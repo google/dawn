@@ -33,7 +33,6 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Assume
 import org.junit.Before
@@ -75,7 +74,7 @@ class GPUSyncFenceTest {
         val adapter = instance.requestAdapter()
         val hasRequiredFeatures = with(adapter) {
             hasFeature(FeatureName.SharedTextureMemoryAHardwareBuffer) &&
-            hasFeature(FeatureName.SharedFenceSyncFD)
+                    hasFeature(FeatureName.SharedFenceSyncFD)
         }
         adapter.close()
         instance.close()
@@ -191,7 +190,7 @@ class GPUSyncFenceTest {
     @MediumTest
     @ApiRequirement(minApi = 29)
     fun testSyncFence_lifecycleAndAwaiting() = runBlocking {
-        webGpu.execute {
+        val unused = webGpu.execute {
             val (rgbBuffer, wrapper) = createTestTextureWrapper()
 
             val pipeline = setupPipelineAndDraw(wrapper)
@@ -225,10 +224,10 @@ class GPUSyncFenceTest {
     @MediumTest
     @ApiRequirement(minApi = 33)
     fun testSyncFence_fromPlatformSyncFence() = runBlocking {
-        webGpu.execute {
+        val unused = webGpu.execute {
             val (rgbBuffer, wrapper) = createTestTextureWrapper()
 
-            setupPipelineAndDraw(wrapper)
+            val unusedPipeline = setupPipelineAndDraw(wrapper)
             val fence = requireNotNull(wrapper.endAccess()) { "Sync fence should not be null" }
 
             try {

@@ -24,7 +24,6 @@ import java.nio.ByteOrder
 import kotlinx.coroutines.CoroutineDispatcher
 import java.util.concurrent.Executors
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
@@ -32,7 +31,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 
@@ -189,7 +187,7 @@ class RenderPassEncoderTest {
   @Test
   fun testDebugMarker() {
     runBlocking {
-      webGpu!!.execute {
+      val unused = webGpu!!.execute {
         val encoder = device.createCommandEncoder()
         val passEncoder = beginDefaultRenderPass(encoder)
 
@@ -209,7 +207,7 @@ class RenderPassEncoderTest {
   @Test
   fun testPopDebugGroupWithoutPushFails() {
     runBlocking {
-      webGpu!!.execute {
+      val unused = webGpu!!.execute {
         val encoder = device.createCommandEncoder()
         val passEncoder = beginDefaultRenderPass(encoder)
         passEncoder.popDebugGroup()  // Invalid call.
@@ -217,8 +215,8 @@ class RenderPassEncoderTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -227,7 +225,7 @@ class RenderPassEncoderTest {
   @Test
   fun testDrawWithoutPipelineFails() {
     runBlocking {
-      webGpu!!.execute {
+      val unused = webGpu!!.execute {
         val encoder = device.createCommandEncoder()
         val passEncoder = beginDefaultRenderPass(encoder)
         passEncoder.draw(3)  // Invalid: pipeline not set.
@@ -235,8 +233,8 @@ class RenderPassEncoderTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -245,7 +243,7 @@ class RenderPassEncoderTest {
   @Test
   fun testSetVertexBufferInvalidUsageFails() {
     runBlocking {
-      webGpu!!.execute {
+      val unused = webGpu!!.execute {
         val invalidBuffer = device.createBuffer(
           GPUBufferDescriptor(size = 16, usage = BufferUsage.CopyDst)
         )
@@ -256,8 +254,8 @@ class RenderPassEncoderTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
         invalidBuffer.destroy()
       }
@@ -267,7 +265,7 @@ class RenderPassEncoderTest {
   @Test
   fun testDrawIndexedWithoutIndexBufferFails() {
     runBlocking {
-      webGpu!!.execute {
+      val unused = webGpu!!.execute {
         val encoder = device.createCommandEncoder()
         val passEncoder = beginDefaultRenderPass(encoder)
         passEncoder.setPipeline(defaultColorPipeline)
@@ -276,8 +274,8 @@ class RenderPassEncoderTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -286,7 +284,7 @@ class RenderPassEncoderTest {
   @Test
   fun testDrawIndexedValidSucceeds() {
     runBlocking {
-      webGpu!!.execute {
+      val unused = webGpu!!.execute {
         val indexBuffer = createIndexBuffer(shortArrayOf(0, 1, 2))
         val encoder = device.createCommandEncoder()
         val passEncoder = beginDefaultRenderPass(encoder)
@@ -308,7 +306,7 @@ class RenderPassEncoderTest {
   @Test
   fun testDrawIndirectInvalidBufferFails() {
     runBlocking {
-      webGpu!!.execute {
+      val unused = webGpu!!.execute {
         val invalidBuffer = device.createBuffer(
           GPUBufferDescriptor(size = 16, usage = BufferUsage.CopyDst)  // 4 * Int.
         )
@@ -320,8 +318,8 @@ class RenderPassEncoderTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
         invalidBuffer.destroy()
       }
@@ -331,7 +329,7 @@ class RenderPassEncoderTest {
   @Test
   fun testDrawIndexedIndirectWithoutIndexBufferFails() {
     runBlocking {
-      webGpu!!.execute {
+      val unused = webGpu!!.execute {
         val indirectBuffer = createIndirectBuffer(intArrayOf(3, 1, 0, 0, 0))
         val encoder = device.createCommandEncoder()
         val passEncoder = beginDefaultRenderPass(encoder)
@@ -341,8 +339,8 @@ class RenderPassEncoderTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
         indirectBuffer.destroy()
       }
@@ -353,7 +351,7 @@ class RenderPassEncoderTest {
   @MediumTest
   fun testDrawIndexedIndirectValidSucceeds() {
     runBlocking {
-      webGpu!!.execute {
+      val unused = webGpu!!.execute {
         val indirectBuffer = createIndirectBuffer(intArrayOf(3, 1, 0, 0, 0))
         val indexBuffer = createIndexBuffer(shortArrayOf(0, 1, 2))
         val encoder = device.createCommandEncoder()
@@ -377,7 +375,7 @@ class RenderPassEncoderTest {
   @Test
   fun testOcclusionQueryValidSucceeds() {
     runBlocking {
-      webGpu!!.execute {
+      val unused = webGpu!!.execute {
         // This test needs its OWN depth-enabled pipeline.
         // We can't use the class-level 'defaultColorPipeline' because it's color-only.
 
@@ -446,7 +444,7 @@ class RenderPassEncoderTest {
   @Test
   fun testSetPassPropertiesSucceeds() {
     runBlocking {
-      webGpu!!.execute {
+      val unused = webGpu!!.execute {
         val encoder = device.createCommandEncoder()
         val passEncoder = beginDefaultRenderPass(encoder)
         passEncoder.setViewport(0f, 0f, 1f, 1f, 0f, 1f)
@@ -467,15 +465,15 @@ class RenderPassEncoderTest {
   @Test
   fun testEndCalledTwiceFails() {
     runBlocking {
-      webGpu!!.execute {
+      val unused = webGpu!!.execute {
         val encoder = device.createCommandEncoder()
         val passEncoder = beginDefaultRenderPass(encoder)
         passEncoder.end()  // First call (valid).
 
         device.pushErrorScope(ErrorFilter.Validation)
         passEncoder.end()  // Second call (invalid).
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -484,7 +482,7 @@ class RenderPassEncoderTest {
   @Test
   fun testExecuteBundlesSucceeds() {
     runBlocking {
-      webGpu!!.execute {
+      val unused = webGpu!!.execute {
         val bundleEncoder = device.createRenderBundleEncoder(
           GPURenderBundleEncoderDescriptor(
             colorFormats = intArrayOf(TextureFormat.RGBA8Unorm)

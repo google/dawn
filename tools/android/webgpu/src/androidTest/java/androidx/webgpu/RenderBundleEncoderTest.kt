@@ -17,7 +17,6 @@ package androidx.webgpu
 
 import androidx.test.filters.MediumTest
 import androidx.test.filters.SmallTest
-import androidx.webgpu.ValidationException
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
 import java.nio.ByteBuffer
@@ -25,7 +24,6 @@ import java.nio.ByteOrder
 import java.util.concurrent.Executors
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
@@ -60,7 +58,7 @@ class RenderBundleEncoderTest {
       webGpu.processEventsLoop()
     }
 
-    webGpu.execute {
+    val unused = webGpu.execute {
       shaderModule = device.createShaderModule(
         GPUShaderModuleDescriptor(
           shaderSourceWGSL = GPUShaderSourceWGSL(
@@ -154,7 +152,7 @@ class RenderBundleEncoderTest {
   @Test
   fun testInsertDebugMarker() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val bundleEncoder = createDefaultBundleEncoder()
         bundleEncoder.insertDebugMarker("Marker Inside Bundle")
         device.pushErrorScope(ErrorFilter.Validation)
@@ -168,14 +166,14 @@ class RenderBundleEncoderTest {
   @Test
   fun testPopDebugGroupWithoutPushFails() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val bundleEncoder = createDefaultBundleEncoder()
         bundleEncoder.popDebugGroup()  // Invalid call.
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedRenderBundle = bundleEncoder.finish()  // Deferred error caught here.
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -184,7 +182,7 @@ class RenderBundleEncoderTest {
   @Test
   fun testPushAndPopDebugGroupSucceeds() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val bundleEncoder = createDefaultBundleEncoder()
         bundleEncoder.pushDebugGroup("BundleGroup")
         bundleEncoder.popDebugGroup()  // Valid pair.
@@ -201,14 +199,14 @@ class RenderBundleEncoderTest {
   @Test
   fun testDrawWithoutPipelineFails() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val bundleEncoder = createDefaultBundleEncoder()
         bundleEncoder.draw(3)  // Invalid: pipeline not set.
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedRenderBundle = bundleEncoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -217,7 +215,7 @@ class RenderBundleEncoderTest {
   @Test
   fun testDrawWithPipelineSucceeds() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val bundleEncoder = createDefaultBundleEncoder()
         bundleEncoder.setPipeline(defaultColorPipeline)  // Valid.
         bundleEncoder.draw(3)  // Valid.
@@ -234,7 +232,7 @@ class RenderBundleEncoderTest {
   @Test
   fun testSetVertexBufferInvalidUsageFails() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val invalidBuffer = device.createBuffer(
           GPUBufferDescriptor(size = 16, usage = BufferUsage.CopyDst)
         )
@@ -243,8 +241,8 @@ class RenderBundleEncoderTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedRenderBundle = bundleEncoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
         invalidBuffer.destroy()
       }
@@ -254,7 +252,7 @@ class RenderBundleEncoderTest {
   @Test
   fun testSetVertexBufferValidSucceeds() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val validBuffer = device.createBuffer(
           GPUBufferDescriptor(size = 16, usage = BufferUsage.Vertex)
         )
@@ -274,15 +272,15 @@ class RenderBundleEncoderTest {
   @Test
   fun testDrawIndexedWithoutIndexBufferFails() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val bundleEncoder = createDefaultBundleEncoder()
         bundleEncoder.setPipeline(defaultColorPipeline)
         bundleEncoder.drawIndexed(3)  // Invalid: index buffer not set.
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedRenderBundle = bundleEncoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -291,7 +289,7 @@ class RenderBundleEncoderTest {
   @Test
   fun testDrawIndexedValidSucceeds() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val indexBuffer = createIndexBuffer(shortArrayOf(0, 1, 2))
         val bundleEncoder = createDefaultBundleEncoder()
         bundleEncoder.setPipeline(defaultColorPipeline)
@@ -312,7 +310,7 @@ class RenderBundleEncoderTest {
   @Test
   fun testDrawIndirectInvalidBufferFails() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val invalidBuffer = device.createBuffer(
           GPUBufferDescriptor(size = 16, usage = BufferUsage.CopyDst)
         )
@@ -322,8 +320,8 @@ class RenderBundleEncoderTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedRenderBundle = bundleEncoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
         invalidBuffer.destroy()
       }
@@ -333,7 +331,7 @@ class RenderBundleEncoderTest {
   @Test
   fun testDrawIndirectValidSucceeds() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val indirectBuffer = createIndirectBuffer(intArrayOf(3, 1, 0, 0))
         val bundleEncoder = createDefaultBundleEncoder()
         bundleEncoder.setPipeline(defaultColorPipeline)
@@ -353,7 +351,7 @@ class RenderBundleEncoderTest {
   @Test
   fun testDrawIndexedIndirectWithoutIndexBufferFails() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val indirectBuffer = createIndirectBuffer(intArrayOf(3, 1, 0, 0, 0))
         val bundleEncoder = createDefaultBundleEncoder()
         bundleEncoder.setPipeline(defaultColorPipeline)
@@ -362,8 +360,8 @@ class RenderBundleEncoderTest {
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedRenderBundle = bundleEncoder.finish()
 
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
         indirectBuffer.destroy()
       }
@@ -374,7 +372,7 @@ class RenderBundleEncoderTest {
   @Test
   fun testDrawIndexedIndirectValidSucceeds() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val indirectBuffer = createIndirectBuffer(intArrayOf(3, 1, 0, 0, 0))
         val indexBuffer = createIndexBuffer(shortArrayOf(0, 1, 2))
         val bundleEncoder = createDefaultBundleEncoder()
@@ -396,7 +394,7 @@ class RenderBundleEncoderTest {
   @Test
   fun testDrawWithBindGroupRequiredButNotSetFails() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         // Create pipeline requiring a bind group locally
         val bgl = device.createBindGroupLayout(
           GPUBindGroupLayoutDescriptor(
@@ -435,8 +433,8 @@ class RenderBundleEncoderTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedRenderBundle = bundleEncoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -450,7 +448,7 @@ class RenderBundleEncoderTest {
   @Test
   fun testDrawWithBindGroupSetSucceeds() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         // Create the uniform buffer resource needed by the shader.
         val buffer = device.createBuffer(GPUBufferDescriptor(size = 4, usage = BufferUsage.Uniform))
 
@@ -515,7 +513,7 @@ class RenderBundleEncoderTest {
   @Test
   fun testOperationAfterFinishFails() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val bundleEncoder = createDefaultBundleEncoder()
         val bundle = bundleEncoder.finish()  // Encoder is now consumed.
         bundle.close()  // Close the bundle itself.

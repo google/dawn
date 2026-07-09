@@ -16,15 +16,12 @@
 package androidx.webgpu
 
 import androidx.test.filters.SmallTest
-import androidx.webgpu.DawnException
-import androidx.webgpu.ValidationException
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createBitmap
 import androidx.webgpu.helper.createWebGpu
 import java.util.concurrent.Executors
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
@@ -67,7 +64,7 @@ class TextureTest {
   @Test
   fun testTextureProperties() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val testTextureDescriptor = GPUTextureDescriptor(
           size = GPUExtent3D(width = 32, height = 16, depthOrArrayLayers = 1),
           format = TextureFormat.RGBA8Unorm,
@@ -100,7 +97,7 @@ class TextureTest {
   @Test
   fun createTexture_withInvalidUsageCombination_fails() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         // According to the WebGPU specification, a multisampled texture (sampleCount > 1)
         // cannot have the StorageBinding usage flag. This is a guaranteed validation error.
         val invalidDescriptor = GPUTextureDescriptor(
@@ -124,7 +121,7 @@ class TextureTest {
   @Test
   fun useOfDestroyedTextureView_firesUncapturedError() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val textureDescriptor = GPUTextureDescriptor(
           size = GPUExtent3D(width = 32, height = 16, depthOrArrayLayers = 1),
           format = TextureFormat.RGBA8Unorm,
@@ -154,7 +151,7 @@ class TextureTest {
           val commandBuffer = encoder.finish()
 
           val queue = device.getQueue()
-          assertThrowsSuspend(ValidationException::class.java) {
+          val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
             queue.submit(arrayOf(commandBuffer))
             val unusedQueueWorkDoneReturn = queue.onSubmittedWorkDone()
           }
@@ -171,7 +168,7 @@ class TextureTest {
   @Test
   fun createBitmap_withInvalidWidth_fails() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val descriptor = GPUTextureDescriptor(
           size = GPUExtent3D(width = 65, height = 16, depthOrArrayLayers = 1),
           format = TextureFormat.RGBA8Unorm,
@@ -179,7 +176,7 @@ class TextureTest {
         )
         val texture = device.createTexture(descriptor)
         assertThrowsSuspend(DawnException::class.java) {
-          texture.createBitmap(device)
+          val unusedBm = texture.createBitmap(device)
         }
       }
     }

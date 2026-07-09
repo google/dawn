@@ -23,7 +23,6 @@ import androidx.webgpu.helper.WebGpu
 import java.util.concurrent.Executors
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
@@ -187,7 +186,7 @@ class MultisampleStateTest {
   @Test
   @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, onlySkipOnEmulator = true)
   fun verifyDefaultMaskEnablesAllSamplesInMSAARender() = runBlocking {
-    webGpu.execute {
+    val unused = webGpu.execute {
       // Default mask (0xFFFFFFFF or -1) should allow drawing.
       // We draw White on Black background -> Expect White (255).
       val actualValue = executeMsaaTest(
@@ -201,7 +200,7 @@ class MultisampleStateTest {
 
   @Test
   fun verifyZeroMaskDisablesUpdates() = runBlocking {
-    webGpu.execute {
+    val unused = webGpu.execute {
       // Zero mask (0x0) should block all samples from being updated.
       // We draw White on Black background -> Expect Black (0) because the draw was masked out.
       val actualValue = executeMsaaTest(

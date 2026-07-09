@@ -16,7 +16,6 @@
 package androidx.webgpu
 
 import androidx.test.filters.SmallTest
-import androidx.webgpu.ValidationException
 import androidx.webgpu.WebGpuTestConstants.EMULATOR_TESTS_MIN_API_LEVEL
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
@@ -25,7 +24,6 @@ import junit.framework.TestCase
 import java.util.concurrent.Executors
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
@@ -77,7 +75,7 @@ class CommandEncoderTest {
   @Test
   fun testFinish() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val encoder = device.createCommandEncoder()
         val unusedCommandBuffer = encoder.finish()
 
@@ -104,7 +102,7 @@ class CommandEncoderTest {
   @Test
   fun testDebugGroups() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val encoder = device.createCommandEncoder()
 
         device.pushErrorScope(ErrorFilter.Validation)
@@ -130,7 +128,7 @@ class CommandEncoderTest {
   @Test
   fun finish_failsWhenNestedPassWasAttempted() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val encoder = device.createCommandEncoder()
         val activePassEncoder = encoder.beginComputePass()
 
@@ -144,7 +142,7 @@ class CommandEncoderTest {
           "Expected a validation error on .finish() due to an earlier nested pass attempt",
           ValidationException::class.java
         ) {
-          device.popErrorScope()
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -159,7 +157,7 @@ class CommandEncoderTest {
   @Test
   fun testBeginRenderPass() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         device.pushErrorScope(ErrorFilter.Validation)
         val texture = device.createTexture(
           GPUTextureDescriptor(
@@ -198,7 +196,7 @@ class CommandEncoderTest {
   @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, onlySkipOnEmulator = true)
   fun testBeginRenderPass_clearsTextureCorrectly() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val queue = device.getQueue()
 
         val textureWidth = 1
@@ -292,7 +290,7 @@ class CommandEncoderTest {
   @Test
   fun testClearBuffer() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val buffer = device.createBuffer(
           GPUBufferDescriptor(
             size = 16,
@@ -324,7 +322,7 @@ class CommandEncoderTest {
   @Test
   fun testResolveQuerySet() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val querySet = device.createQuerySet(
           GPUQuerySetDescriptor(
             type = QueryType.Occlusion,
@@ -363,7 +361,7 @@ class CommandEncoderTest {
   @Test
   fun testInsertDebugMarker() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val encoder = device.createCommandEncoder()
 
         device.pushErrorScope(ErrorFilter.Validation)

@@ -19,7 +19,6 @@ import android.graphics.Color
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SdkSuppress
-import androidx.webgpu.GPUColor
 import androidx.webgpu.helper.toGPUColor
 import org.junit.Assert.assertEquals
 import org.junit.Test

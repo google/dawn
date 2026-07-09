@@ -124,7 +124,7 @@ class ComputePassEncoderTest {
   @Test
   fun testPopDebugGroupWithoutPushFails() {
     runBlocking {
-      webGpu!!.execute {
+      val unusedExec = webGpu!!.execute {
         val encoder = device.createCommandEncoder()
         val passEncoder = encoder.beginComputePass()
         passEncoder.popDebugGroup() // Invalid call
@@ -132,8 +132,8 @@ class ComputePassEncoderTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedException = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedError = device.popErrorScope()
         }
       }
     }
@@ -210,8 +210,8 @@ class ComputePassEncoderTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedException = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedError = device.popErrorScope()
         }
         invalidBuffer.destroy()
       }
@@ -258,7 +258,7 @@ class ComputePassEncoderTest {
   @Test
   fun testDispatchAfterEndFails() {
     runBlocking {
-      webGpu!!.execute {
+      val unusedExec = webGpu!!.execute {
         val encoder = device.createCommandEncoder()
         val passEncoder = encoder.beginComputePass()
         passEncoder.setPipeline(pipeline)
@@ -268,8 +268,8 @@ class ComputePassEncoderTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedException = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedError = device.popErrorScope()
         }
       }
     }
@@ -282,7 +282,7 @@ class ComputePassEncoderTest {
   @Test
   fun testEndCalledTwiceFails() {
     runBlocking {
-      webGpu!!.execute {
+      val unusedExec = webGpu!!.execute {
         val encoder = device.createCommandEncoder()
         val passEncoder = encoder.beginComputePass()
 
@@ -291,8 +291,8 @@ class ComputePassEncoderTest {
         device.pushErrorScope(ErrorFilter.Validation)
         passEncoder.end()  // Second call (invalid).
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedException = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedError = device.popErrorScope()
         }
       }
     }

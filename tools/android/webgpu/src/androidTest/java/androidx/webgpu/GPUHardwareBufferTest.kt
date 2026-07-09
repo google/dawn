@@ -78,9 +78,9 @@ class GPUHardwareBufferTest {
         val adapter = instance.requestAdapter()
         val hasRequiredFeatures = with(adapter) {
             hasFeature(FeatureName.SharedTextureMemoryAHardwareBuffer) &&
-            hasFeature(FeatureName.SharedFenceSyncFD) &&
-            hasFeature(FeatureName.YCbCrVulkanSamplers) &&
-            hasFeature(FeatureName.OpaqueYCbCrAndroidForExternalTexture)
+                    hasFeature(FeatureName.SharedFenceSyncFD) &&
+                    hasFeature(FeatureName.YCbCrVulkanSamplers) &&
+                    hasFeature(FeatureName.OpaqueYCbCrAndroidForExternalTexture)
         }
         adapter.close()
         instance.close()
@@ -268,7 +268,7 @@ class GPUHardwareBufferTest {
     @ApiRequirement(minApi = 29)
     fun testImportHardwareBufferLoop_noLeaks() {
         runBlocking {
-            webGpu.execute {
+            val unused = webGpu.execute {
                 for (i in 0 until 50) {
                     val (rgbBuffer, wrapper) = createWrappedHardwareBuffer(
                         128, 128,
@@ -295,22 +295,22 @@ class GPUHardwareBufferTest {
     @ApiRequirement(minApi = 29)
     fun testWebGpuOOMScope_handlesErrorGracefully() {
         runBlocking {
-            webGpu.execute {
-            device.pushErrorScope(ErrorFilter.Validation)
+            val unused = webGpu.execute {
+                device.pushErrorScope(ErrorFilter.Validation)
 
-            // Attempt to allocate an absolutely massive texture to trigger validation error
-            val descriptor = GPUTextureDescriptor(
-                size = GPUExtent3D(width = 1000000, height = 1000000, depthOrArrayLayers = 1),
-                format = TextureFormat.RGBA8Unorm,
-                usage = TextureUsage.None // Invalid usage
-            )
-            val unusedTexture = device.createTexture(descriptor)
+                // Attempt to allocate an absolutely massive texture to trigger validation error
+                val descriptor = GPUTextureDescriptor(
+                    size = GPUExtent3D(width = 1000000, height = 1000000, depthOrArrayLayers = 1),
+                    format = TextureFormat.RGBA8Unorm,
+                    usage = TextureUsage.None // Invalid usage
+                )
+                val unusedTexture = device.createTexture(descriptor)
 
-            // Popping the error scope should throw a ValidationException due to validation failure
-            assertThrows(ValidationException::class.java) {
-                runBlocking { device.popErrorScope() }
+                // Popping the error scope should throw a ValidationException due to validation failure
+                assertThrows(ValidationException::class.java) {
+                    runBlocking { val unusedPop = device.popErrorScope() }
+                }
             }
-                    }
         }
     }
 
@@ -326,21 +326,21 @@ class GPUHardwareBufferTest {
     @ApiRequirement(minApi = 29)
     fun testRGBHardwareBuffer_asTexture() {
         runBlocking {
-            webGpu.execute {
-            val (rgbBuffer, wrapper) = createWrappedHardwareBuffer(
-                textureUsage = TextureUsage.TextureBinding
-            )
+            val unused = webGpu.execute {
+                val (rgbBuffer, wrapper) = createWrappedHardwareBuffer(
+                    textureUsage = TextureUsage.TextureBinding
+                )
 
-            assertNotNull(wrapper)
-            assertNotNull(wrapper.texture)
+                assertNotNull(wrapper)
+                assertNotNull(wrapper.texture)
 
-            wrapper.beginAccess(null)
-            val fence = wrapper.endAccess()
-            fence?.close()
+                wrapper.beginAccess(null)
+                val fence = wrapper.endAccess()
+                fence?.close()
 
-            wrapper.close()
-            rgbBuffer.close()
-                    }
+                wrapper.close()
+                rgbBuffer.close()
+            }
         }
     }
 
@@ -352,13 +352,13 @@ class GPUHardwareBufferTest {
     @ApiRequirement(minApi = 29)
     fun testRGBHardwareBuffer_asExternalTexture() {
         runBlocking {
-            webGpu.execute {
-            val rgbBuffer = createHardwareBuffer(64, 64)
+            val unused = webGpu.execute {
+                val rgbBuffer = createHardwareBuffer(64, 64)
 
-            val extDescriptor = createExternalTextureDescriptor()
+                val extDescriptor = createExternalTextureDescriptor()
 
-            validateExternalTextureImport(rgbBuffer, extDescriptor)
-                    }
+                validateExternalTextureImport(rgbBuffer, extDescriptor)
+            }
         }
     }
 
@@ -370,13 +370,13 @@ class GPUHardwareBufferTest {
     @ApiRequirement(minApi = 30)
     fun testYUVHardwareBuffer_asExternalTexture() {
         runBlocking {
-            webGpu.execute {
-            val yuvBuffer = createHardwareBuffer(64, 64, format = HardwareBuffer.YCBCR_420_888)
+            val unused = webGpu.execute {
+                val yuvBuffer = createHardwareBuffer(64, 64, format = HardwareBuffer.YCBCR_420_888)
 
-            val extDescriptor = createExternalTextureDescriptor()
+                val extDescriptor = createExternalTextureDescriptor()
 
-            validateExternalTextureImport(yuvBuffer, extDescriptor)
-                    }
+                validateExternalTextureImport(yuvBuffer, extDescriptor)
+            }
         }
     }
 
@@ -431,24 +431,24 @@ class GPUHardwareBufferTest {
     @ApiRequirement(minApi = 29)
     fun testZeroCopyPipeline_writeAndVerify() {
         runBlocking {
-            webGpu.execute {
-            val width = 64
-            val height = 64
-            val (rgbBuffer, wrapper) = createWrappedHardwareBuffer(
-                width, height,
-                textureUsage = TextureUsage.TextureBinding or TextureUsage.CopyDst or TextureUsage.CopySrc
-            )
+            val unused = webGpu.execute {
+                val width = 64
+                val height = 64
+                val (rgbBuffer, wrapper) = createWrappedHardwareBuffer(
+                    width, height,
+                    textureUsage = TextureUsage.TextureBinding or TextureUsage.CopyDst or TextureUsage.CopySrc
+                )
 
-            assertNotNull(wrapper)
-            assertNotNull(wrapper.texture)
+                assertNotNull(wrapper)
+                assertNotNull(wrapper.texture)
 
-            // Write green pixels to the imported WebGPU texture
-            populateTextureWithSolidColor(wrapper, width, height, r = 0, g = 255.toByte(), b = 0, a = 255.toByte())
+                // Write green pixels to the imported WebGPU texture
+                populateTextureWithSolidColor(wrapper, width, height, r = 0, g = 255.toByte(), b = 0, a = 255.toByte())
 
-            assertPixelColor(rgbBuffer, 0, 255, 0)
-            wrapper.close()
-            rgbBuffer.close()
-                    }
+                assertPixelColor(rgbBuffer, 0, 255, 0)
+                wrapper.close()
+                rgbBuffer.close()
+            }
         }
     }
 
@@ -460,23 +460,23 @@ class GPUHardwareBufferTest {
     @ApiRequirement(minApi = 29)
     fun testZeroCopyPipeline_gpuRenderWriteAndVerify() {
         runBlocking {
-            webGpu.execute {
-            val width = 64
-            val height = 64
+            val unused = webGpu.execute {
+                val width = 64
+                val height = 64
 
-            val (rgbBuffer, wrapper) = createWrappedHardwareBuffer(
-                width, height,
-                textureUsage = TextureUsage.RenderAttachment or TextureUsage.CopySrc
-            )
+                val (rgbBuffer, wrapper) = createWrappedHardwareBuffer(
+                    width, height,
+                    textureUsage = TextureUsage.RenderAttachment or TextureUsage.CopySrc
+                )
 
-            assertNotNull(wrapper)
-            assertNotNull(wrapper.texture)
+                assertNotNull(wrapper)
+                assertNotNull(wrapper.texture)
 
-            // Shader outputs solid red color (R=255, G=0, B=0, A=255)
-            val shaderModule = device.createShaderModule(
-                GPUShaderModuleDescriptor(
-                    shaderSourceWGSL = GPUShaderSourceWGSL(
-                        code = """
+                // Shader outputs solid red color (R=255, G=0, B=0, A=255)
+                val shaderModule = device.createShaderModule(
+                    GPUShaderModuleDescriptor(
+                        shaderSourceWGSL = GPUShaderSourceWGSL(
+                            code = """
                             @vertex fn vertexMain(@builtin(vertex_index) i : u32) -> @builtin(position) vec4f {
                                 const pos = array(vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
                                 return vec4f(pos[i], 0.0, 1.0);
@@ -486,57 +486,57 @@ class GPUHardwareBufferTest {
                                 return vec4f(1.0, 0.0, 0.0, 1.0);
                             }
                         """.trimIndent()
-                    )
-                )
-            )
-
-            val pipeline = device.createRenderPipeline(
-                GPURenderPipelineDescriptor(
-                    vertex = GPUVertexState(
-                        module = shaderModule,
-                        entryPoint = "vertexMain"
-                    ),
-                    fragment = GPUFragmentState(
-                        module = shaderModule,
-                        entryPoint = "fragmentMain",
-                        targets = arrayOf(GPUColorTargetState(format = TextureFormat.RGBA8Unorm))
-                    )
-                )
-            )
-
-            wrapper.beginAccess(null)
-
-            // Render directly into the imported HardwareBuffer texture view
-            val encoder = device.createCommandEncoder()
-            val pass = encoder.beginRenderPass(
-                GPURenderPassDescriptor(
-                    colorAttachments = arrayOf(
-                        GPURenderPassColorAttachment(
-                            view = wrapper.texture.createView(),
-                            loadOp = LoadOp.Clear,
-                            storeOp = StoreOp.Store,
-                            clearValue = GPUColor(0.0, 0.0, 0.0, 1.0)
                         )
                     )
                 )
-            )
-            pass.setPipeline(pipeline)
-            pass.draw(3)
-            pass.end()
 
-            val commandBuffer = encoder.finish()
-            device.queue.submit(arrayOf(commandBuffer))
+                val pipeline = device.createRenderPipeline(
+                    GPURenderPipelineDescriptor(
+                        vertex = GPUVertexState(
+                            module = shaderModule,
+                            entryPoint = "vertexMain"
+                        ),
+                        fragment = GPUFragmentState(
+                            module = shaderModule,
+                            entryPoint = "fragmentMain",
+                            targets = arrayOf(GPUColorTargetState(format = TextureFormat.RGBA8Unorm))
+                        )
+                    )
+                )
 
-            webGpu.instance.processEvents()
+                wrapper.beginAccess(null)
 
-            val fence = requireNotNull(wrapper.endAccess()) { "Expected a valid fence" }
-            assertTrue("GPU execution did not complete in time", fence.await(FENCE_TIMEOUT_MS))
-            fence.close()
+                // Render directly into the imported HardwareBuffer texture view
+                val encoder = device.createCommandEncoder()
+                val pass = encoder.beginRenderPass(
+                    GPURenderPassDescriptor(
+                        colorAttachments = arrayOf(
+                            GPURenderPassColorAttachment(
+                                view = wrapper.texture.createView(),
+                                loadOp = LoadOp.Clear,
+                                storeOp = StoreOp.Store,
+                                clearValue = GPUColor(0.0, 0.0, 0.0, 1.0)
+                            )
+                        )
+                    )
+                )
+                pass.setPipeline(pipeline)
+                pass.draw(3)
+                pass.end()
 
-            assertPixelColor(rgbBuffer, 255, 0, 0)
-            wrapper.close()
-            rgbBuffer.close()
-                    }
+                val commandBuffer = encoder.finish()
+                device.queue.submit(arrayOf(commandBuffer))
+
+                webGpu.instance.processEvents()
+
+                val fence = requireNotNull(wrapper.endAccess()) { "Expected a valid fence" }
+                assertTrue("GPU execution did not complete in time", fence.await(FENCE_TIMEOUT_MS))
+                fence.close()
+
+                assertPixelColor(rgbBuffer, 255, 0, 0)
+                wrapper.close()
+                rgbBuffer.close()
+            }
         }
     }
 
@@ -548,63 +548,63 @@ class GPUHardwareBufferTest {
     @ApiRequirement(minApi = 29)
     fun testZeroCopyPipeline_gpuSamplingAndCopyVerify() {
         runBlocking {
-            webGpu.execute {
-            val width = 64
-            val height = 64
+            val unused = webGpu.execute {
+                val width = 64
+                val height = 64
 
-            // Clear source texture with solid blue color (R=0, G=0, B=255, A=255)
-            val sourceTexture = device.createTexture(
-                GPUTextureDescriptor(
-                    size = GPUExtent3D(width = width, height = height, depthOrArrayLayers = 1),
-                    format = TextureFormat.RGBA8Unorm,
-                    usage = TextureUsage.CopySrc or TextureUsage.RenderAttachment
+                // Clear source texture with solid blue color (R=0, G=0, B=255, A=255)
+                val sourceTexture = device.createTexture(
+                    GPUTextureDescriptor(
+                        size = GPUExtent3D(width = width, height = height, depthOrArrayLayers = 1),
+                        format = TextureFormat.RGBA8Unorm,
+                        usage = TextureUsage.CopySrc or TextureUsage.RenderAttachment
+                    )
                 )
-            )
 
-            val clearEncoder = device.createCommandEncoder()
-            val clearPass = clearEncoder.beginRenderPass(
-                GPURenderPassDescriptor(
-                    colorAttachments = arrayOf(
-                        GPURenderPassColorAttachment(
-                            view = sourceTexture.createView(),
-                            loadOp = LoadOp.Clear,
-                            storeOp = StoreOp.Store,
-                            clearValue = GPUColor(0.0, 0.0, 1.0, 1.0)
+                val clearEncoder = device.createCommandEncoder()
+                val clearPass = clearEncoder.beginRenderPass(
+                    GPURenderPassDescriptor(
+                        colorAttachments = arrayOf(
+                            GPURenderPassColorAttachment(
+                                view = sourceTexture.createView(),
+                                loadOp = LoadOp.Clear,
+                                storeOp = StoreOp.Store,
+                                clearValue = GPUColor(0.0, 0.0, 1.0, 1.0)
+                            )
                         )
                     )
                 )
-            )
-            clearPass.end()
-            device.queue.submit(arrayOf(clearEncoder.finish()))
+                clearPass.end()
+                device.queue.submit(arrayOf(clearEncoder.finish()))
 
-            // Create imported HardwareBuffer texture
-            val (rgbBuffer, wrapper) = createWrappedHardwareBuffer(
-                width, height,
-                textureUsage = TextureUsage.CopyDst or TextureUsage.TextureBinding
-            )
+                // Create imported HardwareBuffer texture
+                val (rgbBuffer, wrapper) = createWrappedHardwareBuffer(
+                    width, height,
+                    textureUsage = TextureUsage.CopyDst or TextureUsage.TextureBinding
+                )
 
-            wrapper.beginAccess(null)
+                wrapper.beginAccess(null)
 
-            // Copy directly from source texture to zero-copy texture
-            val copyEncoder = device.createCommandEncoder()
-            copyEncoder.copyTextureToTexture(
-                source = GPUTexelCopyTextureInfo(texture = sourceTexture),
-                destination = GPUTexelCopyTextureInfo(texture = wrapper.texture),
-                copySize = GPUExtent3D(width = width, height = height)
-            )
-            device.queue.submit(arrayOf(copyEncoder.finish()))
+                // Copy directly from source texture to zero-copy texture
+                val copyEncoder = device.createCommandEncoder()
+                copyEncoder.copyTextureToTexture(
+                    source = GPUTexelCopyTextureInfo(texture = sourceTexture),
+                    destination = GPUTexelCopyTextureInfo(texture = wrapper.texture),
+                    copySize = GPUExtent3D(width = width, height = height)
+                )
+                device.queue.submit(arrayOf(copyEncoder.finish()))
 
-            webGpu.instance.processEvents()
+                webGpu.instance.processEvents()
 
-            val fence = requireNotNull(wrapper.endAccess()) { "Expected a valid fence" }
-            assertTrue("GPU execution did not complete in time", fence.await(FENCE_TIMEOUT_MS))
-            fence.close()
+                val fence = requireNotNull(wrapper.endAccess()) { "Expected a valid fence" }
+                assertTrue("GPU execution did not complete in time", fence.await(FENCE_TIMEOUT_MS))
+                fence.close()
 
-            assertPixelColor(rgbBuffer, 0, 0, 255)
-            wrapper.close()
-            rgbBuffer.close()
-            sourceTexture.destroy()
-                    }
+                assertPixelColor(rgbBuffer, 0, 0, 255)
+                wrapper.close()
+                rgbBuffer.close()
+                sourceTexture.destroy()
+            }
         }
     }
 
@@ -616,16 +616,16 @@ class GPUHardwareBufferTest {
     @ApiRequirement(minApi = 30)
     fun testYUVExternalTexture_descriptorTransform_validatesWithoutError() {
         runBlocking {
-            webGpu.execute {
-            val yuvBuffer = createHardwareBuffer(128, 128, format = HardwareBuffer.YCBCR_420_888)
+            val unused = webGpu.execute {
+                val yuvBuffer = createHardwareBuffer(128, 128, format = HardwareBuffer.YCBCR_420_888)
 
-            val extDescriptor = createExternalTextureDescriptor(
-                cropOriginX = 16, cropOriginY = 16, cropWidth = 96, cropHeight = 96,
-                mirrored = true, rotation = ExternalTextureRotation.Rotate180Degrees
-            )
+                val extDescriptor = createExternalTextureDescriptor(
+                    cropOriginX = 16, cropOriginY = 16, cropWidth = 96, cropHeight = 96,
+                    mirrored = true, rotation = ExternalTextureRotation.Rotate180Degrees
+                )
 
-            validateExternalTextureImport(yuvBuffer, extDescriptor)
-                    }
+                validateExternalTextureImport(yuvBuffer, extDescriptor)
+            }
         }
     }
 
@@ -637,19 +637,19 @@ class GPUHardwareBufferTest {
     @ApiRequirement(minApi = 29)
     fun testRGBExternalTexture_descriptorTransform_validatesWithoutError() {
         runBlocking {
-            webGpu.execute {
-            val width = 64
-            val height = 64
+            val unused = webGpu.execute {
+                val width = 64
+                val height = 64
 
-            val rgbBuffer = createHardwareBuffer(width, height)
+                val rgbBuffer = createHardwareBuffer(width, height)
 
-            val extDescriptor = createExternalTextureDescriptor(
-                cropOriginX = 8, cropOriginY = 8, cropWidth = 48, cropHeight = 48,
-                mirrored = true, rotation = ExternalTextureRotation.Rotate90Degrees
-            )
+                val extDescriptor = createExternalTextureDescriptor(
+                    cropOriginX = 8, cropOriginY = 8, cropWidth = 48, cropHeight = 48,
+                    mirrored = true, rotation = ExternalTextureRotation.Rotate90Degrees
+                )
 
-            validateExternalTextureImport(rgbBuffer, extDescriptor)
-                    }
+                validateExternalTextureImport(rgbBuffer, extDescriptor)
+            }
         }
     }
 
@@ -661,66 +661,66 @@ class GPUHardwareBufferTest {
     @ApiRequirement(minApi = 29)
     fun testColorSpaceEnumVariants() {
         runBlocking {
-            webGpu.execute {
-            val width = 64
-            val height = 64
+            val unused = webGpu.execute {
+                val width = 64
+                val height = 64
 
-            // 1. Allocate source HardwareBuffer and populate it with solid Red
-            val (srcBuffer, srcWrapper) = createWrappedHardwareBuffer(
-                width, height,
-                textureUsage = TextureUsage.TextureBinding or TextureUsage.CopyDst or TextureUsage.CopySrc
-            )
+                // 1. Allocate source HardwareBuffer and populate it with solid Red
+                val (srcBuffer, srcWrapper) = createWrappedHardwareBuffer(
+                    width, height,
+                    textureUsage = TextureUsage.TextureBinding or TextureUsage.CopyDst or TextureUsage.CopySrc
+                )
 
-            populateTextureWithSolidColor(srcWrapper, width, height, r = 255.toByte(), g = 0, b = 0, a = 255.toByte())
+                populateTextureWithSolidColor(srcWrapper, width, height, r = 255.toByte(), g = 0, b = 0, a = 255.toByte())
 
-            // 2. Allocate destination HardwareBuffer (render target)
-            val (dstBuffer, dstWrapper) = createWrappedHardwareBuffer(
-                width, height,
-                textureUsage = TextureUsage.RenderAttachment or TextureUsage.CopySrc
-            )
+                // 2. Allocate destination HardwareBuffer (render target)
+                val (dstBuffer, dstWrapper) = createWrappedHardwareBuffer(
+                    width, height,
+                    textureUsage = TextureUsage.RenderAttachment or TextureUsage.CopySrc
+                )
 
-            val (pipeline, sampler) = createExternalTextureSamplingPipeline()
+                val (pipeline, sampler) = createExternalTextureSamplingPipeline()
 
-            val primariesToTest = intArrayOf(
-                ColorSpacePrimariesDawn.Rec709,
-                ColorSpacePrimariesDawn.Rec601
-            )
+                val primariesToTest = intArrayOf(
+                    ColorSpacePrimariesDawn.Rec709,
+                    ColorSpacePrimariesDawn.Rec601
+                )
 
-            val transfersToTest = intArrayOf(
-                ColorSpaceTransferDawn.SRGB,
-                ColorSpaceTransferDawn.Identity
-            )
+                val transfersToTest = intArrayOf(
+                    ColorSpaceTransferDawn.SRGB,
+                    ColorSpaceTransferDawn.Identity
+                )
 
-            val matricesToTest = intArrayOf(
-                ColorSpaceYCbCrMatrixDawn.Rec709,
-                ColorSpaceYCbCrMatrixDawn.Rec601
-            )
+                val matricesToTest = intArrayOf(
+                    ColorSpaceYCbCrMatrixDawn.Rec709,
+                    ColorSpaceYCbCrMatrixDawn.Rec601
+                )
 
-            val rangesToTest = intArrayOf(
-                ColorSpaceYCbCrRangeDawn.Narrow,
-                ColorSpaceYCbCrRangeDawn.Full
-            )
+                val rangesToTest = intArrayOf(
+                    ColorSpaceYCbCrRangeDawn.Narrow,
+                    ColorSpaceYCbCrRangeDawn.Full
+                )
 
-            // 3. Permute, draw, and verify output color for all combinations on Main thread
-            runBlocking(Dispatchers.Main) {
-                for (primary in primariesToTest) {
-                    for (transfer in transfersToTest) {
-                        val matrix = matricesToTest[primary % matricesToTest.size]
-                        val range = rangesToTest[transfer % rangesToTest.size]
+                // 3. Permute, draw, and verify output color for all combinations on Main thread
+                runBlocking(Dispatchers.Main) {
+                    for (primary in primariesToTest) {
+                        for (transfer in transfersToTest) {
+                            val matrix = matricesToTest[primary % matricesToTest.size]
+                            val range = rangesToTest[transfer % rangesToTest.size]
 
-                        verifyColorSpaceConversion(
-                            pipeline, sampler, srcBuffer, dstBuffer, dstWrapper, width, height, primary, transfer, range, matrix
-                        )
+                            verifyColorSpaceConversion(
+                                pipeline, sampler, srcBuffer, dstBuffer, dstWrapper, width, height, primary, transfer, range, matrix
+                            )
+                        }
                     }
                 }
-            }
 
-            // 5. Clean up shared wrappers
-            srcWrapper.close()
-            dstWrapper.close()
-            srcBuffer.close()
-            dstBuffer.close()
-                    }
+                // 5. Clean up shared wrappers
+                srcWrapper.close()
+                dstWrapper.close()
+                srcBuffer.close()
+                dstBuffer.close()
+            }
         }
     }
 

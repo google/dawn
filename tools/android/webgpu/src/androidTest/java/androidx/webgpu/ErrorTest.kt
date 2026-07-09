@@ -53,7 +53,7 @@ class ErrorTest {
         webGpu.processEventsLoop()
       }
       try {
-        webGpu.execute {
+        val unused = webGpu.execute {
           assertThrows(ValidationException::class.java) {
             device.createTexture(
               GPUTextureDescriptor(

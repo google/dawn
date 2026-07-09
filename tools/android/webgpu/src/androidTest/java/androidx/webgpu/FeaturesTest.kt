@@ -22,10 +22,8 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -62,7 +60,7 @@ class FeaturesTest {
         webGpu.processEventsLoop()
       }
       try {
-        webGpu.execute {
+        val unused = webGpu.execute {
           val deviceFeatures = device.getFeatures().features
           requiredFeatures.forEach {
             assert(deviceFeatures.contains(it)) { "Requested feature $it available on device" }

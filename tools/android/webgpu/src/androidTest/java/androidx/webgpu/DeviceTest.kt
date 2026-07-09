@@ -20,11 +20,9 @@ import androidx.test.filters.SmallTest
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
 import junit.framework.TestCase.assertEquals
-import androidx.webgpu.ValidationException
 import java.util.concurrent.Executors
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
@@ -70,7 +68,7 @@ class DeviceTest {
   @SmallTest
   fun testHasFeature() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         // This test ensures the API is callable.
         Assume.assumeTrue(device.hasFeature(FeatureName.TimestampQuery))
       }
@@ -81,7 +79,7 @@ class DeviceTest {
   @SmallTest
   fun testErrorScope() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         device.pushErrorScope(ErrorFilter.Validation)
 
         // Intentionally create an invalid buffer to trigger a validation error.
@@ -92,8 +90,8 @@ class DeviceTest {
           )
         )
 
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -104,7 +102,7 @@ class DeviceTest {
   @SmallTest
   fun testCreateBuffer() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val buffer = device.createBuffer(
           GPUBufferDescriptor(
             size = 4, usage = BufferUsage.Vertex
@@ -120,7 +118,7 @@ class DeviceTest {
   @SmallTest
   fun testCreateTexture() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val texture = device.createTexture(
           GPUTextureDescriptor(
             size = GPUExtent3D(1, 1, 1),
@@ -137,7 +135,7 @@ class DeviceTest {
   @SmallTest
   fun testCreateComputePipeline_withInvalidEntryPoint_throwsException() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val shaderModule = device.createShaderModule(
           GPUShaderModuleDescriptor(
             shaderSourceWGSL = GPUShaderSourceWGSL(
@@ -163,7 +161,7 @@ class DeviceTest {
   @SmallTest
   fun testCreateShaderModule_withInvalidShader_throwsException() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         // This shader has a syntax error ("fu" instead of "fn")
         val badShaderCode = "@compute @workgroup_size(1) fu main() {}"
 
@@ -184,7 +182,7 @@ class DeviceTest {
   @SmallTest
   fun testCreateRenderPipeline_withInvalidEntryPoint_failsValidation() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val shaderModule = device.createShaderModule(
           GPUShaderModuleDescriptor(
             shaderSourceWGSL = GPUShaderSourceWGSL(
@@ -201,8 +199,8 @@ class DeviceTest {
             )
           )
         )
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -212,7 +210,7 @@ class DeviceTest {
   @SmallTest
   fun testCreateBindGroupLayout_withDuplicateBindings_failsValidation() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedBindGroupLayout = device.createBindGroupLayout(
           GPUBindGroupLayoutDescriptor(
@@ -229,8 +227,8 @@ class DeviceTest {
             )
           )
         )
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -243,7 +241,7 @@ class DeviceTest {
   @SmallTest
   fun testCreateBindGroup_withMismatchedBufferUsage_failsValidation() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val layout = device.createBindGroupLayout(
           GPUBindGroupLayoutDescriptor(
             entries = arrayOf(
@@ -269,8 +267,8 @@ class DeviceTest {
             )
           )
         )
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -280,15 +278,15 @@ class DeviceTest {
   @SmallTest
   fun testCreateQuerySet_withInvalidCount_failsValidation() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedQuerySet = device.createQuerySet(
           GPUQuerySetDescriptor(
             type = QueryType.Occlusion, count = -1 // Invalid: count must be > 0.
           )
         )
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -297,7 +295,7 @@ class DeviceTest {
   @Test
   fun validationError_withoutActiveErrorScope_throwsValidationException() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val invalidDescriptor = GPUQuerySetDescriptor(
           type = QueryType.Occlusion,
           count = -1 // Invalid parameter
@@ -313,7 +311,7 @@ class DeviceTest {
   @SmallTest
   fun testCreateSampler_withInvalidLodClamp_failsValidation() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val invalidDescriptor = GPUSamplerDescriptor(
           lodMinClamp = 10.0f, lodMaxClamp = 1.0f
         )
@@ -321,8 +319,8 @@ class DeviceTest {
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedSampler = device.createSampler(invalidDescriptor)
 
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }

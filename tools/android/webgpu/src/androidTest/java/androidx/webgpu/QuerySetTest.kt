@@ -24,7 +24,6 @@ import java.util.concurrent.Executors
 import junit.framework.TestCase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
@@ -32,7 +31,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
@@ -98,7 +96,7 @@ class QuerySetTest {
   @Test
   fun testCreateOcclusionQuerySet() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val querySet = device.createQuerySet(
           GPUQuerySetDescriptor(type = QueryType.Occlusion, count = QUERY_COUNT)
         )
@@ -113,7 +111,7 @@ class QuerySetTest {
   @Test
   fun testCreateTimestampQuerySet() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         // Timestamp query requires a specific feature.
         Assume.assumeTrue(
           "testCreateTimestampQuerySet: TimestampQuery feature not supported.",
@@ -134,13 +132,13 @@ class QuerySetTest {
   @Test
   fun testCreateQuerySetWithNegativeCountFails() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         // Attempting to create a QuerySet with count -1 should fail validation.
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedQuerySet =
           device.createQuerySet(GPUQuerySetDescriptor(type = QueryType.Occlusion, count = -1))
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
       }
     }
@@ -149,7 +147,7 @@ class QuerySetTest {
   @Test
   fun testGetCount() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val querySet = device.createQuerySet(
           GPUQuerySetDescriptor(type = QueryType.Occlusion, count = QUERY_COUNT)
         )
@@ -162,7 +160,7 @@ class QuerySetTest {
   @Test
   fun testGetType() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val querySet = device.createQuerySet(
           GPUQuerySetDescriptor(type = QueryType.Occlusion, count = QUERY_COUNT)
         )
@@ -186,7 +184,7 @@ class QuerySetTest {
   @Test
   fun testResolveQuerySetValid() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val querySet = device.createQuerySet(
           GPUQuerySetDescriptor(type = QueryType.Occlusion, count = QUERY_COUNT)
         )
@@ -211,7 +209,7 @@ class QuerySetTest {
   @Test
   fun testResolveQuerySetInvalidDestinationUsage() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val querySet = device.createQuerySet(
           GPUQuerySetDescriptor(type = QueryType.Occlusion, count = QUERY_COUNT)
         )
@@ -225,8 +223,8 @@ class QuerySetTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
         invalidBuffer.destroy()
         querySet.destroy()
@@ -237,7 +235,7 @@ class QuerySetTest {
   @Test
   fun testResolveQuerySetDestinationTooSmall() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val querySet = device.createQuerySet(
           GPUQuerySetDescriptor(type = QueryType.Occlusion, count = QUERY_COUNT)
         )
@@ -249,8 +247,8 @@ class QuerySetTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
         smallBuffer.destroy()
         querySet.destroy()
@@ -261,7 +259,7 @@ class QuerySetTest {
   @Test
   fun testResolveQuerySetIndexOutOfBounds() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val querySet = device.createQuerySet(
           GPUQuerySetDescriptor(type = QueryType.Occlusion, count = QUERY_COUNT)
         )
@@ -274,8 +272,8 @@ class QuerySetTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
         destinationBuffer.destroy()
         querySet.destroy()
@@ -286,7 +284,7 @@ class QuerySetTest {
   @Test
   fun testResolveQuerySetOffsetAlignment() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         val querySet = device.createQuerySet(
           GPUQuerySetDescriptor(type = QueryType.Occlusion, count = QUERY_COUNT)
         )
@@ -300,8 +298,8 @@ class QuerySetTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         val unusedCommandBuffer = encoder.finish()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
         destinationBuffer.destroy()
         querySet.destroy()
@@ -463,7 +461,7 @@ class QuerySetTest {
   @ApiRequirement(minApi = 35, onlySkipOnEmulator = true)
   fun testResolveQuerySetAndReadback() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         executeQueryResolveTest(
           drawAction = { passEncoder -> passEncoder.draw(3) },
           expectedResult = 1L
@@ -479,7 +477,7 @@ class QuerySetTest {
   @ApiRequirement(minApi = 35, onlySkipOnEmulator = true)
   fun testResolveQuerySetWithZeroResult() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         executeQueryResolveTest(
           drawAction = { },
           expectedResult = 0L

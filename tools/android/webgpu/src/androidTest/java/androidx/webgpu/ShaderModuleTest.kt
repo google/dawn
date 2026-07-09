@@ -104,14 +104,14 @@ class ShaderModuleTest {
   @Test
   fun invalidShader_producesACompilationError() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         device.pushErrorScope(ErrorFilter.Validation)
         val info = getCompilationInfo(invalidShader)
-        assertThrowsSuspend(
+        val unusedException = assertThrowsSuspend(
           "The operation should result in a validation error",
           ValidationException::class.java
         ) {
-          device.popErrorScope()
+          val unusedError = device.popErrorScope()
         }
 
         val errorCount = info.messages.count { it.type == CompilationMessageType.Error }
@@ -127,7 +127,7 @@ class ShaderModuleTest {
   @Test
   fun invalidShader_reportsCorrectLineNumber() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         device.pushErrorScope(ErrorFilter.Validation)
         val info = getCompilationInfo(invalidShader)
         val errorMessage = info.messages.first { it.type == CompilationMessageType.Error }
@@ -138,8 +138,8 @@ class ShaderModuleTest {
           expectedErrorLine,
           errorMessage.lineNum
         )
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedException = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedError = device.popErrorScope()
         }
       }
     }
@@ -152,7 +152,7 @@ class ShaderModuleTest {
   @Test
   fun invalidShader_reportsConsistentOffsetAndLinePosition() {
     runBlocking {
-      webGpu.execute {
+      val unused = webGpu.execute {
         device.pushErrorScope(ErrorFilter.Validation)
         val info = getCompilationInfo(invalidShader)
         val errorMessage = info.messages.first { it.type == CompilationMessageType.Error }
@@ -170,8 +170,8 @@ class ShaderModuleTest {
           errorMessage.offset,
           calculatedOffset
         )
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedException = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedError = device.popErrorScope()
         }
       }
     }

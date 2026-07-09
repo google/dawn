@@ -27,7 +27,6 @@ import junit.framework.TestCase.assertEquals
 import java.util.concurrent.Executors
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
@@ -78,7 +77,7 @@ class ImageTest {
         webGpu.processEventsLoop()
       }
       try {
-        webGpu.execute {
+        val unused = webGpu.execute {
           val shaderModule = device.createShaderModule(
             GPUShaderModuleDescriptor(
               shaderSourceWGSL = GPUShaderSourceWGSL(
