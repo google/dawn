@@ -386,9 +386,12 @@ Java_androidx_webgpu_GPUHardwareBufferWrapper_nativeBeginAccess(JNIEnv* env,
         }
     }
 
+    std::vector<uint64_t> signaledValues(importedFences.size(), 1);
     wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
     beginDesc.fenceCount = importedFences.size();
     beginDesc.fences = importedFences.data();
+    beginDesc.signaledValueCount = signaledValues.size();
+    beginDesc.signaledValues = signaledValues.data();
     beginDesc.concurrentRead = false;
     beginDesc.initialized = true;
 
