@@ -50,104 +50,93 @@ if (build_with_chromium) {
 }
 
 # Centralized config for -Weverything and its suppressions.
-# TODO(crbug.com/523358231): These warnings get passed to the compiler twice.
-# Is there a way to un-duplicate the config?
+#
+# Notes:
+# - File-specific warning suppressions can't be specified as cflags in a GN
+#   target, and must be specified in warning_suppression_mappings.txt. This is
+#   due to GN's flag ordering rules which specify that configs' cflags come
+#   after target cflags:
+#   https://gn.googlesource.com/gn/+/main/docs/faq.md#What-is-the-order-of-flags-and-values-given-to-the-compiler
+# - This is not the only source of warning configs. GN also has default warning
+#   configs in //build/config/BUILDCONFIG.gn (which we include from our .gn).
 config("dawn_warnings") {
-  if (dawn_weverything) {
-    assert(is_clang)
+  cflags = []
+  cflags_c = []
+  cflags_cc = []
 
-    if (!is_wasm) {
-      # One of the warnings in -Weverything is Clang's -Wunsafe-buffer-usage,
-      # but we don't want to run that warning on Dawn without the corresponding
-      # Chromium plugin, which implements support for unsafe_buffers_paths.txt
-      # and probably other important things.
-      assert(clang_use_unsafe_buffers_plugin)
-    }
-
-    cflags = [ "-Weverything" ]
-
-    # Suppressions
-    # Warnings we'll never enable.
-    cflags += [
-      "-Wno-c++98-compat",
-      "-Wno-c++98-compat-pedantic",
-      "-Wno-pre-c++14-compat",
-      "-Wno-pre-c++17-compat",
-      "-Wno-pre-c++20-compat",
-      "-Wno-padded",
-      "-Wno-c++20-extensions",
-      "-Wno-shadow-field-in-constructor",
-      "-Wno-shadow-uncaptured-local",
-
-      # This warning complains on normal usages of structs, especially in
-      # Vulkan, and pushes developers away from using designated initializers.
-      "-Wno-missing-designated-field-initializers",
-    ]
-
-    # TODO(crbug.com/523358231): triage these warnings and determine whether
-    # they're warnings we definitely don't want, or warnings we want to try to
-    # enable, or warnings that we can't currently enable for some reason
-    cflags += [
-      "-Wno-zero-as-null-pointer-constant",
-      "-Wno-old-style-cast",
-      "-Wno-sign-conversion",
-      "-Wno-implicit-int-conversion",
-      "-Wno-double-promotion",
-      "-Wno-global-constructors",
-      "-Wno-exit-time-destructors",
-      "-Wno-disabled-macro-expansion",
-      "-Wno-switch-enum",
-      "-Wno-unused-template",
-      "-Wno-covered-switch-default",
-      "-Wno-missing-prototypes",
-
-      # The lifetime-safety-* warnings are part of an experimental analysis.
-      # Many individual diagnostics (like
-      # -Wlifetime-safety-lifetimebound-violation) are not yet mapped to
-      # toggleable warning flags, so we suppress the entire group and disable
-      # the analysis pass.
-      "-Wno-lifetime-safety",
-      "-Wno-lifetime-safety-all",
-      "-Xclang",
-      "-fno-lifetime-safety-inference",
-      "-Xclang",
-      "-fno-experimental-lifetime-safety-tu-analysis",
-      "-Wno-switch-default",
-      "-Wno-undefined-func-template",
-      "-Wno-weak-vtables",
-      "-Wno-implicit-float-conversion",
-      "-Wno-nullable-to-nonnull-conversion",
-      "-Wno-float-equal",
-      "-Wno-shadow-header",
-      "-Wno-documentation-unknown-command",
-      "-Wno-documentation",
-      "-Wno-nrvo",
-      "-Wno-non-virtual-dtor",
-      "-Wno-reserved-identifier",
-      "-Wno-unused-member-function",
-      "-Wno-tautological-type-limit-compare",
-      "-Wno-nonportable-system-include-path",
-    ]
-
-    # Per file scope warning suppressions goes into
-    # warning_suppression_mappings.txt
-    cflags +=
-        [ "--warning-suppression-mappings=" +
-          rebase_path("warning_suppression_mappings.txt", root_build_dir) ]
+  if (!(dawn_standalone && is_clang)) {
+    # If we're not using clang in a standalone build, then we don't touch any
+    # warning config.
+    assert(!dawn_weverything,
+           "dawn_weverything requires clang in a standalone build.")
   } else {
-    cflags = []
+    ### First, enable the base set of warnings.
 
-    # Allowlist of warnings that are not part of -Wall or -Wextra.
-    if (dawn_standalone && is_clang) {
+    if (dawn_weverything) {
       cflags += [
-        # TODO(crbug.com/523358231): -Wall -Wextra may not be needed because we
-        # get some default warnings via //build/config/compiler/BUILD.gn, like
-        # -Wall -Wextra -Wno-unused-parameter. (Note we would also be able to
-        # remove -Wno-unused-parameter below.)
+        "-Weverything",
+
+        # Re-enable (almost) all the warnings that are mentioned in
+        # //build/config/compiler/BUILD.gn to try to reset any disabled warnings
+        # as -Weverything won't override previous -Wno-* flags.
+        # They may be re-disabled subsequently, this is just to set a baseline.
+        "-Wbackend-plugin",
+        "-Wc++11-narrowing",
+        "-Wcast-function-type",
+        "-Wcomments",
+        "-Wdeprecated-builtins",
+        "-Wdeprecated-declarations",
+        "-Wexit-time-destructors",
+        "-Wgnu-anonymous-struct",
+        "-Wgnu-case-range",
+        "-Wgnu-conditional-omitted-operand",
+        "-Wgnu-include-next",
+        "-Wgnu-label-as-value",
+        "-Wgnu-line-marker",
+        "-Wgnu-offsetof-extensions",
+        "-Wgnu-redeclared-enum",
+        "-Wgnu-statement-expression",
+        "-Wgnu-zero-variadic-macro-arguments",
+        "-Wincompatible-pointer-types",
+        "-Wmissing-field-initializers",
+        "-Wnarrowing",
+        "-Wnonportable-include-path",
+        "-Wnontrivial-memcall",
+        "-Wpsabi",
+        "-Wthread-safety-reference-return",
+        "-Wuninitialized-const-pointer",
+        "-Wunnecessary-virtual-specifier",
+        "-Wunneeded-internal-declaration",
+        "-Wunsafe-buffer-usage-in-static-sized-array",
+        "-Wunused-but-set-global",
+        "-Wunused-but-set-variable",
+        "-Wunused-function",
+        "-Wunused-local-typedefs",
+        "-Wunused-parameter",
+        "-Wunused-variable",
+        "-Wzero-length-array",
+      ]
+
+      # Same but for things passed in cflags_cc as those will be placed on
+      # the command line after ALL the cflags.
+      cflags_cc += [
+        "-Winvalid-offsetof",
+        "-Wmodule-import-in-extern-c",
+        "-Wmodules-ambiguous-internal-linkage",
+        "-Wmodules-import-nested-redundant",
+        "-Wnarrowing",
+        "-Wtrigraphs",
+        "-Wnullability-completeness",
+        "-Wdeprecated-builtins",
+        "-Wc++98-compat-extra-semi",
+      ]
+    } else {
+      cflags = [
         "-Wall",
         "-Wextra",
-
         "-Wpedantic",
+
+        # Additional warnings that are not part of -Wall or -Wextra.
         "-Wconditional-uninitialized",
         "-Wcstring-format-directive",
         "-Wctad-maybe-unsupported",
@@ -173,40 +162,134 @@ config("dawn_warnings") {
         "-Wunreachable-code-aggressive",
         "-Wunused-but-set-variable",
         "-Wunused-macros",
-
-        # TODO(crbug.com/523358231): We probably want to enable these globally,
-        # but currently, suppressing just for specific targets is not working,
-        # probably due to some flag ordering issue.
-        "-Wno-unused-parameter",
-        "-Wno-dollar-in-identifier-extension",
       ]
-    }
-  }
 
-  if (is_clang) {
-    # Disable some warnings that are enabled by the default configs we get from
-    # //build (which include -Wall -Wextra), but that we don't want.
+      cflags_cc = []
+    }
+
+    ### Now, configure all the warning suppressions.
+
+    # Use per-file warning suppressions from warning_suppression_mappings.txt
+    cflags +=
+        [ "--warning-suppression-mappings=" +
+          rebase_path("warning_suppression_mappings.txt", root_build_dir) ]
+
+    if (!clang_use_unsafe_buffers_plugin) {
+      # If we don't have Chromium's unsafe buffers plugin (e.g. it was
+      # disabled in GN args), disable the warning entirely. The plugin
+      # implements unsafe_buffers_paths.txt support, and probably other
+      # important things we don't want to run without.
+      cflags += [ "-Wno-unsafe-buffer-usage" ]
+    }
+
+    # TODO(https://crbug.com/523358231): Enable more warnings.
+
+    # P0. Most likely to help with hardening.
     cflags += [
+      # Arithmetic
+      "-Wno-implicit-float-conversion",
+      "-Wno-implicit-int-conversion",
+      "-Wno-old-style-cast",
+      "-Wno-sign-conversion",
+    ]
+
+    # P1. Likely to help with hardening.
+    cflags += [
+      # Thread safety (https://crbug.com/529895490)
+      "-Wno-thread-safety",
+
+      # Enums (https://crbug.com/515562283)
+      "-Wno-covered-switch-default",
+      "-Wno-switch-default",
+      "-Wno-switch-enum",
+    ]
+
+    # P2. Might help with hardening.
+    cflags += [
+      "-Wno-float-equal",
+      "-Wno-non-virtual-dtor",
+      "-Wno-tautological-type-limit-compare",
+      "-Wno-undefined-func-template",
+      "-Wno-unused-parameter",
+      "-Wno-zero-as-null-pointer-constant",
+
+      # The lifetime-safety-* warnings are part of an experimental analysis.
+      # Many individual diagnostics (like
+      # -Wlifetime-safety-lifetimebound-violation) are not yet mapped to
+      # toggleable warning flags, so we suppress the entire group and disable
+      # the analysis pass.
+      "-Wno-lifetime-safety",
+      "-Wno-lifetime-safety-all",
+      "-Xclang=-fno-lifetime-safety-inference",
+      "-Xclang=-fno-experimental-lifetime-safety-tu-analysis",
+    ]
+
+    # P3. Checks that could be nice but probably don't help with hardening.
+    cflags += [
+      "-Wno-unused-member-function",
+      "-Wno-unused-template",
+
+      # Performance
+      "-Wno-double-promotion",
+      "-Wno-exit-time-destructors",
+      "-Wno-global-constructors",
+      "-Wno-nrvo",
+      "-Wno-weak-vtables",
+    ]
+
+    # P4. Checks we might want to look at again someday.
+    cflags += [
+      "-Wno-documentation",
+      "-Wno-documentation-unknown-command",
+      "-Wno-nonportable-system-include-path",
+      "-Wno-nullable-to-nonnull-conversion",
+      "-Wno-shadow-header",
+
+      # Needed for __COUNTER__ in various Tint and platform macros.
+      "-Wno-c2y-extensions",
+    ]
+
+    # P∞. Checks we're not really interested in re-enabling.
+    cflags += [
+      # We require C++20.
+      "-Wno-c++20-extensions",
+      "-Wno-c++98-compat",
+      "-Wno-c++98-compat-pedantic",
+      "-Wno-pre-c++14-compat",
+      "-Wno-pre-c++17-compat",
+      "-Wno-pre-c++20-compat",
+
+      # Misc.
+      "-Wno-missing-designated-field-initializers",
+      "-Wno-missing-prototypes",
+      "-Wno-padded",
+
+      # Triggers on system header stuff like `stdout`.
+      "-Wno-disabled-macro-expansion",
+
+      # Needed for libc++ and GL, not really useful to us.
+      "-Wno-reserved-identifier",
+
+      # Shadow warnings that would require confusing variable renames.
+      "-Wno-shadow-field-in-constructor",
+      "-Wno-shadow-uncaptured-local",
+
       # This warning tries to prove that the expression passed to
       # __builtin_assume (DAWN_RELEASE_ASSUME) has no side effects, because that
       # expression does not get executed. But its analysis is too simple to be
       # useful - it triggers too often (e.g. on std::numeric_limits::max()).
       # Instead we use clang-tidy's heuristic `bugprone-assert-side-effect`.
       "-Wno-assume",
-
-      # TODO(crbug.com/523358231): We probably want to enable these globally,
-      # but currently, suppressing just for specific targets is not working,
-      # probably due to some flag ordering issue.
-      "-Wno-c2y-extensions",
-
-      # TODO(crbug.com/529895490): We might want to enable this.
-      "-Wno-thread-safety",
     ]
 
     # Treat third_party and gen headers as system headers to suppress warnings.
     # The path needs to be the literal beginning of the string in the #include
     # directive, so include path resolving to different names is added
     # separately.
+    #
+    # TODO(https://crbug.com/523358231): For dependencies whose code ends up in
+    # Dawn, we should try suppressing individual warnings more specifically
+    # using warning_suppression_mappings.txt.
     _prefixes = [
       "third_party/",
       "absl/",
@@ -231,21 +314,18 @@ config("dawn_warnings") {
       "d3d12.h",
     ]
     foreach(_prefix, _prefixes) {
-      if (is_win) {
-        # When building with clang-cl on Windows, the driver only accepts
-        # MSVC-style flags. We use -Xclang to pass the standard Clang
-        # --system-header-prefix flag directly to the compiler engine.
-        cflags += [
-          "-Xclang",
-          "--system-header-prefix=${_prefix}",
-        ]
-      } else {
-        cflags += [ "--system-header-prefix=${_prefix}" ]
-      }
+      # Prefix with -Xclang so this will be accepted by both clang-cl and clang.
+      cflags += [ "-Xclang=--system-header-prefix=${_prefix}" ]
     }
   }
+
+  cflags_objc = cflags_c
+  cflags_objcc = cflags_cc
 }
 
+# TODO(crbug.com/523358231): Some targets pick up this config multiple times and
+# receive all of the warning flags repeatedly, for example they're repeated
+# three times in obj/src/dawn/native/sources/Device.o. Can this be avoided?
 config("internal_config") {
   include_dirs = [ "${dawn_root}" ]
 
@@ -445,18 +525,14 @@ source_set("gmock_and_gtest") {
 template("clang_plugin") {
   config(target_name) {
     cflags = [
-      "-Xclang",
-      "-add-plugin",
-      "-Xclang",
-      invoker.plugin,
+      "-Xclang=-add-plugin",
+      "-Xclang=${invoker.plugin}",
     ]
 
     foreach(flag, invoker.plugin_arguments) {
       cflags += [
-        "-Xclang",
-        "-plugin-arg-${invoker.plugin}",
-        "-Xclang",
-        flag,
+        "-Xclang=-plugin-arg-${invoker.plugin}",
+        "-Xclang=${flag}",
       ]
     }
   }
@@ -479,7 +555,7 @@ clang_plugin("raw_ptr_check") {
     "/src/tint/",
     "/src/dawn/replay/",
 
-    # TODO(479743213): Enforce raw_ptr usage in dawn/node as well.
+    # TODO(https://crbug.com/479743213): Enforce raw_ptr usage in dawn/node.
     "/src/dawn/node/",
   ]
 

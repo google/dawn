@@ -15,3 +15,20 @@ src:*src/tint/utils/rtti/castable.h
 # The OpenGL API forces an excessive amount of sign conversion that is not useful to fix.
 src:*src/dawn/native/opengl/*
 src:*src/dawn/tests/*
+
+[cast-function-type-strict]
+# Needed to cast procs in GL.
+src:*gen/src/dawn/native/opengl/OpenGLFunctionsBase_autogen.cpp
+src:*src/dawn/native/opengl/ContextEGL.cpp
+src:*src/dawn/native/opengl/EGLFunctions.cpp
+src:*src/dawn/native/opengl/OpenGLVersion.cpp
+# Needed to cast procs in Vulkan.
+src:*src/dawn/native/vulkan/VulkanFunctions.cpp
+# Needed to cast procs in webgpu.h.
+src:*gen/src/dawn/native/ProcTable.cpp
+src:*gen/src/dawn/wire/client/ApiProcs_autogen.cpp.inc
+src:*src/dawn/tests/end2end/EventTests.cpp
+src:*src/dawn/tests/unittests/GetProcAddressTests.cpp
+# Needed to cast procs in Windows.
+src:*src/tint/utils/command/command_windows.cc
+src:*src/tint/lang/hlsl/validate/validate.cc
