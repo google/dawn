@@ -43,16 +43,16 @@
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
 
-#if TINT_BUILD_SPV_READER && !defined(__EMSCRIPTEN__)
+#if TINT_BUILD_SPV_READER && !DAWN_PLATFORM_IS(EMSCRIPTEN)
 #include "spirv-tools/optimizer.hpp"
-#endif  // TINT_BUILD_SPV_READER && !defined(__EMSCRIPTEN__)
+#endif  // TINT_BUILD_SPV_READER && !DAWN_PLATFORM_IS(EMSCRIPTEN)
 
 namespace dawn {
 namespace {
 
 class ShaderModuleValidationTest : public ValidationTest {};
 
-#if TINT_BUILD_SPV_READER && !defined(__EMSCRIPTEN__)
+#if TINT_BUILD_SPV_READER && !DAWN_PLATFORM_IS(EMSCRIPTEN)
 
 wgpu::ShaderModule CreateShaderModuleFromASM(
     const wgpu::Device& device,
@@ -299,7 +299,7 @@ TEST_F(ShaderModuleValidationTest, NonUniformDerivatives_FlagSetToTrue) {
     CreateShaderModuleFromASM(device, kShaderWithNonUniformDerivative, &spirv_options_desc);
 }
 
-#endif  // TINT_BUILD_SPV_READER && !defined(__EMSCRIPTEN__)
+#endif  // TINT_BUILD_SPV_READER && !DAWN_PLATFORM_IS(EMSCRIPTEN)
 
 // Test that it is invalid to create a shader module with no chained descriptor. (It must be
 // WGSL or SPIRV, not empty)

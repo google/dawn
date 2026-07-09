@@ -139,6 +139,13 @@ _BANNED_CPP_PATTERNS: Sequence[BanRule] = (
         surface_as_gerrit_lint=True,
     ),
     BanRule(
+        pattern=r'__EMSCRIPTEN__\b',
+        excluded_paths=(r'^src/utils/platform\.h$', ),
+        explanation='Use DAWN_PLATFORM_IS(EMSCRIPTEN) instead where possible.',
+        treat_as_error=False,
+        surface_as_gerrit_lint=True,
+    ),
+    BanRule(
         pattern=r'/\b(EXPECT_DEATH|EXPECT_DEBUG_DEATH)\b',
         excluded_paths=(r'^src/utils/gtest\.h$', ),
         explanation=(
