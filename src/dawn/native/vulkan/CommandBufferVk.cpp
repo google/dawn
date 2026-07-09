@@ -68,6 +68,7 @@
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::vulkan {
 
@@ -137,8 +138,8 @@ VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
 
     bool has3DTextureInCopy = false;
 
-    region.srcOffset.x = dchecked_cast<uint32_t>(srcCopy.origin.x);
-    region.srcOffset.y = dchecked_cast<uint32_t>(srcCopy.origin.y);
+    region.srcOffset.x = dchecked_cast<int32_t>(srcCopy.origin.x);
+    region.srcOffset.y = dchecked_cast<int32_t>(srcCopy.origin.y);
     switch (srcTexture->GetDimension()) {
         case wgpu::TextureDimension::Undefined:
             DAWN_UNREACHABLE();
@@ -156,12 +157,12 @@ VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
             has3DTextureInCopy = true;
             region.srcSubresource.baseArrayLayer = 0;
             region.srcSubresource.layerCount = 1;
-            region.srcOffset.z = dchecked_cast<uint32_t>(srcCopy.origin.z);
+            region.srcOffset.z = dchecked_cast<int32_t>(srcCopy.origin.z);
             break;
     }
 
-    region.dstOffset.x = dchecked_cast<uint32_t>(dstCopy.origin.x);
-    region.dstOffset.y = dchecked_cast<uint32_t>(dstCopy.origin.y);
+    region.dstOffset.x = dchecked_cast<int32_t>(dstCopy.origin.x);
+    region.dstOffset.y = dchecked_cast<int32_t>(dstCopy.origin.y);
     switch (dstTexture->GetDimension()) {
         case wgpu::TextureDimension::Undefined:
             DAWN_UNREACHABLE();
@@ -179,7 +180,7 @@ VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
             has3DTextureInCopy = true;
             region.dstSubresource.baseArrayLayer = 0;
             region.dstSubresource.layerCount = 1;
-            region.dstOffset.z = dchecked_cast<uint32_t>(dstCopy.origin.z);
+            region.dstOffset.z = dchecked_cast<int32_t>(dstCopy.origin.z);
             break;
     }
 
@@ -204,31 +205,31 @@ VkRect2D GetAlignedRenderArea(VkExtent2D granularity, BeginRenderPassCmd* render
     }
 
     if (granularity.width == 0 || granularity.width == 1) {
-        renderArea.offset.x = renderPassCmd->renderArea.x;
+        renderArea.offset.x = sign_cast(renderPassCmd->renderArea.x);
         renderArea.extent.width = renderPassCmd->renderArea.width;
     } else {
-        renderArea.offset.x = AlignDown(renderPassCmd->renderArea.x, granularity.width);
+        renderArea.offset.x = AlignDown(sign_cast(renderPassCmd->renderArea.x), granularity.width);
 
         uint32_t right =
             Align(renderPassCmd->renderArea.x + renderPassCmd->renderArea.width, granularity.width);
         if (right > renderPassCmd->width) {
             right = renderPassCmd->width;
         }
-        renderArea.extent.width = right - renderArea.offset.x;
+        renderArea.extent.width = right - sign_cast(renderArea.offset.x);
     }
 
     if (granularity.height == 0 || granularity.height == 1) {
-        renderArea.offset.y = renderPassCmd->renderArea.y;
+        renderArea.offset.y = sign_cast(renderPassCmd->renderArea.y);
         renderArea.extent.height = renderPassCmd->renderArea.height;
     } else {
-        renderArea.offset.y = AlignDown(renderPassCmd->renderArea.y, granularity.height);
+        renderArea.offset.y = AlignDown(sign_cast(renderPassCmd->renderArea.y), granularity.height);
 
         uint32_t bottom = Align(renderPassCmd->renderArea.y + renderPassCmd->renderArea.height,
                                 granularity.height);
         if (bottom > renderPassCmd->height) {
             bottom = renderPassCmd->height;
         }
-        renderArea.extent.height = bottom - renderArea.offset.y;
+        renderArea.extent.height = bottom - sign_cast(renderArea.offset.y);
     }
 
     return renderArea;
@@ -1782,8 +1783,8 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
         device->fn.CmdSetViewport(commands, 0, 1, &viewport);
 
         VkRect2D scissorRect;
-        scissorRect.offset.x = renderPassCmd->renderArea.x;
-        scissorRect.offset.y = renderPassCmd->renderArea.y;
+        scissorRect.offset.x = static_cast<int32_t>(renderPassCmd->renderArea.x);
+        scissorRect.offset.y = static_cast<int32_t>(renderPassCmd->renderArea.y);
         scissorRect.extent.width = renderPassCmd->renderArea.width;
         scissorRect.extent.height = renderPassCmd->renderArea.height;
         device->fn.CmdSetScissor(commands, 0, 1, &scissorRect);
@@ -2096,8 +2097,8 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             case Command::SetScissorRect: {
                 SetScissorRectCmd* cmd = mCommands.NextCommand<SetScissorRectCmd>();
                 VkRect2D rect;
-                rect.offset.x = cmd->x;
-                rect.offset.y = cmd->y;
+                rect.offset.x = sign_cast(cmd->x);
+                rect.offset.y = sign_cast(cmd->y);
                 rect.extent.width = cmd->width;
                 rect.extent.height = cmd->height;
 

@@ -57,19 +57,19 @@ TEST_P(AdapterPropertiesDrmTest, GetDrmProperties) {
         EXPECT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
 
         if (drmProperties.hasPrimary) {
-            EXPECT_NE(drmProperties.primaryMajor, 0u);
+            EXPECT_NE(drmProperties.primaryMajor, 0);
         }
         if (drmProperties.hasRender) {
-            EXPECT_NE(drmProperties.renderMajor, 0u);
+            EXPECT_NE(drmProperties.renderMajor, 0);
         }
 
         if (!drmProperties.hasPrimary) {
-            EXPECT_EQ(drmProperties.primaryMajor, 0u);
-            EXPECT_EQ(drmProperties.primaryMinor, 0u);
+            EXPECT_EQ(drmProperties.primaryMajor, 0);
+            EXPECT_EQ(drmProperties.primaryMinor, 0);
         }
         if (!drmProperties.hasRender) {
-            EXPECT_EQ(drmProperties.renderMajor, 0u);
-            EXPECT_EQ(drmProperties.renderMinor, 0u);
+            EXPECT_EQ(drmProperties.renderMajor, 0);
+            EXPECT_EQ(drmProperties.renderMinor, 0);
         }
     }
     {
@@ -80,19 +80,19 @@ TEST_P(AdapterPropertiesDrmTest, GetDrmProperties) {
         EXPECT_EQ(adapter.GetInfo(&adapterInfo), wgpu::Status::Success);
 
         if (drmProperties.hasPrimary) {
-            EXPECT_NE(drmProperties.primaryMajor, 0u);
+            EXPECT_NE(drmProperties.primaryMajor, 0);
         }
         if (drmProperties.hasRender) {
-            EXPECT_NE(drmProperties.renderMajor, 0u);
+            EXPECT_NE(drmProperties.renderMajor, 0);
         }
 
         if (!drmProperties.hasPrimary) {
-            EXPECT_EQ(drmProperties.primaryMajor, 0u);
-            EXPECT_EQ(drmProperties.primaryMinor, 0u);
+            EXPECT_EQ(drmProperties.primaryMajor, 0);
+            EXPECT_EQ(drmProperties.primaryMinor, 0);
         }
         if (!drmProperties.hasRender) {
-            EXPECT_EQ(drmProperties.renderMajor, 0u);
-            EXPECT_EQ(drmProperties.renderMinor, 0u);
+            EXPECT_EQ(drmProperties.renderMajor, 0);
+            EXPECT_EQ(drmProperties.renderMinor, 0);
         }
     }
 }

@@ -49,6 +49,7 @@
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 #if DAWN_PLATFORM_IS(ANDROID)
 #include "src/dawn/native/AHBFunctions.h"
@@ -1695,10 +1696,12 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     if (auto* drmProperties = info.Get<AdapterPropertiesDrm>()) {
         drmProperties->hasPrimary = mDeviceInfo.drmProperties.hasPrimary;
         drmProperties->hasRender = mDeviceInfo.drmProperties.hasRender;
-        drmProperties->primaryMajor = mDeviceInfo.drmProperties.primaryMajor;
-        drmProperties->primaryMinor = mDeviceInfo.drmProperties.primaryMinor;
-        drmProperties->renderMajor = mDeviceInfo.drmProperties.renderMajor;
-        drmProperties->renderMinor = mDeviceInfo.drmProperties.renderMinor;
+        // TODO(crbug.com/42240462): Ideally these would be declared as int64_t in dawn.json to
+        // match the Vulkan structs, but at the time of this comment that wasn't supported yet.
+        drmProperties->primaryMajor = sign_dcast(mDeviceInfo.drmProperties.primaryMajor);
+        drmProperties->primaryMinor = sign_dcast(mDeviceInfo.drmProperties.primaryMinor);
+        drmProperties->renderMajor = sign_dcast(mDeviceInfo.drmProperties.renderMajor);
+        drmProperties->renderMinor = sign_dcast(mDeviceInfo.drmProperties.renderMinor);
     }
     if (auto* subgroupMatrixConfigs = info.Get<AdapterPropertiesSubgroupMatrixConfigs>()) {
         std::vector<SubgroupMatrixConfig> supportedConfigs =

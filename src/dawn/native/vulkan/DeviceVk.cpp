@@ -713,18 +713,20 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     {
         // Note that GRAPHICS and COMPUTE imply TRANSFER so we don't need to check for it.
         constexpr uint32_t kUniversalFlags = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT;
-        int universalQueueFamily = -1;
-        for (unsigned int i = 0; i < mDeviceInfo.queueFamilies.size(); ++i) {
+        bool foundQueueFamily = false;
+        uint32_t universalQueueFamily = 0;
+        for (uint32_t i = 0; i < mDeviceInfo.queueFamilies.size(); ++i) {
             if ((mDeviceInfo.queueFamilies[i].queueFlags & kUniversalFlags) == kUniversalFlags) {
                 universalQueueFamily = i;
+                foundQueueFamily = true;
                 break;
             }
         }
 
-        if (universalQueueFamily == -1) {
+        if (!foundQueueFamily) {
             return DAWN_INTERNAL_ERROR("No universal queue family");
         }
-        mMainQueueFamily = static_cast<uint32_t>(universalQueueFamily);
+        mMainQueueFamily = universalQueueFamily;
     }
 
     // Choose to create a single universal queue

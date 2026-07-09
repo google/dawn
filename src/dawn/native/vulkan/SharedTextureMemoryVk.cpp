@@ -45,6 +45,7 @@
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/dawn/utils/SystemHandle.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 #if DAWN_PLATFORM_IS(ANDROID)
 #include <android/hardware_buffer.h>
@@ -451,9 +452,9 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     // Choose the best memory type that satisfies both the image's constraint and the
     // import's constraint.
     memoryRequirements.memoryTypeBits &= fdProperties.memoryTypeBits;
-    int memoryTypeIndex = device->GetResourceMemoryAllocator()->FindBestTypeIndex(
-        memoryRequirements, MemoryKind::DeviceLocal);
-    DAWN_INVALID_IF(memoryTypeIndex == -1, "Unable to find an appropriate memory type for import.");
+    uint32_t memoryTypeIndex;
+    DAWN_TRY_ASSIGN(memoryTypeIndex, device->GetResourceMemoryAllocator()->FindBestTypeIndex(
+                                         memoryRequirements, MemoryKind::DeviceLocal));
 
     utils::SystemHandle memoryFD = utils::SystemHandle::Duplicate(fd);
 
@@ -686,10 +687,9 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         // Choose the best memory type that satisfies the import's constraint.
         VkMemoryRequirements memoryRequirements;
         memoryRequirements.memoryTypeBits = bufferProperties.memoryTypeBits;
-        int memoryTypeIndex = device->GetResourceMemoryAllocator()->FindBestTypeIndex(
-            memoryRequirements, MemoryKind::DeviceLocal);
-        DAWN_INVALID_IF(memoryTypeIndex == -1,
-                        "Unable to find an appropriate memory type for import.");
+        uint32_t memoryTypeIndex;
+        DAWN_TRY_ASSIGN(memoryTypeIndex, device->GetResourceMemoryAllocator()->FindBestTypeIndex(
+                                             memoryRequirements, MemoryKind::DeviceLocal));
 
         VkMemoryAllocateInfo memoryAllocateInfo = {};
         memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;

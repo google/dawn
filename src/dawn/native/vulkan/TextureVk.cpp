@@ -53,6 +53,7 @@
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::vulkan {
 
@@ -1337,7 +1338,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
 
         DAWN_UNSAFE_TODO(DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
             uploadSize, blockInfo.byteSize, [&](UploadReservation reservation) -> MaybeError {
-                memset(reservation.mappedPointer, uClearColor, uploadSize);
+                memset(reservation.mappedPointer, sign_dcast(uClearColor), uploadSize);
 
                 std::vector<VkBufferImageCopy> regions;
                 for (uint32_t level = range.baseMipLevel;

@@ -49,6 +49,7 @@
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::vulkan {
 
@@ -412,9 +413,9 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     // - is device-local on UMA
     // - cannot be non-device-local on non-UMA
     MemoryKind requestKind = MemoryKind::Linear;
-    int memoryTypeIndex =
-        device->GetResourceMemoryAllocator()->FindBestTypeIndex(requirements, requestKind);
-    DAWN_INVALID_IF(memoryTypeIndex < 0, "Failed to find suitable memory type.");
+    uint32_t memoryTypeIndex;
+    DAWN_TRY_ASSIGN(memoryTypeIndex, device->GetResourceMemoryAllocator()->FindBestTypeIndex(
+                                         requirements, requestKind));
 
     // Make a device memory wrapping the host pointer.
     VkMemoryAllocateInfo allocateInfo;

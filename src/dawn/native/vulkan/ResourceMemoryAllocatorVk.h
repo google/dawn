@@ -68,7 +68,7 @@ class ResourceMemoryAllocator {
 
     void Tick(ExecutionSerial completedSerial);
 
-    int FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind);
+    ResultOrError<uint32_t> FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind);
 
     // Reports the total vulkan allocated and vulkan used memories.
     uint64_t GetTotalUsedMemory() const;

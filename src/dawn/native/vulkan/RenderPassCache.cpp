@@ -47,7 +47,7 @@ namespace {
 
 // Contains the attachment description that will be chained in the create info
 // The order of all attachments in attachmentDescs is "color-depthstencil-resolve".
-constexpr uint8_t kMaxAttachmentCount = kMaxColorAttachments * 2 + 1;
+constexpr uint32_t kMaxAttachmentCount = kMaxColorAttachments * 2 + 1;
 
 class RenderPassCreateInfo {
   public:
@@ -112,7 +112,7 @@ class RenderPassCreateInfo2 {
             attachmentDescs[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         }
 
-        for (auto i : Range(2)) {
+        for (auto i : Range(2u)) {
             subpassDescs[i].sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_2;
             subpassDescs[i].pNext = nullptr;
             subpassDescs[i].viewMask = 0;

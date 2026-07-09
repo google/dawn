@@ -39,6 +39,7 @@
 #include "src/dawn/native/vulkan/FencedDeleter.h"
 #include "src/dawn/native/vulkan/ResourceHeapVk.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::vulkan {
 
@@ -185,9 +186,9 @@ ResultOrError<ResourceMemoryAllocation> ResourceMemoryAllocator::Allocate(
     MemoryKind kind,
     bool forceDisableSubAllocation) {
     // The Vulkan spec guarantees at least one memory type is valid.
-    int memoryType = FindBestTypeIndex(requirements, kind);
+    uint32_t memoryType;
+    DAWN_TRY_ASSIGN(memoryType, FindBestTypeIndex(requirements, kind));
     bool isLazyMemoryType = mAllocatorsPerType[memoryType]->IsLazyMemoryType();
-    DAWN_ASSERT(memoryType >= 0);
 
     VkDeviceSize size = requirements.size;
 
@@ -344,8 +345,12 @@ void ResourceMemoryAllocator::Tick(ExecutionSerial completedSerial) {
     mSubAllocationsToDelete.ClearUpTo(completedSerial);
 }
 
-int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind) {
-    return mMemoryTypeSelector.FindBestTypeIndex(requirements, kind);
+ResultOrError<uint32_t> ResourceMemoryAllocator::FindBestTypeIndex(
+    VkMemoryRequirements requirements,
+    MemoryKind kind) {
+    uint32_t index = mMemoryTypeSelector.FindBestTypeIndex(requirements, kind);
+    DAWN_INVALID_IF(index == kInvalidMemoryTypeIndex, "Failed to find suitable memory type.");
+    return index;
 }
 
 void ResourceMemoryAllocator::FreeRecycledMemory() {

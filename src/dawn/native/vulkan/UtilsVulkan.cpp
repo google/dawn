@@ -39,6 +39,7 @@
 #include "src/dawn/native/vulkan/VulkanFunctions.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::vulkan {
 
@@ -258,7 +259,7 @@ VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
         case wgpu::TextureDimension::e1D:
             DAWN_ASSERT(textureCopy.origin.z == TexelCount{0u} &&
                         copySizeTexels.depthOrArrayLayers == TexelCount{1u});
-            region.imageOffset.x = dchecked_cast<uint32_t>(textureCopy.origin.x);
+            region.imageOffset.x = dchecked_cast<int32_t>(textureCopy.origin.x);
             region.imageOffset.y = 0;
             region.imageOffset.z = 0;
             region.imageSubresource.baseArrayLayer = 0;
@@ -271,8 +272,8 @@ VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
             break;
 
         case wgpu::TextureDimension::e2D: {
-            region.imageOffset.x = dchecked_cast<uint32_t>(textureCopy.origin.x);
-            region.imageOffset.y = dchecked_cast<uint32_t>(textureCopy.origin.y);
+            region.imageOffset.x = dchecked_cast<int32_t>(textureCopy.origin.x);
+            region.imageOffset.y = dchecked_cast<int32_t>(textureCopy.origin.y);
             region.imageOffset.z = 0;
             region.imageSubresource.baseArrayLayer = dchecked_cast<uint32_t>(textureCopy.origin.z);
             region.imageSubresource.layerCount =
@@ -287,9 +288,9 @@ VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
         }
 
         case wgpu::TextureDimension::e3D: {
-            region.imageOffset.x = dchecked_cast<uint32_t>(textureCopy.origin.x);
-            region.imageOffset.y = dchecked_cast<uint32_t>(textureCopy.origin.y);
-            region.imageOffset.z = dchecked_cast<uint32_t>(textureCopy.origin.z);
+            region.imageOffset.x = dchecked_cast<int32_t>(textureCopy.origin.x);
+            region.imageOffset.y = dchecked_cast<int32_t>(textureCopy.origin.y);
+            region.imageOffset.z = dchecked_cast<int32_t>(textureCopy.origin.z);
             region.imageSubresource.baseArrayLayer = 0;
             region.imageSubresource.layerCount = 1;
 
@@ -362,7 +363,7 @@ std::string GetDeviceDebugPrefixFromDebugName(const char* debugName) {
         return {};
     }
 
-    size_t length = separator - debugName;
+    size_t length = sign_cast(separator - debugName);
     return std::string(debugName, length);
 }
 
