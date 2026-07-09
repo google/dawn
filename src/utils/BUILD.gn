@@ -427,6 +427,7 @@ if (build_with_chromium) {
 source_set("gmock_and_gtest") {
   testonly = true
   public_deps = [ ":gmock_and_gtest_only" ]
+  deps = [ ":utils" ]
 
   # Dawn's gtest utils.
   sources = [ "gtest.h" ]

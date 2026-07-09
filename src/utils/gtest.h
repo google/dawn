@@ -30,6 +30,9 @@
 
 #include <gtest/gtest.h>  // IWYU pragma: export
 
+#include "src/utils/assert.h"
+#include "src/utils/compiler.h"
+
 #ifdef GTEST_HAS_DEATH_TEST
 // If death tests are supported, defer to *_DEBUG_DEATH.
 #define DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher) \
@@ -42,6 +45,28 @@
     EXPECT_DEATH_IF_SUPPORTED(statement, matcher)
 #define DAWN_ASSERT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher) \
     ASSERT_DEATH_IF_SUPPORTED(statement, matcher)
+#endif
+
+// Use DAWN_EXPECT_ASSERT_DEATH_IF_SUPPORTED_ELSE_SKIP_UBSAN to test
+// statements that are expected to exercise undefined behaviour guarded by an
+// DAWN_ASSERT.
+// The macro will:
+// - Expect the death due to an assert, if death tests are supported and assert are turned on.
+// - Otherwise skip the statement, if an undefined behavior sanitizer is active
+// - Otherwise perform the statement. (In part to ensure test coverage).
+#if defined(GTEST_HAS_DEATH_TEST) && defined(DAWN_ENABLE_ASSERTS)
+// Perform the statement and expect death.
+#define DAWN_EXPECT_ASSERT_DEATH_IF_SUPPORTED_ELSE_SKIP_UBSAN(statement, matcher) \
+    EXPECT_DEATH(statement, matcher)
+#elif DAWN_UBSAN_ENABLED()
+#define DAWN_EXPECT_ASSERT_DEATH_IF_SUPPORTED_ELSE_SKIP_UBSAN(statement, matcher)  \
+    do {                                                                           \
+        GTEST_SKIP() << "Test exercises undefined behavior, and ubsan is enabled"; \
+        statement; /* This may have the only reference to a variable */            \
+    } while (DAWN_ASSERT_LOOP_CONDITION)
+#else
+#define DAWN_EXPECT_ASSERT_DEATH_IF_SUPPORTED_ELSE_SKIP_UBSAN(statement, matcher) \
+    DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher)
 #endif
 
 #endif  // SRC_UTILS_TEST_H_
