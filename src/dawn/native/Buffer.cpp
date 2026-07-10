@@ -782,23 +782,27 @@ const void* BufferBase::APIGetConstMappedRange(size_t offset, size_t size) {
     return GetMappedRange(offset, size, false);
 }
 
-wgpu::Status BufferBase::APIWriteMappedRange(size_t offset, void const* data, size_t size) {
-    void* range = APIGetMappedRange(offset, size);
+wgpu::Status BufferBase::APIWriteMappedRange(size_t offset, Span<const std::byte> data) {
+    // TODO(https://crbug.com/501491697) Use a GetMappedRange that returns a span.
+    void* range = APIGetMappedRange(offset, data.size());
     if (range == nullptr) {
         return wgpu::Status::Error;
     }
 
-    DAWN_UNSAFE_TODO(memcpy(range, data, size));
+    // // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
+    DAWN_UNSAFE_TODO(memcpy(range, data.data(), data.size()));
     return wgpu::Status::Success;
 }
 
-wgpu::Status BufferBase::APIReadMappedRange(size_t offset, void* data, size_t size) {
-    const void* range = APIGetConstMappedRange(offset, size);
+wgpu::Status BufferBase::APIReadMappedRange(size_t offset, Span<std::byte> data) {
+    // TODO(https://crbug.com/501491697) Use a GetConstMappedRange that returns a span.
+    const void* range = APIGetConstMappedRange(offset, data.size());
     if (range == nullptr) {
         return wgpu::Status::Error;
     }
 
-    DAWN_UNSAFE_TODO(memcpy(data, range, size));
+    // // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
+    DAWN_UNSAFE_TODO(memcpy(data.data(), range, data.size()));
     return wgpu::Status::Success;
 }
 

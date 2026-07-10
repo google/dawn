@@ -57,7 +57,7 @@
         {% elif spanify and arg.length and arg.length != "constant" %}
             // TODO(https://crbug.com/524405497): Support fixed-length spans.
             {% if arg.type.name.canonical_case() == "void" %}
-                using {{varName}}SpanT = const std::byte;
+                using {{varName}}SpanT = {% if arg.annotation == "const*" %}const {% endif %}std::byte;
             {% else %}
                 using {{varName}}SpanT = std::remove_pointer_t<{{decorate(as_frontendType(arg.type), arg)}}>;
             {% endif %}
