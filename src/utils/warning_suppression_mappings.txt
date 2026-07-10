@@ -31,9 +31,10 @@ src:*src/dawn/native/opengl/OpenGLVersion.cpp
 src:*src/dawn/native/vulkan/VulkanFunctions.cpp
 # Needed to cast procs in webgpu.h.
 src:*gen/src/dawn/native/ProcTable.cpp
-src:*gen/src/dawn/wire/client/ApiProcs_autogen.cpp.inc
 src:*src/dawn/tests/end2end/EventTests.cpp
 src:*src/dawn/tests/unittests/GetProcAddressTests.cpp
+# For some unknown reason this one filepath can get a backslash on Windows.
+src:*gen/src{/,\\}dawn/wire/client/ApiProcs_autogen.cpp.inc
 # Needed to cast procs in Windows.
 src:*src/tint/utils/command/command_windows.cc
 src:*src/tint/lang/hlsl/validate/validate.cc
