@@ -1,5 +1,6 @@
 {
   "gn_args": {
+    "android_static_analysis": "on",
     "dawn_build_node_bindings": true,
     "dcheck_always_on": true,
     "is_debug": false,

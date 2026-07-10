@@ -40,8 +40,16 @@ gn_args.config(
     name = "android_clang",
     configs = [
         "android",
+        "android_static_analysis_on",
         "siso",
     ],
+)
+
+gn_args.config(
+    name = "android_static_analysis_on",
+    args = {
+        "android_static_analysis": "on",
+    },
 )
 
 gn_args.config(
