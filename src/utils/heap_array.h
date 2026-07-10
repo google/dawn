@@ -132,28 +132,26 @@ class HeapArray :
     constexpr explicit operator bool() { return mOwnedData.data() != nullptr; }
 
     // Span-like interface
-    constexpr inline auto empty() const { return mOwnedData.empty(); }
-    constexpr inline auto data() { return mOwnedData.data(); }
-    constexpr inline auto data() const { return mOwnedData.data(); }
-    constexpr inline auto size() const { return mOwnedData.size(); }
-    constexpr inline auto begin() { return mOwnedData.begin(); }
-    constexpr inline auto begin() const { return mOwnedData.begin(); }
-    constexpr inline auto end() { return mOwnedData.end(); }
-    constexpr inline auto end() const { return mOwnedData.end(); }
-    constexpr inline auto subspan(Index offset) { return mOwnedData.subspan(offset); }
-    constexpr inline auto subspan(Index offset) const { return mOwnedData.subspan(offset); }
-    constexpr inline auto subspan(Index offset, Index count) {
+    constexpr auto empty() const { return mOwnedData.empty(); }
+    constexpr auto data() { return mOwnedData.data(); }
+    constexpr auto data() const { return mOwnedData.data(); }
+    constexpr auto size() const { return mOwnedData.size(); }
+    constexpr auto begin() { return mOwnedData.begin(); }
+    constexpr auto begin() const { return mOwnedData.begin(); }
+    constexpr auto end() { return mOwnedData.end(); }
+    constexpr auto end() const { return mOwnedData.end(); }
+    constexpr auto subspan(Index offset) { return mOwnedData.subspan(offset); }
+    constexpr auto subspan(Index offset) const { return mOwnedData.subspan(offset); }
+    constexpr auto subspan(Index offset, Index count) { return mOwnedData.subspan(offset, count); }
+    constexpr auto subspan(Index offset, Index count) const {
         return mOwnedData.subspan(offset, count);
     }
-    constexpr inline auto subspan(Index offset, Index count) const {
-        return mOwnedData.subspan(offset, count);
-    }
-    constexpr inline auto& front() { return mOwnedData.front(); }
-    constexpr inline const auto& front() const { return mOwnedData.front(); }
-    constexpr inline auto& back() { return mOwnedData.back(); }
-    constexpr inline const auto& back() const { return mOwnedData.back(); }
-    constexpr inline auto& operator[](Index i) { return mOwnedData[i]; }
-    constexpr inline const auto& operator[](Index i) const { return mOwnedData[i]; }
+    constexpr auto& front() { return mOwnedData.front(); }
+    constexpr const auto& front() const { return mOwnedData.front(); }
+    constexpr auto& back() { return mOwnedData.back(); }
+    constexpr const auto& back() const { return mOwnedData.back(); }
+    constexpr auto& operator[](Index i) { return mOwnedData[i]; }
+    constexpr const auto& operator[](Index i) const { return mOwnedData[i]; }
 
   private:
     // Constructs a HeapArray by taking ownership of an existing allocation that was allocated with
