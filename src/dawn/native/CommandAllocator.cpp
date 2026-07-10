@@ -109,7 +109,7 @@ void CommandIterator::Reset() {
     if (mBlocks.empty()) {
         // This will case the first NextCommandId call to try to move to the next block and stop
         // the iteration immediately, without special casing the initialization.
-        mCurrentPtr = reinterpret_cast<char*>(&mEndOfBlock);
+        mCurrentPtr = reinterpret_cast<std::byte*>(&mEndOfBlock);
     } else {
         mCurrentPtr = AlignPtr(mBlocks[0].data(), alignof(uint32_t));
     }
@@ -120,7 +120,7 @@ void CommandIterator::MakeEmptyAsDataWasDestroyed() {
         return;
     }
 
-    mCurrentPtr = reinterpret_cast<char*>(&mEndOfBlock);
+    mCurrentPtr = reinterpret_cast<std::byte*>(&mEndOfBlock);
     mBlocks.clear();
     Reset();
     DAWN_ASSERT(IsEmpty());
@@ -179,7 +179,7 @@ void CommandAllocator::Reset() {
 }
 
 bool CommandAllocator::IsEmpty() const {
-    return mCurrentPtr == reinterpret_cast<const char*>(&mPlaceholderSpace[0]);
+    return mCurrentPtr == reinterpret_cast<const std::byte*>(&mPlaceholderSpace[0]);
 }
 
 size_t CommandAllocator::GetCommandBlocksCount() const {
@@ -197,9 +197,9 @@ CommandBlocks&& CommandAllocator::AcquireBlocks() {
     return std::move(mBlocks);
 }
 
-char* CommandAllocator::AllocateInNewBlock(uint32_t commandId,
-                                           size_t commandSize,
-                                           size_t commandAlignment) {
+std::byte* CommandAllocator::AllocateInNewBlock(uint32_t commandId,
+                                                size_t commandSize,
+                                                size_t commandAlignment) {
     // When there is not enough space, we signal the kEndOfBlock, so that the iterator knows
     // to move to the next one. kEndOfBlock on the last block means the end of the commands.
     uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
@@ -223,7 +223,7 @@ void CommandAllocator::AppendNewBlock(size_t minimumSize) {
     mLastAllocationSize = std::max(minimumSize, std::min(mLastAllocationSize * 2, size_t(16384)));
 
     // SAFETY: This is a pool allocation that will be initialized when it's suballocated.
-    auto block = DAWN_UNSAFE_BUFFERS(HeapArray<char>::Uninit(mLastAllocationSize));
+    auto block = DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(mLastAllocationSize));
 
     mCurrentPtr = AlignPtr(block.data(), alignof(uint32_t));
     mEndPtr = std::to_address(block.end());
@@ -231,8 +231,8 @@ void CommandAllocator::AppendNewBlock(size_t minimumSize) {
 }
 
 void CommandAllocator::ResetPointers() {
-    mCurrentPtr = reinterpret_cast<char*>(mPlaceholderSpace.data());
-    mEndPtr = reinterpret_cast<char*>(DAWN_UNSAFE_TODO(mPlaceholderSpace.data() + 1));
+    mCurrentPtr = reinterpret_cast<std::byte*>(mPlaceholderSpace.data());
+    mEndPtr = reinterpret_cast<std::byte*>(DAWN_UNSAFE_TODO(mPlaceholderSpace.data() + 1));
 }
 
 }  // namespace dawn::native

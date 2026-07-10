@@ -76,7 +76,7 @@ namespace dawn::native {
 
 // These are the lists of blocks, should not be used directly, only through CommandAllocator
 // and CommandIterator
-using BlockDef = HeapArray<char>;
+using BlockDef = HeapArray<std::byte>;
 using CommandBlocks = std::vector<BlockDef>;
 
 namespace detail {
@@ -124,8 +124,8 @@ class CommandIterator : public NonCopyable {
     bool IsEmpty() const;
 
     DAWN_FORCE_INLINE bool NextCommandId(uint32_t* commandId) {
-        char* idPtr = AlignPtr(mCurrentPtr, alignof(uint32_t));
-        DAWN_ASSERT(idPtr == reinterpret_cast<char*>(&mEndOfBlock) ||
+        std::byte* idPtr = AlignPtr(mCurrentPtr, alignof(uint32_t));
+        DAWN_ASSERT(idPtr == reinterpret_cast<std::byte*>(&mEndOfBlock) ||
                     DAWN_UNSAFE_TODO(idPtr + sizeof(uint32_t)) <=
                         std::to_address(mBlocks[mCurrentBlock].end()));
 
@@ -142,7 +142,7 @@ class CommandIterator : public NonCopyable {
     bool NextCommandIdInNewBlock(uint32_t* commandId);
 
     DAWN_FORCE_INLINE void* NextCommand(size_t commandSize, size_t commandAlignment) {
-        char* commandPtr = AlignPtr(mCurrentPtr, commandAlignment);
+        std::byte* commandPtr = AlignPtr(mCurrentPtr, commandAlignment);
         DAWN_ASSERT(DAWN_UNSAFE_TODO(commandPtr + sizeof(commandSize)) <=
                     std::to_address(mBlocks[mCurrentBlock].end()));
 
@@ -162,7 +162,7 @@ class CommandIterator : public NonCopyable {
     CommandBlocks mBlocks;
     // RAW_PTR_EXCLUSION: This is an extremely hot pointer during command iteration, but always
     // points to at least a valid uint32_t, either inside a block, or at mEndOfBlock.
-    RAW_PTR_EXCLUSION char* mCurrentPtr = nullptr;
+    RAW_PTR_EXCLUSION std::byte* mCurrentPtr = nullptr;
     size_t mCurrentBlock = 0;
     // Used to avoid a special case for empty iterators.
     uint32_t mEndOfBlock = detail::kEndOfBlock;
@@ -227,9 +227,9 @@ class CommandAllocator : public NonCopyable {
     friend CommandIterator;
     CommandBlocks&& AcquireBlocks();
 
-    DAWN_FORCE_INLINE char* Allocate(uint32_t commandId,
-                                     size_t commandSize,
-                                     size_t commandAlignment) {
+    DAWN_FORCE_INLINE std::byte* Allocate(uint32_t commandId,
+                                          size_t commandSize,
+                                          size_t commandAlignment) {
         DAWN_ASSERT(mCurrentPtr != nullptr);
         DAWN_ASSERT(mEndPtr != nullptr);
         DAWN_ASSERT(commandId != detail::kEndOfBlock);
@@ -257,7 +257,7 @@ class CommandAllocator : public NonCopyable {
             uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
             *idAlloc = commandId;
 
-            char* commandAlloc =
+            std::byte* commandAlloc =
                 AlignPtr(DAWN_UNSAFE_TODO(mCurrentPtr + sizeof(uint32_t)), commandAlignment);
             mCurrentPtr = AlignPtr(DAWN_UNSAFE_TODO(commandAlloc + commandSize), alignof(uint32_t));
 
@@ -266,9 +266,9 @@ class CommandAllocator : public NonCopyable {
         return AllocateInNewBlock(commandId, commandSize, commandAlignment);
     }
 
-    char* AllocateInNewBlock(uint32_t commandId, size_t commandSize, size_t commandAlignment);
+    std::byte* AllocateInNewBlock(uint32_t commandId, size_t commandSize, size_t commandAlignment);
 
-    DAWN_FORCE_INLINE char* AllocateData(size_t commandSize, size_t commandAlignment) {
+    DAWN_FORCE_INLINE std::byte* AllocateData(size_t commandSize, size_t commandAlignment) {
         return Allocate(detail::kAdditionalData, commandSize, commandAlignment);
     }
 
@@ -289,8 +289,8 @@ class CommandAllocator : public NonCopyable {
     // be written. Nullptr iff the blocks were moved out.
     // RAW_PTR_EXCLUSION: These are extremely hot pointers during command allocation, but always
     // set to a valid slice (either the placeholder space, or a real allocated block).
-    RAW_PTR_EXCLUSION char* mCurrentPtr = nullptr;
-    RAW_PTR_EXCLUSION char* mEndPtr = nullptr;
+    RAW_PTR_EXCLUSION std::byte* mCurrentPtr = nullptr;
+    RAW_PTR_EXCLUSION std::byte* mEndPtr = nullptr;
 };
 
 }  // namespace dawn::native
