@@ -153,7 +153,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     bool NeedsInitialization() const;
     void MarkUsedInPendingCommands();
     void MarkUsedInPendingCommands(ExecutionSerial pendingSerial);
-    virtual MaybeError UploadData(uint64_t bufferOffset, const void* data, size_t size);
+    virtual MaybeError UploadData(uint64_t bufferOffset, Span<const std::byte> data);
 
     // SharedResource impl.
     ExecutionSerial OnEndAccess() override;

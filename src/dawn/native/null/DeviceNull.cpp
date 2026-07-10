@@ -369,7 +369,7 @@ BindGroupLayout::BindGroupLayout(DeviceBase* device,
 Buffer::Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor)
     : BufferBase(device, descriptor) {
     // SAFETY: Frontend is responsible for initializing mapped memory.
-    mBackingData = DAWN_UNSAFE_BUFFERS(HeapArray<uint8_t>::Uninit(GetSize()));
+    mBackingData = DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(GetSize()));
     mAllocatedSize = GetSize();
 }
 
@@ -387,18 +387,17 @@ void Buffer::CopyFromStaging(BufferBase* staging,
                              uint64_t sourceOffset,
                              uint64_t destinationOffset,
                              uint64_t size) {
-    uint8_t* ptr = reinterpret_cast<uint8_t*>(staging->GetMappedPointer());
-    auto src = DAWN_UNSAFE_TODO(Span<uint8_t>{ptr + sourceOffset, checked_cast<size_t>(size)});
+    std::byte* ptr = reinterpret_cast<std::byte*>(staging->GetMappedPointer());
+    auto src = DAWN_UNSAFE_TODO(Span<std::byte>{ptr + sourceOffset, checked_cast<size_t>(size)});
     // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
     std::ranges::copy(src, mBackingData.begin());
 }
 
-void Buffer::DoWriteBuffer(uint64_t bufferOffset, const void* data, size_t size) {
-    DAWN_ASSERT(bufferOffset + size <= GetSize());
+void Buffer::DoWriteBuffer(uint64_t bufferOffset, Span<const std::byte> data) {
+    DAWN_ASSERT(bufferOffset + data.size() <= GetSize());
     DAWN_ASSERT(mBackingData);
-    auto src = DAWN_UNSAFE_TODO(Span<const uint8_t>{static_cast<const uint8_t*>(data)), size};
     // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-    std::ranges::copy(src, mBackingData.subspan(bufferOffset).begin());
+    std::ranges::copy(data, mBackingData.subspan(bufferOffset).begin());
 }
 
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
@@ -455,9 +454,8 @@ MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const>) {
 
 MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
                                   uint64_t bufferOffset,
-                                  const void* data,
-                                  size_t size) {
-    ToBackend(buffer)->DoWriteBuffer(bufferOffset, data, size);
+                                  Span<const std::byte> data) {
+    ToBackend(buffer)->DoWriteBuffer(bufferOffset, data);
     return {};
 }
 

@@ -143,24 +143,20 @@ class Device final : public DeviceBase {
         return EnqueueGL(ExecutionQueueBase::SubmitMode::Normal, std::forward<Fn>(work));
     }
 
-    // A variant of EnqueueGL that takes an array and a size. In deferral mode, a CPU-side copy of
+    // A variant of EnqueueGL that takes an span of data. In deferral mode, a CPU-side copy of
     // the array is made and captured with the lambda. Otherwise, the call is executed immediately
     // without copying the array.
     template <typename Fn>
-    MaybeError EnqueueGL(const void* data, size_t size, Fn work) {
+    MaybeError EnqueueGL(Span<const std::byte> data, Fn work) {
         if (!IsToggleEnabled(Toggle::GLDefer)) {
-            return ExecuteGL(ExecutionQueueBase::SubmitMode::Normal,
-                             [data, size, work](const OpenGLFunctions& gl) -> MaybeError {
-                                 return work(gl, data, size);
-                             });
+            return ExecuteGL(
+                ExecutionQueueBase::SubmitMode::Normal,
+                [data, work](const OpenGLFunctions& gl) -> MaybeError { return work(gl, data); });
         }
 
         // Call is deferred; must copy data.
-        auto* d = static_cast<const char*>(data);
-        return EnqueueGL([data = std::vector<char>(d, DAWN_UNSAFE_TODO(d + size)),
-                          work](const OpenGLFunctions& gl) -> MaybeError {
-            return work(gl, data.data(), data.size());
-        });
+        return EnqueueGL([data = std::vector<std::byte>(data.begin(), data.end()), work](
+                             const OpenGLFunctions& gl) -> MaybeError { return work(gl, data); });
     }
 
     // Flush any pending GL commands enqueued via EnqueueGL().

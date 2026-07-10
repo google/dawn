@@ -268,7 +268,7 @@ class Buffer final : public BufferBase {
                          uint64_t destinationOffset,
                          uint64_t size);
 
-    void DoWriteBuffer(uint64_t bufferOffset, const void* data, size_t size);
+    void DoWriteBuffer(uint64_t bufferOffset, Span<const std::byte> data);
 
   private:
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
@@ -279,7 +279,7 @@ class Buffer final : public BufferBase {
     MaybeError MapAtCreationImpl() override;
     void* GetMappedPointerImpl() override;
 
-    HeapArray<uint8_t> mBackingData;
+    HeapArray<std::byte> mBackingData;
 };
 
 class CommandBuffer final : public CommandBufferBase {
@@ -301,8 +301,7 @@ class Queue final : public QueueBase {
     MaybeError SubmitImpl(Span<CommandBufferBase* const> commands) override;
     MaybeError WriteBufferImpl(BufferBase* buffer,
                                uint64_t bufferOffset,
-                               const void* data,
-                               size_t size) override;
+                               Span<const std::byte> data) override;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void ForceEventualFlushOfCommands() override;
     bool HasPendingCommands() const override;

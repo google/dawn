@@ -43,13 +43,12 @@ class QueueMock : public QueueBase {
     MOCK_METHOD(MaybeError, SubmitImpl, (Span<CommandBufferBase* const>), (override));
     MOCK_METHOD(MaybeError,
                 WriteBufferImpl,
-                (BufferBase*, uint64_t, const void*, size_t),
+                (BufferBase*, uint64_t, Span<const std::byte>),
                 (override));
     MOCK_METHOD(MaybeError,
                 WriteTextureImpl,
                 (const TexelCopyTextureInfo&,
-                 const void*,
-                 size_t,
+                 Span<const std::byte>,
                  const TexelCopyBufferLayout&,
                  const Extent3D&),
                 (override));

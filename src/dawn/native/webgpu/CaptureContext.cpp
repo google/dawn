@@ -252,26 +252,24 @@ void CaptureContext::WriteCommandBytes(const void* data, size_t size) {
 
 MaybeError CaptureContext::CaptureQueueWriteBuffer(Buffer* buffer,
                                                    uint64_t bufferOffset,
-                                                   const void* data,
-                                                   size_t size) {
+                                                   Span<const std::byte> data) {
     schema::ObjectId id;
     DAWN_TRY_ASSIGN(id, AddResourceAndGetId(buffer));
     schema::RootCommandWriteBufferCmd cmd{{
         .data = {{
             .bufferId = id,
             .bufferOffset = bufferOffset,
-            .size = size,
+            .size = data.size(),
         }},
     }};
 
     Serialize(*this, cmd);
-    WriteContentBytes(data, size);
+    WriteContentBytes(data.data(), data.size());
     return {};
 }
 
 MaybeError CaptureContext::CaptureQueueWriteTexture(const TexelCopyTextureInfo& destination,
-                                                    const void* data,
-                                                    size_t dataSize,
+                                                    Span<const std::byte> data,
                                                     const TexelCopyBufferLayout& dataLayout,
                                                     const TexelExtent3D& writeSizePixel) {
     DAWN_TRY(AddResource(ToBackend(destination.texture)));
@@ -280,13 +278,13 @@ MaybeError CaptureContext::CaptureQueueWriteTexture(const TexelCopyTextureInfo& 
             .destination = ToSchema(*this, destination),
             .layout = ToSchema(dataLayout),
             .size = ToSchema(writeSizePixel),
-            .dataSize = dataSize,
+            .dataSize = data.size(),
         }},
     }};
     Serialize(*this, cmd);
 
     CaptureContext::ScopedContentWriter writer(*this);
-    writer.WriteContentBytes(data, dataSize);
+    writer.WriteContentBytes(data.data(), data.size());
     return {};
 }
 

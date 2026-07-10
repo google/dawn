@@ -1062,16 +1062,19 @@ ExecutionSerial BufferBase::GetLastUsageSerial() const {
     return mLastUsageSerial;
 }
 
-MaybeError BufferBase::UploadData(uint64_t bufferOffset, const void* data, size_t size) {
-    if (size == 0) {
+MaybeError BufferBase::UploadData(uint64_t bufferOffset, Span<const std::byte> data) {
+    if (data.empty()) {
         return {};
     }
 
     return GetDevice()->GetDynamicUploader()->WithUploadReservation(
-        size, kCopyBufferToBufferOffsetAlignment, [&](UploadReservation reservation) -> MaybeError {
-            DAWN_UNSAFE_TODO(memcpy(reservation.mappedPointer, data, size));
-            return GetDevice()->CopyFromStagingToBuffer(
-                reservation.buffer.Get(), reservation.offsetInBuffer, this, bufferOffset, size);
+        data.size(), kCopyBufferToBufferOffsetAlignment,
+        [&](UploadReservation reservation) -> MaybeError {
+            // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
+            DAWN_UNSAFE_TODO(memcpy(reservation.mappedPointer, data.data(), data.size()));
+            return GetDevice()->CopyFromStagingToBuffer(reservation.buffer.Get(),
+                                                        reservation.offsetInBuffer, this,
+                                                        bufferOffset, data.size());
         });
 }
 

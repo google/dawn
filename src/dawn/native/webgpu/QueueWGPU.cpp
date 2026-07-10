@@ -111,28 +111,25 @@ CaptureContext* Queue::GetCaptureContext() const {
 
 MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
                                   uint64_t bufferOffset,
-                                  const void* data,
-                                  size_t size) {
+                                  Span<const std::byte> data) {
     if (IsCapturing()) {
-        DAWN_TRY(
-            mCaptureContext->CaptureQueueWriteBuffer(ToBackend(buffer), bufferOffset, data, size));
+        DAWN_TRY(mCaptureContext->CaptureQueueWriteBuffer(ToBackend(buffer), bufferOffset, data));
     }
 
     auto innerBuffer = ToBackend(buffer)->GetInnerHandle();
     ToBackend(GetDevice())
-        ->wgpu->queueWriteBuffer(mInnerHandle, innerBuffer, bufferOffset, data, size);
+        ->wgpu->queueWriteBuffer(mInnerHandle, innerBuffer, bufferOffset, data.data(), data.size());
     buffer->MarkUsedInPendingCommands();
 
     return {};
 }
 
 MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
-                                   const void* data,
-                                   size_t dataSize,
+                                   Span<const std::byte> data,
                                    const TexelCopyBufferLayout& dataLayout,
                                    const Extent3D& writeSizePixel) {
     if (IsCapturing()) {
-        DAWN_TRY(mCaptureContext->CaptureQueueWriteTexture(destination, data, dataSize, dataLayout,
+        DAWN_TRY(mCaptureContext->CaptureQueueWriteTexture(destination, data, dataLayout,
                                                            writeSizePixel));
     }
 
@@ -151,7 +148,8 @@ MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
     WGPUExtent3D writeSize = ToWGPU(writeSizePixel);
     ToBackend(destination.texture)->SynchronizeTextureBeforeUse();
     ToBackend(GetDevice())
-        ->wgpu->queueWriteTexture(mInnerHandle, &dest, data, dataSize, &layout, &writeSize);
+        ->wgpu->queueWriteTexture(mInnerHandle, &dest, data.data(), data.size(), &layout,
+                                  &writeSize);
     destination.texture->SetIsSubresourceContentInitialized(
         true, GetSubresourcesAffectedByCopy(copy, writeSizePixel));
 

@@ -418,20 +418,18 @@ void Queue::CancelScheduledBufferMapping(Buffer* buffer) {
 
 MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
                                   uint64_t bufferOffset,
-                                  const void* data,
-                                  size_t size) {
-    if (size == 0) {
+                                  Span<const std::byte> data) {
+    if (data.empty()) {
         // skip the empty write
         return {};
     }
 
     auto commandContext = GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
-    return ToBackend(buffer)->Write(&commandContext, bufferOffset, data, size);
+    return ToBackend(buffer)->Write(&commandContext, bufferOffset, data.data(), data.size());
 }
 
 MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
-                                   const void* data,
-                                   size_t dataSize,
+                                   Span<const std::byte> data,
                                    const TexelCopyBufferLayout& dataLayout,
                                    const Extent3D& writeSizePixel) {
     if (writeSizePixel.width == 0 || writeSizePixel.height == 0 ||
@@ -450,9 +448,10 @@ MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
 
     Texture* texture = ToBackend(destination.texture);
     DAWN_TRY(texture->SynchronizeTextureBeforeUse(&commandContext));
-    return texture->Write(&commandContext, subresources, destination.origin, writeSizePixel,
-                          DAWN_UNSAFE_TODO(static_cast<const uint8_t*>(data) + dataLayout.offset),
-                          dataLayout.bytesPerRow, dataLayout.rowsPerImage);
+    return texture->Write(
+        &commandContext, subresources, destination.origin, writeSizePixel,
+        DAWN_UNSAFE_TODO(reinterpret_cast<const uint8_t*>(data.data()) + dataLayout.offset),
+        dataLayout.bytesPerRow, dataLayout.rowsPerImage);
 }
 
 bool Queue::HasPendingCommands() const {

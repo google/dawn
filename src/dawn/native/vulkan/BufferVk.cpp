@@ -635,8 +635,8 @@ void* Buffer::GetMappedPointerImpl() {
     return memory;
 }
 
-MaybeError Buffer::UploadData(uint64_t bufferOffset, const void* data, size_t size) {
-    if (size == 0) {
+MaybeError Buffer::UploadData(uint64_t bufferOffset, Span<const std::byte> data) {
+    if (data.empty()) {
         return {};
     }
 
@@ -653,15 +653,15 @@ MaybeError Buffer::UploadData(uint64_t bufferOffset, const void* data, size_t si
 
     if (isInUse || hasPendingWrites || !mHostVisible) {
         // Write to scratch buffer and copy into final destination buffer.
-        return BufferBase::UploadData(bufferOffset, data, size);
+        return BufferBase::UploadData(bufferOffset, data);
     }
 
     // Buffer does not have any pending uses and is CPU writable. We can map the buffer directly
     // and write the contents, skipping the scratch buffer.
 
     // If the buffer needs initialization request the full buffer is mapped.
-    bool needsZeroInitialization = NeedsInitialization() && size < GetSize();
-    uint64_t mapSize = needsZeroInitialization ? mAllocatedSize.value() : size;
+    bool needsZeroInitialization = NeedsInitialization() && data.size() < GetSize();
+    uint64_t mapSize = needsZeroInitialization ? mAllocatedSize.value() : data.size();
     uint64_t mapOffset = needsZeroInitialization ? 0 : bufferOffset;
 
     return MapMemoryAndPerformOperation(mapOffset, mapSize, [&](std::span<uint8_t> mapped) {
@@ -676,8 +676,9 @@ MaybeError Buffer::UploadData(uint64_t bufferOffset, const void* data, size_t si
         // above or memcpy below.
         SetInitialized(true);
 
-        DAWN_ASSERT(mapped.size() >= dstOffset + size);
-        DAWN_UNSAFE_TODO(memcpy(mapped.data() + dstOffset, data, size));
+        DAWN_ASSERT(mapped.size() >= dstOffset + data.size());
+        // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
+        DAWN_UNSAFE_TODO(memcpy(mapped.data() + dstOffset, data.data(), data.size()));
     });
 }
 

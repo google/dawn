@@ -312,58 +312,53 @@ void QueueBase::HandleDeviceLoss() {
 
 void QueueBase::APIWriteBuffer(BufferBase* buffer,
                                uint64_t bufferOffset,
-                               const void* data,
-                               size_t size) {
+                               Span<const std::byte> data) {
     auto writeBuffer = [&]() -> MaybeError {
-        DAWN_TRY(WriteBuffer(buffer, bufferOffset, data, size));
+        DAWN_TRY(WriteBuffer(buffer, bufferOffset, data));
         return GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands();
     };
     [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
         writeBuffer(), "calling %s.WriteBuffer(%s, (%d bytes), data, (%d bytes))", this, buffer,
-        bufferOffset, size);
+        bufferOffset, data.size());
 }
 
 MaybeError QueueBase::WriteBuffer(BufferBase* buffer,
                                   uint64_t bufferOffset,
-                                  const void* data,
-                                  size_t size) {
+                                  Span<const std::byte> data) {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
-    DAWN_TRY(ValidateWriteBuffer(GetDevice(), buffer, bufferOffset, size));
+    DAWN_TRY(ValidateWriteBuffer(GetDevice(), buffer, bufferOffset, data.size()));
     BufferBase::ScopedUseBuffer scopedUseBuffer;
     DAWN_TRY_ASSIGN(scopedUseBuffer, buffer->ValidateCanUseOnQueueNow());
-    return WriteBufferImpl(buffer, bufferOffset, data, size);
+    return WriteBufferImpl(buffer, bufferOffset, data);
 }
 
 MaybeError QueueBase::WriteBufferImpl(BufferBase* buffer,
                                       uint64_t bufferOffset,
-                                      const void* data,
-                                      size_t size) {
-    return buffer->UploadData(bufferOffset, data, size);
+                                      Span<const std::byte> data) {
+    return buffer->UploadData(bufferOffset, data);
 }
 
 void QueueBase::APIWriteTexture(const TexelCopyTextureInfo* destination,
-                                const void* data,
-                                size_t dataSize,
+                                Span<const std::byte> data,
                                 const TexelCopyBufferLayout* dataLayout,
                                 const Extent3D* writeSize) {
     auto writeTexture = [&]() -> MaybeError {
-        DAWN_TRY(WriteTextureInternal(destination, data, dataSize, *dataLayout, writeSize));
+        DAWN_TRY(WriteTextureInternal(destination, data, *dataLayout, writeSize));
         return GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands();
     };
     [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
         writeTexture(), "calling %s.WriteTexture(%s, (%u bytes), %s, %s)", this, destination,
-        dataSize, dataLayout, writeSize);
+        data.size(), dataLayout, writeSize);
 }
 
 MaybeError QueueBase::WriteTextureInternal(const TexelCopyTextureInfo* destinationOrig,
-                                           const void* data,
-                                           size_t dataSize,
+                                           Span<const std::byte> data,
                                            const TexelCopyBufferLayout& dataLayout,
                                            const Extent3D* writeSize) {
     TexelCopyTextureInfo destination = destinationOrig->WithTrivialFrontendDefaults();
 
-    DAWN_TRY(ValidateWriteTexture(&destination, dataSize, dataLayout, writeSize));
+    DAWN_TRY(ValidateWriteTexture(&destination, data.size(), dataLayout, writeSize));
 
     if (writeSize->width == 0 || writeSize->height == 0 || writeSize->depthOrArrayLayers == 0) {
         return {};
@@ -372,12 +367,11 @@ MaybeError QueueBase::WriteTextureInternal(const TexelCopyTextureInfo* destinati
     const TexelBlockInfo& blockInfo = GetBlockInfo(destination);
     TexelCopyBufferLayout layout = dataLayout;
     ApplyDefaultTexelCopyBufferLayoutOptions(&layout, blockInfo, *writeSize);
-    return WriteTextureImpl(destination, data, dataSize, layout, *writeSize);
+    return WriteTextureImpl(destination, data, layout, *writeSize);
 }
 
 MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
-                                       const void* data,
-                                       size_t dataSize,
+                                       Span<const std::byte> data,
                                        const TexelCopyBufferLayout& dataLayout,
                                        const Extent3D& writeSizePixel) {
     const TypedTexelBlockInfo& blockInfo = GetBlockInfo(destination);
@@ -411,7 +405,7 @@ MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
     return GetDevice()->GetDynamicUploader()->WithUploadReservation(
         packedDataSize, offsetAlignment, [&](UploadReservation reservation) -> MaybeError {
             const uint8_t* srcPointer =
-                DAWN_UNSAFE_TODO(reinterpret_cast<const uint8_t*>(data) + dataLayout.offset);
+                DAWN_UNSAFE_TODO(reinterpret_cast<const uint8_t*>(data.data()) + dataLayout.offset);
             uint8_t* dstPointer = reinterpret_cast<uint8_t*>(reservation.mappedPointer.get());
             CopyTextureData(dstPointer, srcPointer, writeSizePixel.depthOrArrayLayers,
                             dchecked_cast<uint32_t>(rowsPerImage), dataLayout.rowsPerImage,

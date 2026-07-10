@@ -36,9 +36,7 @@
         "function_spanification_blocklist": [
             "BufferReadMappedRange",
             "BufferWriteMappedRange",
-            "CommandEncoderWriteBuffer",
-            "QueueWriteBuffer",
-            "QueueWriteTexture"
+            "CommandEncoderWriteBuffer"
         ],
         "function_span_index_type_override": {
             "ComputePassEncoderSetBindGroup::dynamicOffsets": "BindingIndex",

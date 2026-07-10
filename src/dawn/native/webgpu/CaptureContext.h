@@ -172,15 +172,14 @@ class CaptureContext {
     template <>
     void CaptureSetLabel(Surface* object, const std::string& label);
 
+    // TODO(https://crbug.com/439062058): Spanify this function.
     void WriteCommandBytes(const void* data, size_t size);
 
     MaybeError CaptureQueueWriteBuffer(Buffer* buffer,
                                        uint64_t bufferOffset,
-                                       const void* data,
-                                       size_t size);
+                                       Span<const std::byte> data);
     MaybeError CaptureQueueWriteTexture(const TexelCopyTextureInfo& destination,
-                                        const void* data,
-                                        size_t dataSize,
+                                        Span<const std::byte> data,
                                         const TexelCopyBufferLayout& dataLayout,
                                         const TexelExtent3D& writeSizePixel);
 
@@ -199,6 +198,7 @@ class CaptureContext {
     void ReleaseReferences();
 
   protected:
+    // TODO(https://crbug.com/439062058): Spanify this function.
     void WriteContentBytes(const void* data, size_t size);
 
   private:
