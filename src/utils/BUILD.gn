@@ -199,7 +199,6 @@ config("dawn_warnings") {
       "-Wno-thread-safety",
 
       # Enums (https://crbug.com/515562283)
-      "-Wno-covered-switch-default",
       "-Wno-switch-default",
       "-Wno-switch-enum",
     ]
@@ -208,7 +207,6 @@ config("dawn_warnings") {
     cflags += [
       "-Wno-float-equal",
       "-Wno-non-virtual-dtor",
-      "-Wno-tautological-type-limit-compare",
       "-Wno-undefined-func-template",
       "-Wno-unused-parameter",
 
@@ -238,13 +236,24 @@ config("dawn_warnings") {
     # P4. Checks we might want to look at again someday.
     cflags += [
       "-Wno-documentation",
-      "-Wno-documentation-unknown-command",
       "-Wno-nonportable-system-include-path",
-      "-Wno-nullable-to-nonnull-conversion",
-      "-Wno-shadow-header",
 
       # Needed for __COUNTER__ in various Tint and platform macros.
       "-Wno-c2y-extensions",
+
+      # Disallows `default:` in switches that appear to be covered. Our switches
+      # are rarely actually covered. Note, crbug.com/515562283 may change this.
+      "-Wno-covered-switch-default",
+
+      # Dawn codebase codebase mostly lives without any nullability checks. Few
+      # obscure cases like `std::string{[NSString UTF8String])` are not worth
+      # changing.
+      "-Wno-nullable-to-nonnull-conversion",
+
+      # Disallows multiple header file candidates.
+      # Dawn and Tint have many headers that are mirrored between the source and
+      # generated files directories while they are the same file.
+      "-Wno-shadow-header",
     ]
 
     # P∞. Checks we're not really interested in re-enabling.
@@ -278,6 +287,15 @@ config("dawn_warnings") {
       # useful - it triggers too often (e.g. on std::numeric_limits::max()).
       # Instead we use clang-tidy's heuristic `bugprone-assert-side-effect`.
       "-Wno-assume",
+
+      # Disallows comparison result always true. We have branches that can be
+      # always true on some platforms but not on other platforms (e.g. x86, x64)
+      "-Wno-tautological-type-limit-compare",
+
+      # WGSL uses @ as part of its attribute syntax and it vastly appears in
+      # Tint comments, while clang uses @ to mark a documentation command in the
+      # comment.
+      "-Wno-documentation-unknown-command",
     ]
 
     # Treat third_party and gen headers as system headers to suppress warnings.
