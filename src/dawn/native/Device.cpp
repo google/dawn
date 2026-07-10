@@ -438,7 +438,7 @@ MaybeError DeviceBase::Initialize(const UnpackedPtr<DeviceDescriptor>& descripto
     }
 
     if (HasFeature(Feature::ImplicitDeviceSynchronization)) {
-        mMutex = AcquireRef(new DeviceMutex);
+        mMutex = AcquireRef(new DeviceMutex(GetPlatform()));
     } else {
         mMutex = nullptr;
     }

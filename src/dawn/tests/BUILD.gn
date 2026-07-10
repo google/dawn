@@ -323,6 +323,7 @@ dawn_test("dawn_unittests") {
     "unittests/native/DestroyObjectTests.cpp",
     "unittests/native/DeviceAsyncTaskTests.cpp",
     "unittests/native/DeviceCreationTests.cpp",
+    "unittests/native/DeviceMutexTests.cpp",
     "unittests/native/ErrorMonadTests.cpp",
     "unittests/native/ImmediatesTrackerTests.cpp",
     "unittests/native/LimitsTests.cpp",
