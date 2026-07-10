@@ -168,6 +168,45 @@ TEST_F(HeapArrayTest, HeapArrayFrom) {
     }
 }
 
+// HeapArray is freed when it goes out of scope. Requires 512MiB of memory if working.
+// Should OOM (at least on systems without ridiculous amounts of memory) if broken.
+TEST_F(HeapArrayTest, FreedByScope) {
+    constexpr size_t k512MiB = 256 * 1024 * 1024;
+    constexpr uint64_t kAllocateTotal = sizeof(size_t) > sizeof(uint32_t)
+                                            ? 0x100'0000'0000  // 1 TiB
+                                            : 0x1'0000'0000;   // 4 GiB
+
+    for (uint64_t allocated = 0; allocated < kAllocateTotal; ++allocated) {
+        // SAFETY: Data not used. Initialization would take a long time.
+        auto x = DAWN_UNSAFE_BUFFERS(HeapArray<uint8_t>::Uninit(k512MiB, std::nothrow));
+        allocated += k512MiB;
+
+        // Use nothrow and then check the pointer, to prevent the allocation from being optimized
+        // away by the compiler assuming it will succeed.
+        ASSERT_NE(x.data(), nullptr);
+    }
+}
+
+// HeapArray is freed when assigned over. Requires 512MiB of memory if working.
+// Should OOM (at least on systems without ridiculous amounts of memory) if broken.
+TEST_F(HeapArrayTest, FreedByAssignment) {
+    constexpr size_t k256MiB = 256 * 1024 * 1024;
+    constexpr uint64_t kAllocateTotal = sizeof(size_t) > sizeof(uint32_t)
+                                            ? 0x100'0000'0000  // 1 TiB
+                                            : 0x1'0000'0000;   // 4 GiB
+
+    HeapArray<uint8_t> x;
+    for (uint64_t allocated = 0; allocated < kAllocateTotal; ++allocated) {
+        // SAFETY: Data not used. Initialization would take a long time.
+        x = DAWN_UNSAFE_BUFFERS(HeapArray<uint8_t>::Uninit(k256MiB, std::nothrow));
+        allocated += k256MiB;
+
+        // Use nothrow and then check the pointer, to prevent the allocation from being optimized
+        // away by the compiler assuming it will succeed.
+        ASSERT_NE(x.data(), nullptr);
+    }
+}
+
 // Test HeapArray can be used as a range (by converting it to span).
 TEST_F(HeapArrayTest, Range) {
     HeapArrayVal arr{Index{10u}};

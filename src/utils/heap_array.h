@@ -71,8 +71,7 @@ class HeapArray :
 
     constexpr HeapArray(HeapArray<Index, Value>&& other) { *this = std::move(other); }
     constexpr HeapArray<Index, Value>& operator=(HeapArray<Index, Value>&& other) {
-        mOwnedData = other.mOwnedData;
-        other.mOwnedData = {};
+        std::swap(mOwnedData, other.mOwnedData);
         return *this;
     }
 
