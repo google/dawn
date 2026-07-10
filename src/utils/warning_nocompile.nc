@@ -67,11 +67,18 @@ void TestUnsafeBuffersRawPointer() {
 }
 
 // -Wunsafe-buffer-usage-in-libc-call: memcpy()
+// This is skipped on Android because with Android Bionic's _FORTIFY_SOURCE,
+// memcpy is a static inline wrapper (__BIONIC_FORTIFY_INLINE). This causes
+// Clang's unsafe-buffer-usage checker to ignore it (as it only matches global
+// functions or std:: functions), which then causes the expected error to not
+// be raised.
+#if !defined(__ANDROID__)
 void TestUnsafeBuffersMemcpy() {
     int x = 1;
     int y = 2;
     memcpy(&y, &x, sizeof(int));  // expected-error {{function 'memcpy' is unsafe}}
 }
+#endif  // !defined(__ANDROID__)
 
 // -Wunsafe-buffer-usage: std::span() constructors
 void TestUnsafeBuffersStdSpanConstructors() {
