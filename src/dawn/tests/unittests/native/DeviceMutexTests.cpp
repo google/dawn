@@ -31,14 +31,18 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/Compiler.h"
 #include "src/dawn/native/DeviceGuard.h"
 
 namespace dawn::native {
 
 class DeviceMutexTest : public ::testing::Test {
   protected:
-    void Lock(DeviceMutex& mutex) { mutex.Lock(); }
-    void Unlock(DeviceMutex& mutex) { mutex.Unlock(); }
+    // TODO(533405609) Thread safety analysis flags this whole test as
+    // problematic. The issue tracks revisiting the need for a recursive mutex in
+    // the first place.
+    void Lock(DeviceMutex& mutex) DAWN_NO_THREAD_SAFETY_ANALYSIS { mutex.Lock(); }
+    void Unlock(DeviceMutex& mutex) DAWN_NO_THREAD_SAFETY_ANALYSIS { mutex.Unlock(); }
 };
 
 namespace {
