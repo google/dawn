@@ -99,7 +99,8 @@ bool CommandIterator::NextCommandIdInNewBlock(uint32_t* commandId) {
         *commandId = detail::kEndOfBlock;
         return false;
     }
-    mCurrentPtr = AlignPtr(mBlocks[mCurrentBlock].data(), alignof(uint32_t));
+    mCurrentPtr = mBlocks[mCurrentBlock].data();
+    DAWN_ASSERT(IsPtrAligned(mCurrentPtr, kMaxAllocatedCommandAlignment));
     return NextCommandId(commandId);
 }
 
@@ -111,8 +112,9 @@ void CommandIterator::Reset() {
         // the iteration immediately, without special casing the initialization.
         mCurrentPtr = reinterpret_cast<std::byte*>(&mEndOfBlock);
     } else {
-        mCurrentPtr = AlignPtr(mBlocks[0].data(), alignof(uint32_t));
+        mCurrentPtr = mBlocks[0].data();
     }
+    DAWN_ASSERT(IsPtrAligned(mCurrentPtr, kMaxAllocatedCommandAlignment));
 }
 
 void CommandIterator::MakeEmptyAsDataWasDestroyed() {
@@ -133,8 +135,6 @@ bool CommandIterator::IsEmpty() const {
 // Potential TODO(crbug.com/dawn/835):
 //  - Host the size and pointer to next block in the block itself to avoid having an allocation
 //    in the vector
-//  - Assume T's alignof is, say 64bits, static assert it, and make commandAlignment a constant
-//    in Allocate
 //  - Be able to optimize allocation to one block, for command buffers expected to live long to
 //    avoid cache misses
 //  - Better block allocation, maybe have Dawn API to say command buffer is going to have size
@@ -188,7 +188,7 @@ size_t CommandAllocator::GetCommandBlocksCount() const {
 
 CommandBlocks&& CommandAllocator::AcquireBlocks() {
     DAWN_ASSERT(mCurrentPtr != nullptr && mEndPtr != nullptr);
-    DAWN_ASSERT(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
+    DAWN_ASSERT(IsPtrAligned(mCurrentPtr, kMaxAllocatedCommandAlignment));
     DAWN_UNSAFE_TODO(DAWN_ASSERT(mCurrentPtr + sizeof(uint32_t) <= mEndPtr));
     *reinterpret_cast<uint32_t*>(mCurrentPtr) = detail::kEndOfBlock;
 
@@ -197,9 +197,7 @@ CommandBlocks&& CommandAllocator::AcquireBlocks() {
     return std::move(mBlocks);
 }
 
-std::byte* CommandAllocator::AllocateInNewBlock(uint32_t commandId,
-                                                size_t commandSize,
-                                                size_t commandAlignment) {
+std::byte* CommandAllocator::AllocateInNewBlock(uint32_t commandId, size_t commandSize) {
     // When there is not enough space, we signal the kEndOfBlock, so that the iterator knows
     // to move to the next one. kEndOfBlock on the last block means the end of the commands.
     uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
@@ -215,7 +213,7 @@ std::byte* CommandAllocator::AllocateInNewBlock(uint32_t commandId,
     }
 
     AppendNewBlock(requestedBlockSize);
-    return Allocate(commandId, commandSize, commandAlignment);
+    return Allocate(commandId, commandSize);
 }
 
 void CommandAllocator::AppendNewBlock(size_t minimumSize) {
@@ -224,8 +222,9 @@ void CommandAllocator::AppendNewBlock(size_t minimumSize) {
 
     // SAFETY: This is a pool allocation that will be initialized when it's suballocated.
     auto block = DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(mLastAllocationSize));
+    DAWN_ASSERT(IsPtrAligned(block.data(), kMaxAllocatedCommandAlignment));
 
-    mCurrentPtr = AlignPtr(block.data(), alignof(uint32_t));
+    mCurrentPtr = block.data();
     mEndPtr = std::to_address(block.end());
     mBlocks.push_back(std::move(block));
 }

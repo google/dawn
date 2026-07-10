@@ -51,7 +51,7 @@ struct TexelCopyTextureInfo;
 // CommandBufferBuilder. There are not defined in CommandBuffer.h to break some header
 // dependencies: Ref<Object> needs Object to be defined.
 
-enum class Command {
+enum class Command : uint32_t {
     BeginComputePass,
     BeginOcclusionQuery,
     BeginRenderPass,

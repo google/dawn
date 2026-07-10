@@ -31,7 +31,7 @@
 #include "src/dawn/native/CommandBuffer.h"
 
 namespace dawn::native {
-enum class Command;
+enum class Command : uint32_t;
 struct BeginRenderPassCmd;
 struct DispatchCmd;
 }  // namespace dawn::native

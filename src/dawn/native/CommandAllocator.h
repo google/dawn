@@ -84,6 +84,10 @@ constexpr uint32_t kEndOfBlock = std::numeric_limits<uint32_t>::max();
 constexpr uint32_t kAdditionalData = std::numeric_limits<uint32_t>::max() - 1;
 }  // namespace detail
 
+// The alignment used for all allocations in the command allocator. It is constant to help avoid
+// complexity to handle variable alignment.
+static inline constexpr size_t kMaxAllocatedCommandAlignment = sizeof(uint64_t);
+
 class CommandAllocator;
 
 class CommandIterator : public NonCopyable {
@@ -100,16 +104,19 @@ class CommandIterator : public NonCopyable {
     void AcquireCommandBlocks(std::vector<CommandAllocator> allocators);
 
     template <typename E>
+        requires(std::is_same_v<UnderlyingType<E>, uint32_t>)
     bool NextCommandId(E* commandId) {
         return NextCommandId(reinterpret_cast<uint32_t*>(commandId));
     }
     template <typename T>
+        requires(alignof(T) <= kMaxAllocatedCommandAlignment)
     T* NextCommand() {
-        return static_cast<T*>(NextCommand(sizeof(T), alignof(T)));
+        return static_cast<T*>(NextCommand(sizeof(T)));
     }
     template <typename T>
+        requires(alignof(T) <= kMaxAllocatedCommandAlignment)
     T* NextData(size_t count) {
-        return static_cast<T*>(NextData(sizeof(T) * count, alignof(T)));
+        return static_cast<T*>(NextData(sizeof(T) * count));
     }
 
     // Sets iterator to the beginning of the commands without emptying the list. This method can
@@ -124,15 +131,16 @@ class CommandIterator : public NonCopyable {
     bool IsEmpty() const;
 
     DAWN_FORCE_INLINE bool NextCommandId(uint32_t* commandId) {
-        std::byte* idPtr = AlignPtr(mCurrentPtr, alignof(uint32_t));
-        DAWN_ASSERT(idPtr == reinterpret_cast<std::byte*>(&mEndOfBlock) ||
-                    DAWN_UNSAFE_TODO(idPtr + sizeof(uint32_t)) <=
+        DAWN_ASSERT(IsPtrAligned(mCurrentPtr, kMaxAllocatedCommandAlignment));
+
+        DAWN_ASSERT(mCurrentPtr == reinterpret_cast<std::byte*>(&mEndOfBlock) ||
+                    DAWN_UNSAFE_TODO(mCurrentPtr + sizeof(uint32_t)) <=
                         std::to_address(mBlocks[mCurrentBlock].end()));
 
-        uint32_t id = *reinterpret_cast<uint32_t*>(idPtr);
+        uint32_t id = *reinterpret_cast<uint32_t*>(mCurrentPtr);
 
         if (id != detail::kEndOfBlock) {
-            mCurrentPtr = DAWN_UNSAFE_TODO(idPtr + sizeof(uint32_t));
+            DAWN_UNSAFE_TODO(mCurrentPtr += kMaxAllocatedCommandAlignment);
             *commandId = id;
             return true;
         }
@@ -141,22 +149,23 @@ class CommandIterator : public NonCopyable {
 
     bool NextCommandIdInNewBlock(uint32_t* commandId);
 
-    DAWN_FORCE_INLINE void* NextCommand(size_t commandSize, size_t commandAlignment) {
-        std::byte* commandPtr = AlignPtr(mCurrentPtr, commandAlignment);
-        DAWN_ASSERT(DAWN_UNSAFE_TODO(commandPtr + sizeof(commandSize)) <=
+    DAWN_FORCE_INLINE void* NextCommand(size_t commandSize) {
+        DAWN_ASSERT(DAWN_UNSAFE_TODO(mCurrentPtr + kMaxAllocatedCommandAlignment) <=
                     std::to_address(mBlocks[mCurrentBlock].end()));
 
-        mCurrentPtr = DAWN_UNSAFE_TODO(commandPtr + commandSize);
+        std::byte* commandPtr = mCurrentPtr;
+        mCurrentPtr =
+            AlignPtr(DAWN_UNSAFE_TODO(mCurrentPtr + commandSize), kMaxAllocatedCommandAlignment);
         return commandPtr;
     }
 
-    DAWN_FORCE_INLINE void* NextData(size_t dataSize, size_t dataAlignment) {
+    DAWN_FORCE_INLINE void* NextData(size_t dataSize) {
         uint32_t id = 0;
         bool hasId = NextCommandId(&id);
         DAWN_ASSERT(hasId);
         DAWN_ASSERT(id == detail::kAdditionalData);
 
-        return NextCommand(dataSize, dataAlignment);
+        return NextCommand(dataSize);
     }
 
     CommandBlocks mBlocks;
@@ -165,7 +174,7 @@ class CommandIterator : public NonCopyable {
     RAW_PTR_EXCLUSION std::byte* mCurrentPtr = nullptr;
     size_t mCurrentBlock = 0;
     // Used to avoid a special case for empty iterators.
-    uint32_t mEndOfBlock = detail::kEndOfBlock;
+    alignas(kMaxAllocatedCommandAlignment) uint32_t mEndOfBlock = detail::kEndOfBlock;
 };
 
 class CommandAllocator : public NonCopyable {
@@ -183,12 +192,10 @@ class CommandAllocator : public NonCopyable {
     bool IsEmpty() const;
 
     template <typename T, typename E>
+        requires(std::is_same_v<UnderlyingType<E>, uint32_t> &&
+                 alignof(T) <= kMaxAllocatedCommandAlignment)
     T* Allocate(E commandId) {
-        static_assert(sizeof(E) == sizeof(uint32_t));
-        static_assert(alignof(E) == alignof(uint32_t));
-        static_assert(alignof(T) <= kMaxSupportedAlignment);
-        T* result =
-            reinterpret_cast<T*>(Allocate(static_cast<uint32_t>(commandId), sizeof(T), alignof(T)));
+        T* result = reinterpret_cast<T*>(Allocate(static_cast<uint32_t>(commandId), sizeof(T)));
         if (!result) {
             return nullptr;
         }
@@ -197,9 +204,9 @@ class CommandAllocator : public NonCopyable {
     }
 
     template <typename T>
+        requires(alignof(T) <= kMaxAllocatedCommandAlignment)
     T* AllocateData(size_t count) {
-        static_assert(alignof(T) <= kMaxSupportedAlignment);
-        T* result = reinterpret_cast<T*>(AllocateData(sizeof(T) * count, alignof(T)));
+        T* result = reinterpret_cast<T*>(AllocateData(sizeof(T) * count));
         if (!result) {
             return nullptr;
         }
@@ -212,14 +219,12 @@ class CommandAllocator : public NonCopyable {
     size_t GetCommandBlocksCount() const;
 
   private:
-    // This is used for some internal computations and can be any power of two as long as code
-    // using the CommandAllocator passes the static_asserts.
-    static constexpr size_t kMaxSupportedAlignment = 8;
-
     // To avoid checking for overflows at every step of the computations we compute an upper
     // bound of the space that will be needed in addition to the command data.
     static constexpr size_t kWorstCaseAdditionalSize =
-        sizeof(uint32_t) + kMaxSupportedAlignment + alignof(uint32_t) + sizeof(uint32_t);
+        kMaxAllocatedCommandAlignment +  // The CommandID + padding before the command.
+        kMaxAllocatedCommandAlignment +  // The padding after the command data.
+        sizeof(uint32_t);                // The EndOfBlock tag.
 
     // The default value of mLastAllocationSize.
     static constexpr size_t kDefaultBaseAllocationSize = 2048;
@@ -227,23 +232,21 @@ class CommandAllocator : public NonCopyable {
     friend CommandIterator;
     CommandBlocks&& AcquireBlocks();
 
-    DAWN_FORCE_INLINE std::byte* Allocate(uint32_t commandId,
-                                          size_t commandSize,
-                                          size_t commandAlignment) {
+    DAWN_FORCE_INLINE std::byte* Allocate(uint32_t commandId, size_t commandSize) {
         DAWN_ASSERT(mCurrentPtr != nullptr);
         DAWN_ASSERT(mEndPtr != nullptr);
         DAWN_ASSERT(commandId != detail::kEndOfBlock);
 
         // It should always be possible to allocate one id, for kEndOfBlock tagging,
-        DAWN_ASSERT(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
+        DAWN_ASSERT(IsPtrAligned(mCurrentPtr, kMaxAllocatedCommandAlignment));
         DAWN_ASSERT(mEndPtr >= mCurrentPtr);
         DAWN_ASSERT(static_cast<size_t>(mEndPtr - mCurrentPtr) >= sizeof(uint32_t));
 
         // The memory after the ID will contain the following:
         //   - the current ID
-        //   - padding to align the command, maximum kMaxSupportedAlignment
+        //   - padding to align the command to kMaxAllocatedCommandAlignment
         //   - the command of size commandSize
-        //   - padding to align the next ID, maximum alignof(uint32_t)
+        //   - padding to align the next ID to kMaxAllocatedCommandAlignment
         //   - the next ID of size sizeof(uint32_t)
 
         // This can't overflow because by construction mCurrentPtr always has space for the next
@@ -257,19 +260,20 @@ class CommandAllocator : public NonCopyable {
             uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
             *idAlloc = commandId;
 
-            std::byte* commandAlloc =
-                AlignPtr(DAWN_UNSAFE_TODO(mCurrentPtr + sizeof(uint32_t)), commandAlignment);
-            mCurrentPtr = AlignPtr(DAWN_UNSAFE_TODO(commandAlloc + commandSize), alignof(uint32_t));
+            std::byte* commandAlloc = DAWN_UNSAFE_TODO(mCurrentPtr + kMaxAllocatedCommandAlignment);
+
+            mCurrentPtr = AlignPtr(DAWN_UNSAFE_TODO(commandAlloc + commandSize),
+                                   kMaxAllocatedCommandAlignment);
 
             return commandAlloc;
         }
-        return AllocateInNewBlock(commandId, commandSize, commandAlignment);
+        return AllocateInNewBlock(commandId, commandSize);
     }
 
-    std::byte* AllocateInNewBlock(uint32_t commandId, size_t commandSize, size_t commandAlignment);
+    std::byte* AllocateInNewBlock(uint32_t commandId, size_t commandSize);
 
-    DAWN_FORCE_INLINE std::byte* AllocateData(size_t commandSize, size_t commandAlignment) {
-        return Allocate(detail::kAdditionalData, commandSize, commandAlignment);
+    DAWN_FORCE_INLINE std::byte* AllocateData(size_t commandSize) {
+        return Allocate(detail::kAdditionalData, commandSize);
     }
 
     void AppendNewBlock(size_t minimumSize);
@@ -282,7 +286,7 @@ class CommandAllocator : public NonCopyable {
     // Data used for the block range at initialization so that the first call to Allocate sees
     // there is not enough space and calls AppendNewBlock. This avoids having to special case the
     // initialization in Allocate.
-    std::array<uint32_t, 1> mPlaceholderSpace = {0};
+    alignas(kMaxAllocatedCommandAlignment) std::array<uint32_t, 1> mPlaceholderSpace = {0};
 
     // Pointers to the current range of allocation in the block. Guaranteed to allow for at
     // least one uint32_t if not nullptr, so that the special kEndOfBlock command id can always

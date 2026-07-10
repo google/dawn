@@ -41,7 +41,7 @@
 namespace dawn::native {
 
 // Definition of the command types used in the tests
-enum class CommandType {
+enum class CommandType : uint32_t {
     Draw,
     Pipeline,
     Immediate,
