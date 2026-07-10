@@ -170,6 +170,7 @@ config("dawn_warnings") {
     ### Now, configure all the warning suppressions.
 
     # Use per-file warning suppressions from warning_suppression_mappings.txt
+    inputs = [ "warning_suppression_mappings.txt" ]
     cflags +=
         [ "--warning-suppression-mappings=" +
           rebase_path("warning_suppression_mappings.txt", root_build_dir) ]
@@ -189,7 +190,6 @@ config("dawn_warnings") {
       # Arithmetic
       "-Wno-implicit-float-conversion",
       "-Wno-implicit-int-conversion",
-      "-Wno-old-style-cast",
       "-Wno-sign-conversion",
     ]
 

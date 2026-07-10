@@ -41,9 +41,16 @@ namespace dawn {
 // Verify that warnings that are part of -Weverything but not -Wall -Wextra
 // are enabled. This test runs only when `dawn_weverything = true`.
 void TestWeverything() {
-    // -Wcast-align is one such warning.
-    char* p = nullptr;
-    [[maybe_unused]] int* q = (int*)p; // expected-error {{increases required alignment}}
+    // -Wzero-as-null-pointer-constant is one such warning.
+    [[maybe_unused]] void* p = 0; // expected-error {{zero as null pointer constant}}
+}
+
+// Verify that warnings suppressions limited to specific file with --warning-suppression-mappings
+// are enabled to other code.
+void TestWarningSuppressionMappings() {
+    // -Wold-style-cast is one such warning.
+    int x = 0;
+    [[maybe_unused]] float y = (float)x; // expected-error {{use of old-style cast}}
 }
 
 // -Wunsafe-buffer-usage: operator[] on T*

@@ -1,4 +1,5 @@
 [language-extension-token]
+# For MSVC-specific extensions: __FUNCSIG__, __uuidof, IID_PPV_ARGS.
 src:*src/dawn/native/Surface.cpp
 src:*src/dawn/native/d3d/*
 src:*src/dawn/native/d3d11/*
@@ -36,3 +37,7 @@ src:*src/dawn/tests/unittests/GetProcAddressTests.cpp
 # Needed to cast procs in Windows.
 src:*src/tint/utils/command/command_windows.cc
 src:*src/tint/lang/hlsl/validate/validate.cc
+
+[old-style-cast]
+# For C-Style casts used by RenderDoc macros
+src:*src/dawn/native/vulkan/TextureVk.cpp
