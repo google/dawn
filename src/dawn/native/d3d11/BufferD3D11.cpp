@@ -33,7 +33,6 @@
 #include <vector>
 
 #include "dawn/platform/DawnPlatform.h"
-#include "src/dawn/common/Alloc.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/ChainUtils.h"
@@ -47,6 +46,7 @@
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::native::d3d11 {
 
@@ -212,28 +212,31 @@ class UploadBuffer final : public Buffer {
   private:
     // BufferBase implementations
     MaybeError MapAtCreationImpl() override {
-        mMappedData = mUploadData.get();
+        mMappedData = mUploadData.data();
         // MapAtCreation does the zeroization on the front-end side.
         return {};
     }
 
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override {
-        mMappedData = mUploadData.get();
+        mMappedData = mUploadData.data();
         return EnsureDataInitialized(nullptr);
     }
     void UnmapImpl(BufferState oldState, BufferState newState) override { mMappedData = nullptr; }
 
     // d3d11::Buffer implementations
     MaybeError InitializeInternal() override {
-        mUploadData = std::unique_ptr<uint8_t[]>(AllocNoThrow<uint8_t>(GetAllocatedSize()));
-        if (mUploadData == nullptr) {
+        mUploadData =
+            // SAFETY: This allocation takes the place of a GPU allocation in a GPU-backed Buffer,
+            // so its initialization is ensured in the same way.
+            DAWN_UNSAFE_BUFFERS(HeapArray<uint8_t>::Uninit(GetAllocatedSize(), std::nothrow));
+        if (!mUploadData) {
             return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer uploading.");
         }
         return {};
     }
 
     MaybeError MapInternal(const ScopedCommandRecordingContext*, wgpu::MapMode) override {
-        mMappedData = mUploadData.get();
+        mMappedData = mUploadData.data();
         return {};
     }
 
@@ -243,7 +246,7 @@ class UploadBuffer final : public Buffer {
                              uint8_t clearValue,
                              uint64_t offset,
                              uint64_t size) override {
-        DAWN_UNSAFE_TODO(memset(mUploadData.get() + offset, clearValue, size));
+        std::ranges::fill(mUploadData.subspan(offset, size), clearValue);
         return {};
     }
 
@@ -253,7 +256,7 @@ class UploadBuffer final : public Buffer {
                               Buffer* destination,
                               uint64_t destinationOffset) override {
         return destination->WriteInternal(commandContext, destinationOffset,
-                                          DAWN_UNSAFE_TODO(mUploadData.get() + sourceOffset), size,
+                                          DAWN_UNSAFE_TODO(mUploadData.data() + sourceOffset), size,
                                           /*isInitialWrite=*/false);
     }
 
@@ -272,12 +275,14 @@ class UploadBuffer final : public Buffer {
                              const void* data,
                              size_t size,
                              bool isInitialWrite) override {
-        const auto* src = static_cast<const uint8_t*>(data);
-        std::copy(src, DAWN_UNSAFE_TODO(src + size), DAWN_UNSAFE_TODO(mUploadData.get() + offset));
+        // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
+        std::ranges::copy(
+            DAWN_UNSAFE_TODO(Span<const uint8_t>{static_cast<const uint8_t*>(data), size}),
+            mUploadData.subspan(offset).begin());
         return {};
     }
 
-    std::unique_ptr<uint8_t[]> mUploadData;
+    HeapArray<uint8_t> mUploadData;
 };
 
 bool CanAddStorageUsageToBufferWithoutSideEffects(const Device* device,
@@ -418,9 +423,11 @@ MaybeError Buffer::MapAtCreationImpl() {
         return MapInternal(&maybeCommandContext.value(), mAutoMapMode | wgpu::MapMode::Write);
     }
 
-    // Lock could not be acquired, use temporary storage instead
-    mMapAtCreationData = std::unique_ptr<uint8_t[]>(AllocNoThrow<uint8_t>(GetAllocatedSize()));
-    mMappedData = mMapAtCreationData.get();
+    // Lock could not be acquired, use temporary storage instead.
+    mMapAtCreationData =
+        // SAFETY: Frontend is responsible for initializing MapAtCreation memory.
+        DAWN_UNSAFE_BUFFERS(HeapArray<uint8_t>::Uninit(GetAllocatedSize(), std::nothrow));
+    mMappedData = mMapAtCreationData.data();
     return {};
 }
 
@@ -446,9 +453,8 @@ MaybeError Buffer::UnmapIfNeeded(const ScopedCommandRecordingContext* commandCon
         ScopedMap scopedMap;
         DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(commandContext, this, wgpu::MapMode::Write));
         DAWN_ASSERT(scopedMap.GetMappedData());
-        DAWN_UNSAFE_TODO(
-            memcpy(scopedMap.GetMappedData(), mMapAtCreationData.get(), GetAllocatedSize()));
-        mMapAtCreationData.reset();
+        std::ranges::copy(mMapAtCreationData, scopedMap.GetMappedData());
+        mMapAtCreationData = {};
         return {};
     }
 
@@ -538,6 +544,8 @@ MaybeError Buffer::TryMapNow(ScopedCommandRecordingContext* commandContext,
     // - If mode is Write, then it's already writable.
     // - If mode is Read, it's only possible to map staging buffer. In that case,
     // D3D11_MAP_READ_WRITE will be used, hence the mapped pointer will also be writable.
+    // The memory will be initialized from the CPU, if needed, in FinalizeMapImpl.
+    //
     // TODO(dawn:1705): make sure the map call is not blocked by the GPU operations.
     DAWN_TRY(MapInternal(commandContext, mode));
 
@@ -551,7 +559,7 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
 
     DAWN_ASSERT(mMappedData);
 
-    // Ensure data is initialized after a MapAsync event completes.
+    // Ensure data is initialized before completing the MapAsync event and giving it to the user.
     DAWN_TRY(EnsureDataInitialized(nullptr));
 
     return {};
@@ -792,6 +800,7 @@ ResultOrError<Buffer::ScopedMap> Buffer::ScopedMap::Create(
         return ScopedMap(commandContext, buffer, /*needsUnmap=*/false);
     }
 
+    // The memory will be initialized from the CPU, if needed, in FinalizeMapImpl.
     DAWN_TRY(buffer->MapInternal(commandContext, mode));
     return ScopedMap(commandContext, buffer, /*needsUnmap=*/true);
 }
@@ -1493,11 +1502,14 @@ MaybeError GPUUsableBuffer::UpdateD3D11ConstantBuffer(
         // |..........................| leftExtraBytes |     data   | ............... |
         // |<----------------- offset ---------------->|<-- size -->|
         // |<----- alignedOffset ---->|<--------- alignedSize --------->|
-        std::unique_ptr<uint8_t[]> alignedBuffer;
+        HeapArray<uint8_t> alignedBuffer;
         if (size != alignedSize) {
-            alignedBuffer.reset(new uint8_t[alignedSize]);
-            DAWN_UNSAFE_TODO(std::memcpy(alignedBuffer.get() + leftExtraBytes, data, size));
-            data = alignedBuffer.get();
+            // SAFETY: The copy() should initialize all memory that actually gets read.
+            alignedBuffer = DAWN_UNSAFE_BUFFERS(HeapArray<uint8_t>::Uninit(alignedSize));
+            std::ranges::copy(
+                DAWN_UNSAFE_TODO(Span<const uint8_t>{static_cast<const uint8_t*>(data), size}),
+                alignedBuffer.begin() + leftExtraBytes);
+            data = alignedBuffer.data();
         }
 
         D3D11_BOX dstBox;

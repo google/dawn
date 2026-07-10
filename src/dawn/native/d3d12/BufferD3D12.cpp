@@ -511,6 +511,7 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
         DAWN_TRY(EnsureDataInitialized(commandContext));
     }
 
+    // The buffer has been initialized from the GPU if needed, now we can map it.
     return MapInternal(mode & wgpu::MapMode::Write, offset, size, "D3D12 map async");
 }
 

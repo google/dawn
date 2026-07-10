@@ -41,6 +41,7 @@
 #include "src/dawn/native/d3d/d3d_platform.h"
 #include "src/dawn/native/d3d11/Forward.h"
 #include "src/dawn/native/d3d11/QueueD3D11.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::native::d3d11 {
 
@@ -181,6 +182,7 @@ class Buffer : public BufferBase {
 
     virtual ComPtr<ID3D11Buffer> GetD3D11MappedBuffer();
 
+    // TODO(https://crbug.com/501491697): Spanify this.
     Atomic<uint8_t*, std::memory_order::relaxed> mMappedData{nullptr};
 
   private:
@@ -203,7 +205,7 @@ class Buffer : public BufferBase {
     // Track whether padding bytes have been cleared to zero.
     bool mPaddingCleared = false;
     // Temporary storage for MapAtCreation when the lock cannot be acquired.
-    std::unique_ptr<uint8_t[]> mMapAtCreationData;
+    HeapArray<uint8_t> mMapAtCreationData;
 
     // A buffer can only have one scheduled map request at a time, so we embed the request object
     // here to avoid heap allocations.
