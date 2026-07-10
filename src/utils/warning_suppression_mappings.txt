@@ -41,3 +41,7 @@ src:*src/tint/lang/hlsl/validate/validate.cc
 [old-style-cast]
 # For C-Style casts used by RenderDoc macros
 src:*src/dawn/native/vulkan/TextureVk.cpp
+
+[double-promotion]
+# Performance warning for float-to-double promotion, common in tests.
+src:*src/dawn/tests/*

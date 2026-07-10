@@ -1185,6 +1185,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
     const bool isZero = clearValue == TextureBase::ClearValue::Zero;
     uint32_t uClearColor = isZero ? 0 : 1;
     float fClearColor = isZero ? 0.f : 1.f;
+    double dClearColor = double{fClearColor};
 
     VkImageSubresourceRange imageRange = {};
     imageRange.levelCount = 1;
@@ -1255,7 +1256,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                 colorAttachment.view = beginCmd.colorAttachments[ca0].view.Get();
 
                 beginCmd.colorAttachments[ca0].clearColor = colorAttachment.clearValue = {
-                    fClearColor, fClearColor, fClearColor, fClearColor};
+                    dClearColor, dClearColor, dClearColor, dClearColor};
                 beginCmd.colorAttachments[ca0].loadOp = colorAttachment.loadOp =
                     wgpu::LoadOp::Clear;
                 beginCmd.colorAttachments[ca0].storeOp = colorAttachment.storeOp =

@@ -77,7 +77,7 @@ float KalmanFilter(KalmanInfo* info, float measuredValue) {
 
     // Correct filter value
     info->filterValue =
-        info->kalmanGain * measuredValue + (1.0 - info->kalmanGain) * info->filterValue;
+        info->kalmanGain * measuredValue + (1.0f - info->kalmanGain) * info->filterValue;
     // Update estimate covariance
     info->P = (1.0f - info->kalmanGain) * info->P;
     return info->filterValue;

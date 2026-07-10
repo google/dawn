@@ -252,15 +252,15 @@ void DoRender(WindowData* data) {
         pass.Draw(3);
         pass.End();
     } else {
-        data->clearCycle -= 1.0 / 60.f;
-        if (data->clearCycle < 0.0) {
+        data->clearCycle -= 1.0f / 60.0f;
+        if (data->clearCycle < 0.0f) {
             data->clearCycle = 1.0f;
         }
 
         dawn::utils::ComboRenderPassDescriptor desc({view});
         desc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-        desc.cColorAttachments[0].clearValue = {data->clearCycle, 1.0f - data->clearCycle, 0.0f,
-                                                1.0f};
+        desc.cColorAttachments[0].clearValue = {double{data->clearCycle},
+                                                double{1.0f - data->clearCycle}, 0.0, 1.0};
 
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&desc);
         pass.End();

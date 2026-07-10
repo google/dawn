@@ -229,7 +229,6 @@ config("dawn_warnings") {
       "-Wno-unused-template",
 
       # Performance
-      "-Wno-double-promotion",
       "-Wno-exit-time-destructors",
       "-Wno-global-constructors",
       "-Wno-nrvo",

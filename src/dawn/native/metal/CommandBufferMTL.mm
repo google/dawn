@@ -279,7 +279,7 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
             switch (attachmentInfo.depthLoadOp) {
                 case wgpu::LoadOp::Clear:
                     descriptor.depthAttachment.loadAction = MTLLoadActionClear;
-                    descriptor.depthAttachment.clearDepth = attachmentInfo.clearDepth;
+                    descriptor.depthAttachment.clearDepth = double{attachmentInfo.clearDepth};
                     break;
 
                 case wgpu::LoadOp::Load:
@@ -2083,12 +2083,12 @@ MaybeError CommandBuffer::EncodeRenderPass(
             case Command::SetViewport: {
                 SetViewportCmd* cmd = mCommands.NextCommand<SetViewportCmd>();
                 MTLViewport viewport;
-                viewport.originX = cmd->x;
-                viewport.originY = cmd->y;
-                viewport.width = cmd->width;
-                viewport.height = cmd->height;
-                viewport.znear = cmd->minDepth;
-                viewport.zfar = cmd->maxDepth;
+                viewport.originX = double{cmd->x};
+                viewport.originY = double{cmd->y};
+                viewport.width = double{cmd->width};
+                viewport.height = double{cmd->height};
+                viewport.znear = double{cmd->minDepth};
+                viewport.zfar = double{cmd->maxDepth};
 
                 // Try applying the immediate data that contain min/maxDepth immediately. This can
                 // be deferred if no pipeline is currently bound.

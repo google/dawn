@@ -199,7 +199,7 @@ MaybeError LazyClearRenderPassAttachments(DeviceBase* device,
                     // If the loadOp is Load, but the subresource is not initialized, use Clear
                     // instead.
                     attachmentInfo.loadOp = wgpu::LoadOp::Clear;
-                    attachmentInfo.clearColor = {0.f, 0.f, 0.f, 0.f};
+                    attachmentInfo.clearColor = {0.0, 0.0, 0.0, 0.0};
                 }
             }
         }
@@ -296,7 +296,7 @@ MaybeError LazyClearRenderPassAttachments(DeviceBase* device,
             if (!view->GetTexture()->IsSubresourceContentInitialized(range)) {
                 if (attachmentInfo.loadOp == wgpu::LoadOp::Load) {
                     attachmentInfo.loadOp = wgpu::LoadOp::Clear;
-                    attachmentInfo.clearColor = {0.f, 0.f, 0.f, 0.f};
+                    attachmentInfo.clearColor = {0.0, 0.0, 0.0, 0.0};
                 }
                 if (partialRenderArea) {
                     renderPass->forceFullRenderArea = true;
