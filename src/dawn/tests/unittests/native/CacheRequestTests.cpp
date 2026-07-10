@@ -100,7 +100,7 @@ DAWN_MAKE_CACHE_REQUEST(CacheRequestForTesting, REQUEST_MEMBERS);
 // static_assert the expected types for various return types from the cache hit handler and cache
 // miss handler.
 TEST_P(CacheRequestTests, CacheResultTypes) {
-    EXPECT_CALL(mMockCache, LoadData(_, _, nullptr, 0)).WillRepeatedly(Return(0));
+    EXPECT_CALL(mMockCache, FindKey(_)).WillRepeatedly(Return(0));
 
     // (int, ResultOrError<int>), should be ResultOrError<CacheResult<int>>.
     auto v1 = LoadOrRun(
@@ -131,10 +131,11 @@ TEST_P(CacheRequestTests, MakesCacheKey) {
     StreamIn(&expectedKey, GetDevice()->GetCacheKey(), "CacheRequestForTesting", req.a, req.b,
              req.c);
 
-    // Expect a call to LoadData with the expected key.
-    EXPECT_CALL(mMockCache, LoadData(_, expectedKey.size(), nullptr, 0))
-        .WillOnce(WithArg<0>([&](const void* actualKeyData) {
-            EXPECT_EQ(memcmp(actualKeyData, expectedKey.data(), expectedKey.size()), 0);
+    // Expect a call to FindKey with the expected key.
+    EXPECT_CALL(mMockCache, FindKey(_))
+        .WillOnce(WithArg<0>([&](std::span<const std::byte> actualKey) {
+            EXPECT_EQ(actualKey.size(), expectedKey.size());
+            EXPECT_EQ(memcmp(actualKey.data(), expectedKey.data(), expectedKey.size()), 0);
             return 0;
         }));
 
@@ -162,7 +163,7 @@ TEST_P(CacheRequestTests, CacheKeyIgnoresUnsafeIgnoredValue) {
     req2.d = UnsafeUnserializedValue(&v2);
     req2.e = UnsafeUnserializedValue(Foo{24});
 
-    EXPECT_CALL(mMockCache, LoadData(_, _, nullptr, 0)).WillOnce(Return(0)).WillOnce(Return(0));
+    EXPECT_CALL(mMockCache, FindKey(_)).WillOnce(Return(0)).WillOnce(Return(0));
 
     static StrictMock<MockFunction<int(CacheRequestForTesting)>> cacheMissFn;
 
@@ -211,7 +212,7 @@ TEST_P(CacheRequestTests, CacheMiss) {
     static StrictMock<MockFunction<int(CacheRequestForTesting)>> cacheMissFn;
 
     // Mock a cache miss.
-    EXPECT_CALL(mMockCache, LoadData(_, _, nullptr, 0)).WillOnce(Return(0));
+    EXPECT_CALL(mMockCache, FindKey(_)).WillOnce(Return(0));
 
     // Expect the cache miss, and return some value.
     int rv = 42;
@@ -255,10 +256,10 @@ TEST_P(CacheRequestTests, CacheHit) {
         std::as_bytes(std::span(kCachedData)));
 
     // Mock a cache hit, and load the cached data.
-    EXPECT_CALL(mMockCache, LoadData(_, _, nullptr, 0)).WillOnce(Return(actualStoredData.Size()));
-    EXPECT_CALL(mMockCache, LoadData(_, _, _, actualStoredData.Size()))
-        .WillOnce(WithArg<2>([&actualStoredData](void* dataOut) {
-            memcpy(dataOut, actualStoredData.DataPtr(), actualStoredData.Size());
+    EXPECT_CALL(mMockCache, FindKey(_)).WillOnce(Return(actualStoredData.Size()));
+    EXPECT_CALL(mMockCache, LoadData(_, _))
+        .WillOnce(WithArg<1>([&actualStoredData](std::span<std::byte> dest) {
+            memcpy(dest.data(), actualStoredData.DataPtr(), actualStoredData.Size());
             return actualStoredData.Size();
         }));
 
@@ -305,10 +306,10 @@ TEST_P(CacheRequestTests, CacheHitError) {
         std::as_bytes(std::span(kCachedData)));
 
     // Mock a cache hit, and load the cached data.
-    EXPECT_CALL(mMockCache, LoadData(_, _, nullptr, 0)).WillOnce(Return(actualStoredData.Size()));
-    EXPECT_CALL(mMockCache, LoadData(_, _, _, actualStoredData.Size()))
-        .WillOnce(WithArg<2>([&actualStoredData](void* dataOut) {
-            memcpy(dataOut, actualStoredData.DataPtr(), actualStoredData.Size());
+    EXPECT_CALL(mMockCache, FindKey(_)).WillOnce(Return(actualStoredData.Size()));
+    EXPECT_CALL(mMockCache, LoadData(_, _))
+        .WillOnce(WithArg<1>([&actualStoredData](std::span<std::byte> dest) {
+            memcpy(dest.data(), actualStoredData.DataPtr(), actualStoredData.Size());
             return actualStoredData.Size();
         }));
 
@@ -361,11 +362,11 @@ TEST_P(CacheRequestTests, CacheHitDifferentLoadSizes) {
     static StrictMock<MockFunction<int(Blob)>> cacheHitFn;
     static StrictMock<MockFunction<int(CacheRequestForTesting)>> cacheMissFn;
 
-    // Mock a cache hit, but with different sizes returned from LoadData.
+    // Mock a cache hit, but with different sizes returned from FindKey and LoadData.
     const size_t kExpectedSize = 10;
     const size_t kActualSize = 5;
-    EXPECT_CALL(mMockCache, LoadData(_, _, nullptr, 0)).WillOnce(Return(kExpectedSize));
-    EXPECT_CALL(mMockCache, LoadData(_, _, _, kExpectedSize)).WillOnce(Return(kActualSize));
+    EXPECT_CALL(mMockCache, FindKey(_)).WillOnce(Return(kExpectedSize));
+    EXPECT_CALL(mMockCache, LoadData(_, _)).WillOnce(Return(kActualSize));
 
     // Expect the cache miss handler since the load sizes were different.
     int rv = 79;
@@ -431,12 +432,11 @@ TEST_P(CacheRequestTests, CacheHitHashValidationFailed) {
         unsigned int* cPtr = req.c.data();
 
         // Mock a cache hit with given data buffer.
-        EXPECT_CALL(mMockCache, LoadData(_, _, nullptr, 0)).WillOnce(Return(loadSize));
-        EXPECT_CALL(mMockCache, LoadData(_, _, _, loadSize))
-            .WillOnce(WithArg<2>([&](void* dataOut) {
-                memcpy(dataOut, loadBuffer, loadSize);
-                return loadSize;
-            }));
+        EXPECT_CALL(mMockCache, FindKey(_)).WillOnce(Return(loadSize));
+        EXPECT_CALL(mMockCache, LoadData(_, _)).WillOnce(WithArg<1>([&](std::span<std::byte> dest) {
+            memcpy(dest.data(), loadBuffer, loadSize);
+            return loadSize;
+        }));
 
         // Construct mock functions for current test.
         ASSERT_FALSE(cacheHitFn);

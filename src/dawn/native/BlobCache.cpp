@@ -98,9 +98,6 @@ ResultOrError<Blob> CheckAndUnpackHashPrefixedPayload(Blob&& blobWithHash) {
 
 BlobCache::BlobCache(const dawn::native::DawnCacheDeviceDescriptor& desc, bool enableHashValidation)
     : mHashValidation(enableHashValidation),
-      mLoadFunction(desc.loadDataFunction),
-      mStoreFunction(desc.storeDataFunction),
-      mFunctionUserdata(desc.functionUserdata),
       mLoadCallbackInfo(desc.dawnLoadCacheDataCallbackInfo),
       mStoreCallbackInfo(desc.dawnStoreCacheDataCallbackInfo) {}
 
@@ -132,19 +129,14 @@ void BlobCache::StoreInternal(const CacheKey& cacheKey, std::span<const std::byt
 
     // Make sure we early out if we are not using storing functionality. Otherwise, computing the
     // hash may add unnecessary overhead.
-    if (mStoreFunction == nullptr && mStoreCallbackInfo.callback == nullptr) {
+    if (mStoreCallbackInfo.callback == nullptr) {
         return;
     }
     auto store = [&](std::span<const std::byte> actualValue) {
-        if (mStoreCallbackInfo.callback != nullptr) {
-            mStoreCallbackInfo.callback(
-                cacheKey.size(), reinterpret_cast<const uint8_t*>(cacheKey.data()),
-                actualValue.size(), reinterpret_cast<const uint8_t*>(actualValue.data()),
-                mStoreCallbackInfo.userdata1, mStoreCallbackInfo.userdata2);
-        } else if (mStoreFunction != nullptr) {
-            mStoreFunction(cacheKey.data(), cacheKey.size(), actualValue.data(), actualValue.size(),
-                           mFunctionUserdata);
-        }
+        mStoreCallbackInfo.callback(
+            cacheKey.size(), reinterpret_cast<const uint8_t*>(cacheKey.data()), actualValue.size(),
+            reinterpret_cast<const uint8_t*>(actualValue.data()), mStoreCallbackInfo.userdata1,
+            mStoreCallbackInfo.userdata2);
     };
 
     // Call the actual store function for actual stored bytes.
@@ -159,17 +151,14 @@ void BlobCache::StoreInternal(const CacheKey& cacheKey, std::span<const std::byt
 ResultOrError<Blob> BlobCache::LoadInternal(const CacheKey& cacheKey) {
     DAWN_ASSERT(ValidateCacheKey(cacheKey));
 
+    if (mLoadCallbackInfo.callback == nullptr) {
+        return Blob();
+    }
     auto load = [&](std::span<std::byte> value) -> size_t {
-        if (mLoadCallbackInfo.callback != nullptr) {
-            return mLoadCallbackInfo.callback(
-                cacheKey.size(), reinterpret_cast<const uint8_t*>(cacheKey.data()), value.size(),
-                reinterpret_cast<uint8_t*>(value.data()), mLoadCallbackInfo.userdata1,
-                mLoadCallbackInfo.userdata2);
-        } else if (mLoadFunction != nullptr) {
-            return mLoadFunction(cacheKey.data(), cacheKey.size(), value.data(), value.size(),
-                                 mFunctionUserdata);
-        }
-        return 0;
+        return mLoadCallbackInfo.callback(cacheKey.size(),
+                                          reinterpret_cast<const uint8_t*>(cacheKey.data()),
+                                          value.size(), reinterpret_cast<uint8_t*>(value.data()),
+                                          mLoadCallbackInfo.userdata1, mLoadCallbackInfo.userdata2);
     };
 
     const size_t expectedSize = load({});
@@ -178,7 +167,7 @@ ResultOrError<Blob> BlobCache::LoadInternal(const CacheKey& cacheKey) {
         // Load bytes from cache.
         Blob result = Blob::Create(expectedSize);
         const size_t actualSize = load(result.Data());
-        // TODO(crbug.com/469351711): If `mLoadFunction` (or the new callback) returns a different
+        // TODO(crbug.com/469351711): If `mLoadCallbackInfo`'s callback returns a different
         // size on the second call (due to external cache eviction, I/O errors, or timeouts), treat
         // it as a cache miss. The blob cache API should be updated to a single `mLoadFunction` call
         // in the future.
