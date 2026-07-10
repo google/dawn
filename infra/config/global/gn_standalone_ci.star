@@ -84,6 +84,86 @@ def dawn_win_parent_builder(**kwargs):
     ci.builder(**kwargs)
 
 dawn_linux_parent_builder(
+    name = "dawn-android-arm-builder-rel",
+    description_html = "Compiles release Dawn test binaries for Android/arm",
+    schedule = "triggered",
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+            apply_configs = [
+                "dawn_android",
+                "dawn_node",
+                "dawn_wasm",
+            ],
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.ARM,
+            target_bits = 32,
+            target_platform = builder_config.target_platform.ANDROID,
+        ),
+    ),
+    gn_args = gn_args.config(
+        configs = [
+            "android_clang",
+            "arm",
+            "dawn_node_bindings",
+            "release_with_dchecks",
+        ],
+    ),
+    targets = targets.bundle(
+        additional_compile_targets = [
+            "default",
+        ],
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "android|build|clang|rel",
+        short_name = "arm",
+    ),
+)
+
+dawn_linux_parent_builder(
+    name = "dawn-android-arm64-builder-rel",
+    description_html = "Compiles release Dawn test binaries for Android/arm64",
+    schedule = "triggered",
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+            apply_configs = [
+                "dawn_android",
+                "dawn_node",
+                "dawn_wasm",
+            ],
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.ARM,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.ANDROID,
+        ),
+    ),
+    gn_args = gn_args.config(
+        configs = [
+            "android_clang",
+            "arm64",
+            "dawn_node_bindings",
+            "release_with_dchecks",
+        ],
+    ),
+    targets = targets.bundle(
+        additional_compile_targets = [
+            "default",
+        ],
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "android|build|clang|rel",
+        short_name = "arm64",
+    ),
+)
+
+dawn_linux_parent_builder(
     name = "dawn-linux-x64-builder-dbg",
     description_html = "Compile debug Dawn test binaries for Linux/x64",
     schedule = "triggered",

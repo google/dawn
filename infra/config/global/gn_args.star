@@ -30,6 +30,28 @@
 load("@chromium-luci//gn_args.star", "gn_args")
 
 gn_args.config(
+    name = "android",
+    args = {
+        "target_os": "android",
+    },
+)
+
+gn_args.config(
+    name = "android_clang",
+    configs = [
+        "android",
+        "siso",
+    ],
+)
+
+gn_args.config(
+    name = "arm",
+    args = {
+        "target_cpu": "arm",
+    },
+)
+
+gn_args.config(
     name = "arm64",
     args = {
         "target_cpu": "arm64",
