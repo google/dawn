@@ -31,7 +31,7 @@
 
 #include "dawn/wire/WireCmd_autogen.h"
 #include "src/dawn/common/StringViewUtils.h"
-#include "src/dawn/wire/BufferConsumer_impl.h"
+#include "src/dawn/wire/BufferConsumer.h"
 #include "src/dawn/wire/WireResult.h"
 #include "src/dawn/wire/server/Server.h"
 #include "src/utils/assert.h"

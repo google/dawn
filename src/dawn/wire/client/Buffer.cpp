@@ -35,7 +35,6 @@
 #include "dawn/wire/WireCmd_autogen.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/StringViewUtils.h"
-#include "src/dawn/wire/BufferConsumer_impl.h"
 #include "src/dawn/wire/client/Client.h"
 #include "src/dawn/wire/client/Device.h"
 #include "src/dawn/wire/client/EventManager.h"

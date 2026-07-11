@@ -83,6 +83,27 @@ namespace dawn::wire {
     struct CmdHeader {
         uint64_t commandSize;
         WireCmd commandId;
+
+        CmdHeader() = default;
+        CmdHeader(const CmdHeader&) = default;
+        CmdHeader(CmdHeader&&) = default;
+
+        // Volatile constructors and assignment operators are never expected to be called at
+        // runtime when handling wire commands. They exist solely to satisfy C++20 iterator and
+        // std::span requirements (e.g. std::indirectly_readable) when constructing views over
+        // volatile shared memory buffers.
+        [[noreturn]] CmdHeader(const volatile CmdHeader& other) {
+            DAWN_UNREACHABLE();
+        }
+        [[noreturn]] CmdHeader(volatile CmdHeader&& other) {
+            DAWN_UNREACHABLE();
+        }
+        [[noreturn]] CmdHeader(const volatile CmdHeader&& other) {
+            DAWN_UNREACHABLE();
+        }
+        [[noreturn]] CmdHeader& operator=(const volatile CmdHeader& other) {
+            DAWN_UNREACHABLE();
+        }
     };
 
 {% macro write_command_struct(command, is_return_command) %}

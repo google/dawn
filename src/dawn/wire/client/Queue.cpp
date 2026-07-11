@@ -34,7 +34,6 @@
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/Atomic.h"
 #include "src/dawn/common/StringViewUtils.h"
-#include "src/dawn/wire/BufferConsumer_impl.h"
 #include "src/dawn/wire/client/Client.h"
 #include "src/dawn/wire/client/EventManager.h"
 #include "src/utils/compiler.h"

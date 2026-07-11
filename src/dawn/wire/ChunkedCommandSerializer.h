@@ -63,11 +63,9 @@ template <typename Extension, typename... Extensions>
 WireResult SerializeCommandExtension(SerializeBuffer* serializeBuffer,
                                      Extension&& e,
                                      Extensions&&... es) {
-    std::byte* buffer;
+    Span<std::byte> buffer;
     WIRE_TRY(serializeBuffer->NextN(e.size, &buffer));
-
-    // TODO(https://crbug.com/492456046): Spanify NextN to return a Span.
-    e.serialize(DAWN_UNSAFE_TODO(Span<std::byte>(buffer, e.size)));
+    e.serialize(buffer);
 
     WIRE_TRY(SerializeCommandExtension(serializeBuffer, std::forward<Extensions>(es)...));
     return WireResult::Success;
@@ -125,9 +123,11 @@ class ChunkedCommandSerializer {
         size_t requiredSize = (Align(extensions.size, kWireBufferAlignment) + ... + commandSize);
 
         if (requiredSize <= mMaxAllocationSize) {
-            char* allocatedBuffer = static_cast<char*>(mSerializer->GetCmdSpace(requiredSize));
-            if (allocatedBuffer != nullptr) {
-                SerializeBuffer serializeBuffer(allocatedBuffer, requiredSize);
+            // TODO(https://crbug.com/528027992): Spanify CommandSerializer::GetCmdSpace.
+            Span<std::byte> allocatedBuffer = DAWN_UNSAFE_TODO(Span<std::byte>(
+                static_cast<std::byte*>(mSerializer->GetCmdSpace(requiredSize)), requiredSize));
+            if (allocatedBuffer.data() != nullptr) {
+                SerializeBuffer serializeBuffer(allocatedBuffer);
                 WireResult rCmd = SerializeCmd(cmd, requiredSize, &serializeBuffer);
                 WireResult rExts =
                     detail::SerializeCommandExtension(&serializeBuffer, extensions...);
@@ -140,19 +140,21 @@ class ChunkedCommandSerializer {
 
         // Allocate as zero-initialized because padding won't get initialized during command
         // serialization (and this whole buffer is sent raw to the other end of the wire).
-        auto cmdSpace = std::unique_ptr<char[]>(new char[requiredSize]{});
+        auto cmdSpaceAlloc = std::unique_ptr<std::byte[]>(new std::byte[requiredSize]{});
+        // TODO(https://crbug.com/512465980): Use dawn::HeapArray above.
+        Span<std::byte> DAWN_UNSAFE_TODO(cmdSpace{cmdSpaceAlloc.get(), requiredSize});
 
-        SerializeBuffer serializeBuffer(cmdSpace.get(), requiredSize);
+        SerializeBuffer serializeBuffer(cmdSpace);
         WireResult rCmd = SerializeCmd(cmd, requiredSize, &serializeBuffer);
         WireResult rExts = detail::SerializeCommandExtension(&serializeBuffer, extensions...);
         if (rCmd != WireResult::Success || rExts != WireResult::Success) [[unlikely]] {
             mSerializer->OnSerializeError();
             return;
         }
-        SerializeChunkedCommand(cmdSpace.get(), requiredSize);
+        SerializeChunkedCommand(cmdSpace);
     }
 
-    void SerializeChunkedCommand(const char* allocatedBuffer, size_t totalSize);
+    void SerializeChunkedCommand(Span<const std::byte> allocatedBuffer);
 
     raw_ptr<CommandSerializer> mSerializer;
     size_t mMaxAllocationSize;

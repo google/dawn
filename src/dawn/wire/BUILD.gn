@@ -89,7 +89,6 @@ source_set("sources") {
   sources = get_target_outputs(":gen")
   sources += [
     "BufferConsumer.h",
-    "BufferConsumer_impl.h",
     "ChunkedCommandHandler.cpp",
     "ChunkedCommandHandler.h",
     "ChunkedCommandSerializer.cpp",

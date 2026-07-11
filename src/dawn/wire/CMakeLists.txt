@@ -41,7 +41,6 @@ set(headers
 
 set(private_headers
     "${DAWN_WIRE_GEN_HEADERS}"
-    "BufferConsumer_impl.h"
     "BufferConsumer.h"
     "ChunkedCommandHandler.h"
     "ChunkedCommandSerializer.h"

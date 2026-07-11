@@ -82,7 +82,9 @@ class WireSpecificCommandTests : public WireTest {
         toIntercept();
         size_t endOffset = c2sBuf->GetOffsetForTesting();
         std::span<const char> subrange = c2sBuf->GetContentSubrange(startOffset, endOffset);
-        dawn::wire::DeserializeBuffer deserializeBuffer(subrange.data(), subrange.size());
+        // TODO(https://crbug.com/528027992): Make TerribleCommandBuffer return Span instead of
+        // std::span.
+        dawn::wire::DeserializeBuffer deserializeBuffer(SpanAsBytes(Span<const char>(subrange)));
         EXPECT_EQ(WireResult::Success, cmd.Deserialize(&deserializeBuffer, &mAllocator,
                                                        *GetWireServer()->GetImplForTesting()));
 

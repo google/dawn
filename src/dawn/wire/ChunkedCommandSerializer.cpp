@@ -47,25 +47,23 @@ void ChunkedCommandSerializer::Flush() {
     mSerializer->Flush();
 }
 
-void ChunkedCommandSerializer::SerializeChunkedCommand(const char* allocatedBuffer,
-                                                       size_t totalSize) {
+void ChunkedCommandSerializer::SerializeChunkedCommand(Span<const std::byte> allocatedBuffer) {
     // Constant regarding the size of the WireChunkedCommandCmd that can be computed once.
     static size_t kWireChunkedCmdPrefixSize = ChunkedCommandCmd{0, 0, nullptr, 0}.GetRequiredSize();
 
+    // TODO(https://crbug.com/528027992): Spanify the ChunkedCommandCmd struct.
     ChunkedCommandCmd cmd;
     cmd.id = mNextChunkedCommandId++;
-    cmd.size = totalSize;
+    cmd.size = allocatedBuffer.size();
 
-    size_t remainingSize = totalSize;
-    while (remainingSize > 0) {
-        cmd.chunkData = allocatedBuffer;
-        cmd.chunkSize = std::min(remainingSize, mMaxAllocationSize - kWireChunkedCmdPrefixSize);
+    while (!allocatedBuffer.empty()) {
+        cmd.chunkData = reinterpret_cast<const char*>(allocatedBuffer.data());
+        cmd.chunkSize =
+            std::min(allocatedBuffer.size(), mMaxAllocationSize - kWireChunkedCmdPrefixSize);
         DAWN_ASSERT(cmd.GetRequiredSize() <= mMaxAllocationSize);
 
         SerializeCommand(cmd);
-
-        DAWN_UNSAFE_TODO(allocatedBuffer += cmd.chunkSize);
-        remainingSize -= cmd.chunkSize;
+        allocatedBuffer = allocatedBuffer.subspan(cmd.chunkSize);
     }
 }
 

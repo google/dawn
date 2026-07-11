@@ -88,12 +88,12 @@ namespace dawn::wire::server {
     {% endfor %}
 
     const volatile char* Server::HandleCommands(const volatile char* commands, size_t size) {
-        DeserializeBuffer deserializeBuffer(commands, size);
+        // TODO(https://crbug.com/528027992): Spanify the input commands.
+        DeserializeBuffer deserializeBuffer(SpanAsBytes(DAWN_UNSAFE_TODO(Span<const volatile char>(commands, size))));
 
-        while (deserializeBuffer.AvailableSize() >= sizeof(CmdHeader)) {
-            WireCmd cmdId = static_cast<const volatile CmdHeader*>(
-                            static_cast<const volatile void*>(deserializeBuffer.Buffer()))
-                            ->commandId;
+        const volatile CmdHeader* cmdHeader;
+        while (deserializeBuffer.Peek(&cmdHeader) != WireResult::FatalError) {
+            WireCmd cmdId = cmdHeader->commandId;
             WireResult result;
             switch (cmdId) {
                 {% for command in cmd_records["special command"] + cmd_records["command"] %}
@@ -120,7 +120,7 @@ namespace dawn::wire::server {
             }
         }
 
-        if (deserializeBuffer.AvailableSize() != 0) {
+        if (!deserializeBuffer.Empty()) {
             return nullptr;
         }
 
