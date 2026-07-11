@@ -64,110 +64,112 @@ config("dawn_warnings") {
   cflags_c = []
   cflags_cc = []
 
-  if (!(dawn_standalone && is_clang)) {
-    # If we're not using clang in a standalone build, then we don't touch any
-    # warning config.
-    assert(!dawn_weverything,
+  if (dawn_weverything) {
+    assert(dawn_standalone && is_clang,
            "dawn_weverything requires clang in a standalone build.")
-  } else {
-    ### First, enable the base set of warnings.
+  }
 
-    if (dawn_weverything) {
-      cflags += [
-        "-Weverything",
+  # If we're not using Clang, then we don't touch any warning config.
+  if (is_clang) {
+    ### In dawn_standalone, first, enable the base set of warnings.
+    if (dawn_standalone) {
+      if (dawn_weverything) {
+        cflags += [
+          "-Weverything",
 
-        # Re-enable (almost) all the warnings that are mentioned in
-        # //build/config/compiler/BUILD.gn to try to reset any disabled warnings
-        # as -Weverything won't override previous -Wno-* flags.
-        # They may be re-disabled subsequently, this is just to set a baseline.
-        "-Wbackend-plugin",
-        "-Wc++11-narrowing",
-        "-Wcast-function-type",
-        "-Wcomments",
-        "-Wdeprecated-builtins",
-        "-Wdeprecated-declarations",
-        "-Wexit-time-destructors",
-        "-Wgnu-anonymous-struct",
-        "-Wgnu-case-range",
-        "-Wgnu-conditional-omitted-operand",
-        "-Wgnu-include-next",
-        "-Wgnu-label-as-value",
-        "-Wgnu-line-marker",
-        "-Wgnu-offsetof-extensions",
-        "-Wgnu-redeclared-enum",
-        "-Wgnu-statement-expression",
-        "-Wgnu-zero-variadic-macro-arguments",
-        "-Wincompatible-pointer-types",
-        "-Wmissing-field-initializers",
-        "-Wnarrowing",
-        "-Wnonportable-include-path",
-        "-Wnontrivial-memcall",
-        "-Wpsabi",
-        "-Wthread-safety-reference-return",
-        "-Wuninitialized-const-pointer",
-        "-Wunnecessary-virtual-specifier",
-        "-Wunneeded-internal-declaration",
-        "-Wunsafe-buffer-usage-in-static-sized-array",
-        "-Wunused-but-set-global",
-        "-Wunused-but-set-variable",
-        "-Wunused-function",
-        "-Wunused-local-typedefs",
-        "-Wunused-parameter",
-        "-Wunused-variable",
-        "-Wzero-length-array",
-      ]
+          # Re-enable (almost) all the warnings that are mentioned in
+          # //build/config/compiler/BUILD.gn to try to reset any disabled
+          # warnings as -Weverything won't override previous -Wno-* flags. They
+          # may be re-disabled subsequently, this is just to set a baseline.
+          "-Wbackend-plugin",
+          "-Wc++11-narrowing",
+          "-Wcast-function-type",
+          "-Wcomments",
+          "-Wdeprecated-builtins",
+          "-Wdeprecated-declarations",
+          "-Wexit-time-destructors",
+          "-Wgnu-anonymous-struct",
+          "-Wgnu-case-range",
+          "-Wgnu-conditional-omitted-operand",
+          "-Wgnu-include-next",
+          "-Wgnu-label-as-value",
+          "-Wgnu-line-marker",
+          "-Wgnu-offsetof-extensions",
+          "-Wgnu-redeclared-enum",
+          "-Wgnu-statement-expression",
+          "-Wgnu-zero-variadic-macro-arguments",
+          "-Wincompatible-pointer-types",
+          "-Wmissing-field-initializers",
+          "-Wnarrowing",
+          "-Wnonportable-include-path",
+          "-Wnontrivial-memcall",
+          "-Wpsabi",
+          "-Wthread-safety-reference-return",
+          "-Wuninitialized-const-pointer",
+          "-Wunnecessary-virtual-specifier",
+          "-Wunneeded-internal-declaration",
+          "-Wunsafe-buffer-usage-in-static-sized-array",
+          "-Wunused-but-set-global",
+          "-Wunused-but-set-variable",
+          "-Wunused-function",
+          "-Wunused-local-typedefs",
+          "-Wunused-parameter",
+          "-Wunused-variable",
+          "-Wzero-length-array",
+        ]
 
-      # Same but for things passed in cflags_cc as those will be placed on
-      # the command line after ALL the cflags.
-      cflags_cc += [
-        "-Winvalid-offsetof",
-        "-Wmodule-import-in-extern-c",
-        "-Wmodules-ambiguous-internal-linkage",
-        "-Wmodules-import-nested-redundant",
-        "-Wnarrowing",
-        "-Wtrigraphs",
-        "-Wnullability-completeness",
-        "-Wdeprecated-builtins",
-        "-Wc++98-compat-extra-semi",
-      ]
-    } else {
-      cflags = [
-        "-Wall",
-        "-Wextra",
-        "-Wpedantic",
+        # Same but for things passed in cflags_cc as those will be placed on
+        # the command line after ALL the cflags.
+        cflags_cc += [
+          "-Winvalid-offsetof",
+          "-Wmodule-import-in-extern-c",
+          "-Wmodules-ambiguous-internal-linkage",
+          "-Wmodules-import-nested-redundant",
+          "-Wnarrowing",
+          "-Wtrigraphs",
+          "-Wnullability-completeness",
+          "-Wdeprecated-builtins",
+          "-Wc++98-compat-extra-semi",
+        ]
+      } else {
+        cflags = [
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
 
-        # Additional warnings that are not part of -Wall or -Wextra.
-        "-Wconditional-uninitialized",
-        "-Wcstring-format-directive",
-        "-Wctad-maybe-unsupported",
-        "-Wc++11-narrowing",
-        "-Wdeprecated-copy",
-        "-Wdeprecated-copy-dtor",
-        "-Wduplicate-enum",
-        "-Wextra-semi",
-        "-Wextra-semi-stmt",
-        "-Wimplicit-fallthrough",
-        "-Winconsistent-missing-destructor-override",
-        "-Winvalid-offsetof",
-        "-Wmissing-field-initializers",
-        "-Wnon-c-typedef-for-linkage",
-        "-Wpessimizing-move",
-        "-Wrange-loop-analysis",
-        "-Wredundant-move",
-        "-Wshadow-field",
-        "-Wstrict-prototypes",
-        "-Wsuggest-destructor-override",
-        "-Wsuggest-override",
-        "-Wtautological-unsigned-zero-compare",
-        "-Wunreachable-code-aggressive",
-        "-Wunused-but-set-variable",
-        "-Wunused-macros",
-      ]
+          # Additional warnings that are not part of -Wall or -Wextra.
+          "-Wconditional-uninitialized",
+          "-Wcstring-format-directive",
+          "-Wctad-maybe-unsupported",
+          "-Wc++11-narrowing",
+          "-Wdeprecated-copy",
+          "-Wdeprecated-copy-dtor",
+          "-Wduplicate-enum",
+          "-Wextra-semi",
+          "-Wextra-semi-stmt",
+          "-Wimplicit-fallthrough",
+          "-Winconsistent-missing-destructor-override",
+          "-Winvalid-offsetof",
+          "-Wmissing-field-initializers",
+          "-Wnon-c-typedef-for-linkage",
+          "-Wpessimizing-move",
+          "-Wrange-loop-analysis",
+          "-Wredundant-move",
+          "-Wshadow-field",
+          "-Wstrict-prototypes",
+          "-Wsuggest-destructor-override",
+          "-Wsuggest-override",
+          "-Wtautological-unsigned-zero-compare",
+          "-Wunreachable-code-aggressive",
+          "-Wunused-but-set-variable",
+          "-Wunused-macros",
+        ]
 
-      cflags_cc = []
+        cflags_cc = []
+      }
     }
 
-    ### Now, configure all the warning suppressions.
+    ### Now, configure all warning suppressions (regardless of dawn_standalone).
 
     # Use per-file warning suppressions from warning_suppression_mappings.txt
     inputs = [ "warning_suppression_mappings.txt" ]
