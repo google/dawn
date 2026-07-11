@@ -334,6 +334,28 @@ TEST_P(SharedBufferMemoryExistingD3D12ResourceTests, CustomCrossAdapterHeapImpor
     ASSERT_TRUE(sharedBufferMemory.CreateBuffer().Get());
 }
 
+// Tests that creating a buffer from SharedBufferMemory with mappedAtCreation=true is an error
+// when the shared buffer memory does not have MapWrite usage.
+TEST_P(SharedBufferMemoryExistingD3D12ResourceTests,
+       CreateBufferMappedAtCreationWithoutMapWriteIsError) {
+    constexpr wgpu::BufferUsage kStorageUsages =
+        wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Storage;
+    wgpu::SharedBufferMemory memory =
+        GetParam().mBackend->CreateSharedBufferMemory(device, kStorageUsages, kBufferSize);
+    wgpu::SharedBufferMemoryProperties properties;
+    memory.GetProperties(&properties);
+
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.size = properties.size;
+    bufferDesc.usage = kStorageUsages;
+    bufferDesc.mappedAtCreation = true;
+
+    ASSERT_DEVICE_ERROR_MSG(
+        memory.CreateBuffer(&bufferDesc),
+        testing::HasSubstr(
+            "mappedAtCreation=true requires the SharedBufferMemory to have MapWrite usage"));
+}
+
 // Tests that creating SharedBufferMemory emits a specific error message if Uniform usage specified.
 TEST_P(SharedBufferMemoryExistingD3D12ResourceTests, UniformUsageValidation) {
     constexpr wgpu::BufferUsage kMapWriteUsages =

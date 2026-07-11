@@ -135,6 +135,12 @@ ResultOrError<Ref<BufferBase>> SharedBufferMemoryBase::CreateBuffer(
                     "The buffer usage (%s) is incompatible with the SharedBufferMemory usage (%s).",
                     descriptor->usage, mProperties.usage);
 
+    // Require MapWrite usage on the shared buffer memory when mappedAtCreation is true.
+    DAWN_INVALID_IF(
+        descriptor->mappedAtCreation && !(mProperties.usage & wgpu::BufferUsage::MapWrite),
+        "Buffer created from SharedBufferMemory with mappedAtCreation=true requires "
+        "the SharedBufferMemory to have MapWrite usage.");
+
     // Validate that the buffer size does not exceed the shared buffer memory's size.
     DAWN_INVALID_IF(descriptor->size > mProperties.size,
                     "The buffer size (%u) is larger than SharedBufferMemory size (%u).",

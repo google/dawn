@@ -868,40 +868,37 @@ TEST_P(SharedBufferMemoryTests, MapAsyncEnsureSynchronization) {
     buffer2.Unmap();
 }
 
-// Test that creating a buffer from SharedBufferMemory with mappedAtCreation works correctly,
-// both with map usages and without (mappedAtCreation grants write access regardless of usage).
+// Test that creating a buffer from SharedBufferMemory with mappedAtCreation works correctly
+// when the shared buffer memory has MapWrite usage.
 TEST_P(SharedBufferMemoryTests, CreateBufferMappedAtCreation) {
-    for (wgpu::BufferUsage usage : {kMapWriteUsages, kStorageUsages}) {
-        SCOPED_TRACE(absl::StrFormat("usage = %u", static_cast<uint32_t>(usage)));
-        wgpu::SharedBufferMemory memory =
-            GetParam().mBackend->CreateSharedBufferMemory(device, usage, kBufferSize);
-        wgpu::SharedBufferMemoryProperties properties;
-        memory.GetProperties(&properties);
+    wgpu::SharedBufferMemory memory =
+        GetParam().mBackend->CreateSharedBufferMemory(device, kMapWriteUsages, kBufferSize);
+    wgpu::SharedBufferMemoryProperties properties;
+    memory.GetProperties(&properties);
 
-        wgpu::BufferDescriptor bufferDesc = {};
-        bufferDesc.size = properties.size;
-        bufferDesc.usage = usage;
-        bufferDesc.mappedAtCreation = true;
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.size = properties.size;
+    bufferDesc.usage = kMapWriteUsages;
+    bufferDesc.mappedAtCreation = true;
 
-        wgpu::SharedBufferMemoryBeginAccessDescriptor beginAccessDesc;
-        beginAccessDesc.initialized = false;
+    wgpu::SharedBufferMemoryBeginAccessDescriptor beginAccessDesc;
+    beginAccessDesc.initialized = false;
 
-        wgpu::Buffer buffer = memory.CreateBuffer(&bufferDesc);
-        memory.BeginAccess(buffer, &beginAccessDesc);
+    wgpu::Buffer buffer = memory.CreateBuffer(&bufferDesc);
+    memory.BeginAccess(buffer, &beginAccessDesc);
 
-        // Write data directly through the mapped range.
-        uint32_t* mappedData = static_cast<uint32_t*>(buffer.GetMappedRange(0, kBufferSize));
-        ASSERT_NE(mappedData, nullptr);
-        *mappedData = kBufferData;
-        buffer.Unmap();
+    // Write data directly through the mapped range.
+    uint32_t* mappedData = static_cast<uint32_t*>(buffer.GetMappedRange(0, kBufferSize));
+    ASSERT_NE(mappedData, nullptr);
+    *mappedData = kBufferData;
+    buffer.Unmap();
 
-        // Verify the written data is correct by reading it back.
-        EXPECT_BUFFER_U32_EQ(kBufferData, buffer, 0);
+    // Verify the written data is correct by reading it back.
+    EXPECT_BUFFER_U32_EQ(kBufferData, buffer, 0);
 
-        wgpu::SharedBufferMemoryEndAccessState endState;
-        memory.EndAccess(buffer, &endState);
-        EXPECT_EQ(endState.initialized, true);
-    }
+    wgpu::SharedBufferMemoryEndAccessState endState;
+    memory.EndAccess(buffer, &endState);
+    EXPECT_EQ(endState.initialized, true);
 }
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SharedBufferMemoryTests);
