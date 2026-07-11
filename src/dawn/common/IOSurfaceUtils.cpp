@@ -32,6 +32,7 @@
 
 #include "src/dawn/common/CoreFoundationRef.h"
 #include "src/utils/assert.h"
+#include "src/utils/numeric.h"
 
 namespace dawn {
 
@@ -123,14 +124,14 @@ IOSurfaceRef CreateMultiPlanarIOSurface(wgpu::TextureFormat format,
                                         uint32_t height) {
     CFRef<CFMutableDictionaryRef> dict = AcquireCFRef(CFDictionaryCreateMutable(
         kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
-    AddIntegerValue(dict.Get(), kIOSurfaceWidth, width);
-    AddIntegerValue(dict.Get(), kIOSurfaceHeight, height);
-    AddIntegerValue(dict.Get(), kIOSurfacePixelFormat, ToCVFormat(format));
+    AddIntegerValue(dict.Get(), kIOSurfaceWidth, sign_cast(width));
+    AddIntegerValue(dict.Get(), kIOSurfaceHeight, sign_cast(height));
+    AddIntegerValue(dict.Get(), kIOSurfacePixelFormat, sign_cast(ToCVFormat(format)));
 
     size_t numPlanes = NumPlanes(format);
 
-    CFRef<CFMutableArrayRef> planes =
-        AcquireCFRef(CFArrayCreateMutable(kCFAllocatorDefault, numPlanes, &kCFTypeArrayCallBacks));
+    CFRef<CFMutableArrayRef> planes = AcquireCFRef(
+        CFArrayCreateMutable(kCFAllocatorDefault, sign_cast(numPlanes), &kCFTypeArrayCallBacks));
     size_t totalBytesAlloc = 0;
     for (size_t plane = 0; plane < numPlanes; ++plane) {
         const size_t planeWidth =

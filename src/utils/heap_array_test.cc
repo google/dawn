@@ -274,7 +274,7 @@ TEST_F(HeapArrayTest, OutOfMemoryAtLimit) {
     {
         // Test sizes that are blocked by the HeapArray implementation before trying to allocate,
         // and one element smaller so that HeapArray will actually try to allocate.
-        for (size_t leaveSpace : {0, 4094, 4095}) {
+        for (size_t leaveSpace : {0u, 4094u, 4095u}) {
             HeapArray<uint8_t> arr{std::numeric_limits<size_t>::max() - leaveSpace, std::nothrow};
             // Access the pointer first to prevent the allocation from being optimized away by
             // the compiler assuming it will succeed.
@@ -288,7 +288,7 @@ TEST_F(HeapArrayTest, OutOfMemoryAtLimit) {
 
         // Test sizes that are blocked by the HeapArray implementation before trying to allocate,
         // and one element smaller so that HeapArray will actually try to allocate.
-        for (size_t leaveSpace : {0, 1022, 1023}) {
+        for (size_t leaveSpace : {0u, 1022u, 1023u}) {
             HeapArray<uint32_t> arr{kMaxSize - leaveSpace, std::nothrow};
             // Access the pointer first to prevent the allocation from being optimized away.
             EXPECT_EQ(arr.data(), nullptr);
