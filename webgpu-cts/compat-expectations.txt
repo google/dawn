@@ -2550,7 +2550,6 @@ crbug.com/526671415 webgpu:api,validation,encoding,cmds,setImmediates:overflow:*
 crbug.com/0000 [ android-14 android-pixel-6 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r32float";dstFormat="r32float";dimension="2d" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg11b10ufloat";dstFormat="rg11b10ufloat";dimension="2d" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux renderer-skia-gl ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg32float";dstFormat="rg32float";dimension="3d" [ Failure ]
-crbug.com/0000 [ android-14 android-pixel-6 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg32sint";dstFormat="rg32sint";dimension="2d" [ Failure ]
 crbug.com/0000 [ android-14 android-pixel-6 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg8unorm";dstFormat="rg8unorm";dimension="2d" [ Failure ]
 crbug.com/0000 [ android-14 android-pixel-6 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgb10a2uint";dstFormat="rgb10a2uint";dimension="2d" [ Failure ]
 crbug.com/0000 [ android-14 android-pixel-6 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgb10a2unorm";dstFormat="rgb10a2unorm";dimension="2d" [ Failure ]
