@@ -56,8 +56,7 @@ class Texture final : public TextureBase {
             GLuint handle,
             OwnsHandle ownsHandle);
 
-    GLuint GetTextureHandle() const;
-    GLuint GetRenderbufferHandle() const;
+    GLuint GetHandle() const;
     GLenum GetGLTarget() const;
     const GLFormat& GetGLFormat() const;
 
@@ -65,7 +64,6 @@ class Texture final : public TextureBase {
                                                    const SubresourceRange& range);
 
     MaybeError SynchronizeTextureBeforeUse();
-    bool IsRenderbuffer() const;
 
   private:
     ~Texture() override;
@@ -75,8 +73,7 @@ class Texture final : public TextureBase {
                             const SubresourceRange& range,
                             TextureBase::ClearValue clearValue);
 
-    GLuint mTextureHandle;
-    GLuint mRenderbufferHandle;
+    GLuint mHandle;
     OwnsHandle mOwnsHandle = OwnsHandle::No;
     GLenum mTarget;
 };
@@ -87,8 +84,7 @@ class TextureView final : public TextureViewBase {
         TextureBase* texture,
         const UnpackedPtr<TextureViewDescriptor>& descriptor);
 
-    GLuint GetTextureHandle() const;
-    GLuint GetRenderbufferHandle() const;
+    GLuint GetHandle() const;
     GLenum GetGLTarget() const;
     MaybeError BindToFramebuffer(const OpenGLFunctions& gl,
                                  GLenum target,
@@ -102,8 +98,8 @@ class TextureView final : public TextureViewBase {
     void DestroyImpl(DestroyReason reason) override;
     GLenum GetInternalFormat() const;
 
-    GLuint mTextureHandle;
-    GLuint mRenderbufferHandle;
+    // TODO(crbug.com/dawn/1355): Delete this handle on texture destroy.
+    GLuint mHandle;
     GLenum mTarget;
     OwnsHandle mOwnsHandle = OwnsHandle::No;
 };

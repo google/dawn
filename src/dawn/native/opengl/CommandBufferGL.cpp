@@ -415,7 +415,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
                 },
                 [&](const TextureBindingInfo&) -> MaybeError {
                     TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
-                    GLuint handle = view->GetTextureHandle();
+                    GLuint handle = view->GetHandle();
                     GLenum target = view->GetGLTarget();
                     FlatBindingIndex viewIndex = indices[bindingIndex];
 
@@ -477,7 +477,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
                 [&](const StorageTextureBindingInfo& layout) -> MaybeError {
                     TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                     Texture* texture = ToBackend(view->GetTexture());
-                    GLuint handle = texture->GetTextureHandle();
+                    GLuint handle = texture->GetHandle();
                     FlatBindingIndex imageIndex = indices[bindingIndex];
 
                     GLenum access;
@@ -961,7 +961,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                 DAWN_TRY(texture->EnsureSubresourceContentInitialized(gl, subresources));
                 // The only way to move data from a texture to a buffer in GL is via
                 // glReadPixels with a pack buffer. Create a temporary FBO for the copy.
-                DAWN_GL_TRY(gl, BindTexture(target, texture->GetTextureHandle()));
+                DAWN_GL_TRY(gl, BindTexture(target, texture->GetHandle()));
 
                 GLuint readFBO = 0;
                 DAWN_GL_TRY(gl, GenFramebuffers(1, &readFBO));
@@ -1010,9 +1010,9 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                     case wgpu::TextureDimension::e2D: {
                         if (target == GL_TEXTURE_2D) {
                             DAWN_ASSERT(texture->GetArrayLayers() == 1);
-                            DAWN_GL_TRY(gl, FramebufferTexture2D(
-                                                GL_READ_FRAMEBUFFER, glAttachment, target,
-                                                texture->GetTextureHandle(), src.mipLevel));
+                            DAWN_GL_TRY(
+                                gl, FramebufferTexture2D(GL_READ_FRAMEBUFFER, glAttachment, target,
+                                                         texture->GetHandle(), src.mipLevel));
                             DAWN_GL_TRY(gl, ReadPixels(dchecked_cast<uint32_t>(src.origin.x),
                                                        dchecked_cast<uint32_t>(src.origin.y),
                                                        dchecked_cast<uint32_t>(copySize.width),
@@ -1026,10 +1026,10 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                             for (TexelCount z{0u}; z < copySize.depthOrArrayLayers; ++z) {
                                 GLenum cubeMapTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X +
                                                        dchecked_cast<uint32_t>(z + src.origin.z);
-                                DAWN_GL_TRY(gl, FramebufferTexture2D(GL_READ_FRAMEBUFFER,
-                                                                     glAttachment, cubeMapTarget,
-                                                                     texture->GetTextureHandle(),
-                                                                     src.mipLevel));
+                                DAWN_GL_TRY(
+                                    gl, FramebufferTexture2D(GL_READ_FRAMEBUFFER, glAttachment,
+                                                             cubeMapTarget, texture->GetHandle(),
+                                                             src.mipLevel));
                                 DAWN_GL_TRY(gl, ReadPixels(dchecked_cast<uint32_t>(src.origin.x),
                                                            dchecked_cast<uint32_t>(src.origin.y),
                                                            dchecked_cast<uint32_t>(copySize.width),
@@ -1047,10 +1047,10 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                         const uint64_t bytesPerImage =
                             blockInfo.ToBytes(dst.blocksPerRow * dst.rowsPerImage);
                         for (TexelCount z{0u}; z < copySize.depthOrArrayLayers; ++z) {
-                            DAWN_GL_TRY(gl, FramebufferTextureLayer(
-                                                GL_READ_FRAMEBUFFER, glAttachment,
-                                                texture->GetTextureHandle(), src.mipLevel,
-                                                dchecked_cast<uint32_t>(src.origin.z + z)));
+                            DAWN_GL_TRY(
+                                gl, FramebufferTextureLayer(
+                                        GL_READ_FRAMEBUFFER, glAttachment, texture->GetHandle(),
+                                        src.mipLevel, dchecked_cast<uint32_t>(src.origin.z + z)));
                             DAWN_GL_TRY(gl, ReadPixels(dchecked_cast<uint32_t>(src.origin.x),
                                                        dchecked_cast<uint32_t>(src.origin.y),
                                                        dchecked_cast<uint32_t>(copySize.width),
@@ -1104,9 +1104,9 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                 } else {
                     DAWN_TRY(dstTexture->EnsureSubresourceContentInitialized(gl, dstRange));
                 }
-                DAWN_TRY(CopyImageSubData(gl, src.aspect, srcTexture->GetTextureHandle(),
+                DAWN_TRY(CopyImageSubData(gl, src.aspect, srcTexture->GetHandle(),
                                           srcTexture->GetGLTarget(), src.mipLevel,
-                                          src.origin.ToOrigin3D(), dstTexture->GetTextureHandle(),
+                                          src.origin.ToOrigin3D(), dstTexture->GetHandle(),
                                           dstTexture->GetGLTarget(), dst.mipLevel,
                                           dst.origin.ToOrigin3D(), copySize.ToExtent3D()));
                 break;
@@ -1728,7 +1728,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
     GLenum target = texture->GetGLTarget();
     data = DAWN_UNSAFE_TODO(static_cast<const uint8_t*>(data) + dataLayout.offset);
     DAWN_GL_TRY(gl, ActiveTexture(GL_TEXTURE0));
-    DAWN_GL_TRY(gl, BindTexture(target, texture->GetTextureHandle()));
+    DAWN_GL_TRY(gl, BindTexture(target, texture->GetHandle()));
     const TypedTexelBlockInfo& blockInfo = GetBlockInfo(destination);
     const BlockExtent3D blockCopySize = blockInfo.ToBlock(copySize);
     const uint64_t bytesPerImage = dataLayout.rowsPerImage * dataLayout.bytesPerRow;

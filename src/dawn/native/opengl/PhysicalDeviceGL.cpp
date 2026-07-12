@@ -310,8 +310,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (SupportTextureComponentSwizzle()) {
         EnableFeature(Feature::TextureComponentSwizzle);
     }
-
-    EnableFeature(Feature::TransientAttachments);
 }
 
 namespace {
