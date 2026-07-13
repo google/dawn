@@ -748,13 +748,8 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                 shaderSamplerType == kUnknownFilteringSamplerBindingType &&
                 (bglSamplerType == wgpu::SamplerBindingType::Filtering ||
                  bglSamplerType == wgpu::SamplerBindingType::NonFiltering);
-            bool shaderSamplerTypeConvertsFromFiltering =
-                shaderSamplerType == wgpu::SamplerBindingType::NonFiltering &&
-                bglSamplerType == wgpu::SamplerBindingType::Filtering;
 
-            bool bglConvertsToShaderSamplerType = isSameSamplerType ||
-                                                  unknownFilteringTypeInShader ||
-                                                  shaderSamplerTypeConvertsFromFiltering;
+            bool bglConvertsToShaderSamplerType = isSameSamplerType || unknownFilteringTypeInShader;
             DAWN_INVALID_IF(!bglConvertsToShaderSamplerType,
                             "The sampler type in the shader (%s) doesn't match the type in "
                             "the layout (%s).",
