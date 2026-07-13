@@ -137,7 +137,8 @@ def process_dir(args, dir_path, required_submodules):
     DEPS = open(deps_path).read()
 
     ldict = {}
-    exec(DEPS, globals(), ldict)
+    exec(DEPS, {'Var': Var, 'Str': str}, ldict)
+
     deps = ldict.get('deps')
     variables = ldict.get('vars', {})
 
