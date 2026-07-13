@@ -156,10 +156,6 @@ func (s *State) Close(results Results) error {
 		}
 	}
 
-	if err := AddToListingMeta(s.CTS.path, results); err != nil {
-		return err
-	}
-
 	return nil
 }
 
