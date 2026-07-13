@@ -118,9 +118,8 @@ def dawn_android_functional_cq_tester(**kwargs):
     kwargs = apply_linux_cq_builder_defaults(kwargs)
     kwargs = apply_functional_builder_with_node_defaults(kwargs)
 
-    # TODO(crbug.com/520153663): Add to CQ + branches once CI builders are
-    # confirmed to work.
-    kwargs.update(cq_settings = try_.cq_settings(includable_only = True))
+    # TODO(crbug.com/520153663): Add to branches once both arm and arm64 are
+    # added to the CQ.
     try_.builder(**kwargs)
 
 def dawn_linux_functional_cq_tester(**kwargs):
@@ -166,6 +165,9 @@ dawn_android_functional_cq_tester(
         "ci/dawn-android-arm-builder-rel",
     ],
     gn_args = "ci/dawn-android-arm-builder-rel",
+    # TODO(crbug.com/520153663): Add to CQ + branches once we confirm there is
+    # sufficient GCE capacity.
+    cq_settings = try_.cq_settings(includable_only = True),
 )
 
 dawn_android_functional_cq_tester(
