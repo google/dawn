@@ -1090,6 +1090,9 @@ class Parser {
                         case spv::Decoration::Coherent:
                             // Tint has coherent memory semantics, so this is a no-op.
                             break;
+                        case spv::Decoration::Restrict:
+                            // All Tint pointers are restrict. This is a no-op.
+                            break;
                         case spv::Decoration::RowMajor:
                             is_row_major = true;
                             break;
