@@ -64,9 +64,6 @@ default_args = {
 
   # Use Siso instead of Ninja.
   use_siso = true
-
-  # Disable SwiftShader's Wayland build
-  ozone_platform_wayland = false
 }
 
 # Export compile_commands.json to build dir for all generated targets.
