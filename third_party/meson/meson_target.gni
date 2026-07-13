@@ -98,8 +98,7 @@ template("_meson_setup") {
     ]
     if (is_linux) {
       _native_file_content +=
-          [ "llvm-config = '" +
-            rebase_path("//third_party/llvm-dev/bin/llvm-config") + "'" ]
+          [ "llvm-config = '" + rebase_path("${meson_llvm_config_bin}") + "'" ]
     }
 
     write_file(_native_file_path, _native_file_content)
