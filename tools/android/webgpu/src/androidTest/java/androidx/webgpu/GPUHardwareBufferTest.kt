@@ -16,6 +16,7 @@
 
 package androidx.webgpu
 
+import android.annotation.SuppressLint
 import android.hardware.HardwareBuffer
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
@@ -404,6 +405,7 @@ class GPUHardwareBufferTest {
     @Test
     @MediumTest
     @ApiRequirement(minApi = 29)
+    @SuppressLint("SuspendBlocks")
     fun testConcurrentAccess_raceCondition() {
         runBlocking(Dispatchers.IO) {
             val numThreads = 2
@@ -478,7 +480,7 @@ class GPUHardwareBufferTest {
                         shaderSourceWGSL = GPUShaderSourceWGSL(
                             code = """
                             @vertex fn vertexMain(@builtin(vertex_index) i : u32) -> @builtin(position) vec4f {
-                                const pos = array(vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
+                                const pos = array(vec2f(-1, -1), vec2f(3, -1), vec2f(-1, 3));
                                 return vec4f(pos[i], 0.0, 1.0);
                             }
 
@@ -659,6 +661,7 @@ class GPUHardwareBufferTest {
     @Test
     @MediumTest
     @ApiRequirement(minApi = 29)
+    @SuppressLint("SuspendBlocks")
     fun testColorSpaceEnumVariants() {
         runBlocking {
             val unused = webGpu.execute {

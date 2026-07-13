@@ -21,7 +21,6 @@ import androidx.webgpu.helper.createWebGpu
 import java.util.concurrent.Executors
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
@@ -30,7 +29,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import junit.framework.TestCase.assertEquals
 import org.junit.After
-import org.junit.Assert.assertThrows
 import org.junit.Before
 
 @Suppress("UNUSED_VARIABLE")
