@@ -438,6 +438,9 @@ class SubgroupMatrixArithmeticTest : public DawnTestWithParams<MatrixMatrixArith
         if (SupportsFeatures({wgpu::FeatureName::ShaderF16})) {
             features.push_back(wgpu::FeatureName::ShaderF16);
         }
+        if (SupportsFeatures({wgpu::FeatureName::Subgroups})) {
+            features.push_back(wgpu::FeatureName::Subgroups);
+        }
         return features;
     }
 };
@@ -452,6 +455,7 @@ class SubgroupMatrix_MatrixMatrixArithmeticTest : public SubgroupMatrixArithmeti
         // Generate a shader that performs a matrix multiplication that matches the config.
         std::ostringstream shader;
         shader << "enable chromium_experimental_subgroup_matrix;\n";
+        shader << "enable subgroups;\n";
         if (config.componentType == wgpu::SubgroupMatrixComponentType::F16 ||
             config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16) {
             shader << "enable f16;\n";
@@ -494,9 +498,11 @@ class SubgroupMatrix_MatrixMatrixArithmeticTest : public SubgroupMatrixArithmeti
 @group(0) @binding(1) var<storage, read_write> output : array<ResultArrayType, kResultArraySize>;
 
 @compute @workgroup_size(SubgroupMaxSize)
-fn main() {
+fn main(@builtin(subgroup_id) sgid: u32) {
+if sgid != 0 {
+  return;
+}
 )";
-
         std::string loadLHS;
         std::string loadRHS;
         std::string loadAcc;
@@ -606,10 +612,6 @@ TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MatrixMultiply) {
     // TODO(crbug.com/492539239): Access violation during test teardown.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsVulkan());
 
-    // TODO(crbug.com/525517826): On WARP 1.65535.20-preview, tests fail every config for
-    // MatrixMultiplyAccumulate
-    DAWN_SUPPRESS_TEST_IF(IsWARP() && GetParam().mMatrixOp == MatrixOp::MatrixMultiplyAccumulate);
-
     MatrixOp op = GetParam().mMatrixOp;
     bool columnMajor = GetParam().mColumnMajor;
 
@@ -661,6 +663,7 @@ class SubgroupMatrix_MatrixScalarArithmeticTest : public SubgroupMatrixArithmeti
         // Generate a shader that performs a matrix scalar operation that matches the config.
         std::ostringstream shader;
         shader << "enable chromium_experimental_subgroup_matrix;\n";
+        shader << "enable subgroups;\n";
         if (config.componentType == wgpu::SubgroupMatrixComponentType::F16 ||
             config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16) {
             shader << "enable f16;\n";
@@ -688,7 +691,10 @@ class SubgroupMatrix_MatrixScalarArithmeticTest : public SubgroupMatrixArithmeti
 @group(0) @binding(1) var<storage, read_write> output : array<ScalarShaderType, kMatrixDataSize>;
 
 @compute @workgroup_size(SubgroupMaxSize)
-fn main() {
+fn main(@builtin(subgroup_id) sgid: u32) {
+if sgid != 0 {
+  return;
+}
 )";
 
         std::string loadLHS;
