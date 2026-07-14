@@ -48,6 +48,7 @@ lucicfg.config(
         "luci/commit-queue.cfg",
         "luci/cr-buildbucket.cfg",
         "luci/luci-bisection.cfg",
+        "luci/luci-bisection-dev.cfg",
         "luci/luci-logdog.cfg",
         "luci/luci-milo.cfg",
         "luci/luci-notify.cfg",
@@ -431,4 +432,9 @@ exec("//trusted_robots.star")
 lucicfg.emit(
     dest = "luci/luci-bisection.cfg",
     data = io.read_file("luci-bisection.cfg"),
+)
+
+lucicfg.emit(
+    dest = "luci/luci-bisection-dev.cfg",
+    data = io.read_file("luci-bisection-dev.cfg"),
 )
