@@ -452,7 +452,17 @@ bool Buffer::IsCPUWritableAtCreation() const {
     // staging buffer, and copied from the staging buffer to the GPU memory of the current
     // buffer in the unmap() call.
     // TODO(enga): Handle CPU-visible memory on UMA
-    return (GetInternalUsage() & wgpu::BufferUsage::MapWrite) != 0;
+    if ((GetInternalUsage() & wgpu::BufferUsage::MapWrite) != 0) {
+        return true;
+    }
+    // For shared buffer memory buffers, the underlying memory may be CPU writable even if the
+    // buffer's usage doesn't include MapWrite. Check the shared memory's properties.
+    if (auto* contents = GetSharedResourceMemoryContents()) {
+        if (auto sharedMemory = contents->GetSharedResourceMemory().Promote()) {
+            return static_cast<SharedBufferMemoryBase*>(sharedMemory.Get())->CanBeWrittenByCPU();
+        }
+    }
+    return false;
 }
 
 MaybeError Buffer::MapInternal(bool isWrite, size_t offset, size_t size, const char* contextInfo) {
@@ -490,7 +500,7 @@ MaybeError Buffer::MapAtCreationImpl() {
     // We will use a staging buffer for MapRead buffers instead so we just clear the staging
     // buffer and initialize the original buffer by copying the staging buffer to the original
     // buffer one the first time Unmap() is called.
-    DAWN_ASSERT((GetInternalUsage() & wgpu::BufferUsage::MapWrite) != 0);
+    DAWN_ASSERT(IsCPUWritableAtCreation());
 
     // The buffers with mappedAtCreation == true will be initialized in
     // BufferBase::MapAtCreation().

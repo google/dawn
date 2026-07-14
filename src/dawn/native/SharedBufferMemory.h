@@ -57,6 +57,10 @@ class SharedBufferMemoryBase : public SharedResourceMemory {
 
     ObjectType GetType() const override;
 
+    // Returns true if the underlying resource can be written by the CPU, detect by checking for
+    // MapWrite in the properties.
+    bool CanBeWrittenByCPU() const;
+
   protected:
     SharedBufferMemoryBase(DeviceBase* device,
                            StringView label,

@@ -28,6 +28,7 @@
 #include "src/dawn/native/SharedResourceMemory.h"
 
 #include <algorithm>
+#include <span>
 #include <utility>
 
 #include "src/dawn/common/Enumerator.h"
@@ -196,11 +197,19 @@ MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
 
     DAWN_CHECK(!resource->IsError());
     resource->OnBeginAccess();
-    // For buffers created with mappedAtCreation=true, MapAtCreation() already called
-    // SetInitialized(true). Don't override that with descriptor->initialized here, since
-    // the buffer is mapped and the user is about to write into it through the mapped range.
     if constexpr (std::is_same_v<Resource, BufferBase>) {
-        if (resource->GetState() != BufferBase::BufferState::MappedAtCreation) {
+        if (resource->GetState() == BufferBase::BufferState::MappedAtCreation) {
+            // MapAtCreation is where zero-initialization of mappedAtCreation buffers is done, but
+            // it is never called again after the initial buffer creation, so zero-initialize
+            // manually here.
+            if (!descriptor->initialized) {
+                void* ptr = resource->GetMappedPointer();
+                DAWN_ASSERT(ptr != nullptr);
+                std::span<uint8_t> data(static_cast<uint8_t*>(ptr), resource->GetAllocatedSize());
+                std::ranges::fill(data, uint8_t{0});
+            }
+            resource->SetInitialized(true);
+        } else {
             resource->SetInitialized(descriptor->initialized);
         }
     } else {

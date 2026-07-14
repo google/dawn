@@ -87,6 +87,10 @@ ObjectType SharedBufferMemoryBase::GetType() const {
     return ObjectType::SharedBufferMemory;
 }
 
+bool SharedBufferMemoryBase::CanBeWrittenByCPU() const {
+    return (mProperties.usage & wgpu::BufferUsage::MapWrite) != 0;
+}
+
 wgpu::Status SharedBufferMemoryBase::APIGetProperties(
     SharedBufferMemoryProperties* properties) const {
     properties->usage = mProperties.usage;
@@ -136,10 +140,9 @@ ResultOrError<Ref<BufferBase>> SharedBufferMemoryBase::CreateBuffer(
                     descriptor->usage, mProperties.usage);
 
     // Require MapWrite usage on the shared buffer memory when mappedAtCreation is true.
-    DAWN_INVALID_IF(
-        descriptor->mappedAtCreation && !(mProperties.usage & wgpu::BufferUsage::MapWrite),
-        "Buffer created from SharedBufferMemory with mappedAtCreation=true requires "
-        "the SharedBufferMemory to have MapWrite usage.");
+    DAWN_INVALID_IF(descriptor->mappedAtCreation && !CanBeWrittenByCPU(),
+                    "Buffer created from SharedBufferMemory with mappedAtCreation=true requires "
+                    "the SharedBufferMemory to have MapWrite usage.");
 
     // Validate that the buffer size does not exceed the shared buffer memory's size.
     DAWN_INVALID_IF(descriptor->size > mProperties.size,

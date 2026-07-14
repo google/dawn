@@ -29,6 +29,7 @@
 
 #include <gtest/gtest.h>
 
+#include <span>
 #include <vector>
 
 #include "src/dawn/tests/DawnTest.h"
@@ -899,6 +900,73 @@ TEST_P(SharedBufferMemoryTests, CreateBufferMappedAtCreation) {
     wgpu::SharedBufferMemoryEndAccessState endState;
     memory.EndAccess(buffer, &endState);
     EXPECT_EQ(endState.initialized, true);
+}
+
+// Test that creating a buffer from shared buffer memory with `mappedAtCreation = true` and no
+// `MapWrite` usage correctly handles the `initialized` flag in `BeginAccess()`:
+// - `initialized = true` preserves the original data in the buffer at untouched offsets.
+// - `initialized = false` clears the entire buffer to zero regardless of the original data.
+// Also verifies that the second BeginAccess (after the buffer is no longer MappedAtCreation)
+// correctly preserves the data written during the first access.
+TEST_P(SharedBufferMemoryTests, CreateBufferMappedAtCreationOnSharedBufferMemoryNoMapWriteUsage) {
+    constexpr uint32_t kInitialData = 0x12345678;
+    constexpr uint32_t kWrittenData = 0x9ABCDEF0;
+    constexpr uint32_t kTotalBufferSize = sizeof(uint32_t) * 2;
+
+    auto runScenario = [&](bool initialized, uint32_t expectedAtOffset0) {
+        SCOPED_TRACE(testing::Message() << "initialized=" << initialized);
+
+        wgpu::SharedBufferMemory memory = GetParam().mBackend->CreateSharedBufferMemory(
+            device, kStorageUsages, kTotalBufferSize, kInitialData);
+
+        // `mappedAtCreation == true` is only allowed when the shared buffer memory is CPU
+        // accessible.
+        wgpu::SharedBufferMemoryProperties properties;
+        memory.GetProperties(&properties);
+        if (!(properties.usage & wgpu::BufferUsage::MapWrite)) {
+            return;
+        }
+
+        wgpu::BufferDescriptor bufferDesc = {};
+        bufferDesc.size = kTotalBufferSize;
+        bufferDesc.usage = kStorageUsages;
+        bufferDesc.mappedAtCreation = true;
+        wgpu::Buffer buffer = memory.CreateBuffer(&bufferDesc);
+
+        // First access: buffer is in MappedAtCreation state.
+        wgpu::SharedBufferMemoryBeginAccessDescriptor beginAccessDesc = {};
+        beginAccessDesc.initialized = initialized;
+        memory.BeginAccess(buffer, &beginAccessDesc);
+
+        // Write kWrittenData at offset sizeof(uint32_t); leave offset 0 untouched.
+        uint32_t* mappedData = static_cast<uint32_t*>(buffer.GetMappedRange(0, kTotalBufferSize));
+        ASSERT_NE(mappedData, nullptr);
+        std::span<uint32_t> mappedSpan(mappedData, kTotalBufferSize / sizeof(uint32_t));
+        mappedSpan[1] = kWrittenData;
+        buffer.Unmap();
+
+        EXPECT_BUFFER_U32_EQ(expectedAtOffset0, buffer, 0);
+        EXPECT_BUFFER_U32_EQ(kWrittenData, buffer, sizeof(uint32_t));
+
+        wgpu::SharedBufferMemoryEndAccessState endState = {};
+        memory.EndAccess(buffer, &endState);
+
+        // Second access: buffer is now in Unmapped state (no longer MappedAtCreation).
+        // Verify that the data written during the first access is preserved.
+        beginAccessDesc = {};
+        beginAccessDesc.initialized = true;
+        memory.BeginAccess(buffer, &beginAccessDesc);
+
+        EXPECT_BUFFER_U32_EQ(expectedAtOffset0, buffer, 0);
+        EXPECT_BUFFER_U32_EQ(kWrittenData, buffer, sizeof(uint32_t));
+
+        memory.EndAccess(buffer, &endState);
+    };
+
+    // `initialized = true`: the original data at offset 0 is preserved.
+    runScenario(true, kInitialData);
+    // `initialized = false`: the original data at offset 0 is cleared to zero.
+    runScenario(false, 0u);
 }
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SharedBufferMemoryTests);

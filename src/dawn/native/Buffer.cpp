@@ -594,6 +594,12 @@ MaybeError BufferBase::MapAtCreation() {
     void* ptr = GetMappedPointer();
 
     DeviceBase* device = GetDevice();
+    // Don't zero-initialize buffers created from shared buffer memory at creation time.
+    // They will be initialized in `BeginAccess()` based on the `initialized` flag in
+    // `wgpu::SharedBufferMemoryBeginAccessDescriptor`.
+    if (mSharedResourceMemoryContents != nullptr) {
+        return {};
+    }
     if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
         !device->IsToggleEnabled(Toggle::DisableLazyClearForMappedAtCreationBuffer)) {
         // The staging buffer is created with `MappedAtCreation == true` and the main buffer will
