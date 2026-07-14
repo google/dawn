@@ -163,7 +163,7 @@ TEST(CommandAllocator, BasicWithData) {
         ASSERT_EQ(immediates->size, mySize);
         ASSERT_EQ(immediates->offset, myOffset);
 
-        uint32_t* values = iterator.NextData<uint32_t>(5);
+        uint32_t* values = iterator.NextData<uint32_t>(5u);
         for (size_t i = 0; i < 5; i++) {
             ASSERT_EQ(values[i], myValues[i]);
         }

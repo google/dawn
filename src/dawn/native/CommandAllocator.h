@@ -42,6 +42,7 @@
 #include "src/utils/compiler.h"
 #include "src/utils/heap_array.h"
 #include "src/utils/non_copyable.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 
@@ -106,17 +107,21 @@ class CommandIterator : public NonCopyable {
     template <typename E>
         requires(std::is_same_v<UnderlyingType<E>, uint32_t>)
     bool NextCommandId(E* commandId) {
-        return NextCommandId(reinterpret_cast<uint32_t*>(commandId));
+        std::optional<uint32_t> id = NextCommandId();
+        *reinterpret_cast<uint32_t*>(commandId) = id.value_or(detail::kEndOfBlock);
+        return id.has_value();
     }
+
     template <typename T>
         requires(alignof(T) <= kMaxAllocatedCommandAlignment)
     T* NextCommand() {
-        return static_cast<T*>(NextCommand(sizeof(T)));
+        return reinterpret_cast<T*>(NextCommand(sizeof(T)).data());
     }
-    template <typename T>
+
+    template <typename T, typename Index>
         requires(alignof(T) <= kMaxAllocatedCommandAlignment)
-    T* NextData(size_t count) {
-        return static_cast<T*>(NextData(sizeof(T) * count));
+    T* NextData(Index count) {
+        return ReinterpretSpan<T, Index>(NextData(sizeof(T) * count)).data();
     }
 
     // Sets iterator to the beginning of the commands without emptying the list. This method can
@@ -130,49 +135,43 @@ class CommandIterator : public NonCopyable {
   private:
     bool IsEmpty() const;
 
-    DAWN_FORCE_INLINE bool NextCommandId(uint32_t* commandId) {
-        DAWN_ASSERT(IsPtrAligned(mCurrentPtr, kMaxAllocatedCommandAlignment));
+    DAWN_FORCE_INLINE std::optional<uint32_t> NextCommandId() {
+        DAWN_ASSERT(IsPtrAligned(mCurrentBlock.data(), kMaxAllocatedCommandAlignment));
+        DAWN_ASSERT(mCurrentBlock.size() >= sizeof(uint32_t));
 
-        DAWN_ASSERT(mCurrentPtr == reinterpret_cast<std::byte*>(&mEndOfBlock) ||
-                    DAWN_UNSAFE_TODO(mCurrentPtr + sizeof(uint32_t)) <=
-                        std::to_address(mBlocks[mCurrentBlock].end()));
-
-        uint32_t id = *reinterpret_cast<uint32_t*>(mCurrentPtr);
+        uint32_t id = *reinterpret_cast<uint32_t*>(mCurrentBlock.data());
 
         if (id != detail::kEndOfBlock) {
-            DAWN_UNSAFE_TODO(mCurrentPtr += kMaxAllocatedCommandAlignment);
-            *commandId = id;
-            return true;
+            mCurrentBlock = mCurrentBlock.subspan(kMaxAllocatedCommandAlignment);
+            return {id};
         }
-        return NextCommandIdInNewBlock(commandId);
+        return NextCommandIdInNewBlock();
     }
 
-    bool NextCommandIdInNewBlock(uint32_t* commandId);
+    std::optional<uint32_t> NextCommandIdInNewBlock();
 
-    DAWN_FORCE_INLINE void* NextCommand(size_t commandSize) {
-        DAWN_ASSERT(DAWN_UNSAFE_TODO(mCurrentPtr + kMaxAllocatedCommandAlignment) <=
-                    std::to_address(mBlocks[mCurrentBlock].end()));
+    DAWN_FORCE_INLINE Span<std::byte> NextCommand(size_t commandSize) {
+        DAWN_ASSERT(IsPtrAligned(mCurrentBlock.data(), kMaxAllocatedCommandAlignment));
 
-        std::byte* commandPtr = mCurrentPtr;
-        mCurrentPtr =
-            AlignPtr(DAWN_UNSAFE_TODO(mCurrentPtr + commandSize), kMaxAllocatedCommandAlignment);
-        return commandPtr;
+        size_t alignedSize = Align(commandSize, kMaxAllocatedCommandAlignment);
+        return mCurrentBlock.TakeFirst(alignedSize).first(commandSize);
     }
 
-    DAWN_FORCE_INLINE void* NextData(size_t dataSize) {
-        uint32_t id = 0;
-        bool hasId = NextCommandId(&id);
-        DAWN_ASSERT(hasId);
-        DAWN_ASSERT(id == detail::kAdditionalData);
+    DAWN_FORCE_INLINE Span<std::byte> NextData(size_t dataSize) {
+        std::optional<uint32_t> id = NextCommandId();
+        DAWN_ASSERT(id.has_value());
+        DAWN_ASSERT(id.value() == detail::kAdditionalData);
 
         return NextCommand(dataSize);
     }
 
     CommandBlocks mBlocks;
-    // RAW_PTR_EXCLUSION: This is an extremely hot pointer during command iteration, but always
-    // points to at least a valid uint32_t, either inside a block, or at mEndOfBlock.
-    RAW_PTR_EXCLUSION std::byte* mCurrentPtr = nullptr;
-    size_t mCurrentBlock = 0;
+    size_t mCurrentBlockIndex = 0;
+
+    // RAW_PTR_EXCLUSION: This is an extremely hot span during command iteration, but always points
+    // to at least a valid uint32_t, either inside a block, or at mEndOfBlock.
+    RAW_PTR_EXCLUSION Span<std::byte> mCurrentBlock;
+
     // Used to avoid a special case for empty iterators.
     alignas(kMaxAllocatedCommandAlignment) uint32_t mEndOfBlock = detail::kEndOfBlock;
 };

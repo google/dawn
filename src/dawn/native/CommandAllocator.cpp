@@ -92,29 +92,28 @@ void CommandIterator::AcquireCommandBlocks(std::vector<CommandAllocator> allocat
     Reset();
 }
 
-bool CommandIterator::NextCommandIdInNewBlock(uint32_t* commandId) {
-    mCurrentBlock++;
-    if (mCurrentBlock >= mBlocks.size()) {
+std::optional<uint32_t> CommandIterator::NextCommandIdInNewBlock() {
+    mCurrentBlockIndex++;
+    if (mCurrentBlockIndex >= mBlocks.size()) {
         Reset();
-        *commandId = detail::kEndOfBlock;
-        return false;
+        return std::nullopt;
     }
-    mCurrentPtr = mBlocks[mCurrentBlock].data();
-    DAWN_ASSERT(IsPtrAligned(mCurrentPtr, kMaxAllocatedCommandAlignment));
-    return NextCommandId(commandId);
+    mCurrentBlock = mBlocks[mCurrentBlockIndex];
+    DAWN_ASSERT(IsPtrAligned(mCurrentBlock.data(), kMaxAllocatedCommandAlignment));
+    return NextCommandId();
 }
 
 void CommandIterator::Reset() {
-    mCurrentBlock = 0;
+    mCurrentBlockIndex = 0;
 
     if (mBlocks.empty()) {
         // This will case the first NextCommandId call to try to move to the next block and stop
         // the iteration immediately, without special casing the initialization.
-        mCurrentPtr = reinterpret_cast<std::byte*>(&mEndOfBlock);
+        mCurrentBlock = ByteSpanFromRef(mEndOfBlock);
     } else {
-        mCurrentPtr = mBlocks[0].data();
+        mCurrentBlock = mBlocks[0];
     }
-    DAWN_ASSERT(IsPtrAligned(mCurrentPtr, kMaxAllocatedCommandAlignment));
+    DAWN_ASSERT(IsPtrAligned(mCurrentBlock.data(), kMaxAllocatedCommandAlignment));
 }
 
 void CommandIterator::MakeEmptyAsDataWasDestroyed() {
@@ -122,7 +121,7 @@ void CommandIterator::MakeEmptyAsDataWasDestroyed() {
         return;
     }
 
-    mCurrentPtr = reinterpret_cast<std::byte*>(&mEndOfBlock);
+    mCurrentBlock = ByteSpanFromRef(mEndOfBlock);
     mBlocks.clear();
     Reset();
     DAWN_ASSERT(IsEmpty());
