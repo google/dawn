@@ -153,6 +153,76 @@ TEST_F(HeapArrayTest, Uninit) {
     EXPECT_EQ(arr[Index{0u}], 5);
 }
 
+// Tests for MoveToRawPointer.
+TEST_F(HeapArrayTest, MoveToRawPointer) {
+    // Check with an untyped HeapArray.
+    {
+        auto arr = HeapArray<int>(5);
+        int* originalData = arr.data();
+        size_t originalSize = arr.size();
+
+        auto [size, data] = std::move(arr).MoveToRawPointer();
+
+        ASSERT_TRUE(arr.empty());
+        static_assert(std::is_same_v<decltype(data), int*>);
+        static_assert(std::is_same_v<decltype(size), size_t>);
+        ASSERT_EQ(data, originalData);
+        ASSERT_EQ(size, originalSize);
+
+        delete[] data;
+    }
+    // Check with a typed HeapArray.
+    {
+        auto arr = ityp::HeapArray<Index, int>(Index{5u});
+        int* originalData = arr.data();
+        Index originalSize = arr.size();
+
+        auto [size, data] = std::move(arr).MoveToRawPointer();
+
+        ASSERT_TRUE(arr.empty());
+        static_assert(std::is_same_v<decltype(data), int*>);
+        static_assert(std::is_same_v<decltype(size), size_t>);  // Not an Index!
+        ASSERT_EQ(data, originalData);
+        ASSERT_EQ(size, size_t(originalSize));
+
+        delete[] data;
+    }
+}
+
+// Tests for MoveToSpan.
+TEST_F(HeapArrayTest, MoveToSpan) {
+    // Check with an untyped HeapArray.
+    {
+        auto arr = HeapArray<int>(5);
+        int* originalData = arr.data();
+        size_t originalSize = arr.size();
+
+        auto sp = std::move(arr).MoveToSpan();
+
+        ASSERT_TRUE(arr.empty());
+        static_assert(std::is_same_v<decltype(sp), Span<int>>);
+        ASSERT_EQ(sp.data(), originalData);
+        ASSERT_EQ(sp.size(), originalSize);
+
+        delete[] sp.data();
+    }
+    // Check with a typed HeapArray.
+    {
+        auto arr = ityp::HeapArray<Index, int>(Index{5u});
+        int* originalData = arr.data();
+        Index originalSize = arr.size();
+
+        auto sp = std::move(arr).MoveToSpan();
+
+        ASSERT_TRUE(arr.empty());
+        static_assert(std::is_same_v<decltype(sp), ityp::span<Index, int>>);
+        ASSERT_EQ(sp.data(), originalData);
+        ASSERT_EQ(sp.size(), originalSize);
+
+        delete[] sp.data();
+    }
+}
+
 // Tests for the HeapArrayFrom helper.
 TEST_F(HeapArrayTest, HeapArrayFrom) {
     constexpr std::array<int, 5> kSrc = {1, 2, 3, 4, 5};

@@ -119,11 +119,19 @@ class HeapArray :
 
     // Acquire the contents as a raw pointer and size (kind of like what you get from new[] - it's
     // valid to delete using `delete[]`).
-    // Useful with std::tie when returning a size+ptr array (e.g. via the webgpu.h API).
+    // Useful with std::tie when returning a size+ptr array (e.g. via the webgpu.h C API).
     constexpr std::pair<size_t, Value*> MoveToRawPointer() && {
         auto data = mOwnedData;
         mOwnedData = {};
         return {checked_cast<size_t>(data.size()), data.data()};
+    }
+
+    // Acquire the contents as a size, it's valid to delete using `delete[] span.data()`).
+    // Useful when returning an array as a span (e.g. via the webgpu.h C++ API).
+    constexpr TSpan MoveToSpan() && {
+        TSpan result = mOwnedData;
+        mOwnedData = {};
+        return result;
     }
 
     // Returns true if the allocation succeeded. This can be used like `if (myHeapArray) {}` to
