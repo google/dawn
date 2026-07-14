@@ -28,10 +28,11 @@
 #ifndef SRC_DAWN_UTILS_TERRIBLECOMMANDBUFFER_H_
 #define SRC_DAWN_UTILS_TERRIBLECOMMANDBUFFER_H_
 
-#include <span>
+#include <array>
 
 #include "dawn/wire/Wire.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/span.h"
 
 namespace dawn::utils {
 
@@ -51,14 +52,16 @@ class TerribleCommandBuffer : public dawn::wire::CommandSerializer {
     // The following APIs should only be used for testing purposes.
     size_t GetOffsetForTesting() const;
     void SetOffsetForTesting(size_t offset);
-    std::span<const char> GetContentSubrange(size_t startOffset, size_t endOffset);
+    Span<const std::byte> GetContentSubrange(size_t startOffset, size_t endOffset);
 
   private:
     raw_ptr<dawn::wire::CommandHandler> mHandler = nullptr;
 
     size_t mOffset = 0;
     size_t mLastFlushedOffset = 0;
-    char mBuffer[1000000];
+
+    alignas(8) std::array<std::byte, 1000000> mBackingBuffer;
+    Span<std::byte> mBuffer;
 };
 
 }  // namespace dawn::utils

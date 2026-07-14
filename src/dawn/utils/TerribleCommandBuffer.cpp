@@ -32,42 +32,45 @@
 
 namespace dawn::utils {
 
-TerribleCommandBuffer::TerribleCommandBuffer() {}
+TerribleCommandBuffer::TerribleCommandBuffer() : mBuffer(mBackingBuffer) {}
 
 TerribleCommandBuffer::TerribleCommandBuffer(dawn::wire::CommandHandler* handler)
-    : mHandler(handler) {}
+    : mHandler(handler), mBuffer(mBackingBuffer) {}
 
 void TerribleCommandBuffer::SetHandler(dawn::wire::CommandHandler* handler) {
     mHandler = handler;
 }
 
 size_t TerribleCommandBuffer::GetMaximumAllocationSize() const {
-    return sizeof(mBuffer);
+    return mBackingBuffer.size();
 }
 
 void* TerribleCommandBuffer::GetCmdSpace(size_t size) {
     // Note: This returns non-null even if size is zero.
-    if (size > sizeof(mBuffer)) {
+    if (size > mBackingBuffer.size()) {
         return nullptr;
     }
-    char* result = &DAWN_UNSAFE_TODO(mBuffer[mOffset]);
-    if (sizeof(mBuffer) - size < mOffset) {
+
+    if (mBuffer.size() - size < mOffset) {
         if (!Flush()) {
             return nullptr;
         }
         return GetCmdSpace(size);
     }
 
+    void* result = mBuffer.subspan(mOffset, size).data();
     mOffset += size;
     return result;
 }
 
 bool TerribleCommandBuffer::Flush() {
-    char* start = &DAWN_UNSAFE_TODO(mBuffer[mLastFlushedOffset]);
-    size_t size = mOffset - mLastFlushedOffset;
+    Span<std::byte> flushRange = mBuffer.subspan(mLastFlushedOffset, mOffset - mLastFlushedOffset);
     mLastFlushedOffset = mOffset;
 
-    bool success = mHandler->HandleCommands(start, size) != nullptr;
+    // TODO(crbug.com/528027992): Remove the cast and use Span once we update the interface.
+    bool success =
+        mHandler->HandleCommands(reinterpret_cast<const volatile char*>(flushRange.data()),
+                                 flushRange.size()) != nullptr;
 
     // After a flush, we can only reset |mOffset| to 0 if both offsets are equal. Otherwise, there
     // are unflushed commands, likely queued as a part of the last flush, so defer resetting
@@ -91,10 +94,10 @@ void TerribleCommandBuffer::SetOffsetForTesting(size_t offset) {
     mOffset = offset;
 }
 
-std::span<const char> TerribleCommandBuffer::GetContentSubrange(size_t startOffset,
+Span<const std::byte> TerribleCommandBuffer::GetContentSubrange(size_t startOffset,
                                                                 size_t endOffset) {
     DAWN_ASSERT(endOffset >= startOffset);
-    return DAWN_UNSAFE_TODO(std::span<const char>(&mBuffer[startOffset], endOffset - startOffset));
+    return mBuffer.subspan(startOffset, endOffset - startOffset);
 }
 
 }  // namespace dawn::utils
