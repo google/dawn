@@ -843,7 +843,7 @@ MaybeError Texture::WriteDepthStencilInternal(const ScopedCommandRecordingContex
         commandContext->Unmap(stagingTexture->GetD3D11Resource(), layer);
         DAWN_ASSERT(size.height <= rowsPerImage);
         // Skip the padding rows.
-        DAWN_UNSAFE_TODO(pSrcData += (rowsPerImage - size.height)) * bytesPerRow;
+        DAWN_UNSAFE_TODO(pSrcData += static_cast<size_t>(rowsPerImage - size.height) * bytesPerRow);
     }
 
     // Copy to the dest texture from the staging texture.
