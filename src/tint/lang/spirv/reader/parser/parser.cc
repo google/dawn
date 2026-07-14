@@ -4518,12 +4518,21 @@ class Parser {
         }
 
         auto* element_ty = Type(inst.type_id(), access_mode)->As<core::type::Pointer>();
-        if (element_ty->AddressSpace() == core::AddressSpace::kOut &&
-            element_ty->StoreType()->IsIntegerScalarOrVector()) {
-            io_attributes.interpolation = {
-                .type = core::InterpolationType::kFlat,
-                .sampling = core::InterpolationSampling::kUndefined,
-            };
+        if (element_ty->AddressSpace() == core::AddressSpace::kOut) {
+            if (element_ty->StoreType()->IsIntegerScalarOrVector()) {
+                io_attributes.interpolation = {
+                    .type = core::InterpolationType::kFlat,
+                    .sampling = core::InterpolationSampling::kUndefined,
+                };
+            } else if (auto* str = element_ty->StoreType()->As<core::type::Struct>()) {
+                for (auto* member : str->Members()) {
+                    if (member->Type()->IsIntegerScalarOrVector()) {
+                        const_cast<core::type::StructMember*>(member)->SetInterpolation(
+                            core::Interpolation{core::InterpolationType::kFlat,
+                                                core::InterpolationSampling::kUndefined});
+                    }
+                }
+            }
         }
 
         auto* var = b_.Var(element_ty);
