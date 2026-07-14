@@ -214,6 +214,7 @@ dawn_linux_parent_builder(
             apply_configs = [
                 "dawn_node",
                 "dawn_wasm",
+                "checkout_litert_lm",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -375,6 +376,7 @@ dawn_mac_parent_builder(
             apply_configs = [
                 "dawn_node",
                 "dawn_wasm",
+                "checkout_litert_lm",
             ],
         ),
         chromium_config = builder_config.chromium_config(
