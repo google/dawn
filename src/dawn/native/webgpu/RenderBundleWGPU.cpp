@@ -92,7 +92,7 @@ void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
 
         case Command::InsertDebugMarker: {
             auto cmd = commands.NextCommand<InsertDebugMarkerCmd>();
-            Span<const char> label = commands.NextData<char>(cmd->length + 1);
+            std::string_view label = NextNullTerminatedString(&commands, cmd->length);
             wgpu.renderBundleEncoderInsertDebugMarker(encoder, {label.data(), label.size()});
             break;
         }
@@ -105,7 +105,7 @@ void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
 
         case Command::PushDebugGroup: {
             auto cmd = commands.NextCommand<PushDebugGroupCmd>();
-            Span<const char> label = commands.NextData<char>(cmd->length + 1);
+            std::string_view label = NextNullTerminatedString(&commands, cmd->length);
             wgpu.renderBundleEncoderPushDebugGroup(encoder, {label.data(), label.size()});
             break;
         }

@@ -72,6 +72,14 @@ MTLIndexType MTLIndexFormat(wgpu::IndexFormat format) {
     }
 }
 
+NSRef<NSString> NextNSString(CommandIterator* iter, size_t length) {
+    std::string_view s = NextNullTerminatedString(iter, length);
+    DAWN_ASSERT(s[s.length() - 1] == '\0');
+    return AcquireNSRef([[NSString alloc] initWithBytes:s.data()
+                                                 length:s.length() - 1
+                                               encoding:NSUTF8StringEncoding]);
+}
+
 template <typename PassDescriptor>
 class SampleBufferAttachment {
   public:
@@ -1523,10 +1531,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
 
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
-                NSRef<NSString> mtlLabel =
-                    AcquireNSRef([[NSString alloc] initWithUTF8String:label.data()]);
-                [commandContext->GetCommands() pushDebugGroup:mtlLabel.Get()];
+                NSRef<NSString> label = NextNSString(&mCommands, cmd->length);
+                [commandContext->GetCommands() pushDebugGroup:label.Get()];
                 break;
             }
 
@@ -1716,10 +1722,8 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
 
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
-                NSRef<NSString> mtlLabel =
-                    AcquireNSRef([[NSString alloc] initWithUTF8String:label.data()]);
-                [encoder insertDebugSignpost:mtlLabel.Get()];
+                NSRef<NSString> label = NextNSString(&mCommands, cmd->length);
+                [encoder insertDebugSignpost:label.Get()];
                 break;
             }
 
@@ -1732,10 +1736,8 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
 
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
-                NSRef<NSString> mtlLabel =
-                    AcquireNSRef([[NSString alloc] initWithUTF8String:label.data()]);
-                [encoder pushDebugGroup:mtlLabel.Get()];
+                NSRef<NSString> label = NextNSString(&mCommands, cmd->length);
+                [encoder pushDebugGroup:label.Get()];
                 break;
             }
 
@@ -1951,10 +1953,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
-                Span<const char> label = iter->NextData<char>(cmd->length + 1);
-                NSRef<NSString> mtlLabel =
-                    AcquireNSRef([[NSString alloc] initWithUTF8String:label.data()]);
-                [encoder insertDebugSignpost:mtlLabel.Get()];
+                NSRef<NSString> label = NextNSString(iter, cmd->length);
+                [encoder insertDebugSignpost:label.Get()];
                 break;
             }
 
@@ -1967,10 +1967,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = iter->NextCommand<PushDebugGroupCmd>();
-                Span<const char> label = iter->NextData<char>(cmd->length + 1);
-                NSRef<NSString> mtlLabel =
-                    AcquireNSRef([[NSString alloc] initWithUTF8String:label.data()]);
-                [encoder pushDebugGroup:mtlLabel.Get()];
+                NSRef<NSString> label = NextNSString(iter, cmd->length);
+                [encoder pushDebugGroup:label.Get()];
                 break;
             }
 

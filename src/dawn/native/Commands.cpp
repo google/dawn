@@ -448,6 +448,12 @@ const char* AddNullTerminatedString(CommandAllocator* allocator, StringView s, s
     return out;
 }
 
+std::string_view NextNullTerminatedString(CommandIterator* iterator, size_t length) {
+    Span<const char> data = iterator->NextData<char>(length + 1);
+    DAWN_ASSERT(data[data.size() - 1] == '\0');  // The string is null-terminated.
+    return {data.begin(), data.end()};
+}
+
 TimestampWrites::TimestampWrites() = default;
 TimestampWrites::~TimestampWrites() = default;
 

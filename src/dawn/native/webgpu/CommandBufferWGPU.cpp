@@ -158,7 +158,7 @@ void EncodeComputePass(const DawnProcTable& wgpu,
             }
             case Command::InsertDebugMarker: {
                 auto cmd = commands.NextCommand<InsertDebugMarkerCmd>();
-                Span<const char> label = commands.NextData<char>(cmd->length + 1);
+                std::string_view label = NextNullTerminatedString(&commands, cmd->length);
                 wgpu.computePassEncoderInsertDebugMarker(passEncoder, {label.data(), label.size()});
                 break;
             }
@@ -171,7 +171,7 @@ void EncodeComputePass(const DawnProcTable& wgpu,
 
             case Command::PushDebugGroup: {
                 auto cmd = commands.NextCommand<PushDebugGroupCmd>();
-                Span<const char> label = commands.NextData<char>(cmd->length + 1);
+                std::string_view label = NextNullTerminatedString(&commands, cmd->length);
                 wgpu.computePassEncoderPushDebugGroup(passEncoder, {label.data(), label.size()});
                 break;
             }
@@ -369,7 +369,7 @@ void EncodeRenderPass(const Device* device,
 
             case Command::InsertDebugMarker: {
                 auto cmd = commands.NextCommand<InsertDebugMarkerCmd>();
-                Span<const char> label = commands.NextData<char>(cmd->length + 1);
+                std::string_view label = NextNullTerminatedString(&commands, cmd->length);
                 wgpu.renderPassEncoderInsertDebugMarker(passEncoder, {label.data(), label.size()});
                 break;
             }
@@ -382,7 +382,7 @@ void EncodeRenderPass(const Device* device,
 
             case Command::PushDebugGroup: {
                 auto cmd = commands.NextCommand<PushDebugGroupCmd>();
-                Span<const char> label = commands.NextData<char>(cmd->length + 1);
+                std::string_view label = NextNullTerminatedString(&commands, cmd->length);
                 wgpu.renderPassEncoderPushDebugGroup(passEncoder, {label.data(), label.size()});
                 break;
             }
@@ -1111,7 +1111,7 @@ ResultOrError<WGPUCommandBuffer> CommandBuffer::Encode() {
             }
             case Command::InsertDebugMarker: {
                 auto cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
+                std::string_view label = NextNullTerminatedString(&mCommands, cmd->length);
                 wgpu.commandEncoderInsertDebugMarker(innerEncoder, {label.data(), label.size()});
                 break;
             }
@@ -1122,7 +1122,7 @@ ResultOrError<WGPUCommandBuffer> CommandBuffer::Encode() {
             }
             case Command::PushDebugGroup: {
                 auto cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
+                std::string_view label = NextNullTerminatedString(&mCommands, cmd->length);
                 wgpu.commandEncoderPushDebugGroup(innerEncoder, {label.data(), label.size()});
                 break;
             }

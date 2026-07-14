@@ -1468,7 +1468,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
             case Command::InsertDebugMarker: {
                 if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                     InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                    Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
+                    std::string_view label = NextNullTerminatedString(&mCommands, cmd->length);
                     VkDebugUtilsLabelEXT utilsLabel;
                     utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
                     utilsLabel.pNext = nullptr;
@@ -1498,7 +1498,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
             case Command::PushDebugGroup: {
                 if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                     PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                    Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
+                    std::string_view label = NextNullTerminatedString(&mCommands, cmd->length);
                     VkDebugUtilsLabelEXT utilsLabel;
                     utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
                     utilsLabel.pNext = nullptr;
@@ -1644,7 +1644,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
             case Command::InsertDebugMarker: {
                 if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                     InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                    Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
+                    std::string_view label = NextNullTerminatedString(&mCommands, cmd->length);
                     VkDebugUtilsLabelEXT utilsLabel;
                     utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
                     utilsLabel.pNext = nullptr;
@@ -1674,7 +1674,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
             case Command::PushDebugGroup: {
                 if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                     PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                    Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
+                    std::string_view label = NextNullTerminatedString(&mCommands, cmd->length);
                     VkDebugUtilsLabelEXT utilsLabel;
                     utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
                     utilsLabel.pNext = nullptr;
@@ -1909,7 +1909,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             case Command::InsertDebugMarker: {
                 if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                     InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
-                    Span<const char> label = iter->NextData<char>(cmd->length + 1);
+                    std::string_view label = NextNullTerminatedString(iter, cmd->length);
                     VkDebugUtilsLabelEXT utilsLabel;
                     utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
                     utilsLabel.pNext = nullptr;
@@ -1939,7 +1939,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             case Command::PushDebugGroup: {
                 if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                     PushDebugGroupCmd* cmd = iter->NextCommand<PushDebugGroupCmd>();
-                    Span<const char> label = iter->NextData<char>(cmd->length + 1);
+                    std::string_view label = NextNullTerminatedString(iter, cmd->length);
                     VkDebugUtilsLabelEXT utilsLabel;
                     utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
                     utilsLabel.pNext = nullptr;

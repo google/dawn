@@ -84,7 +84,7 @@ void CaptureDebugCommand(CaptureContext& captureContext, CommandIterator& comman
     switch (type) {
         case Command::PushDebugGroup: {
             const auto& cmd = *commands.NextCommand<PushDebugGroupCmd>();
-            Span<const char> label = commands.NextData<char>(cmd.length + 1);
+            std::string_view label = NextNullTerminatedString(&commands, cmd.length);
             schema::CommandBufferCommandPushDebugGroupCmd data{{
                 .data = {{
                     .groupLabel = {label.begin(), label.end()},
@@ -100,7 +100,7 @@ void CaptureDebugCommand(CaptureContext& captureContext, CommandIterator& comman
         }
         case Command::InsertDebugMarker: {
             const auto& cmd = *commands.NextCommand<InsertDebugMarkerCmd>();
-            Span<const char> label = commands.NextData<char>(cmd.length + 1);
+            std::string_view label = NextNullTerminatedString(&commands, cmd.length);
             schema::CommandBufferCommandInsertDebugMarkerCmd data{{
                 .data = {{
                     .markerLabel = {label.begin(), label.end()},

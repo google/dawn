@@ -1356,7 +1356,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
 
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
+                std::string_view label = NextNullTerminatedString(&mCommands, cmd->length);
 
                 if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                     // PIX color is 1 byte per channel in ARGB format
@@ -1380,7 +1380,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
 
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
+                std::string_view label = NextNullTerminatedString(&mCommands, cmd->length);
 
                 if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                     // PIX color is 1 byte per channel in ARGB format
@@ -1542,7 +1542,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
 
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
+                std::string_view label = NextNullTerminatedString(&mCommands, cmd->length);
 
                 if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                     // PIX color is 1 byte per channel in ARGB format
@@ -1566,7 +1566,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
 
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
+                std::string_view label = NextNullTerminatedString(&mCommands, cmd->length);
 
                 if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                     // PIX color is 1 byte per channel in ARGB format
@@ -1940,7 +1940,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
-                Span<const char> label = iter->NextData<char>(cmd->length + 1);
+                std::string_view label = NextNullTerminatedString(iter, cmd->length);
 
                 if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                     // PIX color is 1 byte per channel in ARGB format
@@ -1964,7 +1964,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = iter->NextCommand<PushDebugGroupCmd>();
-                Span<const char> label = iter->NextData<char>(cmd->length + 1);
+                std::string_view label = NextNullTerminatedString(iter, cmd->length);
 
                 if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                     // PIX color is 1 byte per channel in ARGB format

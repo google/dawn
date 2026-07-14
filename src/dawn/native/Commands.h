@@ -44,6 +44,7 @@
 namespace dawn::native {
 
 class CommandAllocator;
+class CommandIterator;
 struct TexelBlockInfo;
 struct TexelCopyTextureInfo;
 
@@ -478,6 +479,8 @@ void SkipCommand(CommandIterator* commands, Command type);
 
 // Helper function to copy a wgpu::StringView into a safely null-terminated C-string in commands.
 const char* AddNullTerminatedString(CommandAllocator* allocator, StringView s, size_t* length);
+// Mirror function that gets the same string back as a null-terminated string_view.
+std::string_view NextNullTerminatedString(CommandIterator* iterator, size_t length);
 
 }  // namespace dawn::native
 
