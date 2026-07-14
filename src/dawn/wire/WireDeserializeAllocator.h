@@ -32,6 +32,7 @@
 
 #include "dawn/wire/WireCmd_autogen.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::wire {
 // A really really simple implementation of the DeserializeAllocator. It's main feature
@@ -50,7 +51,7 @@ class WireDeserializeAllocator : public DeserializeAllocator {
     size_t mRemainingSize = 0;
     raw_ptr<char, AllowPtrArithmetic> mCurrentBuffer = nullptr;
     char mStaticBuffer[2048];
-    std::vector<raw_ptr<char>> mAllocations;
+    std::vector<HeapArray<char>> mAllocations;
 };
 }  // namespace dawn::wire
 

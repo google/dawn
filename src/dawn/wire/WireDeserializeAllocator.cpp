@@ -28,6 +28,7 @@
 #include "src/dawn/wire/WireDeserializeAllocator.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "src/utils/compiler.h"
 
@@ -51,14 +52,16 @@ void* WireDeserializeAllocator::GetSpace(size_t size) {
 
     // Otherwise allocate a new buffer and try again.
     size_t allocationSize = std::max(size, size_t(2048));
-    char* allocation = static_cast<char*>(malloc(allocationSize));
-    if (allocation == nullptr) {
+    auto allocation =
+        // SAFETY: This is a pool allocation that will be initialized when it's suballocated.
+        DAWN_UNSAFE_BUFFERS(HeapArray<char>::Uninit(allocationSize, std::nothrow));
+    if (!allocation) {
         return nullptr;
     }
 
-    mAllocations.push_back(allocation);
-    mCurrentBuffer = allocation;
-    mRemainingSize = allocationSize;
+    mCurrentBuffer = allocation.data();
+    mRemainingSize = allocation.size();
+    mAllocations.push_back(std::move(allocation));
     return GetSpace(size);
 }
 
@@ -66,10 +69,6 @@ void WireDeserializeAllocator::Reset() {
     // The initial buffer is the inline buffer so that some allocations can be skipped
     mCurrentBuffer = mStaticBuffer;
     mRemainingSize = sizeof(mStaticBuffer);
-
-    for (auto& allocation : mAllocations) {
-        free(allocation.ExtractAsDangling());
-    }
     mAllocations.clear();
 }
 }  // namespace dawn::wire

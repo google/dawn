@@ -27,6 +27,7 @@
 
 #include <limits>
 #include <memory>
+#include <new>
 
 #include "src/dawn/wire/server/Server.h"
 #include "src/utils/assert.h"
@@ -98,23 +99,21 @@ WireResult Server::DoQueueWriteBufferXl(Known<WGPUQueue> queue,
     }
 
     // Otherwise, fall back to DeserializeDataUpdate.
-    // TODO(https://crbug.com/512465980): Use HeapArray.
-    auto backingData = std::unique_ptr<std::byte[]>(AllocNoThrow<std::byte>(size));
+    auto backingData = HeapArray<std::byte>(size, std::nothrow);
     if (!backingData) {
         return WireResult::FatalError;
     }
-    std::span<std::byte> target(backingData.get(), size);
 
     // Deserialize the flush info and flush updated data from the handle into the target of the
     // handle that's just a temporary allocation from above right now.
     // TODO(https://crbug.com/526533386): Spanify the input API of dawn::wire::server.
     Span<const std::byte> DAWN_UNSAFE_TODO(
         dataUpdateInfoSpan{memoryDataUpdateInfo, memoryDataUpdateInfoLength});
-    if (!memoryHandle->DeserializeDataUpdate(dataUpdateInfoSpan, 0u, size, target)) {
+    if (!memoryHandle->DeserializeDataUpdate(dataUpdateInfoSpan, 0u, size, backingData)) {
         return WireResult::FatalError;
     }
 
-    mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, backingData.get(), size);
+    mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, backingData.data(), size);
     return WireResult::Success;
 }
 
@@ -160,23 +159,21 @@ WireResult Server::DoQueueWriteTextureXl(Known<WGPUQueue> queue,
     }
 
     // Otherwise, fall back to DeserializeDataUpdate.
-    // TODO(https://crbug.com/512465980): Use HeapArray.
-    auto backingData = std::unique_ptr<std::byte[]>(AllocNoThrow<std::byte>(dataSize));
+    auto backingData = HeapArray<std::byte>(dataSize, std::nothrow);
     if (!backingData) {
         return WireResult::FatalError;
     }
-    std::span<std::byte> target(backingData.get(), dataSize);
 
     // Deserialize the flush info and flush updated data from the handle into the target of the
     // handle that's just a temporary allocation from above right now.
     // TODO(https://crbug.com/526533386): Spanify the input API of dawn::wire::server.
     Span<const std::byte> DAWN_UNSAFE_TODO(
         dataUpdateInfoSpan{memoryDataUpdateInfo, memoryDataUpdateInfoLength});
-    if (!memoryHandle->DeserializeDataUpdate(dataUpdateInfoSpan, 0u, dataSize, target)) {
+    if (!memoryHandle->DeserializeDataUpdate(dataUpdateInfoSpan, 0u, dataSize, backingData)) {
         return WireResult::FatalError;
     }
 
-    mProcs->queueWriteTexture(queue->handle, destination, backingData.get(), dataSize, dataLayout,
+    mProcs->queueWriteTexture(queue->handle, destination, backingData.data(), dataSize, dataLayout,
                               writeSize);
     return WireResult::Success;
 }

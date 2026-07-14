@@ -38,10 +38,10 @@
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/Alloc.h"
 #include "src/dawn/common/Compiler.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/Math.h"
+#include "src/utils/heap_array.h"
 #include "src/utils/span.h"
 
 namespace dawn::wire {
@@ -140,9 +140,7 @@ class ChunkedCommandSerializer {
 
         // Allocate as zero-initialized because padding won't get initialized during command
         // serialization (and this whole buffer is sent raw to the other end of the wire).
-        auto cmdSpaceAlloc = std::unique_ptr<std::byte[]>(new std::byte[requiredSize]{});
-        // TODO(https://crbug.com/512465980): Use dawn::HeapArray above.
-        Span<std::byte> DAWN_UNSAFE_TODO(cmdSpace{cmdSpaceAlloc.get(), requiredSize});
+        HeapArray<std::byte> cmdSpace(requiredSize);
 
         SerializeBuffer serializeBuffer(cmdSpace);
         WireResult rCmd = SerializeCmd(cmd, requiredSize, &serializeBuffer);

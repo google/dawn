@@ -27,22 +27,23 @@
 
 #include <cstring>
 #include <memory>
+#include <new>
 #include <utility>
 
 #include "dawn/wire/WireClient.h"
-#include "src/dawn/common/Alloc.h"
 #include "src/dawn/wire/client/Client.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::wire::client {
 
 class InlineMemoryTransferService : public MemoryTransferService {
     class MemoryHandleImpl : public MemoryHandle {
       public:
-        explicit MemoryHandleImpl(std::unique_ptr<std::byte[]> stagingData, size_t size)
-            : mStagingData(std::move(stagingData)), mSize(size) {
-            DAWN_ASSERT(mStagingData != nullptr);
+        explicit MemoryHandleImpl(HeapArray<std::byte> stagingData)
+            : mStagingData(std::move(stagingData)) {
+            DAWN_ASSERT(mStagingData);
         }
 
         ~MemoryHandleImpl() override = default;
@@ -52,15 +53,11 @@ class InlineMemoryTransferService : public MemoryTransferService {
             DAWN_ASSERT(serializeSpace.size() == GetSerializeCreateSize());
         }
 
-        std::span<std::byte> GetData() const override {
-            // SAFETY: The creator of the object must make mSize be the size of the allocation of
-            // mStagingData.
-            return DAWN_UNSAFE_BUFFERS({mStagingData.get(), mSize});
-        }
+        std::span<std::byte> GetData() const override { return mStagingData; }
 
         size_t GetSerializeDataUpdateSize(size_t offset, size_t size) const override {
-            DAWN_ASSERT(offset <= mSize);
-            DAWN_ASSERT(size <= mSize - offset);
+            DAWN_ASSERT(offset <= mStagingData.size());
+            DAWN_ASSERT(size <= mStagingData.size() - offset);
             return size;
         }
 
@@ -68,31 +65,27 @@ class InlineMemoryTransferService : public MemoryTransferService {
                                  size_t offset,
                                  size_t size) const override {
             DAWN_ASSERT(serializeData.size() == GetSerializeDataUpdateSize(offset, size));
-            DAWN_ASSERT(offset <= mSize);
-            DAWN_ASSERT(size <= mSize - offset);
+            DAWN_ASSERT(offset <= mStagingData.size());
+            DAWN_ASSERT(size <= mStagingData.size() - offset);
 
-            // TODO(https://crbug.com/524406299): Use span::copy_from
-            std::span<const std::byte> source = GetConstData().subspan(offset, size);
-            DAWN_UNSAFE_TODO(memcpy(serializeData.data(), source.data(), size));
+            auto src = GetData().subspan(offset, serializeData.size());
+            std::ranges::copy(src, serializeData.begin());
         }
 
         bool DeserializeDataUpdate(std::span<const std::byte> deserializeData,
                                    size_t offset,
                                    size_t size) override {
-            if (offset > mSize || deserializeData.size() > mSize - offset) {
+            if (offset > mStagingData.size() ||
+                deserializeData.size() > mStagingData.size() - offset) {
                 return false;
             }
 
-            // TODO(https://crbug.com/524406299): Use span::copy_from
-            std::span<std::byte> target = GetData().subspan(offset, size);
-            DAWN_UNSAFE_TODO(memcpy(target.data(), deserializeData.data(), size));
+            std::ranges::copy(deserializeData, GetData().begin() + offset);
             return true;
         }
 
       private:
-        // TODO(https://crbug.com/512465980): Use HeapArray instead.
-        std::unique_ptr<std::byte[]> mStagingData;
-        size_t mSize;
+        HeapArray<std::byte> mStagingData;
     };
 
   public:
@@ -100,13 +93,12 @@ class InlineMemoryTransferService : public MemoryTransferService {
     ~InlineMemoryTransferService() override = default;
 
     std::unique_ptr<MemoryHandle> CreateMemoryHandle(size_t size) override {
-        // TODO(https://crbug.com/512465980): Use HeapArray instead.
-        auto stagingData = std::unique_ptr<std::byte[]>(AllocNoThrow<std::byte>(size));
+        auto stagingData = HeapArray<std::byte>(size, std::nothrow);
         if (!stagingData) {
             return nullptr;
         }
 
-        return std::make_unique<MemoryHandleImpl>(std::move(stagingData), size);
+        return std::make_unique<MemoryHandleImpl>(std::move(stagingData));
     }
 };
 

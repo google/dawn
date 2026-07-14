@@ -37,6 +37,7 @@
 #include "dawn/wire/WireCmd_autogen.h"
 #include "src/dawn/wire/WireDeserializeAllocator.h"
 #include "src/utils/assert.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::wire {
 
@@ -55,9 +56,10 @@ class ChunkedCommandHandler : public CommandHandler {
     // must be called in a thread-safe manner, we do not need to explicitly synchronize access to
     // this map.
     struct ChunkedCommand {
-        size_t remainingSize = 0;
         size_t putOffset = 0;
-        std::unique_ptr<char[]> data = nullptr;
+        HeapArray<char> data;
+
+        size_t GetRemainingSize() const { return data.size() - putOffset; }
     };
     absl::flat_hash_map<uint64_t, ChunkedCommand> mChunkedCommands;
 };
