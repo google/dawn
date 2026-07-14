@@ -100,8 +100,6 @@ class TrackedEvent : public RefCounted {
 // Subcomponent which tracks callback events for the Future-based callback
 // entrypoints. All events from this instance (regardless of whether from an adapter, device, queue,
 // etc.) are tracked here, and used by the instance-wide ProcessEvents and WaitAny entrypoints.
-//
-// TODO(crbug.com/dawn/2060): This should probably be merged together with RequestTracker.
 class EventManager final : NonMovable {
   public:
     using EventMap = std::map<FutureID, Ref<TrackedEvent>>;
@@ -128,14 +126,14 @@ class EventManager final : NonMovable {
             return WireResult::FatalError;
         }
 
-        Ref<TrackedEvent> spontaneousEvent;
+        Ref<TrackedEvent> trackedEvent;
         WireResult result = mTrackedEvents.Use([&](auto trackedEvents) {
             auto it = trackedEvents->find(futureID);
             if (it == trackedEvents->end()) {
                 // If the future is not found, it must've already been completed.
                 return WireResult::Success;
             }
-            auto& trackedEvent = it->second;
+            trackedEvent = it->second;
 
             if (trackedEvent->GetType() != Event::kType) {
                 // Assert here for debugging, before returning a fatal error that is handled upwards
@@ -143,22 +141,25 @@ class EventManager final : NonMovable {
                 DAWN_ASSERT(trackedEvent->GetType() == Event::kType);
                 return WireResult::FatalError;
             }
-
-            WireResult result = static_cast<Event*>(trackedEvent.Get())
-                                    ->ReadyHook(futureID, std::forward<ReadyArgs>(readyArgs)...);
-            trackedEvent->SetReady();
-
-            // If the event can be spontaneously completed, prepare to do so now.
-            if (trackedEvent->GetCallbackMode() == WGPUCallbackMode_AllowSpontaneous) {
-                spontaneousEvent = trackedEvent;
-            }
-
-            return result;
+            return WireResult::Success;
         });
 
+        if (result != WireResult::Success || !trackedEvent) {
+            return result;
+        }
+
+        // The ReadyHook function is assumed to be thread-safe or only triggered by a server
+        // response (which only happens in a single thread). The only events that can be triggered
+        // from the client directly as of writing are MapAsync and DeviceLost.
+        result = static_cast<Event*>(trackedEvent.Get())
+                     ->ReadyHook(futureID, std::forward<ReadyArgs>(readyArgs)...);
+
+        // We need to set the event ready within the scope of the cond-var to signal it.
+        mTrackedEvents.Use([&](auto trackedEvents) { trackedEvent->SetReady(); });
+
         // Handle spontaneous completions.
-        if (spontaneousEvent) {
-            spontaneousEvent->Complete(futureID, EventCompletionType::Ready);
+        if (trackedEvent->GetCallbackMode() == WGPUCallbackMode_AllowSpontaneous) {
+            trackedEvent->Complete(futureID, EventCompletionType::Ready);
             mTrackedEvents.Use([&](auto trackedEvents) { trackedEvents->erase(futureID); });
         }
         return result;

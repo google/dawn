@@ -110,7 +110,7 @@ class Buffer final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
         size_t mappedOffset = 0;
         size_t mappedSize = 0;
 
-        std::unique_ptr<MemoryTransferService::MemoryHandle> memoryHandle = nullptr;
+        std::shared_ptr<MemoryTransferService::MemoryHandle> memoryHandle = nullptr;
     };
     using GuardedState = MutexRecursiveProtected<State>::Usage;
 

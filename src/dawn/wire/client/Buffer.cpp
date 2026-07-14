@@ -213,7 +213,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     }
 
     // Create the MemoryHandle for mappable buffers.
-    std::unique_ptr<MemoryTransferService::MemoryHandle> memoryHandle = nullptr;
+    std::shared_ptr<MemoryTransferService::MemoryHandle> memoryHandle = nullptr;
     size_t memoryHandleCreateInfoLength = 0;
     if (mappable) {
         memoryHandle = wireClient->GetMemoryTransferService()->CreateMemoryHandle(descriptor->size);
@@ -234,8 +234,17 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     Ref<Buffer> buffer =
         wireClient->Make<Buffer>(device->GetEventManagerHandle(), device, descriptor);
 
+    DeviceCreateBufferCmd cmd;
+    cmd.deviceId = device->GetWireHandle(wireClient).id;
+    cmd.descriptor = descriptor;
+    // Set the pointer lengths, but the pointed-to data itself won't be serialized as usual (due
+    // to skip_serialize). Instead, the custom CommandExtensions below fill that memory.
+    cmd.memoryHandleCreateInfoLength = memoryHandleCreateInfoLength;
+    cmd.memoryHandleCreateInfo = nullptr;  // Skipped by skip_serialize.
+    cmd.result = buffer->GetWireHandle(wireClient);
+
     buffer->mState.Use([&](auto state) {
-        state->memoryHandle = std::move(memoryHandle);
+        state->memoryHandle = memoryHandle;
 
         if (descriptor->mappedAtCreation) {
             // If the buffer is mapped at creation, a memory handle is created and will be
@@ -248,28 +257,18 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
             DAWN_ASSERT(state->memoryHandle != nullptr);
             state->mappedData = state->memoryHandle->GetData();
         }
-
-        DeviceCreateBufferCmd cmd;
-        cmd.deviceId = device->GetWireHandle(wireClient).id;
-        cmd.descriptor = descriptor;
-        // Set the pointer lengths, but the pointed-to data itself won't be serialized as usual (due
-        // to skip_serialize). Instead, the custom CommandExtensions below fill that memory.
-        cmd.memoryHandleCreateInfoLength = memoryHandleCreateInfoLength;
-        cmd.memoryHandleCreateInfo = nullptr;  // Skipped by skip_serialize.
-        cmd.result = buffer->GetWireHandle(wireClient);
-
-        // Turning off clang format here because for some reason it does not format the
-        // CommandExtensions consistently, making it harder to read.
-        wireClient->SerializeCommand(
-            cmd,
-            // Extensions to replace fields skipped by skip_serialize.
-            CommandExtension{memoryHandleCreateInfoLength, [&](Span<std::byte> serializeBuffer) {
-                                 if (state->memoryHandle != nullptr) {
-                                     // Serialize the MemoryHandle into the space after the command.
-                                     state->memoryHandle->SerializeCreate(serializeBuffer);
-                                 }
-                             }});
     });
+
+    wireClient->SerializeCommand(
+        cmd,
+        // Extensions to replace fields skipped by skip_serialize.
+        CommandExtension{memoryHandleCreateInfoLength, [&](Span<std::byte> serializeBuffer) {
+                             if (memoryHandle != nullptr) {
+                                 // Serialize the MemoryHandle into the space after the command.
+                                 memoryHandle->SerializeCreate(serializeBuffer);
+                             }
+                         }});
+
     return ReturnToAPI(std::move(buffer));
 }
 
@@ -468,33 +467,20 @@ void Buffer::APIUnmap() {
     //   - Server -> Client: Result of MapRequest2
     Client* client = GetClient();
 
+    BufferUpdateMappedDataCmd cmd{};
+    std::shared_ptr<MemoryTransferService::MemoryHandle> memoryHandle;
+
     mState.Use([&](auto state) {
         if (state->IsMappedForWriting()) {
             // Writes need to be flushed before Unmap is sent. Unmap calls all associated
             // in-flight callbacks which may read the updated data.
             DAWN_ASSERT(state->memoryHandle != nullptr);
 
-            // Get the serialization size of data update writes.
-            size_t memoryDataUpdateInfoLength = state->memoryHandle->GetSerializeDataUpdateSize(
-                state->mappedOffset, state->mappedSize);
-
-            BufferUpdateMappedDataCmd cmd{};
             cmd.bufferId = GetWireHandle(client).id;
-            // Set the pointer length, but the pointed-to data itself won't be serialized as usual
-            // (due to skip_serialize). Instead, the custom CommandExtension below fills that
-            // memory.
-            cmd.dataUpdateInfoLength = memoryDataUpdateInfoLength;
-            cmd.dataUpdateInfo = nullptr;  // Skipped by skip_serialize.
             cmd.offset = state->mappedOffset;
             cmd.size = state->mappedSize;
 
-            client->SerializeCommand(
-                cmd,
-                // Extensions to replace fields skipped by skip_serialize.
-                CommandExtension{memoryDataUpdateInfoLength, [&](Span<std::byte> serializeBuffer) {
-                                     state->memoryHandle->SerializeDataUpdate(
-                                         serializeBuffer, state->mappedOffset, state->mappedSize);
-                                 }});
+            memoryHandle = state->memoryHandle;
 
             // If mDestructMemoryHandleOnUnmap is true, that means the memory handle is merely
             // for mappedAtCreation usage. It is destroyed on unmap after flush to server
@@ -511,11 +497,30 @@ void Buffer::APIUnmap() {
         state->mappedSize = 0;
     });
 
+    if (memoryHandle) {
+        size_t memoryDataUpdateInfoLength =
+            memoryHandle->GetSerializeDataUpdateSize(cmd.offset, cmd.size);
+
+        // Set the pointer length, but the pointed-to data itself won't be serialized as usual
+        // (due to skip_serialize). Instead, the custom CommandExtension below fills that
+        // memory.
+        cmd.dataUpdateInfoLength = memoryDataUpdateInfoLength;
+        cmd.dataUpdateInfo = nullptr;  // Skipped by skip_serialize.
+
+        client->SerializeCommand(
+            cmd,
+            // Extensions to replace fields skipped by skip_serialize.
+            CommandExtension{memoryDataUpdateInfoLength, [&](Span<std::byte> serializeBuffer) {
+                                 memoryHandle->SerializeDataUpdate(serializeBuffer, cmd.offset,
+                                                                   cmd.size);
+                             }});
+    }
+
     SetFutureStatus(WGPUMapAsyncStatus_Aborted, "Buffer was unmapped before mapping was resolved.");
 
-    BufferUnmapCmd cmd{};
-    cmd.self = ToAPI(this);
-    client->SerializeCommand(cmd);
+    BufferUnmapCmd unmapCmd{};
+    unmapCmd.self = ToAPI(this);
+    client->SerializeCommand(unmapCmd);
 }
 
 void Buffer::APIDestroy() {

@@ -34,6 +34,7 @@
 
 #include "dawn/wire/client/ApiObjects_autogen.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/wire/client/Client.h"
 #include "src/dawn/wire/client/EventManager.h"
@@ -188,19 +189,28 @@ class Device::DeviceLostEvent : public TrackedEvent {
     EventType GetType() override { return kType; }
 
     WireResult ReadyHook(FutureID futureID, WGPUDeviceLostReason reason, WGPUStringView message) {
-        if (mMessage.empty()) {
-            mReason = reason;
-            mMessage = ToString(message);
-        }
+        mState.Use([&](auto state) {
+            if (state->message.empty()) {
+                state->reason = reason;
+                state->message = ToString(message);
+            }
+        });
         return WireResult::Success;
     }
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
-        if (completionType == EventCompletionType::Shutdown) {
-            mReason = WGPUDeviceLostReason_CallbackCancelled;
-            mMessage = "A valid external Instance reference no longer exists.";
-        }
+        WGPUDeviceLostReason reason;
+        std::string message;
+
+        mState.Use([&](auto state) {
+            if (completionType == EventCompletionType::Shutdown) {
+                state->reason = WGPUDeviceLostReason_CallbackCancelled;
+                state->message = "A valid external Instance reference no longer exists.";
+            }
+            reason = state->reason;
+            message = state->message;
+        });
 
         // The uncaptured error and logging callbacks are spontaneous and must not be called
         // after we call the device lost's |mCallback| below, so we clear them and wait for them to
@@ -213,8 +223,8 @@ class Device::DeviceLostEvent : public TrackedEvent {
 
         if (mCallback != nullptr) {
             const auto device =
-                mReason != WGPUDeviceLostReason_FailedCreation ? ToAPI(mDevice.Get()) : nullptr;
-            mCallback(&device, mReason, ToOutputStringView(mMessage), userdata1, userdata2);
+                reason != WGPUDeviceLostReason_FailedCreation ? ToAPI(mDevice.Get()) : nullptr;
+            mCallback(&device, reason, ToOutputStringView(message), userdata1, userdata2);
         }
     }
 
@@ -222,8 +232,11 @@ class Device::DeviceLostEvent : public TrackedEvent {
     raw_ptr<void> mUserdata1 = nullptr;
     raw_ptr<void> mUserdata2 = nullptr;
 
-    WGPUDeviceLostReason mReason;
-    std::string mMessage;
+    struct State {
+        WGPUDeviceLostReason reason;
+        std::string message;
+    };
+    MutexProtected<State> mState;
 
     // Strong reference to the device so that when we call the callback we can pass the device.
     Ref<Device> mDevice;
