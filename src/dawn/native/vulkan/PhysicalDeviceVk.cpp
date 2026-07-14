@@ -1287,11 +1287,15 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->ForceSet(Toggle::UseSpirv14, false);
     }
 
-    if (GetDeviceInfo().HasExt(DeviceExt::MaximalReconvergence)) {
+    if (GetDeviceInfo().HasExt(DeviceExt::MaximalReconvergence) &&
+        GetDeviceInfo().shaderMaximalReconvergenceFeatures.shaderMaximalReconvergence == VK_TRUE) {
         deviceToggles->Default(
             Toggle::UseSpirvReconvergenceMode,
             platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirvReconvergenceMode));
     } else if (GetDeviceInfo().HasExt(DeviceExt::SubgroupUniformControlFlow) &&
+               GetDeviceInfo()
+                       .shaderSubgroupUniformControlFlowFeatures.shaderSubgroupUniformControlFlow ==
+                   VK_TRUE &&
                (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) &&
                (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_FRAGMENT_BIT)) {
         deviceToggles->Default(

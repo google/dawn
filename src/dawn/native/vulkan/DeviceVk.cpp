@@ -521,6 +521,19 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         featuresChain.Add(&usedKnobs.subgroupSizeControlFeatures);
     }
 
+    if (mDeviceInfo.HasExt(DeviceExt::MaximalReconvergence)) {
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::MaximalReconvergence));
+        usedKnobs.shaderMaximalReconvergenceFeatures =
+            mDeviceInfo.shaderMaximalReconvergenceFeatures;
+        featuresChain.Add(&usedKnobs.shaderMaximalReconvergenceFeatures);
+    }
+    if (mDeviceInfo.HasExt(DeviceExt::SubgroupUniformControlFlow)) {
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::SubgroupUniformControlFlow));
+        usedKnobs.shaderSubgroupUniformControlFlowFeatures =
+            mDeviceInfo.shaderSubgroupUniformControlFlowFeatures;
+        featuresChain.Add(&usedKnobs.shaderSubgroupUniformControlFlowFeatures);
+    }
+
     if (mDeviceInfo.HasExt(DeviceExt::ZeroInitializeWorkgroupMemory)) {
         DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::ZeroInitializeWorkgroupMemory));
 

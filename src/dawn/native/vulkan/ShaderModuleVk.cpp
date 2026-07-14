@@ -321,9 +321,16 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     // backend so just try to turn both on.
     if (GetDevice()->IsToggleEnabled(Toggle::UseSpirvReconvergenceMode)) {
         req.tintOptions.extensions.use_maximal_reconvergence =
-            ToBackend(GetDevice())->GetDeviceInfo().HasExt(DeviceExt::MaximalReconvergence);
+            ToBackend(GetDevice())->GetDeviceInfo().HasExt(DeviceExt::MaximalReconvergence) &&
+            ToBackend(GetDevice())
+                    ->GetDeviceInfo()
+                    .shaderMaximalReconvergenceFeatures.shaderMaximalReconvergence == VK_TRUE;
         req.tintOptions.extensions.use_subgroup_uniform_control_flow =
-            ToBackend(GetDevice())->GetDeviceInfo().HasExt(DeviceExt::SubgroupUniformControlFlow);
+            ToBackend(GetDevice())->GetDeviceInfo().HasExt(DeviceExt::SubgroupUniformControlFlow) &&
+            ToBackend(GetDevice())
+                    ->GetDeviceInfo()
+                    .shaderSubgroupUniformControlFlowFeatures.shaderSubgroupUniformControlFlow ==
+                VK_TRUE;
     }
 
     req.tintOptions.workarounds.texture_sample_compare_depth_cube_array =
