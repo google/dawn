@@ -49,7 +49,7 @@ class BindGroupTrackerBase {
     void OnSetBindGroup(BindGroupIndex index,
                         BindGroupBase* bindGroup,
                         uint32_t dynamicOffsetCount,
-                        uint32_t* dynamicOffsets) {
+                        const uint32_t* dynamicOffsets) {
         DAWN_ASSERT(index < kMaxBindGroupsTyped);
         DAWN_ASSERT(dynamicOffsetCount <= kMaxDynamicOffsetsPerBindGroup);
 
@@ -71,7 +71,7 @@ class BindGroupTrackerBase {
         mBindGroups[index] = bindGroup;
         mDynamicOffsets[index].count = BindingIndex(dynamicOffsetCount);
         auto dynamicOffsetsSpan =
-            DAWN_UNSAFE_TODO(Span<uint32_t>(dynamicOffsets, dynamicOffsetCount));
+            DAWN_UNSAFE_TODO(Span<const uint32_t>(dynamicOffsets, dynamicOffsetCount));
         std::ranges::copy(dynamicOffsetsSpan, mDynamicOffsets[index].offsets.begin());
     }
 

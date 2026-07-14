@@ -28,6 +28,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/native/CommandBuffer.h"
 #include "src/dawn/native/Commands.h"
 #include "src/dawn/native/ComputePassEncoder.h"
@@ -174,16 +175,16 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
                                  std::vector<uint32_t> offsets = {}) {
         return [index, bg, offsets](CommandIterator* commands) {
             auto* cmd = commands->NextCommand<SetBindGroupCmd>();
-            uint32_t* dynamicOffsets = nullptr;
+            Span<const uint32_t> cmdOffsets;
             if (cmd->dynamicOffsetCount > 0) {
-                dynamicOffsets = commands->NextData<uint32_t>(cmd->dynamicOffsetCount);
+                cmdOffsets = commands->NextData<uint32_t>(cmd->dynamicOffsetCount);
             }
 
             ASSERT_EQ(cmd->index, BindGroupIndex(index));
             ASSERT_EQ(ToAPI(cmd->group.Get()), bg.Get());
-            ASSERT_EQ(cmd->dynamicOffsetCount, offsets.size());
-            for (uint32_t i = 0; i < cmd->dynamicOffsetCount; ++i) {
-                DAWN_UNSAFE_TODO(ASSERT_EQ(dynamicOffsets[i], offsets[i]));
+            ASSERT_EQ(cmdOffsets.size(), offsets.size());
+            for (auto [i, cmdOffset] : Enumerate(cmdOffsets)) {
+                ASSERT_EQ(cmdOffset, offsets[i]);
             }
         };
     };

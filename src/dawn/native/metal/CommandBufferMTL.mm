@@ -1523,9 +1523,9 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
 
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                char* label = mCommands.NextData<char>(cmd->length + 1);
+                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
                 NSRef<NSString> mtlLabel =
-                    AcquireNSRef([[NSString alloc] initWithUTF8String:label]);
+                    AcquireNSRef([[NSString alloc] initWithUTF8String:label.data()]);
                 [commandContext->GetCommands() pushDebugGroup:mtlLabel.Get()];
                 break;
             }
@@ -1533,10 +1533,9 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
             case Command::WriteBuffer: {
                 WriteBufferCmd* write = mCommands.NextCommand<WriteBufferCmd>();
                 const uint64_t offset = write->offset;
-                const uint64_t size = write->size;
-                uint8_t* data = mCommands.NextData<uint8_t>(size);
+                Span<const uint8_t> data = mCommands.NextData<uint8_t>(write->size);
 
-                if (size == 0) {
+                if (data.empty()) {
                     continue;
                 }
 
@@ -1544,10 +1543,12 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 Device* device = ToBackend(GetDevice());
 
                 DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
-                    size, kCopyBufferToBufferOffsetAlignment,
+                    data.size(), kCopyBufferToBufferOffsetAlignment,
                     [&](UploadReservation reservation) -> MaybeError {
-                        DAWN_UNSAFE_TODO(memcpy(reservation.mappedPointer, data, size));
-                        dstBuffer->EnsureDataInitializedAsDestination(commandContext, offset, size);
+                        DAWN_UNSAFE_TODO(
+                            memcpy(reservation.mappedPointer, data.data(), data.size()));
+                        dstBuffer->EnsureDataInitializedAsDestination(commandContext, offset,
+                                                                      data.size());
 
                         dstBuffer->TrackUsage();
                         [commandContext->EnsureBlit()
@@ -1555,7 +1556,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                                  sourceOffset:reservation.offsetInBuffer
                                      toBuffer:dstBuffer->GetMTLBuffer()
                             destinationOffset:offset
-                                         size:size];
+                                         size:data.size()];
                         return {};
                     }));
                 break;
@@ -1693,29 +1694,31 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
 
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
-                uint32_t* dynamicOffsets = nullptr;
-                if (cmd->dynamicOffsetCount > 0) {
+                Span<const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != 0) {
                     dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
 
+                // TODO(https://crbug.com/532944732): Spanify BindGroupTracker.
                 bindGroups.OnSetBindGroup(cmd->index, ToBackend(cmd->group.Get()),
-                                          cmd->dynamicOffsetCount, dynamicOffsets);
+                                          dynamicOffsets.size(), dynamicOffsets.data());
                 break;
             }
 
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = mCommands.NextCommand<SetImmediatesCmd>();
                 DAWN_ASSERT(cmd->size > 0);
-                uint8_t* value = mCommands.NextData<uint8_t>(cmd->size);
-                immediates.SetImmediates(cmd->offset, value, cmd->size);
+                Span<const uint8_t> data = mCommands.NextData<uint8_t>(cmd->size);
+                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
+                immediates.SetImmediates(cmd->offset, data.data(), data.size());
                 break;
             }
 
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                char* label = mCommands.NextData<char>(cmd->length + 1);
+                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
                 NSRef<NSString> mtlLabel =
-                    AcquireNSRef([[NSString alloc] initWithUTF8String:label]);
+                    AcquireNSRef([[NSString alloc] initWithUTF8String:label.data()]);
                 [encoder insertDebugSignpost:mtlLabel.Get()];
                 break;
             }
@@ -1729,9 +1732,9 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
 
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                char* label = mCommands.NextData<char>(cmd->length + 1);
+                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
                 NSRef<NSString> mtlLabel =
-                    AcquireNSRef([[NSString alloc] initWithUTF8String:label]);
+                    AcquireNSRef([[NSString alloc] initWithUTF8String:label.data()]);
                 [encoder pushDebugGroup:mtlLabel.Get()];
                 break;
             }
@@ -1948,9 +1951,9 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
-                char* label = iter->NextData<char>(cmd->length + 1);
+                Span<const char> label = iter->NextData<char>(cmd->length + 1);
                 NSRef<NSString> mtlLabel =
-                    AcquireNSRef([[NSString alloc] initWithUTF8String:label]);
+                    AcquireNSRef([[NSString alloc] initWithUTF8String:label.data()]);
                 [encoder insertDebugSignpost:mtlLabel.Get()];
                 break;
             }
@@ -1964,9 +1967,9 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = iter->NextCommand<PushDebugGroupCmd>();
-                char* label = iter->NextData<char>(cmd->length + 1);
+                Span<const char> label = iter->NextData<char>(cmd->length + 1);
                 NSRef<NSString> mtlLabel =
-                    AcquireNSRef([[NSString alloc] initWithUTF8String:label]);
+                    AcquireNSRef([[NSString alloc] initWithUTF8String:label.data()]);
                 [encoder pushDebugGroup:mtlLabel.Get()];
                 break;
             }
@@ -2005,21 +2008,23 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
-                uint32_t* dynamicOffsets = nullptr;
-                if (cmd->dynamicOffsetCount > 0) {
+                Span<const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != 0) {
                     dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
 
+                // TODO(https://crbug.com/532944732): Spanify BindGroupTracker.
                 bindGroups.OnSetBindGroup(cmd->index, ToBackend(cmd->group.Get()),
-                                          cmd->dynamicOffsetCount, dynamicOffsets);
+                                          dynamicOffsets.size(), dynamicOffsets.data());
                 break;
             }
 
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = iter->NextCommand<SetImmediatesCmd>();
                 DAWN_ASSERT(cmd->size > 0);
-                uint8_t* value = iter->NextData<uint8_t>(cmd->size);
-                immediates.SetImmediates(cmd->offset, value, cmd->size);
+                Span<const uint8_t> data = iter->NextData<uint8_t>(cmd->size);
+                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
+                immediates.SetImmediates(cmd->offset, data.data(), data.size());
                 break;
             }
 
@@ -2123,8 +2128,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
                 ExecuteBundlesCmd* cmd = mCommands.NextCommand<ExecuteBundlesCmd>();
                 auto bundles = mCommands.NextData<Ref<RenderBundleBase>>(cmd->count);
 
-                for (uint32_t i = 0; i < cmd->count; ++i) {
-                    CommandIterator* iter = DAWN_UNSAFE_TODO(bundles[i]->GetCommands());
+                for (const auto& bundle : bundles) {
+                    CommandIterator* iter = bundle->GetCommands();
                     iter->Reset();
                     while (iter->NextCommandId(&type)) {
                         EncodeRenderBundleCommand(iter, type);

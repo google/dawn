@@ -92,8 +92,8 @@ void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
 
         case Command::InsertDebugMarker: {
             auto cmd = commands.NextCommand<InsertDebugMarkerCmd>();
-            char* label = commands.NextData<char>(cmd->length + 1);
-            wgpu.renderBundleEncoderInsertDebugMarker(encoder, {label, cmd->length});
+            Span<const char> label = commands.NextData<char>(cmd->length + 1);
+            wgpu.renderBundleEncoderInsertDebugMarker(encoder, {label.data(), label.size()});
             break;
         }
 
@@ -105,20 +105,20 @@ void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
 
         case Command::PushDebugGroup: {
             auto cmd = commands.NextCommand<PushDebugGroupCmd>();
-            char* label = commands.NextData<char>(cmd->length + 1);
-            wgpu.renderBundleEncoderPushDebugGroup(encoder, {label, cmd->length});
+            Span<const char> label = commands.NextData<char>(cmd->length + 1);
+            wgpu.renderBundleEncoderPushDebugGroup(encoder, {label.data(), label.size()});
             break;
         }
 
         case Command::SetBindGroup: {
             auto cmd = commands.NextCommand<SetBindGroupCmd>();
-            uint32_t* dynamicOffsets = nullptr;
-            if (cmd->dynamicOffsetCount > 0) {
+            Span<const uint32_t> dynamicOffsets;
+            if (cmd->dynamicOffsetCount != 0) {
                 dynamicOffsets = commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
             }
             wgpu.renderBundleEncoderSetBindGroup(encoder, static_cast<uint32_t>(cmd->index),
                                                  ToBackend(cmd->group)->GetInnerHandle(),
-                                                 cmd->dynamicOffsetCount, dynamicOffsets);
+                                                 dynamicOffsets.size(), dynamicOffsets.data());
             break;
         }
 
@@ -148,9 +148,8 @@ void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
         case Command::SetImmediates: {
             auto cmd = commands.NextCommand<SetImmediatesCmd>();
             DAWN_ASSERT(cmd->size > 0);
-            uint8_t* value = nullptr;
-            value = commands.NextData<uint8_t>(cmd->size);
-            wgpu.renderBundleEncoderSetImmediates(encoder, cmd->offset, value, cmd->size);
+            Span<const uint8_t> data = commands.NextData<uint8_t>(cmd->size);
+            wgpu.renderBundleEncoderSetImmediates(encoder, cmd->offset, data.data(), data.size());
             break;
         }
 

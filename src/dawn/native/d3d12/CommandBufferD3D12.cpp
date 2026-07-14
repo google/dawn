@@ -1356,14 +1356,15 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
 
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                const char* label = mCommands.NextData<char>(cmd->length + 1);
+                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
 
                 if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                     // PIX color is 1 byte per channel in ARGB format
+                    // TODO(https://crbug.com/526533386): Prevent format string injection in PIX.
                     constexpr uint64_t kPIXBlackColor = 0xff000000;
                     ToBackend(GetDevice())
                         ->GetFunctions()
-                        ->pixSetMarkerOnCommandList(commandList, kPIXBlackColor, label);
+                        ->pixSetMarkerOnCommandList(commandList, kPIXBlackColor, label.data());
                 }
                 break;
             }
@@ -1379,14 +1380,15 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
 
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                const char* label = mCommands.NextData<char>(cmd->length + 1);
+                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
 
                 if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                     // PIX color is 1 byte per channel in ARGB format
+                    // TODO(https://crbug.com/526533386): Prevent format string injection in PIX.
                     constexpr uint64_t kPIXBlackColor = 0xff000000;
                     ToBackend(GetDevice())
                         ->GetFunctions()
-                        ->pixBeginEventOnCommandList(commandList, kPIXBlackColor, label);
+                        ->pixBeginEventOnCommandList(commandList, kPIXBlackColor, label.data());
                 }
                 break;
             }
@@ -1394,29 +1396,29 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
             case Command::WriteBuffer: {
                 WriteBufferCmd* write = mCommands.NextCommand<WriteBufferCmd>();
                 const uint64_t offset = write->offset;
-                const uint64_t size = write->size;
-                uint8_t* data = mCommands.NextData<uint8_t>(size);
+                Span<const uint8_t> data = mCommands.NextData<uint8_t>(write->size);
 
-                if (size == 0) {
+                if (data.empty()) {
                     continue;
                 }
 
                 Buffer* dstBuffer = ToBackend(write->buffer.Get());
 
                 DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
-                    size, kCopyBufferToBufferOffsetAlignment,
+                    data.size(), kCopyBufferToBufferOffsetAlignment,
                     [&](UploadReservation reservation) -> MaybeError {
-                        DAWN_UNSAFE_TODO(memcpy(reservation.mappedPointer, data, size));
+                        DAWN_UNSAFE_TODO(
+                            memcpy(reservation.mappedPointer, data.data(), data.size()));
                         [[maybe_unused]] bool cleared;
                         DAWN_TRY_ASSIGN(cleared, dstBuffer->EnsureDataInitializedAsDestination(
-                                                     commandContext, offset, size));
+                                                     commandContext, offset, data.size()));
 
                         dstBuffer->TrackUsageAndTransitionNow(commandContext,
                                                               wgpu::BufferUsage::CopyDst);
                         commandList->CopyBufferRegion(
                             dstBuffer->GetD3D12Resource(), offset,
                             ToBackend(reservation.buffer.Get())->GetD3D12Resource(),
-                            reservation.offsetInBuffer, size);
+                            reservation.offsetInBuffer, data.size());
                         return {};
                     }));
                 break;
@@ -1518,35 +1520,37 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                 BindGroup* group = ToBackend(cmd->group.Get());
-                uint32_t* dynamicOffsets = nullptr;
-
-                if (cmd->dynamicOffsetCount > 0) {
+                Span<const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != 0) {
                     dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
 
-                bindingTracker->OnSetBindGroup(cmd->index, group, cmd->dynamicOffsetCount,
-                                               dynamicOffsets);
+                // TODO(https://crbug.com/532944732): Spanify BindGroupTracker.
+                bindingTracker->OnSetBindGroup(cmd->index, group, dynamicOffsets.size(),
+                                               dynamicOffsets.data());
                 break;
             }
 
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = mCommands.NextCommand<SetImmediatesCmd>();
                 DAWN_ASSERT(cmd->size > 0);
-                uint8_t* value = mCommands.NextData<uint8_t>(cmd->size);
-                immediates.SetImmediates(cmd->offset, value, cmd->size);
+                Span<const uint8_t> data = mCommands.NextData<uint8_t>(cmd->size);
+                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
+                immediates.SetImmediates(cmd->offset, data.data(), data.size());
                 break;
             }
 
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                const char* label = mCommands.NextData<char>(cmd->length + 1);
+                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
 
                 if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                     // PIX color is 1 byte per channel in ARGB format
+                    // TODO(https://crbug.com/526533386): Prevent format string injection in PIX.
                     constexpr uint64_t kPIXBlackColor = 0xff000000;
                     ToBackend(GetDevice())
                         ->GetFunctions()
-                        ->pixSetMarkerOnCommandList(commandList, kPIXBlackColor, label);
+                        ->pixSetMarkerOnCommandList(commandList, kPIXBlackColor, label.data());
                 }
                 break;
             }
@@ -1562,14 +1566,15 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
 
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                const char* label = mCommands.NextData<char>(cmd->length + 1);
+                Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
 
                 if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                     // PIX color is 1 byte per channel in ARGB format
+                    // TODO(https://crbug.com/526533386): Prevent format string injection in PIX.
                     constexpr uint64_t kPIXBlackColor = 0xff000000;
                     ToBackend(GetDevice())
                         ->GetFunctions()
-                        ->pixBeginEventOnCommandList(commandList, kPIXBlackColor, label);
+                        ->pixBeginEventOnCommandList(commandList, kPIXBlackColor, label.data());
                 }
                 break;
             }
@@ -1935,14 +1940,15 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
-                const char* label = iter->NextData<char>(cmd->length + 1);
+                Span<const char> label = iter->NextData<char>(cmd->length + 1);
 
                 if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                     // PIX color is 1 byte per channel in ARGB format
+                    // TODO(https://crbug.com/526533386): Prevent format string injection in PIX.
                     constexpr uint64_t kPIXBlackColor = 0xff000000;
                     ToBackend(GetDevice())
                         ->GetFunctions()
-                        ->pixSetMarkerOnCommandList(commandList, kPIXBlackColor, label);
+                        ->pixSetMarkerOnCommandList(commandList, kPIXBlackColor, label.data());
                 }
                 break;
             }
@@ -1958,14 +1964,15 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = iter->NextCommand<PushDebugGroupCmd>();
-                const char* label = iter->NextData<char>(cmd->length + 1);
+                Span<const char> label = iter->NextData<char>(cmd->length + 1);
 
                 if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                     // PIX color is 1 byte per channel in ARGB format
+                    // TODO(https://crbug.com/526533386): Prevent format string injection in PIX.
                     constexpr uint64_t kPIXBlackColor = 0xff000000;
                     ToBackend(GetDevice())
                         ->GetFunctions()
-                        ->pixBeginEventOnCommandList(commandList, kPIXBlackColor, label);
+                        ->pixBeginEventOnCommandList(commandList, kPIXBlackColor, label.data());
                 }
                 break;
             }
@@ -1987,22 +1994,23 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
                 BindGroup* group = ToBackend(cmd->group.Get());
-                uint32_t* dynamicOffsets = nullptr;
-
-                if (cmd->dynamicOffsetCount > 0) {
+                Span<const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != 0) {
                     dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
 
-                bindingTracker->OnSetBindGroup(cmd->index, group, cmd->dynamicOffsetCount,
-                                               dynamicOffsets);
+                // TODO(https://crbug.com/532944732): Spanify BindGroupTracker.
+                bindingTracker->OnSetBindGroup(cmd->index, group, dynamicOffsets.size(),
+                                               dynamicOffsets.data());
                 break;
             }
 
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = iter->NextCommand<SetImmediatesCmd>();
                 DAWN_ASSERT(cmd->size > 0);
-                uint8_t* value = iter->NextData<uint8_t>(cmd->size);
-                immediates.SetImmediates(cmd->offset, value, cmd->size);
+                Span<const uint8_t> data = iter->NextData<uint8_t>(cmd->size);
+                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
+                immediates.SetImmediates(cmd->offset, data.data(), data.size());
                 break;
             }
 
@@ -2117,8 +2125,8 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 ExecuteBundlesCmd* cmd = mCommands.NextCommand<ExecuteBundlesCmd>();
                 auto bundles = mCommands.NextData<Ref<RenderBundleBase>>(cmd->count);
 
-                for (uint32_t i = 0; i < cmd->count; ++i) {
-                    CommandIterator* iter = DAWN_UNSAFE_TODO(bundles[i])->GetCommands();
+                for (const auto& bundle : bundles) {
+                    CommandIterator* iter = bundle->GetCommands();
                     iter->Reset();
                     while (iter->NextCommandId(&type)) {
                         DAWN_TRY(EncodeRenderBundleCommand(iter, type));

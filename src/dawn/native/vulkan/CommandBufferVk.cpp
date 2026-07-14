@@ -1468,11 +1468,11 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
             case Command::InsertDebugMarker: {
                 if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                     InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                    const char* label = mCommands.NextData<char>(cmd->length + 1);
+                    Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
                     VkDebugUtilsLabelEXT utilsLabel;
                     utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
                     utilsLabel.pNext = nullptr;
-                    utilsLabel.pLabelName = label;
+                    utilsLabel.pLabelName = label.data();
                     // Default color to black
                     utilsLabel.color[0] = 0.0;
                     utilsLabel.color[1] = 0.0;
@@ -1498,11 +1498,11 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
             case Command::PushDebugGroup: {
                 if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                     PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                    const char* label = mCommands.NextData<char>(cmd->length + 1);
+                    Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
                     VkDebugUtilsLabelEXT utilsLabel;
                     utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
                     utilsLabel.pNext = nullptr;
-                    utilsLabel.pLabelName = label;
+                    utilsLabel.pLabelName = label.data();
                     // Default color to black
                     utilsLabel.color[0] = 0.0;
                     utilsLabel.color[1] = 0.0;
@@ -1518,28 +1518,27 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
             case Command::WriteBuffer: {
                 WriteBufferCmd* write = mCommands.NextCommand<WriteBufferCmd>();
                 const uint64_t offset = write->offset;
-                const uint64_t size = write->size;
-                uint8_t* data = mCommands.NextData<uint8_t>(size);
+                Span<const uint8_t> data = mCommands.NextData<uint8_t>(write->size);
 
-                if (size == 0) {
+                if (data.empty()) {
                     continue;
                 }
 
                 Buffer* dstBuffer = ToBackend(write->buffer.Get());
 
                 DAWN_UNSAFE_TODO(DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
-                    size, kCopyBufferToBufferOffsetAlignment,
+                    data.size(), kCopyBufferToBufferOffsetAlignment,
                     [&](UploadReservation reservation) -> MaybeError {
-                        memcpy(reservation.mappedPointer, data, size);
+                        memcpy(reservation.mappedPointer, data.data(), data.size());
 
                         dstBuffer->EnsureDataInitializedAsDestination(recordingContext, offset,
-                                                                      size);
+                                                                      data.size());
                         dstBuffer->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
 
                         VkBufferCopy copy;
                         copy.srcOffset = reservation.offsetInBuffer;
                         copy.dstOffset = offset;
-                        copy.size = size;
+                        copy.size = data.size();
 
                         device->fn.CmdCopyBuffer(commands,
                                                  ToBackend(reservation.buffer)->GetHandle(),
@@ -1624,15 +1623,15 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
 
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
-
                 BindGroup* bindGroup = ToBackend(cmd->group.Get());
-                uint32_t* dynamicOffsets = nullptr;
-                if (cmd->dynamicOffsetCount > 0) {
+                Span<const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != 0) {
                     dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
 
-                state.descriptorSets.OnSetBindGroup(cmd->index, bindGroup, cmd->dynamicOffsetCount,
-                                                    dynamicOffsets);
+                // TODO(https://crbug.com/532944732): Spanify DescriptorSetTracker.
+                state.descriptorSets.OnSetBindGroup(cmd->index, bindGroup, dynamicOffsets.size(),
+                                                    dynamicOffsets.data());
                 break;
             }
 
@@ -1645,11 +1644,11 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
             case Command::InsertDebugMarker: {
                 if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                     InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                    const char* label = mCommands.NextData<char>(cmd->length + 1);
+                    Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
                     VkDebugUtilsLabelEXT utilsLabel;
                     utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
                     utilsLabel.pNext = nullptr;
-                    utilsLabel.pLabelName = label;
+                    utilsLabel.pLabelName = label.data();
                     // Default color to black
                     utilsLabel.color[0] = 0.0;
                     utilsLabel.color[1] = 0.0;
@@ -1675,11 +1674,11 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
             case Command::PushDebugGroup: {
                 if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                     PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                    const char* label = mCommands.NextData<char>(cmd->length + 1);
+                    Span<const char> label = mCommands.NextData<char>(cmd->length + 1);
                     VkDebugUtilsLabelEXT utilsLabel;
                     utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
                     utilsLabel.pNext = nullptr;
-                    utilsLabel.pLabelName = label;
+                    utilsLabel.pLabelName = label.data();
                     // Default color to black
                     utilsLabel.color[0] = 0.0;
                     utilsLabel.color[1] = 0.0;
@@ -1705,9 +1704,9 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = mCommands.NextCommand<SetImmediatesCmd>();
                 DAWN_ASSERT(cmd->size > 0);
-                uint8_t* value = nullptr;
-                value = mCommands.NextData<uint8_t>(cmd->size);
-                state.immediates.SetImmediates(cmd->offset, value, cmd->size);
+                Span<const uint8_t> data = mCommands.NextData<uint8_t>(cmd->size);
+                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
+                state.immediates.SetImmediates(cmd->offset, data.data(), data.size());
                 break;
             }
 
@@ -1910,11 +1909,11 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             case Command::InsertDebugMarker: {
                 if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                     InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
-                    const char* label = iter->NextData<char>(cmd->length + 1);
+                    Span<const char> label = iter->NextData<char>(cmd->length + 1);
                     VkDebugUtilsLabelEXT utilsLabel;
                     utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
                     utilsLabel.pNext = nullptr;
-                    utilsLabel.pLabelName = label;
+                    utilsLabel.pLabelName = label.data();
                     // Default color to black
                     utilsLabel.color[0] = 0.0;
                     utilsLabel.color[1] = 0.0;
@@ -1940,11 +1939,11 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             case Command::PushDebugGroup: {
                 if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                     PushDebugGroupCmd* cmd = iter->NextCommand<PushDebugGroupCmd>();
-                    const char* label = iter->NextData<char>(cmd->length + 1);
+                    Span<const char> label = iter->NextData<char>(cmd->length + 1);
                     VkDebugUtilsLabelEXT utilsLabel;
                     utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
                     utilsLabel.pNext = nullptr;
-                    utilsLabel.pLabelName = label;
+                    utilsLabel.pLabelName = label.data();
                     // Default color to black
                     utilsLabel.color[0] = 0.0;
                     utilsLabel.color[1] = 0.0;
@@ -1960,13 +1959,14 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
                 BindGroup* bindGroup = ToBackend(cmd->group.Get());
-                uint32_t* dynamicOffsets = nullptr;
-                if (cmd->dynamicOffsetCount > 0) {
+                Span<const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != 0) {
                     dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
 
-                state.descriptorSets.OnSetBindGroup(cmd->index, bindGroup, cmd->dynamicOffsetCount,
-                                                    dynamicOffsets);
+                // TODO(https://crbug.com/532944732): Spanify DescriptorSetTracker.
+                state.descriptorSets.OnSetBindGroup(cmd->index, bindGroup, dynamicOffsets.size(),
+                                                    dynamicOffsets.data());
                 break;
             }
 
@@ -1998,9 +1998,9 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = iter->NextCommand<SetImmediatesCmd>();
                 DAWN_ASSERT(cmd->size > 0);
-                uint8_t* value = nullptr;
-                value = iter->NextData<uint8_t>(cmd->size);
-                state.immediates.SetImmediates(cmd->offset, value, cmd->size);
+                Span<const uint8_t> data = iter->NextData<uint8_t>(cmd->size);
+                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
+                state.immediates.SetImmediates(cmd->offset, data.data(), data.size());
                 break;
             }
 
@@ -2110,8 +2110,8 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 ExecuteBundlesCmd* cmd = mCommands.NextCommand<ExecuteBundlesCmd>();
                 auto bundles = mCommands.NextData<Ref<RenderBundleBase>>(cmd->count);
 
-                for (uint32_t i = 0; i < cmd->count; ++i) {
-                    CommandIterator* iter = DAWN_UNSAFE_TODO(bundles[i])->GetCommands();
+                for (const auto& bundle : bundles) {
+                    CommandIterator* iter = bundle->GetCommands();
                     iter->Reset();
                     while (iter->NextCommandId(&type)) {
                         DAWN_TRY(EncodeRenderBundleCommand(iter, type));

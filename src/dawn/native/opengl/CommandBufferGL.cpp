@@ -1181,18 +1181,17 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
             case Command::WriteBuffer: {
                 WriteBufferCmd* write = mCommands.NextCommand<WriteBufferCmd>();
                 uint64_t offset = write->offset;
-                uint64_t size = write->size;
-                uint8_t* data = mCommands.NextData<uint8_t>(size);
+                Span<const uint8_t> data = mCommands.NextData<uint8_t>(write->size);
 
-                if (size == 0) {
+                if (data.empty()) {
                     continue;
                 }
 
                 Buffer* dstBuffer = ToBackend(write->buffer.Get());
-                DAWN_TRY(dstBuffer->EnsureDataInitializedAsDestination(offset, size));
+                DAWN_TRY(dstBuffer->EnsureDataInitializedAsDestination(offset, data.size()));
 
                 DAWN_GL_TRY(gl, BindBuffer(GL_ARRAY_BUFFER, dstBuffer->GetHandle()));
-                DAWN_GL_TRY(gl, BufferSubData(GL_ARRAY_BUFFER, offset, size, data));
+                DAWN_GL_TRY(gl, BufferSubData(GL_ARRAY_BUFFER, offset, data.size(), data.data()));
 
                 dstBuffer->TrackUsage();
                 break;
@@ -1259,12 +1258,14 @@ MaybeError CommandBuffer::ExecuteComputePass(const OpenGLFunctions& gl) {
 
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
-                uint32_t* dynamicOffsets = nullptr;
-                if (cmd->dynamicOffsetCount > 0) {
+                Span<const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != 0) {
                     dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
-                bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(),
-                                                cmd->dynamicOffsetCount, dynamicOffsets);
+
+                // TODO(https://crbug.com/532944732): Spanify BindGroupTracker.
+                bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(), dynamicOffsets.size(),
+                                                dynamicOffsets.data());
                 break;
             }
 
@@ -1283,8 +1284,9 @@ MaybeError CommandBuffer::ExecuteComputePass(const OpenGLFunctions& gl) {
 
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = mCommands.NextCommand<SetImmediatesCmd>();
-                uint8_t* values = mCommands.NextData<uint8_t>(cmd->size);
-                immediates.SetImmediates(cmd->offset, values, cmd->size);
+                Span<const uint8_t> data = mCommands.NextData<uint8_t>(cmd->size);
+                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
+                immediates.SetImmediates(cmd->offset, data.data(), data.size());
                 break;
             }
 
@@ -1549,12 +1551,14 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
 
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
-                uint32_t* dynamicOffsets = nullptr;
-                if (cmd->dynamicOffsetCount > 0) {
+                Span<const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != 0) {
                     dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
-                bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(),
-                                                cmd->dynamicOffsetCount, dynamicOffsets);
+
+                // TODO(https://crbug.com/532944732): Spanify BindGroupTracker.
+                bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(), dynamicOffsets.size(),
+                                                dynamicOffsets.data());
                 break;
             }
 
@@ -1579,8 +1583,9 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
 
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = iter->NextCommand<SetImmediatesCmd>();
-                uint8_t* values = iter->NextData<uint8_t>(cmd->size);
-                immediates.SetImmediates(cmd->offset, values, cmd->size);
+                Span<const uint8_t> data = iter->NextData<uint8_t>(cmd->size);
+                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
+                immediates.SetImmediates(cmd->offset, data.data(), data.size());
                 break;
             }
             default:
@@ -1679,8 +1684,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                 ExecuteBundlesCmd* cmd = mCommands.NextCommand<ExecuteBundlesCmd>();
                 auto bundles = mCommands.NextData<Ref<RenderBundleBase>>(cmd->count);
 
-                for (uint32_t i = 0; i < cmd->count; ++i) {
-                    CommandIterator* iter = DAWN_UNSAFE_TODO(bundles[i])->GetCommands();
+                for (const auto& bundle : bundles) {
+                    CommandIterator* iter = bundle->GetCommands();
                     iter->Reset();
                     while (iter->NextCommandId(&type)) {
                         DAWN_TRY(DoRenderBundleCommand(iter, type));

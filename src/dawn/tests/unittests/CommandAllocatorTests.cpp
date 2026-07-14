@@ -36,6 +36,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/native/CommandAllocator.h"
 
 namespace dawn::native {
@@ -163,9 +164,10 @@ TEST(CommandAllocator, BasicWithData) {
         ASSERT_EQ(immediates->size, mySize);
         ASSERT_EQ(immediates->offset, myOffset);
 
-        uint32_t* values = iterator.NextData<uint32_t>(5u);
-        for (size_t i = 0; i < 5; i++) {
-            ASSERT_EQ(values[i], myValues[i]);
+        Span<const uint32_t> values = iterator.NextData<uint32_t>(size_t{5u});
+        ASSERT_EQ(values.size(), 5u);
+        for (auto [i, value] : Enumerate(values)) {
+            ASSERT_EQ(value, myValues[i]);
         }
 
         hasNext = iterator.NextCommandId(&type);

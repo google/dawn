@@ -530,16 +530,16 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
 
             case Command::WriteBuffer: {
                 WriteBufferCmd* cmd = mCommands.NextCommand<WriteBufferCmd>();
-                uint8_t* data = mCommands.NextData<uint8_t>(cmd->size);
+                Span<const uint8_t> data = mCommands.NextData<uint8_t>(cmd->size);
 
-                if (cmd->size == 0) {
+                if (data.empty()) {
                     // Skip no-op writes.
                     continue;
                 }
 
                 Buffer* dstBuffer = ToBackend(cmd->buffer.Get());
                 DAWN_TRY(dstBuffer->TrackUsage(commandContext, pendingSerial));
-                DAWN_TRY(dstBuffer->Write(commandContext, cmd->offset, data, cmd->size));
+                DAWN_TRY(dstBuffer->Write(commandContext, cmd->offset, data.data(), data.size()));
 
                 break;
             }
@@ -621,13 +621,14 @@ MaybeError CommandBuffer::ExecuteComputePass(
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
 
-                uint32_t* dynamicOffsets = nullptr;
+                Span<const uint32_t> dynamicOffsets;
                 if (cmd->dynamicOffsetCount > 0) {
                     dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
 
-                bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(),
-                                                cmd->dynamicOffsetCount, dynamicOffsets);
+                // TODO(https://crbug.com/532944732): Spanify BindGroupTracker.
+                bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(), dynamicOffsets.size(),
+                                                dynamicOffsets.data());
 
                 break;
             }
@@ -646,8 +647,9 @@ MaybeError CommandBuffer::ExecuteComputePass(
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = mCommands.NextCommand<SetImmediatesCmd>();
                 DAWN_ASSERT(cmd->size > 0);
-                uint8_t* value = mCommands.NextData<uint8_t>(cmd->size);
-                immediates.SetImmediates(cmd->offset, value, cmd->size);
+                Span<const uint8_t> data = mCommands.NextData<uint8_t>(cmd->size);
+                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
+                immediates.SetImmediates(cmd->offset, data.data(), data.size());
                 break;
             }
 
@@ -880,12 +882,14 @@ MaybeError CommandBuffer::ExecuteRenderPass(
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
 
-                uint32_t* dynamicOffsets = nullptr;
+                Span<const uint32_t> dynamicOffsets;
                 if (cmd->dynamicOffsetCount > 0) {
                     dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
-                bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(),
-                                                cmd->dynamicOffsetCount, dynamicOffsets);
+
+                // TODO(https://crbug.com/532944732): Spanify BindGroupTracker.
+                bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(), dynamicOffsets.size(),
+                                                dynamicOffsets.data());
 
                 break;
             }
@@ -924,8 +928,9 @@ MaybeError CommandBuffer::ExecuteRenderPass(
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = iter->NextCommand<SetImmediatesCmd>();
                 DAWN_ASSERT(cmd->size > 0);
-                uint8_t* value = iter->NextData<uint8_t>(cmd->size);
-                immediates.SetImmediates(cmd->offset, value, cmd->size);
+                Span<const uint8_t> data = iter->NextData<uint8_t>(cmd->size);
+                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
+                immediates.SetImmediates(cmd->offset, data.data(), data.size());
                 break;
             }
 
@@ -1044,8 +1049,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(
             case Command::ExecuteBundles: {
                 ExecuteBundlesCmd* cmd = mCommands.NextCommand<ExecuteBundlesCmd>();
                 auto bundles = mCommands.NextData<Ref<RenderBundleBase>>(cmd->count);
-                for (uint32_t i = 0; i < cmd->count; ++i) {
-                    CommandIterator* iter = DAWN_UNSAFE_TODO(bundles[i])->GetCommands();
+                for (const auto& bundle : bundles) {
+                    CommandIterator* iter = bundle->GetCommands();
                     iter->Reset();
                     while (iter->NextCommandId(&type)) {
                         DAWN_TRY(DoRenderBundleCommand(iter, type));
@@ -1089,7 +1094,7 @@ void CommandBuffer::HandleDebugCommands(
     switch (command) {
         case Command::InsertDebugMarker: {
             InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
-            std::wstring label = UTF8ToWStr(iter->NextData<char>(cmd->length + 1));
+            std::wstring label = UTF8ToWStr(iter->NextData<char>(cmd->length + 1).data());
             commandContext->GetD3DUserDefinedAnnotation()->SetMarker(label.c_str());
             break;
         }
@@ -1102,7 +1107,7 @@ void CommandBuffer::HandleDebugCommands(
 
         case Command::PushDebugGroup: {
             PushDebugGroupCmd* cmd = iter->NextCommand<PushDebugGroupCmd>();
-            std::wstring label = UTF8ToWStr(iter->NextData<char>(cmd->length + 1));
+            std::wstring label = UTF8ToWStr(iter->NextData<char>(cmd->length + 1).data());
             commandContext->GetD3DUserDefinedAnnotation()->BeginEvent(label.c_str());
             break;
         }

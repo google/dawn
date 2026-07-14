@@ -141,8 +141,8 @@ void FreeCommands(CommandIterator* commands) {
             case Command::ExecuteBundles: {
                 ExecuteBundlesCmd* cmd = commands->NextCommand<ExecuteBundlesCmd>();
                 auto bundles = commands->NextData<Ref<RenderBundleBase>>(cmd->count);
-                for (size_t i = 0; i < cmd->count; ++i) {
-                    (&DAWN_UNSAFE_TODO(bundles[i]))->~Ref<RenderBundleBase>();
+                for (auto& bundle : bundles) {
+                    (&bundle)->~Ref<RenderBundleBase>();
                 }
                 cmd->~ExecuteBundlesCmd();
                 break;

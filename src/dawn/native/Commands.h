@@ -411,7 +411,8 @@ struct SetBindGroupCmd {
 
     BindGroupIndex index = BindGroupIndex(0u);
     Ref<BindGroupBase> group;
-    uint32_t dynamicOffsetCount = 0;
+    // TODO(https://crbug.com/532944732) Use BindingIndex.
+    size_t dynamicOffsetCount = 0;
 };
 
 struct SetImmediatesCmd {
@@ -419,7 +420,7 @@ struct SetImmediatesCmd {
     ~SetImmediatesCmd();
 
     uint32_t offset = 0;
-    uint32_t size = 0;
+    size_t size = 0;
 };
 
 struct SetIndexBufferCmd {
@@ -455,7 +456,7 @@ struct WriteBufferCmd {
 
     Ref<BufferBase> buffer;
     uint64_t offset = 0;
-    uint64_t size = 0;
+    size_t size = 0;
 };
 
 struct WriteTimestampCmd {

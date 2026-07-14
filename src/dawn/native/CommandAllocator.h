@@ -119,9 +119,10 @@ class CommandIterator : public NonCopyable {
     }
 
     template <typename T, typename Index>
-        requires(alignof(T) <= kMaxAllocatedCommandAlignment)
-    T* NextData(Index count) {
-        return ReinterpretSpan<T, Index>(NextData(sizeof(T) * count)).data();
+        requires(alignof(T) <= kMaxAllocatedCommandAlignment &&
+                 (std::is_same_v<Index, size_t> || !std::is_integral_v<Index>))
+    ityp::span<Index, const T> NextData(Index count) {
+        return ReinterpretSpan<const T, Index>(NextData(sizeof(T) * count));
     }
 
     // Sets iterator to the beginning of the commands without emptying the list. This method can

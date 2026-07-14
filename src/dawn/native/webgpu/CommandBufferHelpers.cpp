@@ -45,16 +45,17 @@ void CaptureSharedCommand(CaptureContext& captureContext, CommandIterator& comma
     switch (type) {
         case Command::SetBindGroup: {
             const auto& cmd = *commands.NextCommand<SetBindGroupCmd>();
-            const uint32_t* dynamicOffsetsData =
-                cmd.dynamicOffsetCount > 0 ? commands.NextData<uint32_t>(cmd.dynamicOffsetCount)
-                                           : nullptr;
+            Span<const uint32_t> dynamicOffsets;
+            if (cmd.dynamicOffsetCount != 0) {
+                dynamicOffsets = commands.NextData<uint32_t>(cmd.dynamicOffsetCount);
+            }
+
             schema::CommandBufferCommandSetBindGroupCmd data{{
                 .data = {{
                     .index = uint32_t(cmd.index),
                     .bindGroupId = captureContext.GetId(cmd.group),
-                    .dynamicOffsets = std::vector<uint32_t>(
-                        dynamicOffsetsData,
-                        DAWN_UNSAFE_TODO(dynamicOffsetsData + cmd.dynamicOffsetCount)),
+                    .dynamicOffsets =
+                        std::vector<uint32_t>(dynamicOffsets.begin(), dynamicOffsets.end()),
                 }},
             }};
             Serialize(captureContext, data);
@@ -62,11 +63,11 @@ void CaptureSharedCommand(CaptureContext& captureContext, CommandIterator& comma
         }
         case Command::SetImmediates: {
             const auto& cmd = *commands.NextCommand<SetImmediatesCmd>();
-            const uint8_t* values = commands.NextData<uint8_t>(cmd.size);
+            Span<const uint8_t> immediateData = commands.NextData<uint8_t>(cmd.size);
             schema::CommandBufferCommandSetImmediatesCmd data{{
                 .data = {{
                     .offset = cmd.offset,
-                    .data = std::vector<uint8_t>(values, DAWN_UNSAFE_TODO(values + cmd.size)),
+                    .data = std::vector<uint8_t>(immediateData.begin(), immediateData.end()),
                 }},
             }};
             Serialize(captureContext, data);
@@ -83,10 +84,10 @@ void CaptureDebugCommand(CaptureContext& captureContext, CommandIterator& comman
     switch (type) {
         case Command::PushDebugGroup: {
             const auto& cmd = *commands.NextCommand<PushDebugGroupCmd>();
-            const char* label = commands.NextData<char>(cmd.length + 1);
+            Span<const char> label = commands.NextData<char>(cmd.length + 1);
             schema::CommandBufferCommandPushDebugGroupCmd data{{
                 .data = {{
-                    .groupLabel = label,
+                    .groupLabel = {label.begin(), label.end()},
                 }},
             }};
             Serialize(captureContext, data);
@@ -99,10 +100,10 @@ void CaptureDebugCommand(CaptureContext& captureContext, CommandIterator& comman
         }
         case Command::InsertDebugMarker: {
             const auto& cmd = *commands.NextCommand<InsertDebugMarkerCmd>();
-            const char* label = commands.NextData<char>(cmd.length + 1);
+            Span<const char> label = commands.NextData<char>(cmd.length + 1);
             schema::CommandBufferCommandInsertDebugMarkerCmd data{{
                 .data = {{
-                    .markerLabel = label,
+                    .markerLabel = {label.begin(), label.end()},
                 }},
             }};
             Serialize(captureContext, data);

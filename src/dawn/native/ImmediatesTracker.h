@@ -78,7 +78,7 @@ class UserImmediatesTrackerBase {
     UserImmediatesTrackerBase() {}
 
     // Setters
-    void SetImmediates(uint32_t offset, uint8_t* values, uint32_t size) {
+    void SetImmediates(uint32_t offset, const uint8_t* values, uint32_t size) {
         uint8_t* destData = mContent.template Get<uint8_t>(offsetof(T, userImmediates) + offset);
         if (DAWN_UNSAFE_TODO(memcmp(destData, values, size)) != 0) {
             DAWN_UNSAFE_TODO(memcpy(destData, values, size));
