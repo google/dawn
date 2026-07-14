@@ -39,8 +39,6 @@
 
 namespace dawn::native {
 
-// TODO(cwallez@chromium.org): figure out a way to have more type safety for the iterator
-
 CommandIterator::CommandIterator() {
     Reset();
 }
@@ -151,8 +149,7 @@ CommandAllocator::CommandAllocator(CommandAllocator&& other)
     : mBlocks(std::move(other.mBlocks)), mLastAllocationSize(other.mLastAllocationSize) {
     other.mBlocks.clear();
     if (!other.IsEmpty()) {
-        mCurrentPtr = other.mCurrentPtr;
-        mEndPtr = other.mEndPtr;
+        mCurrentBlock = other.mCurrentBlock;
     } else {
         ResetPointers();
     }
@@ -164,8 +161,7 @@ CommandAllocator& CommandAllocator::operator=(CommandAllocator&& other) {
     if (!other.IsEmpty()) {
         std::swap(mBlocks, other.mBlocks);
         mLastAllocationSize = other.mLastAllocationSize;
-        mCurrentPtr = other.mCurrentPtr;
-        mEndPtr = other.mEndPtr;
+        mCurrentBlock = other.mCurrentBlock;
     }
     other.Reset();
     return *this;
@@ -178,7 +174,7 @@ void CommandAllocator::Reset() {
 }
 
 bool CommandAllocator::IsEmpty() const {
-    return mCurrentPtr == reinterpret_cast<const std::byte*>(&mPlaceholderSpace[0]);
+    return mCurrentBlock.data() == mPlaceholderSpace.data();
 }
 
 size_t CommandAllocator::GetCommandBlocksCount() const {
@@ -186,21 +182,19 @@ size_t CommandAllocator::GetCommandBlocksCount() const {
 }
 
 CommandBlocks&& CommandAllocator::AcquireBlocks() {
-    DAWN_ASSERT(mCurrentPtr != nullptr && mEndPtr != nullptr);
-    DAWN_ASSERT(IsPtrAligned(mCurrentPtr, kMaxAllocatedCommandAlignment));
-    DAWN_UNSAFE_TODO(DAWN_ASSERT(mCurrentPtr + sizeof(uint32_t) <= mEndPtr));
-    *reinterpret_cast<uint32_t*>(mCurrentPtr) = detail::kEndOfBlock;
+    DAWN_ASSERT(!mCurrentBlock.empty());
+    DAWN_ASSERT(IsPtrAligned(mCurrentBlock.data(), kMaxAllocatedCommandAlignment));
+    DAWN_ASSERT(mCurrentBlock.size() >= sizeof(uint32_t));
+    *reinterpret_cast<uint32_t*>(mCurrentBlock.data()) = detail::kEndOfBlock;
 
-    mCurrentPtr = nullptr;
-    mEndPtr = nullptr;
+    mCurrentBlock = {};
     return std::move(mBlocks);
 }
 
-std::byte* CommandAllocator::AllocateInNewBlock(uint32_t commandId, size_t commandSize) {
+Span<std::byte> CommandAllocator::AllocateInNewBlock(uint32_t commandId, size_t commandSize) {
     // When there is not enough space, we signal the kEndOfBlock, so that the iterator knows
     // to move to the next one. kEndOfBlock on the last block means the end of the commands.
-    uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
-    *idAlloc = detail::kEndOfBlock;
+    *reinterpret_cast<uint32_t*>(mCurrentBlock.data()) = detail::kEndOfBlock;
 
     // We'll request a block that can contain at least the command ID, the command and an
     // additional ID to contain the kEndOfBlock tag.
@@ -208,7 +202,7 @@ std::byte* CommandAllocator::AllocateInNewBlock(uint32_t commandId, size_t comma
 
     // The computation of the request could overflow.
     if (requestedBlockSize <= commandSize) [[unlikely]] {
-        return nullptr;
+        return {};
     }
 
     AppendNewBlock(requestedBlockSize);
@@ -223,14 +217,12 @@ void CommandAllocator::AppendNewBlock(size_t minimumSize) {
     auto block = DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(mLastAllocationSize));
     DAWN_ASSERT(IsPtrAligned(block.data(), kMaxAllocatedCommandAlignment));
 
-    mCurrentPtr = block.data();
-    mEndPtr = std::to_address(block.end());
+    mCurrentBlock = block;
     mBlocks.push_back(std::move(block));
 }
 
 void CommandAllocator::ResetPointers() {
-    mCurrentPtr = reinterpret_cast<std::byte*>(mPlaceholderSpace.data());
-    mEndPtr = reinterpret_cast<std::byte*>(DAWN_UNSAFE_TODO(mPlaceholderSpace.data() + 1));
+    mCurrentBlock = ByteSpanFromRef(mPlaceholderSpace);
 }
 
 }  // namespace dawn::native
