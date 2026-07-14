@@ -387,7 +387,7 @@ class D3D12SharedMemoryFileHandleBackend : public SharedBufferMemoryTestBackend 
     }
 
     std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter& adapter) const override {
-        return {wgpu::FeatureName::SharedBufferMemoryD3D12SharedMemoryFileMappingHandle,
+        return {wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle,
                 wgpu::FeatureName::SharedFenceDXGISharedHandle,
                 wgpu::FeatureName::BufferMapExtendedUsages, wgpu::FeatureName::HostMappedPointer};
     }
@@ -418,7 +418,7 @@ class D3D12SharedMemoryFileHandleBackend : public SharedBufferMemoryTestBackend 
         }
 
         wgpu::SharedBufferMemoryDescriptor desc;
-        wgpu::SharedBufferMemoryD3D12SharedMemoryFileMappingHandleDescriptor sharedFileHandleDesc;
+        wgpu::SharedBufferMemoryFromWindowsHandleDescriptor sharedFileHandleDesc;
         sharedFileHandleDesc.handle = mSharedMemoryHandle;
         sharedFileHandleDesc.size = alignedHeapSize;
         desc.nextInChain = &sharedFileHandleDesc;
@@ -436,7 +436,7 @@ class SharedBufferMemoryD3D12SharedFileHandleTests : public SharedBufferMemoryTe
 
 // Ensure that importing a nullptr handle results in error.
 TEST_P(SharedBufferMemoryD3D12SharedFileHandleTests, nullResourceFailure) {
-    wgpu::SharedBufferMemoryD3D12SharedMemoryFileMappingHandleDescriptor sharedFileHandleDesc;
+    wgpu::SharedBufferMemoryFromWindowsHandleDescriptor sharedFileHandleDesc;
     sharedFileHandleDesc.handle = nullptr;
     sharedFileHandleDesc.size = kD3D12SharedBufferMemoryFileMappingHandleSizeAlignment;
     wgpu::SharedBufferMemoryDescriptor desc;
@@ -457,7 +457,7 @@ TEST_P(SharedBufferMemoryD3D12SharedFileHandleTests, MemorySizeNotAlignFailure) 
                                                   largeSize.HighPart, largeSize.LowPart, nullptr);
     EXPECT_NE(sharedMemoryHandle, nullptr);
 
-    wgpu::SharedBufferMemoryD3D12SharedMemoryFileMappingHandleDescriptor sharedFileHandleDesc;
+    wgpu::SharedBufferMemoryFromWindowsHandleDescriptor sharedFileHandleDesc;
     sharedFileHandleDesc.handle = nullptr;
     sharedFileHandleDesc.size = kUnAlignedSize;
     wgpu::SharedBufferMemoryDescriptor desc;

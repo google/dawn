@@ -401,7 +401,7 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, ExhaustiveTestAllFeatures) {
         SharedFenceEGLSync,
         DawnDeviceAllocatorControl,
         AdapterPropertiesWGPU,
-        SharedBufferMemoryD3D12SharedMemoryFileMappingHandle,
+        SharedBufferMemoryFromWindowsHandle,
         SharedTextureMemoryD3D12Resource,
         ChromiumExperimentalSamplingResourceTable,
         AtomicVec2uMinMax,

@@ -2011,7 +2011,7 @@
             {"name": "label", "type": "string view", "optional": true}
         ]
     },
-    "shared buffer memory D3D12 shared memory file mapping handle descriptor": {
+    "shared buffer memory from windows handle descriptor": {
         "category": "structure",
         "chained": "in",
         "chain roots": ["shared buffer memory descriptor"],
@@ -2556,7 +2556,7 @@
             {"value": 53, "name": "shared fence EGL sync", "tags": ["dawn", "native"]},
             {"value": 54, "name": "dawn device allocator control", "tags": ["dawn"]},
             {"value": 55, "name": "adapter properties WGPU", "tags": ["dawn"]},
-            {"value": 56, "name": "shared buffer memory D3D12 shared memory file mapping handle", "tags": ["dawn"]},
+            {"value": 56, "name": "shared buffer memory from windows handle", "tags": ["dawn"]},
             {"value": 57, "name": "shared texture memory D3D12 resource", "tags": ["dawn", "native"]},
             {"value": 58, "name": "chromium experimental sampling resource table", "tags": ["dawn"]},
             {"value": 59, "name": "atomic vec2u min max", "tags": ["dawn"]},
@@ -4177,7 +4177,7 @@
             {"value": 74, "name": "texel buffer binding layout", "tags": ["dawn"]},
             {"value": 75, "name": "shared texture memory metal end access state", "tags": ["dawn", "native"]},
             {"value": 76, "name": "adapter properties WGPU", "tags": ["dawn"]},
-            {"value": 77, "name": "shared buffer memory D3D12 shared memory file mapping handle descriptor", "tags": ["dawn", "native"]},
+            {"value": 77, "name": "shared buffer memory from windows handle descriptor", "tags": ["dawn", "native"]},
             {"value": 78, "name": "shared texture memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
             {"value": 79, "name": "request adapter options angle virtualization group", "tags": ["dawn", "native"]},
             {"value": 80, "name": "pipeline layout resource table", "tags": ["dawn"]},

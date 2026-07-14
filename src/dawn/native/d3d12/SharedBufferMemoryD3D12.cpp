@@ -211,7 +211,7 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
 ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     Device* device,
     StringView label,
-    const SharedBufferMemoryD3D12SharedMemoryFileMappingHandleDescriptor* descriptor) {
+    const SharedBufferMemoryFromWindowsHandleDescriptor* descriptor) {
     HANDLE sharedMemoryFileHandle = descriptor->handle;
     DAWN_INVALID_IF(sharedMemoryFileHandle == nullptr, "shared HANDLE is missing.");
 

@@ -1830,7 +1830,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::DawnTexelCopyBufferRowAlignment:
         case wgpu::FeatureName::FlexibleTextureViews:
         case wgpu::FeatureName::AdapterPropertiesWGPU:
-        case wgpu::FeatureName::SharedBufferMemoryD3D12SharedMemoryFileMappingHandle:
+        case wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle:
         case wgpu::FeatureName::SharedTextureMemoryD3D12Resource:
         case wgpu::FeatureName::Unorm16FormatsForExternalTexture:
         case wgpu::FeatureName::OpaqueYCbCrAndroidForExternalTexture:

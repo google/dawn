@@ -240,12 +240,12 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::BufferMapExtendedUsages);
     }
 
-    // Temporarily only enable SharedBufferMemoryD3D12SharedMemoryFileMappingHandle on cache
+    // Temporarily only enable SharedBufferMemoryFromWindowsHandle on cache
     // coherent UMA.
-    // TODO(386255678): enable SharedBufferMemoryD3D12SharedMemoryFileMappingHandle on other
+    // TODO(386255678): enable SharedBufferMemoryFromWindowsHandle on other
     // architectures.
     if (GetDeviceInfo().supportsExistingHeap && SupportsBufferMapExtendedUsages()) {
-        EnableFeature(Feature::SharedBufferMemoryD3D12SharedMemoryFileMappingHandle);
+        EnableFeature(Feature::SharedBufferMemoryFromWindowsHandle);
     }
 
     if (GetDeviceInfo().supportsTextureCompressionUnaligned) {
