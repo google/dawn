@@ -118,18 +118,29 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
         return DAWN_VALIDATION_ERROR("Failed to get inner surface capabilities");
     }
 
+    Span<const WGPUTextureFormat> innerSurfaceFormats =
+        // SAFETY: The WGPU implementation guarantees that each `things` points to at least
+        // `thingCount` valid entries.
+        DAWN_UNSAFE_BUFFERS({innerCapabilities.formats, innerCapabilities.formatCount});
+    Span<const WGPUPresentMode> innerSurfacePresentModes =
+        // SAFETY: The WGPU implementation guarantees that each `things` points to at least
+        // `thingCount` valid entries.
+        DAWN_UNSAFE_BUFFERS({innerCapabilities.presentModes, innerCapabilities.presentModeCount});
+    Span<const WGPUCompositeAlphaMode> innerSurfaceAlphaModes =
+        // SAFETY: The WGPU implementation guarantees that each `things` points to at least
+        // `thingCount` valid entries.
+        DAWN_UNSAFE_BUFFERS({innerCapabilities.alphaModes, innerCapabilities.alphaModeCount});
+
     PhysicalDeviceSurfaceCapabilities capabilities;
     capabilities.usages = static_cast<wgpu::TextureUsage>(innerCapabilities.usages);
-    for (size_t i = 0; i < innerCapabilities.formatCount; ++i) {
-        capabilities.formats.push_back(FromAPI(DAWN_UNSAFE_TODO(innerCapabilities.formats[i])));
+    for (WGPUTextureFormat format : innerSurfaceFormats) {
+        capabilities.formats.push_back(FromAPI(format));
     }
-    for (size_t i = 0; i < innerCapabilities.presentModeCount; ++i) {
-        capabilities.presentModes.push_back(
-            FromAPI(DAWN_UNSAFE_TODO(innerCapabilities.presentModes[i])));
+    for (WGPUPresentMode mode : innerSurfacePresentModes) {
+        capabilities.presentModes.push_back(FromAPI(mode));
     }
-    for (size_t i = 0; i < innerCapabilities.alphaModeCount; ++i) {
-        capabilities.alphaModes.push_back(
-            FromAPI(DAWN_UNSAFE_TODO(innerCapabilities.alphaModes[i])));
+    for (WGPUCompositeAlphaMode mode : innerSurfaceAlphaModes) {
+        capabilities.alphaModes.push_back(FromAPI(mode));
     }
 
     mBackend->GetFunctions().surfaceCapabilitiesFreeMembers(innerCapabilities);

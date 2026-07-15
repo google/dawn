@@ -99,6 +99,7 @@ bool Buffer::IsCPUWritableAtCreation() const {
 }
 
 MaybeError Buffer::MapAtCreationImpl() {
+    // TODO(https://crbug.com/501491697): Spanify along with GetMappedPointerImpl.
     mMappedData = ToBackend(GetDevice())->wgpu->bufferGetMappedRange(mInnerHandle, 0, GetSize());
     return {};
 }
@@ -138,9 +139,11 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     // The frontend asks that the pointer returned by GetMappedPointer is from the start of
     // the resource but WGPU gives us the pointer at offset. Remove the offset.
     if (bool{mode & wgpu::MapMode::Write}) {
+        // TODO(https://crbug.com/501491697): Spanify along with GetMappedPointerImpl.
         mMappedData = DAWN_UNSAFE_TODO(
             static_cast<uint8_t*>(wgpu.bufferGetMappedRange(mInnerHandle, offset, size)) - offset);
     } else if (bool{mode & wgpu::MapMode::Read}) {
+        // TODO(https://crbug.com/501491697): Spanify along with GetMappedPointerImpl.
         mMappedData =
             DAWN_UNSAFE_TODO(static_cast<uint8_t*>(const_cast<void*>(
                                  wgpu.bufferGetConstMappedRange(mInnerHandle, offset, size))) -
