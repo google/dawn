@@ -387,10 +387,9 @@ void Buffer::CopyFromStaging(BufferBase* staging,
                              uint64_t sourceOffset,
                              uint64_t destinationOffset,
                              uint64_t size) {
-    std::byte* ptr = reinterpret_cast<std::byte*>(staging->GetMappedPointer());
-    auto src = DAWN_UNSAFE_TODO(Span<std::byte>{ptr + sourceOffset, checked_cast<size_t>(size)});
     // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-    std::ranges::copy(src, mBackingData.begin());
+    std::ranges::copy(staging->GetCurrentMapping().GetMappedSubspan(sourceOffset, size),
+                      mBackingData.begin() + destinationOffset);
 }
 
 void Buffer::DoWriteBuffer(uint64_t bufferOffset, Span<const std::byte> data) {

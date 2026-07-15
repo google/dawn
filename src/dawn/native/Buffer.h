@@ -163,7 +163,17 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     void SetInitialized(bool initialized) override;
     bool IsInitialized() const override;
 
-    void* GetMappedPointer();
+    struct CurrentMapping {
+        // The region of valid memory that is mapped. Empty if not mapped.
+        Span<std::byte> mappedSpan;
+        // Offset from the base pointer of the whole buffer to the beginning of mValidSpan.
+        size_t offsetFromBufferStartToMappedSpan = 0;
+
+        Span<std::byte> GetMappedSubspan(size_t offsetFromBufferStartToSubrange,
+                                         size_t subrangeSize) const;
+    };
+    CurrentMapping GetCurrentMapping();
+
     void* GetMappedRange(size_t offset, size_t size, bool writable = true);
 
     // Internal non-reentrant version of Unmap. This is used in workarounds or additional copies.
@@ -313,9 +323,19 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
 
     // Mapping specific states.
     wgpu::MapMode mMapMode = wgpu::MapMode::None;
+    // Offset from the start of the buffer to the start of the mapped region. In other words,
+    // (mMappedPointer + mMapOffset) gives the first valid address of the mapping region.
     size_t mMapOffset = 0;
+    // Map size we expose to the API.
     size_t mMapSize = 0;
-    // TODO(crbug.com/485825675): Investigate this dangling pointers.
+    // Size of the actually accessible region of memory.
+    size_t mAllocatedMapSize = 0;
+    // Pointer to the beginning of the buffer resource (or where the beginning of the buffer
+    // resource *would* be), if it's mapped. This pointer MUST be offset before being accessed, as
+    // the beginning of the pointed region might not exist at all. GetCurrentMapping() returns this
+    // in a structure that handles this offsetting.
+    // TODO(https://crbug.com/501491697): Spanify this pointer.
+    // TODO(https://crbug.com/485825675): Investigate this dangling pointer.
     raw_ptr<void, DanglingUntriaged> mMappedPointer = nullptr;
 };
 

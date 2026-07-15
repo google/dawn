@@ -203,10 +203,9 @@ MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
             // it is never called again after the initial buffer creation, so zero-initialize
             // manually here.
             if (!descriptor->initialized) {
-                void* ptr = resource->GetMappedPointer();
-                DAWN_ASSERT(ptr != nullptr);
-                std::span<uint8_t> data(static_cast<uint8_t*>(ptr), resource->GetAllocatedSize());
-                std::ranges::fill(data, uint8_t{0});
+                auto mapping = resource->GetCurrentMapping();
+                DAWN_ASSERT(!mapping.mappedSpan.empty());
+                std::ranges::fill(mapping.mappedSpan, std::byte{0});
             }
             resource->SetInitialized(true);
         } else {

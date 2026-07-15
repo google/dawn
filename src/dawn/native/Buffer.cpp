@@ -87,7 +87,7 @@ class ErrorBuffer final : public BufferBase {
         if (size < uint64_t(std::numeric_limits<size_t>::max())) {
             mFakeMappedData =
                 // SAFETY: Frontend is responsible for initializing MapAtCreation memory.
-                DAWN_UNSAFE_BUFFERS(HeapArray<uint8_t>::Uninit(size, std::nothrow));
+                DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(size, std::nothrow));
         }
 
         if (!mFakeMappedData) {
@@ -108,7 +108,7 @@ class ErrorBuffer final : public BufferBase {
 
     void UnmapImpl(BufferState oldState, BufferState newState) override { mFakeMappedData = {}; }
 
-    HeapArray<uint8_t> mFakeMappedData;
+    HeapArray<std::byte> mFakeMappedData;
 };
 
 // GetMappedRange on a zero-sized buffer returns a pointer to this value.
@@ -590,8 +590,9 @@ MaybeError BufferBase::MapAtCreation() {
     if (GetSize() == 0) {
         return {};
     }
-    size_t size = GetAllocatedSize();
-    void* ptr = GetMappedPointer();
+    auto mapping = GetCurrentMapping();
+    DAWN_ASSERT(mapping.offsetFromBufferStartToMappedSpan == 0);
+    DAWN_CHECK(mapping.mappedSpan.size() == GetAllocatedSize());
 
     DeviceBase* device = GetDevice();
     // Don't zero-initialize buffers created from shared buffer memory at creation time.
@@ -606,11 +607,11 @@ MaybeError BufferBase::MapAtCreation() {
         // actually get initialized when the staging data is copied in. (But we mark the main buffer
         // as initialized now.)
         if (!usingStagingBuffer) {
-            DAWN_UNSAFE_TODO(memset(ptr, uint8_t(0u), size));
+            std::ranges::fill(mapping.mappedSpan, std::byte{0});
             device->IncrementLazyClearCountForTesting();
         }
     } else if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-        DAWN_UNSAFE_TODO(memset(ptr, uint8_t(1u), size));
+        std::ranges::fill(mapping.mappedSpan, std::byte{1});
     }
     // Mark the buffer as initialized since we don't want to later clear it using the GPU since that
     // would overwrite what the client wrote using the CPU.
@@ -652,6 +653,7 @@ ResultOrError<bool> BufferBase::MapAtCreationInternal() {
     mMapMode = wgpu::MapMode::Write;
     mMapOffset = 0;
     mMapSize = mSize;
+    mAllocatedMapSize = GetAllocatedSize();
     mStagingBuffer = std::move(stagingBuffer);
     mIsMappedAtCreation = true;
     DAWN_TRY(FinalizeMap(BufferState::MappedAtCreation));
@@ -765,6 +767,7 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
             mMapMode = mode;
             mMapOffset = offset;
             mMapSize = size;
+            mAllocatedMapSize = size;
 
             event =
                 AcquireRef(new MapAsyncEvent(GetDevice(), this, callbackInfo, mLastUsageSerial));
@@ -781,11 +784,11 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
 }
 
 void* BufferBase::APIGetMappedRange(size_t offset, size_t size) {
-    return GetMappedRange(offset, size, true);
+    return GetMappedRange(offset, size == wgpu::kWholeMapSize ? mSize - offset : size, true);
 }
 
 const void* BufferBase::APIGetConstMappedRange(size_t offset, size_t size) {
-    return GetMappedRange(offset, size, false);
+    return GetMappedRange(offset, size == wgpu::kWholeMapSize ? mSize - offset : size, false);
 }
 
 wgpu::Status BufferBase::APIWriteMappedRange(size_t offset, Span<const std::byte> data) {
@@ -812,19 +815,33 @@ wgpu::Status BufferBase::APIReadMappedRange(size_t offset, Span<std::byte> data)
     return wgpu::Status::Success;
 }
 
-void* BufferBase::GetMappedPointer() {
-    if (!IsMappedState(mState.load(std::memory_order::acquire))) {
-        return nullptr;
-    }
-    return mMappedPointer.get();
+Span<std::byte> BufferBase::CurrentMapping::GetMappedSubspan(size_t offsetFromBufferStartToSubrange,
+                                                             size_t subrangeSize) const {
+    DAWN_CHECK(offsetFromBufferStartToSubrange >= offsetFromBufferStartToMappedSpan);
+    size_t rangeOffsetFromMappedSpan =
+        offsetFromBufferStartToSubrange - offsetFromBufferStartToMappedSpan;
+
+    return mappedSpan.subspan(rangeOffsetFromMappedSpan, subrangeSize);
 }
 
+BufferBase::CurrentMapping BufferBase::GetCurrentMapping() {
+    if (!IsMappedState(mState.load(std::memory_order::acquire))) {
+        return {};
+    }
+
+    auto span = DAWN_UNSAFE_TODO(Span<std::byte>{
+        static_cast<std::byte*>(mMappedPointer.get()) + mMapOffset, mAllocatedMapSize});
+    return {span, mMapOffset};
+}
+
+// TODO(https://crbug.com/501491697): Return a span here for internal use, only APIGetMappedRange
+// should be unsafe.
 void* BufferBase::GetMappedRange(size_t offset, size_t size, bool writable) {
+    DAWN_ASSERT(size != wgpu::kWholeMapSize);
     if (!CanGetMappedRange(writable, offset, size)) {
         return nullptr;
     }
-    uint8_t* start = static_cast<uint8_t*>(GetMappedPointer());
-    return start == nullptr ? nullptr : DAWN_UNSAFE_TODO(start + offset);
+    return GetCurrentMapping().GetMappedSubspan(offset, size).data();
 }
 
 void BufferBase::APIDestroy() {
@@ -1031,14 +1048,15 @@ bool BufferBase::CanGetMappedRange(bool writable, size_t offset, size_t size) co
         return false;
     }
 
-    size_t rangeSize = size == WGPU_WHOLE_MAP_SIZE ? mSize - offset : size;
+    // Defaulting should have already been done. If not we'll fail the map on the next line.
+    DAWN_ASSERT(size != wgpu::kWholeMapSize);
 
-    if (rangeSize % 4 != 0 || rangeSize > mMapSize) {
+    if (size % 4 != 0 || size > mMapSize) {
         return false;
     }
 
     size_t offsetInMappedRange = offset - mMapOffset;
-    if (offsetInMappedRange > mMapSize - rangeSize) {
+    if (offsetInMappedRange > mMapSize - size) {
         return false;
     }
 
