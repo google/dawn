@@ -33,6 +33,11 @@ declare_args() {
   }
 
   if (!defined(mesa_options)) {
-    mesa_options = []
+    mesa_options = [
+      "-Dgallium-drivers=llvmpipe",
+      "-Dvulkan-drivers=swrast",
+      "-Dshared-llvm=disabled",
+      "-Dcpp_rtti=false",
+    ]
   }
 }
