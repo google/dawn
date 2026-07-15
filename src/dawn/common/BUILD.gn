@@ -159,7 +159,6 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "Algebra.h",
       "AlignedAlloc.cpp",
       "AlignedAlloc.h",
-      "Alloc.h",
       "Atomic.h",
       "BitSetRangeIterator.h",
       "ColorSpace.h",
