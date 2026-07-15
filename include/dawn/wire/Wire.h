@@ -32,6 +32,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <span>
 
 #include "dawn/wire/dawn_wire_export.h"
 
@@ -61,7 +62,15 @@ class DAWN_WIRE_EXPORT CommandHandler {
     CommandHandler(const CommandHandler& rhs) = delete;
     CommandHandler& operator=(const CommandHandler& rhs) = delete;
 
-    virtual const volatile char* HandleCommands(const volatile char* commands, size_t size) = 0;
+    virtual const volatile char* HandleCommands(const volatile char* commands, size_t size) {
+        // TODO(https://crbug.com/528027992): Remove in favor of the version below once Chromium
+        // implements it.
+        return nullptr;
+    }
+    virtual bool HandleCommands(std::span<const volatile std::byte> commands) {
+        // TODO(https://crbug.com/528027992): Make pure virtual once Chromium implements it.
+        return {};
+    }
 };
 
 // Handle struct that are used to uniquely represent an object of a particular type in the wire.
