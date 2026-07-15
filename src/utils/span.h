@@ -28,6 +28,7 @@
 #ifndef SRC_UTILS_SPAN_H_
 #define SRC_UTILS_SPAN_H_
 
+#include <algorithm>
 #include <concepts>
 #include <cstdint>
 #include <limits>
@@ -35,6 +36,7 @@
 #include <new>
 #include <ranges>
 #include <span>
+#include <utility>
 
 #include "src/utils/numeric.h"
 #include "src/utils/underlying_type.h"
@@ -275,7 +277,6 @@ class SpanBase {
     //
     //  - constructor from (&T)[N]
     //  - operator ==, operator <=>
-    //  - copy_from, copy_prefix_from
     //  - take_first_elem
     //  - get_at
     //  - to_fixed_extent
@@ -291,6 +292,33 @@ class SpanBase {
         const auto [first, rest] = SplitAt(offset);
         *this = rest;
         return first;
+    }
+
+    // Performs a deep copy of the elements referenced by `range` to those referenced by `this`.
+    // The spans must be the same size.
+    // Mirrors Chromium's base::span::copy_from but does not implement the constexpr version since
+    // it is not currently needed.
+    template <typename R>
+        requires(CompatibleRange<const T, Index, R> && !std::is_const_v<T>)
+    void CopyFrom(R&& range) {
+        SpanBase<const T, Index, const T*> other(std::forward<R>(range));
+        DAWN_CHECK(other.size() == size());
+        // Using `<=` to compare pointers to different allocations is UB;
+        // delegating to the STL is the legal workaround:
+        // https://eel.is/c++draft/defns.order.ptr
+        std::less_equal{}(data(), other.data()) ? std::ranges::copy(other, begin())
+                                                : std::ranges::copy_backward(other, end());
+    }
+
+    // Like `CopyFrom()`, but allows the source to be smaller than this span, and will only copy as
+    // far as the source size, leaving the remaining elements of this span unwritten. Mirrors
+    // Chromium's base::span::copy_prefix_from but does not implement the constexpr version since it
+    // is not currently needed.
+    template <typename R>
+        requires(CompatibleRange<const T, Index, R> && !std::is_const_v<T>)
+    void CopyPrefixFrom(R&& range) {
+        SpanBase<const T, Index, const T*> other(std::forward<R>(range));
+        first(other.size()).CopyFrom(other);
     }
 
   private:

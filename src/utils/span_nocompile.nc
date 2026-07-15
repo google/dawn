@@ -198,4 +198,30 @@ void TestReinterpretSpan() {
     }
 }
 
+void TestCopyFromIncompatibleTypes() {
+    std::array<int, 3> dst_data;
+    Span<int> dst{dst_data};
+
+    // Different element type
+    {
+        std::array<float, 3> src;
+        dst.CopyFrom(src);  // expected-error {{no matching member function for call}}
+        dst.CopyPrefixFrom(src);  // expected-error {{no matching member function for call}}
+    }
+
+    // Different index type
+    {
+        dst.CopyFrom(FakeTypedRange()); // expected-error {{no matching member function for call}}
+        dst.CopyPrefixFrom(FakeTypedRange()); // expected-error {{no matching member function for call}}
+    }
+
+    // Const destination
+    {
+        Span<const int> const_dst{dst_data};
+        std::array<int, 3> src = {1, 2, 3};
+        const_dst.CopyFrom(src); // expected-error {{no matching member function for call}}
+        const_dst.CopyPrefixFrom(src); // expected-error {{no matching member function for call}}
+    }
+}
+
 }  // namespace dawn

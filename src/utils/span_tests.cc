@@ -27,7 +27,9 @@
 
 #include <algorithm>
 #include <array>
+#include <vector>
 
+#include "gmock/gmock.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/utils/gtest.h"
 #include "src/utils/span.h"
@@ -35,6 +37,8 @@
 
 namespace dawn {
 namespace {
+
+using testing::ElementsAreArray;
 
 static constexpr std::array<int, 5> kSpanData = {1, 2, 3, 4, 5};
 
@@ -898,6 +902,130 @@ TEST(SpanDeathTest, TakeFirstOOB) {
 
     sp.TakeFirst(sp.size());
     EXPECT_DEATH_IF_SUPPORTED(sp.TakeFirst(sp.size() + 1), "");
+}
+
+TEST(SpanTest, CopyFrom) {
+    // Copy from implicitly constructed span (std::array)
+    {
+        std::array<int, 3> src = {1, 2, 3};
+        std::array<int, 3> dst = {0, 0, 0};
+        Span<int> dst_sp{dst};
+
+        dst_sp.CopyFrom(src);
+        EXPECT_THAT(dst, ElementsAreArray(src));
+    }
+
+    // Copy from heap array (std::vector)
+    {
+        std::vector<int> src = {4, 5, 6};
+        std::array<int, 3> dst = {0, 0, 0};
+        Span<int> dst_sp{dst};
+
+        dst_sp.CopyFrom(src);
+        EXPECT_THAT(dst, ElementsAreArray(src));
+    }
+
+    // Test different index types
+    {
+        std::array<int, 3> src = {1, 2, 3};
+        std::array<int, 3> dst = {0, 0, 0};
+        // SAFETY: This is viewing dst, just with typed indices.
+        ityp::span<Index, int> DAWN_UNSAFE_BUFFERS(dst_sp(dst.data(), Index{3u}));
+        // SAFETY: This is viewing src, just with typed indices.
+        ityp::span<Index, const int> DAWN_UNSAFE_BUFFERS(src_sp(src.data(), Index{3u}));
+
+        dst_sp.CopyFrom(src_sp);
+        EXPECT_THAT(dst, ElementsAreArray(src));
+    }
+}
+
+TEST(SpanTest, CopyFromOverlapping) {
+    // Forward copy (src before dst)
+    {
+        std::array<int, 5> data = {1, 2, 3, 4, 5};
+        Span<int> sp{data};
+        sp.subspan(1, 3).CopyFrom(sp.subspan(0, 3));
+        EXPECT_THAT(data, testing::ElementsAre(1, 1, 2, 3, 5));
+    }
+
+    // Backward copy (dst before src)
+    {
+        std::array<int, 5> data = {1, 2, 3, 4, 5};
+        Span<int> sp{data};
+        sp.subspan(0, 3).CopyFrom(sp.subspan(1, 3));
+        EXPECT_THAT(data, testing::ElementsAre(2, 3, 4, 4, 5));
+    }
+}
+
+TEST(SpanDeathTest, CopyFromSizeMismatch) {
+    std::array<int, 3> src = {1, 2, 3};
+    std::array<int, 2> dst = {0, 0};
+    Span<int> dst_sp{dst};
+    Span<const int> src_sp{src};
+
+    EXPECT_DEATH_IF_SUPPORTED(dst_sp.CopyFrom(src_sp), "");
+}
+
+TEST(SpanTest, CopyPrefixFrom) {
+    // Copy from implicitly constructed span (std::array)
+    {
+        std::array<int, 2> src = {1, 2};
+        std::array<int, 3> dst = {0, 0, 0};
+        Span<int> dst_sp{dst};
+
+        dst_sp.CopyPrefixFrom(src);
+        EXPECT_THAT(dst, testing::ElementsAre(1, 2, 0));
+    }
+
+    // Copy from heap array (std::vector)
+    {
+        std::vector<int> src = {4};
+        std::array<int, 3> dst = {0, 0, 0};
+        Span<int> dst_sp{dst};
+
+        dst_sp.CopyPrefixFrom(src);
+        EXPECT_THAT(dst, testing::ElementsAre(4, 0, 0));
+    }
+
+    // Test different index types
+    {
+        std::array<int, 2> src = {1, 2};
+        std::array<int, 3> dst = {0, 0, 0};
+        // SAFETY: This is viewing dst, just with typed indices.
+        ityp::span<Index, int> DAWN_UNSAFE_BUFFERS(dst_sp(dst.data(), Index{3u}));
+        // SAFETY: This is viewing src, just with typed indices.
+        ityp::span<Index, const int> DAWN_UNSAFE_BUFFERS(src_sp(src.data(), Index{2u}));
+
+        dst_sp.CopyPrefixFrom(src_sp);
+        EXPECT_THAT(dst, testing::ElementsAre(1, 2, 0));
+    }
+}
+
+TEST(SpanTest, CopyPrefixFromOverlapping) {
+    // Forward copy
+    {
+        std::array<int, 5> data = {1, 2, 3, 4, 5};
+        Span<int> sp{data};
+        sp.subspan(1, 4).CopyPrefixFrom(sp.subspan(0, 3));
+        EXPECT_THAT(data, testing::ElementsAre(1, 1, 2, 3, 5));
+    }
+
+    // Backward copy
+    {
+        std::array<int, 5> data = {1, 2, 3, 4, 5};
+        Span<int> sp{data};
+        sp.subspan(0, 4).CopyPrefixFrom(sp.subspan(1, 3));
+        EXPECT_THAT(data, testing::ElementsAre(2, 3, 4, 4, 5));
+    }
+}
+
+TEST(SpanDeathTest, CopyPrefixFromSizeMismatch) {
+    std::array<int, 3> src = {1, 2, 3};
+    std::array<int, 2> dst = {0, 0};
+    Span<int> dst_sp{dst};
+    Span<const int> src_sp{src};
+
+    EXPECT_DEATH_IF_SUPPORTED(dst_sp.CopyPrefixFrom(src_sp), "");
 }
 
 }  // anonymous namespace
