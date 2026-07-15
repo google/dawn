@@ -499,6 +499,20 @@ template <typename R, typename... Args, typename T>
 struct CallbackTypeBase<R, std::tuple<Args...>, T> {
     using Callback = R (Args..., T);
 };
+
+// Noexcept specializations of CallbackTypeBase.
+template <typename R, typename... Args>
+struct CallbackTypeBase<R, std::tuple<Args...>, std::true_type> {
+    using Callback = R (Args...) noexcept;
+};
+template <typename R, typename... Args>
+struct CallbackTypeBase<R, std::tuple<Args...>, void, std::true_type> {
+    using Callback = R (Args...) noexcept;
+};
+template <typename R, typename... Args, typename T>
+struct CallbackTypeBase<R, std::tuple<Args...>, T, std::true_type> {
+    using Callback = R (Args..., T) noexcept;
+};
 }  // namespace detail
 
 //* Special callbacks that require some custom code generation.
@@ -773,10 +787,36 @@ struct CppFTraitsImpl<CppFT, R(*)(CppArgs...), T> {
     }(std::make_index_sequence<std::is_same_v<T, Untyped> ? NumCppArgs : NumCppArgs - 1>{})
     )::type;
 };
+// Specialization for noexcept raw function pointers.
+template <typename CppFT, typename R, typename... CppArgs, typename T>
+struct CppFTraitsImpl<CppFT, R(*)(CppArgs...) noexcept, T> {
+    using PtrT = R(*)(CppArgs...) noexcept;
+    using ReturnT = R;
+    static constexpr bool capturing = false;
+
+    static constexpr size_t NumCppArgs = sizeof...(CppArgs);
+    using BaseArgsTuple = decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
+        return std::type_identity<std::tuple<std::tuple_element_t<Is, std::tuple<CppArgs...>>...>>{};
+    }(std::make_index_sequence<std::is_same_v<T, Untyped> ? NumCppArgs : NumCppArgs - 1>{})
+    )::type;
+};
 // Specialization for member function pointers (lambdas);
 template <typename CppFT, typename R, typename C, typename... CppArgs, typename T>
 struct CppFTraitsImpl<CppFT, R(C::*)(CppArgs...) const, T> {
     using PtrT = R(*)(CppArgs...);
+    using ReturnT = R;
+    static constexpr bool capturing = !std::is_convertible_v<CppFT, PtrT>;
+
+    static constexpr size_t NumCppArgs = sizeof...(CppArgs);
+    using BaseArgsTuple = decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
+        return std::type_identity<std::tuple<std::tuple_element_t<Is, std::tuple<CppArgs...>>...>>{};
+    }(std::make_index_sequence<std::is_same_v<T, Untyped> ? NumCppArgs : NumCppArgs - 1>{})
+    )::type;
+};
+// Specialization for noexcept member function pointers (noexcept lambdas);
+template <typename CppFT, typename R, typename C, typename... CppArgs, typename T>
+struct CppFTraitsImpl<CppFT, R(C::*)(CppArgs...) const noexcept, T> {
+    using PtrT = R(*)(CppArgs...) noexcept;
     using ReturnT = R;
     static constexpr bool capturing = !std::is_convertible_v<CppFT, PtrT>;
 
@@ -791,6 +831,9 @@ struct CppFTraits : CppFTraitsImpl<CppFT, decltype(&CppFT::operator()), T> {};
 template <typename R, typename... CppArgs, typename T>
 struct CppFTraits<R(*)(CppArgs...), T> :
     CppFTraitsImpl<R(*)(CppArgs...), R(*)(CppArgs...), T> {};
+template <typename R, typename... CppArgs, typename T>
+struct CppFTraits<R(*)(CppArgs...) noexcept, T> :
+    CppFTraitsImpl<R(*)(CppArgs...) noexcept, R(*)(CppArgs...) noexcept, T> {};
 
 // CArgConverter are specialization structs that specialize a conversion from a C CallbackInfo's
 // callback argument types to a set of valid C++ types. These specializations provide us a way to
