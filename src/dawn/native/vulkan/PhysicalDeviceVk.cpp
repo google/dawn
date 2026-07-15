@@ -1288,8 +1288,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->ForceSet(Toggle::UseSpirv14, false);
     }
 
+    // TODO(b/379673383): Disabled on Pixel10 devices.
     if (GetDeviceInfo().HasExt(DeviceExt::MaximalReconvergence) &&
-        GetDeviceInfo().shaderMaximalReconvergenceFeatures.shaderMaximalReconvergence == VK_TRUE) {
+        GetDeviceInfo().shaderMaximalReconvergenceFeatures.shaderMaximalReconvergence == VK_TRUE &&
+        !IsAndroidImgTec()) {
         deviceToggles->Default(
             Toggle::UseSpirvReconvergenceMode,
             platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirvReconvergenceMode));
@@ -1298,7 +1300,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
                        .shaderSubgroupUniformControlFlowFeatures.shaderSubgroupUniformControlFlow ==
                    VK_TRUE &&
                (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) &&
-               (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_FRAGMENT_BIT)) {
+               (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_FRAGMENT_BIT) &&
+               !IsAndroidImgTec()) {
         deviceToggles->Default(
             Toggle::UseSpirvReconvergenceMode,
             platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirvReconvergenceMode));
