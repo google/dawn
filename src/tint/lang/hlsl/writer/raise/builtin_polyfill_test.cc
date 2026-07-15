@@ -48,7 +48,10 @@ namespace {
 
 struct HlslWriter_BuiltinPolyfillTest : public core::ir::transform::TransformTest {
   protected:
-    void SetUp() override { mod.properties.Add(core::ir::Property::kAllow16BitFloats); }
+    void SetUp() override {
+        mod.properties.Add(core::ir::Property::kAllow8BitIntegers,
+                           core::ir::Property::kAllow16BitFloats);
+    }
 };
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastIdentity) {

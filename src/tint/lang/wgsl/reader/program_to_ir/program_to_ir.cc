@@ -1167,6 +1167,10 @@ class Impl {
                         inst = call;
                     }
                 } else if (sem->Target()->As<sem::ValueConstructor>()) {
+                    const core::type::SubgroupMatrix* sm = ty->As<core::type::SubgroupMatrix>();
+                    if (sm && sm->Type()->IsAnyOf<core::type::I8, core::type::U8>()) {
+                        impl.mod.properties.Add(core::ir::Property::kAllow8BitIntegers);
+                    }
                     inst = impl.builder_.Construct(ty, std::move(args));
                 } else if (sem->Target()->Is<sem::ValueConversion>()) {
                     inst = impl.builder_.Convert(ty, args[0]);
@@ -1413,6 +1417,11 @@ class Impl {
                 if (store_ty->Is<core::type::Buffer>()) {
                     mod.properties.Add(core::ir::Property::kAllowBufferTypes);
                 }
+
+                const core::type::SubgroupMatrix* sm = store_ty->As<core::type::SubgroupMatrix>();
+                if (sm && sm->Type()->IsAnyOf<core::type::I8, core::type::U8>()) {
+                    mod.properties.Add(core::ir::Property::kAllow8BitIntegers);
+                }
             },
             [&](const ast::Let* l) {
                 auto init = EmitValueExpression(l->initializer);
@@ -1426,6 +1435,12 @@ class Impl {
                 if (init->Type()->IsAnyOf<core::type::Texture, core::type::Sampler>()) {
                     scopes_.Set(l->name->symbol, init);
                     return;
+                }
+
+                const core::type::SubgroupMatrix* sm =
+                    init->Type()->As<core::type::SubgroupMatrix>();
+                if (sm && sm->Type()->IsAnyOf<core::type::I8, core::type::U8>()) {
+                    mod.properties.Add(core::ir::Property::kAllow8BitIntegers);
                 }
 
                 auto* let = current_block_->Append(builder_.Let(l->name->symbol.Name(), init));

@@ -1634,6 +1634,8 @@ TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixLoad_NegativeOffset) {
 }
 
 TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixStore_i8_i32_InBoundsOffset) {
+    mod.properties.Add(Property::kAllow8BitIntegers);
+
     auto* mat_ty = ty.subgroup_matrix_left(ty.i8(), 8u, 8u);
     auto* arr_ptr_ty = ty.ptr<workgroup, array<i32, 8>>();
 
@@ -1653,6 +1655,8 @@ TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixStore_i8_i32_InBoundsOffset) {
 }
 
 TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixStore_i8_i32_OOBOffset) {
+    mod.properties.Add(Property::kAllow8BitIntegers);
+
     auto* mat_ty = ty.subgroup_matrix_left(ty.i8(), 8u, 8u);
     auto* arr_ptr_ty = ty.ptr<workgroup, array<i32, 8>>();
 

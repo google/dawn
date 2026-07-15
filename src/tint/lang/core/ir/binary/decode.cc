@@ -1146,6 +1146,9 @@ struct Decoder {
             err_ << "invalid subtype for subgroup matrix\n";
             return mod_out_.Types().invalid();
         }
+        if (el_ty->IsAnyOf<core::type::I8, core::type::U8>()) {
+            mod_out_.properties.Add(core::ir::Property::kAllow8BitIntegers);
+        }
         return mod_out_.Types().subgroup_matrix(kind, el_ty, subgroup_matrix.columns(),
                                                 subgroup_matrix.rows());
     }

@@ -6681,7 +6681,8 @@ TEST_P(IR_RobustnessTest, BufferArrayView_ArrayU32_SubgroupMatrixUse) {
 }
 
 TEST_P(IR_RobustnessTest, BufferArrayView_ArrayU32_SubgroupMatrixUse_Max) {
-    mod.properties.Add(Property::kAllowBufferTypes);
+    mod.properties.Add(Property::kAllow8BitIntegers, Property::kAllowBufferTypes);
+
     auto* mat1_ty = ty.subgroup_matrix_left(ty.u32(), 8, 8);
     auto* mat2_ty = ty.subgroup_matrix_left(ty.u8(), 8, 8);
     auto* func = b.Function("foo", ty.void_());

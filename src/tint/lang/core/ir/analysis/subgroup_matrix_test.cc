@@ -283,6 +283,8 @@ INSTANTIATE_TEST_SUITE_P(,
                              }));
 
 TEST_F(IR_SubgroupMatrixAnalysis, Config_Multiple) {
+    mod.properties.Add(Property::kAllow8BitIntegers);
+
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {  //
         b.Var("v1", ty.ptr(function, ty.subgroup_matrix_left(ty.f16(), 8u, 8u)));
@@ -673,6 +675,8 @@ TEST_F(IR_SubgroupMatrixAnalysis, MultiplyAccumulate) {
 }
 
 TEST_F(IR_SubgroupMatrixAnalysis, Multiply_DifferentResultType) {
+    mod.properties.Add(Property::kAllow8BitIntegers);
+
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {  //
         auto* left =

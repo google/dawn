@@ -1074,6 +1074,11 @@ using Type_SubgroupMatrixComponentType = TypeTest;
 TEST_P(Type_SubgroupMatrixComponentType, Test) {
     bool allowed = std::get<0>(GetParam());
     auto* type = std::get<1>(GetParam())(ty);
+
+    if (type->IsAnyOf<core::type::I8, core::type::U8>()) {
+        mod.properties.Add(Property::kAllow8BitIntegers);
+    }
+
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         b.Var("m", AddressSpace::kFunction, ty.subgroup_matrix_result(type, 8u, 8u));

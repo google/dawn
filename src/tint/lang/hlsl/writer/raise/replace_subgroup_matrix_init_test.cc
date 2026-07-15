@@ -39,7 +39,10 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::hlsl::writer::raise {
 namespace {
 
-using HlslWriterReplaceSubgroupMatrixInitTest = core::ir::transform::TransformTest;
+struct HlslWriterReplaceSubgroupMatrixInitTest : public core::ir::transform::TransformTest {
+  protected:
+    void SetUp() override { mod.properties.Add(core::ir::Property::kAllow8BitIntegers); }
+};
 
 TEST_F(HlslWriterReplaceSubgroupMatrixInitTest, Var_Zero) {
     auto* func = b.ComputeFunction("foo");

@@ -394,8 +394,7 @@ class Structural {
 
     /// Checks that 8-bit integer types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
-    /// @param parent the parent type for the 8-bit type
-    bool Check8BitInteger(std::function<diag::Diagnostic&()>& diag, const core::type::Type* parent);
+    bool Check8BitInteger(std::function<diag::Diagnostic&()>& diag);
     /// Checks that 16-bit integer types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
     bool Check16BitInteger(std::function<diag::Diagnostic&()>& diag);
@@ -791,7 +790,7 @@ class Structural {
     Hashmap<const ir::Block*, const ir::Function*, 64> block_to_function_{};
     Hashmap<const ir::Function*, Hashset<const ir::UserCall*, 4>, 4> user_func_calls_;
     Hashmap<const ir::Instruction*, SupportedStages, 4> stage_restricted_instructions_;
-    Hashset<const core::type::Type*, 16> validated_types_{};
+    Hashset<const core::type::Type*, 16> already_validated_types_{};
 };
 
 }  // namespace tint::core::ir::validator

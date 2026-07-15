@@ -75,21 +75,6 @@
 namespace tint::core::ir::validator {
 namespace {
 
-struct Pending {
-    const core::type::Type* type = nullptr;
-    const core::type::Type* parent = nullptr;
-
-    bool operator==(const Pending& other) const {
-        return type == other.type && parent == other.parent;
-    }
-
-    struct Hasher {
-        HashCode operator()(const Pending& p) const {
-            return HashCombine(Hash(p.type), Hash(p.parent));
-        }
-    };
-};
-
 /// @returns the parent block of @p block
 const Block* ParentBlockOf(const Block* block) {
     if (auto* parent = block->Parent()) {
@@ -657,12 +642,12 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
         return;
     }
 
-    if (!ir_.properties.Contains(Property::kAllowNonCoreTypes) && !IsCoreType(root)) {
-        diag() << "non-core types not allowed in core IR";
+    if (!already_validated_types_.Add(root)) {
         return;
     }
 
-    if (!validated_types_.Add(root)) {
+    if (!ir_.properties.Contains(Property::kAllowNonCoreTypes) && !IsCoreType(root)) {
+        diag() << "non-core types not allowed in core IR";
         return;
     }
 
@@ -671,10 +656,10 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
         addrspace = mv->AddressSpace();
     }
 
-    Vector<Pending, 8> stack{Pending{root, nullptr}};
-    Hashset<Pending, 8, Pending::Hasher> seen{};
+    Vector<const core::type::Type*, 8> stack{root};
+    Hashset<const core::type::Type*, 8> seen{};
     while (!stack.IsEmpty()) {
-        auto [ty, parent] = stack.Pop();
+        auto ty = stack.Pop();
         if (!ty) {
             continue;
         }
@@ -688,8 +673,8 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             [&](const core::type::Struct* str) { return CheckStruct(str, diag); },
             [&](const core::type::Reference* ref) { return CheckRef(ref, diag, root); },
             [&](const core::type::Pointer* ptr) { return CheckPtr(ptr, diag); },
-            [&](const core::type::I8*) { return Check8BitInteger(diag, parent); },
-            [&](const core::type::U8*) { return Check8BitInteger(diag, parent); },
+            [&](const core::type::I8*) { return Check8BitInteger(diag); },
+            [&](const core::type::U8*) { return Check8BitInteger(diag); },
             [&](const core::type::U16*) { return Check16BitInteger(diag); },
             [&](const core::type::U64*) { return Check64BitInteger(diag); },
             [&](const core::type::F16*) { return Check16BitFloat(diag); },
@@ -716,9 +701,8 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
         }
 
         if (auto* view = ty->As<core::type::MemoryView>()) {
-            Pending next{view->StoreType(), ty};
-            if (seen.Add(next)) {
-                stack.Push(next);
+            if (seen.Add(view->StoreType())) {
+                stack.Push(view->StoreType());
             }
             continue;
         }
@@ -728,9 +712,8 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
         if (type_count.type) {
             // Every element has the same type (e.g. array, vector, matrix, ...), so validate that
             // type once if it has not been seen before.
-            Pending next{type_count.type, ty};
-            if (seen.Add(next)) {
-                stack.Push(next);
+            if (seen.Add(type_count.type)) {
+                stack.Push(type_count.type);
             }
             continue;
         }
@@ -739,9 +722,8 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
         // of them if they have not been seen before.
         for (uint32_t i = 0; i < type_count.count; i++) {
             if (auto* subtype = ty->Element(i)) {
-                Pending next{subtype, ty};
-                if (seen.Add(next)) {
-                    stack.Push(next);
+                if (seen.Add(subtype)) {
+                    stack.Push(subtype);
                 }
             }
         }
@@ -938,10 +920,8 @@ bool Structural::CheckArray(const core::type::Array* arr,
 
 // 8-bit integer types are guarded by the Allow8BitIntegers property.
 // They can be used as the component type of a subgroup matrix without the property.
-bool Structural::Check8BitInteger(std::function<diag::Diagnostic&()>& diag,
-                                  const core::type::Type* parent) {
-    if (!Is<core::type::SubgroupMatrix>(parent) &&
-        !ir_.properties.Contains(Property::kAllow8BitIntegers)) {
+bool Structural::Check8BitInteger(std::function<diag::Diagnostic&()>& diag) {
+    if (!ir_.properties.Contains(Property::kAllow8BitIntegers)) {
         diag() << "8-bit integer types are not permitted";
         return false;
     }
