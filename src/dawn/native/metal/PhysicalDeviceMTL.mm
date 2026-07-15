@@ -74,9 +74,9 @@ const Vendor kVendors[] = {
 // Find vendor ID from MTLDevice name.
 MaybeError GetVendorIdFromVendors(id<MTLDevice> device, PCIIDs* ids) {
     uint32_t vendorId = 0;
-    const char* deviceName = [device.name UTF8String];
+    std::string_view deviceName = [device.name UTF8String];
     for (const auto& it : kVendors) {
-        if (DAWN_UNSAFE_TODO(strstr(deviceName, it.trademark)) != nullptr) {
+        if (deviceName.find(it.trademark) != std::string_view::npos) {
             vendorId = it.vendorId;
             break;
         }

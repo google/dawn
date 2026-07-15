@@ -210,6 +210,7 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     // The real mapped pointer is never returned for zero sized buffers. MappedAtCreation buffers
     // are initialized in BufferBase already.
     if (NeedsInitialization() && GetSize() > 0 && newState == BufferState::Mapped) {
+        // TODO(https://crbug.com/501491697): Spanify GetMappedPointerImpl.
         DAWN_UNSAFE_TODO(std::memset(GetMappedPointerImpl(), 0, GetAllocatedSize()));
         GetDevice()->IncrementLazyClearCountForTesting();
         SetInitialized(true);

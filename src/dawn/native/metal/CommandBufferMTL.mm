@@ -637,6 +637,8 @@ class ImmediateTracker : public T {
         DAWN_ASSERT(size <= sizeof(uint32_t) * (kMaxImmediateBlockSize - offset));
         // Copy data to all affected shader stages
         for (auto stage : IterateStages(stages)) {
+            // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
+            // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
             DAWN_UNSAFE_TODO(std::memcpy(&mImmediateBlockContent[stage][offset], data, size));
         }
         dirtyStages |= stages;
@@ -1548,6 +1550,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 Buffer* dstBuffer = ToBackend(write->buffer.Get());
                 Device* device = ToBackend(GetDevice());
 
+                // TODO(https://crbug.com/534203108): Spanify WithUploadReservation.
                 DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
                     data.size(), kCopyBufferToBufferOffsetAlignment,
                     [&](UploadReservation reservation) -> MaybeError {

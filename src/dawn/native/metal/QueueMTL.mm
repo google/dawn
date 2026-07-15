@@ -276,7 +276,7 @@ MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
         }
         TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
 
-        DAWN_UNSAFE_TODO(DAWN_TRY(SubmitPendingCommandBuffer()));
+        DAWN_TRY(SubmitPendingCommandBuffer());
 
         return {};
     }
