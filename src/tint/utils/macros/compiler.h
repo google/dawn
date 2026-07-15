@@ -193,7 +193,7 @@
 #define TINT_DISABLE_WARNING_EXTRA_SEMICOLON              /* currently no-op */
 #define TINT_DISABLE_WARNING_FLOAT_EQUAL                  /* currently no-op */
 #define TINT_DISABLE_WARNING_LIFETIME_SAFETY_INVALIDATION /* currently no-op */
-#define TINT_DISABLE_WARNING_MAYBE_UNINITIALIZED \        /* currently no-op */
+#define TINT_DISABLE_WARNING_MAYBE_UNINITIALIZED          /* currently no-op */
 #define TINT_DISABLE_WARNING_MISSING_DESTRUCTOR_OVERRIDE  /* currently no-op */
 #define TINT_DISABLE_WARNING_NEWLINE_EOF                  /* currently no-op */
 #define TINT_DISABLE_WARNING_OLD_STYLE_CAST               /* currently no-op */
