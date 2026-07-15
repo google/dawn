@@ -30,10 +30,13 @@
 
 #include <webgpu/webgpu.h>
 
+#include <optional>
+
 #include "dawn/wire/ObjectType_autogen.h"
 #include "src/dawn/wire/BufferConsumer.h"
 #include "src/dawn/wire/ObjectHandle.h"
 #include "src/dawn/wire/WireResult.h"
+#include "src/utils/span.h"
 
 namespace dawn::wire {
 
@@ -41,7 +44,7 @@ namespace dawn::wire {
     // nullptr is treated as an error.
     class DeserializeAllocator {
         public:
-            virtual void* GetSpace(size_t size) = 0;
+            virtual std::optional<Span<std::byte>> TryGetSpace(size_t size) = 0;
     };
 
     // Interface to convert an ID to a server object, if possible.

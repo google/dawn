@@ -578,13 +578,13 @@ WireResult GetSpace(DeserializeAllocator* allocator, size_t count, Span<T>* out)
       size = *sizeN;
     }
 
-    // TODO(https://crbug.com/528027992): Spanify DeserializeAllocator::GetSpace.
-    auto* ptr = static_cast<T*>(allocator->GetSpace(size));
-    if (ptr == nullptr) {
+    auto span = allocator->TryGetSpace(size);
+    if (!span) {
         return WireResult::FatalError;
     }
+
     // SAFETY: Size and alignment is checked above.
-    *out = DAWN_UNSAFE_BUFFERS(Span<T>(ptr, count));
+    *out = DAWN_UNSAFE_BUFFERS(Span<T>(reinterpret_cast<T*>(span->data()), count));
     return WireResult::Success;
 }
 
