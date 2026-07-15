@@ -328,16 +328,17 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
             // interferes with using the UploadData() fast path.
             if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
                 DAWN_TRY(MapMemoryAndPerformOperation(
-                    0, mAllocatedSize.value(),
-                    [](std::span<uint8_t> mapped) { std::ranges::fill(mapped, 0x01); }));
+                    0, mAllocatedSize.value(), [](std::span<std::byte> mapped) {
+                        std::ranges::fill(mapped, std::byte(0x01));
+                    }));
             }
             if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
                 paddingClearSize > 0) {
                 DAWN_TRY(
                     MapMemoryAndPerformOperation(paddingClearOffset, paddingClearSize,
-                                                 [&paddingClearSize](std::span<uint8_t> mapped) {
+                                                 [&paddingClearSize](std::span<std::byte> mapped) {
                                                      DAWN_CHECK(mapped.size() == paddingClearSize);
-                                                     std::ranges::fill(mapped, 0x0);
+                                                     std::ranges::fill(mapped, std::byte(0x0));
                                                  }));
             }
         } else {
@@ -561,7 +562,7 @@ BufferBarrier Buffer::TrackUsageAndGetResourceBarrier(wgpu::BufferUsage usage,
 
 bool Buffer::IsCPUWritableAtCreation() const {
     // TODO(enga): Handle CPU-visible memory on UMA
-    return mMemoryAllocation.GetMappedPointer() != nullptr;
+    return mMemoryAllocation.GetMappedSpan().data() != nullptr;
 }
 
 MaybeError Buffer::MapAtCreationImpl() {
@@ -578,6 +579,7 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     // The real mapped pointer is never returned for zero sized buffers. MappedAtCreation buffers
     // are initialized in BufferBase already.
     if (NeedsInitialization() && GetSize() > 0 && newState == BufferState::Mapped) {
+        // TODO(https://crbug.com/501491697): Spanify GetMappedPointerImpl.
         DAWN_UNSAFE_TODO(std::memset(GetMappedPointerImpl(), 0, GetAllocatedSize()));
         GetDevice()->IncrementLazyClearCountForTesting();
         SetInitialized(true);
@@ -630,7 +632,7 @@ void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
 }
 
 void* Buffer::GetMappedPointerImpl() {
-    uint8_t* memory = mMemoryAllocation.GetMappedPointer();
+    std::byte* memory = mMemoryAllocation.GetMappedSpan().data();
     DAWN_ASSERT(memory != nullptr);
     return memory;
 }
@@ -664,11 +666,11 @@ MaybeError Buffer::UploadData(uint64_t bufferOffset, Span<const std::byte> data)
     uint64_t mapSize = needsZeroInitialization ? mAllocatedSize.value() : data.size();
     uint64_t mapOffset = needsZeroInitialization ? 0 : bufferOffset;
 
-    return MapMemoryAndPerformOperation(mapOffset, mapSize, [&](std::span<uint8_t> mapped) {
+    return MapMemoryAndPerformOperation(mapOffset, mapSize, [&](std::span<std::byte> mapped) {
         uint64_t dstOffset = 0;
         if (needsZeroInitialization) {
             DAWN_ASSERT(mapped.size() == mAllocatedSize);
-            std::ranges::fill(mapped, 0x0);
+            std::ranges::fill(mapped, std::byte(0x0));
             GetDevice()->IncrementLazyClearCountForTesting();
             dstOffset = bufferOffset;
         }
@@ -693,12 +695,12 @@ MaybeError Buffer::MapMemoryAndPerformOperation(uint64_t requestedOffset,
     DAWN_ASSERT(GetLastUsageSerial() <= device->GetQueue()->GetCompletedCommandSerial());
 
     VkDeviceMemory deviceMemory = ToBackend(mMemoryAllocation.GetResourceHeap())->GetMemory();
-    uint8_t* memory = nullptr;
+    Span<std::byte> memory;
     uint64_t realOffset = requestedOffset;
 
     if (isMappable) {
         // Mappable buffers are already persistently mapped.
-        memory = mMemoryAllocation.GetMappedPointer();
+        memory = mMemoryAllocation.GetMappedSpan();
     } else {
         // TODO(crbug.com/dawn/774): Persistently map frequently updated buffers instead of
         // mapping/unmapping each time.
@@ -717,7 +719,10 @@ MaybeError Buffer::MapMemoryAndPerformOperation(uint64_t requestedOffset,
         DAWN_TRY(CheckVkSuccess(device->fn.MapMemory(device->GetVkDevice(), deviceMemory, offset,
                                                      mapSize, 0, &mappedPointer),
                                 "vkMapMemory"));
-        memory = static_cast<uint8_t*>(mappedPointer);
+        // SAFETY: A successful call to vkMapMemory returns a pointer to `size` bytes of mapped
+        // data. (of the full allocation when size == VK_WHOLE_SIZE).
+        memory = DAWN_UNSAFE_BUFFERS(
+            {static_cast<std::byte*>(mappedPointer), checked_cast<size_t>(mapSize)});
     }
 
     VkMappedMemoryRange mappedMemoryRange = {};
@@ -732,7 +737,7 @@ MaybeError Buffer::MapMemoryAndPerformOperation(uint64_t requestedOffset,
     }
 
     // Pass a span that is exactly the offset/size requested even if a larger range was mapped.
-    op(std::span(DAWN_UNSAFE_TODO(memory + realOffset), requestedSize));
+    op(memory.subspan(realOffset, requestedSize));
 
     if (!mHostCoherent) {
         // For non-coherent memory we need to explicitly flush the memory range to make the host

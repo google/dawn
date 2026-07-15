@@ -32,6 +32,7 @@
 #include <utility>
 
 #include "src/dawn/common/Compiler.h"
+#include "src/dawn/common/Range.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/Surface.h"
@@ -309,16 +310,15 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
         "Vulkan SwapChain must support opaque alpha.");
 #else
     // TODO(dawn:286): investigate composite alpha for WebGPU native
-    VkCompositeAlphaFlagBitsKHR compositeAlphaFlags[4] = {
+    std::array<VkCompositeAlphaFlagBitsKHR, 4u> compositeAlphaFlags = {
         VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
         VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
         VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
         VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
     };
-    for (uint32_t i = 0; i < 4; i++) {
-        if (surfaceInfo.capabilities.supportedCompositeAlpha &
-            DAWN_UNSAFE_TODO(compositeAlphaFlags[i])) {
-            config.alphaMode = DAWN_UNSAFE_TODO(compositeAlphaFlags[i]);
+    for (uint32_t i : Range(4u)) {
+        if (surfaceInfo.capabilities.supportedCompositeAlpha & compositeAlphaFlags[i]) {
+            config.alphaMode = compositeAlphaFlags[i];
             break;
         }
     }

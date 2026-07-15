@@ -31,6 +31,7 @@
 #include <cstdint>
 
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 
@@ -76,7 +77,7 @@ class ResourceMemoryAllocation {
     ResourceMemoryAllocation(const AllocationInfo& info,
                              uint64_t offset,
                              ResourceHeapBase* resourceHeap,
-                             uint8_t* mappedPointer = nullptr);
+                             Span<std::byte> mappedSpan = {});
     virtual ~ResourceMemoryAllocation() = default;
 
     ResourceMemoryAllocation(const ResourceMemoryAllocation&) = default;
@@ -84,7 +85,7 @@ class ResourceMemoryAllocation {
 
     ResourceHeapBase* GetResourceHeap() const;
     uint64_t GetOffset() const;
-    uint8_t* GetMappedPointer() const;
+    Span<std::byte> GetMappedSpan() const;
     AllocationInfo GetInfo() const;
 
     virtual void Invalidate();
@@ -94,8 +95,9 @@ class ResourceMemoryAllocation {
     uint64_t mOffset = 0;
     // TODO(crbug.com/485825675): Investigate why this pointer is dangling.
     raw_ptr<ResourceHeapBase, DanglingUntriaged> mResourceHeap = nullptr;
-    // TODO(crbug.com/485825675): Investigate why this pointer is dangling.
-    raw_ptr<uint8_t, DanglingUntriaged | AllowPtrArithmetic> mMappedPointer = nullptr;
+    // TODO(https://crbug.com/526537224): Use RawSpan even if we point at driver memory that's not
+    // owned by partition_alloc.
+    Span<std::byte> mMappedSpan = {};
 };
 }  // namespace dawn::native
 

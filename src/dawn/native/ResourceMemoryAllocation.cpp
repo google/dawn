@@ -31,14 +31,13 @@
 
 namespace dawn::native {
 
-ResourceMemoryAllocation::ResourceMemoryAllocation()
-    : mOffset(0), mResourceHeap(nullptr), mMappedPointer(nullptr) {}
+ResourceMemoryAllocation::ResourceMemoryAllocation() {}
 
 ResourceMemoryAllocation::ResourceMemoryAllocation(const AllocationInfo& info,
                                                    uint64_t offset,
                                                    ResourceHeapBase* resourceHeap,
-                                                   uint8_t* mappedPointer)
-    : mInfo(info), mOffset(offset), mResourceHeap(resourceHeap), mMappedPointer(mappedPointer) {}
+                                                   Span<std::byte> mappedSpan)
+    : mInfo(info), mOffset(offset), mResourceHeap(resourceHeap), mMappedSpan(mappedSpan) {}
 
 ResourceHeapBase* ResourceMemoryAllocation::GetResourceHeap() const {
     DAWN_ASSERT(mInfo.mMethod != AllocationMethod::kInvalid);
@@ -54,11 +53,12 @@ AllocationInfo ResourceMemoryAllocation::GetInfo() const {
     return mInfo;
 }
 
-uint8_t* ResourceMemoryAllocation::GetMappedPointer() const {
-    return mMappedPointer;
+Span<std::byte> ResourceMemoryAllocation::GetMappedSpan() const {
+    return mMappedSpan;
 }
 
 void ResourceMemoryAllocation::Invalidate() {
+    mMappedSpan = {};
     mResourceHeap = nullptr;
     mInfo = {};
 }

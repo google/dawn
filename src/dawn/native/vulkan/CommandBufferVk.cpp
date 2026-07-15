@@ -599,25 +599,26 @@ VkClearValue ToVkClearValue(dawn::native::Color clearColor, TextureComponentType
     switch (baseType) {
         case TextureComponentType::Float: {
             const std::array<float, 4> appliedClearColor = ConvertToFloatColor(clearColor);
-            for (uint32_t j = 0; j < 4; ++j) {
-                DAWN_UNSAFE_TODO(clearValue.color.float32[j]) = appliedClearColor[j];
-            }
+            // TODO(https://crbug.com/532554331): Use Span's constructor from C-style arrays.
+            Span<float> floatValues = DAWN_UNSAFE_TODO(Span<float>(clearValue.color.float32, 4u));
+            floatValues.CopyFrom(appliedClearColor);
             break;
         }
         case TextureComponentType::Uint: {
             const std::array<uint32_t, 4> appliedClearColor =
                 ConvertToUnsignedIntegerColor(clearColor);
-            for (uint32_t j = 0; j < 4; ++j) {
-                DAWN_UNSAFE_TODO(clearValue.color.uint32[j]) = appliedClearColor[j];
-            }
+            // TODO(https://crbug.com/532554331): Use Span's constructor from C-style arrays.
+            Span<uint32_t> u32Values =
+                DAWN_UNSAFE_TODO(Span<uint32_t>(clearValue.color.uint32, 4u));
+            u32Values.CopyFrom(appliedClearColor);
             break;
         }
         case TextureComponentType::Sint: {
             const std::array<int32_t, 4> appliedClearColor =
                 ConvertToSignedIntegerColor(clearColor);
-            for (uint32_t j = 0; j < 4; ++j) {
-                DAWN_UNSAFE_TODO(clearValue.color.int32[j]) = appliedClearColor[j];
-            }
+            // TODO(https://crbug.com/532554331): Use Span's constructor from C-style arrays.
+            Span<int32_t> i32Values = DAWN_UNSAFE_TODO(Span<int32_t>(clearValue.color.int32, 4u));
+            i32Values.CopyFrom(appliedClearColor);
             break;
         }
     }
@@ -1526,6 +1527,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
 
                 Buffer* dstBuffer = ToBackend(write->buffer.Get());
 
+                // TODO(https://crbug.com/534203108): Spanify WithUploadReservation.
                 DAWN_UNSAFE_TODO(DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
                     data.size(), kCopyBufferToBufferOffsetAlignment,
                     [&](UploadReservation reservation) -> MaybeError {

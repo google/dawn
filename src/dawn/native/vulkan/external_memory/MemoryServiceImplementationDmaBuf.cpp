@@ -354,14 +354,11 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
 
         std::array<VkSubresourceLayout, ExternalImageDescriptorDmaBuf::kMaxPlanes> planeLayouts;
         for (uint32_t plane = 0u; plane < planeCount; ++plane) {
-            DAWN_UNSAFE_TODO(planeLayouts[plane]).offset =
-                dmaBufDescriptor->planeLayouts[plane].offset;
-            DAWN_UNSAFE_TODO(planeLayouts[plane]).size =
-                0;  // VK_EXT_image_drm_format_modifier mandates size = 0.
-            DAWN_UNSAFE_TODO(planeLayouts[plane]).rowPitch =
-                dmaBufDescriptor->planeLayouts[plane].stride;
-            DAWN_UNSAFE_TODO(planeLayouts[plane]).arrayPitch = 0;  // Not an array texture
-            DAWN_UNSAFE_TODO(planeLayouts[plane]).depthPitch = 0;  // Not a depth texture
+            planeLayouts[plane].offset = dmaBufDescriptor->planeLayouts[plane].offset;
+            planeLayouts[plane].size = 0;  // VK_EXT_image_drm_format_modifier mandates size = 0.
+            planeLayouts[plane].rowPitch = dmaBufDescriptor->planeLayouts[plane].stride;
+            planeLayouts[plane].arrayPitch = 0;  // Not an array texture
+            planeLayouts[plane].depthPitch = 0;  // Not a depth texture
         }
 
         VkImageDrmFormatModifierExplicitCreateInfoEXT explicitCreateInfo = {};

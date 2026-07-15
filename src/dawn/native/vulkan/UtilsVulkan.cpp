@@ -347,24 +347,23 @@ std::string GetNextDeviceDebugPrefix() {
     return objectName.str();
 }
 
-std::string GetDeviceDebugPrefixFromDebugName(const char* debugName) {
-    if (debugName == nullptr) {
+std::string GetDeviceDebugPrefixFromDebugName(const char* cDebugName) {
+    if (cDebugName == nullptr) {
         return {};
     }
 
-    if (DAWN_UNSAFE_TODO(strncmp(debugName, kDeviceDebugPrefix, sizeof(kDeviceDebugPrefix) - 1)) !=
-        0) {
+    std::string_view debugName = cDebugName;
+
+    if (debugName.starts_with(kDeviceDebugPrefix)) {
         return {};
     }
 
-    const char* separator =
-        DAWN_UNSAFE_TODO(strstr(debugName + sizeof(kDeviceDebugPrefix), kDeviceDebugSeparator));
-    if (separator == nullptr) {
+    size_t separatorIndex = debugName.find(kDeviceDebugSeparator);
+    if (separatorIndex == std::string_view::npos) {
         return {};
     }
 
-    size_t length = sign_cast(separator - debugName);
-    return std::string(debugName, length);
+    return std::string(debugName.substr(0u, separatorIndex));
 }
 
 std::string FormatAPIVersion(uint32_t version) {

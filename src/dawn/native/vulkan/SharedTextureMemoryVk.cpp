@@ -858,20 +858,21 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         "which is required for view format reinterpretation.");
 
     if (imageFormatListInfo && mayNeedViewReinterpretation) {
-        auto viewFormatsBegin = imageFormatListInfo->pViewFormats;
-        auto viewFormatsEnd = DAWN_UNSAFE_TODO(imageFormatListInfo->pViewFormats +
-                                               imageFormatListInfo->viewFormatCount);
+        // SAFETY: Vulkan requires that pViewFormats point at viewFormatCount valid formats and the
+        // application giving us its VkImageCreateInfo needs to conform to that.
+        Span<const VkFormat> viewFormats = DAWN_UNSAFE_BUFFERS(
+            {imageFormatListInfo->pViewFormats, imageFormatListInfo->viewFormatCount});
         VkFormat baseVkFormat = VulkanImageFormat(device, properties.format);
 
         DAWN_INVALID_IF(
-            std::find(viewFormatsBegin, viewFormatsEnd, baseVkFormat) == viewFormatsEnd,
+            std::ranges::find(viewFormats, baseVkFormat) == viewFormats.end(),
             "VkImageFormatCreateInfo did not contain VkFormat 0x%x which may be required to "
             "create a texture view with %s.",
             baseVkFormat, properties.format);
 
         for (const auto* f : compatibleViewFormats) {
             VkFormat vkFormat = VulkanImageFormat(device, f->format);
-            DAWN_INVALID_IF(std::find(viewFormatsBegin, viewFormatsEnd, vkFormat) == viewFormatsEnd,
+            DAWN_INVALID_IF(std::ranges::find(viewFormats, vkFormat) == viewFormats.end(),
                             "VkImageFormatCreateInfo did not contain VkFormat 0x%x which may be "
                             "required to create a texture view with %s.",
                             vkFormat, f->format);

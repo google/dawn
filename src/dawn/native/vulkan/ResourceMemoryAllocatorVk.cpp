@@ -244,6 +244,10 @@ ResultOrError<ResourceMemoryAllocation> ResourceMemoryAllocator::Allocate(
                            "vkMapMemory"),
             { mAllocatorsPerType[memoryType]->DeallocateResourceHeap(std::move(resourceHeap)); });
     }
+    Span<std::byte> mappedSpan =
+        // SAFETY: A successful call to vkMapMemory returns a pointer to `size` bytes of mapped
+        // data. (of the full allocation when size == VK_WHOLE_SIZE).
+        DAWN_UNSAFE_BUFFERS({static_cast<std::byte*>(mappedPointer), checked_cast<size_t>(size)});
 
     mUsedMemoryTracker->Increment(size);
     mLazyUsedMemoryTracker->Increment(isLazyMemoryType ? size : 0);
@@ -252,8 +256,7 @@ ResultOrError<ResourceMemoryAllocation> ResourceMemoryAllocator::Allocate(
     info.mMethod = AllocationMethod::kDirect;
     info.mRequestedSize = size;
     info.mIsLazyAllocated = isLazyMemoryType;
-    return ResourceMemoryAllocation(info, /*offset*/ 0, resourceHeap.release(),
-                                    static_cast<uint8_t*>(mappedPointer));
+    return ResourceMemoryAllocation(info, /*offset*/ 0, resourceHeap.release(), mappedSpan);
 }
 
 void ResourceMemoryAllocator::Deallocate(ResourceMemoryAllocation* allocation) {
