@@ -57,6 +57,7 @@
 #include "src/dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "src/dawn/native/d3d12/UtilsD3D12.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::d3d12 {
 
@@ -1838,7 +1839,8 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 DAWN_TRY(bindingTracker->Apply(commandContext));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
-                immediates.SetFirstVertexAndInstanceIndex(draw->baseVertex, draw->firstInstance);
+                immediates.SetFirstVertexAndInstanceIndex(static_cast<uint32_t>(draw->baseVertex),
+                                                          draw->firstInstance);
                 immediates.Apply(commandContext);
                 commandList->DrawIndexedInstanced(draw->indexCount, draw->instanceCount,
                                                   draw->firstIndex, draw->baseVertex,
@@ -2105,10 +2107,10 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
             case Command::SetScissorRect: {
                 SetScissorRectCmd* cmd = mCommands.NextCommand<SetScissorRectCmd>();
                 D3D12_RECT rect;
-                rect.left = cmd->x;
-                rect.top = cmd->y;
-                rect.right = cmd->x + cmd->width;
-                rect.bottom = cmd->y + cmd->height;
+                rect.left = sign_cast(cmd->x);
+                rect.top = sign_cast(cmd->y);
+                rect.right = sign_cast(cmd->x + cmd->width);
+                rect.bottom = sign_cast(cmd->y + cmd->height);
 
                 commandList->RSSetScissorRects(1, &rect);
                 break;

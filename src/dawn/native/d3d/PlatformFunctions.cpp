@@ -34,6 +34,7 @@
 
 #include "src/dawn/common/SystemUtils.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::d3d {
 
@@ -53,7 +54,7 @@ uint64_t ReadFromSZRegistryKey(HKEY registerKey, const char* registerKeyName) {
         return 0;
     }
     constexpr int32_t kRadix = 10;
-    return DAWN_UNSAFE_TODO(strtol(returnStringValue.data(), nullptr, kRadix));
+    return DAWN_UNSAFE_TODO(sign_cast(strtol(returnStringValue.data(), nullptr, kRadix)));
 }
 
 }  // anonymous namespace

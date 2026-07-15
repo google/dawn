@@ -31,6 +31,8 @@
 
 #include <memory>
 
+#include "src/utils/numeric.h"
+
 namespace dawn {
 
 std::string WCharToUTF8(const wchar_t* input) {
@@ -39,7 +41,7 @@ std::string WCharToUTF8(const wchar_t* input) {
     int requiredSize = WideCharToMultiByte(CP_UTF8, 0, input, -1, nullptr, 0, nullptr, nullptr);
 
     std::string result;
-    result.resize(requiredSize - 1);
+    result.resize(sign_cast(requiredSize - 1));
     WideCharToMultiByte(CP_UTF8, 0, input, -1, result.data(), requiredSize, nullptr, nullptr);
 
     return result;
@@ -51,7 +53,7 @@ std::wstring UTF8ToWStr(const char* input) {
     int requiredSize = MultiByteToWideChar(CP_UTF8, 0, input, -1, nullptr, 0);
 
     std::wstring result;
-    result.resize(requiredSize - 1);
+    result.resize(sign_cast(requiredSize - 1));
     MultiByteToWideChar(CP_UTF8, 0, input, -1, result.data(), requiredSize);
 
     return result;

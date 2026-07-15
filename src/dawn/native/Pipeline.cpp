@@ -78,10 +78,10 @@ uint32_t ComputeNumTextureSamplerCombinations(const dawn::native::EntryPointMeta
     }
 
     // count the number of non-sampled that are not referenced by sampled pairs.
-    auto numNonSampled = std::count_if(nonSampled.begin(), nonSampled.end(),
-                                       [&](const WGSLBindPoint& nonSampledBindingPoint) {
-                                           return !sampledTextures.contains(nonSampledBindingPoint);
-                                       });
+    auto numNonSampled = sign_cast(std::count_if(
+        nonSampled.begin(), nonSampled.end(), [&](const WGSLBindPoint& nonSampledBindingPoint) {
+            return !sampledTextures.contains(nonSampledBindingPoint);
+        }));
     return numSamplerTexturePairs + numNonSampled + numSamplerExternalTexturePairs * 3 +
            uint32_t(sampledExternalTextures.size());
 }

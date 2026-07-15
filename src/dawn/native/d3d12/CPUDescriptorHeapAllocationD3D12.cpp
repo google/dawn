@@ -50,7 +50,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHeapAllocation::OffsetFrom(
 }
 
 uint32_t CPUDescriptorHeapAllocation::GetHeapIndex() const {
-    DAWN_ASSERT(mHeapIndex >= 0);
+    DAWN_ASSERT(mHeapIndex < kNoHeapIndex);
     return mHeapIndex;
 }
 

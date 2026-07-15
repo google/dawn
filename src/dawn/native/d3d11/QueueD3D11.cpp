@@ -50,6 +50,7 @@
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/compiler.h"
 #include "src/utils/log.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::d3d11 {
 namespace {
@@ -593,7 +594,8 @@ ResultOrError<ExecutionSerial> SystemEventQueue::CheckCompletedSerialsImpl() {
             std::for_each_n(pendingEvents->begin(), completedEvents, [&returnedReceivers](auto& e) {
                 returnedReceivers.emplace_back(std::move(e.receiver));
             });
-            pendingEvents->erase(pendingEvents->begin(), pendingEvents->begin() + completedEvents);
+            pendingEvents->erase(pendingEvents->begin(),
+                                 pendingEvents->begin() + sign_cast(completedEvents));
 
             return completedSerial;
         }));
@@ -825,7 +827,7 @@ ResultOrError<ExecutionSerial> DelayFlushQueue::WaitForQueueSerialImpl(Execution
     }
 
     // Completed queries will be recycled in CheckCompletedSerialsImpl();
-    auto numCompletedQueries = std::distance(mPendingQueries.begin(), it) + 1;
+    auto numCompletedQueries = sign_cast(std::distance(mPendingQueries.begin(), it) + 1);
     MarkPendingQueriesAsComplete(numCompletedQueries);
     return done ? waitSerial : kWaitSerialTimeout;
 }
@@ -853,9 +855,10 @@ void DelayFlushQueue::SetEventOnCompletion(ExecutionSerial serial, HANDLE event)
 void DelayFlushQueue::MarkPendingQueriesAsComplete(size_t numCompletedQueries) {
     mCompletedQueries.insert(
         mCompletedQueries.end(), std::make_move_iterator(mPendingQueries.begin()),
-        std::make_move_iterator(mPendingQueries.begin() + numCompletedQueries));
+        std::make_move_iterator(mPendingQueries.begin() + sign_cast(numCompletedQueries)));
 
-    mPendingQueries.erase(mPendingQueries.begin(), mPendingQueries.begin() + numCompletedQueries);
+    mPendingQueries.erase(mPendingQueries.begin(),
+                          mPendingQueries.begin() + sign_cast(numCompletedQueries));
 }
 
 ResultOrError<bool> DelayFlushQueue::IsQueryCompleted(

@@ -92,7 +92,7 @@ template <typename It>
         return false;
     }
     DAWN_CHECK(WAIT_OBJECT_0 <= status && status < WAIT_OBJECT_0 + count);
-    const size_t completedIndex = status - WAIT_OBJECT_0;
+    const ptrdiff_t completedIndex = sign_cast(status - WAIT_OBJECT_0);
 
     *(*(DAWN_UNSAFE_TODO(begin + completedIndex))).second = true;
     return true;

@@ -32,6 +32,7 @@
 
 #include "src/dawn/common/WindowsUtils.h"
 #include "src/dawn/native/d3d/BackendD3D.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::d3d {
 
@@ -103,7 +104,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
     LARGE_INTEGER umdVersion;
     if (GetHardwareAdapter()->CheckInterfaceSupport(__uuidof(IDXGIDevice), &umdVersion) !=
         DXGI_ERROR_UNSUPPORTED) {
-        uint64_t encodedVersion = umdVersion.QuadPart;
+        uint64_t encodedVersion = sign_cast(umdVersion.QuadPart);
         uint16_t mask = 0xFFFF;
         mDriverVersion = {static_cast<uint16_t>((encodedVersion >> 48) & mask),
                           static_cast<uint16_t>((encodedVersion >> 32) & mask),

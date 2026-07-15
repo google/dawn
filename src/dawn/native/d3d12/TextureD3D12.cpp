@@ -57,6 +57,7 @@
 #include "src/dawn/native/d3d12/UtilsD3D12.h"
 #include "src/dawn/native/utils/RenderDoc.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::d3d12 {
 
@@ -157,7 +158,7 @@ ResourceHeapKind GetResourceHeapKind(D3D12_RESOURCE_FLAGS flags, uint32_t resour
     return ResourceHeapKind::Default_OnlyNonRenderableOrDepthTextures;
 }
 
-D3D12_SHADER_COMPONENT_MAPPING D3D12ComponentSwizzle(wgpu::ComponentSwizzle swizzle) {
+UINT D3D12ComponentSwizzle(wgpu::ComponentSwizzle swizzle) {
     switch (swizzle) {
         case wgpu::ComponentSwizzle::Zero:
             return D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0;
@@ -484,7 +485,7 @@ void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext
 
     std::vector<D3D12_RESOURCE_BARRIER> barriers;
 
-    int32_t aspectCount = std::popcount(static_cast<uint8_t>(range.aspects));
+    uint32_t aspectCount = sign_dcast(std::popcount(static_cast<uint8_t>(range.aspects)));
     barriers.reserve(range.levelCount * range.layerCount * aspectCount);
 
     TransitionUsageAndGetResourceBarrier(commandContext, &barriers, newState, range);

@@ -30,11 +30,12 @@
 #include <utility>
 
 #include "src/dawn/native/Device.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::d3d {
 
 ResultOrError<std::wstring> ConvertStringToWstring(std::string_view s) {
-    size_t len = s.length();
+    auto len = sign_cast(s.length());
     if (len == 0) {
         return std::wstring();
     }
@@ -43,7 +44,7 @@ ResultOrError<std::wstring> ConvertStringToWstring(std::string_view s) {
         return DAWN_INTERNAL_ERROR("Failed to convert string to wide string");
     }
     std::wstring result;
-    result.resize(numChars);
+    result.resize(sign_cast(numChars));
     int numConvertedChars =
         MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s.data(), len, &result[0], numChars);
     if (numConvertedChars != numChars) {

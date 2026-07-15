@@ -45,6 +45,7 @@
 #include "src/dawn/native/d3d11/SamplerD3D11.h"
 #include "src/dawn/native/d3d11/TextureD3D11.h"
 #include "src/utils/assert.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::d3d11 {
 namespace {
@@ -226,7 +227,7 @@ void BindGroupTracker::SetConstantBuffer(uint32_t idx,
     mConstantBufferSlots[Stage].Bind(idx, {d3d11Buffer, firstConstant, numConstants},
                                      [this](size_t idx, const ConstantBufferBinding& binding) {
                                          SetConstantBuffersImpl<Stage>(
-                                             mCommandContext->GetD3D11DeviceContext3(), idx, 1,
+                                             mCommandContext->GetD3D11DeviceContext3(), idx, 1u,
                                              binding.buffer.GetAddressOf(), &binding.firstConstant,
                                              &binding.numConstants);
                                      });
@@ -242,15 +243,15 @@ void BindGroupTracker::UnbindConstantBuffers() {
     static constexpr ID3D11Buffer* kNullBuffers[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT] =
         {};
 
-    SetConstantBuffersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0, slots, kNullBuffers,
-                                  nullptr, nullptr);
+    SetConstantBuffersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0u, slots,
+                                  kNullBuffers, nullptr, nullptr);
 }
 
 template <SingleShaderStage Stage>
 void BindGroupTracker::SetShaderResource(uint32_t idx, ID3D11ShaderResourceView* srv) {
     mSRVSlots[Stage].Bind(
         idx, std::move(srv), [this](size_t idx, const ComPtr<ID3D11ShaderResourceView>& binding) {
-            SetShaderResourcesImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), idx, 1,
+            SetShaderResourcesImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), idx, 1u,
                                           binding.GetAddressOf());
         });
 }
@@ -265,7 +266,7 @@ void BindGroupTracker::UnbindShaderResources() {
     static constexpr ID3D11ShaderResourceView*
         kNullSRVs[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = {};
 
-    SetShaderResourcesImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0, slots, kNullSRVs);
+    SetShaderResourcesImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0u, slots, kNullSRVs);
 }
 
 template <SingleShaderStage Stage>
@@ -273,7 +274,7 @@ void BindGroupTracker::SetSampler(uint32_t idx, ID3D11SamplerState* sampler) {
     mSamplerSlots[Stage].Bind(idx, sampler,
                               [this](size_t idx, const ComPtr<ID3D11SamplerState>& binding) {
                                   SetSamplersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(),
-                                                         idx, 1, binding.GetAddressOf());
+                                                         idx, 1u, binding.GetAddressOf());
                               });
 }
 
@@ -286,7 +287,7 @@ void BindGroupTracker::UnbindSamplers() {
 
     static constexpr ID3D11SamplerState* kNullSamplers[D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT] = {};
 
-    SetSamplersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0, slots, kNullSamplers);
+    SetSamplersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0u, slots, kNullSamplers);
 }
 
 void BindGroupTracker::CSSetUnorderedAccessView(uint32_t idx, ID3D11UnorderedAccessView* uav) {
@@ -294,8 +295,8 @@ void BindGroupTracker::CSSetUnorderedAccessView(uint32_t idx, ID3D11UnorderedAcc
 
     mCSUAVSlots.Bind(
         idx, std::move(uav), [this](size_t idx, const ComPtr<ID3D11UnorderedAccessView>& binding) {
-            SetUnorderedAccessViewsImpl<kCompute>(mCommandContext->GetD3D11DeviceContext3(), idx, 1,
-                                                  binding.GetAddressOf());
+            SetUnorderedAccessViewsImpl<kCompute>(mCommandContext->GetD3D11DeviceContext3(), idx,
+                                                  1u, binding.GetAddressOf());
         });
 }
 
@@ -654,7 +655,7 @@ void ComputePassBindGroupTracker::UnapplyComputeBindings(BindGroupIndex index) {
             [&](const BufferBindingInfo& layout) {
                 switch (layout.type) {
                     case wgpu::BufferBindingType::Uniform: {
-                        this->SetConstantBuffer<kCompute>(bindingSlot, nullptr, 0, 0);
+                        this->SetConstantBuffer<kCompute>(bindingSlot, nullptr, 0u, 0u);
                         break;
                     }
                     case wgpu::BufferBindingType::Storage:

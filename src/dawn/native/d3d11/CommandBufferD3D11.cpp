@@ -60,6 +60,7 @@
 #include "src/dawn/native/d3d11/TextureD3D11.h"
 #include "src/dawn/native/d3d11/UtilsD3D11.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::d3d11 {
 namespace {
@@ -759,8 +760,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(
     D3D11_RECT scissor;
     scissor.left = 0;
     scissor.top = 0;
-    scissor.right = renderPass->width;
-    scissor.bottom = renderPass->height;
+    scissor.right = sign_cast(renderPass->width);
+    scissor.bottom = sign_cast(renderPass->height);
     d3d11DeviceContext->RSSetScissorRects(1, &scissor);
 
     RenderPipeline* lastPipeline = nullptr;
@@ -791,7 +792,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(
 
                 DAWN_TRY(bindGroupTracker.Apply());
                 vertexBufferTracker.Apply(lastPipeline);
-                immediates.SetFirstIndexOffset(draw->baseVertex, draw->firstInstance);
+                immediates.SetFirstIndexOffset(static_cast<uint32_t>(draw->baseVertex),
+                                               draw->firstInstance);
                 DAWN_TRY(immediates.Apply(commandContext));
                 commandContext->GetD3D11DeviceContext3()->DrawIndexedInstanced(
                     draw->indexCount, draw->instanceCount, draw->firstIndex, draw->baseVertex,
