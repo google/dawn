@@ -36,6 +36,7 @@ namespace tint::core::type {
 Bool::Bool()
     : Base(static_cast<size_t>(tint::TypeCode::Of<Bool>().bits),
            core::type::Flags{
+               Flag::kCore,
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,

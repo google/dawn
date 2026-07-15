@@ -43,7 +43,8 @@ namespace tint::core::type {
 namespace {
 
 core::type::Flags FlagsFrom(const Type* element, const ArrayCount* count) {
-    core::type::Flags flags;
+    core::type::Flags flags{Flag::kCore};
+
     // Only constant-expression sized arrays are constructible
     if (count->Is<ConstantArrayCount>()) {
         if (element->IsConstructible()) {

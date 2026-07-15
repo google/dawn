@@ -41,6 +41,7 @@ namespace tint::core::type {
 Atomic::Atomic(const core::type::Type* subtype)
     : Base(Hash(tint::TypeCode::Of<Atomic>().bits, subtype),
            core::type::Flags{
+               Flag::kCore,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,
                Flag::kHostShareable,

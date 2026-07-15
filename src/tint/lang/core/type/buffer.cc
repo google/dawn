@@ -33,8 +33,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::Buffer);
 
 namespace tint::core::type {
 
-const core::type::Flags sizedFlags{Flag::kHostShareable, Flag::kFixedFootprint};
-const core::type::Flags unsizedFlags{Flag::kHostShareable};
+const core::type::Flags sizedFlags{Flag::kCore, Flag::kHostShareable, Flag::kFixedFootprint};
+const core::type::Flags unsizedFlags{Flag::kCore, Flag::kHostShareable};
 
 Buffer::Buffer(const ArrayCount* size)
     : Base(Hash(tint::TypeCode::Of<Buffer>().bits, size),

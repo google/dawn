@@ -45,6 +45,9 @@ namespace tint::core::type {
 
 /// Flag is an enumerator of type flag bits, used by Flags.
 enum Flag {
+    /// Type is core to Tint. (Note, this doesn't mean it's core in WGSL, it may be from an
+    /// extension but it is _not_ a dialect type.)
+    kCore,
     /// Type is constructable.
     /// @see https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
     kConstructable,
@@ -113,6 +116,9 @@ class Type : public Castable<Type, UniqueNode> {
 
     /// @returns the flags on the type
     core::type::Flags Flags() { return flags_; }
+
+    /// @returns true if the type is part of the core types
+    inline bool IsCore() const { return flags_.Contains(Flag::kCore); }
 
     /// @returns true if type is constructable
     /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types

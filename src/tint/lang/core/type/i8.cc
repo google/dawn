@@ -36,6 +36,7 @@ namespace tint::core::type {
 I8::I8()
     : Base(static_cast<size_t>(tint::TypeCode::Of<I8>().bits),
            core::type::Flags{
+               Flag::kCore,
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,

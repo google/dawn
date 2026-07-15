@@ -39,6 +39,7 @@ SubgroupMatrix::SubgroupMatrix(SubgroupMatrixKind kind,
                                uint32_t rows)
     : Base(Hash(tint::TypeCode::Of<SubgroupMatrix>().bits, kind, columns, rows, subtype),
            core::type::Flags{
+               Flag::kCore,
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,

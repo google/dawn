@@ -40,7 +40,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::BindingArray);
 namespace tint::core::type {
 
 BindingArray::BindingArray(const Type* element, const ArrayCount* count)
-    : Base(Hash(tint::TypeCode::Of<BindingArray>().bits, count), core::type::Flags{}),
+    : Base(Hash(tint::TypeCode::Of<BindingArray>().bits, count), core::type::Flags{Flag::kCore}),
       element_(element),
       count_(count) {
     TINT_ASSERT(element_);

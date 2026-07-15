@@ -35,7 +35,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::Sampler);
 namespace tint::core::type {
 
 Sampler::Sampler(SamplerKind kind)
-    : Base(Hash(tint::TypeCode::Of<Sampler>().bits, kind), core::type::Flags{}), kind_(kind) {}
+    : Base(Hash(tint::TypeCode::Of<Sampler>().bits, kind), core::type::Flags{Flag::kCore}),
+      kind_(kind) {}
 
 Sampler::~Sampler() = default;
 

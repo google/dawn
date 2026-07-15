@@ -93,11 +93,6 @@ bool TransitivelyHolds(const Block* block, const Instruction* inst) {
     return false;
 }
 
-/// @returns true if @p type is in the core namespace
-bool IsCoreType(const core::type::Type* type) {
-    return std::string_view(type->TypeInfo().name).starts_with("tint::core");
-}
-
 template <typename CTX, typename IMPL>
 void WalkTypeAndMembers(CTX& ctx,
                         const core::type::Type* type,
@@ -646,7 +641,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
         return;
     }
 
-    if (!ir_.properties.Contains(Property::kAllowNonCoreTypes) && !IsCoreType(root)) {
+    if (!ir_.properties.Contains(Property::kAllowNonCoreTypes) && !root->IsCore()) {
         diag() << "non-core types not allowed in core IR";
         return;
     }

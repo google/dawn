@@ -34,7 +34,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::Function);
 namespace tint::core::type {
 
 Function::Function()
-    : Base(static_cast<size_t>(tint::TypeCode::Of<Function>().bits), core::type::Flags{}) {}
+    : Base(static_cast<size_t>(tint::TypeCode::Of<Function>().bits),
+           core::type::Flags{Flag::kCore}) {}
 
 Function::~Function() = default;
 

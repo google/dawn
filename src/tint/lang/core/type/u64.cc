@@ -36,6 +36,7 @@ namespace tint::core::type {
 U64::U64()
     : Base(static_cast<size_t>(tint::TypeCode::Of<U64>().bits),
            core::type::Flags{
+               Flag::kCore,
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,

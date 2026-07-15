@@ -38,7 +38,7 @@ MemoryView::MemoryView(size_t hash,
                        core::AddressSpace address_space,
                        const Type* store_type,
                        core::Access access)
-    : Base(hash, core::type::Flags{}),
+    : Base(hash, core::type::Flags{Flag::kCore}),
       store_type_(store_type),
       address_space_(address_space),
       access_(access) {

@@ -34,7 +34,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::Invalid);
 namespace tint::core::type {
 
 Invalid::Invalid()
-    : Base(static_cast<size_t>(tint::TypeCode::Of<Invalid>().bits), core::type::Flags{}) {}
+    : Base(static_cast<size_t>(tint::TypeCode::Of<Invalid>().bits),
+           core::type::Flags{Flag::kCore}) {}
 
 Invalid::~Invalid() = default;
 
