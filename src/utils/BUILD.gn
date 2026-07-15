@@ -149,7 +149,6 @@ config("dawn_warnings") {
           "benchmark/",
           "glslang/",
           "gmock/",
-          "gtest/",
           "KHR/",
           "partition_alloc/",
           "napi.h",
