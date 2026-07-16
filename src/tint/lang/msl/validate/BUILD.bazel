@@ -45,8 +45,7 @@ cc_library(
   srcs = [
     "validate.cc",
   ] + select({
-    ":tint_build_is_mac": [
-      "validate_metal.mm",
+    "@platforms//os:macos": [
     ],
     "//conditions:default": [],
   }),
@@ -63,17 +62,12 @@ cc_library(
     "//src/tint/utils/text",
     "//src/utils",
   ] + select({
-    ":tint_build_is_mac": [
+    "@platforms//os:macos": [
     ],
     "//conditions:default": [],
   }),
   copts = COPTS,
   visibility = ["//visibility:public"],
-)
-
-alias(
-  name = "tint_build_is_mac",
-  actual = "//src/tint:tint_build_is_mac_true",
 )
 
 alias(

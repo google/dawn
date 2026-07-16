@@ -658,6 +658,61 @@ func checkForCycles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter)
 	return nil
 }
 
+// platformOSMap maps Tint's build-flag variables to standard Bazel platform constraints.
+// This makes it easier for clients to build w/o needing to set too many flags.
+var platformOSMap = map[string]string{
+	"tint_build_is_win":   "@platforms//os:windows",
+	"tint_build_is_linux": "@platforms//os:linux",
+	"tint_build_is_mac":   "@platforms//os:macos",
+}
+
+// ConditionTargetLabel returns a Bazel target label for a build variable and optional negation.
+// For platform constraints, it returns the standard @platforms//os target.
+// For custom flags, it returns the global //src/tint config settings.
+//
+// Examples:
+//
+//	ConditionTargetLabel("tint_build_is_win", false)     => "@platforms//os:windows"
+//	ConditionTargetLabel("tint_build_glsl_writer", true) => "//src/tint:tint_build_glsl_writer_false"
+func ConditionTargetLabel(variable string, isNegated bool) string {
+	if label, ok := platformOSMap[variable]; ok {
+		return label
+	}
+	suffix := "_true"
+	if isNegated {
+		suffix = "_false"
+	}
+	return "//src/tint:" + variable + suffix
+}
+
+// ShouldSkipOrs returns true if the OR expression consists entirely of negated platform variables.
+func ShouldSkipOrs(ors cnf.Ors) bool {
+	for _, unary := range ors {
+		if !unary.Negate {
+			return false
+		}
+		if _, ok := platformOSMap[unary.Var]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
+// ShouldSkipAnds returns true if the AND expression consists entirely of negated platform variables.
+func ShouldSkipAnds(ands cnf.Ands) bool {
+	for _, ors := range ands {
+		for _, unary := range ors {
+			if !unary.Negate {
+				return false
+			}
+			if _, ok := platformOSMap[unary.Var]; !ok {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // TODO(crbug.com/344014313): Add unittests once fileutils and template are
 // converted to support dependency injection
 // emitBuildFiles emits a 'BUILD.*' file in each source directory for each
@@ -713,7 +768,18 @@ func emitBuildFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter)
 			w.WriteString(common.Header(string(existing), CanonicalizePath(relTmplPath), "#"))
 
 			// Write the template output
-			err = templates[tmplPath].Run(w, dir, map[string]any{})
+			err = templates[tmplPath].Run(w, dir, map[string]any{
+				"ShouldSkipUnary": func(unary cnf.Unary) bool {
+					_, ok := platformOSMap[unary.Var]
+					return ok
+				},
+				"ShouldSkipOrs":  ShouldSkipOrs,
+				"ShouldSkipAnds": ShouldSkipAnds,
+				"PlatformLabel": func(variable string) string {
+					return platformOSMap[variable]
+				},
+				"ConditionTargetLabel": ConditionTargetLabel,
+			})
 			if err != nil {
 				return nil, err
 			}

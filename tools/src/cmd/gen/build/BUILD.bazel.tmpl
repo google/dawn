@@ -109,9 +109,11 @@ cc_binary(
 {{-     end}}
 {{-   else}}
 {{-     range $File := $.UnconditionalSourceFiles}}
-{{-       if or (not $.Kind.IsLib) (HasSuffix $File.Name ".cc")}}
-{{-         if not ($.IsGeneratedSource $File.Path)}}
+{{-       if not (HasSuffix $File.Name ".mm")}}
+{{-         if or (not $.Kind.IsLib) (HasSuffix $File.Name ".cc")}}
+{{-           if not ($.IsGeneratedSource $File.Path)}}
     "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{-           end}}
 {{-         end}}
 {{-       end}}
 {{-     end}}
@@ -122,14 +124,29 @@ cc_binary(
   ]
 {{-   if $Conditionals.HasSourceFiles}}
 {{-     range $Cond := $Conditionals}} + select({
-{{-       if $Cond.SourceFiles}}
-    ":{{Eval "ConditionTarget" $Cond.Condition}}": [
+{{-       if $Cond.Condition.IsNegative}}
+{{-         range $Var := $Cond.Condition.PositiveVarsOfNegative}}
+    "{{$Label := PlatformLabel $Var}}{{if $Label}}{{$Label}}{{else}}//src/tint:{{$Var}}_true{{end}}": [],
+{{-         end}}
+    "//conditions:default": [
 {{-         range $File := $Cond.SourceFiles}}
+{{-           if not (HasSuffix $File.Name ".mm")}}
       "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{-           end}}
 {{-         end}}
     ],
-{{-       end}}
+{{-       else}}
+{{-         if $Cond.SourceFiles}}
+    "{{$Label := PlatformLabel $Cond.Condition.String}}{{if $Label}}{{$Label}}{{else}}:{{Eval "ConditionTarget" $Cond.Condition}}{{end}}": [
+{{-           range $File := $Cond.SourceFiles}}
+{{-             if not (HasSuffix $File.Name ".mm")}}
+      "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{-             end}}
+{{-           end}}
+    ],
+{{-         end}}
     "//conditions:default": [],
+{{-       end}}
   })
 {{-     end}}
 {{-   end}},
@@ -144,8 +161,10 @@ cc_binary(
 {{-   else}}
 {{-     range $File := $.UnconditionalSourceFiles}}
 {{-       if not (HasSuffix $File.Name ".cc")}}
-{{-         if not ($.IsGeneratedSource $File.Path)}}
+{{-         if not (HasSuffix $File.Name ".mm")}}
+{{-           if not ($.IsGeneratedSource $File.Path)}}
     "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{-           end}}
 {{-         end}}
 {{-       end}}
 {{-     end}}
@@ -176,8 +195,11 @@ cc_binary(
   ]
 {{-   if $Conditionals.HasDependencies}}
 {{-     range $Cond := $Conditionals}} + select({
-{{-       if or $Cond.InternalDependencies $Cond.ExternalDependencies}}
-    ":{{Eval "ConditionTarget" $Cond.Condition}}": [
+{{-       if $Cond.Condition.IsNegative}}
+{{-         range $Var := $Cond.Condition.PositiveVarsOfNegative}}
+    "{{$Label := PlatformLabel $Var}}{{if $Label}}{{$Label}}{{else}}//src/tint:{{$Var}}_true{{end}}": [],
+{{-         end}}
+    "//conditions:default": [
 {{-         range $Dep := $Cond.InternalDependencies}}
       "{{Eval "Dependency" $Dep}}",
 {{-         end}}
@@ -188,8 +210,22 @@ cc_binary(
 {{-           end}}
 {{-         end}}
     ],
-{{-       end}}
+{{-       else}}
+{{-         if or $Cond.InternalDependencies $Cond.ExternalDependencies}}
+    "{{$Label := PlatformLabel $Cond.Condition.String}}{{if $Label}}{{$Label}}{{else}}:{{Eval "ConditionTarget" $Cond.Condition}}{{end}}": [
+{{-           range $Dep := $Cond.InternalDependencies}}
+      "{{Eval "Dependency" $Dep}}",
+{{-           end}}
+{{-           range $Dep := $Cond.ExternalDependencies}}
+{{-             $Target := Eval "ExternalDependencyTarget" $Dep}}
+{{-             if $Target}}
+      {{$Target}}
+{{-             end}}
+{{-           end}}
+    ],
+{{-         end}}
     "//conditions:default": [],
+{{-       end}}
   })
 {{-     end}}
 {{-   end}},
@@ -261,28 +297,33 @@ cc_binary(
 {{- define "ConditionalRules"}}
 {{-   if $.Unarys}}
 {{-     range $Unary := $.Unarys}}
+{{-       if not (ShouldSkipUnary $Unary)}}
 alias(
   name = "{{Eval "ConditionTarget" $Unary}}",
-  actual = "//src/tint:{{$Unary.Var}}_{{not $Unary.Negate}}",
+  actual = "{{ConditionTargetLabel $Unary.Var $Unary.Negate}}",
 )
 {{/* newline */}}
+{{-       end}}
 {{-     end}}
 {{-   end}}
 {{-   if $.Ors}}
 {{-     range $Ors := $.Ors}}
+{{-       if not (ShouldSkipOrs $Ors)}}
 selects.config_setting_group(
     name = "{{Eval "ConditionTarget" $Ors}}",
     match_any = [
 {{-       range $Unary := $Ors}}
-        "{{Eval "ConditionTarget" $Unary}}",
+        "{{$Label := PlatformLabel $Unary.Var}}{{if $Label}}{{$Label}}{{else}}:{{Eval "ConditionTarget" $Unary}}{{end}}",
 {{-       end}}
     ],
 )
 {{/* newline */}}
+{{-       end}}
 {{-     end}}
 {{-   end}}
 {{-   if $.Ands}}
 {{-     range $Ands := $.Ands}}
+{{-       if not (ShouldSkipAnds $Ands)}}
 selects.config_setting_group(
     name = "{{Eval "ConditionTarget" $Ands}}",
     match_all = [
@@ -291,6 +332,7 @@ selects.config_setting_group(
 {{-       end}}
     ],
 )
+{{-       end}}
 {{-     end}}
 {{/* newline */}}
 {{-   end}}

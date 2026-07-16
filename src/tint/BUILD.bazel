@@ -27,7 +27,8 @@
 
 # GEN_BUILD:DO_NOT_GENERATE - This is a hand-crafted file.
 
-load(":flags.bzl", "declare_bool_flag", "declare_os_flag")
+load(":flags.bzl", "declare_bool_flag")
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("//src/tint:generated_sources.bzl", "tint_generated_sources", "tint_generation_dependencies")
 
 # Declares the 'tint_build_*' flags that control what parts of Tint get built
@@ -66,8 +67,7 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
-# Declares the 'os' flag that control what OS-specific Tint code gets built
-declare_os_flag()
+
 
 genrule(
     name = "generate_sources",

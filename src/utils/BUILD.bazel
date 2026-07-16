@@ -26,9 +26,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//src/utils:flags.bzl", "COPTS", "declare_os_flag")
-
-declare_os_flag()
+load("//src/utils:flags.bzl", "COPTS")
 
 cc_library(
   name = "utils",
@@ -47,7 +45,7 @@ cc_library(
     "typed_integer.h",
     "underlying_type.h",
   ] + select({
-    "//src/utils:dawn_build_is_win_true": [
+    "@platforms//os:windows": [
       "windows_with_undefs.h",
     ],
     "//conditions:default": [],

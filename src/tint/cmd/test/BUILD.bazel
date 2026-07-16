@@ -232,8 +232,8 @@ alias(
 selects.config_setting_group(
     name = "tint_build_spv_reader_or_tint_build_spv_writer",
     match_any = [
-        "tint_build_spv_reader",
-        "tint_build_spv_writer",
+        ":tint_build_spv_reader",
+        ":tint_build_spv_writer",
     ],
 )
 
