@@ -416,7 +416,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::MetalUseArgumentBuffers, false);
 
         bool haveBaseVertexBaseInstance = true;
-#if DAWN_PLATFORM_IS(IOS) && !DAWN_PLATFORM_IS(TVOS) && \
+        // The iOS Simulator only advertises the MTLFeatureSet_iOS_GPUFamily2 feature set, but
+        // base vertex/instance draws execute correctly there because Metal commands are serviced
+        // by the host GPU, which always supports them.
+        // NOTE: TARGET_OS_SIMULATOR can be defined but set to false for MacOS builds.
+#if DAWN_PLATFORM_IS(IOS) && !DAWN_PLATFORM_IS(TVOS) &&        \
+    (!defined(TARGET_OS_SIMULATOR) || !TARGET_OS_SIMULATOR) && \
     (!defined(__IPHONE_16_0) || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_16_0)
         haveBaseVertexBaseInstance = [*mDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v1];
 #endif
