@@ -207,7 +207,7 @@ class Parser {
             EmitModuleScopeVariables();
         }
 
-        EmitFunctions();
+        TINT_CHECK_RESULT(EmitFunctions());
         EmitEntryPointAttributes();
 
         RemapSamplers();
@@ -1667,7 +1667,7 @@ class Parser {
     }
 
     /// Emit the functions.
-    void EmitFunctions() {
+    Result<SuccessType> EmitFunctions() {
         // Add all the functions in a first pass and then fill in the function bodies. This means
         // the function will exist fixing an issues where calling a function that hasn't been seen
         // generates the wrong signature.
@@ -1704,7 +1704,7 @@ class Parser {
             current_spirv_function_ = &func;
 
             current_function_ = Function(func.result_id());
-            EmitBlockParent(current_function_->Block(), *func.entry());
+            TINT_CHECK_RESULT(EmitBlockParent(current_function_->Block(), *func.entry()));
 
             // No terminator was emitted, that means then end of block is
             // unreachable. Mark as such.
@@ -1713,6 +1713,7 @@ class Parser {
             }
             current_spirv_function_ = nullptr;
         }
+        return Success;
     }
 
     /// Emit entry point attributes.
@@ -1815,22 +1816,24 @@ class Parser {
 
     // A block parent is a container for a scope, like a `{}`d section in code. It controls the
     // block addition to the current blocks and the ID stack entry for the block.
-    void EmitBlockParent(core::ir::Block* dst, spvtools::opt::BasicBlock& src) {
+    Result<SuccessType> EmitBlockParent(core::ir::Block* dst, spvtools::opt::BasicBlock& src) {
         TINT_ASSERT(!InBlock(dst));
 
         id_stack_.emplace_back();
         current_blocks_.insert(dst);
 
-        EmitBlock(dst, src);
+        auto res = EmitBlock(dst, src);
 
         current_blocks_.erase(dst);
         id_stack_.pop_back();
+
+        return res;
     }
 
     /// Emit the contents of SPIR-V block @p src into Tint IR block @p dst.
     /// @param dst the Tint IR block to append to
     /// @param src the SPIR-V block to emit
-    void EmitBlock(core::ir::Block* dst, spvtools::opt::BasicBlock& src) {
+    Result<SuccessType> EmitBlock(core::ir::Block* dst, spvtools::opt::BasicBlock& src) {
         TINT_SCOPED_ASSIGNMENT(current_block_, dst);
 
         // Register the merge if this is a header block
@@ -1865,7 +1868,7 @@ class Parser {
         // Note, this comes after the loop code since the current block is set to the loop body
         spirv_id_to_block_.insert({src.id(), current_block_});
 
-        ProcessInstructions(src);
+        TINT_CHECK_RESULT(ProcessInstructions(src));
 
         // Add the body terminator if necessary
         if (loop && !loop->Body()->Terminator()) {
@@ -1885,7 +1888,7 @@ class Parser {
         values_to_replace_.pop_back();
 
         if (!loop) {
-            return;
+            return Success;
         }
 
         // Emit the continuing block. The continue block is within the scope of the body block,
@@ -1906,7 +1909,7 @@ class Parser {
             }
         }
 
-        EmitContinueBlock(src.id(), continue_id, loop);
+        TINT_CHECK_RESULT(EmitContinueBlock(src.id(), continue_id, loop));
 
         // Remove the body block id stack before emitting the merge block.
         current_blocks_.erase(loop->Body());
@@ -1956,10 +1959,13 @@ class Parser {
         // Emit the merge block
         auto merge_id = loop_merge_inst->GetSingleWordInOperand(0);
         const auto& merge_bb = current_spirv_function_->FindBlock(merge_id);
-        EmitBlock(dst, *merge_bb);
+        TINT_CHECK_RESULT(EmitBlock(dst, *merge_bb));
+        return Success;
     }
 
-    void EmitContinueBlock(uint32_t src_id, uint32_t continue_id, core::ir::Loop* loop) {
+    Result<SuccessType> EmitContinueBlock(uint32_t src_id,
+                                          uint32_t continue_id,
+                                          core::ir::Loop* loop) {
         // We're emitting the continue block, so remove it from the continue targets as it can no
         // longer be a target for this loop. This will allow it to be _reused_ as the continue
         // target for a single block loop if needed (which may have this same block as the
@@ -1982,7 +1988,7 @@ class Parser {
             const auto& bb_continue = current_spirv_function_->FindBlock(continue_id);
 
             current_blocks_.insert(loop->Continuing());
-            EmitBlock(loop->Continuing(), *bb_continue);
+            TINT_CHECK_RESULT(EmitBlock(loop->Continuing(), *bb_continue));
             current_blocks_.erase(loop->Continuing());
         }
 
@@ -2017,9 +2023,10 @@ class Parser {
         }
 
         id_stack_.pop_back();
+        return Success;
     }
 
-    void ProcessInstructions(spvtools::opt::BasicBlock& src) {
+    Result<SuccessType> ProcessInstructions(spvtools::opt::BasicBlock& src) {
         for (auto& inst : src) {
             switch (inst.opcode()) {
                 case spv::Op::OpNop:
@@ -2028,13 +2035,13 @@ class Parser {
                     AddValue(inst.result_id(), b_.Zero(Type(inst.type_id())));
                     break;
                 case spv::Op::OpBranch:
-                    EmitBranch(inst);
+                    TINT_CHECK_RESULT(EmitBranch(inst));
                     break;
                 case spv::Op::OpBranchConditional:
-                    EmitBranchConditional(src, inst);
+                    TINT_CHECK_RESULT(EmitBranchConditional(src, inst));
                     break;
                 case spv::Op::OpSwitch:
-                    EmitSwitch(src, inst);
+                    TINT_CHECK_RESULT(EmitSwitch(src, inst));
                     break;
                 case spv::Op::OpLoopMerge:
                     EmitLoopMerge(src, inst);
@@ -2516,12 +2523,19 @@ class Parser {
                 case spv::Op::OpGroupNonUniformBitwiseXor:
                     EmitSubgroupBitwise(inst, core::BuiltinFn::kSubgroupXor);
                     break;
+                case spv::Op::OpIsNan:
+                    return Failure(
+                        "IsNan is not supported because NaNs cannot be represented in WGSL");
+                case spv::Op::OpIsInf:
+                    return Failure(
+                        "IsInf is not supported because Infinities cannot be represented in WGSL");
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << spv::OpToString(inst.opcode())
                         << " (val = " << static_cast<uint32_t>(inst.opcode()) << ")";
             }
         }
+        return Success;
     }
 
     void ValidateScope(spvtools::opt::Instruction& inst) {
@@ -3464,7 +3478,7 @@ class Parser {
         return nullptr;
     }
 
-    void EmitBranch(spvtools::opt::Instruction& inst) {
+    Result<SuccessType> EmitBranch(spvtools::opt::Instruction& inst) {
         auto dest_id = inst.GetSingleWordInOperand(0);
 
         // Disallow fallthrough
@@ -3479,7 +3493,7 @@ class Parser {
             auto id = spirv_context_->get_instr_block(&inst)->id();
             inst_to_spirv_block_[new_inst] = id;
             EmitWithoutResult(new_inst);
-            return;
+            return Success;
         }
         // If this is branching to a previous merge block then we're done. It can be a previous
         // merge block in the case of an `if` breaking out of a `switch` or `loop`.
@@ -3493,13 +3507,14 @@ class Parser {
             } else if (ctrl_inst->Is<core::ir::Switch>()) {
                 EmitWithoutResult(b_.Exit(ctrl_inst));
             }
-            return;
+            return Success;
         }
 
         TINT_ASSERT(current_spirv_function_);
         const auto& bb = current_spirv_function_->FindBlock(dest_id);
 
-        EmitBlock(current_block_, *bb);
+        TINT_CHECK_RESULT(EmitBlock(current_block_, *bb));
+        return Success;
     }
 
     // Given a true and false branch find if there is a common convergence point before the merge
@@ -3657,9 +3672,9 @@ class Parser {
         return false;
     }
 
-    void EmitPremergeBlock(uint32_t merge_id,
-                           uint32_t premerge_start_id,
-                           core::ir::If* premerge_if_) {
+    Result<SuccessType> EmitPremergeBlock(uint32_t merge_id,
+                                          uint32_t premerge_start_id,
+                                          core::ir::If* premerge_if_) {
         auto iter = merge_to_premerge_.find(merge_id);
         TINT_ASSERT(iter != merge_to_premerge_.end());
 
@@ -3676,30 +3691,32 @@ class Parser {
         EmitWithoutResult(premerge_if_);
 
         const auto& bb_premerge = current_spirv_function_->FindBlock(premerge_start_id);
-        EmitBlockParent(premerge_if_->True(), *bb_premerge);
+        TINT_CHECK_RESULT(EmitBlockParent(premerge_if_->True(), *bb_premerge));
         if (!premerge_if_->True()->Terminator()) {
             premerge_if_->True()->Append(b_.Exit(premerge_if_));
         }
 
         premerge_if_->False()->Append(b_.Unreachable());
+        return Success;
     }
 
-    void EmitIfBranch(uint32_t id, core::ir::If* if_, core::ir::Block* blk) {
+    Result<SuccessType> EmitIfBranch(uint32_t id, core::ir::If* if_, core::ir::Block* blk) {
         const auto& bb = current_spirv_function_->FindBlock(id);
-        EmitBlockParent(blk, *bb);
+        TINT_CHECK_RESULT(EmitBlockParent(blk, *bb));
         if (!blk->Terminator()) {
             blk->Append(b_.Exit(if_));
         }
+        return Success;
     }
 
-    void EmitBranchConditional(const spvtools::opt::BasicBlock& bb,
-                               const spvtools::opt::Instruction& inst) {
+    Result<SuccessType> EmitBranchConditional(const spvtools::opt::BasicBlock& bb,
+                                              const spvtools::opt::Instruction& inst) {
         auto cond = Value(inst.GetSingleWordInOperand(0));
         auto true_id = inst.GetSingleWordInOperand(1);
         auto false_id = inst.GetSingleWordInOperand(2);
 
         if (ProcessBranchAsLoopHeader(cond, true_id, false_id)) {
-            return;
+            return Success;
         }
 
         // If the true and false block are the same, then we change the condition into
@@ -3746,7 +3763,7 @@ class Parser {
             auto* new_inst = EmitBranchStopBlock(ctrl, if_, if_->True(), true_id);
             inst_to_spirv_block_[new_inst] = bb.id();
         } else {
-            EmitIfBranch(true_id, if_, if_->True());
+            TINT_CHECK_RESULT(EmitIfBranch(true_id, if_, if_->True()));
         }
 
         // Pre-SPIRV 1.6 the true and false blocks could be the same. If that's the case then we
@@ -3757,21 +3774,23 @@ class Parser {
             auto* new_inst = EmitBranchStopBlock(ctrl, if_, if_->False(), false_id);
             inst_to_spirv_block_[new_inst] = bb.id();
         } else {
-            EmitIfBranch(false_id, if_, if_->False());
+            TINT_CHECK_RESULT(EmitIfBranch(false_id, if_, if_->False()));
         }
 
         // There was a premerge, remove it from the merge stack and then emit the premerge into an
         // `if true` block in order to maintain re-convergence guarantees. The premerge will contain
         // all the blocks up to the merge block.
         if (premerge_start_id.has_value()) {
-            EmitPremergeBlock(merge_id.value(), premerge_start_id.value(), premerge_if_);
+            TINT_CHECK_RESULT(
+                EmitPremergeBlock(merge_id.value(), premerge_start_id.value(), premerge_if_));
         }
 
         // Emit the merge block if it exists.
         if (merge_id.has_value()) {
             const auto& bb_merge = current_spirv_function_->FindBlock(merge_id.value());
-            EmitBlock(current_block_, *bb_merge);
+            TINT_CHECK_RESULT(EmitBlock(current_block_, *bb_merge));
         }
+        return Success;
     }
 
     void EmitLoop(const spvtools::opt::BasicBlock& bb) {
@@ -3817,7 +3836,8 @@ class Parser {
         // instructions in the loop header are emitted.
     }
 
-    void EmitSwitch(const spvtools::opt::BasicBlock& bb, const spvtools::opt::Instruction& inst) {
+    Result<SuccessType> EmitSwitch(const spvtools::opt::BasicBlock& bb,
+                                   const spvtools::opt::Instruction& inst) {
         auto* selector = Value(inst.GetSingleWordInOperand(0));
         auto default_id = inst.GetSingleWordInOperand(1);
 
@@ -3838,7 +3858,7 @@ class Parser {
             current_switch_blocks_[switch_blocks_id].emplace(default_id);
 
             const auto& bb_default = current_spirv_function_->FindBlock(default_id);
-            EmitBlockParent(default_blk, *bb_default);
+            TINT_CHECK_RESULT(EmitBlockParent(default_blk, *bb_default));
         }
         if (!default_blk->Terminator()) {
             default_blk->Append(b_.ExitSwitch(switch_));
@@ -3878,7 +3898,7 @@ class Parser {
             core::ir::Block* blk = b_.Case(switch_, Vector{sel});
             if (blk_id != merge_id) {
                 const auto& basic_block = current_spirv_function_->FindBlock(blk_id);
-                EmitBlockParent(blk, *basic_block);
+                TINT_CHECK_RESULT(EmitBlockParent(blk, *basic_block));
             }
             if (!blk->Terminator()) {
                 blk->Append(b_.ExitSwitch(switch_));
@@ -3889,7 +3909,8 @@ class Parser {
         current_switch_blocks_.pop_back();
 
         const auto& bb_merge = current_spirv_function_->FindBlock(merge_id);
-        EmitBlock(current_block_, *bb_merge);
+        TINT_CHECK_RESULT(EmitBlock(current_block_, *bb_merge));
+        return Success;
     }
 
     Vector<core::ir::Value*, 4> Args(const spvtools::opt::Instruction& inst, uint32_t start) {
