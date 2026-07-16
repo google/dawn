@@ -148,6 +148,46 @@ class Parser {
             }
         }
 
+        // Check for unsupported capabilities.
+        for (auto it = spirv_context_->capability_begin(); it != spirv_context_->capability_end();
+             ++it) {
+            auto capability = static_cast<spv::Capability>(it->GetSingleWordInOperand(0));
+            switch (capability) {
+                case spv::Capability::ClipDistance:
+                case spv::Capability::DerivativeControl:
+                case spv::Capability::Float16:
+                case spv::Capability::Geometry:
+                case spv::Capability::GroupNonUniform:
+                case spv::Capability::GroupNonUniformArithmetic:
+                case spv::Capability::GroupNonUniformBallot:
+                case spv::Capability::GroupNonUniformQuad:
+                case spv::Capability::GroupNonUniformShuffle:
+                case spv::Capability::GroupNonUniformShuffleRelative:
+                case spv::Capability::GroupNonUniformVote:
+                case spv::Capability::Image1D:
+                case spv::Capability::ImageQuery:
+                case spv::Capability::InputAttachment:
+                case spv::Capability::Matrix:
+                case spv::Capability::Sampled1D:
+                case spv::Capability::SampledCubeArray:
+                case spv::Capability::SampleRateShading:
+                case spv::Capability::Shader:
+                case spv::Capability::StorageBuffer16BitAccess:
+                case spv::Capability::StorageImageExtendedFormats:
+                case spv::Capability::StorageInputOutput16:
+                case spv::Capability::StoragePushConstant16:
+                case spv::Capability::UniformAndStorageBuffer16BitAccess:
+                case spv::Capability::VulkanMemoryModel:
+                case spv::Capability::VulkanMemoryModelDeviceScope:
+                    // Supported
+                    break;
+                default:
+                    return Failure("SPIR-V capability '" +
+                                   std::string(spv::CapabilityToString(capability)) +
+                                   "' is not supported");
+            }
+        }
+
         // Check for unsupported types.
         for (const auto& type : *spirv_context_->get_type_mgr()) {
             switch (type.second->kind()) {
