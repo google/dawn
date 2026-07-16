@@ -61,7 +61,7 @@ class BumpAllocator {
   public:
     /// The default size for a block's data. Allocations can be greater than this, but smaller
     /// allocations will use this size.
-    static constexpr size_t kDefaultBlockDataSize = 64 * 1024;
+    static constexpr size_t kDefaultBlockDataSize = 64ULL * 1024;
 
     /// Constructor
     BumpAllocator() = default;

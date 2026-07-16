@@ -779,7 +779,7 @@ TEST_P(SharedBufferMemoryTests, WriteBufferEnsureSynchronization) {
     memory.BeginAccess(buffer, &beginAccessDesc);
 
     constexpr uint32_t bufferData[] = {kBufferData, kBufferData};
-    wgpu::Buffer srcBuffer = utils::CreateBufferFromData(device, bufferData, kBufferSize * 2,
+    wgpu::Buffer srcBuffer = utils::CreateBufferFromData(device, bufferData, kBufferSize * 2ULL,
                                                          wgpu::BufferUsage::CopySrc);
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyBufferToBuffer(srcBuffer, 0, buffer, 0, 4);

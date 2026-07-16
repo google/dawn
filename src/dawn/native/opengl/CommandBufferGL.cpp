@@ -1470,8 +1470,9 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                 DAWN_TRY(immediates.Apply(gl));
                 DAWN_GL_TRY(gl, DrawElementsInstanced(
                                     topology, draw->indexCount, indexBufferFormat,
-                                    reinterpret_cast<void*>(draw->firstIndex * indexFormatSize +
-                                                            indexBufferBaseOffset),
+                                    reinterpret_cast<void*>(
+                                        static_cast<uint64_t>(draw->firstIndex) * indexFormatSize +
+                                        indexBufferBaseOffset),
                                     draw->instanceCount));
                 break;
             }
@@ -1736,7 +1737,8 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
     DAWN_GL_TRY(gl, BindTexture(target, texture->GetTextureHandle()));
     const TypedTexelBlockInfo& blockInfo = GetBlockInfo(destination);
     const BlockExtent3D blockCopySize = blockInfo.ToBlock(copySize);
-    const uint64_t bytesPerImage = dataLayout.rowsPerImage * dataLayout.bytesPerRow;
+    const uint64_t bytesPerImage =
+        static_cast<uint64_t>(dataLayout.rowsPerImage) * dataLayout.bytesPerRow;
     const BlockCount rowsPerImage{dataLayout.rowsPerImage};
     // Note: bytesPerRow is not necessarily a multiple of block size because WriteTexture is
     // directly implemented by the GL backend and doesn't have alignment constraints for

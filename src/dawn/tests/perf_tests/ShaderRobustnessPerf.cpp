@@ -488,14 +488,14 @@ void ShaderRobustnessPerf::SetUpPerfTest() {
     DAWN_TEST_UNSUPPORTED_IF((GetParam().mElemType == ElemType::F16) &&
                              !SupportsFeatures({wgpu::FeatureName::ShaderF16}));
 
-    const size_t dataASize = mDimAOuter * mDimInner;
+    const size_t dataASize = static_cast<size_t>(mDimAOuter) * mDimInner;
     std::vector<float> dataA(dataASize);
     uint64_t byteASize = sizeof(float) * dataA.size();
     // It's ok to use all zeros to do the matrix multiplication for performance test.
     wgpu::Buffer bufA =
         utils::CreateBufferFromData(device, dataA.data(), byteASize, wgpu::BufferUsage::Storage);
 
-    const size_t dataBSize = mDimInner * mDimBOuter;
+    const size_t dataBSize = static_cast<size_t>(mDimInner) * mDimBOuter;
     std::vector<float> dataB(dataBSize);
     uint64_t byteBSize = sizeof(float) * dataB.size();
     wgpu::Buffer bufB =

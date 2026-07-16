@@ -166,7 +166,7 @@ ShaderVisibleDescriptorAllocator::AllocateHeap(uint32_t descriptorCount) const {
     // The size in bytes of a descriptor heap is best calculated by the increment size
     // multiplied by the number of descriptors. In practice, this is only an estimate and
     // the actual size may vary depending on the driver.
-    const uint64_t kSize = mSizeIncrement * descriptorCount;
+    const uint64_t kSize = static_cast<uint64_t>(mSizeIncrement) * descriptorCount;
 
     DAWN_TRY(mDevice->GetResidencyManager()->EnsureCanAllocate(kSize, MemorySegment::Local));
 

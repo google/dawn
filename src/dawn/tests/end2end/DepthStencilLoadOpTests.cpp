@@ -132,7 +132,8 @@ class DepthStencilLoadOpTests : public DawnTestWithParams<DepthStencilLoadOpTest
                 // textureLoad with texture_depth_xxx is not supported in compat mode.
                 DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
-                std::vector<float> expectedDepth(mipSize * mipSize, kDepthValues[mipLevel]);
+                std::vector<float> expectedDepth(static_cast<size_t>(mipSize) * mipSize,
+                                                 kDepthValues[mipLevel]);
                 ExpectSampledDepthData(
                     texture, mipSize, mipSize, 0, mipLevel,
                     new detail::ExpectEq<float>(expectedDepth.data(), expectedDepth.size(), 0.0001))
@@ -144,14 +145,15 @@ class DepthStencilLoadOpTests : public DawnTestWithParams<DepthStencilLoadOpTest
                 DAWN_TEST_UNSUPPORTED_IF(utils::IsStencilOnlyFormat(GetParam().mFormat));
 
                 if (GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm) {
-                    std::vector<uint16_t> expectedDepth(mipSize * mipSize,
+                    std::vector<uint16_t> expectedDepth(static_cast<size_t>(mipSize) * mipSize,
                                                         kU16DepthValues[mipLevel]);
                     EXPECT_TEXTURE_EQ(expectedDepth.data(), texture, {0, 0}, {mipSize, mipSize},
                                       mipLevel, wgpu::TextureAspect::DepthOnly,
                                       /* bytesPerRow */ 0, /* tolerance */ uint16_t(1))
                         << "copy depth mip " << mipLevel;
                 } else {
-                    std::vector<float> expectedDepth(mipSize * mipSize, kDepthValues[mipLevel]);
+                    std::vector<float> expectedDepth(static_cast<size_t>(mipSize) * mipSize,
+                                                     kDepthValues[mipLevel]);
                     EXPECT_TEXTURE_EQ(expectedDepth.data(), texture, {0, 0}, {mipSize, mipSize},
                                       mipLevel, wgpu::TextureAspect::DepthOnly)
                         << "copy depth mip " << mipLevel;
@@ -161,7 +163,8 @@ class DepthStencilLoadOpTests : public DawnTestWithParams<DepthStencilLoadOpTest
             }
 
             case Check::CopyStencil: {
-                std::vector<uint8_t> expectedStencil(mipSize * mipSize, kStencilValues[mipLevel]);
+                std::vector<uint8_t> expectedStencil(static_cast<size_t>(mipSize) * mipSize,
+                                                     kStencilValues[mipLevel]);
                 EXPECT_TEXTURE_EQ(expectedStencil.data(), texture, {0, 0}, {mipSize, mipSize},
                                   mipLevel, wgpu::TextureAspect::StencilOnly)
                     << "copy stencil mip " << mipLevel;
@@ -171,7 +174,8 @@ class DepthStencilLoadOpTests : public DawnTestWithParams<DepthStencilLoadOpTest
             case Check::DepthTest: {
                 DAWN_TEST_UNSUPPORTED_IF(utils::IsStencilOnlyFormat(GetParam().mFormat));
 
-                std::vector<float> expectedDepth(mipSize * mipSize, kDepthValues[mipLevel]);
+                std::vector<float> expectedDepth(static_cast<size_t>(mipSize) * mipSize,
+                                                 kDepthValues[mipLevel]);
                 ExpectAttachmentDepthTestData(texture, GetParam().mFormat, mipSize, mipSize, 0,
                                               mipLevel, expectedDepth)
                     << "depth test mip " << mipLevel;
@@ -466,7 +470,7 @@ TEST_P(DepthTextureClearTwiceTest, ClearDepthAspectTwice) {
         constexpr std::array<uint32_t, 3> kLevelsToTest = {0, 1u, 3u};
         for (uint32_t level : kLevelsToTest) {
             uint32_t sizeAtLevel = kSize >> level;
-            std::vector<float> expectedValue(sizeAtLevel * sizeAtLevel, 0.f);
+            std::vector<float> expectedValue(static_cast<size_t>(sizeAtLevel) * sizeAtLevel, 0.f);
             ExpectAttachmentDepthTestData(depthTexture, GetParam().mFormat, sizeAtLevel,
                                           sizeAtLevel, 0, level, expectedValue);
         }

@@ -51,7 +51,7 @@ constexpr int64_t kMaxSubgroupSize = 128;
 constexpr int64_t kQuadSize = 4;
 
 // A @size attribute maximum size
-constexpr int64_t kMaxStructMemberPadding = 10 * 1024 * 1024;
+constexpr int64_t kMaxStructMemberPadding = 10LL * 1024 * 1024;
 
 // The maximum number of locations allowed for shader IO.
 // This hard limit is derived from spirv-val (kMaxLocations in

@@ -499,7 +499,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
     cpDesc.compute.module = csModule;
     wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
     wgpu::Buffer vertexBuffer = CreateZeroedBuffer(
-        kVertexBufferStride * 4,
+        kVertexBufferStride * 4ULL,
         wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
     wgpu::Buffer indexBuffer = CreateZeroedBuffer(
         sizeof(int) * 4 * 2,

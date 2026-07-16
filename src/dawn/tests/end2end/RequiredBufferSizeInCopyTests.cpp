@@ -131,7 +131,7 @@ class RequiredBufferSizeInCopyTests
         uint64_t imageSize = kBytesPerRow * rowsPerImage;
         DAWN_ASSERT(bufferSize >= (imageSize * (copySize.depthOrArrayLayers - 1) + kBytesPerBlock));
         uint32_t numOfImageElements = imageSize / kBytesPerBlock;
-        for (uint32_t i = 0; i < copySize.depthOrArrayLayers; ++i) {
+        for (size_t i = 0; i < copySize.depthOrArrayLayers; ++i) {
             data[i * numOfImageElements] = 0x80808080;
             expectedBufferData[i * numOfImageElements] = 0x80808080;
             expectedTextureData[i] = 0x80808080;
@@ -195,7 +195,8 @@ TEST_P(RequiredBufferSizeInCopyTests, BufferSizeOnBoundary) {
         const uint64_t rowsPerImage = extraRowsPerImage + copySize.height;
 
         uint64_t size = kOffset + kBytesPerRow * rowsPerImage * (copySize.depthOrArrayLayers - 1) +
-                        kBytesPerRow * (rowsPerImage - 1) + kBytesPerBlock * copySize.width;
+                        kBytesPerRow * (rowsPerImage - 1) +
+                        static_cast<uint64_t>(kBytesPerBlock) * copySize.width;
         DoTest(size, copySize, rowsPerImage);
 
         size -= kBytesPerBlock;

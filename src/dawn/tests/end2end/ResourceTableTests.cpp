@@ -474,7 +474,7 @@ class ResourceTableTests : public DawnTest {
         auto texture = device.CreateTexture(&descriptor);
 
         const uint32_t rowPixels = kTextureBytesPerRowAlignment / sizeof(utils::RGBA8);
-        std::array<utils::RGBA8, rowPixels * 2> pixels;
+        std::array<utils::RGBA8, static_cast<size_t>(rowPixels) * 2> pixels;
         pixels[0] = pixels[rowPixels + 1] = utils::RGBA8::kRed;
         pixels[1] = pixels[rowPixels] = utils::RGBA8::kGreen;
 
@@ -1799,16 +1799,16 @@ TEST_P(ResourceTableTests, MultipleSamplers) {
         float expectedRed[4] = {1.0, 0.0, 0.0, 1.0};
 
         // repeat: 1,0 -> red, 1.5,0 -> green
-        EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 0 * 4 * sizeof(float), 4);
-        EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 1 * 4 * sizeof(float), 4);
+        EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 0ULL * 4 * sizeof(float), 4);
+        EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 1ULL * 4 * sizeof(float), 4);
 
         // mirror: 1,0 -> green, 1.5,0 -> red
-        EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 2 * 4 * sizeof(float), 4);
-        EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 3 * 4 * sizeof(float), 4);
+        EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 2ULL * 4 * sizeof(float), 4);
+        EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 3ULL * 4 * sizeof(float), 4);
 
         // clamp: 1,0 -> green, 1.5,0 -> green
-        EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 4 * 4 * sizeof(float), 4);
-        EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 5 * 4 * sizeof(float), 4);
+        EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 4ULL * 4 * sizeof(float), 4);
+        EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 5ULL * 4 * sizeof(float), 4);
     }
 }
 
@@ -1901,17 +1901,17 @@ TEST_P(ResourceTableTests, UseDefaultSamplers) {
     float expectedGreen[4] = {1.0, 0.0, 0.0, 1.0};
 
     // The default non-filtering sampler should return red at (0.5, 0.5), and green at (0.6, 0.6)
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 0 * 4 * sizeof(float), 4);
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 1 * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 0ULL * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 1ULL * 4 * sizeof(float), 4);
 
     // The default filtering sampler is actually a non-filtering one, so should return the same
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 2 * 4 * sizeof(float), 4);
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 3 * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 2ULL * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 3ULL * 4 * sizeof(float), 4);
 
     // The comparison sampler is an 'always' one, so it should return 1.0, which the shader returns
     // in two of the vector elements.
     float expectedCompare[4] = {1.0, 42.0, 1.0, 83.5};
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedCompare, resultBuffer, 4 * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedCompare, resultBuffer, 4ULL * 4 * sizeof(float), 4);
 }
 
 // Test that removing then adding a new sampler in a slot that already has a sampler of the same
@@ -1995,8 +1995,8 @@ TEST_P(ResourceTableTests, RemoveThenAddSamplerInSameSlot) {
     draw();
 
     // repeat: 1,0 -> red, 1.5,0 -> green
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 0 * 4 * sizeof(float), 4);
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 1 * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 0ULL * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 1ULL * 4 * sizeof(float), 4);
 
     // Now test removing then adding mirror sampler
     EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(1));
@@ -2006,8 +2006,8 @@ TEST_P(ResourceTableTests, RemoveThenAddSamplerInSameSlot) {
     draw();
 
     // mirror: 1,0 -> green, 1.5,0 -> red
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 0 * 4 * sizeof(float), 4);
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 1 * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 0ULL * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 1ULL * 4 * sizeof(float), 4);
 }
 
 // Test that adding and removing samplers in the same slot between draws ensure that
@@ -2093,8 +2093,8 @@ TEST_P(ResourceTableTests, RemoveThenAddSamplerMultipleInSameSlot) {
     draw();
 
     // repeat: 1,0 -> red, 1.5,0 -> green
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 0 * 4 * sizeof(float), 4);
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 1 * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 0ULL * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 1ULL * 4 * sizeof(float), 4);
 
     // Remove then add mirror samplers
     for (auto sampler : samplerMirror) {
@@ -2114,8 +2114,8 @@ TEST_P(ResourceTableTests, RemoveThenAddSamplerMultipleInSameSlot) {
     draw();
 
     // clamp: 1,0 -> green, 1.5,0 -> green
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 0 * 4 * sizeof(float), 4);
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 1 * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 0ULL * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 1ULL * 4 * sizeof(float), 4);
 }
 
 // Test what happens when we add more than kD3D12MaxUniqueSamplers unique samplers

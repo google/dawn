@@ -2028,7 +2028,7 @@ TEST_F(CompatCompressedCopyT2BAndCopyT2TValidationTests, CanNotCopyCompressedTex
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
         wgpu::BufferDescriptor bufferDescriptor;
-        bufferDescriptor.size = 256 * 4;
+        bufferDescriptor.size = 256ULL * 4;
         bufferDescriptor.usage = wgpu::BufferUsage::CopyDst;
         wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 

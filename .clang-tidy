@@ -32,7 +32,6 @@ Checks:
   - -bugprone-easily-swappable-parameters
   - -bugprone-forward-declaration-namespace
   - -bugprone-forwarding-reference-overload
-  - -bugprone-implicit-widening-of-multiplication-result
   - -bugprone-infinite-loop
   - -bugprone-integer-division
   - -bugprone-lambda-function-name

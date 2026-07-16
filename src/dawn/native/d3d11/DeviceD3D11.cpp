@@ -631,7 +631,7 @@ ResultOrError<TextureViewBase*> Device::GetOrCreateCachedImplicitPixelLocalStora
 ResultOrError<Ref<BufferBase>> Device::GetStagingBuffer(
     const ScopedCommandRecordingContext* commandContext,
     uint64_t size) {
-    constexpr uint64_t kMinStagingBufferSize = 4 * 1024;
+    constexpr uint64_t kMinStagingBufferSize = 4ULL * 1024;
     uint64_t bufferSize = Align(size, kMinStagingBufferSize);
     BufferDescriptor descriptor;
     descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
@@ -667,7 +667,7 @@ ResultOrError<Ref<BufferBase>> Device::GetStagingBuffer(
     mTotalStagingBufferSize += bufferSize;
 
     // Purge the old staging buffers if the total size is too large.
-    constexpr uint64_t kMaxTotalSize = 16 * 1024 * 1024;
+    constexpr uint64_t kMaxTotalSize = 16ULL * 1024 * 1024;
     for (auto it = mStagingBuffers.begin(); it != mStagingBuffers.end() &&
                                             mTotalStagingBufferSize > kMaxTotalSize &&
                                             (*it)->GetLastUsageSerial() <= completedSerial;) {

@@ -200,7 +200,7 @@ class TextureViewSamplingTest : public TextureViewTestBase {
                 const int pixelValue = GenerateTestPixelValue(layer, level);
 
                 constexpr uint32_t kPaddedTexWidth = kPixelsPerRowPitch;
-                std::vector<utils::RGBA8> data(kPaddedTexWidth * texHeight,
+                std::vector<utils::RGBA8> data(static_cast<size_t>(kPaddedTexWidth) * texHeight,
                                                utils::RGBA8(0, 0, 0, pixelValue));
                 wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
                     device, data.data(), data.size() * sizeof(utils::RGBA8),

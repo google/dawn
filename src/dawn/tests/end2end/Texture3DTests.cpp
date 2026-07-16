@@ -256,7 +256,7 @@ TEST_P(Texture3DTests, Rendering) {
     queue.Submit(1, &commands);
 
     uint32_t mipSize = std::max(kRTSize >> viewDescriptor.baseMipLevel, 1u);
-    std::vector<utils::RGBA8> expected(mipSize * mipSize);
+    std::vector<utils::RGBA8> expected(static_cast<size_t>(mipSize) * mipSize);
     // Only bottom-left triangle should be drawn with green color (0, 255, 0, 255), other pixels
     // stay red color (255, 0, 0, 255).
     for (uint32_t i = 0; i < mipSize; ++i) {

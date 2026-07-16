@@ -222,8 +222,8 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
 
             wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
             renderPassEncoder.SetPipeline(drawPipeline);
-            renderPassEncoder.SetVertexBuffer(0, vBuffer, kQuadNumBytes * sampleOffset,
-                                              kQuadNumBytes);
+            renderPassEncoder.SetVertexBuffer(
+                0, vBuffer, static_cast<uint64_t>(kQuadNumBytes) * sampleOffset, kQuadNumBytes);
             renderPassEncoder.Draw(4);
             renderPassEncoder.End();
 

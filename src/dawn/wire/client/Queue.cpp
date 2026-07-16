@@ -42,7 +42,7 @@ namespace dawn::wire::client {
 namespace {
 
 // Buffer and Texture uploads larger than 4Mb use a different path optimized for larger transfers.
-const uint64_t kWriteXLThreshold = 1024 * 1024 * 4;
+const uint64_t kWriteXLThreshold = 1024ULL * 1024 * 4;
 
 class WorkDoneEvent : public TrackedEvent {
   public:

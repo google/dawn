@@ -229,7 +229,7 @@ uint64_t ComputeExtraArraySizeForIntelGen12(uint32_t width,
     }
     uint32_t tileWidth = kTileSize / tileHeight;
 
-    uint64_t layerxSamples = arrayLayerCount * sampleCount;
+    uint64_t layerxSamples = static_cast<uint64_t>(arrayLayerCount) * sampleCount;
 
     if (layerxSamples <= 1) {
         return 0;
@@ -237,7 +237,7 @@ uint64_t ComputeExtraArraySizeForIntelGen12(uint32_t width,
 
     uint32_t columnPitch = GetColumnPitch(height, mipLevelCount);
 
-    uint64_t totalWidth = width * colorFormatBytesPerBlock;
+    uint64_t totalWidth = static_cast<uint64_t>(width) * colorFormatBytesPerBlock;
     uint64_t totalHeight = columnPitch * layerxSamples;
 
     // Texture should be aligned on both tile width (512 bytes) and tile height (128 rows) on Intel

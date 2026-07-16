@@ -181,7 +181,7 @@ class Device final : public DeviceBase {
 
     std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
 
-    static constexpr uint64_t kMaxMemoryUsage = 512 * 1024 * 1024;
+    static constexpr uint64_t kMaxMemoryUsage = 512ULL * 1024 * 1024;
     size_t mMemoryUsage = 0;
 };
 

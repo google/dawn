@@ -119,7 +119,7 @@ TEST_F(TexelBufferValidationTest, UndefinedLayoutFormat) {
 // BindingInitializationHelper should chain a TexelBufferBindingEntry when initialized
 // with a TexelBufferView.
 TEST_F(TexelBufferValidationTest, BindingHelperChainsTexelBufferBindingEntry) {
-    constexpr uint64_t kSize = 4 * 4;
+    constexpr uint64_t kSize = 4ULL * 4;
     wgpu::Buffer buffer = CreateTexelBuffer(kSize, wgpu::BufferUsage::TexelBuffer);
 
     wgpu::TexelBufferViewDescriptor viewDesc;
@@ -144,7 +144,7 @@ TEST_F(TexelBufferValidationTest, BindingHelperChainsTexelBufferBindingEntry) {
 
 // Creating a bind group without chaining a TexelBufferBindingEntry fails.
 TEST_F(TexelBufferValidationTest, BindGroupMissingTexelBufferBindingEntry) {
-    constexpr uint64_t kSize = 4 * 4;
+    constexpr uint64_t kSize = 4ULL * 4;
     wgpu::Buffer buffer = CreateTexelBuffer(kSize, wgpu::BufferUsage::TexelBuffer);
 
     TexelBufferLayoutDescriptor helper(wgpu::TexelBufferAccess::ReadOnly,

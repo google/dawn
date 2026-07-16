@@ -1069,7 +1069,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
 
     testPipeline = device.CreateRenderPipeline(&testDescriptor);
 
-    for (unsigned int c = 0; c < kColors.size(); ++c) {
+    for (size_t c = 0; c < kColors.size(); ++c) {
         utils::RGBA8 base = kColors[((c + 31) * 29) % kColors.size()];
         utils::RGBA8 color0 = kColors[((c + 19) * 13) % kColors.size()];
         utils::RGBA8 color1 = kColors[((c + 11) * 43) % kColors.size()];

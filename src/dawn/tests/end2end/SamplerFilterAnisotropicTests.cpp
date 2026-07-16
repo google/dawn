@@ -137,7 +137,7 @@ class SamplerFilterAnisotropicTest : public DawnTest {
 
             const utils::RGBA8 color = colors[level];
 
-            std::vector<utils::RGBA8> data(rowPixels * texHeight, color);
+            std::vector<utils::RGBA8> data(static_cast<size_t>(rowPixels) * texHeight, color);
             wgpu::Buffer stagingBuffer =
                 utils::CreateBufferFromData(device, data.data(), data.size() * sizeof(utils::RGBA8),
                                             wgpu::BufferUsage::CopySrc);

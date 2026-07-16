@@ -854,10 +854,13 @@ TEST_P(VulkanImageWrappingUsageTests, LargerImage) {
             float normCol = static_cast<float>(col) / width;
             float dist = sqrt(normRow * normRow + normCol * normCol) * 3;
             dist = dist - static_cast<int>(dist);
-            data[4 * (row * width + col)] = static_cast<unsigned char>(dist * 255);
-            data[4 * (row * width + col) + 1] = static_cast<unsigned char>(dist * 255);
-            data[4 * (row * width + col) + 2] = static_cast<unsigned char>(dist * 255);
-            data[4 * (row * width + col) + 3] = 255;
+            data[static_cast<size_t>(4) * (row * width + col)] =
+                static_cast<unsigned char>(dist * 255);
+            data[static_cast<size_t>(4) * (row * width + col) + 1] =
+                static_cast<unsigned char>(dist * 255);
+            data[static_cast<size_t>(4) * (row * width + col) + 2] =
+                static_cast<unsigned char>(dist * 255);
+            data[static_cast<size_t>(4) * (row * width + col) + 3] = 255;
         }
     }
 

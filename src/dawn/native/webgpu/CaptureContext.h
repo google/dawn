@@ -88,7 +88,7 @@ class CaptureContext {
         raw_ref<CaptureContext> mContext;
     };
 
-    static constexpr uint64_t kCopyBufferSize = 1024 * 1024;
+    static constexpr uint64_t kCopyBufferSize = 1024ULL * 1024;
 
     // Add resources both, creates an id for the resource AND captures its
     // description if it has not already been captured which is effectively

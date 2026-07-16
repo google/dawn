@@ -74,7 +74,7 @@ static constexpr uint16_t kShaderVisibleDescriptorHeapSize = 1024;
 static constexpr uint8_t kAttachmentDescriptorHeapSize = 64;
 
 // Value may change in the future to better accommodate large clears.
-static constexpr uint64_t kZeroBufferSize = 1024 * 1024 * 4;  // 4 Mb
+static constexpr uint64_t kZeroBufferSize = 1024ULL * 1024 * 4;  // 4 Mb
 
 static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
 }  // namespace

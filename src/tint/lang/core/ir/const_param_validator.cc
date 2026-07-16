@@ -509,7 +509,8 @@ bool ConstParamValidator::CheckSubgroupMatrixMemory(const CoreBuiltinCall* call,
     }
 
     // Note: Offset and stride are in bytes.
-    uint64_t mat_required_size = offset + stride * (major_size - 1) + minor_size * ele_ty->Size();
+    uint64_t mat_required_size = offset + static_cast<uint64_t>(stride) * (major_size - 1) +
+                                 static_cast<uint64_t>(minor_size) * ele_ty->Size();
     // Round up to scalar size.
     mat_required_size = RoundUp(stride_factor, mat_required_size);
     if (mat_required_size > std::numeric_limits<uint32_t>::max()) {

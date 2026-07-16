@@ -312,7 +312,8 @@ class TextureFormatTest : public DawnTest {
                                                                 wgpu::BufferUsage::CopySrc);
 
         // Create the texture that we will render results to
-        DAWN_ASSERT(expectedRenderDataSize == width * renderFormatInfo.texelByteSize);
+        DAWN_ASSERT(expectedRenderDataSize ==
+                    static_cast<size_t>(width) * renderFormatInfo.texelByteSize);
 
         wgpu::TextureDescriptor renderTargetDesc;
         renderTargetDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;

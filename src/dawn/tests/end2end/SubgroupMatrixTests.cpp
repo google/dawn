@@ -580,7 +580,7 @@ if sgid != 0 {
         // Create the output buffer and copy the accumulator to it.
         wgpu::BufferDescriptor outputDescriptor{
             .usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage,
-            .size = config.M * config.N * resultComponentByteSize,
+            .size = static_cast<uint64_t>(config.M) * config.N * resultComponentByteSize,
             .mappedAtCreation = true,
         };
         wgpu::Buffer output = device.CreateBuffer(&outputDescriptor);
@@ -798,7 +798,7 @@ if sgid != 0 {
         // Create the output buffer
         wgpu::BufferDescriptor outputDescriptor{
             .usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage,
-            .size = config.K * config.M * componentByteSize,
+            .size = static_cast<uint64_t>(config.K) * config.M * componentByteSize,
             .mappedAtCreation = false,
         };
         wgpu::Buffer output = device.CreateBuffer(&outputDescriptor);
@@ -1471,7 +1471,7 @@ fn main(@builtin(subgroup_id) sgid: u32,
         // Create the output buffer.
         wgpu::BufferDescriptor outputDescriptor{
             .usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage,
-            .size = matrix_cols * matrix_rows * resultComponentByteSize,
+            .size = static_cast<uint64_t>(matrix_cols) * matrix_rows * resultComponentByteSize,
         };
         wgpu::Buffer output = device.CreateBuffer(&outputDescriptor);
 

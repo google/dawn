@@ -120,7 +120,7 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
         auto* heapInfo = new MemoryHeapInfo[1];
         memoryHeapProperties->heapInfo = DAWN_UNSAFE_TODO({heapInfo, 1});
 
-        heapInfo[0].size = 1024 * 1024 * 1024;
+        heapInfo[0].size = 1024ULL * 1024 * 1024;
         heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
                                  wgpu::HeapProperty::HostCached;
     }

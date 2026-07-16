@@ -497,8 +497,8 @@ void SubresourceStorage<T>::DecompressAspect(uint32_t aspectIndex) {
         DAWN_ASSERT(!mLayerCompressed);
 
         uint32_t aspectCount = GetAspectCount(mAspects);
-        mLayerCompressed = HeapArray<bool>{aspectCount * mArrayLayerCount};
-        mData = HeapArray<T>{aspectCount * mArrayLayerCount * mMipLevelCount};
+        mLayerCompressed = HeapArray<bool>{static_cast<size_t>(aspectCount) * mArrayLayerCount};
+        mData = HeapArray<T>{static_cast<size_t>(aspectCount) * mArrayLayerCount * mMipLevelCount};
 
         for (uint32_t layerIndex = 0; layerIndex < aspectCount * mArrayLayerCount; layerIndex++) {
             mLayerCompressed[layerIndex] = true;

@@ -92,7 +92,7 @@ TEST_P(D3D12ResourceHeapTests, AlignSmallCompressedTexture) {
 TEST_P(D3D12ResourceHeapTests, AlignUBO) {
     // Create a small UBO
     wgpu::BufferDescriptor descriptor;
-    descriptor.size = 4 * 1024;
+    descriptor.size = 4ULL * 1024;
     descriptor.usage = wgpu::BufferUsage::Uniform;
 
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);

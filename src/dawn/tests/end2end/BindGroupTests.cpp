@@ -1395,7 +1395,7 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
 
     // Create three buffers large enough to by offset by the largest offset.
     wgpu::BufferDescriptor bufferDescriptor;
-    bufferDescriptor.size = 3 * mMinUniformBufferOffsetAlignment + sizeof(uint32_t);
+    bufferDescriptor.size = 3ULL * mMinUniformBufferOffsetAlignment + sizeof(uint32_t);
     bufferDescriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
 
     wgpu::Buffer buffer0 = device.CreateBuffer(&bufferDescriptor);
@@ -1477,7 +1477,7 @@ TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) 
 
         // Create three buffers large enough to by offset by the largest offset.
         wgpu::BufferDescriptor bufferDescriptor;
-        bufferDescriptor.size = 2 * mMinUniformBufferOffsetAlignment + sizeof(uint32_t);
+        bufferDescriptor.size = 2ULL * mMinUniformBufferOffsetAlignment + sizeof(uint32_t);
         bufferDescriptor.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
 
         wgpu::Buffer dynamicBuffer = device.CreateBuffer(&bufferDescriptor);

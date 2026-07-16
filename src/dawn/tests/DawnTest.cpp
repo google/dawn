@@ -1964,7 +1964,8 @@ std::ostringstream& DawnTestBase::ExpectSampledFloatDataImpl(wgpu::Texture textu
 
     // Create and initialize the slot buffer so that it won't unexpectedly affect the count of
     // resources lazily cleared.
-    const std::vector<float> initialBufferData(width * height * componentCount * sampleCount, 0.f);
+    const std::vector<float> initialBufferData(
+        static_cast<size_t>(width) * height * componentCount * sampleCount, 0.f);
     wgpu::Buffer readbackBuffer = utils::CreateBufferFromData(
         device, initialBufferData.data(), sizeof(float) * initialBufferData.size(),
         wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage);
@@ -2159,7 +2160,7 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
-    std::vector<uint32_t> colorData(width * height, 1u);
+    std::vector<uint32_t> colorData(static_cast<size_t>(width) * height, 1u);
     return EXPECT_TEXTURE_EQ(colorData.data(), colorTexture, {0, 0}, {width, height});
 }
 

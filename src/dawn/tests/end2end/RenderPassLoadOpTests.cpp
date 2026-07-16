@@ -41,7 +41,7 @@
 namespace dawn {
 namespace {
 
-constexpr static unsigned int kRTSize = 16;
+constexpr size_t kRTSize = 16;
 
 class DrawQuad {
   public:

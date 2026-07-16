@@ -121,7 +121,7 @@ TEST_P(BufferHostMappedPointerTests, Alignment) {
 
     // Valid: multiple of required alignment
     GetParam().mBackend->CreateHostMappedBuffer(device, wgpu::BufferUsage::CopySrc,
-                                                2 * mRequiredAlignment);
+                                                2 * static_cast<size_t>(mRequiredAlignment));
 }
 
 // Test creating a buffer with data initially in the host-mapped memory.
@@ -299,7 +299,7 @@ TEST_P(BufferHostMappedPointerTests, MultithreadedCreation) {
     }
 
     // Create buffers on multiple threads.
-    utils::RunInParallel(buffers.size(), [&, this](uint32_t i) {
+    utils::RunInParallel(buffers.size(), [&, this](size_t i) {
         auto [buffer, _] = GetParam().mBackend->CreateHostMappedBuffer(
             device, wgpu::BufferUsage::CopySrc, bufferSize, [&](void* initialPtr) {
                 DAWN_UNSAFE_TODO(memcpy(initialPtr, &expected[i * u32PerBuffer], bufferSize));
@@ -308,7 +308,7 @@ TEST_P(BufferHostMappedPointerTests, MultithreadedCreation) {
     });
 
     // Check the buffer contents.
-    for (uint32_t i = 0; i < buffers.size(); ++i) {
+    for (size_t i = 0; i < buffers.size(); ++i) {
         EXPECT_BUFFER_U32_RANGE_EQ(&expected[i * u32PerBuffer], buffers[i], 0, u32PerBuffer);
     }
 }

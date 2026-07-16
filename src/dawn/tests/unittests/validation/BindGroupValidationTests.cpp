@@ -1113,7 +1113,7 @@ TEST_F(BindGroupValidationTest, BufferBindingOOB) {
     utils::MakeBindGroup(device, layout, {{0, buffer, 0, 256}});
 
     // Success case, touching the end of the buffer works
-    utils::MakeBindGroup(device, layout, {{0, buffer, 3 * 256, 256}});
+    utils::MakeBindGroup(device, layout, {{0, buffer, 3ULL * 256, 256}});
 
     // Error case, zero size is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 1024, 0}}));
@@ -1126,10 +1126,10 @@ TEST_F(BindGroupValidationTest, BufferBindingOOB) {
     utils::MakeBindGroup(device, layout, {{0, buffer, 256, wgpu::kWholeSize}});
 
     // Error case, offset is OOB
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 256 * 5, 0}}));
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 256ULL * 5, 0}}));
 
     // Error case, size is OOB
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 0, 256 * 5}}));
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 0, 256ULL * 5}}));
 
     // Error case, offset+size is OOB
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 1024, 256}}));

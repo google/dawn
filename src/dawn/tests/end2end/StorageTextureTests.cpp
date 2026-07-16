@@ -621,7 +621,7 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
 
         std::vector<uint8_t> outputData(texelSizeInBytes * kWidth * kHeight * sliceCount);
 
-        for (uint32_t i = 0; i < outputData.size() / texelSizeInBytes; ++i) {
+        for (size_t i = 0; i < outputData.size() / texelSizeInBytes; ++i) {
             uint8_t* pixelValuePtr = &outputData[i * texelSizeInBytes];
             const uint32_t x = i % kWidth;
             const uint32_t y = (i % (kWidth * kHeight)) / kWidth;
@@ -899,7 +899,8 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
             for (size_t y = 0; y < size.height; ++y) {
                 const size_t resultBufferOffset =
                     kTextureBytesPerRowAlignment * (size.height * z + y);
-                const size_t expectedDataOffset = texelSize * size.width * (size.height * z + y);
+                const size_t expectedDataOffset =
+                    static_cast<size_t>(texelSize) * size.width * (size.height * z + y);
                 EXPECT_BUFFER_U32_RANGE_EQ(
                     reinterpret_cast<const uint32_t*>(expectedData + expectedDataOffset),
                     resultBuffer, resultBufferOffset, texelSize);
@@ -1339,7 +1340,8 @@ fn main(@builtin(local_invocation_id) local_id: vec3<u32>) {
         const uint32_t texelSizeInBytes = utils::GetTexelBlockSizeInBytes(format);
 
         for (uint32_t i = 0; i < kWidth * kHeight; ++i) {
-            uint8_t* pixelValuePtr = &expectedModifiedData[i * texelSizeInBytes];
+            uint8_t* pixelValuePtr =
+                &expectedModifiedData[static_cast<size_t>(i) * texelSizeInBytes];
             const uint32_t x = i % kWidth;
             const uint32_t y = i / kWidth;
             FillExpectedData(pixelValuePtr, format, x, y, 0, expectedResultIncrement);

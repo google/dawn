@@ -1276,7 +1276,7 @@ class TexelBufferViewValidationTest : public ValidationTest {
 
 // Valid texel buffer view creation
 TEST_F(TexelBufferViewValidationTest, CreationSuccess) {
-    constexpr uint64_t kSize = 4 * 4;  // 4 texels of RGBA8Uint
+    constexpr uint64_t kSize = 4ULL * 4;  // 4 texels of RGBA8Uint
     wgpu::Buffer buffer =
         CreateTexelBuffer(kSize, wgpu::BufferUsage::TexelBuffer | wgpu::BufferUsage::CopySrc);
 

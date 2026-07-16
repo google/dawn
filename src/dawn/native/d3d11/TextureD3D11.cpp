@@ -744,6 +744,8 @@ MaybeError Texture::WriteInternal(const ScopedCommandRecordingContext* commandCo
     bool writeCompleteTexture = isCompleteSubresourceCopiedTo && GetNumMipLevels() == 1 &&
                                 GetArrayLayers() == subresources.layerCount;
 
+    uint32_t bytesPerImage = bytesPerRow * rowsPerImage;
+
     if (GetDimension() == wgpu::TextureDimension::e3D) {
         dstBox.front = origin.z;
         dstBox.back = origin.z + size.depthOrArrayLayers;
@@ -751,7 +753,7 @@ MaybeError Texture::WriteInternal(const ScopedCommandRecordingContext* commandCo
             GetSubresourceIndex(subresources.baseMipLevel, 0, D3D11Aspect(subresources.aspects));
         UINT copyFlag = writeCompleteTexture ? D3D11_COPY_DISCARD : 0;
         commandContext->UpdateSubresource1(GetD3D11Resource(), subresource, &dstBox, data,
-                                           bytesPerRow, bytesPerRow * rowsPerImage, copyFlag);
+                                           bytesPerRow, bytesPerImage, copyFlag);
     } else {
         dstBox.front = 0;
         dstBox.back = 1;
@@ -763,7 +765,7 @@ MaybeError Texture::WriteInternal(const ScopedCommandRecordingContext* commandCo
             UINT copyFlag = (writeCompleteTexture && layer == 0) ? D3D11_COPY_DISCARD : 0;
             commandContext->UpdateSubresource1(GetD3D11Resource(), subresource, pDstBox, data,
                                                bytesPerRow, 0, copyFlag);
-            DAWN_UNSAFE_TODO(data += rowsPerImage * bytesPerRow);
+            DAWN_UNSAFE_TODO(data += bytesPerImage);
         }
     }
 
@@ -892,7 +894,7 @@ MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandCont
                 "D3D11 map staging texture"));
 
             uint8_t* pSrcData = static_cast<uint8_t*>(mappedResource.pData);
-            uint64_t dstOffset = dstBytesPerRow * dstRowsPerImage * layer;
+            uint64_t dstOffset = static_cast<uint64_t>(dstBytesPerRow) * dstRowsPerImage * layer;
             if (dstBytesPerRow == bytesPerRow && mappedResource.RowPitch == bytesPerRow) {
                 // If there is no padding in the rows, we can upload the whole image
                 // in one read.
@@ -940,7 +942,7 @@ MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandCont
                      "D3D11 map staging texture"));
 
     for (uint32_t z = 0; z < size.depthOrArrayLayers; ++z) {
-        uint64_t dstOffset = dstBytesPerRow * dstRowsPerImage * z;
+        uint64_t dstOffset = static_cast<uint64_t>(dstBytesPerRow) * dstRowsPerImage * z;
         uint8_t* pSrcData = DAWN_UNSAFE_TODO(static_cast<uint8_t*>(mappedResource.pData) +
                                              z * mappedResource.DepthPitch);
         if (dstBytesPerRow == bytesPerRow && mappedResource.RowPitch == bytesPerRow) {

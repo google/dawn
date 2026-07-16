@@ -133,7 +133,7 @@ class Device final : public d3d::Device {
            const UnpackedPtr<DeviceDescriptor>& descriptor,
            const TogglesState& deviceToggles,
            Ref<DeviceBase::DeviceLostEvent>&& lostEvent);
-    static constexpr uint64_t kMaxStagingBufferSize = 512 * 1024;
+    static constexpr uint64_t kMaxStagingBufferSize = 512ULL * 1024;
 
     ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
         const UnpackedPtr<BindGroupDescriptor>& descriptor) override;

@@ -40,7 +40,7 @@
 namespace dawn::native {
 
 namespace {
-constexpr uint64_t kRingBufferSize = 4 * 1024 * 1024;
+constexpr uint64_t kRingBufferSize = 4ULL * 1024 * 1024;
 }  // anonymous namespace
 
 DynamicUploader::DynamicUploader(DeviceBase* device) : mDevice(device) {}
@@ -138,7 +138,7 @@ MaybeError DynamicUploader::OnStagingMemoryFreePendingOnSubmit(uint64_t size) {
 }
 
 MaybeError DynamicUploader::MaybeSubmitPendingCommands() {
-    constexpr uint64_t kPendingMemorySubmitThreshold = 16 * 1024 * 1024;
+    constexpr uint64_t kPendingMemorySubmitThreshold = 16ULL * 1024 * 1024;
     if (mMemoryPendingSubmit.load(std::memory_order_relaxed) < kPendingMemorySubmitThreshold) {
         return {};
     }

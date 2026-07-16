@@ -522,8 +522,8 @@ TEST_F(CopyCommandTest_B2T, Success) {
         TestB2TCopy(utils::Expectation::Success, source, 0, 256, 3, destination, 0, {5, 7, 0},
                     {2, 3, 1});
         // Unaligned region, with buffer offset
-        TestB2TCopy(utils::Expectation::Success, source, 31 * 4, 256, 3, destination, 0, {0, 0, 0},
-                    {3, 3, 1});
+        TestB2TCopy(utils::Expectation::Success, source, 31ULL * 4, 256, 3, destination, 0,
+                    {0, 0, 0}, {3, 3, 1});
     }
 
     // bytesPerRow is undefined
@@ -631,7 +631,7 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnTexture) {
 
 // Test that we force Depth=1 on copies to 2D textures
 TEST_F(CopyCommandTest_B2T, DepthConstraintFor2DTextures) {
-    wgpu::Buffer source = CreateBuffer(16 * 4, wgpu::BufferUsage::CopySrc);
+    wgpu::Buffer source = CreateBuffer(16ULL * 4, wgpu::BufferUsage::CopySrc);
     wgpu::Texture destination =
         Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopyDst);
 
@@ -641,8 +641,8 @@ TEST_F(CopyCommandTest_B2T, DepthConstraintFor2DTextures) {
 
 // Test B2T copies with incorrect buffer usage
 TEST_F(CopyCommandTest_B2T, IncorrectUsage) {
-    wgpu::Buffer source = CreateBuffer(16 * 4, wgpu::BufferUsage::CopySrc);
-    wgpu::Buffer vertex = CreateBuffer(16 * 4, wgpu::BufferUsage::Vertex);
+    wgpu::Buffer source = CreateBuffer(16ULL * 4, wgpu::BufferUsage::CopySrc);
+    wgpu::Buffer vertex = CreateBuffer(16ULL * 4, wgpu::BufferUsage::Vertex);
     wgpu::Texture destination =
         Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopyDst);
     wgpu::Texture sampled = Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm,
@@ -1128,8 +1128,8 @@ TEST_F(CopyCommandTest_T2B, Success) {
         TestT2BCopy(utils::Expectation::Success, source, 0, {5, 7, 0}, destination, 0, 256, 3,
                     {2, 3, 1});
         // Unaligned region, with buffer offset
-        TestT2BCopy(utils::Expectation::Success, source, 2, {0, 0, 0}, destination, 31 * 4, 256, 3,
-                    {3, 3, 1});
+        TestT2BCopy(utils::Expectation::Success, source, 2, {0, 0, 0}, destination, 31ULL * 4, 256,
+                    3, {3, 3, 1});
     }
 
     // bytesPerRow is undefined

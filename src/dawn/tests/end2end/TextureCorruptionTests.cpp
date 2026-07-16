@@ -116,7 +116,7 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
         }
         uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
         uint32_t bytesPerRow = Align(levelSize.width * bytesPerTexel, 256);
-        uint64_t bufferSize = bytesPerRow * levelSize.height;
+        uint64_t bufferSize = static_cast<uint64_t>(bytesPerRow) * levelSize.height;
         wgpu::BufferDescriptor descriptor;
         descriptor.size = bufferSize;
         descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -142,7 +142,7 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
         if (bytesPerTexel >= sizeof(uint32_t)) {
             elementNumPerTexel = bytesPerTexel / sizeof(uint32_t);
         } else {
-            copyWidth = copyWidth * bytesPerTexel / sizeof(uint32_t);
+            copyWidth = static_cast<size_t>(copyWidth) * bytesPerTexel / sizeof(uint32_t);
         }
 
         uint32_t elementNumPerRow = bytesPerRow / sizeof(uint32_t);

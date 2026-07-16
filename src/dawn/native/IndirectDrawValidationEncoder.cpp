@@ -423,7 +423,7 @@ ResultOrError<ComputePipelineBase*> GetOrCreateMultiDrawValidationPipeline(Devic
 }
 
 size_t GetBatchDataSize(uint32_t numDraws) {
-    return sizeof(BatchInfo) + (numDraws * kIndirectDrawByteSize);
+    return sizeof(BatchInfo) + (static_cast<size_t>(numDraws) * kIndirectDrawByteSize);
 }
 
 }  // namespace
@@ -596,7 +596,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
                 continue;
             }
             outputParamsSizeForMultiDraw +=
-                draw.cmd->maxDrawCount *
+                static_cast<uint64_t>(draw.cmd->maxDrawCount) *
                 GetOutputIndirectDrawSize(draw.type, draw.duplicateBaseVertexInstance);
             outputParamsSizeForMultiDraw =
                 Align(outputParamsSizeForMultiDraw, minStorageBufferOffsetAlignment);
@@ -834,7 +834,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
             outputParamsBinding.buffer = outputParamsBuffer.GetBuffer();
             outputParamsBinding.offset = outputOffset;
             outputParamsBinding.size =
-                draw.cmd->maxDrawCount *
+                static_cast<uint64_t>(draw.cmd->maxDrawCount) *
                 GetOutputIndirectDrawSize(draw.type, draw.duplicateBaseVertexInstance);
 
             if (cmd->drawCountBuffer != nullptr) {
@@ -883,7 +883,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
             cmd->indirectOffset = outputOffset;
 
             // Proceed to the next output offset.
-            outputOffset += cmd->maxDrawCount *
+            outputOffset += static_cast<uint64_t>(cmd->maxDrawCount) *
                             GetOutputIndirectDrawSize(draw.type, draw.duplicateBaseVertexInstance);
             outputOffset = Align(outputOffset, minStorageBufferOffsetAlignment);
         }

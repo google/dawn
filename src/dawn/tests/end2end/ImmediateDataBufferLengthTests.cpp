@@ -261,11 +261,10 @@ class ImmediateDataBufferLengthTest : public DawnTest {
         resultIndex++;
     }
 
-    static constexpr uint32_t kMaxExecutionTime = 2u;
-    static constexpr uint32_t kMaxImmediateCount = 4u;
-    static constexpr uint32_t kMaxStorageBufferCount = 3u;
-    static constexpr uint32_t kResultSizeInExpectation =
-        kMaxImmediateCount + kMaxStorageBufferCount;
+    static constexpr size_t kMaxExecutionTime = 2u;
+    static constexpr size_t kMaxImmediateCount = 4u;
+    static constexpr size_t kMaxStorageBufferCount = 3u;
+    static constexpr size_t kResultSizeInExpectation = kMaxImmediateCount + kMaxStorageBufferCount;
 
     std::vector<wgpu::Buffer> mStorageBuffers;
     wgpu::Buffer mResultBuffer;

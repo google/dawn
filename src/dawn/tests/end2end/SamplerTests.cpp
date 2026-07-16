@@ -107,7 +107,7 @@ class SamplerTest : public DawnTest {
 
         // Create a 2x2 checkerboard texture, with black in the top left and bottom right corners.
         const uint32_t rowPixels = kTextureBytesPerRowAlignment / sizeof(utils::RGBA8);
-        std::array<utils::RGBA8, rowPixels * 2> pixels;
+        std::array<utils::RGBA8, static_cast<size_t>(rowPixels) * 2> pixels;
         pixels[0] = pixels[rowPixels + 1] = utils::RGBA8::kBlack;
         pixels[1] = pixels[rowPixels] = utils::RGBA8::kWhite;
 

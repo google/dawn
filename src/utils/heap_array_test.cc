@@ -241,7 +241,7 @@ TEST_F(HeapArrayTest, HeapArrayFrom) {
 // HeapArray is freed when it goes out of scope. Requires 512MiB of memory if working.
 // Should OOM (at least on systems without ridiculous amounts of memory) if broken.
 TEST_F(HeapArrayTest, FreedByScope) {
-    constexpr size_t k512MiB = 256 * 1024 * 1024;
+    constexpr size_t k512MiB = static_cast<size_t>(512) * 1024 * 1024;
     constexpr uint64_t kAllocateTotal = sizeof(size_t) > sizeof(uint32_t)
                                             ? 0x100'0000'0000  // 1 TiB
                                             : 0x1'0000'0000;   // 4 GiB
@@ -260,7 +260,7 @@ TEST_F(HeapArrayTest, FreedByScope) {
 // HeapArray is freed when assigned over. Requires 512MiB of memory if working.
 // Should OOM (at least on systems without ridiculous amounts of memory) if broken.
 TEST_F(HeapArrayTest, FreedByAssignment) {
-    constexpr size_t k256MiB = 256 * 1024 * 1024;
+    constexpr size_t k256MiB = static_cast<size_t>(256) * 1024 * 1024;
     constexpr uint64_t kAllocateTotal = sizeof(size_t) > sizeof(uint32_t)
                                             ? 0x100'0000'0000  // 1 TiB
                                             : 0x1'0000'0000;   // 4 GiB

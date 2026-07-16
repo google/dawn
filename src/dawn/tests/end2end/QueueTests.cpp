@@ -140,7 +140,7 @@ TEST_P(QueueWriteBufferTests, ManyWriteBuffer) {
     // this test to take forever. Skip it when VVLs are enabled.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
 
-    constexpr uint64_t kSize = 4000 * 1000;
+    constexpr uint64_t kSize = 4000ULL * 1000;
     constexpr uint32_t kElements = 250 * 250;
     wgpu::BufferDescriptor descriptor;
     descriptor.size = kSize;
@@ -158,7 +158,7 @@ TEST_P(QueueWriteBufferTests, ManyWriteBuffer) {
 
 // Test using WriteBuffer for lots of data
 TEST_P(QueueWriteBufferTests, LargeWriteBuffer) {
-    constexpr uint64_t kSize = 4000 * 1000;
+    constexpr uint64_t kSize = 4000ULL * 1000;
     constexpr uint32_t kElements = 1000 * 1000;
     wgpu::BufferDescriptor descriptor;
     descriptor.size = kSize;
@@ -177,8 +177,8 @@ TEST_P(QueueWriteBufferTests, LargeWriteBuffer) {
 
 // Test using WriteBuffer for super large data block
 TEST_P(QueueWriteBufferTests, SuperLargeWriteBuffer) {
-    constexpr uint64_t kSize = 12000 * 1000;
-    constexpr uint64_t kElements = 3000 * 1000;
+    constexpr uint64_t kSize = 12000ULL * 1000;
+    constexpr uint64_t kElements = 3000ULL * 1000;
     wgpu::BufferDescriptor descriptor;
     descriptor.size = kSize;
     descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -823,7 +823,7 @@ class QueueWriteTextureSimpleTests : public DawnTest {
         constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
         constexpr uint32_t kPixelSize = 4;
 
-        std::vector<uint32_t> data(width * height);
+        std::vector<uint32_t> data(static_cast<size_t>(width) * height);
         for (size_t i = 0; i < data.size(); i++) {
             data[i] = 0xFFFFFFFF;
         }
@@ -840,8 +840,8 @@ class QueueWriteTextureSimpleTests : public DawnTest {
             utils::CreateTexelCopyBufferLayout(0, width * kPixelSize);
         wgpu::Extent3D copyExtent = {width, height, 1};
         device.GetQueue().WriteTexture(&texelCopyTextureInfo, data.data(),
-                                       width * height * kPixelSize, &texelCopyBufferLayout,
-                                       &copyExtent);
+                                       static_cast<size_t>(width) * height * kPixelSize,
+                                       &texelCopyBufferLayout, &copyExtent);
 
         EXPECT_TEXTURE_EQ(data.data(), texture, {0, 0}, {width, height});
     }

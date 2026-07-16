@@ -458,8 +458,8 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
             DAWN_TRY_ASSIGN(dstView, dst.texture->CreateView(&viewDesc));
         }
 
-        const uint64_t srcOffset =
-            src.offset + dchecked_cast<uint32_t>(z) * src.rowsPerImage * src.bytesPerRow;
+        const uint64_t srcOffset = src.offset + static_cast<uint64_t>(dchecked_cast<uint32_t>(z)) *
+                                                    src.rowsPerImage * src.bytesPerRow;
         const uint64_t srcBufferBindingOffset = AlignDown(srcOffset, ssboAlignment);
         const uint32_t shaderReadOffset = static_cast<uint32_t>(srcOffset & (ssboAlignment - 1));
         Ref<BufferBase> paramsBuffer;

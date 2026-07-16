@@ -367,9 +367,11 @@ class CopyTests {
             uint32_t srcDepthOffset = z * srcBytesPerRow * srcRowsPerImage;
             uint32_t dstDepthOffset = z * dstBytesPerRow * dstRowsPerImage;
             for (unsigned int y = 0; y < heightInBlocks; ++y) {
-                memcpy(static_cast<uint8_t*>(dstData) + dstDepthOffset + y * dstBytesPerRow,
-                       static_cast<const uint8_t*>(srcData) + srcDepthOffset + y * srcBytesPerRow,
-                       widthInBlocks * bytesPerTexelBlock);
+                memcpy(static_cast<uint8_t*>(dstData) + dstDepthOffset +
+                           static_cast<size_t>(y) * dstBytesPerRow,
+                       static_cast<const uint8_t*>(srcData) + srcDepthOffset +
+                           static_cast<size_t>(y) * srcBytesPerRow,
+                       static_cast<size_t>(widthInBlocks) * bytesPerTexelBlock);
             }
         }
     }
@@ -638,7 +640,7 @@ class CopyTests_T2B : public CopyTests_WithFormatParam {
                     << errorMsgSs.str();
             }
 
-            bufferOffset += bufferSpec.bytesPerRow * bufferSpec.rowsPerImage;
+            bufferOffset += static_cast<uint64_t>(bufferSpec.bytesPerRow) * bufferSpec.rowsPerImage;
         }
 
         if (useMappableBuffer) {
@@ -968,7 +970,7 @@ class CopyTests_T2TBase : public CopyTests, public Parent {
                 // slice)-th layer to its expected data after the copy (the outputBuffer contains
                 // the data of the destination texture since the dstSpec.copyOrigin.z-th layer).
                 uint64_t outputBufferExpectationBytesOffset =
-                    dstDataCopyLayout.bytesPerImage * slice;
+                    static_cast<uint64_t>(dstDataCopyLayout.bytesPerImage) * slice;
                 EXPECT_BUFFER_U32_RANGE_EQ(
                     reinterpret_cast<const uint32_t*>(expectedDstDataPerSlice.data()), outputBuffer,
                     outputBufferExpectationBytesOffset,
@@ -1374,7 +1376,7 @@ TEST_P(CopyTests_T2B, OffsetBufferAligned) {
 
     for (unsigned int i = 0; i < 3; ++i) {
         BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight);
-        uint64_t offset = 512 * i;
+        uint64_t offset = 512ULL * i;
         bufferSpec.size += offset;
         bufferSpec.offset += offset;
         DoTest(textureSpec, bufferSpec, {kWidth, kHeight, 1});
@@ -1583,7 +1585,7 @@ TEST_P(CopyTests_T2B, BytesPerRowAligned) {
     BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight);
     for (unsigned int i = 1; i < 4; ++i) {
         bufferSpec.bytesPerRow += 256;
-        bufferSpec.size += 256 * kHeight;
+        bufferSpec.size += 256ULL * kHeight;
         DoTest(textureSpec, bufferSpec, {kWidth, kHeight, 1});
     }
 }
@@ -1602,7 +1604,7 @@ TEST_P(CopyTests_T2B, BytesPerRowUnaligned) {
     BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight);
     for (unsigned int i = 1; i < 4; ++i) {
         bufferSpec.bytesPerRow += 256;
-        bufferSpec.size += 256 * kHeight;
+        bufferSpec.size += 256ULL * kHeight;
         DoTest(textureSpec, bufferSpec, {kWidth, kHeight, 1});
     }
 }
@@ -2597,7 +2599,7 @@ TEST_P(CopyTests_B2T, OffsetBufferAligned) {
 
     for (unsigned int i = 0; i < 3; ++i) {
         BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight);
-        uint64_t offset = 512 * i;
+        uint64_t offset = 512ULL * i;
         bufferSpec.size += offset;
         bufferSpec.offset += offset;
         DoTest(textureSpec, bufferSpec, {kWidth, kHeight, 1});
@@ -2666,7 +2668,7 @@ TEST_P(CopyTests_B2T, BytesPerRowAligned) {
     BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight);
     for (unsigned int i = 1; i < 4; ++i) {
         bufferSpec.bytesPerRow += 256;
-        bufferSpec.size += 256 * kHeight;
+        bufferSpec.size += 256ULL * kHeight;
         DoTest(textureSpec, bufferSpec, {kWidth, kHeight, 1});
     }
 }
@@ -2685,7 +2687,7 @@ TEST_P(CopyTests_B2T, BytesPerRowUnaligned) {
     BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight);
     for (unsigned int i = 1; i < 4; ++i) {
         bufferSpec.bytesPerRow += 256;
-        bufferSpec.size += 256 * kHeight;
+        bufferSpec.size += 256ULL * kHeight;
         DoTest(textureSpec, bufferSpec, {kWidth, kHeight, 1});
     }
 }
@@ -4201,7 +4203,7 @@ TEST_P(CopyTests_MemoryLeak, T2BLeakUninitializedPadding) {
     // Dirty the GPU heap with a recognizable pattern.
     // Use a large enough size to likely hit the same heap as the upcoming temporary buffer.
     {
-        constexpr uint64_t kDirtySize = 64 * 1024;
+        constexpr uint64_t kDirtySize = 64ULL * 1024;
         constexpr uint32_t kPattern = 0xDEADBEEF;
 
         wgpu::BufferDescriptor descriptor;

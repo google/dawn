@@ -41,7 +41,7 @@ namespace dawn {
 // string of bits it is in the order defined for S in FIPS 202. When accessed as a state,
 // A[x, y, z] is the z-th bit of element x + 5y.
 using Sha3Lane = uint64_t;
-static_assert(25 * 8 * sizeof(Sha3Lane) == 1600);
+static_assert(25ULL * 8 * sizeof(Sha3Lane) == 1600);
 using Sha3State = std::array<Sha3Lane, 25>;
 static_assert(sizeof(Sha3State) == 25 * sizeof(Sha3Lane), "Sha3State must be packed.");
 

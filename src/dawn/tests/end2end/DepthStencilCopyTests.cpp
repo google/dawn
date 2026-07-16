@@ -595,9 +595,10 @@ class DepthCopyTests : public DepthStencilCopyTests {
             if (format == wgpu::TextureFormat::Depth16Unorm) {
                 uint16_t expected = FloatToUnorm<uint16_t>(kInitDepth);
                 uint16_t cleared = FloatToUnorm<uint16_t>(kClearDepth);
-                std::vector<uint16_t> expectedData(copyWidth * copyHeight, cleared);
+                std::vector<uint16_t> expectedData(static_cast<size_t>(copyWidth) * copyHeight,
+                                                   cleared);
                 for (uint32_t y = copyHeight / 2; y < copyHeight; y++) {
-                    auto rowStart = expectedData.data() + y * copyWidth;
+                    auto rowStart = expectedData.data() + static_cast<size_t>(y) * copyWidth;
                     std::fill(rowStart, rowStart + copyWidth / 2, expected);
                 }
 
@@ -605,7 +606,8 @@ class DepthCopyTests : public DepthStencilCopyTests {
                     uint32_t bufferOffsetPerArrayLayer = bytesPerImage * z;
                     for (uint32_t y = 0; y < copyHeight; ++y) {
                         EXPECT_BUFFER_U16_RANGE_EQ(
-                            expectedData.data() + copyWidth * y, destinationBuffer,
+                            expectedData.data() + static_cast<size_t>(copyWidth) * y,
+                            destinationBuffer,
                             bufferCopyOffset + bufferOffsetPerArrayLayer + y * bytesPerRow,
                             copyWidth);
                     }
@@ -615,9 +617,10 @@ class DepthCopyTests : public DepthStencilCopyTests {
                                    format == wgpu::TextureFormat::Depth24PlusStencil8)
                                       ? 3e-8f
                                       : 0.0f;
-                std::vector<float> expectedData(copyWidth * copyHeight, kClearDepth);
+                std::vector<float> expectedData(static_cast<size_t>(copyWidth) * copyHeight,
+                                                kClearDepth);
                 for (uint32_t y = copyHeight / 2; y < copyHeight; y++) {
-                    auto rowStart = expectedData.data() + y * copyWidth;
+                    auto rowStart = expectedData.data() + static_cast<size_t>(y) * copyWidth;
                     std::fill(rowStart, rowStart + copyWidth / 2, kInitDepth);
                 }
 
@@ -625,7 +628,8 @@ class DepthCopyTests : public DepthStencilCopyTests {
                     uint32_t bufferOffsetPerArrayLayer = bytesPerImage * z;
                     for (uint32_t y = 0; y < copyHeight; ++y) {
                         EXPECT_BUFFER_FLOAT_RANGE_TOLERANCE_EQ(
-                            expectedData.data() + copyWidth * y, destinationBuffer,
+                            expectedData.data() + static_cast<size_t>(copyWidth) * y,
+                            destinationBuffer,
                             bufferCopyOffset + bufferOffsetPerArrayLayer + y * bytesPerRow,
                             copyWidth, tolerance);
                     }
@@ -1058,10 +1062,11 @@ class StencilCopyTests : public DepthStencilCopyTests {
         queue.Submit(1, &commandBuffer);
 
         if (checkBufferContent) {
-            std::vector<uint8_t> expectedData(copyWidth * copyHeight, kClearStencil);
+            std::vector<uint8_t> expectedData(static_cast<size_t>(copyWidth) * copyHeight,
+                                              kClearStencil);
             // std::fill(expectedData.data(), expectedData.data() + expectedData.size(), 0x77);
             for (uint32_t y = copyHeight / 2; y < copyHeight; y++) {
-                auto rowStart = expectedData.data() + y * copyWidth;
+                auto rowStart = expectedData.data() + static_cast<size_t>(y) * copyWidth;
                 std::fill(rowStart, rowStart + copyWidth / 2, kInitStencil);
             }
 
@@ -1069,7 +1074,7 @@ class StencilCopyTests : public DepthStencilCopyTests {
                 uint32_t bufferOffsetPerArrayLayer = bytesPerImage * z;
                 for (uint32_t y = 0; y < copyHeight; ++y) {
                     EXPECT_BUFFER_U8_RANGE_EQ(
-                        expectedData.data() + copyWidth * y, destinationBuffer,
+                        expectedData.data() + static_cast<size_t>(copyWidth) * y, destinationBuffer,
                         bufferCopyOffset + bufferOffsetPerArrayLayer + y * bytesPerRow, copyWidth);
                 }
             }
@@ -1130,7 +1135,8 @@ class StencilCopyTests : public DepthStencilCopyTests {
             uint8_t* mappedPtr = static_cast<uint8_t*>(srcBuffer.GetMappedRange(bufferCopyOffset));
             constexpr uint32_t kBytesPerRow = kTextureBytesPerRowAlignment;
             for (uint32_t y = 0; y < kHeight; ++y) {
-                memcpy(mappedPtr + y * kBytesPerRow, stencilData.data() + y * kWidth, kWidth);
+                memcpy(mappedPtr + static_cast<size_t>(y) * kBytesPerRow,
+                       stencilData.data() + static_cast<size_t>(y) * kWidth, kWidth);
             }
             srcBuffer.Unmap();
 

@@ -336,7 +336,8 @@ TEST_P(RenderPassTest, ClearMultisubresourceAfterWriteDepth16Unorm) {
 
                     // Use a distinct value for each subresource.
                     uint16_t value = level * 10 + layer;
-                    std::vector<uint16_t> data(copySize.width * copySize.height, value);
+                    std::vector<uint16_t> data(
+                        static_cast<size_t>(copySize.width) * copySize.height, value);
                     queue.WriteTexture(&texelCopyTextureInfo, data.data(),
                                        data.size() * sizeof(uint16_t), &texelCopyBufferLayout,
                                        &copySize);
@@ -395,7 +396,8 @@ TEST_P(RenderPassTest, ClearMultisubresourceAfterWriteDepth16Unorm) {
                     uint32_t mipHeight = height >> level;
                     if (cleared) {
                         // Check the subresource is cleared as expected.
-                        std::vector<uint16_t> data(mipWidth * mipHeight, 0xCCCC);
+                        std::vector<uint16_t> data(static_cast<size_t>(mipWidth) * mipHeight,
+                                                   0xCCCC);
                         EXPECT_TEXTURE_EQ(data.data(), tex, {0, 0, layer}, {mipWidth, mipHeight},
                                           level)
                             << "cleared texture data should have been 0xCCCC at:" << "\nlayer: "
@@ -405,7 +407,8 @@ TEST_P(RenderPassTest, ClearMultisubresourceAfterWriteDepth16Unorm) {
                         // Without the workaround, they are 0.
                         uint16_t value =
                             level * 10 + layer;  // Compute the expected value for the subresource.
-                        std::vector<uint16_t> data(mipWidth * mipHeight, value);
+                        std::vector<uint16_t> data(static_cast<size_t>(mipWidth) * mipHeight,
+                                                   value);
                         EXPECT_TEXTURE_EQ(data.data(), tex, {0, 0, layer}, {mipWidth, mipHeight},
                                           level)
                             << "written texture data should still be " << value

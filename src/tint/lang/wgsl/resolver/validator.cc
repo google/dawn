@@ -2359,8 +2359,8 @@ bool Validator::SubgroupMatrixLoadStore(const sem::Call* call) const {
         return true;
     }
 
-    uint64_t mat_required_size =
-        stride_value * (major_size - 1) + minor_size * ele_ty->Size() + offset_value;
+    uint64_t mat_required_size = stride_value * (major_size - 1) +
+                                 static_cast<uint64_t>(minor_size) * ele_ty->Size() + offset_value;
     uint64_t arr_size = ptr_arr_ty->Size();
     if (arr_size < mat_required_size) {
         AddError(call->Declaration()->source)

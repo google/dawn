@@ -159,10 +159,11 @@ class BufferZeroInitTest : public DawnTest {
 
         for (uint32_t slice = 0; slice < spec.textureSize.depthOrArrayLayers; ++slice) {
             const uint64_t baseOffsetBytesPerSlice =
-                spec.bufferOffset + spec.bytesPerRow * spec.rowsPerImage * slice;
+                spec.bufferOffset +
+                static_cast<uint64_t>(spec.bytesPerRow) * spec.rowsPerImage * slice;
             for (uint32_t y = 0; y < spec.textureSize.height; ++y) {
                 const uint64_t baseOffsetBytesPerRow =
-                    baseOffsetBytesPerSlice + spec.bytesPerRow * y;
+                    baseOffsetBytesPerSlice + static_cast<uint64_t>(spec.bytesPerRow) * y;
                 const uint64_t baseOffsetFloatCountPerRow = baseOffsetBytesPerRow / sizeof(float);
                 for (uint32_t x = 0; x < spec.textureSize.width; ++x) {
                     expectedValues[baseOffsetFloatCountPerRow + x] = 0.5f;
@@ -949,7 +950,7 @@ TEST_P(BufferZeroInitTest, Copy2DTextureToBuffer) {
 
     // bytesPerRow > texelBlockSizeInBytes * copySize.width
     {
-        constexpr uint64_t kBytesPerRow = kTextureBytesPerRowAlignment * 2;
+        constexpr uint64_t kBytesPerRow = kTextureBytesPerRowAlignment * 2ULL;
         TestBufferZeroInitInCopyTextureToBuffer(
             {kTextureSize, 0u, 0u, kBytesPerRow, kTextureSize.height, 1u});
     }

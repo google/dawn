@@ -190,7 +190,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                                                 uint64_t(std::numeric_limits<int32_t>::max()) + 8);
                 maxBufferBindingSize = Align(maxBufferBindingSize - 3u, 4);
 
-                const uint64_t kMaxStructMemberU32ArraySize = 65535 * 4;
+                const uint64_t kMaxStructMemberU32ArraySize = 65535ULL * 4;
                 uint64_t paddingNeeded = maxBufferBindingSize - 8;
                 uint64_t numPaddingMembers = (paddingNeeded + kMaxStructMemberU32ArraySize - 1) /
                                              kMaxStructMemberU32ArraySize;

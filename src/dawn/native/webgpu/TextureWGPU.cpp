@@ -315,7 +315,7 @@ MaybeError MapBufferAndWriteTextureData(CaptureContext::ScopedContentWriter& wri
     // We only write out the beginning of each row, the rest is padding.
     for (BlockCount blockRow{0u}; blockRow < blockRows; ++blockRow) {
         const void* data = wgpu->bufferGetConstMappedRange(
-            copyBuffer, dchecked_cast<uint32_t>(blockRow) * alignedBytesPerRow,
+            copyBuffer, static_cast<size_t>(dchecked_cast<uint32_t>(blockRow)) * alignedBytesPerRow,
             mappableBytesPerRow);
         writer.WriteContentBytes(data, usedBytesPerRow);
     }

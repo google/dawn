@@ -55,7 +55,7 @@ class ScopedCommandRecordingContext;
 namespace {
 
 // Max size for a CPU buffer.
-constexpr uint64_t kMaxCPUUploadBufferSize = 64 * 1024;
+constexpr uint64_t kMaxCPUUploadBufferSize = 64ULL * 1024;
 
 constexpr wgpu::BufferUsage kCopyUsages =
     wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst | kInternalCopySrcBuffer;

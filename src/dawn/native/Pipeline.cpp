@@ -28,6 +28,7 @@
 #include "src/dawn/native/Pipeline.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <set>
 #include <utility>
 
@@ -78,12 +79,12 @@ uint32_t ComputeNumTextureSamplerCombinations(const dawn::native::EntryPointMeta
     }
 
     // count the number of non-sampled that are not referenced by sampled pairs.
-    auto numNonSampled = sign_cast(std::count_if(
+    uint32_t numNonSampled = sign_cast(std::count_if(
         nonSampled.begin(), nonSampled.end(), [&](const WGSLBindPoint& nonSampledBindingPoint) {
             return !sampledTextures.contains(nonSampledBindingPoint);
         }));
     return numSamplerTexturePairs + numNonSampled + numSamplerExternalTexturePairs * 3 +
-           uint32_t(sampledExternalTextures.size());
+           static_cast<uint32_t>(sampledExternalTextures.size());
 }
 
 }  // namespace

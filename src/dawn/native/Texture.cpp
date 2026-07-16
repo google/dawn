@@ -1601,8 +1601,8 @@ uint64_t TextureBase::ComputeEstimatedByteSize() const {
         const AspectInfo& info = mFormat->GetAspectInfo(aspect);
         for (uint32_t i = 0; i < mMipLevelCount; i++) {
             Extent3D mipSize = GetMipLevelSingleSubresourcePhysicalSize(i, aspect);
-            byteSize += (mipSize.width / info.block.width) * (mipSize.height / info.block.height) *
-                        info.block.byteSize * mSampleCount;
+            byteSize += static_cast<uint64_t>(mipSize.width / info.block.width) *
+                        (mipSize.height / info.block.height) * info.block.byteSize * mSampleCount;
         }
     }
     if (mDimension == wgpu::TextureDimension::e2D) {

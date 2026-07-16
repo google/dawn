@@ -655,12 +655,12 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
                                                utils::RGBA8 rightColorInBlock) {
         DAWN_ASSERT(testRegion.depthOrArrayLayers == 1);
 
-        std::vector<utils::RGBA8> expectedData(testRegion.width * testRegion.height,
-                                               leftColorInBlock);
+        std::vector<utils::RGBA8> expectedData(
+            static_cast<size_t>(testRegion.width) * testRegion.height, leftColorInBlock);
         for (uint32_t y = 0; y < testRegion.height; ++y) {
             for (uint32_t x = 0; x < testRegion.width; ++x) {
                 if (x % BlockWidthInTexels() >= BlockWidthInTexels() / 2) {
-                    expectedData[testRegion.width * y + x] = rightColorInBlock;
+                    expectedData[static_cast<size_t>(testRegion.width) * y + x] = rightColorInBlock;
                 }
             }
         }

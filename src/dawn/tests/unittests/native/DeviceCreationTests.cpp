@@ -126,7 +126,7 @@ TEST_F(DeviceCreationTest, CreateDeviceSuccess) {
 // Test successful call to CreateDevice with allocator descriptor.
 TEST_F(DeviceCreationTest, CreateDeviceWithAllocatorSuccess) {
     wgpu::DawnDeviceAllocatorControl allocationDesc = {};
-    allocationDesc.allocatorHeapBlockSize = 4 * 1024;
+    allocationDesc.allocatorHeapBlockSize = 4ULL * 1024;
 
     wgpu::DeviceDescriptor desc = {};
     wgpu::FeatureName feature = wgpu::FeatureName::DawnDeviceAllocatorControl;
@@ -142,7 +142,7 @@ TEST_F(DeviceCreationTest, CreateDeviceWithAllocatorSuccess) {
 // not have DawnDeviceAllocatorControl feature enabled.
 TEST_F(DeviceCreationTest, CreateDeviceWithAllocatorFailedMissingFeature) {
     wgpu::DawnDeviceAllocatorControl allocationDesc = {};
-    allocationDesc.allocatorHeapBlockSize = 4 * 1024;
+    allocationDesc.allocatorHeapBlockSize = 4ULL * 1024;
 
     wgpu::DeviceDescriptor desc = {};
     desc.nextInChain = &allocationDesc;

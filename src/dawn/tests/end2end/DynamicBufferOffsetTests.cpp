@@ -674,7 +674,8 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
     uint32_t minUniformBufferOffsetAlignment = GetSupportedLimits().minUniformBufferOffsetAlignment;
     uint32_t minStorageBufferOffsetAlignment = GetSupportedLimits().minStorageBufferOffsetAlignment;
 
-    uint32_t arrayByteLength = kArrayLength * 4 * sizeof(uint32_t);
+    uint32_t arrayByteLength =
+        static_cast<uint32_t>(static_cast<size_t>(kArrayLength) * 4 * sizeof(uint32_t));
 
     uint32_t uniformBufferOffset = Align(arrayByteLength, minUniformBufferOffsetAlignment);
     uint32_t storageBufferOffset = Align(arrayByteLength, minStorageBufferOffsetAlignment);

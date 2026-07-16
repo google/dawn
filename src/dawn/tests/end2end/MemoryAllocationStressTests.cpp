@@ -46,7 +46,7 @@ TEST_P(MemoryAllocationStressTests, LargeBuffer) {
     uint32_t count = 100;
     for (uint32_t i = 0; i < count; i++) {
         wgpu::BufferDescriptor descriptor;
-        descriptor.size = 1024 * 1024 * 1024;  // 1G
+        descriptor.size = 1024ULL * 1024 * 1024;  // 1G
         descriptor.usage = wgpu::BufferUsage::Storage;
         wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
         buffer.Destroy();

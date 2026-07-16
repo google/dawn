@@ -1742,8 +1742,9 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
                         alphaVal = 255;
                         break;
                 }
-                std::vector<utils::RGBA8> expected(texture.GetWidth() * texture.GetHeight(),
-                                                   utils::RGBA8{0, 0, 0, alphaVal});
+                std::vector<utils::RGBA8> expected(
+                    static_cast<size_t>(texture.GetWidth()) * texture.GetHeight(),
+                    utils::RGBA8{0, 0, 0, alphaVal});
                 EXPECT_TEXTURE_EQ(device, expected.data(), colorTarget, {0, 0},
                                   {colorTarget.GetWidth(), colorTarget.GetHeight()})
                     << "format: " << static_cast<uint32_t>(properties.format);

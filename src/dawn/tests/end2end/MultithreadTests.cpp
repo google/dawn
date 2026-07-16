@@ -628,9 +628,10 @@ TEST_P(MultithreadTests, T2BThenMapInParallel) {
     constexpr uint32_t kTextureSize = 512;
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
     constexpr uint32_t kBytesPerPixel = 4;
-    constexpr uint64_t kBufferSize = kTextureSize * kTextureSize * kBytesPerPixel;
+    constexpr uint64_t kBufferSize =
+        static_cast<uint64_t>(kTextureSize) * kTextureSize * kBytesPerPixel;
 
-    std::vector<utils::RGBA8> textureData(kTextureSize * kTextureSize);
+    std::vector<utils::RGBA8> textureData(static_cast<size_t>(kTextureSize) * kTextureSize);
     for (uint32_t y = 0; y < kTextureSize; ++y) {
         for (uint32_t x = 0; x < kTextureSize; ++x) {
             textureData[y * kTextureSize + x] =

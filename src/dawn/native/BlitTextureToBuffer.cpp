@@ -1138,13 +1138,13 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
         switch (bytesPerTexel) {
             case 1:
                 // One thread is responsible for writing four texel values (x, y) ~ (x+3, y).
-                workgroupCountX =
-                    Align(texelCopyWidth, 4 * kWorkgroupSizeX) / (4 * kWorkgroupSizeX);
+                workgroupCountX = Align(texelCopyWidth, static_cast<size_t>(4) * kWorkgroupSizeX) /
+                                  (static_cast<size_t>(4) * kWorkgroupSizeX);
                 break;
             case 2:
                 // One thread is responsible for writing two texel values (x, y) and (x+1, y).
-                workgroupCountX =
-                    Align(texelCopyWidth, 2 * kWorkgroupSizeX) / (2 * kWorkgroupSizeX);
+                workgroupCountX = Align(texelCopyWidth, static_cast<size_t>(2) * kWorkgroupSizeX) /
+                                  (static_cast<size_t>(2) * kWorkgroupSizeX);
                 break;
             case 4:
             case 8:

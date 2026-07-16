@@ -36,7 +36,7 @@
 namespace dawn {
 namespace {
 
-constexpr static uint32_t kSize = 4;
+constexpr size_t kSize = 4;
 
 using TextureFormat = wgpu::TextureFormat;
 DAWN_TEST_PARAM_STRUCT(ReadOnlyDepthStencilAttachmentTestsParams, TextureFormat);
@@ -280,9 +280,9 @@ class ReadOnlyDepthStencilAttachmentTests
     }
 
     void CheckTopBottomColor(wgpu::Texture color, utils::RGBA8 topColor, utils::RGBA8 bottomColor) {
-        std::vector<utils::RGBA8> expectedTop(kSize * kSize / 2, topColor);
+        std::vector<utils::RGBA8> expectedTop((kSize * kSize) / 2, topColor);
         EXPECT_TEXTURE_EQ(expectedTop.data(), color, {0, 0}, {kSize, kSize / 2});
-        std::vector<utils::RGBA8> expectedBottom(kSize * kSize / 2, bottomColor);
+        std::vector<utils::RGBA8> expectedBottom((kSize * kSize) / 2, bottomColor);
         EXPECT_TEXTURE_EQ(expectedBottom.data(), color, {0, kSize / 2}, {kSize, kSize / 2});
     }
 

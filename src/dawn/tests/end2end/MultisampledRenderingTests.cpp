@@ -1980,7 +1980,7 @@ class DawnLoadResolveTextureTest : public MultisampledRenderingTest {
                                         const wgpu::Texture& msaaTexture) {
         auto textureWidth = msaaTexture.GetWidth();
         auto textureHeight = msaaTexture.GetHeight();
-        std::vector<Point> points(textureWidth * textureHeight);
+        std::vector<Point> points(static_cast<size_t>(textureWidth) * textureHeight);
         for (size_t i = 0; i < points.size(); ++i) {
             uint32_t x = i % (textureWidth);
             uint32_t y = i / (textureWidth);
@@ -2918,7 +2918,7 @@ TEST_P(DawnLoadResolveTextureTest, ExpandResolveTextureAsInput) {
 
     wgpu::TexelCopyTextureInfo dst = {};
     dst.texture = mResolveTexture;
-    std::array<utils::RGBA8, resolveWidth * resolveHeight> rgbaTextureData;
+    std::array<utils::RGBA8, static_cast<size_t>(resolveWidth) * resolveHeight> rgbaTextureData;
     for (size_t i = 0; i < rgbaTextureData.size(); ++i) {
         rgbaTextureData[i] = utils::RGBA8(0, 0, 0, 255);
     }

@@ -50,7 +50,7 @@ class DevNull : public dawn::wire::CommandSerializer {
   public:
     size_t GetMaximumAllocationSize() const override {
         // Some fuzzer bots have a 2GB allocation limit. Pick a value reasonably below that.
-        return 1024 * 1024 * 1024;
+        return 1024ULL * 1024 * 1024;
     }
     void* GetCmdSpace(size_t size) override {
         if (size > buf.size()) {

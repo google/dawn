@@ -160,7 +160,8 @@ MaybeError BlitBufferToDepthTexture::Blit(wgpu::Device device,
             dstView = dst.texture.CreateView(&viewDesc);
         }
 
-        const uint64_t srcOffset = src.offset + z * src.rowsPerImage * src.bytesPerRow;
+        const uint64_t srcOffset =
+            src.offset + static_cast<uint64_t>(z) * src.rowsPerImage * src.bytesPerRow;
         const uint32_t shaderReadOffset = uint32_t(srcOffset);
         wgpu::Buffer paramsBuffer;
         {

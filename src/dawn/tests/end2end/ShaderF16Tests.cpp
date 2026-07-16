@@ -376,10 +376,10 @@ fn FSMain(@location(0) color : vec4f) -> @location(0) vec4f {
     // corresponding WGSL type vec2<f16> and vec4<f16> by driver.
     // Buffer for pos_half
     wgpu::Buffer vertexBufferPos = utils::CreateBufferFromData(
-        device, positionData.data(), 2 * kPointCount * sizeof(float), wgpu::BufferUsage::Vertex);
+        device, positionData.data(), 2ULL * kPointCount * sizeof(float), wgpu::BufferUsage::Vertex);
     // Buffer for color_quarter
     wgpu::Buffer vertexBufferColor = utils::CreateBufferFromData(
-        device, colorData.data(), 4 * kPointCount * sizeof(float), wgpu::BufferUsage::Vertex);
+        device, colorData.data(), 4ULL * kPointCount * sizeof(float), wgpu::BufferUsage::Vertex);
 
     // Create render pipeline.
     wgpu::RenderPipeline pipeline;

@@ -1586,7 +1586,8 @@ void Resolver::RegisterSubgroupMatrixAccess(const sem::Call* call, wgsl::Builtin
         mat_ty = call->Arguments()[2]->Type()->As<core::type::SubgroupMatrix>();
     }
 
-    uint64_t mat_required_size = mat_ty->Rows() * mat_ty->Columns() * mat_ty->Type()->Size();
+    uint64_t mat_required_size =
+        static_cast<uint64_t>(mat_ty->Rows()) * mat_ty->Columns() * mat_ty->Type()->Size();
 
     auto* root = pointer->RootIdentifier();
     mat_required_size += FindSubgroupMatrixStructOffset(pointer);
