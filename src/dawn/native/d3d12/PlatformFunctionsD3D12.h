@@ -70,20 +70,22 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
     PFN_D3D11ON12_CREATE_DEVICE d3d11on12CreateDevice = nullptr;
 
     // Functions from WinPixEventRuntime.dll
+    //
+    // The only official reference for these function signatures is
+    // https://devblogs.microsoft.com/pix/winpixeventruntime/
+    // however it is incorrect: it says the third argument is a `formatString` like in PIXBeginEvent
+    // (implying it would have varargs, but it doesn't). It appears that PIX in fact treats it as a
+    // plain label, not a format string, so we've renamed it here.
+    using PFN_PIX_BEGIN_EVENT_ON_COMMAND_LIST =
+        HRESULT(WINAPI*)(ID3D12GraphicsCommandList* commandList, UINT64 color, _In_ PCSTR label);
     using PFN_PIX_END_EVENT_ON_COMMAND_LIST =
         HRESULT(WINAPI*)(ID3D12GraphicsCommandList* commandList);
-
-    PFN_PIX_END_EVENT_ON_COMMAND_LIST pixEndEventOnCommandList = nullptr;
-
-    using PFN_PIX_BEGIN_EVENT_ON_COMMAND_LIST = HRESULT(
-        WINAPI*)(ID3D12GraphicsCommandList* commandList, UINT64 color, _In_ PCSTR formatString);
-
-    PFN_PIX_BEGIN_EVENT_ON_COMMAND_LIST pixBeginEventOnCommandList = nullptr;
-
     using PFN_SET_MARKER_ON_COMMAND_LIST = HRESULT(WINAPI*)(ID3D12GraphicsCommandList* commandList,
                                                             UINT64 color,
-                                                            _In_ PCSTR formatString);
+                                                            _In_ PCSTR label);
 
+    PFN_PIX_BEGIN_EVENT_ON_COMMAND_LIST pixBeginEventOnCommandList = nullptr;
+    PFN_PIX_END_EVENT_ON_COMMAND_LIST pixEndEventOnCommandList = nullptr;
     PFN_SET_MARKER_ON_COMMAND_LIST pixSetMarkerOnCommandList = nullptr;
 
     // Functions from dxcompiler.dll
