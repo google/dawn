@@ -45,6 +45,16 @@ class HeapArrayTest : public ::testing::Test {
 
     // Type for use with Uninit() which requires a POD value type.
     using HeapArrayPOD = ityp::HeapArray<Index, int>;
+
+    // Read the pointer of a HeapArray's allocation to prevent the allocation attempt from being
+    // optimized away, forcing any OOM or leak to actually happen at runtime.
+    template <typename Arr>
+    void PreventElidingAllocation(const Arr& arr) {
+        // Write the pointer value to volatile memory so that a pointer address must be created.
+        using ConstVoidPtr = const void*;
+        [[maybe_unused]] static volatile ConstVoidPtr data;
+        data = arr.data();
+    }
 };
 
 // Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
@@ -238,6 +248,24 @@ TEST_F(HeapArrayTest, HeapArrayFrom) {
     }
 }
 
+// Test for HeapArray's assignment operator.
+TEST_F(HeapArrayTest, Assignment) {
+    HeapArray<int> arr(100);
+    PreventElidingAllocation(arr);
+    arr[0] = 10;
+    EXPECT_EQ(arr[0], 10);
+
+    // operator=() should replace the old allocation. If the test runs with LeakSanitizer
+    // (is_asan + ASAN_OPTIONS=detect_leaks=1), this will also check it's not leaked, but
+    // the FreedBy* tests are the primary tests of this.
+    arr = HeapArray<int>(200);
+    PreventElidingAllocation(arr);
+    EXPECT_EQ(arr.size(), 200);
+    EXPECT_EQ(arr[0], 0);
+    arr[199] = 20;
+    EXPECT_EQ(arr[199], 20);
+}
+
 // HeapArray is freed when it goes out of scope. Requires 512MiB of memory if working.
 // Should OOM (at least on systems without ridiculous amounts of memory) if broken.
 TEST_F(HeapArrayTest, FreedByScope) {
@@ -346,9 +374,7 @@ TEST_F(HeapArrayTest, OutOfMemoryAtLimit) {
         // and one element smaller so that HeapArray will actually try to allocate.
         for (size_t leaveSpace : {0u, 4094u, 4095u}) {
             HeapArray<uint8_t> arr{std::numeric_limits<size_t>::max() - leaveSpace, std::nothrow};
-            // Access the pointer first to prevent the allocation from being optimized away by
-            // the compiler assuming it will succeed.
-            EXPECT_EQ(arr.data(), nullptr);
+            PreventElidingAllocation(arr);
             EXPECT_FALSE(bool{arr});
         }
     }
@@ -360,8 +386,7 @@ TEST_F(HeapArrayTest, OutOfMemoryAtLimit) {
         // and one element smaller so that HeapArray will actually try to allocate.
         for (size_t leaveSpace : {0u, 1022u, 1023u}) {
             HeapArray<uint32_t> arr{kMaxSize - leaveSpace, std::nothrow};
-            // Access the pointer first to prevent the allocation from being optimized away.
-            EXPECT_EQ(arr.data(), nullptr);
+            PreventElidingAllocation(arr);
             EXPECT_FALSE(bool{arr});
         }
 
@@ -384,45 +409,42 @@ TEST_F(HeapArrayTest, OutOfMemory64) {
 
     {
         ityp::HeapArray<Key64, Val> arr{kHugeSize, std::nothrow};
-        // Access the pointer first to prevent the allocation from being optimized away.
-        EXPECT_EQ(arr.data(), nullptr);
+        PreventElidingAllocation(arr);
         EXPECT_FALSE(bool{arr});
     }
     {
         auto arr =
             // SAFETY: Testing unsafe API.
             DAWN_UNSAFE_BUFFERS(ityp::HeapArray<Key64, int>::Uninit(kHugeSize, std::nothrow));
-        // Access the pointer first to prevent the allocation from being optimized away.
-        EXPECT_EQ(arr.data(), nullptr);
+        PreventElidingAllocation(arr);
         EXPECT_FALSE(bool{arr});
     }
 }
 
 // Test allocations close to the size of the address space.
 TEST_F(HeapArrayDeathTest, OutOfMemoryAtLimit) {
-    // We store the allocation's pointer here so the allocation attempt can't be optimized away.
-    void* volatile ptr;
-
     // Allocation of uint8_t values
     {
         // Exact maximum amount that will fit in the address space
         EXPECT_DEATH_IF_SUPPORTED(
-            (ptr = HeapArray<uint8_t>{std::numeric_limits<size_t>::max()}.data()), "");
+            PreventElidingAllocation(HeapArray<uint8_t>{std::numeric_limits<size_t>::max()}), "");
         // And a bit less.
         EXPECT_DEATH_IF_SUPPORTED(
-            (ptr = HeapArray<uint8_t>{std::numeric_limits<size_t>::max() - 4095}.data()), "");
+            PreventElidingAllocation(HeapArray<uint8_t>{std::numeric_limits<size_t>::max() - 4095}),
+            "");
     }
     // Allocation of uint32_t values
     {
         static constexpr size_t kMaxSize = std::numeric_limits<size_t>::max() / sizeof(uint32_t);
         // Maximum amount that will fit in the address space
-        EXPECT_DEATH_IF_SUPPORTED((ptr = HeapArray<uint32_t>{kMaxSize}.data()), "");
+        EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize}), "");
         // And a bit less.
-        EXPECT_DEATH_IF_SUPPORTED((ptr = HeapArray<uint32_t>{kMaxSize - 1023}.data()), "");
+        EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize - 1023}),
+                                  "");
 
         // Cases where size * sizeof(val) is larger than the address space and could overflow.
-        EXPECT_DEATH_IF_SUPPORTED((ptr = HeapArray<uint32_t>{kMaxSize + 1}.data()), "");
-        EXPECT_DEATH_IF_SUPPORTED((ptr = HeapArray<uint32_t>{kMaxSize + 2}.data()), "");
+        EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize + 1}), "");
+        EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize + 2}), "");
     }
 }
 
@@ -431,13 +453,12 @@ TEST_F(HeapArrayDeathTest, OutOfMemory64) {
     using Key64 = TypedInteger<struct Key64T, uint64_t>;
     static constexpr Key64 kHugeSize{0x1000'0000'0000'0000u};
 
-    // We store the allocation's pointer here so the allocation attempt can't be optimized away.
-    void* volatile ptr;
-
-    EXPECT_DEATH_IF_SUPPORTED((ptr = ityp::HeapArray<Key64, Val>{kHugeSize}.data()), "");
+    EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(ityp::HeapArray<Key64, Val>{kHugeSize}), "");
     EXPECT_DEATH_IF_SUPPORTED(
-        // SAFETY: Testing unsafe API.
-        (ptr = DAWN_UNSAFE_BUFFERS(ityp::HeapArray<Key64, int>::Uninit(kHugeSize)).data()), "");
+        PreventElidingAllocation(
+            // SAFETY: Testing unsafe API.
+            DAWN_UNSAFE_BUFFERS(ityp::HeapArray<Key64, int>::Uninit(kHugeSize))),
+        "");
 }
 
 // Out of bounds accesses should crash even in release (the underlying container
