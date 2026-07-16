@@ -40,6 +40,7 @@
 #include "src/dawn/native/Surface.h"
 #include "src/dawn/native/TintUtils.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 #include "tint/tint.h"
 
 namespace dawn::native::null {
@@ -389,7 +390,7 @@ void Buffer::CopyFromStaging(BufferBase* staging,
                              uint64_t size) {
     // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
     std::ranges::copy(staging->GetCurrentMapping().GetMappedSubspan(sourceOffset, size),
-                      mBackingData.begin() + destinationOffset);
+                      mBackingData.begin() + sign_cast(destinationOffset));
 }
 
 void Buffer::DoWriteBuffer(uint64_t bufferOffset, Span<const std::byte> data) {

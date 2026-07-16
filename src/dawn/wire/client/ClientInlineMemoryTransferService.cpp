@@ -35,6 +35,7 @@
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 #include "src/utils/heap_array.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::wire::client {
 
@@ -80,7 +81,7 @@ class InlineMemoryTransferService : public MemoryTransferService {
                 return false;
             }
 
-            std::ranges::copy(deserializeData, GetData().begin() + offset);
+            std::ranges::copy(deserializeData, GetData().begin() + sign_cast(offset));
             return true;
         }
 

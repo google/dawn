@@ -47,6 +47,7 @@
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 #include "src/utils/heap_array.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::d3d11 {
 
@@ -1508,7 +1509,7 @@ MaybeError GPUUsableBuffer::UpdateD3D11ConstantBuffer(
             alignedBuffer = DAWN_UNSAFE_BUFFERS(HeapArray<uint8_t>::Uninit(alignedSize));
             std::ranges::copy(
                 DAWN_UNSAFE_TODO(Span<const uint8_t>{static_cast<const uint8_t*>(data), size}),
-                alignedBuffer.begin() + leftExtraBytes);
+                alignedBuffer.begin() + sign_cast(leftExtraBytes));
             data = alignedBuffer.data();
         }
 

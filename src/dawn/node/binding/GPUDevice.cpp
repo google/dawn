@@ -54,6 +54,7 @@
 #include "src/dawn/node/binding/GPUTexture.h"
 #include "src/dawn/node/utils/Debug.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace wgpu::binding {
 
@@ -104,7 +105,7 @@ void chunkedWrite(wgpu::StringView msg) {
             n = DAWN_UNSAFE_TODO(printf("%.*s", static_cast<int>(msg.length), msg.data));
         }
         DAWN_UNSAFE_TODO(msg.data += n);
-        msg.length -= n;
+        msg.length -= dawn::sign_cast(n);
     }
 }
 

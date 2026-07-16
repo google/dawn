@@ -34,6 +34,7 @@
 
 #include "src/utils/compiler.h"
 #include "src/utils/heap_array.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::wire {
 
@@ -74,7 +75,7 @@ WireResult ChunkedCommandHandler::HandleChunkedCommand(DeserializeBuffer* deseri
     }
     // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
     std::ranges::copy(DAWN_UNSAFE_TODO(Span<const char>{cmd.chunkData, cmd.chunkSize}),
-                      chunkedCommand->data.begin() + chunkedCommand->putOffset);
+                      chunkedCommand->data.begin() + sign_cast(chunkedCommand->putOffset));
     chunkedCommand->putOffset += cmd.chunkSize;
 
     if (chunkedCommand->GetRemainingSize() == 0) {

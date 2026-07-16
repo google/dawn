@@ -231,7 +231,6 @@ config("dawn_warnings") {
       # Arithmetic
       "-Wno-implicit-float-conversion",
       "-Wno-implicit-int-conversion",
-      "-Wno-sign-conversion",
     ]
 
     # P1. Likely to help with hardening.
