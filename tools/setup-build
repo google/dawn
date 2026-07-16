@@ -48,6 +48,7 @@ UBSAN=""
 ANDROID_ABI="arm64-v8a"
 ANDROID_NDK=""
 ANDROID_PLATFORM="android-28"
+USE_GCC_RUNTIME=0
 
 function show_usage() {
   echo "setup-build [-f] $POSSIBLE_BUILD_SYSTEMS $POSSIBLE_BUILD_TYPES $POSSIBLE_BUILD_ARCHS [fuzz|fuzzer]"
@@ -66,6 +67,7 @@ function show_usage() {
   echo "  debug         Make a debug build"
   echo " "
   echo "  fuzz, fuzzer  Build fuzzers. Forces Clang to be used"
+  echo "  gccrt         Use GCC 14 runtime with clang"
   echo "  install       Install to out/install (cmake only)"
   echo "  native        Target the machine you're running on"
   echo "  x86           Target a 32-bit x86 (adds -m32 to compiler flags)"
@@ -128,6 +130,9 @@ for arg in "$@"; do
       set_build_arch $lowered_arg
     ;;
     "native")
+    ;;
+    "gccrt")
+      USE_GCC_RUNTIME=1
     ;;
     "fuzz" | "fuzzer")
       BUILD_FUZZER=1
@@ -263,6 +268,8 @@ case $BUILD_SYSTEM in
     fi
   ;;
   "cmake")
+    CXX_FLAGS=()
+    C_FLAGS=()
     CMAKE_FLAGS=()
     CMAKE_FLAGS+=("-DTINT_BUILD_GLSL_WRITER=1")
     CMAKE_FLAGS+=("-DTINT_BUILD_HLSL_WRITER=1")
@@ -278,9 +285,17 @@ case $BUILD_SYSTEM in
         CMAKE_FLAGS+=("-DTINT_BUILD_TINTD=0")
     fi
     CMAKE_FLAGS+=("-DDAWN_BUILD_NODE_BINDINGS=1")
+    CMAKE_FLAGS+=("-DCMAKE_CXX_COMPILER=clang++")
+    CMAKE_FLAGS+=("-DCMAKE_C_COMPILER=clang")
+    if [[ $USE_GCC_RUNTIME == 1 ]]; then
+        GCCRT_DIR=/usr/lib/gcc/x86_64-linux-gnu/14
+        if [[ ! -d $GCCRT_DIR ]]; then
+            echo "error: specified 'gccrt' but $GCCRT_DIR does not exist"
+            exit 1
+        fi
+        CXX_FLAGS+=("--gcc-install-dir=$GCCRT_DIR")
+    fi
     if [[ -n "$BUILD_FUZZER" ]]; then
-        CMAKE_FLAGS+=("-DCMAKE_CXX_COMPILER=clang++")
-        CMAKE_FLAGS+=("-DCMAKE_C_COMPILER=clang")
         CMAKE_FLAGS+=("-DTINT_BUILD_FUZZERS=ON")
         CMAKE_FLAGS+=("-DDAWN_BUILD_PROTOBUF=ON")
         CMAKE_FLAGS+=("-DTINT_BUILD_IR_BINARY=ON")
@@ -312,8 +327,8 @@ case $BUILD_SYSTEM in
         "")
         ;;
         "x86")
-          CMAKE_FLAGS+=("-DCMAKE_CXX_FLAGS=-m32")
-          CMAKE_FLAGS+=("-DCMAKE_C_FLAGS=-m32")
+          CXX_FLAGS+=("-m32")
+          C_FLAGS+=("-m32")
         ;;
         *)
           show_usage "invalid build architecture '$BUILD_ARCH'"
@@ -327,6 +342,11 @@ case $BUILD_SYSTEM in
       CMAKE_FLAGS+=("-DCMAKE_INSTALL_PREFIX=out/install")
       CMAKE_FLAGS+=("-DTINT_ENABLE_INSTALL=ON")
       CMAKE_FLAGS+=("-DDAWN_ENABLE_INSTALL=ON")
+
+      # With Ninja, avoid the need to relink at install time
+      # with installed directory location.
+      CMAKE_FLAGS+=("-DCMAKE_BUILD_WITH_INSTALL_RPATH=ON")
+
       # Build Dawn as a monolithic library.  This is incompatible
       # with BUILD_SHARED_LIBS=ON
       CMAKE_FLAGS+=("-DBUILD_SHARED_LIBS=OFF")
@@ -339,6 +359,12 @@ case $BUILD_SYSTEM in
       if [[ -n "$SHARED" ]]; then
         CMAKE_FLAGS+=("-DBUILD_SHARED_LIBS=ON")
       fi
+    fi
+    if [[ -n "$CXX_FLAGS" ]]; then
+        CMAKE_FLAGS+=("-DCMAKE_CXX_FLAGS='${CXX_FLAGS[@]}'")
+    fi
+    if [[ -n "$C_FLAGS" ]]; then
+        CMAKE_FLAGS+=("-DCMAKE_C_FLAGS='${C_FLAGS[@]}'")
     fi
     generate "cmake"             \
              "-S" "."            \
