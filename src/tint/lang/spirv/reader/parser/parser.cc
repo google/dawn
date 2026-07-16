@@ -244,11 +244,11 @@ class Parser {
         {
             TINT_SCOPED_ASSIGNMENT(current_block_, ir_.root_block);
             EmitSpecConstants();
-            EmitModuleScopeVariables();
+            TINT_CHECK_RESULT(EmitModuleScopeVariables());
         }
 
         TINT_CHECK_RESULT(EmitFunctions());
-        EmitEntryPointAttributes();
+        TINT_CHECK_RESULT(EmitEntryPointAttributes());
 
         RemapSamplers();
         RemapBufferBlockAddressSpace();
@@ -682,7 +682,7 @@ class Parser {
 
     /// @param b a SPIR-V BuiltIn
     /// @returns the Tint builtin value for a SPIR-V BuiltIn decoration
-    core::BuiltinValue Builtin(spv::BuiltIn b) {
+    Result<core::BuiltinValue> Builtin(spv::BuiltIn b) {
         switch (b) {
             case spv::BuiltIn::FragCoord:
                 return core::BuiltinValue::kPosition;
@@ -727,8 +727,8 @@ class Parser {
             case spv::BuiltIn::PrimitiveId:
                 return core::BuiltinValue::kPrimitiveIndex;
             default:
-                TINT_UNIMPLEMENTED() << "unhandled SPIR-V BuiltIn: " << spv::BuiltInToString(b)
-                                     << " (val = " << static_cast<uint32_t>(b) << ")";
+                return Failure("unhandled SPIR-V BuiltIn: " + std::string(spv::BuiltInToString(b)) +
+                               " (val = " + std::to_string(static_cast<uint32_t>(b)) + ")");
         }
     }
 
@@ -1142,9 +1142,14 @@ class Parser {
                         case spv::Decoration::Offset:
                             offset = deco[1];
                             break;
-                        case spv::Decoration::BuiltIn:
-                            attributes.builtin = Builtin(spv::BuiltIn(deco[1]));
+                        case spv::Decoration::BuiltIn: {
+                            auto builtin_res = Builtin(spv::BuiltIn(deco[1]));
+                            if (builtin_res != Success) {
+                                TINT_ICE() << builtin_res.Failure().reason;
+                            }
+                            attributes.builtin = builtin_res.Get();
                             break;
+                        }
                         case spv::Decoration::Invariant:
                             attributes.invariant = true;
                             break;
@@ -1603,7 +1608,8 @@ class Parser {
             } else if (float_ty->width() == 32) {
                 return b_.ConstantValue(f32(f->GetFloat()));
             } else {
-                TINT_UNREACHABLE() << "unsupported floating point type width";
+                TINT_UNREACHABLE()
+                    << "unsupported floating point type width: " << float_ty->width();
             }
         }
         if (auto* v = constant->AsVectorConstant()) {
@@ -1638,7 +1644,7 @@ class Parser {
             return ir_.constant_values.Composite(
                 Type(spirv_context_->get_type_mgr()->GetId(s->type())), std::move(elements));
         }
-        TINT_UNIMPLEMENTED() << "unhandled constant type";
+        TINT_ICE() << "unhandled constant type: " << constant->type()->str();
     }
 
     /// @returns a literal operand with the given value
@@ -1685,11 +1691,11 @@ class Parser {
     }
 
     /// Emit the module-scope variables.
-    void EmitModuleScopeVariables() {
+    Result<SuccessType> EmitModuleScopeVariables() {
         for (auto& inst : spirv_context_->module()->types_values()) {
             switch (inst.opcode()) {
                 case spv::Op::OpVariable:
-                    EmitVar(inst);
+                    TINT_CHECK_RESULT(EmitVar(inst));
                     break;
                 case spv::Op::OpUndef: {
                     auto* ty = Type(inst.type_id());
@@ -1704,6 +1710,7 @@ class Parser {
                     break;
             }
         }
+        return Success;
     }
 
     /// Emit the functions.
@@ -1757,7 +1764,7 @@ class Parser {
     }
 
     /// Emit entry point attributes.
-    void EmitEntryPointAttributes() {
+    Result<SuccessType> EmitEntryPointAttributes() {
         // Handle OpEntryPoint declarations.
         for (auto& entry_point : spirv_context_->module()->entry_points()) {
             auto model = entry_point.GetSingleWordInOperand(0);
@@ -1775,7 +1782,7 @@ class Parser {
                     func->SetStage(core::ir::Function::PipelineStage::kVertex);
                     break;
                 default:
-                    TINT_UNIMPLEMENTED() << "unhandled execution model: " << model;
+                    return Failure("unhandled execution model: " + std::to_string(model));
             }
 
             // Set the entry point name.
@@ -1847,9 +1854,10 @@ class Parser {
                     // These are ignored as they are implicitly supported by Tint IR.
                     break;
                 default:
-                    TINT_UNIMPLEMENTED() << "unhandled execution mode: " << mode;
+                    return Failure("unhandled execution mode: " + std::to_string(mode));
             }
         }
+        return Success;
     }
 
     bool InBlock(core::ir::Block* blk) { return current_blocks_.contains(blk); }
@@ -2263,7 +2271,7 @@ class Parser {
                     EmitCopyMemory(inst);
                     break;
                 case spv::Op::OpVariable:
-                    EmitVar(inst);
+                    TINT_CHECK_RESULT(EmitVar(inst));
                     break;
                 case spv::Op::OpUnreachable:
                     EmitWithoutResult(b_.Unreachable());
@@ -4493,7 +4501,7 @@ class Parser {
     }
 
     /// @param inst the SPIR-V instruction for OpVariable
-    void EmitVar(const spvtools::opt::Instruction& inst) {
+    Result<SuccessType> EmitVar(const spvtools::opt::Instruction& inst) {
         // Handle decorations.
         std::optional<uint32_t> group;
         std::optional<uint32_t> binding;
@@ -4527,9 +4535,12 @@ class Parser {
                 case spv::Decoration::Binding:
                     binding = deco->GetSingleWordOperand(2);
                     break;
-                case spv::Decoration::BuiltIn:
-                    io_attributes.builtin = Builtin(spv::BuiltIn(deco->GetSingleWordOperand(2)));
+                case spv::Decoration::BuiltIn: {
+                    TINT_CHECK_RESULT_UNWRAP(builtin_val,
+                                             Builtin(spv::BuiltIn(deco->GetSingleWordOperand(2))));
+                    io_attributes.builtin = builtin_val;
                     break;
+                }
                 case spv::Decoration::Invariant:
                     io_attributes.invariant = true;
                     break;
@@ -4628,6 +4639,7 @@ class Parser {
         var_to_original_access_mode_.insert({var, access_mode});
 
         Emit(var, inst.result_id());
+        return Success;
     }
 
   private:
