@@ -115,20 +115,13 @@ WGPUStatus Surface::APIGetCapabilities(WGPUAdapter adapter,
     capabilities->nextInChain = nullptr;
     capabilities->usages = mSupportedUsages;
 
-    capabilities->presentModeCount = mSupportedPresentModes.size();
-    WGPUPresentMode* presentModes = new WGPUPresentMode[capabilities->presentModeCount];
-    std::copy(mSupportedPresentModes.begin(), mSupportedPresentModes.end(), presentModes);
-    capabilities->presentModes = presentModes;
-
-    capabilities->formatCount = mSupportedFormats.size();
-    WGPUTextureFormat* formats = new WGPUTextureFormat[capabilities->formatCount];
-    std::copy(mSupportedFormats.begin(), mSupportedFormats.end(), formats);
-    capabilities->formats = formats;
-
-    capabilities->alphaModeCount = mSupportedAlphaModes.size();
-    WGPUCompositeAlphaMode* alphaModes = new WGPUCompositeAlphaMode[capabilities->alphaModeCount];
-    std::copy(mSupportedAlphaModes.begin(), mSupportedAlphaModes.end(), alphaModes);
-    capabilities->alphaModes = alphaModes;
+    // These will be freed by APIFreeMembers.
+    std::tie(capabilities->presentModeCount, capabilities->presentModes) =
+        HeapArrayFrom(mSupportedPresentModes).MoveToRawPointer();
+    std::tie(capabilities->formatCount, capabilities->formats) =
+        HeapArrayFrom(mSupportedFormats).MoveToRawPointer();
+    std::tie(capabilities->alphaModeCount, capabilities->alphaModes) =
+        HeapArrayFrom(mSupportedAlphaModes).MoveToRawPointer();
 
     return WGPUStatus_Success;
 }

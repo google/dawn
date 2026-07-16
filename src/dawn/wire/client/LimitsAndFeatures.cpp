@@ -30,6 +30,7 @@
 #include "src/dawn/wire/SupportedFeatures.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::wire::client {
 
@@ -75,22 +76,9 @@ void LimitsAndFeatures::ToSupportedFeatures(WGPUSupportedFeatures* supportedFeat
         return;
     }
 
-    const size_t count = mFeatures.size();
-    supportedFeatures->featureCount = count;
-    supportedFeatures->features = nullptr;
-
-    if (count == 0) {
-        return;
-    }
-
     // This will be freed by wgpuSupportedFeaturesFreeMembers.
-    WGPUFeatureName* features = new WGPUFeatureName[count];
-    uint32_t index = 0;
-    for (WGPUFeatureName f : mFeatures) {
-        DAWN_UNSAFE_TODO(features[index++]) = f;
-    }
-    DAWN_ASSERT(index == count);
-    supportedFeatures->features = features;
+    std::tie(supportedFeatures->featureCount, supportedFeatures->features) =
+        HeapArrayFrom(mFeatures).MoveToRawPointer();
 }
 
 void LimitsAndFeatures::SetLimits(const WGPULimits* limits) {

@@ -31,6 +31,7 @@
 
 #include "src/dawn/wire/server/Server.h"
 #include "src/utils/assert.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::wire::server {
 
