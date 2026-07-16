@@ -1840,17 +1840,13 @@ class Parser {
                         b_.Constant(u32(execution_mode.GetSingleWordInOperand(4))));
                     break;
                 case spv::ExecutionMode::DepthGreater:
-                    TINT_ICE() << "ExecutionMode DepthGreater is not supported in WGSL";
-                    /* Ice aborts, so this doesn't fallthrough */
+                    return Failure("ExecutionMode DepthGreater is not supported in WGSL");
                 case spv::ExecutionMode::DepthLess:
-                    TINT_ICE() << "ExecutionMode DepthLess is not supported in WGSL";
-                    /* Ice aborts, so this doesn't fallthrough */
+                    return Failure("ExecutionMode DepthLess is not supported in WGSL");
                 case spv::ExecutionMode::DepthUnchanged:
-                    TINT_ICE() << "ExecutionMode DepthUnchanged is not supported in WGSL";
-                    /* Ice aborts, so this doesn't fallthrough */
+                    return Failure("ExecutionMode DepthUnchanged is not supported in WGSL");
                 case spv::ExecutionMode::EarlyFragmentTests:
-                    TINT_ICE() << "ExecutionMode EarlyFragmentTests is not supported in WGSL";
-                    /* Ice aborts, so this doesn't fallthrough */
+                    return Failure("ExecutionMode EarlyFragmentTests is not supported in WGSL");
                 case spv::ExecutionMode::DepthReplacing:
                 case spv::ExecutionMode::OriginUpperLeft:
                     // These are ignored as they are implicitly supported by Tint IR.
@@ -4570,7 +4566,7 @@ class Parser {
                     // Hint to the compiler that it may compile as if there is no aliasing. Ignore.
                     break;
                 default:
-                    TINT_UNIMPLEMENTED() << "unhandled decoration " << d;
+                    return Failure("unhandled decoration " + std::to_string(d));
             }
         }
 
