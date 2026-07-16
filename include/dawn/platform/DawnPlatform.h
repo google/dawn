@@ -53,21 +53,14 @@ class DAWN_PLATFORM_EXPORT CachingInterface {
 
     // Returns zero if there does not exist a cached entry for |key|, otherwise returns a non-zero
     // size indicating the size of cached data
-    virtual size_t FindKey(std::span<const std::byte> key) { return 0; }
+    virtual size_t FindKey(std::span<const std::byte> key) = 0;
 
     // Returns zero if unable to load cached entry for |key| into |dest|, otherwise returns number
     // of bytes written to |dest|.
-    virtual size_t LoadData(std::span<const std::byte> key, std::span<std::byte> dest) { return 0; }
+    virtual size_t LoadData(std::span<const std::byte> key, std::span<std::byte> dest) = 0;
 
     // Stores the data in |src| at the entry specified by |key|.
-    virtual void StoreData(std::span<const std::byte> key, std::span<const std::byte> src) {}
-
-    // TODO(503801946): Remove these outdated default implementations and make the newer API above
-    // fully virtual once users are updated.
-    virtual size_t LoadData(const void* key, size_t keySize, void* valueOut, size_t valueSize) {
-        return 0;
-    }
-    virtual void StoreData(const void* key, size_t keySize, const void* value, size_t valueSize) {}
+    virtual void StoreData(std::span<const std::byte> key, std::span<const std::byte> src) = 0;
 
   private:
     CachingInterface(const CachingInterface&) = delete;
