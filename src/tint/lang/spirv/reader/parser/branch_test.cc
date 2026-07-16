@@ -1450,7 +1450,7 @@ TEST_F(SpirvParserTest, Switch_HoistFromCase) {
 )");
 }
 
-TEST_F(SpirvParserDeathTest, Switch_Fallthrough) {
+TEST_F(SpirvParserTest, Switch_Fallthrough) {
     auto src = R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -1482,7 +1482,10 @@ TEST_F(SpirvParserDeathTest, Switch_Fallthrough) {
                OpReturn
                OpFunctionEnd
 )";
-    EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
+    auto result = Run(src);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("switch fallthrough not supported by the SPIR-V reader"));
 }
 
 TEST_F(SpirvParserTest, Switch_IfBreakInCase) {

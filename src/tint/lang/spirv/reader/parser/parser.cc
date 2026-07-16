@@ -38,6 +38,8 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/utils/ice/ice.h"
+
 #define SPV_ENABLE_UTILITY_CODE
 #include "spirv/unified1/spirv.hpp11"
 
@@ -2099,7 +2101,7 @@ class Parser {
                     // OpBranchCondition or OpSwitch instruction
                     break;
                 case spv::Op::OpExtInst:
-                    EmitExtInst(inst);
+                    TINT_CHECK_RESULT(EmitExtInst(inst));
                     break;
                 case spv::Op::OpCopyObject:
                     EmitCopyObject(inst);
@@ -2578,9 +2580,9 @@ class Parser {
                     return Failure(
                         "IsInf is not supported because Infinities cannot be represented in WGSL");
                 default:
-                    TINT_UNIMPLEMENTED()
-                        << "unhandled SPIR-V instruction: " << spv::OpToString(inst.opcode())
-                        << " (val = " << static_cast<uint32_t>(inst.opcode()) << ")";
+                    return Failure("unhandled SPIR-V instruction: " +
+                                   std::string(spv::OpToString(inst.opcode())) + " (val = " +
+                                   std::to_string(static_cast<uint32_t>(inst.opcode())) + ")");
             }
         }
         return Success;
@@ -3531,8 +3533,9 @@ class Parser {
 
         // Disallow fallthrough
         for (auto& switch_blocks : current_switch_blocks_) {
-            TINT_ASSERT(switch_blocks.count(dest_id) == 0)
-                << "switch fallthrough not supported by the SPIR-V reader";
+            if (switch_blocks.count(dest_id) != 0) {
+                return Failure("switch fallthrough not supported by the SPIR-V reader");
+            }
         }
 
         // The destination is a continuing block, so insert a `continue`
@@ -4043,19 +4046,17 @@ class Parser {
     }
 
     /// @param inst the SPIR-V instruction for OpExtInst
-    void EmitExtInst(const spvtools::opt::Instruction& inst) {
+    Result<SuccessType> EmitExtInst(const spvtools::opt::Instruction& inst) {
         auto inst_set = inst.GetSingleWordInOperand(0);
         if (ignored_imports_.count(inst_set) > 0) {
             // Ignore it but don't error out.
-            return;
+            return Success;
         }
         if (glsl_std_450_imports_.count(inst_set) > 0) {
-            EmitGlslStd450ExtInst(inst);
-            return;
+            return EmitGlslStd450ExtInst(inst);
         }
-
-        TINT_UNIMPLEMENTED() << "unhandled extended instruction import with ID "
-                             << inst.GetSingleWordInOperand(0);
+        TINT_UNREACHABLE()
+            << "unrecognized extended instruction set should have been caught during registration";
     }
 
     // Returns the WGSL standard library function for the given GLSL.std.450 extended instruction
@@ -4239,7 +4240,7 @@ class Parser {
     }
 
     /// @param inst the SPIR-V instruction for OpAccessChain
-    void EmitGlslStd450ExtInst(const spvtools::opt::Instruction& inst) {
+    Result<SuccessType> EmitGlslStd450ExtInst(const spvtools::opt::Instruction& inst) {
         const auto ext_opcode = inst.GetSingleWordInOperand(1);
         auto* spv_ty = Type(inst.type_id());
 
@@ -4270,7 +4271,7 @@ class Parser {
             EmitWithoutSpvResult(fract);
             EmitWithoutSpvResult(whole);
             Emit(b_.Construct(spv_ty, fract, whole), inst.result_id());
-            return;
+            return Success;
         }
         if (wgsl_fn == core::BuiltinFn::kFrexp) {
             // For `FrexpStruct`, which is, essentially, a WGSL `frexp`
@@ -4303,11 +4304,11 @@ class Parser {
             }
 
             Emit(b_.Construct(spv_ty, fract, exp_res), inst.result_id());
-            return;
+            return Success;
         }
         if (wgsl_fn != core::BuiltinFn::kNone) {
             Emit(b_.Call(spv_ty, wgsl_fn, operands), inst.result_id());
-            return;
+            return Success;
         }
 
         const auto spv_fn = GetGlslStd450SpirvEquivalentFuncName(ext_opcode);
@@ -4315,10 +4316,10 @@ class Parser {
             auto explicit_params = GlslStd450ExplicitParams(ext_opcode, spv_ty);
             Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(spv_ty, spv_fn, explicit_params, operands),
                  inst.result_id());
-            return;
+            return Success;
         }
 
-        TINT_UNIMPLEMENTED() << "unhandled GLSL.std.450 instruction " << ext_opcode;
+        TINT_UNREACHABLE() << "unhandled GLSL.std.450 instruction " << ext_opcode;
     }
 
     /// @param inst the SPIR-V instruction for OpAccessChain
