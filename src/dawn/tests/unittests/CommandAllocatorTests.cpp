@@ -146,7 +146,7 @@ TEST(CommandAllocator, BasicWithData) {
         immediates->size = mySize;
         immediates->offset = myOffset;
 
-        uint32_t* values = allocator.AllocateData<uint32_t>(5);
+        Span<uint32_t> values = allocator.AllocateData<uint32_t>(size_t{5u});
         for (size_t i = 0; i < 5; i++) {
             values[i] = myValues[i];
         }
@@ -391,35 +391,31 @@ struct alignas(A) AlignedStruct {
 };
 
 // Test for overflows in Allocate's computations, size 1 variant
-TEST(CommandAllocator, AllocationOverflow_1) {
+TEST(CommandAllocatorDeathTest, AllocationOverflow_1) {
     CommandAllocator allocator;
-    AlignedStruct<1>* data =
-        allocator.AllocateData<AlignedStruct<1>>(std::numeric_limits<size_t>::max() / 1);
-    ASSERT_EQ(data, nullptr);
+    EXPECT_DEATH_IF_SUPPORTED(
+        allocator.AllocateData<AlignedStruct<1>>(std::numeric_limits<size_t>::max() / 1u), "");
 }
 
 // Test for overflows in Allocate's computations, size 2 variant
-TEST(CommandAllocator, AllocationOverflow_2) {
+TEST(CommandAllocatorDeathTest, AllocationOverflow_2) {
     CommandAllocator allocator;
-    AlignedStruct<2>* data =
-        allocator.AllocateData<AlignedStruct<2>>(std::numeric_limits<size_t>::max() / 2);
-    ASSERT_EQ(data, nullptr);
+    EXPECT_DEATH_IF_SUPPORTED(
+        allocator.AllocateData<AlignedStruct<2>>(std::numeric_limits<size_t>::max() / 2u), "");
 }
 
 // Test for overflows in Allocate's computations, size 4 variant
-TEST(CommandAllocator, AllocationOverflow_4) {
+TEST(CommandAllocatorDeathTest, AllocationOverflow_4) {
     CommandAllocator allocator;
-    AlignedStruct<4>* data =
-        allocator.AllocateData<AlignedStruct<4>>(std::numeric_limits<size_t>::max() / 4);
-    ASSERT_EQ(data, nullptr);
+    EXPECT_DEATH_IF_SUPPORTED(
+        allocator.AllocateData<AlignedStruct<4>>(std::numeric_limits<size_t>::max() / 4u), "");
 }
 
 // Test for overflows in Allocate's computations, size 8 variant
-TEST(CommandAllocator, AllocationOverflow_8) {
+TEST(CommandAllocatorDeathTest, AllocationOverflow_8) {
     CommandAllocator allocator;
-    AlignedStruct<8>* data =
-        allocator.AllocateData<AlignedStruct<8>>(std::numeric_limits<size_t>::max() / 8);
-    ASSERT_EQ(data, nullptr);
+    EXPECT_DEATH_IF_SUPPORTED(
+        allocator.AllocateData<AlignedStruct<8>>(std::numeric_limits<size_t>::max() / 8u), "");
 }
 
 template <int DefaultValue>
@@ -450,14 +446,17 @@ TEST(CommandAllocator, AllocateDefaultInitializes) {
 TEST(CommandAllocator, AllocateDataDefaultInitializes) {
     CommandAllocator allocator;
 
-    IntWithDefault<33>* int33 = allocator.AllocateData<IntWithDefault<33>>(1);
+    Span<IntWithDefault<33>> int33 = allocator.AllocateData<IntWithDefault<33>>(size_t{1});
+    ASSERT_EQ(int33.size(), 1);
     ASSERT_EQ(int33[0].value, 33);
 
-    IntWithDefault<34>* int34 = allocator.AllocateData<IntWithDefault<34>>(2);
+    Span<IntWithDefault<34>> int34 = allocator.AllocateData<IntWithDefault<34>>(size_t{2});
+    ASSERT_EQ(int34.size(), 2);
     ASSERT_EQ(int34[0].value, 34);
     ASSERT_EQ(int34[0].value, 34);
 
-    IntWithDefault<35>* int35 = allocator.AllocateData<IntWithDefault<35>>(3);
+    Span<IntWithDefault<35>> int35 = allocator.AllocateData<IntWithDefault<35>>(size_t{3});
+    ASSERT_EQ(int35.size(), 3);
     ASSERT_EQ(int35[0].value, 35);
     ASSERT_EQ(int35[1].value, 35);
     ASSERT_EQ(int35[2].value, 35);

@@ -371,11 +371,8 @@ void RenderPassEncoder::APIExecuteBundles(Span<RenderBundleBase* const> renderBu
                 allocator->Allocate<ExecuteBundlesCmd>(Command::ExecuteBundles);
             cmd->count = renderBundles.size();
 
-            // TODO(https://crbug.com/528305452): Make AllocateData handle typed indices and return
-            // a span.
-            Span<Ref<RenderBundleBase>> bundles = DAWN_UNSAFE_TODO(
-                {allocator->AllocateData<Ref<RenderBundleBase>>(renderBundles.size()),
-                 renderBundles.size()});
+            Span<Ref<RenderBundleBase>> bundles =
+                allocator->AllocateData<Ref<RenderBundleBase>>(renderBundles.size());
             for (auto [i, bundle] : Enumerate(bundles)) {
                 // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
                 bundles[i] = renderBundles[i];

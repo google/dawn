@@ -196,28 +196,25 @@ class CommandAllocator : public NonCopyable {
                  alignof(T) <= kMaxAllocatedCommandAlignment)
     T* Allocate(E commandId) {
         Span<std::byte> allocation = Allocate(static_cast<uint32_t>(commandId), sizeof(T));
-        if (allocation.empty()) {
-            return nullptr;
-        }
+        DAWN_CHECK(allocation.data() != nullptr);  // Crash on OOM
 
         T* result = reinterpret_cast<T*>(allocation.data());
         new (result) T;
         return result;
     }
 
-    template <typename T>
-        requires(alignof(T) <= kMaxAllocatedCommandAlignment)
-    T* AllocateData(size_t count) {
+    template <typename T, typename Index>
+        requires(alignof(T) <= kMaxAllocatedCommandAlignment &&
+                 (std::is_same_v<Index, size_t> || !std::is_integral_v<Index>))
+    ityp::span<Index, T> AllocateData(Index count) {
         Span<std::byte> allocation = AllocateData(sizeof(T) * count);
-        if (allocation.empty()) {
-            return nullptr;
-        }
+        DAWN_CHECK(allocation.data() != nullptr);  // Crash on OOM
 
-        Span<T> results = ReinterpretSpan<T>(allocation);
+        ityp::span<Index, T> results = ReinterpretSpan<T, Index>(allocation);
         for (auto& value : results) {
             new (&value) T;
         }
-        return results.data();
+        return results;
     }
 
     size_t GetCommandBlocksCount() const;

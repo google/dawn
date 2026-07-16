@@ -115,10 +115,10 @@ void ProgrammableEncoder::APIPushDebugGroup(StringView groupLabelIn) {
         [&](CommandAllocator* allocator) -> MaybeError {
             PushDebugGroupCmd* cmd =
                 allocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
-            const char* label = AddNullTerminatedString(allocator, groupLabel, &cmd->length);
+            AddNullTerminatedString(allocator, groupLabel, &cmd->length);
 
             mDebugGroupStackSize++;
-            mEncodingContext->PushDebugGroupLabel(std::string_view(label, cmd->length));
+            mEncodingContext->PushDebugGroupLabel(groupLabel);
 
             return {};
         },
@@ -235,14 +235,11 @@ void ProgrammableEncoder::RecordSetBindGroup(
     cmd->group = group;
     // TODO(https://crbug.com/524554511): Propagate the usage of the BindingIndex type to
     // SetBindGroupCmd and through backends as well.
-    // TODO(https://crbug.com/528305452): Don't convert to uint32_t and instead make AllocateData
-    // handle typed indices and return a span.
     cmd->dynamicOffsetCount = uint32_t{dynamicOffsets.size()};
     if (!dynamicOffsets.empty()) {
-        uint32_t* offsets = allocator->AllocateData<uint32_t>(cmd->dynamicOffsetCount);
+        Span<uint32_t> offsets = allocator->AllocateData<uint32_t>(cmd->dynamicOffsetCount);
         // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-        DAWN_UNSAFE_TODO(
-            memcpy(offsets, dynamicOffsets.data(), cmd->dynamicOffsetCount * sizeof(uint32_t)));
+        std::ranges::copy(dynamicOffsets, offsets.begin());
     }
 }
 
@@ -258,10 +255,9 @@ void ProgrammableEncoder::RecordSetImmediates(CommandAllocator* allocator,
     SetImmediatesCmd* cmd = allocator->Allocate<SetImmediatesCmd>(Command::SetImmediates);
     cmd->offset = offset;
     cmd->size = uint32_t(data.size());
-    // TODO(https://crbug.com/528305452): Make AllocateData return a span.
-    uint8_t* immediateDatas = allocator->AllocateData<uint8_t>(data.size());
+    Span<std::byte> immediateDatas = allocator->AllocateData<std::byte>(data.size());
     // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-    DAWN_UNSAFE_TODO(memcpy(immediateDatas, data.data(), data.size()));
+    std::ranges::copy(data, immediateDatas.begin());
 }
 
 MaybeError ProgrammableEncoder::SetResourceTable(ResourceTableBase* table,

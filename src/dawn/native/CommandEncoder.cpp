@@ -2139,10 +2139,10 @@ void CommandEncoder::APIPushDebugGroup(StringView groupLabelIn) {
         [&](CommandAllocator* allocator) -> MaybeError {
             PushDebugGroupCmd* cmd =
                 allocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
-            const char* label = AddNullTerminatedString(allocator, groupLabel, &cmd->length);
+            AddNullTerminatedString(allocator, groupLabel, &cmd->length);
 
             mDebugGroupStackSize++;
-            mEncodingContext.PushDebugGroupLabel(std::string_view(label, cmd->length));
+            mEncodingContext.PushDebugGroupLabel(groupLabel);
 
             return {};
         },
@@ -2219,8 +2219,8 @@ void CommandEncoder::APIWriteBuffer(BufferBase* buffer,
             cmd->offset = bufferOffset;
             cmd->size = size;
 
-            uint8_t* inlinedData = allocator->AllocateData<uint8_t>(size);
-            DAWN_UNSAFE_TODO(memcpy(inlinedData, data, size));
+            Span<uint8_t> inlinedData = allocator->AllocateData<uint8_t>(cmd->size);
+            DAWN_UNSAFE_TODO(memcpy(inlinedData.data(), data, size));
 
             mTopLevelBuffers.insert(buffer);
 

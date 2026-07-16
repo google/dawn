@@ -477,8 +477,8 @@ void FreeCommands(CommandIterator* commands);
 // consuming the correct amount of data from the command iterator.
 void SkipCommand(CommandIterator* commands, Command type);
 
-// Helper function to copy a wgpu::StringView into a safely null-terminated C-string in commands.
-const char* AddNullTerminatedString(CommandAllocator* allocator, StringView s, size_t* length);
+// Helper function to copy a wgpu::StringView into the command stream, writing out its size.
+void AddNullTerminatedString(CommandAllocator* allocator, std::string_view s, size_t* length);
 // Mirror function that gets the same string back as a null-terminated string_view.
 std::string_view NextNullTerminatedString(CommandIterator* iterator, size_t length);
 

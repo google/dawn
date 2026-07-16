@@ -434,22 +434,21 @@ void SkipCommand(CommandIterator* commands, Command type) {
     }
 }
 
-const char* AddNullTerminatedString(CommandAllocator* allocator, StringView s, size_t* length) {
-    std::string_view view = s;
-    *length = view.length();
+void AddNullTerminatedString(CommandAllocator* allocator, std::string_view s, size_t* length) {
+    *length = s.length() + 1;
 
     // Include extra null-terminator character. The string_view may not be null-terminated. It also
     // may already have a null-terminator inside of it, in which case adding the null-terminator is
     // unnecessary. However, this is unlikely, so always include the extra character.
-    char* out = allocator->AllocateData<char>(view.length() + 1);
-    DAWN_UNSAFE_TODO(memcpy(out, view.data(), view.length()));
-    DAWN_UNSAFE_TODO(out[view.length()]) = '\0';
+    Span<char> out = allocator->AllocateData<char>(s.length() + 1);
 
-    return out;
+    // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
+    std::ranges::copy(s, out.begin());
+    out[s.length()] = '\0';
 }
 
 std::string_view NextNullTerminatedString(CommandIterator* iterator, size_t length) {
-    Span<const char> data = iterator->NextData<char>(length + 1);
+    Span<const char> data = iterator->NextData<char>(length);
     DAWN_ASSERT(data[data.size() - 1] == '\0');  // The string is null-terminated.
     return {data.begin(), data.end()};
 }
