@@ -581,5 +581,26 @@ TEST_F(SpirvWriterTest, SubgroupUniformControlFlow_Vertex) {
 )");
 }
 
+TEST_F(SpirvWriterTest, BufferView_Vec2h_Via_U16) {
+    mod.properties.Add(core::ir::Property::kAllowBufferTypes);
+    auto* v = b.Var("v", ty.ptr(storage, ty.unsized_buffer()));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* ep = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    b.Append(ep->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(storage, ty.vec2h()), core::BuiltinFn::kBufferView,
+                                    Vector<core::ir::TemplateParameter, 1>{ty.vec2h()}, v, 0_u);
+        b.Store(view, b.Zero(ty.vec2h()));
+        b.Return(ep);
+    });
+
+    Options options;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST(R"(OpCapability Int16)");
+    EXPECT_INST(R"(OpTypeInt 16 0)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer
