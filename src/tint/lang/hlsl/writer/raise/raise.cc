@@ -66,6 +66,7 @@
 #include "src/tint/lang/hlsl/writer/raise/array_offset_from_uniform.h"
 #include "src/tint/lang/hlsl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
+#include "src/tint/lang/hlsl/writer/raise/decompose_snorm10_10_10_2.h"
 #include "src/tint/lang/hlsl/writer/raise/decompose_storage_access.h"
 #include "src/tint/lang/hlsl/writer/raise/extract_ternary_values.h"
 #include "src/tint/lang/hlsl/writer/raise/localize_struct_array_assignment.h"
@@ -289,6 +290,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
         TINT_CHECK_RESULT(raise::ShaderIO(module, config));
     }
+
+    TINT_CHECK_RESULT(raise::DecomposeSnorm10_10_10_2(module, options.snorm10_10_10_2_locations));
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
     // Run after ShaderIO to ensure the discards are added to the entry point it introduces.

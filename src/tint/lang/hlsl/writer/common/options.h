@@ -262,6 +262,9 @@ struct Options {
     /// The binding points that will be ignored by the rebustness transform.
     std::vector<BindingPoint> ignored_by_robustness_transform;
 
+    /// Vertex shader locations that use the snorm10-10-10-2 format (which is emulated on D3D).
+    std::vector<uint32_t> snorm10_10_10_2_locations = {};
+
     /// Pixel local configuration
     PixelLocalOptions pixel_local;
 
@@ -294,6 +297,7 @@ struct Options {
                  num_workgroups_start_offset,
                  bindings,
                  ignored_by_robustness_transform,
+                 snorm10_10_10_2_locations,
                  pixel_local,
                  resource_table,
                  substitute_overrides_config);

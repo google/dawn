@@ -78,6 +78,7 @@ enum class VertexFormat : uint8_t {
     kSint32x4,         // sint32x4
     kUnorm10_10_10_2,  // unorm10-10-10-2
     kUnorm8x4BGRA,     // unorm8x4-bgra
+    kSnorm10_10_10_2,  // snorm10-10-10-2
 };
 
 /// @param out the stream to write to
@@ -210,6 +211,9 @@ auto& operator<<(STREAM& out, VertexFormat format) {
         case VertexFormat::kUnorm8x4BGRA:
             out << "unorm8x4BGRA";
             break;
+        case VertexFormat::kSnorm10_10_10_2:
+            out << "snorm10_10_10_2";
+            break;
     }
     return out;
 }
@@ -292,7 +296,7 @@ struct VertexPullingConfig {
 };
 
 /// Reflection for VertexFormat.
-TINT_REFLECT_ENUM_RANGE(tint::VertexFormat, kUint8, kUnorm8x4BGRA);
+TINT_REFLECT_ENUM_RANGE(tint::VertexFormat, kUint8, kSnorm10_10_10_2);
 
 /// Reflection for VertexStepMode.
 TINT_REFLECT_ENUM_RANGE(tint::VertexStepMode, kVertex, kInstance);
