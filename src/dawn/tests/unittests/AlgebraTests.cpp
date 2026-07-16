@@ -287,12 +287,12 @@ TEST(Algebra, MatrixCropOrExpandFrom) {
 // Test computation of the determinant.
 TEST(Algebra, MatrixDeterminant) {
     // Simple test vectors.
-    EXPECT_EQ(Mat2x2f({2, 3}, {5, 7}).Determinant(), -1.0);
-    EXPECT_EQ(Mat3x3f({2, 3, 5}, {7, 11, 13}, {17, 19, 23}).Determinant(), -78.0);
+    EXPECT_EQ(Mat2x2f({2, 3}, {5, 7}).Determinant(), -1.0f);
+    EXPECT_EQ(Mat3x3f({2, 3, 5}, {7, 11, 13}, {17, 19, 23}).Determinant(), -78.0f);
 
     // Determinant of non-invertible matrices is 0.
-    EXPECT_EQ(Mat2x2f({1, 2}, {2, 4}).Determinant(), 0.0);
-    EXPECT_EQ(Mat3x3f({1, 2, 3}, {1, 3, 5}, {2, 5, 8}).Determinant(), 0.0);
+    EXPECT_EQ(Mat2x2f({1, 2}, {2, 4}).Determinant(), 0.0f);
+    EXPECT_EQ(Mat3x3f({1, 2, 3}, {1, 3, 5}, {2, 5, 8}).Determinant(), 0.0f);
 }
 
 // Test computation of the inverse.
