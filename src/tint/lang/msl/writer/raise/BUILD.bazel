@@ -54,6 +54,7 @@ cc_library(
     "raise.cc",
     "shader_io.cc",
     "simd_ballot.cc",
+    "switch_return.cc",
     "validate_subgroup_matrix.cc",
   ],
   hdrs = [
@@ -68,6 +69,7 @@ cc_library(
     "raise.h",
     "shader_io.h",
     "simd_ballot.h",
+    "switch_return.h",
     "validate_subgroup_matrix.h",
   ],
   deps = [
@@ -114,6 +116,7 @@ cc_library(
     "module_scope_vars_test.cc",
     "shader_io_test.cc",
     "simd_ballot_test.cc",
+    "switch_return_test.cc",
     "validate_subgroup_matrix_test.cc",
   ],
   deps = [

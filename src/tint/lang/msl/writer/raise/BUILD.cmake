@@ -63,6 +63,8 @@ tint_add_target(tint_lang_msl_writer_raise lib
   lang/msl/writer/raise/shader_io.h
   lang/msl/writer/raise/simd_ballot.cc
   lang/msl/writer/raise/simd_ballot.h
+  lang/msl/writer/raise/switch_return.cc
+  lang/msl/writer/raise/switch_return.h
   lang/msl/writer/raise/validate_subgroup_matrix.cc
   lang/msl/writer/raise/validate_subgroup_matrix.h
 )
@@ -116,6 +118,7 @@ tint_add_target(tint_lang_msl_writer_raise_test test
   lang/msl/writer/raise/module_scope_vars_test.cc
   lang/msl/writer/raise/shader_io_test.cc
   lang/msl/writer/raise/simd_ballot_test.cc
+  lang/msl/writer/raise/switch_return_test.cc
   lang/msl/writer/raise/validate_subgroup_matrix_test.cc
 )
 

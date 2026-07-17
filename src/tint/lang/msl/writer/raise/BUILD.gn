@@ -67,6 +67,8 @@ if (tint_build_msl_writer) {
       "shader_io.h",
       "simd_ballot.cc",
       "simd_ballot.h",
+      "switch_return.cc",
+      "switch_return.h",
       "validate_subgroup_matrix.cc",
       "validate_subgroup_matrix.h",
     ]
@@ -113,6 +115,7 @@ if (tint_build_unittests) {
         "module_scope_vars_test.cc",
         "shader_io_test.cc",
         "simd_ballot_test.cc",
+        "switch_return_test.cc",
         "validate_subgroup_matrix_test.cc",
       ]
       deps = [

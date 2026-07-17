@@ -1,13 +1,18 @@
 #include <metal_stdlib>
 using namespace metal;
 
+volatile constexpr constant uint tint_volatile_zero = 0u;
+
 [[max_total_threads_per_threadgroup(1)]]
 kernel void a() {
   int a_1 = 0;
   switch(a_1) {
     default:
     {
-      return;
+      if (( tint_volatile_zero == 0u)) {
+        return;
+      }
+      break;
     }
   }
   /* unreachable */
