@@ -40,6 +40,7 @@
 #include "src/dawn/native/Surface.h"
 #include "src/dawn/native/TintUtils.h"
 #include "src/utils/compiler.h"
+#include "src/utils/heap_array.h"
 #include "src/utils/numeric.h"
 #include "tint/tint.h"
 
@@ -117,13 +118,13 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
 void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
                                                const TogglesState&) const {
     if (auto* memoryHeapProperties = info.Get<AdapterPropertiesMemoryHeaps>()) {
-        // TODO(https://crbug.com/512465980): Use dawn::HeapArray
-        auto* heapInfo = new MemoryHeapInfo[1];
-        memoryHeapProperties->heapInfo = DAWN_UNSAFE_TODO({heapInfo, 1});
+        auto heapInfo = HeapArray<MemoryHeapInfo>(1);
 
         heapInfo[0].size = 1024ULL * 1024 * 1024;
         heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
                                  wgpu::HeapProperty::HostCached;
+
+        memoryHeapProperties->heapInfo = std::move(heapInfo).MoveToSpan();
     }
     if (auto* d3dProperties = info.Get<AdapterPropertiesD3D>()) {
         d3dProperties->shaderModel = 0;

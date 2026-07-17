@@ -38,6 +38,7 @@
 #include "src/dawn/native/Queue.h"
 #include "src/dawn/native/Texture.h"
 #include "src/utils/compiler.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::native {
 
@@ -335,16 +336,16 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource, EndAccessState* s
 
     // Copy the fences to the output state.
     if (size_t fenceCount = fenceList.size()) {
-        // TODO(https://crbug.com/512465980): Use dawn::HeapArray
-        auto* fences = new SharedFenceBase*[fenceCount];
-        uint64_t* signaledValues = new uint64_t[fenceCount];
+        auto fences = HeapArray<SharedFenceBase*>(fenceCount);
+        auto signaledValues = HeapArray<uint64_t>(fenceCount);
+
         for (size_t i = 0; i < fenceCount; ++i) {
-            DAWN_UNSAFE_TODO(fences[i]) = ReturnToAPI(std::move(fenceList[i].object));
-            DAWN_UNSAFE_TODO(signaledValues[i]) = fenceList[i].signaledValue;
+            fences[i] = ReturnToAPI(std::move(fenceList[i].object));
+            signaledValues[i] = fenceList[i].signaledValue;
         }
 
-        state->fences = DAWN_UNSAFE_TODO({fences, fenceCount});
-        state->signaledValues = DAWN_UNSAFE_TODO({signaledValues, fenceCount});
+        state->fences = std::move(fences).MoveToSpan();
+        state->signaledValues = std::move(signaledValues).MoveToSpan();
     } else {
         state->fences = {};
         state->signaledValues = {};

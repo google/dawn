@@ -34,6 +34,7 @@
 #include <vector>
 
 #include "dawn/platform/DawnPlatform.h"
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/GPUInfo.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Error.h"
@@ -1668,35 +1669,30 @@ const AHBFunctions* PhysicalDevice::GetOrLoadAHBFunctions() {
 void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
                                                const TogglesState& toggles) const {
     if (auto* memoryHeapProperties = info.Get<AdapterPropertiesMemoryHeaps>()) {
-        // TODO(https://crbug.com/512465980): Use dawn::HeapArray and Enumerate to loop over it.
-        size_t count = mDeviceInfo.memoryHeaps.size();
-        auto* heapInfo = new MemoryHeapInfo[count];
-        memoryHeapProperties->heapInfo = DAWN_UNSAFE_TODO({heapInfo, count});
+        auto heapInfo = HeapArray<MemoryHeapInfo>(mDeviceInfo.memoryHeaps.size());
 
-        for (size_t i = 0; i < count; ++i) {
-            DAWN_UNSAFE_TODO(heapInfo[i]).size = mDeviceInfo.memoryHeaps[i].size;
-            DAWN_UNSAFE_TODO(heapInfo[i]).properties = {};
+        for (auto [i, heap] : Enumerate(heapInfo)) {
+            heap.size = mDeviceInfo.memoryHeaps[i].size;
+            heap.properties = {};
             if (mDeviceInfo.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) {
-                DAWN_UNSAFE_TODO(heapInfo[i]).properties |= wgpu::HeapProperty::DeviceLocal;
+                heap.properties |= wgpu::HeapProperty::DeviceLocal;
             }
         }
         for (const auto& memoryType : mDeviceInfo.memoryTypes) {
             if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
-                DAWN_UNSAFE_TODO(heapInfo[memoryType.heapIndex]).properties |=
-                    wgpu::HeapProperty::HostVisible;
+                heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostVisible;
             }
             if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) {
-                DAWN_UNSAFE_TODO(heapInfo[memoryType.heapIndex]).properties |=
-                    wgpu::HeapProperty::HostCoherent;
+                heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostCoherent;
             }
             if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) {
-                DAWN_UNSAFE_TODO(heapInfo[memoryType.heapIndex]).properties |=
-                    wgpu::HeapProperty::HostCached;
+                heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostCached;
             } else {
-                DAWN_UNSAFE_TODO(heapInfo[memoryType.heapIndex]).properties |=
-                    wgpu::HeapProperty::HostUncached;
+                heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostUncached;
             }
         }
+
+        memoryHeapProperties->heapInfo = std::move(heapInfo).MoveToSpan();
     }
     if (auto* vkProperties = info.Get<AdapterPropertiesVk>()) {
         vkProperties->driverVersion = mDeviceInfo.properties.driverVersion;
@@ -1714,13 +1710,7 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     if (auto* subgroupMatrixConfigs = info.Get<AdapterPropertiesSubgroupMatrixConfigs>()) {
         std::vector<SubgroupMatrixConfig> supportedConfigs =
             EnumerateSubgroupMatrixConfigs(toggles);
-        size_t count = supportedConfigs.size();
-        // TODO(https://crbug.com/512465980): Use dawn::HeapArray
-        SubgroupMatrixConfig* configs = new SubgroupMatrixConfig[count];
-        subgroupMatrixConfigs->configs = DAWN_UNSAFE_TODO({configs, supportedConfigs.size()});
-        // TODO(https://crbug.com/524406299): use dawn::Span::CopyFrom.
-        DAWN_UNSAFE_TODO(
-            memcpy(configs, supportedConfigs.data(), count * sizeof(SubgroupMatrixConfig)));
+        subgroupMatrixConfigs->configs = HeapArrayFrom(supportedConfigs).MoveToSpan();
     }
 }
 
@@ -1735,16 +1725,14 @@ void PhysicalDevice::PopulateBackendFormatCapabilities(
         auto drmFormatModifiers =
             GetFormatModifierProps(mVulkanInstance->GetFunctions(), mVkPhysicalDevice, vk_format);
         if (!drmFormatModifiers.empty()) {
-            size_t count = drmFormatModifiers.size();
-            // TODO(https://crbug.com/512465980): Use dawn::HeapArray
-            auto* properties = new DawnDrmFormatProperties[count];
-            drmCapabilities->properties = DAWN_UNSAFE_TODO({properties, count});
+            auto properties = HeapArray<DawnDrmFormatProperties>(drmFormatModifiers.size());
 
-            for (size_t i = 0; i < count; i++) {
-                DAWN_UNSAFE_TODO(properties[i]).modifier = drmFormatModifiers[i].drmFormatModifier;
-                DAWN_UNSAFE_TODO(properties[i]).modifierPlaneCount =
-                    drmFormatModifiers[i].drmFormatModifierPlaneCount;
+            for (auto [i, property] : Enumerate(properties)) {
+                property.modifier = drmFormatModifiers[i].drmFormatModifier;
+                property.modifierPlaneCount = drmFormatModifiers[i].drmFormatModifierPlaneCount;
             }
+
+            drmCapabilities->properties = std::move(properties).MoveToSpan();
         }
     }
 }

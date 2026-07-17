@@ -228,8 +228,7 @@ template <typename Index>
 
     Index size = checked_cast<Index>(std::ranges::size(src));
 
-    // SAFETY: Initialized by the copy.
-    auto result = DAWN_UNSAFE_BUFFERS(HeapArray<Index, Value>::Uninit(size));
+    auto result = HeapArray<Index, Value>(size);
     std::ranges::copy(src, result.begin());
     return result;
 }

@@ -44,6 +44,7 @@
 #include "src/dawn/native/d3d12/PlatformFunctionsD3D12.h"
 #include "src/dawn/native/d3d12/UtilsD3D12.h"
 #include "src/utils/compiler.h"
+#include "src/utils/heap_array.h"
 #include "src/utils/platform.h"
 
 namespace dawn::native::d3d12 {
@@ -983,9 +984,7 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
         // https://microsoft.github.io/DirectX-Specs/d3d/D3D12GPUUploadHeaps.html describes
         // the properties of D3D12 Default/Upload/Readback heaps.
         if (mDeviceInfo.isUMA) {
-            // TODO(https://crbug.com/512465980): Use dawn::HeapArray
-            auto* heapInfo = new MemoryHeapInfo[1];
-            memoryHeapProperties->heapInfo = DAWN_UNSAFE_TODO({heapInfo, 1});
+            auto heapInfo = HeapArray<MemoryHeapInfo>(1);
 
             heapInfo[0].size =
                 std::max(mDeviceInfo.dedicatedVideoMemory, mDeviceInfo.sharedSystemMemory);
@@ -999,18 +998,20 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
                     wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
                     wgpu::HeapProperty::HostUncached | wgpu::HeapProperty::HostCached;
             }
+
+            memoryHeapProperties->heapInfo = std::move(heapInfo).MoveToSpan();
         } else {
-            // TODO(https://crbug.com/512465980): Use dawn::HeapArray
-            auto* heapInfo = new MemoryHeapInfo[2];
-            memoryHeapProperties->heapInfo = DAWN_UNSAFE_TODO({heapInfo, 2});
+            auto heapInfo = HeapArray<MemoryHeapInfo>(2);
 
             heapInfo[0].size = mDeviceInfo.dedicatedVideoMemory;
             heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal;
 
-            DAWN_UNSAFE_TODO(heapInfo[1]).size = mDeviceInfo.sharedSystemMemory;
-            DAWN_UNSAFE_TODO(heapInfo[1]).properties =
+            heapInfo[1].size = mDeviceInfo.sharedSystemMemory;
+            heapInfo[1].properties =
                 wgpu::HeapProperty::HostVisible | wgpu::HeapProperty::HostCoherent |
                 wgpu::HeapProperty::HostUncached | wgpu::HeapProperty::HostCached;
+
+            memoryHeapProperties->heapInfo = std::move(heapInfo).MoveToSpan();
         }
     }
     if (auto* d3dProperties = info.Get<AdapterPropertiesD3D>()) {
@@ -1020,13 +1021,7 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     if (auto* subgroupMatrixConfigs = info.Get<AdapterPropertiesSubgroupMatrixConfigs>()) {
         std::vector<SubgroupMatrixConfig> supportedConfigs =
             EnumerateSubgroupMatrixConfigs(toggles);
-        size_t count = supportedConfigs.size();
-        // TODO(https://crbug.com/512465980): Use dawn::HeapArray
-        SubgroupMatrixConfig* configs = new SubgroupMatrixConfig[count];
-        subgroupMatrixConfigs->configs = DAWN_UNSAFE_TODO({configs, supportedConfigs.size()});
-        // TODO(https://crbug.com/524406299): use dawn::Span::CopyFrom.
-        DAWN_UNSAFE_TODO(
-            memcpy(configs, supportedConfigs.data(), count * sizeof(SubgroupMatrixConfig)));
+        subgroupMatrixConfigs->configs = HeapArrayFrom(supportedConfigs).MoveToSpan();
     }
 }
 

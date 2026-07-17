@@ -33,6 +33,7 @@
 #include "src/dawn/common/ityp_array.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::native {
 namespace {
@@ -515,14 +516,14 @@ void FeaturesSet::ToSupportedFeatures(SupportedFeatures* supportedFeatures) cons
     }
 
     // This will be freed by wgpuSupportedFeaturesFreeMembers.
-    wgpu::FeatureName* features = new wgpu::FeatureName[count];
+    auto features = HeapArray<wgpu::FeatureName>(count);
     uint32_t index = 0;
     for (Feature f : featuresBitSet) {
-        DAWN_UNSAFE_TODO(features[index++]) = ToAPI(f);
+        features[index++] = ToAPI(f);
     }
     DAWN_ASSERT(index == count);
-    // TODO(https://crbug.com/512465980): Use dawn::HeapArray
-    supportedFeatures->features = DAWN_UNSAFE_TODO({features, count});
+
+    supportedFeatures->features = std::move(features).MoveToSpan();
 }
 
 }  // namespace dawn::native

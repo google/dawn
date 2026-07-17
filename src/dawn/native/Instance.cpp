@@ -45,6 +45,7 @@
 #include "src/dawn/native/Toggles.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/heap_array.h"
 #include "src/utils/log.h"
 
 // For SwiftShader fallback
@@ -795,16 +796,7 @@ bool InstanceBase::APIHasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName featu
 void InstanceBase::APIGetWGSLLanguageFeatures(SupportedWGSLLanguageFeatures* features) const {
     DAWN_ASSERT(features != nullptr);
 
-    size_t featureCount = mWGSLFeatures.size();
-    wgpu::WGSLLanguageFeatureName* wgslFeatures = new wgpu::WGSLLanguageFeatureName[featureCount];
-    uint32_t index = 0;
-    for (wgpu::WGSLLanguageFeatureName feature : mWGSLFeatures) {
-        DAWN_UNSAFE_TODO(wgslFeatures[index++]) = feature;
-    }
-    DAWN_CHECK(index == featureCount);
-
-    // TODO(https://crbug.com/512465980): Use dawn::HeapArray
-    features->features = DAWN_UNSAFE_TODO({wgslFeatures, featureCount});
+    features->features = HeapArrayFrom(mWGSLFeatures).MoveToSpan();
 }
 
 void APISupportedWGSLLanguageFeaturesFreeMembers(
