@@ -184,7 +184,7 @@ class Server : public ServerBase {
     ~Server() override;
 
     // ChunkedCommandHandler implementation
-    const volatile char* HandleCommands(const volatile char* commands, size_t size) override;
+    bool HandleCommands(Span<const volatile std::byte> commands) override;
 
     WireResult InjectBuffer(WGPUBuffer buffer, const Handle& handle, const Handle& deviceHandle);
     WireResult InjectTexture(WGPUTexture texture, const Handle& handle, const Handle& deviceHandle);

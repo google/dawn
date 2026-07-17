@@ -41,8 +41,19 @@ WireServer::~WireServer() {
     mImpl.reset();
 }
 
+// TODO(https://crbug.com/528027992): Remove this once the Wire API is spanified.
 const volatile char* WireServer::HandleCommands(const volatile char* commands, size_t size) {
-    return mImpl->HandleCommands(commands, size);
+    // TODO(https://crbug.com/528027992): Spanify the Wire API.
+    Span<const volatile std::byte> DAWN_UNSAFE_TODO(
+        commandsSpan{reinterpret_cast<const volatile std::byte*>(commands), size});
+    if (mImpl->HandleCommands(commandsSpan)) {
+        return commands;
+    }
+    return nullptr;
+}
+
+bool WireServer::HandleCommands(std::span<const volatile std::byte> commands) {
+    return mImpl->HandleCommands(commands);
 }
 
 bool WireServer::InjectBuffer(WGPUBuffer buffer, const Handle& handle, const Handle& deviceHandle) {

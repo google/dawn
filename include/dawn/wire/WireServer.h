@@ -57,6 +57,7 @@ class DAWN_WIRE_EXPORT WireServer : public CommandHandler {
     ~WireServer() override;
 
     const volatile char* HandleCommands(const volatile char* commands, size_t size) override;
+    bool HandleCommands(std::span<const volatile std::byte> commands) override;
 
     bool InjectBuffer(WGPUBuffer buffer, const Handle& handle, const Handle& deviceHandle);
     bool InjectTexture(WGPUTexture texture, const Handle& handle, const Handle& deviceHandle);

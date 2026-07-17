@@ -82,7 +82,7 @@ class Client : public ClientBase {
     }
 
     // ChunkedCommandHandler implementation
-    const volatile char* HandleCommands(const volatile char* commands, size_t size) override;
+    bool HandleCommands(Span<const volatile std::byte> commands) override;
 
     MemoryTransferService* GetMemoryTransferService() const { return mMemoryTransferService; }
 

@@ -241,8 +241,8 @@
         "chunked command": [
             {"name": "id", "type": "uint64_t"},
             {"name": "size", "type": "size_t"},
-            {"name": "chunk data", "type": "char", "annotation": "const*", "length": "chunk size", "wire_is_data_only": true},
-            {"name": "chunk size", "type": "uint32_t"}
+            {"name": "chunk data", "type": "std::byte", "annotation": "const*", "length": "chunk size", "wire_is_data_only": true},
+            {"name": "chunk size", "type": "size_t"}
         ]
     },
     "special items": {

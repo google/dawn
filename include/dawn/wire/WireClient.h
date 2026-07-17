@@ -79,6 +79,7 @@ class DAWN_WIRE_EXPORT WireClient : public CommandHandler {
     ~WireClient() override;
 
     const volatile char* HandleCommands(const volatile char* commands, size_t size) override;
+    bool HandleCommands(std::span<const volatile std::byte> commands) override;
 
     ReservedBuffer ReserveBuffer(WGPUDevice device, const WGPUBufferDescriptor* descriptor);
     ReservedTexture ReserveTexture(WGPUDevice device, const WGPUTextureDescriptor* descriptor);

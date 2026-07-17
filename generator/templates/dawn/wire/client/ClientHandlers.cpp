@@ -61,9 +61,8 @@ namespace dawn::wire::client {
         }
     {% endfor %}
 
-    const volatile char* Client::HandleCommands(const volatile char* commands, size_t size) {
-        // TODO(https://crbug.com/528027992): Spanify the input commands.
-        DeserializeBuffer deserializeBuffer(SpanAsBytes(DAWN_UNSAFE_TODO(Span<const volatile char>(commands, size))));
+    bool Client::HandleCommands(Span<const volatile std::byte> commands) {
+        DeserializeBuffer deserializeBuffer(commands);
 
         const volatile CmdHeader* cmdHeader;
         while (deserializeBuffer.Peek(&cmdHeader) != WireResult::FatalError) {
@@ -87,15 +86,15 @@ namespace dawn::wire::client {
             }
 
             if (result != WireResult::Success) {
-                return nullptr;
+                return false;
             }
             mAllocator.Reset();
         }
 
         if (!deserializeBuffer.Empty()) {
-            return nullptr;
+            return false;
         }
 
-        return commands;
+        return true;
     }
 }  // namespace dawn::wire::client

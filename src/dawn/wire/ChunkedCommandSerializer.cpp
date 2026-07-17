@@ -57,7 +57,7 @@ void ChunkedCommandSerializer::SerializeChunkedCommand(Span<const std::byte> all
     cmd.size = allocatedBuffer.size();
 
     while (!allocatedBuffer.empty()) {
-        cmd.chunkData = reinterpret_cast<const char*>(allocatedBuffer.data());
+        cmd.chunkData = allocatedBuffer.data();
         cmd.chunkSize =
             std::min(allocatedBuffer.size(), mMaxAllocationSize - kWireChunkedCmdPrefixSize);
         DAWN_ASSERT(cmd.GetRequiredSize() <= mMaxAllocationSize);

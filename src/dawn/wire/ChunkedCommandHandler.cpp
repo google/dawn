@@ -38,8 +38,6 @@
 
 namespace dawn::wire {
 
-ChunkedCommandHandler::ChunkedCommandHandler() = default;
-
 ChunkedCommandHandler::~ChunkedCommandHandler() = default;
 
 WireResult ChunkedCommandHandler::HandleChunkedCommand(DeserializeBuffer* deserializeBuffer) {
@@ -56,10 +54,11 @@ WireResult ChunkedCommandHandler::HandleChunkedCommand(DeserializeBuffer* deseri
         newChunkedCommand.data =
             // SAFETY: This will be incrementally initialized as we handle each chunk of the
             // command.
-            DAWN_UNSAFE_BUFFERS(HeapArray<char>::Uninit(cmd.size, std::nothrow));
+            DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(cmd.size, std::nothrow));
         if (!newChunkedCommand.data) {
             return WireResult::FatalError;
         }
+        newChunkedCommand.current = newChunkedCommand.data;
 
         const auto& [newIt, inserted] =
             mChunkedCommands.insert({cmd.id, std::move(newChunkedCommand)});
@@ -68,20 +67,19 @@ WireResult ChunkedCommandHandler::HandleChunkedCommand(DeserializeBuffer* deseri
     }
     DAWN_ASSERT(chunkedCommand);
 
-    if (cmd.chunkSize > chunkedCommand->GetRemainingSize()) {
+    if (cmd.chunkSize > chunkedCommand->current.size()) {
         // If the chunk size is greater than the remaining size, something is wrong and we can no
         // longer handle it, so just return a FatalError.
         return WireResult::FatalError;
     }
-    // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-    std::ranges::copy(DAWN_UNSAFE_TODO(Span<const char>{cmd.chunkData, cmd.chunkSize}),
-                      chunkedCommand->data.begin() + sign_cast(chunkedCommand->putOffset));
-    chunkedCommand->putOffset += cmd.chunkSize;
+    // TODO(https://crbug.com/528027992): Spanify the chunked command members.
+    chunkedCommand->current.TakeFirst(cmd.chunkSize)
+        .CopyFrom(DAWN_UNSAFE_TODO(Span<const std::byte>{cmd.chunkData, cmd.chunkSize}));
 
-    if (chunkedCommand->GetRemainingSize() == 0) {
+    if (chunkedCommand->current.empty()) {
         ChunkedCommand fullCommand = std::move(*chunkedCommand);
         mChunkedCommands.erase(cmd.id);
-        if (HandleCommands(fullCommand.data.data(), fullCommand.putOffset) == nullptr) {
+        if (!HandleCommands(fullCommand.data)) {
             return WireResult::FatalError;
         }
     }
