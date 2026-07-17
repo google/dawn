@@ -198,4 +198,17 @@ void TestCopyFromIncompatibleTypes() {
     }
 }
 
+void TestItypSpanFromUntypedRangeOrArray() {
+    int arr[] = {1, 2, 3, 4, 5};
+
+    // Control case: Standard dawn::Span<int> allows construction from
+    // C-style array.
+    Span<int> control_sp(arr);
+
+    // Disallowed case: ityp::span<Index, int> must not implicitly construct
+    // from a non-typed C-style array or non-typed range.
+    ityp::span<Index, int> typed_sp(arr); // expected-error {{no matching constructor for initialization}}
+}
+
+
 }  // namespace dawn

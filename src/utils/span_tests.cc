@@ -1028,5 +1028,27 @@ TEST(SpanDeathTest, CopyPrefixFromSizeMismatch) {
     EXPECT_DEATH_IF_SUPPORTED(dst_sp.CopyPrefixFrom(src_sp), "");
 }
 
+TEST(SpanTest, Constructor_CArray) {
+    int arr[] = {1, 2, 3, 4};
+    const int constArr[] = {5, 6, 7};
+
+    {
+        Span<int> sp(arr);
+        EXPECT_EQ(sp.size(), static_cast<size_t>(4u));
+        EXPECT_EQ(sp.data(), arr);
+        EXPECT_EQ(sp[0], 1);
+    }
+    {
+        Span<const int> sp(arr);
+        EXPECT_EQ(sp.size(), static_cast<size_t>(4u));
+        EXPECT_EQ(sp.data(), arr);
+    }
+    {
+        Span<const int> sp(constArr);
+        EXPECT_EQ(sp.size(), static_cast<size_t>(3u));
+        EXPECT_EQ(sp.data(), constArr);
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn
