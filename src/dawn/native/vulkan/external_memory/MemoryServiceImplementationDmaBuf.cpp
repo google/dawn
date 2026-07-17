@@ -277,6 +277,7 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
         // (https://www.techpowerup.com/gpu-specs/amd-mendocino.g1022).
         // See crbug.com/422128949
         if (result.IsError()) {
+            std::unique_ptr<ErrorData> errorData = result.AcquireError();
             result = mDevice->GetResourceMemoryAllocator()->FindBestTypeIndex(
                 memoryRequirements, MemoryKind::HostCached);
         }

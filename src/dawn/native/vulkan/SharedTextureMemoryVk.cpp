@@ -28,6 +28,7 @@
 #include "src/dawn/native/vulkan/SharedTextureMemoryVk.h"
 
 #include <algorithm>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -452,9 +453,21 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     // Choose the best memory type that satisfies both the image's constraint and the
     // import's constraint.
     memoryRequirements.memoryTypeBits &= fdProperties.memoryTypeBits;
+    ResultOrError<uint32_t> result = device->GetResourceMemoryAllocator()->FindBestTypeIndex(
+        memoryRequirements, MemoryKind::DeviceLocal);
+
+    // Some devices may fail to find device local memory for these FD imports (likely from
+    // camera).  When this occurs we can alternatively use host memory even though there could
+    // be performance consequences. This issue was discovered on AMD
+    // (https://www.techpowerup.com/gpu-specs/amd-mendocino.g1022).
+    // See crbug.com/422128949
+    if (result.IsError()) {
+        std::unique_ptr<ErrorData> errorData = result.AcquireError();
+        result = device->GetResourceMemoryAllocator()->FindBestTypeIndex(memoryRequirements,
+                                                                         MemoryKind::HostCached);
+    }
     uint32_t memoryTypeIndex;
-    DAWN_TRY_ASSIGN(memoryTypeIndex, device->GetResourceMemoryAllocator()->FindBestTypeIndex(
-                                         memoryRequirements, MemoryKind::DeviceLocal));
+    DAWN_TRY_ASSIGN(memoryTypeIndex, std::move(result));
 
     utils::SystemHandle memoryFD = utils::SystemHandle::Duplicate(fd);
 
