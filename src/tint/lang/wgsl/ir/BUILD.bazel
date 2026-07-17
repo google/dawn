@@ -84,13 +84,9 @@ cc_library(
     "atomic_vec2u_to_from_u64_test.cc",
     "builtin_call_test.cc",
   ] + select({
-    "//conditions:default": [],
-  }) + select({
     ":tint_build_wgsl_reader_and_tint_build_wgsl_writer": [
       "direct_variable_access_wgsl_test.cc",
     ],
-    "//conditions:default": [],
-  }) + select({
     "//conditions:default": [],
   }),
   deps = [
@@ -130,8 +126,6 @@ cc_library(
       "//src/tint/lang/wgsl/reader",
       "//src/tint/lang/wgsl/reader/program_to_ir",
     ],
-    "//conditions:default": [],
-  }) + select({
     "//conditions:default": [],
   }) + select({
     ":tint_build_wgsl_writer": [

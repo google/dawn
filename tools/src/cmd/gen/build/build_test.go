@@ -1138,6 +1138,33 @@ func TestEmitDotFile_OnlyMatchingKindIncluded(t *testing.T) {
 	require.Equal(t, expectedContents, string(bytes[:]))
 }
 
+func TestHasSupportedDeps(t *testing.T) {
+	test := func(name string, internalDeps []string, externalDeps []string, expected bool) {
+		t.Run(name, func(t *testing.T) {
+			cond := &TargetConditional{}
+			for _, dep := range internalDeps {
+				cond.InternalDependencies = append(cond.InternalDependencies, &Target{
+					Name: TargetName(dep),
+				})
+			}
+			for _, dep := range externalDeps {
+				cond.ExternalDependencies = append(cond.ExternalDependencies, ExternalDependency{
+					Name: ExternalDependencyName(dep),
+				})
+			}
+
+			got := HasSupportedDeps(cond)
+			require.Equal(t, expected, got)
+		})
+	}
+
+	test("Empty deps", nil, nil, false)
+	test("Only internal dependency", []string{"some_internal_lib"}, nil, true)
+	test("Only supported external dependency", nil, []string{"gtest"}, true)
+	test("Only unsupported external dependency", nil, []string{"metal"}, false)
+	test("Mixed dependencies", []string{"some_internal_lib"}, []string{"metal"}, true)
+}
+
 func TestConditionTargetLabel(t *testing.T) {
 	test := func(variable string, isNegated bool, expected string) {
 		name := fmt.Sprintf("%v_%v", variable, isNegated)
@@ -1205,4 +1232,44 @@ func TestShouldSkipAnds(t *testing.T) {
 		cnf.Ors{{Var: "tint_build_is_win", Negate: true}},
 		cnf.Ors{{Var: "tint_build_glsl_writer", Negate: true}},
 	}, false)
+}
+
+func TestTargetHasObjcSrcs(t *testing.T) {
+	test := func(name string, sourceFiles []string, expected bool) {
+		t.Run(name, func(t *testing.T) {
+			target := &Target{
+				SourceFileSet: container.NewSet[string](),
+			}
+			for _, file := range sourceFiles {
+				target.SourceFileSet.Add(file)
+			}
+			got := target.HasObjcSrcs()
+			require.Equal(t, expected, got)
+		})
+	}
+
+	test("Empty sources", nil, false)
+	test("Only C++ sources", []string{"alpha.cc", "beta.cpp", "gamma.h"}, false)
+	test("Objective-C++ sources present", []string{"alpha.cc", "delta.mm"}, true)
+	test("Only Objective-C++ sources", []string{"delta.mm"}, true)
+}
+
+func TestHasCppSrcs(t *testing.T) {
+	test := func(name string, sourceFiles []string, expected bool) {
+		t.Run(name, func(t *testing.T) {
+			cond := &TargetConditional{}
+			for _, file := range sourceFiles {
+				cond.SourceFiles = append(cond.SourceFiles, &File{
+					Name: file,
+				})
+			}
+			got := HasCppSrcs(cond)
+			require.Equal(t, expected, got)
+		})
+	}
+
+	test("Empty sources", nil, false)
+	test("Only standard C++ sources", []string{"alpha.cc", "beta.cpp", "gamma.h"}, true)
+	test("Only Objective-C++ sources", []string{"validate_metal.mm"}, false)
+	test("Mixed sources", []string{"validate.cc", "validate_metal.mm"}, true)
 }

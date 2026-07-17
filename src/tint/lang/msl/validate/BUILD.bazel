@@ -44,11 +44,7 @@ cc_library(
   name = "validate",
   srcs = [
     "validate.cc",
-  ] + select({
-    "@platforms//os:macos": [
-    ],
-    "//conditions:default": [],
-  }),
+  ],
   hdrs = [
     "validate.h",
   ],
@@ -63,11 +59,49 @@ cc_library(
     "//src/utils",
   ] + select({
     "@platforms//os:macos": [
+      ":validate_objc",
     ],
     "//conditions:default": [],
   }),
   copts = COPTS,
   visibility = ["//visibility:public"],
+)
+
+genrule(
+  name = "validate_objc_cc",
+  srcs = [
+    "validate_metal.mm",
+  ],
+  outs = [
+    "validate_metal.mm.cc",
+  ],
+  cmd = "cp $< $@",
+)
+
+cc_library(
+  name = "validate_objc",
+  srcs = [
+    ":validate_objc_cc",
+  ],
+  hdrs = [
+    "validate.h",
+  ],
+  copts = COPTS + [
+    "-x",
+    "objective-c++",
+  ],
+  deps = [
+    "//src/tint/utils",
+    "//src/tint/utils/command",
+    "//src/tint/utils/file",
+    "//src/tint/utils/ice",
+    "//src/tint/utils/macros",
+    "//src/tint/utils/rtti",
+    "//src/tint/utils/text",
+    "//src/utils",
+  ],
+  target_compatible_with = ["@platforms//os:macos"],
+  visibility = ["//visibility:private"],
 )
 
 alias(

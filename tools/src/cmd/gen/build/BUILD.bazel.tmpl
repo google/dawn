@@ -61,7 +61,7 @@ proto_library(
     "//src/tint/{{$Dep.Directory.Path}}:{{$Dep.Directory.Name}}_proto",
 {{-   end}}
 {{-   range $Dep := $.UnconditionalExternalDependencies}}
-{{-     $Target := Eval "ExternalDependencyTarget" $Dep}}
+{{-     $Target := ExternalDependencyTarget $Dep}}
 {{-     if $Target}}
     {{$Target}}
 {{-     end}}
@@ -123,31 +123,33 @@ cc_binary(
 {{-   end}}
   ]
 {{-   if $Conditionals.HasSourceFiles}}
-{{-     range $Cond := $Conditionals}} + select({
-{{-       if $Cond.Condition.IsNegative}}
-{{-         range $Var := $Cond.Condition.PositiveVarsOfNegative}}
+{{-     range $Cond := $Conditionals}}
+{{-       if HasCppSrcs $Cond}} + select({
+{{-         if $Cond.Condition.IsNegative}}
+{{-           range $Var := $Cond.Condition.PositiveVarsOfNegative}}
     "{{$Label := PlatformLabel $Var}}{{if $Label}}{{$Label}}{{else}}//src/tint:{{$Var}}_true{{end}}": [],
-{{-         end}}
-    "//conditions:default": [
-{{-         range $File := $Cond.SourceFiles}}
-{{-           if not (HasSuffix $File.Name ".mm")}}
-      "{{TrimPrefix $File.Name $.Directory.Path}}",
 {{-           end}}
-{{-         end}}
-    ],
-{{-       else}}
-{{-         if $Cond.SourceFiles}}
-    "{{$Label := PlatformLabel $Cond.Condition.String}}{{if $Label}}{{$Label}}{{else}}:{{Eval "ConditionTarget" $Cond.Condition}}{{end}}": [
+    "//conditions:default": [
 {{-           range $File := $Cond.SourceFiles}}
 {{-             if not (HasSuffix $File.Name ".mm")}}
       "{{TrimPrefix $File.Name $.Directory.Path}}",
 {{-             end}}
 {{-           end}}
     ],
-{{-         end}}
+{{-         else}}
+{{-           if $Cond.SourceFiles}}
+    "{{$Label := PlatformLabel $Cond.Condition.String}}{{if $Label}}{{$Label}}{{else}}:{{Eval "ConditionTarget" $Cond.Condition}}{{end}}": [
+{{-             range $File := $Cond.SourceFiles}}
+{{-               if not (HasSuffix $File.Name ".mm")}}
+      "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{-               end}}
+{{-             end}}
+    ],
+{{-           end}}
     "//conditions:default": [],
-{{-       end}}
+{{-         end}}
   })
+{{-       end}}
 {{-     end}}
 {{-   end}},
 {{- if or $.Kind.IsLib $.Kind.IsProto}}
@@ -187,51 +189,124 @@ cc_binary(
 
 {{- /* Emit unconditional external dependencies */}}
 {{-   range $Dep := $.UnconditionalExternalDependencies}}
-{{-     $Target := Eval "ExternalDependencyTarget" $Dep}}
+{{-     $Target := ExternalDependencyTarget $Dep}}
 {{-     if $Target}}
     {{$Target}}
 {{-     end}}
 {{-   end}}
   ]
 {{-   if $Conditionals.HasDependencies}}
-{{-     range $Cond := $Conditionals}} + select({
-{{-       if $Cond.Condition.IsNegative}}
-{{-         range $Var := $Cond.Condition.PositiveVarsOfNegative}}
+{{-     range $Cond := $Conditionals}}
+{{-       if HasSupportedDeps $Cond}} + select({
+{{-         if $Cond.Condition.IsNegative}}
+{{-           range $Var := $Cond.Condition.PositiveVarsOfNegative}}
     "{{$Label := PlatformLabel $Var}}{{if $Label}}{{$Label}}{{else}}//src/tint:{{$Var}}_true{{end}}": [],
-{{-         end}}
-    "//conditions:default": [
-{{-         range $Dep := $Cond.InternalDependencies}}
-      "{{Eval "Dependency" $Dep}}",
-{{-         end}}
-{{-         range $Dep := $Cond.ExternalDependencies}}
-{{-           $Target := Eval "ExternalDependencyTarget" $Dep}}
-{{-           if $Target}}
-      {{$Target}}
 {{-           end}}
-{{-         end}}
-    ],
-{{-       else}}
-{{-         if or $Cond.InternalDependencies $Cond.ExternalDependencies}}
-    "{{$Label := PlatformLabel $Cond.Condition.String}}{{if $Label}}{{$Label}}{{else}}:{{Eval "ConditionTarget" $Cond.Condition}}{{end}}": [
+    "//conditions:default": [
 {{-           range $Dep := $Cond.InternalDependencies}}
       "{{Eval "Dependency" $Dep}}",
 {{-           end}}
 {{-           range $Dep := $Cond.ExternalDependencies}}
-{{-             $Target := Eval "ExternalDependencyTarget" $Dep}}
+{{-             $Target := ExternalDependencyTarget $Dep}}
 {{-             if $Target}}
       {{$Target}}
 {{-             end}}
 {{-           end}}
     ],
-{{-         end}}
+{{-         else}}
+{{-           if or $Cond.InternalDependencies $Cond.ExternalDependencies}}
+    "{{$Label := PlatformLabel $Cond.Condition.String}}{{if $Label}}{{$Label}}{{else}}:{{Eval "ConditionTarget" $Cond.Condition}}{{end}}": [
+{{-             range $Dep := $Cond.InternalDependencies}}
+      "{{Eval "Dependency" $Dep}}",
+{{-             end}}
+{{-             range $Dep := $Cond.ExternalDependencies}}
+{{-               $Target := ExternalDependencyTarget $Dep}}
+{{-               if $Target}}
+      {{$Target}}
+{{-               end}}
+{{-             end}}
+    ],
+{{-           end}}
     "//conditions:default": [],
-{{-       end}}
+{{-         end}}
   })
+{{-       end}}
 {{-     end}}
+{{-   end}}
+{{-   if $.HasObjcSrcs}} + select({
+    "@platforms//os:macos": [
+      ":{{$.Directory.Name}}_objc",
+    ],
+    "//conditions:default": [],
+  })
 {{-   end}},
   copts = COPTS,
   visibility = ["//visibility:public"],
 )
+{{- if $.HasObjcSrcs}}
+
+genrule(
+  name = "{{$.Directory.Name}}_objc_cc",
+  srcs = [
+{{-   range $Cond := $Conditionals}}
+{{-     if not $Cond.Condition.IsNegative}}
+{{-       range $File := $Cond.SourceFiles}}
+{{-         if HasSuffix $File.Name ".mm"}}
+    "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{-         end}}
+{{-       end}}
+{{-     end}}
+{{-   end}}
+  ],
+  outs = [
+{{-   range $Cond := $Conditionals}}
+{{-     if not $Cond.Condition.IsNegative}}
+{{-       range $File := $Cond.SourceFiles}}
+{{-         if HasSuffix $File.Name ".mm"}}
+    "{{TrimPrefix $File.Name $.Directory.Path}}.cc",
+{{-         end}}
+{{-       end}}
+{{-     end}}
+{{-   end}}
+  ],
+  cmd = "cp $< $@",
+)
+
+cc_library(
+  name = "{{$.Directory.Name}}_objc",
+  srcs = [
+    ":{{$.Directory.Name}}_objc_cc",
+  ],
+  hdrs = [
+{{-     range $File := $.UnconditionalSourceFiles}}
+{{-       if not (HasSuffix $File.Name ".cc")}}
+{{-         if not (HasSuffix $File.Name ".mm")}}
+{{-           if not ($.IsGeneratedSource $File.Path)}}
+    "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{-           end}}
+{{-         end}}
+{{-       end}}
+{{-     end}}
+  ],
+  copts = COPTS + [
+    "-x",
+    "objective-c++",
+  ],
+  deps = [
+{{-   range $Dep := $.UnconditionalInternalDependencies}}
+    "{{Eval "Dependency" $Dep}}",
+{{-   end}}
+{{-   range $Dep := $.UnconditionalExternalDependencies}}
+{{-     $Target := ExternalDependencyTarget $Dep}}
+{{-     if $Target}}
+    {{$Target}}
+{{-     end}}
+{{-   end}}
+  ],
+  target_compatible_with = ["@platforms//os:macos"],
+  visibility = ["//visibility:private"],
+)
+{{- end}}
 {{- end}}
 {{/* newline */}}
 {{- end}}
@@ -256,37 +331,7 @@ cc_binary(
 {{- end}}
 
 
-{{- /*
---------------------------------------------------------------------------------
--- Emits comma separated, quoted external dependency target name(s) with a trailing comma
--- External target names are declared in tools/src/cmd/gen/build/externals.json
---------------------------------------------------------------------------------
-*/ -}}
-{{- define "ExternalDependencyTarget"}}
-{{-        if eq $.Name "abseil"                         -}}"@abseil_cpp//absl/strings",
-{{-   else if eq $.Name "dl"                             -}}{{/* unsupported */}}
-{{-   else if eq $.Name "dxc-include"                    -}}"//third_party/directx-shader-compiler:dxc_headers",
-{{-   else if eq $.Name "dxcompiler-for-fuzzer"          -}}{{/* unsupported */}}
-{{-   else if eq $.Name "glslang-res-limits"             -}}{{/* unsupported */}}
-{{-   else if eq $.Name "glslang"                        -}}{{/* unsupported */}}
-{{-   else if eq $.Name "gmock"                          -}}"@gtest",
-{{-   else if eq $.Name "google-benchmark"               -}}"@benchmark",
-{{-   else if eq $.Name "gtest"                          -}}"@gtest",
-{{-   else if eq $.Name "jsoncpp"                        -}}{{/* unsupported */}}
-{{-   else if eq $.Name "langsvr"                        -}}{{/* unsupported */}}
-{{-   else if eq $.Name "mesa"                           -}}{{/* unsupported */}}
-{{-   else if eq $.Name "metal"                          -}}{{/* unsupported */}}
-{{-   else if eq $.Name "spirv-headers"                  -}}"@spirv_headers//:spirv_cpp11_headers", "@spirv_headers//:spirv_c_headers",
-{{-   else if eq $.Name "spirv-opt-internal"             -}}"@spirv_tools//:spirv_tools_opt",
-{{-   else if eq $.Name "spirv-tools"                    -}}"@spirv_tools",
-{{-   else if eq $.Name "thread"                         -}}{{/* unsupported */}}
-{{-   else if eq $.Name "winsock"                        -}}{{/* unsupported */}}
-{{-   else if eq $.Name "src_utils_crash_handler"        -}}"//src/utils:crash_handler",
-{{-   else if eq $.Name "src_utils"                      -}}"//src/utils",
-{{-   else if eq $.Name "src_utils_chromium_test_compat" -}}"//src/utils/chromium_test_compat",
-{{-   else                                      -}}{{Error (printf "unhandled external dependency '%v'" $.Name)}}
-{{-   end}}
-{{- end}}
+
 
 
 {{- /*

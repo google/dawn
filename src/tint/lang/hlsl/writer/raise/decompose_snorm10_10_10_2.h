@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_DECOMPOSE_SNORM10_10_10_2_H_
 #define SRC_TINT_LANG_HLSL_WRITER_RAISE_DECOMPOSE_SNORM10_10_10_2_H_
 
+#include <cstdint>
 #include <vector>
 
 #include "src/tint/utils/result.h"

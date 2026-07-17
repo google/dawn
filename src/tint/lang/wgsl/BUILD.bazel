@@ -80,14 +80,10 @@ cc_library(
     "language_feature_status_test.cc",
     "//src/tint:gen/src/tint/lang/wgsl/enums_test.cc",
   ] + select({
-    "//conditions:default": [],
-  }) + select({
     ":tint_build_wgsl_reader_and_tint_build_wgsl_writer": [
       "ir_roundtrip_test.cc",
       "minifier_test.cc",
     ],
-    "//conditions:default": [],
-  }) + select({
     "//conditions:default": [],
   }),
   deps = [
@@ -122,8 +118,6 @@ cc_library(
       "//src/tint/lang/wgsl/reader",
       "//src/tint/lang/wgsl/reader/program_to_ir",
     ],
-    "//conditions:default": [],
-  }) + select({
     "//conditions:default": [],
   }) + select({
     ":tint_build_wgsl_writer": [

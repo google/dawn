@@ -80,6 +80,16 @@ func (d *Directory) Subdirectories() []*Directory {
 	return out
 }
 
+// HasObjcSources returns true if any target in this directory has Objective-C++ sources.
+func (d *Directory) HasObjcSrcs() bool {
+	for _, target := range d.Targets() {
+		if target.HasObjcSrcs() {
+			return true
+		}
+	}
+	return false
+}
+
 // DecomposedConditionals returns the combined decomposed ANDs, ORs and unary expressions of all
 // the conditional expressions used by the targets in this directory. This can be used by templates
 // that need to break expressions down into separate sub-expressions.

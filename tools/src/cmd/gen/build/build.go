@@ -666,6 +666,69 @@ var platformOSMap = map[string]string{
 	"tint_build_is_mac":   "@platforms//os:macos",
 }
 
+// externalDependencyBazelTargets maps external dependencies to their corresponding Bazel target
+// labels. Supported dependencies map to non-empty strings, while unsupported dependencies map
+// to empty strings.
+var externalDependencyBazelTargets = map[string]string{
+	"abseil":                         `"@abseil_cpp//absl/strings",`,
+	"dxc-include":                    `"//third_party/directx-shader-compiler:dxc_headers",`,
+	"gmock":                          `"@gtest",`,
+	"google-benchmark":               `"@benchmark",`,
+	"gtest":                          `"@gtest",`,
+	"spirv-headers":                  `"@spirv_headers//:spirv_cpp11_headers", "@spirv_headers//:spirv_c_headers",`,
+	"spirv-opt-internal":             `"@spirv_tools//:spirv_tools_opt",`,
+	"spirv-tools":                    `"@spirv_tools",`,
+	"src_utils_crash_handler":        `"//src/utils:crash_handler",`,
+	"src_utils":                      `"//src/utils",`,
+	"src_utils_chromium_test_compat": `"//src/utils/chromium_test_compat",`,
+	// Explicitly mark unsupported dependencies as empty so they can be identified as unsupported
+	// and we can omit a block if it only contains unsupported deps.
+	"dl":                    "",
+	"dxcompiler-for-fuzzer": "",
+	"glslang-res-limits":    "",
+	"glslang":               "",
+	"jsoncpp":               "",
+	"langsvr":               "",
+	"mesa":                  "",
+	"metal":                 "",
+	"thread":                "",
+	"winsock":               "",
+}
+
+// HasCppSrcs returns true if the conditional has any supported C++ files.
+func HasCppSrcs(cond *TargetConditional) bool {
+	for _, file := range cond.SourceFiles {
+		// For now, it's easiest to just reject lists that contain only .mm files.
+		if !strings.HasSuffix(file.Name, ".mm") {
+			return true
+		}
+	}
+	return false
+}
+
+// HasSupportedDeps returns true if the conditional has one or more deps supported by Bazel.
+// If this returns false, then the block can be omitted from Bazel files.
+func HasSupportedDeps(cond *TargetConditional) bool {
+	if len(cond.InternalDependencies) > 0 {
+		return true
+	}
+	for _, dep := range cond.ExternalDependencies {
+		if externalDependencyBazelTargets[string(dep.Name)] != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// ExternalDependencyTarget returns the Bazel target label for the given external dependency.
+func ExternalDependencyTarget(dep ExternalDependency) (string, error) {
+	target, ok := externalDependencyBazelTargets[string(dep.Name)]
+	if !ok {
+		return "", fmt.Errorf("unhandled external dependency '%v'", dep.Name)
+	}
+	return target, nil
+}
+
 // ConditionTargetLabel returns a Bazel target label for a build variable and optional negation.
 // For platform constraints, it returns the standard @platforms//os target.
 // For custom flags, it returns the global //src/tint config settings.
@@ -778,7 +841,10 @@ func emitBuildFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter)
 				"PlatformLabel": func(variable string) string {
 					return platformOSMap[variable]
 				},
-				"ConditionTargetLabel": ConditionTargetLabel,
+				"HasCppSrcs":               HasCppSrcs,
+				"HasSupportedDeps":         HasSupportedDeps,
+				"ExternalDependencyTarget": ExternalDependencyTarget,
+				"ConditionTargetLabel":     ConditionTargetLabel,
 			})
 			if err != nil {
 				return nil, err
@@ -1013,4 +1079,14 @@ func getGoDependencies(p *Project, fsReaderWriter oswrapper.FilesystemReaderWrit
 	}
 	sort.Strings(goFiles)
 	return goFiles, nil
+}
+
+// HasObjcSrcs returns true if the target contains any Objective-C++ .mm files.
+func (t *Target) HasObjcSrcs() bool {
+	for name := range t.SourceFileSet {
+		if strings.HasSuffix(name, ".mm") {
+			return true
+		}
+	}
+	return false
 }
