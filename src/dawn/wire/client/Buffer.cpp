@@ -265,7 +265,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
         CommandExtension{memoryHandleCreateInfoLength, [&](Span<std::byte> serializeBuffer) {
                              if (memoryHandle != nullptr) {
                                  // Serialize the MemoryHandle into the space after the command.
-                                 memoryHandle->SerializeCreate(serializeBuffer);
+                                 memoryHandle->SerializeCreate(std::span(serializeBuffer));
                              }
                          }});
 
@@ -511,8 +511,8 @@ void Buffer::APIUnmap() {
             cmd,
             // Extensions to replace fields skipped by skip_serialize.
             CommandExtension{memoryDataUpdateInfoLength, [&](Span<std::byte> serializeBuffer) {
-                                 memoryHandle->SerializeDataUpdate(serializeBuffer, cmd.offset,
-                                                                   cmd.size);
+                                 memoryHandle->SerializeDataUpdate(std::span(serializeBuffer),
+                                                                   cmd.offset, cmd.size);
                              }});
     }
 

@@ -225,10 +225,11 @@ void Queue::WriteBufferXL(WGPUBuffer cBuffer,
         // Extensions to replace fields skipped by skip_serialize.
         CommandExtension{memoryHandleCreateInfoLength,
                          [&](Span<std::byte> serializeBuffer) {
-                             memoryHandle->SerializeCreate(serializeBuffer);
+                             memoryHandle->SerializeCreate(std::span(serializeBuffer));
                          }},
         CommandExtension{memoryDataUpdateInfoLength, [&](Span<std::byte> serializeBuffer) {
-                             memoryHandle->SerializeDataUpdate(serializeBuffer, 0u, size);
+                             memoryHandle->SerializeDataUpdate(std::span(serializeBuffer), 0u,
+                                                               size);
                          }});
 }
 
@@ -294,10 +295,11 @@ void Queue::WriteTextureXL(const WGPUTexelCopyTextureInfo* destination,
         // Extensions to replace fields skipped by skip_serialize.
         CommandExtension{memoryHandleCreateInfoLength,
                          [&](Span<std::byte> serializeBuffer) {
-                             memoryHandle->SerializeCreate(serializeBuffer);
+                             memoryHandle->SerializeCreate(std::span(serializeBuffer));
                          }},
         CommandExtension{memoryDataUpdateInfoLength, [&](Span<std::byte> serializeBuffer) {
-                             memoryHandle->SerializeDataUpdate(serializeBuffer, 0u, dataSize);
+                             memoryHandle->SerializeDataUpdate(std::span(serializeBuffer), 0u,
+                                                               dataSize);
                          }});
 }
 

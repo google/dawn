@@ -32,6 +32,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <optional>
 #include <span>
 
 #include "dawn/wire/dawn_wire_export.h"
@@ -49,7 +50,15 @@ class DAWN_WIRE_EXPORT CommandSerializer {
     // GetCmdSpace will never be called with a value larger than
     // what GetMaximumAllocationSize returns. Return nullptr to indicate
     // a fatal error.
-    virtual void* GetCmdSpace(size_t size) = 0;
+    virtual void* GetCmdSpace(size_t size) {
+        // TODO(https://crbug.com/528027992): Remove in favor of GetCommandSpace once Chromium
+        // implements it.
+        return nullptr;
+    }
+    virtual std::optional<std::span<volatile std::byte>> GetCommandSpace(size_t size) {
+        // TODO(https://crbug.com/528027992): Make pure virtual once Chromium implements it.
+        return std::nullopt;
+    }
     virtual bool Flush() = 0;
     virtual size_t GetMaximumAllocationSize() const = 0;
     virtual void OnSerializeError();

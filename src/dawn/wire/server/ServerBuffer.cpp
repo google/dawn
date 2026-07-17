@@ -238,7 +238,7 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
                     CommandExtension{dataUpdateInfoLength, [&](Span<std::byte> serializeBuffer) {
                                          // The in-flight map request returned successfully.
                                          mapState->memoryHandle->SerializeDataUpdate(
-                                             serializeBuffer, data->offset, data->size,
+                                             std::span(serializeBuffer), data->offset, data->size,
                                              mappedRange);
                                      }});
             });
