@@ -640,7 +640,7 @@ TEST_P(ResourceTableTests, HasResourceFilterableToUnfilterable) {
 }
 
 // Test that calling texture.Destroy() implicitly hides it.
-// TODO(crbug.com/530981418): Add similar test for EndAccess
+// Note: Similar tests for EndAccess are implemented in SharedTextureMemoryResourceTableTests.
 TEST_P(ResourceTableTests, HasResourceOneTextureDestroy) {
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
@@ -689,7 +689,7 @@ TEST_P(ResourceTableTests, HasResourceSameTextureMultipleTimes) {
 
 // Test that updating a table with an already destroyed texture works, but doesn't show that entry
 // as available.
-// TODO(crbug.com/530981418): Add similar test for EndAccess
+// Note: Similar tests for EndAccess are implemented in SharedTextureMemoryResourceTableTests.
 TEST_P(ResourceTableTests, HasResourceUpdateWithTextureAlreadyDestroyed) {
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
@@ -705,7 +705,7 @@ TEST_P(ResourceTableTests, HasResourceUpdateWithTextureAlreadyDestroyed) {
 }
 
 // Test that a texture used in multiple resource tables has its availability correctly updated.
-// TODO(crbug.com/522749739): Add similar test for EndAccess
+// Note: Similar tests for EndAccess are implemented in SharedTextureMemoryResourceTableTests.
 TEST_P(ResourceTableTests, HasResourceSameTextureMultipleTables) {
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,

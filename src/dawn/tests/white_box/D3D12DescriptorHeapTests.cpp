@@ -1617,6 +1617,9 @@ class D3D12ResourceTableDescriptorHeapTests : public D3D12DescriptorHeapTests {
 
     void SetUp() override {
         D3D12DescriptorHeapTests::SetUp();
+        if (IsSkipped() || HasFatalFailure()) {
+            return;
+        }
         DAWN_TEST_UNSUPPORTED_IF(
             !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
 

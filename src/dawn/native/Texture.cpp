@@ -1139,7 +1139,6 @@ void TextureBase::DestroyImpl(DestroyReason reason) {
 
     // Destroying the texture implicitly hides it in resource tables.
     MarkDestroyedInResourceTables();
-    mResourceTableUses.clear();
 
     mState.destroyed = true;
 
@@ -1340,19 +1339,20 @@ void TextureBase::SetInitialized(bool initialized) {
 }
 
 ExecutionSerial TextureBase::OnEndAccess() {
-    // Ending access on the texture implicitly hides it in resource tables.
-    MarkDirtyInResourceTables();
-    mResourceTableUses.clear();
-
     mState.hasAccess = false;
+
+    // EndAccess on the texture implicitly hides it in resource tables.
+    MarkDirtyInResourceTables();
+
     ExecutionSerial lastUsageSerial = mLastSharedTextureMemoryUsageSerial;
     mLastSharedTextureMemoryUsageSerial = kBeginningOfGPUTime;
     return lastUsageSerial;
 }
 
 void TextureBase::OnBeginAccess() {
-    // TODO(crbug.com/530960027): Consider making BeginAccess unhide this texture in resource tables
     mState.hasAccess = true;
+    // BeginAccess on the texture implicitly unhides it in resource tables.
+    MarkDirtyInResourceTables();
 }
 
 bool TextureBase::HasAccess() const {
@@ -1697,6 +1697,7 @@ void TextureBase::MarkDestroyedInResourceTables() {
             table->OnTextureDestroyed(this);
         }
     }
+    mResourceTableUses.clear();
 }
 
 void TextureBase::APISetOwnershipForMemoryDump(uint64_t ownerGuid) {
