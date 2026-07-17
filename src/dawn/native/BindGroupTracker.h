@@ -38,6 +38,7 @@
 #include "src/dawn/native/Pipeline.h"
 #include "src/dawn/native/PipelineLayout.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 
@@ -48,10 +49,9 @@ class BindGroupTrackerBase {
   public:
     void OnSetBindGroup(BindGroupIndex index,
                         BindGroupBase* bindGroup,
-                        uint32_t dynamicOffsetCount,
-                        const uint32_t* dynamicOffsets) {
+                        ityp::span<BindingIndex, const uint32_t> dynamicOffsets) {
         DAWN_ASSERT(index < kMaxBindGroupsTyped);
-        DAWN_ASSERT(dynamicOffsetCount <= kMaxDynamicOffsetsPerBindGroup);
+        DAWN_ASSERT(dynamicOffsets.size() <= kMaxDynamicOffsetsPerBindGroupTyped);
 
         if (mBindGroupLayoutsMask[index]) {
             // It is okay to only dirty bind groups that are used by the current pipeline
@@ -63,16 +63,15 @@ class BindGroupTrackerBase {
                 mDirtyBindGroupsObjectChangedOrIsDynamic.set(index);
             }
 
-            if (dynamicOffsetCount > 0) {
+            if (!dynamicOffsets.empty()) {
                 mDirtyBindGroupsObjectChangedOrIsDynamic.set(index);
             }
         }
 
         mBindGroups[index] = bindGroup;
-        mDynamicOffsets[index].count = BindingIndex(dynamicOffsetCount);
-        auto dynamicOffsetsSpan =
-            DAWN_UNSAFE_TODO(Span<const uint32_t>(dynamicOffsets, dynamicOffsetCount));
-        std::ranges::copy(dynamicOffsetsSpan, mDynamicOffsets[index].offsets.begin());
+        mDynamicOffsets[index].count = dynamicOffsets.size();
+        // TODO(https://crbug.com/524406299): Use Span::CopyFrom
+        std::ranges::copy(dynamicOffsets, mDynamicOffsets[index].offsets.begin());
     }
 
     void OnSetPipeline(PipelineBase* pipeline) { mPipeline = pipeline; }
@@ -150,6 +149,8 @@ class BindGroupTrackerBase {
     // group uses none.
     static constexpr uint32_t kMaxDynamicOffsetsPerBindGroup =
         kMaxDynamicUniformBuffersPerPipelineLayout + kMaxDynamicStorageBuffersPerPipelineLayout;
+    static constexpr BindingIndex kMaxDynamicOffsetsPerBindGroupTyped{
+        kMaxDynamicOffsetsPerBindGroup};
 
     struct BindingDynamicOffsets {
         ityp::array<BindingIndex, uint32_t, kMaxDynamicOffsetsPerBindGroup> offsets = {};

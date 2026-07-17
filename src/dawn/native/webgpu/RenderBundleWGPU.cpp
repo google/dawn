@@ -112,13 +112,13 @@ void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
 
         case Command::SetBindGroup: {
             auto cmd = commands.NextCommand<SetBindGroupCmd>();
-            Span<const uint32_t> dynamicOffsets;
-            if (cmd->dynamicOffsetCount != 0) {
+            ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
+            if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
                 dynamicOffsets = commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
             }
-            wgpu.renderBundleEncoderSetBindGroup(encoder, static_cast<uint32_t>(cmd->index),
-                                                 ToBackend(cmd->group)->GetInnerHandle(),
-                                                 dynamicOffsets.size(), dynamicOffsets.data());
+            wgpu.renderBundleEncoderSetBindGroup(
+                encoder, static_cast<uint32_t>(cmd->index), ToBackend(cmd->group)->GetInnerHandle(),
+                uint32_t{dynamicOffsets.size()}, dynamicOffsets.data());
             break;
         }
 

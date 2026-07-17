@@ -233,11 +233,11 @@ void ProgrammableEncoder::RecordSetBindGroup(
     SetBindGroupCmd* cmd = allocator->Allocate<SetBindGroupCmd>(Command::SetBindGroup);
     cmd->index = index;
     cmd->group = group;
-    // TODO(https://crbug.com/524554511): Propagate the usage of the BindingIndex type to
-    // SetBindGroupCmd and through backends as well.
-    cmd->dynamicOffsetCount = uint32_t{dynamicOffsets.size()};
+    cmd->dynamicOffsetCount = dynamicOffsets.size();
+
     if (!dynamicOffsets.empty()) {
-        Span<uint32_t> offsets = allocator->AllocateData<uint32_t>(cmd->dynamicOffsetCount);
+        ityp::span<BindingIndex, uint32_t> offsets =
+            allocator->AllocateData<uint32_t>(cmd->dynamicOffsetCount);
         // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
         std::ranges::copy(dynamicOffsets, offsets.begin());
     }

@@ -1521,14 +1521,12 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                 BindGroup* group = ToBackend(cmd->group.Get());
-                Span<const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount != 0) {
+                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
                     dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
 
-                // TODO(https://crbug.com/532944732): Spanify BindGroupTracker.
-                bindingTracker->OnSetBindGroup(cmd->index, group, dynamicOffsets.size(),
-                                               dynamicOffsets.data());
+                bindingTracker->OnSetBindGroup(cmd->index, group, dynamicOffsets);
                 break;
             }
 
@@ -1996,14 +1994,12 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
                 BindGroup* group = ToBackend(cmd->group.Get());
-                Span<const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount != 0) {
+                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
                     dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
 
-                // TODO(https://crbug.com/532944732): Spanify BindGroupTracker.
-                bindingTracker->OnSetBindGroup(cmd->index, group, dynamicOffsets.size(),
-                                               dynamicOffsets.data());
+                bindingTracker->OnSetBindGroup(cmd->index, group, dynamicOffsets);
                 break;
             }
 

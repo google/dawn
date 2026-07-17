@@ -126,15 +126,15 @@ class CommandIterator : public NonCopyable {
         requires(alignof(T) <= kMaxAllocatedCommandAlignment &&
                  (std::is_same_v<Index, size_t> || !std::is_integral_v<Index>))
     ityp::span<Index, const T> NextData(Index count) {
+        size_t size = sizeof(T) * checked_cast<size_t>(count);
         // TODO(crbug.com/491867541): Move Ref<T>s out of the commands and onto the CommandEncoder
         // instead, so that we don't need to walk all the commands to free the Refs.
         if constexpr (IsRef<T>::value) {
             // SAFETY: If T is is a Ref, caller must ensure that the Refs have been properly
             // constructed in the command stream.
-            return DAWN_UNSAFE_BUFFERS(
-                ReinterpretSpan<const T, Index>(NextData(sizeof(T) * count)));
+            return DAWN_UNSAFE_BUFFERS(ReinterpretSpan<const T, Index>(NextData(size)));
         } else {
-            return ReinterpretSpan<const T, Index>(NextData(sizeof(T) * count));
+            return ReinterpretSpan<const T, Index>(NextData(size));
         }
     }
 
@@ -222,7 +222,8 @@ class CommandAllocator : public NonCopyable {
         requires(alignof(T) <= kMaxAllocatedCommandAlignment &&
                  (std::is_same_v<Index, size_t> || !std::is_integral_v<Index>))
     ityp::span<Index, T> AllocateData(Index count) {
-        Span<std::byte> allocation = AllocateData(sizeof(T) * count);
+        size_t size = sizeof(T) * checked_cast<size_t>(count);
+        Span<std::byte> allocation = AllocateData(size);
         DAWN_CHECK(allocation.data() != nullptr);  // Crash on OOM
         ityp::span<Index, T> results;
         // TODO(crbug.com/491867541): Move Ref<T>s out of the commands and onto the CommandEncoder

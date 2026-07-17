@@ -175,16 +175,16 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
                                  std::vector<uint32_t> offsets = {}) {
         return [index, bg, offsets](CommandIterator* commands) {
             auto* cmd = commands->NextCommand<SetBindGroupCmd>();
-            Span<const uint32_t> cmdOffsets;
-            if (cmd->dynamicOffsetCount > 0) {
+            ityp::span<BindingIndex, const uint32_t> cmdOffsets;
+            if (cmd->dynamicOffsetCount > BindingIndex{0u}) {
                 cmdOffsets = commands->NextData<uint32_t>(cmd->dynamicOffsetCount);
             }
 
             ASSERT_EQ(cmd->index, BindGroupIndex(index));
             ASSERT_EQ(ToAPI(cmd->group.Get()), bg.Get());
-            ASSERT_EQ(cmdOffsets.size(), offsets.size());
+            ASSERT_EQ(uint32_t{cmdOffsets.size()}, offsets.size());
             for (auto [i, cmdOffset] : Enumerate(cmdOffsets)) {
-                ASSERT_EQ(cmdOffset, offsets[i]);
+                ASSERT_EQ(cmdOffset, offsets[uint32_t{i}]);
             }
         };
     };
@@ -219,7 +219,7 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
         auto* cmd = commands->NextCommand<SetBindGroupCmd>();
         ASSERT_EQ(cmd->index, BindGroupIndex(0u));
         ASSERT_NE(cmd->group.Get(), nullptr);
-        ASSERT_EQ(cmd->dynamicOffsetCount, 0u);
+        ASSERT_EQ(cmd->dynamicOffsetCount, BindingIndex{0u});
     };
 
     auto ExpectSetValidationDispatch = [&](CommandIterator* commands) {

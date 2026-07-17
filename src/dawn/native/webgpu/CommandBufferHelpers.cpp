@@ -45,8 +45,8 @@ void CaptureSharedCommand(CaptureContext& captureContext, CommandIterator& comma
     switch (type) {
         case Command::SetBindGroup: {
             const auto& cmd = *commands.NextCommand<SetBindGroupCmd>();
-            Span<const uint32_t> dynamicOffsets;
-            if (cmd.dynamicOffsetCount != 0) {
+            ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
+            if (cmd.dynamicOffsetCount != BindingIndex{0u}) {
                 dynamicOffsets = commands.NextData<uint32_t>(cmd.dynamicOffsetCount);
             }
 
@@ -234,7 +234,7 @@ MaybeError GatherReferencedResourcesFromRenderCommand(CaptureContext& captureCon
         }
         case Command::SetBindGroup: {
             auto cmd = commands.NextCommand<SetBindGroupCmd>();
-            if (cmd->dynamicOffsetCount > 0) {
+            if (cmd->dynamicOffsetCount > BindingIndex{0u}) {
                 commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
             }
             usedResources.bindGroups.push_back(cmd->group.Get());

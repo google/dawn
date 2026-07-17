@@ -412,8 +412,7 @@ struct SetBindGroupCmd {
 
     BindGroupIndex index = BindGroupIndex(0u);
     Ref<BindGroupBase> group;
-    // TODO(https://crbug.com/532944732) Use BindingIndex.
-    size_t dynamicOffsetCount = 0;
+    BindingIndex dynamicOffsetCount = BindingIndex{0u};
 };
 
 struct SetImmediatesCmd {

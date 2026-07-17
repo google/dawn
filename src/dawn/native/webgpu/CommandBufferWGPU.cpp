@@ -146,14 +146,15 @@ void EncodeComputePass(const DawnProcTable& wgpu,
 
             case Command::SetBindGroup: {
                 auto cmd = commands.NextCommand<SetBindGroupCmd>();
-                Span<const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount != 0) {
+                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
                     dynamicOffsets = commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
 
                 wgpu.computePassEncoderSetBindGroup(passEncoder, static_cast<uint32_t>(cmd->index),
                                                     ToBackend(cmd->group)->GetInnerHandle(),
-                                                    dynamicOffsets.size(), dynamicOffsets.data());
+                                                    uint32_t{dynamicOffsets.size()},
+                                                    dynamicOffsets.data());
                 break;
             }
             case Command::InsertDebugMarker: {
@@ -389,13 +390,14 @@ void EncodeRenderPass(const Device* device,
 
             case Command::SetBindGroup: {
                 auto cmd = commands.NextCommand<SetBindGroupCmd>();
-                Span<const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount != 0) {
+                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
                     dynamicOffsets = commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
                 wgpu.renderPassEncoderSetBindGroup(passEncoder, static_cast<uint32_t>(cmd->index),
                                                    ToBackend(cmd->group)->GetInnerHandle(),
-                                                   dynamicOffsets.size(), dynamicOffsets.data());
+                                                   uint32_t{dynamicOffsets.size()},
+                                                   dynamicOffsets.data());
                 break;
             }
 
@@ -459,7 +461,7 @@ MaybeError GatherReferencedResourcesFromComputePass(CaptureContext& captureConte
             }
             case Command::SetBindGroup: {
                 auto cmd = commands.NextCommand<SetBindGroupCmd>();
-                if (cmd->dynamicOffsetCount > 0) {
+                if (cmd->dynamicOffsetCount > BindingIndex{0u}) {
                     commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
                 usedResources.bindGroups.push_back(cmd->group.Get());

@@ -1626,14 +1626,12 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                 BindGroup* bindGroup = ToBackend(cmd->group.Get());
-                Span<const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount != 0) {
+                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
                     dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
 
-                // TODO(https://crbug.com/532944732): Spanify DescriptorSetTracker.
-                state.descriptorSets.OnSetBindGroup(cmd->index, bindGroup, dynamicOffsets.size(),
-                                                    dynamicOffsets.data());
+                state.descriptorSets.OnSetBindGroup(cmd->index, bindGroup, dynamicOffsets);
                 break;
             }
 
@@ -1961,14 +1959,12 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
                 BindGroup* bindGroup = ToBackend(cmd->group.Get());
-                Span<const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount != 0) {
+                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
                     dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
 
-                // TODO(https://crbug.com/532944732): Spanify DescriptorSetTracker.
-                state.descriptorSets.OnSetBindGroup(cmd->index, bindGroup, dynamicOffsets.size(),
-                                                    dynamicOffsets.data());
+                state.descriptorSets.OnSetBindGroup(cmd->index, bindGroup, dynamicOffsets);
                 break;
             }
 

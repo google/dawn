@@ -212,7 +212,7 @@ void FreeCommands(CommandIterator* commands) {
             }
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = commands->NextCommand<SetBindGroupCmd>();
-                if (cmd->dynamicOffsetCount > 0) {
+                if (cmd->dynamicOffsetCount > BindingIndex{0u}) {
                     commands->NextData<uint32_t>(cmd->dynamicOffsetCount);
                 }
                 cmd->~SetBindGroupCmd();
@@ -393,7 +393,7 @@ void SkipCommand(CommandIterator* commands, Command type) {
 
         case Command::SetBindGroup: {
             SetBindGroupCmd* cmd = commands->NextCommand<SetBindGroupCmd>();
-            if (cmd->dynamicOffsetCount > 0) {
+            if (cmd->dynamicOffsetCount > BindingIndex{0u}) {
                 commands->NextData<uint32_t>(cmd->dynamicOffsetCount);
             }
             break;
