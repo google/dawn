@@ -426,20 +426,11 @@ class ObjectBase {
     struct {{as_cppType(type.name)}};
 {% endfor %}
 
-// TODO(42241188): Remove once all clients use StringView versions of the callbacks.
-// To make MSVC happy we need a StringView constructor from the adapter, so we first need to
-// forward declare StringViewAdapter here. Otherwise MSVC complains about an ambiguous conversion.
-namespace detail {
-    struct StringViewAdapter;
-}  // namespace detail
-
 struct StringView {
     char const * data = nullptr;
     size_t length = WGPU_STRLEN;
 
     {{wgpu_string_members("StringView") | indent(4)}}
-
-    explicit(false) StringView(const detail::StringViewAdapter& s);
 };
 
 namespace detail {
@@ -451,35 +442,7 @@ template <typename T>
 inline T& AsNonConstReference(const T& value) {
     return const_cast<T&>(value);
 }
-
-// A wrapper around StringView that can be implicitly converted to const char* with temporary
-// storage that adds the \0 for output strings that are all explicitly-sized.
-// TODO(42241188): Remove once all clients use StringView versions of the callbacks.
-struct StringViewAdapter {
-    WGPUStringView sv;
-    char* nullTerminated = nullptr;
-
-    explicit(false) StringViewAdapter(WGPUStringView sv) : sv(sv) {}
-    ~StringViewAdapter() { delete[] nullTerminated; }
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    operator ::WGPUStringView() { return sv; }
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    operator StringView() { return {sv.data, sv.length}; }
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    operator const char*() {
-        assert(sv.length != WGPU_STRLEN);
-        assert(nullTerminated == nullptr);
-        nullTerminated = new char[sv.length + 1];
-        for (size_t i = 0; i < sv.length; i++) {
-            nullTerminated[i] = sv.data[i];
-        }
-        nullTerminated[sv.length] = 0;
-        return nullTerminated;
-    }
-};
 }  // namespace detail
-
-inline StringView::StringView(const detail::StringViewAdapter& s): data(s.sv.data), length(s.sv.length) {}
 
 namespace detail {
 // For callbacks, we support two modes:

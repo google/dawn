@@ -1495,13 +1495,6 @@ def has_callback_arguments(method):
                for arg in method.arguments)
 
 
-# TODO: crbug.com/dawn/2509 - Remove this helper when once we deprecate older APIs.
-def has_callback_info(method):
-    return method.returns.type.name.get() == 'future' and any(
-        arg.name.get() == 'callback info'
-        and arg.type.category != 'callback info' for arg in method.arguments)
-
-
 def has_callbackInfoStruct(args):
     return any(arg.type.category == 'callback info' for arg in args)
 
@@ -1851,7 +1844,6 @@ class MultiGeneratorFromDawnJSON(Generator):
             mock_params = [
                 RENDER_PARAMS_BASE, params_dawn, {
                     'has_callback_arguments': has_callback_arguments,
-                    "has_callback_info": has_callback_info
                 }
             ]
             renders.append(
