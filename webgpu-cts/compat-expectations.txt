@@ -346,6 +346,14 @@ crbug.com/465497437 [ android android-pixel-6 ] webgpu:api,validation,capability
 crbug.com/495510120 [ android-pixel-10 ] webgpu:shader,execution,memory_layout:* [ Skip ]
 crbug.com/495780892 [ android-pixel-10 ] webgpu:shader,validation,expression,binary,bitwise_shift:* [ Skip ]
 
+# More Android failures
+crbug.com/535313717 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,bufferLength:unsized_buffer:size=600 [ Failure ]
+crbug.com/535313717 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,bufferLength:unsized_buffer:size=600 [ Failure ]
+crbug.com/535351717 [ android-pixel-6 ] webgpu:api,validation,min_buffer_binding_size:render,shader_required_buffer_size:case="fragment_larger_buffer_array_view_ro_storage" [ Failure ]
+crbug.com/535351717 [ android-pixel-6 ] webgpu:api,validation,min_buffer_binding_size:render,shader_required_buffer_size:case="fragment_larger_buffer_view_ro_storage" [ Failure ]
+crbug.com/535351717 [ android-pixel-6 ] webgpu:api,validation,min_buffer_binding_size:render,shader_required_buffer_size:case="vertex_larger_buffer_array_view_ro_storage" [ Failure ]
+crbug.com/535351717 [ android-pixel-6 ] webgpu:api,validation,min_buffer_binding_size:render,shader_required_buffer_size:case="vertex_larger_buffer_view_ro_storage" [ Failure ]
+
 ################################################################################
 # Triaged or Manually-Added Flakes and Failures
 ################################################################################
