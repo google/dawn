@@ -144,23 +144,6 @@ config("dawn_warnings") {
         # Dawn, we should try suppressing individual warnings more specifically
         # using warning_suppression_mappings.txt.
         _prefixes = [
-          "third_party/",
-          "absl/",
-          "benchmark/",
-          "glslang/",
-          "gmock/",
-          "KHR/",
-          "partition_alloc/",
-          "napi.h",
-          "testing/",
-          "vulkan/",
-
-          # TODO(crbug.com/523358231): It's good to enable warnings for
-          # generated code. Currently, removing this results in many warnings in
-          # generated webgpu_cpp.h.
-          "dawn/webgpu_cpp.h",
-          "webgpu/webgpu_cpp.h",
-
           # Also include headers from prebuilt third_party libraries, such as
           # agility-sdk.
           "d3d12.h",

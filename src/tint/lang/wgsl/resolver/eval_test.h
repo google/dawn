@@ -141,7 +141,8 @@ inline void CheckConstant(const constant::Value* got_constant,
                         }
                         if (flags.float_compare) {
                             if (flags.float_compare_epsilon) {
-                                EXPECT_NEAR(got, expected, *flags.float_compare_epsilon)
+                                EXPECT_NEAR(static_cast<double>(got), static_cast<double>(expected),
+                                            static_cast<double>(*flags.float_compare_epsilon))
                                     << "index: " << i;
                             } else {
                                 EXPECT_FLOAT_EQ(got, expected) << "index: " << i;
