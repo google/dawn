@@ -260,7 +260,7 @@ TEST_F(HeapArrayTest, Assignment) {
     // the FreedBy* tests are the primary tests of this.
     arr = HeapArray<int>(200);
     PreventElidingAllocation(arr);
-    EXPECT_EQ(arr.size(), 200);
+    EXPECT_EQ(arr.size(), 200u);
     EXPECT_EQ(arr[0], 0);
     arr[199] = 20;
     EXPECT_EQ(arr[199], 20);

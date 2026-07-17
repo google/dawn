@@ -80,11 +80,6 @@ src:*third_party{/,\\}googletest{/,\\}{,src/,src\\}googletest{/,\\}include{/,\\}
 # Many of our code triggers this for absl string formatting.
 src:*third_party{/,\\}abseil-cpp{/,\\}absl{/,\\}strings{/,\\}str_cat.h
 
-[sign-compare]
-# Happens inside EXPECT_EQ macros and similar in our tests. Should be fixed, but not critical.
-# Path differs currently in Dawn vs Chromium.
-src:*third_party{/,\\}googletest{/,\\}{,src/,src\\}googletest{/,\\}include{/,\\}gtest{/,\\}gtest.h
-
 [used-but-marked-unused]
 # Google Benchmark's state.h defines internal types/methods using "Value", which is marked as unused, triggering this warning.
 src:*third_party{/,\\}google_benchmark{/,\\}*
