@@ -131,28 +131,6 @@ config("dawn_warnings") {
           "-Wdeprecated-builtins",
           "-Wc++98-compat-extra-semi",
         ]
-
-        # Treat third_party and gen headers as system headers to suppress
-        # warnings. The path needs to be the literal beginning of the string in
-        # the #include directive, so include path resolving to different names
-        # is added separately.
-        #
-        # This is only applied when dawn_standalone. Chromium build has
-        # system_headers_in_deps = false by default.
-        #
-        # TODO(https://crbug.com/523358231): For dependencies whose code ends up in
-        # Dawn, we should try suppressing individual warnings more specifically
-        # using warning_suppression_mappings.txt.
-        _prefixes = [
-          # Also include headers from prebuilt third_party libraries, such as
-          # agility-sdk.
-          "d3d12.h",
-        ]
-        foreach(_prefix, _prefixes) {
-          # Prefix with -Xclang so this will be accepted by both clang-cl and
-          # clang.
-          cflags += [ "-Xclang=--system-header-prefix=${_prefix}" ]
-        }
       } else {
         cflags = [
           "-Wall",
