@@ -81,6 +81,7 @@ class Blob;
 class BlobCache;
 class CallbackTaskManager;
 class DynamicUploader;
+class MemoryBlockAllocator;
 class ErrorScope;
 class ErrorScopeStack;
 class OwnedCompilationMessages;
@@ -337,6 +338,8 @@ class DeviceBase : public ErrorSink,
                                         const Extent3D& copySizePixels);
 
     DynamicUploader* GetDynamicUploader() const;
+
+    MemoryBlockAllocator* GetMemoryBlockAllocator();
 
     // The device state which is a combination of creation state and loss state.
     //
@@ -649,6 +652,7 @@ class DeviceBase : public ErrorSink,
     Ref<TextureViewBase> mExternalTexturePlaceholderView;
 
     std::unique_ptr<DynamicUploader> mDynamicUploader;
+    std::unique_ptr<MemoryBlockAllocator> mMemoryBlockAllocator;
     Ref<QueueBase> mQueue;
 
     std::atomic<uint32_t> mEmittedCompilationLogCount = 0;

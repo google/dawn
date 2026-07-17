@@ -34,6 +34,7 @@
 #include <utility>
 
 #include "src/dawn/common/Math.h"
+#include "src/dawn/native/MemoryBlockAllocator.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
@@ -50,6 +51,7 @@ CommandIterator::~CommandIterator() {
 CommandIterator::CommandIterator(CommandIterator&& other) {
     if (!other.IsEmpty()) {
         mBlocks = std::move(other.mBlocks);
+        mPool = std::move(other.mPool);
         other.Reset();
     }
     Reset();
@@ -59,13 +61,15 @@ CommandIterator& CommandIterator::operator=(CommandIterator&& other) {
     DAWN_ASSERT(IsEmpty());
     if (!other.IsEmpty()) {
         mBlocks = std::move(other.mBlocks);
+        mPool = std::move(other.mPool);
         other.Reset();
     }
     Reset();
     return *this;
 }
 
-CommandIterator::CommandIterator(CommandAllocator allocator) : mBlocks(allocator.AcquireBlocks()) {
+CommandIterator::CommandIterator(CommandAllocator allocator)
+    : mBlocks(allocator.AcquireBlocks()), mPool(allocator.mPool) {
     Reset();
 }
 
@@ -75,6 +79,9 @@ void CommandIterator::AcquireCommandBlocks(std::vector<CommandAllocator> allocat
 
     size_t totalBlocksCount = 0;
     for (CommandAllocator& allocator : allocators) {
+        // All allocators being merged into this iterator must use the same pool.
+        DAWN_ASSERT(mPool == nullptr || mPool == allocator.mPool);
+        mPool = allocator.mPool;
         totalBlocksCount += allocator.GetCommandBlocksCount();
     }
 
@@ -115,14 +122,13 @@ void CommandIterator::Reset() {
 }
 
 void CommandIterator::MakeEmptyAsDataWasDestroyed() {
-    if (IsEmpty()) {
-        return;
+    if (!IsEmpty()) {
+        mCurrentBlock = ByteSpanFromRef(mEndOfBlock);
+        mPool->Return(std::move(mBlocks));
+        Reset();
+        DAWN_ASSERT(IsEmpty());
     }
-
-    mCurrentBlock = ByteSpanFromRef(mEndOfBlock);
-    mBlocks.clear();
-    Reset();
-    DAWN_ASSERT(IsEmpty());
+    mPool = nullptr;
 }
 
 bool CommandIterator::IsEmpty() const {
@@ -137,16 +143,18 @@ bool CommandIterator::IsEmpty() const {
 //  - Better block allocation, maybe have Dawn API to say command buffer is going to have size
 //    close to another
 
-CommandAllocator::CommandAllocator() {
+CommandAllocator::CommandAllocator(MemoryBlockAllocator* pool) : mPool(pool) {
     ResetPointers();
 }
 
 CommandAllocator::~CommandAllocator() {
-    Reset();
+    Destroy();
 }
 
 CommandAllocator::CommandAllocator(CommandAllocator&& other)
-    : mBlocks(std::move(other.mBlocks)), mLastAllocationSize(other.mLastAllocationSize) {
+    // We don't move the other's pool because the other might be used to allocate new blocks after
+    // this move. A move copy shouldn't make the other allocator unusable (with null pool).
+    : mPool(other.mPool), mBlocks(std::move(other.mBlocks)) {
     other.mBlocks.clear();
     if (!other.IsEmpty()) {
         mCurrentBlock = other.mCurrentBlock;
@@ -158,9 +166,9 @@ CommandAllocator::CommandAllocator(CommandAllocator&& other)
 
 CommandAllocator& CommandAllocator::operator=(CommandAllocator&& other) {
     Reset();
+    mPool = other.mPool;
     if (!other.IsEmpty()) {
         std::swap(mBlocks, other.mBlocks);
-        mLastAllocationSize = other.mLastAllocationSize;
         mCurrentBlock = other.mCurrentBlock;
     }
     other.Reset();
@@ -169,8 +177,14 @@ CommandAllocator& CommandAllocator::operator=(CommandAllocator&& other) {
 
 void CommandAllocator::Reset() {
     ResetPointers();
-    mBlocks.clear();
-    mLastAllocationSize = kDefaultBaseAllocationSize;
+    if (!mBlocks.empty()) {
+        mPool->Return(std::move(mBlocks));
+    }
+}
+
+void CommandAllocator::Destroy() {
+    Reset();
+    mPool = nullptr;
 }
 
 bool CommandAllocator::IsEmpty() const {
@@ -210,11 +224,8 @@ Span<std::byte> CommandAllocator::AllocateInNewBlock(uint32_t commandId, size_t 
 }
 
 void CommandAllocator::AppendNewBlock(size_t minimumSize) {
-    // Allocate blocks doubling sizes each time, to a maximum of 16k (or at least minimumSize).
-    mLastAllocationSize = std::max(minimumSize, std::min(mLastAllocationSize * 2, size_t(16384)));
-
-    // SAFETY: This is a pool allocation that will be initialized when it's suballocated.
-    auto block = DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(mLastAllocationSize));
+    size_t allocationSize = std::max(minimumSize, mPool->GetBlockSize());
+    BlockDef block = mPool->Allocate(allocationSize);
     DAWN_ASSERT(IsPtrAligned(block.data(), kMaxAllocatedCommandAlignment));
 
     mCurrentBlock = block;

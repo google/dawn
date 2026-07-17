@@ -69,6 +69,7 @@
 #include "src/dawn/native/ExternalTexture.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/InternalPipelineStore.h"
+#include "src/dawn/native/MemoryBlockAllocator.h"
 #include "src/dawn/native/PhysicalDevice.h"
 #include "src/dawn/native/PipelineCache.h"
 #include "src/dawn/native/QuerySet.h"
@@ -410,6 +411,7 @@ MaybeError DeviceBase::Initialize(const UnpackedPtr<DeviceDescriptor>& descripto
 
     mCaches = std::make_unique<DeviceBase::Caches>();
     mDynamicUploader = std::make_unique<DynamicUploader>(this);
+    mMemoryBlockAllocator = std::make_unique<MemoryBlockAllocator>();
     mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
     mInternalPipelineStore = std::make_unique<InternalPipelineStore>(this);
 
@@ -630,6 +632,7 @@ void DeviceBase::Destroy(DestroyReason reason) {
     mInternalPipelineStore = nullptr;
     mExternalTexturePlaceholderView = nullptr;
     mTemporaryUniformBuffer = nullptr;
+    mMemoryBlockAllocator = nullptr;
 
     // Note: mQueue is not released here since the application may still get it after calling
     // Destroy() via APIGetQueue.
@@ -1623,6 +1626,7 @@ MaybeError DeviceBase::Tick() {
     // reclaiming resources one tick earlier.
     mDynamicUploader->Deallocate(mQueue->GetCompletedCommandSerial());
     mQueue->Tick(mQueue->GetCompletedCommandSerial());
+    mMemoryBlockAllocator->Tick();
 
     return {};
 }
@@ -2420,6 +2424,10 @@ DynamicUploader* DeviceBase::GetDynamicUploader() const {
     return mDynamicUploader.get();
 }
 
+MemoryBlockAllocator* DeviceBase::GetMemoryBlockAllocator() {
+    return mMemoryBlockAllocator.get();
+}
+
 // The Toggle device facility
 
 std::vector<const char*> DeviceBase::GetTogglesUsed() const {
@@ -2690,6 +2698,7 @@ bool DeviceBase::ReduceMemoryUsage() {
         return false;
     }
     GetDynamicUploader()->Deallocate(GetQueue()->GetCompletedCommandSerial(), /*freeAll=*/true);
+    mMemoryBlockAllocator->TrimMemory();
     mInternalPipelineStore->ResetScratchBuffers();
     mTemporaryUniformBuffer = nullptr;
 

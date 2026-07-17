@@ -38,8 +38,20 @@
 #include "gtest/gtest.h"
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/native/CommandAllocator.h"
+#include "src/dawn/native/MemoryBlockAllocator.h"
 
 namespace dawn::native {
+namespace {
+
+class CommandAllocatorAndPool : public CommandAllocator {
+  public:
+    CommandAllocatorAndPool() : CommandAllocator(&mBlockAllocator) {}
+
+  private:
+    MemoryBlockAllocator mBlockAllocator;
+};
+
+}  // anonymous namespace
 
 // Definition of the command types used in the tests
 enum class CommandType : uint32_t {
@@ -77,19 +89,19 @@ struct CommandSmall {
 
 // Test allocating nothing works
 TEST(CommandAllocator, DoNothingAllocator) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
 }
 
 // Test iterating over nothing works
 TEST(CommandAllocator, DoNothingAllocatorWithIterator) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
     CommandIterator iterator(std::move(allocator));
     iterator.MakeEmptyAsDataWasDestroyed();
 }
 
 // Test basic usage of allocator + iterator
 TEST(CommandAllocator, Basic) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
 
     uint64_t myPipeline = 0xDEADBEEFBEEFDEAD;
     uint32_t myAttachmentPoint = 2;
@@ -135,7 +147,7 @@ TEST(CommandAllocator, Basic) {
 
 // Test basic usage of allocator + iterator with data
 TEST(CommandAllocator, BasicWithData) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
 
     uint8_t mySize = 8;
     uint8_t myOffset = 3;
@@ -179,7 +191,7 @@ TEST(CommandAllocator, BasicWithData) {
 
 // Test basic iterating several times
 TEST(CommandAllocator, MultipleIterations) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
 
     uint32_t myFirst = 42;
     uint32_t myCount = 16;
@@ -223,7 +235,7 @@ TEST(CommandAllocator, MultipleIterations) {
 }
 // Test large commands work
 TEST(CommandAllocator, LargeCommands) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
 
     const int kCommandCount = 5;
 
@@ -256,7 +268,7 @@ TEST(CommandAllocator, LargeCommands) {
 
 // Test many small commands work
 TEST(CommandAllocator, ManySmallCommands) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
 
     // Stay under max representable uint16_t
     const int kCommandCount = 50000;
@@ -296,7 +308,7 @@ TEST(CommandAllocator, ManySmallCommands) {
 
 // Test usage of iterator.Reset
 TEST(CommandAllocator, IteratorReset) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
 
     uint64_t myPipeline = 0xDEADBEEFBEEFDEAD;
     uint32_t myAttachmentPoint = 2;
@@ -353,7 +365,7 @@ TEST(CommandAllocator, IteratorReset) {
 // Test iterating empty iterators
 TEST(CommandAllocator, EmptyIterator) {
     {
-        CommandAllocator allocator;
+        CommandAllocatorAndPool allocator;
         CommandIterator iterator(std::move(allocator));
 
         CommandType type;
@@ -363,7 +375,7 @@ TEST(CommandAllocator, EmptyIterator) {
         iterator.MakeEmptyAsDataWasDestroyed();
     }
     {
-        CommandAllocator allocator;
+        CommandAllocatorAndPool allocator;
         CommandIterator iterator1(std::move(allocator));
         CommandIterator iterator2(std::move(iterator1));
 
@@ -392,28 +404,28 @@ struct alignas(A) AlignedStruct {
 
 // Test for overflows in Allocate's computations, size 1 variant
 TEST(CommandAllocatorDeathTest, AllocationOverflow_1) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
     EXPECT_DEATH_IF_SUPPORTED(
         allocator.AllocateData<AlignedStruct<1>>(std::numeric_limits<size_t>::max() / 1u), "");
 }
 
 // Test for overflows in Allocate's computations, size 2 variant
 TEST(CommandAllocatorDeathTest, AllocationOverflow_2) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
     EXPECT_DEATH_IF_SUPPORTED(
         allocator.AllocateData<AlignedStruct<2>>(std::numeric_limits<size_t>::max() / 2u), "");
 }
 
 // Test for overflows in Allocate's computations, size 4 variant
 TEST(CommandAllocatorDeathTest, AllocationOverflow_4) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
     EXPECT_DEATH_IF_SUPPORTED(
         allocator.AllocateData<AlignedStruct<4>>(std::numeric_limits<size_t>::max() / 4u), "");
 }
 
 // Test for overflows in Allocate's computations, size 8 variant
 TEST(CommandAllocatorDeathTest, AllocationOverflow_8) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
     EXPECT_DEATH_IF_SUPPORTED(
         allocator.AllocateData<AlignedStruct<8>>(std::numeric_limits<size_t>::max() / 8u), "");
 }
@@ -427,7 +439,7 @@ struct IntWithDefault {
 
 // Test that the allcator correctly defaults initalizes data for Allocate
 TEST(CommandAllocator, AllocateDefaultInitializes) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
 
     IntWithDefault<42>* int42 = allocator.Allocate<IntWithDefault<42>>(CommandType::Draw);
     ASSERT_EQ(int42->value, 42);
@@ -444,7 +456,7 @@ TEST(CommandAllocator, AllocateDefaultInitializes) {
 
 // Test that the allocator correctly default-initalizes data for AllocateData
 TEST(CommandAllocator, AllocateDataDefaultInitializes) {
-    CommandAllocator allocator;
+    CommandAllocatorAndPool allocator;
 
     Span<IntWithDefault<33>> int33 = allocator.AllocateData<IntWithDefault<33>>(size_t{1});
     ASSERT_EQ(int33.size(), size_t{1});
@@ -482,7 +494,12 @@ TEST(CommandAllocator, AcquireCommandBlocks) {
     const std::array<std::array<const uint32_t, kNumCommandsPerAllocator>, kNumAllocators> counts =
         {{{16, 32}, {4, 8}}};
 
-    std::vector<CommandAllocator> allocators(kNumAllocators);
+    MemoryBlockAllocator pool;
+    std::vector<CommandAllocator> allocators;
+    allocators.reserve(kNumAllocators);
+    for (size_t j = 0; j < kNumAllocators; j++) {
+        allocators.emplace_back(&pool);
+    }
     for (size_t j = 0; j < kNumAllocators; ++j) {
         CommandAllocator& allocator = allocators[j];
         for (size_t i = 0; i < kNumCommandsPerAllocator; ++i) {

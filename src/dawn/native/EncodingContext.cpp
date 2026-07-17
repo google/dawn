@@ -41,6 +41,7 @@ EncodingContext::EncodingContext(DeviceBase* device, const ApiObjectBase* initia
     : mDevice(device),
       mTopLevelEncoder(initialEncoder),
       mCurrentEncoder(initialEncoder),
+      mPendingCommands(device->GetMemoryBlockAllocator()),
       mStatus(Status::Open) {
     DAWN_CHECK(!initialEncoder->IsError());
 }
@@ -49,6 +50,7 @@ EncodingContext::EncodingContext(DeviceBase* device, ErrorMonad::ErrorTag tag)
     : mDevice(device),
       mTopLevelEncoder(nullptr),
       mCurrentEncoder(nullptr),
+      mPendingCommands(/*pool=*/nullptr),
       mStatus(Status::ErrorAtCreation) {}
 
 EncodingContext::~EncodingContext() {
@@ -64,6 +66,10 @@ void EncodingContext::Destroy() {
     if (!mWereCommandsAcquired) {
         CommandIterator commands = AcquireCommands();
         FreeCommands(&commands);
+    }
+    mPendingCommands.Destroy();
+    for (CommandAllocator& allocator : mAllocators) {
+        allocator.Destroy();
     }
 
     CloseWithStatus(Status::Destroyed);

@@ -37,6 +37,7 @@
 #include <string_view>
 #include <vector>
 
+#include "partition_alloc/pointers/raw_ptr.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/common/Ref.h"
@@ -91,6 +92,7 @@ constexpr uint32_t kAdditionalData = std::numeric_limits<uint32_t>::max() - 1;
 // complexity to handle variable alignment.
 static inline constexpr size_t kMaxAllocatedCommandAlignment = sizeof(uint64_t);
 
+class MemoryBlockAllocator;
 class CommandAllocator;
 
 class CommandIterator : public NonCopyable {
@@ -186,11 +188,12 @@ class CommandIterator : public NonCopyable {
 
     // Used to avoid a special case for empty iterators.
     alignas(kMaxAllocatedCommandAlignment) uint32_t mEndOfBlock = detail::kEndOfBlock;
+    raw_ptr<MemoryBlockAllocator> mPool = nullptr;
 };
 
 class CommandAllocator : public NonCopyable {
   public:
-    CommandAllocator();
+    explicit CommandAllocator(MemoryBlockAllocator* pool);
     ~CommandAllocator();
 
     // NOTE: A moved-from CommandAllocator is reset to its initial empty state.
@@ -199,6 +202,7 @@ class CommandAllocator : public NonCopyable {
 
     // Frees all blocks held by the allocator and restores it to its initial empty state.
     void Reset();
+    void Destroy();
 
     bool IsEmpty() const;
 
@@ -247,9 +251,6 @@ class CommandAllocator : public NonCopyable {
         kMaxAllocatedCommandAlignment +  // The padding after the command data.
         sizeof(uint32_t);                // The EndOfBlock tag.
 
-    // The default value of mLastAllocationSize.
-    static constexpr size_t kDefaultBaseAllocationSize = 2048;
-
     friend CommandIterator;
     CommandBlocks&& AcquireBlocks();
 
@@ -291,8 +292,8 @@ class CommandAllocator : public NonCopyable {
 
     void ResetPointers();
 
+    raw_ptr<MemoryBlockAllocator> mPool;
     CommandBlocks mBlocks;
-    size_t mLastAllocationSize = kDefaultBaseAllocationSize;
 
     // Data used for the block range at initialization so that the first call to Allocate sees
     // there is not enough space and calls AppendNewBlock. This avoids having to special case the
