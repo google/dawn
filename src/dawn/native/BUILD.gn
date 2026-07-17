@@ -361,6 +361,8 @@ source_set("sources") {
     "Limits.cpp",
     "Limits.h",
     "LogEmitter.h",
+    "MemoryBlockAllocator.cpp",
+    "MemoryBlockAllocator.h",
     "ObjectBase.cpp",
     "ObjectBase.h",
     "ObjectContentHasher.cpp",
