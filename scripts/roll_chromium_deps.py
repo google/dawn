@@ -371,6 +371,10 @@ class GerritUtilHttpConnAdapter:
     """Adapter to extract auth headers from gerrit_util."""
 
     def __init__(self, host: str, uri: str):
+        # Convert Gitiles host into Gerrit host
+        if "review" not in host:
+            subdomain, domain = host.split(".", 1)
+            host = f"{subdomain}-review.{domain}"
         self.req_host = host
         self.req_uri = uri
         self.req_headers = {}
