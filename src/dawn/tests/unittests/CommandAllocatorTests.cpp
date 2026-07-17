@@ -447,16 +447,16 @@ TEST(CommandAllocator, AllocateDataDefaultInitializes) {
     CommandAllocator allocator;
 
     Span<IntWithDefault<33>> int33 = allocator.AllocateData<IntWithDefault<33>>(size_t{1});
-    ASSERT_EQ(int33.size(), 1);
+    ASSERT_EQ(int33.size(), size_t{1});
     ASSERT_EQ(int33[0].value, 33);
 
     Span<IntWithDefault<34>> int34 = allocator.AllocateData<IntWithDefault<34>>(size_t{2});
-    ASSERT_EQ(int34.size(), 2);
+    ASSERT_EQ(int34.size(), size_t{2});
     ASSERT_EQ(int34[0].value, 34);
     ASSERT_EQ(int34[0].value, 34);
 
     Span<IntWithDefault<35>> int35 = allocator.AllocateData<IntWithDefault<35>>(size_t{3});
-    ASSERT_EQ(int35.size(), 3);
+    ASSERT_EQ(int35.size(), size_t{3});
     ASSERT_EQ(int35[0].value, 35);
     ASSERT_EQ(int35[1].value, 35);
     ASSERT_EQ(int35[2].value, 35);
