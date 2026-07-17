@@ -1346,7 +1346,6 @@ ci.thin_tester(
     ),
     targets = targets.bundle(
         targets = [
-            "real_hardware_common_gtests",
         ],
         mixins = [
             "mac_arm64_apple_m2_retina_gpu_experimental",
@@ -1356,10 +1355,12 @@ ci.thin_tester(
         browser_config = targets.browser_config.RELEASE,
         os_type = targets.os_type.MAC,
     ),
-    console_view_entry = consoles.console_view_entry(
-        category = "mac|test|clang|exp|arm64",
-        short_name = "m2",
-    ),
+    # Uncomment this entry when this experimental tester is actually in use.
+    # console_view_entry = consoles.console_view_entry(
+    #     category = "mac|test|clang|exp|arm64",
+    #     short_name = "m2",
+    # ),
+    list_view = "exp",
 )
 
 ci.thin_tester(
@@ -1500,10 +1501,12 @@ ci.thin_tester(
         browser_config = targets.browser_config.RELEASE,
         os_type = targets.os_type.MAC,
     ),
+    # Uncomment this entry when this experimental tester is actually in use.
     console_view_entry = consoles.console_view_entry(
         category = "mac|test|clang|exp|x64",
         short_name = "630",
     ),
+    list_view = "exp",
 )
 
 ci.thin_tester(
@@ -1872,10 +1875,12 @@ ci.thin_tester(
         browser_config = targets.browser_config.RELEASE,
         os_type = targets.os_type.WINDOWS,
     ),
+    # Uncomment this entry when this experimental tester is actually in use.
     console_view_entry = consoles.console_view_entry(
         category = "win|test|clang|exp|x64",
         short_name = "1660",
     ),
+    list_view = "exp",
 )
 
 ci.thin_tester(

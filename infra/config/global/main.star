@@ -404,6 +404,11 @@ consoles.console_view(
 )
 
 consoles.list_view(
+    name = "exp",
+    title = "Dawn experimental CI Builders",
+)
+
+consoles.list_view(
     name = "try",
     title = "Dawn try Builders",
 )
