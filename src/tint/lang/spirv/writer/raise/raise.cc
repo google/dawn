@@ -259,6 +259,20 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                     .depth_range_offsets = options.depth_range_offsets,
                 }));
 
+    // Immediate data is decomposed after ShaderIO because ShaderIO can introduce new accesses
+    // into the immediate block (frag-depth clamping). Decomposing to a u32 array lets f16
+    // immediates unpack via bitcast without the optional StoragePushConstant16 capability.
+    TINT_CHECK_RESULT(core::ir::transform::DecomposeAccess(
+        module, {
+                    .immediate = true,
+                    .minimum_array_size = options.minimum_immediate_size,
+                }));
+
+    // BlockDecoratedStructs must run again to wrap the decomposed immediate array in a block
+    // struct, as SPIR-V requires push constant variables to be typed as a struct. Storage and
+    // uniform variables already carry a block struct from the earlier run and are left untouched.
+    TINT_CHECK_RESULT(core::ir::transform::BlockDecoratedStructs(module));
+
     // ForkExplicitLayoutTypes must come after DecomposeAccess, since it rewrites
     // host-shareable array types to use the explicitly laid array type defined by the SPIR-V
     // dialect.

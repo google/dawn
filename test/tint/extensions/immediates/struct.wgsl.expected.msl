@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct Immediate_packed_vec3 {
+  /* 0x0000 */ packed_float3 color;
+  /* 0x000c */ uint count;
+};
+
+struct tint_module_vars_struct {
+  const constant Immediate_packed_vec3* data;
+  device float4* output;
+};
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void v(const constant Immediate_packed_vec3* data [[buffer(30)]], device float4* output [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.data=data, .output=output};
+  float3 const v_1 = float3((*tint_module_vars.data).color);
+  (*tint_module_vars.output) = float4(v_1, float((*tint_module_vars.data).count));
+}

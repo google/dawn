@@ -613,15 +613,6 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
                         << style::Enum(address_space) << " here";
     };
 
-    // Among three host-shareable address spaces, f16 is supported in "uniform" and
-    // "storage" address space, but not "immediate" address space yet.
-    if (Is<core::type::F16>(store_ty->DeepestElement()) &&
-        address_space == core::AddressSpace::kImmediate) {
-        AddError(source) << "using " << style::Type("f16") << " in " << style::Enum("immediate")
-                         << " address space is not implemented yet";
-        return false;
-    }
-
     if (auto* str = store_ty->As<sem::Struct>()) {
         auto& str_source = str->Declaration()->name->source;
         for (size_t i = 0; i < str->Members().Length(); ++i) {

@@ -650,11 +650,6 @@ void Functional::CheckVar(const Var* var) {
             AddError(var) << "vars in the 'immediate' address space must be host-shareable";
             return;
         }
-
-        if (ContainsType<core::type::F16>(mv->StoreType())) {
-            AddError(var) << "vars in the 'immediate' address space cannot contain f16 types";
-            return;
-        }
     } else if (mv->AddressSpace() == core::AddressSpace::kPixelLocal) {
         if (var->Block() == ir_.root_block) {
             if (!mv->StoreType()->Is<core::type::Struct>()) {

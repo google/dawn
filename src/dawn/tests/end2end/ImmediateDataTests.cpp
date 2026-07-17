@@ -29,6 +29,7 @@
 #include <limits>
 #include <vector>
 
+#include "src/dawn/common/Math.h"
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
@@ -999,6 +1000,89 @@ DAWN_INSTANTIATE_TEST(ImmediateDataTests,
                       OpenGLESBackend(),
                       VulkanBackend(),
                       WebGPUBackend());
+
+// f16 immediates are tested in their own suite so it can require the shader-f16 feature and be
+// instantiated only on backends that can enable it (on D3D12 that means DXC).
+class ImmediateDataF16Tests : public DawnTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        if (SupportsFeatures({wgpu::FeatureName::ShaderF16})) {
+            return {wgpu::FeatureName::ShaderF16};
+        }
+        return {};
+    }
+
+    void SetUp() override {
+        DawnTest::SetUp();
+        // GetRequiredFeatures only requests shader-f16 when the adapter advertises it, but the
+        // device can still be created without it: on D3D12 the adapter reports support even when
+        // the pipeline uses FXC, while enabling the feature requires DXC, so device creation drops
+        // it. Skip when the feature did not make it onto the device. This runs per test because
+        // DawnTest recreates the device for each test case.
+        DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::ShaderF16));
+    }
+};
+
+// Authoritative check that Tint's f16 immediate member byte offsets agree with the bytes Dawn
+// uploads via SetImmediates. Three f16 members sit at byte offsets 0/2/4, so the last of the two
+// uint32_t slots is only partially used, exercising the padded-tail case.
+TEST_P(ImmediateDataF16Tests, Vec3) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        enable f16;
+        struct Immediate {
+            a: f16,
+            b: f16,
+            c: f16,
+        };
+        var<immediate> imm: Immediate;
+        @group(0) @binding(0) var<storage, read_write> output : vec3f;
+
+        @compute @workgroup_size(1, 1, 1)
+        fn csMain() {
+            output = vec3f(f32(imm.a), f32(imm.b), f32(imm.c));
+        })");
+
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = sizeof(float) * 3;
+    bufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage;
+    wgpu::Buffer storageBuffer = device.CreateBuffer(&bufferDesc);
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = module;
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, storageBuffer}});
+
+    // These values are exactly representable in f16 but carry dense mantissa bits and mixed signs,
+    // so they catch bit-level packing errors as well as offset/stride/ordering errors. Packed
+    // contiguously, the three uint16_t values occupy byte offsets 0/2/4 -- matching the WGSL struct
+    // member offsets.
+    std::array<float, 3> values = {1.5f, -2.25f, 3.75f};
+    std::array<uint16_t, 4> packed = {
+        Float32ToFloat16(values[0]),
+        Float32ToFloat16(values[1]),
+        Float32ToFloat16(values[2]),
+        0,
+    };
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+    computePassEncoder.SetPipeline(pipeline);
+    computePassEncoder.SetImmediates(0, packed.data(), packed.size() * sizeof(uint16_t));
+    computePassEncoder.SetBindGroup(0, bindGroup);
+    computePassEncoder.DispatchWorkgroups(1);
+    computePassEncoder.End();
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(values.data(), storageBuffer, 0, values.size());
+}
+
+DAWN_INSTANTIATE_TEST(ImmediateDataF16Tests,
+                      D3D12Backend({}, {"use_dxc"}),
+                      MetalBackend(),
+                      VulkanBackend());
 
 class ImmediateDataWithResourceTableTests : public DawnTest {
   protected:

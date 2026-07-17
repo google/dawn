@@ -7275,6 +7275,57 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 }
 
+// Regression test: an immediate struct whose Size() is rounded up by member alignment (here a
+// vec4 forces 16-byte alignment, padding 24 bytes of content to 32) must be decomposed to an array
+// sized by minimum_array_size (the reserved push constant range), not by the padded Size(). Using
+// the padded Size() emitted a block larger than the reserved range and failed Vulkan push constant
+// validation (VUID-VkGraphicsPipelineCreateInfo-layout-10069).
+TEST_F(IR_DecomposeAccessTest, ImmediateAccessPaddedStructCappedByMinimumArraySize) {
+    auto* SB = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("b"), ty.f32()},
+                                                    {mod.symbols.New("c"), ty.f32()},
+                                                });
+
+    auto* var = b.Var("v", immediate, SB, core::Access::kRead);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("b", b.Load(b.Access(ty.ptr<immediate, f32, core::Access::kRead>(), var, 2_u)));
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  a:vec4<f32> @offset(0)
+  b:f32 @offset(16)
+  c:f32 @offset(20)
+}
+
+$B1: {  # root
+  %v:ptr<immediate, array<u32, 6>, read> = var undef
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<immediate, u32, read> = access %v, 5u
+    %4:u32 = load %3
+    %5:f32 = bitcast<f32> %4
+    %b:f32 = let %5
+    ret
+  }
+}
+)";
+
+    // SB has align 16 (from the vec4), so SB->Size() is roundUp(16, 24) = 32 -> 8 u32 elements.
+    // minimum_array_size is the reserved range of 24 bytes -> the array must be capped at 6.
+    DecomposeAccessOptions options{.immediate = true, .minimum_array_size = 24};
+    Run(DecomposeAccess, options);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 
 }  // namespace tint::core::ir::transform

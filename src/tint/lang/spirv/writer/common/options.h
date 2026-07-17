@@ -284,6 +284,10 @@ struct Options {
     // Configuration for substitute overrides
     SubstituteOverridesConfig substitute_overrides_config{};
 
+    /// Minimum size in bytes of all immediate data in the pipeline, both internal and
+    /// user-defined. Used to size the decomposed immediate array.
+    uint32_t minimum_immediate_size = 0;
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
                  entry_point_name,
@@ -304,7 +308,8 @@ struct Options {
                  depth_range_offsets,
                  spirv_version,
                  resource_table,
-                 substitute_overrides_config);
+                 substitute_overrides_config,
+                 minimum_immediate_size);
 };
 
 }  // namespace tint::spirv::writer

@@ -924,6 +924,65 @@ void main() {
 )");
 }
 
+TEST_F(HlslWriterTest, AccessImmediateScalarF16) {
+    auto* var = b.Var<immediate, f16, core::Access::kRead>("v");
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(var));
+        b.Return(func);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+cbuffer cbuffer_v : register(b0) {
+  uint4 v[1];
+};
+vector<float16_t, 2> tint_bitcast_to_f16(uint src) {
+  uint v_1 = src;
+  uint2 v_2 = uint2(v_1, v_1);
+  vector<uint16_t, 2> v16 = vector<uint16_t, 2>(((v_2 >> uint2(0u, 16u)) & (65535u).xx));
+  return asfloat16(v16);
+}
+
+void main() {
+  float16_t a = tint_bitcast_to_f16(v[0u].x).x;
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, AccessImmediateVec3F16) {
+    auto* var = b.Var<immediate, vec3<f16>, core::Access::kRead>("v");
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(var));
+        b.Return(func);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+cbuffer cbuffer_v : register(b0) {
+  uint4 v[1];
+};
+vector<float16_t, 4> tint_bitcast_to_f16(uint2 src) {
+  uint2 v_1 = src;
+  vector<uint16_t, 4> v16 = vector<uint16_t, 4>(((v_1.xxyy >> uint4(0u, 16u, 0u, 16u)) & (65535u).xxxx));
+  return asfloat16(v16);
+}
+
+void main() {
+  vector<float16_t, 3> a = tint_bitcast_to_f16(v[0u].xy).xyz;
+}
+
+)");
+}
+
 TEST_F(HlslWriterTest, AccessUniformVector) {
     auto* var = b.Var<uniform, vec4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);

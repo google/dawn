@@ -363,6 +363,9 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     }
 
     // Set internal immediate offsets
+    // Size the immediate block to the pipeline's used slots so the decomposed array matches the
+    // push constant range reserved by the pipeline layout (see ToPushConstantBytes).
+    req.tintOptions.minimum_immediate_size = in.immediateMask.count() * kImmediateElementByteSize;
     if (HasImmediates(&RenderImmediates::clampFragDepth, in.immediateMask)) {
         uint32_t offsetStartBytes =
             GetImmediateByteOffsetInPipeline(&RenderImmediates::clampFragDepth, in.immediateMask);

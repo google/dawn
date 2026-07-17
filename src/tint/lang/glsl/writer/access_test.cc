@@ -980,6 +980,90 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, AccessImmediateScalarF16) {
+    auto* var = b.Var<immediate, f16, core::Access::kRead>("v");
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(var));
+        b.Return(func);
+    });
+
+    Options options;
+    options.minimum_immediate_size = 4u;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+layout(location = 0) uniform uint tint_immediates[1];
+f16vec2 tint_bitcast_to_16bit(uint src) {
+  return unpackFloat2x16(src);
+}
+void main() {
+  float16_t a = tint_bitcast_to_16bit(tint_immediates[0u]).x;
+}
+)");
+}
+
+TEST_F(GlslWriterTest, AccessImmediateVec3F16) {
+    auto* var = b.Var<immediate, vec3<f16>, core::Access::kRead>("v");
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(var));
+        b.Return(func);
+    });
+
+    Options options;
+    options.minimum_immediate_size = 8u;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+layout(location = 0) uniform uint tint_immediates[2];
+f16vec4 tint_bitcast_to_16bit(uvec2 src) {
+  return f16vec4(unpackFloat2x16(src.x), unpackFloat2x16(src.y));
+}
+void main() {
+  f16vec3 a = tint_bitcast_to_16bit(uvec2(tint_immediates[0u], tint_immediates[1u])).xyz;
+}
+)");
+}
+
+TEST_F(GlslWriterTest, AccessImmediateVec4F16) {
+    auto* var = b.Var<immediate, vec4<f16>, core::Access::kRead>("v");
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(var));
+        b.Return(func);
+    });
+
+    Options options;
+    options.minimum_immediate_size = 8u;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+layout(location = 0) uniform uint tint_immediates[2];
+f16vec4 tint_bitcast_to_16bit(uvec2 src) {
+  return f16vec4(unpackFloat2x16(src.x), unpackFloat2x16(src.y));
+}
+void main() {
+  f16vec4 a = tint_bitcast_to_16bit(uvec2(tint_immediates[0u], tint_immediates[1u]));
+}
+)");
+}
+
 TEST_F(GlslWriterTest, AccessUniformVector) {
     auto* var = b.Var<uniform, vec4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);

@@ -747,28 +747,18 @@ alias t = ptr<immediate, bool>;
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_ImmediateF16) {
-    EXPECT_ERROR(R"(
+    EXPECT_SUCCESS(R"(
 enable f16;
 
 var<immediate> g : f16;
-)",
-                 R"(
-input.wgsl:4:1 error: using 'f16' in 'immediate' address space is not implemented yet
-var<immediate> g : f16;
-^^^^^^^^^^^^^^^^^^^^^^
 )");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_ImmediateF16) {
-    EXPECT_ERROR(R"(
+    EXPECT_SUCCESS(R"(
 enable f16;
 
 alias t = ptr<immediate, f16>;
-)",
-                 R"(
-input.wgsl:4:11 error: using 'f16' in 'immediate' address space is not implemented yet
-alias t = ptr<immediate, f16>;
-          ^^^^^^^^^^^^^^^^^^^
 )");
 }
 

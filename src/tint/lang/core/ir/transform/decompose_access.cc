@@ -122,8 +122,18 @@ struct State {
                 TINT_CHECK_RESULT_UNWRAP(array_length,
                                          NumBaseElementsChecked(var_ty->StoreType(), var));
 
-                array_length =
-                    std::max(array_length, options.minimum_array_size / BaseEleType()->Size());
+                // For the immediate address space, minimum_array_size is the exact byte size of the
+                // push constant range reserved by the pipeline. The store type's own Size() may be
+                // larger because a struct rounds up to its member alignment (e.g. a struct holding
+                // a vec4 has 16-byte alignment, so 24 bytes of content report a size of 32). Using
+                // that padded size would emit a block larger than the reserved range and fail
+                // Vulkan push constant validation, so cap the immediate array at the reserved size.
+                if (options.immediate && options.minimum_array_size > 0) {
+                    array_length = options.minimum_array_size / BaseEleType()->Size();
+                } else {
+                    array_length =
+                        std::max(array_length, options.minimum_array_size / BaseEleType()->Size());
+                }
                 array_ty = ty.array(BaseEleType(), array_length);
             }
 
@@ -923,13 +933,13 @@ struct State {
         //    - scalar loads equal to number of vector elements
         // 2. Base type is u32
         //    - 1 or 2 u32 loads
-        //    - Note: vec3h is not possible here
+        //    - Note: vec3h occupies two u32 words (immediate address space)
         // 3. Base type is vec2u
         //    - 1 load of vec2u
         //    - Note: only vec4h possible here
         // 4. Base type is vec4u
         //    - 1 load of vec4u
-        //    - Note: vec3h is not possible here, but vec2h is
+        //    - Note: vec2h, vec3h, and vec4h are all possible here
         if (BaseEleType() == ty.u16()) {
             auto* vec_ty = ty.vec(ty.u16(), num_loads);
             auto* construct = b.Construct(vec_ty, loads);
@@ -941,8 +951,14 @@ struct State {
             if (result_ty->Width() == 2) {
                 return b.Bitcast(result_ty, loads[0]);
             }
-            TINT_IR_ASSERT(ir, result_ty->Width() == 4);
+            TINT_IR_ASSERT(ir, result_ty->Width() == 3 || result_ty->Width() == 4);
             auto* construct = b.Construct(ty.vec2u(), loads);
+            // A vec3 occupies the same two words as a vec4, so bitcast as a vec4 and swizzle out
+            // the last element.
+            if (result_ty->Width() == 3) {
+                auto* bc = b.Bitcast(ty.vec4(result_ty->Type()), construct->Result());
+                return b.Swizzle(result_ty, bc->Result(), {0, 1, 2});
+            }
             return b.Bitcast(result_ty, construct->Result());
         } else if (BaseEleType() == ty.vec2u()) {
             TINT_IR_ASSERT(ir, result_ty->Width() == 4);

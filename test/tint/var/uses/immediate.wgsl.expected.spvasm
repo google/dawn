@@ -4,37 +4,43 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 17
+; Bound: 22
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main1 "main1"
                OpExecutionMode %main1 LocalSize 1 1 1
-               OpMemberName %a_block 0 "inner"
-               OpName %a_block "a_block"
+               OpMemberName %tint_symbol_tint_explicit_layout 0 "inner"
+               OpName %tint_symbol_tint_explicit_layout "tint_symbol_tint_explicit_layout"
                OpName %uses_a "uses_a"
                OpName %foo "foo"
                OpName %main1 "main1"
-               OpMemberDecorate %a_block 0 Offset 0
-               OpDecorate %a_block Block
-        %int = OpTypeInt 32 1
-    %a_block = OpTypeStruct %int
-%_ptr_PushConstant_a_block = OpTypePointer PushConstant %a_block
-          %1 = OpVariable %_ptr_PushConstant_a_block PushConstant
-       %void = OpTypeVoid
-          %7 = OpTypeFunction %void
-%_ptr_PushConstant_int = OpTypePointer PushConstant %int
+               OpDecorate %_arr_uint_uint_1 ArrayStride 4
+               OpMemberDecorate %tint_symbol_tint_explicit_layout 0 Offset 0
+               OpDecorate %tint_symbol_tint_explicit_layout Block
        %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+%_arr_uint_uint_1 = OpTypeArray %uint %uint_1
+%tint_symbol_tint_explicit_layout = OpTypeStruct %_arr_uint_uint_1
+%_ptr_PushConstant_tint_symbol_tint_explicit_layout = OpTypePointer PushConstant %tint_symbol_tint_explicit_layout
+          %1 = OpVariable %_ptr_PushConstant_tint_symbol_tint_explicit_layout PushConstant
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+%_ptr_PushConstant__arr_uint_uint_1 = OpTypePointer PushConstant %_arr_uint_uint_1
      %uint_0 = OpConstant %uint 0
-     %uses_a = OpFunction %void None %7
-          %8 = OpLabel
-          %9 = OpAccessChain %_ptr_PushConstant_int %1 %uint_0
-        %foo = OpLoad %int %9 None
+%_ptr_PushConstant_uint = OpTypePointer PushConstant %uint
+        %int = OpTypeInt 32 1
+     %uses_a = OpFunction %void None %9
+         %10 = OpLabel
+         %11 = OpAccessChain %_ptr_PushConstant__arr_uint_uint_1 %1 %uint_0
+         %14 = OpAccessChain %_ptr_PushConstant_uint %11 %uint_0
+         %16 = OpLoad %uint %14 None
+        %foo = OpBitcast %int %16
                OpReturn
                OpFunctionEnd
-      %main1 = OpFunction %void None %7
-         %15 = OpLabel
-         %16 = OpFunctionCall %void %uses_a
+      %main1 = OpFunction %void None %9
+         %20 = OpLabel
+         %21 = OpFunctionCall %void %uses_a
                OpReturn
                OpFunctionEnd
 ;
@@ -43,43 +49,49 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 20
+; Bound: 25
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main2 "main2"
                OpExecutionMode %main2 LocalSize 1 1 1
-               OpMemberName %a_block 0 "inner"
-               OpName %a_block "a_block"
+               OpMemberName %tint_symbol_tint_explicit_layout 0 "inner"
+               OpName %tint_symbol_tint_explicit_layout "tint_symbol_tint_explicit_layout"
                OpName %uses_a "uses_a"
                OpName %foo "foo"
                OpName %uses_uses_a "uses_uses_a"
                OpName %main2 "main2"
-               OpMemberDecorate %a_block 0 Offset 0
-               OpDecorate %a_block Block
-        %int = OpTypeInt 32 1
-    %a_block = OpTypeStruct %int
-%_ptr_PushConstant_a_block = OpTypePointer PushConstant %a_block
-          %1 = OpVariable %_ptr_PushConstant_a_block PushConstant
-       %void = OpTypeVoid
-          %7 = OpTypeFunction %void
-%_ptr_PushConstant_int = OpTypePointer PushConstant %int
+               OpDecorate %_arr_uint_uint_1 ArrayStride 4
+               OpMemberDecorate %tint_symbol_tint_explicit_layout 0 Offset 0
+               OpDecorate %tint_symbol_tint_explicit_layout Block
        %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+%_arr_uint_uint_1 = OpTypeArray %uint %uint_1
+%tint_symbol_tint_explicit_layout = OpTypeStruct %_arr_uint_uint_1
+%_ptr_PushConstant_tint_symbol_tint_explicit_layout = OpTypePointer PushConstant %tint_symbol_tint_explicit_layout
+          %1 = OpVariable %_ptr_PushConstant_tint_symbol_tint_explicit_layout PushConstant
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+%_ptr_PushConstant__arr_uint_uint_1 = OpTypePointer PushConstant %_arr_uint_uint_1
      %uint_0 = OpConstant %uint 0
-     %uses_a = OpFunction %void None %7
-          %8 = OpLabel
-          %9 = OpAccessChain %_ptr_PushConstant_int %1 %uint_0
-        %foo = OpLoad %int %9 None
+%_ptr_PushConstant_uint = OpTypePointer PushConstant %uint
+        %int = OpTypeInt 32 1
+     %uses_a = OpFunction %void None %9
+         %10 = OpLabel
+         %11 = OpAccessChain %_ptr_PushConstant__arr_uint_uint_1 %1 %uint_0
+         %14 = OpAccessChain %_ptr_PushConstant_uint %11 %uint_0
+         %16 = OpLoad %uint %14 None
+        %foo = OpBitcast %int %16
                OpReturn
                OpFunctionEnd
-%uses_uses_a = OpFunction %void None %7
-         %15 = OpLabel
-         %16 = OpFunctionCall %void %uses_a
+%uses_uses_a = OpFunction %void None %9
+         %20 = OpLabel
+         %21 = OpFunctionCall %void %uses_a
                OpReturn
                OpFunctionEnd
-      %main2 = OpFunction %void None %7
-         %18 = OpLabel
-         %19 = OpFunctionCall %void %uses_uses_a
+      %main2 = OpFunction %void None %9
+         %23 = OpLabel
+         %24 = OpFunctionCall %void %uses_uses_a
                OpReturn
                OpFunctionEnd
 ;
@@ -88,37 +100,43 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 17
+; Bound: 22
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main3 "main3"
                OpExecutionMode %main3 LocalSize 1 1 1
-               OpMemberName %b_block 0 "inner"
-               OpName %b_block "b_block"
+               OpMemberName %tint_symbol_tint_explicit_layout 0 "inner"
+               OpName %tint_symbol_tint_explicit_layout "tint_symbol_tint_explicit_layout"
                OpName %uses_b "uses_b"
                OpName %foo "foo"
                OpName %main3 "main3"
-               OpMemberDecorate %b_block 0 Offset 0
-               OpDecorate %b_block Block
-        %int = OpTypeInt 32 1
-    %b_block = OpTypeStruct %int
-%_ptr_PushConstant_b_block = OpTypePointer PushConstant %b_block
-          %1 = OpVariable %_ptr_PushConstant_b_block PushConstant
-       %void = OpTypeVoid
-          %7 = OpTypeFunction %void
-%_ptr_PushConstant_int = OpTypePointer PushConstant %int
+               OpDecorate %_arr_uint_uint_1 ArrayStride 4
+               OpMemberDecorate %tint_symbol_tint_explicit_layout 0 Offset 0
+               OpDecorate %tint_symbol_tint_explicit_layout Block
        %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+%_arr_uint_uint_1 = OpTypeArray %uint %uint_1
+%tint_symbol_tint_explicit_layout = OpTypeStruct %_arr_uint_uint_1
+%_ptr_PushConstant_tint_symbol_tint_explicit_layout = OpTypePointer PushConstant %tint_symbol_tint_explicit_layout
+          %1 = OpVariable %_ptr_PushConstant_tint_symbol_tint_explicit_layout PushConstant
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+%_ptr_PushConstant__arr_uint_uint_1 = OpTypePointer PushConstant %_arr_uint_uint_1
      %uint_0 = OpConstant %uint 0
-     %uses_b = OpFunction %void None %7
-          %8 = OpLabel
-          %9 = OpAccessChain %_ptr_PushConstant_int %1 %uint_0
-        %foo = OpLoad %int %9 None
+%_ptr_PushConstant_uint = OpTypePointer PushConstant %uint
+        %int = OpTypeInt 32 1
+     %uses_b = OpFunction %void None %9
+         %10 = OpLabel
+         %11 = OpAccessChain %_ptr_PushConstant__arr_uint_uint_1 %1 %uint_0
+         %14 = OpAccessChain %_ptr_PushConstant_uint %11 %uint_0
+         %16 = OpLoad %uint %14 None
+        %foo = OpBitcast %int %16
                OpReturn
                OpFunctionEnd
-      %main3 = OpFunction %void None %7
-         %15 = OpLabel
-         %16 = OpFunctionCall %void %uses_b
+      %main3 = OpFunction %void None %9
+         %20 = OpLabel
+         %21 = OpFunctionCall %void %uses_b
                OpReturn
                OpFunctionEnd
 ;

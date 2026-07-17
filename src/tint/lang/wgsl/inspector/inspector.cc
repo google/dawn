@@ -1008,7 +1008,7 @@ uint32_t Inspector::ComputeImmediateDataSize(const ast::Function* func) const {
         }
     }
 
-    return size;
+    return tint::RoundUp(static_cast<uint32_t>(kImmediateSlotSize), size);
 }
 
 std::vector<PixelLocalMemberType> Inspector::ComputePixelLocalMemberTypes(

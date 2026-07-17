@@ -277,6 +277,64 @@ kernel void entry(device tint_array<uint, 1>* a [[buffer(0)]], const constant ti
     EXPECT_TRUE(output_.needs_storage_buffer_sizes);
 }
 
+TEST_F(MslWriterTest, ImmediateF16) {
+    auto* v = b.Var<immediate, f16, core::Access::kRead>("v");
+    mod.root_block->Append(v);
+
+    auto* func = b.ComputeFunction("entry");
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(v));
+        b.Return(func);
+    });
+
+    Options options;
+    options.immediate_binding_point = tint::BindingPoint{0, 30};
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  const constant half* v;
+};
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void entry(const constant half* v [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
+  half const a = (*tint_module_vars.v);
+}
+)");
+}
+
+TEST_F(MslWriterTest, ImmediateVec3F16) {
+    auto* v = b.Var<immediate, vec3<f16>, core::Access::kRead>("v");
+    mod.root_block->Append(v);
+
+    auto* func = b.ComputeFunction("entry");
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(v));
+        b.Return(func);
+    });
+
+    Options options;
+    options.immediate_binding_point = tint::BindingPoint{0, 30};
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  const constant packed_half3* v;
+};
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void entry(const constant packed_half3* v [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
+  half3 const a = half3((*tint_module_vars.v));
+}
+)");
+}
+
 TEST_F(MslWriterTest, StripAllNames) {
     auto* str = ty.Struct(mod.symbols.New("MyStruct"), {
                                                            {mod.symbols.Register("a"), ty.i32()},

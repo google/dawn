@@ -262,6 +262,25 @@ var<immediate> pc: f32;
     EXPECT_EQ(4u, result[0].immediate_data_size);
 }
 
+// Test that immediate_data_size is rounded up to 4 (bytes) for a single f16
+// immediate data, which has a raw size of 2 bytes.
+TEST_F(InspectorGetEntryPointTest, ImmediateDataSizeF16RoundsUpToFour) {
+    auto* src = R"(
+enable f16;
+
+var<immediate> x : f16;
+
+@compute @workgroup_size(1) fn main() { _ = x; }
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(4u, result[0].immediate_data_size);
+}
+
 TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
     auto* src = R"(
 @compute @workgroup_size(8i, 2i, 1i)

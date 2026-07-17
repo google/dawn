@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  const constant half* value;
+  device float* output;
+};
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void v(const constant half* value [[buffer(30)]], device float* output [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.value=value, .output=output};
+  (*tint_module_vars.output) = float((*tint_module_vars.value));
+}

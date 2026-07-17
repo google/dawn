@@ -537,14 +537,7 @@ TEST_F(IR_ValidatorTest, Var_Immediate_f16) {
     mod.root_block->Append(v);
 
     auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(
-            R"(:2:34 error: var: vars in the 'immediate' address space cannot contain f16 types
-  %1:ptr<immediate, f16, read> = var undef
-                                 ^^^
-)")) << res.Failure();
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Var_Immediate_Struct_f16) {
@@ -555,14 +548,7 @@ TEST_F(IR_ValidatorTest, Var_Immediate_Struct_f16) {
     mod.root_block->Append(v);
 
     auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(
-            R"(:6:32 error: var: vars in the 'immediate' address space cannot contain f16 types
-  %1:ptr<immediate, S, read> = var undef
-                               ^^^
-)")) << res.Failure();
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Var_Immediate_vec3f16) {
@@ -570,14 +556,7 @@ TEST_F(IR_ValidatorTest, Var_Immediate_vec3f16) {
     mod.root_block->Append(v);
 
     auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(
-            R"(:2:40 error: var: vars in the 'immediate' address space cannot contain f16 types
-  %1:ptr<immediate, vec3<f16>, read> = var undef
-                                       ^^^
-)")) << res.Failure();
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Var_Immediate_Multiple_SameEntryPoint) {
