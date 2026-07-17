@@ -1347,26 +1347,26 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndRast
     // TODO(crbug.com/458113207): Flaky w/ WARP.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
 
-    // TODO(crbug.com/500793601): Fails on Windows 11/AMD RX 5500 XT.
-    DAWN_TEST_UNSUPPORTED_IF(IsWindows11() && IsAMD());
-
     constexpr bool kTestDepth = false;
     constexpr float kMSAACoverage = 0.50f;
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;
     constexpr bool kAlphaToCoverageEnabled = true;
     constexpr bool kFlipTriangle = true;
 
-    // For those values of alpha we expect the proportion of samples to be covered
-    // to correspond to the value of alpha.
-    // We're assuming in the case of alpha = 0.50f that the implementation
-    // dependendent algorithm will choose exactly one of the samples covered by the
-    // triangle.
+    // The Direct3D 11.3 Functional Specification, section 17.18 Alpha-to-Coverage:
+    // https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm#17.18%20Alpha-to-Coverage
+    // "As alpha goes from 0 to 1, the resulting coverages should generally increase monotonically,
+    // however hardware may or may not perform area dithering to provide some better quantization
+    // of alpha values at the cost of spatial resolution and noise."
     for (float alpha : {0.0f, 0.50f, 1.00f}) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
             kTestDepth, kSampleMask, kAlphaToCoverageEnabled, kFlipTriangle);
 
-        const wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, alpha - 0.01f};
+        // AMD uses exact endpoint alpha values; other vendors use a small offset to avoid
+        // implementation-dependent quantization at alpha-to-coverage thresholds.
+        const float colorAlpha = IsAMD() ? alpha : alpha - 0.01f;
+        const wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, colorAlpha};
 
         // Draw a green triangle.
         {
@@ -1380,7 +1380,16 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndRast
         wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
         queue.Submit(1, &commandBuffer);
 
-        VerifyResolveTarget(kGreen, mResolveTexture, 0, 0, kMSAACoverage * alpha);
+        if (IsAMD() && alpha == 0.50f) {
+            // AMD may select either rasterized sample at an intermediate alpha. Only require the
+            // result to remain within the rasterization coverage.
+            const utils::RGBA8 minExpectedColor = ExpectedMSAAColor(kGreen, 0.0f);
+            const utils::RGBA8 maxExpectedColor = ExpectedMSAAColor(kGreen, kMSAACoverage);
+            EXPECT_PIXEL_RGBA8_BETWEEN(minExpectedColor, maxExpectedColor, mResolveTexture,
+                                       (kWidth - 1) / 2, (kHeight - 1) / 2);
+        } else {
+            VerifyResolveTarget(kGreen, mResolveTexture, 0, 0, kMSAACoverage * alpha);
+        }
     }
 }
 
