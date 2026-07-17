@@ -43,6 +43,9 @@ class AllocatorMemoryInstrumentationTest : public DawnTest {
 
 // Test the detailed memory usage reported by GetAllocatorMemoryInfo()
 TEST_P(AllocatorMemoryInstrumentationTest, GetAllocatorMemoryInfo) {
+    // TODO(crbug.com/536069163): Fails on older WARP versions
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     native::AllocatorMemoryInfo memInfo = native::GetAllocatorMemoryInfo(device.Get());
     auto usedMemoryInInitialization = memInfo.totalUsedMemory;
 
