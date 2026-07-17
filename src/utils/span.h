@@ -375,30 +375,19 @@ constexpr auto SpanAsWritableBytes(detail::SpanBase<T, Index, PtrType> s) {
     }
 }
 
-// Converts a `Span<[const|volatile] std::byte>` to a `Span<[const|volatile] T>`.
-// Mirrors Chromium's base::subtle::reintepret_span with some minor differences:
-//   - Allows for volatile qualifiers as long as they are not cast away.
-//   - Relaxes requirement for std::is_trivially_copyable<T> for volatile structures because they
-//     are never trivially copyable when used in Spans.
-// TODO(https://crbug.com/524405497): Support `Span<std::byte, ...>` to `Span<T, N>` once fixed
-// extent spans are supported.
-template <typename T, typename Index = size_t, typename ByteType>
-    requires(
-        // This function effectively "creates" objects by overlaying a type onto raw bytes,
-        // bypassing constructors. Such an operation is only safe for objects that do not maintain
-        // internal invariant. Therefore, we restrict this function to trivially copyable types,
-        // unless we are dealing with a volatile type in which case we assume the user is aware of
-        // the potential pitfalls.
-        // TODO(https://crbug.com/528027992): Add this restriction back once we make wire
-        // serialization volatile in both directions.
-        // (std::is_trivially_copyable_v<T> || std::is_volatile_v<T>) &&
-        // Only allow reintepreting spans of std::byte type.
-        std::same_as<std::remove_cv_t<ByteType>, std::byte> &&
-        // Ensure we are not casting away constness.
-        (!std::is_const_v<ByteType> || std::is_const_v<T>) &&
-        // Ensure we are not casting away volatility.
-        (!std::is_volatile_v<ByteType> || std::is_volatile_v<T>))
-constexpr auto ReinterpretSpan(Span<ByteType> s) {
+namespace detail {
+template <typename T, typename Index, typename ByteType>
+concept LegalByteReinterpretAs =
+    // Only allow reintepreting spans of std::byte type.
+    std::same_as<std::remove_cv_t<ByteType>, std::byte> &&
+    // Ensure we are not casting away constness.
+    (!std::is_const_v<ByteType> || std::is_const_v<T>) &&
+    // Ensure we are not casting away volatility.
+    (!std::is_volatile_v<ByteType> || std::is_volatile_v<T>);
+
+template <typename T, typename Index, typename ByteType>
+    requires(LegalByteReinterpretAs<T, Index, ByteType>)
+constexpr auto ReinterpretSpanImpl(Span<ByteType> s) {
     // Check for proper alignment of the target type.
     DAWN_CHECK(reinterpret_cast<uintptr_t>(s.data()) % alignof(T) == 0u);
     // Check that the size is a multiple of the target type.
@@ -428,6 +417,30 @@ constexpr auto ReinterpretSpan(Span<ByteType> s) {
     // lifetime of the array.
     return DAWN_UNSAFE_BUFFERS(
         ityp::span<Index, T>{ptr, Index{UnderlyingType<Index>(s.size_bytes() / sizeof(T))}});
+}
+}  // namespace detail
+
+// Converts a `Span<[const|volatile] std::byte>` to a `Span<[const|volatile] T>`.
+// Mirrors Chromium's base::subtle::reinterpret_span with some minor differences:
+//   - Allows for volatile qualifiers as long as they are not cast away.
+//   - Provides a less strict requirement for std::is_trivially_copyable<T> if using the
+//     alternative overload along with the UNSAFE_BUFFER suppressions.
+// TODO(https://crbug.com/524405497): Support `Span<std::byte, ...>` to `Span<T, N>` once fixed
+// extent spans are supported.
+template <typename T, typename Index = size_t, typename ByteType>
+    requires(detail::LegalByteReinterpretAs<T, Index, ByteType>)
+DAWN_UNSAFE_BUFFER_USAGE constexpr auto ReinterpretSpan(Span<ByteType> s) {
+    return detail::ReinterpretSpanImpl<T, Index, ByteType>(s);
+}
+template <typename T, typename Index = size_t, typename ByteType>
+    requires(
+        // This function effectively "creates" objects by overlaying a type onto raw bytes,
+        // bypassing constructors. Such an operation is only safe for objects that do not maintain
+        // internal invariant. Therefore, we restrict this function to trivially copyable types.
+        std::is_trivially_copyable_v<T> && detail::LegalByteReinterpretAs<T, Index, ByteType>)
+constexpr auto ReinterpretSpan(Span<ByteType> s) {
+    // SAFETY: We don't need to worry about ctors/dtors since T is trivially copyable.
+    return detail::ReinterpretSpanImpl<T, Index, ByteType>(s);
 }
 
 // Converts a `[const] T&` to a `Span<[const] T>`.

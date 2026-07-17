@@ -52,7 +52,10 @@ template <typename T, typename Traits>
 class RefBase {
   public:
     // Default constructor and destructor.
-    RefBase() : mValue(Traits::kNullValue) {}
+    RefBase() : mValue(Traits::kNullValue) {
+        static_assert(sizeof(RefBase<T, Traits>) == sizeof(T));
+        static_assert(alignof(RefBase<T, Traits>) == alignof(T));
+    }
 
     ~RefBase() { Release(mValue); }
 

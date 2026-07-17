@@ -111,4 +111,19 @@ void TestUnsafeBuffersDawnHeapArrayConstructors() {
     { [[maybe_unused]] auto x = HeapArray<int>::Uninit(4, std::nothrow); }  // expected-error {{introduces unsafe buffer manipulation}}
 }
 
+// -Wunsafe-buffer-usage: dawn::ReinterpretSpan() for non-trivially-copyable types
+void TestUnsafeBuffersDawnReinterpretSpan() {
+    struct S {
+        S() {}
+        ~S() {}
+        S(const S&) {}
+        char i;
+    };
+    std::array<std::byte, 4> bytes;
+    auto s = Span<std::byte>{bytes};
+
+    { [[maybe_unused]] auto x = DAWN_UNSAFE_BUFFERS(ReinterpretSpan<S>(s)); }  // Control case.
+    { [[maybe_unused]] auto x = ReinterpretSpan<S>(s); }  // expected-error {{introduces unsafe buffer manipulation}}
+}
+
 }

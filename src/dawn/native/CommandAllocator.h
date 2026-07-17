@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_COMMANDALLOCATOR_H_
 #define SRC_DAWN_NATIVE_COMMANDALLOCATOR_H_
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -38,6 +39,7 @@
 
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/common/Math.h"
+#include "src/dawn/common/Ref.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 #include "src/utils/heap_array.h"
@@ -122,7 +124,16 @@ class CommandIterator : public NonCopyable {
         requires(alignof(T) <= kMaxAllocatedCommandAlignment &&
                  (std::is_same_v<Index, size_t> || !std::is_integral_v<Index>))
     ityp::span<Index, const T> NextData(Index count) {
-        return ReinterpretSpan<const T, Index>(NextData(sizeof(T) * count));
+        // TODO(crbug.com/491867541): Move Ref<T>s out of the commands and onto the CommandEncoder
+        // instead, so that we don't need to walk all the commands to free the Refs.
+        if constexpr (IsRef<T>::value) {
+            // SAFETY: If T is is a Ref, caller must ensure that the Refs have been properly
+            // constructed in the command stream.
+            return DAWN_UNSAFE_BUFFERS(
+                ReinterpretSpan<const T, Index>(NextData(sizeof(T) * count)));
+        } else {
+            return ReinterpretSpan<const T, Index>(NextData(sizeof(T) * count));
+        }
     }
 
     // Sets iterator to the beginning of the commands without emptying the list. This method can
@@ -209,8 +220,17 @@ class CommandAllocator : public NonCopyable {
     ityp::span<Index, T> AllocateData(Index count) {
         Span<std::byte> allocation = AllocateData(sizeof(T) * count);
         DAWN_CHECK(allocation.data() != nullptr);  // Crash on OOM
-
-        ityp::span<Index, T> results = ReinterpretSpan<T, Index>(allocation);
+        ityp::span<Index, T> results;
+        // TODO(crbug.com/491867541): Move Ref<T>s out of the commands and onto the CommandEncoder
+        // instead, so that we don't need to walk all the commands to free the Refs.
+        if constexpr (IsRef<T>::value) {
+            // SAFETY: Reintepreting Ref<T> is OK because Ref<T> has the same layout as T* which is
+            // a trivially_copyable type. We also manually handle releasing the Ref<T> in
+            // FreeCommands.
+            results = DAWN_UNSAFE_BUFFERS(ReinterpretSpan<T, Index>(allocation));
+        } else {
+            results = ReinterpretSpan<T, Index>(allocation);
+        }
         for (auto& value : results) {
             new (&value) T;
         }
