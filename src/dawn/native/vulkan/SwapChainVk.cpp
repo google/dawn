@@ -272,7 +272,10 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
     VkImageUsageFlags targetUsages =
         VulkanImageUsage(GetDevice(), GetUsage(), GetDevice()->GetValidInternalFormat(GetFormat()));
     VkImageUsageFlags supportedUsages = surfaceInfo.capabilities.supportedUsageFlags;
-    if (!IsSubset(targetUsages, supportedUsages)) {
+    // The swapchain images are also unable to satisfy viewFormats: they are
+    // created without VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT, so they cannot be
+    // reinterpreted. The blit texture is a regular texture and can.
+    if (!IsSubset(targetUsages, supportedUsages) || !GetViewFormats().empty()) {
         config.needsBlit = true;
     } else {
         config.usage = targetUsages;
