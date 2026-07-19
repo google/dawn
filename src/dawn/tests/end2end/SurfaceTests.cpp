@@ -743,7 +743,22 @@ TEST_P(SurfaceTests, ConfigureWithViewFormats) {
 
     wgpu::SurfaceTexture surfaceTexture;
     surface.GetCurrentTexture(&surfaceTexture);  // aborts on Vulkan before the fix
-    ClearTexture(surfaceTexture.texture, {1.0, 0.0, 0.0, 1.0});
+
+    // Render through a view using the reinterpreted format to check the texture really
+    // supports its viewFormats.
+    wgpu::TextureViewDescriptor viewDesc;
+    viewDesc.format = viewFormat;
+    utils::ComboRenderPassDescriptor renderPassDesc(
+        {surfaceTexture.texture.CreateView(&viewDesc)});
+    renderPassDesc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    renderPassDesc.cColorAttachments[0].clearValue = {1.0, 0.0, 0.0, 1.0};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
     surface.Present();
 }
 

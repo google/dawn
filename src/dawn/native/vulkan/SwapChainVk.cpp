@@ -195,6 +195,19 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     createInfo.clipped = VK_FALSE;
     createInfo.oldSwapchain = previousVkSwapChain;
 
+    // Create the swapchain images with VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT so they can be
+    // reinterpreted to the configuration's viewFormats. VK_KHR_swapchain_mutable_format
+    // requires the full list of formats to be provided, including the image format itself.
+    VkImageFormatListCreateInfo imageFormatListInfo;
+    if (!mConfig.viewFormats.empty()) {
+        createInfo.flags |= VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR;
+        imageFormatListInfo.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO;
+        imageFormatListInfo.pNext = nullptr;
+        imageFormatListInfo.viewFormatCount = static_cast<uint32_t>(mConfig.viewFormats.size());
+        imageFormatListInfo.pViewFormats = mConfig.viewFormats.data();
+        createInfo.pNext = &imageFormatListInfo;
+    }
+
     DAWN_TRY(CheckVkSuccess(
         device->fn.CreateSwapchainKHR(device->GetVkDevice(), &createInfo, nullptr, &*mSwapChain),
         "CreateSwapChain"));
@@ -272,10 +285,13 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
     VkImageUsageFlags targetUsages =
         VulkanImageUsage(GetDevice(), GetUsage(), GetDevice()->GetValidInternalFormat(GetFormat()));
     VkImageUsageFlags supportedUsages = surfaceInfo.capabilities.supportedUsageFlags;
-    // The swapchain images are also unable to satisfy viewFormats: they are
-    // created without VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT, so they cannot be
-    // reinterpreted. The blit texture is a regular texture and can.
-    if (!IsSubset(targetUsages, supportedUsages) || !GetViewFormats().empty()) {
+    // Without VK_KHR_swapchain_mutable_format the swapchain images are created
+    // without VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT, so they cannot be reinterpreted
+    // to the configuration's viewFormats. The blit texture is a regular texture and can.
+    const bool viewFormatsRequireBlit =
+        !GetViewFormats().empty() &&
+        !ToBackend(GetDevice())->GetDeviceInfo().HasExt(DeviceExt::SwapchainMutableFormat);
+    if (!IsSubset(targetUsages, supportedUsages) || viewFormatsRequireBlit) {
         config.needsBlit = true;
     } else {
         config.usage = targetUsages;
@@ -297,6 +313,18 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
     if (!formatIsSupported) {
         return DAWN_INTERNAL_ERROR(absl::StrFormat(
             "Vulkan SwapChain must support %s with sRGB colorspace.", config.wgpuFormat));
+    }
+
+    // If the swapchain images are exposed to the user directly and need to be reinterpreted
+    // to the configuration's viewFormats, gather the full list of formats used to create the
+    // swapchain with VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR.
+    if (!config.needsBlit && !GetViewFormats().empty()) {
+        DAWN_ASSERT(
+            ToBackend(GetDevice())->GetDeviceInfo().HasExt(DeviceExt::SwapchainMutableFormat));
+        config.viewFormats.push_back(config.format);
+        for (wgpu::TextureFormat viewFormat : GetViewFormats()) {
+            config.viewFormats.push_back(VulkanImageFormat(ToBackend(GetDevice()), viewFormat));
+        }
     }
 
     // Only the identity transform with opaque alpha is supported for now.
@@ -554,6 +582,11 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
     textureDesc.size.height = mConfig.extent.height;
     textureDesc.format = mConfig.wgpuFormat;
     textureDesc.usage = mConfig.wgpuUsage;
+    if (!mConfig.needsBlit) {
+        // The swapchain images were created mutable so the user-facing texture supports the
+        // configuration's viewFormats. In the blit case they stay on the blit texture instead.
+        textureDesc.viewFormats = GetViewFormats();
+    }
 
     mTexture = SwapChainTexture::Create(device, Unpack(&textureDesc), lastImage.image);
 

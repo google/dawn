@@ -66,6 +66,11 @@ class SwapChain : public SwapChainBase {
         uint32_t targetImageCount;
         VkSurfaceTransformFlagBitsKHR transform;
         VkCompositeAlphaFlagBitsKHR alphaMode;
+        // When non-empty, the swapchain is created with
+        // VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR and this list (which includes `format`)
+        // is chained as a VkImageFormatListCreateInfo so the images can be reinterpreted to
+        // the configuration's viewFormats.
+        std::vector<VkFormat> viewFormats;
 
         // Redundant information but as WebGPU enums to create the wgpu::Texture that
         // encapsulates the native swapchain texture.
