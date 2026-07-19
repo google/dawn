@@ -71,6 +71,10 @@ class SwapChain : public SwapChainBase {
         // encapsulates the native swapchain texture.
         wgpu::TextureUsage wgpuUsage;
         wgpu::TextureFormat wgpuFormat;
+        // When non-empty, the swapchain is created with
+        // VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR so its images can be reinterpreted to
+        // these formats, and the wrapped texture exposes them as its viewFormats.
+        std::vector<wgpu::TextureFormat> wgpuViewFormats;
 
         // Information about the blit workarounds we need to do (if any)
         bool needsBlit = false;
