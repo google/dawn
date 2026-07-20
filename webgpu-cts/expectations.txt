@@ -194,10 +194,6 @@ crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call
 # point.
 ################################################################################
 
-# Pointer validation due to buffer_view
-crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="functionRTArray" [ Skip ]
-crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="privateRTArray" [ Skip ]
-
 # Must skip on HLSL backends while we change behavior of CTS sample_mask
 crbug.com/407144390 [ arch-x86_64 clang-coverage dawn-no-backend-validation graphite-enabled no-asan nvidia-0x2184 nvidia_lt_32.0.15.8180 release-x64 target-cpu-64 webgpu-dxc-enabled win10 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
 crbug.com/407144390 [ arch-x86_64 graphite-enabled intel-0x4680 no-asan no-clang-coverage release-x64 target-cpu-64 win10 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]

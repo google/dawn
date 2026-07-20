@@ -64,14 +64,26 @@ var<function> g : f32;
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Private_RuntimeArray) {
     EXPECT_ERROR("var<private> v : array<i32>;", R"(
-input.wgsl:1:1 error: variables in 'private' address space must have a fixed footprint
+input.wgsl:1:18 error: runtime-sized arrays cannot be used in the <private> address space
+var<private> v : array<i32>;
+                 ^^^^^^^^^^
+
+input.wgsl:1:1 note: while instantiating 'var' v
 var<private> v : array<i32>;
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Private_RuntimeArray) {
-    EXPECT_SUCCESS("alias t = ptr<private, array<i32>>;");
+    EXPECT_ERROR("alias t = ptr<private, array<i32>>;", R"(
+input.wgsl:1:24 error: runtime-sized arrays cannot be used in the <private> address space
+alias t = ptr<private, array<i32>>;
+                       ^^^^^^^^^^
+
+input.wgsl:1:11 note: while instantiating ptr<private, array<i32>, read_write>
+alias t = ptr<private, array<i32>>;
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+)");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Private_RuntimeArrayInStruct) {
@@ -80,16 +92,37 @@ struct S { m : array<i32> };
 var<private> v : S;
 )",
                  R"(
-input.wgsl:3:1 error: variables in 'private' address space must have a fixed footprint
+input.wgsl:2:16 error: runtime-sized arrays cannot be used in the <private> address space
+struct S { m : array<i32> };
+               ^^^^^^^^^^
+
+input.wgsl:2:12 note: while analyzing structure member S.m
+struct S { m : array<i32> };
+           ^
+
+input.wgsl:3:1 note: while instantiating 'var' v
 var<private> v : S;
 ^^^^^^^^^^^^^^^^^^
 )");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Private_RuntimeArrayInStruct) {
-    EXPECT_SUCCESS(R"(
+    EXPECT_ERROR(R"(
 struct S { m : array<i32> };
 alias t = ptr<private, S>;
+)",
+                 R"(
+input.wgsl:2:16 error: runtime-sized arrays cannot be used in the <private> address space
+struct S { m : array<i32> };
+               ^^^^^^^^^^
+
+input.wgsl:2:12 note: while analyzing structure member S.m
+struct S { m : array<i32> };
+           ^
+
+input.wgsl:3:11 note: while instantiating ptr<private, S, read_write>
+alias t = ptr<private, S>;
+          ^^^^^^^^^^^^^^^
 )");
 }
 

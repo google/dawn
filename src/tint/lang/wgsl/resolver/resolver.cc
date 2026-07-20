@@ -4763,15 +4763,29 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
     }
 
     if (auto* arr = ty->As<sem::Array>()) {
-        if (address_space != core::AddressSpace::kStorage) {
-            // With buffer_view, runtime-sized arrays can appear in more locations.
-            if (!allowed_features_.features.contains(wgsl::LanguageFeature::kBufferView)) {
-                if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
-                    AddError(usage)
-                        << "runtime-sized arrays can only be used in the <storage> address space";
+        // Runtime-sized arrays can appear in storage always and workgroup and uniform if
+        // buffer_view is enabled.
+        if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
+            if (allowed_features_.features.contains(wgsl::LanguageFeature::kBufferView)) {
+                if (address_space != core::AddressSpace::kStorage &&
+                    address_space != core::AddressSpace::kUniform &&
+                    address_space != core::AddressSpace::kWorkgroup) {
+                    if (address_space == core::AddressSpace::kUndefined) {
+                        AddError(usage)
+                            << "runtime-sized arrays must be used with an address space";
+                    } else {
+                        AddError(usage) << "runtime-sized arrays cannot be used in the <"
+                                        << address_space << "> address space";
+                    }
                     return false;
                 }
+            } else if (address_space != core::AddressSpace::kStorage) {
+                AddError(usage)
+                    << "runtime-sized arrays can only be used in the <storage> address space";
+                return false;
             }
+        }
+        if (address_space != core::AddressSpace::kStorage) {
             auto count = arr->ConstantCount();
             if (count.has_value() && count.value() >= internal_limits::kMaxArrayElementCount) {
                 AddError(usage) << "array count (" << count.value() << ") must be less than "
