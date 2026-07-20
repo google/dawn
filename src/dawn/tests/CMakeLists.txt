@@ -371,6 +371,7 @@ if (DAWN_ENABLE_OPENGLES)
     list(APPEND whitebox_conditional_private_platform_depends dawn_khronos_platform)
     list(APPEND whitebox_sources
         "white_box/EGLImageWrappingTests.cpp"
+        "white_box/GLFramebufferCompletenessTests.cpp"
         "white_box/GLTextureWrappingTests.cpp"
     )
 endif()

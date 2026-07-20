@@ -712,6 +712,8 @@ MaybeError ResolveMultisampledRenderTargets(const OpenGLFunctions& gl,
                 ToBackend(renderPass->colorAttachments[i].resolveTarget.Get());
             DAWN_GL_TRY(gl, BindFramebuffer(GL_DRAW_FRAMEBUFFER, writeFbo));
             DAWN_TRY(resolveView->BindToFramebuffer(gl, GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0));
+            DAWN_TRY(CheckFramebufferComplete(gl, GL_READ_FRAMEBUFFER));
+            DAWN_TRY(CheckFramebufferComplete(gl, GL_DRAW_FRAMEBUFFER));
             DAWN_GL_TRY(gl, BlitFramebuffer(0, 0, renderPass->width, renderPass->height, 0, 0,
                                             renderPass->width, renderPass->height,
                                             GL_COLOR_BUFFER_BIT, GL_NEAREST));
@@ -1013,6 +1015,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                             DAWN_GL_TRY(gl, FramebufferTexture2D(
                                                 GL_READ_FRAMEBUFFER, glAttachment, target,
                                                 texture->GetTextureHandle(), src.mipLevel));
+                            DAWN_TRY(CheckFramebufferComplete(gl, GL_READ_FRAMEBUFFER));
                             DAWN_GL_TRY(gl, ReadPixels(dchecked_cast<uint32_t>(src.origin.x),
                                                        dchecked_cast<uint32_t>(src.origin.y),
                                                        dchecked_cast<uint32_t>(copySize.width),
@@ -1030,6 +1033,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                                                                      glAttachment, cubeMapTarget,
                                                                      texture->GetTextureHandle(),
                                                                      src.mipLevel));
+                                DAWN_TRY(CheckFramebufferComplete(gl, GL_READ_FRAMEBUFFER));
                                 DAWN_GL_TRY(gl, ReadPixels(dchecked_cast<uint32_t>(src.origin.x),
                                                            dchecked_cast<uint32_t>(src.origin.y),
                                                            dchecked_cast<uint32_t>(copySize.width),
@@ -1051,6 +1055,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                                                 GL_READ_FRAMEBUFFER, glAttachment,
                                                 texture->GetTextureHandle(), src.mipLevel,
                                                 dchecked_cast<uint32_t>(src.origin.z + z)));
+                            DAWN_TRY(CheckFramebufferComplete(gl, GL_READ_FRAMEBUFFER));
                             DAWN_GL_TRY(gl, ReadPixels(dchecked_cast<uint32_t>(src.origin.x),
                                                        dchecked_cast<uint32_t>(src.origin.y),
                                                        dchecked_cast<uint32_t>(copySize.width),
@@ -1347,7 +1352,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
         }
     }
 
-    DAWN_ASSERT(gl.CheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+    DAWN_TRY(CheckFramebufferComplete(gl, GL_DRAW_FRAMEBUFFER));
 
     // Set defaults for dynamic state before executing clears and commands.
     PersistentPipelineState persistentPipelineState;

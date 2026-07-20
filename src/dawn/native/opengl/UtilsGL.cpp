@@ -30,6 +30,7 @@
 #include <string>
 
 #include "src/dawn/native/EnumMaskIterator.h"
+#include "src/dawn/native/ErrorInjector.h"
 #include "src/dawn/native/opengl/OpenGLFunctions.h"
 #include "src/utils/assert.h"
 #include "src/utils/log.h"
@@ -193,6 +194,39 @@ const char* GLErrorAsString(GLenum error) {
     }
 
 #undef ERROR_CASE_STRING
+}
+
+const char* GLFramebufferStatusAsString(GLenum status) {
+#define STATUS_CASE_STRING(statusEnum) \
+    case statusEnum:                   \
+        return #statusEnum
+
+    switch (status) {
+        STATUS_CASE_STRING(GL_FRAMEBUFFER_COMPLETE);
+        STATUS_CASE_STRING(GL_FRAMEBUFFER_UNDEFINED);
+        STATUS_CASE_STRING(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT);
+        STATUS_CASE_STRING(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
+        STATUS_CASE_STRING(GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS);
+        STATUS_CASE_STRING(GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER);
+        STATUS_CASE_STRING(GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER);
+        STATUS_CASE_STRING(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE);
+        STATUS_CASE_STRING(GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS);
+        STATUS_CASE_STRING(GL_FRAMEBUFFER_UNSUPPORTED);
+        default:
+            return "<Unknown OpenGL framebuffer status>";
+    }
+
+#undef STATUS_CASE_STRING
+}
+
+MaybeError CheckFramebufferComplete(const OpenGLFunctions& gl, GLenum target) {
+    GLenum status = INJECT_ERROR_OR_RUN(gl.CheckFramebufferStatus(target),
+                                        static_cast<GLenum>(GL_FRAMEBUFFER_UNSUPPORTED));
+    if (status == GL_FRAMEBUFFER_COMPLETE) [[likely]] {
+        return {};
+    }
+    return DAWN_FORMAT_INTERNAL_ERROR("glCheckFramebufferStatus returned %s (0x%04X).",
+                                      GLFramebufferStatusAsString(status), status);
 }
 
 void ClearErrors(const OpenGLFunctions& gl,
