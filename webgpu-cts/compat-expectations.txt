@@ -342,7 +342,7 @@ crbug.com/465497437 [ android android-pixel-6 ] webgpu:api,validation,capability
 
 # These failures prevent further tests from executing. These will likely be fixed by a driver update.
 crbug.com/495510120 [ android-pixel-10 ] webgpu:shader,execution,memory_layout:* [ Skip ]
-crbug.com/495780892 [ android-pixel-10 ] webgpu:shader,validation,expression,binary,bitwise_shift:* [ Skip ]
+crbug.com/495780892 [ android-pixel-10 ] webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Skip ]
 
 # More Android failures
 crbug.com/535313717 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,bufferLength:unsized_buffer:size=600 [ Failure ]
