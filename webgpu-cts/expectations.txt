@@ -350,10 +350,11 @@ crbug.com/364595481 [ android-pixel-6 arm ] webgpu:shader,execution,expression,c
 crbug.com/364595481 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Skip ] # CAT:Accuracy
 
 # textureGather on intel mac does not gather across cube face edges
-crbug.com/414842427 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/414842427 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/414842427 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:*format="stencil8"* [ Failure ] # CAT:Accuracy
 crbug.com/414842427 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_3d_coords:* [ Skip ] # CAT:Accuracy
 crbug.com/414842427 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Skip ] # CAT:Accuracy
-crbug.com/414842427 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/414842427 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Skip ] # CAT:Accuracy
 crbug.com/414842427 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_3d_coords:* [ Skip ] # CAT:Accuracy
 crbug.com/414842427 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Skip ] # CAT:Accuracy
 
@@ -496,7 +497,10 @@ crbug.com/42240657 [ angle-d3d11 intel release renderer-skia-gl win10 ] webgpu:a
 crbug.com/42240657 [ angle-d3d11 graphite-enabled intel-0x4680 no-asan release-x64 renderer-skia-gl target-cpu-64 win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;* [ Failure ]
 crbug.com/42240657 [ graphite-enabled intel-gen-9 release renderer-skia-gl ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;* [ Failure ]
 crbug.com/42240657 [ angle-d3d11 intel-0x4680 no-asan release-x64 renderer-skia-gl target-cpu-64 win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=0;* [ Failure ]
+crbug.com/42240657 [ graphite-enabled intel-gen-9 release renderer-skia-gl ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;* [ Skip ]
 crbug.com/42240657 [ intel-gen-9 release renderer-skia-gl ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=0;* [ Failure ]
+crbug.com/42240657 [ intel-0x3e9b mac ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;* [ Skip ]
+crbug.com/42240657 [ intel-0x3e9b mac ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=0;* [ Skip ]
 
 # Occlusion query with alpha to coverage failing on Android Qualcomm (Pixel 4)
 crbug.com/42240847 [ android qualcomm ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:* [ Failure ]
@@ -565,7 +569,7 @@ crbug.com/42251260 [ webgpu-dxc-disabled win ] webgpu:shader,execution,memory_mo
 crbug.com/42251260 [ webgpu-dxc-disabled win ] webgpu:shader,execution,memory_model,barrier:workgroup_barrier_store_load:accessValueType="u32";memType="non_atomic_texture";accessPair="wr";normalBarrier=true [ Failure ] # CAT:Critical
 
 # Many sampleWithVideoFrameWithVisibleRectParam tests failing across backends
-crbug.com/407133969 [ intel-0x3e9b mac ] webgpu:web_platform,external_texture,video:importExternalTexture,* [ Failure ]
+crbug.com/407133969 [ intel-0x3e9b mac ] webgpu:web_platform,external_texture,video:importExternalTexture,* [ Skip ]
 crbug.com/407133969 [ apple mac webgpu-adapter-swiftshader ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt601-rotate-90.mp4";* [ Failure ]
 
 # D3D debug layer bug which reports that the same subresource of a 3d texture cannot be written twice.
@@ -702,14 +706,16 @@ crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builti
 crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth24plus";* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth32float-stencil8";* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ angle-d3d11 desktop graphite-enabled intel-0x4680 no-asan no-clang-coverage release-x64 renderer-skia-gl target-cpu-64 win10 ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:* [ Failure ] # CAT:Accuracy
-crbug.com/407088850 [ desktop graphite-enabled intel-gen-9 no-clang-coverage release renderer-skia-gl ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ desktop graphite-enabled intel-gen-9 no-clang-coverage release renderer-skia-gl ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:* [ Skip ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_3d_coords:* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_3d_coords:* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_3d_coords:* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
-crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:* [ Failure ] # CAT:Critical
-crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:* [ Skip ] # CAT:Critical
+crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:* [ Skip ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:stage="*";format="stencil8"* [ Failure ] # CAT:Critical
+crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:stage="*";format="stencil8"* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
@@ -1074,10 +1080,10 @@ crbug.com/432284622 [ intel sequoia webgpu-adapter-swiftshader ] webgpu:web_plat
 crbug.com/432284622 [ intel sequoia webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 
 # Seemingly flaky but always flake on retry too (at least some of these)
-crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Failure ] # CAT:Accuracy
-crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:* [ Failure ] # CAT:Accuracy
-crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:* [ Failure ] # CAT:Accuracy
-crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:* [ Failure ] # CAT:Accuracy
+crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Skip ] # CAT:Accuracy
+crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:* [ Skip ] # CAT:Accuracy
+crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:* [ Skip ] # CAT:Accuracy
+crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:* [ Skip ] # CAT:Accuracy
 
 # rgb10a2unorm precision issue on Intel 770
 crbug.com/445458866 [ intel-0x4680 linux ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";* [ Failure ]
@@ -1088,11 +1094,11 @@ crbug.com/421941589 [ angle-opengl arch-x86_64 desktop display-server-x graphite
 crbug.com/421941589 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgb10a2unorm";* [ Failure ]
 
 # Unsure if these ever pass on retry, or if they also are flaky-but-fail-on-retry
-crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:* [ RetryOnFailure ] # CAT:Accuracy
-crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ RetryOnFailure ] # CAT:Accuracy
+crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Skip ] # CAT:Accuracy
 
-crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
-crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_array_2d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_array_2d_coords:* [ Skip ] # CAT:Accuracy
 
 # Failures on brya devices running Android Desktop.
 crbug.com/445230380 [ android android-brya dawn-no-backend-validation webgpu-service-worker ] webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
@@ -1115,7 +1121,13 @@ crbug.com/448397616 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,b
 crbug.com/448397616 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:depth:stage="c";format="depth32float-stencil8" [ Failure ]
 
 # The spec doesn't precisely require a behavior and the CTS tests only one of them. Remove suppressions once the spec / CTS is fixed.
-crbug.com/449980070 webgpu:api,validation,encoding,encoder_open_state:* [ Failure ]
+crbug.com/449980070 [ amd mac ] webgpu:api,validation,encoding,encoder_open_state:* [ Failure ]
+crbug.com/449980070 [ android ] webgpu:api,validation,encoding,encoder_open_state:* [ Failure ]
+crbug.com/449980070 [ apple mac ] webgpu:api,validation,encoding,encoder_open_state:* [ Failure ]
+crbug.com/449980070 [ chromeos ] webgpu:api,validation,encoding,encoder_open_state:* [ Failure ]
+crbug.com/528379972 [ intel-0x3e9b mac ] webgpu:api,validation,encoding,encoder_open_state:* [ Skip ]
+crbug.com/449980070 [ linux ] webgpu:api,validation,encoding,encoder_open_state:* [ Failure ]
+crbug.com/449980070 [ win ] webgpu:api,validation,encoding,encoder_open_state:* [ Failure ]
 
 # Increase in binding limits resulted in test timeouts on Windows intel
 crbug.com/479909173 [ dawn-no-backend-validation intel-0x9bc5 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
@@ -1682,7 +1694,10 @@ crbug.com/487752270 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffe
 
 # Dawn validation error on all platforms
 crbug.com/487756197 webgpu:api,validation,encoding,encoder_state:pass_end_invalid_order:* [ Failure ]
-crbug.com/526671415 webgpu:api,validation,encoding,cmds,setImmediates:alignment:*;contentByteSize=10 [ Failure ]
+crbug.com/526671415 webgpu:api,validation,encoding,cmds,setImmediates:alignment:*;contentByteSize=10 [ Skip ]
+# crbug.com/526671415 webgpu:api,validation,encoding,cmds,setImmediates:out_of_bounds:*;dataLengthDelta=-1 [ Skip ]
+# crbug.com/526671415 webgpu:api,validation,encoding,cmds,setImmediates:overflow:*;dataOffset=2147483647;elementCount=4 [ Skip ]
+# crbug.com/526671415 webgpu:api,validation,encoding,cmds,setImmediates:overflow:*;dataOffset=4294967295;elementCount=4 [ Skip ]
 
 # Benign OOM from trying to create a big buffer (in theory avoidable by reducing maxBufferSize)
 [ android-pixel-4 ] webgpu:api,validation,buffer,create:limit:* [ Failure ] # CAT:Spurious
