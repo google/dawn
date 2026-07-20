@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-07-17 08:17:52AM
+# Last rolled: 2026-07-19 01:55:54PM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -136,8 +136,6 @@ crbug.com/407076121 [ linux nvidia ] webgpu:shader,execution,limits:const_array_
 
 # Pointer validation due to buffer_view
 crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="functionRTArray" [ Skip ]
-crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="uniformRTArray" [ Skip ]
-crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="workgroupRTArray" [ Skip ]
 crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="privateRTArray" [ Skip ]
 
 # These tests are invalid under Compat and need to be modified upstream

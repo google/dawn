@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-07-17 08:17:52AM
+# Last rolled: 2026-07-19 01:55:54PM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -196,8 +196,6 @@ crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call
 
 # Pointer validation due to buffer_view
 crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="functionRTArray" [ Skip ]
-crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="uniformRTArray" [ Skip ]
-crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="workgroupRTArray" [ Skip ]
 crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="privateRTArray" [ Skip ]
 
 # Must skip on HLSL backends while we change behavior of CTS sample_mask
