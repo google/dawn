@@ -320,7 +320,7 @@ func run(c *mainConfig) error {
 		fallthrough
 	default:
 		// If temporary directories are allowed, c.out should already have been set to the created value by this point
-		if c.out != "" && c.out != "<tmp>" {
+		if c.out == "" || c.out == "<tmp>" {
 			return fmt.Errorf("temporary output is not allowed for '%v'", c.cmdMode)
 		}
 
