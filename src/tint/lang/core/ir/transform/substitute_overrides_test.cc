@@ -2991,6 +2991,42 @@ TEST_F(IR_SubstituteOverridesTest, Buffer_WorkgroupPtr_TwoBytes_F16) {
     ASSERT_EQ(result, Success);
 }
 
+TEST_F(IR_SubstituteOverridesTest, SubgroupSize_NotPowerOf2) {
+    Override* o = nullptr;
+    b.Append(mod.root_block, [&] {
+        o = b.Override("o", ty.u32());
+        o->SetOverrideId({1});
+    });
+    auto* foo = b.ComputeFunction("foo", o->Result(), 1_u, 1_u);
+    foo->SetSubgroupSize(o->Result());
+    foo->Block()->Append(b.Return(foo));
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{1}] = 3;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason, R"(error: @subgroup_size value must be a power of two)");
+}
+
+TEST_F(IR_SubstituteOverridesTest, SubgroupSize_NotPowerOf2_Expr) {
+    Override* o = nullptr;
+    Value* add = nullptr;
+    b.Append(mod.root_block, [&] {
+        o = b.Override("o", ty.u32());
+        o->SetOverrideId({1});
+        add = b.Add(o, 1_u)->Result();
+    });
+    auto* foo = b.ComputeFunction("foo", add, 1_u, 1_u);
+    foo->SetSubgroupSize(add);
+    foo->Block()->Append(b.Return(foo));
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{1}] = 2;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason, R"(error: @subgroup_size value must be a power of two)");
+}
+
 template <typename T>
 const core::type::Type* TypeBuilder(core::type::Manager& m) {
     return m.Get<T>();

@@ -45,6 +45,7 @@
 #include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/value.h"
+#include "src/tint/utils/math/math.h"
 #include "src/utils/numeric.h"
 
 namespace tint::core::ir::transform {
@@ -226,6 +227,9 @@ struct State {
             auto sgs = func->SubgroupSize();
             if (sgs.has_value()) {
                 TINT_CHECK_RESULT_UNWRAP(new_sg, CalculateOverride(sgs.value()));
+                if (!IsPowerOfTwo(new_sg->Value()->ValueAs<uint32_t>())) {
+                    return diag::Failure("@subgroup_size value must be a power of two");
+                }
                 func->SetSubgroupSize(new_sg);
             }
         }

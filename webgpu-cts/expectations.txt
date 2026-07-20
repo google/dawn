@@ -1256,12 +1256,6 @@ crbug.com/480115865 [ android-pixel-10 ] webgpu:shader,execution,expression,unar
 crbug.com/480115865 [ android-pixel-10 ] webgpu:shader,execution,expression,unary,f16_conversion:f32_mat:inputSource="const";cols=3;rows=4 [ Failure ]
 crbug.com/480115865 [ android-pixel-10 ] webgpu:shader,execution,expression,unary,f16_conversion:f32_mat:inputSource="const";cols=4;rows=3 [ Failure ]
 crbug.com/480115865 [ android-pixel-10 ] webgpu:shader,execution,expression,unary,f16_conversion:f32_mat:inputSource="const";cols=4;rows=4 [ Failure ]
-crbug.com/523311420 [ android android-pixel-10 ] webgpu:shader,validation,extension,subgroup_size_control:subgroup_size_override_must_be_power_of_2_at_pipeline_creation:size=127 [ Failure ]
-crbug.com/523311420 [ android android-pixel-10 ] webgpu:shader,validation,extension,subgroup_size_control:subgroup_size_override_must_be_power_of_2_at_pipeline_creation:size=15 [ Failure ]
-crbug.com/523311420 [ android android-pixel-10 ] webgpu:shader,validation,extension,subgroup_size_control:subgroup_size_override_must_be_power_of_2_at_pipeline_creation:size=31 [ Failure ]
-crbug.com/523311420 [ android android-pixel-10 ] webgpu:shader,validation,extension,subgroup_size_control:subgroup_size_override_must_be_power_of_2_at_pipeline_creation:size=5 [ Failure ]
-crbug.com/523311420 [ android android-pixel-10 ] webgpu:shader,validation,extension,subgroup_size_control:subgroup_size_override_must_be_power_of_2_at_pipeline_creation:size=63 [ Failure ]
-crbug.com/523311420 [ android android-pixel-10 ] webgpu:shader,validation,extension,subgroup_size_control:subgroup_size_override_must_be_power_of_2_at_pipeline_creation:size=7 [ Failure ]
 
 # Untriaged failures of Pixel 10
 # See crbug.com/40238674 and crbug.com/475503907
@@ -2246,8 +2240,6 @@ crbug.com/0000 [ intel mac ] webgpu:shader,validation,decl,var:module_scope_type
 crbug.com/0000 [ intel win ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%20array_size_const%3E";kind="immediate";via_alias=true [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%20array_size_const%3E";kind="immediate";via_alias=true [ Failure ]
 crbug.com/0000 [ microsoft win ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%20array_size_const%3E";kind="immediate";via_alias=true [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:shader,validation,extension,subgroup_size_control:subgroup_size_override_must_be_power_of_2_at_pipeline_creation:size=15 [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:shader,validation,extension,subgroup_size_control:subgroup_size_override_must_be_power_of_2_at_pipeline_creation:size=31 [ Failure ]
 crbug.com/0000 [ amd mac ] webgpu:shader,validation,functions,alias_analysis:one_pointer_one_module_scope:address_space="private";aliased=false [ Failure ]
 crbug.com/0000 [ intel win ] webgpu:shader,validation,functions,alias_analysis:one_pointer_one_module_scope:address_space="storage";aliased=false [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,functions,alias_analysis:one_pointer_one_module_scope:address_space="storage";aliased=true [ Failure ]
