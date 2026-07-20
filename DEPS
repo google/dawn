@@ -339,7 +339,7 @@ deps = {
 
   # GLFW for tests and samples
   'third_party/glfw3/src': {
-    'url': '{chromium_git}/external/github.com/glfw/glfw@ed6452b13c76f7b4da216a9952bc7837aeb0f031',
+    'url': '{chromium_git}/external/github.com/glfw/glfw@463cf73610d911e8eff95ae345143137cf610be4',
   },
 
   'third_party/vulkan_memory_allocator': {
