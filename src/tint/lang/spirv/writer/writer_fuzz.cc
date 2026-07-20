@@ -138,10 +138,12 @@ Result<SuccessType> ValidateUsingVulkan(const std::string& vk_icd_path,
     // This setenv call is why this works on Linux/Mac but not Windows
     setenv("VK_ICD_FILENAMES", vk_icd_path.c_str(), 1);
 
+    TINT_BEGIN_DISABLE_WARNING(OLD_STYLE_CAST);
     VkApplicationInfo app_info = {
         .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
         .apiVersion = VK_API_VERSION_1_1,
     };
+    TINT_END_DISABLE_WARNING(OLD_STYLE_CAST);
 
     VkInstanceCreateInfo create_info = {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
