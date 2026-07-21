@@ -122,6 +122,8 @@ tint::VertexFormat ToTintVertexFormat(wgpu::VertexFormat format) {
             return tint::VertexFormat::kUnorm10_10_10_2;
         case wgpu::VertexFormat::Unorm8x4BGRA:
             return tint::VertexFormat::kUnorm8x4BGRA;
+        case wgpu::VertexFormat::Snorm10_10_10_2:
+            return tint::VertexFormat::kSnorm10_10_10_2;
     }
     DAWN_UNREACHABLE();
 }

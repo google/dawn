@@ -48,9 +48,9 @@
 
 namespace dawn::native {
 
-static constexpr ityp::array<wgpu::VertexFormat, VertexFormatInfo, 42> sVertexFormatTable =
+static constexpr ityp::array<wgpu::VertexFormat, VertexFormatInfo, 43> sVertexFormatTable =
     []() constexpr {
-        ityp::array<wgpu::VertexFormat, VertexFormatInfo, 42> table{};
+        ityp::array<wgpu::VertexFormat, VertexFormatInfo, 43> table{};
 
         // clang-format off
         table[wgpu::VertexFormat::Uint8          ] = { 1, 1, VertexFormatBaseType::Uint };
@@ -96,6 +96,7 @@ static constexpr ityp::array<wgpu::VertexFormat, VertexFormatInfo, 42> sVertexFo
         table[wgpu::VertexFormat::Sint32x4       ] = {16, 4, VertexFormatBaseType::Sint };
         table[wgpu::VertexFormat::Unorm10_10_10_2] = { 4, 4, VertexFormatBaseType::Float};
         table[wgpu::VertexFormat::Unorm8x4BGRA   ] = { 4, 4, VertexFormatBaseType::Float};
+        table[wgpu::VertexFormat::Snorm10_10_10_2] = { 4, 4, VertexFormatBaseType::Float};
         // clang-format on
 
         return table;
@@ -115,6 +116,12 @@ MaybeError ValidateVertexAttribute(DeviceBase* device,
                                    uint64_t vertexBufferStride,
                                    VertexAttributeMask* attributesSetMask) {
     DAWN_TRY(ValidateVertexFormat(attribute.format));
+    DAWN_INVALID_IF(
+        attribute.format == wgpu::VertexFormat::Snorm10_10_10_2 &&
+            !device->IsToggleEnabled(Toggle::AllowUnsafeAPIs) &&
+            !device->IsToggleEnabled(Toggle::AllowExperimentalSnorm10_10_10_2),
+        "Vertex format snorm10-10-10-2 is experimental and requires the "
+        "allow_unsafe_apis or allow_experimental_snorm10_10_10_2 toggle to be enabled.");
     const VertexFormatInfo& formatInfo = GetVertexFormatInfo(attribute.format);
 
     uint32_t maxVertexAttributes = device->GetLimits().v1.maxVertexAttributes;

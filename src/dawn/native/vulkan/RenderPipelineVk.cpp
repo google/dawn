@@ -144,6 +144,8 @@ VkFormat VulkanVertexFormat(wgpu::VertexFormat format) {
             return VK_FORMAT_A2B10G10R10_UNORM_PACK32;
         case wgpu::VertexFormat::Unorm8x4BGRA:
             return VK_FORMAT_B8G8R8A8_UNORM;
+        case wgpu::VertexFormat::Snorm10_10_10_2:
+            return VK_FORMAT_A2B10G10R10_SNORM_PACK32;
         default:
             DAWN_UNREACHABLE();
     }

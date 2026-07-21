@@ -517,6 +517,8 @@ DXGI_FORMAT DXGIVertexFormat(wgpu::VertexFormat format) {
             return DXGI_FORMAT_R32G32B32A32_SINT;
         case wgpu::VertexFormat::Unorm10_10_10_2:
             return DXGI_FORMAT_R10G10B10A2_UNORM;
+        case wgpu::VertexFormat::Snorm10_10_10_2:
+            return DXGI_FORMAT_R10G10B10A2_UNORM;
         case wgpu::VertexFormat::Unorm8x4BGRA:
             return DXGI_FORMAT_B8G8R8A8_UNORM;
         default:

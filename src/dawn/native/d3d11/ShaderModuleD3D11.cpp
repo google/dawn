@@ -74,7 +74,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     uint32_t compileFlags,
     const ImmediateMask& pipelineImmediateMask,
     const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>& usedInterstageVariables,
-    const std::optional<tint::hlsl::writer::PixelLocalOptions>& pixelLocalOptions) {
+    const std::optional<tint::hlsl::writer::PixelLocalOptions>& pixelLocalOptions,
+    std::vector<uint32_t> snorm10_10_10_2_locations) {
     Device* device = ToBackend(GetDevice());
     TRACE_EVENT0(device->GetPlatform(), General, "ShaderModuleD3D11::Compile");
     DAWN_ASSERT(!IsError());
@@ -85,6 +86,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.hlsl.dumpShaders = device->IsToggleEnabled(Toggle::DumpShaders);
     req.hlsl.dumpShadersOnFailure = device->IsToggleEnabled(Toggle::DumpShadersOnFailure);
+    req.hlsl.tintOptions.snorm10_10_10_2_locations = std::move(snorm10_10_10_2_locations);
     req.hlsl.tintOptions.entry_point_name = programmableStage.entryPoint;
     req.hlsl.tintOptions.remapped_entry_point_name = device->GetIsolatedEntryPointName();
 

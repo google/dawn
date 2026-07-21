@@ -31,6 +31,7 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "src/dawn/native/CreatePipelineAsyncEvent.h"
 #include "src/dawn/native/Instance.h"
@@ -377,11 +378,21 @@ MaybeError RenderPipeline::InitializeImpl() {
                 !device->IsToggleEnabled(Toggle::D3DDisableIEEEStrictness))) {
             additionalCompileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
         }
-        DAWN_TRY_ASSIGN(compiledShader[stage],
-                        ToBackend(programmableStage.module)
-                            ->Compile(programmableStage, stage, ToBackend(GetLayout()),
-                                      compileFlags | additionalCompileFlags, GetImmediateMask(),
-                                      usedInterstageVariables));
+        std::vector<uint32_t> snorm10_10_10_2_locations;
+        if (stage == SingleShaderStage::Vertex) {
+            for (VertexAttributeLocation location : GetAttributeLocationsUsed()) {
+                if (GetAttribute(location).format == wgpu::VertexFormat::Snorm10_10_10_2) {
+                    snorm10_10_10_2_locations.push_back(
+                        static_cast<uint32_t>(static_cast<uint8_t>(location)));
+                }
+            }
+        }
+        DAWN_TRY_ASSIGN(
+            compiledShader[stage],
+            ToBackend(programmableStage.module)
+                ->Compile(programmableStage, stage, ToBackend(GetLayout()),
+                          compileFlags | additionalCompileFlags, GetImmediateMask(),
+                          usedInterstageVariables, std::move(snorm10_10_10_2_locations)));
         *shaders[stage] = {compiledShader[stage].shaderBlob.DataPtr(),
                            compiledShader[stage].shaderBlob.Size()};
     }

@@ -4623,7 +4623,8 @@
             {"value": 38, "name": "sint32x3"},
             {"value": 39, "name": "sint32x4"},
             {"value": 40, "name": "unorm 10_10_10_2", "jsrepr": "'unorm10-10-10-2'"},
-            {"value": 41, "name": "unorm8x4 BGRA", "jsrepr": "'unorm8x4-bgra'"}
+            {"value": 41, "name": "unorm8x4 BGRA", "jsrepr": "'unorm8x4-bgra'"},
+            {"value": 42, "name": "snorm 10_10_10_2", "jsrepr": "'snorm10-10-10-2'"}
         ]
     },
     "WGSL language feature name": {

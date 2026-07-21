@@ -63,7 +63,8 @@ class ShaderModule final : public ShaderModuleBase {
         const ImmediateMask& pipelineImmediateMask,
         const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>&
             usedInterstageVariables = {},
-        const std::optional<tint::hlsl::writer::PixelLocalOptions>& pixelLocalOptions = {});
+        const std::optional<tint::hlsl::writer::PixelLocalOptions>& pixelLocalOptions = {},
+        std::vector<uint32_t> snorm10_10_10_2_locations = {});
 
   private:
     ShaderModule(Device* device,

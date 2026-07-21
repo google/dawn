@@ -145,6 +145,8 @@ GLenum VertexFormatType(wgpu::VertexFormat format) {
             return GL_INT;
         case wgpu::VertexFormat::Unorm10_10_10_2:
             return GL_UNSIGNED_INT_2_10_10_10_REV;
+        case wgpu::VertexFormat::Snorm10_10_10_2:
+            return GL_INT_2_10_10_10_REV;
         default:
             DAWN_UNREACHABLE();
     }
@@ -166,6 +168,7 @@ GLboolean VertexFormatIsNormalized(wgpu::VertexFormat format) {
         case wgpu::VertexFormat::Snorm16x2:
         case wgpu::VertexFormat::Snorm16x4:
         case wgpu::VertexFormat::Unorm10_10_10_2:
+        case wgpu::VertexFormat::Snorm10_10_10_2:
             return GL_TRUE;
         default:
             return GL_FALSE;

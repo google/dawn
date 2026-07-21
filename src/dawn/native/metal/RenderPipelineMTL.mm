@@ -126,6 +126,8 @@ MTLVertexFormat VertexFormatType(wgpu::VertexFormat format) {
             return MTLVertexFormatUInt1010102Normalized;
         case wgpu::VertexFormat::Unorm8x4BGRA:
             return MTLVertexFormatUChar4Normalized_BGRA;
+        case wgpu::VertexFormat::Snorm10_10_10_2:
+            return MTLVertexFormatInt1010102Normalized;
         default:
             DAWN_UNREACHABLE();
     }

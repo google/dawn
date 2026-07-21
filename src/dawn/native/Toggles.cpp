@@ -180,6 +180,9 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Suppresses validation errors on API entry points or parameter combinations that aren't "
       "considered secure yet.",
       "http://crbug.com/1138528", ToggleStage::Instance}},
+    {Toggle::AllowExperimentalSnorm10_10_10_2,
+     {"allow_experimental_snorm10_10_10_2", "Allow the experimental snorm10_10_10_2 vertex format.",
+      "https://crbug.com/dawn/536160421", ToggleStage::Instance}},
     {Toggle::FlushBeforeClientWaitSync,
      {"flush_before_client_wait_sync",
       "Call glFlush before glClientWaitSync to work around bugs in the latter",

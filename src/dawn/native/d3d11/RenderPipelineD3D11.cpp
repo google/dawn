@@ -474,11 +474,20 @@ MaybeError RenderPipeline::InitializeShaders() {
             additionalCompileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
         }
 
-        DAWN_TRY_ASSIGN(compiledShader[SingleShaderStage::Vertex],
-                        ToBackend(programmableStage.module)
-                            ->Compile(programmableStage, SingleShaderStage::Vertex,
-                                      ToBackend(GetLayout()), compileFlags | additionalCompileFlags,
-                                      GetImmediateMask(), usedInterstageVariables));
+        std::vector<uint32_t> snorm10_10_10_2_locations;
+        for (VertexAttributeLocation location : GetAttributeLocationsUsed()) {
+            if (GetAttribute(location).format == wgpu::VertexFormat::Snorm10_10_10_2) {
+                snorm10_10_10_2_locations.push_back(
+                    static_cast<uint32_t>(static_cast<uint8_t>(location)));
+            }
+        }
+
+        DAWN_TRY_ASSIGN(
+            compiledShader[SingleShaderStage::Vertex],
+            ToBackend(programmableStage.module)
+                ->Compile(programmableStage, SingleShaderStage::Vertex, ToBackend(GetLayout()),
+                          compileFlags | additionalCompileFlags, GetImmediateMask(),
+                          usedInterstageVariables, {}, std::move(snorm10_10_10_2_locations)));
         const Blob& shaderBlob = compiledShader[SingleShaderStage::Vertex].shaderBlob;
         {
             TRACE_EVENT0(device->GetPlatform(), General, "RenderPipelineD3D11::CreateVertexShader");

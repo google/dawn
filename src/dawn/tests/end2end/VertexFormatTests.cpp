@@ -88,6 +88,7 @@ class VertexFormatTest : public DawnTest {
             case wgpu::VertexFormat::Snorm16x2:
             case wgpu::VertexFormat::Snorm16x4:
             case wgpu::VertexFormat::Unorm10_10_10_2:
+            case wgpu::VertexFormat::Snorm10_10_10_2:
                 return true;
             default:
                 return false;
@@ -115,6 +116,8 @@ class VertexFormatTest : public DawnTest {
                 return 32767;
             case wgpu::VertexFormat::Unorm10_10_10_2:
                 return (component == 3) ? 3 : 1023;
+            case wgpu::VertexFormat::Snorm10_10_10_2:
+                return (component == 3) ? 1 : 511;
             default:
                 DAWN_UNREACHABLE();
         }
@@ -192,6 +195,7 @@ class VertexFormatTest : public DawnTest {
             case wgpu::VertexFormat::Float16x2:
             case wgpu::VertexFormat::Float32:
             case wgpu::VertexFormat::Unorm10_10_10_2:
+            case wgpu::VertexFormat::Snorm10_10_10_2:
             case wgpu::VertexFormat::Sint16x2:
             case wgpu::VertexFormat::Sint32:
             case wgpu::VertexFormat::Sint8x4:
@@ -272,6 +276,7 @@ class VertexFormatTest : public DawnTest {
             case wgpu::VertexFormat::Uint32x4:
             case wgpu::VertexFormat::Sint32x4:
             case wgpu::VertexFormat::Unorm10_10_10_2:
+            case wgpu::VertexFormat::Snorm10_10_10_2:
                 return 4;
             default:
                 DAWN_UNREACHABLE();
@@ -1220,6 +1225,33 @@ TEST_P(VertexFormatTest, Unorm10_10_10_2) {
     };
 
     DoVertexFormatTest(wgpu::VertexFormat::Unorm10_10_10_2, vertexData, expectedData);
+}
+
+TEST_P(VertexFormatTest, Snorm10_10_10_2) {
+    auto MakeRGB10A2 = [](int32_t r, int32_t g, int32_t b, int32_t a) -> uint32_t {
+        DAWN_ASSERT(r >= -512 && r <= 511);
+        DAWN_ASSERT(g >= -512 && g <= 511);
+        DAWN_ASSERT(b >= -512 && b <= 511);
+        DAWN_ASSERT(a >= -2 && a <= 1);
+        uint32_t ur = static_cast<uint32_t>(r) & 0x3FFu;
+        uint32_t ug = static_cast<uint32_t>(g) & 0x3FFu;
+        uint32_t ub = static_cast<uint32_t>(b) & 0x3FFu;
+        uint32_t ua = static_cast<uint32_t>(a) & 0x3u;
+        return ur | ug << 10u | ub << 20u | ua << 30u;
+    };
+
+    std::vector<uint32_t> vertexData = {
+        MakeRGB10A2(0, 0, 0, 0),
+        MakeRGB10A2(511, 511, 511, 1),
+        MakeRGB10A2(-512, -512, -512, -2),
+        MakeRGB10A2(-128, 256, -384, -1),
+    };
+
+    std::vector<int32_t> expectedData = {
+        0, 0, 0, 0, 511, 511, 511, 1, -512, -512, -512, -2, -128, 256, -384, -1,
+    };
+
+    DoVertexFormatTest(wgpu::VertexFormat::Snorm10_10_10_2, vertexData, expectedData);
 }
 
 DAWN_INSTANTIATE_TEST(VertexFormatTest,
