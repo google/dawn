@@ -62,3 +62,7 @@ wheel: <
   name: "infra/python/wheels/httplib2-py3"
   version: "version:0.22.0"
 >
+wheel: <
+  name: "infra/python/wheels/pyparsing-py3"
+  version: "version:3.2.0"
+>
