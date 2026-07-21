@@ -372,6 +372,67 @@ TEST_P(SharedBufferMemoryExistingD3D12ResourceTests, UniformUsageValidation) {
     ASSERT_DEVICE_ERROR_MSG(memory.CreateBuffer(&bufferDesc), testing::HasSubstr("Uniform"));
 }
 
+// Verify that DuplicateHandle with the correct access rights including READ_CONTROL succeeds in
+// OpenExistingHeapFromFileMapping() (control case for MissingReadControlAccessCausesFailure).
+TEST_P(SharedBufferMemoryExistingD3D12ResourceTests, DuplicateWithReadControlAccessSucceeds) {
+    ComPtr<ID3D12Device> d3d12Device =
+        static_cast<ExistingD3D12ResourceBackend*>(GetParam().mBackend)
+            ->CreateD3D12Device(device, false);
+    ComPtr<ID3D12Device3> d3d12Device3;
+    HRESULT hr = d3d12Device->QueryInterface(IID_PPV_ARGS(&d3d12Device3));
+    DAWN_TEST_UNSUPPORTED_IF(hr != S_OK);
+
+    LARGE_INTEGER largeSize = {};
+    largeSize.QuadPart = kD3D12SharedBufferMemoryFileMappingHandleSizeAlignment;
+    HANDLE handle = CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE,
+                                      largeSize.HighPart, largeSize.LowPart, nullptr);
+    EXPECT_NE(handle, nullptr);
+
+    HANDLE duplicatedHandle = nullptr;
+    HANDLE process = GetCurrentProcess();
+    constexpr DWORD kValidAccess = FILE_MAP_READ | FILE_MAP_WRITE | SECTION_QUERY | READ_CONTROL;
+    EXPECT_TRUE(
+        DuplicateHandle(process, handle, process, &duplicatedHandle, kValidAccess, FALSE, 0));
+
+    // With READ_CONTROL present, OpenExistingHeapFromFileMapping should succeed.
+    ComPtr<ID3D12Heap> d3d12Heap;
+    hr = d3d12Device3->OpenExistingHeapFromFileMapping(duplicatedHandle, IID_PPV_ARGS(&d3d12Heap));
+    EXPECT_EQ(S_OK, hr);
+
+    CloseHandle(duplicatedHandle);
+    CloseHandle(handle);
+}
+
+// Verify missing READ_CONTROL access in DuplicateHandle will cause failure in
+// OpenExistingHeapFromFileMapping()
+TEST_P(SharedBufferMemoryExistingD3D12ResourceTests, MissingReadControlAccessCausesFailure) {
+    ComPtr<ID3D12Device> d3d12Device =
+        static_cast<ExistingD3D12ResourceBackend*>(GetParam().mBackend)
+            ->CreateD3D12Device(device, false);
+    ComPtr<ID3D12Device3> d3d12Device3;
+    HRESULT hr = d3d12Device->QueryInterface(IID_PPV_ARGS(&d3d12Device3));
+    DAWN_TEST_UNSUPPORTED_IF(hr != S_OK);
+
+    LARGE_INTEGER largeSize = {};
+    largeSize.QuadPart = kD3D12SharedBufferMemoryFileMappingHandleSizeAlignment;
+    HANDLE handle = CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE,
+                                      largeSize.HighPart, largeSize.LowPart, nullptr);
+    EXPECT_NE(handle, nullptr);
+
+    // Import the duplicated handle to align with the behavior in Chromium.
+    HANDLE duplicatedHandle = nullptr;
+    HANDLE process = GetCurrentProcess();
+    constexpr DWORD kInvalidAccess = FILE_MAP_READ | FILE_MAP_WRITE | SECTION_QUERY;
+    EXPECT_TRUE(
+        DuplicateHandle(process, handle, process, &duplicatedHandle, kInvalidAccess, FALSE, 0));
+
+    // Missing read control will cause an error when calling `OpenExistingHeapFromFileMapping`.
+    ComPtr<ID3D12Heap> d3d12Heap;
+    HRESULT error_hr =
+        d3d12Device3->OpenExistingHeapFromFileMapping(duplicatedHandle, IID_PPV_ARGS(&d3d12Heap));
+    EXPECT_NE(S_OK, error_hr);
+}
+
 class D3D12SharedMemoryFileHandleBackend : public SharedBufferMemoryTestBackend {
   public:
     static Backend GetInstance() {
