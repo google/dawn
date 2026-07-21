@@ -1062,6 +1062,41 @@ TEST_F(ResolverFunctionValidationTest, ParameterMatrixNoType) {
     EXPECT_EQ(r()->error(), R"(12:34 error: expected '<' for 'mat3x3')");
 }
 
+TEST_F(ResolverFunctionValidationTest, Parameter_PointerImmediate_Array) {
+    EXPECT_ERROR(R"(
+fn foo(p : ptr<immediate, array<f32, 2>>) { }
+)",
+                 R"(input.wgsl:2:27 error: arrays cannot be used in the <immediate> address space
+fn foo(p : ptr<immediate, array<f32, 2>>) { }
+                          ^^^^^^^^^^^^^
+
+input.wgsl:2:12 note: while instantiating ptr<immediate, array<f32, 2>, read>
+fn foo(p : ptr<immediate, array<f32, 2>>) { }
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(ResolverFunctionValidationTest, Parameter_PointerImmediate_ArrayInStruct) {
+    EXPECT_ERROR(R"(
+struct S {
+  a : array<f32, 2>,
+}
+fn foo(p : ptr<immediate, S>) { }
+)",
+                 R"(input.wgsl:3:7 error: arrays cannot be used in the <immediate> address space
+  a : array<f32, 2>,
+      ^^^^^^^^^^^^^
+
+input.wgsl:3:3 note: while analyzing structure member S.a
+  a : array<f32, 2>,
+  ^
+
+input.wgsl:5:12 note: while instantiating ptr<immediate, S, read>
+fn foo(p : ptr<immediate, S>) { }
+           ^^^^^^^^^^^^^^^^^
+)");
+}
+
 enum class Expectation {
     kPass,
     kFail,

@@ -827,20 +827,36 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_ImmediateVectorF32) {
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_ImmediateArrayF32) {
-    EXPECT_SUCCESS(R"(
+    EXPECT_ERROR(R"(
 struct S {
   a : f32
 }
 var<immediate> g : array<S, 3u>;
+)",
+                 R"(input.wgsl:5:20 error: arrays cannot be used in the <immediate> address space
+var<immediate> g : array<S, 3u>;
+                   ^^^^^^^^^^^^
+
+input.wgsl:5:1 note: while instantiating 'var' g
+var<immediate> g : array<S, 3u>;
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_ImmediateArrayF32) {
-    EXPECT_SUCCESS(R"(
+    EXPECT_ERROR(R"(
 struct S {
   a : f32
 }
 alias t = ptr<immediate, array<S, 3u>>;
+)",
+                 R"(input.wgsl:5:26 error: arrays cannot be used in the <immediate> address space
+alias t = ptr<immediate, array<S, 3u>>;
+                         ^^^^^^^^^^^^
+
+input.wgsl:5:11 note: while instantiating ptr<immediate, array<S, 3>, read>
+alias t = ptr<immediate, array<S, 3u>>;
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )");
 }
 

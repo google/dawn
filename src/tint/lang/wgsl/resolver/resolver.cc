@@ -4802,6 +4802,11 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
             }
         }
 
+        if (address_space == core::AddressSpace::kImmediate) {
+            AddError(usage) << "arrays cannot be used in the <immediate> address space";
+            return false;
+        }
+
         return ApplyAddressSpaceUsageToType(address_space,
                                             const_cast<core::type::Type*>(arr->ElemType()), usage);
     }
