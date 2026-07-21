@@ -355,8 +355,10 @@ MaybeError Queue::SubmitPendingCommandsImpl() {
     for (VkSemaphore semaphore : mRecordingContext.waitSemaphores) {
         device->GetFencedDeleter()->DeleteWhenUnused(semaphore);
     }
-    IncrementLastSubmittedCommandSerial();
-    mFencesInFlight->emplace_back(fence, GetLastSubmittedCommandSerial());
+    mFencesInFlight.Use([&](auto fencesInFlight) {
+        IncrementLastSubmittedCommandSerial();
+        fencesInFlight->emplace_back(fence, GetLastSubmittedCommandSerial());
+    });
 
     for (auto texture : mRecordingContext.specialSyncTextures) {
         DAWN_TRY(texture->OnAfterSubmit());
