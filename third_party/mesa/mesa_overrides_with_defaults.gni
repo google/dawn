@@ -38,6 +38,7 @@ declare_args() {
       "-Dvulkan-drivers=swrast",
       "-Dshared-llvm=disabled",
       "-Dcpp_rtti=false",
+      "-Dzstd=disabled",
     ]
   }
 }

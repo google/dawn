@@ -32,6 +32,7 @@ set(MESA_OPTIONS
     "-Dvulkan-drivers=swrast"
     "-Dshared-llvm=disabled"
     "-Dcpp_rtti=false"
+    "-Dzstd=disabled"
 )
 
 meson_target("mesa_build"

@@ -75,6 +75,11 @@ function(meson_target TARGET_NAME)
             set(LLVM_STRIP_PATH "llvm-strip")
         endif()
 
+        set(LLVM_CONFIG_PATH "${DAWN_THIRD_PARTY_DIR}/llvm-dev/bin/llvm-config")
+        if (NOT EXISTS "${LLVM_CONFIG_PATH}")
+            message(FATAL_ERROR "Could not find required llvm-config at ${LLVM_CONFIG_PATH}")
+        endif()
+
         set(NATIVE_FILE_CONTENT
             "[binaries]\n"
             "c = '${CC_PATH}'\n"
@@ -82,11 +87,13 @@ function(meson_target TARGET_NAME)
             "ar = '${LLVM_AR_PATH}'\n"
             "strip = '${LLVM_STRIP_PATH}'\n"
             "pkg-config = 'pkg-config'\n"
+            "llvm-config = '${LLVM_CONFIG_PATH}'\n"
             "python = ['vpython3', '-vpython-spec', '${PROJECT_SOURCE_DIR}/.vpython3']\n"
         )
 
         set(NATIVE_FILE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}_native.ini")
-        file(WRITE "${NATIVE_FILE_PATH}" "${NATIVE_FILE_CONTENT}")
+        string(JOIN "" NATIVE_FILE_CONTENT_STR ${NATIVE_FILE_CONTENT})
+        file(WRITE "${NATIVE_FILE_PATH}" "${NATIVE_FILE_CONTENT_STR}")
 
         list(APPEND MESON_ARGS
             "--native-file"
