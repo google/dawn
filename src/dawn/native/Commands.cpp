@@ -160,7 +160,7 @@ void FreeCommands(CommandIterator* commands) {
             }
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = commands->NextCommand<InsertDebugMarkerCmd>();
-                commands->NextData<char>(cmd->length + 1);
+                commands->NextData<char>(cmd->length);
                 cmd->~InsertDebugMarkerCmd();
                 break;
             }
@@ -171,7 +171,7 @@ void FreeCommands(CommandIterator* commands) {
             }
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = commands->NextCommand<PushDebugGroupCmd>();
-                commands->NextData<char>(cmd->length + 1);
+                commands->NextData<char>(cmd->length);
                 cmd->~PushDebugGroupCmd();
                 break;
             }
@@ -348,7 +348,7 @@ void SkipCommand(CommandIterator* commands, Command type) {
 
         case Command::InsertDebugMarker: {
             InsertDebugMarkerCmd* cmd = commands->NextCommand<InsertDebugMarkerCmd>();
-            commands->NextData<char>(cmd->length + 1);
+            commands->NextData<char>(cmd->length);
             break;
         }
 
@@ -358,7 +358,7 @@ void SkipCommand(CommandIterator* commands, Command type) {
 
         case Command::PushDebugGroup: {
             PushDebugGroupCmd* cmd = commands->NextCommand<PushDebugGroupCmd>();
-            commands->NextData<char>(cmd->length + 1);
+            commands->NextData<char>(cmd->length);
             break;
         }
 
