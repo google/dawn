@@ -75,6 +75,75 @@ ResultOrError<id<MTLCounterSampleBuffer>> CreateCounterSampleBuffer(Device* devi
 }
 }  // namespace
 
+CounterSampleBufferAllocator::CounterSampleBufferAllocator(Device* device) : mDevice(device) {}
+
+CounterSampleBufferAllocator::~CounterSampleBufferAllocator() {
+    mPool.clear();
+}
+
+ResultOrError<CounterSampleBufferAllocator::Allocation> CounterSampleBufferAllocator::Allocate(
+    uint32_t count) {
+    // Try to find an existing pool buffer with a contiguous block of 'count' free elements.
+    // poolBuffer.occupied acts as a bitmap tracker for the allocated query slots.
+    for (auto& poolBuffer : mPool) {
+        uint32_t run = 0;
+        for (uint32_t i = 0; i < poolBuffer.occupied.size(); ++i) {
+            if (!poolBuffer.occupied[i]) {
+                run++;
+                if (run == count) {
+                    uint32_t firstIndex = i - count + 1;
+                    for (uint32_t j = 0; j < count; ++j) {
+                        poolBuffer.occupied[firstIndex + j] = true;
+                    }
+                    poolBuffer.occupiedCount += count;
+                    return Allocation{poolBuffer.buffer.Get(), firstIndex};
+                }
+            } else {
+                run = 0;
+            }
+        }
+    }
+
+    // Allocate a new pool buffer.
+    uint32_t poolBufferSize = std::max(count, 4096u);
+    NSRef<NSString> label =
+        MakeDebugName(mDevice.get(), "Dawn_QuerySet_TimestampCounterSampleBuffer", "Pooled");
+
+    id<MTLCounterSampleBuffer> newBuffer = nil;
+    DAWN_TRY_ASSIGN(newBuffer, CreateCounterSampleBuffer(mDevice.get(), label.Get(),
+                                                         MTLCommonCounterSetTimestamp,
+                                                         QueryIndex(poolBufferSize)));
+
+    // Allocate from the new buffer.
+    PoolBuffer poolBuffer;
+    poolBuffer.buffer = AcquireNSPRef(newBuffer);
+    poolBuffer.occupied.resize(poolBufferSize, false);
+    poolBuffer.occupiedCount = count;
+
+    for (uint32_t j = 0; j < count; ++j) {
+        poolBuffer.occupied[j] = true;
+    }
+
+    mPool.push_back(std::move(poolBuffer));
+    return Allocation{newBuffer, 0};
+}
+
+void CounterSampleBufferAllocator::Deallocate(const Allocation& allocation, uint32_t count) {
+    for (auto it = mPool.begin(); it != mPool.end(); ++it) {
+        if (it->buffer.Get() == allocation.buffer) {
+            for (uint32_t i = 0; i < count; ++i) {
+                it->occupied[allocation.baseIndex + i] = false;
+            }
+
+            it->occupiedCount -= count;
+            if (it->occupiedCount == 0) {
+                mPool.erase(it);
+            }
+            return;
+        }
+    }
+}
+
 // static
 ResultOrError<Ref<QuerySet>> QuerySet::Create(Device* device,
                                               const QuerySetDescriptor* descriptor) {
@@ -104,12 +173,19 @@ MaybeError QuerySet::Initialize() {
             break;
         }
         case wgpu::QueryType::Timestamp: {
-            NSRef<NSString> label = MakeDebugName(
-                GetDevice(), "Dawn_QuerySet_TimestampCounterSampleBuffer", GetLabel());
-            DAWN_TRY_ASSIGN(
-                mCounterSampleBuffer,
-                CreateCounterSampleBuffer(device, label.Get(), MTLCommonCounterSetTimestamp,
-                                          GetQueryCount()));
+            if (GetLabel().empty()) {
+                auto* allocator = device->GetCounterSampleBufferAllocator();
+                DAWN_TRY_ASSIGN(mCounterSampleBufferAllocation,
+                                allocator->Allocate(static_cast<uint32_t>(GetQueryCount())));
+            } else {
+                NSRef<NSString> label = MakeDebugName(
+                    GetDevice(), "Dawn_QuerySet_TimestampCounterSampleBuffer", GetLabel());
+                DAWN_TRY_ASSIGN(
+                    mCounterSampleBuffer,
+                    CreateCounterSampleBuffer(device, label.Get(), MTLCommonCounterSetTimestamp,
+                                              GetQueryCount()));
+                mCounterSampleBufferAllocation = {mCounterSampleBuffer, 0};
+            }
         } break;
         default:
             DAWN_UNREACHABLE();
@@ -124,7 +200,12 @@ id<MTLBuffer> QuerySet::GetVisibilityBuffer() const {
 }
 
 id<MTLCounterSampleBuffer> QuerySet::GetCounterSampleBuffer() const {
-    return mCounterSampleBuffer;
+    return mCounterSampleBufferAllocation.buffer;
+}
+
+uint32_t QuerySet::GetSampleIndex(QueryIndex queryIndex) const {
+    DAWN_ASSERT(GetQueryType() == wgpu::QueryType::Timestamp);
+    return static_cast<uint32_t>(queryIndex) + mCounterSampleBufferAllocation.baseIndex;
 }
 
 QuerySet::~QuerySet() = default;
@@ -141,8 +222,18 @@ void QuerySet::DestroyImpl(DestroyReason reason) {
 
     mVisibilityBuffer = nullptr;
 
-    [mCounterSampleBuffer release];
-    mCounterSampleBuffer = nullptr;
+    if (mCounterSampleBufferAllocation.buffer != nil) {
+        if (mCounterSampleBuffer == nullptr) {
+            Device* device = ToBackend(GetDevice());
+            auto* allocator = device->GetCounterSampleBufferAllocator();
+            allocator->Deallocate(mCounterSampleBufferAllocation,
+                                  static_cast<uint32_t>(GetQueryCount()));
+        } else {
+            [mCounterSampleBuffer release];
+            mCounterSampleBuffer = nullptr;
+        }
+        mCounterSampleBufferAllocation = {};
+    }
 }
 
 }  // namespace dawn::native::metal

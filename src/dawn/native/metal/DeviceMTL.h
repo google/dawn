@@ -46,6 +46,7 @@
 namespace dawn::native::metal {
 
 struct KalmanInfo;
+class CounterSampleBufferAllocator;
 
 class Device final : public DeviceBase {
   public:
@@ -87,6 +88,8 @@ class Device final : public DeviceBase {
     // Get a MTLBuffer that can be used as a mock in a no-op blit encoder based on filling this
     // single-byte buffer
     id<MTLBuffer> GetMockBlitMtlBuffer();
+
+    CounterSampleBufferAllocator* GetCounterSampleBufferAllocator() const;
 
   private:
     Device(AdapterBase* adapter,
@@ -159,6 +162,8 @@ class Device final : public DeviceBase {
     // vertex/fragement stage
     bool mCounterSamplingAtStageBoundary;
     NSPRef<id<MTLBuffer>> mMockBlitMtlBuffer;
+
+    std::unique_ptr<CounterSampleBufferAllocator> mCounterSampleBufferAllocator;
 };
 
 }  // namespace dawn::native::metal

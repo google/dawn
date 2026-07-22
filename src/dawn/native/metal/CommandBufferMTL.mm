@@ -151,21 +151,21 @@ void SetSampleBufferAttachments(PassDescriptor* descriptor, BeginPass* cmd) {
     if (querySet == nullptr) {
         return;
     }
+    QuerySet* querySetMTL = ToBackend(querySet);
     SampleBufferAttachment<PassDescriptor> sampleBufferAttachment;
-    sampleBufferAttachment.SetSampleBuffer(descriptor,
-                                           ToBackend(querySet)->GetCounterSampleBuffer());
+    sampleBufferAttachment.SetSampleBuffer(descriptor, querySetMTL->GetCounterSampleBuffer());
 
     QueryIndex beginningOfPassWriteIndex = cmd->timestampWrites.beginningOfPassWriteIndex;
     sampleBufferAttachment.SetStartSampleIndex(
         descriptor, beginningOfPassWriteIndex != kQuerySetIndexUndefinedTyped
-                        ? NSUInteger{beginningOfPassWriteIndex}
+                        ? NSUInteger{querySetMTL->GetSampleIndex(beginningOfPassWriteIndex)}
                         : MTLCounterDontSample);
 
     QueryIndex endOfPassWriteIndex = cmd->timestampWrites.endOfPassWriteIndex;
-    sampleBufferAttachment.SetEndSampleIndex(descriptor,
-                                             endOfPassWriteIndex != kQuerySetIndexUndefinedTyped
-                                                 ? NSUInteger{endOfPassWriteIndex}
-                                                 : MTLCounterDontSample);
+    sampleBufferAttachment.SetEndSampleIndex(
+        descriptor, endOfPassWriteIndex != kQuerySetIndexUndefinedTyped
+                        ? NSUInteger{querySetMTL->GetSampleIndex(endOfPassWriteIndex)}
+                        : MTLCounterDontSample);
 }
 
 NSRef<MTLComputePassDescriptor> CreateMTLComputePassDescriptor(BeginComputePassCmd* computePass) {
@@ -436,10 +436,11 @@ void EncodeEmptyBlitEncoderForWriteTimestamp(Device* device,
     auto scopedDescriptor = AcquireNSRef([[MTLBlitPassDescriptor alloc] init]);
     MTLBlitPassDescriptor* descriptor = scopedDescriptor.Get();
     if (cmd->querySet.Get() != nullptr) {
-        descriptor.sampleBufferAttachments[0].sampleBuffer =
-            ToBackend(cmd->querySet.Get())->GetCounterSampleBuffer();
+        QuerySet* querySet = ToBackend(cmd->querySet.Get());
+        descriptor.sampleBufferAttachments[0].sampleBuffer = querySet->GetCounterSampleBuffer();
         descriptor.sampleBufferAttachments[0].startOfEncoderSampleIndex = MTLCounterDontSample;
-        descriptor.sampleBufferAttachments[0].endOfEncoderSampleIndex = NSUInteger(cmd->queryIndex);
+        descriptor.sampleBufferAttachments[0].endOfEncoderSampleIndex =
+            NSUInteger(querySet->GetSampleIndex(cmd->queryIndex));
 
         id<MTLBlitCommandEncoder> blit = commandContext->BeginBlit(descriptor);
         if (device->IsToggleEnabled(Toggle::MetalUseMockBlitEncoderForWriteTimestamp)) {
@@ -1489,7 +1490,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                     }
                     [commandContext->EnsureBlit()
                           resolveCounters:querySet->GetCounterSampleBuffer()
-                                  inRange:NSMakeRange(uint32_t{cmd->firstQuery},
+                                  inRange:NSMakeRange(querySet->GetSampleIndex(cmd->firstQuery),
                                                       uint32_t{cmd->queryCount})
                         destinationBuffer:destination->GetMTLBuffer()
                         destinationOffset:NSUInteger(cmd->destinationOffset)];
@@ -1508,10 +1509,10 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
 
                 } else {
                     DAWN_ASSERT(ToBackend(GetDevice())->UseCounterSamplingAtCommandBoundary());
+                    QuerySet* querySet = ToBackend(cmd->querySet.Get());
                     [commandContext->EnsureBlit()
-                        sampleCountersInBuffer:ToBackend(cmd->querySet.Get())
-                                                   ->GetCounterSampleBuffer()
-                                 atSampleIndex:NSUInteger(cmd->queryIndex)
+                        sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
+                                 atSampleIndex:NSUInteger(querySet->GetSampleIndex(cmd->queryIndex))
                                    withBarrier:YES];
                 }
 
@@ -1611,12 +1612,12 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
             kQuerySetIndexUndefinedTyped) {
             DAWN_ASSERT(ToBackend(GetDevice())->UseCounterSamplingAtCommandBoundary());
 
-            [encoder
-                sampleCountersInBuffer:ToBackend(computePassCmd->timestampWrites.querySet.Get())
-                                           ->GetCounterSampleBuffer()
-                         atSampleIndex:NSUInteger(computePassCmd->timestampWrites
-                                                      .beginningOfPassWriteIndex)
-                           withBarrier:YES];
+            QuerySet* querySet = ToBackend(computePassCmd->timestampWrites.querySet.Get());
+            [encoder sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
+                              atSampleIndex:NSUInteger(querySet->GetSampleIndex(
+                                                computePassCmd->timestampWrites
+                                                    .beginningOfPassWriteIndex))
+                                withBarrier:YES];
         }
     }
     SetDebugName(GetDevice(), encoder, "Dawn_ComputePassEncoder", computePassCmd->label);
@@ -1635,13 +1636,12 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
                         kQuerySetIndexUndefinedTyped) {
                     DAWN_ASSERT(!ToBackend(GetDevice())->UseCounterSamplingAtStageBoundary());
 
-                    [encoder
-                        sampleCountersInBuffer:ToBackend(
-                                                   computePassCmd->timestampWrites.querySet.Get())
-                                                   ->GetCounterSampleBuffer()
-                                 atSampleIndex:NSUInteger(computePassCmd->timestampWrites
-                                                              .endOfPassWriteIndex)
-                                   withBarrier:YES];
+                    QuerySet* querySet = ToBackend(computePassCmd->timestampWrites.querySet.Get());
+                    [encoder sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
+                                      atSampleIndex:NSUInteger(querySet->GetSampleIndex(
+                                                        computePassCmd->timestampWrites
+                                                            .endOfPassWriteIndex))
+                                        withBarrier:YES];
                 }
                 UpdateQueryAvailability(computePassCmd->timestampWrites);
 
@@ -1746,9 +1746,10 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
                 WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
                 QuerySet* querySet = ToBackend(cmd->querySet.Get());
 
-                [encoder sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
-                                  atSampleIndex:NSUInteger(cmd->queryIndex)
-                                    withBarrier:YES];
+                [encoder
+                    sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
+                             atSampleIndex:NSUInteger(querySet->GetSampleIndex(cmd->queryIndex))
+                               withBarrier:YES];
 
                 UpdateQueryAvailability(cmd);
                 break;
@@ -1795,11 +1796,11 @@ MaybeError CommandBuffer::EncodeRenderPass(
         renderPassCmd->timestampWrites.beginningOfPassWriteIndex != kQuerySetIndexUndefinedTyped) {
         DAWN_ASSERT(!ToBackend(GetDevice())->UseCounterSamplingAtStageBoundary());
 
+        QuerySet* querySet = ToBackend(renderPassCmd->timestampWrites.querySet.Get());
         [encoder
-            sampleCountersInBuffer:ToBackend(renderPassCmd->timestampWrites.querySet.Get())
-                                       ->GetCounterSampleBuffer()
-                     atSampleIndex:NSUInteger(
-                                       renderPassCmd->timestampWrites.beginningOfPassWriteIndex)
+            sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
+                     atSampleIndex:NSUInteger(querySet->GetSampleIndex(
+                                       renderPassCmd->timestampWrites.beginningOfPassWriteIndex))
                        withBarrier:YES];
     }
 
@@ -2063,13 +2064,12 @@ MaybeError CommandBuffer::EncodeRenderPass(
                         kQuerySetIndexUndefinedTyped) {
                     DAWN_ASSERT(!ToBackend(GetDevice())->UseCounterSamplingAtStageBoundary());
 
-                    [encoder
-                        sampleCountersInBuffer:ToBackend(
-                                                   renderPassCmd->timestampWrites.querySet.Get())
-                                                   ->GetCounterSampleBuffer()
-                                 atSampleIndex:NSUInteger(renderPassCmd->timestampWrites
-                                                              .endOfPassWriteIndex)
-                                   withBarrier:YES];
+                    QuerySet* querySet = ToBackend(renderPassCmd->timestampWrites.querySet.Get());
+                    [encoder sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
+                                      atSampleIndex:NSUInteger(querySet->GetSampleIndex(
+                                                        renderPassCmd->timestampWrites
+                                                            .endOfPassWriteIndex))
+                                        withBarrier:YES];
                 }
 
                 UpdateQueryAvailability(renderPassCmd->timestampWrites);
@@ -2172,9 +2172,10 @@ MaybeError CommandBuffer::EncodeRenderPass(
                 WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
                 QuerySet* querySet = ToBackend(cmd->querySet.Get());
 
-                [encoder sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
-                                  atSampleIndex:NSUInteger(cmd->queryIndex)
-                                    withBarrier:YES];
+                [encoder
+                    sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
+                             atSampleIndex:NSUInteger(querySet->GetSampleIndex(cmd->queryIndex))
+                               withBarrier:YES];
 
                 UpdateQueryAvailability(cmd);
                 break;
