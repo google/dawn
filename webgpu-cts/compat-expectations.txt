@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-07-21 07:04:52AM
+# Last rolled: 2026-07-22 07:18:54AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -2542,6 +2542,7 @@ crbug.com/0000 [ android-14 android-pixel-6 ] webgpu:api,operation,command_buffe
 crbug.com/0000 [ android-14 android-pixel-6 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm-srgb";dstFormat="rgba8unorm-srgb";dimension="2d" [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus-stencil8" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="astc-8x8-unorm-srgb";dimension="3d" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyT2B";aspect="stencil-only" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,compute,basic:large_dispatch:dispatchSize="maximum" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="queue-op";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="queue-op";writeOps=["storage","b2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
@@ -3308,6 +3309,7 @@ crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,flow_control,eval_ord
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,flow_control,eval_order:array_index_via_ptrs: [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:shader,execution,flow_control,eval_order:array_index_via_ptrs: [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,flow_control,return:return:preventValueOptimizations=true [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,value_init:struct:addressSpace="private" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="function";workgroupSize=[1,1,1];batch__=3 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="function";workgroupSize=[1,1,1];batch__=3 [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="function";workgroupSize=[1,1,1];batch__=3 [ Failure ]
