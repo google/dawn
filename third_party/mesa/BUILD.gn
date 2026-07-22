@@ -32,6 +32,7 @@ import("${mesa_meson_dir}/meson_target.gni")
 meson_target("mesa_build") {
   source_dir = "src"
   options = mesa_options
+  inputs = [ "${mesa_src_dir}/mesa_options.txt" ]
   outputs = [ "${target_gen_dir}/install" ]
 }
 

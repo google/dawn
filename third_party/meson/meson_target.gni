@@ -113,6 +113,7 @@ template("_meson_setup") {
                              "public_deps",
                              "testonly",
                              "visibility",
+                             "inputs",
                            ])
 
     if (!defined(deps)) {
@@ -126,6 +127,7 @@ template("_meson_setup") {
 
     args = [
       "setup",
+      "--reconfigure",
       rebase_path(_setup_dir, root_build_dir),
       rebase_path(invoker.source_dir, root_build_dir),
       "--prefix=" + rebase_path("${target_gen_dir}/install"),
@@ -224,6 +226,7 @@ template("meson_target") {
                              "public_deps",
                              "testonly",
                              "visibility",
+                             "inputs",
                            ])
   }
 

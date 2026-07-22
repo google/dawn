@@ -27,13 +27,7 @@
 
 include("${DAWN_THIRD_PARTY_DIR}/meson/CMakeLists.txt")
 
-set(MESA_OPTIONS
-    "-Dgallium-drivers=llvmpipe"
-    "-Dvulkan-drivers=swrast"
-    "-Dshared-llvm=disabled"
-    "-Dcpp_rtti=false"
-    "-Dzstd=disabled"
-)
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/mesa_options.txt" MESA_OPTIONS)
 
 meson_target("mesa_build"
     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src"
