@@ -252,11 +252,11 @@ TEST_P(SharedBufferMemoryTests, FenceCountMatchesSignaledValueCount) {
     // Error case, fenceCount != signaledValueCount
     beginDesc.signaledValueCount = 1;
     beginDesc.signaledValues = &signalValue;
-    ASSERT_DEVICE_ERROR(EXPECT_FALSE(memory.BeginAccess(buffer, &beginDesc)));
+    ASSERT_DEVICE_ERROR(EXPECT_NE(memory.BeginAccess(buffer, &beginDesc), wgpu::Status::Success));
 
     // Success case, fenceCount == signaledValueCount
     beginDesc.signaledValueCount = 0;
-    EXPECT_TRUE(memory.BeginAccess(buffer, &beginDesc));
+    EXPECT_EQ(memory.BeginAccess(buffer, &beginDesc), wgpu::Status::Success);
 }
 
 // Ensure that EndAccess cannot be called on a mapped or pending mapped buffer.
