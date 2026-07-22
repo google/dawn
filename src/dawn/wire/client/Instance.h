@@ -28,10 +28,12 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_INSTANCE_H_
 #define SRC_DAWN_WIRE_CLIENT_INSTANCE_H_
 
+#include <memory>
+
 #include "absl/container/flat_hash_set.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireCmd_autogen.h"
-#include "src/dawn/common/RefCountedWithExternalCount.h"
+#include "src/dawn/wire/client/EventManager.h"
 #include "src/dawn/wire/client/ObjectBase.h"
 
 namespace dawn::wire::client {
@@ -39,11 +41,13 @@ namespace dawn::wire::client {
 void APIFreeMembers(WGPUSupportedWGSLLanguageFeatures supportedFeatures);
 void APIFreeMembers(WGPUSupportedInstanceFeatures supportedFeatures);
 
-class Instance final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
+class Instance final : public ObjectBase {
   public:
     explicit Instance(const ObjectBaseParams& params);
 
     ObjectType GetObjectType() const override;
+
+    EventManager& GetEventManager() const;
 
     // Validate and initialize the client side state. Note the *actual* native
     // instance is not created via the wire, but gets injected separately.
@@ -61,11 +65,11 @@ class Instance final : public RefCountedWithExternalCount<ObjectWithEventsBase> 
     WGPUSurface APICreateSurface(const WGPUSurfaceDescriptor* desc) const;
 
   private:
-    void WillDropLastExternalRef() override;
     void GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,
                             const WGPUDawnWGSLBlocklist* wgslBlocklist);
 
     absl::flat_hash_set<WGPUWGSLLanguageFeatureName> mWGSLFeatures;
+    std::unique_ptr<EventManager> mEventManager;
 };
 
 }  // namespace dawn::wire::client

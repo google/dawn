@@ -50,7 +50,7 @@ class Queue;
 class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
   public:
     Device(const ObjectBaseParams& params,
-           const ObjectHandle& eventManagerHandle,
+           Ref<Instance> instance,
            Adapter* adapter,
            const WGPUDeviceDescriptor* descriptor);
 

@@ -112,7 +112,7 @@ struct MapUserdata : CallbackUserdata {
 
     ObjectHandle buffer;
     WGPUBuffer bufferObj;
-    ObjectHandle eventManager;
+    ObjectId instanceId;
     WGPUFuture future;
     size_t offset;
     size_t size;
@@ -123,14 +123,14 @@ struct ErrorScopeUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectHandle device;
-    ObjectHandle eventManager;
+    ObjectId instanceId;
     WGPUFuture future;
 };
 
 struct ShaderModuleGetCompilationInfoUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
-    ObjectHandle eventManager;
+    ObjectId instanceId;
     WGPUFuture future;
 };
 
@@ -138,7 +138,7 @@ struct QueueWorkDoneUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectHandle queue;
-    ObjectHandle eventManager;
+    ObjectId instanceId;
     WGPUFuture future;
 };
 
@@ -146,7 +146,7 @@ struct CreatePipelineAsyncUserData : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectHandle device;
-    ObjectHandle eventManager;
+    ObjectId instanceId;
     WGPUFuture future;
     ObjectHandle pipeline;
 };
@@ -154,7 +154,7 @@ struct CreatePipelineAsyncUserData : CallbackUserdata {
 struct RequestAdapterUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
-    ObjectHandle eventManager;
+    ObjectId instanceId;
     WGPUFuture future;
     ObjectHandle adapter;
 };
@@ -162,7 +162,7 @@ struct RequestAdapterUserdata : CallbackUserdata {
 struct RequestDeviceUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
-    ObjectHandle eventManager;
+    ObjectId instanceId;
     WGPUFuture future;
     ObjectHandle device;
     WGPUFuture deviceLostFuture;
@@ -171,7 +171,7 @@ struct RequestDeviceUserdata : CallbackUserdata {
 struct DeviceLostUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
-    ObjectHandle eventManager;
+    ObjectId instanceId;
     WGPUFuture future;
 };
 

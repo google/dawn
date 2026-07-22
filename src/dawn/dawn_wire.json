@@ -33,7 +33,7 @@
     "commands": {
         "buffer map async": [
             { "name": "buffer id", "type": "ObjectId", "id_type": "buffer" },
-            { "name": "event manager handle", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" },
             { "name": "mode", "type": "map mode" },
             { "name": "offset", "type": "size_t"},
@@ -55,21 +55,21 @@
         ],
         "device create compute pipeline async": [
             { "name": "device id", "type": "ObjectId", "id_type": "device"},
-            { "name": "event manager handle", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" },
             { "name": "pipeline object handle", "type": "ObjectHandle", "handle_type": "compute pipeline"},
             { "name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"}
         ],
         "device create render pipeline async": [
             { "name": "device id", "type": "ObjectId", "id_type": "device" },
-            { "name": "event manager handle", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" },
             { "name": "pipeline object handle", "type": "ObjectHandle", "handle_type": "render pipeline"},
             { "name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"}
         ],
         "device pop error scope": [
             { "name": "device id", "type": "ObjectId", "id_type": "device" },
-            { "name": "event manager handle", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" }
         ],
         "unregister object": [
@@ -78,7 +78,7 @@
         ],
         "queue on submitted work done": [
             { "name": "queue id", "type": "ObjectId", "id_type": "queue" },
-            { "name": "event manager handle", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" }
         ],
         "queue write buffer": [
@@ -119,7 +119,7 @@
         ],
         "shader module get compilation info": [
             { "name": "shader module id", "type": "ObjectId", "id_type": "shader module" },
-            { "name": "event manager handle", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" }
         ],
         "surface get current texture": [
@@ -129,14 +129,13 @@
         ],
         "instance request adapter": [
             { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
-            { "name": "event manager handle", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "adapter object handle", "type": "ObjectHandle", "handle_type": "adapter"},
             { "name": "options", "type": "request adapter options", "annotation": "const*", "optional": true }
         ],
         "adapter request device": [
             { "name": "adapter id", "type": "ObjectId", "id_type": "adapter" },
-            { "name": "event manager handle", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" },
             { "name": "device object handle", "type": "ObjectHandle", "handle_type": "device"},
             { "name": "device lost future", "type": "future" },
@@ -163,7 +162,7 @@
     },
     "return commands": {
         "buffer map async callback": [
-            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "map async status" },
             { "name": "message", "type": "string view" },
@@ -171,13 +170,13 @@
             { "name": "read data update info", "type": "std::byte", "annotation": "const*", "length": "read data update info length", "skip_serialize": true }
         ],
         "device create compute pipeline async callback": [
-            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "create pipeline async status" },
             { "name": "message", "type": "string view"}
         ],
         "device create render pipeline async callback": [
-            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "create pipeline async status" },
             { "name": "message", "type": "string view"}
@@ -193,32 +192,32 @@
             { "name": "message", "type": "string view" }
         ],
         "device lost callback" : [
-            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" },
             { "name": "reason", "type": "device lost reason" },
             { "name": "message", "type": "string view"}
         ],
         "device pop error scope callback": [
-            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "pop error scope status" },
             { "name": "type", "type": "error type" },
             { "name": "message", "type": "string view"}
         ],
         "queue work done callback": [
-            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "queue work done status" },
             { "name": "message", "type": "string view" }
         ],
         "shader module get compilation info callback": [
-            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "compilation info request status" },
             { "name": "info", "type": "compilation info", "annotation": "const*", "optional": true }
         ],
         "instance request adapter callback": [
-            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "request adapter status" },
             { "name": "message", "type": "string view" },
@@ -228,7 +227,7 @@
             { "name": "features", "type": "feature name", "annotation": "const*", "length": "features count"}
         ],
         "adapter request device callback": [
-            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "request device status" },
             { "name": "message", "type": "string view" },

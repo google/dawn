@@ -167,19 +167,18 @@ WGPUFuture ShaderModule::APIGetCompilationInfo(
 
     ShaderModuleGetCompilationInfoCmd cmd;
     cmd.shaderModuleId = GetWireHandle(GetClient()).id;
-    cmd.eventManagerHandle = GetEventManagerHandle();
+    cmd.instanceId = GetInstance()->GetWireHandle(GetClient()).id;
     cmd.future = {futureIDInternal};
 
     GetClient()->SerializeCommand(cmd);
     return {futureIDInternal};
 }
 
-WireResult Client::DoShaderModuleGetCompilationInfoCallback(ObjectHandle eventManager,
+WireResult Client::DoShaderModuleGetCompilationInfoCallback(ObjectId instanceId,
                                                             WGPUFuture future,
                                                             WGPUCompilationInfoRequestStatus status,
                                                             const WGPUCompilationInfo* info) {
-    return SetFutureReady<ShaderModule::CompilationInfoEvent>(eventManager, future.id, status,
-                                                              info);
+    return SetFutureReady<ShaderModule::CompilationInfoEvent>(instanceId, future.id, status, info);
 }
 
 }  // namespace dawn::wire::client

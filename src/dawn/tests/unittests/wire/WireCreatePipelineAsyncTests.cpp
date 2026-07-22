@@ -305,67 +305,7 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateAfterDisconnect) {
     });
 }
 
-TEST_P(WireCreateComputePipelineAsyncTest, CreateAndDropInstance) {
-    // For spontaneous, dropping the instance does not immediately call the callback because it is
-    // allowed to resolve later.
-    DAWN_SKIP_TEST_IF(IsSpontaneous());
 
-    CreateComputePipelineAsync(&mDescriptor);
-
-    ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::CallbackCancelled, IsNull(),
-                                 NonEmptySizedString()))
-            .Times(1);
-
-        instance = nullptr;
-    });
-}
-
-TEST_P(WireCreateRenderPipelineAsyncTest, CreateAndDropInstance) {
-    // For spontaneous, dropping the instance does not immediately call the callback because it is
-    // allowed to resolve later.
-    DAWN_SKIP_TEST_IF(IsSpontaneous());
-
-    CreateRenderPipelineAsync(&mDescriptor);
-
-    ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::CallbackCancelled, IsNull(),
-                                 NonEmptySizedString()))
-            .Times(1);
-
-        instance = nullptr;
-    });
-}
-
-TEST_P(WireCreateComputePipelineAsyncTest, CreateAfterDroppingInstance) {
-    // For spontaneous, dropping the instance does not immediately call the callback because it is
-    // allowed to resolve later.
-    DAWN_SKIP_TEST_IF(IsSpontaneous());
-    instance = nullptr;
-
-    ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::CallbackCancelled, IsNull(),
-                                 NonEmptySizedString()))
-            .Times(1);
-
-        CreateComputePipelineAsync(&mDescriptor);
-    });
-}
-
-TEST_P(WireCreateRenderPipelineAsyncTest, CreateAfterDroppingInstance) {
-    // For spontaneous, dropping the instance does not immediately call the callback because it is
-    // allowed to resolve later.
-    DAWN_SKIP_TEST_IF(IsSpontaneous());
-    instance = nullptr;
-
-    ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::CallbackCancelled, IsNull(),
-                                 NonEmptySizedString()))
-            .Times(1);
-
-        CreateRenderPipelineAsync(&mDescriptor);
-    });
-}
 
 TEST_P(WireCreateComputePipelineAsyncTest, CreateInvalidThenDestroyDevice) {
     DAWN_SKIP_TEST_IF(IsSpontaneous());

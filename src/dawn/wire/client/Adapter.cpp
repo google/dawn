@@ -289,7 +289,7 @@ WGPUStatus Adapter::APIGetInfo(WGPUAdapterInfo* info) const {
 WGPUFuture Adapter::APIRequestDevice(const WGPUDeviceDescriptor* descriptor,
                                      const WGPURequestDeviceCallbackInfo& callbackInfo) {
     Client* client = GetClient();
-    Ref<Device> device = client->Make<Device>(GetEventManagerHandle(), this, descriptor);
+    Ref<Device> device = client->Make<Device>(GetInstance(), this, descriptor);
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(AcquireRef(new RequestDeviceEvent(callbackInfo, device)));
     if (!tracked) {
@@ -307,7 +307,7 @@ WGPUFuture Adapter::APIRequestDevice(const WGPUDeviceDescriptor* descriptor,
 
     AdapterRequestDeviceCmd cmd;
     cmd.adapterId = GetWireHandle(client).id;
-    cmd.eventManagerHandle = GetEventManagerHandle();
+    cmd.instanceId = GetInstance()->GetWireHandle(client).id;
     cmd.future = {futureIDInternal};
     cmd.deviceObjectHandle = device->GetWireHandle(client);
     cmd.deviceLostFuture = device->APIGetLostFuture();
@@ -317,20 +317,19 @@ WGPUFuture Adapter::APIRequestDevice(const WGPUDeviceDescriptor* descriptor,
     return {futureIDInternal};
 }
 
-WireResult Client::DoAdapterRequestDeviceCallback(ObjectHandle eventManager,
+WireResult Client::DoAdapterRequestDeviceCallback(ObjectId instanceId,
                                                   WGPUFuture future,
                                                   WGPURequestDeviceStatus status,
                                                   WGPUStringView message,
                                                   const WGPULimits* limits,
                                                   uint32_t featuresCount,
                                                   const WGPUFeatureName* features) {
-    return SetFutureReady<RequestDeviceEvent>(eventManager, future.id, status, message, limits,
+    return SetFutureReady<RequestDeviceEvent>(instanceId, future.id, status, message, limits,
                                               featuresCount, features);
 }
 
 WGPUInstance Adapter::APIGetInstance() const {
-    dawn::ErrorLog() << "adapter.GetInstance not supported with dawn_wire.";
-    return nullptr;
+    return ReturnToAPI(GetInstance());
 }
 
 WGPUDevice Adapter::APICreateDevice(const WGPUDeviceDescriptor*) {

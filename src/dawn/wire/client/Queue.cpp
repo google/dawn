@@ -136,11 +136,11 @@ void Queue::APISubmit(size_t commandCount, const WGPUCommandBuffer* commands) {
     APIOnSubmittedWorkDone(callback);
 }
 
-WireResult Client::DoQueueWorkDoneCallback(ObjectHandle eventManager,
+WireResult Client::DoQueueWorkDoneCallback(ObjectId instanceId,
                                            WGPUFuture future,
                                            WGPUQueueWorkDoneStatus status,
                                            WGPUStringView message) {
-    return SetFutureReady<WorkDoneEvent>(eventManager, future.id, status, message);
+    return SetFutureReady<WorkDoneEvent>(instanceId, future.id, status, message);
 }
 
 WGPUFuture Queue::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {
@@ -157,7 +157,7 @@ WGPUFuture Queue::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& ca
 
     QueueOnSubmittedWorkDoneCmd cmd;
     cmd.queueId = GetWireHandle(client).id;
-    cmd.eventManagerHandle = GetEventManagerHandle();
+    cmd.instanceId = GetInstance()->GetWireHandle(client).id;
     cmd.future = {futureIDInternal};
 
     client->SerializeCommand(cmd);

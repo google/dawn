@@ -77,7 +77,7 @@ WireResult Server::PreHandleBufferDestroy(const BufferDestroyCmd& cmd) {
 }
 
 WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
-                                    ObjectHandle eventManager,
+                                    Known<WGPUInstance> instance,
                                     WGPUFuture future,
                                     WGPUMapMode mode,
                                     size_t offset,
@@ -86,7 +86,7 @@ WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
     // client will require in the return command.
     std::unique_ptr<MapUserdata> userdata = MakeUserdata<MapUserdata>();
     userdata->buffer = buffer.AsHandle();
-    userdata->eventManager = eventManager;
+    userdata->instanceId = instance.id;
     userdata->bufferObj = buffer->handle;
     userdata->future = future;
     userdata->mode = mode;
@@ -204,7 +204,7 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
     bool isSuccess = status == WGPUMapAsyncStatus_Success;
 
     ReturnBufferMapAsyncCallbackCmd cmd = {};
-    cmd.eventManager = data->eventManager;
+    cmd.instanceId = data->instanceId;
     cmd.future = data->future;
     cmd.status = status;
     cmd.message = message;

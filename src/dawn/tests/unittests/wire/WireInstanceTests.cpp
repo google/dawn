@@ -464,24 +464,7 @@ TEST_P(WireInstanceTests, RequestAdapterError) {
     });
 }
 
-// Test that RequestAdapter receives unknown status if the instance is deleted before the callback
-// happens.
-TEST_P(WireInstanceTests, RequestAdapterInstanceDestroyedBeforeCallback) {
-    // For spontaneous, dropping the instance does not immediately call the callback because it is
-    // allowed to resolve later.
-    DAWN_SKIP_TEST_IF(IsSpontaneous());
 
-    wgpu::RequestAdapterOptions options = {};
-    RequestAdapter(&options);
-
-    ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::RequestAdapterStatus::CallbackCancelled, IsNull(),
-                                 NonEmptySizedString()))
-            .Times(1);
-
-        instance = nullptr;
-    });
-}
 
 // Test that RequestAdapter receives unknown status if the wire is disconnected
 // before the callback happens.

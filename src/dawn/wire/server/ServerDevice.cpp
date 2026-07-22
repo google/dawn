@@ -47,7 +47,7 @@ void Server::OnDeviceLost(DeviceLostUserdata* userdata,
                           WGPUDeviceLostReason reason,
                           WGPUStringView message) {
     ReturnDeviceLostCallbackCmd cmd;
-    cmd.eventManager = userdata->eventManager;
+    cmd.instanceId = userdata->instanceId;
     cmd.future = userdata->future;
     cmd.reason = reason;
     cmd.message = message;
@@ -65,11 +65,11 @@ void Server::OnLogging(ObjectHandle device, WGPULoggingType type, WGPUStringView
 }
 
 WireResult Server::DoDevicePopErrorScope(Known<WGPUDevice> device,
-                                         ObjectHandle eventManager,
+                                         Known<WGPUInstance> instance,
                                          WGPUFuture future) {
     auto userdata = MakeUserdata<ErrorScopeUserdata>();
     userdata->device = device.AsHandle();
-    userdata->eventManager = eventManager;
+    userdata->instanceId = instance.id;
     userdata->future = future;
 
     mProcs->devicePopErrorScope(
@@ -84,7 +84,7 @@ void Server::OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
                                    WGPUErrorType type,
                                    WGPUStringView message) {
     ReturnDevicePopErrorScopeCallbackCmd cmd;
-    cmd.eventManager = userdata->eventManager;
+    cmd.instanceId = userdata->instanceId;
     cmd.future = userdata->future;
     cmd.status = status;
     cmd.type = type;
@@ -95,7 +95,7 @@ void Server::OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
 
 WireResult Server::DoDeviceCreateComputePipelineAsync(
     Known<WGPUDevice> device,
-    ObjectHandle eventManager,
+    Known<WGPUInstance> instance,
     WGPUFuture future,
     ObjectHandle pipelineObjectHandle,
     const WGPUComputePipelineDescriptor* descriptor) {
@@ -104,7 +104,7 @@ WireResult Server::DoDeviceCreateComputePipelineAsync(
 
     auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
     userdata->device = device.AsHandle();
-    userdata->eventManager = eventManager;
+    userdata->instanceId = instance.id;
     userdata->future = future;
     userdata->pipeline = pipeline.AsHandle();
 
@@ -120,7 +120,7 @@ void Server::OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* d
                                                   WGPUComputePipeline pipeline,
                                                   WGPUStringView message) {
     ReturnDeviceCreateComputePipelineAsyncCallbackCmd cmd;
-    cmd.eventManager = data->eventManager;
+    cmd.instanceId = data->instanceId;
     cmd.future = data->future;
     cmd.status = status;
     cmd.message = message;
@@ -135,7 +135,7 @@ void Server::OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* d
 
 WireResult Server::DoDeviceCreateRenderPipelineAsync(
     Known<WGPUDevice> device,
-    ObjectHandle eventManager,
+    Known<WGPUInstance> instance,
     WGPUFuture future,
     ObjectHandle pipelineObjectHandle,
     const WGPURenderPipelineDescriptor* descriptor) {
@@ -144,7 +144,7 @@ WireResult Server::DoDeviceCreateRenderPipelineAsync(
 
     auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
     userdata->device = device.AsHandle();
-    userdata->eventManager = eventManager;
+    userdata->instanceId = instance.id;
     userdata->future = future;
     userdata->pipeline = pipeline.AsHandle();
 
@@ -160,7 +160,7 @@ void Server::OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* da
                                                  WGPURenderPipeline pipeline,
                                                  WGPUStringView message) {
     ReturnDeviceCreateRenderPipelineAsyncCallbackCmd cmd;
-    cmd.eventManager = data->eventManager;
+    cmd.instanceId = data->instanceId;
     cmd.future = data->future;
     cmd.status = status;
     cmd.message = message;

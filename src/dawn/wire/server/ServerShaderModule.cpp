@@ -32,10 +32,10 @@
 namespace dawn::wire::server {
 
 WireResult Server::DoShaderModuleGetCompilationInfo(Known<WGPUShaderModule> shaderModule,
-                                                    ObjectHandle eventManager,
+                                                    Known<WGPUInstance> instance,
                                                     WGPUFuture future) {
     auto userdata = MakeUserdata<ShaderModuleGetCompilationInfoUserdata>();
-    userdata->eventManager = eventManager;
+    userdata->instanceId = instance.id;
     userdata->future = future;
 
     mProcs->shaderModuleGetCompilationInfo(
@@ -49,7 +49,7 @@ void Server::OnShaderModuleGetCompilationInfo(ShaderModuleGetCompilationInfoUser
                                               WGPUCompilationInfoRequestStatus status,
                                               const WGPUCompilationInfo* info) {
     ReturnShaderModuleGetCompilationInfoCallbackCmd cmd;
-    cmd.eventManager = data->eventManager;
+    cmd.instanceId = data->instanceId;
     cmd.future = data->future;
     cmd.status = status;
     cmd.info = info;

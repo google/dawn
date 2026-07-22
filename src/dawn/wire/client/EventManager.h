@@ -107,17 +107,12 @@ class EventManager final : NonMovable {
     explicit EventManager(size_t timedWaitAnyMaxCount);
     ~EventManager();
 
-    // See mState for breakdown of these states.
-    enum class State { Nominal, InstanceDropped, ClientDropped };
-
     // Returns a pair of the FutureID and a bool that is true iff the event was successfuly tracked,
     // false otherwise. Events may not be tracked if the client is already disconnected.
     std::pair<FutureID, bool> TrackEvent(Ref<TrackedEvent>&& event);
 
-    // Transitions the EventManager to the given state. Note that states can only go in one
-    // direction, i.e. once the EventManager transitions to InstanceDropped, it cannot transition
-    // back to Nominal, though it may transition to ClientDropped later on.
-    void TransitionTo(State state);
+    // Destroys the EventManager. Any existing tracked events' callbacks are immediately called.
+    void Destroy();
 
     template <typename Event, typename... ReadyArgs>
     WireResult SetFutureReady(FutureID futureID, ReadyArgs&&... readyArgs) {
@@ -171,17 +166,7 @@ class EventManager final : NonMovable {
   private:
     const size_t mTimedWaitAnyMaxCount = 0;
 
-    // Different states of the EventManager dictate how new incoming events are handled.
-    //   Nominal: Usual state of the manager. All events are tracked and callbacks are fired
-    //     depending on the callback modes.
-    //   InstanceDropped: Transitioned to this state if the last external reference of the Instance
-    //     is dropped. In this mode, any non-spontaneous events are no longer tracked and their
-    //     callbacks are immediately called since the user cannot call WaitAny or ProcessEvents
-    //     anymore. Any existing non-spontaneous events' callbacks are also called on transition.
-    //   ClientDropped: Transitioned to this state once the client is dropped. In this mode, no new
-    //     events are tracked and callbacks are all immediately fired. Any existing tracked events'
-    //     callbacks are also called on transition.
-    State mState = State::Nominal;
+    bool mIsDestroyed = false;
 
     // Tracks all kinds of events (for both WaitAny and ProcessEvents). We use an ordered map so
     // that in most cases, event ordering is already implicit when we iterate the map. (Not true for

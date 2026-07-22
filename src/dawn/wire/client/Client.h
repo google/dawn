@@ -107,8 +107,6 @@ class Client : public ClientBase {
         mSerializer.SerializeCommand(cmd, *this, std::forward<Extensions>(es)...);
     }
 
-    EventManager& GetEventManager(const ObjectHandle& instance);
-
     void Disconnect();
     bool IsDisconnected() const;
 
@@ -122,12 +120,9 @@ class Client : public ClientBase {
     }
 
     template <typename Event, typename... ReadyArgs>
-    WireResult SetFutureReady(ObjectHandle eventManager,
-                              FutureID futureID,
-                              ReadyArgs&&... readyArgs) {
-        // Validate that the event manager exists.
-        auto it = mEventManagers.find(eventManager);
-        if (it == mEventManagers.end()) {
+    WireResult SetFutureReady(ObjectId instanceId, FutureID futureID, ReadyArgs&&... readyArgs) {
+        Instance* instance = Get<Instance>(instanceId);
+        if (instance == nullptr) {
             return WireResult::FatalError;
         }
 
@@ -136,8 +131,8 @@ class Client : public ClientBase {
             return WireResult::FatalError;
         }
 
-        return GetEventManager(eventManager)
-            .SetFutureReady<Event>(futureID, std::forward<ReadyArgs>(readyArgs)...);
+        return instance->GetEventManager().SetFutureReady<Event>(
+            futureID, std::forward<ReadyArgs>(readyArgs)...);
     }
 
 #include "dawn/wire/client/ClientPrototypes_autogen.inc"
@@ -146,14 +141,6 @@ class Client : public ClientBase {
     PerObjectType<ObjectStore> mObjects;
     std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
     raw_ptr<MemoryTransferService> mMemoryTransferService = nullptr;
-    // Map of instance object handles to a corresponding event manager. Note that for now because we
-    // do not have an internal refcount on the instances, i.e. we don't know when the last object
-    // associated with a particular instance is destroyed, this map is not cleaned up until the
-    // client is destroyed. This should only be a problem for users that are creating many
-    // instances. We also cannot currently store the EventManger on the Instance because
-    // spontaneous mode callbacks outlive the instance. We also can't reuse the ObjectStore for the
-    // EventManagers because we need to track old instance handles even after they are reclaimed.
-    absl::flat_hash_map<ObjectHandle, std::unique_ptr<EventManager>> mEventManagers;
     bool mDisconnected = false;
 };
 

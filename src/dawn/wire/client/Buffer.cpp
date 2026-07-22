@@ -231,8 +231,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     // Create the buffer and send the creation command.
     // This must happen after any potential error buffer creation as the server expects allocating
     // ids to be monotonically increasing
-    Ref<Buffer> buffer =
-        wireClient->Make<Buffer>(device->GetEventManagerHandle(), device, descriptor);
+    Ref<Buffer> buffer = wireClient->Make<Buffer>(device->GetInstance(), device, descriptor);
 
     DeviceCreateBufferCmd cmd;
     cmd.deviceId = device->GetWireHandle(wireClient).id;
@@ -284,7 +283,7 @@ WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descr
     }
 
     Client* client = device->GetClient();
-    Ref<Buffer> buffer = client->Make<Buffer>(device->GetEventManagerHandle(), device, descriptor);
+    Ref<Buffer> buffer = client->Make<Buffer>(device->GetInstance(), device, descriptor);
 
     DeviceCreateErrorBufferCmd cmd;
     cmd.self = ToAPI(device);
@@ -296,10 +295,10 @@ WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descr
 }
 
 Buffer::Buffer(const ObjectBaseParams& params,
-               const ObjectHandle& eventManagerHandle,
+               Ref<Instance> instance,
                Device* device,
                const WGPUBufferDescriptor* descriptor)
-    : RefCountedWithExternalCount<ObjectWithEventsBase>(params, eventManagerHandle),
+    : RefCountedWithExternalCount<ObjectWithEventsBase>(params, std::move(instance)),
       mSize(descriptor->size),
       mUsage(static_cast<WGPUBufferUsage>(descriptor->usage)),
       mDestructMemoryHandleOnUnmap(
@@ -386,7 +385,7 @@ WGPUFuture Buffer::APIMapAsync(WGPUMapMode mode,
     // Serialize the command to send to the server.
     BufferMapAsyncCmd cmd;
     cmd.bufferId = GetWireHandle(client).id;
-    cmd.eventManagerHandle = GetEventManagerHandle();
+    cmd.instanceId = GetInstance()->GetWireHandle(client).id;
     cmd.future = {futureIDInternal};
     cmd.mode = mode;
     cmd.offset = offset;
@@ -396,13 +395,13 @@ WGPUFuture Buffer::APIMapAsync(WGPUMapMode mode,
     return {futureIDInternal};
 }
 
-WireResult Client::DoBufferMapAsyncCallback(ObjectHandle eventManager,
+WireResult Client::DoBufferMapAsyncCallback(ObjectId instanceId,
                                             WGPUFuture future,
                                             WGPUMapAsyncStatus status,
                                             WGPUStringView message,
                                             size_t readDataUpdateInfoLength,
                                             const std::byte* readDataUpdateInfo) {
-    return SetFutureReady<Buffer::MapAsyncEvent>(eventManager, future.id, status, message,
+    return SetFutureReady<Buffer::MapAsyncEvent>(instanceId, future.id, status, message,
                                                  readDataUpdateInfoLength, readDataUpdateInfo);
 }
 

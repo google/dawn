@@ -39,7 +39,7 @@ void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data,
                              WGPUQueueWorkDoneStatus status,
                              WGPUStringView message) {
     ReturnQueueWorkDoneCallbackCmd cmd;
-    cmd.eventManager = data->eventManager;
+    cmd.instanceId = data->instanceId;
     cmd.future = data->future;
     cmd.status = status;
     cmd.message = message;
@@ -48,11 +48,11 @@ void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data,
 }
 
 WireResult Server::DoQueueOnSubmittedWorkDone(Known<WGPUQueue> queue,
-                                              ObjectHandle eventManager,
+                                              Known<WGPUInstance> instance,
                                               WGPUFuture future) {
     auto userdata = MakeUserdata<QueueWorkDoneUserdata>();
     userdata->queue = queue.AsHandle();
-    userdata->eventManager = eventManager;
+    userdata->instanceId = instance.id;
     userdata->future = future;
 
     mProcs->queueOnSubmittedWorkDone(

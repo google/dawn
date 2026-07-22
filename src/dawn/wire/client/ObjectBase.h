@@ -73,21 +73,19 @@ class ObjectBase : public RefCounted {
     const ObjectHandle mHandle;
 };
 
+class Instance;
+
 // Compositable functionality for objects on the client side that need to have access to the event
 // manager.
 class ObjectWithEventsBase : public ObjectBase {
   public:
-    // Note that the ObjectHandle associated with an EventManager is the same handle associated to
-    // the Instance that "owns" the EventManager.
-    ObjectWithEventsBase(const ObjectBaseParams& params, const ObjectHandle& eventManager);
+    ObjectWithEventsBase(const ObjectBaseParams& params, Ref<Instance> instance);
 
-    const ObjectHandle& GetEventManagerHandle() const;
+    Ref<Instance> GetInstance() const;
     EventManager& GetEventManager() const;
 
   private:
-    // The EventManager is owned by the client and long-lived. When the client is destroyed all
-    // objects are also freed.
-    ObjectHandle mEventManagerHandle;
+    Ref<Instance> mInstance;
 };
 
 template <class T>

@@ -27,7 +27,10 @@
 
 #include "src/dawn/wire/client/ObjectBase.h"
 
+#include <utility>
+
 #include "src/dawn/wire/client/Client.h"
+#include "src/dawn/wire/client/Instance.h"
 #include "src/utils/assert.h"
 
 namespace dawn::wire::client {
@@ -70,16 +73,15 @@ void ObjectBase::Unregister() {
     mClient = nullptr;
 }
 
-ObjectWithEventsBase::ObjectWithEventsBase(const ObjectBaseParams& params,
-                                           const ObjectHandle& eventManagerHandle)
-    : ObjectBase(params), mEventManagerHandle(eventManagerHandle) {}
+ObjectWithEventsBase::ObjectWithEventsBase(const ObjectBaseParams& params, Ref<Instance> instance)
+    : ObjectBase(params), mInstance(std::move(instance)) {}
 
-const ObjectHandle& ObjectWithEventsBase::GetEventManagerHandle() const {
-    return mEventManagerHandle;
+Ref<Instance> ObjectWithEventsBase::GetInstance() const {
+    return mInstance;
 }
 
 EventManager& ObjectWithEventsBase::GetEventManager() const {
-    return GetClient()->GetEventManager(mEventManagerHandle);
+    return mInstance->GetEventManager();
 }
 
 }  // namespace dawn::wire::client
