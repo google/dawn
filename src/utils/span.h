@@ -146,10 +146,16 @@ class SpanBase {
         requires LegalDataConversion<ElementType, T> && std::same_as<Index, size_t>
     explicit constexpr SpanBase(ElementType (&arr)[N]) noexcept
         : mSize(checked_cast<size_t>(N)), mData(arr) {
-        if constexpr (sizeof(size_t) > sizeof(Index)) {
-            DAWN_CHECK(mSize < size_t{UnderlyingType<Index>{DynamicExtent<Index>}});
-        }
     }
+
+    // Constructor from an initializer list.
+    // This is needed because until C++26's P3016R6, std::initializer_list does not have a .data()
+    // member so it cannot use the constructor from a range.
+    template <typename ElementType>
+    explicit constexpr SpanBase(std::initializer_list<ElementType> l)
+        requires LegalDataConversion<ElementType, T> && std::is_const_v<T> &&
+                     std::same_as<Index, size_t>
+        : mSize(l.size()), mData(l.begin()) {}
 
     // Constructor from a pointer + size. This is UNSAFE_BUFFER_USAGE as other methods should be
     // preferred to create spans directly from ranges. Will DAWN_CHECK() if the size doesn't fit in

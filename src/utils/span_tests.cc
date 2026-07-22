@@ -1034,21 +1034,36 @@ TEST(SpanTest, Constructor_CArray) {
 
     {
         Span<int> sp(arr);
-        EXPECT_EQ(sp.size(), static_cast<size_t>(4u));
+        EXPECT_EQ(sp.size(), 4u);
         EXPECT_EQ(sp.data(), arr);
         EXPECT_EQ(sp[0], 1);
     }
     {
         Span<const int> sp(arr);
-        EXPECT_EQ(sp.size(), static_cast<size_t>(4u));
+        EXPECT_EQ(sp.size(), 4u);
         EXPECT_EQ(sp.data(), arr);
     }
     {
         Span<const int> sp(constArr);
-        EXPECT_EQ(sp.size(), static_cast<size_t>(3u));
+        EXPECT_EQ(sp.size(), 3u);
         EXPECT_EQ(sp.data(), constArr);
     }
 }
 
+TEST(SpanTest, Constructor_InitializeList) {
+    std::initializer_list<int> list = {1, 2, 3, 4};
+    std::initializer_list<const int> constList = {5, 6, 7};
+
+    {
+        Span<const int> sp(list);
+        EXPECT_EQ(sp.size(), 4u);
+        EXPECT_EQ(sp.data(), list.begin());
+    }
+    {
+        Span<const int> sp(constList);
+        EXPECT_EQ(sp.size(), 3u);
+        EXPECT_EQ(sp.data(), constList.begin());
+    }
+}
 }  // anonymous namespace
 }  // namespace dawn

@@ -198,16 +198,28 @@ void TestCopyFromIncompatibleTypes() {
     }
 }
 
-void TestItypSpanFromUntypedRangeOrArray() {
+void TestItypSpanFromCArray() {
     int arr[] = {1, 2, 3, 4, 5};
 
-    // Control case: Standard dawn::Span<int> allows construction from
-    // C-style array.
+    // Control case: Standard dawn::Span<int> allows construction from C-style array.
     Span<int> control_sp(arr);
 
     // Disallowed case: ityp::span<Index, int> must not implicitly construct
     // from a non-typed C-style array or non-typed range.
     ityp::span<Index, int> typed_sp(arr); // expected-error {{no matching constructor for initialization}}
+}
+
+void TestItypSpanFromInitializerList() {
+    std::initializer_list<int> list = {1, 2, 3, 4, 5};
+
+    // Control case: Span<const int> allows construction from initializer_list.
+    Span<const int> control_sp(list);
+
+    // Error case: Span<int> (non-const) fails construction from initializer_list.
+    Span<int> nonconst_sp(list); // expected-error {{no matching constructor for initialization}}
+
+    // Error case: ityp::span<Index, const int>  fails construction from initializer_list.
+    ityp::span<Index, const int> typed_sp(list); // expected-error {{no matching constructor for initialization}}
 }
 
 
