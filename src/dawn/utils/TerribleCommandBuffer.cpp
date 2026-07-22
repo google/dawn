@@ -66,11 +66,7 @@ void* TerribleCommandBuffer::GetCmdSpace(size_t size) {
 bool TerribleCommandBuffer::Flush() {
     Span<std::byte> flushRange = mBuffer.subspan(mLastFlushedOffset, mOffset - mLastFlushedOffset);
     mLastFlushedOffset = mOffset;
-
-    // TODO(crbug.com/528027992): Remove the cast and use Span once we update the interface.
-    bool success =
-        mHandler->HandleCommands(reinterpret_cast<const volatile char*>(flushRange.data()),
-                                 flushRange.size()) != nullptr;
+    bool success = mHandler->HandleCommands(flushRange);
 
     // After a flush, we can only reset |mOffset| to 0 if both offsets are equal. Otherwise, there
     // are unflushed commands, likely queued as a part of the last flush, so defer resetting
