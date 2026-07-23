@@ -41,7 +41,7 @@ namespace dawn::wire::client {
 
         // Implementation of the ObjectIdProvider interface
         {% for type in by_category["object"] %}
-            WireResult GetId({{as_cType(type.name)}} object, ObjectId* out) const final {
+            WireResult GetId({{as_cType(type.name)}} object, volatile ObjectId* out) const final {
                 DAWN_ASSERT(out != nullptr);
                 if (object == nullptr) {
                     return WireResult::FatalError;
@@ -49,7 +49,7 @@ namespace dawn::wire::client {
                 *out = reinterpret_cast<{{as_wireType(type)}}>(object)->GetWireHandle(this).id;
                 return WireResult::Success;
             }
-            WireResult GetOptionalId({{as_cType(type.name)}} object, ObjectId* out) const final {
+            WireResult GetOptionalId({{as_cType(type.name)}} object, volatile ObjectId* out) const final {
                 DAWN_ASSERT(out != nullptr);
                 *out = (object == nullptr ? 0 : reinterpret_cast<{{as_wireType(type)}}>(object)->GetWireHandle(this).id);
                 return WireResult::Success;

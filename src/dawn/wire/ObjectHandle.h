@@ -47,9 +47,11 @@ struct ObjectHandle : public Handle {
 
     explicit(false) ObjectHandle(const volatile ObjectHandle& rhs);
     ObjectHandle& operator=(const volatile ObjectHandle& rhs);
+    volatile ObjectHandle& operator=(const volatile ObjectHandle& rhs) volatile;
 
     ObjectHandle(const ObjectHandle& rhs);
     ObjectHandle& operator=(const ObjectHandle& rhs);
+    volatile ObjectHandle& operator=(const ObjectHandle& rhs) volatile;
 
     // Allow direct conversion from the base Handle type.
     explicit(false) ObjectHandle(const Handle& rhs);
@@ -60,8 +62,14 @@ struct ObjectHandle : public Handle {
     ObjectHandle& operator=(const T& rhs) {
         return AssignFrom(rhs);
     }
+    template <typename T>
+    volatile ObjectHandle& operator=(const T& rhs) volatile {
+        return AssignFrom(rhs);
+    }
     ObjectHandle& AssignFrom(const ObjectHandle& rhs);
     ObjectHandle& AssignFrom(const volatile ObjectHandle& rhs);
+    volatile ObjectHandle& AssignFrom(const ObjectHandle& rhs) volatile;
+    volatile ObjectHandle& AssignFrom(const volatile ObjectHandle& rhs) volatile;
 
     bool IsValid() const;
 };

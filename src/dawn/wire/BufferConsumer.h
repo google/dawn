@@ -111,7 +111,7 @@ class BufferConsumer {
     Span<BufferT> mData = {};
 };
 
-class SerializeBuffer : public BufferConsumer<std::byte> {
+class SerializeBuffer : public BufferConsumer<volatile std::byte> {
   public:
     using BufferConsumer::BufferConsumer;
 

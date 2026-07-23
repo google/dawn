@@ -261,7 +261,8 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     wireClient->SerializeCommand(
         cmd,
         // Extensions to replace fields skipped by skip_serialize.
-        CommandExtension{memoryHandleCreateInfoLength, [&](Span<std::byte> serializeBuffer) {
+        CommandExtension{memoryHandleCreateInfoLength,
+                         [&](Span<volatile std::byte> serializeBuffer) {
                              if (memoryHandle != nullptr) {
                                  // Serialize the MemoryHandle into the space after the command.
                                  memoryHandle->SerializeCreate(std::span(serializeBuffer));
@@ -506,13 +507,13 @@ void Buffer::APIUnmap() {
         cmd.dataUpdateInfoLength = memoryDataUpdateInfoLength;
         cmd.dataUpdateInfo = nullptr;  // Skipped by skip_serialize.
 
-        client->SerializeCommand(
-            cmd,
-            // Extensions to replace fields skipped by skip_serialize.
-            CommandExtension{memoryDataUpdateInfoLength, [&](Span<std::byte> serializeBuffer) {
-                                 memoryHandle->SerializeDataUpdate(std::span(serializeBuffer),
-                                                                   cmd.offset, cmd.size);
-                             }});
+        client->SerializeCommand(cmd,
+                                 // Extensions to replace fields skipped by skip_serialize.
+                                 CommandExtension{memoryDataUpdateInfoLength,
+                                                  [&](Span<volatile std::byte> serializeBuffer) {
+                                                      memoryHandle->SerializeDataUpdate(
+                                                          serializeBuffer, cmd.offset, cmd.size);
+                                                  }});
     }
 
     SetFutureStatus(WGPUMapAsyncStatus_Aborted, "Buffer was unmapped before mapping was resolved.");

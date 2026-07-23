@@ -224,12 +224,11 @@ void Queue::WriteBufferXL(WGPUBuffer cBuffer,
         cmd,
         // Extensions to replace fields skipped by skip_serialize.
         CommandExtension{memoryHandleCreateInfoLength,
-                         [&](Span<std::byte> serializeBuffer) {
-                             memoryHandle->SerializeCreate(std::span(serializeBuffer));
+                         [&](Span<volatile std::byte> serializeBuffer) {
+                             memoryHandle->SerializeCreate(serializeBuffer);
                          }},
-        CommandExtension{memoryDataUpdateInfoLength, [&](Span<std::byte> serializeBuffer) {
-                             memoryHandle->SerializeDataUpdate(std::span(serializeBuffer), 0u,
-                                                               size);
+        CommandExtension{memoryDataUpdateInfoLength, [&](Span<volatile std::byte> serializeBuffer) {
+                             memoryHandle->SerializeDataUpdate(serializeBuffer, 0u, size);
                          }});
 }
 
@@ -294,12 +293,11 @@ void Queue::WriteTextureXL(const WGPUTexelCopyTextureInfo* destination,
         cmd,
         // Extensions to replace fields skipped by skip_serialize.
         CommandExtension{memoryHandleCreateInfoLength,
-                         [&](Span<std::byte> serializeBuffer) {
-                             memoryHandle->SerializeCreate(std::span(serializeBuffer));
+                         [&](Span<volatile std::byte> serializeBuffer) {
+                             memoryHandle->SerializeCreate(serializeBuffer);
                          }},
-        CommandExtension{memoryDataUpdateInfoLength, [&](Span<std::byte> serializeBuffer) {
-                             memoryHandle->SerializeDataUpdate(std::span(serializeBuffer), 0u,
-                                                               dataSize);
+        CommandExtension{memoryDataUpdateInfoLength, [&](Span<volatile std::byte> serializeBuffer) {
+                             memoryHandle->SerializeDataUpdate(serializeBuffer, 0u, dataSize);
                          }});
 }
 

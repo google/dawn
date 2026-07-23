@@ -232,15 +232,16 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
                 size_t dataUpdateInfoLength =
                     mapState->memoryHandle->GetSerializeDataUpdateSize(data->offset, data->size);
                 cmd.readDataUpdateInfoLength = dataUpdateInfoLength;
-                SerializeCommand(
-                    cmd,
-                    // Extensions to replace fields skipped by skip_serialize.
-                    CommandExtension{dataUpdateInfoLength, [&](Span<std::byte> serializeBuffer) {
-                                         // The in-flight map request returned successfully.
-                                         mapState->memoryHandle->SerializeDataUpdate(
-                                             std::span(serializeBuffer), data->offset, data->size,
-                                             mappedRange);
-                                     }});
+                SerializeCommand(cmd,
+                                 // Extensions to replace fields skipped by skip_serialize.
+                                 CommandExtension{dataUpdateInfoLength,
+                                                  [&](Span<volatile std::byte> serializeBuffer) {
+                                                      // The in-flight map request returned
+                                                      // successfully.
+                                                      mapState->memoryHandle->SerializeDataUpdate(
+                                                          serializeBuffer, data->offset, data->size,
+                                                          mappedRange);
+                                                  }});
             });
             break;
         }

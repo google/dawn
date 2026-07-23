@@ -48,12 +48,29 @@ class MockMemoryTransferService : public MemoryTransferService {
 
         MOCK_METHOD(size_t, GetSerializeCreateSize, (), (const, override));
         MOCK_METHOD(void, SerializeCreate, (std::span<std::byte>), (const, override));
+        // GMock does not natively support printing/handling volatile types in mock argument tuples
+        // without custom printers, so we implement the volatile overload directly to cast away
+        // volatile and forward to the non-volatile MOCK_METHOD.
+        void SerializeCreate(std::span<volatile std::byte> serializeSpace) const override {
+            SerializeCreate(std::span<std::byte>(const_cast<std::byte*>(serializeSpace.data()),
+                                                 serializeSpace.size()));
+        }
         MOCK_METHOD(std::span<std::byte>, GetData, (), (const, override));
         MOCK_METHOD(size_t, GetSerializeDataUpdateSize, (size_t, size_t), (const, override));
         MOCK_METHOD(void,
                     SerializeDataUpdate,
                     (std::span<std::byte>, size_t, size_t),
                     (const, override));
+        // GMock does not natively support printing/handling volatile types in mock argument tuples
+        // without custom printers, so we implement the volatile overload directly to cast away
+        // volatile and forward to the non-volatile MOCK_METHOD.
+        void SerializeDataUpdate(std::span<volatile std::byte> serializeData,
+                                 size_t offset,
+                                 size_t size) const override {
+            SerializeDataUpdate(std::span<std::byte>(const_cast<std::byte*>(serializeData.data()),
+                                                     serializeData.size()),
+                                offset, size);
+        }
         MOCK_METHOD(bool,
                     DeserializeDataUpdate,
                     (std::span<const std::byte>, size_t, size_t),

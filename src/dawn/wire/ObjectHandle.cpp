@@ -43,9 +43,19 @@ ObjectHandle& ObjectHandle::operator=(const volatile ObjectHandle& rhs) {
     generation = rhs.generation;
     return *this;
 }
+volatile ObjectHandle& ObjectHandle::operator=(const volatile ObjectHandle& rhs) volatile {
+    id = rhs.id;
+    generation = rhs.generation;
+    return *this;
+}
 
 ObjectHandle::ObjectHandle(const ObjectHandle& rhs) = default;
 ObjectHandle& ObjectHandle::operator=(const ObjectHandle& rhs) = default;
+volatile ObjectHandle& ObjectHandle::operator=(const ObjectHandle& rhs) volatile {
+    id = rhs.id;
+    generation = rhs.generation;
+    return *this;
+}
 
 ObjectHandle::ObjectHandle(const Handle& rhs) : Handle{rhs.id, rhs.generation} {}
 
@@ -55,6 +65,16 @@ ObjectHandle& ObjectHandle::AssignFrom(const ObjectHandle& rhs) {
     return *this;
 }
 ObjectHandle& ObjectHandle::AssignFrom(const volatile ObjectHandle& rhs) {
+    id = rhs.id;
+    generation = rhs.generation;
+    return *this;
+}
+volatile ObjectHandle& ObjectHandle::AssignFrom(const ObjectHandle& rhs) volatile {
+    id = rhs.id;
+    generation = rhs.generation;
+    return *this;
+}
+volatile ObjectHandle& ObjectHandle::AssignFrom(const volatile ObjectHandle& rhs) volatile {
     id = rhs.id;
     generation = rhs.generation;
     return *this;

@@ -255,7 +255,7 @@
     //* and `provider` to serialize objects.
     [[maybe_unused]] WireResult {{Return}}{{name}}Serialize(
         const {{Return}}{{name}}{{Cmd}}& record,
-        {{TransferStructName}}* transfer,
+        volatile {{TransferStructName}}* transfer,
         [[maybe_unused]] SerializeBuffer* buffer
         {%- if record.may_have_dawn_object -%}
             , const ObjectIdProvider& provider
@@ -275,7 +275,7 @@
                     {% for extension in record.extensions if extension.name.CamelCase() not in client_side_structures %}
                         {% set CType = as_cType(extension.name) %}
                         case {{as_cEnum(types["s type"].name, extension.name)}}: {
-                            {{CType}}Transfer* chainTransfer;
+                            volatile {{CType}}Transfer* chainTransfer;
                             WIRE_TRY(buffer->Next(&chainTransfer));
                             chainTransfer->chain.sType = next->sType;
                             chainTransfer->chain.hasNext = next->next != nullptr;
@@ -288,7 +288,7 @@
                         // Invalid enum. Serialize just the invalid sType for validation purposes.
                         dawn::WarningLog() << "Unknown sType " << next->sType << " discarded.";
 
-                        WGPUDawnInjectedInvalidSTypeTransfer* chainTransfer;
+                        volatile WGPUDawnInjectedInvalidSTypeTransfer* chainTransfer;
                         WIRE_TRY(buffer->Next(&chainTransfer));
                         chainTransfer->chain.sType = WGPUSType_DawnInjectedInvalidSType;
                         chainTransfer->chain.hasNext = next->next != nullptr;
@@ -331,7 +331,7 @@
             {% endif %}
                 auto memberLength = {{member_length(member, "record.")}};
 
-                Span<{{member_transfer_type(member.type)}}> memberBuffer;
+                Span<volatile {{member_transfer_type(member.type)}}> memberBuffer;
                 WIRE_TRY(buffer->NextN(memberLength, &memberBuffer));
 
                 {% if member.type.is_wire_transparent %}
@@ -504,7 +504,7 @@
             size_t commandSize,
             SerializeBuffer* serializeBuffer,
             const ObjectIdProvider& provider) const {
-            {{TransferStructName}}* transfer;
+            volatile {{TransferStructName}}* transfer;
             WIRE_TRY(serializeBuffer->Next(&transfer));
             transfer->commandSize = commandSize;
             return ({{Name}}Serialize(*this, transfer, serializeBuffer, provider));
@@ -528,7 +528,7 @@
         }
     {% else %}
         WireResult {{Cmd}}::Serialize(size_t commandSize, SerializeBuffer* serializeBuffer) const {
-            {{TransferStructName}}* transfer;
+            volatile {{TransferStructName}}* transfer;
             WIRE_TRY(serializeBuffer->Next(&transfer));
             transfer->commandSize = commandSize;
             return ({{Name}}Serialize(*this, transfer, serializeBuffer));
@@ -668,7 +668,7 @@ size_t WGPUStringViewGetExtraRequiredSize(const WGPUStringView& record) {
 
 WireResult WGPUStringViewSerialize(
     const WGPUStringView& record,
-    WGPUStringViewTransfer* transfer,
+    volatile WGPUStringViewTransfer* transfer,
     SerializeBuffer* buffer) {
 
     bool has_data = record.data != nullptr;
@@ -691,7 +691,7 @@ WireResult WGPUStringViewSerialize(
         length = std::strlen(record.data);
     }
     if (length > 0) {
-        Span<char> memberBuffer;
+        Span<volatile char> memberBuffer;
         WIRE_TRY(buffer->NextN(length, &memberBuffer));
         // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
         // TODO(https://crbug.com/528027992): Spanify the record members.
@@ -812,10 +812,10 @@ class ErrorObjectIdResolver final : public ObjectIdResolver {
 class ErrorObjectIdProvider final : public ObjectIdProvider {
     public:
     {% for type in by_category["object"] %}
-      WireResult GetId({{as_cType(type.name)}} object, ObjectId* out) const override {
+      WireResult GetId({{as_cType(type.name)}} object, volatile ObjectId* out) const override {
           return WireResult::FatalError;
       }
-      WireResult GetOptionalId({{as_cType(type.name)}} object, ObjectId* out) const override {
+      WireResult GetOptionalId({{as_cType(type.name)}} object, volatile ObjectId* out) const override {
           return WireResult::FatalError;
       }
     {% endfor %}

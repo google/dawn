@@ -45,20 +45,19 @@ size_t TerribleCommandBuffer::GetMaximumAllocationSize() const {
     return mBackingBuffer.size();
 }
 
-void* TerribleCommandBuffer::GetCmdSpace(size_t size) {
-    // Note: This returns non-null even if size is zero.
+std::optional<std::span<volatile std::byte>> TerribleCommandBuffer::GetCommandSpace(size_t size) {
     if (size > mBackingBuffer.size()) {
-        return nullptr;
+        return std::nullopt;
     }
 
     if (mBuffer.size() - size < mOffset) {
         if (!Flush()) {
-            return nullptr;
+            return std::nullopt;
         }
-        return GetCmdSpace(size);
+        return GetCommandSpace(size);
     }
 
-    void* result = mBuffer.subspan(mOffset, size).data();
+    std::span<volatile std::byte> result = mBuffer.subspan(mOffset, size);
     mOffset += size;
     return result;
 }

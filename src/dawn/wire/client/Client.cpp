@@ -51,6 +51,9 @@ class NoopCommandSerializer final : public CommandSerializer {
         return SIZE_MAX;
     }
     void* GetCmdSpace(size_t size) final { return nullptr; }
+    std::optional<std::span<volatile std::byte>> GetCommandSpace(size_t size) final {
+        return std::nullopt;
+    }
     bool Flush() final { return false; }
 };
 

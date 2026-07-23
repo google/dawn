@@ -45,7 +45,7 @@ class TerribleCommandBuffer : public dawn::wire::CommandSerializer {
 
     size_t GetMaximumAllocationSize() const override;
 
-    void* GetCmdSpace(size_t size) override;
+    std::optional<std::span<volatile std::byte>> GetCommandSpace(size_t size) override;
     bool Flush() override;
     bool Empty();
 

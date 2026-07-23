@@ -61,8 +61,8 @@ namespace dawn::wire {
     class ObjectIdProvider {
         public:
             {% for type in by_category["object"] %}
-                virtual WireResult GetId({{as_cType(type.name)}} object, ObjectId* out) const = 0;
-                virtual WireResult GetOptionalId({{as_cType(type.name)}} object, ObjectId* out) const = 0;
+                virtual WireResult GetId({{as_cType(type.name)}} object, volatile ObjectId* out) const = 0;
+                virtual WireResult GetOptionalId({{as_cType(type.name)}} object, volatile ObjectId* out) const = 0;
             {% endfor %}
     };
 

@@ -50,7 +50,7 @@ namespace dawn::wire {
 // that is not baked directly into the command already.
 struct CommandExtension {
     size_t size;
-    std::function<void(Span<std::byte>)> serialize;
+    std::function<void(Span<volatile std::byte>)> serialize;
 };
 
 namespace detail {
@@ -63,7 +63,7 @@ template <typename Extension, typename... Extensions>
 WireResult SerializeCommandExtension(SerializeBuffer* serializeBuffer,
                                      Extension&& e,
                                      Extensions&&... es) {
-    Span<std::byte> buffer;
+    Span<volatile std::byte> buffer;
     WIRE_TRY(serializeBuffer->NextN(e.size, &buffer));
     e.serialize(buffer);
 
@@ -123,11 +123,10 @@ class ChunkedCommandSerializer {
         size_t requiredSize = (Align(extensions.size, kWireBufferAlignment) + ... + commandSize);
 
         if (requiredSize <= mMaxAllocationSize) {
-            // TODO(https://crbug.com/528027992): Spanify CommandSerializer::GetCmdSpace.
-            Span<std::byte> allocatedBuffer = DAWN_UNSAFE_TODO(Span<std::byte>(
-                static_cast<std::byte*>(mSerializer->GetCmdSpace(requiredSize)), requiredSize));
-            if (allocatedBuffer.data() != nullptr) {
-                SerializeBuffer serializeBuffer(allocatedBuffer);
+            std::optional<std::span<volatile std::byte>> cmdSpace =
+                mSerializer->GetCommandSpace(requiredSize);
+            if (cmdSpace) {
+                SerializeBuffer serializeBuffer(*cmdSpace);
                 WireResult rCmd = SerializeCmd(cmd, requiredSize, &serializeBuffer);
                 WireResult rExts =
                     detail::SerializeCommandExtension(&serializeBuffer, extensions...);
