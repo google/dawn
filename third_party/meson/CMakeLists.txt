@@ -49,6 +49,7 @@ function(meson_target TARGET_NAME)
 
     set(MESON_ARGS
         "setup"
+        "--wrap-mode=nodownload"
         "--reconfigure"
         "${MESON_BUILD_DIR}"
         "${ARG_SOURCE_DIR}"

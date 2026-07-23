@@ -195,9 +195,6 @@ endif()
 
 if (NOT TARGET Vulkan::Loader AND DAWN_ENABLE_VULKAN AND TINT_BUILD_FUZZER_VULKAN_SUPPORT)
     message(STATUS "Dawn: using Vulkan::Loader at ${DAWN_VULKAN_LOADER_DIR}")
-    # Workaround for vulkan-loader's find_package(VulkanHeaders) failing when
-    # headers are built via add_subdirectory, leaving VulkanHeaders_VERSION undefined.
-    set(VulkanHeaders_VERSION "0.0.0")
     add_subdirectory(${DAWN_VULKAN_LOADER_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-loader/src")
 endif()
 
