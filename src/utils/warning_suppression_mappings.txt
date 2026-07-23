@@ -88,6 +88,8 @@ src:*third_party{/,\\}google_benchmark{/,\\}*
 # __OBJC__ and DEFINE_PARTITION_ROOT_EXPORT_TEMPLATE can be undefined.
 src:*third_party{/,\\}partition_alloc{/,\\}src{/,\\}partition_alloc{/,\\}pointers{/,\\}raw_ptr.h
 src:*third_party{/,\\}partition_alloc{/,\\}src{/,\\}partition_alloc{/,\\}internal{/,\\}partition_root_exports.h
+# __PTRAUTH__ can be undefined in build_config.h
+src:*build{/,\\}build_config.h
 
 [unique-object-duplication]
 # straighten_larger_slot_span_free_lists_, sort_smaller_slot_span_free_lists_,
