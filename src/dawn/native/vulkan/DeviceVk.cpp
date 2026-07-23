@@ -601,6 +601,11 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         usedKnobs.features.geometryShader = VK_TRUE;
     }
 
+    if (HasFeature(Feature::IndirectFirstInstance)) {
+        DAWN_CHECK(mDeviceInfo.features.drawIndirectFirstInstance == VK_TRUE);
+        usedKnobs.features.drawIndirectFirstInstance = VK_TRUE;
+    }
+
     bool shaderFloat16Int8FeaturesAdded = false;
     if (HasFeature(Feature::ShaderF16)) {
         DAWN_CHECK(usedKnobs.HasExt(DeviceExt::ShaderFloat16Int8) &&
