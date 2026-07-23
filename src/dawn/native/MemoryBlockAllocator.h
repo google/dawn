@@ -29,13 +29,14 @@
 #define SRC_DAWN_NATIVE_MEMORYBLOCKALLOCATOR_H_
 
 #include <cstdint>
-#include <deque>
 #include <utility>
 #include <vector>
 
+#include "src/dawn/common/LinkedList.h"
 #include "src/dawn/common/MutexProtected.h"
 #include "src/utils/heap_array.h"
 #include "src/utils/non_copyable.h"
+#include "src/utils/non_movable.h"
 
 namespace dawn::native {
 
@@ -48,14 +49,21 @@ namespace dawn::native {
 // Block retention is tracked via an internal tick serial: every call to Tick() increments
 // mTickSerial by 1, and blocks whose age exceeds the keep alive window are evicted.
 //
-// We use std::deque<FreeBlock> protected by MutexProtected to store recycled blocks.
-// Popping from the back (`back()` / `pop_back()`) provides LIFO / MRU allocation order so that
-// returned blocks remain warm in CPU cache. Pushing to the back (`push_back()`) naturally keeps
-// the oldest blocks at the front (`front()`) for early-terminating eviction in Tick().
-// TODO(crbug.com/533386841): Consider using intrusive linked list to avoid additional deque memory.
+// Recycled blocks are stored as an intrusive LinkedList<FreeBlock>, protected by MutexProtected.
+// Each FreeBlock node is placement-new'd directly inside the (otherwise idle) memory block it
+// describes, so recycling a block requires no separate allocation. Appending to the tail
+// (`Append()`) and popping from the tail provides LIFO / MRU allocation order so that returned
+// blocks remain warm in CPU cache. Since new nodes are always appended at the tail, the oldest
+// blocks remain at the head for early-terminating eviction in Tick().
 class MemoryBlockAllocator : public dawn::NonCopyable {
   public:
-    explicit MemoryBlockAllocator(size_t blockSize = 16384, uint64_t keepAliveWindow = 60);
+    // Sized slightly below 16 KiB (16384 bytes) so that heap allocator bookkeeping
+    // metadata (such as malloc/PartitionAlloc chunk headers) doesn't cause the total
+    // allocation to exceed the 16 KiB power-of-two size bin and round up to the next bin.
+    static constexpr size_t kDefaultBlockSize = 16352;
+
+    explicit MemoryBlockAllocator(size_t blockSize = kDefaultBlockSize,
+                                  uint64_t keepAliveWindow = 60);
     ~MemoryBlockAllocator();
 
     HeapArray<std::byte> Allocate(size_t minimumSize);
@@ -66,14 +74,28 @@ class MemoryBlockAllocator : public dawn::NonCopyable {
     size_t GetBlockSize() const;
 
   private:
-    struct FreeBlock {
-        uint64_t lastKnownSerial;
-        HeapArray<std::byte> block;
+    // A FreeBlock is placement-new'd into the HeapArray it describes, so that recycling a block
+    // requires no separate node allocation.
+    class FreeBlock : public LinkNode<FreeBlock>, public dawn::NonMovable {
+      public:
+        static FreeBlock* FromHeapArray(uint64_t serial, HeapArray<std::byte> block);
+        HeapArray<std::byte> UnlinkAndAcquireHeapArray();
+
+        uint64_t GetLastKnownSerial() const { return mLastKnownSerial; }
+
+      private:
+        FreeBlock(uint64_t serial, HeapArray<std::byte> block);
+        ~FreeBlock() = default;
+
+        uint64_t mLastKnownSerial;
+        // We store the HeapArray inside FreeBlock to simplify manipulating and reclaiming the
+        // memory allocation.
+        HeapArray<std::byte> mSelfBlock;
     };
 
     const size_t mBlockSize;
     const uint64_t mKeepAliveWindow;
-    MutexProtected<std::deque<FreeBlock>> mFreeList;
+    MutexProtected<LinkedList<FreeBlock>> mFreeList;
     uint64_t mTickSerial = 0;
 };
 

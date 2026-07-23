@@ -27,12 +27,40 @@
 
 #include "src/dawn/native/MemoryBlockAllocator.h"
 
+#include <algorithm>
 #include <utility>
+
+#include "src/dawn/common/Math.h"
 
 namespace dawn::native {
 
+// static
+MemoryBlockAllocator::FreeBlock* MemoryBlockAllocator::FreeBlock::FromHeapArray(
+    uint64_t serial,
+    HeapArray<std::byte> block) {
+    DAWN_CHECK(block.size() >= sizeof(FreeBlock));
+    DAWN_CHECK(IsPtrAligned(block.data(), alignof(FreeBlock)));
+    void* storage = block.data();
+    return new (storage) FreeBlock(serial, std::move(block));
+}
+
+HeapArray<std::byte> MemoryBlockAllocator::FreeBlock::UnlinkAndAcquireHeapArray() {
+    RemoveFromList();
+    // The move must happen before the destructor call: ~FreeBlock's base ~LinkNode touches
+    // members that live inside `block`'s storage, so this object must not own (and free) that
+    // storage while being destroyed.
+    HeapArray<std::byte> block = std::move(mSelfBlock);
+    this->~FreeBlock();
+    return block;
+}
+
+MemoryBlockAllocator::FreeBlock::FreeBlock(uint64_t serial, HeapArray<std::byte> block)
+    : mLastKnownSerial(serial), mSelfBlock(std::move(block)) {
+    DAWN_ASSERT(reinterpret_cast<std::byte*>(this) == mSelfBlock.data());
+}
+
 MemoryBlockAllocator::MemoryBlockAllocator(size_t blockSize, uint64_t keepAliveWindow)
-    : mBlockSize(blockSize), mKeepAliveWindow(keepAliveWindow) {}
+    : mBlockSize(std::max(blockSize, sizeof(FreeBlock))), mKeepAliveWindow(keepAliveWindow) {}
 
 MemoryBlockAllocator::~MemoryBlockAllocator() {
     TrimMemory();
@@ -52,9 +80,7 @@ HeapArray<std::byte> MemoryBlockAllocator::Allocate(size_t minimumSize) {
         if (freeList->empty()) {
             return {};
         }
-        HeapArray<std::byte> result = std::move(freeList->back().block);
-        freeList->pop_back();
-        return result;
+        return freeList->tail()->value()->UnlinkAndAcquireHeapArray();
     });
 
     if (!block.empty()) {
@@ -67,9 +93,12 @@ HeapArray<std::byte> MemoryBlockAllocator::Allocate(size_t minimumSize) {
 void MemoryBlockAllocator::Return(std::vector<HeapArray<std::byte>>&& blocks) {
     mFreeList.Use([&](auto freeList) {
         for (HeapArray<std::byte>& block : blocks) {
-            if (block.size() <= mBlockSize) {
-                freeList->push_back({mTickSerial, std::move(block)});
+            if (block.size() != mBlockSize) {
+                // Only exactly mBlockSize blocks are pooled for reuse. Blocks of any other size
+                // are freed below when `blocks` is cleared.
+                continue;
             }
+            freeList->Append(FreeBlock::FromHeapArray(mTickSerial, std::move(block)));
         }
     });
     blocks.clear();
@@ -78,19 +107,32 @@ void MemoryBlockAllocator::Return(std::vector<HeapArray<std::byte>>&& blocks) {
 void MemoryBlockAllocator::Tick() {
     mFreeList.Use([&](auto freeList) {
         mTickSerial++;
-        while (!freeList->empty() &&
-               freeList->front().lastKnownSerial + mKeepAliveWindow <= mTickSerial) {
-            freeList->pop_front();
+        for (LinkNode<FreeBlock>* node : *freeList) {
+            FreeBlock* fb = node->value();
+            if (fb->GetLastKnownSerial() + mKeepAliveWindow > mTickSerial) {
+                break;
+            }
+            fb->UnlinkAndAcquireHeapArray();
         }
     });
 }
 
 void MemoryBlockAllocator::TrimMemory() {
-    mFreeList.Use([&](auto freeList) { std::deque<FreeBlock>().swap(*freeList); });
+    mFreeList.Use([&](auto freeList) {
+        for (LinkNode<FreeBlock>* node : *freeList) {
+            node->value()->UnlinkAndAcquireHeapArray();
+        }
+    });
 }
 
 size_t MemoryBlockAllocator::GetRecycledBlockCountForTesting() {
-    return mFreeList.Use([&](auto freeList) { return freeList->size(); });
+    return mFreeList.Use([&](auto freeList) {
+        size_t count = 0;
+        for ([[maybe_unused]] LinkNode<FreeBlock>* node : *freeList) {
+            count++;
+        }
+        return count;
+    });
 }
 
 }  // namespace dawn::native
