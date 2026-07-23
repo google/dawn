@@ -2564,6 +2564,18 @@ void Structural::CheckCoreBuiltinCall(const CoreBuiltinCall* call) {
                 break;
         }
     }
+    if (ir_.properties.Contains(Property::kAllowBufferTypes)) {
+        switch (call->Func()) {
+            case core::BuiltinFn::kBufferArrayView:
+                if (call->Result()->Type()->UnwrapPtr()->HasFixedFootprint()) {
+                    AddError(call)
+                        << call->FriendlyName() << " result type must not have a fixed footprint";
+                }
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 void Structural::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {

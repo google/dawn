@@ -698,4 +698,23 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_VectorClamp_Disallowed) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, CallBuiltinFn_BufferArrayView_FixedFootprint) {
+    mod.properties.Add(core::ir::Property::kAllowBufferTypes);
+    auto* bar = b.Function("bar", ty.void_());
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
+    bar->SetParams({p});
+    b.Append(bar->Block(), [&] {
+        b.CallExplicit(ty.ptr(storage, ty.array(ty.vec2f(), 2)), BuiltinFn::kBufferArrayView,
+                       Vector<TemplateParameter, 1>{ty.array(ty.vec2f(), 2)}, p, 0_i, 32_i);
+        b.Return(bar);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(bufferArrayView result type must not have a fixed footprint)"))
+        << res.Failure();
+}
+
 }  // namespace tint::core::ir
