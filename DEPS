@@ -24,7 +24,7 @@ vars = {
   'dawn_tintd': False, # Also fetches dependencies required for building tintd.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'dawn_gn_version': 'git_revision:2de5327bfac4c9bcde7a07960d6ae344b13075b2',
+  'dawn_gn_version': 'git_revision:270735aad0feec26c61b107c053a84bfcf230f62',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
@@ -76,7 +76,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '2c76a16ba37dc9d337c127eb8a39e228d6ed4f91',
+  'chromium_revision': '2b6571f5ae4344194c8ffbc5c79622dc4e770cab',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -137,7 +137,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@36a464bfe6ef49e0710caf65bfbabc87725720da',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@b276ddf3c75027b86715bab97ea46f1d463e087c',
     'condition': 'dawn_standalone',
   },
 
@@ -153,7 +153,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@997ff00a9bce38952e415de76a384d5efd4fb033',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@fc207ca0fe8936a7c3746bea5d8080c4e5427018',
     'condition': 'dawn_standalone',
   },
 
@@ -168,11 +168,11 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@fccbf2b8d9b655d009b54a8411e8b184d3d9aed5',
+  'url': '{chromium_git}/chromium/src/build@482059be519ebe948813cd01923a8b458311d24a',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@007be1bbdf96e5c418113938565169e3d9369ba3',
+  'url': '{chromium_git}/chromium/src/tools/clang@ff7e1238b9f947aa3985e72e7f63fb0977e84678',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
@@ -194,7 +194,7 @@ deps = {
 
   # For run-tricium-clang-tidy.py
   'third_party/chromium-tools-build/src': {
-    'url': '{chromium_git}/chromium/tools/build@df66645cb4c912c9940f133f08949c81dc152115',
+    'url': '{chromium_git}/chromium/tools/build@d2a213a09990116a023bbdaa74ab39d0bc1531d3',
     'condition': 'dawn_standalone and checkout_clang_tidy',
   },
 
@@ -282,13 +282,13 @@ deps = {
 
   # Used for Dawn-side GN arg definitions.
   'tools/mb': {
-    'url': '{chromium_git}/chromium/src/tools/mb@bc534bf62c2bf80d74a7820a16fd80793aaf6d38',
+    'url': '{chromium_git}/chromium/src/tools/mb@c9d8feb70ccc257a58114495b079ddb19c06a1d8',
     'condition': 'dawn_standalone',
   },
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@a8978ccdc9f4c44f364387e3755d395ed556109a',
+    'url': '{chromium_git}/chromium/src/testing@ceb4b44bc9480b55f29a154338d44650a4edd1c6',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -408,7 +408,7 @@ deps = {
   },
 
   'third_party/abseil-cpp': {
-    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@02671cd501abfe018792a5ecb81442bb8676598c',
+    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@ff6e8ce3e932c16cebd1611c8fc42c45080a0e55',
     'condition': 'dawn_standalone',
   },
 
@@ -671,7 +671,7 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@8454eacd11f112e53b702b6a0a6bb9a25d4896c2',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@247cfd34b260469d17839c76636308ed414611f2',
     'condition': 'dawn_standalone',
   },
 
@@ -759,7 +759,7 @@ deps = {
     'condition': 'checkout_android and dawn_standalone',
   },
   'third_party/libunwind/src': {
-    'url': Var('chromium_git') + '/external/github.com/llvm/llvm-project/libunwind.git@bc2c2b1715f3a491d7313fb03642bfe27ce0f3b5',
+    'url': Var('chromium_git') + '/external/github.com/llvm/llvm-project/libunwind.git@a622539c31e0eb0e635dac3a310eee8e0234aff1',
     'condition': 'checkout_android and dawn_standalone',
   },
 
