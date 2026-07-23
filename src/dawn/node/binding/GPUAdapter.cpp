@@ -101,7 +101,7 @@ interop::Interface<interop::GPUSupportedFeatures> GPUAdapter::getFeatures(Napi::
 
 interop::Interface<interop::GPUSupportedLimits> GPUAdapter::getLimits(Napi::Env env) {
     dawn::utils::ComboLimits limits;
-    if (adapter_.GetLimits(limits.GetLinked()) != wgpu::Status::Success) {
+    if (!adapter_.GetLimits(limits.GetLinked())) {
         Napi::Error::New(env, "failed to get adapter limits").ThrowAsJavaScriptException();
     }
 

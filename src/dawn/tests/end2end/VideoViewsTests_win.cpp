@@ -229,11 +229,9 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         beginDesc.signaledValues = &signaled_value;
 
         auto wgpuTexture = sharedTextureMemory.CreateTexture(&textureDesc);
-        wgpu::Status status = sharedTextureMemory.BeginAccess(wgpuTexture, &beginDesc);
+        bool success = sharedTextureMemory.BeginAccess(wgpuTexture, &beginDesc);
 
-        return status == wgpu::Status::Success
-                   ? std::make_unique<PlatformTextureWin>(std::move(wgpuTexture))
-                   : nullptr;
+        return success ? std::make_unique<PlatformTextureWin>(std::move(wgpuTexture)) : nullptr;
     }
 
     void DestroyVideoTextureForTest(
