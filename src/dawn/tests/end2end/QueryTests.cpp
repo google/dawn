@@ -700,6 +700,19 @@ TEST_P(OcclusionQueryTests, ResolveWithFirstQuery) {
                   new OcclusionExpectation(OcclusionExpectation::Result::NonZero));
 }
 
+// Regression test for https://crbug.com/536641544 where the Vulkan backend does a vkCmdFillBuffer
+// of size 0 (which is not allowed) when 0 queries are resolved.
+TEST_P(OcclusionQueryTests, ResolveZeroQueries) {
+    wgpu::QuerySet querySet = CreateOcclusionQuerySet(1);
+    wgpu::Buffer destination = CreateResolveBuffer(sizeof(uint64_t));
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.ResolveQuerySet(querySet, 0, 0, destination, 0);
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+}
+
 class TimestampExpectation : public detail::Expectation {
   public:
     ~TimestampExpectation() override = default;
@@ -1483,6 +1496,7 @@ DAWN_INSTANTIATE_TEST(OcclusionQueryTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend(),
+                      VulkanBackend({"clear_buffer_before_resolve_queries"}),
                       WebGPUBackend());
 DAWN_INSTANTIATE_TEST(TimestampQueryTests,
                       D3D11Backend(),
