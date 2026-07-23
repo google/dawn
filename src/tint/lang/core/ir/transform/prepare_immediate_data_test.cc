@@ -328,7 +328,36 @@ TEST_F(IR_PrepareImmediateDataTests, ValidateInternalImmediate_MisalignedScalar)
               R"(immediate offset for 'internal_constant' must be aligned to 4 bytes)");
 }
 
+TEST_F(IR_PrepareImmediateDataTests, ValidateInternalImmediate_StructU32Aligned) {
+    // A struct of three u32 members only needs 4-byte alignment, so it is accepted at a 4-aligned
+    // offset. This is the num_workgroups case placed after a non-16-byte user block.
+    PrepareImmediateDataConfig config;
+    auto* struct_ty =
+        ty.Struct(mod.symbols.New("num_workgroups"), {
+                                                         {mod.symbols.New("x"), ty.u32()},
+                                                         {mod.symbols.New("y"), ty.u32()},
+                                                         {mod.symbols.New("z"), ty.u32()},
+                                                     });
+    ASSERT_EQ(config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant"), struct_ty),
+              Success);
+    auto result = Run(config);
+    EXPECT_EQ(result, Success);
+}
+
+TEST_F(IR_PrepareImmediateDataTests, ValidateInternalImmediate_MisalignedVector) {
+    // A vec3<u32> requires 16-byte alignment, so a 4-aligned offset is rejected.
+    PrepareImmediateDataConfig config;
+    ASSERT_EQ(config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant"), ty.vec3u()),
+              Success);
+    auto result = Run(config);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              R"(immediate offset for 'internal_constant' must be aligned to 16 bytes)");
+}
+
 TEST_F(IR_PrepareImmediateDataTests, ValidateInternalImmediate_MisalignedArray) {
+    // An array<vec4<u32>> requires 16-byte alignment (its element's alignment); an offset of 8 is
+    // rejected.
     PrepareImmediateDataConfig config;
     ASSERT_EQ(config.AddInternalImmediateData(8u, mod.symbols.New("internal_constant"),
                                               ty.array<vec4u, 4>()),

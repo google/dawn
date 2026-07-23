@@ -616,9 +616,21 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 auto* immediate_data = config.immediate_data_layout.var;
                 auto num_workgroup_idx = u32(config.immediate_data_layout.IndexOf(
                     config.num_workgroups_start_offset.value()));
-                auto* load = builder.Load(
-                    builder.Access<ptr<immediate, vec3<u32>>>(immediate_data, num_workgroup_idx));
-                return load->Result();
+                // num_workgroups is stored as a struct of three u32 members (4-byte aligned); load
+                // each member and reconstruct the vec3<u32> value the builtin expects.
+                auto* immediate_struct = config.immediate_data_layout.var->Result()
+                                             ->Type()
+                                             ->As<core::type::Pointer>()
+                                             ->StoreType()
+                                             ->As<core::type::Struct>();
+                auto* num_workgroups_type = immediate_struct->Members()[num_workgroup_idx]->Type();
+                auto* str = builder.Access(ty.ptr(immediate, num_workgroups_type), immediate_data,
+                                           num_workgroup_idx);
+                auto* e0 = builder.Load(builder.Access<ptr<immediate, u32>>(str, 0_u));
+                auto* e1 = builder.Load(builder.Access<ptr<immediate, u32>>(str, 1_u));
+                auto* e2 = builder.Load(builder.Access<ptr<immediate, u32>>(str, 2_u));
+                return builder.Construct(ty.vec3u(), e0->Result(), e1->Result(), e2->Result())
+                    ->Result();
             }
             return GetInputForNumWorkgroups(builder);
         }

@@ -993,6 +993,58 @@ TEST_P(ImmediateDataTests, AutoCalculatedPipelineLayoutImmediateSize) {
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), mStorageBuffer, 0, expected.size());
 }
 
+// A compute entry point that uses a vec3u user immediate (12 bytes, not a multiple of 16) together
+// with @builtin(num_workgroups). The user immediate block precedes num_workgroups in the internal
+// immediate layout, so the 12-byte user block pushes num_workgroups onto a 4-aligned, non-16-byte
+// offset. Both the user immediate and num_workgroups must read back correctly.
+TEST_P(ImmediateDataTests, ComputeVec3UserImmediateWithNumWorkgroups) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        var<immediate> userImm : vec3u;
+        struct Output {
+            userImm : vec3u,
+            numWorkgroups : vec3u,
+        };
+        @group(0) @binding(0) var<storage, read_write> output : Output;
+
+        @compute @workgroup_size(1, 1, 1) fn csMain(@builtin(num_workgroups) n : vec3u) {
+            output.userImm = userImm;
+            output.numWorkgroups = n;
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor desc;
+    desc.compute.module = module;
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&desc);
+
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = sizeof(uint32_t) * 8;
+    bufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage;
+    wgpu::Buffer output = device.CreateBuffer(&bufferDesc);
+    wgpu::BindGroup bg =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, output}});
+
+    std::array<uint32_t, 3> userImm = {11, 22, 33};
+    constexpr uint32_t kX = 2, kY = 3, kZ = 4;
+
+    wgpu::CommandEncoder enc = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = enc.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bg);
+    pass.SetImmediates(0, userImm.data(), userImm.size() * sizeof(uint32_t));
+    pass.DispatchWorkgroups(kX, kY, kZ);
+    pass.End();
+    wgpu::CommandBuffer commands = enc.Finish();
+    queue.Submit(1, &commands);
+
+    // The Output struct places userImm at byte offset 0 and numWorkgroups at byte offset 16 (vec3u
+    // members are 16-byte aligned in std430). The EXPECT_BUFFER offset argument is in bytes.
+    std::array<uint32_t, 3> expectedUserImm = {11, 22, 33};
+    std::array<uint32_t, 3> expectedNumWorkgroups = {kX, kY, kZ};
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedUserImm.data(), output, 0, expectedUserImm.size());
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedNumWorkgroups.data(), output, 16,
+                               expectedNumWorkgroups.size());
+}
+
 DAWN_INSTANTIATE_TEST(ImmediateDataTests,
                       D3D11Backend(),
                       D3D12Backend(),
