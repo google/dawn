@@ -60,6 +60,7 @@ MaybeError PhysicalDeviceBase::Initialize() {
     EnableFeature(Feature::DawnInternalUsages);
     EnableFeature(Feature::ImplicitDeviceSynchronization);
     EnableFeature(Feature::DawnFormatCapabilities);
+    EnableFeature(Feature::DawnAllowUndefinedLoadStoreOp);
     InitializeSupportedFeaturesImpl();
 
     DAWN_TRY_CONTEXT(

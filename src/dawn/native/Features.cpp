@@ -478,6 +478,12 @@ static constexpr auto kFeatureInfo = std::to_array<FeatureEnumAndInfo>({
      {"Supports creating compressed texture with partial blocks in level 0",
       // TODO(https://crbug.com/528245806): point at the WebGPU spec once landed.
       "https://crbug.com/528245806", FeatureInfo::FeatureState::Experimental}},
+    {Feature::DawnAllowUndefinedLoadStoreOp,
+     {"Allow wgpu::LoadOp::Undefined and wgpu::StoreOp::Undefined to be used for render pass "
+      "attachments.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "dawn_allow_undefined_load_store_op.md",
+      FeatureInfo::FeatureState::Stable}},
 
     // Comment to separate the } so it is clearer what to copy-paste to add a feature.
 });

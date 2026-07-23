@@ -131,6 +131,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_OpaqueYCbCrAndroidForExternalTexture:
         case WGPUFeatureName_Unorm16Filterable:
         case WGPUFeatureName_TextureCompressionUnaligned:
+        case WGPUFeatureName_DawnAllowUndefinedLoadStoreOp:
             return true;
     }
 

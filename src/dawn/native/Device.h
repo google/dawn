@@ -435,6 +435,9 @@ class DeviceBase : public ErrorSink,
     // Whether the backend needs to validate the indirect buffer on GPU.
     virtual bool NeedsIndirectGPUValidation() const;
 
+    // Whether the GPU is known to be a tile-based (deferred) renderer, based on vendor/device ID.
+    bool IsTileBasedRenderer() const;
+
     bool HasFeature(Feature feature) const;
 
     const CombinedLimits& GetLimits() const;

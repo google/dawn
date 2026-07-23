@@ -101,5 +101,8 @@ QualcommACPIGen GetQualcommACPIGen(PCIVendorID venderId, PCIDeviceID deviceId);
 // ARM
 bool IsMaliG68(PCIDeviceID deviceId);
 
+// Returns whether the GPU vendor is known to build tile-based (deferred) renderers.
+bool IsTileBasedRenderer(PCIVendorID vendorId, PCIDeviceID deviceId);
+
 }  // namespace dawn::gpu_info
 #endif  // SRC_DAWN_COMMON_GPUINFO_H_

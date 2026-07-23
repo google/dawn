@@ -154,4 +154,9 @@ bool IsMaliG68(PCIDeviceID deviceId) {
     return deviceId == kMaliG68;
 }
 
+bool IsTileBasedRenderer(PCIVendorID vendorId, PCIDeviceID /*deviceId*/) {
+    return IsARM(vendorId) || IsImgTec(vendorId) || IsQualcommPCI(vendorId) ||
+           IsQualcommACPI(vendorId) || IsApple(vendorId);
+}
+
 }  // namespace dawn::gpu_info

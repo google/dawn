@@ -1498,7 +1498,43 @@ class MultisampledRenderingWithTransientAttachmentTest : public MultisampledRend
         // TODO(crbug.com/522868204): Produces incorrect result on Pixel 10.
         DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
     }
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::DawnAllowUndefinedLoadStoreOp})) {
+            requiredFeatures.push_back(wgpu::FeatureName::DawnAllowUndefinedLoadStoreOp);
+        }
+        return requiredFeatures;
+    }
 };
+
+// Test that a transient color attachment using LoadOp::Undefined and StoreOp::Undefined (which
+// must resolve to Clear/Discard since the attachment is transient) is correctly cleared to zero.
+TEST_P(MultisampledRenderingWithTransientAttachmentTest, UndefinedOpsClearTransientAttachment) {
+    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::DawnAllowUndefinedLoadStoreOp}));
+
+    auto transientMultisampledColorTexture =
+        CreateTextureForRenderAttachment(kColorFormat, kSampleCount,
+                                         /*mipLevelCount=*/1,
+                                         /*arrayLayerCount=*/1,
+                                         /*transientAttachment=*/true);
+    auto transientMultisampledColorView = transientMultisampledColorTexture.CreateView();
+
+    utils::ComboRenderPassDescriptor renderPass({transientMultisampledColorView});
+    renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Undefined;
+    renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Undefined;
+    renderPass.cColorAttachments[0].resolveTarget = mResolveView;
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
+    pass.End();
+
+    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, mResolveTexture, (kWidth - 1) / 2,
+                          (kHeight - 1) / 2);
+}
 
 // Test using one multisampled color transient attachment with resolve target can render correctly.
 TEST_P(MultisampledRenderingWithTransientAttachmentTest, ResolveTransientAttachmentInto2DTexture) {
@@ -1785,6 +1821,9 @@ class DawnLoadResolveTextureTest : public MultisampledRenderingTest {
         if (SupportsFeatures({wgpu::FeatureName::TransientAttachments})) {
             requiredFeatures.push_back(wgpu::FeatureName::TransientAttachments);
         }
+        if (SupportsFeatures({wgpu::FeatureName::DawnAllowUndefinedLoadStoreOp})) {
+            requiredFeatures.push_back(wgpu::FeatureName::DawnAllowUndefinedLoadStoreOp);
+        }
         return requiredFeatures;
     }
 
@@ -2040,50 +2079,59 @@ TEST_P(DawnLoadResolveTextureTest, DrawThenLoad) {
     // TODO(crbug.com/519251257): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-    auto multiSampledTexture = CreateTextureForRenderAttachment(
-        kColorFormat, 4, 1, 1,
-        /*transientAttachment=*/device.HasFeature(wgpu::FeatureName::TransientAttachments),
-        /*supportsTextureBinding=*/false);
-    auto multiSampledTextureView = multiSampledTexture.CreateView();
-
-    auto singleSampledTexture =
-        CreateTextureForRenderAttachment(kColorFormat, 1, 1, 1, /*transientAttachment=*/false,
-                                         /*supportsTextureBinding=*/true);
-    auto singleSampledTextureView = singleSampledTexture.CreateView();
-
-    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-    wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
-        /*testDepth=*/false, /*sampleMask=*/0xFFFFFFFF, /*alphaToCoverageEnabled=*/false,
-        /*flipTriangle=*/false, /*enableExpandResolveLoadOp=*/false);
-
-    constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
-
-    // In first render pass we draw a green triangle. StoreOp=Discard to discard the MSAA texture's
-    // content.
-    {
-        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
-            {multiSampledTextureView}, {singleSampledTextureView}, wgpu::LoadOp::Clear,
-            wgpu::LoadOp::Clear,
-            /*testDepth=*/false);
-        renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
-        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kGreen);
+    std::vector<wgpu::StoreOp> storeOps = {wgpu::StoreOp::Discard};
+    if (SupportsFeatures({wgpu::FeatureName::DawnAllowUndefinedLoadStoreOp})) {
+        storeOps.push_back(wgpu::StoreOp::Undefined);
     }
 
-    // In second render pass, we only use LoadOp::ExpandResolveTexture with no draw call.
-    {
-        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
-            {multiSampledTextureView}, {singleSampledTextureView},
-            wgpu::LoadOp::ExpandResolveTexture, wgpu::LoadOp::Load,
-            /*testDepth=*/false);
-        renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
-        wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
-        renderPassEncoder.End();
+    for (wgpu::StoreOp storeOp : storeOps) {
+        SCOPED_TRACE(storeOp == wgpu::StoreOp::Discard ? "storeOp: Discard" : "storeOp: Undefined");
+
+        auto multiSampledTexture = CreateTextureForRenderAttachment(
+            kColorFormat, 4, 1, 1,
+            /*transientAttachment=*/device.HasFeature(wgpu::FeatureName::TransientAttachments),
+            /*supportsTextureBinding=*/false);
+        auto multiSampledTextureView = multiSampledTexture.CreateView();
+
+        auto singleSampledTexture =
+            CreateTextureForRenderAttachment(kColorFormat, 1, 1, 1, /*transientAttachment=*/false,
+                                             /*supportsTextureBinding=*/true);
+        auto singleSampledTextureView = singleSampledTexture.CreateView();
+
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
+            /*testDepth=*/false, /*sampleMask=*/0xFFFFFFFF, /*alphaToCoverageEnabled=*/false,
+            /*flipTriangle=*/false, /*enableExpandResolveLoadOp=*/false);
+
+        constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
+
+        // In first render pass we draw a green triangle. storeOp discards (or lets the backend
+        // decide whether to discard) the MSAA texture's content.
+        {
+            utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+                {multiSampledTextureView}, {singleSampledTextureView}, wgpu::LoadOp::Clear,
+                wgpu::LoadOp::Clear,
+                /*testDepth=*/false);
+            renderPass.cColorAttachments[0].storeOp = storeOp;
+            EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kGreen);
+        }
+
+        // In second render pass, we only use LoadOp::ExpandResolveTexture with no draw call.
+        {
+            utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+                {multiSampledTextureView}, {singleSampledTextureView},
+                wgpu::LoadOp::ExpandResolveTexture, wgpu::LoadOp::Load,
+                /*testDepth=*/false);
+            renderPass.cColorAttachments[0].storeOp = storeOp;
+            wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+            renderPassEncoder.End();
+        }
+
+        wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+        queue.Submit(1, &commandBuffer);
+
+        VerifyResolveTarget(kGreen, singleSampledTexture);
     }
-
-    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
-    queue.Submit(1, &commandBuffer);
-
-    VerifyResolveTarget(kGreen, singleSampledTexture);
 }
 
 // Test using ExpandResolveTexture load op for non-zero indexed attachment.

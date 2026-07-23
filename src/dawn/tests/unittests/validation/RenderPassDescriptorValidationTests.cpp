@@ -2781,5 +2781,198 @@ TEST_F(RenderPassRenderAreaValidationTests, ScissorRectOutsideRenderArea) {
     }
 }
 
+// Test that using LoadOp::Undefined without the DawnAllowUndefinedLoadStoreOp feature results in
+// error.
+TEST_F(RenderPassDescriptorValidationTest, ErrorUseUndefinedLoadOpWithoutFeature) {
+    // Using Undefined LoadOp for color attachment results in error.
+    {
+        wgpu::TextureView renderView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        utils::ComboRenderPassDescriptor renderPass({renderView});
+        renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Undefined;
+        AssertBeginRenderPassError(&renderPass,
+                                   testing::HasSubstr("DawnAllowUndefinedLoadStoreOp"));
+    }
+
+    // Using Undefined LoadOp for depth attachment (that has a depth aspect and isn't read-only)
+    // results in error.
+    {
+        wgpu::TextureView colorView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::TextureView depthStencilView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8);
+        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
+        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
+        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+        AssertBeginRenderPassError(&renderPass,
+                                   testing::HasSubstr("DawnAllowUndefinedLoadStoreOp"));
+    }
+
+    // Using Undefined LoadOp for stencil attachment (that has a stencil aspect and isn't
+    // read-only) results in error.
+    {
+        wgpu::TextureView colorView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::TextureView depthStencilView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8);
+        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
+        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
+        AssertBeginRenderPassError(&renderPass,
+                                   testing::HasSubstr("DawnAllowUndefinedLoadStoreOp"));
+    }
+}
+
+// Test that using StoreOp::Undefined without the DawnAllowUndefinedLoadStoreOp feature results in
+// error.
+TEST_F(RenderPassDescriptorValidationTest, ErrorUseUndefinedStoreOpWithoutFeature) {
+    // Using Undefined StoreOp for color attachment results in error.
+    {
+        wgpu::TextureView renderView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        utils::ComboRenderPassDescriptor renderPass({renderView});
+        renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Undefined;
+        AssertBeginRenderPassError(&renderPass,
+                                   testing::HasSubstr("DawnAllowUndefinedLoadStoreOp"));
+    }
+
+    // Using Undefined StoreOp for depth attachment (that has a depth aspect and isn't read-only)
+    // results in error.
+    {
+        wgpu::TextureView colorView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::TextureView depthStencilView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8);
+        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
+        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
+        AssertBeginRenderPassError(&renderPass,
+                                   testing::HasSubstr("DawnAllowUndefinedLoadStoreOp"));
+    }
+
+    // Using Undefined StoreOp for stencil attachment (that has a stencil aspect and isn't
+    // read-only) results in error.
+    {
+        wgpu::TextureView colorView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::TextureView depthStencilView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8);
+        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
+        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+        AssertBeginRenderPassError(&renderPass,
+                                   testing::HasSubstr("DawnAllowUndefinedLoadStoreOp"));
+    }
+}
+
+class DawnAllowUndefinedLoadStoreOpValidationTest : public RenderPassDescriptorValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::DawnAllowUndefinedLoadStoreOp,
+                wgpu::FeatureName::TransientAttachments};
+    }
+};
+
+// Test that using LoadOp::Undefined with the DawnAllowUndefinedLoadStoreOp feature should work.
+TEST_F(DawnAllowUndefinedLoadStoreOpValidationTest, UseUndefinedLoadOpSuccess) {
+    // Using Undefined LoadOp for color attachment.
+    {
+        wgpu::TextureView renderView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        utils::ComboRenderPassDescriptor renderPass({renderView});
+        renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Undefined;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // Using Undefined LoadOp for depth attachment.
+    {
+        wgpu::TextureView colorView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::TextureView depthStencilView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8);
+        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
+        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
+        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // Using Undefined LoadOp for stencil attachment.
+    {
+        wgpu::TextureView colorView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::TextureView depthStencilView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8);
+        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
+        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+}
+
+// Test that using StoreOp::Undefined with the DawnAllowUndefinedLoadStoreOp feature should work.
+TEST_F(DawnAllowUndefinedLoadStoreOpValidationTest, UseUndefinedStoreOpSuccess) {
+    // Using Undefined StoreOp for color attachment.
+    {
+        wgpu::TextureView renderView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        utils::ComboRenderPassDescriptor renderPass({renderView});
+        renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Undefined;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // Using Undefined StoreOp for depth attachment.
+    {
+        wgpu::TextureView colorView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::TextureView depthStencilView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8);
+        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
+        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // Using Undefined StoreOp for stencil attachment.
+    {
+        wgpu::TextureView colorView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::TextureView depthStencilView =
+            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8);
+        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
+        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+}
+
+// Test that using Undefined load/storeOp with a TransientAttachment texture should work.
+TEST_F(DawnAllowUndefinedLoadStoreOpValidationTest,
+       UseUndefinedLoadStoreOpWithTransientAttachmentSuccess) {
+    auto multisampledColorTexture = CreateTexture(
+        device, wgpu::TextureDimension::e2D, wgpu::TextureFormat::RGBA8Unorm, 1, 1, 1, 1,
+        /*sampleCount=*/4,
+        wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment);
+    auto multisampledColorView = multisampledColorTexture.CreateView();
+
+    wgpu::TextureView resolveView =
+        Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+
+    auto depthStencilTexture = CreateTexture(
+        device, wgpu::TextureDimension::e2D, wgpu::TextureFormat::Depth24PlusStencil8, 1, 1, 1, 1,
+        /*sampleCount=*/4,
+        wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment);
+    auto depthStencilView = depthStencilTexture.CreateView();
+
+    utils::ComboRenderPassDescriptor renderPass({multisampledColorView}, depthStencilView);
+    renderPass.cColorAttachments[0].resolveTarget = resolveView;
+    renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Undefined;
+    renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Undefined;
+    renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
+    renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
+    renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+    renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+    AssertBeginRenderPassSuccess(&renderPass);
+}
+
 }  // anonymous namespace
 }  // namespace dawn

@@ -2565,7 +2565,8 @@
             {"value": 62, "name": "unorm16 filterable", "tags": ["dawn"]},
             {"value": 63, "name": "render pass render area", "tags": ["dawn"]},
             {"value": 64, "name": "adapter properties drm", "tags": ["dawn", "native"]},
-            {"value": 65, "name": "texture compression unaligned", "tags": ["dawn"]}
+            {"value": 65, "name": "texture compression unaligned", "tags": ["dawn"]},
+            {"value": 66, "name": "dawn allow undefined load store op", "tags": ["dawn", "native"]}
         ]
     },
     "filter mode": {

@@ -43,6 +43,7 @@
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/GPUInfo.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/Sha3.h"
 #include "src/dawn/common/StringViewUtils.h"
@@ -2578,6 +2579,11 @@ bool DeviceBase::NeedsStaticSamplerForExternalTexture() const {
 
 bool DeviceBase::NeedsIndirectGPUValidation() const {
     return true;
+}
+
+bool DeviceBase::IsTileBasedRenderer() const {
+    return gpu_info::IsTileBasedRenderer(GetPhysicalDevice()->GetVendorId(),
+                                         GetPhysicalDevice()->GetDeviceId());
 }
 
 uint64_t DeviceBase::GetBufferCopyOffsetAlignmentForDepthStencil() const {
