@@ -558,7 +558,8 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
         return {};
     }
 
-    DAWN_ASSERT(mMappedData);
+    // This can only happen if the prior Map call has failed.
+    DAWN_INTERNAL_ERROR_IF(mMappedData == nullptr, "Buffer failed to be mapped.");
 
     // Ensure data is initialized before completing the MapAsync event and giving it to the user.
     DAWN_TRY(EnsureDataInitialized(nullptr));
