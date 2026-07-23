@@ -85,8 +85,8 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     // Dawn API
     void APIDestroy();
     wgpu::Status APIUpdate(uint32_t slot, const BindingResource* resource);
-    uint32_t APIInsertBinding(const BindingResource* resource);
-    wgpu::Status APIRemoveBinding(uint32_t slot);
+    uint32_t APIInsert(const BindingResource* resource);
+    wgpu::Status APIRemove(uint32_t slot);
     uint32_t APIGetSize() const;
 
     // Computes the tint::ResourceType that should be in the metadata buffer for the resource.
@@ -111,8 +111,7 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     void Remove(ResourceTableSlot slot);
 
     // Performs the steps for wgpu::ResourceTable::Update that are after the validation returning a
-    // synchronous error. This is to allow factoring the code between APIUpdate and
-    // APIInsertBinding.
+    // synchronous error. This is to allow factoring the code between APIUpdate and APIInsert.
     void UpdateWithDeviceValidation(ResourceTableSlot slot,
                                     const BindingResource* resource,
                                     std::string_view methodName);
@@ -145,7 +144,7 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
 
     bool IsValidSlot(ResourceTableSlot slot) const;
 
-    // Helper method that does the bulk of the shared work between Update and RemoveBinding.
+    // Helper method that does the bulk of the shared work between Update and Remove.
     void SetEntry(ResourceTableSlot slot, const BindingResource* contents);
 
     // Helper method that must be called when anything in the SlotState changes (except

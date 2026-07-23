@@ -136,8 +136,8 @@ interface GPUResourceTable {
     undefined destroy();
 
     undefined update(GPUIndex32 slot, GPUBindingResource resource);
-    GPUIndex32 insertBinding(GPUBindingResource resource);
-    undefined removeBinding(GPUIndex32 slot);
+    GPUIndex32 insert(GPUBindingResource resource);
+    undefined remove(GPUIndex32 slot);
 
     readonly attribute GPUSize32Out size;
 };

@@ -113,7 +113,7 @@ WGPUStatus ResourceTable::APIUpdate(uint32_t slot, const WGPUBindingResource* re
     return WGPUStatus_Success;
 }
 
-uint32_t ResourceTable::APIInsertBinding(const WGPUBindingResource* resource) {
+uint32_t ResourceTable::APIInsert(const WGPUBindingResource* resource) {
     if (mDestroyed) {
         return WGPU_INVALID_BINDING;
     }
@@ -136,7 +136,7 @@ uint32_t ResourceTable::APIInsertBinding(const WGPUBindingResource* resource) {
     return WGPU_INVALID_BINDING;
 }
 
-WGPUStatus ResourceTable::APIRemoveBinding(uint32_t slot) {
+WGPUStatus ResourceTable::APIRemove(uint32_t slot) {
     if (mDestroyed || slot >= mSlotAvailableAfterSubmit.size()) {
         return WGPUStatus_Error;
     }
@@ -144,7 +144,7 @@ WGPUStatus ResourceTable::APIRemoveBinding(uint32_t slot) {
     mSlotAvailableAfterSubmit[slot] = mDevice->GetQueue()->GetLastSubmitIndex();
 
     // Forward the command to the server.
-    ResourceTableRemoveBindingCmd cmd;
+    ResourceTableRemoveCmd cmd;
     cmd.self = ToAPI(this);
     cmd.slot = slot;
     GetClient()->SerializeCommand(cmd);

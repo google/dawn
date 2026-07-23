@@ -256,7 +256,7 @@ wgpu::Status ResourceTableBase::APIUpdate(uint32_t slotIn, const BindingResource
     return wgpu::Status::Success;
 }
 
-uint32_t ResourceTableBase::APIInsertBinding(const BindingResource* resource) {
+uint32_t ResourceTableBase::APIInsert(const BindingResource* resource) {
     if (IsDestroyed()) {
         return wgpu::kInvalidBinding;
     }
@@ -269,7 +269,7 @@ uint32_t ResourceTableBase::APIInsertBinding(const BindingResource* resource) {
             continue;
         }
 
-        UpdateWithDeviceValidation(slot, resource, "InsertBinding");
+        UpdateWithDeviceValidation(slot, resource, "Insert");
         return uint32_t(slot);
     }
 
@@ -277,7 +277,7 @@ uint32_t ResourceTableBase::APIInsertBinding(const BindingResource* resource) {
     return wgpu::kInvalidBinding;
 }
 
-wgpu::Status ResourceTableBase::APIRemoveBinding(uint32_t slotIn) {
+wgpu::Status ResourceTableBase::APIRemove(uint32_t slotIn) {
     ResourceTableSlot slot = ResourceTableSlot(slotIn);
     if (!IsValidSlot(slot)) {
         return wgpu::Status::Error;
@@ -288,7 +288,7 @@ wgpu::Status ResourceTableBase::APIRemoveBinding(uint32_t slotIn) {
     Remove(slot);
 
     [[maybe_unused]] bool error = GetDevice()->ConsumedError(
-        GetDevice()->ValidateObject(this), "validating %s.RemoveBinding(%u)", this, slot);
+        GetDevice()->ValidateObject(this), "validating %s.Remove(%u)", this, slot);
     return wgpu::Status::Success;
 }
 

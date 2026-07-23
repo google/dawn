@@ -1999,7 +1999,7 @@ TEST_P(ResourceTableTests, RemoveThenAddSamplerInSameSlot) {
     EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 1ULL * 4 * sizeof(float), 4);
 
     // Now test removing then adding mirror sampler
-    EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(1));
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(1));
     WaitForAllOperations();
     res = {.sampler = samplerMirror};
     EXPECT_EQ(wgpu::Status::Success, table.Update(1, &res));
@@ -2098,14 +2098,14 @@ TEST_P(ResourceTableTests, RemoveThenAddSamplerMultipleInSameSlot) {
 
     // Remove then add mirror samplers
     for (auto sampler : samplerMirror) {
-        EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(1));
+        EXPECT_EQ(wgpu::Status::Success, table.Remove(1));
         WaitForAllOperations();
         res = {.sampler = sampler};
         EXPECT_EQ(wgpu::Status::Success, table.Update(1, &res));
     }
 
     // Finally, remove and add clamp sampler
-    EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(1));
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(1));
     WaitForAllOperations();
     res = {.sampler = samplerClamp};
     EXPECT_EQ(wgpu::Status::Success, table.Update(1, &res));
@@ -2212,7 +2212,7 @@ TEST_P(ResourceTableTests, RemoveAddDuplicateSampler) {
 
     {
         // Remove the sampler in slot 1
-        EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(1));
+        EXPECT_EQ(wgpu::Status::Success, table.Remove(1));
 
         WaitForAllOperations();
 
@@ -2328,7 +2328,7 @@ TEST_P(ResourceTableTests, AddAndRemoveMaxSamplersTwice) {
 
     // Remove all samplers
     for (uint32_t i : Range(kD3D12MaxUniqueSamplers)) {
-        EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(i));
+        EXPECT_EQ(wgpu::Status::Success, table.Remove(i));
     }
 
     // Add different samplers to slots kD3D12MaxUniqueSamplers..kD3D12MaxUniqueSamplers*2-1
@@ -2413,7 +2413,7 @@ TEST_P(ResourceTableTests, RemoveThenAddTextureInSameSlot) {
     EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 0, 4);
 
     // Now test removing and adding the green texture in the same slot
-    EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(0));
     WaitForAllOperations();
     res = {.textureView = textureGreen.CreateView()};
     EXPECT_EQ(wgpu::Status::Success, table.Update(0, &res));
@@ -2494,13 +2494,13 @@ TEST_P(ResourceTableTests, RemoveThenAddTextureMultipleInSameSlot) {
     EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 0, 4);
 
     // Remove then add green texture (this could be done in a loop with multiple textures)
-    EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(0));
     WaitForAllOperations();
     res = {.textureView = textureGreen.CreateView()};
     EXPECT_EQ(wgpu::Status::Success, table.Update(0, &res));
 
     // Now test removing and adding the blue texture in the same slot
-    EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(0));
     WaitForAllOperations();
     res = {.textureView = textureBlue.CreateView()};
     EXPECT_EQ(wgpu::Status::Success, table.Update(0, &res));
@@ -2614,7 +2614,7 @@ TEST_P(ResourceTableTests, ImplicitZeroInit) {
 }
 
 // Check that a resource table slot can be updated only after all commands submitted prior to
-// RemoveBinding are completed.
+// Remove are completed.
 TEST_P(ResourceTableTests, UpdateAfterRemoveRequiresGPUIsFinished) {
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
@@ -2634,7 +2634,7 @@ TEST_P(ResourceTableTests, UpdateAfterRemoveRequiresGPUIsFinished) {
     queue.OnSubmittedWorkDone(
         wgpu::CallbackMode::AllowSpontaneous,
         [&](wgpu::QueueWorkDoneStatus, wgpu::StringView) { updateValid = true; });
-    EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(0));
 
     if (updateValid) {
         EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
@@ -2653,7 +2653,7 @@ TEST_P(ResourceTableTests, UpdateAfterRemoveRequiresGPUIsFinished) {
 }
 
 // Check that a resource table slot can be updated only after all commands submitted prior to
-// RemoveBinding are completed.
+// Remove are completed.
 TEST_P(ResourceTableTests, UpdateAfterRemoveRequiresGPUIsFinished_ErrorBindGroup) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
@@ -2690,7 +2690,7 @@ TEST_P(ResourceTableTests, UpdateAfterRemoveRequiresGPUIsFinished_ErrorBindGroup
         queue.OnSubmittedWorkDone(
             wgpu::CallbackMode::AllowSpontaneous,
             [&](wgpu::QueueWorkDoneStatus, wgpu::StringView) { updateValid = true; });
-        EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+        EXPECT_EQ(wgpu::Status::Success, table.Remove(0));
 
         if (updateValid) {
             EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
@@ -2709,8 +2709,8 @@ TEST_P(ResourceTableTests, UpdateAfterRemoveRequiresGPUIsFinished_ErrorBindGroup
     }
 }
 
-// Check that Update and InsertBinding make the new binding visible in the resource table.
-TEST_P(ResourceTableTests, UpdateAndInsertBindingMakeBindingVisible) {
+// Check that Update and Insert make the new binding visible in the resource table.
+TEST_P(ResourceTableTests, UpdateAndInsertMakeBindingVisible) {
     // TODO(crbug.com/385158827): Fails on older WARP 10.0.19041.5794
     DAWN_SUPPRESS_TEST_IF(IsWARP());
 
@@ -2724,34 +2724,34 @@ TEST_P(ResourceTableTests, UpdateAndInsertBindingMakeBindingVisible) {
     EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource0));
     TestHasU8BindingsAll(table, {{17}, {}});
 
-    // InsertBinding makes the entry visible.
+    // Insert makes the entry visible.
     wgpu::BindingResource resource1 = {.textureView = MakeU8View(42)};
-    EXPECT_EQ(1u, table.InsertBinding(&resource1));
+    EXPECT_EQ(1u, table.Insert(&resource1));
     TestHasU8BindingsAll(table, {{17}, {42}});
 }
 
-// Check that RemoveBinding instantly makes the binding not visible, both for entries added with
-// Update and InsertBinding.
-TEST_P(ResourceTableTests, RemoveBindingMakeBindingInvalid) {
+// Check that Remove instantly makes the binding not visible, both for entries added with
+// Update and Insert.
+TEST_P(ResourceTableTests, RemoveMakeBindingInvalid) {
     // TODO(crbug.com/385158827): Fails on older WARP 10.0.19041.5794
     DAWN_SUPPRESS_TEST_IF(IsWARP());
 
-    // Fill a resource table with both Update and InsertBinding.
+    // Fill a resource table with both Update and Insert.
     wgpu::ResourceTable table = MakeResourceTable(2);
 
     wgpu::BindingResource resource0 = {.textureView = MakeU8View(100)};
     EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource0));
 
     wgpu::BindingResource resource1 = {.textureView = MakeU8View(101)};
-    EXPECT_EQ(1u, table.InsertBinding(&resource1));
+    EXPECT_EQ(1u, table.Insert(&resource1));
 
     // Before we remove bindings, they are all valid.
     TestHasU8BindingsAll(table, {{100}, {101}});
 
-    // RemoveBinding immediately makes bindings invalid.
-    EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(1));
+    // Remove immediately makes bindings invalid.
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(1));
     TestHasU8BindingsAll(table, {{100}, {}});
-    EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(0));
     TestHasU8BindingsAll(table, {{}, {}});
 }
 
@@ -2767,7 +2767,7 @@ TEST_P(ResourceTableTests, ReplaceBinding) {
 
     // Test removing a binding that was previously there.
     TestHasU8BindingsAll(table, {{19}});
-    EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(0));
     TestHasU8BindingsAll(table, {{}});
 
     /// Add it back a new entry, the shader should be seeing the updated entry.
@@ -2790,7 +2790,7 @@ TEST_P(ResourceTableTests, ReplaceWithSameBinding) {
 
     // Test removing a binding that was previously there.
     TestHasU8BindingsAll(table, {{19}});
-    EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(0));
     TestHasU8BindingsAll(table, {{}});
 
     /// Add it back a new entry, the shader should be seeing the updated entry.

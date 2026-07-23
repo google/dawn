@@ -3752,7 +3752,7 @@
                 ]
             },
             {
-                "name": "insert binding",
+                "name": "insert",
                 "tags": ["dawn"],
                 "returns": "uint32_t",
                 "args": [
@@ -3760,7 +3760,7 @@
                 ]
             },
             {
-                "name": "remove binding",
+                "name": "remove",
                 "tags": ["dawn"],
                 "returns": "status",
                 "args": [
