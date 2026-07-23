@@ -315,6 +315,10 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     wgpu::FeatureName feature,
     const TogglesState& toggles) const {
+    if (feature == wgpu::FeatureName::PrimitiveIndex && gpu_info::IsIntel(GetVendorId())) {
+        return FeatureValidationResult(
+            "Feature primitive-index is not supported on Intel GPUs for D3D11.");
+    }
     return {};
 }
 

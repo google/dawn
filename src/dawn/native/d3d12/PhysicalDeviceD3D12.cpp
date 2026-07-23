@@ -467,6 +467,12 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
             case wgpu::FeatureName::AtomicVec2uMinMax:
                 return FeatureValidationResult(
                     absl::StrFormat("Feature %s requires DXC for D3D12.", feature));
+            case wgpu::FeatureName::PrimitiveIndex:
+                if (gpu_info::IsIntel(GetVendorId())) {
+                    return FeatureValidationResult(
+                        "Feature primitive-index requires DXC on Intel GPUs for D3D12.");
+                }
+                break;
             default:
                 break;
         }
