@@ -4,7 +4,7 @@ URL: https://github.com/microsoft/DirectX-Shader-Compiler
 Update Mechanism: Autoroll
 Security Critical: yes
 Version: N/A
-Revision: 2fab3f1755184b89fa9dfb9bb370f01ae9d2762f
+Revision: 1f8a14aecd4f2f25991fa9f7aad6c320fea91409
 License: bcrypt-solar-designer, bsd-3-clause, gpl-2.0-with-autoconf-exception, isc, mit, ncsa, spencer-86, unicode_org, unlicense
 License File: LICENSE
 Shipped: yes
