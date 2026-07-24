@@ -50,13 +50,6 @@ namespace dawn::wire::client {
             };
         {% endif %}
 
-        inline {{Type}}* FromAPI(WGPU{{Type}} obj) {
-            return reinterpret_cast<{{Type}}*>(obj);
-        }
-        inline WGPU{{Type}} ToAPI({{Type}}* obj) {
-            return reinterpret_cast<WGPU{{Type}}>(obj);
-        }
-
         template <>
         inline constexpr ObjectType ObjectTypeToTypeEnum<{{Type}}> = ObjectType::{{Type}};
 

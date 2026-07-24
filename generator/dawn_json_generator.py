@@ -2022,6 +2022,10 @@ class MultiGeneratorFromDawnJSON(Generator):
                     'src/dawn/wire/client/' + metadata.namespace +
                     '_structs_autogen.cpp', wire_params))
             renders.append(
+                FileRender('dawn/wire/client/dawn_platform.h',
+                           'src/dawn/wire/client/' + prefix + '_platform.h',
+                           wire_params))
+            renders.append(
                 FileRender('dawn/wire/server/ServerBase.h',
                            'src/dawn/wire/server/ServerBase_autogen.h',
                            wire_params))

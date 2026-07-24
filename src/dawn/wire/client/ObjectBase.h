@@ -31,6 +31,7 @@
 #include <webgpu/webgpu.h>
 
 #include "dawn/wire/ObjectType_autogen.h"
+#include "dawn/wire/client/dawn_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/RefCounted.h"
