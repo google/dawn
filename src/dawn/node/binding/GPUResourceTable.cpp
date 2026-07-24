@@ -68,7 +68,9 @@ void GPUResourceTable::update(Napi::Env env,
         return;
     }
 
-    table_.Update(slot, &binding);
+    if (table_.Update(slot, &binding) != wgpu::Status::Success) {
+        Errors::OperationError(env).ThrowAsJavaScriptException();
+    }
 }
 
 interop::GPUIndex32 GPUResourceTable::insert(Napi::Env env, interop::GPUBindingResource resource) {
@@ -87,8 +89,10 @@ interop::GPUIndex32 GPUResourceTable::insert(Napi::Env env, interop::GPUBindingR
     return slot;
 }
 
-void GPUResourceTable::remove(Napi::Env, interop::GPUIndex32 slot) {
-    table_.Remove(slot);
+void GPUResourceTable::remove(Napi::Env env, interop::GPUIndex32 slot) {
+    if (table_.Remove(slot) != wgpu::Status::Success) {
+        Errors::OperationError(env).ThrowAsJavaScriptException();
+    }
 }
 
 }  // namespace wgpu::binding

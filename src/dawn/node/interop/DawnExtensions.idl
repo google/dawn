@@ -150,9 +150,6 @@ dictionary GPUPipelineLayoutDescriptor {
 interface GPUComputePassEncoder {
     undefined setResourceTable(GPUResourceTable? table);
 };
-interface GPURenderBundleEncoder {
-    undefined setResourceTable(GPUResourceTable? table);
-};
-interface GPURenderPassEncoder {
-    undefined setResourceTable(GPUResourceTable? table);
-};
+dictionary GPURenderPassDescriptor {
+    GPUResourceTable resourceTable;
+}
