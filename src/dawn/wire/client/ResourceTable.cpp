@@ -94,10 +94,10 @@ void ResourceTable::APIDestroy() {
     GetClient()->SerializeCommand(cmd);
 }
 
-WGPUStatus ResourceTable::APIUpdate(uint32_t slot, const WGPUBindingResource* resource) {
+wgpu::Status ResourceTable::APIUpdate(uint32_t slot, const BindingResource* resource) {
     if (mDestroyed || slot >= mSlotAvailableAfterSubmit.size() ||
         mSlotAvailableAfterSubmit[slot] > mDevice->GetQueue()->GetCompletedSubmitIndex()) {
-        return WGPUStatus_Error;
+        return wgpu::Status::Error;
     }
 
     constexpr uint64_t kSlotInUseOnGPU = std::numeric_limits<uint64_t>::max();
@@ -107,13 +107,13 @@ WGPUStatus ResourceTable::APIUpdate(uint32_t slot, const WGPUBindingResource* re
     ResourceTableUpdateCmd cmd;
     cmd.self = ToAPI(this);
     cmd.slot = slot;
-    cmd.resource = resource;
+    cmd.resource = ToAPI(resource);
     GetClient()->SerializeCommand(cmd);
 
-    return WGPUStatus_Success;
+    return wgpu::Status::Success;
 }
 
-uint32_t ResourceTable::APIInsert(const WGPUBindingResource* resource) {
+uint32_t ResourceTable::APIInsert(const BindingResource* resource) {
     if (mDestroyed) {
         return WGPU_INVALID_BINDING;
     }
@@ -127,8 +127,8 @@ uint32_t ResourceTable::APIInsert(const WGPUBindingResource* resource) {
             continue;
         }
 
-        WGPUStatus updateStatus = APIUpdate(slot, resource);
-        DAWN_ASSERT(updateStatus == WGPUStatus_Success);
+        wgpu::Status updateStatus = APIUpdate(slot, resource);
+        DAWN_ASSERT(updateStatus == wgpu::Status::Success);
         return slot;
     }
 
@@ -136,9 +136,9 @@ uint32_t ResourceTable::APIInsert(const WGPUBindingResource* resource) {
     return WGPU_INVALID_BINDING;
 }
 
-WGPUStatus ResourceTable::APIRemove(uint32_t slot) {
+wgpu::Status ResourceTable::APIRemove(uint32_t slot) {
     if (mDestroyed || slot >= mSlotAvailableAfterSubmit.size()) {
-        return WGPUStatus_Error;
+        return wgpu::Status::Error;
     }
 
     mSlotAvailableAfterSubmit[slot] = mDevice->GetQueue()->GetLastSubmitIndex();
@@ -149,7 +149,7 @@ WGPUStatus ResourceTable::APIRemove(uint32_t slot) {
     cmd.slot = slot;
     GetClient()->SerializeCommand(cmd);
 
-    return WGPUStatus_Success;
+    return wgpu::Status::Success;
 }
 
 uint32_t ResourceTable::APIGetSize() const {

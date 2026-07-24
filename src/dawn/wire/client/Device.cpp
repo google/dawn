@@ -330,7 +330,7 @@ void Device::HandleDeviceLost(WGPUDeviceLostReason reason, WGPUStringView messag
     DAWN_CHECK(wireStatus == WireResult::Success);
 }
 
-WGPUFuture Device::APIGetLostFuture() {
+Future Device::APIGetLostFuture() {
     // Lazily track the device lost event so that event ordering w.r.t RequestDevice is correct.
     if (const auto* e = std::get_if<Ref<TrackedEvent>>(&mDeviceLostInfo)) {
         Ref<TrackedEvent> event = *e;
@@ -353,7 +353,7 @@ WireResult Client::DoDeviceLostCallback(ObjectId instanceId,
     return SetFutureReady<Device::DeviceLostEvent>(instanceId, future.id, reason, message);
 }
 
-WGPUFuture Device::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo) {
+Future Device::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo) {
     Client* client = GetClient();
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(AcquireRef(new PopErrorScopeEvent(callbackInfo)));
@@ -377,11 +377,11 @@ WireResult Client::DoDevicePopErrorScopeCallback(ObjectId instanceId,
     return SetFutureReady<PopErrorScopeEvent>(instanceId, future.id, status, errorType, message);
 }
 
-void Device::APIInjectError(WGPUErrorType type, WGPUStringView message) {
+void Device::APIInjectError(wgpu::ErrorType type, StringView message) {
     DeviceInjectErrorCmd cmd;
     cmd.self = ToAPI(this);
-    cmd.type = type;
-    cmd.message = message;
+    cmd.type = ToAPI(type);
+    cmd.message = ToAPI(message);
     GetClient()->SerializeCommand(cmd);
 }
 
@@ -405,14 +405,14 @@ WGPUTexture Device::APICreateErrorTexture(const WGPUTextureDescriptor* descripto
     return Texture::CreateError(this, descriptor);
 }
 
-WGPUAdapter Device::APIGetAdapter() const {
+Adapter* Device::APIGetAdapter() const {
     Ref<Adapter> adapter = mAdapter;
-    return ReturnToAPI(std::move(adapter));
+    return ReturnToAPI2(std::move(adapter));
 }
 
-WGPUQueue Device::APIGetQueue() {
+Queue* Device::APIGetQueue() {
     Ref<Queue> queue = GetQueue();
-    return ReturnToAPI(std::move(queue));
+    return ReturnToAPI2(std::move(queue));
 }
 
 template <typename Event, typename Cmd, typename CallbackInfo, typename Descriptor>

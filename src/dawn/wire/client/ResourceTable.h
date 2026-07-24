@@ -51,9 +51,9 @@ class ResourceTable final : public ObjectBase {
 
     // WebGPU API
     void APIDestroy();
-    WGPUStatus APIUpdate(uint32_t slot, const WGPUBindingResource* resource);
-    uint32_t APIInsert(const WGPUBindingResource* resource);
-    WGPUStatus APIRemove(uint32_t slot);
+    wgpu::Status APIUpdate(uint32_t slot, const BindingResource* resource);
+    uint32_t APIInsert(const BindingResource* resource);
+    wgpu::Status APIRemove(uint32_t slot);
     uint32_t APIGetSize() const;
 
   private:

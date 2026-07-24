@@ -301,7 +301,7 @@ Buffer::Buffer(const ObjectBaseParams& params,
                const WGPUBufferDescriptor* descriptor)
     : RefCountedWithExternalCount<ObjectWithEventsBase>(params, std::move(instance)),
       mSize(descriptor->size),
-      mUsage(static_cast<WGPUBufferUsage>(descriptor->usage)),
+      mUsage(static_cast<wgpu::BufferUsage>(descriptor->usage)),
       mDestructMemoryHandleOnUnmap(
           wgpu::Bool(descriptor->mappedAtCreation) &&
           ((descriptor->usage & (WGPUBufferUsage_MapWrite | WGPUBufferUsage_MapRead)) == 0)),
@@ -340,10 +340,10 @@ void Buffer::SetFutureStatus(WGPUMapAsyncStatus status, std::string_view message
     DAWN_CHECK(wireStatus == WireResult::Success);
 }
 
-WGPUFuture Buffer::APIMapAsync(WGPUMapMode mode,
-                               size_t offset,
-                               size_t size,
-                               const WGPUBufferMapCallbackInfo& callbackInfo) {
+Future Buffer::APIMapAsync(wgpu::MapMode mode,
+                           size_t offset,
+                           size_t size,
+                           const WGPUBufferMapCallbackInfo& callbackInfo) {
     Client* client = GetClient();
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(AcquireRef(new MapAsyncEvent(callbackInfo, this)));
@@ -368,9 +368,9 @@ WGPUFuture Buffer::APIMapAsync(WGPUMapMode mode,
 
         // Set up the request structure that will hold information while this mapping is in flight.
         std::optional<MapRequestType> mapMode;
-        if (mode & WGPUMapMode_Read) {
+        if (mode & wgpu::MapMode::Read) {
             mapMode = MapRequestType::Read;
-        } else if (mode & WGPUMapMode_Write) {
+        } else if (mode & wgpu::MapMode::Write) {
             mapMode = MapRequestType::Write;
         }
         state->pendingMapRequest = {futureIDInternal, offset, size, mapMode};
@@ -388,7 +388,7 @@ WGPUFuture Buffer::APIMapAsync(WGPUMapMode mode,
     cmd.bufferId = GetWireHandle(client).id;
     cmd.instanceId = GetInstance()->GetWireHandle(client).id;
     cmd.future = {futureIDInternal};
-    cmd.mode = mode;
+    cmd.mode = ToAPI(mode);
     cmd.offset = offset;
     cmd.size = size;
 
@@ -538,7 +538,7 @@ void Buffer::APIDestroy() {
     client->SerializeCommand(cmd);
 }
 
-WGPUBufferUsage Buffer::APIGetUsage() const {
+wgpu::BufferUsage Buffer::APIGetUsage() const {
     return mUsage;
 }
 
@@ -546,18 +546,18 @@ uint64_t Buffer::APIGetSize() const {
     return mSize;
 }
 
-WGPUBufferMapState Buffer::APIGetMapState() const {
+wgpu::BufferMapState Buffer::APIGetMapState() const {
     return mState.Use([](auto state) {
         switch (state->mappedState) {
             case MapState::MappedForRead:
             case MapState::MappedForWrite:
             case MapState::MappedAtCreation:
-                return WGPUBufferMapState_Mapped;
+                return wgpu::BufferMapState::Mapped;
             case MapState::Unmapped:
                 if (state->pendingMapRequest) {
-                    return WGPUBufferMapState_Pending;
+                    return wgpu::BufferMapState::Pending;
                 } else {
-                    return WGPUBufferMapState_Unmapped;
+                    return wgpu::BufferMapState::Unmapped;
                 }
         }
         DAWN_UNREACHABLE();

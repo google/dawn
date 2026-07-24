@@ -53,8 +53,8 @@ class Instance final : public ObjectBase {
     // instance is not created via the wire, but gets injected separately.
     WireResult Initialize(const WGPUInstanceDescriptor* descriptor);
 
-    WGPUFuture APIRequestAdapter(const WGPURequestAdapterOptions* options,
-                                 const WGPURequestAdapterCallbackInfo& callbackInfo);
+    Future APIRequestAdapter(const RequestAdapterOptions* options,
+                             const WGPURequestAdapterCallbackInfo& callbackInfo);
 
     void APIProcessEvents();
     WGPUWaitStatus APIWaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS);
@@ -62,7 +62,7 @@ class Instance final : public ObjectBase {
     bool APIHasWGSLLanguageFeature(WGPUWGSLLanguageFeatureName feature) const;
     void APIGetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const;
 
-    WGPUSurface APICreateSurface(const WGPUSurfaceDescriptor* desc) const;
+    Surface* APICreateSurface(const SurfaceDescriptor* desc) const;
 
   private:
     void GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,

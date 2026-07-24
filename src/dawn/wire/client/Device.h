@@ -71,8 +71,8 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
 
     // WebGPU API
     void APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackInfo);
-    void APIInjectError(WGPUErrorType type, WGPUStringView message);
-    WGPUFuture APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
+    void APIInjectError(wgpu::ErrorType type, StringView message);
+    Future APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
 
     template <typename PipelineT, typename CmdT>
     Ref<PipelineT> CreateErrorPipeline(WGPUStringView label);
@@ -90,12 +90,12 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     WGPUTexture APICreateErrorTexture(const WGPUTextureDescriptor* descriptor);
 
     WGPUStatus APIGetLimits(WGPULimits* limits) const;
-    WGPUFuture APIGetLostFuture();
+    Future APIGetLostFuture();
     bool APIHasFeature(WGPUFeatureName feature) const;
     void APIGetFeatures(WGPUSupportedFeatures* features) const;
     WGPUStatus APIGetAdapterInfo(WGPUAdapterInfo* info) const;
-    WGPUAdapter APIGetAdapter() const;
-    WGPUQueue APIGetQueue();
+    Adapter* APIGetAdapter() const;
+    Queue* APIGetQueue();
 
     void APIDestroy();
 

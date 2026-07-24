@@ -89,6 +89,8 @@ class ObjectWithEventsBase : public ObjectBase {
     Ref<Instance> mInstance;
 };
 
+// TODO(https://crbug.com/526537254): Remove ReturnToAPI2 and replace ReturnToAPI with it once all
+// callsites are updated.
 template <class T>
 auto ReturnToAPI(Ref<T>&& object) {
     if constexpr (T::HasExternalRefCount) {
@@ -97,6 +99,15 @@ auto ReturnToAPI(Ref<T>&& object) {
         object->IncrementExternalRefCount();
     }
     return ToAPI(object.Detach());
+}
+template <class T>
+T* ReturnToAPI2(Ref<T>&& object) {
+    if constexpr (T::HasExternalRefCount) {
+        // For an object which has external ref count, just need to increase the external ref count,
+        // and keep the total ref count unchanged.
+        object->IncrementExternalRefCount();
+    }
+    return object.Detach();
 }
 
 }  // namespace dawn::wire::client

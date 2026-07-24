@@ -54,19 +54,19 @@ class Texture final : public ObjectBase {
     uint32_t APIGetDepthOrArrayLayers() const;
     uint32_t APIGetMipLevelCount() const;
     uint32_t APIGetSampleCount() const;
-    WGPUTextureDimension APIGetDimension() const;
-    WGPUTextureFormat APIGetFormat() const;
-    WGPUTextureUsage APIGetUsage() const;
-    WGPUTextureViewDimension APIGetTextureBindingViewDimension() const;
+    wgpu::TextureDimension APIGetDimension() const;
+    wgpu::TextureFormat APIGetFormat() const;
+    wgpu::TextureUsage APIGetUsage() const;
+    wgpu::TextureViewDimension APIGetTextureBindingViewDimension() const;
 
   private:
     WGPUExtent3D mSize;
     uint32_t mMipLevelCount;
     uint32_t mSampleCount;
-    WGPUTextureDimension mDimension;
-    WGPUTextureFormat mFormat;
-    WGPUTextureUsage mUsage;
-    WGPUTextureViewDimension mTextureBindingViewDimension;
+    wgpu::TextureDimension mDimension;
+    wgpu::TextureFormat mFormat;
+    wgpu::TextureUsage mUsage;
+    wgpu::TextureViewDimension mTextureBindingViewDimension;
 };
 
 }  // namespace dawn::wire::client

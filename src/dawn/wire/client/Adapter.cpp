@@ -310,7 +310,7 @@ WGPUFuture Adapter::APIRequestDevice(const WGPUDeviceDescriptor* descriptor,
     cmd.instanceId = GetInstance()->GetWireHandle(client).id;
     cmd.future = {futureIDInternal};
     cmd.deviceObjectHandle = device->GetWireHandle(client);
-    cmd.deviceLostFuture = device->APIGetLostFuture();
+    cmd.deviceLostFuture = ToAPI(device->APIGetLostFuture());
     cmd.descriptor = &wireDescriptor;
 
     client->SerializeCommand(cmd);
@@ -332,15 +332,15 @@ WGPUInstance Adapter::APIGetInstance() const {
     return ReturnToAPI(GetInstance());
 }
 
-WGPUDevice Adapter::APICreateDevice(const WGPUDeviceDescriptor*) {
+Device* Adapter::APICreateDevice(const DeviceDescriptor*) {
     dawn::ErrorLog() << "adapter.CreateDevice not supported with dawn_wire.";
     return nullptr;
 }
 
-WGPUStatus Adapter::APIGetFormatCapabilities(WGPUTextureFormat format,
-                                             WGPUDawnFormatCapabilities* capabilities) {
+wgpu::Status Adapter::APIGetFormatCapabilities(wgpu::TextureFormat format,
+                                               DawnFormatCapabilities* capabilities) {
     dawn::ErrorLog() << "adapter.GetFormatCapabilities not supported with dawn_wire.";
-    return WGPUStatus_Error;
+    return wgpu::Status::Error;
 }
 
 void APIFreeMembers(WGPUAdapterInfo info) {

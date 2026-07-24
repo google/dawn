@@ -206,8 +206,8 @@ WireResult Instance::Initialize(const WGPUInstanceDescriptor* descriptor) {
     return WireResult::Success;
 }
 
-WGPUFuture Instance::APIRequestAdapter(const WGPURequestAdapterOptions* options,
-                                       const WGPURequestAdapterCallbackInfo& callbackInfo) {
+Future Instance::APIRequestAdapter(const RequestAdapterOptions* options,
+                                   const WGPURequestAdapterCallbackInfo& callbackInfo) {
     Client* client = GetClient();
     Ref<Adapter> adapter = client->Make<Adapter>(this);
     auto [futureIDInternal, tracked] =
@@ -220,7 +220,7 @@ WGPUFuture Instance::APIRequestAdapter(const WGPURequestAdapterOptions* options,
     cmd.instanceId = GetWireHandle(client).id;
     cmd.future = {futureIDInternal};
     cmd.adapterObjectHandle = adapter->GetWireHandle(client);
-    cmd.options = options;
+    cmd.options = ToAPI(options);
 
     client->SerializeCommand(cmd);
     return {futureIDInternal};
@@ -329,7 +329,7 @@ void Instance::APIGetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* fea
     features->features = wgslFeatures;
 }
 
-WGPUSurface Instance::APICreateSurface(const WGPUSurfaceDescriptor* desc) const {
+Surface* Instance::APICreateSurface(const SurfaceDescriptor* desc) const {
     dawn::ErrorLog() << "Instance::CreateSurface is not supported in the wire. Use "
                         "dawn::wire::client::WireClient::InjectSurface instead.";
     return nullptr;

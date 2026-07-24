@@ -64,9 +64,9 @@ class Adapter final : public ObjectWithEventsBase {
                                 const WGPURequestDeviceCallbackInfo& callbackInfo);
 
     // Unimplementable. Only available in dawn_native.
-    WGPUDevice APICreateDevice(const WGPUDeviceDescriptor*);
-    WGPUStatus APIGetFormatCapabilities(WGPUTextureFormat format,
-                                        WGPUDawnFormatCapabilities* capabilities);
+    Device* APICreateDevice(const DeviceDescriptor*);
+    wgpu::Status APIGetFormatCapabilities(wgpu::TextureFormat format,
+                                          DawnFormatCapabilities* capabilities);
 
   private:
     LimitsAndFeatures mLimitsAndFeatures;

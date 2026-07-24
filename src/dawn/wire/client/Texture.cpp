@@ -71,11 +71,12 @@ Texture::Texture(const ObjectBaseParams& params,
       mSize(descriptor->size),
       mMipLevelCount(descriptor->mipLevelCount),
       mSampleCount(descriptor->sampleCount),
-      mDimension(descriptor->dimension == WGPUTextureDimension_Undefined ? WGPUTextureDimension_2D
-                                                                         : descriptor->dimension),
-      mFormat(descriptor->format),
-      mUsage(static_cast<WGPUTextureUsage>(descriptor->usage)),
-      mTextureBindingViewDimension(WGPUTextureViewDimension_Undefined) {
+      mDimension(FromAPI(descriptor->dimension) == wgpu::TextureDimension::Undefined
+                     ? wgpu::TextureDimension::e2D
+                     : FromAPI(descriptor->dimension)),
+      mFormat(FromAPI(descriptor->format)),
+      mUsage(static_cast<wgpu::TextureUsage>(descriptor->usage)),
+      mTextureBindingViewDimension(wgpu::TextureViewDimension::Undefined) {
     // We only set mTextureBindingViewDimension in compatibility mode
     // and if it's undefined we need to set it to the default.
     if (!device->APIHasFeature(WGPUFeatureName_CoreFeaturesAndLimits)) {
@@ -84,27 +85,27 @@ Texture::Texture(const ObjectBaseParams& params,
                 case WGPUSType_TextureBindingViewDimension:
                     if (!device->APIHasFeature(WGPUFeatureName_CoreFeaturesAndLimits)) {
                         WGPUTextureViewDimension viewDimension =
-                            reinterpret_cast<WGPUTextureBindingViewDimension*>(chain)
+                            reinterpret_cast<const WGPUTextureBindingViewDimension*>(chain)
                                 ->textureBindingViewDimension;
-                        mTextureBindingViewDimension = viewDimension;
+                        mTextureBindingViewDimension = FromAPI(viewDimension);
                     }
                     break;
                 default:
                     break;
             }
         }
-        if (mTextureBindingViewDimension == WGPUTextureViewDimension_Undefined) {
+        if (mTextureBindingViewDimension == wgpu::TextureViewDimension::Undefined) {
             switch (mDimension) {
-                case WGPUTextureDimension_1D:
-                    mTextureBindingViewDimension = WGPUTextureViewDimension_1D;
+                case wgpu::TextureDimension::e1D:
+                    mTextureBindingViewDimension = wgpu::TextureViewDimension::e1D;
                     break;
-                case WGPUTextureDimension_2D:
+                case wgpu::TextureDimension::e2D:
                     mTextureBindingViewDimension = mSize.depthOrArrayLayers == 1
-                                                       ? WGPUTextureViewDimension_2D
-                                                       : WGPUTextureViewDimension_2DArray;
+                                                       ? wgpu::TextureViewDimension::e2D
+                                                       : wgpu::TextureViewDimension::e2DArray;
                     break;
-                case WGPUTextureDimension_3D:
-                    mTextureBindingViewDimension = WGPUTextureViewDimension_3D;
+                case wgpu::TextureDimension::e3D:
+                    mTextureBindingViewDimension = wgpu::TextureViewDimension::e3D;
                     break;
                 default:
                     // We could get here if the texture descriptor is invalid
@@ -140,19 +141,19 @@ uint32_t Texture::APIGetSampleCount() const {
     return mSampleCount;
 }
 
-WGPUTextureDimension Texture::APIGetDimension() const {
+wgpu::TextureDimension Texture::APIGetDimension() const {
     return mDimension;
 }
 
-WGPUTextureFormat Texture::APIGetFormat() const {
+wgpu::TextureFormat Texture::APIGetFormat() const {
     return mFormat;
 }
 
-WGPUTextureUsage Texture::APIGetUsage() const {
+wgpu::TextureUsage Texture::APIGetUsage() const {
     return mUsage;
 }
 
-WGPUTextureViewDimension Texture::APIGetTextureBindingViewDimension() const {
+wgpu::TextureViewDimension Texture::APIGetTextureBindingViewDimension() const {
     return mTextureBindingViewDimension;
 }
 

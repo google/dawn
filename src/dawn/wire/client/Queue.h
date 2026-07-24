@@ -49,7 +49,7 @@ class Queue final : public ObjectWithEventsBase {
 
     // Dawn API
     void APISubmit(size_t commandCount, const WGPUCommandBuffer* commands);
-    WGPUFuture APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo);
+    Future APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo);
     void APIWriteBuffer(WGPUBuffer cBuffer, uint64_t bufferOffset, const void* data, size_t size);
     void APIWriteTexture(const WGPUTexelCopyTextureInfo* destination,
                          const void* data,

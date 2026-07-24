@@ -80,10 +80,10 @@ void Surface::APIConfigure(const WGPUSurfaceConfiguration* config) {
     GetClient()->SerializeCommand(cmd);
 }
 
-WGPUStatus Surface::APIPresent() {
+wgpu::Status Surface::APIPresent() {
     if (mConfiguredDevice == nullptr) {
         dawn::ErrorLog() << "Surface::Present on an unconfigured Surface.";
-        return WGPUStatus_Error;
+        return wgpu::Status::Error;
     }
 
     SurfacePresentCmd cmd;
@@ -92,7 +92,7 @@ WGPUStatus Surface::APIPresent() {
 
     // The only synchronous error is if the surface isn't configured.
     // Otherwise, we let the server report errors via the device.
-    return WGPUStatus_Success;
+    return wgpu::Status::Success;
 }
 
 void Surface::APIUnconfigure() {

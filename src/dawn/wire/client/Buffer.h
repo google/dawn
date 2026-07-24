@@ -59,10 +59,10 @@ class Buffer final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
 
     ObjectType GetObjectType() const override;
 
-    WGPUFuture APIMapAsync(WGPUMapMode mode,
-                           size_t offset,
-                           size_t size,
-                           const WGPUBufferMapCallbackInfo& callbackInfo);
+    Future APIMapAsync(wgpu::MapMode mode,
+                       size_t offset,
+                       size_t size,
+                       const WGPUBufferMapCallbackInfo& callbackInfo);
     void* APIGetMappedRange(size_t offset, size_t size);
     const void* APIGetConstMappedRange(size_t offset, size_t size);
     WGPUStatus APIWriteMappedRange(size_t offset, void const* data, size_t size);
@@ -71,10 +71,10 @@ class Buffer final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     void APIDestroy();
 
     // Note that these values can be arbitrary since they aren't validated in the wire client.
-    WGPUBufferUsage APIGetUsage() const;
+    wgpu::BufferUsage APIGetUsage() const;
     uint64_t APIGetSize() const;
 
-    WGPUBufferMapState APIGetMapState() const;
+    wgpu::BufferMapState APIGetMapState() const;
 
   private:
     friend class Client;
@@ -122,7 +122,7 @@ class Buffer final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     void FreeMappedData(GuardedState& state);
 
     const uint64_t mSize = 0;
-    const WGPUBufferUsage mUsage;
+    const wgpu::BufferUsage mUsage;
     const bool mDestructMemoryHandleOnUnmap;
     Ref<Device> mDevice;
 
