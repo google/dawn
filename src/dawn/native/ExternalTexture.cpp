@@ -185,14 +185,13 @@ ExternalTextureParams ComputeExternalTextureParams(const ExternalTextureDescript
         {0, 0, 0},
     });
     if (descriptor->yuvToRgbConversionMatrix) {
-        const float* yMatIn = descriptor->yuvToRgbConversionMatrix;
+        // TODO(https://crbug.com/524405497): Spanify the input API with fixed extent spans once
+        // they are supported.
+        Span<const float> yMatIn = DAWN_UNSAFE_TODO({descriptor->yuvToRgbConversionMatrix, 12});
         yMat = {
-            {yMatIn[0], DAWN_UNSAFE_TODO(yMatIn[1]), DAWN_UNSAFE_TODO(yMatIn[2]),
-             DAWN_UNSAFE_TODO(yMatIn[3])},  //
-            {DAWN_UNSAFE_TODO(yMatIn[4]), DAWN_UNSAFE_TODO(yMatIn[5]), DAWN_UNSAFE_TODO(yMatIn[6]),
-             DAWN_UNSAFE_TODO(yMatIn[7])},  //
-            {DAWN_UNSAFE_TODO(yMatIn[8]), DAWN_UNSAFE_TODO(yMatIn[9]), DAWN_UNSAFE_TODO(yMatIn[10]),
-             DAWN_UNSAFE_TODO(yMatIn[11])},
+            {yMatIn[0], yMatIn[1], yMatIn[2], yMatIn[3]},  //
+            {yMatIn[4], yMatIn[5], yMatIn[6], yMatIn[7]},  //
+            {yMatIn[8], yMatIn[9], yMatIn[10], yMatIn[11]},
         };
     }
 
@@ -214,11 +213,12 @@ ExternalTextureParams ComputeExternalTextureParams(const ExternalTextureDescript
     // Gamut correction is performed by multiplying a 3x3 matrix passed from Chromium. The
     // matrix was computed by multiplying the appropriate source and destination gamut
     // matrices sourced from ui/gfx/color_space.cc.
-    const float* gMat = descriptor->gamutConversionMatrix;
-    params.gamutConversionMatrix = {
-        {gMat[0], DAWN_UNSAFE_TODO(gMat[1]), DAWN_UNSAFE_TODO(gMat[2])},                    //
-        {DAWN_UNSAFE_TODO(gMat[3]), DAWN_UNSAFE_TODO(gMat[4]), DAWN_UNSAFE_TODO(gMat[5])},  //
-        {DAWN_UNSAFE_TODO(gMat[6]), DAWN_UNSAFE_TODO(gMat[7]), DAWN_UNSAFE_TODO(gMat[8])}};
+    // TODO(https://crbug.com/524405497): Spanify the input API with fixed extent spans once
+    // they are supported.
+    Span<const float> gMat = DAWN_UNSAFE_TODO({descriptor->gamutConversionMatrix, 9});
+    params.gamutConversionMatrix = {{gMat[0], gMat[1], gMat[2]},  //
+                                    {gMat[3], gMat[4], gMat[5]},  //
+                                    {gMat[6], gMat[7], gMat[8]}};
 
     // Gamma decode/encode is performed by the logic:
     //    if (abs(v) < params.D) {
@@ -227,7 +227,10 @@ ExternalTextureParams ComputeExternalTextureParams(const ExternalTextureDescript
     //    return pow(A * x + B, G) + E
     //
     // Constants are passed from Chromium and originally sourced from ui/gfx/color_space.cc
-    auto ToTransferFunctionParams = [](const float* params) -> TransferFunctionParams {
+    auto ToTransferFunctionParams = [](const float* paramsPtr) -> TransferFunctionParams {
+        // TODO(https://crbug.com/524405497): Spanify the input API with fixed extent spans once
+        // they are supported.
+        Span<const float> params = DAWN_UNSAFE_TODO({paramsPtr, 7});
         TransferFunctionMode mode = TransferFunctionMode::Gamma;
 
         // TODO(https://crbug.com/496604550): Passing the mode as a negative value for G is a hack.
@@ -238,12 +241,12 @@ ExternalTextureParams ComputeExternalTextureParams(const ExternalTextureDescript
 
         return {
             .mode = mode,
-            .a = DAWN_UNSAFE_TODO(params[1]),
-            .b = DAWN_UNSAFE_TODO(params[2]),
-            .c = DAWN_UNSAFE_TODO(params[3]),
-            .d = DAWN_UNSAFE_TODO(params[4]),
-            .e = DAWN_UNSAFE_TODO(params[5]),
-            .f = DAWN_UNSAFE_TODO(params[6]),
+            .a = params[1],
+            .b = params[2],
+            .c = params[3],
+            .d = params[4],
+            .e = params[5],
+            .f = params[6],
             // This is the first param for historical reasons.
             // TODO(https://crbug.com/496604550): Make the parameters to Dawn a struct with members
             // in alphabetical order.

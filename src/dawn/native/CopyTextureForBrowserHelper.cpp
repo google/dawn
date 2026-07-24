@@ -439,43 +439,43 @@ MaybeError DoCopyForBrowser(DeviceBase* device,
 
     if (options->needsColorSpaceConversion) {
         stepsMask |= kDecodeToLinearStep;
-        const float* decodingParams = options->srcTransferFunctionParameters;
+        Span<const float> decodingParams =
+            // TODO(https://crbug.com/524405497): Spanify the input API with fixed extent spans once
+            // they are supported.
+            DAWN_UNSAFE_TODO({options->srcTransferFunctionParameters, 7});
 
-        uniformData.gammaDecodingParams = {decodingParams[0],
-                                           DAWN_UNSAFE_TODO(decodingParams[1]),
-                                           DAWN_UNSAFE_TODO(decodingParams[2]),
-                                           DAWN_UNSAFE_TODO(decodingParams[3]),
-                                           DAWN_UNSAFE_TODO(decodingParams[4]),
-                                           DAWN_UNSAFE_TODO(decodingParams[5]),
-                                           DAWN_UNSAFE_TODO(decodingParams[6])};
+        uniformData.gammaDecodingParams = {decodingParams[0], decodingParams[1], decodingParams[2],
+                                           decodingParams[3], decodingParams[4], decodingParams[5],
+                                           decodingParams[6]};
 
         stepsMask |= kConvertToDstGamutStep;
-        const float* matrix = options->conversionMatrix;
+        // TODO(https://crbug.com/524405497): Spanify the input API with fixed extent spans once
+        // they are supported.
+        Span<const float> matrix = DAWN_UNSAFE_TODO({options->conversionMatrix, 9});
         uniformData.conversionMatrix = {{
             matrix[0],
-            DAWN_UNSAFE_TODO(matrix[1]),
-            DAWN_UNSAFE_TODO(matrix[2]),
+            matrix[1],
+            matrix[2],
             0.0,
-            DAWN_UNSAFE_TODO(matrix[3]),
-            DAWN_UNSAFE_TODO(matrix[4]),
-            DAWN_UNSAFE_TODO(matrix[5]),
+            matrix[3],
+            matrix[4],
+            matrix[5],
             0.0,
-            DAWN_UNSAFE_TODO(matrix[6]),
-            DAWN_UNSAFE_TODO(matrix[7]),
-            DAWN_UNSAFE_TODO(matrix[8]),
+            matrix[6],
+            matrix[7],
+            matrix[8],
             0.0,
         }};
 
         stepsMask |= kEncodeToGammaStep;
-        const float* encodingParams = options->dstTransferFunctionParameters;
+        Span<const float> encodingParams =
+            // TODO(https://crbug.com/524405497): Spanify the input API with fixed extent spans once
+            // they are supported.
+            DAWN_UNSAFE_TODO({options->dstTransferFunctionParameters, 7});
 
-        uniformData.gammaEncodingParams = {encodingParams[0],
-                                           DAWN_UNSAFE_TODO(encodingParams[1]),
-                                           DAWN_UNSAFE_TODO(encodingParams[2]),
-                                           DAWN_UNSAFE_TODO(encodingParams[3]),
-                                           DAWN_UNSAFE_TODO(encodingParams[4]),
-                                           DAWN_UNSAFE_TODO(encodingParams[5]),
-                                           DAWN_UNSAFE_TODO(encodingParams[6])};
+        uniformData.gammaEncodingParams = {encodingParams[0], encodingParams[1], encodingParams[2],
+                                           encodingParams[3], encodingParams[4], encodingParams[5],
+                                           encodingParams[6]};
     }
 
     if (options->dstAlphaMode == wgpu::AlphaMode::Premultiplied) {
