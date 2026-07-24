@@ -1996,9 +1996,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
                 // When using and unclipped depth we need to clamp to the viewport, otherwise
                 // Metal writes the raw value to the depth buffer, which doesn't match other
                 // APIs.
-                MTLDepthClipMode clipMode =
-                    newPipeline->HasUnclippedDepth() ? MTLDepthClipModeClamp : MTLDepthClipModeClip;
-                [encoder setDepthClipMode:clipMode];
+                if (newPipeline->UsesFragDepth() || newPipeline->HasUnclippedDepth())
+                    [encoder setDepthClipMode:MTLDepthClipModeClamp];
 
                 newPipeline->Encode(encoder);
 
