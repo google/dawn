@@ -611,6 +611,13 @@ interop::Interface<interop::GPUResourceTable> GPUDevice::createResourceTable(
         return {};
     }
 
+    static constexpr uint32_t kMaxResourceTableSizeInSpec = 65536;
+    if (desc.size > kMaxResourceTableSizeInSpec) {
+        Napi::RangeError::New(env, "GPUResourceTableDescriptor.size is too large.")
+            .ThrowAsJavaScriptException();
+        return {};
+    }
+
     return interop::GPUResourceTable::Create<GPUResourceTable>(env, desc,
                                                                device_.CreateResourceTable(&desc));
 }
