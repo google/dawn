@@ -163,6 +163,7 @@ option(DAWN_USE_GLFW "Enable compilation of the GLFW windowing utils" ${DAWN_SUP
 option(DAWN_USE_WINDOWS_UI "Enable support for Windows UI surface" ${USE_WINDOWS_UI})
 option(DAWN_USE_BUILT_DXC "Enable building and using DXC by the D3D12 backend" OFF)
 option(DAWN_DXC_ENABLE_ASSERTS_IN_NDEBUG "Enable DXC asserts in non-debug builds" ON)
+option(DAWN_USE_AGILITY_SDK "Enable building Dawn with the D3D12 Agility SDK" OFF)
 option(DAWN_TARGET_MACOS "Manually link Apple core frameworks" ${TARGET_MACOS})
 
 option(DAWN_BUILD_SAMPLES "Enables building Dawn's samples" ${BUILD_SAMPLES})
@@ -201,6 +202,7 @@ set_if_not_defined(DAWN_VULKAN_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-heade
 set_if_not_defined(DAWN_VULKAN_LOADER_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-loader/src" "Directory in which to find Vulkan-Loader")
 set_if_not_defined(DAWN_VULKAN_UTILITY_LIBRARIES_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-utility-libraries/src" "Directory in which to find Vulkan-Utility-Libraries")
 set_if_not_defined(DAWN_WEBGPU_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/webgpu-headers/src" "Directory in which to find webgpu headers")
+set_if_not_defined(DAWN_AGILITY_SDK_DIR "${DAWN_THIRD_PARTY_DIR}/agility-sdk" "Directory in which to find the D3D12 Agility SDK")
 
 
 # Handling of the type of monolithic library to build, if any.
