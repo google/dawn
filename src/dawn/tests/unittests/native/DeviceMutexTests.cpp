@@ -79,13 +79,13 @@ TEST_F(DeviceMutexTest, UMARecording) {
     // We expect both the Average and Max histograms to be called exactly once after 100 lock
     // acquisitions.
     EXPECT_CALL(mockPlatform,
-                HistogramCustomCountsHPC(::testing::StrEq("GPU.Dawn.DeviceLockAcquireTimeAvgUs"), 5,
-                                         1, 1'000'000, 50))
+                HistogramCustomCountsHPC(::testing::StrEq("DeviceLockAcquireTimeAvgUs"), 5, 1,
+                                         1'000'000, 50))
         .Times(1);
 
     EXPECT_CALL(mockPlatform,
-                HistogramCustomCountsHPC(::testing::StrEq("GPU.Dawn.DeviceLockAcquireTimeMaxUs"), 5,
-                                         1, 1'000'000, 50))
+                HistogramCustomCountsHPC(::testing::StrEq("DeviceLockAcquireTimeMaxUs"), 5, 1,
+                                         1'000'000, 50))
         .Times(1);
 
     for (int i = 0; i < 100; ++i) {
@@ -103,13 +103,11 @@ TEST_F(DeviceMutexTest, RecursiveLocksIgnored) {
 
     // Even if we perform 100 total locks, since they are recursive, they shouldn't trigger UMA
     // emission.
-    EXPECT_CALL(mockPlatform,
-                HistogramCustomCountsHPC(::testing::StrEq("GPU.Dawn.DeviceLockAcquireTimeAvgUs"), _,
-                                         _, _, _))
+    EXPECT_CALL(mockPlatform, HistogramCustomCountsHPC(
+                                  ::testing::StrEq("DeviceLockAcquireTimeAvgUs"), _, _, _, _))
         .Times(0);
-    EXPECT_CALL(mockPlatform,
-                HistogramCustomCountsHPC(::testing::StrEq("GPU.Dawn.DeviceLockAcquireTimeMaxUs"), _,
-                                         _, _, _))
+    EXPECT_CALL(mockPlatform, HistogramCustomCountsHPC(
+                                  ::testing::StrEq("DeviceLockAcquireTimeMaxUs"), _, _, _, _))
         .Times(0);
 
     Lock(mutex);  // Outermost lock - increment starts.

@@ -73,11 +73,9 @@ void DeviceMutex::Lock() {
             double avgTimeUs = (mAcquireTimeSum / mAcquireCount) * 1'000'000.0;
             double maxTimeUs = mAcquireTimeMax * 1'000'000.0;
 
-            DAWN_HISTOGRAM_CUSTOM_MICROSECOND_TIMES(mPlatform,
-                                                    "GPU.Dawn.DeviceLockAcquireTimeAvgUs",
+            DAWN_HISTOGRAM_CUSTOM_MICROSECOND_TIMES(mPlatform, "DeviceLockAcquireTimeAvgUs",
                                                     static_cast<int>(avgTimeUs), 1, 1'000'000, 50);
-            DAWN_HISTOGRAM_CUSTOM_MICROSECOND_TIMES(mPlatform,
-                                                    "GPU.Dawn.DeviceLockAcquireTimeMaxUs",
+            DAWN_HISTOGRAM_CUSTOM_MICROSECOND_TIMES(mPlatform, "DeviceLockAcquireTimeMaxUs",
                                                     static_cast<int>(maxTimeUs), 1, 1'000'000, 50);
 
             mAcquireTimeSum = 0.0;
