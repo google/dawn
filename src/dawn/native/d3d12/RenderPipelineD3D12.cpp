@@ -427,19 +427,21 @@ MaybeError RenderPipeline::InitializeImpl() {
 
     static_assert(kMaxColorAttachments == 8);
     auto highestColorAttachmentIndexPlusOne = GetHighestBitIndexPlusOne(GetColorAttachmentsMask());
+
+    Span<DXGI_FORMAT> descRTVFormats{descriptorD3D12.RTVFormats};
+    Span<D3D12_RENDER_TARGET_BLEND_DESC> descBlendTargets{descriptorD3D12.BlendState.RenderTarget};
     for (uint8_t i = 0; i < kMaxColorAttachments; i++) {
         if (i < static_cast<uint8_t>(highestColorAttachmentIndexPlusOne)) {
-            DAWN_UNSAFE_TODO(descriptorD3D12.RTVFormats[i]) =
-                GetNullRTVDXGIFormatForD3D12RenderPass();
+            descRTVFormats[i] = GetNullRTVDXGIFormatForD3D12RenderPass();
         } else {
-            DAWN_UNSAFE_TODO(descriptorD3D12.RTVFormats[i]) = DXGI_FORMAT_UNKNOWN;
+            descRTVFormats[i] = DXGI_FORMAT_UNKNOWN;
         }
-        DAWN_UNSAFE_TODO(descriptorD3D12.BlendState.RenderTarget[i]).LogicOp = D3D12_LOGIC_OP_NOOP;
+        descBlendTargets[i].LogicOp = D3D12_LOGIC_OP_NOOP;
     }
     for (auto i : GetColorAttachmentsMask()) {
-        DAWN_UNSAFE_TODO(descriptorD3D12.RTVFormats[static_cast<uint8_t>(i)]) =
+        descRTVFormats[static_cast<uint8_t>(i)] =
             d3d::DXGITextureFormat(device, GetColorAttachmentFormat(i));
-        DAWN_UNSAFE_TODO(descriptorD3D12.BlendState.RenderTarget[static_cast<uint8_t>(i)]) =
+        descBlendTargets[static_cast<uint8_t>(i)] =
             ComputeColorDesc(device, GetColorTargetState(i));
     }
     DAWN_ASSERT(highestColorAttachmentIndexPlusOne <= kMaxColorAttachmentsTyped);

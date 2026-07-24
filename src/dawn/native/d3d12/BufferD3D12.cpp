@@ -730,6 +730,7 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
     if (GetInternalUsage() & wgpu::BufferUsage::MapWrite) {
         DAWN_TRY(MapInternal(true, static_cast<size_t>(offset), static_cast<size_t>(size),
                              "D3D12 map at clear buffer"));
+        // TODO(https://crbug.com/501491697): Spanify GetMappedPointerImpl.
         DAWN_UNSAFE_TODO(memset(mMappedData, clearValue, size));
         UnmapImpl(GetState(), BufferState::Unmapped);
     } else if (clearValue == 0u) {
@@ -737,6 +738,7 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
     } else {
         // TODO(crbug.com/dawn/852): use ClearUnorderedAccessView*() when the buffer usage
         // includes STORAGE.
+        // TODO(https://crbug.com/534203108): Spanify WithUploadReservation.
         DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
             size, kCopyBufferToBufferOffsetAlignment,
             [&](UploadReservation reservation) -> MaybeError {

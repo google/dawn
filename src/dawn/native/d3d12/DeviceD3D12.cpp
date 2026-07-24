@@ -343,6 +343,7 @@ MaybeError Device::CreateZeroBuffer() {
         CommandRecordingContext* commandContext =
             ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive);
 
+        // TODO(https://crbug.com/534203108): Spanify WithUploadReservation.
         DAWN_TRY(GetDynamicUploader()->WithUploadReservation(
             kZeroBufferSize, kCopyBufferToBufferOffsetAlignment,
             [&](UploadReservation reservation) -> MaybeError {

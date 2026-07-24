@@ -45,11 +45,11 @@ namespace dawn::native::d3d12 {
 // We change the value from {1024, 512} to {32, 16} because we use blending
 // for D3D12DescriptorHeapTests.EncodeManyUBO and R16Float has limited range
 // and low precision at big integer.
-static constexpr const uint32_t kShaderVisibleSmallHeapSizes[] = {32, 16};
+static constexpr std::array<uint32_t, 2> kShaderVisibleSmallHeapSizes = {32, 16};
 
 uint32_t GetD3D12ShaderVisibleHeapMinSize(D3D12_DESCRIPTOR_HEAP_TYPE heapType, bool useSmallSize) {
     if (useSmallSize) {
-        return DAWN_UNSAFE_TODO(kShaderVisibleSmallHeapSizes[heapType]);
+        return kShaderVisibleSmallHeapSizes[heapType];
     }
 
     // Minimum heap size must be large enough to satisfy the largest descriptor allocation
@@ -68,7 +68,7 @@ uint32_t GetD3D12ShaderVisibleHeapMinSize(D3D12_DESCRIPTOR_HEAP_TYPE heapType, b
 
 uint32_t GetD3D12ShaderVisibleHeapMaxSize(D3D12_DESCRIPTOR_HEAP_TYPE heapType, bool useSmallSize) {
     if (useSmallSize) {
-        return DAWN_UNSAFE_TODO(kShaderVisibleSmallHeapSizes[heapType]);
+        return kShaderVisibleSmallHeapSizes[heapType];
     }
 
     switch (heapType) {

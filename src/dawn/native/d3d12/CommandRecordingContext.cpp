@@ -82,8 +82,7 @@ MaybeError CommandRecordingContext::ExecuteCommandList(Device* device,
     if (error.IsError()) {
         DAWN_TRY(std::move(error));
     }
-    DAWN_TRY(device->GetResidencyManager()->EnsureHeapsAreResident(mHeapsPendingUsage.data(),
-                                                                   mHeapsPendingUsage.size()));
+    DAWN_TRY(device->GetResidencyManager()->EnsureHeapsAreResident(mHeapsPendingUsage));
 
     if (device->IsToggleEnabled(Toggle::RecordDetailedTimingInTraceEvents)) {
         uint64_t gpuTimestamp;

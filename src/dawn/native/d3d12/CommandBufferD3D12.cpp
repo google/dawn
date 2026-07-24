@@ -1405,6 +1405,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
 
                 Buffer* dstBuffer = ToBackend(write->buffer.Get());
 
+                // TODO(https://crbug.com/534203108): Spanify WithUploadReservation.
                 DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
                     data.size(), kCopyBufferToBufferOffsetAlignment,
                     [&](UploadReservation reservation) -> MaybeError {

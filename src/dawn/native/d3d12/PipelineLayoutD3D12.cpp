@@ -97,11 +97,15 @@ HRESULT SerializeRootParameter1_0(Device* device,
                                   const D3D12_VERSIONED_ROOT_SIGNATURE_DESC& rootSignature1_1,
                                   ID3DBlob** ppBlob,
                                   ID3DBlob** ppErrorBlob) {
+    // SAFETY: pParameters + NumParameters must define a valid range of D2D12_ROOT_PARAMETER1s.
+    Span<const D3D12_ROOT_PARAMETER1> rootParameters1_1 = DAWN_UNSAFE_BUFFERS(
+        {rootSignature1_1.Desc_1_1.pParameters, rootSignature1_1.Desc_1_1.NumParameters});
+
+    std::vector<D3D12_ROOT_PARAMETER> rootParameters1_0(rootParameters1_1.size());
     std::vector<std::vector<D3D12_DESCRIPTOR_RANGE>> allDescriptorRanges1_0;
-    std::vector<D3D12_ROOT_PARAMETER> rootParameters1_0(rootSignature1_1.Desc_1_1.NumParameters);
+
     for (size_t i = 0; i < rootParameters1_0.size(); ++i) {
-        const D3D12_ROOT_PARAMETER1& rootParameter1_1 =
-            DAWN_UNSAFE_TODO(rootSignature1_1.Desc_1_1.pParameters[i]);
+        const D3D12_ROOT_PARAMETER1& rootParameter1_1 = rootParameters1_1[i];
 
         rootParameters1_0[i].ParameterType = rootParameter1_1.ParameterType;
         rootParameters1_0[i].ShaderVisibility = rootParameter1_1.ShaderVisibility;
@@ -120,16 +124,22 @@ HRESULT SerializeRootParameter1_0(Device* device,
                     rootParameter1_1.Descriptor.ShaderRegister;
                 break;
 
-            case D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE:
+            case D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE: {
+                Span<const D3D12_DESCRIPTOR_RANGE1> descriptorRanges1_1 =
+                    // SAFETY: pDescriptorRanges + NumDescriptorRanges must define a valid range of
+                    // D3D12_DESCRIPTOR_RANGE1 values.
+                    DAWN_UNSAFE_BUFFERS({rootParameter1_1.DescriptorTable.pDescriptorRanges,
+                                         rootParameter1_1.DescriptorTable.NumDescriptorRanges});
+
                 rootParameters1_0[i].DescriptorTable.NumDescriptorRanges =
-                    rootParameter1_1.DescriptorTable.NumDescriptorRanges;
+                    descriptorRanges1_1.size();
                 if (rootParameters1_0[i].DescriptorTable.NumDescriptorRanges > 0) {
                     std::vector<D3D12_DESCRIPTOR_RANGE> descriptorRanges1_0(
                         rootParameters1_0[i].DescriptorTable.NumDescriptorRanges);
                     for (uint32_t index = 0;
                          index < rootParameter1_1.DescriptorTable.NumDescriptorRanges; ++index) {
-                        const D3D12_DESCRIPTOR_RANGE1& descriptorRange1_1 = DAWN_UNSAFE_TODO(
-                            rootParameter1_1.DescriptorTable.pDescriptorRanges[index]);
+                        const D3D12_DESCRIPTOR_RANGE1& descriptorRange1_1 =
+                            descriptorRanges1_1[index];
                         descriptorRanges1_0[index].BaseShaderRegister =
                             descriptorRange1_1.BaseShaderRegister;
                         descriptorRanges1_0[index].NumDescriptors =
@@ -144,6 +154,7 @@ HRESULT SerializeRootParameter1_0(Device* device,
                         allDescriptorRanges1_0.back().data();
                 }
                 break;
+            }
 
             default:
                 DAWN_UNREACHABLE();

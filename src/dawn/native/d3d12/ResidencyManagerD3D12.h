@@ -34,6 +34,7 @@
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
 #include "src/dawn/native/dawn_platform.h"
+#include "src/utils/span.h"
 
 namespace dawn::native::d3d12 {
 
@@ -49,7 +50,7 @@ class ResidencyManager {
     void UnlockAllocation(Pageable* pageable);
 
     MaybeError EnsureCanAllocate(uint64_t allocationSize, MemorySegment memorySegment);
-    MaybeError EnsureHeapsAreResident(Heap** heaps, size_t heapCount);
+    MaybeError EnsureHeapsAreResident(Span<Heap* const> heaps);
 
     uint64_t SetExternalMemoryReservation(MemorySegment segment, uint64_t requestedReservationSize);
 
