@@ -1443,6 +1443,18 @@ def as_wireType(metadata, typ):
         return as_cppType(typ.name)
 
 
+def as_wire_clientType(metadata, typ):
+    if typ.category == 'object':
+        return typ.name.CamelCase() + '*'
+    elif typ.category in ['bitmask', 'enum'] or typ.name.get() == 'bool':
+        return metadata.namespace + '::' + typ.name.CamelCase()
+    elif typ.category == 'structure':
+        return as_cppType(typ.name)
+    else:
+        return as_cType(metadata.c_prefix, typ.name)
+
+
+
 def c_methods(params, typ):
     if typ.category == 'object':
         return typ.methods + [
@@ -1955,12 +1967,19 @@ class MultiGeneratorFromDawnJSON(Generator):
             additional_params = compute_wire_params(params_dawn_wire,
                                                     wire_json)
 
+            imported_templates += [
+                "dawn/cpp_macros.tmpl",
+            ]
+
             wire_params = [
                 RENDER_PARAMS_BASE, params_dawn_wire, {
                     'as_wireType': lambda type : as_wireType(metadata, type),
                     'as_annotated_wireType': \
                         lambda arg: annotate(as_wireType(metadata, arg.type), arg),
                     'is_wire_serializable': lambda type : is_wire_serializable(type),
+                    'as_wire_clientType': lambda typ: as_wire_clientType(metadata, typ),
+                    'as_annotated_wire_clientType': \
+                        lambda arg: annotate(as_wire_clientType(metadata, arg.type), arg),
                 }, additional_params
             ]
             renders.append(
@@ -1994,6 +2013,15 @@ class MultiGeneratorFromDawnJSON(Generator):
                     'src/dawn/wire/client/ClientPrototypes_autogen.inc',
                     wire_params))
             renders.append(
+                FileRender(
+                    'dawn/wire/client/api_structs.h', 'src/dawn/wire/client/' +
+                    metadata.namespace + '_structs_autogen.h', wire_params))
+            renders.append(
+                FileRender(
+                    'dawn/wire/client/api_structs.cpp',
+                    'src/dawn/wire/client/' + metadata.namespace +
+                    '_structs_autogen.cpp', wire_params))
+            renders.append(
                 FileRender('dawn/wire/server/ServerBase.h',
                            'src/dawn/wire/server/ServerBase_autogen.h',
                            wire_params))
@@ -2014,6 +2042,7 @@ class MultiGeneratorFromDawnJSON(Generator):
                 FileRender('dawn/wire/server/WGPUTraits.h',
                            'src/dawn/wire/server/WGPUTraits_autogen.h',
                            wire_params))
+
 
         if 'kotlin' in targets:
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json,
