@@ -1801,10 +1801,13 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 workCommandCount++;
                 DrawCmd* draw = iter->NextCommand<DrawCmd>();
 
-                DAWN_TRY(state.SyncAndRun([&](const VulkanFunctions& vk, VkCommandBuffer commands) {
-                    vk.CmdDraw(commands, draw->vertexCount, draw->instanceCount, draw->firstVertex,
-                               draw->firstInstance);
-                }));
+                if (draw->vertexCount > 0 && draw->instanceCount > 0) {
+                    DAWN_TRY(
+                        state.SyncAndRun([&](const VulkanFunctions& vk, VkCommandBuffer commands) {
+                            vk.CmdDraw(commands, draw->vertexCount, draw->instanceCount,
+                                       draw->firstVertex, draw->firstInstance);
+                        }));
+                }
                 break;
             }
 
@@ -1812,10 +1815,13 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 workCommandCount++;
                 DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
 
-                DAWN_TRY(state.SyncAndRun([&](const VulkanFunctions& vk, VkCommandBuffer commands) {
-                    vk.CmdDrawIndexed(commands, draw->indexCount, draw->instanceCount,
-                                      draw->firstIndex, draw->baseVertex, draw->firstInstance);
-                }));
+                if (draw->indexCount > 0 && draw->instanceCount > 0) {
+                    DAWN_TRY(state.SyncAndRun([&](const VulkanFunctions& vk,
+                                                  VkCommandBuffer commands) {
+                        vk.CmdDrawIndexed(commands, draw->indexCount, draw->instanceCount,
+                                          draw->firstIndex, draw->baseVertex, draw->firstInstance);
+                    }));
+                }
                 break;
             }
 

@@ -1959,8 +1959,6 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pass,storeop2:st
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,render_pipeline,overrides:multi_entry_points:isAsync=true [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_slice_with_diff_mip_levels:format="r16unorm";depthSlice=1 [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,rendering,basic:large_draw:indexed=true;indirect=false [ Failure ]
-crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,rendering,draw:arguments:first=0;count=0;first_instance=0;instance_count=0;indexed=true;indirect=false;vertex_buffer_offset=0;index_buffer_offset=0;base_vertex=0 [ Failure ]
-crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,rendering,draw:arguments:first=0;count=0;first_instance=0;instance_count=0;indexed=true;indirect=false;vertex_buffer_offset=32;index_buffer_offset=0;base_vertex=0 [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,rendering,draw:arguments:first=0;count=0;first_instance=2;instance_count=0;indexed=true;indirect=false;vertex_buffer_offset=0;index_buffer_offset=16;base_vertex=9 [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,rendering,stencil:stencil_accumulation:format="depth24plus-stencil8" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,rendering,stencil:stencil_accumulation:format="depth32float-stencil8" [ Failure ]
