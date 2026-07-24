@@ -599,26 +599,19 @@ VkClearValue ToVkClearValue(dawn::native::Color clearColor, TextureComponentType
     switch (baseType) {
         case TextureComponentType::Float: {
             const std::array<float, 4> appliedClearColor = ConvertToFloatColor(clearColor);
-            // TODO(https://crbug.com/532554331): Use Span's constructor from C-style arrays.
-            Span<float> floatValues = DAWN_UNSAFE_TODO(Span<float>(clearValue.color.float32, 4u));
-            floatValues.CopyFrom(appliedClearColor);
+            Span<float>{clearValue.color.float32}.CopyFrom(appliedClearColor);
             break;
         }
         case TextureComponentType::Uint: {
             const std::array<uint32_t, 4> appliedClearColor =
                 ConvertToUnsignedIntegerColor(clearColor);
-            // TODO(https://crbug.com/532554331): Use Span's constructor from C-style arrays.
-            Span<uint32_t> u32Values =
-                DAWN_UNSAFE_TODO(Span<uint32_t>(clearValue.color.uint32, 4u));
-            u32Values.CopyFrom(appliedClearColor);
+            Span<uint32_t>{clearValue.color.uint32}.CopyFrom(appliedClearColor);
             break;
         }
         case TextureComponentType::Sint: {
             const std::array<int32_t, 4> appliedClearColor =
                 ConvertToSignedIntegerColor(clearColor);
-            // TODO(https://crbug.com/532554331): Use Span's constructor from C-style arrays.
-            Span<int32_t> i32Values = DAWN_UNSAFE_TODO(Span<int32_t>(clearValue.color.int32, 4u));
-            i32Values.CopyFrom(appliedClearColor);
+            Span<int32_t>{clearValue.color.int32}.CopyFrom(appliedClearColor);
             break;
         }
     }

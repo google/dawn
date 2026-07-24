@@ -175,13 +175,10 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
         VkPhysicalDeviceMemoryProperties memory;
         vkFunctions.GetPhysicalDeviceMemoryProperties(vkPhysicalDevice, &memory);
 
-        // TODO(https://crbug.com/532554331): Use Span's constructor from C-style arrays.
-        Span<const VkMemoryType> driverMemoryTypes =
-            DAWN_UNSAFE_TODO(Span<const VkMemoryType>(memory.memoryTypes, VK_MAX_MEMORY_TYPES))
-                .first(memory.memoryTypeCount);
-        Span<const VkMemoryHeap> driverMemoryHeaps =
-            DAWN_UNSAFE_TODO(Span<const VkMemoryHeap>(memory.memoryHeaps, VK_MAX_MEMORY_HEAPS))
-                .first(memory.memoryHeapCount);
+        auto driverMemoryTypes =
+            Span<const VkMemoryType>(memory.memoryTypes).first(memory.memoryTypeCount);
+        auto driverMemoryHeaps =
+            Span<const VkMemoryHeap>(memory.memoryHeaps).first(memory.memoryHeapCount);
 
         info.memoryTypes.assign(driverMemoryTypes.begin(), driverMemoryTypes.end());
         info.memoryHeaps.assign(driverMemoryHeaps.begin(), driverMemoryHeaps.end());
