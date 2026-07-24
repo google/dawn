@@ -231,20 +231,22 @@ function(tint_spvtools_compile_options TARGET)
 endfunction()
 
 function(tint_lib_compile_options TARGET)
-  if (TINT_ENABLE_INSTALL)
+  if (TINT_INSTALL_LIBS)
     install(TARGETS ${TARGET}
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      OPTIONAL
     )
   endif()
   tint_default_compile_options(${TARGET})
 endfunction()
 
 function(tint_proto_compile_options TARGET)
-  if (TINT_ENABLE_INSTALL)
+  if (TINT_INSTALL_LIBS)
     install(TARGETS ${TARGET}
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      OPTIONAL
     )
   endif()
   tint_core_compile_options(${TARGET})
@@ -421,7 +423,7 @@ function(tint_add_target TARGET KIND)
   elseif(${KIND} STREQUAL cmd)
     add_executable(${TARGET})
     tint_default_compile_options(${TARGET})
-    if (TINT_ENABLE_INSTALL)
+    if (TINT_INSTALL_CMD_TOOLS)
       install(TARGETS "${TARGET}")
     endif()
   elseif(${KIND} STREQUAL test_cmd)
@@ -753,7 +755,7 @@ add_library(libtint ALIAS tint_api)
 ################################################################################
 # Install rules
 ################################################################################
-if (TINT_ENABLE_INSTALL)
+if (TINT_INSTALL_LIBS)
   # We need to recurse all folders and include all headers because tint.h includes most headers from src/tint
   file(GLOB TINT_HEADERS "${DAWN_INCLUDE_DIR}/tint/*.h")
 
