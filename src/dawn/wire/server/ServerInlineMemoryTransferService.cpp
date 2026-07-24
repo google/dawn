@@ -46,16 +46,6 @@ class InlineMemoryTransferService : public MemoryTransferService {
             return size;
         }
 
-        // TODO(https://crbug.com/528027992): Remove non-volatile overload once implemented.
-        void SerializeDataUpdate(std::span<std::byte> serializeData,
-                                 size_t offset,
-                                 size_t size,
-                                 std::span<const std::byte> data) const override {
-            DAWN_ASSERT(serializeData.size() == GetSerializeDataUpdateSize(offset, size));
-            DAWN_ASSERT(data.size() == size);
-            DAWN_ASSERT(serializeData.size() >= data.size());
-            std::ranges::copy(data, serializeData.begin());
-        }
         void SerializeDataUpdate(std::span<volatile std::byte> serializeData,
                                  size_t offset,
                                  size_t size,

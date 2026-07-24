@@ -51,7 +51,7 @@ class MockMemoryTransferService : public MemoryTransferService {
         MOCK_METHOD(void,
                     SerializeDataUpdate,
                     (std::span<std::byte>, size_t, size_t, std::span<const std::byte>),
-                    (const, override));
+                    (const));
         // GMock does not natively support printing/handling volatile types in mock argument tuples
         // without custom printers, so we implement the volatile overload directly to cast away
         // volatile and forward to the non-volatile MOCK_METHOD.

@@ -123,8 +123,7 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
         virtual size_t GetSerializeCreateSize() const = 0;
 
         // Serialize the handle into |serializeSpace| so it can be received by the server.
-        virtual void SerializeCreate(std::span<std::byte> serializeSpace) const {}
-        virtual void SerializeCreate(std::span<volatile std::byte> serializeSpace) const {}
+        virtual void SerializeCreate(std::span<volatile std::byte> serializeSpace) const = 0;
 
         // Returns a const view of the memory.
         // dawn::wire::client ensures that the memory is initialized by a data update before it is
@@ -142,13 +141,9 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
 
         // Serializes into |serializeData| the modification of the contents in the range [offset,
         // offset + size).
-        // TODO(https://crbug.com/528027992): Remove non-volatile overload once implemented.
-        virtual void SerializeDataUpdate(std::span<std::byte> serializeData,
-                                         size_t offset,
-                                         size_t size) const {}
         virtual void SerializeDataUpdate(std::span<volatile std::byte> serializeData,
                                          size_t offset,
-                                         size_t size) const {}
+                                         size_t size) const = 0;
 
         // Applies a data update for the range [offset, offset + size) that was produced by
         // `server::MemoryTransferService::MemoryHandle::SerializeDataUpdate`.

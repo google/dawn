@@ -115,15 +115,10 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
         //  - `offset`: The byte offset of data.data() within the whole allocation..
         //  - `size`: The size of the range to update (must be <= data.size()).
         //  - `data`: The new contents for the range [offset, offset + data.size()).
-        // TODO(https://crbug.com/528027992): Remove non-volatile overload once implemented.
-        virtual void SerializeDataUpdate(std::span<std::byte> serializeData,
-                                         size_t offset,
-                                         size_t size,
-                                         std::span<const std::byte> data) const {}
         virtual void SerializeDataUpdate(std::span<volatile std::byte> serializeData,
                                          size_t offset,
                                          size_t size,
-                                         std::span<const std::byte> data) const {}
+                                         std::span<const std::byte> data) const = 0;
 
         // Applies a data update for the range [offset, offset + size) that was produced by
         // `client::MemoryTransferService::MemoryHandle::SerializeDataUpdate`.

@@ -50,10 +50,6 @@ class InlineMemoryTransferService : public MemoryTransferService {
         ~MemoryHandleImpl() override = default;
 
         size_t GetSerializeCreateSize() const override { return 0; }
-        // TODO(https://crbug.com/528027992): Remove non-volatile overload once implemented.
-        void SerializeCreate(std::span<std::byte> serializeSpace) const override {
-            DAWN_ASSERT(serializeSpace.size() == GetSerializeCreateSize());
-        }
         void SerializeCreate(std::span<volatile std::byte> serializeSpace) const override {
             DAWN_ASSERT(serializeSpace.size() == GetSerializeCreateSize());
         }
@@ -66,17 +62,6 @@ class InlineMemoryTransferService : public MemoryTransferService {
             return size;
         }
 
-        // TODO(https://crbug.com/528027992): Remove non-volatile overload once implemented.
-        void SerializeDataUpdate(std::span<std::byte> serializeData,
-                                 size_t offset,
-                                 size_t size) const override {
-            DAWN_ASSERT(serializeData.size() == GetSerializeDataUpdateSize(offset, size));
-            DAWN_ASSERT(offset <= mStagingData.size());
-            DAWN_ASSERT(size <= mStagingData.size() - offset);
-
-            auto src = GetData().subspan(offset, serializeData.size());
-            std::ranges::copy(src, serializeData.begin());
-        }
         void SerializeDataUpdate(std::span<volatile std::byte> serializeData,
                                  size_t offset,
                                  size_t size) const override {

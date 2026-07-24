@@ -47,18 +47,10 @@ class DAWN_WIRE_EXPORT CommandSerializer {
     CommandSerializer& operator=(const CommandSerializer& rhs) = delete;
 
     // Get space for serializing commands.
-    // GetCmdSpace will never be called with a value larger than
-    // what GetMaximumAllocationSize returns. Return nullptr to indicate
-    // a fatal error.
-    virtual void* GetCmdSpace(size_t size) {
-        // TODO(https://crbug.com/528027992): Remove in favor of GetCommandSpace once Chromium
-        // implements it.
-        return nullptr;
-    }
-    virtual std::optional<std::span<volatile std::byte>> GetCommandSpace(size_t size) {
-        // TODO(https://crbug.com/528027992): Make pure virtual once Chromium implements it.
-        return std::nullopt;
-    }
+    // GetCommandSpace will never be called with a value larger than what GetMaximumAllocationSize
+    // returns. Returns std::nullopt to indicate a fatal error, otherwise the returned std::span is
+    // expected to be a contiguous slice of aligned memory.
+    virtual std::optional<std::span<volatile std::byte>> GetCommandSpace(size_t size) = 0;
     virtual bool Flush() = 0;
     virtual size_t GetMaximumAllocationSize() const = 0;
     virtual void OnSerializeError();
@@ -71,15 +63,7 @@ class DAWN_WIRE_EXPORT CommandHandler {
     CommandHandler(const CommandHandler& rhs) = delete;
     CommandHandler& operator=(const CommandHandler& rhs) = delete;
 
-    virtual const volatile char* HandleCommands(const volatile char* commands, size_t size) {
-        // TODO(https://crbug.com/528027992): Remove in favor of the version below once Chromium
-        // implements it.
-        return nullptr;
-    }
-    virtual bool HandleCommands(std::span<const volatile std::byte> commands) {
-        // TODO(https://crbug.com/528027992): Make pure virtual once Chromium implements it.
-        return {};
-    }
+    virtual bool HandleCommands(std::span<const volatile std::byte> commands) = 0;
 };
 
 // Handle struct that are used to uniquely represent an object of a particular type in the wire.

@@ -50,7 +50,6 @@ class NoopCommandSerializer final : public CommandSerializer {
         // Return SIZE_MAX so ChunkedCommandSerializer won't unnecessarily try to chunk commands.
         return SIZE_MAX;
     }
-    void* GetCmdSpace(size_t size) final { return nullptr; }
     std::optional<std::span<volatile std::byte>> GetCommandSpace(size_t size) final {
         return std::nullopt;
     }
