@@ -723,14 +723,14 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
 
         dynamicStates.push_back(VK_DYNAMIC_STATE_STENCIL_OP_EXT);
         mDynamicState.packedFrontStencil =
-            PackStencilOpState(depthStencilState.front, depthStencilState.stencilTestEnable);
+            PackStencilOpState(depthStencilState.front, mDynamicState.stencilTestEnable);
         depthStencilState.front.failOp = VK_STENCIL_OP_KEEP;
         depthStencilState.front.passOp = VK_STENCIL_OP_KEEP;
         depthStencilState.front.depthFailOp = VK_STENCIL_OP_KEEP;
         depthStencilState.front.compareOp = VK_COMPARE_OP_NEVER;
 
         mDynamicState.packedBackStencil =
-            PackStencilOpState(depthStencilState.back, depthStencilState.stencilTestEnable);
+            PackStencilOpState(depthStencilState.back, mDynamicState.stencilTestEnable);
         depthStencilState.back.failOp = VK_STENCIL_OP_KEEP;
         depthStencilState.back.passOp = VK_STENCIL_OP_KEEP;
         depthStencilState.back.depthFailOp = VK_STENCIL_OP_KEEP;
