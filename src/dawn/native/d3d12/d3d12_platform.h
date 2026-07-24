@@ -28,28 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_D3D12_PLATFORM_H_
 #define SRC_DAWN_NATIVE_D3D12_D3D12_PLATFORM_H_
 
+#include "dawn/native/D3D12Backend.h"
 #include "src/dawn/native/d3d/d3d_platform.h"
-
-#if defined(DAWN_USE_AGILITY_SDK)
-
-// Include d3d12.h from the Agility SDK. Note that we only include this header from Dawn's internal
-// implementation. Externally, <d3d12.h> will be included from the Windows SDK, which may be an
-// older version, but this typically does not cause any issues.
-
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmicrosoft-enum-value"
-#pragma clang diagnostic ignored "-Wnested-anon-types"
-#endif
-#include "third_party/agility-sdk/src/build/native/include/d3d12.h"
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#endif
-
-#else  // defined(DAWN_USE_AGILITY_SDK)
-#include <d3d12.h>
-#endif  // defined(DAWN_USE_AGILITY_SDK)
-
-#include <d3d11on12.h>
 
 #endif  // SRC_DAWN_NATIVE_D3D12_D3D12_PLATFORM_H_

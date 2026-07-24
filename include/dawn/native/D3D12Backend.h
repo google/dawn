@@ -30,8 +30,20 @@
 
 // d3d12.h must be included first, before other d3d headers that may include it, to ensure
 // we pick up the one from the Agility SDK when enabled.
+#if defined(DAWN_USE_AGILITY_SDK)
 // clang-format off
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmicrosoft-enum-value"
+#pragma clang diagnostic ignored "-Wnested-anon-types"
+#endif
+#include "third_party/agility-sdk/src/build/native/include/d3d12.h"
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
+#else  // defined(DAWN_USE_AGILITY_SDK)
 #include <d3d12.h>
+#endif  // defined(DAWN_USE_AGILITY_SDK)
 // clang-format on
 
 #include <d3d11on12.h>
