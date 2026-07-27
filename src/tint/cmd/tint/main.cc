@@ -1616,7 +1616,10 @@ int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
             std::cerr << "Failed convert program to IR: " << ir.Failure() << "\n";
             return 1;
         }
-        auto p = tint::wgsl::writer::ProgramFromIR(ir.Get(), {});
+        tint::wgsl::writer::Options wgsl_options{
+            .allowed_features = tint::wgsl::AllowedFeatures::Everything(),
+        };
+        auto p = tint::wgsl::writer::ProgramFromIR(ir.Get(), wgsl_options);
         if (p != tint::Success) {
             std::cerr << "Failed converting IR to program: " << p.Failure() << "\n";
             return 1;
