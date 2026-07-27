@@ -891,6 +891,10 @@ bool Structural::CheckArray(const core::type::Array* arr,
     }
 
     if (auto* val_count = arr->Count()->As<core::ir::type::ValueArrayCount>()) {
+        if (!val_count->value) {
+            diag() << "ValueArrayCount value is undefined";
+            return false;
+        }
         if (!val_count->value->Alive()) {
             diag() << "ValueArrayCount value is not alive";
             return false;

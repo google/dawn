@@ -2088,6 +2088,21 @@ TEST_F(IR_ValidatorTest, ValueArrayCount_NotInRootBlock) {
         << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, ValueArrayCount_NullValue) {
+    mod.properties.Add(Property::kAllowOverrides);
+
+    b.Append(mod.root_block, [&] {
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(nullptr);
+        auto* a1 = ty.Get<core::type::Array>(ty.i32(), cnt, 4u);
+        b.Var("a", ty.ptr(workgroup, a1, core::Access::kReadWrite));
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("ValueArrayCount value is undefined"))
+        << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, OverrideWithoutIdOrInitializer) {
     mod.properties.Add(Property::kAllowOverrides);
 
