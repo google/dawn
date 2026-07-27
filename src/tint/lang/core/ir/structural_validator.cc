@@ -2643,6 +2643,17 @@ void Structural::CheckIf(const If* if_) {
         AddError(if_) << "if true block must be a block";
     }
 
+    if (auto* constexpr_if = if_->As<core::ir::ConstExprIf>()) {
+        if (constexpr_if->Results().Length() != 1) {
+            AddError(constexpr_if) << "constexpr_if must have exactly one result";
+        } else if (!constexpr_if->Result(0)->Type()->Is<core::type::Bool>()) {
+            AddError(constexpr_if) << "constexpr_if result type must be 'bool'";
+        }
+        if (constexpr_if->False()->IsEmpty()) {
+            AddError(constexpr_if) << "constexpr_if must have a false block";
+        }
+    }
+
     tasks_.Push([this] { control_stack_.Pop(); });
 
     if (!if_->False()->IsEmpty()) {
