@@ -47,6 +47,8 @@ lucicfg.config(
         "builders/gn_args_locations.json",
         "luci/commit-queue.cfg",
         "luci/cr-buildbucket.cfg",
+        "luci/luci-analysis.cfg",
+        "luci/luci-analysis-dev.cfg",
         "luci/luci-bisection.cfg",
         "luci/luci-bisection-dev.cfg",
         "luci/luci-logdog.cfg",
@@ -442,4 +444,15 @@ lucicfg.emit(
 lucicfg.emit(
     dest = "luci/luci-bisection-dev.cfg",
     data = io.read_file("luci-bisection-dev.cfg"),
+)
+
+# Just copy LUCI Analysis config to generated outputs.
+lucicfg.emit(
+    dest = "luci/luci-analysis.cfg",
+    data = io.read_file("luci-analysis.cfg"),
+)
+
+lucicfg.emit(
+    dest = "luci/luci-analysis-dev.cfg",
+    data = io.read_file("luci-analysis-dev.cfg"),
 )

@@ -9,6 +9,8 @@
 			],
 			"lucicfg": "1.45.6",
 			"resources": [
+				"luci-analysis-dev.cfg",
+				"luci-analysis.cfg",
 				"luci-bisection-dev.cfg",
 				"luci-bisection.cfg",
 				"milestones.json"
