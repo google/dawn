@@ -53,11 +53,12 @@ class DevNull : public dawn::wire::CommandSerializer {
         // Some fuzzer bots have a 2GB allocation limit. Pick a value reasonably below that.
         return 1024ULL * 1024 * 1024;
     }
-    void* GetCmdSpace(size_t size) override {
+    std::optional<std::span<volatile std::byte>> GetCommandSpace(size_t size) override {
         if (size > buf.size()) {
             buf.resize(size);
         }
-        return buf.data();
+        return std::span<volatile std::byte>(reinterpret_cast<volatile std::byte*>(buf.data()),
+                                             size);
     }
     bool Flush() override { return true; }
 
