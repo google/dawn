@@ -45,4 +45,7 @@ Result<SuccessType> BinaryPolyfillFuzzer(Module& ir,
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::BinaryPolyfillFuzzer);
+constexpr auto kUnsupportedProperties = tint::core::ir::Properties{
+    tint::core::ir::Property::kAllowOverrides,
+};
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::BinaryPolyfillFuzzer, kUnsupportedProperties);
