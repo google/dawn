@@ -69,8 +69,14 @@ config("dawn_warnings") {
            "dawn_weverything requires clang in a standalone build.")
   }
 
+  # TODO(https://crbug.com/404297941): Disable warning-suppression-mappings
+  # configuration because the ICECC build doesn't distribute the
+  # warning_suppression.txt file to other ICECC nodes. As a result, the nodes
+  # cannot locate the file during target compilation. Therefore, we are
+  # disabling the warning-suppression-mappings configuration for ICECC builds
+  # for now.
   # If we're not using Clang, then we don't touch any warning config.
-  if (is_clang) {
+  if (is_clang && cc_wrapper != "icecc") {
     ### In dawn_standalone, first, enable the base set of warnings.
     if (dawn_standalone) {
       if (dawn_weverything) {
