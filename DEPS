@@ -828,6 +828,13 @@ hooks = [
     'action': ['vpython3', 'build/mac_toolchain.py'],
   },
   {
+    # Create the required ranlib symlink for hermetic xcode
+    'name': 'mac_ranlib_symlink',
+    'pattern': '.',
+    'condition': 'dawn_standalone and checkout_mac',
+    'action': ['vpython3', 'tools/create_ranlib_symlink.py'],
+  },
+  {
     # Case-insensitivity for the Win SDK. Must run before win_toolchain below.
     'name': 'ciopfs_linux',
     'pattern': '.',

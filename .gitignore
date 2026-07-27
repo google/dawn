@@ -11,6 +11,7 @@
 /bazel-*
 /build
 /buildtools
+/src/cmake/HermeticXcode/ranlib
 /testing
 /third_party/abseil-cpp/
 /third_party/agility-sdk/src
