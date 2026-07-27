@@ -228,10 +228,10 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
         VkMemoryRequirements requirements;
         deviceVk->fn.GetImageMemoryRequirements(deviceVk->GetVkDevice(), handle, &requirements);
 
-        ResultOrError<uint32_t> result = deviceVk->GetResourceMemoryAllocator()->FindBestTypeIndex(
+        auto result = deviceVk->GetResourceMemoryAllocator()->FindBestTypeIndex(
             requirements, MemoryKind::DeviceLocal);
-        EXPECT_EQ(result.IsSuccess(), true);
-        uint32_t bestType = result.AcquireSuccess();
+        EXPECT_TRUE(result.has_value());
+        uint32_t bestType = result.value();
 
         VkMemoryAllocateInfo allocateInfo;
         allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;

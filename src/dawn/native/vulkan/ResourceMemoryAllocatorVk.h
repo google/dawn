@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -68,7 +69,7 @@ class ResourceMemoryAllocator {
 
     void Tick(ExecutionSerial completedSerial);
 
-    ResultOrError<uint32_t> FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind);
+    std::optional<uint32_t> FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind);
 
     // Reports the total vulkan allocated and vulkan used memories.
     uint64_t GetTotalUsedMemory() const;

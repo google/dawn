@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -453,7 +454,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     // Choose the best memory type that satisfies both the image's constraint and the
     // import's constraint.
     memoryRequirements.memoryTypeBits &= fdProperties.memoryTypeBits;
-    ResultOrError<uint32_t> result = device->GetResourceMemoryAllocator()->FindBestTypeIndex(
+    auto maybeMemoryTypeIndex = device->GetResourceMemoryAllocator()->FindBestTypeIndex(
         memoryRequirements, MemoryKind::DeviceLocal);
 
     // Some devices may fail to find device local memory for these FD imports (likely from
@@ -461,13 +462,13 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     // be performance consequences. This issue was discovered on AMD
     // (https://www.techpowerup.com/gpu-specs/amd-mendocino.g1022).
     // See crbug.com/422128949
-    if (result.IsError()) {
-        std::unique_ptr<ErrorData> errorData = result.AcquireError();
-        result = device->GetResourceMemoryAllocator()->FindBestTypeIndex(memoryRequirements,
-                                                                         MemoryKind::HostCached);
+    if (!maybeMemoryTypeIndex.has_value()) {
+        maybeMemoryTypeIndex = device->GetResourceMemoryAllocator()->FindBestTypeIndex(
+            memoryRequirements, MemoryKind::HostCached);
     }
-    uint32_t memoryTypeIndex;
-    DAWN_TRY_ASSIGN(memoryTypeIndex, std::move(result));
+    DAWN_INVALID_IF(!maybeMemoryTypeIndex.has_value(),
+                    "Unable to find an appropriate memory type for import.");
+    uint32_t memoryTypeIndex = maybeMemoryTypeIndex.value();
 
     utils::SystemHandle memoryFD = utils::SystemHandle::Duplicate(fd);
 
@@ -700,9 +701,11 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         // Choose the best memory type that satisfies the import's constraint.
         VkMemoryRequirements memoryRequirements;
         memoryRequirements.memoryTypeBits = bufferProperties.memoryTypeBits;
-        uint32_t memoryTypeIndex;
-        DAWN_TRY_ASSIGN(memoryTypeIndex, device->GetResourceMemoryAllocator()->FindBestTypeIndex(
-                                             memoryRequirements, MemoryKind::DeviceLocal));
+        auto maybeMemoryTypeIndex = device->GetResourceMemoryAllocator()->FindBestTypeIndex(
+            memoryRequirements, MemoryKind::DeviceLocal);
+        DAWN_INVALID_IF(!maybeMemoryTypeIndex.has_value(),
+                        "Unable to find an appropriate memory type for import.");
+        uint32_t memoryTypeIndex = maybeMemoryTypeIndex.value();
 
         VkMemoryAllocateInfo memoryAllocateInfo = {};
         memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;

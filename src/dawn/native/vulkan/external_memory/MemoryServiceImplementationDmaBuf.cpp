@@ -28,6 +28,7 @@
 #include "src/dawn/native/vulkan/external_memory/MemoryServiceImplementationDmaBuf.h"
 
 #include <array>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -268,7 +269,7 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
         // Choose the best memory type that satisfies both the image's constraint and the
         // import's constraint.
         memoryRequirements.memoryTypeBits &= fdProperties.memoryTypeBits;
-        ResultOrError<uint32_t> result = mDevice->GetResourceMemoryAllocator()->FindBestTypeIndex(
+        auto maybeMemoryTypeIndex = mDevice->GetResourceMemoryAllocator()->FindBestTypeIndex(
             memoryRequirements, MemoryKind::DeviceLocal);
 
         // Some devices may fail to find device local memory for these FD imports (likely from
@@ -276,13 +277,13 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
         // be performance consequences. This issue was discovered on AMD
         // (https://www.techpowerup.com/gpu-specs/amd-mendocino.g1022).
         // See crbug.com/422128949
-        if (result.IsError()) {
-            std::unique_ptr<ErrorData> errorData = result.AcquireError();
-            result = mDevice->GetResourceMemoryAllocator()->FindBestTypeIndex(
+        if (!maybeMemoryTypeIndex.has_value()) {
+            maybeMemoryTypeIndex = mDevice->GetResourceMemoryAllocator()->FindBestTypeIndex(
                 memoryRequirements, MemoryKind::HostCached);
         }
-        uint32_t memoryTypeIndex;
-        DAWN_TRY_ASSIGN(memoryTypeIndex, std::move(result));
+        DAWN_INVALID_IF(!maybeMemoryTypeIndex.has_value(),
+                        "Unable to find an appropriate memory type for import.");
+        uint32_t memoryTypeIndex = maybeMemoryTypeIndex.value();
 
         MemoryImportParams params;
         params.allocationSize = memoryRequirements.size;

@@ -31,6 +31,7 @@
 #include <cstring>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -414,9 +415,11 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     // - is device-local on UMA
     // - cannot be non-device-local on non-UMA
     MemoryKind requestKind = MemoryKind::Linear;
-    uint32_t memoryTypeIndex;
-    DAWN_TRY_ASSIGN(memoryTypeIndex, device->GetResourceMemoryAllocator()->FindBestTypeIndex(
-                                         requirements, requestKind));
+    auto maybeMemoryTypeIndex =
+        device->GetResourceMemoryAllocator()->FindBestTypeIndex(requirements, requestKind);
+    DAWN_INTERNAL_ERROR_IF(!maybeMemoryTypeIndex.has_value(),
+                           "Unable to find an appropriate memory type for import.");
+    uint32_t memoryTypeIndex = maybeMemoryTypeIndex.value();
 
     // Make a device memory wrapping the host pointer.
     VkMemoryAllocateInfo allocateInfo;

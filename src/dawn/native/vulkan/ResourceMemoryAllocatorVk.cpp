@@ -28,6 +28,7 @@
 #include "src/dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 
 #include <algorithm>
+#include <optional>
 #include <utility>
 
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -186,8 +187,9 @@ ResultOrError<ResourceMemoryAllocation> ResourceMemoryAllocator::Allocate(
     MemoryKind kind,
     bool forceDisableSubAllocation) {
     // The Vulkan spec guarantees at least one memory type is valid.
-    uint32_t memoryType;
-    DAWN_TRY_ASSIGN(memoryType, FindBestTypeIndex(requirements, kind));
+    auto maybeMemoryType = FindBestTypeIndex(requirements, kind);
+    DAWN_INTERNAL_ERROR_IF(!maybeMemoryType.has_value(), "Failed to find suitable memory type.");
+    uint32_t memoryType = maybeMemoryType.value();
     bool isLazyMemoryType = mAllocatorsPerType[memoryType]->IsLazyMemoryType();
 
     VkDeviceSize size = requirements.size;
@@ -348,11 +350,13 @@ void ResourceMemoryAllocator::Tick(ExecutionSerial completedSerial) {
     mSubAllocationsToDelete.ClearUpTo(completedSerial);
 }
 
-ResultOrError<uint32_t> ResourceMemoryAllocator::FindBestTypeIndex(
+std::optional<uint32_t> ResourceMemoryAllocator::FindBestTypeIndex(
     VkMemoryRequirements requirements,
     MemoryKind kind) {
     uint32_t index = mMemoryTypeSelector.FindBestTypeIndex(requirements, kind);
-    DAWN_INVALID_IF(index == kInvalidMemoryTypeIndex, "Failed to find suitable memory type.");
+    if (index == kInvalidMemoryTypeIndex) {
+        return std::nullopt;
+    }
     return index;
 }
 
