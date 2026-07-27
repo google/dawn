@@ -184,6 +184,35 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
     }
 
+    // Check that there are no dynamic offsets supplied for non-buffer types.
+    if (ir.root_block) {
+        for (auto* inst : *ir.root_block) {
+            auto* var = inst->As<core::ir::Var>();
+            if (!var) {
+                continue;
+            }
+            auto bp = var->BindingPoint();
+            if (!bp.has_value()) {
+                continue;
+            }
+            auto iter = options.group_to_argument_buffer_info.find(bp->group);
+            if (iter == options.group_to_argument_buffer_info.end()) {
+                continue;
+            }
+            auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+            TINT_ASSERT(ptr);
+
+            if (!(ptr->AddressSpace() == core::AddressSpace::kStorage ||
+                  ptr->AddressSpace() == core::AddressSpace::kUniform)) {
+                auto binding_iter = iter->second.binding_info_to_offset_index.find(bp->binding);
+                if (binding_iter != iter->second.binding_info_to_offset_index.end()) {
+                    return Failure(
+                        "dynamic offset supplied for a non-buffer type inside an argument buffer");
+                }
+            }
+        }
+    }
+
     TINT_CHECK_RESULT(ValidateBindingOptions(options));
 
     return Success;

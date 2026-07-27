@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "gmock/gmock.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/msl/validate/validate.h"
 #include "src/tint/lang/msl/writer/helper_test.h"
@@ -527,6 +528,33 @@ TEST_F(MslWriterTest, CanGenerate_TexelBufferUnsupported) {
     ASSERT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("texel buffers are not supported by the MSL backend"));
+}
+
+TEST_F(MslWriterTest, CanGenerate_DynamicOffsetOnNonBufferType) {
+    auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+    auto* var = b.Var("tex", ty.ptr<handle>(tex_ty));
+    var->SetBindingPoint(2, 0);
+    mod.root_block->Append(var);
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        b.Let("x", var);
+        b.Return(ep);
+    });
+
+    Options options;
+    options.entry_point_name = "entry";
+
+    ArgumentBufferInfo abi;
+    abi.id = 0;
+    abi.binding_info_to_offset_index.emplace(0, 0);
+    options.group_to_argument_buffer_info.emplace(2, abi);
+
+    auto result = Generate(options);
+    ASSERT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr(
+                    "dynamic offset supplied for a non-buffer type inside an argument buffer"));
 }
 
 TEST_F(MslWriterTest, AtomicStoreMax_Supported) {
