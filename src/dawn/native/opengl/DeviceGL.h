@@ -206,7 +206,7 @@ class Device final : public DeviceBase {
 
     const GLFormat& GetGLFormat(const Format& format);
 
-    int GetMaxTextureMaxAnisotropy() const;
+    float GetMaxTextureMaxAnisotropy() const;
 
     MaybeError ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor);
     Ref<TextureBase> CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
@@ -302,7 +302,7 @@ class Device final : public DeviceBase {
 
     GLFormatTable mFormatTable;
     std::unique_ptr<ContextEGL> mContext;
-    int mMaxTextureMaxAnisotropy = 0;
+    float mMaxTextureMaxAnisotropy = 0;
 
     // Maintain an internal uniform buffer to store extra information needed by shader emulation for
     // certain texture builtins.

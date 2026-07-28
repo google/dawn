@@ -208,7 +208,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
     if (HasAnisotropicFiltering(gl)) {
-        DAWN_GL_TRY(gl, GetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &mMaxTextureMaxAnisotropy));
+        DAWN_GL_TRY(gl, GetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &mMaxTextureMaxAnisotropy));
     }
 
     DAWN_TRY(DeviceBase::Initialize(descriptor, std::move(queue)));
@@ -580,7 +580,7 @@ const OpenGLFunctions& Device::GetGL(bool makeCurrent) const {
     return mGL;
 }
 
-int Device::GetMaxTextureMaxAnisotropy() const {
+float Device::GetMaxTextureMaxAnisotropy() const {
     return mMaxTextureMaxAnisotropy;
 }
 

@@ -147,11 +147,11 @@ MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
         }
 
         if (HasAnisotropicFiltering(gl)) {
-            auto maxAnisotropy = std::min(
-                self->GetMaxAnisotropy(),
-                static_cast<uint16_t>(ToBackend(self->GetDevice())->GetMaxTextureMaxAnisotropy()));
+            float maxAnisotropy =
+                std::min(static_cast<float>(self->GetMaxAnisotropy()),
+                         ToBackend(self->GetDevice())->GetMaxTextureMaxAnisotropy());
 
-            DAWN_GL_TRY(gl, SamplerParameteri(handle, GL_TEXTURE_MAX_ANISOTROPY, maxAnisotropy));
+            DAWN_GL_TRY(gl, SamplerParameterf(handle, GL_TEXTURE_MAX_ANISOTROPY, maxAnisotropy));
         }
 
         return {};
