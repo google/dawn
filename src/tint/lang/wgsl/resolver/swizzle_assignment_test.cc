@@ -123,11 +123,55 @@ TEST_F(ResolverSwizzleAssignmentTest, InvalidDuplicateComponents) {
               "1:2 error: cannot assign to vector swizzle with duplicate target components");
 }
 
-TEST_F(ResolverSwizzleAssignmentTest, InvalidDuplicateComponentsChainedSwizzle) {
+TEST_F(ResolverSwizzleAssignmentTest, DuplicateComponentsChainedSwizzle_SingleUnique) {
     // var v : vec4f;
     // v.xxy.x = 1.0;
     GlobalVar("v", ty.vec4<f32>(), core::AddressSpace::kPrivate);
     WrapInFunction(Assign(MemberAccessor(Source{{1, 2}}, MemberAccessor("v", "xxy"), "x"), 1_f));
+
+    wgsl::AllowedFeatures allowed_features{};
+    allowed_features.features.insert(wgsl::LanguageFeature::kSwizzleAssignment);
+
+    Resolver resolver{this, allowed_features};
+    EXPECT_TRUE(resolver.Resolve()) << resolver.error();
+}
+
+TEST_F(ResolverSwizzleAssignmentTest, DuplicateComponentsChainedSwizzle_MultipleUnique) {
+    // var v : vec4f;
+    // v.xyy.xy = vec2(1.0, 2.0);
+    GlobalVar("v", ty.vec4<f32>(), core::AddressSpace::kPrivate);
+    WrapInFunction(Assign(MemberAccessor(Source{{1, 2}}, MemberAccessor("v", "xyy"), "xy"),
+                          Call<vec2<f32>>(1_f, 2_f)));
+
+    wgsl::AllowedFeatures allowed_features{};
+    allowed_features.features.insert(wgsl::LanguageFeature::kSwizzleAssignment);
+
+    Resolver resolver{this, allowed_features};
+    EXPECT_TRUE(resolver.Resolve()) << resolver.error();
+}
+
+TEST_F(ResolverSwizzleAssignmentTest, DuplicateComponentsChainedSwizzle_Multiple) {
+    // var v : vec4f;
+    // v.xyy.yy = vec2(1.0, 2.0);
+    GlobalVar("v", ty.vec4<f32>(), core::AddressSpace::kPrivate);
+    WrapInFunction(Assign(MemberAccessor(Source{{1, 2}}, MemberAccessor("v", "xyy"), "yy"),
+                          Call<vec2<f32>>(1_f, 2_f)));
+
+    wgsl::AllowedFeatures allowed_features{};
+    allowed_features.features.insert(wgsl::LanguageFeature::kSwizzleAssignment);
+
+    Resolver resolver{this, allowed_features};
+    EXPECT_FALSE(resolver.Resolve());
+    EXPECT_EQ(r()->error(),
+              "1:2 error: cannot assign to vector swizzle with duplicate target components");
+}
+
+TEST_F(ResolverSwizzleAssignmentTest, DuplicateComponentsChainedSwizzle_MultipleNonUnique) {
+    // var v : vec4f;
+    // v.xxyy.xy = vec2(1.0, 2.0);
+    GlobalVar("v", ty.vec4<f32>(), core::AddressSpace::kPrivate);
+    WrapInFunction(Assign(MemberAccessor(Source{{1, 2}}, MemberAccessor("v", "xxyy"), "xy"),
+                          Call<vec2<f32>>(1_f, 2_f)));
 
     wgsl::AllowedFeatures allowed_features{};
     allowed_features.features.insert(wgsl::LanguageFeature::kSwizzleAssignment);

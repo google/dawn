@@ -3357,8 +3357,9 @@ bool Validator::Assignment(const ast::Statement* a, const core::type::Type* rhs_
     if (!lhs_ref &&
         allowed_features_.features.contains(wgsl::LanguageFeature::kSwizzleAssignment)) {
         lhs_ref = lhs_ty->As<core::type::SwizzleView>();
+        auto const* sem_swizzle = lhs_sem->As<sem::Swizzle>();
 
-        if (!SwizzleAssignment(lhs_sem->As<sem::Swizzle>(), lhs->source)) {
+        if (sem_swizzle && !SwizzleAssignment(sem_swizzle, lhs->source)) {
             return false;
         }
     }
@@ -3771,18 +3772,15 @@ bool Validator::CheckSubgroupMatrixOpOffset(const sem::BuiltinFn* fn,
 }
 
 bool Validator::SwizzleAssignment(const sem::Swizzle* lhs, const Source& source) const {
-    // Check whether swizzle components are duplicated.
-    while (lhs) {
-        tint::Hashset<uint32_t, 4> seen_indices;
-        for (auto index : lhs->Indices()) {
-            if (!seen_indices.Add(index)) {
-                AddError(source) << "cannot assign to vector swizzle with "
-                                    "duplicate target components";
-                return false;
-            }
+    // Check whether the final collapsed swizzle has duplicated components.
+    auto collapsed = sem::CollapseLhsSwizzle(lhs);
+    tint::Hashset<uint32_t, 4> seen_indices;
+    for (auto index : collapsed.indices) {
+        if (!seen_indices.Add(index)) {
+            AddError(source) << "cannot assign to vector swizzle with "
+                                "duplicate target components";
+            return false;
         }
-        // Swizzle views may be chained, so validate inner object too, if applicable.
-        lhs = lhs->Object()->As<sem::Swizzle>();
     }
 
     return true;
