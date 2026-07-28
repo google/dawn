@@ -44,15 +44,14 @@ namespace dawn::wire::client {
 namespace {
 
 // Returns either an error buffer or null, depending on mappedAtCreation.
-[[nodiscard]] WGPUBuffer ReturnOOMAtClient(Device* device, const WGPUBufferDescriptor* descriptor) {
+[[nodiscard]] Buffer* ReturnOOMAtClient(Device* device, const BufferDescriptor* descriptor) {
     if (descriptor->mappedAtCreation) {
         return nullptr;
     }
-    WGPUBufferDescriptor errorBufferDescriptor = *descriptor;
-    WGPUDawnBufferDescriptorErrorInfoFromWireClient errorInfo = {};
-    errorInfo.chain.sType = WGPUSType_DawnBufferDescriptorErrorInfoFromWireClient;
-    errorInfo.outOfMemory = static_cast<WGPUBool>(true);
-    errorBufferDescriptor.nextInChain = &errorInfo.chain;
+    BufferDescriptor errorBufferDescriptor = *descriptor;
+    DawnBufferDescriptorErrorInfoFromWireClient errorInfo = {};
+    errorInfo.outOfMemory = true;
+    errorBufferDescriptor.nextInChain = &errorInfo;
     return device->APICreateErrorBuffer(&errorBufferDescriptor);
 }
 
@@ -187,16 +186,17 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
 };
 
 // static
-WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor) {
+Buffer* Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
     Client* wireClient = device->GetClient();
 
     bool fakeOOMAtWireClientMap = false;
-    for (const auto* chain = descriptor->nextInChain; chain != nullptr; chain = chain->next) {
+    for (const auto* chain = descriptor->nextInChain; chain != nullptr;
+         chain = chain->nextInChain) {
         switch (chain->sType) {
-            case WGPUSType_DawnFakeBufferOOMForTesting: {
+            case wgpu::SType::DawnFakeBufferOOMForTesting: {
                 auto oomForTesting =
-                    reinterpret_cast<const WGPUDawnFakeBufferOOMForTesting*>(chain);
-                fakeOOMAtWireClientMap = (oomForTesting->fakeOOMAtWireClientMap != 0u);
+                    reinterpret_cast<const wgpu::DawnFakeBufferOOMForTesting*>(chain);
+                fakeOOMAtWireClientMap = oomForTesting->fakeOOMAtWireClientMap;
             } break;
             default:
                 break;
@@ -204,9 +204,11 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     }
 
     // Handle client-side error cases.
-    bool mappableForWrite = (descriptor->usage & WGPUBufferUsage_MapWrite) != 0 ||
-                            wgpu::Bool(descriptor->mappedAtCreation);
-    bool mappable = mappableForWrite || (descriptor->usage & WGPUBufferUsage_MapRead) != 0;
+    bool mappableForWrite =
+        (descriptor->usage & wgpu::BufferUsage::MapWrite) != wgpu::BufferUsage::None ||
+        descriptor->mappedAtCreation;
+    bool mappable = mappableForWrite ||
+                    (descriptor->usage & wgpu::BufferUsage::MapRead) != wgpu::BufferUsage::None;
     if (mappable &&
         (descriptor->size >= std::numeric_limits<size_t>::max() || fakeOOMAtWireClientMap)) {
         return ReturnOOMAtClient(device, descriptor);
@@ -235,7 +237,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
 
     DeviceCreateBufferCmd cmd;
     cmd.deviceId = device->GetWireHandle(wireClient).id;
-    cmd.descriptor = descriptor;
+    cmd.descriptor = ToAPI(descriptor);
     // Set the pointer lengths, but the pointed-to data itself won't be serialized as usual (due
     // to skip_serialize). Instead, the custom CommandExtensions below fill that memory.
     cmd.memoryHandleCreateInfoLength = memoryHandleCreateInfoLength;
@@ -269,11 +271,11 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
                              }
                          }});
 
-    return ReturnToAPI(std::move(buffer));
+    return ReturnToAPI2(std::move(buffer));
 }
 
 // static
-WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descriptor) {
+Buffer* Buffer::CreateError(Device* device, const BufferDescriptor* descriptor) {
     if (descriptor->mappedAtCreation) {
         // This codepath isn't used (at the time of this writing). Just return nullptr
         // (pretend there was a mapping OOM), so we don't have to bother mapping the ErrorBuffer
@@ -288,23 +290,24 @@ WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descr
 
     DeviceCreateErrorBufferCmd cmd;
     cmd.self = ToAPI(device);
-    cmd.descriptor = descriptor;
+    cmd.descriptor = ToAPI(descriptor);
     cmd.result = buffer->GetWireHandle(client);
     client->SerializeCommand(cmd);
 
-    return ReturnToAPI(std::move(buffer));
+    return ReturnToAPI2(std::move(buffer));
 }
 
 Buffer::Buffer(const ObjectBaseParams& params,
                Ref<Instance> instance,
                Device* device,
-               const WGPUBufferDescriptor* descriptor)
+               const BufferDescriptor* descriptor)
     : RefCountedWithExternalCount<ObjectWithEventsBase>(params, std::move(instance)),
       mSize(descriptor->size),
-      mUsage(static_cast<wgpu::BufferUsage>(descriptor->usage)),
+      mUsage(descriptor->usage),
       mDestructMemoryHandleOnUnmap(
-          wgpu::Bool(descriptor->mappedAtCreation) &&
-          ((descriptor->usage & (WGPUBufferUsage_MapWrite | WGPUBufferUsage_MapRead)) == 0)),
+          descriptor->mappedAtCreation &&
+          ((descriptor->usage & (wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::MapRead)) ==
+           wgpu::BufferUsage::None)),
       mDevice(device) {}
 
 void Buffer::DeleteThis() {

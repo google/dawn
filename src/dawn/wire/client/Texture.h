@@ -38,12 +38,12 @@ class Device;
 
 class Texture final : public ObjectBase {
   public:
-    static WGPUTexture Create(Device* device, const WGPUTextureDescriptor* descriptor);
-    static WGPUTexture CreateError(Device* device, const WGPUTextureDescriptor* descriptor);
+    static Texture* Create(Device* device, const TextureDescriptor* descriptor);
+    static Texture* CreateError(Device* device, const TextureDescriptor* descriptor);
 
     Texture(const ObjectBaseParams& params,
             const Device* device,
-            const WGPUTextureDescriptor* descriptor);
+            const TextureDescriptor* descriptor);
     ~Texture() override;
 
     ObjectType GetObjectType() const override;
@@ -60,7 +60,7 @@ class Texture final : public ObjectBase {
     wgpu::TextureViewDimension APIGetTextureBindingViewDimension() const;
 
   private:
-    WGPUExtent3D mSize;
+    Extent3D mSize;
     uint32_t mMipLevelCount;
     uint32_t mSampleCount;
     wgpu::TextureDimension mDimension;

@@ -286,8 +286,8 @@ WGPUStatus Adapter::APIGetInfo(WGPUAdapterInfo* info) const {
     return WGPUStatus_Success;
 }
 
-WGPUFuture Adapter::APIRequestDevice(const WGPUDeviceDescriptor* descriptor,
-                                     const WGPURequestDeviceCallbackInfo& callbackInfo) {
+Future Adapter::APIRequestDevice(const DeviceDescriptor* descriptor,
+                                 const WGPURequestDeviceCallbackInfo& callbackInfo) {
     Client* client = GetClient();
     Ref<Device> device = client->Make<Device>(GetInstance(), this, descriptor);
     auto [futureIDInternal, tracked] =
@@ -298,7 +298,7 @@ WGPUFuture Adapter::APIRequestDevice(const WGPUDeviceDescriptor* descriptor,
 
     // Ensure callbacks are not serialized as part of the command, as they cannot be passed between
     // processes.
-    WGPUDeviceDescriptor wireDescriptor = {};
+    DeviceDescriptor wireDescriptor = {};
     if (descriptor) {
         wireDescriptor = *descriptor;
         wireDescriptor.deviceLostCallbackInfo = {};
@@ -311,7 +311,7 @@ WGPUFuture Adapter::APIRequestDevice(const WGPUDeviceDescriptor* descriptor,
     cmd.future = {futureIDInternal};
     cmd.deviceObjectHandle = device->GetWireHandle(client);
     cmd.deviceLostFuture = ToAPI(device->APIGetLostFuture());
-    cmd.descriptor = &wireDescriptor;
+    cmd.descriptor = ToAPI(&wireDescriptor);
 
     client->SerializeCommand(cmd);
     return {futureIDInternal};
@@ -328,8 +328,9 @@ WireResult Client::DoAdapterRequestDeviceCallback(ObjectId instanceId,
                                               featuresCount, features);
 }
 
-WGPUInstance Adapter::APIGetInstance() const {
-    return ReturnToAPI(GetInstance());
+Instance* Adapter::APIGetInstance() const {
+    Ref<Instance> instance = GetInstance();
+    return ReturnToAPI2(std::move(instance));
 }
 
 Device* Adapter::APICreateDevice(const DeviceDescriptor*) {

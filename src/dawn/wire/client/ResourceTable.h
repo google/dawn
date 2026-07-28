@@ -37,14 +37,15 @@
 namespace dawn::wire::client {
 
 class Device;
+struct ResourceTableDescriptor;
 
 class ResourceTable final : public ObjectBase {
   public:
-    static WGPUResourceTable Create(Device* device, const WGPUResourceTableDescriptor* descriptor);
+    static ResourceTable* Create(Device* device, const ResourceTableDescriptor* descriptor);
 
     ResourceTable(const ObjectBaseParams& params,
                   Device* device,
-                  const WGPUResourceTableDescriptor* descriptor);
+                  const ResourceTableDescriptor* descriptor);
     ~ResourceTable() override;
 
     ObjectType GetObjectType() const override;

@@ -49,21 +49,21 @@ bool WireClient::HandleCommands(std::span<const volatile std::byte> commands) {
 
 ReservedBuffer WireClient::ReserveBuffer(WGPUDevice device,
                                          const WGPUBufferDescriptor* descriptor) {
-    return mImpl->ReserveBuffer(device, descriptor);
+    return mImpl->ReserveBuffer(client::FromAPI(device), client::FromAPI(descriptor));
 }
 
 ReservedTexture WireClient::ReserveTexture(WGPUDevice device,
                                            const WGPUTextureDescriptor* descriptor) {
-    return mImpl->ReserveTexture(device, descriptor);
+    return mImpl->ReserveTexture(client::FromAPI(device), client::FromAPI(descriptor));
 }
 
 ReservedSurface WireClient::ReserveSurface(WGPUInstance instance,
                                            const WGPUSurfaceCapabilities* capabilities) {
-    return mImpl->ReserveSurface(instance, capabilities);
+    return mImpl->ReserveSurface(client::FromAPI(instance), client::FromAPI(capabilities));
 }
 
 ReservedInstance WireClient::ReserveInstance(const WGPUInstanceDescriptor* descriptor) {
-    return mImpl->ReserveInstance(descriptor);
+    return mImpl->ReserveInstance(client::FromAPI(descriptor));
 }
 
 void WireClient::ReclaimBufferReservation(const ReservedBuffer& reservation) {

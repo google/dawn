@@ -245,11 +245,11 @@ class Device::DeviceLostEvent : public TrackedEvent {
 Device::Device(const ObjectBaseParams& params,
                Ref<Instance> instance,
                Adapter* adapter,
-               const WGPUDeviceDescriptor* descriptor)
+               const DeviceDescriptor* descriptor)
     : RefCountedWithExternalCount<ObjectWithEventsBase>(params, std::move(instance)),
-      mDeviceLostInfo(
-          AcquireRef(new DeviceLostEvent(GetDeviceLostCallbackInfoOrDefault(descriptor), this))),
-      mCallbackInfos(descriptor),
+      mDeviceLostInfo(AcquireRef(
+          new DeviceLostEvent(GetDeviceLostCallbackInfoOrDefault(ToAPI(descriptor)), this))),
+      mCallbackInfos(ToAPI(descriptor)),
       mAdapter(adapter) {}
 
 ObjectType Device::GetObjectType() const {
@@ -385,23 +385,23 @@ void Device::APIInjectError(wgpu::ErrorType type, StringView message) {
     GetClient()->SerializeCommand(cmd);
 }
 
-WGPUBuffer Device::APICreateBuffer(const WGPUBufferDescriptor* descriptor) {
+Buffer* Device::APICreateBuffer(const BufferDescriptor* descriptor) {
     return Buffer::Create(this, descriptor);
 }
 
-WGPUBuffer Device::APICreateErrorBuffer(const WGPUBufferDescriptor* descriptor) {
+Buffer* Device::APICreateErrorBuffer(const BufferDescriptor* descriptor) {
     return Buffer::CreateError(this, descriptor);
 }
 
-WGPUResourceTable Device::APICreateResourceTable(const WGPUResourceTableDescriptor* descriptor) {
+ResourceTable* Device::APICreateResourceTable(const ResourceTableDescriptor* descriptor) {
     return ResourceTable::Create(this, descriptor);
 }
 
-WGPUTexture Device::APICreateTexture(const WGPUTextureDescriptor* descriptor) {
+Texture* Device::APICreateTexture(const TextureDescriptor* descriptor) {
     return Texture::Create(this, descriptor);
 }
 
-WGPUTexture Device::APICreateErrorTexture(const WGPUTextureDescriptor* descriptor) {
+Texture* Device::APICreateErrorTexture(const TextureDescriptor* descriptor) {
     return Texture::CreateError(this, descriptor);
 }
 
@@ -416,21 +416,20 @@ Queue* Device::APIGetQueue() {
 }
 
 template <typename Event, typename Cmd, typename CallbackInfo, typename Descriptor>
-WGPUFuture Device::CreatePipelineAsync(Descriptor const* descriptor,
-                                       const CallbackInfo& callbackInfo) {
+Future Device::CreatePipelineAsync(Descriptor const* descriptor, const CallbackInfo& callbackInfo) {
     using Pipeline = typename Event::Pipeline;
 
     Client* client = GetClient();
     Ref<Pipeline> pipeline = client->Make<Pipeline>();
     auto [futureIDInternal, tracked] = GetEventManager().TrackEvent(AcquireRef(new Event(
-        callbackInfo, this, pipeline, descriptor ? descriptor->label : WGPUStringView{})));
+        callbackInfo, this, pipeline, descriptor ? ToAPI(descriptor->label) : WGPUStringView{})));
     if (!tracked) {
         return {futureIDInternal};
     }
 
     Cmd cmd;
     cmd.deviceId = GetWireHandle(client).id;
-    cmd.descriptor = descriptor;
+    cmd.descriptor = ToAPI(descriptor);
     cmd.instanceId = GetInstance()->GetWireHandle(client).id;
     cmd.future = {futureIDInternal};
     cmd.pipelineObjectHandle = pipeline->GetWireHandle(client);
@@ -439,8 +438,8 @@ WGPUFuture Device::CreatePipelineAsync(Descriptor const* descriptor,
     return {futureIDInternal};
 }
 
-WGPUFuture Device::APICreateComputePipelineAsync(
-    WGPUComputePipelineDescriptor const* descriptor,
+Future Device::APICreateComputePipelineAsync(
+    const ComputePipelineDescriptor* descriptor,
     const WGPUCreateComputePipelineAsyncCallbackInfo& callbackInfo) {
     return CreatePipelineAsync<CreateComputePipelineEvent, DeviceCreateComputePipelineAsyncCmd>(
         descriptor, callbackInfo);
@@ -453,8 +452,8 @@ WireResult Client::DoDeviceCreateComputePipelineAsyncCallback(ObjectId instanceI
     return SetFutureReady<CreateComputePipelineEvent>(instanceId, future.id, status, message);
 }
 
-WGPUFuture Device::APICreateRenderPipelineAsync(
-    WGPURenderPipelineDescriptor const* descriptor,
+Future Device::APICreateRenderPipelineAsync(
+    const RenderPipelineDescriptor* descriptor,
     const WGPUCreateRenderPipelineAsyncCallbackInfo& callbackInfo) {
     return CreatePipelineAsync<CreateRenderPipelineEvent, DeviceCreateRenderPipelineAsyncCmd>(
         descriptor, callbackInfo);

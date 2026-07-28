@@ -51,7 +51,7 @@ class Instance final : public ObjectBase {
 
     // Validate and initialize the client side state. Note the *actual* native
     // instance is not created via the wire, but gets injected separately.
-    WireResult Initialize(const WGPUInstanceDescriptor* descriptor);
+    WireResult Initialize(const InstanceDescriptor* descriptor);
 
     Future APIRequestAdapter(const RequestAdapterOptions* options,
                              const WGPURequestAdapterCallbackInfo& callbackInfo);
@@ -59,16 +59,16 @@ class Instance final : public ObjectBase {
     void APIProcessEvents();
     WGPUWaitStatus APIWaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS);
 
-    bool APIHasWGSLLanguageFeature(WGPUWGSLLanguageFeatureName feature) const;
-    void APIGetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const;
+    bool APIHasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName feature) const;
+    void APIGetWGSLLanguageFeatures(SupportedWGSLLanguageFeatures* features) const;
 
     Surface* APICreateSurface(const SurfaceDescriptor* desc) const;
 
   private:
-    void GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,
-                            const WGPUDawnWGSLBlocklist* wgslBlocklist);
+    void GatherWGSLFeatures(const DawnWireWGSLControl* wgslControl,
+                            const DawnWGSLBlocklist* wgslBlocklist);
 
-    absl::flat_hash_set<WGPUWGSLLanguageFeatureName> mWGSLFeatures;
+    absl::flat_hash_set<wgpu::WGSLLanguageFeatureName> mWGSLFeatures;
     std::unique_ptr<EventManager> mEventManager;
 };
 

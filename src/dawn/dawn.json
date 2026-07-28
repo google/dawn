@@ -322,7 +322,7 @@
       ]
     },
     "dawn WGSL blocklist": {
-        "tags": ["dawn", "native"],
+        "tags": ["dawn"],
         "category": "structure",
         "chained": "in",
         "chain roots": ["instance descriptor"],
@@ -4124,7 +4124,7 @@
             {"value": 20, "name": "adapter properties D3D", "tags": ["dawn"]},
             {"value": 21, "name": "adapter properties vk", "tags": ["dawn"]},
             {"value": 22, "name": "dawn wire WGSL control", "tags": ["dawn"]},
-            {"value": 23, "name": "dawn WGSL blocklist", "tags": ["dawn", "native"]},
+            {"value": 23, "name": "dawn WGSL blocklist", "tags": ["dawn"]},
             {"value": 24, "name": "dawn drm format capabilities", "tags": ["dawn"]},
             {"value": 25, "name": "shader module compilation options", "tags": ["dawn"]},
             {"value": 26, "name": "color target state expand resolve texture dawn", "tags": ["dawn"]},

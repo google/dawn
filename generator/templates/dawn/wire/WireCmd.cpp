@@ -623,7 +623,7 @@ struct WGPUChainedStructTransfer {
 };
 
 //* Structs that need special handling for [de]serialization code generation.
-{% set SpecialSerializeStructs = ["string view", "dawn injected invalid s type"] %}
+{% set SpecialSerializeStructs = ["string view", "dawn injected invalid s type", "dawn WGSL blocklist"] %}
 
 // Manually define serialization and deserialization for WGPUStringView because
 // it has a special encoding where:

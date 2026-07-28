@@ -95,38 +95,38 @@ void Client::UnregisterAllObjects() {
     }
 }
 
-ReservedBuffer Client::ReserveBuffer(WGPUDevice device, const WGPUBufferDescriptor* descriptor) {
-    Ref<Buffer> buffer = Make<Buffer>(FromAPI(device)->GetInstance(), FromAPI(device), descriptor);
+ReservedBuffer Client::ReserveBuffer(Device* device, const BufferDescriptor* descriptor) {
+    Ref<Buffer> buffer = Make<Buffer>(device->GetInstance(), device, descriptor);
 
     ReservedBuffer result;
     result.handle = buffer->GetWireHandle(this);
-    result.deviceHandle = FromAPI(device)->GetWireHandle(this);
-    result.buffer = ReturnToAPI(std::move(buffer));
+    result.deviceHandle = device->GetWireHandle(this);
+    result.buffer = ToAPI(ReturnToAPI2(std::move(buffer)));
     return result;
 }
 
-ReservedTexture Client::ReserveTexture(WGPUDevice device, const WGPUTextureDescriptor* descriptor) {
-    Ref<Texture> texture = Make<Texture>(FromAPI(device), descriptor);
+ReservedTexture Client::ReserveTexture(Device* device, const TextureDescriptor* descriptor) {
+    Ref<Texture> texture = Make<Texture>(device, descriptor);
 
     ReservedTexture result;
     result.handle = texture->GetWireHandle(this);
-    result.deviceHandle = FromAPI(device)->GetWireHandle(this);
-    result.texture = ReturnToAPI(std::move(texture));
+    result.deviceHandle = device->GetWireHandle(this);
+    result.texture = ToAPI(ReturnToAPI2(std::move(texture)));
     return result;
 }
 
-ReservedSurface Client::ReserveSurface(WGPUInstance instance,
-                                       const WGPUSurfaceCapabilities* capabilities) {
+ReservedSurface Client::ReserveSurface(Instance* instance,
+                                       const SurfaceCapabilities* capabilities) {
     Ref<Surface> surface = Make<Surface>(capabilities);
 
     ReservedSurface result;
     result.handle = surface->GetWireHandle(this);
-    result.instanceHandle = FromAPI(instance)->GetWireHandle(this);
-    result.surface = ReturnToAPI(std::move(surface));
+    result.instanceHandle = instance->GetWireHandle(this);
+    result.surface = ToAPI(ReturnToAPI2(std::move(surface)));
     return result;
 }
 
-ReservedInstance Client::ReserveInstance(const WGPUInstanceDescriptor* descriptor) {
+ReservedInstance Client::ReserveInstance(const InstanceDescriptor* descriptor) {
     Ref<Instance> instance = Make<Instance>();
 
     if (instance->Initialize(descriptor) != WireResult::Success) {
@@ -135,7 +135,7 @@ ReservedInstance Client::ReserveInstance(const WGPUInstanceDescriptor* descripto
 
     ReservedInstance result;
     result.handle = instance->GetWireHandle(this);
-    result.instance = ReturnToAPI(std::move(instance));
+    result.instance = ToAPI(ReturnToAPI2(std::move(instance)));
     return result;
 }
 

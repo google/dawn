@@ -35,59 +35,59 @@
 namespace dawn::wire::client {
 
 // static
-WGPUTexture Texture::Create(Device* device, const WGPUTextureDescriptor* descriptor) {
+Texture* Texture::Create(Device* device, const TextureDescriptor* descriptor) {
     Client* wireClient = device->GetClient();
 
     DeviceCreateTextureCmd cmd;
     cmd.self = ToAPI(device);
-    cmd.descriptor = descriptor;
+    cmd.descriptor = ToAPI(descriptor);
 
     Ref<Texture> texture = wireClient->Make<Texture>(device, descriptor);
     cmd.result = texture->GetWireHandle(wireClient);
 
     wireClient->SerializeCommand(cmd);
 
-    return ReturnToAPI(std::move(texture));
+    return ReturnToAPI2(std::move(texture));
 }
 
 // static
-WGPUTexture Texture::CreateError(Device* device, const WGPUTextureDescriptor* descriptor) {
+Texture* Texture::CreateError(Device* device, const TextureDescriptor* descriptor) {
     Client* client = device->GetClient();
     Ref<Texture> texture = client->Make<Texture>(device, descriptor);
 
     DeviceCreateErrorTextureCmd cmd;
     cmd.self = ToAPI(device);
-    cmd.descriptor = descriptor;
+    cmd.descriptor = ToAPI(descriptor);
     cmd.result = texture->GetWireHandle(client);
     client->SerializeCommand(cmd);
 
-    return ReturnToAPI(std::move(texture));
+    return ReturnToAPI2(std::move(texture));
 }
 
 Texture::Texture(const ObjectBaseParams& params,
                  const Device* device,
-                 const WGPUTextureDescriptor* descriptor)
+                 const TextureDescriptor* descriptor)
     : ObjectBase(params),
       mSize(descriptor->size),
       mMipLevelCount(descriptor->mipLevelCount),
       mSampleCount(descriptor->sampleCount),
-      mDimension(FromAPI(descriptor->dimension) == wgpu::TextureDimension::Undefined
+      mDimension(descriptor->dimension == wgpu::TextureDimension::Undefined
                      ? wgpu::TextureDimension::e2D
-                     : FromAPI(descriptor->dimension)),
-      mFormat(FromAPI(descriptor->format)),
-      mUsage(static_cast<wgpu::TextureUsage>(descriptor->usage)),
+                     : descriptor->dimension),
+      mFormat(descriptor->format),
+      mUsage(descriptor->usage),
       mTextureBindingViewDimension(wgpu::TextureViewDimension::Undefined) {
     // We only set mTextureBindingViewDimension in compatibility mode
     // and if it's undefined we need to set it to the default.
     if (!device->APIHasFeature(WGPUFeatureName_CoreFeaturesAndLimits)) {
-        for (auto* chain = descriptor->nextInChain; chain; chain = chain->next) {
+        for (const auto* chain = descriptor->nextInChain; chain; chain = chain->nextInChain) {
             switch (chain->sType) {
-                case WGPUSType_TextureBindingViewDimension:
+                case wgpu::SType::TextureBindingViewDimension:
                     if (!device->APIHasFeature(WGPUFeatureName_CoreFeaturesAndLimits)) {
-                        WGPUTextureViewDimension viewDimension =
-                            reinterpret_cast<const WGPUTextureBindingViewDimension*>(chain)
+                        wgpu::TextureViewDimension viewDimension =
+                            reinterpret_cast<const TextureBindingViewDimension*>(chain)
                                 ->textureBindingViewDimension;
-                        mTextureBindingViewDimension = FromAPI(viewDimension);
+                        mTextureBindingViewDimension = viewDimension;
                     }
                     break;
                 default:

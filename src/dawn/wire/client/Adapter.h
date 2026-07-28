@@ -55,13 +55,13 @@ class Adapter final : public ObjectWithEventsBase {
     void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
     void SetInfo(const WGPUAdapterInfo* info);
 
-    WGPUInstance APIGetInstance() const;
+    Instance* APIGetInstance() const;
     WGPUStatus APIGetLimits(WGPULimits* limits) const;
     bool APIHasFeature(WGPUFeatureName feature) const;
     WGPUStatus APIGetInfo(WGPUAdapterInfo* info) const;
     void APIGetFeatures(WGPUSupportedFeatures* features) const;
-    WGPUFuture APIRequestDevice(const WGPUDeviceDescriptor* descriptor,
-                                const WGPURequestDeviceCallbackInfo& callbackInfo);
+    Future APIRequestDevice(const DeviceDescriptor* descriptor,
+                            const WGPURequestDeviceCallbackInfo& callbackInfo);
 
     // Unimplementable. Only available in dawn_native.
     Device* APICreateDevice(const DeviceDescriptor*);

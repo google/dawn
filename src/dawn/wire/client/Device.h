@@ -32,6 +32,7 @@
 
 #include <memory>
 #include <optional>
+#include <variant>
 
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/client/ApiObjects_autogen.h"
@@ -52,7 +53,7 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     Device(const ObjectBaseParams& params,
            Ref<Instance> instance,
            Adapter* adapter,
-           const WGPUDeviceDescriptor* descriptor);
+           const DeviceDescriptor* descriptor);
 
     ObjectType GetObjectType() const override;
 
@@ -77,17 +78,17 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     template <typename PipelineT, typename CmdT>
     Ref<PipelineT> CreateErrorPipeline(WGPUStringView label);
 
-    WGPUBuffer APICreateBuffer(const WGPUBufferDescriptor* descriptor);
-    WGPUBuffer APICreateErrorBuffer(const WGPUBufferDescriptor* descriptor);
-    WGPUFuture APICreateComputePipelineAsync(
-        WGPUComputePipelineDescriptor const* descriptor,
+    Buffer* APICreateBuffer(const BufferDescriptor* descriptor);
+    Buffer* APICreateErrorBuffer(const BufferDescriptor* descriptor);
+    Future APICreateComputePipelineAsync(
+        const ComputePipelineDescriptor* descriptor,
         const WGPUCreateComputePipelineAsyncCallbackInfo& callbackInfo);
-    WGPUFuture APICreateRenderPipelineAsync(
-        WGPURenderPipelineDescriptor const* descriptor,
+    Future APICreateRenderPipelineAsync(
+        const RenderPipelineDescriptor* descriptor,
         const WGPUCreateRenderPipelineAsyncCallbackInfo& callbackInfo);
-    WGPUResourceTable APICreateResourceTable(const WGPUResourceTableDescriptor* descriptor);
-    WGPUTexture APICreateTexture(const WGPUTextureDescriptor* descriptor);
-    WGPUTexture APICreateErrorTexture(const WGPUTextureDescriptor* descriptor);
+    ResourceTable* APICreateResourceTable(const ResourceTableDescriptor* descriptor);
+    Texture* APICreateTexture(const TextureDescriptor* descriptor);
+    Texture* APICreateErrorTexture(const TextureDescriptor* descriptor);
 
     WGPUStatus APIGetLimits(WGPULimits* limits) const;
     Future APIGetLostFuture();
@@ -105,7 +106,7 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
               typename Cmd,
               typename CallbackInfo = typename Event::CallbackInfo,
               typename Descriptor = decltype(std::declval<Cmd>().descriptor)>
-    WGPUFuture CreatePipelineAsync(Descriptor const* descriptor, const CallbackInfo& callbackInfo);
+    Future CreatePipelineAsync(Descriptor const* descriptor, const CallbackInfo& callbackInfo);
 
     LimitsAndFeatures mLimitsAndFeatures;
     std::variant<Ref<TrackedEvent>, FutureID> mDeviceLostInfo;

@@ -48,13 +48,13 @@ class Device;
 
 class Buffer final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
   public:
-    static WGPUBuffer Create(Device* device, const WGPUBufferDescriptor* descriptor);
-    static WGPUBuffer CreateError(Device* device, const WGPUBufferDescriptor* descriptor);
+    static Buffer* Create(Device* device, const BufferDescriptor* descriptor);
+    static Buffer* CreateError(Device* device, const BufferDescriptor* descriptor);
 
     Buffer(const ObjectBaseParams& params,
            Ref<Instance> instance,
            Device* device,
-           const WGPUBufferDescriptor* descriptor);
+           const BufferDescriptor* descriptor);
     void DeleteThis() override;
 
     ObjectType GetObjectType() const override;

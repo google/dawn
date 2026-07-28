@@ -38,8 +38,7 @@
 namespace dawn::wire::client {
 
 // static
-WGPUResourceTable ResourceTable::Create(Device* device,
-                                        const WGPUResourceTableDescriptor* descriptor) {
+ResourceTable* ResourceTable::Create(Device* device, const ResourceTableDescriptor* descriptor) {
     if (descriptor->size > kMaxResourceTableSize) {
         return nullptr;
     }
@@ -48,19 +47,19 @@ WGPUResourceTable ResourceTable::Create(Device* device,
 
     DeviceCreateResourceTableCmd cmd;
     cmd.self = ToAPI(device);
-    cmd.descriptor = descriptor;
+    cmd.descriptor = ToAPI(descriptor);
 
     Ref<ResourceTable> table = wireClient->Make<ResourceTable>(device, descriptor);
     cmd.result = table->GetWireHandle(wireClient);
 
     wireClient->SerializeCommand(cmd);
 
-    return ReturnToAPI(std::move(table));
+    return ReturnToAPI2(std::move(table));
 }
 
 ResourceTable::ResourceTable(const ObjectBaseParams& params,
                              Device* device,
-                             const WGPUResourceTableDescriptor* descriptor)
+                             const ResourceTableDescriptor* descriptor)
     : ObjectBase(params), mDevice(device) {
     const LimitsAndFeatures& limitsAndFeatures = device->GetLimitsAndFeatures();
 
