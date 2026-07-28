@@ -70,16 +70,10 @@ struct State {
             b.InsertBefore(ret, [&] {
                 auto* zero = b.Call<msl::ir::BuiltinCall>(ty.u32(), msl::BuiltinFn::kVolatileZero);
                 auto* cond = b.If(b.Equal(zero, b.Constant(core::u32(0))));
-                b.Append(cond->True(), [&] {
-                    if (ret->Value()) {
-                        b.Return(ret->Func(), ret->Value());
-                    } else {
-                        b.Return(ret->Func());
-                    }
-                });
                 b.Exit(ret->Block()->Parent());
+                ret->Remove();
+                cond->True()->Append(ret);
             });
-            ret->Destroy();
         }
     }
 };
