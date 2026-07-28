@@ -72,9 +72,11 @@ class RequestAdapterEvent : public TrackedEvent {
         mStatus = status;
         mMessage = ToString(message);
         if (status == WGPURequestAdapterStatus_Success) {
-            mAdapter->SetInfo(info);
-            mAdapter->SetLimits(limits);
-            mAdapter->SetFeatures(features, featuresCount);
+            mAdapter->SetInfo(FromAPI(info));
+            mAdapter->SetLimits(FromAPI(limits));
+            // TODO(https://crbug.com/526537254): Spanify/Cppify the wire commands API.
+            mAdapter->SetFeatures(DAWN_UNSAFE_TODO(Span<const wgpu::FeatureName>(
+                reinterpret_cast<const wgpu::FeatureName*>(features), featuresCount)));
         }
         return WireResult::Success;
     }

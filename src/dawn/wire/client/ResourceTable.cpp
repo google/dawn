@@ -64,7 +64,8 @@ ResourceTable::ResourceTable(const ObjectBaseParams& params,
     const LimitsAndFeatures& limitsAndFeatures = device->GetLimitsAndFeatures();
 
     uint32_t sizeLimit = 0;
-    if (limitsAndFeatures.HasFeature(WGPUFeatureName_ChromiumExperimentalSamplingResourceTable)) {
+    if (limitsAndFeatures.HasFeature(
+            wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable)) {
         sizeLimit = kMaxResourceTableSize;
     }
 

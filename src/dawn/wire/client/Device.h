@@ -57,8 +57,8 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
 
     ObjectType GetObjectType() const override;
 
-    void SetLimits(const WGPULimits* limits);
-    void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
+    void SetLimits(const Limits* limits);
+    void SetFeatures(Span<const wgpu::FeatureName> features);
 
     bool IsDestroyed() const;
     bool IsKnownLost() const;
@@ -90,11 +90,11 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     Texture* APICreateTexture(const TextureDescriptor* descriptor);
     Texture* APICreateErrorTexture(const TextureDescriptor* descriptor);
 
-    WGPUStatus APIGetLimits(WGPULimits* limits) const;
+    wgpu::Status APIGetLimits(Limits* limits) const;
     Future APIGetLostFuture();
-    bool APIHasFeature(WGPUFeatureName feature) const;
-    void APIGetFeatures(WGPUSupportedFeatures* features) const;
-    WGPUStatus APIGetAdapterInfo(WGPUAdapterInfo* info) const;
+    bool APIHasFeature(wgpu::FeatureName feature) const;
+    void APIGetFeatures(SupportedFeatures* features) const;
+    wgpu::Status APIGetAdapterInfo(AdapterInfo* info) const;
     Adapter* APIGetAdapter() const;
     Queue* APIGetQueue();
 

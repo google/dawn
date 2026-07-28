@@ -79,11 +79,11 @@ Texture::Texture(const ObjectBaseParams& params,
       mTextureBindingViewDimension(wgpu::TextureViewDimension::Undefined) {
     // We only set mTextureBindingViewDimension in compatibility mode
     // and if it's undefined we need to set it to the default.
-    if (!device->APIHasFeature(WGPUFeatureName_CoreFeaturesAndLimits)) {
+    if (!device->APIHasFeature(wgpu::FeatureName::CoreFeaturesAndLimits)) {
         for (const auto* chain = descriptor->nextInChain; chain; chain = chain->nextInChain) {
             switch (chain->sType) {
                 case wgpu::SType::TextureBindingViewDimension:
-                    if (!device->APIHasFeature(WGPUFeatureName_CoreFeaturesAndLimits)) {
+                    if (!device->APIHasFeature(wgpu::FeatureName::CoreFeaturesAndLimits)) {
                         wgpu::TextureViewDimension viewDimension =
                             reinterpret_cast<const TextureBindingViewDimension*>(chain)
                                 ->textureBindingViewDimension;

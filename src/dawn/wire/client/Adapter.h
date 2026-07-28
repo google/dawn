@@ -51,15 +51,15 @@ class Adapter final : public ObjectWithEventsBase {
 
     ObjectType GetObjectType() const override;
 
-    void SetLimits(const WGPULimits* limits);
-    void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
-    void SetInfo(const WGPUAdapterInfo* info);
+    void SetLimits(const Limits* limits);
+    void SetFeatures(Span<const wgpu::FeatureName> features);
+    void SetInfo(const AdapterInfo* info);
 
     Instance* APIGetInstance() const;
-    WGPUStatus APIGetLimits(WGPULimits* limits) const;
-    bool APIHasFeature(WGPUFeatureName feature) const;
-    WGPUStatus APIGetInfo(WGPUAdapterInfo* info) const;
-    void APIGetFeatures(WGPUSupportedFeatures* features) const;
+    wgpu::Status APIGetLimits(Limits* limits) const;
+    bool APIHasFeature(wgpu::FeatureName feature) const;
+    wgpu::Status APIGetInfo(AdapterInfo* info) const;
+    void APIGetFeatures(SupportedFeatures* features) const;
     Future APIRequestDevice(const DeviceDescriptor* descriptor,
                             const WGPURequestDeviceCallbackInfo& callbackInfo);
 
@@ -70,16 +70,17 @@ class Adapter final : public ObjectWithEventsBase {
 
   private:
     LimitsAndFeatures mLimitsAndFeatures;
-    WGPUAdapterInfo mInfo;
+    AdapterInfo mInfo;
     std::string mVendor;
     std::string mArchitecture;
     std::string mDeviceName;
     std::string mDescription;
-    std::vector<WGPUMemoryHeapInfo> mMemoryHeapInfo;
-    WGPUAdapterPropertiesD3D mD3DProperties;
-    WGPUAdapterPropertiesVk mVkProperties;
-    std::vector<WGPUSubgroupMatrixConfig> mSubgroupMatrixConfigs;
-    WGPUDawnAdapterPropertiesPowerPreference mPowerProperties;
+    std::vector<MemoryHeapInfo> mMemoryHeapInfo;
+
+    AdapterPropertiesD3D mD3DProperties;
+    AdapterPropertiesVk mVkProperties;
+    std::vector<SubgroupMatrixConfig> mSubgroupMatrixConfigs;
+    DawnAdapterPropertiesPowerPreference mPowerProperties;
 };
 
 }  // namespace dawn::wire::client

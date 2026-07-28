@@ -291,28 +291,28 @@ void Device::WillDropLastExternalRef() {
     }
 }
 
-WGPUStatus Device::APIGetLimits(WGPULimits* limits) const {
+wgpu::Status Device::APIGetLimits(Limits* limits) const {
     return mLimitsAndFeatures.GetLimits(limits);
 }
 
-bool Device::APIHasFeature(WGPUFeatureName feature) const {
+bool Device::APIHasFeature(wgpu::FeatureName feature) const {
     return mLimitsAndFeatures.HasFeature(feature);
 }
 
-void Device::APIGetFeatures(WGPUSupportedFeatures* features) const {
+void Device::APIGetFeatures(SupportedFeatures* features) const {
     mLimitsAndFeatures.ToSupportedFeatures(features);
 }
 
-WGPUStatus Device::APIGetAdapterInfo(WGPUAdapterInfo* adapterInfo) const {
+wgpu::Status Device::APIGetAdapterInfo(AdapterInfo* adapterInfo) const {
     return mAdapter->APIGetInfo(adapterInfo);
 }
 
-void Device::SetLimits(const WGPULimits* limits) {
+void Device::SetLimits(const Limits* limits) {
     mLimitsAndFeatures.SetLimits(limits);
 }
 
-void Device::SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount) {
-    mLimitsAndFeatures.SetFeatures(features, featuresCount);
+void Device::SetFeatures(Span<const wgpu::FeatureName> features) {
+    mLimitsAndFeatures.SetFeatures(features);
 }
 
 void Device::HandleError(WGPUErrorType errorType, WGPUStringView message) {

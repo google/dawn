@@ -27,6 +27,7 @@
 
 #include "src/dawn/wire/client/LimitsAndFeatures.h"
 
+#include "dawn/wire/client/dawn_platform.h"
 #include "src/dawn/wire/SupportedFeatures.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
@@ -38,68 +39,67 @@ LimitsAndFeatures::LimitsAndFeatures() = default;
 
 LimitsAndFeatures::~LimitsAndFeatures() = default;
 
-WGPUStatus LimitsAndFeatures::GetLimits(WGPULimits* limits) const {
+wgpu::Status LimitsAndFeatures::GetLimits(Limits* limits) const {
     DAWN_ASSERT(limits != nullptr);
     auto* originalNextInChain = limits->nextInChain;
     *limits = mLimits;
     limits->nextInChain = originalNextInChain;
-    // Handle other requiring limits that chained after WGPUSupportedLimits
-    for (auto* chain = limits->nextInChain; chain; chain = chain->next) {
-        // Store the WGPUChainedStruct to restore the chain after assignment.
-        WGPUChainedStruct originalChainedStruct = *chain;
+    // Handle other requiring limits that chained after Limits.
+    for (auto* chain = limits->nextInChain; chain; chain = chain->nextInChain) {
+        // Store the ChainedStruct to restore the chain after assignment.
+        auto originalChainedStruct = *chain;
         switch (chain->sType) {
-            case WGPUSType_CompatibilityModeLimits: {
-                *reinterpret_cast<WGPUCompatibilityModeLimits*>(chain) = mCompatLimits;
+            case wgpu::SType::CompatibilityModeLimits: {
+                *reinterpret_cast<CompatibilityModeLimits*>(chain) = mCompatLimits;
                 break;
             }
-            case WGPUSType_DawnTexelCopyBufferRowAlignmentLimits: {
-                *reinterpret_cast<WGPUDawnTexelCopyBufferRowAlignmentLimits*>(chain) =
+            case wgpu::SType::DawnTexelCopyBufferRowAlignmentLimits: {
+                *reinterpret_cast<DawnTexelCopyBufferRowAlignmentLimits*>(chain) =
                     mTexelCopyBufferRowAlignmentLimits;
                 break;
             }
             default:
                 // Fail if unknown sType found.
-                return WGPUStatus_Error;
+                return wgpu::Status::Error;
         }
         // Restore the chain (sType and next).
         *chain = originalChainedStruct;
     }
-    return WGPUStatus_Success;
+    return wgpu::Status::Success;
 }
 
-bool LimitsAndFeatures::HasFeature(WGPUFeatureName feature) const {
+bool LimitsAndFeatures::HasFeature(wgpu::FeatureName feature) const {
     return mFeatures.contains(feature);
 }
 
-void LimitsAndFeatures::ToSupportedFeatures(WGPUSupportedFeatures* supportedFeatures) const {
+void LimitsAndFeatures::ToSupportedFeatures(SupportedFeatures* supportedFeatures) const {
     if (!supportedFeatures) {
         return;
     }
 
     // This will be freed by wgpuSupportedFeaturesFreeMembers.
-    std::tie(supportedFeatures->featureCount, supportedFeatures->features) =
-        HeapArrayFrom(mFeatures).MoveToRawPointer();
+    supportedFeatures->features = HeapArrayFrom(mFeatures).MoveToSpan();
 }
 
-void LimitsAndFeatures::SetLimits(const WGPULimits* limits) {
+void LimitsAndFeatures::SetLimits(const Limits* limits) {
     DAWN_ASSERT(limits != nullptr);
     mLimits = *limits;
     mLimits.nextInChain = nullptr;
     // Handle other limits that chained after WGPUSupportedLimits
-    for (auto* chain = limits->nextInChain; chain; chain = chain->next) {
+    for (auto* chain = limits->nextInChain; chain; chain = chain->nextInChain) {
         switch (chain->sType) {
-            case WGPUSType_CompatibilityModeLimits: {
-                mCompatLimits = *reinterpret_cast<WGPUCompatibilityModeLimits*>(chain);
-                DAWN_ASSERT(mCompatLimits.chain.sType == WGPUSType_CompatibilityModeLimits);
-                mCompatLimits.chain.next = nullptr;
+            case wgpu::SType::CompatibilityModeLimits: {
+                mCompatLimits = *reinterpret_cast<CompatibilityModeLimits*>(chain);
+                DAWN_ASSERT(mCompatLimits.sType == wgpu::SType::CompatibilityModeLimits);
+                mCompatLimits.nextInChain = nullptr;
                 break;
             }
-            case WGPUSType_DawnTexelCopyBufferRowAlignmentLimits: {
+            case wgpu::SType::DawnTexelCopyBufferRowAlignmentLimits: {
                 mTexelCopyBufferRowAlignmentLimits =
-                    *reinterpret_cast<WGPUDawnTexelCopyBufferRowAlignmentLimits*>(chain);
-                DAWN_ASSERT(mTexelCopyBufferRowAlignmentLimits.chain.sType ==
-                            WGPUSType_DawnTexelCopyBufferRowAlignmentLimits);
-                mTexelCopyBufferRowAlignmentLimits.chain.next = nullptr;
+                    *reinterpret_cast<DawnTexelCopyBufferRowAlignmentLimits*>(chain);
+                DAWN_ASSERT(mTexelCopyBufferRowAlignmentLimits.sType ==
+                            wgpu::SType::DawnTexelCopyBufferRowAlignmentLimits);
+                mTexelCopyBufferRowAlignmentLimits.nextInChain = nullptr;
                 break;
             }
             default:
@@ -108,15 +108,14 @@ void LimitsAndFeatures::SetLimits(const WGPULimits* limits) {
     }
 }
 
-void LimitsAndFeatures::SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount) {
-    DAWN_ASSERT(features != nullptr || featuresCount == 0);
-    for (uint32_t i = 0; i < featuresCount; ++i) {
+void LimitsAndFeatures::SetFeatures(Span<const wgpu::FeatureName> features) {
+    for (wgpu::FeatureName feature : features) {
         // Filter out features that the server supports, but the client does not.
         // (Could be different versions)
-        if (!IsFeatureSupported(DAWN_UNSAFE_TODO(features[i]))) {
+        if (!IsFeatureSupported(ToAPI(feature))) {
             continue;
         }
-        mFeatures.insert(DAWN_UNSAFE_TODO(features[i]));
+        mFeatures.insert(feature);
     }
 }
 
