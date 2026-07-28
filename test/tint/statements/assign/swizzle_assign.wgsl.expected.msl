@@ -1,6 +1,18 @@
 #include <metal_stdlib>
 using namespace metal;
 
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
 struct Buf {
   /* 0x0000 */ uint4 res;
 };
@@ -8,25 +20,33 @@ struct Buf {
 struct tint_module_vars_struct {
   device Buf* buf;
 };
+const constant tint_array<uint, 3> v_1 = tint_array<uint, 3>{2u, 1u, 0u};
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v_1(device Buf* buf [[buffer(0)]]) {
+kernel void v_2(device Buf* buf [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.buf=buf};
+  uint idx = 0u;
   uint4 v = uint4(1u, 2u, 3u, 4u);
-  uint4 const v_2 = v;
-  v = uint4(v_2.x, uint2(5u, 6u).y, uint2(5u, 6u).x, v_2.w);
   uint4 const v_3 = v;
-  v = uint4(v_3.x, uint2(99u, 100u).y, uint2(99u, 100u).x, v_3.w);
+  v = uint4(v_3.x, uint2(5u, 6u).y, uint2(5u, 6u).x, v_3.w);
+  uint4 const v_4 = v;
+  v = uint4(v_4.x, uint2(99u, 100u).y, uint2(99u, 100u).x, v_4.w);
   v.z = 200u;
-  uint3 const v_4 = (v.xyz * uint3(100u));
-  v = uint4(v_4.x, v_4.y, v_4.z, v.w);
+  uint3 const v_5 = (v.xyz * uint3(100u));
+  v = uint4(v_5.x, v_5.y, v_5.z, v.w);
+  v.y = 300u;
+  v[min(v_1[min(idx, 2u)], 3u)] = 400u;
+  v.x = (v.x + 500u);
   device uint4* const p = (&(*tint_module_vars.buf).res);
   (*p) = uint4(uint4(0u).x, uint4(0u).y, uint4(0u).z, uint4(0u).w);
-  uint4 const v_5 = (*p);
-  (*p) = uint4(v_5.x, uint2(1u, 2u).y, uint2(1u, 2u).x, v_5.w);
   uint4 const v_6 = (*p);
-  (*p) = uint4(v_6.x, uint2(3u, 4u).y, uint2(3u, 4u).x, v_6.w);
+  (*p) = uint4(v_6.x, uint2(1u, 2u).y, uint2(1u, 2u).x, v_6.w);
+  uint4 const v_7 = (*p);
+  (*p) = uint4(v_7.x, uint2(3u, 4u).y, uint2(3u, 4u).x, v_7.w);
   (*p).z = 5u;
-  uint3 const v_7 = ((*p).xyz + uint3(10u));
-  (*p) = uint4(v_7.x, v_7.y, v_7.z, (*p).w);
+  uint3 const v_8 = ((*p).xyz + uint3(10u));
+  (*p) = uint4(v_8.x, v_8.y, v_8.z, (*p).w);
+  (*p).y = 5u;
+  (*p)[min(v_1[min(idx, 2u)], 3u)] = 6u;
+  (*p).x = ((*p).x + 7u);
 }

@@ -2023,10 +2023,17 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
         return nullptr;
     }
 
-    // If we're extracting from a memory view that will need to be loaded, we return a reference.
-    if (memory_view && !memory_view->Is<core::type::SwizzleView>()) {
-        ty =
-            b.create<core::type::Reference>(memory_view->AddressSpace(), ty, memory_view->Access());
+    // If we're extracting from a memory view, we return a reference (which will need to be loaded)
+    // or a swizzle view (which acts as a virtualized assignment target).
+    if (memory_view) {
+        if (memory_view->Is<core::type::SwizzleView>()) {
+            ty = b.create<core::type::SwizzleView>(
+                memory_view->AddressSpace(), ty, memory_view->Access(),
+                storage_ty->As<core::type::Vector>()->Width(), 1u);
+        } else {
+            ty = b.create<core::type::Reference>(memory_view->AddressSpace(), ty,
+                                                 memory_view->Access());
+        }
     }
 
     const core::constant::Value* val = nullptr;

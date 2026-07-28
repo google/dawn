@@ -461,13 +461,30 @@ class Impl {
         }
 
         auto b = builder_.Append(current_block_);
-        const auto* sem_swizzle = program_.Sem().Get<sem::Swizzle>(stmt->lhs);
+        // TODO(crbug.com/488394907): Refactor swizzle assignment logic out of program_to_ir and
+        // into an IR transform pass as it's gotten too complicated to be inline here.
+        const auto* sem_lhs = program_.Sem().Get<sem::ValueExpression>(stmt->lhs);
+        auto* sem_idx = sem_lhs->As<sem::IndexAccessorExpression>();
+        auto* sem_swizzle = sem_lhs->As<sem::Swizzle>();
+        // If assigning to a an index accessor, check whether it's indexing into a swizzle.
+        if (sem_idx && sem_idx->Object()->Type()->Is<core::type::SwizzleView>()) {
+            sem_swizzle = sem_idx->Object()->As<sem::Swizzle>();
+        }
+
         if (sem_swizzle) {
             sem::CollapsedSwizzle swizzle = sem::CollapseLhsSwizzle(sem_swizzle);
             // Evaluate pointer to swizzled vector.
             auto lhs_vec_ptr = EmitValueExpression(swizzle.vector->Declaration());
-            auto* rhs_val = EmitValueExpression(stmt->rhs);
 
+            if (sem_idx) {
+                auto* idx_val = EmitValueExpression(sem_idx->Index()->Declaration());
+                auto* rhs_val = EmitValueExpression(stmt->rhs);
+                auto* target_idx = GetIndexIntoSwizzle(swizzle, idx_val);
+                b.StoreVectorElement(lhs_vec_ptr, target_idx, rhs_val);
+                return;
+            }
+
+            auto* rhs_val = EmitValueExpression(stmt->rhs);
             if (swizzle.indices.Length() == 1) {
                 b.StoreVectorElement(lhs_vec_ptr, b.Constant(u32(swizzle.indices[0])), rhs_val);
             } else {
@@ -504,12 +521,31 @@ class Impl {
     }
 
     void EmitCompoundAssignment(const ast::CompoundAssignmentStatement* stmt) {
-        const auto* sem_swizzle = program_.Sem().Get<sem::Swizzle>(stmt->lhs);
+        // TODO(crbug.com/488394907): Refactor swizzle assignment logic out of program_to_ir and
+        // into an IR transform pass as it's gotten too complicated to be inline here.
+        const auto* sem_lhs = program_.Sem().Get<sem::ValueExpression>(stmt->lhs);
+        auto* sem_idx = sem_lhs->As<sem::IndexAccessorExpression>();
+        auto* sem_swizzle = sem_lhs->As<sem::Swizzle>();
+        // If assigning to a an index accessor, check whether it's indexing into a swizzle.
+        if (sem_idx && sem_idx->Object()->Type()->Is<core::type::SwizzleView>()) {
+            sem_swizzle = sem_idx->Object()->As<sem::Swizzle>();
+        }
+
         if (sem_swizzle && sem_swizzle->Type()->Is<core::type::SwizzleView>()) {
             auto b = builder_.Append(current_block_);
 
             sem::CollapsedSwizzle swizzle = sem::CollapseLhsSwizzle(sem_swizzle);
             auto* lhs_vec_ptr = EmitValueExpression(swizzle.vector->Declaration());
+
+            if (sem_idx) {
+                auto* idx_val = EmitValueExpression(sem_idx->Index()->Declaration());
+                auto* target_idx = GetIndexIntoSwizzle(swizzle, idx_val);
+                auto* lhs_val = b.LoadVectorElement(lhs_vec_ptr, target_idx);
+                auto* rhs_val = EmitValueExpression(stmt->rhs);
+                auto* inst = current_block_->Append(BinaryOp(lhs_val->Result(), rhs_val, stmt->op));
+                b.StoreVectorElement(lhs_vec_ptr, target_idx, inst);
+                return;
+            }
             auto* lhs_ty = sem_swizzle->Type()->As<core::type::SwizzleView>()->StoreType();
 
             // Single element swizzles with a swizzle view type only result from chained swizzles,
@@ -607,6 +643,30 @@ class Impl {
 
         // Construct the result vector.
         return b.Construct(vec_ty->Clone(clone_ctx_.type_ctx), new_vec_args)->Result();
+    }
+
+    core::ir::Value* GetIndexIntoSwizzle(const sem::CollapsedSwizzle& swizzle,
+                                         core::ir::Value* idx_val) {
+        auto b = builder_.Append(current_block_);
+
+        // If the index accessor is constant, get a direct index into the swizzled vector.
+        if (auto* const_val = idx_val->As<core::ir::Constant>()) {
+            uint32_t i = const_val->Value()->ValueAs<uint32_t>();
+            return b.Constant(u32(swizzle.indices[i]));
+        }
+
+        // Otherwise, construct an array of the swizzle indices.
+        tint::Vector<const core::constant::Value*, 4> indices;
+        for (auto idx : swizzle.indices) {
+            indices.Push(b.ConstantValue(u32(idx)));
+        }
+        auto* arr_ty =
+            b.ir.Types().array(b.ir.Types().u32(), static_cast<uint32_t>(swizzle.indices.Length()));
+        auto* arr = b.Composite(arr_ty, std::move(indices));
+
+        // Index into the array with the non-constant index accessor value.
+        auto* access = b.Access(b.ir.Types().u32(), arr, idx_val);
+        return access->Result();
     }
 
     void EmitBlock(const ast::BlockStatement* block) {
