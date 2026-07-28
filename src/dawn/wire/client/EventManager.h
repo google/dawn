@@ -28,8 +28,6 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_EVENTMANAGER_H_
 #define SRC_DAWN_WIRE_CLIENT_EVENTMANAGER_H_
 
-#include <webgpu/webgpu.h>
-
 #include <atomic>
 #include <cstddef>
 #include <functional>
@@ -38,6 +36,7 @@
 #include <mutex>
 #include <utility>
 
+#include "dawn/wire/client/wgpu_structs_autogen.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/FutureUtils.h"
 #include "src/dawn/common/MutexProtected.h"
@@ -45,6 +44,7 @@
 #include "src/dawn/common/RefCounted.h"
 #include "src/dawn/wire/WireResult.h"
 #include "src/utils/non_movable.h"
+#include "src/utils/span.h"
 
 namespace dawn::wire::client {
 
@@ -161,7 +161,7 @@ class EventManager final : NonMovable {
     }
 
     void ProcessPollEvents();
-    WGPUWaitStatus WaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS);
+    wgpu::WaitStatus WaitAny(Span<FutureWaitInfo> infos, uint64_t timeoutNS);
 
   private:
     const size_t mTimedWaitAnyMaxCount = 0;

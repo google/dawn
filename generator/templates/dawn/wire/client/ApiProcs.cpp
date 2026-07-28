@@ -54,7 +54,7 @@
                 using {{varName}}SpanT = {% if arg.annotation == "const*" %}const {% endif %}std::byte;
                 auto {{varName}}Ptr = reinterpret_cast<{{varName}}SpanT*>({{varName}});
             {% else %}
-                using {{varName}}SpanT = std::remove_pointer_t<{% if arg.type.category == "object" %}{{client}}::{% endif %}{{decorate(as_wire_clientType(arg.type), arg)}}>;
+                using {{varName}}SpanT = std::remove_pointer_t<{% if arg.type.category in ["object", "structure"] %}{{client}}::{% endif %}{{decorate(as_wire_clientType(arg.type), arg)}}>;
                 auto {{varName}}Ptr = {{client}}::FromAPI({{varName}});
             {% endif %}
             // SAFETY: The webgpu.h user is required to pass valid ranges of objects.

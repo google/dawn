@@ -244,8 +244,8 @@ void Instance::APIProcessEvents() {
     GetEventManager().ProcessPollEvents();
 }
 
-WGPUWaitStatus Instance::APIWaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS) {
-    return GetEventManager().WaitAny(count, infos, timeoutNS);
+wgpu::WaitStatus Instance::APIWaitAny(Span<FutureWaitInfo> infos, uint64_t timeoutNS) {
+    return GetEventManager().WaitAny(infos, timeoutNS);
 }
 
 void Instance::GatherWGSLFeatures(const DawnWireWGSLControl* wgslControl,

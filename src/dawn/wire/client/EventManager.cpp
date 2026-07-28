@@ -156,7 +156,7 @@ void EventManager::ProcessPollEvents() {
 }
 
 namespace {
-bool UpdateAnyCompletedOrReady(std::span<WGPUFutureWaitInfo> waitInfos,
+bool UpdateAnyCompletedOrReady(Span<FutureWaitInfo> waitInfos,
                                const EventManager::EventMap& allEvents,
                                EventManager::EventMap* eventsToComplete) {
     DAWN_ASSERT(eventsToComplete->empty());
@@ -183,35 +183,34 @@ bool UpdateAnyCompletedOrReady(std::span<WGPUFutureWaitInfo> waitInfos,
 }
 }  // anonymous namespace
 
-WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS) {
+wgpu::WaitStatus EventManager::WaitAny(Span<FutureWaitInfo> infos, uint64_t timeoutNS) {
     if (timeoutNS > 0) {
         if (mTimedWaitAnyMaxCount == 0) {
             dawn::ErrorLog() << "Instance only supports timed wait anys if "
                                 "WGPUInstanceFeatureName_TimedWaitAny is enabled.";
-            return WGPUWaitStatus_Error;
+            return wgpu::WaitStatus::Error;
         }
-        if (count > mTimedWaitAnyMaxCount) {
+        if (infos.size() > mTimedWaitAnyMaxCount) {
             dawn::ErrorLog() << "Instance only supports up to (" << mTimedWaitAnyMaxCount
                              << ") timed wait anys.";
-            return WGPUWaitStatus_Error;
+            return wgpu::WaitStatus::Error;
         }
     }
 
-    if (count == 0) {
-        return WGPUWaitStatus_Success;
+    if (infos.empty()) {
+        return wgpu::WaitStatus::Success;
     }
 
     // Since the user can specify the FutureIDs in any order, we need to use another ordered map
     // here to ensure that the result is ordered for JS event ordering.
-    auto waitInfos = std::span(infos, count);
     EventMap eventsToComplete;
     bool anyCompleted = mTrackedEvents.ConstUse([&](auto trackedEvents) {
-        if (UpdateAnyCompletedOrReady(waitInfos, *trackedEvents, &eventsToComplete)) {
+        if (UpdateAnyCompletedOrReady(infos, *trackedEvents, &eventsToComplete)) {
             return true;
         }
         if (timeoutNS > 0) {
             return trackedEvents.WaitFor(Nanoseconds(timeoutNS), [&](const EventMap& events) {
-                return UpdateAnyCompletedOrReady(waitInfos, events, &eventsToComplete);
+                return UpdateAnyCompletedOrReady(infos, events, &eventsToComplete);
             });
         }
         return false;
@@ -228,7 +227,7 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
         }
     });
 
-    return anyCompleted ? WGPUWaitStatus_Success : WGPUWaitStatus_TimedOut;
+    return anyCompleted ? wgpu::WaitStatus::Success : wgpu::WaitStatus::TimedOut;
 }
 
 }  // namespace dawn::wire::client

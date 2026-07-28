@@ -250,7 +250,6 @@
             "BufferReadMappedRange",
             "BufferWriteMappedRange",
             "ComputePassEncoderSetImmediates",
-            "InstanceWaitAny",
             "QueueSubmit",
             "QueueWriteBuffer",
             "QueueWriteTexture",

@@ -57,7 +57,7 @@ class Instance final : public ObjectBase {
                              const WGPURequestAdapterCallbackInfo& callbackInfo);
 
     void APIProcessEvents();
-    WGPUWaitStatus APIWaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS);
+    wgpu::WaitStatus APIWaitAny(Span<FutureWaitInfo> infos, uint64_t timeoutNS);
 
     bool APIHasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName feature) const;
     void APIGetWGSLLanguageFeatures(SupportedWGSLLanguageFeatures* features) const;
