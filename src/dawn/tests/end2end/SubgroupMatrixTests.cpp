@@ -1517,5 +1517,177 @@ DAWN_INSTANTIATE_TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest,
                             1024u,
                         });
 
+// Test loading from workgroup address space and storing to storage address space.
+// The spec states that subgroupMatrixLoad/Store can operate on both workgroup and storage.
+class SubgroupMatrix_WorkgroupLoadStoreTest : public DawnTestWithParams<MatrixStoreParams> {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> features;
+        if (SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix})) {
+            features.push_back(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix);
+        }
+        if (SupportsFeatures({wgpu::FeatureName::ShaderF16})) {
+            features.push_back(wgpu::FeatureName::ShaderF16);
+        }
+        return features;
+    }
+
+    wgpu::ComputePipeline GetComputePipelineFromSubgroupMatrixConfig(
+        const wgpu::SubgroupMatrixConfig& config,
+        uint32_t subgroupMaxSize,
+        bool columnMajor) {
+        std::ostringstream shader;
+        shader << "enable chromium_experimental_subgroup_matrix;\n";
+        if (config.componentType == wgpu::SubgroupMatrixComponentType::F16 ||
+            config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16) {
+            shader << "enable f16;\n";
+        }
+        shader << "\n";
+        shader << "alias ComponentType = " << ComponentTypeToWgslType(config.componentType)
+               << ";\n";
+        shader << "alias ArrayType = " << ComponentTypeToScalarShaderType(config.componentType)
+               << ";\n\n";
+        shader << "alias InputType = subgroup_matrix_left<ComponentType, K, M>;\n";
+        shader << "const K = " << config.K << ";\n";
+        shader << "const M = " << config.M << ";\n";
+
+        shader << "const kArraySize = K * M";
+        if (Is8Bit(config.componentType)) {
+            shader << " / 4";
+        }
+        shader << ";\n";
+
+        shader << "const SubgroupMaxSize = " << subgroupMaxSize << ";\n";
+
+        shader << "const kStride = " << (columnMajor ? "M" : "K");
+        if (Is8Bit(config.componentType)) {
+            shader << " / 4";
+        }
+        shader << ";\n";
+
+        shader << R"(
+@group(0) @binding(0) var<storage, read>       input : array<ArrayType, kArraySize>;
+@group(0) @binding(1) var<storage, read_write> output : array<ArrayType, kArraySize>;
+
+var<workgroup> wg_data : array<ArrayType, kArraySize>;
+
+@compute @workgroup_size(SubgroupMaxSize)
+fn main(@builtin(local_invocation_index) lid: u32) {
+  // Copy data from storage to workgroup memory.
+  for (var i = lid; i < kArraySize; i += SubgroupMaxSize) {
+    wg_data[i] = input[i];
+  }
+  workgroupBarrier();
+
+  // Load the matrix from workgroup memory.
+)";
+
+        if (columnMajor) {
+            shader << "  let mat = subgroupMatrixLoad<InputType, col_major>(&wg_data, 0, "
+                      "kStride);\n";
+            shader << "  // Store to storage buffer.\n";
+            shader << "  subgroupMatrixStore<col_major>(&output, 0, mat, kStride);\n";
+        } else {
+            shader << "  let mat = subgroupMatrixLoad<InputType, row_major>(&wg_data, 0, "
+                      "kStride);\n";
+            shader << "  // Store to storage buffer.\n";
+            shader << "  subgroupMatrixStore<row_major>(&output, 0, mat, kStride);\n";
+        }
+
+        shader << "}\n";
+
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = utils::CreateShaderModule(device, shader.str());
+        return device.CreateComputePipeline(&csDesc);
+    }
+
+    void TestSubgroupMatrixConfig(const wgpu::SubgroupMatrixConfig& config,
+                                  uint32_t subgroupMaxSize,
+                                  bool columnMajor) {
+        wgpu::ComputePipeline pipeline =
+            GetComputePipelineFromSubgroupMatrixConfig(config, subgroupMaxSize, columnMajor);
+
+        Matrix inputMatrix(config.K, config.M, config.componentType, columnMajor);
+        inputMatrix.Fill(0);
+
+        // Create the input buffer.
+        wgpu::BufferDescriptor inputDescriptor{
+            .usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage,
+            .size = inputMatrix.TotalByteSize(),
+            .mappedAtCreation = true,
+        };
+        wgpu::Buffer inputBuffer = device.CreateBuffer(&inputDescriptor);
+        memcpy(inputBuffer.GetMappedRange(), inputMatrix.data, inputMatrix.TotalByteSize());
+        inputBuffer.Unmap();
+
+        // Create the output buffer.
+        wgpu::BufferDescriptor outputDescriptor{
+            .usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage,
+            .size = inputMatrix.TotalByteSize(),
+        };
+        wgpu::Buffer output = device.CreateBuffer(&outputDescriptor);
+
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {{0, inputBuffer}, {1, output}});
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // Verify: data loaded from workgroup and stored to storage should match the original input.
+        EXPECT_BUFFER_U8_RANGE_EQ(inputMatrix.data, output, 0, inputMatrix.TotalByteSize())
+            << config;
+    }
+};
+
+// Test loading from workgroup address space and storing to storage.
+TEST_P(SubgroupMatrix_WorkgroupLoadStoreTest, WorkgroupLoadStore) {
+    DAWN_TEST_UNSUPPORTED_IF(
+        !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
+
+    bool columnMajor = GetParam().mInputColumnMajor;
+
+    // Query the supported subgroup matrix configurations.
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
+    info.nextInChain = &subgroupMatrixConfigs;
+    ASSERT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
+
+    for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
+        auto& config = subgroupMatrixConfigs.configs[i];
+
+        // TODO(crbug.com/512455144): Support 8-bit subgroup matrix loads from workgroup memory in
+        // the HLSL writer.
+        if (IsD3D12() && Is8Bit(config.componentType)) {
+            std::cout << "Skipping config: " << config << "\n";
+            continue;
+        }
+
+        if ((IsWindows() && IsAMD() && IsD3D12()) && (CrashesOnRX9060XT(config, false))) {
+            std::cout << "Skipping config: " << config << "\n";
+            continue;
+        }
+
+        TestSubgroupMatrixConfig(config, info.subgroupMaxSize, columnMajor);
+    }
+}
+
+DAWN_INSTANTIATE_TEST_P(SubgroupMatrix_WorkgroupLoadStoreTest,
+                        {
+                            D3D12Backend(),
+                            MetalBackend(),
+                            VulkanBackend(),
+                        },
+                        {
+                            // Column-major or row-major
+                            true,
+                            false,
+                        });
+
 }  // anonymous namespace
 }  // namespace dawn
