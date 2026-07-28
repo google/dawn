@@ -2400,6 +2400,22 @@ TEST_F(IR_ValidatorTest, Function_Param_Color_Bool) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_Return_Struct_Color_NonEntryPoint) {
+    IOAttributes attr;
+    attr.color = 0;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("pos"), ty.vec4f(), attr},
+                                               });
+
+    auto* f = b.Function("my_func", str_ty);
+    b.Append(f->Block(), [&] { b.Return(f, b.Zero(str_ty)); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_Param_InputIndexAttachment) {
     auto* f = FragmentEntryPoint("my_func");
 

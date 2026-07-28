@@ -403,7 +403,8 @@ constexpr IOAttributeChecker kColorChecker{
     .kind = IOAttributeKind::kColor,
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
     .valid_io_kinds =
-        EnumSet<ShaderIOKind>{ShaderIOKind::kInputParam, ShaderIOKind::kModuleScopeVar},
+        EnumSet<ShaderIOKind>{ShaderIOKind::kInputParam, ShaderIOKind::kModuleScopeVar,
+                              ShaderIOKind::kResultValue},
     .check = [](const core::type::Type*, const IOAttributes&, const Properties&, IOAttributeUsage)
         -> Result<SuccessType, std::string> { return Success; },
     .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
