@@ -210,9 +210,11 @@ tint_target_add_external_dependencies(tint_lang_core_ir_transform_test test
   "src_utils"
 )
 
+if(TINT_BUILD_FUZZERS)
 ################################################################################
 # Target:    tint_lang_core_ir_transform_fuzz
 # Kind:      fuzz
+# Condition: TINT_BUILD_FUZZERS
 ################################################################################
 tint_add_target(tint_lang_core_ir_transform_fuzz fuzz
   lang/core/ir/transform/array_length_from_uniform_fuzz.cc
@@ -264,3 +266,5 @@ tint_target_add_dependencies(tint_lang_core_ir_transform_fuzz fuzz
 tint_target_add_external_dependencies(tint_lang_core_ir_transform_fuzz fuzz
   "src_utils"
 )
+
+endif(TINT_BUILD_FUZZERS)

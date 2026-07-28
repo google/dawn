@@ -159,3 +159,8 @@ cc_library(
   visibility = ["//visibility:public"],
 )
 
+alias(
+  name = "tint_build_fuzzers",
+  actual = "//src/tint:tint_build_fuzzers_true",
+)
+

@@ -122,6 +122,11 @@ cc_library(
 )
 
 alias(
+  name = "tint_build_fuzzers",
+  actual = "//src/tint:tint_build_fuzzers_true",
+)
+
+alias(
   name = "tint_build_wgsl_reader",
   actual = "//src/tint:tint_build_wgsl_reader_true",
 )
@@ -129,5 +134,13 @@ alias(
 alias(
   name = "tint_build_wgsl_writer",
   actual = "//src/tint:tint_build_wgsl_writer_true",
+)
+
+selects.config_setting_group(
+    name = "tint_build_fuzzers_and_tint_build_wgsl_writer",
+    match_all = [
+        ":tint_build_fuzzers",
+        ":tint_build_wgsl_writer",
+    ],
 )
 

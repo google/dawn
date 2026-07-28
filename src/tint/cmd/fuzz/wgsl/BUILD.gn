@@ -38,7 +38,7 @@ import("../../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
-if (tint_build_wgsl_reader) {
+if (tint_build_fuzzers && tint_build_wgsl_reader) {
   tint_fuzz_source_set("fuzz") {
     sources = [
       "fuzz.cc",
@@ -78,7 +78,7 @@ if (tint_build_wgsl_reader) {
     }
   }
 }
-if (tint_build_wgsl_reader) {
+if (tint_build_fuzzers && tint_build_wgsl_reader) {
   tint_fuzzer_test("wgsl") {
     output_name = "tint_wgsl_fuzzer"
     sources = [ "main_fuzz.cc" ]

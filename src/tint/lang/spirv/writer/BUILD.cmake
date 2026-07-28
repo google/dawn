@@ -145,11 +145,11 @@ tint_target_add_external_dependencies(tint_lang_spirv_writer_test test
 )
 
 endif(TINT_BUILD_SPV_WRITER)
-if(TINT_BUILD_SPV_WRITER)
+if(TINT_BUILD_FUZZERS AND TINT_BUILD_SPV_WRITER)
 ################################################################################
 # Target:    tint_lang_spirv_writer_fuzz
 # Kind:      fuzz
-# Condition: TINT_BUILD_SPV_WRITER
+# Condition: TINT_BUILD_FUZZERS AND TINT_BUILD_SPV_WRITER
 ################################################################################
 tint_add_target(tint_lang_spirv_writer_fuzz fuzz
   lang/spirv/writer/writer_fuzz.cc
@@ -194,4 +194,4 @@ if(TINT_BUILD_FUZZER_VULKAN_SUPPORT)
   )
 endif(TINT_BUILD_FUZZER_VULKAN_SUPPORT)
 
-endif(TINT_BUILD_SPV_WRITER)
+endif(TINT_BUILD_FUZZERS AND TINT_BUILD_SPV_WRITER)

@@ -34,11 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
-if(TINT_BUILD_WGSL_READER)
+if(TINT_BUILD_FUZZERS AND TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_cmd_fuzz_wgsl_fuzz_cmd
 # Kind:      fuzz_cmd
-# Condition: TINT_BUILD_WGSL_READER
+# Condition: TINT_BUILD_FUZZERS AND TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
   cmd/fuzz/wgsl/main_fuzz.cc
@@ -114,12 +114,12 @@ endif(TINT_BUILD_WGSL_WRITER)
 
 tint_target_set_output_name(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd "tint_wgsl_fuzzer")
 
-endif(TINT_BUILD_WGSL_READER)
-if(TINT_BUILD_WGSL_READER)
+endif(TINT_BUILD_FUZZERS AND TINT_BUILD_WGSL_READER)
+if(TINT_BUILD_FUZZERS AND TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_cmd_fuzz_wgsl_fuzz
 # Kind:      fuzz
-# Condition: TINT_BUILD_WGSL_READER
+# Condition: TINT_BUILD_FUZZERS AND TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_cmd_fuzz_wgsl_fuzz fuzz
   cmd/fuzz/wgsl/fuzz.cc
@@ -164,4 +164,4 @@ if(TINT_BUILD_WGSL_WRITER)
   )
 endif(TINT_BUILD_WGSL_WRITER)
 
-endif(TINT_BUILD_WGSL_READER)
+endif(TINT_BUILD_FUZZERS AND TINT_BUILD_WGSL_READER)

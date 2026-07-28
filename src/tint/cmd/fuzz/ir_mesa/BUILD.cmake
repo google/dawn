@@ -34,11 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
-if(TINT_BUILD_FUZZER_VULKAN_SUPPORT AND TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER AND TINT_BUILD_MESA)
+if(TINT_BUILD_FUZZER_VULKAN_SUPPORT AND TINT_BUILD_FUZZERS AND TINT_BUILD_IR_BINARY AND TINT_BUILD_MESA AND TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_mesa_fuzz_cmd
 # Kind:      fuzz_cmd
-# Condition: TINT_BUILD_FUZZER_VULKAN_SUPPORT AND TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER AND TINT_BUILD_MESA
+# Condition: TINT_BUILD_FUZZER_VULKAN_SUPPORT AND TINT_BUILD_FUZZERS AND TINT_BUILD_IR_BINARY AND TINT_BUILD_MESA AND TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_cmd_fuzz_ir_mesa_fuzz_cmd fuzz_cmd
   cmd/fuzz/ir_mesa/main_fuzz.cc
@@ -111,4 +111,4 @@ endif(TINT_BUILD_WGSL_WRITER)
 
 tint_target_set_output_name(tint_cmd_fuzz_ir_mesa_fuzz_cmd fuzz_cmd "tint_ir_mesa_fuzzer")
 
-endif(TINT_BUILD_FUZZER_VULKAN_SUPPORT AND TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER AND TINT_BUILD_MESA)
+endif(TINT_BUILD_FUZZER_VULKAN_SUPPORT AND TINT_BUILD_FUZZERS AND TINT_BUILD_IR_BINARY AND TINT_BUILD_MESA AND TINT_BUILD_WGSL_READER)

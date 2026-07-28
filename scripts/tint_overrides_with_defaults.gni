@@ -25,6 +25,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import("//build/config/sanitizers/sanitizers.gni")
 import("//build_overrides/tint.gni")
 
 # This file contains Tint-related build flags.
@@ -155,6 +156,11 @@ declare_args() {
   # Build benchmarks
   if (!defined(tint_build_benchmarks)) {
     tint_build_benchmarks = true
+  }
+
+  # Build fuzzers
+  if (!defined(tint_build_fuzzers)) {
+    tint_build_fuzzers = use_libfuzzer
   }
 
   # Enable building Mesa as part of Tint fuzzers

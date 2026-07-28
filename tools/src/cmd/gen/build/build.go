@@ -96,6 +96,7 @@ func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 		{"populating source files", populateSourceFiles},
 		{"scanning source files", scanSourceFiles},
 		{"loading directory configs", applyDirectoryConfigs},
+		{"applying implicit target conditions", applyImplicitTargetConditions},
 		{"building dependencies", buildDependencies},
 		{"checking for cycles", checkForCycles},
 		{"emitting build files", emitBuildFiles},
@@ -476,6 +477,25 @@ func applyDirectoryConfigs(p *Project, fsReaderWriter oswrapper.FilesystemReader
 		}
 	}
 
+	return nil
+}
+
+// applyImplicitTargetConditions applies implicit conditions to targets based on their kind
+// (combining them with any existing conditions).
+func applyImplicitTargetConditions(p *Project, _ oswrapper.FilesystemReaderWriter) error {
+	fuzzCond, err := cnf.Parse("tint_build_fuzzers")
+	if err != nil {
+		return err
+	}
+	for _, target := range p.Targets.Values() {
+		if target.Kind.IsFuzz() || target.Kind.IsFuzzCmd() {
+			if target.Condition == nil {
+				target.Condition = fuzzCond
+			} else {
+				target.Condition = cnf.Optimize(cnf.And(target.Condition, fuzzCond))
+			}
+		}
+	}
 	return nil
 }
 

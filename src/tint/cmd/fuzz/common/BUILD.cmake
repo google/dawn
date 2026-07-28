@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_FUZZERS)
 ################################################################################
 # Target:    tint_cmd_fuzz_common
 # Kind:      lib
+# Condition: TINT_BUILD_FUZZERS
 ################################################################################
 tint_add_target(tint_cmd_fuzz_common lib
   cmd/fuzz/common/helper.cc
@@ -83,3 +85,5 @@ if(TINT_BUILD_HLSL_WRITER)
     tint_lang_hlsl_validate
   )
 endif(TINT_BUILD_HLSL_WRITER)
+
+endif(TINT_BUILD_FUZZERS)

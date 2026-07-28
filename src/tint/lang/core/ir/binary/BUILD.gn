@@ -109,7 +109,7 @@ if (tint_build_unittests) {
     }
   }
 }
-if (tint_build_ir_binary) {
+if (tint_build_fuzzers && tint_build_ir_binary) {
   tint_fuzz_source_set("fuzz") {
     sources = [ "roundtrip_fuzz.cc" ]
     deps = [

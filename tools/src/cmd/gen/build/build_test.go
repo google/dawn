@@ -1273,3 +1273,32 @@ func TestHasCppSrcs(t *testing.T) {
 	test("Only Objective-C++ sources", []string{"validate_metal.mm"}, false)
 	test("Mixed sources", []string{"validate.cc", "validate_metal.mm"}, true)
 }
+
+func TestApplyImplicitTargetConditions(t *testing.T) {
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	cfg := &common.Config{OsWrapper: wrapper}
+	p := NewProject("/root", cfg)
+	dir := p.AddDirectory("src")
+
+	fuzzLib := p.AddTarget(dir, targetFuzz)
+	fuzzCmd := p.AddTarget(dir, targetFuzzCmd)
+	regularLib := p.AddTarget(dir, targetLib)
+
+	// Set an existing condition on fuzzLib
+	existingCond, err := cnf.Parse("existing_condition")
+	require.NoError(t, err)
+	fuzzLib.Condition = existingCond
+
+	err = applyImplicitTargetConditions(p, nil)
+	require.NoError(t, err)
+
+	// Fuzz targets should have tint_build_fuzzers applied
+	require.NotNil(t, fuzzLib.Condition)
+	require.Equal(t, "existing_condition && tint_build_fuzzers", fuzzLib.Condition.String())
+
+	require.NotNil(t, fuzzCmd.Condition)
+	require.Equal(t, "tint_build_fuzzers", fuzzCmd.Condition.String())
+
+	// Non-fuzz targets should not be affected
+	require.Nil(t, regularLib.Condition)
+}

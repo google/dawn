@@ -157,9 +157,11 @@ tint_target_add_external_dependencies(tint_lang_hlsl_writer_raise_test test
   "src_utils"
 )
 
+if(TINT_BUILD_FUZZERS)
 ################################################################################
 # Target:    tint_lang_hlsl_writer_raise_fuzz
 # Kind:      fuzz
+# Condition: TINT_BUILD_FUZZERS
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_raise_fuzz fuzz
   lang/hlsl/writer/raise/promote_initializers_fuzz.cc
@@ -190,3 +192,5 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_raise_fuzz fuzz
 tint_target_add_external_dependencies(tint_lang_hlsl_writer_raise_fuzz fuzz
   "src_utils"
 )
+
+endif(TINT_BUILD_FUZZERS)

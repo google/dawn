@@ -115,11 +115,11 @@ tint_target_add_external_dependencies(tint_lang_core_ir_binary_test test
 )
 
 endif(TINT_BUILD_IR_BINARY)
-if(TINT_BUILD_IR_BINARY)
+if(TINT_BUILD_FUZZERS AND TINT_BUILD_IR_BINARY)
 ################################################################################
 # Target:    tint_lang_core_ir_binary_fuzz
 # Kind:      fuzz
-# Condition: TINT_BUILD_IR_BINARY
+# Condition: TINT_BUILD_FUZZERS AND TINT_BUILD_IR_BINARY
 ################################################################################
 tint_add_target(tint_lang_core_ir_binary_fuzz fuzz
   lang/core/ir/binary/roundtrip_fuzz.cc
@@ -151,4 +151,4 @@ tint_target_add_external_dependencies(tint_lang_core_ir_binary_fuzz fuzz
   "src_utils"
 )
 
-endif(TINT_BUILD_IR_BINARY)
+endif(TINT_BUILD_FUZZERS AND TINT_BUILD_IR_BINARY)

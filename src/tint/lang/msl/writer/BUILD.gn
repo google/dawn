@@ -119,7 +119,7 @@ if (tint_build_unittests) {
     }
   }
 }
-if (tint_build_msl_writer) {
+if (tint_build_fuzzers && tint_build_msl_writer) {
   tint_fuzz_source_set("fuzz") {
     sources = [ "writer_fuzz.cc" ]
     deps = [

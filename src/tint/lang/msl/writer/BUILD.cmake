@@ -129,11 +129,11 @@ tint_target_add_external_dependencies(tint_lang_msl_writer_test test
 )
 
 endif(TINT_BUILD_MSL_WRITER)
-if(TINT_BUILD_MSL_WRITER)
+if(TINT_BUILD_FUZZERS AND TINT_BUILD_MSL_WRITER)
 ################################################################################
 # Target:    tint_lang_msl_writer_fuzz
 # Kind:      fuzz
-# Condition: TINT_BUILD_MSL_WRITER
+# Condition: TINT_BUILD_FUZZERS AND TINT_BUILD_MSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_msl_writer_fuzz fuzz
   lang/msl/writer/writer_fuzz.cc
@@ -168,4 +168,4 @@ tint_target_add_external_dependencies(tint_lang_msl_writer_fuzz fuzz
   "src_utils"
 )
 
-endif(TINT_BUILD_MSL_WRITER)
+endif(TINT_BUILD_FUZZERS AND TINT_BUILD_MSL_WRITER)

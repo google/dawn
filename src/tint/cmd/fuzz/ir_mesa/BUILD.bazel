@@ -47,6 +47,11 @@ alias(
 )
 
 alias(
+  name = "tint_build_fuzzers",
+  actual = "//src/tint:tint_build_fuzzers_true",
+)
+
+alias(
   name = "tint_build_glsl_writer",
   actual = "//src/tint:tint_build_glsl_writer_true",
 )
@@ -87,12 +92,13 @@ alias(
 )
 
 selects.config_setting_group(
-    name = "tint_build_fuzzer_vulkan_support_and_tint_build_ir_binary_and_tint_build_wgsl_reader_and_tint_build_mesa",
+    name = "tint_build_fuzzer_vulkan_support_and_tint_build_fuzzers_and_tint_build_ir_binary_and_tint_build_mesa_and_tint_build_wgsl_reader",
     match_all = [
         ":tint_build_fuzzer_vulkan_support",
+        ":tint_build_fuzzers",
         ":tint_build_ir_binary",
-        ":tint_build_wgsl_reader",
         ":tint_build_mesa",
+        ":tint_build_wgsl_reader",
     ],
 )
 

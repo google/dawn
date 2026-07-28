@@ -117,7 +117,7 @@ if (tint_build_unittests) {
     }
   }
 }
-if (tint_build_wgsl_writer) {
+if (tint_build_fuzzers && tint_build_wgsl_writer) {
   tint_fuzz_source_set("fuzz") {
     sources = []
     deps = [

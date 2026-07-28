@@ -130,11 +130,11 @@ tint_target_add_external_dependencies(tint_lang_wgsl_writer_test test
 )
 
 endif(TINT_BUILD_WGSL_WRITER)
-if(TINT_BUILD_WGSL_WRITER)
+if(TINT_BUILD_FUZZERS AND TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_lang_wgsl_writer_fuzz
 # Kind:      fuzz
-# Condition: TINT_BUILD_WGSL_WRITER
+# Condition: TINT_BUILD_FUZZERS AND TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_wgsl_writer_fuzz fuzz
 )
@@ -167,4 +167,4 @@ if(TINT_BUILD_WGSL_READER)
   )
 endif(TINT_BUILD_WGSL_READER)
 
-endif(TINT_BUILD_WGSL_WRITER)
+endif(TINT_BUILD_FUZZERS AND TINT_BUILD_WGSL_WRITER)

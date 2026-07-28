@@ -293,40 +293,49 @@ group("cmds") {
 group("fuzzers") {
   testonly = true
   data_deps = []
-  if (tint_build_wgsl_reader) {
-    data_deps += [ "${tint_src_dir}/cmd/fuzz/wgsl" ]
-    if (tint_build_mesa && tint_build_fuzzer_vulkan_support) {
-      data_deps += [ "${tint_src_dir}/cmd/fuzz/wgsl_mesa" ]
+  if (tint_build_fuzzers) {
+    if (tint_build_wgsl_reader) {
+      data_deps += [ "${tint_src_dir}/cmd/fuzz/wgsl" ]
+      if (tint_build_mesa && tint_build_fuzzer_vulkan_support) {
+        data_deps += [ "${tint_src_dir}/cmd/fuzz/wgsl_mesa" ]
+      }
     }
-  }
-  if (tint_build_ir_binary) {
-    data_deps += [ "${tint_src_dir}/cmd/fuzz/ir" ]
-    if (tint_build_mesa && tint_build_fuzzer_vulkan_support &&
-        tint_build_wgsl_reader) {
-      data_deps += [ "${tint_src_dir}/cmd/fuzz/ir_mesa" ]
+    if (tint_build_ir_binary) {
+      data_deps += [ "${tint_src_dir}/cmd/fuzz/ir" ]
+      if (tint_build_mesa && tint_build_fuzzer_vulkan_support &&
+          tint_build_wgsl_reader) {
+        data_deps += [ "${tint_src_dir}/cmd/fuzz/ir_mesa" ]
+      }
     }
   }
 }
 
 group("fuzzer_corpus_tools") {
   testonly = true
-  data_deps = [ ":fuzzers" ]
-  if (tint_build_ir_binary) {
-    data_deps += [ "${tint_src_dir}/cmd/fuzz/ir/as" ]
+  data_deps = []
+  if (tint_build_fuzzers) {
+    data_deps += [ ":fuzzers" ]
+    if (tint_build_ir_binary) {
+      data_deps += [ "${tint_src_dir}/cmd/fuzz/ir/as" ]
+    }
   }
 }
 
 group("fuzzer_corpus_tests") {
   testonly = true
-  data_deps = [
-    ":fuzzer_corpus_tools",
-    "${dawn_root}/tools:go_tools",
-  ]
-  data = [
-    "${dawn_root}/scripts/run_tint_fuzzer_corpus_tests.py",
-    "${dawn_root}/test/tint/",
-    "${dawn_root}/tools/python/",
-  ]
+  data_deps = []
+  data = []
+  if (tint_build_fuzzers) {
+    data_deps += [
+      ":fuzzer_corpus_tools",
+      "${dawn_root}/tools:go_tools",
+    ]
+    data += [
+      "${dawn_root}/scripts/run_tint_fuzzer_corpus_tests.py",
+      "${dawn_root}/test/tint/",
+      "${dawn_root}/tools/python/",
+    ]
+  }
 }
 
 group("tests") {

@@ -37,11 +37,11 @@
 include(cmd/fuzz/ir/as/BUILD.cmake)
 include(cmd/fuzz/ir/dis/BUILD.cmake)
 
-if(TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER)
+if(TINT_BUILD_FUZZERS AND TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_fuzz_cmd
 # Kind:      fuzz_cmd
-# Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER
+# Condition: TINT_BUILD_FUZZERS AND TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
   cmd/fuzz/ir/main_fuzz.cc
@@ -119,10 +119,12 @@ endif(TINT_BUILD_WGSL_WRITER)
 
 tint_target_set_output_name(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd "tint_ir_fuzzer")
 
-endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER)
+endif(TINT_BUILD_FUZZERS AND TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER)
+if(TINT_BUILD_FUZZERS)
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_fuzz
 # Kind:      fuzz
+# Condition: TINT_BUILD_FUZZERS
 ################################################################################
 tint_add_target(tint_cmd_fuzz_ir_fuzz fuzz
   cmd/fuzz/ir/fuzz.cc
@@ -165,3 +167,5 @@ if(TINT_BUILD_WGSL_READER)
     tint_lang_wgsl_reader
   )
 endif(TINT_BUILD_WGSL_READER)
+
+endif(TINT_BUILD_FUZZERS)

@@ -38,8 +38,8 @@ import("../../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
-if (tint_build_fuzzer_vulkan_support && tint_build_wgsl_reader &&
-    tint_build_mesa) {
+if (tint_build_fuzzer_vulkan_support && tint_build_fuzzers && tint_build_mesa &&
+    tint_build_wgsl_reader) {
   tint_fuzzer_test("wgsl_mesa") {
     output_name = "tint_wgsl_mesa_fuzzer"
     sources = [ "main_fuzz.cc" ]
