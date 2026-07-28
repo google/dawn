@@ -41,7 +41,6 @@ namespace tint::core::type {
 Matrix::Matrix(const Vector* column_type, uint32_t columns)
     : Base(Hash(tint::TypeCode::Of<Vector>().bits, columns, column_type),
            core::type::Flags{
-               Flag::kCore,
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,

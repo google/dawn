@@ -53,8 +53,10 @@ namespace {
 
 Flags FlagsFrom(VectorRef<const StructMember*> members) {
     Flags flags{
-        Flag::kCore,           Flag::kConstructable, Flag::kCreationFixedFootprint,
-        Flag::kFixedFootprint, Flag::kHostShareable,
+        Flag::kConstructable,
+        Flag::kCreationFixedFootprint,
+        Flag::kFixedFootprint,
+        Flag::kHostShareable,
     };
     for (auto* member : members) {
         if (!member->Type()->IsConstructible()) {

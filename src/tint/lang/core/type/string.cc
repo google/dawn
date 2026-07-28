@@ -39,7 +39,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::String);
 
 namespace tint::core::type {
 
-String::String() : Base(Hash(tint::TypeCode::Of<String>().bits), core::type::Flags{Flag::kCore}) {}
+String::String() : Base(Hash(tint::TypeCode::Of<String>().bits), core::type::Flags{}) {}
 
 bool String::Equals(const UniqueNode& other) const {
     return other.Is<String>();

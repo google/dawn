@@ -46,7 +46,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 
-namespace tint::mock {
+namespace tint::hlsl {
 /// A mock non-core type used for testing the non-core type validation rule.
 class NonCoreType final : public Castable<NonCoreType, core::type::Type> {
   public:
@@ -69,9 +69,9 @@ class NonCoreType final : public Castable<NonCoreType, core::type::Type> {
     uint32_t align_;
     bool is_handle_;
 };
-}  // namespace tint::mock
+}  // namespace tint::hlsl
 
-TINT_INSTANTIATE_TYPEINFO(tint::mock::NonCoreType);
+TINT_INSTANTIATE_TYPEINFO(tint::hlsl::NonCoreType);
 
 namespace tint::core::ir {
 
@@ -350,7 +350,7 @@ TEST_F(IR_ValidatorTest, StructMember_TypeAlignZero) {
     core::IOAttributes attrs = {};
     tint::Vector<const core::type::StructMember*, 4> members;
     members.Push(ty.Get<core::type::StructMember>(
-        mod.symbols.New("v"), ty.Get<tint::mock::NonCoreType>(/* align */ 0u), 0u, 0u,
+        mod.symbols.New("v"), ty.Get<tint::hlsl::NonCoreType>(/* align */ 0u), 0u, 0u,
         /* align */ 4u, 4u, std::move(attrs)));
     auto* str_ty = ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), std::move(members),
                                               tint::RoundUp(0u, 16u));
@@ -373,7 +373,7 @@ TEST_F(IR_ValidatorTest, StructMember_TypeAlignNotPowerOfTwo) {
     core::IOAttributes attrs = {};
     tint::Vector<const core::type::StructMember*, 4> members;
     members.Push(ty.Get<core::type::StructMember>(
-        mod.symbols.New("v"), ty.Get<tint::mock::NonCoreType>(/* align */ 5u), 0u, 0u,
+        mod.symbols.New("v"), ty.Get<tint::hlsl::NonCoreType>(/* align */ 5u), 0u, 0u,
         /* align */ 8u, 8u, std::move(attrs)));
     auto* str_ty = ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), std::move(members),
                                               tint::RoundUp(0u, 16u));
@@ -836,7 +836,7 @@ TEST_F(IR_ValidatorTest, FunctionParam_InvalidHandlePointer) {
 
 TEST_F(IR_ValidatorTest, NonCoreType) {
     auto* fn = b.Function("my_func", ty.void_());
-    fn->AppendParam(b.FunctionParam(ty.Get<tint::mock::NonCoreType>(/* align*/ 4u)));
+    fn->AppendParam(b.FunctionParam(ty.Get<tint::hlsl::NonCoreType>(/* align*/ 4u)));
     b.Append(fn->Block(), [&] {  //
         b.Return(fn);
     });
@@ -1214,7 +1214,7 @@ TEST_F(IR_ValidatorTest, BindingArray_AllowedNonSampledTextureWithNonCoreType) {
         auto* var =
             b.Var("m", AddressSpace::kHandle,
                   ty.binding_array(
-                      ty.Get<tint::mock::NonCoreType>(/*align */ 4u, /*is_handle*/ true), 5));
+                      ty.Get<tint::hlsl::NonCoreType>(/*align */ 4u, /*is_handle*/ true), 5));
         var->SetBindingPoint(0, 0);
     });
 

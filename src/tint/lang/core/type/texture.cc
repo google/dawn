@@ -31,8 +31,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::Texture);
 
 namespace tint::core::type {
 
-Texture::Texture(size_t hash, TextureDimension dim)
-    : Base(hash, core::type::Flags{Flag::kCore}), dim_(dim) {}
+Texture::Texture(size_t hash, TextureDimension dim) : Base(hash, core::type::Flags{}), dim_(dim) {}
 
 Texture::~Texture() = default;
 

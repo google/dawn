@@ -37,7 +37,7 @@ namespace tint::core::type {
 
 ResourceTable::ResourceTable(const core::type::Type* binding_type)
     : Base(static_cast<size_t>(Hash(tint::TypeCode::Of<ResourceTable>().bits, binding_type)),
-           core::type::Flags{Flag::kCore}),
+           core::type::Flags{}),
       binding_type_(binding_type) {}
 
 bool ResourceTable::Equals(const UniqueNode& other) const {

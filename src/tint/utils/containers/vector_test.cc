@@ -43,13 +43,14 @@ TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
 // no simple way to avoid unsafe buffer usage warnings.
 TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
-namespace tint {
-namespace {
+namespace tint::test {
 
 class C0 : public Castable<C0> {};
 class C1 : public Castable<C1, C0> {};
 class C2a : public Castable<C2a, C1> {};
 class C2b : public Castable<C2b, C1> {};
+
+namespace {
 
 /// @returns true if the address of el is within the memory of the vector vec.
 template <typename T, size_t N, typename E>
@@ -2456,12 +2457,12 @@ TEST(TintVectorRefDeathTest, AssertOOBs) {
 }
 
 }  // namespace
-}  // namespace tint
+}  // namespace tint::test
 
-TINT_INSTANTIATE_TYPEINFO(tint::C0);
-TINT_INSTANTIATE_TYPEINFO(tint::C1);
-TINT_INSTANTIATE_TYPEINFO(tint::C2a);
-TINT_INSTANTIATE_TYPEINFO(tint::C2b);
+TINT_INSTANTIATE_TYPEINFO(tint::test::C0);
+TINT_INSTANTIATE_TYPEINFO(tint::test::C1);
+TINT_INSTANTIATE_TYPEINFO(tint::test::C2a);
+TINT_INSTANTIATE_TYPEINFO(tint::test::C2b);
 
 TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 TINT_END_DISABLE_WARNING(UNREACHABLE_CODE);

@@ -36,7 +36,6 @@ namespace tint::core::type {
 F32::F32()
     : Base(static_cast<size_t>(tint::TypeCode::Of<F32>().bits),
            core::type::Flags{
-               Flag::kCore,
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,

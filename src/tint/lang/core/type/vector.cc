@@ -41,7 +41,6 @@ namespace {
 
 core::type::Flags FlagsFrom(const Type* element) {
     core::type::Flags flags{
-        Flag::kCore,
         Flag::kConstructable,
         Flag::kCreationFixedFootprint,
         Flag::kFixedFootprint,

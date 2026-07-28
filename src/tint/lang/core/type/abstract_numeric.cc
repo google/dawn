@@ -34,7 +34,6 @@ namespace tint::core::type {
 AbstractNumeric::AbstractNumeric(size_t hash)
     : Base(hash,
            core::type::Flags{
-               Flag::kCore,
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,
