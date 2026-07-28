@@ -607,7 +607,7 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
     rasterization.cullMode = VulkanCullMode(GetCullMode());
     rasterization.frontFace = VulkanFrontFace(GetFrontFace());
     rasterization.depthBiasEnable = IsDepthBiasEnabled() ? VK_TRUE : VK_FALSE;
-    rasterization.depthBiasConstantFactor = GetDepthBias();
+    rasterization.depthBiasConstantFactor = static_cast<float>(GetDepthBias());
     rasterization.depthBiasClamp = GetDepthBiasClamp();
     rasterization.depthBiasSlopeFactor = GetDepthBiasSlopeScale();
     rasterization.lineWidth = 1.0f;

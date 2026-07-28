@@ -196,7 +196,6 @@ config("dawn_warnings") {
     # P0. Most likely to help with hardening.
     cflags += [
       # Arithmetic
-      "-Wno-implicit-float-conversion",
       "-Wno-implicit-int-conversion",
     ]
 

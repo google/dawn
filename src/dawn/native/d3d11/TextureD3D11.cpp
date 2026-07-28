@@ -613,13 +613,15 @@ MaybeError Texture::ClearCompressed(const ScopedCommandRecordingContext* command
     if (clearValue == ClearValue::NonZero) {
         // Ensure value 1 per byte rather than per component. This is required in this test case:
         // https://source.chromium.org/chromium/chromium/src/+/refs/heads/main:third_party/dawn/src/dawn/tests/end2end/NonzeroTextureCreationTests.cpp;drc=7a6604d0564b56cce77b72ae759b3773a756423c;l=244
-        double valueOnePerByte;
+        float valueOnePerByte;
         switch (desc.format) {
             case wgpu::TextureFormat::RGBA16Uint:
                 valueOnePerByte = 0x0101;
                 break;
             case wgpu::TextureFormat::RGBA32Uint:
-                valueOnePerByte = 0x01010101;
+                // We can't represent 0x01010101 in a D3D clear.
+                // The test apparently doesn't care, so this is fine.
+                valueOnePerByte = 0x01010100;
                 break;
             default:
                 DAWN_UNREACHABLE();

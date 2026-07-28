@@ -70,7 +70,7 @@ void DeviceMutex::Lock() {
 
         static constexpr uint64_t kAcquireTimeMetricSampleCount = 100;
         if (mAcquireCount >= kAcquireTimeMetricSampleCount) {
-            double avgTimeUs = (mAcquireTimeSum / mAcquireCount) * 1'000'000.0;
+            double avgTimeUs = (mAcquireTimeSum / static_cast<double>(mAcquireCount)) * 1'000'000.0;
             double maxTimeUs = mAcquireTimeMax * 1'000'000.0;
 
             DAWN_HISTOGRAM_CUSTOM_MICROSECOND_TIMES(mPlatform, "DeviceLockAcquireTimeAvgUs",

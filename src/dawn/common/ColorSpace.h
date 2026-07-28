@@ -237,53 +237,53 @@ inline constexpr TransferFunction kEOTF_Identity = {};
 
 // https://registry.khronos.org/DataFormat/specs/1.4/dataformat.1.4.html#TRANSFER_SRGB
 inline constexpr TransferFunction kEOTF_sRGB = {
-    .g = 2.4,
-    .a = 1.0 / 1.055,
-    .b = 0.055 / 1.055,
-    .c = 1.0 / 12.92,
-    .d = 0.04045,
-    .e = 0,
-    .f = 0,
+    .g = 2.4f,
+    .a = 1.0f / 1.055f,
+    .b = 0.055f / 1.055f,
+    .c = 1.0f / 12.92f,
+    .d = 0.04045f,
+    .e = 0.0f,
+    .f = 0.0f,
 };
 inline constexpr TransferFunction kEOTFInverse_sRGB = {
-    .g = 1.0 / 2.4,
-    .a = 1.13711,  // 1.055 ^ 2.4
-    .b = 0,
-    .c = 12.92,
-    .d = 0.0031308,
-    .e = -0.055,
-    .f = 0,
+    .g = 1.0f / 2.4f,
+    .a = 1.13711f,  // 1.055 ^ 2.4
+    .b = 0.0f,
+    .c = 12.92f,
+    .d = 0.0031308f,
+    .e = -0.055f,
+    .f = 0.0f,
 };
 
 // https://registry.khronos.org/DataFormat/specs/1.4/dataformat.1.4.html#TRANSFER_DCIP3
 inline constexpr TransferFunction kEOTF_DisplayP3 = {
-    .g = 2.6,
-    .a = 1.0,
-    .b = 0,
-    .c = 0,
-    .d = 0,
-    .e = 0,
-    .f = 0,
+    .g = 2.6f,
+    .a = 1.0f,
+    .b = 0.0f,
+    .c = 0.0f,
+    .d = 0.0f,
+    .e = 0.0f,
+    .f = 0.0f,
 };
 inline constexpr TransferFunction kEOTFInverse_DisplayP3 = {
-    .g = 1.0 / 2.6,
-    .a = 1.0,
-    .b = 0,
-    .c = 0,
-    .d = 0,
-    .e = 0,
-    .f = 0,
+    .g = 1.0f / 2.6f,
+    .a = 1.0f,
+    .b = 0.0f,
+    .c = 0.0f,
+    .d = 0.0f,
+    .e = 0.0f,
+    .f = 0.0f,
 };
 
 // https://registry.khronos.org/DataFormat/specs/1.4/dataformat.1.4.html#TRANSFER_ITU
 inline constexpr TransferFunction kEOTF_SMPTE_170M = {
-    .g = 1.0 / 0.45,
-    .a = 1.0 / 1.099,
-    .b = 0.099 / 1.099,
-    .c = 1.0 / 4.5,
-    .d = 0.0812,
-    .e = 0,
-    .f = 0,
+    .g = 1.0f / 0.45f,
+    .a = 1.0f / 1.099f,
+    .b = 0.099f / 1.099f,
+    .c = 1.0f / 4.5f,
+    .d = 0.0812f,
+    .e = 0.0f,
+    .f = 0.0f,
 };
 
 // Luminance values of various color spaces for the white of value "1" after the transfer function.

@@ -107,7 +107,7 @@ void UpdateTimestampPeriod(id<MTLDevice> device,
 
     if (cpuTimestampEnd - *cpuTimestampStart >= kFilterIntervalInMs) {
         // The measured timestamp period
-        float measurement = (cpuTimestampEnd - *cpuTimestampStart) /
+        float measurement = static_cast<float>(cpuTimestampEnd - *cpuTimestampStart) /
                             static_cast<float>(gpuTimestampEnd - *gpuTimestampStart);
 
         // Measurement update

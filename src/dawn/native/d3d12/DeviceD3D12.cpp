@@ -115,7 +115,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         DAWN_TRY(CheckHRESULT(queue->GetCommandQueue()->GetTimestampFrequency(&frequency),
                               "D3D12 get timestamp frequency"));
         // Calculate the period in nanoseconds by the frequency.
-        mTimestampPeriod = static_cast<float>(1e9) / frequency;
+        mTimestampPeriod = static_cast<float>(1e9 / static_cast<double>(frequency));
     }
 
     // Initialize backend services

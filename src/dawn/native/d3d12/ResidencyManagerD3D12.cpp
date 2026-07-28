@@ -154,9 +154,10 @@ void ResidencyManager::UpdateMemorySegmentInfo(MemorySegmentInfo* segmentInfo) {
     // decreases fluctuations in the operating-system-defined budget, which improves stability
     // for both Dawn and other applications on the system. Note the value of 95% is arbitrarily
     // chosen and subject to future experimentation.
-    static constexpr float kBudgetCap = 0.95f;
+    static constexpr double kBudgetCap = 0.95;
     segmentInfo->budget = static_cast<uint64_t>(
-        (queryVideoMemoryInfo.Budget - segmentInfo->externalReservation) * kBudgetCap);
+        static_cast<double>(queryVideoMemoryInfo.Budget - segmentInfo->externalReservation) *
+        kBudgetCap);
 }
 
 // Removes a heap from the LRU and returns the least recently used heap when possible. Returns

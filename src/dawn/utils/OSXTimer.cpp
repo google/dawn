@@ -53,13 +53,15 @@ class OSXTimer : public Timer {
 
     double GetElapsedTime() const override {
         if (mRunning) {
-            return mSecondCoeff * (mach_absolute_time() - mStartTime);
+            return mSecondCoeff * static_cast<double>(mach_absolute_time() - mStartTime);
         } else {
-            return mSecondCoeff * (mStopTime - mStartTime);
+            return mSecondCoeff * static_cast<double>(mStopTime - mStartTime);
         }
     }
 
-    double GetAbsoluteTime() override { return GetSecondCoeff() * mach_absolute_time(); }
+    double GetAbsoluteTime() override {
+        return GetSecondCoeff() * static_cast<double>(mach_absolute_time());
+    }
 
   private:
     double GetSecondCoeff() {

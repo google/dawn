@@ -242,7 +242,8 @@ void RenderPassEncoder::APISetViewport(float x,
 
                 const CombinedLimits& limits = GetDevice()->GetLimits();
                 uint32_t maxViewportSize = limits.v1.maxTextureDimension2D;
-                float maxViewportBounds = maxViewportSize * 2.0f;
+                float maxViewportSizeFloat = static_cast<float>(maxViewportSize);
+                float maxViewportBounds = static_cast<float>(maxViewportSize) * 2.0f;
 
                 DAWN_INVALID_IF(
                     width < 0 || height < 0,
@@ -250,17 +251,17 @@ void RenderPassEncoder::APISetViewport(float x,
                     height);
 
                 DAWN_INVALID_IF(
-                    width > maxViewportSize, "Viewport width (%f) exceeds the maximum (%u).%s",
+                    width > maxViewportSizeFloat, "Viewport width (%f) exceeds the maximum (%u).%s",
                     width, maxViewportSize,
                     DAWN_INCREASE_LIMIT_MESSAGE(GetDevice()->GetAdapter()->GetLimits().v1,
-                                                maxTextureDimension2D, width));
+                                                maxTextureDimension2D, static_cast<double>(width)));
 
-                DAWN_INVALID_IF(
-                    height > maxViewportSize,
-                    "Viewport size height (%f) exceeds the maximum (%u).%s", height,
-                    maxViewportSize,
-                    DAWN_INCREASE_LIMIT_MESSAGE(GetDevice()->GetAdapter()->GetLimits().v1,
-                                                maxTextureDimension2D, height));
+                DAWN_INVALID_IF(height > maxViewportSizeFloat,
+                                "Viewport size height (%f) exceeds the maximum (%u).%s", height,
+                                maxViewportSize,
+                                DAWN_INCREASE_LIMIT_MESSAGE(
+                                    GetDevice()->GetAdapter()->GetLimits().v1,
+                                    maxTextureDimension2D, static_cast<double>(height)));
 
                 DAWN_INVALID_IF(x < -maxViewportBounds || y < -maxViewportBounds,
                                 "Viewport offset (x: %f, y: %f) is less than the minimum "

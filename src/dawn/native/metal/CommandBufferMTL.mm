@@ -1989,7 +1989,7 @@ MaybeError CommandBuffer::EncodeRenderPass(
                 [encoder setDepthStencilState:newPipeline->GetMTLDepthStencilState()];
                 [encoder setFrontFacingWinding:newPipeline->GetMTLFrontFace()];
                 [encoder setCullMode:newPipeline->GetMTLCullMode()];
-                [encoder setDepthBias:newPipeline->GetDepthBias()
+                [encoder setDepthBias:static_cast<float>(newPipeline->GetDepthBias())
                            slopeScale:newPipeline->GetDepthBiasSlopeScale()
                                 clamp:newPipeline->GetDepthBiasClamp()];
 
@@ -2114,10 +2114,10 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
             case Command::SetBlendConstant: {
                 SetBlendConstantCmd* cmd = mCommands.NextCommand<SetBlendConstantCmd>();
-                [encoder setBlendColorRed:cmd->color.r
-                                    green:cmd->color.g
-                                     blue:cmd->color.b
-                                    alpha:cmd->color.a];
+                [encoder setBlendColorRed:static_cast<float>(cmd->color.r)
+                                    green:static_cast<float>(cmd->color.g)
+                                     blue:static_cast<float>(cmd->color.b)
+                                    alpha:static_cast<float>(cmd->color.a)];
                 break;
             }
 

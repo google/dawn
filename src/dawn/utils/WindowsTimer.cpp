@@ -66,14 +66,14 @@ class WindowsTimer : public Timer {
             endTime = mStopTime;
         }
 
-        return static_cast<double>(endTime - mStartTime) / mFrequency;
+        return static_cast<double>(endTime - mStartTime) / static_cast<double>(mFrequency);
     }
 
     double GetAbsoluteTime() override {
         LARGE_INTEGER curTime;
         QueryPerformanceCounter(&curTime);
 
-        return static_cast<double>(curTime.QuadPart) / GetFrequency();
+        return static_cast<double>(curTime.QuadPart) / static_cast<double>(GetFrequency());
     }
 
   private:

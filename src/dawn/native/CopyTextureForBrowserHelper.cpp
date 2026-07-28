@@ -399,8 +399,9 @@ MaybeError DoCopyForBrowser(DeviceBase* device,
     // this flip when converting positions to texcoords.
     // https://www.w3.org/TR/webgpu/#coordinate-systems
     if (!options->flipY) {
-        uniformData.scaleY *= -1.0;
-        uniformData.offsetY += copySize->height / static_cast<float>(sourceInfo->size.height);
+        uniformData.scaleY *= -1.0f;
+        uniformData.offsetY +=
+            static_cast<float>(copySize->height) / static_cast<float>(sourceInfo->size.height);
     }
 
     uint32_t stepsMask = 0u;

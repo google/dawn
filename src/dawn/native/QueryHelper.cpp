@@ -181,13 +181,13 @@ TimestampParams::TimestampParams(uint32_t count,
     // so we need to keep the multiplier under 2^16. At the same time, the larger the
     // multiplier, the better the precision, so we maximize the value of the right shift while
     // keeping the multiplier under 2 ^ 16
-    uint32_t upperLog2 = uint32_t(ceil(log2(period)));
+    uint32_t upperLog2 = static_cast<uint32_t>(ceil(log2(period)));
 
     // Clamp the shift to 16 because we're doing computations in 16bit chunks. The
     // multiplication by the period will overflow the chunks, but timestamps are mostly
     // informational so that's ok.
     rightShift = 16u - std::min(upperLog2, 16u);
-    multiplier = uint32_t(period * (1 << rightShift));
+    multiplier = static_cast<uint32_t>(period * static_cast<float>(1u << rightShift));
 }
 
 MaybeError EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,

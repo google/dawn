@@ -145,8 +145,7 @@ class SpanBase {
     template <typename ElementType, size_t N>
         requires LegalDataConversion<ElementType, T> && std::same_as<Index, size_t>
     explicit constexpr SpanBase(ElementType (&arr)[N]) noexcept
-        : mSize(checked_cast<size_t>(N)), mData(arr) {
-    }
+        : mSize(checked_cast<size_t>(N)), mData(arr) {}
 
     // Constructor from an initializer list.
     // This is needed because until C++26's P3016R6, std::initializer_list does not have a .data()

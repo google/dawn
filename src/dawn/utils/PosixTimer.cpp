@@ -67,10 +67,10 @@ class PosixTimer : public Timer {
             endTimeNs = mStopTimeNs;
         }
 
-        return (endTimeNs - mStartTimeNs) * 1e-9;
+        return static_cast<double>(endTimeNs - mStartTimeNs) * 1e-9;
     }
 
-    double GetAbsoluteTime() override { return GetCurrentTimeNs() * 1e-9; }
+    double GetAbsoluteTime() override { return static_cast<double>(GetCurrentTimeNs()) * 1e-9; }
 
   private:
     bool mRunning;

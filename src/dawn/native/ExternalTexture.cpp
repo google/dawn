@@ -265,7 +265,7 @@ ExternalTextureParams ComputeExternalTextureParams(const ExternalTextureDescript
         constexpr math::Vec3f yFactors = kYCbCrToRGB_Rec2020.Inverse().Transposed()[0];
         // Gamma is 1.2, which means that Y is multiplied 0.2 times to the color to achieve a total
         // of 1.2 gamma.
-        params.ootfParam = {yFactors[0], yFactors[1], yFactors[2], 0.2};
+        params.ootfParam = {yFactors[0], yFactors[1], yFactors[2], 0.2f};
     }
 
     // Compute the various transforms and bounds used for sampling and loading operations. They make
@@ -279,10 +279,14 @@ ExternalTextureParams ComputeExternalTextureParams(const ExternalTextureDescript
     if (params.numPlanes == 2) {
         plane1Extent = descriptor->plane1->GetSingleSubresourceVirtualSize();
     }
-    auto plane0Size = Vec2f(plane0Extent.width, plane0Extent.height);
-    auto plane1Size = Vec2f(plane1Extent.width, plane1Extent.height);
-    auto cropOrigin = Vec2f(descriptor->cropOrigin.x, descriptor->cropOrigin.y);
-    auto cropSize = Vec2f(descriptor->cropSize.width, descriptor->cropSize.height);
+    auto plane0Size =
+        Vec2f(static_cast<float>(plane0Extent.width), static_cast<float>(plane0Extent.height));
+    auto plane1Size =
+        Vec2f(static_cast<float>(plane1Extent.width), static_cast<float>(plane1Extent.height));
+    auto cropOrigin = Vec2f(static_cast<float>(descriptor->cropOrigin.x),
+                            static_cast<float>(descriptor->cropOrigin.y));
+    auto cropSize = Vec2f(static_cast<float>(descriptor->cropSize.width),
+                          static_cast<float>(descriptor->cropSize.height));
 
     // Offset the coordinates so the center texel is at the origin, so we can apply rotations and
     // y-flips. After translation, coordinates range from [-0.5 .. +0.5] in both U and V.

@@ -40,13 +40,13 @@ namespace dawn {
 //   }
 //   return (B + exp((v - C) / A)) / F
 constexpr TransferFunction kEOTF_HLG = {
-    .g = -1,  // Mode HLG see src/dawn/native/ExternalTexture.cpp
-    .a = 0.17883277,
-    .b = 0.28466892,
-    .c = 0.55991073,
-    .d = 0.5,
-    .e = 3.0,
-    .f = 12.0,
+    .g = -1.0f,  // Mode HLG see src/dawn/native/ExternalTexture.cpp
+    .a = 0.17883277f,
+    .b = 0.28466892f,
+    .c = 0.55991073f,
+    .d = 0.5f,
+    .e = 3.0f,
+    .f = 12.0f,
 };
 
 // PQ is mode 2 which is tagged with G = -2
@@ -57,13 +57,13 @@ constexpr TransferFunction kEOTF_HLG = {
 //   v = max(v - C, 0) / (D - E * v)
 //   return pow(v, 1.0 / A)
 constexpr TransferFunction kEOTF_PQ = {
-    .g = -2,  // Mode PQ see src/dawn/native/ExternalTexture.cpp
-    .a = (2610.0 / 16384.0),
-    .b = (2523.0 / 4096.0) * 128.0,
-    .c = (3424.0 / 4096.0),
-    .d = (2413.0 / 4096.0) * 32.0,
-    .e = (2392.0 / 4096.0) * 32.0,
-    .f = 0.0,
+    .g = -2.0f,  // Mode PQ see src/dawn/native/ExternalTexture.cpp
+    .a = (2610.0f / 16384.0f),
+    .b = (2523.0f / 4096.0f) * 128.0f,
+    .c = (3424.0f / 4096.0f),
+    .d = (2413.0f / 4096.0f) * 32.0f,
+    .e = (2392.0f / 4096.0f) * 32.0f,
+    .f = 0.0f,
 };
 
 wgpu::Status ComputeExternalTextureParams(const wgpu::ColorSpaceDawn& srcColorSpace,

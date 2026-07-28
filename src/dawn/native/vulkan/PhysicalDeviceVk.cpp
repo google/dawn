@@ -118,6 +118,21 @@ bool VKComponentTypeToWGPUSubgroupMatrixComponentType(
     }
 }
 
+template <std::integral T, std::integral U>
+constexpr bool SafeLessThan(T a, U b) {
+    return std::cmp_less(a, b);
+}
+
+template <std::integral T>
+constexpr bool SafeLessThan(float a, T b) {
+    return static_cast<double>(a) < static_cast<double>(b);
+}
+
+template <std::integral T, std::integral U>
+constexpr bool SafeGreaterThan(T a, U b) {
+    return std::cmp_greater(a, b);
+}
+
 }  // anonymous namespace
 
 PhysicalDevice::PhysicalDevice(VulkanInstance* vulkanInstance, VkPhysicalDevice physicalDevice)
@@ -729,7 +744,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
 
 #define CHECK_V1_LIMIT_IMPL(vulkanName, webgpuName, compareOp, msgSegment)           \
     do {                                                                             \
-        if (vkLimits.vulkanName compareOp baseLimits.v1.webgpuName) {                \
+        if (Safe##compareOp(vkLimits.vulkanName, baseLimits.v1.webgpuName)) {        \
             return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for " #webgpuName \
                                        "."                                           \
                                        " VkPhysicalDeviceLimits::" #vulkanName       \
@@ -745,11 +760,11 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     } while (false)
 
 #define CHECK_V1_MAX_LIMIT(vulkanName, webgpuName) \
-    CHECK_V1_LIMIT_IMPL(vulkanName, webgpuName, <, "least")
+    CHECK_V1_LIMIT_IMPL(vulkanName, webgpuName, LessThan, "least")
 #define CHECK_AND_SET_V1_MAX_LIMIT(vulkanName, webgpuName) \
-    CHECK_AND_SET_V1_LIMIT_IMPL(vulkanName, webgpuName, <, "least")
+    CHECK_AND_SET_V1_LIMIT_IMPL(vulkanName, webgpuName, LessThan, "least")
 #define CHECK_AND_SET_V1_MIN_LIMIT(vulkanName, webgpuName) \
-    CHECK_AND_SET_V1_LIMIT_IMPL(vulkanName, webgpuName, >, "most")
+    CHECK_AND_SET_V1_LIMIT_IMPL(vulkanName, webgpuName, GreaterThan, "most")
 
     CHECK_AND_SET_V1_MAX_LIMIT(maxImageDimension1D, maxTextureDimension1D);
 

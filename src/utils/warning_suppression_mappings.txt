@@ -103,3 +103,8 @@ src:*third_party{/,\\}abseil-cpp{/,\\}absl{/,\\}*
 [gcc-compat]
 # absl uses enable_if.
 src:*third_party{/,\\}abseil-cpp{/,\\}absl{/,\\}*
+
+[implicit-float-conversion]
+# Implicit float conversions in tests, samples, and external dependencies.
+src:*src{/,\\}dawn{/,\\}tests{/,\\}*
+src:*src{/,\\}dawn{/,\\}samples{/,\\}*

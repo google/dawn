@@ -340,7 +340,7 @@ MaybeError RenderPipeline::ApplyNow(const OpenGLFunctions& gl,
 
     if (IsDepthBiasEnabled()) {
         DAWN_GL_TRY(gl, Enable(GL_POLYGON_OFFSET_FILL));
-        float depthBias = GetDepthBias();
+        float depthBias = static_cast<float>(GetDepthBias());
         if (GetDevice()->IsToggleEnabled(Toggle::GLDepthBiasModifier)) {
             // There is an ambiguity in the GL and Vulkan specs with respect to
             // depthBias: If a depth value lies between 2^n and 2^(n+1), is the

@@ -747,8 +747,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(
     D3D11_VIEWPORT defautViewport;
     defautViewport.TopLeftX = 0;
     defautViewport.TopLeftY = 0;
-    defautViewport.Width = renderPass->width;
-    defautViewport.Height = renderPass->height;
+    defautViewport.Width = static_cast<float>(renderPass->width);
+    defautViewport.Height = static_cast<float>(renderPass->height);
     defautViewport.MinDepth = 0.0f;
     defautViewport.MaxDepth = 1.0f;
     d3d11DeviceContext->RSSetViewports(1, &defautViewport);
