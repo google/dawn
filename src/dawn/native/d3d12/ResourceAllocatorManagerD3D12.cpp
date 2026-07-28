@@ -377,7 +377,7 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
             return DAWN_OUT_OF_MEMORY_ERROR(
                 "Texture array size with Intel Gen12 workaround exceeds UINT16");
         }
-        revisedDescriptor.DepthOrArraySize = depthOrArraySize;
+        revisedDescriptor.DepthOrArraySize = checked_cast<UINT16>(depthOrArraySize);
     }
 
     // TODO(crbug.com/dawn/849): Conditionally disable sub-allocation.

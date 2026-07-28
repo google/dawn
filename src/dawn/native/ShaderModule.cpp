@@ -342,7 +342,7 @@ ResultOrError<InterStageComponentType> TintComponentTypeToInterStageComponentTyp
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<uint32_t> TintCompositionTypeToInterStageComponentCount(
+ResultOrError<uint8_t> TintCompositionTypeToInterStageComponentCount(
     tint::inspector::CompositionType type) {
     switch (type) {
         case tint::inspector::CompositionType::kScalar:
@@ -1075,7 +1075,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             // `metadata->fragmentOutputVariables[0].blendSrc` is always 1.
             bool isBlendSrc0 = false;
             if (outputVar.attributes.blend_src.has_value()) {
-                variable.blendSrc = *outputVar.attributes.blend_src;
+                variable.blendSrc = checked_cast<uint8_t>(*outputVar.attributes.blend_src);
                 isBlendSrc0 = variable.blendSrc == 0;
             } else {
                 variable.blendSrc = 0;

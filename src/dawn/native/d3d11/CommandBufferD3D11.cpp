@@ -729,9 +729,9 @@ MaybeError CommandBuffer::ExecuteRenderPass(
             clearFlags |= D3D11_CLEAR_STENCIL;
         }
 
-        d3d11DeviceContext->ClearDepthStencilView(d3d11DepthStencilView, clearFlags,
-                                                  attachmentInfo->clearDepth,
-                                                  attachmentInfo->clearStencil);
+        d3d11DeviceContext->ClearDepthStencilView(
+            d3d11DepthStencilView, clearFlags, attachmentInfo->clearDepth,
+            dchecked_cast<UINT8>(attachmentInfo->clearStencil));
     }
 
     d3d11DeviceContext->OMSetRenderTargets(static_cast<uint8_t>(attachmentCount),

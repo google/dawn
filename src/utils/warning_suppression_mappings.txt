@@ -108,3 +108,8 @@ src:*third_party{/,\\}abseil-cpp{/,\\}absl{/,\\}*
 # Implicit float conversions in tests, samples, and external dependencies.
 src:*src{/,\\}dawn{/,\\}tests{/,\\}*
 src:*src{/,\\}dawn{/,\\}samples{/,\\}*
+
+[implicit-int-conversion]
+# Implicit int conversions in tests and samples.
+src:*src{/,\\}dawn{/,\\}tests{/,\\}*
+src:*src{/,\\}dawn{/,\\}samples{/,\\}*

@@ -348,9 +348,11 @@ uint16_t PackStencilOpState(VkStencilOpState state, VkBool32 enabled) {
     DAWN_ASSERT(static_cast<uint32_t>(state.passOp) < 8);
     DAWN_ASSERT(static_cast<uint32_t>(state.depthFailOp) < 8);
     DAWN_ASSERT(static_cast<uint32_t>(state.compareOp) < 8);
-    uint16_t packed = state.failOp | state.passOp << 3 | state.depthFailOp << 6 |
-                      state.compareOp << 9 |
-                      (enabled ? 0x8000 : 0);  // Set high bit if stencil is enabled.
+    uint16_t packed = static_cast<uint16_t>(
+        static_cast<uint32_t>(state.failOp) | static_cast<uint32_t>(state.passOp) << 3u |
+        static_cast<uint32_t>(state.depthFailOp) << 6u |
+        static_cast<uint32_t>(state.compareOp) << 9u |
+        (enabled ? 0x8000u : 0u));  // Set high bit if stencil is enabled.
     return packed;
 }
 

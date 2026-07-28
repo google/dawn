@@ -34,6 +34,7 @@
 #include "src/dawn/native/vulkan/DeviceVk.h"
 #include "src/dawn/native/vulkan/FencedDeleter.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::vulkan {
 
@@ -67,7 +68,7 @@ DescriptorSetAllocator::DescriptorSetAllocator(
     // Compute the total number of descriptors sets that fits given the max but always make sure
     // that at least one descriptor set can be made (bindings with visibility none can force giant
     // sets to be made).
-    mMaxSets = std::max(kMaxDescriptorsPerPool / totalDescriptorCount, 1u);
+    mMaxSets = checked_cast<SetIndex>(std::max(kMaxDescriptorsPerPool / totalDescriptorCount, 1u));
     DAWN_CHECK(mMaxSets > 0);
 
     // Grow the number of descriptors in the pool to fit the computed |mMaxSets|.

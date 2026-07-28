@@ -33,6 +33,7 @@
 #include "src/dawn/native/Queue.h"
 #include "src/dawn/native/d3d/D3DError.h"
 #include "src/dawn/native/d3d12/DeviceD3D12.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::d3d12 {
 
@@ -144,7 +145,7 @@ uint32_t StagingDescriptorAllocator::GetSizeIncrement() const {
 }
 
 StagingDescriptorAllocator::Index StagingDescriptorAllocator::GetFreeBlockIndicesSize() const {
-    return ((mHeapSize * mSizeIncrement) / mBlockSize);
+    return checked_cast<Index>((mHeapSize * mSizeIncrement) / mBlockSize);
 }
 
 ResultOrError<CPUDescriptorHeapAllocation>

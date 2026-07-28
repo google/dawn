@@ -231,7 +231,8 @@ void SlabAllocatorImpl::Deallocate(void* ptr) {
     IndexLinkNode* node = NodeFromObject(ptr);
 
     DAWN_ASSERT(node->index < mBlocksPerSlab);
-    void* firstAllocation = ObjectFromNode(OffsetFrom(node, -node->index));
+    void* firstAllocation =
+        ObjectFromNode(OffsetFrom(node, checked_cast<std::make_signed_t<Index>>(-node->index)));
     Slab* slab = reinterpret_cast<Slab*>(
         DAWN_UNSAFE_TODO(static_cast<char*>(firstAllocation) - mSlabBlocksOffset));
     DAWN_ASSERT(slab != nullptr);
@@ -268,11 +269,12 @@ void SlabAllocatorImpl::GetNewSlab() {
     char* dataStart = DAWN_UNSAFE_TODO(alignedPtr + mSlabBlocksOffset);
 
     IndexLinkNode* node = NodeFromObject(dataStart);
-    for (uint32_t i = 0; i < mBlocksPerSlab; ++i) {
-        new (OffsetFrom(node, i)) IndexLinkNode(i, i + 1);
+    for (Index i = 0; i < mBlocksPerSlab; ++i) {
+        new (OffsetFrom(node, sign_cast(i))) IndexLinkNode(i, i + 1);
     }
 
-    IndexLinkNode* lastNode = OffsetFrom(node, mBlocksPerSlab - 1);
+    IndexLinkNode* lastNode =
+        OffsetFrom(node, checked_cast<std::make_signed_t<Index>>(mBlocksPerSlab - 1));
     lastNode->nextIndex = kInvalidIndex;
 
     mAvailableSlabs.Prepend(new (alignedPtr) Slab(alignedPtr, node));

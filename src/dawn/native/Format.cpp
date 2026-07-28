@@ -36,6 +36,7 @@
 #include "src/dawn/native/EnumMaskIterator.h"
 #include "src/dawn/native/Features.h"
 #include "src/dawn/native/Texture.h"
+#include "src/utils/numeric.h"
 #include "src/utils/typed_integer.h"
 
 namespace dawn::native {
@@ -446,14 +447,14 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
                 (baseFormat == wgpu::TextureFormat::Undefined) ? fmt : baseFormat;
             internalFormat.isCompressed = false;
             internalFormat.aspects = Aspect::Color;
-            internalFormat.componentCount = static_cast<uint32_t>(componentCount);
+            internalFormat.componentCount = dchecked_cast<uint8_t>(componentCount);
             internalFormat.unsupportedReason = std::monostate{};
             internalFormat.caps = Cap::None;
 
             if (rtPixelCost != RenderTargetPixelByteCost(0u)) {
-                internalFormat.renderTargetPixelByteCost = static_cast<uint32_t>(rtPixelCost);
+                internalFormat.renderTargetPixelByteCost = dchecked_cast<uint8_t>(rtPixelCost);
                 internalFormat.renderTargetComponentAlignment =
-                    static_cast<uint32_t>(rtComponentAlign);
+                    dchecked_cast<uint8_t>(rtComponentAlign);
             }
             AspectInfo* aspect = internalFormat.aspectInfo.data();
             aspect->block.byteSize = static_cast<uint32_t>(byteSize);
@@ -689,7 +690,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
         internalFormat.isCompressed = true;
         internalFormat.unsupportedReason = unsupportedReason;
         internalFormat.aspects = Aspect::Color;
-        internalFormat.componentCount = static_cast<uint32_t>(componentCount);
+        internalFormat.componentCount = dchecked_cast<uint8_t>(componentCount);
 
         // Default baseFormat of each compressed formats should be themselves.
         if (baseFormat == wgpu::TextureFormat::Undefined) {
@@ -754,7 +755,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
             internalFormat.unsupportedReason = unsupportedReason;
             internalFormat.caps = capabilites;
             internalFormat.aspects = aspects;
-            internalFormat.componentCount = static_cast<uint32_t>(componentCount);
+            internalFormat.componentCount = dchecked_cast<uint8_t>(componentCount);
 
             // Multi aspect formats just copy information about single-aspect formats. This
             // means that the single-plane formats must have been added before multi-aspect

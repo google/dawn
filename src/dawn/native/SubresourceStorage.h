@@ -40,6 +40,7 @@
 #include "src/dawn/native/Subresource.h"
 #include "src/utils/assert.h"
 #include "src/utils/heap_array.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native {
 
@@ -253,10 +254,9 @@ SubresourceStorage<T>::SubresourceStorage(Aspect aspects,
                                           uint32_t arrayLayerCount,
                                           uint32_t mipLevelCount,
                                           const T& initialValue)
-    : mAspects(aspects), mMipLevelCount(mipLevelCount), mArrayLayerCount(arrayLayerCount) {
-    DAWN_ASSERT(arrayLayerCount <= std::numeric_limits<decltype(mArrayLayerCount)>::max());
-    DAWN_ASSERT(mipLevelCount <= std::numeric_limits<decltype(mMipLevelCount)>::max());
-
+    : mAspects(aspects),
+      mMipLevelCount(checked_cast<uint8_t>(mipLevelCount)),
+      mArrayLayerCount(checked_cast<uint16_t>(arrayLayerCount)) {
     Fill(initialValue);
 }
 

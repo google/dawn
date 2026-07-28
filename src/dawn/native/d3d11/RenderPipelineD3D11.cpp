@@ -400,7 +400,8 @@ MaybeError RenderPipeline::InitializeBlendState() {
             rtBlendDesc.DestBlendAlpha = D3DBlendAlphaFactor(descriptor->blend->alpha.dstFactor);
             rtBlendDesc.BlendOpAlpha = D3DBlendOperation(descriptor->blend->alpha.operation);
         }
-        rtBlendDesc.RenderTargetWriteMask = D3DColorWriteMask(descriptor->writeMask);
+        rtBlendDesc.RenderTargetWriteMask =
+            dchecked_cast<UINT8>(D3DColorWriteMask(descriptor->writeMask));
     }
 
     DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreateBlendState(&blendDesc, &mBlendState),

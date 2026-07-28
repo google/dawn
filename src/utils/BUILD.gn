@@ -196,7 +196,7 @@ config("dawn_warnings") {
     # P0. Most likely to help with hardening.
     cflags += [
       # Arithmetic
-      "-Wno-implicit-int-conversion",
+      "-Wno-shorten-64-to-32",
     ]
 
     # P1. Likely to help with hardening.

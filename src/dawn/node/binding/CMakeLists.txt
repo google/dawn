@@ -109,6 +109,7 @@ target_link_libraries(dawn_node_binding
     PRIVATE
         dawncpp
         dawn_node_interop
+        dawn_shared_utils
         dawn_warnings_config
         dawn::dawn_wgpu_utils
 )

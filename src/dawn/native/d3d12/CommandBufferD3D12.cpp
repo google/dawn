@@ -1696,7 +1696,7 @@ MaybeError CommandBuffer::SetupRenderPass(CommandRecordingContext* commandContex
         if (hasStencil) {
             renderPassBuilder->SetStencilAccess(
                 attachmentInfo.stencilLoadOp, attachmentInfo.stencilStoreOp,
-                attachmentInfo.clearStencil, view->GetD3D12Format());
+                dchecked_cast<uint8_t>(attachmentInfo.clearStencil), view->GetD3D12Format());
         } else {
             renderPassBuilder->SetStencilNoAccess();
         }
@@ -1739,8 +1739,9 @@ void CommandBuffer::EmulateBeginRenderPass(CommandRecordingContext* commandConte
                     ->StencilBeginningAccess.Type ==
                 D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_CLEAR) {
                 clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
-                stencilClear = renderPassBuilder->GetRenderPassDepthStencilDescriptor()
-                                   ->StencilBeginningAccess.Clear.ClearValue.DepthStencil.Stencil;
+                stencilClear = dchecked_cast<uint8_t>(
+                    renderPassBuilder->GetRenderPassDepthStencilDescriptor()
+                        ->StencilBeginningAccess.Clear.ClearValue.DepthStencil.Stencil);
             }
 
             if (clearFlags) {

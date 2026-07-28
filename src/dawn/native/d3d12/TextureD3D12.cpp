@@ -251,7 +251,7 @@ MaybeError Texture::InitializeAsInternalTexture() {
     const Extent3D& size = GetBaseSize();
     resourceDescriptor.Width = size.width;
     resourceDescriptor.Height = size.height;
-    resourceDescriptor.DepthOrArraySize = size.depthOrArrayLayers;
+    resourceDescriptor.DepthOrArraySize = checked_cast<UINT16>(size.depthOrArrayLayers);
 
     Device* device = ToBackend(GetDevice());
     // When the depth stencil texture is created on a not-zeroed heap, its first usage will also be

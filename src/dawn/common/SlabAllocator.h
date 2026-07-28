@@ -37,6 +37,7 @@
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/Numeric.h"
 #include "src/dawn/common/PlacementAllocated.h"
+#include "src/utils/numeric.h"
 
 namespace dawn {
 
@@ -195,7 +196,7 @@ class SlabAllocator : public SlabAllocatorImpl {
     explicit SlabAllocator(size_t totalObjectBytes,
                            uint32_t objectSize = u32_sizeof<T>,
                            uint32_t objectAlignment = u32_alignof<T>)
-        : SlabAllocatorImpl(std::max(totalObjectBytes / objectSize, size_t{1}),
+        : SlabAllocatorImpl(checked_cast<Index>(std::max(totalObjectBytes / objectSize, size_t{1})),
                             objectSize,
                             objectAlignment) {}
 
