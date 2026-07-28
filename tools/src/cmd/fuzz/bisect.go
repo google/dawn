@@ -264,7 +264,7 @@ func testBisectStep(t *taskConfig) (bisectStepResult, error) {
 	}
 
 	fmt.Printf("--> Running fuzzer %s against test case...\n", fuzzerName)
-	_, err := t.runCmd(t.fuzzer, t.bisectFile)
+	_, err := t.runCmd(t.fuzzer, "-timeout=60", t.bisectFile)
 	if err != nil {
 		return BisectStepFailed, nil
 	}

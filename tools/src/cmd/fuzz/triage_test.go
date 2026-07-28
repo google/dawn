@@ -150,7 +150,7 @@ $B1: {
 	require.Contains(t, reportStr, "### Original File\n`some-crash-file`")
 	require.Contains(t, reportStr, "### Reproduction File\n`some-crash-file.repro` (identical to original)")
 	require.Contains(t, reportStr, "## Reproduction Instructions")
-	require.Contains(t, reportStr, "tint_ir_fuzzer --verbose --dump-ir=true --filter=tint::glsl::writer::IRFuzzer some-crash-file.repro")
+	require.Contains(t, reportStr, "tint_ir_fuzzer -timeout=60 --verbose --dump-ir=true --filter=tint::glsl::writer::IRFuzzer some-crash-file.repro")
 	require.Contains(t, reportStr, "## Failing Pass\n`tint::glsl::writer::IRFuzzer`")
 	require.Contains(t, reportStr, "## Transforms Run\n```\nglsl.Printer\nglsl.Printer\n```")
 	require.Contains(t, reportStr, "## Failing Transform\n`glsl.Printer`")
@@ -194,7 +194,7 @@ func TestGenerateTriageReportResilience(t *testing.T) {
 	require.Contains(t, reportStr, "# Triage Report for some-crash-file")
 	require.Contains(t, reportStr, "## Reproduction Instructions")
 	// Should not have --filter, and should have single spaces
-	require.Contains(t, reportStr, "tint_ir_fuzzer --verbose --dump-ir=true some-crash-file.repro")
+	require.Contains(t, reportStr, "tint_ir_fuzzer -timeout=60 --verbose --dump-ir=true some-crash-file.repro")
 	require.Contains(t, reportStr, "## Failing Pass\n`Unknown (failed to identify from fuzzer output)`")
 	require.Contains(t, reportStr, "## Transforms Run\n```\nNone\n```")
 	require.Contains(t, reportStr, "## Failing Transform\n`Unknown`")
