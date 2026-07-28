@@ -138,5 +138,15 @@
             "mac",
             "win"
         ]
+    },
+    "152": {
+        "name": "m152",
+        "chromium_project": "chromium-m152",
+        "ref": "refs/heads/chromium/7977",
+        "platforms": [
+            "linux",
+            "mac",
+            "win"
+        ]
     }
 }
