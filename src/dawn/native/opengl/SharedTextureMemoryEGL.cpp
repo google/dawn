@@ -53,8 +53,12 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemoryEGL::Create(
     DAWN_INVALID_IF(aHardwareBuffer == nullptr, "AHardwareBuffer is missing.");
 
     // Reflect the properties of the AHardwareBuffer.
-    SharedTextureMemoryProperties properties =
+    AHBSharedTextureMemoryProperties ahbProperties =
         GetAHBSharedTextureMemoryProperties(device->GetOrLoadAHBFunctions(), aHardwareBuffer);
+    DAWN_INVALID_IF(ahbProperties.isProtected,
+                    "Unsupported AHardwareBuffer usage AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT.");
+
+    SharedTextureMemoryProperties& properties = ahbProperties.properties;
     DAWN_INVALID_IF(properties.format == wgpu::TextureFormat::Undefined,
                     "Unknown AHardwareBuffer format cannot be imported.");
 

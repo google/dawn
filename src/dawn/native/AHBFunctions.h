@@ -51,7 +51,14 @@ class AHBFunctions {
     DynamicLib mNativeWindowLib;
 };
 
-SharedTextureMemoryProperties GetAHBSharedTextureMemoryProperties(
+// Encapsulates the SharedTextureMemoryProperties that describe the AHardwareBuffer and additional
+// supplementary information.
+struct AHBSharedTextureMemoryProperties {
+    SharedTextureMemoryProperties properties;
+    bool isProtected;
+};
+
+AHBSharedTextureMemoryProperties GetAHBSharedTextureMemoryProperties(
     const AHBFunctions* ahbFunctions,
     ::AHardwareBuffer* aHardwareBuffer);
 

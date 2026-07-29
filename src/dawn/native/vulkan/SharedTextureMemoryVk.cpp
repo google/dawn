@@ -518,8 +518,18 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID;
 
     // Reflect the properties of the AHardwareBuffer.
-    SharedTextureMemoryProperties properties =
+    AHBSharedTextureMemoryProperties ahbProperties =
         GetAHBSharedTextureMemoryProperties(ahbFunctions, aHardwareBuffer);
+
+    // Reject protected AHBs.
+    // Dawn doesn't enable VkPhysicalDeviceProtectedMemoryFeatures::protectedMemory and never sets
+    // VK_IMAGE_CREATE_PROTECTED_BIT, so an AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT buffer would
+    // produce an invalid vkAllocateMemory (VUID-VkMemoryAllocateInfo-None-01872) and
+    // vkBindImageMemory (VUID-vkBindImageMemory-None-01902).
+    DAWN_INVALID_IF(ahbProperties.isProtected,
+                    "Unsupported AHardwareBuffer usage AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT.");
+
+    SharedTextureMemoryProperties& properties = ahbProperties.properties;
 
     const CombinedLimits& limits = device->GetLimits();
     DAWN_INVALID_IF(properties.size.width > limits.v1.maxTextureDimension2D,

@@ -470,6 +470,31 @@ TEST_P(SharedTextureMemoryTests, MSRTSSWriteThenCPURead) {
     AHardwareBuffer_release(aHardwareBuffer);
 }
 
+// Ensure that importing protected AHBs is unsupported.
+TEST_P(SharedTextureMemoryTests, ProtectedUnsupported) {
+    AHardwareBuffer_Desc aHardwareBufferDesc = {
+        .width = 4,
+        .height = 4,
+        .layers = 1,
+        .format = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
+        .usage = AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER | AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT,
+    };
+    AHardwareBuffer* aHardwareBuffer;
+    EXPECT_EQ(AHardwareBuffer_allocate(&aHardwareBufferDesc, &aHardwareBuffer), 0);
+
+    // Get actual desc for allocated buffer so we know the stride for cpu data.
+    AHardwareBuffer_describe(aHardwareBuffer, &aHardwareBufferDesc);
+
+    wgpu::SharedTextureMemoryAHardwareBufferDescriptor stmAHardwareBufferDesc;
+    stmAHardwareBufferDesc.handle = aHardwareBuffer;
+
+    wgpu::SharedTextureMemoryDescriptor desc;
+    desc.nextInChain = &stmAHardwareBufferDesc;
+
+    ASSERT_DEVICE_ERROR_MSG(device.ImportSharedTextureMemory(&desc),
+                            testing::HasSubstr("Unsupported AHardwareBuffer usage"));
+}
+
 DAWN_INSTANTIATE_PREFIXED_TEST_P(Vulkan,
                                  SharedTextureMemoryNoFeatureTests,
                                  {VulkanBackend()},
