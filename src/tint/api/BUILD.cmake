@@ -52,14 +52,11 @@ tint_target_add_dependencies(tint_api lib
   tint_lang_core_constant
   tint_lang_core_ir
   tint_lang_core_type
-  tint_lang_hlsl_writer_common
-  tint_lang_null_writer_common
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_inspector
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer_common
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -87,6 +84,7 @@ endif(TINT_BUILD_GLSL_WRITER)
 if(TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies(tint_api lib
     tint_lang_hlsl_writer
+    tint_lang_hlsl_writer_common
   )
 endif(TINT_BUILD_HLSL_WRITER)
 
@@ -100,6 +98,7 @@ endif(TINT_BUILD_MSL_WRITER)
 if(TINT_BUILD_NULL_WRITER)
   tint_target_add_dependencies(tint_api lib
     tint_lang_null_writer
+    tint_lang_null_writer_common
   )
 endif(TINT_BUILD_NULL_WRITER)
 
@@ -126,6 +125,7 @@ endif(TINT_BUILD_WGSL_READER)
 if(TINT_BUILD_WGSL_WRITER)
   tint_target_add_dependencies(tint_api lib
     tint_lang_wgsl_writer
+    tint_lang_wgsl_writer_common
   )
 endif(TINT_BUILD_WGSL_WRITER)
 
@@ -140,7 +140,6 @@ tint_add_target(tint_api_test test
 tint_target_add_dependencies(tint_api_test test
   tint_api
   tint_lang_wgsl
-  tint_lang_wgsl_writer_common
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -163,3 +162,9 @@ if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
     "spirv-tools"
   )
 endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
+
+if(TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_api_test test
+    tint_lang_wgsl_writer_common
+  )
+endif(TINT_BUILD_WGSL_WRITER)

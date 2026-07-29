@@ -53,13 +53,11 @@ tint_target_add_dependencies(tint_cmd_tint_cmd cmd
   tint_lang_core_ir
   tint_lang_core_ir_transform
   tint_lang_core_type
-  tint_lang_hlsl_writer_common
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_inspector
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer_common
   tint_utils
   tint_utils_command
   tint_utils_containers
@@ -97,6 +95,7 @@ if(TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_tint_cmd cmd
     tint_lang_hlsl_validate
     tint_lang_hlsl_writer
+    tint_lang_hlsl_writer_common
   )
 endif(TINT_BUILD_HLSL_WRITER)
 
@@ -137,6 +136,7 @@ endif(TINT_BUILD_WGSL_READER)
 if(TINT_BUILD_WGSL_WRITER)
   tint_target_add_dependencies(tint_cmd_tint_cmd cmd
     tint_lang_wgsl_writer
+    tint_lang_wgsl_writer_common
   )
 endif(TINT_BUILD_WGSL_WRITER)
 

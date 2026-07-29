@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_NULL_WRITER)
 ################################################################################
 # Target:    tint_lang_null_writer_raise
 # Kind:      lib
+# Condition: TINT_BUILD_NULL_WRITER
 ################################################################################
 tint_add_target(tint_lang_null_writer_raise lib
   lang/null/writer/raise/raise.cc
@@ -67,3 +69,5 @@ tint_target_add_dependencies(tint_lang_null_writer_raise lib
 tint_target_add_external_dependencies(tint_lang_null_writer_raise lib
   "src_utils"
 )
+
+endif(TINT_BUILD_NULL_WRITER)

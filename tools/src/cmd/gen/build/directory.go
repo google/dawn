@@ -49,6 +49,8 @@ type Directory struct {
 	SubdirectoryNames container.Set[string]
 	// The names of all targets of this directory
 	TargetNames container.Set[TargetName]
+	// The optional condition for building this directory
+	Condition Condition
 }
 
 // AbsPath returns an absolute path for this directory

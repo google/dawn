@@ -58,8 +58,6 @@ if (tint_build_fuzzer_vulkan_support && tint_build_fuzzers &&
       "${tint_src_dir}/lang/core/ir/binary:fuzz",
       "${tint_src_dir}/lang/core/ir/transform:fuzz",
       "${tint_src_dir}/lang/core/type",
-      "${tint_src_dir}/lang/hlsl/writer/raise:fuzz",
-      "${tint_src_dir}/lang/wgsl/writer/raise:fuzz",
       "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/bytes",
       "${tint_src_dir}/utils/containers",
@@ -80,7 +78,10 @@ if (tint_build_fuzzer_vulkan_support && tint_build_fuzzers &&
     }
 
     if (tint_build_hlsl_writer) {
-      deps += [ "${tint_src_dir}/lang/hlsl/writer:fuzz" ]
+      deps += [
+        "${tint_src_dir}/lang/hlsl/writer:fuzz",
+        "${tint_src_dir}/lang/hlsl/writer/raise:fuzz",
+      ]
     }
 
     if (tint_build_msl_writer) {
@@ -92,7 +93,10 @@ if (tint_build_fuzzer_vulkan_support && tint_build_fuzzers &&
     }
 
     if (tint_build_wgsl_writer) {
-      deps += [ "${tint_src_dir}/lang/wgsl/writer:fuzz" ]
+      deps += [
+        "${tint_src_dir}/lang/wgsl/writer:fuzz",
+        "${tint_src_dir}/lang/wgsl/writer/raise:fuzz",
+      ]
     }
   }
 }

@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_writer_raise
 # Kind:      lib
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_raise lib
   lang/hlsl/writer/raise/array_offset_from_immediate.cc
@@ -103,9 +105,12 @@ tint_target_add_external_dependencies(tint_lang_hlsl_writer_raise lib
   "src_utils"
 )
 
+endif(TINT_BUILD_HLSL_WRITER)
+if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_writer_raise_test
 # Kind:      test
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_raise_test test
   lang/hlsl/writer/raise/array_offset_from_immediate_test.cc
@@ -157,11 +162,12 @@ tint_target_add_external_dependencies(tint_lang_hlsl_writer_raise_test test
   "src_utils"
 )
 
-if(TINT_BUILD_FUZZERS)
+endif(TINT_BUILD_HLSL_WRITER)
+if(TINT_BUILD_FUZZERS AND TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_writer_raise_fuzz
 # Kind:      fuzz
-# Condition: TINT_BUILD_FUZZERS
+# Condition: TINT_BUILD_FUZZERS AND TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_raise_fuzz fuzz
   lang/hlsl/writer/raise/promote_initializers_fuzz.cc
@@ -193,4 +199,4 @@ tint_target_add_external_dependencies(tint_lang_hlsl_writer_raise_fuzz fuzz
   "src_utils"
 )
 
-endif(TINT_BUILD_FUZZERS)
+endif(TINT_BUILD_FUZZERS AND TINT_BUILD_HLSL_WRITER)

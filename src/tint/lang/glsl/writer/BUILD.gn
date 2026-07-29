@@ -75,7 +75,7 @@ if (tint_build_glsl_writer) {
   }
 }
 if (tint_build_unittests) {
-  if (tint_build_glsl_writer && tint_build_glsl_validator) {
+  if (tint_build_glsl_validator && tint_build_glsl_writer) {
     tint_unittests_source_set("unittests") {
       sources = [
         "access_test.cc",

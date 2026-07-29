@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_SPV_READER)
 ################################################################################
 # Target:    tint_lang_spirv_reader_lower
 # Kind:      lib
+# Condition: TINT_BUILD_SPV_READER
 ################################################################################
 tint_add_target(tint_lang_spirv_reader_lower lib
   lang/spirv/reader/lower/atomics.cc
@@ -88,9 +90,12 @@ tint_target_add_external_dependencies(tint_lang_spirv_reader_lower lib
   "src_utils"
 )
 
+endif(TINT_BUILD_SPV_READER)
+if(TINT_BUILD_SPV_READER)
 ################################################################################
 # Target:    tint_lang_spirv_reader_lower_test
 # Kind:      test
+# Condition: TINT_BUILD_SPV_READER
 ################################################################################
 tint_add_target(tint_lang_spirv_reader_lower_test test
   lang/spirv/reader/lower/atomics_test.cc
@@ -133,3 +138,5 @@ tint_target_add_external_dependencies(tint_lang_spirv_reader_lower_test test
   "gtest"
   "src_utils"
 )
+
+endif(TINT_BUILD_SPV_READER)

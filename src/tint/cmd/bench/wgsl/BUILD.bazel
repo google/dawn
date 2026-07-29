@@ -90,10 +90,10 @@ alias(
 )
 
 selects.config_setting_group(
-    name = "tint_build_wgsl_writer_and_tint_build_wgsl_reader",
+    name = "tint_build_wgsl_reader_and_tint_build_wgsl_writer",
     match_all = [
-        ":tint_build_wgsl_writer",
         ":tint_build_wgsl_reader",
+        ":tint_build_wgsl_writer",
     ],
 )
 

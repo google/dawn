@@ -374,25 +374,40 @@ func scanSourceFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter
 func applyDirectoryConfigs(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 	// For each directory in the project...
 	for _, dir := range p.Directories.Values() {
+		// Inherit condition from parent first.
+		// By the time we visit a child, its parent has already been fully resolved and updated.
+		if dir.Parent != nil && dir.Parent.Condition != nil {
+			dir.Condition = dir.Parent.Condition
+		}
+
+		// Look for directory level configurations.
 		path := path.Join(dir.AbsPath(), "BUILD.cfg")
 		content, err := fsReaderWriter.ReadFile(path)
-		if err != nil {
-			continue
-		}
-
-		// Parse the config
-		cfg := DirectoryConfig{}
-		if err := json.Unmarshal(jsonc.ToJSON(content), &cfg); err != nil {
-			return fmt.Errorf("error while parsing '%v': %w", path, err)
-		}
-
-		// Apply any directory-level condition
-		for _, target := range dir.Targets() {
-			cond, err := cnf.Parse(cfg.Condition)
-			if err != nil {
-				return fmt.Errorf("%v: could not parse condition: %w", path, err)
+		var cfg DirectoryConfig
+		if err == nil {
+			if err := json.Unmarshal(jsonc.ToJSON(content), &cfg); err != nil {
+				return fmt.Errorf("error while parsing '%v': %w", path, err)
 			}
-			target.Condition = cond
+
+			// Apply any directory-level condition
+			if cfg.Condition != "" {
+				cond, err := cnf.Parse(cfg.Condition)
+				if err != nil {
+					return fmt.Errorf("%v: could not parse condition: %w", path, err)
+				}
+				if dir.Condition == nil {
+					dir.Condition = cond
+				} else {
+					dir.Condition = cnf.Optimize(cnf.And(dir.Condition, cond))
+				}
+			}
+		}
+
+		// Apply the combined directory-level condition to all targets in this directory.
+		if dir.Condition != nil {
+			for _, target := range dir.Targets() {
+				target.Condition = dir.Condition
+			}
 		}
 
 		// For each target config...
@@ -441,7 +456,11 @@ func applyDirectoryConfigs(p *Project, fsReaderWriter oswrapper.FilesystemReader
 				if err != nil {
 					return fmt.Errorf("%v: %v", path, err)
 				}
-				target.Condition = cnf.And(target.Condition, condition)
+				if target.Condition == nil {
+					target.Condition = condition
+				} else {
+					target.Condition = cnf.Optimize(cnf.And(target.Condition, condition))
+				}
 			}
 
 			// Add any additional internal dependencies

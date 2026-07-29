@@ -105,9 +105,6 @@ cc_library(
     "//src/tint/lang/wgsl/ir",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",
-    "//src/tint/lang/wgsl/writer/common",
-    "//src/tint/lang/wgsl/writer/ir_to_program",
-    "//src/tint/lang/wgsl/writer/raise",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -130,6 +127,9 @@ cc_library(
   }) + select({
     ":tint_build_wgsl_writer": [
       "//src/tint/lang/wgsl/writer",
+      "//src/tint/lang/wgsl/writer/common",
+      "//src/tint/lang/wgsl/writer/ir_to_program",
+      "//src/tint/lang/wgsl/writer/raise",
     ],
     "//conditions:default": [],
   }),

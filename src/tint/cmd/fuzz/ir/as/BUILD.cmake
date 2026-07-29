@@ -59,7 +59,6 @@ tint_target_add_dependencies(tint_cmd_fuzz_ir_as_cmd cmd
   tint_lang_wgsl_program
   tint_lang_wgsl_reader
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer_common
   tint_utils
   tint_utils_command
   tint_utils_containers
@@ -85,6 +84,12 @@ if(TINT_BUILD_SPV_READER)
     tint_lang_spirv_reader_common
   )
 endif(TINT_BUILD_SPV_READER)
+
+if(TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_as_cmd cmd
+    tint_lang_wgsl_writer_common
+  )
+endif(TINT_BUILD_WGSL_WRITER)
 
 tint_target_set_output_name(tint_cmd_fuzz_ir_as_cmd cmd "ir_fuzz_as")
 

@@ -55,14 +55,11 @@ libtint_source_set("api") {
     "${tint_src_dir}/lang/core/constant",
     "${tint_src_dir}/lang/core/ir",
     "${tint_src_dir}/lang/core/type",
-    "${tint_src_dir}/lang/hlsl/writer/common",
-    "${tint_src_dir}/lang/null/writer/common",
     "${tint_src_dir}/lang/wgsl",
     "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/lang/wgsl/inspector",
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/sem",
-    "${tint_src_dir}/lang/wgsl/writer/common",
     "${tint_src_dir}/utils",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
@@ -84,7 +81,10 @@ libtint_source_set("api") {
   }
 
   if (tint_build_hlsl_writer) {
-    deps += [ "${tint_src_dir}/lang/hlsl/writer" ]
+    deps += [
+      "${tint_src_dir}/lang/hlsl/writer",
+      "${tint_src_dir}/lang/hlsl/writer/common",
+    ]
   }
 
   if (tint_build_msl_writer) {
@@ -95,7 +95,10 @@ libtint_source_set("api") {
   }
 
   if (tint_build_null_writer) {
-    deps += [ "${tint_src_dir}/lang/null/writer" ]
+    deps += [
+      "${tint_src_dir}/lang/null/writer",
+      "${tint_src_dir}/lang/null/writer/common",
+    ]
   }
 
   if (tint_build_spv_reader) {
@@ -117,7 +120,10 @@ libtint_source_set("api") {
   }
 
   if (tint_build_wgsl_writer) {
-    deps += [ "${tint_src_dir}/lang/wgsl/writer" ]
+    deps += [
+      "${tint_src_dir}/lang/wgsl/writer",
+      "${tint_src_dir}/lang/wgsl/writer/common",
+    ]
   }
 }
 if (tint_build_unittests) {
@@ -128,7 +134,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/api",
       "${tint_src_dir}/lang/wgsl",
-      "${tint_src_dir}/lang/wgsl/writer/common",
       "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
@@ -146,6 +151,10 @@ if (tint_build_unittests) {
         "${tint_spirv_tools_dir}:spvtools_headers",
         "${tint_spirv_tools_dir}:spvtools_val",
       ]
+    }
+
+    if (tint_build_wgsl_writer) {
+      deps += [ "${tint_src_dir}/lang/wgsl/writer/common" ]
     }
   }
 }

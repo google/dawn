@@ -54,13 +54,11 @@ tint_executable("tint") {
     "${tint_src_dir}/lang/core/ir",
     "${tint_src_dir}/lang/core/ir/transform",
     "${tint_src_dir}/lang/core/type",
-    "${tint_src_dir}/lang/hlsl/writer/common",
     "${tint_src_dir}/lang/wgsl",
     "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/lang/wgsl/inspector",
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/sem",
-    "${tint_src_dir}/lang/wgsl/writer/common",
     "${tint_src_dir}/utils",
     "${tint_src_dir}/utils/command",
     "${tint_src_dir}/utils/containers",
@@ -92,6 +90,7 @@ tint_executable("tint") {
     deps += [
       "${tint_src_dir}/lang/hlsl/validate",
       "${tint_src_dir}/lang/hlsl/writer",
+      "${tint_src_dir}/lang/hlsl/writer/common",
     ]
   }
 
@@ -129,6 +128,9 @@ tint_executable("tint") {
   }
 
   if (tint_build_wgsl_writer) {
-    deps += [ "${tint_src_dir}/lang/wgsl/writer" ]
+    deps += [
+      "${tint_src_dir}/lang/wgsl/writer",
+      "${tint_src_dir}/lang/wgsl/writer/common",
+    ]
   }
 }

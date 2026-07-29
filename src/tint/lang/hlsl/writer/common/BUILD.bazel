@@ -110,3 +110,8 @@ cc_library(
   visibility = ["//visibility:public"],
 )
 
+alias(
+  name = "tint_build_hlsl_writer",
+  actual = "//src/tint:tint_build_hlsl_writer_true",
+)
+

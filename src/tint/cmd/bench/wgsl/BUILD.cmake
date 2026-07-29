@@ -34,11 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
-if(TINT_BUILD_WGSL_WRITER AND TINT_BUILD_WGSL_READER)
+if(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_cmd_bench_wgsl_bench
 # Kind:      bench
-# Condition: TINT_BUILD_WGSL_WRITER AND TINT_BUILD_WGSL_READER
+# Condition: TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_cmd_bench_wgsl_bench bench
   cmd/bench/wgsl/reader_bench.cc
@@ -77,4 +77,4 @@ tint_target_add_external_dependencies(tint_cmd_bench_wgsl_bench bench
   "src_utils"
 )
 
-endif(TINT_BUILD_WGSL_WRITER AND TINT_BUILD_WGSL_READER)
+endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)

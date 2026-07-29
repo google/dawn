@@ -136,3 +136,8 @@ cc_library(
   visibility = ["//visibility:public"],
 )
 
+alias(
+  name = "tint_build_spv_reader",
+  actual = "//src/tint:tint_build_spv_reader_true",
+)
+

@@ -59,23 +59,15 @@ cc_binary(
     "//src/tint/lang/glsl/ir:test",
     "//src/tint/lang/hlsl/ir:test",
     "//src/tint/lang/hlsl/type:test",
-    "//src/tint/lang/hlsl/writer/common:test",
-    "//src/tint/lang/hlsl/writer/raise:test",
     "//src/tint/lang/msl/ir:test",
     "//src/tint/lang/msl/type:test",
     "//src/tint/lang/spirv/ir:test",
-    "//src/tint/lang/spirv/reader/lower:test",
     "//src/tint/lang/spirv/type:test",
-    "//src/tint/lang/spirv/writer/analysis:test",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast:test",
     "//src/tint/lang/wgsl/ir:test",
     "//src/tint/lang/wgsl/program:test",
-    "//src/tint/lang/wgsl/reader/lower:test",
     "//src/tint/lang/wgsl/sem:test",
-    "//src/tint/lang/wgsl/writer/common",
-    "//src/tint/lang/wgsl/writer/ir_to_program:test",
-    "//src/tint/lang/wgsl/writer/raise:test",
     "//src/tint/lang/wgsl:test",
     "//src/tint/utils",
     "//src/tint/utils/bytes:test",
@@ -107,18 +99,20 @@ cc_binary(
     "//src/utils/chromium_test_compat",
     "//src/utils:crash_handler",
   ] + select({
+    ":tint_build_glsl_validator_and_tint_build_glsl_writer": [
+      "//src/tint/lang/glsl/writer:test",
+    ],
+    "//conditions:default": [],
+  }) + select({
     ":tint_build_glsl_writer": [
       "//src/tint/lang/glsl/writer/common:test",
       "//src/tint/lang/glsl/writer/raise:test",
     ],
     "//conditions:default": [],
   }) + select({
-    ":tint_build_glsl_writer_and_tint_build_glsl_validator": [
-      "//src/tint/lang/glsl/writer:test",
-    ],
-    "//conditions:default": [],
-  }) + select({
     ":tint_build_hlsl_writer": [
+      "//src/tint/lang/hlsl/writer/common:test",
+      "//src/tint/lang/hlsl/writer/raise:test",
       "//src/tint/lang/hlsl/writer:test",
     ],
     "//conditions:default": [],
@@ -137,6 +131,7 @@ cc_binary(
   }) + select({
     ":tint_build_spv_reader": [
       "//src/tint/lang/spirv/reader/common:test",
+      "//src/tint/lang/spirv/reader/lower:test",
       "//src/tint/lang/spirv/reader/parser:test",
       "//src/tint/lang/spirv/reader:test",
     ],
@@ -148,6 +143,7 @@ cc_binary(
     "//conditions:default": [],
   }) + select({
     ":tint_build_spv_writer": [
+      "//src/tint/lang/spirv/writer/analysis:test",
       "//src/tint/lang/spirv/writer/common:test",
       "//src/tint/lang/spirv/writer/raise:test",
       "//src/tint/lang/spirv/writer:test",
@@ -162,6 +158,7 @@ cc_binary(
     ":tint_build_wgsl_reader": [
       "//src/tint/lang/wgsl/inspector:test",
       "//src/tint/lang/wgsl/intrinsic:test",
+      "//src/tint/lang/wgsl/reader/lower:test",
       "//src/tint/lang/wgsl/reader/parser:test",
       "//src/tint/lang/wgsl/reader/program_to_ir:test",
       "//src/tint/lang/wgsl/reader:test",
@@ -171,6 +168,9 @@ cc_binary(
   }) + select({
     ":tint_build_wgsl_writer": [
       "//src/tint/lang/wgsl/writer/ast_printer:test",
+      "//src/tint/lang/wgsl/writer/common",
+      "//src/tint/lang/wgsl/writer/ir_to_program:test",
+      "//src/tint/lang/wgsl/writer/raise:test",
       "//src/tint/lang/wgsl/writer:test",
     ],
     "//conditions:default": [],
@@ -238,10 +238,10 @@ selects.config_setting_group(
 )
 
 selects.config_setting_group(
-    name = "tint_build_glsl_writer_and_tint_build_glsl_validator",
+    name = "tint_build_glsl_validator_and_tint_build_glsl_writer",
     match_all = [
-        ":tint_build_glsl_writer",
         ":tint_build_glsl_validator",
+        ":tint_build_glsl_writer",
     ],
 )
 selects.config_setting_group(
