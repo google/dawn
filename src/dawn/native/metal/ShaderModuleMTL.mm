@@ -421,6 +421,22 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                                     result->workgroup_info, r.usesSubgroupMatrix, r.maxSubgroupSize,
                                     r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
 
+                if (!result->workgroup_allocations.empty()) {
+                    DAWN_ASSERT(result->workgroup_allocations.size() == 1);
+
+                    uint32_t maxComputeWorkgroupStorageSize =
+                        r.limits.maxComputeWorkgroupStorageSize;
+                    uint64_t size = result->workgroup_allocations.front();
+                    DAWN_INTERNAL_ERROR_IF(
+                        size > maxComputeWorkgroupStorageSize,
+                        "The total combined workgroup storage (%u bytes) size with all workgroup "
+                        "variables combined into a single structure is larger than the maximum "
+                        "allowed (%u bytes).%s",
+                        size, maxComputeWorkgroupStorageSize,
+                        DAWN_INCREASE_LIMIT_MESSAGE(r.adapterSupportedLimits.UnsafeGetValue(),
+                                                    maxComputeWorkgroupStorageSize, size));
+                }
+
                 if (result->workgroup_info.subgroup_size.has_value()) {
                     uint32_t explicitSubgroupSize = result->workgroup_info.subgroup_size.value();
                     DAWN_INVALID_IF(

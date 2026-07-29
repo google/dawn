@@ -465,6 +465,12 @@ class Printer : public tint::TextGenerator {
                     out << " [[threadgroup(" << allocations.size() << ")]]";
                     allocations.push_back(ty->Size());
 
+                    // Because we combine the workgroup memory into a single struct, we should only
+                    // ever get a single allocation. If we change this we need to update the
+                    // corresponding validation in ShaderModuleMTL which checks the allocation size
+                    // against the available compute workgroup memory size.
+                    TINT_ASSERT(allocations.size() == 1);
+
                     // Currently type is always a struct, if this changes in the future we'll need
                     // to update this to handle non-struct data as well.
                     TINT_IR_ASSERT(ir_, ty->Is<core::type::Struct>());
