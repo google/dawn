@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  const constant float2* pc;
+  device float* out;
+  const constant uint* idx;
+};
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void v(const constant float2* pc [[buffer(30)]], device float* out [[buffer(0)]], const constant uint* idx [[buffer(1)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.pc=pc, .out=out, .idx=idx};
+  (*tint_module_vars.out) = (*tint_module_vars.pc)[min((*tint_module_vars.idx), 1u)];
+}

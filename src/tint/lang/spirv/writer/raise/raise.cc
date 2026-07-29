@@ -266,6 +266,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         module, {
                     .immediate = true,
                     .minimum_array_size = options.minimum_immediate_size,
+                    .allow_dynamic_immediate_indices = false,
                 }));
 
     // BlockDecoratedStructs must run again to wrap the decomposed immediate array in a block

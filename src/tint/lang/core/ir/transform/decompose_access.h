@@ -49,6 +49,8 @@ struct DecomposeAccessOptions {
     // The minimum size of the resulting array, in bytes.
     uint32_t minimum_array_size = 0;
 
+    bool allow_dynamic_immediate_indices = true;
+
     // TODO(b/477295042): should there be a uniform standard layout option? When enabled uniform
     // could be treated like every other storage class.
 };

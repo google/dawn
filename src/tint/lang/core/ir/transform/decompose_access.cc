@@ -137,6 +137,11 @@ struct State {
                 array_ty = ty.array(BaseEleType(), array_length);
             }
 
+            if (var_ty->AddressSpace() == core::AddressSpace::kImmediate &&
+                !options.allow_dynamic_immediate_indices) {
+                RewriteDynamicIndices(var);
+            }
+
             auto usage_worklist = result->UsagesSorted();
             while (!usage_worklist.IsEmpty()) {
                 auto usage = usage_worklist.Pop();
@@ -490,6 +495,125 @@ struct State {
     /// @returns true if data has length information.
     bool HasLengthData(const OffsetData& data) {
         return data.byte_length != 0 || data.byte_length_expr != nullptr;
+    }
+
+    // Rewrites uses of var that contain a dynamic index.
+    // Only necessary for immediate variables so the set of potential instructions is considerably
+    // limited.
+    void RewriteDynamicIndices(core::ir::Var* var) {
+        TINT_IR_ASSERT(ir, var->Result()->Type()->As<core::type::Pointer>()->AddressSpace() ==
+                               core::AddressSpace::kImmediate);
+        auto worklist = var->Result()->UsagesSorted();
+        while (!worklist.IsEmpty()) {
+            auto usage = worklist.Pop();
+            tint::Switch(
+                usage.instruction,
+                [&](core::ir::Access* a) {
+                    Vector<Value*, 4> const_indices;
+                    Vector<Value*, 4> non_const_indices;
+                    const core::type::Type* type = a->Object()->Type()->UnwrapPtr();
+                    for (auto* idx_value : a->Indices()) {
+                        if (!idx_value->Is<core::ir::Constant>() || !non_const_indices.IsEmpty()) {
+                            non_const_indices.Push(idx_value);
+                        } else {
+                            const_indices.Push(idx_value);
+                            tint::Switch(
+                                type,  //
+                                [&](const core::type::Struct* s) {
+                                    auto* cnst = idx_value->As<core::ir::Constant>();
+
+                                    // A struct index must be a constant
+                                    TINT_IR_ASSERT(ir, cnst);
+
+                                    uint32_t idx = cnst->Value()->ValueAs<uint32_t>();
+                                    auto* mem = s->Members()[idx];
+                                    type = mem->Type();
+                                },
+                                [&](const core::type::Array*) { TINT_IR_ASSERT(ir, false); },
+                                [&](const core::type::Matrix* m) { type = m->ColumnType(); },
+                                [&](const core::type::Vector* v) { type = v->Type(); },
+                                TINT_ICE_ON_NO_MATCH);
+                        }
+                    }
+                    if (!non_const_indices.IsEmpty()) {
+                        Materialize(a, type, const_indices, non_const_indices);
+                        a->Destroy();
+                    }
+                },
+                [&](core::ir::LoadVectorElement* lve) {
+                    if (!lve->Index()->Is<core::ir::Constant>()) {
+                        b.InsertBefore(lve, [&] {
+                            auto* load = b.Load(lve->From());
+                            b.AccessWithResult(lve->DetachResult(), load, lve->Index());
+                        });
+                        lve->Destroy();
+                    }
+                },
+                [&](core::ir::Let* let) {
+                    for (auto& use : let->Result()->UsagesSorted()) {
+                        worklist.Push(use);
+                    }
+                },
+                TINT_ICE_ON_NO_MATCH);
+        }
+    }
+
+    // Materialize access a that contains at least one non-constant index and update its uses.
+    // Splits a into:
+    // %const_a = access %a->Object(), %const_indices
+    // %load = load %const_a
+    // %non_const_a = access %load, %non_const_indices
+    //
+    // Uses of %a are then based on the value %non_const_a (no longer a pointer).
+    void Materialize(core::ir::Access* a,
+                     const core::type::Type* const_type,
+                     VectorRef<core::ir::Value*> const_indices,
+                     VectorRef<core::ir::Value*> non_const_indices) {
+        core::ir::Value* const_access = nullptr;
+        core::ir::Value* materialized = nullptr;
+        b.InsertBefore(a, [&] {
+            const_access = b.Access(ty.ptr(core::AddressSpace::kImmediate, const_type), a->Object(),
+                                    const_indices)
+                               ->Result();
+            materialized = b.Load(const_access)->Result();
+            if (!non_const_indices.IsEmpty()) {
+                materialized =
+                    b.Access(a->Result()->Type()->UnwrapPtr(), materialized, non_const_indices)
+                        ->Result();
+            }
+        });
+        a->Result()->ReplaceAllUsesWith(materialized);
+
+        // Accesses on values get handled by VarForDynamicIndex if necessary.
+        auto worklist = materialized->UsagesSorted();
+        while (!worklist.IsEmpty()) {
+            auto usage = worklist.Pop();
+            tint::Switch(
+                usage.instruction,
+                [&](core::ir::Access* sub_access) {
+                    sub_access->Result()->SetType(sub_access->Result()->Type()->UnwrapPtr());
+                    for (auto& use : sub_access->Result()->UsagesSorted()) {
+                        worklist.Push(use);
+                    }
+                },
+                [&](core::ir::Let* let) {
+                    let->Result()->SetType(let->Result()->Type()->UnwrapPtr());
+                    for (auto& use : let->Result()->UsagesSorted()) {
+                        worklist.Push(use);
+                    }
+                },
+                [&](core::ir::Load* load) {
+                    load->Result()->ReplaceAllUsesWith(load->From());
+                    load->Destroy();
+                },
+                [&](core::ir::LoadVectorElement* lve) {
+                    b.InsertBefore(lve, [&] {
+                        b.AccessWithResult(lve->DetachResult(), lve->From(), lve->Index());
+                    });
+                    lve->Destroy();
+                },
+                TINT_ICE_ON_NO_MATCH);
+        }
     }
 
     void Access(core::ir::Access* a,
