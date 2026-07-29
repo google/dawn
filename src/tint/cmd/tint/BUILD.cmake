@@ -77,11 +77,11 @@ tint_target_add_external_dependencies(tint_cmd_tint_cmd cmd
   "src_utils"
 )
 
-if(TINT_BUILD_GLSL_VALIDATOR)
+if(TINT_BUILD_GLSL_VALIDATOR AND TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_tint_cmd cmd
     tint_lang_glsl_validate
   )
-endif(TINT_BUILD_GLSL_VALIDATOR)
+endif(TINT_BUILD_GLSL_VALIDATOR AND TINT_BUILD_GLSL_WRITER)
 
 if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_tint_cmd cmd

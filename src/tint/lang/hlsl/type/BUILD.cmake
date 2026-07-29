@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_type
 # Kind:      lib
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_type lib
   lang/hlsl/type/byte_address_buffer.cc
@@ -71,9 +73,12 @@ tint_target_add_external_dependencies(tint_lang_hlsl_type lib
   "src_utils"
 )
 
+endif(TINT_BUILD_HLSL_WRITER)
+if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_type_test
 # Kind:      test
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_type_test test
   lang/hlsl/type/byte_address_buffer_test.cc
@@ -100,3 +105,5 @@ tint_target_add_external_dependencies(tint_lang_hlsl_type_test test
   "gtest"
   "src_utils"
 )
+
+endif(TINT_BUILD_HLSL_WRITER)

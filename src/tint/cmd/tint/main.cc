@@ -87,9 +87,9 @@
 #include "src/tint/lang/glsl/writer/writer.h"
 #endif  // TINT_BUILD_GLSL_WRITER
 
-#if TINT_BUILD_GLSL_VALIDATOR
+#if TINT_BUILD_GLSL_WRITER && TINT_BUILD_GLSL_VALIDATOR
 #include "src/tint/lang/glsl/validate/validate.h"
-#endif  // TINT_BUILD_GLSL_VALIDATOR
+#endif  // TINT_BUILD_GLSL_WRITER && TINT_BUILD_GLSL_VALIDATOR
 
 namespace {
 

@@ -47,3 +47,16 @@ alias(
   actual = "//src/tint:tint_build_glsl_validator_true",
 )
 
+alias(
+  name = "tint_build_glsl_writer",
+  actual = "//src/tint:tint_build_glsl_writer_true",
+)
+
+selects.config_setting_group(
+    name = "tint_build_glsl_validator_and_tint_build_glsl_writer",
+    match_all = [
+        ":tint_build_glsl_validator",
+        ":tint_build_glsl_writer",
+    ],
+)
+

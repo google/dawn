@@ -53,11 +53,6 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_lang_core_ir_test
   tint_lang_core_type_test
   tint_lang_core_test
-  tint_lang_glsl_ir_test
-  tint_lang_hlsl_ir_test
-  tint_lang_hlsl_type_test
-  tint_lang_msl_ir_test
-  tint_lang_msl_type_test
   tint_lang_spirv_ir_test
   tint_lang_spirv_type_test
   tint_lang_wgsl
@@ -108,6 +103,7 @@ endif(TINT_BUILD_GLSL_VALIDATOR AND TINT_BUILD_GLSL_WRITER)
 
 if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
+    tint_lang_glsl_ir_test
     tint_lang_glsl_writer_common_test
     tint_lang_glsl_writer_raise_test
   )
@@ -115,6 +111,8 @@ endif(TINT_BUILD_GLSL_WRITER)
 
 if(TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
+    tint_lang_hlsl_ir_test
+    tint_lang_hlsl_type_test
     tint_lang_hlsl_writer_common_test
     tint_lang_hlsl_writer_raise_test
     tint_lang_hlsl_writer_test
@@ -129,6 +127,8 @@ endif(TINT_BUILD_IR_BINARY)
 
 if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
+    tint_lang_msl_ir_test
+    tint_lang_msl_type_test
     tint_lang_msl_writer_common_test
     tint_lang_msl_writer_raise_test
     tint_lang_msl_writer_test

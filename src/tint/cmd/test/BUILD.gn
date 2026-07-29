@@ -62,11 +62,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/ir/analysis:unittests",
       "${tint_src_dir}/lang/core/ir/transform:unittests",
       "${tint_src_dir}/lang/core/type:unittests",
-      "${tint_src_dir}/lang/glsl/ir:unittests",
-      "${tint_src_dir}/lang/hlsl/ir:unittests",
-      "${tint_src_dir}/lang/hlsl/type:unittests",
-      "${tint_src_dir}/lang/msl/ir:unittests",
-      "${tint_src_dir}/lang/msl/type:unittests",
       "${tint_src_dir}/lang/spirv/ir:unittests",
       "${tint_src_dir}/lang/spirv/type:unittests",
       "${tint_src_dir}/lang/wgsl",
@@ -108,6 +103,7 @@ if (tint_build_unittests) {
 
     if (tint_build_glsl_writer) {
       deps += [
+        "${tint_src_dir}/lang/glsl/ir:unittests",
         "${tint_src_dir}/lang/glsl/writer/common:unittests",
         "${tint_src_dir}/lang/glsl/writer/raise:unittests",
       ]
@@ -115,6 +111,8 @@ if (tint_build_unittests) {
 
     if (tint_build_hlsl_writer) {
       deps += [
+        "${tint_src_dir}/lang/hlsl/ir:unittests",
+        "${tint_src_dir}/lang/hlsl/type:unittests",
         "${tint_src_dir}/lang/hlsl/writer:unittests",
         "${tint_src_dir}/lang/hlsl/writer/common:unittests",
         "${tint_src_dir}/lang/hlsl/writer/raise:unittests",
@@ -127,6 +125,8 @@ if (tint_build_unittests) {
 
     if (tint_build_msl_writer) {
       deps += [
+        "${tint_src_dir}/lang/msl/ir:unittests",
+        "${tint_src_dir}/lang/msl/type:unittests",
         "${tint_src_dir}/lang/msl/writer:unittests",
         "${tint_src_dir}/lang/msl/writer/common:unittests",
         "${tint_src_dir}/lang/msl/writer/raise:unittests",

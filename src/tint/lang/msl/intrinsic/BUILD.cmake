@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_MSL_WRITER)
 ################################################################################
 # Target:    tint_lang_msl_intrinsic
 # Kind:      lib
+# Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_msl_intrinsic lib
   lang/msl/intrinsic/data.cc
@@ -69,3 +71,5 @@ tint_target_add_dependencies(tint_lang_msl_intrinsic lib
 tint_target_add_external_dependencies(tint_lang_msl_intrinsic lib
   "src_utils"
 )
+
+endif(TINT_BUILD_MSL_WRITER)

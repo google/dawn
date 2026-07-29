@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_ir
 # Kind:      lib
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_ir lib
   lang/hlsl/ir/builtin_call.cc
@@ -73,9 +75,12 @@ tint_target_add_external_dependencies(tint_lang_hlsl_ir lib
   "src_utils"
 )
 
+endif(TINT_BUILD_HLSL_WRITER)
+if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_ir_test
 # Kind:      test
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_ir_test test
   lang/hlsl/ir/builtin_call_test.cc
@@ -112,3 +117,5 @@ tint_target_add_external_dependencies(tint_lang_hlsl_ir_test test
   "gtest"
   "src_utils"
 )
+
+endif(TINT_BUILD_HLSL_WRITER)

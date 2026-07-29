@@ -76,3 +76,8 @@ cc_library(
   visibility = ["//visibility:public"],
 )
 
+alias(
+  name = "tint_build_msl_writer",
+  actual = "//src/tint:tint_build_msl_writer_true",
+)
+

@@ -76,7 +76,7 @@ cc_binary(
     "//src/tint/utils/text",
     "//src/utils",
   ] + select({
-    ":tint_build_glsl_validator": [
+    ":tint_build_glsl_validator_and_tint_build_glsl_writer": [
       "//src/tint/lang/glsl/validate",
     ],
     "//conditions:default": [],
@@ -179,6 +179,14 @@ selects.config_setting_group(
     match_any = [
         ":tint_build_spv_reader",
         ":tint_build_spv_writer",
+    ],
+)
+
+selects.config_setting_group(
+    name = "tint_build_glsl_validator_and_tint_build_glsl_writer",
+    match_all = [
+        ":tint_build_glsl_validator",
+        ":tint_build_glsl_writer",
     ],
 )
 
