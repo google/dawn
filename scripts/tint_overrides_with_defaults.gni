@@ -160,7 +160,7 @@ declare_args() {
 
   # Build fuzzers
   if (!defined(tint_build_fuzzers)) {
-    tint_build_fuzzers = use_libfuzzer
+    tint_build_fuzzers = use_fuzzing_engine
   }
 
   # Enable building Mesa as part of Tint fuzzers
