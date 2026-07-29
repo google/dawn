@@ -938,6 +938,38 @@ TEST_F(IR_ValidatorTest, LargeArrays) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, NestedTypes_ExceedLimit) {
+    const core::type::Type* current = ty.u32();
+    for (size_t i = 0; i < 256; ++i) {  // kMaxNestDepthOfCompositeType + 1
+        current = ty.array(current, 1u);
+    }
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Var("v", function, current);
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("type has a nesting depth that exceeds the maximum of 255"));
+}
+
+TEST_F(IR_ValidatorTest, NestedTypes_UnderLimit) {
+    const core::type::Type* current = ty.u32();
+    for (size_t i = 0; i < 255; ++i) {
+        current = ty.array(current, 1u);
+    }
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Var("v", function, current);
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Array_ZeroSize) {
     auto* fn = b.Function("my_func", ty.void_());
     b.Append(fn->Block(), [&] {

@@ -66,6 +66,7 @@
 #include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/ice/ice.h"
+#include "src/tint/utils/internal_limits.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/result.h"
@@ -661,6 +662,10 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
         return;
     }
 
+    if (!CheckNestDepth(root, diag)) {
+        return;
+    }
+
     AddressSpace addrspace = AddressSpace::kUndefined;
     if (auto* mv = root->As<core::type::MemoryView>()) {
         addrspace = mv->AddressSpace();
@@ -741,6 +746,69 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckNestDepth(const core::type::Type* type,
+                                std::function<diag::Diagnostic&()> diag) {
+    if (type == nullptr) {
+        return true;
+    }
+
+    struct Task {
+        const core::type::Type* type;
+        uint64_t depth;
+    };
+
+    Vector<Task, 16> tasks;
+    tasks.Push({type, 0});
+
+    while (!tasks.IsEmpty()) {
+        auto [cur, depth] = tasks.Pop();
+
+        // Unwrap memory views
+        if (auto* view = cur->As<core::type::MemoryView>()) {
+            cur = view->StoreType();
+        }
+
+        if (cur == nullptr) {
+            continue;
+        }
+
+        auto max_depth = max_nest_depth_.Get(cur);
+        if (max_depth && *max_depth.value >= depth) {
+            // A deeper depth has already been tested for this type
+            continue;
+        }
+        max_nest_depth_.Replace(cur, depth);
+
+        if (depth > internal_limits::kMaxNestDepthOfCompositeType) {
+            diag() << "type has a nesting depth that exceeds the maximum of "
+                   << internal_limits::kMaxNestDepthOfCompositeType;
+            return false;
+        }
+
+        auto elems = cur->Elements();
+        if (elems.count == 0) {
+            // Not a composite type, so no further work needed
+            continue;
+        }
+
+        // cur is a composite type so need to check all of the contained elements
+        uint64_t next_depth = depth + 1;
+        if (elems.type) {
+            // Homogeneous elements, i.e. is an array, vec, etc, so only need to enqueue one type
+            tasks.Push({elems.type, next_depth});
+        } else {
+            // Heterogeneous elements, so need to enqueue each type
+            for (uint32_t i = 0; i < elems.count; i++) {
+                if (auto* elem_type = cur->Element(i)) {
+                    tasks.Push({elem_type, next_depth});
+                }
+            }
+        }
+    }
+
+    return true;
 }
 
 bool Structural::CheckBuffer(const core::type::Buffer* buf,

@@ -38,6 +38,9 @@
 
 namespace tint::internal_limits {
 
+// Limits the nest depth of composite types
+constexpr size_t kMaxNestDepthOfCompositeType = 255;
+
 // Limits the number of elements appearing in the constructor for an array
 constexpr size_t kMaxArrayConstructorElements = 32767;
 

@@ -137,7 +137,6 @@ using CtorConvIntrinsic = wgsl::intrinsic::CtorConv;
 using OverloadFlag = core::intrinsic::OverloadFlag;
 
 constexpr uint32_t kMaxStatementDepth = 127;
-constexpr size_t kMaxNestDepthOfCompositeType = 255;
 
 }  // namespace
 
@@ -4214,9 +4213,9 @@ sem::Array* Resolver::Array(const Source& array_source,
     // Maximum nesting depth of composite types
     //  https://gpuweb.github.io/gpuweb/wgsl/#limits
     const size_t nest_depth = 1 + NestDepth(el_ty);
-    if (nest_depth > kMaxNestDepthOfCompositeType) {
+    if (nest_depth > internal_limits::kMaxNestDepthOfCompositeType) {
         AddError(array_source) << "array has nesting depth of " << nest_depth << ", maximum is "
-                               << kMaxNestDepthOfCompositeType;
+                               << internal_limits::kMaxNestDepthOfCompositeType;
         return nullptr;
     }
     nest_depth_.Add(out, nest_depth);
@@ -4472,10 +4471,10 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     // Maximum nesting depth of composite types
     //  https://gpuweb.github.io/gpuweb/wgsl/#limits
     const size_t nest_depth = 1 + members_nest_depth;
-    if (nest_depth > kMaxNestDepthOfCompositeType) {
+    if (nest_depth > internal_limits::kMaxNestDepthOfCompositeType) {
         AddError(str) << style::Keyword("struct ") << style::Type(struct_name())
                       << " has nesting depth of " << nest_depth << ", maximum is "
-                      << kMaxNestDepthOfCompositeType;
+                      << internal_limits::kMaxNestDepthOfCompositeType;
         return nullptr;
     }
     nest_depth_.Add(out, nest_depth);

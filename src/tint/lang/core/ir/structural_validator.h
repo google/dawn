@@ -316,9 +316,18 @@ class Structural {
 
     /// Checks that @p type is allowed by the spec, and does not use any types that are prohibited
     /// by the target properties.
+    /// NOTE: Expects to be called on a 'root' type, i.e. the type of a variable declaration or a
+    ///       function param, not in the middle a walk of elements of a composite.
     /// @param type the type
     /// @param diag a function that creates an error diagnostic for the source of the type
     void CheckType(const core::type::Type* type, std::function<diag::Diagnostic&()> diag);
+
+    /// Check that @p type and its children are not nested beyond the depth limit
+    /// NOTE: Expects to be called by CheckType, i.e. on a 'root' type, not in the middle a walk of
+    ///       elements of a composite..
+    /// @param type the type
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    bool CheckNestDepth(const core::type::Type* type, std::function<diag::Diagnostic&()> diag);
 
     /// Checks that `str` is a valid structure.
     /// @param str the struct to validate
@@ -792,6 +801,7 @@ class Structural {
     Hashmap<const ir::Function*, Hashset<const ir::UserCall*, 4>, 4> user_func_calls_;
     Hashmap<const ir::Instruction*, SupportedStages, 4> stage_restricted_instructions_;
     Hashset<const core::type::Type*, 16> validated_types_{};
+    Hashmap<const core::type::Type*, uint64_t, 16> max_nest_depth_{};
 };
 
 }  // namespace tint::core::ir::validator
