@@ -107,7 +107,7 @@ TEST_F(ResolverVariableValidationTest, GlobalVarUsedAtModuleScope) {
 
 TEST_F(ResolverVariableValidationTest, OverrideNoInitializerNoType) {
     // override a;
-    Override(Source{{12, 34}}, "a");
+    Override(Source{{12, 34}}, "a", ast::Type{}, nullptr);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: override declaration requires a type or initializer");
@@ -134,7 +134,7 @@ TEST_F(ResolverVariableValidationTest, OverrideExceedsIDLimit_LastReserved) {
     // ...
     // @id(N) override oN : i32;
     constexpr size_t kLimit = std::numeric_limits<decltype(OverrideId::value)>::max();
-    Override("reserved", ty.i32(), Id(AInt(kLimit)));
+    Override("reserved", ty.i32(), Vector{Id(AInt(kLimit))});
     for (size_t i = 0; i < kLimit; i++) {
         Override("o" + std::to_string(i), ty.i32());
     }

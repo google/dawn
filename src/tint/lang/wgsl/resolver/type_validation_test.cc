@@ -76,7 +76,7 @@ TEST_F(ResolverTypeValidationTest, VariableDeclNoInitializer_Pass) {
 
 TEST_F(ResolverTypeValidationTest, GlobalOverrideNoInitializer_Pass) {
     // @id(0) override a :i32;
-    Override(Source{{12, 34}}, "a", ty.i32(), Id(0_u));
+    Override(Source{{12, 34}}, "a", ty.i32(), Vector{Id(0_u)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }

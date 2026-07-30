@@ -1461,7 +1461,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     GlobalVar(Sym(), ty.i32(), Vector{Binding(V), Group(V)});
     GlobalVar(Sym(), ty.input_attachment(T), Vector{Binding(V), Group(V), InputAttachmentIndex(V)});
     GlobalVar(Sym(), ty.i32(), Vector{Location(V)});
-    Override(Sym(), ty.i32(), Vector{Id(V)});
+    Override("o", ty.i32(), Vector{Id(V)});
 
     Func(Sym(), tint::Empty, ty.void_(), tint::Empty);
 #undef V

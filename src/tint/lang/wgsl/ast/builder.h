@@ -164,26 +164,6 @@ class Builder {
         void Set(const Attribute* a) { attributes.Push(a); }
     };
 
-    /// OverrideOptions is a helper for accepting an arbitrary number of order independent options
-    /// for constructing an Override.
-    struct OverrideOptions {
-        template <typename... ARGS>
-        explicit OverrideOptions(ARGS&&... args) {
-            (Set(std::forward<ARGS>(args)), ...);
-        }
-        ~OverrideOptions();
-
-        Type type;
-        const Expression* initializer = nullptr;
-        Vector<const Attribute*, 4> attributes;
-
-      private:
-        void Set(Type t) { type = t; }
-        void Set(const Expression* c) { initializer = c; }
-        void Set(VectorRef<const Attribute*> l) { attributes = std::move(l); }
-        void Set(const Attribute* a) { attributes.Push(a); }
-    };
-
   public:
     /// ASTNodeAllocator is an alias to BlockAllocator<Node>
     using ASTNodeAllocator = BlockAllocator<Node>;
@@ -1844,35 +1824,97 @@ class Builder {
         return variable;
     }
 
-    /// @param name the variable name
-    /// @param options the extra options passed to the Override initializer
-    /// Can be any of the following, in any order:
-    ///   * Expression*    - specifies the variable's initializer expression (required)
-    ///   * Type           - specifies the variable's type
-    ///   * Attribute*     - specifies the variable's attributes (repeatable, or vector)
-    /// Note that non-repeatable arguments of the same type will use the last argument's value.
-    /// @returns an `Override` with the given name, type and additional options, which is
-    /// automatically registered as a global variable with the Module.
-    template <typename NAME, typename... OPTIONS, typename = DisableIfSource<NAME>>
-    const ast::Override* Override(NAME&& name, OPTIONS&&... options) {
-        return Override(source_, std::forward<NAME>(name), std::forward<OPTIONS>(options)...);
+    /// @param name the name
+    /// @param init the initializer
+    /// @returns an `Override` with the given name
+    const ast::Override* Override(std::string_view name, const Expression* init) {
+        return Override(source_, name, init);
     }
 
-    /// @param source the variable source
-    /// @param name the variable name
-    /// @param options the extra options passed to the Override initializer
-    /// Can be any of the following, in any order:
-    ///   * Expression*    - specifies the variable's initializer expression (required)
-    ///   * Type           - specifies the variable's type
-    ///   * Attribute*     - specifies the variable's attributes (repeatable, or vector)
-    /// Note that non-repeatable arguments of the same type will use the last argument's value.
-    /// @returns an `Override` with the given name, type and additional options, which is
-    /// automatically registered as a global variable with the Module.
-    template <typename NAME, typename... OPTIONS>
-    const ast::Override* Override(const Source& source, NAME&& name, OPTIONS&&... options) {
-        OverrideOptions opts(std::forward<OPTIONS>(options)...);
-        auto* variable = create<ast::Override>(source, Ident(std::forward<NAME>(name)), opts.type,
-                                               opts.initializer, std::move(opts.attributes));
+    /// @param source the source
+    /// @param name the name
+    /// @param init the initializer
+    /// @returns an `Override` with the given name
+    const ast::Override* Override(const Source& source,
+                                  std::string_view name,
+                                  const Expression* init) {
+        return Override(source, name, ast::Type{}, init);
+    }
+
+    /// @param name the name
+    /// @param type the type
+    /// @param init the initializer
+    /// @param attrs the attributes
+    /// @returns an `Override` with the given name
+    const ast::Override* Override(std::string_view name,
+                                  Type type,
+                                  VectorRef<const ast::Attribute*> attrs) {
+        return Override(source_, name, type, attrs);
+    }
+
+    /// @param source the source
+    /// @param name the name
+    /// @param type the type
+    /// @param init the initializer
+    /// @param attrs the attributes
+    /// @returns an `Override` with the given name
+    const ast::Override* Override(const Source& source,
+                                  std::string_view name,
+                                  Type type,
+                                  VectorRef<const ast::Attribute*> attrs = {}) {
+        return Override(source, name, type, nullptr, attrs);
+    }
+
+    /// @param name the name
+    /// @param type the type
+    /// @param init the initializer
+    /// @param attrs the attributes
+    /// @returns an `Override` with the given name
+    const ast::Override* Override(Symbol name,
+                                  Type type,
+                                  const ast::Expression* init = nullptr,
+                                  VectorRef<const ast::Attribute*> attrs = {}) {
+        return Override(source_, Ident(name), type, init, attrs);
+    }
+
+    /// @param name the name
+    /// @param type the type
+    /// @param init the initializer
+    /// @param attrs the attributes
+    /// @returns an `Override` with the given name
+    const ast::Override* Override(std::string_view name,
+                                  Type type,
+                                  const Expression* init = nullptr,
+                                  VectorRef<const ast::Attribute*> attrs = {}) {
+        return Override(source_, name, type, init, attrs);
+    }
+
+    /// @param source the source
+    /// @param name the name
+    /// @param type the type
+    /// @param init the initializer
+    /// @param attrs the attributes
+    /// @returns an `Override` with the given name
+    const ast::Override* Override(const Source& source,
+                                  std::string_view name,
+                                  Type type,
+                                  const Expression* init,
+                                  VectorRef<const ast::Attribute*> attrs = {}) {
+        return Override(source, Ident(name), type, init, attrs);
+    }
+
+    /// @param source the source
+    /// @param name the name
+    /// @param type the type
+    /// @param init the initializer
+    /// @param attrs the attributes
+    /// @returns an `Override` with the given name
+    const ast::Override* Override(const Source& source,
+                                  const ast::Identifier* name,
+                                  Type type,
+                                  const Expression* init,
+                                  VectorRef<const ast::Attribute*> attrs) {
+        auto* variable = create<ast::Override>(source, name, type, init, attrs);
         AST().AddGlobalVariable(variable);
         return variable;
     }
