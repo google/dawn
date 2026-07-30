@@ -875,6 +875,15 @@ MaybeError ValidateTextureDescriptor(
                         (format->aspects & (Aspect::Depth | Aspect::Stencil)),
                     "The dimension (%s) of a texture with a depth/stencil format (%s) is not 2D.",
                     descriptor->dimension, format->format);
+    if (device->IsToggleEnabled(Toggle::VulkanDisallowNPOTDepthStencilMipmaps)) {
+        DAWN_INVALID_IF(
+            (format->aspects & (Aspect::Depth | Aspect::Stencil)) &&
+                descriptor->mipLevelCount > 1 &&
+                (!IsPowerOfTwo(descriptor->size.width) || !IsPowerOfTwo(descriptor->size.height)),
+            "Non-power-of-two depth/stencil texture (%s) with mipLevelCount (%u) > 1 is "
+            "disallowed on this device due to a driver bug.",
+            descriptor->size, descriptor->mipLevelCount);
+    }
 
     DAWN_TRY(ValidateTextureSize(device, *descriptor, format));
     return {};

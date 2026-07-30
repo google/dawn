@@ -546,6 +546,9 @@ TEST_P(QueueWriteTextureTests, VaryingArrayWriteSize) {
 
 // Test writing to varying mips
 TEST_P(QueueWriteTextureTests, TextureWriteToMip) {
+    // TODO(crbug.com/540087398): NPOT mipmapped depth/stencil textures disallowed due to driver bug
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
+
     constexpr uint32_t kWidth = 259;
     constexpr uint32_t kHeight = 127;
 

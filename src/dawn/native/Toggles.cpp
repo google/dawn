@@ -819,6 +819,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"vulkan_replace_workgroup_atomic_store_with_exchange",
       "Workaround for a driver bug that implements atomic store incorrectly.",
       "https://crbug.com/487773864", ToggleStage::Device}},
+    {Toggle::VulkanDisallowNPOTDepthStencilMipmaps,
+     {"vulkan_disallow_npot_depth_stencil_mipmaps",
+      "Reject NPOT depth/stencil textures with mipLevelCount > 1. Workaround for mip level "
+      "miscomputation in PowerVR proprietary driver.",
+      "https://crbug.com/540087398", ToggleStage::Device}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "

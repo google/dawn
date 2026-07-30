@@ -1073,8 +1073,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     }
 
     if (MayBeImaginationProprietary()) {
-        // crbug.com/443906252: Polyfill for case switch with large ranges.
+        // crbug.com/443906252 - Polyfill for case switch with large ranges.
         deviceToggles->Default(Toggle::VulkanPolyfillSwitchWithIf, true);
+
+        // crbug.com/540087398 - Driver bug miscomputes mip sizes for NPOT depth/stencil textures.
+        // TODO(https://crbug.com/540087398): Limit this to old drivers once there's a driver fix.
+        deviceToggles->Default(Toggle::VulkanDisallowNPOTDepthStencilMipmaps, true);
     }
 
     // AMD Mesa front end optimizer bug for unary negation and abs.
