@@ -326,6 +326,14 @@ struct State {
                                 call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
                                 auto* ptr_ty = call->Args()[0]->Type()->As<type::Pointer>();
                                 return SmallestElementSize(ptr_ty->StoreType());
+                            } else if (call->Func() == core::BuiltinFn::kBufferLength) {
+                                auto* buf =
+                                    var->Result()->Type()->UnwrapPtr()->As<core::type::Buffer>();
+                                if (buf->Count()->Is<core::type::RuntimeArrayCount>()) {
+                                    // Buffers in WebGPU must be a multiple of 4 so we cannot
+                                    // use a larger size than that.
+                                    return 4u;
+                                }
                             }
                         }
                         return size;

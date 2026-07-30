@@ -5985,13 +5985,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, array<vec4<u32>>, read> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<u32>, read> = var undef @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:u32 = arrayLength %v
-    %4:u32 = mul %3, 16u
+    %4:u32 = mul %3, 4u
     %a:u32 = let %4
     ret
   }

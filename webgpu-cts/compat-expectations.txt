@@ -342,7 +342,6 @@ crbug.com/495780892 [ android-pixel-10 ] webgpu:shader,validation,expression,bin
 
 # More Android failures
 crbug.com/535313717 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,bufferLength:unsized_buffer:size=600 [ Failure ]
-crbug.com/535313717 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,bufferLength:unsized_buffer:size=600 [ Failure ]
 crbug.com/535351717 [ android-pixel-6 ] webgpu:api,validation,min_buffer_binding_size:render,shader_required_buffer_size:case="fragment_larger_buffer_array_view_ro_storage" [ Failure ]
 crbug.com/535351717 [ android-pixel-6 ] webgpu:api,validation,min_buffer_binding_size:render,shader_required_buffer_size:case="fragment_larger_buffer_view_ro_storage" [ Failure ]
 crbug.com/535351717 [ android-pixel-6 ] webgpu:api,validation,min_buffer_binding_size:render,shader_required_buffer_size:case="vertex_larger_buffer_array_view_ro_storage" [ Failure ]
@@ -3184,8 +3183,6 @@ crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,encoding,encoder_open_s
 crbug.com/0000 [ intel linux ] webgpu:api,validation,encoding,encoder_open_state:render_pass_commands:command="setImmediates" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,encoding,encoder_open_state:render_pass_commands:command="setImmediates" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:source_image,crossOrigin:sourceImage="offscreenCanvas";isOriginClean=true [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,bufferLength:unsized_buffer:size=600 [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,bufferLength:unsized_buffer:size=600 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:depth:format="depth16unorm";aspect="all";samples=1 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:depth:format="depth16unorm";aspect="all";samples=4 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:depth:format="depth24plus";aspect="all";samples=1 [ Failure ]
