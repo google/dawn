@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-07-22 07:18:54AM
+# Last rolled: 2026-07-30 09:03:51AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -3337,6 +3337,10 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,decl,const:initiali
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,extension,readonly_and_readwrite_storage_textures:var_decl: [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,validation,extension,readonly_and_readwrite_storage_textures:var_decl: [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,extension,readonly_and_readwrite_storage_textures:var_decl: [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="fragment_depth" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="fragment_depth" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="fragment_depth" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="fragment_depth" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="texture_formats_tier1" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="texture_formats_tier1" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="texture_formats_tier1" [ Failure ]
