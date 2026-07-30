@@ -220,6 +220,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             options.workarounds.texture_sample_compare_2d_polyfill,
         .cooperative_matrix_stride_is_matrix_elements =
             options.workarounds.cooperative_matrix_stride_is_matrix_elements,
+        .replace_workgroup_atomic_store_with_exchange =
+            options.workarounds.replace_workgroup_atomic_store_with_exchange,
     };
     TINT_CHECK_RESULT(raise::BuiltinPolyfill(module, config));
     TINT_CHECK_RESULT(raise::ExpandImplicitSplats(module));

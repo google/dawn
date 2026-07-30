@@ -812,6 +812,54 @@ $B1: {  # root
 
     EXPECT_EQ(expect, str());
 }
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicStore_ReplaceWithExchange) {
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+
+    auto* arg1 = b.FunctionParam("arg1", ty.i32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({arg1});
+
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kAtomicStore, var, arg1);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+}
+
+%foo = func(%arg1:i32):void {
+  $B2: {
+    %4:void = atomicStore %1, %arg1
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+}
+
+%foo = func(%arg1:i32):void {
+  $B2: {
+    %4:i32 = spirv.atomic_exchange %1, 2u, 0u, %arg1
+    ret
+  }
+}
+)";
+
+    PolyfillConfig config{
+        .replace_workgroup_atomic_store_with_exchange = true,
+    };
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicSub) {
     auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 

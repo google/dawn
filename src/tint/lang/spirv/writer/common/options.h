@@ -143,6 +143,9 @@ struct Options {
         /// Set to `true` to collapse redundant subgroup min and max operations
         bool collapse_subgroup_min_max = false;
 
+        /// Set to `true` to replace atomicStore in workgroup memory with atomicExchange.
+        bool replace_workgroup_atomic_store_with_exchange = false;
+
         TINT_REFLECT(Workarounds,
                      polyfill_case_switch,
                      scalarize_max_min_clamp,
@@ -158,7 +161,8 @@ struct Options {
                      polyfill_distance_scalar_float,
                      polyfill_saturate_as_min_max_f16,
                      cooperative_matrix_stride_is_matrix_elements,
-                     collapse_subgroup_min_max);
+                     collapse_subgroup_min_max,
+                     replace_workgroup_atomic_store_with_exchange);
     };
 
     /// Any options which are controlled by the presence/absence of a vulkan extension.

@@ -514,5 +514,121 @@ DAWN_INSTANTIATE_TEST_P(ShaderAtomicVec2Tests,
                         {1, 2, 7, 15}                                  /*dispatch size */
 );
 
+DAWN_TEST_PARAM_STRUCT(AtomicStoreWorkgroupAdvancedParams, WorkgroupSizeParameter);
+class ShaderAtomicStoreWorkgroupAdvancedTests
+    : public DawnTestWithParams<AtomicStoreWorkgroupAdvancedParams> {
+  protected:
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        required.maxComputeWorkgroupSizeX = supported.maxComputeWorkgroupSizeX;
+        required.maxComputeWorkgroupSizeY = supported.maxComputeWorkgroupSizeY;
+        required.maxComputeWorkgroupSizeZ = supported.maxComputeWorkgroupSizeZ;
+        required.maxComputeInvocationsPerWorkgroup = supported.maxComputeInvocationsPerWorkgroup;
+    }
+};
+
+class ExpectLessThan : public detail::Expectation {
+    unsigned int mHigh;
+
+  public:
+    explicit ExpectLessThan(unsigned int high) : mHigh(high) {}
+
+    testing::AssertionResult Check(const void* data, size_t size) override {
+        DAWN_ASSERT(size == sizeof(uint32_t));
+        // SAFETY: Test-only code.
+        uint32_t val = DAWN_UNSAFE_BUFFERS(*static_cast<const uint32_t*>(data));
+        if (val >= mHigh) {
+            return testing::AssertionFailure()
+                   << "Found unexpected value " << val << " (expected between 0 and " << (mHigh - 1)
+                   << ")\n";
+        }
+        return testing::AssertionSuccess();
+    }
+};
+
+// Ported from the atomicStore:store_workgroup_advanced CTS tests for bug crbug.com/487773864.
+TEST_P(ShaderAtomicStoreWorkgroupAdvancedTests, StoreWorkgroupAdvanced) {
+    const unsigned int workgroupSize = GetParam().mWorkgroupSizeParameter;
+    DAWN_TEST_UNSUPPORTED_IF(workgroupSize > GetSupportedLimits().maxComputeWorkgroupSizeX);
+
+    wgpu::ConstantEntry workgroupSizeConstant{
+        .key = "kWorkgroupSize",
+        .value = static_cast<double>(workgroupSize),
+    };
+
+    std::string wgsl = R"(
+override kWorkgroupSize: u32;
+
+var<workgroup> wg: atomic<u32>;
+
+// Result of each workgroup is written to output[workgroup_id.x]
+@group(0) @binding(0)
+var<storage, read_write> output: array<u32, 1>;
+
+@compute @workgroup_size(kWorkgroupSize)
+fn main(
+    @builtin(local_invocation_index) local_invocation_index: u32,
+    @builtin(workgroup_id) workgroup_id : vec3<u32>
+) {
+  let id = u32(local_invocation_index);
+
+  // All invocations of a given dispatch store to the same location.
+  // In the end, the final value should be randomly equal to one of the ids.
+  atomicStore(&wg, id);
+
+  // Once all invocations have completed, the first one copies the result
+  // to output for this dispatch (workgroup_id.x)
+  workgroupBarrier();
+  if (local_invocation_index == 0u) {
+    output[workgroup_id.x] = atomicLoad(&wg);
+  }
+}
+)";
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = utils::CreateShaderModule(device, wgsl.c_str());
+    csDesc.compute.entryPoint = "main";
+    csDesc.compute.constants = &workgroupSizeConstant;
+    csDesc.compute.constantCount = 1;
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    wgpu::BufferDescriptor desc{
+        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+        .size = static_cast<uint64_t>(1 * sizeof(uint32_t)),
+    };
+    wgpu::Buffer output = device.CreateBuffer(&desc);
+
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, output}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER(output, 0, sizeof(uint32_t), new ExpectLessThan(workgroupSize));
+}
+
+DAWN_INSTANTIATE_TEST_P(ShaderAtomicStoreWorkgroupAdvancedTests,
+                        {
+                            D3D12Backend(),
+                            MetalBackend(),
+                            OpenGLESBackend(),
+                            VulkanBackend(),
+                            VulkanBackend({"vulkan_replace_workgroup_atomic_store_with_exchange"}),
+                        },
+                        {1,  2,  3,  4,  5,  6,   7,   8,   9,   13, 15,
+                         16, 31, 32, 53, 64, 111, 128, 137, 173, 256} /* workgroup size*/
+);
+
 }  // anonymous namespace
 }  // namespace dawn

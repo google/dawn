@@ -1135,6 +1135,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::CollapseSubgroupMinMax, true);
     }
 
+    if (IsAndroidSamsung()) {
+        // Samsung Xclipse GPUs implement workgroup atomicStore incorrectly.
+        // TODO(crbug.com/487773864): If newer driver version without bug is released then we can
+        // gate this on driver version.
+        // https://crbug.com/487773864
+        deviceToggles->Default(Toggle::VulkanReplaceWorkgroupAtomicStoreWithExchange, true);
+    }
+
     if (IsSwiftshader()) {
         // Swiftshader doesn't handle propagating decorations for descriptors through
         // OpCompositeExtract which happens when a binding_array is indexed "by value" instead of

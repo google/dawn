@@ -194,6 +194,7 @@ enum class Toggle {
     MetalFixU32DivMod,
     VulkanSleepAfterLostDeviceWait,
     UseSpirvReconvergenceMode,
+    VulkanReplaceWorkgroupAtomicStoreWithExchange,
 
     // Once all backends have been updated to be thread safe for waiting, we can remove this toggle.
     WaitIsThreadSafe,

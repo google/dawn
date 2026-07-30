@@ -355,6 +355,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::CollapseSubgroupMinMax);
     req.tintOptions.workarounds.cooperative_matrix_stride_is_matrix_elements =
         GetDevice()->IsToggleEnabled(Toggle::VulkanCooperativeMatrixStrideIsMatrixElements);
+    req.tintOptions.workarounds.replace_workgroup_atomic_store_with_exchange =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanReplaceWorkgroupAtomicStoreWithExchange);
 
     // Pass matrices to user functions by pointer on Qualcomm devices to workaround a known bug.
     // See crbug.com/tint/2045.

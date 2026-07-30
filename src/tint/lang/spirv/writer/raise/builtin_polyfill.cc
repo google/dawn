@@ -449,8 +449,9 @@ struct State {
         auto* result_ty = builtin->Result()->Type();
 
         auto* pointer = builtin->Args()[0];
+        auto addrspace = pointer->Type()->As<core::type::Pointer>()->AddressSpace();
         auto* memory = [&]() -> core::ir::Value* {
-            switch (pointer->Type()->As<core::type::Pointer>()->AddressSpace()) {
+            switch (addrspace) {
                 case core::AddressSpace::kWorkgroup:
                     return b.Constant(u32(SpvScopeWorkgroup));
                 case core::AddressSpace::kStorage:
@@ -539,8 +540,15 @@ struct State {
                 call->Result()->SetType(ty.u64());
                 break;
             case core::BuiltinFn::kAtomicStore:
-                call = build(spirv::BuiltinFn::kAtomicStore);
-                call->AppendArg(builtin->Args()[1]);
+                if (addrspace == core::AddressSpace::kWorkgroup &&
+                    config.replace_workgroup_atomic_store_with_exchange) {
+                    call = build(spirv::BuiltinFn::kAtomicExchange);
+                    call->AppendArg(builtin->Args()[1]);
+                    call->SetResult(b.InstructionResult(builtin->Args()[1]->Type()));
+                } else {
+                    call = build(spirv::BuiltinFn::kAtomicStore);
+                    call->AppendArg(builtin->Args()[1]);
+                }
                 break;
             case core::BuiltinFn::kAtomicSub:
                 call = build(spirv::BuiltinFn::kAtomicISub);
