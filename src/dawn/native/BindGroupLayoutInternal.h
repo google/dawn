@@ -213,9 +213,10 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     template <typename BindGroup>
     SlabAllocator<BindGroup> MakeFrontendBindGroupAllocator(size_t size) {
         return SlabAllocator<BindGroup>(
-            size,                                                                        // bytes
-            Align(sizeof(BindGroup), GetBindingDataAlignment()) + GetBindingDataSize(),  // size
-            std::max(alignof(BindGroup), GetBindingDataAlignment())  // alignment
+            size,  // bytes
+            static_cast<uint32_t>(Align(sizeof(BindGroup), GetBindingDataAlignment())) +
+                checked_cast<uint32_t>(GetBindingDataSize()),                  // size
+            uint32_t{std::max(alignof(BindGroup), GetBindingDataAlignment())}  // alignment
         );
     }
 

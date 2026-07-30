@@ -225,7 +225,8 @@ Command::Output Command::Exec(std::initializer_list<std::string> arguments) cons
     }
 
     if (!input_.empty()) {
-        if (!WriteFile(stdin_pipe.write, input_.data(), input_.size(), nullptr, nullptr)) {
+        if (!WriteFile(stdin_pipe.write, input_.data(), static_cast<DWORD>(input_.size()), nullptr,
+                       nullptr)) {
             Output output;
             output.err = "Command::Exec() Failed to write stdin";
             return output;

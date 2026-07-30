@@ -64,7 +64,7 @@ const uint16_t& DriverVersion::operator[](size_t i) const {
     return mDriverVersion.operator[](i);
 }
 
-uint32_t DriverVersion::size() const {
+size_t DriverVersion::size() const {
     return mDriverVersion.size();
 }
 

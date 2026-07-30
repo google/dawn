@@ -149,19 +149,22 @@ IOSurfaceRef CreateMultiPlanarIOSurface(wgpu::TextureFormat format,
             CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks,
                                       &kCFTypeDictionaryValueCallBacks));
 
-        AddIntegerValue(planeInfo.Get(), kIOSurfacePlaneWidth, planeWidth);
-        AddIntegerValue(planeInfo.Get(), kIOSurfacePlaneHeight, planeHeight);
-        AddIntegerValue(planeInfo.Get(), kIOSurfacePlaneBytesPerElement, planeBytesPerElement);
-        AddIntegerValue(planeInfo.Get(), kIOSurfacePlaneBytesPerRow, planeBytesPerRow);
-        AddIntegerValue(planeInfo.Get(), kIOSurfacePlaneSize, planeBytesAlloc);
-        AddIntegerValue(planeInfo.Get(), kIOSurfacePlaneOffset, planeOffset);
+        AddIntegerValue(planeInfo.Get(), kIOSurfacePlaneWidth, checked_cast<int32_t>(planeWidth));
+        AddIntegerValue(planeInfo.Get(), kIOSurfacePlaneHeight, checked_cast<int32_t>(planeHeight));
+        AddIntegerValue(planeInfo.Get(), kIOSurfacePlaneBytesPerElement,
+                        checked_cast<int32_t>(planeBytesPerElement));
+        AddIntegerValue(planeInfo.Get(), kIOSurfacePlaneBytesPerRow,
+                        checked_cast<int32_t>(planeBytesPerRow));
+        AddIntegerValue(planeInfo.Get(), kIOSurfacePlaneSize,
+                        checked_cast<int32_t>(planeBytesAlloc));
+        AddIntegerValue(planeInfo.Get(), kIOSurfacePlaneOffset, checked_cast<int32_t>(planeOffset));
         CFArrayAppendValue(planes.Get(), planeInfo.Get());
         totalBytesAlloc = planeOffset + planeBytesAlloc;
     }
     CFDictionaryAddValue(dict.Get(), kIOSurfacePlaneInfo, planes.Get());
 
     totalBytesAlloc = IOSurfaceAlignProperty(kIOSurfaceAllocSize, totalBytesAlloc);
-    AddIntegerValue(dict.Get(), kIOSurfaceAllocSize, totalBytesAlloc);
+    AddIntegerValue(dict.Get(), kIOSurfaceAllocSize, checked_cast<int32_t>(totalBytesAlloc));
 
     IOSurfaceRef surface = IOSurfaceCreate(dict.Get());
 

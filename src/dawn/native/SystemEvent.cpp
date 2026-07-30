@@ -91,7 +91,7 @@ void SystemEventPipeSender::Signal() && {
     {
         // Send one byte to signal the receiver
         char zero[1] = {0};
-        int status = write(mPrimitive.Get(), zero, 1);
+        ssize_t status = write(mPrimitive.Get(), zero, 1);
         DAWN_CHECK(status >= 0);
     }
 #else

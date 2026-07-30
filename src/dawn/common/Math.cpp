@@ -66,14 +66,6 @@ bool IsPtrAligned(const void* ptr, size_t alignment) {
     return (reinterpret_cast<size_t>(ptr) & (alignment - 1)) == 0;
 }
 
-bool IsAligned(uint32_t value, size_t alignment) {
-    DAWN_RELEASE_ASSUME(alignment <= UINT32_MAX);
-    DAWN_RELEASE_ASSUME(IsPowerOfTwo(alignment));
-    DAWN_RELEASE_ASSUME(alignment != 0);
-    uint32_t alignment32 = static_cast<uint32_t>(alignment);
-    return (value & (alignment32 - 1)) == 0;
-}
-
 uint16_t Float32ToFloat16(float fp32) {
     uint32_t fp32i = std::bit_cast<uint32_t>(fp32);
     uint32_t sign16 = (fp32i & 0x80000000) >> 16;

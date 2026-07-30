@@ -208,7 +208,7 @@ VkRect2D GetAlignedRenderArea(VkExtent2D granularity, BeginRenderPassCmd* render
         renderArea.offset.x = sign_cast(renderPassCmd->renderArea.x);
         renderArea.extent.width = renderPassCmd->renderArea.width;
     } else {
-        renderArea.offset.x = AlignDown(sign_cast(renderPassCmd->renderArea.x), granularity.width);
+        renderArea.offset.x = sign_cast(AlignDown(renderPassCmd->renderArea.x, granularity.width));
 
         uint32_t right =
             Align(renderPassCmd->renderArea.x + renderPassCmd->renderArea.width, granularity.width);
@@ -222,7 +222,7 @@ VkRect2D GetAlignedRenderArea(VkExtent2D granularity, BeginRenderPassCmd* render
         renderArea.offset.y = sign_cast(renderPassCmd->renderArea.y);
         renderArea.extent.height = renderPassCmd->renderArea.height;
     } else {
-        renderArea.offset.y = AlignDown(sign_cast(renderPassCmd->renderArea.y), granularity.height);
+        renderArea.offset.y = sign_cast(AlignDown(renderPassCmd->renderArea.y, granularity.height));
 
         uint32_t bottom = Align(renderPassCmd->renderArea.y + renderPassCmd->renderArea.height,
                                 granularity.height);

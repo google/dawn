@@ -81,10 +81,18 @@ inline uint32_t Log2Ceil(uint64_t v) {
 
 uint64_t NextPowerOfTwo(uint64_t n);
 bool IsPtrAligned(const void* ptr, size_t alignment);
-bool IsAligned(uint32_t value, size_t alignment);
 
-template <typename T>
-T Align(T value, size_t alignment) {
+template <std::unsigned_integral T>
+inline constexpr bool IsAligned(T value, size_t alignment) {
+    DAWN_RELEASE_ASSUME(alignment <= std::numeric_limits<T>::max());
+    DAWN_RELEASE_ASSUME(IsPowerOfTwo(alignment));
+    DAWN_RELEASE_ASSUME(alignment != 0);
+    T alignmentT = static_cast<T>(alignment);
+    return (value & (alignmentT - 1)) == 0;
+}
+
+template <std::unsigned_integral T>
+constexpr T Align(T value, size_t alignment) {
     DAWN_RELEASE_ASSUME(value <= std::numeric_limits<T>::max() - (alignment - 1));
     DAWN_RELEASE_ASSUME(IsPowerOfTwo(alignment));
     DAWN_RELEASE_ASSUME(alignment != 0);
@@ -92,8 +100,8 @@ T Align(T value, size_t alignment) {
     return (value + (alignmentT - 1)) & ~(alignmentT - 1);
 }
 
-template <typename T>
-T AlignDown(T value, size_t alignment) {
+template <std::unsigned_integral T>
+constexpr T AlignDown(T value, size_t alignment) {
     DAWN_RELEASE_ASSUME(IsPowerOfTwo(alignment));
     DAWN_RELEASE_ASSUME(alignment != 0);
     T alignmentT = static_cast<T>(alignment);

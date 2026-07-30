@@ -81,7 +81,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     // Query and report the adapter supported features.
     FreeMembers<WGPUSupportedFeatures> supportedFeatures(mProcs);
     mProcs->adapterGetFeatures(adapter, &supportedFeatures);
-    cmd.featuresCount = supportedFeatures.featureCount;
+    cmd.featuresCount = static_cast<uint32_t>(supportedFeatures.featureCount);
     cmd.features = supportedFeatures.features;
 
     // Query and report the adapter info.

@@ -832,7 +832,7 @@ void CommandBufferStateTracker::SetImmediateData(uint32_t offset, size_t size) {
 
     static_assert(ImmediateMask{}.size() <= 64);
     uint32_t startSlot = offset / kImmediateElementByteSize;
-    uint32_t slotCount = size / kImmediateElementByteSize;
+    uint32_t slotCount = static_cast<uint32_t>(size) / kImmediateElementByteSize;
 
     mImmediateDataMask |= ImmediateMask(((1u << slotCount) - 1u) << startSlot);
 }

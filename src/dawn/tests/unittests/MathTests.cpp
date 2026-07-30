@@ -270,17 +270,17 @@ TEST(Math, IsPtrAligned) {
 // Tests for IsAligned
 TEST(Math, IsAligned) {
     // 0 is aligned
-    ASSERT_TRUE(IsAligned(0, 4));
-    ASSERT_TRUE(IsAligned(0, 256));
-    ASSERT_TRUE(IsAligned(0, 512));
+    ASSERT_TRUE(IsAligned(0u, 4));
+    ASSERT_TRUE(IsAligned(0u, 256));
+    ASSERT_TRUE(IsAligned(0u, 512));
 
     // Multiples are aligned
-    ASSERT_TRUE(IsAligned(8, 8));
-    ASSERT_TRUE(IsAligned(16, 8));
-    ASSERT_TRUE(IsAligned(24, 8));
-    ASSERT_TRUE(IsAligned(256, 256));
-    ASSERT_TRUE(IsAligned(512, 256));
-    ASSERT_TRUE(IsAligned(768, 256));
+    ASSERT_TRUE(IsAligned(8u, 8));
+    ASSERT_TRUE(IsAligned(16u, 8));
+    ASSERT_TRUE(IsAligned(24u, 8));
+    ASSERT_TRUE(IsAligned(256u, 256));
+    ASSERT_TRUE(IsAligned(512u, 256));
+    ASSERT_TRUE(IsAligned(768u, 256));
 
     // Alignment with 1 is always aligned
     for (uint32_t i = 0; i < 128; ++i) {
@@ -289,7 +289,7 @@ TEST(Math, IsAligned) {
 
     // Everything in the range (align, 2*align) is not aligned
     for (uint32_t i = 1; i < 64; ++i) {
-        ASSERT_FALSE(IsAligned(64 + i, 64));
+        ASSERT_FALSE(IsAligned(64u + i, 64));
     }
 }
 

@@ -115,7 +115,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
             return;
         }
     }
-    cmd.featuresCount = features.size();
+    cmd.featuresCount = static_cast<uint32_t>(features.size());
     cmd.features = features.data();
 
     // Query and report the adapter limits, including all known extension limits.

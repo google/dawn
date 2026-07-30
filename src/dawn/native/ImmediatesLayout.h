@@ -81,7 +81,8 @@ uint32_t GetImmediateByteOffsetInPipeline(Member Object::* ptr,
 
     const ImmediateMask prefixBits = (1u << (offset / kImmediateElementByteSize)) - 1u;
 
-    return (prefixBits & pipelineImmediateMask).count() * kImmediateElementByteSize;
+    return static_cast<uint32_t>((prefixBits & pipelineImmediateMask).count() *
+                                 kImmediateElementByteSize);
 }
 
 template <typename Object, typename Member>

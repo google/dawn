@@ -113,3 +113,20 @@ src:*src{/,\\}dawn{/,\\}samples{/,\\}*
 # Implicit int conversions in tests and samples.
 src:*src{/,\\}dawn{/,\\}tests{/,\\}*
 src:*src{/,\\}dawn{/,\\}samples{/,\\}*
+
+[shorten-64-to-32]
+src:*src{/,\\}dawn{/,\\}tests{/,\\}*
+src:*src{/,\\}dawn{/,\\}samples{/,\\}*
+# Suppress shorten-64-to-32 progressively.
+# Suppress only backends of native (e.g. d3d, vulkan, etc.).
+src:*src{/,\\}dawn{/,\\}native{/,\\}d3d{/,\\}*
+src:*src{/,\\}dawn{/,\\}native{/,\\}d3d11{/,\\}*
+src:*src{/,\\}dawn{/,\\}native{/,\\}d3d12{/,\\}*
+src:*src{/,\\}dawn{/,\\}native{/,\\}metal{/,\\}*
+src:*src{/,\\}dawn{/,\\}native{/,\\}null{/,\\}*
+src:*src{/,\\}dawn{/,\\}native{/,\\}opengl{/,\\}*
+src:*src{/,\\}dawn{/,\\}native{/,\\}stream{/,\\}*
+src:*src{/,\\}dawn{/,\\}native{/,\\}utils{/,\\}*
+src:*src{/,\\}dawn{/,\\}native{/,\\}vulkan{/,\\}*
+src:*src{/,\\}dawn{/,\\}native{/,\\}webgpu{/,\\}*
+

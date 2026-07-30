@@ -106,7 +106,8 @@ template <typename It>
     bool retry = false;
     do {
         retry = false;
-        status = poll(pollfds.data(), pollfds.size(), ToMilliseconds(timeout));
+        status =
+            poll(pollfds.data(), checked_cast<nfds_t>(pollfds.size()), ToMilliseconds(timeout));
         if (status < 0) {
             int lErrno = errno;
             if (EAGAIN == lErrno || EINTR == lErrno) {

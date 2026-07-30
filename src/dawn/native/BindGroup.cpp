@@ -431,7 +431,7 @@ MaybeError ValidateStaticSamplersWithSampledTextures(
     const BindGroupLayoutInternalBase* layout) {
     // Cache the position of all the sampled texture in descriptor->entries to later validate them
     // against their static sampler (if they are used with the static sampler).
-    absl::flat_hash_map<BindingIndex, uint32_t> textureIndexToEntryIndex;
+    absl::flat_hash_map<BindingIndex, size_t> textureIndexToEntryIndex;
     for (auto [i, entry] : Enumerate(descriptor->entries)) {
         APIBindingIndex apiIndex = layout->GetBindingMap().at(BindingNumber(entry.binding));
         const auto& bindingInfo = layout->GetAPIBindingInfo(apiIndex);
@@ -441,7 +441,7 @@ MaybeError ValidateStaticSamplersWithSampledTextures(
     }
 
     // Gather the indices of YCbCr textures sampled by a static sampler.
-    ityp::bitset<uint32_t, kMaxBindingsPerPipelineLayout> sampledYcbcrTextures;
+    ityp::bitset<size_t, kMaxBindingsPerPipelineLayout> sampledYcbcrTextures;
     for (BindingIndex samplerIndex : layout->GetStaticSamplerIndices()) {
         const BindingInfo& bindingInfo = layout->GetBindingInfo(samplerIndex);
         const auto& staticSamplerLayout =
@@ -450,7 +450,7 @@ MaybeError ValidateStaticSamplersWithSampledTextures(
             continue;
         }
 
-        uint32_t textureEntryIndex =
+        size_t textureEntryIndex =
             textureIndexToEntryIndex.at(staticSamplerLayout.sampledTextureIndex);
 
         const SamplerBase* sampler = staticSamplerLayout.sampler.Get();
@@ -491,7 +491,7 @@ MaybeError ValidateStaticSamplersWithSampledTextures(
             layout->GetAPIBindingInfo(bindingMap.at(BindingNumber(entry.binding)));
         if (std::holds_alternative<TextureBindingInfo>(bindingInfo.bindingLayout) &&
             entry.textureView && entry.textureView->IsYCbCr()) {
-            DAWN_INVALID_IF(!sampledYcbcrTextures.test(i),
+            DAWN_INVALID_IF(!sampledYcbcrTextures.test(static_cast<uint32_t>(i)),
                             "YCbCr texture at binding (%u) is not sampled by a static sampler.",
                             entry.binding);
         }

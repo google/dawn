@@ -35,9 +35,9 @@ namespace dawn {
 void GetMacOSVersion(int32_t* majorVersion, int32_t* minorVersion) {
     NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
     DAWN_ASSERT(majorVersion != nullptr);
-    *majorVersion = version.majorVersion;
+    *majorVersion = static_cast<int32_t>(version.majorVersion);
     if (minorVersion != nullptr) {
-        *minorVersion = version.minorVersion;
+        *minorVersion = static_cast<int32_t>(version.minorVersion);
     }
 }
 

@@ -161,7 +161,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
                     binding::Errors::OperationError(env, "Limit \"" #LIMIT "\" out of range.")); \
                 return promise;                                                                  \
             }                                                                                    \
-            *dawnLimit = jsLimit;                                                                \
+            *dawnLimit = static_cast<DawnLimitType>(jsLimit);                                    \
         }                                                                                        \
         descriptor.requiredLimits.erase(#LIMIT);                                                 \
     }

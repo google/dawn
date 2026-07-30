@@ -202,7 +202,7 @@ class ParamGenerator {
         Iterator& operator++() {
             // Increment the Index by 1. If the i'th place reaches the maximum,
             // reset it to 0 and continue with the i+1'th place.
-            for (int i = mIndex.size() - 1; i >= 0; --i) {
+            for (int i = static_cast<int>(mIndex.size()) - 1; i >= 0; --i) {
                 if (mIndex[i] >= mLastIndex[i]) {
                     mIndex[i] = 0;
                 } else {
