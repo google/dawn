@@ -7,7 +7,6 @@ if (WIN32)
 endif ()
 set(DAWN_FETCH_DEPENDENCIES ON CACHE BOOL "")
 set(DAWN_ENABLE_INSTALL ON CACHE BOOL "")
-set(TINT_ENABLE_INSTALL ON CACHE BOOL "")
 if (CMAKE_SYTEM_NAME STREQUAL "Linux")
     # `sccache` seems effective only on linux.
     # for windows, we could look into `buildcache`
@@ -49,5 +48,6 @@ if(DAWN_MOBILE_BUILD)
         message(STATUS "- Disabling OpenGL ES for non-Android mobile build")
         set(DAWN_ENABLE_OPENGLES OFF CACHE BOOL "")
     endif()
-
+else()
+    set(TINT_ENABLE_INSTALL ON CACHE BOOL "")
 endif()
