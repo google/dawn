@@ -1096,9 +1096,8 @@ MaybeError Texture::CopyInternal(const ScopedCommandRecordingContext* commandCon
     return {};
 }
 
-ResultOrError<ComPtr<ID3D11ShaderResourceView>> Texture::GetStencilSRV(
-    const ScopedCommandRecordingContext* commandContext,
-    const TextureView* view) {
+MaybeError Texture::UpdateStencilCopyForView(const ScopedCommandRecordingContext* commandContext,
+                                             const TextureView* view) {
     DAWN_ASSERT(GetFormat().HasStencil());
 
     if (!mTextureForStencilSampling.Get()) {
@@ -1153,6 +1152,14 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> Texture::GetStencilSRV(
                                                            rowsPerImage));
     }
 
+    return {};
+}
+
+ResultOrError<ComPtr<ID3D11ShaderResourceView>> Texture::GetStencilSRV(
+    const ScopedCommandRecordingContext* commandContext,
+    const TextureView* view) {
+    DAWN_TRY(UpdateStencilCopyForView(commandContext, view));
+
     Ref<TextureViewBase> textureView;
     TextureViewDescriptor viewDesc = {};
     viewDesc.label = "InterimStencilTextureView";
@@ -1165,7 +1172,8 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> Texture::GetStencilSRV(
     DAWN_TRY_ASSIGN(textureView, mTextureForStencilSampling->CreateView(&viewDesc));
 
     ComPtr<ID3D11ShaderResourceView> srv;
-    DAWN_TRY_ASSIGN(srv, ToBackend(textureView)->GetOrCreateD3D11ShaderResourceView());
+    DAWN_TRY_ASSIGN(srv,
+                    ToBackend(textureView)->GetOrCreateD3D11ShaderResourceView(commandContext));
     return srv;
 }
 
@@ -1267,16 +1275,28 @@ void TextureView::DestroyImpl(DestroyReason reason) {
     mD3d11UnorderedAccessView = nullptr;
 }
 
-ResultOrError<ID3D11ShaderResourceView*> TextureView::GetOrCreateD3D11ShaderResourceView() {
+ResultOrError<ID3D11ShaderResourceView*> TextureView::GetOrCreateD3D11ShaderResourceView(
+    const ScopedCommandRecordingContext* commandContext) {
     if (mD3d11SharedResourceView) {
+        if (GetAspects() == Aspect::Stencil) [[unlikely]] {
+            // Refresh the stencil copy to ensure it contains the latest stencil data.
+            DAWN_TRY(ToBackend(GetTexture())->UpdateStencilCopyForView(commandContext, this));
+        }
         return mD3d11SharedResourceView.Get();
     }
 
-    DAWN_TRY_ASSIGN(mD3d11SharedResourceView,
-                    ToBackend(GetTexture())
-                        ->CreateD3D11ShaderResourceView(
-                            GetDimension(), GetFormat().format, GetAspects(), GetBaseMipLevel(),
-                            GetLevelCount(), GetBaseArrayLayer(), GetLayerCount()));
+    if (GetAspects() == Aspect::Stencil) [[unlikely]] {
+        // For sampling from stencil, we have to use an internal mirror 'R8Uint' texture.
+        DAWN_TRY_ASSIGN(mD3d11SharedResourceView,
+                        ToBackend(GetTexture())->GetStencilSRV(commandContext, this));
+    } else {
+        DAWN_TRY_ASSIGN(mD3d11SharedResourceView,
+                        ToBackend(GetTexture())
+                            ->CreateD3D11ShaderResourceView(
+                                GetDimension(), GetFormat().format, GetAspects(), GetBaseMipLevel(),
+                                GetLevelCount(), GetBaseArrayLayer(), GetLayerCount()));
+    }
+
     return mD3d11SharedResourceView.Get();
 }
 

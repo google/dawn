@@ -406,12 +406,7 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> BindGroupTracker::GetTextureShad
     TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
     ComPtr<ID3D11ShaderResourceView> srv;
 
-    if (view->GetAspects() == Aspect::Stencil) [[unlikely]] {
-        // For sampling from stencil, we have to use an internal mirror 'R8Uint' texture.
-        DAWN_TRY_ASSIGN(srv, ToBackend(view->GetTexture())->GetStencilSRV(mCommandContext, view));
-    } else {
-        DAWN_TRY_ASSIGN(srv, view->GetOrCreateD3D11ShaderResourceView());
-    }
+    DAWN_TRY_ASSIGN(srv, view->GetOrCreateD3D11ShaderResourceView(mCommandContext));
 
     return srv;
 }
