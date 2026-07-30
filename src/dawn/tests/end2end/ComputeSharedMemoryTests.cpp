@@ -120,6 +120,9 @@ TEST_P(ComputeSharedMemoryTests, Basic) {
 // for matrices in threadgroup memory. Basic test that reading and
 // writing a matrix in workgroup memory works.
 TEST_P(ComputeSharedMemoryTests, AssortedTypes) {
+    // TODO(540681577): Fix VUID-StandaloneSpirv-None-10684 in ANGLE
+    DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
+
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         struct StructValues {
