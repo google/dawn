@@ -144,6 +144,7 @@ cq_chromium_trybot(builder = "chromium:try/android-dawn-arm64-rel")
 cq_branch_verifier_chromium_trybot(base_builder_name = "dawn-android-arm64-deps-rel", platform = "android")
 
 manual_only_chromium_trybot(builder = "chromium:try/android-dawn-arm64-exp-rel")
+manual_only_chromium_trybot(builder = "chromium:try/android-dawn-arm64-p10-rel")
 
 ###########
 ## Linux ##
