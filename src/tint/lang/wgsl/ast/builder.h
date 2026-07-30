@@ -1731,7 +1731,7 @@ class Builder {
                         const ast::Identifier* name,
                         Type type,
                         const Expression* init) {
-        return create<ast::Let>(source, name, type, init, Vector<const Attribute*, 4>{});
+        return create<ast::Let>(source, name, type, init);
     }
 
     /// @param source the source location
@@ -1752,7 +1752,7 @@ class Builder {
                         std::string_view name,
                         Type type,
                         const Expression* init) {
-        return create<ast::Let>(source, Ident(name), type, init, Vector<const Attribute*, 4>{});
+        return create<ast::Let>(source, Ident(name), type, init);
     }
 
     /// @param name the parameter name
