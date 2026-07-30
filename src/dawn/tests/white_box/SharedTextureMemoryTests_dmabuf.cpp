@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <webgpu/webgpu_cpp.h>
 
+#include <array>
 #include <memory>
 #include <string>
 #include <utility>
@@ -91,15 +92,15 @@ class Backend : public SharedTextureMemoryTestVulkanBackend {
         dmaBufDesc.drmFormat = format;
         dmaBufDesc.drmModifier = gbm_bo_get_modifier(bo);
 
-        wgpu::SharedTextureMemoryDmaBufPlane planes[GBM_MAX_PLANES];
+        std::array<wgpu::SharedTextureMemoryDmaBufPlane, GBM_MAX_PLANES> planes;
         dmaBufDesc.planeCount = gbm_bo_get_plane_count(bo);
-        dmaBufDesc.planes = planes;
+        dmaBufDesc.planes = planes.data();
         DAWN_ASSERT(dmaBufDesc.planeCount <= GBM_MAX_PLANES);
 
         for (uint32_t plane = 0; plane < dmaBufDesc.planeCount; ++plane) {
-            DAWN_UNSAFE_TODO(planes[plane]).fd = gbm_bo_get_fd(bo);
-            DAWN_UNSAFE_TODO(planes[plane]).stride = gbm_bo_get_stride_for_plane(bo, plane);
-            DAWN_UNSAFE_TODO(planes[plane]).offset = gbm_bo_get_offset(bo, plane);
+            planes[plane].fd = gbm_bo_get_fd(bo);
+            planes[plane].stride = gbm_bo_get_stride_for_plane(bo, plane);
+            planes[plane].offset = gbm_bo_get_offset(bo, plane);
         }
 
         std::string label = MakeLabel(dmaBufDesc);
@@ -110,7 +111,7 @@ class Backend : public SharedTextureMemoryTestVulkanBackend {
         auto ret = createFn(desc);
 
         for (uint32_t plane = 0; plane < dmaBufDesc.planeCount; ++plane) {
-            close(DAWN_UNSAFE_TODO(planes[plane]).fd);
+            close(planes[plane].fd);
         }
         gbm_bo_destroy(bo);
 
