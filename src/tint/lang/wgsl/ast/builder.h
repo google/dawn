@@ -141,29 +141,6 @@ class Builder {
         void Set(Builder&, const Attribute* a) { attributes.Push(a); }
     };
 
-    /// LetOptions is a helper for accepting an arbitrary number of order independent options for
-    /// constructing a Let.
-    struct LetOptions {
-        template <typename... ARGS>
-        explicit LetOptions(ARGS&&... args) {
-            static constexpr bool has_init =
-                (traits::IsTypeOrDerived<traits::PtrElTy<ARGS>, Expression> || ...);
-            static_assert(has_init, "Let() must be constructed with an initializer expression");
-            (Set(std::forward<ARGS>(args)), ...);
-        }
-        ~LetOptions();
-
-        Type type;
-        const Expression* initializer = nullptr;
-        Vector<const Attribute*, 4> attributes;
-
-      private:
-        void Set(Type t) { type = t; }
-        void Set(const Expression* c) { initializer = c; }
-        void Set(VectorRef<const Attribute*> l) { attributes = std::move(l); }
-        void Set(const Attribute* a) { attributes.Push(a); }
-    };
-
     /// ConstOptions is a helper for accepting an arbitrary number of order independent options for
     /// constructing a Const.
     struct ConstOptions {
@@ -1714,32 +1691,68 @@ class Builder {
     }
 
     /// @param name the variable name
-    /// @param options the extra options passed to the Var initializer
-    /// Can be any of the following, in any order:
-    ///   * Expression*    - specifies the variable's initializer expression (required)
-    ///   * Type           - specifies the variable's type
-    ///   * Attribute*     - specifies the variable's attributes (repeatable, or vector)
-    /// Note that non-repeatable arguments of the same type will use the last argument's value.
-    /// @returns an `Let` with the given name, type and additional options
-    template <typename NAME, typename... OPTIONS, typename = DisableIfSource<NAME>>
-    const ast::Let* Let(NAME&& name, OPTIONS&&... options) {
-        return Let(source_, std::forward<NAME>(name), std::forward<OPTIONS>(options)...);
+    /// @param type the variable's type
+    /// @param init initializer expression (required)
+    /// @returns an `Let` with the given name, type and initializer
+    const ast::Let* Let(std::string_view name, Type type, const Expression* init) {
+        return Let(source_, name, type, init);
     }
 
-    /// @param source the variable source
     /// @param name the variable name
-    /// @param options the extra options passed to the Var initializer
-    /// Can be any of the following, in any order:
-    ///   * Expression*    - specifies the variable's initializer expression (required)
-    ///   * Type           - specifies the variable's type
-    ///   * Attribute*     - specifies the variable's attributes (repeatable, or vector)
-    /// Note that non-repeatable arguments of the same type will use the last argument's value.
-    /// @returns an `Let` with the given name, type and additional options
-    template <typename NAME, typename... OPTIONS>
-    const ast::Let* Let(const Source& source, NAME&& name, OPTIONS&&... options) {
-        LetOptions opts(std::forward<OPTIONS>(options)...);
-        return create<ast::Let>(source, Ident(std::forward<NAME>(name)), opts.type,
-                                opts.initializer, std::move(opts.attributes));
+    /// @param init initializer expression (required)
+    /// @returns an `Let` with the given name, type and initializer
+    const ast::Let* Let(std::string_view name, const Expression* init) {
+        return Let(source_, name, ast::Type{}, init);
+    }
+
+    /// @param source the source location
+    /// @param name the variable name
+    /// @param type the variable's type
+    /// @param init initializer expression (required)
+    /// @returns an `Let` with the given name, type and initializer
+    const ast::Let* Let(const Source& source, Symbol name, Type type, const Expression* init) {
+        return Let(source, Ident(name), type, init);
+    }
+
+    /// @param name the variable name
+    /// @param type the variable's type
+    /// @param init initializer expression (required)
+    /// @returns an `Let` with the given name, type and initializer
+    const ast::Let* Let(Symbol name, Type type, const Expression* init) {
+        return Let(source_, name, type, init);
+    }
+
+    /// @param source the source location
+    /// @param name the variable name
+    /// @param type the variable's type
+    /// @param init initializer expression (required)
+    /// @returns an `Let` with the given name, type and initializer
+    const ast::Let* Let(const Source& source,
+                        const ast::Identifier* name,
+                        Type type,
+                        const Expression* init) {
+        return create<ast::Let>(source, name, type, init, Vector<const Attribute*, 4>{});
+    }
+
+    /// @param source the source location
+    /// @param name the variable name
+    /// @param type the variable's type
+    /// @param init initializer expression (required)
+    /// @returns an `Let` with the given name, type and initializer
+    const ast::Let* Let(const Source& source, std::string_view name, const Expression* init) {
+        return Let(source, name, ast::Type{}, init);
+    }
+
+    /// @param source the source location
+    /// @param name the variable name
+    /// @param type the variable's type
+    /// @param init initializer expression (required)
+    /// @returns an `Let` with the given name, type and initializer
+    const ast::Let* Let(const Source& source,
+                        std::string_view name,
+                        Type type,
+                        const Expression* init) {
+        return create<ast::Let>(source, Ident(name), type, init, Vector<const Attribute*, 4>{});
     }
 
     /// @param name the parameter name

@@ -34,7 +34,6 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::ast {
 
 Builder::VarOptions::~VarOptions() = default;
-Builder::LetOptions::~LetOptions() = default;
 Builder::ConstOptions::~ConstOptions() = default;
 Builder::OverrideOptions::~OverrideOptions() = default;
 
@@ -78,7 +77,7 @@ void Builder::AssertNotMoved() const {
 
 const Statement* Builder::WrapInStatement(const Expression* expr) {
     // Create a temporary variable of inferred type from expr.
-    return Decl(Let(symbols_.New(), expr));
+    return Decl(Let(symbols_.New(), ast::Type{}, expr));
 }
 
 const VariableDeclStatement* Builder::WrapInStatement(const Variable* v) {

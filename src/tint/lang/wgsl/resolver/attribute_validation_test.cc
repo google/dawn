@@ -1708,15 +1708,6 @@ TEST_F(VariableAttributeTest, LocalVar) {
     EXPECT_EQ(r()->error(), "12:34 error: '@binding' is not valid for function-scope 'var'");
 }
 
-TEST_F(VariableAttributeTest, LocalLet) {
-    auto* v = Let("a", Vector{Binding(Source{{12, 34}}, 2_a)}, Expr(1_a));
-
-    WrapInFunction(v);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: '@binding' is not valid for 'let' declaration");
-}
-
 using ConstantAttributeTest = TestWithParams;
 TEST_P(ConstantAttributeTest, IsValid) {
     EnableRequiredExtensions();

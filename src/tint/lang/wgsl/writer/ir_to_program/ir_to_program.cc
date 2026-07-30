@@ -668,7 +668,7 @@ class State {
     void Let(const core::ir::Let* let) {
         auto* result = let->Result();
         Symbol name = NameFor(result);
-        Append(b.Decl(b.Let(name, Expr(let->Value()))));
+        Append(b.Decl(b.Let(name, ast::Type{}, Expr(let->Value()))));
         Bind(result, name);
     }
 
