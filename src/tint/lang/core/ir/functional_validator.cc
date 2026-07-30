@@ -48,12 +48,14 @@
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/containers/transform.h"
+#include "src/tint/utils/internal_limits.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/styled_text.h"
 
@@ -202,6 +204,67 @@ StyledText Functional::NameOf(const Value* value) {
         return StyledText{} << ir_.NameOf(value).to_str();
     }
     return Disassemble().NameOf(value);
+}
+
+uint64_t Functional::ElementsCount(const core::type::Type* root_ty) {
+    TINT_ASSERT(root_ty);
+
+    Vector<const core::type::Type*, 16> stack;
+    stack.Push(root_ty);
+
+    while (!stack.IsEmpty()) {
+        const core::type::Type* ty = stack.Back();
+
+        if (elements_counts_.Contains(ty)) {
+            stack.Pop();
+            continue;
+        }
+
+        bool children_ready = true;
+        uint64_t count = 0;
+
+        tint::Switch(
+            ty,
+            [&](const core::type::Struct* s) {
+                for (auto* member : s->Members()) {
+                    if (auto res = elements_counts_.Get(member->Type())) {
+                        count += *res;
+                    } else {
+                        stack.Push(member->Type());
+                        children_ready = false;
+                    }
+                }
+            },
+            [&](const core::type::Array* a) {
+                if (auto res = elements_counts_.Get(a->ElemType())) {
+                    uint64_t array_count = 0;
+                    if (auto* const_count = a->Count()->As<core::type::ConstantArrayCount>()) {
+                        array_count = const_count->value;
+                    }
+                    count = array_count * (*res);
+                } else {
+                    stack.Push(a->ElemType());
+                    children_ready = false;
+                }
+            },
+            [&](const core::type::Matrix* m) {
+                if (auto res = elements_counts_.Get(m->ColumnType())) {
+                    count = static_cast<uint64_t>(m->Columns()) * (*res);
+                } else {
+                    stack.Push(m->ColumnType());
+                    children_ready = false;
+                }
+            },
+            [&](const core::type::Vector* v) { count = static_cast<uint64_t>(v->Width()); },
+            [&](Default) { count = 1; });
+
+        if (children_ready) {
+            elements_counts_.Add(ty, count);
+            stack.Pop();
+        }
+    }
+
+    return *elements_counts_.Get(root_ty);
 }
 
 Source Functional::SourceOf(const Function* func) {
@@ -563,6 +626,19 @@ void Functional::CheckVar(const Var* var) {
         return;
     }
 
+    bool generates_initializer = var->Initializer() != nullptr ||
+                                 mv->AddressSpace() == core::AddressSpace::kPrivate ||
+                                 mv->AddressSpace() == core::AddressSpace::kFunction;
+    if (generates_initializer) {
+        if (ElementsCount(result_type->UnwrapPtrOrRef()) >
+            internal_limits::kMaxArrayConstructorElements) {
+            AddError(var) << "type has excessive number of elements (>"
+                          << internal_limits::kMaxArrayConstructorElements
+                          << ") for an initializer";
+            return;
+        }
+    }
+
     // Check that initializer and result type match
     if (var->Initializer()) {
         if (mv->AddressSpace() != AddressSpace::kFunction &&
@@ -661,8 +737,13 @@ void Functional::CheckVar(const Var* var) {
 }
 
 void Functional::CheckLet(const Let* l) {
-    auto* value_ty = l->Value()->Type();
     auto* result_ty = l->Result()->Type();
+    if (ElementsCount(result_ty) > internal_limits::kMaxArrayConstructorElements) {
+        AddError(l) << "type has excessive number of elements (>"
+                    << internal_limits::kMaxArrayConstructorElements << ") for an initializer";
+        return;
+    }
+    auto* value_ty = l->Value()->Type();
     if (value_ty != result_ty) {
         AddError(l) << "result type " << NameOf(l->Result()->Type())
                     << " does not match value type " << NameOf(l->Value()->Type());
@@ -693,6 +774,12 @@ void Functional::CheckLet(const Let* l) {
 
 void Functional::CheckConstruct(const Construct* construct) {
     auto* result_type = construct->Result()->Type();
+    if (ElementsCount(result_type) > internal_limits::kMaxArrayConstructorElements) {
+        AddError(construct) << "type has excessive number of elements (>"
+                            << internal_limits::kMaxArrayConstructorElements
+                            << ") for an initializer";
+        return;
+    }
     if (!result_type->IsConstructible()) {
         // We only allow `construct` to create non-constructible types when they are structures that
         // contain pointers and handle types, with the corresponding property enabled.

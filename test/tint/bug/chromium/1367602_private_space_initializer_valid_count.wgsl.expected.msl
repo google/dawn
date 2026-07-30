@@ -14,11 +14,11 @@ struct tint_array {
 };
 
 struct tint_module_vars_struct {
-  thread tint_array<bool, 65535>* v;
+  thread tint_array<bool, 32767>* v;
 };
 
 [[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
-  thread tint_array<bool, 65535> v = tint_array<bool, 65535>{};
+  thread tint_array<bool, 32767> v = tint_array<bool, 32767>{};
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&v)};
 }

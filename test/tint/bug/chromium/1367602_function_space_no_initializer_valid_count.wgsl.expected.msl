@@ -15,5 +15,5 @@ struct tint_array {
 
 [[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
-  tint_array<bool, 65535> v = {};
+  tint_array<bool, 32767> v = {};
 }

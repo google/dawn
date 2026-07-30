@@ -423,6 +423,60 @@ TEST_F(IR_ValidatorTest, Var_Init_InvalidAddressSpace) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Var_ExcessiveElements) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        b.Var(ty.ptr<function>(ty.array(ty.f32(), 40000u)));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("type has excessive number of elements (>32767) for an initializer"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Construct_ExcessiveElements) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        b.Construct(ty.array(ty.f32(), 40000u));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("type has excessive number of elements (>32767) for an initializer"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Construct_Struct_ExcessiveElements) {
+    auto* str =
+        ty.Struct(mod.symbols.New("S"), {
+                                            {mod.symbols.New("a"), ty.array(ty.f32(), 20000u)},
+                                            {mod.symbols.New("b"), ty.array(ty.f32(), 20000u)},
+                                        });
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        b.Construct(str);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("type has excessive number of elements (>32767) for an initializer"))
+        << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Var_HandleMissingBindingPoint) {
     auto* v = b.Var(ty.ptr<handle, i32>());
     mod.root_block->Append(v);
@@ -1248,6 +1302,25 @@ TEST_F(IR_ValidatorTest, Let_PropertyBypass) {
     mod.properties.Add(ir::Property::kAllowAnyLetType);
     auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Let_ExcessiveElements) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("p", ty.array(ty.f32(), 40000u));
+    f->AppendParam(p);
+
+    b.Append(f->Block(), [&] {
+        b.Append(
+            mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.array(ty.f32(), 40000u)), p));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("type has excessive number of elements (>32767) for an initializer"))
+        << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Phony_NullValue) {

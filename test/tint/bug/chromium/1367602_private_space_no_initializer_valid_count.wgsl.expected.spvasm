@@ -11,15 +11,15 @@
                OpName %f "f"
        %bool = OpTypeBool
        %uint = OpTypeInt 32 0
- %uint_65535 = OpConstant %uint 65535
-%_arr_bool_uint_65535 = OpTypeArray %bool %uint_65535
-%_ptr_Private__arr_bool_uint_65535 = OpTypePointer Private %_arr_bool_uint_65535
-          %7 = OpConstantNull %_arr_bool_uint_65535
-          %v = OpVariable %_ptr_Private__arr_bool_uint_65535 Private %7
+ %uint_32767 = OpConstant %uint 32767
+%_arr_bool_uint_32767 = OpTypeArray %bool %uint_32767
+%_ptr_Private__arr_bool_uint_32767 = OpTypePointer Private %_arr_bool_uint_32767
+          %7 = OpConstantNull %_arr_bool_uint_32767
+          %v = OpVariable %_ptr_Private__arr_bool_uint_32767 Private %7
        %void = OpTypeVoid
          %10 = OpTypeFunction %void
           %f = OpFunction %void None %10
          %11 = OpLabel
-         %12 = OpLoad %_arr_bool_uint_65535 %v None
+         %12 = OpLoad %_arr_bool_uint_32767 %v None
                OpReturn
                OpFunctionEnd

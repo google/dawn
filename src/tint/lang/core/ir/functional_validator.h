@@ -103,6 +103,13 @@ class Functional {
     StyledText NameOf(const core::type::Type* ty);
     StyledText NameOf(const Value* value);
 
+    ///
+    /// Calculates the total number elements contained in a type, i.e. the number of values required
+    /// for an initializer.
+    /// @param ty the type to calculate elements for
+    /// @returns the count of elements in the type and all of its children
+    uint64_t ElementsCount(const core::type::Type* ty);
+
     Source SourceOf(const Function* func);
     Source SourceOf(const FunctionParam* param);
     Source SourceOf(const Instruction* inst);
@@ -178,6 +185,7 @@ class Functional {
     Hashset<OverrideId, 8> seen_override_ids_;
     Hashmap<const Loop*, const Continue*, 4> first_continues_;
     Hashset<std::string, 4> entry_point_names_;
+    Hashmap<const core::type::Type*, uint64_t, 16> elements_counts_;
 };
 
 }  // namespace tint::core::ir::validator
