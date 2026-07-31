@@ -45,9 +45,11 @@
 //* Helper macros so that the main [de]serialization functions can be written in a generic manner.
 
 //* Outputs an rvalue that's the number of elements a pointer member points to.
-{%- macro member_length(member, record_accessor) -%}
+{%- macro member_length(member, record_accessor, spanify=False) -%}
     {%- if member.length == "constant" -%}
         {{member.constant_length}}u
+    {%- elif spanify -%}
+        {{record_accessor}}{{as_varName(member.name)}}.size()
     {%- else -%}
         {{record_accessor}}{{as_varName(member.length.name)}}
     {%- endif -%}
@@ -61,6 +63,8 @@
         {{as_cType(type.name)}}Transfer
     {%- elif as_cType(type.name) == "size_t" -%}
         {{as_cType(types["uint64_t"].name)}}
+    {%- elif type.name.canonical_case() == "void" -%}
+        std::byte
     {%- else -%}
         {%- do assert(type.is_wire_transparent, 'wire transparent') -%}
         {{as_cType(type.name)}}
@@ -128,6 +132,8 @@
 {%- macro write_record_serialization_helpers(record, name, members, is_cmd=False, is_return_command=False) -%}
     {%- set Return = "Return" if is_return_command else "" -%}
     {%- set Cmd = "Cmd" if is_cmd else "" -%}
+    {%- set RecordName = Return + name + Cmd -%}
+    {%- set spanify = is_cmd and RecordName not in cmd_spanification_blocklist -%}
     {%- set Inherits = " : CmdHeader" if is_cmd else "" %}
     {%- set TransferStructName = Return + name + "Transfer" -%}
 
@@ -189,7 +195,7 @@
     {% endif %}
 
     //* Returns the required transfer size for `record` in addition to the transfer structure.
-    [[maybe_unused]] size_t {{Return}}{{name}}GetExtraRequiredSize([[maybe_unused]] const {{Return}}{{name}}{{Cmd}}& record) {
+    [[maybe_unused]] size_t {{Return}}{{name}}GetExtraRequiredSize([[maybe_unused]] const {{RecordName}}& record) {
         size_t result = 0;
 
         //* Gather how much space will be needed for the extension chain.
@@ -229,7 +235,7 @@
                 {% endif %}
                 {
                     {% do assert(member.annotation != "const*const*", "const*const* not valid here") %}
-                    auto memberLength = {{member_length(member, "record.")}};
+                    auto memberLength = {{member_length(member, "record.", spanify)}};
                     auto size = WireAlignSizeofN<{{member_transfer_type(member.type)}}>(memberLength);
                     DAWN_ASSERT(size);
                     result += *size;
@@ -254,7 +260,7 @@
     //* Serializes `record` into `transfer`, using `buffer` to get more space for pointed-to data
     //* and `provider` to serialize objects.
     [[maybe_unused]] WireResult {{Return}}{{name}}Serialize(
-        const {{Return}}{{name}}{{Cmd}}& record,
+        const {{RecordName}}& record,
         volatile {{TransferStructName}}* transfer,
         [[maybe_unused]] SerializeBuffer* buffer
         {%- if record.may_have_dawn_object -%}
@@ -310,48 +316,79 @@
         //* "length", but order is not always given.
         {% for member in members | sort(reverse=true, attribute="annotation") %}
             {% set memberName = as_varName(member.name) %}
-            //* Skip serialization for custom serialized members and callback infos.
-            {% if member.skip_serialize or member.type.category == 'callback info' %}
-                // [Skipped serialization for {{ memberName }}, it needs to be filled with a CommandExtension by the caller.]
+            //* Skip serialization for callback infos.
+            {% if member.type.category == 'callback info' %}
                 {% continue %}
             {% endif %}
             //* Value types are directly in the transfer record, objects being replaced with their IDs.
             {% if member.annotation == "value" %}
+                {% if member.is_length %}
+                    //* Skipped serializing length {{ memberName }} from record as it will be serialized when we handle the member.
+                    {% continue %}
+                {% endif %}
                 {{serialize_member(member.type, member.optional, "record." + memberName, "transfer->" + memberName)}}
                 {% continue %}
             {% endif %}
             //* Allocate space and write the non-value arguments in it.
             {% do assert(member.annotation != "const*const*") %}
             {% if member.type.category != "object" and member.optional %}
-                bool has_{{memberName}} = record.{{memberName}} != nullptr;
+                {% if spanify and member.length and member.length != "constant" %}
+                    bool has_{{memberName}} = !record.{{memberName}}.empty();
+                {% else %}
+                    bool has_{{memberName}} = record.{{memberName}} != nullptr;
+                {% endif %}
                 transfer->has_{{memberName}} = has_{{memberName}};
                 if (has_{{memberName}}) {
             {% else %}
                 {
             {% endif %}
-                auto memberLength = {{member_length(member, "record.")}};
-
+                auto memberLength = {{member_length(member, "record.", spanify)}};
+                {% if member.length != "constant" %}
+                    {{serialize_member(member.length.type, false, "memberLength", "transfer->" + as_varName(member.length.name))}}
+                {% endif %}
+                {% if member.skip_serialize %}
+                    }
+                    {% continue %}
+                {% endif %}
                 Span<volatile {{member_transfer_type(member.type)}}> memberBuffer;
                 WIRE_TRY(buffer->NextN(memberLength, &memberBuffer));
 
-                {% if member.type.is_wire_transparent %}
-                    if (memberLength != 0) {
-                        // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-                        std::ranges::copy(
-                            // TODO(https://crbug.com/530019520): Use deduction guides to avoid explicit templating.
-                            // TODO(https://crbug.com/528027992): Spanify the record members.
-                            SpanAsBytes(DAWN_UNSAFE_TODO(Span<const {{as_cType(member.type.name)}}>(record.{{memberName}}, memberLength))),
-                            SpanAsWritableBytes(memberBuffer).begin()
-                        );
-                    }
+                //* TODO(https://crbug.com/526537254): Remove this branch once all the commands have been spanified.
+                {% if spanify and member.length and member.length != "constant" %}
+                    {{serialize_member(member.length.type, false, "memberLength", "transfer->" + as_varName(member.length.name))}}
+                    {% if member.type.is_wire_transparent %}
+                        if (memberLength != 0) {
+                            SpanAsWritableBytes(memberBuffer).CopyFrom(SpanAsBytes(record.{{memberName}}));
+                        }
+                    {% else %}
+                        //* This loop cannot overflow because it iterates up to |memberLength|. Even if
+                        //* memberLength were the maximum integer value, |i| would become equal to it
+                        //* just before exiting the loop, but not increment past or wrap around.
+                        //* TODO(https://crbug.com/528027992): Spanify the record members.
+                        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
+                            {{serialize_member(member.type, member.array_element_optional, "record." + memberName + "[i]", "memberBuffer[i]" )}}
+                        }
+                    {% endif %}
                 {% else %}
-                    //* This loop cannot overflow because it iterates up to |memberLength|. Even if
-                    //* memberLength were the maximum integer value, |i| would become equal to it
-                    //* just before exiting the loop, but not increment past or wrap around.
-                    //* TODO(https://crbug.com/528027992): Spanify the record members.
-                    for (decltype(memberLength) i = 0; i < memberLength; ++i) {
-                        {{serialize_member(member.type, member.array_element_optional, "record." + memberName + "[i]", "memberBuffer[i]" )}}
-                    }
+                    {% if member.type.is_wire_transparent %}
+                        if (memberLength != 0) {
+                            // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
+                            std::ranges::copy(
+                                // TODO(https://crbug.com/530019520): Use deduction guides to avoid explicit templating.
+                                // TODO(https://crbug.com/528027992): Spanify the record members.
+                                SpanAsBytes(DAWN_UNSAFE_TODO(Span<const {{as_cType(member.type.name)}}>(record.{{memberName}}, memberLength))),
+                                SpanAsWritableBytes(memberBuffer).begin()
+                            );
+                        }
+                    {% else %}
+                        //* This loop cannot overflow because it iterates up to |memberLength|. Even if
+                        //* memberLength were the maximum integer value, |i| would become equal to it
+                        //* just before exiting the loop, but not increment past or wrap around.
+                        //* TODO(https://crbug.com/528027992): Spanify the record members.
+                        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
+                            {{serialize_member(member.type, member.array_element_optional, "record." + memberName + "[i]", "memberBuffer[i]" )}}
+                        }
+                    {% endif %}
                 {% endif %}
             }
         {% endfor %}
@@ -364,7 +401,7 @@
     //* if needed, using `allocator` to store pointed-to values and `resolver` to translate object
     //* Ids to actual objects.
     [[maybe_unused]] WireResult {{Return}}{{name}}Deserialize(
-        {{Return}}{{name}}{{Cmd}}* record,
+        {{RecordName}}* record,
         const volatile {{TransferStructName}}* transfer,
         DeserializeBuffer* deserializeBuffer,
         [[maybe_unused]] DeserializeAllocator* allocator
@@ -432,6 +469,10 @@
             {% set memberName = as_varName(member.name) %}
             //* Value types are directly in the transfer record, objects being replaced with their IDs.
             {% if member.annotation == "value" %}
+                {% if spanify and member.is_length %}
+                    //* Skipped deserializing length {{ memberName }} as it is included in the span.
+                    {% continue %}
+                {% endif %}
                 {{deserialize_member(member.type, member.optional, "transfer->" + memberName, "record->" + memberName)}}
                 {% continue %}
             {% endif %}
@@ -446,40 +487,70 @@
                 //* uninitialized pointer.
                 {% do assert(member.length == "constant") %}
                 bool has_{{memberName}} = transfer->has_{{memberName}};
-                record->{{memberName}} = nullptr;
+                {% if spanify and member.length and member.length != "constant" %}
+                    record->{{memberName}} = {};
+                {% else %}
+                    record->{{memberName}} = nullptr;
+                {% endif %}
                 if (has_{{memberName}}) {
             {% else %}
                 {
             {% endif %}
+                auto memberLength = {{member_length(member, "transfer->", False)}};
                 Span<const volatile {{member_transfer_type(member.type)}}> memberBuffer;
-                WIRE_TRY(deserializeBuffer->ReadN({{member_length(member, "record->")}}, &memberBuffer));
+                WIRE_TRY(deserializeBuffer->ReadN(memberLength, &memberBuffer));
 
-                //* For data-only members (e.g. "data" in WriteBuffer and WriteTexture), they are
-                //* not security sensitive so we can directly refer the data inside the transfer
-                //* buffer in dawn_native. For other members, as prevention of TOCTOU attacks is an
-                //* important feature of the wire, we must make sure every single value returned to
-                //* dawn_native must be a copy of what's in the wire.
-                {% if member.json_data["wire_is_data_only"] %}
-                    record->{{memberName}} =
-                        const_cast<const {{member_transfer_type(member.type)}}*>(memberBuffer.data());
-
-                {% else %}
-                    Span<{{as_cType(member.type.name)}}> copiedMembers;
-                    WIRE_TRY(GetSpace(allocator, memberBuffer.size(), &copiedMembers));
-                    record->{{memberName}} = copiedMembers.data();
-
-                    {% if member.type.is_wire_transparent %}
-                        if (!memberBuffer.empty()) {
-                            // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-                            std::ranges::copy(
-                                SpanAsBytes(memberBuffer),
-                                SpanAsWritableBytes(copiedMembers).begin()
-                            );
-                        }
+                //* TODO(https://crbug.com/526537254): Remove this branch once all the commands have been spanified.
+                {% if spanify and member.length and member.length != "constant" %}
+                    //* For data-only members (e.g. "data" in WriteBuffer and WriteTexture), they are
+                    //* not security sensitive so we can directly refer the data inside the transfer
+                    //* buffer in dawn_native. For other members, as prevention of TOCTOU attacks is an
+                    //* important feature of the wire, we must make sure every single value returned to
+                    //* dawn_native must be a copy of what's in the wire.
+                    {% if member.json_data["wire_is_data_only"] %}
+                        record->{{memberName}} = memberBuffer;
                     {% else %}
-                        for (auto [i, member] : Enumerate(memberBuffer)) {
-                            {{deserialize_member(member.type, member.array_element_optional, "member", "copiedMembers[i]" )}}
-                        }
+                        Span<{{as_cType(member.type.name, spanify)}}> copiedMembers;
+                        WIRE_TRY(GetSpace(allocator, memberBuffer.size(), &copiedMembers));
+                        record->{{memberName}} = copiedMembers;
+
+                        {% if member.type.is_wire_transparent %}
+                            if (!memberBuffer.empty()) {
+                                copiedMembers.CopyFrom(memberBuffer);
+                            }
+                        {% else %}
+                            for (auto [i, member] : Enumerate(memberBuffer)) {
+                                {{deserialize_member(member.type, member.array_element_optional, "member", "copiedMembers[i]" )}}
+                            }
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    //* For data-only members (e.g. "data" in WriteBuffer and WriteTexture), they are
+                    //* not security sensitive so we can directly refer the data inside the transfer
+                    //* buffer in dawn_native. For other members, as prevention of TOCTOU attacks is an
+                    //* important feature of the wire, we must make sure every single value returned to
+                    //* dawn_native must be a copy of what's in the wire.
+                    {% if member.json_data["wire_is_data_only"] %}
+                        record->{{memberName}} =
+                            const_cast<const {{member_transfer_type(member.type)}}*>(memberBuffer.data());
+                    {% else %}
+                        Span<{{as_cType(member.type.name)}}> copiedMembers;
+                        WIRE_TRY(GetSpace(allocator, memberBuffer.size(), &copiedMembers));
+                        record->{{memberName}} = copiedMembers.data();
+
+                        {% if member.type.is_wire_transparent %}
+                            if (!memberBuffer.empty()) {
+                                // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
+                                std::ranges::copy(
+                                    SpanAsBytes(memberBuffer),
+                                    SpanAsWritableBytes(copiedMembers).begin()
+                                );
+                            }
+                        {% else %}
+                            for (auto [i, member] : Enumerate(memberBuffer)) {
+                                {{deserialize_member(member.type, member.array_element_optional, "member", "copiedMembers[i]" )}}
+                            }
+                        {% endif %}
                     {% endif %}
                 {% endif %}
             }

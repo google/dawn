@@ -35,6 +35,8 @@ namespace dawn::wire::server {
         {% set returns = is_method and method.returns %}
 
         {% set Suffix = command.name.CamelCase() %}
+        {% set CmdName = Suffix + "Cmd" %}
+        {% set spanify = CmdName not in cmd_spanification_blocklist %}
         //* The generic command handlers
         WireResult Server::Handle{{Suffix}}(DeserializeBuffer* deserializeBuffer) {
             {{Suffix}}Cmd cmd;
@@ -67,7 +69,8 @@ namespace dawn::wire::server {
 
             //* Do command
             WIRE_TRY(Do{{Suffix}}(
-                {%- for member in command.members -%}
+                {%- for member in command.members if (not spanify or not member.is_length) -%}
+                    {%- if not loop.first -%}, {% endif %}
                     {%- if member.is_return_value -%}
                         {%- if member.handle_type -%}
                             &{{as_varName(member.name)}}Data->handle //* Pass the handle of the output object to be written by the doer
@@ -79,7 +82,6 @@ namespace dawn::wire::server {
                     {%- else -%}
                         cmd.{{as_varName(member.name)}}
                     {%- endif -%}
-                    {%- if not loop.last -%}, {% endif %}
                 {%- endfor -%}
             ));
 

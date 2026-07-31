@@ -52,8 +52,7 @@ WireResult ChunkedCommandHandler::HandleChunkedCommand(DeserializeBuffer* deseri
         // This is the first block of this chunked command. Make a new allocation to write into.
         ChunkedCommand newChunkedCommand = {};
         newChunkedCommand.data =
-            // SAFETY: This will be incrementally initialized as we handle each chunk of the
-            // command.
+            // SAFETY: This will be incrementally initialized by each chunk of the command.
             DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(cmd.size, std::nothrow));
         if (!newChunkedCommand.data) {
             return WireResult::FatalError;
@@ -67,14 +66,12 @@ WireResult ChunkedCommandHandler::HandleChunkedCommand(DeserializeBuffer* deseri
     }
     DAWN_ASSERT(chunkedCommand);
 
-    if (cmd.chunkSize > chunkedCommand->current.size()) {
+    if (cmd.chunkData.size() > chunkedCommand->current.size()) {
         // If the chunk size is greater than the remaining size, something is wrong and we can no
         // longer handle it, so just return a FatalError.
         return WireResult::FatalError;
     }
-    // TODO(https://crbug.com/528027992): Spanify the chunked command members.
-    chunkedCommand->current.TakeFirst(cmd.chunkSize)
-        .CopyFrom(DAWN_UNSAFE_TODO(Span<const std::byte>{cmd.chunkData, cmd.chunkSize}));
+    chunkedCommand->current.TakeFirst(cmd.chunkData.size()).CopyFrom(cmd.chunkData);
 
     if (chunkedCommand->current.empty()) {
         ChunkedCommand fullCommand = std::move(*chunkedCommand);

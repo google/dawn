@@ -107,6 +107,16 @@ concept CompatibleRange =
         { r.size() } -> std::same_as<Index>;
     };
 
+template <typename T, typename Index, typename R>
+concept CompatibleCopySource =
+    std::ranges::contiguous_range<R> &&  //
+    LegalDataConversion<
+        std::remove_volatile_t<std::remove_reference_t<std::ranges::range_reference_t<R>>>,
+        T> &&
+    requires(R r) {
+        { r.size() } -> std::same_as<Index>;
+    };
+
 // DIFF: only dynamic_extent is supported at the moment because Dawn might not need spans with
 // static extents.
 // DIFF: size_t in function signatures is replaced by Index to support typed integers as the index
@@ -315,9 +325,11 @@ class SpanBase {
     // Mirrors Chromium's base::span::copy_from but does not implement the constexpr version since
     // it is not currently needed.
     template <typename R>
-        requires(CompatibleRange<const T, Index, R> && !std::is_const_v<T>)
+        requires(CompatibleCopySource<const T, Index, R> && !std::is_const_v<T>)
     void CopyFrom(R&& range) {
-        SpanBase<const T, Index, const T*> other(std::forward<R>(range));
+        using RElement =
+            std::add_const_t<std::remove_reference_t<std::ranges::range_reference_t<R>>>;
+        SpanBase<RElement, Index, const RElement*> other(std::forward<R>(range));
         DAWN_CHECK(other.size() == size());
         // Using `<=` to compare pointers to different allocations is UB;
         // delegating to the STL is the legal workaround:
@@ -331,9 +343,11 @@ class SpanBase {
     // Chromium's base::span::copy_prefix_from but does not implement the constexpr version since it
     // is not currently needed.
     template <typename R>
-        requires(CompatibleRange<const T, Index, R> && !std::is_const_v<T>)
+        requires(CompatibleCopySource<const T, Index, R> && !std::is_const_v<T>)
     void CopyPrefixFrom(R&& range) {
-        SpanBase<const T, Index, const T*> other(std::forward<R>(range));
+        using RElement =
+            std::add_const_t<std::remove_reference_t<std::ranges::range_reference_t<R>>>;
+        SpanBase<RElement, Index, const RElement*> other(std::forward<R>(range));
         first(other.size()).CopyFrom(other);
     }
 

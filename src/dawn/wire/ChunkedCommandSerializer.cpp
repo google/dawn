@@ -49,21 +49,19 @@ void ChunkedCommandSerializer::Flush() {
 
 void ChunkedCommandSerializer::SerializeChunkedCommand(Span<const std::byte> allocatedBuffer) {
     // Constant regarding the size of the WireChunkedCommandCmd that can be computed once.
-    static size_t kWireChunkedCmdPrefixSize = ChunkedCommandCmd{0, 0, nullptr, 0}.GetRequiredSize();
+    static size_t kWireChunkedCmdPrefixSize = ChunkedCommandCmd{0, 0, {}}.GetRequiredSize();
 
-    // TODO(https://crbug.com/528027992): Spanify the ChunkedCommandCmd struct.
     ChunkedCommandCmd cmd;
     cmd.id = mNextChunkedCommandId++;
     cmd.size = allocatedBuffer.size();
 
     while (!allocatedBuffer.empty()) {
-        cmd.chunkData = allocatedBuffer.data();
-        cmd.chunkSize =
+        size_t chunkSize =
             std::min(allocatedBuffer.size(), mMaxAllocationSize - kWireChunkedCmdPrefixSize);
+        cmd.chunkData = allocatedBuffer.TakeFirst(chunkSize);
         DAWN_ASSERT(cmd.GetRequiredSize() <= mMaxAllocationSize);
 
         SerializeCommand(cmd);
-        allocatedBuffer = allocatedBuffer.subspan(cmd.chunkSize);
     }
 }
 

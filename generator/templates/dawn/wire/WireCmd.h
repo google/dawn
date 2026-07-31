@@ -111,8 +111,9 @@ namespace dawn::wire {
 
 {% macro write_command_struct(command, is_return_command) %}
     {% set Return = "Return" if is_return_command else "" %}
-    {% set Cmd = command.name.CamelCase() + "Cmd" %}
-    struct {{Return}}{{Cmd}} {
+    {% set CmdName = Return + command.name.CamelCase() + "Cmd" %}
+    {% set spanify = CmdName not in cmd_spanification_blocklist %}
+    struct {{CmdName}} {
         //* From a filled structure, compute how much size will be used in the serialization buffer.
         size_t GetRequiredSize() const;
 
@@ -140,7 +141,20 @@ namespace dawn::wire {
         {% endif %}
 
         {% for member in command.members %}
-            {{as_annotated_cType(member)}};
+            {% if spanify and member.is_length %}
+                //* Skip as it's included in the span just below.
+            {% elif spanify and member.length and member.length != "constant" %}
+                //* TODO(https://crbug.com/524405497): Support fixed-length spans.
+                {% set element_type = "std::remove_pointer_t<" + decorate(as_cType(member.type.name, spanify), member) + ">" %}
+                {% if member.json_data["wire_is_data_only"] %}
+                    //* If the member is data only, we do not copy the data, so it will be volatile.
+                    {% set element_type = "volatile " + element_type %}
+                {% endif %}
+                {% set index_type = member.length.type.name.canonical_case() %}
+                ityp::span<{{index_type}}, {{element_type}}> {{as_varName(member.name)}};
+            {% else %}
+                {{as_annotated_cType(member)}};
+            {% endif %}
         {% endfor %}
     };
 {% endmacro %}

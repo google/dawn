@@ -28,15 +28,21 @@
 // Command handlers & doers
 {% for command in cmd_records["return command"] %}
     {% set Suffix = command.name.CamelCase() %}
+    {% set CmdName = "Return" + Suffix + "Cmd" %}
+    {% set spanify = CmdName not in cmd_spanification_blocklist %}
     WireResult Handle{{Suffix}}(DeserializeBuffer* deserializeBuffer);
     WireResult Do{{Suffix}}(
-        {%- for member in command.members -%}
+        {%- for member in command.members if (not spanify or not member.is_length) -%}
+            {%- if not loop.first -%}, {% endif %}
             {%- if member.handle_type -%}
                 {{as_wireType(member.handle_type)}} {{as_varName(member.name)}}
+            {%- elif spanify and member.length and member.length != "constant" -%}
+                {% set element_type = "std::remove_pointer_t<" + decorate(as_cType(member.type.name, spanify), member) + ">" %}
+                {% set index_type = member.length.type.name.canonical_case() %}
+                ityp::span<{{index_type}}, {{element_type}}> {{as_varName(member.name)}}
             {%- else -%}
                 {{as_annotated_wireType(member)}}
             {%- endif -%}
-            {%- if not loop.last -%}, {% endif %}
         {%- endfor -%}
     );
 

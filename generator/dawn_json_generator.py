@@ -1268,9 +1268,11 @@ def as_varName(*names):
         [name.CamelCase() for name in names[1:]])
 
 
-def as_cType(c_prefix, name):
+def as_cType(c_prefix, name, spanify=False):
     # Special case for 'bool' because it has a typedef for compatibility.
-    if name.native and name.get() != 'bool':
+    if name.get() == 'void' and spanify:
+        return 'std::byte'
+    elif name.native and name.get() != 'bool':
         return name.concatcase()
     else:
         return c_prefix + name.CamelCase()
@@ -1579,7 +1581,7 @@ def make_base_render_params(metadata):
             'as_MethodSuffix': as_MethodSuffix,
             'as_CppMethodSuffix': as_CppMethodSuffix,
             'as_cProc': as_cProc,
-            'as_cType': lambda name: as_cType(c_prefix, name),
+            'as_cType': lambda name, spanify=False: as_cType(c_prefix, name, spanify),
             'as_cppType': as_cppType,
             'as_jsEnumValue': as_jsEnumValue,
             'has_wasmType': has_wasmType,
