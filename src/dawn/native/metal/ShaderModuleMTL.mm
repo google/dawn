@@ -287,6 +287,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             RoundUp(pipelineImmediateMask.count() * kImmediateElementByteSize, 16);
     }
 
+    // Type should match src/tint/lang/msl/writer/common/options.h
     std::unordered_map<uint32_t, uint32_t> pixelLocalAttachments;
     if (stage == SingleShaderStage::Fragment && layout->HasPixelLocalStorage()) {
         const AttachmentState* attachmentState = renderPipeline->GetAttachmentState();
@@ -295,8 +296,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         std::vector<ColorAttachmentIndex> storageAttachmentPacking =
             attachmentState->ComputeStorageAttachmentPackingInColorAttachments();
 
-        for (size_t i = 0; i < storageAttachmentSlots.size(); i++) {
-            pixelLocalAttachments[i] = uint8_t(storageAttachmentPacking[i]);
+        for (uint32_t i = 0; i < storageAttachmentSlots.size(); i++) {
+            pixelLocalAttachments[i] = uint8_t{storageAttachmentPacking[i]};
         }
     }
 

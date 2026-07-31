@@ -279,7 +279,7 @@ MaybeError MapBufferAndWriteTextureData(CaptureContext::ScopedContentWriter& wri
                                         WGPUBuffer copyBuffer,
                                         BlockCount blockRows,
                                         uint32_t alignedBytesPerRow,
-                                        uint32_t mappableBytesPerRow,
+                                        size_t mappableBytesPerRow,
                                         uint32_t usedBytesPerRow) {
     struct MapAsyncResult {
         WGPUMapAsyncStatus status;
@@ -374,7 +374,7 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
             auto size = TexelExtent3D(GetMipLevelSubresourcePhysicalSize(mipLevel, aspect));
             auto blockSize = blockInfo.ToBlock(size);
             uint32_t usedBytesPerRow = uint32_t(blockInfo.ToBytes(blockSize.width));
-            uint32_t mappableBytesPerRow = RoundUp(usedBytesPerRow, 4);
+            size_t mappableBytesPerRow = RoundUp(usedBytesPerRow, 4);
 
             schema::RootCommandInitTextureCmd cmd{{
                 .data = {{

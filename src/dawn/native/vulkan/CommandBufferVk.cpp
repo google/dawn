@@ -414,7 +414,8 @@ class ImmediateTracker : public T {
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask) *
                 kImmediateElementByteSize;
             vk.CmdPushConstants(commandBuffer, layout, kImmediateShaderStages,
-                                pushConstantRangeStartOffset, size * kImmediateElementByteSize,
+                                pushConstantRangeStartOffset,
+                                checked_cast<uint32_t>(size * kImmediateElementByteSize),
                                 this->mContent.template Get<uint32_t>(immediateContentStartOffset));
         }
 
@@ -526,9 +527,10 @@ MaybeError PrepareResourcesForSyncScope(Device* device,
 
     for (const ImageBarriers& barriers : {vertexImageBarriers, nonVertexImageBarriers}) {
         if (!barriers.imageBarriers.empty()) {
-            device->fn.CmdPipelineBarrier(
-                recordingContext->commandBuffer, barriers.srcStages, barriers.dstStages, 0, 0,
-                nullptr, 0, nullptr, barriers.imageBarriers.size(), barriers.imageBarriers.data());
+            device->fn.CmdPipelineBarrier(recordingContext->commandBuffer, barriers.srcStages,
+                                          barriers.dstStages, 0, 0, nullptr, 0, nullptr,
+                                          checked_cast<uint32_t>(barriers.imageBarriers.size()),
+                                          barriers.imageBarriers.data());
         }
     }
     recordingContext->EmitBufferBarrierIfNecessary(device, vertexBufferBarrier);
@@ -931,7 +933,7 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
 
     // Query a VkRenderPass from the cache
     VkRenderPass renderPassVK = VK_NULL_HANDLE;
-    uint32_t renderPassId = 0;
+    uint64_t renderPassId = 0;
     {
         RenderPassCacheQuery query;
 

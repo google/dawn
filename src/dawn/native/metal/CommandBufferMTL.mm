@@ -480,7 +480,7 @@ struct StorageBufferLengthTracker {
     // TODO(crbug.com/366291600): Remove this logic when merging
     // StorageBufferLengthTracker in ImmediateTracker.
     void OnSetPipeline(RenderPipelineBase* pipeline) {
-        uint32_t immediateCount = pipeline->GetImmediateMask().count();
+        size_t immediateCount = pipeline->GetImmediateMask().count();
         if (immediateCount != mLastImmediateCounts) {
             mLastImmediateCounts = immediateCount;
             dirtyStages |= (wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment);
@@ -488,7 +488,7 @@ struct StorageBufferLengthTracker {
     }
 
     void OnSetPipeline(ComputePipelineBase* pipeline) {
-        uint32_t immediateCount = pipeline->GetImmediateMask().count();
+        size_t immediateCount = pipeline->GetImmediateMask().count();
         if (immediateCount != mLastImmediateCounts) {
             mLastImmediateCounts = immediateCount;
             dirtyStages |= wgpu::ShaderStage::Compute;
@@ -533,7 +533,7 @@ struct StorageBufferLengthTracker {
         dataSize[SingleShaderStage::Compute] = sizeof(uint32_t) * bufferCount;
     }
 
-    uint32_t mLastImmediateCounts;
+    size_t mLastImmediateCounts = 0;
 };
 
 class RenderImmediatesTracker
@@ -580,7 +580,7 @@ class ImmediateTracker : public T {
         for (auto [offset, size] : IterateRanges(uploadBits)) {
             uint32_t immediateContentStartOffset =
                 static_cast<uint32_t>(offset) * kImmediateElementByteSize;
-            uint32_t immediateRangeStartOffset =
+            size_t immediateRangeStartOffset =
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
             WriteImmediateBlocks(stages, immediateRangeStartOffset,
                                  this->mContent.template Get<uint32_t>(immediateContentStartOffset),
@@ -590,21 +590,24 @@ class ImmediateTracker : public T {
         // Calculate buffer sizes start offset based on ImmediateBlock layouts
         // describes in PipelineLayoutMTL.h
         // - must be 16-byte aligned for UBO requirements
-        uint32_t bufferSizeOffset = RoundUp(pipelineMask.count() * kImmediateElementByteSize, 16);
+        static_assert(16 % kImmediateElementByteSize == 0);
+        size_t bufferSizeOffsetElements =
+            RoundUp(pipelineMask.count(), 16 / kImmediateElementByteSize);
 
         // Update storage buffer length data that are needed and changed.
         for (auto stage : IterateStages(lengthTracker->dirtyStages)) {
             // Sizes must be > 0, otherwise we'll do min(index, bufferSize - 1) and underflow.
             // TODO(crbug.com/488400770): Should be able to assert that, but Graphite violates it.
 
-            WriteImmediateBlocks(StageBit(stage), bufferSizeOffset / kImmediateElementByteSize,
+            WriteImmediateBlocks(StageBit(stage), bufferSizeOffsetElements,
                                  lengthTracker->data[stage].data(), lengthTracker->dataSize[stage]);
         }
 
         // Update per stage dirty size. lengthTracker always keeps last valid length of buffer
         // sizes.
         for (auto stage : IterateStages(stages)) {
-            dirtySize[stage] = bufferSizeOffset + lengthTracker->dataSize[stage];
+            dirtySize[stage] = bufferSizeOffsetElements * kImmediateElementByteSize +
+                               lengthTracker->dataSize[stage];
         }
 
         // Reset StorageBufferLengthTracker dirty stages
@@ -631,7 +634,7 @@ class ImmediateTracker : public T {
     // Writes data to the immediate block content for the specified shader stages.
     // This is used for both immediates and storage buffer length data.
     void WriteImmediateBlocks(wgpu::ShaderStage stages,
-                              uint32_t offset,
+                              size_t offset,
                               const void* data,
                               size_t size) {
         DAWN_ASSERT(offset < kMaxImmediateBlockSize);
@@ -797,21 +800,19 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
                     const BufferBinding& binding = group->GetBindingAsBufferBinding(bindingIndex);
                     ToBackend(binding.buffer)->TrackUsage();
 
-                    // Check to make sure sizes will fit into uint32_t below.
-                    // TODO(crbug.com/488400770): Warnings for implicit narrowing below are missing.
-                    DAWN_ASSERT(binding.size <= std::numeric_limits<uint32_t>::max());
-
                     if (hasVertStage) {
-                        mLengthTracker->data[SingleShaderStage::Vertex][vertIndex] = binding.size;
+                        mLengthTracker->data[SingleShaderStage::Vertex][vertIndex] =
+                            checked_cast<uint32_t>(binding.size);
                         mLengthTracker->dirtyStages |= wgpu::ShaderStage::Vertex;
                     }
                     if (hasFragStage) {
-                        mLengthTracker->data[SingleShaderStage::Fragment][fragIndex] = binding.size;
+                        mLengthTracker->data[SingleShaderStage::Fragment][fragIndex] =
+                            checked_cast<uint32_t>(binding.size);
                         mLengthTracker->dirtyStages |= wgpu::ShaderStage::Fragment;
                     }
                     if (hasComputeStage) {
                         mLengthTracker->data[SingleShaderStage::Compute][computeIndex] =
-                            binding.size;
+                            checked_cast<uint32_t>(binding.size);
                         mLengthTracker->dirtyStages |= wgpu::ShaderStage::Compute;
                     }
 
@@ -1775,7 +1776,7 @@ MaybeError CommandBuffer::EncodeRenderPass(
     bool enableVertexPulling = GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling);
     RenderPipeline* lastPipeline = nullptr;
     id<MTLBuffer> indexBuffer = nullptr;
-    uint32_t indexBufferBaseOffset = 0;
+    size_t indexBufferBaseOffset = 0;
     MTLIndexType indexBufferType;
     uint64_t indexFormatSize = 0;
     uint32_t multiDrawIndex = 0;

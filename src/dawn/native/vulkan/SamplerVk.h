@@ -76,7 +76,7 @@ struct StaticSamplerSpecialization {
     // need to use different model/range values, at which point the views will need to be
     // specialized either at ExternalTexture creation, or when the rest of the state is specialized.
     static YCbCrVkDescriptor GetYCbCrForTextureView(VkFormat vkFormat,
-                                                    uint32_t androidExternalFormat);
+                                                    uint64_t androidExternalFormat);
 
     wgpu::FilterMode minFilter;
     wgpu::FilterMode magFilter;
@@ -84,7 +84,7 @@ struct StaticSamplerSpecialization {
 
     // Members that are only used when isYcbCr
     VkFormat vkFormat;
-    uint32_t androidExternalFormat;
+    uint64_t androidExternalFormat;
 
     // Assumes that:
     //  - Model is the RGB identity

@@ -166,7 +166,7 @@ MaybeError DescriptorSetAllocator::AllocateDescriptorPool(VkDescriptorSetLayout 
     createInfo.pNext = nullptr;
     createInfo.flags = 0;
     createInfo.maxSets = mMaxSets;
-    createInfo.poolSizeCount = mPoolSizes.size();
+    createInfo.poolSizeCount = checked_cast<uint32_t>(mPoolSizes.size());
     createInfo.pPoolSizes = mPoolSizes.data();
 
     VkDescriptorPool descriptorPool;
@@ -201,7 +201,7 @@ MaybeError DescriptorSetAllocator::AllocateDescriptorPool(VkDescriptorSetLayout 
         freeSetIndices.push_back(i);
     }
 
-    mAvailableDescriptorPoolIndices.push_back(mDescriptorPools.size());
+    mAvailableDescriptorPoolIndices.push_back(checked_cast<PoolIndex>(mDescriptorPools.size()));
     mDescriptorPools.emplace_back(
         DescriptorPool{descriptorPool, std::move(sets), std::move(freeSetIndices)});
 

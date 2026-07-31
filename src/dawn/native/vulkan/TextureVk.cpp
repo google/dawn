@@ -1096,7 +1096,8 @@ void Texture::TransitionUsageNow(CommandRecordingContext* recordingContext,
         DAWN_ASSERT(srcStages != 0 && dstStages != 0);
         ToBackend(GetDevice())
             ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
-                                    nullptr, 0, nullptr, barriers.size(), barriers.data());
+                                    nullptr, 0, nullptr, checked_cast<uint32_t>(barriers.size()),
+                                    barriers.data());
     }
 }
 
@@ -1373,10 +1374,10 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                     }
                 }
 
-                device->fn.CmdCopyBufferToImage(recordingContext->commandBuffer,
-                                                ToBackend(reservation.buffer)->GetHandle(),
-                                                GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                regions.size(), regions.data());
+                device->fn.CmdCopyBufferToImage(
+                    recordingContext->commandBuffer, ToBackend(reservation.buffer)->GetHandle(),
+                    GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                    checked_cast<uint32_t>(regions.size()), regions.data());
                 return {};
             })));
     }
@@ -1504,7 +1505,7 @@ MaybeError InternalTexture::Initialize(VkImageUsageFlags extraUsages) {
             viewFormats.push_back(VulkanImageFormat(device, viewFormat.format));
         }
 
-        imageFormatListInfo.viewFormatCount = viewFormats.size();
+        imageFormatListInfo.viewFormatCount = checked_cast<uint32_t>(viewFormats.size());
         imageFormatListInfo.pViewFormats = viewFormats.data();
     }
 
@@ -1954,7 +1955,7 @@ MaybeError ExternalVkImageTexture::Initialize(const ExternalImageDescriptorVk* d
                 viewFormats.push_back(VulkanImageFormat(device, viewFormat.format));
             }
 
-            imageFormatListInfo.viewFormatCount = viewFormats.size();
+            imageFormatListInfo.viewFormatCount = checked_cast<uint32_t>(viewFormats.size());
             imageFormatListInfo.pViewFormats = viewFormats.data();
         }
     }

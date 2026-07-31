@@ -321,7 +321,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
 
     // The buffers with mappedAtCreation == true will be initialized in BufferBase::MapAtCreation().
     if (!mappedAtCreation) {
-        uint32_t paddingClearSize = Align(GetAllocatedSize() - GetSize(), 4);
+        size_t paddingClearSize = Align(GetAllocatedSize() - GetSize(), 4);
         uint64_t paddingClearOffset = GetAllocatedSize() - paddingClearSize;
 
         if (mHostVisible && GetSize() > 0) {

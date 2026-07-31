@@ -51,6 +51,7 @@
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/dawn/utils/SystemUtils.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::vulkan {
 
@@ -330,9 +331,11 @@ MaybeError Queue::SubmitPendingCommandsImpl() {
     submitInfo.waitSemaphoreCount = static_cast<uint32_t>(mRecordingContext.waitSemaphores.size());
     submitInfo.pWaitSemaphores = AsVkArray(mRecordingContext.waitSemaphores.data());
     submitInfo.pWaitDstStageMask = dstStageMasks.data();
-    submitInfo.commandBufferCount = mRecordingContext.commandBufferList.size();
+    submitInfo.commandBufferCount =
+        checked_cast<uint32_t>(mRecordingContext.commandBufferList.size());
     submitInfo.pCommandBuffers = mRecordingContext.commandBufferList.data();
-    submitInfo.signalSemaphoreCount = mRecordingContext.signalSemaphores.size();
+    submitInfo.signalSemaphoreCount =
+        checked_cast<uint32_t>(mRecordingContext.signalSemaphores.size());
     submitInfo.pSignalSemaphores = AsVkArray(mRecordingContext.signalSemaphores.data());
 
     VkFence fence = VK_NULL_HANDLE;

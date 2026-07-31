@@ -29,6 +29,8 @@
 
 #include <utility>
 
+#include "src/utils/numeric.h"
+
 namespace dawn::native::vulkan {
 namespace {
 
@@ -73,9 +75,9 @@ uint32_t MemoryTypeSelector::FindBestTypeIndex(VkMemoryRequirements requirements
 
     // Find a suitable memory type for this allocation
     uint32_t bestType = kInvalidMemoryTypeIndex;
-    for (size_t i = 0; i < mMemoryTypes.size(); ++i) {
+    for (uint32_t i = 0; i < checked_cast<uint32_t>(mMemoryTypes.size()); ++i) {
         // Resource must support this memory type
-        if ((requirements.memoryTypeBits & (1 << i)) == 0) {
+        if ((requirements.memoryTypeBits & (1u << i)) == 0) {
             continue;
         }
 

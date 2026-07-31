@@ -218,7 +218,7 @@ StaticSamplerSpecialization StaticSamplerSpecialization::From(const TextureView*
 // static
 YCbCrVkDescriptor StaticSamplerSpecialization::GetYCbCrForTextureView(
     VkFormat vkFormat,
-    uint32_t androidExternalFormat) {
+    uint64_t androidExternalFormat) {
     YCbCrVkDescriptor yCbCrDesc;
     yCbCrDesc.vkFormat = vkFormat;
     yCbCrDesc.externalFormat = androidExternalFormat;

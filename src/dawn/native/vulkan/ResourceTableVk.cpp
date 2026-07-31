@@ -39,6 +39,7 @@
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 namespace dawn::native::vulkan {
 
 // static
@@ -257,9 +258,9 @@ MaybeError ResourceTable::UpdateMetadataBuffer(CommandRecordingContext* recordin
             }
 
             // Enqueue the copy commands all at once.
-            device->fn.CmdCopyBuffer(recordingContext->commandBuffer,
-                                     ToBackend(reservation.buffer)->GetHandle(),
-                                     metadataBuffer->GetHandle(), copies.size(), copies.data());
+            device->fn.CmdCopyBuffer(
+                recordingContext->commandBuffer, ToBackend(reservation.buffer)->GetHandle(),
+                metadataBuffer->GetHandle(), checked_cast<uint32_t>(copies.size()), copies.data());
 
             // Transition the buffer back to be used as storage as that's how it will be used for
             // shader-side validation.
@@ -340,8 +341,8 @@ MaybeError ResourceTable::UpdateResourceBindings(const std::vector<ResourceDiff>
         writes.push_back(write);
     }
 
-    device->fn.UpdateDescriptorSets(device->GetVkDevice(), writes.size(), writes.data(), 0,
-                                    nullptr);
+    device->fn.UpdateDescriptorSets(device->GetVkDevice(), checked_cast<uint32_t>(writes.size()),
+                                    writes.data(), 0, nullptr);
     return {};
 }
 

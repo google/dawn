@@ -45,6 +45,7 @@
 #include "src/dawn/native/opengl/ShaderModuleGL.h"
 #include "src/dawn/native/opengl/TextureGL.h"
 #include "src/dawn/native/opengl/UtilsGL.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::opengl {
 
@@ -155,7 +156,8 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
         if (uniformsToSet.size() == 1) {
             DAWN_GL_TRY(gl, Uniform1i(location, uniformsToSet[0]));
         } else {
-            DAWN_GL_TRY(gl, Uniform1iv(location, uniformsToSet.size(), uniformsToSet.data()));
+            DAWN_GL_TRY(gl, Uniform1iv(location, checked_cast<GLsizei>(uniformsToSet.size()),
+                                       uniformsToSet.data()));
         }
     }
 

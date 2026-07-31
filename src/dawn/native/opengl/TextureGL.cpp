@@ -206,7 +206,7 @@ MaybeError AllocateTexture(const OpenGLFunctions& gl,
                                        levelSize.height, 0, format.format, format.type, nullptr));
                     break;
                 case GL_TEXTURE_CUBE_MAP:
-                    for (size_t faceIdx = 0; faceIdx < 6; faceIdx++) {
+                    for (uint32_t faceIdx = 0; faceIdx < 6; faceIdx++) {
                         GLenum faceTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIdx;
                         DAWN_GL_TRY_ALWAYS_CHECK(
                             gl,

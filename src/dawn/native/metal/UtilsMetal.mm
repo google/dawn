@@ -39,6 +39,7 @@
 #include "src/dawn/native/dawn_platform.h"
 #include "src/dawn/native/metal/BufferMTL.h"
 #include "src/utils/assert.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::metal {
 
@@ -744,8 +745,8 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
     }
 
     const BlockCount blocksPerImage = blocksPerRow * rowsPerImage;
-    const uint32_t bytesPerRow = blockInfo.ToBytes(blocksPerRow);
-    const uint32_t bytesPerImage = blockInfo.ToBytes(blocksPerImage);
+    const size_t bytesPerRow = blockInfo.ToBytes(blocksPerRow);
+    const size_t bytesPerImage = blockInfo.ToBytes(blocksPerImage);
 
     // Check whether buffer size is big enough.
     const uint64_t sizeRequiredByValidation =
@@ -753,9 +754,9 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
     const bool needCopyLastImageAndLastRowSeparately =
         bufferSize - bufferOffset < sizeRequiredByValidation;
     if (!needCopyLastImageAndLastRowSeparately) {
-        const uint32_t localBytesPerImage = copyExtent.depthOrArrayLayers == BlockCount(1u)
-                                                ? 0
-                                                : bytesPerImage;  // workaround case 3
+        const size_t localBytesPerImage = copyExtent.depthOrArrayLayers == BlockCount(1u)
+                                              ? 0
+                                              : bytesPerImage;  // workaround case 3
         copy.push_back(
             TextureBufferCopySplit::CopyInfo(bufferOffset, bytesPerRow, localBytesPerImage,
                                              blockInfo.ToTexel(origin), clampedCopyExtent));
@@ -768,7 +769,7 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
     // Doing all the copy except the last image.
     if (copyExtent.depthOrArrayLayers > BlockCount(1u)) {
         const BlockCount localDepthOrArrayLayers = copyExtent.depthOrArrayLayers - BlockCount(1u);
-        const uint32_t localBytesPerImage =
+        const size_t localBytesPerImage =
             localDepthOrArrayLayers == BlockCount(1u) ? 0 : bytesPerImage;  // workaround case 3
         const TexelExtent3D localSize = {clampedCopyExtent.width, clampedCopyExtent.height,
                                          blockInfo.ToTexelDepth(localDepthOrArrayLayers)};
@@ -783,7 +784,7 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
 
     // Doing all the copy in last image except the last row.
     if (copyExtent.height > BlockCount(1u)) {
-        const uint32_t localBytesPerImage = 0;  // workaround case 3
+        const size_t localBytesPerImage = 0;  // workaround case 3
         const BlockOrigin3D localOrigin = {
             origin.x, origin.y, origin.z + copyExtent.depthOrArrayLayers - BlockCount(1u)};
         const TexelExtent3D localSize = {
@@ -800,8 +801,8 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
 
     // Doing the last row copy with the exact number of bytes in last row.
     // Workaround this issue in a way just like the copy to a 1D texture.
-    const uint32_t lastRowDataSize = blockInfo.ToBytes(copyExtent.width);
-    const uint32_t lastImageDataSize = 0;  // workaround case 3
+    const size_t lastRowDataSize = blockInfo.ToBytes(copyExtent.width);
+    const size_t lastImageDataSize = 0;  // workaround case 3
     const TexelCount lastRowCopyExtentHeight =
         clampedCopyExtent.height - blockInfo.ToTexelHeight(copyExtent.height - BlockCount(1u));
     DAWN_ASSERT(lastRowCopyExtentHeight <= blockInfo.height);
@@ -991,7 +992,7 @@ id<MTLTexture> CreateTextureMtlForPlane(MTLTextureUsage mtlUsage,
                                         size_t plane,
                                         Device* device,
                                         IOSurfaceRef ioSurface) {
-    Aspect aspect = GetPlaneAspect(format, plane);
+    Aspect aspect = GetPlaneAspect(format, static_cast<uint32_t>(plane));
     const auto& aspectInfo = format.GetAspectInfo(aspect);
 
     // Multiplanar texture is validated to only have single layer, single mipLevel

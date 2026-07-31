@@ -43,6 +43,7 @@
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/dawn/platform/metrics/HistogramMacros.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::vulkan {
 
@@ -743,7 +744,7 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
     dynamic.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     dynamic.pNext = nullptr;
     dynamic.flags = 0;
-    dynamic.dynamicStateCount = dynamicStates.size();
+    dynamic.dynamicStateCount = checked_cast<uint32_t>(dynamicStates.size());
     dynamic.pDynamicStates = dynamicStates.data();
 
     // The create info chains in a bunch of things created on the stack here or inside state
@@ -980,7 +981,7 @@ VkPipelineVertexInputStateCreateInfo RenderPipeline::ComputeVertexInputDesc(
 
         VkVertexInputBindingDescription* bindingDesc = &tempAllocations->bindings[bindingCount];
         bindingDesc->binding = static_cast<uint8_t>(slot);
-        bindingDesc->stride = bindingInfo.arrayStride;
+        bindingDesc->stride = checked_cast<uint32_t>(bindingInfo.arrayStride);
         bindingDesc->inputRate = VulkanInputRate(bindingInfo.stepMode);
 
         bindingCount++;
@@ -996,7 +997,7 @@ VkPipelineVertexInputStateCreateInfo RenderPipeline::ComputeVertexInputDesc(
         attributeDesc->location = static_cast<uint8_t>(loc);
         attributeDesc->binding = static_cast<uint8_t>(attributeInfo.vertexBufferSlot);
         attributeDesc->format = VulkanVertexFormat(attributeInfo.format);
-        attributeDesc->offset = attributeInfo.offset;
+        attributeDesc->offset = checked_cast<uint32_t>(attributeInfo.offset);
 
         attributeCount++;
     }

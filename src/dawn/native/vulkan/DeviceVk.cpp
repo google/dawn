@@ -69,6 +69,7 @@
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/utils/log.h"
 #include "src/utils/non_copyable.h"
+#include "src/utils/numeric.h"
 #include "src/utils/platform.h"
 
 namespace dawn::native::vulkan {
@@ -1188,7 +1189,7 @@ MaybeError Device::GetAHardwareBufferPropertiesImpl(void* handle,
 }
 
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {
-    return mDeviceInfo.properties.limits.optimalBufferCopyRowPitchAlignment;
+    return checked_cast<uint32_t>(mDeviceInfo.properties.limits.optimalBufferCopyRowPitchAlignment);
 }
 
 uint64_t Device::GetOptimalBufferToTextureCopyOffsetAlignment() const {

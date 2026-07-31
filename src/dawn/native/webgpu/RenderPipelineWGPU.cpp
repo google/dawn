@@ -173,7 +173,7 @@ MaybeError RenderPipeline::InitializeImpl() {
                 wgpuTarget->nextInChain = &(e.chain);
             }
 
-            targetCount = static_cast<size_t>(i) + 1;
+            targetCount = static_cast<uint32_t>(i) + 1;
         }
         fragmentState.targetCount = targetCount;
         fragmentState.targets = colorTargets.data();

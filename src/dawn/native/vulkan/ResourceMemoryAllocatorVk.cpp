@@ -106,7 +106,7 @@ class ResourceMemoryAllocator::SingleTypeAllocator : public ResourceHeapAllocato
         allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocateInfo.pNext = nullptr;
         allocateInfo.allocationSize = size;
-        allocateInfo.memoryTypeIndex = mMemoryTypeIndex;
+        allocateInfo.memoryTypeIndex = checked_cast<uint32_t>(mMemoryTypeIndex);
 
         VkDeviceMemory allocatedMemory = VK_NULL_HANDLE;
 
