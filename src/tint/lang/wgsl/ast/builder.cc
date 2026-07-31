@@ -34,7 +34,6 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::ast {
 
 Builder::VarOptions::~VarOptions() = default;
-Builder::ConstOptions::~ConstOptions() = default;
 
 Builder::Builder() : ast_(ast_nodes_.Create<Module>(AllocateNodeID(), Source{})) {}
 

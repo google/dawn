@@ -242,7 +242,7 @@ TEST_P(ResolverExpressionKindTest, Test) {
         }
         case Def::kVariable: {
             sym = Sym("VARIABLE");
-            auto* c = GlobalConst(kDefSource, sym, Expr(1_i));
+            auto* c = GlobalConst(kDefSource, Ident(sym), ast::Type{}, Expr(1_i));
             check_expr = [c](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
                 auto* var_expr = expr->As<sem::VariableUser>();

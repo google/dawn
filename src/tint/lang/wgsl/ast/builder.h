@@ -141,26 +141,6 @@ class Builder {
         void Set(Builder&, const Attribute* a) { attributes.Push(a); }
     };
 
-    /// ConstOptions is a helper for accepting an arbitrary number of order independent options for
-    /// constructing a Const.
-    struct ConstOptions {
-        template <typename... ARGS>
-        explicit ConstOptions(ARGS&&... args) {
-            static constexpr bool has_init =
-                (traits::IsTypeOrDerived<traits::PtrElTy<ARGS>, Expression> || ...);
-            static_assert(has_init, "Const() must be constructed with an initializer expression");
-            (Set(std::forward<ARGS>(args)), ...);
-        }
-        ~ConstOptions();
-
-        Type type;
-        const Expression* initializer = nullptr;
-
-      private:
-        void Set(Type t) { type = t; }
-        void Set(const Expression* c) { initializer = c; }
-    };
-
   public:
     /// ASTNodeAllocator is an alias to BlockAllocator<Node>
     using ASTNodeAllocator = BlockAllocator<Node>;
@@ -1637,32 +1617,53 @@ class Builder {
                                 std::move(opts.attributes));
     }
 
-    /// @param name the variable name
-    /// @param options the extra options passed to the Var initializer
-    /// Can be any of the following, in any order:
-    ///   * Expression*    - specifies the variable's initializer expression (required)
-    ///   * Type           - specifies the variable's type
-    /// Note that non-repeatable arguments of the same type will use the last argument's value.
-    /// @returns an `Const` with the given name, type and additional options
-    template <typename NAME, typename... OPTIONS, typename = DisableIfSource<NAME>>
-    const ast::Const* Const(NAME&& name, OPTIONS&&... options) {
-        return Const(source_, std::forward<NAME>(name), std::forward<OPTIONS>(options)...);
+    /// @param name the name
+    /// @param expr the initializer expression
+    /// @returns an `Const` with the given name, and type
+    const ast::Const* Const(std::string_view name, const ast::Expression* expr) {
+        return Const(source_, name, expr);
     }
 
-    /// @param source the variable source
-    /// @param name the variable name
-    /// @param options the extra options passed to the Var initializer
-    /// Can be any of the following, in any order:
-    ///   * Expression*    - specifies the variable's initializer expression (required)
-    ///   * Identifier*    - specifies the variable's type
-    ///   * Type           - specifies the variable's type
-    /// Note that non-repeatable arguments of the same type will use the last argument's value.
-    /// @returns an `Const` with the given name, type and additional options
-    template <typename NAME, typename... OPTIONS>
-    const ast::Const* Const(const Source& source, NAME&& name, OPTIONS&&... options) {
-        ConstOptions opts(std::forward<OPTIONS>(options)...);
-        return create<ast::Const>(source, Ident(std::forward<NAME>(name)), opts.type,
-                                  opts.initializer);
+    /// @param source the source
+    /// @param name the name
+    /// @param expr the initializer expression
+    /// @returns an `Const` with the given name, and type
+    const ast::Const* Const(const Source& source,
+                            std::string_view name,
+                            const ast::Expression* expr) {
+        return Const(source, name, ast::Type{}, expr);
+    }
+
+    /// @param name the name
+    /// @param type the type
+    /// @param expr the initializer expression
+    /// @returns an `Const` with the given name, and type
+    const ast::Const* Const(std::string_view name, Type type, const ast::Expression* expr) {
+        return Const(source_, name, type, expr);
+    }
+
+    /// @param source the source
+    /// @param name the name
+    /// @param type the type
+    /// @param expr the initializer expression
+    /// @returns an `Const` with the given name, and type
+    const ast::Const* Const(const Source& source,
+                            std::string_view name,
+                            Type type,
+                            const ast::Expression* expr) {
+        return Const(source, Ident(name), type, expr);
+    }
+
+    /// @param source the source
+    /// @param name the name
+    /// @param type the type
+    /// @param expr the initializer expression
+    /// @returns an `Const` with the given name, and type
+    const ast::Const* Const(const Source& source,
+                            const ast::Identifier* name,
+                            Type type,
+                            const ast::Expression* expr) {
+        return create<ast::Const>(source, name, type, expr);
     }
 
     /// @param name the variable name
@@ -1788,31 +1789,64 @@ class Builder {
         return variable;
     }
 
-    /// @param name the variable name
-    /// @param options the extra options passed to the Const initializer
-    /// Can be any of the following, in any order:
-    ///   * Expression*    - specifies the variable's initializer expression (required)
-    ///   * Type           - specifies the variable's type
-    /// Note that non-repeatable arguments of the same type will use the last argument's value.
-    /// @returns an `Const` with the given name, type and additional options, which is
-    /// automatically registered as a global variable with the Module.
-    template <typename NAME, typename... OPTIONS, typename = DisableIfSource<NAME>>
-    const ast::Const* GlobalConst(NAME&& name, OPTIONS&&... options) {
-        return GlobalConst(source_, std::forward<NAME>(name), std::forward<OPTIONS>(options)...);
+    /// @param name the name
+    /// @param expr the initializer expression
+    /// @returns an `Const` with the given name, and type
+    const ast::Const* GlobalConst(std::string_view name, const ast::Expression* expr) {
+        return GlobalConst(source_, name, ast::Type{}, expr);
     }
 
-    /// @param source the variable source
-    /// @param name the variable name
-    /// @param options the extra options passed to the Const initializer
-    /// Can be any of the following, in any order:
-    ///   * Expression*    - specifies the variable's initializer expression (required)
-    ///   * Type           - specifies the variable's type
-    /// Note that non-repeatable arguments of the same type will use the last argument's value.
-    /// @returns an `Const` with the given name, type and additional options, which is
-    /// automatically registered as a global variable with the Module.
-    template <typename NAME, typename... OPTIONS>
-    const ast::Const* GlobalConst(const Source& source, NAME&& name, OPTIONS&&... options) {
-        auto* variable = Const(source, std::forward<NAME>(name), std::forward<OPTIONS>(options)...);
+    /// @param name the name
+    /// @param type the type
+    /// @param expr the initializer expression
+    /// @returns an `Const` with the given name, and type
+    const ast::Const* GlobalConst(std::string_view name, Type type, const ast::Expression* expr) {
+        return GlobalConst(source_, name, type, expr);
+    }
+
+    /// @param source the source
+    /// @param name the name
+    /// @param expr the initializer expression
+    /// @returns an `Const` with the given name, and type
+    const ast::Const* GlobalConst(const Source& source,
+                                  std::string_view name,
+                                  const ast::Expression* expr) {
+        return GlobalConst(source, Ident(name), ast::Type{}, expr);
+    }
+
+    /// @param source the source
+    /// @param name the name
+    /// @param type the type
+    /// @param expr the initializer expression
+    /// @returns an `Const` with the given name, and type
+    const ast::Const* GlobalConst(const Source& source,
+                                  std::string_view name,
+                                  Type type,
+                                  const ast::Expression* expr) {
+        return GlobalConst(source, Ident(name), type, expr);
+    }
+
+    /// @param source the source
+    /// @param name the name
+    /// @param type the type
+    /// @param expr the initializer expression
+    /// @returns an `Const` with the given name, and type
+    const ast::Const* GlobalConst(const ast::Identifier* name,
+                                  Type type,
+                                  const ast::Expression* expr) {
+        return GlobalConst(source_, name, type, expr);
+    }
+
+    /// @param source the source
+    /// @param name the name
+    /// @param type the type
+    /// @param expr the initializer expression
+    /// @returns an `Const` with the given name, and type
+    const ast::Const* GlobalConst(const Source& source,
+                                  const ast::Identifier* name,
+                                  Type type,
+                                  const ast::Expression* expr) {
+        auto* variable = Const(source, name, type, expr);
         AST().AddGlobalVariable(variable);
         return variable;
     }

@@ -391,7 +391,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolDeclKind kind, Symbol symbol, Sourc
         case SymbolDeclKind::GlobalVar:
             return b.GlobalVar(source, symbol, b.ty.i32(), core::AddressSpace::kPrivate);
         case SymbolDeclKind::GlobalConst:
-            return b.GlobalConst(source, symbol, b.ty.i32(), b.Expr(1_i));
+            return b.GlobalConst(source, b.Ident(symbol), b.ty.i32(), b.Expr(1_i));
         case SymbolDeclKind::Alias:
             return b.Alias(source, symbol, b.ty.i32());
         case SymbolDeclKind::Struct:
@@ -475,32 +475,32 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
         }
         case SymbolUseKind::GlobalConstType: {
             auto node = b.ty.AsType(source, symbol);
-            b.GlobalConst(b.Sym(), node, b.Expr(1_i));
+            b.GlobalConst("aa", node, b.Expr(1_i));
             return node->identifier;
         }
         case SymbolUseKind::GlobalConstArrayElemType: {
             auto node = b.ty.AsType(source, symbol);
-            b.GlobalConst(b.Sym(), b.ty.array(node, b.Expr(4_i)), b.Expr(1_i));
+            b.GlobalConst("ab", b.ty.array(node, b.Expr(4_i)), b.Expr(1_i));
             return node->identifier;
         }
         case SymbolUseKind::GlobalConstArraySizeValue: {
             auto* node = b.Expr(source, symbol);
-            b.GlobalConst(b.Sym(), b.ty.array(b.ty.i32(), node), b.Expr(1_i));
+            b.GlobalConst("ac", b.ty.array(b.ty.i32(), node), b.Expr(1_i));
             return node->identifier;
         }
         case SymbolUseKind::GlobalConstVectorElemType: {
             auto node = b.ty.AsType(source, symbol);
-            b.GlobalConst(b.Sym(), b.ty.vec3(node), b.Expr(1_i));
+            b.GlobalConst("ad", b.ty.vec3(node), b.Expr(1_i));
             return node->identifier;
         }
         case SymbolUseKind::GlobalConstMatrixElemType: {
             auto node = b.ty.AsType(source, symbol);
-            b.GlobalConst(b.Sym(), b.ty.mat3x4(node), b.Expr(1_i));
+            b.GlobalConst("ae", b.ty.mat3x4(node), b.Expr(1_i));
             return node->identifier;
         }
         case SymbolUseKind::GlobalConstValue: {
             auto* node = b.Expr(source, symbol);
-            b.GlobalConst(b.Sym(), b.ty.i32(), node);
+            b.GlobalConst("af", b.ty.i32(), node);
             return node->identifier;
         }
         case SymbolUseKind::AliasType: {
@@ -752,7 +752,7 @@ TEST_F(ResolverDependencyGraphDeclSelfUse, GlobalVar) {
 
 TEST_F(ResolverDependencyGraphDeclSelfUse, GlobalConst) {
     const Symbol symbol = Sym("SYMBOL");
-    GlobalConst(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123_i));
+    GlobalConst(Ident(symbol), ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123_i));
     Build(R"(error: cyclic dependency found: 'SYMBOL' -> 'SYMBOL'
 12:34 note: const 'SYMBOL' references const 'SYMBOL' here)");
 }
@@ -1398,7 +1398,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
                                 MemberAlign(V), MemberSize(V)  //
                             })});
     GlobalVar(Sym(), T, V);
-    GlobalConst(Sym(), T, V);
+    GlobalConst("ba", T, V);
     Func(Sym(),
          Vector{
              Param(Sym(), T,
