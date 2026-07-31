@@ -155,13 +155,10 @@ class Builder {
 
         Type type;
         const Expression* initializer = nullptr;
-        Vector<const Attribute*, 4> attributes;
 
       private:
         void Set(Type t) { type = t; }
         void Set(const Expression* c) { initializer = c; }
-        void Set(VectorRef<const Attribute*> l) { attributes = std::move(l); }
-        void Set(const Attribute* a) { attributes.Push(a); }
     };
 
   public:
@@ -1645,7 +1642,6 @@ class Builder {
     /// Can be any of the following, in any order:
     ///   * Expression*    - specifies the variable's initializer expression (required)
     ///   * Type           - specifies the variable's type
-    ///   * Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns an `Const` with the given name, type and additional options
     template <typename NAME, typename... OPTIONS, typename = DisableIfSource<NAME>>
@@ -1660,14 +1656,13 @@ class Builder {
     ///   * Expression*    - specifies the variable's initializer expression (required)
     ///   * Identifier*    - specifies the variable's type
     ///   * Type           - specifies the variable's type
-    ///   * Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns an `Const` with the given name, type and additional options
     template <typename NAME, typename... OPTIONS>
     const ast::Const* Const(const Source& source, NAME&& name, OPTIONS&&... options) {
         ConstOptions opts(std::forward<OPTIONS>(options)...);
         return create<ast::Const>(source, Ident(std::forward<NAME>(name)), opts.type,
-                                  opts.initializer, std::move(opts.attributes));
+                                  opts.initializer);
     }
 
     /// @param name the variable name
@@ -1798,7 +1793,6 @@ class Builder {
     /// Can be any of the following, in any order:
     ///   * Expression*    - specifies the variable's initializer expression (required)
     ///   * Type           - specifies the variable's type
-    ///   * Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns an `Const` with the given name, type and additional options, which is
     /// automatically registered as a global variable with the Module.
@@ -1813,7 +1807,6 @@ class Builder {
     /// Can be any of the following, in any order:
     ///   * Expression*    - specifies the variable's initializer expression (required)
     ///   * Type           - specifies the variable's type
-    ///   * Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns an `Const` with the given name, type and additional options, which is
     /// automatically registered as a global variable with the Module.
