@@ -24,7 +24,7 @@ vars = {
   'dawn_tintd': False, # Also fetches dependencies required for building tintd.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'dawn_gn_version': 'git_revision:4c57ddcb664d8e432c4edbd864017e1d1cee709d',
+  'dawn_gn_version': 'git_revision:4a060c55dcc5380837a8684949b74400e929b85e',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
@@ -76,7 +76,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': 'cf9d3a74d02f3f4464c3e15da9f7555e9c1b1898',
+  'chromium_revision': 'cbb915d67c46e1089df7e1f74ba96463ffeaff57',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -137,7 +137,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@9f755996d3ff258aaf750cb0d21bdc8322254137',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@e051c661c3785286de8623547e3a1574b989a428',
     'condition': 'dawn_standalone',
   },
 
@@ -153,7 +153,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@9be848ff8817516c13a72cecfd439a799fca35a2',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@1234eac50061f86e70c222cc2aa1aab06f49ad09',
     'condition': 'dawn_standalone',
   },
 
@@ -168,7 +168,7 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@dce834524aca5c369d1bbaf02c66ac6da8d8aaaf',
+  'url': '{chromium_git}/chromium/src/build@8cfa312efc088fce7b349855cbbd5fa00cd12fb3',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
@@ -194,7 +194,7 @@ deps = {
 
   # For run-tricium-clang-tidy.py
   'third_party/chromium-tools-build/src': {
-    'url': '{chromium_git}/chromium/tools/build@e0267d69884144423c8eec887b979e0978a3c0ae',
+    'url': '{chromium_git}/chromium/tools/build@e703b33dd24598a7ad900405726155275bf8abd0',
     'condition': 'dawn_standalone and checkout_clang_tidy',
   },
 
@@ -288,7 +288,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@1c4d75c21034b725089e1ba13f239c2bbc1e58f2',
+    'url': '{chromium_git}/chromium/src/testing@3bcd8c9b2b7998c0bd898b7c3f8950b2da3d58d1',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -301,7 +301,7 @@ deps = {
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@12c9a9affa63bab026bffaec6a90217c8cf7507e',
+    'url': '{chromium_git}/catapult.git@e4d1a01c96deb68b0aa26a66dca45fc290885cbf',
     'condition': 'dawn_standalone',
   },
   'third_party/google_benchmark/src': {
@@ -671,7 +671,7 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@d7aeed15f395f59cf998dce0682e2b3a9ce938d3',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@ad56996fecb8731dec9d9137430b91b0906e8137',
     'condition': 'dawn_standalone',
   },
 
@@ -727,7 +727,7 @@ deps = {
     'dep_type': 'cipd',
   },
   'third_party/android_build_tools': {
-    'url': Var('chromium_git') + '/chromium/src/third_party/android_build_tools@a2a0555973510ba995e0236da14370e4c546a3c9',
+    'url': Var('chromium_git') + '/chromium/src/third_party/android_build_tools@35a7fbad451d8d3a730dbf604e7fa440e9ab85de',
     'condition': 'checkout_android and dawn_standalone',
   },
   'third_party/android_build_tools/aapt2/cipd': {
@@ -744,7 +744,7 @@ deps = {
     'packages': [
       {
         'package': 'chromium/third_party/android_build_tools/manifest_merger',
-        'version': 'ybiyHFabJYNtTymLmlAEta5XXs-Bk2yh5_U0F2aE8FQC',
+        'version': 'pSnauLHOd1J9rrmuQesady_yrUhPXkRFg9Go0XcJ5a0C',
       },
     ],
     'condition': 'checkout_android and dawn_standalone',
