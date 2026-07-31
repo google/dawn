@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
+#include <array>
 #include <span>
 #include <utility>
 
@@ -34,6 +35,7 @@
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/Blob.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 namespace {
@@ -182,15 +184,15 @@ TEST(BlobTests, MoveAssignOver) {
 
 // Test that the offset factory still calls the deleter, with an offsetted view of the data.
 TEST(BlobTests, OffsetMoveConstructor) {
-    unsigned char data[13] = "hello world!";
+    std::array<unsigned char, 13> data{"hello world!"};
     static constexpr size_t kOffset = 2u;
     testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
 
     // Make a blob with a mock deleter.
-    Blob b1 = Blob::UnsafeCreateWithDeleter(data, sizeof(data), [&] { mockDeleter.Call(); });
+    Blob b1 = Blob::UnsafeCreateWithDeleter(data.data(), sizeof(data), [&] { mockDeleter.Call(); });
     EXPECT_FALSE(b1.Empty());
     EXPECT_EQ(b1.Size(), 13u);
-    EXPECT_EQ(b1.DataPtr(), reinterpret_cast<std::byte*>(data));
+    EXPECT_EQ(b1.DataPtr(), reinterpret_cast<std::byte*>(data.data()));
 
     {
         // Move b1 with an offset into b2, check the contents, and verify that the deleter is
@@ -198,7 +200,7 @@ TEST(BlobTests, OffsetMoveConstructor) {
         Blob b2 = Blob::Create(std::move(b1), kOffset);
         EXPECT_EQ(b2.Size(), 13u - kOffset);
         // Data still points to the data.
-        DAWN_UNSAFE_TODO(EXPECT_EQ(b2.DataPtr(), reinterpret_cast<std::byte*>(data) + kOffset));
+        EXPECT_EQ(b2.DataPtr(), &ByteSpanFromRef(data)[kOffset]);
 
         // |b| is deleted when this scope exits.
         EXPECT_CALL(mockDeleter, Call());
