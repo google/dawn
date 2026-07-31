@@ -36,6 +36,7 @@
 #include "src/dawn/replay/ReadHead.h"
 #include "src/dawn/replay/SurfaceDiscovery.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::replay {
 namespace {
@@ -177,8 +178,8 @@ TEST(CaptureWalkerTests, SurfaceDiscoverySkipsCommandBuffer) {
     std::vector<uint8_t> commands;
 
     auto Emit = [&](auto v) {
-        const uint8_t* p = reinterpret_cast<const uint8_t*>(&v);
-        commands.insert(commands.end(), p, DAWN_UNSAFE_TODO(p + sizeof(v)));
+        Span<const uint8_t> p = ReinterpretSpan<const uint8_t>(ByteSpanFromRef(v));
+        commands.insert(commands.end(), p.begin(), p.end());
     };
 
     auto EmitString = [&](std::string s) {
