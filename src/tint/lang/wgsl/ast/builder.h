@@ -973,20 +973,20 @@ class Builder {
         /// @param name the alias name
         /// @param type the alias type
         /// @returns the alias pointer
-        const Alias* alias(std::string_view name, Type type) const;
+        const ast::Alias* alias(std::string_view name, Type type) const;
 
         /// Creates an alias type
         /// @param name the alias name
         /// @param type the alias type
         /// @returns the alias pointer
-        const Alias* alias(Symbol name, Type type) const;
+        const ast::Alias* alias(Symbol name, Type type) const;
 
         /// Creates an alias type
         /// @param source the Source of the node
         /// @param name the alias name
         /// @param type the alias type
         /// @returns the alias pointer
-        const Alias* alias(const Source& source, const Identifier* name, Type type) const;
+        const ast::Alias* alias(const Source& source, const Identifier* name, Type type) const;
 
         /// @param address_space the address space of the pointer
         /// @param type the type of the pointer
