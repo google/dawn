@@ -65,8 +65,8 @@ class Buffer final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
                        const WGPUBufferMapCallbackInfo& callbackInfo);
     void* APIGetMappedRange(size_t offset, size_t size);
     const void* APIGetConstMappedRange(size_t offset, size_t size);
-    WGPUStatus APIWriteMappedRange(size_t offset, void const* data, size_t size);
-    WGPUStatus APIReadMappedRange(size_t offset, void* data, size_t size);
+    wgpu::Status APIWriteMappedRange(size_t offset, Span<const std::byte> data);
+    wgpu::Status APIReadMappedRange(size_t offset, Span<std::byte> data);
     void APIUnmap();
     void APIDestroy();
 

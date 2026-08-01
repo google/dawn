@@ -233,10 +233,11 @@ Buffer* Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
     DeviceCreateBufferCmd cmd;
     cmd.deviceId = device->GetWireHandle(wireClient).id;
     cmd.descriptor = ToAPI(descriptor);
-    // Set the pointer lengths, but the pointed-to data itself won't be serialized as usual (due
-    // to skip_serialize). Instead, the custom CommandExtensions below fill that memory.
-    cmd.memoryHandleCreateInfoLength = memoryHandleCreateInfoLength;
-    cmd.memoryHandleCreateInfo = nullptr;  // Skipped by skip_serialize.
+    // SAFETY: This Span is NEVER supposed to be read/serialized, so nullptr is fine.
+    // The member is not serialized because skip_serialize, but is a Span so that on
+    // the deserialization side we have a well-formed member.
+    cmd.memoryHandleCreateInfo = DAWN_UNSAFE_BUFFERS(Span<const std::byte>(
+        static_cast<const std::byte*>(nullptr), memoryHandleCreateInfoLength));
     cmd.result = buffer->GetWireHandle(wireClient);
 
     buffer->mState.Use([&](auto state) {
@@ -427,29 +428,25 @@ const void* Buffer::APIGetConstMappedRange(size_t offset, size_t size) {
     });
 }
 
-WGPUStatus Buffer::APIWriteMappedRange(size_t offset, void const* data, size_t size) {
+wgpu::Status Buffer::APIWriteMappedRange(size_t offset, Span<const std::byte> data) {
     return mState.Use([&](auto state) {
-        auto dst = state->GetMappedRange(offset, size);
+        auto dst = state->GetMappedRange(offset, data.size());
         if (dst.data() == nullptr) {
-            return WGPUStatus_Error;
+            return wgpu::Status::Error;
         }
-        // TODO(https://crbug.com/526537254): Spanify the input API of dawn::wire::client.
-        Span<const std::byte> DAWN_UNSAFE_TODO(src(reinterpret_cast<const std::byte*>(data), size));
-        std::ranges::copy(src, dst.begin());
-        return WGPUStatus_Success;
+        dst.CopyFrom(data);
+        return wgpu::Status::Success;
     });
 }
 
-WGPUStatus Buffer::APIReadMappedRange(size_t offset, void* data, size_t size) {
+wgpu::Status Buffer::APIReadMappedRange(size_t offset, Span<std::byte> data) {
     return mState.Use([&](auto state) {
-        auto src = state->GetMappedRange(offset, size);
+        auto src = state->GetMappedRange(offset, data.size());
         if (src.data() == nullptr) {
-            return WGPUStatus_Error;
+            return wgpu::Status::Error;
         }
-        // TODO(https://crbug.com/526537254): Spanify the input API of dawn::wire::client.
-        Span<std::byte> DAWN_UNSAFE_TODO(dst(reinterpret_cast<std::byte*>(data), size));
-        std::ranges::copy(src, dst.begin());
-        return WGPUStatus_Success;
+        data.CopyFrom(src);
+        return wgpu::Status::Success;
     });
 }
 
@@ -497,12 +494,11 @@ void Buffer::APIUnmap() {
     if (memoryHandle) {
         size_t memoryDataUpdateInfoLength =
             memoryHandle->GetSerializeDataUpdateSize(cmd.offset, cmd.size);
-
-        // Set the pointer length, but the pointed-to data itself won't be serialized as usual
-        // (due to skip_serialize). Instead, the custom CommandExtension below fills that
-        // memory.
-        cmd.dataUpdateInfoLength = memoryDataUpdateInfoLength;
-        cmd.dataUpdateInfo = nullptr;  // Skipped by skip_serialize.
+        // SAFETY: This Span is NEVER supposed to be read/serialized, so nullptr is fine.
+        // The member is not serialized because skip_serialize, but is a Span so that on
+        // the deserialization side we have a well-formed member.
+        cmd.dataUpdateInfo = DAWN_UNSAFE_BUFFERS(Span<const std::byte>(
+            static_cast<const std::byte*>(nullptr), memoryDataUpdateInfoLength));
 
         client->SerializeCommand(cmd,
                                  // Extensions to replace fields skipped by skip_serialize.

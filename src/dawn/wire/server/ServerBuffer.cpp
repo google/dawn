@@ -112,8 +112,7 @@ WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
 WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
                                         const WGPUBufferDescriptor* descriptor,
                                         ObjectHandle bufferHandle,
-                                        size_t memoryHandleCreateInfoLength,
-                                        const std::byte* memoryHandleCreateInfo) {
+                                        Span<const std::byte> memoryHandleCreateInfo) {
     // Create and register the buffer object.
     Reserved<WGPUBuffer> buffer;
     WIRE_TRY(Allocate(&buffer, bufferHandle));
@@ -136,10 +135,8 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
     return buffer->mapState.Use([&](auto mapState) {
         if (isMappable) {
             // Deserialize metadata produced from the client to create a companion server handle.
-            // TODO(https://crbug.com/526533386): Spanify the input API of dawn::wire::server.
-            Span<const std::byte> DAWN_UNSAFE_TODO(
-                creationData{memoryHandleCreateInfo, memoryHandleCreateInfoLength});
-            mapState->memoryHandle = mMemoryTransferService->DeserializeMemoryHandle(creationData);
+            mapState->memoryHandle =
+                mMemoryTransferService->DeserializeMemoryHandle(memoryHandleCreateInfo);
             if (mapState->memoryHandle == nullptr) {
                 return WireResult::FatalError;
             }
@@ -149,8 +146,7 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
 }
 
 WireResult Server::DoBufferUpdateMappedData(Known<WGPUBuffer> buffer,
-                                            size_t writeDataUpdateInfoLength,
-                                            const std::byte* writeDataUpdateInfo,
+                                            Span<const std::byte> writeDataUpdateInfo,
                                             size_t offset,
                                             size_t size) {
     return buffer->mapState.Use([&](auto mapState) {
@@ -180,10 +176,7 @@ WireResult Server::DoBufferUpdateMappedData(Known<WGPUBuffer> buffer,
         }
 
         // Deserialize the flush info and flush updated data from the handle into mappedRange.
-        // TODO(https://crbug.com/526533386): Spanify the input API of dawn::wire::server.
-        Span<const std::byte> DAWN_UNSAFE_TODO(
-            writeDataUpdateInfoSpan(writeDataUpdateInfo, writeDataUpdateInfoLength));
-        if (!mapState->memoryHandle->DeserializeDataUpdate(writeDataUpdateInfoSpan, offset, size,
+        if (!mapState->memoryHandle->DeserializeDataUpdate(writeDataUpdateInfo, offset, size,
                                                            mappedRange)) {
             return WireResult::FatalError;
         }
