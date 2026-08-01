@@ -973,8 +973,8 @@
                 "args": [
                     {"name": "buffer", "type": "buffer"},
                     {"name": "buffer offset", "type": "uint64_t"},
-                    {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "size"},
-                    {"name": "size", "type": "uint64_t"}
+                    {"name": "data", "type": "void", "annotation": "const*", "length": "size"},
+                    {"name": "size", "type": "size_t"}
                 ]
             },
             {

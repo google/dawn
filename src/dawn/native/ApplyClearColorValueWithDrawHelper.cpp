@@ -277,8 +277,8 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
     CommandEncoder* encoder,
     const RenderPassDescriptor* renderPassDescriptor,
     const KeyOfApplyClearColorValueWithDrawPipelines& key) {
-    std::array<uint8_t, sizeof(uint32_t) * 4 * kMaxColorAttachments> clearValues = {};
-    uint32_t offset = 0;
+    std::array<std::byte, sizeof(uint32_t) * 4 * kMaxColorAttachments> clearValues = {};
+    Span<std::byte> clearValueBuffer = clearValues;
     for (auto i : key.colorTargetsToApplyClearColorValue) {
         const RenderPassColorAttachment& colorAttachment =
             renderPassDescriptor->colorAttachments[i];
@@ -289,42 +289,44 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
         Color clearValue = ClampClearColorValueToLegalRange(initialClearValue, format);
         switch (baseType) {
             case TextureComponentType::Uint: {
-                uint32_t* clearValuePtr =
-                    reinterpret_cast<uint32_t*>(DAWN_UNSAFE_TODO(clearValues.data() + offset));
-                clearValuePtr[0] = static_cast<uint32_t>(clearValue.r);
-                DAWN_UNSAFE_TODO(clearValuePtr[1]) = static_cast<uint32_t>(clearValue.g);
-                DAWN_UNSAFE_TODO(clearValuePtr[2]) = static_cast<uint32_t>(clearValue.b);
-                DAWN_UNSAFE_TODO(clearValuePtr[3]) = static_cast<uint32_t>(clearValue.a);
+                Span<uint32_t> clearValueSubBuffer =
+                    ReinterpretSpan<uint32_t>(clearValueBuffer.TakeFirst(sizeof(uint32_t) * 4));
+                clearValueSubBuffer[0] = static_cast<uint32_t>(clearValue.r);
+                clearValueSubBuffer[1] = static_cast<uint32_t>(clearValue.g);
+                clearValueSubBuffer[2] = static_cast<uint32_t>(clearValue.b);
+                clearValueSubBuffer[3] = static_cast<uint32_t>(clearValue.a);
                 break;
             }
             case TextureComponentType::Sint: {
-                int32_t* clearValuePtr =
-                    reinterpret_cast<int32_t*>(DAWN_UNSAFE_TODO(clearValues.data() + offset));
-                clearValuePtr[0] = static_cast<int32_t>(clearValue.r);
-                DAWN_UNSAFE_TODO(clearValuePtr[1]) = static_cast<int32_t>(clearValue.g);
-                DAWN_UNSAFE_TODO(clearValuePtr[2]) = static_cast<int32_t>(clearValue.b);
-                DAWN_UNSAFE_TODO(clearValuePtr[3]) = static_cast<int32_t>(clearValue.a);
+                Span<int32_t> clearValueSubBuffer =
+                    ReinterpretSpan<int32_t>(clearValueBuffer.TakeFirst(sizeof(int32_t) * 4));
+                clearValueSubBuffer[0] = static_cast<int32_t>(clearValue.r);
+                clearValueSubBuffer[1] = static_cast<int32_t>(clearValue.g);
+                clearValueSubBuffer[2] = static_cast<int32_t>(clearValue.b);
+                clearValueSubBuffer[3] = static_cast<int32_t>(clearValue.a);
                 break;
             }
             case TextureComponentType::Float: {
-                float* clearValuePtr =
-                    reinterpret_cast<float*>(DAWN_UNSAFE_TODO(clearValues.data() + offset));
-                clearValuePtr[0] = static_cast<float>(clearValue.r);
-                DAWN_UNSAFE_TODO(clearValuePtr[1]) = static_cast<float>(clearValue.g);
-                DAWN_UNSAFE_TODO(clearValuePtr[2]) = static_cast<float>(clearValue.b);
-                DAWN_UNSAFE_TODO(clearValuePtr[3]) = static_cast<float>(clearValue.a);
+                Span<float> clearValueSubBuffer =
+                    ReinterpretSpan<float>(clearValueBuffer.TakeFirst(sizeof(float) * 4));
+                clearValueSubBuffer[0] = static_cast<float>(clearValue.r);
+                clearValueSubBuffer[1] = static_cast<float>(clearValue.g);
+                clearValueSubBuffer[2] = static_cast<float>(clearValue.b);
+                clearValueSubBuffer[3] = static_cast<float>(clearValue.a);
                 break;
             }
         }
-        offset += sizeof(uint32_t) * 4;
     }
 
-    DAWN_CHECK(offset > 0);
+    size_t clearValuesSize = clearValues.size() - clearValueBuffer.size();
+    DAWN_CHECK(clearValuesSize > 0);
 
     Ref<BufferBase> buffer;
-    DAWN_TRY_ASSIGN(buffer, encoder->GetDevice()->GetOrCreateTemporaryUniformBuffer(offset));
+    DAWN_TRY_ASSIGN(buffer,
+                    encoder->GetDevice()->GetOrCreateTemporaryUniformBuffer(clearValuesSize));
     buffer->SetLabel("Internal_UniformClearValues");
-    encoder->APIWriteBuffer(buffer.Get(), 0, clearValues.data(), offset);
+    encoder->APIWriteBuffer(buffer.Get(), 0,
+                            Span<const std::byte>(clearValues).first(clearValuesSize));
 
     return std::move(buffer);
 }

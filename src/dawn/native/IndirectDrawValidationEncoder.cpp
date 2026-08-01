@@ -470,7 +470,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         IndirectDrawMetadata::DrawType drawType;
         uint64_t outputParamsSize = 0;
         uint64_t batchDataSize = 0;
-        HeapArray<uint8_t> batchData;
+        HeapArray<std::byte> batchData;
         std::vector<Batch> batches;
     };
 
@@ -648,7 +648,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
     // Now we allocate and populate host-side batch data to be copied to the GPU.
     for (Pass& pass : passes) {
         // batchData is maximally-aligned, so we can suballocate it.
-        pass.batchData = HeapArray<uint8_t>{checked_cast<size_t>(pass.batchDataSize)};
+        pass.batchData = HeapArray<std::byte>{checked_cast<size_t>(pass.batchDataSize)};
         for (Batch& batch : pass.batches) {
             auto placement = pass.batchData.subspan(batch.dataBufferOffset, sizeof(BatchInfo));
             batch.batchInfo = new (placement.data()) BatchInfo();
@@ -716,8 +716,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         // compute pass. The compute pass encodes a separate SetBindGroup and Dispatch command
         // for each batch.
         for (const Pass& pass : passes) {
-            commandEncoder->APIWriteBuffer(batchDataBuffer.GetBuffer(), 0, pass.batchData.data(),
-                                           pass.batchDataSize);
+            commandEncoder->APIWriteBuffer(batchDataBuffer.GetBuffer(), 0, pass.batchData);
 
             Ref<ComputePassEncoder> passEncoder = commandEncoder->BeginComputePass();
             passEncoder->APISetPipeline(pipeline);
@@ -859,8 +858,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
             DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bindGroupDescriptor));
 
             commandEncoder->APIWriteBuffer(drawConstantsBuffer.GetBuffer(), 0,
-                                           reinterpret_cast<const uint8_t*>(&drawConstants),
-                                           sizeof(MultiDrawConstants));
+                                           ByteSpanFromRef(drawConstants));
 
             Ref<ComputePassEncoder> passEncoder = commandEncoder->BeginComputePass();
             passEncoder->APISetPipeline(pipeline);

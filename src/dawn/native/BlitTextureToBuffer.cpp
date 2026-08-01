@@ -1204,7 +1204,8 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
             // We only need to initialize the last 4 bytes in the temp buffer.
             std::array<uint8_t, 4> clearData = {};
             commandEncoder->APIWriteBuffer(destinationBuffer.Get(),
-                                           destinationBuffer->GetSize() - 4, clearData.data(), 4);
+                                           destinationBuffer->GetSize() - 4,
+                                           SpanAsBytes(Span<const uint8_t>(clearData)));
         }
 
         // Copy the bytes that we won't write in the shader (those before offset, padding bytes,

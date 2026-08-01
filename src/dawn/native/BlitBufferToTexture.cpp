@@ -467,14 +467,13 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
             DAWN_TRY_ASSIGN(paramsBuffer,
                             device->GetOrCreateTemporaryUniformBuffer(sizeof(uint32_t) * 4));
 
-            uint32_t params[4];
+            std::array<uint32_t, 4> params;
             params[0] = shaderReadOffset;
             params[1] = src.bytesPerRow;
             params[2] = dchecked_cast<uint32_t>(dst.origin.x);
             params[3] = dchecked_cast<uint32_t>(dst.origin.y);
             commandEncoder->APIWriteBuffer(paramsBuffer.Get(), 0,
-                                           reinterpret_cast<const uint8_t*>(&params[0]),
-                                           sizeof(params));
+                                           SpanAsBytes(Span<const uint32_t>(params)));
         }
 
         Ref<BindGroupBase> bindGroup;

@@ -33,9 +33,7 @@
 
     "metadata": {
         "_function_spanification_blocklist_comment": "// TODO(https://crbug.com/515272358): Drive this list down.",
-        "function_spanification_blocklist": [
-            "CommandEncoderWriteBuffer"
-        ],
+        "function_spanification_blocklist": [],
         "function_span_index_type_override": {
             "ComputePassEncoderSetBindGroup::dynamicOffsets": "BindingIndex",
             "RenderBundleEncoderSetBindGroup::dynamicOffsets": "BindingIndex",

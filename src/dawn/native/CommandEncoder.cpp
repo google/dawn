@@ -2274,28 +2274,27 @@ void CommandEncoder::APIResolveQuerySet(QuerySetBase* querySet,
 
 void CommandEncoder::APIWriteBuffer(BufferBase* buffer,
                                     uint64_t bufferOffset,
-                                    const uint8_t* data,
-                                    uint64_t size) {
+                                    Span<const std::byte> data) {
     mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(ValidateWriteBuffer(GetDevice(), buffer, bufferOffset, size));
+                DAWN_TRY(ValidateWriteBuffer(GetDevice(), buffer, bufferOffset, data.size()));
             }
 
             WriteBufferCmd* cmd = allocator->Allocate<WriteBufferCmd>(Command::WriteBuffer);
             cmd->buffer = buffer;
             cmd->offset = bufferOffset;
-            cmd->size = size;
+            cmd->size = data.size();
 
-            Span<uint8_t> inlinedData = allocator->AllocateData<uint8_t>(cmd->size);
-            DAWN_UNSAFE_TODO(memcpy(inlinedData.data(), data, size));
+            Span<std::byte> inlinedData = allocator->AllocateData<std::byte>(cmd->size);
+            inlinedData.CopyFrom(data);
 
             mTopLevelBuffers.insert(buffer);
 
             return {};
         },
-        "encoding %s.WriteBuffer(%s, %u, ..., %u).", this, buffer, bufferOffset, size);
+        "encoding %s.WriteBuffer(%s, %u, ..., %u).", this, buffer, bufferOffset, data.size());
 }
 
 void CommandEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndexUntyped) {

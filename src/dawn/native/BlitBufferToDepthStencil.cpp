@@ -434,7 +434,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         if (z >= 1) {
             // Pass the array layer info via the uniform buffer.
             commandEncoder->APIWriteBuffer(paramsBuffer.Get(), sizeof(uint32_t) * 2,
-                                           reinterpret_cast<const uint8_t*>(&z), sizeof(uint32_t));
+                                           ByteSpanFromRef(z));
         }
 
         Ref<TextureViewBase> dstView;
