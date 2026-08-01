@@ -37,6 +37,7 @@
 
 {% set namespace = metadata.namespace %}
 #include "dawn/wire/client/{{namespace}}_structs_autogen.h"
+#include "src/utils/span.h"
 
 namespace dawn::wire::client {
     {% for type in by_category["object"] %}
@@ -91,8 +92,11 @@ namespace dawn::wire::client {
         inline const {{Type}}* const* FromAPI(const WGPU{{Type}}* rhs) {
             return reinterpret_cast<const {{Type}}* const*>(rhs);
         }
-        inline {{Type}}* const* FromAPI(WGPU{{Type}}* rhs) {
-            return reinterpret_cast<{{Type}}* const*>(rhs);
+        inline const WGPU{{Type}}* ToAPI(const {{Type}}* const* rhs) {
+            return reinterpret_cast<const WGPU{{Type}}*>(const_cast<{{Type}}**>(rhs));
+        }
+        inline WGPU{{Type}}* ToAPI({{Type}}* const* rhs) {
+            return reinterpret_cast<WGPU{{Type}}*>(const_cast<{{Type}}**>(rhs));
         }
     {% endfor %}
 
@@ -114,13 +118,51 @@ namespace dawn::wire::client {
         inline {{as_cType(type.name)}} ToAPI({{namespace}}::{{as_cppType(type.name)}} rhs) {
             return static_cast<{{as_cType(type.name)}}>(rhs);
         }
+        inline const {{as_cType(type.name)}}* ToAPI(const {{namespace}}::{{as_cppType(type.name)}}* rhs) {
+            return reinterpret_cast<const {{as_cType(type.name)}}*>(rhs);
+        }
+        inline {{as_cType(type.name)}}* ToAPI({{namespace}}::{{as_cppType(type.name)}}* rhs) {
+            return reinterpret_cast<{{as_cType(type.name)}}*>(rhs);
+        }
     {% endfor %}
 
     {% for type in by_category["enum"] %}
         inline {{namespace}}::{{as_cppType(type.name)}} FromAPI({{as_cType(type.name)}} rhs) {
             return static_cast<{{namespace}}::{{as_cppType(type.name)}}>(rhs);
         }
+        inline const {{namespace}}::{{as_cppType(type.name)}}* FromAPI(const {{as_cType(type.name)}}* rhs) {
+            return reinterpret_cast<const {{namespace}}::{{as_cppType(type.name)}}*>(rhs);
+        }
+        inline {{namespace}}::{{as_cppType(type.name)}}* FromAPI({{as_cType(type.name)}}* rhs) {
+            return reinterpret_cast<{{namespace}}::{{as_cppType(type.name)}}*>(rhs);
+        }
     {% endfor %}
+
+    // Fallback ToAPI and FromAPI for primitive and matching pointer types.
+    template <typename T>
+    inline T* ToAPI(T* rhs) {
+        return rhs;
+    }
+
+    template <typename T>
+    inline T* FromAPI(T* rhs) {
+        return rhs;
+    }
+
+    // Templated helper for converting Spans.
+    template <typename T>
+    auto ToAPI(dawn::Span<T> rhs) {
+        using ResultItem = std::remove_pointer_t<decltype(ToAPI(rhs.data()))>;
+        // SAFETY: The returned Span has the same lifetime as the input Span.
+        return DAWN_UNSAFE_BUFFERS(dawn::Span<ResultItem>(ToAPI(rhs.data()), rhs.size()));
+    }
+
+    template <typename T>
+    auto FromAPI(dawn::Span<T> rhs) {
+        using ResultItem = std::remove_pointer_t<decltype(FromAPI(rhs.data()))>;
+        // SAFETY: The returned Span has the same lifetime as the input Span.
+        return DAWN_UNSAFE_BUFFERS(dawn::Span<ResultItem>(FromAPI(rhs.data()), rhs.size()));
+    }
 
 }  // namespace dawn::wire::client
 

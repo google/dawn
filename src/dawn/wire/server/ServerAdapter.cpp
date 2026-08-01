@@ -101,8 +101,9 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     // the request to preserve callback ordering.
     FreeMembers<WGPUSupportedFeatures> supportedFeatures(mProcs);
     mProcs->deviceGetFeatures(device, &supportedFeatures);
-    absl::Span<const WGPUFeatureName> features(supportedFeatures.features,
-                                               supportedFeatures.featureCount);
+    // SAFETY: WebGPU API guarantees that the returned features are valid.
+    Span<const WGPUFeatureName> DAWN_UNSAFE_BUFFERS(
+        features(supportedFeatures.features, supportedFeatures.featureCount));
     for (WGPUFeatureName feature : features) {
         if (!IsFeatureSupported(feature)) {
             // Release the device.
@@ -115,8 +116,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
             return;
         }
     }
-    cmd.featuresCount = static_cast<uint32_t>(features.size());
-    cmd.features = features.data();
+    cmd.features = features;
 
     // Query and report the adapter limits, including all known extension limits.
     // TODO(crbug.com/421950205): Use dawn::utils::ComboLimits here.

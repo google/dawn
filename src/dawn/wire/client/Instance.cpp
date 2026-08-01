@@ -66,17 +66,14 @@ class RequestAdapterEvent : public TrackedEvent {
                          WGPUStringView message,
                          const WGPUAdapterInfo* info,
                          const WGPULimits* limits,
-                         uint32_t featuresCount,
-                         const WGPUFeatureName* features) {
+                         Span<const WGPUFeatureName> features) {
         DAWN_ASSERT(mAdapter != nullptr);
         mStatus = status;
         mMessage = ToString(message);
         if (status == WGPURequestAdapterStatus_Success) {
             mAdapter->SetInfo(FromAPI(info));
             mAdapter->SetLimits(FromAPI(limits));
-            // TODO(https://crbug.com/526537254): Spanify/Cppify the wire commands API.
-            mAdapter->SetFeatures(DAWN_UNSAFE_TODO(Span<const wgpu::FeatureName>(
-                reinterpret_cast<const wgpu::FeatureName*>(features), featuresCount)));
+            mAdapter->SetFeatures(FromAPI(features));
         }
         return WireResult::Success;
     }
@@ -234,10 +231,9 @@ WireResult Client::DoInstanceRequestAdapterCallback(ObjectId instanceId,
                                                     WGPUStringView message,
                                                     const WGPUAdapterInfo* info,
                                                     const WGPULimits* limits,
-                                                    uint32_t featuresCount,
-                                                    const WGPUFeatureName* features) {
+                                                    Span<const WGPUFeatureName> features) {
     return SetFutureReady<RequestAdapterEvent>(instanceId, future.id, status, message, info, limits,
-                                               featuresCount, features);
+                                               features);
 }
 
 void Instance::APIProcessEvents() {

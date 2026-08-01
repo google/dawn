@@ -223,7 +223,7 @@
             { "name": "message", "type": "string view" },
             { "name": "info", "type": "adapter info", "annotation": "const*", "optional": "true" },
             { "name": "limits", "type": "limits", "annotation": "const*", "optional": "true" },
-            { "name": "features count", "type": "uint32_t"},
+            { "name": "features count", "type": "size_t"},
             { "name": "features", "type": "feature name", "annotation": "const*", "length": "features count"}
         ],
         "adapter request device callback": [
@@ -232,7 +232,7 @@
             { "name": "status", "type": "request device status" },
             { "name": "message", "type": "string view" },
             { "name": "limits", "type": "limits", "annotation": "const*", "optional": "true" },
-            { "name": "features count", "type": "uint32_t"},
+            { "name": "features count", "type": "size_t"},
             { "name": "features", "type": "feature name", "annotation": "const*", "length": "features count"}
         ]
     },
@@ -257,10 +257,7 @@
             "QueueWriteTextureCmd",
             "QueueWriteTextureXlCmd",
             "RenderBundleEncoderSetImmediatesCmd",
-            "RenderPassEncoderSetImmediatesCmd",
-            "ReturnAdapterRequestDeviceCallbackCmd",
-            "ReturnBufferMapAsyncCallbackCmd",
-            "ReturnInstanceRequestAdapterCallbackCmd"
+            "RenderPassEncoderSetImmediatesCmd"
         ],
         "_function_cpp_blocklist_comment": "// TODO(https://crbug.com/526537254): Drive this list down.",
         "function_cpp_blocklist": [

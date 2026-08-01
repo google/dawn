@@ -59,16 +59,13 @@ class RequestDeviceEvent : public TrackedEvent {
                          WGPURequestDeviceStatus status,
                          WGPUStringView message,
                          const WGPULimits* limits,
-                         uint32_t featuresCount,
-                         const WGPUFeatureName* features) {
+                         Span<const WGPUFeatureName> features) {
         DAWN_ASSERT(mDevice != nullptr);
         mStatus = status;
         mMessage = ToString(message);
         if (status == WGPURequestDeviceStatus_Success) {
             mDevice->SetLimits(FromAPI(limits));
-            // TODO(https://crbug.com/526537254): Spanify/Cppify the wire commands API.
-            mDevice->SetFeatures(DAWN_UNSAFE_TODO(Span<const wgpu::FeatureName>(
-                reinterpret_cast<const wgpu::FeatureName*>(features), featuresCount)));
+            mDevice->SetFeatures(FromAPI(features));
         }
         return WireResult::Success;
     }
@@ -312,10 +309,9 @@ WireResult Client::DoAdapterRequestDeviceCallback(ObjectId instanceId,
                                                   WGPURequestDeviceStatus status,
                                                   WGPUStringView message,
                                                   const WGPULimits* limits,
-                                                  uint32_t featuresCount,
-                                                  const WGPUFeatureName* features) {
+                                                  Span<const WGPUFeatureName> features) {
     return SetFutureReady<RequestDeviceEvent>(instanceId, future.id, status, message, limits,
-                                              featuresCount, features);
+                                              features);
 }
 
 Instance* Adapter::APIGetInstance() const {

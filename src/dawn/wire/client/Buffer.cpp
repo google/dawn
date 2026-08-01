@@ -75,8 +75,7 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
     WireResult ReadyHook(FutureID futureID,
                          WGPUMapAsyncStatus status,
                          WGPUStringView message,
-                         size_t readDataUpdateInfoLength = 0,
-                         const std::byte* readDataUpdateInfo = nullptr) {
+                         Span<const std::byte> readDataUpdateInfo = {}) {
         auto FailRequest = [this](const char* message) -> WireResult {
             mStatus = static_cast<WGPUMapAsyncStatus>(0);
             mMessage = message;
@@ -106,12 +105,8 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
             }
             switch (*pending.type) {
                 case MapRequestType::Read: {
-                    // Update user map data with server returned data
-                    // TODO(https://crbug.com/526537254): Spanify the input API of
-                    // dawn::wire::client.
-                    Span<const std::byte> DAWN_UNSAFE_TODO(
-                        readDataUpdateInfoSpan(readDataUpdateInfo, readDataUpdateInfoLength));
-                    if (!state->memoryHandle->DeserializeDataUpdate(readDataUpdateInfoSpan,
+                    // Update user map data with server returned data.
+                    if (!state->memoryHandle->DeserializeDataUpdate(readDataUpdateInfo,
                                                                     pending.offset, pending.size)) {
                         return FailRequest("Failed to deserialize data returned from the server.");
                     }
@@ -403,10 +398,9 @@ WireResult Client::DoBufferMapAsyncCallback(ObjectId instanceId,
                                             WGPUFuture future,
                                             WGPUMapAsyncStatus status,
                                             WGPUStringView message,
-                                            size_t readDataUpdateInfoLength,
-                                            const std::byte* readDataUpdateInfo) {
+                                            Span<const std::byte> readDataUpdateInfo) {
     return SetFutureReady<Buffer::MapAsyncEvent>(instanceId, future.id, status, message,
-                                                 readDataUpdateInfoLength, readDataUpdateInfo);
+                                                 readDataUpdateInfo);
 }
 
 void* Buffer::APIGetMappedRange(size_t offset, size_t size) {

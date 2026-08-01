@@ -208,10 +208,6 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
     cmd.future = data->future;
     cmd.status = status;
     cmd.message = message;
-    // Set the pointer length, but the pointed-to data itself won't be serialized as usual (due
-    // to skip_serialize). Instead, the custom CommandExtension below fills that memory.
-    cmd.readDataUpdateInfoLength = 0;
-    cmd.readDataUpdateInfo = nullptr;  // Skipped by skip_serialize.
 
     if (!isSuccess) {
         SerializeCommand(cmd);
@@ -231,7 +227,11 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
 
                 size_t dataUpdateInfoLength =
                     mapState->memoryHandle->GetSerializeDataUpdateSize(data->offset, data->size);
-                cmd.readDataUpdateInfoLength = dataUpdateInfoLength;
+                // SAFETY: This Span is NEVER supposed to be read/serialized, so nullptr is fine.
+                // The member is not serialized because skip_serialize, but is a Span so that on
+                // the deserialization side we have a well-formed member.
+                cmd.readDataUpdateInfo = DAWN_UNSAFE_BUFFERS(Span<const std::byte>(
+                    static_cast<const std::byte*>(nullptr), dataUpdateInfoLength));
                 SerializeCommand(cmd,
                                  // Extensions to replace fields skipped by skip_serialize.
                                  CommandExtension{dataUpdateInfoLength,
