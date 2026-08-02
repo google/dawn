@@ -33,6 +33,7 @@ vars = {
   'agility_sdk_version': 'version:2@1.721.0-preview',
   'dawn_bazelisk_version': 'version:3@1.29.0',
   'dawn_llvm-dev_version': 'version:3@22.1.0',
+  'dawn_zstd_version': 'Lf-seQJdussz81cZXnez5xIxEdkejDRxKumQpHbHMOUC',
 
   # GN variable required by //testing that will be output in the gclient_args.gni
   'generate_location_tags': False,
@@ -322,6 +323,14 @@ deps = {
     'packages': [{
       'package': 'infra/3pp/tools/llvm-dev/linux-amd64',
       'version': Var('dawn_llvm-dev_version'),
+    }],
+    'dep_type': 'cipd',
+    'condition': 'checkout_mesa and host_os == "linux"',
+  },
+  'third_party/zstd': {
+    'packages': [{
+      'package': 'infra/3pp/static_libs/libzstd/linux-amd64',
+      'version': Var('dawn_zstd_version'),
     }],
     'dep_type': 'cipd',
     'condition': 'checkout_mesa and host_os == "linux"',

@@ -82,6 +82,11 @@ function(meson_target TARGET_NAME)
             message(FATAL_ERROR "Could not find required llvm-config at ${LLVM_CONFIG_PATH}")
         endif()
 
+        set(ZSTD_DIR "${DAWN_THIRD_PARTY_DIR}/zstd")
+        set(ZSTD_PKGCONFIG_DIR "${ZSTD_DIR}/lib/pkgconfig")
+        set(ZSTD_LIB_DIR "${ZSTD_DIR}/lib")
+        set(ZSTD_INCLUDE_DIR "${ZSTD_DIR}/include")
+
         set(NATIVE_FILE_CONTENT
             "[binaries]\n"
             "c = '${CC_PATH}'\n"
@@ -91,6 +96,15 @@ function(meson_target TARGET_NAME)
             "pkg-config = 'pkg-config'\n"
             "llvm-config = '${LLVM_CONFIG_PATH}'\n"
             "python = ['vpython3', '-vpython-spec', '${PROJECT_SOURCE_DIR}/.vpython3']\n"
+            "\n"
+            "[properties]\n"
+            "pkg_config_path = ['${ZSTD_PKGCONFIG_DIR}']\n"
+            "\n"
+            "[built-in options]\n"
+            "c_args = ['-I${ZSTD_INCLUDE_DIR}']\n"
+            "cpp_args = ['-I${ZSTD_INCLUDE_DIR}']\n"
+            "c_link_args = ['-L${ZSTD_LIB_DIR}']\n"
+            "cpp_link_args = ['-L${ZSTD_LIB_DIR}']\n"
         )
 
         set(NATIVE_FILE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}_native.ini")

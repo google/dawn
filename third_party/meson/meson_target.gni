@@ -99,6 +99,12 @@ template("_meson_setup") {
           [ "llvm-config = '" + rebase_path("${meson_llvm_config_bin}") + "'" ]
     }
 
+    _zstd_pkgconfig_dir = rebase_path("${meson_zstd_dir}/lib/pkgconfig")
+    _native_file_content += [
+      "[properties]",
+      "pkg_config_path = ['${_zstd_pkgconfig_dir}']",
+    ]
+
     write_file(_native_file_path, _native_file_content)
   }
 
@@ -141,21 +147,25 @@ template("_meson_setup") {
     }
 
     if (is_clang) {
-      _c_link_args = "-fuse-ld=lld"
-      _cpp_link_args = "-fuse-ld=lld"
+      _zstd_lib_dir = rebase_path("${meson_zstd_dir}/lib", root_build_dir)
+      _zstd_include_dir =
+          rebase_path("${meson_zstd_dir}/include", root_build_dir)
+
+      _c_args = "-I${_zstd_include_dir}"
+      _cpp_args = "-I${_zstd_include_dir}"
+      _c_link_args = "-fuse-ld=lld -L${_zstd_lib_dir}"
+      _cpp_link_args = "-fuse-ld=lld -L${_zstd_lib_dir}"
+
       if (use_clang_coverage) {
-        _c_args = "-fprofile-instr-generate -fcoverage-mapping"
-        _cpp_args = "-fprofile-instr-generate -fcoverage-mapping"
+        _c_args += " -fprofile-instr-generate -fcoverage-mapping"
+        _cpp_args += " -fprofile-instr-generate -fcoverage-mapping"
         _c_link_args += " -fprofile-instr-generate -fcoverage-mapping"
         _cpp_link_args += " -fprofile-instr-generate -fcoverage-mapping"
-
-        args += [
-          "-Dc_args=${_c_args}",
-          "-Dcpp_args=${_cpp_args}",
-        ]
       }
 
       args += [
+        "-Dc_args=${_c_args}",
+        "-Dcpp_args=${_cpp_args}",
         "-Dc_link_args=${_c_link_args}",
         "-Dcpp_link_args=${_cpp_link_args}",
         "--native-file",
