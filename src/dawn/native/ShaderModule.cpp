@@ -652,11 +652,16 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
             bool bglConvertsToShaderSampleType = isSameSampleType ||
                                                  unknownFloatSampleTypeInShader ||
                                                  shaderSampleTypeConvertsFromRequiredFloat;
+            // kUnknownFilterableFloatSampleType has no named enum value; describe it as both
+            // possible public types since it is compatible with either Float or UnfilterableFloat.
             DAWN_INVALID_IF(!bglConvertsToShaderSampleType,
                             "The shader's texture sample type (%s) isn't compatible with the "
                             "layout's texture sample type (%s) (it is only compatible with %s for "
                             "the shader texture sample type).",
-                            shaderSampleType, bindingLayout.sampleType, bglSampleType);
+                            shaderSampleType == kUnknownFilterableFloatSampleType
+                                ? "TextureSampleType::Float or TextureSampleType::UnfilterableFloat"
+                                : absl::StrFormat("%s", shaderSampleType),
+                            bindingLayout.sampleType, bglSampleType);
 
             DAWN_INVALID_IF(
                 bindingLayout.viewDimension != shaderBindingInfo.viewDimension,
