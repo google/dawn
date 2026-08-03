@@ -221,10 +221,7 @@ config("dawn_warnings") {
       # -Wlifetime-safety-lifetimebound-violation) are not yet mapped to
       # toggleable warning flags, so we suppress the entire group and disable
       # the analysis pass.
-      "-Wno-lifetime-safety",
       "-Wno-lifetime-safety-all",
-      "-Xclang=-fno-lifetime-safety-inference",
-      "-Xclang=-fno-experimental-lifetime-safety-tu-analysis",
     ]
 
     # P3. Checks that could be nice but probably don't help with hardening.
@@ -510,15 +507,20 @@ source_set("gmock_and_gtest") {
 #   plugin_arguments: List of arguments to pass to the plugin.
 template("clang_plugin") {
   config(target_name) {
+    # -Xclang=arg is mishandled by clang-tidy, so have to use the two-arg style.
     cflags = [
-      "-Xclang=-add-plugin",
-      "-Xclang=${invoker.plugin}",
+      "-Xclang",
+      "-add-plugin",
+      "-Xclang",
+      "${invoker.plugin}",
     ]
 
     foreach(flag, invoker.plugin_arguments) {
       cflags += [
-        "-Xclang=-plugin-arg-${invoker.plugin}",
-        "-Xclang=${flag}",
+        "-Xclang",
+        "-plugin-arg-${invoker.plugin}",
+        "-Xclang",
+        "${flag}",
       ]
     }
   }
