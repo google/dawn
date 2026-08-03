@@ -1982,6 +1982,9 @@ class MultiGeneratorFromDawnJSON(Generator):
                     'as_wire_clientType': lambda typ: as_wire_clientType(metadata, typ),
                     'as_annotated_wire_clientType': \
                         lambda arg: annotate(as_wire_clientType(metadata, arg.type), arg),
+                    'is_wire_data_only': \
+                        lambda member: member.type.name.get() in ['void', 'std::byte'] and \
+                                       not member.skip_serialize,
                 }, additional_params
             ]
             renders.append(

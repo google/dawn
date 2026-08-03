@@ -146,7 +146,7 @@ namespace dawn::wire {
             {% elif spanify and member.length and member.length != "constant" %}
                 //* TODO(https://crbug.com/524405497): Support fixed-length spans.
                 {% set element_type = "std::remove_pointer_t<" + decorate(as_cType(member.type.name, spanify), member) + ">" %}
-                {% if member.json_data["wire_is_data_only"] %}
+                {% if is_wire_data_only(member) %}
                     //* If the member is data only, we do not copy the data, so it will be volatile.
                     {% set element_type = "volatile " + element_type %}
                 {% endif %}

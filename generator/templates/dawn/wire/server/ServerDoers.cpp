@@ -52,6 +52,10 @@ namespace dawn::wire::server {
                         {%- elif spanify and member.length and member.length != "constant" -%}
                             //* TODO(https://crbug.com/524405497): Support fixed-length spans.
                             {% set element_type = "std::remove_pointer_t<" + decorate(as_cType(member.type.name, spanify), member) + ">" %}
+                            {% if is_wire_data_only(member) %}
+                                //* If the member is data only, we do not copy the data, so it will be volatile.
+                                {% set element_type = "volatile " + element_type %}
+                            {% endif %}
                             {% set index_type = member.length.type.name.canonical_case() %}
                             ityp::span<{{index_type}}, {{element_type}}> {{as_varName(member.name)}}
                         {%- else -%}
@@ -77,7 +81,13 @@ namespace dawn::wire::server {
                                 {%- set span_members = command.members | selectattr("length", "equalto", member) | list -%}
                                 {{as_varName(span_members[0].name)}}.size()
                             {%- elif spanify and member.length and member.length != "constant" -%}
-                                {{as_varName(member.name)}}.data()
+                                {% if is_wire_data_only(member) %}
+                                    //* For wire data types, we cast away the volatile here. This
+                                    //* is fine since the data is not sensitive to TOCTOU attacks.
+                                    const_cast<const std::byte*>({{as_varName(member.name)}}.data())
+                                {%- else -%}
+                                    {{as_varName(member.name)}}.data()
+                                {%- endif -%}
                             {%- else -%}
                                 {{as_varName(member.name)}}
                             {%- endif -%}

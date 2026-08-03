@@ -507,7 +507,8 @@
                     //* buffer in dawn_native. For other members, as prevention of TOCTOU attacks is an
                     //* important feature of the wire, we must make sure every single value returned to
                     //* dawn_native must be a copy of what's in the wire.
-                    {% if member.json_data["wire_is_data_only"] %}
+                    {% if is_wire_data_only(member) %}
+                        {% do assert(member.annotation == "const*") %}
                         record->{{memberName}} = memberBuffer;
                     {% else %}
                         Span<{{as_cType(member.type.name, spanify)}}> copiedMembers;

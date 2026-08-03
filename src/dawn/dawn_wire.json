@@ -140,24 +140,6 @@
             { "name": "device object handle", "type": "ObjectHandle", "handle_type": "device"},
             { "name": "device lost future", "type": "future" },
             { "name": "descriptor", "type": "device descriptor", "annotation": "const*" }
-        ],
-        "render pass encoder set immediates": [
-            { "name": "render pass encoder id", "type": "ObjectId", "id_type": "render pass encoder"},
-            { "name": "offset", "type": "uint32_t"},
-            { "name": "data", "type": "uint8_t", "annotation": "const*", "length": "size", "wire_is_data_only": true},
-            { "name": "size", "type": "size_t"}
-        ],
-        "render bundle encoder set immediates": [
-            { "name": "render bundle encoder id", "type": "ObjectId", "id_type": "render bundle encoder"},
-            {"name": "offset", "type": "uint32_t"},
-            { "name": "data", "type": "uint8_t", "annotation": "const*", "length": "size", "wire_is_data_only": true},
-            { "name": "size", "type": "size_t"}
-        ],
-        "compute pass encoder set immediates": [
-            { "name": "compute pass encoder id", "type": "ObjectId", "id_type": "compute pass encoder"},
-            { "name": "offset", "type": "uint32_t"},
-            { "name": "data", "type": "uint8_t", "annotation": "const*", "length": "size", "wire_is_data_only": true},
-            { "name": "size", "type": "size_t"}
         ]
     },
     "return commands": {
@@ -240,30 +222,24 @@
         "chunked command": [
             {"name": "id", "type": "uint64_t"},
             {"name": "size", "type": "size_t"},
-            {"name": "chunk data", "type": "std::byte", "annotation": "const*", "length": "chunk size", "wire_is_data_only": true},
+            {"name": "chunk data", "type": "std::byte", "annotation": "const*", "length": "chunk size"},
             {"name": "chunk size", "type": "size_t"}
         ]
     },
     "special items": {
         "_cmd_spanification_blocklist_comment": "// TODO(https://crbug.com/526537254): Drive this list down.",
         "cmd_spanification_blocklist": [
-            "ComputePassEncoderSetImmediatesCmd",
             "QueueSubmitCmd",
             "QueueWriteBufferCmd",
             "QueueWriteBufferXlCmd",
             "QueueWriteTextureCmd",
-            "QueueWriteTextureXlCmd",
-            "RenderBundleEncoderSetImmediatesCmd",
-            "RenderPassEncoderSetImmediatesCmd"
+            "QueueWriteTextureXlCmd"
         ],
         "_function_cpp_blocklist_comment": "// TODO(https://crbug.com/526537254): Drive this list down.",
         "function_cpp_blocklist": [
-            "ComputePassEncoderSetImmediates",
             "QueueSubmit",
             "QueueWriteBuffer",
-            "QueueWriteTexture",
-            "RenderBundleEncoderSetImmediates",
-            "RenderPassEncoderSetImmediates"
+            "QueueWriteTexture"
         ],
         "client_side_structures": [
             "DawnWGSLBlocklist",
@@ -295,7 +271,6 @@
             "BufferGetMapState",
             "BufferGetSize",
             "BufferGetUsage",
-            "ComputePassEncoderSetImmediates",
             "DeviceCreateBuffer",
             "DeviceCreateComputePipelineAsync",
             "DeviceCreateRenderPipelineAsync",
@@ -316,8 +291,6 @@
             "QueueOnSubmittedWorkDone",
             "QueueWriteBuffer",
             "QueueWriteTexture",
-            "RenderBundleEncoderSetImmediates",
-            "RenderPassEncoderSetImmediates",
             "ResourceTableGetSize",
             "ResourceTableInsert",
             "ShaderModuleGetCompilationInfo",
@@ -367,10 +340,7 @@
             "ShaderModule",
             "Surface",
             "SurfaceCapabilities",
-            "Texture",
-            "RenderPassEncoder",
-            "RenderBundleEncoder",
-            "ComputePassEncoder"
+            "Texture"
         ],
         "server_custom_pre_handler_commands": [
             "DeviceCreateErrorBuffer",

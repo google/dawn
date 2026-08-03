@@ -44,6 +44,10 @@
                 Known<WGPU{{member.id_type.name.CamelCase()}}> {{member.name.camelCase()}}
             {%- elif spanify and member.length and member.length != "constant" -%}
                 {% set element_type = "std::remove_pointer_t<" + decorate(as_cType(member.type.name, spanify), member) + ">" %}
+                {% if is_wire_data_only(member) %}
+                    //* If the member is data only, we do not copy the data, so it will be volatile.
+                    {% set element_type = "volatile " + element_type %}
+                {% endif %}
                 {% set index_type = member.length.type.name.canonical_case() %}
                 ityp::span<{{index_type}}, {{element_type}}> {{as_varName(member.name)}}
             {%- else -%}
