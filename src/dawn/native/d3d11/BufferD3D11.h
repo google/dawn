@@ -234,10 +234,32 @@ class GPUUsableBuffer final : public Buffer {
     ID3D11Buffer* GetD3D11ConstantBufferForTesting();
     ID3D11Buffer* GetD3D11NonConstantBufferForTesting();
 
-    ResultOrError<ComPtr<ID3D11ShaderResourceView>>
-    UseAsSRV(const ScopedCommandRecordingContext* commandContext, uint64_t offset, uint64_t size);
-    ResultOrError<ComPtr<ID3D11UnorderedAccessView>>
-    UseAsUAV(const ScopedCommandRecordingContext* commandContext, uint64_t offset, uint64_t size);
+    // Runs `fn` with the buffer's (possibly cached) raw SRV/UAV pointer. The pointer is owned by
+    // this Buffer's view cache, which may destroy or replace it later (e.g. on the next SRV/UAV
+    // creation or on DestroyImpl), so `fn` must not keep using the raw pointer once it returns. If
+    // `fn` needs to keep the view alive longer, it should copy the pointer into a ComPtr (which
+    // AddRefs) before returning.
+    template <typename Fn>
+    MaybeError UseAsSRV(const ScopedCommandRecordingContext* commandContext,
+                        uint64_t offset,
+                        uint64_t size,
+                        Fn&& fn) {
+        ID3D11ShaderResourceView* srv;
+        DAWN_TRY_ASSIGN(srv, UseAsSRV(commandContext, offset, size));
+        fn(srv);
+        return {};
+    }
+
+    template <typename Fn>
+    MaybeError UseAsUAV(const ScopedCommandRecordingContext* commandContext,
+                        uint64_t offset,
+                        uint64_t size,
+                        Fn&& fn) {
+        ID3D11UnorderedAccessView* uav;
+        DAWN_TRY_ASSIGN(uav, UseAsUAV(commandContext, offset, size));
+        fn(uav);
+        return {};
+    }
 
     MaybeError PredicatedClear(const ScopedSwapStateCommandRecordingContext* commandContext,
                                ID3D11Predicate* predicate,
@@ -279,6 +301,11 @@ class GPUUsableBuffer final : public Buffer {
                              bool isInitialWrite) override;
 
     ComPtr<ID3D11Buffer> GetD3D11MappedBuffer() override;
+
+    ResultOrError<ID3D11ShaderResourceView*>
+    UseAsSRV(const ScopedCommandRecordingContext* commandContext, uint64_t offset, uint64_t size);
+    ResultOrError<ID3D11UnorderedAccessView*>
+    UseAsUAV(const ScopedCommandRecordingContext* commandContext, uint64_t offset, uint64_t size);
 
     ResultOrError<ComPtr<ID3D11ShaderResourceView>> CreateD3D11ShaderResourceViewFromD3DBuffer(
         ID3D11Buffer* d3d11Buffer,
