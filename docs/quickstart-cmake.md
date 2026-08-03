@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
   wgpu::RequestAdapterOptions options = {};
   wgpu::Adapter adapter;
 
-  auto callback = [](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, const char *message, void *userdata) {
+  auto callback = [](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, wgpu::StringView message, void *userdata) {
     if (status != wgpu::RequestAdapterStatus::Success) {
       std::cerr << "Failed to get an adapter:" << message;
       return;
@@ -125,6 +125,8 @@ Now, create a `CMakeLists.txt` file within the `TestDawn` directory like the fol
 cmake_minimum_required(VERSION 3.13)
 
 project(hello_webgpu)
+
+set(CMAKE_CXX_STANDARD 20)
 
 find_package(Dawn REQUIRED)
 add_executable(hello_webgpu hello_webgpu.cpp)
