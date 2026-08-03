@@ -29,9 +29,9 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "src/dawn/native/MemoryBlockAllocator.h"
+#include "src/dawn/common/MemoryBlockAllocator.h"
 
-namespace dawn::native {
+namespace dawn {
 namespace {
 
 constexpr size_t kBlockSize = 16384;
@@ -175,4 +175,4 @@ TEST(MemoryBlockAllocator, AllocateAndReturnManyBlocks) {
     pool.Return(std::move(reallocated));
 }
 
-}  // namespace dawn::native
+}  // namespace dawn

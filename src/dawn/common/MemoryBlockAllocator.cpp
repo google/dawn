@@ -25,14 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/dawn/native/MemoryBlockAllocator.h"
+#include "src/dawn/common/MemoryBlockAllocator.h"
 
 #include <algorithm>
 #include <utility>
 
 #include "src/dawn/common/Math.h"
 
-namespace dawn::native {
+namespace dawn {
 
 // static
 MemoryBlockAllocator::FreeBlock* MemoryBlockAllocator::FreeBlock::FromHeapArray(
@@ -135,4 +135,4 @@ size_t MemoryBlockAllocator::GetRecycledBlockCountForTesting() {
     });
 }
 
-}  // namespace dawn::native
+}  // namespace dawn

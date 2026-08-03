@@ -47,6 +47,10 @@
 #include "src/utils/non_copyable.h"
 #include "src/utils/span.h"
 
+namespace dawn {
+class MemoryBlockAllocator;
+}  // namespace dawn
+
 namespace dawn::native {
 
 // Allocation for command buffers should be fast. To avoid doing an allocation per command
@@ -92,7 +96,6 @@ constexpr uint32_t kAdditionalData = std::numeric_limits<uint32_t>::max() - 1;
 // complexity to handle variable alignment.
 static inline constexpr size_t kMaxAllocatedCommandAlignment = sizeof(uint64_t);
 
-class MemoryBlockAllocator;
 class CommandAllocator;
 
 class CommandIterator : public NonCopyable {

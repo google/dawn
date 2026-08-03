@@ -69,6 +69,10 @@
 #include "src/dawn/native/dawn_platform.h"
 #include "src/utils/non_movable.h"
 
+namespace dawn {
+class MemoryBlockAllocator;
+}  // namespace dawn
+
 namespace dawn::platform {
 class WorkerTaskPool;
 }  // namespace dawn::platform
@@ -81,7 +85,6 @@ class Blob;
 class BlobCache;
 class CallbackTaskManager;
 class DynamicUploader;
-class MemoryBlockAllocator;
 class ErrorScope;
 class ErrorScopeStack;
 class OwnedCompilationMessages;

@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_MEMORYBLOCKALLOCATOR_H_
-#define SRC_DAWN_NATIVE_MEMORYBLOCKALLOCATOR_H_
+#ifndef SRC_DAWN_COMMON_MEMORYBLOCKALLOCATOR_H_
+#define SRC_DAWN_COMMON_MEMORYBLOCKALLOCATOR_H_
 
 #include <cstdint>
 #include <utility>
@@ -38,7 +38,7 @@
 #include "src/utils/non_copyable.h"
 #include "src/utils/non_movable.h"
 
-namespace dawn::native {
+namespace dawn {
 
 // MemoryBlockAllocator is a pool allocator that recycles fixed-size memory blocks
 // (`HeapArray<std::byte>`).
@@ -99,6 +99,6 @@ class MemoryBlockAllocator : public dawn::NonCopyable {
     uint64_t mTickSerial = 0;
 };
 
-}  // namespace dawn::native
+}  // namespace dawn
 
-#endif  // SRC_DAWN_NATIVE_MEMORYBLOCKALLOCATOR_H_
+#endif  // SRC_DAWN_COMMON_MEMORYBLOCKALLOCATOR_H_

@@ -37,8 +37,8 @@
 
 #include "gtest/gtest.h"
 #include "src/dawn/common/Enumerator.h"
+#include "src/dawn/common/MemoryBlockAllocator.h"
 #include "src/dawn/native/CommandAllocator.h"
-#include "src/dawn/native/MemoryBlockAllocator.h"
 
 namespace dawn::native {
 namespace {

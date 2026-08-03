@@ -34,7 +34,7 @@
 #include <utility>
 
 #include "src/dawn/common/Math.h"
-#include "src/dawn/native/MemoryBlockAllocator.h"
+#include "src/dawn/common/MemoryBlockAllocator.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
