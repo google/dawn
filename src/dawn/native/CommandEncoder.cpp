@@ -2239,10 +2239,6 @@ void CommandEncoder::APIResolveQuerySet(QuerySetBase* querySet,
             TrackUsedQuerySet(querySet);
             mTopLevelBuffers.insert(destination);
 
-            if (queryCount == QueryIndex{0u}) {
-                return {};
-            }
-
             ResolveQuerySetCmd* cmd =
                 allocator->Allocate<ResolveQuerySetCmd>(Command::ResolveQuerySet);
             cmd->querySet = querySet;

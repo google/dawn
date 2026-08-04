@@ -713,6 +713,22 @@ TEST_P(OcclusionQueryTests, ResolveZeroQueries) {
     queue.Submit(1, &commands);
 }
 
+// Regression test for https://crbug.com/541130706 where the skipping of empty resolves would
+// take a pointer to the WebGPU objects but fail to take a ref to them.
+TEST_P(OcclusionQueryTests, ResolveZeroQueriesEarlyObjectDestroy) {
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::QuerySet querySet = CreateOcclusionQuerySet(1);
+        wgpu::Buffer destination = CreateResolveBuffer(sizeof(uint64_t));
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.ResolveQuerySet(querySet, 0, 0, destination, 0);
+
+        commands = encoder.Finish();
+    }
+    queue.Submit(1, &commands);
+}
+
 class TimestampExpectation : public detail::Expectation {
   public:
     ~TimestampExpectation() override = default;
