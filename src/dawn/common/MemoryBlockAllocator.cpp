@@ -90,6 +90,15 @@ HeapArray<std::byte> MemoryBlockAllocator::Allocate(size_t minimumSize) {
     return DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(mBlockSize));
 }
 
+void MemoryBlockAllocator::Return(HeapArray<std::byte>&& block) {
+    if (block.size() != mBlockSize) {
+        return;
+    }
+    mFreeList.Use([&](auto freeList) {
+        freeList->Append(FreeBlock::FromHeapArray(mTickSerial, std::move(block)));
+    });
+}
+
 void MemoryBlockAllocator::Return(std::vector<HeapArray<std::byte>>&& blocks) {
     mFreeList.Use([&](auto freeList) {
         for (HeapArray<std::byte>& block : blocks) {

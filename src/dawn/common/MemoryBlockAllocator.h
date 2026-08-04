@@ -67,6 +67,7 @@ class MemoryBlockAllocator : public dawn::NonCopyable {
     ~MemoryBlockAllocator();
 
     HeapArray<std::byte> Allocate(size_t minimumSize);
+    void Return(HeapArray<std::byte>&& block);
     void Return(std::vector<HeapArray<std::byte>>&& blocks);
     void Tick();
     void TrimMemory();

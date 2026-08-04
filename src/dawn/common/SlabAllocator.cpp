@@ -33,6 +33,7 @@
 
 #include "src/dawn/common/AlignedAlloc.h"
 #include "src/dawn/common/Math.h"
+#include "src/dawn/common/MemoryBlockAllocator.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
@@ -46,8 +47,8 @@ SlabAllocatorImpl::IndexLinkNode::IndexLinkNode(Index index, Index nextIndex)
 // Slab
 
 SlabAllocatorImpl::Slab::Slab() = default;
-SlabAllocatorImpl::Slab::Slab(char allocation[], IndexLinkNode* head)
-    : allocation(allocation), freeList(head) {}
+SlabAllocatorImpl::Slab::Slab(HeapArray<std::byte> allocation, IndexLinkNode* head)
+    : allocation(std::move(allocation)), freeList(head) {}
 
 SlabAllocatorImpl::Slab::Slab(Slab&& rhs) = default;
 
@@ -57,14 +58,18 @@ SlabAllocatorImpl::SentinelSlab::SentinelSlab() = default;
 SlabAllocatorImpl::SentinelSlab::SentinelSlab(SentinelSlab&& rhs) = default;
 
 SlabAllocatorImpl::SentinelSlab::~SentinelSlab() {
+    DAWN_CHECK(next == nullptr);
+}
+
+void SlabAllocatorImpl::SentinelSlab::Destroy(MemoryBlockAllocator* allocator) {
     // Delete the full linked list.
     while (next) {
         Slab* slab = next;
         slab->Splice();
         DAWN_ASSERT(slab->blocksInUse == 0);
-        char* allocation = slab->allocation;
+        HeapArray<std::byte> allocation = std::move(slab->allocation);
         slab->~Slab();  // Placement delete.
-        AlignedFree(allocation);
+        allocator->Return(std::move(allocation));
     }
 }
 
@@ -79,8 +84,12 @@ SlabAllocatorImpl::SlabAllocatorImpl(Index blocksPerSlab,
       mBlockStride(Align(mIndexLinkNodeOffset + u32_sizeof<IndexLinkNode>, objectAlignment)),
       mBlocksPerSlab(blocksPerSlab),
       mTotalAllocationSize(static_cast<size_t>(mSlabBlocksOffset) +
-                           static_cast<size_t>(mBlocksPerSlab) * mBlockStride) {
+                           static_cast<size_t>(mBlocksPerSlab) * mBlockStride),
+      mMemoryBlockAllocator(std::make_unique<MemoryBlockAllocator>(mTotalAllocationSize)) {
     DAWN_ASSERT(blocksPerSlab > 0);
+    // TODO(542009502): Currently only support standard alignment. So that standard malloc used by
+    // MemoryBlockAllocator can return a pointer satisfies this alignment.
+    DAWN_CHECK(mAllocationAlignment <= alignof(std::max_align_t));
     DAWN_ASSERT(IsPowerOfTwo(mAllocationAlignment));
 }
 
@@ -91,11 +100,16 @@ SlabAllocatorImpl::SlabAllocatorImpl(SlabAllocatorImpl&& rhs)
       mBlockStride(rhs.mBlockStride),
       mBlocksPerSlab(rhs.mBlocksPerSlab),
       mTotalAllocationSize(rhs.mTotalAllocationSize),
+      mMemoryBlockAllocator(std::move(rhs.mMemoryBlockAllocator)),
       mAvailableSlabs(std::move(rhs.mAvailableSlabs)),
       mFullSlabs(std::move(rhs.mFullSlabs)),
       mRecycledSlabs(std::move(rhs.mRecycledSlabs)) {}
 
-SlabAllocatorImpl::~SlabAllocatorImpl() = default;
+SlabAllocatorImpl::~SlabAllocatorImpl() {
+    mAvailableSlabs.Destroy(mMemoryBlockAllocator.get());
+    mFullSlabs.Destroy(mMemoryBlockAllocator.get());
+    mRecycledSlabs.Destroy(mMemoryBlockAllocator.get());
+}
 
 SlabAllocatorImpl::IndexLinkNode* SlabAllocatorImpl::OffsetFrom(
     IndexLinkNode* node,
@@ -175,16 +189,19 @@ void SlabAllocatorImpl::Slab::Splice() {
 }
 
 void SlabAllocatorImpl::DeleteEmptySlabs() {
-    auto DeleteEmptyFromList = [](const SentinelSlab& sentinel) {
+    // TODO(542009502): this should be removed. SlabAllocator should eagerly return the memory block
+    // to the memory block allocator then memory block allocator will implicitly trim the memory
+    // when needed.
+    auto DeleteEmptyFromList = [&](const SentinelSlab& sentinel) {
         for (Slab* current = sentinel.next; current != nullptr;) {
             if (current->blocksInUse == 0) {
                 Slab* next = current->next;
 
                 // Remove from list and then delete to avoid dangling pointers.
                 current->Splice();
-                char* allocation = current->allocation;
+                HeapArray<std::byte> allocation = std::move(current->allocation);
                 current->~Slab();
-                AlignedFree(allocation);
+                mMemoryBlockAllocator->Return(std::move(allocation));
 
                 current = next;
             } else {
@@ -194,6 +211,7 @@ void SlabAllocatorImpl::DeleteEmptySlabs() {
     };
     DeleteEmptyFromList(mRecycledSlabs);
     DeleteEmptyFromList(mAvailableSlabs);
+    mMemoryBlockAllocator->TrimMemory();
 }
 
 uint32_t SlabAllocatorImpl::CountAllocatedSlabsForTesting() const {
@@ -264,9 +282,11 @@ void SlabAllocatorImpl::GetNewSlab() {
         return;
     }
 
-    char* alignedPtr = static_cast<char*>(AlignedAlloc(mTotalAllocationSize, mAllocationAlignment));
+    HeapArray<std::byte> allocation = mMemoryBlockAllocator->Allocate(mTotalAllocationSize);
+    std::byte* alignedPtr = allocation.data();
+    DAWN_CHECK(IsPtrAligned(alignedPtr, mAllocationAlignment));
 
-    char* dataStart = DAWN_UNSAFE_TODO(alignedPtr + mSlabBlocksOffset);
+    void* dataStart = allocation.subspan(mSlabBlocksOffset).data();
 
     IndexLinkNode* node = NodeFromObject(dataStart);
     for (Index i = 0; i < mBlocksPerSlab; ++i) {
@@ -277,7 +297,7 @@ void SlabAllocatorImpl::GetNewSlab() {
         OffsetFrom(node, checked_cast<std::make_signed_t<Index>>(mBlocksPerSlab - 1));
     lastNode->nextIndex = kInvalidIndex;
 
-    mAvailableSlabs.Prepend(new (alignedPtr) Slab(alignedPtr, node));
+    mAvailableSlabs.Prepend(new (alignedPtr) Slab(std::move(allocation), node));
 }
 
 }  // namespace dawn

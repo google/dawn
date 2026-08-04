@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <cstddef>
 #include <set>
 #include <vector>
 
@@ -41,7 +42,7 @@ struct Foo : public PlacementAllocated {
     uint32_t value;
 };
 
-struct alignas(256) AlignedFoo : public Foo {
+struct alignas(std::max_align_t) MaxAlignedFoo : public Foo {
     using Foo::Foo;
 };
 
@@ -82,11 +83,11 @@ TEST(SlabAllocatorTests, AllocateSequential) {
         }
     }
 
-    // Check large alignment
+    // Check max alignment
     {
-        SlabAllocator<AlignedFoo> allocator(9 * sizeof(AlignedFoo));
+        SlabAllocator<MaxAlignedFoo> allocator(9 * sizeof(MaxAlignedFoo));
 
-        std::vector<AlignedFoo*> objects;
+        std::vector<MaxAlignedFoo*> objects;
         for (uint32_t i = 0; i < 21; ++i) {
             auto* ptr = allocator.Allocate(i);
             EXPECT_TRUE(std::find(objects.begin(), objects.end(), ptr) == objects.end());
@@ -98,11 +99,11 @@ TEST(SlabAllocatorTests, AllocateSequential) {
             EXPECT_EQ(objects[i]->value, i);
 
             // Check that the alignment is correct.
-            EXPECT_TRUE(IsPtrAligned(objects[i], 256));
+            EXPECT_TRUE(IsPtrAligned(objects[i], alignof(std::max_align_t)));
         }
 
         // Deallocate all of the objects.
-        for (AlignedFoo* object : objects) {
+        for (MaxAlignedFoo* object : objects) {
             allocator.Deallocate(object);
         }
     }
@@ -252,12 +253,19 @@ TEST(SlabAllocatorTests, AllocateDeallocateMany) {
 // larger that the totalObjectBytes would allocate space for no objects but still attempt to fulfill
 // requests.
 TEST(SlabAllocatorTests, TotalObjectBytesTooSmall) {
-    SlabAllocator<AlignedFoo> allocator(sizeof(AlignedFoo) - 1);
+    SlabAllocator<Foo> allocator(sizeof(Foo) - 1);
 
-    AlignedFoo* obj = allocator.Allocate(4u);
+    Foo* obj = allocator.Allocate(4u);
     EXPECT_EQ(obj->value, 4u);
 
     allocator.Deallocate(obj);
+}
+
+TEST(SlabAllocatorDeathTest, AlignmentLargerThanMaxAlignT) {
+    struct alignas(256) OverAlignedFoo : public Foo {
+        using Foo::Foo;
+    };
+    EXPECT_DEATH_IF_SUPPORTED(SlabAllocator<OverAlignedFoo>(100), "");
 }
 
 }  // anonymous namespace
