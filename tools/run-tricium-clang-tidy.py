@@ -161,6 +161,10 @@ def main():
     if not recipe_script.is_file():
         fail(f'{recipe_script} missing. See docs/clang-tidy.md.')
 
+    # Check that outdir/args.gn exists, fail if not.
+    if not (outdir / 'args.gn').is_file():
+        fail(f'{outdir} does not have an args.gn.')
+
     run_command(['gn', 'gen', outdir])
 
     # Check that Wasm is disabled, because clang-tidy doesn't understand em++

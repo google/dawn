@@ -12,7 +12,8 @@
 * Set up a build directory for the configuration you want to run. It doesn't
   need to be built yet. This can be a native build or a cross-compiled build.
 * Run `tools/run-tricium-clang-tidy.py --help` for instructions. Running the
-  tool with `--default` takes about 12 minutes on a 10-core M1 Pro laptop.
+  tool with `--default` takes about 12 minutes on a 10-core M1 Pro laptop and
+  under 2.5 minutes on a 64-core (128-thread) cloud VM.
 * This will output a json file with the full findings, and a summary file with a
   nicely-formatted list of results.
 

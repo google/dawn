@@ -1,134 +1,176 @@
 FormatStyle: file
 Checks:
-  # Enable interesting groups of checks.
-  - abseil-*
-  - bugprone-*
-  - cert-*
-  - concurrency-*
-  - cppcoreguidelines-*
-  - google-*
-  - misc-*
-  - modernize-*
-  - performance-*
-  - portability-*
-  - readability-*
+  # List of checks: https://clang.llvm.org/extra/clang-tidy/checks/list.html
+  # Checks can be locally disabled with NOLINT/NOLINTNEXTLINE.
 
-  # Checks we're not really interested in re-enabling.
-  # - Prefers #ifdef over #if defined. Triggers a lot and doesn't really matter.
-  - -readability-use-concise-preprocessor-directives
-  # - Aliases of other checks. When adding a check here, verify that it didn't
-  #   disable the check you wanted.
-  - -cppcoreguidelines-explicit-constructor  # google-explicit-constructor
-  - -misc-explicit-constructor               # google-explicit-constructor
+  # Enable all checks, then disable irrelevant groups.
+  - "*"
+  - -altera-*                 # OpenCL
+  - -boost-*                  # Usages of Boost
+  - -linuxkernel-*            # Internals of Linux kernel
+  - -llvm-*                   # Internals of LLVM
+  - -llvmlibc-*               # Internals of libc
+  - -openmp-*                 # OpenMP
 
-  # Untriaged checks that weren't passing on a first-pass over the codebase.
-  - -abseil-faster-strsplit-delimiter
-  - -abseil-string-find-startswith
-  - -abseil-string-find-str-contains
-  - -bugprone-argument-comment
-  - -bugprone-branch-clone
-  - -bugprone-copy-constructor-init
-  - -bugprone-crtp-constructor-accessibility
+  # Disable clang-analyzer checks because loading even one of them is VERY slow.
+  # TODO(https://crbug.com/501491694): We should investigate running
+  # clang-analyzer somewhere. It seems to run more than just these checks.
+  - -clang-analyzer-*
+
+  # Checks that were estimated as P0/P1 are not disabled even though the code is
+  # not "clean" of them. It's useful for them to keep triggering on new changes.
+  # https://crbug.com/501491694 tracks fixing existing check failures.
+  # P2+ are disabled for now to reduce noise.
+
+  ## P0. Most likely to help with hardening.
+  #- -bugprone-derived-method-shadowing-base-method
+  #- -bugprone-parent-virtual-call
+  #- -bugprone-unhandled-code-paths
+  #- -bugprone-unhandled-self-assignment
+  #- -readability-suspicious-call-argument
+  ## - Memory initialization
+  #- -cppcoreguidelines-init-variables
+  #- -cppcoreguidelines-pro-type-member-init
+  ## - Other memory safety
+  #- -bugprone-casting-through-void
+  #- -bugprone-sizeof-expression
+  #- -cppcoreguidelines-owning-memory
+  ## - Arithmetic (crbug.com/515527144/dependencies)
+  #- -bugprone-implicit-widening-of-multiplication-result
+  #- -bugprone-integer-division
+  #- -bugprone-misplaced-widening-cast
+  #- -bugprone-narrowing-conversions
+  #- -bugprone-too-small-loop-variable
+  #- -cppcoreguidelines-pro-type-cstyle-cast
+  #- -modernize-avoid-c-style-cast
+  #- -modernize-use-integer-sign-comparison  # Note in most cases we'll fix this another way
+
+  ## P1. Likely to help with hardening.
+  #- -bugprone-argument-comment
+  #- -bugprone-branch-clone
+  #- -bugprone-suspicious-memory-comparison
+  #- -bugprone-suspicious-stringview-data-usage
+  #- -bugprone-swapped-arguments
+  #- -bugprone-undefined-memory-manipulation
+  #- -bugprone-use-after-move
+  #- -cppcoreguidelines-pro-bounds-pointer-arithmetic
+  #- -cppcoreguidelines-slicing
+  #- -cppcoreguidelines-virtual-class-destructor
+  #- -misc-misplaced-const
+  #- -modernize-use-ranges
+  #- -modernize-use-string-view
+  #- -readability-math-missing-parentheses
+  #- -readability-reference-to-constructed-temporary
+
+  # P2. Might help with hardening.
+  - -android-cloexec-*
   - -bugprone-easily-swappable-parameters
-  - -bugprone-forward-declaration-namespace
-  - -bugprone-forwarding-reference-overload
-  - -bugprone-infinite-loop
-  - -bugprone-integer-division
-  - -bugprone-lambda-function-name
-  - -bugprone-macro-parentheses
-  - -bugprone-misplaced-widening-cast
-  - -bugprone-move-forwarding-reference
   - -bugprone-multi-level-implicit-pointer-conversion
-  - -bugprone-narrowing-conversions
-  - -bugprone-nondeterministic-pointer-iteration-order
-  - -bugprone-parent-virtual-call
-  - -bugprone-reserved-identifier
-  - -bugprone-return-const-ref-from-parameter
-  - -bugprone-signed-char-misuse
-  - -bugprone-sizeof-expression
+  - -bugprone-signed-bitwise
   - -bugprone-string-constructor
-  - -bugprone-suspicious-include
-  - -bugprone-suspicious-memory-comparison
-  - -bugprone-suspicious-stringview-data-usage
-  - -bugprone-swapped-arguments
-  - -bugprone-switch-missing-default-case
-  - -bugprone-throwing-static-initialization
-  - -bugprone-too-small-loop-variable
-  - -bugprone-unchecked-optional-access
-  - -bugprone-unhandled-self-assignment
-  - -bugprone-unintended-char-ostream-output
-  - -bugprone-unused-local-non-trivial-variable
-  - -bugprone-use-after-move
-  - -cert-arr39-c
-  - -cert-dcl16-c
-  - -cert-dcl21-cpp
-  - -cert-dcl37-c
-  - -cert-dcl50-cpp
-  - -cert-dcl51-cpp
-  - -cert-dcl54-cpp
-  - -cert-dcl58-cpp
-  - -cert-err33-c
-  - -cert-err34-c
-  - -cert-err58-cpp
-  - -cert-exp42-c
-  - -cert-flp37-c
-  - -cert-int09-c
-  - -cert-msc30-c
-  - -cert-msc32-c
-  - -cert-msc50-cpp
-  - -cert-msc51-cpp
-  - -cert-oop11-cpp
-  - -cert-oop54-cpp
-  - -cert-str34-c
-  - -concurrency-mt-unsafe
-  - -cppcoreguidelines-avoid-c-arrays
-  - -cppcoreguidelines-avoid-const-or-ref-data-members
-  - -cppcoreguidelines-avoid-do-while
-  - -cppcoreguidelines-avoid-goto
-  - -cppcoreguidelines-avoid-magic-numbers
-  - -cppcoreguidelines-avoid-non-const-global-variables
-  - -cppcoreguidelines-c-copy-assignment-signature
-  - -cppcoreguidelines-explicit-virtual-functions
-  - -cppcoreguidelines-init-variables
-  - -cppcoreguidelines-interfaces-global-init
-  - -cppcoreguidelines-macro-usage
-  - -cppcoreguidelines-missing-std-forward
-  - -cppcoreguidelines-narrowing-conversions
-  - -cppcoreguidelines-no-malloc
-  - -cppcoreguidelines-non-private-member-variables-in-classes
   - -cppcoreguidelines-owning-memory
-  - -cppcoreguidelines-prefer-member-initializer
   - -cppcoreguidelines-pro-bounds-array-to-pointer-decay
-  - -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access
   - -cppcoreguidelines-pro-bounds-constant-array-index
-  - -cppcoreguidelines-pro-bounds-pointer-arithmetic
   - -cppcoreguidelines-pro-type-const-cast
-  - -cppcoreguidelines-pro-type-cstyle-cast
-  - -cppcoreguidelines-pro-type-reinterpret-cast
   - -cppcoreguidelines-pro-type-static-cast-downcast
   - -cppcoreguidelines-pro-type-union-access
   - -cppcoreguidelines-pro-type-vararg
+  - -misc-confusable-identifiers
+  - -modernize-avoid-c-arrays
+  - -portability-no-assembler
+  - -readability-else-after-return
+  - -readability-implicit-bool-conversion
+  - -readability-redundant-casting
+  - -readability-simplify-boolean-expr
+  # - Enums (crbug.com/515562283)
+  - -bugprone-invalid-enum-default-initialization
+  - -cppcoreguidelines-use-enum-class
+
+  # P3. Checks that could be nice, but probably don't help with hardening.
+  - -bugprone-random-generator-seed
+  - -cppcoreguidelines-pro-type-reinterpret-cast
+  - -fuchsia-statically-constructed-objects
+  - -fuchsia-virtual-inheritance
+  - -google-objc-avoid-nsobject-new
+  - -misc-multiple-inheritance
+  - -misc-override-with-different-visibility
+  - -misc-predictable-rand
+  - -modernize-avoid-variadic-functions
+  - -modernize-use-constraints
+  - -modernize-use-scoped-lock
+  - -modernize-use-structured-binding
+  - -performance-*
+  - -readability-avoid-const-params-in-decls
+  - -readability-redundant-qualified-alias
+  - -readability-redundant-qualified-alias
+  - -readability-redundant-typename
+
+  # P4. Checks we may or may not want to enable eventually.
+  - -readability-avoid-const-params-in-decls
+  - -readability-redundant-lambda-parameter-list
+  - -readability-redundant-nested-if
+
+  # P∞. Checks we're not really interested in re-enabling.
+  # - Zircon kernel code style checks.
+  - -fuchsia-default-arguments-calls
+  - -fuchsia-default-arguments-declarations
+  - -fuchsia-overloaded-operator
+  - -fuchsia-temporary-objects
+  - -zircon-temporary-objects
+  # - Style checks handled by clang-format instead.
+  - -readability-inconsistent-ifelse-braces
+  # - We don't prefer #ifdef over #if defined.
+  - -readability-use-concise-preprocessor-directives
+  # - We don't prefer [] {} over []() {} for lambdas with no arguments.
+  - -readability-redundant-lambda-parameter-list
+  # - Appears unnecessary since we use hardened libc++.
+  - -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access
+
+  # P?. Untriaged checks that weren't passing on a first-pass over the codebase.
+  # TODO(https://crbug.com/501491694): Estimate priorities for all of these.
+  - -abseil-faster-strsplit-delimiter
+  - -abseil-string-find-startswith
+  - -abseil-string-find-str-contains
+  - -bugprone-copy-constructor-init
+  - -bugprone-crtp-constructor-accessibility
+  - -bugprone-forward-declaration-namespace
+  - -bugprone-forwarding-reference-overload
+  - -bugprone-infinite-loop
+  - -bugprone-lambda-function-name
+  - -bugprone-macro-parentheses
+  - -bugprone-move-forwarding-reference
+  - -bugprone-nondeterministic-pointer-iteration-order
+  - -bugprone-reserved-identifier
+  - -bugprone-return-const-ref-from-parameter
+  - -bugprone-signed-char-misuse
+  - -bugprone-suspicious-include
+  - -bugprone-switch-missing-default-case
+  - -bugprone-throwing-static-initialization
+  - -bugprone-unchecked-optional-access
+  - -bugprone-unintended-char-ostream-output
+  - -bugprone-unused-local-non-trivial-variable
+  - -concurrency-mt-unsafe
+  - -cppcoreguidelines-avoid-const-or-ref-data-members
+  - -cppcoreguidelines-avoid-do-while
+  - -cppcoreguidelines-avoid-goto
+  - -cppcoreguidelines-avoid-non-const-global-variables
+  - -cppcoreguidelines-interfaces-global-init
+  - -cppcoreguidelines-macro-usage
+  - -cppcoreguidelines-missing-std-forward
+  - -cppcoreguidelines-no-malloc
+  - -cppcoreguidelines-prefer-member-initializer
   - -cppcoreguidelines-rvalue-reference-param-not-moved
-  - -cppcoreguidelines-slicing
   - -cppcoreguidelines-special-member-functions
-  - -cppcoreguidelines-use-default-member-init
-  - -cppcoreguidelines-virtual-class-destructor
   - -google-build-using-namespace
   - -google-default-arguments
   - -google-objc-function-naming
   - -google-objc-global-variable-declaration
   - -google-readability-avoid-underscore-in-googletest-name
-  - -google-readability-braces-around-statements
-  - -google-readability-casting
-  - -google-readability-function-size
-  - -google-readability-namespace-comments
   - -google-readability-todo
   - -google-runtime-float
   - -google-runtime-int
-  - -misc-confusable-identifiers
   - -misc-const-correctness
   - -misc-include-cleaner
-  - -misc-misplaced-const
   - -misc-new-delete-overloads
   - -misc-no-recursion
   - -misc-non-private-member-variables-in-classes
@@ -138,7 +180,6 @@ Checks:
   - -misc-unused-parameters
   - -misc-use-anonymous-namespace
   - -misc-use-internal-linkage
-  - -modernize-avoid-c-arrays
   - -modernize-concat-nested-namespaces
   - -modernize-deprecated-headers
   - -modernize-loop-convert
@@ -158,28 +199,14 @@ Checks:
   - -modernize-use-emplace
   - -modernize-use-equals-default
   - -modernize-use-equals-delete
-  - -modernize-use-integer-sign-comparison
   - -modernize-use-nodiscard
   - -modernize-use-nullptr
-  - -modernize-use-ranges
   - -modernize-use-starts-ends-with
   - -modernize-use-std-format
   - -modernize-use-std-numbers
   - -modernize-use-trailing-return-type
   - -modernize-use-transparent-functors
   - -modernize-use-using
-  - -performance-enum-size
-  - -performance-faster-string-find
-  - -performance-for-range-copy
-  - -performance-inefficient-algorithm
-  - -performance-inefficient-string-concatenation
-  - -performance-move-const-arg
-  - -performance-no-automatic-move
-  - -performance-no-int-to-ptr
-  - -performance-noexcept-move-constructor
-  - -performance-trivially-destructible
-  - -performance-unnecessary-copy-initialization
-  - -performance-unnecessary-value-param
   - -portability-template-virtual-member-function
   - -readability-avoid-nested-conditional-operator
   - -readability-avoid-return-with-void-value
@@ -189,23 +216,19 @@ Checks:
   - -readability-container-data-pointer
   - -readability-container-size-empty
   - -readability-convert-member-functions-to-static
-  - -readability-else-after-return
   - -readability-enum-initial-value
   - -readability-fn_size
   - -readability-function-cognitive-complexity
   - -readability-function-size
   - -readability-identifier-length
-  - -readability-implicit-bool-conversion
   - -readability-inconsistent-declaration-parameter-name
   - -readability-isolate-declaration
   - -readability-magic-numbers
   - -readability-make-member-function-const
-  - -readability-math-missing-parentheses
   - -readability-named-parameter
   - -readability-non-const-parameter
   - -readability-qualified-auto
   - -readability-redundant-access-specifiers
-  - -readability-redundant-casting
   - -readability-redundant-control-flow
   - -readability-redundant-declaration
   - -readability-redundant-inline-specifier
@@ -215,15 +238,87 @@ Checks:
   - -readability-redundant-smartptr-get
   - -readability-redundant-string-cstr
   - -readability-redundant-string-init
-  - -readability-reference-to-constructed-temporary
-  - -readability-simplify-boolean-expr
   - -readability-static-accessed-through-instance
   - -readability-static-definition-in-anonymous-namespace
-  - -readability-suspicious-call-argument
   - -readability-trailing-comma
   - -readability-uppercase-literal-suffix
   - -readability-use-anyofallof
   - -readability-use-std-min-max
+
+  # Aliases of other checks. If ANY of the names of a check is enabled, it will
+  # run. So we can blanket disable everything that says its an alias, EXCEPT
+  # for those which are in groups we disable.
+  # https://clang.llvm.org/extra/clang-tidy/checks/list.html#check-aliases
+  - -cert-arr39-c                                               # bugprone-sizeof-expression
+  - -cert-con36-c                                               # bugprone-spuriously-wake-up-functions
+  - -cert-con54-cpp                                             # bugprone-spuriously-wake-up-functions
+  - -cert-ctr56-cpp                                             # bugprone-pointer-arithmetic-on-polymorphic-object
+  - -cert-dcl03-c                                               # misc-static-assert
+  - -cert-dcl16-c                                               # readability-uppercase-literal-suffix
+  - -cert-dcl37-c                                               # bugprone-reserved-identifier
+  - -cert-dcl50-cpp                                             # modernize-avoid-variadic-functions
+  - -cert-dcl51-cpp                                             # bugprone-reserved-identifier
+  - -cert-dcl54-cpp                                             # misc-new-delete-overloads
+  - -cert-dcl58-cpp                                             # bugprone-std-namespace-modification
+  - -cert-dcl59-cpp                                             # misc-anonymous-namespace-in-header
+  - -cert-env33-c                                               # bugprone-command-processor
+  - -cert-err09-cpp                                             # misc-throw-by-value-catch-by-reference
+  - -cert-err33-c                                               # bugprone-unused-return-value
+  - -cert-err34-c                                               # bugprone-unchecked-string-to-number-conversion
+  - -cert-err52-cpp                                             # modernize-avoid-setjmp-longjmp
+  - -cert-err58-cpp                                             # bugprone-throwing-static-initialization
+  - -cert-err60-cpp                                             # bugprone-exception-copy-constructor-throws
+  - -cert-err61-cpp                                             # misc-throw-by-value-catch-by-reference
+  - -cert-exp42-c                                               # bugprone-suspicious-memory-comparison
+  - -cert-exp45-c                                               # bugprone-assignment-in-selection-statement
+  - -cert-fio38-c                                               # misc-non-copyable-objects
+  - -cert-flp30-c                                               # bugprone-float-loop-counter
+  - -cert-flp37-c                                               # bugprone-suspicious-memory-comparison
+  - -cert-int09-c                                               # readability-enum-initial-value
+  - -cert-mem57-cpp                                             # bugprone-default-operator-new-on-overaligned-type
+  - -cert-msc24-c                                               # bugprone-unsafe-functions
+  - -cert-msc30-c                                               # misc-predictable-rand
+  - -cert-msc32-c                                               # bugprone-random-generator-seed
+  - -cert-msc33-c                                               # bugprone-unsafe-functions
+  - -cert-msc50-cpp                                             # misc-predictable-rand
+  - -cert-msc51-cpp                                             # bugprone-random-generator-seed
+  - -cert-msc54-cpp                                             # bugprone-signal-handler
+  - -cert-oop11-cpp                                             # performance-move-constructor-init
+  - -cert-oop54-cpp                                             # bugprone-unhandled-self-assignment
+  - -cert-oop57-cpp                                             # bugprone-raw-memory-call-on-non-trivial-type
+  - -cert-oop58-cpp                                             # bugprone-copy-constructor-mutates-argument
+  - -cert-pos44-c                                               # bugprone-bad-signal-to-kill-thread
+  - -cert-pos47-c                                               # concurrency-thread-canceltype-asynchronous
+  - -cert-sig30-c                                               # bugprone-signal-handler
+  - -cert-str34-c                                               # bugprone-signed-char-misuse
+  - -cppcoreguidelines-avoid-c-arrays                           # modernize-avoid-c-arrays
+  - -cppcoreguidelines-avoid-magic-numbers                      # readability-magic-numbers
+  - -cppcoreguidelines-c-copy-assignment-signature              # misc-unconventional-assign-operator
+  - -cppcoreguidelines-explicit-constructor                     # misc-explicit-constructor
+  - -cppcoreguidelines-explicit-virtual-functions               # modernize-use-override
+  - -cppcoreguidelines-macro-to-enum                            # modernize-macro-to-enum
+  - -cppcoreguidelines-narrowing-conversions                    # bugprone-narrowing-conversions
+  - -cppcoreguidelines-noexcept-destructor                      # performance-noexcept-destructor
+  - -cppcoreguidelines-noexcept-move-operations                 # performance-noexcept-move-constructor
+  - -cppcoreguidelines-noexcept-swap                            # performance-noexcept-swap
+  - -cppcoreguidelines-non-private-member-variables-in-classes  # misc-non-private-member-variables-in-classes
+  - -cppcoreguidelines-use-default-member-init                  # modernize-use-default-member-init
+  - -fuchsia-header-anon-namespaces                             # misc-anonymous-namespace-in-header
+  - -fuchsia-multiple-inheritance                               # misc-multiple-inheritance
+  - -google-build-namespaces                                    # misc-anonymous-namespace-in-header
+  #- -google-explicit-constructor                                # misc-explicit-constructor
+  - -google-readability-braces-around-statements                # readability-braces-around-statements
+  - -google-readability-casting                                 # modernize-avoid-c-style-cast
+  - -google-readability-function-size                           # readability-function-size
+  - -llvm-else-after-return                                     # readability-else-after-return
+  - -llvm-qualified-auto                                        # readability-qualified-auto
+  - -performance-faster-string-find                             # performance-prefer-single-char-overloads
+  # - TODO(https://crbug.com/501491694): We currently use
+  #   NOLINTNEXTLINE(google-explicit-constructor) instead of
+  #   misc-explicit-constructor. Now that we enable just one copy of each check,
+  #   we should eventually switch to misc-explicit-constructor (remove this line
+  #   and re-add the google-explicit-constructor alias to the list above).
+  - -misc-explicit-constructor
 
 CheckOptions:
   - key: cppcoreguidelines-avoid-do-while.IgnoreMacros
