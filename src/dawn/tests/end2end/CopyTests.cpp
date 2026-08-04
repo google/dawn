@@ -233,11 +233,24 @@ class CopyTests {
         const utils::TextureDataCopyLayout& layout) {
         // These are some known 16 bit float values that always unpack and pack to the same bytes.
         // Pick test data from these values to provide some level of test coverage for *16Float.
-        constexpr uint8_t goodBytes[] = {
-            0x30, 0x00, 0x49, 0x00, 0x56, 0x40, 0x20, 0x00, 0x37, 0x4C, 0x42, 0x00, 0x3F, 0x6C,
-        };
+        constexpr auto goodBytes = std::to_array<uint8_t>({
+            0x30,
+            0x00,
+            0x49,
+            0x00,
+            0x56,
+            0x40,
+            0x20,
+            0x00,
+            0x37,
+            0x4C,
+            0x42,
+            0x00,
+            0x3F,
+            0x6C,
+        });
         constexpr uint32_t formatByteSize = 2;
-        constexpr uint32_t numGoodValues = sizeof(goodBytes) / sizeof(uint8_t) / formatByteSize;
+        constexpr uint32_t numGoodValues = goodBytes.size() / sizeof(uint8_t) / formatByteSize;
 
         uint32_t bytesPerTexelBlock = layout.bytesPerRow / layout.texelBlocksPerRow;
         std::vector<uint8_t> textureData(layout.byteLength);
@@ -264,12 +277,12 @@ class CopyTests {
         // These are some known 4-byte RGB9E5Ufloat values that always unpack and pack to the same
         // bytes. Pick test data from these values to provide some level of test coverage for
         // RGB9E5Ufloat.
-        constexpr uint8_t goodBytes[] = {
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
-            0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C,
-            0x1D, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28};
+        constexpr auto goodBytes = std::to_array<uint8_t>(
+            {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
+             0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C,
+             0x1D, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28});
         constexpr uint32_t formatByteSize = 4;
-        constexpr uint32_t numGoodValues = sizeof(goodBytes) / sizeof(uint8_t) / formatByteSize;
+        constexpr uint32_t numGoodValues = goodBytes.size() / sizeof(uint8_t) / formatByteSize;
         uint32_t bytesPerTexelBlock = layout.bytesPerRow / layout.texelBlocksPerRow;
         std::vector<uint8_t> textureData(layout.byteLength);
         for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
@@ -296,12 +309,13 @@ class CopyTests {
         // These are some known 4-byte RG11B10Ufloat values that always unpack and pack to the same
         // bytes. Pick test data from these values to provide some level of test coverage for
         // RG11B10Ufloat.
-        constexpr uint8_t goodBytes[] = {
+        constexpr auto goodBytes = std::to_array<uint8_t>({
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
             0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C,
-            0x1D, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28};
+            0x1D, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
+        });
         constexpr uint32_t formatByteSize = 4;
-        constexpr uint32_t numGoodValues = sizeof(goodBytes) / sizeof(uint8_t) / formatByteSize;
+        constexpr uint32_t numGoodValues = goodBytes.size() / formatByteSize;
         uint32_t bytesPerTexelBlock = layout.bytesPerRow / layout.texelBlocksPerRow;
         std::vector<uint8_t> textureData(layout.byteLength);
         for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
