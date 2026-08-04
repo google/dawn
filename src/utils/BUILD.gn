@@ -415,6 +415,17 @@ source_set("unittests") {
 ###############################################################################
 # Gtest Gmock - Handle building inside and outside of Chromium.
 ###############################################################################
+config("gtest_warnings_config") {
+  if (is_clang) {
+    cflags_cc = [
+      "-Wno-deprecated-copy-with-dtor",
+      "-Wno-sign-conversion",
+      "-Wno-ms-bitfield-padding",
+      "-Wno-zero-as-null-pointer-constant",
+    ]
+    cflags_objcc = cflags_cc
+  }
+}
 
 # When building outside of Chromium we need to define our own targets for GTest
 # and GMock. However when compiling inside of Chromium we need to reuse the
@@ -434,56 +445,23 @@ if (build_with_chromium) {
     ]
   }
 } else {
-  # When we aren't in Chromium we define out own targets based on the location
-  # of the googletest repo.
-  googletest_dir = dawn_googletest_dir
-
-  config("gtest_config") {
-    include_dirs = [
-      "${googletest_dir}/googletest",
-      "${googletest_dir}/googletest/include",
-    ]
-  }
-
-  static_library("gtest") {
-    testonly = true
-    sources = [ "${googletest_dir}/googletest/src/gtest-all.cc" ]
-    public_configs = [ ":gtest_config" ]
-  }
-
-  config("gmock_config") {
-    include_dirs = [
-      "${googletest_dir}/googlemock",
-      "${googletest_dir}/googlemock/include",
-      "${googletest_dir}/googletest/include",
-    ]
-    if (dawn_standalone && is_clang) {
-      cflags = [
-        # gmock emits deprecated-copy-dtor warnings when using
-        # ::testing::Combine
-        "-Wno-deprecated-copy-dtor",
-      ]
-    }
-  }
-
-  static_library("gmock") {
-    testonly = true
-    sources = [ "${googletest_dir}/googlemock/src/gmock-all.cc" ]
-    public_configs = [ ":gmock_config" ]
-  }
-
+  # When we aren't in Chromium we use the targets defined in
+  # //third_party/googletest
   group("gmock_and_gtest_only") {
     testonly = true
     public_deps = [
-      ":gmock",
-      ":gtest",
+      "//third_party/googletest:gmock",
+      "//third_party/googletest:gtest",
     ]
   }
 
-  static_library("gmock_main") {
+  group("gmock_main") {
     testonly = true
-    sources = [ "${googletest_dir}/googlemock/src/gmock_main.cc" ]
-    public_deps = [ ":gmock_and_gtest_only" ]
+    public_deps = [
+      "//third_party/googletest:gmock",
+      "//third_party/googletest:gmock_main",
+    ]
+    public_configs = [ ":gtest_warnings_config" ]
   }
 }
 
@@ -494,6 +472,8 @@ source_set("gmock_and_gtest") {
 
   # Dawn's gtest utils.
   sources = [ "gtest.h" ]
+
+  public_configs = [ ":gtest_warnings_config" ]
 }
 
 ###############################################################################

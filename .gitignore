@@ -27,7 +27,7 @@
 /third_party/glfw3/src
 /third_party/glslang/src/
 /third_party/google_benchmark/src
-/third_party/googletest
+/third_party/googletest/src
 /third_party/gpuweb
 /third_party/jdk/current
 /third_party/jinja2

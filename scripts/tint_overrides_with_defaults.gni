@@ -63,7 +63,7 @@ declare_args() {
 
   # Path to googletest checkout
   if (!defined(tint_googletest_dir)) {
-    tint_googletest_dir = "//third_party/googletest"
+    tint_googletest_dir = "//third_party/googletest/src"
   }
 
   # Path to spirv-headers checkout

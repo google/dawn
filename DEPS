@@ -296,7 +296,7 @@ deps = {
     'url': '{chromium_git}/external/github.com/llvm/llvm-project/compiler-rt/lib/fuzzer.git' + '@' + '3f386be62e362fa50284ebd24262966f1a93798e',
     'condition': 'dawn_standalone',
   },
-  'third_party/googletest': {
+  'third_party/googletest/src': {
     'url': '{chromium_git}/external/github.com/google/googletest@4fe3307fb2d9f86d19777c7eb0e4809e9694dde7',
     'condition': 'dawn_standalone',
   },
