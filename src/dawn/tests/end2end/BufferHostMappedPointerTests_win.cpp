@@ -74,10 +74,8 @@ class VMBackend : public BufferHostMappedPointerTestBackend {
         if (dawn::native::CheckIsErrorForTesting(buffer.Get())) {
             DeallocMemory();
         } else {
-            mDisposeCallback.Use([&](auto callback) {
-                EXPECT_CALL(*callback, Call(ptr))
-                    .WillOnce(testing::InvokeWithoutArgs(DeallocMemory));
-            });
+            mDisposeCallback.Use(
+                [&](auto callback) { EXPECT_CALL(*callback, Call(ptr)).WillOnce(DeallocMemory); });
         }
 
         return std::make_pair(std::move(buffer), hostMappedDesc.pointer);
@@ -160,10 +158,8 @@ class MMapBackend : public BufferHostMappedPointerTestBackend {
         if (dawn::native::CheckIsErrorForTesting(buffer.Get())) {
             DeallocMemory();
         } else {
-            mDisposeCallback.Use([&](auto callback) {
-                EXPECT_CALL(*callback, Call(ptr))
-                    .WillOnce(testing::InvokeWithoutArgs(DeallocMemory));
-            });
+            mDisposeCallback.Use(
+                [&](auto callback) { EXPECT_CALL(*callback, Call(ptr)).WillOnce(DeallocMemory); });
         }
 
         return std::make_pair(std::move(buffer), hostMappedDesc.pointer);
@@ -223,10 +219,8 @@ class NamedSharedMemoryBackend : public BufferHostMappedPointerTestBackend {
         if (dawn::native::CheckIsErrorForTesting(buffer.Get())) {
             DeallocMemory();
         } else {
-            mDisposeCallback.Use([&](auto callback) {
-                EXPECT_CALL(*callback, Call(ptr))
-                    .WillOnce(testing::InvokeWithoutArgs(DeallocMemory));
-            });
+            mDisposeCallback.Use(
+                [&](auto callback) { EXPECT_CALL(*callback, Call(ptr)).WillOnce(DeallocMemory); });
         }
 
         return std::make_pair(std::move(buffer), hostMappedDesc.pointer);

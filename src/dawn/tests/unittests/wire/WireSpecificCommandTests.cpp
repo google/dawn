@@ -46,7 +46,6 @@ namespace {
 
 using testing::_;
 using testing::EmptySizedString;
-using testing::InvokeWithoutArgs;
 using testing::IsNull;
 using testing::MockCppCallback;
 using testing::NonEmptySizedString;
@@ -149,11 +148,10 @@ TEST_F(WireSpecificCommandTests, UpdateMappedDataAfterDeviceDestroy_MapWriteOffs
     // Map the buffer
     buffer.MapAsync(wgpu::MapMode::Write, 4, 4, wgpu::CallbackMode::AllowProcessEvents,
                     [](wgpu::MapAsyncStatus status, wgpu::StringView) {});
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 4, 4, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
-                                           kEmptyOutputStringView);
-        }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 4, 4, _)).WillOnce([&] {
+        api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
+                                       kEmptyOutputStringView);
+    });
 
     FlushClient();
     FlushServer();

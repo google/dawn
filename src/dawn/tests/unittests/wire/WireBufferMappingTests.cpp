@@ -58,7 +58,6 @@ namespace dawn::wire {
 namespace {
 
 using testing::_;
-using testing::InvokeWithoutArgs;
 using testing::Return;
 using testing::SizedString;
 
@@ -146,10 +145,10 @@ class WireBufferMappingTests : public WireBufferMappingTestBase {
 
         EXPECT_CALL(
             api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mapMode), 0, kBufferSize, _))
-            .WillOnce(InvokeWithoutArgs([&] {
+            .WillOnce([&] {
                 api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                                kEmptyOutputStringView);
-            }));
+            });
         if (mapMode & wgpu::MapMode::Read) {
             ExpectMappedRangeCall();
         }
@@ -190,10 +189,10 @@ class WireBufferMappingTests : public WireBufferMappingTestBase {
 
         EXPECT_CALL(
             api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mapMode), 0, kBufferSize, _))
-            .WillOnce(InvokeWithoutArgs([&] {
+            .WillOnce([&] {
                 api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Error,
                                                ToOutputStringView("Validation error"));
-            }));
+            });
 
         // Ensure that the server had a chance to respond if relevant.
         FlushClient();
@@ -233,10 +232,10 @@ class WireBufferMappingTests : public WireBufferMappingTestBase {
 
         EXPECT_CALL(
             api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mapMode), 0, kBufferSize, _))
-            .WillOnce(InvokeWithoutArgs([&] {
+            .WillOnce([&] {
                 api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                                kEmptyOutputStringView);
-            }));
+            });
         if (mapMode & wgpu::MapMode::Read) {
             ExpectMappedRangeCall();
         }
@@ -282,10 +281,10 @@ TEST_P(WireBufferMappingTests, ErrorWhileMapping) {
 
     EXPECT_CALL(api,
                 OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mapMode), 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Error,
                                            ToOutputStringView("Validation error"));
-        }));
+        });
 
     FlushClient();
     FlushFutures();
@@ -398,10 +397,10 @@ TEST_P(WireBufferMappingReadTests, MappingSuccess) {
     MapAsync(wgpu::MapMode::Read, 0, kBufferSize);
 
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                            kEmptyOutputStringView);
-        }));
+        });
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&mappedBufferContents));
 
@@ -427,10 +426,10 @@ TEST_P(WireBufferMappingReadTests, MappingErrorWhileAlreadyMapped) {
     MapAsync(wgpu::MapMode::Read, 0, kBufferSize);
 
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                            kEmptyOutputStringView);
-        }));
+        });
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&mappedBufferContents));
 
@@ -446,10 +445,10 @@ TEST_P(WireBufferMappingReadTests, MappingErrorWhileAlreadyMapped) {
     MapAsync(wgpu::MapMode::Read, 0, kBufferSize);
 
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Error,
                                            ToOutputStringView("Already mapped"));
-        }));
+        });
 
     FlushClient();
     FlushFutures();
@@ -482,10 +481,10 @@ TEST_P(WireBufferMappingWriteTests, MappingSuccess) {
     uint32_t updatedContent = 4242;
 
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                            kEmptyOutputStringView);
-        }));
+        });
 
     // The map write callback always gets a buffer full of zeroes.
     FlushClient();
@@ -519,10 +518,10 @@ TEST_P(WireBufferMappingWriteTests, MappingErrorWhileAlreadyMapped) {
     MapAsync(wgpu::MapMode::Write, 0, kBufferSize);
 
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                            kEmptyOutputStringView);
-        }));
+        });
 
     FlushClient();
     FlushFutures();
@@ -535,10 +534,10 @@ TEST_P(WireBufferMappingWriteTests, MappingErrorWhileAlreadyMapped) {
     // Map failure while the buffer is already mapped
     MapAsync(wgpu::MapMode::Write, 0, kBufferSize);
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Error,
                                            ToOutputStringView("Already mapped"));
-        }));
+        });
 
     FlushClient();
     FlushFutures();
@@ -615,10 +614,10 @@ TEST_P(WireBufferMappedAtCreationTests, MapSuccess) {
     MapAsync(wgpu::MapMode::Write, 0, kBufferSize);
 
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                            kEmptyOutputStringView);
-        }));
+        });
     FlushClient();
     FlushFutures();
 
@@ -645,10 +644,10 @@ TEST_P(WireBufferMappedAtCreationTests, MapFailure) {
     // Note that the validation logic is entirely on the native side so we inject the validation
     // error here and flush the server response to mock the expected behavior.
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Error,
                                            ToOutputStringView("Already mapped"));
-        }));
+        });
 
     FlushClient();
     FlushFutures();
@@ -758,10 +757,10 @@ TEST_P(WireBufferMappingTests, MapThenDisconnect) {
 
     EXPECT_CALL(api,
                 OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mapMode), 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                            kEmptyOutputStringView);
-        }));
+        });
     if (mapMode & wgpu::MapMode::Read) {
         ExpectMappedRangeCall();
     }
@@ -795,10 +794,10 @@ TEST_P(WireBufferMappingTests, PendingMapImmediateError) {
     // Calls for the first successful map.
     EXPECT_CALL(api,
                 OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mapMode), 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                            kEmptyOutputStringView);
-        }));
+        });
     if (mapMode & wgpu::MapMode::Read) {
         ExpectMappedRangeCall();
     }
@@ -848,10 +847,10 @@ TEST_P(WireBufferMappingTests, GetMapState) {
 
         EXPECT_CALL(
             api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mapMode), 0, kBufferSize, _))
-            .WillOnce(InvokeWithoutArgs([&] {
+            .WillOnce([&] {
                 api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                                kEmptyOutputStringView);
-            }));
+            });
         MapAsync(mapMode, 0, kBufferSize);
         if (mapMode & wgpu::MapMode::Read) {
             ExpectMappedRangeCall();
@@ -891,10 +890,10 @@ TEST_P(WireBufferMappingTests, GetMapState) {
     {
         EXPECT_CALL(
             api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mapMode), 0, kBufferSize, _))
-            .WillOnce(InvokeWithoutArgs([&] {
+            .WillOnce([&] {
                 api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Error,
                                                ToOutputStringView("Error"));
-            }));
+            });
 
         // Map state should initially be unmapped.
         ASSERT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Unmapped);
@@ -930,10 +929,10 @@ TEST_P(WireBufferMappingTests, MapInsideCallbackBeforeDisconnect) {
 
     EXPECT_CALL(api,
                 OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mapMode), 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                            kEmptyOutputStringView);
-        }));
+        });
     if (mapMode & wgpu::MapMode::Read) {
         ExpectMappedRangeCall();
     }
@@ -962,10 +961,10 @@ TEST_P(WireBufferMappingTests, MapInsideCallbackBeforeDestroy) {
 
     EXPECT_CALL(api,
                 OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mapMode), 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                            kEmptyOutputStringView);
-        }));
+        });
     if (mapMode & wgpu::MapMode::Read) {
         ExpectMappedRangeCall();
     }

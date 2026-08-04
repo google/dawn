@@ -37,7 +37,6 @@ namespace dawn::wire {
 namespace {
 
 using testing::_;
-using testing::InvokeWithoutArgs;
 using testing::Return;
 
 using WireShaderModuleTestBase = WireFutureTest<wgpu::CompilationInfoCallback<void>*>;
@@ -84,12 +83,11 @@ DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireShaderModuleTests);
 TEST_P(WireShaderModuleTests, GetCompilationInfo) {
     GetCompilationInfo();
 
-    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallShaderModuleGetCompilationInfoCallback(
-                apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
-                reinterpret_cast<const WGPUCompilationInfo*>(&mCompilationInfo));
-        }));
+    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _)).WillOnce([&] {
+        api.CallShaderModuleGetCompilationInfoCallback(
+            apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
+            reinterpret_cast<const WGPUCompilationInfo*>(&mCompilationInfo));
+    });
     FlushClient();
     FlushFutures();
 
@@ -147,12 +145,11 @@ TEST_P(WireShaderModuleTests, GetCompilationInfoMixedUseOfDawnCompilationMessage
 
     GetCompilationInfo();
 
-    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallShaderModuleGetCompilationInfoCallback(
-                apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
-                reinterpret_cast<const WGPUCompilationInfo*>(&compilationInfo));
-        }));
+    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _)).WillOnce([&] {
+        api.CallShaderModuleGetCompilationInfoCallback(
+            apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
+            reinterpret_cast<const WGPUCompilationInfo*>(&compilationInfo));
+    });
     FlushClient();
     FlushFutures();
 
@@ -200,12 +197,11 @@ TEST_P(WireShaderModuleTests, GetCompilationInfoDuplicateDawnMessageStructIsDrop
 
     GetCompilationInfo();
 
-    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallShaderModuleGetCompilationInfoCallback(
-                apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
-                reinterpret_cast<const WGPUCompilationInfo*>(&compilationInfo));
-        }));
+    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _)).WillOnce([&] {
+        api.CallShaderModuleGetCompilationInfoCallback(
+            apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
+            reinterpret_cast<const WGPUCompilationInfo*>(&compilationInfo));
+    });
     FlushClient();
     FlushFutures();
 
@@ -248,12 +244,11 @@ TEST_P(WireShaderModuleTests, GetCompilationInfoDuplicateDawnMessageStructIsDrop
 TEST_P(WireShaderModuleTests, GetCompilationInfoBeforeDisconnect) {
     GetCompilationInfo();
 
-    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallShaderModuleGetCompilationInfoCallback(
-                apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
-                reinterpret_cast<const WGPUCompilationInfo*>(&mCompilationInfo));
-        }));
+    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _)).WillOnce([&] {
+        api.CallShaderModuleGetCompilationInfoCallback(
+            apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
+            reinterpret_cast<const WGPUCompilationInfo*>(&mCompilationInfo));
+    });
     FlushClient();
     FlushFutures();
 
@@ -284,12 +279,11 @@ TEST_P(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDisconnect) 
 
     GetCompilationInfo();
 
-    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallShaderModuleGetCompilationInfoCallback(
-                apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
-                reinterpret_cast<const WGPUCompilationInfo*>(&mCompilationInfo));
-        }));
+    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _)).WillOnce([&] {
+        api.CallShaderModuleGetCompilationInfoCallback(
+            apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
+            reinterpret_cast<const WGPUCompilationInfo*>(&mCompilationInfo));
+    });
     FlushClient();
     FlushFutures();
 
@@ -313,12 +307,11 @@ TEST_P(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDestruction)
 
     GetCompilationInfo();
 
-    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallShaderModuleGetCompilationInfoCallback(
-                apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
-                reinterpret_cast<const WGPUCompilationInfo*>(&mCompilationInfo));
-        }));
+    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _)).WillOnce([&] {
+        api.CallShaderModuleGetCompilationInfoCallback(
+            apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
+            reinterpret_cast<const WGPUCompilationInfo*>(&mCompilationInfo));
+    });
     FlushClient();
     FlushFutures();
 

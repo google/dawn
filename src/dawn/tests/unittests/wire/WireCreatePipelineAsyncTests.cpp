@@ -43,7 +43,6 @@ namespace {
 
 using testing::_;
 using testing::EmptySizedString;
-using testing::InvokeWithoutArgs;
 using testing::IsNull;
 using testing::NonEmptySizedString;
 using testing::NotNull;
@@ -149,12 +148,10 @@ DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireCreateRenderPipelineAsyncTest);
 TEST_P(WireCreateComputePipelineAsyncTest, CreateSuccess) {
     CreateComputePipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateComputePipelineAsyncCallback(apiDevice,
-                                                             WGPUCreatePipelineAsyncStatus_Success,
-                                                             apiPipeline, kEmptyOutputStringView);
-        }));
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _)).WillOnce([&] {
+        api.CallDeviceCreateComputePipelineAsyncCallback(
+            apiDevice, WGPUCreatePipelineAsyncStatus_Success, apiPipeline, kEmptyOutputStringView);
+    });
 
     FlushClient();
     FlushFutures();
@@ -171,12 +168,10 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateSuccess) {
 TEST_P(WireCreateRenderPipelineAsyncTest, CreateSuccess) {
     CreateRenderPipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateRenderPipelineAsyncCallback(apiDevice,
-                                                            WGPUCreatePipelineAsyncStatus_Success,
-                                                            apiPipeline, kEmptyOutputStringView);
-        }));
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _)).WillOnce([&] {
+        api.CallDeviceCreateRenderPipelineAsyncCallback(
+            apiDevice, WGPUCreatePipelineAsyncStatus_Success, apiPipeline, kEmptyOutputStringView);
+    });
 
     FlushClient();
     FlushFutures();
@@ -193,12 +188,11 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateSuccess) {
 TEST_P(WireCreateComputePipelineAsyncTest, CreateError) {
     CreateComputePipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateComputePipelineAsyncCallback(
-                apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
-                ToOutputStringView("Some error message"));
-        }));
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _)).WillOnce([&] {
+        api.CallDeviceCreateComputePipelineAsyncCallback(
+            apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
+            ToOutputStringView("Some error message"));
+    });
 
     FlushClient();
     FlushFutures();
@@ -215,12 +209,11 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateError) {
 TEST_P(WireCreateRenderPipelineAsyncTest, CreateError) {
     CreateRenderPipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateRenderPipelineAsyncCallback(
-                apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
-                ToOutputStringView("Some error message"));
-        }));
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _)).WillOnce([&] {
+        api.CallDeviceCreateRenderPipelineAsyncCallback(
+            apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
+            ToOutputStringView("Some error message"));
+    });
 
     FlushClient();
     FlushFutures();
@@ -238,12 +231,10 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateError) {
 TEST_P(WireCreateComputePipelineAsyncTest, CreateThenDisconnect) {
     CreateComputePipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateComputePipelineAsyncCallback(apiDevice,
-                                                             WGPUCreatePipelineAsyncStatus_Success,
-                                                             apiPipeline, kEmptyOutputStringView);
-        }));
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _)).WillOnce([&] {
+        api.CallDeviceCreateComputePipelineAsyncCallback(
+            apiDevice, WGPUCreatePipelineAsyncStatus_Success, apiPipeline, kEmptyOutputStringView);
+    });
 
     FlushClient();
     ExpectWireCallbacksWhen([&](auto& mockCb) {
@@ -260,12 +251,10 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateThenDisconnect) {
 TEST_P(WireCreateRenderPipelineAsyncTest, CreateThenDisconnect) {
     CreateRenderPipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateRenderPipelineAsyncCallback(apiDevice,
-                                                            WGPUCreatePipelineAsyncStatus_Success,
-                                                            apiPipeline, kEmptyOutputStringView);
-        }));
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _)).WillOnce([&] {
+        api.CallDeviceCreateRenderPipelineAsyncCallback(
+            apiDevice, WGPUCreatePipelineAsyncStatus_Success, apiPipeline, kEmptyOutputStringView);
+    });
 
     FlushClient();
     ExpectWireCallbacksWhen([&](auto& mockCb) {
@@ -312,19 +301,18 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateInvalidThenDestroyDevice) {
 
     CreateComputePipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateComputePipelineAsyncCallback(
-                apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
-                ToOutputStringView("Some error message"));
-        }));
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _)).WillOnce([&] {
+        api.CallDeviceCreateComputePipelineAsyncCallback(
+            apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
+            ToOutputStringView("Some error message"));
+    });
 
     FlushClient();
 
-    EXPECT_CALL(api, DeviceDestroy(apiDevice)).WillOnce(InvokeWithoutArgs([&] {
+    EXPECT_CALL(api, DeviceDestroy(apiDevice)).WillOnce([&] {
         api.CallDeviceLostCallback(apiDevice, WGPUDeviceLostReason_Destroyed,
                                    ToOutputStringView("Device destroyed"));
-    }));
+    });
 
     device.Destroy();
     FlushClient();
@@ -344,19 +332,18 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateInvalidThenDestroyDevice) {
 
     CreateRenderPipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateRenderPipelineAsyncCallback(
-                apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
-                ToOutputStringView("Some error message"));
-        }));
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _)).WillOnce([&] {
+        api.CallDeviceCreateRenderPipelineAsyncCallback(
+            apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
+            ToOutputStringView("Some error message"));
+    });
 
     FlushClient();
 
-    EXPECT_CALL(api, DeviceDestroy(apiDevice)).WillOnce(InvokeWithoutArgs([&] {
+    EXPECT_CALL(api, DeviceDestroy(apiDevice)).WillOnce([&] {
         api.CallDeviceLostCallback(apiDevice, WGPUDeviceLostReason_Destroyed,
                                    ToOutputStringView("Device destroyed"));
-    }));
+    });
 
     device.Destroy();
     FlushClient();

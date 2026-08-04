@@ -88,9 +88,8 @@ class MMapBackend : public BufferHostMappedPointerTestBackend {
         if (dawn::native::CheckIsErrorForTesting(buffer.Get())) {
             UnmapMemory();
         } else {
-            mDisposeCallback.Use([&](auto callback) {
-                EXPECT_CALL(*callback, Call(ptr)).WillOnce(testing::InvokeWithoutArgs(UnmapMemory));
-            });
+            mDisposeCallback.Use(
+                [&](auto callback) { EXPECT_CALL(*callback, Call(ptr)).WillOnce(UnmapMemory); });
         }
 
         return std::make_pair(std::move(buffer), hostMappedDesc.pointer);

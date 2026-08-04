@@ -92,9 +92,9 @@ class WireFutureTestWithParamsBase : public WireTest, public testing::WithParamI
     //
     //     // Call the API under test
     //     CallImpl(mockCb, this, args...);
-    //     EXPECT_CALL(api, OnAsyncAPI(...)).WillOnce(InvokeWithoutArgs([&] {
+    //     EXPECT_CALL(api, OnAsyncAPI(...)).WillOnce([&] {
     //         api.CallAsyncAPICallback(...);
-    //     }));
+    //     });
     //
     //     FlushClient();
     //     FlushFutures(); // Ensures that the callbacks are ready (if applicable), but NOT called.

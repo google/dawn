@@ -37,7 +37,6 @@ namespace {
 
 using testing::_;
 using testing::Exactly;
-using testing::InvokeWithoutArgs;
 using testing::Return;
 using testing::SizedString;
 
@@ -114,7 +113,7 @@ TEST_F(WireDisconnectTests, ServerLostThenDisconnectInCallback) {
     EXPECT_CALL(deviceLostCallback,
                 Call(_, wgpu::DeviceLostReason::Unknown, SizedString("lost reason")))
         .Times(Exactly(1))
-        .WillOnce(InvokeWithoutArgs([&] { GetWireClient()->Disconnect(); }));
+        .WillOnce([&] { GetWireClient()->Disconnect(); });
     FlushServer();
 }
 

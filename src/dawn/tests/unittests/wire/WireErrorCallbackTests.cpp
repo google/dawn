@@ -40,7 +40,6 @@ namespace {
 
 using testing::_;
 using testing::EmptySizedString;
-using testing::InvokeWithoutArgs;
 using testing::SizedString;
 
 class WireErrorCallbackTests : public WireTest {};
@@ -168,11 +167,11 @@ TEST_P(WirePopErrorScopeCallbackTests, DisconnectAfterServerReply) {
     PushErrorScope(wgpu::ErrorFilter::Validation);
     PopErrorScope();
 
-    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _)).WillOnce(InvokeWithoutArgs([&] {
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _)).WillOnce([&] {
         api.CallDevicePopErrorScopeCallback(apiDevice, WGPUPopErrorScopeStatus_Success,
                                             WGPUErrorType_Validation,
                                             ToOutputStringView("Some error message"));
-    }));
+    });
 
     FlushClient();
     FlushFutures();
@@ -189,11 +188,11 @@ TEST_P(WirePopErrorScopeCallbackTests, DisconnectAfterServerReply) {
 TEST_P(WirePopErrorScopeCallbackTests, EmptyStack) {
     PopErrorScope();
 
-    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _)).WillOnce(InvokeWithoutArgs([&] {
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _)).WillOnce([&] {
         api.CallDevicePopErrorScopeCallback(apiDevice, WGPUPopErrorScopeStatus_Error,
                                             WGPUErrorType_NoError,
                                             ToOutputStringView("No error scopes to pop"));
-    }));
+    });
 
     FlushClient();
     FlushFutures();

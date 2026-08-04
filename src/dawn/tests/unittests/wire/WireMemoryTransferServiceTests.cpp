@@ -64,7 +64,6 @@ namespace dawn::wire {
 namespace {
 
 using testing::_;
-using testing::InvokeWithoutArgs;
 using testing::MockCppCallback;
 using testing::Ne;
 using testing::NotNull;
@@ -179,9 +178,9 @@ class WireMemoryTransferServiceTestBase : public WireTest,
     void ExpectHandleSerialization(MockClientMemoryHandle* clientHandle) {
         DAWN_ASSERT(clientHandle != nullptr);
 
-        EXPECT_CALL(*clientHandle, GetSerializeCreateSize).WillOnce(InvokeWithoutArgs([&] {
+        EXPECT_CALL(*clientHandle, GetSerializeCreateSize).WillOnce([&] {
             return sizeof(mSerializeCreateInfo);
-        }));
+        });
         EXPECT_CALL(*clientHandle, SerializeCreate)
             .WillOnce(WithArg<0>([&](std::span<std::byte> serializeBuffer) {
                 // TODO(https://crbug.com/524406299) use copy_from.
@@ -278,10 +277,10 @@ class WireMemoryTransferServiceTestBase : public WireTest,
         // Mode independent expectations.
         EXPECT_CALL(api,
                     OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
-            .WillOnce(InvokeWithoutArgs([&] {
+            .WillOnce([&] {
                 api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                                kEmptyOutputStringView);
-            }));
+            });
         EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
 
         switch (mode) {
@@ -549,10 +548,10 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, Error) {
 
     // Make the server respond to the callback with an error.
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Error,
                                            ToOutputStringView("Validation error"));
-        }));
+        });
     FlushClient();
 
     // The callback should happen when the server flushes the response.
@@ -592,10 +591,10 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, DeserializeDataUpdateFailur
 
     // Set mode independent expectations for the map async call now.
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&] {
+        .WillOnce([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
                                            kEmptyOutputStringView);
-        }));
+        });
 
     switch (mode) {
         case wgpu::MapMode::Read: {
