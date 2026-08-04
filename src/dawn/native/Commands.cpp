@@ -434,7 +434,9 @@ void SkipCommand(CommandIterator* commands, Command type) {
     }
 }
 
-void AddNullTerminatedString(CommandAllocator* allocator, std::string_view s, size_t* length) {
+std::string_view AddNullTerminatedString(CommandAllocator* allocator,
+                                         std::string_view s,
+                                         size_t* length) {
     *length = s.length() + 1;
 
     // Include extra null-terminator character. The string_view may not be null-terminated. It also
@@ -445,6 +447,8 @@ void AddNullTerminatedString(CommandAllocator* allocator, std::string_view s, si
     // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
     std::ranges::copy(s, out.begin());
     out[s.length()] = '\0';
+
+    return {out.begin(), out.end()};
 }
 
 std::string_view NextNullTerminatedString(CommandIterator* iterator, size_t length) {

@@ -2204,10 +2204,11 @@ void CommandEncoder::APIPushDebugGroup(StringView groupLabelIn) {
         [&](CommandAllocator* allocator) -> MaybeError {
             PushDebugGroupCmd* cmd =
                 allocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
-            AddNullTerminatedString(allocator, groupLabel, &cmd->length);
+            std::string_view copiedLabel =
+                AddNullTerminatedString(allocator, groupLabel, &cmd->length);
 
             mDebugGroupStackSize++;
-            mEncodingContext.PushDebugGroupLabel(groupLabel);
+            mEncodingContext.PushDebugGroupLabel(copiedLabel);
 
             return {};
         },
