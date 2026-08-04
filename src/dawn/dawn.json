@@ -1905,7 +1905,8 @@
             {"value": 3, "name": "display p3"},
             {"value": 4, "name": "SMPTE_170M"},
             {"value": 5, "name": "HLG"},
-            {"value": 6, "name": "PQ"}
+            {"value": 6, "name": "PQ"},
+            {"value": 7, "name": "BT_1886"}
         ]
     },
     "color space y cb cr range dawn": {

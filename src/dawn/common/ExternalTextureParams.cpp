@@ -155,6 +155,9 @@ wgpu::Status ComputeExternalTextureParams(const wgpu::ColorSpaceDawn& srcColorSp
             srcLuminanceOf1 = kPQLuminanceOf1;
             srcEOTF = kEOTF_PQ;
             break;
+        case wgpu::ColorSpaceTransferDawn::BT_1886:
+            srcEOTF = kEOTF_BT_1886;
+            break;
         default:
             return wgpu::Status::Error;
     }

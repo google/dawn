@@ -255,6 +255,18 @@ inline constexpr TransferFunction kEOTFInverse_sRGB = {
     .f = 0.0f,
 };
 
+// https://registry.khronos.org/DataFormat/specs/1.4/dataformat.1.4.html#TRANSFER_BT1886
+// BT1886 also known as Gamma 2.4
+inline constexpr TransferFunction kEOTF_BT_1886 = {
+    .g = 2.4f,
+    .a = 1.0f,
+    .b = 0.0f,
+    .c = 0.0f,
+    .d = 0.0f,
+    .e = 0.0f,
+    .f = 0.0f,
+};
+
 // https://registry.khronos.org/DataFormat/specs/1.4/dataformat.1.4.html#TRANSFER_DCIP3
 inline constexpr TransferFunction kEOTF_DisplayP3 = {
     .g = 2.6f,

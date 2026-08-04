@@ -2138,6 +2138,27 @@ TEST_P(ExternalTextureTests, ColorSpaceConversion_Rec2020_Rec2020Linear) {
         wgpu::PredefinedColorSpace::Rec2020Linear, {0.4, 0.2, 0.1, 1}, {0.4, 0.2, 0.1});
 }
 
+// Test that ColorSpaceTransferDawn::BT_1886 is indeed Gamma 2.4.
+TEST_P(ExternalTextureTests, ColorSpaceConversion_BT1886) {
+    auto G = [](float f) -> float { return std::powf(f, 2.4); };
+
+    CheckColorSpaceConversion(
+        {
+            .primaries = wgpu::ColorSpacePrimariesDawn::Rec2020,
+            .transfer = wgpu::ColorSpaceTransferDawn::BT_1886,
+        },
+        wgpu::PredefinedColorSpace::Rec2020Linear, {0.4, 0.2, 0.1, 1}, {G(0.4), G(0.2), G(0.1)});
+
+    // Test with small values that would be in the linear ramp of sRGB (between 0 and 0.05).
+    CheckColorSpaceConversion(
+        {
+            .primaries = wgpu::ColorSpacePrimariesDawn::Rec2020,
+            .transfer = wgpu::ColorSpaceTransferDawn::BT_1886,
+        },
+        wgpu::PredefinedColorSpace::Rec2020Linear, {0.04, 0.02, 0.01, 1},
+        {G(0.04), G(0.02), G(0.01)});
+}
+
 // TODO(https://crbug.com/468988322): Add tests of ExternalTextures being used with a resource table
 // and with Vulkan's extended dynamic state as these are other interactions that could easily break.
 
