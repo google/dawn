@@ -236,6 +236,8 @@ Buffer* Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
     // SAFETY: This Span is NEVER supposed to be read/serialized, so nullptr is fine.
     // The member is not serialized because skip_serialize, but is a Span so that on
     // the deserialization side we have a well-formed member.
+    // TODO(https://crbug.com/542275488): Clean these up if when we update command extension
+    // serialization to serialize into this span directly.
     cmd.memoryHandleCreateInfo = DAWN_UNSAFE_BUFFERS(Span<const std::byte>(
         static_cast<const std::byte*>(nullptr), memoryHandleCreateInfoLength));
     cmd.result = buffer->GetWireHandle(wireClient);
@@ -497,6 +499,8 @@ void Buffer::APIUnmap() {
         // SAFETY: This Span is NEVER supposed to be read/serialized, so nullptr is fine.
         // The member is not serialized because skip_serialize, but is a Span so that on
         // the deserialization side we have a well-formed member.
+        // TODO(https://crbug.com/542275488): Clean these up if when we update command extension
+        // serialization to serialize into this span directly.
         cmd.dataUpdateInfo = DAWN_UNSAFE_BUFFERS(Span<const std::byte>(
             static_cast<const std::byte*>(nullptr), memoryDataUpdateInfoLength));
 

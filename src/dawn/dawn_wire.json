@@ -85,7 +85,7 @@
             { "name": "queue id", "type": "ObjectId", "id_type": "queue" },
             { "name": "buffer id", "type": "ObjectId", "id_type": "buffer" },
             { "name": "buffer offset", "type": "uint64_t"},
-            {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "size", "wire_is_data_only": true},
+            {"name": "data", "type": "std::byte", "annotation": "const*", "length": "size"},
             {"name": "size", "type": "size_t"}
         ],
         "queue write buffer xl": [
@@ -101,7 +101,7 @@
         "queue write texture": [
             {"name": "queue id", "type": "ObjectId", "id_type": "queue" },
             {"name": "destination", "type": "texel copy texture info", "annotation": "const*"},
-            {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "data size", "wire_is_data_only": true},
+            {"name": "data", "type": "std::byte", "annotation": "const*", "length": "data size"},
             {"name": "data size", "type": "size_t"},
             {"name": "data layout", "type": "texel copy buffer layout", "annotation": "const*"},
             {"name": "writeSize", "type": "extent 3D", "annotation": "const*"}
@@ -229,17 +229,9 @@
     "special items": {
         "_cmd_spanification_blocklist_comment": "// TODO(https://crbug.com/526537254): Drive this list down.",
         "cmd_spanification_blocklist": [
-            "QueueSubmitCmd",
-            "QueueWriteBufferCmd",
-            "QueueWriteBufferXlCmd",
-            "QueueWriteTextureCmd",
-            "QueueWriteTextureXlCmd"
         ],
         "_function_cpp_blocklist_comment": "// TODO(https://crbug.com/526537254): Drive this list down.",
         "function_cpp_blocklist": [
-            "QueueSubmit",
-            "QueueWriteBuffer",
-            "QueueWriteTexture"
         ],
         "client_side_structures": [
             "DawnWGSLBlocklist",

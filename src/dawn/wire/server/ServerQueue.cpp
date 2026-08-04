@@ -64,9 +64,11 @@ WireResult Server::DoQueueOnSubmittedWorkDone(Known<WGPUQueue> queue,
 WireResult Server::DoQueueWriteBuffer(Known<WGPUQueue> queue,
                                       Known<WGPUBuffer> buffer,
                                       uint64_t bufferOffset,
-                                      const uint8_t* data,
-                                      size_t size) {
-    mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, data, size);
+                                      Span<const volatile std::byte> data) {
+    // Note we cast away the volatile here because the data is user provided and "safe" from TOCTOU
+    // attacks, i.e. the data is/was already visible to the user.
+    mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset,
+                             const_cast<const std::byte*>(data.data()), data.size());
     return WireResult::Success;
 }
 
@@ -74,22 +76,17 @@ WireResult Server::DoQueueWriteBufferXl(Known<WGPUQueue> queue,
                                         Known<WGPUBuffer> buffer,
                                         uint64_t bufferOffset,
                                         size_t size,
-                                        size_t memoryHandleCreateInfoLength,
-                                        const std::byte* memoryHandleCreateInfo,
-                                        size_t memoryDataUpdateInfoLength,
-                                        const std::byte* memoryDataUpdateInfo) {
+                                        Span<const std::byte> memoryHandleCreateInfo,
+                                        Span<const std::byte> memoryDataUpdateInfo) {
     // Deserialize metadata produced from the client to create a companion server handle.
-    // TODO(https://crbug.com/526533386): Spanify the input API of dawn::wire::server.
-    Span<const std::byte> DAWN_UNSAFE_TODO(
-        creationData{memoryHandleCreateInfo, memoryHandleCreateInfoLength});
-    auto memoryHandle = mMemoryTransferService->DeserializeMemoryHandle(creationData);
+    auto memoryHandle = mMemoryTransferService->DeserializeMemoryHandle(memoryHandleCreateInfo);
     if (memoryHandle == nullptr) {
         return WireResult::FatalError;
     }
 
     // Try first to use GetSourceData if the memory transfer service implements
     // it. If so, we can avoid a copy.
-    std::span<std::byte> source = memoryHandle->GetSource();
+    Span<std::byte> source = memoryHandle->GetSource();
     if (!source.empty()) {
         if (source.size() < size) {
             return WireResult::FatalError;
@@ -107,10 +104,7 @@ WireResult Server::DoQueueWriteBufferXl(Known<WGPUQueue> queue,
 
     // Deserialize the flush info and flush updated data from the handle into the target of the
     // handle that's just a temporary allocation from above right now.
-    // TODO(https://crbug.com/526533386): Spanify the input API of dawn::wire::server.
-    Span<const std::byte> DAWN_UNSAFE_TODO(
-        dataUpdateInfoSpan{memoryDataUpdateInfo, memoryDataUpdateInfoLength});
-    if (!memoryHandle->DeserializeDataUpdate(dataUpdateInfoSpan, 0u, size, backingData)) {
+    if (!memoryHandle->DeserializeDataUpdate(memoryDataUpdateInfo, 0u, size, backingData)) {
         return WireResult::FatalError;
     }
 
@@ -120,11 +114,13 @@ WireResult Server::DoQueueWriteBufferXl(Known<WGPUQueue> queue,
 
 WireResult Server::DoQueueWriteTexture(Known<WGPUQueue> queue,
                                        const WGPUTexelCopyTextureInfo* destination,
-                                       const uint8_t* data,
-                                       size_t dataSize,
+                                       Span<const volatile std::byte> data,
                                        const WGPUTexelCopyBufferLayout* dataLayout,
                                        const WGPUExtent3D* writeSize) {
-    mProcs->queueWriteTexture(queue->handle, destination, data, dataSize, dataLayout, writeSize);
+    // Note we cast away the volatile here because the data is user provided and "safe" from TOCTOU
+    // attacks, i.e. the data is/was already visible to the user.
+    mProcs->queueWriteTexture(queue->handle, destination, const_cast<const std::byte*>(data.data()),
+                              data.size(), dataLayout, writeSize);
     return WireResult::Success;
 }
 
@@ -133,22 +129,17 @@ WireResult Server::DoQueueWriteTextureXl(Known<WGPUQueue> queue,
                                          size_t dataSize,
                                          const WGPUTexelCopyBufferLayout* dataLayout,
                                          const WGPUExtent3D* writeSize,
-                                         size_t memoryHandleCreateInfoLength,
-                                         const std::byte* memoryHandleCreateInfo,
-                                         size_t memoryDataUpdateInfoLength,
-                                         const std::byte* memoryDataUpdateInfo) {
+                                         Span<const std::byte> memoryHandleCreateInfo,
+                                         Span<const std::byte> memoryDataUpdateInfo) {
     // Deserialize metadata produced from the client to create a companion server handle.
-    // TODO(https://crbug.com/526533386): Spanify the input API of dawn::wire::server.
-    Span<const std::byte> DAWN_UNSAFE_TODO(
-        creationData{memoryHandleCreateInfo, memoryHandleCreateInfoLength});
-    auto memoryHandle = mMemoryTransferService->DeserializeMemoryHandle(creationData);
+    auto memoryHandle = mMemoryTransferService->DeserializeMemoryHandle(memoryHandleCreateInfo);
     if (memoryHandle == nullptr) {
         return WireResult::FatalError;
     }
 
     // Try first to use GetSourceData if the memory transfer service implements
     // it. If so, we can avoid a copy.
-    std::span<std::byte> source = memoryHandle->GetSource();
+    Span<std::byte> source = memoryHandle->GetSource();
     if (!source.empty()) {
         if (source.size() < dataSize) {
             return WireResult::FatalError;
@@ -167,10 +158,7 @@ WireResult Server::DoQueueWriteTextureXl(Known<WGPUQueue> queue,
 
     // Deserialize the flush info and flush updated data from the handle into the target of the
     // handle that's just a temporary allocation from above right now.
-    // TODO(https://crbug.com/526533386): Spanify the input API of dawn::wire::server.
-    Span<const std::byte> DAWN_UNSAFE_TODO(
-        dataUpdateInfoSpan{memoryDataUpdateInfo, memoryDataUpdateInfoLength});
-    if (!memoryHandle->DeserializeDataUpdate(dataUpdateInfoSpan, 0u, dataSize, backingData)) {
+    if (!memoryHandle->DeserializeDataUpdate(memoryDataUpdateInfo, 0u, dataSize, backingData)) {
         return WireResult::FatalError;
     }
 

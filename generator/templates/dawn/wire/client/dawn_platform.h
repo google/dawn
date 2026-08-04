@@ -85,18 +85,21 @@ namespace dawn::wire::client {
         inline WGPU{{Type}} ToAPI({{Type}}* rhs) {
             return reinterpret_cast<WGPU{{Type}}>(rhs);
         }
+        inline const WGPU{{Type}}* ToAPI({{Type}}* const* rhs) {
+            return reinterpret_cast<const WGPU{{Type}}*>(rhs);
+        }
+        inline WGPU{{Type}}* ToAPI({{Type}}** rhs) {
+            return reinterpret_cast<WGPU{{Type}}*>(rhs);
+        }
 
         inline {{Type}}* FromAPI(WGPU{{Type}} rhs) {
             return reinterpret_cast<{{Type}}*>(rhs);
         }
-        inline const {{Type}}* const* FromAPI(const WGPU{{Type}}* rhs) {
-            return reinterpret_cast<const {{Type}}* const*>(rhs);
+        inline {{Type}}* const* FromAPI(const WGPU{{Type}}* rhs) {
+            return reinterpret_cast<{{Type}}* const*>(rhs);
         }
-        inline const WGPU{{Type}}* ToAPI(const {{Type}}* const* rhs) {
-            return reinterpret_cast<const WGPU{{Type}}*>(const_cast<{{Type}}**>(rhs));
-        }
-        inline WGPU{{Type}}* ToAPI({{Type}}* const* rhs) {
-            return reinterpret_cast<WGPU{{Type}}*>(const_cast<{{Type}}**>(rhs));
+        inline {{Type}}** FromAPI(WGPU{{Type}}* rhs) {
+            return reinterpret_cast<{{Type}}**>(rhs);
         }
     {% endfor %}
 
