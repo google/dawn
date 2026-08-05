@@ -76,11 +76,82 @@ TEST(SpanTest, Constructor_Default) {
         Span<int> sp;
         EXPECT_EQ(sp.size(), 0u);
         EXPECT_EQ(sp.data(), nullptr);
+        EXPECT_TRUE(sp.empty());
+        EXPECT_EQ(sp.size_bytes(), 0u);
+    }
+    {
+        Span<int, 0> sp;
+        EXPECT_EQ(sp.size(), 0u);
+        EXPECT_EQ(sp.data(), nullptr);
+        EXPECT_TRUE(sp.empty());
+        EXPECT_EQ(sp.size_bytes(), 0u);
+    }
+    {
+        Span<int, 5> sp;
+        EXPECT_EQ(sp.size(), 0u);
+        EXPECT_EQ(sp.data(), nullptr);
+        EXPECT_TRUE(sp.empty());
+        EXPECT_EQ(sp.size_bytes(), 0u);
+
+        Span<const int, 5> sp_const = sp;
+        EXPECT_EQ(sp_const.size(), 0u);
+        EXPECT_EQ(sp_const.data(), nullptr);
+        EXPECT_TRUE(sp_const.empty());
+        EXPECT_EQ(sp_const.size_bytes(), 0u);
     }
     {
         ityp::span<Index, int> sp;
         EXPECT_EQ(sp.size(), Index{0u});
         EXPECT_EQ(sp.data(), nullptr);
+        EXPECT_TRUE(sp.empty());
+        EXPECT_EQ(sp.size_bytes(), 0u);
+    }
+    {
+        ityp::span<Index, int, Index{0u}> sp;
+        EXPECT_EQ(sp.size(), Index{0u});
+        EXPECT_EQ(sp.data(), nullptr);
+        EXPECT_TRUE(sp.empty());
+        EXPECT_EQ(sp.size_bytes(), 0u);
+    }
+    {
+        ityp::span<Index, int, Index{5u}> sp;
+        EXPECT_EQ(sp.size(), Index{0u});
+        EXPECT_EQ(sp.data(), nullptr);
+        EXPECT_TRUE(sp.empty());
+        EXPECT_EQ(sp.size_bytes(), 0u);
+
+        ityp::span<Index, const int, Index{5u}> sp_const = sp;
+        EXPECT_EQ(sp_const.size(), Index{0u});
+        EXPECT_EQ(sp_const.data(), nullptr);
+        EXPECT_TRUE(sp_const.empty());
+        EXPECT_EQ(sp_const.size_bytes(), 0u);
+    }
+}
+
+TEST(SpanDeathTest, Constructor_DefaultFixedSpan) {
+    {
+        Span<int, 5> sp;
+        EXPECT_DEATH_IF_SUPPORTED(sp.front(), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.back(), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp[0], "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.at(0), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.begin(), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.first(1), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.last(1), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.subspan(1), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.subspan(0, 1), "");
+    }
+    {
+        ityp::span<Index, int, Index{5u}> sp;
+        EXPECT_DEATH_IF_SUPPORTED(sp.front(), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.back(), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp[Index{0u}], "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.at(Index{0u}), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.begin(), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.first(Index{1u}), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.last(Index{1u}), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.subspan(Index{1u}), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.subspan(Index{0u}, Index{1u}), "");
     }
 }
 
@@ -111,6 +182,28 @@ TEST(SpanTest, Constructor_PointerAndSize) {
         EXPECT_EQ(sp.data(), data);
     }
 
+    // T* for Span<T, N>
+    {
+        // SAFETY: Test for the unsafe constructor.
+        Span<int, 3> DAWN_UNSAFE_BUFFERS(sp{&data[0]});
+        EXPECT_EQ(sp.size(), 3u);
+        EXPECT_EQ(sp.data(), data);
+    }
+    // const T* for Span<const T, N>
+    {
+        // SAFETY: Test for the unsafe constructor.
+        Span<const int, 3> DAWN_UNSAFE_BUFFERS(sp{&constData[0]});
+        EXPECT_EQ(sp.size(), 3u);
+        EXPECT_EQ(sp.data(), constData);
+    }
+    // T* for Span<const T, N>
+    {
+        // SAFETY: Test for the unsafe constructor.
+        Span<const int, 3> DAWN_UNSAFE_BUFFERS(sp{&data[0]});
+        EXPECT_EQ(sp.size(), 3u);
+        EXPECT_EQ(sp.data(), data);
+    }
+
     // T* + size for ityp::span<T, ...>
     {
         // SAFETY: Test for the unsafe constructor.
@@ -132,6 +225,28 @@ TEST(SpanTest, Constructor_PointerAndSize) {
         EXPECT_EQ(sp.size(), Index{3u});
         EXPECT_EQ(sp.data(), data);
     }
+
+    // T* for ityp::span<T, ..., N>
+    {
+        // SAFETY: Test for the unsafe constructor.
+        ityp::span<Index, int, Index{3u}> DAWN_UNSAFE_BUFFERS(sp{&data[0]});
+        EXPECT_EQ(sp.size(), Index{3u});
+        EXPECT_EQ(sp.data(), data);
+    }
+    // const T* for ityp::span<const T, ..., N>
+    {
+        // SAFETY: Test for the unsafe constructor.
+        ityp::span<Index, const int, Index{3u}> DAWN_UNSAFE_BUFFERS(sp{&constData[0]});
+        EXPECT_EQ(sp.size(), Index{3u});
+        EXPECT_EQ(sp.data(), constData);
+    }
+    // T* for ityp::span<const T, ..., N>
+    {
+        // SAFETY: Test for the unsafe constructor.
+        ityp::span<Index, const int, Index{3u}> DAWN_UNSAFE_BUFFERS(sp{&data[0]});
+        EXPECT_EQ(sp.size(), Index{3u});
+        EXPECT_EQ(sp.data(), data);
+    }
 }
 
 TEST(SpanDeathTest, Constructor_PointerAndSizeOversizedIndex) {
@@ -144,6 +259,13 @@ TEST(SpanDeathTest, Constructor_PointerAndSizeOversizedIndex) {
     // SAFETY: Test for the unsafe constructor.
     DAWN_UNSAFE_BUFFERS(EXPECT_DEATH_IF_SUPPORTED(
         (ityp::span<Index64, const int>(kSpanData.data(), kHugeSize)), ""));
+}
+
+TEST(SpanDeathTest, Constructor_PointerAndSizeDynamicExtent) {
+    // DynamicExtent is invalid because it's reserved as a sentinel value.
+    // SAFETY: Test for the unsafe constructor.
+    DAWN_UNSAFE_BUFFERS(EXPECT_DEATH_IF_SUPPORTED(
+        (ityp::span<Index8, const int>(kSpanData.data(), detail::DynamicExtent<Index8>)), ""));
 }
 
 TEST(SpanTest, Constructor_TwoIterators) {
@@ -172,6 +294,28 @@ TEST(SpanTest, Constructor_TwoIterators) {
         EXPECT_EQ(sp.data(), data.data());
     }
 
+    // 2 x iterator for Span<T, N>
+    {
+        // SAFETY: Test for the unsafe constructor.
+        Span<int, 3> DAWN_UNSAFE_BUFFERS(sp{data.begin(), data.end()});
+        EXPECT_EQ(sp.size(), 3u);
+        EXPECT_EQ(sp.data(), data.data());
+    }
+    // 2 x const_iterator for Span<const T, N>
+    {
+        // SAFETY: Test for the unsafe constructor.
+        Span<const int, 3> DAWN_UNSAFE_BUFFERS(sp{constData.begin(), constData.end()});
+        EXPECT_EQ(sp.size(), 3u);
+        EXPECT_EQ(sp.data(), constData.data());
+    }
+    // 2 x iterator for Span<const T, N>
+    {
+        // SAFETY: Test for the unsafe constructor.
+        Span<const int, 3> DAWN_UNSAFE_BUFFERS(sp{data.begin(), data.end()});
+        EXPECT_EQ(sp.size(), 3u);
+        EXPECT_EQ(sp.data(), data.data());
+    }
+
     // 2 x iterator for ityp::span<T, ...>
     {
         // SAFETY: Test for the unsafe constructor.
@@ -193,12 +337,37 @@ TEST(SpanTest, Constructor_TwoIterators) {
         EXPECT_EQ(sp.size(), Index{3u});
         EXPECT_EQ(sp.data(), data.data());
     }
+
+    // 2 x iterator for ityp::span<T, ..., N>
+    {
+        // SAFETY: Test for the unsafe constructor.
+        ityp::span<Index, int, Index{3u}> DAWN_UNSAFE_BUFFERS(sp{data.begin(), data.end()});
+        EXPECT_EQ(sp.size(), Index{3u});
+        EXPECT_EQ(sp.data(), data.data());
+    }
+    // 2 x const_iterator for ityp::span<const T, ..., N>
+    {
+        // SAFETY: Test for the unsafe constructor.
+        ityp::span<Index, const int, Index{3u}> DAWN_UNSAFE_BUFFERS(
+            sp{constData.begin(), constData.end()});
+        EXPECT_EQ(sp.size(), Index{3u});
+        EXPECT_EQ(sp.data(), constData.data());
+    }
+    // 2 x iterator for ityp::span<const T, ..., N>
+    {
+        // SAFETY: Test for the unsafe constructor.
+        ityp::span<Index, const int, Index{3u}> DAWN_UNSAFE_BUFFERS(sp{data.begin(), data.end()});
+        EXPECT_EQ(sp.size(), Index{3u});
+        EXPECT_EQ(sp.data(), data.data());
+    }
 }
 
 TEST(SpanDeathTest, Constructor_TwoIteratorsInverted) {
     std::array<int, 3> data = {1, 2, 3};
     // SAFETY: Test for the unsafe constructor.
     DAWN_UNSAFE_BUFFERS(EXPECT_DEATH_IF_SUPPORTED((Span<int>{data.end(), data.begin()}), ""));
+    // SAFETY: Test for the unsafe constructor.
+    DAWN_UNSAFE_BUFFERS(EXPECT_DEATH_IF_SUPPORTED((Span<int, 3>{data.end(), data.begin()}), ""));
 }
 
 TEST(SpanDeathTest, Constructor_TwoIteratorsLargerThanIndexType) {
@@ -209,8 +378,14 @@ TEST(SpanDeathTest, Constructor_TwoIteratorsLargerThanIndexType) {
     DAWN_UNSAFE_BUFFERS(
         EXPECT_DEATH_IF_SUPPORTED((ityp::span<Index8, int>(data.begin(), data.end())), ""));
 
-    // Fits exactly in uint8_t for indexing.
+    // 255 is invalid because it's reserved as a sentinel value.
     data.resize(255);
+    // SAFETY: Test for the unsafe constructor.
+    DAWN_UNSAFE_BUFFERS(
+        EXPECT_DEATH_IF_SUPPORTED((ityp::span<Index8, int>(data.begin(), data.end())), ""));
+
+    // Fits in uint8_t for indexing without matching DynamicExtent.
+    data.resize(254);
 
     // SAFETY: Test for the unsafe constructor.
     DAWN_UNSAFE_BUFFERS((ityp::span<Index8, int>(data.begin(), data.end())));
@@ -232,6 +407,32 @@ TEST(SpanTest, ConstructorFromCompatibleRange) {
         Span<const int> sp{data};
         EXPECT_EQ(sp.size(), data.size());
         EXPECT_EQ(sp.data(), data.data());
+    }
+    {
+        std::array<int, 3> data = {1, 2, 3};
+        Span<int, 3> sp{data};
+        EXPECT_EQ(sp.size(), data.size());
+        EXPECT_EQ(sp.data(), data.data());
+    }
+    {
+        const std::array<int, 3> data = {1, 2, 3};
+        Span<const int, 3> sp{data};
+        EXPECT_EQ(sp.size(), data.size());
+        EXPECT_EQ(sp.data(), data.data());
+    }
+    {
+        int data[] = {1, 2, 3};
+        Span<int, 3> sp{data};
+        EXPECT_EQ(sp.size(), 3u);
+        EXPECT_EQ(sp.data(), data);
+        static_assert(sizeof(sp) == sizeof(int*));
+    }
+    {
+        const int data[] = {1, 2, 3};
+        Span<const int, 3> sp{data};
+        EXPECT_EQ(sp.size(), 3u);
+        EXPECT_EQ(sp.data(), data);
+        static_assert(sizeof(sp) == sizeof(const int*));
     }
     {
         std::vector<int> data{{1, 2, 3}};
@@ -274,21 +475,26 @@ TEST(SpanTest, ConstructorFromCompatibleRange) {
 
 TEST(SpanTest, CopyConstructor) {
     std::array<int, 3> data = {1, 2, 3};
-    Span<int> sp{data};
+    Span<int, 3> sp{data};
 
     Span<int> sp2{sp};
     ASSERT_EQ(sp.data(), sp2.data());
     ASSERT_EQ(sp.size(), sp2.size());
 
     // Actually calls the constructor from a range.
-    Span<const int> sp3{sp};
+    Span<const int> sp3{sp2};
     ASSERT_EQ(sp.data(), sp3.data());
     ASSERT_EQ(sp.size(), sp3.size());
+
+    // Actually calls the constructor from a range.
+    Span<const int, 3> sp4{sp};
+    ASSERT_EQ(sp.data(), sp4.data());
+    ASSERT_EQ(sp.size(), sp4.size());
 }
 
 TEST(SpanTest, CopyAssignment) {
     std::array<int, 3> data = {1, 2, 3};
-    Span<int> sp{data};
+    Span<int, 3> sp{data};
 
     Span<int> sp2;
     sp2 = sp;
@@ -297,7 +503,7 @@ TEST(SpanTest, CopyAssignment) {
 
     // Actually calls the constructor from a range and then assigns.
     Span<const int> sp3;
-    sp3 = sp;
+    sp3 = sp2;
     ASSERT_EQ(sp.data(), sp3.data());
     ASSERT_EQ(sp.size(), sp3.size());
 }
@@ -336,7 +542,17 @@ TEST(SpanTest, BeginEnd) {
         ASSERT_EQ(&*sp.end(), &*kSpanData.end());
     }
     {
+        Span<const int, 5> sp(FakeRange{});
+        ASSERT_EQ(&*sp.begin(), &*kSpanData.begin());
+        ASSERT_EQ(&*sp.end(), &*kSpanData.end());
+    }
+    {
         ityp::span<Index, const int> sp(FakeTypedRange{});
+        ASSERT_EQ(&*sp.begin(), &*kSpanData.begin());
+        ASSERT_EQ(&*sp.end(), &*kSpanData.end());
+    }
+    {
+        ityp::span<Index, const int, Index{5u}> sp(FakeTypedRange{});
         ASSERT_EQ(&*sp.begin(), &*kSpanData.begin());
         ASSERT_EQ(&*sp.end(), &*kSpanData.end());
     }
@@ -346,6 +562,15 @@ TEST(SpanTest, BeginEndForIteration) {
     // Uses begin/end
     {
         Span<const int> sp(FakeRange{});
+
+        int expected = 1;
+        for (const int& i : sp) {
+            EXPECT_EQ(i, expected);
+            expected++;
+        }
+    }
+    {
+        Span<const int, 5> sp(FakeRange{});
 
         int expected = 1;
         for (const int& i : sp) {
@@ -364,10 +589,28 @@ TEST(SpanTest, BeginEndForIteration) {
             expected++;
         }
     }
+    {
+        const Span<const int, 5> sp(FakeRange{});
+
+        int expected = 1;
+        for (const int& i : sp) {
+            EXPECT_EQ(i, expected);
+            expected++;
+        }
+    }
 
     // ityp, uses begin/end
     {
         ityp::span<Index, const int> sp(FakeTypedRange{});
+
+        int expected = 1;
+        for (const int& i : sp) {
+            EXPECT_EQ(i, expected);
+            expected++;
+        }
+    }
+    {
+        ityp::span<Index, const int, Index{5u}> sp(FakeTypedRange{});
 
         int expected = 1;
         for (const int& i : sp) {
@@ -386,6 +629,15 @@ TEST(SpanTest, BeginEndForIteration) {
             expected++;
         }
     }
+    {
+        const ityp::span<Index, const int, Index{5u}> sp(FakeTypedRange{});
+
+        int expected = 1;
+        for (const int& i : sp) {
+            EXPECT_EQ(i, expected);
+            expected++;
+        }
+    }
 }
 
 TEST(SpanTest, FrontBack) {
@@ -395,16 +647,33 @@ TEST(SpanTest, FrontBack) {
         EXPECT_EQ(&sp.back(), &kSpanData.back());
     }
     {
+        Span<const int, 5> sp(FakeRange{});
+        EXPECT_EQ(&sp.front(), &kSpanData.front());
+        EXPECT_EQ(&sp.back(), &kSpanData.back());
+    }
+    {
         ityp::span<Index, const int> sp(FakeTypedRange{});
+        EXPECT_EQ(&sp.front(), &kSpanData.front());
+        EXPECT_EQ(&sp.back(), &kSpanData.back());
+    }
+    {
+        ityp::span<Index, const int, Index{5u}> sp(FakeTypedRange{});
         EXPECT_EQ(&sp.front(), &kSpanData.front());
         EXPECT_EQ(&sp.back(), &kSpanData.back());
     }
 }
 
 TEST(SpanDeathTest, FrontBackOfEmpty) {
-    Span<const int> sp;
-    EXPECT_DEATH_IF_SUPPORTED(sp.front(), "");
-    EXPECT_DEATH_IF_SUPPORTED(sp.back(), "");
+    {
+        Span<const int> sp;
+        EXPECT_DEATH_IF_SUPPORTED(sp.front(), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.back(), "");
+    }
+    {
+        Span<const int, 0> sp;
+        EXPECT_DEATH_IF_SUPPORTED(sp.front(), "");
+        EXPECT_DEATH_IF_SUPPORTED(sp.back(), "");
+    }
 }
 
 TEST(SpanTest, Indexing) {
@@ -416,7 +685,22 @@ TEST(SpanTest, Indexing) {
         }
     }
     {
+        Span<const int, 5> sp(FakeRange{});
+        for (size_t i = 0; i < kSpanData.size(); i++) {
+            EXPECT_EQ(&sp.at(i), &kSpanData[i]);
+            EXPECT_EQ(&sp[i], &kSpanData[i]);
+        }
+    }
+    {
         ityp::span<Index, const int> sp(FakeTypedRange{});
+        for (size_t i = 0; i < kSpanData.size(); i++) {
+            Index id{static_cast<uint32_t>(i)};
+            EXPECT_EQ(&sp.at(id), &kSpanData[i]);
+            EXPECT_EQ(&sp[id], &kSpanData[i]);
+        }
+    }
+    {
+        ityp::span<Index, const int, Index{5u}> sp(FakeTypedRange{});
         for (size_t i = 0; i < kSpanData.size(); i++) {
             Index id{static_cast<uint32_t>(i)};
             EXPECT_EQ(&sp.at(id), &kSpanData[i]);
@@ -433,6 +717,10 @@ TEST(SpanDeathTest, IndexingOOB) {
     Span<const int> spEmpty;
     EXPECT_DEATH_IF_SUPPORTED(spEmpty.at(0u), "");
     EXPECT_DEATH_IF_SUPPORTED(spEmpty[0u], "");
+
+    Span<const int, 0> spFixedEmpty;
+    EXPECT_DEATH_IF_SUPPORTED(spFixedEmpty.at(0u), "");
+    EXPECT_DEATH_IF_SUPPORTED(spFixedEmpty[0u], "");
 }
 
 TEST(SpanDeathTest, IndexingOversizedIndex) {
@@ -459,6 +747,10 @@ TEST(SpanTest, Empty) {
     // SAFETY: Test for the unsafe constructor.
     ASSERT_TRUE(DAWN_UNSAFE_BUFFERS((Span<const int>{kSpanData.data(), 0u})).empty());
 
+    ASSERT_TRUE((Span<const int, 0>{}.empty()));
+    // SAFETY: Test for the unsafe constructor.
+    ASSERT_TRUE(DAWN_UNSAFE_BUFFERS((Span<const int, 0>{kSpanData.data()})).empty());
+
     ASSERT_FALSE((ityp::span<Index, const int>{FakeTypedRange{}}.empty()));
     ASSERT_FALSE(
         // SAFETY: Test for the unsafe constructor.
@@ -468,17 +760,26 @@ TEST(SpanTest, Empty) {
     ASSERT_TRUE(
         // SAFETY: Test for the unsafe constructor.
         DAWN_UNSAFE_BUFFERS((ityp::span<Index, const int>{kSpanData.data(), Index{0u}})).empty());
+
+    ASSERT_TRUE((ityp::span<Index, const int, Index{0u}>{}.empty()));
+    ASSERT_TRUE(
+        // SAFETY: Test for the unsafe constructor.
+        DAWN_UNSAFE_BUFFERS((ityp::span<Index, const int, Index{0u}>{kSpanData.data(), Index{0u}}))
+            .empty());
 }
 
 TEST(SpanTest, SizeBytes) {
     ASSERT_EQ(Span<int>{}.size_bytes(), 0u);
     ASSERT_EQ((ityp::span<Index, int>{}.size_bytes()), 0u);
+    ASSERT_EQ((ityp::span<Index, int, Index{0u}>{}.size_bytes()), 0u);
 
     std::array<int, 3> ints{};
     ASSERT_EQ(Span<int>{ints}.size_bytes(), 3 * sizeof(int));
+    ASSERT_EQ((Span<int, 3>{ints}.size_bytes()), 3 * sizeof(int));
 
     std::array<double, 10> doubles{};
     ASSERT_EQ(Span<double>{doubles}.size_bytes(), 10 * sizeof(double));
+    ASSERT_EQ((Span<double, 10>{doubles}.size_bytes()), 10 * sizeof(double));
 }
 
 TEST(SpanTest, FirstLast) {
@@ -499,9 +800,43 @@ TEST(SpanTest, FirstLast) {
         EXPECT_EQ(last2.data(), &sp.at(sp.size() - 2));
         EXPECT_EQ(last2.size(), 2u);
     }
+    {
+        Span<const int, 5> sp{FakeRange()};
+        Span<const int> first0 = sp.first(0);
+        Span<const int> first2 = sp.first(2);
+        Span<const int> last0 = sp.last(0);
+        Span<const int> last2 = sp.last(2);
+
+        EXPECT_EQ(first0.data(), sp.data());
+        EXPECT_EQ(first0.size(), 0u);
+        EXPECT_EQ(first2.data(), sp.data());
+        EXPECT_EQ(first2.size(), 2u);
+
+        EXPECT_EQ(last0.data(), &*sp.end());
+        EXPECT_EQ(last0.size(), 0u);
+        EXPECT_EQ(last2.data(), &sp.at(sp.size() - 2));
+        EXPECT_EQ(last2.size(), 2u);
+    }
 
     {
         ityp::span<Index, const int> sp{FakeTypedRange()};
+        ityp::span<Index, const int> first0 = sp.first(Index{0u});
+        ityp::span<Index, const int> first2 = sp.first(Index{2u});
+        ityp::span<Index, const int> last0 = sp.last(Index{0u});
+        ityp::span<Index, const int> last2 = sp.last(Index{2u});
+
+        EXPECT_EQ(first0.data(), sp.data());
+        EXPECT_EQ(first0.size(), Index{0u});
+        EXPECT_EQ(first2.data(), sp.data());
+        EXPECT_EQ(first2.size(), Index{2u});
+
+        EXPECT_EQ(last0.data(), &*sp.end());
+        EXPECT_EQ(last0.size(), Index{0u});
+        EXPECT_EQ(last2.data(), &sp.at(sp.size() - Index{2u}));
+        EXPECT_EQ(last2.size(), Index{2u});
+    }
+    {
+        ityp::span<Index, const int, Index{5u}> sp{FakeTypedRange()};
         ityp::span<Index, const int> first0 = sp.first(Index{0u});
         ityp::span<Index, const int> first2 = sp.first(Index{2u});
         ityp::span<Index, const int> last0 = sp.last(Index{0u});
@@ -541,7 +876,27 @@ TEST(SpanTest, Subspan1Arg) {
         EXPECT_EQ(subspan2.size(), sp.size() - 2);
     }
     {
+        Span<const int, 5> sp{FakeRange()};
+        Span<const int> subspan0 = sp.subspan(0);
+        Span<const int> subspan2 = sp.subspan(2);
+
+        EXPECT_EQ(subspan0.data(), sp.data());
+        EXPECT_EQ(subspan0.size(), sp.size());
+        EXPECT_EQ(subspan2.data(), &sp.at(2));
+        EXPECT_EQ(subspan2.size(), sp.size() - 2);
+    }
+    {
         ityp::span<Index, const int> sp{FakeTypedRange()};
+        ityp::span<Index, const int> subspan0 = sp.subspan(Index{0u});
+        ityp::span<Index, const int> subspan2 = sp.subspan(Index{2u});
+
+        EXPECT_EQ(subspan0.data(), sp.data());
+        EXPECT_EQ(subspan0.size(), sp.size());
+        EXPECT_EQ(subspan2.data(), &sp.at(Index{2u}));
+        EXPECT_EQ(subspan2.size(), sp.size() - Index{2u});
+    }
+    {
+        ityp::span<Index, const int, Index{5u}> sp{FakeTypedRange()};
         ityp::span<Index, const int> subspan0 = sp.subspan(Index{0u});
         ityp::span<Index, const int> subspan2 = sp.subspan(Index{2u});
 
@@ -553,10 +908,16 @@ TEST(SpanTest, Subspan1Arg) {
 }
 
 TEST(SpanDeathTest, Subspan1ArgOOB) {
-    Span<const int> sp{FakeRange()};
-
-    sp.subspan(sp.size());
-    EXPECT_DEATH_IF_SUPPORTED(sp.subspan(sp.size() + 1), "");
+    {
+        Span<const int> sp{FakeRange()};
+        sp.subspan(sp.size());
+        EXPECT_DEATH_IF_SUPPORTED(sp.subspan(sp.size() + 1), "");
+    }
+    {
+        Span<const int, 5> sp{FakeRange()};
+        sp.subspan(sp.size());
+        EXPECT_DEATH_IF_SUPPORTED(sp.subspan(sp.size() + 1), "");
+    }
 }
 
 TEST(SpanTest, Subspan2Args) {
@@ -571,7 +932,28 @@ TEST(SpanTest, Subspan2Args) {
         EXPECT_EQ(subspan3_2.size(), 2u);
     }
     {
+        Span<const int, 5> sp{FakeRange()};
+        Span<const int> subspan0_2 = sp.subspan(0, 2);
+        Span<const int> subspan3_2 = sp.subspan(3, 2);
+
+        EXPECT_EQ(subspan0_2.data(), sp.data());
+        EXPECT_EQ(subspan0_2.size(), 2u);
+        EXPECT_EQ(subspan3_2.data(), &sp.at(3));
+        EXPECT_EQ(subspan3_2.size(), 2u);
+    }
+
+    {
         ityp::span<Index, const int> sp{FakeTypedRange()};
+        ityp::span<Index, const int> subspan0_2 = sp.subspan(Index{0u}, Index{2u});
+        ityp::span<Index, const int> subspan3_2 = sp.subspan(Index{3u}, Index{2u});
+
+        EXPECT_EQ(subspan0_2.data(), sp.data());
+        EXPECT_EQ(subspan0_2.size(), Index{2u});
+        EXPECT_EQ(subspan3_2.data(), &sp.at(Index{3u}));
+        EXPECT_EQ(subspan3_2.size(), Index{2u});
+    }
+    {
+        ityp::span<Index, const int, Index{5u}> sp{FakeTypedRange()};
         ityp::span<Index, const int> subspan0_2 = sp.subspan(Index{0u}, Index{2u});
         ityp::span<Index, const int> subspan3_2 = sp.subspan(Index{3u}, Index{2u});
 
@@ -648,6 +1030,32 @@ TEST(SpanTest, SpanAsBytes) {
         EXPECT_EQ(vbsp.data(), reinterpret_cast<const volatile std::byte*>(vsp.data()));
         auto vwbsp = SpanAsWritableBytes(vsp);
         static_assert(std::is_same_v<Span<volatile std::byte>, decltype(vwbsp)>);
+        EXPECT_EQ(vwbsp.size(), vsp.size_bytes());
+        EXPECT_EQ(vwbsp.data(), reinterpret_cast<volatile std::byte*>(vsp.data()));
+    }
+
+    // Fixed-extent span.
+    {
+        std::array<int, 3> ints{};
+
+        Span<int, 3> sp{ints};
+        auto bsp = SpanAsBytes(sp);
+        static_assert(std::is_same_v<Span<const std::byte, sizeof(int) * 3u>, decltype(bsp)>);
+        EXPECT_EQ(bsp.size(), sp.size_bytes());
+        EXPECT_EQ(bsp.data(), reinterpret_cast<const std::byte*>(sp.data()));
+        auto wbsp = SpanAsWritableBytes(sp);
+        static_assert(std::is_same_v<Span<std::byte, sizeof(int) * 3u>, decltype(wbsp)>);
+        EXPECT_EQ(wbsp.size(), sp.size_bytes());
+        EXPECT_EQ(wbsp.data(), reinterpret_cast<std::byte*>(sp.data()));
+
+        Span<volatile int, 3> vsp{ints};
+        auto vbsp = SpanAsBytes(vsp);
+        static_assert(
+            std::is_same_v<Span<const volatile std::byte, sizeof(int) * 3u>, decltype(vbsp)>);
+        EXPECT_EQ(vbsp.size(), vsp.size_bytes());
+        EXPECT_EQ(vbsp.data(), reinterpret_cast<const volatile std::byte*>(vsp.data()));
+        auto vwbsp = SpanAsWritableBytes(vsp);
+        static_assert(std::is_same_v<Span<volatile std::byte, sizeof(int) * 3u>, decltype(vwbsp)>);
         EXPECT_EQ(vwbsp.size(), vsp.size_bytes());
         EXPECT_EQ(vwbsp.data(), reinterpret_cast<volatile std::byte*>(vsp.data()));
     }
@@ -779,6 +1187,49 @@ TEST(SpanTest, ReintepretSpans) {
     }
 }
 
+TEST(SpanTest, ReintepretFixedExtentSpans) {
+    // Basic usages with varying const/volatile and type-ness.
+    {
+        alignas(uint32_t) std::array<std::byte, 8> bytes{};
+        Span<std::byte, 8> bsp{bytes};
+
+        auto sp16 = ReinterpretSpan<uint16_t>(bsp);
+        static_assert(std::is_same_v<Span<uint16_t, 4>, decltype(sp16)>);
+        EXPECT_EQ(sp16.data(), reinterpret_cast<uint16_t*>(bsp.data()));
+
+        auto sp32 = ReinterpretSpan<const uint32_t>(bsp);
+        static_assert(std::is_same_v<Span<const uint32_t, 2>, decltype(sp32)>);
+        EXPECT_EQ(sp32.data(), reinterpret_cast<const uint32_t*>(bsp.data()));
+
+        auto sp16_typed = ReinterpretSpan<volatile uint16_t, Index>(bsp);
+        static_assert(
+            std::is_same_v<ityp::span<Index, volatile uint16_t, Index{4u}>, decltype(sp16_typed)>);
+        EXPECT_EQ(sp16_typed.data(), reinterpret_cast<volatile uint16_t*>(bsp.data()));
+
+        auto sp32_typed = ReinterpretSpan<const volatile uint32_t, Index>(bsp);
+        static_assert(std::is_same_v<ityp::span<Index, const volatile uint32_t, Index{2u}>,
+                                     decltype(sp32_typed)>);
+        EXPECT_EQ(sp32_typed.data(), reinterpret_cast<const volatile uint32_t*>(bsp.data()));
+    }
+    // Round-trip data integrity with SpanAs*Bytes.
+    {
+        std::array<int, 3> ints{1, 2, 3};
+        Span<int, 3> sp{ints};
+        {
+            Span<const std::byte, sizeof(int) * 3u> bsp = SpanAsBytes(sp);
+            Span<const int, 3> sp2 = ReinterpretSpan<const int>(bsp);
+            EXPECT_EQ(sp2.data(), sp.data());
+            EXPECT_TRUE(std::ranges::equal(sp2, sp));
+        }
+        {
+            Span<std::byte, sizeof(int) * 3u> wbsp = SpanAsWritableBytes(sp);
+            Span<int, 3> sp2 = ReinterpretSpan<int>(wbsp);
+            EXPECT_EQ(sp2.data(), sp.data());
+            EXPECT_TRUE(std::ranges::equal(sp2, sp));
+        }
+    }
+}
+
 TEST(SpanDeathTest, ReinterpretSpan) {
     // Check unaligned empty span.
     // Empty slice (e.g. data() != nullptr, but size() == 0).
@@ -813,12 +1264,12 @@ TEST(SpanTest, SpanFromRef) {
         uint32_t i = 0;
 
         auto sp = SpanFromRef(i);
-        static_assert(std::is_same_v<Span<uint32_t>, decltype(sp)>);
+        static_assert(std::is_same_v<Span<uint32_t, 1>, decltype(sp)>);
         EXPECT_EQ(sp.size(), 1u);
         EXPECT_EQ(sp.data(), &i);
 
         auto bsp = ByteSpanFromRef(i);
-        static_assert(std::is_same_v<Span<std::byte>, decltype(bsp)>);
+        static_assert(std::is_same_v<Span<std::byte, sizeof(uint32_t)>, decltype(bsp)>);
         EXPECT_EQ(bsp.size(), sizeof(uint32_t));
         EXPECT_EQ(bsp.data(), reinterpret_cast<std::byte*>(&i));
     }
@@ -826,12 +1277,12 @@ TEST(SpanTest, SpanFromRef) {
         const uint32_t i = 0;
 
         auto sp = SpanFromRef(i);
-        static_assert(std::is_same_v<Span<const uint32_t>, decltype(sp)>);
+        static_assert(std::is_same_v<Span<const uint32_t, 1>, decltype(sp)>);
         EXPECT_EQ(sp.size(), 1u);
         EXPECT_EQ(sp.data(), &i);
 
         auto bsp = ByteSpanFromRef(i);
-        static_assert(std::is_same_v<Span<const std::byte>, decltype(bsp)>);
+        static_assert(std::is_same_v<Span<const std::byte, sizeof(uint32_t)>, decltype(bsp)>);
         EXPECT_EQ(bsp.size(), sizeof(uint32_t));
         EXPECT_EQ(bsp.data(), reinterpret_cast<const std::byte*>(&i));
     }
@@ -842,7 +1293,7 @@ TEST(SpanTest, SpanFromRefTyped) {
         uint32_t i = 0;
 
         auto sp = SpanFromRef<Index>(i);
-        static_assert(std::is_same_v<ityp::span<Index, uint32_t>, decltype(sp)>);
+        static_assert(std::is_same_v<ityp::span<Index, uint32_t, Index{1u}>, decltype(sp)>);
         EXPECT_EQ(sp.size(), Index{1u});
         EXPECT_EQ(sp.data(), &i);
     }
@@ -850,7 +1301,7 @@ TEST(SpanTest, SpanFromRefTyped) {
         const uint32_t i = 0;
 
         auto sp = SpanFromRef<Index>(i);
-        static_assert(std::is_same_v<ityp::span<Index, const uint32_t>, decltype(sp)>);
+        static_assert(std::is_same_v<ityp::span<Index, const uint32_t, Index{1u}>, decltype(sp)>);
         EXPECT_EQ(sp.size(), Index{1u});
         EXPECT_EQ(sp.data(), &i);
     }
@@ -910,6 +1361,16 @@ TEST(SpanTest, CopyFrom) {
         std::array<int, 3> src = {1, 2, 3};
         std::array<int, 3> dst = {0, 0, 0};
         Span<int> dst_sp{dst};
+
+        dst_sp.CopyFrom(src);
+        EXPECT_THAT(dst, ElementsAreArray(src));
+    }
+
+    // Copy from implicitly constructed span (std::array) with fixed extents
+    {
+        std::array<int, 3> src = {1, 2, 3};
+        std::array<int, 3> dst = {0, 0, 0};
+        Span<int, 3> dst_sp{dst};
 
         dst_sp.CopyFrom(src);
         EXPECT_THAT(dst, ElementsAreArray(src));
@@ -977,6 +1438,16 @@ TEST(SpanTest, CopyPrefixFrom) {
         EXPECT_THAT(dst, testing::ElementsAre(1, 2, 0));
     }
 
+    // Copy from implicitly constructed span (std::array) with fixed extents
+    {
+        std::array<int, 2> src = {1, 2};
+        std::array<int, 3> dst = {0, 0, 0};
+        Span<int, 3> dst_sp{dst};
+
+        dst_sp.CopyPrefixFrom(src);
+        EXPECT_THAT(dst, testing::ElementsAre(1, 2, 0));
+    }
+
     // Copy from heap array (std::vector)
     {
         std::vector<int> src = {4};
@@ -1039,6 +1510,11 @@ TEST(SpanTest, Constructor_CArray) {
         EXPECT_EQ(sp[0], 1);
     }
     {
+        Span<int, 4> sp(arr);
+        EXPECT_EQ(sp.data(), arr);
+        EXPECT_EQ(sp[0], 1);
+    }
+    {
         Span<const int> sp(arr);
         EXPECT_EQ(sp.size(), 4u);
         EXPECT_EQ(sp.data(), arr);
@@ -1046,6 +1522,10 @@ TEST(SpanTest, Constructor_CArray) {
     {
         Span<const int> sp(constArr);
         EXPECT_EQ(sp.size(), 3u);
+        EXPECT_EQ(sp.data(), constArr);
+    }
+    {
+        Span<const int, 3> sp(constArr);
         EXPECT_EQ(sp.data(), constArr);
     }
 }
@@ -1065,5 +1545,6 @@ TEST(SpanTest, Constructor_InitializeList) {
         EXPECT_EQ(sp.data(), constList.begin());
     }
 }
+
 }  // anonymous namespace
 }  // namespace dawn

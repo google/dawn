@@ -99,6 +99,12 @@ void TestUnsafeBuffersDawnSpanConstructors() {
 
         DAWN_UNSAFE_BUFFERS(Span<const int>(kArr.begin(), kArr.end()));  // Control case.
         Span<const int>(kArr.begin(), kArr.end());  // expected-error {{introduces unsafe buffer manipulation}}
+
+        DAWN_UNSAFE_BUFFERS(Span<const int, 5>(kArr.data()));  // Control case.
+        Span<const int, 5>(kArr.data());  // expected-error {{introduces unsafe buffer manipulation}}
+
+        DAWN_UNSAFE_BUFFERS(Span<const int, 5>(kArr.begin()));  // Control case.
+        Span<const int, 5>(kArr.begin());  // expected-error {{introduces unsafe buffer manipulation}}
     }
 }
 

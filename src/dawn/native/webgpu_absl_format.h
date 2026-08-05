@@ -34,19 +34,7 @@
 #include "dawn/native/webgpu_absl_format_autogen.h"
 #include "src/dawn/native/dawn_platform.h"
 #include "src/utils/numeric.h"
-
-namespace dawn::detail {
-template <typename Tag, typename T>
-class TypedIntegerImpl;
-
-template <typename T, HasUnsignedUnderlyingType Index, typename PtrType>
-class SpanBase;
-}  // namespace dawn::detail
-
-namespace dawn::ityp {
-template <typename Index, typename T>
-using span = dawn::detail::SpanBase<T, Index, T*>;
-}  // namespace dawn::ityp
+#include "src/utils/span.h"
 
 namespace dawn::native {
 

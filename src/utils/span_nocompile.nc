@@ -60,11 +60,14 @@ struct FakeTypedRange {
 };
 
 void TestConstPointerToNonConstSpan() {
-    Span<const int>(kSpanData.data(), kSpanData.size()); // Control case.
-    Span<int>(kSpanData.data(), kSpanData.size()); // expected-error {{no matching constructor for initialization}}
+    Span<const int>{kSpanData.data(), kSpanData.size()}; // Control case.
+    Span<int>{kSpanData.data(), kSpanData.size()}; // expected-error {{no matching constructor for initialization}}
 
-    Span<const int>(kSpanData.begin(), kSpanData.end()); // Control case.
-    Span<int>(kSpanData.begin(), kSpanData.end()); // expected-error {{no matching constructor for initialization}}
+    Span<const int>{kSpanData.begin(), kSpanData.end()}; // Control case.
+    Span<int>{kSpanData.begin(), kSpanData.end()}; // expected-error {{no matching constructor for initialization}}
+
+    Span<const int, 5>{kSpanData.data()}; // Control case.
+    Span<int, 5>{kSpanData.data()}; // expected-error {{no matching constructor for initialization}}
 
     Span<const int>{FakeRange()}; // Control case.
     Span<int>{FakeRange()}; // expected-error {{no matching constructor for initialization}}
@@ -99,17 +102,31 @@ void TestConstructorWithRangeRequirements() {
 }
 
 void TestTypedIntegerArguments() {
-    ityp::span<Index, const int> sp{FakeTypedRange()};
+    {
+        ityp::span<Index, const int> sp{FakeTypedRange()};
 
-    ityp::span<Index, const int>(kSpanData.data(), kSpanData.size()); // expected-error {{no matching constructor for initialization}}
-    (void) sp.at(2); // expected-error {{no viable conversion from}}
-    (void) sp[2]; // expected-error {{no viable overloaded operator[]}}
-    (void) sp.first(2); // expected-error {{no viable conversion from}}
-    (void) sp.last(2); // expected-error {{no viable conversion from}}
-    (void) sp.subspan(2); // expected-error {{no matching member function for call to}}
-    (void) sp.subspan(2, 2); // expected-error {{no matching member function for call to}}
-    (void) sp.SplitAt(2); // expected-error {{no viable conversion}}
-    (void) sp.TakeFirst(2); // expected-error {{no viable conversion}}
+        ityp::span<Index, const int>(kSpanData.data(), kSpanData.size()); // expected-error {{no matching constructor for initialization}}
+        (void) sp.at(2); // expected-error {{no viable conversion from}}
+        (void) sp[2]; // expected-error {{no viable overloaded operator[]}}
+        (void) sp.first(2); // expected-error {{no viable conversion from}}
+        (void) sp.last(2); // expected-error {{no viable conversion from}}
+        (void) sp.subspan(2); // expected-error {{no matching member function for call to}}
+        (void) sp.subspan(2, 2); // expected-error {{no matching member function for call to}}
+        (void) sp.SplitAt(2); // expected-error {{no viable conversion}}
+        (void) sp.TakeFirst(2); // expected-error {{no viable conversion}}
+    }{
+        ityp::span<Index, const int, Index{5u}> sp{FakeTypedRange()};
+
+        ityp::span<Index, const int, 5>{FakeTypedRange()}; // expected-error {{no viable conversion}}
+        ityp::span<Index, const int, Index{5u}>(kSpanData.data(), kSpanData.size()); // expected-error {{no matching constructor for initialization}}
+        (void) sp.at(2); // expected-error {{no viable conversion from}}
+        (void) sp[2]; // expected-error {{no viable overloaded operator[]}}
+        (void) sp.first(2); // expected-error {{no viable conversion from}}
+        (void) sp.last(2); // expected-error {{no viable conversion from}}
+        (void) sp.subspan(2); // expected-error {{no matching member function for call to}}
+        (void) sp.subspan(2, 2); // expected-error {{no matching member function for call to}}
+        (void) sp.SplitAt(2); // expected-error {{no viable conversion}}
+    }
 }
 
 void TestAsWriteableBytesRequiresNonConst() {
@@ -127,11 +144,15 @@ void TestAsBytesRetainsVolatile() {
         // Control case
         [[maybe_unused]] Span<const volatile std::byte> vbsp = SpanAsBytes(sp);
         [[maybe_unused]] Span<volatile std::byte> vwbsp = SpanAsWritableBytes(sp);
+        [[maybe_unused]] Span<const volatile std::byte, 3 * sizeof(int)> fvbsp = SpanAsBytes(sp);
+        [[maybe_unused]] Span<volatile std::byte, 3 * sizeof(int)> fvwbsp = SpanAsWritableBytes(sp);
     }
 
     {
         Span<const std::byte> vbsp = SpanAsBytes(sp); // expected-error {{no viable conversion from}}
         Span<std::byte> vwbsp = SpanAsWritableBytes(sp); // expected-error {{no viable conversion from}}
+        Span<const std::byte, 3 * sizeof(int)> fvbsp = SpanAsBytes(sp); // expected-error {{no viable conversion from}}
+        Span<std::byte, 3 * sizeof(int)> fvwbsp = SpanAsWritableBytes(sp); // expected-error {{no viable conversion from}}
     }
 }
 
@@ -139,9 +160,16 @@ void TestReinterpretSpan() {
     {
         // Non-byte source.
         std::array<int, 3> ints{};
-        auto s = Span<int>{ints};
-        auto r1 = ReinterpretSpan<int>(s);  // expected-error {{no matching function for call}}
-        auto r2 = ReinterpretSpan<int, Index>(s);  // expected-error {{no matching function for call}}
+        {
+            auto s = Span<int>{ints};
+            auto r1 = ReinterpretSpan<int>(s);  // expected-error {{no matching function for call}}
+            auto r2 = ReinterpretSpan<int, Index>(s);  // expected-error {{no matching function for call}}
+        }
+        {
+            auto s = Span<int, 3>{ints};
+            auto r1 = ReinterpretSpan<int, 3>(s);  // expected-error {{no matching function for call}}
+            auto r2 = ReinterpretSpan<int, Index, 3>(s);  // expected-error {{no matching function for call}}
+        }
     }
     {
         // Casting away const or volatile.
@@ -222,5 +250,17 @@ void TestItypSpanFromInitializerList() {
     ityp::span<Index, const int> typed_sp(list); // expected-error {{no matching constructor for initialization}}
 }
 
+
+void TestFixedExtentTakeFirst() {
+    std::array<int, 3> arr = {1, 2, 3};
+    Span<int, 3> sp(arr);
+    sp.TakeFirst(1);  // expected-error {{invalid reference to function 'TakeFirst': constraints not satisfied}}
+}
+
+void TestFixedExtentReinterpretSizeMismatch() {
+    alignas(uint32_t) std::array<std::byte, 7> bytes{};
+    Span<std::byte, 7> bsp{bytes};
+    ReinterpretSpan<uint32_t>(bsp);  // expected-error {{no matching function for call to 'ReinterpretSpan'}}
+}
 
 }  // namespace dawn

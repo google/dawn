@@ -81,9 +81,12 @@ namespace detail {
 template <typename Tag, typename T>
 class DAWN_TRIVIAL_ABI alignas(T) TypedIntegerImpl {
     static_assert(std::is_integral_v<T>, "TypedInteger must be integral");
-    T mValue;
 
   public:
+    // Note that |mValue| here needs to be public in order to satisfy requirements in dawn::Span to
+    // allow using TypedIntegers as NTTP template arguments for fixed extent Spans.
+    T mValue;
+
     constexpr TypedIntegerImpl() : mValue(0) {
         static_assert(alignof(TypedIntegerImpl) == alignof(T));
         static_assert(sizeof(TypedIntegerImpl) == sizeof(T));
