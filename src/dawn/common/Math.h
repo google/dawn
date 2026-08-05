@@ -50,7 +50,10 @@ namespace dawn {
 // The following are not valid for 0
 uint32_t Log2(uint32_t value);
 uint32_t Log2(uint64_t value);
-bool IsPowerOfTwo(uint64_t n);
+constexpr bool IsPowerOfTwo(uint64_t n) {
+    DAWN_RELEASE_ASSUME(n != 0);
+    return (n & (n - 1)) == 0;
+}
 
 // Returns 2^exp for integrals
 template <std::integral T>

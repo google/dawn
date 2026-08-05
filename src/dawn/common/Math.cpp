@@ -55,11 +55,6 @@ uint64_t NextPowerOfTwo(uint64_t n) {
     return 1ull << (Log2(n - 1) + 1);
 }
 
-bool IsPowerOfTwo(uint64_t n) {
-    DAWN_RELEASE_ASSUME(n != 0);
-    return (n & (n - 1)) == 0;
-}
-
 bool IsPtrAligned(const void* ptr, size_t alignment) {
     DAWN_RELEASE_ASSUME(IsPowerOfTwo(alignment));
     DAWN_RELEASE_ASSUME(alignment != 0);

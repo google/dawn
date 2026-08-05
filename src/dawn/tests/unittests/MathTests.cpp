@@ -121,6 +121,9 @@ TEST(Math, Log2Ceil) {
 
 // Tests for IsPowerOfTwo
 TEST(Math, IsPowerOfTwo) {
+    static_assert(IsPowerOfTwo(1));
+    static_assert(!IsPowerOfTwo(3));
+
     ASSERT_TRUE(IsPowerOfTwo(1));
     ASSERT_TRUE(IsPowerOfTwo(2));
     ASSERT_FALSE(IsPowerOfTwo(3));
@@ -160,6 +163,8 @@ TEST(Math, AlignPtr) {
 
 // Tests for Align
 TEST(Math, Align) {
+    static_assert(Align(77u, 4) == 80u);
+
     // 0 aligns to 0
     ASSERT_EQ(Align(0u, 4), 0u);
     ASSERT_EQ(Align(0u, 256), 0u);

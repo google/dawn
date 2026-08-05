@@ -180,9 +180,9 @@ void ScopedCommandRecordingContext::Flush1(D3D11_CONTEXT_TYPE ContextType, HANDL
 void ScopedCommandRecordingContext::WriteUniformBufferRange(uint32_t offset,
                                                             const void* data,
                                                             size_t size) const {
-    DAWN_ASSERT(offset < CommandRecordingContext::kMaxImmediateSizeD3D11);
+    DAWN_ASSERT(offset < CommandRecordingContext::kMaxImmediateSlotsD3D11);
     DAWN_ASSERT(size <=
-                sizeof(uint32_t) * (CommandRecordingContext::kMaxImmediateSizeD3D11 - offset));
+                sizeof(uint32_t) * (CommandRecordingContext::kMaxImmediateSlotsD3D11 - offset));
     DAWN_UNSAFE_TODO(std::memcpy(&Get()->mUniformBufferData[offset], data, size));
     Get()->mUniformBufferDirty = true;
 }
@@ -383,7 +383,7 @@ ResultOrError<Ref<BufferBase>> CommandRecordingContext::CreateInternalUniformBuf
     DeviceBase* device) {
     // Create a uniform buffer for user and internal Immediates.
     BufferDescriptor descriptor;
-    descriptor.size = sizeof(uint32_t) * kMaxImmediateSizeD3D11;
+    descriptor.size = sizeof(uint32_t) * kMaxImmediateSlotsD3D11;
     descriptor.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
     descriptor.mappedAtCreation = false;
     descriptor.label = "ImmediatesInternalBuffer";

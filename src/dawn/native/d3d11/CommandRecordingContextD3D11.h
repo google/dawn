@@ -35,6 +35,7 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/container/inlined_vector.h"
 #include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Math.h"
 #include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/StackAllocated.h"
@@ -92,8 +93,10 @@ class CommandRecordingContext {
     bool IsValid() const;
 
     static ResultOrError<Ref<BufferBase>> CreateInternalUniformBuffer(DeviceBase* device);
-    static constexpr uint32_t kMaxImmediateSizeD3D11 =
-        std::max(sizeof(RenderImmediates), sizeof(ComputeImmediates));
+    // The number of uint32_t elements in the immediate uniform buffer.
+    static constexpr uint32_t kMaxImmediateSlotsD3D11 =
+        Align(std::max(sizeof(RenderImmediates), sizeof(ComputeImmediates)), sizeof(uint32_t)) /
+        sizeof(uint32_t);
 
     void ReleaseKeyedMutexes();
 
@@ -116,7 +119,7 @@ class CommandRecordingContext {
 
     // The uniform buffer for built-in variables.
     Ref<GPUUsableBuffer> mUniformBuffer;
-    std::array<uint32_t, kMaxImmediateSizeD3D11> mUniformBufferData{};
+    std::array<uint32_t, kMaxImmediateSlotsD3D11> mUniformBufferData{};
     bool mUniformBufferDirty = true;
 
     absl::flat_hash_set<Ref<d3d::KeyedMutex>> mAcquiredKeyedMutexes;
