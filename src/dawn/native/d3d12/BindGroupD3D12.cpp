@@ -117,8 +117,8 @@ MaybeError BindGroup::InitializeImpl() {
                 switch (layout.type) {
                     case wgpu::BufferBindingType::Uniform: {
                         D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
-                        desc.SizeInBytes =
-                            Align(binding.size, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+                        desc.SizeInBytes = static_cast<UINT>(
+                            Align(binding.size, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT));
                         desc.BufferLocation = ToBackend(binding.buffer)->GetVA() + binding.offset;
 
                         d3d12Device->CreateConstantBufferView(

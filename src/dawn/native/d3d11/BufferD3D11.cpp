@@ -744,7 +744,7 @@ MaybeError Buffer::EnsurePaddingInitialized(const ScopedCommandRecordingContext*
 }
 
 MaybeError Buffer::ClearPaddingInternal(const ScopedCommandRecordingContext* commandContext) {
-    uint32_t paddingBytes = GetAllocatedSize() - GetSize();
+    uint32_t paddingBytes = static_cast<uint32_t>(GetAllocatedSize() - GetSize());
     if (paddingBytes == 0) {
         return {};
     }
@@ -1048,7 +1048,7 @@ ResultOrError<GPUUsableBuffer::Storage*> GPUUsableBuffer::GetOrCreateStorage(
     };
 
     D3D11_BUFFER_DESC bufferDescriptor;
-    bufferDescriptor.ByteWidth = GetAllocatedSize();
+    bufferDescriptor.ByteWidth = checked_cast<UINT>(GetAllocatedSize());
     bufferDescriptor.StructureByteStride = 0;
 
     switch (storageType) {
@@ -1676,7 +1676,7 @@ MaybeError GPUUsableBuffer::CopyFromD3DInternal(const ScopedCommandRecordingCont
 
     commandContext->CopySubresourceRegion(
         gpuCopyableStorage->GetD3D11Buffer(), /*DstSubresource=*/0,
-        /*DstX=*/destinationOffset,
+        /*DstX=*/checked_cast<UINT>(destinationOffset),
         /*DstY=*/0,
         /*DstZ=*/0, d3d11SourceBuffer, /*SrcSubresource=*/0, &srcBox);
 

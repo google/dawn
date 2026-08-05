@@ -186,7 +186,8 @@ MaybeError RecordCopyTextureWithTemporaryBuffer(CommandRecordingContext* recordi
     const TypedTexelBlockInfo& blockInfo = GetBlockInfo(srcCopy);
 
     // Create tempBuffer
-    uint32_t bytesPerRow = Align(blockInfo.ToBytes(copySize.width), kTextureBytesPerRowAlignment);
+    uint32_t bytesPerRow = static_cast<uint32_t>(
+        Align(blockInfo.ToBytes(copySize.width), kTextureBytesPerRowAlignment));
     BlockCount blocksPerRow = blockInfo.BytesToBlocks(bytesPerRow);
     BlockCount rowsPerImage = copySize.height;
 
@@ -419,7 +420,8 @@ class ImmediateTracker : public T {
             SetRootConstant(
                 commandContext->GetCommandList(),
                 ToBackend(lastPipeline)->GetPipelineLayoutHandle()->GetImmediatesParameterIndex(),
-                size, this->mContent.template Get<uint32_t>(immediateContentStartOffset),
+                static_cast<uint32_t>(size),
+                this->mContent.template Get<uint32_t>(immediateContentStartOffset),
                 immediateRangeStartOffset);
         }
 
@@ -753,7 +755,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
                 uint32_t offsetsParameterIndex =
                     pipelineLayout->GetDynamicStorageBufferOffsetsParameterIndex();
                 SetRootConstant(commandList, offsetsParameterIndex,
-                                storageBufferDynamicOffsets.size(),
+                                static_cast<uint32_t>(storageBufferDynamicOffsets.size()),
                                 storageBufferDynamicOffsets.data(), firstRegisterOffset);
             }
         }

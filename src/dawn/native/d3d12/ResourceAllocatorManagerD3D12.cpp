@@ -370,7 +370,7 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
         uint64_t depthOrArraySize =
             revisedDescriptor.DepthOrArraySize +
             ComputeExtraArraySizeForIntelGen12(
-                resourceDescriptor.Width, resourceDescriptor.Height,
+                static_cast<uint32_t>(resourceDescriptor.Width), resourceDescriptor.Height,
                 resourceDescriptor.DepthOrArraySize, resourceDescriptor.MipLevels,
                 resourceDescriptor.SampleDesc.Count, colorFormatBytesPerBlock);
         if (depthOrArraySize >= std::numeric_limits<UINT16>::max()) {

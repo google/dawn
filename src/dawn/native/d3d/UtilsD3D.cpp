@@ -35,19 +35,21 @@
 namespace dawn::native::d3d {
 
 ResultOrError<std::wstring> ConvertStringToWstring(std::string_view s) {
-    auto len = sign_cast(s.length());
+    size_t len = s.length();
     if (len == 0) {
         return std::wstring();
     }
-    int numChars = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s.data(), len, nullptr, 0);
+    size_t numChars = checked_cast<size_t>(MultiByteToWideChar(
+        CP_UTF8, MB_ERR_INVALID_CHARS, s.data(), static_cast<int>(len), nullptr, 0));
     if (numChars == 0) {
         return DAWN_INTERNAL_ERROR("Failed to convert string to wide string");
     }
     std::wstring result;
-    result.resize(sign_cast(numChars));
+    result.resize(numChars);
     int numConvertedChars =
-        MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s.data(), len, &result[0], numChars);
-    if (numConvertedChars != numChars) {
+        MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s.data(), static_cast<int>(len),
+                            &result[0], static_cast<int>(numChars));
+    if (static_cast<size_t>(numConvertedChars) != numChars) {
         return DAWN_INTERNAL_ERROR("Failed to convert string to wide string");
     }
     return std::move(result);

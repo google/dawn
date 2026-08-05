@@ -349,7 +349,7 @@ MaybeError RenderPipeline::InitializeInputLayout(const Blob& vertexShader) {
 
         const VertexBufferInfo& input = GetVertexBuffer(attribute.vertexBufferSlot);
 
-        inputElementDescriptor.AlignedByteOffset = attribute.offset;
+        inputElementDescriptor.AlignedByteOffset = checked_cast<UINT>(attribute.offset);
         inputElementDescriptor.InputSlotClass = VertexStepModeFunction(input.stepMode);
         if (inputElementDescriptor.InputSlotClass == D3D11_INPUT_PER_VERTEX_DATA) {
             inputElementDescriptor.InstanceDataStepRate = 0;
@@ -518,7 +518,7 @@ MaybeError RenderPipeline::InitializeShaders() {
             // allocate register u60 to u63 for them.
             const uint32_t basePixelLocalAttachmentIndex =
                 uavEndIndex - static_cast<uint32_t>(storageAttachmentSlots.size());
-            for (size_t i = 0; i < storageAttachmentSlots.size(); i++) {
+            for (uint32_t i = 0; i < storageAttachmentSlots.size(); i++) {
                 auto& attachment = pixelLocalOptions->attachments[i];
                 attachment.index = basePixelLocalAttachmentIndex + i;
 

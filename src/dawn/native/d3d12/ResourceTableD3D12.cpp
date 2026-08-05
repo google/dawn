@@ -254,7 +254,7 @@ MaybeError ResourceTable::Initialize() {
     desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
     desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
     desc.Buffer.FirstElement = 0;
-    desc.Buffer.NumElements = metadataBuffer->GetSize() / 4;
+    desc.Buffer.NumElements = checked_cast<UINT>(metadataBuffer->GetSize() / 4);
     desc.Buffer.StructureByteStride = 0;
     desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
 

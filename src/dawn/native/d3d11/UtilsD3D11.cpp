@@ -141,14 +141,16 @@ void SetDebugName(Device* device,
     }
 
     if (label.empty()) {
-        object->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(prefix), prefix);
+        object->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(strlen(prefix)),
+                               prefix);
         return;
     }
 
     std::string objectName = prefix;
     objectName += "_";
     objectName += label;
-    object->SetPrivateData(WKPDID_D3DDebugObjectName, objectName.length(), objectName.c_str());
+    object->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(objectName.length()),
+                           objectName.c_str());
 }
 
 bool IsDebugLayerEnabled(const ComPtr<ID3D11Device>& d3d11Device) {

@@ -132,7 +132,7 @@ HRESULT SerializeRootParameter1_0(Device* device,
                                          rootParameter1_1.DescriptorTable.NumDescriptorRanges});
 
                 rootParameters1_0[i].DescriptorTable.NumDescriptorRanges =
-                    descriptorRanges1_1.size();
+                    static_cast<UINT>(descriptorRanges1_1.size());
                 if (rootParameters1_0[i].DescriptorTable.NumDescriptorRanges > 0) {
                     std::vector<D3D12_DESCRIPTOR_RANGE> descriptorRanges1_0(
                         rootParameters1_0[i].DescriptorTable.NumDescriptorRanges);
@@ -360,7 +360,8 @@ MaybeError PipelineLayout::BuildBaseRootParameters() {
             // Set visibilities according to bind group layout descriptor.
             rootParameter.ShaderVisibility = ShaderVisibilityType(bindingInfo.visibility);
 
-            mDynamicUniformRootParameterIndices[group][dynamicBindingIndex] = rootParameters.size();
+            mDynamicUniformRootParameterIndices[group][dynamicBindingIndex] =
+                static_cast<uint32_t>(rootParameters.size());
             rootParameters.emplace_back(rootParameter);
         }
     }
@@ -452,7 +453,7 @@ ResultOrError<Ref<PipelineLayoutHandle>> PipelineLayout::CreatePipelineLayoutHan
         D3D12_ROOT_PARAMETER1 immediates{};
         immediates.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         immediates.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-        immediates.Constants.Num32BitValues = pipelineImmediateMask.count();
+        immediates.Constants.Num32BitValues = static_cast<UINT>(pipelineImmediateMask.count());
         immediates.Constants.RegisterSpace = kImmediatesRegisterSpace;
         immediates.Constants.ShaderRegister = kImmediatesBaseRegister;
         immediatesParameterIndex = static_cast<uint32_t>(rootParameters.size());

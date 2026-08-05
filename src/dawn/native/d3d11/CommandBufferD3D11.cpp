@@ -95,7 +95,7 @@ class VertexBufferTracker {
         }
 
         mD3D11Buffers[slot] = buffer;
-        mOffsets[slot] = offset;
+        mOffsets[slot] = checked_cast<unsigned int>(offset);
 
         mDirtyVertexBuffers.set(slot);
     }
@@ -111,7 +111,8 @@ class VertexBufferTracker {
                     continue;
                 }
 
-                mStrides[slot] = renderPipeline->GetVertexBuffer(slot).arrayStride;
+                mStrides[slot] =
+                    checked_cast<unsigned int>(renderPipeline->GetVertexBuffer(slot).arrayStride);
                 mDirtyVertexBuffers.set(slot);
             }
         }
@@ -279,7 +280,8 @@ class ImmediateTracker : public T {
     uint32_t GetFirstIndexContentStartOffset() {
         uint32_t startIndex = offsetof(RenderImmediates, firstVertex) / kImmediateElementByteSize;
         ImmediateMask prefixBits = ImmediateMask((1u << startIndex) - 1u);
-        return (prefixBits & this->mDirty).count() * kImmediateElementByteSize;
+        return static_cast<uint32_t>((prefixBits & this->mDirty).count() *
+                                     kImmediateElementByteSize);
     }
 };
 
@@ -606,7 +608,7 @@ MaybeError CommandBuffer::ExecuteComputePass(
                 DAWN_TRY_ASSIGN(d3dBuffer,
                                 indirectBuffer->GetD3D11NonConstantBuffer(commandContext));
                 commandContext->GetD3D11DeviceContext3()->DispatchIndirect(
-                    d3dBuffer, dispatch->indirectOffset);
+                    d3dBuffer, checked_cast<UINT>(dispatch->indirectOffset));
                 break;
             }
 
@@ -828,7 +830,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 DAWN_TRY_ASSIGN(d3dBuffer,
                                 indirectBuffer->GetD3D11NonConstantBuffer(commandContext));
                 commandContext->GetD3D11DeviceContext3()->DrawInstancedIndirect(
-                    d3dBuffer, validatedDraw.indirectOffset);
+                    d3dBuffer, checked_cast<UINT>(validatedDraw.indirectOffset));
 
                 break;
             }
@@ -862,7 +864,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 DAWN_TRY_ASSIGN(d3dBuffer,
                                 indirectBuffer->GetD3D11NonConstantBuffer(commandContext));
                 commandContext->GetD3D11DeviceContext3()->DrawIndexedInstancedIndirect(
-                    d3dBuffer, validatedDraw.indirectOffset);
+                    d3dBuffer, checked_cast<UINT>(validatedDraw.indirectOffset));
 
                 break;
             }
@@ -893,7 +895,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
             case Command::SetIndexBuffer: {
                 SetIndexBufferCmd* cmd = iter->NextCommand<SetIndexBufferCmd>();
 
-                UINT indexBufferBaseOffset = cmd->offset;
+                UINT indexBufferBaseOffset = checked_cast<UINT>(cmd->offset);
                 DXGI_FORMAT indexBufferFormat = DXGIIndexFormat(cmd->format);
 
                 ID3D11Buffer* d3dBuffer;

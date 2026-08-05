@@ -570,9 +570,9 @@ ResultOrError<ExecutionSerial> SystemEventQueue::CheckCompletedSerialsImpl() {
             std::for_each_n(pendingEvents->rbegin(), numberOfHandles, [&handles](const auto& e) {
                 handles.push_back(e.receiver.GetPrimitive().Get());
             });
-            DWORD result =
-                WaitForMultipleObjects(handles.size(), handles.data(), /*bWaitAll=*/false,
-                                       /*dwMilliseconds=*/0);
+            DWORD result = WaitForMultipleObjects(static_cast<DWORD>(handles.size()),
+                                                  handles.data(), /*bWaitAll=*/false,
+                                                  /*dwMilliseconds=*/0);
             DAWN_INTERNAL_ERROR_IF(result == WAIT_FAILED, "WaitForMultipleObjects() failed");
 
             DAWN_INTERNAL_ERROR_IF(
