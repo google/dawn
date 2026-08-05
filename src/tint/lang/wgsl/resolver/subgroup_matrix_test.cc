@@ -1188,21 +1188,24 @@ fn foo(offset : u32, stride : u32) {
       ✓  'AM' is 'read' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixLoad<T  ✓ , Majorness  ✗ >(ptr<storage, array<E>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
+ • 'subgroupMatrixLoad<T  ✓ , Majorness  ✗ >(ptr<AS, array<E>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
       ✓  'T' is 'subgroup_matrix<K, E, C, R>'
       ✓  'E' is 'f32', 'i32', 'u32' or 'f16'
+      ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'read' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixLoad<T  ✗ , Majorness  ✗ >(ptr<storage, array<i32>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
+ • 'subgroupMatrixLoad<T  ✗ , Majorness  ✗ >(ptr<AS, array<i32>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
       ✗  'T' is 'subgroup_matrix<K, E, C, R>'
       ✗  'E' is 'i8'
+      ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'read' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixLoad<T  ✗ , Majorness  ✗ >(ptr<storage, array<u32>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
+ • 'subgroupMatrixLoad<T  ✗ , Majorness  ✗ >(ptr<AS, array<u32>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
       ✗  'T' is 'subgroup_matrix<K, E, C, R>'
       ✗  'E' is 'u8'
+      ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'read' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
@@ -1280,8 +1283,9 @@ fn foo(offset : u32, stride : u32) {
 input.wgsl:6:3 error: no matching call to 'subgroupMatrixStore<<invalid-type>>(ptr<storage, array<f32>, read_write>, u32, subgroup_matrix_result<f32, 8, 8>, u32)'
 
 12 candidate functions:
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<storage, array<E>, AM>  ✓ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✓ )' where:
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<E>, AM>  ✓ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✓ )' where:
       ✓  'E' is 'f32', 'i32', 'u32' or 'f16'
+      ✓  'AS' is 'workgroup' or 'storage'
       ✓  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
@@ -1291,13 +1295,15 @@ input.wgsl:6:3 error: no matching call to 'subgroupMatrixStore<<invalid-type>>(p
       ✗  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<storage, array<i32>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✓ )' where:
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<i32>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✓ )' where:
       ✗  'E' is 'i8'
+      ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<storage, array<u32>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✓ )' where:
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<u32>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✓ )' where:
       ✗  'E' is 'u8'
+      ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
@@ -1367,8 +1373,9 @@ fn foo(offset : u32, stride : u32) {
 input.wgsl:6:3 error: no matching call to 'subgroupMatrixStore<<invalid-type>>(ptr<storage, array<f32>, read_write>, u32, subgroup_matrix_result<f32, 8, 8>, bool, u32)'
 
 12 candidate functions:
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<storage, array<E>, AM>  ✓ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✗ )' where:
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<E>, AM>  ✓ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✗ )' where:
       ✓  'E' is 'f32', 'i32', 'u32' or 'f16'
+      ✓  'AS' is 'workgroup' or 'storage'
       ✓  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✗  'S' is 'i32' or 'u32'
@@ -1378,13 +1385,15 @@ input.wgsl:6:3 error: no matching call to 'subgroupMatrixStore<<invalid-type>>(p
       ✗  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✗  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<storage, array<i32>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✗ )' where:
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<i32>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✗ )' where:
       ✗  'E' is 'i8'
+      ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✗  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<storage, array<u32>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✗ )' where:
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<u32>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✗ )' where:
       ✗  'E' is 'u8'
+      ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✗  'S' is 'i32' or 'u32'
@@ -1551,6 +1560,26 @@ fn foo(m : subgroup_matrix_right<u8, 16, 8>) {
   subgroupMatrixStore<row_major>(&out, 5, m, 8);
   ^^^^^^^^^^^^^^^^^^^
 )");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, Load_RuntimeArray_Workgroup) {
+    EXPECT_SUCCESS(R"(
+enable chromium_experimental_subgroup_matrix;
+var<workgroup> v : buffer<1024>;
+fn foo(offset: u32, stride: u32) {
+  let view = bufferView<array<u32>>(&v, 0);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, col_major>(view, offset, stride);
+})");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, Store_RuntimeArray_Workgroup) {
+    EXPECT_SUCCESS(R"(
+enable chromium_experimental_subgroup_matrix;
+var<workgroup> v : buffer<1024>;
+fn foo(m : subgroup_matrix_left<u32, 8, 8>, offset: u32, stride: u32) {
+  let view = bufferArrayView<array<u32>>(&v, 0, 1024);
+  subgroupMatrixStore<row_major>(view, offset, m, stride);
+})");
 }
 
 }  // namespace

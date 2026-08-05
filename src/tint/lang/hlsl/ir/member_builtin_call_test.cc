@@ -149,13 +149,16 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchIncorrectType) {
         res.Failure().reason,
         R"(:7:17 error: Store: no matching call to 'Store(hlsl.byte_address_buffer<read>, u32, u32)'
 
-3 candidate functions:
+4 candidate functions:
  • 'Store(byte_address_buffer<write' or 'read_write>  ✗ , offset: u32  ✓ , value: u32  ✓ )'
  • 'Store(subgroup_matrix<K, S, C, R>  ✗ , ptr<workgroup, array<S, AC>, read_write>  ✗ , offset: u32  ✓ , stride: u32  ✗ , matrix_layout  ✗ )' where:
       ✗  'S' is 'f32', 'i32', 'u32', 'f16', 'i8' or 'u8'
  • 'Store(subgroup_matrix<K, S, C, R>  ✗ , byte_address_buffer<AM>  ✗ , offset: u32  ✓ , stride: u32  ✗ , matrix_layout  ✗ )' where:
       ✗  'S' is 'f32', 'i32', 'u32', 'f16', 'i8' or 'u8'
       ✗  'AM' is 'write' or 'read_write'
+ • 'Store(subgroup_matrix<K, S, C, R>  ✗ , ptr<workgroup, array<AE, AC>, read_write>  ✗ , offset: u32  ✓ , stride: u32  ✗ , matrix_layout  ✗ )' where:
+      ✗  'S' is 'f32', 'i32', 'u32', 'f16', 'i8' or 'u8'
+      ✗  'AE' is 'u16', 'i32' or 'u32'
 
     %3:u32 = %t.Store 2u, 2u
                 ^^^^^

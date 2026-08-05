@@ -184,12 +184,7 @@ struct State {
                                 break;
                             case core::BuiltinFn::kSubgroupMatrixLoad:
                             case core::BuiltinFn::kSubgroupMatrixStore:
-                                // Nothing to do.
-                                // TOOD(507458400): Need a decision on how to handle mismatches
-                                // between the chosen element type and the subgroup matrix component
-                                // type for workgroup address space. Depends on ongoing discussion
-                                // with Microsoft
-                                // (https://github.com/microsoft/hlsl-specs/pull/879#pullrequestreview-4439318581).
+                                SubgroupMatrixAccess(call, var, {});
                                 break;
                             default:
                                 TINT_IR_UNREACHABLE(ir);
@@ -321,6 +316,8 @@ struct State {
                             }
                         }
                         if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
+                            // TODO(b/541591251): When array requirements are relaxed, subgroup
+                            // matrix load/store shouldn't need to impose a limit here.
                             if (call->Func() == core::BuiltinFn::kArrayLength ||
                                 call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
                                 call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
@@ -743,10 +740,58 @@ struct State {
                     if (call->Func() == core::BuiltinFn::kArrayLength) {
                         ArrayLength(call, var, obj_ty, offset);
                     }
+                    if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
+                        call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
+                        SubgroupMatrixAccess(call, var, offset);
+                    }
                 },
                 TINT_ICE_ON_NO_MATCH);
         }
         inst->Destroy();
+    }
+
+    void SubgroupMatrixAccess(core::ir::CoreBuiltinCall* call,
+                              core::ir::Var* var,
+                              OffsetData offset) {
+        // TODO(b/529415904): Remove after migrating. For now only support non-deprecated versions.
+        TINT_IR_ASSERT(ir, (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad &&
+                            call->ExplicitTemplateParams().Length() == 2) ||
+                               (call->Func() == core::BuiltinFn::kSubgroupMatrixStore &&
+                                call->ExplicitTemplateParams().Length() == 1));
+        b.InsertBefore(call, [&] {
+            // Incoming offset in terms of base array type.
+            auto* byte_idx = OffsetToValue(offset);
+            auto* incoming_offset = b.Divide(byte_idx, u32(BaseEleType()->Size()))->Result();
+
+            // Access offset adjusted to base array type.
+            auto* call_offset = call->Args()[1];
+            auto* array_ty = call->Args()[0]->Type()->UnwrapPtr()->As<core::type::Array>();
+            auto* call_ele_type = array_ty->ElemType();
+            TINT_IR_ASSERT(ir, BaseEleType()->Size() <= call_ele_type->Size());
+            if (call_ele_type->Size() != BaseEleType()->Size()) {
+                auto* u32_offset_arg = b.InsertBitcastIfNeeded(ty.u32(), call_offset);
+                auto* offset_bytes =
+                    b.Multiply(u32_offset_arg, u32(call_ele_type->Size()))->Result();
+                call_offset = b.Divide(offset_bytes, u32(BaseEleType()->Size()))->Result();
+            }
+
+            // Total offset
+            auto* full_offset = b.Add(incoming_offset, call_offset)->Result();
+
+            // Adjust stride to be in terms of base array type.
+            uint32_t stride_index = static_cast<uint32_t>(call->Args().size() - 1);
+            auto* call_stride = call->Args()[stride_index];
+            if (call_ele_type->Size() != BaseEleType()->Size()) {
+                auto* u32_call_stride = b.InsertBitcastIfNeeded(ty.u32(), call_stride);
+                auto* stride_bytes =
+                    b.Multiply(u32_call_stride, u32(call_ele_type->Size()))->Result();
+                call_stride = b.Divide(stride_bytes, u32(BaseEleType()->Size()))->Result();
+            }
+
+            call->SetArg(0, var->Result());
+            call->SetArg(1, full_offset);
+            call->SetArg(stride_index, call_stride);
+        });
     }
 
     void Load(core::ir::Load* ld, core::ir::Var* var, OffsetData offset) {
