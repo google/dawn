@@ -163,7 +163,10 @@ ResultOrError<Ref<Buffer>> Buffer::CreateFromSharedBufferMemory(
 
 MaybeError Buffer::InitializeAsExternalBuffer(ComPtr<ID3D12Resource> d3d12Buffer,
                                               const UnpackedPtr<BufferDescriptor>& descriptor) {
-    mAllocatedSize = descriptor->size;
+    // `mAllocatedSize` should always be the size of the underlying D3D12 buffer resource. Note that
+    // for a buffer backed by shared memory, its wgpu buffer size may be smaller than the width of
+    // the underlying D3D12 buffer resource.
+    mAllocatedSize = d3d12Buffer->GetDesc().Width;
     AllocationInfo info;
     info.mMethod = AllocationMethod::kExternal;
     info.mRequestedSize = mAllocatedSize.value();

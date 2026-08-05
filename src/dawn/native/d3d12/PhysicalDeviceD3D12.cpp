@@ -241,11 +241,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::BufferMapExtendedUsages);
     }
 
-    // Temporarily only enable SharedBufferMemoryFromWindowsHandle on cache
-    // coherent UMA.
+    // Temporarily only enable SharedBufferMemoryFromWindowsHandle on UMA.
     // TODO(386255678): enable SharedBufferMemoryFromWindowsHandle on other
     // architectures.
-    if (GetDeviceInfo().supportsExistingHeap && SupportsBufferMapExtendedUsages()) {
+    if (GetDeviceInfo().supportsExistingHeap && GetDeviceInfo().isUMA) {
         EnableFeature(Feature::SharedBufferMemoryFromWindowsHandle);
     }
 
