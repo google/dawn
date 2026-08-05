@@ -296,7 +296,7 @@ jobs:
             library_path: src/dawn/native/libwebgpu_dawn.a
 
     name: Build-${{ matrix.platform }}-${{ matrix.arch }}
-    runs-on: macos-latest-large
+    runs-on: macos-latest
     steps:
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1
