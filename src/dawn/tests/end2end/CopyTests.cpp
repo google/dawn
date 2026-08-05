@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "src/utils/span.h"
+
 #ifdef UNSAFE_BUFFERS_BUILD
 // TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
 #pragma allow_unsafe_buffers
@@ -100,9 +102,9 @@ class ColorExpectation : public detail::CustomTextureExpectation {
     static constexpr size_t kNumComponents = ColorType::kNumComponents;
     using CompRepType = ColorType::ComponentRepresentation;
 
-    ColorExpectation(const ColorType* expected, size_t count, CompRepType tolerance)
+    ColorExpectation(dawn::Span<const ColorType> expected, CompRepType tolerance)
         : mTolerance(tolerance) {
-        mExpected.assign(expected, expected + count);
+        mExpected.assign(expected.begin(), expected.end());
     }
 
     uint32_t DataSize() override { return ColorType::kDataSize; }
@@ -804,8 +806,9 @@ class CopyTests_B2T : public CopyTests_WithFormatParam {
                             copySize.width * bytesPerTexel, copySize.height);
 
             EXPECT_TEXTURE_EQ(
-                new ColorExpectation<PixelType>(
-                    expected.data(), copySize.width * copySize.height * copyDepth, tolerance),
+                new ColorExpectation<PixelType>(dawn::Span<const PixelType>(expected).first(
+                                                    copySize.width * copySize.height * copyDepth),
+                                                tolerance),
                 texture,
                 {textureSpec.copyOrigin.x, textureSpec.copyOrigin.y,
                  textureSpec.copyOrigin.z + layer},
