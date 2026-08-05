@@ -449,6 +449,9 @@ class MatchState {
     inline void PrintNum(StyledText& out);
 
   private:
+    template <typename IndexType>
+    inline auto& NextMatcher();
+
     const MatcherIndex* matcher_indices_ = nullptr;
 };
 
@@ -614,32 +617,29 @@ struct TableData {
     const IntrinsicInfo& unary_and;
 };
 
-// Incrementing matcher_indices_ triggers this warning. This code is performance critical.
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
-const core::type::Type* MatchState::Type(const core::type::Type* ty) {
-    TypeMatcherIndex matcher_index{(*matcher_indices_++).value};
-    auto& matcher = data[matcher_index];
-    return matcher.match(*this, ty);
+template <typename IndexType>
+inline auto& MatchState::NextMatcher() {
+    // Incrementing matcher_indices_ triggers unsafe buffer warnings.
+    // Pointer arithmetic is retained here because this section is performance-critical.
+    IndexType matcher_index{DAWN_UNSAFE_TODO((*matcher_indices_++).value)};
+    return data[matcher_index];
 }
 
-Number MatchState::Num(Number number) {
-    NumberMatcherIndex matcher_index{(*matcher_indices_++).value};
-    auto& matcher = data[matcher_index];
-    return matcher.match(*this, number);
+inline const core::type::Type* MatchState::Type(const core::type::Type* ty) {
+    return NextMatcher<TypeMatcherIndex>().match(*this, ty);
 }
 
-void MatchState::PrintType(StyledText& out) {
-    TypeMatcherIndex matcher_index{(*matcher_indices_++).value};
-    auto& matcher = data[matcher_index];
-    matcher.print(this, out);
+inline Number MatchState::Num(Number number) {
+    return NextMatcher<NumberMatcherIndex>().match(*this, number);
 }
 
-void MatchState::PrintNum(StyledText& out) {
-    NumberMatcherIndex matcher_index{(*matcher_indices_++).value};
-    auto& matcher = data[matcher_index];
-    matcher.print(this, out);
+inline void MatchState::PrintType(StyledText& out) {
+    NextMatcher<TypeMatcherIndex>().print(this, out);
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
+inline void MatchState::PrintNum(StyledText& out) {
+    NextMatcher<NumberMatcherIndex>().print(this, out);
+}
 
 /// TemplateTypeMatcher is a Matcher for a template type.
 /// The TemplateTypeMatcher will initially match against any type, and then will only be further
