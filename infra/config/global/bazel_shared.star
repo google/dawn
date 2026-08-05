@@ -33,6 +33,7 @@ def _apply_linux_bazel_builder_defaults(kwargs):
     kwargs.setdefault("cores", 8)
     kwargs.setdefault("cpu", cpu.X86_64)
     kwargs.setdefault("os", os.LINUX_DEFAULT)
+    kwargs.setdefault("ssd", None)
     return kwargs
 
 def _apply_mac_bazel_builder_defaults(kwargs):

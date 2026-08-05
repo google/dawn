@@ -70,6 +70,7 @@ targets.builder_defaults.set(
 def dawn_linux_parent_builder(**kwargs):
     kwargs.setdefault("cores", 8)
     kwargs.setdefault("os", os.LINUX_DEFAULT)
+    kwargs.setdefault("ssd", None)
     ci.builder(**kwargs)
 
 def dawn_mac_parent_builder(**kwargs):
