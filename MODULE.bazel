@@ -24,7 +24,7 @@ local_path_override(
 bazel_dep(name = "googletest", repo_name = "gtest")
 local_path_override(
     module_name = "googletest",
-    path = "third_party/googletest",
+    path = "third_party/googletest/src",
 )
 
 bazel_dep(name = "spirv_headers")
