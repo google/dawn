@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "src/utils/span.h"
+
 #ifdef UNSAFE_BUFFERS_BUILD
 // TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
 #pragma allow_unsafe_buffers
@@ -320,8 +322,8 @@ void PackTextureData(const uint8_t* srcData,
     }
 }
 
-void FillData(uint8_t* data, size_t count) {
-    for (size_t i = 0; i < count; ++i) {
+void FillData(Span<uint8_t> data) {
+    for (size_t i = 0; i < data.size(); ++i) {
         data[i] = static_cast<uint8_t>(i % 253);
     }
 }
@@ -354,7 +356,7 @@ class QueueWriteTextureTests : public DawnTestWithParams<WriteTextureFormatParam
                     wgpu::TextureViewDimension::Undefined) {
         // Create data of size `size` and populate it
         std::vector<uint8_t> data(dataSpec.size);
-        FillData(data.data(), data.size());
+        FillData(data);
 
         // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
         wgpu::TextureDescriptor descriptor = {};
