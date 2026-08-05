@@ -710,6 +710,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
                 return CheckBindingArray(t, diag, addrspace);
             },
             [&](const core::type::Buffer* buf) { return CheckBuffer(buf, diag); },
+            [&](const core::type::SwizzleView* sv) { return CheckSwizzleView(sv, diag); },
             [](Default) { return true; });
         if (!chk) {
             return;
@@ -957,6 +958,24 @@ bool Structural::CheckVector(const core::type::Vector* vec,
                              std::function<diag::Diagnostic&()>& diag) {
     if (!vec->Type()->IsScalar()) {
         diag() << "vector elements, " << NameOf(vec) << ", must be scalars";
+        return false;
+    }
+    return true;
+}
+
+bool Structural::CheckSwizzleView(const core::type::SwizzleView* sv,
+                                  std::function<diag::Diagnostic&()>& diag) {
+    if (!ir_.properties.Contains(Property::kAllowSwizzleView)) {
+        diag() << "swizzle view is not allowed in this module";
+        return false;
+    }
+    if (sv->FromSize() < 2 || sv->FromSize() > 4) {
+        diag() << "swizzle view object must be a vector of 2, 3 or 4 elements, got "
+               << sv->FromSize();
+        return false;
+    }
+    if (sv->ToSize() < 1 || sv->ToSize() > 4) {
+        diag() << "swizzle view result must be 1, 2, 3 or 4 elements, got " << sv->ToSize();
         return false;
     }
     return true;

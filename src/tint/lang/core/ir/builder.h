@@ -1345,7 +1345,7 @@ class Builder {
     template <typename VAL>
     ir::Load* Load(VAL&& from) {
         auto* value = Value(std::forward<VAL>(from));
-        return LoadWithResult(InstructionResult(value->Type()->UnwrapPtrOrRef()), value);
+        return LoadWithResult(InstructionResult(value->Type()->UnwrapMemoryView()), value);
     }
 
     /// Creates a store instruction

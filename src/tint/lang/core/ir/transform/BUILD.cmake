@@ -69,6 +69,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/demote_to_helper.h
   lang/core/ir/transform/direct_variable_access.cc
   lang/core/ir/transform/direct_variable_access.h
+  lang/core/ir/transform/lower_swizzle_view.cc
+  lang/core/ir/transform/lower_swizzle_view.h
   lang/core/ir/transform/multiplanar_external_texture.cc
   lang/core/ir/transform/multiplanar_external_texture.h
   lang/core/ir/transform/multiplanar_options.h
@@ -162,6 +164,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/demote_to_helper_test.cc
   lang/core/ir/transform/direct_variable_access_test.cc
   lang/core/ir/transform/helper_test.h
+  lang/core/ir/transform/lower_swizzle_view_test.cc
   lang/core/ir/transform/multiplanar_external_texture_test.cc
   lang/core/ir/transform/prepare_immediate_data_test.cc
   lang/core/ir/transform/preserve_padding_test.cc

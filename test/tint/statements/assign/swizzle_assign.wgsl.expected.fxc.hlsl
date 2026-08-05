@@ -18,7 +18,7 @@ void main() {
   uint4 v_7 = uint4((400u).xxxx);
   uint4 v_8 = uint4((v_5).xxxx);
   v = (((v_8 == uint4(0u, 1u, 2u, 3u))) ? (v_7) : (v_6));
-  v.x = (v.x + 500u);
+  v.x = (v.xyz.x + 500u);
   buf.Load4(0u);
   buf.Store4(0u, uint4((0u).xxxx.x, (0u).xxxx.y, (0u).xxxx.z, (0u).xxxx.w));
   uint4 v_9 = buf.Load4(0u);
@@ -30,6 +30,6 @@ void main() {
   buf.Store4(0u, uint4(v_11.x, v_11.y, v_11.z, buf.Load4(0u).w));
   buf.Store(4u, 5u);
   buf.Store((0u + (min(v_4[min(idx, 2u)], 3u) * 4u)), 6u);
-  buf.Store(0u, (buf.Load(0u) + 7u));
+  buf.Store(0u, (buf.Load4(0u).xyz.x + 7u));
 }
 

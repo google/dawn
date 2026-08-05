@@ -72,6 +72,7 @@
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/swizzle_view.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
@@ -400,6 +401,12 @@ class Structural {
     /// Checks that buffers are available
     /// @param diag a function that creates an error diagnostic for the source of the type
     bool CheckBuffer(const core::type::Buffer* buf, std::function<diag::Diagnostic&()>& diag);
+
+    /// Checks that `sv` is a valid swizzle view type
+    /// @param sv the swizzle view to validate
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    bool CheckSwizzleView(const core::type::SwizzleView* sv,
+                          std::function<diag::Diagnostic&()>& diag);
 
     /// Checks that 8-bit integer types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type

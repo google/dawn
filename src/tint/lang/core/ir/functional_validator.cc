@@ -49,6 +49,7 @@
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/struct.h"
+#include "src/tint/lang/core/type/swizzle_view.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
@@ -999,9 +1000,11 @@ void Functional::CheckAccess(const Access* a) {
         ok = (want_view != nullptr) && ty == want_view->StoreType();
         if (ok) {
             // Also check that the address space and access modes match.
-            ok = obj_view->Is<core::type::Pointer>() == want_view->Is<core::type::Pointer>() &&
-                 obj_view->AddressSpace() == want_view->AddressSpace() &&
-                 obj_view->Access() == want_view->Access();
+            bool base_is_ptr = obj_view->IsAnyOf<core::type::Pointer, core::type::SwizzleView>();
+            ok =
+                base_is_ptr == want_view->IsAnyOf<core::type::Pointer, core::type::SwizzleView>() &&
+                obj_view->AddressSpace() == want_view->AddressSpace() &&
+                obj_view->Access() == want_view->Access();
         }
     } else {
         // Otherwise, result types should exactly match.
@@ -1327,7 +1330,12 @@ void Functional::CheckSwitch(const Switch* s) {
 }
 
 void Functional::CheckSwizzle(const Swizzle* s) {
-    auto* src_vec = s->Object()->Type()->As<core::type::Vector>();
+    auto* result_ty = s->Result()->Type();
+
+    auto* obj_ty = s->Object()->Type();
+    auto* src_mv = obj_ty->As<core::type::MemoryView>();
+    auto* src_vec =
+        src_mv ? src_mv->StoreType()->As<core::type::Vector>() : obj_ty->As<core::type::Vector>();
     if (!src_vec) {
         AddError(s) << "object of swizzle, " << NameOf(s->Object()) << ", is not a vector, "
                     << NameOf(s->Object()->Type());
@@ -1354,8 +1362,16 @@ void Functional::CheckSwizzle(const Swizzle* s) {
     }
 
     auto* elem_ty = src_vec->Elements().type;
-    auto* expected_ty = type_mgr_.MatchWidth(elem_ty, indices.Length());
-    auto* result_ty = s->Result()->Type();
+    auto* expected_store_ty = type_mgr_.MatchWidth(elem_ty, indices.Length());
+    const core::type::Type* expected_ty = nullptr;
+    if (src_mv) {
+        expected_ty = type_mgr_.Get<core::type::SwizzleView>(
+            src_mv->AddressSpace(), expected_store_ty, src_mv->Access(), src_vec->Width(),
+            static_cast<uint32_t>(indices.Length()));
+    } else {
+        expected_ty = expected_store_ty;
+    }
+
     if (result_ty != expected_ty) {
         AddError(s) << "result type " << NameOf(result_ty) << " does not match expected type, "
                     << NameOf(expected_ty);
