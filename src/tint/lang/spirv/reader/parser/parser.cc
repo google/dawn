@@ -1293,11 +1293,6 @@ class Parser {
     // @param id the spir-v ID to propagate up
     // @param src the source value being propagated
     core::ir::Value* Propagate(uint32_t id, core::ir::Value* src) {
-        // Function params are always in scope so we should never need to propagate.
-        if (src->Is<core::ir::FunctionParam>()) {
-            return src;
-        }
-
         auto* blk = tint::Switch(
             src,  //
             [&](core::ir::BlockParam* bp) { return bp->Block(); },
@@ -1569,8 +1564,16 @@ class Parser {
         auto v = ValueNoPropagate(id);
         TINT_ASSERT(v.has_value());
 
-        if (v.value()->Is<core::ir::Constant>() || IdIsInScope(id)) {
+        if (v.value()->Is<core::ir::Constant>() || v.value()->Is<core::ir::FunctionParam>() ||
+            IdIsInScope(id)) {
             return v.value();
+        }
+
+        // A return values from a control instruction cannot be a pointer type
+        // without supporting variable pointers. We regenerate the value so it
+        // is in scope.
+        if (v.value()->Type()->Is<core::type::Pointer>()) {
+            return ReplicatePointer(id);
         }
 
         auto* new_v = Propagate(id, v.value());
@@ -1578,6 +1581,30 @@ class Parser {
             AddValue(id, new_v);
         }
         return new_v;
+    }
+
+    /// Replicates a pointer instruction that is defined inside a control flow construct
+    /// but used outside of it.
+    /// @param id the SPIR-V result ID of the pointer instruction
+    /// @returns the replicated Tint IR value
+    core::ir::Value* ReplicatePointer(uint32_t id) {
+        auto* spv_inst = spirv_context_->get_def_use_mgr()->GetDef(id);
+        TINT_ASSERT(spv_inst);
+        switch (spv_inst->opcode()) {
+            case spv::Op::OpAccessChain:
+            case spv::Op::OpInBoundsAccessChain:
+                EmitAccess(*spv_inst);
+                break;
+            case spv::Op::OpCopyObject:
+                EmitCopyObject(*spv_inst);
+                break;
+            default:
+                TINT_UNREACHABLE() << "unhandled instruction for pointer replication: "
+                                   << spv::OpToString(spv_inst->opcode());
+        }
+        auto new_v = values_.Get(id);
+        TINT_ASSERT(new_v);
+        return *new_v;
     }
 
     /// Creates the Tint IR constant for the SPIR-V `constant` value.
@@ -2789,7 +2816,7 @@ class Parser {
         if (val) {
             // If we've already seen the value, and it's still in scope, then we can just emit as it
             // isn't referencing a later value.
-            if (IdIsInScope(id)) {
+            if (IdIsInScope(id) || (*val)->Is<core::ir::FunctionParam>()) {
                 term->PushOperand(Value(id, false));
                 return;
             }
