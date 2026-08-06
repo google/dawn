@@ -59,6 +59,7 @@ cc_library(
     "replace_subgroup_matrix_init.cc",
     "resource_table_helper.cc",
     "shader_io.cc",
+    "split_workgroup_atomics.cc",
   ],
   hdrs = [
     "array_offset_from_immediate.h",
@@ -77,6 +78,7 @@ cc_library(
     "replace_subgroup_matrix_init.h",
     "resource_table_helper.h",
     "shader_io.h",
+    "split_workgroup_atomics.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -125,6 +127,7 @@ cc_library(
     "replace_non_indexable_mat_vec_stores_test.cc",
     "replace_subgroup_matrix_init_test.cc",
     "shader_io_test.cc",
+    "split_workgroup_atomics_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

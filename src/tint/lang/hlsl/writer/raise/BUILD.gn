@@ -77,6 +77,8 @@ if (tint_build_hlsl_writer) {
       "resource_table_helper.h",
       "shader_io.cc",
       "shader_io.h",
+      "split_workgroup_atomics.cc",
+      "split_workgroup_atomics.h",
     ]
     deps = [
       "${dawn_root}/src/utils",
@@ -124,6 +126,7 @@ if (tint_build_unittests) {
         "replace_non_indexable_mat_vec_stores_test.cc",
         "replace_subgroup_matrix_init_test.cc",
         "shader_io_test.cc",
+        "split_workgroup_atomics_test.cc",
       ]
       deps = [
         "${dawn_root}/src/utils",

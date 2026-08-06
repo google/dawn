@@ -77,6 +77,7 @@
 #include "src/tint/lang/hlsl/writer/raise/replace_subgroup_matrix_init.h"
 #include "src/tint/lang/hlsl/writer/raise/resource_table_helper.h"
 #include "src/tint/lang/hlsl/writer/raise/shader_io.h"
+#include "src/tint/lang/hlsl/writer/raise/split_workgroup_atomics.h"
 
 namespace tint::hlsl::writer {
 
@@ -312,6 +313,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
     TINT_CHECK_RESULT(core::ir::transform::DirectVariableAccess(
         module, core::ir::transform::DirectVariableAccessOptions{}));
+
+    // Split workgroup variables that contain atomics into separate data and atomic variables.
+    // Must run after DirectVariableAccess and before DecomposeAccess.
+    if (options.workarounds.d3d12_decompose_workgroup_access) {
+        TINT_CHECK_RESULT(raise::SplitWorkgroupAtomics(module));
+    }
 
     // DecomposeStorageAccess must come after Robustness and DirectVariableAccess
     TINT_CHECK_RESULT(raise::DecomposeStorageAccess(module));
