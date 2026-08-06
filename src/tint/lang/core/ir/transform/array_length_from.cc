@@ -34,6 +34,9 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/struct.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -458,25 +461,22 @@ struct State {
                 TINT_IR_ASSERT(ir, bindpoint_to_size_index.contains(info.binding_point));
                 TINT_IR_ASSERT(ir, bindpoint_to_length_member_index.Contains(info.binding_point));
 
-                // Load the total storage buffer size from the uniform buffer.
-                // The sizes are packed into vec4s to satisfy the 16-byte alignment requirement for
-                // array elements in uniform buffers, so we have to find the vector and element that
-                // correspond to the index that we want.
+                // Uniform data packs sizes into vec4s; immediate data uses tightly packed u32s.
                 const uint32_t size_index = bindpoint_to_size_index.at(info.binding_point);
-                const uint32_t array_index = size_index / 4;
-                const uint32_t vec_index = size_index % 4;
                 Value* total_buffer_size = nullptr;
                 if (from_uniform) {
+                    const uint32_t array_index = size_index / 4;
+                    const uint32_t vec_index = size_index % 4;
                     auto* vec_ptr = b.Access<ptr<uniform, vec4u>>(BufferSizes(), u32(array_index));
                     total_buffer_size = b.LoadVectorElement(vec_ptr, u32(vec_index))->Result();
                 } else {
                     auto* buffer_sizes = b.Access(
-                        ty.ptr(immediate, ty.array(ty.vec4u(), buffer_sizes_array_elements_num)),
+                        ty.ptr(immediate, ty.array(ty.u32(), buffer_sizes_array_elements_num)),
                         immediate_data_layout.var,
                         u32(immediate_data_layout.IndexOf(buffer_sizes_offset)));
-                    auto* vec_ptr = b.Access(ty.ptr(immediate, ty.vec4u()), buffer_sizes->Result(),
-                                             u32(array_index));
-                    total_buffer_size = b.LoadVectorElement(vec_ptr, u32(vec_index))->Result();
+                    auto* size_ptr = b.Access(ty.ptr(immediate, ty.u32()), buffer_sizes->Result(),
+                                              u32(size_index));
+                    total_buffer_size = b.Load(size_ptr)->Result();
                 }
 
                 // Calculate actual array length:

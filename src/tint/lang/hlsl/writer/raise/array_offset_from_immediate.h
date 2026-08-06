@@ -50,7 +50,7 @@ using ImmediateDataLayout = core::ir::transform::ImmediateDataLayout;
 /// ```
 /// struct tint_immediate_data_struct {
 ///  ...
-///    buffer_offsets: array<vec4<u32>, 8>;  // offset is provided via config
+///    buffer_offsets: array<u32, 8>;  // offset is provided via config
 /// };
 /// var<immediate> tint_immediate_data : tint_immediate_data_struct;
 /// ```
@@ -61,8 +61,8 @@ using ImmediateDataLayout = core::ir::transform::ImmediateDataLayout;
 /// @param module the module to transform
 /// @param immediate_data_layout The immediate data layout information.
 /// @param buffer_offsets_offset The offset in immediate block where buffer offsets start.
-/// @param buffer_offsets_array_elements_num the number of vec4s used to store buffer offsets that
-/// will be set into the immediate block.
+/// @param buffer_offsets_array_elements_num number of u32 buffer-offset elements in the immediate
+/// block
 /// @param bindpoint_to_offset_index The map from binding point to an index which holds the offset
 /// of that buffer.
 /// @returns the transform result or failure

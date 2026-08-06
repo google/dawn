@@ -78,7 +78,7 @@ Result<ArrayLengthResult> ArrayLengthFromUniform(
 /// @group(0) @binding(30)
 /// struct tint_immediate_data_struct {
 ///  ...
-///    buffer_sizes: array<vec4<u32>, 8>;  // offset is provided via config
+///    buffer_sizes: array<u32, 8>;  // offset is provided via config
 // };
 /// var<immediate> tint_immediate_data : tint_immediate_data_struct;
 /// ```
@@ -91,8 +91,7 @@ Result<ArrayLengthResult> ArrayLengthFromUniform(
 /// @param bindpoint_to_size_index The map from binding point to an index which holds the size
 /// of that buffer.
 /// @param buffer_sizes_offset The offset in immediate block where buffer sizes start.
-/// @param buffer_sizes_array_elements_num the number of vec4s used to store buffer sizes that will
-/// be set into the immediate block.
+/// @param buffer_sizes_array_elements_num number of u32 buffer-size elements in the immediate block
 /// @returns the transform result or failure
 /// TODO(crbug.com/366291600): Replace ArrayLengthFromUniform.
 Result<ArrayLengthResult> ArrayLengthFromImmediates(

@@ -136,39 +136,29 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     if (array_length_from_uniform_options.buffer_sizes_offset) {
-        // Find the largest index declared in the map, in order to determine the number of
-        // elements needed in the array of buffer sizes. The buffer sizes will be packed into
-        // vec4s to satisfy the 16-byte alignment requirement for array elements in constant
-        // buffers.
         uint32_t max_index = 0;
         for (const auto& entry : array_length_from_uniform_options.bindpoint_to_size_index) {
             max_index = std::max(max_index, entry.second);
         }
-        buffer_sizes_array_elements_num = (max_index / 4) + 1;
+        buffer_sizes_array_elements_num = max_index + 1;
 
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
             array_length_from_uniform_options.buffer_sizes_offset.value(),
             module.symbols.New("buffer_sizes"),
-            module.Types().array(module.Types().vec4<core::u32>(),
-                                 buffer_sizes_array_elements_num)));
+            module.Types().array(module.Types().u32(), buffer_sizes_array_elements_num)));
     }
 
     if (array_offset_from_uniform_options.buffer_offsets_offset) {
-        // Find the largest index declared in the map, in order to determine the number of
-        // elements needed in the array of buffer offsets. The buffer offsets will be packed into
-        // vec4s to satisfy the 16-byte alignment requirement for array elements in constant
-        // buffers.
         uint32_t max_index = 0;
         for (const auto& entry : array_offset_from_uniform_options.bindpoint_to_offset_index) {
             max_index = std::max(max_index, entry.second);
         }
-        buffer_offsets_array_elements_num = (max_index / 4) + 1;
+        buffer_offsets_array_elements_num = max_index + 1;
 
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
             array_offset_from_uniform_options.buffer_offsets_offset.value(),
             module.symbols.New("buffer_offsets"),
-            module.Types().array(module.Types().vec4<core::u32>(),
-                                 buffer_offsets_array_elements_num)));
+            module.Types().array(module.Types().u32(), buffer_offsets_array_elements_num)));
     }
 
     TINT_CHECK_RESULT_UNWRAP(immediate_data_layout, core::ir::transform::PrepareImmediateData(

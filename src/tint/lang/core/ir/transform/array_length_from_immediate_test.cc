@@ -48,7 +48,7 @@ uint32_t GetBufferSizesNumElements(
     for (auto& entry : bindpoint_to_size_index) {
         max_index = std::max(max_index, entry.second);
     }
-    return (max_index / 4) + 1;
+    return max_index + 1;
 }
 
 TEST_F(IR_ArrayLengthFromImmediatesTest, NoModify_UserFunction) {
@@ -152,8 +152,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -167,9 +167,9 @@ $B1: {  # root
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:ptr<immediate, array<vec4<u32>, 1>, read> = access %tint_immediate_data, 0u
-    %5:ptr<immediate, vec4<u32>, read> = access %4, 0u
-    %6:u32 = load_vector_element %5, 0u
+    %4:ptr<immediate, array<u32, 1>, read> = access %tint_immediate_data, 0u
+    %5:ptr<immediate, u32, read> = access %4, 0u
+    %6:u32 = load %5
     %7:u32 = div %6, 4u
     %8:tint_array_lengths_struct = construct %7
     %9:u32 = access %8, 0u
@@ -187,7 +187,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -229,8 +229,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 2> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 8> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -244,9 +244,9 @@ $B1: {  # root
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:ptr<immediate, array<vec4<u32>, 2>, read> = access %tint_immediate_data, 0u
-    %5:ptr<immediate, vec4<u32>, read> = access %4, 1u
-    %6:u32 = load_vector_element %5, 3u
+    %4:ptr<immediate, array<u32, 8>, read> = access %tint_immediate_data, 0u
+    %5:ptr<immediate, u32, read> = access %4, 7u
+    %6:u32 = load %5
     %7:u32 = div %6, 4u
     %8:tint_array_lengths_struct = construct %7
     %9:u32 = access %8, 0u
@@ -264,7 +264,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -427,8 +427,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -448,9 +448,9 @@ $B1: {  # root
 }
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
-    %7:ptr<immediate, array<vec4<u32>, 1>, read> = access %tint_immediate_data, 0u
-    %8:ptr<immediate, vec4<u32>, read> = access %7, 0u
-    %9:u32 = load_vector_element %8, 0u
+    %7:ptr<immediate, array<u32, 1>, read> = access %tint_immediate_data, 0u
+    %8:ptr<immediate, u32, read> = access %7, 0u
+    %9:u32 = load %8
     %10:u32 = div %9, 4u
     %11:tint_array_lengths_struct = construct %10
     %12:u32 = call %bar, %11
@@ -468,7 +468,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -523,8 +523,8 @@ MyStruct = struct @align(4) {
   a:array<i32> @offset(0)
 }
 
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -538,9 +538,9 @@ $B1: {  # root
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:ptr<immediate, array<vec4<u32>, 1>, read> = access %tint_immediate_data, 0u
-    %5:ptr<immediate, vec4<u32>, read> = access %4, 0u
-    %6:u32 = load_vector_element %5, 0u
+    %4:ptr<immediate, array<u32, 1>, read> = access %tint_immediate_data, 0u
+    %5:ptr<immediate, u32, read> = access %4, 0u
+    %6:u32 = load %5
     %7:u32 = sub %6, 0u
     %8:u32 = div %7, 4u
     %9:tint_array_lengths_struct = construct %8
@@ -560,7 +560,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -630,8 +630,8 @@ MyStruct = struct @align(4) {
   a:array<i32> @offset(20)
 }
 
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -645,9 +645,9 @@ $B1: {  # root
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:ptr<immediate, array<vec4<u32>, 1>, read> = access %tint_immediate_data, 0u
-    %5:ptr<immediate, vec4<u32>, read> = access %4, 0u
-    %6:u32 = load_vector_element %5, 0u
+    %4:ptr<immediate, array<u32, 1>, read> = access %tint_immediate_data, 0u
+    %5:ptr<immediate, u32, read> = access %4, 0u
+    %6:u32 = load %5
     %7:u32 = sub %6, 20u
     %8:u32 = div %7, 4u
     %9:tint_array_lengths_struct = construct %8
@@ -667,7 +667,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -710,8 +710,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -725,9 +725,9 @@ $B1: {  # root
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:ptr<immediate, array<vec4<u32>, 1>, read> = access %tint_immediate_data, 0u
-    %5:ptr<immediate, vec4<u32>, read> = access %4, 0u
-    %6:u32 = load_vector_element %5, 0u
+    %4:ptr<immediate, array<u32, 1>, read> = access %tint_immediate_data, 0u
+    %5:ptr<immediate, u32, read> = access %4, 0u
+    %6:u32 = load %5
     %7:u32 = div %6, 4u
     %8:tint_array_lengths_struct = construct %7
     %let:ptr<storage, array<i32>, read_write> = let %buffer
@@ -746,7 +746,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -802,8 +802,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -822,9 +822,9 @@ $B1: {  # root
 }
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
-    %7:ptr<immediate, array<vec4<u32>, 1>, read> = access %tint_immediate_data, 0u
-    %8:ptr<immediate, vec4<u32>, read> = access %7, 0u
-    %9:u32 = load_vector_element %8, 0u
+    %7:ptr<immediate, array<u32, 1>, read> = access %tint_immediate_data, 0u
+    %8:ptr<immediate, u32, read> = access %7, 0u
+    %9:u32 = load %8
     %10:u32 = div %9, 4u
     %11:tint_array_lengths_struct = construct %10
     %12:u32 = access %11, 0u
@@ -843,7 +843,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -913,8 +913,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -939,9 +939,9 @@ $B1: {  # root
 }
 %foo_2 = @compute @workgroup_size(1u, 1u, 1u) func():void {  # %foo_2: 'foo'
   $B4: {
-    %11:ptr<immediate, array<vec4<u32>, 1>, read> = access %tint_immediate_data, 0u
-    %12:ptr<immediate, vec4<u32>, read> = access %11, 0u
-    %13:u32 = load_vector_element %12, 0u
+    %11:ptr<immediate, array<u32, 1>, read> = access %tint_immediate_data, 0u
+    %12:ptr<immediate, u32, read> = access %11, 0u
+    %13:u32 = load %12
     %14:u32 = div %13, 4u
     %15:tint_array_lengths_struct = construct %14
     %16:u32 = access %15, 0u
@@ -960,7 +960,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -1099,8 +1099,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -1121,9 +1121,9 @@ $B1: {  # root
 }
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
-    %9:ptr<immediate, array<vec4<u32>, 1>, read> = access %tint_immediate_data, 0u
-    %10:ptr<immediate, vec4<u32>, read> = access %9, 0u
-    %11:u32 = load_vector_element %10, 0u
+    %9:ptr<immediate, array<u32, 1>, read> = access %tint_immediate_data, 0u
+    %10:ptr<immediate, u32, read> = access %9, 0u
+    %11:u32 = load %10
     %12:u32 = div %11, 4u
     %13:tint_array_lengths_struct = construct %12
     %14:u32 = access %13, 0u
@@ -1142,7 +1142,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -1206,8 +1206,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -1228,9 +1228,9 @@ $B1: {  # root
 }
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
-    %13:ptr<immediate, array<vec4<u32>, 1>, read> = access %tint_immediate_data, 0u
-    %14:ptr<immediate, vec4<u32>, read> = access %13, 0u
-    %15:u32 = load_vector_element %14, 0u
+    %13:ptr<immediate, array<u32, 1>, read> = access %tint_immediate_data, 0u
+    %14:ptr<immediate, u32, read> = access %13, 0u
+    %15:u32 = load %14
     %16:u32 = div %15, 4u
     %17:tint_array_lengths_struct = construct %16
     %18:u32 = access %17, 0u
@@ -1251,7 +1251,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -1329,8 +1329,8 @@ MyStruct = struct @align(4) {
   a:array<i32> @offset(4)
 }
 
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -1351,9 +1351,9 @@ $B1: {  # root
 }
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
-    %9:ptr<immediate, array<vec4<u32>, 1>, read> = access %tint_immediate_data, 0u
-    %10:ptr<immediate, vec4<u32>, read> = access %9, 0u
-    %11:u32 = load_vector_element %10, 0u
+    %9:ptr<immediate, array<u32, 1>, read> = access %tint_immediate_data, 0u
+    %10:ptr<immediate, u32, read> = access %9, 0u
+    %11:u32 = load %10
     %12:u32 = sub %11, 4u
     %13:u32 = div %12, 4u
     %14:tint_array_lengths_struct = construct %13
@@ -1375,7 +1375,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -1416,8 +1416,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -1431,9 +1431,9 @@ $B1: {  # root
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:ptr<immediate, array<vec4<u32>, 1>, read> = access %tint_immediate_data, 0u
-    %5:ptr<immediate, vec4<u32>, read> = access %4, 0u
-    %6:u32 = load_vector_element %5, 0u
+    %4:ptr<immediate, array<u32, 1>, read> = access %tint_immediate_data, 0u
+    %5:ptr<immediate, u32, read> = access %4, 0u
+    %6:u32 = load %5
     %7:u32 = div %6, 16u
     %8:tint_array_lengths_struct = construct %7
     %9:u32 = access %8, 0u
@@ -1451,7 +1451,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -1514,8 +1514,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 2> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 6> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -1537,25 +1537,25 @@ $B1: {  # root
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %8:ptr<immediate, array<vec4<u32>, 2>, read> = access %tint_immediate_data, 0u
-    %9:ptr<immediate, vec4<u32>, read> = access %8, 0u
-    %10:u32 = load_vector_element %9, 0u
+    %8:ptr<immediate, array<u32, 6>, read> = access %tint_immediate_data, 0u
+    %9:ptr<immediate, u32, read> = access %8, 0u
+    %10:u32 = load %9
     %11:u32 = div %10, 4u
-    %12:ptr<immediate, array<vec4<u32>, 2>, read> = access %tint_immediate_data, 0u
-    %13:ptr<immediate, vec4<u32>, read> = access %12, 1u
-    %14:u32 = load_vector_element %13, 1u
+    %12:ptr<immediate, array<u32, 6>, read> = access %tint_immediate_data, 0u
+    %13:ptr<immediate, u32, read> = access %12, 5u
+    %14:u32 = load %13
     %15:u32 = div %14, 4u
-    %16:ptr<immediate, array<vec4<u32>, 2>, read> = access %tint_immediate_data, 0u
-    %17:ptr<immediate, vec4<u32>, read> = access %16, 0u
-    %18:u32 = load_vector_element %17, 3u
+    %16:ptr<immediate, array<u32, 6>, read> = access %tint_immediate_data, 0u
+    %17:ptr<immediate, u32, read> = access %16, 3u
+    %18:u32 = load %17
     %19:u32 = div %18, 4u
-    %20:ptr<immediate, array<vec4<u32>, 2>, read> = access %tint_immediate_data, 0u
-    %21:ptr<immediate, vec4<u32>, read> = access %20, 0u
-    %22:u32 = load_vector_element %21, 2u
+    %20:ptr<immediate, array<u32, 6>, read> = access %tint_immediate_data, 0u
+    %21:ptr<immediate, u32, read> = access %20, 2u
+    %22:u32 = load %21
     %23:u32 = div %22, 4u
-    %24:ptr<immediate, array<vec4<u32>, 2>, read> = access %tint_immediate_data, 0u
-    %25:ptr<immediate, vec4<u32>, read> = access %24, 1u
-    %26:u32 = load_vector_element %25, 0u
+    %24:ptr<immediate, array<u32, 6>, read> = access %tint_immediate_data, 0u
+    %25:ptr<immediate, u32, read> = access %24, 4u
+    %26:u32 = load %25
     %27:u32 = div %26, 4u
     %28:tint_array_lengths_struct = construct %11, %15, %19, %23, %27
     %29:u32 = access %28, 0u
@@ -1580,7 +1580,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -1619,8 +1619,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 $B1: {  # root
@@ -1644,7 +1644,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -1687,8 +1687,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 $B1: {  # root
@@ -1713,7 +1713,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -1770,8 +1770,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 $B1: {  # root
@@ -1801,7 +1801,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -1842,8 +1842,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 $B1: {  # root
@@ -1867,7 +1867,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -1935,8 +1935,8 @@ S = struct @align(4) {
   b:array<u32> @offset(4)
 }
 
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -1950,9 +1950,9 @@ $B1: {  # root
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:ptr<immediate, array<vec4<u32>, 1>, read> = access %tint_immediate_data, 0u
-    %5:ptr<immediate, vec4<u32>, read> = access %4, 0u
-    %6:u32 = load_vector_element %5, 0u
+    %4:ptr<immediate, array<u32, 1>, read> = access %tint_immediate_data, 0u
+    %5:ptr<immediate, u32, read> = access %4, 0u
+    %6:u32 = load %5
     %7:tint_array_lengths_struct = construct %6
     %offset:u32 = let 16u
     %9:u32 = access %7, 0u
@@ -1974,7 +1974,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -2020,8 +2020,8 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 $B1: {  # root
@@ -2046,7 +2046,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -2147,8 +2147,8 @@ buffer_bundle_0 = struct @align(4) {
   length:u32 @offset(12)
 }
 
-tint_immediate_data_struct = struct @align(16), @block {
-  tint_storage_buffer_sizes:array<vec4<u32>, 1> @offset(16)
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_storage_buffer_sizes:array<u32, 1> @offset(16)
 }
 
 tint_array_lengths_struct = struct @align(4) {
@@ -2173,9 +2173,9 @@ $B1: {  # root
 }
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
-    %13:ptr<immediate, array<vec4<u32>, 1>, read> = access %tint_immediate_data, 0u
-    %14:ptr<immediate, vec4<u32>, read> = access %13, 0u
-    %15:u32 = load_vector_element %14, 0u
+    %13:ptr<immediate, array<u32, 1>, read> = access %tint_immediate_data, 0u
+    %14:ptr<immediate, u32, read> = access %13, 0u
+    %15:u32 = load %14
     %16:tint_array_lengths_struct = construct %15
     %17:u32 = access %16, 0u
     %18:u32 = sub %17, 0u
@@ -2197,7 +2197,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
                   buffer_size_start_offset, mod.symbols.New("tint_storage_buffer_sizes"),
-                  ty.array(ty.vec4u(), num_elements)),
+                  ty.array(ty.u32(), num_elements)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);

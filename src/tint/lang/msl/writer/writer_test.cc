@@ -204,7 +204,7 @@ struct tint_array {
 };
 
 struct tint_immediate_data_struct {
-  tint_array<uint4, 1> tint_storage_buffer_sizes;
+  tint_array<uint, 1> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {
@@ -257,7 +257,7 @@ struct tint_array {
 
 struct tint_immediate_data_struct {
   /* 0x0000 */ tint_array<int8_t, 64> tint_pad;
-  /* 0x0040 */ tint_array<uint4, 1> tint_storage_buffer_sizes;
+  /* 0x0040 */ tint_array<uint, 1> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {
@@ -272,7 +272,7 @@ struct tint_array_lengths_struct {
 [[max_total_threads_per_threadgroup(1)]]
 kernel void entry(device tint_array<uint, 1>* a [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .tint_immediate_data=tint_immediate_data};
-  (*tint_module_vars.a)[0u] = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u].x / 4u)}.tint_array_length_0_0;
+  (*tint_module_vars.a)[0u] = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] / 4u)}.tint_array_length_0_0;
 }
 )");
     EXPECT_TRUE(output_.needs_storage_buffer_sizes);
@@ -482,7 +482,7 @@ struct tint_array {
 
 struct tint_immediate_data_struct {
   /* 0x0000 */ tint_array<int8_t, 64> tint_pad;
-  /* 0x0040 */ tint_array<uint4, 1> tint_storage_buffer_sizes;
+  /* 0x0040 */ tint_array<uint, 1> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {
@@ -499,7 +499,7 @@ struct entry_outputs {
 };
 
 float4 entry_inner(uint tint_vertex_index, tint_module_vars_struct tint_module_vars) {
-  return float4(as_type<float>((*tint_module_vars.tint_vertex_buffer_0)[min(tint_vertex_index, (tint_array_lengths_struct{.tint_array_length_0_1=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u].x / 4u)}.tint_array_length_0_1 - 1u))]), 0.0f, 0.0f, 1.0f);
+  return float4(as_type<float>((*tint_module_vars.tint_vertex_buffer_0)[min(tint_vertex_index, (tint_array_lengths_struct{.tint_array_length_0_1=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] / 4u)}.tint_array_length_0_1 - 1u))]), 0.0f, 0.0f, 1.0f);
 }
 
 vertex entry_outputs entry(uint tint_vertex_index [[vertex_id]], const device tint_array<uint, 1>* tint_vertex_buffer_0 [[buffer(1)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {

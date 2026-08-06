@@ -33,7 +33,6 @@
 
 #include "dawn/platform/DawnPlatform.h"
 #include "src/dawn/common/MatchVariant.h"
-#include "src/dawn/common/Math.h"
 #include "src/dawn/common/Range.h"
 #include "src/dawn/native/Adapter.h"
 #include "src/dawn/native/BindGroupLayout.h"
@@ -281,10 +280,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     }
 
     if (!arrayLengthFromConstants.bindpoint_to_size_index.empty()) {
-        // Based on Immediate block layouts describes in PipelineLayoutMTL.h, it requires
-        // vec4<u32> array aligns to 16 bytes.
         arrayLengthFromConstants.buffer_sizes_offset =
-            RoundUp(pipelineImmediateMask.count() * kImmediateElementByteSize, 16);
+            GetImmediateBufferSizesByteOffset(pipelineImmediateMask);
     }
 
     // Type should match src/tint/lang/msl/writer/common/options.h
