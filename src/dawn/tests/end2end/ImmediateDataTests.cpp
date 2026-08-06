@@ -1132,7 +1132,7 @@ TEST_P(ImmediateDataF16Tests, Vec3) {
 }
 
 DAWN_INSTANTIATE_TEST(ImmediateDataF16Tests,
-                      D3D12Backend({}, {"use_dxc"}),
+                      D3D12Backend({"use_dxc"}),
                       MetalBackend(),
                       VulkanBackend());
 
