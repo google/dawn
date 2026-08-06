@@ -30,6 +30,7 @@
 #include <utility>
 
 #include "src/dawn/common/Math.h"
+#include "src/utils/numeric.h"
 
 // Note: Current RingBufferAllocator implementation uses two indices (start and end) to implement a
 // circular queue. However, this approach defines a full queue when one element is still unused.
@@ -106,7 +107,8 @@ uint64_t RingBufferAllocator::Allocate(uint64_t allocationSize,
     uint64_t currentRequestSize = 0u;
 
     // Compute an alignment offset for the buffer if allocating at the end.
-    const uint64_t alignmentOffset = Align(mUsedEndOffset, offsetAlignment) - mUsedEndOffset;
+    const uint64_t alignmentOffset =
+        Align(mUsedEndOffset, checked_cast<size_t>(offsetAlignment)) - mUsedEndOffset;
     const uint64_t alignedUsedEndOffset = mUsedEndOffset + alignmentOffset;
 
     // Check if the buffer is NOT split (i.e sub-alloc on ends)

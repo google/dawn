@@ -52,6 +52,7 @@
 #include "src/dawn/native/utils/WGPUHelpers.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native {
 
@@ -127,7 +128,8 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
             DAWN_UNREACHABLE();
     }
 
-    DAWN_INVALID_IF(!IsAligned(static_cast<uint32_t>(entry.offset), requiredBindingAlignment),
+    DAWN_INVALID_IF(!IsAligned(static_cast<uint32_t>(entry.offset),
+                               checked_cast<size_t>(requiredBindingAlignment)),
                     "Offset (%u) of %s does not satisfy the minimum %s alignment (%u).",
                     entry.offset, entry.buffer, layout.type, requiredBindingAlignment);
 

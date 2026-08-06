@@ -124,7 +124,8 @@ ResultOrError<UploadReservation> DynamicUploader::Reserve(uint64_t allocationSiz
     UploadReservation reservation;
     reservation.buffer = targetRingBuffer->mStagingBuffer;
     reservation.mappedPointer = reservation.buffer->GetCurrentMapping()
-                                    .GetMappedSubspan(startOffset, allocationSize)
+                                    .GetMappedSubspan(checked_cast<size_t>(startOffset),
+                                                      checked_cast<size_t>(allocationSize))
                                     .data();
     reservation.offsetInBuffer = startOffset;
 

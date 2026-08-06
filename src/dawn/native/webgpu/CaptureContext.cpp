@@ -56,7 +56,7 @@ CaptureContext::ScopedContentWriter::~ScopedContentWriter() {
     if (offset) {
         static char zero[3] = {0};
         uint64_t paddingNeeded = 4 - offset;
-        mContext->WriteContentBytes(zero, paddingNeeded);
+        mContext->WriteContentBytes(zero, checked_cast<size_t>(paddingNeeded));
     }
 }
 

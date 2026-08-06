@@ -66,6 +66,7 @@
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/compiler.h"
 #include "src/utils/non_movable.h"
+#include "src/utils/numeric.h"
 #include "src/utils/span.h"
 
 namespace dawn::native {
@@ -1636,7 +1637,8 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             if (auto* pls = descriptor.Get<RenderPassPixelLocalStorage>()) {
                 for (const RenderPassStorageAttachment& attachment : pls->storageAttachments) {
                     RenderPassStorageAttachmentInfo* attachmentInfo =
-                        &cmd->storageAttachments[attachment.offset / kPLSSlotByteSize];
+                        &cmd->storageAttachments[checked_cast<size_t>(attachment.offset /
+                                                                      kPLSSlotByteSize)];
 
                     attachmentInfo->storage = attachment.storage;
                     attachmentInfo->loadOp = attachment.loadOp;
@@ -2282,7 +2284,7 @@ void CommandEncoder::APIWriteBuffer(BufferBase* buffer,
             WriteBufferCmd* cmd = allocator->Allocate<WriteBufferCmd>(Command::WriteBuffer);
             cmd->buffer = buffer;
             cmd->offset = bufferOffset;
-            cmd->size = data.size();
+            cmd->size = checked_cast<size_t>(data.size());
 
             Span<std::byte> inlinedData = allocator->AllocateData<std::byte>(cmd->size);
             inlinedData.CopyFrom(data);

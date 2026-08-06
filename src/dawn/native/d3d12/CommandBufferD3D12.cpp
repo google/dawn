@@ -1440,7 +1440,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                                             BindGroupStateTracker<ComputePipeline>* bindingTracker,
                                             BeginComputePassCmd* computePass,
                                             const ComputePassResourceUsage& resourceUsages) {
-    uint64_t currentDispatch = 0;
+    size_t currentDispatch = 0;
     ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
 
     // Write timestamp at the beginning of compute pass if it's set.

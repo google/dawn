@@ -41,6 +41,7 @@
 #include "src/dawn/native/webgpu/SharedFenceWGPU.h"
 #include "src/dawn/native/webgpu/SharedTextureMemoryWGPU.h"
 #include "src/dawn/native/webgpu/ToWGPU.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::webgpu {
 
@@ -301,9 +302,10 @@ MaybeError MapBufferAndWriteTextureData(CaptureContext::ScopedContentWriter& wri
 
     // Read this back synchronously.
     WGPUFutureWaitInfo waitInfo = {};
-    uint64_t offset = 0;
+    size_t offset = 0;
     waitInfo.future = wgpu->bufferMapAsync(copyBuffer, WGPUMapMode_Read, offset,
-                                           CaptureContext::kCopyBufferSize, innerCallbackInfo);
+                                           checked_cast<size_t>(CaptureContext::kCopyBufferSize),
+                                           innerCallbackInfo);
     wgpu->instanceWaitAny(device->GetInnerInstance(), 1, &waitInfo, UINT64_MAX);
 
     DAWN_ASSERT(mapAsyncResult.status == WGPUMapAsyncStatus_Success);
@@ -374,7 +376,7 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
             auto size = TexelExtent3D(GetMipLevelSubresourcePhysicalSize(mipLevel, aspect));
             auto blockSize = blockInfo.ToBlock(size);
             uint32_t usedBytesPerRow = uint32_t(blockInfo.ToBytes(blockSize.width));
-            size_t mappableBytesPerRow = RoundUp(usedBytesPerRow, 4);
+            size_t mappableBytesPerRow = checked_cast<size_t>(RoundUp(usedBytesPerRow, 4));
 
             schema::RootCommandInitTextureCmd cmd{{
                 .data = {{
@@ -403,7 +405,8 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
             CaptureContext::ScopedContentWriter writer(captureContext);
 
             uint32_t alignedBytesPerRow = Align(usedBytesPerRow, 256);
-            BlockCount maxBlockRowsPerRead{CaptureContext::kCopyBufferSize / alignedBytesPerRow};
+            BlockCount maxBlockRowsPerRead{
+                checked_cast<uint32_t>(CaptureContext::kCopyBufferSize / alignedBytesPerRow)};
             DAWN_ASSERT(maxBlockRowsPerRead > BlockCount{0u});
 
             for (BlockCount z{0u}; z < blockSize.depthOrArrayLayers; ++z) {

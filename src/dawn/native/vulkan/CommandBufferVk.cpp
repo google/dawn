@@ -1572,7 +1572,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
 
     VkCommandBuffer commands = recordingContext->commandBuffer;
 
-    uint64_t currentDispatch = 0;
+    size_t currentDispatch = 0;
     ComputePassState state(device->fn, recordingContext);
 
     Command type;

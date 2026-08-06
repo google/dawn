@@ -236,7 +236,7 @@
                 {
                     {% do assert(member.annotation != "const*const*", "const*const* not valid here") %}
                     auto memberLength = {{member_length(member, "record.", spanify)}};
-                    auto size = WireAlignSizeofN<{{member_transfer_type(member.type)}}>(memberLength);
+                    auto size = WireAlignSizeofN<{{member_transfer_type(member.type)}}>(checked_cast<size_t>(memberLength));
                     DAWN_ASSERT(size);
                     result += *size;
                     //* Structures might contain more pointers so we need to add their extra size as well.
@@ -351,7 +351,7 @@
                     {% continue %}
                 {% endif %}
                 Span<volatile {{member_transfer_type(member.type)}}> memberBuffer;
-                WIRE_TRY(buffer->NextN(memberLength, &memberBuffer));
+                WIRE_TRY(buffer->NextN(checked_cast<size_t>(memberLength), &memberBuffer));
 
                 //* TODO(https://crbug.com/526537254): Remove this branch once all the commands have been spanified.
                 {% if spanify and member.length and member.length != "constant" %}
@@ -498,7 +498,7 @@
             {% endif %}
                 auto memberLength = {{member_length(member, "transfer->", False)}};
                 Span<const volatile {{member_transfer_type(member.type)}}> memberBuffer;
-                WIRE_TRY(deserializeBuffer->ReadN(memberLength, &memberBuffer));
+                WIRE_TRY(deserializeBuffer->ReadN(checked_cast<size_t>(memberLength), &memberBuffer));
 
                 //* TODO(https://crbug.com/526537254): Remove this branch once all the commands have been spanified.
                 {% if spanify and member.length and member.length != "constant" %}
@@ -764,7 +764,7 @@ WireResult WGPUStringViewSerialize(
     }
     if (length > 0) {
         Span<volatile char> memberBuffer;
-        WIRE_TRY(buffer->NextN(length, &memberBuffer));
+        WIRE_TRY(buffer->NextN(checked_cast<size_t>(length), &memberBuffer));
         // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
         // TODO(https://crbug.com/528027992): Spanify the record members.
         std::ranges::copy(record.data, record.data + length, memberBuffer.begin());

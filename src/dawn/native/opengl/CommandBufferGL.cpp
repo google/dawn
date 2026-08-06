@@ -267,14 +267,14 @@ class VertexStateBufferBindingTracker {
 
                 GLuint attribIndex = static_cast<GLuint>(static_cast<uint8_t>(location));
                 GLuint buffer = mVertexBuffers[slot]->GetHandle();
-                intptr_t offset = mVertexBufferOffsets[slot];
+                intptr_t offset = checked_cast<intptr_t>(mVertexBufferOffsets[slot]);
 
                 const VertexBufferInfo& vertexBuffer = mLastPipeline->GetVertexBuffer(slot);
 
                 if (vertexBuffer.stepMode == wgpu::VertexStepMode::Vertex) {
-                    offset += mBaseVertex * vertexBuffer.arrayStride;
+                    offset += checked_cast<intptr_t>(mBaseVertex * vertexBuffer.arrayStride);
                 } else if (vertexBuffer.stepMode == wgpu::VertexStepMode::Instance) {
-                    offset += mFirstInstance * vertexBuffer.arrayStride;
+                    offset += checked_cast<intptr_t>(mFirstInstance * vertexBuffer.arrayStride);
                 }
                 uint32_t components = GetVertexFormatInfo(attribute.format).componentCount;
                 GLenum formatType = VertexFormatType(attribute.format);
@@ -404,8 +404,9 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
                             DAWN_UNREACHABLE();
                     }
 
-                    DAWN_GL_TRY(
-                        gl, BindBufferRange(target, GLuint(index), buffer, offset, binding.size));
+                    DAWN_GL_TRY(gl, BindBufferRange(target, GLuint(index), buffer,
+                                                    checked_cast<GLintptr>(offset),
+                                                    checked_cast<GLsizeiptr>(binding.size)));
                     return {};
                 },
                 [&](const StaticSamplerBindingInfo& layout) -> MaybeError {
@@ -888,9 +889,10 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                             BindBuffer(GL_PIXEL_PACK_BUFFER, ToBackend(copy->source)->GetHandle()));
                 DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_UNPACK_BUFFER,
                                            ToBackend(copy->destination)->GetHandle()));
-                DAWN_GL_TRY(
-                    gl, CopyBufferSubData(GL_PIXEL_PACK_BUFFER, GL_PIXEL_UNPACK_BUFFER,
-                                          copy->sourceOffset, copy->destinationOffset, copy->size));
+                DAWN_GL_TRY(gl, CopyBufferSubData(GL_PIXEL_PACK_BUFFER, GL_PIXEL_UNPACK_BUFFER,
+                                                  checked_cast<GLintptr>(copy->sourceOffset),
+                                                  checked_cast<GLintptr>(copy->destinationOffset),
+                                                  checked_cast<GLsizeiptr>(copy->size)));
 
                 DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_PACK_BUFFER, 0));
                 DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
@@ -1135,10 +1137,11 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                                                                        &clearedToZero));
 
                 if (!clearedToZero) {
-                    const std::vector<uint8_t> clearValues(cmd->size, 0u);
+                    const std::vector<uint8_t> clearValues(checked_cast<size_t>(cmd->size), 0u);
                     DAWN_GL_TRY(gl, BindBuffer(GL_ARRAY_BUFFER, dstBuffer->GetHandle()));
-                    DAWN_GL_TRY(gl, BufferSubData(GL_ARRAY_BUFFER, cmd->offset, cmd->size,
-                                                  clearValues.data()));
+                    DAWN_GL_TRY(
+                        gl, BufferSubData(GL_ARRAY_BUFFER, checked_cast<GLintptr>(cmd->offset),
+                                          checked_cast<GLsizeiptr>(cmd->size), clearValues.data()));
                 }
 
                 dstBuffer->TrackUsage();
@@ -1169,8 +1172,9 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                 }
 
                 DAWN_GL_TRY(gl, BindBuffer(GL_ARRAY_BUFFER, destination->GetHandle()));
-                DAWN_GL_TRY(gl, BufferSubData(GL_ARRAY_BUFFER, cmd->destinationOffset, size,
-                                              values.data()));
+                DAWN_GL_TRY(gl, BufferSubData(GL_ARRAY_BUFFER,
+                                              checked_cast<GLintptr>(cmd->destinationOffset),
+                                              checked_cast<GLsizeiptr>(size), values.data()));
 
                 break;
             }
@@ -1201,7 +1205,8 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                 DAWN_TRY(dstBuffer->EnsureDataInitializedAsDestination(offset, data.size()));
 
                 DAWN_GL_TRY(gl, BindBuffer(GL_ARRAY_BUFFER, dstBuffer->GetHandle()));
-                DAWN_GL_TRY(gl, BufferSubData(GL_ARRAY_BUFFER, offset, data.size(), data.data()));
+                DAWN_GL_TRY(gl, BufferSubData(GL_ARRAY_BUFFER, checked_cast<GLintptr>(offset),
+                                              checked_cast<GLsizeiptr>(data.size()), data.data()));
 
                 dstBuffer->TrackUsage();
                 break;
@@ -1757,7 +1762,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
     TexelCount z = destination.origin.z;
 
     if (texture->GetFormat().isCompressed) {
-        size_t rowSize = blockInfo.ToBytes(blockCopySize.width);
+        size_t rowSize = checked_cast<size_t>(blockInfo.ToBytes(blockCopySize.width));
         TexelExtent3D virtSize = texture->GetMipLevelSingleSubresourceVirtualSize(
             destination.mipLevel, destination.aspect);
         const TexelCount width = std::min(copySize.width, virtSize.width - x);
@@ -1771,8 +1776,9 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
         if (bytesPerRow % blockInfo.byteSize == 0 && gl.GetVersion().IsDesktop()) {
             const BlockCount blocksPerRow = blockInfo.BytesToBlocks(bytesPerRow);
 
-            size_t imageSize = rowSize * blockInfo.ToBytes(blockCopySize.height *
-                                                           blockCopySize.depthOrArrayLayers);
+            size_t imageSize =
+                rowSize * checked_cast<size_t>(blockInfo.ToBytes(blockCopySize.height *
+                                                                 blockCopySize.depthOrArrayLayers));
 
             const TexelCount height = std::min(copySize.height, virtSize.height - y);
 

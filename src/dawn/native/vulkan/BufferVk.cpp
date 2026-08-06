@@ -202,11 +202,11 @@ VkMappedMemoryRange GetMappedMemoryRange(const ResourceMemoryAllocation& allocat
 
     // `offset` must always be a multiple of nonCoherentAtomSize. `size` must either be a multiple
     // of nonCoherentAtomSize or offset+size must be equal to the size of the allocation.
-    size_t fullOffset = allocation.GetOffset() + offset;
+    size_t fullOffset = checked_cast<size_t>(allocation.GetOffset()) + offset;
     size_t alignedOffset = AlignDown(fullOffset, nonCoherentAtomSize);
     size_t alignedSize = Align(size + (fullOffset - alignedOffset), nonCoherentAtomSize);
 
-    size_t allocationSize = allocation.GetInfo().mRequestedSize;
+    size_t allocationSize = checked_cast<size_t>(allocation.GetInfo().mRequestedSize);
     if (alignedOffset + alignedSize > allocationSize) {
         alignedSize = allocationSize - alignedOffset;
     }
@@ -321,26 +321,27 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
 
     // The buffers with mappedAtCreation == true will be initialized in BufferBase::MapAtCreation().
     if (!mappedAtCreation) {
-        size_t paddingClearSize = Align(GetAllocatedSize() - GetSize(), 4);
+        size_t paddingClearSize = checked_cast<size_t>(Align(GetAllocatedSize() - GetSize(), 4));
         uint64_t paddingClearOffset = GetAllocatedSize() - paddingClearSize;
 
         if (mHostVisible && GetSize() > 0) {
             // For host visible buffers do initialization on CPU to avoid a GPU write that
             // interferes with using the UploadData() fast path.
             if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-                DAWN_TRY(MapMemoryAndPerformOperation(
-                    0, mAllocatedSize.value(), [](std::span<std::byte> mapped) {
-                        std::ranges::fill(mapped, std::byte(0x01));
-                    }));
+                DAWN_TRY(
+                    MapMemoryAndPerformOperation(0, checked_cast<size_t>(mAllocatedSize.value()),
+                                                 [](std::span<std::byte> mapped) {
+                                                     std::ranges::fill(mapped, std::byte(0x01));
+                                                 }));
             }
             if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
                 paddingClearSize > 0) {
-                DAWN_TRY(
-                    MapMemoryAndPerformOperation(paddingClearOffset, paddingClearSize,
-                                                 [&paddingClearSize](std::span<std::byte> mapped) {
-                                                     DAWN_CHECK(mapped.size() == paddingClearSize);
-                                                     std::ranges::fill(mapped, std::byte(0x0));
-                                                 }));
+                DAWN_TRY(MapMemoryAndPerformOperation(
+                    checked_cast<size_t>(paddingClearOffset), paddingClearSize,
+                    [&paddingClearSize](std::span<std::byte> mapped) {
+                        DAWN_CHECK(mapped.size() == paddingClearSize);
+                        std::ranges::fill(mapped, std::byte(0x0));
+                    }));
             }
         } else {
             if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
@@ -583,7 +584,8 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     // are initialized in BufferBase already.
     if (NeedsInitialization() && GetSize() > 0 && newState == BufferState::Mapped) {
         // TODO(https://crbug.com/501491697): Spanify GetMappedPointerImpl.
-        DAWN_UNSAFE_TODO(std::memset(GetMappedPointerImpl(), 0, GetAllocatedSize()));
+        DAWN_UNSAFE_TODO(
+            std::memset(GetMappedPointerImpl(), 0, checked_cast<size_t>(GetAllocatedSize())));
         GetDevice()->IncrementLazyClearCountForTesting();
         SetInitialized(true);
 
@@ -595,7 +597,8 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
                 device->GetDeviceInfo().properties.limits.nonCoherentAtomSize;
 
             VkMappedMemoryRange range =
-                GetMappedMemoryRange(mMemoryAllocation, 0, GetAllocatedSize(), nonCoherentAtomSize);
+                GetMappedMemoryRange(mMemoryAllocation, 0, checked_cast<size_t>(GetAllocatedSize()),
+                                     checked_cast<size_t>(nonCoherentAtomSize));
 
             device->fn.FlushMappedMemoryRanges(device->GetVkDevice(), 1, &range);
         }
@@ -611,8 +614,9 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
             VkDeviceSize nonCoherentAtomSize =
                 device->GetDeviceInfo().properties.limits.nonCoherentAtomSize;
 
-            VkMappedMemoryRange range = GetMappedMemoryRange(mMemoryAllocation, MapOffset(),
-                                                             MapSize(), nonCoherentAtomSize);
+            VkMappedMemoryRange range =
+                GetMappedMemoryRange(mMemoryAllocation, MapOffset(), MapSize(),
+                                     checked_cast<size_t>(nonCoherentAtomSize));
 
             device->fn.InvalidateMappedMemoryRanges(device->GetVkDevice(), 1, &range);
         }
@@ -627,8 +631,8 @@ void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
         VkDeviceSize nonCoherentAtomSize =
             device->GetDeviceInfo().properties.limits.nonCoherentAtomSize;
 
-        VkMappedMemoryRange range =
-            GetMappedMemoryRange(mMemoryAllocation, MapOffset(), MapSize(), nonCoherentAtomSize);
+        VkMappedMemoryRange range = GetMappedMemoryRange(mMemoryAllocation, MapOffset(), MapSize(),
+                                                         checked_cast<size_t>(nonCoherentAtomSize));
 
         device->fn.FlushMappedMemoryRanges(device->GetVkDevice(), 1, &range);
     }
@@ -669,22 +673,24 @@ MaybeError Buffer::UploadData(uint64_t bufferOffset, Span<const std::byte> data)
     uint64_t mapSize = needsZeroInitialization ? mAllocatedSize.value() : data.size();
     uint64_t mapOffset = needsZeroInitialization ? 0 : bufferOffset;
 
-    return MapMemoryAndPerformOperation(mapOffset, mapSize, [&](std::span<std::byte> mapped) {
-        uint64_t dstOffset = 0;
-        if (needsZeroInitialization) {
-            DAWN_ASSERT(mapped.size() == mAllocatedSize);
-            std::ranges::fill(mapped, std::byte(0x0));
-            GetDevice()->IncrementLazyClearCountForTesting();
-            dstOffset = bufferOffset;
-        }
-        // The buffer is always initialized here, either by explicit zero initialization
-        // above or memcpy below.
-        SetInitialized(true);
+    return MapMemoryAndPerformOperation(
+        checked_cast<size_t>(mapOffset), checked_cast<size_t>(mapSize),
+        [&](std::span<std::byte> mapped) {
+            uint64_t dstOffset = 0;
+            if (needsZeroInitialization) {
+                DAWN_ASSERT(mapped.size() == mAllocatedSize);
+                std::ranges::fill(mapped, std::byte(0x0));
+                GetDevice()->IncrementLazyClearCountForTesting();
+                dstOffset = bufferOffset;
+            }
+            // The buffer is always initialized here, either by explicit zero initialization
+            // above or memcpy below.
+            SetInitialized(true);
 
-        DAWN_ASSERT(mapped.size() >= dstOffset + data.size());
-        // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-        DAWN_UNSAFE_TODO(memcpy(mapped.data() + dstOffset, data.data(), data.size()));
-    });
+            DAWN_ASSERT(mapped.size() >= dstOffset + data.size());
+            // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
+            DAWN_UNSAFE_TODO(memcpy(mapped.data() + dstOffset, data.data(), data.size()));
+        });
 }
 
 template <typename F>
@@ -740,7 +746,7 @@ MaybeError Buffer::MapMemoryAndPerformOperation(uint64_t requestedOffset,
     }
 
     // Pass a span that is exactly the offset/size requested even if a larger range was mapped.
-    op(memory.subspan(realOffset, requestedSize));
+    op(memory.subspan(checked_cast<size_t>(realOffset), checked_cast<size_t>(requestedSize)));
 
     if (!mHostCoherent) {
         // For non-coherent memory we need to explicitly flush the memory range to make the host

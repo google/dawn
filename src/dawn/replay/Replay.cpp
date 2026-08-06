@@ -47,6 +47,7 @@
 #include "src/dawn/replay/Deserialization.h"
 #include "src/dawn/replay/ReplayImpl.h"
 #include "src/dawn/replay/SurfaceDiscovery.h"
+#include "src/utils/numeric.h"
 #include "src/utils/platform.h"
 
 namespace dawn::replay {
@@ -448,9 +449,9 @@ MaybeError ReadContentIntoBuffer(ReadHead& readHead,
                                  uint64_t bufferOffset,
                                  uint64_t size) {
     const uint32_t* data;
-    DAWN_TRY_ASSIGN(data, readHead.GetData(size));
+    DAWN_TRY_ASSIGN(data, readHead.GetData(checked_cast<size_t>(size)));
 
-    device.GetQueue().WriteBuffer(buffer, bufferOffset, data, size);
+    device.GetQueue().WriteBuffer(buffer, bufferOffset, data, checked_cast<size_t>(size));
     return {};
 }
 
@@ -461,12 +462,13 @@ MaybeError ReadContentIntoTexture(const DawnRootCommandVisitor& replay,
     const uint64_t dataSize = (cmdData.dataSize + 3) & ~3u;
 
     const uint32_t* data;
-    DAWN_TRY_ASSIGN(data, readHead.GetData(dataSize));
+    DAWN_TRY_ASSIGN(data, readHead.GetData(checked_cast<size_t>(dataSize)));
 
     wgpu::TexelCopyTextureInfo dst = ToWGPU(replay, cmdData.destination);
     wgpu::TexelCopyBufferLayout layout = ToWGPU(cmdData.layout);
     wgpu::Extent3D size = ToWGPU(cmdData.size);
-    device.GetQueue().WriteTexture(&dst, data, cmdData.dataSize, &layout, &size);
+    device.GetQueue().WriteTexture(&dst, data, checked_cast<size_t>(cmdData.dataSize), &layout,
+                                   &size);
     return {};
 }
 
@@ -492,16 +494,18 @@ MaybeError InitializeTexture(const DawnRootCommandVisitor& replay,
     const uint64_t dataSize = (cmdData.dataSize + 3) & ~3u;
 
     const uint32_t* data;
-    DAWN_TRY_ASSIGN(data, readHead.GetData(dataSize));
+    DAWN_TRY_ASSIGN(data, readHead.GetData(checked_cast<size_t>(dataSize)));
 
     wgpu::TexelCopyTextureInfo dst = ToWGPU(replay, cmdData.destination);
     wgpu::TexelCopyBufferLayout layout = ToWGPU(cmdData.layout);
     wgpu::Extent3D size = ToWGPU(cmdData.size);
 
     if (TextureFormatNeedsBlit(dst.texture.GetFormat(), dst.aspect)) {
-        DAWN_TRY(blitBufferToDepthTexture.Blit(device, dst, data, cmdData.dataSize, layout, size));
+        DAWN_TRY(blitBufferToDepthTexture.Blit(
+            device, dst, data, checked_cast<size_t>(cmdData.dataSize), layout, size));
     } else {
-        device.GetQueue().WriteTexture(&dst, data, cmdData.dataSize, &layout, &size);
+        device.GetQueue().WriteTexture(&dst, data, checked_cast<size_t>(cmdData.dataSize), &layout,
+                                       &size);
     }
     return {};
 }

@@ -385,8 +385,9 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                 DAWN_TRY(destination->TrackUsage(commandContext, pendingSerial));
 
                 // Buffer::Copy() will ensure the source and destination buffers are initialized.
-                DAWN_TRY(Buffer::Copy(commandContext, source, copy->sourceOffset, copy->size,
-                                      destination, copy->destinationOffset));
+                DAWN_TRY(Buffer::Copy(commandContext, source, copy->sourceOffset,
+                                      checked_cast<size_t>(copy->size), destination,
+                                      copy->destinationOffset));
                 break;
             }
 
@@ -421,8 +422,8 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                                                                   Unpack(&desc), commandContext));
                     use = stagingBuffer->UseInternal();
                     DAWN_TRY(Buffer::Copy(commandContext, buffer, src.offset,
-                                          stagingBuffer->GetSize(), ToBackend(stagingBuffer.Get()),
-                                          0));
+                                          checked_cast<size_t>(stagingBuffer->GetSize()),
+                                          ToBackend(stagingBuffer.Get()), 0));
                     buffer = ToBackend(stagingBuffer.Get());
                     bufferOffset = 0;
                 }
@@ -474,7 +475,8 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                 Texture::ReadCallback callback = [&](const uint8_t* data, uint64_t offset,
                                                      uint64_t size) -> MaybeError {
                     DAWN_TRY(ToBackend(dst.buffer)
-                                 ->Write(commandContext, dst.offset + offset, data, size));
+                                 ->Write(commandContext, dst.offset + offset, data,
+                                         checked_cast<size_t>(size)));
                     return {};
                 };
 

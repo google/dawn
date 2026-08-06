@@ -51,6 +51,7 @@
 #include "src/dawn/native/d3d11/SharedTextureMemoryD3D11.h"
 #include "src/dawn/native/d3d11/UtilsD3D11.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::d3d11 {
 namespace {
@@ -562,7 +563,8 @@ MaybeError Texture::ClearNonRenderable(const ScopedCommandRecordingContext* comm
         DAWN_TRY_ASSIGN(byteLength, ComputeRequiredBytesInCopy(blockInfo, writeSize, bytesPerRow,
                                                                rowsPerImage));
 
-        std::vector<uint8_t> clearData(byteLength, clearValue == ClearValue::Zero ? 0 : 1);
+        std::vector<uint8_t> clearData(checked_cast<size_t>(byteLength),
+                                       clearValue == ClearValue::Zero ? 0 : 1);
         SubresourceRange writeRange = range;
         writeRange.layerCount = 1;
         writeRange.levelCount = 1;
@@ -900,7 +902,8 @@ MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandCont
             if (dstBytesPerRow == bytesPerRow && mappedResource.RowPitch == bytesPerRow) {
                 // If there is no padding in the rows, we can upload the whole image
                 // in one read.
-                DAWN_TRY(callback(pSrcData, dstOffset, dstBytesPerRow * rowsPerImage));
+                DAWN_TRY(callback(pSrcData, checked_cast<size_t>(dstOffset),
+                                  dstBytesPerRow * rowsPerImage));
             } else if (hasStencil) {
                 // We need to read texel by texel for depth-stencil formats.
                 std::vector<uint8_t> depthOrStencilData(size.width * blockInfo.byteSize);
@@ -917,14 +920,15 @@ MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandCont
                         DAWN_UNSAFE_TODO(src += aspectLayout.texelSize);
                         DAWN_UNSAFE_TODO(dst += aspectLayout.componentSize);
                     }
-                    DAWN_TRY(callback(depthOrStencilData.data(), dstOffset, bytesPerRow));
+                    DAWN_TRY(callback(depthOrStencilData.data(), checked_cast<size_t>(dstOffset),
+                                      bytesPerRow));
                     dstOffset += dstBytesPerRow;
                     DAWN_UNSAFE_TODO(pSrcData += mappedResource.RowPitch);
                 }
             } else {
                 // Otherwise, we need to read each row separately.
                 for (uint32_t y = 0; y < rowsPerImage; ++y) {
-                    DAWN_TRY(callback(pSrcData, dstOffset, bytesPerRow));
+                    DAWN_TRY(callback(pSrcData, checked_cast<size_t>(dstOffset), bytesPerRow));
                     dstOffset += dstBytesPerRow;
                     DAWN_UNSAFE_TODO(pSrcData += mappedResource.RowPitch);
                 }
@@ -950,11 +954,12 @@ MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandCont
         if (dstBytesPerRow == bytesPerRow && mappedResource.RowPitch == bytesPerRow) {
             // If there is no padding in the rows, we can upload the whole image
             // in one read.
-            DAWN_TRY(callback(pSrcData, dstOffset, bytesPerRow * size.height));
+            DAWN_TRY(
+                callback(pSrcData, checked_cast<size_t>(dstOffset), bytesPerRow * size.height));
         } else {
             // Otherwise, we need to read each row separately.
             for (uint32_t y = 0; y < size.height; ++y) {
-                DAWN_TRY(callback(pSrcData, dstOffset, bytesPerRow));
+                DAWN_TRY(callback(pSrcData, checked_cast<size_t>(dstOffset), bytesPerRow));
                 dstOffset += dstBytesPerRow;
                 DAWN_UNSAFE_TODO(pSrcData += mappedResource.RowPitch);
             }
@@ -1127,7 +1132,7 @@ MaybeError Texture::UpdateStencilCopyForView(const ScopedCommandRecordingContext
     DAWN_TRY_ASSIGN(byteLength,
                     ComputeRequiredBytesInCopy(blockInfo, size, bytesPerRow, rowsPerImage));
 
-    std::vector<uint8_t> stagingData(byteLength);
+    std::vector<uint8_t> stagingData(checked_cast<size_t>(byteLength));
     for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
          ++level) {
         size = GetMipLevelSubresourceVirtualSize(level, range.aspects);
@@ -1135,8 +1140,8 @@ MaybeError Texture::UpdateStencilCopyForView(const ScopedCommandRecordingContext
         rowsPerImage = size.height;
         auto singleRange = SubresourceRange(range.aspects, {0, range.layerCount}, {level, 1});
 
-        Texture::ReadCallback callback = [&](const uint8_t* data, uint64_t offset,
-                                             uint64_t length) -> MaybeError {
+        Texture::ReadCallback callback = [&](const uint8_t* data, size_t offset,
+                                             size_t length) -> MaybeError {
             DAWN_UNSAFE_TODO(
                 std::memcpy(static_cast<uint8_t*>(stagingData.data()) + offset, data, length));
             return {};

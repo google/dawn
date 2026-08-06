@@ -42,6 +42,7 @@
 #include "src/dawn/native/ResourceTable.h"
 #include "src/dawn/native/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native {
 
@@ -193,7 +194,7 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(
                 DAWN_UNREACHABLE();
         }
 
-        DAWN_INVALID_IF(!IsAligned(dynamicOffsets[i], requiredAlignment),
+        DAWN_INVALID_IF(!IsAligned(dynamicOffsets[i], checked_cast<size_t>(requiredAlignment)),
                         "Dynamic Offset[%u] (%u) is not %u byte aligned.", i, dynamicOffsets[i],
                         requiredAlignment);
 

@@ -406,8 +406,8 @@ MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
 
     auto commandContext =
         ToBackend(GetQueue())->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
-    return Buffer::Copy(&commandContext, ToBackend(source), sourceOffset, size,
-                        ToBackend(destination), destinationOffset);
+    return Buffer::Copy(&commandContext, ToBackend(source), sourceOffset,
+                        checked_cast<size_t>(size), ToBackend(destination), destinationOffset);
 }
 
 MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,

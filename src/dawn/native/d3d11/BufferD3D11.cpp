@@ -229,7 +229,8 @@ class UploadBuffer final : public Buffer {
         mUploadData =
             // SAFETY: This allocation takes the place of a GPU allocation in a GPU-backed Buffer,
             // so its initialization is ensured in the same way.
-            DAWN_UNSAFE_BUFFERS(HeapArray<uint8_t>::Uninit(GetAllocatedSize(), std::nothrow));
+            DAWN_UNSAFE_BUFFERS(
+                HeapArray<uint8_t>::Uninit(checked_cast<size_t>(GetAllocatedSize()), std::nothrow));
         if (!mUploadData) {
             return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer uploading.");
         }
@@ -247,7 +248,9 @@ class UploadBuffer final : public Buffer {
                              uint8_t clearValue,
                              uint64_t offset,
                              uint64_t size) override {
-        std::ranges::fill(mUploadData.subspan(offset, size), clearValue);
+        std::ranges::fill(
+            mUploadData.subspan(checked_cast<size_t>(offset), checked_cast<size_t>(size)),
+            clearValue);
         return {};
     }
 
@@ -279,7 +282,7 @@ class UploadBuffer final : public Buffer {
         // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
         std::ranges::copy(
             DAWN_UNSAFE_TODO(Span<const uint8_t>{static_cast<const uint8_t*>(data), size}),
-            mUploadData.subspan(offset).begin());
+            mUploadData.subspan(checked_cast<size_t>(offset)).begin());
         return {};
     }
 
@@ -326,10 +329,11 @@ ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
                                           const UnpackedPtr<BufferDescriptor>& descriptor,
                                           const ScopedCommandRecordingContext* commandContext,
                                           bool allowUploadBufferEmulation) {
-    const auto actualUsage =
-        ComputeInternalBufferUsages(device, descriptor->usage, descriptor->size);
+    const auto actualUsage = ComputeInternalBufferUsages(device, descriptor->usage,
+                                                         checked_cast<size_t>(descriptor->size));
     bool useUploadBuffer = allowUploadBufferEmulation;
-    useUploadBuffer &= CanUseCPUUploadBuffer(device, actualUsage, descriptor->size);
+    useUploadBuffer &=
+        CanUseCPUUploadBuffer(device, actualUsage, checked_cast<size_t>(descriptor->size));
     Ref<Buffer> buffer;
     if (useUploadBuffer) {
         buffer = AcquireRef(new UploadBuffer(device, descriptor));
@@ -427,7 +431,8 @@ MaybeError Buffer::MapAtCreationImpl() {
     // Lock could not be acquired, use temporary storage instead.
     mMapAtCreationData =
         // SAFETY: Frontend is responsible for initializing MapAtCreation memory.
-        DAWN_UNSAFE_BUFFERS(HeapArray<uint8_t>::Uninit(GetAllocatedSize(), std::nothrow));
+        DAWN_UNSAFE_BUFFERS(
+            HeapArray<uint8_t>::Uninit(checked_cast<size_t>(GetAllocatedSize()), std::nothrow));
     mMappedData = mMapAtCreationData.data();
     return {};
 }
@@ -729,8 +734,8 @@ MaybeError Buffer::ClearInternal(const ScopedCommandRecordingContext* commandCon
 
     // TODO(dawn:1705): use a reusable zero staging buffer to clear the buffer to avoid this CPU to
     // GPU copy.
-    std::vector<uint8_t> clearData(size, clearValue);
-    return WriteInternal(commandContext, offset, clearData.data(), size,
+    std::vector<uint8_t> clearData(checked_cast<size_t>(size), clearValue);
+    return WriteInternal(commandContext, offset, clearData.data(), checked_cast<size_t>(size),
                          /*isInitialWrite=*/true);
 }
 
@@ -1195,7 +1200,7 @@ MaybeError GPUUsableBuffer::SyncStorage(const ScopedCommandRecordingContext* com
     };
 
     auto result = MapAndCopy(commandContext, dstStorage->GetD3D11Buffer(), mappedSrcResource.pData,
-                             GetAllocatedSize());
+                             checked_cast<size_t>(GetAllocatedSize()));
 
     commandContext->Unmap(stagingStorage->GetD3D11Buffer(),
                           /*Subresource=*/0);
@@ -1483,24 +1488,24 @@ MaybeError GPUUsableBuffer::UpdateD3D11ConstantBuffer(
         } else {
             DAWN_ASSERT(firstTimeUpdate);
             // For offset we align to lower value (<= offset).
-            alignedOffset = Align(offset - (kConstantBufferUpdateAlignment - 1),
-                                  kConstantBufferUpdateAlignment);
+            alignedOffset = checked_cast<size_t>(Align(
+                offset - (kConstantBufferUpdateAlignment - 1), kConstantBufferUpdateAlignment));
         }
         size_t alignedEnd;
         if (requiresFullAllocatedSizeWrite) {
-            alignedEnd = GetAllocatedSize();
+            alignedEnd = checked_cast<size_t>(GetAllocatedSize());
         } else {
-            alignedEnd = Align(offset + size, kConstantBufferUpdateAlignment);
+            alignedEnd = checked_cast<size_t>(Align(offset + size, kConstantBufferUpdateAlignment));
         }
         size_t alignedSize = alignedEnd - alignedOffset;
 
         DAWN_CHECK((alignedSize % kConstantBufferUpdateAlignment) == 0);
-        DAWN_CHECK(alignedSize <= GetAllocatedSize());
+        DAWN_CHECK(alignedSize <= checked_cast<size_t>(GetAllocatedSize()));
         DAWN_ASSERT(offset >= alignedOffset);
 
         // Extra bytes on the left of offset we could write to. This is only valid if
         // firstTimeUpdate = true.
-        size_t leftExtraBytes = offset - alignedOffset;
+        size_t leftExtraBytes = checked_cast<size_t>(offset) - alignedOffset;
         DAWN_ASSERT(leftExtraBytes == 0 || firstTimeUpdate);
 
         // The layout of the buffer is like this:
@@ -1712,7 +1717,8 @@ MaybeError GPUUsableBuffer::PredicatedClear(
 
     // TODO(350493305): Change function signature to accept a single uint64_t value.
     // So that we don't need to allocate a vector here.
-    absl::InlinedVector<uint8_t, sizeof(uint64_t)> clearData(size, clearValue);
+    absl::InlinedVector<uint8_t, sizeof(uint64_t)> clearData(checked_cast<size_t>(size),
+                                                             clearValue);
 
     // The update will *NOT* be performed if the predicate's data is false.
     commandContext->GetD3D11DeviceContext3()->SetPredication(predicate, false);

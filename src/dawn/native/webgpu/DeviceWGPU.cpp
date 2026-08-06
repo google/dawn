@@ -68,6 +68,7 @@
 #include "src/dawn/native/webgpu/TextureWGPU.h"
 #include "src/dawn/native/webgpu/ToWGPU.h"
 #include "src/utils/log.h"
+#include "src/utils/numeric.h"
 #include "tint/tint.h"
 
 namespace dawn::native::webgpu {
@@ -410,8 +411,9 @@ MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
         // buffers in a copyB2B we would need to unmap them but the DynamicUploader doesn't support
         // that. Instead keep the buffers mapped and use queueWriteBuffer to read directly from the
         // mapped staging memory.
-        wgpu->bufferGetConstMappedRange(ToBackend(source)->GetInnerHandle(), 0, source->GetSize()),
-        size);
+        wgpu->bufferGetConstMappedRange(ToBackend(source)->GetInnerHandle(), 0,
+                                        checked_cast<size_t>(source->GetSize())),
+        checked_cast<size_t>(size));
     return {};
 }
 
@@ -421,7 +423,7 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
                                                 const Extent3D& copySizePixels) {
     WGPUTexelCopyBufferLayout innerSource = ToWGPU(src);
     WGPUTexelCopyTextureInfo innerDestination = ToWGPU(dst);
-    size_t bufferSize = source->GetSize();
+    size_t bufferSize = checked_cast<size_t>(source->GetSize());
     WGPUExtent3D size = ToWGPU(copySizePixels);
     wgpu->queueWriteTexture(
         ToBackend(GetQueue())->GetInnerHandle(), &innerDestination,

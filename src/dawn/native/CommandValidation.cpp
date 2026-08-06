@@ -49,6 +49,7 @@
 #include "src/dawn/native/RenderBundle.h"
 #include "src/dawn/native/RenderPipeline.h"
 #include "src/dawn/native/webgpu_absl_format.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native {
 
@@ -780,7 +781,7 @@ MaybeError ValidatePLSInfo(
         // Validate that there are no collisions, each storage attachment takes a single slot so
         // we don't need to loop over all slots for a storage attachment.
         DAWN_CHECK(format.GetAspectInfo(Aspect::Color).block.byteSize == kPLSSlotByteSize);
-        size_t slot = offset / kPLSSlotByteSize;
+        size_t slot = checked_cast<size_t>(offset / kPLSSlotByteSize);
         DAWN_INVALID_IF(indexForSlot[slot] != kSlotNotSet,
                         "storageAttachments[%i] and storageAttachment[%i] conflict.", i,
                         indexForSlot[slot]);

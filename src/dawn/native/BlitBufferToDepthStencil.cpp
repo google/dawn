@@ -307,8 +307,8 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
             bufferDesc.mappedAtCreation = true;
             DAWN_TRY_ASSIGN(paramsBuffer, device->CreateBuffer(&bufferDesc));
 
-            uint32_t* params =
-                static_cast<uint32_t*>(paramsBuffer->GetMappedRange(0, bufferDesc.size));
+            uint32_t* params = static_cast<uint32_t*>(
+                paramsBuffer->GetMappedRange(0, checked_cast<size_t>(bufferDesc.size)));
             params[0] = dchecked_cast<uint32_t>(dst.origin.x);
             DAWN_UNSAFE_TODO(params[1]) = dchecked_cast<uint32_t>(dst.origin.y);
             DAWN_TRY(paramsBuffer->Unmap());
@@ -411,7 +411,8 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         bufferDesc.mappedAtCreation = true;
         DAWN_TRY_ASSIGN(paramsBuffer, device->CreateBuffer(&bufferDesc));
 
-        uint32_t* params = static_cast<uint32_t*>(paramsBuffer->GetMappedRange(0, bufferDesc.size));
+        uint32_t* params = static_cast<uint32_t*>(
+            paramsBuffer->GetMappedRange(0, checked_cast<size_t>(bufferDesc.size)));
         params[0] = dchecked_cast<uint32_t>(dst.origin.x);
         DAWN_UNSAFE_TODO(params[1]) = dchecked_cast<uint32_t>(dst.origin.y);
         DAWN_UNSAFE_TODO(params[2]) = 0;

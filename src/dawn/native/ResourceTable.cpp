@@ -38,6 +38,7 @@
 #include "src/dawn/native/ResourceTableDefaultResources.h"
 #include "src/dawn/native/Texture.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 #include "tint/tint.h"
 
 namespace dawn::native {
@@ -185,11 +186,13 @@ MaybeError ResourceTableBase::InitializeBase() {
     // TODO(https://crbug.com/435317394): We could rely on zero initialization if it is enabled, and
     // also apply the initial dirty slots in this mapping instead of on the first use of the
     // resource table.
-    uint32_t* data = static_cast<uint32_t*>(mMetadataBuffer->GetMappedRange(0, metadataDesc.size));
+    uint32_t* data = static_cast<uint32_t*>(
+        mMetadataBuffer->GetMappedRange(0, checked_cast<size_t>(metadataDesc.size)));
     // Store APISize at element 0 in the metadata buffer, which will be used in the shader to index
     // default resources at APISize + resource type index.
     data[0] = uint32_t(mAPISize);
-    DAWN_UNSAFE_TODO(memset(data + 1, 0, metadataDesc.size - sizeof(uint32_t)));
+    DAWN_UNSAFE_TODO(
+        memset(data + 1, 0, checked_cast<size_t>(metadataDesc.size - sizeof(uint32_t))));
     DAWN_TRY(mMetadataBuffer->Unmap());
 
     // Add the default resources at the end of the table.

@@ -33,6 +33,7 @@
 #include "src/dawn/native/dawn_platform.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 #include "tint/tint.h"
 
 namespace dawn::native {
@@ -131,17 +132,17 @@ void ParsedCompilationMessages::AddMessage(const tint::diag::Diagnostic& diagnos
         // pointer with the start of the file's content. Note that line numbering in Tint source
         // range starts at 1 while the array of lines start at 0 (hence the -1).
         const char* fileStart = content.data.data();
-        const char* lineStart = content.lines[lineNum - 1].data();
+        const char* lineStart = content.lines[checked_cast<size_t>(lineNum - 1)].data();
         offsetInBytes = static_cast<uint64_t>(lineStart - fileStart) + linePosInBytes - 1;
 
         // The linePosInBytes is 1-based.
-        uint64_t linePosOffsetInUTF16 =
-            CountUTF16CodeUnitsFromUTF8String(std::string_view(lineStart, linePosInBytes - 1));
+        uint64_t linePosOffsetInUTF16 = CountUTF16CodeUnitsFromUTF8String(
+            std::string_view(lineStart, checked_cast<size_t>(linePosInBytes - 1)));
         linePosInUTF16 = linePosOffsetInUTF16 + 1;
 
         // The offset is 0-based.
         uint64_t lineStartToFileStartOffsetInUTF16 = CountUTF16CodeUnitsFromUTF8String(
-            std::string_view(fileStart, static_cast<uint64_t>(lineStart - fileStart)));
+            std::string_view(fileStart, checked_cast<size_t>(lineStart - fileStart)));
         offsetInUTF16 = lineStartToFileStartOffsetInUTF16 + linePosInUTF16 - 1;
 
         // If the range has a valid start but the end is not specified, clamp it to the start.
@@ -152,15 +153,15 @@ void ParsedCompilationMessages::AddMessage(const tint::diag::Diagnostic& diagnos
             endLineCol = linePosInBytes;
         }
 
-        const char* endLineStart = content.lines[endLineNum - 1].data();
+        const char* endLineStart = content.lines[checked_cast<size_t>(endLineNum - 1)].data();
         uint64_t endOffsetInBytes =
             static_cast<uint64_t>(endLineStart - fileStart) + endLineCol - 1;
         // The length of the message is the difference between the starting offset and the
         // ending offset. Negative ranges aren't allowed.
         DAWN_ASSERT(endOffsetInBytes >= offsetInBytes);
         lengthInBytes = endOffsetInBytes - offsetInBytes;
-        lengthInUTF16 = CountUTF16CodeUnitsFromUTF8String(
-            std::string_view(DAWN_UNSAFE_TODO(fileStart + offsetInBytes), lengthInBytes));
+        lengthInUTF16 = CountUTF16CodeUnitsFromUTF8String(std::string_view(
+            DAWN_UNSAFE_TODO(fileStart + offsetInBytes), checked_cast<size_t>(lengthInBytes)));
     }
 
     std::string plainMessage = diagnostic.message.Plain();

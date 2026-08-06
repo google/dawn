@@ -1187,6 +1187,8 @@ TEST_P(BufferTests, ZeroSizedBuffer) {
 
 // Test that creating a very large buffers fails gracefully.
 TEST_P(BufferTests, CreateBufferOOM) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
     // TODO(http://crbug.com/dawn/749): Missing support.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsAsan());
@@ -1229,6 +1231,8 @@ TEST_P(BufferTests, CreateBufferOOMWithValidationError) {
 
 // Test that a very large buffer mappedAtCreation fails gracefully.
 TEST_P(BufferTests, BufferMappedAtCreationOOM) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
     // TODO(http://crbug.com/dawn/749): Missing support.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsAsan());
@@ -1384,6 +1388,8 @@ TEST_P(BufferTests, CreateErrorBuffer) {
 
 // Test that mapping an OOM buffer fails gracefully
 TEST_P(BufferTests, CreateBufferOOMMapAsync) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
     // TODO(http://crbug.com/dawn/749): Missing support.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsAsan());

@@ -294,12 +294,13 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
 
     D3D12_RESOURCE_ALLOCATION_INFO resourceInfo =
         device->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
-    DAWN_INVALID_IF(resourceInfo.SizeInBytes > heapSize,
-                    "Resource required %u bytes, but heap is %u bytes.", resourceInfo.SizeInBytes,
-                    heapSize);
-    DAWN_INVALID_IF(!IsPtrAligned(hostMappedDesc->pointer, resourceInfo.Alignment),
-                    "Host-mapped pointer (%p) did not satisfy required alignment (%u).",
-                    hostMappedDesc->pointer, resourceInfo.Alignment);
+    DAWN_INVALID_IF(
+        resourceInfo.SizeInBytes > heapSize, "Resource required %u bytes, but heap is %u bytes.",
+        checked_cast<uint32_t>(resourceInfo.SizeInBytes), checked_cast<uint32_t>(heapSize));
+    DAWN_INVALID_IF(
+        !IsPtrAligned(hostMappedDesc->pointer, checked_cast<size_t>(resourceInfo.Alignment)),
+        "Host-mapped pointer (%p) did not satisfy required alignment (%u).",
+        hostMappedDesc->pointer, resourceInfo.Alignment);
 
     mAllocatedSize = resourceInfo.SizeInBytes;
     mLastState = D3D12_RESOURCE_STATE_COMMON;
@@ -734,7 +735,7 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
         DAWN_TRY(MapInternal(true, static_cast<size_t>(offset), static_cast<size_t>(size),
                              "D3D12 map at clear buffer"));
         // TODO(https://crbug.com/501491697): Spanify GetMappedPointerImpl.
-        DAWN_UNSAFE_TODO(memset(mMappedData, clearValue, size));
+        DAWN_UNSAFE_TODO(memset(mMappedData, clearValue, checked_cast<size_t>(size)));
         UnmapImpl(GetState(), BufferState::Unmapped);
     } else if (clearValue == 0u) {
         DAWN_TRY(device->ClearBufferToZero(commandContext, this, offset, size));
@@ -745,7 +746,8 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
         DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
             size, kCopyBufferToBufferOffsetAlignment,
             [&](UploadReservation reservation) -> MaybeError {
-                DAWN_UNSAFE_TODO(memset(reservation.mappedPointer, clearValue, size));
+                DAWN_UNSAFE_TODO(
+                    memset(reservation.mappedPointer, clearValue, checked_cast<size_t>(size)));
                 device->CopyFromStagingToBufferHelper(commandContext, reservation.buffer.Get(),
                                                       reservation.offsetInBuffer, this, offset,
                                                       size);

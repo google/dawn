@@ -93,6 +93,7 @@
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/compiler.h"
 #include "src/utils/log.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native {
 
@@ -1829,7 +1830,7 @@ bool DeviceBase::IsImmediateErrorHandlingEnabled() const {
 }
 
 size_t DeviceBase::GetLazyClearCountForTesting() {
-    return mLazyClearCountForTesting;
+    return checked_cast<size_t>(mLazyClearCountForTesting.load());
 }
 
 void DeviceBase::IncrementLazyClearCountForTesting() {
@@ -2747,7 +2748,8 @@ std::string_view DeviceBase::GetIsolatedEntryPointName() const {
 }
 
 IgnoreLazyClearCountScope::IgnoreLazyClearCountScope(DeviceBase* device)
-    : mDevice(device), mLazyClearCountForTesting(device->mLazyClearCountForTesting) {}
+    : mDevice(device),
+      mLazyClearCountForTesting(checked_cast<size_t>(device->mLazyClearCountForTesting.load())) {}
 
 IgnoreLazyClearCountScope::~IgnoreLazyClearCountScope() {
     mDevice->mLazyClearCountForTesting = mLazyClearCountForTesting;

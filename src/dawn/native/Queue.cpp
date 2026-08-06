@@ -64,6 +64,7 @@
 #include "src/dawn/native/Texture.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 #include "src/utils/span.h"
 
 namespace dawn::native {
@@ -95,12 +96,13 @@ void CopyTextureData(uint8_t* dstPointer,
         uint64_t layerSize = uint64_t(dstRowsPerImage) * actualBytesPerRow;
         if (!copyWholeData) {  // copy layer by layer
             for (uint32_t d = 0; d < depth; ++d) {
-                DAWN_UNSAFE_TODO(memcpy(dstPointer, srcPointer, layerSize));
+                DAWN_UNSAFE_TODO(memcpy(dstPointer, srcPointer, checked_cast<size_t>(layerSize)));
                 DAWN_UNSAFE_TODO(dstPointer += layerSize);
                 DAWN_UNSAFE_TODO(srcPointer += layerSize + imageAdditionalStride);
             }
         } else {  // do a single copy
-            DAWN_UNSAFE_TODO(memcpy(dstPointer, srcPointer, layerSize * depth));
+            DAWN_UNSAFE_TODO(
+                memcpy(dstPointer, srcPointer, checked_cast<size_t>(layerSize * depth)));
         }
     }
 }

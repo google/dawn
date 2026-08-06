@@ -36,6 +36,7 @@
 #include "src/dawn/native/opengl/DeviceGL.h"
 #include "src/dawn/native/opengl/UtilsGL.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::opengl {
 
@@ -76,13 +77,15 @@ ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
 
         auto allocatedSize = buffer->mAllocatedSize.value();
         if (clear) {
-            std::vector<uint8_t> clearValues(allocatedSize, 1u);
+            std::vector<uint8_t> clearValues(checked_cast<size_t>(allocatedSize), 1u);
             DAWN_GL_TRY_ALWAYS_CHECK(
-                gl, BufferData(GL_ARRAY_BUFFER, allocatedSize, clearValues.data(), GL_STATIC_DRAW));
+                gl, BufferData(GL_ARRAY_BUFFER, checked_cast<GLsizeiptr>(allocatedSize),
+                               clearValues.data(), GL_STATIC_DRAW));
         } else {
             // Buffers start uninitialized if you pass nullptr to glBufferData.
             DAWN_GL_TRY_ALWAYS_CHECK(
-                gl, BufferData(GL_ARRAY_BUFFER, allocatedSize, nullptr, GL_STATIC_DRAW));
+                gl, BufferData(GL_ARRAY_BUFFER, checked_cast<GLsizeiptr>(allocatedSize), nullptr,
+                               GL_STATIC_DRAW));
         }
         return {};
     }));
@@ -100,7 +103,7 @@ Buffer::Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor)
     // Allocate at least 4 bytes so clamped accesses are always in bounds.
     // Align with 4 byte to avoid out-of-bounds access issue in compute emulation for 2 byte
     // element.
-    uint64_t alignment = 4u;
+    size_t alignment = 4u;
     // Round uniform buffer sizes up to a multiple of 16 bytes since Tint will polyfill them as
     // array<vec4u, ...>.
     if (GetUsage() & wgpu::BufferUsage::Uniform) {
@@ -186,9 +189,10 @@ MaybeError Buffer::InitializeToZero() {
 
     DAWN_TRY(device->EnqueueGL([self = Ref<Buffer>(this), size = GetAllocatedSize()](
                                    const OpenGLFunctions& gl) -> MaybeError {
-        const std::vector<uint8_t> clearValues(size, 0u);
+        const std::vector<uint8_t> clearValues(checked_cast<size_t>(size), 0u);
         DAWN_GL_TRY(gl, BindBuffer(GL_ARRAY_BUFFER, self->mBuffer));
-        DAWN_GL_TRY(gl, BufferSubData(GL_ARRAY_BUFFER, 0, size, clearValues.data()));
+        DAWN_GL_TRY(gl, BufferSubData(GL_ARRAY_BUFFER, 0, checked_cast<GLsizeiptr>(size),
+                                      clearValues.data()));
         return {};
     }));
     device->IncrementLazyClearCountForTesting();
@@ -207,7 +211,7 @@ bool Buffer::IsCPUWritableAtCreation() const {
 MaybeError Buffer::MapAtCreationImpl() {
     auto device = ToBackend(GetDevice());
     if (device->IsToggleEnabled(Toggle::GLDefer)) {
-        mCPUStaging.resize(GetAllocatedSize());
+        mCPUStaging.resize(checked_cast<size_t>(GetAllocatedSize()));
         mMappedData = mCPUStaging.data();
         return {};
     }
@@ -215,7 +219,8 @@ MaybeError Buffer::MapAtCreationImpl() {
         ExecutionQueueBase::SubmitMode::Normal, [this](const OpenGLFunctions& gl) -> MaybeError {
             DAWN_GL_TRY(gl, BindBuffer(GL_ARRAY_BUFFER, mBuffer));
             mMappedData = DAWN_GL_TRY_ALWAYS_CHECK(
-                gl, MapBufferRange(GL_ARRAY_BUFFER, 0, GetAllocatedSize(), GL_MAP_WRITE_BIT));
+                gl, MapBufferRange(GL_ARRAY_BUFFER, 0, checked_cast<GLsizeiptr>(GetAllocatedSize()),
+                                   GL_MAP_WRITE_BIT));
             return {};
         });
 }
@@ -225,7 +230,7 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     // at the cost of a host-side copy. This should be removed in favour of eager buffer mapping,
     // once that's implemented.
     if ((mode & wgpu::MapMode::Write) && GetDevice()->IsToggleEnabled(Toggle::ShadowCopyMapWrite)) {
-        mCPUStaging.resize(GetSize());
+        mCPUStaging.resize(checked_cast<size_t>(GetSize()));
         mMappedData = mCPUStaging.data();
         return {};
     }
@@ -292,8 +297,11 @@ void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
             DAWN_GL_TRY(gl, BindBuffer(GL_ARRAY_BUFFER, self->mBuffer));
             if (self->mCPUStaging.size() > 0) {
                 auto mappedData = DAWN_GL_TRY_ALWAYS_CHECK(
-                    gl, MapBufferRange(GL_ARRAY_BUFFER, 0, self->GetSize(), GL_MAP_WRITE_BIT));
-                DAWN_UNSAFE_TODO(memcpy(mappedData, self->mCPUStaging.data(), self->GetSize()));
+                    gl,
+                    MapBufferRange(GL_ARRAY_BUFFER, 0, checked_cast<GLsizeiptr>(self->GetSize()),
+                                   GL_MAP_WRITE_BIT));
+                DAWN_UNSAFE_TODO(memcpy(mappedData, self->mCPUStaging.data(),
+                                        checked_cast<size_t>(self->GetSize())));
                 self->mCPUStaging.resize(0);
             }
             DAWN_GL_TRY(gl, UnmapBuffer(GL_ARRAY_BUFFER));

@@ -31,6 +31,7 @@
 
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/ResourceHeapAllocator.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native {
 
@@ -44,14 +45,14 @@ BuddyMemoryAllocator::BuddyMemoryAllocator(uint64_t maxSystemSize,
     DAWN_ASSERT(IsPowerOfTwo(mMemoryBlockSize));
     DAWN_ASSERT(maxSystemSize % mMemoryBlockSize == 0);
 
-    mTrackedSubAllocations.resize(maxSystemSize / mMemoryBlockSize);
+    mTrackedSubAllocations.resize(checked_cast<size_t>(maxSystemSize / mMemoryBlockSize));
 }
 
 BuddyMemoryAllocator::~BuddyMemoryAllocator() = default;
 
-uint64_t BuddyMemoryAllocator::GetMemoryIndex(uint64_t offset) const {
+size_t BuddyMemoryAllocator::GetMemoryIndex(uint64_t offset) const {
     DAWN_ASSERT(offset != BuddyAllocator::kInvalidOffset);
-    return offset / mMemoryBlockSize;
+    return checked_cast<size_t>(offset / mMemoryBlockSize);
 }
 
 ResultOrError<ResourceMemoryAllocation> BuddyMemoryAllocator::Allocate(uint64_t allocationSize,
@@ -83,7 +84,7 @@ ResultOrError<ResourceMemoryAllocation> BuddyMemoryAllocator::Allocate(uint64_t 
         return std::move(invalidAllocation);
     }
 
-    const uint64_t memoryIndex = GetMemoryIndex(blockOffset);
+    const size_t memoryIndex = GetMemoryIndex(blockOffset);
     if (mTrackedSubAllocations[memoryIndex].refcount == 0) {
         // Transfer ownership to this allocator
         std::unique_ptr<ResourceHeapBase> memory;
@@ -111,7 +112,7 @@ void BuddyMemoryAllocator::Deallocate(const ResourceMemoryAllocation& allocation
 
     DAWN_ASSERT(info.mMethod == AllocationMethod::kSubAllocated);
 
-    const uint64_t memoryIndex = GetMemoryIndex(info.mBlockOffset);
+    const size_t memoryIndex = GetMemoryIndex(info.mBlockOffset);
 
     DAWN_ASSERT(mTrackedSubAllocations[memoryIndex].refcount > 0);
     mTrackedSubAllocations[memoryIndex].refcount--;

@@ -61,6 +61,7 @@
 #include "src/utils/compiler.h"
 #include "src/utils/heap_array.h"
 #include "src/utils/log.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native {
 
@@ -87,7 +88,8 @@ class ErrorBuffer final : public BufferBase {
         if (size < uint64_t(std::numeric_limits<size_t>::max())) {
             mFakeMappedData =
                 // SAFETY: Frontend is responsible for initializing MapAtCreation memory.
-                DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(size, std::nothrow));
+                DAWN_UNSAFE_BUFFERS(
+                    HeapArray<std::byte>::Uninit(checked_cast<size_t>(size), std::nothrow));
         }
 
         if (!mFakeMappedData) {
@@ -428,7 +430,9 @@ BufferBase::BufferBase(DeviceBase* device, const UnpackedPtr<BufferDescriptor>& 
     : SharedResource(device, descriptor->label),
       mSize(descriptor->size),
       mUsage(descriptor->usage),
-      mInternalUsage(ComputeInternalBufferUsages(device, descriptor->usage, descriptor->size)),
+      mInternalUsage(ComputeInternalBufferUsages(device,
+                                                 descriptor->usage,
+                                                 checked_cast<size_t>(descriptor->size))),
       mIsHostMapped(descriptor.Has<BufferHostMappedPointer>()) {
     GetObjectTrackingList()->Track(this);
 }
@@ -652,8 +656,8 @@ ResultOrError<bool> BufferBase::MapAtCreationInternal() {
     // staging buffer, we will have issues when we try to destroy the buffer.
     mMapMode = wgpu::MapMode::Write;
     mMapOffset = 0;
-    mMapSize = mSize;
-    mAllocatedMapSize = GetAllocatedSize();
+    mMapSize = checked_cast<size_t>(mSize);
+    mAllocatedMapSize = checked_cast<size_t>(GetAllocatedSize());
     mStagingBuffer = std::move(stagingBuffer);
     mIsMappedAtCreation = true;
     DAWN_TRY(FinalizeMap(BufferState::MappedAtCreation));
@@ -723,7 +727,7 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
         // possible to default the function argument (because there is the callback later in the
         // argument list)
         if ((size == wgpu::kWholeMapSize) && (offset <= mSize)) {
-            size = mSize - offset;
+            size = checked_cast<size_t>(mSize - offset);
         }
 
         WGPUMapAsyncStatus errorStatus = WGPUMapAsyncStatus_Aborted;
@@ -784,11 +788,13 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
 }
 
 void* BufferBase::APIGetMappedRange(size_t offset, size_t size) {
-    return GetMappedRange(offset, size == wgpu::kWholeMapSize ? mSize - offset : size, true);
+    return GetMappedRange(
+        offset, size == wgpu::kWholeMapSize ? checked_cast<size_t>(mSize - offset) : size, true);
 }
 
 const void* BufferBase::APIGetConstMappedRange(size_t offset, size_t size) {
-    return GetMappedRange(offset, size == wgpu::kWholeMapSize ? mSize - offset : size, false);
+    return GetMappedRange(
+        offset, size == wgpu::kWholeMapSize ? checked_cast<size_t>(mSize - offset) : size, false);
 }
 
 wgpu::Status BufferBase::APIWriteMappedRange(size_t offset, Span<const std::byte> data) {

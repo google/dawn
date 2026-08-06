@@ -37,6 +37,7 @@
 #include "src/dawn/native/Texture.h"
 #include "src/utils/compiler.h"
 #include "src/utils/log.h"
+#include "src/utils/numeric.h"
 #include "src/utils/span.h"
 
 namespace dawn::native {
@@ -163,9 +164,10 @@ AttachmentState::AttachmentState(const UnpackedPtr<RenderPassDescriptor>& descri
     if (auto* pls = descriptor.Get<RenderPassPixelLocalStorage>()) {
         mHasPLS = true;
         mStorageAttachmentSlots = std::vector<wgpu::TextureFormat>(
-            pls->totalPixelLocalStorageSize / kPLSSlotByteSize, wgpu::TextureFormat::Undefined);
+            checked_cast<size_t>(pls->totalPixelLocalStorageSize / kPLSSlotByteSize),
+            wgpu::TextureFormat::Undefined);
         for (const RenderPassStorageAttachment& attachment : pls->storageAttachments) {
-            size_t slot = attachment.offset / kPLSSlotByteSize;
+            size_t slot = checked_cast<size_t>(attachment.offset / kPLSSlotByteSize);
             const TextureViewBase* storage = attachment.storage;
 
             mStorageAttachmentSlots[slot] = storage->GetFormat().format;

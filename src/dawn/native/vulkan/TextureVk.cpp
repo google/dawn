@@ -1341,7 +1341,8 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
         // TODO(https://crbug.com/534203108): Spanify WithUploadReservation.
         DAWN_UNSAFE_TODO(DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
             uploadSize, blockInfo.byteSize, [&](UploadReservation reservation) -> MaybeError {
-                memset(reservation.mappedPointer, sign_dcast(uClearColor), uploadSize);
+                memset(reservation.mappedPointer, sign_dcast(uClearColor),
+                       checked_cast<size_t>(uploadSize));
 
                 std::vector<VkBufferImageCopy> regions;
                 for (uint32_t level = range.baseMipLevel;

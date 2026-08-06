@@ -29,6 +29,7 @@
 
 #include "src/dawn/common/Math.h"
 #include "src/utils/assert.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native {
 
@@ -161,12 +162,14 @@ uint64_t BuddyAllocator::Allocate(uint64_t allocationSize, uint64_t alignment) {
 
     DAWN_CHECK(allocationSizeToLevel < mFreeLists.size());
 
-    uint64_t currBlockLevel = GetNextFreeAlignedBlock(allocationSizeToLevel, alignment);
+    uint64_t nextFreeBlockLevel = GetNextFreeAlignedBlock(allocationSizeToLevel, alignment);
 
     // Error when no free blocks exist (allocator is full)
-    if (currBlockLevel == kInvalidOffset) {
+    if (nextFreeBlockLevel == kInvalidOffset) {
         return kInvalidOffset;
     }
+
+    size_t currBlockLevel = checked_cast<size_t>(nextFreeBlockLevel);
 
     // Split free blocks level-by-level.
     // Terminate when the current block level is equal to the computed level of the requested

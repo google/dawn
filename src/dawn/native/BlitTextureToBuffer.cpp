@@ -1251,8 +1251,8 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
             DAWN_TRY_ASSIGN(uniformBuffer, device->CreateBuffer(&bufferDesc));
         }
 
-        uint32_t* params =
-            static_cast<uint32_t*>(uniformBuffer->GetMappedRange(0, bufferDesc.size));
+        uint32_t* params = static_cast<uint32_t*>(
+            uniformBuffer->GetMappedRange(0, checked_cast<size_t>(bufferDesc.size)));
         // srcOrigin: vec3u
         params[0] = dchecked_cast<uint32_t>(src.origin.x);
         DAWN_UNSAFE_TODO(params[1]) = dchecked_cast<uint32_t>(src.origin.y);

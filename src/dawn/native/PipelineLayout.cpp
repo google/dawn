@@ -46,6 +46,7 @@
 #include "src/dawn/native/ShaderModule.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 #include "src/utils/span.h"
 
 namespace dawn::native {
@@ -185,9 +186,10 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
     if (auto* pls = descriptor.Get<PipelineLayoutPixelLocalStorage>()) {
         mHasPLS = true;
         mStorageAttachmentSlots = std::vector<wgpu::TextureFormat>(
-            pls->totalPixelLocalStorageSize / kPLSSlotByteSize, wgpu::TextureFormat::Undefined);
+            checked_cast<size_t>(pls->totalPixelLocalStorageSize / kPLSSlotByteSize),
+            wgpu::TextureFormat::Undefined);
         for (const PipelineLayoutStorageAttachment& attachment : pls->storageAttachments) {
-            size_t slot = attachment.offset / kPLSSlotByteSize;
+            size_t slot = checked_cast<size_t>(attachment.offset / kPLSSlotByteSize);
             mStorageAttachmentSlots[slot] = attachment.format;
         }
     }

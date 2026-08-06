@@ -43,6 +43,7 @@
 #include "src/dawn/native/opengl/UtilsGL.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::opengl {
 
@@ -99,8 +100,9 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
                     [buffer = Ref<Buffer>(ToBackend(buffer)), bufferOffset](
                         const OpenGLFunctions& gl, Span<const std::byte> data) -> MaybeError {
                         DAWN_GL_TRY(gl, BindBuffer(GL_ARRAY_BUFFER, buffer->GetHandle()));
-                        DAWN_GL_TRY(gl, BufferSubData(GL_ARRAY_BUFFER, bufferOffset, data.size(),
-                                                      data.data()));
+                        DAWN_GL_TRY(
+                            gl, BufferSubData(GL_ARRAY_BUFFER, checked_cast<GLintptr>(bufferOffset),
+                                              checked_cast<GLsizeiptr>(data.size()), data.data()));
                         return {};
                     });
 }

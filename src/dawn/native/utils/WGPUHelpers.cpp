@@ -64,7 +64,7 @@ ResultOrError<Ref<BufferBase>> CreateBufferFromData(DeviceBase* device,
                                                     std::string_view label,
                                                     wgpu::BufferUsage usage,
                                                     const void* data,
-                                                    uint64_t size) {
+                                                    size_t size) {
     BufferDescriptor descriptor;
     descriptor.label = label;
     descriptor.size = size;

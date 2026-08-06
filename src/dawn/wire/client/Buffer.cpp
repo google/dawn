@@ -39,6 +39,7 @@
 #include "src/dawn/wire/client/Device.h"
 #include "src/dawn/wire/client/EventManager.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::wire::client {
 namespace {
@@ -213,7 +214,8 @@ Buffer* Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
     std::shared_ptr<MemoryTransferService::MemoryHandle> memoryHandle = nullptr;
     size_t memoryHandleCreateInfoLength = 0;
     if (mappable) {
-        memoryHandle = wireClient->GetMemoryTransferService()->CreateMemoryHandle(descriptor->size);
+        memoryHandle = wireClient->GetMemoryTransferService()->CreateMemoryHandle(
+            checked_cast<size_t>(descriptor->size));
         if (memoryHandle == nullptr) {
             return ReturnOOMAtClient(device, descriptor);
         }
@@ -251,7 +253,7 @@ Buffer* Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
             // The buffer is mapped right now.
             state->mappedState = MapState::MappedAtCreation;
             state->mappedOffset = 0;
-            state->mappedSize = buffer->mSize;
+            state->mappedSize = checked_cast<size_t>(buffer->mSize);
 
             DAWN_ASSERT(state->memoryHandle != nullptr);
             state->mappedData = state->memoryHandle->GetData();
@@ -360,7 +362,7 @@ Future Buffer::APIMapAsync(wgpu::MapMode mode,
         // Handle the defaulting of size required by WebGPU.
         if (size == WGPU_WHOLE_MAP_SIZE) {
             if (offset <= mSize) {
-                size = mSize - offset;
+                size = checked_cast<size_t>(mSize - offset);
             } else {
                 // Send any valid size to the server as the mapping will be rejected anyway.
                 size = 0;

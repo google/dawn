@@ -650,7 +650,8 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         // batchData is maximally-aligned, so we can suballocate it.
         pass.batchData = HeapArray<std::byte>{checked_cast<size_t>(pass.batchDataSize)};
         for (Batch& batch : pass.batches) {
-            auto placement = pass.batchData.subspan(batch.dataBufferOffset, sizeof(BatchInfo));
+            auto placement = pass.batchData.subspan(checked_cast<size_t>(batch.dataBufferOffset),
+                                                    sizeof(BatchInfo));
             batch.batchInfo = new (placement.data()) BatchInfo();
             batch.batchInfo->numDraws = static_cast<uint32_t>(batch.metadata->draws.size());
             batch.batchInfo->flags = pass.flags;

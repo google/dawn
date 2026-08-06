@@ -46,6 +46,7 @@
 #include "src/dawn/native/utils/WGPUHelpers.h"
 #include "src/dawn/native/webgpu_absl_format.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 #include "src/utils/span.h"
 
 namespace dawn::native {
@@ -138,18 +139,19 @@ std::string ConstructFragmentShader(DeviceBase* device,
     std::ostringstream fragmentShaderStream;
     if (key.hasPLS) {
         std::vector<const char*> plsTypes;
-        const size_t plsSlotCount = key.totalPixelLocalStorageSize / kPLSSlotByteSize;
+        const size_t plsSlotCount =
+            checked_cast<size_t>(key.totalPixelLocalStorageSize / kPLSSlotByteSize);
         plsTypes.resize(plsSlotCount, "u32");
         for (const auto& attachment : key.plsAttachments) {
             switch (attachment.format) {
                 case wgpu::TextureFormat::R32Uint:
-                    plsTypes[attachment.offset / kPLSSlotByteSize] = "u32";
+                    plsTypes[checked_cast<size_t>(attachment.offset / kPLSSlotByteSize)] = "u32";
                     break;
                 case wgpu::TextureFormat::R32Sint:
-                    plsTypes[attachment.offset / kPLSSlotByteSize] = "i32";
+                    plsTypes[checked_cast<size_t>(attachment.offset / kPLSSlotByteSize)] = "i32";
                     break;
                 case wgpu::TextureFormat::R32Float:
-                    plsTypes[attachment.offset / kPLSSlotByteSize] = "f32";
+                    plsTypes[checked_cast<size_t>(attachment.offset / kPLSSlotByteSize)] = "f32";
                     break;
                 default:
                     DAWN_UNREACHABLE();

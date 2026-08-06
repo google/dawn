@@ -69,7 +69,7 @@ class BuddyMemoryAllocator {
     uint64_t ComputeTotalNumOfHeapsForTesting() const;
 
   private:
-    uint64_t GetMemoryIndex(uint64_t offset) const;
+    size_t GetMemoryIndex(uint64_t offset) const;
 
     uint64_t mMemoryBlockSize = 0;
 

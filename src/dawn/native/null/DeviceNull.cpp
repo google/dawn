@@ -371,7 +371,8 @@ BindGroupLayout::BindGroupLayout(DeviceBase* device,
 Buffer::Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor)
     : BufferBase(device, descriptor) {
     // SAFETY: Frontend is responsible for initializing mapped memory.
-    mBackingData = DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(GetSize()));
+    mBackingData =
+        DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(checked_cast<size_t>(GetSize())));
     mAllocatedSize = GetSize();
 }
 
@@ -390,15 +391,16 @@ void Buffer::CopyFromStaging(BufferBase* staging,
                              uint64_t destinationOffset,
                              uint64_t size) {
     // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-    std::ranges::copy(staging->GetCurrentMapping().GetMappedSubspan(sourceOffset, size),
-                      mBackingData.begin() + sign_cast(destinationOffset));
+    std::ranges::copy(staging->GetCurrentMapping().GetMappedSubspan(
+                          checked_cast<size_t>(sourceOffset), checked_cast<size_t>(size)),
+                      mBackingData.begin() + sign_cast(checked_cast<size_t>(destinationOffset)));
 }
 
 void Buffer::DoWriteBuffer(uint64_t bufferOffset, Span<const std::byte> data) {
     DAWN_ASSERT(bufferOffset + data.size() <= GetSize());
     DAWN_ASSERT(mBackingData);
     // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-    std::ranges::copy(data, mBackingData.subspan(bufferOffset).begin());
+    std::ranges::copy(data, mBackingData.subspan(checked_cast<size_t>(bufferOffset)).begin());
 }
 
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
