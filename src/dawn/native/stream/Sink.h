@@ -36,6 +36,14 @@ namespace dawn::native::stream {
 // Interface for a serialization sink.
 class Sink {
   public:
+    Sink() = default;
+    Sink(const Sink&) = default;
+    Sink& operator=(const Sink&) = default;
+    Sink(Sink&&) = default;
+    Sink& operator=(Sink&&) = default;
+
+    virtual ~Sink() = default;
+
     // Allocate `bytes` space in the sink. Returns a span to the start
     // of the allocation.
     virtual std::span<std::byte> GetSpace(size_t bytes) = 0;

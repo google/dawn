@@ -37,6 +37,8 @@ namespace dawn {
 
 class BufferHostMappedPointerTestBackend {
   public:
+    virtual ~BufferHostMappedPointerTestBackend() = default;
+
     // The name used in gtest parameterization.
     virtual const char* Name() const = 0;
 

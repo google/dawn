@@ -40,6 +40,8 @@ bool InitSample(int argc, const char** argv);
 
 class SampleBase {
   public:
+    virtual ~SampleBase() = default;
+
     SampleBase();
     SampleBase(uint32_t w, uint32_t h);
 

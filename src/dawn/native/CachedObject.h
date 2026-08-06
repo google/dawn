@@ -40,6 +40,8 @@ namespace dawn::native {
 // refcount of an existing object.
 class CachedObject {
   public:
+    virtual ~CachedObject() = default;
+
     // Functor necessary for the unordered_set<CachedObject*>-based cache.
     struct HashFunc {
         size_t operator()(const CachedObject* obj) const;

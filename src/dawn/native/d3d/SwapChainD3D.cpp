@@ -103,6 +103,12 @@ DXGI_USAGE ToDXGIUsage(DeviceBase* device, wgpu::TextureFormat format, wgpu::Tex
 
 #if defined(DAWN_USE_WINDOWS_UI)
 // Interface from microsoft.ui.xaml.media.dxinterop.h
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+#endif
+// Classes extended IUnknown are COM interface and guaranteed to be released by Release instead of
+// via delete and destructor. Having a vitural destructor will mess with the vtable.
 MIDL_INTERFACE("63aad0b8-7c24-40ff-85a8-640d944cc325")
 IWinUISwapChainPanelNative : public IUnknown {
   public:
@@ -110,6 +116,9 @@ IWinUISwapChainPanelNative : public IUnknown {
         /* [annotation][in] */
         _In_ IDXGISwapChain * swapChain) = 0;
 };
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 #endif  // defined(DAWN_USE_WINDOWS_UI)
 
 }  // namespace

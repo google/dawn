@@ -35,6 +35,8 @@
 // LogEmitter is an abstract class that only expose log emitting ability.
 class LogEmitter {
   public:
+    virtual ~LogEmitter() = default;
+
     virtual void EmitLog(std::string_view message) = 0;
     virtual void EmitLog(wgpu::LoggingType type, std::string_view message) = 0;
 };

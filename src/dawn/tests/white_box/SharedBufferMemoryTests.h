@@ -41,6 +41,8 @@ namespace dawn {
 
 class SharedBufferMemoryTestBackend {
   public:
+    virtual ~SharedBufferMemoryTestBackend() = default;
+
     virtual void SetUp() {}
     virtual void TearDown() {}
 

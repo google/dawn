@@ -36,6 +36,8 @@ namespace dawn::native::webgpu {
 class CaptureContext;
 class RecordableObject {
   public:
+    virtual ~RecordableObject() = default;
+
     explicit RecordableObject(schema::ObjectType objectType);
     schema::ObjectType GetObjectType() const;
 

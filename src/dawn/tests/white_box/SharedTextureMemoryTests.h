@@ -41,6 +41,8 @@ namespace dawn {
 
 class SharedTextureMemoryTestBackend {
   public:
+    virtual ~SharedTextureMemoryTestBackend() = default;
+
     virtual void SetUp(const wgpu::Device& device) {}
     virtual void TearDown() {}
 

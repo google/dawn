@@ -50,7 +50,7 @@ class ScopedSwapStateCommandRecordingContext;
 class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/true> {
   public:
     explicit BindGroupTracker(const ScopedSwapStateCommandRecordingContext* commandContext);
-    virtual ~BindGroupTracker();
+    ~BindGroupTracker() override;
 
   protected:
     const ScopedSwapStateCommandRecordingContext* GetCommandContext() const {

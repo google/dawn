@@ -47,6 +47,8 @@ namespace dawn::native {
 template <bool CanInheritBindGroups>
 class BindGroupTrackerBase {
   public:
+    virtual ~BindGroupTrackerBase() = default;
+
     void OnSetBindGroup(BindGroupIndex index,
                         BindGroupBase* bindGroup,
                         ityp::span<BindingIndex, const uint32_t> dynamicOffsets) {

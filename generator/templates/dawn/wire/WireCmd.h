@@ -44,6 +44,7 @@ namespace dawn::wire {
     // nullptr is treated as an error.
     class DeserializeAllocator {
         public:
+            virtual ~DeserializeAllocator() = default;
             virtual std::optional<Span<std::byte>> TryGetSpace(size_t size) = 0;
     };
 
@@ -51,6 +52,7 @@ namespace dawn::wire {
     // Methods return FatalError if the ID is for a non-existent object and Success otherwise.
     class ObjectIdResolver {
         public:
+            virtual ~ObjectIdResolver() = default;
             {% for type in by_category["object"] %}
                 virtual WireResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const = 0;
                 virtual WireResult GetOptionalFromId(ObjectId id, {{as_cType(type.name)}}* out) const = 0;
@@ -60,6 +62,7 @@ namespace dawn::wire {
     // Interface to convert a client object to its ID for the wiring.
     class ObjectIdProvider {
         public:
+            virtual ~ObjectIdProvider() = default;
             {% for type in by_category["object"] %}
                 virtual WireResult GetId({{as_cType(type.name)}} object, volatile ObjectId* out) const = 0;
                 virtual WireResult GetOptionalId({{as_cType(type.name)}} object, volatile ObjectId* out) const = 0;

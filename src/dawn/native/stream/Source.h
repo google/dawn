@@ -38,6 +38,14 @@ namespace dawn::native::stream {
 // Interface for a deserialization source.
 class Source {
   public:
+    Source() = default;
+    Source(const Source&) = default;
+    Source& operator=(const Source&) = default;
+    Source(Source&&) = default;
+    Source& operator=(Source&&) = default;
+
+    virtual ~Source() = default;
+
     // Try to read `bytes` space from the source. The data must live as long as `Source.
     virtual ResultOrError<std::span<const std::byte>> Read(size_t bytes) = 0;
 };

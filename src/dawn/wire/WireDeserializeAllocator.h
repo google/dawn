@@ -43,7 +43,7 @@ namespace dawn::wire {
 class WireDeserializeAllocator : public DeserializeAllocator {
   public:
     WireDeserializeAllocator();
-    virtual ~WireDeserializeAllocator();
+    ~WireDeserializeAllocator() override;
 
     std::optional<Span<std::byte>> TryGetSpace(size_t size) override;
 
