@@ -1008,6 +1008,7 @@ dawn_linux_parent_builder(
         configs = [
             "component",
             "dawn_swiftshader",
+            "libfuzzer",
             "linux_clang",
             "release_with_dchecks",
             "tint_build_ir_binary",
