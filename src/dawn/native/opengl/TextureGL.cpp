@@ -263,7 +263,7 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, 0, OwnsHandle::Yes));
 
     if (texture->IsRenderbuffer()) {
-        DAWN_TRY(device->EnqueueGL([texture](const OpenGLFunctions& gl) -> MaybeError {
+        DAWN_TRY(device->EnqueueGL([texture, device](const OpenGLFunctions& gl) -> MaybeError {
             DAWN_GL_TRY(gl, GenRenderbuffers(1, &texture->mRenderbufferHandle));
 
             const GLFormat& glFormat = texture->GetGLFormat();
@@ -272,9 +272,19 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
             auto width = texture->GetBaseSize().width;
             auto height = texture->GetBaseSize().height;
             if (texture->GetSampleCount() > 1) {
-                DAWN_GL_TRY(
-                    gl, RenderbufferStorageMultisample(GL_RENDERBUFFER, texture->GetSampleCount(),
-                                                       glFormat.internalFormat, width, height));
+                // GL_EXT_multisampled_render_to_texture requires that depth/stencil renderbuffers
+                // are allocated with the EXT flavour of this function. The non-EXT version of the
+                // function creates depth/stencil textures that can only be used with regular
+                // (ES 3.0-style) multisampling.
+                if (device->HasFeature(Feature::MSAARenderToSingleSampled)) {
+                    DAWN_GL_TRY(gl, RenderbufferStorageMultisampleEXT(
+                                        GL_RENDERBUFFER, texture->GetSampleCount(),
+                                        glFormat.internalFormat, width, height));
+                } else {
+                    DAWN_GL_TRY(gl, RenderbufferStorageMultisample(
+                                        GL_RENDERBUFFER, texture->GetSampleCount(),
+                                        glFormat.internalFormat, width, height));
+                }
             } else {
                 DAWN_GL_TRY(gl, RenderbufferStorage(GL_RENDERBUFFER, glFormat.internalFormat, width,
                                                     height));
@@ -755,7 +765,8 @@ GLenum TextureView::GetGLTarget() const {
 MaybeError TextureView::BindToFramebuffer(const OpenGLFunctions& gl,
                                           GLenum target,
                                           GLenum attachment,
-                                          GLuint depthSlice) {
+                                          GLuint depthSlice,
+                                          std::optional<uint32_t> passSampleCount) {
     DAWN_ASSERT(depthSlice <
                 static_cast<GLuint>(GetSingleSubresourceVirtualSize().depthOrArrayLayers));
 
@@ -796,6 +807,13 @@ MaybeError TextureView::BindToFramebuffer(const OpenGLFunctions& gl,
     }
 
     DAWN_ASSERT(textureHandle != 0);
+
+    if (passSampleCount.has_value() && passSampleCount.value() != GetTexture()->GetSampleCount()) {
+        DAWN_GL_TRY(gl,
+                    FramebufferTexture2DMultisampleEXT(target, attachment, textarget, textureHandle,
+                                                       mipLevel, *passSampleCount));
+        return {};
+    }
 
     return FramebufferTextureHelper(gl, textarget, target, attachment, textureHandle, mipLevel,
                                     arrayLayer);

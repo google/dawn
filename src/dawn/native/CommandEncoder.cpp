@@ -145,6 +145,11 @@ class RenderPassValidationState final : public NonMovable {
                                     "explicit sample count (%u).",
                                     attachmentTypeStr, attachment,
                                     attachment->GetTexture()->GetSampleCount(), mSampleCount);
+                    DAWN_INVALID_IF(
+                        !(attachment->GetInternalUsage() & wgpu::TextureUsage::TransientAttachment),
+                        "The %s %s must have %s usage when used with "
+                        "MSAARenderToSingleSampled.",
+                        attachmentTypeStr, attachment, wgpu::TextureUsage::TransientAttachment);
                     break;
                 case AttachmentType::ResolveTarget:
                     // Resolve target sample counts are already validated to be 1 elsewhere.
@@ -956,6 +961,10 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
                          "validating colorAttachments[%u].", i);
         if (attachment.view) {
             if (renderPassSampleCount) {
+                DAWN_INVALID_IF(
+                    i != ColorAttachmentIndex{uint8_t(0)},
+                    "Only colorAttachment 0 may be used when the render pass has an explicit "
+                    "sample count for MSAARenderToSingleSampled.");
                 DAWN_TRY(ValidateColorAttachmentRenderToSingleSampled(device, attachment,
                                                                       renderPassSampleCount));
             }

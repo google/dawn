@@ -1346,7 +1346,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
 
             // Attach color buffers.
             DAWN_TRY(textureView->BindToFramebuffer(gl, GL_DRAW_FRAMEBUFFER, glAttachment,
-                                                    renderPass->colorAttachments[i].depthSlice));
+                                                    renderPass->colorAttachments[i].depthSlice,
+                                                    renderPass->attachmentState->GetSampleCount()));
             drawBuffers[i] = glAttachment;
             attachmentCount = i.PlusOne();
         }
@@ -1358,7 +1359,9 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
 
             // Attach depth/stencil buffer.
             GLenum glAttachment = DepthStencilAttachmentPoint(format);
-            DAWN_TRY(textureView->BindToFramebuffer(gl, GL_DRAW_FRAMEBUFFER, glAttachment));
+
+            DAWN_TRY(textureView->BindToFramebuffer(gl, GL_DRAW_FRAMEBUFFER, glAttachment, 0,
+                                                    renderPass->attachmentState->GetSampleCount()));
         }
     }
 

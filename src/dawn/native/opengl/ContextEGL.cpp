@@ -261,6 +261,7 @@ void ContextEGL::RequestRequiredExtensionsExplicitly() {
     glRequestExtension("GL_APPLE_texture_format_BGRA8888");
     glRequestExtension("GL_EXT_color_buffer_float");
     glRequestExtension("GL_EXT_color_buffer_half_float");
+    glRequestExtension("GL_EXT_multisampled_render_to_texture");
 }
 
 bool ContextEGL::IsInScopedMakeCurrent() const {

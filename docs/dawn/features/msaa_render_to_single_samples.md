@@ -35,5 +35,6 @@ renderPassEncoder.End();
 
 Notes:
  - To trigger MSRTSS load or store behavior, a single-sampled color attachment must be attached to a render pass with an explicit sample count given by the `wgpu::DawnRenderPassSampleCount` chained struct. The `resolveTarget` field of the the color attachment must be `nullptr`.
- - Traditional multi-sampled color or depth/stencil attachments can be mixed with the MSRTSS color attachments. They must have the match the `sampleCount` specified by the `wgpu::DawnRenderPassSampleCount` chained struct and color attachments may have a `resolveTarget` as usual.
+ - Only colorAttachment zero may be used.
+ - If a multisampled depth/stencil attachment is specified, it must have `TextureUsage::TransientAttachment`, its sample count must match the `sampleCount` specified by the wgpu::DawnRenderPassSampleCount` chained struct and the `resolveTarget` field of the attachment must be `nullptr`
  - If a texture is not resolvable by WebGPU standard it cannot be used as an MSRTSS color attachment. This means this feature currently doesn't work with integer textures.

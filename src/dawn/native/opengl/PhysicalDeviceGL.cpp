@@ -312,6 +312,9 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     }
 
     EnableFeature(Feature::TransientAttachments);
+    if (mFunctions.IsGLExtensionSupported("GL_EXT_multisampled_render_to_texture")) {
+        EnableFeature(Feature::MSAARenderToSingleSampled);
+    }
 }
 
 namespace {
