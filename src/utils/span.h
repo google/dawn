@@ -185,7 +185,7 @@ class SpanBase : private SpanStorage<Index, PtrType, Extent> {
     using const_reference = const T&;
     using iterator = std::span<T, kStdExtent>::iterator;
 
-    static inline constexpr Index extent = Extent;
+    static constexpr Index extent = Extent;
 
     static constexpr size_t GetOffsetOfSize()
         requires(kIsDynamicExtent)

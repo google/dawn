@@ -54,9 +54,9 @@ namespace tint::hlsl::writer::raise {
 ///   - DecomposeAccess sees a data variable without atomics and decomposes it normally, while the
 ///     atomic variables are left untouched.
 ///
-/// @param module the module to transform
+/// @param ir the module to transform
 /// @returns success or failure
-Result<SuccessType> SplitWorkgroupAtomics(core::ir::Module& module);
+Result<SuccessType> SplitWorkgroupAtomics(core::ir::Module& ir);
 
 }  // namespace tint::hlsl::writer::raise
 
