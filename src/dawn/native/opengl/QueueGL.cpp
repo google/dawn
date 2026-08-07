@@ -289,12 +289,12 @@ ResultOrError<Ref<SharedFence>> Queue::GetOrCreateSharedFence(ExecutionSerial la
             // the sync.
             DAWN_GL_TRY(gl, Flush());
 
-            utils::SystemHandle handle;
+            SystemHandle handle;
             if (type == wgpu::SharedFenceType::SyncFD) {
                 EGLint fd;
                 DAWN_TRY_ASSIGN(fd, sync->DupFD(gl));
 
-                handle = utils::SystemHandle::Acquire(fd);
+                handle = SystemHandle::Acquire(fd);
             }
             return AcquireRef(new SharedFenceEGL(ToBackend(GetDevice()), "Internal EGLSync", type,
                                                  std::move(handle), sync));

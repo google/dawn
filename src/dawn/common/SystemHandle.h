@@ -1,4 +1,4 @@
-// Copyright 2025 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_UTILS_SYSTEMHANDLE_H_
-#define SRC_DAWN_UTILS_SYSTEMHANDLE_H_
+#ifndef SRC_DAWN_COMMON_SYSTEMHANDLE_H_
+#define SRC_DAWN_COMMON_SYSTEMHANDLE_H_
 
 #include <cstdint>
 #include <type_traits>
@@ -35,7 +35,7 @@
 #include "src/utils/non_copyable.h"
 #include "src/utils/platform.h"
 
-namespace dawn::utils {
+namespace dawn {
 
 class SystemHandle : public NonCopyable {
   public:
@@ -102,6 +102,6 @@ class SystemHandle : public NonCopyable {
     Handle mHandle;
 };
 
-}  // namespace dawn::utils
+}  // namespace dawn
 
-#endif  // SRC_DAWN_UTILS_SYSTEMHANDLE_H_
+#endif  // SRC_DAWN_COMMON_SYSTEMHANDLE_H_

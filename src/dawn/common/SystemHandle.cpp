@@ -1,4 +1,4 @@
-// Copyright 2025 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/dawn/utils/SystemHandle.h"
+#include "src/dawn/common/SystemHandle.h"
 
 #include <utility>
 
@@ -40,7 +40,7 @@
 #include <unistd.h>
 #endif
 
-namespace dawn::utils {
+namespace dawn {
 
 namespace {
 
@@ -174,4 +174,4 @@ SystemHandle::~SystemHandle() {
     }
 }
 
-}  // namespace dawn::utils
+}  // namespace dawn

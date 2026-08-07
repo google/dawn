@@ -904,7 +904,7 @@ MaybeError Device::ImportExternalImage(const ExternalImageDescriptorVk* descript
         // Therefore, on success, because ImportSemaphore has dup'ed the handle,
         // we need to close the old handle by acquiring and dropping it.
         // TODO(dawn:1745): This entire code path will be deprecated and removed.
-        utils::SystemHandle::Acquire(handle);
+        SystemHandle::Acquire(handle);
         outWaitSemaphores->push_back(semaphore);
     }
 

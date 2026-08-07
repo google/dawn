@@ -54,7 +54,7 @@ ResultOrError<SystemEventReceiver> Queue::GetSystemEventReceiver() {
         if (fenceEvent == nullptr) {
             return DAWN_INTERNAL_ERROR("CreateEvent failed");
         }
-        receiver = SystemEventReceiver(utils::SystemHandle::Acquire(fenceEvent));
+        receiver = SystemEventReceiver(SystemHandle::Acquire(fenceEvent));
     }
 
     return receiver;

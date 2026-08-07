@@ -31,13 +31,13 @@
 
 #include <utility>
 
+#include "src/dawn/common/SystemHandle.h"
 #include "src/dawn/native/vulkan/BackendVk.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
 #include "src/dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementation.h"
-#include "src/dawn/utils/SystemHandle.h"
 
 static constexpr VkExternalSemaphoreHandleTypeFlagBits kDefaultHandleType =
 #if DAWN_PLATFORM_IS(ANDROID) || DAWN_PLATFORM_IS(CHROMEOS)
@@ -120,7 +120,7 @@ class ServiceImplementationFD : public ServiceImplementation {
         importSemaphoreFdInfo.flags = VK_SEMAPHORE_IMPORT_TEMPORARY_BIT;
         importSemaphoreFdInfo.handleType = mHandleType;
         // vkImportSemaphoreFdKHR takes ownership, so make a dup of the handle.
-        utils::SystemHandle handleCopy = utils::SystemHandle::Duplicate(handle);
+        SystemHandle handleCopy = SystemHandle::Duplicate(handle);
         importSemaphoreFdInfo.fd = handleCopy.Get();
 
         MaybeError status = CheckVkSuccess(

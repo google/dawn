@@ -35,6 +35,7 @@
 
 #include "dawn/native/wgpu_structs_autogen.h"
 #include "src/dawn/common/Enumerator.h"
+#include "src/dawn/common/SystemHandle.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
@@ -45,7 +46,6 @@
 #include "src/dawn/native/vulkan/TextureVk.h"
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
-#include "src/dawn/utils/SystemHandle.h"
 #include "src/utils/compiler.h"
 #include "src/utils/numeric.h"
 
@@ -294,7 +294,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     // Validate that the import is valid.
     {
         // Verify plane count for the modifier.
-        // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDrmFormatModifierPropertiesEXT.html#_description
+        // https://docs.vulkan.org/refpages/latest/refpages/source/VkDrmFormatModifierPropertiesEXT.html#_description
         VkDrmFormatModifierPropertiesEXT drmModifierProps;
         DAWN_TRY_ASSIGN(drmModifierProps,
                         GetFormatModifierProps(device->fn, vkPhysicalDevice, vkFormat,
@@ -470,7 +470,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
                     "Unable to find an appropriate memory type for import.");
     uint32_t memoryTypeIndex = maybeMemoryTypeIndex.value();
 
-    utils::SystemHandle memoryFD = utils::SystemHandle::Duplicate(fd);
+    SystemHandle memoryFD = SystemHandle::Duplicate(fd);
 
     VkMemoryAllocateInfo memoryAllocateInfo = {};
     memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -570,7 +570,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
                                 "vkGetAndroidHardwareBufferPropertiesANDROID"));
 
         // TODO(crbug.com/dawn/2476): Validate more as per
-        // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkImageCreateInfo.html
+        // https://docs.vulkan.org/refpages/latest/refpages/source/VkImageCreateInfo.html
         if (usesExternalFormat) {
             DAWN_INVALID_IF(
                 bufferFormatProperties.externalFormat == 0,
@@ -948,7 +948,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
                         "allocation size (%u).",
                         requirements.size, descriptor->allocationSize);
 
-        utils::SystemHandle memoryFD = utils::SystemHandle::Duplicate(descriptor->memoryFD);
+        SystemHandle memoryFD = SystemHandle::Duplicate(descriptor->memoryFD);
 
         VkMemoryDedicatedAllocateInfo dedicatedAllocateInfo{};
         dedicatedAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO;
@@ -1099,7 +1099,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
                     wgpu::SharedFenceType::VkSemaphoreOpaqueFD, wgpu::SharedFenceType::SyncFD);
 #endif
 
-    utils::SystemHandle handle;
+    SystemHandle handle;
     {
         ExternalSemaphoreHandle semaphoreHandle;
         VkImageLayout releasedOldLayout;
@@ -1110,7 +1110,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
         // TODO(dawn:1745): Consider using one event per submit that is tracked by the
         // CommandRecordingContext so that we don't need to create one handle per texture,
         // and so we don't need to acquire it here to close it.
-        handle = utils::SystemHandle::Acquire(semaphoreHandle);
+        handle = SystemHandle::Acquire(semaphoreHandle);
         vkLayoutEndState->oldLayout = releasedOldLayout;
         vkLayoutEndState->newLayout = releasedNewLayout;
     }

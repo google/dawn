@@ -31,11 +31,11 @@
 #include <vector>
 
 #include "dawn/native/D3D12Backend.h"
+#include "src/dawn/common/SystemHandle.h"
 #include "src/dawn/native/d3d12/DeviceD3D12.h"
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/tests/white_box/SharedBufferMemoryTests.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "src/dawn/utils/SystemHandle.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
 
@@ -82,8 +82,7 @@ void CopyD3D12Resource(ID3D12Device* device, ID3D12Resource* source, ID3D12Resou
     UINT64 signaledValue = 1;
     commandQueue->Signal(fence.Get(), signaledValue);
 
-    utils::SystemHandle fenceEvent =
-        utils::SystemHandle::Acquire(CreateEvent(nullptr, FALSE, FALSE, nullptr));
+    SystemHandle fenceEvent = SystemHandle::Acquire(CreateEvent(nullptr, FALSE, FALSE, nullptr));
     if (fence->GetCompletedValue() < signaledValue) {
         fence->SetEventOnCompletion(signaledValue, fenceEvent.Get());
         WaitForSingleObject(fenceEvent.Get(), INFINITE);
@@ -386,12 +385,12 @@ TEST_P(SharedBufferMemoryExistingD3D12ResourceTests, DuplicateWithReadControlAcc
 
     LARGE_INTEGER largeSize = {};
     largeSize.QuadPart = kD3D12SharedBufferMemoryFileMappingHandleSizeAlignment;
-    utils::SystemHandle handle = utils::SystemHandle::Acquire(
-        CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, largeSize.HighPart,
-                          largeSize.LowPart, nullptr));
+    SystemHandle handle =
+        SystemHandle::Acquire(CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE,
+                                                largeSize.HighPart, largeSize.LowPart, nullptr));
     EXPECT_TRUE(handle.IsValid());
 
-    utils::SystemHandle duplicatedHandle;
+    SystemHandle duplicatedHandle;
     HANDLE process = GetCurrentProcess();
     constexpr DWORD kValidAccess = FILE_MAP_READ | FILE_MAP_WRITE | SECTION_QUERY | READ_CONTROL;
     EXPECT_TRUE(DuplicateHandle(process, handle.Get(), process, duplicatedHandle.GetMut(),
@@ -416,13 +415,13 @@ TEST_P(SharedBufferMemoryExistingD3D12ResourceTests, MissingReadControlAccessCau
 
     LARGE_INTEGER largeSize = {};
     largeSize.QuadPart = kD3D12SharedBufferMemoryFileMappingHandleSizeAlignment;
-    utils::SystemHandle handle = utils::SystemHandle::Acquire(
-        CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, largeSize.HighPart,
-                          largeSize.LowPart, nullptr));
+    SystemHandle handle =
+        SystemHandle::Acquire(CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE,
+                                                largeSize.HighPart, largeSize.LowPart, nullptr));
     EXPECT_TRUE(handle.IsValid());
 
     // Import the duplicated handle to align with the behavior in Chromium.
-    utils::SystemHandle duplicatedHandle;
+    SystemHandle duplicatedHandle;
     HANDLE process = GetCurrentProcess();
     constexpr DWORD kInvalidAccess = FILE_MAP_READ | FILE_MAP_WRITE | SECTION_QUERY;
     EXPECT_TRUE(DuplicateHandle(process, handle.Get(), process, duplicatedHandle.GetMut(),
@@ -452,7 +451,7 @@ class D3D12SharedMemoryFileHandleBackendBase : public SharedBufferMemoryTestBack
         largeSize.QuadPart = alignedHeapSize;
         // Create a named shared memory object by using INVALID_HANDLE_VALUE as input file handle.
         // See https://learn.microsoft.com/en-us/windows/win32/memory/creating-named-shared-memory.
-        mSharedMemoryHandle = utils::SystemHandle::Acquire(
+        mSharedMemoryHandle = SystemHandle::Acquire(
             CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, largeSize.HighPart,
                               largeSize.LowPart, nullptr));
         EXPECT_TRUE(mSharedMemoryHandle.IsValid());
@@ -480,7 +479,7 @@ class D3D12SharedMemoryFileHandleBackendBase : public SharedBufferMemoryTestBack
     D3D12SharedMemoryFileHandleBackendBase() {}
 
   private:
-    utils::SystemHandle mSharedMemoryHandle;
+    SystemHandle mSharedMemoryHandle;
 };
 
 class D3D12SharedMemoryFileHandleWithExtendedUsagesBackend
@@ -523,9 +522,9 @@ TEST_P(SharedBufferMemoryD3D12SharedFileHandleWithExtendedUsagesTests, MemorySiz
     largeSize.QuadPart = kUnAlignedSize;
     // Create a named shared memory object by using INVALID_HANDLE_VALUE as input file handle.
     // See https://learn.microsoft.com/en-us/windows/win32/memory/creating-named-shared-memory.
-    utils::SystemHandle sharedMemoryHandle = utils::SystemHandle::Acquire(
-        CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, largeSize.HighPart,
-                          largeSize.LowPart, nullptr));
+    SystemHandle sharedMemoryHandle =
+        SystemHandle::Acquire(CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE,
+                                                largeSize.HighPart, largeSize.LowPart, nullptr));
     EXPECT_TRUE(sharedMemoryHandle.IsValid());
 
     wgpu::SharedBufferMemoryFromWindowsHandleDescriptor sharedFileHandleDesc;

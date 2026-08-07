@@ -41,14 +41,12 @@
 #include "dawn/native/D3D11Backend.h"
 #include "dawn/native/D3DBackend.h"
 #include "dawn/native/DawnNative.h"
+#include "src/dawn/common/SystemHandle.h"
 #include "src/dawn/tests/white_box/SharedTextureMemoryTests.h"
-#include "src/dawn/utils/SystemHandle.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
-
-using dawn::utils::SystemHandle;
 using Microsoft::WRL::ComPtr;
 
 enum class Mode {

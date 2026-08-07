@@ -31,12 +31,12 @@
 
 #include <utility>
 
+#include "src/dawn/common/SystemHandle.h"
 #include "src/dawn/native/vulkan/BackendVk.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
 #include "src/dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementation.h"
-#include "src/dawn/utils/SystemHandle.h"
 
 namespace dawn::native::vulkan::external_semaphore {
 
@@ -108,7 +108,7 @@ class ServiceImplementationZirconHandle : public ServiceImplementation {
         importSemaphoreHandleInfo.flags = VK_SEMAPHORE_IMPORT_TEMPORARY_BIT;
         importSemaphoreHandleInfo.handleType =
             VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_ZIRCON_EVENT_BIT_FUCHSIA;
-        utils::SystemHandle handleCopy = utils::SystemHandle::Duplicate(handle);
+        SystemHandle handleCopy = SystemHandle::Duplicate(handle);
         importSemaphoreHandleInfo.zirconHandle = handleCopy.Get();
 
         MaybeError status = CheckVkSuccess(mDevice->fn.ImportSemaphoreZirconHandleFUCHSIA(

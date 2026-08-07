@@ -31,8 +31,8 @@
 #include <cstdio>
 #include <thread>
 
+#include "src/dawn/common/SystemHandle.h"
 #include "src/dawn/utils/PlatformDebugLogger.h"
-#include "src/dawn/utils/SystemHandle.h"
 #include "src/utils/assert.h"
 
 namespace dawn::utils {

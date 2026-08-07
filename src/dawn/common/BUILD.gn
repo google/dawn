@@ -210,6 +210,8 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "StringViewUtils.cpp",
       "StringViewUtils.h",
       "Strings.h",
+      "SystemHandle.cpp",
+      "SystemHandle.h",
       "SystemUtils.cpp",
       "SystemUtils.h",
       "ThreadLocal.cpp",
