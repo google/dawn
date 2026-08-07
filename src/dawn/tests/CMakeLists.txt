@@ -279,7 +279,7 @@ if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12 OR DAWN_ENABLE_METAL OR (DAWN_ENABLE_
     )
 endif()
 
-if (DAWN_ENABLE_VULKAN AND (UNIX AND NOT ANDROID))
+if (DAWN_ENABLE_VULKAN AND (UNIX AND NOT ANDROID AND NOT APPLE))
     list(APPEND end2end_conditional_private_platform_depends
         "gbm"
     )
@@ -388,7 +388,7 @@ if (DAWN_ENABLE_VULKAN)
         "white_box/QueryInternalShaderTests.cpp"
     )
 
-    if (UNIX AND NOT ANDROID)
+    if (UNIX AND NOT ANDROID AND NOT APPLE)
         list(APPEND whitebox_sources
             "white_box/SharedTextureMemoryTests_dmabuf.cpp"
             "white_box/SharedTextureMemoryTests_opaquefd.cpp"
