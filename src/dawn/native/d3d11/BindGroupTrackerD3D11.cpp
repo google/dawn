@@ -224,9 +224,8 @@ void BindGroupTracker::SetConstantBuffer(uint32_t idx,
                                          uint32_t numConstants) {
     CBufferBindingKey key{std::bit_cast<uintptr_t>(d3d11Buffer), firstConstant, numConstants};
     mConstantBufferSlots[Stage].Bind(idx, key, [&] {
-        SetConstantBuffersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(),
-                                      static_cast<UINT>(idx), 1u, &d3d11Buffer, &firstConstant,
-                                      &numConstants);
+        SetConstantBuffersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), idx, 1u,
+                                      &d3d11Buffer, &firstConstant, &numConstants);
     });
 }
 
@@ -240,8 +239,8 @@ void BindGroupTracker::UnbindConstantBuffers() {
     static constexpr ID3D11Buffer* kNullBuffers[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT] =
         {};
 
-    SetConstantBuffersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0u,
-                                  static_cast<UINT>(slots), kNullBuffers, nullptr, nullptr);
+    SetConstantBuffersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0u, slots,
+                                  kNullBuffers, nullptr, nullptr);
 }
 
 template <SingleShaderStage Stage>
@@ -261,8 +260,7 @@ void BindGroupTracker::UnbindShaderResources() {
     static constexpr ID3D11ShaderResourceView*
         kNullSRVs[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = {};
 
-    SetShaderResourcesImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0u,
-                                  static_cast<UINT>(slots), kNullSRVs);
+    SetShaderResourcesImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0u, slots, kNullSRVs);
 }
 
 template <SingleShaderStage Stage>
@@ -281,8 +279,7 @@ void BindGroupTracker::UnbindSamplers() {
 
     static constexpr ID3D11SamplerState* kNullSamplers[D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT] = {};
 
-    SetSamplersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0u, static_cast<UINT>(slots),
-                           kNullSamplers);
+    SetSamplersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0u, slots, kNullSamplers);
 }
 
 void BindGroupTracker::CSSetUnorderedAccessView(uint32_t idx, ID3D11UnorderedAccessView* uav) {
@@ -312,7 +309,7 @@ void BindGroupTracker::UnbindUnorderedAccessViews() {
     if constexpr (Stage == kFragment) {
         end = mPSMaxUAVSlot;
     } else if constexpr (Stage == kCompute) {
-        end = static_cast<uint32_t>(mCSUAVSlots.MaxBoundSlots());
+        end = mCSUAVSlots.MaxBoundSlots();
     } else {
         DAWN_UNREACHABLE();
         return;
@@ -326,8 +323,8 @@ void BindGroupTracker::UnbindUnorderedAccessViews() {
 
     const auto count = end - start;
 
-    SetUnorderedAccessViewsImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), start,
-                                       static_cast<UINT>(count), kNullUAVs);
+    SetUnorderedAccessViewsImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), start, count,
+                                       kNullUAVs);
 }
 
 ResultOrError<std::tuple<ID3D11Buffer*, UINT, UINT>> BindGroupTracker::GetConstantBufferBinding(
