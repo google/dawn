@@ -283,7 +283,7 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true> {
     void Apply(const VulkanFunctions& vk,
                VkCommandBuffer commandBuffer,
                VkPipelineBindPoint bindPoint) {
-        Apply(vk, commandBuffer, bindPoint,
+        Apply(vk, commandBuffer, bindPoint, mVkLayout,
               [&](BindGroupIndex i) { return ToBackend(mBindGroups[i])->GetHandle(); });
     }
 
@@ -291,6 +291,7 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true> {
     void Apply(const VulkanFunctions& vk,
                VkCommandBuffer commandBuffer,
                VkPipelineBindPoint bindPoint,
+               VkPipelineLayout layout,
                F GetDescriptorSet) {
         BeforeApply();
 
@@ -313,7 +314,7 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true> {
 
             if (mFramebufferFetchEnabled) {
                 DAWN_ASSERT(mFramebufferFetchDescriptorSet != VK_NULL_HANDLE);
-                vk.CmdBindDescriptorSets(commandBuffer, bindPoint, mVkLayout,
+                vk.CmdBindDescriptorSets(commandBuffer, bindPoint, layout,
                                          static_cast<uint32_t>(startOfBindGroups), 1,
                                          &*mFramebufferFetchDescriptorSet, 0, nullptr);
             }
@@ -332,7 +333,7 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true> {
             if (mUsesResourceTable) {
                 DAWN_ASSERT(mResourceTable != nullptr);
                 VkDescriptorSet set = mResourceTable->GetHandle();
-                vk.CmdBindDescriptorSets(commandBuffer, bindPoint, mVkLayout,
+                vk.CmdBindDescriptorSets(commandBuffer, bindPoint, layout,
                                          static_cast<uint32_t>(startOfBindGroups), 1, &*set, 0,
                                          nullptr);
             }
@@ -349,7 +350,7 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true> {
             uint32_t count = static_cast<uint32_t>(dynamicOffsetSpan.size());
             const uint32_t* dynamicOffset = count > 0 ? dynamicOffsetSpan.data() : nullptr;
 
-            vk.CmdBindDescriptorSets(commandBuffer, bindPoint, mVkLayout, setIndex, 1, &*set, count,
+            vk.CmdBindDescriptorSets(commandBuffer, bindPoint, layout, setIndex, 1, &*set, count,
                                      dynamicOffset);
         }
 
@@ -745,7 +746,7 @@ struct ProgrammablePassState : public StackAllocated {
         VkCommandBuffer commands = recordingContext->commandBuffer;
 
         vk.CmdBindPipeline(commands, PipelineBindPoint, pipelineHandles.pipeline);
-        descriptorSets.Apply(vk, commands, PipelineBindPoint,
+        descriptorSets.Apply(vk, commands, PipelineBindPoint, pipelineHandles.layout,
                              [&](BindGroupIndex i) { return newDescriptorSets[i]->GetHandle(); });
         immediates.Apply(vk, commands, pipelineHandles.layout, lastPipeline->GetImmediateMask());
 

@@ -234,9 +234,6 @@ MaybeError BindGroupLayout::Initialize() {
     DAWN_TRY_ASSIGN(bindings, ComputeVulkanStaticBindings(device, this));
     mTextureToStaticSampler = std::move(bindings.textureToStaticSampler);
 
-    mDescriptorSetAllocator =
-        DescriptorSetAllocator::Create(device, std::move(bindings.descriptorCountPerType));
-
     VkDescriptorSetLayoutCreateInfo createInfo{
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         .pNext = nullptr,
@@ -248,20 +245,21 @@ MaybeError BindGroupLayout::Initialize() {
     // Record cache key information now since the createInfo is not stored.
     StreamIn(&mCacheKey, createInfo);
 
-    DAWN_TRY(CheckVkSuccess(device->fn.CreateDescriptorSetLayout(device->GetVkDevice(), &createInfo,
-                                                                 nullptr, &*mHandle),
-                            "CreateDescriptorSetLayout"));
-    mSpecializations->insert({{}, mHandle});
+    SpecializationResult r;
+    DAWN_TRY_ASSIGN(r, GetOrCreateSpecialization({}));
+
+    mHandle = r.layout;
+    mDescriptorSetAllocator = r.allocator.Get();
 
     SetLabelImpl();
 
     return {};
 }
 
-ResultOrError<VkDescriptorSetLayout> BindGroupLayout::GetOrCreateSpecializedHandle(
+ResultOrError<BindGroupLayout::SpecializationResult> BindGroupLayout::GetOrCreateSpecialization(
     const Specialization& specialization) {
     if (auto specialized = mSpecializations.ConstUse(
-            [&](auto specializations) -> std::optional<VkDescriptorSetLayout> {
+            [&](auto specializations) -> std::optional<SpecializationResult> {
                 if (auto it = specializations->find(specialization); it != specializations->end()) {
                     return it->second;
                 }
@@ -289,14 +287,25 @@ ResultOrError<VkDescriptorSetLayout> BindGroupLayout::GetOrCreateSpecializedHand
                                                                  nullptr, &*specialized),
                             "CreateDescriptorSetLayout"));
 
-    return mSpecializations.Use([&](auto specializations) -> ResultOrError<VkDescriptorSetLayout> {
-        auto [it, inserted] = specializations->insert({specialization, specialized});
+    Ref<DescriptorSetAllocator> allocator =
+        DescriptorSetAllocator::Create(device, std::move(bindings.descriptorCountPerType));
+
+    return mSpecializations.Use([&](auto specializations) -> ResultOrError<SpecializationResult> {
+        SpecializationResult result{.layout = specialized, .allocator = std::move(allocator)};
+        auto [it, inserted] = specializations->insert({specialization, result});
         if (!inserted) {
             device->fn.DestroyDescriptorSetLayout(device->GetVkDevice(), specialized, nullptr);
             return it->second;
         }
-        return specialized;
+        return result;
     });
+}
+
+ResultOrError<VkDescriptorSetLayout> BindGroupLayout::GetOrCreateSpecializedHandle(
+    const Specialization& specialization) {
+    SpecializationResult specialized;
+    DAWN_TRY_ASSIGN(specialized, GetOrCreateSpecialization(specialization));
+    return specialized.layout;
 }
 
 void BindGroupLayout::DestroyImpl(DestroyReason reason) {
@@ -304,19 +313,20 @@ void BindGroupLayout::DestroyImpl(DestroyReason reason) {
 
     Device* device = ToBackend(GetDevice());
 
-    // DescriptorSetLayout aren't used by execution on the GPU and can be deleted at any time,
-    // so we can destroy mHandle immediately instead of using the FencedDeleter.
-    mSpecializations.Use([&](auto specializations) {
-        for (auto& [_, handle] : *specializations) {
-            device->fn.DestroyDescriptorSetLayout(device->GetVkDevice(), handle, nullptr);
-        }
-        specializations->clear();
-    });
-
-    // Handled in the loop above already.
+    // mHandle is destroyed in the loop below.
     mHandle = VK_NULL_HANDLE;
 
     mDescriptorSetAllocator = nullptr;
+
+    // DescriptorSetLayouts aren't used by execution on the GPU and can be deleted at any time,
+    // so we can destroy them immediately instead of using the FencedDeleter.
+    mSpecializations.Use([&](auto specializations) {
+        for (auto& [_, specialized] : *specializations) {
+            device->fn.DestroyDescriptorSetLayout(device->GetVkDevice(), specialized.layout,
+                                                  nullptr);
+        }
+        specializations->clear();
+    });
 }
 
 VkDescriptorSetLayout BindGroupLayout::GetHandle() const {
@@ -349,14 +359,14 @@ ResultOrError<std::unique_ptr<OwnedDescriptorSet>> BindGroupLayout::GetSpecializ
     const Specialization& specialization) {
     DAWN_ASSERT(bg->GetLayout() == this);
 
-    VkDescriptorSetLayout dsLayout;
-    DAWN_TRY_ASSIGN(dsLayout, GetOrCreateSpecializedHandle(specialization));
+    SpecializationResult specialized;
+    DAWN_TRY_ASSIGN(specialized, GetOrCreateSpecialization(specialization));
 
     DescriptorSetAllocation dsAllocation;
-    DAWN_TRY_ASSIGN(dsAllocation, mDescriptorSetAllocator->Allocate(dsLayout));
+    DAWN_TRY_ASSIGN(dsAllocation, specialized.allocator->Allocate(specialized.layout));
 
     bg->WriteDescriptorSet(dsAllocation.set, mTextureToStaticSampler);
-    return std::make_unique<OwnedDescriptorSet>(this, dsAllocation);
+    return std::make_unique<OwnedDescriptorSet>(std::move(specialized.allocator), dsAllocation);
 }
 
 const TextureToStaticSamplerMap& BindGroupLayout::GetTextureToStaticSamplerMap() const {
@@ -369,12 +379,13 @@ void BindGroupLayout::SetLabelImpl() {
 
 // OwnedDescriptorSet
 
-OwnedDescriptorSet::OwnedDescriptorSet(BindGroupLayout* bgl, DescriptorSetAllocation allocation)
-    : mAllocation(allocation), mBindGroupLayout(bgl) {}
+OwnedDescriptorSet::OwnedDescriptorSet(Ref<DescriptorSetAllocator> allocator,
+                                       DescriptorSetAllocation allocation)
+    : mAllocation(allocation), mAllocator(std::move(allocator)) {}
 
 OwnedDescriptorSet::~OwnedDescriptorSet() {
-    mBindGroupLayout->DeallocateDescriptorSet(&mAllocation);
-    mBindGroupLayout = nullptr;
+    mAllocator->Deallocate(&mAllocation);
+    mAllocator = nullptr;
 }
 
 VkDescriptorSet OwnedDescriptorSet::GetHandle() const {

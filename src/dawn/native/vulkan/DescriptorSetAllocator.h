@@ -67,6 +67,11 @@ class DescriptorSetAllocator : public RefCounted {
     using SetIndex = uint16_t;
 
   public:
+    // TODO(crbug.com/439522242): Note that allocators cannot be shared across layouts with matching
+    // descriptor counts if their VkDescriptorSetLayouts differ (e.g. immutable
+    // samplers argument change with default and YCbCr samplers), because sets are sub-allocated
+    // from pools using the layout passed to the first Allocate() call. Consider adding a
+    // descriptor set layout parameter if reusing allocators.
     static Ref<DescriptorSetAllocator> Create(
         Device* device,
         absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType);

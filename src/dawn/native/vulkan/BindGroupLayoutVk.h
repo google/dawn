@@ -32,6 +32,7 @@
 #include <utility>
 #include <vector>
 
+#include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/common/SlabAllocator.h"
 #include "src/dawn/common/vulkan_platform.h"
@@ -79,6 +80,12 @@ class BindGroupLayout : public BindGroupLayoutInternalBase {
         }
         bool operator==(const Specialization& other) const = default;
     };
+    struct SpecializationResult {
+        VkDescriptorSetLayout layout = VK_NULL_HANDLE;
+        Ref<DescriptorSetAllocator> allocator;
+    };
+    ResultOrError<SpecializationResult> GetOrCreateSpecialization(
+        const Specialization& specialization);
     ResultOrError<VkDescriptorSetLayout> GetOrCreateSpecializedHandle(
         const Specialization& specialization);
 
@@ -113,17 +120,16 @@ class BindGroupLayout : public BindGroupLayoutInternalBase {
     void SetLabelImpl() override;
 
     VkDescriptorSetLayout mHandle = VK_NULL_HANDLE;
+    raw_ptr<DescriptorSetAllocator> mDescriptorSetAllocator = nullptr;
 
     // Caches VkDescriptorSetLayouts for specializations so that the lifetime guarantees are the
     // same as for mHandle. Note that the noop specialization has mHandle cached directly, but
     // mHandle is also kept separate for efficiency when creating BindGroups.
-    MutexProtected<absl::flat_hash_map<Specialization, VkDescriptorSetLayout>> mSpecializations;
+    MutexProtected<absl::flat_hash_map<Specialization, SpecializationResult>> mSpecializations;
 
     // Maps from indices of texture entries that are paired with static samplers
     // to indices of the entries of their respective samplers.
     TextureToStaticSamplerMap mTextureToStaticSampler;
-
-    Ref<DescriptorSetAllocator> mDescriptorSetAllocator;
 };
 
 // RAII wrapper around a VkDescriptorSet for use when the VkDescriptorSet is not part of a BindGroup
@@ -131,14 +137,14 @@ class BindGroupLayout : public BindGroupLayoutInternalBase {
 class OwnedDescriptorSet : public NonCopyable {
   public:
     OwnedDescriptorSet() = default;
-    OwnedDescriptorSet(BindGroupLayout* bgl, DescriptorSetAllocation allocation);
+    OwnedDescriptorSet(Ref<DescriptorSetAllocator> allocator, DescriptorSetAllocation allocation);
     ~OwnedDescriptorSet();
 
     VkDescriptorSet GetHandle() const;
 
   private:
     DescriptorSetAllocation mAllocation;
-    Ref<BindGroupLayout> mBindGroupLayout = nullptr;
+    Ref<DescriptorSetAllocator> mAllocator = nullptr;
 };
 
 }  // namespace dawn::native::vulkan
