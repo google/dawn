@@ -144,7 +144,7 @@ SYNCED_REPOS = {
     # Dawn, but for different purposes and on non-overlapping platforms. Thus,
     # there is no need to sync their revisions.
     'third_party/google_benchmark/src': None,
-    'third_party/googletest': 'third_party/googletest/src',
+    'third_party/googletest/src': 'third_party/googletest/src',
     'third_party/jsoncpp': 'third_party/jsoncpp/source',
     'third_party/libc++/src': None,
     'third_party/libc++abi/src': None,
