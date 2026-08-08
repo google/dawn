@@ -1,0 +1,125 @@
+#include <metal_stdlib>
+using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_packed_vec3_f32_array_element {
+  /* 0x0000 */ packed_float3 packed;
+  /* 0x000c */ tint_array<int8_t, 4> tint_pad;
+};
+
+struct S_packed_vec3 {
+  /* 0x0000 */ tint_array<tint_array<tint_packed_vec3_f32_array_element, 3>, 3> a;
+  /* 0x0090 */ tint_array<tint_array<tint_packed_vec3_f32_array_element, 3>, 3> b;
+};
+
+struct S {
+  tint_array<float3x3, 3> a;
+  tint_array<tint_array<float3, 3>, 3> b;
+};
+
+struct tint_module_vars_struct {
+  device S_packed_vec3* s;
+};
+
+void tint_store_and_preserve_padding_4(device tint_array<tint_packed_vec3_f32_array_element, 3>* const target, tint_array<float3, 3> value_param) {
+  {
+    uint v = 0u;
+    v = 0u;
+    while(true) {
+      uint const v_1 = v;
+      if ((v_1 >= 3u)) {
+        break;
+      }
+      (*target)[v_1].packed = packed_float3(value_param[v_1]);
+      {
+        v = (v_1 + 1u);
+      }
+    }
+  }
+}
+
+void tint_store_and_preserve_padding_3(device tint_array<tint_array<tint_packed_vec3_f32_array_element, 3>, 3>* const target, tint_array<tint_array<float3, 3>, 3> value_param) {
+  {
+    uint v_2 = 0u;
+    v_2 = 0u;
+    while(true) {
+      uint const v_3 = v_2;
+      if ((v_3 >= 3u)) {
+        break;
+      }
+      (tint_store_and_preserve_padding_4((&(*target)[v_3]), value_param[v_3]));
+      {
+        v_2 = (v_3 + 1u);
+      }
+    }
+  }
+}
+
+void tint_store_and_preserve_padding_2(device tint_array<tint_packed_vec3_f32_array_element, 3>* const target, float3x3 value_param) {
+  (*target)[0u].packed = packed_float3(value_param[0u]);
+  (*target)[1u].packed = packed_float3(value_param[1u]);
+  (*target)[2u].packed = packed_float3(value_param[2u]);
+}
+
+void tint_store_and_preserve_padding_1(device tint_array<tint_array<tint_packed_vec3_f32_array_element, 3>, 3>* const target, tint_array<float3x3, 3> value_param) {
+  {
+    uint v_4 = 0u;
+    v_4 = 0u;
+    while(true) {
+      uint const v_5 = v_4;
+      if ((v_5 >= 3u)) {
+        break;
+      }
+      (tint_store_and_preserve_padding_2((&(*target)[v_5]), value_param[v_5]));
+      {
+        v_4 = (v_5 + 1u);
+      }
+    }
+  }
+}
+
+void tint_store_and_preserve_padding(device S_packed_vec3* const target, S value_param) {
+  (tint_store_and_preserve_padding_1((&(*target).a), value_param.a));
+  (tint_store_and_preserve_padding_3((&(*target).b), value_param.b));
+}
+
+tint_array<float3, 3> tint_load_array_packed_vec3_2(device tint_array<tint_packed_vec3_f32_array_element, 3>* const from) {
+  return tint_array<float3, 3>{float3((*from)[0u].packed), float3((*from)[1u].packed), float3((*from)[2u].packed)};
+}
+
+tint_array<tint_array<float3, 3>, 3> tint_load_array_packed_vec3_1(device tint_array<tint_array<tint_packed_vec3_f32_array_element, 3>, 3>* const from) {
+  tint_array<float3, 3> const v_6 = tint_load_array_packed_vec3_2((&(*from)[0u]));
+  tint_array<float3, 3> const v_7 = tint_load_array_packed_vec3_2((&(*from)[1u]));
+  return tint_array<tint_array<float3, 3>, 3>{v_6, v_7, tint_load_array_packed_vec3_2((&(*from)[2u]))};
+}
+
+tint_array<float3x3, 3> tint_load_array_packed_vec3(device tint_array<tint_array<tint_packed_vec3_f32_array_element, 3>, 3>* const from) {
+  tint_array<tint_packed_vec3_f32_array_element, 3> const v_8 = (*from)[0u];
+  float3x3 const v_9 = float3x3(float3(v_8[0u].packed), float3(v_8[1u].packed), float3(v_8[2u].packed));
+  tint_array<tint_packed_vec3_f32_array_element, 3> const v_10 = (*from)[1u];
+  float3x3 const v_11 = float3x3(float3(v_10[0u].packed), float3(v_10[1u].packed), float3(v_10[2u].packed));
+  tint_array<tint_packed_vec3_f32_array_element, 3> const v_12 = (*from)[2u];
+  return tint_array<float3x3, 3>{v_9, v_11, float3x3(float3(v_12[0u].packed), float3(v_12[1u].packed), float3(v_12[2u].packed))};
+}
+
+S tint_load_struct_packed_vec3(device S_packed_vec3* const from) {
+  tint_array<float3x3, 3> const v_13 = tint_load_array_packed_vec3((&(*from).a));
+  return S{.a=v_13, .b=tint_load_array_packed_vec3_1((&(*from).b))};
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void v_14(device S_packed_vec3* s [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s};
+  (tint_store_and_preserve_padding(tint_module_vars.s, tint_load_struct_packed_vec3(tint_module_vars.s)));
+}

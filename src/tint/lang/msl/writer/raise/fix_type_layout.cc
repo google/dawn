@@ -69,11 +69,13 @@ struct State {
     /// when inside an array.
     Hashmap<const core::type::Type*, const core::type::Struct*, 4> packed_array_element_types{};
 
-    // A map from a packed pointer type to a helper function that will load it to an unpacked type.
-    Hashmap<const core::type::Pointer*, core::ir::Function*, 4> packed_load_helpers{};
+    // A map from an unpacked type and a packed pointer type to a helper that will load it.
+    Hashmap<std::pair<const core::type::Type*, const core::type::Pointer*>, core::ir::Function*, 4>
+        packed_load_helpers{};
 
-    // A map from a packed pointer type to a helper function that will store an unpacked type to it.
-    Hashmap<const core::type::Pointer*, core::ir::Function*, 4> packed_store_helpers{};
+    // A map from an unpacked type and a packed pointer type to a helper that will store it.
+    Hashmap<std::pair<const core::type::Type*, const core::type::Pointer*>, core::ir::Function*, 4>
+        packed_store_helpers{};
 
     /// Process the module.
     void Process() {
@@ -526,7 +528,7 @@ struct State {
     /// @returns the helper function
     core::ir::Function* LoadPackedArrayHelper(const core::type::Array* unpacked_arr,
                                               const core::type::Pointer* packed_ptr_type) {
-        return packed_load_helpers.GetOrAdd(packed_ptr_type, [&] {
+        return packed_load_helpers.GetOrAdd(std::make_pair(unpacked_arr, packed_ptr_type), [&] {
             auto* func = b.Function(sym.New("tint_load_array_packed_vec3").Name(), unpacked_arr);
             auto* from = b.FunctionParam("from", packed_ptr_type);
             func->SetParams({from});
@@ -588,7 +590,7 @@ struct State {
     /// @returns the helper function
     core::ir::Function* LoadPackedStructHelper(const core::type::Struct* unpacked_str,
                                                const core::type::Pointer* packed_ptr_type) {
-        return packed_load_helpers.GetOrAdd(packed_ptr_type, [&] {
+        return packed_load_helpers.GetOrAdd(std::make_pair(unpacked_str, packed_ptr_type), [&] {
             auto* func = b.Function(sym.New("tint_load_struct_packed_vec3").Name(), unpacked_str);
             auto* from = b.FunctionParam("from", packed_ptr_type);
             func->SetParams({from});
@@ -674,7 +676,7 @@ struct State {
     /// @returns the helper function
     core::ir::Function* StorePackedArrayHelper(const core::type::Array* unpacked_arr,
                                                const core::type::Pointer* packed_ptr_type) {
-        return packed_store_helpers.GetOrAdd(packed_ptr_type, [&] {
+        return packed_store_helpers.GetOrAdd(std::make_pair(unpacked_arr, packed_ptr_type), [&] {
             auto* func = b.Function(sym.New("tint_store_array_packed_vec3").Name(), ty.void_());
             auto* to = b.FunctionParam("to", packed_ptr_type);
             auto* value = b.FunctionParam("value", unpacked_arr);
@@ -730,8 +732,8 @@ struct State {
     /// @returns the helper function
     core::ir::Function* StorePackedStructHelper(const core::type::Struct* unpacked_str,
                                                 const core::type::Pointer* packed_ptr_type) {
-        return packed_store_helpers.GetOrAdd(packed_ptr_type, [&] {
-            auto* func = b.Function(sym.New("tint_store_array_packed_vec3").Name(), ty.void_());
+        return packed_store_helpers.GetOrAdd(std::make_pair(unpacked_str, packed_ptr_type), [&] {
+            auto* func = b.Function(sym.New("tint_store_struct_packed_vec3").Name(), ty.void_());
             auto* to = b.FunctionParam("to", packed_ptr_type);
             auto* value = b.FunctionParam("value", unpacked_str);
             func->SetParams({to, value});

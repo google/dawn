@@ -40,17 +40,17 @@ struct tint_symbol_1 {
   S_packed_vec3 tint_symbol;
 };
 
-void tint_store_array_packed_vec3_1(threadgroup tint_array<tint_packed_vec3_u32_array_element, 4>* const to, tint_array<uint3, 4> value) {
+void tint_store_array_packed_vec3(threadgroup tint_array<tint_packed_vec3_u32_array_element, 4>* const to, tint_array<uint3, 4> value) {
   (*to)[0u].packed = packed_uint3(value[0u]);
   (*to)[1u].packed = packed_uint3(value[1u]);
   (*to)[2u].packed = packed_uint3(value[2u]);
   (*to)[3u].packed = packed_uint3(value[3u]);
 }
 
-void tint_store_array_packed_vec3(threadgroup S_packed_vec3* const to, S value) {
+void tint_store_struct_packed_vec3(threadgroup S_packed_vec3* const to, S value) {
   (*to).a = packed_uint3(value.a);
   (*to).b = value.b;
-  (tint_store_array_packed_vec3_1((&(*to).c), value.c));
+  (tint_store_array_packed_vec3((&(*to).c), value.c));
 }
 
 void tint_store_and_preserve_padding_1(device tint_array<tint_packed_vec3_u32_array_element, 4>* const target, tint_array<uint3, 4> value_param) {
@@ -120,7 +120,7 @@ void foo_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) 
   S const s = tint_load_struct_packed_vec3_1(tint_module_vars.sbuffer);
   S const w = tint_load_struct_packed_vec3_1(tint_module_vars.sbuffer);
   (tint_store_and_preserve_padding(tint_module_vars.sbuffer, S{}));
-  (tint_store_array_packed_vec3(tint_module_vars.wbuffer, S{}));
+  (tint_store_struct_packed_vec3(tint_module_vars.wbuffer, S{}));
 }
 
 [[max_total_threads_per_threadgroup(1)]]
