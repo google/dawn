@@ -129,8 +129,9 @@ if(DAWN_SUPPORTS_CXX_MODULES)
     FILES     "${DAWNCPP_MODULES_GEN_SOURCES}"
   )
   target_include_directories(dawncpp_module PRIVATE
-    "${cpp_modules_includes}"
-    "${DAWN_INCLUDE_DIR}"
+    "$<BUILD_INTERFACE:${cpp_modules_includes}>"
+    "$<BUILD_INTERFACE:${DAWN_INCLUDE_DIR}>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
   )
   add_dependencies(dawncpp_module webgpu_cpp webgpu_c)
   get_target_property(webgpu_cpp_ALIASED webgpu_cpp ALIASED_TARGET)
@@ -142,6 +143,15 @@ if(DAWN_SUPPORTS_CXX_MODULES)
   set_target_properties(dawncpp_module PROPERTIES
     CXX_STANDARD    ${DAWN_TOPLEVEL_CXX_STANDARD}
     CXX_EXTENSIONS  ${DAWN_TOPLEVEL_CXX_EXTENSIONS}
+  )
+  target_compile_features(dawncpp_module PUBLIC cxx_std_20)
+
+  set_property(TARGET dawncpp_module PROPERTY EXPORT_NAME cpp_module)
+
+  install(TARGETS dawncpp_module
+    EXPORT DawnTargets
+    FILE_SET dawncpp_modules
+    DESTINATION "."
   )
 
   if (EMSCRIPTEN)
