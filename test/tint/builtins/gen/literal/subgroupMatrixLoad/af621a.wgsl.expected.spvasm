@@ -68,7 +68,7 @@
          %21 = OpUDiv %uint %uint_8 %uint_4
          %23 = OpUDiv %uint %uint_1 %uint_4
          %25 = OpAccessChain %_ptr_StorageBuffer_uint %19 %23
-         %27 = OpCooperativeMatrixLoadKHR %12 %25 %uint_1 %21 NonPrivatePointer
+         %27 = OpCooperativeMatrixLoadKHR %12 %25 %uint_1 %21 None
                OpStore %res %27
          %30 = OpLoad %12 %res None
                OpReturnValue %30

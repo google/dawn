@@ -92,7 +92,7 @@
          %43 = OpLabel
          %49 = OpBitcast %uint %28
          %47 = OpAccessChain %_ptr_StorageBuffer_half %25 %49
-         %50 = OpCooperativeMatrixLoadKHR %13 %47 %uint_1 %30 NonPrivatePointer
+         %50 = OpCooperativeMatrixLoadKHR %13 %47 %uint_1 %30 None
                OpStore %39 %50 None
                OpBranch %42
          %42 = OpLabel

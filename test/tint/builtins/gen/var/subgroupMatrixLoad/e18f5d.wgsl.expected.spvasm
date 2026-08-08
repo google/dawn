@@ -96,7 +96,7 @@
          %50 = OpBitcast %uint %28
          %51 = OpUDiv %uint %50 %uint_4
          %52 = OpAccessChain %_ptr_StorageBuffer_int %25 %51
-         %54 = OpCooperativeMatrixLoadKHR %13 %52 %uint_1 %48 NonPrivatePointer
+         %54 = OpCooperativeMatrixLoadKHR %13 %52 %uint_1 %48 None
                OpStore %40 %54 None
                OpBranch %43
          %43 = OpLabel

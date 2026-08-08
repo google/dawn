@@ -84,7 +84,7 @@
          %38 = OpSelect %uint %36 %31 %uint_0
          %39 = OpSelect %uint %36 %29 %uint_8
          %40 = OpAccessChain %_ptr_StorageBuffer_int %24 %38
-         %42 = OpCooperativeMatrixLoadKHR %13 %40 %uint_0 %39 NonPrivatePointer
+         %42 = OpCooperativeMatrixLoadKHR %13 %40 %uint_0 %39 None
                OpStore %res %42
          %45 = OpLoad %13 %res None
                OpReturnValue %45

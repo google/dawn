@@ -84,7 +84,7 @@
                OpBranchConditional %32 %38 %37
          %38 = OpLabel
          %42 = OpAccessChain %_ptr_StorageBuffer_uint %22 %24
-         %44 = OpCooperativeMatrixLoadKHR %12 %42 %uint_1 %26 NonPrivatePointer
+         %44 = OpCooperativeMatrixLoadKHR %12 %42 %uint_1 %26 None
                OpStore %34 %44 None
                OpBranch %37
          %37 = OpLabel

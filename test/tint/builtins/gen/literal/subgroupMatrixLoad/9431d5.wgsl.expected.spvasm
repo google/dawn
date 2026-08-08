@@ -70,7 +70,7 @@
          %24 = OpBitcast %uint %int_1
          %26 = OpUDiv %uint %24 %uint_4
          %27 = OpAccessChain %_ptr_StorageBuffer_int %20 %26
-         %29 = OpCooperativeMatrixLoadKHR %13 %27 %uint_1 %22 NonPrivatePointer
+         %29 = OpCooperativeMatrixLoadKHR %13 %27 %uint_1 %22 None
                OpStore %res %29
          %33 = OpLoad %13 %res None
                OpReturnValue %33
