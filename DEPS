@@ -77,7 +77,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '3e452a2ef67895a74c017cf1569c94b2aaca056f',
+  'chromium_revision': '899fe204246ce5b48b742748a5d97128b0f9b4ff',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -138,7 +138,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@fa1fac8477c70532274e7244777a846537004750',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@33025ff4f2a57667af0b8302d1547b8c58922cf9',
     'condition': 'dawn_standalone',
   },
 
@@ -169,7 +169,7 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@456a718a6024925d7159047fb32ceda862e3239e',
+  'url': '{chromium_git}/chromium/src/build@0de6cd0db9aec5e844ab09059bf1c7b1d13d1d21',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
@@ -195,7 +195,7 @@ deps = {
 
   # For run-tricium-clang-tidy.py
   'third_party/chromium-tools-build/src': {
-    'url': '{chromium_git}/chromium/tools/build@4b244c03c235f2fa7c35a9d007742274c2454525',
+    'url': '{chromium_git}/chromium/tools/build@ecb9c3d394159b51c5a7aa2c63e17923431960dd',
     'condition': 'dawn_standalone and checkout_clang_tidy',
   },
 
@@ -289,7 +289,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@ea771603d0ff4681027a0dae58e8cdad359fe1e5',
+    'url': '{chromium_git}/chromium/src/testing@6f0975a03da82bdf48e7634c703e6d544b3cb14b',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
