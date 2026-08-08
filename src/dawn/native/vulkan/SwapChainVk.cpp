@@ -502,7 +502,14 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
         case VK_SUBOPTIMAL_KHR:
             swapChainTextureInfo.status = wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal;
             break;
-
+        // The infinite timeout above makes VK_TIMEOUT and VK_NOT_READY
+        // spec-illegal here, but some Android drivers (Adreno, Mali) return
+        // them anyway when the compositor has stopped releasing swapchain
+        // buffers (backgrounding, screen-off, system UI transitions). A
+        // recreated swapchain gets a fresh set of buffers, so treat this like
+        // OUT_OF_DATE instead of letting it escalate to device loss.
+        case VK_TIMEOUT:
+        case VK_NOT_READY:
         case VK_ERROR_OUT_OF_DATE_KHR: {
             swapChainTextureInfo.status = wgpu::SurfaceGetCurrentTextureStatus::Outdated;
             // Prevent infinite recursive calls to GetCurrentTextureViewInternal when the
