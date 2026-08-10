@@ -969,6 +969,44 @@ TEST_P(SharedBufferMemoryTests, CreateBufferMappedAtCreationOnSharedBufferMemory
     runScenario(false, 0u);
 }
 
+// Regression test: DawnFakeBufferOOMForTesting must be honoured when creating a buffer
+// via SharedBufferMemory, not just via Device::CreateBuffer.
+TEST_P(SharedBufferMemoryTests, CreateBufferFakeOOM) {
+    wgpu::SharedBufferMemory memory =
+        GetParam().mBackend->CreateSharedBufferMemory(device, kMapWriteUsages, kBufferSize);
+    wgpu::SharedBufferMemoryProperties properties;
+    memory.GetProperties(&properties);
+
+    wgpu::DawnFakeBufferOOMForTesting oomForTesting;
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.nextInChain = &oomForTesting;
+    bufferDesc.size = properties.size;
+    bufferDesc.usage = kMapWriteUsages;
+
+    // Both false: CreateBuffer should succeed.
+    oomForTesting = {};
+    wgpu::Buffer buffer = memory.CreateBuffer(&bufferDesc);
+    EXPECT_NE(buffer, nullptr);
+
+    // fakeOOMAtDevice: CreateBuffer should surface a device error and return an error buffer.
+    oomForTesting = {};
+    oomForTesting.fakeOOMAtDevice = true;
+    ASSERT_DEVICE_ERROR(buffer = memory.CreateBuffer(&bufferDesc));
+    EXPECT_NE(buffer, nullptr);
+
+    // fakeOOMAtNativeMap without mappedAtCreation: CreateBuffer should succeed.
+    oomForTesting = {};
+    oomForTesting.fakeOOMAtNativeMap = true;
+    buffer = memory.CreateBuffer(&bufferDesc);
+    EXPECT_NE(buffer, nullptr);
+
+    // fakeOOMAtNativeMap with mappedAtCreation: CreateBuffer should surface a device error.
+    oomForTesting = {};
+    oomForTesting.fakeOOMAtNativeMap = true;
+    bufferDesc.mappedAtCreation = true;
+    ASSERT_DEVICE_ERROR(memory.CreateBuffer(&bufferDesc));
+}
+
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SharedBufferMemoryTests);
 
 }  // anonymous namespace

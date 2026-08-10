@@ -149,9 +149,20 @@ ResultOrError<Ref<BufferBase>> SharedBufferMemoryBase::CreateBuffer(
                     "The buffer size (%u) is larger than SharedBufferMemory size (%u).",
                     descriptor->size, mProperties.size);
 
+    bool fakeOOMAtNativeMap = false;
+    if (auto* ext = descriptor.Get<DawnFakeBufferOOMForTesting>()) {
+        fakeOOMAtNativeMap = ext->fakeOOMAtNativeMap;
+        if (ext->fakeOOMAtDevice) {
+            return DAWN_OUT_OF_MEMORY_ERROR("DawnFakeBufferOOMForTesting fakeOOMAtDevice");
+        }
+    }
+
     Ref<BufferBase> buffer;
     DAWN_TRY_ASSIGN(buffer, CreateBufferImpl(descriptor));
     if (descriptor->mappedAtCreation) {
+        if (fakeOOMAtNativeMap) {
+            return DAWN_OUT_OF_MEMORY_ERROR("DawnFakeBufferOOMForTesting fakeOOMAtNativeMap");
+        }
         DAWN_TRY(buffer->MapAtCreation());
     }
     // Access is not allowed until BeginAccess has been called.
