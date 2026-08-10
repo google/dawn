@@ -36,6 +36,7 @@
 #include <algorithm>
 #include <cstring>
 #include <limits>
+#include <utility>
 
 #if defined(__GNUC__) || defined(__clang__)
 // error: 'offsetof' within non-standard-layout type 'wgpu::XXX' is conditionally-supported
@@ -115,7 +116,7 @@
         {{out}} = nullptr;
     {%- elif type.name.get() == "size_t" -%}
         //* Deserializing into size_t requires check that the uint64_t used on the wire won't narrow.
-        if ({{in}} > std::numeric_limits<size_t>::max()) {
+        if (!std::in_range<size_t>({{in}})) {
             return WireResult::FatalError;
         }
         {{out}} = checked_cast<size_t>({{in}});
@@ -351,6 +352,9 @@
                     {% continue %}
                 {% endif %}
                 Span<volatile {{member_transfer_type(member.type)}}> memberBuffer;
+                if (!std::in_range<size_t>(memberLength)) {
+                    return WireResult::FatalError;
+                }
                 WIRE_TRY(buffer->NextN(checked_cast<size_t>(memberLength), &memberBuffer));
 
                 //* TODO(https://crbug.com/526537254): Remove this branch once all the commands have been spanified.
@@ -497,6 +501,9 @@
                 {
             {% endif %}
                 auto memberLength = {{member_length(member, "transfer->", False)}};
+                if (!std::in_range<size_t>(memberLength)) {
+                    return WireResult::FatalError;
+                }
                 Span<const volatile {{member_transfer_type(member.type)}}> memberBuffer;
                 WIRE_TRY(deserializeBuffer->ReadN(checked_cast<size_t>(memberLength), &memberBuffer));
 
@@ -764,6 +771,9 @@ WireResult WGPUStringViewSerialize(
     }
     if (length > 0) {
         Span<volatile char> memberBuffer;
+        if (!std::in_range<size_t>(length)) {
+            return WireResult::FatalError;
+        }
         WIRE_TRY(buffer->NextN(checked_cast<size_t>(length), &memberBuffer));
         // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
         // TODO(https://crbug.com/528027992): Spanify the record members.
