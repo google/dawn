@@ -44,6 +44,7 @@
 #include "src/dawn/native/QuerySet.h"
 #include "src/dawn/native/RenderBundle.h"
 #include "src/dawn/native/RenderPipeline.h"
+#include "src/dawn/native/ResourceTable.h"
 #include "src/dawn/native/ValidationUtils.h"
 #include "src/utils/compiler.h"
 
@@ -329,11 +330,24 @@ void RenderPassEncoder::APISetResourceTable(ResourceTableBase* table) {
     mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
-            DAWN_TRY(ProgrammableEncoder::SetResourceTable(table, allocator));
+            if (GetDevice()->IsValidationEnabled()) {
+                DAWN_INVALID_IF(
+                    !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
+                    "setResourceTable requires the %s feature enabled.",
+                    wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
+                if (table) {
+                    DAWN_TRY(GetDevice()->ValidateObject(table));
+                }
+            }
+
             mCommandBufferState.SetResourceTable(table);
             if (table) {
                 mUsageTracker.AddResourceTableUsage(table);
             }
+
+            SetResourceTableCmd* cmd =
+                allocator->Allocate<SetResourceTableCmd>(Command::SetResourceTable);
+            cmd->table = table;
             return {};
         },
         "encoding %s.SetResourceTable(%s).", this, table);

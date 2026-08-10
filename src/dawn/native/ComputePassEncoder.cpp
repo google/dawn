@@ -45,6 +45,7 @@
 #include "src/dawn/native/InternalPipelineStore.h"
 #include "src/dawn/native/PassResourceUsageTracker.h"
 #include "src/dawn/native/QuerySet.h"
+#include "src/dawn/native/ResourceTable.h"
 #include "src/dawn/native/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
 
@@ -507,13 +508,26 @@ void ComputePassEncoder::APISetResourceTable(ResourceTableBase* table) {
     mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
-            DAWN_TRY(ProgrammableEncoder::SetResourceTable(table, allocator));
+            if (GetDevice()->IsValidationEnabled()) {
+                DAWN_INVALID_IF(
+                    !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
+                    "setResourceTable requires the %s feature enabled.",
+                    wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
+                if (table) {
+                    DAWN_TRY(GetDevice()->ValidateObject(table));
+                }
+            }
+
             mCommandBufferState.SetResourceTable(table);
             if (table) {
                 // Add table for submit validation. Note that we add the currently used table to the
                 // usage tracker in AddDispatchSyncScope for command processing.
                 mUsageTracker.AddReferencedResourceTable(table);
             }
+
+            SetResourceTableCmd* cmd =
+                allocator->Allocate<SetResourceTableCmd>(Command::SetResourceTable);
+            cmd->table = table;
             return {};
         },
         "encoding %s.SetResourceTable(%s).", this, table);

@@ -79,9 +79,6 @@ class ProgrammableEncoder : public ApiObjectBase {
                         ErrorTag errorTag,
                         StringView label);
 
-    // Called by APISetResourceTable in child classes
-    MaybeError SetResourceTable(ResourceTableBase* table, CommandAllocator* allocator);
-
     raw_ptr<EncodingContext> mEncodingContext = nullptr;
 
     uint64_t mDebugGroupStackSize = 0;

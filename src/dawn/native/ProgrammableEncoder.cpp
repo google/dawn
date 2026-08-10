@@ -258,24 +258,4 @@ void ProgrammableEncoder::RecordSetImmediates(CommandAllocator* allocator,
     std::ranges::copy(data, immediateDatas.begin());
 }
 
-MaybeError ProgrammableEncoder::SetResourceTable(ResourceTableBase* table,
-                                                 CommandAllocator* allocator) {
-    DAWN_ASSERT(allocator);
-
-    if (GetDevice()->IsValidationEnabled()) {
-        if (table) {
-            DAWN_TRY(GetDevice()->ValidateObject(table));
-        }
-        DAWN_INVALID_IF(
-            !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
-            "setResourceTable requires the %s feature enabled.",
-            wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
-    }
-
-    SetResourceTableCmd* cmd = allocator->Allocate<SetResourceTableCmd>(Command::SetResourceTable);
-    cmd->table = table;
-
-    return {};
-}
-
 }  // namespace dawn::native
