@@ -393,7 +393,10 @@ class ResourceTableTests : public DawnTest {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
 
         if (useRenderBundles) {
+            pass.SetResourceTable(cases[0].table);
+
             utils::ComboRenderBundleEncoderDescriptor desc = {};
+            desc.SetUsesResourceTable();
             desc.colorFormatCount = 1;
             desc.cColorFormats[0] = rp.colorFormat;
             wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
@@ -401,7 +404,6 @@ class ResourceTableTests : public DawnTest {
             uint32_t offset = 0;
             for (auto& [table, expected] : cases) {
                 uint32_t immediates[] = {table.GetSize(), offset};
-                rbe.SetResourceTable(table);
                 rbe.SetImmediates(0, &immediates, sizeof(immediates));
                 rbe.SetBindGroup(0, resultBG);
                 rbe.SetPipeline(testPipeline);
@@ -442,7 +444,11 @@ class ResourceTableTests : public DawnTest {
     // Convenience that tests cases using compute, render, and render bundle encoders
     void TestHasU8BindingsAll(std::vector<TableAndExpected> cases) {
         TestHasU8BindingsCompute(cases);
-        TestHasU8BindingsRender(cases, true);
+        // TODO(https://crbug.com/530981417): When a single resource table is allowed per render
+        // pass, remove simplify TestHasU8Binding* to assume there is a single resource table.
+        if (cases.size() == 1) {
+            TestHasU8BindingsRender(cases, true);
+        }
         TestHasU8BindingsRender(cases, false);
     }
 

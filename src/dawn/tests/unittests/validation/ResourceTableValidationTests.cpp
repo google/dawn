@@ -636,50 +636,140 @@ TEST_F(ResourceTableValidationTest, RenderPassEncoder_SetResourceTable) {
     }
 }
 
-// Tests calling RenderBundleEncoder::SetResourceTable
-TEST_F(ResourceTableValidationTest, RenderBundleEncoder_SetResourceTable) {
+// Tests that the resource table in RenderBundle can be used in draw
+TEST_F(ResourceTableValidationTest, RenderBundleUsesResourceTable) {
+    for (bool defaulted : {true, false}) {
+        wgpu::RenderPipeline pipelineUsesTable = MakeRenderPipeline(defaulted, true);
+        wgpu::RenderPipeline pipelineNoTable = MakeRenderPipeline(defaulted, false);
+
+        // Control case 1: The pipeline doesn't use a resource table and is compatible with a render
+        // bundle created without RenderBundleEncoderResourceTable.
+        {
+            utils::ComboRenderBundleEncoderDescriptor desc = {};
+            desc.colorFormatCount = 1;
+            desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+            desc.SetUsesResourceTable(false);
+
+            wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
+            rbe.SetPipeline(pipelineNoTable);
+            rbe.Draw(1);
+            rbe.Finish();
+        }
+        // Control case 2: The pipeline doesn't use a resource table and is compatible with
+        // usesResourceTable = false.
+        {
+            utils::ComboRenderBundleEncoderDescriptor desc = {};
+            desc.colorFormatCount = 1;
+            desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+
+            wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
+            rbe.SetPipeline(pipelineNoTable);
+            rbe.Draw(1);
+            rbe.Finish();
+        }
+
+        // Success case: The pipeline uses a resource table and is compatible with a render bundle
+        // created with usesResourceTable = true.
+        {
+            utils::ComboRenderBundleEncoderDescriptor desc = {};
+            desc.colorFormatCount = 1;
+            desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+            desc.SetUsesResourceTable(true);
+
+            wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
+            rbe.SetPipeline(pipelineUsesTable);
+            rbe.Draw(1);
+            rbe.Finish();
+        }
+
+        // Error case 1: The pipeline uses a resource table and is not compatible with a render
+        // bundle created without RenderBundleEncoderResourceTable.
+        {
+            utils::ComboRenderBundleEncoderDescriptor desc = {};
+            desc.colorFormatCount = 1;
+            desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+
+            wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
+            rbe.SetPipeline(pipelineUsesTable);
+            rbe.Draw(1);
+            ASSERT_DEVICE_ERROR(rbe.Finish());
+        }
+        // Control case 2: The pipeline uses a resource table and is not compatible with
+        // usesResourceTable = false.
+        {
+            utils::ComboRenderBundleEncoderDescriptor desc = {};
+            desc.colorFormatCount = 1;
+            desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+            desc.SetUsesResourceTable(false);
+
+            wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
+            rbe.SetPipeline(pipelineUsesTable);
+            rbe.Draw(1);
+            ASSERT_DEVICE_ERROR(rbe.Finish());
+        }
+    }
+}
+
+// Test that a RenderBundle created with usesResourceTable requires a table to be set when
+// ExecuteBundles is called.
+TEST_F(ResourceTableValidationTest, ExecuteBundlesUsingResourceTableRequiresCurrentResourceTable) {
     auto rp = utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+
     utils::ComboRenderBundleEncoderDescriptor desc = {};
     desc.colorFormatCount = 1;
-    desc.cColorFormats[0] = rp.colorFormat;
+    desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::RenderBundle rbNoTable = device.CreateRenderBundleEncoder(&desc).Finish();
 
-    // Failure case: invalid encoder state
+    desc.SetUsesResourceTable(true);
+    wgpu::RenderBundle rbTable = device.CreateRenderBundleEncoder(&desc).Finish();
+
+    // Control case: render bundle not using table doesn't require a ResourceTable set.
     {
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        wgpu::RenderBundle renderBundle = rbe.Finish();
-        ASSERT_DEVICE_ERROR(rbe.SetResourceTable(nullptr));
-    }
-
-    // Failure case: invalid resource table
-    {
-        ASSERT_DEVICE_ERROR(wgpu::ResourceTable resourceTable = MakeErrorResourceTable());
-
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        rbe.SetResourceTable(resourceTable);
-        ASSERT_DEVICE_ERROR(wgpu::RenderBundle renderBundle = rbe.Finish());
-    }
-
-    // Success case: valid resource table
-    {
-        wgpu::ResourceTable resourceTable = MakeResourceTable(1);
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        rbe.SetResourceTable(resourceTable);
-        wgpu::RenderBundle renderBundle = rbe.Finish();
-        pass.ExecuteBundles(1, &renderBundle);
+        pass.ExecuteBundles(1, &rbNoTable);
         pass.End();
         encoder.Finish();
     }
 
-    // Success case: null resource table
+    // Error case: render bundle using table causes an error if no ResourceTable is set.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        rbe.SetResourceTable(nullptr);
-        wgpu::RenderBundle renderBundle = rbe.Finish();
-        pass.ExecuteBundles(1, &renderBundle);
+        pass.ExecuteBundles(1, &rbTable);
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Error case: render bundle using table causes an error if a ResourceTable was set then
+    // removed.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.SetResourceTable(MakeResourceTable(1));
+        pass.SetResourceTable(nullptr);
+        pass.ExecuteBundles(1, &rbTable);
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Error case: at least one of the render bundles executed requires a resource table set.
+    {
+        std::array<wgpu::RenderBundle, 3u> rbs = {rbNoTable, rbTable, rbNoTable};
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.ExecuteBundles(3, rbs.data());
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Success case: render bundle using table can be executed if there is a resource table.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.SetResourceTable(MakeResourceTable(1));
+        pass.ExecuteBundles(1, &rbTable);
         pass.End();
         encoder.Finish();
     }
@@ -706,15 +796,34 @@ TEST_F(ResourceTableValidationTestDisabled, RenderPassEncoder_SetResourceTable) 
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
 
-// Tests calling RenderBundleEncoder::SetResourceTable when the feature is disabled
-TEST_F(ResourceTableValidationTestDisabled, RenderBundleEncoder_SetResourceTable) {
-    // Failure case: feature is disabled
-    utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatCount = 1;
-    desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
-    wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-    rbe.SetResourceTable(nullptr);
-    ASSERT_DEVICE_ERROR(rbe.Finish());
+// Tests calling RenderBundleEncoderResourceTable is not allowed when the feature is disabled
+TEST_F(ResourceTableValidationTestDisabled, RenderBundleEncoderResourceTable) {
+    // Control case: RenderBundleEncoderResourceTable is not chained.
+    {
+        utils::ComboRenderBundleEncoderDescriptor desc = {};
+        desc.colorFormatCount = 1;
+        desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
+        rbe.Finish();
+    }
+
+    // Success case: RenderBundleEncoderResourceTable is chained (with false).
+    {
+        utils::ComboRenderBundleEncoderDescriptor desc = {};
+        desc.colorFormatCount = 1;
+        desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+        desc.SetUsesResourceTable(false);
+        device.CreateRenderBundleEncoder(&desc);
+    }
+
+    // Error case: RenderBundleEncoderResourceTable is chained (with true).
+    {
+        utils::ComboRenderBundleEncoderDescriptor desc = {};
+        desc.colorFormatCount = 1;
+        desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+        desc.SetUsesResourceTable(true);
+        ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
+    }
 }
 
 // Tests that resource tables set on a compute pass can be used in submit
@@ -875,144 +984,6 @@ TEST_F(ResourceTableValidationTest, RenderPassEncoder_CanUseInSubmit) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
         pass.SetResourceTable(resourceTable);
         pass.SetResourceTable(nullptr);  // Clear it
-        pass.End();
-        wgpu::CommandBuffer commands = encoder.Finish();
-        resourceTable.Destroy();  // Destroy it
-        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
-    }
-}
-
-// Tests that resource tables set on a render bundle can be used in submit
-TEST_F(ResourceTableValidationTest, RenderBundleEncoder_CanUseInSubmit) {
-    wgpu::ResourceTable resourceTable = MakeResourceTable(1);
-    wgpu::ResourceTable resourceTable2 = MakeResourceTable(1);
-    wgpu::ResourceTable resourceTable3 = MakeResourceTable(1);
-    auto rp = utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
-    utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatCount = 1;
-    desc.cColorFormats[0] = rp.colorFormat;
-
-    // Success case: resource table can be used in submit
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        rbe.SetResourceTable(resourceTable);
-        wgpu::RenderBundle renderBundle = rbe.Finish();
-        pass.ExecuteBundles(1, &renderBundle);
-        pass.End();
-        wgpu::CommandBuffer commands = encoder.Finish();
-        device.GetQueue().Submit(1, &commands);
-    }
-
-    // Success case: resource table can be used in multiple passes for submit
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        rbe.SetResourceTable(resourceTable);
-        wgpu::RenderBundle renderBundle = rbe.Finish();
-        pass.ExecuteBundles(1, &renderBundle);
-        pass.End();
-
-        wgpu::RenderPassEncoder pass2 = encoder.BeginRenderPass(&rp.renderPassInfo);
-        wgpu::RenderBundleEncoder rbe2 = device.CreateRenderBundleEncoder(&desc);
-        rbe2.SetResourceTable(resourceTable);
-        wgpu::RenderBundle renderBundle2 = rbe2.Finish();
-        pass2.ExecuteBundles(1, &renderBundle2);
-        pass2.End();
-
-        wgpu::CommandBuffer commands = encoder.Finish();
-        device.GetQueue().Submit(1, &commands);
-    }
-
-    // Success case: resource table can be used in multiple rbes in one pass for submit
-    {
-        std::vector<wgpu::RenderBundle> renderBundles;
-
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        rbe.SetResourceTable(resourceTable);
-        renderBundles.push_back(rbe.Finish());
-
-        wgpu::RenderBundleEncoder rbe2 = device.CreateRenderBundleEncoder(&desc);
-        rbe2.SetResourceTable(resourceTable);
-        renderBundles.push_back(rbe2.Finish());
-
-        pass.ExecuteBundles(renderBundles.size(), renderBundles.data());
-        pass.End();
-
-        wgpu::CommandBuffer commands = encoder.Finish();
-        device.GetQueue().Submit(1, &commands);
-    }
-
-    // Failure case: resource table has been destroyed
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        rbe.SetResourceTable(resourceTable);
-        wgpu::RenderBundle renderBundle = rbe.Finish();
-        pass.ExecuteBundles(1, &renderBundle);
-        pass.End();
-        wgpu::CommandBuffer commands = encoder.Finish();
-        resourceTable.Destroy();  // Destroy it
-        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
-    }
-
-    // Failure case: one of multiple resource tables has been destroyed
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        rbe.SetResourceTable(resourceTable);
-        rbe.SetResourceTable(resourceTable2);
-        rbe.SetResourceTable(resourceTable3);
-        wgpu::RenderBundle renderBundle = rbe.Finish();
-        pass.ExecuteBundles(1, &renderBundle);
-        pass.End();
-        wgpu::CommandBuffer commands = encoder.Finish();
-        resourceTable2.Destroy();  // Destroy one
-        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
-    }
-
-    // Failure case: one of multiple resource tables in another pass has been destroyed
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        rbe.SetResourceTable(resourceTable);
-        rbe.SetResourceTable(resourceTable2);
-        wgpu::RenderBundle renderBundle = rbe.Finish();
-        pass.ExecuteBundles(1, &renderBundle);
-        pass.End();
-
-        wgpu::RenderPassEncoder pass2 = encoder.BeginRenderPass(&rp.renderPassInfo);
-        wgpu::RenderBundleEncoder rbe2 = device.CreateRenderBundleEncoder(&desc);
-        rbe2.SetResourceTable(resourceTable);
-        rbe2.SetResourceTable(resourceTable3);
-        wgpu::RenderBundle renderBundle2 = rbe2.Finish();
-        pass2.ExecuteBundles(1, &renderBundle2);
-        pass2.End();
-
-        wgpu::CommandBuffer commands = encoder.Finish();
-        resourceTable3.Destroy();  // Destroy one
-        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
-    }
-
-    // Failure case: resource table must still be valid if set, then nullptr is set
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        rbe.SetResourceTable(resourceTable);
-        rbe.SetResourceTable(nullptr);  // Clear it
-        wgpu::RenderBundle renderBundle = rbe.Finish();
-        pass.ExecuteBundles(1, &renderBundle);
         pass.End();
         wgpu::CommandBuffer commands = encoder.Finish();
         resourceTable.Destroy();  // Destroy it
@@ -1225,225 +1196,31 @@ TEST_F(ResourceTableValidationTest, Submit_DrawRequiresResourceTable) {
     }
 }
 
-// Tests that the resource table in RenderBundle can be used in draw
-TEST_F(ResourceTableValidationTest, Submit_RenderBundleDrawRequiresResourceTable) {
-    for (bool defaulted : {true, false}) {
-        wgpu::RenderPipeline pipelineUsesTable = MakeRenderPipeline(defaulted, true);
-        wgpu::RenderPipeline pipelineNoTable = MakeRenderPipeline(defaulted, false);
-        wgpu::ResourceTable resourceTable = MakeResourceTable(1);
-        wgpu::ResourceTable resourceTable2 = MakeResourceTable(1);
-
+// Test that the resource table persists on the render pass after an ExecuteBundle call that uses /
+// doesn't use a ResourceTable.
+TEST_F(ResourceTableValidationTest, ExecuteBundlesPersistsResourceTable) {
+    for (bool rbUsesResourceTable : {true, false}) {
         auto rp = utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
 
         utils::ComboRenderBundleEncoderDescriptor desc = {};
         desc.colorFormatCount = 1;
         desc.cColorFormats[0] = rp.colorFormat;
+        desc.SetUsesResourceTable(rbUsesResourceTable);
 
-        // Success case: `usesResourceTable` is enabled, and one has been set on the encoder
-        {
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-            wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-            rbe.SetResourceTable(resourceTable);
-            rbe.SetPipeline(pipelineUsesTable);
-            rbe.Draw(1);
-            wgpu::RenderBundle renderBundle = rbe.Finish();
-            pass.ExecuteBundles(1, &renderBundle);
-            pass.End();
-            wgpu::CommandBuffer commands = encoder.Finish();
-            device.GetQueue().Submit(1, &commands);
-        }
-
-        // Failure case: `usesResourceTable` is enabled, but none has been set on the encoder
-        {
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-            wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-            rbe.SetPipeline(pipelineUsesTable);
-            rbe.Draw(1);
-            ASSERT_DEVICE_ERROR(wgpu::RenderBundle renderBundle = rbe.Finish());
-        }
-
-        // Failure case: `usesResourceTable` is enabled, one then nullptr set on the encoder
-        {
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-            wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-            rbe.SetResourceTable(resourceTable);  // Set a valid one
-            rbe.SetResourceTable(nullptr);        // Then clear it
-            rbe.SetPipeline(pipelineUsesTable);
-            rbe.Draw(1);
-            ASSERT_DEVICE_ERROR(wgpu::RenderBundle renderBundle = rbe.Finish());
-        }
-
-        // Success case: `usesResourceTable` is enabled, one then nullptr then another set on the
-        // encoder
-        {
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-            wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-            rbe.SetResourceTable(resourceTable);   // Set a valid one
-            rbe.SetResourceTable(nullptr);         // Then clear it
-            rbe.SetResourceTable(resourceTable2);  // Then set another valid one
-            rbe.SetPipeline(pipelineUsesTable);
-            rbe.Draw(1);
-            wgpu::RenderBundle renderBundle = rbe.Finish();
-            pass.ExecuteBundles(1, &renderBundle);
-            pass.End();
-            wgpu::CommandBuffer commands = encoder.Finish();
-            device.GetQueue().Submit(1, &commands);
-        }
-
-        // Success case: single rbe toggles between pipelines that do not use and use a table
-        {
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-            wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-            rbe.SetPipeline(pipelineUsesTable);
-            rbe.SetResourceTable(resourceTable);
-            rbe.Draw(1);
-            rbe.SetPipeline(pipelineNoTable);
-            rbe.Draw(1);
-            wgpu::RenderBundle renderBundle = rbe.Finish();
-            pass.ExecuteBundles(1, &renderBundle);
-            pass.End();
-            wgpu::CommandBuffer commands = encoder.Finish();
-            device.GetQueue().Submit(1, &commands);
-        }
-
-        // Failure case: single rbe toggles between pipelines that do not use and use a table, but
-        // does not set a table when required
-        {
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-            wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-            rbe.SetPipeline(pipelineUsesTable);
-            rbe.Draw(1);
-            rbe.SetPipeline(pipelineNoTable);
-            rbe.Draw(1);
-            ASSERT_DEVICE_ERROR(wgpu::RenderBundle renderBundle = rbe.Finish());
-        }
-
-        // Success case: mix pass and rbe
-        {
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-            pass.SetPipeline(pipelineUsesTable);
-            pass.SetResourceTable(resourceTable);
-            pass.SetPipeline(pipelineNoTable);
-            pass.Draw(1);
-
-            wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-            rbe.SetPipeline(pipelineUsesTable);
-            rbe.SetResourceTable(resourceTable);
-            rbe.Draw(1);
-            rbe.SetPipeline(pipelineNoTable);
-            rbe.Draw(1);
-            wgpu::RenderBundle renderBundle = rbe.Finish();
-            pass.ExecuteBundles(1, &renderBundle);
-
-            pass.End();
-            wgpu::CommandBuffer commands = encoder.Finish();
-            device.GetQueue().Submit(1, &commands);
-        }
-    }
-}
-
-// Test that render bundles do not persist resource tables onto a render pass
-TEST_F(ResourceTableValidationTest, RenderBundleDoesNotPersistResourceTable) {
-    auto rp = utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
-    utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatCount = 1;
-    desc.cColorFormats[0] = rp.colorFormat;
-
-    // Success case: pipeline uses table, one is set on the bundle, and one on the pass
-    {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.SetResourceTable(MakeResourceTable(1));
 
-        // Create render bundle with a resource table
         wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        wgpu::ResourceTable resourceTable = MakeResourceTable(1);
-        rbe.SetResourceTable(resourceTable);
         wgpu::RenderBundle renderBundle = rbe.Finish();
 
         auto pipelineUsesTable = MakeRenderPipeline(true, true);
         pass.ExecuteBundles(1, &renderBundle);
         pass.SetPipeline(pipelineUsesTable);
-        pass.SetResourceTable(resourceTable);  // Set table on the pass
         pass.Draw(1);
         pass.End();
 
         encoder.Finish();
-    }
-
-    // Failure case: pipeline uses table, one is set on the bundle, but not on the pass
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-
-        // Create render bundle with a resource table
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        wgpu::ResourceTable resourceTable = MakeResourceTable(1);
-        rbe.SetResourceTable(resourceTable);
-        wgpu::RenderBundle renderBundle = rbe.Finish();
-
-        auto pipelineUsesTable = MakeRenderPipeline(true, true);
-        pass.ExecuteBundles(1, &renderBundle);
-        pass.SetPipeline(pipelineUsesTable);
-        pass.Draw(1);
-        pass.End();
-
-        ASSERT_DEVICE_ERROR(encoder.Finish());
-    }
-}
-
-// Test that render bundles do not inherit resource tables from a render pass
-TEST_F(ResourceTableValidationTest, RenderBundleDoesNotInheritResourceTable) {
-    auto rp = utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
-    utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatCount = 1;
-    desc.cColorFormats[0] = rp.colorFormat;
-
-    // Success case: pipeline uses table, one is set on the bundle, and one on the pass
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        wgpu::ResourceTable resourceTable = MakeResourceTable(1);
-
-        // Create render bundle with a resource table
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        rbe.SetResourceTable(resourceTable);  // Set table on the bundle
-        wgpu::RenderBundle renderBundle = rbe.Finish();
-
-        auto pipelineUsesTable = MakeRenderPipeline(true, true);
-        pass.ExecuteBundles(1, &renderBundle);
-        pass.SetPipeline(pipelineUsesTable);
-        pass.SetResourceTable(resourceTable);  // Set table on the pass
-        pass.Draw(1);
-        pass.End();
-
-        encoder.Finish();
-    }
-
-    // Failure case: pipeline uses table, one is set on the pass, but not on the bundle
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        wgpu::ResourceTable resourceTable = MakeResourceTable(1);
-
-        // Create render bundle without a resource table
-        wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
-        wgpu::RenderBundle renderBundle = rbe.Finish();
-
-        auto pipelineUsesTable = MakeRenderPipeline(true, true);
-        pass.SetPipeline(pipelineUsesTable);
-        pass.SetResourceTable(resourceTable);  // Set table on the pass
-        pass.ExecuteBundles(1, &renderBundle);
-        pass.Draw(1);
-        pass.End();
-
-        ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
 

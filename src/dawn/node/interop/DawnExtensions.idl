@@ -153,3 +153,6 @@ interface GPUComputePassEncoder {
 dictionary GPURenderPassDescriptor {
     GPUResourceTable resourceTable;
 }
+dictionary GPURenderBundleEncoderDescriptor {
+    bool usesResourceTable = false;
+};

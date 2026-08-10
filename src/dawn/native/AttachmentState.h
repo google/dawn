@@ -58,7 +58,7 @@ class AttachmentState final : public RefCounted,
     };
 
     // Note: Descriptors must be validated before the AttachmentState is constructed.
-    explicit AttachmentState(const RenderBundleEncoderDescriptor* descriptor);
+    explicit AttachmentState(const UnpackedPtr<RenderBundleEncoderDescriptor>& descriptor);
     explicit AttachmentState(const UnpackedPtr<RenderPipelineDescriptor>& descriptor,
                              const PipelineLayoutBase* layout);
     explicit AttachmentState(const UnpackedPtr<RenderPassDescriptor>& descriptor);

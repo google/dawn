@@ -33,6 +33,7 @@
 #include <array>
 
 #include "src/dawn/common/Constants.h"
+#include "src/utils/platform.h"
 
 namespace dawn::utils {
 
@@ -41,6 +42,11 @@ class ComboRenderBundleEncoderDescriptor : public wgpu::RenderBundleEncoderDescr
     ComboRenderBundleEncoderDescriptor();
 
     std::array<wgpu::TextureFormat, kMaxColorAttachments> cColorFormats;
+
+#if !DAWN_PLATFORM_IS(EMSCRIPTEN)
+    void SetUsesResourceTable(bool use = true);
+    wgpu::RenderBundleEncoderResourceTable cResourceTable;
+#endif  // !DAWN_PLATFORM_IS(EMSCRIPTEN)
 };
 
 }  // namespace dawn::utils

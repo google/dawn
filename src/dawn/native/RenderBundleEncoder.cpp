@@ -67,8 +67,19 @@ MaybeError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateRenderBundleEncoderDescriptor(DeviceBase* device,
-                                                 const RenderBundleEncoderDescriptor* descriptor) {
+ResultOrError<UnpackedPtr<RenderBundleEncoderDescriptor>> ValidateRenderBundleEncoderDescriptor(
+    DeviceBase* device,
+    const RenderBundleEncoderDescriptor* descriptor) {
+    UnpackedPtr<RenderBundleEncoderDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+
+    if (auto* rt = unpacked.Get<RenderBundleEncoderResourceTable>()) {
+        DAWN_INVALID_IF(rt->usesResourceTable &&
+                            !device->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
+                        "Resource table used without the %s feature enabled.",
+                        wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
+    }
+
     DAWN_INVALID_IF(!IsValidSampleCount(descriptor->sampleCount),
                     "Sample count (%u) is not supported.", descriptor->sampleCount);
 
@@ -105,11 +116,12 @@ MaybeError ValidateRenderBundleEncoderDescriptor(DeviceBase* device,
             "No color or depthStencil attachments specified. At least one is required.");
     }
 
-    return {};
+    return unpacked;
 }
 
-RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device,
-                                         const RenderBundleEncoderDescriptor* descriptor)
+RenderBundleEncoder::RenderBundleEncoder(
+    DeviceBase* device,
+    const UnpackedPtr<RenderBundleEncoderDescriptor>& descriptor)
     : RenderEncoderBase(device,
                         descriptor->label,
                         &mBundleEncodingContext,
@@ -118,6 +130,14 @@ RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device,
                         descriptor->stencilReadOnly),
       mBundleEncodingContext(device, this) {
     GetObjectTrackingList()->Track(this);
+
+    // Gather the resource table information.
+    if (auto* rt = descriptor.Get<RenderBundleEncoderResourceTable>()) {
+        mUsesResourceTable = rt->usesResourceTable;
+        if (mUsesResourceTable) {
+            mCommandBufferState.SetRenderBundleHasResourceTable();
+        }
+    }
 }
 
 RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag, StringView label)
@@ -138,7 +158,7 @@ void RenderBundleEncoder::DestroyImpl(DestroyReason reason) {
 // static
 Ref<RenderBundleEncoder> RenderBundleEncoder::Create(
     DeviceBase* device,
-    const RenderBundleEncoderDescriptor* descriptor) {
+    const UnpackedPtr<RenderBundleEncoderDescriptor>& descriptor) {
     return AcquireRef(new RenderBundleEncoder(device, descriptor));
 }
 
@@ -173,6 +193,10 @@ RenderBundleBase* RenderBundleEncoder::APIFinish(const RenderBundleDescriptor* d
     }
 
     return ReturnToAPI(std::move(result));
+}
+
+bool RenderBundleEncoder::UsesResourceTable() const {
+    return mUsesResourceTable;
 }
 
 ResultOrError<Ref<RenderBundleBase>> RenderBundleEncoder::Finish(

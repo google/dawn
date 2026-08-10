@@ -36,13 +36,15 @@
 
 namespace dawn::native {
 
-MaybeError ValidateRenderBundleEncoderDescriptor(DeviceBase* device,
-                                                 const RenderBundleEncoderDescriptor* descriptor);
+ResultOrError<UnpackedPtr<RenderBundleEncoderDescriptor>> ValidateRenderBundleEncoderDescriptor(
+    DeviceBase* device,
+    const RenderBundleEncoderDescriptor* descriptor);
 
 class RenderBundleEncoder final : public RenderEncoderBase {
   public:
-    static Ref<RenderBundleEncoder> Create(DeviceBase* device,
-                                           const RenderBundleEncoderDescriptor* descriptor);
+    static Ref<RenderBundleEncoder> Create(
+        DeviceBase* device,
+        const UnpackedPtr<RenderBundleEncoderDescriptor>& descriptor);
     static Ref<RenderBundleEncoder> MakeError(DeviceBase* device, StringView label);
 
     ~RenderBundleEncoder() override;
@@ -56,8 +58,11 @@ class RenderBundleEncoder final : public RenderEncoderBase {
     RenderPassResourceUsage AcquireRenderPassUsages();
     IndirectDrawMetadata AcquireIndirectDrawMetadata();
 
+    bool UsesResourceTable() const;
+
   private:
-    RenderBundleEncoder(DeviceBase* device, const RenderBundleEncoderDescriptor* descriptor);
+    RenderBundleEncoder(DeviceBase* device,
+                        const UnpackedPtr<RenderBundleEncoderDescriptor>& descriptor);
     RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag, StringView label);
 
     void DestroyImpl(DestroyReason reason) override;
@@ -69,6 +74,8 @@ class RenderBundleEncoder final : public RenderEncoderBase {
 
     // Temporarily store for validation and will be moved to RenderBundle afterwards.
     RenderPassResourceUsage mUsages;
+
+    bool mUsesResourceTable = false;
 };
 
 }  // namespace dawn::native

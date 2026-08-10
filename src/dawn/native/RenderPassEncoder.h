@@ -72,6 +72,7 @@ class RenderPassEncoder final : public RenderEncoderBase {
                         float minDepth,
                         float maxDepth);
     void APISetScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+    void APISetResourceTable(ResourceTableBase* table);
     void APIExecuteBundles(Span<RenderBundleBase* const> renderBundles);
 
     void APIBeginOcclusionQuery(uint32_t queryIndex);

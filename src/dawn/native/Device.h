@@ -210,7 +210,7 @@ class DeviceBase : public ErrorSink,
 
     Ref<AttachmentState> GetOrCreateAttachmentState(AttachmentState* blueprint);
     Ref<AttachmentState> GetOrCreateAttachmentState(
-        const RenderBundleEncoderDescriptor* descriptor);
+        const UnpackedPtr<RenderBundleEncoderDescriptor>& descriptor);
     Ref<AttachmentState> GetOrCreateAttachmentState(
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor,
         const PipelineLayoutBase* layout);

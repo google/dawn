@@ -1171,7 +1171,7 @@ Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(AttachmentState* blu
 }
 
 Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
-    const RenderBundleEncoderDescriptor* descriptor) {
+    const UnpackedPtr<RenderBundleEncoderDescriptor>& descriptor) {
     AttachmentState blueprint(descriptor);
     return GetOrCreateAttachmentState(&blueprint);
 }
@@ -2151,11 +2151,15 @@ ResultOrError<Ref<QuerySetBase>> DeviceBase::CreateQuerySet(const QuerySetDescri
 ResultOrError<Ref<RenderBundleEncoder>> DeviceBase::CreateRenderBundleEncoder(
     const RenderBundleEncoderDescriptor* descriptor) {
     DAWN_TRY(ValidateIsAlive());
+    UnpackedPtr<RenderBundleEncoderDescriptor> unpacked;
     if (IsValidationEnabled()) {
-        DAWN_TRY_CONTEXT(ValidateRenderBundleEncoderDescriptor(this, descriptor),
-                         "validating render bundle encoder descriptor.");
+        DAWN_TRY_ASSIGN_CONTEXT(unpacked, ValidateRenderBundleEncoderDescriptor(this, descriptor),
+                                "validating render bundle encoder descriptor.");
+    } else {
+        unpacked = Unpack(descriptor);
     }
-    return RenderBundleEncoder::Create(this, descriptor);
+
+    return RenderBundleEncoder::Create(this, unpacked);
 }
 
 ResultOrError<Ref<RenderBundleBase>> DeviceBase::CreateRenderBundle(
@@ -2163,10 +2167,10 @@ ResultOrError<Ref<RenderBundleBase>> DeviceBase::CreateRenderBundle(
     const RenderBundleDescriptor* descriptor) {
     // This is the default behavior for all backends other than WebGPU backend.
     // This is called by RenderBundleEncoder::Finish.
-    return AcquireRef(new RenderBundleBase(encoder, descriptor, encoder->AcquireAttachmentState(),
-                                           encoder->IsDepthReadOnly(), encoder->IsStencilReadOnly(),
-                                           encoder->AcquireRenderPassUsages(),
-                                           encoder->AcquireIndirectDrawMetadata()));
+    return AcquireRef(new RenderBundleBase(
+        encoder, descriptor, encoder->AcquireAttachmentState(), encoder->IsDepthReadOnly(),
+        encoder->IsStencilReadOnly(), encoder->UsesResourceTable(),
+        encoder->AcquireRenderPassUsages(), encoder->AcquireIndirectDrawMetadata()));
 }
 
 ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateRenderPipeline(

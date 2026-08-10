@@ -42,7 +42,7 @@
 
 namespace dawn::native {
 
-AttachmentState::AttachmentState(const RenderBundleEncoderDescriptor* descriptor)
+AttachmentState::AttachmentState(const UnpackedPtr<RenderBundleEncoderDescriptor>& descriptor)
     : mSampleCount(descriptor->sampleCount) {
     DAWN_CHECK(descriptor->colorFormats.size() <= kMaxColorAttachmentsTyped);
 

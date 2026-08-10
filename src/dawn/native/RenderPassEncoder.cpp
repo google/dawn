@@ -325,6 +325,20 @@ void RenderPassEncoder::APISetScissorRect(uint32_t x, uint32_t y, uint32_t width
         "encoding %s.SetScissorRect(%u, %u, %u, %u).", this, x, y, width, height);
 }
 
+void RenderPassEncoder::APISetResourceTable(ResourceTableBase* table) {
+    mEncodingContext->TryEncode(
+        this,
+        [&](CommandAllocator* allocator) -> MaybeError {
+            DAWN_TRY(ProgrammableEncoder::SetResourceTable(table, allocator));
+            mCommandBufferState.SetResourceTable(table);
+            if (table) {
+                mUsageTracker.AddResourceTableUsage(table);
+            }
+            return {};
+        },
+        "encoding %s.SetResourceTable(%s).", this, table);
+}
+
 void RenderPassEncoder::APIExecuteBundles(Span<RenderBundleBase* const> renderBundles) {
     mEncodingContext->TryEncode(
         this,
@@ -333,6 +347,7 @@ void RenderPassEncoder::APIExecuteBundles(Span<RenderBundleBase* const> renderBu
                 const AttachmentState* attachmentState = GetAttachmentState();
                 bool depthReadOnlyInPass = IsDepthReadOnly();
                 bool stencilReadOnlyInPass = IsStencilReadOnly();
+                bool hasResourceTable = mCommandBufferState.HasResourceTable();
                 for (auto [i, renderBundle] : Enumerate(renderBundles)) {
                     DAWN_TRY(GetDevice()->ValidateObject(renderBundle));
 
@@ -357,11 +372,18 @@ void RenderPassEncoder::APIExecuteBundles(Span<RenderBundleBase* const> renderBu
                                     "compatible with StencilReadOnly (%u) of %s.",
                                     stencilReadOnlyInBundle, i, renderBundle, stencilReadOnlyInPass,
                                     this);
+
+                    DAWN_INVALID_IF(
+                        renderBundle->UsesResourceTable() && !hasResourceTable,
+                        "renderBundles[%i] (%s) uses a ResourceTable but none is set on %s.", i,
+                        renderBundle, this);
                 }
             }
 
-            // Always reset state
+            // Always reset state but the ResourceTable.
+            ResourceTableBase* table = mCommandBufferState.GetResourceTable();
             mCommandBufferState = CommandBufferStateTracker{};
+            mCommandBufferState.SetResourceTable(table);
 
             // Only encode an ExecuteBundles command if count > 0
             if (renderBundles.empty()) {

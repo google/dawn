@@ -589,7 +589,9 @@ void ComputePassEncoder::AddDispatchSyncScope(SyncScopeUsageTracker scope) {
     for (BindGroupIndex i : layout->GetBindGroupLayoutsMask()) {
         scope.AddBindGroup(mCommandBufferState.GetBindGroup(i));
     }
-    if (auto* table = mCommandBufferState.GetResourceTable()) {
+    if (mCommandBufferState.GetPipelineLayout()->UsesResourceTable()) {
+        ResourceTableBase* table = mCommandBufferState.GetResourceTable();
+        DAWN_ASSERT(table != nullptr);
         scope.AddResourceTableUsage(table);
     }
     mUsageTracker.AddDispatch(scope.AcquireSyncScopeUsage());

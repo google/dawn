@@ -71,6 +71,7 @@ class CommandBufferStateTracker {
                       BindGroupBase* bindgroup,
                       ityp::span<BindingIndex, const uint32_t> dynamicOffsets);
     void SetResourceTable(ResourceTableBase* resourceTable);
+    void SetRenderBundleHasResourceTable();
     void SetIndexBuffer(BufferBase* buffer,
                         wgpu::IndexFormat format,
                         uint64_t offset,
@@ -87,6 +88,7 @@ class CommandBufferStateTracker {
     ResourceTableBase* GetResourceTable() const;
     ityp::span<BindingIndex, const uint32_t> GetDynamicOffsets(BindGroupIndex index) const;
     bool HasPipeline() const;
+    bool HasResourceTable() const;
     bool IndexBufferSet() const;
     RenderPipelineBase* GetRenderPipeline() const;
     ComputePipelineBase* GetComputePipeline() const;
@@ -119,6 +121,7 @@ class CommandBufferStateTracker {
     RAW_PTR_EXCLUSION PerBindGroup<BindGroupBase*> mBindgroups = {};
     PerBindGroup<ityp::vector<BindingIndex, uint32_t>> mDynamicOffsets;
     RAW_PTR_EXCLUSION ResourceTableBase* mResourceTable = nullptr;
+    bool mHasResourceTable = false;
 
     RAW_PTR_EXCLUSION PipelineLayoutBase* mLastPipelineLayout = nullptr;
     RAW_PTR_EXCLUSION PipelineBase* mLastPipeline = nullptr;

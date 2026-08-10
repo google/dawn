@@ -74,7 +74,6 @@ class RenderEncoderBase : public ProgrammableEncoder {
                                      uint64_t drawCountBufferOffset = 0);
 
     void APISetPipeline(RenderPipelineBase* pipeline);
-    void APISetResourceTable(ResourceTableBase* table);
 
     void APISetVertexBuffer(uint32_t slot, BufferBase* buffer, uint64_t offset, uint64_t size);
     void APISetIndexBuffer(BufferBase* buffer,

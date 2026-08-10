@@ -565,7 +565,7 @@ void CommandBufferStateTracker::RecomputeLazyAspects(ValidationAspects aspects) 
     if (aspects[VALIDATION_ASPECT_RESOURCE_TABLES]) {
         // If current pipeline uses a resource table, make sure one has been set on the pass
         // encoder
-        if (!mLastPipelineLayout->UsesResourceTable() || mResourceTable) {
+        if (!mLastPipelineLayout->UsesResourceTable() || mHasResourceTable) {
             mAspects.set(VALIDATION_ASPECT_RESOURCE_TABLES);
         }
     }
@@ -800,7 +800,12 @@ void CommandBufferStateTracker::SetBindGroup(
 
 void CommandBufferStateTracker::SetResourceTable(ResourceTableBase* resourceTable) {
     mResourceTable = resourceTable;
+    mHasResourceTable = resourceTable != nullptr;
     mAspects.reset(VALIDATION_ASPECT_RESOURCE_TABLES);
+}
+
+void CommandBufferStateTracker::SetRenderBundleHasResourceTable() {
+    mHasResourceTable = true;
 }
 
 void CommandBufferStateTracker::SetIndexBuffer(BufferBase* buffer,
@@ -863,6 +868,10 @@ ityp::span<BindingIndex, const uint32_t> CommandBufferStateTracker::GetDynamicOf
 
 bool CommandBufferStateTracker::HasPipeline() const {
     return mLastPipeline != nullptr;
+}
+
+bool CommandBufferStateTracker::HasResourceTable() const {
+    return mResourceTable != nullptr;
 }
 
 bool CommandBufferStateTracker::IndexBufferSet() const {

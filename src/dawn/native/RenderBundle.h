@@ -53,6 +53,7 @@ class RenderBundleBase : public ApiObjectBase {
                      Ref<AttachmentState> attachmentState,
                      bool depthReadOnly,
                      bool stencilReadOnly,
+                     bool usesResourceTable,
                      RenderPassResourceUsage resourceUsage,
                      IndirectDrawMetadata indirectDrawMetadata);
 
@@ -69,6 +70,7 @@ class RenderBundleBase : public ApiObjectBase {
     const AttachmentState* GetAttachmentState() const;
     bool IsDepthReadOnly() const;
     bool IsStencilReadOnly() const;
+    bool UsesResourceTable() const;
     uint64_t GetDrawCount() const;
     const RenderPassResourceUsage& GetResourceUsage() const;
     const IndirectDrawMetadata& GetIndirectDrawMetadata();
@@ -84,6 +86,7 @@ class RenderBundleBase : public ApiObjectBase {
     Ref<AttachmentState> mAttachmentState;
     bool mDepthReadOnly = false;
     bool mStencilReadOnly = false;
+    bool mUsesResourceTable = false;
     uint64_t mDrawCount = 0;
     RenderPassResourceUsage mResourceUsage;
     std::string mEncoderLabel;

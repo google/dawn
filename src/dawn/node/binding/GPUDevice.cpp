@@ -597,6 +597,13 @@ interop::Interface<interop::GPURenderBundleEncoder> GPUDevice::createRenderBundl
         return {};
     }
 
+    wgpu::RenderBundleEncoderResourceTable resourceTable{};
+    if (descriptor.usesResourceTable) {
+        resourceTable.usesResourceTable = true;
+        resourceTable.nextInChain = desc.nextInChain;
+        desc.nextInChain = &resourceTable;
+    }
+
     return interop::GPURenderBundleEncoder::Create<GPURenderBundleEncoder>(
         env, desc, device_.CreateRenderBundleEncoder(&desc));
 }

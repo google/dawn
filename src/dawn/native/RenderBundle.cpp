@@ -42,6 +42,7 @@ RenderBundleBase::RenderBundleBase(RenderBundleEncoder* encoder,
                                    Ref<AttachmentState> attachmentState,
                                    bool depthReadOnly,
                                    bool stencilReadOnly,
+                                   bool usesResourceTable,
                                    RenderPassResourceUsage resourceUsage,
                                    IndirectDrawMetadata indirectDrawMetadata)
     : ApiObjectBase(encoder->GetDevice(), kLabelNotImplemented),
@@ -50,6 +51,7 @@ RenderBundleBase::RenderBundleBase(RenderBundleEncoder* encoder,
       mAttachmentState(std::move(attachmentState)),
       mDepthReadOnly(depthReadOnly),
       mStencilReadOnly(stencilReadOnly),
+      mUsesResourceTable(usesResourceTable),
       mDrawCount(encoder->GetDrawCount()),
       mResourceUsage(std::move(resourceUsage)),
       mEncoderLabel(encoder->GetLabel()) {
@@ -116,6 +118,11 @@ bool RenderBundleBase::IsDepthReadOnly() const {
 bool RenderBundleBase::IsStencilReadOnly() const {
     DAWN_CHECK(!IsError());
     return mStencilReadOnly;
+}
+
+bool RenderBundleBase::UsesResourceTable() const {
+    DAWN_CHECK(!IsError());
+    return mUsesResourceTable;
 }
 
 uint64_t RenderBundleBase::GetDrawCount() const {
