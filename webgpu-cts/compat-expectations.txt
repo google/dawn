@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-07-30 09:03:51AM
+# Last rolled: 2026-08-10 06:49:50AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -2502,7 +2502,6 @@ crbug.com/487349982 webgpu:api,validation,buffer,mapping:mapAsync,state,mappingP
 # Apparent GPU process crash from trying to create a big buffer
 crbug.com/491869936 [ linux nvidia ] webgpu:api,validation,buffer,create:limit:* [ Failure ]
 
-
 # Alias analysis failures
 crbug.com/538691038 [ intel-0x4680 linux ] webgpu:shader,validation,functions,alias_analysis:two_pointers:address_space="function";aliased=false [ Failure ]
 crbug.com/538691038 [ android-pixel-10 ] webgpu:shader,validation,functions,alias_analysis:two_pointers_to_array_elements:address_space="workgroup";index=0;aliased=false [ Failure ]
@@ -2596,6 +2595,7 @@ crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgba8unorm-srgb";mipLevel=1;depthSlice=1 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgba8unorm-srgb";mipLevel=2;depthSlice=0 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgba8unorm-srgb";mipLevel=2;depthSlice=1 [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux renderer-skia-gl ] webgpu:api,operation,texture_view,texture_component_swizzle:read_swizzle:format="astc-10x10-unorm";func="textureGather" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux renderer-skia-gl ] webgpu:api,operation,texture_view,texture_component_swizzle:read_swizzle:format="astc-10x10-unorm";func="textureLoad" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux renderer-skia-gl ] webgpu:api,operation,texture_view,texture_component_swizzle:read_swizzle:format="astc-10x10-unorm";func="textureSample" [ Failure ]
@@ -3167,6 +3167,7 @@ crbug.com/0000 [ linux nvidia ] webgpu:api,validation,encoding,encoder_open_stat
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,encoding,encoder_open_state:render_pass_commands:command="setImmediates" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,validation,encoding,encoder_open_state:render_pass_commands:command="setImmediates" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,encoding,encoder_open_state:render_pass_commands:command="setImmediates" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureDimensions:depth:format="depth16unorm";aspect="all";samples=1 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:depth:format="depth16unorm";aspect="all";samples=1 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:depth:format="depth16unorm";aspect="all";samples=4 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:depth:format="depth24plus";aspect="all";samples=1 [ Failure ]
