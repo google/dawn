@@ -1094,7 +1094,7 @@ void CommandBuffer::HandleDebugCommands(
     switch (command) {
         case Command::InsertDebugMarker: {
             InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
-            std::wstring label = UTF8ToWStr(iter->NextData<char>(cmd->length + 1).data());
+            std::wstring label = UTF8ToWStr(iter->NextData<char>(cmd->length).data());
             commandContext->GetD3DUserDefinedAnnotation()->SetMarker(label.c_str());
             break;
         }
@@ -1107,7 +1107,7 @@ void CommandBuffer::HandleDebugCommands(
 
         case Command::PushDebugGroup: {
             PushDebugGroupCmd* cmd = iter->NextCommand<PushDebugGroupCmd>();
-            std::wstring label = UTF8ToWStr(iter->NextData<char>(cmd->length + 1).data());
+            std::wstring label = UTF8ToWStr(iter->NextData<char>(cmd->length).data());
             commandContext->GetD3DUserDefinedAnnotation()->BeginEvent(label.c_str());
             break;
         }
