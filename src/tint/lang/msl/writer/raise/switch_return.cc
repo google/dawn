@@ -27,6 +27,8 @@
 
 #include "src/tint/lang/msl/writer/raise/switch_return.h"
 
+#include <utility>
+
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -67,10 +69,17 @@ struct State {
         // Wrap return in volatile zero conditional to work around a driver bug
         // (crbug.com/508638064).
         for (auto* ret : returns_to_wrap) {
+            auto* sw = ret->Block()->Parent()->As<core::ir::Switch>();
             b.InsertBefore(ret, [&] {
                 auto* zero = b.Call<msl::ir::BuiltinCall>(ty.u32(), msl::BuiltinFn::kVolatileZero);
                 auto* cond = b.If(b.Equal(zero, b.Constant(core::u32(0))));
-                b.Exit(ret->Block()->Parent());
+
+                // If the switch produces result values, use nullptr since this exit path is
+                // dynamically unreachable.
+                Vector<core::ir::Value*, 4> args;
+                args.Resize(sw->Results().Length(), nullptr);
+                b.Exit(sw, std::move(args));
+
                 ret->Remove();
                 cond->True()->Append(ret);
             });
