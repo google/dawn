@@ -201,6 +201,7 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
             if (context.options.verbose) {
                 std::cout << "   Failed to execute fuzzer: " << result.Failure() << "\n";
             }
+            return;
         }
 
         if (!context.options.disable_ir_validator) {
