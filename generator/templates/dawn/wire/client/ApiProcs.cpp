@@ -180,7 +180,7 @@ namespace dawn::wire::client {
                 auto self = {{client}}::FromAPI(cSelf);
                 {{convert_arguments_and_call(method, Suffix, "self->API" + method.name.CamelCase())}}
             {% elif type.category == "structure" %}
-                return {{client}}::API{{method.name.CamelCase()}}(cSelf);
+                return {{client}}::API{{Suffix}}(cSelf);
             {% endif %}
         }
     {% endfor %}

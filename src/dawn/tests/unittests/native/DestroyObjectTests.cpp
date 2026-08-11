@@ -380,11 +380,13 @@ TEST_F(DestroyObjectTests, ExternalTextureNativeExplicit) {
         AcquireRef(new NiceMock<TextureViewMock>(textureMock.Get(), Unpack(&textureViewDesc)));
 
     ExternalTextureDescriptor desc = {};
-    std::array<float, 12> placeholderConstantArray = {};
-    desc.yuvToRgbConversionMatrix = placeholderConstantArray.data();
-    desc.gamutConversionMatrix = placeholderConstantArray.data();
-    desc.srcTransferFunctionParameters = placeholderConstantArray.data();
-    desc.dstTransferFunctionParameters = placeholderConstantArray.data();
+    std::array<float, 12> placeholderConstantArray12 = {};
+    std::array<float, 9> placeholderConstantArray9 = {};
+    std::array<float, 7> placeholderConstantArray7 = {};
+    desc.yuvToRgbConversionMatrix = placeholderConstantArray12;
+    desc.gamutConversionMatrix = placeholderConstantArray9;
+    desc.srcTransferFunctionParameters = placeholderConstantArray7;
+    desc.dstTransferFunctionParameters = placeholderConstantArray7;
     desc.cropSize = {1, 1};
     desc.apparentSize = {1, 1};
     desc.plane0 = textureViewMock.Get();
@@ -411,11 +413,13 @@ TEST_F(DestroyObjectTests, ExternalTextureApiExplicit) {
         AcquireRef(new NiceMock<TextureViewMock>(textureMock.Get(), Unpack(&textureViewDesc)));
 
     ExternalTextureDescriptor desc = {};
-    std::array<float, 12> placeholderConstantArray = {};
-    desc.yuvToRgbConversionMatrix = placeholderConstantArray.data();
-    desc.gamutConversionMatrix = placeholderConstantArray.data();
-    desc.srcTransferFunctionParameters = placeholderConstantArray.data();
-    desc.dstTransferFunctionParameters = placeholderConstantArray.data();
+    std::array<float, 12> placeholderConstantArray12 = {};
+    std::array<float, 9> placeholderConstantArray9 = {};
+    std::array<float, 7> placeholderConstantArray7 = {};
+    desc.yuvToRgbConversionMatrix = placeholderConstantArray12;
+    desc.gamutConversionMatrix = placeholderConstantArray9;
+    desc.srcTransferFunctionParameters = placeholderConstantArray7;
+    desc.dstTransferFunctionParameters = placeholderConstantArray7;
     desc.cropSize = {1, 1};
     desc.apparentSize = {1, 1};
     desc.plane0 = textureViewMock.Get();
@@ -446,11 +450,13 @@ TEST_F(DestroyObjectTests, ExternalTextureImplicit) {
         AcquireRef(new NiceMock<TextureViewMock>(textureMock.Get(), Unpack(&textureViewDesc)));
 
     ExternalTextureDescriptor desc = {};
-    std::array<float, 12> placeholderConstantArray = {};
-    desc.yuvToRgbConversionMatrix = placeholderConstantArray.data();
-    desc.gamutConversionMatrix = placeholderConstantArray.data();
-    desc.srcTransferFunctionParameters = placeholderConstantArray.data();
-    desc.dstTransferFunctionParameters = placeholderConstantArray.data();
+    std::array<float, 12> placeholderConstantArray12 = {};
+    std::array<float, 9> placeholderConstantArray9 = {};
+    std::array<float, 7> placeholderConstantArray7 = {};
+    desc.yuvToRgbConversionMatrix = placeholderConstantArray12;
+    desc.gamutConversionMatrix = placeholderConstantArray9;
+    desc.srcTransferFunctionParameters = placeholderConstantArray7;
+    desc.dstTransferFunctionParameters = placeholderConstantArray7;
     desc.cropSize = {1, 1};
     desc.apparentSize = {1, 1};
     desc.plane0 = textureViewMock.Get();
@@ -989,11 +995,13 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     wgpu::ExternalTexture externalTexture;
     {
         ExternalTextureDescriptor desc = {};
-        std::array<float, 12> placeholderConstantArray = {};
-        desc.yuvToRgbConversionMatrix = placeholderConstantArray.data();
-        desc.gamutConversionMatrix = placeholderConstantArray.data();
-        desc.srcTransferFunctionParameters = placeholderConstantArray.data();
-        desc.dstTransferFunctionParameters = placeholderConstantArray.data();
+        std::array<float, 12> placeholderConstantArray12 = {};
+        std::array<float, 9> placeholderConstantArray9 = {};
+        std::array<float, 7> placeholderConstantArray7 = {};
+        desc.yuvToRgbConversionMatrix = placeholderConstantArray12;
+        desc.gamutConversionMatrix = placeholderConstantArray9;
+        desc.srcTransferFunctionParameters = placeholderConstantArray7;
+        desc.dstTransferFunctionParameters = placeholderConstantArray7;
         desc.cropSize = {1, 1};
         desc.apparentSize = {1, 1};
         desc.plane0 = textureViewMock.Get();

@@ -33,6 +33,7 @@
 {%- macro render_structure_conversions(name) -%}
     {% set CType = as_cType(name) %}
     {% set DawnType = as_dawnType(name) %}
+    {% set CppType = "wgpu::" + as_cppType(name) %}
     inline const {{CType}}* ToAPI(const {{DawnType}}* rhs) {
         return reinterpret_cast<const {{CType}}*>(rhs);
     }
@@ -50,6 +51,18 @@
     }
     inline {{DawnType}}& FromAPI({{CType}}& rhs) {
         return *reinterpret_cast<{{DawnType}}*>(&rhs);
+    }
+    inline const {{CppType}}* ToCppAPI(const {{DawnType}}* rhs) {
+        return reinterpret_cast<const {{CppType}}*>(rhs);
+    }
+    inline {{CppType}}* ToCppAPI({{DawnType}}* rhs) {
+        return reinterpret_cast<{{CppType}}*>(rhs);
+    }
+    inline const {{DawnType}}* FromCppAPI(const {{CppType}}* rhs) {
+        return reinterpret_cast<const {{DawnType}}*>(rhs);
+    }
+    inline {{DawnType}}* FromCppAPI({{CppType}}* rhs) {
+        return reinterpret_cast<{{DawnType}}*>(rhs);
     }
 {%- endmacro -%}
 
@@ -98,6 +111,16 @@ inline WGPUStringView ToAPI(StringView rhs) {
 inline StringView FromAPI(WGPUStringView rhs) {
     return StringView(rhs);
 }
+
+template <typename T>
+struct EnumCount;
+
+{% for e in by_category["enum"] if e.contiguous and e.startValue == 0 %}
+    template<>
+    struct EnumCount<wgpu::{{as_cppType(e.name)}}> {
+        static constexpr uint32_t value = {{len(e.values)}};
+    };
+{% endfor %}
 
 {% for type in by_category["enum"] + by_category["bitmask"] %}
     inline {{as_cType(type.name)}} ToAPI(wgpu::{{as_cppType(type.name)}} rhs) {

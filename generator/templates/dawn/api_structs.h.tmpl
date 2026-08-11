@@ -85,6 +85,9 @@ struct StringView {
     size_t length = WGPU_STRLEN;
 
     {{wgpu_string_members("StringView", True) | indent}}
+    // Equality operators, mostly for testing. Note that this tests
+    // strict pointer-pointer equality if the struct contains member pointers.
+    bool operator==(const StringView& rhs) const;
 };
 
 //* Special structures that are manually written above.
@@ -94,6 +97,7 @@ struct StringView {
 
 {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
     {% set CppType = as_cppType(type.name) %}
+    {% set spanify = not CppType in structure_spanification_blocklist %}
     {% if type.chained %}
         {% set chainedStructType = "ChainedStructOut" if type.chained == "out" else "ChainedStruct" %}
         struct {{CppType}} : {{chainedStructType}} {
@@ -137,23 +141,32 @@ struct StringView {
                     {% set forced_default_value = "{ nullptr, wgpu::StorageTextureAccess::BindingNotUsed, wgpu::TextureFormat::Undefined, wgpu::TextureViewDimension::e2D }" %}
                 {% endif %}
             {% endif %}
-            {%- if member.is_length %}
-                //* Skip as it's included in the span just below.
-            {% elif member.length and member.constant_length != 1 %}
-                {% set length = "dawn::detail::DynamicExtent<size_t>" %}
-                {% if member.length == "constant" %}
-                    {% set length = member.constant_length %}
-                {% endif %}
-                {% if member.type.name.canonical_case() == "void" %}
-                    {% set element_type = "const std::byte" %}
+            {%- if spanify %}
+                {% if member.is_length %}
+                    //* Skip as it's included in the span just below.
+                {% elif member.length and member.constant_length != 1 %}
+                    {% set index_type = structure_span_index_type_override.get(CppType + "::" + as_varName(member.name), "size_t") %}
+                    {% set length = "dawn::detail::DynamicExtent<" + index_type + ">" %}
+                    {% if member.length == "constant" %}
+                        {% set length = index_type + "{" ~ member.constant_length + "}" %}
+                    {% endif %}
+                    {% if member.type.name.canonical_case() == "void" %}
+                        {% set element_type = "const std::byte" %}
+                    {% else %}
+                        {% set element_type = "std::remove_pointer_t<" + decorate(as_dawnType(member.type), member) + ">" %}
+                    {% endif %}
+                    ityp::span<{{index_type}}, {{element_type}}, {{length}}> {{as_varName(member.name)}};
                 {% else %}
-                    {% set element_type = "std::remove_pointer_t<" + decorate(as_dawnType(member.type), member) + ">" %}
+                    {{as_annotated_dawnType(member)}}{{render_cpp_default_value(member, forced_default_value)}}
                 {% endif %}
-                ityp::span<size_t, {{element_type}}, {{length}}> {{as_varName(member.name)}};
             {% else %}
                 {{as_annotated_dawnType(member)}}{{render_cpp_default_value(member, forced_default_value)}}
             {% endif %}
         {% endfor %}
+
+        // Equality operators, mostly for testing. Note that this tests
+        // strict pointer-pointer equality if the struct contains member pointers.
+        bool operator==(const {{CppType}}& rhs) const;
         {% if type.has_free_members_function %}
 
             private:
@@ -164,6 +177,14 @@ struct StringView {
 {% endfor %}
 // NOLINTEND(bugprone-invalid-enum-default-initialization)
 
+// Fully qualify FreeMember function names for the generated code.
 {% for type in by_category["structure"] if type.has_free_members_function %}
-    void APIFreeMembers({{as_cType(type.name)}});
+    void API{{as_MethodSuffix(type.name, Name("free members"))}}({{as_cType(type.name)}});
+{% endfor %}
+
+// Aliased FreeMember functions for templated code.
+{% for type in by_category["structure"] if type.has_free_members_function %}
+    inline void APIFreeMembers({{as_cType(type.name)}} s) {
+        API{{as_MethodSuffix(type.name, Name("free members"))}}(s);
+    }
 {% endfor %}

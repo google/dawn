@@ -1451,7 +1451,7 @@ def as_dawnType(metadata, typ):
     if isinstance(typ, Name):
         return as_cppType(typ)
     if typ.category == 'object':
-        return typ.name.CamelCase() + '*'
+        return "detail::" + typ.name.CamelCase() + '*'
     elif typ.category in ['bitmask', 'enum'] or typ.name.get() == 'bool':
         return metadata.namespace + '::' + typ.name.CamelCase()
     elif typ.category == 'structure':
@@ -1589,6 +1589,9 @@ def make_base_render_params(metadata):
             'as_jsEnumValue': as_jsEnumValue,
             'has_wasmType': has_wasmType,
             'as_wasmType': as_wasmType,
+            'as_dawnType': lambda typ: as_dawnType(metadata, typ),
+            'as_annotated_dawnType': \
+                lambda arg: annotate(as_dawnType(metadata, arg.type), arg),
             'convert_cType_to_cppType': convert_cType_to_cppType,
             'as_varName': as_varName,
             'decorate': lambda typ, arg: decorate(typ, arg, with_nullability=False),
@@ -1877,14 +1880,15 @@ class MultiGeneratorFromDawnJSON(Generator):
                 {
                     # TODO: as_frontendType and co. take a Type, not a Name :(
                     'as_frontendType': lambda typ: as_frontendType(metadata, typ),
-                    'as_annotated_frontendType': \
-                        lambda arg: annotate(as_frontendType(metadata, arg.type), arg),
                 },
                 native_json['metadata'],
             ]
 
             imported_templates += [
+                "dawn/api_structs.h.tmpl",
+                "dawn/api_structs.cpp.tmpl",
                 "dawn/cpp_macros.tmpl",
+                "dawn/dawn_platform.h.tmpl",
             ]
 
             impl_dir = metadata.impl_dir + '/' if metadata.impl_dir else ''
@@ -1995,9 +1999,6 @@ class MultiGeneratorFromDawnJSON(Generator):
                     'as_annotated_wireType': \
                         lambda arg: annotate(as_wireType(metadata, arg.type), arg),
                     'is_wire_serializable': lambda type : is_wire_serializable(type),
-                    'as_dawnType': lambda typ: as_dawnType(metadata, typ),
-                    'as_annotated_dawnType': \
-                        lambda arg: annotate(as_dawnType(metadata, arg.type), arg),
                     'is_wire_data_only': \
                         lambda member: member.type.name.get() in ['void', 'std::byte'] and \
                                        not member.skip_serialize,

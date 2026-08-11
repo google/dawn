@@ -42,11 +42,16 @@ static_assert(offsetof(ChainedStruct, nextInChain) == offsetof(WGPUChainedStruct
 static_assert(offsetof(ChainedStruct, sType) == offsetof(WGPUChainedStruct, sType),
         "offsetof mismatch for ChainedStruct::sType");
 
+bool StringView::operator==(const StringView& rhs) const {
+    return data == rhs.data && length == rhs.length;
+}
+
 // NOLINTBEGIN(bugprone-invalid-enum-default-initialization)
 
 {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
     {% set CppType = as_cppType(type.name) %}
     {% set CType = as_cType(type.name) %}
+    {% set spanify = not CppType in structure_spanification_blocklist %}
     static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
     static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
 
@@ -61,24 +66,52 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof(WGPUChainedStruct, sTyp
                 "offsetof mismatch for {{CppType}}::sType");
     {% endif %}
     {% for member in type.members %}
-        {% if member.is_length %}
-            //* Skip as the member is included in the span member.
-        {% elif member.length and member.constant_length != 1 %}
-            {% set memberName = member.name.camelCase() %}
-            using {{CppType}}{{memberName}}Span = decltype(std::declval<{{CppType}}>().{{memberName}});
-            {% if member.length != "constant" %}
-                {% set lengthName = member.length.name.camelCase() %}
-                static_assert(offsetof({{CppType}}, {{memberName}}) + {{CppType}}{{memberName}}Span::GetOffsetOfSize() == offsetof({{CType}}, {{lengthName}}),
-                                "offsetof mismatch for {{CppType}}::{{memberName}}::mSize");
+        {% set memberName = member.name.camelCase() %}
+        {% if spanify %}
+            {% if member.is_length %}
+                //* Skip as the member is included in the span member.
+            {% elif member.length and member.constant_length != 1 %}
+                using {{CppType}}{{memberName}}Span = decltype(std::declval<{{CppType}}>().{{memberName}});
+                {% if member.length != "constant" %}
+                    {% set lengthName = member.length.name.camelCase() %}
+                    static_assert(offsetof({{CppType}}, {{memberName}}) + {{CppType}}{{memberName}}Span::GetOffsetOfSize() == offsetof({{CType}}, {{lengthName}}),
+                                    "offsetof mismatch for {{CppType}}::{{memberName}}::mSize");
+                {% endif %}
+                static_assert(offsetof({{CppType}}, {{memberName}}) + {{CppType}}{{memberName}}Span::GetOffsetOfData() == offsetof({{CType}}, {{memberName}}),
+                                "offsetof mismatch for {{CppType}}::{{memberName}}::mData");
+            {% else %}
+                static_assert(offsetof({{CppType}}, {{memberName}}) == offsetof({{CType}}, {{memberName}}),
+                                "offsetof mismatch for {{CppType}}::{{memberName}}");
             {% endif %}
-            static_assert(offsetof({{CppType}}, {{memberName}}) + {{CppType}}{{memberName}}Span::GetOffsetOfData() == offsetof({{CType}}, {{memberName}}),
-                            "offsetof mismatch for {{CppType}}::{{memberName}}::mData");
         {% else %}
-            {% set memberName = member.name.camelCase() %}
             static_assert(offsetof({{CppType}}, {{memberName}}) == offsetof({{CType}}, {{memberName}}),
-                            "offsetof mismatch for {{CppType}}::{{memberName}}");
+                                "offsetof mismatch for {{CppType}}::{{memberName}}");
         {% endif %}
+
     {% endfor %}
+
+    bool {{CppType}}::operator==(const {{CppType}}& rhs) const {
+        {% if type.extensible or type.chained -%}
+            if (nextInChain != rhs.nextInChain) { return false; }
+        {% endif %}
+        {% for member in type.members if member.type.category != 'callback info' %}
+            {% if spanify %}
+                {% if member.is_length %}
+                    //* Skip as the member is included in the span member.
+                {% elif member.length and member.constant_length != 1 %}
+                    {% if member.length != "constant" %}
+                        if ({{member.name.camelCase()}}.size() != rhs.{{member.name.camelCase()}}.size()) { return false; }
+                    {% endif %}
+                    if ({{member.name.camelCase()}}.data() != rhs.{{member.name.camelCase()}}.data()) { return false; }
+                {% else %}
+                    if ({{member.name.camelCase()}} != rhs.{{member.name.camelCase()}}) { return false; }
+                {% endif %}
+            {% else %}
+                if ({{member.name.camelCase()}} != rhs.{{member.name.camelCase()}}) { return false; }
+            {% endif %}
+        {% endfor %}
+        return true;
+    }
 
 {% endfor %}
 // NOLINTEND(bugprone-invalid-enum-default-initialization)

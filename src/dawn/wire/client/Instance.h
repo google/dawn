@@ -38,8 +38,9 @@
 
 namespace dawn::wire::client {
 
-void APIFreeMembers(WGPUSupportedWGSLLanguageFeatures supportedFeatures);
-void APIFreeMembers(WGPUSupportedInstanceFeatures supportedFeatures);
+void APISupportedWGSLLanguageFeaturesFreeMembers(
+    WGPUSupportedWGSLLanguageFeatures supportedFeatures);
+void APISupportedInstanceFeaturesFreeMembers(WGPUSupportedInstanceFeatures supportedFeatures);
 
 class Instance final : public ObjectBase {
   public:

@@ -323,11 +323,12 @@ Surface* Instance::APICreateSurface(const SurfaceDescriptor* desc) const {
     return nullptr;
 }
 
-void APIFreeMembers(WGPUSupportedWGSLLanguageFeatures supportedFeatures) {
+void APISupportedWGSLLanguageFeaturesFreeMembers(
+    WGPUSupportedWGSLLanguageFeatures supportedFeatures) {
     delete[] supportedFeatures.features;
 }
 
-void APIFreeMembers(WGPUSupportedInstanceFeatures supportedFeatures) {
+void APISupportedInstanceFeaturesFreeMembers(WGPUSupportedInstanceFeatures supportedFeatures) {
     // Nothing to do, supportedFeatures.features is statically allocated.
 }
 

@@ -39,11 +39,13 @@
 
 namespace dawn::wire::client {
 
-void APIFreeMembers(WGPUAdapterInfo info);
-void APIFreeMembers(WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties);
-void APIFreeMembers(WGPUDawnDrmFormatCapabilities capabilities);
-void APIFreeMembers(WGPUSupportedFeatures supportedFeatures);
-void APIFreeMembers(WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs);
+void APIAdapterInfoFreeMembers(WGPUAdapterInfo info);
+void APIAdapterPropertiesMemoryHeapsFreeMembers(
+    WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties);
+void APIDawnDrmFormatCapabilitiesFreeMembers(WGPUDawnDrmFormatCapabilities capabilities);
+void APISupportedFeaturesFreeMembers(WGPUSupportedFeatures supportedFeatures);
+void APIAdapterPropertiesSubgroupMatrixConfigsFreeMembers(
+    WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs);
 
 class Adapter final : public ObjectWithEventsBase {
   public:

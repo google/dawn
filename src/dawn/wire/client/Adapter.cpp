@@ -330,24 +330,26 @@ wgpu::Status Adapter::APIGetFormatCapabilities(wgpu::TextureFormat format,
     return wgpu::Status::Error;
 }
 
-void APIFreeMembers(WGPUAdapterInfo info) {
+void APIAdapterInfoFreeMembers(WGPUAdapterInfo info) {
     // This single delete is enough because everything is a single allocation.
     delete[] info.vendor.data;
 }
 
-void APIFreeMembers(WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties) {
+void APIAdapterPropertiesMemoryHeapsFreeMembers(
+    WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties) {
     delete[] memoryHeapProperties.heapInfo;
 }
 
-void APIFreeMembers(WGPUDawnDrmFormatCapabilities capabilities) {
+void APIDawnDrmFormatCapabilitiesFreeMembers(WGPUDawnDrmFormatCapabilities capabilities) {
     delete[] capabilities.properties;
 }
 
-void APIFreeMembers(WGPUSupportedFeatures supportedFeatures) {
+void APISupportedFeaturesFreeMembers(WGPUSupportedFeatures supportedFeatures) {
     delete[] supportedFeatures.features;
 }
 
-void APIFreeMembers(WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs) {
+void APIAdapterPropertiesSubgroupMatrixConfigsFreeMembers(
+    WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs) {
     delete[] subgroupMatrixConfigs.configs;
 }
 

@@ -46,12 +46,10 @@ ExternalTexture::CreationParams::CreationParams(const ExternalTextureDescriptor*
 
     hasPlane1 = descriptor->plane1 != nullptr;
 
-    std::copy_n(descriptor->yuvToRgbConversionMatrix, 12, yuvToRgbConversionMatrix.begin());
-    std::copy_n(descriptor->srcTransferFunctionParameters, 7,
-                srcTransferFunctionParameters.begin());
-    std::copy_n(descriptor->dstTransferFunctionParameters, 7,
-                dstTransferFunctionParameters.begin());
-    std::copy_n(descriptor->gamutConversionMatrix, 9, gamutConversionMatrix.begin());
+    Span<float>(yuvToRgbConversionMatrix).CopyFrom(descriptor->yuvToRgbConversionMatrix);
+    Span<float>(srcTransferFunctionParameters).CopyFrom(descriptor->srcTransferFunctionParameters);
+    Span<float>(dstTransferFunctionParameters).CopyFrom(descriptor->dstTransferFunctionParameters);
+    Span<float>(gamutConversionMatrix).CopyFrom(descriptor->gamutConversionMatrix);
 }
 
 // static
@@ -78,10 +76,10 @@ ExternalTexture::ExternalTexture(Device* device, const ExternalTextureDescriptor
         .cropSize = ToWGPU(descriptor->cropSize),
         .apparentSize = ToWGPU(descriptor->apparentSize),
         .doYuvToRgbConversionOnly = descriptor->doYuvToRgbConversionOnly,
-        .yuvToRgbConversionMatrix = descriptor->yuvToRgbConversionMatrix,
-        .srcTransferFunctionParameters = descriptor->srcTransferFunctionParameters,
-        .dstTransferFunctionParameters = descriptor->dstTransferFunctionParameters,
-        .gamutConversionMatrix = descriptor->gamutConversionMatrix,
+        .yuvToRgbConversionMatrix = descriptor->yuvToRgbConversionMatrix.data(),
+        .srcTransferFunctionParameters = descriptor->srcTransferFunctionParameters.data(),
+        .dstTransferFunctionParameters = descriptor->dstTransferFunctionParameters.data(),
+        .gamutConversionMatrix = descriptor->gamutConversionMatrix.data(),
         .mirrored = descriptor->mirrored,
         .rotation = ToAPI(descriptor->rotation),
     };

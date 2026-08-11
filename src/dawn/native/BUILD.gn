@@ -92,7 +92,10 @@ dawn_json_generator("utils_gen") {
   target = "native_utils"
   inputs = [
     "${dawn_root}/src/dawn/dawn_native.json",
+    "${dawn_template_dir}/dawn/api_structs.h.tmpl",
+    "${dawn_template_dir}/dawn/api_structs.cpp.tmpl",
     "${dawn_template_dir}/dawn/cpp_macros.tmpl",
+    "${dawn_template_dir}/dawn/dawn_platform.h.tmpl",
     "${dawn_template_dir}/dawn/native/api_absl_format.cpp",
     "${dawn_template_dir}/dawn/native/api_absl_format.h",
     "${dawn_template_dir}/dawn/native/api_StreamImpl.cpp",

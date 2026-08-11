@@ -46,6 +46,14 @@ namespace dawn::wire::client {
     {% endif %}
 {% endfor %}
 
+namespace detail {
+//* Import the object types verbatim into the detail namespace since the templates assume the types
+//* to be defined in a detail namespace.
+{% for type in by_category["object"] %}
+    using {{type.name.CamelCase()}} = {{type.name.CamelCase()}};
+{% endfor %}
+}
+
 {% include 'dawn/api_structs.h.tmpl' %}
 
 } // namespace dawn::wire::client

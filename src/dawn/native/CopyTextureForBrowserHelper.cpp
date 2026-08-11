@@ -440,19 +440,14 @@ MaybeError DoCopyForBrowser(DeviceBase* device,
 
     if (options->needsColorSpaceConversion) {
         stepsMask |= kDecodeToLinearStep;
-        Span<const float> decodingParams =
-            // TODO(https://crbug.com/524405497): Spanify the input API with fixed extent spans once
-            // they are supported.
-            DAWN_UNSAFE_TODO({options->srcTransferFunctionParameters, 7});
+        auto decodingParams = options->srcTransferFunctionParameters;
 
         uniformData.gammaDecodingParams = {decodingParams[0], decodingParams[1], decodingParams[2],
                                            decodingParams[3], decodingParams[4], decodingParams[5],
                                            decodingParams[6]};
 
         stepsMask |= kConvertToDstGamutStep;
-        // TODO(https://crbug.com/524405497): Spanify the input API with fixed extent spans once
-        // they are supported.
-        Span<const float> matrix = DAWN_UNSAFE_TODO({options->conversionMatrix, 9});
+        auto matrix = options->conversionMatrix;
         uniformData.conversionMatrix = {{
             matrix[0],
             matrix[1],
@@ -469,10 +464,7 @@ MaybeError DoCopyForBrowser(DeviceBase* device,
         }};
 
         stepsMask |= kEncodeToGammaStep;
-        Span<const float> encodingParams =
-            // TODO(https://crbug.com/524405497): Spanify the input API with fixed extent spans once
-            // they are supported.
-            DAWN_UNSAFE_TODO({options->dstTransferFunctionParameters, 7});
+        auto encodingParams = options->dstTransferFunctionParameters;
 
         uniformData.gammaEncodingParams = {encodingParams[0], encodingParams[1], encodingParams[2],
                                            encodingParams[3], encodingParams[4], encodingParams[5],
@@ -622,11 +614,11 @@ MaybeError ValidateCopyForBrowserOptions(const CopyTextureForBrowserOptions& opt
     DAWN_TRY(ValidateAlphaMode(options.dstAlphaMode));
 
     if (options.needsColorSpaceConversion) {
-        DAWN_INVALID_IF(options.srcTransferFunctionParameters == nullptr,
+        DAWN_INVALID_IF(options.srcTransferFunctionParameters.empty(),
                         "srcTransferFunctionParameters is nullptr when doing color conversion");
-        DAWN_INVALID_IF(options.conversionMatrix == nullptr,
+        DAWN_INVALID_IF(options.conversionMatrix.empty(),
                         "conversionMatrix is nullptr when doing color conversion");
-        DAWN_INVALID_IF(options.dstTransferFunctionParameters == nullptr,
+        DAWN_INVALID_IF(options.dstTransferFunctionParameters.empty(),
                         "dstTransferFunctionParameters is nullptr when doing color conversion");
     }
     return {};

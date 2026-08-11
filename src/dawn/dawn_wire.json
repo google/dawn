@@ -227,6 +227,8 @@
         ]
     },
     "special items": {
+        "function_span_index_type_override": {},
+        "structure_span_index_type_override": {},
         "client_side_structures": [
             "DawnWGSLBlocklist",
             "FutureWaitInfo",

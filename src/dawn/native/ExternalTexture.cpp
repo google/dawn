@@ -70,13 +70,13 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
 
     DAWN_TRY(device->ValidateObject(descriptor->plane0));
 
-    DAWN_INVALID_IF(!descriptor->gamutConversionMatrix,
+    DAWN_INVALID_IF(descriptor->gamutConversionMatrix.empty(),
                     "The gamut conversion matrix must be non-null.");
 
-    DAWN_INVALID_IF(!descriptor->srcTransferFunctionParameters,
+    DAWN_INVALID_IF(descriptor->srcTransferFunctionParameters.empty(),
                     "The source transfer function parameters must be non-null.");
 
-    DAWN_INVALID_IF(!descriptor->dstTransferFunctionParameters,
+    DAWN_INVALID_IF(descriptor->dstTransferFunctionParameters.empty(),
                     "The destination transfer function parameters must be non-null.");
 
     DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane0));
@@ -107,7 +107,7 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
 
     if (descriptor->plane1) {
         DAWN_INVALID_IF(
-            !descriptor->yuvToRgbConversionMatrix,
+            descriptor->yuvToRgbConversionMatrix.empty(),
             "When more than one plane is set, the YUV-to-RGB conversion matrix must be non-null.");
 
         DAWN_TRY(device->ValidateObject(descriptor->plane1));
@@ -184,10 +184,8 @@ ExternalTextureParams ComputeExternalTextureParams(const ExternalTextureDescript
         {0, 0, 1},
         {0, 0, 0},
     });
-    if (descriptor->yuvToRgbConversionMatrix) {
-        // TODO(https://crbug.com/524405497): Spanify the input API with fixed extent spans once
-        // they are supported.
-        Span<const float> yMatIn = DAWN_UNSAFE_TODO({descriptor->yuvToRgbConversionMatrix, 12});
+    if (!descriptor->yuvToRgbConversionMatrix.empty()) {
+        auto yMatIn = descriptor->yuvToRgbConversionMatrix;
         yMat = {
             {yMatIn[0], yMatIn[1], yMatIn[2], yMatIn[3]},  //
             {yMatIn[4], yMatIn[5], yMatIn[6], yMatIn[7]},  //
@@ -213,9 +211,7 @@ ExternalTextureParams ComputeExternalTextureParams(const ExternalTextureDescript
     // Gamut correction is performed by multiplying a 3x3 matrix passed from Chromium. The
     // matrix was computed by multiplying the appropriate source and destination gamut
     // matrices sourced from ui/gfx/color_space.cc.
-    // TODO(https://crbug.com/524405497): Spanify the input API with fixed extent spans once
-    // they are supported.
-    Span<const float> gMat = DAWN_UNSAFE_TODO({descriptor->gamutConversionMatrix, 9});
+    auto gMat = descriptor->gamutConversionMatrix;
     params.gamutConversionMatrix = {{gMat[0], gMat[1], gMat[2]},  //
                                     {gMat[3], gMat[4], gMat[5]},  //
                                     {gMat[6], gMat[7], gMat[8]}};
@@ -227,10 +223,7 @@ ExternalTextureParams ComputeExternalTextureParams(const ExternalTextureDescript
     //    return pow(A * x + B, G) + E
     //
     // Constants are passed from Chromium and originally sourced from ui/gfx/color_space.cc
-    auto ToTransferFunctionParams = [](const float* paramsPtr) -> TransferFunctionParams {
-        // TODO(https://crbug.com/524405497): Spanify the input API with fixed extent spans once
-        // they are supported.
-        Span<const float> params = DAWN_UNSAFE_TODO({paramsPtr, 7});
+    auto ToTransferFunctionParams = [](Span<const float, 7> params) -> TransferFunctionParams {
         TransferFunctionMode mode = TransferFunctionMode::Gamma;
 
         // TODO(https://crbug.com/496604550): Passing the mode as a negative value for G is a hack.
@@ -375,7 +368,8 @@ ExternalTextureParams ComputeExternalTextureParams(const ExternalTextureDescript
 ResultOrError<Ref<BufferBase>> MakeParamsBufferForSimpleView(DeviceBase* device,
                                                              Ref<TextureViewBase> textureView) {
     const Extent3D textureSize = textureView->GetSingleSubresourceVirtualSize();
-    std::array<float, 12> placeholderConstantArray = {};
+    std::array<float, 7> placeholderConstantArray7 = {};
+    std::array<float, 9> placeholderConstantArray9 = {};
 
     // Make a fake ExternalTextureDescriptor for the view that reuses the code computing uniform
     // parameters passed to the shader.
@@ -385,9 +379,9 @@ ResultOrError<Ref<BufferBase>> MakeParamsBufferForSimpleView(DeviceBase* device,
     desc.cropSize = {textureSize.width, textureSize.height};
     desc.apparentSize = {textureSize.width, textureSize.height};
     desc.doYuvToRgbConversionOnly = true;
-    desc.srcTransferFunctionParameters = placeholderConstantArray.data();
-    desc.dstTransferFunctionParameters = placeholderConstantArray.data();
-    desc.gamutConversionMatrix = placeholderConstantArray.data();
+    desc.srcTransferFunctionParameters = placeholderConstantArray7;
+    desc.dstTransferFunctionParameters = placeholderConstantArray7;
+    desc.gamutConversionMatrix = placeholderConstantArray9;
 
     ExternalTextureParams params = ComputeExternalTextureParams(&desc);
     return utils::CreateBufferFromData(device, "Dawn_Simple_Texture_View_Params_Buffer",

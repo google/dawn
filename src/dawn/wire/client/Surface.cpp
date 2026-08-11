@@ -111,7 +111,7 @@ wgpu::Status Surface::APIGetCapabilities(Adapter* adapter,
     capabilities->nextInChain = nullptr;
     capabilities->usages = mSupportedUsages;
 
-    // These will be freed by APIFreeMembers.
+    // These will be freed by APISurfaceCapabilitiesFreeMembers.
     capabilities->presentModes = HeapArrayFrom(mSupportedPresentModes).MoveToSpan();
     capabilities->formats = HeapArrayFrom(mSupportedFormats).MoveToSpan();
     capabilities->alphaModes = HeapArrayFrom(mSupportedAlphaModes).MoveToSpan();
@@ -142,7 +142,7 @@ void Surface::APIGetCurrentTexture(SurfaceTexture* surfaceTexture) {
     surfaceTexture->texture = ReturnToAPI2(std::move(texture));
 }
 
-void APIFreeMembers(WGPUSurfaceCapabilities capabilities) {
+void APISurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities capabilities) {
     delete[] capabilities.presentModes;
     delete[] capabilities.formats;
     delete[] capabilities.alphaModes;

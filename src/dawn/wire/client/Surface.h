@@ -38,7 +38,7 @@ namespace dawn::wire::client {
 
 class Device;
 
-void APIFreeMembers(WGPUSurfaceCapabilities capabilities);
+void APISurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities capabilities);
 
 class Surface final : public ObjectBase {
   public:
