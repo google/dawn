@@ -57,6 +57,8 @@ tint_add_target(tint_lang_msl_writer_raise lib
   lang/msl/writer/raise/module_constant.h
   lang/msl/writer/raise/module_scope_vars.cc
   lang/msl/writer/raise/module_scope_vars.h
+  lang/msl/writer/raise/polyfill_bool_vector_dynamic_stores.cc
+  lang/msl/writer/raise/polyfill_bool_vector_dynamic_stores.h
   lang/msl/writer/raise/raise.cc
   lang/msl/writer/raise/raise.h
   lang/msl/writer/raise/shader_io.cc
@@ -116,6 +118,7 @@ tint_add_target(tint_lang_msl_writer_raise_test test
   lang/msl/writer/raise/fix_type_layout_test.cc
   lang/msl/writer/raise/module_constant_test.cc
   lang/msl/writer/raise/module_scope_vars_test.cc
+  lang/msl/writer/raise/polyfill_bool_vector_dynamic_stores_test.cc
   lang/msl/writer/raise/shader_io_test.cc
   lang/msl/writer/raise/simd_ballot_test.cc
   lang/msl/writer/raise/switch_return_test.cc

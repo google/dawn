@@ -64,6 +64,7 @@ struct FuzzedOptions {
     bool replace_workgroup_bool_with_u32;
     bool collapse_subgroup_min_max;
     bool fix_u32_div_mod;
+    bool polyfill_bool_vec_dynamic_store;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(FuzzedOptions,
@@ -87,7 +88,8 @@ struct FuzzedOptions {
                  polyfill_tanh_f16,
                  replace_workgroup_bool_with_u32,
                  collapse_subgroup_min_max,
-                 fix_u32_div_mod);
+                 fix_u32_div_mod,
+                 polyfill_bool_vec_dynamic_store);
     TINT_REFLECT_HASH_CODE(FuzzedOptions);
 };
 
@@ -147,6 +149,8 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.group_to_argument_buffer_info = fuzzed_options.group_to_argument_buffer_info;
     options.substitute_overrides_config = fuzzed_options.substitute_overrides_config;
     options.workarounds.fix_u32_div_mod = fuzzed_options.fix_u32_div_mod;
+    options.workarounds.polyfill_bool_vec_dynamic_store =
+        fuzzed_options.polyfill_bool_vec_dynamic_store;
 
     options.bindings = GenerateBindings(module, ep_name, false, false);
     options.immediate_binding_point = BindingPoint(0, 30);

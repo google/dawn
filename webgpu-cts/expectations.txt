@@ -1547,13 +1547,6 @@ crbug.com/540087398 [ android-pixel-10 ] webgpu:api,validation,createTexture:mip
 crbug.com/540087398 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,texture_utils:createTextureWithRandomDataAndGetTexels_with_generator:format="depth*";viewDimension="*" [ Failure ]
 crbug.com/540087398 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,texture_utils:createTextureWithRandomDataAndGetTexels_with_generator:format="stencil*";viewDimension="*" [ Failure ]
 
-crbug.com/544053912 [ intel-0x3e9b sequoia ] webgpu:shader,execution,statement,swizzle_assignment:dynamic_index_into_swizzle:elemType="bool";vecSize=2;indexType="i32" [ Failure ]
-crbug.com/544053912 [ intel-0x3e9b sequoia ] webgpu:shader,execution,statement,swizzle_assignment:dynamic_index_into_swizzle:elemType="bool";vecSize=2;indexType="u32" [ Failure ]
-crbug.com/544053912 [ intel-0x3e9b sequoia ] webgpu:shader,execution,statement,swizzle_assignment:dynamic_index_into_swizzle:elemType="bool";vecSize=3;indexType="i32" [ Failure ]
-crbug.com/544053912 [ intel-0x3e9b sequoia ] webgpu:shader,execution,statement,swizzle_assignment:dynamic_index_into_swizzle:elemType="bool";vecSize=3;indexType="u32" [ Failure ]
-crbug.com/544053912 [ intel-0x3e9b sequoia ] webgpu:shader,execution,statement,swizzle_assignment:dynamic_index_into_swizzle:elemType="bool";vecSize=4;indexType="i32" [ Failure ]
-crbug.com/544053912 [ intel-0x3e9b sequoia ] webgpu:shader,execution,statement,swizzle_assignment:dynamic_index_into_swizzle:elemType="bool";vecSize=4;indexType="u32" [ Failure ]
-
 # Untriaged Xclipse failures.
 crbug.com/543960651 [ android-sm-s926b ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:* [ Failure ]
 crbug.com/543960651 [ android-sm-s926b ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:* [ Failure ]

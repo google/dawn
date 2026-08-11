@@ -222,6 +222,7 @@ enum class Toggle {
     ShadowCopyMapWrite,
     DisableTransientAttachment,
     AutoMapBackendBuffer,
+    MetalPolyfillBoolVecDynamicStore,
 
     EnumCount,
     InvalidEnum = EnumCount,

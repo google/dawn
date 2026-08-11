@@ -361,6 +361,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         device->IsToggleEnabled(Toggle::CollapseSubgroupMinMax);
     req.tintOptions.workarounds.fix_u32_div_mod =
         device->IsToggleEnabled(Toggle::MetalFixU32DivMod);
+    req.tintOptions.workarounds.polyfill_bool_vec_dynamic_store =
+        device->IsToggleEnabled(Toggle::MetalPolyfillBoolVecDynamicStore);
 
     req.tintOptions.extensions.disable_demote_to_helper =
         device->IsToggleEnabled(Toggle::DisableDemoteToHelper);

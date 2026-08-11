@@ -70,6 +70,7 @@
 #include "src/tint/lang/msl/writer/raise/fix_type_layout.h"
 #include "src/tint/lang/msl/writer/raise/module_constant.h"
 #include "src/tint/lang/msl/writer/raise/module_scope_vars.h"
+#include "src/tint/lang/msl/writer/raise/polyfill_bool_vector_dynamic_stores.h"
 #include "src/tint/lang/msl/writer/raise/shader_io.h"
 #include "src/tint/lang/msl/writer/raise/simd_ballot.h"
 #include "src/tint/lang/msl/writer/raise/switch_return.h"
@@ -298,6 +299,10 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(raise::ModuleConstant(module, module_const_config));
 
     TINT_CHECK_RESULT(raise::SwitchReturn(module));
+
+    if (options.workarounds.polyfill_bool_vec_dynamic_store) {
+        TINT_CHECK_RESULT(raise::PolyfillBoolVectorDynamicStores(module));
+    }
 
     // These transforms need to be run last as various transforms introduce terminator arguments,
     // naming conflicts, and expressions that need to be explicitly not inlined.
