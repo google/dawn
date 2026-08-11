@@ -99,9 +99,30 @@ template("_meson_setup") {
           [ "llvm-config = '" + rebase_path("${meson_llvm_config_bin}") + "'" ]
     }
 
-    _zstd_pkgconfig_dir = rebase_path("${meson_zstd_dir}/lib/pkgconfig")
+    _zstd_abs_path = rebase_path(meson_zstd_dir)
+
+    # The CIPD supplied version has baked in paths specific to the
+    # original build environment that do not reflect the checked out
+    # paths, so writing custom version
+    _zstd_pc_content = [
+      "prefix=${_zstd_abs_path}",
+      "exec_prefix=\${prefix}",
+      "includedir=\${prefix}/include",
+      "libdir=\${exec_prefix}/lib",
+      "",
+      "Name: zstd",
+      "Description: fast lossless compression algorithm library",
+      "URL: https://facebook.github.io/zstd/",
+      "Version: 1.5.7",
+      "Libs: -L\${libdir} -lzstd",
+      "Libs.private: -pthread",
+      "Cflags: -I\${includedir}",
+    ]
+    _zstd_pkgconfig_dir = rebase_path("${target_gen_dir}/pkgconfig")
+    write_file("${_zstd_pkgconfig_dir}/libzstd.pc", _zstd_pc_content)
+
     _native_file_content += [
-      "[properties]",
+      "[built-in options]",
       "pkg_config_path = ['${_zstd_pkgconfig_dir}']",
     ]
 
