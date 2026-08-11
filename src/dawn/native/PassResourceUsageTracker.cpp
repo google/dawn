@@ -118,9 +118,7 @@ void SyncScopeUsageTracker::MergeResourceUsages(const SyncScopeResourceUsage& us
         mExternalTextureUsages.insert(t);
     }
 
-    for (ResourceTableBase* t : usages.usedResourceTables) {
-        mUsedResourceTables.insert(t);
-    }
+    DAWN_ASSERT(usages.resourceTable == nullptr);
 }
 
 void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
@@ -228,8 +226,9 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
     }
 }
 
-void SyncScopeUsageTracker::AddResourceTableUsage(ResourceTableBase* table) {
-    mUsedResourceTables.insert(table);
+void SyncScopeUsageTracker::SetUsedResourceTable(ResourceTableBase* table) {
+    DAWN_ASSERT(mUsedResourceTable == nullptr || mUsedResourceTable == table);
+    mUsedResourceTable = table;
 }
 
 SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
@@ -256,10 +255,10 @@ SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
     }
     mExternalTextureUsages.clear();
 
-    for (auto* const it : mUsedResourceTables) {
-        result.usedResourceTables.push_back(it);
+    if (auto table = mUsedResourceTable) {
+        result.resourceTable = table;
     }
-    mUsedResourceTables.clear();
+    mUsedResourceTable = nullptr;
 
     return result;
 }

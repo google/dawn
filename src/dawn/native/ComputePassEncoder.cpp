@@ -606,7 +606,7 @@ void ComputePassEncoder::AddDispatchSyncScope(SyncScopeUsageTracker scope) {
     if (mCommandBufferState.GetPipelineLayout()->UsesResourceTable()) {
         ResourceTableBase* table = mCommandBufferState.GetResourceTable();
         DAWN_ASSERT(table != nullptr);
-        scope.AddResourceTableUsage(table);
+        scope.SetUsedResourceTable(table);
     }
     mUsageTracker.AddDispatch(scope.AcquireSyncScopeUsage());
 }

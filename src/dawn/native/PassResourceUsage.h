@@ -76,8 +76,7 @@ struct SyncScopeResourceUsage {
     std::vector<TextureSubresourceSyncInfo> textureSyncInfos;
 
     std::vector<ExternalTextureBase*> externalTextures;
-    // TODO(crbug.com/530981417): Have a single ResourceTable per sync scope
-    std::vector<ResourceTableBase*> usedResourceTables;
+    raw_ptr<ResourceTableBase> resourceTable;
 };
 
 // Contains all the resource usage data for a compute pass.

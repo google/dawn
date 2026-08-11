@@ -434,11 +434,9 @@ MaybeError PrepareResourcesForSyncScope(Device* device,
     // This has to be done before transitioning resources.
     // TODO(crbug.com/529883743): Consider folding the logic in GatherWritableTextures into the
     // scope.textures loop below
-    if (!scope.usedResourceTables.empty()) {
+    if (auto table = scope.resourceTable) {
         auto writables = GatherWritableTextures(scope);
-        for (auto& resourceTable : scope.usedResourceTables) {
-            DAWN_TRY(ToBackend(resourceTable)->ApplyPendingUpdates(recordingContext, writables));
-        }
+        DAWN_TRY(ToBackend(table)->ApplyPendingUpdates(recordingContext, writables));
     }
 
     // Separate barriers with vertex stages in destination stages from all other barriers.

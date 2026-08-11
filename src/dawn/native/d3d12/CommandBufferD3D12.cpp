@@ -320,11 +320,9 @@ MaybeError TransitionAndClearForSyncScope(CommandRecordingContext* commandContex
     // This has to be done before transitioning resources.
     // TODO(crbug.com/529883743): Consider folding the logic in GatherWritableTextures into the
     // scope.textures loop below
-    if (!usages.usedResourceTables.empty()) {
+    if (auto table = usages.resourceTable) {
         auto writables = GatherWritableTextures(usages);
-        for (auto& resourceTable : usages.usedResourceTables) {
-            DAWN_TRY(ToBackend(resourceTable)->ApplyPendingUpdates(commandContext, writables));
-        }
+        DAWN_TRY(ToBackend(table)->ApplyPendingUpdates(commandContext, writables));
     }
 
     std::vector<D3D12_RESOURCE_BARRIER> barriers;

@@ -347,9 +347,7 @@ void RenderPassEncoder::APISetResourceTable(ResourceTableBase* table) {
             }
 
             mCommandBufferState.SetResourceTable(table);
-            if (table) {
-                mUsageTracker.AddResourceTableUsage(table);
-            }
+            mUsageTracker.SetUsedResourceTable(table);
 
             SetResourceTableCmd* cmd =
                 allocator->Allocate<SetResourceTableCmd>(Command::SetResourceTable);

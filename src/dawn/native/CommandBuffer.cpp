@@ -93,8 +93,9 @@ MaybeError CommandBufferBase::ValidateCanUseInSubmitNow() const {
 void CommandBufferBase::DestroyImpl(DestroyReason reason) {
     // These metadatas hold raw_ptr to the commands, so they need to be cleared first.
     mIndirectDrawMetadata.clear();
-    FreeCommands(&mCommands);
     mResourceUsages = {};
+
+    FreeCommands(&mCommands);
 }
 
 const CommandBufferResourceUsage& CommandBufferBase::GetResourceUsages() const {

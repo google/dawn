@@ -71,7 +71,7 @@ class SyncScopeUsageTracker {
     // Walks the bind groups and tracks all its resources.
     void AddBindGroup(BindGroupBase* group);
 
-    void AddResourceTableUsage(ResourceTableBase* table);
+    void SetUsedResourceTable(ResourceTableBase* table);
 
     // Returns the per-pass usage for use by backends for APIs with explicit barriers.
     SyncScopeResourceUsage AcquireSyncScopeUsage();
@@ -82,7 +82,7 @@ class SyncScopeUsageTracker {
     absl::flat_hash_map<BufferBase*, BufferSyncInfo> mBufferSyncInfos;
     absl::flat_hash_map<TextureBase*, TextureSubresourceSyncInfo> mTextureSyncInfos;
     absl::flat_hash_set<ExternalTextureBase*> mExternalTextureUsages;
-    absl::flat_hash_set<ResourceTableBase*> mUsedResourceTables;
+    raw_ptr<ResourceTableBase> mUsedResourceTable = nullptr;
 };
 
 // Helper class to build ComputePassResourceUsages

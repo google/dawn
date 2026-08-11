@@ -516,8 +516,8 @@ MaybeError QueueBase::ValidateSubmit(Span<CommandBufferBase* const> commands,
             for (const ExternalTextureBase* externalTexture : scope.externalTextures) {
                 DAWN_TRY(externalTexture->ValidateCanUseInSubmitNow());
             }
-            for (const ResourceTableBase* resourceTable : scope.usedResourceTables) {
-                DAWN_TRY(resourceTable->ValidateCanUseInSubmitNow());
+            if (auto table = scope.resourceTable) {
+                DAWN_TRY(table->ValidateCanUseInSubmitNow());
             }
         }
 
