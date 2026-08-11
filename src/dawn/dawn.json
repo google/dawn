@@ -3562,7 +3562,7 @@
                 "name": "set resource table",
                 "tags": ["dawn"],
                 "args": [
-                    {"name": "table", "type": "resource table", "optional": true}
+                    {"name": "table", "type": "resource table"}
                 ]
             }
         ]

@@ -327,6 +327,8 @@ void RenderPassEncoder::APISetScissorRect(uint32_t x, uint32_t y, uint32_t width
 }
 
 void RenderPassEncoder::APISetResourceTable(ResourceTableBase* table) {
+    DAWN_ASSERT(table != nullptr);
+
     mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
@@ -335,9 +337,13 @@ void RenderPassEncoder::APISetResourceTable(ResourceTableBase* table) {
                     !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
                     "setResourceTable requires the %s feature enabled.",
                     wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
-                if (table) {
-                    DAWN_TRY(GetDevice()->ValidateObject(table));
-                }
+                DAWN_TRY(GetDevice()->ValidateObject(table));
+
+                ResourceTableBase* currentTable = mCommandBufferState.GetResourceTable();
+                DAWN_INVALID_IF(currentTable != nullptr && table != currentTable,
+                                "Changing from %s to %s is not allowed in a RenderPassEncoder (in "
+                                "the future the table will be set in BeginRenderPass).",
+                                currentTable, table);
             }
 
             mCommandBufferState.SetResourceTable(table);

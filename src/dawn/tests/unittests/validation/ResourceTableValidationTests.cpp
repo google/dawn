@@ -598,10 +598,12 @@ TEST_F(ResourceTableValidationTest, RenderPassEncoder_SetResourceTable) {
 
     // Failure case: invalid encoder state
     {
+        wgpu::ResourceTable resourceTable = MakeResourceTable(1);
+
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
         pass.End();
-        pass.SetResourceTable(nullptr);
+        pass.SetResourceTable(resourceTable);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -619,6 +621,7 @@ TEST_F(ResourceTableValidationTest, RenderPassEncoder_SetResourceTable) {
     // Success case: valid resource table
     {
         wgpu::ResourceTable resourceTable = MakeResourceTable(1);
+
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
         pass.SetResourceTable(resourceTable);
@@ -626,13 +629,29 @@ TEST_F(ResourceTableValidationTest, RenderPassEncoder_SetResourceTable) {
         encoder.Finish();
     }
 
-    // Success case: null resource table
+    // Success case: valid resource table set twice
     {
+        wgpu::ResourceTable resourceTable = MakeResourceTable(1);
+
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        pass.SetResourceTable(nullptr);
+        pass.SetResourceTable(resourceTable);
+        pass.SetResourceTable(resourceTable);
         pass.End();
         encoder.Finish();
+    }
+
+    // Error case: two different resource tables are set
+    {
+        wgpu::ResourceTable resourceTable1 = MakeResourceTable(1);
+        wgpu::ResourceTable resourceTable2 = MakeResourceTable(1);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.SetResourceTable(resourceTable1);
+        pass.SetResourceTable(resourceTable2);
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
 
@@ -741,18 +760,6 @@ TEST_F(ResourceTableValidationTest, ExecuteBundlesUsingResourceTableRequiresCurr
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
-    // Error case: render bundle using table causes an error if a ResourceTable was set then
-    // removed.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        pass.SetResourceTable(MakeResourceTable(1));
-        pass.SetResourceTable(nullptr);
-        pass.ExecuteBundles(1, &rbTable);
-        pass.End();
-        ASSERT_DEVICE_ERROR(encoder.Finish());
-    }
-
     // Error case: at least one of the render bundles executed requires a resource table set.
     {
         std::array<wgpu::RenderBundle, 3u> rbs = {rbNoTable, rbTable, rbNoTable};
@@ -780,17 +787,6 @@ TEST_F(ResourceTableValidationTestDisabled, ComputePassEncoder_SetResourceTable)
     // Failure case: feature is disabled
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-    pass.SetResourceTable(nullptr);
-    pass.End();
-    ASSERT_DEVICE_ERROR(encoder.Finish());
-}
-
-// Tests calling RenderPassEncoder::SetResourceTable when the feature is disabled
-TEST_F(ResourceTableValidationTestDisabled, RenderPassEncoder_SetResourceTable) {
-    // Failure case: feature is disabled
-    auto rp = utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
     pass.SetResourceTable(nullptr);
     pass.End();
     ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -948,47 +944,6 @@ TEST_F(ResourceTableValidationTest, RenderPassEncoder_CanUseInSubmit) {
         resourceTable.Destroy();  // Destroy it
         ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
     }
-
-    // Failure case: one of multiple resource tables has been destroyed
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        pass.SetResourceTable(resourceTable);
-        pass.SetResourceTable(resourceTable2);
-        pass.SetResourceTable(resourceTable3);
-        pass.End();
-        wgpu::CommandBuffer commands = encoder.Finish();
-        resourceTable2.Destroy();  // Destroy one
-        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
-    }
-
-    // Failure case: one of multiple resource tables in another pass has been destroyed
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        pass.SetResourceTable(resourceTable);
-        pass.SetResourceTable(resourceTable2);
-        pass.End();
-        wgpu::RenderPassEncoder pass2 = encoder.BeginRenderPass(&rp.renderPassInfo);
-        pass2.SetResourceTable(resourceTable);
-        pass2.SetResourceTable(resourceTable3);
-        pass2.End();
-        wgpu::CommandBuffer commands = encoder.Finish();
-        resourceTable3.Destroy();  // Destroy one
-        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
-    }
-
-    // Failure case: resource table must still be valid if set, then nullptr is set
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-        pass.SetResourceTable(resourceTable);
-        pass.SetResourceTable(nullptr);  // Clear it
-        pass.End();
-        wgpu::CommandBuffer commands = encoder.Finish();
-        resourceTable.Destroy();  // Destroy it
-        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
-    }
 }
 
 // Tests that the resource table can be used in dispatch
@@ -1108,33 +1063,6 @@ TEST_F(ResourceTableValidationTest, Submit_DrawRequiresResourceTable) {
             pass.Draw(1);
             pass.End();
             ASSERT_DEVICE_ERROR(wgpu::CommandBuffer commands = encoder.Finish());
-        }
-
-        // Failure case: `usesResourceTable` is enabled, one then nullptr set on the pass
-        {
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-            pass.SetResourceTable(resourceTable);  // Set a valid one
-            pass.SetResourceTable(nullptr);        // Then clear it
-            pass.SetPipeline(pipelineUsesTable);
-            pass.Draw(1);
-            pass.End();
-            ASSERT_DEVICE_ERROR(wgpu::CommandBuffer commands = encoder.Finish());
-        }
-
-        // Success case: `usesResourceTable` is enabled, one then nullptr then another set on the
-        // pass
-        {
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-            pass.SetResourceTable(resourceTable);
-            pass.SetResourceTable(nullptr);         // Then clear it
-            pass.SetResourceTable(resourceTable2);  // Then set another valid one
-            pass.SetPipeline(pipelineUsesTable);
-            pass.Draw(1);
-            pass.End();
-            wgpu::CommandBuffer commands = encoder.Finish();
-            device.GetQueue().Submit(1, &commands);
         }
 
         // Success case: single pass toggles between pipelines that do not use and use a table

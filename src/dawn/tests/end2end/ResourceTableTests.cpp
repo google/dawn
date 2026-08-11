@@ -328,10 +328,12 @@ class ResourceTableTests : public DawnTest {
         EXPECT_BUFFER_U32_RANGE_EQ(expectedU32.data(), resultBuffer, 0, expectedU32.size());
     }
 
-    // For each table in `cases`, sets the `table` and dipatches on a render pass/bundle encoder,
-    // and validates that each `table` has a texture_2d<u32> iff the `expected` has a value, and
-    // that the textures have the expected value, if any.
-    void TestHasU8BindingsRender(std::vector<TableAndExpected> cases, bool useRenderBundles) {
+    // Sets the `table` and dipatches on a render pass/bundle encoder, and validates that `table`
+    // has a texture_2d<u32> iff `expected` has a value, and that the textures have the expected
+    // value, if any.
+    void TestHasU8BindingsRender(wgpu::ResourceTable table,
+                                 std::vector<std::optional<uint8_t>> expected,
+                                 bool useRenderBundles = false) {
         wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
             enable chromium_experimental_resource_table;
 
@@ -340,31 +342,20 @@ class ResourceTableTests : public DawnTest {
             }
 
             @group(0) @binding(0) var<storage, read_write> results : array<u32>;
-            struct Immediates {
-                resourceCount : u32,
-                offset : u32,
-            }
-            var<immediate> immediates : Immediates;
+            var<immediate> resourceCount : u32;
 
             @fragment fn main() -> @location(0) vec4f {
-                for (var i = 0u; i < immediates.resourceCount; i++) {
+                for (var i = 0u; i < resourceCount; i++) {
                     if !hasResource<texture_2d<u32>>(i) {
-                        results[immediates.offset + i] = 0xBEEF;
+                        results[i] = 0xBEEF;
                     } else {
                         let tex = getResource<texture_2d<u32>>(i);
-                        results[immediates.offset + i] = textureLoad(tex, vec2(0), 0).x;
+                        results[i] = textureLoad(tex, vec2(0), 0).x;
                     }
                 }
                 return vec4();
             }
         )");
-
-        // Make the result buffer large enough for all cases
-        size_t resultSize = 0;
-        for (auto& [table, expected] : cases) {
-            ASSERT_EQ(table.GetSize(), expected.size());
-            resultSize += expected.size();
-        }
 
         wgpu::BindGroupLayout resultBGL = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
@@ -382,7 +373,7 @@ class ResourceTableTests : public DawnTest {
         // Create the result buffer.
         wgpu::BufferDescriptor bDesc = {
             .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
-            .size = sizeof(uint32_t) * resultSize,
+            .size = sizeof(uint32_t) * expected.size(),
         };
         wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
         wgpu::BindGroup resultBG = utils::MakeBindGroup(device, resultBGL, {{0, resultBuffer}});
@@ -391,39 +382,29 @@ class ResourceTableTests : public DawnTest {
         auto rp = utils::CreateBasicRenderPass(device, 1, 1);
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.SetResourceTable(table);
 
         if (useRenderBundles) {
-            pass.SetResourceTable(cases[0].table);
-
             utils::ComboRenderBundleEncoderDescriptor desc = {};
             desc.SetUsesResourceTable();
             desc.colorFormatCount = 1;
             desc.cColorFormats[0] = rp.colorFormat;
             wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
 
-            uint32_t offset = 0;
-            for (auto& [table, expected] : cases) {
-                uint32_t immediates[] = {table.GetSize(), offset};
-                rbe.SetImmediates(0, &immediates, sizeof(immediates));
-                rbe.SetBindGroup(0, resultBG);
-                rbe.SetPipeline(testPipeline);
-                rbe.Draw(1);
-                offset += expected.size();
-            }
+            uint32_t immediates = table.GetSize();
+            rbe.SetImmediates(0, &immediates, sizeof(immediates));
+            rbe.SetBindGroup(0, resultBG);
+            rbe.SetPipeline(testPipeline);
+            rbe.Draw(1);
 
             wgpu::RenderBundle bundle = rbe.Finish();
             pass.ExecuteBundles(1, &bundle);
         } else {
-            uint32_t offset = 0;
-            for (auto& [table, expected] : cases) {
-                uint32_t immediates[] = {table.GetSize(), offset};
-                pass.SetResourceTable(table);
-                pass.SetImmediates(0, &immediates, sizeof(immediates));
-                pass.SetBindGroup(0, resultBG);
-                pass.SetPipeline(testPipeline);
-                pass.Draw(1);
-                offset += expected.size();
-            }
+            uint32_t immediates = table.GetSize();
+            pass.SetImmediates(0, &immediates, sizeof(immediates));
+            pass.SetBindGroup(0, resultBG);
+            pass.SetPipeline(testPipeline);
+            pass.Draw(1);
         }
         pass.End();
 
@@ -432,30 +413,19 @@ class ResourceTableTests : public DawnTest {
 
         // Check we have the expected results.
         std::vector<uint32_t> expectedU32;
-        for (auto& [_, expected] : cases) {
-            for (auto optValue : expected) {
-                expectedU32.push_back(optValue ? *optValue : 0xBEEFu);
-            }
+        for (auto optValue : expected) {
+            expectedU32.push_back(optValue ? *optValue : 0xBEEFu);
         }
 
         EXPECT_BUFFER_U32_RANGE_EQ(expectedU32.data(), resultBuffer, 0, expectedU32.size());
     }
 
     // Convenience that tests cases using compute, render, and render bundle encoders
-    void TestHasU8BindingsAll(std::vector<TableAndExpected> cases) {
-        TestHasU8BindingsCompute(cases);
-        // TODO(https://crbug.com/530981417): When a single resource table is allowed per render
-        // pass, remove simplify TestHasU8Binding* to assume there is a single resource table.
-        if (cases.size() == 1) {
-            TestHasU8BindingsRender(cases, true);
-        }
-        TestHasU8BindingsRender(cases, false);
-    }
-
-    // Convenience for single table
     void TestHasU8BindingsAll(wgpu::ResourceTable table,
                               std::vector<std::optional<uint8_t>> expected) {
-        TestHasU8BindingsAll({{table, expected}});
+        TestHasU8BindingsCompute({{table, expected}});
+        TestHasU8BindingsRender(table, expected, true);
+        TestHasU8BindingsRender(table, expected, false);
     }
 
     // Creates a sampler by address mode
@@ -2806,9 +2776,8 @@ TEST_P(ResourceTableTests, ReplaceWithSameBinding) {
     TestHasU8BindingsAll(table, {{19}});
 }
 
-// Check that setting multiple resource table, on per dispatch/draw/executebundle, on a single pass
-// works.
-TEST_P(ResourceTableTests, SinglePassMultipleResourceTables) {
+// Check that setting multiple resource table, on per dispatch, on a single pass works.
+TEST_P(ResourceTableTests, SingleComputePassMultipleResourceTables) {
     // TODO(crbug.com/385158827): Fails on older WARP 10.0.19041.5794
     DAWN_SUPPRESS_TEST_IF(IsWARP());
 
@@ -2840,9 +2809,9 @@ TEST_P(ResourceTableTests, SinglePassMultipleResourceTables) {
     auto case1 = TableAndExpected(table1, {{27, {}, 29}});
     auto case2 = TableAndExpected(table2, {{37, 38, {}, 40}});
 
-    TestHasU8BindingsAll({case0, case1, case2});
-    TestHasU8BindingsAll({case1, case0, case2});
-    TestHasU8BindingsAll({case2, case1, case0});
+    TestHasU8BindingsCompute({case0, case1, case2});
+    TestHasU8BindingsCompute({case1, case0, case2});
+    TestHasU8BindingsCompute({case2, case1, case0});
 }
 
 // Check that logic to dirty or reuse VkDescriptorSet takes into account the resource table in the
