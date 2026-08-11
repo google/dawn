@@ -65,6 +65,7 @@
 #         mesa_ge_23.2
 #         nvidia_ge_31.0.15.4601 nvidia_lt_31.0.15.4601
 #         nvidia_ge_32.0.15.8180 nvidia_lt_32.0.15.8180
+#         nvidia_ge_32.0.16.1074 nvidia_lt_32.0.16.1074
 #         nvidia_ge_535.183.01 nvidia_lt_535.183.01 ]
 # ASan
 # tags: [ asan no-asan ]
@@ -934,6 +935,25 @@ crbug.com/470131712 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.81
 crbug.com/470131712 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:texture_format_compatibility:srcFormat="stencil8";dstFormat="stencil8" [ Failure ]
 crbug.com/470115242 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,queue,destroyed,texture:beginRenderPass: [ Failure ]
 crbug.com/470115243 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 webgpu-adapter-default win11 ] webgpu:web_platform,copyToTexture,Image* [ RetryOnFailure ]
+
+# Win11/GTX 1660 failures when going to 610.74
+crbug.com/542749864 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:createRenderPipeline,at_over:*testValueName="atLimit";async=*;items=*primitive_index* [ Failure ]
+
+crbug.com/542752829 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,binary,bitwise:bitwise_and:type="abstract-int";inputSource="const";vectorize="_undef_" [ Skip ]
+crbug.com/542752829 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,af_arithmetic:negation:inputSource="const";vectorize=4 [ Skip ]
+crbug.com/542752829 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,af_arithmetic:negation:inputSource="const";vectorize="_undef_" [ Skip ]
+crbug.com/542752829 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,af_assignment:abstract:inputSource="const" [ Skip ]
+crbug.com/542752829 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,fma:f32:inputSource="const";vectorize="_undef_" [ Skip ]
+
+crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,bitcast:*_to_vec4h:* [ Failure ]
+crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,transpose:f16:inputSource="uniform";cols=3;rows=4 [ Failure ]
+crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,transpose:f16:inputSource="uniform";cols=4;rows=3 [ Failure ]
+crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,transpose:f16:inputSource="uniform";cols=4;rows=4 [ Failure ]
+crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,f16_arithmetic:negation:inputSource="uniform";vectorize=3 [ Failure ]
+crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,f16_arithmetic:negation:inputSource="uniform";vectorize=4 [ Failure ]
+crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,f16_conversion:f16_mat:inputSource="uniform";cols=3;rows=4 [ Failure ]
+crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,f16_conversion:f16_mat:inputSource="uniform";cols=4;rows=3 [ Failure ]
+crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,f16_conversion:f16_mat:inputSource="uniform";cols=4;rows=4 [ Failure ]
 
 # Win/Snapdragon X Elite failures
 # TODO(crbug.com/452840618): Remove this disable block once the tests are actually running.
