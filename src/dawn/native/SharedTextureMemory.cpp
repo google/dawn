@@ -175,7 +175,7 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemoryBase::CreateTexture(
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
-    TextureDescriptor reifiedDescriptor = rawDescriptor->WithTrivialFrontendDefaults();
+    TextureDescriptor reifiedDescriptor = WithTrivialFrontendDefaults(*rawDescriptor);
     UnpackedPtr<TextureDescriptor> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(&reifiedDescriptor));
 

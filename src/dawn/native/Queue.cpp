@@ -358,7 +358,7 @@ MaybeError QueueBase::WriteTextureInternal(const TexelCopyTextureInfo* destinati
                                            Span<const std::byte> data,
                                            const TexelCopyBufferLayout& dataLayout,
                                            const Extent3D* writeSize) {
-    TexelCopyTextureInfo destination = destinationOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo destination = WithTrivialFrontendDefaults(*destinationOrig);
 
     DAWN_TRY(ValidateWriteTexture(&destination, data.size(), dataLayout, writeSize));
 
@@ -449,8 +449,8 @@ MaybeError QueueBase::CopyTextureForBrowserInternal(const TexelCopyTextureInfo* 
                                                     const TexelCopyTextureInfo* destinationOrig,
                                                     const Extent3D* copySize,
                                                     const CopyTextureForBrowserOptions* options) {
-    TexelCopyTextureInfo source = sourceOrig->WithTrivialFrontendDefaults();
-    TexelCopyTextureInfo destination = destinationOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo source = WithTrivialFrontendDefaults(*sourceOrig);
+    TexelCopyTextureInfo destination = WithTrivialFrontendDefaults(*destinationOrig);
 
     if (GetDevice()->IsValidationEnabled()) {
         DAWN_TRY_CONTEXT(
@@ -466,7 +466,7 @@ MaybeError QueueBase::CopyExternalTextureForBrowserInternal(
     const TexelCopyTextureInfo* destinationOrig,
     const Extent3D* copySize,
     const CopyTextureForBrowserOptions* options) {
-    TexelCopyTextureInfo destination = destinationOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo destination = WithTrivialFrontendDefaults(*destinationOrig);
 
     if (GetDevice()->IsValidationEnabled()) {
         DAWN_TRY_CONTEXT(ValidateCopyExternalTextureForBrowser(GetDevice(), source, &destination,

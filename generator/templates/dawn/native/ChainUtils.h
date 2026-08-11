@@ -41,6 +41,7 @@
 
 #include "absl/strings/str_format.h"
 #include "{{include_dir}}/{{namespace}}_structs_autogen.h"
+#include "{{include_dir}}/{{namespace}}_structs_defaults_autogen.h"
 #include "{{native_dir}}/{{prefix}}_platform.h"
 #include "{{native_dir}}/Error.h"
 

@@ -393,7 +393,7 @@ ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingEGLImageImpl(
     const OpenGLFunctions& gl = GetGL(/*makeCurrent=*/false);
 
     TextureDescriptor reifiedDescriptor =
-        FromAPI(descriptor->cTextureDescriptor)->WithTrivialFrontendDefaults();
+        WithTrivialFrontendDefaults(*FromAPI(descriptor->cTextureDescriptor));
     UnpackedPtr<TextureDescriptor> textureDescriptor;
     DAWN_TRY_ASSIGN(textureDescriptor, ValidateAndUnpack(&reifiedDescriptor));
     DAWN_TRY(ValidateTextureDescriptor(this, textureDescriptor));
@@ -455,7 +455,7 @@ ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingGLTextureImpl(
     const OpenGLFunctions& gl = GetGL(/*makeCurrent=*/false);
 
     TextureDescriptor reifiedDescriptor =
-        FromAPI(descriptor->cTextureDescriptor)->WithTrivialFrontendDefaults();
+        WithTrivialFrontendDefaults(*FromAPI(descriptor->cTextureDescriptor));
     UnpackedPtr<TextureDescriptor> textureDescriptor;
     DAWN_TRY_ASSIGN(textureDescriptor, ValidateAndUnpack(&reifiedDescriptor));
     DAWN_TRY(ValidateTextureDescriptor(this, textureDescriptor));

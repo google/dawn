@@ -130,7 +130,7 @@ bool RequiresCreatingNewTextureView(
     // nonexistent. We don't bother to optimize that, because such swizzles are not actually useful.
     // (Also, this code is only reached on Desktop GL anyway.)
     if (auto* swizzleDesc = textureViewDescriptor.Get<TextureComponentSwizzleDescriptor>()) {
-        auto swizzle = swizzleDesc->swizzle.WithTrivialFrontendDefaults();
+        auto swizzle = WithTrivialFrontendDefaults(swizzleDesc->swizzle);
         if (*ToCppAPI(&swizzle) != kRGBASwizzle) {
             return true;
         }

@@ -1008,11 +1008,11 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
         }
     }
 
-    mPrimitive = descriptor->primitive.WithTrivialFrontendDefaults();
+    mPrimitive = WithTrivialFrontendDefaults(descriptor->primitive);
     mMultisample = descriptor->multisample;
 
     if (mAttachmentState->HasDepthStencilAttachment()) {
-        mDepthStencil = descriptor->depthStencil->WithTrivialFrontendDefaults();
+        mDepthStencil = WithTrivialFrontendDefaults(*descriptor->depthStencil);
 
         // Reify depth option for stencil-only formats
         const Format& format = device->GetValidInternalFormat(mDepthStencil.format);
@@ -1058,7 +1058,7 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
         mTargets[i] = target;
 
         if (target.blend != nullptr) {
-            mTargetBlend[i] = target.blend->WithTrivialFrontendDefaults();
+            mTargetBlend[i] = WithTrivialFrontendDefaults(*target.blend);
             mTargets[i].blend = &mTargetBlend[i];
         }
     }

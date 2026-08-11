@@ -102,38 +102,6 @@ namespace {{native_namespace}} {
             {% endif %}
         {% endfor %}
 
-        {% if type.any_member_requires_struct_defaulting %}
-            {{CppType}} {{CppType}}::WithTrivialFrontendDefaults() const {
-                {{CppType}} copy;
-                {% if type.extensible %}
-                    copy.nextInChain = nextInChain;
-                {% endif %}
-                {% if type.chained %}
-                    copy.nextInChain = nextInChain;
-                    copy.sType = sType;
-                {% endif %}
-                {% for member in type.members %}
-                    {% set memberName = member.name.camelCase() %}
-                    {% if spanify and member.is_length %}
-                        //* Skip as the member is included in the span member.
-                    {% elif member.requires_struct_defaulting %}
-                        {% if member.type.category == "structure" %}
-                            copy.{{memberName}} = {{memberName}}.WithTrivialFrontendDefaults();
-                        {% elif member.type.category == "enum" %}
-                            {% set Enum = namespace + "::" + as_cppType(member.type.name) %}
-                            copy.{{memberName}} = ({{memberName}} == {{Enum}}::Undefined)
-                                ? {{Enum}}::{{as_cppEnum(Name(member.default_value))}}
-                                : {{memberName}};
-                        {% else %}
-                            {{assert(False, "other types do not currently support defaulting")}}
-                        {% endif %}
-                    {% else %}
-                        copy.{{memberName}} = {{memberName}};
-                    {% endif %}
-                {% endfor %}
-                return copy;
-            }
-        {% endif %}
         bool {{CppType}}::operator==(const {{CppType}}& rhs) const {
             {% if type.extensible or type.chained -%}
                 if (nextInChain != rhs.nextInChain) { return false; }

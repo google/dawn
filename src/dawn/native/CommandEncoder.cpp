@@ -1795,7 +1795,7 @@ void CommandEncoder::InternalCopyBufferToBufferWithAllocatedSize(BufferBase* sou
 void CommandEncoder::APICopyBufferToTexture(const TexelCopyBufferInfo* source,
                                             const TexelCopyTextureInfo* destinationOrig,
                                             const Extent3D* copySize) {
-    TexelCopyTextureInfo destination = destinationOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo destination = WithTrivialFrontendDefaults(*destinationOrig);
 
     mEncodingContext.TryEncode(
         this,
@@ -1896,7 +1896,7 @@ void CommandEncoder::APICopyBufferToTexture(const TexelCopyBufferInfo* source,
 void CommandEncoder::APICopyTextureToBuffer(const TexelCopyTextureInfo* sourceOrig,
                                             const TexelCopyBufferInfo* destination,
                                             const Extent3D* copySize) {
-    TexelCopyTextureInfo source = sourceOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo source = WithTrivialFrontendDefaults(*sourceOrig);
 
     mEncodingContext.TryEncode(
         this,
@@ -1991,8 +1991,8 @@ void CommandEncoder::APICopyTextureToBuffer(const TexelCopyTextureInfo* sourceOr
 void CommandEncoder::APICopyTextureToTexture(const TexelCopyTextureInfo* sourceOrig,
                                              const TexelCopyTextureInfo* destinationOrig,
                                              const Extent3D* copySize) {
-    TexelCopyTextureInfo source = sourceOrig->WithTrivialFrontendDefaults();
-    TexelCopyTextureInfo destination = destinationOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo source = WithTrivialFrontendDefaults(*sourceOrig);
+    TexelCopyTextureInfo destination = WithTrivialFrontendDefaults(*destinationOrig);
 
     mEncodingContext.TryEncode(
         this,

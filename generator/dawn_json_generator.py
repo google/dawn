@@ -1909,6 +1909,16 @@ class MultiGeneratorFromDawnJSON(Generator):
                     native_dir + '/' + namespace + '_structs_autogen.cpp',
                     frontend_params))
             renders.append(
+                FileRender(
+                    'dawn/native/api_structs_defaults.h', native_dir + '/' +
+                    namespace + '_structs_defaults_autogen.h',
+                    frontend_params))
+            renders.append(
+                FileRender(
+                    'dawn/native/api_structs_defaults.cpp', native_dir + '/' +
+                    namespace + '_structs_defaults_autogen.cpp',
+                    frontend_params))
+            renders.append(
                 FileRender('dawn/native/ProcTable.cpp',
                            native_dir + '/ProcTable.cpp', frontend_params))
             renders.append(

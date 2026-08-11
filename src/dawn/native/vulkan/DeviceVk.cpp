@@ -945,7 +945,7 @@ Ref<TextureBase> Device::CreateTextureWrappingVulkanImage(
         return nullptr;
     }
     TextureDescriptor reifiedDescriptor =
-        FromAPI(descriptor->cTextureDescriptor)->WithTrivialFrontendDefaults();
+        WithTrivialFrontendDefaults(*FromAPI(descriptor->cTextureDescriptor));
     UnpackedPtr<TextureDescriptor> textureDescriptor;
     if (ConsumedError(ValidateAndUnpack(&reifiedDescriptor), &textureDescriptor)) {
         return nullptr;

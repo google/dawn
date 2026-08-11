@@ -423,7 +423,7 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
         options = &kDefaultOptions;
     }
 
-    RequestAdapterOptions rawOptions = options->WithTrivialFrontendDefaults();
+    RequestAdapterOptions rawOptions = WithTrivialFrontendDefaults(*options);
     UnpackedPtr<RequestAdapterOptions> unpacked = Unpack(&rawOptions);
     if (unpacked.Has<RequestAdapterWebXROptions>()) {
         ConsumedErrorAndWarnOnce(DAWN_VALIDATION_ERROR("RequestAdapterWebXROptions unsupported."));

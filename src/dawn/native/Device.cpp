@@ -1953,7 +1953,7 @@ void DeviceBase::APIValidateTextureDescriptor(const TextureDescriptor* descripto
         allowMultiPlanar = AllowMultiPlanarTextureFormat::No;
     }
 
-    TextureDescriptor rawDescriptor = descriptorOrig->WithTrivialFrontendDefaults();
+    TextureDescriptor rawDescriptor = WithTrivialFrontendDefaults(*descriptorOrig);
 
     UnpackedPtr<TextureDescriptor> unpacked;
     if (!ConsumedError(ValidateAndUnpack(&rawDescriptor), &unpacked)) {
@@ -2260,7 +2260,7 @@ ResultOrError<Ref<SamplerBase>> DeviceBase::CreateSampler(const SamplerDescripto
 
     SamplerDescriptor descriptor = {};
     if (descriptorOrig) {
-        descriptor = descriptorOrig->WithTrivialFrontendDefaults();
+        descriptor = WithTrivialFrontendDefaults(*descriptorOrig);
     }
 
     if (IsValidationEnabled() && validate == ValidationMode::Validate) {
@@ -2344,7 +2344,7 @@ ResultOrError<Ref<SwapChainBase>> DeviceBase::CreateSwapChain(Surface* surface,
 ResultOrError<Ref<TextureBase>> DeviceBase::CreateTexture(const TextureDescriptor* descriptorOrig) {
     DAWN_TRY(ValidateIsAlive());
 
-    TextureDescriptor rawDescriptor = descriptorOrig->WithTrivialFrontendDefaults();
+    TextureDescriptor rawDescriptor = WithTrivialFrontendDefaults(*descriptorOrig);
 
     UnpackedPtr<TextureDescriptor> descriptor;
     if (IsValidationEnabled()) {

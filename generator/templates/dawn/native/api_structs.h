@@ -186,14 +186,6 @@ namespace {{native_namespace}} {
                 {% endif %}
             {% endfor %}
 
-            {% if type.any_member_requires_struct_defaulting %}
-                // This method makes a copy of the struct, then, for any enum members with trivial
-                // defaulting (where something like "Undefined" is replaced with a default), applies
-                // all of the defaults for the struct, and recursively its by-value substructs (but
-                // NOT by-pointer substructs since they are const*). It must be called in an
-                // appropriate place in Dawn.
-                [[nodiscard]] {{CppType}} WithTrivialFrontendDefaults() const;
-            {% endif %}
             // Equality operators, mostly for testing. Note that this tests
             // strict pointer-pointer equality if the struct contains member pointers.
             bool operator==(const {{CppType}}& rhs) const;

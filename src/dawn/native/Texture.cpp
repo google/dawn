@@ -499,7 +499,7 @@ MaybeError ValidateTextureComponentSwizzle(const DeviceBase* device,
                         "swizzle used without the %s feature enabled.",
                         wgpu::FeatureName::TextureComponentSwizzle);
 
-        auto swizzle = swizzleDesc->swizzle.WithTrivialFrontendDefaults();
+        auto swizzle = WithTrivialFrontendDefaults(swizzleDesc->swizzle);
         DAWN_TRY(ValidateComponentSwizzle(swizzle.r));
         DAWN_TRY(ValidateComponentSwizzle(swizzle.g));
         DAWN_TRY(ValidateComponentSwizzle(swizzle.b));
@@ -973,7 +973,7 @@ ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
 
     TextureViewDescriptor desc = {};
     if (descriptor) {
-        desc = descriptor->WithTrivialFrontendDefaults();
+        desc = WithTrivialFrontendDefaults(*descriptor);
     }
 
     // The default value for the view dimension depends on the texture's dimension with a
@@ -1163,7 +1163,7 @@ void TextureBase::DestroyImpl(DestroyReason reason) {
 
 // static
 Ref<TextureBase> TextureBase::MakeError(DeviceBase* device, const TextureDescriptor* descriptor) {
-    TextureDescriptor reifiedDesc = descriptor->WithTrivialFrontendDefaults();
+    TextureDescriptor reifiedDesc = WithTrivialFrontendDefaults(*descriptor);
     return AcquireRef(new TextureBase(device, &reifiedDesc, ObjectBase::kError));
 }
 
@@ -1727,7 +1727,7 @@ TextureViewQuery::TextureViewQuery(const UnpackedPtr<TextureViewDescriptor>& des
     usage = desc->usage;
 
     if (auto* swizzleDesc = desc.Get<TextureComponentSwizzleDescriptor>()) {
-        auto swizzle = swizzleDesc->swizzle.WithTrivialFrontendDefaults();
+        auto swizzle = WithTrivialFrontendDefaults(swizzleDesc->swizzle);
         swizzleRed = swizzle.r;
         swizzleGreen = swizzle.g;
         swizzleBlue = swizzle.b;
@@ -1773,7 +1773,7 @@ TextureViewBase::TextureViewBase(TextureBase* texture,
           texture->GetNumMipLevels(),
           texture->GetArrayLayers())) {
     if (auto* swizzleDesc = descriptor.Get<TextureComponentSwizzleDescriptor>()) {
-        auto swizzle = swizzleDesc->swizzle.WithTrivialFrontendDefaults();
+        auto swizzle = WithTrivialFrontendDefaults(swizzleDesc->swizzle);
         mSwizzleRed = swizzle.r;
         mSwizzleGreen = swizzle.g;
         mSwizzleBlue = swizzle.b;

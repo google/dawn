@@ -464,7 +464,7 @@ uint64_t Surface::GetXWindow() const {
 }
 
 MaybeError Surface::Configure(const SurfaceConfiguration* configIn) {
-    SurfaceConfiguration config = configIn->WithTrivialFrontendDefaults();
+    SurfaceConfiguration config = WithTrivialFrontendDefaults(*configIn);
     DAWN_CHECK(config.device);
     // Configured-or-not is specified as a client-side state, so it must be
     // maintained even on error surfaces.

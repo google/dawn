@@ -2127,7 +2127,7 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
             // feature.
             DAWN_ASSERT(device->HasFeature(Feature::YCbCrVulkanSamplers));
 
-            yCbCr = yCbCrVkDescriptor->WithTrivialFrontendDefaults();
+            yCbCr = WithTrivialFrontendDefaults(*yCbCrVkDescriptor);
             yCbCr.nextInChain = nullptr;
         } else {
             // When using OpaqueYCbCrAndroidForExternalTexture, the YCbCr conversion is the same one
