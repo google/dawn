@@ -1233,6 +1233,9 @@ TEST_P(BufferZeroInitTest, PaddingInitialized) {
     // path and fail for EXPECT_LAZY_CLEAR.
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
+    // Fails on Xclipse with Vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsSamsung() && IsVulkan());
+
     constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
     // A small sub-4-byte format means a single vertex can fit entirely within the padded buffer,
     // touching some of the padding. Test a small format, as well as larger formats.

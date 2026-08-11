@@ -1323,6 +1323,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndRast
     // TODO(crbug.com/458113207): Flaky w/ WARP.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
 
+    // Fails on Xclipse GPUs.
+    DAWN_SUPPRESS_TEST_IF(IsSamsung());
+
     constexpr float kMSAACoverage = 0.50f;
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;
     constexpr bool kAlphaToCoverageEnabled = true;

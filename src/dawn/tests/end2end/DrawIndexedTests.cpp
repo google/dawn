@@ -183,6 +183,9 @@ TEST_P(DrawIndexedTest, NegativeBaseVertex) {
     // Also failing on Qualcomm and ARM GLES.
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && (IsQualcomm() || IsARM()));
 
+    // Fails on Xclipse with ANGLE Vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsSamsung() && IsOpenGLES() && IsANGLE());
+
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
 

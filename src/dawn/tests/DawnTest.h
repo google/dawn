@@ -319,6 +319,7 @@ class DawnTestBase {
     bool IsIntel() const;
     bool IsNvidia() const;
     bool IsQualcomm() const;
+    bool IsSamsung() const;
     bool IsSwiftshader() const;
     bool IsANGLE() const;
     bool IsANGLESwiftShader() const;

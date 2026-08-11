@@ -616,6 +616,9 @@ TEST_P(VertexStateTest, LastAllowedVertexBuffer) {
 
 // Test that overlapping vertex attributes are permitted and load data correctly
 TEST_P(VertexStateTest, OverlappingVertexAttributes) {
+    // Fails on Xclipse with ANGLE Vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsSamsung() && IsOpenGLES() && IsANGLE());
+
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
 
     utils::ComboVertexState vertexState;

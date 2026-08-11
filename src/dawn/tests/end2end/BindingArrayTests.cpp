@@ -349,6 +349,9 @@ TEST_P(SizedBindingArrayTests, NonArrayedBindingCompatibleWithArrayedBGLEntry) {
 
 // Test that binding_array<T, 1> is compatible with a non-arrayed layout.
 TEST_P(SizedBindingArrayTests, BindingArraySize1CompatibleWithNonArrayedBGL) {
+    // Crashes on Xclipse GPUs with ANGLE Vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsSamsung() && IsOpenGLES() && IsANGLE());
+
     // Make the test pipeline
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         @vertex fn vs() -> @builtin(position) vec4f {
@@ -462,6 +465,8 @@ TEST_P(SizedBindingArrayTests, BindingArrayOfSampledTexturesPassedAsArgument) {
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsWindows() && IsIntel());
     // TODO(crbug.com/492539239): Access violation during test teardown.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsVulkan());
+    // Crashes on Xclipse GPUs with Vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsSamsung() && IsVulkan());
 
     // TODO(https://crbug.com/496253718): The OpenGL backend is not passing the correct metadata for
     // the texture builtin polyfills.

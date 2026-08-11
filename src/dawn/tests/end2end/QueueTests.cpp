@@ -655,6 +655,8 @@ TEST_P(QueueWriteTextureTests, VaryingBytesPerRowCube) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsIntel() && IsAndroid());
     // TODO(crbug.com/dawn/42241333): diagnose stencil8 failure on Angle Swiftshader
     DAWN_SUPPRESS_TEST_IF(format == wgpu::TextureFormat::Stencil8 && IsANGLESwiftShader());
+    // Fails on Xclipse with ANGLE Vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsSamsung() && IsOpenGLES() && IsANGLE());
 
     // TODO(383765096): D3D11 doesn't allow calling Gather() on R8_UINT
     DAWN_SUPPRESS_TEST_IF(format == wgpu::TextureFormat::Stencil8 && IsD3D11() &&

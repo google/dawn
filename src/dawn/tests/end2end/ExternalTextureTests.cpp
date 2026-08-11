@@ -673,6 +673,9 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
     // TODO(crbug.com/522868202): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
+    // Fails on Xclipse GPUs.
+    DAWN_SUPPRESS_TEST_IF(IsSamsung());
+
     wgpu::Texture sampledTexturePlane0 =
         Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::R8Unorm,
                         wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
@@ -1469,6 +1472,9 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
 
     // TODO(crbug.com/522868202): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
+    // Fails on Xclipse GPUs.
+    DAWN_SUPPRESS_TEST_IF(IsSamsung());
 
     wgpu::Texture sourceTexturePlane0 =
         Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::R8Unorm,

@@ -1188,6 +1188,10 @@ bool DawnTestBase::IsQualcomm() const {
            gpu_info::IsQualcommACPI(mAdapterInfo->vendorID);
 }
 
+bool DawnTestBase::IsSamsung() const {
+    return gpu_info::IsSamsung(mAdapterInfo->vendorID);
+}
+
 bool DawnTestBase::IsSwiftshader() const {
     return gpu_info::IsGoogleSwiftshader(mAdapterInfo->vendorID, mAdapterInfo->deviceID);
 }

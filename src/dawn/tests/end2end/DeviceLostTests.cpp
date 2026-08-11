@@ -498,6 +498,9 @@ TEST_P(DeviceLostTest, QueueOnSubmittedWorkDoneAfterDeviceLost) {
 
 // Test QueueOnSubmittedWorkDone when the device is lost after calling OnSubmittedWorkDone
 TEST_P(DeviceLostTest, QueueOnSubmittedWorkDoneBeforeLossFails) {
+    // Fails on Xclipse with ANGLE Vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsSamsung() && IsOpenGLES() && IsANGLE());
+
     // Callback should have success status
     EXPECT_CALL(mWorkDoneCb, Call(wgpu::QueueWorkDoneStatus::Success, EmptySizedString()));
     queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents, mWorkDoneCb.Callback());

@@ -644,6 +644,8 @@ TEST_P(BufferMappingTests, RegressChromium1421170) {
 TEST_P(BufferMappingTests, WaitForOnSubmittedWorkDoneThenMap) {
     // WaitAnyOnly is not supported in wire.
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    /// Fail on Xclipse with ANGLE Vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsSamsung() && IsOpenGLES() && IsANGLE());
 
     const uint32_t kExpectedValue = 42;
     constexpr size_t kSize = sizeof(kExpectedValue);

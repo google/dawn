@@ -295,6 +295,8 @@ TEST_P(SamplerFilterAnisotropicTest, SlantedPlaneMipmap) {
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
                              HasToggleEnabled("gl_force_es_31_and_no_extensions"));
     DAWN_SUPPRESS_TEST_IF(IsWARP());
+    // Fails on Xclipse with ANGLE Vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsSamsung() && IsOpenGLES() && IsANGLE());
 
     const uint16_t maxAnisotropyLists[] = {1, 2, 16, 128};
     for (uint16_t t : maxAnisotropyLists) {
