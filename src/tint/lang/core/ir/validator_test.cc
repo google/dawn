@@ -379,6 +379,23 @@ TEST_F(IR_ValidatorTest, Construct_Vector_2arg_WrongType) {
 )"));
 }
 
+TEST_F(IR_ValidatorTest, Construct_Vector_InsteadOfConvert) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct<vec2f>(b.Zero<vec2h>());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(error: construct: no matching overload for vec2<f32> constructor
+    %2:vec2<f32> = construct vec2<f16>(0.0h)
+                   ^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Construct_Matrix_NoArgs) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
@@ -432,6 +449,20 @@ TEST_F(IR_ValidatorTest, Construct_Matrix_Scalar_WrongType) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
         b.Construct(ty.mat2x2<f32>(), 1_f, 2_f, 3_h, 4_f);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("error: construct: no matching overload for mat2x2<f32> constructor"));
+}
+
+TEST_F(IR_ValidatorTest, Construct_Matrix_InsteadOfConvert) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(ty.mat2x2<f32>(), b.Zero(ty.mat2x2<f16>()));
         b.Return(f);
     });
 

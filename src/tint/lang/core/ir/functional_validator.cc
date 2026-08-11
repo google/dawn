@@ -877,7 +877,9 @@ void Functional::CheckConstruct(const Construct* construct) {
         auto ctor_conv = intrinsic::VectorCtorConv(vec->Width());
         auto match = table.Lookup(ctor_conv, Vector<TemplateParameter, 1>{vec->Type()},
                                   std::move(arg_types), core::EvaluationStage::kConstant);
-        if (match != Success || vec->Type() != arg_types[0]->DeepestElement()) {
+        if (match != Success ||
+            !match->info->flags.Contains(intrinsic::OverloadFlag::kIsConstructor) ||
+            vec->Type() != arg_types[0]->DeepestElement()) {
             AddError(construct) << "no matching overload for " << vec->FriendlyName()
                                 << " constructor";
         }
@@ -888,7 +890,8 @@ void Functional::CheckConstruct(const Construct* construct) {
         auto ctor_conv = intrinsic::MatrixCtorConv(mat->Columns(), mat->Rows());
         auto match = table.Lookup(ctor_conv, Vector<TemplateParameter, 1>{mat->Type()},
                                   std::move(arg_types), core::EvaluationStage::kConstant);
-        if (match != Success) {
+        if (match != Success ||
+            !match->info->flags.Contains(intrinsic::OverloadFlag::kIsConstructor)) {
             AddError(construct) << "no matching overload for " << mat->FriendlyName()
                                 << " constructor";
         }
