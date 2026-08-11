@@ -395,7 +395,7 @@ std::span<std::byte> GetByteSpan() {
     return {};
 }
 
-TEST(SpanTest, ConstructorFromCompatibleRange) {
+TEST(SpanTest, Constructor_CompatibleRange) {
     {
         std::array<int, 3> data = {1, 2, 3};
         Span<int> sp{data};
@@ -470,6 +470,115 @@ TEST(SpanTest, ConstructorFromCompatibleRange) {
         ityp::span<Index, const int> sp{data};
         EXPECT_EQ(sp.size(), data.size());
         EXPECT_EQ(sp.data(), data.data());
+    }
+}
+
+TEST(SpanTest, Constructor_DynamicToFixed) {
+    // Span<T> -> Span<T, N>
+    {
+        std::array<int, 3> data = {1, 2, 3};
+        Span<int> sp(data);
+        Span<int, 3> fixed(sp);
+        EXPECT_EQ(fixed.size(), 3u);
+        EXPECT_EQ(fixed.data(), data.data());
+        EXPECT_EQ(fixed[0], 1);
+        EXPECT_EQ(fixed[1], 2);
+        EXPECT_EQ(fixed[2], 3);
+    }
+    // Span<const T> -> Span<const T, N>
+    {
+        FakeRange data;
+        Span<const int> sp(data);
+        Span<const int, 5> fixed(sp);
+        EXPECT_EQ(fixed.size(), 5u);
+        EXPECT_EQ(fixed.data(), data.data());
+        EXPECT_EQ(fixed[0], 1);
+        EXPECT_EQ(fixed[1], 2);
+        EXPECT_EQ(fixed[2], 3);
+    }
+    // ityp::span<Index, const T> -> ityp::span<Index, const T, N>
+    {
+        FakeTypedRange data;
+        ityp::span<Index, const int> sp(data);
+        ityp::span<Index, const int, Index{5u}> fixed(sp);
+        EXPECT_EQ(fixed.size(), Index{5u});
+        EXPECT_EQ(fixed.data(), data.data());
+        EXPECT_EQ(fixed[Index{0u}], 1);
+        EXPECT_EQ(fixed[Index{1u}], 2);
+        EXPECT_EQ(fixed[Index{2u}], 3);
+    }
+    // Empty dynamic span -> Span<T, 0>
+    {
+        Span<int> sp;
+        Span<int, 0> fixed(sp);
+        EXPECT_EQ(fixed.size(), 0u);
+        EXPECT_EQ(fixed.data(), nullptr);
+        EXPECT_TRUE(fixed.empty());
+    }
+    // Empty dynamic const span -> Span<const T, 0>
+    {
+        Span<const int> sp;
+        Span<const int, 0> fixed(sp);
+        EXPECT_EQ(fixed.size(), 0u);
+        EXPECT_EQ(fixed.data(), nullptr);
+        EXPECT_TRUE(fixed.empty());
+    }
+    // Empty dynamic typed span -> ityp::span<Index, T, 0>
+    {
+        ityp::span<Index, int> sp;
+        ityp::span<Index, int, Index{0u}> fixed(sp);
+        EXPECT_EQ(fixed.size(), Index{0u});
+        EXPECT_EQ(fixed.data(), nullptr);
+        EXPECT_TRUE(fixed.empty());
+    }
+    // Empty dynamic const typed span -> ityp::span<Index, const T, 0>
+    {
+        ityp::span<Index, const int> sp;
+        ityp::span<Index, const int, Index{0u}> fixed(sp);
+        EXPECT_EQ(fixed.size(), Index{0u});
+        EXPECT_EQ(fixed.data(), nullptr);
+        EXPECT_TRUE(fixed.empty());
+    }
+}
+
+TEST(SpanDeathTest, Constructor_DynamicToFixedSizeMismatch) {
+    {
+        std::array<int, 5> data = {1, 2, 3, 4, 5};
+        FakeRange constData;
+        Span<int> sp(data);
+        Span<const int> constSp(constData);
+
+        // Dynamic span larger than fixed extent.
+        EXPECT_DEATH_IF_SUPPORTED((Span<int, 2>{sp}), "");
+        EXPECT_DEATH_IF_SUPPORTED((Span<const int, 2>{constSp}), "");
+
+        // Dynamic span smaller than fixed extent.
+        EXPECT_DEATH_IF_SUPPORTED((Span<int, 10>{sp}), "");
+        EXPECT_DEATH_IF_SUPPORTED((Span<const int, 10>{constSp}), "");
+
+        // Empty dynamic span to non-zero fixed extent.
+        Span<int> emptySp;
+        Span<const int> emptyConstSp;
+        EXPECT_DEATH_IF_SUPPORTED((Span<int, 3>{emptySp}), "");
+        EXPECT_DEATH_IF_SUPPORTED((Span<const int, 3>{emptyConstSp}), "");
+    }
+
+    // Typed integer index tests.
+    {
+        FakeTypedRange data;
+        ityp::span<Index, const int> constSp(data);
+
+        // Dynamic span larger than fixed extent.
+        EXPECT_DEATH_IF_SUPPORTED((ityp::span<Index, const int, Index{2u}>{constSp}), "");
+
+        // Dynamic span smaller than fixed extent.
+        EXPECT_DEATH_IF_SUPPORTED((ityp::span<Index, const int, Index{10u}>{constSp}), "");
+
+        // Empty dynamic span to non-zero fixed extent.
+        ityp::span<Index, int> emptySp;
+        ityp::span<Index, const int> emptyConstSp;
+        EXPECT_DEATH_IF_SUPPORTED((ityp::span<Index, int, Index{3u}>{emptySp}), "");
+        EXPECT_DEATH_IF_SUPPORTED((ityp::span<Index, const int, Index{3u}>{emptyConstSp}), "");
     }
 }
 

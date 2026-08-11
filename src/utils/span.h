@@ -254,6 +254,18 @@ class SpanBase : private SpanStorage<Index, PtrType, Extent> {
     explicit(false) constexpr SpanBase(const R& range)
         : Storage(checked_cast<size_t>(range.size()), range.data()) {}
 
+    // Constructor converting a dynamic extent Span to a fixed one.
+    explicit constexpr SpanBase(SpanBase<T, Index, PtrType, DynamicExtent<Index>>& other)
+        requires(!kIsDynamicExtent)
+        : Storage(other.data()) {
+        DAWN_CHECK(other.size() == Extent);
+    }
+    explicit constexpr SpanBase(const SpanBase<T, Index, PtrType, DynamicExtent<Index>>& other)
+        requires(!kIsDynamicExtent)
+        : Storage(other.data()) {
+        DAWN_CHECK(other.size() == Extent);
+    }
+
     // Move / copy constructor / assignment operator.
     constexpr SpanBase(const SpanBase& other) noexcept = default;
     constexpr SpanBase(SpanBase&& other) noexcept = default;
