@@ -25,19 +25,11 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//* TODO(https://crbug.com/526537254): It might be possible to merge this with the
-//* api_structs.h in native once we finish migrating both native and wire.
-
-{% from 'dawn/cpp_macros.tmpl' import wgpu_string_members with context %}
-
-{% set namespace = metadata.namespace %}
-#ifndef DAWNWIRE_CLIENT_{{namespace.upper()}}_STRUCTS_AUTOGEN_H_
-#define DAWNWIRE_CLIENT_{{namespace.upper()}}_STRUCTS_AUTOGEN_H_
+#ifndef DAWNWIRE_CLIENT_WGPU_STRUCTS_AUTOGEN_H_
+#define DAWNWIRE_CLIENT_WGPU_STRUCTS_AUTOGEN_H_
 
 #include "absl/strings/string_view.h"
-{% set api = metadata.api.lower() %}
-{% set CAPI = metadata.c_prefix %}
-#include "dawn/{{api}}_cpp.h"
+#include "dawn/webgpu_cpp.h"
 #include "src/utils/span.h"
 
 #include <cmath>
@@ -45,49 +37,6 @@
 #include <string_view>
 
 namespace dawn::wire::client {
-
-{% macro render_cpp_default_value(member, forced_default_value="") -%}
-    //* Apply default values over undefined when dealing with the Dawn
-    //* native header to avoid needing to do the additional step of
-    //* resolving trivial defaults internally.
-    {%- if forced_default_value -%}
-        {{" "}}= {{forced_default_value}}
-    {%- elif member.annotation in ["*", "const*", "const*const*"] or member.default_value == "nullptr" -%}
-        {{" "}}= nullptr
-    {%- elif member.type.category == "object" and member.optional -%}
-        {{" "}}= nullptr
-    {%- elif member.type.category == "callback info" -%}
-        {{" "}}= {{CAPI}}_{{member.name.SNAKE_CASE()}}_INIT
-    {%- elif member.type.category == "enum" -%}
-        {%- if member.default_value != None -%}
-            {{" "}}= {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
-        {%- elif member.type.hasUndefined -%}
-            {{" "}}= {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name("undefined"))}}
-        {%- else -%}
-            {{" "}}= {}
-        {%- endif -%}
-    {%- elif member.type.category == "bitmask" -%}
-        {%- if member.default_value != None -%}
-            {{" "}}= {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
-        {%- else -%}
-            //* Bitmask types should currently always default to "none" if not
-            //* explicitly set.
-            {{" "}}= {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name("none"))}}
-        {%- endif -%}
-    {%- elif member.type.category == "native" and member.default_value != None -%}
-        //* Check to see if the default value is a known constant.
-        {%- set constant = find_by_name(by_category["constant"], member.default_value) -%}
-        {%- if constant -%}
-            {{" "}}= {{namespace}}::k{{constant.name.CamelCase()}}
-        {%- else -%}
-            {{" "}}= {{member.default_value}}
-        {%- endif -%}
-    {%- elif member.default_value != None -%}
-        {{" "}}= {{member.default_value}}
-    {%- else -%}
-        {{assert(member.default_value == None)}}
-    {%- endif -%}
-{%- endmacro %}
 
 {% for type in by_category["object"] %}
     {% if type.name.CamelCase() in client_special_objects %}
@@ -97,115 +46,8 @@ namespace dawn::wire::client {
     {% endif %}
 {% endfor %}
 
-    using {{namespace}}::ChainedStruct;
-    using {{namespace}}::ChainedStructOut;
-
-    //* Special structures that are manually written.
-    {% set SpecialStructures = ["string view"] %}
-
-    struct StringView {
-        char const * data = nullptr;
-        size_t length = WGPU_STRLEN;
-
-        {{wgpu_string_members("StringView")}}
-
-        #ifndef ABSL_USES_STD_STRING_VIEW
-        // NOLINTNEXTLINE(google-explicit-constructor)
-        operator absl::string_view() const {
-            if (this->length == wgpu::kStrlen) {
-                if (IsUndefined()) {
-                    return {};
-                }
-                return {this->data};
-            }
-            return {this->data, this->length};
-        }
-        #endif
-    };
-
-    // NOLINTBEGIN(bugprone-invalid-enum-default-initialization)
-
-    {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
-        {% set CppType = as_cppType(type.name) %}
-        {% if type.chained %}
-            {% set chainedStructType = "ChainedStructOut" if type.chained == "out" else "ChainedStruct" %}
-            struct {{CppType}} : {{chainedStructType}} {
-                {{CppType}}() {
-                    sType = {{namespace}}::SType::{{type.name.CamelCase()}};
-                }
-        {% else %}
-            struct {{CppType}} {
-                {% if type.has_free_members_function %}
-                    {{CppType}}() = default;
-                {% endif %}
-        {% endif %}
-            {% if type.has_free_members_function %}
-                ~{{CppType}}();
-                {{CppType}}(const {{CppType}}&) = delete;
-                {{CppType}}& operator=(const {{CppType}}&) = delete;
-                {{CppType}}({{CppType}}&&);
-                {{CppType}}& operator=({{CppType}}&&);
-
-            {% endif %}
-            {% if type.extensible %}
-                {% set chainedStructType = "ChainedStructOut" if type.output else "ChainedStruct const" %}
-                {{chainedStructType}} * nextInChain = nullptr;
-            {% endif %}
-            {% for member in type.members %}
-                //* Align the first member after ChainedStruct to match the C struct layout.
-                //* It has to be aligned both to its natural and ChainedStruct's alignment.
-                {% if type.chained and loop.first %}
-                    alignas({{namespace}}::{{CppType}}::kFirstMemberAlignment)
-                {% endif %}
-
-                {% if type.name.get() == "bind group layout entry" %}
-                    {% if member.name.canonical_case() == "buffer" %}
-                        {% set forced_default_value = "{ nullptr, wgpu::BufferBindingType::BindingNotUsed, false, 0 }" %}
-                    {% elif member.name.canonical_case() == "sampler" %}
-                        {% set forced_default_value = "{ nullptr, wgpu::SamplerBindingType::BindingNotUsed }" %}
-                    {% elif member.name.canonical_case() == "texture" %}
-                        {% set forced_default_value = "{ nullptr, wgpu::TextureSampleType::BindingNotUsed, wgpu::TextureViewDimension::e2D, false }" %}
-                    {% elif member.name.canonical_case() == "storage texture" %}
-                        {% set forced_default_value = "{ nullptr, wgpu::StorageTextureAccess::BindingNotUsed, wgpu::TextureFormat::Undefined, wgpu::TextureViewDimension::e2D }" %}
-                    {% endif %}
-                {% endif %}
-
-                {% if member.is_length %}
-                    //* Skip as it's included in the span just below.
-                {% elif member.length and member.constant_length != 1 %}
-                    {% set length = "dawn::detail::DynamicExtent<size_t>" %}
-                    {% if member.length == "constant" %}
-                        {% set length = member.constant_length %}
-                    {% endif %}
-                    {% if member.type.name.canonical_case() == "void" %}
-                        {% set element_type = "const std::byte" %}
-                    {% else %}
-                        {% set element_type = "std::remove_pointer_t<" + decorate(as_wire_clientType(member.type), member) + ">" %}
-                    {% endif %}
-                    ityp::span<size_t, {{element_type}}, {{length}}> {{as_varName(member.name)}};
-                {% else %}
-                    {{as_annotated_wire_clientType(member)}} {{render_cpp_default_value(member, forced_default_value)}};
-                {% endif %}
-            {% endfor %}
-
-            {% if type.has_free_members_function %}
-              private:
-                inline void FreeMembers();
-            {% endif %}
-        };
-
-    {% endfor %}
-    // NOLINTEND(bugprone-invalid-enum-default-initialization)
-
-    {% for typeDef in by_category["typedef"] if typeDef.type.category == "structure" %}
-        using {{as_cppType(typeDef.name)}} = {{as_cppType(typeDef.type.name)}};
-    {% endfor %}
-
-    {% for type in by_category["structure"] if type.has_free_members_function %}
-        // {{as_cppType(type.name)}}
-        void APIFreeMembers({{as_cType(type.name)}});
-    {% endfor %}
+{% include 'dawn/api_structs.h.tmpl' %}
 
 } // namespace dawn::wire::client
 
-#endif  // DAWNWIRE_CLIENT_{{namespace.upper()}}_STRUCTS_AUTOGEN_H_
+#endif  // DAWNWIRE_CLIENT_WGPU_STRUCTS_AUTOGEN_H_

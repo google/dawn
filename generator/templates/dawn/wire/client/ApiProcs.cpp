@@ -53,7 +53,7 @@
                 using {{varName}}SpanT = {% if arg.annotation == "const*" %}const {% endif %}std::byte;
                 auto {{varName}}Ptr = reinterpret_cast<{{varName}}SpanT*>({{varName}});
             {% else %}
-                using {{varName}}SpanT = std::remove_pointer_t<{% if arg.type.category in ["object", "structure"] %}{{client}}::{% endif %}{{decorate(as_wire_clientType(arg.type), arg)}}>;
+                using {{varName}}SpanT = std::remove_pointer_t<{% if arg.type.category in ["object", "structure"] %}{{client}}::{% endif %}{{decorate(as_dawnType(arg.type), arg)}}>;
                 auto {{varName}}Ptr = {{client}}::FromAPI({{varName}});
             {% endif %}
             // SAFETY: The webgpu.h user is required to pass valid ranges of objects.
@@ -61,11 +61,11 @@
         {% elif arg.type.category == "structure" %}
             auto {{varName}}_ = {{client}}::FromAPI({{varName}});
         {% elif arg.type.category in ["enum", "bitmask"] and arg.annotation == "value" %}
-            auto {{varName}}_ = static_cast<{{as_wire_clientType(arg.type)}}>({{varName}});
+            auto {{varName}}_ = static_cast<{{as_dawnType(arg.type)}}>({{varName}});
         {% elif arg.type.category == "object" %}
             auto {{varName}}_ = {{client}}::FromAPI({{varName}});
         {% elif arg.annotation != "value" %}
-            auto {{varName}}_ = reinterpret_cast<{{decorate(as_wire_clientType(arg.type), arg)}}>({{varName}});
+            auto {{varName}}_ = reinterpret_cast<{{decorate(as_dawnType(arg.type), arg)}}>({{varName}});
         {% else %}
             auto {{varName}}_ = {{as_varName(arg.name)}};
         {% endif %}

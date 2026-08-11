@@ -25,34 +25,28 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-{% macro wgpu_string_members(CppType) %}
+{% macro wgpu_string_members(CppType, use_absl=False) %}
     inline constexpr {{CppType}}() noexcept = default;
-
     explicit(false) inline constexpr {{CppType}}(const std::string_view& sv) noexcept {
         this->data = sv.data();
         this->length = sv.length();
     }
-
     explicit(false) inline constexpr {{CppType}}(const char* s) {
         this->data = s;
         this->length = WGPU_STRLEN;  // use strlen
     }
-
     explicit(false) inline constexpr {{CppType}}(WGPUStringView s) {
         this->data = s.data;
         this->length = s.length;
     }
-
     inline constexpr {{CppType}}(const char* data, size_t length) {
         this->data = data;
         this->length = length;
     }
-
     explicit(false) inline constexpr {{CppType}}(std::nullptr_t) {
         this->data = nullptr;
         this->length = WGPU_STRLEN;
     }
-
     explicit(false) inline constexpr {{CppType}}(std::nullopt_t) {
         this->data = nullptr;
         this->length = WGPU_STRLEN;
@@ -72,6 +66,22 @@
         }
         return {this->data, this->length};
     }
+
+    {%- if use_absl %}
+
+        #ifndef ABSL_USES_STD_STRING_VIEW
+        // NOLINTNEXTLINE(google-explicit-constructor)
+        operator absl::string_view() const {
+            if (this->length == wgpu::kStrlen) {
+                if (IsUndefined()) {
+                    return {};
+                }
+                return {this->data};
+            }
+            return {this->data, this->length};
+        }
+        #endif
+    {% endif %}
 
     template <typename View,
               typename = std::enable_if_t<std::is_constructible_v<View, const char*, size_t>>>

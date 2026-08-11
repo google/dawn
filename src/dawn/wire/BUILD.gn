@@ -47,7 +47,10 @@ dawn_json_generator("gen") {
   target = "wire"
   inputs = [
     "${dawn_root}/src/dawn/dawn_wire.json",
+    "${dawn_template_dir}/dawn/api_structs.h.tmpl",
+    "${dawn_template_dir}/dawn/api_structs.cpp.tmpl",
     "${dawn_template_dir}/dawn/cpp_macros.tmpl",
+    "${dawn_template_dir}/dawn/dawn_platform.h.tmpl",
     "${dawn_template_dir}/dawn/wire/ObjectType.h",
     "${dawn_template_dir}/dawn/wire/WireCmd.h",
     "${dawn_template_dir}/dawn/wire/WireCmd.cpp",

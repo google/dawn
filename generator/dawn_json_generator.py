@@ -1445,7 +1445,11 @@ def as_wireType(metadata, typ):
         return as_cppType(typ.name)
 
 
-def as_wire_clientType(metadata, typ):
+def as_dawnType(metadata, typ):
+    # Standalone Name instances (e.g. for manually instantiated structures like
+    # ChainedStruct) are treated as structure types.
+    if isinstance(typ, Name):
+        return as_cppType(typ)
     if typ.category == 'object':
         return typ.name.CamelCase() + '*'
     elif typ.category in ['bitmask', 'enum'] or typ.name.get() == 'bool':
@@ -1454,7 +1458,6 @@ def as_wire_clientType(metadata, typ):
         return as_cppType(typ.name)
     else:
         return as_cType(metadata.c_prefix, typ.name)
-
 
 
 def c_methods(params, typ):
@@ -1980,7 +1983,10 @@ class MultiGeneratorFromDawnJSON(Generator):
                                                     wire_json)
 
             imported_templates += [
+                "dawn/api_structs.h.tmpl",
+                "dawn/api_structs.cpp.tmpl",
                 "dawn/cpp_macros.tmpl",
+                "dawn/dawn_platform.h.tmpl",
             ]
 
             wire_params = [
@@ -1989,9 +1995,9 @@ class MultiGeneratorFromDawnJSON(Generator):
                     'as_annotated_wireType': \
                         lambda arg: annotate(as_wireType(metadata, arg.type), arg),
                     'is_wire_serializable': lambda type : is_wire_serializable(type),
-                    'as_wire_clientType': lambda typ: as_wire_clientType(metadata, typ),
-                    'as_annotated_wire_clientType': \
-                        lambda arg: annotate(as_wire_clientType(metadata, arg.type), arg),
+                    'as_dawnType': lambda typ: as_dawnType(metadata, typ),
+                    'as_annotated_dawnType': \
+                        lambda arg: annotate(as_dawnType(metadata, arg.type), arg),
                     'is_wire_data_only': \
                         lambda member: member.type.name.get() in ['void', 'std::byte'] and \
                                        not member.skip_serialize,

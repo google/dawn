@@ -25,11 +25,7 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//* TODO(https://crbug.com/526537254): It might be possible to merge this with the
-//* api_structs.cpp in native once we finish migrating both native and wire.
-
-{% set namespace = metadata.namespace %}
-#include "dawn/wire/client/{{namespace}}_structs_autogen.h"
+#include "dawn/wire/client/wgpu_structs_autogen.h"
 
 #include <cstring>
 #include <tuple>
@@ -43,113 +39,6 @@
 
 namespace dawn::wire::client {
 
-    {% set c_prefix = metadata.c_prefix %}
-    static_assert(sizeof(ChainedStruct) == sizeof({{c_prefix}}ChainedStruct),
-            "sizeof mismatch for ChainedStruct");
-    static_assert(alignof(ChainedStruct) == alignof({{c_prefix}}ChainedStruct),
-            "alignof mismatch for ChainedStruct");
-    static_assert(offsetof(ChainedStruct, nextInChain) == offsetof({{c_prefix}}ChainedStruct, next),
-            "offsetof mismatch for ChainedStruct::nextInChain");
-    static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStruct, sType),
-            "offsetof mismatch for ChainedStruct::sType");
-
-    //* Special structures that are manually written.
-    {% set SpecialStructures = ["string view"] %}
-
-    // NOLINTBEGIN(bugprone-invalid-enum-default-initialization)
-
-    {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
-        {% set CppType = as_cppType(type.name) %}
-        {% set CType = as_cType(type.name) %}
-
-        static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
-        static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
-
-        {% if type.extensible %}
-            static_assert(offsetof({{CppType}}, nextInChain) == offsetof({{CType}}, nextInChain),
-                    "offsetof mismatch for {{CppType}}::nextInChain");
-        {% endif %}
-        {% if type.chained %}
-            static_assert(offsetof({{CppType}}, nextInChain) == offsetof({{CType}}, chain) + offsetof(WGPUChainedStruct, next),
-                    "offsetof mismatch for {{CppType}}::nextInChain");
-            static_assert(offsetof({{CppType}}, sType) == offsetof({{CType}}, chain) + offsetof(WGPUChainedStruct, sType),
-                    "offsetof mismatch for {{CppType}}::sType");
-        {% endif %}
-        {% for member in type.members %}
-            {% if member.is_length %}
-                //* Skip as the member is included in the span member.
-            {% elif member.length and member.constant_length != 1 %}
-                {% set memberName = member.name.camelCase() %}
-                using {{CppType}}{{memberName}}Span = decltype(std::declval<{{CppType}}>().{{memberName}});
-                {% if member.length != "constant" %}
-                    {% set lengthName = member.length.name.camelCase() %}
-                    static_assert(offsetof({{CppType}}, {{memberName}}) + {{CppType}}{{memberName}}Span::GetOffsetOfSize() == offsetof({{CType}}, {{lengthName}}),
-                                 "offsetof mismatch for {{CppType}}::{{memberName}}::mSize");
-                {% endif %}
-                static_assert(offsetof({{CppType}}, {{memberName}}) + {{CppType}}{{memberName}}Span::GetOffsetOfData() == offsetof({{CType}}, {{memberName}}),
-                             "offsetof mismatch for {{CppType}}::{{memberName}}::mData");
-            {% else %}
-                {% set memberName = member.name.camelCase() %}
-                static_assert(offsetof({{CppType}}, {{memberName}}) == offsetof({{CType}}, {{memberName}}),
-                             "offsetof mismatch for {{CppType}}::{{memberName}}");
-            {% endif %}
-        {% endfor %}
-
-    {% endfor %}
-    // NOLINTEND(bugprone-invalid-enum-default-initialization)
-
-    {% for type in by_category["structure"] if type.has_free_members_function %}
-        {% set CppType = as_cppType(type.name) %}
-
-        // {{as_cppType(type.name)}}
-        {{CppType}}::~{{CppType}}() {
-            FreeMembers();
-        }
-
-        {{CppType}}::{{CppType}}({{CppType}}&& rhs)
-        : {% for member in type.members if not member.is_length %}
-            {%- set memberName = member.name.camelCase() -%}
-            {{memberName}}(rhs.{{memberName}}){% if not loop.last %},{{"\n      "}}{% endif %}
-        {% endfor -%}
-        {
-            {% for member in type.members if not member.is_length %}
-                rhs.{{member.name.camelCase()}} = {};
-            {% endfor %}
-        }
-
-        {{CppType}}& {{CppType}}::operator=({{CppType}}&& rhs) {
-            if (&rhs == this) {
-                return *this;
-            }
-            FreeMembers();
-            {% for member in type.members if not member.is_length %}
-                this->{{member.name.camelCase()}} = std::move(rhs.{{member.name.camelCase()}});
-            {% endfor %}
-            {% for member in type.members if not member.is_length %}
-                rhs.{{member.name.camelCase()}} = {};
-            {% endfor %}
-            return *this;
-        }
-
-        void {{CppType}}::FreeMembers() {
-            bool needsFreeing = false;
-            {%- for member in type.members if member.annotation != 'value' %}
-                {% if member.length and member.length != "constant" %}
-                    if (!this->{{member.name.camelCase()}}.empty()) { needsFreeing = true; }
-                {% elif member.length == "constant" and member.constant_length != 1 %}
-                    if (this->{{member.name.camelCase()}}.data() != nullptr) { needsFreeing = true; }
-                {% else %}
-                    if (this->{{member.name.camelCase()}} != nullptr) { needsFreeing = true; }
-                {% endif %}
-            {%- endfor -%}
-            {%- for member in type.members if member.type.name.canonical_case() == 'string view' %}
-                if (this->{{member.name.camelCase()}}.data != nullptr) { needsFreeing = true; }
-            {%- endfor -%}
-            if (needsFreeing) {
-                APIFreeMembers(*reinterpret_cast<{{as_cType(type.name)}}*>(this));
-            }
-        }
-
-    {% endfor %}
+{% include 'dawn/api_structs.cpp.tmpl' %}
 
 } // namespace dawn::wire::client

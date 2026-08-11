@@ -25,148 +25,15 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//* TODO(https://crbug.com/526537254): It might be possible to merge this with the
-//* dawn_platform.h in native once we finish migrating both native and wire.
+#ifndef DAWNWIRE_CLIENT_DAWN_PLATFORM_AUTOGEN_H_
+#define DAWNWIRE_CLIENT_DAWN_PLATFORM_AUTOGEN_H_
 
-{% set PREFIX = metadata.proc_table_prefix.upper() %}
-#ifndef DAWNWIRE_CLIENT_{{PREFIX}}_PLATFORM_AUTOGEN_H_
-#define DAWNWIRE_CLIENT_{{PREFIX}}_PLATFORM_AUTOGEN_H_
-
-{% set api = metadata.api.lower() %}
-#include "dawn/{{api}}_cpp.h"
-
-{% set namespace = metadata.namespace %}
-#include "dawn/wire/client/{{namespace}}_structs_autogen.h"
-#include "src/utils/span.h"
-
-namespace dawn::wire::client {
-    {% for type in by_category["object"] %}
-        {% if type.name.CamelCase() in client_special_objects %}
-            class {{type.name.CamelCase()}};
-        {% else %}
-            struct {{type.name.CamelCase()}};
-        {% endif %}
-    {% endfor %}
-}
-
-{% macro render_structure_conversions(name) -%}
-    inline const {{as_cType(name)}}* ToAPI(const {{as_cppType(name)}}* rhs) {
-        return reinterpret_cast<const {{as_cType(name)}}*>(rhs);
-    }
-    inline {{as_cType(name)}}* ToAPI({{as_cppType(name)}}* rhs) {
-        return reinterpret_cast<{{as_cType(name)}}*>(rhs);
-    }
-    inline const {{as_cppType(name)}}* FromAPI(const {{as_cType(name)}}* rhs) {
-        return reinterpret_cast<const {{as_cppType(name)}}*>(rhs);
-    }
-    inline {{as_cppType(name)}}* FromAPI({{as_cType(name)}}* rhs) {
-        return reinterpret_cast<{{as_cppType(name)}}*>(rhs);
-    }
-    inline const {{as_cppType(name)}}& FromAPI(const {{as_cType(name)}}& rhs) {
-        return *reinterpret_cast<const {{as_cppType(name)}}*>(&rhs);
-    }
-    inline {{as_cppType(name)}}& FromAPI({{as_cType(name)}}& rhs) {
-        return *reinterpret_cast<{{as_cppType(name)}}*>(&rhs);
-    }
-{%- endmacro %}
+#include "dawn/wire/client/wgpu_structs_autogen.h"
 
 namespace dawn::wire::client {
 
-    {% set ChainedStructName = Name("chained struct") %}
-    {{render_structure_conversions(ChainedStructName)|indent}}
-
-    {% for type in by_category["structure"] if type.name.get() != "string view" %}
-        {{render_structure_conversions(type.name)|indent}}
-
-    {% endfor %}
-
-    {% for type in by_category["object"] %}
-        {% set Type = type.name.CamelCase() %}
-        inline WGPU{{Type}} ToAPI({{Type}}* rhs) {
-            return reinterpret_cast<WGPU{{Type}}>(rhs);
-        }
-        inline const WGPU{{Type}}* ToAPI({{Type}}* const* rhs) {
-            return reinterpret_cast<const WGPU{{Type}}*>(rhs);
-        }
-        inline WGPU{{Type}}* ToAPI({{Type}}** rhs) {
-            return reinterpret_cast<WGPU{{Type}}*>(rhs);
-        }
-
-        inline {{Type}}* FromAPI(WGPU{{Type}} rhs) {
-            return reinterpret_cast<{{Type}}*>(rhs);
-        }
-        inline {{Type}}* const* FromAPI(const WGPU{{Type}}* rhs) {
-            return reinterpret_cast<{{Type}}* const*>(rhs);
-        }
-        inline {{Type}}** FromAPI(WGPU{{Type}}* rhs) {
-            return reinterpret_cast<{{Type}}**>(rhs);
-        }
-    {% endfor %}
-
-    //* Special structs that we want to allow copies for since they are trivial.
-    inline WGPUFuture ToAPI(Future rhs) {
-        return {rhs.id};
-    }
-    inline Future FromAPI(WGPUFuture rhs) {
-        return Future{rhs.id};
-    }
-    inline WGPUStringView ToAPI(StringView rhs) {
-        return {rhs.data, rhs.length};
-    }
-    inline StringView FromAPI(WGPUStringView rhs) {
-        return StringView(rhs);
-    }
-
-    {% for type in by_category["enum"] + by_category["bitmask"] %}
-        inline {{as_cType(type.name)}} ToAPI({{namespace}}::{{as_cppType(type.name)}} rhs) {
-            return static_cast<{{as_cType(type.name)}}>(rhs);
-        }
-        inline const {{as_cType(type.name)}}* ToAPI(const {{namespace}}::{{as_cppType(type.name)}}* rhs) {
-            return reinterpret_cast<const {{as_cType(type.name)}}*>(rhs);
-        }
-        inline {{as_cType(type.name)}}* ToAPI({{namespace}}::{{as_cppType(type.name)}}* rhs) {
-            return reinterpret_cast<{{as_cType(type.name)}}*>(rhs);
-        }
-    {% endfor %}
-
-    {% for type in by_category["enum"] %}
-        inline {{namespace}}::{{as_cppType(type.name)}} FromAPI({{as_cType(type.name)}} rhs) {
-            return static_cast<{{namespace}}::{{as_cppType(type.name)}}>(rhs);
-        }
-        inline const {{namespace}}::{{as_cppType(type.name)}}* FromAPI(const {{as_cType(type.name)}}* rhs) {
-            return reinterpret_cast<const {{namespace}}::{{as_cppType(type.name)}}*>(rhs);
-        }
-        inline {{namespace}}::{{as_cppType(type.name)}}* FromAPI({{as_cType(type.name)}}* rhs) {
-            return reinterpret_cast<{{namespace}}::{{as_cppType(type.name)}}*>(rhs);
-        }
-    {% endfor %}
-
-    // Fallback ToAPI and FromAPI for primitive and matching pointer types.
-    template <typename T>
-    inline T* ToAPI(T* rhs) {
-        return rhs;
-    }
-
-    template <typename T>
-    inline T* FromAPI(T* rhs) {
-        return rhs;
-    }
-
-    // Templated helper for converting Spans.
-    template <typename T>
-    auto ToAPI(dawn::Span<T> rhs) {
-        using ResultItem = std::remove_pointer_t<decltype(ToAPI(rhs.data()))>;
-        // SAFETY: The returned Span has the same lifetime as the input Span.
-        return DAWN_UNSAFE_BUFFERS(dawn::Span<ResultItem>(ToAPI(rhs.data()), rhs.size()));
-    }
-
-    template <typename T>
-    auto FromAPI(dawn::Span<T> rhs) {
-        using ResultItem = std::remove_pointer_t<decltype(FromAPI(rhs.data()))>;
-        // SAFETY: The returned Span has the same lifetime as the input Span.
-        return DAWN_UNSAFE_BUFFERS(dawn::Span<ResultItem>(FromAPI(rhs.data()), rhs.size()));
-    }
+{% include 'dawn/dawn_platform.h.tmpl' %}
 
 }  // namespace dawn::wire::client
 
-#endif  // DAWNWIRE_CLIENT_{{PREFIX}}_PLATFORM_AUTOGEN_H_
+#endif  // DAWNWIRE_CLIENT_DAWN_PLATFORM_AUTOGEN_H_
