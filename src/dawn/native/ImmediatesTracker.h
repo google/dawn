@@ -49,25 +49,27 @@ namespace dawn::native {
 template <typename T>
 struct ImmediateDataContent {
   public:
-    const T* operator->() const { return reinterpret_cast<const T*>(&mData); }
-    T* operator->() { return reinterpret_cast<T*>(&mData); }
-
-    const unsigned char* data() const { return mData.data(); }
-
+    // TODO(https://crbug.com/532946455): Spanify these two Get() methods.
     template <typename Out>
-    const Out* Get(uint32_t offset) const {
+    const Out* Get(size_t offset) const {
         DAWN_ASSERT(sizeof(Out) + offset <= sizeof(T));
-        return reinterpret_cast<const Out*>(&DAWN_UNSAFE_TODO(mData[offset]));
+        return reinterpret_cast<const Out*>(&ByteSpanFromRef(mData)[offset]);
+    }
+    template <typename Out>
+    Out* Get(size_t offset) {
+        DAWN_ASSERT(sizeof(Out) + offset <= sizeof(T));
+        return reinterpret_cast<Out*>(&ByteSpanFromRef(mData)[offset]);
     }
 
-    template <typename Out>
-    Out* Get(uint32_t offset) {
-        DAWN_ASSERT(sizeof(Out) + offset <= sizeof(T));
-        return reinterpret_cast<Out*>(&DAWN_UNSAFE_TODO(mData[offset]));
+    Span<const std::byte> GetDataBytes(size_t offset, size_t size) const {
+        return ByteSpanFromRef(mData).subspan(offset, size);
+    }
+    Span<std::byte> GetDataBytes(size_t offset, size_t size) {
+        return ByteSpanFromRef(mData).subspan(offset, size);
     }
 
   private:
-    std::array<unsigned char, sizeof(T)> mData = {0};
+    T mData{};
 };
 
 // TODO(crbug.com/366291600): Add inheritance ability(like BindGroupTracker) so that it can inherit
@@ -78,12 +80,8 @@ class UserImmediatesTrackerBase {
     UserImmediatesTrackerBase() {}
 
     // Setters
-    void SetImmediates(uint32_t offset, const uint8_t* values, size_t size) {
-        uint8_t* destData = mContent.template Get<uint8_t>(offsetof(T, userImmediates) + offset);
-        if (DAWN_UNSAFE_TODO(memcmp(destData, values, size)) != 0) {
-            DAWN_UNSAFE_TODO(memcpy(destData, values, size));
-            mDirty |= GetImmediateBlockBits(offsetof(T, userImmediates), sizeof(UserImmediates));
-        }
+    void SetImmediates(size_t offset, Span<const std::byte> data) {
+        WriteImmediates(offsetof(T, userImmediates) + offset, data);
     }
 
     // TODO(crbug.com/366291600): Support immediate data compatible.
@@ -98,19 +96,22 @@ class UserImmediatesTrackerBase {
 
     // Getters
     const ImmediateMask& GetDirtyBits() const { return mDirty; }
-
     const ImmediateDataContent<T>& GetContent() const { return mContent; }
 
     void SetDirtyBitsForTesting(ImmediateMask dirtyBits) { mDirty = dirtyBits; }
 
   protected:
     template <typename U>
-    void UpdateImmediates(size_t dataOffset, const U& data) {
-        constexpr size_t dataSize = sizeof(U);
-        U* destData = mContent.template Get<U>(uint32_t(dataOffset));
-        if (DAWN_UNSAFE_TODO(memcmp(destData, &data, dataSize)) != 0) {
-            DAWN_UNSAFE_TODO(memcpy(destData, &data, dataSize));
-            mDirty |= GetImmediateBlockBits(dataOffset, dataSize);
+    void UpdateImmediates(size_t offset, const U& data) {
+        WriteImmediates(offset, ByteSpanFromRef(data));
+    }
+
+    // Writes data into the immediate content at offset, updating mDirty if needed.
+    void WriteImmediates(size_t offset, Span<const std::byte> data) {
+        Span<std::byte> dest = mContent.GetDataBytes(offset, data.size());
+        if (!std::ranges::equal(data, dest)) {
+            dest.CopyFrom(data);
+            mDirty |= GetImmediateBlockBits(offset, data.size());
         }
     }
 

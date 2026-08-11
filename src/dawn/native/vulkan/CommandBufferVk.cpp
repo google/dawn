@@ -1702,9 +1702,8 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = mCommands.NextCommand<SetImmediatesCmd>();
                 DAWN_ASSERT(cmd->size > 0);
-                Span<const uint8_t> data = mCommands.NextData<uint8_t>(cmd->size);
-                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
-                state.immediates.SetImmediates(cmd->offset, data.data(), data.size());
+                Span<const std::byte> data = mCommands.NextData<std::byte>(cmd->size);
+                state.immediates.SetImmediates(cmd->offset, data);
                 break;
             }
 
@@ -2000,9 +1999,8 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = iter->NextCommand<SetImmediatesCmd>();
                 DAWN_ASSERT(cmd->size > 0);
-                Span<const uint8_t> data = iter->NextData<uint8_t>(cmd->size);
-                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
-                state.immediates.SetImmediates(cmd->offset, data.data(), data.size());
+                Span<const std::byte> data = iter->NextData<std::byte>(cmd->size);
+                state.immediates.SetImmediates(cmd->offset, data);
                 break;
             }
 

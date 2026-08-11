@@ -790,7 +790,7 @@ class ImmediateTracker : public T {
         ImmediateMask pipelineMask = lastPipeline->GetImmediateMask();
         ImmediateMask uploadBits = this->mDirty & pipelineMask;
         for (auto&& [offset, size] : IterateRanges(uploadBits)) {
-            uint32_t immediateContentStartOffset =
+            size_t immediateContentStartOffset =
                 static_cast<uint32_t>(offset) * kImmediateElementByteSize;
             auto location =
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
@@ -1297,9 +1297,8 @@ MaybeError CommandBuffer::ExecuteComputePass(const OpenGLFunctions& gl) {
 
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = mCommands.NextCommand<SetImmediatesCmd>();
-                Span<const uint8_t> data = mCommands.NextData<uint8_t>(cmd->size);
-                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
-                immediates.SetImmediates(cmd->offset, data.data(), data.size());
+                Span<const std::byte> data = mCommands.NextData<std::byte>(cmd->size);
+                immediates.SetImmediates(cmd->offset, data);
                 break;
             }
 
@@ -1598,9 +1597,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
 
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = iter->NextCommand<SetImmediatesCmd>();
-                Span<const uint8_t> data = iter->NextData<uint8_t>(cmd->size);
-                // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
-                immediates.SetImmediates(cmd->offset, data.data(), data.size());
+                Span<const std::byte> data = iter->NextData<std::byte>(cmd->size);
+                immediates.SetImmediates(cmd->offset, data);
                 break;
             }
             default:
