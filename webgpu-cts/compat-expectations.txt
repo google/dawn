@@ -92,7 +92,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-08-10 06:49:50AM
+# Last rolled: 2026-08-11 06:38:10AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -2590,6 +2590,7 @@ crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgb10a2unorm";mipLevel=1;depthSlice=1 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgb10a2unorm";mipLevel=2;depthSlice=0 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgb10a2unorm";mipLevel=2;depthSlice=1 [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgba32float";mipLevel=2;depthSlice=0 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgba32float";mipLevel=2;depthSlice=1 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgba8unorm-srgb";mipLevel=0;depthSlice=0 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgba8unorm-srgb";mipLevel=1;depthSlice=0 [ Failure ]
