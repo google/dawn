@@ -61,7 +61,6 @@ namespace dawn::wire::client {
     {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
-        {% set spanify = true %}
 
         static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
         static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
@@ -77,15 +76,16 @@ namespace dawn::wire::client {
                     "offsetof mismatch for {{CppType}}::sType");
         {% endif %}
         {% for member in type.members %}
-            {% if spanify and member.is_length %}
+            {% if member.is_length %}
                 //* Skip as the member is included in the span member.
-            {% elif spanify and member.length and member.length != "constant" %}
-                // TODO(https://crbug.com/524405497): Support fixed-length spans.
+            {% elif member.length and member.constant_length != 1 %}
                 {% set memberName = member.name.camelCase() %}
-                {% set lengthName = member.length.name.camelCase() %}
                 using {{CppType}}{{memberName}}Span = decltype(std::declval<{{CppType}}>().{{memberName}});
-                static_assert(offsetof({{CppType}}, {{memberName}}) + {{CppType}}{{memberName}}Span::GetOffsetOfSize() == offsetof({{CType}}, {{lengthName}}),
-                             "offsetof mismatch for {{CppType}}::{{memberName}}::mSize");
+                {% if member.length != "constant" %}
+                    {% set lengthName = member.length.name.camelCase() %}
+                    static_assert(offsetof({{CppType}}, {{memberName}}) + {{CppType}}{{memberName}}Span::GetOffsetOfSize() == offsetof({{CType}}, {{lengthName}}),
+                                 "offsetof mismatch for {{CppType}}::{{memberName}}::mSize");
+                {% endif %}
                 static_assert(offsetof({{CppType}}, {{memberName}}) + {{CppType}}{{memberName}}Span::GetOffsetOfData() == offsetof({{CType}}, {{memberName}}),
                              "offsetof mismatch for {{CppType}}::{{memberName}}::mData");
             {% else %}
@@ -100,7 +100,6 @@ namespace dawn::wire::client {
 
     {% for type in by_category["structure"] if type.has_free_members_function %}
         {% set CppType = as_cppType(type.name) %}
-        {% set spanify = true %}
 
         // {{as_cppType(type.name)}}
         {{CppType}}::~{{CppType}}() {
@@ -108,12 +107,12 @@ namespace dawn::wire::client {
         }
 
         {{CppType}}::{{CppType}}({{CppType}}&& rhs)
-        : {% for member in type.members if (not spanify or not member.is_length)%}
+        : {% for member in type.members if not member.is_length %}
             {%- set memberName = member.name.camelCase() -%}
             {{memberName}}(rhs.{{memberName}}){% if not loop.last %},{{"\n      "}}{% endif %}
         {% endfor -%}
         {
-            {% for member in type.members if (not spanify or not member.is_length)%}
+            {% for member in type.members if not member.is_length %}
                 rhs.{{member.name.camelCase()}} = {};
             {% endfor %}
         }
@@ -123,10 +122,10 @@ namespace dawn::wire::client {
                 return *this;
             }
             FreeMembers();
-            {% for member in type.members if (not spanify or not member.is_length)%}
+            {% for member in type.members if not member.is_length %}
                 this->{{member.name.camelCase()}} = std::move(rhs.{{member.name.camelCase()}});
             {% endfor %}
-            {% for member in type.members if (not spanify or not member.is_length)%}
+            {% for member in type.members if not member.is_length %}
                 rhs.{{member.name.camelCase()}} = {};
             {% endfor %}
             return *this;
@@ -135,8 +134,10 @@ namespace dawn::wire::client {
         void {{CppType}}::FreeMembers() {
             bool needsFreeing = false;
             {%- for member in type.members if member.annotation != 'value' %}
-                {% if spanify and member.length != "constant" %}
+                {% if member.length and member.length != "constant" %}
                     if (!this->{{member.name.camelCase()}}.empty()) { needsFreeing = true; }
+                {% elif member.length == "constant" and member.constant_length != 1 %}
+                    if (this->{{member.name.camelCase()}}.data() != nullptr) { needsFreeing = true; }
                 {% else %}
                     if (this->{{member.name.camelCase()}} != nullptr) { needsFreeing = true; }
                 {% endif %}

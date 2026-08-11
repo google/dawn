@@ -36,7 +36,6 @@ namespace dawn::wire::server {
 
         {% set Suffix = command.name.CamelCase() %}
         {% set CmdName = Suffix + "Cmd" %}
-        {% set spanify = CmdName not in cmd_spanification_blocklist %}
         //* The generic command handlers
         WireResult Server::Handle{{Suffix}}(DeserializeBuffer* deserializeBuffer) {
             {{Suffix}}Cmd cmd;
@@ -69,7 +68,7 @@ namespace dawn::wire::server {
 
             //* Do command
             WIRE_TRY(Do{{Suffix}}(
-                {%- for member in command.members if (not spanify or not member.is_length) -%}
+                {%- for member in command.members if not member.is_length -%}
                     {%- if not loop.first -%}, {% endif %}
                     {%- if member.is_return_value -%}
                         {%- if member.handle_type -%}

@@ -127,7 +127,6 @@ namespace dawn::wire::client {
 
     {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
         {% set CppType = as_cppType(type.name) %}
-        {% set spanify = true %}
         {% if type.chained %}
             {% set chainedStructType = "ChainedStructOut" if type.chained == "out" else "ChainedStruct" %}
             struct {{CppType}} : {{chainedStructType}} {
@@ -171,17 +170,19 @@ namespace dawn::wire::client {
                     {% endif %}
                 {% endif %}
 
-                {% if spanify and member.is_length %}
+                {% if member.is_length %}
                     //* Skip as it's included in the span just below.
-                {% elif spanify and member.length and member.length != "constant" %}
-                    // TODO(https://crbug.com/524405497): Support fixed-length spans.
+                {% elif member.length and member.constant_length != 1 %}
+                    {% set length = "dawn::detail::DynamicExtent<size_t>" %}
+                    {% if member.length == "constant" %}
+                        {% set length = member.constant_length %}
+                    {% endif %}
                     {% if member.type.name.canonical_case() == "void" %}
                         {% set element_type = "const std::byte" %}
                     {% else %}
                         {% set element_type = "std::remove_pointer_t<" + decorate(as_wire_clientType(member.type), member) + ">" %}
                     {% endif %}
-                    {% set index_type = member.length.type.name.canonical_case() %}
-                    ityp::span<{{index_type}}, {{element_type}}> {{as_varName(member.name)}};
+                    ityp::span<size_t, {{element_type}}, {{length}}> {{as_varName(member.name)}};
                 {% else %}
                     {{as_annotated_wire_clientType(member)}} {{render_cpp_default_value(member, forced_default_value)}};
                 {% endif %}

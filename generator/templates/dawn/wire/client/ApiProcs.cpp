@@ -42,15 +42,13 @@
 #include "src/utils/span.h"
 
 {%- macro convert_arguments_and_call(function, suffix, call_receiver, first_arg = None) -%}
-    {% set cppify = not suffix in function_cpp_blocklist %}
     {% set client = "dawn::wire::client" %}
 
     {% for arg in function.arguments %}
         {% set varName = as_varName(arg.name) %}
-        {% if cppify and arg.is_length %}
+        {% if arg.is_length %}
             //* Skip as it's included in the span just below.
-        {% elif cppify and arg.length and arg.length != "constant" %}
-            // TODO(https://crbug.com/524405497): Support fixed-length spans.
+        {% elif arg.length and arg.length != "constant" %}
             {% if arg.type.name.canonical_case() == "void" %}
                 using {{varName}}SpanT = {% if arg.annotation == "const*" %}const {% endif %}std::byte;
                 auto {{varName}}Ptr = reinterpret_cast<{{varName}}SpanT*>({{varName}});
@@ -60,13 +58,13 @@
             {% endif %}
             // SAFETY: The webgpu.h user is required to pass valid ranges of objects.
             auto {{varName}}_ = DAWN_UNSAFE_BUFFERS(dawn::Span<{{varName}}SpanT>({{varName}}Ptr, {{as_varName(arg.length.name)}}));
-        {% elif cppify and arg.type.category == "structure" %}
+        {% elif arg.type.category == "structure" %}
             auto {{varName}}_ = {{client}}::FromAPI({{varName}});
-        {% elif cppify and arg.type.category in ["enum", "bitmask"] and arg.annotation == "value" %}
+        {% elif arg.type.category in ["enum", "bitmask"] and arg.annotation == "value" %}
             auto {{varName}}_ = static_cast<{{as_wire_clientType(arg.type)}}>({{varName}});
-        {% elif cppify and arg.type.category == "object" %}
+        {% elif arg.type.category == "object" %}
             auto {{varName}}_ = {{client}}::FromAPI({{varName}});
-        {% elif cppify and arg.annotation != "value" %}
+        {% elif arg.annotation != "value" %}
             auto {{varName}}_ = reinterpret_cast<{{decorate(as_wire_clientType(arg.type), arg)}}>({{varName}});
         {% else %}
             auto {{varName}}_ = {{as_varName(arg.name)}};
@@ -80,20 +78,16 @@
         {%- if first_arg -%}
             {{first_arg}} {%- if len(function.arguments) != 0 %}, {% endif -%}
         {%- endif -%}
-        {%- for arg in function.arguments if (not cppify or not arg.is_length) -%}
+        {%- for arg in function.arguments if not arg.is_length -%}
             {%- if not loop.first %}, {% endif -%}
             {{as_varName(arg.name)}}_
         {%- endfor -%}
     );
     {% if function.returns %}
-        {% if cppify %}
-            {% if function.returns.type.category in ["object", "enum", "bitmask"] %}
-                return {{client}}::ToAPI(result);
-            {% elif function.returns.type.category in ["structure"] %}
-                return *{{client}}::ToAPI(&result);
-            {% else %}
-                return result;
-            {% endif %}
+        {% if function.returns.type.category in ["object", "enum", "bitmask"] %}
+            return {{client}}::ToAPI(result);
+        {% elif function.returns.type.category in ["structure"] %}
+            return *{{client}}::ToAPI(&result);
         {% else %}
             return result;
         {% endif %}
@@ -160,12 +154,17 @@ namespace dawn::wire::client {
                     {% set varName = as_varName(arg.name) %}
                     {% if arg.is_length %}
                         //* Skipped as it is included in the span below.
-                    {% elif arg.length and arg.length != "constant" %}
+                    {% elif arg.length and arg.constant_length != 1 %}
                         using {{varName}}SpanT = std::remove_pointer_t<{{decorate(as_cType(arg.type.name, True), arg)}}>;
-                        size_t {{varName}}SizeV = dawn::checked_cast<size_t>({{as_varName(arg.length.name)}});
                         auto* {{varName}}Ptr = reinterpret_cast<{{varName}}SpanT*>({{varName}});
-                        // SAFETY: The webgpu.h user is required to pass valid ranges of objects.
-                        cmd.{{varName}} = DAWN_UNSAFE_BUFFERS(dawn::Span<{{varName}}SpanT>({{varName}}Ptr, {{varName}}SizeV));
+                        {% if arg.length == "constant" %}
+                            // SAFETY: The webgpu.h user is required to pass valid ranges of objects.
+                            cmd.{{varName}} = DAWN_UNSAFE_BUFFERS(dawn::Span<{{varName}}SpanT, {{arg.constant_length}}>({{varName}}Ptr));
+                        {% else %}
+                            size_t {{varName}}SizeV = dawn::checked_cast<size_t>({{as_varName(arg.length.name)}});
+                            // SAFETY: The webgpu.h user is required to pass valid ranges of objects.
+                            cmd.{{varName}} = DAWN_UNSAFE_BUFFERS(dawn::Span<{{varName}}SpanT>({{varName}}Ptr, {{varName}}SizeV));
+                        {% endif %}
                     {% else %}
                         cmd.{{varName}} = {{varName}};
                     {% endif %}

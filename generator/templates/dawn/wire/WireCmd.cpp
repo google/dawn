@@ -46,10 +46,10 @@
 //* Helper macros so that the main [de]serialization functions can be written in a generic manner.
 
 //* Outputs an rvalue that's the number of elements a pointer member points to.
-{%- macro member_length(member, record_accessor, spanify=False) -%}
+{%- macro member_length(member, record_accessor, is_cmd=False) -%}
     {%- if member.length == "constant" -%}
         {{member.constant_length}}u
-    {%- elif spanify -%}
+    {%- elif is_cmd -%}
         {{record_accessor}}{{as_varName(member.name)}}.size()
     {%- else -%}
         {{record_accessor}}{{as_varName(member.length.name)}}
@@ -134,7 +134,6 @@
     {%- set Return = "Return" if is_return_command else "" -%}
     {%- set Cmd = "Cmd" if is_cmd else "" -%}
     {%- set RecordName = Return + name + Cmd -%}
-    {%- set spanify = is_cmd and RecordName not in cmd_spanification_blocklist -%}
     {%- set Inherits = " : CmdHeader" if is_cmd else "" %}
     {%- set TransferStructName = Return + name + "Transfer" -%}
 
@@ -232,11 +231,17 @@
             //* Normal handling for pointer members and structs.
             {% if member.annotation != "value" %}
                 {% if member.type.category != "object" and member.optional %}
-                    if (record.{{as_varName(member.name)}} != nullptr)
+                    {% if is_cmd and member.length and member.length != "constant" %}
+                        if (!record.{{as_varName(member.name)}}.empty())
+                    {% elif is_cmd and member.length == "constant" and member.constant_length != 1 %}
+                        if (record.{{as_varName(member.name)}}.data() != nullptr)
+                    {% else %}
+                        if (record.{{as_varName(member.name)}} != nullptr)
+                    {% endif %}
                 {% endif %}
                 {
                     {% do assert(member.annotation != "const*const*", "const*const* not valid here") %}
-                    auto memberLength = {{member_length(member, "record.", spanify)}};
+                    auto memberLength = {{member_length(member, "record.", is_cmd)}};
                     auto size = WireAlignSizeofN<{{member_transfer_type(member.type)}}>(checked_cast<size_t>(memberLength));
                     DAWN_ASSERT(size);
                     result += *size;
@@ -333,8 +338,10 @@
             //* Allocate space and write the non-value arguments in it.
             {% do assert(member.annotation != "const*const*") %}
             {% if member.type.category != "object" and member.optional %}
-                {% if spanify and member.length and member.length != "constant" %}
+                {% if is_cmd and member.length and member.length != "constant" %}
                     bool has_{{memberName}} = !record.{{memberName}}.empty();
+                {% elif is_cmd and member.length == "constant" and member.constant_length != 1 %}
+                    bool has_{{memberName}} = record.{{memberName}}.data() != nullptr;
                 {% else %}
                     bool has_{{memberName}} = record.{{memberName}} != nullptr;
                 {% endif %}
@@ -343,7 +350,7 @@
             {% else %}
                 {
             {% endif %}
-                auto memberLength = {{member_length(member, "record.", spanify)}};
+                auto memberLength = {{member_length(member, "record.", is_cmd)}};
                 {% if member.length != "constant" %}
                     {{serialize_member(member.length.type, false, "memberLength", "transfer->" + as_varName(member.length.name))}}
                 {% endif %}
@@ -357,9 +364,7 @@
                 }
                 WIRE_TRY(buffer->NextN(checked_cast<size_t>(memberLength), &memberBuffer));
 
-                //* TODO(https://crbug.com/526537254): Remove this branch once all the commands have been spanified.
-                {% if spanify and member.length and member.length != "constant" %}
-                    {{serialize_member(member.length.type, false, "memberLength", "transfer->" + as_varName(member.length.name))}}
+                {% if is_cmd and member.length and member.constant_length != 1 %}
                     {% if member.type.is_wire_transparent %}
                         if (memberLength != 0) {
                             SpanAsWritableBytes(memberBuffer).CopyFrom(SpanAsBytes(record.{{memberName}}));
@@ -473,7 +478,7 @@
             {% set memberName = as_varName(member.name) %}
             //* Value types are directly in the transfer record, objects being replaced with their IDs.
             {% if member.annotation == "value" %}
-                {% if spanify and member.is_length %}
+                {% if is_cmd and member.is_length %}
                     //* Skipped deserializing length {{ memberName }} as it is included in the span.
                     {% continue %}
                 {% endif %}
@@ -491,7 +496,7 @@
                 //* uninitialized pointer.
                 {% do assert(member.length == "constant") %}
                 bool has_{{memberName}} = transfer->has_{{memberName}};
-                {% if spanify and member.length and member.length != "constant" %}
+                {% if is_cmd and member.length and member.constant_length != 1 %}
                     record->{{memberName}} = {};
                 {% else %}
                     record->{{memberName}} = nullptr;
@@ -507,8 +512,7 @@
                 Span<const volatile {{member_transfer_type(member.type)}}> memberBuffer;
                 WIRE_TRY(deserializeBuffer->ReadN(checked_cast<size_t>(memberLength), &memberBuffer));
 
-                //* TODO(https://crbug.com/526537254): Remove this branch once all the commands have been spanified.
-                {% if spanify and member.length and member.length != "constant" %}
+                {% if is_cmd and member.length and member.constant_length != 1 %}
                     //* For data-only members (e.g. "data" in WriteBuffer and WriteTexture), they are
                     //* not security sensitive so we can directly refer the data inside the transfer
                     //* buffer in dawn_native. For other members, as prevention of TOCTOU attacks is an
@@ -518,13 +522,18 @@
                         {% do assert(member.annotation == "const*") %}
                         record->{{memberName}} = memberBuffer;
                     {% else %}
-                        Span<{{as_cType(member.type.name, spanify)}}> copiedMembers;
-                        WIRE_TRY(GetSpace(allocator, memberBuffer.size(), &copiedMembers));
+                        {% if member.length == "constant" %}
+                            Span<{{as_cType(member.type.name, True)}}, {{member.constant_length}}> copiedMembers;
+                            WIRE_TRY(GetSpace(allocator, &copiedMembers));
+                        {% else %}
+                            Span<{{as_cType(member.type.name, True)}}> copiedMembers;
+                            WIRE_TRY(GetSpace(allocator, memberBuffer.size(), &copiedMembers));
+                        {% endif %}
                         record->{{memberName}} = copiedMembers;
 
                         {% if member.type.is_wire_transparent %}
                             if (!memberBuffer.empty()) {
-                                copiedMembers.CopyFrom(memberBuffer);
+                                SpanAsWritableBytes(copiedMembers).CopyFrom(SpanAsBytes(memberBuffer));
                             }
                         {% else %}
                             for (auto [i, member] : Enumerate(memberBuffer)) {
@@ -664,6 +673,14 @@ WireResult GetSpace(DeserializeAllocator* allocator, size_t count, Span<T>* out)
 
     // SAFETY: Size and alignment is checked above.
     *out = DAWN_UNSAFE_BUFFERS(Span<T>(reinterpret_cast<T*>(span->data()), count));
+    return WireResult::Success;
+}
+
+template <typename T, size_t N>
+WireResult GetSpace(DeserializeAllocator* allocator, Span<T, N>* out) {
+    Span<T> dynamicSpan;
+    WIRE_TRY(GetSpace(allocator, N, &dynamicSpan));
+    *out = dynamicSpan;
     return WireResult::Success;
 }
 

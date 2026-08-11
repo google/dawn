@@ -115,7 +115,6 @@ namespace dawn::wire {
 {% macro write_command_struct(command, is_return_command) %}
     {% set Return = "Return" if is_return_command else "" %}
     {% set CmdName = Return + command.name.CamelCase() + "Cmd" %}
-    {% set spanify = CmdName not in cmd_spanification_blocklist %}
     struct {{CmdName}} {
         //* From a filled structure, compute how much size will be used in the serialization buffer.
         size_t GetRequiredSize() const;
@@ -144,17 +143,19 @@ namespace dawn::wire {
         {% endif %}
 
         {% for member in command.members %}
-            {% if spanify and member.is_length %}
+            {% if member.is_length %}
                 //* Skip as it's included in the span just below.
-            {% elif spanify and member.length and member.length != "constant" %}
-                //* TODO(https://crbug.com/524405497): Support fixed-length spans.
-                {% set element_type = "std::remove_pointer_t<" + decorate(as_cType(member.type.name, spanify), member) + ">" %}
+            {% elif member.length and member.constant_length != 1 %}
+                {% set length = "dawn::detail::DynamicExtent<size_t>" %}
+                {% if member.length == "constant" %}
+                    {% set length = member.constant_length %}
+                {% endif %}
+                {% set element_type = "std::remove_pointer_t<" + decorate(as_cType(member.type.name, True), member) + ">" %}
                 {% if is_wire_data_only(member) %}
                     //* If the member is data only, we do not copy the data, so it will be volatile.
                     {% set element_type = "volatile " + element_type %}
                 {% endif %}
-                {% set index_type = member.length.type.name.canonical_case() %}
-                ityp::span<{{index_type}}, {{element_type}}> {{as_varName(member.name)}};
+                ityp::span<size_t, {{element_type}}, {{length}}> {{as_varName(member.name)}};
             {% else %}
                 {{as_annotated_cType(member)}};
             {% endif %}

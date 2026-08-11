@@ -33,7 +33,6 @@
 namespace dawn::wire::client {
     {% for command in cmd_records["return command"] %}
         {% set CmdName = "Return" + command.name.CamelCase() + "Cmd" %}
-        {% set spanify = CmdName not in cmd_spanification_blocklist %}
         WireResult Client::Handle{{command.name.CamelCase()}}(DeserializeBuffer* deserializeBuffer) {
             Return{{command.name.CamelCase()}}Cmd cmd;
             WIRE_TRY(cmd.Deserialize(deserializeBuffer, &mAllocator));
@@ -51,7 +50,7 @@ namespace dawn::wire::client {
             {% endfor %}
 
             return Do{{command.name.CamelCase()}}(
-                {%- for member in command.members if (not spanify or not member.is_length) -%}
+                {%- for member in command.members if not member.is_length -%}
                     {%- if not loop.first -%}, {% endif %}
                     {%- if member.handle_type -%}
                         {{as_varName(member.name)}}

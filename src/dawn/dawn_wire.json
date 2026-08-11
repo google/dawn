@@ -227,12 +227,6 @@
         ]
     },
     "special items": {
-        "_cmd_spanification_blocklist_comment": "// TODO(https://crbug.com/526537254): Drive this list down.",
-        "cmd_spanification_blocklist": [
-        ],
-        "_function_cpp_blocklist_comment": "// TODO(https://crbug.com/526537254): Drive this list down.",
-        "function_cpp_blocklist": [
-        ],
         "client_side_structures": [
             "DawnWGSLBlocklist",
             "FutureWaitInfo",
