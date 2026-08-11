@@ -62,22 +62,24 @@ class ResourceTableValidationTest : public ValidationTest {
         return table;
     }
 
-    wgpu::ComputePipeline MakeComputePipeline(bool defaulted, bool usesResourceTable) {
-        auto shaderModuleUsesTable = utils::CreateShaderModule(device, R"(
+    wgpu::ComputePipeline MakeComputePipelineNoTable() {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = utils::CreateShaderModule(device, R"(
+            @compute @workgroup_size(1) fn main() {}
+        )");
+        return device.CreateComputePipeline(&csDesc);
+    }
+
+    wgpu::ComputePipeline MakeComputePipelineWithTable(bool defaulted) {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = utils::CreateShaderModule(device, R"(
             enable chromium_experimental_resource_table;
             @compute @workgroup_size(1) fn main() {
                 _ = hasResource<texture_2d<f32>>(0);
             }
         )");
-        auto shaderModuleNoTable = utils::CreateShaderModule(device, R"(
-            @compute @workgroup_size(1) fn main() {}
-        )");
-
-        wgpu::ComputePipelineDescriptor csDesc;
-        csDesc.compute.module = usesResourceTable ? shaderModuleUsesTable : shaderModuleNoTable;
 
         if (defaulted) {
-            csDesc.layout = nullptr;
             return device.CreateComputePipeline(&csDesc);
         }
 
@@ -86,26 +88,14 @@ class ResourceTableValidationTest : public ValidationTest {
 
         wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
         pipelineLayoutDescriptor.bindGroupLayoutCount = 0;
-        if (usesResourceTable) {
-            pipelineLayoutDescriptor.nextInChain = &plResourceTable;
-        }
-
+        pipelineLayoutDescriptor.nextInChain = &plResourceTable;
         csDesc.layout = device.CreatePipelineLayout(&pipelineLayoutDescriptor);
+
         return device.CreateComputePipeline(&csDesc);
     }
 
-    wgpu::RenderPipeline MakeRenderPipeline(bool defaulted, bool usesResourceTable) {
-        auto shaderModuleUsesTable = utils::CreateShaderModule(device, R"(
-            enable chromium_experimental_resource_table;
-            @vertex fn vs() -> @builtin(position) vec4f {
-                return vec4f();
-            }
-            @fragment fn fs() -> @location(0) vec4f {
-                _ = hasResource<texture_2d<f32>>(0);
-                return vec4f();
-            }
-        )");
-        auto shaderModuleNoTable = utils::CreateShaderModule(device, R"(
+    wgpu::RenderPipeline MakeRenderPipelineNoTable() {
+        auto shaderModule = utils::CreateShaderModule(device, R"(
             @vertex fn vs() -> @builtin(position) vec4f {
                 return vec4f();
             }
@@ -115,11 +105,28 @@ class ResourceTableValidationTest : public ValidationTest {
         )");
 
         utils::ComboRenderPipelineDescriptor pDesc;
-        pDesc.vertex.module = usesResourceTable ? shaderModuleUsesTable : shaderModuleNoTable;
-        pDesc.cFragment.module = usesResourceTable ? shaderModuleUsesTable : shaderModuleNoTable;
+        pDesc.vertex.module = shaderModule;
+        pDesc.cFragment.module = shaderModule;
+        return device.CreateRenderPipeline(&pDesc);
+    }
+
+    wgpu::RenderPipeline MakeRenderPipelineWithTable(bool defaulted = true) {
+        auto shaderModule = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_resource_table;
+            @vertex fn vs() -> @builtin(position) vec4f {
+                return vec4f();
+            }
+            @fragment fn fs() -> @location(0) vec4f {
+                _ = hasResource<texture_2d<f32>>(0);
+                return vec4f();
+            }
+        )");
+
+        utils::ComboRenderPipelineDescriptor pDesc;
+        pDesc.vertex.module = shaderModule;
+        pDesc.cFragment.module = shaderModule;
 
         if (defaulted) {
-            pDesc.layout = nullptr;
             return device.CreateRenderPipeline(&pDesc);
         }
 
@@ -128,11 +135,9 @@ class ResourceTableValidationTest : public ValidationTest {
 
         wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
         pipelineLayoutDescriptor.bindGroupLayoutCount = 0;
-        if (usesResourceTable) {
-            pipelineLayoutDescriptor.nextInChain = &plResourceTable;
-        }
-
+        pipelineLayoutDescriptor.nextInChain = &plResourceTable;
         pDesc.layout = device.CreatePipelineLayout(&pipelineLayoutDescriptor);
+
         return device.CreateRenderPipeline(&pDesc);
     }
 
@@ -658,8 +663,8 @@ TEST_F(ResourceTableValidationTest, RenderPassEncoder_SetResourceTable) {
 // Tests that the resource table in RenderBundle can be used in draw
 TEST_F(ResourceTableValidationTest, RenderBundleUsesResourceTable) {
     for (bool defaulted : {true, false}) {
-        wgpu::RenderPipeline pipelineUsesTable = MakeRenderPipeline(defaulted, true);
-        wgpu::RenderPipeline pipelineNoTable = MakeRenderPipeline(defaulted, false);
+        wgpu::RenderPipeline pipelineUsesTable = MakeRenderPipelineWithTable(defaulted);
+        wgpu::RenderPipeline pipelineNoTable = MakeRenderPipelineNoTable();
 
         // Control case 1: The pipeline doesn't use a resource table and is compatible with a render
         // bundle created without RenderBundleEncoderResourceTable.
@@ -949,8 +954,8 @@ TEST_F(ResourceTableValidationTest, RenderPassEncoder_CanUseInSubmit) {
 // Tests that the resource table can be used in dispatch
 TEST_F(ResourceTableValidationTest, Submit_DispatchRequiresResourceTable) {
     for (bool defaulted : {true, false}) {
-        wgpu::ComputePipeline pipelineUsesTable = MakeComputePipeline(defaulted, true);
-        wgpu::ComputePipeline pipelineNoTable = MakeComputePipeline(defaulted, false);
+        wgpu::ComputePipeline pipelineUsesTable = MakeComputePipelineWithTable(defaulted);
+        wgpu::ComputePipeline pipelineNoTable = MakeComputePipelineNoTable();
         wgpu::ResourceTable resourceTable = MakeResourceTable(1);
         wgpu::ResourceTable resourceTable2 = MakeResourceTable(1);
 
@@ -1037,8 +1042,8 @@ TEST_F(ResourceTableValidationTest, Submit_DispatchRequiresResourceTable) {
 // Tests that the resource table can be used in draw
 TEST_F(ResourceTableValidationTest, Submit_DrawRequiresResourceTable) {
     for (bool defaulted : {true, false}) {
-        wgpu::RenderPipeline pipelineUsesTable = MakeRenderPipeline(defaulted, true);
-        wgpu::RenderPipeline pipelineNoTable = MakeRenderPipeline(defaulted, false);
+        wgpu::RenderPipeline pipelineUsesTable = MakeRenderPipelineWithTable(defaulted);
+        wgpu::RenderPipeline pipelineNoTable = MakeRenderPipelineNoTable();
         wgpu::ResourceTable resourceTable = MakeResourceTable(1);
         wgpu::ResourceTable resourceTable2 = MakeResourceTable(1);
         auto rp = utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
@@ -1142,7 +1147,7 @@ TEST_F(ResourceTableValidationTest, ExecuteBundlesPersistsResourceTable) {
         wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
         wgpu::RenderBundle renderBundle = rbe.Finish();
 
-        auto pipelineUsesTable = MakeRenderPipeline(true, true);
+        auto pipelineUsesTable = MakeRenderPipelineWithTable();
         pass.ExecuteBundles(1, &renderBundle);
         pass.SetPipeline(pipelineUsesTable);
         pass.Draw(1);
