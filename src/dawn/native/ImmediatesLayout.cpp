@@ -27,9 +27,12 @@
 
 #include "src/dawn/native/ImmediatesLayout.h"
 
+#include "src/utils/numeric.h"
+
 namespace dawn::native {
 uint32_t GetImmediateIndexInPipeline(const uint32_t layoutOffset,
                                      const ImmediateMask& pipelineImmediateMask) {
-    return uint32_t((((1u << layoutOffset) - 1u) & pipelineImmediateMask).count());
+    return dchecked_cast<uint32_t>(
+        (((uint64_t{1} << layoutOffset) - 1u) & pipelineImmediateMask).count());
 }
 }  // namespace dawn::native

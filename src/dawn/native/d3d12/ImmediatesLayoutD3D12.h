@@ -28,6 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_IMMEDIATESLAYOUTD3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_IMMEDIATESLAYOUTD3D12_H_
 
+#include <array>
+
+#include "src/dawn/common/Constants.h"
 #include "src/dawn/native/ImmediatesLayout.h"
 
 namespace dawn::native::d3d12 {
@@ -44,11 +47,20 @@ struct FirstIndexOffset {
     uint32_t firstInstance;
 };
 
+using DynamicStorageBufferLengths =
+    std::array<uint32_t, kMaxDynamicStorageBuffersPerPipelineLayout>;
+using DynamicStorageBufferOffsets =
+    std::array<uint32_t, kMaxDynamicStorageBuffersPerPipelineLayout>;
+
 // Define render pipeline immediates layout. Append members to expand the layout.
 struct RenderImmediates {
     UserImmediates userImmediates;
 
     FirstIndexOffset firstIndexOffset;
+
+    DynamicStorageBufferLengths storageBufferDynamicLengths;
+
+    DynamicStorageBufferOffsets storageBufferDynamicOffsets;
 };
 
 // Define compute pipeline immediates layout. Append members to expand the layout.
@@ -56,8 +68,17 @@ struct ComputeImmediates {
     UserImmediates userImmediates;
 
     NumWorkgroupsDimensions numWorkgroups;
+
+    DynamicStorageBufferLengths storageBufferDynamicLengths;
+
+    DynamicStorageBufferOffsets storageBufferDynamicOffsets;
 };
 DAWN_DISABLE_STRUCT_PADDING_WARNINGS
+
+static_assert(sizeof(ComputeImmediates) <= kMaxImmediateMaskBits * kImmediateElementByteSize,
+              "ComputeImmediates must fit within the immediate mask budget.");
+static_assert(sizeof(RenderImmediates) <= kMaxImmediateMaskBits * kImmediateElementByteSize,
+              "RenderImmediates must fit within the immediate mask budget.");
 
 }  // namespace dawn::native::d3d12
 

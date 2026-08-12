@@ -324,6 +324,17 @@ MaybeError RenderPipeline::InitializeImpl() {
                                                 sizeof(FirstIndexOffset));
     }
 
+    uint32_t dynamicStorageBufferCount = ToBackend(GetLayout())->GetDynamicStorageBufferCount();
+    if (dynamicStorageBufferCount > 0) {
+        uint32_t memberByteSize = dynamicStorageBufferCount * kImmediateElementByteSize;
+
+        mImmediateMask |= GetImmediateBlockBits(
+            offsetof(RenderImmediates, storageBufferDynamicLengths), memberByteSize);
+
+        mImmediateMask |= GetImmediateBlockBits(
+            offsetof(RenderImmediates, storageBufferDynamicOffsets), memberByteSize);
+    }
+
     // Create PipelineLayoutHandle after setup internal immediates.
     DAWN_TRY_ASSIGN(mPipelineLayoutHandle,
                     ToBackend(GetLayout())->GetOrCreatePipelineLayoutHandle(GetImmediateMask()));

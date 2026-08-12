@@ -318,5 +318,42 @@ TEST_F(ComputeImmediatesTrackerTest, SetNumWorkgroupDimensions) {
     device.Destroy();
 }
 
+// Regression test: GetImmediateIndexInPipeline must count preceding set bits correctly even for
+// layout offsets >= 32. A 32-bit shift base overflows (UB) for offsets like
+// storageBufferDynamicOffsets (bit 42/43), producing a wrong compacted index. On x86 the shift
+// count is masked mod 32, so `1u << 42` silently becomes `1u << 10`; bit 20 falls strictly between
+// that wrapped boundary and the true boundary at 42, so it is the bit that exposes the bug (it must
+// be counted, but a wrapped prefix mask of only 10 bits would miss it).
+TEST(ImmediatesLayoutTest, IndexInPipelineHandlesHighBitOffsets) {
+    // Set 5 bits below bit 42, one bit between the wrapped (10) and true (42) boundary, plus bits
+    // at/above 42 that must NOT be counted.
+    ImmediateMask mask;
+    for (uint32_t i = 0; i < 5; ++i) {
+        mask.set(ImmediateIndex(i));
+    }
+    mask.set(ImmediateIndex(20u));
+    mask.set(ImmediateIndex(42u));
+    mask.set(ImmediateIndex(50u));
+
+    // Compacted index of bit 42 = count of set bits strictly below 42 = 6.
+    EXPECT_EQ(GetImmediateIndexInPipeline(42u, mask), 6u);
+
+    // A low offset still works (guards against a regression the other direction).
+    EXPECT_EQ(GetImmediateIndexInPipeline(3u, mask), 3u);
+}
+
+// GetImmediateBlockBits must set the correct high bits for members past bit 32. A 32-bit shift base
+// overflows for blocks starting at offsets like storageBufferDynamicOffsets (bit 42/43), producing
+// wrong bits and a corrupt immediate mask.
+TEST(ImmediatesLayoutTest, BlockBitsHandlesHighBitOffsets) {
+    // A 4-slot block starting at byte offset 168 (bit 42) - matches storageBufferDynamicOffsets.
+    ImmediateMask bits = GetImmediateBlockBits(/*byteOffset=*/168u, /*byteSize=*/16u);
+    EXPECT_EQ(bits.count(), 4u);
+    EXPECT_TRUE(bits.test(ImmediateIndex(42u)));
+    EXPECT_TRUE(bits.test(ImmediateIndex(45u)));
+    EXPECT_FALSE(bits.test(ImmediateIndex(41u)));
+    EXPECT_FALSE(bits.test(ImmediateIndex(46u)));
+}
+
 }  // anonymous namespace
 }  // namespace dawn::native

@@ -162,12 +162,19 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     }
 
     tint::hlsl::writer::ArrayLengthFromUniformOptions arrayLengthFromUniform;
-    arrayLengthFromUniform.ubo_binding = {layout->GetDynamicStorageBufferLengthsRegisterSpace(),
-                                          layout->GetDynamicStorageBufferLengthsShaderRegister()};
-
     tint::hlsl::writer::ArrayOffsetFromUniformOptions arrayOffsetFromUniform;
-    arrayOffsetFromUniform.ubo_binding = {layout->GetDynamicStorageBufferOffsetsRegisterSpace(),
-                                          layout->GetDynamicStorageBufferOffsetsShaderRegister()};
+
+    if (stage == SingleShaderStage::Compute) {
+        arrayLengthFromUniform.buffer_sizes_offset = GetImmediateByteOffsetInPipelineIfAny(
+            &ComputeImmediates::storageBufferDynamicLengths, pipelineImmediateMask);
+        arrayOffsetFromUniform.buffer_offsets_offset = GetImmediateByteOffsetInPipelineIfAny(
+            &ComputeImmediates::storageBufferDynamicOffsets, pipelineImmediateMask);
+    } else {
+        arrayLengthFromUniform.buffer_sizes_offset = GetImmediateByteOffsetInPipelineIfAny(
+            &RenderImmediates::storageBufferDynamicLengths, pipelineImmediateMask);
+        arrayOffsetFromUniform.buffer_offsets_offset = GetImmediateByteOffsetInPipelineIfAny(
+            &RenderImmediates::storageBufferDynamicOffsets, pipelineImmediateMask);
+    }
 
     auto ToHLSLBindPoint = [&](BindGroupIndex group, BindingIndex index) -> tint::BindingPoint {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
@@ -252,12 +259,12 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         }
 
         // Add per-group arrayLengthFromUniform and arrayOffsetFromUniform options
-        for (const auto& bindingAndRegisterOffset :
-             layout->GetDynamicStorageBufferInfo()[group].bindingAndRegisterOffsets) {
+        for (const auto& bindingAndImmediateIndex :
+             layout->GetDynamicStorageBufferInfo()[group].bindingAndImmediateIndices) {
             // The bindpoint to index mapping is the same for both lengths and offsets,
             // the difference is the uniform buffer object binding
             // (arrayLengthFromUniform.ubo_binding and arrayOffsetFromUniform.ubo_binding).
-            BindingNumber bindingNum = bindingAndRegisterOffset.binding;
+            BindingNumber bindingNum = bindingAndImmediateIndex.binding;
 
             // Skip bindings not present for the stage because GenerateBindingRemapping doesn't
             // provide a remapping for them, which could lead to collisions between used mappings
@@ -267,11 +274,11 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                 continue;
             }
 
-            uint32_t registerOffset = bindingAndRegisterOffset.registerOffset;
+            uint32_t immediateIndex = bindingAndImmediateIndex.immediateIndex;
             tint::BindingPoint bindingPoint{static_cast<uint32_t>(group),
                                             static_cast<uint32_t>(bindingNum)};
-            arrayLengthFromUniform.bindpoint_to_size_index.emplace(bindingPoint, registerOffset);
-            arrayOffsetFromUniform.bindpoint_to_offset_index.emplace(bindingPoint, registerOffset);
+            arrayLengthFromUniform.bindpoint_to_size_index.emplace(bindingPoint, immediateIndex);
+            arrayOffsetFromUniform.bindpoint_to_offset_index.emplace(bindingPoint, immediateIndex);
         }
     }
 

@@ -64,7 +64,7 @@ constexpr ImmediateMask GetImmediateBlockBits(size_t byteOffset, size_t byteSize
     static_assert(ImmediateMask{}.size() <= 64);
     uint64_t firstIndex = byteOffset / kImmediateElementByteSize;
     uint64_t constantCount = byteSize / kImmediateElementByteSize;
-    return ((1u << constantCount) - 1u) << firstIndex;
+    return ((uint64_t{1} << constantCount) - uint64_t{1}) << firstIndex;
 }
 
 // Returns the offset of the member in the packed immediates of the pipeline.
@@ -79,7 +79,7 @@ uint32_t GetImmediateByteOffsetInPipeline(Member Object::* ptr,
     Object obj = {};
     size_t offset = sign_cast(reinterpret_cast<char*>(&(obj.*ptr)) - reinterpret_cast<char*>(&obj));
 
-    const ImmediateMask prefixBits = (1u << (offset / kImmediateElementByteSize)) - 1u;
+    const ImmediateMask prefixBits = (uint64_t{1} << (offset / kImmediateElementByteSize)) - 1u;
 
     return static_cast<uint32_t>((prefixBits & pipelineImmediateMask).count() *
                                  kImmediateElementByteSize);
@@ -91,7 +91,7 @@ bool HasImmediates(Member Object::* ptr, const ImmediateMask& pipelineImmediateM
     size_t offset = sign_cast(reinterpret_cast<char*>(&(obj.*ptr)) - reinterpret_cast<char*>(&obj));
     size_t size = sizeof(Member);
 
-    return pipelineImmediateMask.to_ulong() & GetImmediateBlockBits(offset, size).to_ulong();
+    return (pipelineImmediateMask & GetImmediateBlockBits(offset, size)).any();
 }
 
 template <typename Object, typename Member>

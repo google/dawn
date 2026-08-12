@@ -387,6 +387,10 @@ class ImmediateTracker : public T {
   public:
     ImmediateTracker() = default;
 
+    using ImmediateType = std::conditional_t<std::is_same_v<T, RenderImmediatesTracker>,
+                                             RenderImmediates,
+                                             ComputeImmediates>;
+
     void SetFirstVertexAndInstanceIndex(uint32_t firstVertexIndex, uint32_t firstInstanceIndex) {
         FirstIndexOffset firstIndexOffset;
         firstIndexOffset.firstVertex = firstVertexIndex;
@@ -401,6 +405,16 @@ class ImmediateTracker : public T {
         numWorkgroupsDimensions.numWorkgroupsZ = numWorkgroupZ;
 
         this->UpdateImmediates(offsetof(ComputeImmediates, numWorkgroups), numWorkgroupsDimensions);
+    }
+
+    void SetDynamicStorageBufferLength(uint32_t offset, Span<const uint32_t> data) {
+        this->WriteImmediates(offsetof(ImmediateType, storageBufferDynamicLengths) + offset,
+                              SpanAsBytes(data));
+    }
+
+    void SetDynamicStorageBufferOffset(uint32_t offset, Span<const uint32_t> data) {
+        this->WriteImmediates(offsetof(ImmediateType, storageBufferDynamicOffsets) + offset,
+                              SpanAsBytes(data));
     }
 
     // Calling this after BindGroupTrackerBase::Apply() to update root signature.
@@ -454,6 +468,9 @@ class DescriptorHeapState;
 template <typename PipelineType>
 class BindGroupStateTracker : public BindGroupTrackerBase<false> {
     using Base = BindGroupTrackerBase<false>;
+    using ImmediateTrackerType = std::conditional_t<std::is_same_v<PipelineType, RenderPipeline>,
+                                                    ImmediateTracker<RenderImmediatesTracker>,
+                                                    ImmediateTracker<ComputeImmediatesTracker>>;
 
   public:
     BindGroupStateTracker(Device* device, DescriptorHeapState* heapState)
@@ -469,7 +486,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
                    CurrentPipeline()->GetPipelineLayoutHandle();
     }
 
-    MaybeError Apply(CommandRecordingContext* commandContext) {
+    MaybeError Apply(CommandRecordingContext* commandContext, ImmediateTrackerType* immediates) {
         BeforeApply();
 
         ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
@@ -557,7 +574,8 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
 
         for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
             BindGroup* group = ToBackend(mBindGroups[index]);
-            ApplyBindGroup(commandList, pipelineLayout, index, group, GetDynamicOffsets(index));
+            ApplyBindGroup(commandList, immediates, pipelineLayout, index, group,
+                           GetDynamicOffsets(index));
         }
 
         if (usesResourceTable) {
@@ -657,21 +675,6 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
         }
     }
 
-    void SetRootConstant(ID3D12GraphicsCommandList* commandList,
-                         uint32_t parameterIndex,
-                         uint32_t rootConstantsLength,
-                         const void* rootConstantsData,
-                         uint32_t registerOffset) {
-        if constexpr (kIsRenderPipeline) {
-            commandList->SetGraphicsRoot32BitConstants(parameterIndex, rootConstantsLength,
-                                                       rootConstantsData, registerOffset);
-        } else {
-            static_assert(kIsComputePipeline);
-            commandList->SetComputeRoot32BitConstants(parameterIndex, rootConstantsLength,
-                                                      rootConstantsData, registerOffset);
-        }
-    }
-
     void UpdateRootSignatureIfNecessary(ID3D12GraphicsCommandList* commandList) {
         if (!AreLayoutsCompatible()) {
             SetRootSignature(commandList);
@@ -702,6 +705,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
     }
 
     void ApplyBindGroup(ID3D12GraphicsCommandList* commandList,
+                        ImmediateTrackerType* immediates,
                         const PipelineLayout* pipelineLayout,
                         BindGroupIndex index,
                         BindGroup* group,
@@ -726,8 +730,8 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
 
             if (bgl->IsStorageBufferBinding(bindingIndex)) {
                 // Dynamic storage buffers are already bound to the root descriptor table, and
-                // only need the dynamic offsets updated in root constants.
-                // Collect the offsets so we can set the root constants after the loop.
+                // only need the dynamic offsets updated in the immediate data.
+                // Collect the offsets so we can update the immediates after the loop.
                 storageBufferDynamicOffsets.push_back(dynamicOffsets[bindingIndex]);
             } else {
                 // Set dynamic uniform buffer root descriptor
@@ -746,16 +750,14 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
                                   std::get<BufferBindingInfo>(bindingInfo.bindingLayout).type,
                                   parameterIndex, bufferLocation);
             }
+        }
 
-            if (!storageBufferDynamicOffsets.empty()) {
-                uint32_t firstRegisterOffset =
-                    pipelineLayout->GetDynamicStorageBufferInfo()[index].firstRegisterOffset;
-                uint32_t offsetsParameterIndex =
-                    pipelineLayout->GetDynamicStorageBufferOffsetsParameterIndex();
-                SetRootConstant(commandList, offsetsParameterIndex,
-                                static_cast<uint32_t>(storageBufferDynamicOffsets.size()),
-                                storageBufferDynamicOffsets.data(), firstRegisterOffset);
-            }
+        if (!storageBufferDynamicOffsets.empty()) {
+            uint32_t firstImmediateIndex =
+                pipelineLayout->GetDynamicStorageBufferInfo()[index].firstImmediateIndex;
+            immediates->SetDynamicStorageBufferOffset(
+                firstImmediateIndex * kImmediateElementByteSize,
+                Span<const uint32_t>(storageBufferDynamicOffsets));
         }
 
         // It's not necessary to update descriptor tables if only the dynamic offset changed.
@@ -784,17 +786,18 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
             }
         }
 
-        // Update dynamic storage buffer root constants: lengths and offsets
+        // Update dynamic storage buffer lengths in the immediate data.
         const auto& dynamicStorageBufferLengths = group->GetDynamicStorageBufferLengths();
         if (!dynamicStorageBufferLengths.empty()) {
-            // Both lengths and offsets use the same register offsets
-            uint32_t firstRegisterOffset =
-                pipelineLayout->GetDynamicStorageBufferInfo()[index].firstRegisterOffset;
-
-            uint32_t lengthsParameterIndex =
-                pipelineLayout->GetDynamicStorageBufferLengthsParameterIndex();
-            SetRootConstant(commandList, lengthsParameterIndex, dynamicStorageBufferLengths.size(),
-                            dynamicStorageBufferLengths.data(), firstRegisterOffset);
+            // Both lengths and offsets use the same immediate indices.
+            uint32_t firstImmediateIndex =
+                pipelineLayout->GetDynamicStorageBufferInfo()[index].firstImmediateIndex;
+            immediates->SetDynamicStorageBufferLength(
+                firstImmediateIndex * kImmediateElementByteSize,
+                // TODO(https://crbug.com/532946455): Support constructing a span from
+                // ityp::stack_vec.
+                DAWN_UNSAFE_TODO(Span<const uint32_t>(dynamicStorageBufferLengths.data(),
+                                                      dynamicStorageBufferLengths.size())));
         }
     }
 
@@ -1465,7 +1468,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 }
 
                 DAWN_TRY(TransitionAndClearForSyncScope(commandContext, scope));
-                DAWN_TRY(bindingTracker->Apply(commandContext));
+                DAWN_TRY(bindingTracker->Apply(commandContext, &immediates));
                 immediates.SetNumWorkgroups(dispatch->x, dispatch->y, dispatch->z);
                 immediates.Apply(commandContext);
 
@@ -1480,7 +1483,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                     resourceUsages.dispatchUsages[currentDispatch++];
 
                 DAWN_TRY(TransitionAndClearForSyncScope(commandContext, scope));
-                DAWN_TRY(bindingTracker->Apply(commandContext));
+                DAWN_TRY(bindingTracker->Apply(commandContext, &immediates));
                 immediates.Apply(commandContext);
 
                 ComPtr<ID3D12CommandSignature> signature =
@@ -1824,7 +1827,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
             case Command::Draw: {
                 DrawCmd* draw = iter->NextCommand<DrawCmd>();
 
-                DAWN_TRY(bindingTracker->Apply(commandContext));
+                DAWN_TRY(bindingTracker->Apply(commandContext, &immediates));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
                 immediates.SetFirstVertexAndInstanceIndex(draw->firstVertex, draw->firstInstance);
                 immediates.Apply(commandContext);
@@ -1836,7 +1839,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
             case Command::DrawIndexed: {
                 DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
 
-                DAWN_TRY(bindingTracker->Apply(commandContext));
+                DAWN_TRY(bindingTracker->Apply(commandContext, &immediates));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
                 immediates.SetFirstVertexAndInstanceIndex(static_cast<uint32_t>(draw->baseVertex),
                                                           draw->firstInstance);
@@ -1850,7 +1853,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
             case Command::DrawIndirect: {
                 DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
 
-                DAWN_TRY(bindingTracker->Apply(commandContext));
+                DAWN_TRY(bindingTracker->Apply(commandContext, &immediates));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
                 immediates.Apply(commandContext);
 
@@ -1870,7 +1873,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
             case Command::DrawIndexedIndirect: {
                 DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
 
-                DAWN_TRY(bindingTracker->Apply(commandContext));
+                DAWN_TRY(bindingTracker->Apply(commandContext, &immediates));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
                 immediates.Apply(commandContext);
 
@@ -1890,7 +1893,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
             case Command::MultiDrawIndirect: {
                 MultiDrawIndirectCmd* draw = iter->NextCommand<MultiDrawIndirectCmd>();
 
-                DAWN_TRY(bindingTracker->Apply(commandContext));
+                DAWN_TRY(bindingTracker->Apply(commandContext, &immediates));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
                 immediates.Apply(commandContext);
 
@@ -1917,7 +1920,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 MultiDrawIndexedIndirectCmd* draw =
                     iter->NextCommand<MultiDrawIndexedIndirectCmd>();
 
-                DAWN_TRY(bindingTracker->Apply(commandContext));
+                DAWN_TRY(bindingTracker->Apply(commandContext, &immediates));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
                 immediates.Apply(commandContext);
 

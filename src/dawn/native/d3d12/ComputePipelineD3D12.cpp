@@ -56,6 +56,17 @@ ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
                                                 sizeof(NumWorkgroupsDimensions));
     }
 
+    uint32_t dynamicStorageBufferCount = ToBackend(GetLayout())->GetDynamicStorageBufferCount();
+    if (dynamicStorageBufferCount > 0) {
+        uint32_t memberByteSize = dynamicStorageBufferCount * kImmediateElementByteSize;
+
+        mImmediateMask |= GetImmediateBlockBits(
+            offsetof(ComputeImmediates, storageBufferDynamicLengths), memberByteSize);
+
+        mImmediateMask |= GetImmediateBlockBits(
+            offsetof(ComputeImmediates, storageBufferDynamicOffsets), memberByteSize);
+    }
+
     // Create PipelineLayoutHandle after setup internal immediates.
     DAWN_TRY_ASSIGN(mPipelineLayoutHandle,
                     ToBackend(GetLayout())->GetOrCreatePipelineLayoutHandle(GetImmediateMask()));

@@ -63,20 +63,6 @@ class PipelineLayout final : public PipelineLayoutBase {
     uint32_t GetDynamicUniformRootParameterIndex(BindGroupIndex group,
                                                  BindingIndex bindingIndex) const;
 
-    uint32_t GetFirstIndexOffsetRegisterSpace() const;
-    uint32_t GetFirstIndexOffsetShaderRegister() const;
-
-    uint32_t GetNumWorkgroupsRegisterSpace() const;
-    uint32_t GetNumWorkgroupsShaderRegister() const;
-
-    uint32_t GetDynamicStorageBufferLengthsRegisterSpace() const;
-    uint32_t GetDynamicStorageBufferLengthsShaderRegister() const;
-    uint32_t GetDynamicStorageBufferLengthsParameterIndex() const;
-
-    uint32_t GetDynamicStorageBufferOffsetsRegisterSpace() const;
-    uint32_t GetDynamicStorageBufferOffsetsShaderRegister() const;
-    uint32_t GetDynamicStorageBufferOffsetsParameterIndex() const;
-
     uint32_t GetImmediatesRegisterSpace() const;
     uint32_t GetImmediatesShaderRegister() const;
 
@@ -84,25 +70,25 @@ class PipelineLayout final : public PipelineLayoutBase {
         const ImmediateMask& pipelineImmediateMask);
 
     struct BindGroupDynamicStorageBufferInfo {
-        // First register offset for a bind group's dynamic storage buffer lengths or offsets.
-        // This is the index into the array of root constants where this bind group's
-        // lengths or offsets start.
-        uint32_t firstRegisterOffset;
+        // First index into the immediate block's length/offset arrays for this bind group's dynamic
+        // storage buffers. This is where the bind group's lengths or offsets start.
+        uint32_t firstImmediateIndex;
 
-        struct BindingAndRegisterOffset {
+        struct BindingAndImmediateIndex {
             BindingNumber binding;
-            uint32_t registerOffset;
+            uint32_t immediateIndex;
         };
-        // Associative list of (BindingNumber,registerOffset) pairs, which is passed into
-        // the shader to map the BindingPoint(thisGroup, BindingNumber) to the registerOffset
-        // into the root constant array which holds the dynamic storage buffer lengths and offsets.
-        std::vector<BindingAndRegisterOffset> bindingAndRegisterOffsets;
+        // Associative list of (BindingNumber,immediateIndex) pairs, which is passed into the shader
+        // to map the BindingPoint(thisGroup, BindingNumber) to the index into the immediate block's
+        // length/offset arrays which hold the dynamic storage buffer lengths and offsets.
+        std::vector<BindingAndImmediateIndex> bindingAndImmediateIndices;
     };
 
-    // Flat map from bind group index to the list of (BindingNumber,Register) pairs.
+    // Flat map from bind group index to the list of (BindingNumber,immediateIndex) pairs.
     using DynamicStorageBufferInfo = PerBindGroup<BindGroupDynamicStorageBufferInfo>;
 
     const DynamicStorageBufferInfo& GetDynamicStorageBufferInfo() const;
+    uint32_t GetDynamicStorageBufferCount() const;
 
   private:
     ~PipelineLayout() override = default;
@@ -118,10 +104,9 @@ class PipelineLayout final : public PipelineLayoutBase {
     PerBindGroup<uint32_t> mSamplerRootParameterIndices;
     PerBindGroup<ityp::vector<BindingIndex, uint32_t>> mDynamicUniformRootParameterIndices;
     DynamicStorageBufferInfo mDynamicStorageBufferInfo;
+    uint32_t mDynamicStorageBufferCount = 0;
     uint32_t mResourceTableCbvUavSrvRootParameterIndex;
     uint32_t mResourceTableSamplerRootParameterIndex;
-    uint32_t mDynamicStorageBufferLengthsParameterIndex;
-    uint32_t mDynamicStorageBufferOffsetsParameterIndex;
 
     // Base root parameters shared by every PipelineLayoutHandle, built once in
     // BuildBaseRootParameters(). rootParameters points into ranges, so both are kept const and
