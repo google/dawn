@@ -602,5 +602,140 @@ TEST_F(SpirvWriterTest, BufferView_Vec2h_Via_U16) {
     EXPECT_INST(R"(OpTypeInt 16 0)");
 }
 
+TEST_F(SpirvWriterTest, Alignment_Load_Workgroup) {
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.u32()));
+    mod.root_block->Append(v);
+
+    auto* ep = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    b.Append(ep->Block(), [&] {
+        auto* ld = b.Load(v);
+        ld->SetAlignment(16);
+        b.Return(ep);
+    });
+
+    Options options;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpLoad %uint %v None");
+}
+
+TEST_F(SpirvWriterTest, Alignment_Load) {
+    auto* v = b.Var("v", ty.ptr(storage, ty.u32()));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* ep = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    b.Append(ep->Block(), [&] {
+        auto* ld = b.Load(v);
+        ld->SetAlignment(16);
+        b.Return(ep);
+    });
+
+    Options options;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpLoad %uint %9 Aligned 16");
+}
+
+TEST_F(SpirvWriterTest, Alignment_LoadVectorElement) {
+    auto* v = b.Var("v", ty.ptr(storage, ty.vec4u()));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* ep = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    b.Append(ep->Block(), [&] {
+        auto* ld = b.LoadVectorElement(v, 2_u);
+        ld->SetAlignment(8);
+        b.Return(ep);
+    });
+
+    Options options;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpLoad %uint %13 Aligned 8");
+}
+
+TEST_F(SpirvWriterTest, Alignment_Store) {
+    auto* v = b.Var("v", ty.ptr(storage, ty.u32()));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* ep = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    b.Append(ep->Block(), [&] {
+        auto* st = b.Store(v, 0_u);
+        st->SetAlignment(16);
+        b.Return(ep);
+    });
+
+    Options options;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpStore %9 %uint_0 Aligned 16");
+}
+
+TEST_F(SpirvWriterTest, Alignment_StoreVectorElement) {
+    auto* v = b.Var("v", ty.ptr(storage, ty.vec4u()));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* ep = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    b.Append(ep->Block(), [&] {
+        auto* st = b.StoreVectorElement(v, 2_u, 0_u);
+        st->SetAlignment(8);
+        b.Return(ep);
+    });
+
+    Options options;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpStore %13 %uint_0 Aligned 8");
+}
+
+TEST_F(SpirvWriterTest, Alignment_CooperativeMatrixLoad) {
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.f32())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* ep = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    b.Append(ep->Block(), [&] {
+        auto* ld = b.CallExplicit(
+            mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat_ty, core::Majorness::kRowMajor}, v, 0_u,
+            8_u);
+        ld->SetAlignment(64);
+        b.Return(ep);
+    });
+
+    Options options;
+    options.extensions.use_vulkan_memory_model = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpCooperativeMatrixLoadKHR %28 %25 %uint_0 %23 Aligned|NonPrivatePointer 64");
+}
+
+TEST_F(SpirvWriterTest, Alignment_CooperativeMatrixStore) {
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.f32())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* ep = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    b.Append(ep->Block(), [&] {
+        auto* m = b.Construct(mat_ty);
+        auto* st = b.CallExplicit(
+            ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+            Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, v, 0_u, m, 8_u);
+        st->SetAlignment(64);
+        b.Return(ep);
+    });
+
+    Options options;
+    options.extensions.use_vulkan_memory_model = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpCooperativeMatrixStoreKHR %28 %10 %uint_0 %26 Aligned|NonPrivatePointer 64");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

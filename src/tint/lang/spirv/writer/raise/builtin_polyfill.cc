@@ -1380,9 +1380,15 @@ struct State {
             }
             auto* layout = b.Constant(u32(col_major ? SpvCooperativeMatrixLayoutColumnMajorKHR
                                                     : SpvCooperativeMatrixLayoutRowMajorKHR));
-            auto* memory_operand = Literal(u32(ptr->Access() == core::Access::kReadWrite
-                                                   ? SpvMemoryAccessNonPrivatePointerMask
-                                                   : SpvMemoryAccessMaskNone));
+            uint32_t mask = static_cast<uint32_t>(SpvMemoryAccessMaskNone);
+            if (ptr->Access() == core::Access::kReadWrite) {
+                mask |= static_cast<uint32_t>(SpvMemoryAccessNonPrivatePointerMask);
+            }
+            if (ptr->AddressSpace() == core::AddressSpace::kStorage &&
+                builtin->Alignment().has_value()) {
+                mask |= static_cast<uint32_t>(SpvMemoryAccessAlignedMask);
+            }
+            auto* memory_operand = Literal(u32(mask));
 
             // In SPIR-V `stride` and `offset` are related to the type of the input pointer, while
             // in WGSL they both mean the number of elements. When the subgroup matrix element type
@@ -1413,6 +1419,10 @@ struct State {
             auto* call = b.CallWithResult<spirv::ir::BuiltinCall>(
                 builtin->DetachResult(), spirv::BuiltinFn::kCooperativeMatrixLoad, src, layout,
                 applied_stride, memory_operand);
+            if (ptr->AddressSpace() == core::AddressSpace::kStorage &&
+                builtin->Alignment().has_value()) {
+                call->PushOperand(Literal(u32(builtin->Alignment().value())));
+            }
             call->SetExplicitTemplateParams(Vector<core::ir::TemplateParameter, 1>{result_ty});
         });
         builtin->Destroy();
@@ -1470,10 +1480,20 @@ struct State {
             auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
             auto* dst = b.Access(elem_ptr, p, applied_offset);
 
-            auto* memory_operand = Literal(u32(SpvMemoryAccessNonPrivatePointerMask));
+            uint32_t mask = static_cast<uint32_t>(SpvMemoryAccessNonPrivatePointerMask);
+            if (ptr->AddressSpace() == core::AddressSpace::kStorage &&
+                builtin->Alignment().has_value()) {
+                mask |= static_cast<uint32_t>(SpvMemoryAccessAlignedMask);
+            }
+            auto* memory_operand = Literal(u32(mask));
 
-            b.Call<spirv::ir::BuiltinCall>(ty.void_(), spirv::BuiltinFn::kCooperativeMatrixStore,
-                                           dst, value, layout, applied_stride, memory_operand);
+            auto* call = b.Call<spirv::ir::BuiltinCall>(
+                ty.void_(), spirv::BuiltinFn::kCooperativeMatrixStore, dst, value, layout,
+                applied_stride, memory_operand);
+            if (ptr->AddressSpace() == core::AddressSpace::kStorage &&
+                builtin->Alignment().has_value()) {
+                call->PushOperand(Literal(u32(builtin->Alignment().value())));
+            }
         });
         builtin->Destroy();
     }

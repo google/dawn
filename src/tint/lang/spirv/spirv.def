@@ -1841,12 +1841,24 @@ fn u_dot(u32, u32, literal) -> u32
 @stage("compute") implicit(K: subgroup_matrix_kind, E: subgroup_matrix_elements, AE: fiu32_fu16, N: num, C: num, R: num, AS: workgroup_or_storage, AM: readable, S: iu32)
   fn cooperative_matrix_load<T: subgroup_matrix<K, E, C, R> >(
     ptr<AS, vec<N, AE>, AM>, u32, S, literal) -> T
+@stage("compute") implicit(K: subgroup_matrix_kind, E: subgroup_matrix_elements, AE: fiu32_fu16, C: num, R: num, AS: workgroup_or_storage, AM: readable, S: iu32)
+  fn cooperative_matrix_load<T: subgroup_matrix<K, E, C, R> >(
+    ptr<AS, AE, AM>, u32, S, literal, literal) -> T
+@stage("compute") implicit(K: subgroup_matrix_kind, E: subgroup_matrix_elements, AE: fiu32_fu16, N: num, C: num, R: num, AS: workgroup_or_storage, AM: readable, S: iu32)
+  fn cooperative_matrix_load<T: subgroup_matrix<K, E, C, R> >(
+    ptr<AS, vec<N, AE>, AM>, u32, S, literal, literal) -> T
 @stage("compute") implicit(K: subgroup_matrix_kind, E: subgroup_matrix_elements, AE: fiu32_fu16, C: num, R: num, AS: workgroup_or_storage, AM: writable, S: iu32)
   fn cooperative_matrix_store(
     ptr<AS, AE, AM>, subgroup_matrix<K, E, C, R>, u32, S, literal)
 @stage("compute") implicit(K: subgroup_matrix_kind, E: subgroup_matrix_elements, AE: fiu32_fu16, N: num, C: num, R: num, AS: workgroup_or_storage, AM: writable, S: iu32)
   fn cooperative_matrix_store(
     ptr<AS, vec<N, AE>, AM>, subgroup_matrix<K, E, C, R>, u32, S, literal)
+@stage("compute") implicit(K: subgroup_matrix_kind, E: subgroup_matrix_elements, AE: fiu32_fu16, C: num, R: num, AS: workgroup_or_storage, AM: writable, S: iu32)
+  fn cooperative_matrix_store(
+    ptr<AS, AE, AM>, subgroup_matrix<K, E, C, R>, u32, S, literal, literal)
+@stage("compute") implicit(K: subgroup_matrix_kind, E: subgroup_matrix_elements, AE: fiu32_fu16, N: num, C: num, R: num, AS: workgroup_or_storage, AM: writable, S: iu32)
+  fn cooperative_matrix_store(
+    ptr<AS, vec<N, AE>, AM>, subgroup_matrix<K, E, C, R>, u32, S, literal, literal)
 
 @must_use @stage("compute") implicit(T: f16, TR: f32_f16, C: num, R: num, K: num)
   fn cooperative_matrix_mul_add(

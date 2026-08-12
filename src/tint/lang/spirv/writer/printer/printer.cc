@@ -2492,26 +2492,47 @@ class Printer {
         current_function_.PushInst(op, std::move(operands));
     }
 
-    SpvMemoryAccessMask MemoryAccessMaskForPointer(const core::type::Pointer* ptr) {
+    bool ExplicitLayoutStorageClass(core::AddressSpace aspace) {
+        switch (aspace) {
+            case core::AddressSpace::kStorage:
+            case core::AddressSpace::kUniform:
+            case core::AddressSpace::kImmediate:
+                return true;
+            default:
+                break;
+        }
+        return false;
+    }
+
+    uint32_t MemoryAccessMaskForPointer(const core::type::Pointer* ptr,
+                                        std::optional<uint32_t> alignment) {
         TINT_IR_ASSERT(ir_, ptr);
 
+        uint32_t mask = static_cast<uint32_t>(SpvMemoryAccessMaskNone);
         if (options_.extensions.use_vulkan_memory_model &&
             (ptr->AddressSpace() == core::AddressSpace::kStorage ||
              ptr->AddressSpace() == core::AddressSpace::kWorkgroup) &&
             ptr->Access() == core::Access::kReadWrite) {
-            return SpvMemoryAccessNonPrivatePointerMask;
+            mask |= static_cast<uint32_t>(SpvMemoryAccessNonPrivatePointerMask);
+        }
+        if (ExplicitLayoutStorageClass(ptr->AddressSpace()) && alignment.has_value()) {
+            mask |= static_cast<uint32_t>(SpvMemoryAccessAlignedMask);
         }
 
-        return SpvMemoryAccessMaskNone;
+        return mask;
     }
 
     /// Emit a load instruction.
     /// @param load the load instruction to emit
     void EmitLoad(core::ir::Load* load) {
-        current_function_.PushInst(spv::Op::OpLoad,
-                                   {Type(load->Result()->Type()), Value(load), Value(load->From()),
-                                    U32Operand(MemoryAccessMaskForPointer(
-                                        load->From()->Type()->As<core::type::Pointer>()))});
+        auto* ptr_ty = load->From()->Type()->As<core::type::Pointer>();
+        auto memory_mask = MemoryAccessMaskForPointer(ptr_ty, load->Alignment());
+        OperandList operands = {Type(load->Result()->Type()), Value(load), Value(load->From()),
+                                U32Operand(memory_mask)};
+        if (ExplicitLayoutStorageClass(ptr_ty->AddressSpace()) && load->Alignment().has_value()) {
+            operands.push_back(U32Operand(load->Alignment().value()));
+        }
+        current_function_.PushInst(spv::Op::OpLoad, operands);
     }
 
     /// Emit a load vector element instruction.
@@ -2524,9 +2545,14 @@ class Printer {
         current_function_.PushInst(spv::Op::OpAccessChain,
                                    {Type(el_ptr_ty), el_ptr_id, Value(load->From()),
                                     GetAccessChainIndexId(load->Index())});
-        current_function_.PushInst(spv::Op::OpLoad,
-                                   {Type(load->Result()->Type()), Value(load), el_ptr_id,
-                                    U32Operand(MemoryAccessMaskForPointer(vec_ptr_ty))});
+        auto memory_mask = MemoryAccessMaskForPointer(vec_ptr_ty, load->Alignment());
+        OperandList operands = {Type(load->Result()->Type()), Value(load), el_ptr_id,
+                                U32Operand(memory_mask)};
+        if (ExplicitLayoutStorageClass(vec_ptr_ty->AddressSpace()) &&
+            load->Alignment().has_value()) {
+            operands.push_back(U32Operand(load->Alignment().value()));
+        }
+        current_function_.PushInst(spv::Op::OpLoad, operands);
     }
 
     /// Emit a loop instruction.
@@ -2648,10 +2674,13 @@ class Printer {
     /// Emit a store instruction.
     /// @param store the store instruction to emit
     void EmitStore(core::ir::Store* store) {
-        current_function_.PushInst(spv::Op::OpStore,
-                                   {Value(store->To()), Value(store->From()),
-                                    U32Operand(MemoryAccessMaskForPointer(
-                                        store->To()->Type()->As<core::type::Pointer>()))});
+        auto* ptr_ty = store->To()->Type()->As<core::type::Pointer>();
+        auto memory_mask = MemoryAccessMaskForPointer(ptr_ty, store->Alignment());
+        OperandList operands = {Value(store->To()), Value(store->From()), U32Operand(memory_mask)};
+        if (ExplicitLayoutStorageClass(ptr_ty->AddressSpace()) && store->Alignment().has_value()) {
+            operands.push_back(U32Operand(store->Alignment().value()));
+        }
+        current_function_.PushInst(spv::Op::OpStore, operands);
     }
 
     /// Emit a store vector element instruction.
@@ -2664,9 +2693,13 @@ class Printer {
         current_function_.PushInst(spv::Op::OpAccessChain,
                                    {Type(el_ptr_ty), el_ptr_id, Value(store->To()),
                                     GetAccessChainIndexId(store->Index())});
-        current_function_.PushInst(
-            spv::Op::OpStore,
-            {el_ptr_id, Value(store->Value()), U32Operand(MemoryAccessMaskForPointer(vec_ptr_ty))});
+        auto memory_mask = MemoryAccessMaskForPointer(vec_ptr_ty, store->Alignment());
+        OperandList operands = {el_ptr_id, Value(store->Value()), U32Operand(memory_mask)};
+        if (ExplicitLayoutStorageClass(vec_ptr_ty->AddressSpace()) &&
+            store->Alignment().has_value()) {
+            operands.push_back(U32Operand(store->Alignment().value()));
+        }
+        current_function_.PushInst(spv::Op::OpStore, operands);
     }
 
     /// Emit a unary instruction.
