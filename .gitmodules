@@ -85,11 +85,11 @@
 [submodule "third_party/mesa/src"]
 	path = third_party/mesa/src
 	url = https://chromium.googlesource.com/external/gitlab.freedesktop.org/mesa/mesa/
-	gclient-condition = checkout_mesa
+	gclient-condition = checkout_mesa and host_os == "linux"
 [submodule "third_party/meson/src"]
 	path = third_party/meson/src
 	url = https://chromium.googlesource.com/external/github.com/mesonbuild/meson
-	gclient-condition = checkout_mesa
+	gclient-condition = checkout_mesa and host_os == "linux"
 [submodule "third_party/jinja2"]
 	path = third_party/jinja2
 	url = https://chromium.googlesource.com/chromium/src/third_party/jinja2
@@ -217,10 +217,6 @@
 	path = third_party/partition_alloc
 	url = https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator.git
 	gclient-condition = dawn_standalone
-[submodule "third_party/litert-lm/src"]
-	path = third_party/litert-lm/src
-	url = https://chromium.googlesource.com/external/github.com/google-ai-edge/LiteRT-LM.git
-	gclient-condition = checkout_litert_lm
 [submodule "third_party/android_sdk"]
 	path = third_party/android_sdk
 	url = https://chromium.googlesource.com/chromium/src/third_party/android_sdk
@@ -241,3 +237,7 @@
 	path = third_party/libunwind/src
 	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libunwind.git
 	gclient-condition = checkout_android and dawn_standalone
+[submodule "third_party/litert-lm/src"]
+	path = third_party/litert-lm/src
+	url = https://chromium.googlesource.com/external/github.com/google-ai-edge/LiteRT-LM.git
+	gclient-condition = checkout_litert_lm
