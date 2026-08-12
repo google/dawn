@@ -136,11 +136,11 @@ std::vector<Token> Lexer::Lex() {
 }
 
 std::string_view Lexer::line() const {
-    if (file_->content.lines.size() == 0) {
+    if (file_->content.GetLineCount() == 0) {
         static const char* empty_string = "";
         return empty_string;
     }
-    return file_->content.lines[location_.line - 1];
+    return file_->content.GetLine(location_.line - 1);
 }
 
 uint32_t Lexer::pos() const {
@@ -188,7 +188,7 @@ void Lexer::advance_line() {
 }
 
 bool Lexer::is_eof() const {
-    return location_.line >= file_->content.lines.size() && pos() >= length();
+    return location_.line >= file_->content.GetLineCount() && pos() >= length();
 }
 
 bool Lexer::is_eol() const {

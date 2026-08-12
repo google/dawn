@@ -132,7 +132,7 @@ void ParsedCompilationMessages::AddMessage(const tint::diag::Diagnostic& diagnos
         // pointer with the start of the file's content. Note that line numbering in Tint source
         // range starts at 1 while the array of lines start at 0 (hence the -1).
         const char* fileStart = content.data.data();
-        const char* lineStart = content.lines[checked_cast<size_t>(lineNum - 1)].data();
+        const char* lineStart = content.GetLine(checked_cast<size_t>(lineNum - 1)).data();
         offsetInBytes = static_cast<uint64_t>(lineStart - fileStart) + linePosInBytes - 1;
 
         // The linePosInBytes is 1-based.
@@ -153,7 +153,7 @@ void ParsedCompilationMessages::AddMessage(const tint::diag::Diagnostic& diagnos
             endLineCol = linePosInBytes;
         }
 
-        const char* endLineStart = content.lines[checked_cast<size_t>(endLineNum - 1)].data();
+        const char* endLineStart = content.GetLine(checked_cast<size_t>(endLineNum - 1)).data();
         uint64_t endOffsetInBytes =
             static_cast<uint64_t>(endLineStart - fileStart) + endLineCol - 1;
         // The length of the message is the difference between the starting offset and the
