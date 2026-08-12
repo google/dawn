@@ -220,9 +220,7 @@ void FreeCommands(CommandIterator* commands) {
             }
             case Command::SetImmediates: {
                 SetImmediatesCmd* cmd = commands->NextCommand<SetImmediatesCmd>();
-                if (cmd->size > 0) {
-                    commands->NextData<uint8_t>(cmd->size);
-                }
+                commands->NextData<uint8_t>(cmd->size);
                 cmd->~SetImmediatesCmd();
                 break;
             }
@@ -401,9 +399,7 @@ void SkipCommand(CommandIterator* commands, Command type) {
 
         case Command::SetImmediates: {
             SetImmediatesCmd* cmd = commands->NextCommand<SetImmediatesCmd>();
-            if (cmd->size > 0) {
-                commands->NextData<uint8_t>(cmd->size);
-            }
+            commands->NextData<uint8_t>(cmd->size);
             break;
         }
 
