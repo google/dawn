@@ -114,7 +114,7 @@ match fi32_f16: f32 | i32 | f16
 match fiu32_f16: f32 | i32 | u32 | f16
 match iu8: i8 | u8
 match iu32_iu8: i32 | u32 | i8 | u8
-match u16_iu32: u16 | i32 | u32
+match u16_u32: u16 | u32
 
 match storage: address_space.storage
 match function: address_space.function
@@ -1008,8 +1008,13 @@ implicit(N: num, T: scalar) fn select(vec<N, bool>, vec<N, T>, vec<N, T>) -> vec
           offset: u32,
           stride: u32,
           matrix_layout) -> SM
-@stage("compute") implicit(K: subgroup_matrix_kind, S: subgroup_matrix_component_types, AE: u16_iu32, C: num, R: num, AC: num, AM: readable)
+@stage("compute") implicit(K: subgroup_matrix_kind, S: subgroup_matrix_component_types, AE: u16_u32, C: num, R: num, AC: num, AM: readable)
   fn Load<SM: subgroup_matrix<K, S, C, R> >(ptr<workgroup, array<AE, AC>, AM>,
+          offset: u32,
+          stride: u32,
+          matrix_layout) -> SM
+@stage("compute") implicit(K: subgroup_matrix_kind, S: subgroup_matrix_component_types, AE: u16_u32, N: num, C: num, R: num, AC: num, AM: readable)
+  fn Load<SM: subgroup_matrix<K, S, C, R> >(ptr<workgroup, array<vec<N, AE>, AC>, AM>,
           offset: u32,
           stride: u32,
           matrix_layout) -> SM
@@ -1027,9 +1032,15 @@ implicit(N: num, T: scalar) fn select(vec<N, bool>, vec<N, T>, vec<N, T>) -> vec
            offset: u32,
            stride: u32,
            matrix_layout)
-@member_function @stage("compute") implicit(K: subgroup_matrix_kind, S: subgroup_matrix_component_types, AE: u16_iu32, C: num, R: num, AC: num)
+@member_function @stage("compute") implicit(K: subgroup_matrix_kind, S: subgroup_matrix_component_types, AE: u16_u32, C: num, R: num, AC: num)
   fn Store(subgroup_matrix<K, S, C, R>,
            ptr<workgroup, array<AE, AC>, read_write>,
+           offset: u32,
+           stride: u32,
+           matrix_layout)
+@member_function @stage("compute") implicit(K: subgroup_matrix_kind, S: subgroup_matrix_component_types, AE: u16_u32, N: num, C: num, R: num, AC: num)
+  fn Store(subgroup_matrix<K, S, C, R>,
+           ptr<workgroup, array<vec<N, AE>, AC>, read_write>,
            offset: u32,
            stride: u32,
            matrix_layout)

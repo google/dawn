@@ -359,7 +359,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     // DecomposeAccess must come after DecomposeStorageAccess, ChangeImmediateToUniform, and
     // ArrayOffsetFrom* transforms
-    core::ir::transform::DecomposeAccessOptions decompose_config{.uniform = true};
+    core::ir::transform::DecomposeAccessOptions decompose_config;
+    decompose_config.uniform = true;
+    decompose_config.workgroup_subgroup_matrix = true;
     decompose_config.workgroup = options.workarounds.d3d12_decompose_workgroup_access;
     TINT_CHECK_RESULT(core::ir::transform::DecomposeAccess(module, decompose_config));
 

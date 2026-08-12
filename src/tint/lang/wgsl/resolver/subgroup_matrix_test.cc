@@ -557,6 +557,21 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad_OOBOffset) {
                                    "bounds of the array type of size 8"));
 }
 
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad_ArrayStrideTooSmall) {
+    EXPECT_ERROR(
+        R"(
+enable chromium_experimental_subgroup_matrix;
+enable f16;
+@group(0) @binding(0) var<storage> in : array<f16>;
+fn foo(stride : u32) {
+  _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major>(&in, 0, stride);
+})",
+        R"(input.wgsl:6:7 error: the stride of the array (2 bytes) must be greater than or equal to the matrix element size (4 bytes)
+  _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major>(&in, 0, stride);
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)");
+}
+
 TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore_OOBOffset) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
     auto* buffer = GlobalVar("buffer", storage, read_write, ty.array(ty.f32(), Expr(8_a)),
@@ -606,6 +621,22 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore_i8_i32_OOBOffset) {
     EXPECT_THAT(r()->error(),
                 testing::HasSubstr("error: the offset argument of subgroupMatrixStore (32) is out "
                                    "of bounds of the array type of size 32"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore_ArrayStrideTooSmall) {
+    EXPECT_ERROR(
+        R"(
+enable chromium_experimental_subgroup_matrix;
+enable f16;
+@group(0) @binding(0) var<storage, read_write> out : array<f16>;
+fn foo(stride : u32) {
+  let m = subgroup_matrix_left<f32, 8, 8>();
+  _ = subgroupMatrixStore<col_major>(&out, 0, m, stride);
+})",
+        R"(input.wgsl:7:7 error: the stride of the array (2 bytes) must be greater than or equal to the matrix element size (4 bytes)
+  _ = subgroupMatrixStore<col_major>(&out, 0, m, stride);
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)");
 }
 
 TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply) {
@@ -1149,23 +1180,135 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad_TemplateMajorness) {
 enable chromium_experimental_subgroup_matrix;
 enable f16;
 
+@group(0) @binding(0) var<storage> in : buffer;
+
 var<workgroup> v : array<f16, 128 * 128>;
 fn foo(offset : u32, stride : u32) {
   _ = subgroupMatrixLoad<subgroup_matrix_left<f16, 8, 8>, col_major>(&v, offset, stride);
   _ = subgroupMatrixLoad<subgroup_matrix_right<f16, 8, 8>, row_major>(&v, offset, stride);
   _ = subgroupMatrixLoad<subgroup_matrix_result<f16, 8, 8>, col_major>(&v, offset, stride);
+
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major>(bufferView<array<f16>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major>(bufferView<array<f32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major>(bufferView<array<u32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major>(bufferView<array<i32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major>(bufferView<array<vec2u>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major>(bufferView<array<vec2u>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major>(bufferView<array<vec3i>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major>(bufferView<array<vec4f>>(&in, 0), offset, stride);
+
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i8, 8, 8>, row_major>(bufferView<array<f16>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i8, 8, 8>, row_major>(bufferView<array<f32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i8, 8, 8>, row_major>(bufferView<array<u32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i8, 8, 8>, row_major>(bufferView<array<i32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i8, 8, 8>, row_major>(bufferView<array<vec2u>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i8, 8, 8>, row_major>(bufferView<array<vec2u>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i8, 8, 8>, row_major>(bufferView<array<vec3i>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i8, 8, 8>, row_major>(bufferView<array<vec4f>>(&in, 0), offset, stride);
+
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f16, 8, 8>, col_major>(bufferView<array<f16>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f16, 8, 8>, col_major>(bufferView<array<f32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f16, 8, 8>, col_major>(bufferView<array<u32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f16, 8, 8>, col_major>(bufferView<array<i32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f16, 8, 8>, col_major>(bufferView<array<vec2u>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f16, 8, 8>, col_major>(bufferView<array<vec2u>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f16, 8, 8>, col_major>(bufferView<array<vec3i>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f16, 8, 8>, col_major>(bufferView<array<vec4f>>(&in, 0), offset, stride);
+
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, row_major>(bufferView<array<f32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, row_major>(bufferView<array<u32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, row_major>(bufferView<array<i32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, row_major>(bufferView<array<vec2u>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, row_major>(bufferView<array<vec2u>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, row_major>(bufferView<array<vec3i>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, row_major>(bufferView<array<vec4f>>(&in, 0), offset, stride);
+
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i32, 8, 8>, col_major>(bufferView<array<f32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i32, 8, 8>, col_major>(bufferView<array<u32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i32, 8, 8>, col_major>(bufferView<array<i32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i32, 8, 8>, col_major>(bufferView<array<vec2u>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i32, 8, 8>, col_major>(bufferView<array<vec2u>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i32, 8, 8>, col_major>(bufferView<array<vec3i>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_right<i32, 8, 8>, col_major>(bufferView<array<vec4f>>(&in, 0), offset, stride);
+
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(bufferView<array<f32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(bufferView<array<u32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(bufferView<array<i32>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(bufferView<array<vec2u>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(bufferView<array<vec2u>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(bufferView<array<vec3i>>(&in, 0), offset, stride);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(bufferView<array<vec4f>>(&in, 0), offset, stride);
 })");
 }
 
 TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore_TemplateMajorness) {
     ExpectSuccess(R"(
 enable chromium_experimental_subgroup_matrix;
+enable f16;
 
 @group(0) @binding(0) var<storage, read_write> v : array<f32>;
+@group(0) @binding(0) var<storage, read_write> out : buffer;
 fn foo(offset : u32, stride : u32) {
   subgroupMatrixStore<row_major>(&v, offset, subgroup_matrix_result<f32, 8, 8>(), stride);
   subgroupMatrixStore<col_major>(&v, offset, subgroup_matrix_left<f32, 8, 8>(), stride);
   subgroupMatrixStore<row_major>(&v, offset, subgroup_matrix_right<f32, 8, 8>(), stride);
+
+  let m_u8 = subgroup_matrix_left<u8, 8, 8>();
+  subgroupMatrixStore<col_major>(bufferView<array<f16>>(&out, 0), offset, m_u8, stride);
+  subgroupMatrixStore<col_major>(bufferView<array<f32>>(&out, 0), offset, m_u8, stride);
+  subgroupMatrixStore<col_major>(bufferView<array<u32>>(&out, 0), offset, m_u8, stride);
+  subgroupMatrixStore<col_major>(bufferView<array<i32>>(&out, 0), offset, m_u8, stride);
+  subgroupMatrixStore<col_major>(bufferView<array<vec2u>>(&out, 0), offset, m_u8, stride);
+  subgroupMatrixStore<col_major>(bufferView<array<vec2u>>(&out, 0), offset, m_u8, stride);
+  subgroupMatrixStore<col_major>(bufferView<array<vec3i>>(&out, 0), offset, m_u8, stride);
+  subgroupMatrixStore<col_major>(bufferView<array<vec4f>>(&out, 0), offset, m_u8, stride);
+
+  let m_i8 = subgroup_matrix_right<i8, 8, 8>();
+  subgroupMatrixStore<row_major>(bufferView<array<f16>>(&out, 0), offset, m_i8, stride);
+  subgroupMatrixStore<row_major>(bufferView<array<f32>>(&out, 0), offset, m_i8, stride);
+  subgroupMatrixStore<row_major>(bufferView<array<u32>>(&out, 0), offset, m_i8, stride);
+  subgroupMatrixStore<row_major>(bufferView<array<i32>>(&out, 0), offset, m_i8, stride);
+  subgroupMatrixStore<row_major>(bufferView<array<vec2u>>(&out, 0), offset, m_i8, stride);
+  subgroupMatrixStore<row_major>(bufferView<array<vec2u>>(&out, 0), offset, m_i8, stride);
+  subgroupMatrixStore<row_major>(bufferView<array<vec3i>>(&out, 0), offset, m_i8, stride);
+  subgroupMatrixStore<row_major>(bufferView<array<vec4f>>(&out, 0), offset, m_i8, stride);
+
+  let m_f16 = subgroup_matrix_result<f16, 8, 8>();
+  subgroupMatrixStore< col_major>(bufferView<array<f16>>(&out, 0), offset, m_f16, stride);
+  subgroupMatrixStore< col_major>(bufferView<array<f32>>(&out, 0), offset, m_f16, stride);
+  subgroupMatrixStore< col_major>(bufferView<array<u32>>(&out, 0), offset, m_f16, stride);
+  subgroupMatrixStore< col_major>(bufferView<array<i32>>(&out, 0), offset, m_f16, stride);
+  subgroupMatrixStore< col_major>(bufferView<array<vec2u>>(&out, 0), offset, m_f16, stride);
+  subgroupMatrixStore< col_major>(bufferView<array<vec2u>>(&out, 0), offset, m_f16, stride);
+  subgroupMatrixStore< col_major>(bufferView<array<vec3i>>(&out, 0), offset, m_f16, stride);
+  subgroupMatrixStore< col_major>(bufferView<array<vec4f>>(&out, 0), offset, m_f16, stride);
+
+  let m_u32 = subgroup_matrix_left<u32, 8, 8>();
+  subgroupMatrixStore< row_major>(bufferView<array<f32>>(&out, 0), offset, m_u32, stride);
+  subgroupMatrixStore< row_major>(bufferView<array<u32>>(&out, 0), offset, m_u32, stride);
+  subgroupMatrixStore< row_major>(bufferView<array<i32>>(&out, 0), offset, m_u32, stride);
+  subgroupMatrixStore< row_major>(bufferView<array<vec2u>>(&out, 0), offset, m_u32, stride);
+  subgroupMatrixStore< row_major>(bufferView<array<vec2u>>(&out, 0), offset, m_u32, stride);
+  subgroupMatrixStore< row_major>(bufferView<array<vec3i>>(&out, 0), offset, m_u32, stride);
+  subgroupMatrixStore< row_major>(bufferView<array<vec4f>>(&out, 0), offset, m_u32, stride);
+
+  let m_i32 = subgroup_matrix_right<i32, 8, 8>();
+  subgroupMatrixStore< col_major>(bufferView<array<f32>>(&out, 0), offset, m_i32, stride);
+  subgroupMatrixStore< col_major>(bufferView<array<u32>>(&out, 0), offset, m_i32, stride);
+  subgroupMatrixStore< col_major>(bufferView<array<i32>>(&out, 0), offset, m_i32, stride);
+  subgroupMatrixStore< col_major>(bufferView<array<vec2u>>(&out, 0), offset, m_i32, stride);
+  subgroupMatrixStore< col_major>(bufferView<array<vec2u>>(&out, 0), offset, m_i32, stride);
+  subgroupMatrixStore< col_major>(bufferView<array<vec3i>>(&out, 0), offset, m_i32, stride);
+  subgroupMatrixStore< col_major>(bufferView<array<vec4f>>(&out, 0), offset, m_i32, stride);
+
+  let m_f32 = subgroup_matrix_left<f32, 8, 8>();
+  subgroupMatrixStore< row_major>(bufferView<array<f32>>(&out, 0), offset, m_f32, stride);
+  subgroupMatrixStore< row_major>(bufferView<array<u32>>(&out, 0), offset, m_f32, stride);
+  subgroupMatrixStore< row_major>(bufferView<array<i32>>(&out, 0), offset, m_f32, stride);
+  subgroupMatrixStore< row_major>(bufferView<array<vec2u>>(&out, 0), offset, m_f32, stride);
+  subgroupMatrixStore< row_major>(bufferView<array<vec2u>>(&out, 0), offset, m_f32, stride);
+  subgroupMatrixStore< row_major>(bufferView<array<vec3i>>(&out, 0), offset, m_f32, stride);
+  subgroupMatrixStore< row_major>(bufferView<array<vec4f>>(&out, 0), offset, m_f32, stride);
 })");
 }
 
@@ -1180,45 +1323,35 @@ fn foo(offset : u32, stride : u32) {
 })",
         R"(input.wgsl:6:7 error: no matching call to 'subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, f32>(ptr<workgroup, array<f32, 16384>, read_write>, u32, u32)'
 
-12 candidate functions:
- • 'subgroupMatrixLoad<T  ✓ , Majorness  ✗ >(ptr<AS, array<E, AC>, AM>  ✓ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
+10 candidate functions:
+ • 'subgroupMatrixLoad<T  ✓ , Majorness  ✗ >(ptr<AS, array<AE, AC>, AM>  ✓ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
       ✓  'T' is 'subgroup_matrix<K, E, C, R>'
-      ✓  'E' is 'f32', 'i32', 'u32' or 'f16'
+      ✓  'E' is 'f32', 'f16', 'u32', 'i32', 'u8' or 'i8'
+      ✓  'AE' is 'f32', 'i32', 'u32' or 'f16'
       ✓  'AS' is 'workgroup' or 'storage'
       ✓  'AM' is 'read' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixLoad<T  ✓ , Majorness  ✗ >(ptr<AS, array<E>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
+ • 'subgroupMatrixLoad<T  ✓ , Majorness  ✗ >(ptr<AS, array<AE>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
       ✓  'T' is 'subgroup_matrix<K, E, C, R>'
-      ✓  'E' is 'f32', 'i32', 'u32' or 'f16'
+      ✓  'E' is 'f32', 'f16', 'u32', 'i32', 'u8' or 'i8'
+      ✗  'AE' is 'f32', 'i32', 'u32' or 'f16'
       ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'read' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixLoad<T  ✗ , Majorness  ✗ >(ptr<AS, array<i32>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
-      ✗  'T' is 'subgroup_matrix<K, E, C, R>'
-      ✗  'E' is 'i8'
+ • 'subgroupMatrixLoad<T  ✓ , Majorness  ✗ >(ptr<AS, array<vecN<AE>>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
+      ✓  'T' is 'subgroup_matrix<K, E, C, R>'
+      ✓  'E' is 'f32', 'f16', 'u32', 'i32', 'u8' or 'i8'
+      ✗  'AE' is 'f32', 'i32', 'u32' or 'f16'
       ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'read' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixLoad<T  ✗ , Majorness  ✗ >(ptr<AS, array<u32>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
-      ✗  'T' is 'subgroup_matrix<K, E, C, R>'
-      ✗  'E' is 'u8'
-      ✓  'AS' is 'workgroup' or 'storage'
-      ✗  'AM' is 'read' or 'read_write'
-      ✓  'O' is 'i32' or 'u32'
-      ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixLoad<T  ✗ , Majorness  ✗ >(ptr<AS, array<i32, AC>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
-      ✗  'T' is 'subgroup_matrix<K, E, C, R>'
-      ✗  'E' is 'i8'
-      ✓  'AS' is 'workgroup' or 'storage'
-      ✗  'AM' is 'read' or 'read_write'
-      ✓  'O' is 'i32' or 'u32'
-      ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixLoad<T  ✗ , Majorness  ✗ >(ptr<AS, array<u32, AC>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
-      ✗  'T' is 'subgroup_matrix<K, E, C, R>'
-      ✗  'E' is 'u8'
+ • 'subgroupMatrixLoad<T  ✓ , Majorness  ✗ >(ptr<AS, array<vecN<AE>, AC>, AM>  ✗ , offset: O  ✓ , stride: S  ✓ ) -> T' where:
+      ✓  'T' is 'subgroup_matrix<K, E, C, R>'
+      ✓  'E' is 'f32', 'f16', 'u32', 'i32', 'u8' or 'i8'
+      ✗  'AE' is 'f32', 'i32', 'u32' or 'f16'
       ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'read' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
@@ -1282,39 +1415,31 @@ fn foo(offset : u32, stride : u32) {
 
 input.wgsl:6:3 error: no matching call to 'subgroupMatrixStore<<invalid-type>>(ptr<storage, array<f32>, read_write>, u32, subgroup_matrix_result<f32, 8, 8>, u32)'
 
-12 candidate functions:
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<E>, AM>  ✓ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✓ )' where:
-      ✓  'E' is 'f32', 'i32', 'u32' or 'f16'
+10 candidate functions:
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<AE>, AM>  ✓ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✓ )' where:
+      ✓  'E' is 'f32', 'f16', 'u32', 'i32', 'u8' or 'i8'
+      ✓  'AE' is 'f32', 'i32', 'u32' or 'f16'
       ✓  'AS' is 'workgroup' or 'storage'
       ✓  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<E, AC>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✓ )' where:
-      ✓  'E' is 'f32', 'i32', 'u32' or 'f16'
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<AE, AC>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✓ )' where:
+      ✓  'E' is 'f32', 'f16', 'u32', 'i32', 'u8' or 'i8'
+      ✗  'AE' is 'f32', 'i32', 'u32' or 'f16'
       ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<i32>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✓ )' where:
-      ✗  'E' is 'i8'
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<vecN<AE>>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✓ )' where:
+      ✓  'E' is 'f32', 'f16', 'u32', 'i32', 'u8' or 'i8'
+      ✗  'AE' is 'f32', 'i32', 'u32' or 'f16'
       ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<u32>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✓ )' where:
-      ✗  'E' is 'u8'
-      ✓  'AS' is 'workgroup' or 'storage'
-      ✗  'AM' is 'write' or 'read_write'
-      ✓  'O' is 'i32' or 'u32'
-      ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<i32, AC>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✓ )' where:
-      ✗  'E' is 'i8'
-      ✓  'AS' is 'workgroup' or 'storage'
-      ✗  'AM' is 'write' or 'read_write'
-      ✓  'O' is 'i32' or 'u32'
-      ✓  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<u32, AC>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✓ )' where:
-      ✗  'E' is 'u8'
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<vecN<AE>, AC>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✓ )' where:
+      ✓  'E' is 'f32', 'f16', 'u32', 'i32', 'u8' or 'i8'
+      ✗  'AE' is 'f32', 'i32', 'u32' or 'f16'
       ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
@@ -1372,39 +1497,31 @@ fn foo(offset : u32, stride : u32) {
 
 input.wgsl:6:3 error: no matching call to 'subgroupMatrixStore<<invalid-type>>(ptr<storage, array<f32>, read_write>, u32, subgroup_matrix_result<f32, 8, 8>, bool, u32)'
 
-12 candidate functions:
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<E>, AM>  ✓ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✗ )' where:
-      ✓  'E' is 'f32', 'i32', 'u32' or 'f16'
+10 candidate functions:
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<AE>, AM>  ✓ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✗ )' where:
+      ✓  'E' is 'f32', 'f16', 'u32', 'i32', 'u8' or 'i8'
+      ✓  'AE' is 'f32', 'i32', 'u32' or 'f16'
       ✓  'AS' is 'workgroup' or 'storage'
       ✓  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✗  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<E, AC>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✗ )' where:
-      ✓  'E' is 'f32', 'i32', 'u32' or 'f16'
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<AE, AC>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✗ )' where:
+      ✓  'E' is 'f32', 'f16', 'u32', 'i32', 'u8' or 'i8'
+      ✗  'AE' is 'f32', 'i32', 'u32' or 'f16'
       ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✗  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<i32>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✗ )' where:
-      ✗  'E' is 'i8'
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<vecN<AE>>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✗ )' where:
+      ✓  'E' is 'f32', 'f16', 'u32', 'i32', 'u8' or 'i8'
+      ✗  'AE' is 'f32', 'i32', 'u32' or 'f16'
       ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'
       ✗  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<u32>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✗ )' where:
-      ✗  'E' is 'u8'
-      ✓  'AS' is 'workgroup' or 'storage'
-      ✗  'AM' is 'write' or 'read_write'
-      ✓  'O' is 'i32' or 'u32'
-      ✗  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<i32, AC>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✗ )' where:
-      ✗  'E' is 'i8'
-      ✓  'AS' is 'workgroup' or 'storage'
-      ✗  'AM' is 'write' or 'read_write'
-      ✓  'O' is 'i32' or 'u32'
-      ✗  'S' is 'i32' or 'u32'
- • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<u32, AC>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✗ , stride: S  ✗ )' where:
-      ✗  'E' is 'u8'
+ • 'subgroupMatrixStore<Majorness  ✗ >(ptr<AS, array<vecN<AE>, AC>, AM>  ✗ , offset: O  ✓ , subgroup_matrix<K, E, C, R>  ✓ , stride: S  ✗ )' where:
+      ✓  'E' is 'f32', 'f16', 'u32', 'i32', 'u8' or 'i8'
+      ✗  'AE' is 'f32', 'i32', 'u32' or 'f16'
       ✓  'AS' is 'workgroup' or 'storage'
       ✗  'AM' is 'write' or 'read_write'
       ✓  'O' is 'i32' or 'u32'

@@ -7277,12 +7277,8 @@ $B1: {  # root
 
 %foo = func():void {
   $B2: {
-    %3:u32 = div 0u, 4u
-    %4:u32 = add %3, 0u
-    %5:subgroup_matrix_left<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, row_major> %v, %4, 8u
-    %6:u32 = div 0u, 4u
-    %7:u32 = add %6, 0u
-    %8:void = subgroupMatrixStore<row_major> %v, %7, %5, 8u
+    %3:subgroup_matrix_left<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, row_major> %v, 0u, 8u
+    %4:void = subgroupMatrixStore<row_major> %v, 0u, %3, 8u
     ret
   }
 }
@@ -7435,6 +7431,762 @@ $B1: {  # root
 )";
 
     DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Storage_SubgroupMatrix_F16_RuntimeArray_F32_Access_F32) {
+    auto* mat_ty = ty.subgroup_matrix(SubgroupMatrixKind::kLeft, ty.f16(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.f32())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* m = b.FunctionParam("m", mat_ty);
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    foo->SetParams({m, offset, stride});
+    b.Append(foo->Block(), [&] {
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, v, offset, m, stride);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:void = subgroupMatrixStore<col_major> %v, %offset, %m, %stride
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:void = subgroupMatrixStore<col_major> %v, %offset, %m, %stride
+    ret
+  }
+}
+)";
+
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Storage_SubgroupMatrix_F16_RuntimeArray_Vec2F_Access_F32) {
+    auto* mat_ty = ty.subgroup_matrix(SubgroupMatrixKind::kLeft, ty.f16(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.vec2f())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* m = b.FunctionParam("m", mat_ty);
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    foo->SetParams({m, offset, stride});
+    b.Append(foo->Block(), [&] {
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, v, offset, m, stride);
+        b.LoadVectorElement(b.Access(ty.ptr(storage, ty.vec2f()), v, 0_u), 0_u);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec2<f32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:void = subgroupMatrixStore<col_major> %v, %offset, %m, %stride
+    %7:ptr<storage, vec2<f32>, read_write> = access %v, 0u
+    %8:f32 = load_vector_element %7, 0u
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:u32 = div 0u, 4u
+    %7:u32 = mul %offset, 8u
+    %8:u32 = div %7, 4u
+    %9:u32 = add %6, %8
+    %10:u32 = mul %stride, 8u
+    %11:u32 = div %10, 4u
+    %12:void = subgroupMatrixStore<col_major> %v, %9, %m, %11
+    %13:ptr<storage, u32, read_write> = access %v, 0u
+    %14:u32 = load %13
+    %15:f32 = bitcast<f32> %14
+    ret
+  }
+}
+)";
+
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Storage_SubgroupMatrix_F16_RuntimeArray_Vec3F_Access_F32) {
+    auto* mat_ty = ty.subgroup_matrix(SubgroupMatrixKind::kLeft, ty.f16(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.vec3f())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* m = b.FunctionParam("m", mat_ty);
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    foo->SetParams({m, offset, stride});
+    b.Append(foo->Block(), [&] {
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, v, offset, m, stride);
+        b.LoadVectorElement(b.Access(ty.ptr(storage, ty.vec3f()), v, 0_u), 0_u);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec3<f32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:void = subgroupMatrixStore<col_major> %v, %offset, %m, %stride
+    %7:ptr<storage, vec3<f32>, read_write> = access %v, 0u
+    %8:f32 = load_vector_element %7, 0u
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:u32 = div 0u, 4u
+    %7:u32 = mul %offset, 16u
+    %8:u32 = div %7, 4u
+    %9:u32 = add %6, %8
+    %10:u32 = mul %stride, 16u
+    %11:u32 = div %10, 4u
+    %12:void = subgroupMatrixStore<col_major> %v, %9, %m, %11
+    %13:ptr<storage, u32, read_write> = access %v, 0u
+    %14:u32 = load %13
+    %15:f32 = bitcast<f32> %14
+    ret
+  }
+}
+)";
+
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Storage_SubgroupMatrix_F16_RuntimeArray_Vec4F_Access_F32) {
+    auto* mat_ty = ty.subgroup_matrix(SubgroupMatrixKind::kLeft, ty.f16(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.vec4f())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* m = b.FunctionParam("m", mat_ty);
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    foo->SetParams({m, offset, stride});
+    b.Append(foo->Block(), [&] {
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, v, offset, m, stride);
+        b.LoadVectorElement(b.Access(ty.ptr(storage, ty.vec4f()), v, 0_u), 0_u);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec4<f32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:void = subgroupMatrixStore<col_major> %v, %offset, %m, %stride
+    %7:ptr<storage, vec4<f32>, read_write> = access %v, 0u
+    %8:f32 = load_vector_element %7, 0u
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:u32 = div 0u, 4u
+    %7:u32 = mul %offset, 16u
+    %8:u32 = div %7, 4u
+    %9:u32 = add %6, %8
+    %10:u32 = mul %stride, 16u
+    %11:u32 = div %10, 4u
+    %12:void = subgroupMatrixStore<col_major> %v, %9, %m, %11
+    %13:ptr<storage, u32, read_write> = access %v, 0u
+    %14:u32 = load %13
+    %15:f32 = bitcast<f32> %14
+    ret
+  }
+}
+)";
+
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_SubgroupMatrix_F32_Array_U32_Access_F16) {
+    auto* arr_ty = ty.array(ty.u32(), 1024);
+    auto* S = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.New("a"), ty.f16()},
+                                                  {mod.symbols.New("b"), arr_ty},
+                                              });
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kRight, ty.f32(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(workgroup, S));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    foo->SetParams({offset, stride});
+    b.Append(foo->Block(), [&] {
+        auto* access = b.Access(ty.ptr(workgroup, arr_ty), v, 1_u);
+        b.CallExplicit(mat_ty, BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 2>{mat_ty, Majorness::kRowMajor}, access, offset,
+                       stride);
+        access = b.Access(ty.ptr(workgroup, ty.f16()), v, 0_u);
+        b.Load(access);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:f16 @offset(0)
+  b:array<u32, 1024> @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:ptr<workgroup, array<u32, 1024>, read_write> = access %v, 1u
+    %6:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %5, %offset, %stride
+    %7:ptr<workgroup, f16, read_write> = access %v, 0u
+    %8:f16 = load %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(4) {
+  a:f16 @offset(0)
+  b:array<u32, 1024> @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u16, 2050>, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:u32 = div 4u, 2u
+    %6:u32 = mul %offset, 4u
+    %7:u32 = div %6, 2u
+    %8:u32 = add %5, %7
+    %9:u32 = mul %stride, 4u
+    %10:u32 = div %9, 2u
+    %11:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %v, %8, %10
+    %12:ptr<workgroup, u16, read_write> = access %v, 0u
+    %13:u16 = load %12
+    %14:f16 = bitcast<f16> %13
+    ret
+  }
+}
+)";
+
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_SubgroupMatrix_F32_Array_Vec2U_Access_F16) {
+    auto* arr_ty = ty.array(ty.vec2u(), 1024);
+    auto* S = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.New("a"), ty.f16()},
+                                                  {mod.symbols.New("b"), arr_ty},
+                                              });
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kRight, ty.f32(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(workgroup, S));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    foo->SetParams({offset, stride});
+    b.Append(foo->Block(), [&] {
+        auto* access = b.Access(ty.ptr(workgroup, arr_ty), v, 1_u);
+        b.CallExplicit(mat_ty, BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 2>{mat_ty, Majorness::kRowMajor}, access, offset,
+                       stride);
+        access = b.Access(ty.ptr(workgroup, ty.f16()), v, 0_u);
+        b.Load(access);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+S = struct @align(8) {
+  a:f16 @offset(0)
+  b:array<vec2<u32>, 1024> @offset(8)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:ptr<workgroup, array<vec2<u32>, 1024>, read_write> = access %v, 1u
+    %6:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %5, %offset, %stride
+    %7:ptr<workgroup, f16, read_write> = access %v, 0u
+    %8:f16 = load %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(8) {
+  a:f16 @offset(0)
+  b:array<vec2<u32>, 1024> @offset(8)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u16, 4100>, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:u32 = div 8u, 2u
+    %6:u32 = mul %offset, 8u
+    %7:u32 = div %6, 2u
+    %8:u32 = add %5, %7
+    %9:u32 = mul %stride, 8u
+    %10:u32 = div %9, 2u
+    %11:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %v, %8, %10
+    %12:ptr<workgroup, u16, read_write> = access %v, 0u
+    %13:u16 = load %12
+    %14:f16 = bitcast<f16> %13
+    ret
+  }
+}
+)";
+
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_SubgroupMatrix_F32_Array_Vec3U_Access_F16) {
+    auto* arr_ty = ty.array(ty.vec3u(), 1024);
+    auto* S = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.New("a"), ty.f16()},
+                                                  {mod.symbols.New("b"), arr_ty},
+                                              });
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kRight, ty.f32(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(workgroup, S));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    foo->SetParams({offset, stride});
+    b.Append(foo->Block(), [&] {
+        auto* access = b.Access(ty.ptr(workgroup, arr_ty), v, 1_u);
+        b.CallExplicit(mat_ty, BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 2>{mat_ty, Majorness::kRowMajor}, access, offset,
+                       stride);
+        access = b.Access(ty.ptr(workgroup, ty.f16()), v, 0_u);
+        b.Load(access);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  a:f16 @offset(0)
+  b:array<vec3<u32>, 1024> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:ptr<workgroup, array<vec3<u32>, 1024>, read_write> = access %v, 1u
+    %6:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %5, %offset, %stride
+    %7:ptr<workgroup, f16, read_write> = access %v, 0u
+    %8:f16 = load %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  a:f16 @offset(0)
+  b:array<vec3<u32>, 1024> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u16, 8200>, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:u32 = div 16u, 2u
+    %6:u32 = mul %offset, 16u
+    %7:u32 = div %6, 2u
+    %8:u32 = add %5, %7
+    %9:u32 = mul %stride, 16u
+    %10:u32 = div %9, 2u
+    %11:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %v, %8, %10
+    %12:ptr<workgroup, u16, read_write> = access %v, 0u
+    %13:u16 = load %12
+    %14:f16 = bitcast<f16> %13
+    ret
+  }
+}
+)";
+
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_SubgroupMatrix_F32_Array_Vec4U_Access_F16) {
+    auto* arr_ty = ty.array(ty.vec4u(), 1024);
+    auto* S = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.New("a"), ty.f16()},
+                                                  {mod.symbols.New("b"), arr_ty},
+                                              });
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kRight, ty.f32(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(workgroup, S));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    foo->SetParams({offset, stride});
+    b.Append(foo->Block(), [&] {
+        auto* access = b.Access(ty.ptr(workgroup, arr_ty), v, 1_u);
+        b.CallExplicit(mat_ty, BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 2>{mat_ty, Majorness::kRowMajor}, access, offset,
+                       stride);
+        access = b.Access(ty.ptr(workgroup, ty.f16()), v, 0_u);
+        b.Load(access);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  a:f16 @offset(0)
+  b:array<vec4<u32>, 1024> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:ptr<workgroup, array<vec4<u32>, 1024>, read_write> = access %v, 1u
+    %6:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %5, %offset, %stride
+    %7:ptr<workgroup, f16, read_write> = access %v, 0u
+    %8:f16 = load %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  a:f16 @offset(0)
+  b:array<vec4<u32>, 1024> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u16, 8200>, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:u32 = div 16u, 2u
+    %6:u32 = mul %offset, 16u
+    %7:u32 = div %6, 2u
+    %8:u32 = add %5, %7
+    %9:u32 = mul %stride, 16u
+    %10:u32 = div %9, 2u
+    %11:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %v, %8, %10
+    %12:ptr<workgroup, u16, read_write> = access %v, 0u
+    %13:u16 = load %12
+    %14:f16 = bitcast<f16> %13
+    ret
+  }
+}
+)";
+
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_UsedWithSubgroupMatrix_Load_SameType) {
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.array(ty.f32(), 1024)));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    foo->SetParams({offset, stride});
+    b.Append(foo->Block(), [&] {
+        auto* l = b.Let("l", v);
+        b.CallExplicit(mat_ty, BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 2>{mat_ty, Majorness::kColMajor}, l, offset,
+                       stride);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, array<f32, 1024>, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %l:ptr<workgroup, array<f32, 1024>, read_write> = let %v
+    %6:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major> %l, %offset, %stride
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    DecomposeAccessOptions options{.workgroup_subgroup_matrix = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(src, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_UsedWithSubgroupMatrix_Load_DifferentType) {
+    auto* S = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.New("a"), ty.array(ty.f32(), 1024)},
+                                              });
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.u8(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(workgroup, S));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    foo->SetParams({offset, stride});
+    b.Append(foo->Block(), [&] {
+        auto* l = b.Let("l", v);
+        auto* a = b.Access(ty.ptr(workgroup, ty.array(ty.f32(), 1024)), l, 0_u);
+        b.CallExplicit(mat_ty, BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 2>{mat_ty, Majorness::kColMajor}, a, offset,
+                       stride);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:array<f32, 1024> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %l:ptr<workgroup, S, read_write> = let %v
+    %6:ptr<workgroup, array<f32, 1024>, read_write> = access %l, 0u
+    %7:subgroup_matrix_left<u8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major> %6, %offset, %stride
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(4) {
+  a:array<f32, 1024> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u32, 1024>, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:subgroup_matrix_left<u8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major> %v, %offset, %stride
+    ret
+  }
+}
+)";
+
+    DecomposeAccessOptions options{.workgroup_subgroup_matrix = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_UsedWithSubgroupMatrix_Store_SameType) {
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.array(ty.f32(), 1024)));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    auto* m = b.FunctionParam("m", mat_ty);
+    foo->SetParams({offset, stride, m});
+    b.Append(foo->Block(), [&] {
+        auto* l = b.Let("l", v);
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, l, offset, m, stride);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, array<f32, 1024>, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32, %m:subgroup_matrix_left<f32, 8, 8>):void {
+  $B2: {
+    %l:ptr<workgroup, array<f32, 1024>, read_write> = let %v
+    %7:void = subgroupMatrixStore<col_major> %l, %offset, %m, %stride
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    DecomposeAccessOptions options{.workgroup_subgroup_matrix = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(src, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_UsedWithSubgroupMatrix_Store_DifferentType) {
+    auto* S = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.New("a"), ty.array(ty.f32(), 1024)},
+                                              });
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.u8(), 8, 8);
+    auto* v = b.Var("v", ty.ptr(workgroup, S));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    auto* m = b.FunctionParam("m", mat_ty);
+    foo->SetParams({offset, stride, m});
+    b.Append(foo->Block(), [&] {
+        auto* l = b.Let("l", v);
+        auto* a = b.Access(ty.ptr(workgroup, ty.array(ty.f32(), 1024)), l, 0_u);
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, a, offset, m, stride);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:array<f32, 1024> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32, %m:subgroup_matrix_left<u8, 8, 8>):void {
+  $B2: {
+    %l:ptr<workgroup, S, read_write> = let %v
+    %7:ptr<workgroup, array<f32, 1024>, read_write> = access %l, 0u
+    %8:void = subgroupMatrixStore<col_major> %7, %offset, %m, %stride
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(4) {
+  a:array<f32, 1024> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u32, 1024>, read_write> = var undef
+}
+
+%foo = func(%offset:u32, %stride:u32, %m:subgroup_matrix_left<u8, 8, 8>):void {
+  $B2: {
+    %6:void = subgroupMatrixStore<col_major> %v, %offset, %m, %stride
+    ret
+  }
+}
+)";
+
+    DecomposeAccessOptions options{.workgroup_subgroup_matrix = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }

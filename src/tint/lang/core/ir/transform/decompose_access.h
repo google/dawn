@@ -51,6 +51,10 @@ struct DecomposeAccessOptions {
 
     bool allow_dynamic_immediate_indices = true;
 
+    // Decompose workgroup variables if they are used with subgroupMatrixLoad/Store and the
+    // pointer's array element base type does not match the matrix element type.
+    bool workgroup_subgroup_matrix = false;
+
     // TODO(b/477295042): should there be a uniform standard layout option? When enabled uniform
     // could be treated like every other storage class.
 };

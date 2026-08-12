@@ -4122,14 +4122,16 @@ $B1: {  # root
   $B2: {
     %4:u32 = max %stride, 2u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %4, 3u
-    %7:u32 = add 16u, %6
-    %8:u32 = add %7, 2u
-    %9:bool = lte %8, %5
-    %10:u32 = select 0u, 16u, %9
-    %11:u32 = select 2u, %4, %9
-    %12:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, row_major> %arr, %10, %11
-    ret %12
+    %6:u32 = mul %5, 4u
+    %7:u32 = mul %4, 3u
+    %8:u32 = add 16u, %7
+    %9:u32 = mul %8, 4u
+    %10:u32 = add %9, 8u
+    %11:bool = lte %10, %6
+    %12:u32 = select 0u, 16u, %11
+    %13:u32 = select 2u, %4, %11
+    %14:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, row_major> %arr, %12, %13
+    ret %14
   }
 }
 )";
@@ -4590,6 +4592,160 @@ $B1: {  # root
     Run(Robustness, cfg);
 
     EXPECT_EQ(expect, str());
+}
+
+TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_U8_Matrix_Vec4F_Array) {
+    mod.properties.Add(core::ir::Property::kAllow8BitIntegers);
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.vec4f())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* mat = ty.subgroup_matrix_left(ty.u8(), 8, 8);
+
+    auto* func = b.Function("foo", ty.void_());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    func->SetParams({offset, stride});
+    b.Append(func->Block(), [&] {
+        b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, v, offset, stride);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec4<f32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:subgroup_matrix_left<u8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major> %v, %offset, %stride
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* no_robust = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec4<f32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:u32 = max %stride, 1u
+    %6:subgroup_matrix_left<u8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major> %v, %offset, %5
+    ret
+  }
+}
+)";
+
+    auto* robust = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec4<f32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:u32 = max %stride, 1u
+    %6:u32 = arrayLength %v
+    %7:u32 = mul %6, 16u
+    %8:u32 = mul %5, 7u
+    %9:u32 = add %offset, %8
+    %10:u32 = mul %9, 16u
+    %11:u32 = add %10, 16u
+    %12:bool = lte %11, %7
+    %13:u32 = select 0u, %offset, %12
+    %14:u32 = select 1u, %5, %12
+    %15:subgroup_matrix_left<u8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major> %v, %13, %14
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.predicate_subgroup_matrix = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? robust : no_robust, str());
+}
+
+TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_F16_Matrix_Vec3U_Array) {
+    mod.properties.Add(core::ir::Property::kAllow16BitFloats);
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.vec3u())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* mat = ty.subgroup_matrix_left(ty.f16(), 8, 8);
+
+    auto* func = b.Function("foo", ty.void_());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    func->SetParams({offset, stride});
+    b.Append(func->Block(), [&] {
+        b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, v, offset, stride);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec3<u32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:subgroup_matrix_left<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f16, 8, 8>, col_major> %v, %offset, %stride
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* no_robust = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec3<u32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:u32 = max %stride, 1u
+    %6:subgroup_matrix_left<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f16, 8, 8>, col_major> %v, %offset, %5
+    ret
+  }
+}
+)";
+
+    auto* robust = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec3<u32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%offset:u32, %stride:u32):void {
+  $B2: {
+    %5:u32 = max %stride, 1u
+    %6:u32 = arrayLength %v
+    %7:u32 = mul %6, 8u
+    %8:u32 = mul %5, 7u
+    %9:u32 = add %offset, %8
+    %10:u32 = mul %9, 8u
+    %11:u32 = add %10, 8u
+    %12:bool = lte %11, %7
+    %13:u32 = select 0u, %offset, %12
+    %14:u32 = select 1u, %5, %12
+    %15:subgroup_matrix_left<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f16, 8, 8>, col_major> %v, %13, %14
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.predicate_subgroup_matrix = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? robust : no_robust, str());
 }
 
 TEST_P(IR_RobustnessTest, SubgroupMatrixStore_StorageRuntimeArray_ConstStride_ColMajor) {
@@ -5868,6 +6024,162 @@ $B1: {  # root
     Run(Robustness, cfg);
 
     EXPECT_EQ(expect, str());
+}
+
+TEST_P(IR_RobustnessTest, SubgroupMatrixStore_U8_Matrix_Vec4F_Array) {
+    mod.properties.Add(core::ir::Property::kAllow8BitIntegers);
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.vec4f())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* mat = ty.subgroup_matrix_left(ty.u8(), 8, 8);
+
+    auto* func = b.Function("foo", ty.void_());
+    auto* m = b.FunctionParam("m", mat);
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    func->SetParams({m, offset, stride});
+    b.Append(func->Block(), [&] {
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, v, offset, m, stride);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec4<f32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<u8, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:void = subgroupMatrixStore<col_major> %v, %offset, %m, %stride
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* no_robust = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec4<f32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<u8, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:u32 = max %stride, 1u
+    %7:void = subgroupMatrixStore<col_major> %v, %offset, %m, %6
+    ret
+  }
+}
+)";
+
+    auto* robust = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec4<f32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<u8, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:u32 = max %stride, 1u
+    %7:u32 = arrayLength %v
+    %8:u32 = mul %7, 16u
+    %9:u32 = mul %6, 7u
+    %10:u32 = add %offset, %9
+    %11:u32 = mul %10, 16u
+    %12:u32 = add %11, 16u
+    %13:bool = lte %12, %8
+    %14:u32 = select 0u, %offset, %13
+    %15:u32 = select 1u, %6, %13
+    %16:void = subgroupMatrixStore<col_major> %v, %14, %m, %15
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.predicate_subgroup_matrix = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? robust : no_robust, str());
+}
+
+TEST_P(IR_RobustnessTest, SubgroupMatrixStore_F16_Matrix_Vec3U_Array) {
+    mod.properties.Add(core::ir::Property::kAllow16BitFloats);
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.vec3u())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* mat = ty.subgroup_matrix_left(ty.f16(), 8, 8);
+
+    auto* func = b.Function("foo", ty.void_());
+    auto* m = b.FunctionParam("m", mat);
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* stride = b.FunctionParam("stride", ty.u32());
+    func->SetParams({m, offset, stride});
+    b.Append(func->Block(), [&] {
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, v, offset, m, stride);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec3<u32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:void = subgroupMatrixStore<col_major> %v, %offset, %m, %stride
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* no_robust = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec3<u32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:u32 = max %stride, 1u
+    %7:void = subgroupMatrixStore<col_major> %v, %offset, %m, %6
+    ret
+  }
+}
+)";
+
+    auto* robust = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec3<u32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
+  $B2: {
+    %6:u32 = max %stride, 1u
+    %7:u32 = arrayLength %v
+    %8:u32 = mul %7, 8u
+    %9:u32 = mul %6, 7u
+    %10:u32 = add %offset, %9
+    %11:u32 = mul %10, 8u
+    %12:u32 = add %11, 8u
+    %13:bool = lte %12, %8
+    %14:u32 = select 0u, %offset, %13
+    %15:u32 = select 1u, %6, %13
+    %16:void = subgroupMatrixStore<col_major> %v, %14, %m, %15
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.predicate_subgroup_matrix = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? robust : no_robust, str());
 }
 
 TEST_P(IR_RobustnessTest, BufferView_RootVar) {

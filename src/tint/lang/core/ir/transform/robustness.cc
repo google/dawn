@@ -461,7 +461,12 @@ struct State {
             TINT_IR_UNREACHABLE(ir);
         }
 
-        auto* scalar_ty = ty.ShaderScalarType(matrix_ty);
+        // There are two paths through this code based on majorness_template.
+        // If majorness_template is true, then offset and stride are in terms of the array
+        // If majorness_template is false, then offset and stride are in terms of the matrix
+        // element.
+        auto* arr_ty = arr->Type()->UnwrapPtr()->As<core::type::Array>();
+        const uint32_t arr_stride = arr_ty->ImplicitStride();
 
         // Determine the minimum valid stride, and the value that we will multiply the stride by to
         // determine the number of elements in memory that will be accessed.
@@ -477,7 +482,8 @@ struct State {
         // Offset and stride of majorness templated versions are counted in elements of the scalar
         // type.
         if (majorness_template) {
-            min_stride = min_stride * matrix_ty->Type()->Size() / scalar_ty->Size();
+            // Note: max comes from situations like 8x8 u8 accessed from an array of vec4u.
+            min_stride = std::max(min_stride * matrix_ty->Type()->Size() / arr_stride, 1u);
         }
 
         // Increase the stride so that it is at least `min_stride` if necessary.
@@ -496,31 +502,18 @@ struct State {
             return;
         }
 
-        // Some matrix components types are packed together into a single array element.
-        // Take that into account here by scaling the array length to number of components.
-        uint32_t components_per_element = 0;
-        if (majorness_template) {
-            components_per_element = 1;
-        } else if (matrix_ty->Type()->IsAnyOf<type::I8, type::U8>()) {
-            components_per_element = 4;
-        } else {
-            TINT_IR_ASSERT(
-                ir, (matrix_ty->Type()->IsAnyOf<type::F16, type::F32, type::I32, type::U32>()));
-            components_per_element = 1;
-        }
-
         // Get the length of the array (in terms of matrix elements).
-        auto* arr_ty = arr->Type()->UnwrapPtr()->As<core::type::Array>();
         TINT_IR_ASSERT(ir, arr_ty);
         Value* array_length = nullptr;
         if (arr_ty->ConstantCount()) {
-            array_length =
-                b.Constant(u32(arr_ty->ConstantCount().value() * components_per_element));
+            array_length = b.Constant(
+                u32(arr_ty->ConstantCount().value() * arr_stride / matrix_ty->Type()->Size()));
         } else {
             TINT_IR_ASSERT(ir, arr_ty->Count()->Is<type::RuntimeArrayCount>());
             array_length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, arr)->Result(0);
-            if (components_per_element > 1) {
-                array_length = b.Multiply(array_length, u32(components_per_element))->Result();
+            if (arr_stride != matrix_ty->Type()->Size()) {
+                array_length =
+                    b.Multiply(array_length, u32(arr_stride / matrix_ty->Type()->Size()))->Result();
             }
         }
 
@@ -530,6 +523,12 @@ struct State {
             uint32_t const_length = array_length->As<Constant>()->Value()->ValueAs<uint32_t>();
             uint32_t const_stride = stride->As<Constant>()->Value()->ValueAs<uint32_t>();
             uint32_t const_offset = offset->As<Constant>()->Value()->ValueAs<uint32_t>();
+            if (majorness_template) {
+                // Put offset and stride in terms of matrix element type.
+                const_stride = const_stride * arr_stride / matrix_ty->Type()->Size();
+                const_offset = const_offset * arr_stride / matrix_ty->Type()->Size();
+                min_stride = min_stride * arr_stride / matrix_ty->Type()->Size();
+            }
             uint32_t const_end = const_offset + (const_stride * (major_dim - 1)) + min_stride;
             if (const_end <= const_length) {
                 return;
@@ -544,10 +543,16 @@ struct State {
                 // The beginning of the last row/column is at `offset + (major_dim-1)*stride`.
                 // We then add another `min_stride` elements to get to the end of the accessed
                 // memory.
+                // Convert last_slice and end into elements of the matrix element.
                 offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
                 stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-                auto* last_slice = b.Add(offset, b.Multiply(stride, u32(major_dim - 1)));
-                auto* end = b.Add(last_slice, u32(min_stride));
+                auto* last_slice = b.Add(offset, b.Multiply(stride, u32(major_dim - 1)))->Result();
+                if (arr_stride != matrix_ty->Type()->Size()) {
+                    last_slice = b.Multiply(last_slice, u32(arr_stride / matrix_ty->Type()->Size()))
+                                     ->Result();
+                }
+                auto* end =
+                    b.Add(last_slice, u32(min_stride * arr_stride / matrix_ty->Type()->Size()));
                 auto* in_bounds = b.LessThanEqual(end, array_length);
                 offset = b.Call(ty.u32(), BuiltinFn::kSelect, 0_u, offset, in_bounds)->Result();
                 stride = b.Call(ty.u32(), BuiltinFn::kSelect, u32(min_stride), stride, in_bounds)

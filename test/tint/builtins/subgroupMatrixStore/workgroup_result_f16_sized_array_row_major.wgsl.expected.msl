@@ -1,0 +1,80 @@
+#include <metal_stdlib>
+using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_packed_vec3_f32_array_element {
+  packed_float3 packed;
+};
+
+struct tint_packed_vec3_f16_array_element {
+  packed_half3 packed_1;
+};
+
+struct tint_module_vars_struct {
+  threadgroup tint_array<uint, 1024>* out0;
+  threadgroup tint_array<int2, 1024>* out1;
+  threadgroup tint_array<tint_packed_vec3_f32_array_element, 1024>* out2;
+  threadgroup tint_array<uint4, 1024>* out3;
+  threadgroup tint_array<half, 1024>* out4;
+  threadgroup tint_array<half2, 1024>* out5;
+  threadgroup tint_array<tint_packed_vec3_f16_array_element, 1024>* out6;
+};
+
+struct tint_symbol_7 {
+  tint_array<uint, 1024> tint_symbol;
+  tint_array<int2, 1024> tint_symbol_1;
+  tint_array<tint_packed_vec3_f32_array_element, 1024> tint_symbol_2;
+  tint_array<uint4, 1024> tint_symbol_3;
+  tint_array<half, 1024> tint_symbol_4;
+  tint_array<half2, 1024> tint_symbol_5;
+  tint_array<tint_packed_vec3_f16_array_element, 1024> tint_symbol_6;
+};
+
+void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  {
+    uint v = 0u;
+    v = tint_local_index;
+    while(true) {
+      uint const v_1 = v;
+      if ((v_1 >= 1024u)) {
+        break;
+      }
+      (*tint_module_vars.out0)[v_1] = 0u;
+      (*tint_module_vars.out1)[v_1] = int2(0);
+      (*tint_module_vars.out2)[v_1].packed = packed_float3(float3(0.0f));
+      (*tint_module_vars.out3)[v_1] = uint4(0u);
+      (*tint_module_vars.out4)[v_1] = 0.0h;
+      (*tint_module_vars.out5)[v_1] = half2(0.0h);
+      (*tint_module_vars.out6)[v_1].packed_1 = packed_half3(half3(0.0h));
+      {
+        v = (v_1 + 64u);
+      }
+    }
+  }
+  (threadgroup_barrier(mem_flags::mem_threadgroup));
+  simdgroup_half8x8 const m = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
+  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out0) + (0u * 4u)), ulong((16u * 2u)), ulong2(0ul), false));
+  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out1) + (0u * 8u)), ulong((16u * 4u)), ulong2(0ul), false));
+  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out2) + (0u * 16u)), ulong((16u * 8u)), ulong2(0ul), false));
+  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out3) + (0u * 16u)), ulong((16u * 8u)), ulong2(0ul), false));
+  (simdgroup_store(m, (&(*tint_module_vars.out4)[0u]), ulong(16u), ulong2(0ul), false));
+  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out5) + (0u * 4u)), ulong((16u * 2u)), ulong2(0ul), false));
+  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out6) + (0u * 8u)), ulong((16u * 4u)), ulong2(0ul), false));
+}
+
+[[max_total_threads_per_threadgroup(64)]]
+kernel void v_2(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_7* v_3 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.out0=(&(*v_3).tint_symbol), .out1=(&(*v_3).tint_symbol_1), .out2=(&(*v_3).tint_symbol_2), .out3=(&(*v_3).tint_symbol_3), .out4=(&(*v_3).tint_symbol_4), .out5=(&(*v_3).tint_symbol_5), .out6=(&(*v_3).tint_symbol_6)};
+  (main_inner(tint_local_index, tint_module_vars));
+}

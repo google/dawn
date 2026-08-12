@@ -366,7 +366,25 @@ struct State {
                 UpdateAccessUsage(access, unpacked_type);
             },
             [&](core::ir::CoreBuiltinCall* call) {
-                // Assume this is only `arrayLength` until we find other cases.
+                if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
+                    call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
+                    b.InsertBefore(call, [&] {
+                        // To match the intrinsic table, cast to vec4.
+                        auto* ptr_ty = call->Args()[0]->Type()->As<core::type::Pointer>();
+                        auto* arr_ty = unpacked_type->As<core::type::Array>();
+                        auto* scalar_ty = arr_ty->ElemType()->DeepestElement();
+                        auto* new_arr_ty = ty.Get<core::type::Array>(
+                            ty.vec4(scalar_ty), arr_ty->Count(), arr_ty->Size());
+                        auto* cast = b.CallExplicit<msl::ir::BuiltinCall>(
+                            ty.ptr(ptr_ty->AddressSpace(), new_arr_ty, ptr_ty->Access()),
+                            msl::BuiltinFn::kPointerOffset,
+                            Vector<core::ir::TemplateParameter, 1>{new_arr_ty}, call->Args()[0],
+                            b.Constant(u32(0)));
+                        call->SetArg(0, cast->Result());
+                    });
+                    return;
+                }
+                // Otherwise, assume this is only `arrayLength` until we find other cases.
                 TINT_IR_ASSERT(ir, call->Func() == core::BuiltinFn::kArrayLength);
                 // Nothing to do - the arrayLength builtin does not need to access the memory.
             },

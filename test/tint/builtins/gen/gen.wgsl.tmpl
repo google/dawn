@@ -25,7 +25,16 @@ See:
               (not (HasPrefix .Name "bufferView")) (not (HasPrefix .Name "bufferArrayView"))
             )
           )
-          (not (HasPrefix .Name "bufferLength")) }}
+          (
+            and
+            (
+              and
+              (not (HasPrefix .Name "subgroupMatrixLoad")) (not (HasPrefix .Name "subgroupMatrixStore"))
+            )
+            (
+              not (HasPrefix .Name "bufferLength")
+            )
+          ) }}
 {{-     range .Overloads  -}}
 {{-       range $I.Permute . -}}
 {{- /*      Generate a ./literal/<function>/<permuataion-hash>.wgsl file using

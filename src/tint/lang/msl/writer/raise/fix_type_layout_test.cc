@@ -4725,5 +4725,111 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_FixTypeLayoutTest, SugroupMatrixLoad_Vec3) {
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.vec3u())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8, 8);
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<core::ir::TemplateParameter, 1>{mat_ty, core::Majorness::kColMajor},
+                       v, 0_u, 8_u);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec3<u32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major> %v, 0u, 8u
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+tint_packed_vec3_u32_array_element = struct @align(16) {
+  packed:__packed_vec3<u32> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<storage, array<tint_packed_vec3_u32_array_element>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<storage, array<vec4<u32>>, read_write> = msl.pointer_offset<array<vec4<u32>>> %v, 0u
+    %4:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major> %3, 0u, 8u
+    ret
+  }
+}
+)";
+
+    Run();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_FixTypeLayoutTest, SugroupMatrixStore_vec3) {
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.vec3i())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8, 8);
+    auto* foo = b.Function("foo", ty.void_());
+    auto* m = b.FunctionParam("m", mat_ty);
+    foo->SetParams({m});
+    b.Append(foo->Block(), [&] {
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 2>{core::Majorness::kRowMajor}, v, 0_u,
+                       m, 8_u);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<vec3<i32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<f32, 8, 8>):void {
+  $B2: {
+    %4:void = subgroupMatrixStore<row_major> %v, 0u, %m, 8u
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+tint_packed_vec3_i32_array_element = struct @align(16) {
+  packed:__packed_vec3<i32> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<storage, array<tint_packed_vec3_i32_array_element>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%m:subgroup_matrix_left<f32, 8, 8>):void {
+  $B2: {
+    %4:ptr<storage, array<vec4<i32>>, read_write> = msl.pointer_offset<array<vec4<i32>>> %v, 0u
+    %5:void = subgroupMatrixStore<row_major> %4, 0u, %m, 8u
+    ret
+  }
+}
+)";
+
+    Run();
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

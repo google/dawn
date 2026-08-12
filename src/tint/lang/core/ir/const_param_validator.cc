@@ -464,6 +464,9 @@ bool ConstParamValidator::CheckSubgroupMatrixMemory(const CoreBuiltinCall* call,
     auto* mat_ty = ty->As<core::type::SubgroupMatrix>();
     auto* ele_ty = mat_ty->Type();
 
+    auto* array_ty = call->Args()[0]->Type()->UnwrapPtr()->As<core::type::Array>();
+    const uint32_t array_stride = array_ty->ImplicitStride();
+
     // Error conditions:
     // * stride is less than minimal required stride
     // * pointed to memory is smaller than matrix requires
@@ -473,15 +476,11 @@ bool ConstParamValidator::CheckSubgroupMatrixMemory(const CoreBuiltinCall* call,
 
     const uint32_t major_size = col_major ? mat_ty->Columns() : mat_ty->Rows();
     const uint32_t minor_size = col_major ? mat_ty->Rows() : mat_ty->Columns();
-    uint64_t stride_factor = 1;
-    if (ele_ty->IsAnyOf<core::type::U8, core::type::I8>()) {
-        stride_factor = 4;
-    }
+
     uint64_t offset = 0;
     if (auto* const_offset = offset_arg->As<Constant>()) {
-        // Offset is array elements of shader scalar type. Multiply by stride factor to get the
-        // right size.
-        offset = const_offset->Value()->ValueAs<uint64_t>() * stride_factor * ele_ty->Size();
+        // Offset is array elements of shader scalar type.
+        offset = const_offset->Value()->ValueAs<uint64_t>() * array_stride;
 
         if (offset > std::numeric_limits<uint32_t>::max()) {
             AddError(*call) << call->FriendlyName() << " has an offset exceeding 32 bits";
@@ -491,9 +490,8 @@ bool ConstParamValidator::CheckSubgroupMatrixMemory(const CoreBuiltinCall* call,
     uint32_t min_stride = minor_size * ele_ty->Size();
     uint64_t stride = 0;
     if (auto* const_stride = stride_arg->As<Constant>()) {
-        // Stride is in array elements of shader scalar type. Multiply by stride factor to get the
-        // right byte size.
-        stride = stride_factor * ele_ty->Size() * const_stride->Value()->ValueAs<uint64_t>();
+        // Stride is in array elements of shader scalar type.
+        stride = const_stride->Value()->ValueAs<uint64_t>() * array_stride;
 
         if (stride > std::numeric_limits<uint32_t>::max()) {
             AddError(*call) << call->FriendlyName() << " has a stride exceeding 32 bits";
@@ -511,8 +509,8 @@ bool ConstParamValidator::CheckSubgroupMatrixMemory(const CoreBuiltinCall* call,
     // Note: Offset and stride are in bytes.
     uint64_t mat_required_size = offset + static_cast<uint64_t>(stride) * (major_size - 1) +
                                  static_cast<uint64_t>(minor_size) * ele_ty->Size();
-    // Round up to scalar size.
-    mat_required_size = RoundUp(stride_factor, mat_required_size);
+    // Round up to array element size.
+    mat_required_size = RoundUp(static_cast<uint64_t>(array_stride), mat_required_size);
     if (mat_required_size > std::numeric_limits<uint32_t>::max()) {
         AddError(*call) << call->FriendlyName() << " has a memory requirement exceeding 32 bits";
         return false;

@@ -1113,6 +1113,21 @@ struct State {
             auto* stride =
                 b.InsertBitcastIfNeeded(ty.u32(), builtin->Args()[majorness_template ? 2 : 3]);
 
+            // If the array was a vec3, then FixTypeLayout may have inserted a (soon to be)
+            // redundant pointer offset call. Elide it here.
+            if (auto* p_res = p->As<core::ir::InstructionResult>()) {
+                if (auto* pre_cast = p_res->Instruction()->As<msl::ir::BuiltinCall>()) {
+                    if (pre_cast->Func() == msl::BuiltinFn::kPointerOffset &&
+                        pre_cast->Args()[1] == b.Constant(u32(0))) {
+                        p = pre_cast->Args()[0];
+
+                        if (p_res->NumUsages() == 1) {
+                            pre_cast->Destroy();
+                        }
+                    }
+                }
+            }
+
             core::ir::Value* col_major = nullptr;
             if (majorness_template) {
                 TINT_IR_ASSERT(ir, std::holds_alternative<core::Majorness>(
@@ -1126,10 +1141,32 @@ struct State {
 
             auto* ptr = p->Type()->As<core::type::Pointer>();
             auto* arr = ptr->StoreType()->As<core::type::Array>();
+            const uint32_t arr_stride = arr->ImplicitStride();
 
-            // Make a pointer to the first element of the array that we will read from.
-            auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
-            auto* src = b.Access(elem_ptr, p, offset);
+            auto* mat = builtin->Result()->Type()->As<core::type::SubgroupMatrix>();
+            auto* mat_ele = mat->Type();
+
+            core::ir::Value* src = nullptr;
+            if (arr->ElemType() != mat_ele) {
+                // MSL requires that pointee type match matrix element type.
+                // Use pointer offset to generate the correct pointer.
+                // Note: the offset needs converted to bytes.
+                offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
+                offset = b.Multiply(offset, u32(arr_stride))->Result();
+                src = b.CallExplicit<msl::ir::BuiltinCall>(
+                           ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()),
+                           msl::BuiltinFn::kPointerOffset,
+                           Vector<core::ir::TemplateParameter, 1>{mat_ele}, p, offset)
+                          ->Result();
+
+                // Stride is changed to elements_per_row which is in terms of matrix element type.
+                stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
+                stride = b.Multiply(stride, u32(arr_stride / mat_ele->Size()))->Result();
+            } else {
+                // Make a pointer to the first element of the array that we will read from.
+                auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
+                src = b.Access(elem_ptr, p, offset)->Result();
+            }
 
             // The origin is always (0, 0), as we use `offset` to set the start of the data.
             auto* matrix_origin = b.Zero<vec2<u64>>();
@@ -1164,6 +1201,21 @@ struct State {
             auto* stride =
                 b.InsertBitcastIfNeeded(ty.u32(), builtin->Args()[majorness_template ? 3 : 4]);
 
+            // If the array was a vec3, then FixTypeLayout may have inserted a (soon to be)
+            // redundant pointer offset call. Elide it here.
+            if (auto* p_res = p->As<core::ir::InstructionResult>()) {
+                if (auto* pre_cast = p_res->Instruction()->As<msl::ir::BuiltinCall>()) {
+                    if (pre_cast->Func() == msl::BuiltinFn::kPointerOffset &&
+                        pre_cast->Args()[1] == b.Constant(u32(0))) {
+                        p = pre_cast->Args()[0];
+
+                        if (p_res->NumUsages() == 1) {
+                            pre_cast->Destroy();
+                        }
+                    }
+                }
+            }
+
             core::ir::Value* col_major = nullptr;
             if (majorness_template) {
                 TINT_IR_ASSERT(ir, std::holds_alternative<core::Majorness>(
@@ -1177,10 +1229,31 @@ struct State {
 
             auto* ptr = p->Type()->As<core::type::Pointer>();
             auto* arr = ptr->StoreType()->As<core::type::Array>();
+            const uint32_t arr_stride = arr->ImplicitStride();
 
-            // Make a pointer to the first element of the array that we will write to.
-            auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
-            auto* dst = b.Access(elem_ptr, p, offset);
+            auto* mat = value->Type()->As<core::type::SubgroupMatrix>();
+            auto* mat_ele = mat->Type();
+
+            core::ir::Value* dst = nullptr;
+            if (arr->ElemType() != mat_ele) {
+                // MSL requires that pointee type match matrix element type.
+                // Use pointer offset to generate the correct pointer.
+                // Note: the offset needs converted to bytes.
+                offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
+                offset = b.Multiply(offset, u32(arr_stride))->Result();
+                dst = b.CallExplicit<msl::ir::BuiltinCall>(
+                           ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()),
+                           msl::BuiltinFn::kPointerOffset,
+                           Vector<core::ir::TemplateParameter, 1>{mat_ele}, p, offset)
+                          ->Result();
+
+                // Stride is changed to elements_per_row which is in terms of matrix element type.
+                stride = b.Multiply(stride, u32(arr_stride / mat_ele->Size()))->Result();
+            } else {
+                // Make a pointer to the first element of the array that we will write to.
+                auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
+                dst = b.Access(elem_ptr, p, offset)->Result();
+            }
 
             // Convert the u32 stride to the ulong that MSL expects.
             ir.properties.Add(core::ir::Property::kAllow64BitIntegers);

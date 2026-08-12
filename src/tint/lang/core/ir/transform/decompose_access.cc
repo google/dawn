@@ -105,6 +105,10 @@ struct State {
                 if (!ContainsAtomic(var_ty->StoreType())) {
                     var_worklist.Push(var);
                 }
+            } else if (options.workgroup_subgroup_matrix &&
+                       var_ty->AddressSpace() == AddressSpace::kWorkgroup &&
+                       UsedWithSubgroupMatrix(var->Result())) {
+                var_worklist.Push(var);
             }
         }
 
@@ -198,6 +202,37 @@ struct State {
         }
 
         return Success;
+    }
+
+    // Returns true if `v` is used with a subgroupMatrixLoad/Store that where the pointer array
+    // element type base does not match the matrix element type.
+    bool UsedWithSubgroupMatrix(core::ir::Value* v) {
+        for (auto& use : v->UsagesUnsorted()) {
+            bool used = tint::Switch(
+                use->instruction,
+                [&](core::ir::Access* a) { return UsedWithSubgroupMatrix(a->Result()); },
+                [&](core::ir::Let* let) { return UsedWithSubgroupMatrix(let->Result()); },
+                [&](core::ir::CoreBuiltinCall* call) {
+                    if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
+                        call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
+                        auto* type = call->Func() == core::BuiltinFn::kSubgroupMatrixLoad
+                                         ? call->Result()->Type()
+                                         : call->Args()[2]->Type();
+                        auto* mat_ty = type->As<core::type::SubgroupMatrix>();
+                        auto* arr_ty =
+                            call->Args()[0]->Type()->UnwrapPtr()->As<core::type::Array>();
+                        if (mat_ty->Type() != arr_ty->ElemType()->DeepestElement()) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+                [&](Default) { return false; });
+            if (used) {
+                return true;
+            }
+        }
+        return false;
     }
 
     const type::Type* BaseEleType() { return base_ty_; }
@@ -316,14 +351,17 @@ struct State {
                             }
                         }
                         if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
-                            // TODO(b/541591251): When array requirements are relaxed, subgroup
-                            // matrix load/store shouldn't need to impose a limit here.
                             if (call->Func() == core::BuiltinFn::kArrayLength ||
                                 call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
                                 call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
+                                // Subgroup matrix load/store offset and stride are in terms of the
+                                // array element type so we cannot choose a larger size unless we
+                                // know they will be representable in those terms. For safety, pick
+                                // an upper bound of the array element type size.
                                 auto* ptr_ty = call->Args()[0]->Type()->As<type::Pointer>();
                                 return SmallestElementSize(ptr_ty->StoreType());
-                            } else if (call->Func() == core::BuiltinFn::kBufferLength) {
+                            }
+                            if (call->Func() == core::BuiltinFn::kBufferLength) {
                                 auto* buf =
                                     var->Result()->Type()->UnwrapPtr()->As<core::type::Buffer>();
                                 if (buf->Count()->Is<core::type::RuntimeArrayCount>()) {
@@ -758,38 +796,41 @@ struct State {
                             call->ExplicitTemplateParams().Length() == 2) ||
                                (call->Func() == core::BuiltinFn::kSubgroupMatrixStore &&
                                 call->ExplicitTemplateParams().Length() == 1));
+
         b.InsertBefore(call, [&] {
-            // Incoming offset in terms of base array type.
-            auto* byte_idx = OffsetToValue(offset);
-            auto* incoming_offset = b.Divide(byte_idx, u32(BaseEleType()->Size()))->Result();
-
-            // Access offset adjusted to base array type.
-            auto* call_offset = call->Args()[1];
+            core::ir::Value* call_offset = call->Args()[1];
             auto* array_ty = call->Args()[0]->Type()->UnwrapPtr()->As<core::type::Array>();
-            auto* call_ele_type = array_ty->ElemType();
-            TINT_IR_ASSERT(ir, BaseEleType()->Size() <= call_ele_type->Size());
-            if (call_ele_type->Size() != BaseEleType()->Size()) {
-                auto* u32_offset_arg = b.InsertBitcastIfNeeded(ty.u32(), call_offset);
-                auto* offset_bytes =
-                    b.Multiply(u32_offset_arg, u32(call_ele_type->Size()))->Result();
-                call_offset = b.Divide(offset_bytes, u32(BaseEleType()->Size()))->Result();
-            }
+            if (BaseEleType()->Size() != array_ty->ImplicitStride() || offset.byte_offset != 0 ||
+                !offset.byte_offset_expr.IsEmpty()) {
+                // Incoming offset in terms of base array type.
+                auto* byte_idx = OffsetToValue(offset);
+                auto* incoming_offset = b.Divide(byte_idx, u32(BaseEleType()->Size()))->Result();
 
-            // Total offset
-            auto* full_offset = b.Add(incoming_offset, call_offset)->Result();
+                // Access offset adjusted to base array type.
+                TINT_IR_ASSERT(ir, BaseEleType()->Size() <= array_ty->ImplicitStride());
+                if (array_ty->ImplicitStride() != BaseEleType()->Size()) {
+                    auto* u32_offset_arg = b.InsertBitcastIfNeeded(ty.u32(), call_offset);
+                    auto* offset_bytes =
+                        b.Multiply(u32_offset_arg, u32(array_ty->ImplicitStride()))->Result();
+                    call_offset = b.Divide(offset_bytes, u32(BaseEleType()->Size()))->Result();
+                }
+
+                // Total offset
+                call_offset = b.Add(incoming_offset, call_offset)->Result();
+            }
 
             // Adjust stride to be in terms of base array type.
             uint32_t stride_index = static_cast<uint32_t>(call->Args().size() - 1);
             auto* call_stride = call->Args()[stride_index];
-            if (call_ele_type->Size() != BaseEleType()->Size()) {
+            if (array_ty->ImplicitStride() != BaseEleType()->Size()) {
                 auto* u32_call_stride = b.InsertBitcastIfNeeded(ty.u32(), call_stride);
                 auto* stride_bytes =
-                    b.Multiply(u32_call_stride, u32(call_ele_type->Size()))->Result();
+                    b.Multiply(u32_call_stride, u32(array_ty->ImplicitStride()))->Result();
                 call_stride = b.Divide(stride_bytes, u32(BaseEleType()->Size()))->Result();
             }
 
             call->SetArg(0, var->Result());
-            call->SetArg(1, full_offset);
+            call->SetArg(1, call_offset);
             call->SetArg(stride_index, call_stride);
         });
     }

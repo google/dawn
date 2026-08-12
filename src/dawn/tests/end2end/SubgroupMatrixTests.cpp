@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <array>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -887,19 +888,45 @@ class SubgroupMatrix_MatrixStoreTest : public DawnTestWithParams<MatrixStorePara
         const wgpu::SubgroupMatrixConfig& config,
         uint32_t subgroupMaxSize,
         bool inputColumnMajor,
-        bool majorness_template) {
+        bool majorness_template,
+        uint32_t array_bytes) {
+        uint32_t mat_ele_bytes = ComponentTypeToByteSize(config.componentType);
+        uint32_t factor =
+            std::max(array_bytes, mat_ele_bytes) / std::min(array_bytes, mat_ele_bytes);
+        std::string factor_operator = array_bytes < mat_ele_bytes ? "*" : "/";
+        std::string array_type;
+        switch (array_bytes) {
+            case 2:
+                array_type = "f16";
+                break;
+            case 4:
+                array_type = "u32";
+                break;
+            case 8:
+                array_type = "vec2u";
+                break;
+            case 16:
+                array_type = "vec4u";
+                break;
+        }
+
         // Generate a shader that stores a subgroup matrix into a storage buffer.
         std::ostringstream shader;
         shader << "enable chromium_experimental_subgroup_matrix;\n";
         if (config.componentType == wgpu::SubgroupMatrixComponentType::F16 ||
-            config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16) {
+            config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16 ||
+            array_bytes == 2) {
             shader << "enable f16;\n";
         }
         shader << "\n";
         shader << "alias ComponentType = " << ComponentTypeToWgslType(config.componentType)
                << ";\n";
-        shader << "alias ArrayType = " << ComponentTypeToScalarShaderType(config.componentType)
-               << ";\n\n";
+        if (majorness_template) {
+            shader << "alias ArrayType = " << array_type << ";\n\n";
+        } else {
+            shader << "alias ArrayType = " << ComponentTypeToScalarShaderType(config.componentType)
+                   << ";\n\n";
+        }
         shader << "alias InputType = subgroup_matrix_left<ComponentType, K, M>;\n";
         shader << "const K = " << config.K << ";\n";
         shader << "const M = " << config.M << ";\n";
@@ -907,20 +934,14 @@ class SubgroupMatrix_MatrixStoreTest : public DawnTestWithParams<MatrixStorePara
         shader << "const kStoreOffset = K * M";
         if (majorness_template) {
             // Offset in terms of ArrayType
-            if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
-                config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
-                shader << "/4";
-            }
+            shader << " " << factor_operator << " " << factor;
         }
         shader << ";\n";
 
         shader << "const stride = " << (inputColumnMajor ? "M" : "K");
         if (majorness_template) {
             // Offset in terms of ArrayType
-            if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
-                config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
-                shader << "/4";
-            }
+            shader << " " << factor_operator << " " << factor;
         }
         shader << ";\n";
 
@@ -981,11 +1002,12 @@ fn main() {
     void TestSubgroupMatrixConfig(const wgpu::SubgroupMatrixConfig& config,
                                   uint32_t subgroupMaxSize,
                                   bool inputColumnMajor,
-                                  bool majorness_template) {
+                                  bool majorness_template,
+                                  uint32_t array_bytes) {
         // In the tests we use a compute pipeline to store a subgroup matrix into a storage buffer
         // and check if the data in the buffer matches the expectation.
         wgpu::ComputePipeline pipeline = GetComputePipelineFromSubgroupMatrixConfig(
-            config, subgroupMaxSize, inputColumnMajor, majorness_template);
+            config, subgroupMaxSize, inputColumnMajor, majorness_template, array_bytes);
 
         // Create the input matrix and fill it with values.
         Matrix inputMatrix(config.K, config.M, config.componentType, inputColumnMajor);
@@ -1023,10 +1045,13 @@ fn main() {
 
         // Verify the result in the output buffer.
         std::vector<uint8_t> zeroBuffer(storeOffset, static_cast<uint8_t>(0));
-        EXPECT_BUFFER_U8_RANGE_EQ(zeroBuffer.data(), output, 0, storeOffset) << config;
+        EXPECT_BUFFER_U8_RANGE_EQ(zeroBuffer.data(), output, 0, storeOffset)
+            << config << "\nmajorness_template = " << majorness_template
+            << "\narray_bytes = " << array_bytes;
         EXPECT_BUFFER_U8_RANGE_EQ(inputMatrix.data, output, storeOffset,
                                   inputMatrix.TotalByteSize())
-            << config;
+            << config << "\nmajorness_template = " << majorness_template
+            << "\narray_bytes = " << array_bytes;
     }
 };
 
@@ -1051,8 +1076,25 @@ TEST_P(SubgroupMatrix_MatrixStoreTest, MatrixStoreWithOffset) {
             }
         }
 
-        TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mInputColumnMajor, false);
-        TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mInputColumnMajor, true);
+        TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mInputColumnMajor, false,
+                                 /* don't care */ 4);
+        // For majorness templated variants, test a variety of array element types.
+        for (uint32_t j = 2; j <= 16; j <<= 1) {
+            if (j < ComponentTypeToByteSize(config.componentType)) {
+                continue;
+            }
+
+            // TODO(b/542145066): IMG has a problem with mismatched components.
+            if (IsImgTec() && j != 2) {
+                continue;
+            }
+            uint32_t stride = GetParam().mInputColumnMajor ? config.M : config.K;
+            uint32_t stride_bytes = stride * ComponentTypeToByteSize(config.componentType);
+            if (j <= stride_bytes) {
+                TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mInputColumnMajor,
+                                         true, j);
+            }
+        }
     }
 }
 

@@ -3040,7 +3040,9 @@ using TypeBuilderFn = const core::type::Type* (*)(core::type::Manager&);
 // - rows
 // - col_major
 // - load/store
-using SubgroupMatrixSizesParam = std::tuple<TypeBuilderFn, uint32_t, uint32_t, bool, bool, bool>;
+// - array type
+using SubgroupMatrixSizesParam =
+    std::tuple<TypeBuilderFn, uint32_t, uint32_t, bool, bool, bool, TypeBuilderFn>;
 
 struct SubgroupMatrixSizes : public TransformTestWithParam<SubgroupMatrixSizesParam> {
     const core::type::SubgroupMatrix* MatrixType() {
@@ -3049,16 +3051,8 @@ struct SubgroupMatrixSizes : public TransformTestWithParam<SubgroupMatrixSizesPa
         const uint32_t rows = std::get<2>(GetParam());
         return ty.subgroup_matrix_left(type, cols, rows);
     }
-    const core::type::Type* ScalarType() {
-        auto* type = std::get<0>(GetParam())(ty);
-        if (type->Is<core::type::U8>()) {
-            return ty.u32();
-        }
-        if (type->Is<core::type::I8>()) {
-            return ty.i32();
-        }
-        return type;
-    }
+    const core::type::Type* ArrayElemType() { return std::get<6>(GetParam())(ty); }
+    uint32_t ArrayStride() { return ty.runtime_array(ArrayElemType())->ImplicitStride(); }
     uint32_t MajorSize() {
         const uint32_t cols = std::get<1>(GetParam());
         const uint32_t rows = std::get<2>(GetParam());
@@ -3096,14 +3090,17 @@ struct SubgroupMatrixSizes : public TransformTestWithParam<SubgroupMatrixSizesPa
 
 TEST_P(SubgroupMatrixSizes, Stride_TooSmallForType) {
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
+
+    if (MinStride() < ArrayStride()) {
+        return;
+    }
 
     Var* v = nullptr;
     Override* o = nullptr;
     b.Append(mod.root_block, [&] {
         o = b.Override("o", ty.u32());
         o->SetOverrideId({1});
-        v = b.Var("v", ty.ptr(storage, ty.runtime_array(scalar_ty)));
+        v = b.Var("v", ty.ptr(storage, ty.runtime_array(ArrayElemType())));
         v->SetBindingPoint(0, 0);
     });
     auto* foo = b.Function("foo", ty.void_());
@@ -3115,25 +3112,24 @@ TEST_P(SubgroupMatrixSizes, Stride_TooSmallForType) {
     });
 
     SubstituteOverridesConfig cfg{};
-    cfg.map[OverrideId{1}] = (MinStride() / scalar_ty->Size()) - 1;
+    cfg.map[OverrideId{1}] = (MinStride() / ArrayStride()) - 1;
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
-                testing::HasSubstr("stride (" + std::to_string(MinStride() - scalar_ty->Size()) +
+                testing::HasSubstr("stride (" + std::to_string(MinStride() - ArrayStride()) +
                                    " bytes) must be greater or equal to " +
                                    std::to_string(MinStride()) + " bytes"));
 }
 
 TEST_P(SubgroupMatrixSizes, Stride_TooLarge) {
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
 
     Var* v = nullptr;
     Override* o = nullptr;
     b.Append(mod.root_block, [&] {
         o = b.Override("o", ty.u32());
         o->SetOverrideId({1});
-        v = b.Var("v", ty.ptr(storage, ty.runtime_array(scalar_ty)));
+        v = b.Var("v", ty.ptr(storage, ty.runtime_array(ArrayElemType())));
         v->SetBindingPoint(0, 0);
     });
     auto* foo = b.Function("foo", ty.void_());
@@ -3153,21 +3149,20 @@ TEST_P(SubgroupMatrixSizes, Stride_TooLarge) {
 
 TEST_P(SubgroupMatrixSizes, Offset_TooLarge) {
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
 
     Var* v = nullptr;
     Override* o = nullptr;
     b.Append(mod.root_block, [&] {
         o = b.Override("o", ty.u32());
         o->SetOverrideId({1});
-        v = b.Var("v", ty.ptr(storage, ty.runtime_array(scalar_ty)));
+        v = b.Var("v", ty.ptr(storage, ty.runtime_array(ArrayElemType())));
         v->SetBindingPoint(0, 0);
     });
     auto* foo = b.Function("foo", ty.void_());
     auto* value = b.FunctionParam("mat", mat_ty);
     foo->SetParams({value});
     b.Append(foo->Block(), [&] {
-        MakeCall(v->Result(), value, o->Result(), b.Constant(u32(MinStride() / scalar_ty->Size())));
+        MakeCall(v->Result(), value, o->Result(), b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
@@ -3182,7 +3177,10 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmallForType_MinStride) {
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
+
+    if (MinStride() < ArrayStride()) {
+        return;
+    }
 
     uint32_t min_array_size = MinStride() * (MajorSize() - 1) + MinorSize() * type->Size();
 
@@ -3191,14 +3189,14 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmallForType_MinStride) {
     b.Append(mod.root_block, [&] {
         o = b.Override("o", ty.u32());
         o->SetOverrideId({1});
-        v = b.Var("v", ty.ptr(storage, ty.array(scalar_ty, min_array_size / scalar_ty->Size())));
+        v = b.Var("v", ty.ptr(storage, ty.array(ArrayElemType(), min_array_size / ArrayStride())));
         v->SetBindingPoint(0, 0);
     });
     auto* foo = b.Function("foo", ty.void_());
     auto* value = b.FunctionParam("mat", mat_ty);
     foo->SetParams({value});
     b.Append(foo->Block(), [&] {
-        MakeCall(v->Result(), value, o->Result(), b.Constant(u32(MinStride() / scalar_ty->Size())));
+        MakeCall(v->Result(), value, o->Result(), b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
@@ -3206,28 +3204,28 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmallForType_MinStride) {
     cfg.map[OverrideId{1}] = 1;
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_THAT(result.Failure().reason,
-                testing::HasSubstr("invalid storage size (" + std::to_string(min_array_size) +
-                                   " bytes) when used with " +
-                                   (load ? "subgroupMatrixLoad" : "subgroupMatrixStore") + " (" +
-                                   std::to_string(min_array_size + scalar_ty->Size()) +
-                                   " bytes required)"));
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("invalid storage size (" + std::to_string(min_array_size) +
+                           " bytes) when used with " +
+                           (load ? "subgroupMatrixLoad" : "subgroupMatrixStore") + " (" +
+                           std::to_string(min_array_size + ArrayStride()) + " bytes required)"));
 }
 
 TEST_P(SubgroupMatrixSizes, Storage_TooSmallForType) {
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
 
-    uint32_t array_size = MinStride() * 2 * (MajorSize() - 1) + MinorSize() * type->Size();
+    uint32_t array_size =
+        RoundUp(ArrayStride(), MinStride() * 2 * (MajorSize() - 1) + MinorSize() * type->Size());
 
     Var* v = nullptr;
     Override* o = nullptr;
     b.Append(mod.root_block, [&] {
         o = b.Override("o", ty.u32());
         o->SetOverrideId({1});
-        v = b.Var("v", ty.ptr(storage, ty.array(scalar_ty, array_size / scalar_ty->Size())));
+        v = b.Var("v", ty.ptr(storage, ty.array(ArrayElemType(), array_size / ArrayStride())));
         v->SetBindingPoint(0, 0);
     });
     auto* foo = b.Function("foo", ty.void_());
@@ -3239,31 +3237,31 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmallForType) {
     });
 
     SubstituteOverridesConfig cfg{};
-    cfg.map[OverrideId{1}] = (2 * MinStride()) / scalar_ty->Size();
+    cfg.map[OverrideId{1}] = (2 * MinStride()) / ArrayStride();
     auto result = RunWithFailure(SubstituteOverrides, cfg);
+    auto rounded = RoundUp(ArrayStride(), array_size + 4 * ArrayStride());
     ASSERT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("invalid storage size (" + std::to_string(array_size) +
                                    " bytes) when used with " +
                                    (load ? "subgroupMatrixLoad" : "subgroupMatrixStore") + " (" +
-                                   std::to_string(array_size + 4 * scalar_ty->Size()) +
-                                   " bytes required)"));
+                                   std::to_string(rounded) + " bytes required)"));
 }
 
 TEST_P(SubgroupMatrixSizes, Storage_TooSmallForType_NonConstStride) {
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
 
-    uint32_t array_size = MinStride() * (MajorSize() - 1) + MinorSize() * type->Size();
+    uint32_t array_size =
+        RoundUp(ArrayStride(), MinStride() * (MajorSize() - 1) + MinorSize() * type->Size());
 
     Var* v = nullptr;
     Override* o = nullptr;
     b.Append(mod.root_block, [&] {
         o = b.Override("o", ty.u32());
         o->SetOverrideId({1});
-        v = b.Var("v", ty.ptr(storage, ty.array(scalar_ty, array_size / scalar_ty->Size())));
+        v = b.Var("v", ty.ptr(storage, ty.array(ArrayElemType(), array_size / ArrayStride())));
         v->SetBindingPoint(0, 0);
     });
     auto* foo = b.Function("foo", ty.void_());
@@ -3278,20 +3276,23 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmallForType_NonConstStride) {
     SubstituteOverridesConfig cfg{};
     cfg.map[OverrideId{1}] = 4;
     auto result = RunWithFailure(SubstituteOverrides, cfg);
+    uint32_t rounded = RoundUp(ArrayStride(), array_size + 4 * ArrayStride());
     ASSERT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("invalid storage size (" + std::to_string(array_size) +
                                    " bytes) when used with " +
                                    (load ? "subgroupMatrixLoad" : "subgroupMatrixStore") + " (" +
-                                   std::to_string(array_size + 4 * scalar_ty->Size()) +
-                                   " bytes required)"));
+                                   std::to_string(rounded) + " bytes required)"));
 }
 
 TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView) {
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
+
+    if (MinStride() < ArrayStride()) {
+        return;
+    }
 
     uint32_t array_size = MinStride() * (MajorSize() - 1) + MinorSize() * type->Size();
 
@@ -3308,29 +3309,33 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView) {
     foo->SetParams({value});
     b.Append(foo->Block(), [&] {
         auto* view = b.CallExplicit(
-            ty.ptr(workgroup, ty.runtime_array(scalar_ty)), BuiltinFn::kBufferView,
-            Vector<TemplateParameter, 1>{ty.runtime_array(scalar_ty)}, v, o->Result());
+            ty.ptr(workgroup, ty.runtime_array(ArrayElemType())), BuiltinFn::kBufferView,
+            Vector<TemplateParameter, 1>{ty.runtime_array(ArrayElemType())}, v, o->Result());
         MakeCall(view->Result(), value, b.Constant(u32(0)),
-                 b.Constant(u32(MinStride() / scalar_ty->Size())));
+                 b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
     SubstituteOverridesConfig cfg{};
-    cfg.map[OverrideId{1}] = 4;
+    cfg.map[OverrideId{1}] = ArrayStride();
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_THAT(result.Failure().reason,
-                testing::HasSubstr("invalid storage size (" + std::to_string(array_size) +
-                                   " bytes) when used with " +
-                                   (load ? "subgroupMatrixLoad" : "subgroupMatrixStore") + " (" +
-                                   std::to_string(array_size + 4) + " bytes required)"));
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("invalid storage size (" + std::to_string(array_size) +
+                           " bytes) when used with " +
+                           (load ? "subgroupMatrixLoad" : "subgroupMatrixStore") + " (" +
+                           std::to_string(array_size + ArrayStride()) + " bytes required)"));
 }
 
 TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_SizedParam) {
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
+
+    if (MinStride() < ArrayStride()) {
+        return;
+    }
 
     uint32_t array_size = MinStride() * (MajorSize() - 1) + MinorSize() * type->Size();
 
@@ -3348,10 +3353,10 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_SizedParam) {
     foo->SetParams({value, p});
     b.Append(foo->Block(), [&] {
         auto* view = b.CallExplicit(
-            ty.ptr(workgroup, ty.runtime_array(scalar_ty)), BuiltinFn::kBufferView,
-            Vector<TemplateParameter, 1>{ty.runtime_array(scalar_ty)}, p, o->Result());
+            ty.ptr(workgroup, ty.runtime_array(ArrayElemType())), BuiltinFn::kBufferView,
+            Vector<TemplateParameter, 1>{ty.runtime_array(ArrayElemType())}, p, o->Result());
         MakeCall(view->Result(), value, b.Constant(u32(0)),
-                 b.Constant(u32(MinStride() / scalar_ty->Size())));
+                 b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
     auto* bar = b.Function("bar", ty.void_());
@@ -3363,22 +3368,27 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_SizedParam) {
     });
 
     SubstituteOverridesConfig cfg{};
-    cfg.map[OverrideId{1}] = 4;
+    cfg.map[OverrideId{1}] = ArrayStride();
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_THAT(result.Failure().reason,
-                testing::HasSubstr("invalid storage size (" + std::to_string(array_size) +
-                                   " bytes) when used with " +
-                                   (load ? "subgroupMatrixLoad" : "subgroupMatrixStore") + " (" +
-                                   std::to_string(array_size + 4) + " bytes required)"));
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("invalid storage size (" + std::to_string(array_size) +
+                           " bytes) when used with " +
+                           (load ? "subgroupMatrixLoad" : "subgroupMatrixStore") + " (" +
+                           std::to_string(array_size + ArrayStride()) + " bytes required)"));
 }
 
 TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferView_Result) {
     auto* type = std::get<0>(GetParam())(ty);
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
 
-    uint32_t array_size = MinStride() * (MajorSize() - 1) + MinorSize() * type->Size();
+    if (MinStride() < ArrayStride()) {
+        return;
+    }
+
+    uint32_t array_size =
+        RoundUp(ArrayStride(), MinStride() * (MajorSize() - 1) + MinorSize() * type->Size());
 
     Var* v = nullptr;
     Override* o = nullptr;
@@ -3393,11 +3403,11 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferView_Result) {
     auto* p = b.FunctionParam("p", ty.buffer(2 * array_size));
     foo->SetParams({value, p});
     b.Append(foo->Block(), [&] {
-        auto* arr_ty = ty.array(scalar_ty, array_size / scalar_ty->Size() - 1);
+        auto* arr_ty = ty.array(ArrayElemType(), array_size / ArrayStride() - 1);
         auto* view = b.CallExplicit(ty.ptr(workgroup, arr_ty), BuiltinFn::kBufferView,
                                     Vector<TemplateParameter, 1>{arr_ty}, p, o->Result());
         MakeCall(view->Result(), value, b.Constant(u32(0)),
-                 b.Constant(u32(MinStride() / scalar_ty->Size())));
+                 b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
     auto* bar = b.Function("bar", ty.void_());
@@ -3415,15 +3425,19 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferView_Result) {
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("requires more memory (" + std::to_string(array_size) +
                                    " bytes) than pointed to (" +
-                                   std::to_string(array_size - scalar_ty->Size()) + " bytes)"));
+                                   std::to_string(array_size - ArrayStride()) + " bytes)"));
 }
 
 TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferArrayView_SizeParam) {
     auto* type = std::get<0>(GetParam())(ty);
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
 
-    uint32_t array_size = MinStride() * (MajorSize() - 1) + MinorSize() * type->Size();
+    if (MinStride() < ArrayStride()) {
+        return;
+    }
+
+    uint32_t array_size =
+        RoundUp(ArrayStride(), MinStride() * (MajorSize() - 1) + MinorSize() * type->Size());
 
     Var* v = nullptr;
     Override* o = nullptr;
@@ -3438,30 +3452,34 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferArrayView_SizeParam) {
     foo->SetParams({value});
     b.Append(foo->Block(), [&] {
         auto* view = b.CallExplicit(
-            ty.ptr(workgroup, ty.runtime_array(scalar_ty)), BuiltinFn::kBufferArrayView,
-            Vector<TemplateParameter, 1>{ty.runtime_array(scalar_ty)}, v, 0_u, o->Result());
+            ty.ptr(workgroup, ty.runtime_array(ArrayElemType())), BuiltinFn::kBufferArrayView,
+            Vector<TemplateParameter, 1>{ty.runtime_array(ArrayElemType())}, v, 0_u, o->Result());
         MakeCall(view->Result(), value, b.Constant(u32(0)),
-                 b.Constant(u32(MinStride() / scalar_ty->Size())));
+                 b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
     SubstituteOverridesConfig cfg{};
-    cfg.map[OverrideId{1}] = array_size - 4;
+    cfg.map[OverrideId{1}] = array_size - ArrayStride();
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("requires more memory (" + std::to_string(array_size) +
-                                   " bytes) than pointed to (" + std::to_string(array_size - 4) +
-                                   " bytes)"));
+                                   " bytes) than pointed to (" +
+                                   std::to_string(array_size - ArrayStride()) + " bytes)"));
 }
 
 TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_Access_Array) {
     auto* type = std::get<0>(GetParam())(ty);
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
 
-    uint32_t array_size = MinStride() * (MajorSize() - 1) + MinorSize() * type->Size();
-    auto* arr_ty = ty.array(scalar_ty, array_size / scalar_ty->Size() - 1);
+    if (MinStride() < ArrayStride()) {
+        return;
+    }
+
+    uint32_t array_size =
+        RoundUp(ArrayStride(), MinStride() * (MajorSize() - 1) + MinorSize() * type->Size());
+    auto* arr_ty = ty.array(ArrayElemType(), array_size / ArrayStride() - 1);
 
     Var* v = nullptr;
     Override* o = nullptr;
@@ -3477,7 +3495,7 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_Access_Array) {
     b.Append(foo->Block(), [&] {
         auto* access = b.Access(ty.ptr(storage, arr_ty), v, o->Result());
         MakeCall(access->Result(), value, b.Constant(u32(0)),
-                 b.Constant(u32(MinStride() / scalar_ty->Size())));
+                 b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
@@ -3488,16 +3506,20 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_Access_Array) {
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("requires more memory (" + std::to_string(array_size) +
                                    " bytes) than pointed to (" +
-                                   std::to_string(array_size - scalar_ty->Size()) + " bytes)"));
+                                   std::to_string(array_size - ArrayStride()) + " bytes)"));
 }
 
 TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_Access_Array_Offset) {
     auto* type = std::get<0>(GetParam())(ty);
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
 
-    uint32_t array_size = MinStride() * (MajorSize() - 1) + MinorSize() * type->Size();
-    auto* arr_ty = ty.array(scalar_ty, array_size / scalar_ty->Size());
+    if (MinStride() < ArrayStride()) {
+        return;
+    }
+
+    uint32_t array_size =
+        RoundUp(ArrayStride(), MinStride() * (MajorSize() - 1) + MinorSize() * type->Size());
+    auto* arr_ty = ty.array(ArrayElemType(), array_size / ArrayStride());
 
     Var* v = nullptr;
     Override* o = nullptr;
@@ -3513,7 +3535,7 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_Access_Array_Offset) {
     b.Append(foo->Block(), [&] {
         auto* access = b.Access(ty.ptr(storage, arr_ty), v, 1_u);
         MakeCall(access->Result(), value, o->Result(),
-                 b.Constant(u32(MinStride() / scalar_ty->Size())));
+                 b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
@@ -3521,19 +3543,23 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_Access_Array_Offset) {
     cfg.map[OverrideId{1}] = 1;
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_THAT(result.Failure().reason,
-                testing::HasSubstr(
-                    "requires more memory (" + std::to_string(array_size + scalar_ty->Size()) +
-                    " bytes) than pointed to (" + std::to_string(array_size) + " bytes)"));
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("requires more memory (" + std::to_string(array_size + ArrayStride()) +
+                           " bytes) than pointed to (" + std::to_string(array_size) + " bytes)"));
 }
 
 TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_StructMember) {
     auto* type = std::get<0>(GetParam())(ty);
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
 
-    uint32_t array_size = MinStride() * (MajorSize() - 1) + MinorSize() * type->Size();
-    auto* arr_ty = ty.array(scalar_ty, array_size / scalar_ty->Size() - 1);
+    if (MinStride() < ArrayStride()) {
+        return;
+    }
+
+    uint32_t array_size =
+        RoundUp(ArrayStride(), MinStride() * (MajorSize() - 1) + MinorSize() * type->Size());
+    auto* arr_ty = ty.array(ArrayElemType(), array_size / ArrayStride() - 1);
 
     auto* S = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.New("a"), ty.vec4u()},
@@ -3554,7 +3580,7 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_StructMember) {
     b.Append(foo->Block(), [&] {
         auto* access = b.Access(ty.ptr(storage, arr_ty), v, 1_u);
         MakeCall(access->Result(), value, o->Result(),
-                 b.Constant(u32(MinStride() / scalar_ty->Size())));
+                 b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
@@ -3565,17 +3591,21 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_StructMember) {
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("requires more memory (" + std::to_string(array_size) +
                                    " bytes) than pointed to (" +
-                                   std::to_string(array_size - scalar_ty->Size()) + " bytes)"));
+                                   std::to_string(array_size - ArrayStride()) + " bytes)"));
 }
 
 TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_Access_Array) {
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
 
-    uint32_t array_size = MinStride() * (MajorSize() - 1) + MinorSize() * type->Size();
-    auto* arr_ty = ty.array(scalar_ty, array_size / scalar_ty->Size());
+    if (MinStride() < ArrayStride()) {
+        return;
+    }
+
+    uint32_t array_size =
+        RoundUp(ArrayStride(), MinStride() * (MajorSize() - 1) + MinorSize() * type->Size());
+    auto* arr_ty = ty.array(ArrayElemType(), array_size / ArrayStride());
 
     Var* v = nullptr;
     Override* o = nullptr;
@@ -3594,35 +3624,39 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_Access_Array) {
                            Vector<TemplateParameter, 1>{ty.runtime_array(arr_ty)}, v, o->Result());
         auto* access = b.Access(ty.ptr(storage, arr_ty), view, 1_u);
         MakeCall(access->Result(), value, b.Constant(u32(0)),
-                 b.Constant(u32(MinStride() / scalar_ty->Size())));
+                 b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
     SubstituteOverridesConfig cfg{};
-    cfg.map[OverrideId{1}] = scalar_ty->Size();
+    cfg.map[OverrideId{1}] = ArrayStride();
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_THAT(result.Failure().reason,
-                testing::HasSubstr("invalid storage size (" + std::to_string(2 * array_size) +
-                                   " bytes) when used with " +
-                                   (load ? "subgroupMatrixLoad" : "subgroupMatrixStore") + " (" +
-                                   std::to_string(2 * array_size + scalar_ty->Size()) +
-                                   " bytes required)"));
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("invalid storage size (" + std::to_string(2 * array_size) +
+                           " bytes) when used with " +
+                           (load ? "subgroupMatrixLoad" : "subgroupMatrixStore") + " (" +
+                           std::to_string(2 * array_size + ArrayStride()) + " bytes required)"));
 }
 
 TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_Access_Struct) {
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();
-    auto* scalar_ty = ScalarType();
 
-    uint32_t array_size = MinStride() * (MajorSize() - 1) + MinorSize() * type->Size();
+    if (MinStride() < ArrayStride()) {
+        return;
+    }
 
-    auto* S =
-        ty.Struct(mod.symbols.New("S"), {
-                                            {mod.symbols.New("a"), ty.vec4u()},
-                                            {mod.symbols.New("b"), ty.runtime_array(scalar_ty)},
-                                        });
+    uint32_t array_size =
+        RoundUp(ArrayStride(), MinStride() * (MajorSize() - 1) + MinorSize() * type->Size());
+
+    auto* S = ty.Struct(mod.symbols.New("S"),
+                        {
+                            {mod.symbols.New("a"), ty.vec4u()},
+                            {mod.symbols.New("b"), ty.runtime_array(ArrayElemType())},
+                        });
 
     Var* v = nullptr;
     Override* o = nullptr;
@@ -3638,10 +3672,10 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_Access_Struct) {
     b.Append(foo->Block(), [&] {
         auto* view =
             b.CallExplicit(ty.ptr(storage, S), BuiltinFn::kBufferView,
-                           Vector<TemplateParameter, 1>{ty.runtime_array(scalar_ty)}, v, 0_u);
-        auto* access = b.Access(ty.ptr(storage, ty.runtime_array(scalar_ty)), view, 1_u);
+                           Vector<TemplateParameter, 1>{ty.runtime_array(ArrayElemType())}, v, 0_u);
+        auto* access = b.Access(ty.ptr(storage, ty.runtime_array(ArrayElemType())), view, 1_u);
         MakeCall(access->Result(), value, o->Result(),
-                 b.Constant(u32(MinStride() / scalar_ty->Size())));
+                 b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
@@ -3649,12 +3683,12 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_Access_Struct) {
     cfg.map[OverrideId{1}] = 1;
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_THAT(result.Failure().reason,
-                testing::HasSubstr("invalid storage size (" + std::to_string(array_size + 16) +
-                                   " bytes) when used with " +
-                                   (load ? "subgroupMatrixLoad" : "subgroupMatrixStore") + " (" +
-                                   std::to_string(array_size + scalar_ty->Size() + 16) +
-                                   " bytes required)"));
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("invalid storage size (" + std::to_string(array_size + 16) +
+                           " bytes) when used with " +
+                           (load ? "subgroupMatrixLoad" : "subgroupMatrixStore") + " (" +
+                           std::to_string(array_size + ArrayStride() + 16) + " bytes required)"));
 }
 
 // Only worth testing one type of each size.
@@ -3666,7 +3700,12 @@ INSTANTIATE_TEST_SUITE_P(
                      testing::Values(8, 16),
                      testing::Values(true, false),
                      testing::Values(true, false),
-                     testing::Values(true, false)));
+                     testing::Values(true, false),
+                     testing::Values(TypeBuilder<f16>,
+                                     TypeBuilder<u32>,
+                                     TypeBuilder<vec2i>,
+                                     TypeBuilder<vec3f>,
+                                     TypeBuilder<vec4u>)));
 
 }  // namespace
 }  // namespace tint::core::ir::transform

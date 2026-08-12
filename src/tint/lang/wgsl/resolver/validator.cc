@@ -2009,7 +2009,16 @@ bool Validator::BuiltinCall(const sem::Call* call) const {
         }
         if (fn->Fn() == wgsl::BuiltinFn::kSubgroupMatrixLoad ||
             fn->Fn() == wgsl::BuiltinFn::kSubgroupMatrixStore) {
-            if (!CheckSubgroupMatrixOpOffset(fn, call->Arguments()[0], call->Arguments()[1])) {
+            const auto* ident = call->Declaration()->target->identifier;
+            uint32_t num_templates = 0;
+            if (const auto* templ_ident = ident->As<ast::TemplatedIdentifier>()) {
+                num_templates = static_cast<uint32_t>(templ_ident->arguments.Length());
+            }
+            const bool majorness_template =
+                (fn->Fn() == wgsl::BuiltinFn::kSubgroupMatrixLoad && num_templates == 2) ||
+                (fn->Fn() == wgsl::BuiltinFn::kSubgroupMatrixStore && num_templates == 1);
+            if (!CheckSubgroupMatrixOpOffset(fn, call->Arguments()[0], call->Arguments()[1],
+                                             majorness_template)) {
                 return false;
             }
         }
@@ -2298,6 +2307,14 @@ bool Validator::SubgroupMatrixLoadStore(const sem::Call* call) const {
     uint32_t major_size = col_major ? mat_ty->Columns() : mat_ty->Rows();
     uint32_t minor_size = col_major ? mat_ty->Rows() : mat_ty->Columns();
     auto* ele_ty = mat_ty->Type();
+
+    if (ptr_arr_ty->ImplicitStride() < ele_ty->Size()) {
+        AddError(call->Declaration()->source)
+            << "the stride of the array (" << ptr_arr_ty->ImplicitStride()
+            << " bytes) must be greater than or equal to the matrix element size ("
+            << ele_ty->Size() << " bytes)";
+        return false;
+    }
 
     const uint32_t min_stride = ele_ty->Size() * minor_size;
 
@@ -3712,7 +3729,8 @@ bool Validator::CheckNoMultipleModuleScopeVarsOfAddressSpace(sem::Function* entr
 
 bool Validator::CheckSubgroupMatrixOpOffset(const sem::BuiltinFn* fn,
                                             const sem::ValueExpression* p_arg,
-                                            const sem::ValueExpression* offset_arg) const {
+                                            const sem::ValueExpression* offset_arg,
+                                            bool majorness_template) const {
     auto* ptr_ty = p_arg->Type()->As<core::type::Pointer>();
     if (!ptr_ty) {
         return true;
@@ -3740,13 +3758,16 @@ bool Validator::CheckSubgroupMatrixOpOffset(const sem::BuiltinFn* fn,
         return true;
     }
 
-    auto arr_elem_size = arr_ty->ElemType()->Size();
+    auto arr_stride = arr_ty->ImplicitStride();
     auto mat_comp_size = mat_ty->Type()->Size();
     if (mat_comp_size == 0) {
         return true;
     }
 
-    auto limit = (const_count.value() * arr_elem_size) / mat_comp_size;
+    auto limit = const_count.value() * arr_stride;
+    if (!majorness_template) {
+        limit /= mat_comp_size;
+    }
 
     uint32_t offset = 0;
     if (offset_arg->Type()->IsUnsignedIntegerScalar()) {

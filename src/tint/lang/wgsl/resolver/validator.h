@@ -662,11 +662,13 @@ class Validator {
     /// @param fn the builtin function symbol
     /// @param p_arg the pointer argument
     /// @param offset_arg the offset argument
+    /// @param majorness_template indicates which variant of the builtin is used
     /// @returns true on success, false if an error was raised.
     /// TODO(b/529415904): remove this when deprecated load/store variants are removed.
     bool CheckSubgroupMatrixOpOffset(const sem::BuiltinFn* fn,
                                      const sem::ValueExpression* p_arg,
-                                     const sem::ValueExpression* offset_arg) const;
+                                     const sem::ValueExpression* offset_arg,
+                                     bool majorness_template) const;
 
     SymbolTable& symbols_;
     diag::List& diagnostics_;
