@@ -1,5 +1,4 @@
-enable subgroups;
-enable subgroup_size_control;
+enable subgroup_size_control, subgroups;
 
 override kSubgroupSize : i32;
 

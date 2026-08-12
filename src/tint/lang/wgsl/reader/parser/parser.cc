@@ -377,6 +377,18 @@ Maybe<Void> Parser::diagnostic_directive() {
     return decl;
 }
 
+void Parser::AddDependentExtensions(Vector<const ast::Extension*, 4>& extensions,
+                                    Extension base_ext,
+                                    Source src) {
+    switch (base_ext) {
+        case Extension::kSubgroupSizeControl:
+            extensions.Push(create<ast::Extension>(src, Extension::kSubgroups));
+            break;
+        default:
+            break;
+    }
+}
+
 // enable_directive :
 // | 'enable' identifier (COMMA identifier)* COMMA? SEMICOLON
 Maybe<Void> Parser::enable_directive() {
@@ -400,6 +412,7 @@ Maybe<Void> Parser::enable_directive() {
                 return Failure::kErrored;
             }
             extensions.Push(create<ast::Extension>(ext_src, ext.value));
+            AddDependentExtensions(extensions, ext.value, ext_src);
 
             if (!match(Token::Type::kComma)) {
                 break;

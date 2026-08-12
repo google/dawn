@@ -330,5 +330,26 @@ enable f16;
     EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
 }
 
+TEST_F(EnableDirectiveTest, DependentExtensions_SubgroupSizeControl) {
+    auto p = parser(R"(
+enable subgroup_size_control;
+)");
+    p->translation_unit();
+    EXPECT_FALSE(p->has_error()) << p->error();
+    auto program = p->program();
+    auto& ast = program.AST();
+    ASSERT_EQ(ast.Enables().Length(), 1u);
+    auto* enable = ast.Enables()[0];
+    ASSERT_EQ(enable->extensions.Length(), 2u);
+    EXPECT_EQ(enable->extensions[0]->name, wgsl::Extension::kSubgroupSizeControl);
+    EXPECT_EQ(enable->extensions[1]->name, wgsl::Extension::kSubgroups);
+    auto ssc_src = enable->extensions[0]->source;
+    auto subgroups_src = enable->extensions[1]->source;
+    EXPECT_EQ(ssc_src.range.begin.line, subgroups_src.range.begin.line);
+    EXPECT_EQ(ssc_src.range.begin.column, subgroups_src.range.begin.column);
+    EXPECT_EQ(ssc_src.range.end.line, subgroups_src.range.end.line);
+    EXPECT_EQ(ssc_src.range.end.column, subgroups_src.range.end.column);
+}
+
 }  // namespace
 }  // namespace tint::wgsl::reader

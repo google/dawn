@@ -1,5 +1,4 @@
-enable subgroups;
-enable subgroup_size_control;
+enable subgroup_size_control, subgroups;
 
 @group(0) @binding(0) var<storage, read_write> buffer : array<u32>;
 

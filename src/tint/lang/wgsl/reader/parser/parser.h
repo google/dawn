@@ -385,6 +385,11 @@ class Parser {
     /// @param source the source to associate the error with
     /// @param msg the note message
     void AddNote(const Source& source, std::string_view msg);
+    /// Enables dependent extensions of `base_ext`
+    /// Dependent extensions are given the same source location as `base_ext`.
+    void AddDependentExtensions(Vector<const ast::Extension*, 4>& extensions,
+                                Extension base_ext,
+                                Source src);
     /// Appends a deprecated-language-feature warning at `source` with the message
     /// `msg`
     /// @param source the source to associate the error with

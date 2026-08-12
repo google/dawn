@@ -1,6 +1,5 @@
 // [hlsl-dxc] flags: --hlsl-shader-model 6.6
 
-enable subgroups;
 enable subgroup_size_control;
 
 @group(0) @binding(0)
