@@ -786,7 +786,7 @@ deps = {
   },
 
   'third_party/litert-lm/src': {
-    'url': '{chromium_git}/external/github.com/google-ai-edge/LiteRT-LM.git@27106e37122bff03bb8c15589127e0d97011d0c3',
+    'url': '{chromium_git}/external/github.com/google-ai-edge/LiteRT-LM.git@df9bb057d50741d5a044de2c2ea4f97d72206949',
     'condition': 'checkout_litert_lm',
   },
 
