@@ -81,6 +81,31 @@ template("_meson_setup") {
     # Use the glslang_validator target built from source.
     _glslang_path = rebase_path("$root_out_dir/glslang_validator")
 
+    # The pre-compiled version of llvm-config from CIPD returns a hard
+    # coded path to a system installed libzstd, so need to intercept
+    # the output and rewrite it to point to where it is checked out.
+    #
+    # Additionally the CIPD supplied version of libzstd.a is not
+    # compile with -fPIC, so will not correctly link into the Mesa
+    # drivers, since they are dynamic libs (.so). Rewritting instead
+    # to use libzstd.so instead.
+    _llvm_config_wrapper_path = "${target_gen_dir}/llvm_config_wrapper.py"
+    _llvm_abs_path = rebase_path("${meson_llvm_config_bin}")
+    _zstd_shared_lib = rebase_path("${meson_zstd_dir}/lib/libzstd.so")
+    _wrapper_content = [
+      "import sys",
+      "import subprocess",
+      "real_llvm_config = '${_llvm_abs_path}'",
+      "zstd_shared_lib = '${_zstd_shared_lib}'",
+      "args = [real_llvm_config] + sys.argv[1:]",
+      "res = subprocess.run(args, capture_output=True, text=True)",
+      "stdout = res.stdout.replace('/usr/lib/x86_64-linux-gnu/libzstd.a', zstd_shared_lib)",
+      "sys.stdout.write(stdout)",
+      "sys.stderr.write(res.stderr)",
+      "sys.exit(res.returncode)",
+    ]
+    write_file(_llvm_config_wrapper_path, _wrapper_content)
+
     # Used by meson to allow specifying the toolchain elements to use
     _native_file_content = [
       "[binaries]",
@@ -93,17 +118,16 @@ template("_meson_setup") {
           "']",
       "glslang = '${_glslang_path}'",
       "glslangValidator = '${_glslang_path}'",
+      "llvm-config = ['python3', '" + rebase_path(_llvm_config_wrapper_path) +
+          "']",
     ]
-    if (is_linux) {
-      _native_file_content +=
-          [ "llvm-config = '" + rebase_path("${meson_llvm_config_bin}") + "'" ]
-    }
 
     _zstd_abs_path = rebase_path(meson_zstd_dir)
 
-    # The CIPD supplied version has baked in paths specific to the
-    # original build environment that do not reflect the checked out
-    # paths, so writing custom version
+    # The CIPD supplied version of the .pc used by Meson to find the
+    # artifacts has baked in paths specific to the original build
+    # environment that do not reflect the checked out paths, so
+    # writing custom version
     _zstd_pc_content = [
       "prefix=${_zstd_abs_path}",
       "exec_prefix=\${prefix}",
