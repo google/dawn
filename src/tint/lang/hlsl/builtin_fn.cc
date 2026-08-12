@@ -118,6 +118,8 @@ const char* str(BuiltinFn i) {
             return "Set";
         case BuiltinFn::kLength:
             return "Length";
+        case BuiltinFn::kCast:
+            return "Cast";
         case BuiltinFn::kLoad:
             return "Load";
         case BuiltinFn::kLoad2:
@@ -259,6 +261,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSampleGrad:
         case BuiltinFn::kSampleLevel:
         case BuiltinFn::kGet:
+        case BuiltinFn::kCast:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};
 
         case BuiltinFn::kAsint:

@@ -195,6 +195,7 @@ struct State {
                         case BuiltinFn::kSampleGrad:
                         case BuiltinFn::kSampleLevel:
                         case BuiltinFn::kSplat:
+                        case BuiltinFn::kCast:
                         case BuiltinFn::kNone:
                             break;
                     }

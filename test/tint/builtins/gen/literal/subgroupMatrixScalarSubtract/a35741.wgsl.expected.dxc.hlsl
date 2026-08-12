@@ -4,22 +4,22 @@ using Matrix_result_i32_8x8 = Matrix<ComponentType::I32, 8, 8, MatrixUse::Accumu
 
 RWByteAddressBuffer prevent_dce : register(u0);
 Matrix_result_i32_8x8 tint_subgroup_matrix_scalar_op(Matrix_result_i32_8x8 m, int s) {
-  Matrix_result_i32_8x8 v = Matrix_result_i32_8x8::Splat(int(0));
+  Matrix_result_i32_8x8 result = m;
   {
-    uint v_1 = 0u;
-    v_1 = 0u;
+    uint v = 0u;
+    v = 0u;
     while(true) {
-      uint v_2 = v_1;
-      if ((v_2 >= v.Length())) {
+      uint v_1 = v;
+      if ((v_1 >= result.Length())) {
         break;
       }
-      v.Set(v_2, (m.Get(v_2) - s));
+      result.Set(v_1, (result.Get(v_1) - s));
       {
-        v_1 = (v_2 + 1u);
+        v = (v_1 + 1u);
       }
     }
   }
-  return v;
+  return result;
 }
 
 Matrix_result_i32_8x8 subgroupMatrixScalarSubtract_a35741() {

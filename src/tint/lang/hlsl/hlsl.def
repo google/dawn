@@ -358,23 +358,23 @@ implicit(N: num, T: scalar) fn select(vec<N, bool>, vec<N, T>, vec<N, T>) -> vec
 @member_function implicit(K: subgroup_matrix_kind, T: fiu32_f16, C: num, R: num)
   fn Get(subgroup_matrix<K, T, C, R>, index: u32) -> T
 
-@member_function implicit(K: subgroup_matrix_kind, C: num, R: num)
-  fn Get(subgroup_matrix<K, i8, C, R>, index: u32) -> i32
-
-@member_function implicit(K: subgroup_matrix_kind, C: num, R: num)
-  fn Get(subgroup_matrix<K, u8, C, R>, index: u32) -> u32
-
 @member_function implicit(K: subgroup_matrix_kind, T: fiu32_f16, C: num, R: num)
   fn Set(ptr<function, subgroup_matrix<K, T, C, R>, read_write>, index: u32, value: T)
 
-@member_function implicit(K: subgroup_matrix_kind, C: num, R: num)
-  fn Set(ptr<function, subgroup_matrix<K, i8, C, R>, read_write>, index: u32, value: i32)
-
-@member_function implicit(K: subgroup_matrix_kind, C: num, R: num)
-  fn Set(ptr<function, subgroup_matrix<K, u8, C, R>, read_write>, index: u32, value: u32)
-
 @member_function implicit(K: subgroup_matrix_kind, T: subgroup_matrix_component_types, C: num, R: num)
   fn Length(ptr<function, subgroup_matrix<K, T, C, R>, read_write>) -> u32
+
+@member_function implicit(K: subgroup_matrix_kind, T: i8, C: num, R: num)
+  fn Cast<TR: i32>(subgroup_matrix<K, T, C, R>) -> subgroup_matrix<K, TR, C, R>
+
+@member_function implicit(K: subgroup_matrix_kind, T: i32, C: num, R: num)
+  fn Cast<TR: i8>(subgroup_matrix<K, T, C, R>) -> subgroup_matrix<K, TR, C, R>
+
+@member_function implicit(K: subgroup_matrix_kind, T: u8, C: num, R: num)
+  fn Cast<TR: u32>(subgroup_matrix<K, T, C, R>) -> subgroup_matrix<K, TR, C, R>
+
+@member_function implicit(K: subgroup_matrix_kind, T: u32, C: num, R: num)
+  fn Cast<TR: u8>(subgroup_matrix<K, T, C, R>) -> subgroup_matrix<K, TR, C, R>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Member Functions                                                           //

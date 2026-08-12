@@ -51,6 +51,7 @@ cc_binary(
     "//src/tint/cmd/common",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
+    "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/ir/binary",
     "//src/tint/lang/core/type",

@@ -88,6 +88,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSampleGrad:
         case BuiltinFn::kSampleLevel:
         case BuiltinFn::kGet:
+        case BuiltinFn::kCast:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};
 
         case BuiltinFn::kAsint:

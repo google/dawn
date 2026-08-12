@@ -4,22 +4,22 @@ using Matrix_left_f16_8x8 = Matrix<ComponentType::F16, 8, 8, MatrixUse::A, Matri
 
 RWByteAddressBuffer prevent_dce : register(u0);
 Matrix_left_f16_8x8 tint_subgroup_matrix_scalar_op(Matrix_left_f16_8x8 m, float16_t s) {
-  Matrix_left_f16_8x8 v = Matrix_left_f16_8x8::Splat(float16_t(0.0h));
+  Matrix_left_f16_8x8 result = m;
   {
-    uint v_1 = 0u;
-    v_1 = 0u;
+    uint v = 0u;
+    v = 0u;
     while(true) {
-      uint v_2 = v_1;
-      if ((v_2 >= v.Length())) {
+      uint v_1 = v;
+      if ((v_1 >= result.Length())) {
         break;
       }
-      v.Set(v_2, (m.Get(v_2) * s));
+      result.Set(v_1, (result.Get(v_1) * s));
       {
-        v_1 = (v_2 + 1u);
+        v = (v_1 + 1u);
       }
     }
   }
-  return v;
+  return result;
 }
 
 Matrix_left_f16_8x8 subgroupMatrixScalarMultiply_4de795() {

@@ -87,6 +87,7 @@ enum class BuiltinFn : uint8_t {
     kGet,
     kSet,
     kLength,
+    kCast,
     kLoad,
     kLoad2,
     kLoad3,

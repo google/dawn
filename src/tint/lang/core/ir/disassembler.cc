@@ -549,19 +549,7 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             EmitValueWithType(c);
             out_ << " = ";
             EmitInstructionName(c);
-
-            auto ep = c->ExplicitTemplateParams();
-            if (!ep.IsEmpty()) {
-                out_ << "<";
-                for (size_t i = 0; i < ep.Length(); ++i) {
-                    if (i > 0) {
-                        out_ << ", ";
-                    }
-                    out_ << ep[i];
-                }
-                out_ << ">";
-            }
-
+            EmitTemplateList(c->ExplicitTemplateParams());
             EmitOperandList(c, BuiltinCall::kArgsOperandOffset);
         },
         [&](const MemberBuiltinCall* c) {
@@ -570,6 +558,7 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             EmitOperand(c, MemberBuiltinCall::kObjectOperandOffset);
             out_ << ".";
             EmitInstructionName(c);
+            EmitTemplateList(c->ExplicitTemplateParams());
             EmitOperandList(c, UserCall::kArgsOperandOffset);
         },
         [&](const Override* o) {
@@ -702,6 +691,20 @@ void Disassembler::EmitOperandList(const Instruction* inst, size_t start_index, 
         }
         EmitOperand(inst, i);
     }
+}
+
+void Disassembler::EmitTemplateList(VectorRef<TemplateParameter> args) {
+    if (args.IsEmpty()) {
+        return;
+    }
+    out_ << "<";
+    for (size_t i = 0; i < args.Length(); ++i) {
+        if (i > 0) {
+            out_ << ", ";
+        }
+        out_ << args[i];
+    }
+    out_ << ">";
 }
 
 void Disassembler::EmitIf(const If* if_) {

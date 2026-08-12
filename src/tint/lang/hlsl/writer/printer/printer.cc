@@ -838,7 +838,23 @@ class Printer : public tint::TextGenerator {
         }
 
         EmitValue(out, c->Object());
-        out << "." << fn << suffix << "(";
+        out << "." << fn << suffix;
+
+        auto params = c->ExplicitTemplateParams();
+        if (!params.IsEmpty()) {
+            out << "<";
+            bool first = true;
+            for (auto p : params) {
+                if (!first) {
+                    out << ", ";
+                }
+                out << SubgroupMatrixComponentTypeToEnum(std::get<const core::type::Type*>(p));
+                first = false;
+            }
+            out << ">";
+        }
+
+        out << "(";
 
         bool needs_comma = false;
         for (const auto* arg : c->Args()) {

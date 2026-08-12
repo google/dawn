@@ -1996,17 +1996,43 @@ struct State {
                 f->SetParams({m_param, s_param});
 
                 b.Append(f->Block(), [&] {
-                    auto* res = b.Var(ty.ptr<function>(sm_ty));
+                    core::ir::Value* input = m_param;
+
+                    // If the element type does not match the scalar type (e.g. 8-bit integer), then
+                    // we need to upcast the matrix to the scalar type to ensure that the type we
+                    // operate on is natively supported in HLSL.
+                    // NOTE: This requires that the same geometries are supported with the wider
+                    // component type, which is not guaranteed by the LinAlg API. This means that we
+                    // have to filter out support for 8-bit matrices on the API side unless the
+                    // device supports the equivalent geometry with the wider type.
+                    if (scalar_ty != elem_ty) {
+                        auto* casted_matrix_ty = ty.subgroup_matrix(
+                            sm_ty->Kind(), scalar_ty, sm_ty->Columns(), sm_ty->Rows());
+                        input = b.MemberCallExplicit<hlsl::ir::MemberBuiltinCall>(
+                                     casted_matrix_ty, hlsl::BuiltinFn::kCast, m_param,
+                                     Vector<core::intrinsic::TemplateParameter, 1>{scalar_ty})
+                                    ->Result();
+                    }
+
+                    auto* res = b.Var<function>("result", input);
                     auto* length = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
                         ty.u32(), hlsl::BuiltinFn::kLength, res);
                     b.LoopRange(0_u, length, 1_u, [&](core::ir::Value* idx) {
                         auto* val = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
-                            scalar_ty, hlsl::BuiltinFn::kGet, m_param, idx);
+                            scalar_ty, hlsl::BuiltinFn::kGet, b.Load(res), idx);
                         auto* binary = b.Binary(op, scalar_ty, val, s_param);
                         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kSet,
                                                                   res, idx, binary);
                     });
-                    b.Return(f, b.Load(res));
+
+                    if (scalar_ty != elem_ty) {
+                        // Downcast the matrix back to the original element type if needed.
+                        b.Return(f, b.MemberCallExplicit<hlsl::ir::MemberBuiltinCall>(
+                                        sm_ty, hlsl::BuiltinFn::kCast, b.Load(res),
+                                        Vector<core::intrinsic::TemplateParameter, 1>{elem_ty}));
+                    } else {
+                        b.Return(f, b.Load(res));
+                    }
                 });
                 return f;
             });

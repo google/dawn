@@ -1236,6 +1236,27 @@ class Builder {
                                                   Values(std::forward<ARGS>(args)...)));
     }
 
+    /// Creates a member builtin call instruction with an existing instruction result and explicit
+    /// template arguments.
+    /// @param result the instruction result to use
+    /// @param func the builtin function to call
+    /// @param obj the object
+    /// @param explicit_params the explicit parameters
+    /// @param args the call arguments
+    /// @returns the instruction
+    template <typename KLASS, typename FUNC, typename OBJ, typename... ARGS>
+        requires(tint::traits::IsTypeOrDerived<KLASS, ir::MemberBuiltinCall>)
+    KLASS* MemberCallExplicitWithResult(ir::InstructionResult* result,
+                                        FUNC func,
+                                        OBJ&& obj,
+                                        VectorRef<core::ir::TemplateParameter> explicit_params,
+                                        ARGS&&... args) {
+        auto* inst = Append(ir.CreateInstruction<KLASS>(result, func, Value(std::forward<OBJ>(obj)),
+                                                        Values(std::forward<ARGS>(args)...)));
+        inst->SetExplicitTemplateParams(explicit_params);
+        return inst;
+    }
+
     /// Creates a member builtin call instruction.
     /// @param type the return type of the call
     /// @param func the builtin function to call
@@ -1248,6 +1269,25 @@ class Builder {
         return MemberCallWithResult<KLASS>(InstructionResult(type), func,
                                            Value(std::forward<OBJ>(obj)),
                                            Values(std::forward<ARGS>(args)...));
+    }
+
+    /// Creates a member builtin call instruction with explicit template arguments.
+    /// @param type the return type of the call
+    /// @param func the builtin function to call
+    /// @param obj the object
+    /// @param explicit_params the explicit parameters
+    /// @param args the call arguments
+    /// @returns the instruction
+    template <typename KLASS, typename FUNC, typename OBJ, typename... ARGS>
+        requires(tint::traits::IsTypeOrDerived<KLASS, ir::MemberBuiltinCall>)
+    KLASS* MemberCallExplicit(const core::type::Type* type,
+                              FUNC func,
+                              OBJ&& obj,
+                              VectorRef<core::ir::TemplateParameter> explicit_params,
+                              ARGS&&... args) {
+        return MemberCallExplicitWithResult<KLASS>(InstructionResult(type), func,
+                                                   Value(std::forward<OBJ>(obj)), explicit_params,
+                                                   Values(std::forward<ARGS>(args)...));
     }
 
     /// Creates a value conversion instruction with an existing instruction result.

@@ -7711,8 +7711,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_F32) {
 }
 %tint_subgroup_matrix_scalar_op = func(%m_1:subgroup_matrix_left<f32, 4, 4>, %s_1:f32):subgroup_matrix_left<f32, 4, 4> {  # %m_1: 'm', %s_1: 's'
   $B2: {
-    %8:ptr<function, subgroup_matrix_left<f32, 4, 4>, read_write> = var undef
-    %9:u32 = %8.Length
+    %result:ptr<function, subgroup_matrix_left<f32, 4, 4>, read_write> = var %m_1
+    %9:u32 = %result.Length
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
         next_iteration 0u  # -> $B4
@@ -7724,18 +7724,19 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_F32) {
             exit_loop  # loop_1
           }
         }
-        %12:f32 = %m_1.Get %idx
-        %13:f32 = add %12, %s_1
-        %14:void = %8.Set %idx, %13
+        %12:subgroup_matrix_left<f32, 4, 4> = load %result
+        %13:f32 = %12.Get %idx
+        %14:f32 = add %13, %s_1
+        %15:void = %result.Set %idx, %14
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %15:u32 = add %idx, 1u
-        next_iteration %15  # -> $B4
+        %16:u32 = add %idx, 1u
+        next_iteration %16  # -> $B4
       }
     }
-    %16:subgroup_matrix_left<f32, 4, 4> = load %8
-    ret %16
+    %17:subgroup_matrix_left<f32, 4, 4> = load %result
+    ret %17
   }
 }
 )";
@@ -7798,8 +7799,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_Deduplication) {
 }
 %tint_subgroup_matrix_scalar_op = func(%m:subgroup_matrix_left<f32, 4, 4>, %s:f32):subgroup_matrix_left<f32, 4, 4> {
   $B2: {
-    %16:ptr<function, subgroup_matrix_left<f32, 4, 4>, read_write> = var undef
-    %17:u32 = %16.Length
+    %result:ptr<function, subgroup_matrix_left<f32, 4, 4>, read_write> = var %m
+    %17:u32 = %result.Length
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
         next_iteration 0u  # -> $B4
@@ -7811,47 +7812,49 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_Deduplication) {
             exit_loop  # loop_1
           }
         }
-        %20:f32 = %m.Get %idx
-        %21:f32 = add %20, %s
-        %22:void = %16.Set %idx, %21
+        %20:subgroup_matrix_left<f32, 4, 4> = load %result
+        %21:f32 = %20.Get %idx
+        %22:f32 = add %21, %s
+        %23:void = %result.Set %idx, %22
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %23:u32 = add %idx, 1u
-        next_iteration %23  # -> $B4
+        %24:u32 = add %idx, 1u
+        next_iteration %24  # -> $B4
       }
     }
-    %24:subgroup_matrix_left<f32, 4, 4> = load %16
-    ret %24
+    %25:subgroup_matrix_left<f32, 4, 4> = load %result
+    ret %25
   }
 }
 %tint_subgroup_matrix_scalar_op_1 = func(%m_1:subgroup_matrix_left<i32, 4, 4>, %s_1:i32):subgroup_matrix_left<i32, 4, 4> {  # %m_1: 'm', %s_1: 's'
   $B7: {
-    %27:ptr<function, subgroup_matrix_left<i32, 4, 4>, read_write> = var undef
-    %28:u32 = %27.Length
+    %result_1:ptr<function, subgroup_matrix_left<i32, 4, 4>, read_write> = var %m_1  # %result_1: 'result'
+    %29:u32 = %result_1.Length
     loop [i: $B8, b: $B9, c: $B10] {  # loop_2
       $B8: {  # initializer
         next_iteration 0u  # -> $B9
       }
       $B9 (%idx_1:u32): {  # body
-        %30:bool = gte %idx_1, %28
-        if %30 [t: $B11] {  # if_2
+        %31:bool = gte %idx_1, %29
+        if %31 [t: $B11] {  # if_2
           $B11: {  # true
             exit_loop  # loop_2
           }
         }
-        %31:i32 = %m_1.Get %idx_1
-        %32:i32 = add %31, %s_1
-        %33:void = %27.Set %idx_1, %32
+        %32:subgroup_matrix_left<i32, 4, 4> = load %result_1
+        %33:i32 = %32.Get %idx_1
+        %34:i32 = add %33, %s_1
+        %35:void = %result_1.Set %idx_1, %34
         continue  # -> $B10
       }
       $B10: {  # continuing
-        %34:u32 = add %idx_1, 1u
-        next_iteration %34  # -> $B9
+        %36:u32 = add %idx_1, 1u
+        next_iteration %36  # -> $B9
       }
     }
-    %35:subgroup_matrix_left<i32, 4, 4> = load %27
-    ret %35
+    %37:subgroup_matrix_left<i32, 4, 4> = load %result_1
+    ret %37
   }
 }
 )";
@@ -7890,31 +7893,34 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_I8) {
 }
 %tint_subgroup_matrix_scalar_op = func(%m_1:subgroup_matrix_left<i8, 4, 4>, %s_1:i32):subgroup_matrix_left<i8, 4, 4> {  # %m_1: 'm', %s_1: 's'
   $B2: {
-    %8:ptr<function, subgroup_matrix_left<i8, 4, 4>, read_write> = var undef
-    %9:u32 = %8.Length
+    %8:subgroup_matrix_left<i32, 4, 4> = %m_1.Cast<i32>
+    %result:ptr<function, subgroup_matrix_left<i32, 4, 4>, read_write> = var %8
+    %10:u32 = %result.Length
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
         next_iteration 0u  # -> $B4
       }
       $B4 (%idx:u32): {  # body
-        %11:bool = gte %idx, %9
-        if %11 [t: $B6] {  # if_1
+        %12:bool = gte %idx, %10
+        if %12 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %12:i32 = %m_1.Get %idx
-        %13:i32 = add %12, %s_1
-        %14:void = %8.Set %idx, %13
+        %13:subgroup_matrix_left<i32, 4, 4> = load %result
+        %14:i32 = %13.Get %idx
+        %15:i32 = add %14, %s_1
+        %16:void = %result.Set %idx, %15
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %15:u32 = add %idx, 1u
-        next_iteration %15  # -> $B4
+        %17:u32 = add %idx, 1u
+        next_iteration %17  # -> $B4
       }
     }
-    %16:subgroup_matrix_left<i8, 4, 4> = load %8
-    ret %16
+    %18:subgroup_matrix_left<i32, 4, 4> = load %result
+    %19:subgroup_matrix_left<i8, 4, 4> = %18.Cast<i8>
+    ret %19
   }
 }
 )";
@@ -7953,8 +7959,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract_F32) {
 }
 %tint_subgroup_matrix_scalar_op = func(%m_1:subgroup_matrix_left<f32, 4, 4>, %s_1:f32):subgroup_matrix_left<f32, 4, 4> {  # %m_1: 'm', %s_1: 's'
   $B2: {
-    %8:ptr<function, subgroup_matrix_left<f32, 4, 4>, read_write> = var undef
-    %9:u32 = %8.Length
+    %result:ptr<function, subgroup_matrix_left<f32, 4, 4>, read_write> = var %m_1
+    %9:u32 = %result.Length
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
         next_iteration 0u  # -> $B4
@@ -7966,18 +7972,19 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract_F32) {
             exit_loop  # loop_1
           }
         }
-        %12:f32 = %m_1.Get %idx
-        %13:f32 = sub %12, %s_1
-        %14:void = %8.Set %idx, %13
+        %12:subgroup_matrix_left<f32, 4, 4> = load %result
+        %13:f32 = %12.Get %idx
+        %14:f32 = sub %13, %s_1
+        %15:void = %result.Set %idx, %14
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %15:u32 = add %idx, 1u
-        next_iteration %15  # -> $B4
+        %16:u32 = add %idx, 1u
+        next_iteration %16  # -> $B4
       }
     }
-    %16:subgroup_matrix_left<f32, 4, 4> = load %8
-    ret %16
+    %17:subgroup_matrix_left<f32, 4, 4> = load %result
+    ret %17
   }
 }
 )";
@@ -8016,8 +8023,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarMultiply_F32) {
 }
 %tint_subgroup_matrix_scalar_op = func(%m_1:subgroup_matrix_left<f32, 4, 4>, %s_1:f32):subgroup_matrix_left<f32, 4, 4> {  # %m_1: 'm', %s_1: 's'
   $B2: {
-    %8:ptr<function, subgroup_matrix_left<f32, 4, 4>, read_write> = var undef
-    %9:u32 = %8.Length
+    %result:ptr<function, subgroup_matrix_left<f32, 4, 4>, read_write> = var %m_1
+    %9:u32 = %result.Length
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
         next_iteration 0u  # -> $B4
@@ -8029,18 +8036,19 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarMultiply_F32) {
             exit_loop  # loop_1
           }
         }
-        %12:f32 = %m_1.Get %idx
-        %13:f32 = mul %12, %s_1
-        %14:void = %8.Set %idx, %13
+        %12:subgroup_matrix_left<f32, 4, 4> = load %result
+        %13:f32 = %12.Get %idx
+        %14:f32 = mul %13, %s_1
+        %15:void = %result.Set %idx, %14
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %15:u32 = add %idx, 1u
-        next_iteration %15  # -> $B4
+        %16:u32 = add %idx, 1u
+        next_iteration %16  # -> $B4
       }
     }
-    %16:subgroup_matrix_left<f32, 4, 4> = load %8
-    ret %16
+    %17:subgroup_matrix_left<f32, 4, 4> = load %result
+    ret %17
   }
 }
 )";
