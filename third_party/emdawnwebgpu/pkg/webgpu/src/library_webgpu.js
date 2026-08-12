@@ -612,7 +612,7 @@ var LibraryWebGPU = {
 
     fillAdapterInfoStruct__deps: ['$stringToNewUTF8', '$lengthBytesUTF8'],
     fillAdapterInfoStruct: (info, infoStruct) => {
-      {{{ gpu.makeCheckDescriptor('infoStruct') }}}
+      {{{ gpu.makeCheck('infoStruct') }}}
 
       // Populate subgroup limits.
       {{{ makeSetValue('infoStruct', C_STRUCTS.WGPUAdapterInfo.subgroupMinSize, 'info.subgroupMinSize', 'u32') }}};
@@ -643,6 +643,29 @@ var LibraryWebGPU = {
       {{{ makeSetValue('infoStruct', C_STRUCTS.WGPUAdapterInfo.adapterType, 'adapterType', 'i32') }}};
       {{{ makeSetValue('infoStruct', C_STRUCTS.WGPUAdapterInfo.vendorID, '0', 'u32') }}};
       {{{ makeSetValue('infoStruct', C_STRUCTS.WGPUAdapterInfo.deviceID, '0', 'u32') }}};
+
+      WebGPU.iterateExtensions(infoStruct, {
+        {{{ gpu.SType.AdapterPropertiesSubgroupMatrixConfigs }}}: (ext) => {
+          let configCount = 0;
+          let configsPtr = {{{ gpu.NULLPTR }}};
+          if (info.subgroupMatrixConfigs) {
+            configCount = info.subgroupMatrixConfigs.length;
+            configsPtr = _malloc(configCount * {{{ C_STRUCTS.WGPUSubgroupMatrixConfig.__size__ }}});
+            for (const [i, cfg] of info.subgroupMatrixConfigs.entries()) {
+              const ptr = configsPtr + i * {{{ C_STRUCTS.WGPUSubgroupMatrixConfig.__size__ }}};
+              const componentType = WebGPU.SubgroupMatrixComponentType.indexOf(cfg.componentType);
+              const resultComponentType = WebGPU.SubgroupMatrixComponentType.indexOf(cfg.resultComponentType);
+              {{{ makeSetValue('ptr', C_STRUCTS.WGPUSubgroupMatrixConfig.componentType, 'componentType', 'i32') }}};
+              {{{ makeSetValue('ptr', C_STRUCTS.WGPUSubgroupMatrixConfig.resultComponentType, 'resultComponentType', 'i32') }}};
+              {{{ makeSetValue('ptr', C_STRUCTS.WGPUSubgroupMatrixConfig.M, 'cfg.M', 'u32') }}};
+              {{{ makeSetValue('ptr', C_STRUCTS.WGPUSubgroupMatrixConfig.N, 'cfg.N', 'u32') }}};
+              {{{ makeSetValue('ptr', C_STRUCTS.WGPUSubgroupMatrixConfig.K, 'cfg.K', 'u32') }}};
+            }
+          }
+          {{{ makeSetValue('ext', C_STRUCTS.WGPUAdapterPropertiesSubgroupMatrixConfigs.configs, 'configsPtr', '*') }}};
+          {{{ makeSetValue('ext', C_STRUCTS.WGPUAdapterPropertiesSubgroupMatrixConfigs.configCount, 'configCount', '*') }}};
+        },
+      });
     },
 
     // Maps from enum number to enum string.

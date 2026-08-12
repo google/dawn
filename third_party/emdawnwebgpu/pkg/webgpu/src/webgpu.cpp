@@ -1813,6 +1813,11 @@ void wgpuAdapterInfoFreeMembers(WGPUAdapterInfo value) {
   free(const_cast<char*>(value.vendor.data));
 }
 
+void wgpuAdapterPropertiesSubgroupMatrixConfigsFreeMembers(
+    WGPUAdapterPropertiesSubgroupMatrixConfigs ext) {
+  free(const_cast<WGPUSubgroupMatrixConfig*>(ext.configs));
+}
+
 void wgpuSupportedFeaturesFreeMembers(WGPUSupportedFeatures value) {
   free(const_cast<WGPUFeatureName*>(value.features));
 }

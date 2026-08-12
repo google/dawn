@@ -2553,7 +2553,7 @@
             {"value": 49, "name": "multi draw indirect", "tags": ["dawn", "emscripten"], "jsrepr": "'chromium-experimental-multi-draw-indirect'"},
             {"value": 50, "name": "dawn texel copy buffer row alignment", "tags": ["dawn"]},
             {"value": 51, "name": "flexible texture views", "tags": ["dawn"]},
-            {"value": 52, "name": "chromium experimental subgroup matrix", "tags": ["dawn"]},
+            {"value": 52, "name": "chromium experimental subgroup matrix", "tags": ["dawn", "emscripten"]},
             {"value": 53, "name": "shared fence EGL sync", "tags": ["dawn", "native"]},
             {"value": 54, "name": "dawn device allocator control", "tags": ["dawn"]},
             {"value": 55, "name": "adapter properties WGPU", "tags": ["dawn"]},
@@ -4164,7 +4164,7 @@
             {"value": 55, "name": "shared texture memory a hardware buffer properties", "tags": ["dawn", "native"]},
             {"value": 56, "name": "a hardware buffer properties", "tags": ["dawn", "native"]},
             {"value": 58, "name": "dawn texel copy buffer row alignment limits", "tags": ["dawn"]},
-            {"value": 59, "name": "adapter properties subgroup matrix configs", "tags": ["dawn"]},
+            {"value": 59, "name": "adapter properties subgroup matrix configs", "tags": ["dawn", "emscripten"]},
             {"value": 60, "name": "shared fence EGL sync descriptor", "tags": ["dawn", "native"]},
             {"value": 61, "name": "shared fence EGL sync export info", "tags": ["dawn", "native"]},
             {"value": 62, "name": "dawn injected invalid s type", "tags": ["dawn"]},
@@ -4887,20 +4887,19 @@
     },
     "subgroup matrix component type": {
         "category": "enum",
-        "emscripten_no_enum_table": true,
-        "tags": ["dawn"],
+        "tags": ["dawn", "emscripten"],
         "values": [
-            {"value": 1, "name": "f32"},
-            {"value": 2, "name": "f16"},
-            {"value": 3, "name": "u32"},
-            {"value": 4, "name": "i32"},
-            {"value": 5, "name": "u8"},
-            {"value": 6, "name": "i8"}
+            {"value": 1, "name": "f32", "jsrepr": "'f32'"},
+            {"value": 2, "name": "f16", "jsrepr": "'f16'"},
+            {"value": 3, "name": "u32", "jsrepr": "'u32'"},
+            {"value": 4, "name": "i32", "jsrepr": "'i32'"},
+            {"value": 5, "name": "u8", "jsrepr": "'u8'"},
+            {"value": 6, "name": "i8", "jsrepr": "'i8'"}
         ]
     },
     "subgroup matrix config": {
         "category": "structure",
-        "tags": ["dawn"],
+        "tags": ["dawn", "emscripten"],
         "members": [
             {"name": "component type", "type": "subgroup matrix component type"},
             {"name": "result component type", "type": "subgroup matrix component type"},
@@ -4913,7 +4912,7 @@
         "category": "structure",
         "chained": "out",
         "chain roots": ["adapter info"],
-        "tags": ["dawn"],
+        "tags": ["dawn", "emscripten"],
         "members": [
             {"name": "config count", "type": "size_t"},
             {"name": "configs", "type": "subgroup matrix config", "annotation": "const*", "length": "config count"}
