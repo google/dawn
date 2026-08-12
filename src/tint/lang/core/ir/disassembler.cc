@@ -646,6 +646,10 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             EmitOperandList(inst);
         });
 
+    if (inst->Alignment().has_value()) {
+        out_ << " @align(" << inst->Alignment().value() << ")";
+    }
+
     {  // Add a comment if the result IDs don't match their names
         Vector<std::string, 4> names;
         for (auto* result : inst->Results()) {

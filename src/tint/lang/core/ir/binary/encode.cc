@@ -268,6 +268,9 @@ struct Encoder {
         for (auto* result : inst_in->Results()) {
             inst_out.add_results(Value(result));
         }
+        if (inst_in->Alignment().has_value()) {
+            inst_out.set_alignment(inst_in->Alignment().value());
+        }
     }
 
     void InstructionAccess(pb::InstructionAccess&, const ir::Access*) {}

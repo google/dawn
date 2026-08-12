@@ -545,6 +545,10 @@ struct Decoder {
         }
         inst_out->SetResults(std::move(results));
 
+        if (inst_in.has_alignment()) {
+            inst_out->SetAlignment(inst_in.alignment());
+        }
+
         if (inst_in.has_break_if()) {
             auto num_next_iter_values = inst_in.break_if().num_next_iter_values();
             bool is_valid =

@@ -502,6 +502,10 @@ class Structural {
     /// @param inst the instruction to validate
     void CheckInstruction(const Instruction* inst);
 
+    // Validates the alignment of the given instruction
+    /// @param inst the instruction to validate
+    void CheckAlignment(const Instruction* inst);
+
     /// Validates the given override
     /// @param o the override to validate
     void CheckOverride(const Override* o);

@@ -359,6 +359,7 @@ message Instruction {
     }
     reserved 9;
     reserved "bitcast";
+    optional uint32 alignment = 32;
 }
 
 message InstructionReturn {}

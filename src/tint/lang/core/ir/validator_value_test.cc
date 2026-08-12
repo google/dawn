@@ -1566,4 +1566,87 @@ TEST_F(IR_ValidatorTest, Override_RequiresInitOperand) {
         testing::HasSubstr("error: override: override is malformed, missing initializer operand"));
 }
 
+TEST_F(IR_ValidatorTest, Alignment_InvalidInstruction) {
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.u32()));
+    v->SetAlignment(4);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(alignment can only be set on memory instructions)"));
+}
+
+TEST_F(IR_ValidatorTest, Alignment_NotPowerOf2) {
+    auto* foo = b.Function("foo", ty.void_());
+    auto* mat_ty = ty.subgroup_matrix(SubgroupMatrixKind::kLeft, ty.f32(), 8, 8);
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.runtime_array(ty.f32())));
+    foo->SetParams({p});
+    b.Append(foo->Block(), [&] {
+        auto* ld =
+            b.CallExplicit(mat_ty, BuiltinFn::kSubgroupMatrixLoad,
+                           Vector<TemplateParameter, 2>{mat_ty, Majorness::kColMajor}, p, 0_u, 8_u);
+        ld->SetAlignment(5);
+        b.Return(foo);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(alignment (5) must be a power of 2)"));
+}
+
+TEST_F(IR_ValidatorTest, Alignment_TooLarge) {
+    auto* foo = b.Function("foo", ty.void_());
+    auto* mat_ty = ty.subgroup_matrix(SubgroupMatrixKind::kLeft, ty.f32(), 8, 8);
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.runtime_array(ty.f32())));
+    auto* m = b.FunctionParam("m", mat_ty);
+    foo->SetParams({p, m});
+    b.Append(foo->Block(), [&] {
+        auto* ld =
+            b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                           Vector<TemplateParameter, 1>{Majorness::kColMajor}, p, 0_u, m, 8_u);
+        ld->SetAlignment(512);
+        b.Return(foo);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(alignment (512) must be less than or equal to 256)"));
+}
+
+TEST_F(IR_ValidatorTest, Alignment_TooSmall_U32) {
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.u32()));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* ld = b.Load(v);
+        ld->SetAlignment(4);
+        b.Return(foo);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(alignment (4) must be greater than natural alignment (4))"));
+}
+
+TEST_F(IR_ValidatorTest, Alignment_TooSmall_Vec4U) {
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.vec4u()));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* st = b.Store(v, b.Zero(ty.vec4u()));
+        st->SetAlignment(8);
+        b.Return(foo);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(alignment (8) must be greater than natural alignment (16))"));
+}
+
 }  // namespace tint::core::ir

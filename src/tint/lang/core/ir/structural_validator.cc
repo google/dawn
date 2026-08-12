@@ -2051,6 +2051,49 @@ void Structural::CheckInstruction(const Instruction* inst) {
         [&](const Override* o) { CheckOverride(o); },                      //
         [&](const Var* var) { CheckVar(var); },                            //
         TINT_ICE_ON_NO_MATCH);
+
+    CheckAlignment(inst);
+}
+
+void Structural::CheckAlignment(const Instruction* inst) {
+    auto align = inst->Alignment();
+    if (align.has_value()) {
+        if (inst->GetSideEffects().Size() == 0) {
+            AddError(inst) << "alignment can only be set on memory instructions";
+        }
+
+        auto align_val = align.value();
+        if (!tint::IsPowerOfTwo(align_val)) {
+            AddError(inst) << "alignment (" << align_val << ") must be a power of 2";
+        }
+
+        if (align_val > 256) {
+            AddError(inst) << "alignment (" << align_val << ") must be less than or equal to 256";
+        }
+
+        // TODO(b/544359162): Which other instructions should be checked?
+        uint32_t natural_align = tint::Switch(
+            inst,  //
+            [&](const Load* ld) { return ld->Result()->Type()->Align(); },
+            [&](const Store* st) { return st->From()->Type()->Align(); },
+            [&](const LoadVectorElement* lve) { return lve->Result()->Type()->Align(); },
+            [&](const StoreVectorElement* sve) { return sve->Value()->Type()->Align(); },
+            [&](const CoreBuiltinCall* call) {
+                switch (call->Func()) {
+                    case BuiltinFn::kSubgroupMatrixLoad:
+                    case BuiltinFn::kSubgroupMatrixStore:
+                        return call->Args()[0]->Type()->UnwrapPtr()->Align();
+                    default:
+                        return 0u;
+                }
+            },
+            [&](Default) { return 0u; });
+
+        if (align_val <= natural_align) {
+            AddError(inst) << "alignment (" << align_val
+                           << ") must be greater than natural alignment (" << natural_align << ")";
+        }
+    }
 }
 
 void Structural::CheckOverride(const Override* o) {

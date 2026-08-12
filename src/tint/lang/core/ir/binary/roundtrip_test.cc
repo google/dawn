@@ -822,5 +822,18 @@ TEST_F(IRBinaryRoundtripTest, Override_WorkgroupArraySize) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, Alignment) {
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.u32()));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* ld = b.Load(v);
+        ld->SetAlignment(128);
+        b.Return(foo);
+    });
+    RUN_TEST();
+}
+
 }  // namespace
 }  // namespace tint::core::ir::binary
