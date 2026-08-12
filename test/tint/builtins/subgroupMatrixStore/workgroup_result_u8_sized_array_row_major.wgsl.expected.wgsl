@@ -1,4 +1,4 @@
-enable chromium_experimental_subgroup_matrix;
+enable chromium_experimental_subgroup_matrix, subgroups;
 enable f16;
 
 var<workgroup> out0 : array<u32, 1024>;

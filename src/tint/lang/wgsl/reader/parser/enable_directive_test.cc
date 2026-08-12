@@ -351,5 +351,26 @@ enable subgroup_size_control;
     EXPECT_EQ(ssc_src.range.end.column, subgroups_src.range.end.column);
 }
 
+TEST_F(EnableDirectiveTest, DependentExtensions_ChromiumExperimentalSubgroupMatrix) {
+    auto p = parser(R"(
+enable chromium_experimental_subgroup_matrix;
+)");
+    p->translation_unit();
+    EXPECT_FALSE(p->has_error()) << p->error();
+    auto program = p->program();
+    auto& ast = program.AST();
+    ASSERT_EQ(ast.Enables().Length(), 1u);
+    auto* enable = ast.Enables()[0];
+    ASSERT_EQ(enable->extensions.Length(), 2u);
+    EXPECT_EQ(enable->extensions[0]->name, wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    EXPECT_EQ(enable->extensions[1]->name, wgsl::Extension::kSubgroups);
+    auto sm_src = enable->extensions[0]->source;
+    auto subgroups_src = enable->extensions[1]->source;
+    EXPECT_EQ(sm_src.range.begin.line, subgroups_src.range.begin.line);
+    EXPECT_EQ(sm_src.range.begin.column, subgroups_src.range.begin.column);
+    EXPECT_EQ(sm_src.range.end.line, subgroups_src.range.end.line);
+    EXPECT_EQ(sm_src.range.end.column, subgroups_src.range.end.column);
+}
+
 }  // namespace
 }  // namespace tint::wgsl::reader

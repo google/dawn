@@ -1727,6 +1727,11 @@ void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescri
                                                                        mToggles));
         mEnabledFeatures.EnableFeature(Feature::Subgroups);
     }
+    if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalSubgroupMatrix)) {
+        DAWN_ASSERT(GetPhysicalDevice()->IsFeatureSupportedWithToggles(wgpu::FeatureName::Subgroups,
+                                                                       mToggles));
+        mEnabledFeatures.EnableFeature(Feature::Subgroups);
+    }
 
     if (level == wgpu::FeatureLevel::Core) {
         // Core-defaulting adapters always support the "core-features-and-limits" feature.

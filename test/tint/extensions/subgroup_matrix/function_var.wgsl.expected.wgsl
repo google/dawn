@@ -1,4 +1,4 @@
-enable chromium_experimental_subgroup_matrix;
+enable chromium_experimental_subgroup_matrix, subgroups;
 
 struct S {
   l : subgroup_matrix_left<f32, 8, 8>,

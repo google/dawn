@@ -212,7 +212,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT linearAlgebraSupport = {};
         hr = mD3d12Device->CheckFeatureSupport(D3D12_FEATURE_LINEAR_ALGEBRA_SUPPORT,
                                                &linearAlgebraSupport, sizeof(linearAlgebraSupport));
-        if (SUCCEEDED(hr) &&
+        if (mDeviceInfo.supportsWaveOps && SUCCEEDED(hr) &&
             linearAlgebraSupport.LinearAlgebraTier >= D3D12_LINEAR_ALGEBRA_TIER_1_0) {
             EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
         }

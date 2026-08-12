@@ -1,4 +1,4 @@
-enable chromium_experimental_subgroup_matrix;
+enable chromium_experimental_subgroup_matrix, subgroups;
 diagnostic(off, chromium.subgroup_matrix_uniformity);
 
 struct S {

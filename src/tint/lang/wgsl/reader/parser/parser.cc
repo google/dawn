@@ -382,6 +382,7 @@ void Parser::AddDependentExtensions(Vector<const ast::Extension*, 4>& extensions
                                     Source src) {
     switch (base_ext) {
         case Extension::kSubgroupSizeControl:
+        case Extension::kChromiumExperimentalSubgroupMatrix:
             extensions.Push(create<ast::Extension>(src, Extension::kSubgroups));
             break;
         default:
