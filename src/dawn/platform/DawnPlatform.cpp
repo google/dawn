@@ -88,7 +88,12 @@ dawn::platform::CachingInterface* Platform::GetCachingInterface() {
 }
 
 std::unique_ptr<dawn::platform::WorkerTaskPool> Platform::CreateWorkerTaskPool() {
-    return std::make_unique<AsyncWorkerThreadPool>();
+    return WorkerTaskPool::CreateDawnDefault(AsyncWorkerThreadPool::kDefaultTaskHandlingJobCount);
+}
+
+std::unique_ptr<dawn::platform::WorkerTaskPool> WorkerTaskPool::CreateDawnDefault(
+    uint32_t maxThreadCount) {
+    return std::make_unique<AsyncWorkerThreadPool>(maxThreadCount);
 }
 
 std::unique_ptr<dawn::platform::JobHandle> WorkerTaskPool::PostWorkerJob(PostWorkerJobCallback cb,

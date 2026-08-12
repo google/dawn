@@ -120,6 +120,10 @@ class DAWN_PLATFORM_EXPORT WorkerTaskPool {
     WorkerTaskPool(const WorkerTaskPool&) = delete;
     WorkerTaskPool& operator=(const WorkerTaskPool&) = delete;
 
+    // Creates Dawn's default worker task pool with at most |maxThreadCount| task handling threads.
+    // Platform implementations may use this when overriding Platform::CreateWorkerTaskPool().
+    static std::unique_ptr<WorkerTaskPool> CreateDawnDefault(uint32_t maxThreadCount);
+
     virtual std::unique_ptr<WaitableEvent> PostWorkerTask(PostWorkerTaskCallback,
                                                           void* userdata) = 0;
 
