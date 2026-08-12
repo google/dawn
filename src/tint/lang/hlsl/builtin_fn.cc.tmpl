@@ -115,6 +115,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kUnpackU8U32:
         case BuiltinFn::kWaveGetLaneIndex:
         case BuiltinFn::kWaveGetLaneCount:
+        case BuiltinFn::kLength:
         case BuiltinFn::kNone:
             break;
     }

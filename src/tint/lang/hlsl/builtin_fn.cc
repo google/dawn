@@ -116,6 +116,8 @@ const char* str(BuiltinFn i) {
             return "Get";
         case BuiltinFn::kSet:
             return "Set";
+        case BuiltinFn::kLength:
+            return "Length";
         case BuiltinFn::kLoad:
             return "Load";
         case BuiltinFn::kLoad2:
@@ -284,6 +286,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kUnpackU8U32:
         case BuiltinFn::kWaveGetLaneIndex:
         case BuiltinFn::kWaveGetLaneCount:
+        case BuiltinFn::kLength:
         case BuiltinFn::kNone:
             break;
     }

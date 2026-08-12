@@ -177,6 +177,7 @@ struct State {
                         case hlsl::BuiltinFn::kMultiplyAccumulate:
                         case hlsl::BuiltinFn::kGet:
                         case hlsl::BuiltinFn::kSet:
+                        case hlsl::BuiltinFn::kLength:
                         case hlsl::BuiltinFn::kPackU8:
                         case hlsl::BuiltinFn::kPackS8:
                         case hlsl::BuiltinFn::kPackClampS8:

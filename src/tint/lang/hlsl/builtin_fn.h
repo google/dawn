@@ -86,6 +86,7 @@ enum class BuiltinFn : uint8_t {
     kMultiplyAccumulate,
     kGet,
     kSet,
+    kLength,
     kLoad,
     kLoad2,
     kLoad3,

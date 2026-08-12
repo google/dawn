@@ -10,7 +10,7 @@ Matrix_right_i32_8x8 tint_subgroup_matrix_scalar_op(Matrix_right_i32_8x8 m, int 
     v_1 = 0u;
     while(true) {
       uint v_2 = v_1;
-      if ((v_2 >= 64u)) {
+      if ((v_2 >= v.Length())) {
         break;
       }
       v.Set(v_2, (m.Get(v_2) * s));

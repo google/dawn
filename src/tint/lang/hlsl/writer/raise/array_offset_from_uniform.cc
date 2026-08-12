@@ -166,6 +166,7 @@ struct State {
                         case BuiltinFn::kMultiplyAccumulate:
                         case BuiltinFn::kGet:
                         case BuiltinFn::kSet:
+                        case BuiltinFn::kLength:
                         case BuiltinFn::kPackU8:
                         case BuiltinFn::kPackS8:
                         case BuiltinFn::kPackClampS8:

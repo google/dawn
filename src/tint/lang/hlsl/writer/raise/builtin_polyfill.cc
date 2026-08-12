@@ -1997,14 +1997,15 @@ struct State {
 
                 b.Append(f->Block(), [&] {
                     auto* res = b.Var(ty.ptr<function>(sm_ty));
-                    b.LoopRange(0_u, u32(sm_ty->Columns() * sm_ty->Rows()), 1_u,
-                                [&](core::ir::Value* idx) {
-                                    auto* val = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
-                                        scalar_ty, hlsl::BuiltinFn::kGet, m_param, idx);
-                                    auto* binary = b.Binary(op, scalar_ty, val, s_param);
-                                    b.MemberCall<hlsl::ir::MemberBuiltinCall>(
-                                        ty.void_(), hlsl::BuiltinFn::kSet, res, idx, binary);
-                                });
+                    auto* length = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                        ty.u32(), hlsl::BuiltinFn::kLength, res);
+                    b.LoopRange(0_u, length, 1_u, [&](core::ir::Value* idx) {
+                        auto* val = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                            scalar_ty, hlsl::BuiltinFn::kGet, m_param, idx);
+                        auto* binary = b.Binary(op, scalar_ty, val, s_param);
+                        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kSet,
+                                                                  res, idx, binary);
+                    });
                     b.Return(f, b.Load(res));
                 });
                 return f;

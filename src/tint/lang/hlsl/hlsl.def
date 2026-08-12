@@ -373,6 +373,9 @@ implicit(N: num, T: scalar) fn select(vec<N, bool>, vec<N, T>, vec<N, T>) -> vec
 @member_function implicit(K: subgroup_matrix_kind, C: num, R: num)
   fn Set(ptr<function, subgroup_matrix<K, u8, C, R>, read_write>, index: u32, value: u32)
 
+@member_function implicit(K: subgroup_matrix_kind, T: subgroup_matrix_component_types, C: num, R: num)
+  fn Length(ptr<function, subgroup_matrix<K, T, C, R>, read_write>) -> u32
+
 ////////////////////////////////////////////////////////////////////////////////
 // Member Functions                                                           //
 ////////////////////////////////////////////////////////////////////////////////
