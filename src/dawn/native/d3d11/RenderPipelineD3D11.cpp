@@ -491,7 +491,7 @@ MaybeError RenderPipeline::InitializeShaders() {
                           usedInterstageVariables, {}, std::move(snorm10_10_10_2_locations)));
         const Blob& shaderBlob = compiledShader[SingleShaderStage::Vertex].shaderBlob;
         {
-            TRACE_EVENT0(device->GetPlatform(), General, "RenderPipelineD3D11::CreateVertexShader");
+            TRACE_EVENT(DAWN_TRACE_CATEGORY(), "RenderPipelineD3D11::CreateVertexShader");
             SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "D3D11.CreateVertexShaderUs");
 
             DAWN_TRY_ASSIGN(mVertexShader, device->GetOrCreateVertexShader(
@@ -561,7 +561,7 @@ MaybeError RenderPipeline::InitializeShaders() {
                           compileFlags | additionalCompileFlags, GetImmediateMask(),
                           usedInterstageVariables, pixelLocalOptions));
         {
-            TRACE_EVENT0(device->GetPlatform(), General, "RenderPipelineD3D11::CreatePixelShader");
+            TRACE_EVENT(DAWN_TRACE_CATEGORY(), "RenderPipelineD3D11::CreatePixelShader");
             SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "D3D11.CreatePixelShaderUs");
             DAWN_TRY_ASSIGN(mPixelShader, device->GetOrCreatePixelShader(
                                               compiledShader[SingleShaderStage::Fragment]));

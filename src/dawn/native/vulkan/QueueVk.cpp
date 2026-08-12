@@ -101,12 +101,13 @@ MaybeError Queue::Initialize() {
 }
 
 MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
-    TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferVk::RecordCommands");
-    CommandRecordingContext* recordingContext = GetPendingRecordingContext();
-    for (CommandBufferBase* commandBuffer : commands) {
-        DAWN_TRY(ToBackend(commandBuffer)->RecordCommands(recordingContext));
+    {
+        TRACE_EVENT(DAWN_TRACE_CATEGORY("recording"), "CommandBufferVk::RecordCommands");
+        CommandRecordingContext* recordingContext = GetPendingRecordingContext();
+        for (CommandBufferBase* commandBuffer : commands) {
+            DAWN_TRY(ToBackend(commandBuffer)->RecordCommands(recordingContext));
+        }
     }
-    TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferVk::RecordCommands");
 
     DAWN_TRY(SubmitPendingCommandsImpl());
 
@@ -342,15 +343,17 @@ MaybeError Queue::SubmitPendingCommandsImpl() {
     DAWN_TRY_ASSIGN(fence, GetUnusedFence());
 
     platform::metrics::DawnHistogramTimer timer(device->GetPlatform());
-    TRACE_EVENT_BEGIN0(device->GetPlatform(), Recording, "vkQueueSubmit");
-    DAWN_TRY_WITH_CLEANUP(
-        CheckVkSuccess(device->fn.QueueSubmit(mQueue, 1, &submitInfo, fence), "vkQueueSubmit"), {
-            // If submitting to the queue fails, move the fence back into the unused fence
-            // list, as if it were never acquired. Not doing so would leak the fence since
-            // it would be neither in the unused list nor in the in-flight list.
-            mUnusedFences->push_back(fence);
-        });
-    TRACE_EVENT_END0(device->GetPlatform(), Recording, "vkQueueSubmit");
+    {
+        TRACE_EVENT(DAWN_TRACE_CATEGORY("recording"), "vkQueueSubmit");
+        DAWN_TRY_WITH_CLEANUP(
+            CheckVkSuccess(device->fn.QueueSubmit(mQueue, 1, &submitInfo, fence), "vkQueueSubmit"),
+            {
+                // If submitting to the queue fails, move the fence back into the unused fence
+                // list, as if it were never acquired. Not doing so would leak the fence since
+                // it would be neither in the unused list nor in the in-flight list.
+                mUnusedFences->push_back(fence);
+            });
+    }
     timer.RecordMicroseconds("Vulkan.VkQueueSubmitUS");
 
     // Enqueue the semaphores before incrementing the serial, so that they can be deleted as

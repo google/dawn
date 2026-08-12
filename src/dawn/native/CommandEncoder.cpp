@@ -2350,7 +2350,7 @@ ResultOrError<Ref<CommandBufferBase>> CommandEncoder::Finish(
     const CommandBufferDescriptor* descriptor) {
     DeviceBase* device = GetDevice();
 
-    TRACE_EVENT0(device->GetPlatform(), Recording, "CommandEncoder::Finish");
+    TRACE_EVENT(DAWN_TRACE_CATEGORY("recording"), "CommandEncoder::Finish");
 
     // Even if mEncodingContext.Finish() validation fails, calling it will mutate the internal
     // state of the encoding context. The internal state is set to finished, and subsequent
@@ -2372,7 +2372,7 @@ ResultOrError<Ref<CommandBufferBase>> CommandEncoder::Finish(
 
 // Implementation of the command buffer validation that can be precomputed before submit
 MaybeError CommandEncoder::ValidateFinish() const {
-    TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "CommandEncoder::ValidateFinish");
+    TRACE_EVENT(DAWN_TRACE_CATEGORY("validation"), "CommandEncoder::ValidateFinish");
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
     for (const RenderPassResourceUsage& passUsage : mEncodingContext.GetRenderPassUsages()) {

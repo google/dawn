@@ -70,7 +70,6 @@
 	path = third_party/googletest/src
 	url = https://chromium.googlesource.com/external/github.com/google/googletest
 	gclient-condition = dawn_standalone
-
 [submodule "third_party/catapult"]
 	path = third_party/catapult
 	url = https://chromium.googlesource.com/catapult.git
@@ -78,6 +77,10 @@
 [submodule "third_party/google_benchmark/src"]
 	path = third_party/google_benchmark/src
 	url = https://chromium.googlesource.com/external/github.com/google/benchmark.git
+	gclient-condition = dawn_standalone
+[submodule "third_party/perfetto"]
+	path = third_party/perfetto
+	url = https://chromium.googlesource.com/external/github.com/google/perfetto.git
 	gclient-condition = dawn_standalone
 [submodule "third_party/mesa/src"]
 	path = third_party/mesa/src

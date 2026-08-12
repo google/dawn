@@ -309,6 +309,10 @@ deps = {
     'url': '{chromium_git}/external/github.com/google/benchmark.git' + '@' + '8abf1e701fbd88c8170f48fe0558247e2e5f8e7d',
     'condition': 'dawn_standalone',
   },
+  'third_party/perfetto': {
+    'url': '{chromium_git}/external/github.com/google/perfetto.git@502412dfb6c6a70d99faddd8783cdc6ae072d4f2',
+    'condition': 'dawn_standalone',
+  },
 
   # Required for fuzzing Mesa via tint fuzzers
   'third_party/mesa/src': {

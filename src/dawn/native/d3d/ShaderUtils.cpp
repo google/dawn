@@ -216,7 +216,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                            CompiledShader* compiledShader) {
     r.tintOptions.strip_all_names = !r.disableSymbolRenaming;
 
-    TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "tint::hlsl::writer::Generate");
+    TRACE_EVENT(DAWN_TRACE_CATEGORY(), "tint::hlsl::writer::Generate");
 
     // Convert the AST program to an IR module.
     tint::Result<tint::core::ir::Module> ir;
@@ -368,7 +368,7 @@ ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
 
     switch (r.bytecode.compiler) {
         case d3d::Compiler::DXC: {
-            TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "CompileShaderDXC");
+            TRACE_EVENT(DAWN_TRACE_CATEGORY(), "CompileShaderDXC");
             ComPtr<IDxcBlob> compiledDXCShader;
             const wchar_t* hlslVersion =
                 (r.hlsl.tintOptions.compiler == tint::hlsl::writer::Options::Compiler::kDXC_2018)
@@ -382,7 +382,7 @@ ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
             break;
         }
         case d3d::Compiler::FXC: {
-            TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "CompileShaderFXC");
+            TRACE_EVENT(DAWN_TRACE_CATEGORY(), "CompileShaderFXC");
             ComPtr<ID3DBlob> compiledFXCShader;
             DAWN_TRY_ASSIGN(
                 compiledFXCShader,

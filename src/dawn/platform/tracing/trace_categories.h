@@ -1,4 +1,4 @@
-// Copyright 2019 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,38 +25,23 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_PLATFORM_TRACING_EVENTTRACER_H_
-#define SRC_DAWN_PLATFORM_TRACING_EVENTTRACER_H_
-
-#include <cstdint>
+#ifndef DAWN_TRACING_TRACE_CATEGORIES_H_
+#define DAWN_TRACING_TRACE_CATEGORIES_H_
 
 #include "dawn/platform/dawn_platform_export.h"
+#include "perfetto/tracing/track_event.h"
 
-namespace dawn::platform {
+#define DAWN_TRACE_CATEGORY(...) "gpu.dawn" __VA_OPT__(".") __VA_ARGS__
 
-class Platform;
-enum class TraceCategory;
+// List of categories used by Dawn trace events.
+PERFETTO_DEFINE_CATEGORIES_IN_NAMESPACE_WITH_ATTRS(
+    dawn,
+    DAWN_PLATFORM_EXPORT,
+    perfetto::Category(DAWN_TRACE_CATEGORY()),
+    perfetto::Category(DAWN_TRACE_CATEGORY("validation")),
+    perfetto::Category(DAWN_TRACE_CATEGORY("recording")),
+    perfetto::Category(DAWN_TRACE_CATEGORY("gpu_work")));
 
-namespace tracing {
+PERFETTO_USE_CATEGORIES_FROM_NAMESPACE(dawn);
 
-using TraceEventHandle = uint64_t;
-
-DAWN_PLATFORM_EXPORT const unsigned char* GetTraceCategoryEnabledFlag(Platform* platform,
-                                                                      TraceCategory category);
-
-// TODO(enga): Simplify this API.
-DAWN_PLATFORM_EXPORT TraceEventHandle AddTraceEvent(Platform* platform,
-                                                    char phase,
-                                                    const unsigned char* categoryGroupEnabled,
-                                                    const char* name,
-                                                    uint64_t id,
-                                                    int numArgs,
-                                                    const char** argNames,
-                                                    const unsigned char* argTypes,
-                                                    const uint64_t* argValues,
-                                                    unsigned char flags);
-
-}  // namespace tracing
-}  // namespace dawn::platform
-
-#endif  // SRC_DAWN_PLATFORM_TRACING_EVENTTRACER_H_
+#endif  // DAWN_TRACING_TRACE_CATEGORIES_H_

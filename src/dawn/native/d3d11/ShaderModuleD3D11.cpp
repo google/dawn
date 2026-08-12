@@ -77,7 +77,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     const std::optional<tint::hlsl::writer::PixelLocalOptions>& pixelLocalOptions,
     std::vector<uint32_t> snorm10_10_10_2_locations) {
     Device* device = ToBackend(GetDevice());
-    TRACE_EVENT0(device->GetPlatform(), General, "ShaderModuleD3D11::Compile");
+    TRACE_EVENT(DAWN_TRACE_CATEGORY(), "ShaderModuleD3D11::Compile");
     DAWN_ASSERT(!IsError());
 
     d3d::D3DCompilationRequest req = {};

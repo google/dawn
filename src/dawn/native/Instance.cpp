@@ -27,6 +27,7 @@
 
 #include "src/dawn/native/Instance.h"
 
+#include <mutex>
 #include <utility>
 
 #include "dawn/native/ValidationUtils_autogen.h"
@@ -66,6 +67,11 @@
 #if defined(DAWN_USE_X11)
 #include "src/dawn/native/X11Functions.h"
 #endif  // defined(DAWN_USE_X11)
+
+#if defined(DAWN_USE_PERFETTO)
+#include "perfetto/tracing/tracing.h"
+#include "src/dawn/platform/tracing/trace_categories.h"
+#endif
 
 namespace dawn::native {
 
@@ -293,6 +299,17 @@ void InstanceBase::DisconnectDawnPlatform() {
 
 // TODO(crbug.com/dawn/832): make the platform an initialization parameter of the instance.
 MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descriptor) {
+#if defined(DAWN_USE_PERFETTO)
+    // Dawn's track event categories must be registered with Perfetto. This can
+    // only be done after Perfetto itself has been initialized (typically by the
+    // embedder). If Perfetto is already initialized, register Dawn's categories
+    // now.
+    if (perfetto::Tracing::IsInitialized()) {
+        static std::once_flag flag;
+        std::call_once(flag, []() { dawn::TrackEvent::Register(); });
+    }
+#endif
+
     // Initialize the platform to the default for now.
     mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
     SetPlatform(mDefaultPlatform.get());

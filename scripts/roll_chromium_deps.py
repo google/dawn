@@ -152,6 +152,7 @@ SYNCED_REPOS = {
     'third_party/llvm-libc/src': None,
     'third_party/libdrm/src': None,
     'third_party/libFuzzer/src': None,
+    'third_party/perfetto': None,
     # third_party/vulkan_memory_allocator is shared with Chromium, but is
     # manually rolled since it typically requires additional code changes in
     # the repo.

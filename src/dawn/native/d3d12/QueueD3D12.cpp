@@ -110,15 +110,15 @@ ID3D12SharingContract* Queue::GetSharingContract() const {
 
 MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
     CommandRecordingContext* commandContext = GetPendingCommandContext();
-    ExecutionSerial pendingSerial = GetPendingCommandSerial();
+    [[maybe_unused]] ExecutionSerial pendingSerial = GetPendingCommandSerial();
 
-    TRACE_EVENT_BEGIN1(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D12::RecordCommands",
-                       "serial", uint64_t(pendingSerial));
-    for (CommandBufferBase* commandBuffer : commands) {
-        DAWN_TRY(ToBackend(commandBuffer)->RecordCommands(commandContext));
+    {
+        TRACE_EVENT(DAWN_TRACE_CATEGORY("recording"), "CommandBufferD3D12::RecordCommands",
+                    "serial", uint64_t(pendingSerial));
+        for (CommandBufferBase* commandBuffer : commands) {
+            DAWN_TRY(ToBackend(commandBuffer)->RecordCommands(commandContext));
+        }
     }
-    TRACE_EVENT_END1(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D12::RecordCommands",
-                     "serial", uint64_t(pendingSerial));
 
     return SubmitPendingCommandsImpl();
 }
@@ -149,8 +149,8 @@ MaybeError Queue::NextSerial() {
 
     IncrementLastSubmittedCommandSerial();
 
-    TRACE_EVENT1(device->GetPlatform(), General, "D3D12Device::SignalFence", "serial",
-                 uint64_t(GetLastSubmittedCommandSerial()));
+    TRACE_EVENT(DAWN_TRACE_CATEGORY(), "D3D12Device::SignalFence", "serial",
+                uint64_t(GetLastSubmittedCommandSerial()));
 
     return CheckHRESULT(
         mCommandQueue->Signal(mFence.Get(), uint64_t(GetLastSubmittedCommandSerial())),

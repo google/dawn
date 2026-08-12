@@ -137,6 +137,9 @@ declare_args() {
   # Enables error injection for faking failures to native API calls
   dawn_enable_error_injection =
       is_debug || (build_with_chromium && use_fuzzing_engine)
+
+  dawn_enable_perfetto =
+      (build_with_chromium || is_clang) && defined(dawn_perfetto_dir)
 }
 
 # GN does not allow reading a variable defined in the same declare_args().

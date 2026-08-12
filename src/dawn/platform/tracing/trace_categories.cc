@@ -1,4 +1,4 @@
-// Copyright 2019 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,21 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/dawn/tests/perf_tests/DawnPerfTestPlatform.h"
+#include "src/dawn/platform/tracing/trace_categories.h"
 
-#include "src/dawn/utils/Timer.h"
-
-namespace dawn {
-
-DawnPerfTestPlatform::DawnPerfTestPlatform() : platform::Platform(), mTimer(utils::CreateTimer()) {}
-
-DawnPerfTestPlatform::~DawnPerfTestPlatform() = default;
-
-double DawnPerfTestPlatform::MonotonicallyIncreasingTime() {
-    // Move the time origin to the first call to this function, to avoid generating
-    // unnecessarily large timestamps.
-    static double origin = mTimer->GetAbsoluteTime();
-    return mTimer->GetAbsoluteTime() - origin;
-}
-
-}  // namespace dawn
+PERFETTO_TRACK_EVENT_STATIC_STORAGE_IN_NAMESPACE_WITH_ATTRS(dawn, DAWN_PLATFORM_EXPORT);

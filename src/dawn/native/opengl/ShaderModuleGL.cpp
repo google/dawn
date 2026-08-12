@@ -363,7 +363,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     EmulatedTextureBuiltinRegistrar* emulatedTextureBuiltins,
     bool* needsSSBOLengthUniformBuffer,
     Extent3D* workgroupSize) {
-    TRACE_EVENT0(GetDevice()->GetPlatform(), General, "TranslateToGLSL");
+    TRACE_EVENT(DAWN_TRACE_CATEGORY(), "TranslateToGLSL");
 
     const OpenGLVersion& version = gl.GetVersion();
 

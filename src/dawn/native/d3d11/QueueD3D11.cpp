@@ -320,7 +320,7 @@ MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
     // affect following usage of it.
     // TODO(dawn:1770): figure how if we need to track and restore the state of the immediate device
     // context.
-    TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D11::Execute");
+    TRACE_EVENT_BEGIN(DAWN_TRACE_CATEGORY("recording"), "CommandBufferD3D11::Execute");
     {
         auto commandContext =
             GetScopedSwapStatePendingCommandContext(QueueBase::SubmitMode::Normal);
@@ -329,7 +329,7 @@ MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
         }
     }
     DAWN_TRY(SubmitPendingCommandsImpl());
-    TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D11::Execute");
+    TRACE_EVENT_END(DAWN_TRACE_CATEGORY("recording"));
 
     return {};
 }
@@ -488,8 +488,7 @@ MaybeError MonitoredFenceQueue::NextSerial() {
     const uint64_t submitSerial = uint64_t(GetPendingCommandSerial());
 
     {
-        TRACE_EVENT1(GetDevice()->GetPlatform(), General, "D3D11Device::SignalFence", "serial",
-                     submitSerial);
+        TRACE_EVENT(DAWN_TRACE_CATEGORY(), "D3D11Device::SignalFence", "serial", submitSerial);
         DAWN_TRY(CheckHRESULT(commandContext.Signal(mFence.Get(), submitSerial),
                               "D3D11 command queue signal fence"));
     }
@@ -535,8 +534,8 @@ MaybeError SystemEventQueue::NextSerial() {
     if (commandContext->AcquireNeedsFence()) {
         DAWN_ASSERT(mFence);
 
-        TRACE_EVENT1(GetDevice()->GetPlatform(), General, "D3D11Device::SignalFence", "serial",
-                     uint64_t(submitSerial));
+        TRACE_EVENT(DAWN_TRACE_CATEGORY(), "D3D11Device::SignalFence", "serial",
+                    uint64_t(submitSerial));
         DAWN_TRY(CheckHRESULT(commandContext.Signal(mFence.Get(), uint64_t(submitSerial)),
                               "D3D11 command queue signal fence"));
     }
@@ -698,8 +697,8 @@ MaybeError DelayFlushQueue::NextSerial() {
     if (commandContext->AcquireNeedsFence()) {
         DAWN_ASSERT(mFence);
 
-        TRACE_EVENT1(GetDevice()->GetPlatform(), General, "D3D11Device::SignalFence", "serial",
-                     uint64_t(submitSerial));
+        TRACE_EVENT(DAWN_TRACE_CATEGORY(), "D3D11Device::SignalFence", "serial",
+                    uint64_t(submitSerial));
         DAWN_TRY(CheckHRESULT(commandContext.Signal(mFence.Get(), uint64_t(submitSerial)),
                               "D3D11 command queue signal fence"));
     }
@@ -834,8 +833,7 @@ ResultOrError<ExecutionSerial> DelayFlushQueue::WaitForQueueSerialImpl(Execution
 
 MaybeError DelayFlushQueue::BlockWaitForLastSubmittedSerial(
     const ScopedCommandRecordingContext* commandContext) {
-    TRACE_EVENT0(GetDevice()->GetPlatform(), General,
-                 "DelayFlushQueue::BlockWaitForLastSubmittedSerial");
+    TRACE_EVENT(DAWN_TRACE_CATEGORY(), "DelayFlushQueue::BlockWaitForLastSubmittedSerial");
 
     SystemEventReceiver receiver;
     DAWN_TRY_ASSIGN(receiver, GetSystemEventReceiver());

@@ -129,7 +129,7 @@ DAWN_MAKE_CACHE_REQUEST(SpirvCompilationRequest, SPIRV_COMPILATION_REQUEST_MEMBE
 
 ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     const CompileParameters& in) {
-    TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleVk::GetHandleAndSpirv");
+    TRACE_EVENT(DAWN_TRACE_CATEGORY(), "ShaderModuleVk::GetHandleAndSpirv");
 
 #if TINT_BUILD_SPV_WRITER
     // Creation of module and spirv is deferred to this point when using tint generator
@@ -393,7 +393,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     DAWN_TRY_LOAD_OR_RUN(
         compilation, GetDevice(), std::move(req), CompiledSpirv::FromValidatedBlob,
         [](SpirvCompilationRequest r) -> ResultOrError<CompiledSpirv> {
-            TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::spirv::writer::Generate()");
+            TRACE_EVENT(DAWN_TRACE_CATEGORY(), "tint::spirv::writer::Generate()");
 
             // Requires Tint Program here right before actual using.
             auto shaderModule = r.inputProgram.UnsafeGetValue();
@@ -501,7 +501,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     VkShaderModule newHandle = VK_NULL_HANDLE;
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetDevice()->GetPlatform(), "Vulkan.CreateShaderModule");
-        TRACE_EVENT0(GetDevice()->GetPlatform(), General, "vkCreateShaderModule");
+        TRACE_EVENT(DAWN_TRACE_CATEGORY(), "vkCreateShaderModule");
         DAWN_TRY(CheckVkSuccess(
             device->fn.CreateShaderModule(device->GetVkDevice(), &createInfo, nullptr, &*newHandle),
             "CreateShaderModule"));

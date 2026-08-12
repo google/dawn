@@ -205,8 +205,6 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
         return {};
     }
 
-    auto platform = GetDevice()->GetPlatform();
-
     // Acquire the pending command buffer, which is retained. It must be released later.
     NSPRef<id<MTLCommandBuffer>> pendingCommands = mCommandContext.AcquireCommands();
 
@@ -234,14 +232,16 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
 
     // This ObjC block runs on a different thread.
     [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
-        TRACE_EVENT_ASYNC_END0(platform, GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
-                               uint64_t(pendingSerial));
+        TRACE_EVENT_NESTABLE_ASYNC_END0(DAWN_TRACE_CATEGORY("gpu_work"),
+                                        "DeviceMTL::SubmitPendingCommandBuffer",
+                                        uint64_t(pendingSerial));
 
         this->UpdateCompletedSerialTo(QueuePriority::Lowest, pendingSerial);
     }];
 
-    TRACE_EVENT_ASYNC_BEGIN0(platform, GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
-                             uint64_t(pendingSerial));
+    TRACE_EVENT_NESTABLE_ASYNC_BEGIN0(DAWN_TRACE_CATEGORY("gpu_work"),
+                                      "DeviceMTL::SubmitPendingCommandBuffer",
+                                      uint64_t(pendingSerial));
 
     DAWN_ASSERT(mSharedFence);
     [*pendingCommands encodeSignalEvent:mSharedFence->GetMTLSharedEvent()
@@ -270,11 +270,12 @@ MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
     @autoreleasepool {
         CommandRecordingContext* commandContext = GetPendingCommandContext();
 
-        TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
-        for (CommandBufferBase* commandBuffer : commands) {
-            DAWN_TRY(ToBackend(commandBuffer)->FillCommands(commandContext));
+        {
+            TRACE_EVENT(DAWN_TRACE_CATEGORY("recording"), "CommandBufferMTL::FillCommands");
+            for (CommandBufferBase* commandBuffer : commands) {
+                DAWN_TRY(ToBackend(commandBuffer)->FillCommands(commandContext));
+            }
         }
-        TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
 
         DAWN_TRY(SubmitPendingCommandBuffer());
 

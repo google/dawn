@@ -284,8 +284,7 @@ void QueueBase::Tick(ExecutionSerial finishedSerial) {
     // To prevent the reentrant call from invalidating mTasksInFlight while in use by the first
     // call, we remove the tasks to finish from the queue, update mTasksInFlight, then run the
     // callbacks.
-    TRACE_EVENT1(GetDevice()->GetPlatform(), General, "Queue::Tick", "finishedSerial",
-                 uint64_t(finishedSerial));
+    TRACE_EVENT(DAWN_TRACE_CATEGORY(), "Queue::Tick", "finishedSerial", uint64_t(finishedSerial));
 
     std::vector<std::unique_ptr<TrackTaskCallback>> tasks;
     mTasksInFlight.Use([&](auto tasksInFlight) {
@@ -480,7 +479,7 @@ MaybeError QueueBase::CopyExternalTextureForBrowserInternal(
 
 MaybeError QueueBase::ValidateSubmit(Span<CommandBufferBase* const> commands,
                                      BufferSet& buffersFromCommands) const {
-    TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "Queue::ValidateSubmit");
+    TRACE_EVENT(DAWN_TRACE_CATEGORY("validation"), "Queue::ValidateSubmit");
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
     std::set<CommandBufferBase*> uniqueCommandBuffers;
@@ -598,7 +597,7 @@ MaybeError QueueBase::SubmitInternal(Span<CommandBufferBase* const> commands) {
     // If device is lost, don't let any commands be submitted
     DAWN_TRY(device->ValidateIsAlive());
 
-    TRACE_EVENT0(device->GetPlatform(), General, "Queue::Submit");
+    TRACE_EVENT(DAWN_TRACE_CATEGORY(), "Queue::Submit");
 
     BufferSet buffersUsedInSubmit;
     absl::Cleanup finishUseBuffers = [&buffersUsedInSubmit]() {

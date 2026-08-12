@@ -936,6 +936,12 @@ dawn_test("dawn_perf_tests") {
     "${dawn_root}/src/utils/chromium_test_compat",
   ]
 
+  defines = []
+  if (dawn_enable_perfetto && build_with_chromium) {
+    defines += [ "DAWN_USE_PERFETTO_TRACE_PROCESSOR" ]
+    deps += [ "//third_party/perfetto:libtrace_processor" ]
+  }
+
   sources = [
     "perf_tests/BufferUploadPerf.cpp",
     "perf_tests/ConcurrentExecutionTest.cpp",

@@ -240,8 +240,7 @@ class BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
         // `this` is used as a unique ID to match begin/end events for concurrent MapAsync calls.
         // It's not a problem that same memory address could be reused for a future MapAsync call
         // since it won't be concurrent with an earlier call.
-        TRACE_EVENT_NESTABLE_ASYNC_BEGIN0(device->GetPlatform(), General, "Buffer::APIMapAsync",
-                                          this);
+        TRACE_EVENT_NESTABLE_ASYNC_BEGIN0(DAWN_TRACE_CATEGORY(), "Buffer::APIMapAsync", this);
     }
 
     // Create an event that's ready at creation (for errors, etc.)
@@ -279,8 +278,7 @@ class BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
     void Complete(EventCompletionType completionType) override {
         if (const auto* queueAndSerial = GetIfQueueAndSerial()) {
             if (auto queue = queueAndSerial->queue.Promote()) {
-                TRACE_EVENT_NESTABLE_ASYNC_END0(queue->GetDevice()->GetPlatform(), General,
-                                                "Buffer::APIMapAsync", this);
+                TRACE_EVENT_NESTABLE_ASYNC_END0(DAWN_TRACE_CATEGORY(), "Buffer::APIMapAsync", this);
             }
         }
 

@@ -127,15 +127,12 @@ template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
 void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::InitializeImpl(
     bool isAsync) {
     DeviceBase* device = mPipeline->GetDevice();
-    const std::string& label = mPipeline->GetLabel();
-    const char* eventLabel = utils::GetLabelForTrace(label);
     if (isAsync) {
-        TRACE_EVENT_FLOW_END1(device->GetPlatform(), General,
-                              "CreatePipelineAsyncEvent::InitializeAsync", this, "label",
-                              eventLabel);
+        TRACE_EVENT_END(DAWN_TRACE_CATEGORY(), perfetto::Track::FromPointer(this), "label",
+                        utils::GetLabelForTrace(mPipeline->GetLabel()));
     }
-    TRACE_EVENT1(device->GetPlatform(), General, "CreatePipelineAsyncEvent::InitializeImpl",
-                 "label", eventLabel);
+    TRACE_EVENT(DAWN_TRACE_CATEGORY(), "CreatePipelineAsyncEvent::InitializeImpl", "label",
+                utils::GetLabelForTrace(mPipeline->GetLabel()));
 
     MaybeError maybeError;
     {
@@ -161,10 +158,9 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::In
 template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
 void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::InitializeAsync() {
     DeviceBase* device = mPipeline->GetDevice();
-    const std::string& label = mPipeline->GetLabel();
-    const char* eventLabel = utils::GetLabelForTrace(label);
-    TRACE_EVENT_FLOW_BEGIN1(device->GetPlatform(), General,
-                            "CreatePipelineAsyncEvent::InitializeAsync", this, "label", eventLabel);
+    TRACE_EVENT_BEGIN(DAWN_TRACE_CATEGORY(), "CreatePipelineAsyncEvent::InitializeAsync",
+                      perfetto::Track::FromPointer(this), "label",
+                      utils::GetLabelForTrace(mPipeline->GetLabel()));
 
     auto asyncTask = [event = Ref<CreatePipelineAsyncEvent>(this)] { event->InitializeImpl(true); };
     device->GetAsyncTaskManager()->PostTask<AsyncTask>(std::move(asyncTask));

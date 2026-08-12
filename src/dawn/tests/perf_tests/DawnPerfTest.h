@@ -111,7 +111,7 @@ class DawnPerfTestBase {
 
   private:
     void DoRunLoop(double maxRunTime);
-    void OutputResults();
+    void OutputResults(const std::vector<char>& traceData = {});
 
     void PrintResultImpl(const std::string& trace,
                          const std::string& value,

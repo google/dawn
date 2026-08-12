@@ -114,9 +114,9 @@ MaybeError CommandRecordingContext::ExecuteCommandList(Device* device,
                 fileTimeNonPrecise.dwLowDateTime,
             cpuTimestamp, gpuTimestamp, cpuFrequency, gpuFrequency);
 
-        TRACE_EVENT_INSTANT1(device->GetPlatform(), General,
-                             "d3d12::CommandRecordingContext::ExecuteCommandList Detailed Timing",
-                             "Timing", timingInfo.c_str());
+        TRACE_EVENT_INSTANT(DAWN_TRACE_CATEGORY(),
+                            "d3d12::CommandRecordingContext::ExecuteCommandList Detailed Timing",
+                            "Timing", timingInfo.c_str());
     }
 
     ID3D12CommandList* d3d12CommandList = GetCommandList();
