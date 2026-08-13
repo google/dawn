@@ -465,7 +465,7 @@ struct StorageBufferLengthTracker {
     static constexpr size_t MaxBufferCount = kGenericMetalBufferSlots;
     PerStage<std::array<uint32_t, MaxBufferCount>> data;
     // Number of bytes to upload for each shader stage.
-    PerStage<uint32_t> dataSize;
+    PerStage<uint32_t> dataSize{0u};
 
     // TODO(crbug.com/366291600): Remove this logic when merging
     // StorageBufferLengthTracker in ImmediateTracker.
