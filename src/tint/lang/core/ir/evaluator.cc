@@ -191,6 +191,9 @@ Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c) {
                 AddError(SourceOf(c)) << "unhandled type constructor";
                 return core::constant::Eval::Result(nullptr);
             }
+            if (arg_values.IsEmpty()) {
+                return const_eval_.Zero(result_ty, arg_values, SourceOf(c));
+            }
             // For scalars, this must be an identity constructor.
             if (arg_values[0]->Type() != result_ty) {
                 AddError(SourceOf(c)) << "invalid type constructor";
