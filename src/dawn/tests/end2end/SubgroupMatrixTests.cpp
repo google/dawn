@@ -884,6 +884,12 @@ class SubgroupMatrix_MatrixStoreTest : public DawnTestWithParams<MatrixStorePara
         return features;
     }
 
+    static bool NeedsF16(const wgpu::SubgroupMatrixConfig& config, uint32_t array_bytes) {
+        return config.componentType == wgpu::SubgroupMatrixComponentType::F16 ||
+               config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16 ||
+               array_bytes == 2;
+    }
+
     wgpu::ComputePipeline GetComputePipelineFromSubgroupMatrixConfig(
         const wgpu::SubgroupMatrixConfig& config,
         uint32_t subgroupMaxSize,
@@ -913,9 +919,7 @@ class SubgroupMatrix_MatrixStoreTest : public DawnTestWithParams<MatrixStorePara
         // Generate a shader that stores a subgroup matrix into a storage buffer.
         std::ostringstream shader;
         shader << "enable chromium_experimental_subgroup_matrix;\n";
-        if (config.componentType == wgpu::SubgroupMatrixComponentType::F16 ||
-            config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16 ||
-            array_bytes == 2) {
+        if (NeedsF16(config, array_bytes)) {
             shader << "enable f16;\n";
         }
         shader << "\n";
@@ -1076,8 +1080,13 @@ TEST_P(SubgroupMatrix_MatrixStoreTest, MatrixStoreWithOffset) {
             }
         }
 
-        TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mInputColumnMajor, false,
-                                 /* don't care */ 4);
+        // First check no majorness template.
+        constexpr uint32_t dont_care_array_bytes = 4;
+        if (!NeedsF16(config, dont_care_array_bytes) ||
+            adapter.HasFeature(wgpu::FeatureName::ShaderF16)) {
+            TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mInputColumnMajor,
+                                     false, dont_care_array_bytes);
+        }
         // For majorness templated variants, test a variety of array element types.
         for (uint32_t j = 2; j <= 16; j <<= 1) {
             if (j < ComponentTypeToByteSize(config.componentType)) {
@@ -1091,6 +1100,9 @@ TEST_P(SubgroupMatrix_MatrixStoreTest, MatrixStoreWithOffset) {
             uint32_t stride = GetParam().mInputColumnMajor ? config.M : config.K;
             uint32_t stride_bytes = stride * ComponentTypeToByteSize(config.componentType);
             if (j <= stride_bytes) {
+                if (NeedsF16(config, j) && !adapter.HasFeature(wgpu::FeatureName::ShaderF16)) {
+                    continue;
+                }
                 TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mInputColumnMajor,
                                          true, j);
             }
