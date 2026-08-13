@@ -226,15 +226,6 @@ MaybeError Buffer::MapAtCreationImpl() {
 }
 
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
-    // This allows the specific code sequence of MapAsync(Write) / WaitAny() to work in deferral
-    // at the cost of a host-side copy. This should be removed in favour of eager buffer mapping,
-    // once that's implemented.
-    if ((mode & wgpu::MapMode::Write) && GetDevice()->IsToggleEnabled(Toggle::ShadowCopyMapWrite)) {
-        mCPUStaging.resize(checked_cast<size_t>(GetSize()));
-        mMappedData = mCPUStaging.data();
-        return {};
-    }
-
     // It is an error to map an empty range in OpenGL. We always have at least a 4-byte buffer
     // so we extend the range to be 4 bytes.
     if (size == 0) {
