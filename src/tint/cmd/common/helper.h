@@ -94,7 +94,7 @@ struct LoadProgramOptions {
     /// The file to be loaded, might be "-" for stdin
     std::string filename;
     /// The input format. Optional for files, mandatory for stdin
-    InputFormat input_format;
+    InputFormat input_format = InputFormat::kUnknown;
 #if TINT_BUILD_SPV_READER
     /// Spirv-reader options
     tint::spirv::reader::Options spirv_reader_options;
