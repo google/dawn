@@ -1567,6 +1567,11 @@ crbug.com/540087398 [ android-pixel-10 ] webgpu:api,validation,createTexture:mip
 crbug.com/540087398 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,texture_utils:createTextureWithRandomDataAndGetTexels_with_generator:format="depth*";viewDimension="*" [ Failure ]
 crbug.com/540087398 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,texture_utils:createTextureWithRandomDataAndGetTexels_with_generator:format="stencil*";viewDimension="*" [ Failure ]
 
+# OOB vertex buffer accesses on Xclipse GPUs
+crbug.com/546173500 [ android-sm-s926b ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=false;indirect=true;* [ Failure ]
+crbug.com/546173500 [ android-sm-s926b ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=true;* [ Failure ]
+crbug.com/546173500 [ android-sm-s926b ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;* [ Failure ]
+
 # Untriaged Xclipse failures.
 crbug.com/543960651 [ android-sm-s926b ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:* [ Failure ]
 crbug.com/543960651 [ android-sm-s926b ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:* [ Failure ]
@@ -1576,9 +1581,6 @@ crbug.com/543960651 [ android-sm-s926b ] webgpu:api,validation,capability_checks
 crbug.com/543960651 [ android-sm-s926b ] webgpu:shader,execution,expression,binary,f32_division:scalar_compound:inputSource="const";* [ Failure ]
 crbug.com/543960651 [ android-sm-s926b ] webgpu:shader,execution,expression,binary,f32_division:vector_scalar_compound:inputSource="const";* [ Failure ]
 crbug.com/543960651 [ android-sm-s926b ] webgpu:shader,execution,expression,binary,f32_remainder:vector_scalar_compound:inputSource="const";* [ Failure ]
-crbug.com/543960651 [ android-sm-s926b ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=false;indirect=true;* [ Failure ]
-crbug.com/543960651 [ android-sm-s926b ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=true;* [ Failure ]
-crbug.com/543960651 [ android-sm-s926b ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;* [ Failure ]
 crbug.com/543960651 [ android-sm-s926b ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="fragment_depth" [ Failure ]
 crbug.com/543960651 [ android-sm-s926b ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_unconfigured_nonzero_size:* [ Failure ]
 crbug.com/543960651 [ android-sm-s926b ] webgpu:web_platform,copyToTexture,image_file:from_multiple_formats:imageName="four-colors.avif";srcDoFlipYDuringCopy=false [ Failure ]
