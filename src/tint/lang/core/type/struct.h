@@ -225,6 +225,10 @@ class StructMember : public Castable<StructMember, Node> {
     /// @returns the name of the structure member
     Symbol Name() const { return name_; }
 
+    /// Sets the name of the structure member
+    /// @param name the new name of the structure member
+    void SetName(Symbol name) { name_ = name; }
+
     /// Sets the owning structure to `s`
     /// @param s the new structure owner
     void SetStruct(const Struct* s) { struct_ = s; }
@@ -283,7 +287,7 @@ class StructMember : public Castable<StructMember, Node> {
     StructMember* Clone(CloneContext& ctx) const;
 
   private:
-    const Symbol name_;
+    Symbol name_;
     const core::type::Struct* struct_;
     const core::type::Type* type_;
     const uint32_t index_;
