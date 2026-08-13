@@ -31,12 +31,14 @@
 #include <vector>
 
 #include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/tests/unittests/validation/ValidationTest.h"
 #include "src/dawn/utils/ComboRenderBundleEncoderDescriptor.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn {
 namespace {
@@ -2742,8 +2744,7 @@ class SetBindGroupValidationTest : public ValidationTest {
     }
 
     void TestRenderPassBindGroup(wgpu::BindGroup bindGroup,
-                                 uint32_t* offsets,
-                                 uint32_t count,
+                                 dawn::Span<const uint32_t> offsets,
                                  bool expectation) {
         wgpu::RenderPipeline renderPipeline = CreateRenderPipeline();
         PlaceholderRenderPass renderPass(device);
@@ -2752,7 +2753,7 @@ class SetBindGroupValidationTest : public ValidationTest {
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
         renderPassEncoder.SetPipeline(renderPipeline);
         if (bindGroup != nullptr) {
-            renderPassEncoder.SetBindGroup(0, bindGroup, count, offsets);
+            renderPassEncoder.SetBindGroup(0, bindGroup, offsets.size(), offsets.data());
         }
         renderPassEncoder.Draw(3);
         renderPassEncoder.End();
@@ -2764,8 +2765,7 @@ class SetBindGroupValidationTest : public ValidationTest {
     }
 
     void TestComputePassBindGroup(wgpu::BindGroup bindGroup,
-                                  uint32_t* offsets,
-                                  uint32_t count,
+                                  dawn::Span<const uint32_t> offsets,
                                   bool expectation) {
         wgpu::ComputePipeline computePipeline = CreateComputePipeline();
 
@@ -2773,7 +2773,7 @@ class SetBindGroupValidationTest : public ValidationTest {
         wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
         computePassEncoder.SetPipeline(computePipeline);
         if (bindGroup != nullptr) {
-            computePassEncoder.SetBindGroup(0, bindGroup, count, offsets);
+            computePassEncoder.SetBindGroup(0, bindGroup, offsets.size(), offsets.data());
         }
         computePassEncoder.DispatchWorkgroups(1);
         computePassEncoder.End();
@@ -2796,15 +2796,15 @@ TEST_F(SetBindGroupValidationTest, Basic) {
 
     std::array<uint32_t, 3> offsets = {512, 256, 0};
 
-    TestRenderPassBindGroup(bindGroup, offsets.data(), 3, true);
+    TestRenderPassBindGroup(bindGroup, offsets, true);
 
-    TestComputePassBindGroup(bindGroup, offsets.data(), 3, true);
+    TestComputePassBindGroup(bindGroup, offsets, true);
 }
 
 // Draw/dispatch with a bind group missing is invalid
 TEST_F(SetBindGroupValidationTest, MissingBindGroup) {
-    TestRenderPassBindGroup(nullptr, nullptr, 0, false);
-    TestComputePassBindGroup(nullptr, nullptr, 0, false);
+    TestRenderPassBindGroup(nullptr, {}, false);
+    TestComputePassBindGroup(nullptr, {}, false);
 }
 
 // Unset the bind group required by current pipeline is invalid.
@@ -2944,15 +2944,15 @@ TEST_F(SetBindGroupValidationTest, DynamicOffsetsMismatch) {
     wgpu::BindGroup bindGroup = CreateAllTypesBindGroup(kBindingSize);
 
     // Number of offsets mismatch.
-    std::array<uint32_t, 4> mismatchOffsets = {768, 512, 256, 0};
+    auto mismatchOffsets = dawn::Span<const uint32_t>({768u, 512u, 256u, 0u});
 
-    TestRenderPassBindGroup(bindGroup, mismatchOffsets.data(), 1, false);
-    TestRenderPassBindGroup(bindGroup, mismatchOffsets.data(), 2, false);
-    TestRenderPassBindGroup(bindGroup, mismatchOffsets.data(), 4, false);
+    TestRenderPassBindGroup(bindGroup, mismatchOffsets.first(1u), false);
+    TestRenderPassBindGroup(bindGroup, mismatchOffsets.first(2u), false);
+    TestRenderPassBindGroup(bindGroup, mismatchOffsets.first(4u), false);
 
-    TestComputePassBindGroup(bindGroup, mismatchOffsets.data(), 1, false);
-    TestComputePassBindGroup(bindGroup, mismatchOffsets.data(), 2, false);
-    TestComputePassBindGroup(bindGroup, mismatchOffsets.data(), 4, false);
+    TestComputePassBindGroup(bindGroup, mismatchOffsets.first(1u), false);
+    TestComputePassBindGroup(bindGroup, mismatchOffsets.first(2u), false);
+    TestComputePassBindGroup(bindGroup, mismatchOffsets.first(4u), false);
 }
 
 // Test cases that test dynamic offsets not aligned
@@ -2961,11 +2961,11 @@ TEST_F(SetBindGroupValidationTest, DynamicOffsetsNotAligned) {
     wgpu::BindGroup bindGroup = CreateAllTypesBindGroup(kBindingSize);
 
     // Dynamic offsets are not aligned.
-    std::array<uint32_t, 3> notAlignedOffsets = {512, 128, 0};
+    auto notAlignedOffsets = dawn::Span<const uint32_t>{512u, 128u, 0u};
 
-    TestRenderPassBindGroup(bindGroup, notAlignedOffsets.data(), 3, false);
+    TestRenderPassBindGroup(bindGroup, notAlignedOffsets.first(3u), false);
 
-    TestComputePassBindGroup(bindGroup, notAlignedOffsets.data(), 3, false);
+    TestComputePassBindGroup(bindGroup, notAlignedOffsets.first(3u), false);
 }
 
 // Test cases that test dynamic uniform buffer out of bound situation.
@@ -2974,11 +2974,11 @@ TEST_F(SetBindGroupValidationTest, OffsetOutOfBoundDynamicUniformBuffer) {
     wgpu::BindGroup bindGroup = CreateAllTypesBindGroup(kBindingSize);
 
     // Dynamic offset + offset is larger than buffer size.
-    std::array<uint32_t, 3> overFlowOffsets = {1024, 256, 0};
+    auto overFlowOffsets = dawn::Span<const uint32_t>({1024u, 256u, 0u});
 
-    TestRenderPassBindGroup(bindGroup, overFlowOffsets.data(), 3, false);
+    TestRenderPassBindGroup(bindGroup, overFlowOffsets.first(3u), false);
 
-    TestComputePassBindGroup(bindGroup, overFlowOffsets.data(), 3, false);
+    TestComputePassBindGroup(bindGroup, overFlowOffsets.first(3u), false);
 }
 
 // Test cases that test dynamic storage buffer out of bound situation.
@@ -2987,11 +2987,11 @@ TEST_F(SetBindGroupValidationTest, OffsetOutOfBoundDynamicStorageBuffer) {
     wgpu::BindGroup bindGroup = CreateAllTypesBindGroup(kBindingSize);
 
     // Dynamic offset + offset is larger than buffer size.
-    std::array<uint32_t, 3> overFlowOffsets = {0, 256, 1024};
+    auto overFlowOffsets = dawn::Span<const uint32_t>({0u, 256u, 1024u});
 
-    TestRenderPassBindGroup(bindGroup, overFlowOffsets.data(), 3, false);
+    TestRenderPassBindGroup(bindGroup, overFlowOffsets.first(3u), false);
 
-    TestComputePassBindGroup(bindGroup, overFlowOffsets.data(), 3, false);
+    TestComputePassBindGroup(bindGroup, overFlowOffsets.first(3u), false);
 }
 
 // Test cases that test dynamic uniform buffer out of bound situation because of binding size.
@@ -3002,11 +3002,11 @@ TEST_F(SetBindGroupValidationTest, BindingSizeOutOfBoundDynamicUniformBuffer) {
 
     // c + offset isn't larger than buffer size.
     // But with binding size, it will trigger OOB error.
-    std::array<uint32_t, 3> offsets = {768, 256, 0};
+    auto offsets = dawn::Span<const uint32_t>({768u, 256u, 0u});
 
-    TestRenderPassBindGroup(bindGroup, offsets.data(), 3, false);
+    TestRenderPassBindGroup(bindGroup, offsets.first(3u), false);
 
-    TestComputePassBindGroup(bindGroup, offsets.data(), 3, false);
+    TestComputePassBindGroup(bindGroup, offsets.first(3u), false);
 }
 
 // Test cases that test dynamic storage buffer out of bound situation because of binding size.
@@ -3016,11 +3016,11 @@ TEST_F(SetBindGroupValidationTest, BindingSizeOutOfBoundDynamicStorageBuffer) {
 
     // Dynamic offset + offset isn't larger than buffer size.
     // But with binding size, it will trigger OOB error.
-    std::array<uint32_t, 3> offsets = {0, 256, 768};
+    auto offsets = dawn::Span<const uint32_t>({0u, 256u, 768u});
 
-    TestRenderPassBindGroup(bindGroup, offsets.data(), 3, false);
+    TestRenderPassBindGroup(bindGroup, offsets.first(3u), false);
 
-    TestComputePassBindGroup(bindGroup, offsets.data(), 3, false);
+    TestComputePassBindGroup(bindGroup, offsets.first(3u), false);
 }
 
 // Regression test for crbug.com/dawn/408 where dynamic offsets were applied in the wrong order.
@@ -3123,9 +3123,9 @@ TEST_F(SetBindGroupValidationTest, ErrorBindGroup) {
     wgpu::BindGroup bindGroup;
     ASSERT_DEVICE_ERROR(bindGroup = utils::MakeBindGroup(device, mBindGroupLayout, {}));
 
-    TestRenderPassBindGroup(bindGroup, nullptr, 0, false);
+    TestRenderPassBindGroup(bindGroup, {}, false);
 
-    TestComputePassBindGroup(bindGroup, nullptr, 0, false);
+    TestComputePassBindGroup(bindGroup, {}, false);
 }
 
 // Test validation of the bindgroup slot for OOB.
@@ -3865,15 +3865,14 @@ class BindingsValidationTest : public BindGroupLayoutCompatibilityTest {
         mBufferSize = 3 * GetSupportedLimits().minUniformBufferOffsetAlignment + 8;
     }
 
-    void TestRenderPassBindings(const wgpu::BindGroup* bg,
-                                uint32_t count,
+    void TestRenderPassBindings(dawn::Span<const wgpu::BindGroup> bg,
                                 wgpu::RenderPipeline pipeline,
                                 bool expectation) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         PlaceholderRenderPass PlaceholderRenderPass(device);
         wgpu::RenderPassEncoder rp = encoder.BeginRenderPass(&PlaceholderRenderPass);
-        for (uint32_t i = 0; i < count; ++i) {
-            rp.SetBindGroup(i, DAWN_UNSAFE_TODO(bg[i]));
+        for (auto [i, bindGroup] : Enumerate(bg)) {
+            rp.SetBindGroup(i, bindGroup);
         }
         rp.SetPipeline(pipeline);
         rp.Draw(3);
@@ -3885,14 +3884,13 @@ class BindingsValidationTest : public BindGroupLayoutCompatibilityTest {
         }
     }
 
-    void TestComputePassBindings(const wgpu::BindGroup* bg,
-                                 uint32_t count,
+    void TestComputePassBindings(dawn::Span<const wgpu::BindGroup> bg,
                                  wgpu::ComputePipeline pipeline,
                                  bool expectation) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder cp = encoder.BeginComputePass();
-        for (uint32_t i = 0; i < count; ++i) {
-            cp.SetBindGroup(i, DAWN_UNSAFE_TODO(bg[i]));
+        for (auto [i, bindGroup] : Enumerate(bg)) {
+            cp.SetBindGroup(i, bindGroup);
         }
         cp.SetPipeline(pipeline);
         cp.DispatchWorkgroups(1);
@@ -3987,9 +3985,8 @@ TEST_F(BindingsValidationTest, BindGroupsWithMoreBindingsThanPipelineLayout) {
     wgpu::ComputePipeline computePipeline = CreateComputePipeline({bgl[0], bgl[1], bgl[2]});
 
     // Comprared to pipeline layout, there is an extra bind group (bg[3])
-    TestRenderPassBindings(bg.data(), kBindingNum + 1, renderPipeline, true);
-
-    TestComputePassBindings(bg.data(), kBindingNum + 1, computePipeline, true);
+    TestRenderPassBindings(bg, renderPipeline, true);
+    TestComputePassBindings(bg, computePipeline, true);
 
     // If a bind group has entry (like bgl1_1 below) unused by the pipeline layout, it is invalid.
     // Bind groups associated layout should exactly match bind group layout if that layout is
@@ -4002,9 +3999,9 @@ TEST_F(BindingsValidationTest, BindGroupsWithMoreBindingsThanPipelineLayout) {
     buffer[1] = CreateBuffer(mBufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::Uniform);
     bg[1] = utils::MakeBindGroup(device, bgl[1], {{0, buffer[1]}, {1, buffer[1]}});
 
-    TestRenderPassBindings(bg.data(), kBindingNum, renderPipeline, false);
-
-    TestComputePassBindings(bg.data(), kBindingNum, computePipeline, false);
+    dawn::Span<wgpu::BindGroup> bg_kBindingNum = dawn::Span<wgpu::BindGroup>(bg).first(kBindingNum);
+    TestRenderPassBindings(bg_kBindingNum, renderPipeline, false);
+    TestComputePassBindings(bg_kBindingNum, computePipeline, false);
 }
 
 // Test that it is invalid to set bind groups that don't have all necessary bindings required
@@ -4027,18 +4024,22 @@ TEST_F(BindingsValidationTest, BindGroupsWithFewerBindingsThanPipelineLayout) {
     wgpu::RenderPipeline renderPipeline = CreateRenderPipeline({bgl[0], bgl[1], bgl[2]});
     wgpu::ComputePipeline computePipeline = CreateComputePipeline({bgl[0], bgl[1], bgl[2]});
 
-    // Compared to pipeline layout, a binding set (bgl2) related bind group is missing
-    TestRenderPassBindings(bg.data(), kBindingNum - 1, renderPipeline, false);
+    dawn::Span<const wgpu::BindGroup> bg_kBindingNum =
+        dawn::Span<const wgpu::BindGroup>(bg).first(kBindingNum - 1);
 
-    TestComputePassBindings(bg.data(), kBindingNum - 1, computePipeline, false);
+    // Compared to pipeline layout, a binding set (bgl2) related bind group is missing
+    TestRenderPassBindings(bg_kBindingNum, renderPipeline, false);
+    TestComputePassBindings(bg_kBindingNum, computePipeline, false);
 
     // bgl[2] related bind group is not missing, but its bind group is empty
     bgl[2] = utils::MakeBindGroupLayout(device, {});
     bg[2] = utils::MakeBindGroup(device, bgl[2], {});
 
-    TestRenderPassBindings(bg.data(), kBindingNum, renderPipeline, false);
+    dawn::Span<const wgpu::BindGroup> bg_kBindingNum_2 =
+        dawn::Span<const wgpu::BindGroup>(bg).first(kBindingNum);
 
-    TestComputePassBindings(bg.data(), kBindingNum, computePipeline, false);
+    TestRenderPassBindings(bg_kBindingNum_2, renderPipeline, false);
+    TestComputePassBindings(bg_kBindingNum_2, computePipeline, false);
 
     // bgl[2] related bind group is neither missing nor empty, but it doesn't contain the necessary
     // binding
@@ -4048,9 +4049,8 @@ TEST_F(BindingsValidationTest, BindGroupsWithFewerBindingsThanPipelineLayout) {
     buffer[2] = CreateBuffer(mBufferSize, wgpu::BufferUsage::Uniform);
     bg[2] = utils::MakeBindGroup(device, bgl[2], {{1, buffer[2]}});
 
-    TestRenderPassBindings(bg.data(), kBindingNum, renderPipeline, false);
-
-    TestComputePassBindings(bg.data(), kBindingNum, computePipeline, false);
+    TestRenderPassBindings(bg_kBindingNum_2, renderPipeline, false);
+    TestComputePassBindings(bg_kBindingNum_2, computePipeline, false);
 }
 
 class FilterabilityValidationTest : public BindGroupLayoutCompatibilityTest {};
