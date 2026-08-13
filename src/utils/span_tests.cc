@@ -749,6 +749,26 @@ TEST(SpanTest, BeginEndForIteration) {
     }
 }
 
+TEST(SpanDeathTest, IteratorsAreHardened) {
+    std::array<int, 4> src4{};
+    std::array<int, 3> src3{};
+
+    std::array<int, 4> dst{};
+    Span<int> dstSpan = Span<int>(dst).first(3u);
+
+    // Control case, copying 3 elements to dst is valid.
+    std::ranges::copy(src3, dstSpan.begin());
+
+    // We check specifically that libc++'s bounded iterators are used as iterators for dawn::Span.
+#if defined(_LIBCPP_ABI_BOUNDED_ITERATORS)
+    // Error case, the hardened iterator will fail when we try to write a non-existent 4th element.
+    EXPECT_DEATH_IF_SUPPORTED(std::ranges::copy(src4, dstSpan.begin()), "");
+#else
+    // Still a success case because we don't have bounded iterators.
+    std::ranges::copy(src4, dstSpan.begin());
+#endif
+}
+
 TEST(SpanTest, FrontBack) {
     {
         Span<const int> sp(FakeRange{});
