@@ -2052,7 +2052,10 @@ void Structural::CheckInstruction(const Instruction* inst) {
         [&](const Var* var) { CheckVar(var); },                            //
         TINT_ICE_ON_NO_MATCH);
 
-    CheckAlignment(inst);
+    // Only check alignment if the instruction passed previous checks.
+    if (!diag_.ContainsErrors()) {
+        CheckAlignment(inst);
+    }
 }
 
 void Structural::CheckAlignment(const Instruction* inst) {
