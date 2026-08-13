@@ -531,7 +531,7 @@ $B1: {  # root
     Run(SplitWorkgroupAtomics);
     ASSERT_EQ(expect, str());
 
-    core::ir::transform::DecomposeAccessOptions options{.workgroup = true};
+    core::ir::transform::DecomposeAccessConfig options{.workgroup = true};
     Run(core::ir::transform::DecomposeAccess, options);
 
     auto* decomposed =

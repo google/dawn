@@ -2293,7 +2293,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     Run(DirectVariableAccess,
-        DirectVariableAccessOptions{.transform_handle = HandleTransformLevel::kExternal});
+        DirectVariableAccessConfig{.transform_handle = HandleTransformLevel::kExternal});
 
     tint::transform::multiplanar::BindingsMap map{};
     map[{1u, 2u}] = tint::transform::multiplanar::YCBCRTexture{{1u, 3u}, {1u, 4u}};

@@ -33,7 +33,7 @@ namespace {
 
 Result<SuccessType> DirectVariableAccessFuzzer(Module& ir,
                                                const fuzz::ir::Context& context,
-                                               const DirectVariableAccessOptions& options) {
+                                               const DirectVariableAccessConfig& options) {
     if (context.options.verbose) {
         PrintReflected(std::cout, options);
         std::cout << "\n";

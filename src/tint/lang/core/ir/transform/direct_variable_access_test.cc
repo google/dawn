@@ -46,25 +46,25 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace {
 
-static constexpr DirectVariableAccessOptions kTransformHandle = {
+static constexpr DirectVariableAccessConfig kTransformHandle = {
     /* transform_private */ false,
     /* transform_function */ false,
     /* transform_handle */ HandleTransformLevel::kFull,
 };
 
-static constexpr DirectVariableAccessOptions kTransformExternalHandle = {
+static constexpr DirectVariableAccessConfig kTransformExternalHandle = {
     /* transform_private */ false,
     /* transform_function */ false,
     /* transform_handle */ HandleTransformLevel::kExternal,
 };
 
-static constexpr DirectVariableAccessOptions kTransformPrivate = {
+static constexpr DirectVariableAccessConfig kTransformPrivate = {
     /* transform_private */ true,
     /* transform_function */ false,
     /* transform_handle */ HandleTransformLevel::kNone,
 };
 
-static constexpr DirectVariableAccessOptions kTransformFunction = {
+static constexpr DirectVariableAccessConfig kTransformFunction = {
     /* transform_private */ false,
     /* transform_function */ true,
     /* transform_handle */ HandleTransformLevel::kNone,
@@ -113,7 +113,7 @@ $B1: {  # root
 
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -152,7 +152,7 @@ $B1: {  # root
 
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -191,7 +191,7 @@ $B1: {  # root
 
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -230,7 +230,7 @@ $B1: {  # root
 
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -264,7 +264,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -336,7 +336,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -407,7 +407,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -635,7 +635,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -855,7 +855,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -932,7 +932,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -1009,7 +1009,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -1319,7 +1319,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -1441,7 +1441,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -1517,7 +1517,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -1593,7 +1593,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -1902,7 +1902,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -2023,7 +2023,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -2115,7 +2115,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -2202,7 +2202,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -2282,7 +2282,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -2592,7 +2592,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -2714,7 +2714,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -2796,7 +2796,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -2872,7 +2872,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -3181,7 +3181,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -3302,7 +3302,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -3590,7 +3590,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -3740,7 +3740,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -3938,7 +3938,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -4428,7 +4428,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -4636,7 +4636,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -4675,7 +4675,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_LocalPtr) {
 
     auto* expect = src;  // Nothing changes
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -5095,7 +5095,7 @@ str = struct @align(4) {
 
     auto* expect = src;
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -5151,7 +5151,7 @@ str = struct @align(4) {
 
     auto* expect = src;
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -5523,7 +5523,7 @@ Outer = struct @align(16) {
 
     auto* expect = src;
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -5712,7 +5712,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_CallChaining2) {
 
     auto* expect = src;
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -6727,7 +6727,7 @@ $B1: {  # root
 
     auto* expect = src;  // No change
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -7343,7 +7343,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -7409,7 +7409,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -7854,7 +7854,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -7978,7 +7978,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -8115,7 +8115,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -8240,7 +8240,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -8315,7 +8315,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -8381,7 +8381,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -8448,7 +8448,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -8523,7 +8523,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -8600,7 +8600,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -8677,7 +8677,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -8756,7 +8756,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -8859,7 +8859,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -8965,7 +8965,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -9049,7 +9049,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -9133,7 +9133,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -9227,7 +9227,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -9296,7 +9296,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -9368,7 +9368,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -9435,7 +9435,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -9521,7 +9521,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -9600,7 +9600,7 @@ $B1: {  # root
 }
 )";
 
-    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
     EXPECT_EQ(expect, str());
 }

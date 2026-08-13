@@ -66,8 +66,8 @@ auto& operator<<(STREAM& out, HandleTransformLevel level) {
     return out;
 }
 
-/// DirectVariableAccessOptions adjusts the behaviour of the transform.
-struct DirectVariableAccessOptions {
+/// DirectVariableAccessConfig adjusts the behaviour of the transform.
+struct DirectVariableAccessConfig {
     /// If true, then 'private' sub-object pointer arguments will be transformed.
     bool transform_private = false;
     /// If true, then 'function' sub-object pointer arguments will be transformed.
@@ -77,7 +77,7 @@ struct DirectVariableAccessOptions {
     HandleTransformLevel transform_handle = HandleTransformLevel::kNone;
 
     /// Reflection for this class
-    TINT_REFLECT(DirectVariableAccessOptions,
+    TINT_REFLECT(DirectVariableAccessConfig,
                  transform_private,
                  transform_function,
                  transform_handle);
@@ -97,8 +97,7 @@ struct DirectVariableAccessOptions {
 /// @param module the module to transform
 /// @param options the options
 /// @returns error on failure
-Result<SuccessType> DirectVariableAccess(Module& module,
-                                         const DirectVariableAccessOptions& options);
+Result<SuccessType> DirectVariableAccess(Module& module, const DirectVariableAccessConfig& options);
 
 }  // namespace tint::core::ir::transform
 

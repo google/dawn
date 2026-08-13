@@ -158,7 +158,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         // This must come after `MultiplanarExternalTexture` as it will insert functions with
         // texture parameters, and also after `PreservePadding` which inserts functions with storage
         // buffer parameters.
-        core::ir::transform::DirectVariableAccessOptions dva_config{};
+        core::ir::transform::DirectVariableAccessConfig dva_config{};
         dva_config.transform_handle = core::ir::transform::HandleTransformLevel::kFull;
         TINT_CHECK_RESULT(core::ir::transform::DirectVariableAccess(module, dva_config));
     }
@@ -168,8 +168,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // uniform buffers passed as function parameters.
     // Uniform buffers are only unconditionally decomposed if the implementation does not support
     // uniform buffer standard layout. Otherwise, only buffer type variables are decomposed.
-    core::ir::transform::DecomposeAccessOptions decompose_config{.uniform =
-                                                                     !options.use_uniform_buffers};
+    core::ir::transform::DecomposeAccessConfig decompose_config{.uniform =
+                                                                    !options.use_uniform_buffers};
     TINT_CHECK_RESULT(core::ir::transform::DecomposeAccess(module, decompose_config));
     if (options.use_uniform_buffers) {
         TINT_CHECK_RESULT(core::ir::transform::Std140(module));

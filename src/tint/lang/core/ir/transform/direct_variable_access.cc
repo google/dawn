@@ -267,7 +267,7 @@ struct State {
     Module& ir;
 
     /// The transform options
-    const DirectVariableAccessOptions& options;
+    const DirectVariableAccessConfig& options;
 
     /// The IR builder.
     Builder b{ir};
@@ -833,7 +833,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> DirectVariableAccess(Module& ir, const DirectVariableAccessOptions& options) {
+Result<SuccessType> DirectVariableAccess(Module& ir, const DirectVariableAccessConfig& options) {
     core::ir::AssertValid(ir, "before core.DirectVariableAccess");
 
     State{ir, options}.Process();

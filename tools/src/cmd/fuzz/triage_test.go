@@ -119,12 +119,20 @@ func TestGenerateTriageReport(t *testing.T) {
 		irInput:       "$B1: { ... }",
 		failingPass:   "tint::glsl::writer::IRFuzzer",
 		verboseOut: []byte(`
+SomeOtherConfig{
+  foo: bar
+}
+=========================================================
 == IR dump before glsl.Printer:
 $B1: {
   # Root block
 }
 ========
 
+SubstituteOverridesConfig{
+  map: []
+}
+=========================================================
 == IR dump before glsl.Printer:
 $B1: {
   # Root block - modified
@@ -154,6 +162,7 @@ $B1: {
 	require.Contains(t, reportStr, "## Failing Pass\n`tint::glsl::writer::IRFuzzer`")
 	require.Contains(t, reportStr, "## Transforms Run\n```\nglsl.Printer\nglsl.Printer\n```")
 	require.Contains(t, reportStr, "## Failing Transform\n`glsl.Printer`")
+	require.Contains(t, reportStr, "## Failing Transform Config\n```\nSubstituteOverridesConfig{\n  map: []\n}\n```")
 	require.Contains(t, reportStr, "## IR Dump before failure\n\n```\n$B1: {\n  # Root block - modified\n}\n```")
 	require.Contains(t, reportStr, "## Crash Stack\n```\n#0 0x12345 in __sanitizer_print_stack_trace\n")
 }
@@ -198,5 +207,6 @@ func TestGenerateTriageReportResilience(t *testing.T) {
 	require.Contains(t, reportStr, "## Failing Pass\n`Unknown (failed to identify from fuzzer output)`")
 	require.Contains(t, reportStr, "## Transforms Run\n```\nNone\n```")
 	require.Contains(t, reportStr, "## Failing Transform\n`Unknown`")
+	require.Contains(t, reportStr, "## Failing Transform Config\nNone")
 	require.Contains(t, reportStr, "## Crash Stack\n```\nUnknown (failed to extract stack trace)\n```")
 }

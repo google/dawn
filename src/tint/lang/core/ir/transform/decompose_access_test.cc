@@ -110,7 +110,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -130,7 +130,7 @@ TEST_F(IR_DecomposeAccessTest, NoBufferAccess) {
     EXPECT_EQ(src, str());
 
     auto* expect = src;
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -215,7 +215,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -301,7 +301,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -375,7 +375,7 @@ $B1: {  # root
   }
 }
 )";
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -422,7 +422,7 @@ $B1: {  # root
   }
 }
 )";
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -511,7 +511,7 @@ $B1: {  # root
   }
 }
 )";
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -603,7 +603,7 @@ $B1: {  # root
   }
 }
 )";
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -689,7 +689,7 @@ $B1: {  # root
   }
 }
 )";
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -776,7 +776,7 @@ $B1: {  # root
   }
 }
 )";
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -863,7 +863,7 @@ $B1: {  # root
   }
 }
 )";
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -949,7 +949,7 @@ $B1: {  # root
   }
 }
 )";
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -1142,7 +1142,7 @@ $B1: {  # root
   }
 }
 )";
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -1213,7 +1213,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -1353,7 +1353,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -1494,7 +1494,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -1634,7 +1634,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -1682,7 +1682,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -1730,7 +1730,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -1777,7 +1777,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -1856,7 +1856,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -1932,7 +1932,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -2009,7 +2009,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -2088,7 +2088,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -2169,7 +2169,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -2253,7 +2253,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -2344,7 +2344,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -2440,7 +2440,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -2523,7 +2523,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -2613,7 +2613,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -2708,7 +2708,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -2784,7 +2784,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -2863,7 +2863,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -2943,7 +2943,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3018,7 +3018,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3096,7 +3096,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3175,7 +3175,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3246,7 +3246,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3327,7 +3327,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3401,7 +3401,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3474,7 +3474,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3557,7 +3557,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3633,7 +3633,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3740,7 +3740,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3844,7 +3844,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3890,7 +3890,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3936,7 +3936,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3982,7 +3982,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -4028,7 +4028,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -4073,7 +4073,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -4143,7 +4143,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -4214,7 +4214,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -4286,7 +4286,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -4362,7 +4362,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -4442,7 +4442,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -4526,7 +4526,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -4620,7 +4620,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -4724,7 +4724,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -4812,7 +4812,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -4912,7 +4912,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5024,7 +5024,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5094,7 +5094,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5167,7 +5167,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5243,7 +5243,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5320,7 +5320,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5407,7 +5407,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5479,7 +5479,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5555,7 +5555,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5635,7 +5635,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5706,7 +5706,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5763,7 +5763,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5811,7 +5811,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5858,7 +5858,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5906,7 +5906,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5951,7 +5951,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -5998,7 +5998,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6044,7 +6044,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6090,7 +6090,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6151,7 +6151,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6231,7 +6231,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6311,7 +6311,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6401,7 +6401,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6495,7 +6495,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6589,7 +6589,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.uniform = true};
+    DecomposeAccessConfig options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6641,7 +6641,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{};
+    DecomposeAccessConfig options{};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6695,7 +6695,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{};
+    DecomposeAccessConfig options{};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6776,7 +6776,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{};
+    DecomposeAccessConfig options{};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6828,7 +6828,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{};
+    DecomposeAccessConfig options{};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6880,7 +6880,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{};
+    DecomposeAccessConfig options{};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -6947,7 +6947,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{};
+    DecomposeAccessConfig options{};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7021,7 +7021,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{};
+    DecomposeAccessConfig options{};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7097,7 +7097,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{};
+    DecomposeAccessConfig options{};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7140,7 +7140,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7184,7 +7184,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7233,7 +7233,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7284,7 +7284,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7342,7 +7342,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7430,7 +7430,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7480,7 +7480,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7542,7 +7542,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7604,7 +7604,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7666,7 +7666,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7745,7 +7745,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7824,7 +7824,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7903,7 +7903,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -7982,7 +7982,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -8020,7 +8020,7 @@ $B1: {  # root
 
     ASSERT_EQ(src, str());
 
-    DecomposeAccessOptions options{.workgroup_subgroup_matrix = true};
+    DecomposeAccessConfig options{.workgroup_subgroup_matrix = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(src, str());
 }
@@ -8084,7 +8084,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup_subgroup_matrix = true};
+    DecomposeAccessConfig options{.workgroup_subgroup_matrix = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -8122,7 +8122,7 @@ $B1: {  # root
 
     ASSERT_EQ(src, str());
 
-    DecomposeAccessOptions options{.workgroup_subgroup_matrix = true};
+    DecomposeAccessConfig options{.workgroup_subgroup_matrix = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(src, str());
 }
@@ -8186,7 +8186,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup_subgroup_matrix = true};
+    DecomposeAccessConfig options{.workgroup_subgroup_matrix = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -8236,7 +8236,7 @@ $B1: {  # root
 
     // SB has align 16 (from the vec4), so SB->Size() is roundUp(16, 24) = 32 -> 8 u32 elements.
     // minimum_array_size is the reserved range of 24 bytes -> the array must be capped at 6.
-    DecomposeAccessOptions options{.immediate = true, .minimum_array_size = 24};
+    DecomposeAccessConfig options{.immediate = true, .minimum_array_size = 24};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -8294,7 +8294,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.immediate = true, .allow_dynamic_immediate_indices = false};
+    DecomposeAccessConfig options{.immediate = true, .allow_dynamic_immediate_indices = false};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -8369,7 +8369,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.immediate = true, .allow_dynamic_immediate_indices = false};
+    DecomposeAccessConfig options{.immediate = true, .allow_dynamic_immediate_indices = false};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -8446,7 +8446,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.immediate = true, .allow_dynamic_immediate_indices = false};
+    DecomposeAccessConfig options{.immediate = true, .allow_dynamic_immediate_indices = false};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -8541,7 +8541,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.immediate = true, .allow_dynamic_immediate_indices = false};
+    DecomposeAccessConfig options{.immediate = true, .allow_dynamic_immediate_indices = false};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -8637,7 +8637,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.immediate = true, .allow_dynamic_immediate_indices = false};
+    DecomposeAccessConfig options{.immediate = true, .allow_dynamic_immediate_indices = false};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -8739,7 +8739,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.immediate = true, .allow_dynamic_immediate_indices = false};
+    DecomposeAccessConfig options{.immediate = true, .allow_dynamic_immediate_indices = false};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -8881,7 +8881,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -9054,7 +9054,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -9182,7 +9182,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -9323,7 +9323,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -9395,7 +9395,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -9467,7 +9467,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.workgroup = true};
+    DecomposeAccessConfig options{.workgroup = true};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -9543,7 +9543,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
@@ -9622,7 +9622,7 @@ $B1: {  # root
 }
 )";
 
-    DecomposeAccessOptions options{.storage = true};
+    DecomposeAccessConfig options{.storage = true};
     Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());

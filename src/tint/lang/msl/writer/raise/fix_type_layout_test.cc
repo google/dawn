@@ -46,7 +46,7 @@ class MslWriter_FixTypeLayoutTest : public core::ir::transform::TransformTest {
                            core::ir::Property::kAllowBufferTypes);
     }
 
-    FixTypeLayoutOptions options;
+    FixTypeLayoutConfig options;
     void Run() { core::ir::transform::TransformTest::Run(FixTypeLayout, options); }
 };
 

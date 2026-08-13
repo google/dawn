@@ -274,6 +274,8 @@ func generateTriageReport(tc *triageConfig) error {
 	stackTrace := ""
 	var transformsRun []string
 	failingTransform := ""
+	var failingTransformConfig []string
+	inConfig := false
 	vLines := strings.Split(string(tc.verboseOut), "\n")
 
 	inDump := false
@@ -281,6 +283,7 @@ func generateTriageReport(tc *triageConfig) error {
 		if strings.HasPrefix(line, "== IR dump before") {
 			irDump = "" // Keep only the last one before crash
 			inDump = true
+			inConfig = false
 
 			transform := strings.TrimPrefix(line, "== IR dump before")
 			transform = strings.TrimSuffix(transform, ":")
@@ -295,11 +298,25 @@ func generateTriageReport(tc *triageConfig) error {
 				continue
 			}
 			irDump += line + "\n"
-		}
-		if strings.HasPrefix(line, "#0 ") || strings.HasPrefix(line, "    #0 ") || strings.Contains(line, "stack trace:") || strings.Contains(line, "internal compiler error:") {
-			if stackTrace == "" {
-				idx := strings.Index(string(tc.verboseOut), line)
-				stackTrace = string(tc.verboseOut)[idx:]
+		} else {
+			if strings.HasPrefix(line, "#0 ") || strings.HasPrefix(line, "    #0 ") || strings.Contains(line, "stack trace:") || strings.Contains(line, "internal compiler error:") {
+				if stackTrace == "" {
+					idx := strings.Index(string(tc.verboseOut), line)
+					stackTrace = string(tc.verboseOut)[idx:]
+				}
+			} else {
+				trimmed := strings.TrimRight(line, " \r")
+				if strings.HasSuffix(trimmed, "Config{") {
+					failingTransformConfig = []string{}
+					inConfig = true
+				}
+				if inConfig {
+					if strings.HasPrefix(line, "====") {
+						inConfig = false
+					} else {
+						failingTransformConfig = append(failingTransformConfig, line)
+					}
+				}
 			}
 		}
 	}
@@ -322,6 +339,11 @@ func generateTriageReport(tc *triageConfig) error {
 	failingTransformDisplay := failingTransform
 	if failingTransformDisplay == "" {
 		failingTransformDisplay = "Unknown"
+	}
+
+	failingTransformConfigDisplay := "None"
+	if len(failingTransformConfig) > 0 {
+		failingTransformConfigDisplay = "```\n" + strings.Join(failingTransformConfig, "\n") + "\n```"
 	}
 
 	transformsRunDisplay := strings.Join(transformsRun, "\n")
@@ -374,6 +396,9 @@ func generateTriageReport(tc *triageConfig) error {
 ## Failing Transform
 `+"`"+`%s`+"`"+`
 
+## Failing Transform Config
+%s
+
 ## IR Dump before failure
 %s
 %s
@@ -393,6 +418,7 @@ func generateTriageReport(tc *triageConfig) error {
 		failingPassDisplay,
 		transformsRunDisplay,
 		failingTransformDisplay,
+		failingTransformConfigDisplay,
 		irDumpStatus,
 		irDumpDisplay,
 		stackTraceDisplay)

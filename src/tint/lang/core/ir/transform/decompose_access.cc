@@ -51,7 +51,7 @@ struct State {
     core::ir::Module& ir;
 
     /// The transform options.
-    const DecomposeAccessOptions& options;
+    const DecomposeAccessConfig& options;
 
     /// The IR builder.
     core::ir::Builder b{ir};
@@ -1798,7 +1798,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> DecomposeAccess(core::ir::Module& ir, const DecomposeAccessOptions& options) {
+Result<SuccessType> DecomposeAccess(core::ir::Module& ir, const DecomposeAccessConfig& options) {
     core::ir::AssertValid(ir, "before core.DecomposeAccess");
 
     auto res = State{ir, options}.Process();

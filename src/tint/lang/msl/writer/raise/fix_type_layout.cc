@@ -51,7 +51,7 @@ struct State {
     core::ir::Module& ir;
 
     /// The transform options.
-    const FixTypeLayoutOptions options;
+    const FixTypeLayoutConfig options;
 
     /// The IR builder.
     core::ir::Builder b{ir};
@@ -779,7 +779,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> FixTypeLayout(core::ir::Module& ir, const FixTypeLayoutOptions& options) {
+Result<SuccessType> FixTypeLayout(core::ir::Module& ir, const FixTypeLayoutConfig& options) {
     AssertValid(ir, "before msl.FixTypeLayout");
 
     State{ir, options}.Process();

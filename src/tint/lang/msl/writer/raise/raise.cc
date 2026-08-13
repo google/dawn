@@ -225,7 +225,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         module, raise::ShaderIOConfig{immediate_data_layout, options.emit_vertex_point_size,
                                       options.fixed_sample_mask, options.depth_range_offsets}));
 
-    raise::FixTypeLayoutOptions fix_type_layout_options{
+    raise::FixTypeLayoutConfig fix_type_layout_options{
         .replace_bool_with_u32 = options.workarounds.replace_workgroup_bool_with_u32,
     };
     TINT_CHECK_RESULT(raise::FixTypeLayout(module, fix_type_layout_options));

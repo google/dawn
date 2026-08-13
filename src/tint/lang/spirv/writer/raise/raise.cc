@@ -153,7 +153,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // PreservePadding must come before DirectVariableAccess.
     TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module));
 
-    core::ir::transform::DirectVariableAccessOptions dva_options;
+    core::ir::transform::DirectVariableAccessConfig dva_options;
     dva_options.transform_function = true;
     dva_options.transform_private = true;
     dva_options.transform_handle = options.workarounds.dva_transform_handle
@@ -183,7 +183,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // buffer resource variables in a structure.
     // Uniform buffers are only unconditionally decomposed if the implementation does not support
     // uniform buffer standard layout. Otherwise, only buffer type variables are decomposed.
-    core::ir::transform::DecomposeAccessOptions decompose_config{
+    core::ir::transform::DecomposeAccessConfig decompose_config{
         .uniform = !options.extensions.use_uniform_buffers};
     TINT_CHECK_RESULT(core::ir::transform::DecomposeAccess(module, decompose_config));
     if (options.extensions.use_uniform_buffers) {

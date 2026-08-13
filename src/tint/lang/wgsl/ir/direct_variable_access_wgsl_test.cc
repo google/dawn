@@ -46,12 +46,12 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace {
 
-static constexpr DirectVariableAccessOptions kTransformPrivate = {
+static constexpr DirectVariableAccessConfig kTransformPrivate = {
     /* transform_private */ true,
     /* transform_function */ false,
 };
 
-static constexpr DirectVariableAccessOptions kTransformFunction = {
+static constexpr DirectVariableAccessConfig kTransformFunction = {
     /* transform_private */ false,
     /* transform_function */ true,
 };
@@ -59,7 +59,7 @@ static constexpr DirectVariableAccessOptions kTransformFunction = {
 class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
   public:
     std::string Run(std::string in,
-                    const DirectVariableAccessOptions& transform_options = {},
+                    const DirectVariableAccessConfig& transform_options = {},
                     const wgsl::writer::Options program_options = {}) {
         wgsl::reader::Options parser_options;
         parser_options.allowed_features = wgsl::AllowedFeatures::Everything();

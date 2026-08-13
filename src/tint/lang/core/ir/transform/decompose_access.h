@@ -39,7 +39,7 @@ class Module;
 
 namespace tint::core::ir::transform {
 
-struct DecomposeAccessOptions {
+struct DecomposeAccessConfig {
     /// Specify whether all variables in the address space should be decomposed.
     bool storage = false;
     bool uniform = false;
@@ -64,8 +64,7 @@ struct DecomposeAccessOptions {
 ///
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> DecomposeAccess(core::ir::Module& module,
-                                    const DecomposeAccessOptions& options);
+Result<SuccessType> DecomposeAccess(core::ir::Module& module, const DecomposeAccessConfig& options);
 
 }  // namespace tint::core::ir::transform
 
