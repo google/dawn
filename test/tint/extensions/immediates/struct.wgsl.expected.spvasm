@@ -46,7 +46,7 @@
          %15 = OpLabel
          %16 = OpAccessChain %_ptr_PushConstant__arr_uint_uint_4 %1 %uint_0
          %19 = OpAccessChain %_ptr_PushConstant_uint %16 %uint_0
-         %21 = OpLoad %uint %19 None
+         %21 = OpLoad %uint %19 Aligned 16
          %22 = OpAccessChain %_ptr_PushConstant__arr_uint_uint_4 %1 %uint_0
          %23 = OpAccessChain %_ptr_PushConstant_uint %22 %uint_1
          %25 = OpLoad %uint %23 None

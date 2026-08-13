@@ -75,7 +75,7 @@
          %44 = OpIAdd %uint %34 %43
          %45 = OpUDiv %uint %44 %uint_4
          %46 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %45
-         %48 = OpLoad %uint %46 None
+         %48 = OpLoad %uint %46 Aligned 16
          %49 = OpIAdd %uint %45 %uint_1
          %50 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %49
          %51 = OpLoad %uint %50 None

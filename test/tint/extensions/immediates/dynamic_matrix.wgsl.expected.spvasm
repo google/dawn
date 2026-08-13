@@ -81,7 +81,7 @@
          %42 = OpUDiv %uint %start_byte_offset %uint_4
          %43 = OpAccessChain %_ptr_PushConstant__arr_uint_uint_4 %1 %uint_0
          %45 = OpAccessChain %_ptr_PushConstant_uint %43 %42
-         %47 = OpLoad %uint %45 None
+         %47 = OpLoad %uint %45 Aligned 8
          %48 = OpIAdd %uint %42 %uint_1
          %49 = OpAccessChain %_ptr_PushConstant__arr_uint_uint_4 %1 %uint_0
          %50 = OpAccessChain %_ptr_PushConstant_uint %49 %48
@@ -92,7 +92,7 @@
          %57 = OpUDiv %uint %55 %uint_4
          %58 = OpAccessChain %_ptr_PushConstant__arr_uint_uint_4 %1 %uint_0
          %59 = OpAccessChain %_ptr_PushConstant_uint %58 %57
-         %60 = OpLoad %uint %59 None
+         %60 = OpLoad %uint %59 Aligned 8
          %61 = OpIAdd %uint %57 %uint_1
          %62 = OpAccessChain %_ptr_PushConstant__arr_uint_uint_4 %1 %uint_0
          %63 = OpAccessChain %_ptr_PushConstant_uint %62 %61

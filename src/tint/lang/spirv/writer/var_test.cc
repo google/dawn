@@ -592,7 +592,7 @@ TEST_F(SpirvWriterTest, ImmediateVar_Vec3F16_Load) {
     EXPECT_INST(R"(
          %11 = OpAccessChain %_ptr_PushConstant__arr_uint_uint_2 %1 %uint_0
          %14 = OpAccessChain %_ptr_PushConstant_uint %11 %uint_0
-         %16 = OpLoad %uint %14 None
+         %16 = OpLoad %uint %14 Aligned 8
          %17 = OpAccessChain %_ptr_PushConstant__arr_uint_uint_2 %1 %uint_0
          %18 = OpAccessChain %_ptr_PushConstant_uint %17 %uint_1
          %20 = OpLoad %uint %18 None
@@ -619,7 +619,7 @@ TEST_F(SpirvWriterTest, ImmediateVar_Vec4F16_Load) {
     EXPECT_INST(R"(
          %11 = OpAccessChain %_ptr_PushConstant__arr_uint_uint_2 %1 %uint_0
          %14 = OpAccessChain %_ptr_PushConstant_uint %11 %uint_0
-         %16 = OpLoad %uint %14 None
+         %16 = OpLoad %uint %14 Aligned 8
          %17 = OpAccessChain %_ptr_PushConstant__arr_uint_uint_2 %1 %uint_0
          %18 = OpAccessChain %_ptr_PushConstant_uint %17 %uint_1
          %20 = OpLoad %uint %18 None

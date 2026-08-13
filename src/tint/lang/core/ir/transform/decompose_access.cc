@@ -540,6 +540,14 @@ struct State {
         return data.byte_length != 0 || data.byte_length_expr != nullptr;
     }
 
+    // Sets the alignment of `inst` to `align` if:
+    // * The decompose alignment is smaller than `align`
+    void MaybeAddAlignment(Instruction* inst, uint32_t align) {
+        if (BaseEleType()->Align() < align) {
+            inst->SetAlignment(align);
+        }
+    }
+
     // Rewrites uses of var that contain a dynamic index.
     // Only necessary for immediate variables so the set of potential instructions is considerably
     // limited.
@@ -832,6 +840,7 @@ struct State {
             call->SetArg(0, var->Result());
             call->SetArg(1, call_offset);
             call->SetArg(stride_index, call_stride);
+            MaybeAddAlignment(call, array_ty->ElemType()->Align());
         });
     }
 
@@ -979,6 +988,7 @@ struct State {
             TINT_IR_ASSERT(ir, num_array_eles == 2);
             auto* vec_ty = ty.vec(BaseEleType(), num_array_eles);
             auto loads = MakeNLoads(var, array_idx, num_array_eles);
+            MaybeAddAlignment(loads[0]->As<InstructionResult>()->Instruction(), result_ty->Align());
             auto* construct = b.Construct(vec_ty, loads);
             return BitcastOrConvertIfNeeded(result_ty, construct);
         }
@@ -1055,6 +1065,7 @@ struct State {
         auto* array_idx = OffsetValueToArrayIndex(byte_idx);
         uint32_t num_loads = NumBaseElements(result_ty);
         auto loads = MakeNLoadInsts(var, array_idx, num_loads);
+        MaybeAddAlignment(loads[0], result_ty->Align());
 
         if (BaseEleType()->Size() < result_ty->DeepestElement()->Size()) {
             TINT_IR_ASSERT(ir, BaseEleType() == ty.u16());
@@ -1145,6 +1156,7 @@ struct State {
         auto* array_idx = OffsetValueToArrayIndex(byte_idx);
         uint32_t num_loads = NumBaseElements(result_ty);
         auto loads = MakeNLoads(var, array_idx, num_loads);
+        MaybeAddAlignment(loads[0]->As<InstructionResult>()->Instruction(), result_ty->Align());
 
         // Since this vector has 2-byte elements, there are only a few possibilities:
         // 1. Base type is u16
@@ -1504,7 +1516,10 @@ struct State {
             auto* cast = BitcastOrConvertIfNeeded(vec_ty, from);
             for (uint32_t i = 0; i < num_array_eles; i++) {
                 auto* access = b.Access(BaseEleTypePtr(), var, array_idx);
-                b.Store(access, b.Access(BaseEleType(), cast, u32(i)));
+                auto* store = b.Store(access, b.Access(BaseEleType(), cast, u32(i)));
+                if (i == 0) {
+                    MaybeAddAlignment(store, st_ty->Align());
+                }
                 if (i < num_array_eles - 1) {
                     if (auto* cnst = array_idx->As<Constant>()) {
                         array_idx = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() + 1));
@@ -1590,7 +1605,10 @@ struct State {
                     Value* elem =
                         (num_u32s == 1) ? cast_val : b.Access(ty.u32(), cast_val, u32(i))->Result();
                     auto* access = b.Access(BaseEleTypePtr(), var, array_idx);
-                    b.Store(access, elem);
+                    auto* store = b.Store(access, elem);
+                    if (i == 0) {
+                        MaybeAddAlignment(store, st_ty->Align());
+                    }
                     if (i < num_u32s - 1) {
                         if (auto* cnst = array_idx->As<Constant>()) {
                             array_idx = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() + 1));
@@ -1620,7 +1638,10 @@ struct State {
                     value = BitcastOrConvertIfNeeded(BaseEleType(), value);
                 }
                 auto* access = b.Access(BaseEleTypePtr(), var, array_idx);
-                b.Store(access, value);
+                auto* store = b.Store(access, value);
+                if (i == 0) {
+                    MaybeAddAlignment(store, st_ty->Align());
+                }
                 if (i < num_array_eles - 1) {
                     if (auto* cnst = array_idx->As<Constant>()) {
                         array_idx = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() + 1));
