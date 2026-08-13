@@ -171,7 +171,7 @@ declare_args() {
 
 # Intentionally not allowing is_wasm, even though it is Linux like,
 # because it uses a different toolchain
-if (tint_build_mesa && !is_linux) {
+if (tint_build_mesa && (!is_linux || is_android || is_chromeos)) {
   assert(false, "Building Mesa is only supported on Linux")
 }
 
