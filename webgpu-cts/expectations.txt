@@ -196,12 +196,6 @@ crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call
 # point.
 ################################################################################
 
-# subgroup_size_control enabling subgroups
-crbug.com/545285663 [ linux ] webgpu:shader,validation,extension,subgroup_size_control:enable_subgroup_size_control_requires_subgroups:* [ Skip ]
-crbug.com/545285663 [ win ] webgpu:shader,validation,extension,subgroup_size_control:enable_subgroup_size_control_requires_subgroups:* [ Skip ]
-crbug.com/545285663 [ mac ] webgpu:shader,validation,extension,subgroup_size_control:enable_subgroup_size_control_requires_subgroups:* [ Skip ]
-crbug.com/545285663 [ android ] webgpu:shader,validation,extension,subgroup_size_control:enable_subgroup_size_control_requires_subgroups:* [ Skip ]
-
 # SharedImage interop failures on Linux
 # Skipped instead of just Crash because of the number of failures
 crbug.com/40782602 [ linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Skip ]
