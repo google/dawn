@@ -42,10 +42,7 @@ group("dawn_perfetto") {
     # When build_with_chromium=true we need to include the combined target
     # to avoid multiply defined globals. Otherwise we can use the client API.
     if (build_with_chromium) {
-      public_deps = [
-        "$dawn_perfetto_dir:libperfetto",
-        "$dawn_perfetto_dir/include/perfetto/tracing",
-      ]
+      public_deps = [ "$dawn_perfetto_dir:libperfetto" ]
     } else {
       public_deps = [ "$dawn_perfetto_dir/src/tracing:client_api" ]
     }
