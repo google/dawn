@@ -1323,6 +1323,19 @@ TEST_F(IR_ValidatorTest, Let_ExcessiveElements) {
         << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Let_ExceedsSizeLimit) {
+    auto* arr_ty = ty.array(ty.i32(), 4000000u);
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Let("l", b.Construct(arr_ty));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("exceeds maximum allowed"));
+}
+
 TEST_F(IR_ValidatorTest, Phony_NullValue) {
     auto* v = mod.CreateInstruction<ir::Phony>(nullptr);
     auto* f = b.Function("my_func", ty.void_());
@@ -1521,6 +1534,53 @@ TEST_F(IR_ValidatorTest, Var_Atomic_NestedArray_Private) {
   %1:ptr<private, array<array<atomic<i32>, 4>, 10>, read_write> = var undef
                                                                   ^^^
 )"));
+}
+
+TEST_F(IR_ValidatorTest, Var_Function_ExceedsSizeLimit) {
+    auto* arr_ty = ty.array(ty.i32(), 4000000u);
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var(ty.ptr<function>(arr_ty));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("exceeds maximum allowed"));
+}
+
+TEST_F(IR_ValidatorTest, Var_Private_ExceedsSizeLimit) {
+    auto* arr_ty = ty.array(ty.i32(), 4000000u);
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var(ty.ptr<private_>(arr_ty));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("exceeds maximum allowed"));
+}
+
+TEST_F(IR_ValidatorTest, Var_Composite_ExceedsSizeLimit) {
+    core::IOAttributes attrs;
+    Vector members{
+        ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u, attrs),
+        ty.Get<core::type::StructMember>(mod.symbols.New("b"), ty.i32(), 1u, 2000000u, 4u, 4u,
+                                         attrs),
+    };
+    auto* s = ty.Struct(mod.symbols.New("S"), std::move(members));
+
+    auto* arr_ty = ty.array(s, 10u);
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var(ty.ptr<function>(arr_ty));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("exceeds maximum allowed"));
 }
 
 TEST_F(IR_ValidatorTest, WorkgroupVar_RuntimeSizedArray_WithMslProperty) {

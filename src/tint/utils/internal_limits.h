@@ -56,6 +56,12 @@ constexpr int64_t kQuadSize = 4;
 // A @size attribute maximum size
 constexpr int64_t kMaxStructMemberPadding = 10LL * 1024 * 1024;
 
+// Limits the size of result types instructions that will be transiently created, i.e. not buffers.
+// Specifically  prevents unreasonably large initializers when printing in the backend. The related
+// minimum maximums from the spec are 8kB, so this should be significantly beyond what a user
+// expects to work.
+constexpr int64_t kMaxTemporaryStorageSize = 10LL * 1024 * 1024;
+
 // The maximum number of locations allowed for shader IO.
 // This hard limit is derived from spirv-val (kMaxLocations in
 // https://github.com/KhronosGroup/SPIRV-Tools/blob/main/source/val/validate_interfaces.cpp).

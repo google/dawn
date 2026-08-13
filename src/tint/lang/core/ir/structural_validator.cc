@@ -499,6 +499,28 @@ bool Structural::CheckResult(const Instruction* inst, size_t idx) {
         return false;
     }
 
+    const core::type::Type* ty = result->Type();
+    bool check_size = false;
+
+    if (auto* mv = ty->As<core::type::MemoryView>()) {
+        if (mv->AddressSpace() == core::AddressSpace::kFunction ||
+            mv->AddressSpace() == core::AddressSpace::kPrivate) {
+            check_size = true;
+            ty = mv->StoreType();
+        }
+    } else {
+        check_size = true;
+    }
+
+    if (check_size) {
+        if (ty->Size() > tint::internal_limits::kMaxTemporaryStorageSize) {
+            AddResultError(inst, idx)
+                << "result type size (" << ty->Size() << ") exceeds maximum allowed ("
+                << tint::internal_limits::kMaxTemporaryStorageSize << ")";
+            return false;
+        }
+    }
+
     return true;
 }
 
