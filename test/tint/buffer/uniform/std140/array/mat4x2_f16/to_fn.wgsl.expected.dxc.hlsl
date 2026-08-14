@@ -63,6 +63,6 @@ void f() {
   float16_t v_14 = a(v_13);
   float16_t v_15 = (v_14 + b(v_2(16u)));
   float16_t v_16 = (v_15 + c(tint_bitcast_to_f16(u[1u].x).yx));
-  s.Store<float16_t>(0u, (v_16 + d(tint_bitcast_to_f16(u[1u].x).yx.x)));
+  s.Store<float16_t>(0u, (v_16 + d(tint_bitcast_to_f16(u[1u].x).y)));
 }
 

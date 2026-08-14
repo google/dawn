@@ -56,5 +56,6 @@ void main() {
   float16_t v_13 = a(v_10(0u));
   float16_t v_14 = (v_13 + b(v_3(16u)));
   float16_t v_15 = (v_14 + c(tint_bitcast_to_16bit(v_1.inner[1u].x).yx));
-  v_2.inner = (v_15 + d(tint_bitcast_to_16bit(v_1.inner[1u].x).yx.x));
+  uvec4 v_16 = v_1.inner[1u];
+  v_2.inner = (v_15 + d(tint_bitcast_to_16bit(v_16.x).y));
 }

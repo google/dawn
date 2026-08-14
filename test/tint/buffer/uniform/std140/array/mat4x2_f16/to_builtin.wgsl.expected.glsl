@@ -25,7 +25,8 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   f16mat2x4 t = transpose(v_2(32u));
   float16_t l = length(tint_bitcast_to_16bit(v.inner[0u].y).yx);
-  float16_t a = abs(tint_bitcast_to_16bit(v.inner[0u].y).yx.x);
-  float16_t v_9 = (t[0u].x + float16_t(l));
-  v_1.inner = (v_9 + float16_t(a));
+  uvec4 v_9 = v.inner[0u];
+  float16_t a = abs(tint_bitcast_to_16bit(v_9.y).y);
+  float16_t v_10 = (t[0u].x + float16_t(l));
+  v_1.inner = (v_10 + float16_t(a));
 }

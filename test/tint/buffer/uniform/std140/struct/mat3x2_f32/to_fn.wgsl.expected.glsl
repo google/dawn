@@ -63,5 +63,6 @@ void main() {
   b(v_10(256u));
   c(v_2(264u));
   d(uintBitsToFloat(v_1.inner[1u].xy).yx);
-  e(uintBitsToFloat(v_1.inner[1u].xy).yx.x);
+  uvec4 v_19 = v_1.inner[1u];
+  e(uintBitsToFloat(v_19.y));
 }

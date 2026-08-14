@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 58
+; Bound: 57
 ; Schema: 0
                OpCapability Shader
          %25 = OpExtInstImport "GLSL.std.450"
@@ -36,7 +36,7 @@
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
      %uint_1 = OpConstant %uint 1
-         %33 = OpTypeFunction %mat4v4float %uint
+         %32 = OpTypeFunction %mat4v4float %uint
     %uint_16 = OpConstant %uint 16
     %uint_32 = OpConstant %uint 32
     %uint_48 = OpConstant %uint 48
@@ -50,34 +50,33 @@
           %l = OpExtInst %float %25 Length %23
          %26 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
          %27 = OpLoad %v4uint %26 None
-         %28 = OpBitcast %v4float %27
-         %29 = OpVectorShuffle %v4float %28 %28 1 3 0 2
-         %30 = OpCompositeExtract %float %29 0
-          %a = OpExtInst %float %25 FAbs %30
+         %28 = OpCompositeExtract %uint %27 1
+         %29 = OpBitcast %float %28
+          %a = OpExtInst %float %25 FAbs %29
                OpReturn
                OpFunctionEnd
-         %16 = OpFunction %mat4v4float None %33
+         %16 = OpFunction %mat4v4float None %32
 %start_byte_offset = OpFunctionParameter %uint
-         %34 = OpLabel
-         %35 = OpUDiv %uint %start_byte_offset %uint_16
-         %37 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %35
-         %38 = OpLoad %v4uint %37 None
-         %39 = OpBitcast %v4float %38
-         %40 = OpIAdd %uint %uint_16 %start_byte_offset
-         %41 = OpUDiv %uint %40 %uint_16
-         %42 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %41
-         %43 = OpLoad %v4uint %42 None
-         %44 = OpBitcast %v4float %43
-         %45 = OpIAdd %uint %uint_32 %start_byte_offset
-         %47 = OpUDiv %uint %45 %uint_16
-         %48 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %47
-         %49 = OpLoad %v4uint %48 None
-         %50 = OpBitcast %v4float %49
-         %51 = OpIAdd %uint %uint_48 %start_byte_offset
-         %53 = OpUDiv %uint %51 %uint_16
-         %54 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %53
-         %55 = OpLoad %v4uint %54 None
-         %56 = OpBitcast %v4float %55
-         %57 = OpCompositeConstruct %mat4v4float %39 %44 %50 %56
-               OpReturnValue %57
+         %33 = OpLabel
+         %34 = OpUDiv %uint %start_byte_offset %uint_16
+         %36 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %34
+         %37 = OpLoad %v4uint %36 None
+         %38 = OpBitcast %v4float %37
+         %39 = OpIAdd %uint %uint_16 %start_byte_offset
+         %40 = OpUDiv %uint %39 %uint_16
+         %41 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %40
+         %42 = OpLoad %v4uint %41 None
+         %43 = OpBitcast %v4float %42
+         %44 = OpIAdd %uint %uint_32 %start_byte_offset
+         %46 = OpUDiv %uint %44 %uint_16
+         %47 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %46
+         %48 = OpLoad %v4uint %47 None
+         %49 = OpBitcast %v4float %48
+         %50 = OpIAdd %uint %uint_48 %start_byte_offset
+         %52 = OpUDiv %uint %50 %uint_16
+         %53 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %52
+         %54 = OpLoad %v4uint %53 None
+         %55 = OpBitcast %v4float %54
+         %56 = OpCompositeConstruct %mat4v4float %38 %43 %49 %55
+               OpReturnValue %56
                OpFunctionEnd

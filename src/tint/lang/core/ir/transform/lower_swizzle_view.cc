@@ -120,10 +120,38 @@ struct State {
     /// Lowers a load from a swizzle view.
     /// @param load the load instruction to lower
     void LowerLoad(core::ir::Load* load) {
-        core::ir::Value* new_result = nullptr;
-        b.InsertBefore(load, [&] { new_result = EmitLoad(load->From()); });
+        auto* inst = load->From()->As<core::ir::InstructionResult>()->Instruction();
+        auto* swizzle = inst->As<core::ir::Swizzle>();
 
-        load->Result()->ReplaceAllUsesWith(new_result);
+        // If loading through an accessor on a swizzle view (i.e. v.zyx[0]), extract the accessor
+        // index first.
+        core::ir::Value* accessor_idx = nullptr;
+        if (auto* access = inst->As<core::ir::Access>()) {
+            accessor_idx = access->Indices()[0];
+            swizzle = access->Object()
+                          ->As<core::ir::InstructionResult>()
+                          ->Instruction()
+                          ->As<core::ir::Swizzle>();
+        }
+
+        auto collapsed = Collapse(swizzle);
+
+        b.InsertBefore(load, [&] {
+            core::ir::InstructionResult* new_result = nullptr;
+            if (accessor_idx || collapsed.indices.Length() == 1) {
+                // Lowers to a single vector element load.
+                auto* idx = accessor_idx ? GetTargetIndex(accessor_idx, collapsed.indices)
+                                         : b.Constant(u32(collapsed.indices[0]));
+                new_result = b.LoadVectorElement(collapsed.vector, idx)->Result();
+            } else {
+                // Extract the target elements from the loaded vector.
+                auto* loaded_vec = b.Load(collapsed.vector);
+                new_result =
+                    b.Swizzle(load->Result()->Type(), loaded_vec, collapsed.indices)->Result();
+            }
+            load->Result()->ReplaceAllUsesWith(new_result);
+        });
+
         load->Destroy();
     }
 
@@ -183,39 +211,6 @@ struct State {
         });
 
         store->Destroy();
-    }
-
-    /// Recursively emits loads of each swizzle view.
-    /// @param val the swizzle view pointer or access thereof
-    /// @returns the loaded value
-    core::ir::Value* EmitLoad(core::ir::Value* val) {
-        auto* inst_res = val->As<core::ir::InstructionResult>();
-        if (!inst_res) {
-            // Base case when the root of the swizzle view is a non-instruction value, such as a
-            // function pointer parameter.
-            return b.Load(val)->Result();
-        }
-        auto* inst = inst_res->Instruction();
-
-        // Emit load for accessor instructions on swizzle views.
-        auto* access = inst->As<core::ir::Access>();
-        if (access && access->Object()->Type()->Is<core::type::SwizzleView>()) {
-            auto* sw_val = EmitLoad(access->Object());
-            auto* elem_ty = access->Result()->Type()->As<core::type::MemoryView>()->StoreType();
-            return b.Access(elem_ty, sw_val, access->Indices()[0])->Result();
-        }
-
-        // Emit load for swizzles.
-        auto* swizzle = inst->As<core::ir::Swizzle>();
-        if (swizzle && swizzle->Result()->Type()->Is<core::type::SwizzleView>()) {
-            auto* obj_val = EmitLoad(swizzle->Object());
-            auto* expected_ty =
-                swizzle->Result()->Type()->As<core::type::SwizzleView>()->StoreType();
-            return b.Swizzle(expected_ty, obj_val, swizzle->Indices())->Result();
-        }
-
-        // Base case when the root of the swizzle view is an instruction such as a variable pointer.
-        return b.Load(val)->Result();
     }
 
     /// CollapsedSwizzle holds the collapsed root pointer and accumulated indices.

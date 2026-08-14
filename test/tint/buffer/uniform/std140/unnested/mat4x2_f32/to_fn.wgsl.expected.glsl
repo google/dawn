@@ -30,5 +30,6 @@ void main() {
   b(uintBitsToFloat(v_1.inner[0u].zw).yx);
   uvec4 v_13 = v_1.inner[0u];
   c(uintBitsToFloat(v_13.z));
-  c(uintBitsToFloat(v_1.inner[0u].zw).yx.x);
+  uvec4 v_14 = v_1.inner[0u];
+  c(uintBitsToFloat(v_14.w));
 }

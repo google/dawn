@@ -39,5 +39,5 @@ kernel void f(const constant tint_array<tint_packed_vec3_f32_array_element, 2>* 
   (b(float3((*tint_module_vars.u)[1u].packed)));
   (b(float3((*tint_module_vars.u)[1u].packed).zxy));
   (c((*tint_module_vars.u)[1u].packed.x));
-  (c(float3((*tint_module_vars.u)[1u].packed).zxy.x));
+  (c((*tint_module_vars.u)[1u].packed.z));
 }

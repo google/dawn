@@ -78,10 +78,8 @@ TEST_F(IR_LowerSwizzleViewTest, Accessor_Load_Constant) {
 %foo = func():void {
   $B1: {
     %v:ptr<function, vec4<f32>, read_write> = var undef
-    %3:vec4<f32> = load %v
-    %4:vec3<f32> = swizzle %3, zyx
-    %5:f32 = access %4, 0u
-    %x:f32 = let %5
+    %3:f32 = load_vector_element %v, 2u
+    %x:f32 = let %3
     ret
   }
 }
@@ -269,6 +267,53 @@ TEST_F(IR_LowerSwizzleViewTest, ChainedSwizzle_Store) {
     %8:f32 = access %4, 3u
     %9:vec4<f32> = construct %6, %7, %5, %8
     store %v, %9
+    ret
+  }
+}
+)";
+
+    Run(LowerSwizzleView);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_LowerSwizzleViewTest, ChainedSwizzle_Load) {
+    auto* func = b.Function("foo", ty.void_());
+
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", ty.ptr<function, vec4<f32>, read_write>());
+        auto* v_mv = v->Result(0)->Type()->As<core::type::MemoryView>();
+        auto* sw_ty1 = ty.Get<core::type::SwizzleView>(v_mv->AddressSpace(), ty.vec3<f32>(),
+                                                       v_mv->Access(), 4u, 3u);
+        auto* sw_ty2 = ty.Get<core::type::SwizzleView>(v_mv->AddressSpace(), ty.vec2<f32>(),
+                                                       v_mv->Access(), 3u, 2u);
+        auto* sw1 = b.Swizzle(sw_ty1, v, {2u, 1u, 0u});  // zyx
+        auto* sw2 = b.Swizzle(sw_ty2, sw1, {0u, 2u});    // xz
+        auto* load = b.Load(sw2);
+        b.Let("l", load);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func():void {
+  $B1: {
+    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %3:swizzle<function, vec3<f32>, read_write, 4, 3> = swizzle %v, zyx
+    %4:swizzle<function, vec2<f32>, read_write, 3, 2> = swizzle %3, xz
+    %5:vec2<f32> = load %4
+    %l:vec2<f32> = let %5
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func():void {
+  $B1: {
+    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %3:vec4<f32> = load %v
+    %4:vec2<f32> = swizzle %3, zx
+    %l:vec2<f32> = let %4
     ret
   }
 }

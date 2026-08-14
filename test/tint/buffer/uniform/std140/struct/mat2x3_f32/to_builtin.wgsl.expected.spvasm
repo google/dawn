@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 55
+; Bound: 53
 ; Schema: 0
                OpCapability Shader
          %31 = OpExtInstImport "GLSL.std.450"
@@ -40,7 +40,7 @@
      %uint_0 = OpConstant %uint 0
      %uint_2 = OpConstant %uint 2
      %v3uint = OpTypeVector %uint 3
-         %40 = OpTypeFunction %mat2v3float %uint
+         %38 = OpTypeFunction %mat2v3float %uint
     %uint_16 = OpConstant %uint 16
           %f = OpFunction %void None %10
          %11 = OpLabel
@@ -54,27 +54,25 @@
           %l = OpExtInst %float %31 Length %29
          %32 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_2
          %33 = OpLoad %v4uint %32 None
-         %34 = OpVectorShuffle %v3uint %33 %33 0 1 2
-         %35 = OpBitcast %v3float %34
-         %36 = OpVectorShuffle %v3float %35 %35 2 0 1
-         %37 = OpCompositeExtract %float %36 0
-          %a = OpExtInst %float %31 FAbs %37
+         %34 = OpCompositeExtract %uint %33 2
+         %35 = OpBitcast %float %34
+          %a = OpExtInst %float %31 FAbs %35
                OpReturn
                OpFunctionEnd
-         %16 = OpFunction %mat2v3float None %40
+         %16 = OpFunction %mat2v3float None %38
 %start_byte_offset = OpFunctionParameter %uint
-         %41 = OpLabel
-         %42 = OpUDiv %uint %start_byte_offset %uint_16
-         %44 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %42
-         %45 = OpLoad %v4uint %44 None
-         %46 = OpVectorShuffle %v3uint %45 %45 0 1 2
-         %47 = OpBitcast %v3float %46
-         %48 = OpIAdd %uint %uint_16 %start_byte_offset
-         %49 = OpUDiv %uint %48 %uint_16
-         %50 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %49
-         %51 = OpLoad %v4uint %50 None
-         %52 = OpVectorShuffle %v3uint %51 %51 0 1 2
-         %53 = OpBitcast %v3float %52
-         %54 = OpCompositeConstruct %mat2v3float %47 %53
-               OpReturnValue %54
+         %39 = OpLabel
+         %40 = OpUDiv %uint %start_byte_offset %uint_16
+         %42 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %40
+         %43 = OpLoad %v4uint %42 None
+         %44 = OpVectorShuffle %v3uint %43 %43 0 1 2
+         %45 = OpBitcast %v3float %44
+         %46 = OpIAdd %uint %uint_16 %start_byte_offset
+         %47 = OpUDiv %uint %46 %uint_16
+         %48 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %47
+         %49 = OpLoad %v4uint %48 None
+         %50 = OpVectorShuffle %v3uint %49 %49 0 1 2
+         %51 = OpBitcast %v3float %50
+         %52 = OpCompositeConstruct %mat2v3float %45 %51
+               OpReturnValue %52
                OpFunctionEnd

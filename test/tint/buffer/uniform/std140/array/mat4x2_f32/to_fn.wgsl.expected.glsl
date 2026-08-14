@@ -56,5 +56,6 @@ void main() {
   float v_17 = a(v_14(0u));
   float v_18 = (v_17 + b(v_3(32u)));
   float v_19 = (v_18 + c(uintBitsToFloat(v_1.inner[2u].xy).yx));
-  v_2.inner = (v_19 + d(uintBitsToFloat(v_1.inner[2u].xy).yx.x));
+  uvec4 v_20 = v_1.inner[2u];
+  v_2.inner = (v_19 + d(uintBitsToFloat(v_20.y)));
 }

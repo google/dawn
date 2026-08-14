@@ -62,5 +62,6 @@ void main() {
   b(v_5(256u));
   c(v_2(260u));
   d(tint_bitcast_to_16bit(v_1.inner[0u].z).yx);
-  e(tint_bitcast_to_16bit(v_1.inner[0u].z).yx.x);
+  uvec4 v_14 = v_1.inner[0u];
+  e(tint_bitcast_to_16bit(v_14.z).y);
 }

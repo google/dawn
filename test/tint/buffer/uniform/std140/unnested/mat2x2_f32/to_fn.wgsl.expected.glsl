@@ -24,5 +24,6 @@ void main() {
   b(uintBitsToFloat(v_1.inner[0u].zw).yx);
   uvec4 v_7 = v_1.inner[0u];
   c(uintBitsToFloat(v_7.z));
-  c(uintBitsToFloat(v_1.inner[0u].zw).yx.x);
+  uvec4 v_8 = v_1.inner[0u];
+  c(uintBitsToFloat(v_8.w));
 }

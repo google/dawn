@@ -15,7 +15,8 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   mat3x4 t = transpose(v_2(128u));
   float l = length(uintBitsToFloat(v.inner[1u].xyz).zxy);
-  float a = abs(uintBitsToFloat(v.inner[1u].xyz).zxy.x);
-  float v_3 = (t[0u].x + float(l));
-  v_1.inner = (v_3 + float(a));
+  uvec4 v_3 = v.inner[1u];
+  float a = abs(uintBitsToFloat(v_3.z));
+  float v_4 = (t[0u].x + float(l));
+  v_1.inner = (v_4 + float(a));
 }

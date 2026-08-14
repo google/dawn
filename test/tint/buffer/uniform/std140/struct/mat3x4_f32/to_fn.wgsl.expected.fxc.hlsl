@@ -65,6 +65,6 @@ void f() {
   b(v_13);
   c(v_1(272u));
   d(asfloat(u[2u]).ywxz);
-  e(asfloat(u[2u]).ywxz.x);
+  e(asfloat(u[2u].y));
 }
 

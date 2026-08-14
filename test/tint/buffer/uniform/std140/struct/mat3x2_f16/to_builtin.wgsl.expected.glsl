@@ -19,5 +19,6 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   f16mat2x3 t = transpose(v_1(260u));
   float16_t l = length(tint_bitcast_to_16bit(v.inner[0u].z).yx);
-  float16_t a = abs(tint_bitcast_to_16bit(v.inner[0u].z).yx.x);
+  uvec4 v_6 = v.inner[0u];
+  float16_t a = abs(tint_bitcast_to_16bit(v_6.z).y);
 }

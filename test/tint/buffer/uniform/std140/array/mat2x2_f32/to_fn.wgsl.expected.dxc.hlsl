@@ -53,6 +53,6 @@ void f() {
   float v_10 = a(v_9);
   float v_11 = (v_10 + b(v_1(16u)));
   float v_12 = (v_11 + c(asfloat(u[1u].xy).yx));
-  s.Store(0u, asuint((v_12 + d(asfloat(u[1u].xy).yx.x))));
+  s.Store(0u, asuint((v_12 + d(asfloat(u[1u].y)))));
 }
 

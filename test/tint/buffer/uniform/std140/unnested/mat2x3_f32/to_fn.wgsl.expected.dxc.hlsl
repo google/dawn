@@ -21,6 +21,6 @@ void f() {
   b(asfloat(u[1u].xyz));
   b(asfloat(u[1u].xyz).zxy);
   c(asfloat(u[1u].x));
-  c(asfloat(u[1u].xyz).zxy.x);
+  c(asfloat(u[1u].z));
 }
 
