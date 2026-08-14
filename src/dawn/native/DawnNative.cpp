@@ -130,11 +130,11 @@ DawnInstanceDescriptor::DawnInstanceDescriptor() {
 }
 
 bool DawnInstanceDescriptor::operator==(const DawnInstanceDescriptor& rhs) const {
-    return (nextInChain == rhs.nextInChain) &&
-           std::tie(additionalRuntimeSearchPathsCount, additionalRuntimeSearchPaths, platform,
-                    backendValidationLevel, beginCaptureOnStartup) ==
-               std::tie(rhs.additionalRuntimeSearchPathsCount, rhs.additionalRuntimeSearchPaths,
-                        rhs.platform, rhs.backendValidationLevel, rhs.beginCaptureOnStartup);
+    return nextInChain == rhs.nextInChain &&
+           additionalRuntimeSearchPaths.size() == rhs.additionalRuntimeSearchPaths.size() &&
+           additionalRuntimeSearchPaths.data() == rhs.additionalRuntimeSearchPaths.data() &&
+           platform == rhs.platform && backendValidationLevel == rhs.backendValidationLevel &&
+           beginCaptureOnStartup == rhs.beginCaptureOnStartup;
 }
 
 // Instance

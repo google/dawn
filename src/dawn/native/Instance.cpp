@@ -316,9 +316,8 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
 
     // Process DawnInstanceDescriptor
     if (const auto* dawnDesc = descriptor.Get<DawnInstanceDescriptor>()) {
-        for (uint32_t i = 0; i < dawnDesc->additionalRuntimeSearchPathsCount; ++i) {
-            mRuntimeSearchPaths.push_back(
-                DAWN_UNSAFE_TODO(dawnDesc->additionalRuntimeSearchPaths[i]));
+        for (std::string_view path : dawnDesc->additionalRuntimeSearchPaths) {
+            mRuntimeSearchPaths.push_back(std::string(path));
         }
         SetPlatform(dawnDesc->platform);
 
