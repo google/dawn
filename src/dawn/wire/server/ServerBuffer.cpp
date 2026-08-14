@@ -28,6 +28,7 @@
 #include <limits>
 #include <memory>
 #include <span>
+#include <utility>
 
 #include "dawn/wire/WireCmd_autogen.h"
 #include "src/dawn/common/StringViewUtils.h"
@@ -132,15 +133,15 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
         descriptor->mappedAtCreation != 0u ||
         (descriptor->usage & (WGPUBufferUsage_MapRead | WGPUBufferUsage_MapWrite)) != 0u;
 
-    return buffer->mapState.Use([&](auto mapState) {
-        if (isMappable) {
-            // Deserialize metadata produced from the client to create a companion server handle.
-            mapState->memoryHandle =
-                mMemoryTransferService->DeserializeMemoryHandle(memoryHandleCreateInfo);
-            if (mapState->memoryHandle == nullptr) {
-                return WireResult::FatalError;
-            }
+    std::unique_ptr<MemoryTransferService::MemoryHandle> memoryHandle = nullptr;
+    if (isMappable) {
+        memoryHandle = mMemoryTransferService->DeserializeMemoryHandle(memoryHandleCreateInfo);
+        if (memoryHandle == nullptr) {
+            return WireResult::FatalError;
         }
+    }
+    return buffer->mapState.Use([&](auto mapState) {
+        mapState->memoryHandle = std::move(memoryHandle);
         return WireResult::Success;
     });
 }
@@ -149,10 +150,11 @@ WireResult Server::DoBufferUpdateMappedData(Known<WGPUBuffer> buffer,
                                             Span<const std::byte> writeDataUpdateInfo,
                                             size_t offset,
                                             size_t size) {
+    if (size == WGPU_WHOLE_MAP_SIZE) {
+        return WireResult::FatalError;
+    }
+
     return buffer->mapState.Use([&](auto mapState) {
-        if (size == WGPU_WHOLE_MAP_SIZE) {
-            return WireResult::FatalError;
-        }
         std::byte* mappedData =
             static_cast<std::byte*>(mProcs->bufferGetMappedRange(buffer->handle, offset, size));
 
@@ -209,8 +211,9 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
 
     switch (data->mode) {
         case WGPUMapMode_Read: {
+            DAWN_ASSERT(data->size != WGPU_WHOLE_MAP_SIZE);  // Validated in DoBufferMapAsync.
+
             buffer->mapState.Use([&](auto mapState) {
-                DAWN_ASSERT(data->size != WGPU_WHOLE_MAP_SIZE);  // Validated in DoBufferMapAsync.
                 const std::byte* mappedData = static_cast<const std::byte*>(
                     mProcs->bufferGetConstMappedRange(data->bufferObj, data->offset, data->size));
 
