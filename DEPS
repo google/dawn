@@ -371,12 +371,12 @@ deps = {
   },
 
   'third_party/vulkan-deps': {
-    'url': '{chromium_git}/vulkan-deps@ed1e17f393a0014c443d76cb6c95a9e31049efe0',
+    'url': '{chromium_git}/vulkan-deps@f98a3773ade5775b127fcde08acf1557134d9af8',
     'condition': 'dawn_standalone',
   },
 
   'third_party/glslang/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@24ae85ba2abc9fe14097ceaebe6be5825a7acfba',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@a11fc7050e740fd9711f2ce89491abe0e3adca56',
     'condition': 'dawn_standalone',
   },
 
@@ -386,17 +386,17 @@ deps = {
   },
 
   'third_party/spirv-tools/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@29174bd16335bb1404466ee59dad4fc7bf51efb3',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@bb9d0b1b97bd3548128f87d180194e912df4d5df',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-headers/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Headers@f9973cd97e6f3584707e7ef1c425e336f1b92a5b',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Headers@0b7f383797fa7be53ae28213e001ae60668ee511',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-loader/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Loader@aa7c0f02d6074374341c2d3f8174848e6869d516',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Loader@83ddfc5ec5ca64ddd1055cefa1559c568101075a',
     'condition': 'dawn_standalone',
   },
 
@@ -406,12 +406,12 @@ deps = {
   },
 
   'third_party/vulkan-utility-libraries/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Utility-Libraries@120d418dd8fa884c82c783578ca381d2c81c92c9',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Utility-Libraries@245b48c522b5375c0acd5377d52bef5e4917f31e',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-validation-layers/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@4835489690e6736149a432c604853aab7b71dbd3',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@9a9d4b240fa48e0a2fb3677bcc6487bffbf17ab0',
     'condition': 'dawn_standalone',
   },
 
