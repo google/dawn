@@ -1354,7 +1354,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
     }
 
     // TODO(b/513631768): Skip clearing the buffer if this is full size copy.
-    // dst.buffer->SetInitialized(fullSizeCopy || dst.buffer->IsInitialized());
+    // dst.buffer->SetInitialized(fullSizeCopy || dst.buffer->IsResourceInitialized());
     //
     // This optimization is temporarily removed because we cannot mark the buffer as initialized
     // until the command buffer is submitted.

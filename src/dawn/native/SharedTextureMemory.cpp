@@ -217,10 +217,6 @@ Ref<SharedResourceMemoryContents> SharedTextureMemoryBase::CreateContents() {
     return AcquireRef(new SharedTextureMemoryContents(GetWeakRef(this)));
 }
 
-SharedTextureMemoryContents* SharedTextureMemoryBase::GetContents() const {
-    return static_cast<SharedTextureMemoryContents*>(SharedResourceMemory::GetContents());
-}
-
 void APISharedTextureMemoryEndAccessStateFreeMembers(WGPUSharedTextureMemoryEndAccessState cState) {
     auto* state = reinterpret_cast<SharedTextureMemoryBase::EndAccessState*>(&cState);
     for (SharedFenceBase* fence : state->fences) {

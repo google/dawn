@@ -49,11 +49,19 @@ class RefCountedWithExternalCount : public T {
 
     using T::T;
 
+    // Hot path and intended to be shadowed.
+    // TODO(crbug.com/501491694): Find if there is a neat way to keep only one copy of
+    // APIAddRef/APIRelease in each class.
+    // NOLINTNEXTLINE(bugprone-derived-method-shadowing-base-method)
     void APIAddRef() {
         IncrementExternalRefCount();
         T::APIAddRef();
     }
 
+    // Hot path and intended to be shadowed.
+    // TODO(crbug.com/501491694): Find if there is a neat way to keep only one copy of
+    // APIAddRef/APIRelease in each class.
+    // NOLINTNEXTLINE(bugprone-derived-method-shadowing-base-method)
     void APIRelease() {
         if (mExternalRefCount.Decrement()) {
             WillDropLastExternalRef();

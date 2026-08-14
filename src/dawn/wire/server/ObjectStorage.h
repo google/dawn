@@ -195,23 +195,28 @@ class KnownObjectsBase {
         return WireResult::Success;
     }
 
-    WireResult FillReservation(ObjectHandle handle, T nativeHandle, Known<T>* known = nullptr) {
-        DAWN_ASSERT(handle.id < mKnown.size());
-        DAWN_ASSERT(nativeHandle != nullptr);
-        Data* data = &mKnown[handle.id];
+    std::vector<T> AcquireAllHandles() {
+        std::vector<T> objects;
+        for (Data& data : mKnown) {
+            if (data.state == AllocationState::Allocated && data.handle != nullptr) {
+                objects.push_back(data.handle);
+                data.state = AllocationState::Free;
+                data.handle = nullptr;
+            }
+        }
 
-        if (data->state != AllocationState::Reserved) {
-            return WireResult::FatalError;
+        return objects;
+    }
+
+    std::vector<T> GetAllHandles() const {
+        std::vector<T> objects;
+        for (const Data& data : mKnown) {
+            if (data.state == AllocationState::Allocated && data.handle != nullptr) {
+                objects.push_back(data.handle);
+            }
         }
-        if (data->generation != handle.generation) {
-            return WireResult::FatalError;
-        }
-        data->handle = nativeHandle;
-        data->state = AllocationState::Allocated;
-        if (known != nullptr) {
-            *known = {handle.id, data};
-        }
-        return WireResult::Success;
+
+        return objects;
     }
 
     // Allocates the data for a given ID and returns it in result.
@@ -251,8 +256,28 @@ class KnownObjectsBase {
         return WireResult::Success;
     }
 
+  protected:
+    WireResult FillReservationImpl(ObjectHandle handle, T nativeHandle, Known<T>* known = nullptr) {
+        DAWN_ASSERT(handle.id < mKnown.size());
+        DAWN_ASSERT(nativeHandle != nullptr);
+        Data* data = &mKnown[handle.id];
+
+        if (data->state != AllocationState::Reserved) {
+            return WireResult::FatalError;
+        }
+        if (data->generation != handle.generation) {
+            return WireResult::FatalError;
+        }
+        data->handle = nativeHandle;
+        data->state = AllocationState::Allocated;
+        if (known != nullptr) {
+            *known = {handle.id, data};
+        }
+        return WireResult::Success;
+    }
+
     // Marks an ID as deallocated
-    void Free(ObjectId id) {
+    void FreeImpl(ObjectId id) {
         DAWN_ASSERT(id < mKnown.size());
         Data data;
         data.generation = mKnown[id].generation;
@@ -260,31 +285,6 @@ class KnownObjectsBase {
         mKnown[id] = std::move(data);
     }
 
-    std::vector<T> AcquireAllHandles() {
-        std::vector<T> objects;
-        for (Data& data : mKnown) {
-            if (data.state == AllocationState::Allocated && data.handle != nullptr) {
-                objects.push_back(data.handle);
-                data.state = AllocationState::Free;
-                data.handle = nullptr;
-            }
-        }
-
-        return objects;
-    }
-
-    std::vector<T> GetAllHandles() const {
-        std::vector<T> objects;
-        for (const Data& data : mKnown) {
-            if (data.state == AllocationState::Allocated && data.handle != nullptr) {
-                objects.push_back(data.handle);
-            }
-        }
-
-        return objects;
-    }
-
-  protected:
     std::vector<Data> mKnown;
 };
 
@@ -292,6 +292,12 @@ template <typename T>
 class KnownObjects : public KnownObjectsBase<T> {
   public:
     KnownObjects() = default;
+
+    WireResult FillReservation(ObjectHandle handle, T nativeHandle, Known<T>* known = nullptr) {
+        return KnownObjectsBase<T>::FillReservationImpl(handle, nativeHandle, known);
+    }
+
+    void Free(ObjectId id) { KnownObjectsBase<T>::FreeImpl(id); }
 };
 
 template <>
@@ -299,17 +305,11 @@ class KnownObjects<WGPUDevice> : public KnownObjectsBase<WGPUDevice> {
   public:
     KnownObjects() = default;
 
-    WireResult Allocate(Reserved<WGPUDevice>* result,
-                        ObjectHandle handle,
-                        AllocationState state = AllocationState::Allocated) {
-        WIRE_TRY(KnownObjectsBase<WGPUDevice>::Allocate(result, handle, state));
-        return WireResult::Success;
-    }
-
     WireResult FillReservation(ObjectHandle handle,
                                WGPUDevice nativeHandle,
                                Known<WGPUDevice>* known = nullptr) {
-        auto result = KnownObjectsBase<WGPUDevice>::FillReservation(handle, nativeHandle, known);
+        auto result =
+            KnownObjectsBase<WGPUDevice>::FillReservationImpl(handle, nativeHandle, known);
         if (result == WireResult::Success) {
             mKnownSet.insert((*known)->handle);
         }
@@ -318,7 +318,7 @@ class KnownObjects<WGPUDevice> : public KnownObjectsBase<WGPUDevice> {
 
     void Free(ObjectId id) {
         mKnownSet.erase(mKnown[id].handle);
-        KnownObjectsBase<WGPUDevice>::Free(id);
+        KnownObjectsBase<WGPUDevice>::FreeImpl(id);
     }
 
     bool IsKnown(WGPUDevice device) const { return mKnownSet.contains(device); }

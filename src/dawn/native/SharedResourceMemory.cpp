@@ -350,7 +350,7 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource, EndAccessState* s
         state->fences = {};
         state->signaledValues = {};
     }
-    state->initialized = resource->IsInitialized();
+    state->initialized = resource->IsResourceInitialized();
     return err;
 }
 

@@ -49,7 +49,7 @@ IDXGIAdapter3* PhysicalDevice::GetHardwareAdapter() const {
     return mHardwareAdapter.Get();
 }
 
-Backend* PhysicalDevice::GetBackend() const {
+Backend* PhysicalDevice::GetBackendBase() const {
     return mBackend;
 }
 

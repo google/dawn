@@ -420,8 +420,8 @@ void DumpFXCCompiledShader(Device* device,
         // Some literals are printed as floats with precision(6) which is not enough
         // precision for values very close to 0, so always print literals as hex values.
         D3D_DISASM_PRINT_HEX_LITERALS;
-    if (FAILED(device->GetFunctions()->d3dDisassemble(shaderBlob.DataPtr(), shaderBlob.Size(),
-                                                      flags, nullptr, &disassembly))) {
+    if (FAILED(device->GetFunctionsBase()->d3dDisassemble(shaderBlob.DataPtr(), shaderBlob.Size(),
+                                                          flags, nullptr, &disassembly))) {
         dumpedMsg << "D3D disassemble failed\n";
     } else {
         dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),

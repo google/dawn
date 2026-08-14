@@ -23,7 +23,7 @@ Checks:
   # P2+ are disabled for now to reduce noise.
 
   ## P0. Most likely to help with hardening.
-  #- -bugprone-derived-method-shadowing-base-method
+  #- -bugprone-derived-method-shadowing-base-method   # src/tint/*
   #- -bugprone-parent-virtual-call
   #- -bugprone-unhandled-code-paths
   #- -bugprone-unhandled-self-assignment

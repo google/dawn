@@ -32,6 +32,7 @@
 
 #include "src/dawn/native/PhysicalDevice.h"
 #include "src/dawn/native/d3d/PhysicalDeviceD3D.h"
+#include "src/dawn/native/d3d12/BackendD3D12.h"
 #include "src/dawn/native/d3d12/D3D12Info.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
 

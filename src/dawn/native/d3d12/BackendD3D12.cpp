@@ -77,7 +77,7 @@ MaybeError Backend::Initialize() {
 }
 
 const PlatformFunctions* Backend::GetFunctions() const {
-    return static_cast<const PlatformFunctions*>(Base::GetFunctions());
+    return static_cast<const PlatformFunctions*>(Base::GetFunctionsBase());
 }
 
 ResultOrError<ComPtr<ID3D12Device>> Backend::CreateD3DDevice(IUnknown* adapter) {

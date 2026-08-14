@@ -184,7 +184,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     void OnBeginAccess() override;
     bool HasAccess() const override;
     bool IsDestroyed() const override;
-    bool IsInitialized() const override;
+    bool IsResourceInitialized() const override;
     void SetInitialized(bool initialized) override;
 
     bool IsReadOnly() const;

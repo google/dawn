@@ -75,6 +75,8 @@ class SwapChainBase : public RefCounted {
     // This is because losing the last reference to the SwapChain will detach its surface which
     // explicitly destroys the current texture. Explicit destruction of textures is not thread safe
     // yet.
+    // Hot path and intended to be shadowed.
+    // NOLINTNEXTLINE(bugprone-derived-method-shadowing-base-method)
     void APIRelease() { ReleaseAndLockBeforeDestroy(); }
 
     DeviceBase* GetDevice() const;

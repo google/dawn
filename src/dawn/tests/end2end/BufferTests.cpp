@@ -1510,19 +1510,6 @@ class BufferMapExtendedUsagesTests : public DawnTest {
         return requiredFeatures;
     }
 
-    void MapAsyncAndWait(const wgpu::Buffer& buffer,
-                         wgpu::MapMode mode,
-                         size_t offset,
-                         size_t size) {
-        wgpu::Future future = buffer.MapAsync(mode, offset, size, wgpu::CallbackMode::WaitAnyOnly,
-                                              [](wgpu::MapAsyncStatus status, wgpu::StringView) {
-                                                  ASSERT_EQ(wgpu::MapAsyncStatus::Success, status);
-                                              });
-        wgpu::FutureWaitInfo waitInfo = {future};
-        GetInstance().WaitAny(1, &waitInfo, UINT64_MAX);
-        ASSERT_TRUE(waitInfo.completed);
-    }
-
     wgpu::Buffer CreateBufferFromData(const void* data, uint64_t size, wgpu::BufferUsage usage) {
         if (!(usage & wgpu::BufferUsage::MapWrite)) {
             return utils::CreateBufferFromData(device, data, size, usage);

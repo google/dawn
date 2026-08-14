@@ -96,7 +96,7 @@ MaybeError Backend::EnsureFXC() {
     return mFunctions.get()->EnsureFXC(GetInstance()->GetRuntimeSearchPaths());
 }
 
-const PlatformFunctions* Backend::GetFunctions() const {
+const PlatformFunctions* Backend::GetFunctionsBase() const {
     return mFunctions.get();
 }
 

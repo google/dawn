@@ -352,7 +352,7 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
                                            schema::ObjectId id,
                                            bool newResource) {
     // If it's all zeros or it's transient we don't need to capture it.
-    if (!IsInitialized() || !newResource ||
+    if (!IsResourceInitialized() || !newResource ||
         (GetUsage() & wgpu::TextureUsage::TransientAttachment)) {
         return {};
     }

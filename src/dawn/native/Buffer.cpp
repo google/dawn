@@ -1137,7 +1137,7 @@ void BufferBase::SetInitialized(bool initialized) {
     mIsDataInitialized = initialized;
 }
 
-bool BufferBase::IsInitialized() const {
+bool BufferBase::IsResourceInitialized() const {
     return mIsDataInitialized;
 }
 

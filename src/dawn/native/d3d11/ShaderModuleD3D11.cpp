@@ -96,7 +96,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     // D3D11 only supports FXC.
     req.bytecode.compiler = d3d::Compiler::FXC;
     req.bytecode.d3dCompile =
-        UnsafeUnserializedValue(pD3DCompile{device->GetFunctions()->d3dCompile});
+        UnsafeUnserializedValue(pD3DCompile{device->GetFunctionsBase()->d3dCompile});
     DAWN_ASSERT(device->GetDeviceInfo().shaderModel == 50);
     switch (stage) {
         case SingleShaderStage::Vertex:

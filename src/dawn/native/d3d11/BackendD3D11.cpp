@@ -96,7 +96,7 @@ MaybeError Backend::Initialize() {
 }
 
 const PlatformFunctions* Backend::GetFunctions() const {
-    return static_cast<const PlatformFunctions*>(Base::GetFunctions());
+    return static_cast<const PlatformFunctions*>(Base::GetFunctionsBase());
 }
 
 std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(

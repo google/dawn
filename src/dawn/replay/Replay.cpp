@@ -95,7 +95,7 @@ T Replay::GetObjectByLabel(std::string_view label) const {
 
 bool Replay::Play() {
     if (auto* impl = static_cast<ReplayImpl*>(this)) {
-        auto result = impl->Play();
+        auto result = impl->PlayImpl();
         if (result.IsError()) {
             result.AcquireError();
             return false;
@@ -107,7 +107,7 @@ bool Replay::Play() {
 
 ReplayStatus Replay::PlayFrame() {
     if (auto* impl = static_cast<ReplayImpl*>(this)) {
-        auto result = impl->PlayFrame();
+        auto result = impl->PlayFrameImpl();
         if (result.IsError()) {
             result.AcquireError();
             return ReplayStatus::Error;
@@ -1583,15 +1583,15 @@ Capture* ReplayImpl::GetCapture() const {
     return mCapture.get();
 }
 
-MaybeError ReplayImpl::Play() {
+MaybeError ReplayImpl::PlayImpl() {
     ReplayStatus status = ReplayStatus::Continuing;
     while (status == ReplayStatus::Continuing) {
-        DAWN_TRY_ASSIGN(status, PlayFrame());
+        DAWN_TRY_ASSIGN(status, PlayFrameImpl());
     }
     return {};
 }
 
-ResultOrError<ReplayStatus> ReplayImpl::PlayFrame() {
+ResultOrError<ReplayStatus> ReplayImpl::PlayFrameImpl() {
     if (mCommandReadHead.IsDone()) {
         return ReplayStatus::Finished;
     }

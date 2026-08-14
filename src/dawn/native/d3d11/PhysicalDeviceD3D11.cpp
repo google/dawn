@@ -94,7 +94,7 @@ ResultOrError<ComPtr<ID3D11Device>> PhysicalDevice::CreateD3D11Device(bool enabl
         mD3D11Device = nullptr;
     }
 
-    const PlatformFunctions* functions = static_cast<Backend*>(GetBackend())->GetFunctions();
+    const PlatformFunctions* functions = static_cast<Backend*>(GetBackendBase())->GetFunctions();
     const D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
 
     ComPtr<ID3D11Device> d3d11Device;

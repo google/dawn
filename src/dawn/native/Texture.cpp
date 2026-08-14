@@ -1339,7 +1339,7 @@ bool TextureBase::IsDestroyed() const {
     return mState.destroyed;
 }
 
-bool TextureBase::IsInitialized() const {
+bool TextureBase::IsResourceInitialized() const {
     return IsSubresourceContentInitialized(GetAllSubresources());
 }
 

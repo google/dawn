@@ -161,7 +161,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     bool HasAccess() const override;
     bool IsDestroyed() const override;
     void SetInitialized(bool initialized) override;
-    bool IsInitialized() const override;
+    bool IsResourceInitialized() const override;
 
     struct CurrentMapping {
         // The region of valid memory that is mapped. Empty if not mapped.

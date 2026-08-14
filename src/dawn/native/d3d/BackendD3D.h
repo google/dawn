@@ -49,7 +49,7 @@ class Backend : public BackendConnection {
 
     IDXGIFactory4* GetFactory() const;
 
-    const PlatformFunctions* GetFunctions() const;
+    const PlatformFunctions* GetFunctionsBase() const;
     MaybeError EnsureFXC();
 
     std::vector<Ref<PhysicalDeviceBase>> DiscoverPhysicalDevices(

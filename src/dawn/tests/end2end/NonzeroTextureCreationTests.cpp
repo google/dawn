@@ -95,7 +95,7 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
         return {};
     }
 
-    void Run() {
+    void DoRun() {
         DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
                                  !SupportsFeatures({wgpu::FeatureName::TextureCompressionBC}));
 
@@ -279,17 +279,17 @@ class NonzeroMultisampledTextureCreationTests : public NonzeroTextureCreationTes
 
 // Test that texture clears to a non-zero value because toggle is enabled.
 TEST_P(NonzeroTextureCreationTests, TextureCreationClears) {
-    Run();
+    DoRun();
 }
 
 // Test that texture clears to a non-zero value because toggle is enabled.
 TEST_P(NonzeroNonrenderableTextureCreationTests, TextureCreationClears) {
-    Run();
+    DoRun();
 }
 
 // Test that texture clears to a non-zero value because toggle is enabled.
 TEST_P(NonzeroCompressedTextureCreationTests, TextureCreationClears) {
-    Run();
+    DoRun();
 }
 
 // Test that texture clears to a non-zero value because toggle is enabled.
@@ -300,7 +300,7 @@ TEST_P(NonzeroDepthTextureCreationTests, TextureCreationClears) {
     // TODO(crbug.com/474396043): [Capture] error value on Mac Intel.
     DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled() && IsMetal() && IsIntel());
 
-    Run();
+    DoRun();
 }
 
 // Test that texture clears to a non-zero value because toggle is enabled.
@@ -308,7 +308,7 @@ TEST_P(NonzeroDepthStencilTextureCreationTests, TextureCreationClears) {
     // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
     DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
-    Run();
+    DoRun();
 }
 
 // Test that texture clears to a non-zero value because toggle is enabled.
@@ -316,12 +316,12 @@ TEST_P(NonzeroStencilTextureCreationTests, TextureCreationClears) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
-    Run();
+    DoRun();
 }
 
 // Test that texture clears to a non-zero value because toggle is enabled.
 TEST_P(NonzeroMultisampledTextureCreationTests, TextureCreationClears) {
-    Run();
+    DoRun();
 }
 
 DAWN_INSTANTIATE_TEST_P(

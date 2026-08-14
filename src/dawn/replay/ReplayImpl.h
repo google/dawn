@@ -48,9 +48,9 @@ class ReplayImpl : public Replay {
     static std::unique_ptr<ReplayImpl> Create(wgpu::Device device,
                                               std::unique_ptr<Capture> capture);
 
-    MaybeError Play();
+    MaybeError PlayImpl();
 
-    ResultOrError<ReplayStatus> PlayFrame();
+    ResultOrError<ReplayStatus> PlayFrameImpl();
 
     ~ReplayImpl() override;
 

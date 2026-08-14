@@ -37,6 +37,7 @@
 #include "src/dawn/native/d3d12/CommandRecordingContext.h"
 #include "src/dawn/native/d3d12/D3D12Info.h"
 #include "src/dawn/native/d3d12/Forward.h"
+#include "src/dawn/native/d3d12/PlatformFunctionsD3D12.h"
 #include "src/dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "src/dawn/native/d3d12/TextureD3D12.h"
 

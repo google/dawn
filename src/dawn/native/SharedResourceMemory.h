@@ -62,7 +62,7 @@ class SharedResource : public ApiObjectBase {
     virtual bool HasAccess() const = 0;
     virtual bool IsDestroyed() const = 0;
     virtual void SetInitialized(bool initialized) = 0;
-    virtual bool IsInitialized() const = 0;
+    virtual bool IsResourceInitialized() const = 0;
 
   protected:
     // The shared contents the resource was created from. May be null.

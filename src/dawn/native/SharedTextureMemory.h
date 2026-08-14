@@ -63,8 +63,6 @@ class SharedTextureMemoryBase : public SharedResourceMemory {
 
     ObjectType GetType() const override;
 
-    SharedTextureMemoryContents* GetContents() const;
-
   protected:
     SharedTextureMemoryBase(DeviceBase* device,
                             StringView label,

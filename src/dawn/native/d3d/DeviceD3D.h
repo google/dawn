@@ -46,7 +46,7 @@ class Device : public DeviceBase {
            Ref<DeviceBase::DeviceLostEvent>&& lostEvent);
     ~Device() override;
 
-    const PlatformFunctions* GetFunctions() const;
+    const PlatformFunctions* GetFunctionsBase() const;
     ComPtr<IDXGIFactory4> GetFactory() const;
 
     virtual void DisposeKeyedMutex(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex) = 0;

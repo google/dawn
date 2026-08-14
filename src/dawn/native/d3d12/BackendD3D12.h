@@ -34,6 +34,7 @@
 
 #include "src/dawn/native/BackendConnection.h"
 #include "src/dawn/native/d3d/BackendD3D.h"
+#include "src/dawn/native/d3d12/PlatformFunctionsD3D12.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {

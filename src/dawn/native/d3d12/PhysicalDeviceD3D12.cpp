@@ -90,7 +90,7 @@ const D3D12DeviceInfo& PhysicalDevice::GetDeviceInfo() const {
 }
 
 Backend* PhysicalDevice::GetBackend() const {
-    return static_cast<Backend*>(Base::GetBackend());
+    return static_cast<Backend*>(Base::GetBackendBase());
 }
 
 ComPtr<ID3D12Device> PhysicalDevice::GetDevice() const {

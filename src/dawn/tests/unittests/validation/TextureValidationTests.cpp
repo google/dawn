@@ -56,7 +56,7 @@ class TextureValidationTest : public ValidationTest {
         queue = device.GetQueue();
     }
 
-    wgpu::TextureDescriptor CreateDefaultTextureDescriptor() {
+    virtual wgpu::TextureDescriptor CreateDefaultTextureDescriptor() {
         wgpu::TextureDescriptor descriptor;
         descriptor.size.width = kWidth;
         descriptor.size.height = kHeight;
@@ -826,7 +826,7 @@ class CompressedTextureFormatsValidationTests : public TextureValidationTest {
                 wgpu::FeatureName::TextureCompressionASTC};
     }
 
-    wgpu::TextureDescriptor CreateDefaultTextureDescriptor() {
+    wgpu::TextureDescriptor CreateDefaultTextureDescriptor() override {
         wgpu::TextureDescriptor descriptor =
             TextureValidationTest::CreateDefaultTextureDescriptor();
         descriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |

@@ -150,7 +150,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     if (innerState.initialized) {
         texture->SetIsSubresourceContentInitialized(true, texture->GetAllSubresources());
     }
-    DAWN_ASSERT(texture->IsInitialized() == static_cast<bool>(innerState.initialized));
+    DAWN_ASSERT(texture->IsResourceInitialized() == static_cast<bool>(innerState.initialized));
 
     if (auto* mtlEndStateChain = state.Get<SharedTextureMemoryMetalEndAccessState>()) {
         DAWN_TRY(ToBackend(GetDevice()->GetQueue())->SubmitPendingCommands());

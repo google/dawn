@@ -49,12 +49,12 @@ Device::~Device() {
 
 void Device::DestroyImpl(DestroyReason reason) {}
 
-const PlatformFunctions* Device::GetFunctions() const {
-    return ToBackend(GetPhysicalDevice())->GetBackend()->GetFunctions();
+const PlatformFunctions* Device::GetFunctionsBase() const {
+    return ToBackend(GetPhysicalDevice())->GetBackendBase()->GetFunctionsBase();
 }
 
 ComPtr<IDXGIFactory4> Device::GetFactory() const {
-    return ToBackend(GetPhysicalDevice())->GetBackend()->GetFactory();
+    return ToBackend(GetPhysicalDevice())->GetBackendBase()->GetFactory();
 }
 
 void Device::RecordDeviceRemovedReason(HRESULT result) {
