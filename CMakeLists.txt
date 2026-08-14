@@ -263,6 +263,10 @@ if (TINT_BUILD_MESA AND NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
     message(FATAL_ERROR "Building Mesa is only supported on Linux")
 endif()
 
+if (TINT_BUILD_MESA AND DAWN_ENABLE_MSAN)
+    message(FATAL_ERROR "Building Mesa with MSAN is not supported, due to pre-built dependencies not being instrumented for MSAN")
+endif()
+
 if (EMSCRIPTEN)
   # Skip tint tests in emscripten build
   set(TINT_BUILD_TESTS OFF)
