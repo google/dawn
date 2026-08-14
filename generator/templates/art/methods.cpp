@@ -53,9 +53,9 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 
     //* Dawn always uses little endian format, so we pre-convert for the client's convenience.
     jclass byteOrderClass = env->FindClass("java/nio/ByteOrder");
-    jobject littleEndian = env->NewGlobalRef(env->GetStaticObjectField(
+    jobject littleEndian = env->GetStaticObjectField(
             byteOrderClass, env->GetStaticFieldID(byteOrderClass, "LITTLE_ENDIAN",
-                                                  "Ljava/nio/ByteOrder;")));
+                                                  "Ljava/nio/ByteOrder;"));
 
     jobject byteBuffer = env->NewDirectByteBuffer(const_cast<void *>(address), size);
 
@@ -63,6 +63,9 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             byteBuffer, env->GetMethodID(byteBufferClass, "order",
                                          "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;"),
             littleEndian);
+
+    env->DeleteLocalRef(byteOrderClass);
+    env->DeleteLocalRef(littleEndian);
     return byteBuffer;
 }
 
