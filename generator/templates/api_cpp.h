@@ -208,22 +208,6 @@ class {{OptionalBoolCppType}} {
     inline const {{OptionalBoolCppType}} {{OptionalBoolCppType}}::{{as_cppEnum(value.name)}} = {{OptionalBoolCppType}}({{as_cEnum(OptionalBool.name, value.name)}});
 {% endfor %}
 
-// Helper class to wrap Status which allows implicit conversion to bool.
-// Used while callers switch to checking the Status enum instead of booleans.
-// TODO(crbug.com/42241199): Remove when all callers check the enum.
-struct ConvertibleStatus {
-    explicit(false) constexpr ConvertibleStatus(Status status) : status(status) {}
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    constexpr operator bool() const {
-        return status == Status::Success;
-    }
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    constexpr operator Status() const {
-        return status;
-    }
-    Status status;
-};
-
 template<typename Derived, typename CType>
 class ObjectBase {
   public:
@@ -387,7 +371,7 @@ class ObjectBase {
     {% set CppType = as_cppType(type.name) %}
     {% set MethodName = method.name.CamelCase() %}
     {% set MethodName = CppType + "::" + MethodName if dfn else MethodName %}
-    {{"ConvertibleStatus" if method.returns and method.returns.type.name.get() == "status" else as_annotated_cppType(method.returns)}} {{MethodName}}(
+    {{"Status" if method.returns and method.returns.type.name.get() == "status" else as_annotated_cppType(method.returns)}} {{MethodName}}(
         {%- for arg in method.arguments -%}
             {%- if not loop.first %}, {% endif -%}
             {%- if arg.type.category == "object" and arg.annotation == "value" -%}

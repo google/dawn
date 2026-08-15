@@ -121,11 +121,12 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         beginAccessDesc.initialized = initialized;
         beginAccessDesc.fenceCount = 0;
         beginAccessDesc.signaledValueCount = 0;
-        bool success = sharedTextureMemory.BeginAccess(texture, &beginAccessDesc);
+        wgpu::Status status = sharedTextureMemory.BeginAccess(texture, &beginAccessDesc);
 
-        return success ? std::make_unique<PlatformTextureIOSurface>(std::move(texture),
-                                                                    std::move(sharedTextureMemory))
-                       : nullptr;
+        return status == wgpu::Status::Success
+                   ? std::make_unique<PlatformTextureIOSurface>(std::move(texture),
+                                                                std::move(sharedTextureMemory))
+                   : nullptr;
     }
 
     void DestroyVideoTextureForTest(
