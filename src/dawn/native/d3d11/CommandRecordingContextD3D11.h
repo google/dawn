@@ -93,10 +93,10 @@ class CommandRecordingContext {
     bool IsValid() const;
 
     static ResultOrError<Ref<BufferBase>> CreateInternalUniformBuffer(DeviceBase* device);
-    // The number of uint32_t elements in the immediate uniform buffer.
+    // The number of uint32_t elements in the immediate uniform buffer. Align to 16 bytes since
+    // D3D11 UpdateSubresource1 requires 16 bytes alignment for constant buffer.
     static constexpr uint32_t kMaxImmediateSlotsD3D11 =
-        Align(std::max(sizeof(RenderImmediates), sizeof(ComputeImmediates)), sizeof(uint32_t)) /
-        sizeof(uint32_t);
+        Align(std::max(sizeof(RenderImmediates), sizeof(ComputeImmediates)), 16) / sizeof(uint32_t);
 
     void ReleaseKeyedMutexes();
 
