@@ -1566,6 +1566,9 @@ crbug.com/546173500 [ android-sm-s926b ] webgpu:shader,execution,robust_access_v
 crbug.com/546173500 [ android-sm-s926b ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=true;* [ Failure ]
 crbug.com/546173500 [ android-sm-s926b ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;* [ Failure ]
 
+# Flaky timeout on Xclipse GPUs
+crbug.com/543960651 [ android-sm-s926b ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos:* [ Failure ]
+
 # Untriaged Xclipse failures.
 crbug.com/543960651 [ android-sm-s926b ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:* [ Failure ]
 crbug.com/543960651 [ android-sm-s926b ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:* [ Failure ]
