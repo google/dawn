@@ -2991,6 +2991,46 @@ fn bar(p : ptr<storage, array<i32>, read_write>) {
     EXPECT_EQ(272u, result[0].size);
 }
 
+TEST_F(InspectorGetResourceBindingsTest, SubgroupMatrix_Direct_Deprecated) {
+    auto* src = R"(
+enable chromium_experimental_subgroup_matrix;
+@group(0) @binding(0) var<storage> v : array<f32>;
+@compute @workgroup_size(16) fn ep() {
+  _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>>(&v, 0, true, 8);
+}
+    )";
+
+    Inspector& inspector = Initialize(src);
+    auto result = inspector.GetResourceBindings("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
+    EXPECT_EQ(256u, result[0].size);
+}
+
+TEST_F(InspectorGetResourceBindingsTest, SubgroupMatrix_Indirect_Deprecated) {
+    auto* src = R"(
+enable f16;
+enable chromium_experimental_subgroup_matrix;
+@group(0) @binding(0) var<storage> v : array<f16>;
+@compute @workgroup_size(16) fn ep() {
+  foo();
+}
+fn foo() {
+  _ = subgroupMatrixLoad<subgroup_matrix_left<f16, 8, 8>>(&v, 0, false, 8);
+}
+    )";
+
+    Inspector& inspector = Initialize(src);
+    auto result = inspector.GetResourceBindings("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
+    EXPECT_EQ(128u, result[0].size);
+}
+
 TEST_F(InspectorGetResourceBindingsTest, SubgroupMatrix_BufferView_ArrayU32) {
     auto* src = R"(
 enable chromium_experimental_subgroup_matrix;

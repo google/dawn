@@ -1569,19 +1569,8 @@ void Resolver::RegisterSubgroupMatrixAccess(const sem::Call* call, wgsl::Builtin
     const core::type::SubgroupMatrix* mat_ty = nullptr;
     if (fn == wgsl::BuiltinFn::kSubgroupMatrixLoad) {
         TINT_ASSERT(templated_ident);
-        // Don't validate deprecated variant.
-        // TODO(b/529415904): remove this after deprecated variant is removed.
-        if (templated_ident->arguments.Length() != 2) {
-            return;
-        }
         mat_ty = call->Target()->ReturnType()->As<core::type::SubgroupMatrix>();
     } else {
-        // Don't validate deprecated variant.
-        // TODO(b/529415904): remove this after deprecated variant is removed.
-        if (!templated_ident) {
-            return;
-        }
-        TINT_ASSERT(templated_ident->arguments.Length() == 1);
         mat_ty = call->Arguments()[2]->Type()->As<core::type::SubgroupMatrix>();
     }
 
