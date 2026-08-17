@@ -397,8 +397,29 @@ inline bool MatchRuntimeArray(intrinsic::MatchState&, const type::Type* ty, cons
 
 inline const type::Array* BuildRuntimeArray(intrinsic::MatchState& state,
                                             const type::Type*,
-                                            const type::Type* el) {
+                                            const type::Type*& el) {
     return state.types.runtime_array(el);
+}
+
+inline bool MatchAnyArray(intrinsic::MatchState&, const type::Type* ty, const type::Type*& el) {
+    if (ty->Is<intrinsic::Any>()) {
+        el = ty;
+        return true;
+    }
+    if (auto* a = ty->As<type::Array>()) {
+        el = a->ElemType();
+        return true;
+    }
+    return false;
+}
+
+inline const type::Array* BuildAnyArray(intrinsic::MatchState& state,
+                                        const type::Type* ty,
+                                        const type::Type* el) {
+    if (auto* a = ty->As<type::Array>()) {
+        return state.types.Get<type::Array>(el, a->Count(), a->Size());
+    }
+    TINT_ICE();
 }
 
 inline const type::BindingArray* BuildBindingArray(intrinsic::MatchState& state,

@@ -1,0 +1,68 @@
+#include <metal_stdlib>
+using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_module_vars_struct {
+  device tint_array<float, 1>* s_var;
+  threadgroup tint_array<float, 1024>* wg_var;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+};
+
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_0;
+};
+
+struct tint_symbol_1 {
+  tint_array<float, 1024> tint_symbol;
+};
+
+void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  {
+    uint v = 0u;
+    v = tint_local_index;
+    while(true) {
+      uint const v_1 = v;
+      if ((v_1 >= 1024u)) {
+        break;
+      }
+      (*tint_module_vars.wg_var)[v_1] = 0.0f;
+      {
+        v = (v_1 + 32u);
+      }
+    }
+  }
+  (threadgroup_barrier(mem_flags::mem_threadgroup));
+  tint_array_lengths_struct const v_2 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)};
+  uint const v_3 = as_type<uint>(0);
+  uint const v_4 = as_type<uint>(8);
+  bool const v_5 = (((v_3 + (v_4 * 7u)) + 8u) <= v_2.tint_array_length_0_0);
+  simdgroup_float8x8 v_6 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+  (simdgroup_load(v_6, (&(*tint_module_vars.s_var)[select(0u, v_3, v_5)]), ulong(select(8u, v_4, v_5)), ulong2(0ul), false));
+  simdgroup_float8x8 const m = v_6;
+  (simdgroup_store(m, (&(*tint_module_vars.wg_var)[0]), ulong(as_type<uint>(8)), ulong2(0ul), false));
+  (threadgroup_barrier(mem_flags::mem_threadgroup));
+  simdgroup_float8x8 v_7 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+  (simdgroup_load(v_7, (&(*tint_module_vars.wg_var)[0]), ulong(as_type<uint>(8)), ulong2(0ul), true));
+  simdgroup_float8x8 const m2 = v_7;
+  uint const v_8 = as_type<uint>(0);
+  uint const v_9 = as_type<uint>(8);
+  bool const v_10 = (((v_8 + (v_9 * 7u)) + 8u) <= v_2.tint_array_length_0_0);
+  (simdgroup_store(m2, (&(*tint_module_vars.s_var)[select(0u, v_8, v_10)]), ulong(select(8u, v_9, v_10)), ulong2(0ul), true));
+}
+
+[[max_total_threads_per_threadgroup(32)]]
+kernel void v_11(uint tint_local_index [[thread_index_in_threadgroup]], device tint_array<float, 1>* s_var [[buffer(0)]], threadgroup tint_symbol_1* v_12 [[threadgroup(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s_var=s_var, .wg_var=(&(*v_12).tint_symbol), .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  (main_inner(tint_local_index, tint_module_vars));
+}
