@@ -109,20 +109,23 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
     // Optional; nullptr on older systems without Agility SDK.
     PFN_D3D12_GET_INTERFACE d3d12GetInterface = nullptr;
 
-#ifdef DAWN_USE_AGILITY_SDK
-    // Called once by Initialize().
-    void EnsureAgilitySDKDeviceFactory();
-
-    // Non-null after a successful EnsureAgilitySDKDeviceFactory() call.
-    ComPtr<ID3D12DeviceFactory> mDeviceFactory;
-    ComPtr<ID3D12DeviceConfiguration> mDeviceConfiguration;
-#endif  // DAWN_USE_AGILITY_SDK
-
     DynamicLib mD3D12Lib;
     DynamicLib mD3D11Lib;
     DynamicLib mPIXEventRuntimeLib;
     DynamicLib mDXILLib;
     DynamicLib mDXCompilerLib;
+
+#ifdef DAWN_USE_AGILITY_SDK
+    // Called once by Initialize().
+    void EnsureAgilitySDKDeviceFactory();
+
+    // These interfaces are implemented by D3D12Core.dll. They must be declared after the
+    // DynamicLib members so reverse-order member destruction releases them before unloading their
+    // implementation.
+    // Non-null after a successful EnsureAgilitySDKDeviceFactory() call.
+    ComPtr<ID3D12DeviceFactory> mDeviceFactory;
+    ComPtr<ID3D12DeviceConfiguration> mDeviceConfiguration;
+#endif  // DAWN_USE_AGILITY_SDK
 };
 
 }  // namespace dawn::native::d3d12
