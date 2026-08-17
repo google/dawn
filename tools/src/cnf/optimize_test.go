@@ -59,11 +59,17 @@ func TestOptimize(t *testing.T) {
 		{in: `X && Y && X`, out: `X && Y`},
 		{in: `(X || Y) && (X || Y)`, out: `X || Y`},
 
+		// Absorption Law
+		{in: `X && (X || Y)`, out: `X`},
+		{in: `(X || Y) && X`, out: `X`},
+		{in: `(X || Y) && (X || Y || Z)`, out: `X || Y`},
+		{in: `(X || Y) && (X || Y || (!Z))`, out: `X || Y`},
+
 		// Complex cases
 		{in: `(X || Y) || (Y || Z)`, out: `X || Y || Z`},
-		{in: `(X || Y) || (Y && Z)`, out: `(X || Y) && (X || Y || Z)`},
+		{in: `(X || Y) || (Y && Z)`, out: `X || Y`},
 		{in: `(X && Y) && (Y && Z)`, out: `X && Y && Z`},
-		{in: `!(X && !(Y || Z)) && Z`, out: `((!X) || Y || Z) && Z`},
+		{in: `!(X && !(Y || Z)) && Z`, out: `Z`},
 		{in: `Z || !(X && !(Y || Z))`, out: `(!X) || Y || Z`},
 	} {
 		expr, err := cnf.Parse(test.in)
