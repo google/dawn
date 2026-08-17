@@ -37,17 +37,23 @@ config("dawn_perfetto_config") {
   }
 }
 
-group("dawn_perfetto") {
-  if (dawn_enable_perfetto) {
-    # When build_with_chromium=true we need to include the combined target
-    # to avoid multiply defined globals. Otherwise we can use the client API.
-    if (build_with_chromium) {
+if (build_with_chromium) {
+  group("dawn_perfetto") {
+    if (dawn_enable_perfetto) {
+      # When build_with_chromium=true we need to include the combined target
+      # to avoid multiply defined globals.
       public_deps = [ "$dawn_perfetto_dir:libperfetto" ]
-    } else {
-      public_deps = [ "$dawn_perfetto_dir/src/tracing:client_api" ]
+      public_configs = [ ":dawn_perfetto_config" ]
     }
-
-    public_configs = [ ":dawn_perfetto_config" ]
+  }
+} else {
+  component("dawn_perfetto") {
+    if (dawn_enable_perfetto) {
+      # In standalone builds, use the client API. A component is required in
+      # component builds to avoid duplicate symbol errors across Dawn DLLs.
+      public_deps = [ "$dawn_perfetto_dir/src/tracing:client_api" ]
+      public_configs = [ ":dawn_perfetto_config" ]
+    }
   }
 }
 

@@ -310,7 +310,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/perfetto': {
-    'url': '{chromium_git}/external/github.com/google/perfetto.git@502412dfb6c6a70d99faddd8783cdc6ae072d4f2',
+    'url': '{chromium_git}/external/github.com/google/perfetto.git@1743360cb287a0f864a220d2950b2fab2d5771d0',
     'condition': 'dawn_standalone',
   },
 
