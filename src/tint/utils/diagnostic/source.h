@@ -59,7 +59,7 @@ class Source {
         /// The original un-split file content
         const std::string data;
 
-        // The range of character in #data for a single line
+        // The range of bytes in #data for a single line
         struct LineRange {
             size_t start;
             size_t length;
