@@ -48,7 +48,7 @@ namespace tint::wgsl::writer {
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
-IRToProgramTest::Result IRToProgramTest::Run() {
+IRToProgramTest::Result IRToProgramTest::RunTest() {
     Result result;
 
     result.ir = str();

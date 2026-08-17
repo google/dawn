@@ -206,6 +206,7 @@ class Parameter final : public Castable<Parameter, Variable> {
     ~Parameter() override;
 
     /// @returns the AST declaration node
+    // NOLINTNEXTLINE(bugprone-derived-method-shadowing-base-method)
     const ast::Parameter* Declaration() const {
         return static_cast<const ast::Parameter*>(Variable::Declaration());
     }
@@ -253,6 +254,7 @@ class VariableUser final : public Castable<VariableUser, ValueExpression> {
     ~VariableUser() override;
 
     /// @returns the AST node
+    // NOLINTNEXTLINE(bugprone-derived-method-shadowing-base-method)
     const ast::IdentifierExpression* Declaration() const;
 
     /// @returns the variable that this expression refers to

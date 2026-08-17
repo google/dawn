@@ -52,7 +52,7 @@ class IRToProgramTest : public core::ir::IRTestHelper {
         std::string err;
     };
     /// @returns the WGSL generated from the IR
-    Result Run();
+    Result RunTest();
 
     /// Creates a new `var` declaration with a name and initializer value, using a reference type.
     /// @tparam SPACE the var's address space
@@ -111,7 +111,7 @@ class IRToProgramTest : public core::ir::IRTestHelper {
 
 #define EXPECT_WGSL(expected_wgsl)                                                   \
     do {                                                                             \
-        if (auto got = Run(); got.err.empty()) {                                     \
+        if (auto got = RunTest(); got.err.empty()) {                                 \
             auto expected = std::string(tint::TrimSpace(expected_wgsl));             \
             if (!expected.empty()) {                                                 \
                 expected = "\n" + expected + "\n";                                   \

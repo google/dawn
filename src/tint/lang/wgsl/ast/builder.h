@@ -153,7 +153,7 @@ class Builder {
     Builder(Builder&& rhs);
 
     /// Destructor
-    ~Builder();
+    virtual ~Builder();
 
     /// Move assignment operator
     /// @param rhs the builder to move
@@ -3571,7 +3571,7 @@ class Builder {
 
   protected:
     /// Asserts that the builder has not been moved.
-    void AssertNotMoved() const;
+    virtual void AssertNotMoved() const;
 
     /// The last Node identifier
     NodeID last_ast_node_id_ = NodeID{static_cast<decltype(NodeID::value)>(0) - 1};

@@ -47,7 +47,7 @@ class MslWriter_FixTypeLayoutTest : public core::ir::transform::TransformTest {
     }
 
     FixTypeLayoutConfig options;
-    void Run() { core::ir::transform::TransformTest::Run(FixTypeLayout, options); }
+    void RunTransform() { core::ir::transform::TransformTest::Run(FixTypeLayout, options); }
 };
 
 TEST_F(MslWriter_FixTypeLayoutTest, NoModify_PrivateVar) {
@@ -75,7 +75,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -106,7 +106,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -137,7 +137,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -168,7 +168,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -210,7 +210,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -253,7 +253,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -296,7 +296,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -344,7 +344,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -390,7 +390,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -441,7 +441,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -496,7 +496,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -570,7 +570,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -640,7 +640,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -704,7 +704,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -774,7 +774,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -840,7 +840,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -891,7 +891,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -949,7 +949,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1025,7 +1025,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1083,7 +1083,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1139,7 +1139,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1201,7 +1201,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1277,7 +1277,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1335,7 +1335,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1391,7 +1391,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1449,7 +1449,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1519,7 +1519,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1606,7 +1606,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1666,7 +1666,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1742,7 +1742,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1830,7 +1830,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1888,7 +1888,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -1993,7 +1993,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -2099,7 +2099,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -2216,7 +2216,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -2305,7 +2305,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -2434,7 +2434,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -2576,7 +2576,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -2721,7 +2721,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -2800,7 +2800,7 @@ $B1: {  # root
 
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -3036,7 +3036,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -3101,7 +3101,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -3191,7 +3191,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -3304,7 +3304,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -3351,7 +3351,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -3455,7 +3455,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -3535,7 +3535,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -3652,7 +3652,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -3746,7 +3746,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -3811,7 +3811,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -3878,7 +3878,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -3928,7 +3928,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -3977,7 +3977,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -4042,7 +4042,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -4076,7 +4076,7 @@ $B1: {  # root
     auto* expect = src;
 
     options.replace_bool_with_u32 = false;
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -4125,7 +4125,7 @@ $B1: {  # root
 )";
 
     options.replace_bool_with_u32 = true;
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -4160,7 +4160,7 @@ $B1: {  # root
     auto* expect = src;
 
     options.replace_bool_with_u32 = false;
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -4210,7 +4210,7 @@ $B1: {  # root
 )";
 
     options.replace_bool_with_u32 = true;
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -4307,7 +4307,7 @@ $B1: {  # root
 )";
 
     options.replace_bool_with_u32 = true;
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -4360,7 +4360,7 @@ $B1: {  # root
 )";
 
     options.replace_bool_with_u32 = false;
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -4438,7 +4438,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -4520,7 +4520,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -4601,7 +4601,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -4720,7 +4720,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -4772,7 +4772,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }
@@ -4826,7 +4826,7 @@ $B1: {  # root
 }
 )";
 
-    Run();
+    RunTransform();
 
     EXPECT_EQ(expect, str());
 }

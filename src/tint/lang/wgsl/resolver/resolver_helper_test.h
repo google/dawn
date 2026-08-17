@@ -66,7 +66,7 @@ class TestHelper : public ProgramBuilder {
     TestHelper();
 
     /// Destructor
-    ~TestHelper();
+    ~TestHelper() override;
 
     /// @return a pointer to the Resolver
     Resolver* r() const { return resolver_.get(); }
