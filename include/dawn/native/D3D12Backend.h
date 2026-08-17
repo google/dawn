@@ -36,6 +36,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmicrosoft-enum-value"
 #pragma clang diagnostic ignored "-Wnested-anon-types"
+#pragma clang diagnostic ignored "-Wnon-virtual-dtor"
 #endif
 #include "third_party/agility-sdk/src/build/native/include/d3d12.h"
 #if defined(__clang__)
