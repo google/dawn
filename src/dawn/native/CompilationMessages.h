@@ -45,7 +45,7 @@ class List;
 
 namespace dawn::native {
 
-uint64_t CountUTF16CodeUnitsFromUTF8String(const std::string_view& utf8String);
+size_t CountUTF16CodeUnitsFromUTF8String(std::string_view utf8String);
 
 // CompilationMessageContent is serializable and holds the content of each compilation message.
 #define COMPILATION_MESSAGE_CONTENT_MEMBER(X) \

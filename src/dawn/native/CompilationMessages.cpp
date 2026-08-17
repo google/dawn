@@ -53,12 +53,12 @@ wgpu::CompilationMessageType TintSeverityToMessageType(tint::diag::Severity seve
 
 }  // anonymous namespace
 
-uint64_t CountUTF16CodeUnitsFromUTF8String(const std::string_view& utf8String) {
+size_t CountUTF16CodeUnitsFromUTF8String(std::string_view utf8String) {
     if (tint::utf8::IsASCII(utf8String)) {
         return utf8String.size();
     }
 
-    uint64_t numberOfUTF16CodeUnits = 0;
+    size_t numberOfUTF16CodeUnits = 0;
     std::string_view remaining = utf8String;
     while (!remaining.empty()) {
         auto [codePoint, utf8CharacterByteLength] = tint::utf8::Decode(remaining);
@@ -115,53 +115,51 @@ void ParsedCompilationMessages::AddMessageForTesting(std::string_view message,
 
 void ParsedCompilationMessages::AddMessage(const tint::diag::Diagnostic& diagnostic) {
     // Tint line and column values are 1-based.
-    uint64_t lineNum = diagnostic.source.range.begin.line;
-    uint64_t linePosInBytes = diagnostic.source.range.begin.column;
+    size_t lineNum = diagnostic.source.range.begin.line;
+    size_t linePosInBytes = diagnostic.source.range.begin.column;
     // The offset is 0-based.
-    uint64_t offsetInBytes = 0;
-    uint64_t lengthInBytes = 0;
-    uint64_t linePosInUTF16 = 0;
-    uint64_t offsetInUTF16 = 0;
-    uint64_t lengthInUTF16 = 0;
+    size_t offsetInBytes = 0;
+    size_t lengthInBytes = 0;
+    size_t linePosInUTF16 = 0;
+    size_t offsetInUTF16 = 0;
+    size_t lengthInUTF16 = 0;
 
     if (lineNum && linePosInBytes && diagnostic.source.file) {
         const tint::Source::FileContent& content = diagnostic.source.file->content;
+        std::string_view wholeFile = content.data.data();
 
-        // Tint stores line as std::string_view in a complete source std::string that's in the
-        // source file. So to get the offset in bytes of a line we just need to substract its start
-        // pointer with the start of the file's content. Note that line numbering in Tint source
-        // range starts at 1 while the array of lines start at 0 (hence the -1).
-        const char* fileStart = content.data.data();
-        const char* lineStart = content.GetLine(checked_cast<size_t>(lineNum - 1)).data();
-        offsetInBytes = static_cast<uint64_t>(lineStart - fileStart) + linePosInBytes - 1;
+        // Line numbering in Tint source range starts at 1 while the array of lines ranges start at
+        // 0 (hence the -1).
+        size_t lineStartByteOffset = content.line_ranges[checked_cast<size_t>(lineNum - 1)].start;
+        offsetInBytes = lineStartByteOffset + linePosInBytes - 1;
 
         // The linePosInBytes is 1-based.
-        uint64_t linePosOffsetInUTF16 = CountUTF16CodeUnitsFromUTF8String(
-            std::string_view(lineStart, checked_cast<size_t>(linePosInBytes - 1)));
+        size_t linePosOffsetInUTF16 = CountUTF16CodeUnitsFromUTF8String(
+            wholeFile.substr(lineStartByteOffset, linePosInBytes - 1));
         linePosInUTF16 = linePosOffsetInUTF16 + 1;
 
         // The offset is 0-based.
-        uint64_t lineStartToFileStartOffsetInUTF16 = CountUTF16CodeUnitsFromUTF8String(
-            std::string_view(fileStart, checked_cast<size_t>(lineStart - fileStart)));
-        offsetInUTF16 = lineStartToFileStartOffsetInUTF16 + linePosInUTF16 - 1;
+        size_t fileStartToLineStartOffsetInUTF16 =
+            CountUTF16CodeUnitsFromUTF8String(wholeFile.substr(0, lineStartByteOffset));
+        offsetInUTF16 = fileStartToLineStartOffsetInUTF16 + linePosInUTF16 - 1;
 
         // If the range has a valid start but the end is not specified, clamp it to the start.
-        uint64_t endLineNum = diagnostic.source.range.end.line;
-        uint64_t endLineCol = diagnostic.source.range.end.column;
+        size_t endLineNum = diagnostic.source.range.end.line;
+        size_t endLineCol = diagnostic.source.range.end.column;
         if (endLineNum == 0 || endLineCol == 0) {
             endLineNum = lineNum;
             endLineCol = linePosInBytes;
         }
 
-        const char* endLineStart = content.GetLine(checked_cast<size_t>(endLineNum - 1)).data();
-        uint64_t endOffsetInBytes =
-            static_cast<uint64_t>(endLineStart - fileStart) + endLineCol - 1;
+        size_t endLineStartByteOffset =
+            content.line_ranges[checked_cast<size_t>(endLineNum - 1)].start;
+        size_t endOffsetInBytes = endLineStartByteOffset + endLineCol - 1;
         // The length of the message is the difference between the starting offset and the
         // ending offset. Negative ranges aren't allowed.
         DAWN_ASSERT(endOffsetInBytes >= offsetInBytes);
         lengthInBytes = endOffsetInBytes - offsetInBytes;
-        lengthInUTF16 = CountUTF16CodeUnitsFromUTF8String(std::string_view(
-            DAWN_UNSAFE_TODO(fileStart + offsetInBytes), checked_cast<size_t>(lengthInBytes)));
+        lengthInUTF16 =
+            CountUTF16CodeUnitsFromUTF8String(wholeFile.substr(offsetInBytes, lengthInBytes));
     }
 
     std::string plainMessage = diagnostic.message.Plain();
