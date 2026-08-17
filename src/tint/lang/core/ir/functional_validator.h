@@ -140,6 +140,10 @@ class Functional {
     void CheckBlock(const Block* blk);
     void CheckInstruction(const Instruction* inst);
 
+    // Validates the alignment of the given instruction
+    /// @param inst the instruction to validate
+    void CheckAlignment(const Instruction* inst);
+
     void CheckAccess(const Access* a);
     void CheckBinary(const Binary* b);
     void CheckBreakIf(const BreakIf* b);
