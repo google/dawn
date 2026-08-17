@@ -56,8 +56,6 @@ cc_binary(
     "//src/tint/lang/core/ir:test",
     "//src/tint/lang/core/type:test",
     "//src/tint/lang/core:test",
-    "//src/tint/lang/spirv/ir:test",
-    "//src/tint/lang/spirv/type:test",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast:test",
     "//src/tint/lang/wgsl/ir:test",
@@ -138,6 +136,8 @@ cc_binary(
     "//conditions:default": [],
   }) + select({
     ":tint_build_spv_reader_or_tint_build_spv_writer": [
+      "//src/tint/lang/spirv/ir:test",
+      "//src/tint/lang/spirv/type:test",
       "//src/tint/lang/spirv/validate:test",
     ],
     "//conditions:default": [],

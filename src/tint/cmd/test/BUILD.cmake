@@ -53,8 +53,6 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_lang_core_ir_test
   tint_lang_core_type_test
   tint_lang_core_test
-  tint_lang_spirv_ir_test
-  tint_lang_spirv_type_test
   tint_lang_wgsl
   tint_lang_wgsl_ast_test
   tint_lang_wgsl_ir_test
@@ -146,6 +144,8 @@ endif(TINT_BUILD_SPV_READER)
 
 if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
+    tint_lang_spirv_ir_test
+    tint_lang_spirv_type_test
     tint_lang_spirv_validate_test
   )
 endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
