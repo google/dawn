@@ -113,7 +113,6 @@ class DAWN_NATIVE_EXPORT Adapter {
 enum BackendValidationLevel { Full, Partial, Disabled };
 
 // Can be chained in InstanceDescriptor
-#define DAWN_BREAKING_INSTANCE_DESCRIPTOR_SPANIFICATION
 struct DAWN_NATIVE_EXPORT DawnInstanceDescriptor : wgpu::ChainedStruct {
     DawnInstanceDescriptor();
     std::span<std::string_view> additionalRuntimeSearchPaths;
