@@ -32,26 +32,16 @@ struct tint_module_vars_struct {
 };
 
 void foo(thread simdgroup_float8x8* const m, thread tint_array<simdgroup_float8x8, 4>* const m_array, thread tint_array<tint_array<simdgroup_float8x8, 4>, 4>* const m_nested_array, thread S* const m_struct, thread S_Nested* const m_nested_struct, tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
-  simdgroup_float8x8 const v = (*m);
-  if ((((as_type<uint>(0) + (as_type<uint>(64) * 7u)) + 8u) <= tint_array_lengths.tint_array_length_0_0)) {
-    (simdgroup_store(v, (&(*tint_module_vars.tint_member)[0]), ulong(as_type<uint>(64)), ulong2(0ul), false));
-  }
-  simdgroup_float8x8 const v_1 = (*m_array)[0u];
-  if ((((as_type<uint>(0) + (as_type<uint>(64) * 7u)) + 8u) <= tint_array_lengths.tint_array_length_0_0)) {
-    (simdgroup_store(v_1, (&(*tint_module_vars.tint_member)[0]), ulong(as_type<uint>(64)), ulong2(0ul), false));
-  }
-  simdgroup_float8x8 const v_2 = (*m_nested_array)[1u][2u];
-  if ((((as_type<uint>(0) + (as_type<uint>(64) * 7u)) + 8u) <= tint_array_lengths.tint_array_length_0_0)) {
-    (simdgroup_store(v_2, (&(*tint_module_vars.tint_member)[0]), ulong(as_type<uint>(64)), ulong2(0ul), false));
-  }
-  simdgroup_float8x8 const v_3 = (*m_struct).l;
-  if ((((as_type<uint>(0) + (as_type<uint>(64) * 7u)) + 8u) <= tint_array_lengths.tint_array_length_0_0)) {
-    (simdgroup_store(v_3, (&(*tint_module_vars.tint_member)[0]), ulong(as_type<uint>(64)), ulong2(0ul), false));
-  }
-  simdgroup_float8x8 const v_4 = (*m_nested_struct).s.r;
-  if ((((as_type<uint>(0) + (as_type<uint>(64) * 7u)) + 8u) <= tint_array_lengths.tint_array_length_0_0)) {
-    (simdgroup_store(v_4, (&(*tint_module_vars.tint_member)[0]), ulong(as_type<uint>(64)), ulong2(0ul), false));
-  }
+  bool const v = (((0u + (64u * 7u)) + 8u) <= tint_array_lengths.tint_array_length_0_0);
+  (simdgroup_store((*m), (&(*tint_module_vars.tint_member)[select(0u, 0u, v)]), ulong(select(8u, 64u, v)), ulong2(0ul), false));
+  bool const v_1 = (((0u + (64u * 7u)) + 8u) <= tint_array_lengths.tint_array_length_0_0);
+  (simdgroup_store((*m_array)[0u], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_1)]), ulong(select(8u, 64u, v_1)), ulong2(0ul), false));
+  bool const v_2 = (((0u + (64u * 7u)) + 8u) <= tint_array_lengths.tint_array_length_0_0);
+  (simdgroup_store((*m_nested_array)[1u][2u], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_2)]), ulong(select(8u, 64u, v_2)), ulong2(0ul), false));
+  bool const v_3 = (((0u + (64u * 7u)) + 8u) <= tint_array_lengths.tint_array_length_0_0);
+  (simdgroup_store((*m_struct).l, (&(*tint_module_vars.tint_member)[select(0u, 0u, v_3)]), ulong(select(8u, 64u, v_3)), ulong2(0ul), false));
+  bool const v_4 = (((0u + (64u * 7u)) + 8u) <= tint_array_lengths.tint_array_length_0_0);
+  (simdgroup_store((*m_nested_struct).s.r, (&(*tint_module_vars.tint_member)[select(0u, 0u, v_4)]), ulong(select(8u, 64u, v_4)), ulong2(0ul), false));
 }
 
 [[max_total_threads_per_threadgroup(64)]]

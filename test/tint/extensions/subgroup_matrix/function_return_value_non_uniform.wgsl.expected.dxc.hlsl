@@ -100,37 +100,32 @@ void main_inner(uint idx) {
   Matrix_left_f32_8x8 v_27 = make_matrix();
   uint v_28 = 0u;
   buffer.GetDimensions(v_28);
-  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_28 / 4u))) {
-    v_27.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
-  }
-  Matrix_left_f32_8x8 v_29[2] = make_array();
-  Matrix_left_f32_8x8 v_30 = v_29[0u];
-  uint v_31 = 0u;
-  buffer.GetDimensions(v_31);
-  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_31 / 4u))) {
-    v_30.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
-  }
-  Matrix_left_f32_8x8 v_32[2][2] = make_nested_array();
-  Matrix_left_f32_8x8 v_33 = v_32[1u][0u];
-  uint v_34 = 0u;
-  buffer.GetDimensions(v_34);
-  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_34 / 4u))) {
-    v_33.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
-  }
-  S v_35 = make_struct();
-  Matrix_left_f32_8x8 v_36 = v_35.l;
-  uint v_37 = 0u;
-  buffer.GetDimensions(v_37);
-  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_37 / 4u))) {
-    v_36.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
-  }
-  S_Nested v_38 = make_nested_struct();
-  Matrix_right_f32_8x8 v_39 = v_38.s.r;
+  bool v_29 = (((0u + (64u * 7u)) + 8u) <= (v_28 / 4u));
+  v_27.Store(buffer, (0u + (select(v_29, 0u, 0u) * 4u)), (select(v_29, 64u, 8u) * 4u), MatrixLayout::RowMajor);
+  Matrix_left_f32_8x8 v_30[2] = make_array();
+  Matrix_left_f32_8x8 v_31 = v_30[0u];
+  uint v_32 = 0u;
+  buffer.GetDimensions(v_32);
+  bool v_33 = (((0u + (64u * 7u)) + 8u) <= (v_32 / 4u));
+  v_31.Store(buffer, (0u + (select(v_33, 0u, 0u) * 4u)), (select(v_33, 64u, 8u) * 4u), MatrixLayout::RowMajor);
+  Matrix_left_f32_8x8 v_34[2][2] = make_nested_array();
+  Matrix_left_f32_8x8 v_35 = v_34[1u][0u];
+  uint v_36 = 0u;
+  buffer.GetDimensions(v_36);
+  bool v_37 = (((0u + (64u * 7u)) + 8u) <= (v_36 / 4u));
+  v_35.Store(buffer, (0u + (select(v_37, 0u, 0u) * 4u)), (select(v_37, 64u, 8u) * 4u), MatrixLayout::RowMajor);
+  S v_38 = make_struct();
+  Matrix_left_f32_8x8 v_39 = v_38.l;
   uint v_40 = 0u;
   buffer.GetDimensions(v_40);
-  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_40 / 4u))) {
-    v_39.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
-  }
+  bool v_41 = (((0u + (64u * 7u)) + 8u) <= (v_40 / 4u));
+  v_39.Store(buffer, (0u + (select(v_41, 0u, 0u) * 4u)), (select(v_41, 64u, 8u) * 4u), MatrixLayout::RowMajor);
+  S_Nested v_42 = make_nested_struct();
+  Matrix_right_f32_8x8 v_43 = v_42.s.r;
+  uint v_44 = 0u;
+  buffer.GetDimensions(v_44);
+  bool v_45 = (((0u + (64u * 7u)) + 8u) <= (v_44 / 4u));
+  v_43.Store(buffer, (0u + (select(v_45, 0u, 0u) * 4u)), (select(v_45, 64u, 8u) * 4u), MatrixLayout::RowMajor);
 }
 
 [numthreads(64, 1, 1)]

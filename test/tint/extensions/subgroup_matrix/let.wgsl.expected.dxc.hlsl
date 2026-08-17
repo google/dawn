@@ -31,28 +31,23 @@ void main() {
   S_Nested m_nested_struct_let = m_nested_struct;
   uint v_4 = 0u;
   buffer.GetDimensions(v_4);
-  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_4 / 4u))) {
-    m_let.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
-  }
-  uint v_5 = 0u;
-  buffer.GetDimensions(v_5);
-  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_5 / 4u))) {
-    m_array_let[0u].Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
-  }
+  bool v_5 = (((0u + (64u * 7u)) + 8u) <= (v_4 / 4u));
+  m_let.Store(buffer, (0u + (select(v_5, 0u, 0u) * 4u)), (select(v_5, 64u, 8u) * 4u), MatrixLayout::RowMajor);
   uint v_6 = 0u;
   buffer.GetDimensions(v_6);
-  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_6 / 4u))) {
-    m_nested_array_let[1u][2u].Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
-  }
-  uint v_7 = 0u;
-  buffer.GetDimensions(v_7);
-  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_7 / 4u))) {
-    m_struct_let.l.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
-  }
+  bool v_7 = (((0u + (64u * 7u)) + 8u) <= (v_6 / 4u));
+  m_array_let[0u].Store(buffer, (0u + (select(v_7, 0u, 0u) * 4u)), (select(v_7, 64u, 8u) * 4u), MatrixLayout::RowMajor);
   uint v_8 = 0u;
   buffer.GetDimensions(v_8);
-  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_8 / 4u))) {
-    m_nested_struct_let.s.r.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
-  }
+  bool v_9 = (((0u + (64u * 7u)) + 8u) <= (v_8 / 4u));
+  m_nested_array_let[1u][2u].Store(buffer, (0u + (select(v_9, 0u, 0u) * 4u)), (select(v_9, 64u, 8u) * 4u), MatrixLayout::RowMajor);
+  uint v_10 = 0u;
+  buffer.GetDimensions(v_10);
+  bool v_11 = (((0u + (64u * 7u)) + 8u) <= (v_10 / 4u));
+  m_struct_let.l.Store(buffer, (0u + (select(v_11, 0u, 0u) * 4u)), (select(v_11, 64u, 8u) * 4u), MatrixLayout::RowMajor);
+  uint v_12 = 0u;
+  buffer.GetDimensions(v_12);
+  bool v_13 = (((0u + (64u * 7u)) + 8u) <= (v_12 / 4u));
+  m_nested_struct_let.s.r.Store(buffer, (0u + (select(v_13, 0u, 0u) * 4u)), (select(v_13, 64u, 8u) * 4u), MatrixLayout::RowMajor);
 }
 
