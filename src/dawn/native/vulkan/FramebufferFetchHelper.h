@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_FRAMEBUFFER_FETCH_H_
 #define SRC_DAWN_NATIVE_VULKAN_FRAMEBUFFER_FETCH_H_
 
+#include "src/dawn/common/GPUInfo.h"
 #include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/vulkan_platform.h"
@@ -42,6 +43,10 @@ namespace dawn::native::vulkan {
 // to implement FramebufferFetch.
 class FramebufferFetchHelper {
   public:
+    // Checks if hardware supports coherent rasterization natively. FramebufferFetch only requires
+    // a subpass self-dependency for color attachments, and no barriers, if this is true.
+    static bool SupportsCoherentRasterization(PCIVendorID vendorId);
+
     explicit FramebufferFetchHelper(Device* device);
     ~FramebufferFetchHelper();
 

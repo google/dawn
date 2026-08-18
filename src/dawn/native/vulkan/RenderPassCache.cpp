@@ -79,7 +79,7 @@ class RenderPassCreateInfo {
 
     std::array<VkAttachmentDescription, kMaxAttachmentCount> attachmentDescs = {};
     std::array<VkSubpassDescription, 2> subpassDescs = {};
-    std::array<VkSubpassDependency, 2> subpassDependencies = {};
+    std::array<VkSubpassDependency, 3> subpassDependencies = {};
 
     VkRenderPassCreateInfo createInfo = {};
 };
@@ -112,11 +112,13 @@ class RenderPassCreateInfo2 {
             attachmentDescs[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         }
 
-        for (auto i : Range(2u)) {
+        for (auto i : Range(subpassDescs.size())) {
             subpassDescs[i].sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_2;
             subpassDescs[i].pNext = nullptr;
             subpassDescs[i].viewMask = 0;
+        }
 
+        for (auto i : Range(subpassDependencies.size())) {
             subpassDependencies[i].sType = VK_STRUCTURE_TYPE_SUBPASS_DEPENDENCY_2;
             subpassDependencies[i].pNext = nullptr;
             subpassDependencies[i].viewOffset = 0;
@@ -136,7 +138,7 @@ class RenderPassCreateInfo2 {
 
     std::array<VkAttachmentDescription2, kMaxAttachmentCount> attachmentDescs = {};
     std::array<VkSubpassDescription2, 2> subpassDescs = {};
-    std::array<VkSubpassDependency2, 2> subpassDependencies = {};
+    std::array<VkSubpassDependency2, 3> subpassDependencies = {};
 
     VkRenderPassCreateInfo2 createInfo = {};
 };
@@ -303,8 +305,23 @@ void InitializePassInfo(Device* device, const RenderPassCacheQuery& query, InfoT
         subpassDesc.inputAttachmentCount = static_cast<uint8_t>(highestColorAttachmentIndexPlusOne);
         subpassDesc.pInputAttachments = passInfo.framebufferFetchAttachmentRefs.data();
 
-        subpassDesc.flags |=
-            VK_SUBPASS_DESCRIPTION_RASTERIZATION_ORDER_ATTACHMENT_COLOR_ACCESS_BIT_EXT;
+        if (device->GetFramebufferFetchMode() == VulkanFramebufferFetchMode::kCoherentExt) {
+            subpassDesc.flags |=
+                VK_SUBPASS_DESCRIPTION_RASTERIZATION_ORDER_ATTACHMENT_COLOR_ACCESS_BIT_EXT;
+        } else if (device->GetFramebufferFetchMode() ==
+                   VulkanFramebufferFetchMode::kCoherentSelfDep) {
+            // Adding the self-dependency should be basically free on coherent hardware since
+            // rasterization already happens in order.
+            auto& dependency = passInfo.subpassDependencies[dependencyCount];
+            dependency.srcSubpass = subpassCount;
+            dependency.dstSubpass = subpassCount;
+            dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+            dependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+            dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            dependency.dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
+            dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+            dependencyCount++;
+        }
     } else {
         subpassDesc.inputAttachmentCount = 0;
         subpassDesc.pInputAttachments = nullptr;

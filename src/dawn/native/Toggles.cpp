@@ -794,6 +794,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"vulkan_use_extended_dynamic_state",
       "Makes use of VK_EXT_extended_dynamic_state to improve pipeline caching.",
       "https://crbug.com/chromium/463893793", ToggleStage::Device}},
+    {Toggle::VulkanUseRasterizationOrderAttachmentAccess,
+     {"vulkan_use_rasterization_order_attachment_access",
+      "Use VK_EXT_rasterization_order_attachment_access when it is available.",
+      "https://crbug.com/42241389", ToggleStage::Device}},
     {Toggle::VulkanForceStaticSamplersForExternalTextures,
      {"vulkan_force_static_samplers_for_external_textures",
       "Enables the code path to take static samplers for external textures. While static YCbCr "

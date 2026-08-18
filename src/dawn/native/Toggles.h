@@ -189,6 +189,7 @@ enum class Toggle {
     MetalReplaceWorkgroupBoolWithU32,
     VulkanCooperativeMatrixStrideIsMatrixElements,
     VulkanUseExtendedDynamicState,
+    VulkanUseRasterizationOrderAttachmentAccess,
     VulkanForceStaticSamplersForExternalTextures,
     D3D12UseHLSL2021,
     MetalFixU32DivMod,

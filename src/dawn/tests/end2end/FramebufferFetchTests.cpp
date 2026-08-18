@@ -564,7 +564,10 @@ TEST_P(FramebufferFetchTests, CreateRenderPipelineInParallel) {
 
 DAWN_INSTANTIATE_TEST(FramebufferFetchTests,
                       MetalBackend(),
-                      VulkanBackend({}, {"vulkan_use_dynamic_rendering"}));
+                      VulkanBackend({}, {"vulkan_use_dynamic_rendering"}),
+                      VulkanBackend({},
+                                    {"vulkan_use_dynamic_rendering",
+                                     "vulkan_use_rasterization_order_attachment_access"}));
 
 }  // anonymous namespace
 }  // namespace dawn

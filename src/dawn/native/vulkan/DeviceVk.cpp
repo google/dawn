@@ -553,12 +553,22 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     if (HasFeature(Feature::FramebufferFetch)) {
-        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::RasterizationOrderAttachmentAccess));
-        auto& usedKnobFeature = usedKnobs.rasterizationOrderAttachmentAccessFeatures;
-        usedKnobFeature = mDeviceInfo.rasterizationOrderAttachmentAccessFeatures;
-        usedKnobFeature.rasterizationOrderDepthAttachmentAccess = VK_FALSE;
-        usedKnobFeature.rasterizationOrderStencilAttachmentAccess = VK_FALSE;
-        featuresChain.Add(&usedKnobs.rasterizationOrderAttachmentAccessFeatures);
+        if (IsToggleEnabled(Toggle::VulkanUseRasterizationOrderAttachmentAccess)) {
+            // Prefer to use the rasterization order extension over subpass self-dependencies when
+            // available. There is a bug in older ARM drivers where subpass self-dependencies add
+            // overhead. The bug is fixed in newer drivers that support the rasterization order
+            // extension, see https://crbug.com/42241389#comment9 for details.
+            DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::RasterizationOrderAttachmentAccess));
+            mFramebufferFetchMode = VulkanFramebufferFetchMode::kCoherentExt;
+
+            auto& usedKnobFeature = usedKnobs.rasterizationOrderAttachmentAccessFeatures;
+            usedKnobFeature = mDeviceInfo.rasterizationOrderAttachmentAccessFeatures;
+            usedKnobFeature.rasterizationOrderDepthAttachmentAccess = VK_FALSE;
+            usedKnobFeature.rasterizationOrderStencilAttachmentAccess = VK_FALSE;
+            featuresChain.Add(&usedKnobs.rasterizationOrderAttachmentAccessFeatures);
+        } else {
+            mFramebufferFetchMode = VulkanFramebufferFetchMode::kCoherentSelfDep;
+        }
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::ShaderIntegerDotProduct)) {

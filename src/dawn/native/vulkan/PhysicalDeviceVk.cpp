@@ -42,6 +42,7 @@
 #include "src/dawn/native/Limits.h"
 #include "src/dawn/native/vulkan/BackendVk.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
+#include "src/dawn/native/vulkan/FramebufferFetchHelper.h"
 #include "src/dawn/native/vulkan/ImmediatesLayoutVk.h"
 #include "src/dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "src/dawn/native/vulkan/SwapChainVk.h"
@@ -338,11 +339,12 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::DualSourceBlending);
     }
 
-    if (mDeviceInfo.HasExt(DeviceExt::RasterizationOrderAttachmentAccess) &&
-        mDeviceInfo.rasterizationOrderAttachmentAccessFeatures
-                .rasterizationOrderColorAttachmentAccess == VK_TRUE) {
-        // There are four possible ways FramebufferFetch can be supported. Currently only #1 is
-        // implemented.
+    if ((mDeviceInfo.HasExt(DeviceExt::RasterizationOrderAttachmentAccess) &&
+         mDeviceInfo.rasterizationOrderAttachmentAccessFeatures
+                 .rasterizationOrderColorAttachmentAccess == VK_TRUE) ||
+        FramebufferFetchHelper::SupportsCoherentRasterization(GetVendorId())) {
+        // There are four possible ways FramebufferFetch can be supported. Currently only #1 and #2
+        // are implemented.
         //
         // 1. Coherent with rasterization order extension.
         // 2. Coherent without rasterization order extension but when GPU architecture supports
@@ -1351,6 +1353,15 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->ForceSet(Toggle::VulkanUseExtendedDynamicState, false);
     } else {
         deviceToggles->Default(Toggle::VulkanUseExtendedDynamicState, false);
+    }
+
+    if (!GetDeviceInfo().HasExt(DeviceExt::RasterizationOrderAttachmentAccess) ||
+        GetDeviceInfo()
+                .rasterizationOrderAttachmentAccessFeatures
+                .rasterizationOrderColorAttachmentAccess == VK_FALSE) {
+        deviceToggles->ForceSet(Toggle::VulkanUseRasterizationOrderAttachmentAccess, false);
+    } else {
+        deviceToggles->Default(Toggle::VulkanUseRasterizationOrderAttachmentAccess, true);
     }
 }
 

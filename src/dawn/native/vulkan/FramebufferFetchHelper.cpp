@@ -68,6 +68,10 @@ ResultOrError<VkDescriptorSetLayout> MakeFramebufferFetchLayout(Device* device,
 
 }  // namespace
 
+bool FramebufferFetchHelper::SupportsCoherentRasterization(PCIVendorID vendorId) {
+    return gpu_info::IsARM(vendorId);
+}
+
 FramebufferFetchHelper::FramebufferFetchHelper(Device* device) : mDevice(device) {
     DAWN_ASSERT(mDevice);
 }
