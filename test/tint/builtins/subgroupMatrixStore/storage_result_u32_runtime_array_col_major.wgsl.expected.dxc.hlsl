@@ -20,17 +20,17 @@ void main() {
   out1.GetDimensions(v_3);
   uint v_4 = asuint(int(0));
   bool v_5 = (((v_4 + (16u * 7u)) + 4u) <= (v_3 / 8u));
-  m.Store(out1, (0u + (select(v_5, v_4, 0u) * 4u)), (select(v_5, 16u, 4u) * 4u), MatrixLayout::ColMajor);
+  m.Store(out1, (0u + (select(v_5, v_4, 0u) * 8u)), (select(v_5, 16u, 4u) * 8u), MatrixLayout::ColMajor);
   uint v_6 = 0u;
   out2.GetDimensions(v_6);
   uint v_7 = asuint(int(0));
   bool v_8 = (((v_7 + (16u * 7u)) + 2u) <= (v_6 / 16u));
-  m.Store(out2, (0u + (select(v_8, v_7, 0u) * 4u)), (select(v_8, 16u, 2u) * 4u), MatrixLayout::ColMajor);
+  m.Store(out2, (0u + (select(v_8, v_7, 0u) * 16u)), (select(v_8, 16u, 2u) * 16u), MatrixLayout::ColMajor);
   uint v_9 = 0u;
   out3.GetDimensions(v_9);
   uint v_10 = asuint(int(0));
   bool v_11 = (((v_10 + (16u * 7u)) + 2u) <= (v_9 / 16u));
-  m.Store(out3, (0u + (select(v_11, v_10, 0u) * 4u)), (select(v_11, 16u, 2u) * 4u), MatrixLayout::ColMajor);
+  m.Store(out3, (0u + (select(v_11, v_10, 0u) * 16u)), (select(v_11, 16u, 2u) * 16u), MatrixLayout::ColMajor);
   uint v_12 = 0u;
   out5.GetDimensions(v_12);
   uint v_13 = asuint(int(0));
@@ -40,6 +40,6 @@ void main() {
   out6.GetDimensions(v_15);
   uint v_16 = asuint(int(0));
   bool v_17 = (((v_16 + (16u * 7u)) + 4u) <= (v_15 / 8u));
-  m.Store(out6, (0u + (select(v_17, v_16, 0u) * 4u)), (select(v_17, 16u, 4u) * 4u), MatrixLayout::ColMajor);
+  m.Store(out6, (0u + (select(v_17, v_16, 0u) * 8u)), (select(v_17, 16u, 4u) * 8u), MatrixLayout::ColMajor);
 }
 

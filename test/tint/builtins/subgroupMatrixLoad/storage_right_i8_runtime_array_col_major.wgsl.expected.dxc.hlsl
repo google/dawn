@@ -27,7 +27,7 @@ void main() {
   in1.GetDimensions(v_8);
   uint v_9 = asuint(int(0));
   bool v_10 = (((v_9 + (16u * 7u)) + 1u) <= (v_8 / 8u));
-  Matrix_right_i8_8x8 m1 = Matrix_right_i8_8x8::Load(in1, (0u + (select(v_10, v_9, 0u) * 4u)), (select(v_10, 16u, 1u) * 4u), MatrixLayout::ColMajor);
+  Matrix_right_i8_8x8 m1 = Matrix_right_i8_8x8::Load(in1, (0u + (select(v_10, v_9, 0u) * 8u)), (select(v_10, 16u, 1u) * 8u), MatrixLayout::ColMajor);
   uint v_11 = 0u;
   v.GetDimensions(v_11);
   uint v_12 = asuint(int(0));
@@ -38,7 +38,7 @@ void main() {
   in2.GetDimensions(v_15);
   uint v_16 = asuint(int(0));
   bool v_17 = (((v_16 + (16u * 7u)) + 1u) <= (v_15 / 16u));
-  Matrix_right_i8_8x8 m2 = Matrix_right_i8_8x8::Load(in2, (0u + (select(v_17, v_16, 0u) * 4u)), (select(v_17, 16u, 1u) * 4u), MatrixLayout::ColMajor);
+  Matrix_right_i8_8x8 m2 = Matrix_right_i8_8x8::Load(in2, (0u + (select(v_17, v_16, 0u) * 16u)), (select(v_17, 16u, 1u) * 16u), MatrixLayout::ColMajor);
   uint v_18 = 0u;
   v.GetDimensions(v_18);
   uint v_19 = asuint(int(0));
@@ -49,7 +49,7 @@ void main() {
   in3.GetDimensions(v_22);
   uint v_23 = asuint(int(0));
   bool v_24 = (((v_23 + (16u * 7u)) + 1u) <= (v_22 / 16u));
-  Matrix_right_i8_8x8 m3 = Matrix_right_i8_8x8::Load(in3, (0u + (select(v_24, v_23, 0u) * 4u)), (select(v_24, 16u, 1u) * 4u), MatrixLayout::ColMajor);
+  Matrix_right_i8_8x8 m3 = Matrix_right_i8_8x8::Load(in3, (0u + (select(v_24, v_23, 0u) * 16u)), (select(v_24, 16u, 1u) * 16u), MatrixLayout::ColMajor);
   uint v_25 = 0u;
   v.GetDimensions(v_25);
   uint v_26 = asuint(int(0));
@@ -60,7 +60,7 @@ void main() {
   in4.GetDimensions(v_29);
   uint v_30 = asuint(int(0));
   bool v_31 = (((v_30 + (16u * 7u)) + 4u) <= (v_29 / 2u));
-  Matrix_right_i8_8x8 m4 = Matrix_right_i8_8x8::Load(in4, (0u + (select(v_31, v_30, 0u) * 4u)), (select(v_31, 16u, 4u) * 4u), MatrixLayout::ColMajor);
+  Matrix_right_i8_8x8 m4 = Matrix_right_i8_8x8::Load(in4, (0u + (select(v_31, v_30, 0u) * 2u)), (select(v_31, 16u, 4u) * 2u), MatrixLayout::ColMajor);
   uint v_32 = 0u;
   v.GetDimensions(v_32);
   uint v_33 = asuint(int(0));
@@ -82,7 +82,7 @@ void main() {
   in6.GetDimensions(v_43);
   uint v_44 = asuint(int(0));
   bool v_45 = (((v_44 + (16u * 7u)) + 1u) <= (v_43 / 8u));
-  Matrix_right_i8_8x8 m6 = Matrix_right_i8_8x8::Load(in6, (0u + (select(v_45, v_44, 0u) * 4u)), (select(v_45, 16u, 1u) * 4u), MatrixLayout::ColMajor);
+  Matrix_right_i8_8x8 m6 = Matrix_right_i8_8x8::Load(in6, (0u + (select(v_45, v_44, 0u) * 8u)), (select(v_45, 16u, 1u) * 8u), MatrixLayout::ColMajor);
   uint v_46 = 0u;
   v.GetDimensions(v_46);
   uint v_47 = asuint(int(0));

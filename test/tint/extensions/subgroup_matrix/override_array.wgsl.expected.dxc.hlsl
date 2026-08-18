@@ -31,9 +31,9 @@ void main_inner(uint tint_local_index) {
   uint v_4 = asuint(int(8));
   bool v_5 = (((v_3 + (v_4 * 7u)) + 8u) <= (v_2 / 4u));
   Matrix_left_f32_8x8 m = Matrix_left_f32_8x8::Load(s_var, (0u + (select(v_5, v_3, 0u) * 4u)), (select(v_5, v_4, 8u) * 4u), MatrixLayout::RowMajor);
-  m.Store(wg_var, asuint(int(0)), asuint(int(8)), MatrixLayout::RowMajor);
+  m.Store(wg_var, 0u, 8u, MatrixLayout::RowMajor);
   GroupMemoryBarrierWithGroupSync();
-  Matrix_right_f32_8x8 m2 = Matrix_right_f32_8x8::Load(wg_var, asuint(int(0)), asuint(int(8)), MatrixLayout::ColMajor);
+  Matrix_right_f32_8x8 m2 = Matrix_right_f32_8x8::Load(wg_var, 0u, 8u, MatrixLayout::ColMajor);
   uint v_6 = 0u;
   s_var.GetDimensions(v_6);
   uint v_7 = asuint(int(0));

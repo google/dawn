@@ -12,10 +12,10 @@ RWByteAddressBuffer out6 : register(u6);
 void main() {
   Matrix_result_f32_8x8 m = Matrix_result_f32_8x8::Splat(0.0f);
   m.Store(out0, 0u, 64u, MatrixLayout::ColMajor);
-  m.Store(out1, 0u, 64u, MatrixLayout::ColMajor);
-  m.Store(out2, 0u, 64u, MatrixLayout::ColMajor);
-  m.Store(out3, 0u, 64u, MatrixLayout::ColMajor);
+  m.Store(out1, 0u, 128u, MatrixLayout::ColMajor);
+  m.Store(out2, 0u, 256u, MatrixLayout::ColMajor);
+  m.Store(out3, 0u, 256u, MatrixLayout::ColMajor);
   m.Store(out5, 0u, 64u, MatrixLayout::ColMajor);
-  m.Store(out6, 0u, 64u, MatrixLayout::ColMajor);
+  m.Store(out6, 0u, 128u, MatrixLayout::ColMajor);
 }
 

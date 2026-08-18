@@ -2101,28 +2101,38 @@ struct State {
     void SubgroupMatrixLoad(core::ir::CoreBuiltinCall* call) {
         auto* ptr = call->Args()[0];
         auto* ptr_ty = ptr->Type()->As<core::type::Pointer>();
+        uint32_t arr_stride = ptr_ty->StoreType()->As<core::type::Array>()->ImplicitStride();
         TINT_IR_ASSERT(ir, ptr_ty);
         if (ptr_ty->AddressSpace() != core::AddressSpace::kWorkgroup) {
             return;
         }
 
         b.InsertBefore(call, [&] {
-            const bool majorness_template = call->ExplicitTemplateParams().Length() == 2;
+            TINT_IR_ASSERT(ir, call->ExplicitTemplateParams().Length() == 2);
             auto* offset = call->Args()[1];
-            auto* stride = call->Args()[majorness_template ? 2 : 3];
-
-            // Workgroup function only take u32 args.
-            if (!offset->Type()->Is<core::type::U32>()) {
-                offset =
-                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, offset)->Result();
-            }
-            if (!stride->Type()->Is<core::type::U32>()) {
-                stride =
-                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, stride)->Result();
-            }
+            auto* stride = call->Args()[2];
 
             auto* sm_ty = call->Result()->Type()->As<core::type::SubgroupMatrix>();
             TINT_IR_ASSERT(ir, sm_ty);
+
+            // Workgroup load offset and stride are in terms of the matrix element type.
+            // Workgroup function only take u32 args.
+            if (auto* const_offset = offset->As<core::ir::Constant>()) {
+                offset = b.Constant(u32(const_offset->Value()->ValueAs<uint32_t>() * arr_stride /
+                                        sm_ty->Type()->Size()));
+            } else {
+                offset =
+                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, offset)->Result();
+                offset = b.Multiply(offset, u32(arr_stride / sm_ty->Type()->Size()))->Result();
+            }
+            if (auto* const_stride = stride->As<core::ir::Constant>()) {
+                stride = b.Constant(u32(const_stride->Value()->ValueAs<uint32_t>() * arr_stride /
+                                        sm_ty->Type()->Size()));
+            } else {
+                stride =
+                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, stride)->Result();
+                stride = b.Multiply(stride, u32(arr_stride / sm_ty->Type()->Size()))->Result();
+            }
 
             // TODO(crbug.com/512455144): 8-bit components need additional work to support.
             if (sm_ty->Type()->IsAnyOf<core::type::I8, core::type::U8>()) {
@@ -2130,16 +2140,11 @@ struct State {
                     << "8-bit subgroup matrix load from workgroup not supported";
             }
 
-            core::ir::Value* col_major = nullptr;
-            if (majorness_template) {
-                TINT_IR_ASSERT(
-                    ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[1]));
-                col_major =
-                    b.Constant(std::get<core::Majorness>(call->ExplicitTemplateParams()[1]) ==
-                               core::Majorness::kColMajor);
-            } else {
-                col_major = call->Args()[2];
-            }
+            TINT_IR_ASSERT(
+                ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[1]));
+            auto* col_major =
+                b.Constant(std::get<core::Majorness>(call->ExplicitTemplateParams()[1]) ==
+                           core::Majorness::kColMajor);
             auto* layout = ColMajorToMatrixLayout(col_major);
 
             b.CallExplicitWithResult<hlsl::ir::BuiltinCall>(
@@ -2152,6 +2157,7 @@ struct State {
     void SubgroupMatrixStore(core::ir::CoreBuiltinCall* call) {
         auto* ptr = call->Args()[0];
         auto* ptr_ty = ptr->Type()->As<core::type::Pointer>();
+        uint32_t arr_stride = ptr_ty->StoreType()->As<core::type::Array>()->ImplicitStride();
         TINT_IR_ASSERT(ir, ptr_ty);
 
         if (ptr_ty->AddressSpace() != core::AddressSpace::kWorkgroup) {
@@ -2159,23 +2165,32 @@ struct State {
         }
 
         b.InsertBefore(call, [&] {
-            const bool majorness_template = call->ExplicitTemplateParams().Length() == 1;
+            TINT_IR_ASSERT(ir, call->ExplicitTemplateParams().Length() == 1);
             auto* offset = call->Args()[1];
             auto* matrix = call->Args()[2];
-            auto* stride = call->Args()[majorness_template ? 3 : 4];
-
-            // Workgroup function only take u32 args.
-            if (!offset->Type()->Is<core::type::U32>()) {
-                offset =
-                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, offset)->Result();
-            }
-            if (!stride->Type()->Is<core::type::U32>()) {
-                stride =
-                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, stride)->Result();
-            }
+            auto* stride = call->Args()[3];
 
             auto* sm_ty = matrix->Type()->As<core::type::SubgroupMatrix>();
             TINT_IR_ASSERT(ir, sm_ty);
+
+            // Workgroup store offset and stride are in terms of the matrix element type.
+            // Workgroup function only take u32 args.
+            if (auto* const_offset = offset->As<core::ir::Constant>()) {
+                offset = b.Constant(u32(const_offset->Value()->ValueAs<uint32_t>() * arr_stride /
+                                        sm_ty->Type()->Size()));
+            } else {
+                offset =
+                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, offset)->Result();
+                offset = b.Multiply(offset, u32(arr_stride / sm_ty->Type()->Size()))->Result();
+            }
+            if (auto* const_stride = stride->As<core::ir::Constant>()) {
+                stride = b.Constant(u32(const_stride->Value()->ValueAs<uint32_t>() * arr_stride /
+                                        sm_ty->Type()->Size()));
+            } else {
+                stride =
+                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, stride)->Result();
+                stride = b.Multiply(stride, u32(arr_stride / sm_ty->Type()->Size()))->Result();
+            }
 
             // TODO(crbug.com/512455144): 8-bit components need additional work to support.
             if (sm_ty->Type()->IsAnyOf<core::type::I8, core::type::U8>()) {
@@ -2183,16 +2198,11 @@ struct State {
                     << "8-bit subgroup matrix store to workgroup not supported";
             }
 
-            core::ir::Value* col_major = nullptr;
-            if (majorness_template) {
-                TINT_IR_ASSERT(
-                    ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[0]));
-                col_major =
-                    b.Constant(std::get<core::Majorness>(call->ExplicitTemplateParams()[0]) ==
-                               core::Majorness::kColMajor);
-            } else {
-                col_major = call->Args()[3];
-            }
+            TINT_IR_ASSERT(
+                ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[0]));
+            auto* col_major =
+                b.Constant(std::get<core::Majorness>(call->ExplicitTemplateParams()[0]) ==
+                           core::Majorness::kColMajor);
             auto* layout = ColMajorToMatrixLayout(col_major);
 
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kStore, matrix,

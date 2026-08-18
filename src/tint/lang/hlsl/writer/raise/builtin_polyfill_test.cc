@@ -8167,9 +8167,10 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup) {
 
     auto* func = b.Function("foo", mat_ty);
     b.Append(func->Block(), [&] {
-        auto* load = b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<core::ir::TemplateParameter, 1>{mat_ty}, wg_var, 0_u,
-                                    b.Constant(false), 4_u);
+        auto* load = b.CallExplicit(
+            mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat_ty, core::Majorness::kRowMajor}, wg_var, 0_u,
+            4_u);
         b.Return(func, load);
     });
 
@@ -8180,7 +8181,7 @@ $B1: {  # root
 
 %foo = func():subgroup_matrix_left<f32, 4, 4> {
   $B2: {
-    %3:subgroup_matrix_left<f32, 4, 4> = subgroupMatrixLoad<subgroup_matrix_left<f32, 4, 4>> %wg, 0u, false, 4u
+    %3:subgroup_matrix_left<f32, 4, 4> = subgroupMatrixLoad<subgroup_matrix_left<f32, 4, 4>, row_major> %wg, 0u, 4u
     ret %3
   }
 }
@@ -8213,9 +8214,10 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_SignedOffset
     auto* stride = b.FunctionParam("stride", ty.i32());
     func->SetParams({offset, stride});
     b.Append(func->Block(), [&] {
-        auto* load = b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<core::ir::TemplateParameter, 1>{mat_ty}, wg_var, offset,
-                                    b.Constant(false), stride);
+        auto* load = b.CallExplicit(
+            mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat_ty, core::Majorness::kRowMajor}, wg_var,
+            offset, stride);
         b.Return(func, load);
     });
 
@@ -8226,7 +8228,7 @@ $B1: {  # root
 
 %foo = func(%offset:i32, %stride:i32):subgroup_matrix_left<f32, 4, 4> {
   $B2: {
-    %5:subgroup_matrix_left<f32, 4, 4> = subgroupMatrixLoad<subgroup_matrix_left<f32, 4, 4>> %wg, %offset, false, %stride
+    %5:subgroup_matrix_left<f32, 4, 4> = subgroupMatrixLoad<subgroup_matrix_left<f32, 4, 4>, row_major> %wg, %offset, %stride
     ret %5
   }
 }
@@ -8241,9 +8243,11 @@ $B1: {  # root
 %foo = func(%offset:i32, %stride:i32):subgroup_matrix_left<f32, 4, 4> {
   $B2: {
     %5:u32 = hlsl.asuint %offset
-    %6:u32 = hlsl.asuint %stride
-    %7:subgroup_matrix_left<f32, 4, 4> = hlsl.Load<subgroup_matrix_left<f32, 4, 4>> %wg, %5, %6, 0u
-    ret %7
+    %6:u32 = mul %5, 1u
+    %7:u32 = hlsl.asuint %stride
+    %8:u32 = mul %7, 1u
+    %9:subgroup_matrix_left<f32, 4, 4> = hlsl.Load<subgroup_matrix_left<f32, 4, 4>> %wg, %6, %8, 0u
+    ret %9
   }
 }
 )";
@@ -8349,8 +8353,9 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup) {
     func->SetParams({mat});
 
     b.Append(func->Block(), [&] {
-        b.Call(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore, wg_var, 0_u, mat,
-               b.Constant(false), 4_u);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, wg_var,
+                       0_u, mat, 4_u);
         b.Return(func);
     });
 
@@ -8361,7 +8366,7 @@ $B1: {  # root
 
 %foo = func(%mat:subgroup_matrix_left<f32, 4, 4>):void {
   $B2: {
-    %4:void = subgroupMatrixStore %wg, 0u, %mat, false, 4u
+    %4:void = subgroupMatrixStore<row_major> %wg, 0u, %mat, 4u
     ret
   }
 }
@@ -8396,8 +8401,9 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_SignedOffse
     func->SetParams({mat, offset, stride});
 
     b.Append(func->Block(), [&] {
-        b.Call(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore, wg_var, offset, mat,
-               b.Constant(false), stride);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, wg_var,
+                       offset, mat, stride);
         b.Return(func);
     });
 
@@ -8408,7 +8414,7 @@ $B1: {  # root
 
 %foo = func(%mat:subgroup_matrix_left<f32, 4, 4>, %offset:i32, %stride:i32):void {
   $B2: {
-    %6:void = subgroupMatrixStore %wg, %offset, %mat, false, %stride
+    %6:void = subgroupMatrixStore<row_major> %wg, %offset, %mat, %stride
     ret
   }
 }
@@ -8423,8 +8429,10 @@ $B1: {  # root
 %foo = func(%mat:subgroup_matrix_left<f32, 4, 4>, %offset:i32, %stride:i32):void {
   $B2: {
     %6:u32 = hlsl.asuint %offset
-    %7:u32 = hlsl.asuint %stride
-    %8:void = %mat.Store %wg, %6, %7, 0u
+    %7:u32 = mul %6, 1u
+    %8:u32 = hlsl.asuint %stride
+    %9:u32 = mul %8, 1u
+    %10:void = %mat.Store %wg, %7, %9, 0u
     ret
   }
 }

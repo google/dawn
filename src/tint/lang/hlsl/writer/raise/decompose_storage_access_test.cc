@@ -1705,9 +1705,10 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoad) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* load = b.CallExplicit(sm_ty, core::BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<core::ir::TemplateParameter, 1>{sm_ty}, var, 0_u,
-                                    b.Constant(false), 8_u);
+        auto* load = b.CallExplicit(
+            sm_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{sm_ty, core::Majorness::kRowMajor}, var, 0_u,
+            8_u);
         b.Let("x", load);
         b.Return(func);
     });
@@ -1719,7 +1720,7 @@ $B1: {  # root
 
 %foo = func():void {
   $B2: {
-    %3:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>> %v, 0u, false, 8u
+    %3:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major> %v, 0u, 8u
     %x:subgroup_matrix_left<f32, 8, 8> = let %3
     ret
   }
@@ -1758,9 +1759,10 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoad_SignedOff
     auto* stride = b.FunctionParam("stride", ty.i32());
     func->SetParams({offset, stride});
     b.Append(func->Block(), [&] {
-        auto* load = b.CallExplicit(sm_ty, core::BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<core::ir::TemplateParameter, 1>{sm_ty}, var, offset,
-                                    b.Constant(false), stride);
+        auto* load = b.CallExplicit(
+            sm_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{sm_ty, core::Majorness::kRowMajor}, var, offset,
+            stride);
         b.Let("x", load);
         b.Return(func);
     });
@@ -1772,7 +1774,7 @@ $B1: {  # root
 
 %foo = func(%offset:i32, %stride:i32):void {
   $B2: {
-    %5:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>> %v, %offset, false, %stride
+    %5:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major> %v, %offset, %stride
     %x:subgroup_matrix_left<f32, 8, 8> = let %5
     ret
   }
@@ -1813,9 +1815,10 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadColMajor) 
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* load = b.CallExplicit(sm_ty, core::BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<core::ir::TemplateParameter, 1>{sm_ty}, var, 0_u,
-                                    b.Constant(true), 8_u);
+        auto* load = b.CallExplicit(
+            sm_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{sm_ty, core::Majorness::kColMajor}, var, 0_u,
+            8_u);
         b.Let("x", load);
         b.Return(func);
     });
@@ -1827,7 +1830,7 @@ $B1: {  # root
 
 %foo = func():void {
   $B2: {
-    %3:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>> %v, 0u, true, 8u
+    %3:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major> %v, 0u, 8u
     %x:subgroup_matrix_left<f32, 8, 8> = let %3
     ret
   }
@@ -2019,9 +2022,10 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadDynamicStr
     func->SetParams({stride_param});
 
     b.Append(func->Block(), [&] {
-        auto* load = b.CallExplicit(sm_ty, core::BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<core::ir::TemplateParameter, 1>{sm_ty}, var, 0_u,
-                                    b.Constant(false), stride_param);
+        auto* load = b.CallExplicit(
+            sm_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{sm_ty, core::Majorness::kRowMajor}, var, 0_u,
+            stride_param);
         b.Let("x", load);
         b.Return(func);
     });
@@ -2033,7 +2037,7 @@ $B1: {  # root
 
 %foo = func(%stride:u32):void {
   $B2: {
-    %4:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>> %v, 0u, false, %stride
+    %4:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major> %v, 0u, %stride
     %x:subgroup_matrix_left<f32, 8, 8> = let %4
     ret
   }
@@ -2073,8 +2077,9 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStore) {
     func->SetParams({mat_param});
 
     b.Append(func->Block(), [&] {
-        b.Call(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore, var, 0_u, mat_param,
-               b.Constant(false), 8_u);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, var, 0_u,
+                       mat_param, 8_u);
         b.Return(func);
     });
 
@@ -2085,7 +2090,7 @@ $B1: {  # root
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
   $B2: {
-    %4:void = subgroupMatrixStore %v, 0u, %mat, false, 8u
+    %4:void = subgroupMatrixStore<row_major> %v, 0u, %mat, 8u
     ret
   }
 }
@@ -2124,8 +2129,9 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStore_SignedOf
     func->SetParams({mat_param, offset, stride});
 
     b.Append(func->Block(), [&] {
-        b.Call(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore, var, offset, mat_param,
-               b.Constant(false), stride);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, var,
+                       offset, mat_param, stride);
         b.Return(func);
     });
 
@@ -2136,7 +2142,7 @@ $B1: {  # root
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>, %offset:i32, %stride:i32):void {
   $B2: {
-    %6:void = subgroupMatrixStore %v, %offset, %mat, false, %stride
+    %6:void = subgroupMatrixStore<row_major> %v, %offset, %mat, %stride
     ret
   }
 }
@@ -2178,8 +2184,9 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStoreColMajor)
     func->SetParams({mat_param});
 
     b.Append(func->Block(), [&] {
-        b.Call(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore, var, 0_u, mat_param,
-               b.Constant(true), 8_u);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kColMajor}, var, 0_u,
+                       mat_param, 8_u);
         b.Return(func);
     });
 
@@ -2190,7 +2197,7 @@ $B1: {  # root
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
   $B2: {
-    %4:void = subgroupMatrixStore %v, 0u, %mat, true, 8u
+    %4:void = subgroupMatrixStore<col_major> %v, 0u, %mat, 8u
     ret
   }
 }
@@ -2378,8 +2385,9 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStoreDynamicSt
     func->SetParams({mat_param, stride_param});
 
     b.Append(func->Block(), [&] {
-        b.Call(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore, var, 0_u, mat_param,
-               b.Constant(false), stride_param);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, var, 0_u,
+                       mat_param, stride_param);
         b.Return(func);
     });
 
@@ -2390,7 +2398,7 @@ $B1: {  # root
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>, %stride:u32):void {
   $B2: {
-    %5:void = subgroupMatrixStore %v, 0u, %mat, false, %stride
+    %5:void = subgroupMatrixStore<row_major> %v, 0u, %mat, %stride
     ret
   }
 }
