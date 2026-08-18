@@ -96,10 +96,12 @@ void Register(const IRFuzzer& fuzzer) {
                 return;
             }
 
-            // Validate the IR against the fuzzer's preconditions before running.
-            // We don't consider validation failure here to be an issue, as it only signals that
-            // there is a bug somewhere in the components run above. Those components have their own
-            // IR fuzzers.
+            // Validate the IR before running, because IR passes are not expected to handle invalid
+            // inputs, so don't want spurious reports if the pass crashes.
+            //
+            // NOTE: Do not ICE here, because there is other fuzzer passes that specifically check
+            // the WGSL->IR conversion doesn't create illegal IR. If an ICE occurred here it would
+            // create duplicate issues that obscures where the issue actually lies.
             if (!context.options.disable_ir_validator) {
                 if (auto val = core::ir::Validate(ir.Get(), "start " + std::string(fuzzer.name));
                     val != Success) {
@@ -158,6 +160,18 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
     Context context;
     context.options = options;
 
+    if (!context.options.disable_ir_validator) {
+        auto mod = acquire_module();
+        // Inputs that fail validation should not be run against the fuzzing passes, since they are
+        // not expected to handle invalid inputs.
+        if (tint::core::ir::Validate(mod, "Pre-run validation") != tint::Success) {
+            if (context.options.verbose) {
+                std::cout << "Failed to validate before running\n";
+            }
+            return;
+        }
+    }
+
     // Run each of the program fuzzer functions
     tint::fuzz::common::RunFuzzers(Fuzzers(), options, [&](const IRFuzzer& fuzzer, size_t i) {
         currently_running = fuzzer.name;
@@ -179,18 +193,6 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
                 std::cout << "unsupported property '" << *unsupported.begin() << "'";
             }
             return;
-        }
-
-        if (!context.options.disable_ir_validator) {
-            if (tint::core::ir::Validate(mod, "start " + std::string(currently_running)) !=
-                tint::Success) {
-                // Failing before running indicates that this input violates the pre-conditions
-                // for this pass, so should be skipped.
-                if (context.options.verbose) {
-                    std::cout << "   Failed to validate before running\n";
-                }
-                return;
-            }
         }
 
         // Enable validation assertions.
