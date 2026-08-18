@@ -33,6 +33,7 @@ to support running it on Swarming with correct libraries and paths.
 
 import argparse
 import json
+import os
 from pathlib import Path
 import subprocess
 
@@ -51,7 +52,13 @@ def run_litert_lm() -> subprocess.CompletedProcess:
 
     print(f"Executing: {' '.join(cmd)}")
 
-    return subprocess.run(cmd, check=False)
+
+    # The .so files are isolated alongside the binary in the current build out directory,
+    # so explicitly add them to the library path for execution on Linux bots.
+    env = os.environ.copy()
+    env['LD_LIBRARY_PATH'] = f"{Path.cwd()}{os.pathsep}{env.get('LD_LIBRARY_PATH', '')}"
+
+    return subprocess.run(cmd, env=env, check=False)
 
 
 def generate_results_for_resultdb_ingestion(success: bool,

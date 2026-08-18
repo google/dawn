@@ -28,6 +28,7 @@
 """Invokes the hermetic Bazelisk binary to build LiteRT-LM and copy the output
 binary to GN's output directory."""
 
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -66,9 +67,18 @@ def main():
     script_dir = Path(__file__).resolve().parent
     project_root = script_dir.parent.parent
     litert_lm_dir = script_dir / 'src'
+    platform_name = get_platform_name()
+    prebuilt_cipd_dir = script_dir / 'data' / 'prebuilt' / platform_name
 
-    if not litert_lm_dir.exists():
-        print("Error: LiteRT-LM source directory not found.", file=sys.stderr)
+    # LiteRT-LM is a submodule and also relies on a CIPD-unpacked prebuilts
+    # package. Verify both are checked out. Since git creates an empty directory
+    # or git link for submodules, check for a sentinel file (WORKSPACE) to
+    # verify the source is actually present.
+    is_checked_out = (litert_lm_dir /
+                      'WORKSPACE').exists() and prebuilt_cipd_dir.exists()
+
+    if not is_checked_out:
+        print("Error: LiteRT-LM dependencies not found.", file=sys.stderr)
         print(
             "Please add the following to your .gclient file under 'custom_vars':",
             file=sys.stderr)
@@ -78,7 +88,6 @@ def main():
         sys.exit(1)
 
     bazelisk_path = project_root / 'tools' / 'bazelisk' / 'bazelisk'
-    prebuilt_cipd_dir = script_dir / 'data' / 'prebuilt'
     prebuilt_src_dir = litert_lm_dir / 'prebuilt'
     backup_dir = litert_lm_dir / 'prebuilt_backup'
 
@@ -112,7 +121,7 @@ def main():
 
         print("Symlinking prebuilt binaries to LiteRT-LM workspace...")
         prebuilt_src_dir.mkdir()
-        platform_dir = prebuilt_cipd_dir / platform_name
+        platform_dir = prebuilt_cipd_dir
         if not platform_dir.exists():
             print(
                 f"Error: Prebuilt shared library dependencies not found in: {platform_dir}",
@@ -143,7 +152,19 @@ def main():
             BAZEL_TARGET,
         ]
 
-        proc = subprocess.run(build_cmd, cwd=litert_lm_dir)
+        env = dict(os.environ)
+
+        # Prepend the hermetic LLVM toolchain bin directory to PATH and set CC/CXX.
+        llvm_bin_dir = project_root / 'third_party' / 'llvm-build' / 'Release+Asserts' / 'bin'
+        if llvm_bin_dir.exists():
+            env['PATH'] = f"{llvm_bin_dir}:{env.get('PATH', '')}"
+
+            # Explicitly set CC and CXX to the hermetic compilers so Bazel's
+            # cc_configure selects them.
+            env['CC'] = str(llvm_bin_dir / 'clang')
+            env['CXX'] = str(llvm_bin_dir / 'clang++')
+
+        proc = subprocess.run(build_cmd, cwd=litert_lm_dir, env=env)
         if proc.returncode != 0:
             print("Error: Bazel build failed.", file=sys.stderr)
             sys.exit(proc.returncode)
@@ -173,7 +194,7 @@ def main():
 
     # Copy other prebuilt LiteRT dependencies to the build output directory for
     # running.
-    target_prebuilt_dir = prebuilt_cipd_dir / platform_name
+    target_prebuilt_dir = prebuilt_cipd_dir
     if target_prebuilt_dir.exists():
         for f in target_prebuilt_dir.iterdir():
             if f.is_file():
