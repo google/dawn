@@ -505,7 +505,11 @@
             {% else %}
                 {
             {% endif %}
+            {% if is_cmd %}
                 auto memberLength = {{member_length(member, "transfer->", False)}};
+            {% else %}
+                auto memberLength = {{member_length(member, "record->", False)}};
+            {% endif %}
                 if (!std::in_range<size_t>(memberLength)) {
                     return WireResult::FatalError;
                 }
