@@ -773,7 +773,6 @@ enum class ParameterUsage : uint8_t {
     kBase,
     kBias,
     kBits,
-    kColMajor,
     kCompareValue,
     kComponent,
     kConstOffset,
@@ -829,6 +828,7 @@ enum class ParameterUsage : uint8_t {
     kZ,
     kZw,
     kZyw,
+    kColMajor,
     kNone,
 };
 

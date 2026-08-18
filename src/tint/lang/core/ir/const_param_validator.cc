@@ -442,23 +442,12 @@ bool ConstParamValidator::CheckSubgroupMatrixMemory(const CoreBuiltinCall* call,
     bool col_major = false;
     auto* offset_arg = call->Args()[1];
     const Value* stride_arg = nullptr;
-    // Only templated versions are checked. Non-templated version are deprecated.
     if (is_load) {
-        if (call->ExplicitTemplateParams().Length() == 2) {
-            col_major =
-                std::get<Majorness>(call->ExplicitTemplateParams()[1]) == Majorness::kColMajor;
-            stride_arg = call->Args()[2];
-        } else {
-            return true;
-        }
+        col_major = std::get<Majorness>(call->ExplicitTemplateParams()[1]) == Majorness::kColMajor;
+        stride_arg = call->Args()[2];
     } else {
-        if (call->ExplicitTemplateParams().Length() == 1) {
-            col_major =
-                std::get<Majorness>(call->ExplicitTemplateParams()[0]) == Majorness::kColMajor;
-            stride_arg = call->Args()[3];
-        } else {
-            return true;
-        }
+        col_major = std::get<Majorness>(call->ExplicitTemplateParams()[0]) == Majorness::kColMajor;
+        stride_arg = call->Args()[3];
     }
     auto* ty = is_load ? call->Result()->Type() : call->Args()[2]->Type();
     auto* mat_ty = ty->As<core::type::SubgroupMatrix>();

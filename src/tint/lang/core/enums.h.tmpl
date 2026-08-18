@@ -87,6 +87,7 @@ enum class ParameterUsage : uint8_t {
 {{- range $I.Sem.UniqueParameterNames  }}
     k{{PascalCase .}},
 {{- end  }}
+    kColMajor,
     kNone,
 };
 

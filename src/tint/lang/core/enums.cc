@@ -1256,6 +1256,8 @@ std::string_view ToString(Attribute value) {
 
 std::string_view ToString(ParameterUsage usage) {
     switch (usage) {
+        case ParameterUsage::kColMajor:
+            return "col_major";
         case ParameterUsage::kNone:
             return "none";
         case ParameterUsage::kArrayIndex:
@@ -1266,8 +1268,6 @@ std::string_view ToString(ParameterUsage usage) {
             return "bias";
         case ParameterUsage::kBits:
             return "bits";
-        case ParameterUsage::kColMajor:
-            return "col_major";
         case ParameterUsage::kCompareValue:
             return "compare_value";
         case ParameterUsage::kComponent:

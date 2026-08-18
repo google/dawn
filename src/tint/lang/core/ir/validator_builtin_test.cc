@@ -1578,8 +1578,9 @@ TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixStore_OOBOffset) {
     f->SetParams({arr_param, mat_param});
 
     b.Append(f->Block(), [&] {
-        b.Call(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore, arr_param, 12_u, mat_param, true,
-               8_u);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr_param, 12_u,
+                       mat_param, 8_u);
         b.Return(f);
     });
 
@@ -1600,7 +1601,8 @@ TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixLoad_OOBOffset) {
 
     b.Append(f->Block(), [&] {
         b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
-                       Vector<TemplateParameter, 1>{mat_ty}, arr_param, 8_u, true, 8_u);
+                       Vector<TemplateParameter, 2>{mat_ty, Majorness::kColMajor}, arr_param, 8_u,
+                       8_u);
         b.Return(f);
     });
 
@@ -1621,7 +1623,8 @@ TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixLoad_NegativeOffset) {
 
     b.Append(f->Block(), [&] {
         b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
-                       Vector<TemplateParameter, 1>{mat_ty}, arr_param, -1_i, true, 8_u);
+                       Vector<TemplateParameter, 2>{mat_ty, Majorness::kColMajor}, arr_param, -1_i,
+                       8_u);
         b.Return(f);
     });
 
@@ -1643,8 +1646,9 @@ TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixStore_i8_i32_InBoundsOffset) {
     f->SetParams({arr_param, mat_param});
 
     b.Append(f->Block(), [&] {
-        b.Call(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore, arr_param, 12_u, mat_param, true,
-               8_u);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr_param, 3_u,
+                       mat_param, 8_u);
         b.Return(f);
     });
 
@@ -1662,16 +1666,17 @@ TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixStore_i8_i32_OOBOffset) {
     f->SetParams({arr_param, mat_param});
 
     b.Append(f->Block(), [&] {
-        b.Call(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore, arr_param, 32_u, mat_param, true,
-               8_u);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr_param, 8_u,
+                       mat_param, 8_u);
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr("the offset argument of subgroupMatrixStore (32) is out of "
-                                   "bounds of the array type of size 32"));
+                testing::HasSubstr("the offset argument of subgroupMatrixStore (8) is out of "
+                                   "bounds of the array type of size 8"));
 }
 
 }  // namespace tint::core::ir

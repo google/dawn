@@ -1555,25 +1555,18 @@ void Functional::CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call) {
         return;
     }
 
-    bool majorness_template = false;
     const core::type::SubgroupMatrix* mat_ty = nullptr;
     if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad) {
         mat_ty = call->Result()->Type()->As<core::type::SubgroupMatrix>();
-        majorness_template = call->ExplicitTemplateParams().Length() == 2;
     } else if (call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
         mat_ty = call->Args()[2]->Type()->As<core::type::SubgroupMatrix>();
-        majorness_template = call->ExplicitTemplateParams().Length() == 1;
     }
     TINT_ASSERT(mat_ty);
 
-    auto arr_stride = arr_ty->ImplicitStride();
     auto mat_comp_size = mat_ty->Type()->Size();
     TINT_ASSERT(mat_comp_size > 0);
 
-    auto limit = const_count.value() * arr_stride;
-    if (!majorness_template) {
-        limit /= mat_comp_size;
-    }
+    auto limit = const_count.value();
 
     if (auto* offset_const = offset_arg->As<ir::Constant>()) {
         auto* offset_val = offset_const->Value();
