@@ -75,4 +75,9 @@ def get_cipd_compatible_current_arch() -> str:
     native_x86 = platform.machine().lower() in ('x86', 'x86_64', 'amd64')
     if native_x86:
         return 'amd64'
+
+    native_riscv64 = platform.machine().lower() in ('riscv64', )
+    if native_riscv64:
+        return 'riscv64'
+
     raise ValueError('Unable to determine architecture')
