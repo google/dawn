@@ -43,7 +43,12 @@ struct UserData {
         bool didAttach = false;
 
         if (envStat == JNI_EDETACHED) {
-            if (jvm->AttachCurrentThread(&env, NULL) == JNI_OK) {
+            //* Deal with difference in signatures between Oracle's jni.h and Android's.
+            #ifdef _JAVASOFT_JNI_H_  //* Oracle's jni.h violates the JNI spec.
+                if (jvm->AttachCurrentThread(reinterpret_cast<void**>(&env), NULL) == JNI_OK) {
+            #else
+                if (jvm->AttachCurrentThread(&env, NULL) == JNI_OK) {
+            #endif
                 didAttach = true;
             }
         }
