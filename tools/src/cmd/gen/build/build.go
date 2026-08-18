@@ -726,8 +726,6 @@ var externalDependencyBazelTargets = map[string]string{
 	"dxcompiler-for-fuzzer": "",
 	"glslang-res-limits":    "",
 	"glslang":               "",
-	"jsoncpp":               "",
-	"langsvr":               "",
 	"mesa":                  "",
 	"metal":                 "",
 	"thread":                "",

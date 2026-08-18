@@ -145,7 +145,6 @@ SYNCED_REPOS = {
     # there is no need to sync their revisions.
     'third_party/google_benchmark/src': None,
     'third_party/googletest/src': 'third_party/googletest/src',
-    'third_party/jsoncpp': 'third_party/jsoncpp/source',
     'third_party/libc++/src': None,
     'third_party/libc++abi/src': None,
     'third_party/libprotobuf-mutator/src': None,

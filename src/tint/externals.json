@@ -28,18 +28,6 @@
             "benchmark/benchmark.h"
         ]
     },
-    "jsoncpp": {
-        "IncludePatterns": [
-            "json/**"
-        ],
-        "Condition": "tint_build_tintd"
-    },
-    "langsvr": {
-        "IncludePatterns": [
-            "langsvr/**"
-        ],
-        "Condition": "tint_build_tintd"
-    },
     "mesa": {
         "Condition": "tint_build_mesa"
     },

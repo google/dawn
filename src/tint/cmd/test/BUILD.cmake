@@ -159,12 +159,6 @@ if(TINT_BUILD_SPV_WRITER)
   )
 endif(TINT_BUILD_SPV_WRITER)
 
-if(TINT_BUILD_TINTD AND TINT_BUILD_WGSL_READER)
-  tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
-    tint_lang_wgsl_ls_test
-  )
-endif(TINT_BUILD_TINTD AND TINT_BUILD_WGSL_READER)
-
 if(TINT_BUILD_WGSL_READER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
     tint_lang_wgsl_inspector_test

@@ -31,7 +31,6 @@
 /third_party/gpuweb
 /third_party/jdk/current
 /third_party/jinja2
-/third_party/jsoncpp
 /third_party/EGL-Registry/src
 /third_party/OpenGL-Registry/src
 /third_party/libc++/src

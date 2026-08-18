@@ -56,19 +56,6 @@ config_setting(
     values = {},
     visibility = ["//visibility:public"],
 )
-# 'tint_build_tintd' is not supported in the bazel build, so force it to always disabled.
-config_setting(
-    name = "tint_build_tintd_true",
-    values = {"define": "never_true=true"},
-    visibility = ["//visibility:public"],
-)
-config_setting(
-    name = "tint_build_tintd_false",
-    values = {},
-    visibility = ["//visibility:public"],
-)
-
-
 
 genrule(
     name = "generate_sources",

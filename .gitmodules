@@ -205,14 +205,6 @@
 	path = third_party/libprotobuf-mutator/src
 	url = https://chromium.googlesource.com/external/github.com/google/libprotobuf-mutator.git
 	gclient-condition = dawn_standalone
-[submodule "third_party/jsoncpp"]
-	path = third_party/jsoncpp
-	url = https://chromium.googlesource.com/external/github.com/open-source-parsers/jsoncpp.git
-	gclient-condition = dawn_tintd
-[submodule "third_party/langsvr"]
-	path = third_party/langsvr
-	url = https://github.com/google/langsvr.git
-	gclient-condition = dawn_tintd
 [submodule "third_party/partition_alloc"]
 	path = third_party/partition_alloc
 	url = https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator.git

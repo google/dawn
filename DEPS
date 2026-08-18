@@ -21,7 +21,6 @@ vars = {
   'dawn_standalone': True,
   'dawn_node': False, # Also fetches dependencies required for building NodeJS bindings.
   'dawn_wasm': False, # Also fetches dependencies required for building WebAssembly.
-  'dawn_tintd': False, # Also fetches dependencies required for building tintd.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
   'dawn_gn_version': 'git_revision:6b0190f746976a2e3b26ed529a9d487ae2587868',
@@ -668,17 +667,6 @@ deps = {
   'third_party/libprotobuf-mutator/src': {
     'url': '{chromium_git}/external/github.com/google/libprotobuf-mutator.git@c1c950eae0440c3808f2b8bd7c57d0c6a42c1a90',
     'condition': 'dawn_standalone',
-  },
-
-  # Dependencies for tintd.
-  'third_party/jsoncpp': {
-    'url': '{chromium_git}/external/github.com/open-source-parsers/jsoncpp.git@60de77f915ab08499032d6e5a63e05e974f85d01',
-    'condition': 'dawn_tintd',
-  },
-
-  'third_party/langsvr': {
-    'url': '{github_git}/google/langsvr.git@303c526231a90049a3e384549720f3fbd453cf66',
-    'condition': 'dawn_tintd',
   },
 
   # Dependencies for PartitionAlloc.

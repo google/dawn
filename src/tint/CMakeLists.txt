@@ -74,8 +74,7 @@ function(tint_core_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_READER=$<BOOL:${TINT_BUILD_WGSL_READER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_WRITER=$<BOOL:${TINT_BUILD_WGSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_NULL_WRITER=$<BOOL:${TINT_BUILD_NULL_WRITER}>)
-  target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_TINTD=$<BOOL:${TINT_BUILD_TINTD}>)
-  target_compile_definitions(${TARGET} PUBLIC -DTINT_ENABLE_IR_DUMPING=$<BOOL:${TINT_ENABLE_IR_DUMPING}>)
+    target_compile_definitions(${TARGET} PUBLIC -DTINT_ENABLE_IR_DUMPING=$<BOOL:${TINT_ENABLE_IR_DUMPING}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_ENABLE_IR_VALIDATION_ASSERTS=$<BOOL:${TINT_ENABLE_IR_VALIDATION_ASSERTS}>)
 
   if(TINT_BUILD_FUZZERS)
@@ -539,10 +538,6 @@ function(tint_target_add_external_dependencies TARGET KIND)
       if(TINT_BUILD_FUZZERS AND DAWN_USE_BUILT_DXC) # TODO: and target arch is not x86
         target_link_libraries(${TARGET} PRIVATE dxcompiler)
       endif()
-    elseif(${DEPENDENCY} STREQUAL "jsoncpp")
-      target_link_libraries(${TARGET} PRIVATE jsoncpp_static)
-    elseif(${DEPENDENCY} STREQUAL "langsvr")
-      target_link_libraries(${TARGET} PRIVATE langsvr)
     elseif(${DEPENDENCY} STREQUAL "glslang")
       target_link_libraries(${TARGET} PRIVATE glslang)
       if(NOT MSVC)
@@ -711,21 +706,6 @@ if (DAWN_BUILD_PROTOBUF)
     target_link_libraries(${PROTO_TARGET} PUBLIC libprotobuf)
   endforeach()
 endif()
-
-################################################################################
-# tintd (VSCode WGSL language server)
-################################################################################
-if(TINT_BUILD_TINTD)
-  # Copy all the files out of cmd/tintd/vscode to {build}/vscode
-  set(VSCODE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmd/tintd/vscode")
-  set(VSCODE_DST_DIR "${DAWN_BUILD_GEN_DIR}/vscode")
-
-  file(GLOB VSCODE_ASSETS RELATIVE "${VSCODE_SRC_DIR}" "${VSCODE_SRC_DIR}/*")
-  foreach(FILE ${VSCODE_ASSETS})
-    configure_file("${VSCODE_SRC_DIR}/${FILE}" "${VSCODE_DST_DIR}/${FILE}" COPYONLY)
-  endforeach()
-  set_target_properties(tint_cmd_tintd_cmd PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${VSCODE_DST_DIR}")
-endif(TINT_BUILD_TINTD)
 
 
 ################################################################################
