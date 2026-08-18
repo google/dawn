@@ -53,9 +53,9 @@ struct RobustnessConfig {
     /// Should accesses to pointers with the 'uniform' address space be clamped?
     bool clamp_uniform = true;
 
-    /// Should subgroup matrix builtins be predicated?
-    /// Note that the stride parameter will still be clamped if predication is disabled.
-    bool predicate_subgroup_matrix = true;
+    /// Should subgroup matrix builtins be clamped?
+    /// Note that the stride parameter will still be clamped if clamping is disabled.
+    bool clamp_subgroup_matrix = true;
 
     /// Bindings that should always be ignored.
     std::unordered_set<tint::BindingPoint> bindings_ignored;
@@ -72,7 +72,7 @@ struct RobustnessConfig {
                  clamp_immediate_data,
                  clamp_storage,
                  clamp_uniform,
-                 predicate_subgroup_matrix,
+                 clamp_subgroup_matrix,
                  bindings_ignored,
                  disable_runtime_sized_array_index_clamping,
                  use_integer_range_analysis);

@@ -156,10 +156,10 @@ struct State {
             });
         }
 
-        // Predicate subgroup matrix loads and stores based on their offset and stride.
+        // Clamp subgroup matrix loads and stores based on their offset and stride.
         for (auto* call : subgroup_matrix_calls) {
             b.InsertBefore(call, [&] {  //
-                PredicateSubgroupMatrixCall(call);
+                ClampSubgroupMatrixCall(call);
             });
         }
 
@@ -415,9 +415,13 @@ struct State {
     /// Clamp the indices and coordinates of a texture builtin call instruction to ensure they are
     /// within the limits of the texture that they are accessing.
     /// @param call the texture builtin call instruction
-    void PredicateSubgroupMatrixCall(ir::CoreBuiltinCall* call) {
-        // TODO(b/529415904): Clean up this function when deprecated variants are removed.
+    void ClampSubgroupMatrixCall(ir::CoreBuiltinCall* call) {
         const auto& args = call->Args();
+
+        TINT_IR_ASSERT(ir, (call->Func() == BuiltinFn::kSubgroupMatrixLoad &&
+                            call->ExplicitTemplateParams().Length() == 2) ||
+                               (call->Func() == BuiltinFn::kSubgroupMatrixStore &&
+                                call->ExplicitTemplateParams().Length() == 1));
 
         // Extract the arguments from the call.
         auto* arr = args[0];
@@ -426,45 +430,26 @@ struct State {
         Value* stride = nullptr;
         uint32_t stride_index = 0;
         const type::SubgroupMatrix* matrix_ty = nullptr;
-        bool majorness_template = false;
         if (call->Func() == BuiltinFn::kSubgroupMatrixLoad) {
-            if (call->ExplicitTemplateParams().Length() == 2) {
-                TINT_IR_ASSERT(
-                    ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[1]));
-                col_major = std::get<core::Majorness>(call->ExplicitTemplateParams()[1]) ==
-                            core::Majorness::kColMajor;
-                stride = args[2];
-                stride_index = 2;
-                majorness_template = true;
-            } else {
-                col_major = args[2]->As<Constant>()->Value()->ValueAs<bool>();
-                stride = args[3];
-                stride_index = 3;
-            }
+            TINT_IR_ASSERT(
+                ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[1]));
+            col_major = std::get<core::Majorness>(call->ExplicitTemplateParams()[1]) ==
+                        core::Majorness::kColMajor;
+            stride = args[2];
+            stride_index = 2;
             matrix_ty = call->Result()->Type()->As<type::SubgroupMatrix>();
         } else if (call->Func() == BuiltinFn::kSubgroupMatrixStore) {
             matrix_ty = args[2]->Type()->As<type::SubgroupMatrix>();
-            if (call->ExplicitTemplateParams().Length() == 1) {
-                TINT_IR_ASSERT(
-                    ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[0]));
-                col_major = std::get<core::Majorness>(call->ExplicitTemplateParams()[0]) ==
-                            core::Majorness::kColMajor;
-                stride = args[3];
-                stride_index = 3;
-                majorness_template = true;
-            } else {
-                col_major = args[3]->As<Constant>()->Value()->ValueAs<bool>();
-                stride = args[4];
-                stride_index = 4;
-            }
+            TINT_IR_ASSERT(
+                ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[0]));
+            col_major = std::get<core::Majorness>(call->ExplicitTemplateParams()[0]) ==
+                        core::Majorness::kColMajor;
+            stride = args[3];
+            stride_index = 3;
         } else {
             TINT_IR_UNREACHABLE(ir);
         }
 
-        // There are two paths through this code based on majorness_template.
-        // If majorness_template is true, then offset and stride are in terms of the array
-        // If majorness_template is false, then offset and stride are in terms of the matrix
-        // element.
         auto* arr_ty = arr->Type()->UnwrapPtr()->As<core::type::Array>();
         const uint32_t arr_stride = arr_ty->ImplicitStride();
 
@@ -479,12 +464,9 @@ struct State {
             min_stride = matrix_ty->Columns();
             major_dim = matrix_ty->Rows();
         }
-        // Offset and stride of majorness templated versions are counted in elements of the scalar
-        // type.
-        if (majorness_template) {
-            // Note: max comes from situations like 8x8 u8 accessed from an array of vec4u.
-            min_stride = std::max(min_stride * matrix_ty->Type()->Size() / arr_stride, 1u);
-        }
+        // Offset and stride are counted in array stride.
+        // Note: max comes from situations like 8x8 u8 accessed from an array of vec4u.
+        min_stride = std::max(min_stride * matrix_ty->Type()->Size() / arr_stride, 1u);
 
         // Increase the stride so that it is at least `min_stride` if necessary.
         if (auto* const_stride = stride->As<Constant>()) {
@@ -498,23 +480,18 @@ struct State {
         call->SetArg(stride_index, stride);
 
         // If we are not predicating, then clamping the stride is all we need to do.
-        if (!config.predicate_subgroup_matrix) {
+        if (!config.clamp_subgroup_matrix) {
             return;
         }
 
-        // Get the length of the array (in terms of matrix elements).
+        // Get the length of the array.
         TINT_IR_ASSERT(ir, arr_ty);
         Value* array_length = nullptr;
         if (arr_ty->ConstantCount()) {
-            array_length = b.Constant(
-                u32(arr_ty->ConstantCount().value() * arr_stride / matrix_ty->Type()->Size()));
+            array_length = b.Constant(u32(arr_ty->ConstantCount().value()));
         } else {
             TINT_IR_ASSERT(ir, arr_ty->Count()->Is<type::RuntimeArrayCount>());
             array_length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, arr)->Result(0);
-            if (arr_stride != matrix_ty->Type()->Size()) {
-                array_length =
-                    b.Multiply(array_length, u32(arr_stride / matrix_ty->Type()->Size()))->Result();
-            }
         }
 
         // If the array length, offset, and stride are all constants, then we can determine if the
@@ -523,79 +500,29 @@ struct State {
             uint32_t const_length = array_length->As<Constant>()->Value()->ValueAs<uint32_t>();
             uint32_t const_stride = stride->As<Constant>()->Value()->ValueAs<uint32_t>();
             uint32_t const_offset = offset->As<Constant>()->Value()->ValueAs<uint32_t>();
-            if (majorness_template) {
-                // Put offset and stride in terms of matrix element type.
-                const_stride = const_stride * arr_stride / matrix_ty->Type()->Size();
-                const_offset = const_offset * arr_stride / matrix_ty->Type()->Size();
-                min_stride = min_stride * arr_stride / matrix_ty->Type()->Size();
-            }
             uint32_t const_end = const_offset + (const_stride * (major_dim - 1)) + min_stride;
             if (const_end <= const_length) {
                 return;
             }
         }
 
-        if (majorness_template) {
-            // Binding size is guaranteed to hold enough for `min_stride` matrix. So check if the
-            // array length is sufficient for the given parameters and, if not, use 0 offset and
-            // minimum stride.
-            b.InsertBefore(call, [&] {
-                // The beginning of the last row/column is at `offset + (major_dim-1)*stride`.
-                // We then add another `min_stride` elements to get to the end of the accessed
-                // memory.
-                // Convert last_slice and end into elements of the matrix element.
-                offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
-                stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-                auto* last_slice = b.Add(offset, b.Multiply(stride, u32(major_dim - 1)))->Result();
-                if (arr_stride != matrix_ty->Type()->Size()) {
-                    last_slice = b.Multiply(last_slice, u32(arr_stride / matrix_ty->Type()->Size()))
-                                     ->Result();
-                }
-                auto* end =
-                    b.Add(last_slice, u32(min_stride * arr_stride / matrix_ty->Type()->Size()));
-                auto* in_bounds = b.LessThanEqual(end, array_length);
-                offset = b.Call(ty.u32(), BuiltinFn::kSelect, 0_u, offset, in_bounds)->Result();
-                stride = b.Call(ty.u32(), BuiltinFn::kSelect, u32(min_stride), stride, in_bounds)
-                             ->Result();
-                call->SetArg(1, offset);
-                call->SetArg(stride_index, stride);
-            });
-            return;
-        }
-
-        // Predicate the builtin call depending on whether it is in bounds.
-        auto insertion_point = call->next;
-        call->Remove();
-        b.InsertBefore(insertion_point, [&] {
+        // Binding size is guaranteed to hold enough for `min_stride` matrix. So check if the
+        // array length is sufficient for the given parameters and, if not, use 0 offset and
+        // minimum stride.
+        b.InsertBefore(call, [&] {
             // The beginning of the last row/column is at `offset + (major_dim-1)*stride`.
-            // We then add another `min_stride` elements to get to the end of the accessed memory.
+            // We then add another `min_stride` elements to get to the end of the accessed
+            // memory.
             offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
             stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-            auto* last_slice = b.Add(offset, b.Multiply(stride, u32(major_dim - 1)));
+            auto* last_slice = b.Add(offset, b.Multiply(stride, u32(major_dim - 1)))->Result();
             auto* end = b.Add(last_slice, u32(min_stride));
             auto* in_bounds = b.LessThanEqual(end, array_length);
-            if (call->Func() == BuiltinFn::kSubgroupMatrixLoad) {
-                // Declare a variable to hold the result of the load, or a zero-initialized matrix.
-                auto* result = b.Var(ty.ptr<function>(matrix_ty));
-                auto* load_result = b.InstructionResult(matrix_ty);
-                call->Result()->ReplaceAllUsesWith(load_result);
-
-                auto* if_ = b.If(in_bounds);
-                b.Append(if_->True(), [&] {  //
-                    if_->True()->Append(call);
-                    b.Store(result, call->Result());
-                    b.ExitIf(if_);
-                });
-                b.LoadWithResult(load_result, result);
-            } else if (call->Func() == BuiltinFn::kSubgroupMatrixStore) {
-                auto* if_ = b.If(in_bounds);
-                b.Append(if_->True(), [&] {  //
-                    if_->True()->Append(call);
-                    b.ExitIf(if_);
-                });
-            } else {
-                TINT_IR_UNREACHABLE(ir);
-            }
+            offset = b.Call(ty.u32(), BuiltinFn::kSelect, 0_u, offset, in_bounds)->Result();
+            stride =
+                b.Call(ty.u32(), BuiltinFn::kSelect, u32(min_stride), stride, in_bounds)->Result();
+            call->SetArg(1, offset);
+            call->SetArg(stride_index, stride);
         });
     }
 
@@ -629,14 +556,10 @@ struct State {
                 },
                 [&](const CoreBuiltinCall* call) {
                     const type::SubgroupMatrix* mat_ty = nullptr;
-                    // TODO(b/529415904): remove template checks when deprecated variants are
-                    // removed.
-                    if (call->Func() == BuiltinFn::kSubgroupMatrixLoad &&
-                        call->ExplicitTemplateParams().Length() == 2) {
+                    if (call->Func() == BuiltinFn::kSubgroupMatrixLoad) {
                         mat_ty = call->Result()->Type()->As<type::SubgroupMatrix>();
                     }
-                    if (call->Func() == BuiltinFn::kSubgroupMatrixStore &&
-                        call->ExplicitTemplateParams().Length() == 1) {
+                    if (call->Func() == BuiltinFn::kSubgroupMatrixStore) {
                         mat_ty = call->Args()[2]->Type()->As<type::SubgroupMatrix>();
                     }
                     if (mat_ty) {

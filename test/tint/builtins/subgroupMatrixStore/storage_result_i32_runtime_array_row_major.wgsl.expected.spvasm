@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 134
+; Bound: 126
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -130,66 +130,58 @@
                OpCooperativeMatrixStoreKHR %57 %m %uint_0 %55 NonPrivatePointer
          %60 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v2int %6 %uint_0
          %62 = OpArrayLength %uint %6 0
-         %63 = OpIMul %uint %62 %uint_2
-         %64 = OpIMul %uint %uint_16 %uint_7
-         %65 = OpIAdd %uint %uint_0 %64
-         %66 = OpIMul %uint %65 %uint_2
-         %67 = OpIAdd %uint %66 %uint_8
-         %68 = OpULessThanEqual %bool %67 %63
-         %69 = OpSelect %uint %68 %uint_0 %uint_0
-         %70 = OpSelect %uint %68 %uint_16 %uint_4
-         %72 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v2int %6 %uint_0
-         %73 = OpAccessChain %_ptr_StorageBuffer_v2int %72 %69
-               OpCooperativeMatrixStoreKHR %73 %m %uint_0 %70 NonPrivatePointer
-         %76 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v3float %12 %uint_0
-         %78 = OpArrayLength %uint %12 0
-         %79 = OpIMul %uint %78 %uint_4
-         %80 = OpIMul %uint %uint_16 %uint_7
-         %81 = OpIAdd %uint %uint_0 %80
-         %82 = OpIMul %uint %81 %uint_4
-         %83 = OpIAdd %uint %82 %uint_8
-         %84 = OpULessThanEqual %bool %83 %79
-         %85 = OpSelect %uint %84 %uint_0 %uint_0
-         %86 = OpSelect %uint %84 %uint_16 %uint_2
-         %87 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v3float %12 %uint_0
-         %88 = OpAccessChain %_ptr_StorageBuffer_v3float %87 %85
-               OpCooperativeMatrixStoreKHR %88 %m %uint_0 %86 NonPrivatePointer
-         %91 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v4uint %18 %uint_0
-         %93 = OpArrayLength %uint %18 0
-         %94 = OpIMul %uint %93 %uint_4
-         %95 = OpIMul %uint %uint_16 %uint_7
-         %96 = OpIAdd %uint %uint_0 %95
-         %97 = OpIMul %uint %96 %uint_4
-         %98 = OpIAdd %uint %97 %uint_8
-         %99 = OpULessThanEqual %bool %98 %94
-        %100 = OpSelect %uint %99 %uint_0 %uint_0
-        %101 = OpSelect %uint %99 %uint_16 %uint_2
-        %102 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v4uint %18 %uint_0
-        %103 = OpAccessChain %_ptr_StorageBuffer_v4uint %102 %100
-               OpCooperativeMatrixStoreKHR %103 %m %uint_0 %101 NonPrivatePointer
-        %106 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v2half %23 %uint_0
-        %108 = OpArrayLength %uint %23 0
-        %109 = OpIMul %uint %uint_16 %uint_7
-        %110 = OpIAdd %uint %uint_0 %109
-        %111 = OpIAdd %uint %110 %uint_8
-        %112 = OpULessThanEqual %bool %111 %108
-        %113 = OpSelect %uint %112 %uint_0 %uint_0
-        %114 = OpSelect %uint %112 %uint_16 %uint_8
-        %115 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v2half %23 %uint_0
-        %116 = OpAccessChain %_ptr_StorageBuffer_v2half %115 %113
-               OpCooperativeMatrixStoreKHR %116 %m %uint_0 %114 NonPrivatePointer
-        %119 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v3half %29 %uint_0
-        %121 = OpArrayLength %uint %29 0
-        %122 = OpIMul %uint %121 %uint_2
-        %123 = OpIMul %uint %uint_16 %uint_7
-        %124 = OpIAdd %uint %uint_0 %123
-        %125 = OpIMul %uint %124 %uint_2
-        %126 = OpIAdd %uint %125 %uint_8
-        %127 = OpULessThanEqual %bool %126 %122
-        %128 = OpSelect %uint %127 %uint_0 %uint_0
-        %129 = OpSelect %uint %127 %uint_16 %uint_4
-        %130 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v3half %29 %uint_0
-        %131 = OpAccessChain %_ptr_StorageBuffer_v3half %130 %128
-               OpCooperativeMatrixStoreKHR %131 %m %uint_0 %129 NonPrivatePointer
+         %63 = OpIMul %uint %uint_16 %uint_7
+         %64 = OpIAdd %uint %uint_0 %63
+         %65 = OpIAdd %uint %64 %uint_4
+         %67 = OpULessThanEqual %bool %65 %62
+         %68 = OpSelect %uint %67 %uint_0 %uint_0
+         %69 = OpSelect %uint %67 %uint_16 %uint_4
+         %70 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v2int %6 %uint_0
+         %71 = OpAccessChain %_ptr_StorageBuffer_v2int %70 %68
+               OpCooperativeMatrixStoreKHR %71 %m %uint_0 %69 NonPrivatePointer
+         %74 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v3float %12 %uint_0
+         %76 = OpArrayLength %uint %12 0
+         %77 = OpIMul %uint %uint_16 %uint_7
+         %78 = OpIAdd %uint %uint_0 %77
+         %79 = OpIAdd %uint %78 %uint_2
+         %80 = OpULessThanEqual %bool %79 %76
+         %81 = OpSelect %uint %80 %uint_0 %uint_0
+         %82 = OpSelect %uint %80 %uint_16 %uint_2
+         %83 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v3float %12 %uint_0
+         %84 = OpAccessChain %_ptr_StorageBuffer_v3float %83 %81
+               OpCooperativeMatrixStoreKHR %84 %m %uint_0 %82 NonPrivatePointer
+         %87 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v4uint %18 %uint_0
+         %89 = OpArrayLength %uint %18 0
+         %90 = OpIMul %uint %uint_16 %uint_7
+         %91 = OpIAdd %uint %uint_0 %90
+         %92 = OpIAdd %uint %91 %uint_2
+         %93 = OpULessThanEqual %bool %92 %89
+         %94 = OpSelect %uint %93 %uint_0 %uint_0
+         %95 = OpSelect %uint %93 %uint_16 %uint_2
+         %96 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v4uint %18 %uint_0
+         %97 = OpAccessChain %_ptr_StorageBuffer_v4uint %96 %94
+               OpCooperativeMatrixStoreKHR %97 %m %uint_0 %95 NonPrivatePointer
+        %100 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v2half %23 %uint_0
+        %102 = OpArrayLength %uint %23 0
+        %103 = OpIMul %uint %uint_16 %uint_7
+        %104 = OpIAdd %uint %uint_0 %103
+        %105 = OpIAdd %uint %104 %uint_8
+        %106 = OpULessThanEqual %bool %105 %102
+        %107 = OpSelect %uint %106 %uint_0 %uint_0
+        %108 = OpSelect %uint %106 %uint_16 %uint_8
+        %109 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v2half %23 %uint_0
+        %110 = OpAccessChain %_ptr_StorageBuffer_v2half %109 %107
+               OpCooperativeMatrixStoreKHR %110 %m %uint_0 %108 NonPrivatePointer
+        %113 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v3half %29 %uint_0
+        %115 = OpArrayLength %uint %29 0
+        %116 = OpIMul %uint %uint_16 %uint_7
+        %117 = OpIAdd %uint %uint_0 %116
+        %118 = OpIAdd %uint %117 %uint_4
+        %119 = OpULessThanEqual %bool %118 %115
+        %120 = OpSelect %uint %119 %uint_0 %uint_0
+        %121 = OpSelect %uint %119 %uint_16 %uint_4
+        %122 = OpAccessChain %_ptr_StorageBuffer__runtimearr_v3half %29 %uint_0
+        %123 = OpAccessChain %_ptr_StorageBuffer_v3half %122 %120
+               OpCooperativeMatrixStoreKHR %123 %m %uint_0 %121 NonPrivatePointer
                OpReturn
                OpFunctionEnd

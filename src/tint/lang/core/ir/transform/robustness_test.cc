@@ -3301,8 +3301,9 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_StorageRuntimeArray_ConstStride_Col
     auto* func = b.Function("foo", mat);
     b.Append(func->Block(), [&] {
         // Constant stride of 1 should be clamped to 4 even when predication is disabled.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, 1_u);
+        auto* load =
+            b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                           Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr, 0_u, 1_u);
         b.Return(func, load);
     });
 
@@ -3313,7 +3314,7 @@ $B1: {  # root
 
 %foo = func():subgroup_matrix_result<f32, 8, 4> {
   $B2: {
-    %3:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, 0u, true, 1u
+    %3:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, 0u, 1u
     ret %3
   }
 }
@@ -3332,15 +3333,9 @@ $B1: {  # root
     %5:u32 = add 0u, %4
     %6:u32 = add %5, 4u
     %7:bool = lte %6, %3
-    %8:ptr<function, subgroup_matrix_result<f32, 8, 4>, read_write> = var undef
-    if %7 [t: $B3] {  # if_1
-      $B3: {  # true
-        %9:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, 0u, true, 4u
-        store %8, %9
-        exit_if  # if_1
-      }
-    }
-    %10:subgroup_matrix_result<f32, 8, 4> = load %8
+    %8:u32 = select 0u, 0u, %7
+    %9:u32 = select 4u, 4u, %7
+    %10:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %8, %9
     ret %10
   }
 }
@@ -3353,14 +3348,14 @@ $B1: {  # root
 
 %foo = func():subgroup_matrix_result<f32, 8, 4> {
   $B2: {
-    %3:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, 0u, true, 4u
+    %3:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, 0u, 4u
     ret %3
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -3379,7 +3374,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_SignedOffsetAndStride) {
     func->SetParams({offset, stride});
     b.Append(func->Block(), [&] {
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, offset, true, stride);
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr,
+                                    offset, stride);
         b.Return(func, load);
     });
 
@@ -3390,7 +3386,7 @@ $B1: {  # root
 
 %foo = func(%offset:i32, %stride:i32):subgroup_matrix_result<f32, 8, 4> {
   $B2: {
-    %5:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, %offset, true, %stride
+    %5:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %offset, %stride
     ret %5
   }
 }
@@ -3412,15 +3408,9 @@ $B1: {  # root
     %10:u32 = add %8, %9
     %11:u32 = add %10, 4u
     %12:bool = lte %11, %7
-    %13:ptr<function, subgroup_matrix_result<f32, 8, 4>, read_write> = var undef
-    if %12 [t: $B3] {  # if_1
-      $B3: {  # true
-        %14:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, %offset, true, %6
-        store %13, %14
-        exit_if  # if_1
-      }
-    }
-    %15:subgroup_matrix_result<f32, 8, 4> = load %13
+    %13:u32 = select 0u, %8, %12
+    %14:u32 = select 4u, %6, %12
+    %15:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %13, %14
     ret %15
   }
 }
@@ -3435,14 +3425,14 @@ $B1: {  # root
   $B2: {
     %5:u32 = bitcast<u32> %stride
     %6:u32 = max %5, 4u
-    %7:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, %offset, true, %6
+    %7:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %offset, %6
     ret %7
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -3457,7 +3447,7 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_StorageRuntimeArray_ConstStride_Col
 
     auto* func = b.Function("foo", mat);
     b.Append(func->Block(), [&] {
-        // Constant stride of 1 should be clamped to 4 even when predication is disabled.
+        // Constant stride of 1 should be clamped to 4 even when clamping is disabled.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
                                     Vector<TemplateParameter, 2>{mat, core::Majorness::kColMajor},
                                     arr, 16_u, 1_u);
@@ -3512,7 +3502,7 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -3529,9 +3519,10 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_i8_StorageRuntimeArray_ConstStride_
 
     auto* func = b.Function("foo", mat);
     b.Append(func->Block(), [&] {
-        // Constant stride of 1 should be clamped to 4 even when predication is disabled.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, 1_u);
+        // Constant stride of 1 should be clamped to 1 even when clamping is disabled.
+        auto* load =
+            b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                           Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr, 0_u, 1_u);
         b.Return(func, load);
     });
 
@@ -3542,7 +3533,7 @@ $B1: {  # root
 
 %foo = func():subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %3:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>> %arr, 0u, true, 1u
+    %3:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, col_major> %arr, 0u, 1u
     ret %3
   }
 }
@@ -3557,21 +3548,14 @@ $B1: {  # root
 %foo = func():subgroup_matrix_result<i8, 8, 4> {
   $B2: {
     %3:u32 = arrayLength %arr
-    %4:u32 = mul %3, 4u
-    %5:u32 = mul 4u, 7u
-    %6:u32 = add 0u, %5
-    %7:u32 = add %6, 4u
-    %8:bool = lte %7, %4
-    %9:ptr<function, subgroup_matrix_result<i8, 8, 4>, read_write> = var undef
-    if %8 [t: $B3] {  # if_1
-      $B3: {  # true
-        %10:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>> %arr, 0u, true, 4u
-        store %9, %10
-        exit_if  # if_1
-      }
-    }
-    %11:subgroup_matrix_result<i8, 8, 4> = load %9
-    ret %11
+    %4:u32 = mul 1u, 7u
+    %5:u32 = add 0u, %4
+    %6:u32 = add %5, 1u
+    %7:bool = lte %6, %3
+    %8:u32 = select 0u, 0u, %7
+    %9:u32 = select 1u, 1u, %7
+    %10:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, col_major> %arr, %8, %9
+    ret %10
   }
 }
 )";
@@ -3583,14 +3567,14 @@ $B1: {  # root
 
 %foo = func():subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %3:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>> %arr, 0u, true, 4u
+    %3:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, col_major> %arr, 0u, 1u
     ret %3
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -3607,9 +3591,10 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_u8_StorageRuntimeArray_ConstStride_
 
     auto* func = b.Function("foo", mat);
     b.Append(func->Block(), [&] {
-        // Constant stride of 1 should be clamped to 4 even when predication is disabled.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, 1_u);
+        // Constant stride of 1 should be clamped to 1 even when clamping is disabled.
+        auto* load =
+            b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                           Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr, 0_u, 1_u);
         b.Return(func, load);
     });
 
@@ -3620,7 +3605,7 @@ $B1: {  # root
 
 %foo = func():subgroup_matrix_result<u8, 8, 4> {
   $B2: {
-    %3:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>> %arr, 0u, true, 1u
+    %3:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, col_major> %arr, 0u, 1u
     ret %3
   }
 }
@@ -3635,21 +3620,14 @@ $B1: {  # root
 %foo = func():subgroup_matrix_result<u8, 8, 4> {
   $B2: {
     %3:u32 = arrayLength %arr
-    %4:u32 = mul %3, 4u
-    %5:u32 = mul 4u, 7u
-    %6:u32 = add 0u, %5
-    %7:u32 = add %6, 4u
-    %8:bool = lte %7, %4
-    %9:ptr<function, subgroup_matrix_result<u8, 8, 4>, read_write> = var undef
-    if %8 [t: $B3] {  # if_1
-      $B3: {  # true
-        %10:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>> %arr, 0u, true, 4u
-        store %9, %10
-        exit_if  # if_1
-      }
-    }
-    %11:subgroup_matrix_result<u8, 8, 4> = load %9
-    ret %11
+    %4:u32 = mul 1u, 7u
+    %5:u32 = add 0u, %4
+    %6:u32 = add %5, 1u
+    %7:bool = lte %6, %3
+    %8:u32 = select 0u, 0u, %7
+    %9:u32 = select 1u, 1u, %7
+    %10:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, col_major> %arr, %8, %9
+    ret %10
   }
 }
 )";
@@ -3661,14 +3639,14 @@ $B1: {  # root
 
 %foo = func():subgroup_matrix_result<u8, 8, 4> {
   $B2: {
-    %3:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>> %arr, 0u, true, 4u
+    %3:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, col_major> %arr, 0u, 1u
     ret %3
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -3685,9 +3663,10 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_StorageRuntimeArray_DynamicStride_C
     auto* stride = b.FunctionParam<u32>("stride");
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, stride);
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr,
+                                    0_u, stride);
         b.Return(func, load);
     });
 
@@ -3698,7 +3677,7 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<f32, 8, 4> {
   $B2: {
-    %4:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, 0u, true, %stride
+    %4:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, 0u, %stride
     ret %4
   }
 }
@@ -3718,15 +3697,9 @@ $B1: {  # root
     %7:u32 = add 0u, %6
     %8:u32 = add %7, 4u
     %9:bool = lte %8, %5
-    %10:ptr<function, subgroup_matrix_result<f32, 8, 4>, read_write> = var undef
-    if %9 [t: $B3] {  # if_1
-      $B3: {  # true
-        %11:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, 0u, true, %4
-        store %10, %11
-        exit_if  # if_1
-      }
-    }
-    %12:subgroup_matrix_result<f32, 8, 4> = load %10
+    %10:u32 = select 0u, 0u, %9
+    %11:u32 = select 4u, %4, %9
+    %12:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %10, %11
     ret %12
   }
 }
@@ -3740,14 +3713,14 @@ $B1: {  # root
 %foo = func(%stride:u32):subgroup_matrix_result<f32, 8, 4> {
   $B2: {
     %4:u32 = max %stride, 4u
-    %5:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, 0u, true, %4
+    %5:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, 0u, %4
     ret %5
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -3766,9 +3739,10 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_i8_StorageRuntimeArray_DynamicStrid
     auto* stride = b.FunctionParam<u32>("stride");
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, stride);
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr,
+                                    0_u, stride);
         b.Return(func, load);
     });
 
@@ -3779,7 +3753,7 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %4:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>> %arr, 0u, true, %stride
+    %4:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, col_major> %arr, 0u, %stride
     ret %4
   }
 }
@@ -3793,23 +3767,16 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 4u
+    %4:u32 = max %stride, 1u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %5, 4u
-    %7:u32 = mul %4, 7u
-    %8:u32 = add 0u, %7
-    %9:u32 = add %8, 4u
-    %10:bool = lte %9, %6
-    %11:ptr<function, subgroup_matrix_result<i8, 8, 4>, read_write> = var undef
-    if %10 [t: $B3] {  # if_1
-      $B3: {  # true
-        %12:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>> %arr, 0u, true, %4
-        store %11, %12
-        exit_if  # if_1
-      }
-    }
-    %13:subgroup_matrix_result<i8, 8, 4> = load %11
-    ret %13
+    %6:u32 = mul %4, 7u
+    %7:u32 = add 0u, %6
+    %8:u32 = add %7, 1u
+    %9:bool = lte %8, %5
+    %10:u32 = select 0u, 0u, %9
+    %11:u32 = select 1u, %4, %9
+    %12:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, col_major> %arr, %10, %11
+    ret %12
   }
 }
 )";
@@ -3821,15 +3788,15 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 4u
-    %5:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>> %arr, 0u, true, %4
+    %4:u32 = max %stride, 1u
+    %5:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, col_major> %arr, 0u, %4
     ret %5
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -3848,9 +3815,10 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_u8_StorageRuntimeArray_DynamicStrid
     auto* stride = b.FunctionParam<u32>("stride");
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, stride);
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr,
+                                    0_u, stride);
         b.Return(func, load);
     });
 
@@ -3861,7 +3829,7 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<u8, 8, 4> {
   $B2: {
-    %4:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>> %arr, 0u, true, %stride
+    %4:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, col_major> %arr, 0u, %stride
     ret %4
   }
 }
@@ -3875,23 +3843,16 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<u8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 4u
+    %4:u32 = max %stride, 1u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %5, 4u
-    %7:u32 = mul %4, 7u
-    %8:u32 = add 0u, %7
-    %9:u32 = add %8, 4u
-    %10:bool = lte %9, %6
-    %11:ptr<function, subgroup_matrix_result<u8, 8, 4>, read_write> = var undef
-    if %10 [t: $B3] {  # if_1
-      $B3: {  # true
-        %12:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>> %arr, 0u, true, %4
-        store %11, %12
-        exit_if  # if_1
-      }
-    }
-    %13:subgroup_matrix_result<u8, 8, 4> = load %11
-    ret %13
+    %6:u32 = mul %4, 7u
+    %7:u32 = add 0u, %6
+    %8:u32 = add %7, 1u
+    %9:bool = lte %8, %5
+    %10:u32 = select 0u, 0u, %9
+    %11:u32 = select 1u, %4, %9
+    %12:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, col_major> %arr, %10, %11
+    ret %12
   }
 }
 )";
@@ -3903,15 +3864,15 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<u8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 4u
-    %5:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>> %arr, 0u, true, %4
+    %4:u32 = max %stride, 1u
+    %5:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, col_major> %arr, 0u, %4
     ret %5
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -3928,9 +3889,10 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_StorageRuntimeArray_DynamicStride_R
     auto* stride = b.FunctionParam<u32>("stride");
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, false, stride);
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kRowMajor}, arr,
+                                    0_u, stride);
         b.Return(func, load);
     });
 
@@ -3941,7 +3903,7 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<f32, 8, 4> {
   $B2: {
-    %4:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, 0u, false, %stride
+    %4:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, row_major> %arr, 0u, %stride
     ret %4
   }
 }
@@ -3961,15 +3923,9 @@ $B1: {  # root
     %7:u32 = add 0u, %6
     %8:u32 = add %7, 8u
     %9:bool = lte %8, %5
-    %10:ptr<function, subgroup_matrix_result<f32, 8, 4>, read_write> = var undef
-    if %9 [t: $B3] {  # if_1
-      $B3: {  # true
-        %11:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, 0u, false, %4
-        store %10, %11
-        exit_if  # if_1
-      }
-    }
-    %12:subgroup_matrix_result<f32, 8, 4> = load %10
+    %10:u32 = select 0u, 0u, %9
+    %11:u32 = select 8u, %4, %9
+    %12:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, row_major> %arr, %10, %11
     ret %12
   }
 }
@@ -3983,14 +3939,14 @@ $B1: {  # root
 %foo = func(%stride:u32):subgroup_matrix_result<f32, 8, 4> {
   $B2: {
     %4:u32 = max %stride, 8u
-    %5:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, 0u, false, %4
+    %5:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, row_major> %arr, 0u, %4
     ret %5
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -4009,9 +3965,10 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_i8_StorageRuntimeArray_DynamicStrid
     auto* stride = b.FunctionParam<u32>("stride");
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, false, stride);
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kRowMajor}, arr,
+                                    0_u, stride);
         b.Return(func, load);
     });
 
@@ -4022,7 +3979,7 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %4:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>> %arr, 0u, false, %stride
+    %4:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, row_major> %arr, 0u, %stride
     ret %4
   }
 }
@@ -4036,23 +3993,16 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 8u
+    %4:u32 = max %stride, 2u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %5, 4u
-    %7:u32 = mul %4, 3u
-    %8:u32 = add 0u, %7
-    %9:u32 = add %8, 8u
-    %10:bool = lte %9, %6
-    %11:ptr<function, subgroup_matrix_result<i8, 8, 4>, read_write> = var undef
-    if %10 [t: $B3] {  # if_1
-      $B3: {  # true
-        %12:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>> %arr, 0u, false, %4
-        store %11, %12
-        exit_if  # if_1
-      }
-    }
-    %13:subgroup_matrix_result<i8, 8, 4> = load %11
-    ret %13
+    %6:u32 = mul %4, 3u
+    %7:u32 = add 0u, %6
+    %8:u32 = add %7, 2u
+    %9:bool = lte %8, %5
+    %10:u32 = select 0u, 0u, %9
+    %11:u32 = select 2u, %4, %9
+    %12:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, row_major> %arr, %10, %11
+    ret %12
   }
 }
 )";
@@ -4064,15 +4014,15 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 8u
-    %5:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>> %arr, 0u, false, %4
+    %4:u32 = max %stride, 2u
+    %5:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, row_major> %arr, 0u, %4
     ret %5
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -4092,7 +4042,7 @@ TEST_P(IR_RobustnessTest,
     auto* stride = b.FunctionParam<u32>("stride");
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
                                     Vector<TemplateParameter, 2>{mat, core::Majorness::kRowMajor},
                                     arr, 16_u, stride);
@@ -4122,16 +4072,14 @@ $B1: {  # root
   $B2: {
     %4:u32 = max %stride, 2u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %5, 4u
-    %7:u32 = mul %4, 3u
-    %8:u32 = add 16u, %7
-    %9:u32 = mul %8, 4u
-    %10:u32 = add %9, 8u
-    %11:bool = lte %10, %6
-    %12:u32 = select 0u, 16u, %11
-    %13:u32 = select 2u, %4, %11
-    %14:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, row_major> %arr, %12, %13
-    ret %14
+    %6:u32 = mul %4, 3u
+    %7:u32 = add 16u, %6
+    %8:u32 = add %7, 2u
+    %9:bool = lte %8, %5
+    %10:u32 = select 0u, 16u, %9
+    %11:u32 = select 2u, %4, %9
+    %12:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, row_major> %arr, %10, %11
+    ret %12
   }
 }
 )";
@@ -4151,7 +4099,7 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -4170,9 +4118,10 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_u8_StorageRuntimeArray_DynamicStrid
     auto* stride = b.FunctionParam<u32>("stride");
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, false, stride);
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kRowMajor}, arr,
+                                    0_u, stride);
         b.Return(func, load);
     });
 
@@ -4183,7 +4132,7 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<u8, 8, 4> {
   $B2: {
-    %4:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>> %arr, 0u, false, %stride
+    %4:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, row_major> %arr, 0u, %stride
     ret %4
   }
 }
@@ -4197,23 +4146,16 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<u8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 8u
+    %4:u32 = max %stride, 2u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %5, 4u
-    %7:u32 = mul %4, 3u
-    %8:u32 = add 0u, %7
-    %9:u32 = add %8, 8u
-    %10:bool = lte %9, %6
-    %11:ptr<function, subgroup_matrix_result<u8, 8, 4>, read_write> = var undef
-    if %10 [t: $B3] {  # if_1
-      $B3: {  # true
-        %12:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>> %arr, 0u, false, %4
-        store %11, %12
-        exit_if  # if_1
-      }
-    }
-    %13:subgroup_matrix_result<u8, 8, 4> = load %11
-    ret %13
+    %6:u32 = mul %4, 3u
+    %7:u32 = add 0u, %6
+    %8:u32 = add %7, 2u
+    %9:bool = lte %8, %5
+    %10:u32 = select 0u, 0u, %9
+    %11:u32 = select 2u, %4, %9
+    %12:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, row_major> %arr, %10, %11
+    ret %12
   }
 }
 )";
@@ -4225,15 +4167,15 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<u8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 8u
-    %5:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>> %arr, 0u, false, %4
+    %4:u32 = max %stride, 2u
+    %5:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, row_major> %arr, 0u, %4
     ret %5
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -4249,9 +4191,10 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_WorkgroupFixedArray_DynamicStride_C
     auto* stride = b.FunctionParam<u32>("stride");
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, stride);
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr,
+                                    0_u, stride);
         b.Return(func, load);
     });
 
@@ -4262,7 +4205,7 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<f32, 8, 4> {
   $B2: {
-    %4:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, 0u, true, %stride
+    %4:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, 0u, %stride
     ret %4
   }
 }
@@ -4281,15 +4224,9 @@ $B1: {  # root
     %6:u32 = add 0u, %5
     %7:u32 = add %6, 4u
     %8:bool = lte %7, 1024u
-    %9:ptr<function, subgroup_matrix_result<f32, 8, 4>, read_write> = var undef
-    if %8 [t: $B3] {  # if_1
-      $B3: {  # true
-        %10:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, 0u, true, %4
-        store %9, %10
-        exit_if  # if_1
-      }
-    }
-    %11:subgroup_matrix_result<f32, 8, 4> = load %9
+    %9:u32 = select 0u, 0u, %8
+    %10:u32 = select 4u, %4, %8
+    %11:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %9, %10
     ret %11
   }
 }
@@ -4303,14 +4240,14 @@ $B1: {  # root
 %foo = func(%stride:u32):subgroup_matrix_result<f32, 8, 4> {
   $B2: {
     %4:u32 = max %stride, 4u
-    %5:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, 0u, true, %4
+    %5:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, 0u, %4
     ret %5
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -4328,9 +4265,10 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_i8_WorkgroupFixedArray_DynamicStrid
     auto* stride = b.FunctionParam<u32>("stride");
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, stride);
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr,
+                                    0_u, stride);
         b.Return(func, load);
     });
 
@@ -4341,7 +4279,7 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %4:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>> %arr, 0u, true, %stride
+    %4:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, col_major> %arr, 0u, %stride
     ret %4
   }
 }
@@ -4355,20 +4293,14 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 4u
+    %4:u32 = max %stride, 1u
     %5:u32 = mul %4, 7u
     %6:u32 = add 0u, %5
-    %7:u32 = add %6, 4u
-    %8:bool = lte %7, 4096u
-    %9:ptr<function, subgroup_matrix_result<i8, 8, 4>, read_write> = var undef
-    if %8 [t: $B3] {  # if_1
-      $B3: {  # true
-        %10:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>> %arr, 0u, true, %4
-        store %9, %10
-        exit_if  # if_1
-      }
-    }
-    %11:subgroup_matrix_result<i8, 8, 4> = load %9
+    %7:u32 = add %6, 1u
+    %8:bool = lte %7, 1024u
+    %9:u32 = select 0u, 0u, %8
+    %10:u32 = select 1u, %4, %8
+    %11:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, col_major> %arr, %9, %10
     ret %11
   }
 }
@@ -4381,15 +4313,15 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 4u
-    %5:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>> %arr, 0u, true, %4
+    %4:u32 = max %stride, 1u
+    %5:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, col_major> %arr, 0u, %4
     ret %5
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -4407,9 +4339,10 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_u8_WorkgroupFixedArray_DynamicStrid
     auto* stride = b.FunctionParam<u32>("stride");
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, stride);
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr,
+                                    0_u, stride);
         b.Return(func, load);
     });
 
@@ -4420,7 +4353,7 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<u8, 8, 4> {
   $B2: {
-    %4:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>> %arr, 0u, true, %stride
+    %4:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, col_major> %arr, 0u, %stride
     ret %4
   }
 }
@@ -4434,20 +4367,14 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<u8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 4u
+    %4:u32 = max %stride, 1u
     %5:u32 = mul %4, 7u
     %6:u32 = add 0u, %5
-    %7:u32 = add %6, 4u
-    %8:bool = lte %7, 4096u
-    %9:ptr<function, subgroup_matrix_result<u8, 8, 4>, read_write> = var undef
-    if %8 [t: $B3] {  # if_1
-      $B3: {  # true
-        %10:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>> %arr, 0u, true, %4
-        store %9, %10
-        exit_if  # if_1
-      }
-    }
-    %11:subgroup_matrix_result<u8, 8, 4> = load %9
+    %7:u32 = add %6, 1u
+    %8:bool = lte %7, 1024u
+    %9:u32 = select 0u, 0u, %8
+    %10:u32 = select 1u, %4, %8
+    %11:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, col_major> %arr, %9, %10
     ret %11
   }
 }
@@ -4460,21 +4387,21 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<u8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 4u
-    %5:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>> %arr, 0u, true, %4
+    %4:u32 = max %stride, 1u
+    %5:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, col_major> %arr, 0u, %4
     ret %5
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
 }
 
-// Test that we avoid any predication and clamping for fixed size arrays when all parameters are
+// Test that we avoid any clamping for fixed size arrays when all parameters are
 // constant and in-bounds.
 TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_WorkgroupFixedArray_ConstStrideAndOffset) {
     auto* arr = b.Var("arr", ty.ptr(workgroup, ty.array<f32, 1024>()));
@@ -4487,7 +4414,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_WorkgroupFixedArray_ConstStrideAndO
         // The final row will start at 1016. Another full stride will take it past the 1024 limit,
         // but the transform should understand that only 8 elements are accessed on that row.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 920_u, false, 32_u);
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kRowMajor}, arr,
+                                    920_u, 32_u);
         b.Return(func, load);
     });
 
@@ -4498,7 +4426,7 @@ $B1: {  # root
 
 %foo = func():subgroup_matrix_result<f32, 8, 4> {
   $B2: {
-    %3:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, 920u, false, 32u
+    %3:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, row_major> %arr, 920u, 32u
     ret %3
   }
 }
@@ -4508,7 +4436,7 @@ $B1: {  # root
     auto* expect = src;
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(expect, str());
@@ -4527,7 +4455,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_i8_WorkgroupFixedArray_ConstStrideA
         // The final row will start at 1016. Another full stride will take it past the 1024 limit,
         // but the transform should understand that only 8 elements are accessed on that row.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 920_u, false, 32_u);
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kRowMajor}, arr,
+                                    920_u, 32_u);
         b.Return(func, load);
     });
 
@@ -4538,7 +4467,7 @@ $B1: {  # root
 
 %foo = func():subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %3:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>> %arr, 920u, false, 32u
+    %3:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, row_major> %arr, 920u, 32u
     ret %3
   }
 }
@@ -4548,7 +4477,7 @@ $B1: {  # root
     auto* expect = src;
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(expect, str());
@@ -4567,7 +4496,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_u8_WorkgroupFixedArray_ConstStrideA
         // The final row will start at 1016. Another full stride will take it past the 1024 limit,
         // but the transform should understand that only 8 elements are accessed on that row.
         auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
-                                    Vector<TemplateParameter, 1>{mat}, arr, 920_u, false, 32_u);
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kRowMajor}, arr,
+                                    920_u, 32_u);
         b.Return(func, load);
     });
 
@@ -4578,7 +4508,7 @@ $B1: {  # root
 
 %foo = func():subgroup_matrix_result<u8, 8, 4> {
   $B2: {
-    %3:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>> %arr, 920u, false, 32u
+    %3:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, row_major> %arr, 920u, 32u
     ret %3
   }
 }
@@ -4588,7 +4518,7 @@ $B1: {  # root
     auto* expect = src;
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(expect, str());
@@ -4650,22 +4580,20 @@ $B1: {  # root
   $B2: {
     %5:u32 = max %stride, 1u
     %6:u32 = arrayLength %v
-    %7:u32 = mul %6, 16u
-    %8:u32 = mul %5, 7u
-    %9:u32 = add %offset, %8
-    %10:u32 = mul %9, 16u
-    %11:u32 = add %10, 16u
-    %12:bool = lte %11, %7
-    %13:u32 = select 0u, %offset, %12
-    %14:u32 = select 1u, %5, %12
-    %15:subgroup_matrix_left<u8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major> %v, %13, %14
+    %7:u32 = mul %5, 7u
+    %8:u32 = add %offset, %7
+    %9:u32 = add %8, 1u
+    %10:bool = lte %9, %6
+    %11:u32 = select 0u, %offset, %10
+    %12:u32 = select 1u, %5, %10
+    %13:subgroup_matrix_left<u8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major> %v, %11, %12
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? robust : no_robust, str());
@@ -4727,22 +4655,20 @@ $B1: {  # root
   $B2: {
     %5:u32 = max %stride, 1u
     %6:u32 = arrayLength %v
-    %7:u32 = mul %6, 8u
-    %8:u32 = mul %5, 7u
-    %9:u32 = add %offset, %8
-    %10:u32 = mul %9, 8u
-    %11:u32 = add %10, 8u
-    %12:bool = lte %11, %7
-    %13:u32 = select 0u, %offset, %12
-    %14:u32 = select 1u, %5, %12
-    %15:subgroup_matrix_left<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f16, 8, 8>, col_major> %v, %13, %14
+    %7:u32 = mul %5, 7u
+    %8:u32 = add %offset, %7
+    %9:u32 = add %8, 1u
+    %10:bool = lte %9, %6
+    %11:u32 = select 0u, %offset, %10
+    %12:u32 = select 1u, %5, %10
+    %13:subgroup_matrix_left<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f16, 8, 8>, col_major> %v, %11, %12
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? robust : no_robust, str());
@@ -4760,7 +4686,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_StorageRuntimeArray_ConstStride_Co
     func->AppendParam(value);
     b.Append(func->Block(), [&] {
         // Constant stride of 1 should be clamped to 4 even when predication is disabled.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 0_u, value, true, 1_u);
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr, 0_u, value, 1_u);
         b.Return(func);
     });
 
@@ -4771,7 +4698,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>):void {
   $B2: {
-    %4:void = subgroupMatrixStore %arr, 0u, %value, true, 1u
+    %4:void = subgroupMatrixStore<col_major> %arr, 0u, %value, 1u
     ret
   }
 }
@@ -4790,12 +4717,9 @@ $B1: {  # root
     %6:u32 = add 0u, %5
     %7:u32 = add %6, 4u
     %8:bool = lte %7, %4
-    if %8 [t: $B3] {  # if_1
-      $B3: {  # true
-        %9:void = subgroupMatrixStore %arr, 0u, %value, true, 4u
-        exit_if  # if_1
-      }
-    }
+    %9:u32 = select 0u, 0u, %8
+    %10:u32 = select 4u, 4u, %8
+    %11:void = subgroupMatrixStore<col_major> %arr, %9, %value, %10
     ret
   }
 }
@@ -4808,14 +4732,14 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>):void {
   $B2: {
-    %4:void = subgroupMatrixStore %arr, 0u, %value, true, 4u
+    %4:void = subgroupMatrixStore<col_major> %arr, 0u, %value, 4u
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -4834,7 +4758,9 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_SignedOffsetAndStride) {
     auto* stride = b.FunctionParam("stride", ty.i32());
     func->SetParams({value, offset, stride});
     b.Append(func->Block(), [&] {
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, offset, value, true, stride);
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr, offset, value,
+                       stride);
         b.Return(func);
     });
 
@@ -4845,7 +4771,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %offset:i32, %stride:i32):void {
   $B2: {
-    %6:void = subgroupMatrixStore %arr, %offset, %value, true, %stride
+    %6:void = subgroupMatrixStore<col_major> %arr, %offset, %value, %stride
     ret
   }
 }
@@ -4867,12 +4793,9 @@ $B1: {  # root
     %11:u32 = add %9, %10
     %12:u32 = add %11, 4u
     %13:bool = lte %12, %8
-    if %13 [t: $B3] {  # if_1
-      $B3: {  # true
-        %14:void = subgroupMatrixStore %arr, %offset, %value, true, %7
-        exit_if  # if_1
-      }
-    }
+    %14:u32 = select 0u, %9, %13
+    %15:u32 = select 4u, %7, %13
+    %16:void = subgroupMatrixStore<col_major> %arr, %14, %value, %15
     ret
   }
 }
@@ -4887,14 +4810,14 @@ $B1: {  # root
   $B2: {
     %6:u32 = bitcast<u32> %stride
     %7:u32 = max %6, 4u
-    %8:void = subgroupMatrixStore %arr, %offset, %value, true, %7
+    %8:void = subgroupMatrixStore<col_major> %arr, %offset, %value, %7
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -4966,7 +4889,7 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -4985,8 +4908,9 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_i8_StorageRuntimeArray_ConstStride
     auto* value = b.FunctionParam("value", mat);
     func->AppendParam(value);
     b.Append(func->Block(), [&] {
-        // Constant stride of 1 should be clamped to 4 even when predication is disabled.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 0_u, value, true, 1_u);
+        // Constant stride of 1 should be clamped to 1 even when clamping is disabled.
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr, 0_u, value, 1_u);
         b.Return(func);
     });
 
@@ -4997,7 +4921,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>):void {
   $B2: {
-    %4:void = subgroupMatrixStore %arr, 0u, %value, true, 1u
+    %4:void = subgroupMatrixStore<col_major> %arr, 0u, %value, 1u
     ret
   }
 }
@@ -5012,17 +4936,13 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>):void {
   $B2: {
     %4:u32 = arrayLength %arr
-    %5:u32 = mul %4, 4u
-    %6:u32 = mul 4u, 7u
-    %7:u32 = add 0u, %6
-    %8:u32 = add %7, 4u
-    %9:bool = lte %8, %5
-    if %9 [t: $B3] {  # if_1
-      $B3: {  # true
-        %10:void = subgroupMatrixStore %arr, 0u, %value, true, 4u
-        exit_if  # if_1
-      }
-    }
+    %5:u32 = mul 1u, 7u
+    %6:u32 = add 0u, %5
+    %7:u32 = add %6, 1u
+    %8:bool = lte %7, %4
+    %9:u32 = select 0u, 0u, %8
+    %10:u32 = select 1u, 1u, %8
+    %11:void = subgroupMatrixStore<col_major> %arr, %9, %value, %10
     ret
   }
 }
@@ -5035,14 +4955,14 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>):void {
   $B2: {
-    %4:void = subgroupMatrixStore %arr, 0u, %value, true, 4u
+    %4:void = subgroupMatrixStore<col_major> %arr, 0u, %value, 1u
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -5061,8 +4981,9 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_u8_StorageRuntimeArray_ConstStride
     auto* value = b.FunctionParam("value", mat);
     func->AppendParam(value);
     b.Append(func->Block(), [&] {
-        // Constant stride of 1 should be clamped to 4 even when predication is disabled.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 0_u, value, true, 1_u);
+        // Constant stride of 1 should be clamped to 1 even when clamping is disabled.
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr, 0_u, value, 1_u);
         b.Return(func);
     });
 
@@ -5073,7 +4994,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>):void {
   $B2: {
-    %4:void = subgroupMatrixStore %arr, 0u, %value, true, 1u
+    %4:void = subgroupMatrixStore<col_major> %arr, 0u, %value, 1u
     ret
   }
 }
@@ -5088,17 +5009,13 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>):void {
   $B2: {
     %4:u32 = arrayLength %arr
-    %5:u32 = mul %4, 4u
-    %6:u32 = mul 4u, 7u
-    %7:u32 = add 0u, %6
-    %8:u32 = add %7, 4u
-    %9:bool = lte %8, %5
-    if %9 [t: $B3] {  # if_1
-      $B3: {  # true
-        %10:void = subgroupMatrixStore %arr, 0u, %value, true, 4u
-        exit_if  # if_1
-      }
-    }
+    %5:u32 = mul 1u, 7u
+    %6:u32 = add 0u, %5
+    %7:u32 = add %6, 1u
+    %8:bool = lte %7, %4
+    %9:u32 = select 0u, 0u, %8
+    %10:u32 = select 1u, 1u, %8
+    %11:void = subgroupMatrixStore<col_major> %arr, %9, %value, %10
     ret
   }
 }
@@ -5111,14 +5028,14 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>):void {
   $B2: {
-    %4:void = subgroupMatrixStore %arr, 0u, %value, true, 4u
+    %4:void = subgroupMatrixStore<col_major> %arr, 0u, %value, 1u
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -5137,8 +5054,9 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_StorageRuntimeArray_DynamicStride_
     func->AppendParam(value);
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 0_u, value, true, stride);
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr, 0_u, value, stride);
         b.Return(func);
     });
 
@@ -5149,7 +5067,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:void = subgroupMatrixStore %arr, 0u, %value, true, %stride
+    %5:void = subgroupMatrixStore<col_major> %arr, 0u, %value, %stride
     ret
   }
 }
@@ -5169,12 +5087,9 @@ $B1: {  # root
     %8:u32 = add 0u, %7
     %9:u32 = add %8, 4u
     %10:bool = lte %9, %6
-    if %10 [t: $B3] {  # if_1
-      $B3: {  # true
-        %11:void = subgroupMatrixStore %arr, 0u, %value, true, %5
-        exit_if  # if_1
-      }
-    }
+    %11:u32 = select 0u, 0u, %10
+    %12:u32 = select 4u, %5, %10
+    %13:void = subgroupMatrixStore<col_major> %arr, %11, %value, %12
     ret
   }
 }
@@ -5188,14 +5103,14 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %stride:u32):void {
   $B2: {
     %5:u32 = max %stride, 4u
-    %6:void = subgroupMatrixStore %arr, 0u, %value, true, %5
+    %6:void = subgroupMatrixStore<col_major> %arr, 0u, %value, %5
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -5216,8 +5131,9 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_i8_StorageRuntimeArray_DynamicStri
     func->AppendParam(value);
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 0_u, value, true, stride);
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr, 0_u, value, stride);
         b.Return(func);
     });
 
@@ -5228,7 +5144,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:void = subgroupMatrixStore %arr, 0u, %value, true, %stride
+    %5:void = subgroupMatrixStore<col_major> %arr, 0u, %value, %stride
     ret
   }
 }
@@ -5242,19 +5158,15 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:u32 = max %stride, 4u
+    %5:u32 = max %stride, 1u
     %6:u32 = arrayLength %arr
-    %7:u32 = mul %6, 4u
-    %8:u32 = mul %5, 7u
-    %9:u32 = add 0u, %8
-    %10:u32 = add %9, 4u
-    %11:bool = lte %10, %7
-    if %11 [t: $B3] {  # if_1
-      $B3: {  # true
-        %12:void = subgroupMatrixStore %arr, 0u, %value, true, %5
-        exit_if  # if_1
-      }
-    }
+    %7:u32 = mul %5, 7u
+    %8:u32 = add 0u, %7
+    %9:u32 = add %8, 1u
+    %10:bool = lte %9, %6
+    %11:u32 = select 0u, 0u, %10
+    %12:u32 = select 1u, %5, %10
+    %13:void = subgroupMatrixStore<col_major> %arr, %11, %value, %12
     ret
   }
 }
@@ -5267,15 +5179,15 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:u32 = max %stride, 4u
-    %6:void = subgroupMatrixStore %arr, 0u, %value, true, %5
+    %5:u32 = max %stride, 1u
+    %6:void = subgroupMatrixStore<col_major> %arr, 0u, %value, %5
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -5296,8 +5208,9 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_u8_StorageRuntimeArray_DynamicStri
     func->AppendParam(value);
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 0_u, value, true, stride);
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr, 0_u, value, stride);
         b.Return(func);
     });
 
@@ -5308,7 +5221,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:void = subgroupMatrixStore %arr, 0u, %value, true, %stride
+    %5:void = subgroupMatrixStore<col_major> %arr, 0u, %value, %stride
     ret
   }
 }
@@ -5322,19 +5235,15 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:u32 = max %stride, 4u
+    %5:u32 = max %stride, 1u
     %6:u32 = arrayLength %arr
-    %7:u32 = mul %6, 4u
-    %8:u32 = mul %5, 7u
-    %9:u32 = add 0u, %8
-    %10:u32 = add %9, 4u
-    %11:bool = lte %10, %7
-    if %11 [t: $B3] {  # if_1
-      $B3: {  # true
-        %12:void = subgroupMatrixStore %arr, 0u, %value, true, %5
-        exit_if  # if_1
-      }
-    }
+    %7:u32 = mul %5, 7u
+    %8:u32 = add 0u, %7
+    %9:u32 = add %8, 1u
+    %10:bool = lte %9, %6
+    %11:u32 = select 0u, 0u, %10
+    %12:u32 = select 1u, %5, %10
+    %13:void = subgroupMatrixStore<col_major> %arr, %11, %value, %12
     ret
   }
 }
@@ -5347,15 +5256,15 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:u32 = max %stride, 4u
-    %6:void = subgroupMatrixStore %arr, 0u, %value, true, %5
+    %5:u32 = max %stride, 1u
+    %6:void = subgroupMatrixStore<col_major> %arr, 0u, %value, %5
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -5374,8 +5283,9 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_StorageRuntimeArray_DynamicStride_
     func->AppendParam(value);
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 0_u, value, false, stride);
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kRowMajor}, arr, 0_u, value, stride);
         b.Return(func);
     });
 
@@ -5386,7 +5296,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:void = subgroupMatrixStore %arr, 0u, %value, false, %stride
+    %5:void = subgroupMatrixStore<row_major> %arr, 0u, %value, %stride
     ret
   }
 }
@@ -5406,12 +5316,9 @@ $B1: {  # root
     %8:u32 = add 0u, %7
     %9:u32 = add %8, 8u
     %10:bool = lte %9, %6
-    if %10 [t: $B3] {  # if_1
-      $B3: {  # true
-        %11:void = subgroupMatrixStore %arr, 0u, %value, false, %5
-        exit_if  # if_1
-      }
-    }
+    %11:u32 = select 0u, 0u, %10
+    %12:u32 = select 8u, %5, %10
+    %13:void = subgroupMatrixStore<row_major> %arr, %11, %value, %12
     ret
   }
 }
@@ -5425,14 +5332,14 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %stride:u32):void {
   $B2: {
     %5:u32 = max %stride, 8u
-    %6:void = subgroupMatrixStore %arr, 0u, %value, false, %5
+    %6:void = subgroupMatrixStore<row_major> %arr, 0u, %value, %5
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -5508,7 +5415,7 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -5529,8 +5436,9 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_i8_StorageRuntimeArray_DynamicStri
     func->AppendParam(value);
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 0_u, value, false, stride);
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kRowMajor}, arr, 0_u, value, stride);
         b.Return(func);
     });
 
@@ -5541,7 +5449,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:void = subgroupMatrixStore %arr, 0u, %value, false, %stride
+    %5:void = subgroupMatrixStore<row_major> %arr, 0u, %value, %stride
     ret
   }
 }
@@ -5555,19 +5463,15 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:u32 = max %stride, 8u
+    %5:u32 = max %stride, 2u
     %6:u32 = arrayLength %arr
-    %7:u32 = mul %6, 4u
-    %8:u32 = mul %5, 3u
-    %9:u32 = add 0u, %8
-    %10:u32 = add %9, 8u
-    %11:bool = lte %10, %7
-    if %11 [t: $B3] {  # if_1
-      $B3: {  # true
-        %12:void = subgroupMatrixStore %arr, 0u, %value, false, %5
-        exit_if  # if_1
-      }
-    }
+    %7:u32 = mul %5, 3u
+    %8:u32 = add 0u, %7
+    %9:u32 = add %8, 2u
+    %10:bool = lte %9, %6
+    %11:u32 = select 0u, 0u, %10
+    %12:u32 = select 2u, %5, %10
+    %13:void = subgroupMatrixStore<row_major> %arr, %11, %value, %12
     ret
   }
 }
@@ -5580,15 +5484,15 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:u32 = max %stride, 8u
-    %6:void = subgroupMatrixStore %arr, 0u, %value, false, %5
+    %5:u32 = max %stride, 2u
+    %6:void = subgroupMatrixStore<row_major> %arr, 0u, %value, %5
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -5609,8 +5513,9 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_u8_StorageRuntimeArray_DynamicStri
     func->AppendParam(value);
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 0_u, value, false, stride);
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kRowMajor}, arr, 0_u, value, stride);
         b.Return(func);
     });
 
@@ -5621,7 +5526,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:void = subgroupMatrixStore %arr, 0u, %value, false, %stride
+    %5:void = subgroupMatrixStore<row_major> %arr, 0u, %value, %stride
     ret
   }
 }
@@ -5635,19 +5540,15 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:u32 = max %stride, 8u
+    %5:u32 = max %stride, 2u
     %6:u32 = arrayLength %arr
-    %7:u32 = mul %6, 4u
-    %8:u32 = mul %5, 3u
-    %9:u32 = add 0u, %8
-    %10:u32 = add %9, 8u
-    %11:bool = lte %10, %7
-    if %11 [t: $B3] {  # if_1
-      $B3: {  # true
-        %12:void = subgroupMatrixStore %arr, 0u, %value, false, %5
-        exit_if  # if_1
-      }
-    }
+    %7:u32 = mul %5, 3u
+    %8:u32 = add 0u, %7
+    %9:u32 = add %8, 2u
+    %10:bool = lte %9, %6
+    %11:u32 = select 0u, 0u, %10
+    %12:u32 = select 2u, %5, %10
+    %13:void = subgroupMatrixStore<row_major> %arr, %11, %value, %12
     ret
   }
 }
@@ -5660,15 +5561,15 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:u32 = max %stride, 8u
-    %6:void = subgroupMatrixStore %arr, 0u, %value, false, %5
+    %5:u32 = max %stride, 2u
+    %6:void = subgroupMatrixStore<row_major> %arr, 0u, %value, %5
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -5686,8 +5587,9 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_WorkgroupFixedArray_DynamicStride_
     func->AppendParam(value);
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 0_u, value, true, stride);
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr, 0_u, value, stride);
         b.Return(func);
     });
 
@@ -5698,7 +5600,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:void = subgroupMatrixStore %arr, 0u, %value, true, %stride
+    %5:void = subgroupMatrixStore<col_major> %arr, 0u, %value, %stride
     ret
   }
 }
@@ -5717,12 +5619,9 @@ $B1: {  # root
     %7:u32 = add 0u, %6
     %8:u32 = add %7, 4u
     %9:bool = lte %8, 1024u
-    if %9 [t: $B3] {  # if_1
-      $B3: {  # true
-        %10:void = subgroupMatrixStore %arr, 0u, %value, true, %5
-        exit_if  # if_1
-      }
-    }
+    %10:u32 = select 0u, 0u, %9
+    %11:u32 = select 4u, %5, %9
+    %12:void = subgroupMatrixStore<col_major> %arr, %10, %value, %11
     ret
   }
 }
@@ -5736,14 +5635,14 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %stride:u32):void {
   $B2: {
     %5:u32 = max %stride, 4u
-    %6:void = subgroupMatrixStore %arr, 0u, %value, true, %5
+    %6:void = subgroupMatrixStore<col_major> %arr, 0u, %value, %5
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -5763,8 +5662,9 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_i8_WorkgroupFixedArray_DynamicStri
     func->AppendParam(value);
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 0_u, value, true, stride);
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr, 0_u, value, stride);
         b.Return(func);
     });
 
@@ -5775,7 +5675,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:void = subgroupMatrixStore %arr, 0u, %value, true, %stride
+    %5:void = subgroupMatrixStore<col_major> %arr, 0u, %value, %stride
     ret
   }
 }
@@ -5789,17 +5689,14 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:u32 = max %stride, 4u
+    %5:u32 = max %stride, 1u
     %6:u32 = mul %5, 7u
     %7:u32 = add 0u, %6
-    %8:u32 = add %7, 4u
-    %9:bool = lte %8, 4096u
-    if %9 [t: $B3] {  # if_1
-      $B3: {  # true
-        %10:void = subgroupMatrixStore %arr, 0u, %value, true, %5
-        exit_if  # if_1
-      }
-    }
+    %8:u32 = add %7, 1u
+    %9:bool = lte %8, 1024u
+    %10:u32 = select 0u, 0u, %9
+    %11:u32 = select 1u, %5, %9
+    %12:void = subgroupMatrixStore<col_major> %arr, %10, %value, %11
     ret
   }
 }
@@ -5812,15 +5709,15 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:u32 = max %stride, 4u
-    %6:void = subgroupMatrixStore %arr, 0u, %value, true, %5
+    %5:u32 = max %stride, 1u
+    %6:void = subgroupMatrixStore<col_major> %arr, 0u, %value, %5
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -5840,8 +5737,9 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_u8_WorkgroupFixedArray_DynamicStri
     func->AppendParam(value);
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
-        // Dynamic stride should be clamped with `max` even when predication is disabled.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 0_u, value, true, stride);
+        // Dynamic stride should be clamped with `max` even when clamping is disabled.
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr, 0_u, value, stride);
         b.Return(func);
     });
 
@@ -5852,7 +5750,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:void = subgroupMatrixStore %arr, 0u, %value, true, %stride
+    %5:void = subgroupMatrixStore<col_major> %arr, 0u, %value, %stride
     ret
   }
 }
@@ -5866,17 +5764,14 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:u32 = max %stride, 4u
+    %5:u32 = max %stride, 1u
     %6:u32 = mul %5, 7u
     %7:u32 = add 0u, %6
-    %8:u32 = add %7, 4u
-    %9:bool = lte %8, 4096u
-    if %9 [t: $B3] {  # if_1
-      $B3: {  # true
-        %10:void = subgroupMatrixStore %arr, 0u, %value, true, %5
-        exit_if  # if_1
-      }
-    }
+    %8:u32 = add %7, 1u
+    %9:bool = lte %8, 1024u
+    %10:u32 = select 0u, 0u, %9
+    %11:u32 = select 1u, %5, %9
+    %12:void = subgroupMatrixStore<col_major> %arr, %10, %value, %11
     ret
   }
 }
@@ -5889,15 +5784,15 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>, %stride:u32):void {
   $B2: {
-    %5:u32 = max %stride, 4u
-    %6:void = subgroupMatrixStore %arr, 0u, %value, true, %5
+    %5:u32 = max %stride, 1u
+    %6:void = subgroupMatrixStore<col_major> %arr, 0u, %value, %5
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
@@ -5917,7 +5812,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_WorkgroupFixedArray_ConstStrideAnd
     b.Append(func->Block(), [&] {
         // The final row will start at 1016. Another full stride will take it past the 1024 limit,
         // but the transform should understand that only 8 elements are accessed on that row.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 920_u, value, false, 32_u);
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kRowMajor}, arr, 920_u, value, 32_u);
         b.Return(func);
     });
 
@@ -5928,7 +5824,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>):void {
   $B2: {
-    %4:void = subgroupMatrixStore %arr, 920u, %value, false, 32u
+    %4:void = subgroupMatrixStore<row_major> %arr, 920u, %value, 32u
     ret
   }
 }
@@ -5938,7 +5834,7 @@ $B1: {  # root
     auto* expect = src;
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(expect, str());
@@ -5958,7 +5854,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_i8_WorkgroupFixedArray_ConstStride
     b.Append(func->Block(), [&] {
         // The final row will start at 1016. Another full stride will take it past the 1024 limit,
         // but the transform should understand that only 8 elements are accessed on that row.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 920_u, value, false, 32_u);
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kRowMajor}, arr, 920_u, value, 32_u);
         b.Return(func);
     });
 
@@ -5969,7 +5866,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>):void {
   $B2: {
-    %4:void = subgroupMatrixStore %arr, 920u, %value, false, 32u
+    %4:void = subgroupMatrixStore<row_major> %arr, 920u, %value, 32u
     ret
   }
 }
@@ -5979,7 +5876,7 @@ $B1: {  # root
     auto* expect = src;
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(expect, str());
@@ -5999,7 +5896,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixStore_u8_WorkgroupFixedArray_ConstStride
     b.Append(func->Block(), [&] {
         // The final row will start at 1016. Another full stride will take it past the 1024 limit,
         // but the transform should understand that only 8 elements are accessed on that row.
-        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, 920_u, value, false, 32_u);
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kRowMajor}, arr, 920_u, value, 32_u);
         b.Return(func);
     });
 
@@ -6010,7 +5908,7 @@ $B1: {  # root
 
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>):void {
   $B2: {
-    %4:void = subgroupMatrixStore %arr, 920u, %value, false, 32u
+    %4:void = subgroupMatrixStore<row_major> %arr, 920u, %value, 32u
     ret
   }
 }
@@ -6020,7 +5918,7 @@ $B1: {  # root
     auto* expect = src;
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(expect, str());
@@ -6083,22 +5981,20 @@ $B1: {  # root
   $B2: {
     %6:u32 = max %stride, 1u
     %7:u32 = arrayLength %v
-    %8:u32 = mul %7, 16u
-    %9:u32 = mul %6, 7u
-    %10:u32 = add %offset, %9
-    %11:u32 = mul %10, 16u
-    %12:u32 = add %11, 16u
-    %13:bool = lte %12, %8
-    %14:u32 = select 0u, %offset, %13
-    %15:u32 = select 1u, %6, %13
-    %16:void = subgroupMatrixStore<col_major> %v, %14, %m, %15
+    %8:u32 = mul %6, 7u
+    %9:u32 = add %offset, %8
+    %10:u32 = add %9, 1u
+    %11:bool = lte %10, %7
+    %12:u32 = select 0u, %offset, %11
+    %13:u32 = select 1u, %6, %11
+    %14:void = subgroupMatrixStore<col_major> %v, %12, %m, %13
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? robust : no_robust, str());
@@ -6161,22 +6057,20 @@ $B1: {  # root
   $B2: {
     %6:u32 = max %stride, 1u
     %7:u32 = arrayLength %v
-    %8:u32 = mul %7, 8u
-    %9:u32 = mul %6, 7u
-    %10:u32 = add %offset, %9
-    %11:u32 = mul %10, 8u
-    %12:u32 = add %11, 8u
-    %13:bool = lte %12, %8
-    %14:u32 = select 0u, %offset, %13
-    %15:u32 = select 1u, %6, %13
-    %16:void = subgroupMatrixStore<col_major> %v, %14, %m, %15
+    %8:u32 = mul %6, 7u
+    %9:u32 = add %offset, %8
+    %10:u32 = add %9, 1u
+    %11:bool = lte %10, %7
+    %12:u32 = select 0u, %offset, %11
+    %13:u32 = select 1u, %6, %11
+    %14:void = subgroupMatrixStore<col_major> %v, %12, %m, %13
     ret
   }
 }
 )";
 
     RobustnessConfig cfg;
-    cfg.predicate_subgroup_matrix = GetParam();
+    cfg.clamp_subgroup_matrix = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? robust : no_robust, str());
@@ -6986,7 +6880,7 @@ TEST_P(IR_RobustnessTest, BufferArrayView_ArrayU32_SubgroupMatrixUse) {
 
     RobustnessConfig cfg;
     cfg.clamp_storage = GetParam();
-    cfg.predicate_subgroup_matrix = false;
+    cfg.clamp_subgroup_matrix = false;
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect : src, str());
@@ -7047,7 +6941,7 @@ TEST_P(IR_RobustnessTest, BufferArrayView_ArrayU32_SubgroupMatrixUse_Max) {
 
     RobustnessConfig cfg;
     cfg.clamp_storage = GetParam();
-    cfg.predicate_subgroup_matrix = false;
+    cfg.clamp_subgroup_matrix = false;
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect : src, str());
@@ -7143,7 +7037,7 @@ S = struct @align(16) {
 
     RobustnessConfig cfg;
     cfg.clamp_storage = GetParam();
-    cfg.predicate_subgroup_matrix = false;
+    cfg.clamp_subgroup_matrix = false;
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect : src, str());
