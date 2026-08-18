@@ -1107,11 +1107,10 @@ struct State {
     /// @param builtin the builtin call instruction
     void SubgroupMatrixLoad(core::ir::CoreBuiltinCall* builtin) {
         b.InsertBefore(builtin, [&] {
-            const bool majorness_template = builtin->ExplicitTemplateParams().Length() == 2;
+            TINT_IR_ASSERT(ir, builtin->ExplicitTemplateParams().Length() == 2);
             auto* p = builtin->Args()[0];
             auto* offset = builtin->Args()[1];
-            auto* stride =
-                b.InsertBitcastIfNeeded(ty.u32(), builtin->Args()[majorness_template ? 2 : 3]);
+            auto* stride = b.InsertBitcastIfNeeded(ty.u32(), builtin->Args()[2]);
 
             // If the array was a vec3, then FixTypeLayout may have inserted a (soon to be)
             // redundant pointer offset call. Elide it here.
@@ -1128,16 +1127,11 @@ struct State {
                 }
             }
 
-            core::ir::Value* col_major = nullptr;
-            if (majorness_template) {
-                TINT_IR_ASSERT(ir, std::holds_alternative<core::Majorness>(
-                                       builtin->ExplicitTemplateParams()[1]));
-                col_major =
-                    b.Constant(std::get<core::Majorness>(builtin->ExplicitTemplateParams()[1]) ==
-                               core::Majorness::kColMajor);
-            } else {
-                col_major = builtin->Args()[2];
-            }
+            TINT_IR_ASSERT(
+                ir, std::holds_alternative<core::Majorness>(builtin->ExplicitTemplateParams()[1]));
+            auto* col_major =
+                b.Constant(std::get<core::Majorness>(builtin->ExplicitTemplateParams()[1]) ==
+                           core::Majorness::kColMajor);
 
             auto* ptr = p->Type()->As<core::type::Pointer>();
             auto* arr = ptr->StoreType()->As<core::type::Array>();
@@ -1194,12 +1188,11 @@ struct State {
     /// @param builtin the builtin call instruction
     void SubgroupMatrixStore(core::ir::CoreBuiltinCall* builtin) {
         b.InsertBefore(builtin, [&] {
-            const bool majorness_template = builtin->ExplicitTemplateParams().Length() == 1;
+            TINT_IR_ASSERT(ir, builtin->ExplicitTemplateParams().Length() == 1);
             auto* p = builtin->Args()[0];
             auto* offset = builtin->Args()[1];
             auto* value = builtin->Args()[2];
-            auto* stride =
-                b.InsertBitcastIfNeeded(ty.u32(), builtin->Args()[majorness_template ? 3 : 4]);
+            auto* stride = b.InsertBitcastIfNeeded(ty.u32(), builtin->Args()[3]);
 
             // If the array was a vec3, then FixTypeLayout may have inserted a (soon to be)
             // redundant pointer offset call. Elide it here.
@@ -1216,16 +1209,11 @@ struct State {
                 }
             }
 
-            core::ir::Value* col_major = nullptr;
-            if (majorness_template) {
-                TINT_IR_ASSERT(ir, std::holds_alternative<core::Majorness>(
-                                       builtin->ExplicitTemplateParams()[0]));
-                col_major =
-                    b.Constant(std::get<core::Majorness>(builtin->ExplicitTemplateParams()[0]) ==
-                               core::Majorness::kColMajor);
-            } else {
-                col_major = builtin->Args()[3];
-            }
+            TINT_IR_ASSERT(
+                ir, std::holds_alternative<core::Majorness>(builtin->ExplicitTemplateParams()[0]));
+            auto* col_major =
+                b.Constant(std::get<core::Majorness>(builtin->ExplicitTemplateParams()[0]) ==
+                           core::Majorness::kColMajor);
 
             auto* ptr = p->Type()->As<core::type::Pointer>();
             auto* arr = ptr->StoreType()->As<core::type::Array>();

@@ -3559,16 +3559,16 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_F32) {
     auto* func = b.Function("foo", mat);
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        auto* call =
-            b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
-                           Vector<core::ir::TemplateParameter, 1>{mat}, p, 64_u, false, 32_u);
+        auto* call = b.CallExplicit(
+            mat, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat, core::Majorness::kRowMajor}, p, 64_u, 32_u);
         b.Return(func, call);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<storage, array<f32, 256>, read_write>):subgroup_matrix_result<f32, 8, 8> {
   $B1: {
-    %3:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>> %p, 64u, false, 32u
+    %3:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major> %p, 64u, 32u
     ret %3
   }
 }
@@ -3605,14 +3605,15 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_SignedOffsetAndStride) 
     b.Append(func->Block(), [&] {
         auto* call =
             b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
-                           Vector<core::ir::TemplateParameter, 1>{mat}, p, offset, false, stride);
+                           Vector<core::ir::TemplateParameter, 2>{mat, core::Majorness::kRowMajor},
+                           p, offset, stride);
         b.Return(func, call);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %offset:i32, %stride:i32):subgroup_matrix_result<f32, 8, 8> {
   $B1: {
-    %5:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>> %p, %offset, false, %stride
+    %5:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major> %p, %offset, %stride
     ret %5
   }
 }
@@ -3730,16 +3731,16 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_F16) {
     auto* func = b.Function("foo", mat);
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        auto* call =
-            b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
-                           Vector<core::ir::TemplateParameter, 1>{mat}, p, 64_u, false, 32_u);
+        auto* call = b.CallExplicit(
+            mat, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat, core::Majorness::kRowMajor}, p, 64_u, 32_u);
         b.Return(func, call);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<workgroup, array<f16, 256>, read_write>):subgroup_matrix_result<f16, 8, 8> {
   $B1: {
-    %3:subgroup_matrix_result<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f16, 8, 8>> %p, 64u, false, 32u
+    %3:subgroup_matrix_result<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f16, 8, 8>, row_major> %p, 64u, 32u
     ret %3
   }
 }
@@ -3772,14 +3773,16 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_F32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({p, m});
     b.Append(func->Block(), [&] {
-        b.Call<void>(core::BuiltinFn::kSubgroupMatrixStore, p, 64_u, m, false, 32_u);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, p, 64_u,
+                       m, 32_u);
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %m:subgroup_matrix_result<f32, 8, 8>):void {
   $B1: {
-    %4:void = subgroupMatrixStore %p, 64u, %m, false, 32u
+    %4:void = subgroupMatrixStore<row_major> %p, 64u, %m, 32u
     ret
   }
 }
@@ -3811,14 +3814,16 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_SignedOffsetAndStride)
     auto* stride = b.FunctionParam("stride", ty.i32());
     func->SetParams({p, m, offset, stride});
     b.Append(func->Block(), [&] {
-        b.Call<void>(core::BuiltinFn::kSubgroupMatrixStore, p, offset, m, false, stride);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, p,
+                       offset, m, stride);
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %m:subgroup_matrix_result<f32, 8, 8>, %offset:i32, %stride:i32):void {
   $B1: {
-    %6:void = subgroupMatrixStore %p, %offset, %m, false, %stride
+    %6:void = subgroupMatrixStore<row_major> %p, %offset, %m, %stride
     ret
   }
 }
@@ -3927,14 +3932,16 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_F16) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({p, m});
     b.Append(func->Block(), [&] {
-        b.Call<void>(core::BuiltinFn::kSubgroupMatrixStore, p, 64_u, m, false, 32_u);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, p, 64_u,
+                       m, 32_u);
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<workgroup, array<f16, 256>, read_write>, %m:subgroup_matrix_result<f16, 8, 8>):void {
   $B1: {
-    %4:void = subgroupMatrixStore %p, 64u, %m, false, 32u
+    %4:void = subgroupMatrixStore<row_major> %p, 64u, %m, 32u
     ret
   }
 }
