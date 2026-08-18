@@ -21,11 +21,11 @@ fn foo(
   m_struct: S,
   m_nested_struct: S_Nested,
 ) {
-  subgroupMatrixStore(&buffer, 0, m, false, 64);
-  subgroupMatrixStore(&buffer, 0, m_array[0], false, 64);
-  subgroupMatrixStore(&buffer, 0, m_nested_array[1][2], false, 64);
-  subgroupMatrixStore(&buffer, 0, m_struct.l, false, 64);
-  subgroupMatrixStore(&buffer, 0, m_nested_struct.s.r, false, 64);
+  subgroupMatrixStore<row_major>(&buffer, 0, m, 64);
+  subgroupMatrixStore<row_major>(&buffer, 0, m_array[0], 64);
+  subgroupMatrixStore<row_major>(&buffer, 0, m_nested_array[1][2], 64);
+  subgroupMatrixStore<row_major>(&buffer, 0, m_struct.l, 64);
+  subgroupMatrixStore<row_major>(&buffer, 0, m_nested_struct.s.r, 64);
 }
 
 @compute @workgroup_size(64)

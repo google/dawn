@@ -49,5 +49,5 @@ fn subgroupMatrixScalarSubtract_4b9bab() -> subgroup_matrix_right<i8, 8, 8>{
 }
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixScalarSubtract_4b9bab(), false, 8);
+  subgroupMatrixStore<row_major>(&prevent_dce, 0, subgroupMatrixScalarSubtract_4b9bab(), 16);
 }

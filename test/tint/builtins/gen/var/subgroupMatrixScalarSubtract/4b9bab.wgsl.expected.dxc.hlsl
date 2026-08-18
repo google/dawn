@@ -32,6 +32,6 @@ Matrix_right_i8_8x8 subgroupMatrixScalarSubtract_4b9bab() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixScalarSubtract_4b9bab().Store(prevent_dce, 0u, 8u, MatrixLayout::RowMajor);
+  subgroupMatrixScalarSubtract_4b9bab().Store(prevent_dce, 0u, 64u, MatrixLayout::RowMajor);
 }
 

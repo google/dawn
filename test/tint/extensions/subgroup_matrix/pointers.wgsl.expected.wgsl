@@ -12,11 +12,11 @@ struct S_Nested {
 @group(0) @binding(0) var<storage, read_write> buffer : array<f32>;
 
 fn foo(m : ptr<function, subgroup_matrix_left<f32, 8, 8>>, m_array : ptr<function, array<subgroup_matrix_left<f32, 8, 8>, 4>>, m_nested_array : ptr<function, array<array<subgroup_matrix_left<f32, 8, 8>, 4>, 4>>, m_struct : ptr<function, S>, m_nested_struct : ptr<function, S_Nested>) {
-  subgroupMatrixStore(&(buffer), 0, *(m), false, 64);
-  subgroupMatrixStore(&(buffer), 0, m_array[0], false, 64);
-  subgroupMatrixStore(&(buffer), 0, m_nested_array[1][2], false, 64);
-  subgroupMatrixStore(&(buffer), 0, m_struct.l, false, 64);
-  subgroupMatrixStore(&(buffer), 0, m_nested_struct.s.r, false, 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, *(m), 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, m_array[0], 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, m_nested_array[1][2], 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, m_struct.l, 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, m_nested_struct.s.r, 64);
 }
 
 @compute @workgroup_size(64)

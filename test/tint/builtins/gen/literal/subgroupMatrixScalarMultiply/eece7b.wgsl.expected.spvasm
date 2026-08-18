@@ -46,7 +46,7 @@
          %30 = OpTypeFunction %void
 %_ptr_StorageBuffer__arr_int_uint_1024 = OpTypePointer StorageBuffer %_arr_int_uint_1024
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
-     %uint_2 = OpConstant %uint 2
+     %int_16 = OpConstant %int 16
 %subgroupMatrixScalarMultiply_eece7b = OpFunction %9 None %14
          %15 = OpLabel
         %res = OpVariable %_ptr_Function_9 Function
@@ -63,6 +63,6 @@
          %32 = OpFunctionCall %9 %subgroupMatrixScalarMultiply_eece7b
          %33 = OpAccessChain %_ptr_StorageBuffer__arr_int_uint_1024 %1 %uint_0
          %35 = OpAccessChain %_ptr_StorageBuffer_int %33 %uint_0
-               OpCooperativeMatrixStoreKHR %35 %32 %uint_0 %uint_2 NonPrivatePointer
+               OpCooperativeMatrixStoreKHR %35 %32 %uint_0 %int_16 NonPrivatePointer
                OpReturn
                OpFunctionEnd

@@ -13,14 +13,14 @@ struct S_Nested {
 
 @compute @workgroup_size(64)
 fn main() {
-  subgroupMatrixStore(&(buffer), 0, subgroup_matrix_left<f32, 8, 8>(), false, 64);
-  subgroupMatrixStore(&(buffer), 0, array<subgroup_matrix_left<f32, 8, 8>, 4>()[1], false, 64);
-  subgroupMatrixStore(&(buffer), 0, array<array<subgroup_matrix_left<f32, 8, 8>, 4>, 4>()[2][3], false, 64);
-  subgroupMatrixStore(&(buffer), 0, S().l, false, 64);
-  subgroupMatrixStore(&(buffer), 0, S_Nested().s.r, false, 64);
-  subgroupMatrixStore(&(buffer), 0, subgroup_matrix_left<f32, 8, 8>(42), false, 64);
-  subgroupMatrixStore(&(buffer), 0, array<subgroup_matrix_left<f32, 8, 8>, 2>(subgroup_matrix_left<f32, 8, 8>(42), subgroup_matrix_left<f32, 8, 8>(100))[1], false, 64);
-  subgroupMatrixStore(&(buffer), 0, array<array<subgroup_matrix_left<f32, 8, 8>, 2>, 2>(array<subgroup_matrix_left<f32, 8, 8>, 2>(subgroup_matrix_left<f32, 8, 8>(42), subgroup_matrix_left<f32, 8, 8>(100)), array<subgroup_matrix_left<f32, 8, 8>, 2>(subgroup_matrix_left<f32, 8, 8>(-(7)), subgroup_matrix_left<f32, 8, 8>(-(42))))[1][0], false, 64);
-  subgroupMatrixStore(&(buffer), 0, S(subgroup_matrix_left<f32, 8, 8>(42), subgroup_matrix_right<f32, 8, 8>(100)).l, false, 64);
-  subgroupMatrixStore(&(buffer), 0, S_Nested(S(subgroup_matrix_left<f32, 8, 8>(42), subgroup_matrix_right<f32, 8, 8>(100))).s.r, false, 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, subgroup_matrix_left<f32, 8, 8>(), 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, array<subgroup_matrix_left<f32, 8, 8>, 4>()[1], 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, array<array<subgroup_matrix_left<f32, 8, 8>, 4>, 4>()[2][3], 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, S().l, 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, S_Nested().s.r, 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, subgroup_matrix_left<f32, 8, 8>(42), 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, array<subgroup_matrix_left<f32, 8, 8>, 2>(subgroup_matrix_left<f32, 8, 8>(42), subgroup_matrix_left<f32, 8, 8>(100))[1], 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, array<array<subgroup_matrix_left<f32, 8, 8>, 2>, 2>(array<subgroup_matrix_left<f32, 8, 8>, 2>(subgroup_matrix_left<f32, 8, 8>(42), subgroup_matrix_left<f32, 8, 8>(100)), array<subgroup_matrix_left<f32, 8, 8>, 2>(subgroup_matrix_left<f32, 8, 8>(-(7)), subgroup_matrix_left<f32, 8, 8>(-(42))))[1][0], 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, S(subgroup_matrix_left<f32, 8, 8>(42), subgroup_matrix_right<f32, 8, 8>(100)).l, 64);
+  subgroupMatrixStore<row_major>(&(buffer), 0, S_Nested(S(subgroup_matrix_left<f32, 8, 8>(42), subgroup_matrix_right<f32, 8, 8>(100))).s.r, 64);
 }

@@ -28,9 +28,9 @@ fn main() {
   let m_struct_let = m_struct;
   let m_nested_struct_let = m_nested_struct;
 
-  subgroupMatrixStore(&buffer, 0, m_let, false, 64);
-  subgroupMatrixStore(&buffer, 0, m_array_let[0], false, 64);
-  subgroupMatrixStore(&buffer, 0, m_nested_array_let[1][2], false, 64);
-  subgroupMatrixStore(&buffer, 0, m_struct_let.l, false, 64);
-  subgroupMatrixStore(&buffer, 0, m_nested_struct_let.s.r, false, 64);
+  subgroupMatrixStore<row_major>(&buffer, 0, m_let, 64);
+  subgroupMatrixStore<row_major>(&buffer, 0, m_array_let[0], 64);
+  subgroupMatrixStore<row_major>(&buffer, 0, m_nested_array_let[1][2], 64);
+  subgroupMatrixStore<row_major>(&buffer, 0, m_struct_let.l, 64);
+  subgroupMatrixStore<row_major>(&buffer, 0, m_nested_struct_let.s.r, 64);
 }

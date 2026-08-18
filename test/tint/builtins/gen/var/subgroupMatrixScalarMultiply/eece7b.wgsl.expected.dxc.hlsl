@@ -32,6 +32,6 @@ Matrix_left_i8_8x8 subgroupMatrixScalarMultiply_eece7b() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixScalarMultiply_eece7b().Store(prevent_dce, 0u, 8u, MatrixLayout::RowMajor);
+  subgroupMatrixScalarMultiply_eece7b().Store(prevent_dce, 0u, 64u, MatrixLayout::RowMajor);
 }
 

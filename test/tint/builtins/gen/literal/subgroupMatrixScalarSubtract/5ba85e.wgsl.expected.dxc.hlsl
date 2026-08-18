@@ -30,6 +30,6 @@ Matrix_left_u8_8x8 subgroupMatrixScalarSubtract_5ba85e() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixScalarSubtract_5ba85e().Store(prevent_dce, 0u, 8u, MatrixLayout::RowMajor);
+  subgroupMatrixScalarSubtract_5ba85e().Store(prevent_dce, 0u, 64u, MatrixLayout::RowMajor);
 }
 

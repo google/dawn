@@ -32,6 +32,6 @@ Matrix_result_i8_8x8 subgroupMatrixScalarAdd_9b357f() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixScalarAdd_9b357f().Store(prevent_dce, 0u, 8u, MatrixLayout::RowMajor);
+  subgroupMatrixScalarAdd_9b357f().Store(prevent_dce, 0u, 64u, MatrixLayout::RowMajor);
 }
 
