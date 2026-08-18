@@ -19,7 +19,7 @@ Checks:
 
   # Checks that were estimated as P0/P1 are not disabled even though the code is
   # not "clean" of them. It's useful for them to keep triggering on new changes.
-  # https://crbug.com/501491694 tracks fixing existing check failures.
+  # https://crbug.com/548071770 tracks fixing existing check failures.
   # P2+ are disabled for now to reduce noise.
 
   ## P0. Most likely to help with hardening.
@@ -58,7 +58,6 @@ Checks:
   #- -misc-misplaced-const
   #- -modernize-use-ranges
   #- -modernize-use-string-view
-  #- -readability-math-missing-parentheses
   #- -readability-reference-to-constructed-temporary
 
   # P2. Might help with hardening.
@@ -124,9 +123,13 @@ Checks:
   - -readability-redundant-lambda-parameter-list
   # - Appears unnecessary since we use hardened libc++.
   - -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access
+  # - Clang already catches the more problematic cases (& with ==, etc.) in
+  #   various warnings, so in practice this only triggers on multiplication
+  #   (*%/) with addition (+-) which isn't a concern.
+  - -readability-math-missing-parentheses
 
   # P?. Untriaged checks that weren't passing on a first-pass over the codebase.
-  # TODO(https://crbug.com/501491694): Estimate priorities for all of these.
+  # TODO(https://crbug.com/548071770): Estimate priorities for all of these.
   - -abseil-faster-strsplit-delimiter
   - -abseil-string-find-startswith
   - -abseil-string-find-str-contains
