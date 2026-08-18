@@ -67,6 +67,8 @@ struct WindowsVersion {
 };
 
 WindowsVersion GetCurrentWindowsVersion();
+
+bool IsWindowsDeveloperModeEnabled();
 #endif
 
 class ScopedEnvironmentVar {

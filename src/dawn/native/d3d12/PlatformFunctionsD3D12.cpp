@@ -104,10 +104,11 @@ HRESULT PlatformFunctions::CreateDevice(IUnknown* adapter,
                                         REFIID riid,
                                         void** ppDevice) const {
 #ifdef DAWN_USE_AGILITY_SDK
-    return mDeviceFactory->CreateDevice(adapter, featureLevel, riid, ppDevice);
-#else
-    return d3d12CreateDevice(adapter, featureLevel, riid, ppDevice);
+    if (mDeviceFactory) {
+        return mDeviceFactory->CreateDevice(adapter, featureLevel, riid, ppDevice);
+    }
 #endif
+    return d3d12CreateDevice(adapter, featureLevel, riid, ppDevice);
 }
 
 HRESULT PlatformFunctions::SerializeVersionedRootSignature(
@@ -115,10 +116,11 @@ HRESULT PlatformFunctions::SerializeVersionedRootSignature(
     ID3DBlob** ppResult,
     ID3DBlob** ppError) const {
 #ifdef DAWN_USE_AGILITY_SDK
-    return mDeviceConfiguration->SerializeVersionedRootSignature(pDesc, ppResult, ppError);
-#else
-    return d3d12SerializeVersionedRootSignature(pDesc, ppResult, ppError);
+    if (mDeviceConfiguration) {
+        return mDeviceConfiguration->SerializeVersionedRootSignature(pDesc, ppResult, ppError);
+    }
 #endif
+    return d3d12SerializeVersionedRootSignature(pDesc, ppResult, ppError);
 }
 
 HRESULT PlatformFunctions::CreateVersionedRootSignatureDeserializer(const void* pBlob,
@@ -126,17 +128,24 @@ HRESULT PlatformFunctions::CreateVersionedRootSignatureDeserializer(const void* 
                                                                     REFIID riid,
                                                                     void** ppDeserializer) const {
 #ifdef DAWN_USE_AGILITY_SDK
-    return mDeviceConfiguration->CreateVersionedRootSignatureDeserializer(pBlob, size, riid,
-                                                                          ppDeserializer);
-#else
-    return d3d12CreateVersionedRootSignatureDeserializer(pBlob, size, riid, ppDeserializer);
+    if (mDeviceConfiguration) {
+        return mDeviceConfiguration->CreateVersionedRootSignatureDeserializer(pBlob, size, riid,
+                                                                              ppDeserializer);
+    }
 #endif
+    return d3d12CreateVersionedRootSignatureDeserializer(pBlob, size, riid, ppDeserializer);
 }
 
 #ifdef DAWN_USE_AGILITY_SDK
 void PlatformFunctions::EnsureAgilitySDKDeviceFactory() {
     // This helper is invoked exactly once by Initialize().
     DAWN_CHECK(!mDeviceFactory);
+
+    if (!IsWindowsDeveloperModeEnabled()) {
+        dawn::InfoLog() << "[AgilitySDK] Developer Mode is not enabled; skipping Agility SDK "
+                           "device factory creation.";
+        return;
+    }
 
     // d3d12GetInterface must be available when building with Agility SDK.
     // TODO(crbug.com/517940507): Gracefully handle when D3D12GetInterface is not available.
@@ -165,10 +174,10 @@ void PlatformFunctions::EnsureAgilitySDKDeviceFactory() {
         HRESULT hr = mDeviceFactory->EnableExperimentalFeatures(_countof(features), features,
                                                                 nullptr, nullptr);
         if (FAILED(hr)) {
-            dawn::InfoLog()
-                << "D3D12ExperimentalShaderModels, needed for LinAlg, is not supported, either "
-                   "because it's unrecognized, or Developer Mode is not enabled, or some other "
-                   "reason.";
+            dawn::InfoLog() << "[AgilitySDK] D3D12ExperimentalShaderModels, needed for LinAlg, is "
+                               "not supported, either because it's unrecognized, or Developer Mode "
+                               "is not enabled, or some other reason.";
+            return;
         }
     }
 

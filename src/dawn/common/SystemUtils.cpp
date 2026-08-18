@@ -224,6 +224,20 @@ std::optional<std::string> GetModuleDirectory() {
 }
 
 #if DAWN_PLATFORM_IS(WINDOWS)
+namespace {
+// Referenced from base/win/registry.cc in Chromium
+std::optional<DWORD> ReadFromDWORDRegistryKey(HKEY registerKey, const char* registerKeyName) {
+    DWORD valueType;
+    DWORD value = 0;
+    DWORD valueSize = sizeof(value);
+    if (RegQueryValueExA(registerKey, registerKeyName, nullptr, &valueType,
+                         reinterpret_cast<LPBYTE>(&value), &valueSize) != ERROR_SUCCESS ||
+        valueType != REG_DWORD) {
+        return std::nullopt;
+    }
+    return value;
+}
+}  // namespace
 // Referenced from base/win/windows_version.cc in Chromium
 WindowsVersion GetCurrentWindowsVersion() {
     // Referenced from base/win/registry.cc in Chromium
@@ -245,19 +259,6 @@ WindowsVersion GetCurrentWindowsVersion() {
             DAWN_UNSAFE_TODO(strtol(returnStringValue.data(), nullptr, kRadix)));
     };
 
-    // Referenced from base/win/registry.cc in Chromium
-    auto ReadFromDWORDRegistryKey = [](HKEY registerKey, const char* registerKeyName) -> uint32_t {
-        DWORD valueType;
-        DWORD value = 0;
-        DWORD valueSize = sizeof(value);
-        if (RegQueryValueExA(registerKey, registerKeyName, nullptr, &valueType,
-                             reinterpret_cast<LPBYTE>(&value), &valueSize) != ERROR_SUCCESS ||
-            valueType != REG_DWORD) {
-            return 0;
-        }
-        return value;
-    };
-
     constexpr wchar_t kRegKeyWindowsNTCurrentVersion[] =
         L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion";
     HKEY hKey;
@@ -268,9 +269,42 @@ WindowsVersion GetCurrentWindowsVersion() {
 
     WindowsVersion version = {};
     version.buildNumber = ReadFromSZRegistryKey(hKey, "CurrentBuildNumber");
-    version.updateBuildRevision = ReadFromDWORDRegistryKey(hKey, "UBR");
+    if (auto ubr = ReadFromDWORDRegistryKey(hKey, "UBR")) {
+        version.updateBuildRevision = *ubr;
+    }
     RegCloseKey(hKey);
     return version;
+}
+
+bool IsWindowsDeveloperModeEnabled() {
+    auto ReadDevModeKey = [](const wchar_t* regPath) -> std::optional<bool> {
+        HKEY hKey;
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, regPath, 0, KEY_QUERY_VALUE, &hKey) !=
+            ERROR_SUCCESS) {
+            return std::nullopt;
+        }
+        if (auto value = ReadFromDWORDRegistryKey(hKey, "AllowDevelopmentWithoutDevLicense")) {
+            return value != 0;
+        }
+        RegCloseKey(hKey);
+        return std::nullopt;
+    };
+
+    // Check Group Policy path first as it overrides user settings.
+    constexpr wchar_t kRegKeyPolicyAppModelUnlock[] =
+        L"SOFTWARE\\Policies\\Microsoft\\Windows\\AppModelUnlock";
+    if (auto enabled = ReadDevModeKey(kRegKeyPolicyAppModelUnlock)) {
+        return *enabled;
+    }
+
+    // Fall back to standard settings path.
+    constexpr wchar_t kRegKeyAppModelUnlock[] =
+        L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AppModelUnlock";
+    if (auto enabled = ReadDevModeKey(kRegKeyAppModelUnlock)) {
+        return *enabled;
+    }
+
+    return false;
 }
 #endif
 
