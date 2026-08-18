@@ -4399,16 +4399,16 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_ColMajor_F32)
     auto* func = b.Function("foo", mat);
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        auto* call =
-            b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
-                           Vector<core::ir::TemplateParameter, 1>{mat}, p, 64_u, true, 32_u);
+        auto* call = b.CallExplicit(
+            mat, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat, core::Majorness::kColMajor}, p, 64_u, 32_u);
         b.Return(func, call);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<storage, array<f32, 256>, read_write>):subgroup_matrix_result<f32, 8, 8> {
   $B1: {
-    %3:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>> %p, 64u, true, 32u
+    %3:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, col_major> %p, 64u, 32u
     ret %3
   }
 }
@@ -4437,16 +4437,16 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_ReadOnly) {
     auto* func = b.Function("foo", mat);
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        auto* call =
-            b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
-                           Vector<core::ir::TemplateParameter, 1>{mat}, p, 64_u, true, 32_u);
+        auto* call = b.CallExplicit(
+            mat, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat, core::Majorness::kColMajor}, p, 64_u, 32_u);
         b.Return(func, call);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<storage, array<f32, 256>, read>):subgroup_matrix_result<f32, 8, 8> {
   $B1: {
-    %3:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>> %p, 64u, true, 32u
+    %3:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, col_major> %p, 64u, 32u
     ret %3
   }
 }
@@ -4482,14 +4482,15 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_SignedOffsetAndStride
     b.Append(func->Block(), [&] {
         auto* call =
             b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
-                           Vector<core::ir::TemplateParameter, 1>{mat}, p, offset, true, stride);
+                           Vector<core::ir::TemplateParameter, 2>{mat, core::Majorness::kColMajor},
+                           p, offset, stride);
         b.Return(func, call);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %offset:i32, %stride:i32):subgroup_matrix_result<f32, 8, 8> {
   $B1: {
-    %5:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>> %p, %offset, true, %stride
+    %5:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, col_major> %p, %offset, %stride
     ret %5
   }
 }
@@ -4518,16 +4519,16 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_RowMajor_U3
     auto* func = b.Function("foo", mat);
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        auto* call =
-            b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
-                           Vector<core::ir::TemplateParameter, 1>{mat}, p, 64_u, false, 32_u);
+        auto* call = b.CallExplicit(
+            mat, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat, core::Majorness::kRowMajor}, p, 64_u, 32_u);
         b.Return(func, call);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<workgroup, array<u32, 256>, read_write>):subgroup_matrix_result<u32, 8, 8> {
   $B1: {
-    %3:subgroup_matrix_result<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<u32, 8, 8>> %p, 64u, false, 32u
+    %3:subgroup_matrix_result<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<u32, 8, 8>, row_major> %p, 64u, 32u
     ret %3
   }
 }
@@ -4670,16 +4671,16 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_ColMajor_I8) 
     auto* func = b.Function("foo", mat);
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        auto* call =
-            b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
-                           Vector<core::ir::TemplateParameter, 1>{mat}, p, 64_u, true, 32_u);
+        auto* call = b.CallExplicit(
+            mat, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat, core::Majorness::kColMajor}, p, 64_u, 32_u);
         b.Return(func, call);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<storage, array<i32, 256>, read_write>):subgroup_matrix_result<i8, 8, 8> {
   $B1: {
-    %3:subgroup_matrix_result<i8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 8>> %p, 64u, true, 32u
+    %3:subgroup_matrix_result<i8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 8>, col_major> %p, 64u, 32u
     ret %3
   }
 }
@@ -4689,11 +4690,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_ColMajor_I8) 
     auto* expect = R"(
 %foo = func(%p:ptr<storage, array<i32, 256>, read_write>):subgroup_matrix_result<i8, 8, 8> {
   $B1: {
-    %3:u32 = div 32u, 4u
-    %4:u32 = div 64u, 4u
-    %5:ptr<storage, i32, read_write> = access %p, %4
-    %6:subgroup_matrix_result<i8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_result<i8, 8, 8>> %5, 1u, %3, 32u
-    ret %6
+    %3:ptr<storage, i32, read_write> = access %p, 64u
+    %4:subgroup_matrix_result<i8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_result<i8, 8, 8>> %3, 1u, 32u, 32u
+    ret %4
   }
 }
 )";
@@ -4710,16 +4709,16 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_RowMajor_U8
     auto* func = b.Function("foo", mat);
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        auto* call =
-            b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
-                           Vector<core::ir::TemplateParameter, 1>{mat}, p, 64_u, false, 32_u);
+        auto* call = b.CallExplicit(
+            mat, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat, core::Majorness::kRowMajor}, p, 64_u, 32_u);
         b.Return(func, call);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<workgroup, array<u32, 256>, read_write>):subgroup_matrix_result<u8, 8, 8> {
   $B1: {
-    %3:subgroup_matrix_result<u8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 8>> %p, 64u, false, 32u
+    %3:subgroup_matrix_result<u8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 8>, row_major> %p, 64u, 32u
     ret %3
   }
 }
@@ -4729,11 +4728,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_RowMajor_U8
     auto* expect = R"(
 %foo = func(%p:ptr<workgroup, array<u32, 256>, read_write>):subgroup_matrix_result<u8, 8, 8> {
   $B1: {
-    %3:u32 = div 32u, 4u
-    %4:u32 = div 64u, 4u
-    %5:ptr<workgroup, u32, read_write> = access %p, %4
-    %6:subgroup_matrix_result<u8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_result<u8, 8, 8>> %5, 0u, %3, 32u
-    ret %6
+    %3:ptr<workgroup, u32, read_write> = access %p, 64u
+    %4:subgroup_matrix_result<u8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_result<u8, 8, 8>> %3, 0u, 32u, 32u
+    ret %4
   }
 }
 )";
@@ -4750,14 +4747,16 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_ColMajor_F32
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({p, m});
     b.Append(func->Block(), [&] {
-        b.Call<void>(core::BuiltinFn::kSubgroupMatrixStore, p, 64_u, m, true, 32_u);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kColMajor}, p, 64_u,
+                       m, 32_u);
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %m:subgroup_matrix_result<f32, 8, 8>):void {
   $B1: {
-    %4:void = subgroupMatrixStore %p, 64u, %m, true, 32u
+    %4:void = subgroupMatrixStore<col_major> %p, 64u, %m, 32u
     ret
   }
 }
@@ -4788,14 +4787,16 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_SignedOffsetAndStrid
     auto* stride = b.FunctionParam("stride", ty.i32());
     func->SetParams({p, m, offset, stride});
     b.Append(func->Block(), [&] {
-        b.Call<void>(core::BuiltinFn::kSubgroupMatrixStore, p, offset, m, true, stride);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kColMajor}, p,
+                       offset, m, stride);
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %m:subgroup_matrix_result<f32, 8, 8>, %offset:i32, %stride:i32):void {
   $B1: {
-    %6:void = subgroupMatrixStore %p, %offset, %m, true, %stride
+    %6:void = subgroupMatrixStore<col_major> %p, %offset, %m, %stride
     ret
   }
 }
@@ -4824,14 +4825,16 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_RowMajor_U
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({p, m});
     b.Append(func->Block(), [&] {
-        b.Call<void>(core::BuiltinFn::kSubgroupMatrixStore, p, 64_u, m, false, 32_u);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, p, 64_u,
+                       m, 32_u);
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<workgroup, array<u32, 256>, read_write>, %m:subgroup_matrix_result<u32, 8, 8>):void {
   $B1: {
-    %4:void = subgroupMatrixStore %p, 64u, %m, false, 32u
+    %4:void = subgroupMatrixStore<row_major> %p, 64u, %m, 32u
     ret
   }
 }
@@ -4974,14 +4977,16 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_ColMajor_I8)
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({p, m});
     b.Append(func->Block(), [&] {
-        b.Call<void>(core::BuiltinFn::kSubgroupMatrixStore, p, 64_u, m, true, 32_u);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kColMajor}, p, 64_u,
+                       m, 32_u);
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<storage, array<i32, 256>, read_write>, %m:subgroup_matrix_result<i8, 8, 8>):void {
   $B1: {
-    %4:void = subgroupMatrixStore %p, 64u, %m, true, 32u
+    %4:void = subgroupMatrixStore<col_major> %p, 64u, %m, 32u
     ret
   }
 }
@@ -4991,10 +4996,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_ColMajor_I8)
     auto* expect = R"(
 %foo = func(%p:ptr<storage, array<i32, 256>, read_write>, %m:subgroup_matrix_result<i8, 8, 8>):void {
   $B1: {
-    %4:u32 = div 32u, 4u
-    %5:u32 = div 64u, 4u
-    %6:ptr<storage, i32, read_write> = access %p, %5
-    %7:void = spirv.cooperative_matrix_store %6, %m, 1u, %4, 32u
+    %4:ptr<storage, i32, read_write> = access %p, 64u
+    %5:void = spirv.cooperative_matrix_store %4, %m, 1u, 32u, 32u
     ret
   }
 }
@@ -5012,14 +5015,16 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_RowMajor_U
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({p, m});
     b.Append(func->Block(), [&] {
-        b.Call<void>(core::BuiltinFn::kSubgroupMatrixStore, p, 64_u, m, false, 32_u);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, p, 64_u,
+                       m, 32_u);
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = func(%p:ptr<workgroup, array<u32, 256>, read_write>, %m:subgroup_matrix_result<u8, 8, 8>):void {
   $B1: {
-    %4:void = subgroupMatrixStore %p, 64u, %m, false, 32u
+    %4:void = subgroupMatrixStore<row_major> %p, 64u, %m, 32u
     ret
   }
 }
@@ -5029,10 +5034,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_RowMajor_U
     auto* expect = R"(
 %foo = func(%p:ptr<workgroup, array<u32, 256>, read_write>, %m:subgroup_matrix_result<u8, 8, 8>):void {
   $B1: {
-    %4:u32 = div 32u, 4u
-    %5:u32 = div 64u, 4u
-    %6:ptr<workgroup, u32, read_write> = access %p, %5
-    %7:void = spirv.cooperative_matrix_store %6, %m, 0u, %4, 32u
+    %4:ptr<workgroup, u32, read_write> = access %p, 64u
+    %5:void = spirv.cooperative_matrix_store %4, %m, 0u, 32u, 32u
     ret
   }
 }

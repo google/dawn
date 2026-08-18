@@ -1360,24 +1360,19 @@ struct State {
     /// @param builtin the builtin call instruction
     void SubgroupMatrixLoad(core::ir::CoreBuiltinCall* builtin) {
         b.InsertBefore(builtin, [&] {
-            const bool majorness_template = builtin->ExplicitTemplateParams().Length() == 2;
+            TINT_IR_ASSERT(ir, builtin->ExplicitTemplateParams().Length() == 2);
             auto* result_ty = builtin->Result()->Type()->As<core::type::SubgroupMatrix>();
             auto* p = builtin->Args()[0];
             auto* offset = builtin->Args()[1];
-            auto* stride = builtin->Args()[majorness_template ? 2 : 3];
+            auto* stride = builtin->Args()[2];
 
             auto* ptr = p->Type()->As<core::type::Pointer>();
             auto* arr = ptr->StoreType()->As<core::type::Array>();
 
-            bool col_major = true;
-            if (majorness_template) {
-                TINT_IR_ASSERT(ir, std::holds_alternative<core::Majorness>(
-                                       builtin->ExplicitTemplateParams()[1]));
-                col_major = std::get<core::Majorness>(builtin->ExplicitTemplateParams()[1]) ==
-                            core::Majorness::kColMajor;
-            } else {
-                col_major = builtin->Args()[2]->As<core::ir::Constant>()->Value()->ValueAs<bool>();
-            }
+            TINT_IR_ASSERT(
+                ir, std::holds_alternative<core::Majorness>(builtin->ExplicitTemplateParams()[1]));
+            bool col_major = std::get<core::Majorness>(builtin->ExplicitTemplateParams()[1]) ==
+                             core::Majorness::kColMajor;
             auto* layout = b.Constant(u32(col_major ? SpvCooperativeMatrixLayoutColumnMajorKHR
                                                     : SpvCooperativeMatrixLayoutRowMajorKHR));
             uint32_t mask = static_cast<uint32_t>(SpvMemoryAccessMaskNone);
@@ -1390,35 +1385,13 @@ struct State {
             }
             auto* memory_operand = Literal(u32(mask));
 
-            // In SPIR-V `stride` and `offset` are related to the type of the input pointer, while
-            // in WGSL they both mean the number of elements. When the subgroup matrix element type
-            // is `i8` or `u8`, and the input array type is `i32` or `u32`, we need to convert the
-            // `stride` and `offset` in WGSL into the ones in SPIR-V by dividing them with 4.
-            // Note: the majorness templated variants match SPIR-V
-            auto* applied_stride = stride;
-            auto* applied_offset = offset;
-            if (!majorness_template && result_ty->Type()->Size() == 1u &&
-                arr->ElemType()->Size() == 4u) {
-                if (!config.cooperative_matrix_stride_is_matrix_elements) {
-                    stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-                    auto* applied_stride_binary =
-                        b.Binary(core::BinaryOp::kDivide, stride->Type(), stride, u32(4));
-                    applied_stride = applied_stride_binary->Result();
-                }
-
-                offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
-                auto* applied_offset_binary =
-                    b.Binary(core::BinaryOp::kDivide, offset->Type(), offset, u32(4));
-                applied_offset = applied_offset_binary->Result();
-            }
-
             // Make a pointer to the first element of the array that we will load from.
             auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
-            auto* src = b.Access(elem_ptr, p, applied_offset);
+            auto* src = b.Access(elem_ptr, p, offset);
 
             auto* call = b.CallWithResult<spirv::ir::BuiltinCall>(
                 builtin->DetachResult(), spirv::BuiltinFn::kCooperativeMatrixLoad, src, layout,
-                applied_stride, memory_operand);
+                stride, memory_operand);
             if (ptr->AddressSpace() == core::AddressSpace::kStorage &&
                 builtin->Alignment().has_value()) {
                 call->PushOperand(Literal(u32(builtin->Alignment().value())));
@@ -1432,53 +1405,25 @@ struct State {
     /// @param builtin the builtin call instruction
     void SubgroupMatrixStore(core::ir::CoreBuiltinCall* builtin) {
         b.InsertBefore(builtin, [&] {
-            const bool majorness_template = builtin->ExplicitTemplateParams().Length() == 1;
+            TINT_IR_ASSERT(ir, builtin->ExplicitTemplateParams().Length() == 1);
             auto* p = builtin->Args()[0];
             auto* offset = builtin->Args()[1];
             auto* value = builtin->Args()[2];
-            auto* value_type = value->Type()->As<core::type::SubgroupMatrix>();
 
-            bool col_major = true;
-            if (majorness_template) {
-                TINT_IR_ASSERT(ir, std::holds_alternative<core::Majorness>(
-                                       builtin->ExplicitTemplateParams()[0]));
-                col_major = std::get<core::Majorness>(builtin->ExplicitTemplateParams()[0]) ==
-                            core::Majorness::kColMajor;
-            } else {
-                col_major = builtin->Args()[3]->As<core::ir::Constant>()->Value()->ValueAs<bool>();
-            }
+            TINT_IR_ASSERT(
+                ir, std::holds_alternative<core::Majorness>(builtin->ExplicitTemplateParams()[0]));
+            bool col_major = std::get<core::Majorness>(builtin->ExplicitTemplateParams()[0]) ==
+                             core::Majorness::kColMajor;
             auto* layout = b.Constant(u32(col_major ? SpvCooperativeMatrixLayoutColumnMajorKHR
                                                     : SpvCooperativeMatrixLayoutRowMajorKHR));
-            auto* stride = builtin->Args()[majorness_template ? 3 : 4];
+            auto* stride = builtin->Args()[3];
 
             auto* ptr = p->Type()->As<core::type::Pointer>();
             auto* arr = ptr->StoreType()->As<core::type::Array>();
 
-            // In SPIR-V `stride` and `offset` are related to the type of the input pointer, while
-            // in WGSL they both mean the number of elements. When the subgroup matrix element type
-            // is `i8` or `u8`, and the input array type is `i32` or `u32`, we need to convert the
-            // `stride` and `offset` in WGSL into the ones in SPIR-V by dividing them with 4.
-            // Note: the majorness templated variants match SPIR-V
-            auto* applied_stride = stride;
-            auto* applied_offset = offset;
-            if (!majorness_template && value_type->Type()->Size() == 1u &&
-                arr->ElemType()->Size() == 4u) {
-                if (!config.cooperative_matrix_stride_is_matrix_elements) {
-                    stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-                    auto* applied_stride_binary =
-                        b.Binary(core::BinaryOp::kDivide, stride->Type(), stride, u32(4));
-                    applied_stride = applied_stride_binary->Result();
-                }
-
-                offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
-                auto* applied_offset_binary =
-                    b.Binary(core::BinaryOp::kDivide, offset->Type(), offset, u32(4));
-                applied_offset = applied_offset_binary->Result();
-            }
-
             // Make a pointer to the first element of the array that we will write to.
             auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
-            auto* dst = b.Access(elem_ptr, p, applied_offset);
+            auto* dst = b.Access(elem_ptr, p, offset);
 
             uint32_t mask = static_cast<uint32_t>(SpvMemoryAccessNonPrivatePointerMask);
             if (ptr->AddressSpace() == core::AddressSpace::kStorage &&
@@ -1487,9 +1432,9 @@ struct State {
             }
             auto* memory_operand = Literal(u32(mask));
 
-            auto* call = b.Call<spirv::ir::BuiltinCall>(
-                ty.void_(), spirv::BuiltinFn::kCooperativeMatrixStore, dst, value, layout,
-                applied_stride, memory_operand);
+            auto* call = b.Call<spirv::ir::BuiltinCall>(ty.void_(),
+                                                        spirv::BuiltinFn::kCooperativeMatrixStore,
+                                                        dst, value, layout, stride, memory_operand);
             if (ptr->AddressSpace() == core::AddressSpace::kStorage &&
                 builtin->Alignment().has_value()) {
                 call->PushOperand(Literal(u32(builtin->Alignment().value())));
