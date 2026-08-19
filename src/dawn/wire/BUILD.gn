@@ -103,6 +103,8 @@ source_set("sources") {
     "ChunkedCommandHandler.h",
     "ChunkedCommandSerializer.cpp",
     "ChunkedCommandSerializer.h",
+    "InlineSharedMemoryManager.cpp",
+    "InlineSharedMemoryManager.h",
     "ObjectHandle.cpp",
     "ObjectHandle.h",
     "SupportedFeatures.cpp",
@@ -155,6 +157,10 @@ source_set("sources") {
     "server/ServerShaderModule.cpp",
     "server/ServerSurface.cpp",
   ]
+
+  if (is_win) {
+    sources += [ "InlineSharedMemoryManager_win.cpp" ]
+  }
 
   public_deps = [
     ":headers",

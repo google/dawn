@@ -53,7 +53,6 @@ class SystemEventPipeSender;
 class SystemEventReceiver final : NonCopyable {
   public:
     static SystemEventReceiver CreateAlreadySignaled();
-    using SystemHandle = SystemHandle;
 
     SystemEventReceiver() = default;
     explicit SystemEventReceiver(SystemHandle primitive);

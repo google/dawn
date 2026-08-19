@@ -44,6 +44,7 @@ set(private_headers
     "BufferConsumer.h"
     "ChunkedCommandHandler.h"
     "ChunkedCommandSerializer.h"
+    "InlineSharedMemoryManager.h"
     "client/Adapter.h"
     "client/ApiObjects.h"
     "client/Buffer.h"
@@ -72,6 +73,7 @@ set(sources
     "${DAWN_WIRE_GEN_SOURCES}"
     "ChunkedCommandHandler.cpp"
     "ChunkedCommandSerializer.cpp"
+    "InlineSharedMemoryManager.cpp"
     "client/Adapter.cpp"
     "client/Buffer.cpp"
     "client/Client.cpp"
@@ -105,6 +107,10 @@ set(sources
     "WireDeserializeAllocator.cpp"
     "WireServer.cpp"
 )
+
+if (WIN32)
+  list(APPEND sources "InlineSharedMemoryManager_win.cpp")
+endif ()
 
 dawn_add_library(
   dawn_wire

@@ -420,7 +420,10 @@ dawn_test("dawn_unittests") {
   }
 
   if (is_win) {
-    sources += [ "unittests/WindowsUtilsTests.cpp" ]
+    sources += [
+      "unittests/WindowsUtilsTests.cpp",
+      "unittests/wire/WireInlineSharedMemoryManagerTests.cpp",
+    ]
   }
 
   if (dawn_enable_d3d12) {
