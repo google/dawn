@@ -1646,7 +1646,7 @@ TEST_P(MultithreadTextureCopyTests, CopyDepthToDepthNoRace) {
         // Copy from depthTexture to destTexture.
         const wgpu::Extent3D dstSize = {kWidth, kHeight, 1};
         wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
-            destTexture, /*dstMipLevel=*/1, {0, 0, 0}, wgpu::TextureAspect::All);
+            destTexture, /*mipLevel=*/1, {0, 0, 0}, wgpu::TextureAspect::All);
         auto encoder = device.CreateCommandEncoder();
         lockStep.Wait(Step::WriteTexture);
         CopyTextureToTextureHelper(depthTexture, dest, dstSize, encoder);
@@ -1715,7 +1715,7 @@ TEST_P(MultithreadTextureCopyTests, CopyBufferToDepthNoRace) {
         auto encoder = device.CreateCommandEncoder();
 
         wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
-            destTexture, /*dstMipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
+            destTexture, /*mipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
 
         // Wait until src buffer is written.
         lockStep.Wait(Step::WriteBuffer);
@@ -1783,7 +1783,7 @@ TEST_P(MultithreadTextureCopyTests, CopyStencilToStencilNoRace) {
         // Copy from stencilTexture to destTexture.
         const wgpu::Extent3D dstSize = {kWidth, kHeight, 1};
         wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
-            destTexture, /*dstMipLevel=*/1, {0, 0, 0}, wgpu::TextureAspect::All);
+            destTexture, /*mipLevel=*/1, {0, 0, 0}, wgpu::TextureAspect::All);
         auto encoder = device.CreateCommandEncoder();
         lockStep.Wait(Step::WriteTexture);
 
@@ -1842,7 +1842,7 @@ TEST_P(MultithreadTextureCopyTests, CopyBufferToStencilNoRace) {
         auto encoder = device.CreateCommandEncoder();
 
         wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
-            destTexture, /*dstMipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
+            destTexture, /*mipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
 
         // Wait until src buffer is written.
         lockStep.Wait(Step::WriteBuffer);
@@ -1912,7 +1912,7 @@ TEST_P(MultithreadTextureCopyTests, CopyTextureForBrowserNoRace) {
         // Copy from srcTexture to destTexture.
         const wgpu::Extent3D dstSize = {kWidth, kHeight, 1};
         wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
-            destTexture, /*dstMipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
+            destTexture, /*mipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
         wgpu::CopyTextureForBrowserOptions options;
         options.flipY = true;
 
@@ -1977,7 +1977,7 @@ TEST_P(MultithreadTextureCopyTests, CopyTextureForBrowserErrorNoDeadLock) {
         // Copy from srcTexture to destTexture.
         const wgpu::Extent3D dstSize = {kWidth, kHeight, 1};
         wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
-            destTexture, /*dstMipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
+            destTexture, /*mipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
         wgpu::CopyTextureForBrowserOptions options = {};
 
         device.PushErrorScope(wgpu::ErrorFilter::Validation);

@@ -187,7 +187,7 @@ TEST_F(MemoryInstrumentationTest, DumpMemoryStatistics) {
     wgpu::Texture sharedTexture = device.CreateTexture(&kSharedTextureDesc);
     EXPECT_CALL(memoryDumpMock,
                 AddScalar(StrEq(GetTextureLabel(sharedTexture)), MemoryDump::kNameSize,
-                          MemoryDump::kUnitsBytes, /*size=*/0));
+                          MemoryDump::kUnitsBytes, /*value=*/0));
 
     // Create a transient attachment (memoryless) texture and check that its size is not counted.
     const wgpu::TextureDescriptor kTransientAttachmentTextureDesc = {
@@ -199,7 +199,7 @@ TEST_F(MemoryInstrumentationTest, DumpMemoryStatistics) {
         device.CreateTexture(&kTransientAttachmentTextureDesc);
     EXPECT_CALL(memoryDumpMock,
                 AddScalar(StrEq(GetTextureLabel(transientAttachmentTexture)), MemoryDump::kNameSize,
-                          MemoryDump::kUnitsBytes, /*size=*/0));
+                          MemoryDump::kUnitsBytes, /*value=*/0));
 
     DumpMemoryStatistics(device.Get(), &memoryDumpMock);
 
@@ -299,7 +299,7 @@ TEST_F(MemoryInstrumentationTest, DumpMemoryStatisticsWithOwner) {
     sharedTextureWithOwnership.SetOwnershipForMemoryDump(kSharedTextureOwnerGUID);
     EXPECT_CALL(memoryDumpMock,
                 AddScalar(StrEq(GetTextureLabel(sharedTextureWithOwnership)), MemoryDump::kNameSize,
-                          MemoryDump::kUnitsBytes, /*size=*/0));
+                          MemoryDump::kUnitsBytes, /*value=*/0));
     EXPECT_CALL(memoryDumpMock, AddOwnerGUID(StrEq(GetTextureLabel(sharedTextureWithOwnership)),
                                              kSharedTextureOwnerGUID));
 

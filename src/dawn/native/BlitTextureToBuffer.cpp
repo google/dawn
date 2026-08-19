@@ -1241,23 +1241,23 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
                 // - the last bytes past the desired copy region.
                 if (shaderStartOffset > 0) {
                     commandEncoder->InternalCopyBufferToBufferWithAllocatedSize(
-                        dst.buffer.Get(), /*srcOffset=*/offsetInOriginalBuf,
+                        dst.buffer.Get(), /*sourceOffset=*/offsetInOriginalBuf,
                         destinationBuffer.Get(),
-                        /*dstOffset=*/0, /*size=*/Align(shaderStartOffset, 4));
+                        /*destinationOffset=*/0, /*size=*/Align(shaderStartOffset, 4));
                 }
                 if (shaderEndOffset != shaderBindingSize) {
                     const auto mod = shaderEndOffset % 4;
                     const auto lastShaderU32Offset = shaderEndOffset - mod;
                     commandEncoder->InternalCopyBufferToBufferWithAllocatedSize(
                         dst.buffer.Get(),
-                        /*srcOffset=*/offsetInOriginalBuf + lastShaderU32Offset,
-                        destinationBuffer.Get(), /*dstOffset=*/lastShaderU32Offset,
+                        /*sourceOffset=*/offsetInOriginalBuf + lastShaderU32Offset,
+                        destinationBuffer.Get(), /*destinationOffset=*/lastShaderU32Offset,
                         /*size=*/shaderBindingSize - lastShaderU32Offset);
                 }
             } else {
                 commandEncoder->InternalCopyBufferToBufferWithAllocatedSize(
-                    dst.buffer.Get(), /*srcOffset=*/offsetInOriginalBuf, destinationBuffer.Get(),
-                    /*dstOffset=*/0, shaderBindingSize);
+                    dst.buffer.Get(), /*sourceOffset=*/offsetInOriginalBuf, destinationBuffer.Get(),
+                    /*destinationOffset=*/0, shaderBindingSize);
             }
         }
     }
@@ -1392,8 +1392,8 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
     if (useIntermediateCopyBuffer) {
         DAWN_ASSERT(destinationBuffer->GetSize() <= dst.buffer->GetAllocatedSize());
         commandEncoder->InternalCopyBufferToBufferWithAllocatedSize(
-            destinationBuffer.Get(), /*srcOffset=*/0, dst.buffer.Get(),
-            /*dstOffset=*/offsetInOriginalBuf, shaderBindingSize);
+            destinationBuffer.Get(), /*sourceOffset=*/0, dst.buffer.Get(),
+            /*destinationOffset=*/offsetInOriginalBuf, shaderBindingSize);
     }
 
     return {};

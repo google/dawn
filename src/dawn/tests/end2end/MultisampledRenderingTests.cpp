@@ -2675,7 +2675,7 @@ TEST_P(DawnLoadResolveTextureTest, DrawThenLoad2DArrayTextureLayer) {
     auto multiSampledTextureView = multiSampledTexture.CreateView();
 
     auto singleSampledTexture = CreateTextureForRenderAttachment(
-        kColorFormat, 1, 1, /*arrayCount=*/2, /*transientAttachment=*/false,
+        kColorFormat, 1, 1, /*arrayLayerCount=*/2, /*transientAttachment=*/false,
         /*supportsTextureBinding=*/true);
     wgpu::TextureViewDescriptor resolveViewDescriptor2;
     resolveViewDescriptor2.dimension = wgpu::TextureViewDimension::e2D;

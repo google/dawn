@@ -141,7 +141,7 @@ class ContentLessObjectCache {
 
   public:
     ContentLessObjectCache()
-        : mCache(/*capacity=*/0,
+        : mCache(/*reservation_size=*/0,
                  typename CacheKeyFuncs::HashFunc(),
                  typename CacheKeyFuncs::EqualityFunc(this)) {}
 

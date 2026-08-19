@@ -340,7 +340,7 @@ class ComputeMultipleDispatchesTests : public DawnTestWithParams<Params> {
 
         bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform,
-                      /* hasDynamicOffset = */ true},
+                      /*bufferHasDynamicOffset=*/true},
                      {1, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
 
         wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;

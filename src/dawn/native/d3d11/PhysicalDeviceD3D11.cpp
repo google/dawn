@@ -129,7 +129,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
     // Create the device to populate the adapter properties then reuse it when needed for actual
     // rendering.
     if (!mIsSharedD3D11Device) {
-        DAWN_TRY_ASSIGN(mD3D11Device, CreateD3D11Device(/*enableDebugLayers=*/false));
+        DAWN_TRY_ASSIGN(mD3D11Device, CreateD3D11Device(/*enableDebugLayer=*/false));
     }
 
     mFeatureLevel = mD3D11Device->GetFeatureLevel();
