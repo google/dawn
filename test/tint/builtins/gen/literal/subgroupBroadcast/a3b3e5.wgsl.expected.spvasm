@@ -4,17 +4,19 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 26
+; Bound: 38
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
                OpCapability StorageBuffer16BitAccess
                OpCapability GroupNonUniformBallot
+               OpCapability GroupNonUniformArithmetic
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
                OpExecutionMode %fragment_main OriginUpperLeft
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce_block "prevent_dce_block"
+               OpName %tint_subgroup_last_id "tint_subgroup_last_id"
                OpName %subgroupBroadcast_a3b3e5 "subgroupBroadcast_a3b3e5"
                OpName %res "res"
                OpName %fragment_main "fragment_main"
@@ -28,30 +30,43 @@
 %prevent_dce_block = OpTypeStruct %v3half
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
           %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
-          %7 = OpTypeFunction %v3half
        %uint = OpTypeInt 32 0
+%_ptr_Private_uint = OpTypePointer Private %uint
+          %9 = OpConstantNull %uint
+%tint_subgroup_last_id = OpVariable %_ptr_Private_uint Private %9
+         %11 = OpTypeFunction %v3half
      %uint_3 = OpConstant %uint 3
 %half_0x1p_0 = OpConstant %half 0x1p+0
-         %12 = OpConstantComposite %v3half %half_0x1p_0 %half_0x1p_0 %half_0x1p_0
+         %15 = OpConstantComposite %v3half %half_0x1p_0 %half_0x1p_0 %half_0x1p_0
      %uint_1 = OpConstant %uint 1
+       %bool = OpTypeBool
+     %v3bool = OpTypeVector %bool 3
+         %24 = OpConstantNull %v3half
 %_ptr_Function_v3half = OpTypePointer Function %v3half
        %void = OpTypeVoid
-         %20 = OpTypeFunction %void
+         %30 = OpTypeFunction %void
 %_ptr_StorageBuffer_v3half = OpTypePointer StorageBuffer %v3half
      %uint_0 = OpConstant %uint 0
-%subgroupBroadcast_a3b3e5 = OpFunction %v3half None %7
-          %8 = OpLabel
+%subgroupBroadcast_a3b3e5 = OpFunction %v3half None %11
+         %12 = OpLabel
         %res = OpVariable %_ptr_Function_v3half Function
-          %9 = OpGroupNonUniformBroadcast %v3half %uint_3 %12 %uint_1
-               OpStore %res %9
-         %17 = OpLoad %v3half %res None
-               OpReturnValue %17
+         %13 = OpGroupNonUniformBroadcast %v3half %uint_3 %15 %uint_1
+         %18 = OpLoad %uint %tint_subgroup_last_id None
+         %19 = OpULessThanEqual %bool %uint_1 %18
+         %22 = OpCompositeConstruct %v3bool %19 %19 %19
+         %23 = OpSelect %v3half %22 %13 %24
+               OpStore %res %23
+         %27 = OpLoad %v3half %res None
+               OpReturnValue %27
                OpFunctionEnd
-%fragment_main = OpFunction %void None %20
-         %21 = OpLabel
-         %22 = OpFunctionCall %v3half %subgroupBroadcast_a3b3e5
-         %23 = OpAccessChain %_ptr_StorageBuffer_v3half %1 %uint_0
-               OpStore %23 %22 None
+%fragment_main = OpFunction %void None %30
+         %31 = OpLabel
+         %32 = OpGroupNonUniformIAdd %uint %uint_3 Reduce %uint_1
+         %33 = OpISub %uint %32 %uint_1
+               OpStore %tint_subgroup_last_id %33 None
+         %34 = OpFunctionCall %v3half %subgroupBroadcast_a3b3e5
+         %35 = OpAccessChain %_ptr_StorageBuffer_v3half %1 %uint_0
+               OpStore %35 %34 None
                OpReturn
                OpFunctionEnd
 ;
@@ -60,17 +75,19 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 26
+; Bound: 38
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
                OpCapability StorageBuffer16BitAccess
                OpCapability GroupNonUniformBallot
+               OpCapability GroupNonUniformArithmetic
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce_block "prevent_dce_block"
+               OpName %tint_subgroup_last_id "tint_subgroup_last_id"
                OpName %subgroupBroadcast_a3b3e5 "subgroupBroadcast_a3b3e5"
                OpName %res "res"
                OpName %compute_main "compute_main"
@@ -84,29 +101,42 @@
 %prevent_dce_block = OpTypeStruct %v3half
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
           %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
-          %7 = OpTypeFunction %v3half
        %uint = OpTypeInt 32 0
+%_ptr_Private_uint = OpTypePointer Private %uint
+          %9 = OpConstantNull %uint
+%tint_subgroup_last_id = OpVariable %_ptr_Private_uint Private %9
+         %11 = OpTypeFunction %v3half
      %uint_3 = OpConstant %uint 3
 %half_0x1p_0 = OpConstant %half 0x1p+0
-         %12 = OpConstantComposite %v3half %half_0x1p_0 %half_0x1p_0 %half_0x1p_0
+         %15 = OpConstantComposite %v3half %half_0x1p_0 %half_0x1p_0 %half_0x1p_0
      %uint_1 = OpConstant %uint 1
+       %bool = OpTypeBool
+     %v3bool = OpTypeVector %bool 3
+         %24 = OpConstantNull %v3half
 %_ptr_Function_v3half = OpTypePointer Function %v3half
        %void = OpTypeVoid
-         %20 = OpTypeFunction %void
+         %30 = OpTypeFunction %void
 %_ptr_StorageBuffer_v3half = OpTypePointer StorageBuffer %v3half
      %uint_0 = OpConstant %uint 0
-%subgroupBroadcast_a3b3e5 = OpFunction %v3half None %7
-          %8 = OpLabel
+%subgroupBroadcast_a3b3e5 = OpFunction %v3half None %11
+         %12 = OpLabel
         %res = OpVariable %_ptr_Function_v3half Function
-          %9 = OpGroupNonUniformBroadcast %v3half %uint_3 %12 %uint_1
-               OpStore %res %9
-         %17 = OpLoad %v3half %res None
-               OpReturnValue %17
+         %13 = OpGroupNonUniformBroadcast %v3half %uint_3 %15 %uint_1
+         %18 = OpLoad %uint %tint_subgroup_last_id None
+         %19 = OpULessThanEqual %bool %uint_1 %18
+         %22 = OpCompositeConstruct %v3bool %19 %19 %19
+         %23 = OpSelect %v3half %22 %13 %24
+               OpStore %res %23
+         %27 = OpLoad %v3half %res None
+               OpReturnValue %27
                OpFunctionEnd
-%compute_main = OpFunction %void None %20
-         %21 = OpLabel
-         %22 = OpFunctionCall %v3half %subgroupBroadcast_a3b3e5
-         %23 = OpAccessChain %_ptr_StorageBuffer_v3half %1 %uint_0
-               OpStore %23 %22 None
+%compute_main = OpFunction %void None %30
+         %31 = OpLabel
+         %32 = OpGroupNonUniformIAdd %uint %uint_3 Reduce %uint_1
+         %33 = OpISub %uint %32 %uint_1
+               OpStore %tint_subgroup_last_id %33 None
+         %34 = OpFunctionCall %v3half %subgroupBroadcast_a3b3e5
+         %35 = OpAccessChain %_ptr_StorageBuffer_v3half %1 %uint_0
+               OpStore %35 %34 None
                OpReturn
                OpFunctionEnd

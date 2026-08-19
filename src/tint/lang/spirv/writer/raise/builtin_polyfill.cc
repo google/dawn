@@ -1320,6 +1320,15 @@ struct State {
         ir.properties.Add(core::ir::Property::kAllowAnyInputAttachmentIndexType);
     }
 
+    void CreateSubgroupLastIdIfNeeded() {
+        if (subgroup_last_id_) {
+            return;
+        }
+        b.Append(ir.root_block, [&] {
+            subgroup_last_id_ = b.Var<core::AddressSpace::kPrivate, u32>("tint_subgroup_last_id");
+        });
+    }
+
     /// Handles SubgroupShuffle() builtin.
     /// @param builtin the builtin call instruction
     void SubgroupShuffle(core::ir::CoreBuiltinCall* builtin) {
@@ -1336,12 +1345,8 @@ struct State {
 
         /// Polyfill a `subgroupShuffleX` builtin call with one that has clamped the arg2 param
         auto* shuffle_id = builtin->Args()[1];
-        if (!subgroup_last_id_) {
-            b.Append(ir.root_block, [&] {
-                subgroup_last_id_ =
-                    b.Var<core::AddressSpace::kPrivate, u32>("tint_subgroup_last_id");
-            });
-        }
+        CreateSubgroupLastIdIfNeeded();
+
         b.InsertBefore(builtin, [&] {
             auto* last_id = b.Load(subgroup_last_id_);
             auto* clamp_via_min = b.Min(shuffle_id, last_id);
@@ -1389,8 +1394,26 @@ struct State {
 
         // For const signed int IDs, compile-time convert to u32 to maintain constness.
         if (id->Type()->IsSignedIntegerScalar()) {
-            builtin->SetArg(1, b.Constant(id->As<core::ir::Constant>()->Value()->ValueAs<u32>()));
+            id = b.Constant(id->As<core::ir::Constant>()->Value()->ValueAs<u32>());
         }
+        builtin->SetArg(1, id);
+
+        CreateSubgroupLastIdIfNeeded();
+
+        core::ir::CoreBuiltinCall* call = nullptr;
+        b.InsertAfter(builtin, [&] {
+            auto* ret_ty = builtin->Result()->Type();
+            auto* result = b.InstructionResult(ret_ty);
+
+            // Replace the uses before we create the new usage.
+            builtin->Result()->ReplaceAllUsesWith(result);
+
+            auto* cmp = b.LessThanEqual(id, b.Load(subgroup_last_id_));
+            call = b.CallWithResult(result, core::BuiltinFn::kSelect, b.Zero(ret_ty), builtin, cmp);
+        });
+
+        // Make sure the select gets converted to proper SPIR-V select
+        Select(call);
     }
 
     /// Handle a QuadBroadcast() builtin.

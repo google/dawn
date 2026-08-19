@@ -4346,10 +4346,20 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupBroadcastConstSignedId) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
+$B1: {  # root
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+}
+
 %foo = @fragment func():void {
-  $B1: {
-    %2:i32 = subgroupBroadcast 1i, 1u
-    %a:i32 = let %2
+  $B2: {
+    %3:u32 = subgroupAdd 1u
+    %4:u32 = sub %3, 1u
+    store %tint_subgroup_last_id, %4
+    %5:i32 = subgroupBroadcast 1i, 1u
+    %6:u32 = load %tint_subgroup_last_id
+    %7:bool = lte 1u, %6
+    %8:i32 = spirv.select %7, %5, 0i
+    %a:i32 = let %8
     ret
   }
 }
