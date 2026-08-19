@@ -152,11 +152,12 @@ function(tint_default_compile_options TARGET)
       /wd4018 # '>=': signed/unsigned mismatch (Comes from protobuf library)
       /wd4068 # unknown pragma
       /wd4127 # conditional expression is constant
+      /wd4201 # nonstandard extension used: nameless struct/union (Comes from protobuf library)
       /wd4244 # 'conversion' conversion from 'type1' to 'type2', possible loss of data
       /wd4267 # 'var' : conversion from 'size_t' to 'type', possible loss of data
       /wd4324 # 'struct_name' : structure was padded due to __declspec(align())
-      /wd4459 # declaration of 'identifier' hides global declaration
       /wd4458 # declaration of 'identifier' hides class member
+      /wd4459 # declaration of 'identifier' hides global declaration
       /wd4514 # 'function' : unreferenced inline function has been removed
       /wd4571 # catch(...) semantics changed since Visual C++ 7.1; structured exceptions (SEH) are no longer caught
       /wd4625 # 'derived class' : copy constructor was implicitly defined as deleted because a base class copy constructor is inaccessible or deleted
