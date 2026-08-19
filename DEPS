@@ -441,7 +441,7 @@ deps = {
         'version': Var('agility_sdk_version'),
       },
     ],
-    'condition': 'dawn_standalone and host_os == "win"',
+    'condition': 'host_os == "win"',
     'dep_type': 'cipd',
   },
 
