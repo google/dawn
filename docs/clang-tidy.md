@@ -38,5 +38,21 @@ Tips:
     when they're in a different file from the warning. Alternatively, see if
     there's a way to automate it via `clangd`.
 
+## Workflow: Fixing a Given Check with Autofix
+
+After you run `tools/run-tricium-clang-tidy.py` and get a list of findings (`clang-tidy-*-findings.json`), you can automatically apply fixes for specific checks that support autofix (such as `bugprone-parent-virtual-call` or `modernize-use-override`, see the [list of checks](https://clang.llvm.org/extra/clang-tidy/checks/list.html)) across all affected files using the helper script:
+
+```bash
+# Apply fixes for a specific check.
+# The script will parse the `clang-tidy-xxx-findings.json`
+# file, extract all affected files, and run clang-tidy with the --fix flag on them.
+tools/apply-clang-tidy-fixes.py out/debug -f clang-tidy-xxx-findings.json -c bugprone-parent-virtual-call
+```
+
+Arguments & Options:
+* `outdir`: The build directory (e.g., `out/debug`) (Required).
+* `-c`, `--check`: The specific clang-tidy check name (Required).
+* `-f`, `--findings`: Explicit path to a `findings.json` file (Defaults to the newest `clang-tidy-*-findings.json` in the current directory).
+
 For additional info on running Clang-Tidy locally, see
 [these instructions](https://chromium.googlesource.com/chromium/src/+/main/docs/clang_tidy.md).
