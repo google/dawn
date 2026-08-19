@@ -1457,19 +1457,25 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleDown_Clamped) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var undef
 }
 
-%foo = @fragment func(%tint_subgroup_size:u32 [@subgroup_size]):i32 [@location(0)] {
+%foo = @fragment func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):i32 [@location(0)] {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B2: {
-    %4:u32 = sub %tint_subgroup_size, 1u
-    store %tint_subgroup_size_mask, %4
+    %5:u32 = subgroupAdd 1u
+    %6:u32 = sub %5, 1u
+    store %tint_subgroup_last_id, %6
+    store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
     %val:i32 = let 1i
     %delta:u32 = let 1u
-    %7:u32 = load %tint_subgroup_size_mask
-    %8:u32 = and %delta, %7
-    %9:i32 = subgroupShuffleDown %val, %8
-    ret %9
+    %9:i32 = subgroupShuffleDown %val, %delta
+    %10:u32 = load %tint_subgroup_invocation_id
+    %11:u32 = add %10, %delta
+    %12:u32 = load %tint_subgroup_last_id
+    %13:bool = lte %11, %12
+    %14:i32 = spirv.select %13, %9, 0i
+    ret %14
   }
 }
 )";
@@ -1505,19 +1511,25 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleDown_SignedDelta_Clamped)
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var undef
 }
 
-%foo = @fragment func(%tint_subgroup_size:u32 [@subgroup_size]):i32 [@location(0)] {
+%foo = @fragment func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):i32 [@location(0)] {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B2: {
-    %4:u32 = sub %tint_subgroup_size, 1u
-    store %tint_subgroup_size_mask, %4
+    %5:u32 = subgroupAdd 1u
+    %6:u32 = sub %5, 1u
+    store %tint_subgroup_last_id, %6
+    store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
     %val:i32 = let 1i
     %delta:u32 = let 1u
-    %7:u32 = load %tint_subgroup_size_mask
-    %8:u32 = and %delta, %7
-    %9:i32 = subgroupShuffleDown %val, %8
-    ret %9
+    %9:i32 = subgroupShuffleDown %val, %delta
+    %10:u32 = load %tint_subgroup_invocation_id
+    %11:u32 = add %10, %delta
+    %12:u32 = load %tint_subgroup_last_id
+    %13:bool = lte %11, %12
+    %14:i32 = spirv.select %13, %9, 0i
+    ret %14
   }
 }
 )";
@@ -1553,19 +1565,25 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleUp_Clamped) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var undef
 }
 
-%foo = @fragment func(%tint_subgroup_size:u32 [@subgroup_size]):i32 [@location(0)] {
+%foo = @fragment func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):i32 [@location(0)] {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B2: {
-    %4:u32 = sub %tint_subgroup_size, 1u
-    store %tint_subgroup_size_mask, %4
+    %5:u32 = subgroupAdd 1u
+    %6:u32 = sub %5, 1u
+    store %tint_subgroup_last_id, %6
+    store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
     %val:i32 = let 1i
     %delta:u32 = let 1u
-    %7:u32 = load %tint_subgroup_size_mask
-    %8:u32 = and %delta, %7
-    %9:i32 = subgroupShuffleUp %val, %8
-    ret %9
+    %9:i32 = subgroupShuffleUp %val, %delta
+    %10:u32 = load %tint_subgroup_invocation_id
+    %11:u32 = sub %10, %delta
+    %12:u32 = load %tint_subgroup_last_id
+    %13:bool = lte %11, %12
+    %14:i32 = spirv.select %13, %9, 0i
+    ret %14
   }
 }
 )";
@@ -1601,19 +1619,25 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleUp_SignedDelta_Clamped) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var undef
 }
 
-%foo = @fragment func(%tint_subgroup_size:u32 [@subgroup_size]):i32 [@location(0)] {
+%foo = @fragment func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):i32 [@location(0)] {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B2: {
-    %4:u32 = sub %tint_subgroup_size, 1u
-    store %tint_subgroup_size_mask, %4
+    %5:u32 = subgroupAdd 1u
+    %6:u32 = sub %5, 1u
+    store %tint_subgroup_last_id, %6
+    store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
     %val:i32 = let 1i
     %delta:u32 = let 1u
-    %7:u32 = load %tint_subgroup_size_mask
-    %8:u32 = and %delta, %7
-    %9:i32 = subgroupShuffleUp %val, %8
-    ret %9
+    %9:i32 = subgroupShuffleUp %val, %delta
+    %10:u32 = load %tint_subgroup_invocation_id
+    %11:u32 = sub %10, %delta
+    %12:u32 = load %tint_subgroup_last_id
+    %13:bool = lte %11, %12
+    %14:i32 = spirv.select %13, %9, 0i
+    ret %14
   }
 }
 )";
@@ -1649,19 +1673,25 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleXor_Clamped) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var undef
 }
 
-%foo = @fragment func(%tint_subgroup_size:u32 [@subgroup_size]):i32 [@location(0)] {
+%foo = @fragment func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):i32 [@location(0)] {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B2: {
-    %4:u32 = sub %tint_subgroup_size, 1u
-    store %tint_subgroup_size_mask, %4
+    %5:u32 = subgroupAdd 1u
+    %6:u32 = sub %5, 1u
+    store %tint_subgroup_last_id, %6
+    store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
     %val:i32 = let 1i
     %mask:u32 = let 1u
-    %7:u32 = load %tint_subgroup_size_mask
-    %8:u32 = and %mask, %7
-    %9:i32 = subgroupShuffleXor %val, %8
-    ret %9
+    %9:i32 = subgroupShuffleXor %val, %mask
+    %10:u32 = load %tint_subgroup_invocation_id
+    %11:u32 = xor %10, %mask
+    %12:u32 = load %tint_subgroup_last_id
+    %13:bool = lte %11, %12
+    %14:i32 = spirv.select %13, %9, 0i
+    ret %14
   }
 }
 )";
@@ -5744,22 +5774,28 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle_ComputeHelper_Clamped) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var undef
 }
 
 %helper = func(%arg1:i32, %arg2:u32):i32 {
   $B2: {
-    %5:u32 = load %tint_subgroup_size_mask
-    %6:u32 = and %arg2, %5
-    %7:i32 = subgroupShuffleDown %arg1, %6
-    ret %7
+    %6:i32 = subgroupShuffleDown %arg1, %arg2
+    %7:u32 = load %tint_subgroup_invocation_id
+    %8:u32 = add %7, %arg2
+    %9:u32 = load %tint_subgroup_last_id
+    %10:bool = lte %8, %9
+    %11:i32 = spirv.select %10, %6, 0i
+    ret %11
   }
 }
-%ep = @compute @workgroup_size(1u, 1u, 1u) func(%tint_subgroup_size:u32 [@subgroup_size]):void {
+%ep = @compute @workgroup_size(1u, 1u, 1u) func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):void {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B3: {
-    %10:u32 = sub %tint_subgroup_size, 1u
-    store %tint_subgroup_size_mask, %10
-    %11:i32 = call %helper, 1i, 1u
+    %14:u32 = subgroupAdd 1u
+    %15:u32 = sub %14, 1u
+    store %tint_subgroup_last_id, %15
+    store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
+    %16:i32 = call %helper, 1i, 1u
     ret
   }
 }

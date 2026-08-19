@@ -1262,6 +1262,17 @@ crbug.com/480115865 [ android-pixel-10 ] webgpu:shader,execution,expression,unar
 crbug.com/480115865 [ android-pixel-10 ] webgpu:shader,execution,expression,unary,f16_conversion:f32_mat:inputSource="const";cols=4;rows=3 [ Failure ]
 crbug.com/480115865 [ android-pixel-10 ] webgpu:shader,execution,expression,unary,f16_conversion:f32_mat:inputSource="const";cols=4;rows=4 [ Failure ]
 
+# Pixel-6 subgroup failures
+crbug.com/548610177 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[111,3] [ Failure ]
+crbug.com/548610177 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[13,10] [ Failure ]
+crbug.com/548610177 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[13,53] [ Failure ]
+crbug.com/548610177 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[15,15] [ Failure ]
+crbug.com/548610177 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[19,13] [ Failure ]
+crbug.com/548610177 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[3,111] [ Failure ]
+crbug.com/548610177 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[3,35] [ Failure ]
+crbug.com/548610177 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[35,3] [ Failure ]
+crbug.com/548610177 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[53,13] [ Failure ]
+
 # Untriaged failures of Pixel 10
 # See crbug.com/40238674 and crbug.com/475503907
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,compute,basic:large_dispatch:dispatchSize="maximum" [ Failure ]

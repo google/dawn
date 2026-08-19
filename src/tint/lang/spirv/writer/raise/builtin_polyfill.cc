@@ -184,8 +184,8 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
-    /// Module-scoped variable for subgroup size mask.
-    core::ir::Var* subgroup_size_mask_ = nullptr;
+    /// Module-scoped variable for subgroup invocation id.
+    core::ir::Var* subgroup_invocation_id_ = nullptr;
     /// Module-scoped variable for the last active subgroup id.
     core::ir::Var* subgroup_last_id_ = nullptr;
 
@@ -373,14 +373,14 @@ struct State {
             construct->SetArg(0, value);
         }
 
-        if (subgroup_size_mask_ || subgroup_last_id_) {
+        if (subgroup_invocation_id_ || subgroup_last_id_) {
             for (auto func : ir.functions) {
                 if (!func->IsEntryPoint()) {
                     continue;
                 }
 
-                if (subgroup_size_mask_) {
-                    SetSubgroupSizeMaskForEntryPoint(func);
+                if (subgroup_invocation_id_) {
+                    SetSubgroupInvocationIdForEntryPoint(func);
                 }
                 if (subgroup_last_id_) {
                     SetSubgroupLastIdForEntryPoint(func);
@@ -389,37 +389,36 @@ struct State {
         }
     }
 
-    /// Set the subgroup_size_mask variable from an entry point.
-    void SetSubgroupSizeMaskForEntryPoint(core::ir::Function* ep) {
+    /// Set the subgroup_invocation_id variable from an entry point.
+    void SetSubgroupInvocationIdForEntryPoint(core::ir::Function* ep) {
         b.InsertBefore(ep->Block()->Front(), [&] {
-            core::ir::Value* subgroup_size = nullptr;
+            core::ir::Value* subgroup_invocation_id = nullptr;
             for (auto* param : ep->Params()) {
-                if (param->Attributes().builtin == core::BuiltinValue::kSubgroupSize) {
-                    subgroup_size = param;
+                if (param->Attributes().builtin == core::BuiltinValue::kSubgroupInvocationId) {
+                    subgroup_invocation_id = param;
                     break;
                 }
                 if (auto* str = param->Type()->As<core::type::Struct>()) {
                     for (auto* member : str->Members()) {
-                        if (member->Attributes().builtin == core::BuiltinValue::kSubgroupSize) {
-                            subgroup_size =
+                        if (member->Attributes().builtin ==
+                            core::BuiltinValue::kSubgroupInvocationId) {
+                            subgroup_invocation_id =
                                 b.Access(ty.u32(), param, u32(member->Index()))->Result();
                             break;
                         }
                     }
-                    if (subgroup_size) {
+                    if (subgroup_invocation_id) {
                         break;
                     }
                 }
             }
-            if (!subgroup_size) {
-                auto* param = b.FunctionParam("tint_subgroup_size", ty.u32());
-                param->SetBuiltin(core::BuiltinValue::kSubgroupSize);
+            if (!subgroup_invocation_id) {
+                auto* param = b.FunctionParam("tint_subgroup_invocation_id", ty.u32());
+                param->SetBuiltin(core::BuiltinValue::kSubgroupInvocationId);
                 ep->AppendParam(param);
-                subgroup_size = param;
+                subgroup_invocation_id = param;
             }
-
-            auto* mask = b.Subtract(subgroup_size, 1_u);
-            b.Store(subgroup_size_mask_, mask);
+            b.Store(subgroup_invocation_id_, subgroup_invocation_id);
         });
     }
 
@@ -1329,6 +1328,16 @@ struct State {
         });
     }
 
+    void CreateSubgroupInvocationIdIfNeeded() {
+        if (subgroup_invocation_id_) {
+            return;
+        }
+        b.Append(ir.root_block, [&] {
+            subgroup_invocation_id_ =
+                b.Var<core::AddressSpace::kPrivate, u32>("tint_subgroup_invocation_id");
+        });
+    }
+
     /// Handles SubgroupShuffle() builtin.
     /// @param builtin the builtin call instruction
     void SubgroupShuffle(core::ir::CoreBuiltinCall* builtin) {
@@ -1356,8 +1365,6 @@ struct State {
 
     /// Handles SubgroupShuffleDown(), SubgroupShuffleUp(), SubgroupShuffleXor() builtins.
     /// @param builtin the builtin call instruction
-    /// TODO(548610177): This should be updated to use a stricter bounds for the `b.And`, similar to
-    /// what SubgroupShuffle above does, but tailored for the specific up/down/xor variant.
     void SubgroupShuffleDirection(core::ir::CoreBuiltinCall* builtin) {
         TINT_IR_ASSERT(ir, builtin->Args().size() == 2);
         // The second argument is either 'id' , 'delta', or 'mask'.
@@ -1370,19 +1377,41 @@ struct State {
             builtin->SetArg(1, cast->Result());
         }
 
-        /// Polyfill a `subgroupShuffleX` builtin call with one that has clamped the arg2 param
-        auto* shuffle_id = builtin->Args()[1];
-        if (!subgroup_size_mask_) {
-            b.Append(ir.root_block, [&] {
-                subgroup_size_mask_ =
-                    b.Var<core::AddressSpace::kPrivate, u32>("tint_subgroup_size_mask");
-            });
-        }
-        b.InsertBefore(builtin, [&] {
-            auto* subgroup_size_mask = b.Load(subgroup_size_mask_);
-            auto* clamp_via_masking_and = b.And(shuffle_id, subgroup_size_mask);
-            builtin->SetArg(1, clamp_via_masking_and->Result());
+        auto* delta = builtin->Args()[1];
+
+        CreateSubgroupLastIdIfNeeded();
+        CreateSubgroupInvocationIdIfNeeded();
+
+        core::ir::CoreBuiltinCall* call = nullptr;
+        b.InsertAfter(builtin, [&] {
+            auto* ret_ty = builtin->Result()->Type();
+            auto* result = b.InstructionResult(ret_ty);
+
+            // Replace the uses before we create the new usage.
+            builtin->Result()->ReplaceAllUsesWith(result);
+
+            core::ir::Instruction* id = nullptr;
+            auto* subgroup_invocation_id = b.Load(subgroup_invocation_id_);
+            switch (builtin->Func()) {
+                case core::BuiltinFn::kSubgroupShuffleUp:
+                    id = b.Subtract(subgroup_invocation_id, delta);
+                    break;
+                case core::BuiltinFn::kSubgroupShuffleDown:
+                    id = b.Add(subgroup_invocation_id, delta);
+                    break;
+                case core::BuiltinFn::kSubgroupShuffleXor:
+                    id = b.Xor(subgroup_invocation_id, delta);
+                    break;
+                default:
+                    TINT_IR_UNREACHABLE(ir);
+            }
+
+            auto* cmp = b.LessThanEqual(id, b.Load(subgroup_last_id_));
+            call = b.CallWithResult(result, core::BuiltinFn::kSelect, b.Zero(ret_ty), builtin, cmp);
         });
+
+        // Make sure the select gets converted to proper SPIR-V select
+        Select(call);
     }
 
     /// Handle a SubgroupBroadcast() builtin.
