@@ -552,9 +552,9 @@ bool Structural::CheckOperand(const Instruction* inst, size_t idx) {
     auto* operand = inst->Operand(idx);
 
     if (DAWN_UNLIKELY(operand == nullptr)) {
-        // var instructions are allowed to have a nullptr initializers.
+        // var and override instructions are allowed to have a nullptr initializers.
         // terminator instructions use nullptr operands to signal 'undef'.
-        if (inst->IsAnyOf<Terminator, Var>()) {
+        if (inst->IsAnyOf<Terminator, Var, Override>()) {
             return true;
         }
 
@@ -2076,19 +2076,12 @@ void Structural::CheckInstruction(const Instruction* inst) {
 }
 
 void Structural::CheckOverride(const Override* o) {
-    // Intentionally not checking operands, since Override may have a null operand
-    if (!CheckResults(o, Override::kNumResults)) {
+    if (!CheckResultsAndOperands(o, Override::kNumResults, Override::kNumOperands)) {
         return;
     }
 
     if (o->Block() != ir_.root_block) {
         AddError(o) << "override must be declared at module scope";
-    }
-
-    if (o->Initializer()) {
-        CheckOperand(o, ir::Var::kInitializerOperandOffset);
-    } else if (o->Operands().Length() == 0) {
-        AddError(o) << "override is malformed, missing initializer operand";
     }
 }
 
