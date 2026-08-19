@@ -424,7 +424,7 @@ fn main() {
 TEST_P(WorkgroupSizeValidationTest, WorkgroupAlignValidationDivergence) {
     // The metal backend is the only one that combines the workgroup variables into a distinct
     // structure which causes the padding issue.
-    DAWN_SUPPRESS_TEST_IF(!IsMetal());
+    DAWN_TEST_UNSUPPORTED_IF(!IsMetal());
 
     const auto& supportedLimits = GetSupportedLimits();
     uint32_t maxComputeWorkgroupStorageSize = supportedLimits.maxComputeWorkgroupStorageSize;
@@ -454,7 +454,7 @@ TEST_P(WorkgroupSizeValidationTest, WorkgroupAlignValidationDivergence) {
 
     // Because the padding makes the actual workgroup storage size (1.5 *
     // maxComputeWorkgroupStorageSize) exceed maxComputeWorkgroupStorageSize, creating this pipeline
-    // should fail pipeline creation on Metal (the test is suppressed on other backends). This
+    // should fail pipeline creation on Metal (the test is unsupported on other backends). This
     // failure is an internal error due to the size of our buffer allocation
     ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&desc));
 }
