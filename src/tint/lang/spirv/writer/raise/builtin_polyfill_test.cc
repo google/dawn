@@ -4192,16 +4192,17 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
 }
 
-%foo = @fragment func(%tint_subgroup_size:u32 [@subgroup_size]):void {
+%foo = @fragment func():void {
   $B2: {
-    %4:u32 = sub %tint_subgroup_size, 1u
-    store %tint_subgroup_size_mask, %4
+    %3:u32 = subgroupAdd 1u
+    %4:u32 = sub %3, 1u
+    store %tint_subgroup_last_id, %4
     %5:u32 = bitcast<u32> 1i
-    %6:u32 = load %tint_subgroup_size_mask
-    %7:u32 = and %5, %6
+    %6:u32 = load %tint_subgroup_last_id
+    %7:u32 = min %5, %6
     %8:i32 = subgroupShuffle 1i, %7
     %a:i32 = let %8
     ret
@@ -4239,18 +4240,19 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle_ExistingBuiltin) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
 }
 
 %foo = @fragment func(%my_subgroup_size:u32 [@subgroup_size]):void {
   $B2: {
-    %4:u32 = sub %my_subgroup_size, 1u
-    store %tint_subgroup_size_mask, %4
-    %5:u32 = bitcast<u32> 1i
-    %6:u32 = load %tint_subgroup_size_mask
-    %7:u32 = and %5, %6
-    %8:i32 = subgroupShuffle 1i, %7
-    %a:i32 = let %8
+    %4:u32 = subgroupAdd 1u
+    %5:u32 = sub %4, 1u
+    store %tint_subgroup_last_id, %5
+    %6:u32 = bitcast<u32> 1i
+    %7:u32 = load %tint_subgroup_last_id
+    %8:u32 = min %6, %7
+    %9:i32 = subgroupShuffle 1i, %8
+    %a:i32 = let %9
     ret
   }
 }
@@ -4303,17 +4305,17 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
 }
 
 %foo = @fragment func(%inputs:S):void {
   $B2: {
-    %4:u32 = access %inputs, 0u
+    %4:u32 = subgroupAdd 1u
     %5:u32 = sub %4, 1u
-    store %tint_subgroup_size_mask, %5
+    store %tint_subgroup_last_id, %5
     %6:u32 = bitcast<u32> 1i
-    %7:u32 = load %tint_subgroup_size_mask
-    %8:u32 = and %6, %7
+    %7:u32 = load %tint_subgroup_last_id
+    %8:u32 = min %6, %7
     %9:i32 = subgroupShuffle 1i, %8
     %a:i32 = let %9
     ret
@@ -5526,18 +5528,19 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleClamped_I32) {
 )";
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
 }
 
-%foo = @fragment func(%tint_subgroup_size:u32 [@subgroup_size]):void {
+%foo = @fragment func():void {
   $B2: {
-    %4:u32 = sub %tint_subgroup_size, 1u
-    store %tint_subgroup_size_mask, %4
+    %3:u32 = subgroupAdd 1u
+    %4:u32 = sub %3, 1u
+    store %tint_subgroup_last_id, %4
     %arg1:i32 = let 1i
     %arg2:i32 = let 1i
     %7:u32 = bitcast<u32> %arg2
-    %8:u32 = load %tint_subgroup_size_mask
-    %9:u32 = and %7, %8
+    %8:u32 = load %tint_subgroup_last_id
+    %9:u32 = min %7, %8
     %10:i32 = subgroupShuffle %arg1, %9
     %a:i32 = let %10
     ret
@@ -5574,17 +5577,18 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleClamped_U32) {
 )";
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
 }
 
-%foo = @fragment func(%tint_subgroup_size:u32 [@subgroup_size]):void {
+%foo = @fragment func():void {
   $B2: {
-    %4:u32 = sub %tint_subgroup_size, 1u
-    store %tint_subgroup_size_mask, %4
+    %3:u32 = subgroupAdd 1u
+    %4:u32 = sub %3, 1u
+    store %tint_subgroup_last_id, %4
     %arg1:u32 = let 1u
     %arg2:u32 = let 1u
-    %7:u32 = load %tint_subgroup_size_mask
-    %8:u32 = and %arg2, %7
+    %7:u32 = load %tint_subgroup_last_id
+    %8:u32 = min %arg2, %7
     %9:u32 = subgroupShuffle %arg1, %8
     %a:u32 = let %9
     ret
@@ -5621,17 +5625,18 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleClamped_F32) {
 )";
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
 }
 
-%foo = @fragment func(%tint_subgroup_size:u32 [@subgroup_size]):void {
+%foo = @fragment func():void {
   $B2: {
-    %4:u32 = sub %tint_subgroup_size, 1u
-    store %tint_subgroup_size_mask, %4
+    %3:u32 = subgroupAdd 1u
+    %4:u32 = sub %3, 1u
+    store %tint_subgroup_last_id, %4
     %arg1:f32 = let 1.0f
     %arg2:u32 = let 1u
-    %7:u32 = load %tint_subgroup_size_mask
-    %8:u32 = and %arg2, %7
+    %7:u32 = load %tint_subgroup_last_id
+    %8:u32 = min %arg2, %7
     %9:f32 = subgroupShuffle %arg1, %8
     %a:f32 = let %9
     ret
@@ -5668,17 +5673,18 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleClamped_Vec2F32) {
 )";
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
 }
 
-%foo = @fragment func(%tint_subgroup_size:u32 [@subgroup_size]):void {
+%foo = @fragment func():void {
   $B2: {
-    %4:u32 = sub %tint_subgroup_size, 1u
-    store %tint_subgroup_size_mask, %4
+    %3:u32 = subgroupAdd 1u
+    %4:u32 = sub %3, 1u
+    store %tint_subgroup_last_id, %4
     %arg1:vec2<f32> = let vec2<f32>(1.0f)
     %arg2:u32 = let 1u
-    %7:u32 = load %tint_subgroup_size_mask
-    %8:u32 = and %arg2, %7
+    %7:u32 = load %tint_subgroup_last_id
+    %8:u32 = min %arg2, %7
     %9:vec2<f32> = subgroupShuffle %arg1, %8
     %a:vec2<f32> = let %9
     ret

@@ -1,4 +1,3 @@
-SKIP: INVALID   no textureSampleCompareLevel in compat
 //
 // fragment_main
 //

@@ -186,6 +186,8 @@ struct State {
 
     /// Module-scoped variable for subgroup size mask.
     core::ir::Var* subgroup_size_mask_ = nullptr;
+    /// Module-scoped variable for the last active subgroup id.
+    core::ir::Var* subgroup_last_id_ = nullptr;
 
     /// Process the module.
     void Process() {
@@ -248,11 +250,14 @@ struct State {
                     case core::BuiltinFn::kSubgroupBroadcast:
                         worklist.push_back([this, builtin] { SubgroupBroadcast(builtin); });
                         break;
-                    case core::BuiltinFn::kSubgroupShuffle:
+                    case core::BuiltinFn::kSubgroupShuffle: {
+                        worklist.push_back([this, builtin] { SubgroupShuffle(builtin); });
+                        break;
+                    }
                     case core::BuiltinFn::kSubgroupShuffleDown:
                     case core::BuiltinFn::kSubgroupShuffleUp:
                     case core::BuiltinFn::kSubgroupShuffleXor: {
-                        worklist.push_back([this, builtin] { SubgroupShuffle(builtin); });
+                        worklist.push_back([this, builtin] { SubgroupShuffleDirection(builtin); });
                         break;
                     }
                     case core::BuiltinFn::kTextureDimensions:
@@ -368,10 +373,17 @@ struct State {
             construct->SetArg(0, value);
         }
 
-        if (subgroup_size_mask_) {
+        if (subgroup_size_mask_ || subgroup_last_id_) {
             for (auto func : ir.functions) {
-                if (func->IsEntryPoint()) {
+                if (!func->IsEntryPoint()) {
+                    continue;
+                }
+
+                if (subgroup_size_mask_) {
                     SetSubgroupSizeMaskForEntryPoint(func);
+                }
+                if (subgroup_last_id_) {
+                    SetSubgroupLastIdForEntryPoint(func);
                 }
             }
         }
@@ -408,6 +420,14 @@ struct State {
 
             auto* mask = b.Subtract(subgroup_size, 1_u);
             b.Store(subgroup_size_mask_, mask);
+        });
+    }
+
+    /// Set the subgroup_last_id_ variable from an entry point.
+    void SetSubgroupLastIdForEntryPoint(core::ir::Function* ep) {
+        b.InsertBefore(ep->Block()->Front(), [&] {
+            core::ir::Instruction* count = b.Call(ty.u32(), core::BuiltinFn::kSubgroupAdd, 1_u);
+            b.Store(subgroup_last_id_, b.Subtract(count, 1_u));
         });
     }
 
@@ -1300,10 +1320,40 @@ struct State {
         ir.properties.Add(core::ir::Property::kAllowAnyInputAttachmentIndexType);
     }
 
-    /// Handles SubgroupShuffle(), SubgroupShuffleDown(), SubgroupShuffleUp(), SubgroupShuffleXor()
-    /// builtins.
+    /// Handles SubgroupShuffle() builtin.
     /// @param builtin the builtin call instruction
     void SubgroupShuffle(core::ir::CoreBuiltinCall* builtin) {
+        TINT_IR_ASSERT(ir, builtin->Args().size() == 2);
+        // The second argument is either 'id' , 'delta', or 'mask'.
+        // All must be bound by [0, subgroup_size)
+        auto* arg2 = builtin->Args()[1];
+        // arg2 must be an unsigned integer scalar, so bitcast if necessary.
+        if (arg2->Type()->IsSignedIntegerScalar()) {
+            auto* cast = b.Bitcast(ty.u32(), arg2);
+            cast->InsertBefore(builtin);
+            builtin->SetArg(1, cast->Result());
+        }
+
+        /// Polyfill a `subgroupShuffleX` builtin call with one that has clamped the arg2 param
+        auto* shuffle_id = builtin->Args()[1];
+        if (!subgroup_last_id_) {
+            b.Append(ir.root_block, [&] {
+                subgroup_last_id_ =
+                    b.Var<core::AddressSpace::kPrivate, u32>("tint_subgroup_last_id");
+            });
+        }
+        b.InsertBefore(builtin, [&] {
+            auto* last_id = b.Load(subgroup_last_id_);
+            auto* clamp_via_min = b.Min(shuffle_id, last_id);
+            builtin->SetArg(1, clamp_via_min->Result());
+        });
+    }
+
+    /// Handles SubgroupShuffleDown(), SubgroupShuffleUp(), SubgroupShuffleXor() builtins.
+    /// @param builtin the builtin call instruction
+    /// TODO(548610177): This should be updated to use a stricter bounds for the `b.And`, similar to
+    /// what SubgroupShuffle above does, but tailored for the specific up/down/xor variant.
+    void SubgroupShuffleDirection(core::ir::CoreBuiltinCall* builtin) {
         TINT_IR_ASSERT(ir, builtin->Args().size() == 2);
         // The second argument is either 'id' , 'delta', or 'mask'.
         // All must be bound by [0, subgroup_size)
