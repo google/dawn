@@ -51,7 +51,9 @@ std::optional<std::string> GetModuleDirectory();
 
 #if DAWN_PLATFORM_IS(MACOS)
 void GetMacOSVersion(int32_t* majorVersion, int32_t* minorVersion = nullptr);
-bool IsMacOSVersionAtLeast(uint32_t majorVersion, uint32_t minorVersion = 0);
+bool IsMacOSVersionAtLeast(uint32_t majorVersion,
+                           uint32_t minorVersion = 0,
+                           uint32_t patchVersion = 0);
 #endif
 
 #if DAWN_PLATFORM_IS(WINDOWS)

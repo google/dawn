@@ -562,8 +562,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
             deviceToggles->Default(Toggle::MetalSerializeTimestampGenerationAndResolution, true);
         }
 
-        // TODO(517225032): Gate on macOS version when a fix is released.
-        deviceToggles->Default(Toggle::MetalFixU32DivMod, true);
+        // Fix for u32 div and mod bug on Apple Silicon (crbug.com/517225032).
+        // Confirmed to be fixed starting in macOS 26.6.0 build 25G70, so check for 26.6.1 to be
+        // sure that we have the fix.
+        if (!IsMacOSVersionAtLeast(26, 6, 1)) {
+            deviceToggles->Default(Toggle::MetalFixU32DivMod, true);
+        }
     }
 
     // Local testing shows the workaround is needed on AMD Radeon HD 8870M (gcn-1) MacOS 12.1;

@@ -337,7 +337,8 @@ class DawnTestBase {
     bool IsWindows11() const;
     bool IsWindowsVersionAtLeast(uint32_t buildNumber, uint32_t updateBuildRevision = 0) const;
     bool IsLinux() const;
-    bool IsMacOS(int32_t majorVersion = -1, int32_t minorVersion = -1) const;
+    bool IsMacOS() const;
+    bool IsMacOSVersionAtLeast(int32_t majorVersion, int32_t minorVersion) const;
     bool IsAndroid() const;
     bool IsAndroidOlderThan(uint32_t version) const;
     bool IsChromeOS() const;

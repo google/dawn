@@ -41,9 +41,9 @@ void GetMacOSVersion(int32_t* majorVersion, int32_t* minorVersion) {
     }
 }
 
-bool IsMacOSVersionAtLeast(uint32_t majorVersion, uint32_t minorVersion) {
-    return
-        [NSProcessInfo.processInfo isOperatingSystemAtLeastVersion:{majorVersion, minorVersion, 0}];
+bool IsMacOSVersionAtLeast(uint32_t majorVersion, uint32_t minorVersion, uint32_t patchVersion) {
+    return [NSProcessInfo.processInfo
+        isOperatingSystemAtLeastVersion:{majorVersion, minorVersion, patchVersion}];
 }
 
 }  // namespace dawn
