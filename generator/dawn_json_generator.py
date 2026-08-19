@@ -1778,13 +1778,37 @@ class MultiGeneratorFromDawnJSON(Generator):
                            [RENDER_PARAMS_BASE, params_dawn]))
 
         if 'webgpu_headers' in targets:
+            imported_templates += [
+                "BSD_LICENSE",
+                "dawn/cpp_macros.tmpl",
+            ]
+
             params_upstream = parse_json(loaded_json,
                                          enabled_tags=['native'],
                                          disabled_tags=['dawn'])
-            imported_templates.append('BSD_LICENSE')
             renders.append(
                 FileRender('api.h', 'webgpu-headers/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_upstream]))
+
+            upstream_cpp = 'include/webgpu_upstream/' + api + '/' + api
+            renders.append(
+                FileRender('api_cpp.h', upstream_cpp + '_cpp.h', [
+                    RENDER_PARAMS_BASE, params_upstream, {
+                        'c_header': api + '/' + api + '.h',
+                        'c_namespace': None,
+                    }
+                ]))
+            renders.append(
+                FileRender('api_cpp_chained_struct.h',
+                           upstream_cpp + '_cpp_chained_struct.h',
+                           [RENDER_PARAMS_BASE, params_upstream]))
+            renders.append(
+                FileRender('api_cpp_print.h', upstream_cpp + '_cpp_print.h', [
+                    RENDER_PARAMS_BASE, params_upstream, {
+                        'cpp_header': api + '/' + api + '_cpp.h',
+                        'c_namespace': None,
+                    }
+                ]))
 
         if 'emdawnwebgpu_headers' in targets:
             imported_templates += [
