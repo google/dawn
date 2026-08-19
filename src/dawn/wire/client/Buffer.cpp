@@ -564,13 +564,6 @@ wgpu::BufferMapState Buffer::APIGetMapState() const {
 }
 
 void Buffer::FreeMappedData(GuardedState& state) {
-#ifdef DAWN_ENABLE_ASSERTS
-    // When in "debug" mode, 0xCA-out the mapped data when we free it so that in we can detect
-    // use-after-free of the mapped data. This is particularly useful for WebGPU test about the
-    // interaction of mapping and GC.
-    std::ranges::fill(state->mappedData, std::byte(0xCA));
-#endif  // DAWN_ENABLE_ASSERTS
-
     state->mappedOffset = 0;
     state->mappedSize = 0;
     state->mappedData = {};
