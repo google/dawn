@@ -1268,13 +1268,11 @@ bool DawnTestBase::IsMacOS() const {
 #endif
 }
 
-bool DawnTestBase::IsMacOSVersionAtLeast(int32_t majorVersion, int32_t minorVersion) const {
+bool DawnTestBase::IsMacOSVersionAtLeast(uint32_t majorVersion,
+                                         uint32_t minorVersion,
+                                         uint32_t patchVersion) const {
 #if DAWN_PLATFORM_IS(MACOS)
-    int32_t majorVersionOut = 0;
-    int32_t minorVersionOut = 0;
-    GetMacOSVersion(&majorVersionOut, &minorVersionOut);
-    return (majorVersionOut > majorVersion) ||
-           ((majorVersionOut == majorVersion) && (minorVersionOut >= minorVersion));
+    return dawn::IsMacOSVersionAtLeast(majorVersion, minorVersion, patchVersion);
 #else
     return false;
 #endif
