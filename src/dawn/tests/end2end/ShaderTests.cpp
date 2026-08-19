@@ -3728,6 +3728,65 @@ fn main(in : FSIn) -> @location(0) vec4f {
     readbackBuffer.Unmap();
 }
 
+// Regression test for a bug on Xclipse GPUs that affects certain combinations of bitwise operations
+// and select builtins.
+// https://crbug.com/542268656
+TEST_P(ShaderTests, XclipseBitwiseAndSelectBuiltinBug) {
+    wgpu::ComputePipelineDescriptor pDesc;
+    pDesc.compute.module = utils::CreateShaderModule(device, R"(
+@group(0) @binding(0) var<storage> inputs: array<u32>;
+@group(0) @binding(1) var<storage, read_write> outputs: array<u32>;
+
+@compute @workgroup_size(16)
+fn main(@builtin(global_invocation_id) global_invocation_id: vec3u) {
+    let in_index = global_invocation_id.x;
+    if (in_index >= 3) {
+        return;
+    }
+
+    let value = (inputs[in_index] >> 24u) & 0xff;
+    let edge = value & 0xfu;
+
+    let out_index = select(
+      select(0u, 1u, edge == 0u),
+      2u,
+      edge == 8u
+    );
+
+    outputs[out_index] = in_index;
+}
+)");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pDesc);
+
+    std::vector<uint32_t> inputValues = {
+        0u << 24u,  // edge=0 -> out_index=1 -> writes 0 at outputs[1]
+        3u << 24u,  // edge=3 -> out_index=0 -> writes 1 at outputs[0]
+        8u << 24u,  // edge=8 -> out_index=2 -> writes 2 at outputs[2]
+    };
+    wgpu::Buffer inputBuffer = utils::CreateBufferFromData(device, inputValues.data(),
+                                                           inputValues.size() * sizeof(uint32_t),
+                                                           wgpu::BufferUsage::Storage);
+
+    wgpu::Buffer outputBuffer = CreateBuffer(inputValues.size());
+
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                              {{0, inputBuffer}, {1, outputBuffer}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetBindGroup(0, bg);
+    pass.SetPipeline(pipeline);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_EQ(1u, outputBuffer, 0);
+    EXPECT_BUFFER_U32_EQ(0u, outputBuffer, 4);
+    EXPECT_BUFFER_U32_EQ(2u, outputBuffer, 8);
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D11Backend(),
                       D3D12Backend(),

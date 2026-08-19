@@ -197,6 +197,7 @@ enum class Toggle {
     UseSpirvReconvergenceMode,
     VulkanReplaceWorkgroupAtomicStoreWithExchange,
     VulkanDisallowNPOTDepthStencilMipmaps,
+    VulkanReplaceUnsignedCompareZero,
 
     // Once all backends have been updated to be thread safe for waiting, we can remove this toggle.
     WaitIsThreadSafe,

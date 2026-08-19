@@ -358,6 +358,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::VulkanCooperativeMatrixStrideIsMatrixElements);
     req.tintOptions.workarounds.replace_workgroup_atomic_store_with_exchange =
         GetDevice()->IsToggleEnabled(Toggle::VulkanReplaceWorkgroupAtomicStoreWithExchange);
+    req.tintOptions.workarounds.replace_unsigned_compare_zero =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanReplaceUnsignedCompareZero);
 
     // Pass matrices to user functions by pointer on Qualcomm devices to workaround a known bug.
     // See crbug.com/tint/2045.

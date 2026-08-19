@@ -61,6 +61,8 @@ tint_add_target(tint_lang_spirv_writer_raise lib
   lang/spirv/writer/raise/raise.h
   lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.cc
   lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.h
+  lang/spirv/writer/raise/replace_unsigned_compare_zero.cc
+  lang/spirv/writer/raise/replace_unsigned_compare_zero.h
   lang/spirv/writer/raise/resource_table_helper.cc
   lang/spirv/writer/raise/resource_table_helper.h
   lang/spirv/writer/raise/shader_io.cc
@@ -119,6 +121,7 @@ tint_add_target(tint_lang_spirv_writer_raise_test test
   lang/spirv/writer/raise/merge_return_test.cc
   lang/spirv/writer/raise/pass_matrix_by_pointer_test.cc
   lang/spirv/writer/raise/remove_unreachable_in_loop_continuing_test.cc
+  lang/spirv/writer/raise/replace_unsigned_compare_zero_test.cc
   lang/spirv/writer/raise/shader_io_test.cc
   lang/spirv/writer/raise/unary_polyfill_test.cc
   lang/spirv/writer/raise/var_for_dynamic_index_test.cc

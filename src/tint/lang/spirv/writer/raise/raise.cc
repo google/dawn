@@ -64,6 +64,7 @@
 #include "src/tint/lang/spirv/writer/raise/merge_return.h"
 #include "src/tint/lang/spirv/writer/raise/pass_matrix_by_pointer.h"
 #include "src/tint/lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.h"
+#include "src/tint/lang/spirv/writer/raise/replace_unsigned_compare_zero.h"
 #include "src/tint/lang/spirv/writer/raise/resource_table_helper.h"
 #include "src/tint/lang/spirv/writer/raise/shader_io.h"
 #include "src/tint/lang/spirv/writer/raise/unary_polyfill.h"
@@ -234,6 +235,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{
         .signed_negation = true, .signed_arithmetic = true, .signed_shiftleft = true};
     TINT_CHECK_RESULT(core::ir::transform::SignedIntegerPolyfill(module, signed_integer_cfg));
+
+    if (options.workarounds.replace_unsigned_compare_zero) {
+        TINT_CHECK_RESULT(raise::ReplaceUnsignedCompareZero(module));
+    }
 
     // AMD Mesa front end optimizer bug for unary f32 and f16 negation and abs.
     // Fixed in 25.3 - See crbug.com/448294721 and crbug.com/500099471

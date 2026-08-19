@@ -828,6 +828,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Reject NPOT depth/stencil textures with mipLevelCount > 1. Workaround for mip level "
       "miscomputation in PowerVR proprietary driver.",
       "https://crbug.com/540087398", ToggleStage::Device}},
+    {Toggle::VulkanReplaceUnsignedCompareZero,
+     {"vulkan_rewrite_unsigned_compare_zero",
+      "Workaround for a driver bug where unsigned equality comparisons with zero trigger a buggy "
+      "peephole optimization on Samsung Xclipse GPUs.",
+      "https://crbug.com/543420711", ToggleStage::Device}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "

@@ -1148,6 +1148,15 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // gate this on driver version.
         // https://crbug.com/487773864
         deviceToggles->Default(Toggle::VulkanReplaceWorkgroupAtomicStoreWithExchange, true);
+
+        // Samsung Xclipse GPUs produce incorrect results from certain combinations of bitwise
+        // operations and select instructions when comparing unsigned values with zero.
+        // Fixed in driver versions >= 25.x.
+        // https://crbug.com/543420711
+        const gpu_info::DriverVersion kFixedDriverVersion = {25, 0, 0, 0};
+        if (GetDriverVersion() < kFixedDriverVersion) {
+            deviceToggles->Default(Toggle::VulkanReplaceUnsignedCompareZero, true);
+        }
     }
 
     if (IsSwiftshader()) {
