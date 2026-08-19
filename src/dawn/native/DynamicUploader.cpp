@@ -48,12 +48,13 @@ DynamicUploader::DynamicUploader(DeviceBase* device) : mDevice(device) {}
 ResultOrError<UploadReservation> DynamicUploader::Reserve(uint64_t allocationSize,
                                                           uint64_t offsetAlignment) {
     DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
+    uint64_t alignedAllocationSize = Align(allocationSize, 8);
 
     // Disable further sub-allocation should the request be too large.
     if (allocationSize > kRingBufferSize) {
         BufferDescriptor bufferDesc = {};
         bufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
-        bufferDesc.size = Align(allocationSize, 4);
+        bufferDesc.size = alignedAllocationSize;
         bufferDesc.mappedAtCreation = true;
         bufferDesc.label = "Dawn_DynamicUploaderStaging";
 
@@ -62,7 +63,7 @@ ResultOrError<UploadReservation> DynamicUploader::Reserve(uint64_t allocationSiz
         DAWN_TRY_ASSIGN(stagingBuffer, mDevice->CreateBuffer(&bufferDesc));
 
         UploadReservation reservation;
-        reservation.mappedPointer = stagingBuffer->GetCurrentMapping().mappedSpan.data();
+        reservation.mappedPointer = stagingBuffer->GetMappedRange().data();
         reservation.offsetInBuffer = 0;
         reservation.buffer = std::move(stagingBuffer);
         return reservation;
@@ -85,7 +86,7 @@ ResultOrError<UploadReservation> DynamicUploader::Reserve(uint64_t allocationSiz
         RingBufferAllocator& ringBufferAllocator = ringBuffer->mAllocator;
         // Prevent overflow.
         DAWN_ASSERT(ringBufferAllocator.GetSize() >= ringBufferAllocator.GetUsedSize());
-        startOffset = ringBufferAllocator.Allocate(allocationSize, serial, offsetAlignment);
+        startOffset = ringBufferAllocator.Allocate(alignedAllocationSize, serial, offsetAlignment);
         if (startOffset != RingBufferAllocator::kInvalidOffset) {
             targetRingBuffer = ringBuffer.get();
             break;
@@ -99,7 +100,7 @@ ResultOrError<UploadReservation> DynamicUploader::Reserve(uint64_t allocationSiz
             new RingBuffer{nullptr, RingBufferAllocator(kRingBufferSize)}));
 
         targetRingBuffer = mRingBuffers.back().get();
-        startOffset = targetRingBuffer->mAllocator.Allocate(allocationSize, serial);
+        startOffset = targetRingBuffer->mAllocator.Allocate(alignedAllocationSize, serial);
     }
 
     DAWN_ASSERT(startOffset != RingBufferAllocator::kInvalidOffset);
@@ -123,9 +124,10 @@ ResultOrError<UploadReservation> DynamicUploader::Reserve(uint64_t allocationSiz
 
     UploadReservation reservation;
     reservation.buffer = targetRingBuffer->mStagingBuffer;
-    reservation.mappedPointer = reservation.buffer->GetCurrentMapping()
-                                    .GetMappedSubspan(checked_cast<size_t>(startOffset),
-                                                      checked_cast<size_t>(allocationSize))
+    reservation.mappedPointer = reservation.buffer
+                                    ->GetMappedRange(checked_cast<size_t>(startOffset),
+                                                     checked_cast<size_t>(alignedAllocationSize))
+                                    .first(checked_cast<size_t>(allocationSize))
                                     .data();
     reservation.offsetInBuffer = startOffset;
 

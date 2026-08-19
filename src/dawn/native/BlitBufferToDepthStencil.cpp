@@ -31,6 +31,7 @@
 #include <string_view>
 #include <utility>
 
+#include "src/dawn/common/Algebra.h"
 #include "src/dawn/common/Strings.h"
 #include "src/dawn/native/BindGroup.h"
 #include "src/dawn/native/CommandBuffer.h"
@@ -47,6 +48,11 @@ namespace dawn::native {
 
 namespace {
 
+// Keep in sync with the WGSL structure below.
+struct BlitRG8ToDepthParams {
+    math::Vec2u origin;
+};
+
 constexpr char kBlitRG8ToDepthShaders[] = DAWN_MULTILINE(
     @vertex fn vert_fullscreen_quad(
         @builtin(vertex_index) vertex_index : u32
@@ -58,12 +64,13 @@ constexpr char kBlitRG8ToDepthShaders[] = DAWN_MULTILINE(
         return vec4f(pos[vertex_index], 0.0, 1.0);
     }
 
-    struct Params {
-    origin : vec2u
+    // Keep in sync with the C++ struct above.
+    struct BlitRG8ToDepthParams {
+        origin : vec2u
     };
 
     @group(0) @binding(0) var src_tex : texture_2d<u32>;
-    @group(0) @binding(1) var<uniform> params : Params;
+    @group(0) @binding(1) var<uniform> params : BlitRG8ToDepthParams;
 
     @fragment fn blit_to_depth(
         @builtin(position) position : vec4f
@@ -95,12 +102,19 @@ constexpr std::string_view kTexture2DArrayHead = DAWN_MULTILINE(
     @group(0) @binding(0) var src_tex : texture_2d_array<u32>;
 );
 
+// Keep in sync with the WGSL structure below.
+struct BlitStencilParams {
+    math::Vec2u origin;
+    uint32_t layer;
+};
+
 constexpr std::string_view kBlitStencilShaderCommon = DAWN_MULTILINE(
-    struct Params {
+    // Keep in sync with the C++ struct above.
+    struct BlitStencilParams {
         origin : vec2u,
         layer: u32,
     };
-    @group(0) @binding(1) var<uniform> params : Params;
+    @group(0) @binding(1) var<uniform> params : BlitStencilParams;
 
     struct VertexOutputs {
         @location(0) @interpolate(flat, either) stencil_val : u32,
@@ -302,15 +316,16 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
         Ref<BufferBase> paramsBuffer;
         {
             BufferDescriptor bufferDesc = {};
-            bufferDesc.size = sizeof(uint32_t) * 2;
+            bufferDesc.size = sizeof(BlitRG8ToDepthParams);
             bufferDesc.usage = wgpu::BufferUsage::Uniform;
             bufferDesc.mappedAtCreation = true;
             DAWN_TRY_ASSIGN(paramsBuffer, device->CreateBuffer(&bufferDesc));
 
-            uint32_t* params = static_cast<uint32_t*>(
-                paramsBuffer->GetMappedRange(0, checked_cast<size_t>(bufferDesc.size)));
-            params[0] = dchecked_cast<uint32_t>(dst.origin.x);
-            DAWN_UNSAFE_TODO(params[1]) = dchecked_cast<uint32_t>(dst.origin.y);
+            BlitRG8ToDepthParams* params = paramsBuffer->GetMappedDataAs<BlitRG8ToDepthParams>();
+            params->origin = {
+                dchecked_cast<uint32_t>(dst.origin.x),
+                dchecked_cast<uint32_t>(dst.origin.y),
+            };
             DAWN_TRY(paramsBuffer->Unmap());
         }
 
@@ -406,16 +421,16 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
     Ref<BufferBase> paramsBuffer;
     {
         BufferDescriptor bufferDesc = {};
-        bufferDesc.size = sizeof(uint32_t) * 4;
+        bufferDesc.size = sizeof(BlitStencilParams);
         bufferDesc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
         bufferDesc.mappedAtCreation = true;
         DAWN_TRY_ASSIGN(paramsBuffer, device->CreateBuffer(&bufferDesc));
 
-        uint32_t* params = static_cast<uint32_t*>(
-            paramsBuffer->GetMappedRange(0, checked_cast<size_t>(bufferDesc.size)));
-        params[0] = dchecked_cast<uint32_t>(dst.origin.x);
-        DAWN_UNSAFE_TODO(params[1]) = dchecked_cast<uint32_t>(dst.origin.y);
-        DAWN_UNSAFE_TODO(params[2]) = 0;
+        BlitStencilParams* params = paramsBuffer->GetMappedDataAs<BlitStencilParams>();
+        params->origin = {
+            dchecked_cast<uint32_t>(dst.origin.x),
+            dchecked_cast<uint32_t>(dst.origin.y),
+        };
         DAWN_TRY(paramsBuffer->Unmap());
     }
 

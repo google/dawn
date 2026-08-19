@@ -39,6 +39,7 @@
 #include "src/dawn/native/dawn_platform.h"
 #include "src/utils/compiler.h"
 #include "src/utils/non_copyable.h"
+#include "src/utils/span.h"
 
 namespace tint::wgsl {
 enum class Extension : uint8_t;
@@ -54,22 +55,20 @@ ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
 ResultOrError<Ref<BufferBase>> CreateBufferFromData(DeviceBase* device,
                                                     std::string_view label,
                                                     wgpu::BufferUsage usage,
-                                                    const void* data,
-                                                    size_t size);
+                                                    Span<const std::byte> data);
 
 template <typename T>
 ResultOrError<Ref<BufferBase>> CreateBufferFromData(DeviceBase* device,
                                                     wgpu::BufferUsage usage,
                                                     std::initializer_list<T> data) {
-    return CreateBufferFromData(device, "", usage, data.begin(), uint32_t(sizeof(T) * data.size()));
+    return CreateBufferFromData(device, "", usage, SpanAsBytes(Span<const T>(data)));
 }
 template <typename T>
 ResultOrError<Ref<BufferBase>> CreateBufferFromData(DeviceBase* device,
                                                     std::string_view label,
                                                     wgpu::BufferUsage usage,
                                                     std::initializer_list<T> data) {
-    return CreateBufferFromData(device, label, usage, data.begin(),
-                                uint32_t(sizeof(T) * data.size()));
+    return CreateBufferFromData(device, label, usage, SpanAsBytes(Span<const T>(data)));
 }
 
 ResultOrError<Ref<PipelineLayoutBase>> MakeBasicPipelineLayout(

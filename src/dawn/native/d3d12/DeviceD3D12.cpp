@@ -329,10 +329,7 @@ MaybeError Device::CreateZeroBuffer() {
         zeroBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
 
         DAWN_TRY_ASSIGN(zeroBufferBase, CreateBuffer(&zeroBufferDescriptor));
-
-        auto mapping = zeroBufferBase->GetCurrentMapping();
-        DAWN_ASSERT(!mapping.mappedSpan.empty());
-        std::ranges::fill(mapping.mappedSpan, std::byte{0});
+        std::ranges::fill(zeroBufferBase->GetMappedRange(), std::byte{0});
         DAWN_TRY(zeroBufferBase->Unmap());
     } else {
         zeroBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;

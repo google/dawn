@@ -63,16 +63,15 @@ ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
 ResultOrError<Ref<BufferBase>> CreateBufferFromData(DeviceBase* device,
                                                     std::string_view label,
                                                     wgpu::BufferUsage usage,
-                                                    const void* data,
-                                                    size_t size) {
+                                                    Span<const std::byte> data) {
     BufferDescriptor descriptor;
     descriptor.label = label;
-    descriptor.size = size;
+    descriptor.size = data.size();
     descriptor.usage = usage;
     descriptor.mappedAtCreation = true;
     Ref<BufferBase> buffer;
     DAWN_TRY_ASSIGN(buffer, device->CreateBuffer(&descriptor));
-    DAWN_UNSAFE_TODO(memcpy(buffer->GetMappedRange(0, size), data, size));
+    buffer->GetMappedRange().CopyFrom(data);
     DAWN_TRY(buffer->Unmap());
     return buffer;
 }

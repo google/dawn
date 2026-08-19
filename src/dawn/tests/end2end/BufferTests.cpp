@@ -286,6 +286,15 @@ TEST_P(BufferMappingTests, MapWrite_Basic) {
         buffer.Unmap();
         EXPECT_BUFFER_U32_EQ(myData2, buffer, 0);
     }
+    {
+        // ReadMappedRange and WriteMappedRange of 0 size.
+        MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 4);
+        ASSERT_EQ(wgpu::Status::Success,
+                  static_cast<wgpu::Status>(buffer.ReadMappedRange(0, nullptr, 0)));
+        ASSERT_EQ(wgpu::Status::Success,
+                  static_cast<wgpu::Status>(buffer.WriteMappedRange(0, nullptr, 0)));
+        buffer.Unmap();
+    }
 }
 
 // Test that the simplest map write works with a range.

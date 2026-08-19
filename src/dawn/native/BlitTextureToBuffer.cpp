@@ -33,6 +33,7 @@
 #include <string_view>
 #include <utility>
 
+#include "src/dawn/common/Algebra.h"
 #include "src/dawn/common/Strings.h"
 #include "src/dawn/native/BindGroup.h"
 #include "src/dawn/native/BlockInfo.h"
@@ -186,27 +187,50 @@ constexpr std::string_view kEncodeRG16FloatInU32 = DAWN_MULTILINE(
     }
 );
 
+// Keep in sync with the WGSL struct below.
+struct Params {
+    // copyExtent
+    math::Vec3u srcOrigin;
+    // Implicit padding of 4 bytes.
+    // How many texel values one thread needs to pack (1, 2, or 4)
+    uint32_t packTexelCount;
+    math::Vec3u srcExtent;
+    // Implicit padding of 4 bytes.
+    uint32_t mipLevel;
+    // GPUImageDataLayout
+    uint32_t bytesPerRow;
+    uint32_t rowsPerImage;
+    uint32_t offset;
+    uint32_t shift;
+    uint32_t texelSize;
+    uint32_t numU32PerRowNeedsWriting;
+    uint32_t readPreviousRow;
+    uint32_t isCompactImage;
+    // Used for cube sample
+    math::Vec3u levelSize;
+};
+
 // Each thread is responsible for reading (packTexelCount) texel and packing them into a 4-byte u32.
 constexpr std::string_view kCommonHead = DAWN_MULTILINE(  //
+    // Keep in sync with the C++ struct above.
     struct Params {
         // copyExtent
-        srcOrigin: vec3u,
+        @size(16) srcOrigin: vec3u,
         // How many texel values one thread needs to pack (1, 2, or 4)
         packTexelCount: u32,
-        srcExtent: vec3u,
+        @size(16) srcExtent: vec3u,
         mipLevel: u32,
         // GPUImageDataLayout
         bytesPerRow: u32,
         rowsPerImage: u32,
         offset: u32,
         shift: u32,
-        // Used for cube sample
-        levelSize: vec3u,
-        pad0: u32,
         texelSize: u32,
         numU32PerRowNeedsWriting: u32,
         readPreviousRow: u32,
         isCompactImage: u32,
+        // Used for cube sample
+        levelSize: vec3u,
     };
 
     @group(0) @binding(2) var<uniform> params : Params;
@@ -1242,7 +1266,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
     {
         BufferDescriptor bufferDesc = {};
         // Uniform buffer size needs to be multiple of 16 bytes
-        bufferDesc.size = sizeof(uint32_t) * 20;
+        bufferDesc.size = sizeof(Params);
         bufferDesc.usage = wgpu::BufferUsage::Uniform;
         bufferDesc.mappedAtCreation = true;
 
@@ -1251,44 +1275,41 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
             DAWN_TRY_ASSIGN(uniformBuffer, device->CreateBuffer(&bufferDesc));
         }
 
-        uint32_t* params = static_cast<uint32_t*>(
-            uniformBuffer->GetMappedRange(0, checked_cast<size_t>(bufferDesc.size)));
-        // srcOrigin: vec3u
-        params[0] = dchecked_cast<uint32_t>(src.origin.x);
-        DAWN_UNSAFE_TODO(params[1]) = dchecked_cast<uint32_t>(src.origin.y);
-        DAWN_UNSAFE_TODO(params[2]) = dchecked_cast<uint32_t>(src.origin.z);
+        Params* params = uniformBuffer->GetMappedDataAs<Params>();
+        params->srcOrigin = {
+            dchecked_cast<uint32_t>(src.origin.x),
+            dchecked_cast<uint32_t>(src.origin.y),
+            dchecked_cast<uint32_t>(src.origin.z),
+        };
+        params->packTexelCount = std::max(1u, 4 / bytesPerTexel);
+        params->srcExtent = {
+            dchecked_cast<uint32_t>(copyExtent.width),
+            dchecked_cast<uint32_t>(copyExtent.height),
+            dchecked_cast<uint32_t>(copyExtent.depthOrArrayLayers),
+        };
+        params->mipLevel = src.mipLevel;
 
-        // packTexelCount: number of texel values (1, 2, or 4) one thread packs into the dst
-        // buffer
-        DAWN_UNSAFE_TODO(params[3]) = std::max(1u, 4 / bytesPerTexel);
-        // srcExtent: vec3u
-        DAWN_UNSAFE_TODO(params[4]) = dchecked_cast<uint32_t>(copyExtent.width);
-        DAWN_UNSAFE_TODO(params[5]) = dchecked_cast<uint32_t>(copyExtent.height);
-        DAWN_UNSAFE_TODO(params[6]) = dchecked_cast<uint32_t>(copyExtent.depthOrArrayLayers);
-
-        DAWN_UNSAFE_TODO(params[7]) = src.mipLevel;
-
-        DAWN_UNSAFE_TODO(params[8]) = static_cast<uint32_t>(blockInfo.ToBytes(dst.blocksPerRow));
-        DAWN_UNSAFE_TODO(params[9]) = dchecked_cast<uint32_t>(dst.rowsPerImage);
-        DAWN_UNSAFE_TODO(params[10]) = static_cast<uint32_t>(shaderStartOffset);
+        params->bytesPerRow = static_cast<uint32_t>(blockInfo.ToBytes(dst.blocksPerRow));
+        params->rowsPerImage = dchecked_cast<uint32_t>(dst.rowsPerImage);
+        params->offset = static_cast<uint32_t>(shaderStartOffset);
 
         // These params are only used for formats smaller than 4 bytes
-        DAWN_UNSAFE_TODO(params[11]) =
-            (static_cast<uint32_t>(shaderStartOffset) % 4) / bytesPerTexel;  // shift
+        params->shift = (static_cast<uint32_t>(shaderStartOffset) % 4) / bytesPerTexel;
 
-        DAWN_UNSAFE_TODO(params[16]) = bytesPerTexel;
-        DAWN_UNSAFE_TODO(params[17]) = numU32PerRowNeedsWriting;
-        DAWN_UNSAFE_TODO(params[18]) = readPreviousRow ? 1 : 0;
-        DAWN_UNSAFE_TODO(params[19]) =
-            dst.rowsPerImage == copyExtent.height ? 1 : 0;  // isCompactImage
+        params->texelSize = bytesPerTexel;
+        params->numU32PerRowNeedsWriting = numU32PerRowNeedsWriting;
+        params->readPreviousRow = readPreviousRow ? 1 : 0;
+        params->isCompactImage = dst.rowsPerImage == copyExtent.height ? 1 : 0;
 
         if (textureViewDimension == wgpu::TextureViewDimension::Cube) {
             // cube need texture size to convert texel coord to sample location
             auto levelSize =
                 src.texture->GetMipLevelSingleSubresourceVirtualSize(src.mipLevel, Aspect::Color);
-            DAWN_UNSAFE_TODO(params[12]) = levelSize.width;
-            DAWN_UNSAFE_TODO(params[13]) = levelSize.height;
-            DAWN_UNSAFE_TODO(params[14]) = levelSize.depthOrArrayLayers;
+            params->levelSize = {
+                levelSize.width,
+                levelSize.height,
+                levelSize.depthOrArrayLayers,
+            };
         }
 
         DAWN_TRY(uniformBuffer->Unmap());
