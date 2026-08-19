@@ -38,7 +38,7 @@ from pathlib import Path
 import subprocess
 
 
-def run_litert_lm() -> subprocess.CompletedProcess:
+def run_litert_lm(metric_proto_file_path: Path) -> subprocess.CompletedProcess:
     repo_root = Path(__file__).resolve().parent.parent
     binary_path = Path.cwd() / 'litert_lm_advanced_main'
     model_path = repo_root / 'third_party' / 'litert-lm' / 'data' / 'model.litertlm'
@@ -48,10 +48,10 @@ def run_litert_lm() -> subprocess.CompletedProcess:
         '--benchmark',
         '--backend=gpu',
         f'--model_path={model_path}',
+        f'--metric_proto_file_path={metric_proto_file_path}',
     ]
 
     print(f"Executing: {' '.join(cmd)}")
-
 
     # The .so files are isolated alongside the binary in the current build out directory,
     # so explicitly add them to the library path for execution on Linux bots.
@@ -89,7 +89,15 @@ def main() -> None:
                         help='Currently unused, needed for bot support.')
     args = parser.parse_args()
 
-    proc = run_litert_lm()
+    # Determine output directory for results.
+    if args.isolated_script_test_output:
+        output_dir = Path(args.isolated_script_test_output).parent
+    else:
+        output_dir = Path.cwd()
+
+    # Run the benchmark and generate metric results file.
+    metric_file = output_dir / 'litert_lm_metrics.pb'
+    proc = run_litert_lm(metric_file)
     if args.isolated_script_test_output:
         generate_results_for_resultdb_ingestion(
             not proc.returncode, args.isolated_script_test_output)
