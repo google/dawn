@@ -12062,7 +12062,7 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [338] */
-    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse),
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse, OverloadFlag::kIsDeprecated),
     /* num_parameters */ 4,
     /* num_explicit_templates */ 1,
     /* num_templates   */ 8,
@@ -12073,7 +12073,7 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [339] */
-    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse),
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse, OverloadFlag::kIsDeprecated),
     /* num_parameters */ 4,
     /* num_explicit_templates */ 1,
     /* num_templates   */ 10,
@@ -12084,7 +12084,7 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [340] */
-    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse),
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse, OverloadFlag::kIsDeprecated),
     /* num_parameters */ 4,
     /* num_explicit_templates */ 1,
     /* num_templates   */ 8,
@@ -12095,7 +12095,7 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [341] */
-    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse),
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse, OverloadFlag::kIsDeprecated),
     /* num_parameters */ 4,
     /* num_explicit_templates */ 1,
     /* num_templates   */ 8,
@@ -12106,7 +12106,7 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [342] */
-    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse),
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse, OverloadFlag::kIsDeprecated),
     /* num_parameters */ 4,
     /* num_explicit_templates */ 1,
     /* num_templates   */ 10,
@@ -12117,7 +12117,7 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [343] */
-    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse),
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse, OverloadFlag::kIsDeprecated),
     /* num_parameters */ 4,
     /* num_explicit_templates */ 1,
     /* num_templates   */ 10,
@@ -12150,7 +12150,7 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [346] */
-    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline),
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kIsDeprecated),
     /* num_parameters */ 5,
     /* num_explicit_templates */ 0,
     /* num_templates   */ 7,
@@ -12161,7 +12161,7 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [347] */
-    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline),
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kIsDeprecated),
     /* num_parameters */ 5,
     /* num_explicit_templates */ 0,
     /* num_templates   */ 9,
@@ -12172,7 +12172,7 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [348] */
-    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline),
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kIsDeprecated),
     /* num_parameters */ 5,
     /* num_explicit_templates */ 0,
     /* num_templates   */ 7,
@@ -12183,7 +12183,7 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [349] */
-    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline),
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kIsDeprecated),
     /* num_parameters */ 5,
     /* num_explicit_templates */ 0,
     /* num_templates   */ 7,
@@ -12194,7 +12194,7 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [350] */
-    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline),
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kIsDeprecated),
     /* num_parameters */ 5,
     /* num_explicit_templates */ 0,
     /* num_templates   */ 9,
@@ -12205,7 +12205,7 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [351] */
-    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline),
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kIsDeprecated),
     /* num_parameters */ 5,
     /* num_explicit_templates */ 0,
     /* num_templates   */ 9,

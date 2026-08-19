@@ -1619,13 +1619,15 @@ class SubgroupMatrixTest : public ResolverTestWithParam<std::tuple<SubgroupMatri
                 return Assign(Phony(),
                               Call(Ident(wgsl::BuiltinFn::kSubgroupMatrixLoad,
                                          ty.subgroup_matrix(core::SubgroupMatrixKind::kResult,
-                                                            ty.f32(), 8, 8)),
-                                   ptr, 0_u, false, 8_u));
+                                                            ty.f32(), 8, 8),
+                                         core::Majorness::kRowMajor),
+                                   ptr, 0_u, 8_u));
             case SubgroupMatrixAction::kStore:
                 return CallStmt(Call(
-                    wgsl::BuiltinFn::kSubgroupMatrixStore, ptr, 0_u,
+                    Ident(wgsl::BuiltinFn::kSubgroupMatrixStore, core::Majorness::kRowMajor), ptr,
+                    0_u,
                     Call(ty.subgroup_matrix(core::SubgroupMatrixKind::kResult, ty.f32(), 8, 8)),
-                    false, 8_u));
+                    8_u));
         }
         return nullptr;
     }

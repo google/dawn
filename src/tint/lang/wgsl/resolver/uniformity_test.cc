@@ -325,11 +325,11 @@ class BasicTest : public UniformityAnalysisTestBase,
             case kSubgroupMatrixConstruct:
                 return "_ = subgroup_matrix_result<f32, 8, 8>()";
             case kSubgroupMatrixLoad:
-                return "_ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>>("
-                       "&subgroup_matrix_data, 0, false, 4)";
+                return "_ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>("
+                       "&subgroup_matrix_data, 0, 8)";
             case kSubgroupMatrixStore:
-                return "subgroupMatrixStore(&subgroup_matrix_data, 0, "
-                       "subgroup_matrix_right_zero, false, 4)";
+                return "subgroupMatrixStore<row_major>(&subgroup_matrix_data, 0, "
+                       "subgroup_matrix_right_zero, 8)";
             case kSubgroupMatrixMultiply:
                 return "_ = subgroupMatrixMultiply<f32>("
                        "subgroup_matrix_left_zero, subgroup_matrix_right_zero)";
@@ -11866,15 +11866,15 @@ var<workgroup> buffer : array<array<f32, 64>, 4>;
 
 fn foo() {
   let p = &buffer[non_uniform];
-  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>>(p, 0, false, 4);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(p, 0, 8);
 }
 )";
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:10:61 error: 'subgroupMatrixLoad' requires argument 0 to be uniform
-  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>>(p, 0, false, 4);
-                                                            ^
+              R"(test:10:72 error: 'subgroupMatrixLoad' requires argument 0 to be uniform
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(p, 0, 8);
+                                                                       ^
 
 test:9:19 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
   let p = &buffer[non_uniform];
@@ -11891,19 +11891,19 @@ var<private> non_uniform: u32;
 var<workgroup> buffer : array<f32, 64>;
 
 fn foo() {
-  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>>(&buffer, non_uniform, false, 4);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(&buffer, non_uniform, 8);
 }
 )";
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:9:70 error: 'subgroupMatrixLoad' requires argument 1 to be uniform
-  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>>(&buffer, non_uniform, false, 4);
-                                                                     ^^^^^^^^^^^
+              R"(test:9:81 error: 'subgroupMatrixLoad' requires argument 1 to be uniform
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(&buffer, non_uniform, 8);
+                                                                                ^^^^^^^^^^^
 
-test:9:70 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
-  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>>(&buffer, non_uniform, false, 4);
-                                                                     ^^^^^^^^^^^
+test:9:81 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(&buffer, non_uniform, 8);
+                                                                                ^^^^^^^^^^^
 )");
 }
 
@@ -11916,19 +11916,19 @@ var<private> non_uniform: u32;
 var<workgroup> buffer : array<f32, 64>;
 
 fn foo() {
-  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>>(&buffer, 0, false, non_uniform);
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(&buffer, 0, non_uniform);
 }
 )";
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:9:80 error: 'subgroupMatrixLoad' requires argument 3 to be uniform
-  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>>(&buffer, 0, false, non_uniform);
-                                                                               ^^^^^^^^^^^
+              R"(test:9:84 error: 'subgroupMatrixLoad' requires argument 2 to be uniform
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(&buffer, 0, non_uniform);
+                                                                                   ^^^^^^^^^^^
 
-test:9:80 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
-  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>>(&buffer, 0, false, non_uniform);
-                                                                               ^^^^^^^^^^^
+test:9:84 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  _ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>, row_major>(&buffer, 0, non_uniform);
+                                                                                   ^^^^^^^^^^^
 )");
 }
 
@@ -11943,15 +11943,15 @@ var<workgroup> buffer : array<array<f32, 64>, 4>;
 fn foo() {
   let p = &buffer[non_uniform];
   let value = subgroup_matrix_result<f32, 8, 8>();
-  subgroupMatrixStore(p, 0, value, false, 4);
+  subgroupMatrixStore<row_major>(p, 0, value, 8);
 }
 )";
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:11:23 error: 'subgroupMatrixStore' requires argument 0 to be uniform
-  subgroupMatrixStore(p, 0, value, false, 4);
-                      ^
+              R"(test:11:34 error: 'subgroupMatrixStore' requires argument 0 to be uniform
+  subgroupMatrixStore<row_major>(p, 0, value, 8);
+                                 ^
 
 test:9:19 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
   let p = &buffer[non_uniform];
@@ -11969,19 +11969,19 @@ var<workgroup> buffer : array<f32, 64>;
 
 fn foo() {
   let value = subgroup_matrix_result<f32, 8, 8>();
-  subgroupMatrixStore(&buffer, non_uniform, value, false, 4);
+  subgroupMatrixStore<row_major>(&buffer, non_uniform, value, 8);
 }
 )";
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:10:32 error: 'subgroupMatrixStore' requires argument 1 to be uniform
-  subgroupMatrixStore(&buffer, non_uniform, value, false, 4);
-                               ^^^^^^^^^^^
+              R"(test:10:43 error: 'subgroupMatrixStore' requires argument 1 to be uniform
+  subgroupMatrixStore<row_major>(&buffer, non_uniform, value, 8);
+                                          ^^^^^^^^^^^
 
-test:10:32 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
-  subgroupMatrixStore(&buffer, non_uniform, value, false, 4);
-                               ^^^^^^^^^^^
+test:10:43 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  subgroupMatrixStore<row_major>(&buffer, non_uniform, value, 8);
+                                          ^^^^^^^^^^^
 )");
 }
 
@@ -12004,19 +12004,19 @@ fn bar() -> subgroup_matrix_result<f32, 8, 8> {
 }
 
 fn foo() {
-  subgroupMatrixStore(&buffer, 0, bar(), false, 4);
+  subgroupMatrixStore<row_major>(&buffer, 0, bar(), 8);
 }
 )";
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:19:35 error: 'subgroupMatrixStore' requires argument 2 to be uniform
-  subgroupMatrixStore(&buffer, 0, bar(), false, 4);
-                                  ^^^^^
+              R"(test:19:46 error: 'subgroupMatrixStore' requires argument 2 to be uniform
+  subgroupMatrixStore<row_major>(&buffer, 0, bar(), 8);
+                                             ^^^^^
 
-test:19:35 note: return value of 'bar' may be non-uniform
-  subgroupMatrixStore(&buffer, 0, bar(), false, 4);
-                                  ^^^^^
+test:19:46 note: return value of 'bar' may be non-uniform
+  subgroupMatrixStore<row_major>(&buffer, 0, bar(), 8);
+                                             ^^^^^
 )");
 }
 
@@ -12030,19 +12030,19 @@ var<workgroup> buffer : array<f32, 64>;
 
 fn foo() {
   let value = subgroup_matrix_result<f32, 8, 8>();
-  subgroupMatrixStore(&buffer, 0, value, false, non_uniform);
+  subgroupMatrixStore<row_major>(&buffer, 0, value, non_uniform);
 }
 )";
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:10:49 error: 'subgroupMatrixStore' requires argument 4 to be uniform
-  subgroupMatrixStore(&buffer, 0, value, false, non_uniform);
-                                                ^^^^^^^^^^^
+              R"(test:10:53 error: 'subgroupMatrixStore' requires argument 3 to be uniform
+  subgroupMatrixStore<row_major>(&buffer, 0, value, non_uniform);
+                                                    ^^^^^^^^^^^
 
-test:10:49 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
-  subgroupMatrixStore(&buffer, 0, value, false, non_uniform);
-                                                ^^^^^^^^^^^
+test:10:53 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  subgroupMatrixStore<row_major>(&buffer, 0, value, non_uniform);
+                                                    ^^^^^^^^^^^
 )");
 }
 
@@ -12376,7 +12376,7 @@ TEST_P(UniformityAnalysisDiagnosticFilterTest, Directive_SubgroupMatrixUniformit
 
 fn foo() {
   if (non_uniform == 42) {
-    _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>>(&data, 0, false, 4);
+    _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major>(&data, 0, 8);
   }
 }
 )";
@@ -12457,7 +12457,7 @@ TEST_P(UniformityAnalysisDiagnosticFilterTest,
 @group(0) @binding(1) var<storage, read_write> data : array<f32>;
 
 fn foo() {
-  _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>>(&data, non_uniform, false, 4);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major>(&data, non_uniform, 8);
 }
 )";
 
@@ -12562,7 +12562,7 @@ enable chromium_experimental_subgroup_matrix;
        << param << ", chromium.subgroup_matrix_uniformity)" <<
         R"(fn foo() {
   if (non_uniform == 42) {
-    _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>>(&data, 0, false, 4);
+    _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major>(&data, 0, 8);
   }
 }
 )";

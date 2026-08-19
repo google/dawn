@@ -1136,12 +1136,13 @@ TEST_F(ResolverSubgroupMatrixTest, FragmentShader_Constructor) {
 
 TEST_F(ResolverSubgroupMatrixTest, FragmentShader_SubgroupMatrixLoad) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    auto* buffer = GlobalVar("buffer", storage, ty.array(ty.f32(), Expr(8_a)),
+    auto* buffer = GlobalVar("buffer", storage, ty.array(ty.f32(), Expr(64_a)),
                              Vector{Group(0_u), Binding(0_u)});
     auto* call = Call(Source({12, 34}),
                       Ident(wgsl::BuiltinFn::kSubgroupMatrixLoad,
-                            ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u)),
-                      AddressOf(buffer), 0_u, false, 32_u);
+                            ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u),
+                            core::Majorness::kRowMajor),
+                      AddressOf(buffer), 0_u, 8_u);
     Func("foo", Empty, ty.void_(),
          Vector{
              Assign(Phony(), call),
@@ -1173,6 +1174,35 @@ TEST_F(ResolverSubgroupMatrixTest, VertexShader_IndirectUse) {
               R"(12:34 error: subgroup matrix type cannot be used in vertex pipeline stage
 note: called by function 'foo'
 note: called by entry point 'main')");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad_Deprecated) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* v = GlobalVar("v", storage, ty.array(ty.f32()), Vector{Group(0_u), Binding(0_u)});
+    auto* call = Call(Source({12, 34}),
+                      Ident(wgsl::BuiltinFn::kSubgroupMatrixLoad,
+                            ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u)),
+                      AddressOf(v), 0_u, true, 8_u);
+
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+    EXPECT_TRUE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 warning: use of deprecated builtin)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore_Deprecated) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* v =
+        GlobalVar("v", storage, read_write, ty.array(ty.f32()), Vector{Group(0_u), Binding(0_u)});
+    auto* call = Call(
+        Source({12, 34}), Ident(wgsl::BuiltinFn::kSubgroupMatrixStore), AddressOf(v), 0_u,
+        Call(ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u)), false, 8_u);
+
+    Func("foo", Empty, ty.void_(), Vector{CallStmt(call)});
+    EXPECT_TRUE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 warning: use of deprecated builtin)");
 }
 
 TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad_TemplateMajorness) {
