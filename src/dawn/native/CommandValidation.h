@@ -48,7 +48,7 @@ class QuerySetBase;
 struct SyncScopeResourceUsage;
 struct TexelBlockInfo;
 
-MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& usage);
+MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope);
 
 MaybeError ValidateTimestampQuery(const DeviceBase* device,
                                   const QuerySetBase* querySet,
@@ -91,7 +91,7 @@ MaybeError ValidateLinearTextureData(const TexelCopyBufferLayout& layout,
                                      const TexelBlockInfo& blockInfo,
                                      const Extent3D& copyExtent);
 MaybeError ValidateTextureCopyRange(DeviceBase const* device,
-                                    const TexelCopyTextureInfo& TexelCopyTextureInfo,
+                                    const TexelCopyTextureInfo& textureCopy,
                                     const Extent3D& copySize);
 ResultOrError<Aspect> SingleAspectUsedByTexelCopyTextureInfo(const TexelCopyTextureInfo& view);
 MaybeError ValidateLinearToDepthStencilCopyRestrictions(const TexelCopyTextureInfo& dst);
@@ -99,7 +99,7 @@ MaybeError ValidateLinearToDepthStencilCopyRestrictions(const TexelCopyTextureIn
 MaybeError ValidateTexelCopyBufferInfo(DeviceBase const* device,
                                        const TexelCopyBufferInfo& texelCopyBufferInfo);
 MaybeError ValidateTexelCopyTextureInfo(DeviceBase const* device,
-                                        const TexelCopyTextureInfo& TexelCopyTextureInfo,
+                                        const TexelCopyTextureInfo& textureCopy,
                                         const Extent3D& copySize);
 
 MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,

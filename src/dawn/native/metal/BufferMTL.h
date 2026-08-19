@@ -61,7 +61,7 @@ class Buffer final : public BufferBase {
   private:
     using BufferBase::BufferBase;
     MaybeError Initialize(bool mappedAtCreation);
-    MaybeError InitializeHostMapped(const BufferHostMappedPointer* regionDesc);
+    MaybeError InitializeHostMapped(const BufferHostMappedPointer* hostMappedDesc);
 
     ~Buffer() override;
 

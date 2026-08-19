@@ -88,10 +88,10 @@ class CommandEncoder final : public ApiObjectBase {
     void APICopyTextureToTexture(const TexelCopyTextureInfo* source,
                                  const TexelCopyTextureInfo* destination,
                                  const Extent3D* copySize);
-    void APIClearBuffer(BufferBase* destination, uint64_t destinationOffset, uint64_t size);
+    void APIClearBuffer(BufferBase* buffer, uint64_t offset, uint64_t size);
 
     void APIInjectValidationError(StringView message);
-    void APIInsertDebugMarker(StringView groupLabel);
+    void APIInsertDebugMarker(StringView marker);
     void APIPopDebugGroup();
     void APIPushDebugGroup(StringView groupLabel);
 

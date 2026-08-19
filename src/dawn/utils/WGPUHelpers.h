@@ -69,7 +69,7 @@ wgpu::TexelCopyBufferInfo CreateTexelCopyBufferInfo(
     uint32_t rowsPerImage = wgpu::kCopyStrideUndefined);
 wgpu::TexelCopyTextureInfo CreateTexelCopyTextureInfo(
     wgpu::Texture texture,
-    uint32_t level = 0,
+    uint32_t mipLevel = 0,
     wgpu::Origin3D origin = {0, 0, 0},
     wgpu::TextureAspect aspect = wgpu::TextureAspect::All);
 wgpu::TexelCopyBufferLayout CreateTexelCopyBufferLayout(

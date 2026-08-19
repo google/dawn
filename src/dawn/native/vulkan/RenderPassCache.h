@@ -65,7 +65,7 @@ struct RenderPassCacheQuery {
                          bool depthReadOnly,
                          wgpu::LoadOp stencilLoadOp,
                          wgpu::StoreOp stencilStoreOp,
-                         bool stencilRendOnly);
+                         bool stencilReadOnly);
     void SetSampleCount(uint32_t sampleCount);
 
     ColorAttachmentMask colorMask;

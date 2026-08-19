@@ -176,7 +176,7 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
     bool usesSubgroupMatrix,
     uint32_t maxSubgroupSize,
     const LimitsForCompilationRequest& limits,
-    const LimitsForCompilationRequest& adaterSupportedlimits);
+    const LimitsForCompilationRequest& adapterSupportedlimits);
 
 MaybeError ValidateSubgroupMatrixConfiguration(const tint::SubgroupMatrixInfo& smInfo,
                                                const std::vector<SubgroupMatrixConfig>& cfg);

@@ -765,10 +765,9 @@ GLenum TextureView::GetGLTarget() const {
 MaybeError TextureView::BindToFramebuffer(const OpenGLFunctions& gl,
                                           GLenum target,
                                           GLenum attachment,
-                                          GLuint depthSlice,
+                                          GLuint layer,
                                           std::optional<uint32_t> passSampleCount) {
-    DAWN_ASSERT(depthSlice <
-                static_cast<GLuint>(GetSingleSubresourceVirtualSize().depthOrArrayLayers));
+    DAWN_ASSERT(layer < static_cast<GLuint>(GetSingleSubresourceVirtualSize().depthOrArrayLayers));
 
     if (ToBackend(GetTexture())->IsRenderbuffer()) {
         DAWN_ASSERT(GetDimension() == wgpu::TextureViewDimension::e2D);
@@ -799,11 +798,11 @@ MaybeError TextureView::BindToFramebuffer(const OpenGLFunctions& gl,
         textureHandle = ToBackend(GetTexture())->GetTextureHandle();
         textarget = ToBackend(GetTexture())->GetGLTarget();
         mipLevel = GetBaseMipLevel();
-        // We have validated that the depthSlice in render pass's colorAttachments must be undefined
+        // We have validated that the layer in render pass's colorAttachments must be undefined
         // for 2d RTVs, which value is set to 0. For 3d RTVs, the baseArrayLayer must be 0. So here
-        // we can simply use baseArrayLayer + depthSlice to specify the slice in RTVs without
+        // we can simply use baseArrayLayer + layer to specify the slice in RTVs without
         // checking the view's dimension.
-        arrayLayer = GetBaseArrayLayer() + depthSlice;
+        arrayLayer = GetBaseArrayLayer() + layer;
     }
 
     DAWN_ASSERT(textureHandle != 0);

@@ -366,8 +366,8 @@ class DawnTestBase {
     static bool IsAsan();
     static bool IsTsan();
 
-    bool HasToggleEnabled(const char* workaround, const wgpu::Device& device) const;
-    bool HasToggleEnabled(const char* workaround) const;
+    bool HasToggleEnabled(const char* toggle, const wgpu::Device& device) const;
+    bool HasToggleEnabled(const char* toggle) const;
 
     void DestroyDevice(wgpu::Device device = nullptr);
     void LoseDeviceForTesting(wgpu::Device device = nullptr);
@@ -815,9 +815,9 @@ class DawnTestBase {
                                                    uint32_t width,
                                                    uint32_t height,
                                                    uint32_t componentCount,
+                                                   uint32_t sampleCount,
                                                    uint32_t arrayLayer,
                                                    uint32_t mipLevel,
-                                                   uint32_t sampleCount,
                                                    wgpu::TextureAspect aspect,
                                                    detail::Expectation* expectation);
 

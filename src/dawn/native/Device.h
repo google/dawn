@@ -256,7 +256,7 @@ class DeviceBase : public ErrorSink,
     ResultOrError<Ref<SwapChainBase>> CreateSwapChain(Surface* surface,
                                                       SwapChainBase* previousSwapChain,
                                                       const SurfaceConfiguration* config);
-    ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* rawDescriptor);
+    ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* descriptor);
     ResultOrError<Ref<TextureViewBase>> CreateTextureView(
         TextureBase* texture,
         const TextureViewDescriptor* descriptor = nullptr);
@@ -610,7 +610,7 @@ class DeviceBase : public ErrorSink,
     // users as the respective error rather than causing a device loss instead.
     void HandleError(std::unique_ptr<ErrorData> error,
                      InternalErrorType additionalAllowedErrors = InternalErrorType::None,
-                     wgpu::DeviceLostReason lost_reason = wgpu::DeviceLostReason::Unknown,
+                     wgpu::DeviceLostReason lostReason = wgpu::DeviceLostReason::Unknown,
                      ForwardToErrorScope forwardToErrorScope = ForwardToErrorScope::Yes);
 
     // ErrorSink implementation

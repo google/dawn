@@ -95,7 +95,7 @@ class RenderPipeline final : public RenderPipelineBase {
         std::array<VkVertexInputAttributeDescription, kMaxVertexAttributes> attributes;
     };
     VkPipelineVertexInputStateCreateInfo ComputeVertexInputDesc(
-        PipelineVertexInputStateCreateInfoTemporaryAllocations* temporaryAllocations);
+        PipelineVertexInputStateCreateInfoTemporaryAllocations* tempAllocations);
     VkPipelineDepthStencilStateCreateInfo ComputeDepthStencilDesc();
 
     // The handles are owned by a ref in mSpecializations.

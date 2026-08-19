@@ -25,6 +25,7 @@ Checks:
   ## P0. Most likely to help with hardening.
   #- -bugprone-unhandled-code-paths
   #- -bugprone-unhandled-self-assignment
+  #- -readability-inconsistent-declaration-parameter-name  # in webgpu.h and src/tint
   #- -readability-suspicious-call-argument
   ## - Memory initialization
   #- -cppcoreguidelines-init-variables
@@ -46,6 +47,7 @@ Checks:
   ## P1. Likely to help with hardening.
   #- -bugprone-argument-comment
   #- -bugprone-branch-clone
+  #- -bugprone-easily-swappable-parameters
   #- -bugprone-suspicious-memory-comparison
   #- -bugprone-suspicious-stringview-data-usage
   #- -bugprone-swapped-arguments
@@ -61,7 +63,6 @@ Checks:
 
   # P2. Might help with hardening.
   - -android-cloexec-*
-  - -bugprone-easily-swappable-parameters
   - -bugprone-multi-level-implicit-pointer-conversion
   - -bugprone-signed-bitwise
   - -bugprone-string-constructor
@@ -222,7 +223,6 @@ Checks:
   - -readability-function-cognitive-complexity
   - -readability-function-size
   - -readability-identifier-length
-  - -readability-inconsistent-declaration-parameter-name
   - -readability-isolate-declaration
   - -readability-magic-numbers
   - -readability-make-member-function-const

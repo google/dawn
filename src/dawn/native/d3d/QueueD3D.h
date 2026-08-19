@@ -55,7 +55,7 @@ class Queue : public QueueBase {
 
     ResultOrError<SystemEventReceiver> GetSystemEventReceiver();
     MaybeError ReturnSystemEventReceivers(std::span<SystemEventReceiver> receivers);
-    MaybeError RecycleSystemEventReceivers(ExecutionSerial completeSerial);
+    MaybeError RecycleSystemEventReceivers(ExecutionSerial completedSerial);
 
   private:
     virtual void SetEventOnCompletion(ExecutionSerial serial, HANDLE event) = 0;

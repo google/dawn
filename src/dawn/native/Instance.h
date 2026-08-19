@@ -126,7 +126,7 @@ class InstanceBase final : public ErrorSink, public RefCounted {
 
     // Testing only API that is NOT thread-safe.
     uint64_t GetDeprecationWarningCountForTesting();
-    void EmitDeprecationWarning(const std::string& warning);
+    void EmitDeprecationWarning(const std::string& message);
 
     uint64_t GetDeviceCountForTesting() const;
     void AddDevice(DeviceBase* device);

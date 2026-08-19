@@ -48,7 +48,7 @@ class ProgrammableEncoder : public ApiObjectBase {
   public:
     ProgrammableEncoder(DeviceBase* device, StringView label, EncodingContext* encodingContext);
 
-    void APIInsertDebugMarker(StringView groupLabel);
+    void APIInsertDebugMarker(StringView marker);
     void APIPopDebugGroup();
     void APIPushDebugGroup(StringView groupLabel);
 

@@ -74,7 +74,7 @@ class ResidencyManager {
     };
 
     MemorySegmentInfo* GetMemorySegmentInfo(MemorySegment memorySegment);
-    ResultOrError<uint64_t> EnsureCanMakeResident(uint64_t allocationSize,
+    ResultOrError<uint64_t> EnsureCanMakeResident(uint64_t sizeToMakeResident,
                                                   MemorySegmentInfo* memorySegment);
     ResultOrError<Pageable*> RemoveSingleEntryFromLRU(MemorySegmentInfo* memorySegment);
     MaybeError MakeAllocationsResident(MemorySegmentInfo* segment,

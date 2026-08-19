@@ -47,7 +47,7 @@ class ByteVectorSink : public std::vector<std::byte>, public Sink {
 };
 
 // Stream operator for ByteVectorSink for debugging.
-std::ostream& operator<<(std::ostream& os, const ByteVectorSink& key);
+std::ostream& operator<<(std::ostream& os, const ByteVectorSink& vec);
 
 }  // namespace dawn::native::stream
 

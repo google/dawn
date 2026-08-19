@@ -113,8 +113,8 @@ class ContextEGL : NonMovable {
 
     MaybeError Initialize(wgpu::BackendType backend,
                           bool useRobustness,
-                          bool useANGLETextureSharing,
                           bool disableEGL15Robustness,
+                          bool useANGLETextureSharing,
                           bool forceES31AndMinExtensions,
                           EGLint angleVirtualizationGroup);
 

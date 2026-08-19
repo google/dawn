@@ -289,7 +289,7 @@ class GPUUsableBuffer final : public Buffer {
                               Buffer* destination,
                               uint64_t destinationOffset) override;
     MaybeError CopyFromD3DInternal(const ScopedCommandRecordingContext* commandContext,
-                                   ID3D11Buffer* srcD3D11Buffer,
+                                   ID3D11Buffer* d3d11SourceBuffer,
                                    uint64_t sourceOffset,
                                    size_t size,
                                    uint64_t destinationOffset) override;

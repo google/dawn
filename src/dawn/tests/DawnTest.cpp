@@ -2020,8 +2020,10 @@ std::ostringstream& DawnTestBase::ExpectMultisampledFloatData(wgpu::Texture text
                                                               uint32_t arrayLayer,
                                                               uint32_t mipLevel,
                                                               detail::Expectation* expectation) {
-    return ExpectSampledFloatDataImpl(texture, width, height, componentCount, sampleCount,
-                                      arrayLayer, mipLevel, wgpu::TextureAspect::All, expectation);
+    return ExpectSampledFloatDataImpl(
+        texture, /*width=*/width, /*height=*/height, /*componentCount=*/componentCount,
+        /*sampleCount=*/sampleCount,
+        /*arrayLayer=*/arrayLayer, /*mipLevel=*/mipLevel, wgpu::TextureAspect::All, expectation);
 }
 
 std::ostringstream& DawnTestBase::ExpectSampledDepthData(wgpu::Texture texture,
@@ -2030,7 +2032,9 @@ std::ostringstream& DawnTestBase::ExpectSampledDepthData(wgpu::Texture texture,
                                                          uint32_t arrayLayer,
                                                          uint32_t mipLevel,
                                                          detail::Expectation* expectation) {
-    return ExpectSampledFloatDataImpl(texture, width, height, 1, 1, arrayLayer, mipLevel,
+    return ExpectSampledFloatDataImpl(texture, /*width=*/width, /*height=*/height,
+                                      /*componentCount=*/1, /*sampleCount=*/1,
+                                      /*arrayLayer=*/arrayLayer, /*mipLevel=*/mipLevel,
                                       wgpu::TextureAspect::DepthOnly, expectation);
 }
 

@@ -89,9 +89,9 @@ class ShaderModule final : public ShaderModuleBase {
                                         SingleShaderStage stage,
                                         const ImmediateMask& pipelineImmediateMask,
                                         VertexAttributeMask bgraSwizzleAttributes,
-                                        std::vector<CombinedSampler>* combinedSamplers,
+                                        std::vector<CombinedSampler>* combinedSamplersOut,
                                         const PipelineLayout* layout,
-                                        EmulatedTextureBuiltinRegistrar* emulatedTextureBuiltings,
+                                        EmulatedTextureBuiltinRegistrar* emulatedTextureBuiltins,
                                         bool* needsSSBOLengthUniformBuffer,
                                         Extent3D* workgroupSize);
 

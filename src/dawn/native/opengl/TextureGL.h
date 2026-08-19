@@ -93,7 +93,7 @@ class TextureView final : public TextureViewBase {
     MaybeError BindToFramebuffer(const OpenGLFunctions& gl,
                                  GLenum target,
                                  GLenum attachment,
-                                 GLuint depthLayer = 0,
+                                 GLuint layer = 0,
                                  std::optional<uint32_t> passSampleCount = std::nullopt);
 
   private:

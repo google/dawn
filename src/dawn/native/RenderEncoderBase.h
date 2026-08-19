@@ -52,7 +52,7 @@ class RenderEncoderBase : public ProgrammableEncoder {
                  uint32_t instanceCount = 1,
                  uint32_t firstVertex = 0,
                  uint32_t firstInstance = 0);
-    void APIDrawIndexed(uint32_t vertexCount,
+    void APIDrawIndexed(uint32_t indexCount,
                         uint32_t instanceCount,
                         uint32_t firstIndex,
                         int32_t baseVertex,

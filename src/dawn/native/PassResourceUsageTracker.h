@@ -57,7 +57,7 @@ class SyncScopeUsageTracker {
     void BufferUsedAs(BufferBase* buffer,
                       wgpu::BufferUsage usage,
                       wgpu::ShaderStage shaderStages = wgpu::ShaderStage::None);
-    void TextureViewUsedAs(TextureViewBase* texture,
+    void TextureViewUsedAs(TextureViewBase* view,
                            wgpu::TextureUsage usage,
                            wgpu::ShaderStage shaderStages = wgpu::ShaderStage::None);
     void TextureRangeUsedAs(TextureBase* texture,

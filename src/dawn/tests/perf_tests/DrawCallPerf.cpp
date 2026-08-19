@@ -238,7 +238,7 @@ class DrawCallPerf : public DawnPerfTestWithParams<DrawCallParamForTest> {
     void SetUpPerfTest() override;
 
     template <typename Encoder>
-    void RecordRenderCommands(Encoder encoder);
+    void RecordRenderCommands(Encoder pass);
 
   private:
     void Step() override;

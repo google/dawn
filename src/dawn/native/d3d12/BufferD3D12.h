@@ -82,7 +82,7 @@ class Buffer final : public BufferBase {
 
     MaybeError Initialize(bool mappedAtCreation);
     MaybeError InitializeHostMapped(const BufferHostMappedPointer* hostMappedDesc);
-    MaybeError InitializeAsExternalBuffer(ComPtr<ID3D12Resource> d3dBuffer,
+    MaybeError InitializeAsExternalBuffer(ComPtr<ID3D12Resource> d3d12Buffer,
                                           const UnpackedPtr<BufferDescriptor>& descriptor);
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
     MaybeError FinalizeMapImpl(BufferState newState) override;
@@ -92,7 +92,7 @@ class Buffer final : public BufferBase {
     MaybeError MapAtCreationImpl() override;
     void* GetMappedPointerImpl() override;
 
-    MaybeError MapInternal(bool isWrite, size_t start, size_t end, const char* contextInfo);
+    MaybeError MapInternal(bool isWrite, size_t offset, size_t size, const char* contextInfo);
 
     MaybeError InitializeToZero(CommandRecordingContext* commandContext);
     MaybeError ClearBuffer(CommandRecordingContext* commandContext,

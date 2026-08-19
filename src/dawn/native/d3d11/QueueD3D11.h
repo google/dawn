@@ -87,8 +87,8 @@ class Queue : public d3d::Queue {
 
     ~Queue() override = default;
 
-    MaybeError Initialize(bool useMonitoredFence);
-    MaybeError InitializeD3DFence(bool useMonitoredFence);
+    MaybeError Initialize(bool useNonMonitoredFence);
+    MaybeError InitializeD3DFence(bool useNonMonitoredFence);
 
     MaybeError SubmitImpl(Span<CommandBufferBase* const> commands) override;
     MaybeError WriteBufferImpl(BufferBase* buffer,

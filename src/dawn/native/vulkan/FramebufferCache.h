@@ -61,7 +61,7 @@ struct FramebufferCacheQuery {
     // Use these helpers to build the query, they make sure all relevant data is initialized and
     // masks set.
     void SetRenderPass(uint64_t passId, uint32_t passWidth, uint32_t passHeight);
-    MaybeError AddAttachment(TextureView* attachment,
+    MaybeError AddAttachment(TextureView* view,
                              VkClearValue clearValue = {},
                              uint32_t depthSlice = 0);
 
@@ -101,7 +101,7 @@ class FramebufferCache final
     explicit FramebufferCache(Device* device, size_t capacity = kDefaultCapacity);
     ~FramebufferCache() override;
 
-    void EvictedFromCache(const VkFramebuffer& value) override;
+    void EvictedFromCache(const VkFramebuffer& framebuffer) override;
 
   private:
     // We use a raw pointer to the device here because the cache is always owned by the device
