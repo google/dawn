@@ -91,6 +91,7 @@
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/rtti/switch.h"
+#include "src/utils/compiler.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 
@@ -860,8 +861,8 @@ class State {
             }
             components.Push(xyzw[i]);
         }
-        auto* swizzle =
-            b.MemberAccessor(vec, std::string_view(components.begin(), components.Length()));
+        auto* swizzle = b.MemberAccessor(
+            vec, DAWN_UNSAFE_TODO(std::string_view(components.begin(), components.Length())));
         Bind(s->Result(), swizzle);
     }
 

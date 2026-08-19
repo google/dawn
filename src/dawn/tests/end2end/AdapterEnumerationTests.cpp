@@ -358,7 +358,8 @@ TEST_F(AdapterEnumerationTests, WebGPUBackend) {
             adapter.GetInfo(&info);
 
             EXPECT_EQ(info.backendType, wgpu::BackendType::WebGPU);
-            EXPECT_NE(std::string_view(info.device.data, info.device.length).find("Vulkan"),
+            EXPECT_NE(DAWN_UNSAFE_TODO(std::string_view(info.device.data, info.device.length))
+                          .find("Vulkan"),
                       std::string_view::npos);
         }
     }
@@ -374,7 +375,8 @@ TEST_F(AdapterEnumerationTests, WebGPUBackend) {
             adapter.GetInfo(&info);
 
             EXPECT_EQ(info.backendType, wgpu::BackendType::WebGPU);
-            EXPECT_NE(std::string_view(info.device.data, info.device.length).find("SwiftShader"),
+            EXPECT_NE(DAWN_UNSAFE_TODO(std::string_view(info.device.data, info.device.length))
+                          .find("SwiftShader"),
                       std::string_view::npos);
         }
     }

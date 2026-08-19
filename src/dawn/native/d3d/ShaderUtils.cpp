@@ -40,6 +40,7 @@
 #include "src/dawn/native/d3d/PlatformFunctions.h"
 #include "src/dawn/native/d3d/UtilsD3D.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
+#include "src/utils/compiler.h"
 #include "tint/tint.h"
 
 namespace dawn::native::d3d {
@@ -424,8 +425,9 @@ void DumpFXCCompiledShader(Device* device,
                                                           flags, nullptr, &disassembly))) {
         dumpedMsg << "D3D disassemble failed\n";
     } else {
-        dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
-                                      disassembly->GetBufferSize());
+        dumpedMsg << DAWN_UNSAFE_TODO(
+            std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
+                             disassembly->GetBufferSize()));
     }
 
     std::string logMessage = dumpedMsg.str();

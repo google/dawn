@@ -233,7 +233,7 @@ std::string_view NormalizeMessageString(StringView in) {
     if (in.IsUndefined()) {
         return {};
     }
-    return std::string_view(in.data, DAWN_UNSAFE_TODO(strnlen(in.data, in.length)));
+    return DAWN_UNSAFE_TODO(std::string_view(in.data, strnlen(in.data, in.length)));
 }
 
 }  // namespace dawn::native::utils

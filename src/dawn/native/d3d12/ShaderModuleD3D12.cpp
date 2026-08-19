@@ -50,6 +50,7 @@
 #include "src/dawn/platform/metrics/HistogramMacros.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/assert.h"
+#include "src/utils/compiler.h"
 #include "tint/tint.h"
 
 namespace dawn::native::d3d12 {
@@ -79,15 +80,16 @@ void DumpDXCCompiledShader(Device* device,
     ComPtr<IDxcBlobEncoding> disassembly;
     if (dxcResult && dxcResult->HasOutput(DXC_OUT_DISASSEMBLY) &&
         SUCCEEDED(dxcResult->GetOutput(DXC_OUT_DISASSEMBLY, IID_PPV_ARGS(&disassembly), nullptr))) {
-        dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
-                                      disassembly->GetBufferSize());
+        dumpedMsg << DAWN_UNSAFE_TODO(
+            std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
+                             disassembly->GetBufferSize()));
     } else {
         dumpedMsg << "DXC disassemble failed\n";
         ComPtr<IDxcBlobEncoding> errors;
         if (dxcResult && dxcResult->HasOutput(DXC_OUT_ERRORS) &&
             SUCCEEDED(dxcResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr))) {
-            dumpedMsg << std::string_view(static_cast<const char*>(errors->GetBufferPointer()),
-                                          errors->GetBufferSize());
+            dumpedMsg << DAWN_UNSAFE_TODO(std::string_view(
+                static_cast<const char*>(errors->GetBufferPointer()), errors->GetBufferSize()));
         }
     }
 

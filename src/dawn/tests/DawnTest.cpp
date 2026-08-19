@@ -1038,13 +1038,14 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
                 native::GetProcs().adapterGetInfo(candidate.Get(), &info);
 
                 const auto& testParam = gCurrentTest->mParam;
-                bool result = (testParam.adapterProperties.selected &&
-                               info.deviceID == testParam.adapterProperties.deviceID &&
-                               info.vendorID == testParam.adapterProperties.vendorID &&
-                               info.adapterType == static_cast<WGPUAdapterType>(
-                                                       testParam.adapterProperties.adapterType) &&
-                               std::string_view(info.device.data, info.device.length) ==
-                                   testParam.adapterProperties.name);
+                bool result =
+                    (testParam.adapterProperties.selected &&
+                     info.deviceID == testParam.adapterProperties.deviceID &&
+                     info.vendorID == testParam.adapterProperties.vendorID &&
+                     info.adapterType ==
+                         static_cast<WGPUAdapterType>(testParam.adapterProperties.adapterType) &&
+                     DAWN_UNSAFE_TODO(std::string_view(info.device.data, info.device.length)) ==
+                         testParam.adapterProperties.name);
                 native::GetProcs().adapterInfoFreeMembers(info);
                 return result;
             });

@@ -459,7 +459,8 @@ std::optional<Token> Lexer::try_float() {
         return {};
     }
 
-    auto ret = tint::strconv::ParseDouble(std::string_view(&at(start), end - start));
+    auto ret =
+        tint::strconv::ParseDouble(DAWN_UNSAFE_TODO(std::string_view(&at(start), end - start)));
     double value = ret == Success ? ret.Get() : 0.0;
     bool overflow =
         ret != Success && ret.Failure() == tint::strconv::ParseNumberError::kResultOutOfRange;

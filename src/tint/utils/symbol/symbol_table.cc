@@ -98,7 +98,7 @@ std::string_view SymbolTable::Allocate(std::string_view name) {
     TINT_ASSERT(name_mem != nullptr) << "failed to allocate memory for symbol's string";
 
     DAWN_UNSAFE_TODO(memcpy(name_mem, name.data(), name.length() + 1));
-    return {name_mem, name.length()};
+    return DAWN_UNSAFE_TODO(std::string_view(name_mem, name.length()));
 }
 
 }  // namespace tint

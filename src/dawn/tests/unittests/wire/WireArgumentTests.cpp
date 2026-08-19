@@ -168,8 +168,9 @@ TEST_F(WireArgumentTests, CStringArgument) {
     EXPECT_CALL(api,
                 DeviceCreateRenderPipeline(
                     apiDevice, MatchesLambda([](const WGPURenderPipelineDescriptor* desc) -> bool {
-                        return std::string_view(desc->vertex.entryPoint.data,
-                                                desc->vertex.entryPoint.length) == "main";
+                        return DAWN_UNSAFE_TODO(std::string_view(desc->vertex.entryPoint.data,
+                                                                 desc->vertex.entryPoint.length)) ==
+                               "main";
                     })))
         .WillOnce(Return(apiPlaceholderPipeline));
 
@@ -192,28 +193,28 @@ TEST_F(WireArgumentTests, WGPUStringView) {
     FlushClient();
 
     // Give it a longer, explicit length that contains the null-terminator.
-    vsModule.SetLabel(std::string_view(label, 34));
+    vsModule.SetLabel(DAWN_UNSAFE_TODO(std::string_view(label, 34)));
     EXPECT_CALL(api, ShaderModuleSetLabel(apiVsModule,
                                           AllOf(Field(&WGPUStringView::data, EqBytes(label, 34u)),
                                                 Field(&WGPUStringView::length, Eq(34u)))));
     FlushClient();
 
     // Give it a shorder, explicit length.
-    vsModule.SetLabel(std::string_view(label, 2));
+    vsModule.SetLabel(DAWN_UNSAFE_TODO(std::string_view(label, 2)));
     EXPECT_CALL(api, ShaderModuleSetLabel(apiVsModule,
                                           AllOf(Field(&WGPUStringView::data, EqBytes(label, 2u)),
                                                 Field(&WGPUStringView::length, Eq(2u)))));
     FlushClient();
 
     // Give it a zero length.
-    vsModule.SetLabel(std::string_view(label, 0));
+    vsModule.SetLabel(DAWN_UNSAFE_TODO(std::string_view(label, 0)));
     EXPECT_CALL(
         api, ShaderModuleSetLabel(apiVsModule, AllOf(Field(&WGPUStringView::data, EqBytes("", 1u)),
                                                      Field(&WGPUStringView::length, Eq(0u)))));
     FlushClient();
 
     // Give it zero length and data.
-    vsModule.SetLabel(std::string_view(nullptr, 0));
+    vsModule.SetLabel(std::string_view());
     EXPECT_CALL(api,
                 ShaderModuleSetLabel(apiVsModule, AllOf(Field(&WGPUStringView::data, nullptr),
                                                         Field(&WGPUStringView::length, Eq(0u)))));
