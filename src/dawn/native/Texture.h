@@ -259,6 +259,10 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     void AddInternalUsage(wgpu::TextureUsage usage);
     void SetSharedResourceMemoryContentsForTesting(Ref<SharedResourceMemoryContents> contents);
 
+    // Used to notify resource tables that something needs to be handled for this texture the next
+    // time the resource table is used. Must be called when applying memory barriers on the texture.
+    void MarkDirtyInResourceTables();
+
     ExecutionSerial mLastSharedTextureMemoryUsageSerial{kBeginningOfGPUTime};
 
   private:
@@ -277,7 +281,6 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     ResultOrError<Ref<TextureViewBase>> GetOrCreateDefaultView();
 
-    void MarkDirtyInResourceTables();
     void MarkDestroyedInResourceTables();
 
     void WillAddFirstExternalRef() override;

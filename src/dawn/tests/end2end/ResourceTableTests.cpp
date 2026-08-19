@@ -2897,7 +2897,6 @@ TEST_P(ResourceTableTests, SwitchUseResourceTableAndNot) {
     pass.Draw(1);
     resultIndex++;
 
-    // Switch to using the resource table.
     pass.SetPipeline(resourceTablePipeline);
     pass.SetImmediates(0, &resultIndex, sizeof(resultIndex));
     pass.Draw(1);
@@ -2918,14 +2917,362 @@ TEST_P(ResourceTableTests, SwitchUseResourceTableAndNot) {
     EXPECT_BUFFER_U32_EQ(42, resultBuffer, 8);
 }
 
+DAWN_INSTANTIATE_TEST(ResourceTableTests, D3D12Backend(), MetalBackend(), VulkanBackend());
+
+// Test that a resource used in a bindful way outside of a usage scope will get correctly barriered
+// the next time it is used in a resource table.
+enum class BindlessReadKind {
+    Compute,
+    Render,
+};
+std::ostream& operator<<(std::ostream& os, BindlessReadKind read) {
+    switch (read) {
+        case BindlessReadKind::Compute:
+            return (os << "Compute");
+        case BindlessReadKind::Render:
+            return (os << "Render");
+    }
+}
+
+enum class BindfulWriteKind {
+    Render,
+    Copy,
+    RenderStorage,
+    ComputeStorage,
+};
+std::ostream& operator<<(std::ostream& os, BindfulWriteKind write) {
+    switch (write) {
+        case BindfulWriteKind::Render:
+            return (os << "Render");
+        case BindfulWriteKind::Copy:
+            return (os << "Copy");
+        case BindfulWriteKind::RenderStorage:
+            return (os << "RenderStorage");
+        case BindfulWriteKind::ComputeStorage:
+            return (os << "ComputeStorage");
+    }
+}
+
+DAWN_TEST_PARAM_STRUCT(BindfulInteractionParams, BindlessReadKind, BindfulWriteKind);
+
+class ResourceTableBindfulInteractionTests : public DawnTestWithParams<BindfulInteractionParams> {
+  protected:
+    void SetUp() override {
+        DawnTestWithParams<BindfulInteractionParams>::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF(
+            !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
+
+        // Swiftshader doesn't support variable count descriptor sets used in draw operations. In
+        // vk::DescriptorSet::ParseDescriptors it iterates over all the descriptors to prep various
+        // things but iterates over the whole size defined in the vkDescriptorSetLayout instead of
+        // taking into account the variable count.
+        DAWN_SUPPRESS_TEST_IF(IsSwiftshader());
+    }
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        if (SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable})) {
+            return {wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable};
+        }
+        return {};
+    }
+
+    void DoTest(BindlessReadKind read, BindfulWriteKind write) {
+        switch (read) {
+            case BindlessReadKind::Compute:
+                DoComputeTest(write);
+                break;
+            case BindlessReadKind::Render:
+                DoRenderTest(write);
+                break;
+        }
+    }
+
+  private:
+    // Makes the texture that we'll use for the test and put it in a single-entry ResourceTable.
+    std::pair<wgpu::Texture, wgpu::ResourceTable> CreateTestTextureAndTable(BindfulWriteKind write,
+                                                                            uint32_t initialValue) {
+        // Create and initialize the texture.
+        wgpu::TextureDescriptor tDesc = {
+            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst |
+                     TextureUsageForWriteKind(write),
+            .size = {1, 1},
+            .format = wgpu::TextureFormat::R32Uint,
+        };
+        wgpu::Texture texture = device.CreateTexture(&tDesc);
+
+        wgpu::TexelCopyTextureInfo srcInfo = utils::CreateTexelCopyTextureInfo(texture);
+        wgpu::TexelCopyBufferLayout dstInfo = {};
+        wgpu::Extent3D copySize = {1, 1, 1};
+        queue.WriteTexture(&srcInfo, &initialValue, sizeof(initialValue), &dstInfo, &copySize);
+
+        // Create and initialize the resource table.
+        wgpu::ResourceTableDescriptor tableDesc;
+        tableDesc.size = 1;
+        wgpu::ResourceTable table = device.CreateResourceTable(&tableDesc);
+
+        wgpu::TextureViewDescriptor vDesc = {.usage = wgpu::TextureUsage::TextureBinding};
+        wgpu::BindingResource resource = {.textureView = texture.CreateView(&vDesc)};
+        EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
+
+        return {std::move(texture), std::move(table)};
+    }
+
+    void DoComputeTest(BindfulWriteKind write) {
+        auto [texture, table] = CreateTestTextureAndTable(write, 0xBEEFu);
+
+        // Pipeline that writes the getResource<>(0)'s content in the result buffer.
+        wgpu::ComputePipelineDescriptor pDesc;
+        pDesc.compute.module = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_resource_table;
+
+            @group(0) @binding(0) var<storage, read_write> result : u32;
+            @compute @workgroup_size(1) fn main() {
+                let tex = getResource<texture_2d<u32>>(0);
+                result = textureLoad(tex, vec2(0), 0).x;
+            }
+        )");
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pDesc);
+
+        // The result storage buffer and BindGroup.
+        wgpu::BufferDescriptor bDesc = {
+            .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+            .size = sizeof(uint32_t) * 2,
+        };
+        wgpu::Buffer beefBuffer = device.CreateBuffer(&bDesc);
+        wgpu::Buffer cafeBuffer = device.CreateBuffer(&bDesc);
+
+        // Sample the texture bindlessly, write to it bindfully, then sample bindlessly again.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        {
+            wgpu::BindGroup resultBG =
+                utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, beefBuffer}});
+
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetBindGroup(0, resultBG);
+            pass.SetResourceTable(table);
+            pass.SetPipeline(pipeline);
+
+            pass.DispatchWorkgroups(1);
+            pass.End();
+        }
+
+        EncodeBindfulWrite(encoder, texture, write, 0xCAFEu);
+
+        {
+            wgpu::BindGroup resultBG =
+                utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, cafeBuffer}});
+
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetBindGroup(0, resultBG);
+            pass.SetResourceTable(table);
+            pass.SetPipeline(pipeline);
+
+            pass.DispatchWorkgroups(1);
+            pass.End();
+        }
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // Check results
+        EXPECT_BUFFER_U32_EQ(0xBEEFu, beefBuffer, 0);
+        EXPECT_BUFFER_U32_EQ(0xCAFEu, cafeBuffer, 0);
+    }
+
+    void DoRenderTest(BindfulWriteKind write) {
+        auto [texture, table] = CreateTestTextureAndTable(write, 0xBEEFu);
+
+        // Pipeline that writes the getResource<>(0)'s content at an offset in a storage buffer.
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_resource_table;
+
+            @vertex fn vs() -> @builtin(position) vec4f {
+                return vec4f(0, 0, 0.5, 0.5);
+            }
+            @fragment fn fs() -> @location(0) u32 {
+                let tex = getResource<texture_2d<u32>>(0);
+                return textureLoad(tex, vec2(0), 0).x;
+            }
+        )");
+
+        utils::ComboRenderPipelineDescriptor pDesc;
+        pDesc.vertex.module = module;
+        pDesc.cFragment.module = module;
+        pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        pDesc.cTargets[0].format = wgpu::TextureFormat::R32Uint;
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
+
+        // Sample the texture bindlessly, write to it bindfully, then sample bindlessly again.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        wgpu::Texture beefTexture;
+        {
+            utils::BasicRenderPass rp =
+                utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::R32Uint);
+            beefTexture = rp.color;
+
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+            pass.SetResourceTable(table);
+            pass.SetPipeline(pipeline);
+            pass.Draw(1);
+            pass.End();
+        }
+
+        EncodeBindfulWrite(encoder, texture, write, 0xCAFEu);
+
+        wgpu::Texture cafeTexture;
+        {
+            utils::BasicRenderPass rp =
+                utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::R32Uint);
+            cafeTexture = rp.color;
+
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+            pass.SetResourceTable(table);
+            pass.SetPipeline(pipeline);
+            pass.Draw(1);
+            pass.End();
+        }
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // Check results
+        EXPECT_PIXEL_U32_EQ(uint32_t{0xBEEFu}, beefTexture, 0, 0);
+        EXPECT_PIXEL_U32_EQ(uint32_t{0xCAFEu}, cafeTexture, 0, 0);
+    }
+
+    wgpu::TextureUsage TextureUsageForWriteKind(BindfulWriteKind kind) {
+        switch (kind) {
+            case BindfulWriteKind::Render:
+                return wgpu::TextureUsage::RenderAttachment;
+            case BindfulWriteKind::Copy:
+                return wgpu::TextureUsage::CopyDst;
+            case BindfulWriteKind::ComputeStorage:
+            case BindfulWriteKind::RenderStorage:
+                return wgpu::TextureUsage::StorageBinding;
+        }
+    }
+
+    void EncodeBindfulWrite(wgpu::CommandEncoder encoder,
+                            wgpu::Texture texture,
+                            BindfulWriteKind kind,
+                            uint32_t value) {
+        switch (kind) {
+            case BindfulWriteKind::Render:
+                EncodeBindfulRender(encoder, texture, value);
+                break;
+            case BindfulWriteKind::Copy:
+                EncodeBindfulCopy(encoder, texture, value);
+                break;
+            case BindfulWriteKind::RenderStorage:
+                EncodeBindfulRenderStorageWrite(encoder, texture, value);
+                break;
+            case BindfulWriteKind::ComputeStorage:
+                EncodeBindfulComputeStorageWrite(encoder, texture, value);
+                break;
+        }
+    }
+
+    void EncodeBindfulRender(wgpu::CommandEncoder encoder, wgpu::Texture texture, uint32_t value) {
+        wgpu::RenderPassColorAttachment attachment{
+            .view = texture.CreateView(),
+            .loadOp = wgpu::LoadOp::Clear,
+            .storeOp = wgpu::StoreOp::Store,
+            .clearValue = {.r = static_cast<double>(value)},
+        };
+        wgpu::RenderPassDescriptor passDesc{
+            .colorAttachmentCount = 1,
+            .colorAttachments = &attachment,
+        };
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDesc);
+        pass.End();
+    }
+
+    void EncodeBindfulCopy(wgpu::CommandEncoder encoder, wgpu::Texture texture, uint32_t value) {
+        wgpu::Buffer srcBuffer =
+            utils::CreateBufferFromData(device, wgpu::BufferUsage::CopySrc, {value});
+
+        wgpu::TexelCopyTextureInfo dstInfo = {.texture = texture};
+        wgpu::TexelCopyBufferInfo srcInfo = {.buffer = srcBuffer};
+        wgpu::Extent3D copySize = {1, 1};
+        encoder.CopyBufferToTexture(&srcInfo, &dstInfo, &copySize);
+    }
+
+    void EncodeBindfulRenderStorageWrite(wgpu::CommandEncoder encoder,
+                                         wgpu::Texture texture,
+                                         uint32_t value) {
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+            @vertex fn vs() -> @builtin(position) vec4f {
+                return vec4f(0, 0, 0.5, 0.5);
+            }
+            @group(0) @binding(0) var dst : texture_storage_2d<r32uint, write>;
+            var<immediate> value : u32;
+            @fragment fn fs() -> @location(0) vec4f {
+                textureStore(dst, vec2i(0, 0), vec4u(value, 0, 0, 0));
+                return vec4f();
+            }
+        )");
+
+        utils::ComboRenderPipelineDescriptor pDesc;
+        pDesc.vertex.module = module;
+        pDesc.cFragment.module = module;
+        pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
+
+        wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                  {{0, texture.CreateView()}});
+
+        auto rp = utils::CreateBasicRenderPass(device, 1, 1);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bg);
+        pass.SetImmediates(0, &value, sizeof(value));
+        pass.Draw(1);
+        pass.End();
+    }
+
+    void EncodeBindfulComputeStorageWrite(wgpu::CommandEncoder encoder,
+                                          wgpu::Texture texture,
+                                          uint32_t value) {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var dst : texture_storage_2d<r32uint, write>;
+            var<immediate> value : u32;
+            @compute @workgroup_size(1) fn cs() {
+                textureStore(dst, vec2i(0, 0), vec4u(value, 0, 0, 0));
+            }
+        )");
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+        wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                  {{0, texture.CreateView()}});
+
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bg);
+        pass.SetImmediates(0, &value, sizeof(value));
+        pass.DispatchWorkgroups(1);
+        pass.End();
+    }
+};
+
+TEST_P(ResourceTableBindfulInteractionTests, Test) {
+    DoTest(GetParam().mBindlessReadKind, GetParam().mBindfulWriteKind);
+}
+
+DAWN_INSTANTIATE_TEST_P(ResourceTableBindfulInteractionTests,
+                        {D3D12Backend(), MetalBackend(), VulkanBackend()},
+                        {BindlessReadKind::Render, BindlessReadKind::Compute},
+                        {BindfulWriteKind::Render, BindfulWriteKind::Copy,
+                         BindfulWriteKind::ComputeStorage, BindfulWriteKind::RenderStorage});
+
 // TODO(479179409): Add tests for dynamic validation of filterability
 //   - BGL has tex2d, shader has tex1d, swap in default tex1d
 //   - BGL has sampler_comparison, shader has sampler, swap in sampler
 //   - BGL has unfilterable texture and filtering sampler, swap sampler to non_filternig
 //   - BGL has unfilterable texture, bind-less filtering sampler, swap texture
 //   - bind-less unfilterable texture, BGL has filtering sampler, swap sampler
-
-DAWN_INSTANTIATE_TEST(ResourceTableTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

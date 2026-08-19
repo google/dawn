@@ -1048,6 +1048,7 @@ void Texture::TransitionUsageForPassImpl(
         }
 
         imageBarriers->push_back(BuildMemoryBarrier(this, lastSyncInfo->usage, newUsage, range));
+        MarkDirtyInResourceTables();
 
         allLastUsages |= lastSyncInfo->usage;
         allNewUsages |= newUsage;
@@ -1158,6 +1159,7 @@ void Texture::TransitionUsageAndGetResourceBarrierImpl(
             }
 
             imageBarriers->push_back(BuildMemoryBarrier(this, lastSyncInfo->usage, usage, range));
+            MarkDirtyInResourceTables();
 
             allLastUsages |= lastSyncInfo->usage;
             allLastShaderStages |= lastSyncInfo->shaderStages;

@@ -499,7 +499,7 @@ void Texture::TransitionSubresourceRange(std::vector<D3D12_RESOURCE_BARRIER>* ba
                                          const SubresourceRange& range,
                                          StateAndDecay* state,
                                          D3D12_RESOURCE_STATES newState,
-                                         ExecutionSerial pendingCommandSerial) const {
+                                         ExecutionSerial pendingCommandSerial) {
     D3D12_RESOURCE_STATES lastState = state->lastState;
 
     // If the transition is from-UAV-to-UAV, then a UAV barrier is needed.
@@ -532,6 +532,7 @@ void Texture::TransitionSubresourceRange(std::vector<D3D12_RESOURCE_BARRIER>* ba
 
     // Update the tracked state.
     state->lastState = newState;
+    MarkDirtyInResourceTables();
 
     // The COMMON state represents a state where no write operations can be pending, and
     // where all pixels are uncompressed. This makes it possible to transition to and

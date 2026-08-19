@@ -151,7 +151,7 @@ class Texture final : public TextureBase {
                                     const SubresourceRange& range,
                                     StateAndDecay* state,
                                     D3D12_RESOURCE_STATES subresourceNewState,
-                                    ExecutionSerial pendingCommandSerial) const;
+                                    ExecutionSerial pendingCommandSerial);
     void HandleTransitionSpecialCases(CommandRecordingContext* commandContext);
 
     D3D12_RESOURCE_FLAGS mD3D12ResourceFlags;
