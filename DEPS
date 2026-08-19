@@ -27,7 +27,7 @@ vars = {
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
-  'dawn_go_version': 'version:3@1.25.0',
+  'dawn_go_version': 'version:3@1.26.6',
   'dawn_node_version': 'version:2@20.11.0',
   'agility_sdk_version': 'version:2@1.721.0-preview',
   'dawn_bazelisk_version': 'version:3@1.29.0',

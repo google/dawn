@@ -401,7 +401,7 @@ func (r *roller) roll(ctx context.Context) error {
 	}
 
 	// Look for an existing gerrit change to update
-	existingRolls, err := r.findExistingRolls()
+	existingRolls, err := r.findExistingRolls(ctx)
 	if err != nil {
 		return err
 	}
@@ -411,7 +411,7 @@ func (r *roller) roll(ctx context.Context) error {
 		log.Printf("abandoning %v existing roll...", len(existingRolls))
 		if !r.flags.dryRun {
 			for _, change := range existingRolls {
-				if err := r.gerrit.Abandon(change.ChangeID); err != nil {
+				if err := r.gerrit.Abandon(ctx, change.ChangeID); err != nil {
 					return err
 				}
 			}
@@ -427,7 +427,7 @@ func (r *roller) roll(ctx context.Context) error {
 			changeID = "dry-run-id"
 			log.Printf("created gerrit change (dry-run)...\n%s", msg)
 		} else {
-			change, err := r.gerrit.CreateChange(r.cfg.Gerrit.Project, "main", msg, true)
+			change, err := r.gerrit.CreateChange(ctx, r.cfg.Gerrit.Project, "main", msg, true)
 			if err != nil {
 				return err
 			}
@@ -453,7 +453,7 @@ func (r *roller) roll(ctx context.Context) error {
 	generatedFiles[gitLinkPath] = newCTSHash
 
 	msg := r.rollCommitMessage(oldCTSHash, newCTSHash, ctsLog, changeID)
-	ps, err := r.gerrit.EditFiles(changeID, msg, generatedFiles, deletedFiles)
+	ps, err := r.gerrit.EditFiles(ctx, changeID, msg, generatedFiles, deletedFiles)
 	if err != nil {
 		return fmt.Errorf("failed to update change '%v': %v", changeID, err)
 	}
@@ -526,14 +526,14 @@ func (r *roller) roll(ctx context.Context) error {
 			updateExpectationUpdateTimestamp(&exInfo.newExpectations)
 			editedFiles[exInfo.path] = exInfo.newExpectations.String()
 		}
-		ps, err = r.gerrit.EditFiles(changeID, msg, editedFiles, nil)
+		ps, err = r.gerrit.EditFiles(ctx, changeID, msg, editedFiles, nil)
 		if err != nil {
 			return fmt.Errorf("failed to update change '%v': %v", changeID, err)
 		}
 
 		if attempt >= r.flags.maxAttempts {
 			err := fmt.Errorf("CTS failed after %v retries.\nGiving up", attempt)
-			r.gerrit.Comment(ps, err.Error(), nil)
+			r.gerrit.Comment(ctx, ps, err.Error(), nil)
 			return err
 		}
 
@@ -566,11 +566,11 @@ func (r *roller) roll(ctx context.Context) error {
 		reviewer = jsonRes.Emails[0]
 	}
 
-	if err := r.gerrit.AddLabel(changeID, strconv.Itoa(clRevision), "", "Bot-Commit", 1); err != nil {
+	if err := r.gerrit.AddLabel(ctx, changeID, strconv.Itoa(clRevision), "", "Bot-Commit", 1); err != nil {
 		fmt.Println("WARNING: unable to Bot-Commit+1 (expected if running locally): ", err)
 	}
 
-	if err := r.gerrit.SetReadyForReview(changeID, "CTS roll succeeded", reviewer); err != nil {
+	if err := r.gerrit.SetReadyForReview(ctx, changeID, "CTS roll succeeded", reviewer); err != nil {
 		return fmt.Errorf("failed to mark change as ready for review: %v", err)
 	}
 
@@ -699,9 +699,9 @@ func (r *roller) rollCommitMessage(
 // TODO(crbug.com/460178080): Add unittests for this once Gerrit interactions
 // support dependency injection.
 // findExistingRolls looks for all existing open CTS rolls by this user
-func (r *roller) findExistingRolls() ([]gerrit.ChangeInfo, error) {
+func (r *roller) findExistingRolls(ctx context.Context) ([]gerrit.ChangeInfo, error) {
 	// Look for an existing gerrit change to update
-	changes, _, err := r.gerrit.QueryChanges("owner:me",
+	changes, _, err := r.gerrit.QueryChanges(ctx, "owner:me",
 		"is:open",
 		fmt.Sprintf(`repo:"%v"`, r.cfg.Git.Dawn.Project),
 		fmt.Sprintf(`message:"%v"`, common.RollSubjectPrefix))

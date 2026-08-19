@@ -138,7 +138,7 @@ func (r *ResultSource) getResultsImpl(ctx context.Context, cfg Config, auth auth
 		if err != nil {
 			return nil, err
 		}
-		latest, err := LatestCTSRoll(instance)
+		latest, err := LatestCTSRoll(ctx, instance)
 		if err != nil {
 			return nil, err
 		}
@@ -159,7 +159,7 @@ func (r *ResultSource) getResultsImpl(ctx context.Context, cfg Config, auth auth
 		if err != nil {
 			return nil, err
 		}
-		*ps, err = instance.LatestPatchset(strconv.Itoa(ps.Change))
+		*ps, err = instance.LatestPatchset(ctx, strconv.Itoa(ps.Change))
 		if err != nil {
 			err := fmt.Errorf("failed to find latest patchset of change %v: %w",
 				ps.Change, err)
@@ -466,8 +466,8 @@ func convertV2NameToLegacyName(testName string) string {
 
 // LatestCTSRoll returns for the latest merged CTS roll that landed in the past
 // month. If no roll can be found, then an error is returned.
-func LatestCTSRoll(g *gerrit.Gerrit) (gerrit.ChangeInfo, error) {
-	changes, _, err := g.QueryChanges(
+func LatestCTSRoll(ctx context.Context, g *gerrit.Gerrit) (gerrit.ChangeInfo, error) {
+	changes, _, err := g.QueryChanges(ctx,
 		`status:merged`,
 		`-age:1month`,
 		fmt.Sprintf(`message:"%v"`, RollSubjectPrefix))
@@ -484,8 +484,8 @@ func LatestCTSRoll(g *gerrit.Gerrit) (gerrit.ChangeInfo, error) {
 }
 
 // LatestPatchset returns the most recent patchset for the given change.
-func LatestPatchset(g *gerrit.Gerrit, change int) (gerrit.Patchset, error) {
-	ps, err := g.LatestPatchset(strconv.Itoa(change))
+func LatestPatchset(ctx context.Context, g *gerrit.Gerrit, change int) (gerrit.Patchset, error) {
+	ps, err := g.LatestPatchset(ctx, strconv.Itoa(change))
 	if err != nil {
 		err := fmt.Errorf("failed to find latest patchset of change %v: %w",
 			ps.Change, err)
@@ -533,7 +533,7 @@ func mostRecentResultsForChangeImpl(
 	change int,
 	cacheResults cacheResultsFunc) (result.ResultsByExecutionMode, gerrit.Patchset, error) {
 
-	ps, err := LatestPatchset(g, change)
+	ps, err := LatestPatchset(ctx, g, change)
 	if err != nil {
 		return nil, gerrit.Patchset{}, nil
 	}
