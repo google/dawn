@@ -304,9 +304,8 @@ class DrawIndirectUsingInstanceIndexTest : public DrawIndirectUsingFirstVertexTe
     }
 
     void SetUp() override {
-        DawnTest::SetUp();
+        dawn::DrawIndirectUsingFirstVertexTest::SetUp();
         DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::IndirectFirstInstance));
-        GeneralSetup();
     }
 };
 

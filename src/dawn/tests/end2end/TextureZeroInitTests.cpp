@@ -2476,9 +2476,8 @@ DAWN_INSTANTIATE_TEST(TextureZeroInitRenderAreaTest,
 class CompressedTextureZeroInitTest : public TextureZeroInitTest {
   protected:
     void SetUp() override {
-        DawnTest::SetUp();
+        dawn::TextureZeroInitTest::SetUp();
 
-        DAWN_TEST_UNSUPPORTED_IF(UsesWire());
         DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
     }
 

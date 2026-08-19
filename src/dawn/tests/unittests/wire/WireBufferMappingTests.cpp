@@ -70,16 +70,13 @@ DAWN_WIRE_FUTURE_TEST_PARAM_STRUCT(WireBufferParam, MapMode);
 using WireBufferMappingTestBase =
     WireFutureTestWithParams<wgpu::BufferMapCallback<void>*, WireBufferParam>;
 
-// General mapping tests that either do not care about the specific mapping mode, or apply to both.
-class WireBufferMappingTests : public WireBufferMappingTestBase {
+// A shared base class for WireBufferMappingTests and WireBufferMappedAtCreationTests to avoid
+// calling GetParam() in TEST_F tests.
+class WireBufferMappingTestShared : public WireBufferMappingTestBase {
   protected:
     void SetUp() override {
         WireBufferMappingTestBase::SetUp();
         apiBuffer = api.GetNewBuffer();
-
-        if (GetParam().mMapMode) {
-            SetupBuffer(GetMapMode());
-        }
     }
 
     void TearDown() override {
@@ -269,6 +266,18 @@ class WireBufferMappingTests : public WireBufferMappingTestBase {
     // A successfully created buffer
     wgpu::Buffer buffer;
     WGPUBuffer apiBuffer;
+};
+
+// General mapping tests that either do not care about the specific mapping mode, or apply to both.
+class WireBufferMappingTests : public WireBufferMappingTestShared {
+  protected:
+    void SetUp() override {
+        WireBufferMappingTestShared::SetUp();
+
+        if (GetParam().mMapMode) {
+            SetupBuffer(GetMapMode());
+        }
+    }
 };
 
 DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireBufferMappingTests,
@@ -552,12 +561,9 @@ TEST_P(WireBufferMappingWriteTests, MappingErrorWhileAlreadyMapped) {
 }
 
 // Tests specific to mapped at creation.
-class WireBufferMappedAtCreationTests : public WireBufferMappingTests {
+class WireBufferMappedAtCreationTests : public WireBufferMappingTestShared {
   protected:
-    void SetUp() override {
-        WireBufferMappingTestBase::SetUp();
-        apiBuffer = api.GetNewBuffer();
-    }
+    void SetUp() override { WireBufferMappingTestShared::SetUp(); }
 };
 
 DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireBufferMappedAtCreationTests);
@@ -710,43 +716,33 @@ TEST_F(WireBufferMappedAtCreationTests, DisconnectThenCreateUnmap) {
 }
 
 // Check that trying to create a buffer of size MAX_SIZE_T won't get OOM error at the client side.
-TEST_F(WireBufferMappingTests, MaxSizeMappableBufferOOMDirectly) {
+TEST_F(WireBufferMappedAtCreationTests, MaxSizeMappableBufferOOMDirectly) {
     size_t kOOMSize = std::numeric_limits<size_t>::max();
 
-    // Check for mappedAtCreation.
-    {
-        wgpu::BufferDescriptor descriptor = {};
-        descriptor.usage = wgpu::BufferUsage::CopySrc;
-        descriptor.size = kOOMSize;
-        descriptor.mappedAtCreation = true;
+    wgpu::BufferDescriptor descriptor = {};
+    descriptor.usage = wgpu::BufferUsage::CopySrc;
+    descriptor.size = kOOMSize;
+    descriptor.mappedAtCreation = true;
 
-        device.CreateBuffer(&descriptor);
-        FlushClient();
-    }
+    device.CreateBuffer(&descriptor);
+    FlushClient();
+}
 
-    // Check for MapRead usage.
-    {
-        wgpu::BufferDescriptor descriptor = {};
-        descriptor.usage = wgpu::BufferUsage::MapRead;
-        descriptor.size = kOOMSize;
+// Check that trying to create a buffer of size MAX_SIZE_T won't get OOM error at the client side.
+TEST_P(WireBufferMappingTests, MaxSizeMappableBufferOOMDirectly) {
+    size_t kOOMSize = std::numeric_limits<size_t>::max();
 
-        device.CreateBuffer(&descriptor);
-        EXPECT_CALL(api, DeviceCreateErrorBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
-        EXPECT_CALL(api, BufferRelease(apiBuffer)).Times(1);
-        FlushClient();
-    }
+    wgpu::BufferUsage usage = GetMapMode() == wgpu::MapMode::Read ? wgpu::BufferUsage::MapRead
+                                                                  : wgpu::BufferUsage::MapWrite;
 
-    // Check for MapWrite usage.
-    {
-        wgpu::BufferDescriptor descriptor = {};
-        descriptor.usage = wgpu::BufferUsage::MapWrite;
-        descriptor.size = kOOMSize;
+    wgpu::BufferDescriptor descriptor = {};
+    descriptor.usage = usage;
+    descriptor.size = kOOMSize;
 
-        device.CreateBuffer(&descriptor);
-        EXPECT_CALL(api, DeviceCreateErrorBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
-        EXPECT_CALL(api, BufferRelease(apiBuffer)).Times(1);
-        FlushClient();
-    }
+    device.CreateBuffer(&descriptor);
+    EXPECT_CALL(api, DeviceCreateErrorBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
+    EXPECT_CALL(api, BufferRelease(apiBuffer)).Times(1);
+    FlushClient();
 }
 
 // Test that registering a callback then wire disconnect calls the callback with

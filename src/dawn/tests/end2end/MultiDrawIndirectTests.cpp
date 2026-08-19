@@ -314,12 +314,6 @@ class MultiDrawIndirectUsingInstanceIndexTest : public MultiDrawIndirectUsingFir
                 return vec4f(0.0, 1.0, 0.0, 1.0);
             })");
     }
-
-    void SetUp() override {
-        DawnTest::SetUp();
-        DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::MultiDrawIndirect));
-        GeneralSetup();
-    }
 };
 
 TEST_P(MultiDrawIndirectUsingInstanceIndexTest, IndirectOffset) {
