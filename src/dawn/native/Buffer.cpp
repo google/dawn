@@ -1088,8 +1088,7 @@ MaybeError BufferBase::UploadData(uint64_t bufferOffset, Span<const std::byte> d
     return GetDevice()->GetDynamicUploader()->WithUploadReservation(
         data.size(), kCopyBufferToBufferOffsetAlignment,
         [&](UploadReservation reservation) -> MaybeError {
-            // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-            DAWN_UNSAFE_TODO(memcpy(reservation.mappedPointer, data.data(), data.size()));
+            reservation.mappedData.CopyFrom(data);
             return GetDevice()->CopyFromStagingToBuffer(reservation.buffer.Get(),
                                                         reservation.offsetInBuffer, this,
                                                         bufferOffset, data.size());

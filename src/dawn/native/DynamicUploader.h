@@ -39,6 +39,7 @@
 #include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/RingBufferAllocator.h"
 #include "src/utils/non_movable.h"
+#include "src/utils/span.h"
 
 // DynamicUploader is the front-end implementation used to manage multiple ring buffers for upload
 // usage.
@@ -47,7 +48,7 @@ namespace dawn::native {
 class BufferBase;
 
 struct UploadReservation {
-    raw_ptr<void> mappedPointer = nullptr;
+    Span<std::byte> mappedData = {};
     uint64_t offsetInBuffer = 0;
     Ref<BufferBase> buffer;
 };

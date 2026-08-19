@@ -887,11 +887,9 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                 blocksPerRow * largestMipSize.height * largestMipSize.depthOrArrayLayers;
             uint64_t uploadSize = blockInfo.ToBytes(uploadBlocks);
 
-            // TODO(https://crbug.com/534203108): Spanify WithUploadReservation.
             DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
                 uploadSize, blockInfo.byteSize, [&](UploadReservation reservation) -> MaybeError {
-                    DAWN_UNSAFE_TODO(memset(reservation.mappedPointer, clearColor,
-                                            checked_cast<size_t>(uploadSize)));
+                    std::ranges::fill(reservation.mappedData, std::byte(clearColor));
 
                     for (uint32_t level = range.baseMipLevel;
                          level < range.baseMipLevel + range.levelCount; ++level) {

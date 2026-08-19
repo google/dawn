@@ -63,7 +63,7 @@ ResultOrError<UploadReservation> DynamicUploader::Reserve(uint64_t allocationSiz
         DAWN_TRY_ASSIGN(stagingBuffer, mDevice->CreateBuffer(&bufferDesc));
 
         UploadReservation reservation;
-        reservation.mappedPointer = stagingBuffer->GetMappedRange().data();
+        reservation.mappedData = stagingBuffer->GetMappedRange();
         reservation.offsetInBuffer = 0;
         reservation.buffer = std::move(stagingBuffer);
         return reservation;
@@ -124,11 +124,10 @@ ResultOrError<UploadReservation> DynamicUploader::Reserve(uint64_t allocationSiz
 
     UploadReservation reservation;
     reservation.buffer = targetRingBuffer->mStagingBuffer;
-    reservation.mappedPointer = reservation.buffer
-                                    ->GetMappedRange(checked_cast<size_t>(startOffset),
-                                                     checked_cast<size_t>(alignedAllocationSize))
-                                    .first(checked_cast<size_t>(allocationSize))
-                                    .data();
+    reservation.mappedData = reservation.buffer
+                                 ->GetMappedRange(checked_cast<size_t>(startOffset),
+                                                  checked_cast<size_t>(alignedAllocationSize))
+                                 .first(checked_cast<size_t>(allocationSize));
     reservation.offsetInBuffer = startOffset;
 
     return reservation;

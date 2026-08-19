@@ -232,11 +232,10 @@ MaybeError ResourceTable::UpdateMetadataBuffer(CommandRecordingContext* recordin
     Device* device = ToBackend(GetDevice());
 
     // Allocate enough space for all the data to modify and schedule the copies.
-    // TODO(https://crbug.com/534203108): Spanify WithUploadReservation.
     return device->GetDynamicUploader()->WithUploadReservation(
         sizeof(uint32_t) * updates.size(), kCopyBufferToBufferOffsetAlignment,
         [&](UploadReservation reservation) -> MaybeError {
-            uint32_t* stagedData = static_cast<uint32_t*>(reservation.mappedPointer);
+            Span<uint32_t> stagedData = ReinterpretSpan<uint32_t>(reservation.mappedData);
 
             // The metadata buffer will be copied to.
             Buffer* metadataBuffer = ToBackend(GetMetadataBuffer());
@@ -247,7 +246,7 @@ MaybeError ResourceTable::UpdateMetadataBuffer(CommandRecordingContext* recordin
             // Prepare the copies.
             std::vector<VkBufferCopy> copies(updates.size());
             for (auto [i, update] : Enumerate(updates)) {
-                DAWN_UNSAFE_TODO(stagedData[i]) = update.data;
+                stagedData[i] = update.data;
 
                 VkBufferCopy copy{
                     .srcOffset = reservation.offsetInBuffer + i * sizeof(uint32_t),

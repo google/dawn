@@ -1338,11 +1338,9 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
             blocksPerRow * largestMipSize.height * largestMipSize.depthOrArrayLayers;
         uint64_t uploadSize = blockInfo.ToBytes(uploadBlocks);
 
-        // TODO(https://crbug.com/534203108): Spanify WithUploadReservation.
-        DAWN_UNSAFE_TODO(DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+        DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
             uploadSize, blockInfo.byteSize, [&](UploadReservation reservation) -> MaybeError {
-                memset(reservation.mappedPointer, sign_dcast(uClearColor),
-                       checked_cast<size_t>(uploadSize));
+                std::ranges::fill(reservation.mappedData, std::byte(uClearColor));
 
                 std::vector<VkBufferImageCopy> regions;
                 for (uint32_t level = range.baseMipLevel;
@@ -1380,7 +1378,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                     GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                     checked_cast<uint32_t>(regions.size()), regions.data());
                 return {};
-            })));
+            }));
     }
 
     if (clearValue == TextureBase::ClearValue::Zero) {

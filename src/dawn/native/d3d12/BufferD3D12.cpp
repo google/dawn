@@ -742,12 +742,10 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
     } else {
         // TODO(crbug.com/dawn/852): use ClearUnorderedAccessView*() when the buffer usage
         // includes STORAGE.
-        // TODO(https://crbug.com/534203108): Spanify WithUploadReservation.
         DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
             size, kCopyBufferToBufferOffsetAlignment,
             [&](UploadReservation reservation) -> MaybeError {
-                DAWN_UNSAFE_TODO(
-                    memset(reservation.mappedPointer, clearValue, checked_cast<size_t>(size)));
+                std::ranges::fill(reservation.mappedData, std::byte(clearValue));
                 device->CopyFromStagingToBufferHelper(commandContext, reservation.buffer.Get(),
                                                       reservation.offsetInBuffer, this, offset,
                                                       size);

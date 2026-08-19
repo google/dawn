@@ -1517,7 +1517,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
             case Command::WriteBuffer: {
                 WriteBufferCmd* write = mCommands.NextCommand<WriteBufferCmd>();
                 const uint64_t offset = write->offset;
-                Span<const uint8_t> data = mCommands.NextData<uint8_t>(write->size);
+                Span<const std::byte> data = mCommands.NextData<std::byte>(write->size);
 
                 if (data.empty()) {
                     continue;
@@ -1525,11 +1525,10 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
 
                 Buffer* dstBuffer = ToBackend(write->buffer.Get());
 
-                // TODO(https://crbug.com/534203108): Spanify WithUploadReservation.
-                DAWN_UNSAFE_TODO(DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+                DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
                     data.size(), kCopyBufferToBufferOffsetAlignment,
                     [&](UploadReservation reservation) -> MaybeError {
-                        memcpy(reservation.mappedPointer, data.data(), data.size());
+                        reservation.mappedData.CopyFrom(data);
 
                         dstBuffer->EnsureDataInitializedAsDestination(recordingContext, offset,
                                                                       data.size());
@@ -1544,7 +1543,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                                                  ToBackend(reservation.buffer)->GetHandle(),
                                                  dstBuffer->GetHandle(), 1, &copy);
                         return {};
-                    })));
+                    }));
                 break;
             }
 

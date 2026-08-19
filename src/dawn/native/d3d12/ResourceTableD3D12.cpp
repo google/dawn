@@ -345,11 +345,10 @@ MaybeError ResourceTable::UpdateMetadataBuffer(CommandRecordingContext* recordin
     Device* device = ToBackend(GetDevice());
 
     // Allocate enough space for all the data to modify and schedule the copies.
-    // TODO(https://crbug.com/534203108): Spanify WithUploadReservation.
     return device->GetDynamicUploader()->WithUploadReservation(
         sizeof(uint32_t) * updates.size(), kCopyBufferToBufferOffsetAlignment,
         [&](UploadReservation reservation) -> MaybeError {
-            uint32_t* stagedData = static_cast<uint32_t*>(reservation.mappedPointer);
+            Span<uint32_t> stagedData = ReinterpretSpan<uint32_t>(reservation.mappedData);
 
             // The metadata buffer will be copied to.
             Buffer* metadataBuffer = ToBackend(GetMetadataBuffer());
@@ -365,9 +364,9 @@ MaybeError ResourceTable::UpdateMetadataBuffer(CommandRecordingContext* recordin
                 if (SamplerIndex samplerIndex = mSlotToSamplerIndex[update.slot];
                     samplerIndex != kInvalidSamplerIndex) {
                     // Store sampler index in high 16 bits, type id in low 16 bits
-                    DAWN_UNSAFE_TODO(stagedData[i]) = update.data | (uint32_t{samplerIndex} << 16);
+                    stagedData[i] = update.data | (uint32_t{samplerIndex} << 16);
                 } else {
-                    DAWN_UNSAFE_TODO(stagedData[i]) = update.data;  // Copy to staged
+                    stagedData[i] = update.data;  // Copy to staged
                 }
 
                 // Copy staged to metadata buffer

@@ -71,14 +71,17 @@ namespace dawn::native {
 
 namespace {
 
-void CopyTextureData(uint8_t* dstPointer,
-                     const uint8_t* srcPointer,
+void CopyTextureData(Span<std::byte> dst,
+                     Span<const std::byte> src,
                      uint32_t depth,
                      uint32_t dstRowsPerImage,
                      uint64_t srcRowsPerImage,
                      uint32_t actualBytesPerRow,
                      uint32_t dstBytesPerRow,
                      uint32_t srcBytesPerRow) {
+    const std::byte* srcPointer = src.data();
+    std::byte* dstPointer = dst.data();
+
     uint64_t imageAdditionalStride = srcBytesPerRow * (srcRowsPerImage - dstRowsPerImage);
     bool copyWholeLayer = actualBytesPerRow == dstBytesPerRow && dstBytesPerRow == srcBytesPerRow;
     bool copyWholeData = copyWholeLayer && imageAdditionalStride == 0;
@@ -405,12 +408,10 @@ MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
 
     return GetDevice()->GetDynamicUploader()->WithUploadReservation(
         packedDataSize, offsetAlignment, [&](UploadReservation reservation) -> MaybeError {
-            const uint8_t* srcPointer =
-                DAWN_UNSAFE_TODO(reinterpret_cast<const uint8_t*>(data.data()) + dataLayout.offset);
-            uint8_t* dstPointer = reinterpret_cast<uint8_t*>(reservation.mappedPointer.get());
-            CopyTextureData(dstPointer, srcPointer, writeSizePixel.depthOrArrayLayers,
-                            dchecked_cast<uint32_t>(rowsPerImage), dataLayout.rowsPerImage,
-                            bytesPerRow, alignedBytesPerRow, dataLayout.bytesPerRow);
+            CopyTextureData(
+                reservation.mappedData, data.subspan(checked_cast<size_t>(dataLayout.offset)),
+                writeSizePixel.depthOrArrayLayers, dchecked_cast<uint32_t>(rowsPerImage),
+                dataLayout.rowsPerImage, bytesPerRow, alignedBytesPerRow, dataLayout.bytesPerRow);
 
             TexelCopyBufferLayout passDataLayout = dataLayout;
             passDataLayout.offset = reservation.offsetInBuffer;
