@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_lang_wgsl_resolver
 # Kind:      lib
+# Condition: TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_wgsl_resolver lib
   lang/wgsl/resolver/dependency_graph.cc
@@ -85,6 +87,7 @@ tint_target_add_external_dependencies(tint_lang_wgsl_resolver lib
   "src_utils"
 )
 
+endif(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
 if(TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_lang_wgsl_resolver_test

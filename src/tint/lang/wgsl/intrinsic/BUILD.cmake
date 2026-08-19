@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_lang_wgsl_intrinsic
 # Kind:      lib
+# Condition: TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_wgsl_intrinsic lib
   lang/wgsl/intrinsic/ctor_conv.cc
@@ -70,6 +72,7 @@ tint_target_add_external_dependencies(tint_lang_wgsl_intrinsic lib
   "src_utils"
 )
 
+endif(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
 if(TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_lang_wgsl_intrinsic_test

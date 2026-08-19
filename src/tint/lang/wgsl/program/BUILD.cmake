@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_lang_wgsl_program
 # Kind:      lib
+# Condition: TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_wgsl_program lib
   lang/wgsl/program/program.cc
@@ -70,9 +72,12 @@ tint_target_add_external_dependencies(tint_lang_wgsl_program lib
   "src_utils"
 )
 
+endif(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
+if(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_lang_wgsl_program_test
 # Kind:      test
+# Condition: TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_wgsl_program_test test
   lang/wgsl/program/program_test.cc
@@ -105,3 +110,5 @@ tint_target_add_external_dependencies(tint_lang_wgsl_program_test test
   "gtest"
   "src_utils"
 )
+
+endif(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)

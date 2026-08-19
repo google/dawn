@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_lang_wgsl_ir
 # Kind:      lib
+# Condition: TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_wgsl_ir lib
   lang/wgsl/ir/atomic_vec2u_to_from_u64.cc
@@ -73,9 +75,12 @@ tint_target_add_external_dependencies(tint_lang_wgsl_ir lib
   "src_utils"
 )
 
+endif(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
+if(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_lang_wgsl_ir_test
 # Kind:      test
+# Condition: TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_wgsl_ir_test test
   lang/wgsl/ir/atomic_vec2u_to_from_u64_test.cc
@@ -137,3 +142,5 @@ if(TINT_BUILD_WGSL_WRITER)
     tint_lang_wgsl_writer_raise
   )
 endif(TINT_BUILD_WGSL_WRITER)
+
+endif(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)

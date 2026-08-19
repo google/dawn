@@ -138,10 +138,6 @@ tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz fuzz
   tint_lang_core_constant
   tint_lang_core_ir
   tint_lang_core_type
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
   tint_utils
   tint_utils_bytes
   tint_utils_containers
@@ -167,5 +163,14 @@ if(TINT_BUILD_WGSL_READER)
     tint_lang_wgsl_reader
   )
 endif(TINT_BUILD_WGSL_READER)
+
+if(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz fuzz
+    tint_lang_wgsl
+    tint_lang_wgsl_ast
+    tint_lang_wgsl_program
+    tint_lang_wgsl_sem
+  )
+endif(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
 
 endif(TINT_BUILD_FUZZERS)

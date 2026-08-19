@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_cmd_tint_cmd
 # Kind:      cmd
+# Condition: TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_cmd_tint_cmd cmd
   cmd/tint/main.cc
@@ -141,3 +143,5 @@ if(TINT_BUILD_WGSL_WRITER)
 endif(TINT_BUILD_WGSL_WRITER)
 
 tint_target_set_output_name(tint_cmd_tint_cmd cmd "tint")
+
+endif(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)

@@ -34,7 +34,9 @@
 #include <string>
 #include <vector>
 
+#if TINT_BUILD_WGSL_READER || TINT_BUILD_WGSL_WRITER
 #include "src/tint/lang/wgsl/inspector/inspector.h"
+#endif
 #include "src/tint/utils/diagnostic/source.h"
 #include "src/utils/compiler.h"
 
@@ -81,6 +83,7 @@ struct ProgramInfo {
 /// @param program the program
 void PrintWGSL(std::ostream& out, const tint::Program& program);
 
+#if TINT_BUILD_WGSL_READER || TINT_BUILD_WGSL_WRITER
 /// Prints inspector data information to stderr
 /// @param inspector the inspector to print.
 void PrintInspectorData(tint::inspector::Inspector& inspector);
@@ -88,6 +91,7 @@ void PrintInspectorData(tint::inspector::Inspector& inspector);
 /// Prints inspector binding information to stderr
 /// @param inspector the inspector to print.
 void PrintInspectorBindings(tint::inspector::Inspector& inspector);
+#endif
 
 /// Options for the LoadProgramInfo call
 struct LoadProgramOptions {

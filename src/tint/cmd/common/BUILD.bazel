@@ -55,11 +55,6 @@ cc_library(
     "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
-    "//src/tint/lang/wgsl",
-    "//src/tint/lang/wgsl/ast",
-    "//src/tint/lang/wgsl/inspector",
-    "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/sem",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -86,6 +81,15 @@ cc_library(
   }) + select({
     ":tint_build_wgsl_reader": [
       "//src/tint/lang/wgsl/reader",
+    ],
+    "//conditions:default": [],
+  }) + select({
+    ":tint_build_wgsl_reader_or_tint_build_wgsl_writer": [
+      "//src/tint/lang/wgsl",
+      "//src/tint/lang/wgsl/ast",
+      "//src/tint/lang/wgsl/inspector",
+      "//src/tint/lang/wgsl/program",
+      "//src/tint/lang/wgsl/sem",
     ],
     "//conditions:default": [],
   }) + select({
@@ -124,6 +128,14 @@ selects.config_setting_group(
     match_any = [
         ":tint_build_spv_reader",
         ":tint_build_spv_writer",
+    ],
+)
+
+selects.config_setting_group(
+    name = "tint_build_wgsl_reader_or_tint_build_wgsl_writer",
+    match_any = [
+        ":tint_build_wgsl_reader",
+        ":tint_build_wgsl_writer",
     ],
 )
 

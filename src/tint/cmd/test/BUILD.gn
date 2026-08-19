@@ -62,12 +62,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/ir/analysis:unittests",
       "${tint_src_dir}/lang/core/ir/transform:unittests",
       "${tint_src_dir}/lang/core/type:unittests",
-      "${tint_src_dir}/lang/wgsl",
-      "${tint_src_dir}/lang/wgsl:unittests",
-      "${tint_src_dir}/lang/wgsl/ast:unittests",
-      "${tint_src_dir}/lang/wgsl/ir:unittests",
-      "${tint_src_dir}/lang/wgsl/program:unittests",
-      "${tint_src_dir}/lang/wgsl/sem:unittests",
       "${tint_src_dir}/utils",
       "${tint_src_dir}/utils:unittests",
       "${tint_src_dir}/utils/bytes:unittests",
@@ -166,6 +160,17 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/wgsl/reader/parser:unittests",
         "${tint_src_dir}/lang/wgsl/reader/program_to_ir:unittests",
         "${tint_src_dir}/lang/wgsl/resolver:unittests",
+      ]
+    }
+
+    if (tint_build_wgsl_reader || tint_build_wgsl_writer) {
+      deps += [
+        "${tint_src_dir}/lang/wgsl",
+        "${tint_src_dir}/lang/wgsl:unittests",
+        "${tint_src_dir}/lang/wgsl/ast:unittests",
+        "${tint_src_dir}/lang/wgsl/ir:unittests",
+        "${tint_src_dir}/lang/wgsl/program:unittests",
+        "${tint_src_dir}/lang/wgsl/sem:unittests",
       ]
     }
 

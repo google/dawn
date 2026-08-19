@@ -50,11 +50,6 @@ tint_target_add_dependencies(tint_cmd_common lib
   tint_lang_core_intrinsic
   tint_lang_core_ir
   tint_lang_core_type
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_inspector
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -90,6 +85,16 @@ if(TINT_BUILD_WGSL_READER)
     tint_lang_wgsl_reader
   )
 endif(TINT_BUILD_WGSL_READER)
+
+if(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_common lib
+    tint_lang_wgsl
+    tint_lang_wgsl_ast
+    tint_lang_wgsl_inspector
+    tint_lang_wgsl_program
+    tint_lang_wgsl_sem
+  )
+endif(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
 
 if(TINT_BUILD_WGSL_WRITER)
   tint_target_add_dependencies(tint_cmd_common lib

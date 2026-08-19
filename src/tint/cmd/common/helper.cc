@@ -93,6 +93,7 @@ InputFormat InputFormatFromFilename(const std::string& filename) {
     return input_format;
 }
 
+#if TINT_BUILD_WGSL_READER || TINT_BUILD_WGSL_WRITER
 void PrintBindings(tint::inspector::Inspector& inspector, const std::string& ep_name) {
     auto bindings = inspector.GetResourceBindings(ep_name);
     if (!inspector.error().empty()) {
@@ -108,6 +109,7 @@ void PrintBindings(tint::inspector::Inspector& inspector, const std::string& ep_
                   << "\t\t image_format = " << TexelFormatToString(binding.image_format) << "\n\n";
     }
 }
+#endif
 
 #if TINT_BUILD_SPV_READER
 tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOptions& opts) {
@@ -366,6 +368,7 @@ void PrintDiagnostics(const tint::diag::List& diagnostics,
     fflush(stderr);
 }
 
+#if TINT_BUILD_WGSL_READER || TINT_BUILD_WGSL_WRITER
 void PrintInspectorData(tint::inspector::Inspector& inspector) {
     auto entry_points = inspector.GetEntryPoints();
     if (!inspector.error().empty()) {
@@ -450,6 +453,7 @@ void PrintInspectorBindings(tint::inspector::Inspector& inspector) {
     }
     std::cout << std::string(80, '-') << "\n";
 }
+#endif
 
 std::string EntryPointStageToString(tint::inspector::PipelineStage stage) {
     switch (stage) {

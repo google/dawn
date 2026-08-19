@@ -56,12 +56,6 @@ cc_binary(
     "//src/tint/lang/core/ir:test",
     "//src/tint/lang/core/type:test",
     "//src/tint/lang/core:test",
-    "//src/tint/lang/wgsl",
-    "//src/tint/lang/wgsl/ast:test",
-    "//src/tint/lang/wgsl/ir:test",
-    "//src/tint/lang/wgsl/program:test",
-    "//src/tint/lang/wgsl/sem:test",
-    "//src/tint/lang/wgsl:test",
     "//src/tint/utils",
     "//src/tint/utils/bytes:test",
     "//src/tint/utils/command:test",
@@ -161,6 +155,16 @@ cc_binary(
     ],
     "//conditions:default": [],
   }) + select({
+    ":tint_build_wgsl_reader_or_tint_build_wgsl_writer": [
+      "//src/tint/lang/wgsl",
+      "//src/tint/lang/wgsl/ast:test",
+      "//src/tint/lang/wgsl/ir:test",
+      "//src/tint/lang/wgsl/program:test",
+      "//src/tint/lang/wgsl/sem:test",
+      "//src/tint/lang/wgsl:test",
+    ],
+    "//conditions:default": [],
+  }) + select({
     ":tint_build_wgsl_writer": [
       "//src/tint/lang/wgsl/writer/ast_printer:test",
       "//src/tint/lang/wgsl/writer/common",
@@ -224,6 +228,14 @@ selects.config_setting_group(
     match_any = [
         ":tint_build_spv_reader",
         ":tint_build_spv_writer",
+    ],
+)
+
+selects.config_setting_group(
+    name = "tint_build_wgsl_reader_or_tint_build_wgsl_writer",
+    match_any = [
+        ":tint_build_wgsl_reader",
+        ":tint_build_wgsl_writer",
     ],
 )
 

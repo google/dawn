@@ -53,12 +53,6 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_lang_core_ir_test
   tint_lang_core_type_test
   tint_lang_core_test
-  tint_lang_wgsl
-  tint_lang_wgsl_ast_test
-  tint_lang_wgsl_ir_test
-  tint_lang_wgsl_program_test
-  tint_lang_wgsl_sem_test
-  tint_lang_wgsl_test
   tint_utils
   tint_utils_bytes_test
   tint_utils_command_test
@@ -170,6 +164,17 @@ if(TINT_BUILD_WGSL_READER)
     tint_lang_wgsl_resolver_test
   )
 endif(TINT_BUILD_WGSL_READER)
+
+if(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
+    tint_lang_wgsl
+    tint_lang_wgsl_ast_test
+    tint_lang_wgsl_ir_test
+    tint_lang_wgsl_program_test
+    tint_lang_wgsl_sem_test
+    tint_lang_wgsl_test
+  )
+endif(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
 
 if(TINT_BUILD_WGSL_WRITER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
