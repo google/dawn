@@ -42,6 +42,7 @@ namespace {
 
 class Helper : public ResourceTableHelper {
   public:
+    Helper() = default;
     ~Helper() override = default;
 
     // Returns a map of types to the var which is used to access the memory of that type
@@ -67,6 +68,11 @@ class Helper : public ResourceTableHelper {
 
         return res;
     }
+
+    Helper(const Helper&) = delete;
+    Helper(Helper&&) = delete;
+    Helper& operator=(const Helper&) = delete;
+    Helper& operator=(Helper&&) = delete;
 };
 
 using IR_ResourceTableTest = TransformTest;
