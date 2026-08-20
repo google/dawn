@@ -31,6 +31,23 @@ action("litert_lm_advanced_main") {
       [ rebase_path("$root_out_dir/litert_lm_advanced_main", root_build_dir) ]
   outputs = [ "$root_out_dir/litert_lm_advanced_main" ]
   inputs = [ "build_litert_lm.py" ]
+  if (is_linux) {
+    if (target_cpu == "x64") {
+      inputs += [
+        "data/prebuilt/linux_x86_64/libGemmaModelConstraintProvider.so",
+        "data/prebuilt/linux_x86_64/libLiteRt.so",
+        "data/prebuilt/linux_x86_64/libLiteRtTopKWebGpuSampler.so",
+        "data/prebuilt/linux_x86_64/libLiteRtWebGpuAccelerator.so",
+      ]
+    } else if (target_cpu == "arm64") {
+      inputs += [
+        "data/prebuilt/linux_arm64/libGemmaModelConstraintProvider.so",
+        "data/prebuilt/linux_arm64/libLiteRt.so",
+        "data/prebuilt/linux_arm64/libLiteRtTopKWebGpuSampler.so",
+        "data/prebuilt/linux_arm64/libLiteRtWebGpuAccelerator.so",
+      ]
+    }
+  }
   deps = [ "//src/dawn/native:webgpu_dawn" ]
   data = [
     "data/model.litertlm",
