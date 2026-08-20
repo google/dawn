@@ -57,7 +57,6 @@ enum WGSLLanguageFeatureName {
 
 enum GPUFeatureName {
     "atomic-vec2u-min-max",
-    "subgroup-size-control",
     "texture-compression-unaligned",
 }
 

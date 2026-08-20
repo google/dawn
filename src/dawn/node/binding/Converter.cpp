@@ -1352,6 +1352,9 @@ bool Converter::Convert(wgpu::VertexFormat& out, const interop::GPUVertexFormat&
         case interop::GPUVertexFormat::kUnorm1010102:
             out = wgpu::VertexFormat::Unorm10_10_10_2;
             return true;
+        case interop::GPUVertexFormat::kSnorm1010102:
+            out = wgpu::VertexFormat::Snorm10_10_10_2;
+            return true;
         case interop::GPUVertexFormat::kUnorm8X4Bgra:
             out = wgpu::VertexFormat::Unorm8x4BGRA;
             return true;
