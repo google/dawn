@@ -104,6 +104,8 @@ struct ResourceTableConfig {
                  default_binding_type_order,
                  get_sampler_index_from_metadata,
                  binding_to_resource_type);
+    TINT_REFLECT_HASH_CODE(ResourceTableConfig);
+
     bool operator==(const ResourceTableConfig&) const = default;
 };
 
