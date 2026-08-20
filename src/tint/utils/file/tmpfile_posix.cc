@@ -70,9 +70,11 @@ TmpFile::~TmpFile() {
     }
 }
 
-bool TmpFile::Append(const void* data, size_t size) const {
+bool TmpFile::Append(std::span<const std::byte> data) const {
     if (auto* file = fopen(path_.c_str(), "ab")) {
-        DAWN_UNSAFE_TODO(fwrite(data, size, 1, file));
+        // SAFETY: The source buffer is data.data() and its size is data.size() bytes, which is
+        // bounds-safe for this write.
+        DAWN_UNSAFE_BUFFERS(fwrite(data.data(), 1, data.size(), file));
         fclose(file);
         return true;
     }

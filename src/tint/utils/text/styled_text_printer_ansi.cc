@@ -98,7 +98,9 @@ class Printer24Bit : public StyledTextPrinter {
                     fprintf(file_, ESCAPE "[22m");
                 }
             }
-            DAWN_UNSAFE_TODO(fwrite(text.data(), 1, text.size(), file_));
+            // SAFETY: The source buffer is text.data() and its length is text.size(), which is
+            // bounds-safe for this write.
+            DAWN_UNSAFE_BUFFERS(fwrite(text.data(), 1, text.size(), file_));
         });
         fprintf(file_, ESCAPE "[m");
         fflush(file_);
@@ -184,7 +186,9 @@ class Printer8Bit : public StyledTextPrinter {
                     fprintf(file_, ESCAPE "[22m");
                 }
             }
-            DAWN_UNSAFE_TODO(fwrite(text.data(), 1, text.size(), file_));
+            // SAFETY: The source buffer is text.data() and its length is text.size(), which is
+            // bounds-safe for this write.
+            DAWN_UNSAFE_BUFFERS(fwrite(text.data(), 1, text.size(), file_));
         });
         fprintf(file_, ESCAPE "[m");
         fflush(file_);

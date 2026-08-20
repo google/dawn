@@ -189,7 +189,9 @@ void SetStdinModeBinary();
 template <typename ContainerT>
 bool WriteStdoutImpl(const ContainerT& buffer) {
     FILE* out_file = stdout;
-    size_t written = DAWN_UNSAFE_TODO(
+    // SAFETY: The .data() and .size() are both for the same container, so there should be
+    // .size() * sizeof(value_type) of memory to write into.
+    size_t written = DAWN_UNSAFE_BUFFERS(
         fwrite(buffer.data(), sizeof(typename ContainerT::value_type), buffer.size(), out_file));
     if (buffer.size() != written) {
         std::cerr << "Could not write all output to standard output\n";
@@ -220,7 +222,9 @@ bool WriteFileImpl(const std::string& output_file,
         return false;
     }
 
-    size_t written = DAWN_UNSAFE_TODO(
+    // SAFETY: The .data() and .size() are both for the same container, so there should be
+    // .size() * sizeof(value_type) of memory to write into.
+    size_t written = DAWN_UNSAFE_BUFFERS(
         fwrite(buffer.data(), sizeof(typename ContainerT::value_type), buffer.size(), file));
     if (buffer.size() != written) {
         std::cerr << "Could not write to file " << output_file << "\n";
@@ -278,7 +282,9 @@ bool ReadFileImpl(const std::string& input_file, std::vector<T>* buffer) {
     buffer->clear();
     buffer->resize(file_size / sizeof(T));
 
-    size_t bytes_read = DAWN_UNSAFE_TODO(fread(buffer->data(), 1, file_size, file));
+    // SAFETY: buffer is resized to file_size / sizeof(T) which corresponds to file_size bytes,
+    // making sure there is enough space to write into.
+    size_t bytes_read = DAWN_UNSAFE_BUFFERS(fread(buffer->data(), 1, file_size, file));
     fclose(file);
     if (bytes_read != file_size) {
         std::cerr << "Failed to read " << input_file << "\n";
@@ -302,7 +308,10 @@ bool ReadStdinImpl(std::vector<T>* buffer) {
     std::vector<T> chunk(kItemsPerChunk);
     FILE* in_file = stdin;
     while (!std::feof(in_file)) {
-        size_t bytes_read = DAWN_UNSAFE_TODO(std::fread(chunk.data(), 1, kBytesPerChunk, in_file));
+        // SAFETY: chunk has a capacity of kItemsPerChunk (which is kBytesPerChunk bytes since
+        // sizeof(T) is divisible and checked). std::fread reads at most kBytesPerChunk.
+        size_t bytes_read =
+            DAWN_UNSAFE_BUFFERS(std::fread(chunk.data(), 1, kBytesPerChunk, in_file));
         if (bytes_read == 0) {
             if (std::ferror(in_file)) {
                 std::perror("Error reading from standard input");

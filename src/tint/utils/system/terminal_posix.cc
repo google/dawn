@@ -77,7 +77,9 @@ std::optional<bool> TerminalIsDarkImpl(FILE* out) {
 
     // Emit the device control escape sequence to query the terminal colors.
     static constexpr std::string_view kQuery = "\033]11;?\033\\";
-    DAWN_UNSAFE_TODO(fwrite(kQuery.data(), 1, kQuery.length(), out));
+    // SAFETY: kQuery is a constexpr string_view, its data pointer and length are guaranteed
+    // matching and bounds-safe.
+    DAWN_UNSAFE_BUFFERS(fwrite(kQuery.data(), 1, kQuery.length(), out));
     fflush(out);
 
     // Timeout for attempting to read the response.
@@ -119,7 +121,8 @@ std::optional<bool> TerminalIsDarkImpl(FILE* out) {
             }
 
             char c;
-            if (DAWN_UNSAFE_TODO(fread(&c, 1, 1, in_file)) == 1) {
+            // SAFETY: The target buffer is &c (which has size 1 byte) and the fread count is 1.
+            if (DAWN_UNSAFE_BUFFERS(fread(&c, 1, 1, in_file)) == 1) {
                 return c;
             }
         }

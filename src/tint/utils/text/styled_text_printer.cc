@@ -41,7 +41,9 @@ class Plain : public StyledTextPrinter {
 
     void Print(const StyledText& text) override {
         auto plain = text.Plain();
-        DAWN_UNSAFE_TODO(fwrite(plain.data(), 1, plain.size(), file_));
+        // SAFETY: The source buffer is plain.data() and its length is plain.size(), which is
+        // bounds-safe for this write.
+        DAWN_UNSAFE_BUFFERS(fwrite(plain.data(), 1, plain.size(), file_));
     }
 
   private:
