@@ -486,7 +486,7 @@ void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext
     std::vector<D3D12_RESOURCE_BARRIER> barriers;
 
     uint32_t aspectCount = sign_dcast(std::popcount(static_cast<uint8_t>(range.aspects)));
-    barriers.reserve(range.levelCount * range.layerCount * aspectCount);
+    barriers.reserve(size_t{range.levelCount} * range.layerCount * aspectCount);
 
     TransitionUsageAndGetResourceBarrier(commandContext, &barriers, newState, range);
     if (barriers.size()) {

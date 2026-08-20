@@ -38,7 +38,6 @@ Checks:
   #- -bugprone-sizeof-expression
   #- -cppcoreguidelines-owning-memory
   ## - Arithmetic (crbug.com/515527144/dependencies)
-  #- -bugprone-implicit-widening-of-multiplication-result  # has multiple fixit alternatives
   #- -bugprone-integer-division
   #- -bugprone-misplaced-widening-cast
   #- -bugprone-narrowing-conversions

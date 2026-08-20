@@ -346,7 +346,7 @@ ResultOrError<std::tuple<ID3D11Buffer*, UINT, UINT>> BindGroupTracker::GetConsta
     UINT firstConstant = static_cast<UINT>(binding.offset / 16);
     UINT size = static_cast<UINT>(Align(binding.size, 16) / 16);
     UINT numConstants = Align(size, 16);
-    DAWN_ASSERT(binding.offset + numConstants * 16 <= binding.buffer->GetAllocatedSize());
+    DAWN_ASSERT(binding.offset + uint64_t{numConstants} * 16 <= binding.buffer->GetAllocatedSize());
 
     return std::tuple{d3d11Buffer, firstConstant, numConstants};
 }

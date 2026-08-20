@@ -75,9 +75,10 @@ struct ComputeImmediates {
 };
 DAWN_DISABLE_STRUCT_PADDING_WARNINGS
 
-static_assert(sizeof(ComputeImmediates) <= kMaxImmediateMaskBits * kImmediateElementByteSize,
+static_assert(sizeof(ComputeImmediates) <=
+                  size_t{kMaxImmediateMaskBits} * kImmediateElementByteSize,
               "ComputeImmediates must fit within the immediate mask budget.");
-static_assert(sizeof(RenderImmediates) <= kMaxImmediateMaskBits * kImmediateElementByteSize,
+static_assert(sizeof(RenderImmediates) <= size_t{kMaxImmediateMaskBits} * kImmediateElementByteSize,
               "RenderImmediates must fit within the immediate mask budget.");
 
 }  // namespace dawn::native::d3d12

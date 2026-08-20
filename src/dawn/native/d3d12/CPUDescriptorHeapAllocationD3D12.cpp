@@ -45,7 +45,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHeapAllocation::OffsetFrom(
     uint32_t offsetInDescriptorCount) const {
     DAWN_ASSERT(IsValid());
     D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = mBaseDescriptor;
-    cpuHandle.ptr += sizeIncrementInBytes * offsetInDescriptorCount;
+    cpuHandle.ptr += SIZE_T{sizeIncrementInBytes} * offsetInDescriptorCount;
     return cpuHandle;
 }
 

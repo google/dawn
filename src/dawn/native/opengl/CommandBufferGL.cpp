@@ -790,8 +790,7 @@ class ImmediateTracker : public T {
         ImmediateMask pipelineMask = lastPipeline->GetImmediateMask();
         ImmediateMask uploadBits = this->mDirty & pipelineMask;
         for (auto&& [offset, size] : IterateRanges(uploadBits)) {
-            size_t immediateContentStartOffset =
-                static_cast<uint32_t>(offset) * kImmediateElementByteSize;
+            size_t immediateContentStartOffset = size_t{offset} * kImmediateElementByteSize;
             auto location =
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
             auto count = static_cast<uint32_t>(size);

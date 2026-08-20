@@ -78,7 +78,7 @@ ResultOrError<CPUDescriptorHeapAllocation> StagingDescriptorAllocator::AllocateC
     }
 
     const D3D12_CPU_DESCRIPTOR_HANDLE baseCPUDescriptor = {
-        buffer.heap->GetCPUDescriptorHandleForHeapStart().ptr + (blockIndex * mBlockSize)};
+        buffer.heap->GetCPUDescriptorHandleForHeapStart().ptr + (SIZE_T{blockIndex} * mBlockSize)};
 
     return CPUDescriptorHeapAllocation{baseCPUDescriptor, heapIndex};
 }
