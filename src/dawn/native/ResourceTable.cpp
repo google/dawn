@@ -542,13 +542,33 @@ void ResourceTableBase::SetEntry(ResourceTableSlot slot, const BindingResource* 
     MarkStateDirty(slot);
 }
 
-absl::flat_hash_set<Ref<TextureBase>> ResourceTableBase::MakeResourcesVisibleExcept(
+MaybeError ResourceTableBase::ApplyDirtySlotUpdatesWith(
+    const absl::flat_hash_set<TextureBase*>& writableTextures,
+    absl::FunctionRef<ApplyUpdateFn> ApplyUpdate) {
+    Updates updates = AcquireDirtySlotUpdates(writableTextures);
+
+    DAWN_TRY(
+        ApplyUpdate(updates.metadataUpdates, updates.resourceDiffs, updates.texturesToTransition));
+
+    // The handling of updates.texturesToTransition may cause memory barriers that mark them
+    // dirty again, when they have just been put in the correct state. Ignore this fake dirtying
+    // by clearing mDirtyStateTextures.
+#if defined(DAWN_ENABLE_ASSERTS)
+    for (const auto& texture : mDirtyStateTextures) {
+        DAWN_ASSERT(updates.texturesToTransition.contains(texture));
+    }
+#endif
+    mDirtyStateTextures = std::move(updates.texturesDirtyAfterUpdate);
+    return {};
+}
+
+ResourceTableBase::Updates ResourceTableBase::MakeResourcesVisibleExcept(
     const absl::flat_hash_set<TextureBase*>& writableTextures) {
     // This function uses mDirtyStateTextures and writableTextures to figure out visibility for each
     // texture in the table. Along with returning the set of textures to transition, this function
     // also updates the visibility flag in mTextureState so that SetEntry can set the right
     // visibility on newly added textures.
-    absl::flat_hash_set<Ref<TextureBase>> texturesToTransition;
+    Updates updates;
 
     auto HandleDirtyTexture = [&](TextureBase* texture) {
         // The texture may not be in mTextureState if, for example, it was destroyed.
@@ -563,7 +583,7 @@ absl::flat_hash_set<Ref<TextureBase>> ResourceTableBase::MakeResourcesVisibleExc
             !texture->IsDestroyed() && texture->HasAccess() && !writableTextures.contains(texture);
 
         if (visible) {
-            texturesToTransition.insert(texture);
+            updates.texturesToTransition.insert(texture);
         }
 
         if (textureState.visible != visible) {
@@ -588,27 +608,25 @@ absl::flat_hash_set<Ref<TextureBase>> ResourceTableBase::MakeResourcesVisibleExc
     mDirtyStateTextures.clear();
 
     // Now process writable textures, hiding any that are in the table.
-    // We also make sure to add them to mDirtyStateTextures so that if they're not writable next
-    // call, we unhide them.
+    // We also make sure to add them to texturesDirtyAfterUpdate so that if they're not writable
+    // next call, we unhide them.
     for (TextureBase* texture : writableTextures) {
         if (mTextureState.contains(texture)) {
             // We may be recomputing visibility unnecessarily, but it will be possible to optimize,
             // and it will get more complex once we support resource state.
             HandleDirtyTexture(texture);
-            mDirtyStateTextures.insert(texture);
+            updates.texturesDirtyAfterUpdate.insert(texture);
         }
     }
 
-    return texturesToTransition;
+    return updates;
 }
 
 ResourceTableBase::Updates ResourceTableBase::AcquireDirtySlotUpdates(
     const absl::flat_hash_set<TextureBase*>& writableTextures) {
     DAWN_CHECK(!mDestroyed);
 
-    Updates updates;
-
-    updates.texturesToTransition = MakeResourcesVisibleExcept(writableTextures);
+    Updates updates = MakeResourcesVisibleExcept(writableTextures);
 
     for (ResourceTableSlot dirtySlot : mDirtySlots) {
         SlotState& state = mSlots[dirtySlot];

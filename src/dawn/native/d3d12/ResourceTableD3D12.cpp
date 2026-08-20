@@ -306,29 +306,31 @@ void ResourceTable::FreeCPUHeap(ResourceTable::Heap& heap) {
 MaybeError ResourceTable::ApplyPendingUpdates(
     CommandRecordingContext* recordingContext,
     const absl::flat_hash_set<TextureBase*>& writableTextures) {
-    Updates updates = AcquireDirtySlotUpdates(writableTextures);
+    return ApplyDirtySlotUpdatesWith(
+        writableTextures,
+        [&](const std::vector<MetadataUpdate>& metadataUpdates,
+            const std::vector<ResourceDiff>& resourceDiffs,
+            const absl::flat_hash_set<TextureBase*>& texturesToTransition) -> MaybeError {
+            // Transition and initialize all required textures
+            if (!texturesToTransition.empty()) {
+                DAWN_TRY(TransitionResources(recordingContext, texturesToTransition));
+            }
 
-    // Transition and initialize all required textures
-    if (!updates.texturesToTransition.empty()) {
-        DAWN_TRY(TransitionResources(recordingContext, updates.texturesToTransition));
-    }
-
-    // Update resource bindings before metadata to ensure mSlotToSamplerIndex is up-to-date
-    if (!updates.resourceDiffs.empty()) {
-        DAWN_TRY(UpdateResourceBindings(updates.resourceDiffs));
-    }
-    if (!updates.metadataUpdates.empty()) {
-        DAWN_TRY(UpdateMetadataBuffer(recordingContext, updates.metadataUpdates));
-    }
-
-    return {};
+            // Update resource bindings before metadata to ensure mSlotToSamplerIndex is up-to-date
+            if (!resourceDiffs.empty()) {
+                DAWN_TRY(UpdateResourceBindings(resourceDiffs));
+            }
+            if (!metadataUpdates.empty()) {
+                DAWN_TRY(UpdateMetadataBuffer(recordingContext, metadataUpdates));
+            }
+            return {};
+        });
 }
 
-MaybeError ResourceTable::TransitionResources(
-    CommandRecordingContext* recordingContext,
-    const absl::flat_hash_set<Ref<TextureBase>>& textures) {
+MaybeError ResourceTable::TransitionResources(CommandRecordingContext* recordingContext,
+                                              const absl::flat_hash_set<TextureBase*>& textures) {
     for (const auto& texture : textures) {
-        Texture* textureBackend = ToBackend(texture.Get());
+        Texture* textureBackend = ToBackend(texture);
         DAWN_TRY(textureBackend->EnsureSubresourceContentInitialized(
             recordingContext, textureBackend->GetAllSubresources()));
         textureBackend->TrackUsageAndTransitionNow(recordingContext,

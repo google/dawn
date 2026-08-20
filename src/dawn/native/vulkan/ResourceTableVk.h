@@ -64,7 +64,7 @@ class ResourceTable final : public ResourceTableBase {
     MaybeError Initialize();
 
     MaybeError TransitionResources(CommandRecordingContext* recordingContext,
-                                   const absl::flat_hash_set<Ref<TextureBase>>& textures);
+                                   const absl::flat_hash_set<TextureBase*>& textures);
     MaybeError UpdateMetadataBuffer(CommandRecordingContext* recordingContext,
                                     const std::vector<MetadataUpdate>& updates);
     MaybeError UpdateResourceBindings(const std::vector<ResourceDiff>& diffs);
