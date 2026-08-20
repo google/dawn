@@ -875,8 +875,13 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // AMD GPUS.
     // See http://crbug.com/1237175, http://crbug.com/dawn/1628, and http://crbug.com/dawn/2032
     // for more information.
+    // Known to work fine on this AMD driver version
+    const gpu_info::DriverVersion kSubAllocWithRenderAttachmentKnownGoodAMDDriverVersion = {
+        32, 0, 13031, 8021};
     if ((gpu_info::IsIntelGen9(vendorId, deviceId) && !gpu_info::IsSkylake(deviceId)) ||
-        gpu_info::IsIntelGen11(vendorId, deviceId) || gpu_info::IsAMD(vendorId)) {
+        gpu_info::IsIntelGen11(vendorId, deviceId) ||
+        (gpu_info::IsAMD(vendorId) &&
+         GetDriverVersion() < kSubAllocWithRenderAttachmentKnownGoodAMDDriverVersion)) {
         deviceToggles->Default(
             Toggle::DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment, true);
         // Now we don't need to force clearing depth stencil textures with CopyDst as all the depth
