@@ -19,7 +19,8 @@ pointer, and directly access the data on GPU without any extra copies.
 This is a subset of the more permissive
 [`BufferMapExtendedUsages`](./buffer_map_extended_usages.md) feature, which additionally allows
 `wgpu::BufferUsage::MapRead` to be combined with arbitrary usages but is only available on a
-narrower set of hardware (cache-coherent UMA).
+narrower set of hardware (cache-coherent UMA). Because it is a superset, enabling
+`BufferMapExtendedUsages` on a device implicitly enables `BufferMapWriteExtendedUsages` as well.
 
 ## Target API support
 

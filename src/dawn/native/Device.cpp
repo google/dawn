@@ -1732,6 +1732,9 @@ void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescri
                                                                        mToggles));
         mEnabledFeatures.EnableFeature(Feature::Subgroups);
     }
+    if (mEnabledFeatures.IsEnabled(Feature::BufferMapExtendedUsages)) {
+        mEnabledFeatures.EnableFeature(Feature::BufferMapWriteExtendedUsages);
+    }
 
     if (level == wgpu::FeatureLevel::Core) {
         // Core-defaulting adapters always support the "core-features-and-limits" feature.

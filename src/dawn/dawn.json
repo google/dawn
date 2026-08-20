@@ -2567,7 +2567,8 @@
             {"value": 63, "name": "render pass render area", "tags": ["dawn"]},
             {"value": 64, "name": "adapter properties drm", "tags": ["dawn", "native"]},
             {"value": 65, "name": "texture compression unaligned", "tags": ["dawn"]},
-            {"value": 66, "name": "dawn allow undefined load store op", "tags": ["dawn", "native"]}
+            {"value": 66, "name": "dawn allow undefined load store op", "tags": ["dawn", "native"]},
+            {"value": 67, "name": "buffer map write extended usages", "tags": ["dawn"]}
         ]
     },
     "filter mode": {

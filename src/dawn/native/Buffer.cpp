@@ -116,6 +116,47 @@ class ErrorBuffer final : public BufferBase {
 // GetMappedRange on a zero-sized buffer returns a pointer to this value.
 static uint32_t sZeroSizedMappingData = 0xCAFED00D;
 
+// Validates the combinations of MapRead/MapWrite buffer usages with other usages against the device
+// features.
+MaybeError ValidateBufferUsageCombinations(const DeviceBase* device, wgpu::BufferUsage usage) {
+    // With `BufferMapExtendedUsages`, both MapRead and MapWrite can be combined with any other
+    // buffer usage.
+    if (device->HasFeature(Feature::BufferMapExtendedUsages)) {
+        return {};
+    }
+
+    if (usage & wgpu::BufferUsage::MapRead) {
+        const wgpu::BufferUsage kMapReadAllowedUsages =
+            wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
+        DAWN_INVALID_IF(
+            !IsSubset(usage, kMapReadAllowedUsages),
+            "Buffer usages (%s) is invalid. If a buffer usage contains %s the only other allowed "
+            "usage is %s.",
+            usage, wgpu::BufferUsage::MapRead, wgpu::BufferUsage::CopyDst);
+    }
+
+    if (usage & wgpu::BufferUsage::MapWrite) {
+        if (device->HasFeature(Feature::BufferMapWriteExtendedUsages)) {
+            // MapWrite can be combined with any other usage except MapRead.
+            DAWN_INVALID_IF(
+                usage & wgpu::BufferUsage::MapRead,
+                "Buffer usages (%s) is invalid. %s cannot be combined with %s when %s is enabled.",
+                usage, wgpu::BufferUsage::MapWrite, wgpu::BufferUsage::MapRead,
+                ToAPI(Feature::BufferMapWriteExtendedUsages));
+        } else {
+            const wgpu::BufferUsage kMapWriteAllowedUsages =
+                wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+            DAWN_INVALID_IF(
+                !IsSubset(usage, kMapWriteAllowedUsages),
+                "Buffer usages (%s) is invalid. If a buffer usage contains %s the only other "
+                "allowed usage is %s.",
+                usage, wgpu::BufferUsage::MapWrite, wgpu::BufferUsage::CopySrc);
+        }
+    }
+
+    return {};
+}
+
 }  // anonymous namespace
 
 ResultOrError<UnpackedPtr<TexelBufferViewDescriptor>> ValidateTexelBufferViewDescriptor(
@@ -384,23 +425,7 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
                         wgpu::WGSLLanguageFeatureName::TexelBuffers);
     }
 
-    if (!device->HasFeature(Feature::BufferMapExtendedUsages)) {
-        const wgpu::BufferUsage kMapWriteAllowedUsages =
-            wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
-        DAWN_INVALID_IF(
-            usage & wgpu::BufferUsage::MapWrite && !IsSubset(usage, kMapWriteAllowedUsages),
-            "Buffer usages (%s) is invalid. If a buffer usage contains %s the only other allowed "
-            "usage is %s.",
-            usage, wgpu::BufferUsage::MapWrite, wgpu::BufferUsage::CopySrc);
-
-        const wgpu::BufferUsage kMapReadAllowedUsages =
-            wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
-        DAWN_INVALID_IF(
-            usage & wgpu::BufferUsage::MapRead && !IsSubset(usage, kMapReadAllowedUsages),
-            "Buffer usages (%s) is invalid. If a buffer usage contains %s the only other allowed "
-            "usage is %s.",
-            usage, wgpu::BufferUsage::MapRead, wgpu::BufferUsage::CopyDst);
-    }
+    DAWN_TRY(ValidateBufferUsageCombinations(device, usage));
 
     DAWN_INVALID_IF(descriptor->mappedAtCreation && descriptor->size % 4 != 0,
                     "Buffer is mapped at creation but its size (%u) is not a multiple of 4.",

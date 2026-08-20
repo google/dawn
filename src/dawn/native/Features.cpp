@@ -307,6 +307,11 @@ static constexpr auto kFeatureInfo = std::to_array<FeatureEnumAndInfo>({
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "buffer_map_extended_usages.md",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::BufferMapWriteExtendedUsages,
+     {"Support creating buffers with MapWrite and any other usage except MapRead.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "buffer_map_write_extended_usages.md",
+      FeatureInfo::FeatureState::Experimental}},
     {Feature::AdapterPropertiesMemoryHeaps,
      {"Support querying memory heap info from the adapter.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"

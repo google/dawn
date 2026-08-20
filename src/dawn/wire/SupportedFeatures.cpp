@@ -39,6 +39,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_D3D11MultithreadProtected:
         case WGPUFeatureName_HostMappedPointer:
         case WGPUFeatureName_BufferMapExtendedUsages:
+        case WGPUFeatureName_BufferMapWriteExtendedUsages:
         case WGPUFeatureName_DawnFormatCapabilities:
         case WGPUFeatureName_DawnDrmFormatCapabilities:
         case WGPUFeatureName_RenderPassRenderArea:

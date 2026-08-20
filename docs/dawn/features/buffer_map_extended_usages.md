@@ -2,6 +2,7 @@
 
 ## Overview:
  - The `wgpu::Feature::BufferMapExtendedUsages` feature allows creating a buffer with `wgpu::BufferUsage::MapRead` and/or `wgpu::BufferUsage::MapWrite` and any other `wgpu::BufferUsage`.
+ - `wgpu::Feature::BufferMapExtendedUsages` is a superset of [`BufferMapWriteExtendedUsages`](./buffer_map_write_extended_usages.md). Enabling `BufferMapExtendedUsages` on a device implicitly enables `BufferMapWriteExtendedUsages` as well.
 
 ### Example Usage:
 ```
