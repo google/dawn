@@ -47,14 +47,14 @@ jobs:
             c_compiler: clang
             cpp_compiler: clang++
             env:
-              MACOSX_DEPLOYMENT_TARGET: "12.0"
+              MACOSX_DEPLOYMENT_TARGET: "13.0"
             container: null
           - os: macos-15-intel
             toolchain: clang
             c_compiler: clang
             cpp_compiler: clang++
             env:
-              MACOSX_DEPLOYMENT_TARGET: "12.0"
+              MACOSX_DEPLOYMENT_TARGET: "13.0"
             container: null
           - os: windows-latest
             toolchain: msvc
