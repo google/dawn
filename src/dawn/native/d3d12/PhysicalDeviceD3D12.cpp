@@ -219,9 +219,16 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         const bool isBuggyIntelDriver =
             gpu_info::IsIntel(GetVendorId()) &&
             gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) <= kBuggyDriverVersion;
-        if (mDeviceInfo.supportsWaveOps && SUCCEEDED(hr) &&
-            linearAlgebraSupport.LinearAlgebraTier >= D3D12_LINEAR_ALGEBRA_TIER_1_0 &&
-            !isBuggyIntelDriver) {
+        // Some preview drivers do not report D3D12_LINEAR_ALGEBRA_TIER_1_0, but do return valid
+        // operation-specific wave-matrix configurations. Use those configurations as a fallback
+        // capability signal while the D3D12 linear-algebra API is still experimental.
+        // TODO(crbug.com/549226780): Remove the fallback once the D3D12 linear-algebra API is no
+        // longer experimental.
+        const bool supportsLinearAlgebra =
+            (SUCCEEDED(hr) &&
+             linearAlgebraSupport.LinearAlgebraTier >= D3D12_LINEAR_ALGEBRA_TIER_1_0) ||
+            !mDeviceInfo.linAlgWaveMatrixMultiplySupports.empty();
+        if (mDeviceInfo.supportsWaveOps && supportsLinearAlgebra && !isBuggyIntelDriver) {
             EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
         }
     }

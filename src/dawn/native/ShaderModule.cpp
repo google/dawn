@@ -1411,16 +1411,6 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
         DAWN_INCREASE_LIMIT_MESSAGE(adapterSupportedlimits, maxComputeWorkgroupStorageSize,
                                     workgroupInfo.storage_size));
 
-    if (usesSubgroupMatrix) {
-        // maxSubgroupSize must have a valid value if usesSubgroupMatrix is true and subgroups
-        // feature is supported.
-        DAWN_ASSERT(maxSubgroupSize > 0);
-        DAWN_INVALID_IF((workgroupInfo.x % maxSubgroupSize) != 0,
-                        "The x-dimension of workgroup_size (%u) must be a multiple of the device "
-                        "maxSubgroupSize (%u) when the shader uses a subgroup matrix",
-                        workgroupInfo.x, maxSubgroupSize);
-    }
-
     if (workgroupInfo.subgroup_size.has_value()) {
         const uint32_t explicitSubgroupSize = workgroupInfo.subgroup_size.value();
         DAWN_INVALID_IF(explicitSubgroupSize == 0,
@@ -1429,6 +1419,15 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
                         "The x-dimension of workgroup invocations (%u) is not a multiple of the "
                         "subgroup_size attribute (%u)",
                         workgroupInfo.x, explicitSubgroupSize);
+    } else if (usesSubgroupMatrix) {
+        // If no explicit subgroup size is specified, validate against the adapter maximum.
+        // maxSubgroupSize must have a valid value if usesSubgroupMatrix is true and subgroups
+        // feature is supported.
+        DAWN_ASSERT(maxSubgroupSize > 0);
+        DAWN_INVALID_IF((workgroupInfo.x % maxSubgroupSize) != 0,
+                        "The x-dimension of workgroup_size (%u) must be a multiple of the device "
+                        "maxSubgroupSize (%u) when the shader uses a subgroup matrix",
+                        workgroupInfo.x, maxSubgroupSize);
     }
 
     return Extent3D{workgroupInfo.x, workgroupInfo.y, workgroupInfo.z};

@@ -331,6 +331,9 @@ class SubgroupMatrixTest : public DawnTest {
         if (SupportsFeatures({wgpu::FeatureName::ShaderF16})) {
             features.push_back(wgpu::FeatureName::ShaderF16);
         }
+        if (SupportsFeatures({wgpu::FeatureName::SubgroupSizeControl})) {
+            features.push_back(wgpu::FeatureName::SubgroupSizeControl);
+        }
         return features;
     }
 };
@@ -418,6 +421,74 @@ fn main() {
 }
 
 DAWN_INSTANTIATE_TEST(SubgroupMatrixTest, D3D12Backend(), MetalBackend(), VulkanBackend());
+
+class SubgroupMatrixSubgroupSizeControlTest : public SubgroupMatrixTest {};
+
+// Test that an explicit subgroup size, rather than the device maximum subgroup size, is used to
+// validate the workgroup size of an entry point that uses subgroup matrices.
+TEST_P(SubgroupMatrixSubgroupSizeControlTest, WorkgroupSizeUsesExplicitSubgroupSize) {
+    DAWN_TEST_UNSUPPORTED_IF(
+        !device.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix) ||
+        !device.HasFeature(wgpu::FeatureName::SubgroupSizeControl));
+
+    // TODO(crbug.com/492539239): Access violation during test teardown.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsVulkan());
+
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
+    info.nextInChain = &subgroupMatrixConfigs;
+    ASSERT_EQ(device.GetAdapterInfo(&info), wgpu::Status::Success);
+
+    // A size smaller than the maximum is needed to distinguish explicit-subgroup-size validation
+    // from the default maximum-subgroup-size validation.
+    DAWN_TEST_UNSUPPORTED_IF(info.subgroupMinSize == info.subgroupMaxSize);
+    const uint32_t subgroupSize = info.subgroupMaxSize / 2;
+    DAWN_TEST_UNSUPPORTED_IF(subgroupSize < info.subgroupMinSize);
+
+    // Intel Gen12 cannot use subgroup size 8 on D3D12 despite advertising it as the minimum.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12() && IsIntelGen12() && subgroupSize == 8);
+
+    bool testedConfig = false;
+    for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
+        const auto& config = subgroupMatrixConfigs.configs[i];
+        if (IsWindows() && IsAMD() && IsD3D12() && CrashesOnRX9060XT(config, false)) {
+            continue;
+        }
+
+        std::ostringstream configTrace;
+        configTrace << config;
+        SCOPED_TRACE(configTrace.str());
+        testedConfig = true;
+
+        std::ostringstream shader;
+        shader << "enable subgroups;\n";
+        shader << "enable subgroup_size_control;\n";
+        shader << "enable chromium_experimental_subgroup_matrix;\n";
+        if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16) {
+            shader << "enable f16;\n";
+        }
+        shader << "alias ResultComponentType = "
+               << ComponentTypeToWgslType(config.resultComponentType) << ";\n";
+        shader << "const M = " << config.M << ";\n";
+        shader << "const N = " << config.N << ";\n";
+        shader << "const SubgroupSize = " << subgroupSize << ";\n";
+        shader << R"(
+@compute @workgroup_size(SubgroupSize) @subgroup_size(SubgroupSize)
+fn main() {
+    _ = subgroup_matrix_result<ResultComponentType, N, M>();
+})";
+
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = utils::CreateShaderModule(device, shader.str());
+        device.CreateComputePipeline(&csDesc);
+    }
+    DAWN_TEST_UNSUPPORTED_IF(!testedConfig);
+}
+
+DAWN_INSTANTIATE_TEST(SubgroupMatrixSubgroupSizeControlTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      VulkanBackend());
 
 enum MatrixOp {
     MatrixMultiply,

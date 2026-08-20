@@ -330,6 +330,7 @@ dawn_test("dawn_unittests") {
     "unittests/native/LimitsTests.cpp",
     "unittests/native/MemoryInstrumentationTests.cpp",
     "unittests/native/ObjectContentHasherTests.cpp",
+    "unittests/native/ShaderModuleTests.cpp",
     "unittests/native/SkipValidationTests.cpp",
     "unittests/native/StreamTests.cpp",
     "unittests/validation/BindGroupValidationTests.cpp",
