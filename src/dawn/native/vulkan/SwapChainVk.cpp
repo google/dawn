@@ -195,6 +195,25 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     createInfo.clipped = VK_FALSE;
     createInfo.oldSwapchain = previousVkSwapChain;
 
+    // Create the swapchain images with VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT so they can be
+    // reinterpreted to the configuration's viewFormats. VK_KHR_swapchain_mutable_format requires
+    // the full list of formats to be provided, including the image format itself.
+    VkImageFormatListCreateInfo imageFormatListInfo;
+    std::vector<VkFormat> viewFormats;
+    if (!mConfig.wgpuViewFormats.empty()) {
+        DAWN_ASSERT(device->GetDeviceInfo().HasExt(DeviceExt::SwapchainMutableFormat));
+        createInfo.flags |= VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR;
+        viewFormats.push_back(mConfig.format);
+        for (wgpu::TextureFormat viewFormat : mConfig.wgpuViewFormats) {
+            viewFormats.push_back(VulkanImageFormat(device, viewFormat));
+        }
+        imageFormatListInfo.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO;
+        imageFormatListInfo.pNext = nullptr;
+        imageFormatListInfo.viewFormatCount = static_cast<uint32_t>(viewFormats.size());
+        imageFormatListInfo.pViewFormats = viewFormats.data();
+        createInfo.pNext = &imageFormatListInfo;
+    }
+
     DAWN_TRY(CheckVkSuccess(
         device->fn.CreateSwapchainKHR(device->GetVkDevice(), &createInfo, nullptr, &*mSwapChain),
         "CreateSwapChain"));
@@ -272,11 +291,20 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
     VkImageUsageFlags targetUsages =
         VulkanImageUsage(GetDevice(), GetUsage(), GetDevice()->GetValidInternalFormat(GetFormat()));
     VkImageUsageFlags supportedUsages = surfaceInfo.capabilities.supportedUsageFlags;
-    if (!IsSubset(targetUsages, supportedUsages)) {
-        config.needsBlit = true;
-    } else {
+    // The swapchain images support the configuration's viewFormats only if they are created
+    // with VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT, which requires VK_KHR_swapchain_mutable_format.
+    // Otherwise the blit texture, a regular texture, is used to support them.
+    const bool viewFormatsSupported =
+        GetViewFormats().empty() ||
+        ToBackend(GetDevice())->GetDeviceInfo().HasExt(DeviceExt::SwapchainMutableFormat);
+    if (IsSubset(targetUsages, supportedUsages) && viewFormatsSupported) {
         config.usage = targetUsages;
         config.wgpuUsage = GetUsage();
+        // The swapchain will be created with VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR so the
+        // images can be reinterpreted to these formats.
+        config.wgpuViewFormats = GetViewFormats();
+    } else {
+        config.needsBlit = true;
     }
 
     // Only support BGRA8Unorm (and RGBA8Unorm on android) with SRGB color space for now.
@@ -551,12 +579,13 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
     }
     lastImage.lastAcquireDoneFence = std::move(acquireFence);
 
-    // Wait on the previous fence and destroy it.
+    // Wrap the swapchain texture.
     TextureDescriptor textureDesc;
     textureDesc.size.width = mConfig.extent.width;
     textureDesc.size.height = mConfig.extent.height;
     textureDesc.format = mConfig.wgpuFormat;
     textureDesc.usage = mConfig.wgpuUsage;
+    textureDesc.viewFormats = mConfig.wgpuViewFormats;
 
     mTexture = SwapChainTexture::Create(device, Unpack(&textureDesc), lastImage.image);
 
@@ -566,8 +595,9 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
         return swapChainTextureInfo;
     }
 
-    // The blit texture always perfectly matches what the user requested for the swapchain.
-    // We need to add the Vulkan TRANSFER_SRC flag for the vkCmdBlitImage call.
+    // The blit texture always perfectly matches what the user requested for the swapchain,
+    // including the viewFormats which GetSwapChainBaseTextureDescriptor() carries over. We need
+    // to add the Vulkan TRANSFER_SRC flag for the vkCmdBlitImage call.
     TextureDescriptor desc = GetSwapChainBaseTextureDescriptor(this);
     DAWN_TRY_ASSIGN(mBlitTexture, InternalTexture::Create(device, Unpack(&desc),
                                                           VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
