@@ -63,6 +63,16 @@ if (NOT TARGET absl::strings)
     add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
 endif()
 
+# Warning suppressions to keep dependencies from poluting the logs.
+if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
+    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
+    add_compile_options(
+            -Wno-deprecated-this-capture # For protobuf and marl
+            -Wno-nontrivial-memcall # For swiftshader
+            -Wno-c++20-extensions # For swiftshader and marl
+    )
+endif()
+
 if (DAWN_BUILD_PROTOBUF AND EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
     if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND WIN32)
         set(protobuf_HAVE_BUILTIN_ATOMICS 1)
