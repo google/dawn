@@ -250,11 +250,18 @@ def main():
             line_number = diagnostic['line_number']
             diag_name = diagnostic['diag_name']
             message = diagnostic['message']
-            line = (f'{file_path}:', line_number, f': {message} [{diag_name}]')
+            replacement_count = len(diagnostic['replacements'])
+
+            explanation = f': {message} [{diag_name}]'
+            if replacement_count:
+                explanation += f' ({replacement_count} fixits)'
+            line = (f'{file_path}:', line_number, explanation)
+
             if diag_name.startswith('clang-diagnostic-'):
                 summary_compiler.append(line)
             else:
                 summary_tidy.append(line)
+
             seen_file_paths.add(file_path)
             for expansion_loc in diagnostic['expansion_locs']:
                 seen_file_paths.add(expansion_loc['file_path'])
