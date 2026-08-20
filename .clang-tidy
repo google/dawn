@@ -1,4 +1,9 @@
+# Follow .clang-format for formatting
 FormatStyle: file
+# GN doesn't support -isystem so Clang-Tidy doesn't know which headers belong
+# to us when applying checks/fixes. Set that here.
+HeaderFilterRegex: '^(src|include|third_party/emdawnwebgpu)/.*)'
+
 Checks:
   # List of checks: https://clang.llvm.org/extra/clang-tidy/checks/list.html
   # Checks can be locally disabled with NOLINT/NOLINTNEXTLINE.
@@ -28,37 +33,34 @@ Checks:
   #- -readability-inconsistent-declaration-parameter-name  # in webgpu.h and src/tint
   #- -readability-suspicious-call-argument
   ## - Memory initialization
-  #- -cppcoreguidelines-init-variables
-  #- -cppcoreguidelines-pro-type-member-init
+  #- -cppcoreguidelines-init-variables  # has fixits
+  #- -cppcoreguidelines-pro-type-member-init  # has fixits
   ## - Other memory safety
   #- -bugprone-casting-through-void
   #- -bugprone-sizeof-expression
   #- -cppcoreguidelines-owning-memory
   ## - Arithmetic (crbug.com/515527144/dependencies)
-  #- -bugprone-implicit-widening-of-multiplication-result
+  #- -bugprone-implicit-widening-of-multiplication-result  # has multiple fixit alternatives
   #- -bugprone-integer-division
   #- -bugprone-misplaced-widening-cast
   #- -bugprone-narrowing-conversions
   #- -bugprone-too-small-loop-variable
-  #- -cppcoreguidelines-pro-type-cstyle-cast
-  #- -modernize-avoid-c-style-cast
-  #- -modernize-use-integer-sign-comparison  # Note in most cases we'll fix this another way
+  #- -modernize-avoid-c-style-cast  # has fixits, but for integer casts we'll want to fix this another way (braces instead of parentheses)
+  #- -modernize-use-integer-sign-comparison  # has fixits, but in most cases we'll want to fix this another way (fix types so they match)
 
   ## P1. Likely to help with hardening.
-  #- -bugprone-argument-comment
   #- -bugprone-branch-clone
   #- -bugprone-easily-swappable-parameters
   #- -bugprone-suspicious-memory-comparison
   #- -bugprone-suspicious-stringview-data-usage
-  #- -bugprone-swapped-arguments
   #- -bugprone-undefined-memory-manipulation
   #- -bugprone-use-after-move
   #- -cppcoreguidelines-pro-bounds-pointer-arithmetic
   #- -cppcoreguidelines-slicing
-  #- -cppcoreguidelines-virtual-class-destructor
+  #- -cppcoreguidelines-virtual-class-destructor  # has multiple fixit alternatives
   #- -misc-misplaced-const
-  #- -modernize-use-ranges
-  #- -modernize-use-string-view
+  #- -modernize-use-ranges  # has fixits
+  #- -modernize-use-string-view  # has fixits
   #- -readability-reference-to-constructed-temporary
 
   # P2. Might help with hardening.
@@ -90,6 +92,7 @@ Checks:
   - -fuchsia-statically-constructed-objects
   - -fuchsia-virtual-inheritance
   - -google-objc-avoid-nsobject-new
+  - -google-readability-namespace-comments
   - -misc-multiple-inheritance
   - -misc-override-with-different-visibility
   - -misc-predictable-rand
@@ -99,6 +102,7 @@ Checks:
   - -modernize-use-structured-binding
   - -performance-*
   - -readability-avoid-const-params-in-decls
+  - -readability-duplicate-include  # issue with d3d headers?
   - -readability-redundant-qualified-alias
   - -readability-redundant-qualified-alias
   - -readability-redundant-typename
