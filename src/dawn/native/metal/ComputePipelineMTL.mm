@@ -33,6 +33,7 @@
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/metal/BackendMTL.h"
 #include "src/dawn/native/metal/DeviceMTL.h"
+#include "src/dawn/native/metal/ImmediatesLayoutMTL.h"
 #include "src/dawn/native/metal/ShaderModuleMTL.h"
 #include "src/dawn/native/metal/UtilsMetal.h"
 #include "src/dawn/platform/metrics/HistogramMacros.h"
@@ -57,6 +58,9 @@ ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
 
     const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
     ShaderModule::MetalFunctionData computeData;
+
+    mImmediateMask |= GetImmediateBlockBits(offsetof(ComputeImmediates, nonConstantZero),
+                                            sizeof(NonConstantZero));
 
     DAWN_TRY(ToBackend(computeStage.module.Get())
                  ->CreateFunction(SingleShaderStage::Compute, computeStage, ToBackend(GetLayout()),

@@ -284,9 +284,6 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
 // Apple Silicon due to our workaround that introduces volatile instructions.
 // See https://crbug.com/533785363
 TEST_P(MultisampledSamplingTest, ImplicitDerivativeFromU32Div) {
-    // The workaround that triggers this bug is no longer needed from 26.6.1 onwards.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && !IsMacOSVersionAtLeast(26, 6, 1));
-
     // TODO(crbug.com/468061892): Fails on Windows 11/AMD RX 5500 XT w/ backend validation.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D12() && IsBackendValidationEnabled());
 

@@ -251,7 +251,8 @@ struct tint_array {
 };
 
 struct tint_immediate_data_struct {
-  /* 0x0000 */ tint_array<int8_t, 64> tint_pad;
+  /* 0x0000 */ uint tint_non_constant_zero;
+  /* 0x0004 */ tint_array<int8_t, 60> tint_pad;
   /* 0x0040 */ tint_array<uint, 1> tint_storage_buffer_sizes;
 };
 
@@ -285,19 +286,38 @@ TEST_F(MslWriterTest, ImmediateF16) {
 
     Options options;
     options.immediate_binding_point = tint::BindingPoint{0, 30};
+    options.non_constant_zero_offset = 64;
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_immediate_data_struct {
+  /* 0x0000 */ half user_immediate_data;
+  /* 0x0002 */ tint_array<int8_t, 62> tint_pad;
+  /* 0x0040 */ uint tint_non_constant_zero;
+};
+
 struct tint_module_vars_struct {
-  const constant half* v;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void entry(const constant half* v [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
-  half const a = (*tint_module_vars.v);
+kernel void entry(const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_immediate_data=tint_immediate_data};
+  half const a = (*tint_module_vars.tint_immediate_data).user_immediate_data;
 }
 )");
 }
@@ -314,19 +334,39 @@ TEST_F(MslWriterTest, ImmediateVec3F16) {
 
     Options options;
     options.immediate_binding_point = tint::BindingPoint{0, 30};
+    options.non_constant_zero_offset = 64;
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_immediate_data_struct_packed_vec3 {
+  /* 0x0000 */ packed_half3 user_immediate_data;
+  /* 0x0006 */ tint_array<int8_t, 58> tint_pad;
+  /* 0x0040 */ uint tint_non_constant_zero;
+  /* 0x0044 */ tint_array<int8_t, 4> tint_pad_1;
+};
+
 struct tint_module_vars_struct {
-  const constant packed_half3* v;
+  const constant tint_immediate_data_struct_packed_vec3* tint_immediate_data;
 };
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void entry(const constant packed_half3* v [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
-  half3 const a = half3((*tint_module_vars.v));
+kernel void entry(const constant tint_immediate_data_struct_packed_vec3* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_immediate_data=tint_immediate_data};
+  half3 const a = half3((*tint_module_vars.tint_immediate_data).user_immediate_data);
 }
 )");
 }
@@ -476,7 +516,8 @@ struct tint_array {
 };
 
 struct tint_immediate_data_struct {
-  /* 0x0000 */ tint_array<int8_t, 64> tint_pad;
+  /* 0x0000 */ uint tint_non_constant_zero;
+  /* 0x0004 */ tint_array<int8_t, 60> tint_pad;
   /* 0x0040 */ tint_array<uint, 1> tint_storage_buffer_sizes;
 };
 
@@ -828,12 +869,19 @@ TEST_F(MslWriterTest, FixU32DivMod) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-volatile constexpr constant uint tint_volatile_zero = 0u;
+struct tint_immediate_data_struct {
+  /* 0x0000 */ uint tint_non_constant_zero;
+};
+
+struct tint_module_vars_struct {
+  const constant tint_immediate_data_struct* tint_immediate_data;
+};
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v() {
+kernel void v(const constant tint_immediate_data_struct* tint_immediate_data [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_immediate_data=tint_immediate_data};
   uint const lhs = 65540u;
-  uint const result = ((lhs +  tint_volatile_zero) % 3u);
+  uint const result = ((lhs + (*tint_module_vars.tint_immediate_data).tint_non_constant_zero) % 3u);
 }
 )");
 }

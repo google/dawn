@@ -278,7 +278,7 @@ TEST_F(IR_PrepareImmediateDataTests, DuplicateInternalImmediateOffsets) {
     auto res =
         config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant_b"), ty.f32());
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason, R"(mutiple internal immediates created at offset 4)");
+    EXPECT_EQ(res.Failure().reason, R"(multiple internal immediates created at offset 4)");
 }
 
 TEST_F(IR_PrepareImmediateDataTests, ValidateInternalImmediate_OverlapUser) {

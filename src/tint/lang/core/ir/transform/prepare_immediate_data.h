@@ -76,7 +76,7 @@ struct PrepareImmediateDataConfig {
                                                  const core::type::Type* type) {
         auto res = internal_immediate_data.emplace(offset, InternalImmediateData{name, type});
         if (!res.second) {
-            return Failure("mutiple internal immediates created at offset " +
+            return Failure("multiple internal immediates created at offset " +
                            std::to_string(offset));
         }
         return Success;

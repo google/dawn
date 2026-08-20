@@ -55,6 +55,12 @@ struct NumWorkgroupsDimensions {
     uint32_t numWorkgroupsY = 0;
     uint32_t numWorkgroupsZ = 0;
 };
+
+// A non-constant zero value that is used to workaround buggy optimizations in downstream compilers.
+struct NonConstantZero {
+    uint32_t zero = 0;
+};
+
 DAWN_DISABLE_STRUCT_PADDING_WARNINGS
 
 // Convert byte sizes and offsets into immediate indices and offsets

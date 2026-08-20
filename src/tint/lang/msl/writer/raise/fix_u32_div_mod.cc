@@ -1,4 +1,4 @@
-// Copyright 2024 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,13 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/msl/writer/raise/binary_polyfill.h"
-
-#include <vector>
+#include "src/tint/lang/msl/writer/raise/fix_u32_div_mod.h"
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/lang/msl/ir/builtin_call.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::msl::writer::raise {
 namespace {
@@ -41,70 +40,46 @@ struct State {
     /// The IR module.
     core::ir::Module& ir;
 
+    /// The transform config.
+    const FixU32DivModConfig& config;
+
     /// The IR builder.
     core::ir::Builder b{ir};
 
-    /// The type manager.
-    core::type::Manager& ty{ir.Types()};
-
     /// Process the module.
     void Process() {
-        std::vector<std::function<void()>> worklist;
-        worklist.reserve(128);
-
         for (auto* inst : ir.Instructions()) {
-            core::ir::CoreBinary* binary = inst->As<core::ir::CoreBinary>();
+            auto* binary = inst->As<core::ir::CoreBinary>();
             if (binary == nullptr) {
                 continue;
             }
 
             auto op = binary->Op();
             auto* lhs_type = binary->LHS()->Type();
-            if (op == core::BinaryOp::kModulo && lhs_type->IsFloatScalarOrVector()) {
-                worklist.push_back([this, binary] { FMod(binary); });
-            } else if ((op == core::BinaryOp::kAnd || op == core::BinaryOp::kOr) &&
-                       lhs_type->IsBoolScalarOrVector()) {
-                worklist.push_back([this, binary] { LogicalBool(binary); });
+            if ((op == core::BinaryOp::kModulo || op == core::BinaryOp::kDivide) &&
+                lhs_type->DeepestElement()->Is<core::type::U32>()) {
+                InjectNonConstantZero(binary);
             }
         }
-        for (auto& cb : worklist) {
-            cb();
-        }
     }
 
-    /// Replace a floating point modulo binary instruction with the equivalent MSL intrinsic.
-    /// @param binary the float point modulo binary instruction
-    void FMod(core::ir::CoreBinary* binary) {
-        auto* call = b.CallWithResult<msl::ir::BuiltinCall>(
-            binary->DetachResult(), msl::BuiltinFn::kFmod, binary->Operands());
-        call->InsertBefore(binary);
-        binary->Destroy();
-    }
-
-    /// Replace a logical boolean binary instruction.
-    /// @param binary the logical boolean binary instruction
-    void LogicalBool(core::ir::CoreBinary* binary) {
-        // MSL does not have boolean overloads for `&` and `|`, so it promotes the operands to
-        // integers. Make this explicit in the IR and then convert the result of the binary
-        // instruction back to a boolean.
-        auto* result_ty = binary->Result()->Type();
-        auto* int_ty = ty.MatchWidth(ty.u32(), result_ty);
+    /// Inject a non-constant zero into the LHS of a unsigned div/mod instruction.
+    /// @param binary the unsigned integer divide or modulo binary instruction
+    void InjectNonConstantZero(core::ir::CoreBinary* binary) {
         b.InsertBefore(binary, [&] {
-            auto* int_lhs = b.Convert(int_ty, binary->LHS());
-            auto* int_rhs = b.Convert(int_ty, binary->RHS());
-            auto* int_binary = b.Binary(binary->Op(), int_ty, int_lhs, int_rhs);
-            b.ConvertWithResult(binary->DetachResult(), int_binary);
+            auto* zero = b.Load(b.Access<ptr<immediate, u32>>(config.immediate_var,
+                                                              u32(config.non_constant_zero_index)));
+            binary->SetOperand(0U, b.Add(binary->LHS(), zero)->Result());
         });
-        binary->Destroy();
     }
 };
 
 }  // namespace
 
-Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
-    AssertValid(ir, "before msl.BinaryPolyfill");
+Result<SuccessType> FixU32DivMod(core::ir::Module& ir, const FixU32DivModConfig& config) {
+    AssertValid(ir, "before msl.FixU32DivMod");
 
-    State{ir}.Process();
+    State{ir, config}.Process();
 
     return Success;
 }

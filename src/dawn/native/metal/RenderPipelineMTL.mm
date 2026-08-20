@@ -386,6 +386,9 @@ MaybeError RenderPipeline::InitializeImpl() {
                                                 sizeof(ClampFragDepthArgs));
     }
 
+    mImmediateMask |=
+        GetImmediateBlockBits(offsetof(RenderImmediates, nonConstantZero), sizeof(NonConstantZero));
+
     const PerStage<ProgrammableStage>& allStages = GetAllStages();
     const ProgrammableStage& vertexStage = allStages[wgpu::ShaderStage::Vertex];
     ShaderModule::MetalFunctionData vertexData;

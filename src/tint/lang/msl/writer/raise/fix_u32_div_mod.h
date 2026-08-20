@@ -1,4 +1,4 @@
-// Copyright 2024 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,9 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_BINARY_POLYFILL_H_
-#define SRC_TINT_LANG_MSL_WRITER_RAISE_BINARY_POLYFILL_H_
+#ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_FIX_U32_DIV_MOD_H_
+#define SRC_TINT_LANG_MSL_WRITER_RAISE_FIX_U32_DIV_MOD_H_
 
+#include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 #include "src/tint/utils/result.h"
 
 // Forward declarations.
@@ -37,12 +38,21 @@ class Module;
 
 namespace tint::msl::writer::raise {
 
-/// BinaryPolyfill is a transform that replaces binary instructions with polyfills and calls to
-/// MSL backend intrinsic functions.
+struct FixU32DivModConfig {
+    /// Immediate data variable.
+    core::ir::Var* immediate_var = nullptr;
+
+    /// Index of the non-constant zero value in the immediate structure.
+    uint32_t non_constant_zero_index = UINT32_MAX;
+};
+
+/// FixU32DivMod is a transform that inserts a non-constant zero value into the RHS of all unsigned
+/// divide/modulo operations to avoid a buggy compiler optimization.
 /// @param module the module to transform
+/// @param config the transform config
 /// @returns success or failure
-Result<SuccessType> BinaryPolyfill(core::ir::Module& module);
+Result<SuccessType> FixU32DivMod(core::ir::Module& module, const FixU32DivModConfig& config);
 
 }  // namespace tint::msl::writer::raise
 
-#endif  // SRC_TINT_LANG_MSL_WRITER_RAISE_BINARY_POLYFILL_H_
+#endif  // SRC_TINT_LANG_MSL_WRITER_RAISE_FIX_U32_DIV_MOD_H_

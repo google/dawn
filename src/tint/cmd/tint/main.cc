@@ -1185,6 +1185,9 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
     gen_options.group_to_argument_buffer_info = options.group_to_argument_buffer_info;
     gen_options.array_length_from_constants = GenerateArrayLengthFromConstants(ir, options.ep_name);
 
+    auto entry_point = inspector.GetEntryPoint(options.ep_name);
+    gen_options.non_constant_zero_offset = tint::RoundUp(4U, entry_point.immediate_data_size);
+
     // Run SubstituteOverrides to replace override instructions with constants.
     // This needs to run after SingleEntryPoint which removes unused overrides.
     auto substitute_override_cfg = CreateOverrideMap(options, inspector);

@@ -20,15 +20,20 @@ struct Immediate {
   /* 0x000a */ tint_array<int8_t, 2> tint_pad;
 };
 
+struct tint_immediate_data_struct {
+  /* 0x0000 */ Immediate user_immediate_data;
+  /* 0x000c */ uint tint_non_constant_zero;
+};
+
 struct tint_module_vars_struct {
-  const constant Immediate* data;
   device float4* output;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v(const constant Immediate* data [[buffer(30)]], device float4* output [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.data=data, .output=output};
-  float const v_1 = (*tint_module_vars.data).scale;
-  float2 const v_2 = float2((*tint_module_vars.data).offsets);
-  (*tint_module_vars.output) = float4(v_1, v_2, float((*tint_module_vars.data).bias));
+kernel void v(device float4* output [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.output=output, .tint_immediate_data=tint_immediate_data};
+  float const v_1 = (*tint_module_vars.tint_immediate_data).user_immediate_data.scale;
+  float2 const v_2 = float2((*tint_module_vars.tint_immediate_data).user_immediate_data.offsets);
+  (*tint_module_vars.output) = float4(v_1, v_2, float((*tint_module_vars.tint_immediate_data).user_immediate_data.bias));
 }

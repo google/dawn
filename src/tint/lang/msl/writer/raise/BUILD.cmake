@@ -53,6 +53,8 @@ tint_add_target(tint_lang_msl_writer_raise lib
   lang/msl/writer/raise/decompose_buffer.h
   lang/msl/writer/raise/fix_type_layout.cc
   lang/msl/writer/raise/fix_type_layout.h
+  lang/msl/writer/raise/fix_u32_div_mod.cc
+  lang/msl/writer/raise/fix_u32_div_mod.h
   lang/msl/writer/raise/module_constant.cc
   lang/msl/writer/raise/module_constant.h
   lang/msl/writer/raise/module_scope_vars.cc
@@ -116,6 +118,7 @@ tint_add_target(tint_lang_msl_writer_raise_test test
   lang/msl/writer/raise/convert_print_to_log_test.cc
   lang/msl/writer/raise/decompose_buffer_test.cc
   lang/msl/writer/raise/fix_type_layout_test.cc
+  lang/msl/writer/raise/fix_u32_div_mod_test.cc
   lang/msl/writer/raise/module_constant_test.cc
   lang/msl/writer/raise/module_scope_vars_test.cc
   lang/msl/writer/raise/polyfill_bool_vector_dynamic_stores_test.cc

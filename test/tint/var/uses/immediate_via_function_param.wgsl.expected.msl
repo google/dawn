@@ -1,9 +1,14 @@
 #include <metal_stdlib>
 using namespace metal;
 
+struct tint_immediate_data_struct {
+  /* 0x0000 */ uint user_immediate_data;
+  /* 0x0004 */ uint tint_non_constant_zero;
+};
+
 struct tint_module_vars_struct {
-  const constant uint* value;
   device uint* output;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 void foo(const constant uint* const p, tint_module_vars_struct tint_module_vars) {
@@ -11,7 +16,7 @@ void foo(const constant uint* const p, tint_module_vars_struct tint_module_vars)
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v(const constant uint* value [[buffer(30)]], device uint* output [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.value=value, .output=output};
-  (foo(tint_module_vars.value, tint_module_vars));
+kernel void v(device uint* output [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.output=output, .tint_immediate_data=tint_immediate_data};
+  (foo((&(*tint_module_vars.tint_immediate_data).user_immediate_data), tint_module_vars));
 }

@@ -42,11 +42,14 @@ struct RenderImmediates {
     UserImmediates userImmediates;
 
     ClampFragDepthArgs clampFragDepth;
+    NonConstantZero nonConstantZero;
 };
 
 // Define compute pipeline immediates layout. Append members to expand the layout.
 struct ComputeImmediates {
     UserImmediates userImmediates;
+
+    NonConstantZero nonConstantZero;
 };
 DAWN_DISABLE_STRUCT_PADDING_WARNINGS
 

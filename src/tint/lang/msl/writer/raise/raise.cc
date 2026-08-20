@@ -68,6 +68,7 @@
 #include "src/tint/lang/msl/writer/raise/convert_print_to_log.h"
 #include "src/tint/lang/msl/writer/raise/decompose_buffer.h"
 #include "src/tint/lang/msl/writer/raise/fix_type_layout.h"
+#include "src/tint/lang/msl/writer/raise/fix_u32_div_mod.h"
 #include "src/tint/lang/msl/writer/raise/module_constant.h"
 #include "src/tint/lang/msl/writer/raise/module_scope_vars.h"
 #include "src/tint/lang/msl/writer/raise/polyfill_bool_vector_dynamic_stores.h"
@@ -130,6 +131,9 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
             options.depth_range_offsets.value().max, module.symbols.New("tint_frag_depth_max"),
             module.Types().f32()));
     }
+    TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
+        options.non_constant_zero_offset, module.symbols.New("tint_non_constant_zero"),
+        module.Types().u32()));
 
     TINT_CHECK_RESULT_UNWRAP(immediate_data_layout, core::ir::transform::PrepareImmediateData(
                                                         module, immediate_data_config));
@@ -261,6 +265,15 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         TINT_CHECK_RESULT(raise::ArgumentBuffers(module, cfg));
     }
 
+    if (options.workarounds.fix_u32_div_mod) {
+        raise::FixU32DivModConfig config{
+            .immediate_var = immediate_data_layout.var,
+            .non_constant_zero_index =
+                immediate_data_layout.IndexOf(options.non_constant_zero_offset),
+        };
+        TINT_CHECK_RESULT(raise::FixU32DivMod(module, config));
+    }
+
     // ChangeImmediateToUniform must come before ModuleScopeVars
     {
         core::ir::transform::ChangeImmediateToUniformConfig config = {
@@ -271,12 +284,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     TINT_CHECK_RESULT(raise::ModuleScopeVars(module));
 
-    {
-        raise::BinaryPolyfillConfig config{
-            .fix_u32_div_mod = options.workarounds.fix_u32_div_mod,
-        };
-        TINT_CHECK_RESULT(raise::BinaryPolyfill(module, config));
-    }
+    TINT_CHECK_RESULT(raise::BinaryPolyfill(module));
 
     TINT_CHECK_RESULT(raise::BuiltinPolyfill(
         module, {

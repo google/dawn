@@ -4,17 +4,22 @@
 #include <metal_stdlib>
 using namespace metal;
 
+struct tint_immediate_data_struct {
+  /* 0x0000 */ int user_immediate_data;
+  /* 0x0004 */ uint tint_non_constant_zero;
+};
+
 struct tint_module_vars_struct {
-  const constant int* a;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 void uses_a(tint_module_vars_struct tint_module_vars) {
-  int const foo = (*tint_module_vars.a);
+  int const foo = (*tint_module_vars.tint_immediate_data).user_immediate_data;
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void main1(const constant int* a [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
+kernel void main1(const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_immediate_data=tint_immediate_data};
   (uses_a(tint_module_vars));
 }
 //
@@ -23,12 +28,17 @@ kernel void main1(const constant int* a [[buffer(30)]]) {
 #include <metal_stdlib>
 using namespace metal;
 
+struct tint_immediate_data_struct {
+  /* 0x0000 */ int user_immediate_data;
+  /* 0x0004 */ uint tint_non_constant_zero;
+};
+
 struct tint_module_vars_struct {
-  const constant int* a;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 void uses_a(tint_module_vars_struct tint_module_vars) {
-  int const foo = (*tint_module_vars.a);
+  int const foo = (*tint_module_vars.tint_immediate_data).user_immediate_data;
 }
 
 void uses_uses_a(tint_module_vars_struct tint_module_vars) {
@@ -36,8 +46,8 @@ void uses_uses_a(tint_module_vars_struct tint_module_vars) {
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void main2(const constant int* a [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
+kernel void main2(const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_immediate_data=tint_immediate_data};
   (uses_uses_a(tint_module_vars));
 }
 //
@@ -46,17 +56,22 @@ kernel void main2(const constant int* a [[buffer(30)]]) {
 #include <metal_stdlib>
 using namespace metal;
 
+struct tint_immediate_data_struct {
+  /* 0x0000 */ int user_immediate_data;
+  /* 0x0004 */ uint tint_non_constant_zero;
+};
+
 struct tint_module_vars_struct {
-  const constant int* b;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 void uses_b(tint_module_vars_struct tint_module_vars) {
-  int const foo = (*tint_module_vars.b);
+  int const foo = (*tint_module_vars.tint_immediate_data).user_immediate_data;
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void main3(const constant int* b [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.b=b};
+kernel void main3(const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_immediate_data=tint_immediate_data};
   (uses_b(tint_module_vars));
 }
 //

@@ -331,11 +331,19 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.vertex_pulling_config = std::move(vertexPullingTransformConfig);
 
     // Set internal immediate offsets
-    if (HasImmediates(&RenderImmediates::clampFragDepth, pipelineImmediateMask)) {
+    if (stage == SingleShaderStage::Fragment &&
+        HasImmediates(&RenderImmediates::clampFragDepth, pipelineImmediateMask)) {
         uint32_t offsetStartBytes = GetImmediateByteOffsetInPipeline(
             &RenderImmediates::clampFragDepth, pipelineImmediateMask);
         req.tintOptions.depth_range_offsets = {offsetStartBytes,
                                                offsetStartBytes + kImmediateElementByteSize};
+    }
+    if (stage == SingleShaderStage::Compute) {
+        req.tintOptions.non_constant_zero_offset = GetImmediateByteOffsetInPipeline(
+            &ComputeImmediates::nonConstantZero, pipelineImmediateMask);
+    } else {
+        req.tintOptions.non_constant_zero_offset = GetImmediateByteOffsetInPipeline(
+            &RenderImmediates::nonConstantZero, pipelineImmediateMask);
     }
 
     req.tintOptions.use_argument_buffers = useArgumentBuffers;
