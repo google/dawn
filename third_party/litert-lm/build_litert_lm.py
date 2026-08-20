@@ -164,6 +164,11 @@ def main():
             env['CC'] = str(llvm_bin_dir / 'clang')
             env['CXX'] = str(llvm_bin_dir / 'clang++')
 
+        # Unconditionally clean the Bazel workspace before building to prevent
+        # filesystem inconsistency errors on the bots.
+        clean_cmd = [str(bazelisk_path), 'clean']
+        subprocess.run(clean_cmd, cwd=litert_lm_dir, env=env)
+
         proc = subprocess.run(build_cmd, cwd=litert_lm_dir, env=env)
         if proc.returncode != 0:
             print("Error: Bazel build failed.", file=sys.stderr)
