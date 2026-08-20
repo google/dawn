@@ -14,7 +14,6 @@ struct tint_array {
 };
 
 struct tint_module_vars_struct {
-  device tint_array<uchar, 1>* v;
   device uint* out;
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };

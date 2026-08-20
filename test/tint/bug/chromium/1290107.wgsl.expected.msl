@@ -13,12 +13,7 @@ struct tint_array {
   T elements[N];
 };
 
-struct S {
-  float f;
-};
-
 struct tint_module_vars_struct {
-  const device tint_array<S, 1>* arr;
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 

@@ -203,13 +203,8 @@ struct tint_array {
   T elements[N];
 };
 
-struct tint_immediate_data_struct {
-  tint_array<uint, 1> tint_storage_buffer_sizes;
-};
-
 struct tint_module_vars_struct {
   device tint_array<uint, 1>* a;
-  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 [[max_total_threads_per_threadgroup(1)]]

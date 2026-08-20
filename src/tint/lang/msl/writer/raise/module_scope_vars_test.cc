@@ -1392,5 +1392,69 @@ tint_module_vars_struct = struct @align(1) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_ModuleScopeVarsTest, UnusedVar) {
+    auto* var_a = b.Var("a", ty.ptr<private_, i32>());
+    auto* var_b = b.Var("b", ty.ptr<private_, i32>());
+    auto* var_c = b.Var("c", ty.ptr<private_, i32>());
+    mod.root_block->Append(var_a);
+    mod.root_block->Append(var_b);
+    mod.root_block->Append(var_c);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* load_a = b.Load(var_a);
+        auto* load_c = b.Load(var_c);
+        b.Store(var_a, b.Add(load_a, load_c));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %a:ptr<private, i32, read_write> = var undef
+  %b:ptr<private, i32, read_write> = var undef
+  %c:ptr<private, i32, read_write> = var undef
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %5:i32 = load %a
+    %6:i32 = load %c
+    %7:i32 = add %5, %6
+    store %a, %7
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_module_vars_struct = struct @align(1) {
+  a:ptr<private, i32, read_write> @offset(0)
+  c:ptr<private, i32, read_write> @offset(0)
+}
+
+%foo = @fragment func():void {
+  $B1: {
+    %a:ptr<private, i32, read_write> = var undef
+    %c:ptr<private, i32, read_write> = var undef
+    %4:tint_module_vars_struct = construct %a, %c
+    %tint_module_vars:tint_module_vars_struct = let %4
+    %6:ptr<private, i32, read_write> = access %tint_module_vars, 0u
+    %7:i32 = load %6
+    %8:ptr<private, i32, read_write> = access %tint_module_vars, 1u
+    %9:i32 = load %8
+    %10:i32 = add %7, %9
+    %11:ptr<private, i32, read_write> = access %tint_module_vars, 0u
+    store %11, %10
+    ret
+  }
+}
+)";
+
+    Run(ModuleScopeVars);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise
