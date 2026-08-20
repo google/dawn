@@ -913,6 +913,7 @@ void Texture::NotifySwapChainPresent() {
     // into the GPU process at startup. We start capturing all frames right away. The user has
     // to kill the process or stop it from rendering (e.g. close or change tabs in Chrome).
     if (auto renderDocApi = dawn::native::utils::GetRenderDocApi(device)) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast) - C cast in C header macro.
         void* renderDocDevicePtr = RENDERDOC_DEVICEPOINTER_FROM_VKINSTANCE(device->GetVkInstance());
 
         // We signal the end of the current frame and the start of the next.

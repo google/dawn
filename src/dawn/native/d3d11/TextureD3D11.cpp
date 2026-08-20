@@ -1332,7 +1332,8 @@ ResultOrError<ID3D11RenderTargetView*> TextureView::GetOrCreateD3D11RenderTarget
 ResultOrError<ID3D11DepthStencilView*> TextureView::GetOrCreateD3D11DepthStencilView(
     bool depthReadOnly,
     bool stencilReadOnly) {
-    // TODO: figure out if it is necessary to cache DSV for different properties.
+    // TODO(https://crbug.com/40930969): figure out if it is necessary to cache
+    // DSV for different properties.
     if (mD3d11DepthStencilView && mD3d11DepthStencilViewDepthReadOnly == depthReadOnly &&
         mD3d11DepthStencilViewStencilReadOnly == stencilReadOnly) {
         return mD3d11DepthStencilView.Get();

@@ -1744,7 +1744,7 @@ void CommandBuffer::EmulateBeginRenderPass(CommandRecordingContext* commandConte
                         ->StencilBeginningAccess.Clear.ClearValue.DepthStencil.Stencil);
             }
 
-            if (clearFlags) {
+            if (clearFlags != 0) {
                 commandList->ClearDepthStencilView(
                     renderPassBuilder->GetRenderPassDepthStencilDescriptor()->cpuDescriptor,
                     clearFlags, depthClear, stencilClear, 0, nullptr);

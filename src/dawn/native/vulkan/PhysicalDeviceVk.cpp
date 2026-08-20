@@ -1117,8 +1117,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // See crbug.com/460209126
         deviceToggles->Default(Toggle::VulkanCooperativeMatrixStrideIsMatrixElements, true);
 
-        // dawn:500417361
-        // TODO: Add details once available.
+        // TODO(https://crbug.com/500417361): Add details once available.
         deviceToggles->Default(Toggle::VulkanSleepAfterLostDeviceWait, true);
     }
 

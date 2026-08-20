@@ -321,8 +321,8 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsOutOfBound_Uint8) {
 // Test clearing a color attachment on Sint8 formats (R8Sint, RG8Sint, RGBA8Sint) when the clear
 // values are out of bound.
 TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsOutOfBound_Sint8) {
-    constexpr int16_t kSint8Max = std::numeric_limits<int8_t>::max();
-    constexpr int16_t kSint8Min = std::numeric_limits<int8_t>::min();
+    constexpr int16_t kSint8Max{std::numeric_limits<int8_t>::max()};
+    constexpr int16_t kSint8Min{std::numeric_limits<int8_t>::min()};
 
     using TestCase = std::tuple<wgpu::TextureFormat, wgpu::Color, std::array<int8_t, 4>>;
     constexpr std::array<TestCase, 7> kTestCases = {{

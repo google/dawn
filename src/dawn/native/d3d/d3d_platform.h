@@ -47,7 +47,7 @@
 #include <functional>
 #include <utility>
 
-using Microsoft::WRL::ComPtr;
+using Microsoft::WRL::ComPtr;  // NOLINT(google-global-names-in-headers)
 
 template <typename T>
 struct std::hash<ComPtr<T>> {

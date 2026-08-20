@@ -3522,7 +3522,7 @@ fn main(in : FSIn) -> @location(0) vec4f {
         float mat1[3];
         float mat2[3];
     };
-    static_assert(sizeof(Vertex) == 136, "");
+    static_assert(sizeof(Vertex) == 136);
 
     std::vector<Vertex> vertexData = {
         {/*cornerID*/ 0,

@@ -956,7 +956,7 @@ TEST_P(SharedTextureMemoryOpaqueYCbCrAndroidForExternalTexture,
     }
 }
 
-// TODO
+// TODO(https://crbug.com/468988322):
 //  - Same pipeline check bindgroups get reapplied? Same pipeline check immediates get reapplied.
 
 DAWN_INSTANTIATE_TEST(SharedTextureMemoryOpaqueYCbCrAndroidForExternalTexture, VulkanBackend());

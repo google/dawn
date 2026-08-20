@@ -270,9 +270,9 @@ def expand_source_paths(args, default_outdir):
 
 def make_outdir_mapping(default_outdir, outdir_to_patterns, source_files):
     # Initialize mapping from outdir to its assigned files
-    outdir_to_files = {default_outdir: []}
+    outdir_to_files = {default_outdir: set()}
     for outdir in outdir_to_patterns:
-        outdir_to_files[outdir] = []
+        outdir_to_files[outdir] = set()
 
     # Map each file using PathMatch regex patterns
     for file_path_str in source_files:
@@ -281,7 +281,7 @@ def make_outdir_mapping(default_outdir, outdir_to_patterns, source_files):
             for pattern in patterns:
                 try:
                     if re.match(pattern, file_path_str):
-                        outdir_to_files[outdir].append(file_path_str)
+                        outdir_to_files[outdir].add(file_path_str)
                         assigned = True
                         break
                 except re.error as e:
@@ -289,12 +289,12 @@ def make_outdir_mapping(default_outdir, outdir_to_patterns, source_files):
             if assigned:
                 break
         if not assigned:
-            outdir_to_files[default_outdir].append(file_path_str)
+            outdir_to_files[default_outdir].add(file_path_str)
 
     return outdir_to_files
 
 
-def run_tidy(args, outdir: Path, files_to_lint: list[Path]):
+def run_tidy(args, outdir: Path, files_to_lint):
     if not files_to_lint:
         return ''
 

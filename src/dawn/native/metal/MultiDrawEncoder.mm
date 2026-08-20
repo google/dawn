@@ -33,7 +33,7 @@
 #include "src/dawn/native/metal/BufferMTL.h"
 
 namespace {
-const char* kShaderSource = "#include <metal_stdlib>\n" DAWN_MULTILINE(
+constexpr const char* kShaderSource = "#include <metal_stdlib>\n" DAWN_MULTILINE(
     using namespace metal;
 
     struct DrawCmd {

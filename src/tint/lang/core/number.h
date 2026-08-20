@@ -377,7 +377,7 @@ tint::Result<TO, ConversionFailure> CheckedConvert(Number<FROM> num) {
     // Use the highest-precision integer or floating-point type to perform the comparisons.
     using T = std::conditional_t<IsFloatingPoint<UnwrapNumber<TO>> || IsFloatingPoint<FROM>,
                                  AFloat::type, AInt::type>;
-    const auto value = static_cast<T>(num.value);
+    const auto value = static_cast<T>(num.value);  // NOLINT(bugprone-signed-char-misuse)
     // Float to integral conversions clamp to the target range.
     // https://gpuweb.github.io/gpuweb/wgsl/#scalar-floating-point-to-integral-conversion
     constexpr auto float_to_integral = IsFloatingPoint<FROM> && IsIntegral<UnwrapNumber<TO>>;
@@ -434,8 +434,8 @@ bool operator==(Number<A> a, Number<B> b) {
     // Use the highest-precision integer or floating-point type to perform the comparisons.
     using T =
         std::conditional_t<IsFloatingPoint<A> || IsFloatingPoint<B>, AFloat::type, AInt::type>;
-    auto va = static_cast<T>(a.value);
-    auto vb = static_cast<T>(b.value);
+    auto va = static_cast<T>(a.value);  // NOLINT(bugprone-signed-char-misuse)
+    auto vb = static_cast<T>(b.value);  // NOLINT(bugprone-signed-char-misuse)
     return std::equal_to<T>()(va, vb);
 }
 

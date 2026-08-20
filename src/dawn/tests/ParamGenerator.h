@@ -159,7 +159,8 @@ std::string TestParamToString(const testing::TestParamInfo<ParamStruct>& info) {
 // ParamStruct is a custom struct which ParamStruct will yield when iterating.
 // The types Params... should be the same as the types passed to the constructor
 // of ParamStruct.
-// TODO: When std::span becomes available via c++20, use std::span over std::vector.
+// TODO(https://crbug.com/343500108): When std::span becomes available via
+// c++20, use std::span over std::vector.
 template <typename ParamStruct, typename... Params>
 class ParamGenerator {
     using ParamTuple = std::tuple<std::vector<Params>...>;
