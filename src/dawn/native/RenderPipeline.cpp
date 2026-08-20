@@ -116,12 +116,6 @@ MaybeError ValidateVertexAttribute(DeviceBase* device,
                                    uint64_t vertexBufferStride,
                                    VertexAttributeMask* attributesSetMask) {
     DAWN_TRY(ValidateVertexFormat(attribute.format));
-    DAWN_INVALID_IF(
-        attribute.format == wgpu::VertexFormat::Snorm10_10_10_2 &&
-            !device->IsToggleEnabled(Toggle::AllowUnsafeAPIs) &&
-            !device->IsToggleEnabled(Toggle::AllowExperimentalSnorm10_10_10_2),
-        "Vertex format snorm10-10-10-2 is experimental and requires the "
-        "allow_unsafe_apis or allow_experimental_snorm10_10_10_2 toggle to be enabled.");
     const VertexFormatInfo& formatInfo = GetVertexFormatInfo(attribute.format);
 
     uint32_t maxVertexAttributes = device->GetLimits().v1.maxVertexAttributes;
