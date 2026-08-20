@@ -79,33 +79,32 @@ void CopyTextureData(Span<std::byte> dst,
                      uint32_t actualBytesPerRow,
                      uint32_t dstBytesPerRow,
                      uint32_t srcBytesPerRow) {
-    const std::byte* srcPointer = src.data();
-    std::byte* dstPointer = dst.data();
-
     uint64_t imageAdditionalStride = srcBytesPerRow * (srcRowsPerImage - dstRowsPerImage);
     bool copyWholeLayer = actualBytesPerRow == dstBytesPerRow && dstBytesPerRow == srcBytesPerRow;
     bool copyWholeData = copyWholeLayer && imageAdditionalStride == 0;
 
+    size_t dstOffset = 0;
+    size_t srcOffset = 0;
     if (!copyWholeLayer) {  // copy row by row
         for (uint32_t d = 0; d < depth; ++d) {
             for (uint32_t h = 0; h < dstRowsPerImage; ++h) {
-                DAWN_UNSAFE_TODO(memcpy(dstPointer, srcPointer, actualBytesPerRow));
-                DAWN_UNSAFE_TODO(dstPointer += dstBytesPerRow);
-                DAWN_UNSAFE_TODO(srcPointer += srcBytesPerRow);
+                dst.subspan(dstOffset).CopyPrefixFrom(src.subspan(srcOffset, actualBytesPerRow));
+                dstOffset += dstBytesPerRow;
+                srcOffset += srcBytesPerRow;
             }
-            DAWN_UNSAFE_TODO(srcPointer += imageAdditionalStride);
+            srcOffset += imageAdditionalStride;
         }
     } else {
-        uint64_t layerSize = uint64_t(dstRowsPerImage) * actualBytesPerRow;
+        size_t layerSize =
+            checked_cast<size_t>(dstRowsPerImage) * checked_cast<size_t>(actualBytesPerRow);
         if (!copyWholeData) {  // copy layer by layer
             for (uint32_t d = 0; d < depth; ++d) {
-                DAWN_UNSAFE_TODO(memcpy(dstPointer, srcPointer, checked_cast<size_t>(layerSize)));
-                DAWN_UNSAFE_TODO(dstPointer += layerSize);
-                DAWN_UNSAFE_TODO(srcPointer += layerSize + imageAdditionalStride);
+                dst.subspan(dstOffset).CopyPrefixFrom(src.subspan(srcOffset, layerSize));
+                dstOffset += layerSize;
+                srcOffset += layerSize + imageAdditionalStride;
             }
         } else {  // do a single copy
-            DAWN_UNSAFE_TODO(
-                memcpy(dstPointer, srcPointer, checked_cast<size_t>(layerSize * depth)));
+            dst.CopyPrefixFrom(src.first(layerSize * depth));
         }
     }
 }
