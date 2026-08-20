@@ -28,6 +28,7 @@
 // This is an example to manually test surface code. Controls are the following, scoped to the
 // currently focused window:
 //  - W: creates a new window.
+//  - T: creates a new window with a transparent framebuffer, to test the alpha modes.
 //  - L: Latches the current surface, to check what happens when the window changes but not the
 //    surface.
 //  - R: switches the rendering mode, between "The Red Triangle" and color-cycling clears that's
@@ -64,6 +65,9 @@
 //  - Config change tests:
 //    - Check that cycling between present modes.
 //    - Check that cycling between alpha modes (it sometimes produce a meaningful difference).
+//    - Check alpha modes on a transparent window (T) in the cycling color render mode: the clear
+//      is premultiplied and cycles its alpha, so Premultiplied and Unpremultiplied let the
+//      desktop show through and Opaque does not.
 //    - Check that cycling between formats works and gives the same color.
 //
 //  - Frame throttling:
@@ -75,7 +79,6 @@
 //    - Check sRGB vs not sRGB gradients.
 //    - Check wide gamut / extended color range.
 //    - Check OpenGL rendering with extra usages / depth buffer / MRT.
-//    - Check with GLFW transparency on / off.
 
 #include <webgpu/webgpu_cpp.h>
 
@@ -125,6 +128,7 @@ struct WindowData {
     uint64_t serial = 0;
 
     float clearCycle = 1.0f;
+    bool transparent = false;
     bool latched = false;
     bool renderTriangle = true;
     uint32_t divisor = 1;
@@ -200,8 +204,9 @@ void SyncFromWindow(WindowData* data) {
     data->targetConfig.height = std::max(1u, static_cast<uint32_t>(height) / data->divisor);
 }
 
-void AddWindow() {
+void AddWindow(bool transparent = false) {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, transparent ? GLFW_TRUE : GLFW_FALSE);
     GLFWwindow* window = glfwCreateWindow(400, 400, "", nullptr, nullptr);
     glfwSetKeyCallback(window, OnKeyPress);
 
@@ -221,6 +226,7 @@ void AddWindow() {
     std::unique_ptr<WindowData> data = std::make_unique<WindowData>();
     data->window = window;
     data->serial = windowSerial++;
+    data->transparent = transparent;
     data->surface = surface;
     data->currentConfig = config;
     data->targetConfig = config;
@@ -257,10 +263,14 @@ void DoRender(WindowData* data) {
             data->clearCycle = 1.0f;
         }
 
+        // On a transparent window cycle the alpha as well, so that the alpha modes have a
+        // visible effect. The color channels are premultiplied so that Premultiplied is valid.
+        const double alpha = data->transparent ? double{data->clearCycle} : 1.0;
+
         dawn::utils::ComboRenderPassDescriptor desc({view});
         desc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-        desc.cColorAttachments[0].clearValue = {double{data->clearCycle},
-                                                double{1.0f - data->clearCycle}, 0.0, 1.0};
+        desc.cColorAttachments[0].clearValue = {
+            alpha * double{data->clearCycle}, alpha * double{1.0f - data->clearCycle}, 0.0, alpha};
 
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&desc);
         pass.End();
@@ -314,6 +324,10 @@ void OnKeyPress(GLFWwindow* window, int key, int, int action, int) {
     switch (key) {
         case GLFW_KEY_W:
             AddWindow();
+            break;
+
+        case GLFW_KEY_T:
+            AddWindow(/*transparent=*/true);
             break;
 
         case GLFW_KEY_L:
