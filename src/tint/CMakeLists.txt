@@ -114,8 +114,7 @@ function(tint_default_compile_options TARGET)
     -Wno-unknown-warning-option
     -Wno-used-but-marked-unused
     -Weverything
-    -Wunsafe-buffer-usage
-    -Wno-unsafe-buffer-usage-in-libc-call
+    -Wno-unsafe-buffer-usage
     -Wno-covered-switch-default
     -Wno-c2y-extensions
     -Wno-lifetime-safety-intra-tu-suggestions

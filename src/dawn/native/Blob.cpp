@@ -34,6 +34,7 @@
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/stream/Stream.h"
 #include "src/utils/assert.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -57,7 +58,8 @@ Blob Blob::Create(Blob&& original, size_t offset, size_t extent) {
 
 // static
 Blob Blob::UnsafeCreateWithDeleter(uint8_t* data, size_t size, std::function<void()> deleter) {
-    return Blob({reinterpret_cast<std::byte*>(data), size}, deleter);
+    return Blob(DAWN_UNSAFE_TODO(std::span<std::byte>(reinterpret_cast<std::byte*>(data), size)),
+                deleter);
 }
 
 Blob::Blob() : mData({}), mDeleter({}) {}

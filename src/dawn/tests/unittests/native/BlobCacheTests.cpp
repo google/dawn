@@ -34,6 +34,7 @@
 #include "src/dawn/native/CacheKey.h"
 #include "src/dawn/native/stream/Stream.h"
 #include "src/dawn/tests/MockCallback.h"
+#include "src/utils/compiler.h"
 #include "webgpu/webgpu_cpp.h"
 
 namespace dawn::native {
@@ -44,8 +45,9 @@ using testing::MockCppCallback;
 
 CacheKey CreateValidKey() {
     CacheKey key;
-    stream::StreamIn(&key, std::string_view(reinterpret_cast<const char*>(kDawnVersion.data()),
-                                            kDawnVersion.size()));
+    stream::StreamIn(
+        &key, DAWN_UNSAFE_TODO(std::string_view(reinterpret_cast<const char*>(kDawnVersion.data()),
+                                                kDawnVersion.size())));
     return key;
 }
 

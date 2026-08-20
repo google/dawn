@@ -40,6 +40,7 @@
 #include "src/dawn/node/binding/GPUTexture.h"
 #include "src/dawn/node/binding/GPUTextureView.h"
 #include "src/dawn/node/utils/Debug.h"
+#include "src/utils/compiler.h"
 
 namespace wgpu::binding {
 
@@ -2136,7 +2137,8 @@ bool ConvertDataElementsToSpan(Napi::Env env,
     }
 
     assert(size64 <= std::numeric_limits<size_t>::max());
-    *out = {reinterpret_cast<const uint8_t*>(src.data), static_cast<size_t>(size64)};
+    *out = DAWN_UNSAFE_TODO(std::span<const uint8_t>(reinterpret_cast<const uint8_t*>(src.data),
+                                                     static_cast<size_t>(size64)));
 
     return true;
 }

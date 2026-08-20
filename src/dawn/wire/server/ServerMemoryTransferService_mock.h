@@ -36,6 +36,7 @@
 #include "dawn/wire/WireServer.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/wire/server/Server.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::wire::server {
 
@@ -59,9 +60,10 @@ class MockMemoryTransferService : public MemoryTransferService {
                                  size_t offset,
                                  size_t size,
                                  std::span<const std::byte> data) const override {
-            SerializeDataUpdate(std::span<std::byte>(const_cast<std::byte*>(serializeData.data()),
-                                                     serializeData.size()),
-                                offset, size, data);
+            SerializeDataUpdate(
+                DAWN_UNSAFE_TODO(std::span<std::byte>(const_cast<std::byte*>(serializeData.data()),
+                                                      serializeData.size())),
+                offset, size, data);
         }
         MOCK_METHOD(bool,
                     DeserializeDataUpdate,

@@ -32,6 +32,7 @@
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/utils/compiler.h"
 
 #if TINT_BUILD_IR_BINARY
 
@@ -81,8 +82,8 @@ DEFINE_BINARY_PROTO_FUZZER(const tint::cmd::fuzz::ir::pb::Root& pb) {
         return out;
     };
 
-    std::span<const std::byte> data(reinterpret_cast<const std::byte*>(pb.data().data()),
-                                    pb.data().length());
+    std::span<const std::byte> data = DAWN_UNSAFE_TODO(std::span<const std::byte>(
+        reinterpret_cast<const std::byte*>(pb.data().data()), pb.data().length()));
     tint::fuzz::ir::Run(acquire_module, options, data);
 }
 

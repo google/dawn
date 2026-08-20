@@ -35,7 +35,7 @@
 # Docs: http://crsrc.org/v/docs/unsafe_buffers.md#syntax-of-unsafe-buffer-paths-file
 #
 # NOTE: If adding a check here, add a test to warning_nocompile.nc too.
-.buffers,libc
+.buffers,libc,unique_ptr,container
 
 # These directories are excluded because they come from outside Dawn and Tint and
 # we don't have control over their contents.

@@ -36,6 +36,7 @@
 #include "dawn/wire/WireClient.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/wire/client/Client.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::wire::client {
 
@@ -52,8 +53,8 @@ class MockMemoryTransferService : public MemoryTransferService {
         // without custom printers, so we implement the volatile overload directly to cast away
         // volatile and forward to the non-volatile MOCK_METHOD.
         void SerializeCreate(std::span<volatile std::byte> serializeSpace) const override {
-            SerializeCreate(std::span<std::byte>(const_cast<std::byte*>(serializeSpace.data()),
-                                                 serializeSpace.size()));
+            SerializeCreate(DAWN_UNSAFE_TODO(std::span<std::byte>(
+                const_cast<std::byte*>(serializeSpace.data()), serializeSpace.size())));
         }
         MOCK_METHOD(std::span<std::byte>, GetData, (), (const, override));
         MOCK_METHOD(size_t, GetSerializeDataUpdateSize, (size_t, size_t), (const, override));
@@ -64,9 +65,10 @@ class MockMemoryTransferService : public MemoryTransferService {
         void SerializeDataUpdate(std::span<volatile std::byte> serializeData,
                                  size_t offset,
                                  size_t size) const override {
-            SerializeDataUpdate(std::span<std::byte>(const_cast<std::byte*>(serializeData.data()),
-                                                     serializeData.size()),
-                                offset, size);
+            SerializeDataUpdate(
+                DAWN_UNSAFE_TODO(std::span<std::byte>(const_cast<std::byte*>(serializeData.data()),
+                                                      serializeData.size())),
+                offset, size);
         }
         MOCK_METHOD(bool,
                     DeserializeDataUpdate,

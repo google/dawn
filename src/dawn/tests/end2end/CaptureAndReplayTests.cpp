@@ -516,7 +516,8 @@ TEST_P(CaptureAndReplayTests, CaptureWithMapRead) {
     // does not have CopySrc. So, let's do it ourselves.
     MapAsyncAndWait(dstBuffer, wgpu::MapMode::Read, 0, sizeof(myData));
     auto actual = static_cast<const uint8_t*>(dstBuffer.GetConstMappedRange(0, sizeof(myData)));
-    std::span<const uint8_t> actual_span(actual, std::size(myData));
+    std::span<const uint8_t> actual_span =
+        DAWN_UNSAFE_TODO(std::span<const uint8_t>(actual, std::size(myData)));
     ASSERT_THAT(actual_span, ::testing::ElementsAreArray(myData));
 }
 

@@ -36,6 +36,7 @@
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 #include "src/tint/utils/text/base64.h"
 #include "src/tint/utils/text/string.h"
+#include "src/utils/compiler.h"
 
 namespace {
 
@@ -45,7 +46,8 @@ tint::fuzz::wgsl::Options options;
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* input, size_t size) {
     if (size > 0) {
-        std::string_view wgsl(reinterpret_cast<const char*>(input), size);
+        std::string_view wgsl =
+            DAWN_UNSAFE_TODO(std::string_view(reinterpret_cast<const char*>(input), size));
         auto data = tint::DecodeBase64FromComments(wgsl);
         tint::fuzz::wgsl::Run(wgsl, options, data.AsSpan());
     }

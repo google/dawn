@@ -941,7 +941,8 @@ TEST_P(SharedBufferMemoryTests, CreateBufferMappedAtCreationOnSharedBufferMemory
         // Write kWrittenData at offset sizeof(uint32_t); leave offset 0 untouched.
         uint32_t* mappedData = static_cast<uint32_t*>(buffer.GetMappedRange(0, kTotalBufferSize));
         ASSERT_NE(mappedData, nullptr);
-        std::span<uint32_t> mappedSpan(mappedData, kTotalBufferSize / sizeof(uint32_t));
+        std::span<uint32_t> mappedSpan =
+            DAWN_UNSAFE_TODO(std::span<uint32_t>(mappedData, kTotalBufferSize / sizeof(uint32_t)));
         mappedSpan[1] = kWrittenData;
         buffer.Unmap();
 

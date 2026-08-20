@@ -53,7 +53,7 @@ MATCHER_P(SizedStringMatches, matcher, "") {
     if (arg.length == WGPU_STRLEN) {
         return false;
     }
-    std::string_view v = {arg.data, arg.length};
+    std::string_view v = DAWN_UNSAFE_TODO(std::string_view(arg.data, arg.length));
     return Matches(matcher)(v);
 }
 

@@ -57,8 +57,8 @@ class DevNull : public dawn::wire::CommandSerializer {
         if (size > buf.size()) {
             buf.resize(size);
         }
-        return std::span<volatile std::byte>(reinterpret_cast<volatile std::byte*>(buf.data()),
-                                             size);
+        return DAWN_UNSAFE_TODO(
+            std::span<volatile std::byte>(reinterpret_cast<volatile std::byte*>(buf.data()), size));
     }
     bool Flush() override { return true; }
 

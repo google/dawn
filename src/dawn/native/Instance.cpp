@@ -133,7 +133,7 @@ static constexpr WGPULoggingCallbackInfo kEmptyLoggingCallbackInfo = {nullptr, n
 static constexpr WGPULoggingCallbackInfo kDefaultLoggingCallbackInfo = {
     nullptr,
     [](WGPULoggingType type, WGPUStringView message, void*, void*) {
-        std::string_view view = {message.data, message.length};
+        std::string_view view = DAWN_UNSAFE_TODO(std::string_view(message.data, message.length));
         switch (static_cast<wgpu::LoggingType>(type)) {
             case wgpu::LoggingType::Verbose:
                 dawn::DebugLog() << view;
