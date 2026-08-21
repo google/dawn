@@ -140,11 +140,16 @@ def main():
         dest_dawn_path = platform_dest / dawn_lib_name
         dest_dawn_path.symlink_to(local_dawn_lib)
 
+        # Isolate Bazel's output_user_root to the GN output directory to prevent stale
+        # caches across checkouts, or filesystem inconsistencies.
+        bazel_user_root = dest_path.parent / '.bazel_root'
+
         # Compile the target using Bazelisk inside LiteRT-LM's standalone
         # workspace.
         print(f"Building Bazel target: {BAZEL_TARGET}...")
         build_cmd = [
             str(bazelisk_path),
+            f"--output_user_root={bazel_user_root}",
             'build',
             '--compilation_mode=opt',
             '--define=litert_link_capi_so=true',
@@ -166,6 +171,8 @@ def main():
 
         # Unconditionally clean the Bazel workspace before building to prevent
         # filesystem inconsistency errors on the bots.
+        # TODO(crbug.com/550309673): Try removing this clean step in a follow up if
+        # it's not actually necessary anymore.
         clean_cmd = [str(bazelisk_path), 'clean']
         subprocess.run(clean_cmd, cwd=litert_lm_dir, env=env)
 
