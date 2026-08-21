@@ -427,7 +427,7 @@ Java_androidx_webgpu_GPUHardwareBufferWrapper_nativeBeginAccess(JNIEnv* env,
     wrapper->device.GetAdapterInfo(&adapterInfo);
     if (adapterInfo.backendType == wgpu::BackendType::Vulkan) {
         beginLayout.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
-        beginLayout.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        beginLayout.newLayout = VK_IMAGE_LAYOUT_GENERAL;
         beginDesc.nextInChain = &beginLayout;
     }
 
@@ -445,7 +445,7 @@ JNIEXPORT jint JNICALL Java_androidx_webgpu_GPUHardwareBufferWrapper_nativeEndAc
     wgpu::AdapterInfo adapterInfo;
     wrapper->device.GetAdapterInfo(&adapterInfo);
     if (adapterInfo.backendType == wgpu::BackendType::Vulkan) {
-        endLayout.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        endLayout.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
         endLayout.newLayout = VK_IMAGE_LAYOUT_GENERAL;
         endState.nextInChain = &endLayout;
     }

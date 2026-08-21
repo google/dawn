@@ -455,7 +455,8 @@ class GPUHardwareBufferTest {
     }
 
     /**
-     * Verifies GPU-to-CPU zero-copy memory visibility after rendering.
+     * Verifies GPU-to-CPU zero-copy memory visibility after rendering into an imported HardwareBuffer.
+     * Crashes with Vulkan image layout transition mismatch if GPUImportedAHB does not use VK_IMAGE_LAYOUT_GENERAL.
      */
     @Test
     @MediumTest
