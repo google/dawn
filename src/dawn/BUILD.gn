@@ -109,9 +109,47 @@ dawn_json_generator("webgpu_headers_gen") {
   target = "webgpu_headers"
   inputs = [
     "${dawn_template_dir}/api.h",
+    "${dawn_template_dir}/api_cpp.h",
+    "${dawn_template_dir}/api_cpp_chained_struct.h",
+    "${dawn_template_dir}/api_cpp_print.h",
+    "${dawn_template_dir}/dawn/cpp_macros.tmpl",
     "${dawn_template_dir}/BSD_LICENSE",
   ]
-  outputs = [ "webgpu-headers/webgpu.h" ]
+  outputs = [
+    "webgpu-headers/webgpu.h",
+    "include/webgpu_upstream/webgpu/webgpu_cpp.h",
+    "include/webgpu_upstream/webgpu/webgpu_cpp_chained_struct.h",
+    "include/webgpu_upstream/webgpu/webgpu_cpp_print.h",
+  ]
+}
+
+###############################################################################
+# Upstream WebGPU C++ headers
+###############################################################################
+
+copy("webgpu_upstream_cpp_bitmasks") {
+  sources = [ "${dawn_root}/include/webgpu/webgpu_enum_class_bitmasks.h" ]
+  outputs =
+      [ "${dawn_gen_root}/include/webgpu_upstream/webgpu/{{source_file_part}}" ]
+}
+
+config("webgpu_upstream_cpp_public") {
+  include_dirs = [ "${dawn_gen_root}/include/webgpu_upstream" ]
+}
+
+source_set("webgpu_upstream_cpp_headers") {
+  all_dependent_configs = [ ":webgpu_upstream_cpp_public" ]
+  public_deps = [
+    ":webgpu_headers_gen",
+    ":webgpu_upstream_cpp_bitmasks",
+    "${dawn_root}/include/dawn:headers",
+  ]
+  sources = [
+    "${dawn_gen_root}/include/webgpu_upstream/webgpu/webgpu_cpp.h",
+    "${dawn_gen_root}/include/webgpu_upstream/webgpu/webgpu_cpp_chained_struct.h",
+    "${dawn_gen_root}/include/webgpu_upstream/webgpu/webgpu_cpp_print.h",
+    "${dawn_gen_root}/include/webgpu_upstream/webgpu/webgpu_enum_class_bitmasks.h",
+  ]
 }
 
 ###############################################################################
