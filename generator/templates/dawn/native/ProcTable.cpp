@@ -47,21 +47,19 @@
     {% endif %}
 {% endfor %}
 
-{%- macro convert_arguments_and_call(function, suffix, call_receiver, first_arg = None, spanify=True) -%}
-    {% set spanify = not suffix in function_spanification_blocklist %}
-
+{%- macro convert_arguments_and_call(function, suffix, call_receiver, first_arg = None) -%}
     {% for arg in function.arguments %}
         {% set varName = as_varName(arg.name) %}
-        {% if spanify and arg.is_length %}
+        {% if (arg.spanify | default(True)) and arg.is_length %}
             //* Skip as it's included in the span just below.
-        {% elif spanify and arg.length and arg.length != "constant" %}
+        {% elif (arg.spanify | default(True)) and arg.length and arg.length != "constant" %}
             // TODO(https://crbug.com/524405497): Support fixed-length spans.
             {% if arg.type.name.canonical_case() == "void" %}
                 using {{varName}}SpanT = {% if arg.annotation == "const*" %}const {% endif %}std::byte;
             {% else %}
                 using {{varName}}SpanT = std::remove_pointer_t<{{decorate(as_frontendType(arg.type), arg)}}>;
             {% endif %}
-            {% set IndexType = function_span_index_type_override.get(suffix + "::" + varName, "size_t") %}
+            {% set IndexType = arg.index_type | default('size_t') %}
             auto {{varName}}Size_ = checked_cast<{{IndexType}}>({{as_varName(arg.length.name)}});
             auto {{varName}}Ptr = reinterpret_cast<{{varName}}SpanT*>({{varName}});
             // SAFETY: The webgpu.h user is required to pass valid ranges of objects.
@@ -84,7 +82,7 @@
         {%- if first_arg -%}
             {{first_arg}} {%- if len(function.arguments) != 0 %}, {% endif -%}
         {%- endif -%}
-        {%- for arg in function.arguments if (not spanify or not arg.is_length) -%}
+        {%- for arg in function.arguments if (not (arg.spanify | default(True)) or not arg.is_length) -%}
             {%- if not loop.first %}, {% endif -%}
             {{as_varName(arg.name)}}_
         {%- endfor -%}

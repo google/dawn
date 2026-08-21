@@ -30,6 +30,8 @@
 //* implementations templates. It assumes that the implementing file includes
 //* the corresponding api_structs_autogen.h.
 
+{% from 'dawn/cpp_macros.tmpl' import as_dawnType with context %}
+
 {%- macro render_structure_conversions(name) -%}
     {% set CType = as_cType(name) %}
     {% set DawnType = as_dawnType(name) %}

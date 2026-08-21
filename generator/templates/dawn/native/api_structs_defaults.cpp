@@ -35,7 +35,6 @@ namespace {{native_namespace}} {
 
 {% for type in by_category["structure"] %}
     {% set CppType = as_cppType(type.name) %}
-    {% set spanify = not CppType in structure_spanification_blocklist %}
     {% if type.any_member_requires_struct_defaulting %}
         {{CppType}} WithTrivialFrontendDefaults(const {{CppType}}& in) {
             {{CppType}} copy;
@@ -48,7 +47,7 @@ namespace {{native_namespace}} {
             {% endif %}
             {% for member in type.members %}
                 {% set memberName = member.name.camelCase() %}
-                {% if spanify and member.is_length %}
+                {% if (member.spanify | default(True)) and member.is_length %}
                     //* Skip as the member is included in the span member.
                 {% elif member.requires_struct_defaulting %}
                     {% if member.type.category == "structure" %}

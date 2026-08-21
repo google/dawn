@@ -138,6 +138,9 @@ class Type:
     def __lt__(self, other):
         return self.name < other.name
 
+    def get_child_map(self):
+        return {}
+
 
 EnumValue = namedtuple('EnumValue', ['name', 'value', 'valid', 'json_data'])
 
@@ -264,6 +267,12 @@ class AnnotatedTypedMember:
         self.annotation = annotation
         self.optional = optional
         self.json_data = json_data
+        self.length = None
+        self.constant_length = None
+        self.is_length = False
+
+    def get_child_map(self):
+        return {}
 
 
 # Methods and structures are both "records", so record members correspond to
@@ -282,9 +291,6 @@ class RecordMember(AnnotatedTypedMember):
                  skip_serialize=False):
         super().__init__(typ, annotation, optional, json_data)
         self.name = name
-        self.length = None
-        self.is_length = False
-        self.optional = optional
         self.array_element_optional = array_element_optional
         if array_element_optional:
             assert annotation == 'const*', 'array_element_optional can only be used on array types'
@@ -325,6 +331,9 @@ class Method():
         self.autolock = autolock
         self.json_data = json_data
 
+    def get_child_map(self):
+        return {arg.name.get(): arg for arg in self.arguments}
+
 
 class ObjectType(Type):
 
@@ -335,6 +344,9 @@ class ObjectType(Type):
                 m for m in json_data['methods'] if is_enabled(m)
             ]
         Type.__init__(self, name, dict(json_data, **json_data_override))
+
+    def get_child_map(self):
+        return {method.name.get(): method for method in self.methods}
 
 
 class Record:
@@ -411,6 +423,9 @@ class StructureType(Record, Type):
         self.is_wire_transparent = all(
             get_is_wire_transparent(m) for m in self.members)
 
+    def get_child_map(self):
+        return {member.name.get(): member for member in self.members}
+
     @property
     def output(self):
         # self.out is a temporary way to express that this is an output structure
@@ -450,6 +465,9 @@ class ConstantDefinition():
         self.json_data = json_data
         self.name = Name(name)
 
+    def get_child_map(self):
+        return {}
+
 
 class FunctionDeclaration():
 
@@ -459,6 +477,9 @@ class FunctionDeclaration():
         self.json_data = json_data
         self.name = Name(name)
         self.no_cpp = no_cpp
+
+    def get_child_map(self):
+        return {arg.name.get(): arg for arg in self.arguments}
 
 
 class Command(Record):
@@ -674,7 +695,28 @@ def topo_sort_object(objects):
     return result
 
 
-def parse_json(json, enabled_tags, disabled_tags=None):
+def apply_addins(types, addins):
+
+    def get_addin_target(search_map, path):
+        while path:
+            part = path.pop(0)
+            if part not in search_map:
+                return None
+            target = search_map[part]
+            if not path:
+                return target
+            search_map = target.get_child_map()
+        return None
+
+    for key, prop_dict in addins.items():
+        path = key.split('::')
+        target = get_addin_target(types, path)
+        assert target is not None, f'Addin instance "{key}" not found in dawn.json'
+        for prop, val in prop_dict.items():
+            setattr(target, prop, val)
+
+
+def parse_json(json, enabled_tags, disabled_tags=None, metadata=None):
     is_enabled = lambda json_data: item_is_enabled(
         enabled_tags, json_data) and not item_is_disabled(
             disabled_tags, json_data)
@@ -743,6 +785,9 @@ def parse_json(json, enabled_tags, disabled_tags=None):
 
     for struct in by_category['structure']:
         struct.update_metadata()
+
+    addins = metadata.get('addins', {}) if metadata else {}
+    apply_addins(types, addins)
 
     api_params = {
         'types': types,
@@ -1445,21 +1490,6 @@ def as_wireType(metadata, typ):
         return as_cppType(typ.name)
 
 
-def as_dawnType(metadata, typ):
-    # Standalone Name instances (e.g. for manually instantiated structures like
-    # ChainedStruct) are treated as structure types.
-    if isinstance(typ, Name):
-        return as_cppType(typ)
-    if typ.category == 'object':
-        return "detail::" + typ.name.CamelCase() + '*'
-    elif typ.category in ['bitmask', 'enum'] or typ.name.get() == 'bool':
-        return metadata.namespace + '::' + typ.name.CamelCase()
-    elif typ.category == 'structure':
-        return as_cppType(typ.name)
-    else:
-        return as_cType(metadata.c_prefix, typ.name)
-
-
 def c_methods(params, typ):
     if typ.category == 'object':
         return typ.methods + [
@@ -1589,9 +1619,6 @@ def make_base_render_params(metadata):
             'as_jsEnumValue': as_jsEnumValue,
             'has_wasmType': has_wasmType,
             'as_wasmType': as_wasmType,
-            'as_dawnType': lambda typ: as_dawnType(metadata, typ),
-            'as_annotated_dawnType': \
-                lambda arg: annotate(as_dawnType(metadata, arg.type), arg),
             'convert_cType_to_cppType': convert_cType_to_cppType,
             'as_varName': as_varName,
             'decorate': lambda typ, arg: decorate(typ, arg, with_nullability=False),
@@ -1874,14 +1901,18 @@ class MultiGeneratorFromDawnJSON(Generator):
                            mock_params))
 
         if 'native_utils' in targets:
+            params_dawn_native = parse_json(
+                loaded_json,
+                enabled_tags=['dawn', 'native', 'deprecated'],
+                metadata=native_json['metadata'])
             frontend_params = [
                 RENDER_PARAMS_BASE,
-                params_dawn,
+                params_dawn_native,
                 {
                     # TODO: as_frontendType and co. take a Type, not a Name :(
-                    'as_frontendType': lambda typ: as_frontendType(metadata, typ),
+                    'as_frontendType':
+                    lambda typ: as_frontendType(metadata, typ),
                 },
-                native_json['metadata'],
             ]
 
             imported_templates += [
@@ -1982,7 +2013,8 @@ class MultiGeneratorFromDawnJSON(Generator):
         if 'wire' in targets:
             params_dawn_wire = parse_json(loaded_json,
                                           enabled_tags=['dawn', 'deprecated'],
-                                          disabled_tags=['native'])
+                                          disabled_tags=['native'],
+                                          metadata=wire_json['metadata'])
             additional_params = compute_wire_params(params_dawn_wire,
                                                     wire_json)
 

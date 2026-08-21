@@ -51,7 +51,6 @@ bool StringView::operator==(const StringView& rhs) const {
 {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
     {% set CppType = as_cppType(type.name) %}
     {% set CType = as_cType(type.name) %}
-    {% set spanify = not CppType in structure_spanification_blocklist %}
     static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
     static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
 
@@ -67,7 +66,7 @@ bool StringView::operator==(const StringView& rhs) const {
     {% endif %}
     {% for member in type.members %}
         {% set memberName = member.name.camelCase() %}
-        {% if spanify %}
+        {% if member.spanify | default(True) %}
             {% if member.is_length %}
                 //* Skip as the member is included in the span member.
             {% elif member.length and member.constant_length != 1 %}
@@ -95,7 +94,7 @@ bool StringView::operator==(const StringView& rhs) const {
             if (nextInChain != rhs.nextInChain) { return false; }
         {% endif %}
         {% for member in type.members if member.type.category != 'callback info' %}
-            {% if spanify %}
+            {% if member.spanify | default(True) %}
                 {% if member.is_length %}
                     //* Skip as the member is included in the span member.
                 {% elif member.length and member.constant_length != 1 %}

@@ -25,6 +25,7 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+{% from 'dawn/cpp_macros.tmpl' import as_dawnType with context %}
 {% set Prefix = metadata.proc_table_prefix %}
 {% set prefix = Prefix.lower() %}
 #include <algorithm>
