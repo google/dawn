@@ -161,6 +161,15 @@ if (DAWN_ENABLE_VULKAN)
         Vulkan::Headers)
 endif ()
 
+if (DAWN_ENABLE_VULKAN AND UNIX AND NOT ANDROID AND NOT APPLE)
+    list(APPEND private_headers
+        "DRMUtils.h"
+    )
+    list(APPEND sources
+        "DRMUtils.cpp"
+    )
+endif()
+
 list(APPEND conditional_private_depends
     ${CMAKE_DL_LIBS})
 

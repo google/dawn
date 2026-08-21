@@ -59,7 +59,13 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
   public:
     ~VideoViewsTestBackendWin() override = default;
 
-    void OnSetUp(const wgpu::Device& device) override {
+    bool Initialize(const wgpu::Device& device) override {
+        InitializeD3D11Device(device);
+        return true;
+    }
+
+  protected:
+    void InitializeD3D11Device(const wgpu::Device& device) {
         mWGPUDevice = device;
 
         // Create the D3D11 device/contexts that will be used in subsequent tests
@@ -96,7 +102,6 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         mD3d11Device = std::move(d3d11Device);
     }
 
-  protected:
     static DXGI_FORMAT GetDXGITextureFormat(wgpu::TextureFormat format) {
         switch (format) {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:

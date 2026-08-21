@@ -435,6 +435,10 @@ dawn_test("dawn_unittests") {
     sources += [ "unittests/replay/CaptureWalkerTests.cpp" ]
   }
 
+  if (dawn_enable_vulkan && (is_chromeos || is_linux)) {
+    sources += [ "unittests/DRMUtilsTests.cpp" ]
+  }
+
   sources += [
     "unittests/validation/YCbCrValidationTests.cpp",
     "unittests/vulkan/MemoryTypeSelectorTests.cpp",

@@ -122,6 +122,9 @@ std::vector<wgpu::FeatureName> VideoViewsTestsBase::GetRequiredFeatures() {
     if (SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews})) {
         requiredFeatures.push_back(wgpu::FeatureName::FlexibleTextureViews);
     }
+    if (SupportsFeatures({wgpu::FeatureName::AdapterPropertiesDrm})) {
+        requiredFeatures.push_back(wgpu::FeatureName::AdapterPropertiesDrm);
+    }
 
     requiredFeatures.push_back(wgpu::FeatureName::DawnInternalUsages);
     return requiredFeatures;
@@ -517,12 +520,11 @@ class VideoViewsTests : public VideoViewsTestsBase {
         DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
         mBackend = VideoViewsTestBackend::Create();
-        mBackend->OnSetUp(device);
+        DAWN_TEST_UNSUPPORTED_IF(!mBackend->Initialize(device));
     }
 
     void TearDown() override {
         if (mBackend) {
-            mBackend->OnTearDown();
             mBackend = nullptr;
         }
         VideoViewsTestsBase::TearDown();

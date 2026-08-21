@@ -56,7 +56,10 @@ class PlatformTextureIOSurface : public VideoViewsTestBackend::PlatformTexture {
 
 class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
   public:
-    void OnSetUp(const wgpu::Device& device) override { mWGPUDevice = device; }
+    bool Initialize(const wgpu::Device& device) override {
+        mWGPUDevice = device;
+        return true;
+    }
 
   private:
     std::unique_ptr<VideoViewsTestBackend::PlatformTexture> CreateVideoTextureForTest(
