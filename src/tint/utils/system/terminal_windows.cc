@@ -76,8 +76,11 @@ std::optional<bool> TerminalIsDark(FILE* out) {
             CONSOLE_SCREEN_BUFFER_INFOEX info{};
             info.cbSize = sizeof(info);
             if (GetConsoleScreenBufferInfoEx(screen_buffer, &info)) {
+                // SAFETY: `info.ColorTable` is a fixed-size array of 16 elements. The index is a
+                // 4-bit value `(info.wAttributes & 0xf0) >> 4`, which is guaranteed to be in the
+                // range [0, 15].
                 COLORREF background =
-                    DAWN_UNSAFE_TODO(info.ColorTable[(info.wAttributes & 0xf0) >> 4]);
+                    DAWN_UNSAFE_BUFFERS(info.ColorTable[(info.wAttributes & 0xf0) >> 4]);
                 // https://en.wikipedia.org/wiki/Relative_luminance
                 float r = static_cast<float>((background >> 0) & 0xff) / 255.0f;
                 float g = static_cast<float>((background >> 8) & 0xff) / 255.0f;

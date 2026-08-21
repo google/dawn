@@ -861,8 +861,11 @@ class State {
             }
             components.Push(xyzw[i]);
         }
+        // SAFETY: `components` contains at most 4 elements populated from the valid `xyzw` array
+        // based on the swizzle indices, which is bounds-safe for this view.
         auto* swizzle = b.MemberAccessor(
-            vec, DAWN_UNSAFE_TODO(std::string_view(components.begin(), components.Length())));
+            vec,
+            DAWN_UNSAFE_BUFFERS(std::string_view(components.AsSpan().data(), components.Length())));
         Bind(s->Result(), swizzle);
     }
 
