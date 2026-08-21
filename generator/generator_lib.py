@@ -258,6 +258,12 @@ def _compute_python_dependencies(root_dir=None):
         if not path.startswith(root_dir):
             continue
 
+        # When using hermetic CPython from DEPS (third_party/cpython3), standard
+        # library modules reside inside root_dir. Exclude them so they are not
+        # mistakenly tracked as generator project dependencies.
+        if 'third_party' + os.path.sep + 'cpython3' in path:
+            continue
+
         if (path.endswith('.pyc')
                 or (path.endswith('c') and not os.path.splitext(path)[1])):
             path = path[:-1]
