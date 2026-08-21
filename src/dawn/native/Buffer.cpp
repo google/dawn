@@ -143,7 +143,7 @@ MaybeError ValidateBufferUsageCombinations(const DeviceBase* device, wgpu::Buffe
                 usage & wgpu::BufferUsage::MapRead,
                 "Buffer usages (%s) is invalid. %s cannot be combined with %s when %s is enabled.",
                 usage, wgpu::BufferUsage::MapWrite, wgpu::BufferUsage::MapRead,
-                ToAPI(Feature::BufferMapWriteExtendedUsages));
+                ToCppAPI(Feature::BufferMapWriteExtendedUsages));
         } else {
             const wgpu::BufferUsage kMapWriteAllowedUsages =
                 wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
@@ -403,7 +403,7 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
             device->GetLimits().hostMappedPointerLimits.hostMappedPointerAlignment;
 
         DAWN_INVALID_IF(!device->HasFeature(Feature::HostMappedPointer), "%s requires %s.",
-                        hostMappedDesc->sType, ToAPI(Feature::HostMappedPointer));
+                        hostMappedDesc->sType, ToCppAPI(Feature::HostMappedPointer));
         DAWN_INVALID_IF(!IsAligned(static_cast<uint32_t>(descriptor->size), requiredAlignment),
                         "Buffer size (%u) wrapping host-mapped memory was not aligned to %u.",
                         descriptor->size, requiredAlignment);

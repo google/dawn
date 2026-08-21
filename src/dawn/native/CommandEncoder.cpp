@@ -556,7 +556,7 @@ MaybeError ValidateDawnRenderPassSampleCount(
     DAWN_INVALID_IF(
         !device->HasFeature(Feature::MSAARenderToSingleSampled),
         "The render pass has an explicit sample count while the %s feature is not enabled.",
-        ToAPI(Feature::MSAARenderToSingleSampled));
+        ToCppAPI(Feature::MSAARenderToSingleSampled));
 
     DAWN_INVALID_IF(!IsValidSampleCount(renderPassSampleCount->sampleCount) ||
                         renderPassSampleCount->sampleCount <= 1,
@@ -608,7 +608,7 @@ MaybeError ValidateExpandResolveTextureLoadOp(const DeviceBase* device,
                                               RenderPassValidationState* validationState) {
     DAWN_INVALID_IF(!device->HasFeature(Feature::DawnLoadResolveTexture),
                     "%s is used while the %s is not enabled.", wgpu::LoadOp::ExpandResolveTexture,
-                    ToAPI(Feature::DawnLoadResolveTexture));
+                    ToCppAPI(Feature::DawnLoadResolveTexture));
 
     uint32_t textureSampleCount = colorAttachment.view->GetTexture()->GetSampleCount();
 
@@ -676,7 +676,7 @@ ResultOrError<wgpu::LoadOp> ValidateAndGetActualLoadOp(const DeviceBase* device,
     DAWN_INVALID_IF(loadOp == wgpu::LoadOp::Undefined &&
                         !device->HasFeature(Feature::DawnAllowUndefinedLoadStoreOp),
                     "%s must be set unless the %s feature is enabled.", name,
-                    ToAPI(Feature::DawnAllowUndefinedLoadStoreOp));
+                    ToCppAPI(Feature::DawnAllowUndefinedLoadStoreOp));
     return ActualLoadOpIfUndefined(device, usage, loadOp);
 }
 
@@ -690,7 +690,7 @@ ResultOrError<wgpu::StoreOp> ValidateAndGetActualStoreOp(const DeviceBase* devic
     DAWN_INVALID_IF(storeOp == wgpu::StoreOp::Undefined &&
                         !device->HasFeature(Feature::DawnAllowUndefinedLoadStoreOp),
                     "%s must be set unless the %s feature is enabled.", name,
-                    ToAPI(Feature::DawnAllowUndefinedLoadStoreOp));
+                    ToCppAPI(Feature::DawnAllowUndefinedLoadStoreOp));
     return ActualStoreOpIfUndefined(device, usage, storeOp);
 }
 
@@ -945,7 +945,7 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
     if (const auto* expandResolveRect = descriptor.Get<RenderPassDescriptorResolveRect>()) {
         DAWN_INVALID_IF(!device->HasFeature(Feature::DawnPartialLoadResolveTexture),
                         "RenderPassDescriptorResolveRect can't be used without %s.",
-                        ToAPI(Feature::DawnPartialLoadResolveTexture));
+                        ToCppAPI(Feature::DawnPartialLoadResolveTexture));
         validationState->SetExpandResolveRect(*expandResolveRect);
     }
 
@@ -1019,7 +1019,7 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
     if (auto area = descriptor.Get<RenderPassRenderAreaRect>()) {
         DAWN_INVALID_IF(!device->HasFeature(Feature::RenderPassRenderArea),
                         "RenderPassRenderAreaRect can't be used without %s.",
-                        ToAPI(Feature::RenderPassRenderArea));
+                        ToCppAPI(Feature::RenderPassRenderArea));
         DAWN_INVALID_IF(area->size.width == 0 || area->size.height == 0,
                         "RenderPassRenderAreaRect %s must not be empty", area);
         DAWN_INVALID_IF(

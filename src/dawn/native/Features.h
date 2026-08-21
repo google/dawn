@@ -41,8 +41,8 @@ namespace dawn::native {
 
 extern const ityp::array<Feature, FeatureInfo, kEnumCount<Feature>> kFeatureNameAndInfoList;
 
-wgpu::FeatureName ToAPI(Feature feature);
-Feature FromAPI(wgpu::FeatureName feature);
+wgpu::FeatureName ToCppAPI(Feature feature);
+Feature FromCppAPI(wgpu::FeatureName feature);
 
 // A wrapper of the bitset to store if an feature is enabled or not. This wrapper provides the
 // convenience to convert the enums of enum class Feature to the indices of a bitset.

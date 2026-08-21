@@ -1878,7 +1878,7 @@ wgpu::Status DeviceBase::APIGetAHardwareBufferProperties(void* handle,
         ConsumeError(
             DAWN_VALIDATION_ERROR("Queried APIGetAHardwareBufferProperties() on %s "
                                   "without the %s feature being set.",
-                                  this, ToAPI(Feature::SharedTextureMemoryAHardwareBuffer)));
+                                  this, ToCppAPI(Feature::SharedTextureMemoryAHardwareBuffer)));
         return wgpu::Status::Error;
     }
 

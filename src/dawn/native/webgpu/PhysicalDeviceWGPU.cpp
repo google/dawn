@@ -157,7 +157,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     DAWN_ASSERT(kEnumCount<Feature> == static_cast<uint32_t>(kFeatureNameAndInfoList.size()));
     for (uint32_t f = 0; f < kEnumCount<Feature>; f++) {
         Feature feature = static_cast<Feature>(f);
-        WGPUFeatureName apiFeature = ToAPI(ToAPI(feature));
+        WGPUFeatureName apiFeature = ToAPI(ToCppAPI(feature));
         if (GetFunctions().adapterHasFeature(mInnerAdapter, apiFeature)) {
             EnableFeature(feature);
         }

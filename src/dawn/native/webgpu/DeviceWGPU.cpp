@@ -300,7 +300,7 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
     // TODO(crbug.com/483147423): Handle all possible chained structures.
     if (unpacked.Get<SharedTextureMemoryIOSurfaceDescriptor>()) {
         auto feature = Feature::SharedTextureMemoryIOSurface;
-        DAWN_INVALID_IF(!HasFeature(feature), "%s is not enabled.", ToAPI(feature));
+        DAWN_INVALID_IF(!HasFeature(feature), "%s is not enabled.", ToCppAPI(feature));
     } else if (unpacked.Get<SharedTextureMemoryAHardwareBufferDescriptor>()) {
         return DAWN_UNIMPLEMENTED_ERROR(
             "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
@@ -345,7 +345,7 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     // TODO(crbug.com/483147423): Handle all possible chained structures.
     if (unpacked.Get<SharedFenceMTLSharedEventDescriptor>()) {
         auto feature = Feature::SharedFenceMTLSharedEvent;
-        DAWN_INVALID_IF(!HasFeature(feature), "%s is not enabled.", ToAPI(feature));
+        DAWN_INVALID_IF(!HasFeature(feature), "%s is not enabled.", ToCppAPI(feature));
     } else if (unpacked.Get<SharedFenceDXGISharedHandleDescriptor>()) {
         return DAWN_UNIMPLEMENTED_ERROR(
             "SharedFence in WebGPU backend has not been implemented for all platforms.");

@@ -502,7 +502,7 @@ MaybeError ValidateColorTargetState(
         DAWN_INVALID_IF(!device->HasFeature(Feature::DawnLoadResolveTexture),
                         "The ColorTargetStateExpandResolveTextureDawn struct is used while the "
                         "%s feature is not enabled.",
-                        ToAPI(Feature::DawnLoadResolveTexture));
+                        ToCppAPI(Feature::DawnLoadResolveTexture));
 
         DAWN_INVALID_IF(
             multisample.count <= 1,

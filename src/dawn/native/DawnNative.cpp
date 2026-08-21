@@ -273,11 +273,11 @@ std::vector<const ToggleInfo*> AllToggleInfos() {
 }
 
 const FeatureInfo* GetFeatureInfo(wgpu::FeatureName feature) {
-    Feature f = FromAPI(feature);
+    Feature f = FromCppAPI(feature);
     if (f == Feature::InvalidEnum) {
         return nullptr;
     }
-    return &kFeatureNameAndInfoList[FromAPI(feature)];
+    return &kFeatureNameAndInfoList[FromCppAPI(feature)];
 }
 
 void MemoryDump::AddOwnerGUID(const char* name, uint64_t ownerGUID) {

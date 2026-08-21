@@ -141,7 +141,7 @@ MaybeError SharedTextureMemoryBase::GetProperties(SharedTextureMemoryProperties*
             !GetDevice()->HasFeature(Feature::SharedTextureMemoryAHardwareBuffer),
             "SharedTextureMemory properties (%s) have a chained "
             "SharedTextureMemoryAHardwareBufferProperties without the %s feature being set.",
-            this, ToAPI(Feature::SharedTextureMemoryAHardwareBuffer));
+            this, ToCppAPI(Feature::SharedTextureMemoryAHardwareBuffer));
     }
 
     DAWN_TRY(GetChainedProperties(unpacked));

@@ -194,7 +194,7 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
 
     for (size_t i = 0; i < kTotalFeaturesCount; i++) {
         Feature feature = static_cast<Feature>(i);
-        wgpu::FeatureName featureName = ToAPI(feature);
+        wgpu::FeatureName featureName = ToCppAPI(feature);
 
         // Only test experimental features.
         if (kFeatureNameAndInfoList[feature].featureState == FeatureInfo::FeatureState::Stable) {
