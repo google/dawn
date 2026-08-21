@@ -411,13 +411,21 @@ MaybeError VulkanInstance::Initialize(const InstanceBase* instance, ICD icd) {
 
     VulkanGlobalKnobs usedGlobalKnobs = {};
     DAWN_TRY_ASSIGN(usedGlobalKnobs, CreateVkInstance(instance));
-    *static_cast<VulkanGlobalKnobs*>(&mGlobalInfo) = usedGlobalKnobs;
 
     DAWN_TRY(mFunctions.LoadInstanceProcs(mInstance, mGlobalInfo));
 
     if (usedGlobalKnobs.HasExt(InstanceExt::DebugUtils)) {
-        DAWN_TRY(RegisterDebugUtils());
+        // Workaround for buggy drivers/loaders (e.g. Adreno 610/619 on Android) that advertise
+        // VK_EXT_debug_utils in vkEnumerateInstanceExtensionProperties but return nullptr for
+        // some entrypoints in vkGetInstanceProcAddr.
+        if (mFunctions.TryLoadEXTDebugUtils(mInstance)) {
+            DAWN_TRY(RegisterDebugUtils());
+        } else {
+            usedGlobalKnobs.extensions.set(InstanceExt::DebugUtils, false);
+        }
     }
+
+    *static_cast<VulkanGlobalKnobs*>(&mGlobalInfo) = usedGlobalKnobs;
 
     DAWN_TRY_ASSIGN(mVkPhysicalDevices, GatherPhysicalDevices(mInstance, mFunctions));
 

@@ -70,6 +70,10 @@ using VkFn = typename VkFnImpl<F>::type;
 struct VulkanFunctions {
     MaybeError LoadGlobalProcs(const DynamicLib& vulkanLib);
     MaybeError LoadInstanceProcs(VkInstance instance, const VulkanGlobalInfo& globalInfo);
+    // Attempts to load the VK_EXT_debug_utils extension procs. Returns false if any required
+    // entrypoint is missing (workaround for buggy Android Vulkan drivers/loaders that advertise
+    // the extension but fail to expose entrypoints via vkGetInstanceProcAddr).
+    bool TryLoadEXTDebugUtils(VkInstance instance);
     MaybeError LoadDeviceProcs(VkInstance instance,
                                VkDevice device,
                                const VulkanDeviceInfo& deviceInfo);
