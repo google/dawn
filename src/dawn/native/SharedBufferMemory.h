@@ -70,8 +70,6 @@ class SharedBufferMemoryBase : public SharedResourceMemory {
                            ObjectBase::ErrorTag tag);
 
   private:
-    ResultOrError<Ref<BufferBase>> CreateBuffer(const BufferDescriptor* rawDescriptor);
-
     virtual ResultOrError<Ref<BufferBase>> CreateBufferImpl(
         const UnpackedPtr<BufferDescriptor>& descriptor) = 0;
 

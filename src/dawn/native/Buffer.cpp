@@ -610,6 +610,19 @@ MaybeError BufferBase::FinalizeMap(BufferState newState) {
     return {};
 }
 
+bool BufferBase::TryMapAtCreation(bool fakeOOMAtNativeMap) {
+    MaybeError mapResult =
+        fakeOOMAtNativeMap
+            ? DAWN_OUT_OF_MEMORY_ERROR("DawnFakeBufferOOMForTesting fakeOOMAtNativeMap")
+            : MapAtCreation();
+    if (mapResult.IsError()) {
+        auto error = mapResult.AcquireError();
+        GetDevice()->EmitLog(wgpu::LoggingType::Error, error->GetFormattedMessage());
+        return false;
+    }
+    return true;
+}
+
 MaybeError BufferBase::MapAtCreation() {
     bool usingStagingBuffer = false;
     DAWN_TRY_ASSIGN(usingStagingBuffer, MapAtCreationInternal());

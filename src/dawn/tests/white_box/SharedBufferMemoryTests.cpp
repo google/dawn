@@ -970,42 +970,57 @@ TEST_P(SharedBufferMemoryTests, CreateBufferMappedAtCreationOnSharedBufferMemory
     runScenario(false, 0u);
 }
 
-// Regression test: DawnFakeBufferOOMForTesting must be honoured when creating a buffer
-// via SharedBufferMemory, not just via Device::CreateBuffer.
+// Regression test: `DawnFakeBufferOOMForTesting` must be honoured when creating a buffer
+// via `SharedBufferMemory`, not just via `Device::CreateBuffer`.
 TEST_P(SharedBufferMemoryTests, CreateBufferFakeOOM) {
     wgpu::SharedBufferMemory memory =
         GetParam().mBackend->CreateSharedBufferMemory(device, kMapWriteUsages, kBufferSize);
     wgpu::SharedBufferMemoryProperties properties;
     memory.GetProperties(&properties);
 
+    auto Check = [&](bool mapError, bool deviceError, const wgpu::BufferDescriptor* desc) {
+        wgpu::Buffer buffer;
+        if (deviceError) {
+            ASSERT_DEVICE_ERROR(buffer = memory.CreateBuffer(desc));
+        } else {
+            buffer = memory.CreateBuffer(desc);
+        }
+        if (mapError) {
+            ASSERT_EQ(nullptr, buffer.Get());
+        } else {
+            ASSERT_NE(nullptr, buffer.Get());
+        }
+    };
+
     wgpu::DawnFakeBufferOOMForTesting oomForTesting;
-    wgpu::BufferDescriptor bufferDesc = {};
-    bufferDesc.nextInChain = &oomForTesting;
-    bufferDesc.size = properties.size;
-    bufferDesc.usage = kMapWriteUsages;
+    wgpu::BufferDescriptor descriptor = {};
+    descriptor.nextInChain = &oomForTesting;
+    descriptor.size = properties.size;
+    descriptor.usage = kMapWriteUsages;
+    descriptor.mappedAtCreation = true;
 
-    // Both false: CreateBuffer should succeed.
+    // Control: CreateBuffer should succeed.
     oomForTesting = {};
-    wgpu::Buffer buffer = memory.CreateBuffer(&bufferDesc);
-    EXPECT_NE(buffer, nullptr);
+    Check(false, false, &descriptor);
 
-    // fakeOOMAtDevice: CreateBuffer should surface a device error and return an error buffer.
+    // SharedBufferMemoryTests won't be run with wire.
+    constexpr bool kUsesWire = false;
+
+    // Test OOM in Dawn Native.
+    oomForTesting = {};
+    oomForTesting.fakeOOMAtNativeMap = true;
+    Check(!kUsesWire, false, &descriptor);
+
+    // Test OOM in Dawn Native AND in the device allocation. Similar to previous case.
+    oomForTesting = {};
+    oomForTesting.fakeOOMAtNativeMap = true;
+    oomForTesting.fakeOOMAtDevice = true;
+    Check(!kUsesWire, false, &descriptor);
+
+    // Test OOM only in device allocation. There should be no nulls returned at either layer.
     oomForTesting = {};
     oomForTesting.fakeOOMAtDevice = true;
-    ASSERT_DEVICE_ERROR(buffer = memory.CreateBuffer(&bufferDesc));
-    EXPECT_NE(buffer, nullptr);
-
-    // fakeOOMAtNativeMap without mappedAtCreation: CreateBuffer should succeed.
-    oomForTesting = {};
-    oomForTesting.fakeOOMAtNativeMap = true;
-    buffer = memory.CreateBuffer(&bufferDesc);
-    EXPECT_NE(buffer, nullptr);
-
-    // fakeOOMAtNativeMap with mappedAtCreation: CreateBuffer should surface a device error.
-    oomForTesting = {};
-    oomForTesting.fakeOOMAtNativeMap = true;
-    bufferDesc.mappedAtCreation = true;
-    ASSERT_DEVICE_ERROR(memory.CreateBuffer(&bufferDesc));
+    Check(false, true, &descriptor);
 }
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SharedBufferMemoryTests);

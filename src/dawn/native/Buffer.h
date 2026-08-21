@@ -134,6 +134,8 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     wgpu::BufferUsage GetUsage() const;
 
     MaybeError MapAtCreation();
+    // Attempts to map at creation; on OOM logs and returns false so callers can return nullptr.
+    bool TryMapAtCreation(bool fakeOOMAtNativeMap);
 
     // Changes buffer state to denote it's being used. The buffer must be unmapped so this isn't
     // suitable for buffers that could be used by external API calls. `ScopedUseBuffer` will resets

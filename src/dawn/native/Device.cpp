@@ -1265,14 +1265,7 @@ BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* rawDescriptor) {
         // MapAtCreation requires the device lock in case it allocates staging memory.
         auto deviceGuard = UseGuardForCreateBuffer();
 
-        MaybeError mapResult =
-            fakeOOMAtNativeMap
-                ? DAWN_OUT_OF_MEMORY_ERROR("DawnFakeBufferOOMForTesting fakeOOMAtNativeMap")
-                : buffer->MapAtCreation();
-        if (mapResult.IsError()) {
-            // If we can't map, do "implementation-defined logging" and return null.
-            auto error = mapResult.AcquireError();
-            EmitLog(wgpu::LoggingType::Error, error->GetFormattedMessage());
+        if (!buffer->TryMapAtCreation(fakeOOMAtNativeMap)) {
             // deferredError is silenced because we drop it here.
             return nullptr;
         }
