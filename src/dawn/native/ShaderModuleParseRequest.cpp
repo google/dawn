@@ -73,9 +73,14 @@ ShaderModuleParseRequest BuildShaderModuleParseRequest(
 // Assuming the descriptor chain has already been validated.
 #if TINT_BUILD_SPV_READER
     // Handling SPIR-V if enabled.
+    Span<const uint32_t> spirvCode;
     if (const auto* spirvDesc = descriptor.Get<ShaderSourceSPIRV>()) {
-        Span<const uint32_t> spirvCode = ToSpirvSpan(spirvDesc);
+        spirvCode = ToSpirvSpan(spirvDesc);
+    } else if (const auto* dawnSpirvDesc = descriptor.Get<DawnShaderSourceSPIRV>()) {
+        spirvCode = dawnSpirvDesc->code;
+    }
 
+    if (spirvCode.data() != nullptr) {
         // SPIRV toggle and instance feature should have been validated before checking cache.
         DAWN_ASSERT(!device->IsToggleEnabled(Toggle::DisallowSpirv));
         DAWN_ASSERT(
@@ -84,7 +89,6 @@ ShaderModuleParseRequest BuildShaderModuleParseRequest(
         DAWN_ASSERT(!descriptor.Has<ShaderSourceWGSL>());
 
         const auto* spirvOptions = descriptor.Get<DawnShaderModuleSPIRVOptionsDescriptor>();
-        DAWN_ASSERT(spirvDesc != nullptr);
 
         ShaderModuleParseSpirvDescription spirv = {
             {// TODO(dawn:2033): Avoid unnecessary copies of the SPIR-V code.
@@ -100,6 +104,7 @@ ShaderModuleParseRequest BuildShaderModuleParseRequest(
 #else   // TINT_BUILD_SPV_READER
     // SPIR-V is not enabled, so the descriptor should not contain it.
     DAWN_ASSERT(!descriptor.Has<ShaderSourceSPIRV>());
+    DAWN_ASSERT(!descriptor.Has<DawnShaderSourceSPIRV>());
 #endif  // TINT_BUILD_SPV_READER
 
     // Handling WGSL.

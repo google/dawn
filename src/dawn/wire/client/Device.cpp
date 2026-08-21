@@ -397,6 +397,10 @@ ResourceTable* Device::APICreateResourceTable(const ResourceTableDescriptor* des
     return ResourceTable::Create(this, descriptor);
 }
 
+ShaderModule* Device::APICreateShaderModule(const ShaderModuleDescriptor* descriptor) {
+    return ShaderModule::Create(this, descriptor);
+}
+
 Texture* Device::APICreateTexture(const TextureDescriptor* descriptor) {
     return Texture::Create(this, descriptor);
 }

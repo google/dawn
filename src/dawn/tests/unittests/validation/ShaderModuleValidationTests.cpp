@@ -54,6 +54,7 @@ class ShaderModuleValidationTest : public ValidationTest {};
 
 #if TINT_BUILD_SPV_READER && !DAWN_PLATFORM_IS(EMSCRIPTEN)
 
+template <typename T = wgpu::ShaderSourceSPIRV>
 wgpu::ShaderModule CreateShaderModuleFromASM(
     const wgpu::Device& device,
     const char* source,
@@ -72,8 +73,8 @@ wgpu::ShaderModule CreateShaderModuleFromASM(
         DAWN_ASSERT(spirv != nullptr);
         DAWN_ASSERT(spirv->wordCount <= std::numeric_limits<uint32_t>::max());
 
-        wgpu::ShaderSourceSPIRV spirvDesc;
-        spirvDesc.codeSize = static_cast<uint32_t>(spirv->wordCount);
+        T spirvDesc;
+        spirvDesc.codeSize = static_cast<decltype(spirvDesc.codeSize)>(spirv->wordCount);
         spirvDesc.code = spirv->code;
         spirvDesc.nextInChain = spirv_options;
 
@@ -123,7 +124,8 @@ TEST_F(ShaderModuleValidationTest, CreationSuccess) {
                    OpReturn
                    OpFunctionEnd)";
 
-    CreateShaderModuleFromASM(device, shader);
+    CreateShaderModuleFromASM<wgpu::ShaderSourceSPIRV>(device, shader);
+    CreateShaderModuleFromASM<wgpu::DawnShaderSourceSPIRV>(device, shader);
 }
 
 // Tint's SPIR-V reader transforms a combined image sampler into two

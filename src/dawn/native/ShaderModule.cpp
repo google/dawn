@@ -1475,16 +1475,24 @@ void ShaderModuleParseResult::SetValidationError(std::unique_ptr<ErrorData>&& er
 void DumpShaderFromDescriptor(LogEmitter* logEmitter,
                               const UnpackedPtr<ShaderModuleDescriptor>& shaderModuleDesc) {
 #if TINT_BUILD_SPV_READER
-    if ([[maybe_unused]] const auto* spirvDesc = shaderModuleDesc.Get<ShaderSourceSPIRV>()) {
+    [[maybe_unused]] Span<const uint32_t> spirv;
+    if (const auto* spirvDesc = shaderModuleDesc.Get<ShaderSourceSPIRV>()) {
+        spirv = ToSpirvSpan(spirvDesc);
+    } else if (const auto* dawnSpirvDesc = shaderModuleDesc.Get<DawnShaderSourceSPIRV>()) {
+        spirv = dawnSpirvDesc->code;
+    }
+
+    if (spirv.data() != nullptr) {
         // Dump SPIR-V if enabled.
 #ifdef DAWN_ENABLE_SPIRV_VALIDATION
-        DumpSpirv(logEmitter, ToSpirvSpan(spirvDesc));
+        DumpSpirv(logEmitter, spirv);
 #endif  // DAWN_ENABLE_SPIRV_VALIDATION
         return;
     }
 #else   // TINT_BUILD_SPV_READER
     // SPIR-V is not enabled, so the descriptor should not contain it.
     DAWN_ASSERT(!shaderModuleDesc.Has<ShaderSourceSPIRV>());
+    DAWN_ASSERT(!shaderModuleDesc.Has<DawnShaderSourceSPIRV>());
 #endif  // TINT_BUILD_SPV_READER
 
     // Dump WGSL.
@@ -1802,8 +1810,14 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
     size_t shaderCodeByteSize = 0;
     uint8_t* shaderCode = nullptr;
 
+    Span<const uint32_t> spirv;
     if (auto* spirvDesc = descriptor.Get<ShaderSourceSPIRV>()) {
-        Span<const uint32_t> spirv = ToSpirvSpan(spirvDesc);
+        spirv = ToSpirvSpan(spirvDesc);
+    } else if (auto* dawnSpirvDesc = descriptor.Get<DawnShaderSourceSPIRV>()) {
+        spirv = dawnSpirvDesc->code;
+    }
+
+    if (spirv.data() != nullptr) {
         mType = Type::Spirv;
         mOriginalSpirv.assign(spirv.begin(), spirv.end());
         shaderCodeByteSize = mOriginalSpirv.size() * sizeof(decltype(mOriginalSpirv)::value_type);

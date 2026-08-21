@@ -3850,6 +3850,16 @@
             {"name": "code", "type": "uint32_t", "annotation": "const*", "length": "code size"}
         ]
     },
+    "dawn shader source SPIRV": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shader module descriptor"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "code size", "type": "size_t"},
+            {"name": "code", "type": "uint32_t", "annotation": "const*", "length": "code size"}
+        ]
+    },
     "shader source WGSL": {
         "category": "structure",
         "chained": "in",
@@ -4188,7 +4198,8 @@
             {"value": 79, "name": "request adapter options angle virtualization group", "tags": ["dawn", "native"]},
             {"value": 80, "name": "pipeline layout resource table", "tags": ["dawn"]},
             {"value": 81, "name": "adapter properties drm", "tags": ["dawn", "native"]},
-            {"value": 82, "name": "render bundle encoder resource table", "tags": ["dawn"]}
+            {"value": 82, "name": "render bundle encoder resource table", "tags": ["dawn"]},
+            {"value": 83, "name": "dawn shader source SPIRV", "tags": ["dawn"]}
         ]
     },
     "texture": {

@@ -38,8 +38,12 @@
 
 namespace dawn::wire::client {
 
+class Device;
+
 class ShaderModule final : public ObjectWithEventsBase {
   public:
+    static ShaderModule* Create(Device* device, const ShaderModuleDescriptor* descriptor);
+
     using ObjectWithEventsBase::ObjectWithEventsBase;
 
     ObjectType GetObjectType() const override;

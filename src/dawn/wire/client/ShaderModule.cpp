@@ -28,14 +28,128 @@
 #include "src/dawn/wire/client/ShaderModule.h"
 
 #include <memory>
+#include <optional>
+#include <string>
 #include <utility>
 
+#include "absl/strings/str_format.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/wire/client/Client.h"
+#include "src/dawn/wire/client/Device.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::wire::client {
+
+// static
+ShaderModule* ShaderModule::Create(Device* device, const ShaderModuleDescriptor* descriptor) {
+    DAWN_ASSERT(descriptor != nullptr);
+
+    Client* client = device->GetClient();
+    Ref<ShaderModule> shaderModule = client->Make<ShaderModule>(device->GetInstance());
+
+    ShaderModuleDescriptor desc = *descriptor;
+    desc.nextInChain = nullptr;
+
+    // In Dawn wire client, we replace ShaderSourceSPIRV extensions with DawnShaderSourceSPIRV
+    // extensions. This requires us to potentially make a deep copy of the extensions to re-create
+    // the chain, replacing any ShaderSourceSPIRVs along the way. When/if we run into duplicate or
+    // invalid extensions, instead of trying to forward the descriptor to the server, we just ask
+    // the server to create an error shader module instead.
+    std::optional<DawnShaderSourceSPIRV> dawnShaderSourceSPIRV;
+    std::optional<ShaderSourceWGSL> shaderSourceWGSL;
+    std::optional<DawnShaderModuleSPIRVOptionsDescriptor> dawnShaderModuleSPIRVOptionsDescriptor;
+    std::optional<ShaderModuleCompilationOptions> shaderModuleCompilationOptions;
+
+    std::vector<ChainedStruct*> chainOrder;
+    std::string errorMessage;
+    for (const ChainedStruct* chain = descriptor->nextInChain; chain != nullptr;
+         chain = chain->nextInChain) {
+        switch (chain->sType) {
+            case wgpu::SType::ShaderSourceSPIRV: {
+                if (dawnShaderSourceSPIRV.has_value()) {
+                    errorMessage = "Duplicate chained struct of type ShaderSourceSPIRV.";
+                    break;
+                }
+                const auto* spirv = reinterpret_cast<const wgpu::ShaderSourceSPIRV*>(chain);
+                DawnShaderSourceSPIRV dawnSpirv;
+                // SAFETY: The application must ensure that `code` points at `codeSize` uint32_ts.
+                DAWN_UNSAFE_BUFFERS(dawnSpirv.code = {spirv->code, spirv->codeSize});
+                dawnShaderSourceSPIRV = dawnSpirv;
+                chainOrder.push_back(&*dawnShaderSourceSPIRV);
+                break;
+            }
+            case wgpu::SType::DawnShaderSourceSPIRV:
+                if (dawnShaderSourceSPIRV.has_value()) {
+                    errorMessage = "Duplicate chained struct of type DawnShaderSourceSPIRV.";
+                    break;
+                }
+                dawnShaderSourceSPIRV = *reinterpret_cast<const DawnShaderSourceSPIRV*>(chain);
+                chainOrder.push_back(&*dawnShaderSourceSPIRV);
+                break;
+            case wgpu::SType::ShaderSourceWGSL:
+                if (shaderSourceWGSL.has_value()) {
+                    errorMessage = "Duplicate chained struct of type ShaderSourceWGSL.";
+                    break;
+                }
+                shaderSourceWGSL = *reinterpret_cast<const ShaderSourceWGSL*>(chain);
+                chainOrder.push_back(&*shaderSourceWGSL);
+                break;
+            case wgpu::SType::DawnShaderModuleSPIRVOptionsDescriptor:
+                if (dawnShaderModuleSPIRVOptionsDescriptor.has_value()) {
+                    errorMessage =
+                        "Duplicate chained struct of type DawnShaderModuleSPIRVOptionsDescriptor.";
+                    break;
+                }
+                dawnShaderModuleSPIRVOptionsDescriptor =
+                    *reinterpret_cast<const DawnShaderModuleSPIRVOptionsDescriptor*>(chain);
+                chainOrder.push_back(&*dawnShaderModuleSPIRVOptionsDescriptor);
+                break;
+            case wgpu::SType::ShaderModuleCompilationOptions:
+                if (shaderModuleCompilationOptions.has_value()) {
+                    errorMessage =
+                        "Duplicate chained struct of type ShaderModuleCompilationOptions.";
+                    break;
+                }
+                shaderModuleCompilationOptions =
+                    *reinterpret_cast<const ShaderModuleCompilationOptions*>(chain);
+                chainOrder.push_back(&*shaderModuleCompilationOptions);
+                break;
+            default:
+                errorMessage =
+                    absl::StrFormat("Unsupported or invalid chained struct with SType (%u).",
+                                    static_cast<uint32_t>(chain->sType));
+                break;
+        }
+        if (!errorMessage.empty()) {
+            break;
+        }
+    }
+
+    if (!errorMessage.empty()) {
+        DeviceCreateErrorShaderModuleCmd cmd;
+        cmd.self = ToAPI(device);
+        cmd.descriptor = ToAPI(&desc);
+        cmd.errorMessage = ToOutputStringView(errorMessage);
+        cmd.result = shaderModule->GetWireHandle(client);
+        client->SerializeCommand(cmd);
+        return ReturnToAPI2(std::move(shaderModule));
+    }
+
+    const ChainedStruct** last = &desc.nextInChain;
+    for (ChainedStruct* current : chainOrder) {
+        current->nextInChain = nullptr;
+        *last = current;
+        last = &current->nextInChain;
+    }
+
+    DeviceCreateShaderModuleCmd cmd;
+    cmd.self = ToAPI(device);
+    cmd.descriptor = ToAPI(&desc);
+    cmd.result = shaderModule->GetWireHandle(client);
+    client->SerializeCommand(cmd);
+    return ReturnToAPI2(std::move(shaderModule));
+}
 
 class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
   public:

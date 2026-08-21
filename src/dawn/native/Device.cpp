@@ -2287,13 +2287,17 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     wgpu::SType moduleType = wgpu::SType(0u);
     DAWN_TRY_ASSIGN(
         moduleType,
-        (unpacked.ValidateBranches<Branch<ShaderSourceWGSL, ShaderModuleCompilationOptions>,
-                                   Branch<ShaderSourceSPIRV, DawnShaderModuleSPIRVOptionsDescriptor,
-                                          ShaderModuleCompilationOptions>>()));
+        (unpacked
+             .ValidateBranches<Branch<ShaderSourceWGSL, ShaderModuleCompilationOptions>,
+                               Branch<ShaderSourceSPIRV, DawnShaderModuleSPIRVOptionsDescriptor,
+                                      ShaderModuleCompilationOptions>,
+                               Branch<DawnShaderSourceSPIRV, DawnShaderModuleSPIRVOptionsDescriptor,
+                                      ShaderModuleCompilationOptions>>()));
 
     // Module type specific validation
     switch (moduleType) {
-        case wgpu::SType::ShaderSourceSPIRV: {
+        case wgpu::SType::ShaderSourceSPIRV:
+        case wgpu::SType::DawnShaderSourceSPIRV: {
             DAWN_INVALID_IF(
                 !TINT_BUILD_SPV_READER || IsToggleEnabled(Toggle::DisallowSpirv) ||
                     !GetInstance()->HasFeature(wgpu::InstanceFeatureName::ShaderSourceSPIRV),

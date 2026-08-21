@@ -234,6 +234,7 @@
         "client_side_structures": [
             "DawnWGSLBlocklist",
             "FutureWaitInfo",
+            "ShaderSourceSPIRV",
             "SurfaceDescriptorFromWindowsCoreWindow",
             "SurfaceDescriptorFromWindowsUWPSwapChainPanel",
             "SurfaceDescriptorFromWindowsWinUISwapChainPanel",
@@ -304,6 +305,7 @@
             "DeviceCreateErrorBuffer",
             "DeviceCreateErrorTexture",
             "DeviceCreateResourceTable",
+            "DeviceCreateShaderModule",
             "DeviceCreateTexture",
             "DeviceDestroy",
             "DeviceGetQueue",

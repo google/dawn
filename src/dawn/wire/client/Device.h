@@ -87,6 +87,7 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
         const RenderPipelineDescriptor* descriptor,
         const WGPUCreateRenderPipelineAsyncCallbackInfo& callbackInfo);
     ResourceTable* APICreateResourceTable(const ResourceTableDescriptor* descriptor);
+    ShaderModule* APICreateShaderModule(const ShaderModuleDescriptor* descriptor);
     Texture* APICreateTexture(const TextureDescriptor* descriptor);
     Texture* APICreateErrorTexture(const TextureDescriptor* descriptor);
 

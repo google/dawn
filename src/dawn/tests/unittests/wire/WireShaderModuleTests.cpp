@@ -38,6 +38,9 @@ namespace {
 
 using testing::_;
 using testing::Return;
+using testing::Unused;
+
+using WireShaderModuleCreationTests = WireTest;
 
 using WireShaderModuleTestBase = WireFutureTest<wgpu::CompilationInfoCallback<void>*>;
 class WireShaderModuleTests : public WireShaderModuleTestBase {
@@ -356,6 +359,89 @@ TEST_P(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDestruction)
             FlushCallbacks();
         });
     }
+}
+
+// Test that a chained struct with Invalid sType causes CreateErrorShaderModule to be called.
+TEST_F(WireShaderModuleCreationTests, InvalidSType) {
+    wgpu::ShaderModuleDescriptor shaderModuleDesc = {};
+
+    wgpu::DawnWireWGSLControl clientExt = {};
+    shaderModuleDesc.nextInChain = &clientExt;
+
+    WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
+    wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDesc);
+    EXPECT_CALL(api, DeviceCreateErrorShaderModule(apiDevice, _, _))
+        .WillOnce([&](Unused, const WGPUShaderModuleDescriptor* serverDesc,
+                      WGPUStringView errorMessage) -> WGPUShaderModule {
+            EXPECT_EQ(serverDesc->nextInChain, nullptr);
+            EXPECT_THAT(ToString(errorMessage),
+                        testing::HasSubstr("Unsupported or invalid chained struct with SType"));
+
+            return apiShaderModule;
+        });
+    FlushClient();
+}
+
+// Test that a chained struct with unknown sType causes CreateErrorShaderModule to be called.
+TEST_F(WireShaderModuleCreationTests, UnknownSType) {
+    wgpu::ShaderModuleDescriptor shaderModuleDesc = {};
+    wgpu::ChainedStruct clientExt = {};
+    shaderModuleDesc.nextInChain = &clientExt;
+
+    WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
+    wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDesc);
+    EXPECT_CALL(api, DeviceCreateErrorShaderModule(apiDevice, _, _))
+        .WillOnce([&](Unused, const WGPUShaderModuleDescriptor* serverDesc,
+                      WGPUStringView errorMessage) -> WGPUShaderModule {
+            EXPECT_EQ(serverDesc->nextInChain, nullptr);
+            EXPECT_THAT(ToString(errorMessage),
+                        testing::HasSubstr("Unsupported or invalid chained struct with SType (0)"));
+
+            return apiShaderModule;
+        });
+    FlushClient();
+}
+
+// Test that if both an invalid and valid stype are passed on the chain, CreateErrorShaderModule is
+// called.
+TEST_F(WireShaderModuleCreationTests, ValidAndInvalidSTypeInChain) {
+    wgpu::ShaderModuleDescriptor shaderModuleDesc = {};
+
+    wgpu::DawnWireWGSLControl clientExt2 = {};
+    wgpu::ShaderSourceWGSL clientExt1 = {};
+    clientExt1.code = {"/* comment 1 */", WGPU_STRLEN};
+    clientExt1.nextInChain = &clientExt2;
+    shaderModuleDesc.nextInChain = &clientExt1;
+
+    WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
+    wgpu::ShaderModule shaderModule1 = device.CreateShaderModule(&shaderModuleDesc);
+    EXPECT_CALL(api, DeviceCreateErrorShaderModule(apiDevice, _, _))
+        .WillOnce([&](Unused, const WGPUShaderModuleDescriptor* serverDesc,
+                      WGPUStringView errorMessage) -> WGPUShaderModule {
+            EXPECT_EQ(serverDesc->nextInChain, nullptr);
+            EXPECT_THAT(ToString(errorMessage),
+                        testing::HasSubstr("Unsupported or invalid chained struct with SType"));
+
+            return apiShaderModule;
+        });
+    FlushClient();
+
+    // Swap the order of the chained structs.
+    shaderModuleDesc.nextInChain = &clientExt2;
+    clientExt2.nextInChain = &clientExt1;
+    clientExt1.nextInChain = nullptr;
+
+    wgpu::ShaderModule shaderModule2 = device.CreateShaderModule(&shaderModuleDesc);
+    EXPECT_CALL(api, DeviceCreateErrorShaderModule(apiDevice, _, _))
+        .WillOnce([&](Unused, const WGPUShaderModuleDescriptor* serverDesc,
+                      WGPUStringView errorMessage) -> WGPUShaderModule {
+            EXPECT_EQ(serverDesc->nextInChain, nullptr);
+            EXPECT_THAT(ToString(errorMessage),
+                        testing::HasSubstr("Unsupported or invalid chained struct with SType"));
+
+            return apiShaderModule;
+        });
+    FlushClient();
 }
 
 }  // anonymous namespace
