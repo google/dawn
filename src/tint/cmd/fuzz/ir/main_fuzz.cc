@@ -82,8 +82,7 @@ DEFINE_BINARY_PROTO_FUZZER(const tint::cmd::fuzz::ir::pb::Root& pb) {
         return out;
     };
 
-    std::span<const std::byte> data = DAWN_UNSAFE_TODO(std::span<const std::byte>(
-        reinterpret_cast<const std::byte*>(pb.data().data()), pb.data().length()));
+    auto data = std::as_bytes(std::span(pb.data()));
     tint::fuzz::ir::Run(acquire_module, options, data);
 }
 

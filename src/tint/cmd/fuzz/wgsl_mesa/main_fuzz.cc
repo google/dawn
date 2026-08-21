@@ -46,8 +46,10 @@ tint::fuzz::wgsl::Options options;
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* input, size_t size) {
     if (size > 0) {
+        // SAFETY: The bounds of the `input` pointer are guaranteed to be of length `size` by the
+        // libFuzzer framework.
         std::string_view wgsl =
-            DAWN_UNSAFE_TODO(std::string_view(reinterpret_cast<const char*>(input), size));
+            DAWN_UNSAFE_BUFFERS(std::string_view(reinterpret_cast<const char*>(input), size));
         auto data = tint::DecodeBase64FromComments(wgsl);
         tint::fuzz::wgsl::Run(wgsl, options, data.AsSpan());
     }
