@@ -28,6 +28,7 @@
 #include "src/tint/lang/spirv/writer/common/binary_writer.h"
 
 #include "gtest/gtest.h"
+#include "src/tint/utils/memory/bitcast.h"
 #include "src/utils/compiler.h"
 
 namespace tint::spirv::writer {
@@ -70,8 +71,7 @@ TEST_F(SpirvWriterBinaryWriterTest, Float) {
 
     auto res = bw.Result();
     ASSERT_EQ(res.size(), 2u);
-    float f;
-    DAWN_UNSAFE_TODO(memcpy(&f, &res[1], 4));
+    float f = tint::Bitcast<float>(res[1]);
     EXPECT_EQ(f, 2.4f);
 }
 

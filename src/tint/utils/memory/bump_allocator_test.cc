@@ -40,7 +40,8 @@ TEST_F(BumpAllocatorTest, AllocationSizes) {
     for (size_t n : {1u, 0x10u, 0x100u, 0x1000u, 0x10000u, 0x100000u,  //
                      2u, 0x34u, 0x567u, 0x8912u, 0x34567u, 0x891234u}) {
         auto ptr = allocator.Allocate(n);
-        DAWN_UNSAFE_TODO(memset(ptr, 0x42, n));
+        // SAFETY: allocator.Allocate(n) allocates exactly n bytes, so writing n bytes is safe.
+        DAWN_UNSAFE_BUFFERS(memset(ptr, 0x42, n));
     }
 }
 
@@ -56,7 +57,8 @@ TEST_F(BumpAllocatorTest, AllocationSizesAroundBlockSize) {
          }) {
         BumpAllocator allocator;
         auto* ptr = allocator.Allocate(n);
-        DAWN_UNSAFE_TODO(memset(ptr, 0x42, n));
+        // SAFETY: allocator.Allocate(n) allocates exactly n bytes, so writing n bytes is safe.
+        DAWN_UNSAFE_BUFFERS(memset(ptr, 0x42, n));
     }
 }
 

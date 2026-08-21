@@ -30,6 +30,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/writer/ast_printer/helper_test.h"
+#include "src/tint/utils/memory/bitcast.h"
 #include "src/tint/utils/text/string_stream.h"
 #include "src/utils/compiler.h"
 
@@ -51,11 +52,8 @@ f32 MakeF32(uint32_t sign, uint32_t biased_exponent, uint32_t mantissa) {
     const uint32_t mantissa_bits = (mantissa & 0x7fffffu);
 
     uint32_t bits = sign_bit | exponent_bits | mantissa_bits;
-    float result = 0.0f;
-    static_assert(sizeof(result) == sizeof(bits),
-                  "expected float and uint32_t to be the same size");
-    DAWN_UNSAFE_TODO(std::memcpy(&result, &bits, sizeof(bits)));
-    return f32(result);
+    static_assert(sizeof(float) == sizeof(bits), "expected float and uint32_t to be the same size");
+    return f32(tint::Bitcast<float>(bits));
 }
 
 // Get the representation of an IEEE 754 binary16 floating point number with
@@ -97,11 +95,8 @@ f16 MakeF16(uint32_t sign, uint32_t f16_biased_exponent, uint16_t f16_mantissa) 
     const uint32_t f32_mantissa_bits = (f16_mantissa & 0x03ffu) << 13;
 
     uint32_t bits = sign_bit | f32_exponent_bits | f32_mantissa_bits;
-    float result = 0.0f;
-    static_assert(sizeof(result) == sizeof(bits),
-                  "expected float and uint32_t to be the same size");
-    DAWN_UNSAFE_TODO(std::memcpy(&result, &bits, sizeof(bits)));
-    return f16(result);
+    static_assert(sizeof(float) == sizeof(bits), "expected float and uint32_t to be the same size");
+    return f16(tint::Bitcast<float>(bits));
 }
 
 struct F32Data {

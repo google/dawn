@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/utils/ice/ice.h"
+#include "src/tint/utils/memory/bitcast.h"
 #include "src/tint/utils/strconv/parse_num.h"
 #include "src/tint/utils/text/unicode.h"
 #include "src/utils/compiler.h"
@@ -459,8 +460,7 @@ std::optional<Token> Lexer::try_float() {
         return {};
     }
 
-    auto ret =
-        tint::strconv::ParseDouble(DAWN_UNSAFE_TODO(std::string_view(&at(start), end - start)));
+    auto ret = tint::strconv::ParseDouble(substr(start, end - start));
     double value = ret == Success ? ret.Get() : 0.0;
     bool overflow =
         ret != Success && ret.Failure() == tint::strconv::ParseNumberError::kResultOutOfRange;
@@ -815,8 +815,7 @@ std::optional<Token> Lexer::try_hex_float() {
     result_u64 |= (static_cast<uint64_t>(signed_exponent) & kExponentMask) << kExponentLeftShift;
 
     // Reinterpret as f16 and return
-    double result_f64;
-    DAWN_UNSAFE_TODO(std::memcpy(&result_f64, &result_u64, 8));
+    double result_f64 = tint::Bitcast<double>(result_u64);
 
     if (has_f_suffix) {
         // Check value fits in f32

@@ -97,8 +97,12 @@ std::string_view SymbolTable::Allocate(std::string_view name) {
     char* name_mem = Bitcast<char*>(name_allocator_.Allocate(name.length() + 1));
     TINT_ASSERT(name_mem != nullptr) << "failed to allocate memory for symbol's string";
 
-    DAWN_UNSAFE_TODO(memcpy(name_mem, name.data(), name.length() + 1));
-    return DAWN_UNSAFE_TODO(std::string_view(name_mem, name.length()));
+    // SAFETY: name_mem has size of name.length() + 1. Copying name.length() characters and writing
+    // a null-terminator at name.length() fits within this limit. The returned view is referencing
+    // the name.length() characters of this buffer, which is in boungs.
+    DAWN_UNSAFE_BUFFERS(memcpy(name_mem, name.data(), name.length()));
+    DAWN_UNSAFE_BUFFERS(name_mem[name.length()] = '\0');
+    return DAWN_UNSAFE_BUFFERS(std::string_view(name_mem, name.length()));
 }
 
 }  // namespace tint

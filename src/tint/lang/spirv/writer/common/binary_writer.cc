@@ -80,8 +80,12 @@ void BinaryWriter::ProcessOp(const Operand& op) {
     }
     if (auto* str = std::get_if<std::string>(&op)) {
         auto idx = out_.size();
-        out_.resize(out_.size() + OperandLength(op), 0);
-        DAWN_UNSAFE_TODO(memcpy(&out_[idx], str->c_str(), str->size() + 1));
+        out_.resize(idx + OperandLength(op), 0);
+        // SAFETY: out_ has been resized to hold at least OperandLength(op) words (OperandLength is
+        // length * 4 bytes plus space for the null) starting at `idx`. The copied string size plus
+        // its null-terminator is `str->size() + 1` bytes, which is guaranteed to be less than or
+        // equal to the added size.
+        DAWN_UNSAFE_BUFFERS(memcpy(&out_[idx], str->c_str(), str->size() + 1));
         return;
     }
 }

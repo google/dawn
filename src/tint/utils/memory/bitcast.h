@@ -58,8 +58,10 @@ inline TO Bitcast(FROM&& from) {
     static_assert(std::is_trivially_copyable_v<std::decay_t<FROM>>);
     static_assert(std::is_trivially_copyable_v<std::decay_t<TO>>);
     TO to;
-    DAWN_UNSAFE_TODO(memcpy(reinterpret_cast<std::byte*>(&to),
-                            reinterpret_cast<const std::byte*>(&from), sizeof(TO)));
+    // SAFETY: The source and destination are guaranteed to be of identical size (sizeof(TO) ==
+    // sizeof(FROM)) by the static_assert above, and they are trivially copyable.
+    DAWN_UNSAFE_BUFFERS(memcpy(reinterpret_cast<std::byte*>(&to),
+                               reinterpret_cast<const std::byte*>(&from), sizeof(TO)));
     return to;
 }
 
