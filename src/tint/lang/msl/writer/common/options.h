@@ -34,6 +34,7 @@
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/api/common/bindings.h"
+#include "src/tint/api/common/resource_table_config.h"
 #include "src/tint/api/common/substitute_overrides_config.h"
 #include "src/tint/api/common/vertex_pulling_config.h"
 #include "src/tint/utils/reflection/reflection.h"
@@ -245,6 +246,9 @@ struct Options {
     /// The bindings.
     Bindings bindings;
 
+    /// Resource table information
+    std::optional<ResourceTableConfig> resource_table = std::nullopt;
+
     // Substitute Overrides
     SubstituteOverridesConfig substitute_overrides_config = {};
 
@@ -270,6 +274,7 @@ struct Options {
                  depth_range_offsets,
                  non_constant_zero_offset,
                  bindings,
+                 resource_table,
                  substitute_overrides_config);
     TINT_REFLECT_HASH_CODE(Options);
 
