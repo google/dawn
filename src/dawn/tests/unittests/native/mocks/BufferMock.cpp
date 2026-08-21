@@ -43,12 +43,15 @@ BufferMock::BufferMock(DeviceMock* device,
     mAllocatedSize = allocatedSizeOverride.value_or(GetSize());
     DAWN_ASSERT(mAllocatedSize >= GetSize());
     // SAFETY: Test-only code.
-    mBackingData = DAWN_UNSAFE_BUFFERS(HeapArray<uint8_t>::Uninit(mAllocatedSize.value()));
+    mBackingData = DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(mAllocatedSize.value()));
 
     ON_CALL(*this, DestroyImpl).WillByDefault([this](DestroyReason reason) {
         this->BufferBase::DestroyImpl(reason);
     });
-    ON_CALL(*this, GetMappedPointerImpl).WillByDefault(Return(mBackingData.data()));
+    ON_CALL(*this, GetMappedRangeImpl)
+        .WillByDefault([this](size_t offset, size_t size) -> Span<std::byte> {
+            return mBackingData.subspan(offset, size);
+        });
     ON_CALL(*this, IsCPUWritableAtCreation).WillByDefault([this] {
         return (GetInternalUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) !=
                0;

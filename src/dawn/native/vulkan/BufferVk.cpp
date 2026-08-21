@@ -583,9 +583,8 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     // The real mapped pointer is never returned for zero sized buffers. MappedAtCreation buffers
     // are initialized in BufferBase already.
     if (NeedsInitialization() && GetSize() > 0 && newState == BufferState::Mapped) {
-        // TODO(https://crbug.com/501491697): Spanify GetMappedPointerImpl.
-        DAWN_UNSAFE_TODO(
-            std::memset(GetMappedPointerImpl(), 0, checked_cast<size_t>(GetAllocatedSize())));
+        std::ranges::fill(GetMappedRangeImpl(0, checked_cast<size_t>(GetAllocatedSize())),
+                          std::byte(0u));
         GetDevice()->IncrementLazyClearCountForTesting();
         SetInitialized(true);
 
@@ -638,10 +637,8 @@ void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
     }
 }
 
-void* Buffer::GetMappedPointerImpl() {
-    std::byte* memory = mMemoryAllocation.GetMappedSpan().data();
-    DAWN_ASSERT(memory != nullptr);
-    return memory;
+Span<std::byte> Buffer::GetMappedRangeImpl(size_t offset, size_t size) {
+    return mMemoryAllocation.GetMappedSpan().subspan(offset, size);
 }
 
 MaybeError Buffer::UploadData(uint64_t bufferOffset, Span<const std::byte> data) {

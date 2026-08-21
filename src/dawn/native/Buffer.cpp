@@ -60,7 +60,6 @@
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 #include "src/utils/heap_array.h"
-#include "src/utils/log.h"
 #include "src/utils/numeric.h"
 
 namespace dawn::native {
@@ -106,7 +105,9 @@ class ErrorBuffer final : public BufferBase {
         DAWN_UNREACHABLE();
     }
 
-    void* GetMappedPointerImpl() override { return mFakeMappedData.data(); }
+    Span<std::byte> GetMappedRangeImpl(size_t offset, size_t size) override {
+        return mFakeMappedData.subspan(offset, size);
+    }
 
     void UnmapImpl(BufferState oldState, BufferState newState) override { mFakeMappedData = {}; }
 
@@ -598,12 +599,19 @@ MaybeError BufferBase::FinalizeMap(BufferState newState) {
     DAWN_TRY_WITH_CLEANUP(FinalizeMapImpl(newState),
                           { mState.store(BufferState::Unmapped, std::memory_order::release); });
 
+    // Get the full allocated range on MappedAtCreation and not just the user visible range.
+    size_t rangeSize = mMapSize;
+    if (newState == BufferState::MappedAtCreation) {
+        DAWN_ASSERT(mMapOffset == 0u);
+        rangeSize = checked_cast<size_t>(GetAllocatedSize());
+    }
+
     if (mStagingBuffer) {
-        mMappedPointer = mStagingBuffer->GetMappedPointerImpl();
+        mMappedRange = mStagingBuffer->GetMappedRangeImpl(mMapOffset, rangeSize);
     } else if (GetSize() == 0) {
-        mMappedPointer = static_cast<void*>(&sZeroSizedMappingData);
+        mMappedRange = ByteSpanFromRef(sZeroSizedMappingData);
     } else {
-        mMappedPointer = GetMappedPointerImpl();
+        mMappedRange = GetMappedRangeImpl(mMapOffset, rangeSize);
     }
 
     mState.store(newState, std::memory_order::release);
@@ -808,7 +816,7 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
 
             event =
                 AcquireRef(new MapAsyncEvent(GetDevice(), this, callbackInfo, mLastUsageSerial));
-            mMappedPointer = nullptr;
+            mMappedRange = {};
             DAWN_CHECK(!mPendingMapEvent);
             mPendingMapEvent = event;
             mState.store(BufferState::PendingMap, std::memory_order::release);
@@ -864,12 +872,15 @@ std::optional<Span<std::byte>> BufferBase::GetMappedRangeInternal(size_t offset,
     if (!CanGetMappedRange(writable, offset, size)) {
         return {};
     }
-    return GetFullMappedAllocatedRange().subspan(offset, size);
+
+    DAWN_ASSERT(offset >= mMapOffset);
+    return mMappedRange.subspan(offset - mMapOffset, size);
 }
 
 Span<std::byte> BufferBase::GetFullMappedAllocatedRange() {
-    return DAWN_UNSAFE_TODO(Span<std::byte>{static_cast<std::byte*>(mMappedPointer.get()),
-                                            checked_cast<size_t>(GetAllocatedSize())});
+    DAWN_ASSERT(mMappedRange.size() == GetAllocatedSize());
+    DAWN_ASSERT(mState == BufferState::MappedAtCreation);
+    return mMappedRange;
 }
 
 void BufferBase::APIDestroy() {

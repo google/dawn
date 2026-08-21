@@ -114,7 +114,7 @@ class Buffer final : public BufferBase {
     void DestroyImpl(DestroyReason reason) override;
     bool IsCPUWritableAtCreation() const override;
     MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointerImpl() override;
+    Span<std::byte> GetMappedRangeImpl(size_t offset, size_t size) override;
     MaybeError UploadData(uint64_t bufferOffset, Span<const std::byte> data) override;
 
     VkBuffer mHandle = VK_NULL_HANDLE;

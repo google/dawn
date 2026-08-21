@@ -251,7 +251,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // Performs backend specific work to finalize mapping. `newState` is the state the buffer will
     // be in after this returns.
     virtual MaybeError FinalizeMapImpl(BufferState newState) = 0;
-    virtual void* GetMappedPointerImpl() = 0;
+    virtual Span<std::byte> GetMappedRangeImpl(size_t offset, size_t size) = 0;
     // Performs backend specific work to unmap. `oldState` is the state of the buffer before unmap
     // operation started. The device mutex is not locked when this is called so the implementation
     // should lock if required.
@@ -347,13 +347,11 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     size_t mMapSize = 0;
     // Size of the actually accessible region of memory.
     size_t mAllocatedMapSize = 0;
-    // Pointer to the beginning of the buffer resource (or where the beginning of the buffer
-    // resource *would* be), if it's mapped. This pointer MUST be offset before being accessed, as
-    // the beginning of the pointed region might not exist at all. GetCurrentMapping() returns this
-    // in a structure that handles this offsetting.
-    // TODO(https://crbug.com/501491697): Spanify this pointer.
-    // TODO(https://crbug.com/485825675): Investigate this dangling pointer.
-    raw_ptr<void, DanglingUntriaged> mMappedPointer = nullptr;
+    // The range of bytes that are currently mapped When MappedAtCreation, the range points at
+    // GetAllocatedSize() bytes instead of only GetSize() bytes so that the padding bytes may be
+    // initialized.
+    // TODO(https://crbug.com/526537224): Use RawSpan.
+    Span<std::byte> mMappedRange;
 };
 
 }  // namespace dawn::native

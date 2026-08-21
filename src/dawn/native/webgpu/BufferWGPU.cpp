@@ -101,14 +101,24 @@ bool Buffer::IsCPUWritableAtCreation() const {
 }
 
 MaybeError Buffer::MapAtCreationImpl() {
-    // TODO(https://crbug.com/501491697): Spanify along with GetMappedPointerImpl.
-    mMappedData =
+    mMappedDataOffsetInBuffer = 0;
+    void* mappedPointer =
         ToBackend(GetDevice())
-            ->wgpu->bufferGetMappedRange(mInnerHandle, 0, checked_cast<size_t>(GetSize()));
+            ->wgpu->bufferGetMappedRange(mInnerHandle, 0, checked_cast<size_t>(GetAllocatedSize()));
+
+    DAWN_CHECK(checked_cast<size_t>(GetAllocatedSize()) != WGPU_WHOLE_MAP_SIZE);
+    // SAFETY: A non-null pointer returned by GetMappedRange points at `size` valid bytes of data
+    // (assuming `size` is not `WGPU_WHOLE_MAP_SIZE`).
+    mMappedData = DAWN_UNSAFE_BUFFERS(
+        {static_cast<std::byte*>(mappedPointer), checked_cast<size_t>(GetAllocatedSize())});
     return {};
 }
 
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
+    // We only map the range requested by the MapAsync call so mMappedData will correspond to an
+    // interval in the buffer that can be at an offset from the start.
+    mMappedDataOffsetInBuffer = offset;
+
     auto deviceGuard = GetDevice()->GetGuard();
 
     struct MapAsyncResult {
@@ -140,21 +150,22 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
         return DAWN_INTERNAL_ERROR(mapAsyncResult.message);
     }
 
-    // The frontend asks that the pointer returned by GetMappedPointer is from the start of
-    // the resource but WGPU gives us the pointer at offset. Remove the offset.
+    // The frontend requires a non-const span but will never write to it when using it for MapRead
+    // so cast away the constness.
+    void* mappedPointer = nullptr;
     if (bool{mode & wgpu::MapMode::Write}) {
-        // TODO(https://crbug.com/501491697): Spanify along with GetMappedPointerImpl.
-        mMappedData = DAWN_UNSAFE_TODO(
-            static_cast<uint8_t*>(wgpu.bufferGetMappedRange(mInnerHandle, offset, size)) - offset);
+        mappedPointer = wgpu.bufferGetMappedRange(mInnerHandle, offset, size);
     } else if (bool{mode & wgpu::MapMode::Read}) {
-        // TODO(https://crbug.com/501491697): Spanify along with GetMappedPointerImpl.
-        mMappedData =
-            DAWN_UNSAFE_TODO(static_cast<uint8_t*>(const_cast<void*>(
-                                 wgpu.bufferGetConstMappedRange(mInnerHandle, offset, size))) -
-                             offset);
+        mappedPointer =
+            const_cast<void*>(wgpu.bufferGetConstMappedRange(mInnerHandle, offset, size));
     } else {
         DAWN_UNREACHABLE();
     }
+
+    DAWN_CHECK(size != WGPU_WHOLE_MAP_SIZE);
+    // SAFETY: A non-null pointer returned by GetMappedRange points at `size` valid bytes of data
+    // (assuming `size` is not `WGPU_WHOLE_MAP_SIZE`).
+    mMappedData = DAWN_UNSAFE_BUFFERS({static_cast<std::byte*>(mappedPointer), size});
     return {};
 }
 
@@ -162,9 +173,9 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     return {};
 }
 
-void* Buffer::GetMappedPointerImpl() {
-    // The mapping offset has already been removed.
-    return mMappedData;
+Span<std::byte> Buffer::GetMappedRangeImpl(size_t offset, size_t size) {
+    DAWN_ASSERT(offset >= mMappedDataOffsetInBuffer);
+    return mMappedData.subspan(offset - mMappedDataOffsetInBuffer, size);
 }
 
 void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
@@ -181,7 +192,7 @@ void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
     if (mInnerHandle) {
         ToBackend(GetDevice())->wgpu->bufferUnmap(mInnerHandle);
     }
-    mMappedData = nullptr;
+    mMappedData = {};
 }
 
 void Buffer::DestroyImpl(DestroyReason reason) {

@@ -411,8 +411,8 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     return {};
 }
 
-void* Buffer::GetMappedPointerImpl() {
-    return mBackingData.data();
+Span<std::byte> Buffer::GetMappedRangeImpl(size_t offset, size_t size) {
+    return mBackingData.subspan(offset, size);
 }
 
 void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {}

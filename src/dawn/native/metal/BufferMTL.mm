@@ -210,16 +210,18 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     // The real mapped pointer is never returned for zero sized buffers. MappedAtCreation buffers
     // are initialized in BufferBase already.
     if (NeedsInitialization() && GetSize() > 0 && newState == BufferState::Mapped) {
-        // TODO(https://crbug.com/501491697): Spanify GetMappedPointerImpl.
-        DAWN_UNSAFE_TODO(std::memset(GetMappedPointerImpl(), 0, GetAllocatedSize()));
+        std::ranges::fill(GetMappedRangeImpl(0, GetAllocatedSize()), std::byte(0u));
         GetDevice()->IncrementLazyClearCountForTesting();
         SetInitialized(true);
     }
     return {};
 }
 
-void* Buffer::GetMappedPointerImpl() {
-    return [*mMtlBuffer contents];
+Span<std::byte> Buffer::GetMappedRangeImpl(size_t offset, size_t size) {
+    // SAFETY: For mappable buffers, MTLBuffer::contents points at MTLBuffer::length valid bytes.
+    Span<std::byte> wholeRange = DAWN_UNSAFE_BUFFERS(
+        {static_cast<std::byte*>([*mMtlBuffer contents]), [*mMtlBuffer length]});
+    return wholeRange.subspan(offset, size);
 }
 
 void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {

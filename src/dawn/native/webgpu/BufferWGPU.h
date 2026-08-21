@@ -55,13 +55,15 @@ class Buffer final : public BufferBase, public RecordableObject, public ObjectWG
     MaybeError FinalizeMapImpl(BufferState newState) override;
     bool IsCPUWritableAtCreation() const override;
     MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointerImpl() override;
+    Span<std::byte> GetMappedRangeImpl(size_t offset, size_t size) override;
     void DestroyImpl(DestroyReason reason) override;
     void SetLabelImpl() override;
 
     MaybeError AddContentToCapture(CaptureContext& captureContext);
 
-    raw_ptr<void> mMappedData = nullptr;
+    // TODO(https://crbug.com/526537224): Use RawSpan.
+    Span<std::byte> mMappedData;
+    size_t mMappedDataOffsetInBuffer = 0u;
     bool mNeedsCapture = true;
 };
 

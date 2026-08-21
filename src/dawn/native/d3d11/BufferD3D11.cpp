@@ -593,10 +593,14 @@ void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
     // acquired.
 }
 
-void* Buffer::GetMappedPointerImpl() {
-    // The frontend asks that the pointer returned is from the start of the resource
-    // irrespective of the offset passed in MapAsyncImpl, which is what mMappedData is.
-    return mMappedData;
+Span<std::byte> Buffer::GetMappedRangeImpl(size_t offset, size_t size) {
+    // TODO(https://crbug.com/501491697): Replace mMappedData with some form of span, which will
+    // require changing or updating the logic that checks for mMappedData != nullptr to know if the
+    // buffer is mapped.
+    Span<std::byte> wholeMappedRange =
+        DAWN_UNSAFE_TODO({reinterpret_cast<std::byte*>(mMappedData.Load()),
+                          checked_cast<size_t>(GetAllocatedSize())});
+    return wholeMappedRange.subspan(offset, size);
 }
 
 void Buffer::DestroyImpl(DestroyReason reason) {

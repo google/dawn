@@ -55,13 +55,13 @@ class BufferMock : public BufferBase {
                 (wgpu::MapMode mode, size_t offset, size_t size),
                 (override));
     MOCK_METHOD(MaybeError, FinalizeMapImpl, (BufferState newState), (override));
-    MOCK_METHOD(void*, GetMappedPointerImpl, (), (override));
+    MOCK_METHOD(Span<std::byte>, GetMappedRangeImpl, (size_t offset, size_t size), (override));
     MOCK_METHOD(void, UnmapImpl, (BufferState fromState, BufferState newState), (override));
 
     MOCK_METHOD(bool, IsCPUWritableAtCreation, (), (const, override));
 
   private:
-    HeapArray<uint8_t> mBackingData;
+    HeapArray<std::byte> mBackingData;
 };
 
 }  // namespace dawn::native
