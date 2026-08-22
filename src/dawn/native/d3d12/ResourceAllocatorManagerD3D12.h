@@ -47,7 +47,7 @@ class ResourceHeapAllocation;
 // Resource heap types + flags combinations are named after the D3D constants.
 // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_heap_flags
 // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_heap_type
-enum ResourceHeapKind {
+enum class ResourceHeapKind : uint8_t {
     // Resource heap tier 2
     // Allows resource heaps to contain all buffer and textures types.
     // This enables better heap reuse by avoiding the need for separate heaps and
@@ -118,11 +118,14 @@ class ResourceAllocatorManager {
     Ref<AllocationSizeTracker> mAllocatedMemoryTracker;
     Ref<AllocationSizeTracker> mUsedMemoryTracker;
 
-    std::array<std::unique_ptr<BuddyMemoryAllocator>, ResourceHeapKind::EnumCount>
+    std::array<std::unique_ptr<BuddyMemoryAllocator>,
+               static_cast<size_t>(ResourceHeapKind::EnumCount)>
         mSubAllocatedResourceAllocators;
-    std::array<std::unique_ptr<HeapAllocator>, ResourceHeapKind::EnumCount> mHeapAllocators;
+    std::array<std::unique_ptr<HeapAllocator>, static_cast<size_t>(ResourceHeapKind::EnumCount)>
+        mHeapAllocators;
 
-    std::array<std::unique_ptr<PooledResourceMemoryAllocator>, ResourceHeapKind::EnumCount>
+    std::array<std::unique_ptr<PooledResourceMemoryAllocator>,
+               static_cast<size_t>(ResourceHeapKind::EnumCount)>
         mPooledHeapAllocators;
 
     SerialQueue<ExecutionSerial, ResourceHeapAllocation> mAllocationsToDelete;

@@ -442,7 +442,7 @@ D3D12_HEAP_TYPE GetD3D12HeapType(ResourceHeapKind resourceHeapKind) {
             return D3D12_HEAP_TYPE_UPLOAD;
         case ResourceHeapKind::Custom_WriteBack_OnlyBuffers:
             return D3D12_HEAP_TYPE_CUSTOM;
-        case EnumCount:
+        case ResourceHeapKind::EnumCount:
         default:
             DAWN_UNREACHABLE();
     }
@@ -458,7 +458,7 @@ D3D12_HEAP_PROPERTIES GetD3D12HeapProperties(ResourceHeapKind resourceHeapKind) 
     // heaps and using the custom heap equivalent of upload heaps everywhere, and the upload heaps
     // are actually write-back on CacheCoherentUMA. See below link for more details:
     // https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_feature_data_architecture
-    if (resourceHeapKind == Custom_WriteBack_OnlyBuffers) {
+    if (resourceHeapKind == ResourceHeapKind::Custom_WriteBack_OnlyBuffers) {
         heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
         heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
     } else {
