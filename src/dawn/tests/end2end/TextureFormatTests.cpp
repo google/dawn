@@ -970,10 +970,15 @@ TEST_P(TextureFormatTest, RG11B10Ufloat) {
         {wgpu::TextureFormat::RG11B10Ufloat, 4, TextureComponentType::Float, 4}, textureData,
         uncompressedData);
 
-    // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY and NaN isn't handled
-    // correctly by swiftshader
     if ((IsVulkan() && IsSwiftshader()) || IsANGLE()) {
+        // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY and NaN isn't handled
+        // correctly by swiftshader
         WarningLog() << "Skip Rendering test because Swiftshader doesn't render INFINITY "
+                        "and NaN correctly for RG11B10Ufloat texture format.";
+    } else if (IsVulkan() && IsMesaSoftware()) {
+        // TODO(crbug.com/550575670): Rendering INFINITY and NaN doesn't seem to be handled properly
+        // in Mesa either. Diff: expected: 0xf87e0000, actual: 0xffffe400.
+        WarningLog() << "Skip Rendering test because Mesa doesn't render INFINITY "
                         "and NaN correctly for RG11B10Ufloat texture format.";
     } else {
         DoFormatRenderingTest(
