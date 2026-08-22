@@ -937,7 +937,8 @@ crbug.com/470115242 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.81
 crbug.com/470115243 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 webgpu-adapter-default win11 ] webgpu:web_platform,copyToTexture,Image* [ RetryOnFailure ]
 
 # Win11/GTX 1660 failures when going to 610.74
-crbug.com/542749864 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:createRenderPipeline,at_over:*testValueName="atLimit";async=*;items=*primitive_index* [ Failure ]
+crbug.com/542749864 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-enabled win11 ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:createRenderPipeline,at_over:*testValueName="atLimit";async=*;items=*primitive_index* [ Failure ]
+crbug.com/542749864 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-disabled win11 ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:createRenderPipeline,at_over:*testValueName="atLimit";async=*;items=*primitive_index* [ Failure ]
 
 crbug.com/542752829 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,binary,bitwise:bitwise_and:type="abstract-int";inputSource="const";vectorize="_undef_" [ Skip ]
 crbug.com/542752829 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,af_arithmetic:negation:inputSource="const";vectorize=4 [ Skip ]
@@ -1105,14 +1106,11 @@ crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:s
 
 # Failures on brya devices running Android Desktop.
 crbug.com/445230380 [ android android-brya dawn-no-backend-validation webgpu-service-worker ] webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
-crbug.com/445230380 [ android android-brya webgpu-no-worker ] webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
 crbug.com/445232714 [ android android-brya webgpu-no-worker ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";* [ Failure ]
 crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureGather:*d_coords:* [ Failure ] # CAT:Critical
 crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:*d_coords:* [ Failure ] # CAT:Critical
 crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:*d_coords:* [ Failure ] # CAT:Critical
 crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:*d_coords:* [ Failure ] # CAT:Critical
-crbug.com/445242964 [ android android-brya webgpu-no-worker ] webgpu:web_platform,copyToTexture,image_file:from_multiple_formats:imageName="four-colors.avif";srcDoFlipYDuringCopy=false [ Failure ]
-crbug.com/445242964 [ android android-brya webgpu-no-worker ] webgpu:web_platform,copyToTexture,image_file:from_multiple_formats:imageName="four-colors.avif";srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/459848489 [ android android-brya ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
 crbug.com/459848489 [ android android-brya ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 crbug.com/459848489 [ android android-brya ] webgpu:shader,execution,expression,call,builtin,texture* [ RetryOnFailure ]
@@ -1130,8 +1128,6 @@ crbug.com/528379972 [ intel-0x3e9b mac ] webgpu:api,validation,encoding,encoder_
 crbug.com/449980070 [ linux ] webgpu:api,validation,encoding,encoder_open_state:* [ Failure ]
 crbug.com/449980070 [ win ] webgpu:api,validation,encoding,encoder_open_state:* [ Failure ]
 
-# Increase in binding limits resulted in test timeouts on Windows intel
-crbug.com/479909173 [ dawn-no-backend-validation intel-0x9bc5 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
 
 # Windows code-coverage bots - "The source image could not be decoded"
 crbug.com/469328920 [ clang-coverage webgpu-dedicated-worker win ] webgpu:web_platform,copyToTexture,image_file:from_orientation_metadata_file:imageName="four-colors*.jpg";objectTypeFromFile="ImageBitmap-from-Blob";* [ Failure ]
@@ -1477,10 +1473,6 @@ crbug.com/526671415 webgpu:api,validation,encoding,cmds,setImmediates:alignment:
 # New failures on Qualcomm Snapdragon X Elite (win11 arm64)
 crbug.com/501070661 [ dawn-backend-validation qualcomm webgpu-adapter-default win11 ] webgpu:web_platform,copyToTexture,ImageBitmap:* [ Failure ]
 
-# Shader validation alignment test f16 cases with immediates.
-crbug.com/527439864 [ microsoft target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,validation,shader_io,align:required_alignment:decl="var";address_space="immediate";align="alignment" [ Failure ]
-crbug.com/527439864 [ microsoft target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,validation,shader_io,align:required_alignment:decl="var";address_space="immediate";align=2 [ Failure ]
-crbug.com/527439864 [ microsoft target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,validation,shader_io,align:required_alignment:decl="var";address_space="immediate";align=32 [ Failure ]
 
 crbug.com/499140183 [ intel win ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,reuse:* [ Failure ]
 crbug.com/532123166 [ amd dawn-no-backend-validation mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";* [ Failure ]
@@ -1563,9 +1555,6 @@ crbug.com/537364496 [ android-pixel-4 ] webgpu:api,operation,command_buffer,quer
 crbug.com/537364496 [ dawn-no-backend-validation intel-0x9bc5 no-asan win ] webgpu:api,operation,command_buffer,queries,timestampQuery:many_query_sets:numQuerySets=65536;stage="render" [ Failure ]
 crbug.com/537364496 [ intel linux ] webgpu:api,operation,command_buffer,queries,timestampQuery:many_query_sets:numQuerySets=65536;stage="render" [ Failure ]
 
-# Alias analysis failures
-crbug.com/538691038 [ intel-0x4680 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,validation,functions,alias_analysis:one_pointer_one_module_scope:address_space="storage";aliased=false [ Failure ]
-crbug.com/538691038 [ intel-0x4680 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,validation,functions,alias_analysis:one_pointer_one_module_scope:address_space="workgroup";aliased=false [ Failure ]
 
 crbug.com/540087398 [ android-pixel-10 ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="*";format="depth*" [ Failure ]
 crbug.com/540087398 [ android-pixel-10 ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="*";format="stencil*" [ Failure ]
@@ -1775,10 +1764,8 @@ crbug.com/0000 [ amd mac ] webgpu:api,operation,render_pass,resolve:render_pass_
 crbug.com/0000 [ amd mac ] webgpu:api,operation,render_pass,resolve:render_pass_resolve:colorFormat="rgba8unorm-srgb";separateResolvePass=true;storeOperation="store" [ Failure ]
 crbug.com/0000 [ android-pixel-10 dawn-no-backend-validation webgpu-service-worker ] webgpu:api,operation,render_pass,storeop2:storeOp_controls_whether_1x1_drawn_quad_is_stored:storeOp="discard" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,render_pipeline,overrides:multi_entry_points:isAsync=true [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_slice_with_diff_mip_levels:format="rg11b10ufloat";depthSlice=1 [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,rendering,stencil:stencil_accumulation:format="depth24plus-stencil8" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,rendering,stencil:stencil_accumulation:format="depth32float-stencil8" [ Failure ]
-crbug.com/0000 [ intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba16uint" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,storage_texture,read_only:basic:format="r16snorm";shaderStage="compute";dimension="1d";depthOrArrayLayers=1 [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,storage_texture,read_only:basic:format="r16snorm";shaderStage="compute";dimension="2d";depthOrArrayLayers=1 [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,storage_texture,read_only:basic:format="r16snorm";shaderStage="compute";dimension="2d";depthOrArrayLayers=2 [ Failure ]
@@ -2092,7 +2079,6 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limi
 crbug.com/0000 [ intel win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersInVertexStage:createPipeline,at_over:limitTest="atMaximum";testValueName="overLimit";async=true [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersInVertexStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";async=true [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atDefault";testValueName="overLimit";async=true;bindingCombination="compute" [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="overLimit";async=false;bindingCombination="vertex" [ Failure ]
 crbug.com/0000 [ intel win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="overLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="overLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow" [ Failure ]
@@ -2247,12 +2233,11 @@ crbug.com/0000 [ intel win ] webgpu:api,validation,render_pipeline,vertex_state:
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,render_pipeline,vertex_state:vertex_shader_type_matches_attribute_format:format="snorm10-10-10-2" [ Failure ]
 crbug.com/0000 [ microsoft win ] webgpu:api,validation,render_pipeline,vertex_state:vertex_shader_type_matches_attribute_format:format="snorm10-10-10-2" [ Failure ]
 crbug.com/0000 [ dawn-backend-validation intel-0x9bc5 release-x64 target-cpu-64 webgpu-dxc-disabled win ] webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format="r8snorm";awaitLost=false [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:idl,javascript:device,EventTarget:test="canPassCustomEventThroughDevice" [ Failure ]
+crbug.com/0000 [ android-pixel-6 dawn-no-backend-validation webgpu-service-worker ] webgpu:idl,javascript:device,EventTarget:test="canPassCustomEventThroughDevice" [ Failure ]
 crbug.com/0000 [ android-pixel-10 dawn-no-backend-validation webgpu-service-worker ] webgpu:idl,javascript:device,EventTarget:test="canPassEventThroughDevice" [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:idl,javascript:device,EventTarget:test="canPassEventThroughDevice" [ Failure ]
+crbug.com/0000 [ android-pixel-6 dawn-no-backend-validation webgpu-service-worker ] webgpu:idl,javascript:device,EventTarget:test="canPassEventThroughDevice" [ Failure ]
 crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,access,structure,index:buffer_align: [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation intel-0x9bc5 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,af_matrix_subtraction:matrix:inputSource="const";cols=2;rows=4 [ Failure ]
-crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,binary,af_multiplication:vector_scalar:inputSource="const";dim=3 [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation intel-0x4680 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_vector_scalar:inputSource="storage_r";vectorize_lhs=3 [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d_array:stage="f";format="rg11b10ufloat" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d_array:stage="v";format="rg11b10ufloat" [ Failure ]
@@ -2267,8 +2252,6 @@ crbug.com/0000 [ android-t ] webgpu:shader,execution,expression,constructor,non_
 crbug.com/0000 [ dawn-no-backend-validation no-asan webgpu-dxc-disabled win ] webgpu:shader,execution,limits:struct_members: [ Failure ]
 crbug.com/0000 [ android-r qualcomm ] webgpu:shader,execution,memory_layout:write_layout:* [ Failure ]
 crbug.com/0000 [ android-r ] webgpu:shader,execution,shader_io,vertex_builtins:* [ Failure ]
-crbug.com/0000 [ dawn-no-backend-validation intel-0x4680 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";workgroupSize=[1,1,1];batch__=15 [ Failure ]
-crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,sinh:values:stage="override";type="f32" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,step:values:stage="override";type="f32" [ Failure ]
 crbug.com/0000 [ amd mac ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="fragment_depth" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="fragment_depth" [ Failure ]
@@ -2326,16 +2309,16 @@ crbug.com/0000 [ dawn-backend-validation no-asan no-clang-coverage nvidia releas
 crbug.com/0000 [ dawn-backend-validation no-asan no-clang-coverage nvidia release-x64 target-cpu-64 webgpu-adapter-default webgpu-no-worker win ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";colorSpaceConversion="none";srcFlipYInCopy=true;dstPremultiplied=false [ Failure ]
 crbug.com/0000 [ dawn-backend-validation no-asan no-clang-coverage nvidia release-x64 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled webgpu-no-worker win ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";colorSpaceConversion="none";srcFlipYInCopy=true;dstPremultiplied=true [ Failure ]
 crbug.com/0000 [ dawn-backend-validation no-asan no-clang-coverage nvidia release-x64 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-no-worker win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";colorSpaceConversion="none";srcFlipYInCopy=true;dstPremultiplied=true [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:srcDoFlipYDuringCopy=false;dstPremultiplied=false [ Failure ]
-crbug.com/0000 [ android-pixel-4 ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:srcDoFlipYDuringCopy=false;dstPremultiplied=true [ Failure ]
+crbug.com/0000 [ android-pixel-6 android-t dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:srcDoFlipYDuringCopy=false;dstPremultiplied=false [ Failure ]
+crbug.com/0000 [ android-pixel-4 dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:srcDoFlipYDuringCopy=false;dstPremultiplied=true [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:srcDoFlipYDuringCopy=false;dstPremultiplied=true [ Failure ]
 crbug.com/0000 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:canvasType="offscreen";dstColorFormat="r16float";dstAlphaMode="opaque";srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/0000 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:canvasType="offscreen";dstColorFormat="rgba8unorm";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/0000 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:canvasType="offscreen";dstColorFormat="rgba8unorm";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,image:copy_subrect_from_2D_Canvas:srcDoFlipYDuringCopy=false;dstPremultiplied=false [ Failure ]
+crbug.com/0000 [ android-pixel-6 android-t dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,copyToTexture,image:copy_subrect_from_2D_Canvas:srcDoFlipYDuringCopy=false;dstPremultiplied=false [ Failure ]
 crbug.com/0000 [ android-pixel-4 dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation no-asan no-clang-coverage nvidia release-x64 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-service-worker win ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="srgb" [ Failure ]
+crbug.com/0000 [ android-14 android-pixel-6 dawn-no-backend-validation webgpu-no-worker ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="srgb" [ Failure ]
+crbug.com/0000 [ android-pixel-6 android-t dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="srgb" [ Failure ]
 crbug.com/0000 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="srgb" [ Failure ]
 crbug.com/0000 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="srgb" [ Failure ]
-crbug.com/0000 [ microsoft win ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt601-rotate-90.mp4";dstColorSpace="display-p3" [ Failure ]
