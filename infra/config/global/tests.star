@@ -398,7 +398,7 @@ targets.tests.isolated_script_test(
     name = "litert_lm_benchmark",
     mixins = [
         "result_adapter_single",
-        "true_noop_merge",
+        "litert_lm_benchmark_merge",
         "ci_only",
     ],
     binary = "litert_lm_advanced_main",

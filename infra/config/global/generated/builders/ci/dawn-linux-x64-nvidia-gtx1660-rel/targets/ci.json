@@ -227,7 +227,7 @@
       {
         "ci_only": true,
         "merge": {
-          "script": "//scripts/merge_scripts/true_noop_merge.py"
+          "script": "//scripts/merge_scripts/merge_litert_lm_benchmark_results.py"
         },
         "module_name": "//third_party/litert-lm:litert_lm_advanced_main/",
         "module_scheme": "single",
