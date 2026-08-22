@@ -320,7 +320,7 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
         uint32_t result =
             bytesPerImage * (depth - 1) + (bytesPerRow * (height - 1) + width * bytesPerPixel);
 
-        return alignForMultipleOf4Bytes ? Align(result, uint64_t(4)) : result;
+        return alignForMultipleOf4Bytes ? Align(result, uint64_t{4}) : result;
     }
 
     wgpu::ShaderModule mVertexModule;

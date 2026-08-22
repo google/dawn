@@ -561,7 +561,7 @@ class Converter<EnforceRangeInteger<T>> {
         // Note that the number must both be representable in the integer type, but also below
         // MAX_SAFE_INTEGER after which consecutive double values might skip over some integer
         // values.
-        constexpr double kMaxSafeInteger = (uint64_t(1) << 53) - uint64_t(1);
+        constexpr double kMaxSafeInteger = (uint64_t{1} << 53) - uint64_t{1};
         constexpr double kMinSafeInteger = -kMaxSafeInteger;
 
         constexpr double kMin =

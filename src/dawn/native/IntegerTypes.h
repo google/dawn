@@ -129,7 +129,7 @@ using FenceAPISerial = TypedInteger<struct FenceAPISerialT, uint64_t>;
 // is incremented by one. This way to know if something is done executing, we just need to
 // compare its serial with the currently completed serial.
 using ExecutionSerial = TypedInteger<struct QueueSerialT, uint64_t>;
-constexpr ExecutionSerial kMaxExecutionSerial = ExecutionSerial(~uint64_t(0));
+constexpr ExecutionSerial kMaxExecutionSerial = ExecutionSerial(~uint64_t{0});
 constexpr ExecutionSerial kBeginningOfGPUTime = ExecutionSerial(0u);
 
 // An identifier that indicates which Pipeline a BindGroupLayout is compatible with. Pipelines

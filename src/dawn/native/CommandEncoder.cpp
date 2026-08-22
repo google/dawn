@@ -962,7 +962,7 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
         if (attachment.view) {
             if (renderPassSampleCount) {
                 DAWN_INVALID_IF(
-                    i != ColorAttachmentIndex{uint8_t(0)},
+                    i != ColorAttachmentIndex{uint8_t{0}},
                     "Only colorAttachment 0 may be used when the render pass has an explicit "
                     "sample count for MSAARenderToSingleSampled.");
                 DAWN_TRY(ValidateColorAttachmentRenderToSingleSampled(device, attachment,

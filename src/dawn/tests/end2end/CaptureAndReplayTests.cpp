@@ -1584,7 +1584,7 @@ TEST_P(CaptureAndReplayTests, CaptureDepthRenderPass) {
     // We just expect no errors.
 }
 
-constexpr static uint64_t kSentinelValue = ~uint64_t(0u);
+constexpr static uint64_t kSentinelValue = ~uint64_t{0};
 class OcclusionExpectation : public detail::Expectation {
   public:
     enum class Result { Zero, NonZero };

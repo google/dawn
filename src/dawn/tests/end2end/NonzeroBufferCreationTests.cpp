@@ -47,7 +47,7 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithCopyDstUsage) {
 
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
-    std::vector<uint8_t> expectedData(kSize, uint8_t(1u));
+    std::vector<uint8_t> expectedData(kSize, uint8_t{1});
     DAWN_UNSAFE_TODO(EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<uint32_t*>(expectedData.data()),
                                                 buffer, 0, kSize / sizeof(uint32_t)));
 }
@@ -63,7 +63,7 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithMapWriteWithoutCopyDstUsage
 
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
-    std::vector<uint8_t> expectedData(kSize, uint8_t(1u));
+    std::vector<uint8_t> expectedData(kSize, uint8_t{1});
     DAWN_UNSAFE_TODO(EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<uint32_t*>(expectedData.data()),
                                                 buffer, 0, kSize / sizeof(uint32_t)));
 }
@@ -86,7 +86,7 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithMappedAtCreation) {
     defaultDescriptor.size = kSize;
     defaultDescriptor.mappedAtCreation = true;
 
-    const std::vector<uint8_t> expectedData(kSize, uint8_t(1u));
+    const std::vector<uint8_t> expectedData(kSize, uint8_t{1});
     const uint32_t* expectedDataPtr =
         DAWN_UNSAFE_TODO(reinterpret_cast<const uint32_t*>(expectedData.data()));
 

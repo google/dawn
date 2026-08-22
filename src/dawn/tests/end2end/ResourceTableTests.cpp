@@ -3138,8 +3138,8 @@ class ResourceTableBindfulInteractionTests : public DawnTestWithParams<BindfulIn
         queue.Submit(1, &commands);
 
         // Check results
-        EXPECT_PIXEL_U32_EQ(uint32_t{0xBEEFu}, beefTexture, 0, 0);
-        EXPECT_PIXEL_U32_EQ(uint32_t{0xCAFEu}, cafeTexture, 0, 0);
+        EXPECT_PIXEL_U32_EQ(uint32_t{0xBEEF}, beefTexture, 0, 0);
+        EXPECT_PIXEL_U32_EQ(uint32_t{0xCAFE}, cafeTexture, 0, 0);
     }
 
     wgpu::TextureUsage TextureUsageForWriteKind(BindfulWriteKind kind) {

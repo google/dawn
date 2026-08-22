@@ -234,14 +234,14 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
     [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
         TRACE_EVENT_NESTABLE_ASYNC_END0(DAWN_TRACE_CATEGORY("gpu_work"),
                                         "DeviceMTL::SubmitPendingCommandBuffer",
-                                        uint64_t(pendingSerial));
+                                        uint64_t{pendingSerial});
 
         this->UpdateCompletedSerialTo(QueuePriority::Lowest, pendingSerial);
     }];
 
     TRACE_EVENT_NESTABLE_ASYNC_BEGIN0(DAWN_TRACE_CATEGORY("gpu_work"),
                                       "DeviceMTL::SubmitPendingCommandBuffer",
-                                      uint64_t(pendingSerial));
+                                      uint64_t{pendingSerial});
 
     DAWN_ASSERT(mSharedFence);
     [*pendingCommands encodeSignalEvent:mSharedFence->GetMTLSharedEvent()

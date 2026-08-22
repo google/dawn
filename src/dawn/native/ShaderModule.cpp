@@ -617,7 +617,7 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                     "@binding(%u) in the shader is element %u of the layout's binding which is an "
                     "array starting at binding %u.",
                     shaderInfo.binding, layoutInfo.indexInArray,
-                    uint32_t(layoutInfo.binding) - uint32_t(layoutInfo.indexInArray));
+                    uint32_t{layoutInfo.binding} - uint32_t{layoutInfo.indexInArray});
 
     // Validation specific to each type of binding.
     return MatchVariant(
@@ -1252,7 +1252,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         if (DelayedInvalidIf(
                 bindingNumber >= kMaxBindingsPerBindGroupTyped,
                 "Binding number (%u) exceeds the maxBindingsPerBindGroup limit (%u) - 1.",
-                uint32_t(bindingNumber), kMaxBindingsPerBindGroup)) {
+                uint32_t{bindingNumber}, kMaxBindingsPerBindGroup)) {
             continue;
         }
 

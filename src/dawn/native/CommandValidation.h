@@ -67,7 +67,7 @@ template <typename A, typename B>
 DAWN_FORCE_INLINE uint64_t Safe32x32(A a, B b) {
     static_assert(std::is_same<A, uint32_t>::value, "'a' must be uint32_t");
     static_assert(std::is_same<B, uint32_t>::value, "'b' must be uint32_t");
-    return uint64_t(a) * uint64_t(b);
+    return uint64_t{a} * uint64_t{b};
 }
 
 // Overload to be used before/during validation. Handles bytesPerRow and rowPerImage being

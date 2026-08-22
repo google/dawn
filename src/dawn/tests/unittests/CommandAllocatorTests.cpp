@@ -158,7 +158,7 @@ TEST(CommandAllocator, BasicWithData) {
         immediates->size = mySize;
         immediates->offset = myOffset;
 
-        Span<uint32_t> values = allocator.AllocateData<uint32_t>(size_t{5u});
+        Span<uint32_t> values = allocator.AllocateData<uint32_t>(size_t{5});
         for (size_t i = 0; i < 5; i++) {
             values[i] = myValues[i];
         }
@@ -176,7 +176,7 @@ TEST(CommandAllocator, BasicWithData) {
         ASSERT_EQ(immediates->size, mySize);
         ASSERT_EQ(immediates->offset, myOffset);
 
-        Span<const uint32_t> values = iterator.NextData<uint32_t>(size_t{5u});
+        Span<const uint32_t> values = iterator.NextData<uint32_t>(size_t{5});
         ASSERT_EQ(values.size(), 5u);
         for (auto [i, value] : Enumerate(values)) {
             ASSERT_EQ(value, myValues[i]);

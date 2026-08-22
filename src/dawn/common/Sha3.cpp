@@ -228,7 +228,7 @@ static constexpr std::array<Sha3Lane, kRoundCount> kRoundConstants = []() {
         // Step 3
         for (uint32_t j = 0; j < kLog2LaneBitWidth + 1; j++) {
             if (kRoundConstantsBits[j + 7 * ir]) {
-                RC |= uint64_t(1) << ((1 << j) - 1);
+                RC |= uint64_t{1} << ((1 << j) - 1);
             }
         }
 

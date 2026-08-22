@@ -53,7 +53,7 @@ ResultOrError<Ref<PipelineLayout>> PipelineLayout::Create(
 ResultOrError<Ref<RefCountedVkHandle<VkPipelineLayout>>> PipelineLayout::CreateVkPipelineLayout(
     const Specialization& specialization) {
     // Compute the array of VkDescriptorSetLayouts that will be chained in the create info.
-    ityp::array<BindGroupIndex, VkDescriptorSetLayout, size_t(kMaxBindGroupsTyped) + 2> setLayouts;
+    ityp::array<BindGroupIndex, VkDescriptorSetLayout, size_t{kMaxBindGroupsTyped} + 2> setLayouts;
 
     // The first VkDescriptorSetLayouts are the for framebuffer fetch and/or the resource table if
     // needed.

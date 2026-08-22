@@ -36,7 +36,7 @@ namespace dawn {
 namespace {
 
 // Clear the content of the result buffer into 0xFFFFFFFF.
-constexpr static uint64_t kSentinelValue = ~uint64_t(0u);
+constexpr static uint64_t kSentinelValue = ~uint64_t{0};
 constexpr static uint64_t kZero = 0u;
 constexpr static unsigned int kRTSize = 4;
 constexpr uint64_t kMinDestinationOffset = kQueryResolveAlignment;

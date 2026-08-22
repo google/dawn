@@ -548,7 +548,7 @@ NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() const {
                 }
                 maxArrayStride =
                     std::max(maxArrayStride,
-                             GetVertexFormatInfo(attrib.format).byteSize + size_t(attrib.offset));
+                             GetVertexFormatInfo(attrib.format).byteSize + size_t{attrib.offset});
             }
             layoutDesc.stepFunction = MTLVertexStepFunctionConstant;
             layoutDesc.stepRate = 0;

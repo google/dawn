@@ -39,8 +39,8 @@
 namespace dawn {
 
 static constexpr size_t kPayloadBits = 2;
-static constexpr uint64_t kPayloadMask = (uint64_t(1) << kPayloadBits) - 1;
-static constexpr uint64_t kRefCountIncrement = (uint64_t(1) << kPayloadBits);
+static constexpr uint64_t kPayloadMask = (uint64_t{1} << kPayloadBits) - 1;
+static constexpr uint64_t kRefCountIncrement = (uint64_t{1} << kPayloadBits);
 
 RefCount::RefCount(uint64_t initCount, uint64_t payload)
     : mRefCount(initCount * kRefCountIncrement + payload) {

@@ -1138,7 +1138,7 @@ TEST_F(BindGroupValidationTest, BufferBindingOOB) {
 
     // Error case, offset+size overflows to be 0
     ASSERT_DEVICE_ERROR(
-        utils::MakeBindGroup(device, layout, {{0, buffer, 256, uint32_t(0) - uint32_t(256)}}));
+        utils::MakeBindGroup(device, layout, {{0, buffer, 256, uint32_t{0} - uint32_t{256}}}));
 }
 
 // Tests constraints to be sure the uniform buffer binding isn't too large

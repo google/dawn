@@ -102,7 +102,7 @@ TEST_P(FramebufferFetchTests, Basic) {
 
     // The 10 points should have successfully used framebuffer fetch to do increment ten times
     // without races.
-    EXPECT_TEXTURE_EQ(uint32_t(10), texture, {0, 0});
+    EXPECT_TEXTURE_EQ(uint32_t{10}, texture, {0, 0});
 }
 
 // Check that FramebufferFetch works correctly when switching between pipelines that use and do not
@@ -254,10 +254,10 @@ TEST_P(FramebufferFetchTests, MultipleAttachments) {
 
     // The 10 points should have successfully used framebuffer fetch to do increment ten times
     // without races.
-    EXPECT_TEXTURE_EQ(uint32_t(0), texture0, {0, 0});
-    EXPECT_TEXTURE_EQ(uint32_t(10), texture1, {0, 0});
-    EXPECT_TEXTURE_EQ(uint32_t(20), texture2, {0, 0});
-    EXPECT_TEXTURE_EQ(uint32_t(30), texture3, {0, 0});
+    EXPECT_TEXTURE_EQ(uint32_t{0}, texture0, {0, 0});
+    EXPECT_TEXTURE_EQ(uint32_t{10}, texture1, {0, 0});
+    EXPECT_TEXTURE_EQ(uint32_t{20}, texture2, {0, 0});
+    EXPECT_TEXTURE_EQ(uint32_t{30}, texture3, {0, 0});
 }
 
 // Check with multiple render attachments
@@ -317,8 +317,8 @@ TEST_P(FramebufferFetchTests, VariousFormats) {
 
     // The 10 points should have successfully used framebuffer fetch to do in/decrement ten times
     // without races.
-    EXPECT_TEXTURE_EQ(uint32_t(10), texture0, {0, 0});
-    EXPECT_TEXTURE_EQ(int32_t(-10), texture1, {0, 0});
+    EXPECT_TEXTURE_EQ(uint32_t{10}, texture0, {0, 0});
+    EXPECT_TEXTURE_EQ(int32_t{-10}, texture1, {0, 0});
     EXPECT_TEXTURE_EQ(static_cast<float>(10), texture2, {0, 0});
     EXPECT_TEXTURE_EQ(utils::RGBA8(10, 10, 10, 10), texture3, {0, 0});
 }
@@ -371,8 +371,8 @@ TEST_P(FramebufferFetchTests, LoadAndStoreOpsReallyItsLoadAndDiscard) {
 
     // The first attachment is discard, but it's value of (ten increments + loaded value) is in the
     // second attachment.
-    EXPECT_TEXTURE_EQ(uint32_t(0), texture0, {0, 0});
-    EXPECT_TEXTURE_EQ(uint32_t(10 + 1789), texture1, {0, 0});
+    EXPECT_TEXTURE_EQ(uint32_t{0}, texture0, {0, 0});
+    EXPECT_TEXTURE_EQ(uint32_t{10 + 1789}, texture1, {0, 0});
 }
 
 // Checks that with the framebuffer fetch feature enabled and a multisampled color attachment, a
@@ -555,7 +555,7 @@ TEST_P(FramebufferFetchTests, CreateRenderPipelineInParallel) {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        EXPECT_TEXTURE_EQ(uint32_t(i + 1), texture, {0, 0});
+        EXPECT_TEXTURE_EQ(uint32_t{i + 1}, texture, {0, 0});
     }
 }
 

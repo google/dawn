@@ -1798,7 +1798,7 @@ std::ostringstream& DawnTestBase::AddBufferExpectation(const char* file,
                                                        uint64_t offset,
                                                        uint64_t size,
                                                        detail::Expectation* expectation) {
-    uint64_t alignedSize = Align(size, uint64_t(4));
+    uint64_t alignedSize = Align(size, uint64_t{4});
     auto readback = ReserveReadback(device, alignedSize);
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,

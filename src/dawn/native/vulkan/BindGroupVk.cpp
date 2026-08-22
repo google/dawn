@@ -114,8 +114,8 @@ void BindGroup::WriteDescriptorSet(VkDescriptorSet dsSet,
         write.dstSet = dsSet;
         // Arrays all have a single binding, so compute the binding index for the array, which is
         // the same as the binding index for the 0th element.
-        write.dstBinding = uint32_t(bindingIndex - bindingInfo.indexInArray);
-        write.dstArrayElement = uint32_t(bindingInfo.indexInArray);
+        write.dstBinding = uint32_t{bindingIndex - bindingInfo.indexInArray};
+        write.dstArrayElement = uint32_t{bindingInfo.indexInArray};
         write.descriptorCount = 1;
         write.descriptorType = VulkanDescriptorType(bindingInfo);
 

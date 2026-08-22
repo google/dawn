@@ -954,7 +954,7 @@ class Builder {
                 Expression* expr = nullptr;
                 return array(source, Of<T>(), expr);
             } else {
-                return array(source, Of<T>(), uint32_t(N));
+                return array(source, Of<T>(), uint32_t{N});
             }
         }
 
@@ -965,7 +965,7 @@ class Builder {
                 static_assert(N == 0, "arrays with a count cannot be inferred");
                 return array();
             } else {
-                return array(Of<T>(), uint32_t(N));
+                return array(Of<T>(), uint32_t{N});
             }
         }
 

@@ -153,9 +153,9 @@ TEST(SerializeTests, IntegralTypes) {
     // Only testing explicitly sized types for simplicity, and using 0s for larger types to
     // avoid dealing with endianess.
     EXPECT_CACHE_KEY_EQ('c', ByteVectorSink({std::byte('c')}));
-    EXPECT_CACHE_KEY_EQ(uint8_t(255), ByteVectorSink({std::byte(255)}));
-    EXPECT_CACHE_KEY_EQ(uint16_t(0), ByteVectorSink({std::byte(0), std::byte(0)}));
-    EXPECT_CACHE_KEY_EQ(uint32_t(0),
+    EXPECT_CACHE_KEY_EQ(uint8_t{255}, ByteVectorSink({std::byte(255)}));
+    EXPECT_CACHE_KEY_EQ(uint16_t{0}, ByteVectorSink({std::byte(0), std::byte(0)}));
+    EXPECT_CACHE_KEY_EQ(uint32_t{0},
                         ByteVectorSink({std::byte(0), std::byte(0), std::byte(0), std::byte(0)}));
 }
 
@@ -185,7 +185,7 @@ TEST(SerializeTests, StdStrings) {
     std::string str = "string";
 
     ByteVectorSink expected;
-    StreamIn(&expected, size_t(6));
+    StreamIn(&expected, size_t{6});
     auto strBytes = std::as_bytes(std::span(str));
     expected.insert(expected.end(), strBytes.begin(), strBytes.end());
 
@@ -211,7 +211,7 @@ TEST(SerializeTests, StdStringViews) {
     static constexpr std::string_view str("string");
 
     ByteVectorSink expected;
-    StreamIn(&expected, size_t(6));
+    StreamIn(&expected, size_t{6});
     auto strBytes = std::as_bytes(std::span(str));
     expected.insert(expected.end(), strBytes.begin(), strBytes.end());
 
@@ -284,9 +284,9 @@ TEST(SerializeTests, StdPair) {
     std::string_view s = "hi!";
 
     ByteVectorSink expected;
-    StreamIn(&expected, s, uint32_t(42));
+    StreamIn(&expected, s, uint32_t{42});
 
-    EXPECT_CACHE_KEY_EQ(std::make_pair(s, uint32_t(42)), expected);
+    EXPECT_CACHE_KEY_EQ(std::make_pair(s, uint32_t{42}), expected);
 }
 
 // Test that ByteVectorSink serializes std::optional as expected.
@@ -315,14 +315,14 @@ TEST(SerializeTests, StdVariant) {
         // Type id of std::string_view is 0 in VariantType
         VariantType v1 = stringViewInput;
         ByteVectorSink expected;
-        StreamIn(&expected, /* Type id */ size_t(0), stringViewInput);
+        StreamIn(&expected, /* Type id */ size_t{0}, stringViewInput);
         EXPECT_CACHE_KEY_EQ(v1, expected);
     }
     {
         // Type id of uint32_t is 1 in VariantType
         VariantType v2 = u32Input;
         ByteVectorSink expected;
-        StreamIn(&expected, /* Type id */ size_t(1), u32Input);
+        StreamIn(&expected, /* Type id */ size_t{1}, u32Input);
         EXPECT_CACHE_KEY_EQ(v2, expected);
     }
 }
@@ -371,9 +371,9 @@ TEST(SerializeTests, StdUnorderedMap) {
 
     // Expect the number of entries, followed by (K, V) pairs sorted in order of key.
     ByteVectorSink expected;
-    StreamIn(&expected, size_t(4), std::make_pair(uint32_t(1), m[1]),
-             std::make_pair(uint32_t(3), m[3]), std::make_pair(uint32_t(4), m[4]),
-             std::make_pair(uint32_t(7), m[7]));
+    StreamIn(&expected, size_t{4}, std::make_pair(uint32_t{1}, m[1]),
+             std::make_pair(uint32_t{3}, m[3]), std::make_pair(uint32_t{4}, m[4]),
+             std::make_pair(uint32_t{7}, m[7]));
 
     EXPECT_CACHE_KEY_EQ(m, expected);
 }
@@ -384,7 +384,7 @@ TEST(SerializeTests, StdUnorderedSet) {
 
     // Expect the number of entries, followed by values sorted in order of key.
     ByteVectorSink expected;
-    StreamIn(&expected, size_t(4), 1, 4, 6, 99);
+    StreamIn(&expected, size_t{4}, 1, 4, 6, 99);
 
     EXPECT_CACHE_KEY_EQ(input, expected);
 }
@@ -414,9 +414,9 @@ TEST(SerializeTests, AbslFlatHashMap) {
 
     // Expect the number of entries, followed by (K, V) pairs sorted in order of key.
     ByteVectorSink expected;
-    StreamIn(&expected, size_t(4), std::make_pair(uint32_t(1), m[1]),
-             std::make_pair(uint32_t(3), m[3]), std::make_pair(uint32_t(4), m[4]),
-             std::make_pair(uint32_t(7), m[7]));
+    StreamIn(&expected, size_t{4}, std::make_pair(uint32_t{1}, m[1]),
+             std::make_pair(uint32_t{3}, m[3]), std::make_pair(uint32_t{4}, m[4]),
+             std::make_pair(uint32_t{7}, m[7]));
 
     EXPECT_CACHE_KEY_EQ(m, expected);
 }
@@ -427,7 +427,7 @@ TEST(SerializeTests, AbslFlatHashSet) {
 
     // Expect the number of entries, followed by values sorted in order of key.
     ByteVectorSink expected;
-    StreamIn(&expected, size_t(4), 1, 4, 6, 99);
+    StreamIn(&expected, size_t{4}, 1, 4, 6, 99);
 
     EXPECT_CACHE_KEY_EQ(input, expected);
 }
@@ -437,7 +437,7 @@ TEST(SerializeTests, TintSemBindingPoint) {
     tint::BindingPoint bp{3, 6};
 
     ByteVectorSink expected;
-    StreamIn(&expected, uint32_t(3), uint32_t(6));
+    StreamIn(&expected, uint32_t{3}, uint32_t{6});
 
     EXPECT_CACHE_KEY_EQ(bp, expected);
 }
@@ -448,7 +448,7 @@ TEST(SerializeTests, UnsafeUnserializedValue) {
 
     ByteVectorSink expected;
     // The second UnsafeUnserializedValue<uint32_t> is not serialized.
-    StreamIn(&expected, uint32_t(123));
+    StreamIn(&expected, uint32_t{123});
 
     EXPECT_CACHE_KEY_EQ(input, expected);
 }

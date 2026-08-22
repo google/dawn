@@ -867,7 +867,7 @@ std::optional<Token> Lexer::try_hex_float() {
         }
         // Check the low 52-valid_mantissa_bits mantissa bits must be 0.
         TINT_ASSERT((0 <= valid_mantissa_bits) && (valid_mantissa_bits <= 23));
-        if (result_u64 & ((uint64_t(1) << (52 - valid_mantissa_bits)) - 1)) {
+        if (result_u64 & ((uint64_t{1} << (52 - valid_mantissa_bits)) - 1)) {
             return Token{Token::Type::kError, source,
                          "value cannot be exactly represented as 'f32'"};
         }
@@ -920,7 +920,7 @@ std::optional<Token> Lexer::try_hex_float() {
         }
         // Check the low 52-valid_mantissa_bits mantissa bits must be 0.
         TINT_ASSERT((0 <= valid_mantissa_bits) && (valid_mantissa_bits <= 10));
-        if (result_u64 & ((uint64_t(1) << (52 - valid_mantissa_bits)) - 1)) {
+        if (result_u64 & ((uint64_t{1} << (52 - valid_mantissa_bits)) - 1)) {
             return Token{Token::Type::kError, source,
                          "value cannot be exactly represented as 'f16'"};
         }

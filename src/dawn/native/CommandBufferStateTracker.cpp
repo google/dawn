@@ -645,7 +645,7 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
 
         VertexBufferSlot firstMissing = GetHighestBitIndexPlusOne(missingVertexBuffers).MinusOne();
         return DAWN_VALIDATION_ERROR("Vertex buffer slot %u required by %s was not set.",
-                                     uint8_t(firstMissing), GetRenderPipeline());
+                                     uint8_t{firstMissing}, GetRenderPipeline());
     }
 
     if (aspects[VALIDATION_ASPECT_IMMEDIATE_DATA]) {

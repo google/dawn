@@ -160,7 +160,7 @@ constexpr inline size_t UnpackedPtrIndexOf<UnpackedPtr<T>, Ext> =
 // because std::bitset::operator| is not constexpr until C++23.
 template <typename UnpackedPtrT, typename... Exts>
 constexpr inline auto UnpackedPtrBitsetForExts = typename UnpackedPtrT::BitsetType(
-    ((uint64_t(1) << UnpackedPtrIndexOf<UnpackedPtrT, Exts>) | ...));
+    ((uint64_t{1} << UnpackedPtrIndexOf<UnpackedPtrT, Exts>) | ...));
 template <typename UnpackedPtrT>
 constexpr inline auto UnpackedPtrBitsetForExts<UnpackedPtrT> = typename UnpackedPtrT::BitsetType(0);
 

@@ -52,7 +52,7 @@ void CaptureSharedCommand(CaptureContext& captureContext, CommandIterator& comma
 
             schema::CommandBufferCommandSetBindGroupCmd data{{
                 .data = {{
-                    .index = uint32_t(cmd.index),
+                    .index = uint32_t{cmd.index},
                     .bindGroupId = captureContext.GetId(cmd.group),
                     .dynamicOffsets =
                         std::vector<uint32_t>(dynamicOffsets.begin(), dynamicOffsets.end()),
@@ -134,7 +134,7 @@ MaybeError CaptureRenderCommand(CaptureContext& captureContext,
             const auto& cmd = *commands.NextCommand<SetVertexBufferCmd>();
             schema::CommandBufferCommandSetVertexBufferCmd data{{
                 .data = {{
-                    .slot = uint32_t(cmd.slot),
+                    .slot = uint32_t{cmd.slot},
                     .bufferId = captureContext.GetId(cmd.buffer),
                     .offset = cmd.offset,
                     .size = cmd.size,

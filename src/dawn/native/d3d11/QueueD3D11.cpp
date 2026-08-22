@@ -485,7 +485,7 @@ MaybeError MonitoredFenceQueue::NextSerial() {
 
     DAWN_TRY(commandContext.FlushBuffersForSyncingWithCPU());
 
-    const uint64_t submitSerial = uint64_t(GetPendingCommandSerial());
+    const uint64_t submitSerial = uint64_t{GetPendingCommandSerial()};
 
     {
         TRACE_EVENT(DAWN_TRACE_CATEGORY(), "D3D11Device::SignalFence", "serial", submitSerial);
@@ -535,8 +535,8 @@ MaybeError SystemEventQueue::NextSerial() {
         DAWN_ASSERT(mFence);
 
         TRACE_EVENT(DAWN_TRACE_CATEGORY(), "D3D11Device::SignalFence", "serial",
-                    uint64_t(submitSerial));
-        DAWN_TRY(CheckHRESULT(commandContext.Signal(mFence.Get(), uint64_t(submitSerial)),
+                    uint64_t{submitSerial});
+        DAWN_TRY(CheckHRESULT(commandContext.Signal(mFence.Get(), uint64_t{submitSerial}),
                               "D3D11 command queue signal fence"));
     }
 
@@ -627,7 +627,7 @@ ResultOrError<ExecutionSerial> SystemEventQueue::WaitForQueueSerialImpl(Executio
     if (serial > GetLastSubmittedCommandSerial()) {
         return DAWN_FORMAT_INTERNAL_ERROR(
             "Wait a serial (%llu) which is greater than last submitted command serial (%llu).",
-            uint64_t(serial), uint64_t(GetLastSubmittedCommandSerial()));
+            uint64_t{serial}, uint64_t(GetLastSubmittedCommandSerial()));
     }
 
     return mPendingEvents.Use([=, &completedEventsList = mCompletedEvents](
@@ -698,8 +698,8 @@ MaybeError DelayFlushQueue::NextSerial() {
         DAWN_ASSERT(mFence);
 
         TRACE_EVENT(DAWN_TRACE_CATEGORY(), "D3D11Device::SignalFence", "serial",
-                    uint64_t(submitSerial));
-        DAWN_TRY(CheckHRESULT(commandContext.Signal(mFence.Get(), uint64_t(submitSerial)),
+                    uint64_t{submitSerial});
+        DAWN_TRY(CheckHRESULT(commandContext.Signal(mFence.Get(), uint64_t{submitSerial}),
                               "D3D11 command queue signal fence"));
     }
 
@@ -768,7 +768,7 @@ ResultOrError<ExecutionSerial> DelayFlushQueue::WaitForQueueSerialImpl(Execution
     if (waitSerial > GetLastSubmittedCommandSerial()) {
         return DAWN_FORMAT_INTERNAL_ERROR(
             "Wait a serial (%llu) which is greater than last submitted command serial (%llu).",
-            uint64_t(waitSerial), uint64_t(GetLastSubmittedCommandSerial()));
+            uint64_t{waitSerial}, uint64_t(GetLastSubmittedCommandSerial()));
     }
 
     // A coarse-grained D3D11 scope lock is unnecessary here. When D3D11 multithread protection is

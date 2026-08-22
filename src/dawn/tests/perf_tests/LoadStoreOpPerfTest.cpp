@@ -174,7 +174,7 @@ void LoadStoreOpPerfTest::SetUpPerfTest() {
 
         // Clear the textures
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        float colorScale = std::max(0.1f, i / float(kNumTextures));
+        float colorScale = std::max(0.1f, static_cast<float>(i) / kNumTextures);
         {
             utils::ComboRenderPassDescriptor renderPass({msaaTextureView[i]});
             renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;

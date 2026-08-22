@@ -64,7 +64,7 @@ TEST(RingBufferAllocatorTests, RingBufferManyAlloc) {
     size_t offset = 0;
     for (ExecutionSerial i(0u); i < ExecutionSerial(maxNumOfFrames); ++i) {
         offset = allocator.Allocate(frameSizeInBytes, i);
-        ASSERT_EQ(offset, uint64_t(i) * frameSizeInBytes);
+        ASSERT_EQ(offset, uint64_t{i} * frameSizeInBytes);
     }
 }
 

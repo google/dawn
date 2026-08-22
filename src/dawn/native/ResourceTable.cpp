@@ -59,9 +59,9 @@ Ref<T> GetRef(Variant&& variant) {
 MaybeError ValidateBindingResource(const DeviceBase* device, const BindingResource* resource) {
     DAWN_INVALID_IF(resource->nextInChain != nullptr, "nextInChain is not null.");
 
-    uint32_t resourceCount = uint32_t(resource->buffer != nullptr) +
-                             uint32_t(resource->textureView != nullptr) +
-                             uint32_t(resource->sampler != nullptr);
+    uint32_t resourceCount = uint32_t{resource->buffer != nullptr} +
+                             uint32_t{resource->textureView != nullptr} +
+                             uint32_t{resource->sampler != nullptr};
     DAWN_INVALID_IF(resourceCount != 1,
                     "%i resources are specified (when there must be exactly 1).", resourceCount);
 
@@ -189,7 +189,7 @@ MaybeError ResourceTableBase::InitializeBase() {
     Span<uint32_t> data = mMetadataBuffer->GetMappedRangeSpan<uint32_t>();
     // Store APISize at element 0 in the metadata buffer, which will be used in the shader to index
     // default resources at APISize + resource type index.
-    data[0] = uint32_t(mAPISize);
+    data[0] = uint32_t{mAPISize};
     std::ranges::fill(data.subspan(1), 0u);
     DAWN_TRY(mMetadataBuffer->Unmap());
 
@@ -271,7 +271,7 @@ uint32_t ResourceTableBase::APIInsert(const BindingResource* resource) {
         }
 
         UpdateWithDeviceValidation(slot, resource, "Insert");
-        return uint32_t(slot);
+        return uint32_t{slot};
     }
 
     // No slot found, return the invalid binding.
@@ -294,7 +294,7 @@ wgpu::Status ResourceTableBase::APIRemove(uint32_t slotIn) {
 }
 
 uint32_t ResourceTableBase::APIGetSize() const {
-    return uint32_t(mAPISize);
+    return uint32_t{mAPISize};
 }
 
 // static

@@ -493,12 +493,12 @@ TEST_P(WaitAnyTests, UnsupportedTimeout) {
     std::tie(instance2, device2) = CreateExtraInstance(GetWireHelper(), &desc);
 
     // UnsupportedTimeout is still validated if no futures are passed.
-    for (uint64_t timeout : {uint64_t(1), uint64_t(0), UINT64_MAX}) {
+    for (uint64_t timeout : {uint64_t{1}, uint64_t{0}, UINT64_MAX}) {
         ASSERT_EQ(instance2.WaitAny(0, nullptr, timeout),
                   timeout > 0 ? wgpu::WaitStatus::Error : wgpu::WaitStatus::Success);
     }
 
-    for (uint64_t timeout : {uint64_t(1), uint64_t(0), UINT64_MAX}) {
+    for (uint64_t timeout : {uint64_t{1}, uint64_t{0}, UINT64_MAX}) {
         wgpu::WaitStatus status =
             instance2.WaitAny(device2.GetQueue().OnSubmittedWorkDone(
                                   wgpu::CallbackMode::WaitAnyOnly,
@@ -517,7 +517,7 @@ TEST_P(WaitAnyTests, UnsupportedCount) {
     // TODO(crbug.com/474391710): Flaky on Snapdragon X Elite w/ D3D11.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
 
-    for (uint64_t timeout : {uint64_t(0), uint64_t(1)}) {
+    for (uint64_t timeout : {uint64_t{0}, uint64_t{1}}) {
         // We don't support values higher than the default (64), and if you ask for lower than 64
         // you still get 64. DawnTest doesn't request anything (so requests 0) so gets 64.
         for (size_t count : {kTimedWaitAnyMaxCountDefault, kTimedWaitAnyMaxCountDefault + 1}) {
@@ -547,7 +547,7 @@ TEST_P(WaitAnyTests, UnsupportedMixedSources) {
     wgpu::Queue queue1 = queue;
     wgpu::Queue queue2 = device2.GetQueue();
 
-    for (uint64_t timeout : {uint64_t(0), uint64_t(1)}) {
+    for (uint64_t timeout : {uint64_t{0}, uint64_t{1}}) {
         std::vector<wgpu::FutureWaitInfo> infos{{
             {queue1.OnSubmittedWorkDone(wgpu::CallbackMode::WaitAnyOnly,
                                         [](wgpu::QueueWorkDoneStatus, wgpu::StringView) {})},

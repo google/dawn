@@ -111,8 +111,8 @@ tint::Bindings GenerateBindingRemapping(const PipelineLayoutBase* layout,
             }
 
             tint::BindingPoint srcBindingPoint{
-                .group = uint32_t(group),
-                .binding = uint32_t(bindingNumber),
+                .group = uint32_t{group},
+                .binding = uint32_t{bindingNumber},
             };
 
             MatchVariant(

@@ -82,7 +82,7 @@ MTLOrigin ToMTLOrigin(const TexelOrigin3D& origin);
 // When using argument buffers, we use the compacted BindingIndex directly in MSL, instead of
 // remapping to per-resource-type indices (from GetBindingIndexInfo) like we do without argbufs.
 inline uint32_t ToMTLArgumentBufferIndex(BindingIndex bindingIndex) {
-    return uint32_t(bindingIndex);
+    return uint32_t{bindingIndex};
 }
 
 // For different reasons a WebGPU copy may need to be split into multiple copies for Metal. This

@@ -943,10 +943,10 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
                 ColorAttachmentMask attachmentMask = cmd.attachmentState->GetColorAttachmentsMask();
                 ColorAttachmentIndex attachmentCount = GetHighestBitIndexPlusOne(attachmentMask);
 
-                std::vector<schema::ColorAttachment> colorAttachments(size_t(attachmentCount),
+                std::vector<schema::ColorAttachment> colorAttachments(size_t{attachmentCount},
                                                                       schema::ColorAttachment{});
                 for (ColorAttachmentIndex slot : attachmentMask) {
-                    colorAttachments[size_t(slot)] =
+                    colorAttachments[size_t{slot}] =
                         ToSchema(captureContext, cmd.colorAttachments[slot]);
                 }
 

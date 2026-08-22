@@ -833,7 +833,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     // incorrect values on desktop drivers.
     bool readjustFragmentCombinedOutputResources =
         vkLimits.maxFragmentCombinedOutputResources > minFragmentCombinedOutputResources &&
-        uint64_t(vkLimits.maxFragmentCombinedOutputResources) < maxFragmentCombinedOutputResources;
+        uint64_t{vkLimits.maxFragmentCombinedOutputResources} < maxFragmentCombinedOutputResources;
     if (readjustFragmentCombinedOutputResources) {
         // Split extra resources across the three other limits instead of using the default values
         // since it would overflow.
@@ -904,11 +904,11 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
         vkLimits.maxComputeWorkGroupCount[2],
     });
 
-    if (!IsSubset(VkSampleCountFlags(VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT),
+    if (!IsSubset(VkSampleCountFlags{VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT},
                   vkLimits.framebufferColorSampleCounts)) {
         return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for framebufferColorSampleCounts");
     }
-    if (!IsSubset(VkSampleCountFlags(VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT),
+    if (!IsSubset(VkSampleCountFlags{VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT},
                   vkLimits.framebufferDepthSampleCounts)) {
         return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for framebufferDepthSampleCounts");
     }

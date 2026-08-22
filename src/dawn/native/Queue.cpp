@@ -286,7 +286,7 @@ void QueueBase::Tick(ExecutionSerial finishedSerial) {
     // To prevent the reentrant call from invalidating mTasksInFlight while in use by the first
     // call, we remove the tasks to finish from the queue, update mTasksInFlight, then run the
     // callbacks.
-    TRACE_EVENT(DAWN_TRACE_CATEGORY(), "Queue::Tick", "finishedSerial", uint64_t(finishedSerial));
+    TRACE_EVENT(DAWN_TRACE_CATEGORY(), "Queue::Tick", "finishedSerial", uint64_t{finishedSerial});
 
     std::vector<std::unique_ptr<TrackTaskCallback>> tasks;
     mTasksInFlight.Use([&](auto tasksInFlight) {
@@ -396,7 +396,7 @@ MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
     DAWN_CHECK(IsPowerOfTwo(GetDevice()->GetOptimalBufferToTextureCopyOffsetAlignment()));
     DAWN_CHECK(IsPowerOfTwo(blockInfo.byteSize));
     uint64_t offsetAlignment = std::max(
-        uint64_t(blockInfo.byteSize), GetDevice()->GetOptimalBufferToTextureCopyOffsetAlignment());
+        uint64_t{blockInfo.byteSize}, GetDevice()->GetOptimalBufferToTextureCopyOffsetAlignment());
 
     // Buffer offset alignments must follow additional restrictions for depth stencil formats.
     const Format& format = destination.texture->GetFormat();

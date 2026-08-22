@@ -89,7 +89,7 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
             // Quantization may make an actual value close to the lower limit go below it.
             // Take this into account by also quantizing the lower limit.
             uint32_t invertedQuantizationMask = ~mQuantizationMask;
-            uint64_t quantizationMask64 = ~uint64_t(invertedQuantizationMask);
+            uint64_t quantizationMask64 = ~uint64_t{invertedQuantizationMask};
             lowerLimit &= quantizationMask64;
 
             if (DAWN_UNSAFE_TODO(actual[i]) < lowerLimit ||

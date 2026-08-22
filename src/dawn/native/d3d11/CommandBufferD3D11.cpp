@@ -122,7 +122,7 @@ class VertexBufferTracker {
 
         for (VertexBufferSlot slot : vertexBuffersToApply) {
             mCommandContext->GetD3D11DeviceContext3()->IASetVertexBuffers(
-                uint8_t(slot), 1, &mD3D11Buffers[slot], &mStrides[slot], &mOffsets[slot]);
+                uint8_t{slot}, 1, &mD3D11Buffers[slot], &mStrides[slot], &mOffsets[slot]);
 
             mDirtyVertexBuffers.reset(slot);
         }

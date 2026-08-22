@@ -66,7 +66,7 @@ class ITypBitsetTest : public testing::Test {
                 ASSERT_FALSE(bits[Key(i)]) << i;
                 ASSERT_FALSE(bits.test(Key(i))) << i;
             } else {
-                mask |= (size_t(1) << i);
+                mask |= (size_t{1} << i);
                 ASSERT_TRUE(bits[Key(i)]) << i;
                 ASSERT_TRUE(bits.test(Key(i))) << i;
             }

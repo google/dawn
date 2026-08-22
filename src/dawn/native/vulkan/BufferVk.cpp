@@ -255,7 +255,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
 
     // Allocate at least 4 bytes so clamped accesses are always in bounds.
     // Also, Vulkan requires the size to be non-zero.
-    size = std::max(size, uint64_t(4u));
+    size = std::max(size, uint64_t{4});
 
     if (size > std::numeric_limits<uint64_t>::max() - kAlignment) {
         // Alignment would overlow.
@@ -275,7 +275,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     // VkmemoryRequirements. See https://gitlab.khronos.org/vulkan/vulkan/issues/1904
     // Any size with one of two top bits of VkDeviceSize set is a HUGE allocation and we can
     // safely return an OOM error.
-    if (mAllocatedSize.value() & (uint64_t(3) << uint64_t(62))) {
+    if (mAllocatedSize.value() & (uint64_t{3} << uint64_t{62})) {
         return DAWN_OUT_OF_MEMORY_ERROR("Buffer size is HUGE and could cause overflows");
     }
 

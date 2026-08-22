@@ -353,7 +353,7 @@ BindGroupLayoutEntry ConvertMetadataToEntry(
     const ShaderBindingInfo& shaderBinding,
     const ExternalTextureBindingLayout* externalTextureBindingEntry) {
     BindGroupLayoutEntry entry = {};
-    entry.bindingArraySize = uint32_t(shaderBinding.arraySize);
+    entry.bindingArraySize = uint32_t{shaderBinding.arraySize};
 
     MatchVariant(
         shaderBinding.bindingInfo,
@@ -556,7 +556,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
                 // Create the BindGroupLayoutEntry
                 BindGroupLayoutEntry entry = ConvertMetadataToEntry(
                     texelBufferLayouts, shaderBinding, &externalTextureBindingLayout);
-                entry.binding = uint32_t(bindingNumber);
+                entry.binding = uint32_t{bindingNumber};
                 entry.visibility = StageBit(stage.shaderStage);
 
                 // Add it to our map of all entries, if there is an existing entry, then we

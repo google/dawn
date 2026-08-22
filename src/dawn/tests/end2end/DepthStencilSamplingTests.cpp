@@ -793,10 +793,10 @@ TEST_P(DepthStencilSamplingTest, SampleExtraComponents) {
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 
     DoSamplingExtraStencilComponentsRenderTest(TestAspectAndSamplerType::StencilAsUint, format,
-                                               {uint8_t(42), uint8_t(37)});
+                                               {uint8_t{42}, uint8_t{37}});
 
     DoSamplingExtraStencilComponentsComputeTest(TestAspectAndSamplerType::StencilAsUint, format,
-                                                {uint8_t(42), uint8_t(37)});
+                                                {uint8_t{42}, uint8_t{37}});
 }
 
 // Test sampling both depth and stencil with a render/compute pipeline works.

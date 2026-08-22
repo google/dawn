@@ -219,7 +219,7 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
 
     for (const auto& [bindingNumber, apiBindingIndex] : bindingMap) {
         const auto& bindingInfo = layout->GetAPIBindingInfo(apiBindingIndex);
-        uint32_t binding = uint32_t(bindingNumber);
+        uint32_t binding = uint32_t{bindingNumber};
 
         MatchVariant(
             bindingInfo.bindingLayout,

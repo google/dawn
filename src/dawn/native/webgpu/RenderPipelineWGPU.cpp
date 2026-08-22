@@ -237,7 +237,7 @@ MaybeError RenderPipeline::CaptureCreationParameters(CaptureContext& captureCont
             attributes.push_back({{
                 .format = attrib.format,
                 .offset = attrib.offset,
-                .shaderLocation = uint32_t(attrib.shaderLocation),
+                .shaderLocation = uint32_t{attrib.shaderLocation},
             }});
         }
 
@@ -277,7 +277,7 @@ MaybeError RenderPipeline::CaptureCreationParameters(CaptureContext& captureCont
     // on replay.
     ColorAttachmentMask attachmentMask = GetColorAttachmentsMask();
     ColorAttachmentIndex attachmentCount = GetHighestBitIndexPlusOne(attachmentMask);
-    std::vector<schema::ColorTargetState> targets(size_t(attachmentCount),
+    std::vector<schema::ColorTargetState> targets(size_t{attachmentCount},
                                                   kDefaultColorTargetState);
 
     if (fragment.module != nullptr) {
@@ -293,7 +293,7 @@ MaybeError RenderPipeline::CaptureCreationParameters(CaptureContext& captureCont
                         : schema::ExpandResolveMode::Disabled;
             }
 
-            targets[size_t(slot)] = {{
+            targets[size_t{slot}] = {{
                 .format = target.format,
                 .blend{{
                     .color = ToSchema(target.blend ? &target.blend->color : nullptr),

@@ -1252,7 +1252,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                 // Inherit wgpu::TextureUsage::RenderAttachment, which may be an internal usage.
                 viewDesc.usage = wgpu::TextureUsage::None;
 
-                ColorAttachmentIndex ca0(uint8_t(0));
+                ColorAttachmentIndex ca0(uint8_t{0});
                 DAWN_TRY_ASSIGN(beginCmd.colorAttachments[ca0].view,
                                 device->CreateTextureView(this, &viewDesc));
 

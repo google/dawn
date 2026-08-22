@@ -102,7 +102,7 @@ class RenderPassBuilder {
                              bool isStencilReadOnly);
 
   private:
-    ColorAttachmentIndex mHighestColorAttachmentIndexPlusOne{uint8_t(0)};
+    ColorAttachmentIndex mHighestColorAttachmentIndexPlusOne{uint8_t{0}};
     bool mHasDepthOrStencil = false;
     D3D12_RENDER_PASS_FLAGS mRenderPassFlags = D3D12_RENDER_PASS_FLAG_NONE;
     D3D12_RENDER_PASS_DEPTH_STENCIL_DESC mRenderPassDepthStencilDesc;

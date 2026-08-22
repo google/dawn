@@ -298,7 +298,7 @@ TEST_P(DeviceLostTest, CreateBuffer) {
     // allocates `0x8000000000000000`
     DAWN_TEST_UNSUPPORTED_IF(IsTsan());
 
-    uint64_t kStupidLarge = uint64_t(1) << uint64_t(63);
+    uint64_t kStupidLarge = uint64_t{1} << uint64_t{63};
     LoseDeviceForTesting();
 
     // Each test either expects null or an ErrorBuffer.

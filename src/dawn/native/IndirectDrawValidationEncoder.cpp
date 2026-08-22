@@ -435,7 +435,7 @@ uint32_t ComputeMaxDrawCallsPerIndirectValidationBatch(const CombinedLimits& lim
         (limits.v1.maxStorageBufferBindingSize - sizeof(BatchInfo)) / kIndirectDrawByteSize;
     return static_cast<uint32_t>(
         std::min({batchDrawCallLimitByDispatchSize, batchDrawCallLimitByStorageBindingSize,
-                  uint64_t(std::numeric_limits<uint32_t>::max())}));
+                  uint64_t{std::numeric_limits<uint32_t>::max()}}));
 }
 
 MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,

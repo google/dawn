@@ -231,7 +231,7 @@ void GenerateTextureBuiltinFromUniformData(
     if (!metadata.textureQueries.empty()) {
         textureBuiltinsFromUniform->ubo_binding = {
             .group = 0,
-            .binding = uint32_t(layout->GetInternalTextureBuiltinsUniformBinding()),
+            .binding = uint32_t{layout->GetInternalTextureBuiltinsUniformBinding()},
         };
     }
 
@@ -296,10 +296,10 @@ bool GenerateArrayLengthFromuniformData(
                 case kInternalReadOnlyStorageBufferBinding: {
                     // Use ssbo index as the indices for the buffer size lookups
                     // in the array length from uniform transform.
-                    tint::BindingPoint srcBindingPoint = {uint32_t(group),
-                                                          uint32_t(bindingInfo.binding)};
+                    tint::BindingPoint srcBindingPoint = {uint32_t{group},
+                                                          uint32_t{bindingInfo.binding}};
                     FlatBindingIndex ssboIndex = indexInfo[group][binding];
-                    options.bindpoint_to_size_index.emplace(srcBindingPoint, uint32_t(ssboIndex));
+                    options.bindpoint_to_size_index.emplace(srcBindingPoint, uint32_t{ssboIndex});
                     break;
                 }
                 default:
@@ -382,7 +382,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         GenerateBindingRemapping(layout, stage, [&](BindGroupIndex group, BindingIndex index) {
             return tint::BindingPoint{
                 .group = 0,
-                .binding = uint32_t(layout->GetBindingIndexInfo()[group][index]),
+                .binding = uint32_t{layout->GetBindingIndexInfo()[group][index]},
             };
         });
 
@@ -427,7 +427,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                 req.tintOptions.array_length_from_uniform.ubo_binding,
                 tint::BindingPoint{
                     .group = 0,
-                    .binding = uint32_t(layout->GetInternalArrayLengthUniformBinding()),
+                    .binding = uint32_t{layout->GetInternalArrayLengthUniformBinding()},
                 });
         }
     }

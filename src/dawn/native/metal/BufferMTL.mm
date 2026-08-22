@@ -135,7 +135,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
         auto scopedUseDuringCreation = UseInternal();
         CommandRecordingContext* commandContext =
             ToBackend(GetDevice()->GetQueue())->GetPendingCommandContext();
-        ClearBuffer(commandContext, uint8_t(1u));
+        ClearBuffer(commandContext, uint8_t{1});
     }
 
     // Initialize the padding bytes to zero.
@@ -287,7 +287,7 @@ bool Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* command
 void Buffer::InitializeToZero(CommandRecordingContext* commandContext) {
     DAWN_ASSERT(NeedsInitialization());
 
-    ClearBuffer(commandContext, uint8_t(0u));
+    ClearBuffer(commandContext, uint8_t{0});
 
     SetInitialized(true);
     GetDevice()->IncrementLazyClearCountForTesting();

@@ -371,7 +371,7 @@ ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDes
                             "On entries[%u]: binding (%u) + arraySize (%u) is %u which is larger "
                             "than maxBindingsPerBindGroup (%u).",
                             i, arraySize, bindingNumber,
-                            uint32_t(arraySize) + uint32_t(bindingNumber),
+                            uint32_t{arraySize} + uint32_t{bindingNumber},
                             kMaxBindingsPerBindGroupTyped);
         }
 
@@ -655,7 +655,7 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
             continue;
         }
 
-        APIBindingIndex index = APIBindingIndex(uint32_t(i));
+        APIBindingIndex index = APIBindingIndex{uint32_t{i}};
         const auto& [_, inserted] = result.apiBindingMap.emplace(binding.binding, index);
         DAWN_CHECK(inserted);
     }
@@ -795,7 +795,7 @@ const BindingInfo& BindGroupLayoutInternalBase::GetBindingInfo(BindingIndex bind
 const BindingInfo& BindGroupLayoutInternalBase::GetAPIBindingInfo(
     APIBindingIndex bindingIndex) const {
     DAWN_CHECK(!IsError());
-    BindingIndex index = BindingIndex(uint32_t(bindingIndex));
+    BindingIndex index = BindingIndex{uint32_t{bindingIndex}};
     DAWN_CHECK(index < mBindingInfo.size());
     // Assert this is a user-facing binding and not an private internal binding.
     DAWN_CHECK(mBindingMap.contains(mBindingInfo[index].binding));
@@ -824,7 +824,7 @@ BindingIndex BindGroupLayoutInternalBase::AsBindingIndex(APIBindingIndex binding
     DAWN_CHECK(!IsError());
     // Assert this is a user-facing binding and not a private internal binding, and that it
     // represents an internal bindings.
-    BindingIndex index = BindingIndex(uint32_t(bindingIndex));
+    BindingIndex index = BindingIndex{uint32_t{bindingIndex}};
     DAWN_CHECK(index < GetBindingCount());
     DAWN_CHECK(mBindingMap.contains(mBindingInfo[index].binding));
     return index;
@@ -931,14 +931,14 @@ uint32_t BindGroupLayoutInternalBase::GetAPIStaticSamplerCount() const {
 
 uint32_t BindGroupLayoutInternalBase::GetStaticSamplerCount() const {
     DAWN_CHECK(!IsError());
-    return uint32_t(GetBindingTypeEnd(BindingTypeOrder_StaticSampler) -
-                    GetBindingTypeStart(BindingTypeOrder_StaticSampler));
+    return uint32_t{GetBindingTypeEnd(BindingTypeOrder_StaticSampler) -
+                    GetBindingTypeStart(BindingTypeOrder_StaticSampler)};
 }
 
 uint32_t BindGroupLayoutInternalBase::GetExternalTextureCount() const {
     DAWN_CHECK(!IsError());
-    return uint32_t(GetBindingTypeEnd(BindingTypeOrder_ExternalTexture) -
-                    GetBindingTypeStart(BindingTypeOrder_ExternalTexture));
+    return uint32_t{GetBindingTypeEnd(BindingTypeOrder_ExternalTexture) -
+                    GetBindingTypeStart(BindingTypeOrder_ExternalTexture)};
 }
 
 const BindingCounts& BindGroupLayoutInternalBase::GetValidationBindingCounts() const {
@@ -1020,8 +1020,8 @@ size_t BindGroupLayoutInternalBase::GetBindingDataSize() const {
     // Followed by:
     // |---------buffer size array--------|
     // |-uint64_t[mUnverifiedBufferCount]-|
-    const size_t bufferCount = size_t(GetBindingTypeEnd(BindingTypeOrder_RegularBuffer));
-    const size_t bindingCount = size_t(mBindingInfo.size());
+    const size_t bufferCount = size_t{GetBindingTypeEnd(BindingTypeOrder_RegularBuffer)};
+    const size_t bindingCount = size_t{mBindingInfo.size()};
 
     size_t objectPointerStart = bufferCount * sizeof(BufferBindingData);
     DAWN_CHECK(IsAligned(objectPointerStart, alignof(Ref<ObjectBase>)));
@@ -1033,8 +1033,8 @@ size_t BindGroupLayoutInternalBase::GetBindingDataSize() const {
 
 BindGroupLayoutInternalBase::BindingDataPointers
 BindGroupLayoutInternalBase::ComputeBindingDataPointers(void* dataStart) const {
-    const size_t bufferCount = size_t(GetBindingTypeEnd(BindingTypeOrder_RegularBuffer));
-    const size_t bindingCount = size_t(mBindingInfo.size());
+    const size_t bufferCount = size_t{GetBindingTypeEnd(BindingTypeOrder_RegularBuffer)};
+    const size_t bindingCount = size_t{mBindingInfo.size()};
 
     BufferBindingData* bufferData = reinterpret_cast<BufferBindingData*>(dataStart);
     auto bindings = reinterpret_cast<Ref<ObjectBase>*>(DAWN_UNSAFE_TODO(bufferData + bufferCount));

@@ -75,7 +75,7 @@ interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
     pending_map_.emplace(ctx->promise);
 
     buffer_.MapAsync(
-        mode, dawn::checked_cast<size_t>(uint64_t(offset)), dawn::checked_cast<size_t>(rangeSize),
+        mode, dawn::checked_cast<size_t>(uint64_t{offset}), dawn::checked_cast<size_t>(rangeSize),
         wgpu::CallbackMode::AllowProcessEvents,
         [ctx = std::move(ctx), this](wgpu::MapAsyncStatus status, wgpu::StringView) {
             // The promise may already have been resolved with an AbortError if there was an early
@@ -125,10 +125,10 @@ interop::ArrayBuffer GPUBuffer::getMappedRange(Napi::Env env,
 
     auto* ptr =
         (desc_.usage & wgpu::BufferUsage::MapWrite)
-            ? buffer_.GetMappedRange(dawn::checked_cast<size_t>(uint64_t(offset)),
+            ? buffer_.GetMappedRange(dawn::checked_cast<size_t>(uint64_t{offset}),
                                      dawn::checked_cast<size_t>(s))
             : const_cast<void*>(buffer_.GetConstMappedRange(
-                  dawn::checked_cast<size_t>(uint64_t(offset)), dawn::checked_cast<size_t>(s)));
+                  dawn::checked_cast<size_t>(uint64_t{offset}), dawn::checked_cast<size_t>(s)));
     if (!ptr) {
         Errors::OperationError(env).ThrowAsJavaScriptException();
         return {};

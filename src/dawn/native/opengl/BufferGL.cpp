@@ -109,7 +109,7 @@ Buffer::Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor)
     if (GetUsage() & wgpu::BufferUsage::Uniform) {
         alignment = 16u;
     }
-    mAllocatedSize = Align(std::max(GetSize(), uint64_t(4u)), alignment);
+    mAllocatedSize = Align(std::max(GetSize(), uint64_t{4}), alignment);
 }
 
 Buffer::~Buffer() = default;

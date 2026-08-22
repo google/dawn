@@ -142,9 +142,9 @@ MaybeError BindGroupLayout::CaptureCreationParameters(CaptureContext& captureCon
         const auto& bindingInfo = GetAPIBindingInfo(apiBindingIndex);
 
         schema::BindGroupLayoutBinding binding{{
-            .binding = uint32_t(bindingNumber),
+            .binding = uint32_t{bindingNumber},
             .visibility = bindingInfo.visibility,
-            .bindingArraySize = uint32_t(bindingInfo.arraySize),
+            .bindingArraySize = uint32_t{bindingInfo.arraySize},
         }};
 
         DAWN_TRY(MatchVariant(

@@ -71,7 +71,7 @@ MaybeError Queue::Initialize() {
     // value.
     mCommandQueue.As(&mD3d12SharingContract);
 
-    DAWN_TRY(CheckHRESULT(d3d12Device->CreateFence(uint64_t(kBeginningOfGPUTime),
+    DAWN_TRY(CheckHRESULT(d3d12Device->CreateFence(uint64_t{kBeginningOfGPUTime},
                                                    D3D12_FENCE_FLAG_SHARED, IID_PPV_ARGS(&mFence)),
                           "D3D12 create fence"));
 
@@ -114,7 +114,7 @@ MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
 
     {
         TRACE_EVENT(DAWN_TRACE_CATEGORY("recording"), "CommandBufferD3D12::RecordCommands",
-                    "serial", uint64_t(pendingSerial));
+                    "serial", uint64_t{pendingSerial});
         for (CommandBufferBase* commandBuffer : commands) {
             DAWN_TRY(ToBackend(commandBuffer)->RecordCommands(commandContext));
         }

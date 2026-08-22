@@ -102,9 +102,9 @@ ResultOrError<VulkanStaticBindings> ComputeVulkanStaticBindings(
         }
 
         VkDescriptorSetLayoutBinding vkBinding{
-            .binding = uint32_t(bindingIndex),
+            .binding = uint32_t{bindingIndex},
             .descriptorType = VulkanDescriptorType(bindingInfo),
-            .descriptorCount = uint32_t(bindingInfo.arraySize),
+            .descriptorCount = uint32_t{bindingInfo.arraySize},
             .stageFlags = VulkanShaderStages(bindingInfo.visibility),
             .pImmutableSamplers = nullptr,
         };

@@ -334,11 +334,11 @@ TEST_F(MemoryInstrumentationTest, ReduceMemoryUsage) {
 
     // DynamicUploader buffers will still be alive.
     MemoryUsageInfo memInfo = ComputeEstimatedMemoryUsageInfo(device.Get());
-    EXPECT_GT(memInfo.totalUsage, uint64_t(0));
+    EXPECT_GT(memInfo.totalUsage, uint64_t{0});
     ReduceMemoryUsage(device.Get());
     // But not any more.
     memInfo = ComputeEstimatedMemoryUsageInfo(device.Get());
-    EXPECT_EQ(memInfo.totalUsage, uint64_t(0));
+    EXPECT_EQ(memInfo.totalUsage, uint64_t{0});
 
     // Check that DynamicUploader buffer is recreated again.
     uniformBuffer = device.CreateBuffer(&kBufferDesc);
@@ -352,7 +352,7 @@ TEST_F(MemoryInstrumentationTest, ReduceMemoryUsage) {
     mDeviceMock->GetInstance()->APIProcessEvents();
 
     memInfo = ComputeEstimatedMemoryUsageInfo(device.Get());
-    EXPECT_GT(memInfo.totalUsage, uint64_t(0));
+    EXPECT_GT(memInfo.totalUsage, uint64_t{0});
 }
 
 // Test the detailed memory usage reported by ComputeEstimatedMemoryUsageInfo()

@@ -462,7 +462,7 @@ TEST_P(SpotTests, ImportExternalTexture) {
                 readback.Unmap();
             }),
         UINT64_MAX);
-    EXPECT_EQ(result, uint32_t(0xff00ff00));  // ABGR
+    EXPECT_EQ(result, uint32_t{0xff00ff00});  // ABGR
 
     EM_ASM({
         // VideoFrames should always be closed manually.

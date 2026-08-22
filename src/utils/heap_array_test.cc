@@ -193,7 +193,7 @@ TEST_F(HeapArrayTest, MoveToRawPointer) {
         static_assert(std::is_same_v<decltype(data), int*>);
         static_assert(std::is_same_v<decltype(size), size_t>);  // Not an Index!
         ASSERT_EQ(data, originalData);
-        ASSERT_EQ(size, size_t(originalSize));
+        ASSERT_EQ(size, size_t{originalSize});
 
         delete[] data;
     }

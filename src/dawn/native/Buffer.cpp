@@ -1018,13 +1018,13 @@ MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode, size_t offset, size_
 
     DAWN_INVALID_IF(mIsHostMapped, "Host-mapped %s cannot be mapped again.", this);
 
-    DAWN_INVALID_IF(uint64_t(offset) > mSize,
+    DAWN_INVALID_IF(uint64_t{offset} > mSize,
                     "Mapping offset (%u) is larger than the size (%u) of %s.", offset, mSize, this);
 
     DAWN_INVALID_IF(offset % 8 != 0, "Offset (%u) must be a multiple of 8.", offset);
     DAWN_INVALID_IF(size % 4 != 0, "Size (%u) must be a multiple of 4.", size);
 
-    DAWN_INVALID_IF(uint64_t(size) > mSize - uint64_t(offset),
+    DAWN_INVALID_IF(uint64_t{size} > mSize - uint64_t{offset},
                     "Mapping range (offset:%u, size: %u) doesn't fit in the size (%u) of %s.",
                     offset, size, mSize, this);
 

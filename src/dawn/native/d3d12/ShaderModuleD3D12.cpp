@@ -181,7 +181,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     auto ToHLSLBindPoint = [&](BindGroupIndex group, BindingIndex index) -> tint::BindingPoint {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
         return tint::BindingPoint{
-            .group = uint32_t(group),
+            .group = uint32_t{group},
             .binding = bgl->GetShaderRegister(index),
         };
     };

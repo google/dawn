@@ -146,9 +146,9 @@ tint::VertexPullingConfig BuildVertexPullingTransformConfig(
     const RenderPipelineBase& renderPipeline,
     BindGroupIndex pullingBufferBindingSet) {
     tint::VertexPullingConfig cfg;
-    cfg.pulling_group = uint32_t(pullingBufferBindingSet);
+    cfg.pulling_group = uint32_t{pullingBufferBindingSet};
 
-    cfg.vertex_state.resize(uint32_t(renderPipeline.GetVertexBufferCount()));
+    cfg.vertex_state.resize(uint32_t{renderPipeline.GetVertexBufferCount()});
     for (VertexBufferSlot slot : renderPipeline.GetVertexBuffersUsed()) {
         const VertexBufferInfo& dawnInfo = renderPipeline.GetVertexBuffer(slot);
         tint::VertexBufferLayoutDescriptor* tintInfo =

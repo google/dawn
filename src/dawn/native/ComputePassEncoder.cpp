@@ -404,7 +404,7 @@ ComputePassEncoder::TransformIndirectDispatchBuffer(Ref<BufferBase> indirectBuff
     RestoreCommandBufferState(std::move(previousState));
 
     // Return the new indirect buffer and indirect buffer offset.
-    return std::make_pair(std::move(validatedIndirectBuffer), uint64_t(0));
+    return std::make_pair(std::move(validatedIndirectBuffer), uint64_t{0});
 }
 
 void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffer,

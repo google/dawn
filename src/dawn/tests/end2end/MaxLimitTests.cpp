@@ -150,7 +150,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                 // TODO(crbug.com/dawn/1160): Usually can't actually allocate a buffer this large
                 // because allocating the buffer for zero-initialization fails.
                 maxBufferBindingSize =
-                    std::min(maxBufferBindingSize, uint64_t(2) * 1024 * 1024 * 1024);
+                    std::min(maxBufferBindingSize, uint64_t{2} * 1024 * 1024 * 1024);
                 // With WARP or on 32-bit platforms, such large buffer allocations often fail.
 #if DAWN_PLATFORM_IS(32_BIT)
                 if (IsWindows()) {
@@ -159,7 +159,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
 #endif
                 if (IsWARP()) {
                     maxBufferBindingSize =
-                        std::min(maxBufferBindingSize, uint64_t(512) * 1024 * 1024);
+                        std::min(maxBufferBindingSize, uint64_t{512} * 1024 * 1024);
                 }
                 maxBufferBindingSize = Align(maxBufferBindingSize - 3u, 4);
                 shader = R"(
@@ -187,7 +187,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
 
                 // Clamp to not exceed the maximum i32 value for the WGSL @size(x) annotation.
                 maxBufferBindingSize = std::min(maxBufferBindingSize,
-                                                uint64_t(std::numeric_limits<int32_t>::max()) + 8);
+                                                uint64_t{std::numeric_limits<int32_t>::max()} + 8);
                 maxBufferBindingSize = Align(maxBufferBindingSize - 3u, 4);
 
                 const uint64_t kMaxStructMemberU32ArraySize = 65535ULL * 4;

@@ -158,9 +158,9 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
 
     mExternalMemoryService = std::make_unique<external_memory::Service>(this);
 
-    if (uint32_t(HasFeature(Feature::SharedFenceVkSemaphoreOpaqueFD)) +
-            uint32_t(HasFeature(Feature::SharedFenceSyncFD)) +
-            uint32_t(HasFeature(Feature::SharedFenceVkSemaphoreZirconHandle)) >
+    if (uint32_t{HasFeature(Feature::SharedFenceVkSemaphoreOpaqueFD)} +
+            uint32_t{HasFeature(Feature::SharedFenceSyncFD)} +
+            uint32_t{HasFeature(Feature::SharedFenceVkSemaphoreZirconHandle)} >
         1) {
         return DAWN_VALIDATION_ERROR("At most one of %s, %s, and %s may be enabled.",
                                      wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD,

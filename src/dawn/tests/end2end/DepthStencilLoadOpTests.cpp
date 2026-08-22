@@ -149,7 +149,7 @@ class DepthStencilLoadOpTests : public DawnTestWithParams<DepthStencilLoadOpTest
                                                         kU16DepthValues[mipLevel]);
                     EXPECT_TEXTURE_EQ(expectedDepth.data(), texture, {0, 0}, {mipSize, mipSize},
                                       mipLevel, wgpu::TextureAspect::DepthOnly,
-                                      /* bytesPerRow */ 0, /* tolerance */ uint16_t(1))
+                                      /* bytesPerRow */ 0, /* tolerance */ uint16_t{1})
                         << "copy depth mip " << mipLevel;
                 } else {
                     std::vector<float> expectedDepth(static_cast<size_t>(mipSize) * mipSize,
@@ -333,7 +333,7 @@ TEST_P(StencilClearValueOverflowTest, StencilClearValueOverFlowUint8) {
     CheckMipLevel(0u);
 }
 
-// Test when stencilClearValue overflows uint16_t(>65535), only the last 8 bits will be applied as
+// Test when stencilClearValue overflows uint16_t (>65535), only the last 8 bits will be applied as
 // the stencil clear value in encoder.BeginRenderPass() (currently Dawn only supports 8-bit stencil
 // format).
 TEST_P(StencilClearValueOverflowTest, StencilClearValueOverFlowUint16) {

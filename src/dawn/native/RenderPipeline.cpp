@@ -262,7 +262,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
         return DAWN_VALIDATION_ERROR(
             "Vertex attribute slot %u used in (%s, %s) is not present in the "
             "VertexState.",
-            uint8_t(firstMissing), descriptor->module, entryPoint);
+            uint8_t{firstMissing}, descriptor->module, entryPoint);
     }
 
     return entryPoint;
@@ -704,7 +704,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
         DAWN_INVALID_IF(!usesBlendSrc1,
                         "One of the blend factor uses `blend_src(1)` while `blend_src(1)` is "
                         "missing from the fragment shader outputs.");
-        DAWN_INVALID_IF(descriptor->targets.size() != ColorAttachmentIndex{uint8_t{1u}},
+        DAWN_INVALID_IF(descriptor->targets.size() != ColorAttachmentIndex{uint8_t{1}},
                         "One of the blend factor uses `blend_src(1)` but the color targets count "
                         "is not 1.");
     }

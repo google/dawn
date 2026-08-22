@@ -336,7 +336,7 @@ TEST_P(BufferMappingValidationTest, MapAsync_OffsetSizeOOB) {
     // Error case, offset + size is larger than the buffer, overflow case.
     {
         wgpu::Buffer buffer = CreateBuffer(12);
-        AssertMapAsyncError(buffer, GetParam(), 8, std::numeric_limits<size_t>::max() & ~size_t(7));
+        AssertMapAsyncError(buffer, GetParam(), 8, std::numeric_limits<size_t>::max() & ~size_t{7});
     }
 
     // The same tests, with an unmap before destroying the buffer.
@@ -375,7 +375,7 @@ TEST_P(BufferMappingValidationTest, MapAsync_OffsetSizeOOB) {
         wgpu::Buffer buffer = CreateBuffer(12);
         EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Error, _)).Times(1);
         ASSERT_DEVICE_ERROR(
-            buffer.MapAsync(GetParam(), 8, std::numeric_limits<size_t>::max() & ~size_t(7),
+            buffer.MapAsync(GetParam(), 8, std::numeric_limits<size_t>::max() & ~size_t{7},
                             wgpu::CallbackMode::AllowSpontaneous, mockCb.Callback()));
         buffer.Unmap();
     }
@@ -672,7 +672,7 @@ TEST_F(BufferValidationTest, MappedAtCreationSizeAlignment) {
 
 // Test that if CreateBuffer OOMs while mapping at creation, it returns null.
 TEST_F(BufferValidationTest, MappedAtCreationOOM) {
-    uint64_t kStupidLarge = uint64_t(1) << uint64_t(63);
+    uint64_t kStupidLarge = uint64_t{1} << uint64_t{63};
 
     // Buffer would fail validation due to invalid usage combination
     {

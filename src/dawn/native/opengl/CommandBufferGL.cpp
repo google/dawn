@@ -353,7 +353,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
         Sampler* sampler = ToBackend(s);
 
         for (TextureUnit unit : mPipelineGL->GetTextureUnitsForSampler(samplerIndex)) {
-            DAWN_GL_TRY(gl, BindSampler(uint32_t(unit), sampler->GetHandle()));
+            DAWN_GL_TRY(gl, BindSampler(uint32_t{unit}, sampler->GetHandle()));
         }
 
         return {};
@@ -380,7 +380,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
 
                     if (layout.hasDynamicOffset) {
                         // Dynamic buffers are packed at the front of BindingIndices.
-                        offset += uint64_t(dynamicOffsets[bindingIndex]);
+                        offset += uint64_t{dynamicOffsets[bindingIndex]};
                     }
 
                     GLenum target;
@@ -651,12 +651,12 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
         mInternalArrayLengthBufferData[ssboIndex] = static_cast<uint32_t>(size);
 
         // Updating dirty range of the data vector
-        mDirtyRangeArrayLength.begin = std::min(mDirtyRangeArrayLength.begin, size_t(ssboIndex));
-        mDirtyRangeArrayLength.end = std::max(mDirtyRangeArrayLength.end, size_t(ssboIndex) + 1);
+        mDirtyRangeArrayLength.begin = std::min(mDirtyRangeArrayLength.begin, size_t{ssboIndex});
+        mDirtyRangeArrayLength.end = std::max(mDirtyRangeArrayLength.end, size_t{ssboIndex} + 1);
     }
 
     void ResetInternalUniformDataDirtyRangeArrayLength() {
-        mDirtyRangeArrayLength = {size_t(mInternalArrayLengthBufferData.size()), 0};
+        mDirtyRangeArrayLength = {size_t{mInternalArrayLengthBufferData.size()}, 0};
     }
 
     void ResetInternalUniformDataBindgroupAndDirtyRange() {

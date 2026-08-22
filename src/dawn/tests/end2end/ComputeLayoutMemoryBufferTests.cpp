@@ -430,7 +430,7 @@ std::ostream& operator<<(std::ostream& o, const std::vector<uint8_t>& byteBuffer
     o << "\n";
     uint32_t i = 0;
     for (auto byte : byteBuffer) {
-        o << std::hex << std::setw(2) << std::setfill('0') << uint32_t(byte);
+        o << std::hex << std::setw(2) << std::setfill('0') << uint32_t{byte};
         if (i < 31) {
             o << " ";
             i++;
@@ -612,7 +612,7 @@ fn main() {
     // Structure size: RoundUp(AlignOf(S), OffsetOf(S, L) + SizeOf(S, L))
     // https://www.w3.org/TR/WGSL/#storage-class-constraints
     // RequiredAlignOf(S, uniform): RoundUp(16, max(AlignOf(T0), ..., AlignOf(TN)))
-    uint32_t dataAlign = isUniform ? std::max(size_t(16u), field.GetAlign()) : field.GetAlign();
+    uint32_t dataAlign = isUniform ? std::max(size_t{16}, field.GetAlign()) : field.GetAlign();
 
     // https://www.w3.org/TR/WGSL/#structure-layout-rules
     // Note: When underlying the target is a Vulkan device, we assume the device does not support

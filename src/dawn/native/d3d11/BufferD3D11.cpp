@@ -357,11 +357,11 @@ MaybeError Buffer::Initialize(bool mappedAtCreation,
     // TODO(dawn:1705): handle mappedAtCreation for NonzeroClearResourcesOnCreationForTesting
 
     // Allocate at least 4 bytes so clamped accesses are always in bounds.
-    uint64_t size = std::max(GetSize(), uint64_t(4u));
+    uint64_t size = std::max(GetSize(), uint64_t{4});
     // The validation layer requires:
     // ByteWidth must be 12 or larger to be used with D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS.
     if (GetInternalUsage() & wgpu::BufferUsage::Indirect) {
-        size = std::max(size, uint64_t(12u));
+        size = std::max(size, uint64_t{12});
     }
     size_t alignment = D3D11BufferSizeAlignment(GetInternalUsage());
     // Check for overflow, bufferDescriptor.ByteWidth is a UINT.
@@ -693,7 +693,7 @@ MaybeError Buffer::EnsureDataInitializedAsDestination(
 MaybeError Buffer::InitializeToZero(const ScopedCommandRecordingContext* commandContext) {
     DAWN_ASSERT(NeedsInitialization());
 
-    DAWN_TRY(ClearWholeBuffer(commandContext, uint8_t(0u)));
+    DAWN_TRY(ClearWholeBuffer(commandContext, uint8_t{0}));
     SetInitialized(true);
     GetDevice()->IncrementLazyClearCountForTesting();
 

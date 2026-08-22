@@ -75,9 +75,9 @@ class ResourceMemoryAllocator::SingleTypeAllocator : public ResourceHeapAllocato
           mBuddySystem(
               // Round down to a power of 2 that's <= mMemoryHeapSize. This will always
               // be a multiple of heapBlockSize because heapBlockSize is a power of 2.
-              uint64_t(1) << Log2(mMaxHeapSize),
+              uint64_t{1} << Log2(mMaxHeapSize),
               // Take the min in the very unlikely case the memory heap is tiny.
-              std::min(uint64_t(1) << Log2(mMaxHeapSize), heapBlockSize),
+              std::min(uint64_t{1} << Log2(mMaxHeapSize), heapBlockSize),
               &mPooledMemoryAllocator) {
         DAWN_ASSERT(IsPowerOfTwo(heapBlockSize));
     }

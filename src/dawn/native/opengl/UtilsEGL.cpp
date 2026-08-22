@@ -184,10 +184,10 @@ ResultOrError<EGLenum> WrappedEGLSync::ClientWait(const OpenGLFunctions&,
 
     EGLenum result = EGL_FALSE;
     if (egl.HasExt(EGLExt::FenceSync)) {
-        result = egl.ClientWaitSyncKHR(mDisplay->GetDisplay(), mSync, flags, uint64_t(timeout));
+        result = egl.ClientWaitSyncKHR(mDisplay->GetDisplay(), mSync, flags, uint64_t{timeout});
     } else {
         DAWN_ASSERT(egl.IsAtLeastVersion(1, 5));
-        result = egl.ClientWaitSync(mDisplay->GetDisplay(), mSync, flags, uint64_t(timeout));
+        result = egl.ClientWaitSync(mDisplay->GetDisplay(), mSync, flags, uint64_t{timeout});
     }
 
     DAWN_TRY(CheckEGL(egl, result != EGL_FALSE, "eglClientWaitSync"));

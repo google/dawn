@@ -2113,7 +2113,7 @@ bool ConvertDataElementsToSpan(Napi::Env env,
     }
 
     // The offset is in elements.
-    if (data_offset_elements > uint64_t(src.size / src.bytesPerElement)) {
+    if (data_offset_elements > uint64_t{src.size / src.bytesPerElement}) {
         binding::Errors::OperationError(env, "dataOffset is larger than data's size.")
             .ThrowAsJavaScriptException();
         return false;
@@ -2124,7 +2124,7 @@ bool ConvertDataElementsToSpan(Napi::Env env,
 
     // Size defaults to dataSize - dataOffset. Instead of computing in elements, we directly
     // use it in bytes, and convert the provided value, if any, in bytes.
-    uint64_t size64 = uint64_t(src.size);
+    uint64_t size64 = uint64_t{src.size};
     if (size_elements.has_value()) {
         if (size_elements.value() > std::numeric_limits<uint64_t>::max() / src.bytesPerElement) {
             binding::Errors::OperationError(env, "size overflows.").ThrowAsJavaScriptException();
@@ -2133,7 +2133,7 @@ bool ConvertDataElementsToSpan(Napi::Env env,
         size64 = size_elements.value() * src.bytesPerElement;
     }
 
-    if (size64 > uint64_t(src.size)) {
+    if (size64 > uint64_t{src.size}) {
         binding::Errors::OperationError(env, "size + dataOffset is larger than data's size.")
             .ThrowAsJavaScriptException();
         return false;

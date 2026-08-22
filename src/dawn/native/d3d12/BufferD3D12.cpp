@@ -179,7 +179,7 @@ Buffer::Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor)
 
 MaybeError Buffer::Initialize(bool mappedAtCreation) {
     // Allocate at least 4 bytes so clamped accesses are always in bounds.
-    uint64_t size = std::max(GetSize(), uint64_t(4u));
+    uint64_t size = std::max(GetSize(), uint64_t{4});
     size_t alignment = D3D12BufferSizeAlignment(GetInternalUsage());
     if (size > std::numeric_limits<uint64_t>::max() - alignment) {
         // Alignment would overflow.
@@ -244,7 +244,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
         auto scopedUseDuringCreation = UseInternal();
         CommandRecordingContext* commandRecordingContext =
             ToBackend(GetDevice()->GetQueue())->GetPendingCommandContext();
-        DAWN_TRY(ClearBuffer(commandRecordingContext, uint8_t(1u)));
+        DAWN_TRY(ClearBuffer(commandRecordingContext, uint8_t{1}));
     }
 
     // Initialize the padding bytes to zero.
@@ -718,7 +718,7 @@ MaybeError Buffer::InitializeToZero(CommandRecordingContext* commandContext) {
 
     // TODO(crbug.com/dawn/484): skip initializing the buffer when it is created on a heap
     // that has already been zero initialized.
-    DAWN_TRY(ClearBuffer(commandContext, uint8_t(0u)));
+    DAWN_TRY(ClearBuffer(commandContext, uint8_t{0}));
     SetInitialized(true);
     GetDevice()->IncrementLazyClearCountForTesting();
 

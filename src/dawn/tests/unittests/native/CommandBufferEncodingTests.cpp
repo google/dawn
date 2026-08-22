@@ -198,7 +198,7 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
             indirectScratchBuffer = ToAPI(cmd->indirectBuffer.Get());
         }
         ASSERT_EQ(ToAPI(cmd->indirectBuffer.Get()), indirectScratchBuffer);
-        ASSERT_EQ(cmd->indirectOffset, uint64_t(0));
+        ASSERT_EQ(cmd->indirectOffset, uint64_t{0});
     };
 
     // Initialize as null. Once we know the pointer, we'll check

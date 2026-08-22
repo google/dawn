@@ -929,14 +929,14 @@ MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
                     descriptor->arrayLayerCount, descriptor->mipLevelCount);
 
     DAWN_INVALID_IF(
-        uint64_t(descriptor->baseArrayLayer) + uint64_t(descriptor->arrayLayerCount) >
+        uint64_t{descriptor->baseArrayLayer} + uint64_t{descriptor->arrayLayerCount} >
             uint64_t(texture->GetArrayLayers()),
         "Texture view array layer range (baseArrayLayer: %u, arrayLayerCount: %u) exceeds the "
         "texture's array layer count (%u).",
         descriptor->baseArrayLayer, descriptor->arrayLayerCount, texture->GetArrayLayers());
 
     DAWN_INVALID_IF(
-        uint64_t(descriptor->baseMipLevel) + uint64_t(descriptor->mipLevelCount) >
+        uint64_t{descriptor->baseMipLevel} + uint64_t{descriptor->mipLevelCount} >
             uint64_t(texture->GetNumMipLevels()),
         "Texture view mip level range (baseMipLevel: %u, mipLevelCount: %u) exceeds the "
         "texture's mip level count (%u).",
