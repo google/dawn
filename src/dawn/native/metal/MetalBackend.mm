@@ -47,4 +47,9 @@ id<MTLDevice> GetMTLDevice(WGPUDevice device) {
     return backendDevice->GetMTLDevice();
 }
 
+id<MTLCommandQueue> GetMTLCommandQueue(WGPUDevice device) {
+    Device* backendDevice = ToBackend(FromAPI(device));
+    return ToBackend(backendDevice->GetQueue())->GetMTLCommandQueue();
+}
+
 }  // namespace dawn::native::metal

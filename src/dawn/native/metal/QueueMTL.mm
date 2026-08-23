@@ -257,6 +257,10 @@ id<MTLSharedEvent> Queue::GetMTLSharedEvent() const {
     return mMtlSharedEvent.Get();
 }
 
+id<MTLCommandQueue> Queue::GetMTLCommandQueue() const {
+    return mCommandQueue.Get();
+}
+
 ResultOrError<Ref<SharedFence>> Queue::GetOrCreateSharedFence() {
     if (mSharedFence) {
         return mSharedFence;

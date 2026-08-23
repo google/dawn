@@ -57,6 +57,7 @@ class Queue final : public QueueBase {
     FutureID GetCommandsScheduledFuture();
 
     id<MTLSharedEvent> GetMTLSharedEvent() const;
+    id<MTLCommandQueue> GetMTLCommandQueue() const;
     ResultOrError<Ref<SharedFence>> GetOrCreateSharedFence();
 
   private:

@@ -49,6 +49,11 @@ DAWN_NATIVE_EXPORT void WaitForCommandsToBeScheduled(WGPUDevice device);
 #if defined(__OBJC__)
 // Return the MTLDevice corresponding to the WGPUDevice.
 DAWN_NATIVE_EXPORT id<MTLDevice> GetMTLDevice(WGPUDevice device);
+
+// Return the MTLCommandQueue the WGPUDevice's default queue submits on, so that work submitted
+// alongside Dawn's is ordered by submission rather than by a cross-queue fence. The D3D12 backend
+// exports the same thing as GetD3D12CommandQueue.
+DAWN_NATIVE_EXPORT id<MTLCommandQueue> GetMTLCommandQueue(WGPUDevice device);
 #endif
 
 }  // namespace dawn::native::metal
