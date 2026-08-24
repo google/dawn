@@ -82,7 +82,9 @@ type triageConfig struct {
 	filterArg     string
 }
 
-var fuzzCmdBaseArgs = []string{"-timeout=60", "--verbose"}
+func (tc *triageConfig) fuzzCmdBaseArgs() []string {
+	return []string{fmt.Sprintf("-timeout=%d", tc.timeout), "--verbose"}
+}
 
 // runTriage performs an automated triage of a fuzzer crash.
 // It verifies the reproduction, extracts human-readable IR and WGSL, identifies the failing transformation pass, and
@@ -137,11 +139,11 @@ func runTriage(t *taskConfig) error {
 // If the initial run doesn't crash and execution in IR mode, it tries again with --fix-identifiers=true.
 // It returns the fuzzer output string, and any error encountered.
 func verifyReproduction(tc *triageConfig) (string, error) {
-	out, err := tc.runCmd(tc.fuzzer, append(fuzzCmdBaseArgs, tc.triageFile)...)
+	out, err := tc.runCmd(tc.fuzzer, append(tc.fuzzCmdBaseArgs(), tc.triageFile)...)
 	if err == nil {
 		if tc.fuzzMode == FuzzModeIr {
 			fmt.Println("initial run did not crash, attempting to fix identifiers...")
-			out, err = tc.runCmd(tc.fuzzer, append(fuzzCmdBaseArgs, "--fix-identifiers=true", tc.triageFile)...)
+			out, err = tc.runCmd(tc.fuzzer, append(tc.fuzzCmdBaseArgs(), "--fix-identifiers=true", tc.triageFile)...)
 			if err == nil {
 				return "", fmt.Errorf("issue did not reproduce even with --fix-identifiers=true")
 			}
@@ -248,7 +250,7 @@ func determineFailingPass(fuzzerOutput string) (string, error) {
 // failing pass with verbose logging and IR dumping enabled. The output is captured and written
 // to a log file. Returns the verbose output, the filter argument used, and any error.
 func runSpecificPassAndLog(tc *triageConfig) error {
-	args := append(fuzzCmdBaseArgs, "--dump-ir=true")
+	args := append(tc.fuzzCmdBaseArgs(), "--dump-ir=true")
 	if tc.failingPass != "" {
 		tc.filterArg = "--filter=" + tc.failingPass
 		args = append(args, tc.filterArg)
@@ -352,7 +354,7 @@ func generateTriageReport(tc *triageConfig) error {
 	}
 
 	reproCmdParts := []string{tc.fuzzer}
-	reproCmdParts = append(reproCmdParts, fuzzCmdBaseArgs...)
+	reproCmdParts = append(reproCmdParts, tc.fuzzCmdBaseArgs()...)
 	reproCmdParts = append(reproCmdParts, "--dump-ir=true")
 	if tc.filterArg != "" {
 		reproCmdParts = append(reproCmdParts, tc.filterArg)

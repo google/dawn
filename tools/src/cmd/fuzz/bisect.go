@@ -117,6 +117,7 @@ func (bc *bisectConfig) performBisect() error {
 
 	// Construct args to call ourselves back as the bisect-step handler
 	args := []string{"bisect", "run", self, "-bisect-step", "-bisect=" + bc.bisectFile, "-build=" + bc.build}
+	args = append(args, fmt.Sprintf("-timeout=%d", bc.timeout))
 	if bc.isFix {
 		args = append(args, "-is-fix")
 	}
@@ -264,7 +265,7 @@ func testBisectStep(t *taskConfig) (bisectStepResult, error) {
 	}
 
 	fmt.Printf("--> Running fuzzer %s against test case...\n", fuzzerName)
-	_, err := t.runCmd(t.fuzzer, "-timeout=60", t.bisectFile)
+	_, err := t.runCmd(t.fuzzer, fmt.Sprintf("-timeout=%d", t.timeout), t.bisectFile)
 	if err != nil {
 		return BisectStepFailed, nil
 	}

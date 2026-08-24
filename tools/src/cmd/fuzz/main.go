@@ -89,6 +89,7 @@ const (
 type mainConfig struct {
 	verbose            bool
 	dump               bool
+	timeout            int
 	fuzzMode           FuzzMode
 	cmdMode            TaskMode // meta-task being requested by the user, may require running multiple tasks internally
 	mesaMode           bool
@@ -162,6 +163,7 @@ func main() {
 	flag.BoolVar(&c.skipInputTypeCheck, "skip-input-type-check", false, "bypass the heuristic text/binary input file type check")
 	flag.StringVar(&c.experimentPath, "experiment", "", "run an experiment using the configuration at <root> (WIP feature)")
 	flag.StringVar(&c.machineName, "machine", "", "machine name to identify results")
+	flag.IntVar(&c.timeout, "timeout", 60, "override the default timeout (in seconds) for triage and bisect modes")
 	flag.Parse()
 
 	if c.mesaMode && c.filter != "" {
@@ -206,6 +208,17 @@ func main() {
 		c.cmdMode = TaskModeExperiment
 	default:
 		c.cmdMode = TaskModeRun
+	}
+
+	timeoutSet := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == "timeout" {
+			timeoutSet = true
+		}
+	})
+	if timeoutSet && c.cmdMode != TaskModeTriage && c.cmdMode != TaskModeBisect && c.cmdMode != TaskModeBisectStep {
+		fmt.Println("cannot set -timeout flag outside of triage and bisect modes")
+		os.Exit(1)
 	}
 
 	if irMode {
