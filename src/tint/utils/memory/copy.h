@@ -35,6 +35,7 @@
 
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/compiler.h"
+#include "src/utils/compiler.h"
 
 // These wrappers around memcpy exist to localize the UNSAFE_BUFFER_USAGE warning intrinsic to the
 // operation to one location. These warnings could be eliminated by using iteration to copy, but
@@ -60,8 +61,6 @@ namespace tint {
 /// @tparam N the size of the destination span
 /// @tparam U the type of source elements
 /// @tparam M the size of the source span
-// The usage of std::memcpy will always trigger this warning
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 template <typename T, size_t N, typename U, size_t M>
 inline void Copy(std::span<T, N> dst, std::span<U, M> src) {
     TINT_ASSERT(src.data());
@@ -75,10 +74,10 @@ inline void Copy(std::span<T, N> dst, std::span<U, M> src) {
     static_assert((M * sizeof(U)) % sizeof(T) == 0);
 
     if (!src.empty()) {
-        std::memcpy(dst.data(), src.data(), src.size_bytes());
+        // SAFETY: The bounds are statically checked above (N * sizeof(T) >= M * sizeof(U)).
+        DAWN_UNSAFE_BUFFERS(std::memcpy(dst.data(), src.data(), src.size_bytes()));
     }
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 /// Copy copies all elements from @p src to @p dst.
 /// @param dst the destination pointer
@@ -87,8 +86,6 @@ TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 /// @tparam T the type of destination elements
 /// @tparam U the type of source elements
 /// @tparam M the size of the source span
-// The usage of std::memcpy will always trigger this warning
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 template <typename T, typename U, size_t M>
 inline void Copy(T* dst, size_t dst_count, std::span<U, M> src) {
     TINT_ASSERT(src.data());
@@ -102,10 +99,10 @@ inline void Copy(T* dst, size_t dst_count, std::span<U, M> src) {
     static_assert((M * sizeof(U)) % sizeof(T) == 0);
 
     if (!src.empty()) {
-        std::memcpy(dst, src.data(), src.size_bytes());
+        // SAFETY: The bounds are checked at runtime by the assertion above.
+        DAWN_UNSAFE_BUFFERS(std::memcpy(dst, src.data(), src.size_bytes()));
     }
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 // template <typename T, typename U, size_t M>
 // inline void Copy(std::span<T, M> dest, T* src, size_t src_count)
@@ -117,8 +114,6 @@ TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 /// @tparam T the type of destination elements
 /// @tparam N the size of the destination span
 /// @tparam U the type of source value
-// The usage of std::memcpy will always trigger this warning
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 template <typename T, typename U, size_t N>
 inline void Copy(std::span<T, N> dst, U src) {
     TINT_ASSERT(dst.data());
@@ -130,9 +125,9 @@ inline void Copy(std::span<T, N> dst, U src) {
     // elements it is using in the destination
     static_assert(sizeof(U) % sizeof(T) == 0);
 
-    std::memcpy(dst.data(), &src, sizeof(U));
+    // SAFETY: The bounds are statically checked above (N * sizeof(T) >= sizeof(U)).
+    DAWN_UNSAFE_BUFFERS(std::memcpy(dst.data(), &src, sizeof(U)));
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 }  // namespace tint
 

@@ -33,6 +33,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "src/utils/compiler.h"
+
 #if TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
@@ -229,9 +231,6 @@ Format InferFormat(const std::string& filename) {
     return Format::kUnknown;
 }
 
-// The actual warning occurs on `std::from_chars(hash.data(), hash.data() + hash.size(), value,
-// base);`, but disabling/enabling warnings cannot be done within function scope
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts, ExeMode exe_mode) {
     using namespace tint::cli;  // NOLINT(build/namespaces)
 
@@ -410,7 +409,10 @@ of the hash codes in the comma separated list of hashes)");
                     base = 16;
                 }
 
-                std::from_chars(hash.data(), hash.data() + hash.size(), value, base);
+                // SAFETY: `hash` is a valid string_view, so `hash.data() + hash.size()` is a valid
+                // pointer within bounds.
+                DAWN_UNSAFE_BUFFERS(
+                    std::from_chars(hash.data(), hash.data() + hash.size(), value, base));
                 opts->skip_hash.emplace(value);
             }
         }
@@ -630,10 +632,14 @@ Options:
             }
 
             uint32_t group = 0;
-            std::from_chars(parts[0].data(), parts[0].data() + parts[0].size(), group);
+            // SAFETY: `parts` are subviews of str, which is a valid string_view
+            DAWN_UNSAFE_BUFFERS(
+                std::from_chars(parts[0].data(), parts[0].data() + parts[0].size(), group));
 
             uint32_t binding = 0;
-            std::from_chars(parts[1].data(), parts[1].data() + parts[0].size(), binding);
+            // SAFETY: `parts` are subviews of str, which is a valid string_view
+            DAWN_UNSAFE_BUFFERS(
+                std::from_chars(parts[1].data(), parts[1].data() + parts[0].size(), binding));
 
             return {tint::BindingPoint{group, binding}};
         };
@@ -673,10 +679,14 @@ Options:
             }
 
             uint32_t group = 0;
-            std::from_chars(parts[0].data(), parts[0].data() + parts[0].size(), group);
+            // SAFETY: `parts` are subviews of str, which is a valid string_view.
+            DAWN_UNSAFE_BUFFERS(
+                std::from_chars(parts[0].data(), parts[0].data() + parts[0].size(), group));
 
             uint32_t binding = 0;
-            std::from_chars(parts[1].data(), parts[1].data() + parts[1].size(), binding);
+            // SAFETY: `parts` are subviews of str, which is a valid string_view.
+            DAWN_UNSAFE_BUFFERS(
+                std::from_chars(parts[1].data(), parts[1].data() + parts[1].size(), binding));
 
             return {tint::BindingPoint{group, binding}};
         };
@@ -704,10 +714,14 @@ Options:
             }
 
             uint32_t group = 0;
-            std::from_chars(parts[0].data(), parts[0].data() + parts[0].size(), group, 10);
+            // SAFETY: `parts` are subviews of str, which is a valid string_view
+            DAWN_UNSAFE_BUFFERS(
+                std::from_chars(parts[0].data(), parts[0].data() + parts[0].size(), group, 10));
 
             uint32_t idx = 0;
-            std::from_chars(parts[1].data(), parts[1].data() + parts[1].size(), idx, 10);
+            // SAFETY: `parts` are subviews of str, which is a valid string_view
+            DAWN_UNSAFE_BUFFERS(
+                std::from_chars(parts[1].data(), parts[1].data() + parts[1].size(), idx, 10));
 
             if (!opts->group_to_argument_buffer_info.contains(group)) {
                 opts->group_to_argument_buffer_info.insert({group, {}});
@@ -726,10 +740,14 @@ Options:
             }
 
             uint32_t group = 0;
-            std::from_chars(parts[0].data(), parts[0].data() + parts[0].size(), group, 10);
+            // SAFETY: `parts` are subviews of str, which is a valid string_view
+            DAWN_UNSAFE_BUFFERS(
+                std::from_chars(parts[0].data(), parts[0].data() + parts[0].size(), group, 10));
 
             uint32_t idx = 0;
-            std::from_chars(parts[1].data(), parts[1].data() + parts[1].size(), idx, 10);
+            // SAFETY: `parts` are subviews of str, which is a valid string_view
+            DAWN_UNSAFE_BUFFERS(
+                std::from_chars(parts[1].data(), parts[1].data() + parts[1].size(), idx, 10));
 
             if (!opts->group_to_argument_buffer_info.contains(group)) {
                 opts->group_to_argument_buffer_info.insert({group, {}});
@@ -752,14 +770,20 @@ Options:
                 return false;
             }
             uint32_t group = 0;
-            std::from_chars(bind_point[0].data(), bind_point[0].data() + bind_point[0].size(),
-                            group, 10);
+            // SAFETY: `bind_point[0]` is a subview of `parts[0]` which is a subview of str, which
+            // is a valid string_view
+            DAWN_UNSAFE_BUFFERS(std::from_chars(
+                bind_point[0].data(), bind_point[0].data() + bind_point[0].size(), group, 10));
             uint32_t binding = 0;
-            std::from_chars(bind_point[0].data(), bind_point[0].data() + bind_point[0].size(),
-                            binding, 10);
+            // SAFETY: `bind_point[1]` is a subview of `parts[1]` which is a subview of str, which
+            // is a valid string_view
+            DAWN_UNSAFE_BUFFERS(std::from_chars(
+                bind_point[1].data(), bind_point[1].data() + bind_point[1].size(), binding, 10));
 
             uint32_t offset = 0;
-            std::from_chars(parts[1].data(), parts[1].data() + parts[1].size(), offset, 10);
+            // SAFETY: `parts` are subviews of str, which is a valid string_view
+            DAWN_UNSAFE_BUFFERS(
+                std::from_chars(parts[1].data(), parts[1].data() + parts[1].size(), offset, 10));
 
             if (!opts->group_to_argument_buffer_info.contains(group)) {
                 opts->group_to_argument_buffer_info.insert({group, {}});
@@ -873,7 +897,6 @@ Options:
 
     return true;
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 [[maybe_unused]] tint::diag::Result<tint::SubstituteOverridesConfig> CreateOverrideMap(
     const Options& options,

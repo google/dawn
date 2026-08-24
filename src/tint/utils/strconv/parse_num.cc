@@ -30,6 +30,7 @@
 #include <charconv>
 
 #include "absl/strings/charconv.h"
+#include "src/utils/compiler.h"
 
 namespace tint::strconv {
 
@@ -37,30 +38,40 @@ namespace {
 
 // The unsafe buffer warnings here are intrinsic to how the underlying API being called operates, so
 // cannot be easily avoided.
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 template <typename T>
 Result<T, ParseNumberError> Parse(std::string_view number) {
     T val = 0;
     if constexpr (std::is_floating_point_v<T>) {
-        auto result = absl::from_chars(number.data(), number.data() + number.size(), val);
+        // SAFETY: `number` is a valid string_view, so `number.data()` and `number.data() +
+        // number.size()` are valid pointers within bounds.
+        auto result = DAWN_UNSAFE_BUFFERS(
+            absl::from_chars(number.data(), number.data() + number.size(), val));
         if (result.ec == std::errc::result_out_of_range) {
             return ParseNumberError::kResultOutOfRange;
         }
-        if (result.ec != std::errc() || result.ptr != number.data() + number.size()) {
+        // SAFETY: `number` is a valid string_view, so `number.data() + number.size()` is
+        // bounds-safe.
+        if (result.ec != std::errc() ||
+            result.ptr != DAWN_UNSAFE_BUFFERS(number.data() + number.size())) {
             return ParseNumberError::kUnparsable;
         }
     } else {
-        auto result = std::from_chars(number.data(), number.data() + number.size(), val);
+        // SAFETY: `number` is a valid string_view, so `number.data()` and `number.data() +
+        // number.size()` are valid pointers within bounds.
+        auto result =
+            DAWN_UNSAFE_BUFFERS(std::from_chars(number.data(), number.data() + number.size(), val));
         if (result.ec == std::errc::result_out_of_range) {
             return ParseNumberError::kResultOutOfRange;
         }
-        if (result.ec != std::errc() || result.ptr != number.data() + number.size()) {
+        // SAFETY: `number` is a valid string_view, so `number.data() + number.size()` is
+        // bounds-safe.
+        if (result.ec != std::errc() ||
+            result.ptr != DAWN_UNSAFE_BUFFERS(number.data() + number.size())) {
             return ParseNumberError::kUnparsable;
         }
     }
     return val;
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 }  // namespace
 
