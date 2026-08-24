@@ -47,6 +47,7 @@
 #include "src/tint/utils/memory/bitcast.h"
 #include "src/tint/utils/rtti/castable.h"
 #include "src/tint/utils/rtti/traits.h"
+#include "src/utils/compiler.h"
 
 // This file implements a custom STL style container & iterator in a performant manner, using
 // C-style data access. It is not unexpected that -Wunsafe-buffer-usage (UBU triggers in this code,
@@ -999,8 +1000,6 @@ class Vector {
         impl_.slice.len = other_len;
     }
 
-    // {ptr, size} style span construction will always cause this warning to fire
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
     /// Moves all the elements from `other` to this vector, replacing the content of this vector.
     /// @param other the vector to move
     template <typename U, size_t N2>
@@ -1013,7 +1012,9 @@ class Vector {
                 impl_.slice = other_impl.slice;
                 other_impl.slice = {};
                 if constexpr (N2 > 0) {
-                    other_impl.slice.buffer = {&other_impl.small_arr[0].Get(), N2};
+                    // SAFETY: The small array always has a fixed capacity of N2 elements.
+                    other_impl.slice.buffer =
+                        DAWN_UNSAFE_BUFFERS(std::span{&other_impl.small_arr[0].Get(), N2});
                 }
                 return;
             }
@@ -1039,22 +1040,19 @@ class Vector {
         // Clear other
         other.Clear();
     }
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
 
-    // {ptr, size} style span construction will always cause this warning to fire
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
     /// Clears the vector, then frees the data.
     void ClearAndFree() {
         Clear();
         impl_.Free(impl_.slice.buffer.data());
         if constexpr (N > 0) {
-            impl_.slice.buffer = {&impl_.small_arr[0].Get(), N};
+            // SAFETY: The small array always has a fixed capacity of N elements.
+            impl_.slice.buffer = DAWN_UNSAFE_BUFFERS(std::span{&impl_.small_arr[0].Get(), N});
         } else {
             impl_.slice.buffer = {};
         }
         impl_.slice.len = 0;
     }
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
 
     /// True if this vector uses a small array for small object optimization.
     constexpr static bool HasSmallArray = N > 0;
@@ -1064,20 +1062,25 @@ class Vector {
 
     // Directly manipulating the underlying allocation for performance, so requires unsafe pointers
     TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
-    // {ptr, size} style span construction will always cause this warning to fire
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
     /// The internal structure for the vector with a small array.
     struct ImplWithSmallArray {
         std::array<TStorage, N> small_arr;
-        internal::Slice<T> slice = {std::span<T>{&small_arr[0].Get(), N}, 0};
+        // SAFETY: The small array always has a fixed capacity of N elements.
+        internal::Slice<T> slice = {
+            DAWN_UNSAFE_BUFFERS(std::span<T>{&small_arr[0].Get(), N}),
+            0,
+        };
 
         /// Allocates a new vector of `T` either from #small_arr, or from the heap, then assigns the
         /// pointer it to #slice.buffer.
         void Allocate(size_t new_cap) {
             if (new_cap <= N) {
-                slice.buffer = {&small_arr[0].Get(), N};
+                // SAFETY: The small array always has a fixed capacity of N elements.
+                slice.buffer = DAWN_UNSAFE_BUFFERS(std::span<T>{&small_arr[0].Get(), N});
             } else {
-                slice.buffer = {Bitcast<T*>(new TStorage[new_cap]), new_cap};
+                // SAFETY: The newly allocated heap array has a capacity of new_cap elements.
+                slice.buffer =
+                    DAWN_UNSAFE_BUFFERS(std::span<T>{Bitcast<T*>(new TStorage[new_cap]), new_cap});
             }
         }
 
@@ -1099,7 +1102,9 @@ class Vector {
 
         /// Allocates a new vector of `T` and assigns it to #slice.buffer.
         void Allocate(size_t new_cap) {
-            slice.buffer = {reinterpret_cast<T*>(new TStorage[new_cap]), new_cap};
+            // SAFETY: The newly allocated heap array has a capacity of new_cap elements.
+            slice.buffer = DAWN_UNSAFE_BUFFERS(
+                std::span<T>{reinterpret_cast<T*>(new TStorage[new_cap]), new_cap});
         }
 
         /// Frees `ptr`.
@@ -1113,7 +1118,6 @@ class Vector {
         /// @returns true
         bool CanMove() const { return true; }
     };
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
     TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
     /// Either a ImplWithSmallArray or ImplWithoutSmallArray based on N.
@@ -1195,15 +1199,28 @@ class VectorRef {
     /// @param span the span
     explicit(false) VectorRef(std::span<T> span) : local_slice_{span}, slice_(&local_slice_) {}
 
-    // {ptr, size} style span construction will always cause this warning to fire
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
-    /// Constructor from a span
+    /// Constructor from a qualification-compatible span (e.g., std::span<T> to std::span<const T>)
     /// @param span the span
     template <typename U>
+        requires(std::is_convertible_v<U (*)[], T (*)[]>)
     explicit(false) VectorRef(std::span<U> span)
-        : local_slice_{std::span<T>{Bitcast<T*>(span.data()), span.size()}, span.size()},
-          slice_(&local_slice_) {}
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
+        : local_slice_{span, span.size()}, slice_(&local_slice_) {}
+
+    /// Constructor from a reinterpreted span (e.g., std::span<Derived*> to std::span<Base*>)
+    /// @param span the span
+    template <typename U>
+        requires(!std::is_convertible_v<U (*)[], T (*)[]>)
+    explicit(false) VectorRef(std::span<U> span)
+        : local_slice_{
+              // SAFETY: The input `span` is guaranteed by its type to have at least `span.size()`
+              // valid elements. Since the reinterpretation is safe (verified by
+              // CanReinterpretSlice/traits),
+              // the memory bounds remain valid for the new span.
+              DAWN_UNSAFE_BUFFERS(std::span<T>{Bitcast<T*>(span.data()), span.size()}),
+              span.size(),
+          } {
+        slice_ = &local_slice_;
+    }
 
     /// Constructor from an internal::Slice
     /// @param slice the internal slice
@@ -1242,33 +1259,43 @@ class VectorRef {
         other.can_move_ = false;
     }
 
-    // {ptr, size} style span construction will always cause this warning to fire
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
     /// Copy constructor with covariance / const conversion
     /// @param other the other vector reference
     template <typename U>
         requires(CanReinterpretSlice<ReinterpretMode::kSafe, T, U>)
     explicit(false) VectorRef(const VectorRef<U>& other)
-        : local_slice_{std::span<T>{Bitcast<T*>(other.begin()), other.Capacity()}, other.Length()},
-          slice_(other.slice_ == &other.local_slice_ ? &local_slice_
-                                                     : Bitcast<internal::Slice<T>*>(other.slice_)) {
+        : local_slice_{
+              // SAFETY: The input `other` reference is guaranteed by its type to have at least
+              // `other.Capacity()`
+              // valid elements. Since the reinterpretation is safe (verified by
+              // CanReinterpretSlice),
+              // the memory bounds remain valid for the new span.
+              DAWN_UNSAFE_BUFFERS(std::span<T>{Bitcast<T*>(other.begin()), other.Capacity()}),
+              other.Length(),
+          } {
+        slice_ = other.slice_ == &other.local_slice_ ? &local_slice_
+                                                     : Bitcast<internal::Slice<T>*>(other.slice_);
     }
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
 
-    // {ptr, size} style span construction will always cause this warning to fire
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
     /// Move constructor with covariance / const conversion
     /// @param other the vector reference
     template <typename U>
         requires(CanReinterpretSlice<ReinterpretMode::kSafe, T, U>)
     explicit(false) VectorRef(VectorRef<U>&& other)
-        : local_slice_{std::span<T>{Bitcast<T*>(other.begin()), other.Capacity()}, other.Length()},
-          slice_(other.slice_ == &other.local_slice_ ? &local_slice_
-                                                     : Bitcast<internal::Slice<T>*>(other.slice_)),
-          can_move_(other.can_move_) {
+        : local_slice_{
+              // SAFETY: The input `other` reference is guaranteed by its type to have at least
+              // `other.Capacity()`
+              // valid elements. Since the reinterpretation is safe (verified by
+              // CanReinterpretSlice),
+              // the memory bounds remain valid for the new span.
+              DAWN_UNSAFE_BUFFERS(std::span<T>{Bitcast<T*>(other.begin()), other.Capacity()}),
+              other.Length(),
+          } {
+        slice_ = other.slice_ == &other.local_slice_ ? &local_slice_
+                                                     : Bitcast<internal::Slice<T>*>(other.slice_);
+        can_move_ = other.can_move_;
         other.can_move_ = false;
     }
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
 
     /// Constructor from a Vector with covariance / const conversion
     /// @param vector the vector to create a reference of
@@ -1303,23 +1330,24 @@ class VectorRef {
     /// be made
     size_t Capacity() const { return slice_->buffer.size(); }
 
-    // {ptr, size} style span construction will always cause this warning to fire
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
     /// @return a reinterpretation of this VectorRef as elements of type U.
     /// @note this is doing a reinterpret_cast of elements. It is up to the caller to ensure that
     /// this is a safe operation.
     template <typename U>
     VectorRef<U> ReinterpretCast() const {
         return VectorRef<U>{internal::Slice<U>{
-            std::span<U>{Bitcast<U*>(slice_->buffer.data()), slice_->buffer.size()}, slice_->len}};
+            // SAFETY: Bounds are preserved from slice_->buffer.
+            DAWN_UNSAFE_BUFFERS(
+                std::span<U>{Bitcast<U*>(slice_->buffer.data()), slice_->buffer.size()}),
+            slice_->len,
+        }};
     }
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
 
-    // {ptr, size} style span construction will always cause this warning to fire
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
     /// @returns the internal data of the vector as a std::span
-    std::span<T> AsSpan() { return std::span<T>{slice_->buffer.data(), slice_->len}; }
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
+    std::span<T> AsSpan() {
+        // SAFETY: Depends on internal accounting for vector being correct
+        return DAWN_UNSAFE_BUFFERS(std::span<T>{slice_->buffer.data(), slice_->len});
+    }
 
     /// @returns the internal data of the vector as a std::span
     std::span<const T> AsSpan() const { return slice_->buffer.subspan(0, slice_->len); }

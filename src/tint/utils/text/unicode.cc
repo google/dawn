@@ -32,6 +32,7 @@
 
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/compiler.h"
+#include "src/utils/compiler.h"
 
 namespace tint {
 namespace {
@@ -446,25 +447,24 @@ std::pair<CodePoint, size_t> Decode(std::span<const uint8_t> buffer) {
 // the sizes are not equal.
 // tint::Copy could be used here and below to remove the need for a suppression here, but that
 // would be less performant and as well as just hiding the need for a suppression.
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 std::pair<CodePoint, size_t> Decode(std::span<const std::byte> buffer) {
     TINT_ASSERT(buffer.data());
-    return Decode({reinterpret_cast<const uint8_t*>(buffer.data()),
-                   buffer.size() * sizeof(std::byte) / sizeof(uint8_t)});
+    // SAFETY: The size calculation translates the size from std::byte units to uint8_t units.
+    return Decode(DAWN_UNSAFE_BUFFERS(std::span{
+        reinterpret_cast<const uint8_t*>(buffer.data()),
+        buffer.size() * sizeof(std::byte) / sizeof(uint8_t),
+    }));
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
 
 // Converting the string_view to a span requires usage of the two-part span constructor which will
 // always trigger this warning.
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
 std::pair<CodePoint, size_t> Decode(std::string_view utf8_string) {
     TINT_ASSERT(utf8_string.data());
-    auto buf = std::span{utf8_string.data(), utf8_string.size()};
+    // SAFETY: The span is constructed with the size of the string_view, which guarantees bounds
+    // safety.
+    auto buf = DAWN_UNSAFE_BUFFERS(std::span{utf8_string.data(), utf8_string.size()});
     return Decode(std::as_bytes(buf));
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
 
 size_t Encode(CodePoint code_point, std::span<uint8_t> buffer) {
     if (code_point <= 0x7f) {
@@ -592,25 +592,24 @@ std::pair<CodePoint, size_t> Decode(std::span<const uint16_t> buffer) {
 // constructor.
 // tint::Copy could be used here and below to remove the need for a suppression here, but that
 // would be less performant and as well as just hiding the need for a suppression.
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 std::pair<CodePoint, size_t> Decode(std::span<const std::byte> buffer) {
     TINT_ASSERT(buffer.data());
-    return Decode({reinterpret_cast<const uint16_t*>(buffer.data()),
-                   buffer.size() * sizeof(std::byte) / sizeof(uint16_t)});
+    // SAFETY: The size calculation translates the size from std::byte units to uint16_t units.
+    return Decode(DAWN_UNSAFE_BUFFERS(std::span{
+        reinterpret_cast<const uint16_t*>(buffer.data()),
+        buffer.size() * sizeof(std::byte) / sizeof(uint16_t),
+    }));
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
 
 // Converting the string_view to a span requires usage of the two-part span constructor which will
 // always trigger this warning.
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
 std::pair<CodePoint, size_t> Decode(std::string_view utf16_string) {
     TINT_ASSERT(utf16_string.data());
-    auto buf = std::span{utf16_string.data(), utf16_string.size()};
+    // SAFETY: The span is constructed with the size of the string_view, which guarantees bounds
+    // safety.
+    auto buf = DAWN_UNSAFE_BUFFERS(std::span{utf16_string.data(), utf16_string.size()});
     return Decode(std::as_bytes(buf));
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
 
 size_t Encode(CodePoint code_point, std::span<uint16_t> buffer) {
     if (code_point <= 0xd7ff || (code_point >= 0xe000 && code_point <= 0xffff)) {

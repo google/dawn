@@ -34,6 +34,7 @@
 
 #include "src/tint/utils/bytes/reader.h"
 #include "src/tint/utils/ice/ice.h"
+#include "src/utils/compiler.h"
 
 namespace tint::bytes {
 
@@ -43,16 +44,15 @@ class BufferReader final : public Reader {
     /// Destructor
     ~BufferReader() override;
 
-    // This constructor represents the boundary between unsafe and safe memory constructs, since a
-    // raw pointer is being converted to a std::span. There is no way to avoid this warning, because
-    // if the compiler could statically guarantee the raw pointer + size was valid here, there would
-    // be no need for std::span to exist.
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
     /// Constructor
     /// @param data the data to read from
     /// @param size the number of bytes in the buffer
-    BufferReader(const std::byte* data, size_t size) : data_(data, size) { TINT_ASSERT(data); }
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
+    // SAFETY: This is a boundary between unsafe and safe memory constructs, so the caller must
+    // guarantee that `data` points to at least `size` elements.
+    BufferReader(const std::byte* data, size_t size)
+        : data_(DAWN_UNSAFE_BUFFERS(std::span{data, size})) {
+        TINT_ASSERT(data);
+    }
 
     /// Constructor
     /// @param str the string to read from
