@@ -25,27 +25,29 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_COMMON_DRMUTILS_H_
-#define SRC_DAWN_COMMON_DRMUTILS_H_
+#ifndef SRC_DAWN_TESTS_GBMUTILS_H_
+#define SRC_DAWN_TESTS_GBMUTILS_H_
 
-#include <cstdint>
-#include <string_view>
+// Include this before gbm.h, which can transitively include X11 headers with conflicting macros.
+#include "src/dawn/common/xlib_with_undefs.h"
+// Comment to prevent reordering.
 
-#include "src/dawn/common/SystemHandle.h"
+#include <gbm.h>
+
+#include <memory>
 
 namespace dawn {
 
-bool IsDRMRenderNodeName(std::string_view nodeName);
+struct GbmBoDeleter {
+    void operator()(gbm_bo* bo) const { gbm_bo_destroy(bo); }
+};
+using OwnedGbmBo = std::unique_ptr<gbm_bo, GbmBoDeleter>;
 
-bool IsMatchingDRMRenderNode(std::string_view nodeName,
-                             bool isCharacterDevice,
-                             uint64_t nodeMajor,
-                             uint64_t nodeMinor,
-                             uint64_t renderMajor,
-                             uint64_t renderMinor);
-
-SystemHandle OpenDRMRenderNode(uint64_t renderMajor, uint64_t renderMinor);
+struct GbmDeviceDeleter {
+    void operator()(gbm_device* device) const { gbm_device_destroy(device); }
+};
+using OwnedGbmDevice = std::unique_ptr<gbm_device, GbmDeviceDeleter>;
 
 }  // namespace dawn
 
-#endif  // SRC_DAWN_COMMON_DRMUTILS_H_
+#endif  // SRC_DAWN_TESTS_GBMUTILS_H_

@@ -27,7 +27,6 @@
 
 #include "src/dawn/tests/white_box/VulkanImageWrappingTests_DmaBuf.h"
 
-#include <gbm.h>
 #include <gtest/gtest.h>
 #include <unistd.h>
 
@@ -38,6 +37,7 @@
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/DRMUtils.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
+#include "src/dawn/tests/GBMUtils.h"
 
 namespace dawn::native::vulkan {
 

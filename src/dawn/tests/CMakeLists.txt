@@ -41,6 +41,9 @@ add_library(dawn_test_infra OBJECT
     "mocks/platform/CachingInterfaceMock.cpp"
     "mocks/platform/CachingInterfaceMock.h"
 )
+if (DAWN_ENABLE_VULKAN AND UNIX AND NOT ANDROID AND NOT APPLE)
+    target_sources(dawn_test_infra PRIVATE "GBMUtils.h")
+endif()
 common_compile_options(dawn_test_infra)
 target_link_libraries(dawn_test_infra PRIVATE
     dawn_crash_handler

@@ -25,7 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <gbm.h>
 #include <webgpu/webgpu_cpp.h>
 
 #include <array>
@@ -38,6 +37,7 @@
 // This must be included instead of vulkan.h so that we can wrap it with vulkan_platform.h.
 #include "src/dawn/common/DRMUtils.h"
 #include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/tests/GBMUtils.h"
 #include "src/dawn/tests/white_box/SharedTextureMemoryTests.h"
 
 namespace dawn {
