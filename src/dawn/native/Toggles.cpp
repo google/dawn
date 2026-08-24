@@ -830,6 +830,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Workaround for a driver bug where unsigned equality comparisons with zero trigger a buggy "
       "peephole optimization on Samsung Xclipse GPUs.",
       "https://crbug.com/543420711", ToggleStage::Device}},
+    {Toggle::VulkanUseCooperativeMatrixRobustBufferAccess,
+     {"vulkan_use_cooperative_matrix_robust_access",
+      "Disable clamping of subgroupMatrixLoad/Store on storage buffers if "
+      "cooperativeMatrixRobustBufferAccess == VK_TRUE",
+      "https://crbug.com/548005877", ToggleStage::Device}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "

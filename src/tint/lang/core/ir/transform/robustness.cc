@@ -479,8 +479,11 @@ struct State {
         }
         call->SetArg(stride_index, stride);
 
-        // If we are not predicating, then clamping the stride is all we need to do.
-        if (!config.clamp_subgroup_matrix) {
+        // If we are not doing full clamping, then clamping the stride is all we need to do.
+        if (!config.clamp_subgroup_matrix ||
+            (!config.clamp_storage_subgroup_matrix &&
+             arr->Type()->As<core::type::Pointer>()->AddressSpace() ==
+                 core::AddressSpace::kStorage)) {
             return;
         }
 

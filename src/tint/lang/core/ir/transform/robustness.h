@@ -56,6 +56,7 @@ struct RobustnessConfig {
     /// Should subgroup matrix builtins be clamped?
     /// Note that the stride parameter will still be clamped if clamping is disabled.
     bool clamp_subgroup_matrix = true;
+    bool clamp_storage_subgroup_matrix = true;
 
     /// Bindings that should always be ignored.
     std::unordered_set<tint::BindingPoint> bindings_ignored;
@@ -73,6 +74,7 @@ struct RobustnessConfig {
                  clamp_storage,
                  clamp_uniform,
                  clamp_subgroup_matrix,
+                 clamp_storage_subgroup_matrix,
                  bindings_ignored,
                  disable_runtime_sized_array_index_clamping,
                  use_integer_range_analysis);

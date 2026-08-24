@@ -198,6 +198,11 @@ struct Options {
         /// transform.
         bool disable_runtime_sized_array_index_clamping = false;
 
+        /// Set to `true` to disable bounds checks on subgroup matrix load/store in the storage
+        /// address space. Set by
+        /// VkCooperativeMatrixFeaturesKHR::cooperativeMatrixRobustBufferAccess.
+        bool disable_storage_subgroup_matrix_clamping = false;
+
         /// Set to `true` to generate polyfill for `dot4I8Packed` and `dot4U8Packed` builtins
         bool dot_4x8_packed = false;
 
@@ -220,6 +225,7 @@ struct Options {
                      use_vulkan_memory_model,
                      disable_image_robustness,
                      disable_runtime_sized_array_index_clamping,
+                     disable_storage_subgroup_matrix_clamping,
                      dot_4x8_packed,
                      use_uniform_buffers,
                      use_maximal_reconvergence,

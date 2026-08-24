@@ -305,6 +305,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2);
     req.tintOptions.extensions.disable_image_robustness =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseImageRobustAccess2);
+    req.tintOptions.extensions.disable_storage_subgroup_matrix_clamping =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanUseCooperativeMatrixRobustBufferAccess);
     // The only possible alternative for the vulkan demote to helper extension is
     // "OpTerminateInvocation" which remains unimplemented in dawn/tint.
     req.tintOptions.extensions.use_demote_to_helper_invocation =

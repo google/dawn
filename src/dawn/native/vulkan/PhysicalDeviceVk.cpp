@@ -1305,6 +1305,16 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::VulkanUseBufferRobustAccess2, true);
     }
 
+    // By default try to skip cooperative matrix robustness if both robustBuffer2 and cooperative
+    // matrix robust access features are available.
+    if (GetDeviceInfo().HasExt(DeviceExt::CooperativeMatrix) &&
+        GetDeviceInfo().cooperativeMatrixFeatures.cooperativeMatrixRobustBufferAccess == VK_TRUE &&
+        deviceToggles->IsEnabled(Toggle::VulkanUseBufferRobustAccess2)) {
+        deviceToggles->Default(Toggle::VulkanUseCooperativeMatrixRobustBufferAccess, true);
+    } else {
+        deviceToggles->ForceSet(Toggle::VulkanUseCooperativeMatrixRobustBufferAccess, false);
+    }
+
     // Enable the polyfill versions of dot4I8Packed() and dot4U8Packed() when the SPIR-V capability
     // `DotProductInput4x8BitPackedKHR` is not supported.
     if (!GetDeviceInfo().HasExt(DeviceExt::ShaderIntegerDotProduct) ||

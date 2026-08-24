@@ -701,6 +701,13 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
                     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR);
             }
         }
+
+        // If robustBufferAccess2 is enabled and cooperativeMatrixRobustBufferAccess is available,
+        // enable it.
+        if (IsRobustnessEnabled() && IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2) &&
+            IsToggleEnabled(Toggle::VulkanUseCooperativeMatrixRobustBufferAccess)) {
+            usedKnobs.cooperativeMatrixFeatures.cooperativeMatrixRobustBufferAccess = VK_TRUE;
+        }
     }
 
     if (HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) {
