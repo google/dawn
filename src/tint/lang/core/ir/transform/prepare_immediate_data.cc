@@ -120,7 +120,10 @@ struct State {
             }
 
             auto index = static_cast<uint32_t>(members.Length());
-            layout.offset_to_index.Add(offset, index);
+            if (!layout.immediate_to_index.Add(internal.second.immediate, index)) {
+                return Failure("duplicate internal immediate with id " +
+                               std::to_string(internal.second.immediate));
+            }
             members.Push(ty.Get<core::type::StructMember>(internal.second.name,
                                                           internal.second.type,
                                                           /* index */ index,

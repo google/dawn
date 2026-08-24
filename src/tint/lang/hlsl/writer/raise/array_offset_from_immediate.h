@@ -60,7 +60,6 @@ using ImmediateDataLayout = core::ir::transform::ImmediateDataLayout;
 ///
 /// @param module the module to transform
 /// @param immediate_data_layout The immediate data layout information.
-/// @param buffer_offsets_offset The offset in immediate block where buffer offsets start.
 /// @param buffer_offsets_array_elements_num number of u32 buffer-offset elements in the immediate
 /// block
 /// @param bindpoint_to_offset_index The map from binding point to an index which holds the offset
@@ -69,7 +68,6 @@ using ImmediateDataLayout = core::ir::transform::ImmediateDataLayout;
 Result<SuccessType> ArrayOffsetFromImmediates(
     core::ir::Module& module,
     const ImmediateDataLayout& immediate_data_layout,
-    const uint32_t buffer_offsets_offset,
     const uint32_t buffer_offsets_array_elements_num,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_offset_index);
 

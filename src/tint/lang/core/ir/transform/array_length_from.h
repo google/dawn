@@ -90,14 +90,12 @@ Result<ArrayLengthResult> ArrayLengthFromUniform(
 /// @param immediate_data_layout The immediate data layout information.
 /// @param bindpoint_to_size_index The map from binding point to an index which holds the size
 /// of that buffer.
-/// @param buffer_sizes_offset The offset in immediate block where buffer sizes start.
 /// @param buffer_sizes_array_elements_num number of u32 buffer-size elements in the immediate block
 /// @returns the transform result or failure
 /// TODO(crbug.com/366291600): Replace ArrayLengthFromUniform.
 Result<ArrayLengthResult> ArrayLengthFromImmediates(
     Module& module,
     const core::ir::transform::ImmediateDataLayout& immediate_data_layout,
-    const uint32_t buffer_sizes_offset,
     const uint32_t buffer_sizes_array_elements_num,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index);
 

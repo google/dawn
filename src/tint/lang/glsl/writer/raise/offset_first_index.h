@@ -40,14 +40,8 @@ namespace tint::glsl::writer::raise {
 
 /// OffsetFirstIndexConfig describes the configuration options for the OffsetFirstIndex transform.
 struct OffsetFirstIndexConfig {
-    /// Immediate data layout information.
-    const core::ir::transform::ImmediateDataLayout& immediate_data_layout;
-
-    /// Offset of the firstVertex immediate data.
-    std::optional<uint32_t> first_vertex_offset{};
-
-    /// Offset of the firstInstance immediate data.
-    std::optional<uint32_t> first_instance_offset{};
+    /// Immediate data information.
+    const core::ir::transform::ImmediateDataLayout& immediate_data;
 };
 
 /// OffsetFirstIndex is a transform that adds an offset to the `vertex_index` and `instance_index`

@@ -66,8 +66,9 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, Basic) {
     });
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                             ty.array(ty.u32(), 3)),
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                  core::InternalImmediate::kStorageBufferOffsets, 0,
+                  mod.symbols.New("buffer_offsets"), ty.array(ty.u32(), 3)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     ASSERT_EQ(immediate_data, Success);
@@ -79,7 +80,7 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, Basic) {
     bindpoint_to_offset_index[{0, 0}] = 2;
 
     auto result =
-        ArrayOffsetFromImmediates(mod, immediate_data.Get(), 0, 3, bindpoint_to_offset_index);
+        ArrayOffsetFromImmediates(mod, immediate_data.Get(), 3, bindpoint_to_offset_index);
     ASSERT_EQ(result, Success);
 
     EXPECT_EQ(str(),
@@ -155,14 +156,15 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                             ty.array(ty.u32(), 1)),
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                  core::InternalImmediate::kStorageBufferOffsets, 0,
+                  mod.symbols.New("buffer_offsets"), ty.array(ty.u32(), 1)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_offset_index;
-    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 0u, 1u, bindpoint_to_offset_index);
+    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 1u, bindpoint_to_offset_index);
 
     EXPECT_EQ(expect, str());
 }
@@ -216,15 +218,16 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                             ty.array(ty.u32(), 21)),
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                  core::InternalImmediate::kStorageBufferOffsets, 0,
+                  mod.symbols.New("buffer_offsets"), ty.array(ty.u32(), 21)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_offset_index;
     bindpoint_to_offset_index[{0, 1}] = 20;  // Doesn't match binding point
-    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 0u, 21u, bindpoint_to_offset_index);
+    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 21u, bindpoint_to_offset_index);
 
     EXPECT_EQ(expect, str());
 }
@@ -280,15 +283,16 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                             ty.array(ty.u32(), 21)),
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                  core::InternalImmediate::kStorageBufferOffsets, 0,
+                  mod.symbols.New("buffer_offsets"), ty.array(ty.u32(), 21)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_offset_index;
     bindpoint_to_offset_index[{0, 0}] = 20;
-    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 0u, 21u, bindpoint_to_offset_index);
+    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 21u, bindpoint_to_offset_index);
 
     EXPECT_EQ(expect, str());
 }
@@ -410,8 +414,9 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                             ty.array(ty.u32(), 58)),
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                  core::InternalImmediate::kStorageBufferOffsets, 0,
+                  mod.symbols.New("buffer_offsets"), ty.array(ty.u32(), 58)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -419,7 +424,7 @@ $B1: {  # root
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_offset_index;
     bindpoint_to_offset_index[{5, 6}] = 26;
     bindpoint_to_offset_index[{7, 8}] = 57;
-    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 0u, 58u, bindpoint_to_offset_index);
+    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 58u, bindpoint_to_offset_index);
 
     EXPECT_EQ(expect, str());
 }
@@ -459,15 +464,16 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, AllAtomicOps) {
     });
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                             ty.array(ty.u32(), 8)),
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                  core::InternalImmediate::kStorageBufferOffsets, 0,
+                  mod.symbols.New("buffer_offsets"), ty.array(ty.u32(), 8)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_offset_index;
     bindpoint_to_offset_index[{0, 0}] = 7;
-    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 0u, 8u, bindpoint_to_offset_index);
+    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 8u, bindpoint_to_offset_index);
 
     // Just verify it doesn't crash - detailed output checking would be very long
     EXPECT_NE(str(), "");
@@ -552,8 +558,9 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                             ty.array(ty.u32(), 10)),
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                  core::InternalImmediate::kStorageBufferOffsets, 0,
+                  mod.symbols.New("buffer_offsets"), ty.array(ty.u32(), 10)),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
@@ -562,7 +569,7 @@ $B1: {  # root
     bindpoint_to_offset_index[{0, 0}] = 1;
     bindpoint_to_offset_index[{0, 1}] = 5;
     bindpoint_to_offset_index[{0, 2}] = 9;
-    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 0u, 10u, bindpoint_to_offset_index);
+    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 10u, bindpoint_to_offset_index);
 
     EXPECT_EQ(expect, str());
 }

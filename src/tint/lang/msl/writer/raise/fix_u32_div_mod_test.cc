@@ -44,20 +44,21 @@ class MslWriter_FixU32DivModTest : public core::ir::transform::TransformTest {
         // Set up an internal immediate data layout, including the non-constant zero value.
         constexpr uint32_t kNonConstantZeroOffset = 8;
         core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-        ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("a"), ty.f32()),
+        ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                      core::InternalImmediate::kFragDepthMin, 0, mod.symbols.New("a"), ty.f32()),
                   Success);
         ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
-                      kNonConstantZeroOffset, mod.symbols.New("tint_non_constant_zero"), ty.u32()),
+                      core::InternalImmediate::kNonConstantZero, kNonConstantZeroOffset,
+                      mod.symbols.New("tint_non_constant_zero"), ty.u32()),
                   Success);
-        ASSERT_EQ(
-            immediate_data_config.AddInternalImmediateData(16, mod.symbols.New("b"), ty.f32()),
-            Success);
+        ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                      core::InternalImmediate::kFragDepthMax, 16, mod.symbols.New("b"), ty.f32()),
+                  Success);
         auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
         EXPECT_EQ(immediate_data, Success);
 
         FixU32DivModConfig config{
-            .immediate_var = immediate_data->var,
-            .non_constant_zero_index = immediate_data->IndexOf(kNonConstantZeroOffset),
+            .immediate_data_layout = immediate_data.Get(),
         };
         Run(FixU32DivMod, config);
     }
@@ -85,7 +86,8 @@ TEST_F(MslWriter_FixU32DivModTest, NoModify_FDiv) {
 
     auto* expect = src;
 
-    FixU32DivModConfig config{};
+    core::ir::transform::ImmediateDataLayout layout;
+    FixU32DivModConfig config{layout};
     Run(FixU32DivMod, config);
 
     EXPECT_EQ(expect, str());

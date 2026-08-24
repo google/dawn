@@ -54,14 +54,13 @@ class HlslWriterTransformTest : public core::ir::transform::TransformTest {
                                });
         core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
         ASSERT_EQ(prepare_immediate_data_layout_config.AddInternalImmediateData(
-                      kNumWorkgroupsOffset, mod.symbols.New("tint_num_workgroups_start_offset"),
-                      num_workgroups_type),
+                      core::InternalImmediate::kNumWorkgroups, kNumWorkgroupsOffset,
+                      mod.symbols.New("tint_num_workgroups_start_offset"), num_workgroups_type),
                   Success);
         auto layout =
             core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
         ShaderIOConfig config{layout.Get()};
-        config.num_workgroups_start_offset = kNumWorkgroupsOffset;
         Run(ShaderIO, config);
     }
 };
@@ -3153,13 +3152,13 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
     ASSERT_EQ(prepare_immediate_data_layout_config.AddInternalImmediateData(
-                  first_index_offset, mod.symbols.New("tint_first_index_offset"), ty.u32()),
+                  core::InternalImmediate::kFirstVertexOffset, first_index_offset,
+                  mod.symbols.New("tint_first_index_offset"), ty.u32()),
               Success);
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
     ShaderIOConfig config{layout.Get()};
-    config.first_index_offset = first_index_offset;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -3231,13 +3230,13 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
     ASSERT_EQ(prepare_immediate_data_layout_config.AddInternalImmediateData(
-                  first_instance_offset, mod.symbols.New("tint_first_instance_offset"), ty.u32()),
+                  core::InternalImmediate::kFirstInstanceOffset, first_instance_offset,
+                  mod.symbols.New("tint_first_instance_offset"), ty.u32()),
               Success);
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
     ShaderIOConfig config{layout.Get()};
-    config.first_instance_offset = first_instance_offset;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -3319,17 +3318,17 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
     ASSERT_EQ(prepare_immediate_data_layout_config.AddInternalImmediateData(
-                  first_index_offset, mod.symbols.New("tint_first_index_offset"), ty.u32()),
+                  core::InternalImmediate::kFirstVertexOffset, first_index_offset,
+                  mod.symbols.New("tint_first_index_offset"), ty.u32()),
               Success);
     ASSERT_EQ(prepare_immediate_data_layout_config.AddInternalImmediateData(
-                  first_instance_offset, mod.symbols.New("tint_first_instance_offset"), ty.u32()),
+                  core::InternalImmediate::kFirstInstanceOffset, first_instance_offset,
+                  mod.symbols.New("tint_first_instance_offset"), ty.u32()),
               Success);
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
     ShaderIOConfig config{layout.Get()};
-    config.first_index_offset = first_index_offset;
-    config.first_instance_offset = first_instance_offset;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -3411,17 +3410,17 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
     ASSERT_EQ(prepare_immediate_data_layout_config.AddInternalImmediateData(
-                  first_index_offset, mod.symbols.New("tint_first_index_offset"), ty.u32()),
+                  core::InternalImmediate::kFirstVertexOffset, first_index_offset,
+                  mod.symbols.New("tint_first_index_offset"), ty.u32()),
               Success);
     ASSERT_EQ(prepare_immediate_data_layout_config.AddInternalImmediateData(
-                  first_instance_offset, mod.symbols.New("tint_first_instance_offset"), ty.u32()),
+                  core::InternalImmediate::kFirstInstanceOffset, first_instance_offset,
+                  mod.symbols.New("tint_first_instance_offset"), ty.u32()),
               Success);
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
     ShaderIOConfig config{layout.Get()};
-    config.first_index_offset = first_index_offset;
-    config.first_instance_offset = first_instance_offset;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());

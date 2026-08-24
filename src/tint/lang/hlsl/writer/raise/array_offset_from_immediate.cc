@@ -54,9 +54,6 @@ struct State {
     /// Immediate data layout contains all immediate block info.
     const core::ir::transform::ImmediateDataLayout& immediate_data_layout;
 
-    /// The offset in immediate block for buffer offsets array.
-    uint32_t buffer_offsets_offset = 0;
-
     /// The total number of u32 elements used to store buffer offsets in the immediate block.
     uint32_t buffer_offsets_array_elements_num = 0;
 
@@ -220,7 +217,8 @@ struct State {
     Value* LoadDynamicOffset(uint32_t offset_index) {
         auto* buffer_offsets = b.Access(
             ty.ptr(immediate, ty.array(ty.u32(), buffer_offsets_array_elements_num)),
-            immediate_data_layout.var, u32(immediate_data_layout.IndexOf(buffer_offsets_offset)));
+            immediate_data_layout.var,
+            u32(immediate_data_layout.IndexOf(core::InternalImmediate::kStorageBufferOffsets)));
         auto* offset_ptr =
             b.Access(ty.ptr(immediate, ty.u32()), buffer_offsets->Result(), u32(offset_index));
         return b.Load(offset_ptr)->Result();
@@ -232,12 +230,11 @@ struct State {
 Result<SuccessType> ArrayOffsetFromImmediates(
     core::ir::Module& ir,
     const ImmediateDataLayout& immediate_data_layout,
-    const uint32_t buffer_offsets_offset,
     const uint32_t buffer_offsets_array_elements_num,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_offset_index) {
     AssertValid(ir, "before core.ArrayOffsetFromImmediates");
 
-    State state{ir, immediate_data_layout, buffer_offsets_offset, buffer_offsets_array_elements_num,
+    State state{ir, immediate_data_layout, buffer_offsets_array_elements_num,
                 bindpoint_to_offset_index};
     state.Process();
 

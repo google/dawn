@@ -57,8 +57,6 @@ struct ShaderIOConfig {
     std::optional<uint32_t> polyfill_pixel_center = std::nullopt;
     /// true if the framebuffer fetch should be multisampled
     bool multisampled_framebuffer_fetch = false;
-    /// offsets for clamping frag depth
-    std::optional<Options::RangeOffsets> depth_range_offsets{};
 };
 
 /// ShaderIO is a transform that moves each entry point function's parameters and return value to

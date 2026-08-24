@@ -1371,16 +1371,17 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     ASSERT_EQ(
-        immediate_data_config.AddInternalImmediateData(4, mod.symbols.New("depth_min"), ty.f32()),
+        immediate_data_config.AddInternalImmediateData(core::InternalImmediate::kFragDepthMin, 4,
+                                                       mod.symbols.New("depth_min"), ty.f32()),
         Success);
     ASSERT_EQ(
-        immediate_data_config.AddInternalImmediateData(8, mod.symbols.New("depth_max"), ty.f32()),
+        immediate_data_config.AddInternalImmediateData(core::InternalImmediate::kFragDepthMax, 8,
+                                                       mod.symbols.New("depth_max"), ty.f32()),
         Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
     ShaderIOConfig config{immediate_data.Get()};
-    config.depth_range_offsets = {4, 8};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());

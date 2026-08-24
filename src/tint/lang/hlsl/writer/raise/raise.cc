@@ -108,14 +108,14 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     if (options.first_index_offset) {
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
-            options.first_index_offset.value(), module.symbols.New("tint_first_index_offset"),
-            module.Types().u32()));
+            core::InternalImmediate::kFirstVertexOffset, options.first_index_offset.value(),
+            module.symbols.New("tint_first_index_offset"), module.Types().u32()));
     }
 
     if (options.first_instance_offset) {
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
-            options.first_instance_offset.value(), module.symbols.New("tint_first_instance_offset"),
-            module.Types().u32()));
+            core::InternalImmediate::kFirstInstanceOffset, options.first_instance_offset.value(),
+            module.symbols.New("tint_first_instance_offset"), module.Types().u32()));
     }
 
     if (options.num_workgroups_start_offset) {
@@ -131,7 +131,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                 {module.symbols.New("num_workgroups_z"), module.Types().u32()},
             });
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
-            options.num_workgroups_start_offset.value(),
+            core::InternalImmediate::kNumWorkgroups, options.num_workgroups_start_offset.value(),
             module.symbols.New("tint_num_workgroups_start_offset"), num_workgroups_type));
     }
 
@@ -143,6 +143,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         buffer_sizes_array_elements_num = max_index + 1;
 
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
+            core::InternalImmediate::kStorageBufferSizes,
             array_length_from_uniform_options.buffer_sizes_offset.value(),
             module.symbols.New("buffer_sizes"),
             module.Types().array(module.Types().u32(), buffer_sizes_array_elements_num)));
@@ -156,6 +157,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         buffer_offsets_array_elements_num = max_index + 1;
 
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
+            core::InternalImmediate::kStorageBufferOffsets,
             array_offset_from_uniform_options.buffer_offsets_offset.value(),
             module.symbols.New("buffer_offsets"),
             module.Types().array(module.Types().u32(), buffer_offsets_array_elements_num)));
@@ -253,9 +255,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                     !array_length_from_uniform_options.ubo_binding.binding);
 
         TINT_CHECK_RESULT(core::ir::transform::ArrayLengthFromImmediates(
-            module, immediate_data_layout,
-            array_length_from_uniform_options.buffer_sizes_offset.value(),
-            buffer_sizes_array_elements_num,
+            module, immediate_data_layout, buffer_sizes_array_elements_num,
             array_length_from_uniform_options.bindpoint_to_size_index));
     } else {
         // Always fall back to ArrayLengthFromUniform when buffer_sizes_offset is not provided.
@@ -281,9 +281,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             .add_input_position_member = pixel_local_enabled,
             .truncate_interstage_variables = options.truncate_interstage_variables,
             .interstage_locations = std::move(options.interstage_locations),
-            .first_index_offset = options.first_index_offset,
-            .first_instance_offset = options.first_instance_offset,
-            .num_workgroups_start_offset = options.num_workgroups_start_offset,
         };
 
         TINT_CHECK_RESULT(raise::ShaderIO(module, config));
@@ -322,9 +319,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                     !array_offset_from_uniform_options.ubo_binding.binding);
 
         TINT_CHECK_RESULT(raise::ArrayOffsetFromImmediates(
-            module, immediate_data_layout,
-            array_offset_from_uniform_options.buffer_offsets_offset.value(),
-            buffer_offsets_array_elements_num,
+            module, immediate_data_layout, buffer_offsets_array_elements_num,
             array_offset_from_uniform_options.bindpoint_to_offset_index));
     } else if (array_offset_from_uniform_options.ubo_binding.group ||
                array_offset_from_uniform_options.ubo_binding.binding) {

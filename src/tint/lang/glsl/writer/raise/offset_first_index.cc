@@ -60,22 +60,22 @@ struct State {
 
             auto builtin = var->Attributes().builtin;
             if (builtin == core::BuiltinValue::kInstanceIndex) {
-                if (config.first_instance_offset) {
-                    AddOffset(var, *config.first_instance_offset);
-                }
+                AddOffsetIfNeeded(var, core::InternalImmediate::kFirstInstanceOffset);
             }
             if (builtin == core::BuiltinValue::kVertexIndex) {
-                if (config.first_vertex_offset) {
-                    AddOffset(var, *config.first_vertex_offset);
-                }
+                AddOffsetIfNeeded(var, core::InternalImmediate::kFirstVertexOffset);
             }
         }
     }
 
     /// Add an offset to the value loaded from @p var.
     /// @param var the variable that contains the builtin value
-    /// @param immediate_data_offset the offset in the immediate data where the offset is stored
-    void AddOffset(core::ir::Var* var, uint32_t immediate_data_offset) {
+    /// @param immediate_entry the immediate entry where the offset is stored
+    void AddOffsetIfNeeded(core::ir::Var* var, core::InternalImmediate immediate_entry) {
+        if (!config.immediate_data.HasImmediate(immediate_entry)) {
+            return;
+        }
+
         // ShaderIO transforms these input builtins such that they are loaded a single time and then
         // converted to u32. We add the offset to the result of the conversion.
         auto* load = GetSingularUse<core::ir::Load>(var);
@@ -89,9 +89,9 @@ struct State {
 
         // Load the offset from the immediate data structure and add it to the index.
         b.InsertAfter(index, [&] {
-            auto* immediate_data = config.immediate_data_layout.var;
-            auto idx = u32(config.immediate_data_layout.IndexOf(immediate_data_offset));
-            auto* offset = b.Load(b.Access<ptr<immediate, u32>>(immediate_data, idx));
+            auto* immediate_data = config.immediate_data.var;
+            auto idx = config.immediate_data.IndexOf(immediate_entry);
+            auto* offset = b.Load(b.Access<ptr<immediate, u32>>(immediate_data, u32(idx)));
             b.AddWithResult(offset_index, index, offset);
         });
     }

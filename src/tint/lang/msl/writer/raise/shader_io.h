@@ -50,9 +50,6 @@ struct ShaderIOConfig {
     bool emit_vertex_point_size = false;
     /// A fixed sample mask to combine into masks produced by fragment shaders.
     uint32_t fixed_sample_mask = UINT32_MAX;
-
-    /// Offsets for clamping frag depth
-    std::optional<Options::RangeOffsets> depth_range_offsets{};
 };
 
 /// ShaderIO is a transform that prepares entry point inputs and outputs for MSL codegen.

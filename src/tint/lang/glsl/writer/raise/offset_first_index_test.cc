@@ -63,8 +63,6 @@ TEST_F(GlslWriter_OffsetFirstIndexTest, NoModify_NoBuiltins) {
     EXPECT_EQ(immediate_data, Success);
 
     OffsetFirstIndexConfig config{immediate_data.Get()};
-    config.first_vertex_offset = 4;
-    config.first_instance_offset = 8;
     Run(OffsetFirstIndex, config);
     EXPECT_EQ(expect, str());
 }
@@ -180,14 +178,14 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(4, mod.symbols.New("first_vertex"),
-                                                             ty.u32()),
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                  core::InternalImmediate::kFirstVertexOffset, 4, mod.symbols.New("first_vertex"),
+                  ty.u32()),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
     OffsetFirstIndexConfig config{immediate_data.Get()};
-    config.first_vertex_offset = 4;
     Run(OffsetFirstIndex, config);
     EXPECT_EQ(expect, str());
 }
@@ -255,14 +253,14 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(4, mod.symbols.New("first_instance"),
-                                                             ty.u32()),
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                  core::InternalImmediate::kFirstInstanceOffset, 4,
+                  mod.symbols.New("first_instance"), ty.u32()),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
     OffsetFirstIndexConfig config{immediate_data.Get()};
-    config.first_instance_offset = 4;
     Run(OffsetFirstIndex, config);
     EXPECT_EQ(expect, str());
 }
@@ -334,18 +332,18 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(4, mod.symbols.New("first_vertex"),
-                                                             ty.u32()),
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                  core::InternalImmediate::kFirstVertexOffset, 4, mod.symbols.New("first_vertex"),
+                  ty.u32()),
               Success);
-    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(8, mod.symbols.New("first_instance"),
-                                                             ty.u32()),
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                  core::InternalImmediate::kFirstInstanceOffset, 8,
+                  mod.symbols.New("first_instance"), ty.u32()),
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
     OffsetFirstIndexConfig config{immediate_data.Get()};
-    config.first_vertex_offset = 4;
-    config.first_instance_offset = 8;
     Run(OffsetFirstIndex, config);
     EXPECT_EQ(expect, str());
 }

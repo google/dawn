@@ -67,8 +67,10 @@ struct State {
     /// @param binary the unsigned integer divide or modulo binary instruction
     void InjectNonConstantZero(core::ir::CoreBinary* binary) {
         b.InsertBefore(binary, [&] {
-            auto* zero = b.Load(b.Access<ptr<immediate, u32>>(config.immediate_var,
-                                                              u32(config.non_constant_zero_index)));
+            auto index =
+                config.immediate_data_layout.IndexOf(core::InternalImmediate::kNonConstantZero);
+            auto* zero =
+                b.Load(b.Access<ptr<immediate, u32>>(config.immediate_data_layout.var, u32(index)));
             binary->SetOperand(0U, b.Add(binary->LHS(), zero)->Result());
         });
     }

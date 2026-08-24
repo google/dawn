@@ -92,21 +92,21 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     if (options.first_instance_offset) {
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
-            options.first_instance_offset.value(), module.symbols.New("tint_first_instance"),
-            module.Types().u32()));
+            core::InternalImmediate::kFirstInstanceOffset, options.first_instance_offset.value(),
+            module.symbols.New("tint_first_instance"), module.Types().u32()));
     }
     if (options.first_vertex_offset) {
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
-            options.first_vertex_offset.value(), module.symbols.New("tint_first_vertex"),
-            module.Types().u32()));
+            core::InternalImmediate::kFirstVertexOffset, options.first_vertex_offset.value(),
+            module.symbols.New("tint_first_vertex"), module.Types().u32()));
     }
     if (options.depth_range_offsets) {
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
-            options.depth_range_offsets.value().min, module.symbols.New("tint_frag_depth_min"),
-            module.Types().f32()));
+            core::InternalImmediate::kFragDepthMin, options.depth_range_offsets.value().min,
+            module.symbols.New("tint_frag_depth_min"), module.Types().f32()));
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
-            options.depth_range_offsets.value().max, module.symbols.New("tint_frag_depth_max"),
-            module.Types().f32()));
+            core::InternalImmediate::kFragDepthMax, options.depth_range_offsets.value().max,
+            module.symbols.New("tint_frag_depth_max"), module.Types().f32()));
     }
     TINT_CHECK_RESULT_UNWRAP(immediate_data_layout, core::ir::transform::PrepareImmediateData(
                                                         module, immediate_data_config));
@@ -242,13 +242,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(core::ir::transform::RemoveContinueInSwitch(module));
 
     TINT_CHECK_RESULT(raise::ShaderIO(
-        module, raise::ShaderIOConfig{immediate_data_layout, options.depth_range_offsets,
-                                      options.bgra_swizzle_locations}));
+        module, raise::ShaderIOConfig{immediate_data_layout, options.bgra_swizzle_locations}));
 
     // Must come after ShaderIO as it operates on module-scope `in` variables.
-    TINT_CHECK_RESULT(raise::OffsetFirstIndex(
-        module, raise::OffsetFirstIndexConfig{immediate_data_layout, options.first_vertex_offset,
-                                              options.first_instance_offset}));
+    TINT_CHECK_RESULT(raise::OffsetFirstIndex(module, raise::OffsetFirstIndexConfig{
+                                                          .immediate_data = immediate_data_layout,
+                                                      }));
 
     TINT_CHECK_RESULT(core::ir::transform::DecomposeAccess(
         module, {.immediate = true, .minimum_array_size = options.minimum_immediate_size}));

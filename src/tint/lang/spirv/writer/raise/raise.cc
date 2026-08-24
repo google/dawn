@@ -109,11 +109,11 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     if (options.depth_range_offsets) {
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
-            options.depth_range_offsets.value().min, module.symbols.New("tint_frag_depth_min"),
-            module.Types().f32()));
+            core::InternalImmediate::kFragDepthMin, options.depth_range_offsets.value().min,
+            module.symbols.New("tint_frag_depth_min"), module.Types().f32()));
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
-            options.depth_range_offsets.value().max, module.symbols.New("tint_frag_depth_max"),
-            module.Types().f32()));
+            core::InternalImmediate::kFragDepthMax, options.depth_range_offsets.value().max,
+            module.symbols.New("tint_frag_depth_max"), module.Types().f32()));
     }
     TINT_CHECK_RESULT_UNWRAP(immediate_data_layout, core::ir::transform::PrepareImmediateData(
                                                         module, immediate_data_config));
@@ -265,7 +265,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                     .polyfill_f16_io = !options.extensions.use_storage_input_output_16,
                     .polyfill_pixel_center = options.polyfill_pixel_center,
                     .multisampled_framebuffer_fetch = options.multisampled_framebuffer_fetch,
-                    .depth_range_offsets = options.depth_range_offsets,
                 }));
 
     // Immediate data is decomposed after ShaderIO because ShaderIO can introduce new accesses

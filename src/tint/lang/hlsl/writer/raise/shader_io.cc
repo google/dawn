@@ -263,7 +263,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                                 "global_invocation_id");
         }
 
-        if (needs_num_workgroups && !config.num_workgroups_start_offset) {
+        if (needs_num_workgroups &&
+            !config.immediate_data_layout.HasImmediate(core::InternalImmediate::kNumWorkgroups)) {
             return Failure("num_workgroups required but no immediate offset provided");
         }
 
@@ -560,8 +561,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         }
         if (num_workgroups_index == idx) {
             auto* immediate_data = config.immediate_data_layout.var;
-            auto num_workgroup_idx = u32(
-                config.immediate_data_layout.IndexOf(config.num_workgroups_start_offset.value()));
+            auto num_workgroup_idx =
+                u32(config.immediate_data_layout.IndexOf(core::InternalImmediate::kNumWorkgroups));
             // num_workgroups is stored as a struct of three u32 members (4-byte aligned); load
             // each member and reconstruct the vec3<u32> value the builtin expects.
             auto* immediate_struct = config.immediate_data_layout.var->Result()
@@ -590,19 +591,21 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             auto* div = builder.Divide(1.0_f, w);
             auto* swizzle = builder.Swizzle(ty.vec3f(), v, {0, 1, 2});
             v = builder.Construct(ty.vec4f(), swizzle, div)->Result();
-        } else if (config.first_index_offset.has_value() &&
+        } else if (config.immediate_data_layout.HasImmediate(
+                       core::InternalImmediate::kFirstVertexOffset) &&
                    inputs[idx].attributes.builtin == core::BuiltinValue::kVertexIndex) {
             auto* immediate_data = config.immediate_data_layout.var;
-            auto first_index_offset_idx =
-                u32(config.immediate_data_layout.IndexOf(config.first_index_offset.value()));
+            auto first_index_offset_idx = u32(
+                config.immediate_data_layout.IndexOf(core::InternalImmediate::kFirstVertexOffset));
             auto first_index_offset =
                 builder.Access<ptr<immediate, u32>>(immediate_data, first_index_offset_idx);
             v = builder.Add(v, builder.Load(first_index_offset))->Result();
-        } else if (config.first_instance_offset.has_value() &&
+        } else if (config.immediate_data_layout.HasImmediate(
+                       core::InternalImmediate::kFirstInstanceOffset) &&
                    inputs[idx].attributes.builtin == core::BuiltinValue::kInstanceIndex) {
             auto* immediate_data = config.immediate_data_layout.var;
-            auto first_instance_offset_idx =
-                u32(config.immediate_data_layout.IndexOf(config.first_instance_offset.value()));
+            auto first_instance_offset_idx = u32(config.immediate_data_layout.IndexOf(
+                core::InternalImmediate::kFirstInstanceOffset));
             auto first_instance_offset =
                 builder.Access<ptr<immediate, u32>>(immediate_data, first_instance_offset_idx);
             v = builder.Add(v, builder.Load(first_instance_offset))->Result();

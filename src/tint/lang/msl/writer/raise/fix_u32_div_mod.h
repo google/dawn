@@ -39,11 +39,8 @@ class Module;
 namespace tint::msl::writer::raise {
 
 struct FixU32DivModConfig {
-    /// Immediate data variable.
-    core::ir::Var* immediate_var = nullptr;
-
-    /// Index of the non-constant zero value in the immediate structure.
-    uint32_t non_constant_zero_index = UINT32_MAX;
+    /// Immediate data layout.
+    const core::ir::transform::ImmediateDataLayout& immediate_data_layout;
 };
 
 /// FixU32DivMod is a transform that inserts a non-constant zero value into the RHS of all unsigned

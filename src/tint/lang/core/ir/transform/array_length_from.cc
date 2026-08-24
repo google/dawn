@@ -60,8 +60,6 @@ struct State {
 
     const core::ir::transform::ImmediateDataLayout& immediate_data_layout;
 
-    uint32_t buffer_sizes_offset = 0;
-
     uint32_t buffer_sizes_array_elements_num = 0;
 
     /// The IR builder.
@@ -473,7 +471,8 @@ struct State {
                     auto* buffer_sizes = b.Access(
                         ty.ptr(immediate, ty.array(ty.u32(), buffer_sizes_array_elements_num)),
                         immediate_data_layout.var,
-                        u32(immediate_data_layout.IndexOf(buffer_sizes_offset)));
+                        u32(immediate_data_layout.IndexOf(
+                            core::InternalImmediate::kStorageBufferSizes)));
                     auto* size_ptr = b.Access(ty.ptr(immediate, ty.u32()), buffer_sizes->Result(),
                                               u32(size_index));
                     total_buffer_size = b.Load(size_ptr)->Result();
@@ -549,7 +548,6 @@ Result<ArrayLengthResult> ArrayLengthFromUniform(
 Result<ArrayLengthResult> ArrayLengthFromImmediates(
     Module& ir,
     const core::ir::transform::ImmediateDataLayout& immediate_data_layout,
-    const uint32_t buffer_sizes_offset,
     const uint32_t buffer_sizes_array_elements_num,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index) {
     core::ir::AssertValid(ir, "before core.ArrayLengthFromImmediates");
@@ -559,7 +557,6 @@ Result<ArrayLengthResult> ArrayLengthFromImmediates(
                 .ubo_binding = {},
                 .bindpoint_to_size_index = bindpoint_to_size_index,
                 .immediate_data_layout = immediate_data_layout,
-                .buffer_sizes_offset = buffer_sizes_offset,
                 .buffer_sizes_array_elements_num = buffer_sizes_array_elements_num};
     state.Process();
 

@@ -57,15 +57,6 @@ struct ShaderIOConfig {
     /// Indicate which interstage io locations are actually used by the later stage.
     /// There can be at most 30 user defined interstage variables with locations.
     std::bitset<30> interstage_locations{};
-
-    /// The offset of the first_index_offset push constant.
-    std::optional<uint32_t> first_index_offset = std::nullopt;
-
-    /// The offset of the first_instance_offset push constant.
-    std::optional<uint32_t> first_instance_offset = std::nullopt;
-
-    /// Offsets of num_workgroups push constant.
-    std::optional<uint32_t> num_workgroups_start_offset = std::nullopt;
 };
 
 /// ShaderIO is a transform that prepares entry point inputs and outputs for HLSL codegen.

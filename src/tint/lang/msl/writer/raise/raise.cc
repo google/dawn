@@ -119,21 +119,22 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         buffer_sizes_array_elements_num = max_index + 1;
 
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
+            core::InternalImmediate::kStorageBufferSizes,
             array_length_from_constants.buffer_sizes_offset.value(),
             module.symbols.New("tint_storage_buffer_sizes"),
             module.Types().array(module.Types().u32(), buffer_sizes_array_elements_num)));
     }
     if (options.depth_range_offsets) {
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
-            options.depth_range_offsets.value().min, module.symbols.New("tint_frag_depth_min"),
-            module.Types().f32()));
+            core::InternalImmediate::kFragDepthMin, options.depth_range_offsets.value().min,
+            module.symbols.New("tint_frag_depth_min"), module.Types().f32()));
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
-            options.depth_range_offsets.value().max, module.symbols.New("tint_frag_depth_max"),
-            module.Types().f32()));
+            core::InternalImmediate::kFragDepthMax, options.depth_range_offsets.value().max,
+            module.symbols.New("tint_frag_depth_max"), module.Types().f32()));
     }
     TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
-        options.non_constant_zero_offset, module.symbols.New("tint_non_constant_zero"),
-        module.Types().u32()));
+        core::InternalImmediate::kNonConstantZero, options.non_constant_zero_offset,
+        module.symbols.New("tint_non_constant_zero"), module.Types().u32()));
 
     TINT_CHECK_RESULT_UNWRAP(immediate_data_layout, core::ir::transform::PrepareImmediateData(
                                                         module, immediate_data_config));
@@ -199,9 +200,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         TINT_IR_ASSERT(module, !array_length_from_constants.ubo_binding);
         TINT_CHECK_RESULT_UNWRAP(array_length_from_immediate_result,
                                  core::ir::transform::ArrayLengthFromImmediates(
-                                     module, immediate_data_layout,
-                                     array_length_from_constants.buffer_sizes_offset.value(),
-                                     buffer_sizes_array_elements_num,
+                                     module, immediate_data_layout, buffer_sizes_array_elements_num,
                                      array_length_from_constants.bindpoint_to_size_index));
         raise_result.needs_storage_buffer_sizes =
             array_length_from_immediate_result.needs_storage_buffer_sizes;
@@ -225,9 +224,12 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     // ConvertPrintToLog must come before ShaderIO as it may introduce entry point builtins.
     TINT_CHECK_RESULT(raise::ConvertPrintToLog(module));
 
-    TINT_CHECK_RESULT(raise::ShaderIO(
-        module, raise::ShaderIOConfig{immediate_data_layout, options.emit_vertex_point_size,
-                                      options.fixed_sample_mask, options.depth_range_offsets}));
+    TINT_CHECK_RESULT(
+        raise::ShaderIO(module, raise::ShaderIOConfig{
+                                    .immediate_data_layout = immediate_data_layout,
+                                    .emit_vertex_point_size = options.emit_vertex_point_size,
+                                    .fixed_sample_mask = options.fixed_sample_mask,
+                                }));
 
     raise::FixTypeLayoutConfig fix_type_layout_options{
         .replace_bool_with_u32 = options.workarounds.replace_workgroup_bool_with_u32,
@@ -267,9 +269,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     if (options.workarounds.fix_u32_div_mod) {
         raise::FixU32DivModConfig config{
-            .immediate_var = immediate_data_layout.var,
-            .non_constant_zero_index =
-                immediate_data_layout.IndexOf(options.non_constant_zero_offset),
+            .immediate_data_layout = immediate_data_layout,
         };
         TINT_CHECK_RESULT(raise::FixU32DivMod(module, config));
     }
