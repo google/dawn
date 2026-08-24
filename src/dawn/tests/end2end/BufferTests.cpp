@@ -259,6 +259,17 @@ TEST_P(BufferMappingTests, MapRead_InCallback) {
                     });
 }
 
+// Test that creating a buffer with `MapRead` but without `CopyDst` works.
+TEST_P(BufferMappingTests, MapReadWithoutCopyDst) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::MapRead;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, 4);
+    buffer.Unmap();
+}
+
 // Test that the simplest map write works.
 TEST_P(BufferMappingTests, MapWrite_Basic) {
     wgpu::Buffer buffer = CreateMapWriteBuffer(4);
@@ -527,6 +538,17 @@ TEST_P(BufferMappingTests, MapWrite_ManySimultaneous) {
     for (uint32_t i = 0; i < kBuffers; ++i) {
         EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffers[i], 0, kDataSize);
     }
+}
+
+// Test that creating a buffer with `MapWrite` but without `CopySrc` works.
+TEST_P(BufferMappingTests, MapWriteWithoutCopyDst) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::MapWrite;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 4);
+    buffer.Unmap();
 }
 
 // Test that the map offset isn't updated when the call is an error.

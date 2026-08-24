@@ -110,14 +110,16 @@ size_t D3D12BufferSizeAlignment(wgpu::BufferUsage usage) {
 }
 
 ResourceHeapKind GetResourceHeapKind(wgpu::BufferUsage bufferUsage, uint32_t resourceHeapTier) {
-    if (bufferUsage == (wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc)) {
+    if (bufferUsage == (wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc) ||
+        bufferUsage == wgpu::BufferUsage::MapWrite) {
         if (resourceHeapTier >= 2) {
             return ResourceHeapKind::Upload_AllBuffersAndTextures;
         } else {
             return ResourceHeapKind::Upload_OnlyBuffers;
         }
     }
-    if (bufferUsage == (wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead)) {
+    if (bufferUsage == (wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead) ||
+        bufferUsage == wgpu::BufferUsage::MapRead) {
         if (resourceHeapTier >= 2) {
             return ResourceHeapKind::Readback_AllBuffersAndTextures;
         } else {
