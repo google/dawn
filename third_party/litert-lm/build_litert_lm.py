@@ -171,9 +171,12 @@ def main():
 
         # Unconditionally clean the Bazel workspace before building to prevent
         # filesystem inconsistency errors on the bots.
-        # TODO(crbug.com/550309673): Try removing this clean step in a follow up if
-        # it's not actually necessary anymore.
-        clean_cmd = [str(bazelisk_path), 'clean']
+        clean_cmd = [
+            str(bazelisk_path),
+            f"--output_user_root={bazel_user_root}",
+            'clean',
+            '--expunge',
+        ]
         subprocess.run(clean_cmd, cwd=litert_lm_dir, env=env)
 
         proc = subprocess.run(build_cmd, cwd=litert_lm_dir, env=env)
