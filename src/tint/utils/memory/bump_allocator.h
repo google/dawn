@@ -38,6 +38,7 @@
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/memory/bitcast.h"
+#include "src/utils/compiler.h"
 
 // This file implements a custom allocator & iterator using C-style data access. It is not
 // unexpected that -Wunsafe-buffer-usage triggers in this code, since the type of dynamic access
@@ -45,8 +46,6 @@
 // simple ways to quiet these errors either a) negatively affects the performance by introducing
 // unneeded copes, or b) uses typing shenanigans to work around the warning that other
 // linters/analyses are unhappy with.
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
-
 namespace tint {
 
 /// A allocator for chunks of memory. The memory is owned by the BumpAllocator. When the
@@ -111,8 +110,10 @@ class BumpAllocator {
             }
         }
 
-        auto* base = Bitcast<std::byte*>(data.current) + sizeof(BlockHeader);
-        auto* ptr = base + data.current_offset;
+        // SAFETY: Block allocations are sized appropriately to hold header and data offset.
+        auto* base = DAWN_UNSAFE_BUFFERS(Bitcast<std::byte*>(data.current) + sizeof(BlockHeader));
+        // SAFETY: current_offset is guaranteed to be within the allocated block size.
+        auto* ptr = DAWN_UNSAFE_BUFFERS(base + data.current_offset);
         data.current_offset += size_in_bytes;
         data.count++;
         return ptr;
@@ -152,7 +153,5 @@ class BumpAllocator {
 };
 
 }  // namespace tint
-
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_UTILS_MEMORY_BUMP_ALLOCATOR_H_

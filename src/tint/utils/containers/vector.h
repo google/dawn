@@ -168,8 +168,6 @@ struct Slice {
 
 }  // namespace internal
 
-// VectorIterator intrinsically depends on pointer math, so will always cause UBU warnings
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 /// VectorIterator is a forward iterator of Vector elements.
 template <typename T, bool FORWARD = true>
 class VectorIterator {
@@ -309,14 +307,20 @@ class VectorIterator {
     /// Increments the iterator (prefix)
     /// @returns this VectorIterator
     VectorIterator& operator++() {
-        this->ptr_ = FORWARD ? this->ptr_ + 1 : this->ptr_ - 1;
+        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
+        // are satisfied by the caller (i.e., not incrementing past end() or decrementing before
+        // begin()).
+        this->ptr_ = DAWN_UNSAFE_BUFFERS(FORWARD ? this->ptr_ + 1 : this->ptr_ - 1);
         return *this;
     }
 
     /// Decrements the iterator (prefix)
     /// @returns this VectorIterator
     VectorIterator& operator--() {
-        this->ptr_ = FORWARD ? this->ptr_ - 1 : this->ptr_ + 1;
+        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
+        // are satisfied by the caller (i.e., not incrementing past end() or decrementing before
+        // begin()).
+        this->ptr_ = DAWN_UNSAFE_BUFFERS(FORWARD ? this->ptr_ - 1 : this->ptr_ + 1);
         return *this;
     }
 
@@ -324,7 +328,10 @@ class VectorIterator {
     /// @returns a VectorIterator that points to the element before the increment
     VectorIterator operator++(int) {
         VectorIterator res = *this;
-        this->ptr_ = FORWARD ? this->ptr_ + 1 : this->ptr_ - 1;
+        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
+        // are satisfied by the caller (i.e., not incrementing past end() or decrementing before
+        // begin()).
+        this->ptr_ = DAWN_UNSAFE_BUFFERS(FORWARD ? this->ptr_ + 1 : this->ptr_ - 1);
         return res;
     }
 
@@ -332,7 +339,10 @@ class VectorIterator {
     /// @returns a VectorIterator that points to the element before the decrement
     VectorIterator operator--(int) {
         VectorIterator res = *this;
-        this->ptr_ = FORWARD ? this->ptr_ - 1 : this->ptr_ + 1;
+        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
+        // are satisfied by the caller (i.e., not incrementing past end() or decrementing before
+        // begin()).
+        this->ptr_ = DAWN_UNSAFE_BUFFERS(FORWARD ? this->ptr_ - 1 : this->ptr_ + 1);
         return res;
     }
 
@@ -340,7 +350,10 @@ class VectorIterator {
     /// @param n the number of elements
     /// @returns this VectorIterator
     VectorIterator operator+=(std::ptrdiff_t n) {
-        this->ptr_ = FORWARD ? this->ptr_ + n : this->ptr_ - n;
+        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
+        // are satisfied by the caller (i.e., not incrementing past end() or decrementing before
+        // begin()).
+        this->ptr_ = DAWN_UNSAFE_BUFFERS(FORWARD ? this->ptr_ + n : this->ptr_ - n);
         return *this;
     }
 
@@ -348,7 +361,10 @@ class VectorIterator {
     /// @param n the number of elements
     /// @returns this VectorIterator
     VectorIterator operator-=(std::ptrdiff_t n) {
-        this->ptr_ = FORWARD ? this->ptr_ - n : this->ptr_ + n;
+        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
+        // are satisfied by the caller (i.e., not incrementing past end() or decrementing before
+        // begin()).
+        this->ptr_ = DAWN_UNSAFE_BUFFERS(FORWARD ? this->ptr_ - n : this->ptr_ + n);
         return *this;
     }
 
@@ -356,9 +372,15 @@ class VectorIterator {
     /// @returns a new VectorIterator progressed by @p n elements
     VectorIterator operator+(std::ptrdiff_t n) const {
 #if TINT_VECTOR_MUTATION_CHECKS_ENABLED
-        return VectorIterator{FORWARD ? ptr_ + n : ptr_ - n, iterator_count_};
+        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
+        // are satisfied by the caller (i.e., not incrementing past end() or decrementing before
+        // begin()).
+        return VectorIterator{DAWN_UNSAFE_BUFFERS(FORWARD ? ptr_ + n : ptr_ - n), iterator_count_};
 #else
-        return VectorIterator{FORWARD ? ptr_ + n : ptr_ - n};
+        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
+        // are satisfied by the caller (i.e., not incrementing past end() or decrementing before
+        // begin()).
+        return VectorIterator{DAWN_UNSAFE_BUFFERS(FORWARD ? ptr_ + n : ptr_ - n)};
 #endif
     }
 
@@ -366,16 +388,25 @@ class VectorIterator {
     /// @returns a new VectorIterator regressed by @p n elements
     VectorIterator operator-(std::ptrdiff_t n) const {
 #if TINT_VECTOR_MUTATION_CHECKS_ENABLED
-        return VectorIterator{FORWARD ? ptr_ - n : ptr_ + n, iterator_count_};
+        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
+        // are satisfied by the caller (i.e., not incrementing past end() or decrementing before
+        // begin()).
+        return VectorIterator{DAWN_UNSAFE_BUFFERS(FORWARD ? ptr_ - n : ptr_ + n), iterator_count_};
 #else
-        return VectorIterator{FORWARD ? ptr_ - n : ptr_ + n};
+        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
+        // are satisfied by the caller (i.e., not incrementing past end() or decrementing before
+        // begin()).
+        return VectorIterator{DAWN_UNSAFE_BUFFERS(FORWARD ? ptr_ - n : ptr_ + n)};
 #endif
     }
 
     /// @param other the other iterator
     /// @returns the number of elements between this iterator and @p other
     std::ptrdiff_t operator-(const VectorIterator& other) const {
-        return FORWARD ? ptr_ - other.ptr_ : other.ptr_ - ptr_;
+        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
+        // are satisfied by the caller, both iterators refer to the same vector allocation.
+        return FORWARD ? DAWN_UNSAFE_BUFFERS(ptr_ - other.ptr_)
+                       : DAWN_UNSAFE_BUFFERS(other.ptr_ - ptr_);
     }
 
   private:
@@ -384,7 +415,6 @@ class VectorIterator {
     std::atomic<uint32_t>* iterator_count_ = nullptr;
 #endif
 };
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 /// @param out the stream to write to
 /// @param it the VectorIterator
@@ -596,8 +626,6 @@ class Vector {
     /// be made
     size_t Capacity() const { return impl_.slice.buffer.size(); }
 
-    // Iterating the buffers to move
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
     /// Reserves memory to hold at least `new_cap` elements
     /// @param new_cap the new vector capacity
     void Reserve(size_t new_cap) {
@@ -607,14 +635,15 @@ class Vector {
             size_t len = impl_.slice.len;
             impl_.Allocate(new_cap);
             for (size_t i = 0; i < len; i++) {
-                new (&impl_.slice.buffer[i]) T(std::move(old_data[i]));
-                old_data[i].~T();
+                // SAFETY: old_data is a valid array of length `len` elements.
+                new (&impl_.slice.buffer[i]) T(std::move(DAWN_UNSAFE_BUFFERS(old_data[i])));
+                // SAFETY: old_data is a valid array of length `len` elements.
+                DAWN_UNSAFE_BUFFERS(old_data[i]).~T();
             }
             impl_.slice.len = len;
             impl_.Free(old_data);
         }
     }
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
     /// Resizes the vector to the given length, expanding capacity if necessary.
     /// New elements are zero-initialized
@@ -841,30 +870,40 @@ class Vector {
         return const_iterator{impl_.slice.buffer.data(), &iterator_count_};
     }
 
-    // STL end()/rbegin() is beyond the end of the span, so requires unsafe pointer math
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
     /// @returns a forward iterator to one-pass the last element of the vector
     iterator end() {
-        return iterator{impl_.slice.buffer.data() + impl_.slice.len, &iterator_count_};
+        // SAFETY: Implements the STL behaviour of end() being one beyond the end of the allocation,
+        // so depends on caller following the same restrictions, i.e. not dereferencing.
+        return iterator{DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len),
+                        &iterator_count_};
     }
 
     /// @returns a forward iterator to one-pass the last element of the vector
     const const_iterator end() const {
-        return const_iterator{impl_.slice.buffer.data() + impl_.slice.len, &iterator_count_};
+        // SAFETY: Implements the STL behaviour of end() being one beyond the end of the allocation,
+        // so depends on caller following the same restrictions, i.e. not dereferencing.
+        return const_iterator{DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len),
+                              &iterator_count_};
     }
 
     /// @returns a reverse iterator to the last element of the vector
     reverse_iterator rbegin() {
-        return reverse_iterator{impl_.slice.buffer.data() + impl_.slice.len, &iterator_count_} + 1;
+        // SAFETY: Implements the STL behaviour of rbegin() being one beyond the end of the
+        // allocation, so depends on caller following the same restrictions, i.e. not dereferencing.
+        return reverse_iterator{DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len),
+                                &iterator_count_} +
+               1;
     }
 
     /// @returns a reverse iterator to the last element of the vector
     const const_reverse_iterator rbegin() const {
-        return const_reverse_iterator{impl_.slice.buffer.data() + impl_.slice.len,
-                                      &iterator_count_} +
+        // SAFETY: Implements the STL behaviour of rbegin() being one beyond the end of the
+        // allocation, so depends on caller following the same restrictions, i.e. not dereferencing.
+        return const_reverse_iterator{
+                   DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len),
+                   &iterator_count_} +
                1;
     }
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
     /// @returns a reverse iterator to one element before the first element of the vector
     reverse_iterator rend() {
@@ -882,26 +921,36 @@ class Vector {
     /// @returns a forward iterator to the first element of the vector
     const const_iterator begin() const { return const_iterator{impl_.slice.buffer.data()}; }
 
-    // STL end()/rbegin() is beyond the end of the span, so requires unsafe pointer math
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
     /// @returns a forward iterator to one-pass the last element of the vector
-    iterator end() { return iterator{impl_.slice.buffer.data() + impl_.slice.len}; }
+    iterator end() {
+        // SAFETY: Implements the STL behaviour of end() being one beyond the end of the allocation,
+        // so depends on caller following the same restrictions, i.e. not dereferencing.
+        return iterator{DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len)};
+    }
 
     /// @returns a forward iterator to one-pass the last element of the vector
     const const_iterator end() const {
-        return const_iterator{impl_.slice.buffer.data() + impl_.slice.len};
+        // SAFETY: Implements the STL behaviour of end() being one beyond the end of the allocation,
+        // so depends on caller following the same restrictions, i.e. not dereferencing.
+        return const_iterator{DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len)};
     }
 
     /// @returns a reverse iterator to the last element of the vector
     reverse_iterator rbegin() {
-        return reverse_iterator{impl_.slice.buffer.data() + impl_.slice.len} + 1;
+        // SAFETY: Implements the STL behaviour of rbegin() being one beyond the end of the
+        // allocation, so depends on caller following the same restrictions, i.e. not dereferencing.
+        return reverse_iterator{DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len)} +
+               1;
     }
 
     /// @returns a reverse iterator to the last element of the vector
     const const_reverse_iterator rbegin() const {
-        return const_reverse_iterator{impl_.slice.buffer.data() + impl_.slice.len} + 1;
+        // SAFETY: Implements the STL behaviour of rbegin() being one beyond the end of the
+        // allocation, so depends on caller following the same restrictions, i.e. not dereferencing.
+        return const_reverse_iterator{
+                   DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len)} +
+               1;
     }
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
     /// @returns a reverse iterator to one element before the first element of the vector
     reverse_iterator rend() { return reverse_iterator{impl_.slice.buffer.data()} + 1; }
@@ -1370,14 +1419,15 @@ class VectorRef {
     /// @returns a pointer to the first element in the vector
     const T* begin() const { return slice_->buffer.data(); }
 
-    // STL end()/rbegin() is beyond the end of the span, so requires unsafe pointer math
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
     /// @returns a pointer to one past the last element in the vector
-    const T* end() const { return slice_->buffer.data() + slice_->len; }
+    const T* end() const {
+        // SAFETY: Implements the STL behaviour of end() being one beyond the end of the allocation,
+        // so depends on caller following the same restrictions, i.e. not dereferencing.
+        return DAWN_UNSAFE_BUFFERS(slice_->buffer.data() + slice_->len);
+    }
 
     /// @returns a reverse iterator starting with the last element in the vector
     auto rbegin() const { return std::reverse_iterator<const T*>(end()); }
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
     /// @returns the end for a reverse iterator
     auto rend() const { return std::reverse_iterator<const T*>(begin()); }

@@ -35,6 +35,7 @@
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/memory/bitcast.h"
+#include "src/utils/compiler.h"
 
 // This file implements a custom allocator & iterator using C-style data access. It is not
 // unexpected that -Wunsafe-buffer-usage triggers in this code, since the type of dynamic access
@@ -42,8 +43,6 @@
 // simple ways to quiet these errors either a) negatively affects the performance by introducing
 // unneeded copes, or b) uses typing shenanigans to work around the warning that other
 // linters/analyses are unhappy with.
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
-
 namespace tint {
 
 /// A container and allocator of objects of (or deriving from) the template type `T`.
@@ -268,7 +267,8 @@ class BlockAllocator {
         }
 
         auto* base = &block.current->data[0];
-        auto* ptr = tint::Bitcast<TYPE*>(base + block.current_offset);
+        // SAFETY: current_offset is guaranteed to be within the allocated Block data bounds.
+        auto* ptr = tint::Bitcast<TYPE*>(DAWN_UNSAFE_BUFFERS(base + block.current_offset));
         block.current_offset += sizeof(TYPE);
         return ptr;
     }
@@ -324,7 +324,5 @@ class BlockAllocator {
 };
 
 }  // namespace tint
-
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_UTILS_MEMORY_BLOCK_ALLOCATOR_H_

@@ -41,8 +41,6 @@
 TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
 // Some of these tests are inspecting the underlying pointers being used by iterators, so there is
 // no simple way to avoid unsafe buffer usage warnings.
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
-
 namespace tint::test {
 
 class C0 : public Castable<C0> {};
@@ -1976,15 +1974,18 @@ TEST(TintVectorTest, BeginEnd_NoSpill) {
     static_assert(!std::is_const_v<std::remove_reference_t<decltype(*vec.begin())>>);
     static_assert(!std::is_const_v<std::remove_reference_t<decltype(*vec.end())>>);
     EXPECT_EQ(&*vec.begin(), &vec[0]);
-    EXPECT_EQ(&*vec.end(), &vec[0] + 3);
+    // SAFETY: The vector has 3 elements, so &vec[0] + 3 represents the valid end-of-range pointer.
+    EXPECT_EQ(&*vec.end(), DAWN_UNSAFE_BUFFERS(&vec[0] + 3));
 }
 
 TEST(TintVectorTest, RbeginRend_NoSpill) {
     Vector<std::string, 3> vec{"front", "mid", "back"};
     static_assert(!std::is_const_v<std::remove_reference_t<decltype(*vec.rbegin())>>);
     static_assert(!std::is_const_v<std::remove_reference_t<decltype(*vec.rend())>>);
-    EXPECT_EQ(&*vec.rbegin(), &vec[0] + 2);
-    EXPECT_EQ(&*vec.rend(), &vec[0] - 1);
+    // SAFETY: The vector has 3 elements, so &vec[0] + 2 and &vec[0] - 1 represent the valid rbegin
+    // and rend pointers.
+    EXPECT_EQ(&*vec.rbegin(), DAWN_UNSAFE_BUFFERS(&vec[0] + 2));
+    EXPECT_EQ(&*vec.rend(), DAWN_UNSAFE_BUFFERS(&vec[0] - 1));
 }
 
 TEST(TintVectorTest, BeginEnd_WithSpill) {
@@ -1992,15 +1993,18 @@ TEST(TintVectorTest, BeginEnd_WithSpill) {
     static_assert(!std::is_const_v<std::remove_reference_t<decltype(*vec.begin())>>);
     static_assert(!std::is_const_v<std::remove_reference_t<decltype(*vec.end())>>);
     EXPECT_EQ(&*vec.begin(), &vec[0]);
-    EXPECT_EQ(&*vec.end(), &vec[0] + 3);
+    // SAFETY: The vector has 3 elements, so &vec[0] + 3 represents the valid end-of-range pointer.
+    EXPECT_EQ(&*vec.end(), DAWN_UNSAFE_BUFFERS(&vec[0] + 3));
 }
 
 TEST(TintVectorTest, RbeginRend_WithSpill) {
     Vector<std::string, 2> vec{"front", "mid", "back"};
     static_assert(!std::is_const_v<std::remove_reference_t<decltype(*vec.rbegin())>>);
     static_assert(!std::is_const_v<std::remove_reference_t<decltype(*vec.rend())>>);
-    EXPECT_EQ(&*vec.rbegin(), &vec[0] + 2);
-    EXPECT_EQ(&*vec.rend(), &vec[0] - 1);
+    // SAFETY: The vector has 3 elements, so &vec[0] + 2 and &vec[0] - 1 represent the valid rbegin
+    // and rend pointers.
+    EXPECT_EQ(&*vec.rbegin(), DAWN_UNSAFE_BUFFERS(&vec[0] + 2));
+    EXPECT_EQ(&*vec.rend(), DAWN_UNSAFE_BUFFERS(&vec[0] - 1));
 }
 
 TEST(TintVectorTest, ConstBeginEnd_NoSpill) {
@@ -2008,15 +2012,18 @@ TEST(TintVectorTest, ConstBeginEnd_NoSpill) {
     static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec.begin())>>);
     static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec.end())>>);
     EXPECT_EQ(&*vec.begin(), &vec[0]);
-    EXPECT_EQ(&*vec.end(), &vec[0] + 3);
+    // SAFETY: The vector has 3 elements, so &vec[0] + 3 represents the valid end-of-range pointer.
+    EXPECT_EQ(&*vec.end(), DAWN_UNSAFE_BUFFERS(&vec[0] + 3));
 }
 
 TEST(TintVectorTest, ConstRbeginRend_NoSpill) {
     const Vector<std::string, 3> vec{"front", "mid", "back"};
     static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec.rbegin())>>);
     static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec.rend())>>);
-    EXPECT_EQ(&*vec.rbegin(), &vec[0] + 2);
-    EXPECT_EQ(&*vec.rend(), &vec[0] - 1);
+    // SAFETY: The vector has 3 elements, so &vec[0] + 2 and &vec[0] - 1 represent the valid rbegin
+    // and rend pointers.
+    EXPECT_EQ(&*vec.rbegin(), DAWN_UNSAFE_BUFFERS(&vec[0] + 2));
+    EXPECT_EQ(&*vec.rend(), DAWN_UNSAFE_BUFFERS(&vec[0] - 1));
 }
 
 TEST(TintVectorTest, ConstBeginEnd_WithSpill) {
@@ -2024,15 +2031,18 @@ TEST(TintVectorTest, ConstBeginEnd_WithSpill) {
     static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec.begin())>>);
     static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec.end())>>);
     EXPECT_EQ(&*vec.begin(), &vec[0]);
-    EXPECT_EQ(&*vec.end(), &vec[0] + 3);
+    // SAFETY: The vector has 3 elements, so &vec[0] + 3 represents the valid end-of-range pointer.
+    EXPECT_EQ(&*vec.end(), DAWN_UNSAFE_BUFFERS(&vec[0] + 3));
 }
 
 TEST(TintVectorTest, ConstRbeginRend_WithSpill) {
     const Vector<std::string, 2> vec{"front", "mid", "back"};
     static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec.rbegin())>>);
     static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec.rend())>>);
-    EXPECT_EQ(&*vec.rbegin(), &vec[0] + 2);
-    EXPECT_EQ(&*vec.rend(), &vec[0] - 1);
+    // SAFETY: The vector has 3 elements, so &vec[0] + 2 and &vec[0] - 1 represent the valid rbegin
+    // and rend pointers.
+    EXPECT_EQ(&*vec.rbegin(), DAWN_UNSAFE_BUFFERS(&vec[0] + 2));
+    EXPECT_EQ(&*vec.rend(), DAWN_UNSAFE_BUFFERS(&vec[0] - 1));
 }
 
 TEST(TintVectorTest, Equality) {
@@ -2428,14 +2438,18 @@ TEST(TintVectorRefTest, BeginEnd) {
     static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec_ref.begin())>>);
     static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec_ref.end())>>);
     EXPECT_EQ(&*vec_ref.begin(), &vec[0]);
-    EXPECT_EQ(&*vec_ref.end(), &vec[0] + 3);
+    // SAFETY: The referenced vector has 3 elements, so &vec[0] + 3 represents the valid
+    // end-of-range pointer.
+    EXPECT_EQ(&*vec_ref.end(), DAWN_UNSAFE_BUFFERS(&vec[0] + 3));
 }
 
 TEST(TintVectorRefTest, RbeginRend) {
     Vector<std::string, 3> vec{"front", "mid", "back"};
     const VectorRef<std::string> vec_ref(vec);
-    EXPECT_EQ(&*vec_ref.rbegin(), &vec[0] + 2);
-    EXPECT_EQ(&*vec_ref.rend(), &vec[0] - 1);
+    // SAFETY: The referenced vector has 3 elements, so &vec[0] + 2 and &vec[0] - 1 represent the
+    // valid rbegin and rend pointers.
+    EXPECT_EQ(&*vec_ref.rbegin(), DAWN_UNSAFE_BUFFERS(&vec[0] + 2));
+    EXPECT_EQ(&*vec_ref.rend(), DAWN_UNSAFE_BUFFERS(&vec[0] - 1));
 }
 
 TEST(TintVectorRefTest, ostream) {
@@ -2464,5 +2478,4 @@ TINT_INSTANTIATE_TYPEINFO(tint::test::C1);
 TINT_INSTANTIATE_TYPEINFO(tint::test::C2a);
 TINT_INSTANTIATE_TYPEINFO(tint::test::C2b);
 
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 TINT_END_DISABLE_WARNING(UNREACHABLE_CODE);

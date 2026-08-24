@@ -27,20 +27,24 @@
 
 #include "src/tint/utils/command/args.h"
 
+#include <span>
+
+#include "src/utils/compiler.h"
+
 namespace tint::args {
 
-// Working with argv is known to always cause this warning to fire
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 tint::Vector<std::string_view, 8> Vectorize(int argc, const char** argv) {
     tint::Vector<std::string_view, 8> arguments;
+    // SAFETY: `argv` is guaranteed by the program entry point (argc/argv) to contain at least
+    // `argc` elements.
+    auto args = DAWN_UNSAFE_BUFFERS(std::span<const char* const>{argv, static_cast<size_t>(argc)});
     for (int i = 1; i < argc; i++) {
-        std::string_view arg(argv[i]);
+        std::string_view arg(args[static_cast<size_t>(i)]);
         if (!arg.empty()) {
-            arguments.Push(argv[i]);
+            arguments.Push(arg);
         }
     }
     return arguments;
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 }  // namespace tint::args

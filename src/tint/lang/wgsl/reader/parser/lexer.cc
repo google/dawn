@@ -163,13 +163,10 @@ const char& Lexer::at(uint32_t pos) const {
     return l[pos];
 }
 
-// This pointer is passed into std::from_chars which requires a pointer beyond the end of contiguous
-// range, not an end iterator, so will always hit this warning.
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 const char* Lexer::line_end() const {
-    return &(line()[length() - 1]) + 1;
+    // SAFETY: line() is a valid string_view, so line().data() + line().size() is bounds-safe.
+    return DAWN_UNSAFE_BUFFERS(line().data() + line().size());
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 std::string_view Lexer::substr(uint32_t offset, uint32_t count) {
     return line().substr(offset, count);

@@ -34,6 +34,7 @@
 #include <cstddef>
 
 #include "src/tint/utils/macros/compiler.h"
+#include "src/utils/compiler.h"
 
 // This implementation of CRC32 uses C idioms that trigger '-Wunsafe-buffer-usage', but by
 // inspecting the code one can see that they are not actually unsafe or an acceptable compromise in
@@ -74,8 +75,6 @@
 //
 // A replacement implementing would need to be comparable in performance, be usable in constexpr,
 // and have our confidence in its safety.
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
-
 namespace tint {
 
 /// CRC32 immutable lookup table data.
@@ -121,8 +120,12 @@ constexpr auto kCRC32LUT = std::to_array<uint32_t>({
 /// @see https://en.wikipedia.org/wiki/Cyclic_redundancy_check#CRC-32_algorithm
 constexpr uint32_t CRC32(const char* s) {
     uint32_t crc = 0xffffffff;
-    for (auto* p = s; *p != '\0'; ++p) {
-        crc = (crc >> 8) ^ kCRC32LUT[static_cast<uint8_t>(crc) ^ static_cast<uint8_t>(*p)];
+    // SAFETY: s is a null-terminated C-style string, so iterating until '\0' is bounds-safe.
+    for (auto* p = s; DAWN_UNSAFE_BUFFERS(*p) != '\0'; DAWN_UNSAFE_BUFFERS(++p)) {
+        // SAFETY: p is in bounds, and kCRC32LUT has 256 elements. The index is a uint8_t which is
+        // always < 256.
+        crc = DAWN_UNSAFE_BUFFERS((crc >> 8) ^
+                                  kCRC32LUT[static_cast<uint8_t>(crc) ^ static_cast<uint8_t>(*p)]);
     }
     return crc ^ 0xffffffff;
 }
@@ -134,13 +137,15 @@ inline uint32_t CRC32(const void* ptr, size_t size) {
     auto* p = static_cast<const uint8_t*>(ptr);
     uint32_t crc = 0xffffffff;
     while (size--) {
-        crc = (crc >> 8) ^ kCRC32LUT[static_cast<uint8_t>(crc) ^ *p++];
+        // SAFETY: size represents the valid bounds of ptr. Indexing kCRC32LUT is bounds-safe as the
+        // index is uint8_t.
+        crc = DAWN_UNSAFE_BUFFERS((crc >> 8) ^ kCRC32LUT[static_cast<uint8_t>(crc) ^ *p]);
+        // SAFETY: Increment is safe if original ptr and size are valid.
+        DAWN_UNSAFE_BUFFERS(++p);
     }
     return crc ^ 0xffffffff;
 }
 
 }  // namespace tint
-
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_UTILS_MATH_CRC32_H_

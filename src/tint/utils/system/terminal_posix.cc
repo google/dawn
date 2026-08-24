@@ -94,18 +94,20 @@ std::optional<bool> TerminalIsDarkImpl(FILE* out) {
         // These macros introduce identifiers that start with `__` and use c-style memory access,
         // thus cause warnings.
         TINT_BEGIN_DISABLE_WARNING(RESERVED_IDENTIFIER);
-        TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
         fd_set rfds{};
-        FD_ZERO(&rfds);
-        FD_SET(STDIN_FILENO, &rfds);
+        // SAFETY: fd_set macro expansions use unsafe buffer operations internally.
+        DAWN_UNSAFE_BUFFERS(FD_ZERO(&rfds));
+        // SAFETY: fd_set macro expansions use unsafe buffer operations internally.
+        DAWN_UNSAFE_BUFFERS(FD_SET(STDIN_FILENO, &rfds));
 
         timeval tv{};
         tv.tv_sec = 0;
         tv.tv_usec = 100'000;
         int res = select(STDIN_FILENO + 1, &rfds, nullptr, nullptr, &tv);
-        return res > 0 && FD_ISSET(STDIN_FILENO, &rfds);
-        TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+        // SAFETY: fd_set macro expansions use unsafe buffer operations internally.
+        bool isset = DAWN_UNSAFE_BUFFERS(FD_ISSET(STDIN_FILENO, &rfds));
         TINT_END_DISABLE_WARNING(RESERVED_IDENTIFIER);
+        return res > 0 && isset;
     };
 
     // Helpers for parsing the response.

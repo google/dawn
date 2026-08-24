@@ -33,16 +33,18 @@
 #include "src/tint/cmd/fuzz/common/helper.h"
 #include "src/tint/utils/command/cli.h"
 #include "src/tint/utils/containers/vector.h"
+#include "src/utils/compiler.h"
 
 namespace tint::fuzz::common {
 
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 int ParseFuzzerOptions(FuzzerType type, int* argc, char*** argv, Options* options) {
     tint::cli::OptionSet opts;
 
     tint::Vector<std::string_view, 8> arguments;
     for (int i = 1; i < *argc; i++) {
-        std::string_view arg((*argv)[i]);
+        // SAFETY: `*argv` comes from program main entry point and has at least `*argc` valid
+        // elements.
+        std::string_view arg(DAWN_UNSAFE_BUFFERS((*argv)[i]));
         if (!arg.empty()) {
             arguments.Push(arg);
         }
@@ -56,7 +58,9 @@ int ParseFuzzerOptions(FuzzerType type, int* argc, char*** argv, Options* option
         std::cerr << "Standard libfuzzer ";  // libfuzzer will print 'Usage:'
         static char help[] = "-help=1";
         *argc = 2;
-        (*argv)[1] = help;
+        // SAFETY: `*argv` is guaranteed by the program entry point to have at least 2 valid
+        // elements.
+        DAWN_UNSAFE_BUFFERS((*argv)[1]) = help;
     };
 
     auto& opt_help = opts.Add<tint::cli::BoolOption>("help", "shows the usage");
@@ -125,6 +129,5 @@ int ParseFuzzerOptions(FuzzerType type, int* argc, char*** argv, Options* option
 
     return 0;
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 }  // namespace tint::fuzz::common
