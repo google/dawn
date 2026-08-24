@@ -3359,7 +3359,7 @@ Eval::Result Eval::round(const core::type::Type* ty,
                 if (std::signbit(integral_val)) {
                     integral_val = std::abs(integral_val - 1);
                 }
-                if (uint64_t(integral_val) % 2 == 0) {
+                if (static_cast<uint64_t>(integral_val) % 2 == 0) {
                     result = NumberT(std::floor(e.value));
                 } else {
                     result = NumberT(std::ceil(e.value));
@@ -3614,7 +3614,7 @@ Eval::Result Eval::unpack2x16float(const core::type::Type* ty,
     Vector<const Value*, 2> els;
     els.Reserve(2);
     for (size_t i = 0; i < 2; ++i) {
-        auto in = f16::FromBits(uint16_t((e >> (16 * i)) & 0x0000'ffff));
+        auto in = f16::FromBits(static_cast<uint16_t>((e >> (16 * i)) & 0x0000'ffff));
         auto val = CheckedConvert<f32>(in);
         if (val != Success) {
             AddError(source) << OverflowErrorMessage(in, "f32");
@@ -3638,8 +3638,9 @@ Eval::Result Eval::unpack2x16snorm(const core::type::Type* ty,
     Vector<const Value*, 2> els;
     els.Reserve(2);
     for (size_t i = 0; i < 2; ++i) {
-        auto val = f32(
-            std::max(static_cast<float>(int16_t((e >> (16 * i)) & 0x0000'ffff)) / 32767.f, -1.f));
+        auto val = f32(std::max(
+            static_cast<float>(static_cast<int16_t>((e >> (16 * i)) & 0x0000'ffff)) / 32767.f,
+            -1.f));
         TINT_CHECK_RESULT_UNWRAP(el, CreateScalar(source, inner_ty, val));
         els.Push(el);
     }
@@ -3655,7 +3656,8 @@ Eval::Result Eval::unpack2x16unorm(const core::type::Type* ty,
     Vector<const Value*, 2> els;
     els.Reserve(2);
     for (size_t i = 0; i < 2; ++i) {
-        auto val = f32(static_cast<float>(uint16_t((e >> (16 * i)) & 0x0000'ffff)) / 65535.f);
+        auto val =
+            f32(static_cast<float>(static_cast<uint16_t>((e >> (16 * i)) & 0x0000'ffff)) / 65535.f);
         TINT_CHECK_RESULT_UNWRAP(el, CreateScalar(source, inner_ty, val));
         els.Push(el);
     }
@@ -3671,8 +3673,8 @@ Eval::Result Eval::unpack4x8snorm(const core::type::Type* ty,
     Vector<const Value*, 4> els;
     els.Reserve(4);
     for (size_t i = 0; i < 4; ++i) {
-        auto val =
-            f32(std::max(static_cast<float>(int8_t((e >> (8 * i)) & 0x0000'00ff)) / 127.f, -1.f));
+        auto val = f32(std::max(
+            static_cast<float>(static_cast<int8_t>((e >> (8 * i)) & 0x0000'00ff)) / 127.f, -1.f));
         TINT_CHECK_RESULT_UNWRAP(el, CreateScalar(source, inner_ty, val));
         els.Push(el);
     }
@@ -3688,7 +3690,8 @@ Eval::Result Eval::unpack4x8unorm(const core::type::Type* ty,
     Vector<const Value*, 4> els;
     els.Reserve(4);
     for (size_t i = 0; i < 4; ++i) {
-        auto val = f32(static_cast<float>(uint8_t((e >> (8 * i)) & 0x0000'00ff)) / 255.f);
+        auto val =
+            f32(static_cast<float>(static_cast<uint8_t>((e >> (8 * i)) & 0x0000'00ff)) / 255.f);
         TINT_CHECK_RESULT_UNWRAP(el, CreateScalar(source, inner_ty, val));
         els.Push(el);
     }

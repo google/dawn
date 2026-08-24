@@ -356,14 +356,14 @@ core::Number<core::detail::NumberKindF16> f16::FromBits(uint16_t bits) {
         return f16(-std::numeric_limits<f16::type>::infinity());
     }
 
-    auto f16_sign_bit = uint32_t(bits & kF16SignMask);
+    auto f16_sign_bit = static_cast<uint32_t>(bits & kF16SignMask);
     // If none of the other bits are set we have a 0. If only the sign bit is set we have a -0.
     if ((bits & ~kF16SignMask) == 0) {
         return f16(f16_sign_bit > 0 ? -0.f : 0.f);
     }
 
-    auto f16_mantissa = uint32_t(bits & kF16MantissaMask);
-    auto f16_biased_exponent = uint32_t(bits & kF16ExponentMask);
+    auto f16_mantissa = static_cast<uint32_t>(bits & kF16MantissaMask);
+    auto f16_biased_exponent = static_cast<uint32_t>(bits & kF16ExponentMask);
 
     // F16 NaN has all expoennt bits set and at least one mantissa bit set
     if (((f16_biased_exponent & kF16ExponentMask) == kF16ExponentMask) && f16_mantissa != 0) {

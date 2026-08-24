@@ -465,7 +465,7 @@ struct State {
         ResourceType res_type = core::type::DefaultResourceTypeFor(tex_ty);
         if (texture_kind->Is<ir::Constant>()) {
             auto val = texture_kind->As<ir::Constant>()->Value()->ValueAs<uint32_t>();
-            return b.Constant(val == uint32_t(res_type));
+            return b.Constant(val == static_cast<uint32_t>(res_type));
         }
         return b.Equal(texture_kind, u32(res_type))->Result();
     }
@@ -533,7 +533,7 @@ struct State {
         // we know it isn't filtering.
         if (sampler_kind->Is<core::ir::Constant>() &&
             sampler_kind->As<core::ir::Constant>()->Value()->ValueAs<uint32_t>() ==
-                uint32_t(ResourceType::kSampler_non_filtering)) {
+                static_cast<uint32_t>(ResourceType::kSampler_non_filtering)) {
             return;
         }
 

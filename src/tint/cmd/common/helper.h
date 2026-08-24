@@ -329,7 +329,8 @@ bool ReadStdinImpl(std::vector<T>* buffer) {
         // std::min for extra safety
         size_t items_read = std::min(chunk.size(), bytes_read / sizeof(T));
         buffer->reserve(buffer->size() + items_read);
-        std::copy(chunk.begin(), chunk.begin() + int32_t(items_read), std::back_inserter(*buffer));
+        std::copy(chunk.begin(), chunk.begin() + static_cast<ptrdiff_t>(items_read),
+                  std::back_inserter(*buffer));
     }
     return true;
 }

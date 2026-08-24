@@ -748,7 +748,7 @@ const Inspector::EntryPointTextureMetadata& Inspector::ComputeTextureMetadata(
 
                     // A texture of `sem::Call` means we're dealing with a `getResource` or
                     // `hasResource` call. Skip it.
-                    if (call->Arguments()[size_t(texture_index)]->Is<sem::Call>()) {
+                    if (call->Arguments()[static_cast<size_t>(texture_index)]->Is<sem::Call>()) {
                         return;
                     }
 
@@ -759,12 +759,14 @@ const Inspector::EntryPointTextureMetadata& Inspector::ComputeTextureMetadata(
                     const GlobalSet* sampler_globals = &scratch_sampler_global;
                     if (sampler_index != -1) {
                         sampler_globals = GetGlobalsForArgument(
-                            fn, call->Arguments()[size_t(sampler_index)], &scratch_sampler_global);
+                            fn, call->Arguments()[static_cast<size_t>(sampler_index)],
+                            &scratch_sampler_global);
                     }
 
                     GlobalSet scratch_texture_global;
                     const GlobalSet* texture_globals = GetGlobalsForArgument(
-                        fn, call->Arguments()[size_t(texture_index)], &scratch_texture_global);
+                        fn, call->Arguments()[static_cast<size_t>(texture_index)],
+                        &scratch_texture_global);
 
                     RecordBuiltinCallMetadata(call, builtin, *texture_globals, *sampler_globals);
                 });

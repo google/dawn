@@ -39,6 +39,7 @@
 #include <vector>
 
 #include "src/tint/utils/ice/ice.h"
+#include "src/utils/numeric.h"
 
 #define SPV_ENABLE_UTILITY_CODE
 #include "spirv/unified1/spirv.hpp11"
@@ -981,7 +982,7 @@ class Parser {
             default:
                 break;
         }
-        TINT_ICE() << "invalid image format: " << int(fmt);
+        TINT_ICE() << "invalid image format: " << dawn::to_underlying(fmt);
     }
 
     /// @param type_id the pointer result_id
@@ -1822,8 +1823,10 @@ class Parser {
                 for (const spvtools::opt::Instruction& inst :
                      spirv_context_->module()->annotations()) {
                     if (inst.opcode() != spv::Op::OpDecorate ||
-                        inst.GetSingleWordInOperand(1) != uint32_t(spv::Decoration::BuiltIn) ||
-                        inst.GetSingleWordInOperand(2) != uint32_t(spv::BuiltIn::WorkgroupSize)) {
+                        inst.GetSingleWordInOperand(1) !=
+                            dawn::to_underlying(spv::Decoration::BuiltIn) ||
+                        inst.GetSingleWordInOperand(2) !=
+                            dawn::to_underlying(spv::BuiltIn::WorkgroupSize)) {
                         continue;
                     }
                     uint32_t id = inst.GetSingleWordInOperand(0);
@@ -3483,31 +3486,31 @@ class Parser {
         uint32_t memory = get_constant(1);
         uint32_t semantics = get_constant(2);
 
-        TINT_ASSERT(execution == uint32_t(spv::Scope::Workgroup))
+        TINT_ASSERT(execution == dawn::to_underlying(spv::Scope::Workgroup))
             << "unsupported control barrier execution scope: "
             << "expected Workgroup (2), got: " << execution;
 
-        if (semantics & uint32_t(spv::MemorySemanticsMask::AcquireRelease)) {
-            semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease);
+        if (semantics & dawn::to_underlying(spv::MemorySemanticsMask::AcquireRelease)) {
+            semantics &= ~dawn::to_underlying(spv::MemorySemanticsMask::AcquireRelease);
         } else {
             TINT_ICE() << "control barrier semantics requires acquire and release";
         }
-        TINT_ASSERT(memory == uint32_t(spv::Scope::Workgroup))
+        TINT_ASSERT(memory == dawn::to_underlying(spv::Scope::Workgroup))
             << "control barrier requires workgroup memory scope";
 
-        if (semantics & uint32_t(spv::MemorySemanticsMask::WorkgroupMemory)) {
+        if (semantics & dawn::to_underlying(spv::MemorySemanticsMask::WorkgroupMemory)) {
             EmitWithoutSpvResult(b_.Call(ty_.void_(), core::BuiltinFn::kWorkgroupBarrier));
-            semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::WorkgroupMemory);
+            semantics &= ~dawn::to_underlying(spv::MemorySemanticsMask::WorkgroupMemory);
         }
 
-        if (semantics & uint32_t(spv::MemorySemanticsMask::UniformMemory)) {
+        if (semantics & dawn::to_underlying(spv::MemorySemanticsMask::UniformMemory)) {
             EmitWithoutSpvResult(b_.Call(ty_.void_(), core::BuiltinFn::kStorageBarrier));
-            semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::UniformMemory);
+            semantics &= ~dawn::to_underlying(spv::MemorySemanticsMask::UniformMemory);
         }
 
-        if (semantics & uint32_t(spv::MemorySemanticsMask::ImageMemory)) {
+        if (semantics & dawn::to_underlying(spv::MemorySemanticsMask::ImageMemory)) {
             EmitWithoutSpvResult(b_.Call(ty_.void_(), core::BuiltinFn::kTextureBarrier));
-            semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::ImageMemory);
+            semantics &= ~dawn::to_underlying(spv::MemorySemanticsMask::ImageMemory);
         }
 
         TINT_ASSERT(!semantics) << "unsupported control barrier semantics: " << semantics;

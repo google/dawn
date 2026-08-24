@@ -310,7 +310,7 @@ struct State {
             if (cur_ty->Is<core::type::Matrix>()) {
                 TINT_ASSERT(matrix_index == -1);
                 mat_ty = cur_ty->As<core::type::Matrix>();
-                matrix_index = int32_t(i);
+                matrix_index = static_cast<int32_t>(i);
             }
         }
 

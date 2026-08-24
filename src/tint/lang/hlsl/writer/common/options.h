@@ -100,7 +100,7 @@ struct PixelLocalAttachment {
     };
 
     // Pixel local storage attachment index
-    uint32_t index = uint32_t(-1);
+    uint32_t index = ~uint32_t{0};
 
     // Pixel local storage attachment format
     TexelFormat format = TexelFormat::kUndefined;

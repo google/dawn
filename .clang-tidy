@@ -42,7 +42,6 @@ Checks:
   #- -bugprone-misplaced-widening-cast
   #- -bugprone-narrowing-conversions
   #- -bugprone-too-small-loop-variable
-  #- -modernize-avoid-c-style-cast  # has fixits, but for integer casts we'll want to fix this another way (braces instead of parentheses)
   #- -modernize-use-integer-sign-comparison  # has fixits, but in most cases we'll want to fix this another way (fix types so they match)
 
   ## P1. Likely to help with hardening.

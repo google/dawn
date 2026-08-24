@@ -59,6 +59,7 @@
 #include "src/tint/utils/internal_limits.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/styled_text.h"
+#include "src/utils/numeric.h"
 
 namespace tint::core::ir::validator {
 namespace {
@@ -1492,7 +1493,7 @@ void Functional::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
         for (uint32_t i = 0; i < overload.parameters.Length(); ++i) {
             auto& p = overload.parameters[i];
             if (p.usage == usage) {
-                return int32_t(i);
+                return i;
             }
         }
         return std::nullopt;
