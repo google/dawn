@@ -74,11 +74,11 @@ static const YUVTestData kGreen = {
 static const YUVTestData kBlue = {
     0.0722, 1.0, 0.4937, {0.0, 0.0, 1.0, 1.0}, utils::RGBA8::kBlue,
 };
-static const YUVTestData kColor1 = {0.6402,
-                                    0.3214,
-                                    0.6624,
-                                    {246 / 255.0, 169 / 255.0, 89 / 255.0, 1},
-                                    {246, 169, 89, 255}};
+static const YUVTestData kColor1 = {163 / 255.0,
+                                    82 / 255.0,
+                                    168 / 255.0,
+                                    {244 / 255.0, 169 / 255.0, 89 / 255.0, 1},
+                                    {244, 169, 89, 255}};
 
 template <typename Parent>
 class ExternalTextureTestsBase : public Parent {
@@ -666,9 +666,6 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
 
     // TODO(https://crbug.com/468988322): Fails because of precision issues on Mac AMD.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsAMD());
-
-    // TODO(crbug.com/500766620): Fails on Windows 11/AMD RX 5500 XT.
-    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD());
 
     // TODO(crbug.com/522868202): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
@@ -1466,9 +1463,6 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
 
     // TODO(https://crbug.com/468988322): Fails because of precision issues on Mac AMD.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsAMD());
-
-    // TODO(crbug.com/500766620): Fails on Windows 11/AMD RX 5500 XT.
-    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD());
 
     // TODO(crbug.com/522868202): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
