@@ -241,9 +241,6 @@ struct Options {
     /// This is potentially used for truncating unused interstage outputs at current shader stage.
     std::bitset<kMaxInterStageLocations> interstage_locations;
 
-    /// The binding point to use for information passed via root constants.
-    std::optional<BindingPoint> root_constant_binding_point;
-
     /// Immediate binding point info
     std::optional<BindingPoint> immediate_binding_point;
 
@@ -290,7 +287,6 @@ struct Options {
                  array_length_from_uniform,
                  array_offset_from_uniform,
                  interstage_locations,
-                 root_constant_binding_point,
                  immediate_binding_point,
                  first_index_offset,
                  first_instance_offset,

@@ -275,13 +275,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     const bool pixel_local_enabled = !options.pixel_local.attachments.empty();
 
-    // ShaderIO must be run before DecomposeAccess because it might
-    // introduce a uniform buffer for kNumWorkgroups.
     {
         raise::ShaderIOConfig config = {
             .immediate_data_layout = immediate_data_layout,
-            .num_workgroups_binding = options.root_constant_binding_point,
-            .first_index_offset_binding = options.root_constant_binding_point,
             .add_input_position_member = pixel_local_enabled,
             .truncate_interstage_variables = options.truncate_interstage_variables,
             .interstage_locations = std::move(options.interstage_locations),
