@@ -6,8 +6,8 @@ struct main_inputs {
 };
 
 
-cbuffer cbuffer_tint_num_workgroups : register(b0) {
-  uint4 tint_num_workgroups[1];
+cbuffer cbuffer_tint_immediate_data : register(b0) {
+  uint4 tint_immediate_data[1];
 };
 void main_inner(uint3 local_invocation_id, uint local_invocation_index, uint3 global_invocation_id, uint3 workgroup_id, uint3 num_workgroups) {
   uint foo = ((((local_invocation_id.x + local_invocation_index) + global_invocation_id.x) + workgroup_id.x) + num_workgroups.x);
@@ -15,6 +15,6 @@ void main_inner(uint3 local_invocation_id, uint local_invocation_index, uint3 gl
 
 [numthreads(1, 1, 1)]
 void main(main_inputs inputs) {
-  main_inner(inputs.local_invocation_id, inputs.local_invocation_index, inputs.global_invocation_id, inputs.workgroup_id, tint_num_workgroups[0u].xyz);
+  main_inner(inputs.local_invocation_id, inputs.local_invocation_index, inputs.global_invocation_id, inputs.workgroup_id, uint3(tint_immediate_data[0u].x, tint_immediate_data[0u].y, tint_immediate_data[0u].z));
 }
 

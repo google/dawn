@@ -14,8 +14,8 @@ struct main_inputs {
 };
 
 
-cbuffer cbuffer_tint_num_workgroups : register(b0) {
-  uint4 tint_num_workgroups[1];
+cbuffer cbuffer_tint_immediate_data : register(b0) {
+  uint4 tint_immediate_data[1];
 };
 void main_inner(ComputeInputs inputs) {
   uint foo = ((((inputs.local_invocation_id.x + inputs.local_invocation_index) + inputs.global_invocation_id.x) + inputs.workgroup_id.x) + inputs.num_workgroups.x);
@@ -23,7 +23,7 @@ void main_inner(ComputeInputs inputs) {
 
 [numthreads(1, 1, 1)]
 void main(main_inputs inputs) {
-  ComputeInputs v = {inputs.ComputeInputs_local_invocation_id, inputs.ComputeInputs_local_invocation_index, inputs.ComputeInputs_global_invocation_id, inputs.ComputeInputs_workgroup_id, tint_num_workgroups[0u].xyz};
+  ComputeInputs v = {inputs.ComputeInputs_local_invocation_id, inputs.ComputeInputs_local_invocation_index, inputs.ComputeInputs_global_invocation_id, inputs.ComputeInputs_workgroup_id, uint3(tint_immediate_data[0u].x, tint_immediate_data[0u].y, tint_immediate_data[0u].z)};
   main_inner(v);
 }
 
