@@ -224,3 +224,38 @@ func TestCheckInputFileType(t *testing.T) {
 		})
 	}
 }
+
+func TestTaskModeAndFuzzModeString(t *testing.T) {
+	taskTests := []struct {
+		mode     TaskMode
+		expected string
+	}{
+		{TaskModeRun, "run"},
+		{TaskModeCheck, "check"},
+		{TaskModeGenerate, "generate"},
+		{TaskModeTriage, "triage"},
+		{TaskModeBisect, "bisect"},
+		{TaskModeBisectStep, "bisect-step"},
+		{TaskModeExperiment, "experiment"},
+		{TaskMode(-1), "<unknown> (-1)"},
+		{TaskMode(99), "<unknown> (99)"},
+	}
+
+	for _, tc := range taskTests {
+		require.Equal(t, tc.expected, tc.mode.String())
+	}
+
+	fuzzTests := []struct {
+		mode     FuzzMode
+		expected string
+	}{
+		{FuzzModeWgsl, "wgsl"},
+		{FuzzModeIr, "ir"},
+		{FuzzMode(-1), "<unknown> (-1)"},
+		{FuzzMode(99), "<unknown> (99)"},
+	}
+
+	for _, tc := range fuzzTests {
+		require.Equal(t, tc.expected, tc.mode.String())
+	}
+}

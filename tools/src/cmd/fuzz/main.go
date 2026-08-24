@@ -55,6 +55,27 @@ import (
 
 type TaskMode int
 
+func (t TaskMode) String() string {
+	switch t {
+	case TaskModeRun:
+		return "run"
+	case TaskModeCheck:
+		return "check"
+	case TaskModeGenerate:
+		return "generate"
+	case TaskModeTriage:
+		return "triage"
+	case TaskModeBisect:
+		return "bisect"
+	case TaskModeBisectStep:
+		return "bisect-step"
+	case TaskModeExperiment:
+		return "experiment"
+	default:
+		return fmt.Sprintf("<unknown> (%d)", t)
+	}
+}
+
 const (
 	TaskModeRun TaskMode = iota
 	TaskModeCheck
@@ -74,7 +95,7 @@ func (f FuzzMode) String() string {
 	case FuzzModeIr:
 		return "ir"
 	default:
-		return "<unknown>"
+		return fmt.Sprintf("<unknown> (%d)", f)
 	}
 }
 
@@ -375,7 +396,7 @@ func run(c *mainConfig) error {
 
 	t, err := generateTaskConfig(c.cmdMode, c)
 	if err != nil {
-		return fmt.Errorf("failed to generate task config for command mode %d: %w", c.cmdMode, err)
+		return fmt.Errorf("failed to generate task config for command mode %v: %w", c.cmdMode, err)
 	}
 	queue = append(queue, t)
 
@@ -397,7 +418,7 @@ func run(c *mainConfig) error {
 		case TaskModeExperiment:
 			err = runExperiment(t)
 		default:
-			err = fmt.Errorf("unknown task mode %d", t.taskMode)
+			err = fmt.Errorf("unknown task mode %v", t.taskMode)
 		}
 		if err != nil {
 			return err
@@ -479,7 +500,7 @@ func checkFuzzer(t *taskConfig) error {
 	case FuzzModeWgsl:
 		files, err = glob.Glob(filepath.Join(t.inputs, "**.wgsl"), t.osWrapper)
 	default:
-		err = fmt.Errorf("unknown fuzzer mode %d", t.fuzzMode)
+		err = fmt.Errorf("unknown fuzzer mode %v", t.fuzzMode)
 	}
 	if err != nil {
 		return err
