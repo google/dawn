@@ -133,14 +133,14 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
                     if (member->Attributes().builtin == core::BuiltinValue::kVertexIndex) {
                         options.first_vertex_offset = builtin_immediate();
                     } else if (member->Attributes().builtin == core::BuiltinValue::kInstanceIndex) {
-                        options.first_vertex_offset = builtin_immediate();
+                        options.first_instance_offset = builtin_immediate();
                     }
                 }
             } else {
                 if (param->Builtin() == core::BuiltinValue::kVertexIndex) {
                     options.first_vertex_offset = builtin_immediate();
                 } else if (param->Builtin() == core::BuiltinValue::kInstanceIndex) {
-                    options.first_vertex_offset = builtin_immediate();
+                    options.first_instance_offset = builtin_immediate();
                 }
             }
         }
