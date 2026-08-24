@@ -6661,5 +6661,102 @@ add_carry_result_vec2_u32 = struct @align(8) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, MulSat_Scalar) {
+    auto* foo = b.Function("foo", ty.void_());
+    auto* lhs = b.FunctionParam("a", ty.u32());
+    auto* rhs = b.FunctionParam("b", ty.u32());
+    foo->SetParams({lhs, rhs});
+    b.Append(foo->Block(), [&] {
+        auto* call = b.Call(ty.u32(), core::BuiltinFn::kMulSat, lhs, rhs);
+        b.Let("res", call);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%foo = func(%a:u32, %b:u32):void {
+  $B1: {
+    %4:u32 = mulSat %a, %b
+    %res:u32 = let %4
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+umul_extended_result_u32 = struct @align(4) {
+  lower:u32 @offset(0)
+  upper:u32 @offset(4)
+}
+
+%foo = func(%a:u32, %b:u32):void {
+  $B1: {
+    %4:umul_extended_result_u32 = spirv.umul_extended %a, %b
+    %5:u32 = access %4, 0u
+    %6:u32 = access %4, 1u
+    %7:bool = eq %6, 0u
+    %8:u32 = spirv.select %7, %5, 4294967295u
+    %res:u32 = let %8
+    ret
+  }
+}
+)";
+
+    PolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, MulSat_Vector) {
+    auto* vec_ty = ty.vec2u();
+    auto* foo = b.Function("foo", ty.void_());
+    auto* lhs = b.FunctionParam("a", vec_ty);
+    auto* rhs = b.FunctionParam("b", vec_ty);
+    foo->SetParams({lhs, rhs});
+    b.Append(foo->Block(), [&] {
+        auto* call = b.Call(vec_ty, core::BuiltinFn::kMulSat, lhs, rhs);
+        b.Let("res", call);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%foo = func(%a:vec2<u32>, %b:vec2<u32>):void {
+  $B1: {
+    %4:vec2<u32> = mulSat %a, %b
+    %res:vec2<u32> = let %4
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+umul_extended_result_vec2_u32 = struct @align(8) {
+  lower:vec2<u32> @offset(0)
+  upper:vec2<u32> @offset(8)
+}
+
+%foo = func(%a:vec2<u32>, %b:vec2<u32>):void {
+  $B1: {
+    %4:umul_extended_result_vec2_u32 = spirv.umul_extended %a, %b
+    %5:vec2<u32> = access %4, 0u
+    %6:vec2<u32> = access %4, 1u
+    %7:vec2<bool> = eq %6, vec2<u32>(0u)
+    %8:vec2<u32> = spirv.select %7, %5, vec2<u32>(4294967295u)
+    %res:vec2<u32> = let %8
+    ret
+  }
+}
+)";
+
+    PolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer::raise

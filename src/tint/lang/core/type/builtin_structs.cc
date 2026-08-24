@@ -212,4 +212,21 @@ Struct* CreateAddCarryResult(Manager& types, SymbolTable& symbols, const Type* t
                                             });
 }
 
+Struct* CreateUMulExtendedResult(Manager& types, SymbolTable& symbols, const Type* ty) {
+    std::string name = "umul_extended_result_";
+    if (auto* vec_ty = ty->As<Vector>()) {
+        name += "vec" + std::to_string(vec_ty->Width()) + "_";
+    }
+    name += ty->DeepestElement()->FriendlyName();
+
+    auto symbol = symbols.Register(name);
+    if (auto* existing = types.Find<type::Struct>(symbol, /* is_wgsl_internal */ true)) {
+        return existing;
+    }
+    return types.WgslInternalStruct(symbol, {
+                                                {symbols.Register("lower"), ty},
+                                                {symbols.Register("upper"), ty},
+                                            });
+}
+
 }  // namespace tint::core::type

@@ -77,6 +77,9 @@ type struct_with_runtime_array
 type struct_add_carry_scalar<T>
 type struct_add_carry_vec<N: num, T>
 
+type struct_umul_extended_scalar<T>
+type struct_umul_extended_vec<N: num, T>
+
 @ns("spirv::type") enum dim {
   d1
   d2
@@ -1975,3 +1978,8 @@ fn add_carry(T, T) -> struct_add_carry_scalar<T>
 @must_use implicit(T: u32, N: num)
 fn add_carry(vec<N, T>, vec<N, T>) -> struct_add_carry_vec<N, T>
 
+/// UMul extended
+@must_use implicit(T: u32)
+fn umul_extended(T, T) -> struct_umul_extended_scalar<T>
+@must_use implicit(N: num, T: u32)
+fn umul_extended(vec<N, T>, vec<N, T>) -> struct_umul_extended_vec<N, T>

@@ -460,3 +460,7 @@ implicit(T: fiu32_f16_bool N: num) fn notEqual(vec<N, T>, vec<N, T>) -> vec<N, b
 
 implicit(T: u32) fn uaddCarry(T, T, ptr<function, T, read_write>) -> T
 implicit(T: u32, N:num) fn uaddCarry(vec<N, T>, vec<N, T>, ptr<function, vec<N, T>, read_write>) -> vec<N, T>
+
+implicit(T: u32) fn umulExtended(T, T, ptr<function, T, read_write>, ptr<function, T, read_write>)
+implicit(T: u32, N:num) fn umulExtended(vec<N, T>, vec<N, T>, ptr<function, vec<N, T>, read_write>, ptr<function, vec<N, T>, read_write>)
+

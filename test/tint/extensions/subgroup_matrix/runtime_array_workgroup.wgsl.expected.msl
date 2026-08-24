@@ -40,13 +40,13 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   threadgroup tint_array<float, 1>* const view = reinterpret_cast<threadgroup tint_array<float, 1>*>(reinterpret_cast<threadgroup char*>(tint_module_vars.v) + 0u);
   uint const v_3 = as_type<uint>(0);
   uint const v_4 = as_type<uint>(8);
-  bool const v_5 = (((v_3 + (v_4 * 7u)) + 8u) <= ((1024u - 0u) / 4u));
+  bool const v_5 = (addsat(madsat(v_4, 7u, v_3), 8u) <= ((1024u - 0u) / 4u));
   simdgroup_float8x8 v_6 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
   (simdgroup_load(v_6, (&(*view)[select(0u, v_3, v_5)]), ulong(select(8u, v_4, v_5)), ulong2(0ul), true));
   simdgroup_float8x8 const m = v_6;
   uint const v_7 = as_type<uint>(0);
   uint const v_8 = as_type<uint>(8);
-  bool const v_9 = (((v_7 + (v_8 * 7u)) + 8u) <= ((1024u - 0u) / 4u));
+  bool const v_9 = (addsat(madsat(v_8, 7u, v_7), 8u) <= ((1024u - 0u) / 4u));
   (simdgroup_store(m, (&(*view)[select(0u, v_7, v_9)]), ulong(select(8u, v_8, v_9)), ulong2(0ul), false));
 }
 

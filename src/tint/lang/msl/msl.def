@@ -193,6 +193,8 @@ match subgroup_matrix_kind_result : subgroup_matrix_kind.result
 @stage("fragment", "compute") fn atomic_max_explicit(ptr<storage, atomic<u64>, read_write>, u64, u32)
 @stage("fragment", "compute") fn atomic_min_explicit(ptr<storage, atomic<u64>, read_write>, u64, u32)
 
+fn madsat(u32, u32, u32) -> u32
+implicit(N: num) fn madsat(vec<N, u32>, vec<N, u32>, vec<N, u32>) -> vec<N, u32>
 
 @member_function implicit(F: texel_format, A: access) fn fence(texture: texture_storage_1d<F, A>)
 @member_function implicit(F: texel_format, A: access) fn fence(texture: texture_storage_2d<F, A>)

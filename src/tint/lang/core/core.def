@@ -911,6 +911,11 @@ match workgroup_uniform_storage
 @must_use @const implicit(N: num)
   fn addSat(vec<N, u32>, vec<N, u32>) -> vec<N, u32>
 
+@must_use @const
+  fn mulSat(u32, u32) -> u32
+@must_use @const implicit(N: num)
+  fn mulSat(vec<N, u32>, vec<N, u32>) -> vec<N, u32>
+
 ///////////////////////////////////////////
 // Barriers
 //////////////////////////////////////////

@@ -711,7 +711,7 @@ TEST_F(SpirvWriterTest, Alignment_CooperativeMatrixLoad) {
     options.extensions.use_vulkan_memory_model = true;
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure() << output_;
-    EXPECT_INST("OpCooperativeMatrixLoadKHR %28 %25 %uint_0 %23 Aligned|NonPrivatePointer 64");
+    EXPECT_INST("OpCooperativeMatrixLoadKHR %43 %40 %uint_0 %38 Aligned|NonPrivatePointer 64");
 }
 
 TEST_F(SpirvWriterTest, Alignment_CooperativeMatrixStore) {
@@ -734,7 +734,7 @@ TEST_F(SpirvWriterTest, Alignment_CooperativeMatrixStore) {
     options.extensions.use_vulkan_memory_model = true;
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure() << output_;
-    EXPECT_INST("OpCooperativeMatrixStoreKHR %28 %10 %uint_0 %26 Aligned|NonPrivatePointer 64");
+    EXPECT_INST("OpCooperativeMatrixStoreKHR %43 %10 %uint_0 %41 Aligned|NonPrivatePointer 64");
 }
 
 }  // namespace

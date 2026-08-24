@@ -329,6 +329,9 @@ struct State {
                     case core::BuiltinFn::kAddSat:
                         worklist.push_back([this, builtin] { AddSat(builtin); });
                         break;
+                    case core::BuiltinFn::kMulSat:
+                        worklist.push_back([this, builtin] { MulSat(builtin); });
+                        break;
                     default:
                         break;
                 }
@@ -1641,6 +1644,23 @@ struct State {
                                                                    : b.Constant(u32(0xffffffff)));
             b.CallWithResult<spirv::ir::BuiltinCall>(builtin->DetachResult(),
                                                      spirv::BuiltinFn::kSelect, eq, res, sat);
+        });
+        builtin->Destroy();
+    }
+
+    void MulSat(core::ir::CoreBuiltinCall* builtin) {
+        auto* type = builtin->Result()->Type();
+        auto* str_ty = core::type::CreateUMulExtendedResult(ty, ir.symbols, type);
+        b.InsertBefore(builtin, [&] {
+            auto* call = b.Call<spirv::ir::BuiltinCall>(str_ty, BuiltinFn::kUmulExtended,
+                                                        builtin->Args()[0], builtin->Args()[1]);
+            auto* lower = b.Access(type, call, 0_u);
+            auto* upper = b.Access(type, call, 1_u);
+            auto* eq = b.Equal(upper, b.Zero(type));
+            core::ir::Value* sat = (type->Is<core::type::Vector>() ? b.Splat(type, u32(0xffffffff))
+                                                                   : b.Constant(u32(0xffffffff)));
+            b.CallWithResult<spirv::ir::BuiltinCall>(builtin->DetachResult(),
+                                                     spirv::BuiltinFn::kSelect, eq, lower, sat);
         });
         builtin->Destroy();
     }

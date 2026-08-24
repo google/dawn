@@ -64,6 +64,12 @@ Struct* CreateAtomicCompareExchangeResult(Manager& types, SymbolTable& symbols, 
 /// @returns the builtin struct type for a spirv.add_carry builtin call.
 Struct* CreateAddCarryResult(Manager& types, SymbolTable& symbols, const Type* ty);
 
+/// @param types the type manager
+/// @param symbols the symbol table
+/// @param ty the type of the struct members.
+/// @returns the builtin struct type for a spirv.umul_extended builtin call.
+Struct* CreateUMulExtendedResult(Manager& types, SymbolTable& symbols, const Type* ty);
+
 }  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_BUILTIN_STRUCTS_H_

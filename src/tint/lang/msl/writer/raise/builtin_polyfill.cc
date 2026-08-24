@@ -190,6 +190,12 @@ struct State {
                     case core::BuiltinFn::kSign:
                         call_worklist.push_back([this, builtin] { Sign(builtin); });
                         break;
+                    case core::BuiltinFn::kMulSat:
+                        call_worklist.push_back([this, builtin] { MulSat(builtin); });
+                        break;
+                    case core::BuiltinFn::kAddSat:
+                        call_worklist.push_back([this, builtin] { AddSat(builtin); });
+                        break;
 
                     // Texture builtins.
                     case core::BuiltinFn::kTextureDimensions:
@@ -1484,6 +1490,55 @@ struct State {
             b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kSelect, ctz, n1, eq);
         });
         builtin->Destroy();
+    }
+
+    // Replace mulSat builtin
+    // @param builtin the builtin call instruction
+    void MulSat(core::ir::BuiltinCall* builtin) {
+        if (!builtin->Alive()) {
+            return;
+        }
+        b.InsertBefore(builtin, [&] {
+            // Replace with madsat(%a, %b, 0)
+            auto* type = builtin->Result()->Type();
+            b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(), msl::BuiltinFn::kMadsat,
+                                                   builtin->Args()[0], builtin->Args()[1],
+                                                   b.Zero(type));
+        });
+        builtin->Destroy();
+    }
+
+    // Fold addSat builtin into a preceding msl.madsat if possible
+    // @param builtin the builtin call instruction
+    void AddSat(core::ir::BuiltinCall* builtin) {
+        auto* type = builtin->Result()->Type();
+        auto* zero = b.Zero(type);
+        auto* lhs_result = builtin->Args()[0]->As<core::ir::InstructionResult>();
+        auto* rhs_result = builtin->Args()[1]->As<core::ir::InstructionResult>();
+        // Replace addSat(msl.madsat(x, y, 0), z) with msl.madsat(x, y, z)
+        if (lhs_result) {
+            if (auto* lhs_call = lhs_result->Instruction()->As<msl::ir::BuiltinCall>()) {
+                if (lhs_call->Func() == msl::BuiltinFn::kMadsat && lhs_call->Args()[2] == zero) {
+                    lhs_call->SetArg(2, builtin->Args()[1]);
+                    builtin->SetArg(0, nullptr);
+                    builtin->Result()->ReplaceAllUsesWith(lhs_result);
+                    builtin->Destroy();
+                    return;
+                }
+            }
+        }
+        // Replace addSat(z, msl.madsat(x, y, 0)) with msl.madsat(x, y, z)
+        if (rhs_result) {
+            if (auto* rhs_call = rhs_result->Instruction()->As<msl::ir::BuiltinCall>()) {
+                if (rhs_call->Func() == msl::BuiltinFn::kMadsat && rhs_call->Args()[2] == zero) {
+                    rhs_call->SetArg(2, builtin->Args()[0]);
+                    builtin->SetArg(1, nullptr);
+                    builtin->Result()->ReplaceAllUsesWith(rhs_result);
+                    builtin->Destroy();
+                    return;
+                }
+            }
+        }
     }
 };
 

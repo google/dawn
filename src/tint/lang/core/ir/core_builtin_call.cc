@@ -176,6 +176,7 @@ tint::core::ir::Instruction::Accesses CoreBuiltinCall::GetSideEffects() const {
         case BuiltinFn::kMin:
         case BuiltinFn::kMix:
         case BuiltinFn::kModf:
+        case BuiltinFn::kMulSat:
         case BuiltinFn::kNormalize:
         case BuiltinFn::kPack2X16Float:
         case BuiltinFn::kPack2X16Snorm:

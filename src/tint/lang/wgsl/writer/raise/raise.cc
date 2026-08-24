@@ -212,6 +212,7 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kBufferLength)
         CASE(kBufferArrayView)
         case core::BuiltinFn::kAddSat:  // lowered below
+        case core::BuiltinFn::kMulSat:  // lowered below
         case core::BuiltinFn::kNone:
             break;
     }
@@ -280,6 +281,25 @@ void ReplaceAddSat(core::ir::Builder& b, core::ir::CoreBuiltinCall* call) {
     call->Destroy();
 }
 
+void ReplaceMulSat(core::ir::Builder& b, core::ir::CoreBuiltinCall* call) {
+    auto* ty = call->Result()->Type();
+    auto* lhs = call->Args()[0];
+    auto* rhs = call->Args()[1];
+    b.InsertBefore(call, [&] {
+        auto* mul = b.Multiply(lhs, rhs);
+        auto* lhs_ne_0 = b.NotEqual(lhs, b.Zero(ty));
+        auto* rhs_ne_0 = b.NotEqual(lhs, b.Zero(ty));
+        auto* splat = b.Splat(ty, b.Constant(core::u32(0xffffffff)));
+        auto* div = b.Divide(splat, lhs);
+        auto* gt = b.GreaterThan(rhs, div);
+        auto* logical_and = b.And(lhs_ne_0, rhs_ne_0);
+        logical_and = b.And(logical_and, gt);
+        b.CallWithResult<wgsl::ir::BuiltinCall>(call->DetachResult(), wgsl::BuiltinFn::kSelect, mul,
+                                                splat, logical_and);
+    });
+    call->Destroy();
+}
+
 }  // namespace
 
 Result<SuccessType> Raise(core::ir::Module& mod) {
@@ -297,6 +317,9 @@ Result<SuccessType> Raise(core::ir::Module& mod) {
                     break;
                 case core::BuiltinFn::kAddSat:
                     ReplaceAddSat(b, call);
+                    break;
+                case core::BuiltinFn::kMulSat:
+                    ReplaceMulSat(b, call);
                     break;
                 default:
                     ReplaceBuiltinFnCall(b, call);

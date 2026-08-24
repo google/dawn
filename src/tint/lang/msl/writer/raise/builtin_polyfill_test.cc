@@ -5151,5 +5151,147 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Mat_F32_Array_Vec4H) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, MulSat_U32) {
+    auto* foo = b.Function("foo", ty.void_());
+    auto* lhs = b.FunctionParam("lhs", ty.u32());
+    auto* rhs = b.FunctionParam("rhs", ty.u32());
+    foo->SetParams({lhs, rhs});
+    b.Append(foo->Block(), [&] {
+        b.Call(ty.u32(), core::BuiltinFn::kMulSat, lhs, rhs);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%foo = func(%lhs:u32, %rhs:u32):void {
+  $B1: {
+    %4:u32 = mulSat %lhs, %rhs
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%lhs:u32, %rhs:u32):void {
+  $B1: {
+    %4:u32 = msl.madsat %lhs, %rhs, 0u
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, MulSat_Vec4U) {
+    auto* foo = b.Function("foo", ty.void_());
+    auto* lhs = b.FunctionParam("lhs", ty.vec4u());
+    auto* rhs = b.FunctionParam("rhs", ty.vec4u());
+    foo->SetParams({lhs, rhs});
+    b.Append(foo->Block(), [&] {
+        b.Call(ty.vec4u(), core::BuiltinFn::kMulSat, lhs, rhs);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%foo = func(%lhs:vec4<u32>, %rhs:vec4<u32>):void {
+  $B1: {
+    %4:vec4<u32> = mulSat %lhs, %rhs
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%lhs:vec4<u32>, %rhs:vec4<u32>):void {
+  $B1: {
+    %4:vec4<u32> = msl.madsat %lhs, %rhs, vec4<u32>(0u)
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, AddSat_MulSat_U32) {
+    auto* foo = b.Function("foo", ty.void_());
+    auto* x = b.FunctionParam("x", ty.u32());
+    auto* y = b.FunctionParam("y", ty.u32());
+    auto* z = b.FunctionParam("z", ty.u32());
+    foo->SetParams({x, y, z});
+    b.Append(foo->Block(), [&] {
+        auto* mul = b.Call(ty.u32(), core::BuiltinFn::kMulSat, x, y);
+        b.Call(ty.u32(), core::BuiltinFn::kAddSat, mul, z);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%foo = func(%x:u32, %y:u32, %z:u32):void {
+  $B1: {
+    %5:u32 = mulSat %x, %y
+    %6:u32 = addSat %5, %z
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%x:u32, %y:u32, %z:u32):void {
+  $B1: {
+    %5:u32 = msl.madsat %x, %y, %z
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, AddSat_MulSat_Vec2U) {
+    auto* foo = b.Function("foo", ty.void_());
+    auto* x = b.FunctionParam("x", ty.vec2u());
+    auto* y = b.FunctionParam("y", ty.vec2u());
+    auto* z = b.FunctionParam("z", ty.vec2u());
+    foo->SetParams({x, y, z});
+    b.Append(foo->Block(), [&] {
+        auto* mul = b.Call(ty.vec2u(), core::BuiltinFn::kMulSat, x, y);
+        b.Call(ty.vec2u(), core::BuiltinFn::kAddSat, z, mul);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%foo = func(%x:vec2<u32>, %y:vec2<u32>, %z:vec2<u32>):void {
+  $B1: {
+    %5:vec2<u32> = mulSat %x, %y
+    %6:vec2<u32> = addSat %z, %5
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%x:vec2<u32>, %y:vec2<u32>, %z:vec2<u32>):void {
+  $B1: {
+    %5:vec2<u32> = msl.madsat %x, %y, %z
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

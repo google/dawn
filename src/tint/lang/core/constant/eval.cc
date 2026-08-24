@@ -1984,6 +1984,25 @@ Eval::Result Eval::addSat(const core::type::Type* ty,
     return TransformBinaryElements(mgr, ty, transform, args[0], args[1]);
 }
 
+Eval::Result Eval::mulSat(const core::type::Type* ty,
+                          VectorRef<const Value*> args,
+                          const Source& source) {
+    auto transform = [&](const Value* lhs, const Value* rhs) {
+        auto create = [&](auto a, auto b) {
+            using NumberT = decltype(a);
+            auto result = NumberT{a * b};
+            if (a == NumberT{0} || b == NumberT{0}) {
+                result = NumberT{0};
+            } else if (b > (NumberT::Highest() / NumberT{a})) {
+                result = NumberT::Highest();
+            }
+            return CreateScalar(source, ty->DeepestElement(), result);
+        };
+        return Dispatch_u32(create, lhs, rhs);
+    };
+    return TransformBinaryElements(mgr, ty, transform, args[0], args[1]);
+}
+
 Eval::Result Eval::abs(const core::type::Type* ty,
                        VectorRef<const Value*> args,
                        const Source& source) {

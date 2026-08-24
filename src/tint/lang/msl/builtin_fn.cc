@@ -70,6 +70,8 @@ const char* str(BuiltinFn i) {
             return "atomic_max_explicit";
         case BuiltinFn::kAtomicMinExplicit:
             return "atomic_min_explicit";
+        case BuiltinFn::kMadsat:
+            return "madsat";
         case BuiltinFn::kFence:
             return "fence";
         case BuiltinFn::kGather:
@@ -195,6 +197,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kOsLog:
         case BuiltinFn::kPointerOffset:
         case BuiltinFn::kVolatileZero:
+        case BuiltinFn::kMadsat:
             break;
     }
     return core::ir::Instruction::Accesses{};

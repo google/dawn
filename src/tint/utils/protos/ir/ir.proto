@@ -819,4 +819,5 @@ enum BuiltinFn {
     bitcast = 161;
     buffer_array_view = 162;
     add_sat = 163;
+    mul_sat = 164;
 }

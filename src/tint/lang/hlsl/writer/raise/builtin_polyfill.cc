@@ -313,6 +313,9 @@ struct State {
                     case core::BuiltinFn::kAddSat:
                         call_worklist.push_back([this, call] { AddSat(call); });
                         break;
+                    case core::BuiltinFn::kMulSat:
+                        call_worklist.push_back([this, call] { MulSat(call); });
+                        break;
                     default:
                         break;
                 }
@@ -2220,6 +2223,26 @@ struct State {
             core::ir::Value* sat = (type->Is<core::type::Vector>() ? b.Splat(type, u32(0xffffffff))
                                                                    : b.Constant(u32(0xffffffff)));
             select = b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, add, sat, lt);
+        });
+        call->Destroy();
+        Select(select);
+    }
+
+    void MulSat(core::ir::CoreBuiltinCall* call) {
+        auto* type = call->Result()->Type();
+        core::ir::CoreBuiltinCall* select = nullptr;
+        b.InsertBefore(call, [&] {
+            auto* add = b.Multiply(call->Args()[0], call->Args()[1]);
+            auto* arg0_ne_0 = b.NotEqual(call->Args()[0], b.Zero(type));
+            auto* arg1_ne_0 = b.NotEqual(call->Args()[1], b.Zero(type));
+            core::ir::Value* sat = (type->Is<core::type::Vector>() ? b.Splat(type, u32(0xffffffff))
+                                                                   : b.Constant(u32(0xffffffff)));
+            auto* div = b.Divide(sat, call->Args()[0]);
+            auto* gt = b.GreaterThan(call->Args()[1], div);
+            auto* logical_and = b.And(arg0_ne_0, arg1_ne_0);
+            logical_and = b.And(logical_and, gt);
+            select = b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, add, sat,
+                                      logical_and);
         });
         call->Destroy();
         Select(select);

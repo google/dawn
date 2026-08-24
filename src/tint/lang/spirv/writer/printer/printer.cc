@@ -1834,6 +1834,9 @@ class Printer {
             case BuiltinFn::kAddCarry:
                 op = spv::Op::OpIAddCarry;
                 break;
+            case BuiltinFn::kUmulExtended:
+                op = spv::Op::OpUMulExtended;
+                break;
             case spirv::BuiltinFn::kNone:
                 TINT_IR_ICE(ir_) << "undefined spirv ir function";
         }

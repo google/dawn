@@ -136,6 +136,8 @@ const char* str(BuiltinFn i) {
             return "notEqual";
         case BuiltinFn::kUaddCarry:
             return "uaddCarry";
+        case BuiltinFn::kUmulExtended:
+            return "umulExtended";
     }
     return "<unknown>";
 }
@@ -165,6 +167,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
 
         case BuiltinFn::kImageStore:
         case BuiltinFn::kUaddCarry:
+        case BuiltinFn::kUmulExtended:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kLength:

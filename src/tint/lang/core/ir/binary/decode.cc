@@ -2047,6 +2047,8 @@ struct Decoder {
                 return core::BuiltinFn::kMix;
             case pb::BuiltinFn::modf:
                 return core::BuiltinFn::kModf;
+            case pb::BuiltinFn::mul_sat:
+                return core::BuiltinFn::kMulSat;
             case pb::BuiltinFn::normalize:
                 return core::BuiltinFn::kNormalize;
             case pb::BuiltinFn::pack2x16_float:

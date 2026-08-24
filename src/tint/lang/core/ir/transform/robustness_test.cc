@@ -3329,9 +3329,9 @@ $B1: {  # root
 %foo = func():subgroup_matrix_result<f32, 8, 4> {
   $B2: {
     %3:u32 = arrayLength %arr
-    %4:u32 = mul 4u, 7u
-    %5:u32 = add 0u, %4
-    %6:u32 = add %5, 4u
+    %4:u32 = mulSat 4u, 7u
+    %5:u32 = addSat 0u, %4
+    %6:u32 = addSat %5, 4u
     %7:bool = lte %6, %3
     %8:u32 = select 0u, 0u, %7
     %9:u32 = select 4u, 4u, %7
@@ -3400,9 +3400,9 @@ $B1: {  # root
 %foo = func():subgroup_matrix_result<f32, 8, 4> {
   $B2: {
     %3:u32 = arrayLength %arr
-    %4:u32 = mul 4u, 7u
-    %5:u32 = add 0u, %4
-    %6:u32 = add %5, 4u
+    %4:u32 = mulSat 4u, 7u
+    %5:u32 = addSat 0u, %4
+    %6:u32 = addSat %5, 4u
     %7:bool = lte %6, %3
     %8:u32 = select 0u, 0u, %7
     %9:u32 = select 4u, 4u, %7
@@ -3476,9 +3476,9 @@ $B1: {  # root
     %6:u32 = max %5, 4u
     %7:u32 = arrayLength %arr
     %8:u32 = bitcast<u32> %offset
-    %9:u32 = mul %6, 7u
-    %10:u32 = add %8, %9
-    %11:u32 = add %10, 4u
+    %9:u32 = mulSat %6, 7u
+    %10:u32 = addSat %8, %9
+    %11:u32 = addSat %10, 4u
     %12:bool = lte %11, %7
     %13:u32 = select 0u, %8, %12
     %14:u32 = select 4u, %6, %12
@@ -3548,9 +3548,9 @@ $B1: {  # root
 %foo = func():subgroup_matrix_result<f32, 8, 4> {
   $B2: {
     %3:u32 = arrayLength %arr
-    %4:u32 = mul 4u, 7u
-    %5:u32 = add 16u, %4
-    %6:u32 = add %5, 4u
+    %4:u32 = mulSat 4u, 7u
+    %5:u32 = addSat 16u, %4
+    %6:u32 = addSat %5, 4u
     %7:bool = lte %6, %3
     %8:u32 = select 0u, 16u, %7
     %9:u32 = select 4u, 4u, %7
@@ -3620,9 +3620,9 @@ $B1: {  # root
 %foo = func():subgroup_matrix_result<i8, 8, 4> {
   $B2: {
     %3:u32 = arrayLength %arr
-    %4:u32 = mul 1u, 7u
-    %5:u32 = add 0u, %4
-    %6:u32 = add %5, 1u
+    %4:u32 = mulSat 1u, 7u
+    %5:u32 = addSat 0u, %4
+    %6:u32 = addSat %5, 1u
     %7:bool = lte %6, %3
     %8:u32 = select 0u, 0u, %7
     %9:u32 = select 1u, 1u, %7
@@ -3692,9 +3692,9 @@ $B1: {  # root
 %foo = func():subgroup_matrix_result<u8, 8, 4> {
   $B2: {
     %3:u32 = arrayLength %arr
-    %4:u32 = mul 1u, 7u
-    %5:u32 = add 0u, %4
-    %6:u32 = add %5, 1u
+    %4:u32 = mulSat 1u, 7u
+    %5:u32 = addSat 0u, %4
+    %6:u32 = addSat %5, 1u
     %7:bool = lte %6, %3
     %8:u32 = select 0u, 0u, %7
     %9:u32 = select 1u, 1u, %7
@@ -3765,9 +3765,9 @@ $B1: {  # root
   $B2: {
     %4:u32 = max %stride, 4u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %4, 7u
-    %7:u32 = add 0u, %6
-    %8:u32 = add %7, 4u
+    %6:u32 = mulSat %4, 7u
+    %7:u32 = addSat 0u, %6
+    %8:u32 = addSat %7, 4u
     %9:bool = lte %8, %5
     %10:u32 = select 0u, 0u, %9
     %11:u32 = select 4u, %4, %9
@@ -3841,9 +3841,9 @@ $B1: {  # root
   $B2: {
     %4:u32 = max %stride, 1u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %4, 7u
-    %7:u32 = add 0u, %6
-    %8:u32 = add %7, 1u
+    %6:u32 = mulSat %4, 7u
+    %7:u32 = addSat 0u, %6
+    %8:u32 = addSat %7, 1u
     %9:bool = lte %8, %5
     %10:u32 = select 0u, 0u, %9
     %11:u32 = select 1u, %4, %9
@@ -3917,9 +3917,9 @@ $B1: {  # root
   $B2: {
     %4:u32 = max %stride, 1u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %4, 7u
-    %7:u32 = add 0u, %6
-    %8:u32 = add %7, 1u
+    %6:u32 = mulSat %4, 7u
+    %7:u32 = addSat 0u, %6
+    %8:u32 = addSat %7, 1u
     %9:bool = lte %8, %5
     %10:u32 = select 0u, 0u, %9
     %11:u32 = select 1u, %4, %9
@@ -3991,9 +3991,9 @@ $B1: {  # root
   $B2: {
     %4:u32 = max %stride, 8u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %4, 3u
-    %7:u32 = add 0u, %6
-    %8:u32 = add %7, 8u
+    %6:u32 = mulSat %4, 3u
+    %7:u32 = addSat 0u, %6
+    %8:u32 = addSat %7, 8u
     %9:bool = lte %8, %5
     %10:u32 = select 0u, 0u, %9
     %11:u32 = select 8u, %4, %9
@@ -4067,9 +4067,9 @@ $B1: {  # root
   $B2: {
     %4:u32 = max %stride, 2u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %4, 3u
-    %7:u32 = add 0u, %6
-    %8:u32 = add %7, 2u
+    %6:u32 = mulSat %4, 3u
+    %7:u32 = addSat 0u, %6
+    %8:u32 = addSat %7, 2u
     %9:bool = lte %8, %5
     %10:u32 = select 0u, 0u, %9
     %11:u32 = select 2u, %4, %9
@@ -4144,9 +4144,9 @@ $B1: {  # root
   $B2: {
     %4:u32 = max %stride, 2u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %4, 3u
-    %7:u32 = add 16u, %6
-    %8:u32 = add %7, 2u
+    %6:u32 = mulSat %4, 3u
+    %7:u32 = addSat 16u, %6
+    %8:u32 = addSat %7, 2u
     %9:bool = lte %8, %5
     %10:u32 = select 0u, 16u, %9
     %11:u32 = select 2u, %4, %9
@@ -4220,9 +4220,9 @@ $B1: {  # root
   $B2: {
     %4:u32 = max %stride, 2u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %4, 3u
-    %7:u32 = add 0u, %6
-    %8:u32 = add %7, 2u
+    %6:u32 = mulSat %4, 3u
+    %7:u32 = addSat 0u, %6
+    %8:u32 = addSat %7, 2u
     %9:bool = lte %8, %5
     %10:u32 = select 0u, 0u, %9
     %11:u32 = select 2u, %4, %9
@@ -4292,9 +4292,9 @@ $B1: {  # root
 %foo = func(%stride:u32):subgroup_matrix_result<f32, 8, 4> {
   $B2: {
     %4:u32 = max %stride, 4u
-    %5:u32 = mul %4, 7u
-    %6:u32 = add 0u, %5
-    %7:u32 = add %6, 4u
+    %5:u32 = mulSat %4, 7u
+    %6:u32 = addSat 0u, %5
+    %7:u32 = addSat %6, 4u
     %8:bool = lte %7, 1024u
     %9:u32 = select 0u, 0u, %8
     %10:u32 = select 4u, %4, %8
@@ -4365,9 +4365,9 @@ $B1: {  # root
 %foo = func(%stride:u32):subgroup_matrix_result<f32, 8, 4> {
   $B2: {
     %4:u32 = max %stride, 4u
-    %5:u32 = mul %4, 7u
-    %6:u32 = add 0u, %5
-    %7:u32 = add %6, 4u
+    %5:u32 = mulSat %4, 7u
+    %6:u32 = addSat 0u, %5
+    %7:u32 = addSat %6, 4u
     %8:bool = lte %7, 1024u
     %9:u32 = select 0u, 0u, %8
     %10:u32 = select 4u, %4, %8
@@ -4426,9 +4426,9 @@ $B1: {  # root
 %foo = func(%stride:u32):subgroup_matrix_result<i8, 8, 4> {
   $B2: {
     %4:u32 = max %stride, 1u
-    %5:u32 = mul %4, 7u
-    %6:u32 = add 0u, %5
-    %7:u32 = add %6, 1u
+    %5:u32 = mulSat %4, 7u
+    %6:u32 = addSat 0u, %5
+    %7:u32 = addSat %6, 1u
     %8:bool = lte %7, 1024u
     %9:u32 = select 0u, 0u, %8
     %10:u32 = select 1u, %4, %8
@@ -4500,9 +4500,9 @@ $B1: {  # root
 %foo = func(%stride:u32):subgroup_matrix_result<u8, 8, 4> {
   $B2: {
     %4:u32 = max %stride, 1u
-    %5:u32 = mul %4, 7u
-    %6:u32 = add 0u, %5
-    %7:u32 = add %6, 1u
+    %5:u32 = mulSat %4, 7u
+    %6:u32 = addSat 0u, %5
+    %7:u32 = addSat %6, 1u
     %8:bool = lte %7, 1024u
     %9:u32 = select 0u, 0u, %8
     %10:u32 = select 1u, %4, %8
@@ -4712,9 +4712,9 @@ $B1: {  # root
   $B2: {
     %5:u32 = max %stride, 1u
     %6:u32 = arrayLength %v
-    %7:u32 = mul %5, 7u
-    %8:u32 = add %offset, %7
-    %9:u32 = add %8, 1u
+    %7:u32 = mulSat %5, 7u
+    %8:u32 = addSat %offset, %7
+    %9:u32 = addSat %8, 1u
     %10:bool = lte %9, %6
     %11:u32 = select 0u, %offset, %10
     %12:u32 = select 1u, %5, %10
@@ -4787,9 +4787,9 @@ $B1: {  # root
   $B2: {
     %5:u32 = max %stride, 1u
     %6:u32 = arrayLength %v
-    %7:u32 = mul %5, 7u
-    %8:u32 = add %offset, %7
-    %9:u32 = add %8, 1u
+    %7:u32 = mulSat %5, 7u
+    %8:u32 = addSat %offset, %7
+    %9:u32 = addSat %8, 1u
     %10:bool = lte %9, %6
     %11:u32 = select 0u, %offset, %10
     %12:u32 = select 1u, %5, %10
@@ -4845,9 +4845,9 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>):void {
   $B2: {
     %4:u32 = arrayLength %arr
-    %5:u32 = mul 4u, 7u
-    %6:u32 = add 0u, %5
-    %7:u32 = add %6, 4u
+    %5:u32 = mulSat 4u, 7u
+    %6:u32 = addSat 0u, %5
+    %7:u32 = addSat %6, 4u
     %8:bool = lte %7, %4
     %9:u32 = select 0u, 0u, %8
     %10:u32 = select 4u, 4u, %8
@@ -4917,9 +4917,9 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>):void {
   $B2: {
     %4:u32 = arrayLength %arr
-    %5:u32 = mul 4u, 7u
-    %6:u32 = add 0u, %5
-    %7:u32 = add %6, 4u
+    %5:u32 = mulSat 4u, 7u
+    %6:u32 = addSat 0u, %5
+    %7:u32 = addSat %6, 4u
     %8:bool = lte %7, %4
     %9:u32 = select 0u, 0u, %8
     %10:u32 = select 4u, 4u, %8
@@ -4994,9 +4994,9 @@ $B1: {  # root
     %7:u32 = max %6, 4u
     %8:u32 = arrayLength %arr
     %9:u32 = bitcast<u32> %offset
-    %10:u32 = mul %7, 7u
-    %11:u32 = add %9, %10
-    %12:u32 = add %11, 4u
+    %10:u32 = mulSat %7, 7u
+    %11:u32 = addSat %9, %10
+    %12:u32 = addSat %11, 4u
     %13:bool = lte %12, %8
     %14:u32 = select 0u, %9, %13
     %15:u32 = select 4u, %7, %13
@@ -5068,9 +5068,9 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>):void {
   $B2: {
     %4:u32 = arrayLength %arr
-    %5:u32 = mul 4u, 7u
-    %6:u32 = add 0u, %5
-    %7:u32 = add %6, 4u
+    %5:u32 = mulSat 4u, 7u
+    %6:u32 = addSat 0u, %5
+    %7:u32 = addSat %6, 4u
     %8:bool = lte %7, %4
     %9:u32 = select 0u, 0u, %8
     %10:u32 = select 4u, 4u, %8
@@ -5141,9 +5141,9 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>):void {
   $B2: {
     %4:u32 = arrayLength %arr
-    %5:u32 = mul 1u, 7u
-    %6:u32 = add 0u, %5
-    %7:u32 = add %6, 1u
+    %5:u32 = mulSat 1u, 7u
+    %6:u32 = addSat 0u, %5
+    %7:u32 = addSat %6, 1u
     %8:bool = lte %7, %4
     %9:u32 = select 0u, 0u, %8
     %10:u32 = select 1u, 1u, %8
@@ -5214,9 +5214,9 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>):void {
   $B2: {
     %4:u32 = arrayLength %arr
-    %5:u32 = mul 1u, 7u
-    %6:u32 = add 0u, %5
-    %7:u32 = add %6, 1u
+    %5:u32 = mulSat 1u, 7u
+    %6:u32 = addSat 0u, %5
+    %7:u32 = addSat %6, 1u
     %8:bool = lte %7, %4
     %9:u32 = select 0u, 0u, %8
     %10:u32 = select 1u, 1u, %8
@@ -5288,9 +5288,9 @@ $B1: {  # root
   $B2: {
     %5:u32 = max %stride, 4u
     %6:u32 = arrayLength %arr
-    %7:u32 = mul %5, 7u
-    %8:u32 = add 0u, %7
-    %9:u32 = add %8, 4u
+    %7:u32 = mulSat %5, 7u
+    %8:u32 = addSat 0u, %7
+    %9:u32 = addSat %8, 4u
     %10:bool = lte %9, %6
     %11:u32 = select 0u, 0u, %10
     %12:u32 = select 4u, %5, %10
@@ -5365,9 +5365,9 @@ $B1: {  # root
   $B2: {
     %5:u32 = max %stride, 1u
     %6:u32 = arrayLength %arr
-    %7:u32 = mul %5, 7u
-    %8:u32 = add 0u, %7
-    %9:u32 = add %8, 1u
+    %7:u32 = mulSat %5, 7u
+    %8:u32 = addSat 0u, %7
+    %9:u32 = addSat %8, 1u
     %10:bool = lte %9, %6
     %11:u32 = select 0u, 0u, %10
     %12:u32 = select 1u, %5, %10
@@ -5442,9 +5442,9 @@ $B1: {  # root
   $B2: {
     %5:u32 = max %stride, 1u
     %6:u32 = arrayLength %arr
-    %7:u32 = mul %5, 7u
-    %8:u32 = add 0u, %7
-    %9:u32 = add %8, 1u
+    %7:u32 = mulSat %5, 7u
+    %8:u32 = addSat 0u, %7
+    %9:u32 = addSat %8, 1u
     %10:bool = lte %9, %6
     %11:u32 = select 0u, 0u, %10
     %12:u32 = select 1u, %5, %10
@@ -5517,9 +5517,9 @@ $B1: {  # root
   $B2: {
     %5:u32 = max %stride, 8u
     %6:u32 = arrayLength %arr
-    %7:u32 = mul %5, 3u
-    %8:u32 = add 0u, %7
-    %9:u32 = add %8, 8u
+    %7:u32 = mulSat %5, 3u
+    %8:u32 = addSat 0u, %7
+    %9:u32 = addSat %8, 8u
     %10:bool = lte %9, %6
     %11:u32 = select 0u, 0u, %10
     %12:u32 = select 8u, %5, %10
@@ -5593,9 +5593,9 @@ $B1: {  # root
   $B2: {
     %5:u32 = max %stride, 8u
     %6:u32 = arrayLength %arr
-    %7:u32 = mul %5, 3u
-    %8:u32 = add 0u, %7
-    %9:u32 = add %8, 8u
+    %7:u32 = mulSat %5, 3u
+    %8:u32 = addSat 0u, %7
+    %9:u32 = addSat %8, 8u
     %10:bool = lte %9, %6
     %11:u32 = select 0u, 0u, %10
     %12:u32 = select 8u, %5, %10
@@ -5670,9 +5670,9 @@ $B1: {  # root
   $B2: {
     %5:u32 = max %stride, 2u
     %6:u32 = arrayLength %arr
-    %7:u32 = mul %5, 3u
-    %8:u32 = add 0u, %7
-    %9:u32 = add %8, 2u
+    %7:u32 = mulSat %5, 3u
+    %8:u32 = addSat 0u, %7
+    %9:u32 = addSat %8, 2u
     %10:bool = lte %9, %6
     %11:u32 = select 0u, 0u, %10
     %12:u32 = select 2u, %5, %10
@@ -5747,9 +5747,9 @@ $B1: {  # root
   $B2: {
     %5:u32 = max %stride, 2u
     %6:u32 = arrayLength %arr
-    %7:u32 = mul %5, 3u
-    %8:u32 = add 0u, %7
-    %9:u32 = add %8, 2u
+    %7:u32 = mulSat %5, 3u
+    %8:u32 = addSat 0u, %7
+    %9:u32 = addSat %8, 2u
     %10:bool = lte %9, %6
     %11:u32 = select 0u, 0u, %10
     %12:u32 = select 2u, %5, %10
@@ -5820,9 +5820,9 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %stride:u32):void {
   $B2: {
     %5:u32 = max %stride, 4u
-    %6:u32 = mul %5, 7u
-    %7:u32 = add 0u, %6
-    %8:u32 = add %7, 4u
+    %6:u32 = mulSat %5, 7u
+    %7:u32 = addSat 0u, %6
+    %8:u32 = addSat %7, 4u
     %9:bool = lte %8, 1024u
     %10:u32 = select 0u, 0u, %9
     %11:u32 = select 4u, %5, %9
@@ -5894,9 +5894,9 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %stride:u32):void {
   $B2: {
     %5:u32 = max %stride, 4u
-    %6:u32 = mul %5, 7u
-    %7:u32 = add 0u, %6
-    %8:u32 = add %7, 4u
+    %6:u32 = mulSat %5, 7u
+    %7:u32 = addSat 0u, %6
+    %8:u32 = addSat %7, 4u
     %9:bool = lte %8, 1024u
     %10:u32 = select 0u, 0u, %9
     %11:u32 = select 4u, %5, %9
@@ -5956,9 +5956,9 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>, %stride:u32):void {
   $B2: {
     %5:u32 = max %stride, 1u
-    %6:u32 = mul %5, 7u
-    %7:u32 = add 0u, %6
-    %8:u32 = add %7, 1u
+    %6:u32 = mulSat %5, 7u
+    %7:u32 = addSat 0u, %6
+    %8:u32 = addSat %7, 1u
     %9:bool = lte %8, 1024u
     %10:u32 = select 0u, 0u, %9
     %11:u32 = select 1u, %5, %9
@@ -6031,9 +6031,9 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>, %stride:u32):void {
   $B2: {
     %5:u32 = max %stride, 1u
-    %6:u32 = mul %5, 7u
-    %7:u32 = add 0u, %6
-    %8:u32 = add %7, 1u
+    %6:u32 = mulSat %5, 7u
+    %7:u32 = addSat 0u, %6
+    %8:u32 = addSat %7, 1u
     %9:bool = lte %8, 1024u
     %10:u32 = select 0u, 0u, %9
     %11:u32 = select 1u, %5, %9
@@ -6247,9 +6247,9 @@ $B1: {  # root
   $B2: {
     %6:u32 = max %stride, 1u
     %7:u32 = arrayLength %v
-    %8:u32 = mul %6, 7u
-    %9:u32 = add %offset, %8
-    %10:u32 = add %9, 1u
+    %8:u32 = mulSat %6, 7u
+    %9:u32 = addSat %offset, %8
+    %10:u32 = addSat %9, 1u
     %11:bool = lte %10, %7
     %12:u32 = select 0u, %offset, %11
     %13:u32 = select 1u, %6, %11
@@ -6323,9 +6323,9 @@ $B1: {  # root
   $B2: {
     %6:u32 = max %stride, 1u
     %7:u32 = arrayLength %v
-    %8:u32 = mul %6, 7u
-    %9:u32 = add %offset, %8
-    %10:u32 = add %9, 1u
+    %8:u32 = mulSat %6, 7u
+    %9:u32 = addSat %offset, %8
+    %10:u32 = addSat %9, 1u
     %11:bool = lte %10, %7
     %12:u32 = select 0u, %offset, %11
     %13:u32 = select 1u, %6, %11

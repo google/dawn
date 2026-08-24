@@ -268,6 +268,8 @@ const char* str(BuiltinFn i) {
             return "interpolate_at_offset";
         case BuiltinFn::kAddCarry:
             return "add_carry";
+        case BuiltinFn::kUmulExtended:
+            return "umul_extended";
     }
     return "<unknown>";
 }
@@ -393,6 +395,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSConvert:
         case BuiltinFn::kUConvert:
         case BuiltinFn::kAddCarry:
+        case BuiltinFn::kUmulExtended:
             break;
     }
     return core::ir::Instruction::Accesses{};

@@ -49,18 +49,18 @@ kernel void v(device tint_array<uint, 1>* out0 [[buffer(0)]], device tint_array<
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.out0=out0, .out1=out1, .out2=out2, .out3=out3, .out4=out4, .out5=out5, .out6=out6, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   tint_array_lengths_struct const v_1 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u), .tint_array_length_0_1=((*tint_module_vars.tint_storage_buffer_sizes)[0u].y / 8u), .tint_array_length_0_2=((*tint_module_vars.tint_storage_buffer_sizes)[0u].z / 16u), .tint_array_length_0_3=((*tint_module_vars.tint_storage_buffer_sizes)[0u].w / 16u), .tint_array_length_0_4=((*tint_module_vars.tint_storage_buffer_sizes)[1u].x / 2u), .tint_array_length_0_5=((*tint_module_vars.tint_storage_buffer_sizes)[1u].y / 4u), .tint_array_length_0_6=((*tint_module_vars.tint_storage_buffer_sizes)[1u].z / 8u)};
   simdgroup_half8x8 const m = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
-  bool const v_2 = (((0u + (16u * 7u)) + 4u) <= v_1.tint_array_length_0_0);
+  bool const v_2 = (madsat(16u, 7u, 4u) <= v_1.tint_array_length_0_0);
   (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out0) + (select(0u, 0u, v_2) * 4u)), ulong((select(4u, 16u, v_2) * 2u)), ulong2(0ul), false));
-  bool const v_3 = (((0u + (16u * 7u)) + 2u) <= v_1.tint_array_length_0_1);
+  bool const v_3 = (madsat(16u, 7u, 2u) <= v_1.tint_array_length_0_1);
   (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out1) + (select(0u, 0u, v_3) * 8u)), ulong((select(2u, 16u, v_3) * 4u)), ulong2(0ul), false));
-  bool const v_4 = (((0u + (16u * 7u)) + 1u) <= v_1.tint_array_length_0_2);
+  bool const v_4 = (madsat(16u, 7u, 1u) <= v_1.tint_array_length_0_2);
   (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out2) + (select(0u, 0u, v_4) * 16u)), ulong((select(1u, 16u, v_4) * 8u)), ulong2(0ul), false));
-  bool const v_5 = (((0u + (16u * 7u)) + 1u) <= v_1.tint_array_length_0_3);
+  bool const v_5 = (madsat(16u, 7u, 1u) <= v_1.tint_array_length_0_3);
   (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out3) + (select(0u, 0u, v_5) * 16u)), ulong((select(1u, 16u, v_5) * 8u)), ulong2(0ul), false));
-  bool const v_6 = (((0u + (16u * 7u)) + 8u) <= v_1.tint_array_length_0_4);
+  bool const v_6 = (madsat(16u, 7u, 8u) <= v_1.tint_array_length_0_4);
   (simdgroup_store(m, (&(*tint_module_vars.out4)[select(0u, 0u, v_6)]), ulong(select(8u, 16u, v_6)), ulong2(0ul), false));
-  bool const v_7 = (((0u + (16u * 7u)) + 4u) <= v_1.tint_array_length_0_5);
+  bool const v_7 = (madsat(16u, 7u, 4u) <= v_1.tint_array_length_0_5);
   (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out5) + (select(0u, 0u, v_7) * 4u)), ulong((select(4u, 16u, v_7) * 2u)), ulong2(0ul), false));
-  bool const v_8 = (((0u + (16u * 7u)) + 2u) <= v_1.tint_array_length_0_6);
+  bool const v_8 = (madsat(16u, 7u, 2u) <= v_1.tint_array_length_0_6);
   (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out6) + (select(0u, 0u, v_8) * 8u)), ulong((select(2u, 16u, v_8) * 4u)), ulong2(0ul), false));
 }

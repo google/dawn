@@ -106,6 +106,42 @@ inline const core::type::Type* BuildStructAddCarryVec(core::intrinsic::MatchStat
                                             state.types.vec(T, N.Value()));
 }
 
+inline bool MatchStructUmulExtendedScalar(core::intrinsic::MatchState&,
+                                          const core::type::Type* ty,
+                                          const core::type::Type*& T) {
+    if (ty->Is<core::intrinsic::Any>()) {
+        T = ty;
+        return true;
+    }
+    return false;
+}
+
+inline const core::type::Type* BuildStructUmulExtendedScalar(core::intrinsic::MatchState& state,
+                                                             const core::type::Type*,
+                                                             const core::type::Type* T) {
+    return core::type::CreateUMulExtendedResult(state.types, state.symbols, T);
+}
+
+inline bool MatchStructUmulExtendedVec(core::intrinsic::MatchState&,
+                                       const core::type::Type* ty,
+                                       core::intrinsic::Number& N,
+                                       const core::type::Type*& T) {
+    if (ty->Is<core::intrinsic::Any>()) {
+        T = ty;
+        N = core::intrinsic::Number::any;
+        return true;
+    }
+    return false;
+}
+
+inline const core::type::Type* BuildStructUmulExtendedVec(core::intrinsic::MatchState& state,
+                                                          const core::type::Type*,
+                                                          core::intrinsic::Number& N,
+                                                          const core::type::Type* T) {
+    return core::type::CreateUMulExtendedResult(state.types, state.symbols,
+                                                state.types.vec(T, N.Value()));
+}
+
 inline bool MatchSampledImage(core::intrinsic::MatchState&,
                               const core::type::Type* ty,
                               const core::type::Type*& T) {

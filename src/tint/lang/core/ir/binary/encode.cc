@@ -1290,6 +1290,8 @@ struct Encoder {
                 return pb::BuiltinFn::mix;
             case core::BuiltinFn::kModf:
                 return pb::BuiltinFn::modf;
+            case core::BuiltinFn::kMulSat:
+                return pb::BuiltinFn::mul_sat;
             case core::BuiltinFn::kNormalize:
                 return pb::BuiltinFn::normalize;
             case core::BuiltinFn::kPack2X16Float:

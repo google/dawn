@@ -152,6 +152,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSConvert:
         case BuiltinFn::kUConvert:
         case BuiltinFn::kAddCarry:
+        case BuiltinFn::kUmulExtended:
             break;
     }
     return core::ir::Instruction::Accesses{};

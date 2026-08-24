@@ -500,10 +500,10 @@ struct State {
         // If the array length, offset, and stride are all constants, then we can determine if the
         // call is in bounds now and skip any predication if so.
         if (array_length->Is<Constant>() && stride->Is<Constant>() && offset->Is<Constant>()) {
-            uint32_t const_length = array_length->As<Constant>()->Value()->ValueAs<uint32_t>();
-            uint32_t const_stride = stride->As<Constant>()->Value()->ValueAs<uint32_t>();
-            uint32_t const_offset = offset->As<Constant>()->Value()->ValueAs<uint32_t>();
-            uint32_t const_end = const_offset + (const_stride * (major_dim - 1)) + min_stride;
+            uint64_t const_length = array_length->As<Constant>()->Value()->ValueAs<uint64_t>();
+            uint64_t const_stride = stride->As<Constant>()->Value()->ValueAs<uint64_t>();
+            uint64_t const_offset = offset->As<Constant>()->Value()->ValueAs<uint64_t>();
+            uint64_t const_end = const_offset + (const_stride * (major_dim - 1)) + min_stride;
             if (const_end <= const_length) {
                 return;
             }
@@ -518,8 +518,11 @@ struct State {
             // memory.
             offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
             stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-            auto* last_slice = b.Add(offset, b.Multiply(stride, u32(major_dim - 1)))->Result();
-            auto* end = b.Add(last_slice, u32(min_stride));
+            auto* last_slice =
+                b.Call(ty.u32(), BuiltinFn::kAddSat, offset,
+                       b.Call(ty.u32(), BuiltinFn::kMulSat, stride, u32(major_dim - 1)))
+                    ->Result();
+            auto* end = b.Call(ty.u32(), BuiltinFn::kAddSat, last_slice, u32(min_stride));
             auto* in_bounds = b.LessThanEqual(end, array_length);
             offset = b.Call(ty.u32(), BuiltinFn::kSelect, 0_u, offset, in_bounds)->Result();
             stride =

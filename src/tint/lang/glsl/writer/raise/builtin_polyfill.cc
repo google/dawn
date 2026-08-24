@@ -124,6 +124,9 @@ struct State {
                     case core::BuiltinFn::kAddSat:
                         call_worklist.push_back([this, call] { AddSat(call); });
                         break;
+                    case core::BuiltinFn::kMulSat:
+                        call_worklist.push_back([this, call] { MulSat(call); });
+                        break;
                     default:
                         break;
                 }
@@ -510,6 +513,24 @@ struct State {
                                                                    : b.Constant(u32(0xffffffff)));
             b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), glsl::BuiltinFn::kMix,
                                                     sat, glsl_call, eq);
+        });
+        call->Destroy();
+    }
+
+    void MulSat(core::ir::BuiltinCall* call) {
+        auto* type = call->Result()->Type();
+        b.InsertBefore(call, [&] {
+            auto* msb = b.Var(ty.ptr(function, type));
+            auto* lsb = b.Var(ty.ptr(function, type));
+            b.Call<glsl::ir::BuiltinCall>(ty.void_(), glsl::BuiltinFn::kUmulExtended,
+                                          call->Args()[0], call->Args()[1], msb, lsb);
+            auto* upper = b.Load(msb);
+            auto* eq = b.Equal(upper, b.Zero(type));
+            core::ir::Value* sat = (type->Is<core::type::Vector>() ? b.Splat(type, u32(0xffffffff))
+                                                                   : b.Constant(u32(0xffffffff)));
+            auto* lower = b.Load(lsb);
+            b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), glsl::BuiltinFn::kMix,
+                                                    sat, lower, eq);
         });
         call->Destroy();
     }

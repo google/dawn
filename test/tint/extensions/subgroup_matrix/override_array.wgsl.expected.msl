@@ -46,7 +46,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   tint_array_lengths_struct const v_2 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)};
   uint const v_3 = as_type<uint>(0);
   uint const v_4 = as_type<uint>(8);
-  bool const v_5 = (((v_3 + (v_4 * 7u)) + 8u) <= v_2.tint_array_length_0_0);
+  bool const v_5 = (addsat(madsat(v_4, 7u, v_3), 8u) <= v_2.tint_array_length_0_0);
   simdgroup_float8x8 v_6 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
   (simdgroup_load(v_6, (&(*tint_module_vars.s_var)[select(0u, v_3, v_5)]), ulong(select(8u, v_4, v_5)), ulong2(0ul), false));
   simdgroup_float8x8 const m = v_6;
@@ -57,7 +57,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   simdgroup_float8x8 const m2 = v_7;
   uint const v_8 = as_type<uint>(0);
   uint const v_9 = as_type<uint>(8);
-  bool const v_10 = (((v_8 + (v_9 * 7u)) + 8u) <= v_2.tint_array_length_0_0);
+  bool const v_10 = (addsat(madsat(v_9, 7u, v_8), 8u) <= v_2.tint_array_length_0_0);
   (simdgroup_store(m2, (&(*tint_module_vars.s_var)[select(0u, v_8, v_10)]), ulong(select(8u, v_9, v_10)), ulong2(0ul), true));
 }
 

@@ -63,6 +63,7 @@ enum class BuiltinFn : uint8_t {
     kAtomicStoreExplicit,
     kAtomicMaxExplicit,
     kAtomicMinExplicit,
+    kMadsat,
     kFence,
     kGather,
     kGatherCompare,
