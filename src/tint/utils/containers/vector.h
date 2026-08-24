@@ -1109,8 +1109,6 @@ class Vector {
     /// A structure that has the same size and alignment as T.
     using TStorage = AlignedStorage<T>;
 
-    // Directly manipulating the underlying allocation for performance, so requires unsafe pointers
-    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
     /// The internal structure for the vector with a small array.
     struct ImplWithSmallArray {
         std::array<TStorage, N> small_arr;
@@ -1135,14 +1133,20 @@ class Vector {
 
         /// Frees `ptr`, if isn't a pointer to #small_arr
         void Free(T* ptr) const {
-            if (ptr != &small_arr[0].Get()) {
+            // SAFETY: Accessing &small_arr[0] is safe as N > 0 is guaranteed for
+            // ImplWithSmallArray.
+            if (ptr != DAWN_UNSAFE_BUFFERS(&small_arr[0].Get())) {
                 delete[] reinterpret_cast<TStorage*>(ptr);
             }
         }
 
         /// Indicates whether the structure can be std::move()d.
         /// @returns true if #slice.buffer.data() does not point to #small_arr
-        bool CanMove() const { return slice.buffer.data() != &small_arr[0].Get(); }
+        bool CanMove() const {
+            // SAFETY: Accessing &small_arr[0] is safe as N > 0 is guaranteed for
+            // ImplWithSmallArray.
+            return slice.buffer.data() != DAWN_UNSAFE_BUFFERS(&small_arr[0].Get());
+        }
     };
 
     /// The internal structure for the vector without a small array.
@@ -1167,7 +1171,6 @@ class Vector {
         /// @returns true
         bool CanMove() const { return true; }
     };
-    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
     /// Either a ImplWithSmallArray or ImplWithoutSmallArray based on N.
     std::conditional_t<HasSmallArray, ImplWithSmallArray, ImplWithoutSmallArray> impl_;

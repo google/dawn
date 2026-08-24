@@ -369,6 +369,30 @@ class CheckBannedPatternsTest(unittest.TestCase):
         self.assertEqual(1, loc.start_line)
         self.assertEqual(1, loc.end_line)
 
+    def testBannedTintUnsafeBufferWarning(self):
+        mock_input_api = MockInputApi()
+        mock_input_api.files = [
+            MockAffectedFile('src/tint/Foo.cpp', [
+                'TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);',
+            ]),
+            MockAffectedFile('src/tint/Bar.cpp', [
+                'TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);',
+            ]),
+            MockAffectedFile('src/tint/lang/spirv/reader/parser/parser.cc', [
+                'TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);',
+            ]),
+        ]
+        errors = PRESUBMIT.CheckNoBannedPatterns(mock_input_api,
+                                                 MockOutputApiWithLocations())
+        self.assertEqual(2, len(errors))
+        self.assertIn('A banned pattern was used.', errors[0].message)
+        self.assertIn(
+            'Do not introduce new instances of TINT_BEGIN_DISABLE_WARNING',
+            errors[0].message)
+        self.assertEqual(1, len(errors[0].locations))
+        self.assertEqual('src/tint/Foo.cpp', errors[0].locations[0].file_path)
+        self.assertEqual('src/tint/Bar.cpp', errors[1].locations[0].file_path)
+
     def testCommentedUsageIgnored(self):
         mock_input_api = MockInputApi()
         mock_input_api.files = [

@@ -119,6 +119,22 @@ class BanRule:
 # Configuration for banned patterns checks.
 _BANNED_CPP_PATTERNS: Sequence[BanRule] = (
     BanRule(
+        pattern=
+        r'/\bTINT_BEGIN_DISABLE_WARNING\s*\(\s*(UNSAFE_BUFFER_USAGE|UNSAFE_BUFFER_USAGE_IN_CONTAINER)\s*\)',
+        excluded_paths=(
+            r'^src/tint/lang/spirv/reader/parser/parser\.cc$',
+            r'^src/tint/lang/glsl/validate/validate\.cc$',
+        ),
+        explanation=(
+            'Do not introduce new instances of TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE) ',
+            'or TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER). ',
+            'Use DAWN_UNSAFE_BUFFERS with a // SAFETY: comment instead, ',
+            'or rewrite to be safe.',
+        ),
+        treat_as_error=False,
+        surface_as_gerrit_lint=True,
+    ),
+    BanRule(
         pattern=r'/\bDAWN_UNSAFE_TODO\b',
         explanation=(
             'Do not introduce new instances of DAWN_UNSAFE_TODO. ',
