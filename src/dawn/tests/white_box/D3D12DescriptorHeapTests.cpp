@@ -245,8 +245,8 @@ TEST_P(D3D12DescriptorHeapTests, CrossPassStaleRootDescriptorTable) {
     wgpu::Texture rtTex;
     // To overflow the view heap, we need to create more than 'heapSize' descriptors. We'll create
     // kNumBindGroups, each with kBindingsPerGroup UBOs.
-    constexpr int kBindingsPerGroup = 8;
-    const int kNumBindGroups = (heapSize / kBindingsPerGroup) + 1;
+    constexpr uint32_t kBindingsPerGroup = 8;
+    const uint32_t kNumBindGroups = (heapSize / kBindingsPerGroup) + 1;
     std::vector<wgpu::BindGroup> rpBGs(kNumBindGroups);
     {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
@@ -293,11 +293,11 @@ TEST_P(D3D12DescriptorHeapTests, CrossPassStaleRootDescriptorTable) {
         uboDesc.usage = wgpu::BufferUsage::Uniform;
         wgpu::Buffer ubo = device.CreateBuffer(&uboDesc);
 
-        for (int i = 0; i < kNumBindGroups; ++i) {
+        for (uint32_t i = 0; i < kNumBindGroups; ++i) {
             std::vector<wgpu::BindGroupEntry> entries(kBindingsPerGroup);
-            for (int j = 0; j < kBindingsPerGroup; ++j) {
+            for (uint32_t j = 0; j < kBindingsPerGroup; ++j) {
                 wgpu::BindGroupEntry entry;
-                entry.binding = uint32_t(j);
+                entry.binding = j;
                 entry.buffer = ubo;
                 entries[j] = entry;
             }
@@ -325,7 +325,7 @@ TEST_P(D3D12DescriptorHeapTests, CrossPassStaleRootDescriptorTable) {
         utils::ComboRenderPassDescriptor rpDesc({rtTex.CreateView()});
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rpDesc);
         pass.SetPipeline(rp);
-        for (int i = 0; i < kNumBindGroups; ++i) {
+        for (uint32_t i = 0; i < kNumBindGroups; ++i) {
             pass.SetBindGroup(0, rpBGs[i]);
             pass.Draw(3);
         }

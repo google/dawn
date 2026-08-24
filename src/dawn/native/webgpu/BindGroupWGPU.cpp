@@ -213,7 +213,7 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
 
     schema::BindGroup bg{{
         .layoutId = captureContext.GetId(layout),
-        .numEntries = uint32_t(bindingMap.size()),
+        .numEntries = checked_cast<uint32_t>(bindingMap.size()),
     }};
     Serialize(captureContext, bg);
 

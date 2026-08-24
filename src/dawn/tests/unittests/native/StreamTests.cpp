@@ -199,7 +199,7 @@ TEST(SerializeTests, StdWStrings) {
 
     ByteVectorSink expected;
 
-    StreamIn(&expected, size_t(str.length()));
+    StreamIn(&expected, str.length());
     size_t bytes = str.length() * sizeof(wchar_t);
     DAWN_UNSAFE_TODO(memcpy(expected.GetSpace(bytes).data(), str.data(), bytes));
 
@@ -223,7 +223,7 @@ TEST(SerializeTests, StdWStringViews) {
     static constexpr std::wstring_view str(L"Hello world!");
 
     ByteVectorSink expected;
-    StreamIn(&expected, size_t(str.length()));
+    StreamIn(&expected, str.length());
     size_t bytes = str.length() * sizeof(wchar_t);
     DAWN_UNSAFE_TODO(memcpy(expected.GetSpace(bytes).data(), str.data(), bytes));
 

@@ -38,8 +38,9 @@ class MemoryHeapPropertiesTest : public DawnTest {
     void CheckMemoryHeapProperties(const wgpu::AdapterPropertiesMemoryHeaps& memoryHeapProperties) {
         EXPECT_GT(memoryHeapProperties.heapCount, 0u);
         for (size_t i = 0; i < memoryHeapProperties.heapCount; ++i) {
+            const auto& heapInfo = DAWN_UNSAFE_TODO(memoryHeapProperties.heapInfo[i]);
             // Check the heap is non-zero in size.
-            DAWN_UNSAFE_TODO(EXPECT_GT(memoryHeapProperties.heapInfo[i].size, 0ull));
+            EXPECT_GT(heapInfo.size, 0ull);
 
             constexpr wgpu::HeapProperty kValidProps =
                 wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
@@ -47,11 +48,10 @@ class MemoryHeapPropertiesTest : public DawnTest {
                 wgpu::HeapProperty::HostCached;
 
             // Check the heap properties only contain the set of valid enums.
-            DAWN_UNSAFE_TODO(
-                EXPECT_EQ(memoryHeapProperties.heapInfo[i].properties & ~kValidProps, 0u));
+            EXPECT_EQ(heapInfo.properties & ~kValidProps, wgpu::HeapProperty::None);
 
             // Check the heap properties have at least one bit.
-            DAWN_UNSAFE_TODO(EXPECT_NE(uint32_t(memoryHeapProperties.heapInfo[i].properties), 0u));
+            EXPECT_NE(heapInfo.properties, wgpu::HeapProperty::None);
         }
     }
 };

@@ -95,8 +95,7 @@ void CopyTextureData(Span<std::byte> dst,
             srcOffset += imageAdditionalStride;
         }
     } else {
-        size_t layerSize =
-            checked_cast<size_t>(dstRowsPerImage) * checked_cast<size_t>(actualBytesPerRow);
+        size_t layerSize = size_t{dstRowsPerImage} * actualBytesPerRow;
         if (!copyWholeData) {  // copy layer by layer
             for (uint32_t d = 0; d < depth; ++d) {
                 dst.subspan(dstOffset).CopyPrefixFrom(src.subspan(srcOffset, layerSize));
@@ -384,7 +383,7 @@ MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
     // Note that validating texture copy range ensures that writeSizePixel->width and
     // writeSizePixel->height are multiples of blockWidth and blockHeight respectively.
     BlockCount rowsPerImage = writeSize.height;
-    uint32_t bytesPerRow = uint32_t(blockInfo.ToBytes(writeSize.width));
+    uint32_t bytesPerRow = checked_cast<uint32_t>(blockInfo.ToBytes(writeSize.width));
     uint32_t alignedBytesPerRow = Align(bytesPerRow, GetDevice()->GetOptimalBytesPerRowAlignment());
     BlockCount alignedBlocksPerRow = blockInfo.BytesToBlocks(alignedBytesPerRow);
 

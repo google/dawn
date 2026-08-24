@@ -68,7 +68,7 @@ template <typename Index>
 inline constexpr Index DynamicExtent = std::numeric_limits<Index>::max();
 
 template <typename Index, Index Extent>
-inline constexpr bool IsDynamicExtent = (Extent == DynamicExtent<Index>);
+inline constexpr bool IsDynamicExtent = Extent == DynamicExtent<Index>;
 
 template <typename T,
           HasUnsignedUnderlyingType Index,

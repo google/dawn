@@ -84,7 +84,7 @@ class ErrorBuffer final : public BufferBase {
         DAWN_CHECK(!mFakeMappedData);
 
         uint64_t size = GetSize();
-        if (size < uint64_t(std::numeric_limits<size_t>::max())) {
+        if (size < std::numeric_limits<size_t>::max()) {
             mFakeMappedData =
                 // SAFETY: Frontend is responsible for initializing MapAtCreation memory.
                 DAWN_UNSAFE_BUFFERS(

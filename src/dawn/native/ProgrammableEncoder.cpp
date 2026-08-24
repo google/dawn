@@ -252,7 +252,7 @@ void ProgrammableEncoder::RecordSetImmediates(CommandAllocator* allocator,
 
     SetImmediatesCmd* cmd = allocator->Allocate<SetImmediatesCmd>(Command::SetImmediates);
     cmd->offset = offset;
-    cmd->size = uint32_t(data.size());
+    cmd->size = checked_cast<uint32_t>(data.size());
     Span<std::byte> immediateDatas = allocator->AllocateData<std::byte>(data.size());
     // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
     std::ranges::copy(data, immediateDatas.begin());

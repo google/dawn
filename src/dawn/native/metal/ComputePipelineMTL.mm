@@ -93,9 +93,9 @@ ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
     mRequiresStorageBufferLength = computeData.needsStorageBufferLength;
     mWorkgroupAllocations = std::move(computeData.workgroupAllocations);
 
-    return {{uint32_t(computeData.localWorkgroupSize.width),
-             uint32_t(computeData.localWorkgroupSize.height),
-             uint32_t(computeData.localWorkgroupSize.depth)}};
+    return {{checked_cast<uint32_t>(computeData.localWorkgroupSize.width),
+             checked_cast<uint32_t>(computeData.localWorkgroupSize.height),
+             checked_cast<uint32_t>(computeData.localWorkgroupSize.depth)}};
 }
 
 void ComputePipeline::Encode(id<MTLComputeCommandEncoder> encoder) {

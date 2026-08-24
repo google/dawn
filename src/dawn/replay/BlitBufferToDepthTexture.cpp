@@ -28,6 +28,7 @@
 #include "src/dawn/replay/BlitBufferToDepthTexture.h"
 
 #include "src/dawn/common/Strings.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::replay {
 
@@ -162,7 +163,7 @@ MaybeError BlitBufferToDepthTexture::Blit(wgpu::Device device,
 
         const uint64_t srcOffset =
             src.offset + static_cast<uint64_t>(z) * src.rowsPerImage * src.bytesPerRow;
-        const uint32_t shaderReadOffset = uint32_t(srcOffset);
+        const uint32_t shaderReadOffset = checked_cast<uint32_t>(srcOffset);
         wgpu::Buffer paramsBuffer;
         {
             wgpu::BufferDescriptor desc;

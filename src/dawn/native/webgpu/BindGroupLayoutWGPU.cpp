@@ -134,7 +134,7 @@ MaybeError BindGroupLayout::CaptureCreationParameters(CaptureContext& captureCon
     const auto& bindingMap = GetBindingMap();
 
     schema::BindGroupLayout data{{
-        .numEntries = uint32_t(bindingMap.size()),
+        .numEntries = checked_cast<uint32_t>(bindingMap.size()),
     }};
     Serialize(captureContext, data);
 

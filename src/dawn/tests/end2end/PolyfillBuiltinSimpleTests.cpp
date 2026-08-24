@@ -219,8 +219,12 @@ TEST_P(PolyfillBuiltinSimpleTests, AbsWithBranch) {
 
     wgpu::ComputePipeline pipeline = CreateComputePipeline(kShaderCode);
     uint32_t kDefaultVal = 0;
-    std::vector<uint32_t> init_input = {uint32_t(std::numeric_limits<int32_t>::lowest()),
-                                        uint32_t(-15), 17, 123};
+    std::vector<uint32_t> init_input = {
+        static_cast<uint32_t>(std::numeric_limits<int32_t>::lowest()),
+        static_cast<uint32_t>(-15),
+        17,
+        123,
+    };
 
     wgpu::Buffer input = CreateBuffer(init_input);
     wgpu::Buffer output = CreateBuffer(4, kDefaultVal);
@@ -284,8 +288,12 @@ TEST_P(PolyfillBuiltinSimpleTests, CaseSwitchToIf) {
 
     wgpu::ComputePipeline pipeline = CreateComputePipeline(kShaderCode);
     uint32_t kDefaultVal = 0;
-    std::vector<uint32_t> init_input = {uint32_t(std::numeric_limits<int32_t>::lowest()),
-                                        uint32_t(-15), 17, 123};
+    std::vector<uint32_t> init_input = {
+        static_cast<uint32_t>(std::numeric_limits<int32_t>::lowest()),
+        static_cast<uint32_t>(-15),
+        17,
+        123,
+    };
 
     wgpu::Buffer input = CreateBuffer(init_input);
     wgpu::Buffer output = CreateBuffer(4, kDefaultVal);
@@ -364,8 +372,12 @@ TEST_P(PolyfillBuiltinSimpleTests, CaseSwitchToIfComplex) {
 
     wgpu::ComputePipeline pipeline = CreateComputePipeline(kShaderCode);
     uint32_t kDefaultVal = 0;
-    std::vector<uint32_t> init_input = {uint32_t(std::numeric_limits<int32_t>::lowest()),
-                                        uint32_t(-2), 3, 5};
+    std::vector<uint32_t> init_input = {
+        static_cast<uint32_t>(std::numeric_limits<int32_t>::lowest()),
+        static_cast<uint32_t>(-2),
+        3,
+        5,
+    };
     std::vector<uint32_t> expected = {13, 4, 0, 11};
     wgpu::Buffer input = CreateBuffer(init_input);
     wgpu::Buffer output = CreateBuffer(4, kDefaultVal);

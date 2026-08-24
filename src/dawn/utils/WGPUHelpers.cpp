@@ -231,7 +231,7 @@ wgpu::PipelineLayout MakePipelineLayout(const wgpu::Device& device,
                                         std::vector<wgpu::BindGroupLayout> bgls,
                                         uint32_t immediateSize) {
     wgpu::PipelineLayoutDescriptor descriptor;
-    descriptor.bindGroupLayoutCount = uint32_t(bgls.size());
+    descriptor.bindGroupLayoutCount = bgls.size();
     descriptor.bindGroupLayouts = bgls.data();
     descriptor.immediateSize = immediateSize;
     return device.CreatePipelineLayout(&descriptor);

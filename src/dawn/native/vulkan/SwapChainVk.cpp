@@ -700,7 +700,7 @@ ResultOrError<VkSurfaceKHR> CreateVulkanSurface(InstanceBase* instance,
                 createInfo.pNext = nullptr;
                 createInfo.flags = 0;
                 createInfo.dpy = static_cast<Display*>(surface->GetXDisplay());
-                createInfo.window = uint32_t(surface->GetXWindow());
+                createInfo.window = checked_cast<uint32_t>(surface->GetXWindow());
 
                 VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
                 DAWN_TRY(CheckVkSuccess(
@@ -723,7 +723,7 @@ ResultOrError<VkSurfaceKHR> CreateVulkanSurface(InstanceBase* instance,
                 // The XCB connection lives as long as the X11 display.
                 createInfo.connection =
                     x11->xGetXCBConnection(static_cast<Display*>(surface->GetXDisplay()));
-                createInfo.window = uint32_t(surface->GetXWindow());
+                createInfo.window = checked_cast<uint32_t>(surface->GetXWindow());
 
                 VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
                 DAWN_TRY(CheckVkSuccess(

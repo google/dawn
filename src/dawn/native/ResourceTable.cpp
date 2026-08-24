@@ -38,7 +38,6 @@
 #include "src/dawn/native/ResourceTableDefaultResources.h"
 #include "src/dawn/native/Texture.h"
 #include "src/utils/compiler.h"
-#include "src/utils/numeric.h"
 #include "tint/tint.h"
 
 namespace dawn::native {
@@ -182,7 +181,7 @@ MaybeError ResourceTableBase::InitializeBase() {
 
     // Initialize the metadata buffer with the arrayLength and a bunch of zeroes that correspond to
     // empty entries.
-    DAWN_CHECK(uint32_t(tint::ResourceType::kEmpty) == 0);
+    static_assert(tint::ResourceType{} == tint::ResourceType::kEmpty);
     // TODO(https://crbug.com/435317394): We could rely on zero initialization if it is enabled, and
     // also apply the initial dirty slots in this mapping instead of on the first use of the
     // resource table.
@@ -642,11 +641,11 @@ ResourceTableBase::Updates ResourceTableBase::AcquireDirtySlotUpdates(
 
         // Add the update for the metadata buffer.
         // Add 1 because the 0th element holds the table size (APISize).
-        size_t offset = sizeof(uint32_t) * (uint32_t(dirtySlot) + 1);
+        uint32_t offset = sizeof(uint32_t) * (uint32_t{dirtySlot} + 1);
         updates.metadataUpdates.push_back({
             .slot = dirtySlot,
-            .offset = uint32_t(offset),
-            .data = uint32_t(effectiveType),
+            .offset = offset,
+            .data = to_underlying(effectiveType),
         });
 
         // Compute whether a resource update is needed and skip adding it if unnecessary.

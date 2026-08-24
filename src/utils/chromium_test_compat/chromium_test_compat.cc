@@ -34,6 +34,7 @@
 #include <string_view>
 
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn {
 void SubstituteChromiumArgs(int argc, char** argv) {
@@ -59,7 +60,7 @@ void SubstituteChromiumArgs(int argc, char** argv) {
             int charsWritten =
                 DAWN_UNSAFE_TODO(std::snprintf(argv[i], bufferSize, "%s", replacementArg.c_str()));
 
-            if (size_t(charsWritten) != replacementArg.length()) {
+            if (checked_cast<size_t>(charsWritten) != replacementArg.length()) {
                 abort();
             }
         }

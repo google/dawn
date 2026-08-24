@@ -38,6 +38,13 @@
 
 namespace dawn {
 
+// Backport of C++23 std::to_underlying. Can be removed when we get C++23.
+template <typename E>
+    requires std::is_enum_v<E>
+constexpr inline auto to_underlying(E value) {
+    return static_cast<std::underlying_type_t<E>>(value);
+}
+
 // Checked conversion between differently sized integer-likes (i.e. all the types that can be used
 // by ityp: integers, TypedIntegers, and enum classes). This is only defined for unsigned types
 // because that is all that is needed at the time of writing, however eventually we will want to use

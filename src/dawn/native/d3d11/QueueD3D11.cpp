@@ -784,8 +784,7 @@ ResultOrError<ExecutionSerial> DelayFlushQueue::WaitForQueueSerialImpl(Execution
         return waitSerial;
     }
 
-    if (uint64_t(timeout) == std::numeric_limits<uint64_t>::max() &&
-        waitSerial == GetLastSubmittedCommandSerial()) {
+    if (timeout >= kMaxDurationNanos && waitSerial == GetLastSubmittedCommandSerial()) {
         // If user submits then waits immediately, we can do a small optimization here,
         // Flush + enqueue SetEvent then wait on the event. This can avoid spinning wait below,
         // wasting less CPU cycles.
@@ -815,9 +814,10 @@ ResultOrError<ExecutionSerial> DelayFlushQueue::WaitForQueueSerialImpl(Execution
 
             if (!done) {
                 auto curTime = std::chrono::steady_clock::now();
-                auto elapsedNs =
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(curTime - startTime);
-                if (static_cast<uint64_t>(elapsedNs.count()) >= uint64_t(timeout)) {
+                auto elapsedNs = Nanoseconds(static_cast<uint64_t>(
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(curTime - startTime)
+                        .count()));
+                if (elapsedNs >= timeout) {
                     return kWaitSerialTimeout;
                 }
                 std::this_thread::yield();

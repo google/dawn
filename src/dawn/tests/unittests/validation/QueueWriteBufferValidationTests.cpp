@@ -70,7 +70,7 @@ TEST_F(QueueWriteBufferValidationTest, OutOfBoundsOverflow) {
 
     // An offset that when added to "4" would overflow to be zero and pass validation without
     // overflow checks.
-    uint64_t offset = uint64_t(int64_t(0) - int64_t(4));
+    uint64_t offset = static_cast<uint64_t>(-4);
 
     ASSERT_DEVICE_ERROR(queue.WriteBuffer(buf, offset, foo, 4));
 }

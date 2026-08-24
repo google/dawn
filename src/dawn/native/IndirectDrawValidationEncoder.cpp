@@ -515,7 +515,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
 
             Batch newBatch;
             newBatch.metadata = &batch;
-            newBatch.dataSize = GetBatchDataSize(uint32_t(batch.draws.size()));
+            newBatch.dataSize = GetBatchDataSize(checked_cast<uint32_t>(batch.draws.size()));
             newBatch.inputIndirectOffset = minOffsetAlignedDown;
             newBatch.inputIndirectSize =
                 batch.maxOffset + indirectDrawCommandSize - minOffsetAlignedDown;
@@ -531,7 +531,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
             if (currentPass &&
                 IndirectDrawMetadata::IndexedIndirectConfig{
                     reinterpret_cast<uintptr_t>(currentPass->inputIndirectBuffer.get()),
-                    bool(currentPass->flags & kDuplicateBaseVertexInstance),
+                    (currentPass->flags & kDuplicateBaseVertexInstance) != 0,
                     currentPass->drawType} == config) {
                 uint64_t nextBatchDataOffset =
                     Align(currentPass->batchDataSize, minStorageBufferOffsetAlignment);
@@ -671,7 +671,8 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
                     static_cast<uint32_t>((draw.numIndexBufferElements >> 32) & 0xFFFFFFFF);
 
                 // This is only used in the GL backend.
-                indirectDraw->indexOffsetAsNumElements = uint32_t(draw.indexBufferOffsetInElements);
+                indirectDraw->indexOffsetAsNumElements =
+                    checked_cast<uint32_t>(draw.indexBufferOffsetInElements);
                 DAWN_UNSAFE_TODO(indirectDraw++);
 
                 // Save the args that point to the validated values in the indirectDrawMetadata.

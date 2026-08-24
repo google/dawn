@@ -132,7 +132,7 @@ MaybeError ResourceTable::Initialize() {
             .pNext = nullptr,
             .flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT,
             .maxSets = 1,
-            .poolSizeCount = uint32_t(sizes.size()),
+            .poolSizeCount = checked_cast<uint32_t>(sizes.size()),
             .pPoolSizes = sizes.data(),
         };
 

@@ -656,7 +656,8 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
                         depthStencil->format, descriptor->module, entryPoint);
     }
 
-    ColorAttachmentIndex maxColorAttachments{uint8_t(device->GetLimits().v1.maxColorAttachments)};
+    auto maxColorAttachments =
+        checked_cast<ColorAttachmentIndex>(device->GetLimits().v1.maxColorAttachments);
     DAWN_INVALID_IF(
         descriptor->targets.size() > maxColorAttachments,
         "Number of targets (%u) exceeds the maximum (%u).%s", descriptor->targets.size(),
@@ -993,7 +994,7 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
             // cause no overflow.
             uint32_t formatByteSize = GetVertexFormatInfo(attribute.format).byteSize;
             DAWN_CHECK(attribute.offset <= 2048);
-            uint16_t accessBoundary = uint16_t(attribute.offset) + uint16_t(formatByteSize);
+            uint16_t accessBoundary = checked_cast<uint16_t>(attribute.offset + formatByteSize);
             mVertexBufferInfos[slot].usedBytesInStride =
                 std::max(mVertexBufferInfos[slot].usedBytesInStride, accessBoundary);
             mVertexBufferInfos[slot].lastStride =
