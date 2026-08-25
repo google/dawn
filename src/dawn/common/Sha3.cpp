@@ -256,15 +256,10 @@ void Keccak(Sha3State& a) {
 }
 
 // TODO(402772741): This could be made more efficient by xoring whole 64bits at a time.
-void memxorpy(void* dst, const void* src, size_t n) {
-    char* dstChars = static_cast<char*>(dst);
-    const char* srcChars = static_cast<const char*>(src);
-
-    while (n > 0) {
-        *dstChars ^= *srcChars;
-        n--;
-        DAWN_UNSAFE_TODO(dstChars++);
-        DAWN_UNSAFE_TODO(srcChars++);
+void XorWith(Span<std::byte> dst, Span<const std::byte> src) {
+    DAWN_ASSERT(dst.size() == src.size());
+    for (size_t i = 0; i < dst.size(); i++) {
+        dst[i] ^= src[i];
     }
 }
 
@@ -278,17 +273,12 @@ void memxorpy(void* dst, const void* src, size_t n) {
 // being a valid padding, but not 1).
 template <size_t OutputLength>
 void Sha3<OutputLength>::Update(Span<const std::byte> data) {
-    std::byte* stateAsString = reinterpret_cast<std::byte*>(&mState);
-    const std::byte* dataAsBytes = data.data();
-    size_t size = data.size();
-
-    while (size > 0) {
+    while (!data.empty()) {
         DAWN_ASSERT(mOffsetInState < kByteRate);
-        size_t toProcess = std::min(size, kByteRate - mOffsetInState);
+        size_t toProcess = std::min(data.size(), kByteRate - mOffsetInState);
 
-        memxorpy(DAWN_UNSAFE_TODO(stateAsString + mOffsetInState), dataAsBytes, toProcess);
-        size -= toProcess;
-        DAWN_UNSAFE_TODO(dataAsBytes += toProcess);
+        auto stateToXorInto = ByteSpanFromRef(mState).subspan(mOffsetInState, toProcess);
+        XorWith(stateToXorInto, data.TakeFirst(toProcess));
         mOffsetInState += toProcess;
 
         if (mOffsetInState == kByteRate) {
@@ -300,16 +290,14 @@ void Sha3<OutputLength>::Update(Span<const std::byte> data) {
 
 template <size_t OutputLength>
 typename Sha3<OutputLength>::Output Sha3<OutputLength>::Finalize() {
-    std::byte* stateAsString = reinterpret_cast<std::byte*>(&mState);
+    Span<std::byte> stateAsBytes = ByteSpanFromRef(mState);
     DAWN_ASSERT(mOffsetInState < kByteRate);
 
     // Add in the 01 suffix for SHA3, as well as the first 1 for the padding.
-    std::byte* suffixByte = DAWN_UNSAFE_TODO(stateAsString + mOffsetInState);
-    *suffixByte ^= std::byte(0b110);
+    stateAsBytes[mOffsetInState] ^= std::byte(0b110);
 
     // Add in the last 1 of the multi-rate padding. The byte may be the same byte as suffixByte.
-    std::byte* endByte = DAWN_UNSAFE_TODO(stateAsString + (kByteRate - 1));
-    *endByte ^= std::byte(0b1000'0000);
+    stateAsBytes[kByteRate - 1] ^= std::byte(0b1000'0000);
 
     // Do the final Keccak for the absorption in the sponge.
     Keccak(mState);
@@ -320,7 +308,7 @@ typename Sha3<OutputLength>::Output Sha3<OutputLength>::Finalize() {
     // The squeeze of the hash value can be done in one step.
     static_assert(sizeof(Output) <= kByteRate);
     Output output;
-    DAWN_UNSAFE_TODO(memcpy(&output, &mState, sizeof(output)));
+    Span<std::byte>(output).CopyFrom(stateAsBytes.first(sizeof(Output)));
     return output;
 }
 
