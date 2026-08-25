@@ -3143,13 +3143,13 @@ TEST_F(IR_ValidatorTest, Function_SubgroupSize_ParamTooSmall) {
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
-    auto res = ir::Validate(mod);
+    mod.SetSource(f, Source{{1, 1}});
+
+    auto res = ir::Validate(mod, ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:1:1 error: @subgroup_size param must be greater than 0
-%f = @compute @workgroup_size(1u, 2u, 3u) @subgroup_size(-16i) func():void {
-^^
-)")) << res.Failure();
+                testing::HasSubstr(R"(1:1 error: @subgroup_size param must be greater than 0)"))
+        << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_SubgroupSize_ParamZero) {
@@ -3159,13 +3159,13 @@ TEST_F(IR_ValidatorTest, Function_SubgroupSize_ParamZero) {
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
-    auto res = ir::Validate(mod);
+    mod.SetSource(f, Source{{1, 1}});
+
+    auto res = ir::Validate(mod, ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:1:1 error: @subgroup_size param must be greater than 0
-%f = @compute @workgroup_size(1u, 2u, 3u) @subgroup_size(0u) func():void {
-^^
-)")) << res.Failure();
+                testing::HasSubstr(R"(1:1 error: @subgroup_size param must be greater than 0)"))
+        << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_SubgroupSize_InvalidValue) {
@@ -3188,15 +3188,15 @@ TEST_F(IR_ValidatorTest, Function_SubgroupSize_ParamNonPowerOfTwo) {
     f->SetWorkgroupSize({b.Constant(1_u), b.Constant(2_u), b.Constant(3_u)});
     f->SetSubgroupSize(b.Constant(15_u));
 
+    mod.SetSource(f, Source{{1, 1}});
+
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
-    auto res = ir::Validate(mod);
+    auto res = ir::Validate(mod, ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:1:1 error: @subgroup_size param must be a power of 2
-%f = @compute @workgroup_size(1u, 2u, 3u) @subgroup_size(15u) func():void {
-^^
-)")) << res.Failure();
+                testing::HasSubstr(R"(1:1 error: @subgroup_size param must be a power of 2)"))
+        << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_SubgroupSize_ParamPowerOfTwo) {
@@ -3206,7 +3206,7 @@ TEST_F(IR_ValidatorTest, Function_SubgroupSize_ParamPowerOfTwo) {
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
-    auto res = ir::Validate(mod);
+    auto res = ir::Validate(mod, ErrorSource::kWgsl);
     ASSERT_EQ(res, Success);
 }
 

@@ -1872,11 +1872,6 @@ void Structural::CheckSubgroupSize(const Function* func) {
         return;
     }
 
-    if (!func->IsCompute()) {
-        AddError(func) << "@subgroup_size only valid on compute entry point";
-        return;
-    }
-
     auto subgroup_size = func->SubgroupSize().value();
     if (subgroup_size == nullptr) {
         AddError(func) << "a @subgroup_size param must have a value";
@@ -1888,24 +1883,7 @@ void Structural::CheckSubgroupSize(const Function* func) {
         return;
     }
 
-    auto* ty = subgroup_size->Type();
-    if (!ty->IsAnyOf<core::type::I32, core::type::U32>()) {
-        AddError(func) << "@subgroup_size param must be an 'i32' or 'u32', received " << NameOf(ty);
-        return;
-    }
-
-    if (auto* c = subgroup_size->As<ir::Constant>()) {
-        int64_t value = c->Value()->ValueAs<int64_t>();
-        if (value <= 0) {
-            AddError(func) << "@subgroup_size param must be greater than 0";
-            return;
-        }
-
-        if (!IsPowerOfTwo<int64_t>(value)) {
-            AddError(func) << "@subgroup_size param must be a power of 2";
-            return;
-        }
-
+    if (subgroup_size->Is<core::ir::Constant>()) {
         return;
     }
 

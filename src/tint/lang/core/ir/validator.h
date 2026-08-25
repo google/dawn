@@ -33,11 +33,21 @@
 
 namespace tint::core::ir {
 
+enum class ErrorSource {
+    kWgsl,
+    kIr,
+};
+
 /// Validates the module @p ir is correctly formed
 /// @param mod the module to validate
 /// @param msg the msg to accompany the output
 /// @returns success or failure
 Result<SuccessType> Validate(const Module& mod, std::string_view msg = "");
+/// Validates the module @p ir is correctly formed
+/// @param mod the module to validate
+/// @param source the source we're validating from
+/// @returns success or failure
+Result<SuccessType> Validate(const Module& mod, ErrorSource source);
 
 /// Validates the module @p ir is correctly formed, iff required by the build configuration.
 /// @param mod the module to transform

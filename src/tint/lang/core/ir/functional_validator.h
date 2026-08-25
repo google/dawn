@@ -60,6 +60,7 @@
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/unary.h"
 #include "src/tint/lang/core/ir/user_call.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
@@ -68,11 +69,6 @@ namespace tint::core::ir::validator {
 
 class Functional {
   public:
-    enum class ErrorSource {
-        kWgsl,
-        kIr,
-    };
-
     Functional(const Module& ir, diag::List& diagnostics, ErrorSource error_source);
     ~Functional();
 
@@ -99,6 +95,11 @@ class Functional {
       private:
         Vector<Hashset<const Value*, 8>, 4> stack_;
     };
+
+    // Returns true if we're validating in the context of WGSL. The other option is we're validating
+    // as IR. The primary difference is how const-eval checks are run as the semantics are
+    // different.
+    [[maybe_unused]] bool IsWGSLValidation() const;
 
     StyledText NameOf(const core::type::Type* ty);
     StyledText NameOf(const Value* value);
@@ -135,6 +136,7 @@ class Functional {
     void CheckRootBlock(const Block* blk);
     void CheckFunction(const Function* func);
     void CheckFunctionParam(const FunctionParam* param);
+    void CheckSubgroupSize(const Function* func);
     void CheckEntryPoint(const Function* func);
     void CheckPositionPresentForVertexOutput(const Function* ep);
     void CheckBlock(const Block* blk);
