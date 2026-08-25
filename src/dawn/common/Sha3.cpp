@@ -277,9 +277,10 @@ void memxorpy(void* dst, const void* src, size_t n) {
 // 01 suffix at the end of the message and pads the remaining bits with 10...0...01. (with 11
 // being a valid padding, but not 1).
 template <size_t OutputLength>
-void Sha3<OutputLength>::Update(const void* data, size_t size) {
-    uint8_t* stateAsString = reinterpret_cast<uint8_t*>(&mState);
-    const uint8_t* dataAsBytes = static_cast<const uint8_t*>(data);
+void Sha3<OutputLength>::Update(Span<const std::byte> data) {
+    std::byte* stateAsString = reinterpret_cast<std::byte*>(&mState);
+    const std::byte* dataAsBytes = data.data();
+    size_t size = data.size();
 
     while (size > 0) {
         DAWN_ASSERT(mOffsetInState < kByteRate);
@@ -299,16 +300,16 @@ void Sha3<OutputLength>::Update(const void* data, size_t size) {
 
 template <size_t OutputLength>
 typename Sha3<OutputLength>::Output Sha3<OutputLength>::Finalize() {
-    uint8_t* stateAsString = reinterpret_cast<uint8_t*>(&mState);
+    std::byte* stateAsString = reinterpret_cast<std::byte*>(&mState);
     DAWN_ASSERT(mOffsetInState < kByteRate);
 
     // Add in the 01 suffix for SHA3, as well as the first 1 for the padding.
-    uint8_t* suffixByte = DAWN_UNSAFE_TODO(stateAsString + mOffsetInState);
-    *suffixByte ^= 0b110;
+    std::byte* suffixByte = DAWN_UNSAFE_TODO(stateAsString + mOffsetInState);
+    *suffixByte ^= std::byte(0b110);
 
     // Add in the last 1 of the multi-rate padding. The byte may be the same byte as suffixByte.
-    uint8_t* endByte = DAWN_UNSAFE_TODO(stateAsString + (kByteRate - 1));
-    *endByte ^= 0b1000'0000;
+    std::byte* endByte = DAWN_UNSAFE_TODO(stateAsString + (kByteRate - 1));
+    *endByte ^= std::byte(0b1000'0000);
 
     // Do the final Keccak for the absorption in the sponge.
     Keccak(mState);
@@ -325,17 +326,9 @@ typename Sha3<OutputLength>::Output Sha3<OutputLength>::Finalize() {
 
 // static
 template <size_t OutputLength>
-Sha3<OutputLength>::Output Sha3<OutputLength>::Hash(const void* data, size_t size) {
+Sha3<OutputLength>::Output Sha3<OutputLength>::Hash(Span<const std::byte> data) {
     Sha3 sha;
-    sha.Update(data, size);
-    return sha.Finalize();
-}
-
-// static
-template <size_t OutputLength>
-Sha3<OutputLength>::Output Sha3<OutputLength>::Hash(std::span<const std::byte> data) {
-    Sha3 sha;
-    sha.Update(data.data(), data.size());
+    sha.Update(data);
     return sha.Finalize();
 }
 

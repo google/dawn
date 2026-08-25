@@ -387,7 +387,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     StreamIn(&cacheKey, adapterInfo, mEnabledFeatures.featuresBitSet, mToggles, cacheDesc);
 
     // Hash the key to make it smaller.
-    Sha3_224::Output hash = Sha3_224::Hash(cacheKey.data(), cacheKey.size());
+    Sha3_224::Output hash = Sha3_224::Hash({cacheKey});
     // Dawn Version needs to be in plain because it's used for ValidateCacheKey()
     StreamIn(&mDeviceCacheKey, kDawnVersion, hash);
 }

@@ -1809,8 +1809,7 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
                                    ApiObjectBase::UntrackedByDeviceTag tag)
     : Base(device, ObjectBase::kDelayedInitialization, descriptor->label),
       mInternalExtensions(std::move(internalExtensions)) {
-    size_t shaderCodeByteSize = 0;
-    uint8_t* shaderCode = nullptr;
+    Span<const std::byte> shaderCode;
 
     Span<const uint32_t> spirv;
     if (auto* spirvDesc = descriptor.Get<ShaderSourceSPIRV>()) {
@@ -1822,8 +1821,7 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
     if (spirv.data() != nullptr) {
         mType = Type::Spirv;
         mOriginalSpirv.assign(spirv.begin(), spirv.end());
-        shaderCodeByteSize = mOriginalSpirv.size() * sizeof(decltype(mOriginalSpirv)::value_type);
-        shaderCode = reinterpret_cast<uint8_t*>(mOriginalSpirv.data());
+        shaderCode = SpanAsBytes(Span<const uint32_t>(mOriginalSpirv));
         if (auto* spirvOptions = descriptor.Get<DawnShaderModuleSPIRVOptionsDescriptor>()) {
             mAllowSpirvNonUniformDerivitives =
                 static_cast<bool>(spirvOptions->allowNonUniformDerivatives);
@@ -1831,8 +1829,7 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
     } else if (auto* wgslDesc = descriptor.Get<ShaderSourceWGSL>()) {
         mType = Type::Wgsl;
         mWgsl = std::string(wgslDesc->code);
-        shaderCodeByteSize = mWgsl.size() * sizeof(decltype(mWgsl)::value_type);
-        shaderCode = reinterpret_cast<uint8_t*>(mWgsl.data());
+        shaderCode = SpanAsBytes(Span<const char>(mWgsl));
     } else {
         DAWN_ASSERT(false);
     }
@@ -1843,22 +1840,21 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
 
     ShaderModuleHasher hasher;
     // Hash the metadata.
-    hasher.Update(mType);
-    hasher.Update(mAllowSpirvNonUniformDerivitives);
+    hasher.Update(ByteSpanFromRef(mType));
+    hasher.Update(ByteSpanFromRef(mAllowSpirvNonUniformDerivitives));
     // mStrictMath is a std::optional<bool>, and the bool value might not get initialized by default
     // constructor and thus contains dirty data.
     bool strictMathAssigned = mStrictMath.has_value();
     bool strictMathValue = mStrictMath.value_or(false);
-    hasher.Update(strictMathAssigned);
-    hasher.Update(strictMathValue);
+    hasher.Update(ByteSpanFromRef(strictMathAssigned));
+    hasher.Update(ByteSpanFromRef(strictMathValue));
     // mInternalExtensions is a length-variable vector, so we need to hash its size and its content
     // if any.
-    hasher.Update(mInternalExtensions.size());
-    hasher.Update(mInternalExtensions.data(),
-                  mInternalExtensions.size() * sizeof(decltype(mInternalExtensions)::value_type));
+    hasher.Update(ByteSpanFromRef(mInternalExtensions.size()));
+    hasher.Update(SpanAsBytes(Span<const tint::wgsl::Extension>(mInternalExtensions)));
     // Hash the shader code and its size.
-    hasher.Update(shaderCodeByteSize);
-    hasher.Update(shaderCode, shaderCodeByteSize);
+    hasher.Update(ByteSpanFromRef(shaderCode.size()));
+    hasher.Update(shaderCode);
 
     mHash = hasher.Finalize();
 }

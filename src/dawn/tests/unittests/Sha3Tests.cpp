@@ -29,11 +29,29 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/Sha3.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
+
+// Helper to automatically convert the literals to std::byte since otherwise the output vector would
+// need to have std::byte() around each element.
+template <typename Sha>
+typename Sha::Output MakeOutput(std::initializer_list<uint8_t> data) {
+    typename Sha::Output output;
+    DAWN_ASSERT(data.size() == output.size());
+
+    // Copy in vector because it avoids unsafe buffer usage, is cold code, and
+    // std::initializer_list::data is not always supported.
+    std::vector<uint8_t> dataVec{data};
+    for (auto [i, value] : Enumerate(dataVec)) {
+        output[i] = std::byte(dataVec[i]);
+    }
+
+    return output;
+}
 
 // Below test vectors are taken from
 // https://csrc.nist.gov/projects/cryptographic-standards-and-guidelines/example-values
@@ -72,7 +90,8 @@ TEST(Sha3, CheckKeccak) {
 }
 
 template <size_t N>
-void ExpectOutput(const std::array<uint8_t, N>& actual, const std::array<uint8_t, N>& expected) {
+void ExpectOutput(const std::array<std::byte, N>& actual,
+                  const std::array<std::byte, N>& expected) {
     for (size_t i = 0; i < N; i++) {
         EXPECT_EQ(actual[i], expected[i]);
     }
@@ -91,38 +110,38 @@ TEST(Sha3, AllSizesOn1600BitTestVector) {
         0xa3a3a3a3a3a3a3a3,
     };
 
-    Sha3_224::Output sha224Expected = {0x93, 0x76, 0x81, 0x6A, 0xBA, 0x50, 0x3F, 0x72, 0xF9, 0x6C,
-                                       0xE7, 0xEB, 0x65, 0xAC, 0x09, 0x5D, 0xEE, 0xE3, 0xBE, 0x4B,
-                                       0xF9, 0xBB, 0xC2, 0xA1, 0xCB, 0x7E, 0x11, 0xE0};
+    auto sha224Expected = MakeOutput<Sha3_224>(
+        {0x93, 0x76, 0x81, 0x6A, 0xBA, 0x50, 0x3F, 0x72, 0xF9, 0x6C, 0xE7, 0xEB, 0x65, 0xAC,
+         0x09, 0x5D, 0xEE, 0xE3, 0xBE, 0x4B, 0xF9, 0xBB, 0xC2, 0xA1, 0xCB, 0x7E, 0x11, 0xE0});
 
-    Sha3_224::Output sha224Actual = Sha3_224::Hash(&message, sizeof(message));
+    Sha3_224::Output sha224Actual = Sha3_224::Hash(ByteSpanFromRef(message));
     ExpectOutput(sha224Actual, sha224Expected);
 
-    Sha3_256::Output sha256Expected = {0x79, 0xF3, 0x8A, 0xDE, 0xC5, 0xC2, 0x03, 0x07,
-                                       0xA9, 0x8E, 0xF7, 0x6E, 0x83, 0x24, 0xAF, 0xBF,
-                                       0xD4, 0x6C, 0xFD, 0x81, 0xB2, 0x2E, 0x39, 0x73,
-                                       0xC6, 0x5F, 0xA1, 0xBD, 0x9D, 0xE3, 0x17, 0x87};
+    auto sha256Expected =
+        MakeOutput<Sha3_256>({0x79, 0xF3, 0x8A, 0xDE, 0xC5, 0xC2, 0x03, 0x07, 0xA9, 0x8E, 0xF7,
+                              0x6E, 0x83, 0x24, 0xAF, 0xBF, 0xD4, 0x6C, 0xFD, 0x81, 0xB2, 0x2E,
+                              0x39, 0x73, 0xC6, 0x5F, 0xA1, 0xBD, 0x9D, 0xE3, 0x17, 0x87});
 
-    Sha3_256::Output sha256Actual = Sha3_256::Hash(&message, sizeof(message));
+    Sha3_256::Output sha256Actual = Sha3_256::Hash(ByteSpanFromRef(message));
     ExpectOutput(sha256Actual, sha256Expected);
 
-    Sha3_384::Output sha384Expected = {0x18, 0x81, 0xDE, 0x2C, 0xA7, 0xE4, 0x1E, 0xF9, 0x5D, 0xC4,
-                                       0x73, 0x2B, 0x8F, 0x5F, 0x00, 0x2B, 0x18, 0x9C, 0xC1, 0xE4,
-                                       0x2B, 0x74, 0x16, 0x8E, 0xD1, 0x73, 0x26, 0x49, 0xCE, 0x1D,
-                                       0xBC, 0xDD, 0x76, 0x19, 0x7A, 0x31, 0xFD, 0x55, 0xEE, 0x98,
-                                       0x9F, 0x2D, 0x70, 0x50, 0xDD, 0x47, 0x3E, 0x8F};
+    auto sha384Expected = MakeOutput<Sha3_384>(
+        {0x18, 0x81, 0xDE, 0x2C, 0xA7, 0xE4, 0x1E, 0xF9, 0x5D, 0xC4, 0x73, 0x2B,
+         0x8F, 0x5F, 0x00, 0x2B, 0x18, 0x9C, 0xC1, 0xE4, 0x2B, 0x74, 0x16, 0x8E,
+         0xD1, 0x73, 0x26, 0x49, 0xCE, 0x1D, 0xBC, 0xDD, 0x76, 0x19, 0x7A, 0x31,
+         0xFD, 0x55, 0xEE, 0x98, 0x9F, 0x2D, 0x70, 0x50, 0xDD, 0x47, 0x3E, 0x8F});
 
-    Sha3_384::Output sha384Actual = Sha3_384::Hash(&message, sizeof(message));
+    Sha3_384::Output sha384Actual = Sha3_384::Hash(ByteSpanFromRef(message));
     ExpectOutput(sha384Actual, sha384Expected);
 
-    Sha3_512::Output sha512Expected = {
-        0xE7, 0x6D, 0xFA, 0xD2, 0x20, 0x84, 0xA8, 0xB1, 0x46, 0x7F, 0xCF, 0x2F, 0xFA,
-        0x58, 0x36, 0x1B, 0xEC, 0x76, 0x28, 0xED, 0xF5, 0xF3, 0xFD, 0xC0, 0xE4, 0x80,
-        0x5D, 0xC4, 0x8C, 0xAE, 0xEC, 0xA8, 0x1B, 0x7C, 0x13, 0xC3, 0x0A, 0xDF, 0x52,
-        0xA3, 0x65, 0x95, 0x84, 0x73, 0x9A, 0x2D, 0xF4, 0x6B, 0xE5, 0x89, 0xC5, 0x1C,
-        0xA1, 0xA4, 0xA8, 0x41, 0x6D, 0xF6, 0x54, 0x5A, 0x1C, 0xE8, 0xBA, 0x00};
+    auto sha512Expected = MakeOutput<Sha3_512>(
+        {0xE7, 0x6D, 0xFA, 0xD2, 0x20, 0x84, 0xA8, 0xB1, 0x46, 0x7F, 0xCF, 0x2F, 0xFA,
+         0x58, 0x36, 0x1B, 0xEC, 0x76, 0x28, 0xED, 0xF5, 0xF3, 0xFD, 0xC0, 0xE4, 0x80,
+         0x5D, 0xC4, 0x8C, 0xAE, 0xEC, 0xA8, 0x1B, 0x7C, 0x13, 0xC3, 0x0A, 0xDF, 0x52,
+         0xA3, 0x65, 0x95, 0x84, 0x73, 0x9A, 0x2D, 0xF4, 0x6B, 0xE5, 0x89, 0xC5, 0x1C,
+         0xA1, 0xA4, 0xA8, 0x41, 0x6D, 0xF6, 0x54, 0x5A, 0x1C, 0xE8, 0xBA, 0x00});
 
-    Sha3_512::Output sha512Actual = Sha3_512::Hash(&message, sizeof(message));
+    Sha3_512::Output sha512Actual = Sha3_512::Hash(ByteSpanFromRef(message));
     ExpectOutput(sha512Actual, sha512Expected);
 }
 
@@ -130,37 +149,37 @@ TEST(Sha3, AllSizesOn1600BitTestVector) {
 TEST(Sha3, VariousMessageSizes) {
     // Test what happens with no data provided.
     {
-        Sha3_224::Output sha224Expected = {
-            0x6B, 0x4E, 0x03, 0x42, 0x36, 0x67, 0xDB, 0xB7, 0x3B, 0x6E, 0x15, 0x45, 0x4F, 0x0E,
-            0xB1, 0xAB, 0xD4, 0x59, 0x7F, 0x9A, 0x1B, 0x07, 0x8E, 0x3F, 0x5B, 0x5A, 0x6B, 0xC7};
+        auto sha224Expected = MakeOutput<Sha3_224>(
+            {0x6B, 0x4E, 0x03, 0x42, 0x36, 0x67, 0xDB, 0xB7, 0x3B, 0x6E, 0x15, 0x45, 0x4F, 0x0E,
+             0xB1, 0xAB, 0xD4, 0x59, 0x7F, 0x9A, 0x1B, 0x07, 0x8E, 0x3F, 0x5B, 0x5A, 0x6B, 0xC7});
 
-        Sha3_224::Output sha224Actual = Sha3_224::Hash(nullptr, 0);
+        Sha3_224::Output sha224Actual = Sha3_224::Hash({});
         ExpectOutput(sha224Actual, sha224Expected);
     }
 
     // Test any amount of data that doesn't require any Keccak other than the final one.
     {
-        std::array<char, 42> data;
-        data.fill('a');
+        std::array<std::byte, 42> data;
+        data.fill(std::byte('a'));
 
-        Sha3_224::Output sha224Expected = {
-            0xF4, 0xFB, 0x9A, 0x8F, 0xA2, 0x04, 0x0F, 0x8C, 0x72, 0xC2, 0x2D, 0x6B, 0x26, 0xEE,
-            0xE5, 0xA9, 0xF2, 0x2F, 0xC4, 0x9B, 0x86, 0x01, 0xC6, 0xCD, 0xAB, 0xE2, 0x3E, 0x0D};
+        auto sha224Expected = MakeOutput<Sha3_224>(
+            {0xF4, 0xFB, 0x9A, 0x8F, 0xA2, 0x04, 0x0F, 0x8C, 0x72, 0xC2, 0x2D, 0x6B, 0x26, 0xEE,
+             0xE5, 0xA9, 0xF2, 0x2F, 0xC4, 0x9B, 0x86, 0x01, 0xC6, 0xCD, 0xAB, 0xE2, 0x3E, 0x0D});
 
-        Sha3_224::Output sha224Actual = Sha3_224::Hash(&data, sizeof(data));
+        Sha3_224::Output sha224Actual = Sha3_224::Hash(data);
         ExpectOutput(sha224Actual, sha224Expected);
     }
 
     // Test a "long" message that requires many internal Keccaks
     {
-        std::array<char, 4000> data;
-        data.fill('a');
+        std::array<std::byte, 4000> data;
+        data.fill(std::byte('a'));
 
-        Sha3_224::Output sha224Expected = {
-            0xB5, 0xBF, 0x09, 0x7A, 0x65, 0xB3, 0xC9, 0x42, 0x72, 0x6E, 0x16, 0x77, 0xD8, 0xEE,
-            0x5A, 0x59, 0x39, 0x6F, 0xD2, 0xEB, 0xBF, 0xB4, 0xCB, 0x2E, 0x9F, 0xBA, 0x2F, 0x67};
+        auto sha224Expected = MakeOutput<Sha3_224>(
+            {0xB5, 0xBF, 0x09, 0x7A, 0x65, 0xB3, 0xC9, 0x42, 0x72, 0x6E, 0x16, 0x77, 0xD8, 0xEE,
+             0x5A, 0x59, 0x39, 0x6F, 0xD2, 0xEB, 0xBF, 0xB4, 0xCB, 0x2E, 0x9F, 0xBA, 0x2F, 0x67});
 
-        Sha3_224::Output sha224Actual = Sha3_224::Hash(&data, sizeof(data));
+        Sha3_224::Output sha224Actual = Sha3_224::Hash(data);
         ExpectOutput(sha224Actual, sha224Expected);
     }
 }
@@ -169,17 +188,20 @@ TEST(Sha3, VariousMessageSizes) {
 TEST(Sha3, UpdateAnyByteBoundary) {
     // 500 bytes need at least three different Keccak transforms so we should cover all the special
     // values of the internal insertion offset in Sha3.
-    std::array<char, 500> data;
-    data.fill('a');
+    std::array<std::byte, 500> data;
+    data.fill(std::byte('a'));
+    Span<const std::byte> dataSpan{data};
 
-    Sha3_224::Output sha224Expected = {0xB3, 0x36, 0x37, 0x5B, 0xF8, 0xE6, 0x2A, 0x2F, 0x34, 0xF8,
-                                       0xC4, 0xE3, 0xF9, 0xFD, 0xD5, 0x34, 0x1E, 0x85, 0xB0, 0x23,
-                                       0x49, 0xD9, 0x18, 0x73, 0xC5, 0x9D, 0x70, 0x36};
+    auto sha224Expected = MakeOutput<Sha3_224>(
+        {0xB3, 0x36, 0x37, 0x5B, 0xF8, 0xE6, 0x2A, 0x2F, 0x34, 0xF8, 0xC4, 0xE3, 0xF9, 0xFD,
+         0xD5, 0x34, 0x1E, 0x85, 0xB0, 0x23, 0x49, 0xD9, 0x18, 0x73, 0xC5, 0x9D, 0x70, 0x36});
 
-    for (size_t offset = 0; offset < sizeof(data); offset++) {
+    for (size_t offset = 0; offset < dataSpan.size(); offset++) {
+        auto [first, second] = dataSpan.SplitAt(offset);
+
         Sha3_224 sha;
-        sha.Update(&data[0], offset);
-        sha.Update(&data[offset], sizeof(data) - offset);
+        sha.Update(first);
+        sha.Update(second);
         Sha3_224::Output sha224Actual = sha.Finalize();
 
         ExpectOutput(sha224Actual, sha224Expected);
@@ -234,16 +256,16 @@ class Sha3Proxy {
         }
     }
 
-    std::vector<uint8_t> Hash(const void* data, size_t size) {
+    std::vector<std::byte> Hash(Span<const std::byte> data) {
         switch (mType) {
             case HasherType::Sha3_224:
-                return HashImpl<224>(data, size);
+                return HashImpl<224>(data);
             case HasherType::Sha3_256:
-                return HashImpl<256>(data, size);
+                return HashImpl<256>(data);
             case HasherType::Sha3_384:
-                return HashImpl<384>(data, size);
+                return HashImpl<384>(data);
             case HasherType::Sha3_512:
-                return HashImpl<512>(data, size);
+                return HashImpl<512>(data);
             default:
                 // Unreachable
                 []() { ASSERT_TRUE(false); }();
@@ -251,23 +273,23 @@ class Sha3Proxy {
         }
     }
 
-    void Update(const void* data, size_t size) {
+    void Update(Span<const std::byte> data) {
         switch (mType) {
             case HasherType::Sha3_224:
-                return UpdateImpl<224>(data, size);
+                return UpdateImpl<224>(data);
             case HasherType::Sha3_256:
-                return UpdateImpl<256>(data, size);
+                return UpdateImpl<256>(data);
             case HasherType::Sha3_384:
-                return UpdateImpl<384>(data, size);
+                return UpdateImpl<384>(data);
             case HasherType::Sha3_512:
-                return UpdateImpl<512>(data, size);
+                return UpdateImpl<512>(data);
             default:
                 // Unreachable
                 ASSERT_TRUE(false);
                 break;
         }
     }
-    std::vector<uint8_t> Finalize() {
+    std::vector<std::byte> Finalize() {
         switch (mType) {
             case HasherType::Sha3_224:
                 return FinalizeImpl<224>();
@@ -289,10 +311,10 @@ class Sha3Proxy {
     std::variant<Sha3_224, Sha3_256, Sha3_384, Sha3_512> mHasher;
 
     template <size_t N>
-    std::vector<uint8_t> HashImpl(const void* data, size_t size) {
+    std::vector<std::byte> HashImpl(Span<const std::byte> data) {
         auto& hasher = std::get<Sha3<N>>(mHasher);
-        auto resultArray = hasher.Hash(data, size);
-        std::vector<uint8_t> resultVector;
+        auto resultArray = hasher.Hash(data);
+        std::vector<std::byte> resultVector;
         static_assert(resultArray.size() == N / 8);
         resultVector.reserve(N / 8);
         for (size_t i = 0; i < N / 8; i++) {
@@ -302,16 +324,16 @@ class Sha3Proxy {
     }
 
     template <size_t N>
-    void UpdateImpl(const void* data, size_t size) {
+    void UpdateImpl(Span<const std::byte> data) {
         auto& hasher = std::get<Sha3<N>>(mHasher);
-        hasher.Update(data, size);
+        hasher.Update(data);
     }
 
     template <size_t N>
-    std::vector<uint8_t> FinalizeImpl() {
+    std::vector<std::byte> FinalizeImpl() {
         auto& hasher = std::get<Sha3<N>>(mHasher);
         auto resultArray = hasher.Finalize();
-        std::vector<uint8_t> resultVector;
+        std::vector<std::byte> resultVector;
         static_assert(resultArray.size() == N / 8);
         resultVector.reserve(N / 8);
         for (size_t i = 0; i < N / 8; i++) {
@@ -585,12 +607,12 @@ Sha3LongMessageTestingVectors longMessageTestingVectors{
       0x18, 0xfb, 0xb4, 0x5f, 0x89, 0xa7, 0xdb, 0xee, 0x27, 0xed, 0x46, 0x2d}},
 };
 
-void ExpectOutput(const std::vector<uint8_t>& actual,
+void ExpectOutput(const std::vector<std::byte>& actual,
                   const std::initializer_list<uint8_t>& expected) {
     ASSERT_EQ(actual.size(), expected.size());
     size_t i = 0;
     for (auto expectedElem : expected) {
-        EXPECT_EQ(actual[i], expectedElem);
+        EXPECT_EQ(actual[i], std::byte(expectedElem));
         i++;
     }
 }
@@ -601,7 +623,7 @@ TEST(Sha3, LongMessage) {
         ASSERT_EQ(test.input.size(), test.inputByteSize);
         Sha3Proxy sha3(test.type);
         ASSERT_EQ(test.expectedOutput.size(), sha3.OutputByteSize());
-        auto result = sha3.Hash(test.input.data(), test.input.size());
+        auto result = sha3.Hash(SpanAsBytes(Span<const uint8_t>(test.input)));
         ExpectOutput(result, test.expectedOutput);
     }
 }
@@ -609,13 +631,18 @@ TEST(Sha3, LongMessage) {
 // Check that using Update at any byte boundary produces the same result
 TEST(Sha3, LongMessageUpdate) {
     for (const auto& test : longMessageTestingVectors) {
-        ASSERT_EQ(test.input.size(), test.inputByteSize);
-        for (size_t offset = 0; offset <= test.inputByteSize; offset++) {
+        Span<const std::byte> testInputSpan = SpanAsBytes(Span<const uint8_t>(test.input));
+        ASSERT_EQ(testInputSpan.size(), test.inputByteSize);
+
+        for (size_t offset = 0; offset <= testInputSpan.size(); offset++) {
+            auto [first, second] = testInputSpan.SplitAt(offset);
+
             Sha3Proxy sha3(test.type);
-            ASSERT_EQ(test.expectedOutput.size(), sha3.OutputByteSize());
-            sha3.Update(test.input.data(), offset);
-            sha3.Update(DAWN_UNSAFE_TODO(test.input.data() + offset), test.inputByteSize - offset);
+            sha3.Update(first);
+            sha3.Update(second);
             auto result = sha3.Finalize();
+
+            ASSERT_EQ(test.expectedOutput.size(), sha3.OutputByteSize());
             ExpectOutput(result, test.expectedOutput);
         }
     }

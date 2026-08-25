@@ -34,6 +34,8 @@
 #include <span>
 #include <type_traits>
 
+#include "src/utils/span.h"
+
 namespace dawn {
 
 // SHA3 uses Keccak-p[1600, 24] function, meaning that there are 1600 bits of state in a 5x5x64
@@ -50,25 +52,15 @@ template <size_t BitOutputLength>
 class Sha3 {
   public:
     static constexpr size_t kByteOutputLength = BitOutputLength / 8;
-    using Output = std::array<uint8_t, kByteOutputLength>;
+    using Output = std::array<std::byte, kByteOutputLength>;
 
     // APIs to stream data into the hash function chunk by chunk by calling Update repeatedly.
     // After Finalize is called, it is no longer valid to use this SHA3 object.
-    void Update(const void* data, size_t size);
-
-    template <typename T>
-        requires std::is_trivially_copyable_v<T>
-    void Update(const T& data) {
-        const uint8_t* dataAsBytes = reinterpret_cast<const uint8_t*>(&data);
-        size_t size = sizeof(T);
-        Update(dataAsBytes, size);
-    }
-
+    void Update(Span<const std::byte> data);
     Output Finalize();
 
     // Helper functions to compute the hash directly.
-    static Output Hash(const void* data, size_t size);
-    static Output Hash(std::span<const std::byte> data);
+    static Output Hash(Span<const std::byte> data);
 
   private:
     static_assert(BitOutputLength == 224 || BitOutputLength == 256 || BitOutputLength == 384 ||
