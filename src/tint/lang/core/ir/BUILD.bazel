@@ -202,7 +202,6 @@ cc_library(
     "block_test.cc",
     "break_if_test.cc",
     "builder_test.cc",
-    "const_param_validator_test.cc",
     "constant_test.cc",
     "construct_test.cc",
     "continue_test.cc",

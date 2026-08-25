@@ -204,7 +204,6 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/block_test.cc
   lang/core/ir/break_if_test.cc
   lang/core/ir/builder_test.cc
-  lang/core/ir/const_param_validator_test.cc
   lang/core/ir/constant_test.cc
   lang/core/ir/construct_test.cc
   lang/core/ir/continue_test.cc

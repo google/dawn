@@ -31,7 +31,7 @@
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_switch.h"
-#include "src/tint/lang/core/ir/multi_in_block.h"
+#include "src/tint/lang/core/ir/multi_in_block.h"  // IWYU pragma: export
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
@@ -1101,6 +1101,61 @@ void Functional::CheckBinary(const Binary* b) {
         AddError(b) << "result value type " << NameOf(result->Type()) << " does not match "
                     << style::Instruction(b->Op()) << " result type "
                     << NameOf(overload->return_type);
+    }
+
+    if (auto* c = b->As<CoreBinary>()) {
+        CheckCoreBinaryCall(c);
+    }
+}
+
+void Functional::CheckCoreBinaryCall(const CoreBinary* call) {
+    switch (call->Op()) {
+        case core::BinaryOp::kDivide:
+        case core::BinaryOp::kModulo:
+            CheckBinaryDivModCall(call);
+            break;
+        case core::BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftRight:
+            CheckBinaryShiftCall(call);
+            break;
+        default:
+            break;
+    }
+}
+
+void Functional::CheckBinaryDivModCall(const CoreBinary* call) {
+    if (error_source_ == ErrorSource::kWgsl) {
+        // Integer division by zero should be checked for the partial evaluation case (only rhs
+        // is const). FP division by zero is only invalid when the whole expression is
+        // constant-evaluated.
+        if (call->RHS()->Type()->IsIntegerScalarOrVector()) {
+            auto rhs_constant = call->RHS()->As<ir::Constant>();
+            if (rhs_constant && rhs_constant->Value()->AnyZero()) {
+                AddError(call) << "integer division by zero is invalid";
+            }
+        }
+    }
+}
+
+void Functional::CheckBinaryShiftCall(const CoreBinary* call) {
+    if (error_source_ == ErrorSource::kWgsl) {
+        // If lhs value is a concrete type, and rhs is a const-expression greater than or equal
+        // to the bit width of lhs, then it is a shader-creation error.
+        const auto* elem_type = call->LHS()->Type()->DeepestElement();
+        const uint32_t bit_width = elem_type->Size() * 8;
+        if (auto* rhs_val_as_const = call->RHS()->As<ir::Constant>()) {
+            auto* rhs_as_value = rhs_val_as_const->Value();
+            for (size_t i = 0, n = rhs_as_value->NumElements(); i < n; i++) {
+                auto* shift_val = n == 1 ? rhs_as_value : rhs_as_value->Index(i);
+                if (shift_val->ValueAs<u32>() >= bit_width) {
+                    AddError(call)
+                        << "shift " << (call->Op() == core::BinaryOp::kShiftLeft ? "left" : "right")
+                        << " value must be less than the bit width of the lhs, which is "
+                        << bit_width;
+                    break;
+                }
+            }
+        }
     }
 }
 

@@ -79,9 +79,6 @@ class ConstParamValidator {
     /// @returns success or failure
     Result<SuccessType> Run();
 
-    void CheckCoreBinaryCall(const CoreBinary* call);
-    void CheckBinaryDivModCall(const CoreBinary* call);
-    void CheckBinaryShiftCall(const CoreBinary* call);
     void CheckBuffersAndMatrices(const Var* var);
 
     struct UseInfo {
@@ -121,53 +118,6 @@ diag::Diagnostic& ConstParamValidator::AddError(const Instruction& inst) {
 diag::Diagnostic& ConstParamValidator::AddNote(const Instruction& inst) {
     auto src = mod_.SourceOf(&inst);
     return diagnostics_.AddNote(src);
-}
-
-void ConstParamValidator::CheckBinaryDivModCall(const CoreBinary* call) {
-    // Integer division by zero should be checked for the partial evaluation case (only rhs
-    // is const). FP division by zero is only invalid when the whole expression is
-    // constant-evaluated.
-    if (call->RHS()->Type()->IsIntegerScalarOrVector()) {
-        auto rhs_constant = call->RHS()->As<ir::Constant>();
-        if (rhs_constant && rhs_constant->Value()->AnyZero()) {
-            AddError(*call) << "integer division by zero is invalid";
-        }
-    }
-}
-
-void ConstParamValidator::CheckBinaryShiftCall(const CoreBinary* call) {
-    // If lhs value is a concrete type, and rhs is a const-expression greater than or equal
-    // to the bit width of lhs, then it is a shader-creation error.
-    const auto* elem_type = call->LHS()->Type()->DeepestElement();
-    const uint32_t bit_width = elem_type->Size() * 8;
-    if (auto* rhs_val_as_const = call->RHS()->As<ir::Constant>()) {
-        auto* rhs_as_value = rhs_val_as_const->Value();
-        for (size_t i = 0, n = rhs_as_value->NumElements(); i < n; i++) {
-            auto* shift_val = n == 1 ? rhs_as_value : rhs_as_value->Index(i);
-            if (shift_val->ValueAs<u32>() >= bit_width) {
-                AddError(*call) << "shift "
-                                << (call->Op() == core::BinaryOp::kShiftLeft ? "left" : "right")
-                                << " value must be less than the bit width of the lhs, which is "
-                                << bit_width;
-                break;
-            }
-        }
-    }
-}
-
-void ConstParamValidator::CheckCoreBinaryCall(const CoreBinary* call) {
-    switch (call->Op()) {
-        case core::BinaryOp::kDivide:
-        case core::BinaryOp::kModulo:
-            CheckBinaryDivModCall(call);
-            break;
-        case core::BinaryOp::kShiftLeft:
-        case core::BinaryOp::kShiftRight:
-            CheckBinaryShiftCall(call);
-            break;
-        default:
-            break;
-    }
 }
 
 bool ConstParamValidator::CheckBufferView(const CoreBuiltinCall* call,
@@ -488,15 +438,6 @@ void ConstParamValidator::CheckBuffersAndMatrices(const Var* var) {
 }
 
 Result<SuccessType> ConstParamValidator::Run() {
-    auto instructions = this->mod_.Instructions();
-
-    for (auto inst : instructions) {
-        tint::Switch(
-            inst,                                                  //
-            [&](const CoreBinary* c) { CheckCoreBinaryCall(c); },  //
-            [&](Default) {});
-    }
-
     for (auto* inst : *this->mod_.root_block) {
         if (auto* var = inst->As<Var>()) {
             CheckBuffersAndMatrices(var);

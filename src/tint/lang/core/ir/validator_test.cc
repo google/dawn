@@ -2891,4 +2891,164 @@ TEST_F(IR_ValidatorTest, CorrectPack2x16Float) {
     ASSERT_EQ(res, Success);
 }
 
+TEST_F(IR_ValidatorTest, CorrectDomainShiftLeft) {
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* e1 = b.Let("b", 16_u);
+        auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.u32(), e1, 17_u);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():u32 {
+  $B1: {
+    %b:u32 = let 16u
+    %3:u32 = shl %b, 17u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainShiftLeft) {
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* e1 = b.Let("b", 16_u);
+        auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.u32(), e1, 32_u);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():u32 {
+  $B1: {
+    %b:u32 = let 16u
+    %3:u32 = shl %b, 32u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason,
+        "5:7 error: shift left value must be less than the bit width of the lhs, which is 32");
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainShiftRight_Vec) {
+    auto* func = b.Function("foo", ty.vec4i());
+    b.Append(func->Block(), [&] {
+        auto* e1 = b.Let("b", b.Splat(ty.vec4i(), 4_i));
+        auto* e2 = b.Splat(ty.vec4u(), 33_u);
+        auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.vec4i(), e1, e2);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():vec4<i32> {
+  $B1: {
+    %b:vec4<i32> = let vec4<i32>(4i)
+    %3:vec4<i32> = shl %b, vec4<u32>(33u)
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason,
+        "5:7 error: shift left value must be less than the bit width of the lhs, which is 32");
+}
+
+TEST_F(IR_ValidatorTest, CorrectDomainDiv) {
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* e1 = b.Let("b", 16_u);
+        auto* call_func = b.Binary(core::BinaryOp::kDivide, ty.u32(), e1, 17_u);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():u32 {
+  $B1: {
+    %b:u32 = let 16u
+    %3:u32 = div %b, 17u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainDiv) {
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* e1 = b.Let("b", 16_u);
+        auto* call_func = b.Binary(core::BinaryOp::kDivide, ty.u32(), e1, 0_u);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():u32 {
+  $B1: {
+    %b:u32 = let 16u
+    %3:u32 = div %b, 0u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "5:7 error: integer division by zero is invalid");
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainModulo_Vec) {
+    auto* func = b.Function("foo", ty.vec4i());
+    b.Append(func->Block(), [&] {
+        auto* e1 = b.Let("b", b.Splat(ty.vec4i(), 4_i));
+        auto* e2 = b.Splat(ty.vec4i(), 0_i);
+        auto* call_func = b.Binary(core::BinaryOp::kModulo, ty.vec4i(), e1, e2);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():vec4<i32> {
+  $B1: {
+    %b:vec4<i32> = let vec4<i32>(4i)
+    %3:vec4<i32> = mod %b, vec4<i32>(0i)
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "5:7 error: integer division by zero is invalid");
+}
+
 }  // namespace tint::core::ir

@@ -40,6 +40,7 @@
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/convert.h"
+#include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/exit.h"
@@ -186,6 +187,10 @@ class Functional {
     void CheckPack2x16float(const CoreBuiltinCall* call);
     void CheckClampCall(const CoreBuiltinCall* call);
     void CheckSmoothstepCall(const CoreBuiltinCall* call);
+
+    void CheckCoreBinaryCall(const CoreBinary* call);
+    void CheckBinaryDivModCall(const CoreBinary* call);
+    void CheckBinaryShiftCall(const CoreBinary* call);
 
     Module& ir_;
     diag::List& diag_;
