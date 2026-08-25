@@ -598,7 +598,7 @@ Span<std::byte> Buffer::GetMappedRangeImpl(size_t offset, size_t size) {
     // require changing or updating the logic that checks for mMappedData != nullptr to know if the
     // buffer is mapped.
     Span<std::byte> wholeMappedRange =
-        DAWN_UNSAFE_TODO({reinterpret_cast<std::byte*>(mMappedData.Load()),
+        DAWN_UNSAFE_TODO({reinterpret_cast<std::byte*>(mMappedData.get()),
                           checked_cast<size_t>(GetAllocatedSize())});
     return wholeMappedRange.subspan(offset, size);
 }

@@ -35,7 +35,6 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/Atomic.h"
 #include "src/dawn/common/ityp_array.h"
 #include "src/dawn/native/Buffer.h"
 #include "src/dawn/native/d3d/d3d_platform.h"
@@ -183,7 +182,7 @@ class Buffer : public BufferBase {
     virtual ComPtr<ID3D11Buffer> GetD3D11MappedBuffer();
 
     // TODO(https://crbug.com/501491697): Spanify this.
-    Atomic<uint8_t*, std::memory_order::relaxed> mMappedData{nullptr};
+    raw_ptr<uint8_t> mMappedData{nullptr};
 
   private:
     MaybeError Initialize(bool mappedAtCreation,
