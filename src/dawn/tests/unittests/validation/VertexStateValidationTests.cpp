@@ -361,12 +361,6 @@ TEST_F(VertexStateTest, SetOffsetNotAligned) {
     state.cAttributes[0].format = wgpu::VertexFormat::Sint32x4;
     state.cAttributes[0].offset = 4;
     CreatePipeline(true, state, kPlaceholderVertexShader);
-
-    state.cAttributes[0].format = wgpu::VertexFormat::Snorm10_10_10_2;
-    state.cAttributes[0].offset = 4;
-    CreatePipeline(true, state, kPlaceholderVertexShader);
-    state.cAttributes[0].offset = 2;
-    CreatePipeline(false, state, kPlaceholderVertexShader);
 }
 
 // Check attribute offset overflow

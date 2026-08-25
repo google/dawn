@@ -124,5 +124,61 @@ TEST_F(TimestampQueryUnsafeAPIValidationTest, WriteTimestampOnCommandEncoder) {
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
 
+class Snorm10_10_10_2ValidationTest : public UnsafeAPIValidationTest {
+  protected:
+    void TestCreatePipelineWithSnorm10_10_10_2(bool expectSuccess) {
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+            @vertex fn main() -> @builtin(position) vec4f {
+                return vec4f(0.0, 0.0, 0.0, 1.0);
+            }
+        )");
+
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+        pipelineDescriptor.vertex.module = vsModule;
+        pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+            @fragment fn main() -> @location(0) vec4f {
+                return vec4f(0.0, 0.0, 0.0, 1.0);
+            }
+        )");
+
+        wgpu::VertexAttribute attribute;
+        attribute.format = wgpu::VertexFormat::Snorm10_10_10_2;
+        attribute.offset = 0;
+        attribute.shaderLocation = 0;
+
+        wgpu::VertexBufferLayout layout;
+        layout.arrayStride = 4;
+        layout.attributeCount = 1;
+        layout.attributes = &attribute;
+
+        pipelineDescriptor.vertex.bufferCount = 1;
+        pipelineDescriptor.vertex.buffers = &layout;
+
+        if (expectSuccess) {
+            device.CreateRenderPipeline(&pipelineDescriptor);
+        } else {
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pipelineDescriptor));
+        }
+    }
+};
+
+// Check that Snorm10_10_10_2 is an unsafe API format.
+TEST_F(Snorm10_10_10_2ValidationTest, Snorm10_10_10_2) {
+    TestCreatePipelineWithSnorm10_10_10_2(false);
+}
+
+class Snorm10_10_10_2WithToggleValidationTest : public Snorm10_10_10_2ValidationTest {
+  protected:
+    std::vector<const char*> GetEnabledToggles() override {
+        return {"allow_experimental_snorm10_10_10_2"};
+    }
+};
+
+// Check that Snorm10_10_10_2 is allowed if the dedicated toggle is enabled, even if
+// allow_unsafe_apis is disabled.
+TEST_F(Snorm10_10_10_2WithToggleValidationTest, Snorm10_10_10_2WithToggle) {
+    TestCreatePipelineWithSnorm10_10_10_2(true);
+}
+
 }  // anonymous namespace
 }  // namespace dawn
