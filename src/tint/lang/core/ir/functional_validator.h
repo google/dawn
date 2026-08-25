@@ -99,7 +99,7 @@ class Functional {
     // Returns true if we're validating in the context of WGSL. The other option is we're validating
     // as IR. The primary difference is how const-eval checks are run as the semantics are
     // different.
-    [[maybe_unused]] bool IsWGSLValidation() const;
+    bool IsWGSLValidation() const;
 
     StyledText NameOf(const core::type::Type* ty);
     StyledText NameOf(const Value* value);
@@ -177,6 +177,15 @@ class Functional {
     void CheckUnary(const Unary* u);
     void CheckUserCall(const UserCall* call);
     void CheckVar(const Var* var);
+
+    void CheckSubgroupCall(const CoreBuiltinCall* call);
+    void CheckExtractBitsCall(const CoreBuiltinCall* call);
+    void CheckInsertBitsCall(const CoreBuiltinCall* call);
+    void CheckLdexpCall(const CoreBuiltinCall* call);
+    void CheckQuantizeToF16(const CoreBuiltinCall* call);
+    void CheckPack2x16float(const CoreBuiltinCall* call);
+    void CheckClampCall(const CoreBuiltinCall* call);
+    void CheckSmoothstepCall(const CoreBuiltinCall* call);
 
     Module& ir_;
     diag::List& diag_;

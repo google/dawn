@@ -2220,4 +2220,675 @@ TEST_F(IR_ValidatorTest, Scoping_IfResultUsedInTrueBlock) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr("error: binary: %2 is not in scope"));
 }
 
+TEST_F(IR_ValidatorTest, CorrectDomainQuantizeF16) {
+    auto* func = b.Function("foo", ty.f32());
+    b.Append(func->Block(), [&] {
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, 65504_f);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+
+    auto* src = R"(
+%foo = func():f32 {
+  $B1: {
+    %2:f32 = quantizeToF16 65504.0f
+    ret %2
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainQuantizeF16) {
+    auto* func = b.Function("foo", ty.f32());
+    b.Append(func->Block(), [&] {
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, 65505_f);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+
+    auto* src = R"(
+%foo = func():f32 {
+  $B1: {
+    %2:f32 = quantizeToF16 65505.0f
+    ret %2
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "5:7 error: value 65505.0 cannot be represented as 'f16'");
+}
+
+TEST_F(IR_ValidatorTest, CorrectDomainSubgroupsShuffleXor) {
+    auto* func = b.Function("foo", ty.f32());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("a", 777_f);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffleXor, e, 127_u);
+        b.Return(func, call_func->Result());
+    });
+
+    auto* src = R"(
+%foo = func():f32 {
+  $B1: {
+    %a:f32 = let 777.0f
+    %3:f32 = subgroupShuffleXor %a, 127u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffleXor) {
+    auto* func = b.Function("foo", ty.f32());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("a", 777_f);
+        auto* v = b.Constant(128_u);
+        b.ir.SetSource(v, Source{{5, 7}});
+
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffleXor, e, v);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+
+        mod.SetSource(call_func, Source{{5, 7}});
+    });
+
+    auto* src = R"(
+%foo = func():f32 {
+  $B1: {
+    %a:f32 = let 777.0f
+    %3:f32 = subgroupShuffleXor %a, 128u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason,
+              R"(5:7 error: The mask argument of subgroupShuffleXor must be less than 128)");
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffleDown) {
+    auto* func = b.Function("foo", ty.f32());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("a", 777_f);
+        auto* v = b.Constant(128_u);
+        b.ir.SetSource(v, Source{{5, 7}});
+
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffleDown, e, v);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+
+    auto* src = R"(
+%foo = func():f32 {
+  $B1: {
+    %a:f32 = let 777.0f
+    %3:f32 = subgroupShuffleDown %a, 128u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason,
+              R"(5:7 error: The delta argument of subgroupShuffleDown must be less than 128)");
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffle) {
+    auto* func = b.Function("foo", ty.f32());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("a", 777_f);
+        auto* v = b.Constant(128_u);
+        b.ir.SetSource(v, Source{{5, 7}});
+
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffle, e, v);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+
+    auto* src = R"(
+%foo = func():f32 {
+  $B1: {
+    %a:f32 = let 777.0f
+    %3:f32 = subgroupShuffle %a, 128u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason,
+        R"(5:7 error: The sourceLaneIndex argument of subgroupShuffle must be less than 128)");
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffle_SignedHigh) {
+    auto* func = b.Function("foo", ty.f32());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("a", 777_f);
+        auto* v = b.Constant(128_i);
+        b.ir.SetSource(v, Source{{5, 7}});
+
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffle, e, v);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+
+    auto* src = R"(
+%foo = func():f32 {
+  $B1: {
+    %a:f32 = let 777.0f
+    %3:f32 = subgroupShuffle %a, 128i
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason,
+        R"(5:7 error: The sourceLaneIndex argument of subgroupShuffle must be less than 128)");
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffle_SignedLow) {
+    auto* func = b.Function("foo", ty.f32());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("a", 777_f);
+        auto* v = b.Constant(-128_i);
+        b.ir.SetSource(v, Source{{5, 7}});
+
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffle, e, v);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():f32 {
+  $B1: {
+    %a:f32 = let 777.0f
+    %3:f32 = subgroupShuffle %a, -128i
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason,
+        R"(5:7 error: The sourceLaneIndex argument of subgroupShuffle must be greater than or equal to zero)");
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainkExtractBits) {
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("a", 123_u);
+        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kExtractBits, e, 13_u, 23_u);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():u32 {
+  $B1: {
+    %a:u32 = let 123u
+    %3:u32 = extractBits %a, 13u, 23u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason,
+              "5:7 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'");
+}
+
+TEST_F(IR_ValidatorTest, CorrectDomainkExtractBits) {
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("a", 123_u);
+        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kExtractBits, e, 13_u, 13_u);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():u32 {
+  $B1: {
+    %a:u32 = let 123u
+    %3:u32 = extractBits %a, 13u, 13u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainkExtractBits_Vec) {
+    auto* func = b.Function("foo", ty.vec4i());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("a", b.Splat(ty.vec4i(), -3_i));
+        auto* call_func = b.Call(ty.vec4i(), core::BuiltinFn::kExtractBits, e, 13_u, 23_u);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():vec4<i32> {
+  $B1: {
+    %a:vec4<i32> = let vec4<i32>(-3i)
+    %3:vec4<i32> = extractBits %a, 13u, 23u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason,
+              "5:7 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'");
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainkInsertBits_Vec) {
+    auto* func = b.Function("foo", ty.vec4u());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("a", b.Splat(ty.vec4u(), 3_u));
+        auto* newBits = b.Let("b", b.Splat(ty.vec4u(), 4_u));
+        auto* call_func = b.Call(ty.vec4u(), core::BuiltinFn::kInsertBits, e, newBits, 13_u, 23_u);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():vec4<u32> {
+  $B1: {
+    %a:vec4<u32> = let vec4<u32>(3u)
+    %b:vec4<u32> = let vec4<u32>(4u)
+    %4:vec4<u32> = insertBits %a, %b, 13u, 23u
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason,
+              "5:7 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'");
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainkInsertBits) {
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("a", 3_u);
+        auto* newBits = b.Let("b", 4_u);
+        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kInsertBits, e, newBits, 13_u, 23_u);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():u32 {
+  $B1: {
+    %a:u32 = let 3u
+    %b:u32 = let 4u
+    %4:u32 = insertBits %a, %b, 13u, 23u
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason,
+              "5:7 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'");
+}
+
+TEST_F(IR_ValidatorTest, CorrectDomainkInsertBits) {
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("a", 3_u);
+        auto* newBits = b.Let("b", 4_u);
+        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kInsertBits, e, newBits, 7_u, 7_u);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():u32 {
+  $B1: {
+    %a:u32 = let 3u
+    %b:u32 = let 4u
+    %4:u32 = insertBits %a, %b, 7u, 7u
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainClamp) {
+    auto* func = b.Function("foo", ty.f32());
+    b.Append(func->Block(), [&] {
+        auto* val = b.Let("a", 3_f);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kClamp, val, 2_f, 1_f);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():f32 {
+  $B1: {
+    %a:f32 = let 3.0f
+    %3:f32 = clamp %a, 2.0f, 1.0f
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason,
+              "5:7 error: clamp called with 'low' (2.0) greater than 'high' (1.0)");
+}
+
+TEST_F(IR_ValidatorTest, CorrectDomainClamp) {
+    auto* func = b.Function("foo", ty.f32());
+    b.Append(func->Block(), [&] {
+        auto* val = b.Let("a", 3_f);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kClamp, val, 1_f, 2_f);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():f32 {
+  $B1: {
+    %a:f32 = let 3.0f
+    %3:f32 = clamp %a, 1.0f, 2.0f
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainClamp_Vec) {
+    auto* func = b.Function("foo", ty.vec4h());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("b", b.Splat(ty.vec4h(), 4_h));
+        auto* low = b.Splat(ty.vec4h(), 4_h);
+        auto* high = b.Splat(ty.vec4h(), 2_h);
+        auto* call_func = b.Call(ty.vec4h(), core::BuiltinFn::kClamp, e, low, high);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():vec4<f16> {
+  $B1: {
+    %b:vec4<f16> = let vec4<f16>(4.0h)
+    %3:vec4<f16> = clamp %b, vec4<f16>(4.0h), vec4<f16>(2.0h)
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason,
+              "5:7 error: clamp called with 'low' (4.0) greater than 'high' (2.0)");
+}
+
+TEST_F(IR_ValidatorTest, CorrectDomainSmoothstep) {
+    auto* func = b.Function("foo", ty.f32());
+    b.Append(func->Block(), [&] {
+        auto* val = b.Let("a", 3_f);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSmoothstep, val, 1_f, 2_f);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():f32 {
+  $B1: {
+    %a:f32 = let 3.0f
+    %3:f32 = smoothstep %a, 1.0f, 2.0f
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainSmoothstep_Vec) {
+    auto* func = b.Function("foo", ty.vec4h());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Let("b", b.Splat(ty.vec4h(), 4_h));
+        auto* edge0 = b.Splat(ty.vec4h(), 3_h);
+        auto* edge1 = b.Splat(ty.vec4h(), 3_h);
+        auto* call_func = b.Call(ty.vec4h(), core::BuiltinFn::kSmoothstep, edge0, edge1, e);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():vec4<f16> {
+  $B1: {
+    %b:vec4<f16> = let vec4<f16>(4.0h)
+    %3:vec4<f16> = smoothstep vec4<f16>(3.0h), vec4<f16>(3.0h), %b
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason,
+              "5:7 error: smoothstep called with 'low' (3.0) equal to 'high' (3.0)");
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainLdexp_Vec) {
+    auto* func = b.Function("foo", ty.vec4f());
+    b.Append(func->Block(), [&] {
+        auto* e1 = b.Let("b", b.Splat(ty.vec4f(), 4_f));
+        auto* e2 = b.Splat(ty.vec4i(), 267_i);
+        auto* call_func = b.Call(ty.vec4(ty.f32()), core::BuiltinFn::kLdexp, e1, e2);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():vec4<f32> {
+  $B1: {
+    %b:vec4<f32> = let vec4<f32>(4.0f)
+    %3:vec4<f32> = ldexp %b, vec4<i32>(267i)
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "5:7 error: e2 must be less than or equal to 128");
+}
+
+TEST_F(IR_ValidatorTest, CorrectDomainLdexp_Vec) {
+    auto* func = b.Function("foo", ty.vec4h());
+    b.Append(func->Block(), [&] {
+        auto* e1 = b.Let("b", b.Splat(ty.vec4h(), 4_h));
+        auto* e2 = b.Splat(ty.vec4i(), 10_i);
+        auto* call_func = b.Call(ty.vec4(ty.f16()), core::BuiltinFn::kLdexp, e1, e2);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():vec4<f16> {
+  $B1: {
+    %b:vec4<f16> = let vec4<f16>(4.0h)
+    %3:vec4<f16> = ldexp %b, vec4<i32>(10i)
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, IncorrectDomainLdexp) {
+    auto* func = b.Function("foo", ty.f16());
+    b.Append(func->Block(), [&] {
+        auto* e1 = b.Let("b", 16.0_h);
+        auto* call_func = b.Call(ty.f16(), core::BuiltinFn::kLdexp, e1, 17_i);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():f16 {
+  $B1: {
+    %b:f16 = let 16.0h
+    %3:f16 = ldexp %b, 17i
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "5:7 error: e2 must be less than or equal to 16");
+}
+
+TEST_F(IR_ValidatorTest, CorrectDomainLdexp) {
+    auto* func = b.Function("foo", ty.f32());
+    b.Append(func->Block(), [&] {
+        auto* e1 = b.Let("b", 16.0_f);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kLdexp, e1, 17_i);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():f32 {
+  $B1: {
+    %b:f32 = let 16.0f
+    %3:f32 = ldexp %b, 17i
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, IncorrectPack2x16Float) {
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Splat(ty.vec2f(), 65505_f);
+        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kPack2X16Float, e);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():u32 {
+  $B1: {
+    %2:u32 = pack2x16float vec2<f32>(65505.0f)
+    ret %2
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "5:7 error: value 65505.0 cannot be represented as 'f16'");
+}
+
+TEST_F(IR_ValidatorTest, CorrectPack2x16Float) {
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* e = b.Splat(ty.vec2f(), 4.0_f);
+        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kPack2X16Float, e);
+        b.ir.SetSource(call_func, Source{{5, 7}});
+        b.Return(func, call_func->Result());
+    });
+    ASSERT_EQ(ir::Validate(mod), Success);
+
+    auto* src = R"(
+%foo = func():u32 {
+  $B1: {
+    %2:u32 = pack2x16float vec2<f32>(4.0f)
+    ret %2
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
+    ASSERT_EQ(res, Success);
+}
+
 }  // namespace tint::core::ir

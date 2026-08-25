@@ -172,6 +172,14 @@ bool IsPositionPresent(const IOAttributes& attr, const core::type::Type* ty) {
     return attr.builtin == BuiltinValue::kPosition;
 }
 
+const constant::Value* GetConstArg(const CoreBuiltinCall* call, uint32_t param_index) {
+    if ((call->Args().size() <= param_index) || (call->Args()[param_index] == nullptr) ||
+        (!call->Args()[param_index]->Is<ir::Constant>())) {
+        return nullptr;
+    }
+    return call->Args()[param_index]->As<ir::Constant>()->Value();
+}
+
 }  // namespace
 
 Functional::Functional(Module& ir, diag::List& diagnostics, ErrorSource error_source)
@@ -1547,6 +1555,137 @@ void Functional::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
     if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
         call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
         CheckSubgroupMatrixOpOffset(call);
+    }
+
+    if (IsWGSLValidation()) {
+        switch (call->Func()) {
+            case core::BuiltinFn::kSubgroupShuffle:
+            case core::BuiltinFn::kSubgroupShuffleXor:
+            case core::BuiltinFn::kSubgroupShuffleUp:
+            case core::BuiltinFn::kSubgroupShuffleDown:
+                CheckSubgroupCall(call);
+                break;
+            case core::BuiltinFn::kExtractBits:
+                CheckExtractBitsCall(call);
+                break;
+            case core::BuiltinFn::kInsertBits:
+                CheckInsertBitsCall(call);
+                break;
+            case core::BuiltinFn::kLdexp:
+                CheckLdexpCall(call);
+                break;
+            case core::BuiltinFn::kClamp:
+                CheckClampCall(call);
+                break;
+            case core::BuiltinFn::kSmoothstep:
+                CheckSmoothstepCall(call);
+                break;
+            case core::BuiltinFn::kQuantizeToF16:
+                CheckQuantizeToF16(call);
+                break;
+            case core::BuiltinFn::kPack2X16Float:
+                CheckPack2x16float(call);
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+void Functional::CheckSubgroupCall(const CoreBuiltinCall* call) {
+    if (auto const_val = GetConstArg(call, 1)) {
+        auto as_aint = const_val->ValueAs<AInt>();
+        // User friendly param name.
+        std::string paramName = "sourceLaneIndex";
+        switch (call->Func()) {
+            case core::BuiltinFn::kSubgroupShuffleXor:
+                paramName = "mask";
+                break;
+            case core::BuiltinFn::kSubgroupShuffleUp:
+            case core::BuiltinFn::kSubgroupShuffleDown:
+                paramName = "delta";
+                break;
+            default:
+                break;
+        }
+
+        if (as_aint >= tint::internal_limits::kMaxSubgroupSize) {
+            AddError(call, 1) << "The " << paramName << " argument of " << call->FriendlyName()
+                              << " must be less than " << tint::internal_limits::kMaxSubgroupSize;
+        } else if (as_aint < 0) {
+            AddError(call, 1) << "The " << paramName << " argument of " << call->FriendlyName()
+                              << " must be greater than or equal to zero";
+        }
+    }
+}
+
+void Functional::CheckExtractBitsCall(const CoreBuiltinCall* call) {
+    // This can be u32/i32 or vector of those types.
+    auto* param0 = call->Args()[0];
+    auto* const_val_offset = GetConstArg(call, 1);
+    auto* const_val_count = GetConstArg(call, 2);
+    if (const_val_count && const_val_offset) {
+        auto* zero = const_eval_.Zero(param0->Type(), {}, Source{}).Get();
+        auto fakeArgs = Vector{zero, const_val_offset, const_val_count};
+        [[maybe_unused]] auto result =
+            const_eval_.extractBits(param0->Type(), fakeArgs, ir_.SourceOf(call));
+    }
+}
+
+void Functional::CheckInsertBitsCall(const CoreBuiltinCall* call) {
+    // This can be u32/i32 or vector of those types.
+    auto* param0 = call->Args()[0];
+    auto* const_val_offset = GetConstArg(call, 2);
+    auto* const_val_count = GetConstArg(call, 3);
+    if (const_val_count && const_val_offset) {
+        auto* zero = const_eval_.Zero(param0->Type(), {}, Source{}).Get();
+        auto fakeArgs = Vector{zero, zero, const_val_offset, const_val_count};
+        [[maybe_unused]] auto result =
+            const_eval_.insertBits(param0->Type(), fakeArgs, ir_.SourceOf(call));
+    }
+}
+
+void Functional::CheckLdexpCall(const CoreBuiltinCall* call) {
+    auto* param0 = call->Args()[0];
+    if (auto const_val = GetConstArg(call, 1)) {
+        auto* zero = const_eval_.Zero(param0->Type(), {}, Source{}).Get();
+        auto fakeArgs = Vector{zero, const_val};
+        [[maybe_unused]] auto result =
+            const_eval_.ldexp(param0->Type(), fakeArgs, ir_.SourceOf(call));
+    }
+}
+
+void Functional::CheckQuantizeToF16(const CoreBuiltinCall* call) {
+    if (auto const_val = GetConstArg(call, 0)) {
+        [[maybe_unused]] auto result = const_eval_.quantizeToF16(
+            call->Result()->Type(), Vector{const_val}, ir_.SourceOf(call));
+    }
+}
+
+void Functional::CheckPack2x16float(const CoreBuiltinCall* call) {
+    if (auto const_val = GetConstArg(call, 0)) {
+        [[maybe_unused]] auto result = const_eval_.pack2x16float(
+            call->Result()->Type(), Vector{const_val}, ir_.SourceOf(call));
+    }
+}
+
+void Functional::CheckClampCall(const CoreBuiltinCall* call) {
+    auto* const_val_low = GetConstArg(call, 1);
+    auto* const_val_high = GetConstArg(call, 2);
+    if (const_val_low && const_val_high) {
+        auto fakeArgs = Vector{const_val_low, const_val_low, const_val_high};
+        [[maybe_unused]] auto result =
+            const_eval_.clamp(call->Result()->Type(), fakeArgs, ir_.SourceOf(call));
+    }
+}
+
+void Functional::CheckSmoothstepCall(const CoreBuiltinCall* call) {
+    auto* const_val_low = GetConstArg(call, 0);
+    auto* const_val_high = GetConstArg(call, 1);
+    if (const_val_low && const_val_high) {
+        auto fakeArgs = Vector{const_val_low, const_val_high, const_val_high};
+        [[maybe_unused]] auto result =
+            const_eval_.smoothstep(call->Result()->Type(), fakeArgs, ir_.SourceOf(call));
     }
 }
 
