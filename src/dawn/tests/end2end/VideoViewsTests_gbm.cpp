@@ -30,6 +30,11 @@
 #include <utility>
 #include <vector>
 
+// This must be above VulkanBackend.h otherwise vulkan.h will be included before we can wrap it with
+// vulkan_platform.h.
+#include "src/dawn/common/vulkan_platform.h"
+
+// Must come after vulkan_platform
 #include "dawn/native/VulkanBackend.h"
 #include "src/dawn/common/DRMUtils.h"
 #include "src/dawn/tests/GBMUtils.h"
