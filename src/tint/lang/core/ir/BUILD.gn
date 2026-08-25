@@ -63,8 +63,6 @@ libtint_source_set("ir") {
     "call.h",
     "clone_context.cc",
     "clone_context.h",
-    "const_param_validator.cc",
-    "const_param_validator.h",
     "constant.cc",
     "constant.h",
     "constexpr_if.cc",

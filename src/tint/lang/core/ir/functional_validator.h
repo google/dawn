@@ -192,6 +192,22 @@ class Functional {
     void CheckBinaryDivModCall(const CoreBinary* call);
     void CheckBinaryShiftCall(const CoreBinary* call);
 
+    struct UseInfo {
+        Usage use;
+        /// Variable/buffer size
+        uint32_t storage_size{};
+        /// Accumulated offset to the pointer
+        uint32_t offset{};
+        /// Pointed to size
+        uint32_t pointer_size{};
+    };
+
+    void CheckBuffersAndMatrices(const Var* var);
+    bool CheckBufferView(const CoreBuiltinCall* call, const Var* var, uint32_t buffer_size);
+    bool CheckSubgroupMatrixMemory(const CoreBuiltinCall* call,
+                                   const Var* var,
+                                   const UseInfo& info);
+
     Module& ir_;
     diag::List& diag_;
     ErrorSource error_source_;
