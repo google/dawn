@@ -79,6 +79,7 @@ if (tint_build_fuzzer_vulkan_support && tint_build_fuzzers &&
 
     if (tint_build_hlsl_writer) {
       deps += [
+        "${tint_src_dir}:dxcompiler-for-fuzzer",
         "${tint_src_dir}/lang/hlsl/writer:fuzz",
         "${tint_src_dir}/lang/hlsl/writer/raise:fuzz",
       ]

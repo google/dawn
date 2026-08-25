@@ -88,6 +88,9 @@ if(TINT_BUILD_HLSL_WRITER)
     tint_lang_hlsl_writer_raise_fuzz
     tint_lang_hlsl_writer_fuzz
   )
+  tint_target_add_external_dependencies(tint_cmd_fuzz_ir_mesa_fuzz_cmd fuzz_cmd
+    "dxcompiler-for-fuzzer"
+  )
 endif(TINT_BUILD_HLSL_WRITER)
 
 if(TINT_BUILD_MSL_WRITER)
