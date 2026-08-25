@@ -239,3 +239,51 @@ DawnJSONGenerator(
 add_custom_target(webgpu_headers_gen
     DEPENDS ${WEBGPU_HEADERS_GEN_HEADERS}
 )
+
+###############################################################################
+# Upstream WebGPU C++ headers
+#   Pairs with the webgpu.h of whichever implementation is targeted
+###############################################################################
+
+set(WEBGPU_UPSTREAM_GEN_DIR
+    "${DAWN_BUILD_GEN_DIR}/include/webgpu_upstream")
+
+# Needed alongside the generated headers
+add_custom_command(
+    OUTPUT
+        "${WEBGPU_UPSTREAM_GEN_DIR}/webgpu/webgpu_enum_class_bitmasks.h"
+    DEPENDS
+        "${DAWN_INCLUDE_DIR}/webgpu/webgpu_enum_class_bitmasks.h"
+    COMMAND ${CMAKE_COMMAND} -E copy
+        "${DAWN_INCLUDE_DIR}/webgpu/webgpu_enum_class_bitmasks.h"
+        "${WEBGPU_UPSTREAM_GEN_DIR}/webgpu/webgpu_enum_class_bitmasks.h"
+)
+set(WEBGPU_UPSTREAM_CPP_HEADERS
+    "${WEBGPU_UPSTREAM_GEN_DIR}/webgpu/webgpu_cpp.h"
+    "${WEBGPU_UPSTREAM_GEN_DIR}/webgpu/webgpu_cpp_chained_struct.h"
+    "${WEBGPU_UPSTREAM_GEN_DIR}/webgpu/webgpu_cpp_print.h"
+    "${WEBGPU_UPSTREAM_GEN_DIR}/webgpu/webgpu_enum_class_bitmasks.h"
+)
+
+add_custom_target(webgpu_upstream_cpp_headers_gen ALL
+    DEPENDS "${WEBGPU_UPSTREAM_GEN_DIR}/webgpu/webgpu_enum_class_bitmasks.h"
+)
+add_dependencies(webgpu_upstream_cpp_headers_gen webgpu_headers_gen)
+
+add_library(webgpu_upstream_cpp_headers INTERFACE)
+add_library(dawn::webgpu_upstream_cpp_headers
+    ALIAS webgpu_upstream_cpp_headers)
+# BEFORE so this flavor wins over Dawn's webgpu/webgpu_cpp.h
+target_include_directories(webgpu_upstream_cpp_headers BEFORE INTERFACE
+    "$<BUILD_INTERFACE:${WEBGPU_UPSTREAM_GEN_DIR}>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/webgpu_upstream>"
+)
+
+target_link_libraries(webgpu_upstream_cpp_headers INTERFACE dawn_public_config)
+add_dependencies(webgpu_upstream_cpp_headers webgpu_upstream_cpp_headers_gen)
+
+if (DAWN_ENABLE_INSTALL)
+    install(TARGETS webgpu_upstream_cpp_headers EXPORT DawnTargets)
+    install(FILES ${WEBGPU_UPSTREAM_CPP_HEADERS}
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/webgpu_upstream/webgpu")
+endif ()
