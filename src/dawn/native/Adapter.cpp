@@ -44,6 +44,7 @@
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/PhysicalDevice.h"
 #include "src/utils/compiler.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::native {
 namespace {
@@ -160,26 +161,15 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
 
     mPhysicalDevice->PopulateBackendProperties(unpacked, mTogglesState);
 
-    // Allocate space for all strings.
-    size_t allocSize = mPhysicalDevice->GetVendorName().length() +
-                       mPhysicalDevice->GetArchitectureName().length() +
-                       mPhysicalDevice->GetName().length() +
-                       mPhysicalDevice->GetDriverDescription().length();
-    absl::Span<char> outBuffer{new char[allocSize], allocSize};
-
-    auto AddString = [&](const std::string& in, StringView* out) {
-        DAWN_CHECK(in.length() <= outBuffer.length());
-        DAWN_UNSAFE_TODO(memcpy(outBuffer.data(), in.data(), in.length()));
-        *out = {outBuffer.data(), in.length()};
-        outBuffer = outBuffer.subspan(in.length());
+    auto AllocateStringView = [&](const std::string& in) -> StringView {
+        Span<char> copy = HeapArrayFrom(in).MoveToSpan();
+        return {copy.data(), copy.size()};
     };
 
-    AddString(mPhysicalDevice->GetVendorName(), &info->vendor);
-    AddString(mPhysicalDevice->GetArchitectureName(), &info->architecture);
-    AddString(mPhysicalDevice->GetName(), &info->device);
-    AddString(mPhysicalDevice->GetDriverDescription(), &info->description);
-    DAWN_CHECK(outBuffer.empty());
-
+    info->vendor = AllocateStringView(mPhysicalDevice->GetVendorName());
+    info->architecture = AllocateStringView(mPhysicalDevice->GetArchitectureName());
+    info->device = AllocateStringView(mPhysicalDevice->GetName());
+    info->description = AllocateStringView(mPhysicalDevice->GetDriverDescription());
     info->backendType = mPhysicalDevice->GetBackendType();
     info->adapterType = mPhysicalDevice->GetAdapterType();
     info->vendorID = mPhysicalDevice->GetVendorId();
@@ -199,8 +189,10 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
 }
 
 void APIAdapterInfoFreeMembers(WGPUAdapterInfo info) {
-    // This single delete is enough because everything is a single allocation.
     delete[] info.vendor.data;
+    delete[] info.architecture.data;
+    delete[] info.device.data;
+    delete[] info.description.data;
 }
 
 void APIAdapterPropertiesMemoryHeapsFreeMembers(
