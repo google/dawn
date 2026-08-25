@@ -486,9 +486,7 @@ struct State {
         auto var = var_for_type.Get(binding_type);
         TINT_IR_ASSERT(ir, var);
 
-        const core::type::Pointer* ptr_ty = ty.ptr(handle, binding_type, read);
-        auto* access = b.Access(ptr_ty, (*var)->Result(), idx);
-        return b.Load(access);
+        return helper->LoadResource(b, *var, idx, binding_type);
     }
 
     ir::Value* GetDefaultIndexForResourceType(ResourceType resource_type) {
@@ -645,6 +643,14 @@ Result<SuccessType> ResourceTable(core::ir::Module& ir,
     AssertValid(ir, "before core.ResourceTable");
 
     return State{config, ir, helper}.Process();
+}
+
+Instruction* ResourceTableHelper::LoadResource(core::ir::Builder& b,
+                                               core::ir::Instruction* from,
+                                               core::ir::Value* idx,
+                                               const core::type::Type* ty) const {
+    auto* access = b.Access(b.ir.Types().ptr(handle, ty, read), from->Result(), idx);
+    return b.Load(access);
 }
 
 }  // namespace tint::core::ir::transform

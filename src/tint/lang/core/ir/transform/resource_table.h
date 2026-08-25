@@ -55,6 +55,12 @@ class ResourceTableHelper {
         const BindingPoint& bp,
         const std::vector<ResourceType>& types) const = 0;
 
+    // Helper method to load the `ty` object out of the buffer `from` at `idx.
+    virtual Instruction* LoadResource(core::ir::Builder& b,
+                                      core::ir::Instruction* from,
+                                      core::ir::Value* idx,
+                                      const core::type::Type* ty) const;
+
     ResourceTableHelper(const ResourceTableHelper&) = delete;
     ResourceTableHelper(ResourceTableHelper&&) = delete;
     ResourceTableHelper& operator=(const ResourceTableHelper&) = delete;
@@ -66,11 +72,11 @@ class ResourceTableHelper {
 /// We re-write the `getResource` and `hasResource` calls to use the provided storage buffer to
 /// validate the requested types.
 ///
-/// @param module the module to transform
+/// @param ir the module to transform
 /// @param config the transform configuration
 /// @param helper the resource binding helper
 /// @returns success or failure
-Result<SuccessType> ResourceTable(core::ir::Module& module,
+Result<SuccessType> ResourceTable(core::ir::Module& ir,
                                   const std::optional<ResourceTableConfig>& config,
                                   ResourceTableHelper* helper);
 
