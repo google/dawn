@@ -1,8 +1,8 @@
 
-Texture1D<float4> tint_resource_table_array[] : register(t51, space43);
-Texture2D<int4> tint_resource_table_array_1[] : register(t51, space45);
-Texture3D<uint4> tint_resource_table_array_2[] : register(t51, space46);
-ByteAddressBuffer tint_resource_table_metadata : register(t52, space42);
+Texture1D<float4> tint_resource_table_array[] : register(t28, space4);
+Texture2D<int4> tint_resource_table_array_1[] : register(t28, space6);
+Texture3D<uint4> tint_resource_table_array_2[] : register(t28, space7);
+ByteAddressBuffer tint_resource_table_metadata : register(t29, space5);
 void fs() {
   bool v = false;
   if ((0u < tint_resource_table_metadata.Load(0u))) {

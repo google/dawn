@@ -31,14 +31,14 @@
                OpDecorate %1 DescriptorSet 1
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpDecorate %8 DescriptorSet 43
-               OpDecorate %8 Binding 51
+               OpDecorate %8 DescriptorSet 4
+               OpDecorate %8 Binding 28
                OpMemberDecorate %tint_resource_table_metadata_struct_tint_explicit_layout 0 Offset 0
                OpDecorate %_runtimearr_uint ArrayStride 4
                OpMemberDecorate %tint_resource_table_metadata_struct_tint_explicit_layout 1 Offset 4
                OpDecorate %tint_resource_table_metadata_struct_tint_explicit_layout Block
-               OpDecorate %tint_resource_table_metadata DescriptorSet 42
-               OpDecorate %tint_resource_table_metadata Binding 52
+               OpDecorate %tint_resource_table_metadata DescriptorSet 5
+               OpDecorate %tint_resource_table_metadata Binding 29
                OpDecorate %tint_resource_table_metadata NonWritable
        %uint = OpTypeInt 32 0
      %v4uint = OpTypeVector %uint 4

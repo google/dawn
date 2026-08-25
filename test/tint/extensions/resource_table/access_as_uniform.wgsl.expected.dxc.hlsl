@@ -2,8 +2,8 @@
 cbuffer cbuffer_index : register(b0, space1) {
   uint4 index[1];
 };
-Texture3D<float4> tint_resource_table_array[] : register(t51, space43);
-ByteAddressBuffer tint_resource_table_metadata : register(t52, space42);
+Texture3D<float4> tint_resource_table_array[] : register(t28, space4);
+ByteAddressBuffer tint_resource_table_metadata : register(t29, space5);
 void fs() {
   uint v = index[0u].x;
   bool v_1 = false;

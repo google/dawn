@@ -24,14 +24,14 @@
                OpName %tint_storage_metadata_length_1 "tint_storage_metadata_length"
                OpName %item_idx_1 "item_idx"
                OpName %texture_load "texture_load"
-               OpDecorate %1 DescriptorSet 43
-               OpDecorate %1 Binding 51
+               OpDecorate %1 DescriptorSet 4
+               OpDecorate %1 Binding 28
                OpMemberDecorate %tint_resource_table_metadata_struct_tint_explicit_layout 0 Offset 0
                OpDecorate %_runtimearr_uint ArrayStride 4
                OpMemberDecorate %tint_resource_table_metadata_struct_tint_explicit_layout 1 Offset 4
                OpDecorate %tint_resource_table_metadata_struct_tint_explicit_layout Block
-               OpDecorate %tint_resource_table_metadata DescriptorSet 42
-               OpDecorate %tint_resource_table_metadata Binding 52
+               OpDecorate %tint_resource_table_metadata DescriptorSet 5
+               OpDecorate %tint_resource_table_metadata Binding 29
                OpDecorate %tint_resource_table_metadata NonWritable
       %float = OpTypeFloat 32
           %4 = OpTypeImage %float 1D 0 0 0 1 Unknown

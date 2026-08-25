@@ -4,10 +4,10 @@ struct fs_outputs {
 
 
 Texture2D<float4> t : register(t0);
-Texture2D<float4> tint_resource_table_array[] : register(t51, space43);
-Texture2D tint_resource_table_array_1[] : register(t51, space45);
-SamplerState tint_resource_table_array_2[] : register(s51, space46);
-ByteAddressBuffer tint_resource_table_metadata : register(t52, space42);
+Texture2D<float4> tint_resource_table_array[] : register(t28, space4);
+Texture2D tint_resource_table_array_1[] : register(t28, space6);
+SamplerState tint_resource_table_array_2[] : register(s28, space7);
+ByteAddressBuffer tint_resource_table_metadata : register(t29, space5);
 float4 fs_inner() {
   uint v = uint(int(0));
   bool v_1 = false;

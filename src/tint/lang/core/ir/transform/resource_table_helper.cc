@@ -118,8 +118,8 @@ std::optional<ResourceTableConfig> GenerateResourceTableConfig(Module& mod,
     std::sort(default_binding_type_order.begin(), default_binding_type_order.end());
 
     return ResourceTableConfig{
-        .resource_table_binding = BindingPoint{.group = 43, .binding = 51},
-        .storage_buffer_binding = BindingPoint{.group = 42, .binding = 52},
+        .resource_table_binding = BindingPoint{.group = 4, .binding = 28},
+        .storage_buffer_binding = BindingPoint{.group = 5, .binding = 29},
         .default_binding_type_order = std::move(default_binding_type_order),
         .binding_to_resource_type = std::move(binding_to_resource_type),
     };
