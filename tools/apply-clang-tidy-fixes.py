@@ -81,6 +81,9 @@ def main():
         help=
         "Optional path to the findings JSON file. If not specified, the script automatically searches all out/*/clang-tidy-*-findings.json files. (Note it's fine to search old findings, because this script re-runs clang-tidy on each file anyway. Just a bit slower.)"
     )
+    parser.add_argument("--fix-errors",
+                        action="store_true",
+                        help="Apply fixes even if compiler errors are found.")
     parser.add_argument(
         "files",
         nargs="*",
@@ -174,7 +177,7 @@ def main():
             str(clang_tidy),
             f"-p={outdir_path}",
             f"-checks=-*,{args.check}",
-            "--fix",
+            "--fix-errors" if args.fix_errors else "--fix",
             "--extra-arg=-w",
         ] + [str(f) for f in sorted(files_to_fix)]
 
