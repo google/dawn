@@ -109,7 +109,9 @@ size_t D3D12BufferSizeAlignment(wgpu::BufferUsage usage) {
     return 1;
 }
 
-ResourceHeapKind GetResourceHeapKind(wgpu::BufferUsage bufferUsage, uint32_t resourceHeapTier) {
+ResourceHeapKind GetResourceHeapKind(wgpu::BufferUsage bufferUsage,
+                                     uint32_t resourceHeapTier,
+                                     bool isCacheCoherentUMA) {
     if (bufferUsage == (wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc) ||
         bufferUsage == wgpu::BufferUsage::MapWrite) {
         if (resourceHeapTier >= 2) {
@@ -127,8 +129,16 @@ ResourceHeapKind GetResourceHeapKind(wgpu::BufferUsage bufferUsage, uint32_t res
         }
     }
 
-    if (bufferUsage & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) {
+    if (bufferUsage & wgpu::BufferUsage::MapRead) {
         return ResourceHeapKind::Custom_WriteBack_OnlyBuffers;
+    }
+
+    if (bufferUsage & wgpu::BufferUsage::MapWrite) {
+        if (isCacheCoherentUMA) {
+            return ResourceHeapKind::Custom_WriteBack_OnlyBuffers;
+        } else {
+            return ResourceHeapKind::Custom_WriteCombine_OnlyBuffers;
+        }
     }
 
     if (resourceHeapTier >= 2) {
@@ -205,7 +215,8 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     resourceDescriptor.Flags = D3D12ResourceFlags(GetInternalUsage() | wgpu::BufferUsage::CopyDst);
 
     ResourceHeapKind resourceHeapKind =
-        GetResourceHeapKind(GetInternalUsage(), ToBackend(GetDevice())->GetResourceHeapTier());
+        GetResourceHeapKind(GetInternalUsage(), ToBackend(GetDevice())->GetResourceHeapTier(),
+                            ToBackend(GetDevice())->GetDeviceInfo().isCacheCoherentUMA);
     mLastState = D3D12_RESOURCE_STATE_COMMON;
 
     switch (resourceHeapKind) {
@@ -228,6 +239,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
         case ResourceHeapKind::Default_AllBuffersAndTextures:
         case ResourceHeapKind::Default_OnlyBuffers:
         case ResourceHeapKind::Custom_WriteBack_OnlyBuffers:
+        case ResourceHeapKind::Custom_WriteCombine_OnlyBuffers:
             break;
         default:
             DAWN_UNREACHABLE();

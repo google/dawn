@@ -68,6 +68,9 @@ enum class ResourceHeapKind : uint8_t {
     // Allows custom resource heaps to contain the buffers that support write-back CPU property.
     Custom_WriteBack_OnlyBuffers,
 
+    // Allows custom resource heaps to contain the buffers that support write-combined CPU property.
+    Custom_WriteCombine_OnlyBuffers,
+
     EnumCount,
     InvalidEnum = EnumCount,
 };

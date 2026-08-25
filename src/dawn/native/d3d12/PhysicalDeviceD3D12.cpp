@@ -256,6 +256,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::BufferMapExtendedUsages);
     }
 
+    if (GetDeviceInfo().isUMA) {
+        EnableFeature(Feature::BufferMapWriteExtendedUsages);
+    }
+
     // Temporarily only enable SharedBufferMemoryFromWindowsHandle on UMA.
     // TODO(386255678): enable SharedBufferMemoryFromWindowsHandle on other
     // architectures.

@@ -34,6 +34,7 @@
 #include <array>
 #include <cstring>
 #include <limits>
+#include <span>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -1513,21 +1514,46 @@ DAWN_INSTANTIATE_TEST(BufferNoSuballocationTests,
                       VulkanBackend({"disable_resource_suballocation"}),
                       WebGPUBackend({"disable_resource_suballocation"}));
 
-class BufferMapExtendedUsagesTests : public DawnTest {
+// Selects which buffer-mapping extended-usages feature a test requires. Both features share the
+// same MapWrite test bodies; BufferMapWriteExtendedUsages only lifts usage restrictions for
+// MapWrite buffers, so its parameterization skips the MapRead-only paths.
+enum class MapExtendedUsagesFeature {
+    ReadWrite,  // wgpu::FeatureName::BufferMapExtendedUsages
+    WriteOnly,  // wgpu::FeatureName::BufferMapWriteExtendedUsages
+};
+
+std::ostream& operator<<(std::ostream& o, MapExtendedUsagesFeature feature) {
+    switch (feature) {
+        case MapExtendedUsagesFeature::ReadWrite:
+            return o << "ReadWrite";
+        case MapExtendedUsagesFeature::WriteOnly:
+            return o << "WriteOnly";
+    }
+    return o;
+}
+
+DAWN_TEST_PARAM_STRUCT(BufferMapExtendedUsagesTestParams, MapExtendedUsagesFeature);
+
+class BufferMapExtendedUsagesTests : public DawnTestWithParams<BufferMapExtendedUsagesTestParams> {
   protected:
-    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
-                           dawn::utils::ComboLimits& required) override {
-        required.maxStorageBuffersInVertexStage = supported.maxStorageBuffersInVertexStage;
-        required.maxStorageBuffersPerShaderStage = supported.maxStorageBuffersPerShaderStage;
+    wgpu::FeatureName RequiredFeature() const {
+        if (GetParam().mMapExtendedUsagesFeature == MapExtendedUsagesFeature::WriteOnly) {
+            return wgpu::FeatureName::BufferMapWriteExtendedUsages;
+        }
+        return wgpu::FeatureName::BufferMapExtendedUsages;
     }
 
-  protected:
+    // False when only MapWrite extended usages are enabled, so tests skip MapRead paths.
+    bool CanTestMapRead() const {
+        return GetParam().mMapExtendedUsagesFeature == MapExtendedUsagesFeature::ReadWrite;
+    }
+
     void SetUp() override {
-        DawnTest::SetUp();
+        DawnTestWithParams<BufferMapExtendedUsagesTestParams>::SetUp();
 
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
         // Skip all tests if the required feature is not supported.
-        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::BufferMapExtendedUsages}));
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({RequiredFeature()}));
 
         // TODO(crbug.com/473894293): [Capture] validation error: no CopyDst usage.
         DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
@@ -1535,10 +1561,16 @@ class BufferMapExtendedUsagesTests : public DawnTest {
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         std::vector<wgpu::FeatureName> requiredFeatures = {};
-        if (!UsesWire() && SupportsFeatures({wgpu::FeatureName::BufferMapExtendedUsages})) {
-            requiredFeatures.push_back(wgpu::FeatureName::BufferMapExtendedUsages);
+        if (!UsesWire() && SupportsFeatures({RequiredFeature()})) {
+            requiredFeatures.push_back(RequiredFeature());
         }
         return requiredFeatures;
+    }
+
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        required.maxStorageBuffersInVertexStage = supported.maxStorageBuffersInVertexStage;
+        required.maxStorageBuffersPerShaderStage = supported.maxStorageBuffersPerShaderStage;
     }
 
     wgpu::Buffer CreateBufferFromData(const void* data, uint64_t size, wgpu::BufferUsage usage) {
@@ -1692,6 +1724,8 @@ class BufferMapExtendedUsagesTests : public DawnTest {
 
 // Test that the map read for any kind of buffer works
 TEST_P(BufferMapExtendedUsagesTests, MapReadWithAnyUsage) {
+    DAWN_TEST_UNSUPPORTED_IF(!CanTestMapRead());
+
     wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
 
@@ -1965,6 +1999,8 @@ TEST_P(BufferMapExtendedUsagesTests, MapWriteStorageBufferAndDraw) {
 
 // Test that map write a storage buffer, modifying it on GPU, then map read it on CPU works.
 TEST_P(BufferMapExtendedUsagesTests, MapWriteThenGPUWriteStorageBufferThenMapRead) {
+    DAWN_TEST_UNSUPPORTED_IF(!CanTestMapRead());
+
     const uint32_t kInitialValue = 1;
     const uint32_t kExpectedValue = 2;
     constexpr size_t kSize = sizeof(kExpectedValue);
@@ -2041,7 +2077,10 @@ void BufferMapExtendedUsagesTests::MixMapWriteAndGPUWriteBufferThenDraw(ColorSrc
     wgpu::Buffer ssbo;
     {
         wgpu::BufferUsage usage =
-            wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite;
+            wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+        if (CanTestMapRead()) {
+            usage |= wgpu::BufferUsage::MapRead;
+        }
 
         switch (colorSrc) {
             case ColorSrc::UniformBuffer:
@@ -2127,10 +2166,10 @@ void BufferMapExtendedUsagesTests::MixMapWriteAndGPUWriteBufferThenDraw(ColorSrc
         EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kWhite, finalRenderPass.color, 0, 0);
     }
 
-    // Read the final value.
-    MapAsyncAndWait(ssbo, wgpu::MapMode::Read, 0, kSize);
-    CheckMapping(ssbo.GetConstMappedRange(0, kSize), &kFinalColor, kSize);
-    ssbo.Unmap();
+    if (CanTestMapRead()) {
+        // Read the final value.
+        EXPECT_BUFFER_FLOAT_RANGE_EQ(kFinalColor, ssbo, 0, std::size(kFinalColor));
+    }
 }
 
 TEST_P(BufferMapExtendedUsagesTests, MixMapWriteAndGPUWriteVertexBufferThenDraw) {
@@ -2232,17 +2271,14 @@ TEST_P(BufferMapExtendedUsagesTests,
     }
 }
 
-DAWN_INSTANTIATE_TEST(BufferMapExtendedUsagesTests,
-                      D3D11Backend(),
-                      D3D11Backend({"d3d11_disable_map_on_default_buffers"}),
-                      D3D11Backend({"auto_map_backend_buffer", "d3d11_disable_cpu_buffers"}),
-                      D3D12Backend(),
-                      MetalBackend(),
-                      OpenGLBackend(),
-                      OpenGLESBackend(),
-                      OpenGLESBackend({"gl_defer"}),
-                      VulkanBackend(),
-                      WebGPUBackend());
+// BufferMapWriteExtendedUsages is only ever enabled on D3D12, so the WriteOnly parameter runs on
+// D3D12 and is skipped on other backends; ReadWrite keeps the full backend coverage.
+DAWN_INSTANTIATE_TEST_P(BufferMapExtendedUsagesTests,
+                        {D3D11Backend(), D3D11Backend({"d3d11_disable_map_on_default_buffers"}),
+                         D3D11Backend({"auto_map_backend_buffer", "d3d11_disable_cpu_buffers"}),
+                         D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
+                         OpenGLESBackend({"gl_defer"}), VulkanBackend(), WebGPUBackend()},
+                        {MapExtendedUsagesFeature::ReadWrite, MapExtendedUsagesFeature::WriteOnly});
 
 }  // anonymous namespace
 }  // namespace dawn
