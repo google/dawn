@@ -174,8 +174,12 @@ bool IsPositionPresent(const IOAttributes& attr, const core::type::Type* ty) {
 
 }  // namespace
 
-Functional::Functional(const Module& ir, diag::List& diagnostics, ErrorSource error_source)
-    : ir_(ir), diag_(diagnostics), error_source_(error_source), referenced_module_vars_(ir) {}
+Functional::Functional(Module& ir, diag::List& diagnostics, ErrorSource error_source)
+    : ir_(ir),
+      diag_(diagnostics),
+      error_source_(error_source),
+      const_eval_(ir_.constant_values, diag_),
+      referenced_module_vars_(ir) {}
 
 Functional::~Functional() = default;
 

@@ -42,17 +42,17 @@ enum class ErrorSource {
 /// @param mod the module to validate
 /// @param msg the msg to accompany the output
 /// @returns success or failure
-Result<SuccessType> Validate(const Module& mod, std::string_view msg = "");
+Result<SuccessType> Validate(Module& mod, std::string_view msg = "");
 /// Validates the module @p ir is correctly formed
 /// @param mod the module to validate
 /// @param source the source we're validating from
 /// @returns success or failure
-Result<SuccessType> Validate(const Module& mod, ErrorSource source);
+Result<SuccessType> Validate(Module& mod, ErrorSource source);
 
 /// Validates the module @p ir is correctly formed, iff required by the build configuration.
 /// @param mod the module to transform
 /// @param msg the msg to accompany the output
-void AssertValid(const Module& mod, std::string_view msg = "");
+void AssertValid(Module& mod, std::string_view msg = "");
 
 /// Check if @p mod contains any of the properties in @p unsupported_properties.
 /// Raises a Tint ICE with the name of first unsupported property that was found.

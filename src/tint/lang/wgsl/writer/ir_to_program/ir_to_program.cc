@@ -100,7 +100,7 @@ namespace {
 
 class State {
   public:
-    explicit State(const core::ir::Module& m) : mod(m) {}
+    explicit State(core::ir::Module& m) : mod(m) {}
 
     Program Run(const Options& options) {
         if (auto res = Validate(mod, "before wgsl.to_program"); res != Success) {
@@ -146,7 +146,7 @@ class State {
 
   private:
     /// The source IR module
-    const core::ir::Module& mod;
+    core::ir::Module& mod;
 
     /// The target ProgramBuilder
     ProgramBuilder b;
@@ -1416,7 +1416,7 @@ class State {
 
 }  // namespace
 
-Program IRToProgram(const core::ir::Module& i, const Options& options) {
+Program IRToProgram(core::ir::Module& i, const Options& options) {
     return State{i}.Run(options);
 }
 

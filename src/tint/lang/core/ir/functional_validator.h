@@ -69,7 +69,7 @@ namespace tint::core::ir::validator {
 
 class Functional {
   public:
-    Functional(const Module& ir, diag::List& diagnostics, ErrorSource error_source);
+    Functional(Module& ir, diag::List& diagnostics, ErrorSource error_source);
     ~Functional();
 
     void Validate();
@@ -178,10 +178,12 @@ class Functional {
     void CheckUserCall(const UserCall* call);
     void CheckVar(const Var* var);
 
-    const Module& ir_;
+    Module& ir_;
     diag::List& diag_;
     ErrorSource error_source_;
     std::optional<ir::Disassembler> disassembler_;  // Use Disassemble()
+
+    constant::Eval const_eval_;
 
     SymbolTable symbols_ = SymbolTable::Wrap(ir_.symbols);
     core::type::Manager type_mgr_ = core::type::Manager::Wrap(ir_.Types());

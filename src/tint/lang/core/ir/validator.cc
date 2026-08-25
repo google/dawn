@@ -62,8 +62,7 @@ class Validator {
     /// Create a core validator
     /// @param mod the module to be validated
     /// @param source the source of the program, WGSL or IR
-    Validator(const Module& mod, ErrorSource error_source)
-        : mod_(mod), error_source_(error_source) {}
+    Validator(Module& mod, ErrorSource error_source) : mod_(mod), error_source_(error_source) {}
 
     /// Destructor
     ~Validator() = default;
@@ -94,26 +93,26 @@ class Validator {
     }
 
   private:
-    const Module& mod_;
+    Module& mod_;
     ErrorSource error_source_ = ErrorSource::kIr;
     diag::List diagnostics_;
 };
 
 }  // namespace
 
-Result<SuccessType> Validate(const Module& mod, std::string_view msg) {
+Result<SuccessType> Validate(Module& mod, std::string_view msg) {
     DumpIRIfEnabled(mod, msg);
     Validator v(mod, ErrorSource::kIr);
     return v.Run();
 }
 
-Result<SuccessType> Validate(const Module& mod, ErrorSource source) {
+Result<SuccessType> Validate(Module& mod, ErrorSource source) {
     DumpIRIfEnabled(mod, "");
     Validator v(mod, source);
     return v.Run();
 }
 
-void AssertValid(const Module& mod, std::string_view msg) {
+void AssertValid(Module& mod, std::string_view msg) {
     DumpIRIfEnabled(mod, msg);
 
 #if TINT_ENABLE_IR_VALIDATION_ASSERTS

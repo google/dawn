@@ -42,7 +42,7 @@ namespace tint::wgsl::writer {
 /// @param options the configuration options
 /// @return the tint::Program.
 /// @note Check the returned Program::Diagnostics() for any errors.
-Program IRToProgram(const core::ir::Module& module, const Options& options = {});
+Program IRToProgram(core::ir::Module& module, const Options& options = {});
 
 }  // namespace tint::wgsl::writer
 
