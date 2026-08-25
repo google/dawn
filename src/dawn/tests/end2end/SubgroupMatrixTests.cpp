@@ -105,41 +105,6 @@ std::ostream& operator<<(std::ostream& o, const wgpu::SubgroupMatrixConfig& conf
     return o;
 }
 
-bool IsEqual(const wgpu::SubgroupMatrixConfig& lhs, const wgpu::SubgroupMatrixConfig& rhs) {
-    return lhs.componentType == rhs.componentType &&              //
-           lhs.resultComponentType == rhs.resultComponentType &&  //
-           lhs.M == rhs.M &&                                      //
-           lhs.N == rhs.N &&                                      //
-           lhs.K == rhs.K;
-}
-
-bool CrashesOnRX9060XT(const wgpu::SubgroupMatrixConfig& config, bool include8BitTypes) {
-    // TODO(crbug.com/525518027): These configs are crashing in the AMD driver during
-    // ID3D12Device::CreateComputePipelineState.
-    // AMD driver 32.0.31007.2036, 6/4/2026, AMD Agility SDK installer 26.10.07.02
-    // Note that these configs are not exhaustive; for example, these work:
-    // 16x16x16 f16 -> f16
-    // 16x16x16 f16 -> f32
-    // 16x16x16 i8 -> i32
-    // 16x16x16 i8 -> u32
-    // 16x16x16 u8 -> i32
-    // 16x16x16 u8 -> u32
-    using enum wgpu::SubgroupMatrixComponentType;
-    bool crashes = IsEqual(config, {I32, I32, 16, 16, 16}) ||  //
-                   IsEqual(config, {U32, U32, 16, 16, 16}) ||  //
-                   IsEqual(config, {I32, U32, 16, 16, 16}) ||  //
-                   IsEqual(config, {U32, I32, 16, 16, 16}) ||  //
-                   IsEqual(config, {F32, F32, 16, 16, 16});
-    if (include8BitTypes) {
-        crashes = crashes ||                                //
-                  IsEqual(config, {I8, I8, 16, 16, 16}) ||  //
-                  IsEqual(config, {I8, U8, 16, 16, 16}) ||  //
-                  IsEqual(config, {U8, I8, 16, 16, 16}) ||  //
-                  IsEqual(config, {U8, U8, 16, 16, 16});
-    }
-    return crashes;
-}
-
 /// A Matrix object holds the data and layout of a single matrix.
 /// Provides helper functions to get and set values in different formats and to fill the matrix with
 /// interesting values.
@@ -451,9 +416,6 @@ TEST_P(SubgroupMatrixSubgroupSizeControlTest, WorkgroupSizeUsesExplicitSubgroupS
     bool testedConfig = false;
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         const auto& config = subgroupMatrixConfigs.configs[i];
-        if (IsWindows() && IsAMD() && IsD3D12() && CrashesOnRX9060XT(config, false)) {
-            continue;
-        }
 
         std::ostringstream configTrace;
         configTrace << config;
@@ -710,13 +672,6 @@ TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MatrixMultiply) {
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         auto& config = subgroupMatrixConfigs.configs[i];
 
-        if (IsWindows() && IsAMD() && IsD3D12()) {
-            if (CrashesOnRX9060XT(config, true)) {
-                std::cout << "Skipping config: " << config << "\n";
-                continue;
-            }
-        }
-
         TestSubgroupMatrixConfig(config, op, info.subgroupMaxSize, columnMajor);
     }
 }
@@ -923,13 +878,6 @@ TEST_P(SubgroupMatrix_MatrixScalarArithmeticTest, MatrixScalar) {
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         auto& config = subgroupMatrixConfigs.configs[i];
 
-        if (IsWindows() && IsAMD() && IsD3D12()) {
-            if (CrashesOnRX9060XT(config, true)) {
-                std::cout << "Skipping config: " << config << "\n";
-                continue;
-            }
-        }
-
         TestSubgroupMatrixConfig(config, op, info.subgroupMaxSize, columnMajor);
     }
 }
@@ -1119,13 +1067,6 @@ TEST_P(SubgroupMatrix_MatrixStoreTest, MatrixStoreWithOffset) {
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         auto& config = subgroupMatrixConfigs.configs[i];
 
-        if (IsWindows() && IsAMD() && IsD3D12()) {
-            if (CrashesOnRX9060XT(config, false)) {
-                std::cout << "Skipping config: " << config << "\n";
-                continue;
-            }
-        }
-
         // For majorness templated variants, test a variety of array element types.
         for (uint32_t j = 2; j <= 16; j <<= 1) {
             if (j < ComponentTypeToByteSize(config.componentType)) {
@@ -1308,13 +1249,6 @@ TEST_P(SubgroupMatrix_MatrixConstructorTest, MatrixConstruct) {
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         auto& config = subgroupMatrixConfigs.configs[i];
 
-        if (IsWindows() && IsAMD() && IsD3D12()) {
-            if (CrashesOnRX9060XT(config, false)) {
-                std::cout << "Skipping config: " << config << "\n";
-                continue;
-            }
-        }
-
         TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mWithArgument);
     }
 }
@@ -1404,13 +1338,6 @@ TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest, MatrixMultiply) {
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         auto& config = subgroupMatrixConfigs.configs[i];
         uint32_t resultComponentByteSize = ComponentTypeToByteSize(config.resultComponentType);
-
-        if (IsWindows() && IsAMD() && IsD3D12()) {
-            if (CrashesOnRX9060XT(config, true)) {
-                std::cout << "Skipping config: " << config << "\n";
-                continue;
-            }
-        }
 
         std::stringstream configInfo;
         configInfo << "Testing " << config;
@@ -1779,11 +1706,6 @@ TEST_P(SubgroupMatrix_WorkgroupLoadStoreTest, WorkgroupLoadStore) {
         // TODO(crbug.com/512455144): Support 8-bit subgroup matrix loads from workgroup memory in
         // the HLSL writer.
         if (IsD3D12() && Is8Bit(config.componentType)) {
-            std::cout << "Skipping config: " << config << "\n";
-            continue;
-        }
-
-        if ((IsWindows() && IsAMD() && IsD3D12()) && (CrashesOnRX9060XT(config, false))) {
             std::cout << "Skipping config: " << config << "\n";
             continue;
         }

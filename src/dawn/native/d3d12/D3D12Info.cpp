@@ -79,6 +79,13 @@ std::vector<D3D12DeviceInfo::LinAlgWMMSupport> GatherLinAlgWaveMatrixMultiplySup
                 continue;
             }
 
+            // The preview shape query can return native shapes even when the driver will not
+            // accept this type combination in a shader. SupportFlags is authoritative.
+            if ((opSupport.WaveMatrixMultiply.SupportFlags &
+                 D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAG_SUPPORTED) == 0) {
+                continue;
+            }
+
             uint32_t numShapes = opSupport.WaveMatrixMultiply.NumShapes;
             if (numShapes == 0) {
                 continue;
