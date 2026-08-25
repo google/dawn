@@ -215,12 +215,9 @@ struct State {
     /// Loads the storage buffer dynamic offset from the immediate block.
     /// @returns the loaded dynamic offset value
     Value* LoadDynamicOffset(uint32_t offset_index) {
-        auto* buffer_offsets = b.Access(
-            ty.ptr(immediate, ty.array(ty.u32(), buffer_offsets_array_elements_num)),
-            immediate_data_layout.var,
-            u32(immediate_data_layout.IndexOf(core::InternalImmediate::kStorageBufferOffsets)));
-        auto* offset_ptr =
-            b.Access(ty.ptr(immediate, ty.u32()), buffer_offsets->Result(), u32(offset_index));
+        auto* buffer_offsets =
+            immediate_data_layout.GetPointer(b, core::InternalImmediate::kStorageBufferOffsets);
+        auto* offset_ptr = b.Access(ty.ptr(immediate, ty.u32()), buffer_offsets, u32(offset_index));
         return b.Load(offset_ptr)->Result();
     }
 };

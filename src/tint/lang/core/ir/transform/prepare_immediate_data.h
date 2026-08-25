@@ -37,7 +37,9 @@
 
 // Forward declarations.
 namespace tint::core::ir {
+class Builder;
 class Module;
+class Value;
 class Var;
 }  // namespace tint::core::ir
 namespace tint::core::type {
@@ -79,12 +81,11 @@ struct ImmediateDataLayout {
         return immediate_to_index.Contains(immediate);
     }
 
-    /// @returns the index of the specified immediate
-    uint32_t IndexOf(InternalImmediate immediate) const {
-        auto itr = immediate_to_index.Get(immediate);
-        TINT_ASSERT(itr);
-        return *itr.value;
-    }
+    /// @returns a pointer to the specified immediate
+    Value* GetPointer(Builder& b, InternalImmediate immediate) const;
+
+    /// @returns the value of the specified immediate
+    Value* GetValue(Builder& b, InternalImmediate immediate) const;
 };
 
 /// The internally created immediate data members.

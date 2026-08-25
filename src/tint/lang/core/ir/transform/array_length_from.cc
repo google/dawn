@@ -468,13 +468,10 @@ struct State {
                     auto* vec_ptr = b.Access<ptr<uniform, vec4u>>(BufferSizes(), u32(array_index));
                     total_buffer_size = b.LoadVectorElement(vec_ptr, u32(vec_index))->Result();
                 } else {
-                    auto* buffer_sizes = b.Access(
-                        ty.ptr(immediate, ty.array(ty.u32(), buffer_sizes_array_elements_num)),
-                        immediate_data_layout.var,
-                        u32(immediate_data_layout.IndexOf(
-                            core::InternalImmediate::kStorageBufferSizes)));
-                    auto* size_ptr = b.Access(ty.ptr(immediate, ty.u32()), buffer_sizes->Result(),
-                                              u32(size_index));
+                    auto* buffer_sizes = immediate_data_layout.GetPointer(
+                        b, core::InternalImmediate::kStorageBufferSizes);
+                    auto* size_ptr =
+                        b.Access(ty.ptr(immediate, ty.u32()), buffer_sizes, u32(size_index));
                     total_buffer_size = b.Load(size_ptr)->Result();
                 }
 

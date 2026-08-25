@@ -155,6 +155,19 @@ struct State {
 
 }  // namespace
 
+Value* ImmediateDataLayout::GetPointer(Builder& b, InternalImmediate immediate) const {
+    auto itr = immediate_to_index.Get(immediate);
+    TINT_ASSERT(itr);
+    auto index = u32(*itr.value);
+    auto* str = var->Result()->Type()->UnwrapPtr()->As<core::type::Struct>();
+    auto* type = str->Members()[index]->Type();
+    return b.Access(b.ir.Types().ptr(core::AddressSpace::kImmediate, type), var, index)->Result();
+}
+
+Value* ImmediateDataLayout::GetValue(Builder& b, InternalImmediate immediate) const {
+    return b.Load(GetPointer(b, immediate))->Result();
+}
+
 Result<ImmediateDataLayout> PrepareImmediateData(Module& ir,
                                                  const PrepareImmediateDataConfig& config) {
     core::ir::AssertValid(ir, "before core.PrepareImmediateData");
