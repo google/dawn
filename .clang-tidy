@@ -30,7 +30,6 @@ Checks:
   ## P0. Most likely to help with hardening.
   #- -readability-inconsistent-declaration-parameter-name  # in webgpu.h and src/tint
   ## - Memory initialization
-  #- -cppcoreguidelines-init-variables  # has fixits
   #- -cppcoreguidelines-pro-type-member-init  # has fixits
   ## - Other memory safety
   #- -bugprone-casting-through-void
@@ -177,6 +176,8 @@ Checks:
   - -readability-redundant-nested-if
 
   # P∞. Checks we're not really interested in re-enabling.
+  # -ftrivial-auto-var-init = pattern (debug) or zero (release) is enabled across chrome build, which addresses uninitialized issues of POD variables.
+  - -cppcoreguidelines-init-variables
   # - Appears unnecessary since we use hardened libc++.
   - -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access
   # - Clang already catches the more problematic cases (& with ==, etc.) in
