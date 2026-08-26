@@ -551,7 +551,7 @@ deps = {
 
   # Upstream webgpu.h headers for testing purposes
   'third_party/webgpu-headers/src': {
-    'url': '{chromium_git}/external/github.com/webgpu-native/webgpu-headers@01addc4ba8a2915a061b7095a6768b512071ab96',
+    'url': '{chromium_git}/external/github.com/webgpu-native/webgpu-headers@0d8deca328d6bd74cad4d813aea4a1b839b00e4d',
   },
 
   # Like the Node dependency, architectures are listed out explicitly instead of
