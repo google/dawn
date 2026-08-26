@@ -1366,8 +1366,8 @@ TEST_P(ReadWriteStorageTextureTests, ReadWriteStorageTextureInFragmentShader) {
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
     DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageTexturesInFragmentStage < 1);
 
-    std::array<uint32_t, kWidth * kHeight> inputData;
-    std::array<uint32_t, kWidth * kHeight> expectedData;
+    std::array<uint32_t, kWidth * kHeight> inputData{};
+    std::array<uint32_t, kWidth * kHeight> expectedData{};
     for (size_t i = 0; i < inputData.size(); ++i) {
         inputData[i] = i + 1;
         expectedData[i] = inputData[i] * 2;
@@ -1573,7 +1573,7 @@ TEST_P(ReadWriteStorageTextureTests, ReadWriteInPipelineLayoutAndWriteOnlyInShad
     // TODO(crbug.com/40238674): Fails on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
-    std::array<uint32_t, kWidth * kHeight> expectedData;
+    std::array<uint32_t, kWidth * kHeight> expectedData{};
     for (size_t i = 0; i < expectedData.size(); ++i) {
         expectedData[i] = i + 1;
     }

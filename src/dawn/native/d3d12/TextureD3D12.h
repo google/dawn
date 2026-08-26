@@ -183,7 +183,7 @@ class TextureView final : public TextureViewBase {
   private:
     TextureView(TextureBase* texture, const UnpackedPtr<TextureViewDescriptor>& descriptor);
 
-    D3D12_SHADER_RESOURCE_VIEW_DESC mSrvDesc;
+    D3D12_SHADER_RESOURCE_VIEW_DESC mSrvDesc{};
 };
 }  // namespace d3d12
 }  // namespace dawn::native

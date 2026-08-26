@@ -58,9 +58,9 @@ struct RenderImmediates {
 
     FirstIndexOffset firstIndexOffset;
 
-    DynamicStorageBufferLengths storageBufferDynamicLengths;
+    DynamicStorageBufferLengths storageBufferDynamicLengths{};
 
-    DynamicStorageBufferOffsets storageBufferDynamicOffsets;
+    DynamicStorageBufferOffsets storageBufferDynamicOffsets{};
 };
 
 // Define compute pipeline immediates layout. Append members to expand the layout.
@@ -69,9 +69,9 @@ struct ComputeImmediates {
 
     NumWorkgroupsDimensions numWorkgroups;
 
-    DynamicStorageBufferLengths storageBufferDynamicLengths;
+    DynamicStorageBufferLengths storageBufferDynamicLengths{};
 
-    DynamicStorageBufferOffsets storageBufferDynamicOffsets;
+    DynamicStorageBufferOffsets storageBufferDynamicOffsets{};
 };
 DAWN_DISABLE_STRUCT_PADDING_WARNINGS
 

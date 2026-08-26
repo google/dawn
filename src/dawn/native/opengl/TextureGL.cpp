@@ -476,13 +476,13 @@ MaybeError Texture::ClearTexture(const OpenGLFunctions& gl,
             // For gl.ClearBufferiv/uiv calls
             constexpr std::array<GLuint, 4> kClearColorDataUint0 = {0u, 0u, 0u, 0u};
             constexpr std::array<GLuint, 4> kClearColorDataUint1 = {1u, 1u, 1u, 1u};
-            std::array<GLuint, 4> clearColorData;
+            std::array<GLuint, 4> clearColorData{};
             clearColorData.fill((clearValue == TextureBase::ClearValue::Zero) ? 0u : 1u);
 
             // For gl.ClearBufferfv calls
             constexpr std::array<GLfloat, 4> kClearColorDataFloat0 = {0.f, 0.f, 0.f, 0.f};
             constexpr std::array<GLfloat, 4> kClearColorDataFloat1 = {1.f, 1.f, 1.f, 1.f};
-            std::array<GLfloat, 4> fClearColorData;
+            std::array<GLfloat, 4> fClearColorData{};
             fClearColorData.fill((clearValue == TextureBase::ClearValue::Zero) ? 0.f : 1.f);
 
             static constexpr uint32_t MAX_TEXEL_SIZE = 16;

@@ -3054,7 +3054,7 @@ TEST_F(SetBindGroupValidationTest, DynamicOffsetOrder) {
                                                          {2, buffer1x, 0, 4},
                                                      });
 
-    std::array<uint32_t, 3> offsets;
+    std::array<uint32_t, 3> offsets{};
     {
         // Base case works.
         offsets = {/* binding 0 */ 0,

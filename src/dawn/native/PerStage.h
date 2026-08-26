@@ -84,7 +84,7 @@ class PerStage {
     }
 
   private:
-    std::array<T, kNumStages> mData;
+    std::array<T, kNumStages> mData{};
 };
 
 }  // namespace dawn::native

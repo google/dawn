@@ -69,7 +69,7 @@ void DumpDXCCompiledShader(Device* device,
     dumpedMsg << "/* DXC compile flags */\n"
               << dawn::native::d3d::CompileFlagsToString(compileFlags) << "\n";
     dumpedMsg << "/* Dumped disassembled DXIL */\n";
-    DxcBuffer dxcBuffer;
+    DxcBuffer dxcBuffer{};
     dxcBuffer.Encoding = DXC_CP_UTF8;
     dxcBuffer.Ptr = shaderBlob.DataPtr();
     dxcBuffer.Size = shaderBlob.Size();

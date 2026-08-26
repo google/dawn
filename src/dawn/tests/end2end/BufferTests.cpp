@@ -73,7 +73,7 @@ class BufferMappingTests : public DawnTestWithParams<BufferMappingTestParams> {
                          size_t offset,
                          size_t size,
                          wgpu::BufferMapCallback<> cb = nullptr) {
-        wgpu::Future future;
+        wgpu::Future future{};
 
         if (cb) {
             future = buffer.MapAsync(mode, offset, size, GetParam().mFutureCallbackMode, cb);
@@ -491,7 +491,7 @@ TEST_P(BufferMappingTests, MapWrite_ManySimultaneous) {
         buffers[i] = device.CreateBuffer(&descriptor);
     }
 
-    std::array<wgpu::Future, kBuffers> futures;
+    std::array<wgpu::Future, kBuffers> futures{};
     for (uint32_t i = 0; i < kBuffers; ++i) {
         futures[i] = buffers[i].MapAsync(
             wgpu::MapMode::Write, 0, descriptor.size, GetParam().mFutureCallbackMode,

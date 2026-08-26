@@ -135,7 +135,7 @@ TEST(LRUCache, Basic) {
 TEST(LRUCache, CacheEviction) {
     TestCache cache;
 
-    std::array<uint32_t, TestCache::kDefaultCapacity> keyIds;
+    std::array<uint32_t, TestCache::kDefaultCapacity> keyIds{};
     // Fill the cache with values.
     for (uint32_t i = 0; i < TestCache::kDefaultCapacity; ++i) {
         CacheKey key(i);
@@ -180,7 +180,7 @@ TEST(LRUCache, CacheEviction) {
 TEST(LRUCache, CacheClear) {
     TestCache cache;
 
-    std::array<uint32_t, TestCache::kDefaultCapacity> keyIds;
+    std::array<uint32_t, TestCache::kDefaultCapacity> keyIds{};
     // Fill the cache with values.
     for (uint32_t i = 0; i < TestCache::kDefaultCapacity; ++i) {
         CacheKey key(i);

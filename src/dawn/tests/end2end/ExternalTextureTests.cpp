@@ -140,10 +140,10 @@ class ExternalTextureTestsBase : public Parent {
     // corner as well as an optional color for the outside of the quad. (the quad can be scaled
     // to make it fill only parts of the texture).
     struct QuadData {
-        std::array<float, 4> upperLeft;
-        std::array<float, 4> upperRight;
-        std::array<float, 4> lowerLeft;
-        std::array<float, 4> lowerRight;
+        std::array<float, 4> upperLeft{};
+        std::array<float, 4> upperRight{};
+        std::array<float, 4> lowerLeft{};
+        std::array<float, 4> lowerRight{};
         std::array<float, 4> outsideData = {};
         float scale = 1.0;
         std::array<float, 3> padding = {};
@@ -1244,7 +1244,7 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
 
     struct CropExpectation {
         wgpu::Origin2D cropOrigin;
-        wgpu::Extent2D cropSize;
+        wgpu::Extent2D cropSize{};
         wgpu::ExternalTextureRotation rotation;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;
@@ -1491,7 +1491,7 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
 
     struct CropExpectation {
         wgpu::Origin2D cropOrigin;
-        wgpu::Extent2D cropSize;
+        wgpu::Extent2D cropSize{};
         wgpu::ExternalTextureRotation rotation;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;

@@ -83,7 +83,7 @@ class Scalar {
     } Value;
 
     Type type_;
-    Value value_;
+    Value value_{};
 };
 
 }  // namespace tint::inspector

@@ -39,11 +39,11 @@ struct ExternalTextureColorSpaceParams {
     // Stored row-major to save uniform buffer space. (so one full row after another)
     // TODO(https://crbug.com/496604550): That's an implementation detail that should not be exposed
     // in the API, Dawn can transpose internally.
-    std::array<float, 12> yuvToRgbConversionMatrix;
+    std::array<float, 12> yuvToRgbConversionMatrix{};
     std::array<float, 7> srcTransferFunction = {};
     std::array<float, 7> dstTransferFunction = {};  // Really the inverse transfer function.
     // Stored column major to match WGSL. (so one full column after another)
-    std::array<float, 9> gamutConversionMatrix;
+    std::array<float, 9> gamutConversionMatrix{};
 };
 
 // Helper function to make parameters for an ExternalTextureDescriptor

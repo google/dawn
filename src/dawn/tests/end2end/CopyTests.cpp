@@ -2264,7 +2264,7 @@ TEST_P(CopyTests_T2B_No_Format_Param, CopyOneRowWithDepth32Float) {
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     queue.Submit(1, &commandBuffer);
 
-    std::array<float, kPixelsPerRow> expectedValues;
+    std::array<float, kPixelsPerRow> expectedValues{};
     std::fill(expectedValues.begin(), expectedValues.end(), kClearDepthValue);
     EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedValues.data(), buffer, kBufferCopyOffset, kPixelsPerRow);
 }
@@ -3884,7 +3884,7 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
     // First, create a big buffer and fill some garbage data on DEFAULT heap.
     constexpr size_t kBigBufferSize = 159740u;
     constexpr uint8_t kGarbageData = 255u;
-    std::array<uint8_t, kBigBufferSize> garbageData;
+    std::array<uint8_t, kBigBufferSize> garbageData{};
     garbageData.fill(kGarbageData);
 
     wgpu::Buffer bigBuffer =

@@ -41,7 +41,7 @@ class ComboRenderBundleEncoderDescriptor : public wgpu::RenderBundleEncoderDescr
   public:
     ComboRenderBundleEncoderDescriptor();
 
-    std::array<wgpu::TextureFormat, kMaxColorAttachments> cColorFormats;
+    std::array<wgpu::TextureFormat, kMaxColorAttachments> cColorFormats{};
 
 #if !DAWN_PLATFORM_IS(EMSCRIPTEN)
     void SetUsesResourceTable(bool use = true);

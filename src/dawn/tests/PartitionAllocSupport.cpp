@@ -104,7 +104,7 @@ void InitializeDanglingPointerDetectorForTesting() {
         error << "\n-----------\n";
         auto PrintStack = [&](std::span<void* const> pcs) {
             for (size_t i = 0; i < pcs.size(); ++i) {
-                std::array<char, 1024> symbol;
+                std::array<char, 1024> symbol{};
                 if (absl::Symbolize(pcs[i], symbol.data(), symbol.size())) {
                     error << "\n    #" << i << " " << pcs[i] << " " << symbol.data();
                 } else {

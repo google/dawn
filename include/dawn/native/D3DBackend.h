@@ -45,7 +45,7 @@ DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<IDXGIAdapter> GetDXGIAdapter(WGPUAdapt
 struct DAWN_NATIVE_EXPORT RequestAdapterOptionsLUID : wgpu::ChainedStruct {
     RequestAdapterOptionsLUID();
 
-    ::LUID adapterLUID;
+    ::LUID adapterLUID{};
 };
 
 // Chrome uses 0 as acquire key.

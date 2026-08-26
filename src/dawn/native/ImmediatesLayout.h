@@ -41,7 +41,7 @@ namespace dawn::native {
 // inheritance for RenderImmediates and ComputeImmediates.
 DAWN_ENABLE_STRUCT_PADDING_WARNINGS
 struct UserImmediates {
-    uint32_t userImmediateData[kMaxExternalImmediatesPerPipeline];
+    uint32_t userImmediateData[kMaxExternalImmediatesPerPipeline]{};
 };
 
 // 8 bytes of immediate data data to be used by the ClampFragDepth Tint transform.

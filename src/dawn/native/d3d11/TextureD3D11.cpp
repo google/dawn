@@ -188,7 +188,7 @@ ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
 
 template <typename T>
 T Texture::GetD3D11TextureDesc() const {
-    T desc;
+    T desc{};
 
     if constexpr (std::is_same<T, D3D11_TEXTURE1D_DESC>::value) {
         desc.Width = GetBaseSize().width;

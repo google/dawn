@@ -149,7 +149,7 @@ TEST(Math, NextPowerOfTwo) {
 TEST(Math, AlignPtr) {
     constexpr size_t kTestAlignment = 8;
 
-    std::array<char, kTestAlignment * 4> buffer;
+    std::array<char, kTestAlignment * 4> buffer{};
 
     for (size_t i = 0; i < 2 * kTestAlignment; ++i) {
         char* unaligned = &DAWN_UNSAFE_TODO(buffer[i]);
@@ -262,7 +262,7 @@ TEST(Math, AlignSizeofN) {
 TEST(Math, IsPtrAligned) {
     constexpr size_t kTestAlignment = 8;
 
-    std::array<char, kTestAlignment * 4> buffer;
+    std::array<char, kTestAlignment * 4> buffer{};
 
     for (size_t i = 0; i < 2 * kTestAlignment; ++i) {
         char* unaligned = &DAWN_UNSAFE_TODO(buffer[i]);

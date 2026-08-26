@@ -101,7 +101,7 @@ class ComboBindGroupDescriptor {
     const WGPUBindGroupDescriptor* Get() const { return &mDesc; }
 
   private:
-    WGPUBindGroupDescriptor mDesc;
+    WGPUBindGroupDescriptor mDesc{};
     absl::InlinedVector<WGPUBindGroupEntry, 8> mEntries;
     // Use an inline size of 1 since external textures are rare, and reserve the required capacity
     // in constructor to preserve reallocations.

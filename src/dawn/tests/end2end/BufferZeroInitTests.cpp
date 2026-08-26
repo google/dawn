@@ -646,7 +646,7 @@ TEST_P(BufferZeroInitTest, CopyBufferToBufferDestination) {
 
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
 
-        std::array<uint8_t, kBufferSize> expectedData;
+        std::array<uint8_t, kBufferSize> expectedData{};
         expectedData.fill(0);
         for (uint32_t index = kDstOffset; index < kDstOffset + kCopySize; ++index) {
             expectedData[index] = kInitialData[index - kDstOffset];
@@ -669,7 +669,7 @@ TEST_P(BufferZeroInitTest, CopyBufferToBufferDestination) {
 
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
 
-        std::array<uint8_t, kBufferSize> expectedData;
+        std::array<uint8_t, kBufferSize> expectedData{};
         expectedData.fill(0);
         for (uint32_t index = kDstOffset; index < kDstOffset + kCopySize; ++index) {
             expectedData[index] = kInitialData[index - kDstOffset];
@@ -692,7 +692,7 @@ TEST_P(BufferZeroInitTest, CopyBufferToBufferDestination) {
 
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
 
-        std::array<uint8_t, kBufferSize> expectedData;
+        std::array<uint8_t, kBufferSize> expectedData{};
         expectedData.fill(0);
         for (uint32_t index = kDstOffset; index < kDstOffset + kCopySize; ++index) {
             expectedData[index] = kInitialData[index - kDstOffset];

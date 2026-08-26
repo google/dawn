@@ -625,7 +625,7 @@ TEST_F(RenderBundleValidationTest, RequiresAtLeastOneTextureFormat) {
 
 // Test that it is invalid to create a render bundle with no texture formats
 TEST_F(RenderBundleValidationTest, ColorFormatsCountOutOfBounds) {
-    std::array<wgpu::TextureFormat, kMaxColorAttachments + 1> colorFormats;
+    std::array<wgpu::TextureFormat, kMaxColorAttachments + 1> colorFormats{};
     for (uint32_t i = 0; i < colorFormats.size(); ++i) {
         colorFormats[i] = wgpu::TextureFormat::R8Unorm;
     }

@@ -326,7 +326,7 @@ class OpArrayLengthTest : public DawnTest {
     wgpu::Buffer mStorageBuffer512;
 
     std::string mShaderInterface;
-    std::array<uint32_t, 3> mExpectedLengths;
+    std::array<uint32_t, 3> mExpectedLengths{};
 };
 
 // Test OpArrayLength in the compute stage

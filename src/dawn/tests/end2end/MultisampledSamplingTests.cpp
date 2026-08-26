@@ -245,7 +245,7 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
     queue.Submit(1, &commandBuffer);
 
-    std::array<float, 8> expectedData;
+    std::array<float, 8> expectedData{};
 
     expectedData = {1, 0, 0, 0, 0.7, 0, 0, 0};
     EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedData.data(), outputBuffer, 0 * alignedResultSize, 8)

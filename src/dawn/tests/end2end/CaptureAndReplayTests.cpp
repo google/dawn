@@ -2407,7 +2407,7 @@ TEST_P(CaptureAndReplayTests, CaptureDepth24Plus) {
         queue.Submit(1, &replayCommands);
     }
 
-    std::array<float, kNumLayers> expected;
+    std::array<float, kNumLayers> expected{};
     for (uint32_t i = 0; i < kNumLayers; ++i) {
         DAWN_UNSAFE_TODO(expected[i]) = (i + 0.5f) / 6.f;
     }

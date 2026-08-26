@@ -106,7 +106,7 @@ class ColorStateTest : public DawnTest {
     // Create a bind group to set the colors as a uniform buffer
     template <size_t N>
     wgpu::BindGroup MakeBindGroupForColors(std::array<utils::RGBA8, N> colors) {
-        std::array<float, 4 * N> data;
+        std::array<float, 4 * N> data{};
         for (unsigned int i = 0; i < N; ++i) {
             data[4 * i + 0] = static_cast<float>(colors[i].r) / 255.f;
             data[4 * i + 1] = static_cast<float>(colors[i].g) / 255.f;

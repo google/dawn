@@ -238,7 +238,7 @@ TEST_P(MultisampledInterpolationTest, SamplePositions) {
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
     queue.Submit(1, &commandBuffer);
 
-    std::array<float, 16> expectedData;
+    std::array<float, 16> expectedData{};
 
     expectedData = {
         0.5,

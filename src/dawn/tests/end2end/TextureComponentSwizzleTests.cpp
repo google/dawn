@@ -89,13 +89,13 @@ class TextureComponentSwizzleTest : public DawnTest {
     }
 
     struct TestParams {
-        wgpu::TextureFormat format;
+        wgpu::TextureFormat format{};
         // Input data for the source texture. Max 4 bytes for convenience.
-        std::array<uint8_t, 4> inputData;
+        std::array<uint8_t, 4> inputData{};
         // The expected values (R, G, B, A) that `textureLoad` would produce
         // for this format *before* any swizzling. This accounts for default values
         // for missing channels (e.g., G=0, B=0, A=255 for R8Unorm).
-        std::array<uint8_t, 4> baseLoadValues;
+        std::array<uint8_t, 4> baseLoadValues{};
     };
 
     // Calculates the expected value after swizzling and normalization.

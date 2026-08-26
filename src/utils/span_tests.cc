@@ -1363,7 +1363,7 @@ TEST(SpanDeathTest, ReinterpretSpan) {
     // Check unaligned empty span.
     // Empty slice (e.g. data() != nullptr, but size() == 0).
     {
-        alignas(uint32_t) std::array<std::byte, 4> bytes;
+        alignas(uint32_t) std::array<std::byte, 4> bytes{};
         auto bsp = Span<std::byte>(bytes).subspan(1u, 0);
         EXPECT_EQ(bsp.size(), 0u);
         EXPECT_NE(bsp.data(), nullptr);
@@ -1372,7 +1372,7 @@ TEST(SpanDeathTest, ReinterpretSpan) {
     }
     // Alignment check fails.
     {
-        alignas(uint32_t) std::array<std::byte, 9> bytes;
+        alignas(uint32_t) std::array<std::byte, 9> bytes{};
         auto bsp = Span<std::byte>(bytes).subspan(1u, 4u);
         if (alignof(uint32_t) > 1) {
             EXPECT_DEATH_IF_SUPPORTED(ReinterpretSpan<uint32_t>(bsp), "");
@@ -1381,7 +1381,7 @@ TEST(SpanDeathTest, ReinterpretSpan) {
     }
     // Size check fails.
     {
-        alignas(uint32_t) std::array<std::byte, 8> bytes;
+        alignas(uint32_t) std::array<std::byte, 8> bytes{};
         auto bsp = Span<std::byte>(bytes).first(7u);
         EXPECT_DEATH_IF_SUPPORTED(ReinterpretSpan<uint32_t>(bsp), "");
         EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint32_t, Index>(bsp)), "");

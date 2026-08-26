@@ -76,7 +76,7 @@ struct FramebufferCacheQuery {
     // Attachments and clearValues are not used as part of the query hash, but are stored here
     // anyway because it's natural to build them up at the same time as the query criteria.
     std::array<VkImageView, kMaxFramebufferAttachments> attachments;
-    std::array<VkClearValue, kMaxFramebufferAttachments> clearValues;
+    std::array<VkClearValue, kMaxFramebufferAttachments> clearValues{};
 
     uint32_t attachmentCount = 0;
 };

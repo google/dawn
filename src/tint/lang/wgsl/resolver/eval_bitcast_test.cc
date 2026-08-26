@@ -71,7 +71,7 @@ TEST_P(ConstEvalBitcastTest, Test) {
     const auto& expected = GetParam().expected;
 
     // Get the target type CreatePtrs
-    builder::CreatePtrs target_create_ptrs;
+    builder::CreatePtrs target_create_ptrs{};
     if (expected == tint::Success) {
         target_create_ptrs = expected.Get().value.create_ptrs;
     } else {

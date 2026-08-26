@@ -68,7 +68,8 @@ class BlockAllocator {
     /// Blocks are allocated out of heap memory.
     ///
     /// Note: We're not using std::aligned_storage here as this warns / errors on MSVC.
-    struct alignas(BLOCK_ALIGNMENT) Block {
+    // SAFETY: allocated elements are immediately constructed via placement-new before reads occur.
+    struct alignas(BLOCK_ALIGNMENT) Block {  // NOLINT(cppcoreguidelines-pro-type-member-init)
         uint8_t data[BLOCK_SIZE];
         Block* next = nullptr;
     };

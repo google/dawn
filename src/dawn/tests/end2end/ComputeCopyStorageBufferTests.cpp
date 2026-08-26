@@ -58,7 +58,7 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
         wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer src = device.CreateBuffer(&srcDesc);
 
-    std::array<uint32_t, kNumUints> expected;
+    std::array<uint32_t, kNumUints> expected{};
     for (uint32_t i = 0; i < kNumUints; ++i) {
         expected[i] = (i + 1u) * 0x11111111u;
     }

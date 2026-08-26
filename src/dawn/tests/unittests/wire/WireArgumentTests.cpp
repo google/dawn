@@ -253,7 +253,7 @@ TEST_F(WireArgumentTests, ObjectAsValueArgument) {
 // Test that the wire is able to send array of objects
 TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
     std::array<wgpu::CommandBuffer, 2> cmdBufs;
-    std::array<WGPUCommandBuffer, 2> apiCmdBufs;
+    std::array<WGPUCommandBuffer, 2> apiCmdBufs{};
 
     // Create two command buffers we need to use a GMock sequence otherwise the order of the
     // CreateCommandEncoder might be swapped since they are equivalent in term of matchers

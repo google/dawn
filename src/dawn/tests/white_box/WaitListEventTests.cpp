@@ -156,7 +156,7 @@ TEST_P(WaitListEventTests, WaitAsyncThenSignal) {
 
 // Test WaitAny with an empty list
 TEST_P(WaitListEventTests, WaitAnyEmpty) {
-    std::array<std::pair<Ref<WaitListEvent>, bool*>, 0> events;
+    std::array<std::pair<Ref<WaitListEvent>, bool*>, 0> events{};
     EXPECT_FALSE(
         WaitListEvent::WaitAny(events.begin(), events.end(), Nanoseconds(kShortDurationNs)));
 }

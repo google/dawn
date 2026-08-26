@@ -483,7 +483,7 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
                     layout->GetOrCreateVkLayoutObject(std::move(specialization.layout)));
 
     // There are at most 2 shader stages in render pipeline, i.e. vertex and fragment
-    std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
+    std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
     uint32_t stageCount = 0;
 
     auto AddShaderStage = [&](const ShaderModule::CompileParameters& compileParams) -> MaybeError {

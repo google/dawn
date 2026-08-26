@@ -75,7 +75,7 @@ class WireInjectSurfaceTests : public WireTest {
         return {reservation, wgpu::Surface::Acquire(reservation.surface)};
     }
 
-    WGPUSurfaceCapabilities mCapabilities;
+    WGPUSurfaceCapabilities mCapabilities{};
     WGPUTextureUsage mSupportedUsages =
         WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_CopySrc;
     std::array<WGPUTextureFormat, 2> mSupportedFormats = {WGPUTextureFormat_RGBA8Unorm,

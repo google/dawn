@@ -52,7 +52,7 @@ class WireDeserializeAllocator : public DeserializeAllocator {
   private:
     static constexpr size_t kDefaultBufferSize = 2048;
 
-    std::array<std::byte, kDefaultBufferSize> mStaticBuffer;
+    std::array<std::byte, kDefaultBufferSize> mStaticBuffer{};
     std::vector<HeapArray<std::byte>> mAllocations;
     // TODO(https://crbug.com/526537224): Maybe use RawSpan instead of Span, but we will need to
     // verify that works with the static buffer also.

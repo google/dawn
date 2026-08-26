@@ -159,7 +159,7 @@ TEST(Sha3, VariousMessageSizes) {
 
     // Test any amount of data that doesn't require any Keccak other than the final one.
     {
-        std::array<std::byte, 42> data;
+        std::array<std::byte, 42> data{};
         data.fill(std::byte('a'));
 
         auto sha224Expected = MakeOutput<Sha3_224>(
@@ -172,7 +172,7 @@ TEST(Sha3, VariousMessageSizes) {
 
     // Test a "long" message that requires many internal Keccaks
     {
-        std::array<std::byte, 4000> data;
+        std::array<std::byte, 4000> data{};
         data.fill(std::byte('a'));
 
         auto sha224Expected = MakeOutput<Sha3_224>(
@@ -188,7 +188,7 @@ TEST(Sha3, VariousMessageSizes) {
 TEST(Sha3, UpdateAnyByteBoundary) {
     // 500 bytes need at least three different Keccak transforms so we should cover all the special
     // values of the internal insertion offset in Sha3.
-    std::array<std::byte, 500> data;
+    std::array<std::byte, 500> data{};
     data.fill(std::byte('a'));
     Span<const std::byte> dataSpan{data};
 

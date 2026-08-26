@@ -147,7 +147,7 @@ ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilati
                                                  const std::string& hlslSource,
                                                  const wchar_t* hlslVersion,
                                                  bool dumpShadersOnFailure) {
-    DxcBuffer dxcBuffer;
+    DxcBuffer dxcBuffer{};
     dxcBuffer.Ptr = hlslSource.c_str();
     dxcBuffer.Size = hlslSource.length();
     dxcBuffer.Encoding = DXC_CP_UTF8;

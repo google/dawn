@@ -44,13 +44,13 @@ class ExternalTexture final : public ExternalTextureBase,
   public:
     struct CreationParams {
         Origin2D cropOrigin;
-        Extent2D cropSize;
-        Extent2D apparentSize;
+        Extent2D cropSize{};
+        Extent2D apparentSize{};
         bool doYuvToRgbConversionOnly;
-        std::array<float, 12> yuvToRgbConversionMatrix;
-        std::array<float, 7> srcTransferFunctionParameters;
-        std::array<float, 7> dstTransferFunctionParameters;
-        std::array<float, 9> gamutConversionMatrix;
+        std::array<float, 12> yuvToRgbConversionMatrix{};
+        std::array<float, 7> srcTransferFunctionParameters{};
+        std::array<float, 7> dstTransferFunctionParameters{};
+        std::array<float, 9> gamutConversionMatrix{};
         bool mirrored;
         wgpu::ExternalTextureRotation rotation;
 

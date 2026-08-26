@@ -60,6 +60,8 @@ class TerribleCommandBuffer : public dawn::wire::CommandSerializer {
     size_t mOffset = 0;
     size_t mLastFlushedOffset = 0;
 
+    // SAFETY: reads are limited to suballocated regions for serialized cmds.
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     alignas(8) std::array<std::byte, 1000000> mBackingBuffer;
     Span<std::byte> mBuffer;
 };

@@ -411,7 +411,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     descriptorD3D12.pRootSignature = mPipelineLayoutHandle->GetRootSignature();
 
     // D3D12 logs warnings if any empty input state is used
-    std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes> inputElementDescriptors;
+    std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes> inputElementDescriptors{};
     if (GetAttributeLocationsUsed().any()) {
         descriptorD3D12.InputLayout = ComputeInputLayout(&inputElementDescriptors);
     }

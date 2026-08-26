@@ -354,7 +354,7 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
         createInfoChain.Add(&externalMemoryImageCreateInfo,
                             VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO);
 
-        std::array<VkSubresourceLayout, ExternalImageDescriptorDmaBuf::kMaxPlanes> planeLayouts;
+        std::array<VkSubresourceLayout, ExternalImageDescriptorDmaBuf::kMaxPlanes> planeLayouts{};
         for (uint32_t plane = 0u; plane < planeCount; ++plane) {
             planeLayouts[plane].offset = dmaBufDescriptor->planeLayouts[plane].offset;
             planeLayouts[plane].size = 0;  // VK_EXT_image_drm_format_modifier mandates size = 0.

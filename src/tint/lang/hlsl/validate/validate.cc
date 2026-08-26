@@ -199,7 +199,7 @@ Result ValidateUsingDXC(const std::string& dxc_path,
         require_16bit_types ? L"-enable-16bit-types" : L""  // Enable 16-bit if required
     };
 
-    DxcBuffer source_buffer;
+    DxcBuffer source_buffer{};
     source_buffer.Ptr = source.c_str();
     source_buffer.Size = source.length();
     source_buffer.Encoding = DXC_CP_UTF8;
@@ -226,7 +226,7 @@ Result ValidateUsingDXC(const std::string& dxc_path,
     hr = compile_result->GetResult(&compiled_shader);
     CHECK_HR(hr, "GetResult call failed");
 
-    DxcBuffer compiled_shader_buffer;
+    DxcBuffer compiled_shader_buffer{};
     compiled_shader_buffer.Ptr = compiled_shader->GetBufferPointer();
     compiled_shader_buffer.Size = compiled_shader->GetBufferSize();
     compiled_shader_buffer.Encoding = DXC_CP_UTF8;

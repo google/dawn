@@ -442,7 +442,7 @@ class TextureFormatTest : public DawnTest {
 
         // Expand the sampling texture data to contain garbage data for unused components to check
         // that they don't influence the rendering result.
-        std::array<TextureData, 4> garbageValues;
+        std::array<TextureData, 4> garbageValues{};
         garbageValues.fill(13);
         std::vector<TextureData> expandedTextureData =
             ExpandDataTo4Component(textureData, formatInfo.componentCount, garbageValues);

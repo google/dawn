@@ -35,7 +35,7 @@ namespace dawn::utils {
 namespace {
 
 uint64_t GetCurrentTimeNs() {
-    struct timespec currentTime;
+    struct timespec currentTime{};
     clock_gettime(CLOCK_MONOTONIC, &currentTime);
     return static_cast<uint64_t>(currentTime.tv_sec) * 1'000'000'000llu +
            static_cast<uint64_t>(currentTime.tv_nsec);

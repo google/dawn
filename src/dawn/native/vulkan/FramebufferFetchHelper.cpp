@@ -43,7 +43,7 @@ namespace {
 
 ResultOrError<VkDescriptorSetLayout> MakeFramebufferFetchLayout(Device* device,
                                                                 uint32_t attachmentCount) {
-    std::array<VkDescriptorSetLayoutBinding, kMaxColorAttachments> bindings;
+    std::array<VkDescriptorSetLayoutBinding, kMaxColorAttachments> bindings{};
     for (uint32_t i = 0; i < attachmentCount; ++i) {
         bindings[i].binding = i;
         bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
@@ -112,8 +112,8 @@ ResultOrError<VkDescriptorSet> FramebufferFetchHelper::GetDescriptorsForRenderPa
     DAWN_TRY_ASSIGN(allocation, holder.allocator->Allocate(holder.layout));
     VkDescriptorSet set = allocation.set;
 
-    std::array<VkWriteDescriptorSet, kMaxColorAttachments> writes;
-    std::array<VkDescriptorImageInfo, kMaxColorAttachments> imageInfos;
+    std::array<VkWriteDescriptorSet, kMaxColorAttachments> writes{};
+    std::array<VkDescriptorImageInfo, kMaxColorAttachments> imageInfos{};
     uint32_t writeCount = 0;
 
     for (auto i : cmd->attachmentState->GetColorAttachmentsMask()) {

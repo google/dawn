@@ -56,7 +56,7 @@ PipelineLayout::PipelineLayout(Device* device,
     desc.nextInChain = nullptr;
     desc.label = ToOutputStringView(label);
 
-    std::array<WGPUBindGroupLayout, kMaxBindGroups> bindGroupLayouts;
+    std::array<WGPUBindGroupLayout, kMaxBindGroups> bindGroupLayouts{};
     bindGroupLayouts.fill(nullptr);
     size_t bindGroupLayoutCount = 0;
     for (BindGroupIndex group : GetBindGroupLayoutsMask()) {
