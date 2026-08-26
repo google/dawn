@@ -84,11 +84,11 @@ namespace tint::core::ir::validator {
 /// State for validating blend_src attributes shared across multiple passes within the same entry
 /// point.
 struct BlendSrcContext {
-    Function::PipelineStage stage;
+    Function::PipelineStage stage{};
     Hashmap<uint32_t, const CastableBase*, 4> locations;
     Hashset<uint32_t, 2> blend_srcs;
     const core::type::Type* blend_src_type = nullptr;
-    IODirection dir;
+    IODirection dir{};
 };
 
 using SupportedStages = tint::EnumSet<Function::PipelineStage>;
@@ -315,13 +315,13 @@ class Structural {
                                  size_t num_results,
                                  size_t num_operands);
 
-    /// Checks that @p type is allowed by the spec, and does not use any types that are prohibited
+    /// Checks that @p root is allowed by the spec, and does not use any types that are prohibited
     /// by the target properties.
     /// NOTE: Expects to be called on a 'root' type, i.e. the type of a variable declaration or a
     ///       function param, not in the middle a walk of elements of a composite.
-    /// @param type the type
+    /// @param root the type
     /// @param diag a function that creates an error diagnostic for the source of the type
-    void CheckType(const core::type::Type* type, std::function<diag::Diagnostic&()> diag);
+    void CheckType(const core::type::Type* root, std::function<diag::Diagnostic&()> diag);
 
     /// Check that @p type and its children are not nested beyond the depth limit
     /// NOTE: Expects to be called by CheckType, i.e. on a 'root' type, not in the middle a walk of
@@ -800,6 +800,13 @@ class Structural {
     Vector<const Block*, 8> block_stack_;
     ScopeStack scope_stack_;
 
+    // The task processing queue is required due to how WGSL is translated into IR. In IR, an `else
+    // if` turns into a nested control instruction inside the parent `false` block. This means the
+    // nesting depth of an IR module can be a lot larger then the nesting depth of a WGSL program.
+    // So, while we've validated the maximum nesting depth in WGSL, that does not translate to the
+    // maximum depth in IR.  So, we use a task list. This lets us do a controlled depth-first
+    // iteration of the blocks in the IR along with pushing information for scoping and control
+    // structures at the right times.
     Vector<std::function<void()>, 16> tasks_;
 
     Hashset<const Function*, 4> all_functions_;

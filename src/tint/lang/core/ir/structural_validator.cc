@@ -231,27 +231,29 @@ void Structural::CheckStageRestrictedInstructions() {
 }
 
 void Structural::RunStructuralSoundnessChecks() {
-    scope_stack_.Push();
-    TINT_DEFER({
-        scope_stack_.Pop();
-        TINT_ASSERT(scope_stack_.IsEmpty());
-        TINT_ASSERT(tasks_.IsEmpty());
-        TINT_ASSERT(control_stack_.IsEmpty());
-        TINT_ASSERT(block_stack_.IsEmpty());
-    });
-    CheckRootBlock(ir_.root_block);
+    {
+        scope_stack_.Push();
+        TINT_DEFER(scope_stack_.Pop());
 
-    for (auto& func : ir_.functions) {
-        if (!all_functions_.Add(func)) {
-            AddError(func) << "function " << NameOf(func) << " added to module multiple times";
+        CheckRootBlock(ir_.root_block);
+
+        for (auto& func : ir_.functions) {
+            if (!all_functions_.Add(func)) {
+                AddError(func) << "function " << NameOf(func) << " added to module multiple times";
+            }
+            scope_stack_.Add(func);
         }
-        scope_stack_.Add(func);
+
+        for (auto& func : ir_.functions) {
+            block_to_function_.Add(func->Block(), func);
+            CheckFunction(func);
+        }
     }
 
-    for (auto& func : ir_.functions) {
-        block_to_function_.Add(func->Block(), func);
-        CheckFunction(func);
-    }
+    TINT_ASSERT(scope_stack_.IsEmpty());
+    TINT_ASSERT(tasks_.IsEmpty());
+    TINT_ASSERT(control_stack_.IsEmpty());
+    TINT_ASSERT(block_stack_.IsEmpty());
 }
 
 diag::Diagnostic& Structural::AddError(const Instruction* inst) {
