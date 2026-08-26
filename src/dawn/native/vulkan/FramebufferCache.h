@@ -51,8 +51,8 @@ struct FramebufferCacheTextureView {
     // TODO(crbug.com/436274255): Uses a unique ID assigned at view creation rather than a WeakRef
     // due to the overhead of WeakRef promotion. Could switch back to using WeakRef if that was
     // optimized.
-    uint64_t textureViewId;
-    uint32_t depthSlice;
+    uint64_t textureViewId = 0;
+    uint32_t depthSlice = 0;
 };
 
 // A key to query the FramebufferCache

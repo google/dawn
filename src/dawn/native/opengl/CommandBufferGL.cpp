@@ -317,8 +317,8 @@ class VertexStateBufferBindingTracker {
 // Tracking dirty byte range of a vector that needs to call bufferSubData
 // to update to the internal uniform buffer of mPipelineGL. Range it represents: [begin, end)
 struct VectorDirtyRangeInfo {
-    size_t begin;
-    size_t end;
+    size_t begin = 0;
+    size_t end = 0;
 };
 
 class BindGroupTracker : public BindGroupTrackerBase<false> {

@@ -56,8 +56,8 @@ namespace dawn::native::metal {
 namespace {
 
 struct PCIIDs {
-    uint32_t vendorId;
-    uint32_t deviceId;
+    uint32_t vendorId = 0;
+    uint32_t deviceId = 0;
 };
 
 struct Vendor {
@@ -833,26 +833,26 @@ void PhysicalDevice::InitializeVendorArchitectureImpl() {
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     struct MTLDeviceLimits {
-        uint32_t maxVertexAttribsPerDescriptor;
-        uint32_t maxBufferArgumentEntriesPerFunc;
-        uint32_t maxTextureArgumentEntriesPerFunc;
-        uint32_t maxSamplerStateArgumentEntriesPerFunc;
-        uint32_t maxThreadsPerThreadgroup;
-        uint32_t maxTotalThreadgroupMemory;
-        uint32_t maxFragmentInputs;
-        uint32_t maxFragmentInputComponents;
-        uint32_t max1DTextureSize;
-        uint32_t max2DTextureSize;
-        uint32_t max3DTextureSize;
-        uint32_t maxTextureArrayLayers;
-        uint32_t minBufferOffsetAlignment;
-        uint32_t maxColorRenderTargets;
-        uint32_t maxTotalRenderTargetSize;
+        uint32_t maxVertexAttribsPerDescriptor = 0;
+        uint32_t maxBufferArgumentEntriesPerFunc = 0;
+        uint32_t maxTextureArgumentEntriesPerFunc = 0;
+        uint32_t maxSamplerStateArgumentEntriesPerFunc = 0;
+        uint32_t maxThreadsPerThreadgroup = 0;
+        uint32_t maxTotalThreadgroupMemory = 0;
+        uint32_t maxFragmentInputs = 0;
+        uint32_t maxFragmentInputComponents = 0;
+        uint32_t max1DTextureSize = 0;
+        uint32_t max2DTextureSize = 0;
+        uint32_t max3DTextureSize = 0;
+        uint32_t maxTextureArrayLayers = 0;
+        uint32_t minBufferOffsetAlignment = 0;
+        uint32_t maxColorRenderTargets = 0;
+        uint32_t maxTotalRenderTargetSize = 0;
     };
 
     struct LimitsForFamily {
-        uint32_t MTLDeviceLimits::* limit;
-        ityp::array<MTLGPUFamily, uint32_t, 11> values;
+        uint32_t MTLDeviceLimits::* limit = nullptr;
+        ityp::array<MTLGPUFamily, uint32_t, 11> values{};
     };
 
     // clang-format off

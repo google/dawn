@@ -89,13 +89,13 @@ class BuddyAllocator {
 
         struct FreeLinks {
             // RAW_PTR_EXCLUSION: #union
-            RAW_PTR_EXCLUSION BuddyBlock* pPrev;
-            RAW_PTR_EXCLUSION BuddyBlock* pNext;
+            RAW_PTR_EXCLUSION BuddyBlock* pPrev = nullptr;
+            RAW_PTR_EXCLUSION BuddyBlock* pNext = nullptr;
         };
 
         struct SplitLink {
             // RAW_PTR_EXCLUSION: #union
-            RAW_PTR_EXCLUSION BuddyBlock* pLeft;
+            RAW_PTR_EXCLUSION BuddyBlock* pLeft = nullptr;
         };
 
         union {

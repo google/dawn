@@ -113,8 +113,8 @@ class TextureView final : public TextureViewBase {
 
     struct AttachmentInfo {
         NSPRef<id<MTLTexture>> texture;
-        uint32_t baseMipLevel;
-        uint32_t baseArrayLayer;
+        uint32_t baseMipLevel = 0;
+        uint32_t baseArrayLayer = 0;
     };
     AttachmentInfo GetAttachmentInfo() const;
 

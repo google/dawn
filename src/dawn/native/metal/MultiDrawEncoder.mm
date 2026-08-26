@@ -177,11 +177,11 @@ constexpr const char* kShaderSource = "#include <metal_stdlib>\n" DAWN_MULTILINE
 
 // Direct copy of the Metal shader struct
 struct Constants {
-    uint32_t maxDrawCount;
-    uint32_t numIndexBufferElementsAfterOffsetLow;
-    uint32_t numIndexBufferElementsAfterOffsetHigh;
-    uint8_t flags;
-    uint8_t primitiveType;
+    uint32_t maxDrawCount = 0;
+    uint32_t numIndexBufferElementsAfterOffsetLow = 0;
+    uint32_t numIndexBufferElementsAfterOffsetHigh = 0;
+    uint8_t flags = 0;
+    uint8_t primitiveType = 0;
 };
 
 static constexpr uint8_t kDrawCountBuffer = 4u;

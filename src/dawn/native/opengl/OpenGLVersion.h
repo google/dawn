@@ -49,9 +49,9 @@ struct OpenGLVersion {
     bool IsAtLeast(uint32_t majorVersion, uint32_t minorVersion) const;
 
   private:
-    uint32_t mMajorVersion;
-    uint32_t mMinorVersion;
-    Standard mStandard;
+    uint32_t mMajorVersion = 0;
+    uint32_t mMinorVersion = 0;
+    Standard mStandard{};
 };
 
 }  // namespace dawn::native::opengl

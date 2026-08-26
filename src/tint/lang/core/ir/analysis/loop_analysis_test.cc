@@ -55,12 +55,12 @@ enum class BoundKind : uint8_t {
     kVar,
 };
 struct BoundDescriptor {
-    Type type;
-    Direction dir;
-    BoundKind kind;
-    int64_t const_value;
-    BinaryOp op;
-    bool is_finite;
+    Type type{};
+    Direction dir{};
+    BoundKind kind{};
+    int64_t const_value = 0;
+    BinaryOp op{};
+    bool is_finite = false;
 };
 
 // Empty structure used to describe the position of the index variable in an expression.
