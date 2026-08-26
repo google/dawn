@@ -4,9 +4,15 @@ precision highp float;
 precision highp int;
 
 
-struct S {
-  float f;
-  uint u;
+struct tint_pad16 {
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  uint tint_pad_3;
+};
+const tint_pad16 tint_pad16_init = tint_pad16(0u, 0u, 0u, 0u);
+
+struct tint_pad64 {
   uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
@@ -23,48 +29,33 @@ struct S {
   uint tint_pad_13;
   uint tint_pad_14;
   uint tint_pad_15;
-  uint tint_pad_16;
-  uint tint_pad_17;
-  uint tint_pad_18;
-  uint tint_pad_19;
-  uint tint_pad_20;
-  uint tint_pad_21;
-  uint tint_pad_22;
-  uint tint_pad_23;
-  uint tint_pad_24;
-  uint tint_pad_25;
-  uint tint_pad_26;
-  uint tint_pad_27;
-  uint tint_pad_28;
-  uint tint_pad_29;
+};
+const tint_pad64 tint_pad64_init = tint_pad64(0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
+
+struct S {
+  float f;
+  uint u;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  tint_pad16 tint_pad_2;
+  tint_pad16 tint_pad_3;
+  tint_pad16 tint_pad_4;
+  tint_pad64 tint_pad_5;
   vec4 v;
-  uint tint_pad_30;
-  uint tint_pad_31;
-  uint tint_pad_32;
-  uint tint_pad_33;
+  tint_pad16 tint_pad_6;
   float16_t x;
-  uint tint_pad_34;
-  uint tint_pad_35;
-  uint tint_pad_36;
-  uint tint_pad_37;
-  uint tint_pad_38;
-  uint tint_pad_39;
-  uint tint_pad_40;
+  float16_t tint_pad_7;
+  uint tint_pad_8;
+  uint tint_pad_9;
+  uint tint_pad_10;
+  tint_pad16 tint_pad_11;
   f16vec3 y;
-  uint tint_pad_41;
-  uint tint_pad_42;
-  uint tint_pad_43;
-  uint tint_pad_44;
-  uint tint_pad_45;
-  uint tint_pad_46;
-  uint tint_pad_47;
-  uint tint_pad_48;
-  uint tint_pad_49;
-  uint tint_pad_50;
-  uint tint_pad_51;
-  uint tint_pad_52;
-  uint tint_pad_53;
-  uint tint_pad_54;
+  float16_t tint_pad_12;
+  uint tint_pad_13;
+  uint tint_pad_14;
+  tint_pad16 tint_pad_15;
+  tint_pad16 tint_pad_16;
+  tint_pad16 tint_pad_17;
 };
 
 layout(binding = 0, std430)
@@ -91,5 +82,5 @@ void frag_main_inner(S v_2) {
   tint_store_and_preserve_padding(v_2);
 }
 void main() {
-  frag_main_inner(S(tint_interstage_location0, tint_interstage_location1, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, gl_FragCoord, 0u, 0u, 0u, 0u, tint_interstage_location2, 0u, 0u, 0u, 0u, 0u, 0u, 0u, tint_interstage_location3, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
+  frag_main_inner(S(tint_interstage_location0, tint_interstage_location1, 0u, 0u, tint_pad16_init, tint_pad16_init, tint_pad16_init, tint_pad64_init, gl_FragCoord, tint_pad16_init, tint_interstage_location2, 0.0hf, 0u, 0u, 0u, tint_pad16_init, tint_interstage_location3, 0.0hf, 0u, 0u, tint_pad16_init, tint_pad16_init, tint_pad16_init));
 }

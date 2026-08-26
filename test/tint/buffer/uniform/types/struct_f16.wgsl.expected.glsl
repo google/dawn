@@ -4,8 +4,10 @@
 
 struct Inner {
   float16_t scalar_f16;
-  uint tint_pad_0;
+  float16_t tint_pad_0;
+  uint tint_pad_1;
   f16vec3 vec3_f16;
+  float16_t tint_pad_2;
   f16mat2x4 mat2x4_f16;
 };
 
@@ -48,7 +50,7 @@ Inner v_7(uint start_byte_offset) {
   uint v_10 = (8u + start_byte_offset);
   uvec4 v_11 = v.inner[(v_10 / 16u)];
   f16vec3 v_12 = tint_bitcast_to_16bit_1(mix(v_11.xy, v_11.zw, bvec2((((v_10 & 15u) >> 2u) == 2u)))).xyz;
-  return Inner(v_9, 0u, v_12, v_2((16u + start_byte_offset)));
+  return Inner(v_9, 0.0hf, 0u, v_12, 0.0hf, v_2((16u + start_byte_offset)));
 }
 S v_13(uint start_byte_offset) {
   return S(v_7(start_byte_offset));

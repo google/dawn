@@ -2207,6 +2207,7 @@ precision highp int;
 struct SB {
   int a;
   float16_t b;
+  float16_t tint_pad_0;
 };
 
 layout(binding = 0, std430)

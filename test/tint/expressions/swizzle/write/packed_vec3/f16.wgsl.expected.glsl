@@ -4,6 +4,7 @@
 
 struct S {
   f16vec3 v;
+  float16_t tint_pad_0;
 };
 
 layout(binding = 0, std430)

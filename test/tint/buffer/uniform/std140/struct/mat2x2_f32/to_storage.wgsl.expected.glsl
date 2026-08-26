@@ -1,36 +1,29 @@
 #version 310 es
 
 
+struct tint_pad16 {
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  uint tint_pad_3;
+};
+const tint_pad16 tint_pad16_init = tint_pad16(0u, 0u, 0u, 0u);
+
 struct S {
   int before;
   uint tint_pad_0;
   mat2 m;
   uint tint_pad_1;
   uint tint_pad_2;
-  uint tint_pad_3;
-  uint tint_pad_4;
+  tint_pad16 tint_pad_3;
+  tint_pad16 tint_pad_4;
+  int after;
   uint tint_pad_5;
   uint tint_pad_6;
   uint tint_pad_7;
-  uint tint_pad_8;
-  uint tint_pad_9;
-  uint tint_pad_10;
-  int after;
-  uint tint_pad_11;
-  uint tint_pad_12;
-  uint tint_pad_13;
-  uint tint_pad_14;
-  uint tint_pad_15;
-  uint tint_pad_16;
-  uint tint_pad_17;
-  uint tint_pad_18;
-  uint tint_pad_19;
-  uint tint_pad_20;
-  uint tint_pad_21;
-  uint tint_pad_22;
-  uint tint_pad_23;
-  uint tint_pad_24;
-  uint tint_pad_25;
+  tint_pad16 tint_pad_8;
+  tint_pad16 tint_pad_9;
+  tint_pad16 tint_pad_10;
 };
 
 layout(binding = 0, std140)
@@ -59,7 +52,7 @@ S v_7(uint start_byte_offset) {
   mat2 v_10 = v_2((8u + start_byte_offset));
   uint v_11 = (64u + start_byte_offset);
   uvec4 v_12 = v.inner[(v_11 / 16u)];
-  return S(v_9, 0u, v_10, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, int(v_12[((v_11 & 15u) >> 2u)]), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
+  return S(v_9, 0u, v_10, 0u, 0u, tint_pad16_init, tint_pad16_init, int(v_12[((v_11 & 15u) >> 2u)]), 0u, 0u, 0u, tint_pad16_init, tint_pad16_init, tint_pad16_init);
 }
 void tint_store_and_preserve_padding(S value_param[4]) {
   {
@@ -78,7 +71,7 @@ void tint_store_and_preserve_padding(S value_param[4]) {
   }
 }
 S[4] v_15(uint start_byte_offset) {
-  S a[4] = S[4](S(0, 0u, mat2(vec2(0.0f), vec2(0.0f)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), S(0, 0u, mat2(vec2(0.0f), vec2(0.0f)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), S(0, 0u, mat2(vec2(0.0f), vec2(0.0f)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), S(0, 0u, mat2(vec2(0.0f), vec2(0.0f)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
+  S a[4] = S[4](S(0, 0u, mat2(vec2(0.0f), vec2(0.0f)), 0u, 0u, tint_pad16_init, tint_pad16_init, 0, 0u, 0u, 0u, tint_pad16_init, tint_pad16_init, tint_pad16_init), S(0, 0u, mat2(vec2(0.0f), vec2(0.0f)), 0u, 0u, tint_pad16_init, tint_pad16_init, 0, 0u, 0u, 0u, tint_pad16_init, tint_pad16_init, tint_pad16_init), S(0, 0u, mat2(vec2(0.0f), vec2(0.0f)), 0u, 0u, tint_pad16_init, tint_pad16_init, 0, 0u, 0u, 0u, tint_pad16_init, tint_pad16_init, tint_pad16_init), S(0, 0u, mat2(vec2(0.0f), vec2(0.0f)), 0u, 0u, tint_pad16_init, tint_pad16_init, 0, 0u, 0u, 0u, tint_pad16_init, tint_pad16_init, tint_pad16_init));
   {
     uint v_16 = 0u;
     v_16 = 0u;
