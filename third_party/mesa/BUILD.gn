@@ -36,6 +36,8 @@ meson_target("mesa_build") {
   outputs = [ "${target_gen_dir}/install" ]
 }
 
+_mesa_so = "${root_out_dir}/libvulkan_lvp.so"
+
 action("copy_mesa_vulkan_icd") {
   script = "copy_mesa_driver.py"
   deps = [ ":mesa_build" ]
@@ -43,9 +45,27 @@ action("copy_mesa_vulkan_icd") {
     rebase_path("${target_gen_dir}/install", root_build_dir),
     rebase_path(root_out_dir, root_build_dir),
   ]
-  outputs = [ "${root_out_dir}/lvp_icd.json" ]
+  outputs = [
+    "${root_out_dir}/lvp_icd.json",
+    _mesa_so,
+  ]
+  data = [
+    "${root_out_dir}/lvp_icd.json",
+    _mesa_so,
+  ]
+}
+
+if (is_linux) {
+  copy("copy_zstd") {
+    sources = [ "//third_party/zstd/lib/libzstd.so.1" ]
+    outputs = [ "${root_out_dir}/libzstd.so.1" ]
+  }
 }
 
 group("mesa") {
   public_deps = [ ":copy_mesa_vulkan_icd" ]
+  if (is_linux) {
+    public_deps += [ ":copy_zstd" ]
+    data = [ "${root_out_dir}/libzstd.so.1" ]
+  }
 }
