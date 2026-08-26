@@ -774,6 +774,12 @@ class Structural {
     /// @returns all end points that call the function
     Hashset<const ir::Function*, 4> ContainingEndPoints(const ir::Function* f);
 
+    /// Queues the given tasks. `end` will be pushed first, then `mid` executed
+    /// then `begin`. This will put them in the correct processing order.
+    void QueueTasks(std::function<void()> begin,
+                    std::function<void()> mid,
+                    std::function<void()> end);
+
     /// ScopeStack holds a stack of values that are currently in scope
     struct ScopeStack {
         void Push() { stack_.Push({}); }
