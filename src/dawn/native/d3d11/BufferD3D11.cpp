@@ -728,8 +728,6 @@ MaybeError Buffer::ClearInternal(const ScopedCommandRecordingContext* commandCon
                                  uint64_t size) {
     DAWN_ASSERT(size != 0);
 
-    // TODO(dawn:1705): use a reusable zero staging buffer to clear the buffer to avoid this CPU to
-    // GPU copy.
     std::vector<std::byte> clearData(checked_cast<size_t>(size), std::byte{clearValue});
     return WriteInternal(commandContext, offset, clearData,
                          /*isInitialWrite=*/true);
@@ -1684,6 +1682,53 @@ MaybeError GPUUsableBuffer::CopyFromD3DInternal(const ScopedCommandRecordingCont
         /*DstZ=*/0, d3d11SourceBuffer, /*SrcSubresource=*/0, &srcBox);
 
     IncrStorageRevAndMakeLatest(commandContext, gpuCopyableStorage);
+
+    return {};
+}
+
+MaybeError GPUUsableBuffer::ClearInternal(const ScopedCommandRecordingContext* commandContext,
+                                          uint8_t clearValue,
+                                          uint64_t offset,
+                                          uint64_t size) {
+    DAWN_ASSERT(size != 0);
+
+    // Clear by copying from the device's cached zero buffer if possible, otherwise fall back to
+    // the base class' ClearInternal.
+    const bool canUseZeroBuffer = clearValue == 0 && commandContext != nullptr &&
+                                  mLastUpdatedStorage->SupportsCopyDst() && mMappedData.empty();
+    if (!canUseZeroBuffer) {
+        return Buffer::ClearInternal(commandContext, clearValue, offset, size);
+    }
+
+    DAWN_TRY(TrackUsage(commandContext, GetDevice()->GetQueue()->GetPendingCommandSerial()));
+
+    ID3D11Buffer* zeroBuffer;
+    DAWN_TRY_ASSIGN(zeroBuffer, ToBackend(GetDevice())->GetZeroBuffer());
+
+    D3D11_BOX srcBox;
+    srcBox.left = 0;
+    srcBox.top = 0;
+    srcBox.front = 0;
+    srcBox.bottom = 1;
+    srcBox.back = 1;
+
+    // The zero buffer has a fixed size so clear the storage chunk by chunk.
+    uint64_t clearedSize = 0;
+    while (clearedSize < size) {
+        const uint64_t chunkSize = std::min<uint64_t>(size - clearedSize, Device::kZeroBufferSize);
+        srcBox.right = static_cast<UINT>(chunkSize);
+        commandContext->CopySubresourceRegion(mLastUpdatedStorage->GetD3D11Buffer(),
+                                              /*DstSubresource=*/0,
+                                              /*DstX=*/checked_cast<UINT>(offset + clearedSize),
+                                              /*DstY=*/0,
+                                              /*DstZ=*/0, zeroBuffer, /*SrcSubresource=*/0,
+                                              &srcBox);
+        clearedSize += chunkSize;
+    }
+
+    DAWN_ASSERT(clearedSize == size);
+
+    IncrStorageRevAndMakeLatest(commandContext, mLastUpdatedStorage);
 
     return {};
 }

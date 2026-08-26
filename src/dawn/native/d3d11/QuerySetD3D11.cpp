@@ -27,6 +27,7 @@
 
 #include "src/dawn/native/d3d11/QuerySetD3D11.h"
 
+#include <array>
 #include <utility>
 
 #include "src/dawn/common/Range.h"
@@ -92,13 +93,15 @@ MaybeError QuerySet::Resolve(const ScopedSwapStateCommandRecordingContext* comma
                              QueryIndex queryCount,
                              Buffer* destination,
                              uint64_t offset) {
-    DAWN_TRY(destination->Clear(commandContext, 0, offset, ToQueryStorageSize(queryCount)));
-
     for (QueryIndex i : Range(firstQuery, firstQuery + queryCount)) {
+        uint64_t queryOffset = offset + ToQueryStorageSize(i - firstQuery);
+
+        constexpr std::array<std::byte, kSingleQueryStorageSize> kZero{};
+        DAWN_TRY(destination->Write(commandContext, queryOffset, kZero));
+
         if (IsQueryAvailable(i)) {
             DAWN_TRY(destination->PredicatedClear(commandContext, mPredicates[i].Get(), 1,
-                                                  offset + ToQueryStorageSize(i - firstQuery),
-                                                  kSingleQueryStorageSize));
+                                                  queryOffset, kSingleQueryStorageSize));
         }
     }
 

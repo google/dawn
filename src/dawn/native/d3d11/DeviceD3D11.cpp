@@ -487,6 +487,7 @@ void Device::DestroyImpl(DestroyReason reason) {
 
     mImplicitPixelLocalStorageAttachmentTextureViews = {};
     mStagingBuffers.clear();
+    mZeroBuffer = nullptr;
 
     Base::DestroyImpl(reason);
 }
@@ -533,6 +534,8 @@ bool Device::ReduceMemoryUsageImpl() {
     mVertexShaderCache.Clear();
     mPixelShaderCache.Clear();
     mComputeShaderCache.Clear();
+
+    mZeroBuffer = nullptr;
 
     UnmapDestroyedBuffers();
     GetPlatform()->ReportProgress();
@@ -676,6 +679,34 @@ ResultOrError<Ref<BufferBase>> Device::GetStagingBuffer(
     }
 
     return buffer;
+}
+
+ResultOrError<ID3D11Buffer*> Device::GetZeroBuffer() {
+    if (mZeroBuffer) {
+        return mZeroBuffer.Get();
+    }
+
+    D3D11_BUFFER_DESC bufferDescriptor;
+    bufferDescriptor.ByteWidth = kZeroBufferSize;
+    bufferDescriptor.Usage = D3D11_USAGE_IMMUTABLE;
+    // Immutable usage requires at least one bind flag.
+    bufferDescriptor.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    bufferDescriptor.CPUAccessFlags = 0;
+    bufferDescriptor.MiscFlags = 0;
+    bufferDescriptor.StructureByteStride = 0;
+
+    std::vector<uint8_t> zeros(kZeroBufferSize, 0u);
+    D3D11_SUBRESOURCE_DATA initialData = {};
+    initialData.pSysMem = zeros.data();
+
+    ComPtr<ID3D11Buffer> buffer;
+    DAWN_TRY(CheckOutOfMemoryHRESULT(
+        mD3d11Device->CreateBuffer(&bufferDescriptor, &initialData, &buffer),
+        "ID3D11Device::CreateBuffer zero buffer"));
+    SetDebugName(this, buffer.Get(), "Dawn_ZeroBuffer", "");
+
+    mZeroBuffer = std::move(buffer);
+    return mZeroBuffer.Get();
 }
 
 void Device::ReturnStagingBuffer(Ref<BufferBase>&& buffer) {

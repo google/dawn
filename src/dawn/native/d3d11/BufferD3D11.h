@@ -297,6 +297,11 @@ class GPUUsableBuffer final : public Buffer {
                              Span<const std::byte> data,
                              bool isInitialWrite) override;
 
+    MaybeError ClearInternal(const ScopedCommandRecordingContext* commandContext,
+                             uint8_t clearValue,
+                             uint64_t offset,
+                             uint64_t size) override;
+
     ComPtr<ID3D11Buffer> GetD3D11MappedBuffer() override;
 
     ResultOrError<ID3D11ShaderResourceView*>

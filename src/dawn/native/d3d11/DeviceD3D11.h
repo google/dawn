@@ -118,6 +118,11 @@ class Device final : public d3d::Device {
         uint64_t size);
     void ReturnStagingBuffer(Ref<BufferBase>&& buffer);
 
+    // Size of the buffer returned by GetZeroBuffer().
+    static constexpr size_t kZeroBufferSize = 1024 * 1024;
+    // Get a cached buffer of kZeroBufferSize bytes filled with zeros.
+    ResultOrError<ID3D11Buffer*> GetZeroBuffer();
+
     ResultOrError<ComPtr<ID3D11VertexShader>> GetOrCreateVertexShader(
         const d3d::CompiledShader& args);
     ResultOrError<ComPtr<ID3D11PixelShader>> GetOrCreatePixelShader(
@@ -191,6 +196,9 @@ class Device final : public d3d::Device {
     // The cached staging buffers.
     std::vector<Ref<BufferBase>> mStagingBuffers;
     uint64_t mTotalStagingBufferSize = 0;
+
+    // The cached zero-filled buffer.
+    ComPtr<ID3D11Buffer> mZeroBuffer;
 
     // The cached shader objects:
     // We use the SHA3 hash of the shader blob as the key because it's computed based on the
