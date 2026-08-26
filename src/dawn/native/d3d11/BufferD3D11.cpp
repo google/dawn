@@ -48,6 +48,7 @@
 #include "src/utils/compiler.h"
 #include "src/utils/heap_array.h"
 #include "src/utils/numeric.h"
+#include "src/utils/span.h"
 
 namespace dawn::native::d3d11 {
 
@@ -213,15 +214,15 @@ class UploadBuffer final : public Buffer {
   private:
     // BufferBase implementations
     MaybeError MapAtCreationImpl() override {
-        mMappedData = DAWN_UNSAFE_TODO(reinterpret_cast<uint8_t*>(mUploadData.data()));
+        mMappedData = mUploadData.subspan(0);
         return {};
     }
 
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override {
-        mMappedData = DAWN_UNSAFE_TODO(reinterpret_cast<uint8_t*>(mUploadData.data()));
+        mMappedData = mUploadData.subspan(0);
         return EnsureDataInitialized(nullptr);
     }
-    void UnmapImpl(BufferState oldState, BufferState newState) override { mMappedData = nullptr; }
+    void UnmapImpl(BufferState oldState, BufferState newState) override { mMappedData = {}; }
 
     // d3d11::Buffer implementations
     MaybeError InitializeInternal() override {
@@ -237,11 +238,11 @@ class UploadBuffer final : public Buffer {
     }
 
     MaybeError MapInternal(const ScopedCommandRecordingContext*, wgpu::MapMode) override {
-        mMappedData = DAWN_UNSAFE_TODO(reinterpret_cast<uint8_t*>(mUploadData.data()));
+        mMappedData = mUploadData.subspan(0);
         return {};
     }
 
-    void UnmapInternal(const ScopedCommandRecordingContext*) override { mMappedData = nullptr; }
+    void UnmapInternal(const ScopedCommandRecordingContext*) override { mMappedData = {}; }
 
     MaybeError ClearInternal(const ScopedCommandRecordingContext* commandContext,
                              uint8_t clearValue,
@@ -430,7 +431,7 @@ MaybeError Buffer::MapAtCreationImpl() {
         // SAFETY: Frontend is responsible for initializing MapAtCreation memory.
         DAWN_UNSAFE_BUFFERS(
             HeapArray<uint8_t>::Uninit(checked_cast<size_t>(GetAllocatedSize()), std::nothrow));
-    mMappedData = mMapAtCreationData.data();
+    mMappedData = SpanAsWritableBytes(mMapAtCreationData.subspan(0));
     return {};
 }
 
@@ -446,13 +447,13 @@ void Buffer::UnmapInternal(const ScopedCommandRecordingContext* commandContext) 
 }
 
 MaybeError Buffer::UnmapIfNeeded(const ScopedCommandRecordingContext* commandContext) {
-    if (mMappedData == nullptr) {
+    if (mMappedData.empty()) {
         return {};
     }
 
     if (mMapAtCreationData) {
         // We used temporary storage for MapAtCreation, now copy it to the actual buffer
-        mMappedData = nullptr;
+        mMappedData = {};
         ScopedMap scopedMap;
         DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(commandContext, this, wgpu::MapMode::Write));
         DAWN_ASSERT(scopedMap.GetMappedData());
@@ -491,7 +492,7 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     // boundaries, so MapAsync is a no-op.
     if (mAutoMapMode != wgpu::MapMode::None) {
         // Lazily do the 1st map if the buffer is not used in any queue yet.
-        if (GetLastUsageSerial() == kBeginningOfGPUTime && !mMappedData) {
+        if (GetLastUsageSerial() == kBeginningOfGPUTime && mMappedData.empty()) {
             DAWN_TRY(MapAtCreationImpl());
         }
         return {};
@@ -561,7 +562,7 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     }
 
     // This can only happen if the prior Map call has failed.
-    DAWN_INTERNAL_ERROR_IF(mMappedData == nullptr, "Buffer failed to be mapped.");
+    DAWN_INTERNAL_ERROR_IF(mMappedData.empty(), "Buffer failed to be mapped.");
 
     // Ensure data is initialized before completing the MapAsync event and giving it to the user.
     DAWN_TRY(EnsureDataInitialized(nullptr));
@@ -591,13 +592,7 @@ void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
 }
 
 Span<std::byte> Buffer::GetMappedRangeImpl(size_t offset, size_t size) {
-    // TODO(https://crbug.com/501491697): Replace mMappedData with some form of span, which will
-    // require changing or updating the logic that checks for mMappedData != nullptr to know if the
-    // buffer is mapped.
-    Span<std::byte> wholeMappedRange =
-        DAWN_UNSAFE_TODO({reinterpret_cast<std::byte*>(mMappedData.get()),
-                          checked_cast<size_t>(GetAllocatedSize())});
-    return wholeMappedRange.subspan(offset, size);
+    return mMappedData.subspan(offset, size);
 }
 
 void Buffer::DestroyImpl(DestroyReason reason) {
@@ -624,11 +619,11 @@ void Buffer::DestroyImpl(DestroyReason reason) {
     // UnmapImpl, or Queue operations, so accessing mMappedData here is safe. Additionally, since
     // no Queue operation can use this buffer anymore, it won't be scheduled for a remap after a
     // cancel above.
-    if (mMappedData != nullptr && !mMapAtCreationData) {
+    if (!mMappedData.empty() && !mMapAtCreationData) {
         // We don't need to unmap if the mapping was done on a shadow copy because no real
         // buffer is mapped yet.
         ToBackend(GetDevice())->DeferUnmapDestroyedBuffer(GetD3D11MappedBuffer());
-        mMappedData = nullptr;
+        mMappedData = {};
     }
 }
 
@@ -710,7 +705,7 @@ MaybeError Buffer::Clear(const ScopedCommandRecordingContext* commandContext,
                          uint8_t clearValue,
                          uint64_t offset,
                          uint64_t size) {
-    DAWN_ASSERT(!mMappedData);
+    DAWN_ASSERT(mMappedData.empty());
 
     if (size == 0) {
         return {};
@@ -803,7 +798,7 @@ ResultOrError<Buffer::ScopedMap> Buffer::ScopedMap::Create(
         return ScopedMap();
     }
 
-    if (buffer->mMappedData) {
+    if (!buffer->mMappedData.empty()) {
         return ScopedMap(commandContext, buffer, /*needsUnmap=*/false);
     }
 
@@ -848,7 +843,7 @@ void Buffer::ScopedMap::Reset() {
 }
 
 uint8_t* Buffer::ScopedMap::GetMappedData() const {
-    return mBuffer ? static_cast<uint8_t*>(mBuffer->mMappedData) : nullptr;
+    return mBuffer ? reinterpret_cast<uint8_t*>(mBuffer->mMappedData.data()) : nullptr;
 }
 
 // GPUUsableBuffer::Storage
@@ -1165,7 +1160,7 @@ MaybeError GPUUsableBuffer::SyncStorage(const ScopedCommandRecordingContext* com
     DAWN_ASSERT(commandContext);
 
     // Must not have pending unmap.
-    DAWN_CHECK(!mMappedData);
+    DAWN_CHECK(mMappedData.empty());
 
     if (dstStorage->SupportsCopyDst()) {
         commandContext->CopyResource(dstStorage->GetD3D11Buffer(),
@@ -1247,7 +1242,7 @@ MaybeError GPUUsableBuffer::SyncGPUWritesToStaging(
 
 MaybeError GPUUsableBuffer::MapInternal(const ScopedCommandRecordingContext* commandContext,
                                         wgpu::MapMode mode) {
-    DAWN_ASSERT(!mMappedData);
+    DAWN_ASSERT(mMappedData.empty());
     DAWN_ASSERT(mMappableStorage);
 
     if (mMappableStorage->IsDynamic()) {
@@ -1278,17 +1273,20 @@ MaybeError GPUUsableBuffer::MapInternal(const ScopedCommandRecordingContext* com
                                               /*Subresource=*/0, mD3DMapTypeUsed,
                                               /*MapFlags=*/0, &mappedResource),
                           "ID3D11DeviceContext::Map"));
-    mMappedData = static_cast<uint8_t*>(mappedResource.pData);
+    // SAFETY: The pointer returned is for the actual memory of the resource and contains at least
+    // GetAllocatedSize() bytes.
+    mMappedData = DAWN_UNSAFE_BUFFERS(
+        {static_cast<std::byte*>(mappedResource.pData), checked_cast<size_t>(GetAllocatedSize())});
 
     return {};
 }
 
 void GPUUsableBuffer::UnmapInternal(const ScopedCommandRecordingContext* commandContext) {
-    DAWN_ASSERT(mMappedData);
+    DAWN_ASSERT(!mMappedData.empty());
     DAWN_ASSERT(mMappableStorage);
     commandContext->Unmap(mMappableStorage->GetD3D11Buffer(),
                           /*Subresource=*/0);
-    mMappedData = nullptr;
+    mMappedData = {};
     // Only increment revision if the buffer was mapped for writing.
     if (mD3DMapTypeUsed != D3D11_MAP_READ) {
         IncrStorageRevAndMakeLatest(commandContext, mMappableStorage);
@@ -1573,7 +1571,7 @@ MaybeError GPUUsableBuffer::WriteInternal(const ScopedCommandRecordingContext* c
     // may have already updated it before entering this function. In practice, this is
     // uncommon for mappable buffers since users typically update them via MapAsync when
     // they know the buffer is idle.
-    const bool alreadyMappedForWrite = mMappedData && mD3DMapTypeUsed != D3D11_MAP_READ;
+    const bool alreadyMappedForWrite = !mMappedData.empty() && mD3DMapTypeUsed != D3D11_MAP_READ;
     if ((IsCPUWritable() && isInitialWrite) || alreadyMappedForWrite) {
         // If buffer is already mapped, creating ScopedMap is a no-op.
         ScopedMap scopedMap;
@@ -1736,7 +1734,7 @@ MaybeError GPUUsableBuffer::PredicatedClear(
 }
 
 ComPtr<ID3D11Buffer> GPUUsableBuffer::GetD3D11MappedBuffer() {
-    return mMappedData ? mMappableStorage->GetD3D11Buffer() : nullptr;
+    return !mMappedData.empty() ? mMappableStorage->GetD3D11Buffer() : nullptr;
 }
 
 }  // namespace dawn::native::d3d11
