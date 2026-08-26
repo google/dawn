@@ -1336,6 +1336,62 @@ TEST_F(IR_ValidatorTest, Let_ExceedsSizeLimit) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr("exceeds maximum allowed"));
 }
 
+TEST_F(IR_ValidatorTest, Operand_ExceedsSizeLimit) {
+    auto* arr_ty = ty.array(ty.i32(), 4000000u);
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] { b.Return(f, b.Zero(arr_ty)); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("operand size (16000000) exceeds maximum allowed"));
+}
+
+TEST_F(IR_ValidatorTest, Function_ReturnType_ExceedsSizeLimit) {
+    auto* arr_ty = ty.array(ty.i32(), 4000000u);
+    auto* f = b.Function("my_func", arr_ty);
+    b.Append(f->Block(), [&] { b.Return(f, b.Zero(arr_ty)); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("operand size (16000000) exceeds maximum allowed"));
+}
+
+TEST_F(IR_ValidatorTest, Function_Parameter_ExceedsSizeLimit) {
+    auto* arr_ty = ty.array(ty.i32(), 4000000u);
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("p", arr_ty);
+    f->SetParams({p});
+    b.Append(f->Block(), [&] {
+        b.Let("l", p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("operand size (16000000) exceeds maximum allowed"));
+}
+
+TEST_F(IR_ValidatorTest, Block_Parameter_ExceedsSizeLimit) {
+    auto* arr_ty = ty.array(ty.i32(), 4000000u);
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* loop = b.Loop();
+        auto* p = b.BlockParam("p", arr_ty);
+        loop->Body()->SetParams({p});
+        b.Append(loop->Initializer(), [&] { b.NextIteration(loop, b.Zero(arr_ty)); });
+        b.Append(loop->Body(), [&] { b.Return(f); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("operand size (16000000) exceeds maximum allowed"));
+}
+
 TEST_F(IR_ValidatorTest, Phony_NullValue) {
     auto* v = mod.CreateInstruction<ir::Phony>(nullptr);
     auto* f = b.Function("my_func", ty.void_());

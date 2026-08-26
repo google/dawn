@@ -578,6 +578,15 @@ bool Structural::CheckOperand(const Instruction* inst, size_t idx) {
         return false;
     }
 
+    if (operand->Type() && !operand->Type()->Is<core::type::MemoryView>()) {
+        if (operand->Type()->Size() > tint::internal_limits::kMaxTemporaryStorageSize) {
+            AddError(inst, idx) << "operand size (" << operand->Type()->Size()
+                                << ") exceeds maximum allowed ("
+                                << tint::internal_limits::kMaxTemporaryStorageSize << ")";
+            return false;
+        }
+    }
+
     if (DAWN_UNLIKELY(operand->Is<Constant>() &&
                       operand->Type()->Is<core::type::SubgroupMatrix>())) {
         AddError(inst, idx) << "subgroup_matrix values cannot be constant";
