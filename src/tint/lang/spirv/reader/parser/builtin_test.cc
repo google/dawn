@@ -2123,6 +2123,178 @@ TEST_F(SpirvParserTest, NonUniformBallot) {
                   SPV_ENV_VULKAN_1_1);
 }
 
+TEST_F(SpirvParserTest, NonUniformBallotBitCount_Reduce_FromBallot_Const) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformBallot
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+     %v4uint = OpTypeVector %uint 4
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+          %8 = OpGroupNonUniformBallot %v4uint %uint_3 %true
+          %9 = OpGroupNonUniformBallotBitCount %uint %uint_3 Reduce %8
+                OpReturn
+                OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec4<u32> = subgroupBallot true
+    %3:u32 = convert true
+    %4:u32 = subgroupAdd %3
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+TEST_F(SpirvParserTest, NonUniformBallotBitCount_Reduce_FromBallot_Dynamic) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformBallot
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+     %uint_3 = OpConstant %uint 3
+     %v4uint = OpTypeVector %uint 4
+       %bool = OpTypeBool
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+        %pred = OpINotEqual %bool %uint_1 %uint_2
+          %8 = OpGroupNonUniformBallot %v4uint %uint_3 %pred
+          %9 = OpGroupNonUniformBallotBitCount %uint %uint_3 Reduce %8
+                OpReturn
+                OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = spirv.not_equal 1u, 2u
+    %3:vec4<u32> = subgroupBallot %2
+    %4:u32 = convert %2
+    %5:u32 = subgroupAdd %4
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+TEST_F(SpirvParserTest, NonUniformBallotBitCount_InclusiveScan_FromBallot) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformBallot
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+     %v4uint = OpTypeVector %uint 4
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+          %8 = OpGroupNonUniformBallot %v4uint %uint_3 %true
+          %9 = OpGroupNonUniformBallotBitCount %uint %uint_3 InclusiveScan %8
+                OpReturn
+                OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec4<u32> = subgroupBallot true
+    %3:u32 = convert true
+    %4:u32 = subgroupInclusiveAdd %3
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+TEST_F(SpirvParserTest, NonUniformBallotBitCount_ExclusiveScan_FromBallot) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformBallot
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+     %v4uint = OpTypeVector %uint 4
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+          %8 = OpGroupNonUniformBallot %v4uint %uint_3 %true
+          %9 = OpGroupNonUniformBallotBitCount %uint %uint_3 ExclusiveScan %8
+                OpReturn
+                OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec4<u32> = subgroupBallot true
+    %3:u32 = convert true
+    %4:u32 = subgroupExclusiveAdd %3
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+TEST_F(SpirvParserTest, NonUniformBallotBitCount_NonBallotOperand_Error) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformBallot
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+     %v4uint = OpTypeVector %uint 4
+ %ptr_v4uint = OpTypePointer Function %v4uint
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+        %var = OpVariable %ptr_v4uint Function
+     %ballot = OpLoad %v4uint %var
+          %9 = OpGroupNonUniformBallotBitCount %uint %uint_3 Reduce %ballot
+                OpReturn
+                OpFunctionEnd
+)",
+                      SPV_ENV_VULKAN_1_1);
+    EXPECT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              "OpGroupNonUniformBallotBitCount is only supported when Value is from "
+              "OpGroupNonUniformBallot");
+}
+
 TEST_F(SpirvParserTest, NonUniformQuadBroadcast_Constant_BoolScalar) {
     EXPECT_IR_SPV(R"(
                OpCapability Shader

@@ -2553,6 +2553,9 @@ class Parser {
                 case spv::Op::OpGroupNonUniformBallot:
                     EmitSubgroupBuiltin(inst, core::BuiltinFn::kSubgroupBallot);
                     break;
+                case spv::Op::OpGroupNonUniformBallotBitCount:
+                    TINT_CHECK_RESULT(EmitSubgroupBallotBitCount(inst));
+                    break;
                 case spv::Op::OpGroupNonUniformBroadcastFirst:
                     EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformBroadcastFirst);
                     break;
@@ -2724,6 +2727,43 @@ class Parser {
     void EmitSubgroupBuiltin(spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
         ValidateScope(inst);
         Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 3)), inst.result_id());
+    }
+
+    Result<SuccessType> EmitSubgroupBallotBitCount(spvtools::opt::Instruction& inst) {
+        ValidateScope(inst);
+
+        auto ballot_id = inst.GetSingleWordInOperand(2);
+        auto* ballot_inst = spirv_context_->get_def_use_mgr()->GetDef(ballot_id);
+        if (!ballot_inst || ballot_inst->opcode() != spv::Op::OpGroupNonUniformBallot) {
+            return Failure(
+                "OpGroupNonUniformBallotBitCount is only supported when Value is from "
+                "OpGroupNonUniformBallot");
+        }
+
+        auto group = inst.GetSingleWordInOperand(1);
+        auto group_op = static_cast<spv::GroupOperation>(group);
+
+        core::BuiltinFn fn = core::BuiltinFn::kNone;
+        switch (group_op) {
+            case spv::GroupOperation::Reduce:
+                fn = core::BuiltinFn::kSubgroupAdd;
+                break;
+            case spv::GroupOperation::InclusiveScan:
+                fn = core::BuiltinFn::kSubgroupInclusiveAdd;
+                break;
+            case spv::GroupOperation::ExclusiveScan:
+                fn = core::BuiltinFn::kSubgroupExclusiveAdd;
+                break;
+            default:
+                TINT_UNREACHABLE();
+        }
+
+        auto* pred_val = Value(ballot_inst->GetSingleWordInOperand(1));
+        auto* conv = b_.Convert<u32>(pred_val);
+        EmitWithoutSpvResult(conv);
+
+        Emit(b_.Call(Type(inst.type_id()), fn, conv), inst.result_id());
+        return Success;
     }
 
     struct IfBranchValue {
