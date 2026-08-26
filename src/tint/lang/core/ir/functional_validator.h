@@ -224,6 +224,7 @@ class Functional {
     Hashmap<const Loop*, const Continue*, 4> first_continues_;
     Hashset<std::string, 4> entry_point_names_;
     Hashmap<const core::type::Type*, uint64_t, 16> elements_counts_;
+    uint64_t total_private_bytes_ = 0;
 };
 
 }  // namespace tint::core::ir::validator

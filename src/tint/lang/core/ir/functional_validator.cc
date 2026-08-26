@@ -803,6 +803,15 @@ void Functional::CheckVar(const Var* var) {
             }
         }
     }
+
+    if (mv->AddressSpace() == AddressSpace::kPrivate) {
+        total_private_bytes_ += mv->StoreType()->Size();
+        if (total_private_bytes_ > internal_limits::kMaxCombinedPrivateVariableSize) {
+            AddError(var) << "total size of private address-space variables exceeds "
+                          << internal_limits::kMaxCombinedPrivateVariableSize << " bytes";
+            return;
+        }
+    }
 }
 
 void Functional::CheckLet(const Let* l) {

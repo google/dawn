@@ -477,6 +477,21 @@ TEST_F(IR_ValidatorTest, Construct_Struct_ExcessiveElements) {
         << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Var_CombinedPrivateSizeExceedsLimit) {
+    b.Append(mod.root_block, [&] {
+        for (uint32_t i = 0; i < 128; i++) {
+            b.Var(ty.ptr<private_>(ty.array<vec4u, 8000u>()));
+        }
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("total size of private address-space variables exceeds 8388608 bytes"))
+        << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Var_HandleMissingBindingPoint) {
     auto* v = b.Var(ty.ptr<handle, i32>());
     mod.root_block->Append(v);

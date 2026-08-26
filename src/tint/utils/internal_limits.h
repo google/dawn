@@ -62,6 +62,10 @@ constexpr int64_t kMaxStructMemberPadding = 10LL * 1024 * 1024;
 // expects to work.
 constexpr int64_t kMaxTemporaryStorageSize = 10LL * 1024 * 1024;
 
+// Limits the combined size of all private variables in the shader.
+// The WGSL spec has a min-max for a single variable of 8KB, so this 8MB limit is well above that.
+constexpr int64_t kMaxCombinedPrivateVariableSize = 8LL * 1024 * 1024;
+
 // The maximum number of locations allowed for shader IO.
 // This hard limit is derived from spirv-val (kMaxLocations in
 // https://github.com/KhronosGroup/SPIRV-Tools/blob/main/source/val/validate_interfaces.cpp).
