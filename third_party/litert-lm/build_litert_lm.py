@@ -151,6 +151,8 @@ def main():
             str(bazelisk_path),
             f"--output_user_root={bazel_user_root}",
             'build',
+            '--noexperimental_guard_against_concurrent_changes',
+            '--nowatchfs',
             '--compilation_mode=opt',
             '--define=litert_link_capi_so=true',
             '--define=resolve_symbols_in_exec=false',
