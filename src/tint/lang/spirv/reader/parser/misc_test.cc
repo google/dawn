@@ -573,19 +573,20 @@ TEST_F(SpirvParserTest, Instruction_UnhandledOpcode) {
     auto spirv_asm = R"(
                OpCapability Shader
                OpCapability GroupNonUniform
-               OpCapability GroupNonUniformVote
+               OpCapability GroupNonUniformBallot
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
         %u32 = OpTypeInt 32 0
       %scope = OpConstant %u32 3
        %bool = OpTypeBool
-       %true = OpConstantTrue %bool
+      %v4u32 = OpTypeVector %u32 4
+     %ballot = OpConstantNull %v4u32
        %void = OpTypeVoid
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-        %res = OpGroupNonUniformAllEqual %bool %scope %true
+        %res = OpGroupNonUniformInverseBallot %bool %scope %ballot
                OpReturn
                OpFunctionEnd
 )";
@@ -595,7 +596,7 @@ TEST_F(SpirvParserTest, Instruction_UnhandledOpcode) {
     auto res = Parse(binary.Get(), options);
     EXPECT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason,
-              "unhandled SPIR-V instruction: OpGroupNonUniformAllEqual (val = 336)");
+              "unhandled SPIR-V instruction: OpGroupNonUniformInverseBallot (val = 340)");
 }
 
 }  // namespace

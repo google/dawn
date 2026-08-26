@@ -2544,6 +2544,9 @@ class Parser {
                 case spv::Op::OpGroupNonUniformAll:
                     EmitSubgroupBuiltin(inst, core::BuiltinFn::kSubgroupAll);
                     break;
+                case spv::Op::OpGroupNonUniformAllEqual:
+                    EmitSubgroupAllEqual(inst);
+                    break;
                 case spv::Op::OpGroupNonUniformAny:
                     EmitSubgroupBuiltin(inst, core::BuiltinFn::kSubgroupAny);
                     break;
@@ -2764,6 +2767,30 @@ class Parser {
 
         Emit(b_.Call(Type(inst.type_id()), fn, conv), inst.result_id());
         return Success;
+    }
+
+    void EmitSubgroupAllEqual(spvtools::opt::Instruction& inst) {
+        ValidateScope(inst);
+
+        auto* val = Value(inst.GetSingleWordInOperand(1));
+        auto* first = b_.Call<spirv::ir::BuiltinCall>(
+            val->Type(), spirv::BuiltinFn::kGroupNonUniformBroadcastFirst,
+            Vector{Value(inst.GetSingleWordInOperand(0)), val});
+        EmitWithoutSpvResult(first);
+
+        // If NaNs and INFs are supported in the future, this lowering will remain correct as long
+        // as floating-point equality comparisons use ordered-and-equal (OpFOrdEqual) semantics.
+        auto* eq = b_.Equal(val, first)->AsInstruction();
+        EmitWithoutSpvResult(eq);
+
+        core::ir::Value* eq_val = eq->Result();
+        if (val->Type()->Is<core::type::Vector>()) {
+            auto* all_call = b_.Call(ty_.bool_(), core::BuiltinFn::kAll, eq);
+            EmitWithoutSpvResult(all_call);
+            eq_val = all_call->Result();
+        }
+
+        Emit(b_.Call(ty_.bool_(), core::BuiltinFn::kSubgroupAll, eq_val), inst.result_id());
     }
 
     struct IfBranchValue {
