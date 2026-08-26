@@ -426,7 +426,7 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
     }
 
     auto commandContext = GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
-    return ToBackend(buffer)->Write(&commandContext, bufferOffset, data.data(), data.size());
+    return ToBackend(buffer)->Write(&commandContext, bufferOffset, data);
 }
 
 MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,

@@ -474,9 +474,15 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
 
                 Texture::ReadCallback callback = [&](const uint8_t* data, uint64_t offset,
                                                      uint64_t size) -> MaybeError {
+                    auto* bytePtr = reinterpret_cast<const std::byte*>(data);
+                    size_t byteSize = checked_cast<size_t>(size);
+
+                    dawn::Span<const std::byte> byteSpan =
+                        // SAFETY: `data` points to at least `size` valid bytes of readable memory.
+                        DAWN_UNSAFE_BUFFERS(dawn::Span<const std::byte>(bytePtr, byteSize));
+
                     DAWN_TRY(ToBackend(dst.buffer)
-                                 ->Write(commandContext, dst.offset + offset, data,
-                                         checked_cast<size_t>(size)));
+                                 ->Write(commandContext, dst.offset + offset, byteSpan));
                     return {};
                 };
 
@@ -535,7 +541,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
 
             case Command::WriteBuffer: {
                 WriteBufferCmd* cmd = mCommands.NextCommand<WriteBufferCmd>();
-                Span<const uint8_t> data = mCommands.NextData<uint8_t>(cmd->size);
+                Span<const std::byte> data = mCommands.NextData<std::byte>(cmd->size);
 
                 if (data.empty()) {
                     // Skip no-op writes.
@@ -544,7 +550,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
 
                 Buffer* dstBuffer = ToBackend(cmd->buffer.Get());
                 DAWN_TRY(dstBuffer->TrackUsage(commandContext, pendingSerial));
-                DAWN_TRY(dstBuffer->Write(commandContext, cmd->offset, data.data(), data.size()));
+                DAWN_TRY(dstBuffer->Write(commandContext, cmd->offset, data));
 
                 break;
             }

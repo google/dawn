@@ -213,13 +213,12 @@ class UploadBuffer final : public Buffer {
   private:
     // BufferBase implementations
     MaybeError MapAtCreationImpl() override {
-        mMappedData = mUploadData.data();
-        // MapAtCreation does the zeroization on the front-end side.
+        mMappedData = DAWN_UNSAFE_TODO(reinterpret_cast<uint8_t*>(mUploadData.data()));
         return {};
     }
 
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override {
-        mMappedData = mUploadData.data();
+        mMappedData = DAWN_UNSAFE_TODO(reinterpret_cast<uint8_t*>(mUploadData.data()));
         return EnsureDataInitialized(nullptr);
     }
     void UnmapImpl(BufferState oldState, BufferState newState) override { mMappedData = nullptr; }
@@ -229,8 +228,8 @@ class UploadBuffer final : public Buffer {
         mUploadData =
             // SAFETY: This allocation takes the place of a GPU allocation in a GPU-backed Buffer,
             // so its initialization is ensured in the same way.
-            DAWN_UNSAFE_BUFFERS(
-                HeapArray<uint8_t>::Uninit(checked_cast<size_t>(GetAllocatedSize()), std::nothrow));
+            DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(
+                checked_cast<size_t>(GetAllocatedSize()), std::nothrow));
         if (!mUploadData) {
             return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer uploading.");
         }
@@ -238,7 +237,7 @@ class UploadBuffer final : public Buffer {
     }
 
     MaybeError MapInternal(const ScopedCommandRecordingContext*, wgpu::MapMode) override {
-        mMappedData = mUploadData.data();
+        mMappedData = DAWN_UNSAFE_TODO(reinterpret_cast<uint8_t*>(mUploadData.data()));
         return {};
     }
 
@@ -250,7 +249,7 @@ class UploadBuffer final : public Buffer {
                              uint64_t size) override {
         std::ranges::fill(
             mUploadData.subspan(checked_cast<size_t>(offset), checked_cast<size_t>(size)),
-            clearValue);
+            std::byte{clearValue});
         return {};
     }
 
@@ -259,9 +258,10 @@ class UploadBuffer final : public Buffer {
                               size_t size,
                               Buffer* destination,
                               uint64_t destinationOffset) override {
-        return destination->WriteInternal(commandContext, destinationOffset,
-                                          DAWN_UNSAFE_TODO(mUploadData.data() + sourceOffset), size,
-                                          /*isInitialWrite=*/false);
+        return destination->WriteInternal(
+            commandContext, destinationOffset,
+            mUploadData.subspan(checked_cast<size_t>(sourceOffset), size),
+            /*isInitialWrite=*/false);
     }
 
     MaybeError CopyFromD3DInternal(const ScopedCommandRecordingContext* commandContext,
@@ -276,17 +276,14 @@ class UploadBuffer final : public Buffer {
 
     MaybeError WriteInternal(const ScopedCommandRecordingContext* commandContext,
                              uint64_t offset,
-                             const void* data,
-                             size_t size,
+                             Span<const std::byte> data,
                              bool isInitialWrite) override {
         // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-        std::ranges::copy(
-            DAWN_UNSAFE_TODO(Span<const uint8_t>{static_cast<const uint8_t*>(data), size}),
-            mUploadData.subspan(checked_cast<size_t>(offset)).begin());
+        std::ranges::copy(data, mUploadData.subspan(checked_cast<size_t>(offset)).begin());
         return {};
     }
 
-    HeapArray<uint8_t> mUploadData;
+    HeapArray<std::byte> mUploadData;
 };
 
 bool CanAddStorageUsageToBufferWithoutSideEffects(const Device* device,
@@ -738,8 +735,8 @@ MaybeError Buffer::ClearInternal(const ScopedCommandRecordingContext* commandCon
 
     // TODO(dawn:1705): use a reusable zero staging buffer to clear the buffer to avoid this CPU to
     // GPU copy.
-    std::vector<uint8_t> clearData(checked_cast<size_t>(size), clearValue);
-    return WriteInternal(commandContext, offset, clearData.data(), checked_cast<size_t>(size),
+    std::vector<std::byte> clearData(checked_cast<size_t>(size), std::byte{clearValue});
+    return WriteInternal(commandContext, offset, clearData,
                          /*isInitialWrite=*/true);
 }
 
@@ -770,14 +767,13 @@ ComPtr<ID3D11Buffer> Buffer::GetD3D11MappedBuffer() {
 
 MaybeError Buffer::Write(const ScopedCommandRecordingContext* commandContext,
                          uint64_t offset,
-                         const void* data,
-                         size_t size) {
-    DAWN_ASSERT(size != 0);
+                         Span<const std::byte> data) {
+    DAWN_ASSERT(data.size() != 0);
 
     // For non-staging buffers, we can use UpdateSubresource to write the data.
-    DAWN_TRY(EnsureDataInitializedAsDestination(commandContext, offset, size));
+    DAWN_TRY(EnsureDataInitializedAsDestination(commandContext, offset, data.size()));
 
-    return WriteInternal(commandContext, offset, data, size, /*isInitialWrite=*/false);
+    return WriteInternal(commandContext, offset, data, /*isInitialWrite=*/false);
 }
 
 // static
@@ -1470,15 +1466,14 @@ MaybeError GPUUsableBuffer::UpdateD3D11ConstantBuffer(
     ID3D11Buffer* d3d11Buffer,
     bool firstTimeUpdate,
     uint64_t offset,
-    const void* data,
-    size_t size) {
-    DAWN_ASSERT(size > 0);
+    Span<const std::byte> data) {
+    DAWN_ASSERT(data.size() > 0);
 
     // For a full size write, UpdateSubresource1(D3D11_COPY_DISCARD) can be used to update
     // constant buffer.
     // WriteInternal() can be called with GetAllocatedSize(). We treat it as a full buffer write
     // as well.
-    const bool fullSizeUpdate = size >= GetSize() && offset == 0;
+    const bool fullSizeUpdate = data.size() >= GetSize() && offset == 0;
     const bool canPartialUpdate =
         ToBackend(GetDevice())->GetDeviceInfo().supportsPartialConstantBufferUpdate;
     if (fullSizeUpdate || firstTimeUpdate) {
@@ -1499,7 +1494,8 @@ MaybeError GPUUsableBuffer::UpdateD3D11ConstantBuffer(
         if (requiresFullAllocatedSizeWrite) {
             alignedEnd = checked_cast<size_t>(GetAllocatedSize());
         } else {
-            alignedEnd = checked_cast<size_t>(Align(offset + size, kConstantBufferUpdateAlignment));
+            alignedEnd =
+                checked_cast<size_t>(Align(offset + data.size(), kConstantBufferUpdateAlignment));
         }
         size_t alignedSize = alignedEnd - alignedOffset;
 
@@ -1516,14 +1512,12 @@ MaybeError GPUUsableBuffer::UpdateD3D11ConstantBuffer(
         // |..........................| leftExtraBytes |     data   | ............... |
         // |<----------------- offset ---------------->|<-- size -->|
         // |<----- alignedOffset ---->|<--------- alignedSize --------->|
-        HeapArray<uint8_t> alignedBuffer;
-        if (size != alignedSize) {
+        HeapArray<std::byte> alignedBuffer;
+        if (data.size() != alignedSize) {
             // SAFETY: The copy() should initialize all memory that actually gets read.
-            alignedBuffer = DAWN_UNSAFE_BUFFERS(HeapArray<uint8_t>::Uninit(alignedSize));
-            std::ranges::copy(
-                DAWN_UNSAFE_TODO(Span<const uint8_t>{static_cast<const uint8_t*>(data), size}),
-                alignedBuffer.begin() + sign_cast(leftExtraBytes));
-            data = alignedBuffer.data();
+            alignedBuffer = DAWN_UNSAFE_BUFFERS(HeapArray<std::byte>::Uninit(alignedSize));
+            std::ranges::copy(data, alignedBuffer.begin() + sign_cast(leftExtraBytes));
+            data = alignedBuffer.subspan(0);
         }
 
         D3D11_BOX dstBox;
@@ -1535,7 +1529,8 @@ MaybeError GPUUsableBuffer::UpdateD3D11ConstantBuffer(
         dstBox.back = 1;
         // For full buffer write, D3D11_COPY_DISCARD is used to avoid GPU CPU synchronization.
         commandContext->UpdateSubresource1(d3d11Buffer, /*DstSubresource=*/0,
-                                           requiresFullAllocatedSizeWrite ? nullptr : &dstBox, data,
+                                           requiresFullAllocatedSizeWrite ? nullptr : &dstBox,
+                                           data.data(),
                                            /*SrcRowPitch=*/0,
                                            /*SrcDepthPitch=*/0,
                                            /*CopyFlags=*/D3D11_COPY_DISCARD);
@@ -1545,16 +1540,17 @@ MaybeError GPUUsableBuffer::UpdateD3D11ConstantBuffer(
     // If copy offset and size are not 16 bytes aligned, we have to create a staging buffer for
     // transfer the data to constant buffer.
     Ref<BufferBase> stagingBuffer;
-    DAWN_TRY_ASSIGN(stagingBuffer, ToBackend(GetDevice())->GetStagingBuffer(commandContext, size));
+    DAWN_TRY_ASSIGN(stagingBuffer,
+                    ToBackend(GetDevice())->GetStagingBuffer(commandContext, data.size()));
     {
         auto scopedUseStaging = stagingBuffer->UseInternal();
         DAWN_TRY(ToBackend(stagingBuffer)
-                     ->WriteInternal(commandContext, 0, data, size,
+                     ->WriteInternal(commandContext, 0, data,
                                      /*isInitialWrite=*/true));
         DAWN_TRY(ToBackend(stagingBuffer.Get())
                      ->CopyToInternal(commandContext,
                                       /*sourceOffset=*/0,
-                                      /*size=*/size, this, offset));
+                                      /*size=*/data.size(), this, offset));
     }
     ToBackend(GetDevice())->ReturnStagingBuffer(std::move(stagingBuffer));
 
@@ -1563,10 +1559,9 @@ MaybeError GPUUsableBuffer::UpdateD3D11ConstantBuffer(
 
 MaybeError GPUUsableBuffer::WriteInternal(const ScopedCommandRecordingContext* commandContext,
                                           uint64_t offset,
-                                          const void* data,
-                                          size_t size,
+                                          Span<const std::byte> data,
                                           bool isInitialWrite) {
-    if (size == 0) {
+    if (data.size() == 0) {
         return {};
     }
 
@@ -1585,7 +1580,8 @@ MaybeError GPUUsableBuffer::WriteInternal(const ScopedCommandRecordingContext* c
         DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(commandContext, this, wgpu::MapMode::Write));
 
         DAWN_ASSERT(scopedMap.GetMappedData());
-        DAWN_UNSAFE_TODO(memcpy(scopedMap.GetMappedData() + offset, data, size));
+        // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
+        DAWN_UNSAFE_TODO(memcpy(scopedMap.GetMappedData() + offset, data.data(), data.size()));
 
         return {};
     }
@@ -1596,7 +1592,7 @@ MaybeError GPUUsableBuffer::WriteInternal(const ScopedCommandRecordingContext* c
 
     // WriteInternal() can be called with GetAllocatedSize(). We treat it as a full buffer write
     // as well.
-    bool fullSizeWrite = size >= GetSize() && offset == 0;
+    bool fullSizeWrite = data.size() >= GetSize() && offset == 0;
 
     // Mapping buffer at this point would stall the CPU. We will create a GPU copyable
     // storage and use UpdateSubresource on it below instead. Note if we have both const buffer &
@@ -1623,19 +1619,19 @@ MaybeError GPUUsableBuffer::WriteInternal(const ScopedCommandRecordingContext* c
 
     if (gpuCopyableStorage->IsConstantBuffer()) {
         return UpdateD3D11ConstantBuffer(commandContext, gpuCopyableStorage->GetD3D11Buffer(),
-                                         firstTimeUpdate, offset, data, size);
+                                         firstTimeUpdate, offset, data);
     }
 
     D3D11_BOX box;
     box.left = static_cast<UINT>(offset);
     box.top = 0;
     box.front = 0;
-    box.right = static_cast<UINT>(offset + size);
+    box.right = static_cast<UINT>(offset + data.size());
     box.bottom = 1;
     box.back = 1;
     commandContext->UpdateSubresource1(gpuCopyableStorage->GetD3D11Buffer(),
                                        /*DstSubresource=*/0,
-                                       /*pDstBox=*/&box, data,
+                                       /*pDstBox=*/&box, data.data(),
                                        /*SrcRowPitch=*/0,
                                        /*SrcDepthPitch=*/0,
                                        /*CopyFlags=*/0);

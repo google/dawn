@@ -192,8 +192,9 @@ MaybeError ScopedCommandRecordingContext::FlushUniformBuffer() const {
         if (!mUniformBufferInUse) {
             mUniformBufferInUse = Get()->mUniformBuffer->UseInternal();
         }
-        DAWN_TRY(Get()->mUniformBuffer->Write(this, 0, Get()->mUniformBufferData.data(),
-                                              Get()->mUniformBufferData.size() * sizeof(uint32_t)));
+
+        DAWN_TRY(Get()->mUniformBuffer->Write(
+            this, 0, SpanAsBytes(Span<uint32_t>(Get()->mUniformBufferData))));
         Get()->mUniformBufferDirty = false;
     }
     return {};
