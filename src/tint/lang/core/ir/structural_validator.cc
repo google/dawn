@@ -73,6 +73,13 @@
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/text_style.h"
 
+#define TINT_CHECK_ERRORS()           \
+    do {                              \
+        if (diag_.ContainsErrors()) { \
+            return;                   \
+        }                             \
+    } while (false)
+
 namespace tint::core::ir::validator {
 namespace {
 
@@ -175,9 +182,7 @@ void Structural::Validate() {
 }
 
 void Structural::CheckForRecursion() {
-    if (diag_.ContainsErrors()) {
-        return;
-    }
+    TINT_CHECK_ERRORS();
 
     ReferencedFunctions<const Module> referenced_functions(ir_);
     for (auto& func : ir_.functions) {
@@ -191,9 +196,7 @@ void Structural::CheckForRecursion() {
 }
 
 void Structural::CheckForOrphanedInstructions() {
-    if (diag_.ContainsErrors()) {
-        return;
-    }
+    TINT_CHECK_ERRORS();
 
     // Check for orphaned instructions.
     for (auto* inst : ir_.Instructions()) {
@@ -204,9 +207,7 @@ void Structural::CheckForOrphanedInstructions() {
 }
 
 void Structural::CheckStageRestrictedInstructions() {
-    if (diag_.ContainsErrors()) {
-        return;
-    }
+    TINT_CHECK_ERRORS();
 
     // Check for instructions being used in stages that do not support them.
     for (const auto& i : stage_restricted_instructions_) {
@@ -1988,9 +1989,7 @@ void Structural::EndBlock() {
 }
 
 void Structural::QueueInstructions(const Instruction* inst) {
-    if (diag_.ContainsErrors()) {
-        return;
-    }
+    TINT_CHECK_ERRORS();
 
     tasks_.Push([this, inst] {
         // Tasks are processed LIFO, so push the next instruction to the stack before checking the
