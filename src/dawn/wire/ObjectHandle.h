@@ -74,6 +74,13 @@ struct ObjectHandle : public Handle {
     bool IsValid() const;
 };
 
+inline ObjectHandle ToAPI(ObjectHandle rhs) {
+    return rhs;
+}
+inline ObjectHandle FromAPI(ObjectHandle rhs) {
+    return rhs;
+}
+
 }  // namespace dawn::wire
 
 template <>

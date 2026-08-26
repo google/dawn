@@ -30,9 +30,12 @@
 //* implementations templates. It assumes that the implementing file includes
 //* the corresponding api_structs_autogen.h.
 
-{% from 'dawn/cpp_macros.tmpl' import as_dawnType with context %}
+{%- from 'dawn/cpp_macros.tmpl' import as_dawnType with context -%}
 
-{%- macro render_structure_conversions(name) -%}
+//* Renders pointer conversions between C types (WGPU...*), Dawn internal types
+//* (DawnType*), and C++ API types (wgpu::...*), including identity overloads.
+//* This is the shared base macro used by both default and copy structure conversions.
+{%- macro render_pointer_structure_conversions(name) -%}
     {% set CType = as_cType(name) %}
     {% set DawnType = as_dawnType(name) %}
     {% set CppType = "wgpu::" + as_cppType(name) %}
@@ -42,17 +45,23 @@
     inline {{CType}}* ToAPI({{DawnType}}* rhs) {
         return reinterpret_cast<{{CType}}*>(rhs);
     }
+    inline const {{CType}}* ToAPI(const {{CType}}* rhs) {
+        return rhs;
+    }
+    inline {{CType}}* ToAPI({{CType}}* rhs) {
+        return rhs;
+    }
     inline const {{DawnType}}* FromAPI(const {{CType}}* rhs) {
         return reinterpret_cast<const {{DawnType}}*>(rhs);
     }
     inline {{DawnType}}* FromAPI({{CType}}* rhs) {
         return reinterpret_cast<{{DawnType}}*>(rhs);
     }
-    inline const {{DawnType}}& FromAPI(const {{CType}}& rhs) {
-        return *reinterpret_cast<const {{DawnType}}*>(&rhs);
+    inline const {{DawnType}}* FromAPI(const {{DawnType}}* rhs) {
+        return rhs;
     }
-    inline {{DawnType}}& FromAPI({{CType}}& rhs) {
-        return *reinterpret_cast<{{DawnType}}*>(&rhs);
+    inline {{DawnType}}* FromAPI({{DawnType}}* rhs) {
+        return rhs;
     }
     inline const {{CppType}}* ToCppAPI(const {{DawnType}}* rhs) {
         return reinterpret_cast<const {{CppType}}*>(rhs);
@@ -68,12 +77,60 @@
     }
 {%- endmacro -%}
 
+//* Renders reference conversions for standard (non-copyable / descriptor) structures.
+//* This provides lvalue reference conversions (FromAPI(const &) and FromAPI(&)) to allow
+//* referencing structure instances across API boundaries without deep copies.
+{%- macro render_reference_structure_conversions(name) -%}
+    {% set CType = as_cType(name) %}
+    {% set DawnType = as_dawnType(name) %}
+    inline const {{DawnType}}& FromAPI(const {{CType}}& rhs) {
+        return *reinterpret_cast<const {{DawnType}}*>(&rhs);
+    }
+    inline {{DawnType}}& FromAPI({{CType}}& rhs) {
+        return *reinterpret_cast<{{DawnType}}*>(&rhs);
+    }
+    inline const {{DawnType}}& FromAPI(const {{DawnType}}& rhs) {
+        return rhs;
+    }
+    inline {{DawnType}}& FromAPI({{DawnType}}& rhs) {
+        return rhs;
+    }
+{%- endmacro -%}
+
+//* Renders conversions for trivial copyable structures (e.g. StringView, Future)
+//* that are passed and returned by value across API boundaries.
+//* This provides by-value ToAPI and FromAPI copy overloads. The reference overloads
+//* from render_reference_structure_conversions are omitted to prevent C++ overload
+//* ambiguity when passing non-const lvalues by value.
+{%- macro render_copy_structure_conversions(name) -%}
+    {% set CType = as_cType(name) %}
+    {% set DawnType = as_dawnType(name) %}
+    inline {{CType}} ToAPI({{DawnType}} rhs) {
+        return *reinterpret_cast<const {{CType}}*>(&rhs);
+    }
+    inline {{CType}} ToAPI({{CType}} rhs) {
+        return rhs;
+    }
+    inline {{DawnType}} FromAPI({{CType}} rhs) {
+        return *reinterpret_cast<const {{DawnType}}*>(&rhs);
+    }
+    inline {{DawnType}} FromAPI({{DawnType}} rhs) {
+        return rhs;
+    }
+{%- endmacro -%}
+
 {% set ChainedStructName = Name("chained struct") %}
-{{render_structure_conversions(ChainedStructName)|indent}}
+{{render_pointer_structure_conversions(ChainedStructName)|indent}}
+{{render_reference_structure_conversions(ChainedStructName)|indent}}
 
-{% for type in by_category["structure"] if type.name.get() != "string view" %}
-    {{render_structure_conversions(type.name)|indent}}
-
+{% set CopyStructs = ["string view", "future"] %}
+{% for type in by_category["structure"] %}
+    {{render_pointer_structure_conversions(type.name)|indent}}
+    {% if type.name.get() in CopyStructs %}
+        {{render_copy_structure_conversions(type.name)|indent}}
+    {% else %}
+        {{render_reference_structure_conversions(type.name)|indent}}
+    {% endif %}
 {% endfor %}
 
 {% for type in by_category["object"] %}
@@ -100,18 +157,32 @@
     }
 {% endfor %}
 
-//* Special structs that we want to allow copies for since they are trivial.
-inline WGPUFuture ToAPI(Future rhs) {
-    return {rhs.id};
+//* In the C API (webgpu.h), WGPUBool is a typedef for uint32_t rather than a distinct
+//* struct or enum. In the C++ API, wgpu::Bool is a wrapper struct around WGPUBool.
+//* We intentionally do NOT define `FromAPI(WGPUBool)` or `FromAPI(const WGPUBool*)`
+//* here, because in C++ WGPUBool is indistinguishable from uint32_t and defining those
+//* overloads would cause non-template overload resolution to match ALL uint32_t
+//* parameters (like binding indices, counts, sizes) and erroneously convert them into
+//* wgpu::Bool.
+//* Instead, we define explicit conversions operating specifically on `wgpu::Bool`,
+//* while WGPUBool (uint32_t) is handled via the fundamental fallback templates.
+inline WGPUBool ToAPI(wgpu::Bool rhs) {
+    return static_cast<WGPUBool>(rhs);
 }
-inline Future FromAPI(WGPUFuture rhs) {
-    return Future{rhs.id};
+inline wgpu::Bool FromAPI(wgpu::Bool rhs) {
+    return rhs;
 }
-inline WGPUStringView ToAPI(StringView rhs) {
-    return {rhs.data, rhs.length};
+inline const WGPUBool* ToAPI(const wgpu::Bool* rhs) {
+    return reinterpret_cast<const WGPUBool*>(rhs);
 }
-inline StringView FromAPI(WGPUStringView rhs) {
-    return StringView(rhs);
+inline WGPUBool* ToAPI(wgpu::Bool* rhs) {
+    return reinterpret_cast<WGPUBool*>(rhs);
+}
+inline const wgpu::Bool* FromAPI(const wgpu::Bool* rhs) {
+    return rhs;
+}
+inline wgpu::Bool* FromAPI(wgpu::Bool* rhs) {
+    return rhs;
 }
 
 template <typename T>
@@ -134,9 +205,29 @@ struct EnumCount;
     inline {{as_cType(type.name)}}* ToAPI(wgpu::{{as_cppType(type.name)}}* rhs) {
         return reinterpret_cast<{{as_cType(type.name)}}*>(rhs);
     }
+
+    inline wgpu::{{as_cppType(type.name)}} FromAPI(wgpu::{{as_cppType(type.name)}} rhs) {
+        return rhs;
+    }
+    inline const wgpu::{{as_cppType(type.name)}}* FromAPI(const wgpu::{{as_cppType(type.name)}}* rhs) {
+        return rhs;
+    }
+    inline wgpu::{{as_cppType(type.name)}}* FromAPI(wgpu::{{as_cppType(type.name)}}* rhs) {
+        return rhs;
+    }
 {% endfor %}
 
 {% for type in by_category["enum"] %}
+    inline {{as_cType(type.name)}} ToAPI({{as_cType(type.name)}} rhs) {
+        return rhs;
+    }
+    inline const {{as_cType(type.name)}}* ToAPI(const {{as_cType(type.name)}}* rhs) {
+        return rhs;
+    }
+    inline {{as_cType(type.name)}}* ToAPI({{as_cType(type.name)}}* rhs) {
+        return rhs;
+    }
+
     inline wgpu::{{as_cppType(type.name)}} FromAPI({{as_cType(type.name)}} rhs) {
         return static_cast<wgpu::{{as_cppType(type.name)}}>(rhs);
     }
@@ -150,28 +241,54 @@ struct EnumCount;
 
 // Fallback ToAPI and FromAPI for primitive and matching pointer types.
 template <typename T>
-    requires std::is_fundamental_v<T> || std::is_same_v<T, std::byte>
+    requires(
+        std::is_fundamental_v<std::remove_cv_t<T>> ||
+        std::is_same_v<std::remove_cv_t<T>, std::byte> ||
+        std::is_void_v<std::remove_cv_t<T>>)
 inline T* ToAPI(T* rhs) {
     return rhs;
 }
+inline const std::byte* FromAPI(const void* rhs) {
+    return reinterpret_cast<const std::byte*>(rhs);
+}
+inline std::byte* FromAPI(void* rhs) {
+    return reinterpret_cast<std::byte*>(rhs);
+}
 
 template <typename T>
-    requires std::is_fundamental_v<T> || std::is_same_v<T, std::byte>
+    requires(
+        std::is_fundamental_v<std::remove_cv_t<T>> ||
+        std::is_same_v<std::remove_cv_t<T>, std::byte>)
 inline T* FromAPI(T* rhs) {
     return rhs;
 }
 
-// Templated helper for converting Spans.
 template <typename T>
-auto ToAPI(dawn::Span<T> rhs) {
-    using ResultItem = std::remove_pointer_t<decltype(ToAPI(rhs.data()))>;
-    // SAFETY: The returned Span has the same lifetime as the input Span.
-    return DAWN_UNSAFE_BUFFERS(dawn::Span<ResultItem>(ToAPI(rhs.data()), rhs.size()));
+    requires(
+        (std::is_fundamental_v<std::remove_cv_t<T>> && !std::is_void_v<std::remove_cv_t<T>>) ||
+        std::is_same_v<std::remove_cv_t<T>, std::byte>)
+inline T ToAPI(T rhs) {
+    return rhs;
+}
+template <typename T>
+    requires(
+        (std::is_fundamental_v<std::remove_cv_t<T>> && !std::is_void_v<std::remove_cv_t<T>>) ||
+        std::is_same_v<std::remove_cv_t<T>, std::byte>)
+inline T FromAPI(T rhs) {
+    return rhs;
 }
 
-template <typename T>
-auto FromAPI(dawn::Span<T> rhs) {
+// Templated helper for converting Spans.
+template <typename T, typename Index, typename PtrType, Index Extent>
+auto ToAPI(dawn::detail::SpanBase<T, Index, PtrType, Extent> rhs) {
+    using ResultItem = std::remove_pointer_t<decltype(ToAPI(rhs.data()))>;
+    // SAFETY: The returned Span has the same lifetime as the input Span.
+    return DAWN_UNSAFE_BUFFERS(dawn::detail::SpanBase<ResultItem, Index, ResultItem*, Extent>(ToAPI(rhs.data()), rhs.size()));
+}
+
+template <typename T, typename Index, typename PtrType, Index Extent>
+auto FromAPI(dawn::detail::SpanBase<T, Index, PtrType, Extent> rhs) {
     using ResultItem = std::remove_pointer_t<decltype(FromAPI(rhs.data()))>;
     // SAFETY: The returned Span has the same lifetime as the input Span.
-    return DAWN_UNSAFE_BUFFERS(dawn::Span<ResultItem>(FromAPI(rhs.data()), rhs.size()));
+    return DAWN_UNSAFE_BUFFERS(dawn::detail::SpanBase<ResultItem, Index, ResultItem*, Extent>(FromAPI(rhs.data()), rhs.size()));
 }

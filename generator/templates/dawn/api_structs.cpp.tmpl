@@ -115,60 +115,63 @@ bool StringView::operator==(const StringView& rhs) const {
 {% endfor %}
 // NOLINTEND(bugprone-invalid-enum-default-initialization)
 
-{% for type in by_category["structure"] if type.has_free_members_function %}
-    {% set CppType = as_cppType(type.name) %}
+{% set enable_free_members = enable_free_members | default(True) %}
+{% if enable_free_members %}
+    {% for type in by_category["structure"] if type.has_free_members_function %}
+        {% set CppType = as_cppType(type.name) %}
 
-    // {{as_cppType(type.name)}}
-    {{CppType}}::~{{CppType}}() {
-        FreeMembers();
-    }
-
-    {{CppType}}::{{CppType}}({{CppType}}&& rhs) :
-    {% for member in type.members if not member.is_length %}
-        {% set memberName = member.name.camelCase() %}
-        {% if not loop.last %}
-            {{"    "}}{{memberName}}(rhs.{{memberName}}),
-        {% else %}
-            {{"    "}}{{memberName}}(rhs.{{memberName}})
-        {% endif %}
-    {% endfor %}
-    {
-        {% for member in type.members if not member.is_length %}
-            rhs.{{member.name.camelCase()}} = {};
-        {% endfor %}
-    }
-
-    {{CppType}}& {{CppType}}::operator=({{CppType}}&& rhs) {
-        if (&rhs == this) {
-            return *this;
+        // {{as_cppType(type.name)}}
+        {{CppType}}::~{{CppType}}() {
+            FreeMembers();
         }
-        FreeMembers();
-        {% for member in type.members if not member.is_length %}
-            this->{{member.name.camelCase()}} = std::move(rhs.{{member.name.camelCase()}});
-        {% endfor %}
-        {% for member in type.members if not member.is_length %}
-            rhs.{{member.name.camelCase()}} = {};
-        {% endfor %}
-        return *this;
-    }
 
-    void {{CppType}}::FreeMembers() {
-        bool needsFreeing = false;
-        {% for member in type.members if member.annotation != 'value' %}
-            {% if member.length and member.length != "constant" %}
-                if (!this->{{member.name.camelCase()}}.empty()) { needsFreeing = true; }
-            {% elif member.length == "constant" and member.constant_length != 1 %}
-                if (this->{{member.name.camelCase()}}.data() != nullptr) { needsFreeing = true; }
+        {{CppType}}::{{CppType}}({{CppType}}&& rhs) :
+        {% for member in type.members if not member.is_length %}
+            {% set memberName = member.name.camelCase() %}
+            {% if not loop.last %}
+                {{"    "}}{{memberName}}(rhs.{{memberName}}),
             {% else %}
-                if (this->{{member.name.camelCase()}} != nullptr) { needsFreeing = true; }
+                {{"    "}}{{memberName}}(rhs.{{memberName}})
             {% endif %}
         {% endfor %}
-        {% for member in type.members if member.type.name.canonical_case() == 'string view' %}
-            if (this->{{member.name.camelCase()}}.data != nullptr) { needsFreeing = true; }
-        {% endfor %}
-        if (needsFreeing) {
-            APIFreeMembers(*reinterpret_cast<{{as_cType(type.name)}}*>(this));
+        {
+            {% for member in type.members if not member.is_length %}
+                rhs.{{member.name.camelCase()}} = {};
+            {% endfor %}
         }
-    }
 
-{% endfor %}
+        {{CppType}}& {{CppType}}::operator=({{CppType}}&& rhs) {
+            if (&rhs == this) {
+                return *this;
+            }
+            FreeMembers();
+            {% for member in type.members if not member.is_length %}
+                this->{{member.name.camelCase()}} = std::move(rhs.{{member.name.camelCase()}});
+            {% endfor %}
+            {% for member in type.members if not member.is_length %}
+                rhs.{{member.name.camelCase()}} = {};
+            {% endfor %}
+            return *this;
+        }
+
+        void {{CppType}}::FreeMembers() {
+            bool needsFreeing = false;
+            {% for member in type.members if member.annotation != 'value' %}
+                {% if member.length and member.length != "constant" %}
+                    if (!this->{{member.name.camelCase()}}.empty()) { needsFreeing = true; }
+                {% elif member.length == "constant" and member.constant_length != 1 %}
+                    if (this->{{member.name.camelCase()}}.data() != nullptr) { needsFreeing = true; }
+                {% else %}
+                    if (this->{{member.name.camelCase()}} != nullptr) { needsFreeing = true; }
+                {% endif %}
+            {% endfor %}
+            {% for member in type.members if member.type.name.canonical_case() == 'string view' %}
+                if (this->{{member.name.camelCase()}}.data != nullptr) { needsFreeing = true; }
+            {% endfor %}
+            if (needsFreeing) {
+                APIFreeMembers(*reinterpret_cast<{{as_cType(type.name)}}*>(this));
+            }
+        }
+
+    {% endfor %}
+{% endif %}

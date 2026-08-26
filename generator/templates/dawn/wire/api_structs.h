@@ -1,4 +1,4 @@
-//* Copyright 2020 The Dawn & Tint Authors
+//* Copyright 2026 The Dawn & Tint Authors
 //*
 //* Redistribution and use in source and binary forms, with or without
 //* modification, are permitted provided that the following conditions are met:
@@ -25,32 +25,28 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef DAWNWIRE_OBJECTTYPE_AUTOGEN_H_
-#define DAWNWIRE_OBJECTTYPE_AUTOGEN_H_
+#ifndef DAWNWIRE_WGPU_STRUCTS_AUTOGEN_H_
+#define DAWNWIRE_WGPU_STRUCTS_AUTOGEN_H_
 
-#include "src/dawn/common/ityp_array.h"
+#include "absl/strings/string_view.h"
+#include "dawn/webgpu_cpp.h"
+#include "src/utils/span.h"
+
+#include <cmath>
+#include <optional>
+#include <string_view>
 
 namespace dawn::wire {
 
-    constexpr uint32_t kObjectTypes = {{len(by_category["object"])}};
+namespace detail {
+{% for type in by_category["object"] %}
+    using {{type.name.CamelCase()}} = std::remove_pointer_t<{{as_cType(type.name)}}>;
+{% endfor %}
+}
 
-    enum class ObjectType : uint32_t {
-        {% for type in by_category["object"] %}
-            {{type.name.CamelCase()}},
-        {% endfor %}
-    };
-
-    template <typename T>
-    using PerObjectType = ityp::array<ObjectType, T, {{len(by_category["object"])}}>;
-
-    inline ObjectType ToAPI(ObjectType rhs) {
-        return rhs;
-    }
-    inline ObjectType FromAPI(ObjectType rhs) {
-        return rhs;
-    }
+{% set enable_free_members = False %}
+{% include 'dawn/api_structs.h.tmpl' %}
 
 } // namespace dawn::wire
 
-
-#endif  // DAWNWIRE_OBJECTTYPE_AUTOGEN_H_
+#endif  // DAWNWIRE_WGPU_STRUCTS_AUTOGEN_H_

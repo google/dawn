@@ -1,4 +1,4 @@
-//* Copyright 2020 The Dawn & Tint Authors
+//* Copyright 2026 The Dawn & Tint Authors
 //*
 //* Redistribution and use in source and binary forms, with or without
 //* modification, are permitted provided that the following conditions are met:
@@ -25,32 +25,15 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef DAWNWIRE_OBJECTTYPE_AUTOGEN_H_
-#define DAWNWIRE_OBJECTTYPE_AUTOGEN_H_
+#ifndef DAWNWIRE_DAWN_PLATFORM_AUTOGEN_H_
+#define DAWNWIRE_DAWN_PLATFORM_AUTOGEN_H_
 
-#include "src/dawn/common/ityp_array.h"
+#include "dawn/wire/wgpu_structs_autogen.h"
 
 namespace dawn::wire {
 
-    constexpr uint32_t kObjectTypes = {{len(by_category["object"])}};
+{% include 'dawn/dawn_platform.h.tmpl' %}
 
-    enum class ObjectType : uint32_t {
-        {% for type in by_category["object"] %}
-            {{type.name.CamelCase()}},
-        {% endfor %}
-    };
+}  // namespace dawn::wire
 
-    template <typename T>
-    using PerObjectType = ityp::array<ObjectType, T, {{len(by_category["object"])}}>;
-
-    inline ObjectType ToAPI(ObjectType rhs) {
-        return rhs;
-    }
-    inline ObjectType FromAPI(ObjectType rhs) {
-        return rhs;
-    }
-
-} // namespace dawn::wire
-
-
-#endif  // DAWNWIRE_OBJECTTYPE_AUTOGEN_H_
+#endif  // DAWNWIRE_DAWN_PLATFORM_AUTOGEN_H_

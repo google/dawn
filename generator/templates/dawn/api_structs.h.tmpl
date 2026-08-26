@@ -95,6 +95,7 @@ struct StringView {
 
 // NOLINTBEGIN(bugprone-invalid-enum-default-initialization)
 
+{% set enable_free_members = enable_free_members | default(True) %}
 {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
     {% set CppType = as_cppType(type.name) %}
     {% if type.chained %}
@@ -105,11 +106,11 @@ struct StringView {
             }
     {% else %}
         struct {{CppType}} {
-            {% if type.has_free_members_function %}
+            {% if enable_free_members and type.has_free_members_function %}
                 {{CppType}}() = default;
             {% endif %}
     {% endif %}
-        {% if type.has_free_members_function %}
+        {% if enable_free_members and type.has_free_members_function %}
             ~{{CppType}}();
             {{CppType}}(const {{CppType}}&) = delete;
             {{CppType}}& operator=(const {{CppType}}&) = delete;
@@ -150,7 +151,7 @@ struct StringView {
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
         bool operator==(const {{CppType}}& rhs) const;
-        {% if type.has_free_members_function %}
+        {% if enable_free_members and type.has_free_members_function %}
 
             private:
               inline void FreeMembers();
@@ -160,14 +161,16 @@ struct StringView {
 {% endfor %}
 // NOLINTEND(bugprone-invalid-enum-default-initialization)
 
-// Fully qualify FreeMember function names for the generated code.
-{% for type in by_category["structure"] if type.has_free_members_function %}
-    void API{{as_MethodSuffix(type.name, Name("free members"))}}({{as_cType(type.name)}});
-{% endfor %}
+{% if enable_free_members %}
+    // Fully qualify FreeMember function names for the generated code.
+    {% for type in by_category["structure"] if type.has_free_members_function %}
+        void API{{as_MethodSuffix(type.name, Name("free members"))}}({{as_cType(type.name)}});
+    {% endfor %}
 
-// Aliased FreeMember functions for templated code.
-{% for type in by_category["structure"] if type.has_free_members_function %}
-    inline void APIFreeMembers({{as_cType(type.name)}} s) {
-        API{{as_MethodSuffix(type.name, Name("free members"))}}(s);
-    }
-{% endfor %}
+    // Aliased FreeMember functions for templated code.
+    {% for type in by_category["structure"] if type.has_free_members_function %}
+        inline void APIFreeMembers({{as_cType(type.name)}} s) {
+            API{{as_MethodSuffix(type.name, Name("free members"))}}(s);
+        }
+    {% endfor %}
+{% endif %}

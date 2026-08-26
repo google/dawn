@@ -51,6 +51,9 @@ dawn_json_generator("gen") {
     "${dawn_template_dir}/dawn/api_structs.cpp.tmpl",
     "${dawn_template_dir}/dawn/cpp_macros.tmpl",
     "${dawn_template_dir}/dawn/dawn_platform.h.tmpl",
+    "${dawn_template_dir}/dawn/wire/api_structs.h",
+    "${dawn_template_dir}/dawn/wire/api_structs.cpp",
+    "${dawn_template_dir}/dawn/wire/dawn_platform.h",
     "${dawn_template_dir}/dawn/wire/ObjectType.h",
     "${dawn_template_dir}/dawn/wire/WireCmd.h",
     "${dawn_template_dir}/dawn/wire/WireCmd.cpp",
@@ -69,6 +72,9 @@ dawn_json_generator("gen") {
     "${dawn_template_dir}/dawn/wire/server/WGPUTraits.h",
   ]
   outputs = [
+    "src/dawn/wire/dawn_platform.h",
+    "src/dawn/wire/wgpu_structs_autogen.h",
+    "src/dawn/wire/wgpu_structs_autogen.cpp",
     "src/dawn/wire/ObjectType_autogen.h",
     "src/dawn/wire/WireCmd_autogen.h",
     "src/dawn/wire/WireCmd_autogen.cpp",
@@ -88,7 +94,7 @@ dawn_json_generator("gen") {
   ]
 }
 
-source_set("sources") {
+source_set("common_sources") {
   deps = [
     ":gen",
     "${dawn_root}/src/dawn/common",
@@ -96,7 +102,11 @@ source_set("sources") {
   ]
 
   configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
-  sources = get_target_outputs(":gen")
+  sources = filter_exclude(get_target_outputs(":gen"),
+                           [
+                             "*/client/*",
+                             "*/server/*",
+                           ])
   sources += [
     "BufferConsumer.h",
     "ChunkedCommandHandler.cpp",
@@ -112,6 +122,25 @@ source_set("sources") {
     "WireDeserializeAllocator.cpp",
     "WireDeserializeAllocator.h",
     "WireResult.h",
+  ]
+
+  public_deps = [
+    ":headers",
+    "${dawn_abseil_dir}:absl",
+    "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
+  ]
+}
+
+source_set("client_sources") {
+  deps = [
+    ":gen",
+    "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/tint/lang/wgsl",
+  ]
+
+  configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
+  sources = filter_include(get_target_outputs(":gen"), [ "*/client/*" ])
+  sources += [
     "client/Adapter.cpp",
     "client/Adapter.h",
     "client/ApiObjects.h",
@@ -145,6 +174,26 @@ source_set("sources") {
     "client/Surface.h",
     "client/Texture.cpp",
     "client/Texture.h",
+  ]
+
+  public_deps = [
+    ":common_sources",
+    ":headers",
+    "${dawn_abseil_dir}:absl",
+    "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
+  ]
+}
+
+source_set("server_sources") {
+  deps = [
+    ":gen",
+    "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/tint/lang/wgsl",
+  ]
+
+  configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
+  sources = filter_include(get_target_outputs(":gen"), [ "*/server/*" ])
+  sources += [
     "server/ObjectStorage.h",
     "server/Server.cpp",
     "server/Server.h",
@@ -163,9 +212,17 @@ source_set("sources") {
   }
 
   public_deps = [
+    ":common_sources",
     ":headers",
     "${dawn_abseil_dir}:absl",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
+  ]
+}
+
+source_set("sources") {
+  public_deps = [
+    ":client_sources",
+    ":server_sources",
   ]
 }
 

@@ -2070,6 +2070,19 @@ class MultiGeneratorFromDawnJSON(Generator):
                 FileRender('dawn/wire/WireCmd.cpp',
                            'src/dawn/wire/WireCmd_autogen.cpp', wire_params))
             renders.append(
+                FileRender(
+                    'dawn/wire/api_structs.h', 'src/dawn/wire/' +
+                    metadata.namespace + '_structs_autogen.h', wire_params))
+            renders.append(
+                FileRender(
+                    'dawn/wire/api_structs.cpp', 'src/dawn/wire/' +
+                    metadata.namespace + '_structs_autogen.cpp', wire_params))
+            renders.append(
+                FileRender('dawn/wire/dawn_platform.h',
+                           'src/dawn/wire/' + prefix + '_platform.h',
+                           wire_params))
+
+            renders.append(
                 FileRender('dawn/wire/client/ApiObjects.h',
                            'src/dawn/wire/client/ApiObjects_autogen.h',
                            wire_params))

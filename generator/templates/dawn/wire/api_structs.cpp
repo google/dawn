@@ -1,4 +1,4 @@
-//* Copyright 2020 The Dawn & Tint Authors
+//* Copyright 2026 The Dawn & Tint Authors
 //*
 //* Redistribution and use in source and binary forms, with or without
 //* modification, are permitted provided that the following conditions are met:
@@ -25,32 +25,21 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef DAWNWIRE_OBJECTTYPE_AUTOGEN_H_
-#define DAWNWIRE_OBJECTTYPE_AUTOGEN_H_
+#include "dawn/wire/wgpu_structs_autogen.h"
 
-#include "src/dawn/common/ityp_array.h"
+#include <cstring>
+#include <tuple>
+
+#include "src/utils/assert.h"
+
+#if defined(__GNUC__) || defined(__clang__)
+// error: 'offsetof' within non-standard-layout type '{{namespace}}::XXX' is conditionally-supported
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
 
 namespace dawn::wire {
 
-    constexpr uint32_t kObjectTypes = {{len(by_category["object"])}};
-
-    enum class ObjectType : uint32_t {
-        {% for type in by_category["object"] %}
-            {{type.name.CamelCase()}},
-        {% endfor %}
-    };
-
-    template <typename T>
-    using PerObjectType = ityp::array<ObjectType, T, {{len(by_category["object"])}}>;
-
-    inline ObjectType ToAPI(ObjectType rhs) {
-        return rhs;
-    }
-    inline ObjectType FromAPI(ObjectType rhs) {
-        return rhs;
-    }
+{% set enable_free_members = False %}
+{% include 'dawn/api_structs.cpp.tmpl' %}
 
 } // namespace dawn::wire
-
-
-#endif  // DAWNWIRE_OBJECTTYPE_AUTOGEN_H_
