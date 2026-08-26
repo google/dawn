@@ -433,6 +433,10 @@ func generateTriageReport(tc *triageConfig) error {
 		return fmt.Errorf("failed to write report file: %w", err)
 	}
 
-	fmt.Printf("\nTriage complete.\nRepro: %s\nReport: %s\n", tc.reproFile, tc.reportFile)
+	if tc.temporaryOut {
+		fmt.Printf("\nTriage complete.\nWARNING: Repro file and logs were saved to a temporary directory and will not be retained. Provide -out to keep them.\n")
+	} else {
+		fmt.Printf("\nTriage complete.\nRepro: %s\nReport: %s\n", tc.reproFile, tc.reportFile)
+	}
 	return nil
 }

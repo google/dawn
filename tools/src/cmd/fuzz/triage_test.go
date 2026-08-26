@@ -28,6 +28,9 @@
 package main
 
 import (
+	"bytes"
+	"io"
+	"os"
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
@@ -211,4 +214,48 @@ func TestGenerateTriageReportResilience(t *testing.T) {
 	require.Contains(t, reportStr, "## Failing Transform\n`Unknown`")
 	require.Contains(t, reportStr, "## Failing Transform Config\nNone")
 	require.Contains(t, reportStr, "## Crash Stack\n```\nUnknown (failed to extract stack trace)\n```")
+}
+
+func TestGenerateTriageReportTemporaryOut(t *testing.T) {
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+
+	tc := &triageConfig{
+		taskConfig: &taskConfig{
+			mainConfig: mainConfig{
+				osWrapper:    wrapper,
+				triageFile:   "some-crash-file",
+				fuzzMode:     FuzzModeIr,
+				timeout:      60,
+				temporaryOut: true,
+			},
+			fuzzer: "tint_ir_fuzzer",
+		},
+		inputBase:     "some-crash-file",
+		reproFile:     "some-crash-file.repro",
+		logFile:       "some-crash-file.triage.log",
+		reportFile:    "some-crash-file.triage.md",
+		reproStatus:   ReproStatusIdentical,
+		inputsDisplay: "## IR Input\n```\n$B1: { ... }\n```\n",
+		irInput:       "$B1: { ... }",
+		failingPass:   "tint::glsl::writer::IRFuzzer",
+		verboseOut:    []byte("some log"),
+	}
+
+	// Capture stdout
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	err := generateTriageReport(tc)
+
+	w.Close()
+	os.Stdout = oldStdout
+
+	require.NoError(t, err)
+
+	var buf bytes.Buffer
+	_, _ = io.Copy(&buf, r)
+	output := buf.String()
+
+	require.Contains(t, output, "WARNING: Repro file and logs were saved to a temporary directory and will not be retained.")
 }

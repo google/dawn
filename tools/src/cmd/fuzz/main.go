@@ -125,6 +125,7 @@ type mainConfig struct {
 	skipInputTypeCheck bool
 	build              string
 	out                string
+	temporaryOut       bool
 	numProcesses       int
 	experimentPath     string
 	machineName        string
@@ -340,12 +341,13 @@ func run(c *mainConfig) error {
 	case TaskModeExperiment:
 		// output/build directory checking is part of runExperiment, since the expected locations/content are based on
 		// the values in the experiment config file.
-	case TaskModeRun, TaskModeCheck, TaskModeGenerate:
+	case TaskModeRun, TaskModeCheck, TaskModeGenerate, TaskModeTriage:
 		// These modes allow for using a temporary directory
 		if c.out == "" || c.out == "<tmp>" {
 			if tmp, err := c.osWrapper.MkdirTemp("", "tint_fuzz"); err == nil {
 				defer c.osWrapper.RemoveAll(tmp)
 				c.out = tmp
+				c.temporaryOut = true
 			} else {
 				return err
 			}
