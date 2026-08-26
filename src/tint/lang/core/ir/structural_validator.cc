@@ -2759,6 +2759,15 @@ void Structural::CheckIf(const If* if_) {
         }
         if (constexpr_if->False()->IsEmpty()) {
             AddError(constexpr_if) << "constexpr_if must have a false block";
+        } else if (!constexpr_if->False()->Terminator() ||
+                   !constexpr_if->False()->Terminator()->Is<core::ir::ExitIf>()) {
+            AddError(constexpr_if->False())
+                << "constexpr_if false block terminator must be an exit_if";
+        }
+        if (!constexpr_if->True()->Terminator() ||
+            !constexpr_if->True()->Terminator()->Is<core::ir::ExitIf>()) {
+            AddError(constexpr_if->True())
+                << "constexpr_if true block terminator must be an exit_if";
         }
     }
 
