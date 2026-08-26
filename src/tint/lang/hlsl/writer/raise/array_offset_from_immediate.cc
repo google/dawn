@@ -117,7 +117,7 @@ struct State {
                             Value* curr_offset = mbc->Args()[arg_index];
                             Value* dyn_offset = LoadDynamicOffset(offset_index);
                             auto* new_offset = b.Add(curr_offset, dyn_offset);
-                            mbc->SetArg(arg_index, new_offset->Result());
+                            mbc->SetArg(arg_index, new_offset);
                         });
                     };
 

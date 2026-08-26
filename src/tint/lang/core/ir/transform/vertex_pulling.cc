@@ -234,7 +234,7 @@ struct State {
             if (buffer.array_stride != 4) {
                 // Multiply the index by the stride in words.
                 TINT_IR_ASSERT(ir, (buffer.array_stride & 3u) == 0u);
-                index = b.Multiply(index, u32(buffer.array_stride / 4))->Result();
+                index = b.Multiply(index, u32(buffer.array_stride / 4));
                 ir.SetName(index, buffer_name + "_base");
             }
 
@@ -348,15 +348,15 @@ struct State {
             auto offset_value = info.base_offset;
             offset += (info.attr_byte_offset / 4u);
             if (offset > 0) {
-                offset_value = b.Add(offset_value, u32(offset))->Result();
+                offset_value = b.Add(offset_value, u32(offset));
             }
-            auto* word =
+            core::ir::Value* word =
                 b.Load(b.Access<ptr<storage, u32, read>>(info.buffer, offset_value))->Result();
             // If the offset is not 4-byte aligned, shift the word so that the requested data starts
             // at the first byte. The shift amount is the offset of the byte within a word
             // multiplied by 8 to get the bit offset.
             if (info.attr_byte_offset & 3) {
-                word = b.ShiftRight(word, u32((info.attr_byte_offset & 3) * 8))->Result();
+                word = b.ShiftRight(word, u32((info.attr_byte_offset & 3) * 8));
             }
             return word;
         };
@@ -376,7 +376,7 @@ struct State {
             // yyyyxxxx, yyyyxxxx
             auto* splat = b.Construct(vec, word);
             // xxxxyyyy, yyyyxxxx
-            core::ir::Instruction* shift_left = nullptr;
+            core::ir::Value* shift_left = nullptr;
             switch (vec->Width()) {
                 case 2:
                     if (bits == 8) {
@@ -395,7 +395,7 @@ struct State {
                     TINT_IR_UNREACHABLE(ir);
             }
             // 0000xxxx, 0000yyyy
-            return b.ShiftRight(shift_left, b.Splat(uvec, u32(32 - bits)))->Result();
+            return b.ShiftRight(shift_left, b.Splat(uvec, u32(32 - bits)));
         };
         // Helper to convert a value to f16 if required by the shader, otherwise returns the f32.
         auto float_value = [&](core::ir::Value* value) -> core::ir::Value* {
@@ -410,13 +410,13 @@ struct State {
             // Formats that are always u32 in the shader (or vectors of u32).
             // Shift/mask values to expand to 32-bits.
             case VertexFormat::kUint8:
-                return b.And(load_u32(0), 0xFF_u)->Result();
+                return b.And(load_u32(0), 0xFF_u);
             case VertexFormat::kUint8x2:
                 return load_ivec(0, 8, ty.vec2u());
             case VertexFormat::kUint8x4:
                 return load_ivec(0, 8, ty.vec4u());
             case VertexFormat::kUint16:
-                return b.And(load_u32(0), 0xFFFF_u)->Result();
+                return b.And(load_u32(0), 0xFFFF_u);
             case VertexFormat::kUint16x2:
                 return load_ivec(0, 16, ty.vec2u());
             case VertexFormat::kUint16x4: {
@@ -451,7 +451,7 @@ struct State {
                 // ******xx
                 auto* word = b.Bitcast<i32>(load_u32(0));
                 // 000000xx
-                return b.ShiftRight(b.ShiftLeft(word, 24_u), 24_u)->Result();
+                return b.ShiftRight(b.ShiftLeft(word, 24_u), 24_u);
             }
             case VertexFormat::kSint8x2:
                 return load_ivec(0, 8, ty.vec2i());
@@ -461,7 +461,7 @@ struct State {
                 // ****xxxx
                 auto* word = b.Bitcast<i32>(load_u32(0));
                 // 0000xxxx
-                return b.ShiftRight(b.ShiftLeft(word, 16_u), 16_u)->Result();
+                return b.ShiftRight(b.ShiftLeft(word, 16_u), 16_u);
             }
             case VertexFormat::kSint16x2:
                 return load_ivec(0, 16, ty.vec2i());
@@ -677,7 +677,7 @@ struct State {
                 auto* mask = b.And(shr, b.Composite<vec4u>(0x3FF_u, 0x3FF_u, 0x3FF_u, 0x3_u));
                 // vec4f(mask) / vec4f(1023, 1023, 1023, 3);
                 auto* div = b.Composite<vec4f>(1023_f, 1023_f, 1023_f, 3_f);
-                return float_value(b.Divide(b.Convert<vec4f>(mask), div)->Result());
+                return float_value(b.Divide(b.Convert<vec4f>(mask), div));
             }
             case VertexFormat::kSnorm10_10_10_2: {
                 auto* s32 = b.Bitcast<i32>(load_u32(0));

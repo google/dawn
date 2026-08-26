@@ -60,7 +60,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition) {
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
-            condition = b.LessThan(b.Load(idx), 10_u);
+            condition = b.LessThan(b.Load(idx), 10_u)->AsInstruction<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -144,7 +144,7 @@ TEST_F(IR_ForLoopAnalysisTest, ConditionUniformArray) {
         b.Append(loop->Body(), [&] {
             auto* access = b.Access(ty.ptr<uniform, vec4<u32>>(), U, 3_i);
             auto* load = b.LoadVectorElement(access, 0_u);
-            condition = b.LessThan(load, 10_u);
+            condition = b.LessThan(load, 10_u)->AsInstruction<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -242,7 +242,7 @@ TEST_F(IR_ForLoopAnalysisTest, ConditionUniformStructure) {
         b.Append(loop->Body(), [&] {
             auto* access = b.Access(ty.ptr<uniform, vec4<u32>>(), U, 0_i);
             auto* load = b.LoadVectorElement(access, 0_u);
-            condition = b.LessThan(load, 10_u);
+            condition = b.LessThan(load, 10_u)->AsInstruction<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -346,7 +346,7 @@ TEST_F(IR_ForLoopAnalysisTest, ConditionUniformStructure_WithInfiniteLoopPrevent
         b.Append(loop->Body(), [&] {
             auto* access = b.Access(ty.ptr<uniform, vec4<u32>>(), U, 0_i);
             auto* load = b.LoadVectorElement(access, 0_u);
-            condition = b.LessThan(load, 10_u);
+            condition = b.LessThan(load, 10_u)->AsInstruction<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -452,7 +452,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailLet) {
         });
         b.Append(loop->Body(), [&] {
             auto* as_let = b.Let(10_u);
-            condition = b.LessThan(b.Load(idx), as_let);
+            condition = b.LessThan(b.Load(idx), as_let)->AsInstruction<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -526,7 +526,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailStore) {
         b.Append(loop->Body(), [&] {
             b.Store(idx, b.Add(b.Load(idx), 1_u));
             auto* as_let = b.Let(10_u);
-            condition = b.LessThan(b.Load(idx), as_let);
+            condition = b.LessThan(b.Load(idx), as_let)->AsInstruction<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -602,7 +602,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailNonCanonicalIfFlipped) {
         });
         b.Append(loop->Body(), [&] {
             auto* as_let = b.Let(10_u);
-            condition = b.LessThan(b.Load(idx), as_let);
+            condition = b.LessThan(b.Load(idx), as_let)->AsInstruction<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->False(), [&] {  //
                 b.ExitIf(ifelse);
@@ -675,7 +675,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailNonCanonicalIfOnlyExit) {
         });
         b.Append(loop->Body(), [&] {
             auto* as_let = b.Let(10_u);
-            condition = b.LessThan(b.Load(idx), as_let);
+            condition = b.LessThan(b.Load(idx), as_let)->AsInstruction<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitLoop(loop);
@@ -744,7 +744,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_EmptyContinuingBlock) {
         auto* body_param = b.BlockParam<u32>();
         loop->Body()->AddParam(body_param);
         b.Append(loop->Body(), [&] {
-            condition = b.LessThan(b.Load(idx), body_param);
+            condition = b.LessThan(b.Load(idx), body_param)->AsInstruction<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -811,7 +811,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_ContinuingNextIterationHasOpe
         auto* body_param = b.BlockParam<u32>();
         loop->Body()->AddParam(body_param);
         b.Append(loop->Body(), [&] {
-            condition = b.LessThan(b.Load(idx), body_param);
+            condition = b.LessThan(b.Load(idx), body_param)->AsInstruction<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -886,7 +886,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_ContinuingHasNoStore) {
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
-            condition = b.LessThan(b.Load(idx), 10_u);
+            condition = b.LessThan(b.Load(idx), 10_u)->AsInstruction<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -964,7 +964,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_ContinuingInstructionDoesNotS
         b.Append(loop->Body(), [&] {
             auto* idx_load = b.Load(idx);
             auto* bound_load = b.Load(bound);
-            condition = b.LessThan(idx_load, bound_load);
+            condition = b.LessThan(idx_load, bound_load)->AsInstruction()->As<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -1045,7 +1045,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_ContinuingInstructionUsesBody
         });
         b.Append(loop->Body(), [&] {
             auto* idx_load = b.Load(idx);
-            condition = b.LessThan(idx_load, 5_u);
+            condition = b.LessThan(idx_load, 5_u)->AsInstruction()->As<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -1124,7 +1124,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_ContinuingHasVarDeclaration) 
         });
         b.Append(loop->Body(), [&] {
             auto* idx_load = b.Load(idx);
-            condition = b.LessThan(idx_load, 5_u);
+            condition = b.LessThan(idx_load, 5_u)->AsInstruction()->As<CoreBinary>();
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);

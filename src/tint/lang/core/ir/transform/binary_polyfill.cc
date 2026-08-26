@@ -147,14 +147,14 @@ struct State {
 
                 if (binary->Op() == BinaryOp::kDivide) {
                     // Perform the divide with the modified RHS.
-                    b.Return(func, b.Divide(lhs, rhs_or_one)->Result());
+                    b.Return(func, b.Divide(lhs, rhs_or_one));
                 } else if (binary->Op() == BinaryOp::kModulo) {
                     // Calculate the modulo manually, as modulo with negative operands is undefined
                     // behavior for many backends:
                     //   result = lhs - ((lhs / rhs_or_one) * rhs_or_one)
                     auto* whole = b.Divide(lhs, rhs_or_one);
                     auto* remainder = b.Subtract(lhs, b.Multiply(whole, rhs_or_one));
-                    b.Return(func, remainder->Result());
+                    b.Return(func, remainder);
                 }
             });
             return func;
@@ -183,9 +183,9 @@ struct State {
         auto* lhs = binary->LHS();
         auto* rhs = binary->RHS();
         auto mask = u32(lhs->Type()->DeepestElement()->Size() * 8 - 1);
-        auto* masked = b.And(rhs, b.MatchWidth(mask, rhs->Type()));
-        masked->InsertBefore(binary);
-        binary->SetOperand(ir::CoreBinary::kRhsOperandOffset, masked->Result());
+        Value* masked = nullptr;
+        b.InsertBefore(binary, [&] { masked = b.And(rhs, b.MatchWidth(mask, rhs->Type())); });
+        binary->SetOperand(ir::CoreBinary::kRhsOperandOffset, masked);
     }
 };
 

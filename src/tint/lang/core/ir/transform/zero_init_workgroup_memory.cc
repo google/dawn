@@ -302,10 +302,10 @@ struct State {
                     auto array_index = std::get<ArrayIndex>(idx);
                     Value* index = linear_index;
                     if (count > 1) {
-                        index = b.Divide(index, u32(count))->Result();
+                        index = b.Divide(index, u32(count));
                     }
                     if (total_count > count * array_index.count) {
-                        index = b.Modulo(index, u32(array_index.count))->Result();
+                        index = b.Modulo(index, u32(array_index.count));
                     }
                     indices.Push(index);
                     count *= array_index.count;

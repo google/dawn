@@ -86,7 +86,7 @@ struct State {
                     auto* lhs_col = b.Access(mat->ColumnType(), lhs, u32(col));
                     auto* rhs_col = b.Access(mat->ColumnType(), rhs, u32(col));
                     auto* add = b.Binary(op, mat->ColumnType(), lhs_col, rhs_col);
-                    args.Push(add->Result());
+                    args.Push(add);
                 }
                 b.ConstructWithResult(binary->DetachResult(), std::move(args));
             };

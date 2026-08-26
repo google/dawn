@@ -40,7 +40,8 @@ using IR_ValueDeathTest = IR_ValueTest;
 TEST_F(IR_ValueTest, ReplaceAllUsesWith_Value) {
     auto* val_old = b.InstructionResult(ty.i32());
     auto* val_new = b.InstructionResult(ty.i32());
-    auto* inst = b.Add(val_old, 1_i);
+    auto* v = b.Add(val_old, 1_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
     EXPECT_EQ(inst->LHS(), val_old);
     val_old->ReplaceAllUsesWith(val_new);
     EXPECT_EQ(inst->LHS(), val_new);
@@ -49,7 +50,8 @@ TEST_F(IR_ValueTest, ReplaceAllUsesWith_Value) {
 TEST_F(IR_ValueTest, ReplaceAllUsesWith_Fn) {
     auto* val_old = b.InstructionResult(ty.i32());
     auto* val_new = b.InstructionResult(ty.i32());
-    auto* inst = b.Add(val_old, 1_i);
+    auto* v = b.Add(val_old, 1_i);
+    auto* inst = v->AsInstruction()->As<CoreBinary>();
     EXPECT_EQ(inst->LHS(), val_old);
     val_old->ReplaceAllUsesWith([&](Usage use) {
         EXPECT_EQ(use.instruction, inst);
@@ -95,7 +97,7 @@ TEST_F(IR_ValueDeathTest, Destroy_HasSource) {
         {
             Module mod;
             Builder b{mod};
-            auto* val = b.Add(1_i, 2_i)->Result();
+            auto* val = b.Add(1_i, 2_i);
             val->Destroy();
         },
         "internal compiler error");

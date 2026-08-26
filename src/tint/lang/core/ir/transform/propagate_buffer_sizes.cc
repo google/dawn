@@ -169,7 +169,7 @@ struct State {
             b.InsertBefore(call, [&] {
                 // Modify offset to be aligned to the result store type's alignment.
                 offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
-                offset = b.And(offset, u32(~(store_ty->Align() - 1)))->Result();
+                offset = b.And(offset, u32(~(store_ty->Align() - 1)));
                 call->SetArg(1, offset);
             });
         }
@@ -207,12 +207,12 @@ struct State {
                 if (ty_offset != 0) {
                     // Avoid potential underflow if size < ty_offset.
                     size = b.Call(ty.u32(), BuiltinFn::kMax, size, u32(ty_offset))->Result();
-                    size = b.Subtract(size, u32(ty_offset))->Result();
+                    size = b.Subtract(size, u32(ty_offset));
                 }
-                size = b.Divide(size, u32(ty_stride))->Result();
-                size = b.Multiply(size, u32(ty_stride))->Result();
+                size = b.Divide(size, u32(ty_stride));
+                size = b.Multiply(size, u32(ty_stride));
                 if (ty_offset != 0) {
-                    size = b.Add(size, u32(ty_offset))->Result();
+                    size = b.Add(size, u32(ty_offset));
                 }
                 call->SetArg(2, size);
             });

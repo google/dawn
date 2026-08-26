@@ -426,7 +426,7 @@ struct State {
             if (!val) {
                 val = expr;
             } else {
-                val = b.Add(val, expr)->Result();
+                val = b.Add(val, expr);
             }
         }
 
@@ -442,7 +442,7 @@ struct State {
             auto v = cnst->Value()->ValueAs<uint32_t>();
             return b.Value(u32(v / BaseEleType()->Size()));
         }
-        return b.Divide(val, u32(BaseEleType()->Size()))->Result();
+        return b.Divide(val, u32(BaseEleType()->Size()));
     }
 
     // Calculates the index of the vector element containing the byte at (byte_idx %
@@ -455,10 +455,8 @@ struct State {
         }
         // Note: Using bitwise-and and shift instead of modulo and divide here was necessary to
         // avoid an FXC miscompile. See https://crbug.com/454366353.
-        return b
-            .ShiftRight(b.And(byte_idx, b.Constant(u32(src_ty->Size() - 1))),
-                        u32(log2(src_ty->Type()->Size())))
-            ->Result();
+        return b.ShiftRight(b.And(byte_idx, b.Constant(u32(src_ty->Size() - 1))),
+                            u32(log2(src_ty->Type()->Size())));
     }
 
     // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
@@ -471,7 +469,7 @@ struct State {
             [&](core::ir::Value* val) {
                 auto* idx = val;
                 idx = b.InsertConvertIfNeeded(ty.u32(), val);
-                data->byte_offset_expr.Push(b.Multiply(idx, u32(elm_size))->Result());
+                data->byte_offset_expr.Push(b.Multiply(idx, u32(elm_size)));
             },
             TINT_ICE_ON_NO_MATCH);
     }
@@ -812,19 +810,19 @@ struct State {
                 !offset.byte_offset_expr.IsEmpty()) {
                 // Incoming offset in terms of base array type.
                 auto* byte_idx = OffsetToValue(offset);
-                auto* incoming_offset = b.Divide(byte_idx, u32(BaseEleType()->Size()))->Result();
+                auto* incoming_offset = b.Divide(byte_idx, u32(BaseEleType()->Size()));
 
                 // Access offset adjusted to base array type.
                 TINT_IR_ASSERT(ir, BaseEleType()->Size() <= array_ty->ImplicitStride());
                 if (array_ty->ImplicitStride() != BaseEleType()->Size()) {
                     auto* u32_offset_arg = b.InsertBitcastIfNeeded(ty.u32(), call_offset);
                     auto* offset_bytes =
-                        b.Multiply(u32_offset_arg, u32(array_ty->ImplicitStride()))->Result();
-                    call_offset = b.Divide(offset_bytes, u32(BaseEleType()->Size()))->Result();
+                        b.Multiply(u32_offset_arg, u32(array_ty->ImplicitStride()));
+                    call_offset = b.Divide(offset_bytes, u32(BaseEleType()->Size()));
                 }
 
                 // Total offset
-                call_offset = b.Add(incoming_offset, call_offset)->Result();
+                call_offset = b.Add(incoming_offset, call_offset);
             }
 
             // Adjust stride to be in terms of base array type.
@@ -832,9 +830,8 @@ struct State {
             auto* call_stride = call->Args()[stride_index];
             if (array_ty->ImplicitStride() != BaseEleType()->Size()) {
                 auto* u32_call_stride = b.InsertBitcastIfNeeded(ty.u32(), call_stride);
-                auto* stride_bytes =
-                    b.Multiply(u32_call_stride, u32(array_ty->ImplicitStride()))->Result();
-                call_stride = b.Divide(stride_bytes, u32(BaseEleType()->Size()))->Result();
+                auto* stride_bytes = b.Multiply(u32_call_stride, u32(array_ty->ImplicitStride()));
+                call_stride = b.Divide(stride_bytes, u32(BaseEleType()->Size()));
             }
 
             call->SetArg(0, var->Result());
@@ -873,9 +870,8 @@ struct State {
             if (auto* cnst = lve->Index()->As<core::ir::Constant>()) {
                 offset.byte_offset += (cnst->Value()->ValueAs<uint32_t>() * elem_byte_size);
             } else {
-                offset.byte_offset_expr.Push(
-                    b.Multiply(b.InsertConvertIfNeeded(ty.u32(), lve->Index()), u32(elem_byte_size))
-                        ->Result());
+                offset.byte_offset_expr.Push(b.Multiply(
+                    b.InsertConvertIfNeeded(ty.u32(), lve->Index()), u32(elem_byte_size)));
             }
 
             auto* byte_idx = OffsetToValue(offset);
@@ -920,7 +916,7 @@ struct State {
                 if (auto* cnst = idx->As<Constant>()) {
                     idx = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() + 1));
                 } else {
-                    idx = b.Add(idx, b.Constant(1_u))->Result();
+                    idx = b.Add(idx, b.Constant(1_u));
                 }
             }
             auto* access = b.Access(BaseEleTypePtr(), var, idx);
@@ -1030,7 +1026,7 @@ struct State {
             auto* true_ = b.Value(0_u);
             auto* cond = b.Equal(b.Modulo(byte_idx, 4_u), 0_u);
 
-            Vector<core::ir::Value*, 3> args{false_, true_, cond->Result()};
+            Vector<core::ir::Value*, 3> args{false_, true_, cond};
             element_index = b.Call(ty.u32(), core::BuiltinFn::kSelect, args)->Result();
         }
 
@@ -1126,8 +1122,7 @@ struct State {
                     auto* sw_rhs = b.Swizzle(ty.vec2u(), ubo, {0, 1});
                     auto* cond = b.Equal(vec_idx, 2_u);
 
-                    Vector<core::ir::Value*, 3> args{sw_rhs->Result(), sw_lhs->Result(),
-                                                     cond->Result()};
+                    Vector<core::ir::Value*, 3> args{sw_rhs->Result(), sw_lhs->Result(), cond};
 
                     load = b.Call(ty.vec2u(), core::BuiltinFn::kSelect, args);
                 }
@@ -1217,7 +1212,7 @@ struct State {
                 // else -> xy
                 auto* sw_rhs = b.Swizzle(ty.vec2u(), ubo, {0, 1});
                 auto* cond = b.Equal(vec_idx, 2_u);
-                auto args = Vector{sw_rhs->Result(), sw_lhs->Result(), cond->Result()};
+                auto args = Vector{sw_rhs->Result(), sw_lhs->Result(), cond};
                 load = b.Call(ty.vec2u(), core::BuiltinFn::kSelect, std::move(args));
             }
             if (result_ty->Width() == 3) {
@@ -1313,7 +1308,7 @@ struct State {
                 TINT_IR_ASSERT(ir, count);
 
                 b.LoopRange(0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
-                    auto* stride = b.Multiply(idx, u32(arr->ImplicitStride()))->Result();
+                    auto* stride = b.Multiply(idx, u32(arr->ImplicitStride()));
                     OffsetData od{0, {start_byte_offset, stride}};
                     auto* byte_idx = OffsetToValue(od);
                     auto* access = b.Access(ty.ptr<function>(arr->ElemType()), result_arr, idx);
@@ -1444,24 +1439,24 @@ struct State {
                 value = OffsetToValue(data);
             } else {
                 if (data.byte_offset > 0 && data.byte_offset_expr.Length() > 0) {
-                    value = b.Add(data.byte_offset_expr[0], u32(data.byte_offset))->Result();
+                    value = b.Add(data.byte_offset_expr[0], u32(data.byte_offset));
                 } else if (data.byte_offset_expr.Length() > 0) {
                     value = data.byte_offset_expr[0];
                 } else if (data.byte_offset > 0) {
                     value = b.Constant(u32(data.byte_offset / BaseEleType()->Size()));
                 }
                 if (value && data.byte_offset_expr.Length() > 0) {
-                    value = b.Divide(value, u32(BaseEleType()->Size()))->Result();
+                    value = b.Divide(value, u32(BaseEleType()->Size()));
                 }
             }
             if (value) {
-                len = b.Subtract(len, value)->Result();
+                len = b.Subtract(len, value);
             }
             if (has_size || has_length) {
                 // The calculations are in bytes, so use the array stride here.
-                len = b.Divide(len, u32(array_ty->ImplicitStride()))->Result();
+                len = b.Divide(len, u32(array_ty->ImplicitStride()));
             } else if (ratio != 1u) {
-                len = b.Divide(len, u32(ratio))->Result();
+                len = b.Divide(len, u32(ratio));
             }
             call->Result()->ReplaceAllUsesWith(len);
         });
@@ -1488,9 +1483,10 @@ struct State {
             TINT_IR_ASSERT(ir, buffer_ty->Count()->Is<type::RuntimeArrayCount>());
             b.InsertBefore(call, [&] {
                 // arrayLength(var) * BaseEleType()->Size()
-                ir::Instruction* inst = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, var);
-                inst = b.Multiply(inst, u32(BaseEleType()->Size()));
-                call->Result()->ReplaceAllUsesWith(inst->Result());
+                core::ir::Value* value =
+                    b.Call(ty.u32(), core::BuiltinFn::kArrayLength, var)->Result();
+                value = b.Multiply(value, u32(BaseEleType()->Size()));
+                call->Result()->ReplaceAllUsesWith(value);
             });
         }
         call->Destroy();
@@ -1524,7 +1520,7 @@ struct State {
                     if (auto* cnst = array_idx->As<Constant>()) {
                         array_idx = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() + 1));
                     } else {
-                        array_idx = b.Add(array_idx, 1_u)->Result();
+                        array_idx = b.Add(array_idx, 1_u);
                     }
                 }
             }
@@ -1577,7 +1573,7 @@ struct State {
                 if (auto* cnst = array_idx->As<Constant>()) {
                     array_idx = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() + 1));
                 } else {
-                    array_idx = b.Add(array_idx, 1_u)->Result();
+                    array_idx = b.Add(array_idx, 1_u);
                 }
                 Instruction* second = b.Swizzle(sub_vec_ty, from, {2, 3});
                 second = BitcastOrConvertIfNeeded(BaseEleType(), second);
@@ -1613,7 +1609,7 @@ struct State {
                         if (auto* cnst = array_idx->As<Constant>()) {
                             array_idx = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() + 1));
                         } else {
-                            array_idx = b.Add(array_idx, 1_u)->Result();
+                            array_idx = b.Add(array_idx, 1_u);
                         }
                     }
                 }
@@ -1646,7 +1642,7 @@ struct State {
                     if (auto* cnst = array_idx->As<Constant>()) {
                         array_idx = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() + 1));
                     } else {
-                        array_idx = b.Add(array_idx, 1_u)->Result();
+                        array_idx = b.Add(array_idx, 1_u);
                     }
                 }
             }
@@ -1781,7 +1777,7 @@ struct State {
                 TINT_IR_ASSERT(ir, count);
 
                 b.LoopRange(0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
-                    auto* stride = b.Multiply(idx, u32(a->ImplicitStride()))->Result();
+                    auto* stride = b.Multiply(idx, u32(a->ImplicitStride()));
                     OffsetData od{0, {start_byte_offset, stride}};
                     auto* byte_idx = OffsetToValue(od);
                     auto* from = b.Access(a->ElemType(), object, idx)->Result();

@@ -305,8 +305,7 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
                             } else if (scale != 1) {
                                 offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
                                 offset = b.Divide(offset, core::u32(arr_ty->ImplicitStride() /
-                                                                    mat_ty->Type()->Size()))
-                                             ->Result();
+                                                                    mat_ty->Type()->Size()));
                             }
                             new_args.Push(offset);
 
@@ -321,8 +320,7 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
                             } else if (scale != 1) {
                                 stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
                                 stride = b.Divide(stride, core::u32(arr_ty->ImplicitStride() /
-                                                                    mat_ty->Type()->Size()))
-                                             ->Result();
+                                                                    mat_ty->Type()->Size()));
                             }
                             new_args.Push(stride);
 

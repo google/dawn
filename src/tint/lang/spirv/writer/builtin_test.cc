@@ -902,7 +902,7 @@ TEST_F(SpirvWriterTest, Builtin_CountLeadingZeros_U32) {
          %36 = OpBitwiseOr %uint %20 %35
          %37 = OpBitwiseOr %uint %15 %36
          %38 = OpBitwiseOr %uint %9 %37
-     %result = OpIAdd %uint %38 %33
+         %39 = OpIAdd %uint %38 %33
 )");
 }
 
@@ -948,7 +948,7 @@ TEST_F(SpirvWriterTest, Builtin_CountLeadingZeros_I32) {
          %39 = OpBitwiseOr %uint %17 %38
          %40 = OpBitwiseOr %uint %11 %39
          %41 = OpIAdd %uint %40 %35
-     %result = OpBitcast %int %41
+         %42 = OpBitcast %int %41
 )");
 }
 
@@ -1003,7 +1003,7 @@ TEST_F(SpirvWriterTest, Builtin_CountLeadingZeros_Vec2U32) {
          %48 = OpBitwiseOr %v2uint %27 %47
          %49 = OpBitwiseOr %v2uint %20 %48
          %50 = OpBitwiseOr %v2uint %12 %49
-     %result = OpIAdd %v2uint %50 %45
+         %51 = OpIAdd %v2uint %50 %45
 )");
 }
 
@@ -1051,7 +1051,7 @@ TEST_F(SpirvWriterTest, Builtin_CountTrailingZeros_U32) {
          %39 = OpBitwiseOr %uint %23 %38
          %40 = OpBitwiseOr %uint %17 %39
          %41 = OpBitwiseOr %uint %11 %40
-     %result = OpIAdd %uint %41 %37
+         %42 = OpIAdd %uint %41 %37
 )");
 }
 
@@ -1101,7 +1101,7 @@ TEST_F(SpirvWriterTest, Builtin_CountTrailingZeros_I32) {
          %42 = OpBitwiseOr %uint %19 %41
          %43 = OpBitwiseOr %uint %13 %42
          %44 = OpIAdd %uint %43 %39
-     %result = OpBitcast %int %44
+         %45 = OpBitcast %int %44
 )");
 }
 
@@ -1159,7 +1159,7 @@ TEST_F(SpirvWriterTest, Builtin_CountTrailingZeros_Vec2U32) {
          %50 = OpBitwiseOr %v2uint %30 %49
          %51 = OpBitwiseOr %v2uint %22 %50
          %52 = OpBitwiseOr %v2uint %14 %51
-     %result = OpIAdd %v2uint %52 %48
+         %53 = OpIAdd %v2uint %52 %48
 )");
 }
 
@@ -1206,7 +1206,7 @@ TEST_F(SpirvWriterTest, Builtin_FirstLeadingBit_U32) {
          %38 = OpBitwiseOr %uint %17 %37
          %39 = OpBitwiseOr %uint %11 %38
          %40 = OpIEqual %bool %31 %uint_0
-     %result = OpSelect %uint %40 %uint_4294967295 %39
+         %41 = OpSelect %uint %40 %uint_4294967295 %39
 )");
 }
 
@@ -1258,7 +1258,7 @@ TEST_F(SpirvWriterTest, Builtin_FirstLeadingBit_I32) {
          %45 = OpBitwiseOr %uint %17 %44
          %46 = OpIEqual %bool %37 %uint_0
          %47 = OpSelect %uint %46 %uint_4294967295 %45
-     %result = OpBitcast %int %47
+         %49 = OpBitcast %int %47
 )");
 }
 
@@ -1316,7 +1316,7 @@ TEST_F(SpirvWriterTest, Builtin_FirstLeadingBit_Vec2U32) {
          %49 = OpBitwiseOr %v2uint %22 %48
          %50 = OpBitwiseOr %v2uint %14 %49
          %51 = OpIEqual %v2bool %41 %11
-     %result = OpSelect %v2uint %51 %53 %50
+         %52 = OpSelect %v2uint %51 %53 %50
 )");
 }
 
@@ -1363,7 +1363,7 @@ TEST_F(SpirvWriterTest, Builtin_FirstTrailingBit_U32) {
          %38 = OpBitwiseOr %uint %17 %37
          %39 = OpBitwiseOr %uint %11 %38
          %40 = OpIEqual %bool %31 %uint_0
-     %result = OpSelect %uint %40 %uint_4294967295 %39
+         %41 = OpSelect %uint %40 %uint_4294967295 %39
 )");
 }
 
@@ -1412,7 +1412,7 @@ TEST_F(SpirvWriterTest, Builtin_FirstTrailingBit_I32) {
          %41 = OpBitwiseOr %uint %13 %40
          %42 = OpIEqual %bool %33 %uint_0
          %43 = OpSelect %uint %42 %uint_4294967295 %41
-     %result = OpBitcast %int %43
+         %45 = OpBitcast %int %43
 )");
 }
 
@@ -1470,7 +1470,7 @@ TEST_F(SpirvWriterTest, Builtin_FirstTrailingBit_Vec2U32) {
          %49 = OpBitwiseOr %v2uint %22 %48
          %50 = OpBitwiseOr %v2uint %14 %49
          %51 = OpIEqual %v2bool %41 %11
-     %result = OpSelect %v2uint %51 %53 %50
+         %52 = OpSelect %v2uint %51 %53 %50
 )");
 }
 
@@ -1724,7 +1724,7 @@ TEST_F(SpirvWriterTest, Builtin_Dot_vec4u) {
          %19 = OpCompositeExtract %uint %arg1 3
          %20 = OpCompositeExtract %uint %arg2 3
          %21 = OpIMul %uint %19 %20
-     %result = OpIAdd %uint %18 %21
+         %22 = OpIAdd %uint %18 %21
 )");
 }
 

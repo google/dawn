@@ -3841,8 +3841,10 @@ class Parser {
         // unreachable.
         if (true_id == false_id) {
             auto* binary = b_.Binary(core::BinaryOp::kOr, cond->Type(), cond, b_.Constant(true));
-            EmitWithoutSpvResult(binary);
-            cond = binary->Result();
+            if (auto* res = binary->AsInstruction()) {
+                EmitWithoutSpvResult(res);
+            }
+            cond = binary;
         }
 
         auto* if_ = b_.If(cond);
@@ -4427,7 +4429,11 @@ class Parser {
         auto* lhs = Value(inst.GetSingleWordOperand(first_operand_idx));
         auto* rhs = Value(inst.GetSingleWordOperand(first_operand_idx + 1));
         auto* binary = b_.Binary(op, Type(inst.type_id()), lhs, rhs);
-        Emit(binary, inst.result_id());
+        if (auto* res = binary->AsInstruction()) {
+            Emit(res, inst.result_id());
+        } else {
+            AddValue(inst.result_id(), binary);
+        }
     }
 
     /// Emits the logical negation of the result of the given SPIR-V instruction.
@@ -4437,10 +4443,12 @@ class Parser {
         auto* lhs = Value(inst.GetSingleWordOperand(2));
         auto* rhs = Value(inst.GetSingleWordOperand(3));
         auto* binary = b_.Binary(op, Type(inst.type_id()), lhs, rhs);
-        EmitWithoutSpvResult(binary);
+        if (auto* res = binary->AsInstruction()) {
+            EmitWithoutSpvResult(res);
+        }
 
-        auto* res = b_.Not(binary);
-        Emit(res, inst.result_id());
+        auto* inv = b_.Not(binary);
+        Emit(inv, inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpCompositeExtract

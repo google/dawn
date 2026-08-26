@@ -503,7 +503,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             TINT_IR_ASSERT(ir, local_invocation_index_index);
             auto* local_index = GetInput(builder, local_invocation_index_index.value());
             auto* subgroup_size = GetSubgroupSize(builder);
-            return builder.Divide(local_index, subgroup_size)->Result();
+            return builder.Divide(local_index, subgroup_size);
         }
 
         // Otherwise, we use the atomic counter that is incremented by each subgroup, and then
@@ -519,7 +519,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         if (linear_workgroup_size) {
             auto* subgroup_size = GetSubgroupSize(builder);
             auto* add = builder.Add(u32(linear_workgroup_size.value() - 1), subgroup_size);
-            return builder.Divide(add, subgroup_size)->Result();
+            return builder.Divide(add, subgroup_size);
         }
 
         // Otherwise, we use the atomic counter that is incremented by each subgroup, and then load
@@ -587,13 +587,13 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                    inputs[idx].attributes.builtin == core::BuiltinValue::kVertexIndex) {
             auto first_index_offset = config.immediate_data_layout.GetValue(
                 builder, core::InternalImmediate::kFirstVertexOffset);
-            v = builder.Add(v, first_index_offset)->Result();
+            v = builder.Add(v, first_index_offset);
         } else if (config.immediate_data_layout.HasImmediate(
                        core::InternalImmediate::kFirstInstanceOffset) &&
                    inputs[idx].attributes.builtin == core::BuiltinValue::kInstanceIndex) {
             auto* first_instance_offset = config.immediate_data_layout.GetValue(
                 builder, core::InternalImmediate::kFirstInstanceOffset);
-            v = builder.Add(v, first_instance_offset)->Result();
+            v = builder.Add(v, first_instance_offset);
         }
 
         return v;

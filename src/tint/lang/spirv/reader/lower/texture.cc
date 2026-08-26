@@ -619,7 +619,7 @@ struct State {
             // New coords
             // Divide the coordinates by the last value to simulate the
             // projection behaviour.
-            new_args.Push(b.Divide(swizzle, last)->Result());
+            new_args.Push(b.Divide(swizzle, last));
         } else {
             TINT_ASSERT(new_coords_ty->Is<core::type::Vector>());
 

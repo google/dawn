@@ -184,12 +184,11 @@ struct State {
             if (value) {
                 auto* cnst = value->As<core::ir::Constant>();
                 if (!cnst || cnst->Value()->ValueAs<uint32_t>() > 0) {
-                    len = b.Subtract(len, value)->Result();
+                    len = b.Subtract(len, value);
                 }
             }
 
-            auto* div = b.Divide(len, u32(arr_ty->ImplicitStride()));
-            call->Result()->ReplaceAllUsesWith(div->Result());
+            b.DivideWithResult(call->DetachResult(), len, u32(arr_ty->ImplicitStride()));
         });
         call->Destroy();
     }
@@ -394,12 +393,11 @@ struct State {
                 stride = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() * bytes_per_element));
             } else {
                 auto* u32_stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-                stride = b.Multiply(u32_stride, u32(bytes_per_element))->Result();
+                stride = b.Multiply(u32_stride, u32(bytes_per_element));
             }
-            auto* load = b.CallExplicit<hlsl::ir::BuiltinCall>(
-                sm, BuiltinFn::kLoad, Vector<core::ir::TemplateParameter, 1>{sm}, var,
-                OffsetToValue(offset), stride, layout);
-            call->Result()->ReplaceAllUsesWith(load->Result());
+            b.CallExplicitWithResult<hlsl::ir::BuiltinCall>(
+                call->DetachResult(), BuiltinFn::kLoad, Vector<core::ir::TemplateParameter, 1>{sm},
+                var, OffsetToValue(offset), stride, layout);
         });
         call->Destroy();
     }
@@ -434,7 +432,7 @@ struct State {
                 stride = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() * bytes_per_element));
             } else {
                 auto* u32_stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-                stride = b.Multiply(u32_stride, u32(bytes_per_element))->Result();
+                stride = b.Multiply(u32_stride, u32(bytes_per_element));
             }
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kStore, value, var,
                                                       OffsetToValue(offset), stride, layout);
@@ -451,7 +449,7 @@ struct State {
             },
             [&](core::ir::Value* val) {
                 auto* idx = b.InsertConvertIfNeeded(ty.u32(), val);
-                offset->byte_offset_expr.Push(b.Multiply(idx, u32(elm_size))->Result());
+                offset->byte_offset_expr.Push(b.Multiply(idx, u32(elm_size)));
             },
             TINT_ICE_ON_NO_MATCH);
     }
@@ -488,7 +486,7 @@ struct State {
     core::ir::Value* OffsetToValue(const OffsetData& offset) {
         core::ir::Value* val = b.Value(u32(offset.byte_offset));
         for (core::ir::Value* expr : offset.byte_offset_expr) {
-            val = b.Add(val, expr)->Result();
+            val = b.Add(val, expr);
         }
         return val;
     }
@@ -692,8 +690,7 @@ struct State {
                 Vector<core::ir::Value*, 4> values;
                 for (const auto* mem : s->Members()) {
                     values.Push(
-                        MakeLoad(inst, var, mem->Type(), b.Add(p, u32(mem->Offset()))->Result())
-                            ->Result());
+                        MakeLoad(inst, var, mem->Type(), b.Add(p, u32(mem->Offset())))->Result());
                 }
 
                 b.Return(fn, b.Construct(s, values));
@@ -715,7 +712,7 @@ struct State {
             b.Append(fn->Block(), [&] {
                 for (const auto* mem : s->Members()) {
                     auto* from = b.Access(mem->Type(), obj, u32(mem->Index()));
-                    MakeStore(inst, var, from->Result(), b.Add(p, u32(mem->Offset()))->Result());
+                    MakeStore(inst, var, from->Result(), b.Add(p, u32(mem->Offset())));
                 }
 
                 b.Return(fn);
@@ -747,7 +744,7 @@ struct State {
                 Vector<core::ir::Value*, 4> values;
                 for (size_t i = 0; i < mat->Columns(); ++i) {
                     auto* add = b.Add(p, u32(i * mat->ColumnStride()));
-                    auto* load = MakeLoad(inst, var, mat->ColumnType(), add->Result());
+                    auto* load = MakeLoad(inst, var, mat->ColumnType(), add);
                     values.Push(load->Result());
                 }
 
@@ -771,8 +768,7 @@ struct State {
                 Vector<core::ir::Value*, 4> values;
                 for (size_t i = 0; i < mat->Columns(); ++i) {
                     auto* from = b.Access(mat->ColumnType(), obj, u32(i));
-                    MakeStore(inst, var, from->Result(),
-                              b.Add(p, u32(i * mat->ColumnStride()))->Result());
+                    MakeStore(inst, var, from->Result(), b.Add(p, u32(i * mat->ColumnStride())));
                 }
 
                 b.Return(fn);
@@ -815,7 +811,7 @@ struct State {
                     auto* access = b.Access(ty.ptr<function>(arr->ElemType()), result_arr, idx);
                     auto* stride = b.Multiply(idx, u32(arr->ImplicitStride()));
                     auto* byte_offset = b.Add(p, stride);
-                    b.Store(access, MakeLoad(inst, var, arr->ElemType(), byte_offset->Result()));
+                    b.Store(access, MakeLoad(inst, var, arr->ElemType(), byte_offset));
                 });
 
                 b.Return(fn, b.Load(result_arr));
@@ -842,7 +838,7 @@ struct State {
                     auto* from = b.Access(arr->ElemType(), obj, idx);
                     auto* stride = b.Multiply(idx, u32(arr->ImplicitStride()));
                     auto* byte_offset = b.Add(p, stride);
-                    MakeStore(inst, var, from->Result(), byte_offset->Result());
+                    MakeStore(inst, var, from->Result(), byte_offset);
                 });
 
                 b.Return(fn);

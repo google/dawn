@@ -55,13 +55,14 @@ TEST_F(IR_BinaryDeathTest, Fail_NullType) {
 TEST_F(IR_BinaryTest, Result) {
     auto* a = b.Add(4_i, 2_i);
 
-    EXPECT_EQ(a->Results().Length(), 1u);
-    EXPECT_TRUE(a->Result()->Is<InstructionResult>());
-    EXPECT_EQ(a, a->Result()->Instruction());
+    EXPECT_TRUE(a->Is<InstructionResult>());
+    EXPECT_EQ(a->AsInstruction()->Results().Length(), 1u);
+    EXPECT_EQ(a, a->AsInstruction()->Result());
 }
 
 TEST_F(IR_BinaryTest, CreateAnd) {
-    auto* inst = b.And(4_i, 2_i);
+    auto* v = b.And(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kAnd);
@@ -79,7 +80,8 @@ TEST_F(IR_BinaryTest, CreateAnd) {
 }
 
 TEST_F(IR_BinaryTest, CreateOr) {
-    auto* inst = b.Or(4_i, 2_i);
+    auto* v = b.Or(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kOr);
@@ -96,7 +98,8 @@ TEST_F(IR_BinaryTest, CreateOr) {
 }
 
 TEST_F(IR_BinaryTest, CreateXor) {
-    auto* inst = b.Xor(4_i, 2_i);
+    auto* v = b.Xor(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kXor);
@@ -113,7 +116,8 @@ TEST_F(IR_BinaryTest, CreateXor) {
 }
 
 TEST_F(IR_BinaryTest, CreateEqual) {
-    auto* inst = b.Equal(4_i, 2_i);
+    auto* v = b.Equal(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kEqual);
@@ -130,7 +134,8 @@ TEST_F(IR_BinaryTest, CreateEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateNotEqual) {
-    auto* inst = b.NotEqual(4_i, 2_i);
+    auto* v = b.NotEqual(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kNotEqual);
@@ -147,7 +152,8 @@ TEST_F(IR_BinaryTest, CreateNotEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateLessThan) {
-    auto* inst = b.LessThan(4_i, 2_i);
+    auto* v = b.LessThan(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kLessThan);
@@ -164,7 +170,8 @@ TEST_F(IR_BinaryTest, CreateLessThan) {
 }
 
 TEST_F(IR_BinaryTest, CreateGreaterThan) {
-    auto* inst = b.GreaterThan(4_i, 2_i);
+    auto* v = b.GreaterThan(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kGreaterThan);
@@ -181,7 +188,8 @@ TEST_F(IR_BinaryTest, CreateGreaterThan) {
 }
 
 TEST_F(IR_BinaryTest, CreateLessThanEqual) {
-    auto* inst = b.LessThanEqual(4_i, 2_i);
+    auto* v = b.LessThanEqual(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kLessThanEqual);
@@ -198,7 +206,8 @@ TEST_F(IR_BinaryTest, CreateLessThanEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateGreaterThanEqual) {
-    auto* inst = b.GreaterThanEqual(4_i, 2_i);
+    auto* v = b.GreaterThanEqual(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kGreaterThanEqual);
@@ -215,7 +224,8 @@ TEST_F(IR_BinaryTest, CreateGreaterThanEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateShiftLeft) {
-    auto* inst = b.ShiftLeft(4_i, 2_i);
+    auto* v = b.ShiftLeft(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kShiftLeft);
@@ -232,7 +242,8 @@ TEST_F(IR_BinaryTest, CreateShiftLeft) {
 }
 
 TEST_F(IR_BinaryTest, CreateShiftRight) {
-    auto* inst = b.ShiftRight(4_i, 2_i);
+    auto* v = b.ShiftRight(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kShiftRight);
@@ -249,7 +260,8 @@ TEST_F(IR_BinaryTest, CreateShiftRight) {
 }
 
 TEST_F(IR_BinaryTest, CreateAdd) {
-    auto* inst = b.Add(4_i, 2_i);
+    auto* v = b.Add(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kAdd);
@@ -266,7 +278,8 @@ TEST_F(IR_BinaryTest, CreateAdd) {
 }
 
 TEST_F(IR_BinaryTest, CreateSubtract) {
-    auto* inst = b.Subtract(4_i, 2_i);
+    auto* v = b.Subtract(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kSubtract);
@@ -283,7 +296,8 @@ TEST_F(IR_BinaryTest, CreateSubtract) {
 }
 
 TEST_F(IR_BinaryTest, CreateMultiply) {
-    auto* inst = b.Multiply(4_i, 2_i);
+    auto* v = b.Multiply(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kMultiply);
@@ -300,7 +314,8 @@ TEST_F(IR_BinaryTest, CreateMultiply) {
 }
 
 TEST_F(IR_BinaryTest, CreateDivide) {
-    auto* inst = b.Divide(4_i, 2_i);
+    auto* v = b.Divide(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kDivide);
@@ -317,7 +332,8 @@ TEST_F(IR_BinaryTest, CreateDivide) {
 }
 
 TEST_F(IR_BinaryTest, CreateModulo) {
-    auto* inst = b.Modulo(4_i, 2_i);
+    auto* v = b.Modulo(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kModulo);
@@ -334,7 +350,8 @@ TEST_F(IR_BinaryTest, CreateModulo) {
 }
 
 TEST_F(IR_BinaryTest, Binary_Usage) {
-    auto* inst = b.And(4_i, 2_i);
+    auto* v = b.And(4_i, 2_i);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     EXPECT_EQ(inst->Op(), BinaryOp::kAnd);
 
@@ -347,7 +364,8 @@ TEST_F(IR_BinaryTest, Binary_Usage) {
 
 TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
     auto val = 4_i;
-    auto* inst = b.And(val, val);
+    auto* v = b.And(val, val);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     EXPECT_EQ(inst->Op(), BinaryOp::kAnd);
     ASSERT_EQ(inst->LHS(), inst->RHS());
@@ -360,7 +378,8 @@ TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
 TEST_F(IR_BinaryTest, Binary_Usage_SetOperand) {
     auto* rhs_a = b.Constant(2_i);
     auto* rhs_b = b.Constant(3_i);
-    auto* inst = b.And(4_i, rhs_a);
+    auto* v = b.And(4_i, rhs_a);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     EXPECT_EQ(inst->Op(), BinaryOp::kAnd);
 
@@ -374,7 +393,8 @@ TEST_F(IR_BinaryTest, Binary_Usage_SetOperand) {
 TEST_F(IR_BinaryTest, Clone) {
     auto* lhs = b.Constant(2_i);
     auto* rhs = b.Constant(4_i);
-    auto* inst = b.And(lhs, rhs);
+    auto* v = b.And(lhs, rhs);
+    auto* inst = v->AsInstruction<CoreBinary>();
 
     auto* c = clone_ctx.Clone(inst);
 

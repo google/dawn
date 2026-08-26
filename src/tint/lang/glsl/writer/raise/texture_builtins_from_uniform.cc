@@ -186,7 +186,7 @@ struct State {
         // instead of an array of u32 so we need more complicated indexing logic.
         core::ir::Value* offset = b.Constant(u32(metadata->offset));
         if (path.index != nullptr) {
-            offset = b.Add(offset, b.InsertConvertIfNeeded(ty.u32(), path.index))->Result();
+            offset = b.Add(offset, b.InsertConvertIfNeeded(ty.u32(), path.index));
         }
         auto* index_in_array = b.Divide(offset, u32(4));
         auto* index_in_vector = b.Modulo(offset, u32(4));

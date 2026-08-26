@@ -291,8 +291,7 @@ struct State {
                         b.InsertBefore(call, [&] {
                             auto* apparent_size = b.Access<vec2u>(params, 12_u);
                             auto* vec2u_1_1 = b.Splat<vec2u>(1_u);
-                            auto* dimensions = b.Add(apparent_size, vec2u_1_1);
-                            dimensions->SetResult(call->DetachResult());
+                            b.AddWithResult(call->DetachResult(), apparent_size, vec2u_1_1);
                         });
                         call->Destroy();
                     } else if (call->Func() == core::BuiltinFn::kTextureLoad) {
@@ -871,7 +870,7 @@ struct State {
             auto* rgb_result = b.Multiply(extract_rgb, yuv_to_rgb_conversion);
 
             // Apply gamma correction if needed.
-            auto* final_result = ApplyGammaCorrect(params, rgb_result->Result());
+            auto* final_result = ApplyGammaCorrect(params, rgb_result);
             b.Return(texture_load_ycbcr_external, b.Construct(ty.vec4f(), final_result, 1_f));
         });
 
@@ -1033,7 +1032,7 @@ struct State {
             auto* alpha = b.Swizzle(ty.f32(), texel, {3u});
 
             // Apply gamma correction if needed.
-            auto* final_result = ApplyGammaCorrect(params, colour->Result());
+            auto* final_result = ApplyGammaCorrect(params, colour);
             b.Return(texture_sample_clamp_to_edge_ycbcr_external,
                      b.Construct(ty.vec4f(), final_result, alpha));
         });

@@ -367,8 +367,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             // The expected value for component 'w' of 'FragCoord' is actually 1/w.
             auto* user_center_w = builder.Divide(1_f, interpolated_w);
 
-            auto* viewport_user_center_z =
-                ViewportMappedFragDepth(builder, user_center_z->Result());
+            auto* viewport_user_center_z = ViewportMappedFragDepth(builder, user_center_z);
             value = builder.Construct(ty.vec4f(), plus_p5, viewport_user_center_z, user_center_w)
                         ->Result();
         }
@@ -440,7 +439,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // https://www.w3.org/TR/webgpu/#coordinate-systems#:~:text=Viewport%20coordinates
         auto* max_minus_min = builder.Subtract(max, min);
         auto* rhs = builder.Multiply(max_minus_min, frag_depth);
-        return builder.Add(min, rhs)->Result();
+        return builder.Add(min, rhs);
     }
 
     /// Clamp a frag_depth builtin value if necessary.

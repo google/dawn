@@ -2628,8 +2628,7 @@ TEST_F(IR_ValidatorTest, Loop_ContinuingWithoutContinue) {
     loop->Body()->Append(b.Let("let", b.Constant(u32(1u))));
     loop->Body()->Append(b.Return(f));
     b.Append(loop->Continuing(), [&] {
-        auto* add = b.Add(1_u, 1_u);
-        add->Result()->SetType(ty.bool_());
+        b.Binary(BinaryOp::kAdd, ty.bool_(), 1_u, 1_u);
         b.NextIteration(loop);
     });
     f->Block()->Append(loop);

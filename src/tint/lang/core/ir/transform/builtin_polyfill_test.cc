@@ -753,8 +753,8 @@ TEST_F(IR_BuiltinPolyfillTest, CountLeadingZeros_U32) {
     %21:u32 = or %10, %20
     %22:u32 = or %7, %21
     %23:u32 = or %4, %22
-    %result:u32 = add %23, %18
-    ret %result
+    %24:u32 = add %23, %18
+    ret %24
   }
 }
 )";
@@ -803,8 +803,8 @@ TEST_F(IR_BuiltinPolyfillTest, CountLeadingZeros_I32) {
     %23:u32 = or %8, %22
     %24:u32 = or %5, %23
     %25:u32 = add %24, %19
-    %result:i32 = bitcast<i32> %25
-    ret %result
+    %26:i32 = bitcast<i32> %25
+    ret %26
   }
 }
 )";
@@ -851,8 +851,8 @@ TEST_F(IR_BuiltinPolyfillTest, CountLeadingZeros_Vec2U32) {
     %21:vec2<u32> = or %10, %20
     %22:vec2<u32> = or %7, %21
     %23:vec2<u32> = or %4, %22
-    %result:vec2<u32> = add %23, %18
-    ret %result
+    %24:vec2<u32> = add %23, %18
+    ret %24
   }
 }
 )";
@@ -901,8 +901,8 @@ TEST_F(IR_BuiltinPolyfillTest, CountLeadingZeros_Vec4I32) {
     %23:vec4<u32> = or %8, %22
     %24:vec4<u32> = or %5, %23
     %25:vec4<u32> = add %24, %19
-    %result:vec4<i32> = bitcast<vec4<i32>> %25
-    ret %result
+    %26:vec4<i32> = bitcast<vec4<i32>> %25
+    ret %26
   }
 }
 )";
@@ -973,8 +973,8 @@ TEST_F(IR_BuiltinPolyfillTest, CountTrailingZeros_U32) {
     %25:u32 = or %13, %24
     %26:u32 = or %9, %25
     %27:u32 = or %5, %26
-    %result:u32 = add %27, %23
-    ret %result
+    %28:u32 = add %27, %23
+    ret %28
   }
 }
 )";
@@ -1027,8 +1027,8 @@ TEST_F(IR_BuiltinPolyfillTest, CountTrailingZeros_I32) {
     %27:u32 = or %10, %26
     %28:u32 = or %6, %27
     %29:u32 = add %28, %24
-    %result:i32 = bitcast<i32> %29
-    ret %result
+    %30:i32 = bitcast<i32> %29
+    ret %30
   }
 }
 )";
@@ -1079,8 +1079,8 @@ TEST_F(IR_BuiltinPolyfillTest, CountTrailingZeros_Vec2U32) {
     %25:vec2<u32> = or %13, %24
     %26:vec2<u32> = or %9, %25
     %27:vec2<u32> = or %5, %26
-    %result:vec2<u32> = add %27, %23
-    ret %result
+    %28:vec2<u32> = add %27, %23
+    ret %28
   }
 }
 )";
@@ -1781,8 +1781,8 @@ TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_U32) {
     %24:u32 = or %9, %23
     %25:u32 = or %5, %24
     %26:bool = eq %18, 0u
-    %result:u32 = select %25, 4294967295u, %26
-    ret %result
+    %27:u32 = select %25, 4294967295u, %26
+    ret %27
   }
 }
 )";
@@ -1837,8 +1837,8 @@ TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_I32) {
     %29:u32 = or %9, %28
     %30:bool = eq %22, 0u
     %31:u32 = select %29, 4294967295u, %30
-    %result:i32 = bitcast<i32> %31
-    ret %result
+    %32:i32 = bitcast<i32> %31
+    ret %32
   }
 }
 )";
@@ -1888,8 +1888,8 @@ TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_Vec2U32) {
     %24:vec2<u32> = or %9, %23
     %25:vec2<u32> = or %5, %24
     %26:vec2<bool> = eq %18, vec2<u32>(0u)
-    %result:vec2<u32> = select %25, vec2<u32>(4294967295u), %26
-    ret %result
+    %27:vec2<u32> = select %25, vec2<u32>(4294967295u), %26
+    ret %27
   }
 }
 )";
@@ -1944,8 +1944,8 @@ TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_Vec4I32) {
     %29:vec4<u32> = or %9, %28
     %30:vec4<bool> = eq %22, vec4<u32>(0u)
     %31:vec4<u32> = select %29, vec4<u32>(4294967295u), %30
-    %result:vec4<i32> = bitcast<vec4<i32>> %31
-    ret %result
+    %32:vec4<i32> = bitcast<vec4<i32>> %31
+    ret %32
   }
 }
 )";
@@ -2015,8 +2015,8 @@ TEST_F(IR_BuiltinPolyfillTest, FirstTrailingBit_U32) {
     %24:u32 = or %9, %23
     %25:u32 = or %5, %24
     %26:bool = eq %18, 0u
-    %result:u32 = select %25, 4294967295u, %26
-    ret %result
+    %27:u32 = select %25, 4294967295u, %26
+    ret %27
   }
 }
 )";
@@ -2068,8 +2068,8 @@ TEST_F(IR_BuiltinPolyfillTest, FirstTrailingBit_I32) {
     %26:u32 = or %6, %25
     %27:bool = eq %19, 0u
     %28:u32 = select %26, 4294967295u, %27
-    %result:i32 = bitcast<i32> %28
-    ret %result
+    %29:i32 = bitcast<i32> %28
+    ret %29
   }
 }
 )";
@@ -2119,8 +2119,8 @@ TEST_F(IR_BuiltinPolyfillTest, FirstTrailingBit_Vec2U32) {
     %24:vec2<u32> = or %9, %23
     %25:vec2<u32> = or %5, %24
     %26:vec2<bool> = eq %18, vec2<u32>(0u)
-    %result:vec2<u32> = select %25, vec2<u32>(4294967295u), %26
-    ret %result
+    %27:vec2<u32> = select %25, vec2<u32>(4294967295u), %26
+    ret %27
   }
 }
 )";
@@ -2172,8 +2172,8 @@ TEST_F(IR_BuiltinPolyfillTest, FirstTrailingBit_Vec4I32) {
     %26:vec4<u32> = or %6, %25
     %27:vec4<bool> = eq %19, vec4<u32>(0u)
     %28:vec4<u32> = select %26, vec4<u32>(4294967295u), %27
-    %result:vec4<i32> = bitcast<vec4<i32>> %28
-    ret %result
+    %29:vec4<i32> = bitcast<vec4<i32>> %28
+    ret %29
   }
 }
 )";
@@ -2223,8 +2223,8 @@ TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_F32) {
     %4:f32 = dpdyFine %arg
     %5:f32 = abs %3
     %6:f32 = abs %4
-    %7:f32 = add %5, %6
-    ret %7
+    %result:f32 = add %5, %6
+    ret %result
   }
 }
 )";
@@ -2254,8 +2254,8 @@ TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_Vector) {
     %4:vec4<f32> = dpdyFine %arg
     %5:vec4<f32> = abs %3
     %6:vec4<f32> = abs %4
-    %7:vec4<f32> = add %5, %6
-    ret %7
+    %result:vec4<f32> = add %5, %6
+    ret %result
   }
 }
 )";
@@ -3012,8 +3012,8 @@ TEST_F(IR_BuiltinPolyfillTest, Unpack4xI8) {
     %5:vec4<u32> = shl %4, %3
     %6:vec4<i32> = bitcast<vec4<i32>> %5
     %7:vec4<u32> = construct 24u
-    %result:vec4<i32> = shr %6, %7
-    ret %result
+    %8:vec4<i32> = shr %6, %7
+    ret %8
   }
 }
 )";
@@ -3045,8 +3045,8 @@ TEST_F(IR_BuiltinPolyfillTest, Unpack4xU8) {
     %4:vec4<u32> = construct %arg
     %5:vec4<u32> = shr %4, %3
     %6:vec4<u32> = construct 255u
-    %result:vec4<u32> = and %5, %6
-    ret %result
+    %7:vec4<u32> = and %5, %6
+    ret %7
   }
 }
 )";

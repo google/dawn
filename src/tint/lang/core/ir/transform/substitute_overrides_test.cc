@@ -253,7 +253,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexInitNoOverrides) {
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
-        o->SetInitializer(add->Result());
+        o->SetInitializer(add);
     });
 
     auto* func = b.Function("foo", ty.u32());
@@ -295,7 +295,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexInitComponentOverride) {
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
-        o->SetInitializer(add->Result());
+        o->SetInitializer(add);
     });
 
     auto* func = b.Function("foo", ty.u32());
@@ -341,7 +341,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexIncludingOverride) {
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
-        o->SetInitializer(add->Result());
+        o->SetInitializer(add);
     });
 
     auto* func = b.Function("foo", ty.u32());
@@ -386,7 +386,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithSubgroupShuffle) {
         auto* add = b.Add(x, 4_u);
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
-        o->SetInitializer(add->Result());
+        o->SetInitializer(add);
     });
 
     auto* func = b.Function("foo", ty.u32());
@@ -429,7 +429,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithQuantizeF16) {
 
         o = b.Override(Source{{1, 2}}, "a", ty.f32());
         o->SetOverrideId({1});
-        o->SetInitializer(add->Result());
+        o->SetInitializer(add);
     });
 
     auto* func = b.Function("foo", ty.f32());
@@ -472,7 +472,7 @@ TEST_F(IR_SubstituteOverridesTest, Override_ShiftLeftAmountTooLarge_ConstLHS) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* shift = b.ShiftLeft(1_u, rhs);
-        b.Return(func, shift->Result());
+        b.Return(func, shift);
     });
 
     auto* src = R"(
@@ -508,7 +508,7 @@ TEST_F(IR_SubstituteOverridesTest, Override_ShiftLeftAmountTooLarge_RuntimeLHS) 
     b.Append(func->Block(), [&] {
         auto* lhs = b.Let("lhs", 1_u);
         auto* shift = b.ShiftLeft(lhs, rhs);
-        b.Return(func, shift->Result());
+        b.Return(func, shift);
     });
 
     auto* src = R"(
@@ -544,7 +544,7 @@ TEST_F(IR_SubstituteOverridesTest, Override_ShiftRightAmountTooLarge_ConstLHS) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* shift = b.ShiftRight(1_u, rhs);
-        b.Return(func, shift->Result());
+        b.Return(func, shift);
     });
 
     auto* src = R"(
@@ -581,7 +581,7 @@ TEST_F(IR_SubstituteOverridesTest, Override_ShiftRightAmountTooLarge_RuntimeLHS)
     b.Append(func->Block(), [&] {
         auto* lhs = b.Let("lhs", 1_u);
         auto* shift = b.ShiftRight(lhs, rhs);
-        b.Return(func, shift->Result());
+        b.Return(func, shift);
     });
 
     auto* src = R"(
@@ -619,7 +619,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexGenError) {
 
         o = b.Override("a", ty.f32());
         o->SetOverrideId({1});
-        o->SetInitializer(add->Result());
+        o->SetInitializer(add);
     });
 
     auto* func = b.Function("foo", ty.f32());
@@ -660,7 +660,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWorkgroupSize) {
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
-        o->SetInitializer(add->Result());
+        o->SetInitializer(add);
     });
 
     auto* func = b.ComputeFunction("foo", o, x, o);
@@ -746,7 +746,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpression) {
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
-        o->SetInitializer(add->Result());
+        o->SetInitializer(add);
     });
 
     auto* func = b.ComputeFunction("foo");
@@ -851,7 +851,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperand) {
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
-        o->SetInitializer(add->Result());
+        o->SetInitializer(add);
     });
 
     auto* func = b.ComputeFunction("foo");
@@ -912,7 +912,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandFlipOrder) {
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
-        o->SetInitializer(add->Result());
+        o->SetInitializer(add);
     });
 
     auto* func = b.ComputeFunction("foo");
@@ -973,7 +973,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandNonConstFn) {
 
         o = b.Override(Source{{1, 2}}, "a", ty.f32());
         o->SetOverrideId({1});
-        o->SetInitializer(add->Result());
+        o->SetInitializer(add);
     });
 
     auto* func = b.FragmentFunction("foo", ty.void_());
@@ -1035,7 +1035,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandLet) {
 
         o = b.Override(Source{{1, 2}}, "a", ty.f32());
         o->SetOverrideId({1});
-        o->SetInitializer(add->Result());
+        o->SetInitializer(add);
     });
 
     auto* func = b.FragmentFunction("foo", ty.void_());
@@ -1270,8 +1270,8 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeExpression) {
         auto* x = b.Override("x", ty.u32());
         x->SetOverrideId({2});
 
-        auto* inst = b.Multiply(x, 2_u);
-        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(inst->Result());
+        auto* val = b.Multiply(x, 2_u);
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(val);
         auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 4_u);
         b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
     });
@@ -2162,7 +2162,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedArrayParam) {
     b.Append(mod.root_block, [&] {
         auto* o = b.Override("x", ty.i32());
         o->SetOverrideId({0});
-        add = b.Add(o, 2_i)->Result();
+        add = b.Add(o, 2_i);
         c1 = ty.Get<core::ir::type::ValueArrayCount>(add);
         a1 = ty.Get<core::type::Array>(ty.u32(), c1, 4u);
         v = b.Var("v", ty.ptr(workgroup, a1));
@@ -2233,7 +2233,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer) {
     b.Append(mod.root_block, [&] {
         auto* o = b.Override("x", ty.i32());
         o->SetOverrideId({0});
-        add = b.Add(o, 2_i)->Result();
+        add = b.Add(o, 2_i);
         c1 = ty.Get<core::ir::type::ValueArrayCount>(add);
         b1 = ty.Get<core::type::Buffer>(c1);
         v = b.Var("v", ty.ptr(workgroup, b1));
@@ -3014,7 +3014,7 @@ TEST_F(IR_SubstituteOverridesTest, SubgroupSize_NotPowerOf2_Expr) {
     b.Append(mod.root_block, [&] {
         o = b.Override("o", ty.u32());
         o->SetOverrideId({1});
-        add = b.Add(o, 1_u)->Result();
+        add = b.Add(o, 1_u);
     });
     auto* foo = b.ComputeFunction("foo", add, 1_u, 1_u);
     foo->SetSubgroupSize(add);

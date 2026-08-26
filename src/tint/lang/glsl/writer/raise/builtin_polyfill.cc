@@ -212,9 +212,9 @@ struct State {
                     auto* v = b.Multiply(lhs, rhs);
 
                     if (ret != nullptr) {
-                        ret = b.Add(ret, v)->Result();
+                        ret = b.Add(ret, v);
                     } else {
-                        ret = v->Result();
+                        ret = v;
                     }
                 }
 

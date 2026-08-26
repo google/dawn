@@ -113,13 +113,11 @@ struct State {
 
             // Force to a `let` to get better generated HLSL
             auto* d = b.Let(type);
-            d->SetValue(div->Result());
+            d->SetValue(div);
 
             auto* trunc = b.Call(type, core::BuiltinFn::kTrunc, d);
             auto* mul = b.Multiply(trunc, binary->RHS());
-            auto* sub = b.Subtract(binary->LHS(), mul);
-
-            binary->Result()->ReplaceAllUsesWith(sub->Result());
+            b.SubtractWithResult(binary->DetachResult(), binary->LHS(), mul);
         });
         binary->Destroy();
     }

@@ -52,7 +52,7 @@ struct State {
 
     struct DecodeResult {
         core::ir::InstructionResult* value = nullptr;
-        core::ir::Instruction* multiply_inst = nullptr;
+        core::ir::Value* multiply = nullptr;
     };
 
     void Process() {
@@ -100,11 +100,10 @@ struct State {
                             // usage to be replaced with a different value, and would infinite loop
                             // if we returned the original value for the decoder's first
                             // instruction.
-                            auto usages = access_val->UsagesSorted();
-                            for (auto& use : usages) {
-                                if (use.instruction != decoded.multiply_inst) {
-                                    use.instruction->SetOperand(use.operand_index, decoded.value);
-                                }
+                            access_val->ReplaceAllUsesWith(decoded.value);
+                            if (auto* mul_inst =
+                                    decoded.multiply->AsInstruction<core::ir::Binary>()) {
+                                mul_inst->SetOperand(0, access_val);
                             }
                         });
                     });

@@ -241,10 +241,10 @@ struct State {
                             auto* arg = call->Args()[1];
                             auto* total_offset = b.InsertBitcastIfNeeded(ty.u32(), arg);
                             if (struct_offset != 0) {
-                                total_offset = b.Add(total_offset, u32(struct_offset))->Result();
+                                total_offset = b.Add(total_offset, u32(struct_offset));
                             }
-                            length = b.Subtract(length, total_offset)->Result();
-                            length = b.Divide(length, u32(stride))->Result();
+                            length = b.Subtract(length, total_offset);
+                            length = b.Divide(length, u32(stride));
                         });
                         return length;
                     } else if (call->Func() == BuiltinFn::kBufferArrayView) {
@@ -255,9 +255,9 @@ struct State {
                         Value* length = b.InsertBitcastIfNeeded(ty.u32(), call->Args()[2]);
                         b.InsertBefore(call, [&] {
                             if (struct_offset > 0) {
-                                length = b.Subtract(length, u32(struct_offset))->Result();
+                                length = b.Subtract(length, u32(struct_offset));
                             }
-                            length = b.Divide(length, u32(stride))->Result();
+                            length = b.Divide(length, u32(stride));
                         });
                         return length;
                     }
@@ -485,7 +485,7 @@ struct State {
                     // The variable is a struct, so subtract the byte offset of the array member.
                     auto* member = str->Members().Back();
                     auto* array_type = member->Type()->As<core::type::Array>();
-                    array_size = b.Subtract(total_buffer_size, u32(member->Offset()))->Result();
+                    array_size = b.Subtract(total_buffer_size, u32(member->Offset()));
                     array_stride = array_type->ImplicitStride();
                 } else if (info.store_type->Is<core::type::Buffer>()) {
                     array_stride = 1;
@@ -495,7 +495,7 @@ struct State {
 
                 auto* length = array_size;
                 if (array_stride != 1) {
-                    length = b.Divide(array_size, u32(array_stride))->Result();
+                    length = b.Divide(array_size, u32(array_stride));
                 }
                 constructor_values.Push(length);
             }

@@ -479,9 +479,9 @@ struct State {
                     func->SetParams({lhs, rhs});
                     b.Append(func->Block(), [&] {
                         auto* mul = b.Multiply(lhs, rhs);
-                        auto* sum = b.Access(el_ty, mul, u32(0))->Result();
+                        core::ir::Value* sum = b.Access(el_ty, mul, u32(0))->Result();
                         for (uint32_t i = 1; i < vec->Width(); i++) {
-                            sum = b.Add(sum, b.Access(el_ty, mul, u32(i)))->Result();
+                            sum = b.Add(sum, b.Access(el_ty, mul, u32(i)));
                         }
                         b.Return(func, sum);
                     });
@@ -1152,7 +1152,7 @@ struct State {
                 // Use pointer offset to generate the correct pointer.
                 // Note: the offset needs converted to bytes.
                 offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
-                offset = b.Multiply(offset, u32(arr_stride))->Result();
+                offset = b.Multiply(offset, u32(arr_stride));
                 src = b.CallExplicit<msl::ir::BuiltinCall>(
                            ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()),
                            msl::BuiltinFn::kPointerOffset,
@@ -1161,7 +1161,7 @@ struct State {
 
                 // Stride is changed to elements_per_row which is in terms of matrix element type.
                 stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-                stride = b.Multiply(stride, u32(arr_stride / mat_ele->Size()))->Result();
+                stride = b.Multiply(stride, u32(arr_stride / mat_ele->Size()));
             } else {
                 // Make a pointer to the first element of the array that we will read from.
                 auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
@@ -1234,7 +1234,7 @@ struct State {
                 // Use pointer offset to generate the correct pointer.
                 // Note: the offset needs converted to bytes.
                 offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
-                offset = b.Multiply(offset, u32(arr_stride))->Result();
+                offset = b.Multiply(offset, u32(arr_stride));
                 dst = b.CallExplicit<msl::ir::BuiltinCall>(
                            ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()),
                            msl::BuiltinFn::kPointerOffset,
@@ -1242,7 +1242,7 @@ struct State {
                           ->Result();
 
                 // Stride is changed to elements_per_row which is in terms of matrix element type.
-                stride = b.Multiply(stride, u32(arr_stride / mat_ele->Size()))->Result();
+                stride = b.Multiply(stride, u32(arr_stride / mat_ele->Size()));
             } else {
                 // Make a pointer to the first element of the array that we will write to.
                 auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
@@ -1462,11 +1462,11 @@ struct State {
                               ->Result();
             }
             auto* clz = b.Call(u32_ty, core::BuiltinFn::kCountLeadingZeros, use_arg);
-            core::ir::Instruction* result = b.Subtract(c31, clz);
+            core::ir::Value* result = b.Subtract(c31, clz);
             if (arg->Type()->IsSignedIntegerScalarOrVector()) {
-                result = b.Bitcast(arg->Type(), result);
+                result = b.Bitcast(arg->Type(), result)->Result();
             }
-            result->SetResult(builtin->DetachResult());
+            builtin->Result()->ReplaceAllUsesWith(result);
         });
         builtin->Destroy();
     }

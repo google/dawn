@@ -278,20 +278,20 @@ struct State {
             auto* one = b.Splat(vec4f, 1_f);
 
             core::ir::Value* v = b.Clamp(arg, neg_one, one)->Result();
-            v = b.Multiply(b.Splat(vec4f, 127_f), v)->Result();
-            v = b.Add(b.Splat(vec4f, 0.5_f), v)->Result();
+            v = b.Multiply(b.Splat(vec4f, 127_f), v);
+            v = b.Add(b.Splat(vec4f, 0.5_f), v);
             v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v})->Result();
             v = b.Convert(ty.vec4i(), v)->Result();
             v = b.Bitcast(vec4u, v)->Result();
-            v = b.And(v, b.Splat(vec4u, 0xff_u))->Result();
-            v = b.ShiftLeft(v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
+            v = b.And(v, b.Splat(vec4u, 0xff_u));
+            v = b.ShiftLeft(v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u));
 
             auto* x = b.Access(ty.u32(), v, 0_u);
             auto* y = b.Access(ty.u32(), v, 1_u);
             auto* z = b.Access(ty.u32(), v, 2_u);
             auto* w = b.Access(ty.u32(), v, 3_u);
 
-            v = b.Or(x, b.Or(y, b.Or(z, w)))->Result();
+            v = b.Or(x, b.Or(y, b.Or(z, w)));
 
             call->Result()->ReplaceAllUsesWith(v);
         });
@@ -309,20 +309,20 @@ struct State {
             auto* zero = b.Zero(vec4f);
             auto* one = b.Splat(vec4f, 1_f);
 
-            auto* v = b.Clamp(arg, zero, one)->Result();
-            v = b.Multiply(b.Splat(vec4f, 255_f), v)->Result();
-            v = b.Add(b.Splat(vec4f, 0.5_f), v)->Result();
+            core::ir::Value* v = b.Clamp(arg, zero, one)->Result();
+            v = b.Multiply(b.Splat(vec4f, 255_f), v);
+            v = b.Add(b.Splat(vec4f, 0.5_f), v);
             v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v})->Result();
             v = b.Convert(vec4u, v)->Result();
-            v = b.And(v, b.Splat(vec4u, 0xff_u))->Result();
-            v = b.ShiftLeft(v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
+            v = b.And(v, b.Splat(vec4u, 0xff_u));
+            v = b.ShiftLeft(v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u));
 
             auto* x = b.Access(ty.u32(), v, 0_u);
             auto* y = b.Access(ty.u32(), v, 1_u);
             auto* z = b.Access(ty.u32(), v, 2_u);
             auto* w = b.Access(ty.u32(), v, 3_u);
 
-            v = b.Or(x, b.Or(y, b.Or(z, w)))->Result();
+            v = b.Or(x, b.Or(y, b.Or(z, w)));
 
             call->Result()->ReplaceAllUsesWith(v);
         });
@@ -338,15 +338,15 @@ struct State {
             auto* vec4u = ty.vec4u();
             auto* vec4i = ty.vec4i();
 
-            auto* v = b.Construct(vec4u, arg)->Result();
+            core::ir::Value* v = b.Construct(vec4u, arg)->Result();
             // Shift left to put the 8th bit of each number into the sign bit location, we then
             // convert to an i32 and shift back, so the sign bit will be set as needed. The bits
             // outside the bottom 8 are then masked off.
-            v = b.ShiftLeft(v, b.Construct(vec4u, 24_u, 16_u, 8_u, 0_u))->Result();
+            v = b.ShiftLeft(v, b.Construct(vec4u, 24_u, 16_u, 8_u, 0_u));
             v = b.Bitcast(vec4i, v)->Result();
-            v = b.ShiftRight(v, b.Splat(vec4u, 24_u))->Result();
+            v = b.ShiftRight(v, b.Splat(vec4u, 24_u));
             v = b.Convert(vec4f, v)->Result();
-            v = b.Divide(v, b.Splat(vec4f, 127_f))->Result();
+            v = b.Divide(v, b.Splat(vec4f, 127_f));
             v = b.Max(v, b.Splat(vec4f, -1_f))->Result();
 
             call->Result()->ReplaceAllUsesWith(v);
@@ -362,11 +362,11 @@ struct State {
             auto* vec4f = ty.vec4f();
             auto* vec4u = ty.vec4u();
 
-            auto* v = b.Construct(vec4u, arg)->Result();
-            v = b.ShiftRight(v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
-            v = b.And(v, b.Splat(vec4u, 0xff_u))->Result();
+            core::ir::Value* v = b.Construct(vec4u, arg)->Result();
+            v = b.ShiftRight(v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u));
+            v = b.And(v, b.Splat(vec4u, 0xff_u));
             v = b.Convert(vec4f, v)->Result();
-            v = b.Divide(v, b.Splat(vec4f, 255_f))->Result();
+            v = b.Divide(v, b.Splat(vec4f, 255_f));
 
             call->Result()->ReplaceAllUsesWith(v);
         });
@@ -428,24 +428,24 @@ struct State {
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(16),
                                b.LessThanEqual(x, V(0x0000ffff)));
-            x = b.ShiftLeft(x, b16)->Result();
+            x = b.ShiftLeft(x, b16);
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(8),
                               b.LessThanEqual(x, V(0x00ffffff)));
-            x = b.ShiftLeft(x, b8)->Result();
+            x = b.ShiftLeft(x, b8);
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(4),
                               b.LessThanEqual(x, V(0x0fffffff)));
-            x = b.ShiftLeft(x, b4)->Result();
+            x = b.ShiftLeft(x, b4);
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(2),
                               b.LessThanEqual(x, V(0x3fffffff)));
-            x = b.ShiftLeft(x, b2)->Result();
+            x = b.ShiftLeft(x, b2);
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1),
                               b.LessThanEqual(x, V(0x7fffffff)));
             auto* b0 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(x, V(0)));
-            Instruction* result = b.Add(b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b.Or(b1, b0))))), b0);
+            auto* result = b.Add(b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b.Or(b1, b0))))), b0);
             if (result_ty->IsSignedIntegerScalarOrVector()) {
-                result = b.Bitcast(result_ty, result);
+                result = b.Bitcast(result_ty, result)->Result();
             }
-            result->SetResult(call->DetachResult());
+            call->Result()->ReplaceAllUsesWith(result);
         });
         call->Destroy();
     }
@@ -483,24 +483,24 @@ struct State {
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(16),
                                b.Equal(b.And(x, V(0x0000ffff)), V(0)));
-            x = b.ShiftRight(x, b16)->Result();
+            x = b.ShiftRight(x, b16);
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(8),
                               b.Equal(b.And(x, V(0x000000ff)), V(0)));
-            x = b.ShiftRight(x, b8)->Result();
+            x = b.ShiftRight(x, b8);
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(4),
                               b.Equal(b.And(x, V(0x0000000f)), V(0)));
-            x = b.ShiftRight(x, b4)->Result();
+            x = b.ShiftRight(x, b4);
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(2),
                               b.Equal(b.And(x, V(0x00000003)), V(0)));
-            x = b.ShiftRight(x, b2)->Result();
+            x = b.ShiftRight(x, b2);
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1),
                               b.Equal(b.And(x, V(0x00000001)), V(0)));
             auto* b0 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(x, V(0)));
-            Instruction* result = b.Add(b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b1)))), b0);
+            auto* result = b.Add(b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b1)))), b0);
             if (result_ty->IsSignedIntegerScalarOrVector()) {
-                result = b.Bitcast(result_ty, result);
+                result = b.Bitcast(result_ty, result)->Result();
             }
-            result->SetResult(call->DetachResult());
+            call->Result()->ReplaceAllUsesWith(result);
         });
         call->Destroy();
     }
@@ -516,10 +516,7 @@ struct State {
         } else if (type->Is<core::type::F32>()) {
             value = b.Constant(f32(kRadToDeg));
         }
-        b.InsertBefore(call, [&] {
-            auto* mul = b.Multiply(arg, value);
-            mul->SetResult(call->DetachResult());
-        });
+        b.InsertBefore(call, [&] { b.MultiplyWithResult(call->DetachResult(), arg, value); });
         call->Destroy();
     }
 
@@ -565,9 +562,9 @@ struct State {
 
             // Smoothstep is a well defined function.
             // result = t * t * (3.0 - 2.0 * t);
-            auto* smooth_result = b.Multiply(
-                t_clamped, b.Multiply(t_clamped, b.Subtract(three, b.Multiply(two, t_clamped))));
-            smooth_result->SetResult(call->DetachResult());
+            b.MultiplyWithResult(
+                call->DetachResult(), t_clamped,
+                b.Multiply(t_clamped, b.Subtract(three, b.Multiply(two, t_clamped))));
         });
         call->Destroy();
     }
@@ -667,25 +664,26 @@ struct State {
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(16), V(0),
                                b.Equal(b.And(x, V(0xffff0000)), V(0)));
-            x = b.ShiftRight(x, b16)->Result();
+            x = b.ShiftRight(x, b16);
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(8), V(0),
                               b.Equal(b.And(x, V(0x0000ff00)), V(0)));
-            x = b.ShiftRight(x, b8)->Result();
+            x = b.ShiftRight(x, b8);
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(4), V(0),
                               b.Equal(b.And(x, V(0x000000f0)), V(0)));
-            x = b.ShiftRight(x, b4)->Result();
+            x = b.ShiftRight(x, b4);
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(2), V(0),
                               b.Equal(b.And(x, V(0x0000000c)), V(0)));
-            x = b.ShiftRight(x, b2)->Result();
+            x = b.ShiftRight(x, b2);
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(1), V(0),
                               b.Equal(b.And(x, V(0x00000002)), V(0)));
-            Instruction* result = b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b1))));
+            auto* result = b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b1))));
             result =
-                b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff), b.Equal(x, V(0)));
+                b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff), b.Equal(x, V(0)))
+                    ->Result();
             if (result_ty->IsSignedIntegerScalarOrVector()) {
-                result = b.Bitcast(result_ty, result);
+                result = b.Bitcast(result_ty, result)->Result();
             }
-            result->SetResult(call->DetachResult());
+            call->Result()->ReplaceAllUsesWith(result);
         });
         call->Destroy();
     }
@@ -723,25 +721,26 @@ struct State {
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(16),
                                b.Equal(b.And(x, V(0x0000ffff)), V(0)));
-            x = b.ShiftRight(x, b16)->Result();
+            x = b.ShiftRight(x, b16);
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(8),
                               b.Equal(b.And(x, V(0x000000ff)), V(0)));
-            x = b.ShiftRight(x, b8)->Result();
+            x = b.ShiftRight(x, b8);
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(4),
                               b.Equal(b.And(x, V(0x0000000f)), V(0)));
-            x = b.ShiftRight(x, b4)->Result();
+            x = b.ShiftRight(x, b4);
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(2),
                               b.Equal(b.And(x, V(0x00000003)), V(0)));
-            x = b.ShiftRight(x, b2)->Result();
+            x = b.ShiftRight(x, b2);
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1),
                               b.Equal(b.And(x, V(0x00000001)), V(0)));
-            Instruction* result = b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b1))));
+            auto* result = b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b1))));
             result =
-                b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff), b.Equal(x, V(0)));
+                b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff), b.Equal(x, V(0)))
+                    ->Result();
             if (result_ty->IsSignedIntegerScalarOrVector()) {
-                result = b.Bitcast(result_ty, result);
+                result = b.Bitcast(result_ty, result)->Result();
             }
-            result->SetResult(call->DetachResult());
+            call->Result()->ReplaceAllUsesWith(result);
         });
         call->Destroy();
     }
@@ -756,8 +755,7 @@ struct State {
             auto* dpdy = b.Call(type, core::BuiltinFn::kDpdyFine, value);
             auto* abs_dpdx = b.Call(type, core::BuiltinFn::kAbs, dpdx);
             auto* abs_dpdy = b.Call(type, core::BuiltinFn::kAbs, dpdy);
-            auto* result = b.Add(abs_dpdx, abs_dpdy);
-            call->Result()->ReplaceAllUsesWith(result->Result());
+            b.AddWithResult(call->DetachResult(), abs_dpdx, abs_dpdy);
         });
         call->Destroy();
     }
@@ -798,12 +796,12 @@ struct State {
                 auto* uint_ty = ty.MatchWidth(ty.u32(), result_ty);
                 const bool result_is_signed = result_ty->DeepestElement()->Is<type::I32>();
 
-                auto mask_as_result_type = [&](Instruction* mask) {
+                auto mask_as_result_type = [&](Value* mask) {
                     if (result_is_signed) {
-                        mask = b.Convert<i32>(mask);
+                        mask = b.Convert<i32>(mask)->Result();
                     }
                     if (auto* vec = result_ty->As<type::Vector>()) {
-                        mask = b.Construct(vec, mask);
+                        mask = b.Construct(vec, mask)->Result();
                     }
                     return mask;
                 };
@@ -827,9 +825,8 @@ struct State {
                     auto* s3 = b.Call(result_ty, core::BuiltinFn::kSelect, f3, t3,
                                       b.LessThan(offset, 32_u));
                     auto* result_lhs = b.And(s3, mask_as_result_type(mask));
-                    auto* result_rhs = b.And(e, mask_as_result_type(b.Complement(mask)));
-                    auto* result = b.Or(result_lhs, result_rhs);
-                    result->SetResult(call->DetachResult());
+                    auto* result_rhs = b.And(e, mask_as_result_type(b.Complement(mask)->Result()));
+                    b.OrWithResult(call->DetachResult(), result_lhs, result_rhs);
                 });
                 call->Destroy();
             } break;
@@ -859,10 +856,7 @@ struct State {
         } else if (type->Is<core::type::F32>()) {
             value = b.Constant(f32(kDegToRad));
         }
-        b.InsertBefore(call, [&] {
-            auto* mul = b.Multiply(arg, value);
-            mul->SetResult(call->DetachResult());
-        });
+        b.InsertBefore(call, [&] { b.MultiplyWithResult(call->DetachResult(), arg, value); });
         call->Destroy();
     }
 
@@ -1102,13 +1096,13 @@ struct State {
     /// Emit code for `unpack4xI8` on u32 value `x`, before the given call.
     /// @param call the instruction that should follow the emitted code
     /// @param x the u32 value to be unpacked
-    ir::Instruction* Unpack4xI8OnValue(ir::CoreBuiltinCall* call, ir::Value* x) {
+    ir::Value* Unpack4xI8OnValue(ir::CoreBuiltinCall* call, ir::Value* x) {
         // Replace `unpack4xI8(%x)` with:
         //   %n       = vec4u(24, 16, 8, 0);
         //   %x_splat = vec4u(%x); // splat the scalar to a vector
         //   %x_vec4i = bitcast<vec4i>(%x_splat << n);
         //   %result  = %x_vec4i >> vec4u(24);
-        ir::Instruction* result = nullptr;
+        ir::Value* result = nullptr;
         b.InsertBefore(call, [&] {
             auto* vec4i = ty.vec4i();
             auto* vec4u = ty.vec4u();
@@ -1126,20 +1120,20 @@ struct State {
     /// @param call the builtin call instruction
     void Unpack4xI8(ir::CoreBuiltinCall* call) {
         auto* result = Unpack4xI8OnValue(call, call->Args()[0]);
-        result->SetResult(call->DetachResult());
+        call->Result()->ReplaceAllUsesWith(result);
         call->Destroy();
     }
 
     /// Emit code for `unpack4xU8` on u32 value `x`, before the given call.
     /// @param call the instruction that should follow the emitted code
     /// @param x the u32 value to be unpacked
-    Instruction* Unpack4xU8OnValue(ir::CoreBuiltinCall* call, ir::Value* x) {
+    ir::Value* Unpack4xU8OnValue(ir::CoreBuiltinCall* call, ir::Value* x) {
         // Replace `unpack4xU8(%x)` with:
         //   %n       = vec4u(0, 8, 16, 24);
         //   %x_splat = vec4u(%x); // splat the scalar to a vector
         //   %x_vec4u = %x_splat >> n;
         //   %result  = %x_vec4u & vec4u(0xff);
-        ir::Instruction* result = nullptr;
+        ir::Value* result = nullptr;
         b.InsertBefore(call, [&] {
             auto* vec4u = ty.vec4u();
 
@@ -1156,7 +1150,7 @@ struct State {
     /// @param call the builtin call instruction
     void Unpack4xU8(ir::CoreBuiltinCall* call) {
         auto* result = Unpack4xU8OnValue(call, call->Args()[0]);
-        result->SetResult(call->DetachResult());
+        call->Result()->ReplaceAllUsesWith(result);
         call->Destroy();
     }
 

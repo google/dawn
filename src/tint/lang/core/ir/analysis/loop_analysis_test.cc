@@ -175,7 +175,7 @@ TEST_P(IR_LoopAnalysisBoundTest, Bound) {
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
-            Instruction* cond = nullptr;
+            Value* cond = nullptr;
 
             core::ir::Value* bound = nullptr;
             switch (params.kind) {

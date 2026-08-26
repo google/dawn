@@ -325,7 +325,7 @@ struct State {
                     // Use the `arrayLength` builtin to get the limit of a runtime-sized array.
                     // Subtract 1 to get the max allowed index. (Array size is always at least 1.)
                     auto* length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, object);
-                    return b.Subtract(length, b.Constant(1_u))->Result();
+                    return b.Subtract(length, b.Constant(1_u));
                 });
 
             // If there's a dynamic limit that needs enforced, clamp the index operand.

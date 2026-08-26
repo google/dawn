@@ -294,7 +294,7 @@ struct State {
             ir::Value* type_id = nullptr;
             if (config->get_sampler_index_from_metadata && IsSampler(binding_type)) {
                 // Type id is in lower 16 bits
-                type_id = b.And(metadata_val, u32(0xFFFF))->Result();
+                type_id = b.And(metadata_val, u32(0xFFFF));
             } else {
                 type_id = metadata_val;
             }
@@ -315,7 +315,7 @@ struct State {
                 eq = b.Call(ty.bool_(), core::BuiltinFn::kAny, cmp)->Result();
             } else {
                 ResourceType resource_ty = core::type::TypeToResourceType(binding_type);
-                eq = b.Equal(type_id, u32(resource_ty))->Result();
+                eq = b.Equal(type_id, u32(resource_ty));
             }
             b.ExitIf(has_check, eq);
         });
@@ -467,7 +467,7 @@ struct State {
             auto val = texture_kind->As<ir::Constant>()->Value()->ValueAs<uint32_t>();
             return b.Constant(val == static_cast<uint32_t>(res_type));
         }
-        return b.Equal(texture_kind, u32(res_type))->Result();
+        return b.Equal(texture_kind, u32(res_type));
     }
 
     // Generates the code to access the item at `idx` from the resource table. Does not do any
@@ -479,8 +479,7 @@ struct State {
             // TODO(crbug.com/503755700): Optimize to avoid loading twice from
             // storage_buffer[idx].
             auto* metadata_val = GetTypeId(idx);
-            auto* sampler_index = b.ShiftRight(metadata_val, u32(16));
-            idx = sampler_index->Result();
+            idx = b.ShiftRight(metadata_val, u32(16));
         }
 
         auto var = var_for_type.Get(binding_type);
@@ -497,7 +496,7 @@ struct State {
         auto* len_access = b.Access(ty.ptr<storage, u32, read>(), storage_buffer, 0_u);
         ir::Value* num_elements = b.Load(len_access)->Result();
 
-        return b.Add(u32(idx_iter->second), num_elements)->Result();
+        return b.Add(u32(idx_iter->second), num_elements);
     }
 
     void GenSampledGetResource(ir::CoreBuiltinCall* call, const CallArgs& args) {
@@ -550,7 +549,7 @@ struct State {
                     tex_res->As<ir::Constant>()->Value()->ValueAs<bool>() == true) {
                     samp_res = tex_res;
                 } else {
-                    core::ir::Instruction* sampler_compare =
+                    auto* sampler_compare =
                         b.Equal(sampler_kind, u32(ResourceType::kSampler_filtering));
 
                     // Returns `true` if  the texture/sampler combination is valid.

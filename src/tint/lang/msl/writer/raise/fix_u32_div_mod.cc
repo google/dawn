@@ -69,7 +69,7 @@ struct State {
         b.InsertBefore(binary, [&] {
             auto* zero =
                 config.immediate_data_layout.GetValue(b, core::InternalImmediate::kNonConstantZero);
-            binary->SetOperand(0U, b.Add(binary->LHS(), zero)->Result());
+            binary->SetOperand(0U, b.Add(binary->LHS(), zero));
         });
     }
 };

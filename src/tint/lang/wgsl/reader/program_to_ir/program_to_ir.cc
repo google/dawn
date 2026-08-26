@@ -480,8 +480,9 @@ class Impl {
                         : builder_.Constant(1_u);
 
         auto op = stmt->increment ? core::BinaryOp::kAdd : core::BinaryOp::kSubtract;
-        auto* inst = current_block_->Append(BinaryOp(lhs_val, one, op));
-        Store(lhs, inst->Result());
+        core::ir::Value* value = nullptr;
+        builder_.Append(current_block_, [&] { value = BinaryOp(lhs_val, one, op); });
+        Store(lhs, value);
     }
 
     void EmitCompoundAssignment(const ast::CompoundAssignmentStatement* stmt) {
@@ -493,9 +494,10 @@ class Impl {
             return;
         }
 
-        auto* inst = current_block_->Append(BinaryOp(lhs_val, rhs_val, stmt->op));
+        core::ir::Value* value = nullptr;
+        builder_.Append(current_block_, [&] { value = BinaryOp(lhs_val, rhs_val, stmt->op); });
 
-        Store(lhs, inst->Result());
+        Store(lhs, value);
     }
 
     core::ir::Value* Load(ValueOrVecElAccess val) {
@@ -965,12 +967,13 @@ class Impl {
                 if (!rhs) {
                     return;
                 }
-                auto* inst = impl.BinaryOp(lhs, rhs, b->op);
-                if (!inst) {
+                core::ir::Value* value = nullptr;
+                impl.builder_.Append(impl.current_block_,
+                                     [&] { value = impl.BinaryOp(lhs, rhs, b->op); });
+                if (!value) {
                     return;
                 }
-                impl.current_block_->Append(inst);
-                Bind(b, inst->Result());
+                Bind(b, value);
             }
 
             void EmitUnary(const ast::UnaryOpExpression* expr) {
@@ -1370,7 +1373,7 @@ class Impl {
             TINT_ICE_ON_NO_MATCH);
     }
 
-    core::ir::CoreBinary* BinaryOp(core::ir::Value* lhs, core::ir::Value* rhs, core::BinaryOp op) {
+    core::ir::Value* BinaryOp(core::ir::Value* lhs, core::ir::Value* rhs, core::BinaryOp op) {
         switch (op) {
             case core::BinaryOp::kAnd:
                 return builder_.And(lhs, rhs);

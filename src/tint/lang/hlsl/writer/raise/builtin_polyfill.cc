@@ -411,9 +411,7 @@ struct State {
             auto* one_minus_x = b.Subtract(one, args[0]);
             auto* div = b.Divide(one_plus_x, one_minus_x);
             auto* log = b.Call(result_ty, core::BuiltinFn::kLog, div);
-            auto* mul = b.Multiply(log, half);
-
-            call->Result()->ReplaceAllUsesWith(mul->Result());
+            b.MultiplyWithResult(call->DetachResult(), log, half);
         });
         call->Destroy();
     }
@@ -548,7 +546,7 @@ struct State {
         b.InsertBefore(call, [&] {
             args.Push(b.Call(type, core::BuiltinFn::kFloor, val)->Result());
             args.Push(b.Call(type, core::BuiltinFn::kCeil, val)->Result());
-            args.Push(b.LessThan(val, b.Zero(type))->Result());
+            args.Push(b.LessThan(val, b.Zero(type)));
         });
         auto* trunc = b.ir.CreateInstruction<hlsl::ir::Ternary>(call->DetachResult(), args);
         trunc->InsertBefore(call);
@@ -664,7 +662,7 @@ struct State {
                     }
 
                     auto* uint_src_ty = ty.MatchWidth(ty.u32(), src_type);
-                    core::ir::Instruction* v = b.Convert(uint_src_ty, u16_src);
+                    core::ir::Value* v = b.Convert(uint_src_ty, u16_src)->Result();
 
                     auto width = src_vec->Width();
                     v = b.And(v, b.Splat(uint_src_ty, 0xffff_u));
@@ -678,12 +676,13 @@ struct State {
                         auto* v1 = b.Or(a1, b.Access(ty.u32(), v, 1_u));
                         auto* a2 = b.Access(ty.u32(), v, 2_u);
                         auto* v2 = b.Or(a2, b.Access(ty.u32(), v, 3_u));
-                        v = b.Construct(ty.vec2(ty.u32()), v1, v2);
+                        v = b.Construct(ty.vec2(ty.u32()), v1, v2)->Result();
                     }
                     if (dst_type->DeepestElement()->Is<core::type::F32>()) {
-                        v = b.Call<hlsl::ir::BuiltinCall>(dst_type, BuiltinFn::kAsfloat, v);
+                        v = b.Call<hlsl::ir::BuiltinCall>(dst_type, BuiltinFn::kAsfloat, v)
+                                ->Result();
                     } else if (dst_type->DeepestElement()->Is<core::type::I32>()) {
-                        v = b.Call<hlsl::ir::BuiltinCall>(dst_type, BuiltinFn::kAsint, v);
+                        v = b.Call<hlsl::ir::BuiltinCall>(dst_type, BuiltinFn::kAsint, v)->Result();
                     }
                     b.Return(f, v);
                 });
@@ -764,19 +763,19 @@ struct State {
                     const core::type::Type* uint_dst_ty = ty.MatchWidth(ty.u32(), dst_type);
 
                     // v is now the uint bitcast of src
-                    core::ir::Instruction* shifted = nullptr;
-                    core::ir::Instruction* masked = nullptr;
+                    core::ir::Value* shifted = nullptr;
+                    core::ir::Value* masked = nullptr;
                     // Make a double wide src and then shift and mask the result to produce u16
                     // values.
                     if (src_vec) {
                         // Since the src was vec2, we swizzle so the value is
                         // equivalent to: src.xxyy
                         auto* swizzle = b.Swizzle(uint_dst_ty, v, {0_u, 0_u, 1_u, 1_u});
-                        shifted = b.ShiftRight(
-                            swizzle, b.Construct(uint_dst_ty, 0_u, 16_u, 0_u, 16_u)->Result());
+                        shifted =
+                            b.ShiftRight(swizzle, b.Construct(uint_dst_ty, 0_u, 16_u, 0_u, 16_u));
                     } else {
                         v = b.Construct(uint_dst_ty, v, v);
-                        shifted = b.ShiftRight(v, b.Construct(uint_dst_ty, 0_u, 16_u)->Result());
+                        shifted = b.ShiftRight(v, b.Construct(uint_dst_ty, 0_u, 16_u));
                     }
                     masked = b.And(shifted, b.Splat(uint_dst_ty, 0xffff_u));
                     core::ir::Instruction* v16 = b.Let("v16", b.Convert(u16_vec_ty, masked));
@@ -834,9 +833,7 @@ struct State {
             auto* low64 = b.Convert(ty.u64(), low);
             auto* high64 = b.Convert(ty.u64(), high);
             auto* shifted_high = b.ShiftLeft(high64, b.Convert(ty.u64(), b.Constant(u32(32))));
-            auto* result = b.Or(shifted_high, low64);
-
-            bitcast->Result()->ReplaceAllUsesWith(result->Result());
+            b.OrWithResult(bitcast->DetachResult(), shifted_high, low64);
         });
         bitcast->Destroy();
     }
@@ -1561,8 +1558,7 @@ struct State {
 
             auto* lower = b.Swizzle(ty.u32(), bc, {0});
             auto* upper = b.ShiftLeft(b.Swizzle(ty.u32(), bc, {1}), 16_u);
-            auto* res = b.Or(lower, upper);
-            call->Result()->ReplaceAllUsesWith(res->Result());
+            b.OrWithResult(call->DetachResult(), lower, upper);
         });
         call->Destroy();
     }
@@ -1630,8 +1626,7 @@ struct State {
             auto* conv = b.Convert(ty.vec2u(), round);
             auto* lower = b.Swizzle(ty.u32(), conv, {0});
             auto* upper = b.ShiftLeft(b.Swizzle(ty.u32(), conv, {1}), 16_u);
-            auto* result = b.Or(lower, upper);
-            call->Result()->ReplaceAllUsesWith(result->Result());
+            b.OrWithResult(call->DetachResult(), lower, upper);
         });
         call->Destroy();
     }
@@ -1643,9 +1638,7 @@ struct State {
             auto* y = b.ShiftRight(args[0], 16_u);
             auto* conv = b.Construct(ty.vec2u(), x, y);
             auto* flt_conv = b.Convert(ty.vec2f(), conv);
-            auto* scale = b.Divide(flt_conv, 0xffff_f);
-
-            call->Result()->ReplaceAllUsesWith(scale->Result());
+            b.DivideWithResult(call->DetachResult(), flt_conv, 0xffff_f);
         });
         call->Destroy();
     }
@@ -1702,9 +1695,7 @@ struct State {
             auto* y = b.ShiftLeft(b.Swizzle(ty.u32(), conv, {1}), 8_u);
             auto* z = b.ShiftLeft(b.Swizzle(ty.u32(), conv, {2}), 16_u);
             auto* w = b.ShiftLeft(b.Swizzle(ty.u32(), conv, {3}), 24_u);
-            auto* res = b.Or(x, b.Or(y, b.Or(z, w)));
-
-            call->Result()->ReplaceAllUsesWith(res->Result());
+            b.OrWithResult(call->DetachResult(), x, b.Or(y, b.Or(z, w)));
         });
         call->Destroy();
     }
@@ -1719,9 +1710,7 @@ struct State {
             auto* w = b.ShiftRight(val, 24_u);
             auto* cons = b.Construct(ty.vec4u(), x, y, z, w);
             auto* conv = b.Convert(ty.vec4f(), cons);
-            auto* scale = b.Divide(conv, 255_f);
-
-            call->Result()->ReplaceAllUsesWith(scale->Result());
+            b.DivideWithResult(call->DetachResult(), conv, 255_f);
         });
         call->Destroy();
     }
@@ -1821,8 +1810,9 @@ struct State {
             auto* exp_out = b.Var(ty.ptr<function>(arg_ty));
             // HLSL frexp writes exponent part to second out param, and returns the fraction
             // (mantissa) part.
-            core::ir::Instruction* fract = b.Call<hlsl::ir::BuiltinCall>(
-                arg_ty, hlsl::BuiltinFn::kFrexp, arg, b.Load(exp_out));
+            core::ir::Value* fract =
+                b.Call<hlsl::ir::BuiltinCall>(arg_ty, hlsl::BuiltinFn::kFrexp, arg, b.Load(exp_out))
+                    ->Result();
             // The returned fraction is always positive, but for WGSL, we want it to keep the sign
             // of the input value.
             auto* arg_sign = BuildSign(arg);
@@ -1902,22 +1892,22 @@ struct State {
             auto* id = b.Call<hlsl::ir::BuiltinCall>(ty.u32(), hlsl::BuiltinFn::kWaveGetLaneIndex);
             auto* arg2 = call->Args()[1];
 
-            core::ir::Instruction* inst = nullptr;
+            core::ir::Value* value = nullptr;
             switch (call->Func()) {
                 case core::BuiltinFn::kSubgroupShuffleXor:
-                    inst = b.Xor(id, arg2);
+                    value = b.Xor(id, arg2);
                     break;
                 case core::BuiltinFn::kSubgroupShuffleUp:
-                    inst = b.Subtract(id, arg2);
+                    value = b.Subtract(id, arg2);
                     break;
                 case core::BuiltinFn::kSubgroupShuffleDown:
-                    inst = b.Add(id, arg2);
+                    value = b.Add(id, arg2);
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);
             }
             b.CallWithResult<hlsl::ir::BuiltinCall>(
-                call->DetachResult(), hlsl::BuiltinFn::kWaveReadLaneAt, call->Args()[0], inst);
+                call->DetachResult(), hlsl::BuiltinFn::kWaveReadLaneAt, call->Args()[0], value);
         });
         call->Destroy();
     }
@@ -1949,18 +1939,16 @@ struct State {
             auto call_type = arg1->Type();
             auto* exclusive_call = b.Call<core::ir::CoreBuiltinCall>(call_type, builtin_sel, arg1);
 
-            core::ir::Instruction* inst = nullptr;
             switch (call->Func()) {
                 case core::BuiltinFn::kSubgroupInclusiveAdd:
-                    inst = b.Add(exclusive_call, arg1);
+                    b.AddWithResult(call->DetachResult(), exclusive_call, arg1);
                     break;
                 case core::BuiltinFn::kSubgroupInclusiveMul:
-                    inst = b.Multiply(exclusive_call, arg1);
+                    b.MultiplyWithResult(call->DetachResult(), exclusive_call, arg1);
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);
             }
-            call->Result()->ReplaceAllUsesWith(inst->Result());
         });
         call->Destroy();
     }
@@ -2126,7 +2114,7 @@ struct State {
             } else {
                 offset =
                     b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, offset)->Result();
-                offset = b.Multiply(offset, u32(arr_stride / sm_ty->Type()->Size()))->Result();
+                offset = b.Multiply(offset, u32(arr_stride / sm_ty->Type()->Size()));
             }
             if (auto* const_stride = stride->As<core::ir::Constant>()) {
                 stride = b.Constant(u32(const_stride->Value()->ValueAs<uint32_t>() * arr_stride /
@@ -2134,7 +2122,7 @@ struct State {
             } else {
                 stride =
                     b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, stride)->Result();
-                stride = b.Multiply(stride, u32(arr_stride / sm_ty->Type()->Size()))->Result();
+                stride = b.Multiply(stride, u32(arr_stride / sm_ty->Type()->Size()));
             }
 
             // TODO(crbug.com/512455144): 8-bit components need additional work to support.
@@ -2184,7 +2172,7 @@ struct State {
             } else {
                 offset =
                     b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, offset)->Result();
-                offset = b.Multiply(offset, u32(arr_stride / sm_ty->Type()->Size()))->Result();
+                offset = b.Multiply(offset, u32(arr_stride / sm_ty->Type()->Size()));
             }
             if (auto* const_stride = stride->As<core::ir::Constant>()) {
                 stride = b.Constant(u32(const_stride->Value()->ValueAs<uint32_t>() * arr_stride /
@@ -2192,7 +2180,7 @@ struct State {
             } else {
                 stride =
                     b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, stride)->Result();
-                stride = b.Multiply(stride, u32(arr_stride / sm_ty->Type()->Size()))->Result();
+                stride = b.Multiply(stride, u32(arr_stride / sm_ty->Type()->Size()));
             }
 
             // TODO(crbug.com/512455144): 8-bit components need additional work to support.

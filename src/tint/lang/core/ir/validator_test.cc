@@ -1468,7 +1468,7 @@ TEST_F(IR_ValidatorTest, Binary_MissingOperands) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    auto* add = sb.Add(sb.Constant(1_i), sb.Constant(2_i));
+    auto* add = sb.Add(sb.Constant(1_i), sb.Constant(2_i))->AsInstruction<CoreBinary>();
     add->ClearOperands();
     sb.Return(f);
 
@@ -1485,7 +1485,7 @@ TEST_F(IR_ValidatorTest, Binary_MissingResult) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    auto* add = sb.Add(sb.Constant(1_i), sb.Constant(2_i));
+    auto* add = sb.Add(sb.Constant(1_i), sb.Constant(2_i))->AsInstruction<CoreBinary>();
     add->ClearResults();
     sb.Return(f);
 
@@ -1545,7 +1545,7 @@ TEST_F(IR_ValidatorTest, Binary_Valid) {
 TEST_F(IR_ValidatorTest, Binary_TooManyOperands) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* add = b.Add(b.Constant(1_i), b.Constant(2_i));
+        auto* add = b.Add(b.Constant(1_i), b.Constant(2_i))->AsInstruction<CoreBinary>();
         add->PushOperand(b.Constant(3_i));
         b.Return(func);
     });
@@ -1770,12 +1770,14 @@ TEST_F(IR_ValidatorTest, Unary_OperandWrongType) {
 TEST_F(IR_ValidatorTest, Scoping_UseBeforeDecl) {
     auto* f = b.Function("my_func", ty.void_());
 
-    auto* y = b.Add(2_i, 3_i);
-    auto* x = b.Add(y, 1_i);
-
-    f->Block()->Append(x);
-    f->Block()->Append(y);
-    f->Block()->Append(b.Return(f));
+    b.Append(f->Block(), [&] {
+        auto* x = b.Add(1_i, 1_i);
+        auto* y = b.Add(2_i, 3_i);
+        if (auto* x_inst = x->AsInstruction()->As<Binary>()) {
+            x_inst->SetOperand(0, y);
+        }
+        b.Return(f);
+    });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
@@ -1977,7 +1979,7 @@ TEST_F(IR_ValidatorTest, InstructionInRootBlockOnlyUsedInRootBlock) {
     b.Append(mod.root_block, [&] {
         auto* z = b.Override(ty.u32());
         z->SetOverrideId(OverrideId{2});
-        init = b.Add(z, 2_u)->Result();
+        init = b.Add(z, 2_u);
         b.Override("a", init);
     });
 
@@ -2102,7 +2104,7 @@ TEST_F(IR_ValidatorTest, ValueArrayCount_NotInRootBlock) {
     core::ir::Value* count_val = nullptr;
     auto* func = b.Function("func", ty.void_());
     b.Append(func->Block(), [&] {
-        count_val = b.Add(2_u, 3_u)->Result();
+        count_val = b.Add(2_u, 3_u);
         b.Return(func);
     });
 
@@ -2897,7 +2899,7 @@ TEST_F(IR_ValidatorTest, CorrectDomainShiftLeft) {
         auto* e1 = b.Let("b", 16_u);
         auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.u32(), e1, 17_u);
         b.ir.SetSource(call_func, Source{{5, 7}});
-        b.Return(func, call_func->Result());
+        b.Return(func, call_func);
     });
     ASSERT_EQ(ir::Validate(mod), Success);
 
@@ -2922,7 +2924,7 @@ TEST_F(IR_ValidatorTest, IncorrectDomainShiftLeft) {
         auto* e1 = b.Let("b", 16_u);
         auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.u32(), e1, 32_u);
         b.ir.SetSource(call_func, Source{{5, 7}});
-        b.Return(func, call_func->Result());
+        b.Return(func, call_func);
     });
     ASSERT_EQ(ir::Validate(mod), Success);
 
@@ -2951,7 +2953,7 @@ TEST_F(IR_ValidatorTest, IncorrectDomainShiftRight_Vec) {
         auto* e2 = b.Splat(ty.vec4u(), 33_u);
         auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.vec4i(), e1, e2);
         b.ir.SetSource(call_func, Source{{5, 7}});
-        b.Return(func, call_func->Result());
+        b.Return(func, call_func);
     });
     ASSERT_EQ(ir::Validate(mod), Success);
 
@@ -2979,7 +2981,7 @@ TEST_F(IR_ValidatorTest, CorrectDomainDiv) {
         auto* e1 = b.Let("b", 16_u);
         auto* call_func = b.Binary(core::BinaryOp::kDivide, ty.u32(), e1, 17_u);
         b.ir.SetSource(call_func, Source{{5, 7}});
-        b.Return(func, call_func->Result());
+        b.Return(func, call_func);
     });
     ASSERT_EQ(ir::Validate(mod), Success);
 
@@ -3004,7 +3006,7 @@ TEST_F(IR_ValidatorTest, IncorrectDomainDiv) {
         auto* e1 = b.Let("b", 16_u);
         auto* call_func = b.Binary(core::BinaryOp::kDivide, ty.u32(), e1, 0_u);
         b.ir.SetSource(call_func, Source{{5, 7}});
-        b.Return(func, call_func->Result());
+        b.Return(func, call_func);
     });
     ASSERT_EQ(ir::Validate(mod), Success);
 
@@ -3031,7 +3033,7 @@ TEST_F(IR_ValidatorTest, IncorrectDomainModulo_Vec) {
         auto* e2 = b.Splat(ty.vec4i(), 0_i);
         auto* call_func = b.Binary(core::BinaryOp::kModulo, ty.vec4i(), e1, e2);
         b.ir.SetSource(call_func, Source{{5, 7}});
-        b.Return(func, call_func->Result());
+        b.Return(func, call_func);
     });
     ASSERT_EQ(ir::Validate(mod), Success);
 

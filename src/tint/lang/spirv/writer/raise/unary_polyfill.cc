@@ -137,7 +137,7 @@ struct State {
             auto* u32_val = b.Bitcast(uint_ty, val);
             auto* mask = b.MatchWidth(0x80000000_u, uint_ty);
             auto* xor_res = b.Xor(u32_val, mask);
-            b.BitcastWithResult(unary->DetachResult(), xor_res->Result());
+            b.BitcastWithResult(unary->DetachResult(), xor_res);
         });
         unary->Destroy();
     }
@@ -155,7 +155,7 @@ struct State {
             auto* u32_val = b.Bitcast(uint_ty, val);
             auto* mask = b.MatchWidth(0x7FFFFFFF_u, uint_ty);
             auto* and_res = b.And(u32_val, mask);
-            b.BitcastWithResult(builtin->DetachResult(), and_res->Result());
+            b.BitcastWithResult(builtin->DetachResult(), and_res);
         });
         builtin->Destroy();
     }

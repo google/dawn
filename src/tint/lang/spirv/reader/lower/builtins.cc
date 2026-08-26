@@ -418,7 +418,7 @@ struct State {
 
                 for (uint32_t row = 0; row < rows; ++row) {
                     auto* v1_element = b.Access(elem_ty, vector1, u32(row));
-                    auto* result = b.Multiply(v1_element, v2_element)->Result();
+                    auto* result = b.Multiply(v1_element, v2_element);
                     col_elements.Push(result);
                 }
 
@@ -451,9 +451,7 @@ struct State {
             auto* div = b.Divide(x, y);
             auto* floor = b.Call(res_ty, core::BuiltinFn::kFloor, div);
             auto* mul = b.Multiply(y, floor);
-            auto* sub = b.Subtract(x, mul);
-
-            call->Result()->ReplaceAllUsesWith(sub->Result());
+            b.SubtractWithResult(call->DetachResult(), x, mul);
         });
         call->Destroy();
     }
@@ -545,7 +543,7 @@ struct State {
                 rhs = b.Bitcast(op_ty, rhs)->Result();
             }
 
-            auto* c = b.Binary(op, op_ty, lhs, rhs)->Result();
+            auto* c = b.Binary(op, op_ty, lhs, rhs);
             if (res_ty != op_ty) {
                 c = b.Bitcast(res_ty, c)->Result();
             }
@@ -590,7 +588,7 @@ struct State {
                 rhs = b.Bitcast(op_ty, rhs)->Result();
             }
 
-            auto* c = b.Binary(op, op_ty, lhs, rhs)->Result();
+            auto* c = b.Binary(op, op_ty, lhs, rhs);
             if (res_ty != op_ty) {
                 c = b.Bitcast(res_ty, c)->Result();
             }
@@ -616,7 +614,7 @@ struct State {
                 rhs = b.Bitcast(lhs->Type(), rhs)->Result();
             }
 
-            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs)->Result();
+            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs);
         });
         call->Destroy();
     }
@@ -641,7 +639,7 @@ struct State {
                 rhs = b.Bitcast(arg_ty, rhs)->Result();
             }
 
-            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs)->Result();
+            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs);
         });
         call->Destroy();
     }
@@ -672,7 +670,7 @@ struct State {
                 rhs = b.Bitcast(arg_ty, rhs)->Result();
             }
 
-            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs)->Result();
+            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs);
         });
         call->Destroy();
     }
@@ -851,11 +849,10 @@ struct State {
 
         b.InsertBefore(call, [&] {
             if (I->Type()->IsFloatScalar()) {
-                auto* v = b.Multiply(I, N)->Result();
-                v = b.Multiply(v, N)->Result();
-                v = b.Multiply(v, 2.0_f)->Result();
-                v = b.Subtract(I, v)->Result();
-                call->Result()->ReplaceAllUsesWith(v);
+                auto* v = b.Multiply(I, N);
+                v = b.Multiply(v, N);
+                v = b.Multiply(v, 2.0_f);
+                b.SubtractWithResult(call->DetachResult(), I, v);
             } else {
                 b.CallWithResult(call->DetachResult(), core::BuiltinFn::kReflect,
                                  Vector<core::ir::Value*, 2>{I, N});
@@ -873,8 +870,8 @@ struct State {
         b.InsertBefore(call, [&] {
             if (I->Type()->IsFloatScalar()) {
                 auto* neg = b.Negation(N);
-                auto* sel = b.Multiply(I, Nref)->Result();
-                sel = b.LessThan(sel, b.Zero(sel->Type()))->Result();
+                auto* sel = b.Multiply(I, Nref);
+                sel = b.LessThan(sel, b.Zero(sel->Type()));
                 b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, neg, N, sel);
             } else {
                 b.CallWithResult(call->DetachResult(), core::BuiltinFn::kFaceForward, N, I, Nref);
@@ -1028,7 +1025,7 @@ struct State {
                 shift = b.Bitcast(ty.MatchWidth(ty.u32(), shift->Type()), shift)->Result();
             }
 
-            auto* bin = b.Binary(core::BinaryOp::kShiftLeft, base->Type(), base, shift)->Result();
+            auto* bin = b.Binary(core::BinaryOp::kShiftLeft, base->Type(), base, shift);
             if (base->Type() != call->Result()->Type()) {
                 bin = b.Bitcast(call->Result()->Type(), bin)->Result();
             }
@@ -1052,7 +1049,7 @@ struct State {
                 shift = b.Bitcast(u_ty, shift)->Result();
             }
 
-            auto* bin = b.Binary(core::BinaryOp::kShiftRight, u_ty, base, shift)->Result();
+            auto* bin = b.Binary(core::BinaryOp::kShiftRight, u_ty, base, shift);
             if (u_ty != call->Result()->Type()) {
                 bin = b.Bitcast(call->Result()->Type(), bin)->Result();
             }
@@ -1076,7 +1073,7 @@ struct State {
                 shift = b.Bitcast(ty.MatchWidth(ty.u32(), shift->Type()), shift)->Result();
             }
 
-            auto* bin = b.Binary(core::BinaryOp::kShiftRight, s_ty, base, shift)->Result();
+            auto* bin = b.Binary(core::BinaryOp::kShiftRight, s_ty, base, shift);
             if (s_ty != call->Result()->Type()) {
                 bin = b.Bitcast(call->Result()->Type(), bin)->Result();
             }
@@ -1189,8 +1186,7 @@ struct State {
                     auto* r3 = b.Construct(ty.vec3(elem_ty), r_20, r_21, r_22);
 
                     auto* m = b.Construct(mat_ty, r1, r2, r3);
-                    auto* inv = b.Multiply(inv_det, m);
-                    call->Result()->ReplaceAllUsesWith(inv->Result());
+                    b.MultiplyWithResult(call->DetachResult(), inv_det, m);
                     break;
                 }
                 case 4: {
@@ -1293,8 +1289,7 @@ struct State {
                     auto* r4 = b.Construct(ty.vec4(elem_ty), r_30, r_31, r_32, r_33);
 
                     auto* m = b.Construct(mat_ty, r1, r2, r3, r4);
-                    auto* inv = b.Multiply(inv_det, m);
-                    call->Result()->ReplaceAllUsesWith(inv->Result());
+                    b.MultiplyWithResult(call->DetachResult(), inv_det, m);
                     break;
                 }
                 default: {

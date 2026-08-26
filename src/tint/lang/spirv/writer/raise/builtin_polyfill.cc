@@ -515,12 +515,11 @@ struct State {
 
                 // Compare the original value to the comparator to see if an exchange happened.
                 auto* original = call->Result();
-                auto* compare = b.Equal(original, cmp);
-                compare->InsertBefore(builtin);
+                core::ir::Value* compare = nullptr;
+                b.InsertBefore(builtin, [&] { compare = b.Equal(original, cmp); });
 
                 // Construct the atomicCompareExchange result structure.
-                call = b.ConstructWithResult(builtin->DetachResult(),
-                                             Vector{original, compare->Result()});
+                call = b.ConstructWithResult(builtin->DetachResult(), Vector{original, compare});
                 break;
             }
             case core::BuiltinFn::kAtomicExchange:
@@ -594,7 +593,7 @@ struct State {
         // OpDot only supports floating point operands, so we need to polyfill the integer case.
         // TODO(crbug.com/tint/1267): If SPV_KHR_integer_dot_product is supported, use that instead.
         if (builtin->Result()->Type()->IsIntegerScalar()) {
-            core::ir::Instruction* sum = nullptr;
+            core::ir::Value* sum = nullptr;
 
             auto* v1 = builtin->Args()[0];
             auto* v2 = builtin->Args()[1];
@@ -612,7 +611,7 @@ struct State {
                     }
                 });
             }
-            sum->SetResult(builtin->DetachResult());
+            builtin->Result()->ReplaceAllUsesWith(sum);
             builtin->Destroy();
             return;
         }
@@ -888,13 +887,13 @@ struct State {
                 auto* i_j = b.Call(ty.vec2f(), core::BuiltinFn::kFloor, texelPos);
 
                 // fraction = texelPos - i_j
-                fract_bilinear = b.Subtract(texelPos, i_j)->Result();
+                fract_bilinear = b.Subtract(texelPos, i_j);
 
                 // gatherUV = (i_j + 0.5) / dim
                 auto* gatherUV = b.Divide(b.Add(i_j, b.Splat(ty.vec2f(), b.Constant(0.5_f))), fdim);
 
                 // Update coords for the gather call.
-                coords = gatherUV->Result();
+                coords = gatherUV;
             });
         }
 
@@ -1393,7 +1392,7 @@ struct State {
             // Replace the uses before we create the new usage.
             builtin->Result()->ReplaceAllUsesWith(result);
 
-            core::ir::Instruction* id = nullptr;
+            core::ir::Value* id = nullptr;
             auto* subgroup_invocation_id = b.Load(subgroup_invocation_id_);
             switch (builtin->Func()) {
                 case core::BuiltinFn::kSubgroupShuffleUp:

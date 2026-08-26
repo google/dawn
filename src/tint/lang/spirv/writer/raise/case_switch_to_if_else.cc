@@ -116,9 +116,9 @@ struct State {
                     for (auto& sel : c.selectors) {
                         auto* curr_selector = b.Equal(switch_cond, sel.val->As<core::ir::Value>());
                         if (case_cond) {
-                            case_cond = b.Or(curr_selector, case_cond)->Result();
+                            case_cond = b.Or(curr_selector, case_cond);
                         } else {
-                            case_cond = curr_selector->Result();
+                            case_cond = curr_selector;
                         }
                     }
                     conditions.Push(case_cond);
