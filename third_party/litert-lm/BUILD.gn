@@ -59,6 +59,7 @@ action("litert_lm_advanced_main") {
     ]
   }
   deps = [ "//src/dawn/native:webgpu_dawn_shared" ]
+  data_deps = [ "//src/dawn/native:webgpu_dawn_shared" ]
   data = [
     "data/model.litertlm",
     "//scripts/run_litert_lm_benchmark.py",
