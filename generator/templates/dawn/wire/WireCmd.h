@@ -87,8 +87,8 @@ namespace dawn::wire {
     };
 
     struct CmdHeader {
-        uint64_t commandSize;
-        WireCmd commandId;
+        uint64_t commandSize = 0;
+        WireCmd commandId{};
 
         CmdHeader() = default;
         CmdHeader(const CmdHeader&) = default;
@@ -139,7 +139,7 @@ namespace dawn::wire {
         {% if command.derived_method %}
             //* Command handlers want to know the object ID in addition to the backing object.
             //* Doesn't need to be filled before Serialize, or GetRequiredSize.
-            ObjectId selfId;
+            ObjectId selfId = 0;
         {% endif %}
 
         {% for member in command.members %}
@@ -157,7 +157,7 @@ namespace dawn::wire {
                 {% endif %}
                 ityp::span<size_t, {{element_type}}, {{length}}> {{as_varName(member.name)}};
             {% else %}
-                {{as_annotated_cType(member)}};
+                {{as_annotated_cType(member)}}{};
             {% endif %}
         {% endfor %}
     };

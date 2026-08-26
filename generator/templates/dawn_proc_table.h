@@ -33,15 +33,15 @@
 
 // Note: Often allocated as a static global. Do not add a complex constructor.
 typedef struct {{Prefix}}ProcTable {
-    uint8_t version[20];
+    uint8_t version[20]{};
 
     {% for function in by_category["function"] %}
-        {{as_cProc(None, function.name)}} {{as_varName(function.name)}};
+        {{as_cProc(None, function.name)}} {{as_varName(function.name)}} = nullptr;
     {% endfor %}
 
     {% for (type, methods) in c_methods_sorted_by_parent %}
         {% for method in methods %}
-            {{as_cProc(type.name, method.name)}} {{as_varName(type.name, method.name)}};
+            {{as_cProc(type.name, method.name)}} {{as_varName(type.name, method.name)}} = nullptr;
         {% endfor %}
 
     {% endfor %}
