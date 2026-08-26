@@ -48,6 +48,7 @@ import java.util.concurrent.Executors
 @RunWith(AndroidJUnit4::class)
 @MediumTest
 @OptIn(ExperimentalWebGpuApi::class)
+@androidx.test.filters.SdkSuppress(minSdkVersion = 29)
 class GPUHardwareBufferTest {
 
     companion object {
@@ -86,7 +87,11 @@ class GPUHardwareBufferTest {
         adapter.close()
         instance.close()
 
-        // 2. Skip gracefully if features are missing
+        // 2. Skip gracefully if features are missing or running on emulator
+        Assume.assumeFalse(
+            "HardwareBuffer tests are not supported on emulator environments",
+            EmulatorUtils.isEmulator,
+        )
         Assume.assumeTrue(
             "Adapter does not support required features for hardware buffer tests",
             hasRequiredFeatures
@@ -266,7 +271,7 @@ class GPUHardwareBufferTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 29)
+    @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     fun testImportHardwareBufferLoop_noLeaks() {
         runBlocking {
             val unused = webGpu.execute {
@@ -293,7 +298,7 @@ class GPUHardwareBufferTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 29)
+    @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     fun testWebGpuOOMScope_handlesErrorGracefully() {
         runBlocking {
             val unused = webGpu.execute {
@@ -324,7 +329,7 @@ class GPUHardwareBufferTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 29)
+    @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     fun testRGBHardwareBuffer_asTexture() {
         runBlocking {
             val unused = webGpu.execute {
@@ -350,7 +355,7 @@ class GPUHardwareBufferTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 29)
+    @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     fun testRGBHardwareBuffer_asExternalTexture() {
         runBlocking {
             val unused = webGpu.execute {
@@ -368,7 +373,7 @@ class GPUHardwareBufferTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 30)
+    @ApiRequirement(minApi = 30, onlySkipOnEmulator = true)
     fun testYUVHardwareBuffer_asExternalTexture() {
         runBlocking {
             val unused = webGpu.execute {
@@ -404,7 +409,7 @@ class GPUHardwareBufferTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 29)
+    @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     @SuppressLint("SuspendBlocks")
     fun testConcurrentAccess_raceCondition() {
         runBlocking(Dispatchers.IO) {
@@ -430,7 +435,7 @@ class GPUHardwareBufferTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 29)
+    @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     fun testZeroCopyPipeline_writeAndVerify() {
         runBlocking {
             val unused = webGpu.execute {
@@ -460,7 +465,7 @@ class GPUHardwareBufferTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 29)
+    @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     fun testZeroCopyPipeline_gpuRenderWriteAndVerify() {
         runBlocking {
             val unused = webGpu.execute {
@@ -548,7 +553,7 @@ class GPUHardwareBufferTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 29)
+    @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     fun testZeroCopyPipeline_gpuSamplingAndCopyVerify() {
         runBlocking {
             val unused = webGpu.execute {
@@ -616,7 +621,7 @@ class GPUHardwareBufferTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 30)
+    @ApiRequirement(minApi = 30, onlySkipOnEmulator = true)
     fun testYUVExternalTexture_descriptorTransform_validatesWithoutError() {
         runBlocking {
             val unused = webGpu.execute {
@@ -637,7 +642,7 @@ class GPUHardwareBufferTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 29)
+    @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     fun testRGBExternalTexture_descriptorTransform_validatesWithoutError() {
         runBlocking {
             val unused = webGpu.execute {
@@ -661,7 +666,7 @@ class GPUHardwareBufferTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 29)
+    @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     @SuppressLint("SuspendBlocks")
     fun testColorSpaceEnumVariants() {
         runBlocking {

@@ -120,13 +120,13 @@ internal object GPUSyncFenceHelper {
      * Creates an Android SyncFence from a raw file descriptor using EGL.
      *
      * **Ownership Transfer Rules:**
-     * 1. The caller transfers ownership of the raw file descriptor (`syncFd`) to this function.
-     * 2. If the conversion fails at any early-exit check, this function manually closes `syncFd`
-     *    to prevent file descriptor exhaustion leaks.
+     * 1. The caller transfers ownership of the raw file descriptor ([pfd]) to this function.
+     * 2. If the conversion fails at any early-exit check, this function manually closes [pfd] to
+     *    prevent file descriptor exhaustion leaks.
      * 3. Once `EGL15.eglCreateSync` is successfully called, the underlying EGL driver takes absolute
      *    ownership of the file descriptor and guarantees its closure upon sync object destruction.
      *
-     * @param syncFd The raw file descriptor representing a synchronization fence.
+     * @param pfd The ParcelFileDescriptor representing a synchronization fence.
      * @return A valid [SyncFence] duplicated from the EGL sync object, or null if unsupported/failed.
      */
     @OptIn(ExperimentalWebGpuApi::class)

@@ -325,18 +325,18 @@
     {%- endif -%}
     {%- set optin = kotlin_member_optin(member, parent=parent, chain_children=chain_children) | trim -%}
     {%- if optin -%}
-        {%- do annotations.append(optin) -%}
+        {%- do annotations.append('@android.annotation.SuppressLint("ExperimentalPropertyAnnotation")\n        ' + optin) -%}
     {%- endif -%}
-    {%- set annotations_str = annotations | join(' ') -%}
+    {%- set annotations_str = annotations | join('\n        ') -%}
     {%- set is_experimental = (item_is_experimental(parent) != 'True') and (item_requires_optin(member) == 'True') -%}
-    {{- annotations_str + ' ' if annotations_str -}}public var {{ member.name.camelCase() -}}: {{ kotlin_definition(member) if is_experimental else kotlin_declaration(member) -}}
+    {{- annotations_str + '\n        ' if annotations_str -}}public var {{ member.name.camelCase() -}}: {{ kotlin_definition(member) if is_experimental else kotlin_declaration(member) -}}
 {%- endmacro -%}
 
 //* Generates a public var property declaration for an extensible chain child structure.
 {% macro kotlin_chain_property(child, parent) -%}
     {%- set optin = kotlin_member_optin(child, parent=parent, chain_children=chain_children) | trim -%}
     {%- set is_experimental = (item_is_experimental(parent) != 'True') and (item_requires_optin(child) == 'True') -%}
-    {{- optin + ' ' if optin -}}public var {{ child.name.camelCase() }}: {{ kotlin_name(child) }}?{{ ' = null' if is_experimental }}
+    {{- '@android.annotation.SuppressLint("ExperimentalPropertyAnnotation")\n        ' + optin + '\n        ' if optin -}}public var {{ child.name.camelCase() }}: {{ kotlin_name(child) }}?{{ ' = null' if is_experimental }}
 {%- endmacro -%}
 
 

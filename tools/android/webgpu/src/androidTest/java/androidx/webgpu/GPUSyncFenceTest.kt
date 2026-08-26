@@ -79,7 +79,11 @@ class GPUSyncFenceTest {
         adapter.close()
         instance.close()
 
-        // 2. Skip gracefully if features are missing
+        // 2. Skip gracefully if features are missing or running on emulator
+        Assume.assumeFalse(
+            "HardwareBuffer and SyncFence tests are not supported on emulator environments",
+            EmulatorUtils.isEmulator,
+        )
         Assume.assumeTrue(
             "Adapter does not support required features for hardware buffer tests",
             hasRequiredFeatures
@@ -188,7 +192,7 @@ class GPUSyncFenceTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 29)
+    @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     fun testSyncFence_lifecycleAndAwaiting() = runBlocking {
         val unused = webGpu.execute {
             val (rgbBuffer, wrapper) = createTestTextureWrapper()
@@ -222,7 +226,8 @@ class GPUSyncFenceTest {
      */
     @Test
     @MediumTest
-    @ApiRequirement(minApi = 33)
+    @ApiRequirement(minApi = 33, onlySkipOnEmulator = true)
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 33)
     fun testSyncFence_fromPlatformSyncFence() = runBlocking {
         val unused = webGpu.execute {
             val (rgbBuffer, wrapper) = createTestTextureWrapper()

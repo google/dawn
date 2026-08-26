@@ -15,6 +15,7 @@
  */
 package androidx.webgpu
 
+import androidx.test.filters.SdkSuppress
 import androidx.test.filters.SmallTest
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
@@ -458,6 +459,7 @@ class QuerySetTest {
    * and the triangle successfully draws, the query must return the exact sample count.
    */
   @Test
+    @SdkSuppress(maxSdkVersion = 36) // b/537525245
   @ApiRequirement(minApi = 35, onlySkipOnEmulator = true)
   fun testResolveQuerySetAndReadback() {
     runBlocking {

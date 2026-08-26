@@ -18,7 +18,6 @@ package androidx.webgpu.helper
 import android.graphics.Color
 import android.hardware.SyncFence
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.webgpu.ExperimentalWebGpuApi
 import androidx.webgpu.GPUColor
 import androidx.webgpu.GPUSyncFence
@@ -40,7 +39,6 @@ public fun Int.toGPUColor(): GPUColor {
  * Converts an Android color long to a [GPUColor].
  * @return The [GPUColor] representation of the long color.
  */
-@RequiresApi(Build.VERSION_CODES.O)
 public fun Long.toGPUColor(): GPUColor {
     val r = Color.red(this).toDouble()
     val g = Color.green(this).toDouble()
