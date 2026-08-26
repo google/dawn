@@ -107,7 +107,7 @@ class ResourceTable::SamplerIndexPool {
     // possible to get back a different sampler index. This should not pose a problem.
     struct SamplerEntry {
         SamplerIndex index;
-        uint32_t refCount;
+        uint32_t refCount = 0;
     };
     absl::flat_hash_map<uintptr_t, SamplerEntry> mSamplerToEntry;
 };

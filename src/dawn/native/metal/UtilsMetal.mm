@@ -83,9 +83,9 @@ MTLRenderStages ToMTLRenderStages(wgpu::ShaderStage visibility) {
 // Helper methods encode copies between the two textures.
 struct SavedMetalAttachment {
     id<MTLTexture> texture = nil;
-    NSUInteger level;
-    NSUInteger slice;
-    NSUInteger depthPlane;
+    NSUInteger level = 0;
+    NSUInteger slice = 0;
+    NSUInteger depthPlane = 0;
 
     NSPRef<id<MTLTexture>> temporary;
 

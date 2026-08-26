@@ -4778,7 +4778,7 @@ class Parser {
     // Structure hold spec composite information
     struct SpecComposite {
         // The composite type
-        const core::type::Type* type;
+        const core::type::Type* type = nullptr;
         // The composite arguments
         Vector<uint32_t, 4> args;
     };

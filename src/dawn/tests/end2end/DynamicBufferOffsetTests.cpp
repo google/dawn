@@ -44,8 +44,8 @@ constexpr uint32_t kBindingSize = 8;
 
 class DynamicBufferOffsetTests : public DawnTest {
   protected:
-    uint32_t mMinUniformBufferOffsetAlignment;
-    uint32_t mMinStorageBufferOffsetAlignment;
+    uint32_t mMinUniformBufferOffsetAlignment = 0;
+    uint32_t mMinStorageBufferOffsetAlignment = 0;
     wgpu::BindGroup mBindGroups[2];
     wgpu::BindGroupLayout mBindGroupLayouts[2];
 

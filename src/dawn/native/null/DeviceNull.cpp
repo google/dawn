@@ -170,9 +170,9 @@ struct CopyFromStagingToBufferOperation : PendingOperation {
 
     Ref<BufferBase> staging;
     Ref<Buffer> destination;
-    uint64_t sourceOffset;
-    uint64_t destinationOffset;
-    uint64_t size;
+    uint64_t sourceOffset = 0;
+    uint64_t destinationOffset = 0;
+    uint64_t size = 0;
 };
 
 // Device

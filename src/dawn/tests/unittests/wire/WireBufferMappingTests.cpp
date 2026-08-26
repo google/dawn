@@ -265,7 +265,7 @@ class WireBufferMappingTestShared : public WireBufferMappingTestBase {
 
     // A successfully created buffer
     wgpu::Buffer buffer;
-    WGPUBuffer apiBuffer;
+    WGPUBuffer apiBuffer = nullptr;
 };
 
 // General mapping tests that either do not care about the specific mapping mode, or apply to both.

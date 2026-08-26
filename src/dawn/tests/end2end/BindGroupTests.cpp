@@ -155,7 +155,7 @@ class BindGroupTests : public DawnTest {
         return device.CreateRenderPipeline(&pipelineDescriptor);
     }
 
-    uint32_t mMinUniformBufferOffsetAlignment;
+    uint32_t mMinUniformBufferOffsetAlignment = 0;
 };
 
 // Test a bindgroup reused in two command buffers in the same call to queue.Submit().

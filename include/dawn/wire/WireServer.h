@@ -45,8 +45,8 @@ class MemoryTransferService;
 }  // namespace server
 
 struct DAWN_WIRE_EXPORT WireServerDescriptor {
-    const DawnProcTable* procs;
-    CommandSerializer* serializer;
+    const DawnProcTable* procs = nullptr;
+    CommandSerializer* serializer = nullptr;
     server::MemoryTransferService* memoryTransferService = nullptr;
     bool useSpontaneousCallbacks = false;
 };

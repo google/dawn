@@ -76,7 +76,7 @@ class PipelineLayout final : public PipelineLayoutBase {
 
         struct BindingAndImmediateIndex {
             BindingNumber binding;
-            uint32_t immediateIndex;
+            uint32_t immediateIndex = 0;
         };
         // Associative list of (BindingNumber,immediateIndex) pairs, which is passed into the shader
         // to map the BindingPoint(thisGroup, BindingNumber) to the index into the immediate block's

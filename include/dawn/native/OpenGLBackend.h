@@ -54,8 +54,8 @@ using EGLGetProcProc = EGLFunctionPointerType(DAWN_STDCALL*)(const char*);
 struct DAWN_NATIVE_EXPORT RequestAdapterOptionsGetGLProc : wgpu::ChainedStruct {
     RequestAdapterOptionsGetGLProc();
 
-    EGLGetProcProc getProc;
-    EGLDisplay display;
+    EGLGetProcProc getProc = nullptr;
+    EGLDisplay display = nullptr;
 };
 
 // Can be chained in WGPURequestAdapterOptions
@@ -68,7 +68,7 @@ struct DAWN_NATIVE_EXPORT ExternalImageDescriptorEGLImage : ExternalImageDescrip
   public:
     ExternalImageDescriptorEGLImage();
 
-    EGLImage image;
+    EGLImage image = nullptr;
 };
 
 DAWN_NATIVE_EXPORT WGPUTexture
@@ -78,7 +78,7 @@ struct DAWN_NATIVE_EXPORT ExternalImageDescriptorGLTexture : ExternalImageDescri
   public:
     ExternalImageDescriptorGLTexture();
 
-    GLuint texture;
+    GLuint texture = 0;
 };
 
 DAWN_NATIVE_EXPORT WGPUTexture

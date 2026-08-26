@@ -502,7 +502,7 @@ class HashmapBase {
         /// The slot that will hold the edit.
         Slot& slot;
         /// The hash of the key, passed to EditAt().
-        HashCode hash;
+        HashCode hash = 0;
         /// The resolved node entry, or nullptr if EditAt() did not resolve to an existing entry.
         Entry* entry = nullptr;
 

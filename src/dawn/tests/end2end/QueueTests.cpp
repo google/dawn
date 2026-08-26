@@ -293,7 +293,7 @@ DAWN_TEST_PARAM_STRUCT(WriteTextureFormatParams, TextureFormat);
 struct TextureSpec {
     wgpu::Origin3D copyOrigin;
     wgpu::Extent3D textureSize;
-    uint32_t level;
+    uint32_t level = 0;
 };
 
 struct DataSpec {

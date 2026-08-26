@@ -74,8 +74,8 @@ class PosixTimer : public Timer {
 
   private:
     bool mRunning;
-    uint64_t mStartTimeNs;
-    uint64_t mStopTimeNs;
+    uint64_t mStartTimeNs = 0;
+    uint64_t mStopTimeNs = 0;
 };
 
 Timer* CreateTimer() {

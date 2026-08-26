@@ -882,7 +882,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSampleSinglePlane) {
 
     struct RotationExpectation {
         wgpu::ExternalTextureRotation rotation;
-        bool mirrored;
+        bool mirrored = false;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;
         utils::RGBA8 lowerLeftColor;
@@ -978,7 +978,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipTextureLoadSinglePlaneNotSquare) {
 
     struct RotationExpectation {
         wgpu::ExternalTextureRotation rotation;
-        bool mirrored;
+        bool mirrored = false;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;
         utils::RGBA8 lowerLeftColor;
@@ -1150,7 +1150,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSampleMultiplanar) {
 
     struct RotationExpectation {
         wgpu::ExternalTextureRotation rotation;
-        bool mirrored;
+        bool mirrored = false;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;
         utils::RGBA8 lowerLeftColor;

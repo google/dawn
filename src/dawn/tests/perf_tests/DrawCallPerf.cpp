@@ -245,7 +245,7 @@ class DrawCallPerf : public DawnPerfTestWithParams<DrawCallParamForTest> {
 
     // One large dynamic vertex buffer, or multiple separate vertex buffers.
     std::array<wgpu::Buffer, kNumDraws> mVertexBuffers;
-    size_t mAlignedVertexDataSize;
+    size_t mAlignedVertexDataSize = 0;
 
     std::vector<float> mUniformBufferData;
     // One large dynamic uniform buffer, or multiple separate uniform buffers.
@@ -254,8 +254,8 @@ class DrawCallPerf : public DawnPerfTestWithParams<DrawCallParamForTest> {
     wgpu::BindGroupLayout mUniformBindGroupLayout;
     // One dynamic bind group or multiple bind groups.
     std::array<wgpu::BindGroup, kNumDraws> mUniformBindGroups;
-    size_t mAlignedUniformSize;
-    size_t mNumUniformFloats;
+    size_t mAlignedUniformSize = 0;
+    size_t mNumUniformFloats = 0;
 
     wgpu::BindGroupLayout mConstantBindGroupLayout;
     wgpu::BindGroup mConstantBindGroup;

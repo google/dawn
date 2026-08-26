@@ -45,8 +45,8 @@ struct RenderImmediateTestConstants {
     ClampFragDepthArgs clampFragDepth;
 
     // first index offset
-    uint32_t firstVertex;
-    uint32_t firstInstance;
+    uint32_t firstVertex = 0;
+    uint32_t firstInstance = 0;
 };
 DAWN_DISABLE_STRUCT_PADDING_WARNINGS
 

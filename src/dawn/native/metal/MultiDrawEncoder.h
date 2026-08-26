@@ -63,7 +63,7 @@ class MultiDrawConverterPipeline : public RefCounted {
 
 struct MultiDrawExecutionData {
     NSPRef<id<MTLIndirectCommandBuffer>> mIndirectCommandBuffer;
-    uint32_t mMaxDrawCount;
+    uint32_t mMaxDrawCount = 0;
 };
 
 ResultOrError<std::vector<MultiDrawExecutionData>> PrepareMultiDraws(

@@ -185,7 +185,7 @@ class CommandLineParser {
         std::string JoinNames(absl::string_view separator) const;
         OptionBase::ParseResult ParseImpl(absl::Span<const absl::string_view> args) override;
         E mValue;
-        bool mHasDefault;
+        bool mHasDefault = false;
         std::vector<std::pair<absl::string_view, E>> mConversions;
     };
     static std::string JoinConversionNames(absl::Span<const absl::string_view> names,

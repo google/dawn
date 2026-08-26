@@ -478,7 +478,7 @@ class PixelLocalStorageTests : public DawnTest {
     }
 
     static constexpr uint32_t kIterations = 10;
-    bool supportsCoherent;
+    bool supportsCoherent = false;
 };
 
 // Test that the various supported PLS format work for accumulation.

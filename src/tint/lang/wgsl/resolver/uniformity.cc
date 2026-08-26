@@ -403,7 +403,7 @@ class UniformityGraph {
     Hashmap<const ast::Function*, FunctionInfo, 8> functions_;
 
     /// The function currently being analyzed.
-    FunctionInfo* current_function_;
+    FunctionInfo* current_function_ = nullptr;
 
     /// A map from composite type to true/false to indicate whether it contains a subgroup matrix.
     Hashmap<const core::type::Type*, bool, 16> composite_subgroup_matrix_info_;

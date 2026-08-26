@@ -37,21 +37,21 @@ namespace dawn::native::d3d11 {
 class PhysicalDevice;
 
 struct DeviceInfo {
-    bool isUMA;
+    bool isUMA = false;
 
     // shaderModel indicates the maximum supported shader model, for example, the value 62
     // indicates that current driver supports the maximum shader model is shader model 6.2.
-    uint32_t shaderModel;
+    uint32_t shaderModel = 0;
     PerStage<std::wstring> shaderProfiles;
-    bool supportsSharedResourceCapabilityTier2;
-    bool supportsROV;
-    size_t dedicatedVideoMemory;
-    size_t sharedSystemMemory;
-    bool supportsMonitoredFence;
-    bool supportsNonMonitoredFence;
-    bool supportsMapOnDefaultBuffer;
-    bool supportsMapNoOverwriteDynamicBuffers;
-    bool supportsPartialConstantBufferUpdate;
+    bool supportsSharedResourceCapabilityTier2 = false;
+    bool supportsROV = false;
+    size_t dedicatedVideoMemory = 0;
+    size_t sharedSystemMemory = 0;
+    bool supportsMonitoredFence = false;
+    bool supportsNonMonitoredFence = false;
+    bool supportsMapOnDefaultBuffer = false;
+    bool supportsMapNoOverwriteDynamicBuffers = false;
+    bool supportsPartialConstantBufferUpdate = false;
 };
 
 ResultOrError<DeviceInfo> GatherDeviceInfo(const ComPtr<IDXGIAdapter3>& adapter,

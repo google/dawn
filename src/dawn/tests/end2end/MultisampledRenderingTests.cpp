@@ -1862,9 +1862,9 @@ TEST_P(MultisampledRenderToSingleSampledTest, ES3MSAADrawWithDepthTest) {
 }
 
 struct Point {
-    uint32_t x;
-    uint32_t y;
-    wgpu::Color color;
+    uint32_t x = 0;
+    uint32_t y = 0;
+    wgpu::Color color{};
     float msaaCoverage = 1.0f;
 };
 

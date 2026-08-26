@@ -169,13 +169,13 @@ class WireTest : virtual public testing::Test {
         uncapturedErrorCallback;
 
     wgpu::Instance instance;
-    WGPUInstance apiInstance;
+    WGPUInstance apiInstance = nullptr;
     wgpu::Adapter adapter;
-    WGPUAdapter apiAdapter;
+    WGPUAdapter apiAdapter = nullptr;
     wgpu::Device device;
-    WGPUDevice apiDevice;
+    WGPUDevice apiDevice = nullptr;
     wgpu::Queue queue;
-    WGPUQueue apiQueue;
+    WGPUQueue apiQueue = nullptr;
 
     wire::WireServer* GetWireServer();
     wire::WireClient* GetWireClient();

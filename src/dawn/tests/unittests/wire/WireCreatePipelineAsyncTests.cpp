@@ -86,11 +86,11 @@ class WireCreateComputePipelineAsyncTest : public WireCreateComputePipelineAsync
     }
 
     wgpu::ShaderModule mShader;
-    WGPUShaderModule mApiShader;
+    WGPUShaderModule mApiShader = nullptr;
     wgpu::ComputePipelineDescriptor mDescriptor = {};
 
     // A successfully created pipeline.
-    WGPUComputePipeline apiPipeline;
+    WGPUComputePipeline apiPipeline = nullptr;
 };
 
 using WireCreateRenderPipelineAsyncTestBase =
@@ -133,12 +133,12 @@ class WireCreateRenderPipelineAsyncTest : public WireCreateRenderPipelineAsyncTe
     }
 
     wgpu::ShaderModule mShader;
-    WGPUShaderModule mApiShader;
+    WGPUShaderModule mApiShader = nullptr;
     wgpu::FragmentState mFragment = {};
     wgpu::RenderPipelineDescriptor mDescriptor = {};
 
     // A successfully created pipeline.
-    WGPURenderPipeline apiPipeline;
+    WGPURenderPipeline apiPipeline = nullptr;
 };
 
 DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireCreateComputePipelineAsyncTest);

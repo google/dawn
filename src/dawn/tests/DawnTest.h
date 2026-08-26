@@ -838,7 +838,7 @@ class DawnTestBase {
     struct ReadbackReservation {
         wgpu::Device device;
         wgpu::Buffer buffer;
-        size_t slot;
+        size_t slot = 0;
     };
     ReadbackReservation ReserveReadback(wgpu::Device targetDevice, uint64_t readbackSize);
 

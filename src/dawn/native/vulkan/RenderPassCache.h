@@ -80,12 +80,12 @@ struct RenderPassCacheQuery {
     wgpu::TextureFormat depthStencilFormat;
     wgpu::LoadOp depthLoadOp;
     wgpu::StoreOp depthStoreOp;
-    bool depthReadOnly;
+    bool depthReadOnly = false;
     wgpu::LoadOp stencilLoadOp;
     wgpu::StoreOp stencilStoreOp;
-    bool stencilReadOnly;
+    bool stencilReadOnly = false;
 
-    uint32_t sampleCount;
+    uint32_t sampleCount = 0;
 };
 
 // Caches VkRenderPasses so that we don't create duplicate ones for every RenderPipeline or

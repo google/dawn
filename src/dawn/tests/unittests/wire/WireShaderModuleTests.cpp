@@ -70,7 +70,7 @@ class WireShaderModuleTests : public WireShaderModuleTestBase {
     }
 
     wgpu::ShaderModule shaderModule;
-    WGPUShaderModule apiShaderModule;
+    WGPUShaderModule apiShaderModule = nullptr;
 
     // Default responses.
     wgpu::DawnCompilationMessageUtf16 mUtf18 = {{nullptr, 4, 6, 8}};

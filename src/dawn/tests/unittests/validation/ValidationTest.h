@@ -220,7 +220,7 @@ class ValidationTest : public testing::Test {
     wgpu::Device device;
     dawn::utils::ComboLimits deviceLimits;
     wgpu::Adapter adapter;
-    WGPUDevice backendDevice;
+    WGPUDevice backendDevice = nullptr;
     wgpu::Instance instance;
 
     uint64_t mLastWarningCount = 0;

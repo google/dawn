@@ -33,8 +33,8 @@
 namespace dawn::native::vulkan::external_memory {
 
 struct MemoryImportParams {
-    VkDeviceSize allocationSize;
-    uint32_t memoryTypeIndex;
+    VkDeviceSize allocationSize = 0;
+    uint32_t memoryTypeIndex = 0;
     bool dedicatedAllocation = false;
 };
 

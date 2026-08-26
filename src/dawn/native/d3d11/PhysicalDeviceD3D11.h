@@ -86,7 +86,7 @@ class PhysicalDevice : public d3d::PhysicalDevice {
     ComPtr<ID3D11Device> mD3D11Device;
     D3D_FEATURE_LEVEL mFeatureLevel;
     DeviceInfo mDeviceInfo = {};
-    uint32_t mUAVSlotCount;
+    uint32_t mUAVSlotCount = 0;
 };
 
 }  // namespace dawn::native::d3d11

@@ -288,7 +288,7 @@ class StructMember : public Castable<StructMember, Node> {
 
   private:
     Symbol name_;
-    const core::type::Struct* struct_;
+    const core::type::Struct* struct_ = nullptr;
     const core::type::Type* type_;
     const uint32_t index_;
     const uint32_t offset_;

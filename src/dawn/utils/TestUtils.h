@@ -57,13 +57,13 @@ struct RGBA8 {
 std::ostream& operator<<(std::ostream& stream, const RGBA8& color);
 
 struct TextureDataCopyLayout {
-    uint64_t byteLength;
-    uint64_t texelBlockCount;
-    uint32_t bytesPerRow;
-    uint32_t rowsPerImage;
-    uint32_t texelBlocksPerRow;
-    uint32_t bytesPerImage;
-    uint32_t texelBlocksPerImage;
+    uint64_t byteLength = 0;
+    uint64_t texelBlockCount = 0;
+    uint32_t bytesPerRow = 0;
+    uint32_t rowsPerImage = 0;
+    uint32_t texelBlocksPerRow = 0;
+    uint32_t bytesPerImage = 0;
+    uint32_t texelBlocksPerImage = 0;
     wgpu::Extent3D mipSize;
 };
 

@@ -155,9 +155,9 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
     wgpu::BindGroup mBindGroup;
     wgpu::ComputePipeline mPipeline;
 
-    bool mUsingF16;
-    bool mUsingSubgroups;
-    bool mAllFeaturesSupported;
+    bool mUsingF16 = false;
+    bool mUsingSubgroups = false;
+    bool mAllFeaturesSupported = false;
 };
 
 void MatrixVectorMultiplyPerf::SetUpPerfTest() {

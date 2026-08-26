@@ -86,11 +86,11 @@ class EGLFunctions {
     }
 
   public:
-    PFNEGLCREATEIMAGEPROC CreateImage;
-    PFNEGLDESTROYIMAGEPROC DestroyImage;
-    PFNEGLGETCURRENTCONTEXTPROC GetCurrentContext;
-    PFNEGLGETCURRENTDISPLAYPROC GetCurrentDisplay;
-    PFNEGLQUERYSTRINGPROC QueryString;
+    PFNEGLCREATEIMAGEPROC CreateImage = nullptr;
+    PFNEGLDESTROYIMAGEPROC DestroyImage = nullptr;
+    PFNEGLGETCURRENTCONTEXTPROC GetCurrentContext = nullptr;
+    PFNEGLGETCURRENTDISPLAYPROC GetCurrentDisplay = nullptr;
+    PFNEGLQUERYSTRINGPROC QueryString = nullptr;
 
   private:
     DynamicLib mlibEGL;

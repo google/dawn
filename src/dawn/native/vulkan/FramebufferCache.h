@@ -67,9 +67,9 @@ struct FramebufferCacheQuery {
 
     // A unique ID for the render pass is used for cache lookup rather than the VkRenderPass
     // because Vulkan handles may be reused, making them unreliable as cache keys.
-    uint64_t renderPassId;
-    uint32_t width;
-    uint32_t height;
+    uint64_t renderPassId = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
 
     std::array<FramebufferCacheTextureView, kMaxFramebufferAttachments> textureViews;
 

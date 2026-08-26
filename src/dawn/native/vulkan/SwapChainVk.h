@@ -59,11 +59,11 @@ class SwapChain : public SwapChainBase {
     struct Config {
         // Information that's passed to vulkan swapchain creation.
         VkPresentModeKHR presentMode;
-        VkExtent2D extent;
-        VkImageUsageFlags usage;
+        VkExtent2D extent{};
+        VkImageUsageFlags usage = 0;
         VkFormat format;
         VkColorSpaceKHR colorSpace;
-        uint32_t targetImageCount;
+        uint32_t targetImageCount = 0;
         VkSurfaceTransformFlagBitsKHR transform;
         VkCompositeAlphaFlagBitsKHR alphaMode;
 

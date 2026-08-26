@@ -55,7 +55,7 @@ struct VulkanGlobalKnobs {
 };
 
 struct VulkanGlobalInfo : VulkanGlobalKnobs {
-    uint32_t apiVersion;
+    uint32_t apiVersion = 0;
 };
 
 // Device information - gathered before the device is created.

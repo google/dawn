@@ -103,8 +103,8 @@ class TextureView final : public TextureViewBase {
     void DestroyImpl(DestroyReason reason) override;
     GLenum GetInternalFormat() const;
 
-    GLuint mTextureHandle;
-    GLuint mRenderbufferHandle;
+    GLuint mTextureHandle = 0;
+    GLuint mRenderbufferHandle = 0;
     GLenum mTarget;
     OwnsHandle mOwnsHandle = OwnsHandle::No;
 };

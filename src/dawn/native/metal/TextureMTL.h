@@ -98,7 +98,7 @@ class Texture final : public TextureBase {
 
     MTLPixelFormat mMtlFormat = MTLPixelFormatInvalid;
     MTLTextureType mMtlTextureType;
-    MTLTextureUsage mMtlUsage;
+    MTLTextureUsage mMtlUsage = 0;
 
     CFRef<IOSurfaceRef> mIOSurface = nullptr;
 };

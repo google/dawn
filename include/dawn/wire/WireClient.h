@@ -46,30 +46,30 @@ DAWN_WIRE_EXPORT const DawnProcTable& GetProcs();
 }  // namespace client
 
 struct ReservedBuffer {
-    WGPUBuffer buffer;
+    WGPUBuffer buffer = nullptr;
     Handle handle;
     Handle deviceHandle;
 };
 
 struct ReservedTexture {
-    WGPUTexture texture;
+    WGPUTexture texture = nullptr;
     Handle handle;
     Handle deviceHandle;
 };
 
 struct ReservedSurface {
-    WGPUSurface surface;
+    WGPUSurface surface = nullptr;
     Handle instanceHandle;
     Handle handle;
 };
 
 struct ReservedInstance {
-    WGPUInstance instance;
+    WGPUInstance instance = nullptr;
     Handle handle;
 };
 
 struct DAWN_WIRE_EXPORT WireClientDescriptor {
-    CommandSerializer* serializer;
+    CommandSerializer* serializer = nullptr;
     client::MemoryTransferService* memoryTransferService = nullptr;
 };
 

@@ -58,7 +58,7 @@ class ComputePipeline final : public ComputePipelineBase {
     ResultOrError<Extent3D> InitializeImpl() override;
 
     NSPRef<id<MTLComputePipelineState>> mMtlComputePipelineState;
-    bool mRequiresStorageBufferLength;
+    bool mRequiresStorageBufferLength = false;
     std::vector<uint32_t> mWorkgroupAllocations;
 };
 

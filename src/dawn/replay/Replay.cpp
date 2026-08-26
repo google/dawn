@@ -300,7 +300,7 @@ class DawnRootCommandVisitor : public RootCommandVisitor {
 
     BlitBufferToDepthTexture mBlitBufferToDepthTexture;
 
-    schema::ObjectId mCurrentResourceId;
+    schema::ObjectId mCurrentResourceId = 0;
     std::string mCurrentResourceLabel;
 
     ReadHead* mContentReadHead = nullptr;

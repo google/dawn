@@ -60,11 +60,11 @@ namespace {
 
 struct BufferZeroInitInCopyT2BSpec {
     wgpu::Extent3D textureSize;
-    uint64_t bufferOffset;
-    uint64_t extraBytes;
-    uint32_t bytesPerRow;
-    uint32_t rowsPerImage;
-    uint32_t lazyClearCount;
+    uint64_t bufferOffset = 0;
+    uint64_t extraBytes = 0;
+    uint32_t bytesPerRow = 0;
+    uint32_t rowsPerImage = 0;
+    uint32_t lazyClearCount = 0;
 };
 
 class BufferZeroInitTest : public DawnTest {

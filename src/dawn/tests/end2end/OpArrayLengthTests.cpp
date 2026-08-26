@@ -519,7 +519,7 @@ class MaxArrayLengthTest : public DawnTestWithParams<MaxArrayLengthTestParams> {
     }
 
     wgpu::Buffer mStorageBufferMax;
-    uint32_t mExpectedLength;
+    uint32_t mExpectedLength = 0;
 };
 
 // Test OpArrayLength in the compute stage
