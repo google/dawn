@@ -175,6 +175,7 @@ Checks:
   - -readability-redundant-nested-if
 
   # P∞. Checks we're not really interested in re-enabling.
+  - -bugprone-throwing-static-initialization  # We don't have exceptions, so nothing throws
   # -ftrivial-auto-var-init = pattern (debug) or zero (release) is enabled across chrome build, which addresses uninitialized issues of POD variables.
   - -cppcoreguidelines-init-variables
   # - Appears unnecessary since we use hardened libc++.
