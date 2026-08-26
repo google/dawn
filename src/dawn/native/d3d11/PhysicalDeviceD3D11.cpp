@@ -169,6 +169,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (mDeviceInfo.isUMA && mDeviceInfo.supportsMapNoOverwriteDynamicBuffers) {
         // With UMA we should allow mapping usages on more type of buffers.
         EnableFeature(Feature::BufferMapExtendedUsages);
+        EnableFeature(Feature::BufferMapWriteExtendedUsages);
     }
 
     // Multi planar formats are always supported since Feature Level 11.0
