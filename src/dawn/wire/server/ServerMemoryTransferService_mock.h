@@ -61,8 +61,10 @@ class MockMemoryTransferService : public MemoryTransferService {
                                  size_t size,
                                  std::span<const std::byte> data) const override {
             SerializeDataUpdate(
-                DAWN_UNSAFE_TODO(std::span<std::byte>(const_cast<std::byte*>(serializeData.data()),
-                                                      serializeData.size())),
+                // SAFETY: This is a mock class for testing, and the unsafe-ness comes from only
+                // casting away volatile.
+                DAWN_UNSAFE_BUFFERS(std::span<std::byte>(
+                    const_cast<std::byte*>(serializeData.data()), serializeData.size())),
                 offset, size, data);
         }
         MOCK_METHOD(bool,

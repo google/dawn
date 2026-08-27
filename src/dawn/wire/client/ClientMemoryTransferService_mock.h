@@ -53,7 +53,9 @@ class MockMemoryTransferService : public MemoryTransferService {
         // without custom printers, so we implement the volatile overload directly to cast away
         // volatile and forward to the non-volatile MOCK_METHOD.
         void SerializeCreate(std::span<volatile std::byte> serializeSpace) const override {
-            SerializeCreate(DAWN_UNSAFE_TODO(std::span<std::byte>(
+            // SAFETY: This is a mock class for testing, and the unsafe-ness comes from only casting
+            // away volatile.
+            SerializeCreate(DAWN_UNSAFE_BUFFERS(std::span<std::byte>(
                 const_cast<std::byte*>(serializeSpace.data()), serializeSpace.size())));
         }
         MOCK_METHOD(std::span<std::byte>, GetData, (), (const, override));
@@ -66,8 +68,10 @@ class MockMemoryTransferService : public MemoryTransferService {
                                  size_t offset,
                                  size_t size) const override {
             SerializeDataUpdate(
-                DAWN_UNSAFE_TODO(std::span<std::byte>(const_cast<std::byte*>(serializeData.data()),
-                                                      serializeData.size())),
+                // SAFETY: This is a mock class for testing, and the unsafe-ness comes from only
+                // casting away volatile.
+                DAWN_UNSAFE_BUFFERS(std::span<std::byte>(
+                    const_cast<std::byte*>(serializeData.data()), serializeData.size())),
                 offset, size);
         }
         MOCK_METHOD(bool,
