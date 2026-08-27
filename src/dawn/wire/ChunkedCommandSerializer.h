@@ -48,26 +48,36 @@ namespace dawn::wire {
 
 // Simple command extension struct used when a command needs to serialize additional information
 // that is not baked directly into the command already.
+template <auto Member>
 struct CommandExtension {
-    size_t size;
-    std::function<void(Span<volatile std::byte>)> serialize;
+    static_assert(Member != nullptr, "CommandExtension member pointer cannot be null.");
+
+    size_t size = 0;
+    std::function<void(Span<volatile std::byte>)> serialize = {};
 };
 
 namespace detail {
 
-inline WireResult SerializeCommandExtension(SerializeBuffer* serializeBuffer) {
+template <typename Cmd>
+inline WireResult SerializeCommandExtension(Cmd& cmd, SerializeBuffer* serializeBuffer) {
     return WireResult::Success;
 }
 
-template <typename Extension, typename... Extensions>
-WireResult SerializeCommandExtension(SerializeBuffer* serializeBuffer,
-                                     Extension&& e,
+template <typename Cmd, auto Member, typename... Extensions>
+WireResult SerializeCommandExtension(Cmd& cmd,
+                                     SerializeBuffer* serializeBuffer,
+                                     const CommandExtension<Member>& e,
                                      Extensions&&... es) {
     Span<volatile std::byte> buffer;
     WIRE_TRY(serializeBuffer->NextN(e.size, &buffer));
     e.serialize(buffer);
 
-    WIRE_TRY(SerializeCommandExtension(serializeBuffer, std::forward<Extensions>(es)...));
+    // SAFETY: This Span is NEVER supposed to be read/serialized, only its size is used during Cmd
+    // serialization so that the deserializer sees the correct length.
+    DAWN_UNSAFE_BUFFERS(cmd.*Member =
+                            Span<const std::byte>(static_cast<const std::byte*>(nullptr), e.size));
+
+    WIRE_TRY(SerializeCommandExtension(cmd, serializeBuffer, std::forward<Extensions>(es)...));
     return WireResult::Success;
 }
 
@@ -89,14 +99,15 @@ class ChunkedCommandSerializer {
         });
     }
 
-    template <typename Cmd, typename... Extensions>
-    void SerializeCommand(Cmd&& cmd, CommandExtension&& e, Extensions&&... es) {
+    template <typename Cmd, typename Extension, typename... Extensions>
+        requires(!std::is_base_of_v<ObjectIdProvider, std::decay_t<Extension>>)
+    void SerializeCommand(Cmd&& cmd, Extension&& e, Extensions&&... es) {
         SerializeCommandImpl(
             std::forward<Cmd>(cmd),
             [](const Cmd& cmd, size_t requiredSize, SerializeBuffer* serializeBuffer) {
                 return cmd.Serialize(requiredSize, serializeBuffer);
             },
-            std::forward<CommandExtension>(e), std::forward<Extensions>(es)...);
+            std::forward<Extension>(e), std::forward<Extensions>(es)...);
     }
 
     template <typename Cmd, typename... Extensions>
@@ -129,10 +140,19 @@ class ChunkedCommandSerializer {
             std::optional<std::span<volatile std::byte>> cmdSpace =
                 mSerializer->GetCommandSpace(requiredSize);
             if (cmdSpace) {
-                SerializeBuffer serializeBuffer(*cmdSpace);
-                WireResult rCmd = SerializeCmd(cmd, requiredSize, &serializeBuffer);
+                const auto [cmdBuffer, extBuffer] =
+                    Span<volatile std::byte>(*cmdSpace).SplitAt(commandSize);
+
+                // We must serialize the extensions first since this also updates the command's
+                // extension members with the appropriate sizes for the extension members.
+                SerializeBuffer extSerializeBuffer(extBuffer);
                 WireResult rExts =
-                    detail::SerializeCommandExtension(&serializeBuffer, extensions...);
+                    detail::SerializeCommandExtension(cmd, &extSerializeBuffer, extensions...);
+
+                // Now that the command's extension members have been updated, we can serialise the
+                // command.
+                SerializeBuffer cmdSerializeBuffer(cmdBuffer);
+                WireResult rCmd = SerializeCmd(cmd, requiredSize, &cmdSerializeBuffer);
                 if (rCmd != WireResult::Success || rExts != WireResult::Success) [[unlikely]] {
                     mSerializer->OnSerializeError();
                 }
@@ -143,10 +163,17 @@ class ChunkedCommandSerializer {
         // Allocate as zero-initialized because padding won't get initialized during command
         // serialization (and this whole buffer is sent raw to the other end of the wire).
         HeapArray<std::byte> cmdSpace(requiredSize);
+        const auto [cmdBuffer, extBuffer] = Span<std::byte>(cmdSpace).SplitAt(commandSize);
 
-        SerializeBuffer serializeBuffer(cmdSpace);
-        WireResult rCmd = SerializeCmd(cmd, requiredSize, &serializeBuffer);
-        WireResult rExts = detail::SerializeCommandExtension(&serializeBuffer, extensions...);
+        // We must serialize the extensions first since this also updates the command's extension
+        // members with the appropriate sizes for the extension members.
+        SerializeBuffer extSerializeBuffer(extBuffer);
+        WireResult rExts =
+            detail::SerializeCommandExtension(cmd, &extSerializeBuffer, extensions...);
+
+        // Now that the command's extension members have been updated, we can serialise the command.
+        SerializeBuffer cmdSerializeBuffer(cmdBuffer);
+        WireResult rCmd = SerializeCmd(cmd, requiredSize, &cmdSerializeBuffer);
         if (rCmd != WireResult::Success || rExts != WireResult::Success) [[unlikely]] {
             mSerializer->OnSerializeError();
             return;

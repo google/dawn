@@ -235,13 +235,6 @@ Buffer* Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
     DeviceCreateBufferCmd cmd;
     cmd.deviceId = device->GetWireHandle(wireClient).id;
     cmd.descriptor = ToWireCmd(descriptor);
-    // SAFETY: This Span is NEVER supposed to be read/serialized, so nullptr is fine.
-    // The member is not serialized because skip_serialize, but is a Span so that on
-    // the deserialization side we have a well-formed member.
-    // TODO(https://crbug.com/542275488): Clean these up if when we update command extension
-    // serialization to serialize into this span directly.
-    cmd.memoryHandleCreateInfo = DAWN_UNSAFE_BUFFERS(Span<const std::byte>(
-        static_cast<const std::byte*>(nullptr), memoryHandleCreateInfoLength));
     cmd.result = buffer->GetWireHandle(wireClient);
 
     buffer->mState.Use([&](auto state) {
@@ -263,13 +256,13 @@ Buffer* Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
     wireClient->SerializeCommand(
         std::move(cmd),
         // Extensions to replace fields skipped by skip_serialize.
-        CommandExtension{memoryHandleCreateInfoLength,
-                         [&](Span<volatile std::byte> serializeBuffer) {
-                             if (memoryHandle != nullptr) {
-                                 // Serialize the MemoryHandle into the space after the command.
-                                 memoryHandle->SerializeCreate(std::span(serializeBuffer));
-                             }
-                         }});
+        CommandExtension<&DeviceCreateBufferCmd::memoryHandleCreateInfo>{
+            memoryHandleCreateInfoLength, [&](Span<volatile std::byte> serializeBuffer) {
+                if (memoryHandle != nullptr) {
+                    // Serialize the MemoryHandle into the space after the command.
+                    memoryHandle->SerializeCreate(std::span(serializeBuffer));
+                }
+            }});
 
     return ReturnToAPI2(std::move(buffer));
 }
@@ -494,23 +487,14 @@ void Buffer::APIUnmap() {
     });
 
     if (memoryHandle) {
-        size_t memoryDataUpdateInfoLength =
-            memoryHandle->GetSerializeDataUpdateSize(cmd.offset, cmd.size);
-        // SAFETY: This Span is NEVER supposed to be read/serialized, so nullptr is fine.
-        // The member is not serialized because skip_serialize, but is a Span so that on
-        // the deserialization side we have a well-formed member.
-        // TODO(https://crbug.com/542275488): Clean these up if when we update command extension
-        // serialization to serialize into this span directly.
-        cmd.dataUpdateInfo = DAWN_UNSAFE_BUFFERS(Span<const std::byte>(
-            static_cast<const std::byte*>(nullptr), memoryDataUpdateInfoLength));
-
         client->SerializeCommand(std::move(cmd),
                                  // Extensions to replace fields skipped by skip_serialize.
-                                 CommandExtension{memoryDataUpdateInfoLength,
-                                                  [&](Span<volatile std::byte> serializeBuffer) {
-                                                      memoryHandle->SerializeDataUpdate(
-                                                          serializeBuffer, cmd.offset, cmd.size);
-                                                  }});
+                                 CommandExtension<&BufferUpdateMappedDataCmd::dataUpdateInfo>{
+                                     memoryHandle->GetSerializeDataUpdateSize(cmd.offset, cmd.size),
+                                     [&](Span<volatile std::byte> serializeBuffer) {
+                                         memoryHandle->SerializeDataUpdate(serializeBuffer,
+                                                                           cmd.offset, cmd.size);
+                                     }});
     }
 
     SetFutureStatus(wgpu::MapAsyncStatus::Aborted,
@@ -525,9 +509,7 @@ void Buffer::APIDestroy() {
     Client* client = GetClient();
 
     // Remove the current mapping and destroy MemoryHandle.
-    mState.Use([&](auto state) {
-        FreeMappedData(state);
-    });
+    mState.Use([&](auto state) { FreeMappedData(state); });
     SetFutureStatus(wgpu::MapAsyncStatus::Aborted,
                     "Buffer was destroyed before mapping was resolved.");
 

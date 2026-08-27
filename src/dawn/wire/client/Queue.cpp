@@ -190,36 +190,25 @@ void Queue::WriteBufferXL(Buffer* buffer, uint64_t bufferOffset, Span<const std:
     // Write the data to the allocated memory.
     Span<std::byte>(memoryHandle->GetData()).CopyFrom(data);
 
-    // Prepare to serialize the handle and the data update command.
-    size_t memoryHandleCreateInfoLength = memoryHandle->GetSerializeCreateSize();
-    size_t memoryDataUpdateInfoLength = memoryHandle->GetSerializeDataUpdateSize(0u, data.size());
-
     QueueWriteBufferXlCmd cmd;
     cmd.queueId = GetWireHandle(client).id;
     cmd.bufferId = buffer->GetWireHandle(client).id;
     cmd.bufferOffset = bufferOffset;
     cmd.size = data.size();
 
-    // SAFETY: These Spans are NEVER supposed to be read/serialized, so nullptr is fine.
-    // The members are not serialized because skip_serialize, but are Spans so that on
-    // the deserialization side we have well-formed members.
-    // TODO(https://crbug.com/542275488): Clean these up if when we update command extension
-    // serialization to serialize into this span directly.
-    cmd.memoryHandleCreateInfo = DAWN_UNSAFE_BUFFERS(Span<const std::byte>(
-        static_cast<const std::byte*>(nullptr), memoryHandleCreateInfoLength));
-    cmd.memoryDataUpdateInfo = DAWN_UNSAFE_BUFFERS(
-        Span<const std::byte>(static_cast<const std::byte*>(nullptr), memoryDataUpdateInfoLength));
-
-    client->SerializeCommand(
-        std::move(cmd),
-        // Extensions to replace fields skipped by skip_serialize.
-        CommandExtension{memoryHandleCreateInfoLength,
-                         [&](Span<volatile std::byte> serializeBuffer) {
-                             memoryHandle->SerializeCreate(serializeBuffer);
-                         }},
-        CommandExtension{memoryDataUpdateInfoLength, [&](Span<volatile std::byte> serializeBuffer) {
-                             memoryHandle->SerializeDataUpdate(serializeBuffer, 0u, data.size());
-                         }});
+    client->SerializeCommand(std::move(cmd),
+                             // Extensions to replace fields skipped by skip_serialize.
+                             CommandExtension<&QueueWriteBufferXlCmd::memoryHandleCreateInfo>{
+                                 memoryHandle->GetSerializeCreateSize(),
+                                 [&](Span<volatile std::byte> serializeBuffer) {
+                                     memoryHandle->SerializeCreate(serializeBuffer);
+                                 }},
+                             CommandExtension<&QueueWriteBufferXlCmd::memoryDataUpdateInfo>{
+                                 memoryHandle->GetSerializeDataUpdateSize(0u, data.size()),
+                                 [&](Span<volatile std::byte> serializeBuffer) {
+                                     memoryHandle->SerializeDataUpdate(serializeBuffer, 0u,
+                                                                       data.size());
+                                 }});
 }
 
 void Queue::APIWriteTexture(const TexelCopyTextureInfo* destination,
@@ -258,34 +247,26 @@ void Queue::WriteTextureXL(const TexelCopyTextureInfo* destination,
     // Write the data to the allocated memory.
     Span<std::byte>(memoryHandle->GetData()).CopyFrom(data);
 
-    // Prepare to serialize the handle and the data update command.
-    size_t memoryHandleCreateInfoLength = memoryHandle->GetSerializeCreateSize();
-    size_t memoryDataUpdateInfoLength = memoryHandle->GetSerializeDataUpdateSize(0u, data.size());
-
     QueueWriteTextureXlCmd cmd;
     cmd.queueId = GetWireHandle(GetClient()).id;
     cmd.destination = ToWireCmd(destination);
     cmd.dataSize = data.size();
     cmd.dataLayout = ToWireCmd(dataLayout);
     cmd.writeSize = ToWireCmd(writeSize);
-    // SAFETY: These Spans are NEVER supposed to be read/serialized, so nullptr is fine.
-    // The members are not serialized because skip_serialize, but are Spans so that on
-    // the deserialization side we have well-formed members.
-    cmd.memoryHandleCreateInfo = DAWN_UNSAFE_BUFFERS(Span<const std::byte>(
-        static_cast<const std::byte*>(nullptr), memoryHandleCreateInfoLength));
-    cmd.memoryDataUpdateInfo = DAWN_UNSAFE_BUFFERS(
-        Span<const std::byte>(static_cast<const std::byte*>(nullptr), memoryDataUpdateInfoLength));
 
-    client->SerializeCommand(
-        std::move(cmd),
-        // Extensions to replace fields skipped by skip_serialize.
-        CommandExtension{memoryHandleCreateInfoLength,
-                         [&](Span<volatile std::byte> serializeBuffer) {
-                             memoryHandle->SerializeCreate(serializeBuffer);
-                         }},
-        CommandExtension{memoryDataUpdateInfoLength, [&](Span<volatile std::byte> serializeBuffer) {
-                             memoryHandle->SerializeDataUpdate(serializeBuffer, 0u, data.size());
-                         }});
+    client->SerializeCommand(std::move(cmd),
+                             // Extensions to replace fields skipped by skip_serialize.
+                             CommandExtension<&QueueWriteTextureXlCmd::memoryHandleCreateInfo>{
+                                 memoryHandle->GetSerializeCreateSize(),
+                                 [&](Span<volatile std::byte> serializeBuffer) {
+                                     memoryHandle->SerializeCreate(serializeBuffer);
+                                 }},
+                             CommandExtension<&QueueWriteTextureXlCmd::memoryDataUpdateInfo>{
+                                 memoryHandle->GetSerializeDataUpdateSize(0u, data.size()),
+                                 [&](Span<volatile std::byte> serializeBuffer) {
+                                     memoryHandle->SerializeDataUpdate(serializeBuffer, 0u,
+                                                                       data.size());
+                                 }});
 }
 
 }  // namespace dawn::wire::client

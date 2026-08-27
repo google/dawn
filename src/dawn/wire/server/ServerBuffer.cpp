@@ -224,23 +224,16 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
 
                 size_t dataUpdateInfoLength =
                     mapState->memoryHandle->GetSerializeDataUpdateSize(data->offset, data->size);
-                // SAFETY: This Span is NEVER supposed to be read/serialized, so nullptr is fine.
-                // The member is not serialized because skip_serialize, but is a Span so that on
-                // the deserialization side we have a well-formed member.
-                // TODO(https://crbug.com/542275488): Clean these up if when we update command
-                // extension serialization to serialize into this span directly.
-                cmd.readDataUpdateInfo = DAWN_UNSAFE_BUFFERS(Span<const std::byte>(
-                    static_cast<const std::byte*>(nullptr), dataUpdateInfoLength));
-                SerializeCommand(std::move(cmd),
-                                 // Extensions to replace fields skipped by skip_serialize.
-                                 CommandExtension{dataUpdateInfoLength,
-                                                  [&](Span<volatile std::byte> serializeBuffer) {
-                                                      // The in-flight map request returned
-                                                      // successfully.
-                                                      mapState->memoryHandle->SerializeDataUpdate(
-                                                          serializeBuffer, data->offset, data->size,
-                                                          mappedRange);
-                                                  }});
+                SerializeCommand(
+                    std::move(cmd),
+                    // Extensions to replace fields skipped by skip_serialize.
+                    CommandExtension<&ReturnBufferMapAsyncCallbackCmd::readDataUpdateInfo>{
+                        dataUpdateInfoLength, [&](Span<volatile std::byte> serializeBuffer) {
+                            // The in-flight map request returned
+                            // successfully.
+                            mapState->memoryHandle->SerializeDataUpdate(
+                                serializeBuffer, data->offset, data->size, mappedRange);
+                        }});
             });
             break;
         }
