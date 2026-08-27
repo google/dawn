@@ -437,11 +437,13 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                 DAWN_TRY(texture->SynchronizeTextureBeforeUse(commandContext));
                 SubresourceRange subresources = GetSubresourcesAffectedByCopy(dst, copy->copySize);
 
-                DAWN_ASSERT(scopedMap.GetMappedData());
-                const uint8_t* data = DAWN_UNSAFE_TODO(scopedMap.GetMappedData() + bufferOffset);
+                DAWN_ASSERT(!scopedMap.GetMappedData().empty());
+                Span<std::byte> data =
+                    scopedMap.GetMappedData().subspan(checked_cast<size_t>(bufferOffset));
                 uint64_t bytesPerRow = blockInfo.ToBytes(src.blocksPerRow);
                 DAWN_TRY(texture->Write(commandContext, subresources, dst.origin.ToOrigin3D(),
-                                        copy->copySize.ToExtent3D(), data,
+                                        copy->copySize.ToExtent3D(),
+                                        reinterpret_cast<uint8_t*>(data.data()),
                                         dchecked_cast<uint32_t>(bytesPerRow),
                                         dchecked_cast<uint32_t>(src.rowsPerImage)));
                 break;
