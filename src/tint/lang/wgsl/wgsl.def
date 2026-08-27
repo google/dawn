@@ -72,16 +72,14 @@ enum diagnostic_severity {
 
 // https://gpuweb.github.io/gpuweb/wgsl/#extension
 enum extension {
-  // WGSL Extension "f16"
+  // WGSL extensions that have been standardized.
   f16
-  // WGSL Extension "clip_distances"
   clip_distances
-  // WGSL Extension "dual_source_blending"
   dual_source_blending
-  // WGSL Extension "subgroups"
   subgroups
-  // WGSL Extension "primitive_index"
   primitive_index
+  subgroup_size_control
+  atomic_vec2u_min_max
 
   // A Chromium-specific extension for disabling uniformity analysis.
   chromium_disable_uniformity_analysis
@@ -100,10 +98,6 @@ enum extension {
   chromium_experimental_barycentric_coord
   // A Chromium-specific extension for resource table
   chromium_experimental_resource_table
-  // A Chromium-specific extension for the attribute `subgroup_size`
-  subgroup_size_control
-  // WGSL Extension for atomic vec2u min max
-  atomic_vec2u_min_max
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#language-extensions-sec
