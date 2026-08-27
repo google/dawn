@@ -79,57 +79,48 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     }
 
     // Query and report the adapter supported features.
-    FreeMembers<WGPUSupportedFeatures> supportedFeatures(mProcs);
-    mProcs->adapterGetFeatures(adapter, &supportedFeatures);
-    // TODO(crbug/526537254): Use spanified structs on the server.
-    cmd.features = DAWN_UNSAFE_TODO(Span<const wgpu::FeatureName>(
-        reinterpret_cast<const wgpu::FeatureName*>(supportedFeatures.features),
-        supportedFeatures.featureCount));
+    FreeMembers<SupportedFeatures> supportedFeatures(mProcs);
+    mProcs->adapterGetFeatures(adapter, ToAPI(&supportedFeatures));
+    cmd.features = supportedFeatures.features;
 
     // Query and report the adapter info.
-    FreeMembers<WGPUAdapterInfo> info(mProcs);
-    WGPUChainedStruct** propertiesChain = &info.nextInChain;
+    FreeMembers<AdapterInfo> info(mProcs);
+    ChainedStructOut** propertiesChain = &info.nextInChain;
 
     // Query AdapterPropertiesMemoryHeaps if the feature is supported.
-    FreeMembers<WGPUAdapterPropertiesMemoryHeaps> memoryHeapProperties(mProcs);
-    memoryHeapProperties.chain.sType = WGPUSType_AdapterPropertiesMemoryHeaps;
+    FreeMembers<AdapterPropertiesMemoryHeaps> memoryHeapProperties(mProcs);
     if (mProcs->adapterHasFeature(adapter, WGPUFeatureName_AdapterPropertiesMemoryHeaps)) {
-        *propertiesChain = &memoryHeapProperties.chain;
-        propertiesChain = &(*propertiesChain)->next;
+        *propertiesChain = &memoryHeapProperties;
+        propertiesChain = &(*propertiesChain)->nextInChain;
     }
 
     // Query AdapterPropertiesD3D if the feature is supported.
-    WGPUAdapterPropertiesD3D d3dProperties = {};
-    d3dProperties.chain.sType = WGPUSType_AdapterPropertiesD3D;
+    AdapterPropertiesD3D d3dProperties;
     if (mProcs->adapterHasFeature(adapter, WGPUFeatureName_AdapterPropertiesD3D)) {
-        *propertiesChain = &d3dProperties.chain;
-        propertiesChain = &(*propertiesChain)->next;
+        *propertiesChain = &d3dProperties;
+        propertiesChain = &(*propertiesChain)->nextInChain;
     }
 
     // Query AdapterPropertiesVk if the feature is supported.
-    WGPUAdapterPropertiesVk vkProperties = {};
-    vkProperties.chain.sType = WGPUSType_AdapterPropertiesVk;
+    AdapterPropertiesVk vkProperties;
     if (mProcs->adapterHasFeature(adapter, WGPUFeatureName_AdapterPropertiesVk)) {
-        *propertiesChain = &vkProperties.chain;
-        propertiesChain = &(*propertiesChain)->next;
+        *propertiesChain = &vkProperties;
+        propertiesChain = &(*propertiesChain)->nextInChain;
     }
 
     // Query AdapterPropertiesSubgroupMatrixConfigs if the feature is supported.
-    FreeMembers<WGPUAdapterPropertiesSubgroupMatrixConfigs> subgroupMatrixConfigs(mProcs);
-    // WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs{};
-    subgroupMatrixConfigs.chain.sType = WGPUSType_AdapterPropertiesSubgroupMatrixConfigs;
+    FreeMembers<AdapterPropertiesSubgroupMatrixConfigs> subgroupMatrixConfigs(mProcs);
     if (mProcs->adapterHasFeature(adapter, WGPUFeatureName_ChromiumExperimentalSubgroupMatrix)) {
-        *propertiesChain = &subgroupMatrixConfigs.chain;
-        propertiesChain = &(*propertiesChain)->next;
+        *propertiesChain = &subgroupMatrixConfigs;
+        propertiesChain = &(*propertiesChain)->nextInChain;
     }
 
-    WGPUDawnAdapterPropertiesPowerPreference powerProperties = {};
-    powerProperties.chain.sType = WGPUSType_DawnAdapterPropertiesPowerPreference;
-    *propertiesChain = &powerProperties.chain;
-    propertiesChain = &(*propertiesChain)->next;
+    DawnAdapterPropertiesPowerPreference powerProperties;
+    *propertiesChain = &powerProperties;
+    propertiesChain = &(*propertiesChain)->nextInChain;
 
-    mProcs->adapterGetInfo(adapter, &info);
-    cmd.info = FromAPI(&info);
+    mProcs->adapterGetInfo(adapter, ToAPI(&info));
+    cmd.info = &info;
 
     // Query and report the adapter limits, including all known extension limits.
     // TODO(crbug.com/421950205): Use dawn::utils::ComboLimits here.

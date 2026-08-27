@@ -233,9 +233,13 @@ class Server : public ServerBase {
     template <typename Struct>
     class FreeMembers : public Struct {
       public:
+        using CType = std::remove_pointer_t<decltype(ToAPI(static_cast<Struct*>(nullptr)))>;
+
         explicit FreeMembers(std::shared_ptr<const DawnProcTable>& procs)
-            : Struct({}), mProcs(procs) {}
-        ~FreeMembers() { ((*mProcs).*WGPUTraits<Struct>::FreeMembers)(*this); }
+            : Struct{}, mProcs(procs) {}
+        ~FreeMembers() {
+            ((*mProcs).*WGPUTraits<CType>::FreeMembers)(*ToAPI(static_cast<Struct*>(this)));
+        }
 
       private:
         std::shared_ptr<const DawnProcTable> mProcs;

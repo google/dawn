@@ -99,13 +99,10 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     // features that were enabled must also be supported by the wire.
     // Note: We fail the callback here, instead of immediately upon receiving
     // the request to preserve callback ordering.
-    FreeMembers<WGPUSupportedFeatures> supportedFeatures(mProcs);
-    mProcs->deviceGetFeatures(device, &supportedFeatures);
-    // TODO(crbug/526537254): Use spanified structs on the server.
-    Span<const WGPUFeatureName> DAWN_UNSAFE_TODO(
-        features(supportedFeatures.features, supportedFeatures.featureCount));
-    for (WGPUFeatureName feature : features) {
-        if (!IsFeatureSupported(feature)) {
+    FreeMembers<SupportedFeatures> supportedFeatures(mProcs);
+    mProcs->deviceGetFeatures(device, ToAPI(&supportedFeatures));
+    for (wgpu::FeatureName feature : supportedFeatures.features) {
+        if (!IsFeatureSupported(ToAPI(feature))) {
             // Release the device.
             mProcs->deviceRelease(device);
             device = nullptr;
@@ -116,7 +113,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
             return;
         }
     }
-    cmd.features = FromAPI(features);
+    cmd.features = supportedFeatures.features;
 
     // Query and report the adapter limits, including all known extension limits.
     // TODO(crbug.com/421950205): Use dawn::utils::ComboLimits here.
