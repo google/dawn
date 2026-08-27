@@ -563,7 +563,7 @@ TEST_F(IR_ValidatorTest, Loop_EmptyBody) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:4:7 error: block does not end in a terminator instruction
+                testing::HasSubstr(R"(:4:7 error: loop body block must not be empty
       $B2: {  # body
       ^^^
 )")) << res.Failure();
@@ -657,7 +657,7 @@ TEST_F(IR_ValidatorTest, Loop_BodyEmptyWithParams) {
     ASSERT_NE(res, Success);
     // Empty blocks are not allowed for the loop body, so the IR is rejected before the params check
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(error: block does not end in a terminator instruction)"));
+                testing::HasSubstr(R"(error: loop body block must not be empty)"));
 }
 
 TEST_F(IR_ValidatorTest, Loop_TooManyOperands) {

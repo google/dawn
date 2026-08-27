@@ -158,6 +158,36 @@ void Structural::QueueTasks(std::function<void()> begin,
     tasks_.Push(begin);
 }
 
+std::function<void()> Structural::QueueNestedTasks(std::function<void()> begin,
+                                                   std::function<void()> mid,
+                                                   std::function<void()> end) {
+    return [this, begin, mid, end] { QueueTasks(begin, mid, end); };
+}
+
+std::function<void()> Structural::PushControlStack(const ControlInstruction* ctrl) {
+    return [this, ctrl] { control_stack_.Push(ctrl); };
+}
+
+std::function<void()> Structural::PopControlStack() {
+    return [this] { control_stack_.Pop(); };
+}
+
+std::function<void()> Structural::BeginBlockTask(const Block* blk) {
+    return [this, blk] {
+        if (!blk->IsEmpty()) {
+            BeginBlock(blk);
+        }
+    };
+}
+
+std::function<void()> Structural::EndBlockTask(const Block* blk) {
+    return [this, blk] {
+        if (!blk->IsEmpty()) {
+            EndBlock();
+        }
+    };
+}
+
 void Structural::CheckForRecursion() {
     TINT_CHECK_ERRORS();
 
@@ -2212,14 +2242,15 @@ void Structural::CheckIf(const If* if_) {
         }
     }
 
-    QueueTasks([this, if_] { control_stack_.Push(if_); },
-               [this, if_] {
-                   if (!if_->False()->IsEmpty()) {
-                       QueueBlock(if_->False());
-                   }
-                   QueueBlock(if_->True());
-               },
-               [this] { control_stack_.Pop(); });
+    QueueTasks(
+        PushControlStack(if_),
+        [this, if_] {
+            if (!if_->False()->IsEmpty()) {
+                QueueBlock(if_->False());
+            }
+            QueueBlock(if_->True());
+        },
+        PopControlStack());
 }
 
 void Structural::CheckLoop(const Loop* l) {
@@ -2237,6 +2268,16 @@ void Structural::CheckLoop(const Loop* l) {
         }
     }
 
+    if (!l->Body()->Params().IsEmpty()) {
+        if (!l->HasInitializer()) {
+            AddError(l) << "loop with body block parameters must have an initializer";
+        }
+    }
+
+    if (l->Body()->IsEmpty()) {
+        AddError(l->Body()) << "loop body block must not be empty";
+    }
+
     if (l->Continuing()->IsEmpty()) {
         if (!l->Continuing()->Params().IsEmpty()) {
             AddError(l) << "loop continuing block has parameters but is empty";
@@ -2249,71 +2290,38 @@ void Structural::CheckLoop(const Loop* l) {
     // ⎡Initializer              ⎤
     // ⎢    ⎡Body               ⎤⎥
     // ⎣    ⎣    [Continuing ]  ⎦⎦
-    QueueTasks([this, l] { control_stack_.Push(l); },
-               [this, l] {
-                   QueueTasks(
-                       [this, l] {
-                           if (!l->Initializer()->IsEmpty()) {
-                               BeginBlock(l->Initializer());
-                           }
-                       },
-                       [this, l] {
-                           QueueTasks(
-                               [this, l] {
-                                   CheckLoopBody(l);
-                                   BeginBlock(l->Body());
-                               },
-                               [this, l] {
-                                   QueueTasks(
-                                       [this, l] {
-                                           if (!l->Continuing()->IsEmpty()) {
-                                               BeginBlock(l->Continuing());
-                                           }
-                                       },
-                                       [] {},
-                                       [this, l] {
-                                           if (!l->Continuing()->IsEmpty()) {
-                                               EndBlock();
-                                           }
-                                       });
-                               },
-                               [this] { EndBlock(); });
-                       },
-                       [this, l] {
-                           if (!l->Initializer()->IsEmpty()) {
-                               EndBlock();
-                           }
-                       });
-               },
-               [this] { control_stack_.Pop(); });
-}
-
-void Structural::CheckLoopBody(const Loop* loop) {
-    // If the body block has parameters, there must be an initializer block.
-    if (!loop->Body()->Params().IsEmpty()) {
-        if (!loop->HasInitializer()) {
-            AddError(loop) << "loop with body block parameters must have an initializer";
-        }
-    }
+    QueueTasks(PushControlStack(l),
+               QueueNestedTasks(  //
+                   BeginBlockTask(l->Initializer()),
+                   QueueNestedTasks(  //
+                       BeginBlockTask(l->Body()),
+                       QueueNestedTasks(                     //
+                           BeginBlockTask(l->Continuing()),  //
+                           [] {},                            //
+                           EndBlockTask(l->Continuing())),
+                       EndBlockTask(l->Body())),
+                   EndBlockTask(l->Initializer())),
+               PopControlStack());
 }
 
 void Structural::CheckSwitch(const Switch* s) {
     CheckResults(s);
     CheckOperands(s, Switch::kNumOperands);
 
-    QueueTasks([this, s] { control_stack_.Push(s); },
-               [this, s] {
-                   for (auto& cse : s->Cases()) {
-                       if (cse.selectors.IsEmpty()) {
-                           AddError(s) << "case does not have any selectors";
-                       }
-                       if (cse.block->Is<core::ir::MultiInBlock>()) {
-                           AddError(s) << "case block must be a block";
-                       }
-                       QueueBlock(cse.block);
-                   }
-               },
-               [this] { control_stack_.Pop(); });
+    QueueTasks(
+        PushControlStack(s),
+        [this, s] {
+            for (auto& cse : s->Cases()) {
+                if (cse.selectors.IsEmpty()) {
+                    AddError(s) << "case does not have any selectors";
+                }
+                if (cse.block->Is<core::ir::MultiInBlock>()) {
+                    AddError(s) << "case block must be a block";
+                }
+                QueueBlock(cse.block);
+            }
+        },
+        PopControlStack());
 }
 
 void Structural::CheckSwizzle(const Swizzle* s) {

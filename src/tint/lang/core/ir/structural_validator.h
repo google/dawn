@@ -645,10 +645,6 @@ class Structural {
     /// @param l the loop to validate
     void CheckLoop(const Loop* l);
 
-    /// Validates the loop body block
-    /// @param l the loop to validate
-    void CheckLoopBody(const Loop* l);
-
     /// Validates the given switch
     /// @param s the switch to validate
     void CheckSwitch(const Switch* s);
@@ -779,6 +775,20 @@ class Structural {
     void QueueTasks(std::function<void()> begin,
                     std::function<void()> mid,
                     std::function<void()> end);
+
+    /// @returns a task that queues the given tasks (via `QueueTasks()`).
+    std::function<void()> QueueNestedTasks(std::function<void()> begin,
+                                           std::function<void()> mid,
+                                           std::function<void()> end);
+
+    /// @returns a task that pushes @p ctrl to the control stack
+    std::function<void()> PushControlStack(const ControlInstruction* ctrl);
+    /// @returns a task that pops from the control stack
+    std::function<void()> PopControlStack();
+    /// @returns a task that processes @p blk if it is not empty
+    std::function<void()> BeginBlockTask(const Block* blk);
+    /// @returns a task that finishes processing @p blk if it is not empty
+    std::function<void()> EndBlockTask(const Block* blk);
 
     /// ScopeStack holds a stack of values that are currently in scope
     struct ScopeStack {
