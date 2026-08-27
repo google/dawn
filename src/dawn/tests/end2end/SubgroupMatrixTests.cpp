@@ -264,15 +264,23 @@ struct Matrix {
 void GenerateReferenceMatrixMultiply(Matrix& expected,
                                      const Matrix& lhs,
                                      const Matrix& rhs,
-                                     const Matrix& acc) {
+                                     const Matrix& acc,
+                                     uint32_t blockSize) {
     const bool is_float = expected.component_type == wgpu::SubgroupMatrixComponentType::F16 ||
                           expected.component_type == wgpu::SubgroupMatrixComponentType::F32;
     for (uint32_t r = 0; r < expected.rows; r++) {
         for (uint32_t c = 0; c < expected.cols; c++) {
             if (is_float) {
                 float ref = acc.GetFloat(c, r);
-                for (uint32_t k = 0; k < lhs.cols; k++) {
-                    ref += lhs.GetFloat(k, r) * rhs.GetFloat(c, k);
+                for (uint32_t block = 0; block < lhs.cols; block += blockSize) {
+                    float blockResult = 0.0f;
+                    for (uint32_t k = 0; k < blockSize; k++) {
+                        blockResult += lhs.GetFloat(block + k, r) * rhs.GetFloat(c, block + k);
+                    }
+                    ref += blockResult;
+                    if (expected.component_type == wgpu::SubgroupMatrixComponentType::F16) {
+                        ref = Float16ToFloat32(Float32ToFloat16(ref));
+                    }
                 }
                 expected.SetFloat(ref, c, r);
             } else {
@@ -648,7 +656,7 @@ if sgid != 0 {
 
         // Verify the result against a reference implementation.
         Matrix expected(config.N, config.M, config.resultComponentType, columnMajor);
-        GenerateReferenceMatrixMultiply(expected, inputLHS, inputRHS, acc);
+        GenerateReferenceMatrixMultiply(expected, inputLHS, inputRHS, acc, config.K);
         EXPECT_BUFFER_U8_RANGE_EQ(expected.data, output, 0, expected.TotalByteSize()) << config;
     }
 };
@@ -1531,7 +1539,7 @@ fn main(@builtin(subgroup_id) sgid: u32,
 
         // Verify the result against a reference implementation.
         Matrix expected(matrix_cols, matrix_rows, config.resultComponentType, false);
-        GenerateReferenceMatrixMultiply(expected, inputLHS, inputRHS, acc);
+        GenerateReferenceMatrixMultiply(expected, inputLHS, inputRHS, acc, config.K);
         EXPECT_BUFFER_U8_RANGE_EQ(expected.data, output, 0, expected.TotalByteSize());
     }
 }
