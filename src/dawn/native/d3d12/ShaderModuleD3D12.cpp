@@ -378,6 +378,9 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     }
 
     req.hlsl.usesSubgroupMatrix = programmableStage.metadata->usesSubgroupMatrix;
+    req.hlsl.subgroupMatrixConfig =
+        ToBackend(device->GetPhysicalDevice())
+            ->EnumerateSubgroupMatrixConfigs(device->GetAdapter()->GetTogglesState());
 
     CacheResult<d3d::CompiledShader> compiledShader;
     DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req),

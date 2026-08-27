@@ -250,6 +250,9 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                         result.Failure().reason);
     }
 
+    DAWN_TRY(
+        ValidateSubgroupMatrixConfiguration(result->subgroup_matrix_info, r.subgroupMatrixConfig));
+
     // Workgroup validation has to come after `Generate` because it may require overrides to
     // have been substituted.
     if (r.stage == SingleShaderStage::Compute) {

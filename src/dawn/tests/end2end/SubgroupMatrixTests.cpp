@@ -347,6 +347,79 @@ TEST_P(SubgroupMatrixTest, QueryConfigsMustReturnNonZeroConfigs) {
     ASSERT_NE(subgroupMatrixConfigs.configCount, 0u);
 }
 
+// Test that advertised subgroup matrix configurations succeed and configurations with an
+// unadvertised M dimension fail.
+TEST_P(SubgroupMatrixTest, AdvertisedConfigsValidated) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsD3D12());
+    DAWN_TEST_UNSUPPORTED_IF(
+        !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
+
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
+    info.nextInChain = &subgroupMatrixConfigs;
+    ASSERT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
+    ASSERT_NE(subgroupMatrixConfigs.configCount, 0u);
+
+    uint32_t unsupportedM = 1;
+    while (std::any_of(
+        subgroupMatrixConfigs.configs,
+        subgroupMatrixConfigs.configs + subgroupMatrixConfigs.configCount,
+        [&](const wgpu::SubgroupMatrixConfig& config) { return config.M == unsupportedM; })) {
+        ++unsupportedM;
+    }
+
+    std::vector<wgpu::SubgroupMatrixConfig> supportedConfigs(
+        subgroupMatrixConfigs.configs,
+        subgroupMatrixConfigs.configs + subgroupMatrixConfigs.configCount);
+    std::vector<wgpu::SubgroupMatrixConfig> unsupportedConfigs = supportedConfigs;
+    for (auto& config : unsupportedConfigs) {
+        config.M = unsupportedM;
+    }
+
+    auto testConfigs = [&](const std::vector<wgpu::SubgroupMatrixConfig>& configs, bool supported) {
+        for (const auto& config : configs) {
+            std::ostringstream configTrace;
+            configTrace << config << " supported=" << supported;
+            SCOPED_TRACE(configTrace.str());
+
+            std::ostringstream shader;
+            shader << "enable chromium_experimental_subgroup_matrix;\n";
+            shader << "enable subgroups;\n";
+            if (config.componentType == wgpu::SubgroupMatrixComponentType::F16 ||
+                config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16) {
+                shader << "enable f16;\n";
+            }
+            shader << "alias InputType = " << ComponentTypeToWgslType(config.componentType)
+                   << ";\n";
+            shader << "alias ResultType = " << ComponentTypeToWgslType(config.resultComponentType)
+                   << ";\n";
+            shader << "const M = " << config.M << ";\n";
+            shader << "const N = " << config.N << ";\n";
+            shader << "const K = " << config.K << ";\n";
+            shader << "const SubgroupMaxSize = " << info.subgroupMaxSize << ";\n";
+            shader << R"(
+@compute @workgroup_size(SubgroupMaxSize)
+fn main() {
+    let lhs = subgroup_matrix_left<InputType, K, M>();
+    let rhs = subgroup_matrix_right<InputType, N, K>();
+    _ = subgroupMatrixMultiply<ResultType>(lhs, rhs);
+})";
+
+            wgpu::ComputePipelineDescriptor csDesc;
+            csDesc.compute.module = utils::CreateShaderModule(device, shader.str());
+            if (supported) {
+                device.CreateComputePipeline(&csDesc);
+            } else {
+                ASSERT_DEVICE_ERROR_MSG(device.CreateComputePipeline(&csDesc),
+                                        testing::HasSubstr("not supported by the device"));
+            }
+        }
+    };
+
+    testConfigs(supportedConfigs, true);
+    testConfigs(unsupportedConfigs, false);
+}
+
 // Test that Dawn validates the X-dimension of the workgroup size when subgroup matrices are used,
 // such that it must be a multiple of the maximum subgroup size.
 // The valid edge cases (where it is exactly the same as the maximum subgroup size) are tested in

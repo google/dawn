@@ -32,6 +32,7 @@
 
 #include <string_view>
 #include <unordered_map>
+#include <vector>
 
 #include "src/dawn/native/Adapter.h"
 #include "src/dawn/native/CacheRequest.h"
@@ -77,6 +78,7 @@ using InterStageShaderVariablesMask = std::bitset<tint::hlsl::writer::kMaxInterS
     X(uint32_t, waveLaneCountMin)                                                    \
     X(uint32_t, waveLaneCountMax)                                                    \
     X(bool, usesSubgroupMatrix)                                                      \
+    X(std::vector<SubgroupMatrixConfig>, subgroupMatrixConfig)                       \
     X(bool, disableSymbolRenaming)                                                   \
     X(bool, dumpShaders)                                                             \
     X(bool, dumpShadersOnFailure)

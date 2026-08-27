@@ -32,6 +32,7 @@
 #include <string>
 #include <unordered_set>
 
+#include "src/tint/api/common/subgroup_matrix.h"
 #include "src/tint/api/common/workgroup_info.h"
 #include "src/tint/lang/core/ir/function.h"
 
@@ -66,6 +67,9 @@ struct Output {
 
     /// The workgroup size information, if the entry point was a compute shader
     WorkgroupInfo workgroup_info{};
+
+    /// The subgroup matrix information.
+    SubgroupMatrixInfo subgroup_matrix_info{};
 
     /// True if the shader uses vertex_index
     bool has_vertex_index = false;

@@ -27,6 +27,9 @@
 
 #include "src/tint/lang/hlsl/writer/writer.h"
 
+#include <utility>
+
+#include "src/tint/lang/core/ir/analysis/subgroup_matrix.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -193,10 +196,14 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
 Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     TINT_CHECK_RESULT(CanGenerate(ir, options));
 
+    auto subgroup_matrix_info = core::ir::analysis::GatherSubgroupMatrixInfo(ir);
+
     // Raise the core-dialect to HLSL-dialect
     TINT_CHECK_RESULT(Raise(ir, options));
 
-    return Print(ir, options);
+    TINT_CHECK_RESULT_UNWRAP(output, Print(ir, options));
+    output.subgroup_matrix_info = std::move(subgroup_matrix_info);
+    return output;
 }
 
 }  // namespace tint::hlsl::writer
