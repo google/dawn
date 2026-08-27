@@ -95,12 +95,6 @@ if(TINT_BUILD_HLSL_WRITER)
   )
 endif(TINT_BUILD_HLSL_WRITER)
 
-if(TINT_BUILD_MESA)
-  tint_target_add_external_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
-    "mesa"
-  )
-endif(TINT_BUILD_MESA)
-
 if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
     tint_lang_msl_writer_fuzz
