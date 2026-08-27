@@ -287,7 +287,7 @@ class ObjectBase {
     {%- if forced_default_value -%}
         {{" "}}= {{forced_default_value}}
     {%- elif member.json_data.get("no_default", false) -%}
-    {%- elif member.annotation in ["*", "const*", "const*const*"] and (is_struct or member.optional or member.default_value == "nullptr") -%}
+    {%- elif (member.annotation in ["*", "const*", "const*const*"] or member.type.name.get() in ["void *", "void const *"]) and (is_struct or member.optional or member.default_value == "nullptr") -%}
         {{" "}}= nullptr
     {%- elif member.type.category == "object" and (is_struct or member.optional) -%}
         {{" "}}= nullptr
@@ -311,13 +311,22 @@ class ObjectBase {
                 {{" "}}= {{as_cppType(member.type.name)}}::{{as_cppEnum(Name("none"))}}
             {%- endif -%}
         {%- endif -%}
-    {%- elif member.type.category == "native" and member.default_value != None -%}
-        //* Check to see if the default value is a known constant.
-        {%- set constant = find_by_name(by_category["constant"], member.default_value) -%}
-        {%- if constant -%}
-            {{" "}}= k{{constant.name.CamelCase()}}
-        {%- else -%}
-            {{" "}}= {{member.default_value}}
+    {%- elif member.type.category == "native" -%}
+        {%- if member.default_value != None -%}
+            //* Check to see if the default value is a known constant.
+            {%- set constant = find_by_name(by_category["constant"], member.default_value) -%}
+            {%- if constant -%}
+                {{" "}}= k{{constant.name.CamelCase()}}
+            {%- else -%}
+                {{" "}}= {{member.default_value}}
+            {%- endif -%}
+        {%- elif is_struct -%}
+            //* Init member primitive variables to fit cppcoreguidelines-pro-type-member-init check.
+            {%- if member.type.name.get() == "bool" -%}
+                {{" "}}= false
+            {%- else -%}
+                {{" "}}= 0
+            {%- endif -%}
         {%- endif -%}
     {%- elif member.default_value != None -%}
         {{" "}}= {{member.default_value}}
@@ -325,7 +334,7 @@ class ObjectBase {
         {{" "}}= {}
     {%- else -%}
         {{assert(member.default_value == None)}}
-        {%- if force_default -%}
+        {%- if force_default or is_struct -%}
             {{" "}}= {}
         {%- endif -%}
     {%- endif -%}
@@ -1003,7 +1012,7 @@ struct CallbackInfoHelper {
         //* Init struct allows for designated initializers and constructors.
         struct {{CppType}}::Init {
             {% if type.extensible or type.chained %}
-                ChainedStruct{{Out}} * {{Const}} nextInChain;
+                ChainedStruct{{Out}} * {{Const}} nextInChain = nullptr;
             {% endif %}
             {% for member in type.members if member.type.category != "callback info" %}
                 {{render_member_declaration(member, type.has_free_members_function)}};
