@@ -566,5 +566,103 @@ var<immediate> v : S;
 )");
 }
 
+// TODO(459529440): Enable once ProgramToIr calls IR validator at end
+TEST_F(ResolverVariableValidationTest, DISABLED_FunctionScopeVar_ExcessiveElements) {
+    EXPECT_ERROR(
+        R"(
+fn main() {
+  var v : array<bool, 65535>;
+}
+)",
+        R"(input.wgsl:3:3 error: type has excessive number of elements (>32767) for an initializer
+  var v : array<bool, 65535>;
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+)");
+}
+
+// TODO(459529440): Enable once ProgramToIr calls IR validator at end
+TEST_F(ResolverVariableValidationTest, DISABLED_PrivateScopeVar_ExcessiveElements) {
+    EXPECT_ERROR(
+        R"(
+var<private> v : array<bool, 65535>;
+)",
+        R"(input.wgsl:2:1 error: type has excessive number of elements (>32767) for an initializer
+var<private> v : array<bool, 65535>;
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)");
+}
+
+// TODO(459529440): Enable once ProgramToIr calls IR validator at end
+TEST_F(ResolverVariableValidationTest, DISABLED_NestedArray_ExcessiveElements) {
+    EXPECT_ERROR(
+        R"(
+fn main() {
+  var v : array<array<bool, 256>, 256>;
+}
+)",
+        R"(input.wgsl:3:3 error: type has excessive number of elements (>32767) for an initializer
+  var v : array<array<bool, 256>, 256>;
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)");
+}
+
+// TODO(459529440): Enable once ProgramToIr calls IR validator at end
+TEST_F(ResolverVariableValidationTest, DISABLED_StructInArray_ExcessiveElements) {
+    EXPECT_ERROR(
+        R"(
+struct S {
+  a : u32,
+  b : u32,
+  c : u32,
+  d : u32,
+}
+fn main() {
+  var v : array<S, 10000>;
+}
+)",
+        R"(input.wgsl:9:3 error: type has excessive number of elements (>32767) for an initializer
+  var v : array<S, 10000>;
+  ^^^^^^^^^^^^^^^^^^^^^^^
+)");
+}
+
+// TODO(459529440): Enable once ProgramToIr calls IR validator at end
+TEST_F(ResolverVariableValidationTest, DISABLED_StructWithMultipleArrays_ExcessiveElements) {
+    EXPECT_ERROR(
+        R"(
+struct S {
+  a : array<bool, 20000>,
+  b : array<bool, 20000>,
+}
+fn main() {
+  var v : S;
+}
+)",
+        R"(input.wgsl:7:3 error: type has excessive number of elements (>32767) for an initializer
+  var v : S;
+  ^^^^^^^^^
+)");
+}
+
+TEST_F(ResolverVariableValidationTest, WorkgroupScopeVar_ExcessiveElements_Success) {
+    EXPECT_SUCCESS(R"(
+var<workgroup> v : array<bool, 65535>;
+)");
+}
+
+// TODO(459529440): Enable once ProgramToIr calls IR validator at end
+TEST_F(ResolverVariableValidationTest, DISABLED_Let_ExcessiveElements) {
+    EXPECT_ERROR(
+        R"(
+fn main() {
+  let v : array<bool, 65535> = array<bool, 65535>();
+}
+)",
+        R"(input.wgsl:3:32 error: array constructor has excessive number of elements (>32767)
+  let v : array<bool, 65535> = array<bool, 65535>();
+                               ^^^^^^^^^^^^^^^^^^
+)");
+}
+
 }  // namespace
 }  // namespace tint::resolver
