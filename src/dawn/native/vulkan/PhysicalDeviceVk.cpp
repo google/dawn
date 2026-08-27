@@ -600,6 +600,9 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // large mappable buffers, see https://crbug.com/432044227 for details.
     if (!gpu_info::IsNvidia(GetVendorId()) && SupportsBufferMapExtendedUsages(mDeviceInfo)) {
         EnableFeature(Feature::BufferMapExtendedUsages);
+        // Now `kMapExtendedUsageMemoryPropertyFlags` contains exactly the flags that are required
+        // for `BufferMapWriteExtendedUsages`.
+        EnableFeature(Feature::BufferMapWriteExtendedUsages);
     }
 
     if (mDeviceInfo.features.shaderStorageImageExtendedFormats == VK_TRUE) {

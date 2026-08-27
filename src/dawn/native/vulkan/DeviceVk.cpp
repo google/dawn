@@ -1300,7 +1300,8 @@ bool Device::CanAddStorageUsageToBufferWithoutSideEffects(wgpu::BufferUsage stor
     DAWN_ASSERT(IsSubset(storageUsage, wgpu::BufferUsage::Storage | kInternalStorageBuffer |
                                            kReadOnlyStorageBuffer));
     if (originalUsage & kMappableBufferUsages) {
-        return HasFeature(Feature::BufferMapExtendedUsages);
+        return HasFeature(Feature::BufferMapExtendedUsages) ||
+               HasFeature(Feature::BufferMapWriteExtendedUsages);
     }
     return true;
 }
