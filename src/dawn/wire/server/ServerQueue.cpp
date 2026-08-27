@@ -36,13 +36,13 @@
 namespace dawn::wire::server {
 
 void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data,
-                             WGPUQueueWorkDoneStatus status,
-                             WGPUStringView message) {
+                             wgpu::QueueWorkDoneStatus status,
+                             StringView message) {
     ReturnQueueWorkDoneCallbackCmd cmd;
     cmd.instanceId = data->instanceId;
-    cmd.future = FromAPI(data->future);
-    cmd.status = FromAPI(status);
-    cmd.message = FromAPI(message);
+    cmd.future = data->future;
+    cmd.status = status;
+    cmd.message = message;
 
     SerializeCommand(std::move(cmd));
 }
@@ -53,7 +53,7 @@ WireResult Server::DoQueueOnSubmittedWorkDone(Known<WGPUQueue> queue,
     auto userdata = MakeUserdata<QueueWorkDoneUserdata>();
     userdata->queue = queue.AsHandle();
     userdata->instanceId = instance.id;
-    userdata->future = ToAPI(future);
+    userdata->future = future;
 
     mProcs->queueOnSubmittedWorkDone(
         queue->handle, MakeCallbackInfo<WGPUQueueWorkDoneCallbackInfo, &Server::OnQueueWorkDone>(

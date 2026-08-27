@@ -37,7 +37,7 @@ WireResult Server::DoShaderModuleGetCompilationInfo(Known<WGPUShaderModule> shad
                                                     Future future) {
     auto userdata = MakeUserdata<ShaderModuleGetCompilationInfoUserdata>();
     userdata->instanceId = instance.id;
-    userdata->future = ToAPI(future);
+    userdata->future = future;
 
     mProcs->shaderModuleGetCompilationInfo(
         shaderModule->handle,
@@ -47,13 +47,13 @@ WireResult Server::DoShaderModuleGetCompilationInfo(Known<WGPUShaderModule> shad
 }
 
 void Server::OnShaderModuleGetCompilationInfo(ShaderModuleGetCompilationInfoUserdata* data,
-                                              WGPUCompilationInfoRequestStatus status,
-                                              const WGPUCompilationInfo* info) {
+                                              wgpu::CompilationInfoRequestStatus status,
+                                              const CompilationInfo* info) {
     ReturnShaderModuleGetCompilationInfoCallbackCmd cmd;
     cmd.instanceId = data->instanceId;
-    cmd.future = FromAPI(data->future);
-    cmd.status = FromAPI(status);
-    cmd.info = FromAPI(info);
+    cmd.future = data->future;
+    cmd.status = status;
+    cmd.info = info;
 
     SerializeCommand(std::move(cmd));
 }

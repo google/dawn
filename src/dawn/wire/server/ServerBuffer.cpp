@@ -88,9 +88,8 @@ WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
     std::unique_ptr<MapUserdata> userdata = MakeUserdata<MapUserdata>();
     userdata->buffer = buffer.AsHandle();
     userdata->instanceId = instance.id;
-    userdata->bufferObj = buffer->handle;
-    userdata->future = ToAPI(future);
-    userdata->mode = ToAPI(mode);
+    userdata->future = future;
+    userdata->mode = mode;
 
     // Make sure that the size is not WGPU_WHOLE_MAP_SIZE because we want the client to give us an
     // explicit size (so we don't have to handle the defaulting here). The client needs to track
@@ -188,8 +187,8 @@ WireResult Server::DoBufferUpdateMappedData(Known<WGPUBuffer> buffer,
 }
 
 void Server::OnBufferMapAsyncCallback(MapUserdata* data,
-                                      WGPUMapAsyncStatus status,
-                                      WGPUStringView message) {
+                                      wgpu::MapAsyncStatus status,
+                                      StringView message) {
     // Skip sending the callback if the buffer has already been destroyed.
     Known<WGPUBuffer> buffer;
     if (Get(data->buffer.id, &buffer) != WireResult::Success ||
@@ -197,13 +196,13 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
         return;
     }
 
-    bool isSuccess = status == WGPUMapAsyncStatus_Success;
+    bool isSuccess = status == wgpu::MapAsyncStatus::Success;
 
     ReturnBufferMapAsyncCallbackCmd cmd = {};
     cmd.instanceId = data->instanceId;
-    cmd.future = FromAPI(data->future);
-    cmd.status = FromAPI(status);
-    cmd.message = FromAPI(message);
+    cmd.future = data->future;
+    cmd.status = status;
+    cmd.message = message;
 
     if (!isSuccess) {
         SerializeCommand(std::move(cmd));
@@ -211,12 +210,12 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
     }
 
     switch (data->mode) {
-        case WGPUMapMode_Read: {
+        case wgpu::MapMode::Read: {
             DAWN_ASSERT(data->size != WGPU_WHOLE_MAP_SIZE);  // Validated in DoBufferMapAsync.
 
             buffer->mapState.Use([&](auto mapState) {
                 const std::byte* mappedData = static_cast<const std::byte*>(
-                    mProcs->bufferGetConstMappedRange(data->bufferObj, data->offset, data->size));
+                    mProcs->bufferGetConstMappedRange(buffer->handle, data->offset, data->size));
 
                 // SAFETY: If GetConstMappedRange with size != WGPU_WHOLE_MAP_SIZE returns non-null,
                 // it points to at least `size` valid bytes.
@@ -237,7 +236,7 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
             });
             break;
         }
-        case WGPUMapMode_Write: {
+        case wgpu::MapMode::Write: {
             SerializeCommand(std::move(cmd));
             break;
         }

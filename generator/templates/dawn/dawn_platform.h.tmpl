@@ -292,3 +292,21 @@ auto FromAPI(dawn::detail::SpanBase<T, Index, PtrType, Extent> rhs) {
     // SAFETY: The returned Span has the same lifetime as the input Span.
     return DAWN_UNSAFE_BUFFERS(dawn::detail::SpanBase<ResultItem, Index, ResultItem*, Extent>(FromAPI(rhs.data()), rhs.size()));
 }
+
+namespace detail {
+template <typename T>
+struct AsAPITypeImpl {
+    using type = T;
+};
+template <typename T>
+    requires requires { ToAPI(std::declval<T>()); }
+struct AsAPITypeImpl<T> {
+    using type = decltype(ToAPI(std::declval<T>()));
+};
+}  // namespace detail
+
+// Helper useful in templating code, especially for MSVC where template deduction fails for some
+// overloads sometimes.
+template <typename T>
+using AsAPIType = typename detail::AsAPITypeImpl<T>::type;
+

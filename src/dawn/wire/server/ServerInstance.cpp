@@ -43,27 +43,27 @@ WireResult Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
 
     auto userdata = MakeUserdata<RequestAdapterUserdata>();
     userdata->instanceId = instance.id;
-    userdata->future = ToAPI(future);
+    userdata->future = future;
     userdata->adapter = adapter.AsHandle();
 
     mProcs->instanceRequestAdapter(
         instance->handle, ToAPI(options),
         MakeCallbackInfo<WGPURequestAdapterCallbackInfo, &Server::OnRequestAdapterCallback,
-                         WGPUCallbackMode_AllowSpontaneous>(userdata.release()));
+                         wgpu::CallbackMode::AllowSpontaneous>(userdata.release()));
     return WireResult::Success;
 }
 
 void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
-                                      WGPURequestAdapterStatus status,
+                                      wgpu::RequestAdapterStatus status,
                                       WGPUAdapter adapter,
-                                      WGPUStringView message) {
+                                      StringView message) {
     ReturnInstanceRequestAdapterCallbackCmd cmd = {};
     cmd.instanceId = data->instanceId;
-    cmd.future = FromAPI(data->future);
-    cmd.status = FromAPI(status);
-    cmd.message = FromAPI(message);
+    cmd.future = data->future;
+    cmd.status = status;
+    cmd.message = message;
 
-    if (status != WGPURequestAdapterStatus_Success) {
+    if (status != wgpu::RequestAdapterStatus::Success) {
         DAWN_ASSERT(adapter == nullptr);
         SerializeCommand(std::move(cmd));
         return;
@@ -72,7 +72,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     // Assign the handle and allocated status if the adapter is created successfully.
     if (FillReservation(data->adapter, adapter) == WireResult::FatalError) {
         cmd.status = wgpu::RequestAdapterStatus::CallbackCancelled;
-        cmd.message = FromAPI(ToOutputStringView("Destroyed before request was fulfilled."));
+        cmd.message = "Destroyed before request was fulfilled.";
         SerializeCommand(std::move(cmd));
         return;
     }

@@ -48,14 +48,13 @@ WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
 
     auto userdata = MakeUserdata<RequestDeviceUserdata>();
     userdata->instanceId = instance.id;
-    userdata->future = ToAPI(future);
+    userdata->future = future;
     userdata->device = device.AsHandle();
-    userdata->deviceLostFuture = ToAPI(deviceLostFuture);
 
     // Update the descriptor with the device lost callback associated with this request.
     auto deviceLostUserdata = MakeUserdata<DeviceLostUserdata>();
     deviceLostUserdata->instanceId = instance.id;
-    deviceLostUserdata->future = ToAPI(deviceLostFuture);
+    deviceLostUserdata->future = deviceLostFuture;
 
     WGPUDeviceDescriptor desc = *ToAPI(descriptor);
     desc.deviceLostCallbackInfo =
@@ -67,7 +66,7 @@ WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
             DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
             {
                 auto serverGuard = info->server->GetGuard();
-                info->server->OnUncapturedError(info->self, type, message);
+                info->server->OnUncapturedError(info->self, FromAPI(type), FromAPI(message));
             }
             info->server->Flush();
         },
@@ -76,21 +75,21 @@ WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
     mProcs->adapterRequestDevice(
         adapter->handle, &desc,
         MakeCallbackInfo<WGPURequestDeviceCallbackInfo, &Server::OnRequestDeviceCallback,
-                         WGPUCallbackMode_AllowSpontaneous>(userdata.release()));
+                         wgpu::CallbackMode::AllowSpontaneous>(userdata.release()));
     return WireResult::Success;
 }
 
 void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
-                                     WGPURequestDeviceStatus status,
+                                     wgpu::RequestDeviceStatus status,
                                      WGPUDevice device,
-                                     WGPUStringView message) {
+                                     StringView message) {
     ReturnAdapterRequestDeviceCallbackCmd cmd = {};
     cmd.instanceId = data->instanceId;
-    cmd.future = FromAPI(data->future);
-    cmd.status = FromAPI(status);
-    cmd.message = FromAPI(message);
+    cmd.future = data->future;
+    cmd.status = status;
+    cmd.message = message;
 
-    if (status != WGPURequestDeviceStatus_Success) {
+    if (status != wgpu::RequestDeviceStatus::Success) {
         DAWN_ASSERT(device == nullptr);
         SerializeCommand(std::move(cmd));
         return;
@@ -109,7 +108,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
             device = nullptr;
 
             cmd.status = wgpu::RequestDeviceStatus::Error;
-            cmd.message = FromAPI(ToOutputStringView("Requested feature not supported."));
+            cmd.message = "Requested feature not supported.";
             SerializeCommand(std::move(cmd));
             return;
         }
@@ -134,7 +133,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     Known<WGPUDevice> reservation;
     if (FillReservation(data->device, device, &reservation) == WireResult::FatalError) {
         cmd.status = wgpu::RequestDeviceStatus::CallbackCancelled;
-        cmd.message = FromAPI(ToOutputStringView("Destroyed before request was fulfilled."));
+        cmd.message = "Destroyed before request was fulfilled.";
         SerializeCommand(std::move(cmd));
         return;
     }

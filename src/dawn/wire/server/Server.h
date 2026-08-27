@@ -36,10 +36,59 @@
 #include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/wire/ChunkedCommandSerializer.h"
 
-namespace dawn::wire::server {
-
+namespace dawn::wire {
+namespace server {
 class Server;
 class MemoryTransferService;
+}  // namespace server
+
+namespace detail {
+
+template <typename Target, typename Arg>
+Target ConvertFromAPI(Arg&& arg) {
+    if constexpr (std::is_same_v<Target, std::decay_t<Arg>>) {
+        return std::forward<Arg>(arg);
+    } else {
+        return FromAPI(std::forward<Arg>(arg));
+    }
+}
+
+template <auto F, typename _ = decltype(F)>
+struct ForwardToServerHelper;
+
+template <auto F, typename UserdataT, typename... Args>
+struct ForwardToServerHelper<F, void (server::Server::*)(UserdataT*, Args...)> {
+    using Userdata = UserdataT;
+
+    static void Callback(AsAPIType<Args>... args, void* userdata, void*) {
+        // Acquire the userdata, and cast it to UserdataT.
+        std::unique_ptr<Userdata> data(static_cast<Userdata*>(userdata));
+        auto server = data->server.lock();
+        if (!server) {
+            // If the server is destroyed, release any callback owned results and return.
+            (
+                []<typename T>(const DawnProcTable& procs, T arg) {
+                    if constexpr (server::WGPUTraits<T>::Release != nullptr) {
+                        if (arg) {
+                            (procs.*server::WGPUTraits<T>::Release)(arg);
+                        }
+                    }
+                }(*(data->procs), args),
+                ...);
+            return;
+        }
+        // Forward the arguments and the typed userdata to the Server:: member function.
+        {
+            auto serverGuard = server.get()->GetGuard();
+            (server.get()->*F)(data.get(), ConvertFromAPI<Args>(args)...);
+        }
+        server.get()->Flush();
+    }
+};
+
+}  // namespace detail
+
+namespace server {
 
 // CallbackUserdata and its derived classes are intended to be created by
 // Server::MakeUserdata<T> and then passed as the userdata argument for Dawn
@@ -49,9 +98,9 @@ class MemoryTransferService;
 // |serverIsAlive|. If the weak pointer has expired, it means the server has
 // been destroyed and the callback must not use the Server pointer.
 // To assist with checking |serverIsAlive| and lifetime management of the userdata,
-// |ForwardToServer| (defined later in this file) can be used to acquire the userdata,
-// return early if |serverIsAlive| has expired, and then forward the arguments
-// to userdata->server->MyCallbackHandler.
+// |ForwardToServerHelper| (defined earlier in this file) can be used to acquire the
+// userdata, return early if |serverIsAlive| has expired, and then forward the arguments to
+// userdata->server->MyCallbackHandler.
 //
 // Example Usage:
 //
@@ -61,7 +110,7 @@ class MemoryTransferService;
 // userdata->foo = 2;
 //
 // callMyCallbackHandler(
-//      ForwardToServer<&Server::MyCallbackHandler>::Callback,
+//      ForwardToServerHelper<&Server::MyCallbackHandler>::Callback,
 //      userdata.release());
 //
 // void Server::MyCallbackHandler(MyUserdata* userdata, Other args) { }
@@ -74,49 +123,15 @@ struct CallbackUserdata {
                      std::shared_ptr<const DawnProcTable>& procs);
 };
 
-template <auto F, typename _ = decltype(F)>
-struct ForwardToServerHelper;
-
-template <auto F, typename UserdataT, typename... Args>
-struct ForwardToServerHelper<F, void (Server::*)(UserdataT*, Args...)> {
-    using Userdata = UserdataT;
-
-    static void Callback(Args... args, void* userdata, void*) {
-        // Acquire the userdata, and cast it to UserdataT.
-        std::unique_ptr<Userdata> data(static_cast<Userdata*>(userdata));
-        auto server = data->server.lock();
-        if (!server) {
-            // If the server is destroyed, release any callback owned results and return.
-            (
-                []<typename T>(const DawnProcTable& procs, T arg) {
-                    if constexpr (WGPUTraits<T>::Release != nullptr) {
-                        if (arg) {
-                            (procs.*WGPUTraits<T>::Release)(arg);
-                        }
-                    }
-                }(*(data->procs), std::forward<Args>(args)),
-                ...);
-            return;
-        }
-        // Forward the arguments and the typed userdata to the Server:: member function.
-        {
-            auto serverGuard = server.get()->GetGuard();
-            (server.get()->*F)(data.get(), std::forward<Args>(args)...);
-        }
-        server.get()->Flush();
-    }
-};
-
 struct MapUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectHandle buffer;
-    WGPUBuffer bufferObj;
     ObjectId instanceId;
-    WGPUFuture future;
+    Future future;
     size_t offset;
     size_t size;
-    WGPUMapMode mode;
+    wgpu::MapMode mode;
 };
 
 struct ErrorScopeUserdata : CallbackUserdata {
@@ -124,14 +139,14 @@ struct ErrorScopeUserdata : CallbackUserdata {
 
     ObjectHandle device;
     ObjectId instanceId;
-    WGPUFuture future;
+    Future future;
 };
 
 struct ShaderModuleGetCompilationInfoUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectId instanceId;
-    WGPUFuture future;
+    Future future;
 };
 
 struct QueueWorkDoneUserdata : CallbackUserdata {
@@ -139,7 +154,7 @@ struct QueueWorkDoneUserdata : CallbackUserdata {
 
     ObjectHandle queue;
     ObjectId instanceId;
-    WGPUFuture future;
+    Future future;
 };
 
 struct CreatePipelineAsyncUserData : CallbackUserdata {
@@ -147,7 +162,7 @@ struct CreatePipelineAsyncUserData : CallbackUserdata {
 
     ObjectHandle device;
     ObjectId instanceId;
-    WGPUFuture future;
+    Future future;
     ObjectHandle pipeline;
 };
 
@@ -155,7 +170,7 @@ struct RequestAdapterUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectId instanceId;
-    WGPUFuture future;
+    Future future;
     ObjectHandle adapter;
 };
 
@@ -163,16 +178,15 @@ struct RequestDeviceUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectId instanceId;
-    WGPUFuture future;
+    Future future;
     ObjectHandle device;
-    WGPUFuture deviceLostFuture;
 };
 
 struct DeviceLostUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectId instanceId;
-    WGPUFuture future;
+    Future future;
 };
 
 class Server : public ServerBase {
@@ -207,10 +221,12 @@ class Server : public ServerBase {
 
     template <typename CallbackInfo,
               auto F,
-              WGPUCallbackMode DefaultMode = WGPUCallbackMode_AllowProcessEvents>
-    CallbackInfo MakeCallbackInfo(ForwardToServerHelper<F>::Userdata* userdata) {
-        return {nullptr, mUseSpontaneousCallbacks ? WGPUCallbackMode_AllowSpontaneous : DefaultMode,
-                &ForwardToServerHelper<F>::Callback, userdata, nullptr};
+              wgpu::CallbackMode DefaultMode = wgpu::CallbackMode::AllowProcessEvents>
+    CallbackInfo MakeCallbackInfo(typename detail::ForwardToServerHelper<F>::Userdata* userdata) {
+        return {
+            nullptr,
+            ToAPI(mUseSpontaneousCallbacks ? wgpu::CallbackMode::AllowSpontaneous : DefaultMode),
+            &detail::ForwardToServerHelper<F>::Callback, userdata, nullptr};
     }
 
   private:
@@ -257,45 +273,47 @@ class Server : public ServerBase {
     //   ForwardToServerHelper::Callback unless specified otherwise in the comments.
     void OnDeviceLost(DeviceLostUserdata* userdata,
                       WGPUDevice const* device,
-                      WGPUDeviceLostReason reason,
-                      WGPUStringView message);
+                      wgpu::DeviceLostReason reason,
+                      StringView message);
     void OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
-                               WGPUPopErrorScopeStatus status,
-                               WGPUErrorType type,
-                               WGPUStringView message);
+                               wgpu::PopErrorScopeStatus status,
+                               wgpu::ErrorType type,
+                               StringView message);
     void OnBufferMapAsyncCallback(MapUserdata* userdata,
-                                  WGPUMapAsyncStatus status,
-                                  WGPUStringView message);
+                                  wgpu::MapAsyncStatus status,
+                                  StringView message);
     void OnQueueWorkDone(QueueWorkDoneUserdata* userdata,
-                         WGPUQueueWorkDoneStatus status,
-                         WGPUStringView message);
+                         wgpu::QueueWorkDoneStatus status,
+                         StringView message);
     void OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* userdata,
-                                              WGPUCreatePipelineAsyncStatus status,
+                                              wgpu::CreatePipelineAsyncStatus status,
                                               WGPUComputePipeline pipeline,
-                                              WGPUStringView message);
+                                              StringView message);
     void OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* userdata,
-                                             WGPUCreatePipelineAsyncStatus status,
+                                             wgpu::CreatePipelineAsyncStatus status,
                                              WGPURenderPipeline pipeline,
-                                             WGPUStringView message);
+                                             StringView message);
     void OnShaderModuleGetCompilationInfo(ShaderModuleGetCompilationInfoUserdata* userdata,
-                                          WGPUCompilationInfoRequestStatus status,
-                                          const WGPUCompilationInfo* info);
+                                          wgpu::CompilationInfoRequestStatus status,
+                                          const CompilationInfo* info);
     void OnRequestAdapterCallback(RequestAdapterUserdata* userdata,
-                                  WGPURequestAdapterStatus status,
+                                  wgpu::RequestAdapterStatus status,
                                   WGPUAdapter adapter,
-                                  WGPUStringView message);
+                                  StringView message);
     void OnRequestDeviceCallback(RequestDeviceUserdata* userdata,
-                                 WGPURequestDeviceStatus status,
+                                 wgpu::RequestDeviceStatus status,
                                  WGPUDevice device,
-                                 WGPUStringView message);
+                                 StringView message);
     // The |OnUncapturedError| callback is special in that:
-    //   1) It is a repeating callback, so it can't be used with ForwardToServerHelper::Callback.
-    void OnUncapturedError(ObjectHandle device, WGPUErrorType type, WGPUStringView message);
+    //   1) It is a repeating callback, so it can't be used with
+    //      ForwardToServerHelper::Callback.
+    void OnUncapturedError(ObjectHandle device, wgpu::ErrorType type, StringView message);
     // The |OnLogging| callback is special in that:
-    //   1) It is a repeating callback, so it can't be used with ForwardToServerHelper::Callback.
+    //   1) It is a repeating callback, so it can't be used with
+    //      ForwardToServerHelper::Callback.
     //   2) It does not require holding the server object storage lock, i.e. |GetGuard| before
     //      being called because it never interacts with the object store.
-    void OnLogging(ObjectHandle device, WGPULoggingType type, WGPUStringView message);
+    void OnLogging(ObjectHandle device, wgpu::LoggingType type, StringView message);
 
 #include "dawn/wire/server/ServerPrototypes_autogen.inc"
 
@@ -310,6 +328,7 @@ class Server : public ServerBase {
 
 std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
 
-}  // namespace dawn::wire::server
+}  // namespace server
+}  // namespace dawn::wire
 
 #endif  // SRC_DAWN_WIRE_SERVER_SERVER_H_
