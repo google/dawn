@@ -79,8 +79,8 @@ WireResult Server::PreHandleBufferDestroy(const BufferDestroyCmd& cmd) {
 
 WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
                                     Known<WGPUInstance> instance,
-                                    WGPUFuture future,
-                                    WGPUMapMode mode,
+                                    Future future,
+                                    wgpu::MapMode mode,
                                     size_t offset,
                                     size_t size) {
     // These requests are just forwarded to the buffer, with userdata containing what the
@@ -89,8 +89,8 @@ WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
     userdata->buffer = buffer.AsHandle();
     userdata->instanceId = instance.id;
     userdata->bufferObj = buffer->handle;
-    userdata->future = future;
-    userdata->mode = mode;
+    userdata->future = ToAPI(future);
+    userdata->mode = ToAPI(mode);
 
     // Make sure that the size is not WGPU_WHOLE_MAP_SIZE because we want the client to give us an
     // explicit size (so we don't have to handle the defaulting here). The client needs to track
@@ -103,7 +103,7 @@ WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
     userdata->size = size;
 
     mProcs->bufferMapAsync(
-        buffer->handle, mode, offset, size,
+        buffer->handle, ToAPI(mode), offset, size,
         MakeCallbackInfo<WGPUBufferMapCallbackInfo, &Server::OnBufferMapAsyncCallback>(
             userdata.release()));
 
@@ -111,15 +111,15 @@ WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
 }
 
 WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
-                                        const WGPUBufferDescriptor* descriptor,
+                                        const BufferDescriptor* descriptor,
                                         ObjectHandle bufferHandle,
                                         Span<const std::byte> memoryHandleCreateInfo) {
     // Create and register the buffer object.
     Reserved<WGPUBuffer> buffer;
     WIRE_TRY(Allocate(&buffer, bufferHandle));
-    buffer->handle = mProcs->deviceCreateBuffer(device->handle, descriptor);
-    buffer->usage = descriptor->usage;
-    buffer->mappedAtCreation = (descriptor->mappedAtCreation != 0u);
+    buffer->handle = mProcs->deviceCreateBuffer(device->handle, ToAPI(descriptor));
+    buffer->usage = ToAPI(descriptor->usage);
+    buffer->mappedAtCreation = descriptor->mappedAtCreation;
 
     // A null buffer indicates that mapping-at-creation failed inside createBuffer. Unmark the
     // buffer as allocated so we will skip freeing it.
@@ -130,8 +130,9 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
     }
 
     bool isMappable =
-        descriptor->mappedAtCreation != 0u ||
-        (descriptor->usage & (WGPUBufferUsage_MapRead | WGPUBufferUsage_MapWrite)) != 0u;
+        descriptor->mappedAtCreation ||
+        (descriptor->usage & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) !=
+            wgpu::BufferUsage::None;
 
     std::unique_ptr<MemoryTransferService::MemoryHandle> memoryHandle = nullptr;
     if (isMappable) {
@@ -200,9 +201,9 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
 
     ReturnBufferMapAsyncCallbackCmd cmd = {};
     cmd.instanceId = data->instanceId;
-    cmd.future = data->future;
-    cmd.status = status;
-    cmd.message = message;
+    cmd.future = FromAPI(data->future);
+    cmd.status = FromAPI(status);
+    cmd.message = FromAPI(message);
 
     if (!isSuccess) {
         SerializeCommand(cmd);

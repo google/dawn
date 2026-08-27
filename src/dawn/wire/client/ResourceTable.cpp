@@ -47,7 +47,7 @@ ResourceTable* ResourceTable::Create(Device* device, const ResourceTableDescript
 
     DeviceCreateResourceTableCmd cmd;
     cmd.self = ToAPI(device);
-    cmd.descriptor = ToAPI(descriptor);
+    cmd.descriptor = ToWireCmd(descriptor);
 
     Ref<ResourceTable> table = wireClient->Make<ResourceTable>(device, descriptor);
     cmd.result = table->GetWireHandle(wireClient);
@@ -107,7 +107,7 @@ wgpu::Status ResourceTable::APIUpdate(uint32_t slot, const BindingResource* reso
     ResourceTableUpdateCmd cmd;
     cmd.self = ToAPI(this);
     cmd.slot = slot;
-    cmd.resource = ToAPI(resource);
+    cmd.resource = ToWireCmd(resource);
     GetClient()->SerializeCommand(cmd);
 
     return wgpu::Status::Success;

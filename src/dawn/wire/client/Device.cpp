@@ -57,24 +57,24 @@ class PopErrorScopeEvent final : public TrackedEvent {
     EventType GetType() override { return kType; }
 
     WireResult ReadyHook(FutureID futureID,
-                         WGPUPopErrorScopeStatus status,
-                         WGPUErrorType errorType,
-                         WGPUStringView message) {
+                         wgpu::PopErrorScopeStatus status,
+                         wgpu::ErrorType errorType,
+                         StringView message) {
         mStatus = status;
         mType = errorType;
-        mMessage = ToString(message);
+        mMessage = message;
         return WireResult::Success;
     }
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPUPopErrorScopeStatus_CallbackCancelled;
+            mStatus = wgpu::PopErrorScopeStatus::CallbackCancelled;
             mMessage = "";
         }
         if (mCallback) {
-            mCallback(mStatus, mType, ToOutputStringView(mMessage), mUserdata1.ExtractAsDangling(),
-                      mUserdata2.ExtractAsDangling());
+            mCallback(ToAPI(mStatus), ToAPI(mType), ToOutputStringView(mMessage),
+                      mUserdata1.ExtractAsDangling(), mUserdata2.ExtractAsDangling());
         }
     }
 
@@ -82,8 +82,8 @@ class PopErrorScopeEvent final : public TrackedEvent {
     raw_ptr<void> mUserdata1;
     raw_ptr<void> mUserdata2;
 
-    WGPUPopErrorScopeStatus mStatus = {};
-    WGPUErrorType mType = WGPUErrorType_NoError;
+    wgpu::PopErrorScopeStatus mStatus = {};
+    wgpu::ErrorType mType = wgpu::ErrorType::NoError;
     std::string mMessage;
 };
 
@@ -99,12 +99,12 @@ class CreatePipelineEventBase : public TrackedEvent {
     CreatePipelineEventBase(const CallbackInfo& callbackInfo,
                             Ref<Device> device,
                             Ref<Pipeline> pipeline,
-                            WGPUStringView label)
+                            StringView label)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
           mUserdata2(callbackInfo.userdata2),
-          mLabel(ToString(label)),
+          mLabel(label),
           mDevice(std::move(device)),
           mPipeline(std::move(pipeline)) {
         DAWN_ASSERT(mDevice != nullptr);
@@ -114,11 +114,11 @@ class CreatePipelineEventBase : public TrackedEvent {
     EventType GetType() override { return kType; }
 
     WireResult ReadyHook(FutureID futureID,
-                         WGPUCreatePipelineAsyncStatus status,
-                         WGPUStringView message) {
+                         wgpu::CreatePipelineAsyncStatus status,
+                         StringView message) {
         DAWN_ASSERT(mPipeline != nullptr);
         mStatus = status;
-        mMessage = ToString(message);
+        mMessage = message;
         return WireResult::Success;
     }
 
@@ -132,17 +132,17 @@ class CreatePipelineEventBase : public TrackedEvent {
         }
 
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPUCreatePipelineAsyncStatus_CallbackCancelled;
+            mStatus = wgpu::CreatePipelineAsyncStatus::CallbackCancelled;
             mMessage = "A valid external Instance reference no longer exists.";
         } else if (mDevice->IsKnownLost()) {
             mPipeline =
                 mDevice->CreateErrorPipeline<Pipeline, CreateErrorCmdT>(ToOutputStringView(mLabel));
-            mStatus = WGPUCreatePipelineAsyncStatus_Success;
+            mStatus = wgpu::CreatePipelineAsyncStatus::Success;
             mMessage = "";
         }
 
-        mCallback(mStatus,
-                  mStatus == WGPUCreatePipelineAsyncStatus_Success
+        mCallback(ToAPI(mStatus),
+                  mStatus == wgpu::CreatePipelineAsyncStatus::Success
                       ? ReturnToAPI(std::move(mPipeline))
                       : nullptr,
                   ToOutputStringView(mMessage), userdata1, userdata2);
@@ -153,7 +153,7 @@ class CreatePipelineEventBase : public TrackedEvent {
     raw_ptr<void> mUserdata1;
     raw_ptr<void> mUserdata2;
 
-    WGPUCreatePipelineAsyncStatus mStatus = WGPUCreatePipelineAsyncStatus_Success;
+    wgpu::CreatePipelineAsyncStatus mStatus = wgpu::CreatePipelineAsyncStatus::Success;
     std::string mMessage;
 
     std::string mLabel;
@@ -188,11 +188,11 @@ class Device::DeviceLostEvent : public TrackedEvent {
 
     EventType GetType() override { return kType; }
 
-    WireResult ReadyHook(FutureID futureID, WGPUDeviceLostReason reason, WGPUStringView message) {
+    WireResult ReadyHook(FutureID futureID, wgpu::DeviceLostReason reason, StringView message) {
         mState.Use([&](auto state) {
             if (state->message.empty()) {
                 state->reason = reason;
-                state->message = ToString(message);
+                state->message = message;
             }
         });
         return WireResult::Success;
@@ -200,12 +200,12 @@ class Device::DeviceLostEvent : public TrackedEvent {
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
-        WGPUDeviceLostReason reason;
+        wgpu::DeviceLostReason reason;
         std::string message;
 
         mState.Use([&](auto state) {
             if (completionType == EventCompletionType::Shutdown) {
-                state->reason = WGPUDeviceLostReason_CallbackCancelled;
+                state->reason = wgpu::DeviceLostReason::CallbackCancelled;
                 state->message = "A valid external Instance reference no longer exists.";
             }
             reason = state->reason;
@@ -223,8 +223,8 @@ class Device::DeviceLostEvent : public TrackedEvent {
 
         if (mCallback != nullptr) {
             const auto device =
-                reason != WGPUDeviceLostReason_FailedCreation ? ToAPI(mDevice.Get()) : nullptr;
-            mCallback(&device, reason, ToOutputStringView(message), userdata1, userdata2);
+                reason != wgpu::DeviceLostReason::FailedCreation ? ToAPI(mDevice.Get()) : nullptr;
+            mCallback(&device, ToAPI(reason), ToOutputStringView(message), userdata1, userdata2);
         }
     }
 
@@ -233,7 +233,7 @@ class Device::DeviceLostEvent : public TrackedEvent {
     raw_ptr<void> mUserdata2 = nullptr;
 
     struct State {
-        WGPUDeviceLostReason reason;
+        wgpu::DeviceLostReason reason;
         std::string message;
     };
     MutexProtected<State> mState;
@@ -315,16 +315,16 @@ void Device::SetFeatures(Span<const wgpu::FeatureName> features) {
     mLimitsAndFeatures.SetFeatures(features);
 }
 
-void Device::HandleError(WGPUErrorType errorType, WGPUStringView message) {
+void Device::HandleError(wgpu::ErrorType errorType, StringView message) {
     const auto device = ToAPI(this);
-    mCallbackInfos.CallErrorCallback(&device, errorType, message);
+    mCallbackInfos.CallErrorCallback(&device, ToAPI(errorType), ToOutputStringView(message));
 }
 
-void Device::HandleLogging(WGPULoggingType loggingType, WGPUStringView message) {
-    mCallbackInfos.CallLoggingCallback(loggingType, message);
+void Device::HandleLogging(wgpu::LoggingType loggingType, StringView message) {
+    mCallbackInfos.CallLoggingCallback(ToAPI(loggingType), ToOutputStringView(message));
 }
 
-void Device::HandleDeviceLost(WGPUDeviceLostReason reason, WGPUStringView message) {
+void Device::HandleDeviceLost(wgpu::DeviceLostReason reason, StringView message) {
     FutureID futureID = APIGetLostFuture().id;
     auto wireStatus = GetEventManager().SetFutureReady<DeviceLostEvent>(futureID, reason, message);
     DAWN_CHECK(wireStatus == WireResult::Success);
@@ -347,9 +347,9 @@ void Device::APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackInfo) 
 }
 
 WireResult Client::DoDeviceLostCallback(ObjectId instanceId,
-                                        WGPUFuture future,
-                                        WGPUDeviceLostReason reason,
-                                        WGPUStringView message) {
+                                        Future future,
+                                        wgpu::DeviceLostReason reason,
+                                        StringView message) {
     return SetFutureReady<Device::DeviceLostEvent>(instanceId, future.id, reason, message);
 }
 
@@ -370,18 +370,18 @@ Future Device::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInf
 }
 
 WireResult Client::DoDevicePopErrorScopeCallback(ObjectId instanceId,
-                                                 WGPUFuture future,
-                                                 WGPUPopErrorScopeStatus status,
-                                                 WGPUErrorType errorType,
-                                                 WGPUStringView message) {
+                                                 Future future,
+                                                 wgpu::PopErrorScopeStatus status,
+                                                 wgpu::ErrorType errorType,
+                                                 StringView message) {
     return SetFutureReady<PopErrorScopeEvent>(instanceId, future.id, status, errorType, message);
 }
 
 void Device::APIInjectError(wgpu::ErrorType type, StringView message) {
     DeviceInjectErrorCmd cmd;
     cmd.self = ToAPI(this);
-    cmd.type = ToAPI(type);
-    cmd.message = ToAPI(message);
+    cmd.type = type;
+    cmd.message = ToWireCmd(message);
     GetClient()->SerializeCommand(cmd);
 }
 
@@ -425,15 +425,15 @@ Future Device::CreatePipelineAsync(Descriptor const* descriptor, const CallbackI
 
     Client* client = GetClient();
     Ref<Pipeline> pipeline = client->Make<Pipeline>();
-    auto [futureIDInternal, tracked] = GetEventManager().TrackEvent(AcquireRef(new Event(
-        callbackInfo, this, pipeline, descriptor ? ToAPI(descriptor->label) : WGPUStringView{})));
+    auto [futureIDInternal, tracked] = GetEventManager().TrackEvent(AcquireRef(
+        new Event(callbackInfo, this, pipeline, descriptor ? descriptor->label : StringView{})));
     if (!tracked) {
         return {futureIDInternal};
     }
 
     Cmd cmd;
     cmd.deviceId = GetWireHandle(client).id;
-    cmd.descriptor = ToAPI(descriptor);
+    cmd.descriptor = ToWireCmd(descriptor);
     cmd.instanceId = GetInstance()->GetWireHandle(client).id;
     cmd.future = {futureIDInternal};
     cmd.pipelineObjectHandle = pipeline->GetWireHandle(client);
@@ -449,10 +449,11 @@ Future Device::APICreateComputePipelineAsync(
         descriptor, callbackInfo);
 }
 
-WireResult Client::DoDeviceCreateComputePipelineAsyncCallback(ObjectId instanceId,
-                                                              WGPUFuture future,
-                                                              WGPUCreatePipelineAsyncStatus status,
-                                                              WGPUStringView message) {
+WireResult Client::DoDeviceCreateComputePipelineAsyncCallback(
+    ObjectId instanceId,
+    Future future,
+    wgpu::CreatePipelineAsyncStatus status,
+    StringView message) {
     return SetFutureReady<CreateComputePipelineEvent>(instanceId, future.id, status, message);
 }
 
@@ -464,15 +465,15 @@ Future Device::APICreateRenderPipelineAsync(
 }
 
 WireResult Client::DoDeviceCreateRenderPipelineAsyncCallback(ObjectId instanceId,
-                                                             WGPUFuture future,
-                                                             WGPUCreatePipelineAsyncStatus status,
-                                                             WGPUStringView message) {
+                                                             Future future,
+                                                             wgpu::CreatePipelineAsyncStatus status,
+                                                             StringView message) {
     return SetFutureReady<CreateRenderPipelineEvent>(instanceId, future.id, status, message);
 }
 
 void Device::APIDestroy() {
     mIsDestroyed = true;
-    HandleDeviceLost(WGPUDeviceLostReason_Destroyed, ToOutputStringView("Device was destroyed."));
+    HandleDeviceLost(wgpu::DeviceLostReason::Destroyed, "Device was destroyed.");
 
     DeviceDestroyCmd cmd;
     cmd.self = ToAPI(this);

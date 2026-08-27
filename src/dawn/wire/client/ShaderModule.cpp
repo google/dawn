@@ -129,7 +129,7 @@ ShaderModule* ShaderModule::Create(Device* device, const ShaderModuleDescriptor*
     if (!errorMessage.empty()) {
         DeviceCreateErrorShaderModuleCmd cmd;
         cmd.self = ToAPI(device);
-        cmd.descriptor = ToAPI(&desc);
+        cmd.descriptor = ToWireCmd(&desc);
         cmd.errorMessage = ToOutputStringView(errorMessage);
         cmd.result = shaderModule->GetWireHandle(client);
         client->SerializeCommand(cmd);
@@ -145,7 +145,7 @@ ShaderModule* ShaderModule::Create(Device* device, const ShaderModuleDescriptor*
 
     DeviceCreateShaderModuleCmd cmd;
     cmd.self = ToAPI(device);
-    cmd.descriptor = ToAPI(&desc);
+    cmd.descriptor = ToWireCmd(&desc);
     cmd.result = shaderModule->GetWireHandle(client);
     client->SerializeCommand(cmd);
     return ReturnToAPI2(std::move(shaderModule));
@@ -168,8 +168,8 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
     EventType GetType() override { return kType; }
 
     WireResult ReadyHook(FutureID futureId,
-                         WGPUCompilationInfoRequestStatus status,
-                         const WGPUCompilationInfo* info) {
+                         wgpu::CompilationInfoRequestStatus status,
+                         const CompilationInfo* info) {
         if (mShader->mCompilationInfo) {
             // If we already cached the compilation info on the shader, we don't need to do it
             // again. This can happen if we were to call GetCompilationInfo multiple times before
@@ -179,34 +179,33 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
 
         mStatus = status;
 
-        // Deep copy the WGPUCompilationInfo
-        mShader->mMessageStrings.reserve(info->messageCount);
-        mShader->mMessages.reserve(info->messageCount);
-        mShader->mUtf16s.reserve(info->messageCount);
-        for (size_t i = 0; i < info->messageCount; i++) {
-            DAWN_UNSAFE_TODO(DAWN_ASSERT(info->messages[i].length != WGPU_STRLEN));
-            mShader->mMessageStrings.push_back(
-                ToString(DAWN_UNSAFE_TODO(info->messages[i]).message));
-            mShader->mMessages.push_back(DAWN_UNSAFE_TODO(info->messages[i]));
-            mShader->mMessages[i].message = ToOutputStringView(mShader->mMessageStrings[i]);
+        // Deep copy the CompilationInfo
+        mShader->mMessageStrings.reserve(info->messages.size());
+        mShader->mMessages.reserve(info->messages.size());
+        mShader->mUtf16s.reserve(info->messages.size());
+        for (size_t i = 0; i < info->messages.size(); i++) {
+            DAWN_ASSERT(info->messages[i].length != WGPU_STRLEN);
+            mShader->mMessageStrings.emplace_back(info->messages[i].message);
+            mShader->mMessages.push_back(info->messages[i]);
+            mShader->mMessages[i].message = StringView(mShader->mMessageStrings[i]);
             mShader->mMessages[i].nextInChain = nullptr;
 
             // Iterate the message chain for extensions that we want to handle.
-            WGPUChainedStruct** tail = &mShader->mMessages[i].nextInChain;
-            WGPUChainedStruct* chain = DAWN_UNSAFE_TODO(info->messages[i]).nextInChain;
+            const ChainedStruct** tail = &mShader->mMessages[i].nextInChain;
+            const ChainedStruct* chain = info->messages[i].nextInChain;
             // Guard against duplicates, to avoid a reallocation on the destination vector.
             // Duplicate structs of the same type are not valid in the first place, so don't
             // do much to try to recover or error out.
             bool seenDawnCompilationMessageUtf16 = false;
             while (chain != nullptr) {
                 switch (chain->sType) {
-                    case WGPUSType_DawnCompilationMessageUtf16: {
+                    case wgpu::SType::DawnCompilationMessageUtf16: {
                         if (!seenDawnCompilationMessageUtf16) {
                             seenDawnCompilationMessageUtf16 = true;
-                            mShader->mUtf16s.push_back(
-                                *reinterpret_cast<const WGPUDawnCompilationMessageUtf16*>(chain));
-                            *tail = &(mShader->mUtf16s.back().chain);
-                            tail = &((*tail)->next);
+                            auto* next = &mShader->mUtf16s.emplace_back(
+                                *reinterpret_cast<const DawnCompilationMessageUtf16*>(chain));
+                            *tail = next;
+                            tail = &next->nextInChain;
                         }
                         break;
                     }
@@ -214,13 +213,16 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
                         break;
                 }
 
-                chain = chain->next;
+                chain = chain->nextInChain;
             }
 
             // Ensure that the tail is pointing to nothing else.
             *tail = nullptr;
         }
-        mShader->mCompilationInfo = {nullptr, mShader->mMessages.size(), mShader->mMessages.data()};
+        mShader->mCompilationInfo = CompilationInfo{
+            .nextInChain = nullptr,
+            .messages = mShader->mMessages,
+        };
 
         return WireResult::Success;
     }
@@ -229,23 +231,23 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
         // We call this ReadyHook when we already have a cached compilation on the shader (usually
         // from a previous GetCompilationInfo call).
         DAWN_ASSERT(mShader->mCompilationInfo);
-        mStatus = WGPUCompilationInfoRequestStatus_Success;
+        mStatus = wgpu::CompilationInfoRequestStatus::Success;
         return WireResult::Success;
     }
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
-        WGPUCompilationInfo* compilationInfo = nullptr;
+        const WGPUCompilationInfo* compilationInfo = nullptr;
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPUCompilationInfoRequestStatus_CallbackCancelled;
+            mStatus = wgpu::CompilationInfoRequestStatus::CallbackCancelled;
         } else {
-            compilationInfo = &(*mShader->mCompilationInfo);
+            compilationInfo = ToAPI(&*mShader->mCompilationInfo);
         }
 
         void* userdata1 = mUserdata1.ExtractAsDangling();
         void* userdata2 = mUserdata2.ExtractAsDangling();
         if (mCallback) {
-            mCallback(mStatus, compilationInfo, userdata1, userdata2);
+            mCallback(ToAPI(mStatus), compilationInfo, userdata1, userdata2);
         }
     }
 
@@ -253,7 +255,7 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
     raw_ptr<void> mUserdata1;
     raw_ptr<void> mUserdata2;
 
-    WGPUCompilationInfoRequestStatus mStatus;
+    wgpu::CompilationInfoRequestStatus mStatus = wgpu::CompilationInfoRequestStatus::Success;
 
     // Strong reference to the shader so that when we call the callback we can pass the
     // compilation info from `mShader`.
@@ -287,10 +289,11 @@ Future ShaderModule::APIGetCompilationInfo(const WGPUCompilationInfoCallbackInfo
     return {futureIDInternal};
 }
 
-WireResult Client::DoShaderModuleGetCompilationInfoCallback(ObjectId instanceId,
-                                                            WGPUFuture future,
-                                                            WGPUCompilationInfoRequestStatus status,
-                                                            const WGPUCompilationInfo* info) {
+WireResult Client::DoShaderModuleGetCompilationInfoCallback(
+    ObjectId instanceId,
+    Future future,
+    wgpu::CompilationInfoRequestStatus status,
+    const CompilationInfo* info) {
     return SetFutureReady<ShaderModule::CompilationInfoEvent>(instanceId, future.id, status, info);
 }
 

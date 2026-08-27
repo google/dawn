@@ -169,8 +169,8 @@ void Client::Disconnect() {
 
     for (auto object : mObjects[ObjectType::Device].GetAllObjects()) {
         if (object != nullptr) {
-            static_cast<Device*>(object)->HandleDeviceLost(
-                WGPUDeviceLostReason_Unknown, ToOutputStringView("GPU connection lost"));
+            static_cast<Device*>(object)->HandleDeviceLost(wgpu::DeviceLostReason::Unknown,
+                                                           "GPU connection lost");
         }
     }
 }

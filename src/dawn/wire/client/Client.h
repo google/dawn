@@ -145,6 +145,17 @@ class Client : public ClientBase {
 
 std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
 
+// Right now, the Cmds are implemented with dawn::wire::* structs, but throughout the client code,
+// we are using dawn::wire::client::* structs. We don't currently generate helpers to go from
+// dawn::wire::client::* -> dawn::wire::*, but we do generate helpers to go to/from both and the C
+// API. This helper does the conversions to make that transition easier. If we ever decide to make
+// the wire Cmd explicitly use the client side structs for client commands, we could potentially
+// remove this helper.
+template <typename T>
+auto ToWireCmd(T&& value) {
+    return dawn::wire::FromAPI(ToAPI(std::forward<T>(value)));
+}
+
 }  // namespace dawn::wire::client
 
 #endif  // SRC_DAWN_WIRE_CLIENT_CLIENT_H_

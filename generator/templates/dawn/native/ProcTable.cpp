@@ -47,56 +47,7 @@
     {% endif %}
 {% endfor %}
 
-{%- macro convert_arguments_and_call(function, suffix, call_receiver, first_arg = None) -%}
-    {% for arg in function.arguments %}
-        {% set varName = as_varName(arg.name) %}
-        {% if (arg.spanify | default(True)) and arg.is_length %}
-            //* Skip as it's included in the span just below.
-        {% elif (arg.spanify | default(True)) and arg.length and arg.length != "constant" %}
-            // TODO(https://crbug.com/524405497): Support fixed-length spans.
-            {% if arg.type.name.canonical_case() == "void" %}
-                using {{varName}}SpanT = {% if arg.annotation == "const*" %}const {% endif %}std::byte;
-            {% else %}
-                using {{varName}}SpanT = std::remove_pointer_t<{{decorate(as_frontendType(arg.type), arg)}}>;
-            {% endif %}
-            {% set IndexType = arg.index_type | default('size_t') %}
-            auto {{varName}}Size_ = checked_cast<{{IndexType}}>({{as_varName(arg.length.name)}});
-            auto {{varName}}Ptr = reinterpret_cast<{{varName}}SpanT*>({{varName}});
-            // SAFETY: The webgpu.h user is required to pass valid ranges of objects.
-            auto {{varName}}_ = DAWN_UNSAFE_BUFFERS(ityp::span<{{IndexType}}, {{varName}}SpanT>({{varName}}Ptr, {{varName}}Size_));
-        {% elif arg.type.category in ["enum", "bitmask"] and arg.annotation == "value" %}
-            auto {{varName}}_ = static_cast<{{as_frontendType(arg.type)}}>({{varName}});
-        {% elif arg.type.category == "structure" and arg.annotation == "value" %}
-            auto {{varName}}_ = *reinterpret_cast<{{as_frontendType(arg.type)}}*>(&{{varName}});
-        {% elif arg.annotation != "value" or arg.type.category == "object" %}
-            auto {{varName}}_ = reinterpret_cast<{{decorate(as_frontendType(arg.type), arg)}}>({{varName}});
-        {% else %}
-            auto {{varName}}_ = {{as_varName(arg.name)}};
-        {% endif %}
-    {%- endfor-%}
-
-    {% if function.returns %}
-        auto result =
-    {%- endif %}
-    {{call_receiver}}(
-        {%- if first_arg -%}
-            {{first_arg}} {%- if len(function.arguments) != 0 %}, {% endif -%}
-        {%- endif -%}
-        {%- for arg in function.arguments if (not (arg.spanify | default(True)) or not arg.is_length) -%}
-            {%- if not loop.first %}, {% endif -%}
-            {{as_varName(arg.name)}}_
-        {%- endfor -%}
-    );
-    {% if function.returns %}
-        {% if function.returns.type.category in ["object", "enum", "bitmask"] %}
-            return ToAPI(result);
-        {% elif function.returns.type.category in ["structure"] %}
-            return *ToAPI(&result);
-        {% else %}
-            return result;
-        {% endif %}
-    {% endif %}
-{%- endmacro -%}
+{% from 'dawn/cpp_macros.tmpl' import convert_arguments_and_call with context %}
 
 namespace {{native_namespace}} {
     {% for (type, methods) in c_methods_sorted_by_parent %}
@@ -124,10 +75,10 @@ namespace {{native_namespace}} {
                         // This method is specified to not use AutoLock in json script or it returns a future.
                     {% endif %}
 
-                    {{convert_arguments_and_call(method, suffix, "self->API" + method.name.CamelCase())}}
+                    {{convert_arguments_and_call(method, "self->API" + method.name.CamelCase())}}
                 {% else %}
                     {{assert(type.category == "structure")}}
-                    {{convert_arguments_and_call(method, suffix, "API" + suffix, first_arg="cSelf")}}
+                    {{convert_arguments_and_call(method, "API" + suffix, first_arg="cSelf")}}
                 {% endif %}
             }
         {% endfor %}
@@ -141,7 +92,7 @@ namespace {{native_namespace}} {
                 {{as_annotated_cType(arg)}}
             {%- endfor -%}
         ) {
-            {{convert_arguments_and_call(function, suffix, "API" + suffix)}}
+            {{convert_arguments_and_call(function, "API" + suffix)}}
         }
     {% endfor %}
 

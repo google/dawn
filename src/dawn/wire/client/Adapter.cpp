@@ -56,16 +56,16 @@ class RequestDeviceEvent : public TrackedEvent {
     EventType GetType() override { return kType; }
 
     WireResult ReadyHook(FutureID futureID,
-                         WGPURequestDeviceStatus status,
-                         WGPUStringView message,
-                         const WGPULimits* limits,
-                         Span<const WGPUFeatureName> features) {
+                         wgpu::RequestDeviceStatus status,
+                         StringView message,
+                         const Limits* limits,
+                         Span<const wgpu::FeatureName> features) {
         DAWN_ASSERT(mDevice != nullptr);
         mStatus = status;
-        mMessage = ToString(message);
-        if (status == WGPURequestDeviceStatus_Success) {
-            mDevice->SetLimits(FromAPI(limits));
-            mDevice->SetFeatures(FromAPI(features));
+        mMessage = message;
+        if (status == wgpu::RequestDeviceStatus::Success) {
+            mDevice->SetLimits(limits);
+            mDevice->SetFeatures(features);
         }
         return WireResult::Success;
     }
@@ -73,7 +73,7 @@ class RequestDeviceEvent : public TrackedEvent {
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPURequestDeviceStatus_CallbackCancelled;
+            mStatus = wgpu::RequestDeviceStatus::CallbackCancelled;
             mMessage = "A valid external Instance reference no longer exists.";
         }
 
@@ -82,22 +82,21 @@ class RequestDeviceEvent : public TrackedEvent {
         void* userdata2 = mUserdata2.ExtractAsDangling();
         if (mCallback) {
             Ref<Device> device = mDevice;
-            mCallback(mStatus,
-                      mStatus == WGPURequestDeviceStatus_Success ? ReturnToAPI(std::move(device))
-                                                                 : nullptr,
+            mCallback(ToAPI(mStatus),
+                      mStatus == wgpu::RequestDeviceStatus::Success ? ReturnToAPI(std::move(device))
+                                                                    : nullptr,
                       ToOutputStringView(mMessage), userdata1, userdata2);
         }
 
-        if (mStatus != WGPURequestDeviceStatus_Success) {
+        if (mStatus != wgpu::RequestDeviceStatus::Success) {
             // If there was an error and we didn't return a device, we need to call the device lost
             // callback and reclaim the device allocation.
-            if (mStatus == WGPURequestDeviceStatus_CallbackCancelled) {
-                mDevice->HandleDeviceLost(
-                    WGPUDeviceLostReason_CallbackCancelled,
-                    ToOutputStringView("A valid external Instance reference no longer exists."));
+            if (mStatus == wgpu::RequestDeviceStatus::CallbackCancelled) {
+                mDevice->HandleDeviceLost(wgpu::DeviceLostReason::CallbackCancelled,
+                                          "A valid external Instance reference no longer exists.");
             } else {
-                mDevice->HandleDeviceLost(WGPUDeviceLostReason_FailedCreation,
-                                          ToOutputStringView("Device failed at creation."));
+                mDevice->HandleDeviceLost(wgpu::DeviceLostReason::FailedCreation,
+                                          "Device failed at creation.");
             }
         }
     }
@@ -108,7 +107,7 @@ class RequestDeviceEvent : public TrackedEvent {
 
     // Note that the message is optional because we want to return nullptr when it wasn't set
     // instead of a pointer to an empty string.
-    WGPURequestDeviceStatus mStatus;
+    wgpu::RequestDeviceStatus mStatus = wgpu::RequestDeviceStatus::Success;
     std::string mMessage;
 
     // The device is created when we call RequestDevice. It is guaranteed to be alive
@@ -297,19 +296,19 @@ Future Adapter::APIRequestDevice(const DeviceDescriptor* descriptor,
     cmd.instanceId = GetInstance()->GetWireHandle(client).id;
     cmd.future = {futureIDInternal};
     cmd.deviceObjectHandle = device->GetWireHandle(client);
-    cmd.deviceLostFuture = ToAPI(device->APIGetLostFuture());
-    cmd.descriptor = ToAPI(&wireDescriptor);
+    cmd.deviceLostFuture = {device->APIGetLostFuture().id};
+    cmd.descriptor = ToWireCmd(&wireDescriptor);
 
     client->SerializeCommand(cmd);
     return {futureIDInternal};
 }
 
 WireResult Client::DoAdapterRequestDeviceCallback(ObjectId instanceId,
-                                                  WGPUFuture future,
-                                                  WGPURequestDeviceStatus status,
-                                                  WGPUStringView message,
-                                                  const WGPULimits* limits,
-                                                  Span<const WGPUFeatureName> features) {
+                                                  Future future,
+                                                  wgpu::RequestDeviceStatus status,
+                                                  StringView message,
+                                                  const Limits* limits,
+                                                  Span<const wgpu::FeatureName> features) {
     return SetFutureReady<RequestDeviceEvent>(instanceId, future.id, status, message, limits,
                                               features);
 }

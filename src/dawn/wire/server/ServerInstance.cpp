@@ -36,19 +36,19 @@
 namespace dawn::wire::server {
 
 WireResult Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
-                                            WGPUFuture future,
+                                            Future future,
                                             ObjectHandle adapterHandle,
-                                            const WGPURequestAdapterOptions* options) {
+                                            const RequestAdapterOptions* options) {
     Reserved<WGPUAdapter> adapter;
     WIRE_TRY(Allocate(&adapter, adapterHandle, AllocationState::Reserved));
 
     auto userdata = MakeUserdata<RequestAdapterUserdata>();
     userdata->instanceId = instance.id;
-    userdata->future = future;
+    userdata->future = ToAPI(future);
     userdata->adapter = adapter.AsHandle();
 
     mProcs->instanceRequestAdapter(
-        instance->handle, options,
+        instance->handle, ToAPI(options),
         MakeCallbackInfo<WGPURequestAdapterCallbackInfo, &Server::OnRequestAdapterCallback,
                          WGPUCallbackMode_AllowSpontaneous>(userdata.release()));
     return WireResult::Success;
@@ -60,9 +60,9 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
                                       WGPUStringView message) {
     ReturnInstanceRequestAdapterCallbackCmd cmd = {};
     cmd.instanceId = data->instanceId;
-    cmd.future = data->future;
-    cmd.status = status;
-    cmd.message = message;
+    cmd.future = FromAPI(data->future);
+    cmd.status = FromAPI(status);
+    cmd.message = FromAPI(message);
 
     if (status != WGPURequestAdapterStatus_Success) {
         DAWN_ASSERT(adapter == nullptr);
@@ -72,8 +72,8 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
 
     // Assign the handle and allocated status if the adapter is created successfully.
     if (FillReservation(data->adapter, adapter) == WireResult::FatalError) {
-        cmd.status = WGPURequestAdapterStatus_CallbackCancelled;
-        cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
+        cmd.status = wgpu::RequestAdapterStatus::CallbackCancelled;
+        cmd.message = FromAPI(ToOutputStringView("Destroyed before request was fulfilled."));
         SerializeCommand(cmd);
         return;
     }
@@ -81,9 +81,10 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     // Query and report the adapter supported features.
     FreeMembers<WGPUSupportedFeatures> supportedFeatures(mProcs);
     mProcs->adapterGetFeatures(adapter, &supportedFeatures);
-    // SAFETY: WebGPU API guarantees that the returned features are valid.
-    cmd.features = DAWN_UNSAFE_BUFFERS(
-        Span<const WGPUFeatureName>(supportedFeatures.features, supportedFeatures.featureCount));
+    // TODO(crbug/526537254): Use spanified structs on the server.
+    cmd.features = DAWN_UNSAFE_TODO(Span<const wgpu::FeatureName>(
+        reinterpret_cast<const wgpu::FeatureName*>(supportedFeatures.features),
+        supportedFeatures.featureCount));
 
     // Query and report the adapter info.
     FreeMembers<WGPUAdapterInfo> info(mProcs);
@@ -128,7 +129,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     propertiesChain = &(*propertiesChain)->next;
 
     mProcs->adapterGetInfo(adapter, &info);
-    cmd.info = &info;
+    cmd.info = FromAPI(&info);
 
     // Query and report the adapter limits, including all known extension limits.
     // TODO(crbug.com/421950205): Use dawn::utils::ComboLimits here.
@@ -143,7 +144,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     compatLimits.chain.next = &texelCopyBufferRowAlignmentLimits.chain;
 
     mProcs->adapterGetLimits(adapter, &limits);
-    cmd.limits = &limits;
+    cmd.limits = FromAPI(&limits);
 
     SerializeCommand(cmd);
 }

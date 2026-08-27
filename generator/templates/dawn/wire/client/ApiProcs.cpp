@@ -42,58 +42,7 @@
 #include "src/utils/numeric.h"
 #include "src/utils/span.h"
 
-{%- macro convert_arguments_and_call(function, suffix, call_receiver, first_arg = None) -%}
-    {% set client = "dawn::wire::client" %}
-
-    {% for arg in function.arguments %}
-        {% set varName = as_varName(arg.name) %}
-        {% if arg.is_length %}
-            //* Skip as it's included in the span just below.
-        {% elif arg.length and arg.length != "constant" %}
-            {% if arg.type.name.canonical_case() == "void" %}
-                using {{varName}}SpanT = {% if arg.annotation == "const*" %}const {% endif %}std::byte;
-                auto {{varName}}Ptr = reinterpret_cast<{{varName}}SpanT*>({{varName}});
-            {% else %}
-                using {{varName}}SpanT = std::remove_pointer_t<{% if arg.type.category in ["object", "structure"] %}{{client}}::{% endif %}{{decorate(as_dawnType(arg.type), arg)}}>;
-                auto {{varName}}Ptr = {{client}}::FromAPI({{varName}});
-            {% endif %}
-            // SAFETY: The webgpu.h user is required to pass valid ranges of objects.
-            auto {{varName}}_ = DAWN_UNSAFE_BUFFERS(dawn::Span<{{varName}}SpanT>({{varName}}Ptr, {{as_varName(arg.length.name)}}));
-        {% elif arg.type.category == "structure" %}
-            auto {{varName}}_ = {{client}}::FromAPI({{varName}});
-        {% elif arg.type.category in ["enum", "bitmask"] and arg.annotation == "value" %}
-            auto {{varName}}_ = static_cast<{{as_dawnType(arg.type)}}>({{varName}});
-        {% elif arg.type.category == "object" %}
-            auto {{varName}}_ = {{client}}::FromAPI({{varName}});
-        {% elif arg.annotation != "value" %}
-            auto {{varName}}_ = reinterpret_cast<{{decorate(as_dawnType(arg.type), arg)}}>({{varName}});
-        {% else %}
-            auto {{varName}}_ = {{as_varName(arg.name)}};
-        {% endif %}
-    {%- endfor-%}
-
-    {% if function.returns %}
-        auto result =
-    {%- endif %}
-    {{call_receiver}}(
-        {%- if first_arg -%}
-            {{first_arg}} {%- if len(function.arguments) != 0 %}, {% endif -%}
-        {%- endif -%}
-        {%- for arg in function.arguments if not arg.is_length -%}
-            {%- if not loop.first %}, {% endif -%}
-            {{as_varName(arg.name)}}_
-        {%- endfor -%}
-    );
-    {% if function.returns %}
-        {% if function.returns.type.category in ["object", "enum", "bitmask"] %}
-            return {{client}}::ToAPI(result);
-        {% elif function.returns.type.category in ["structure"] %}
-            return *{{client}}::ToAPI(&result);
-        {% else %}
-            return result;
-        {% endif %}
-    {% endif %}
-{%- endmacro %}
+{% from 'dawn/cpp_macros.tmpl' import convert_arguments_and_call with context %}
 
 namespace dawn::wire::client {
 
@@ -115,11 +64,18 @@ namespace dawn::wire::client {
 
 }  // namespace dawn::wire::client
 
+namespace {
+// Alias the dawn::wire::client namespace in because we need a lot of the helpers, structures, and
+// types, and currently the client wgpu* implementations need to be in global namespace. This is
+// ok because this is an implementation file, and we alias the namespace into an anonymous
+// namespace in this case.
+using namespace dawn::wire::client;
+}  // namespace
+
 //* Implementation of the client API functions.
 {% for (type, methods) in c_methods_sorted_by_parent %}
     {%- set Type = type.name.CamelCase() -%}
     {%- set cType = as_cType(type.name) -%}
-    {%- set client = "dawn::wire::client" -%}
 
     {% for method in methods %}
         {% set Suffix = as_MethodSuffix(type.name, method.name) %}
@@ -131,7 +87,7 @@ namespace dawn::wire::client {
             {%- endfor -%}
         ) {
             {% if Suffix not in client_handwritten_commands %}
-                auto self = {{client}}::FromAPI(cSelf);
+                auto self = FromAPI(cSelf);
                 dawn::wire::{{Suffix}}Cmd cmd;
 
                 //* Create the structure going on the wire on the stack and fill it with the value
@@ -140,8 +96,8 @@ namespace dawn::wire::client {
 
                 //* For object creation, store the object ID the client will use for the result.
                 {% if method.returns and method.returns.type.category == "object" %}
-                    {% set ReturnObj = client + "::" + method.returns.type.name.CamelCase() %}
-                    {{ReturnObj}}* returnObject = {{client}}::Create<{{client}}::{{as_wireType(type)}}, {{ReturnObj}}>(self
+                    {% set ReturnObj = method.returns.type.name.CamelCase() %}
+                    {{ReturnObj}}* returnObject = Create<{{as_wireType(type)}}, {{ReturnObj}}>(self
                         {%- for arg in method.arguments -%}
                                 , {{as_varName(arg.name)}}
                         {%- endfor -%}
@@ -156,8 +112,15 @@ namespace dawn::wire::client {
                     {% if arg.is_length %}
                         //* Skipped as it is included in the span below.
                     {% elif arg.length and arg.constant_length != 1 %}
-                        using {{varName}}SpanT = std::remove_pointer_t<{{decorate(as_cType(arg.type.name, True), arg)}}>;
-                        auto* {{varName}}Ptr = reinterpret_cast<{{varName}}SpanT*>({{varName}});
+                        {% if arg.type.name.get() == "void" %}
+                            {% set raw_type = "std::byte" %}
+                        {% elif arg.type.category == "object" %}
+                            {% set raw_type = as_cType(arg.type.name) %}
+                        {% else %}
+                            {% set raw_type = as_dawnType(arg.type) %}
+                        {% endif %}
+                        using {{varName}}SpanT = std::remove_pointer_t<{{decorate(raw_type, arg)}}>;
+                        auto* {{varName}}Ptr = reinterpret_cast<{{varName}}SpanT*>(dawn::wire::FromAPI({{varName}}));
                         {% if arg.length == "constant" %}
                             // SAFETY: The webgpu.h user is required to pass valid ranges of objects.
                             cmd.{{varName}} = DAWN_UNSAFE_BUFFERS(dawn::Span<{{varName}}SpanT, {{arg.constant_length}}>({{varName}}Ptr));
@@ -167,7 +130,7 @@ namespace dawn::wire::client {
                             cmd.{{varName}} = DAWN_UNSAFE_BUFFERS(dawn::Span<{{varName}}SpanT>({{varName}}Ptr, {{varName}}SizeV));
                         {% endif %}
                     {% else %}
-                        cmd.{{varName}} = {{varName}};
+                        cmd.{{varName}} = dawn::wire::FromAPI({{varName}});
                     {% endif %}
                 {% endfor %}
 
@@ -175,13 +138,13 @@ namespace dawn::wire::client {
                 self->GetClient()->SerializeCommand(cmd);
 
                 {% if method.returns and method.returns.type.category == "object" %}
-                    return {{client}}::ToAPI(returnObject);
+                    return ToAPI(returnObject);
                 {% endif %}
             {% elif type.category == "object" %}
-                auto self = {{client}}::FromAPI(cSelf);
-                {{convert_arguments_and_call(method, Suffix, "self->API" + method.name.CamelCase())}}
+                auto self = FromAPI(cSelf);
+                {{convert_arguments_and_call(method, "self->API" + method.name.CamelCase())}}
             {% elif type.category == "structure" %}
-                return {{client}}::API{{Suffix}}(cSelf);
+                return API{{Suffix}}(cSelf);
             {% endif %}
         }
     {% endfor %}

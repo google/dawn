@@ -54,10 +54,10 @@ class ShaderModule final : public ObjectWithEventsBase {
     friend class Client;
     class CompilationInfoEvent;
 
-    std::optional<WGPUCompilationInfo> mCompilationInfo;
+    std::optional<CompilationInfo> mCompilationInfo;
     std::vector<std::string> mMessageStrings;
-    std::vector<WGPUCompilationMessage> mMessages;
-    std::vector<WGPUDawnCompilationMessageUtf16> mUtf16s;
+    std::vector<CompilationMessage> mMessages;
+    std::vector<DawnCompilationMessageUtf16> mUtf16s;
 };
 
 }  // namespace dawn::wire::client

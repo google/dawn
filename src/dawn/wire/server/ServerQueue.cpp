@@ -40,20 +40,20 @@ void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data,
                              WGPUStringView message) {
     ReturnQueueWorkDoneCallbackCmd cmd;
     cmd.instanceId = data->instanceId;
-    cmd.future = data->future;
-    cmd.status = status;
-    cmd.message = message;
+    cmd.future = FromAPI(data->future);
+    cmd.status = FromAPI(status);
+    cmd.message = FromAPI(message);
 
     SerializeCommand(cmd);
 }
 
 WireResult Server::DoQueueOnSubmittedWorkDone(Known<WGPUQueue> queue,
                                               Known<WGPUInstance> instance,
-                                              WGPUFuture future) {
+                                              Future future) {
     auto userdata = MakeUserdata<QueueWorkDoneUserdata>();
     userdata->queue = queue.AsHandle();
     userdata->instanceId = instance.id;
-    userdata->future = future;
+    userdata->future = ToAPI(future);
 
     mProcs->queueOnSubmittedWorkDone(
         queue->handle, MakeCallbackInfo<WGPUQueueWorkDoneCallbackInfo, &Server::OnQueueWorkDone>(
@@ -113,22 +113,23 @@ WireResult Server::DoQueueWriteBufferXl(Known<WGPUQueue> queue,
 }
 
 WireResult Server::DoQueueWriteTexture(Known<WGPUQueue> queue,
-                                       const WGPUTexelCopyTextureInfo* destination,
+                                       const TexelCopyTextureInfo* destination,
                                        Span<const volatile std::byte> data,
-                                       const WGPUTexelCopyBufferLayout* dataLayout,
-                                       const WGPUExtent3D* writeSize) {
+                                       const TexelCopyBufferLayout* dataLayout,
+                                       const Extent3D* writeSize) {
     // Note we cast away the volatile here because the data is user provided and "safe" from TOCTOU
     // attacks, i.e. the data is/was already visible to the user.
-    mProcs->queueWriteTexture(queue->handle, destination, const_cast<const std::byte*>(data.data()),
-                              data.size(), dataLayout, writeSize);
+    mProcs->queueWriteTexture(queue->handle, ToAPI(destination),
+                              const_cast<const std::byte*>(data.data()), data.size(),
+                              ToAPI(dataLayout), ToAPI(writeSize));
     return WireResult::Success;
 }
 
 WireResult Server::DoQueueWriteTextureXl(Known<WGPUQueue> queue,
-                                         const WGPUTexelCopyTextureInfo* destination,
+                                         const TexelCopyTextureInfo* destination,
                                          size_t dataSize,
-                                         const WGPUTexelCopyBufferLayout* dataLayout,
-                                         const WGPUExtent3D* writeSize,
+                                         const TexelCopyBufferLayout* dataLayout,
+                                         const Extent3D* writeSize,
                                          Span<const std::byte> memoryHandleCreateInfo,
                                          Span<const std::byte> memoryDataUpdateInfo) {
     // Deserialize metadata produced from the client to create a companion server handle.
@@ -145,8 +146,8 @@ WireResult Server::DoQueueWriteTextureXl(Known<WGPUQueue> queue,
             return WireResult::FatalError;
         }
 
-        mProcs->queueWriteTexture(queue->handle, destination, source.data(), dataSize, dataLayout,
-                                  writeSize);
+        mProcs->queueWriteTexture(queue->handle, ToAPI(destination), source.data(), dataSize,
+                                  ToAPI(dataLayout), ToAPI(writeSize));
         return WireResult::Success;
     }
 
@@ -162,8 +163,8 @@ WireResult Server::DoQueueWriteTextureXl(Known<WGPUQueue> queue,
         return WireResult::FatalError;
     }
 
-    mProcs->queueWriteTexture(queue->handle, destination, backingData.data(), dataSize, dataLayout,
-                              writeSize);
+    mProcs->queueWriteTexture(queue->handle, ToAPI(destination), backingData.data(), dataSize,
+                              ToAPI(dataLayout), ToAPI(writeSize));
     return WireResult::Success;
 }
 

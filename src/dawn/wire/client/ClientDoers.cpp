@@ -34,14 +34,14 @@
 namespace dawn::wire::client {
 
 WireResult Client::DoDeviceUncapturedErrorCallback(Device* device,
-                                                   WGPUErrorType errorType,
-                                                   WGPUStringView message) {
+                                                   wgpu::ErrorType errorType,
+                                                   StringView message) {
     switch (errorType) {
-        case WGPUErrorType_NoError:
-        case WGPUErrorType_Validation:
-        case WGPUErrorType_OutOfMemory:
-        case WGPUErrorType_Internal:
-        case WGPUErrorType_Unknown:
+        case wgpu::ErrorType::NoError:
+        case wgpu::ErrorType::Validation:
+        case wgpu::ErrorType::OutOfMemory:
+        case wgpu::ErrorType::Internal:
+        case wgpu::ErrorType::Unknown:
             break;
         default:
             return WireResult::FatalError;
@@ -55,8 +55,8 @@ WireResult Client::DoDeviceUncapturedErrorCallback(Device* device,
 }
 
 WireResult Client::DoDeviceLoggingCallback(Device* device,
-                                           WGPULoggingType loggingType,
-                                           WGPUStringView message) {
+                                           wgpu::LoggingType loggingType,
+                                           StringView message) {
     if (device == nullptr) {
         // The device might have been deleted or recreated so this isn't an error.
         return WireResult::Success;

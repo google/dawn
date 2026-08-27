@@ -55,7 +55,7 @@ namespace dawn::wire::client {
                     {%- if member.handle_type -%}
                         {{as_varName(member.name)}}
                     {%- else -%}
-                        cmd.{{as_varName(member.name)}}
+                        FromAPI(ToAPI(cmd.{{as_varName(member.name)}}))
                     {%- endif -%}
                 {%- endfor -%}
             );

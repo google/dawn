@@ -62,18 +62,18 @@ class RequestAdapterEvent : public TrackedEvent {
     EventType GetType() override { return kType; }
 
     WireResult ReadyHook(FutureID futureID,
-                         WGPURequestAdapterStatus status,
-                         WGPUStringView message,
-                         const WGPUAdapterInfo* info,
-                         const WGPULimits* limits,
-                         Span<const WGPUFeatureName> features) {
+                         wgpu::RequestAdapterStatus status,
+                         StringView message,
+                         const AdapterInfo* info,
+                         const Limits* limits,
+                         Span<const wgpu::FeatureName> features) {
         DAWN_ASSERT(mAdapter != nullptr);
         mStatus = status;
-        mMessage = ToString(message);
-        if (status == WGPURequestAdapterStatus_Success) {
-            mAdapter->SetInfo(FromAPI(info));
-            mAdapter->SetLimits(FromAPI(limits));
-            mAdapter->SetFeatures(FromAPI(features));
+        mMessage = message;
+        if (status == wgpu::RequestAdapterStatus::Success) {
+            mAdapter->SetInfo(info);
+            mAdapter->SetLimits(limits);
+            mAdapter->SetFeatures(features);
         }
         return WireResult::Success;
     }
@@ -81,16 +81,17 @@ class RequestAdapterEvent : public TrackedEvent {
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPURequestAdapterStatus_CallbackCancelled;
+            mStatus = wgpu::RequestAdapterStatus::CallbackCancelled;
             mMessage = "A valid external Instance reference no longer exists.";
         }
 
         void* userdata1 = mUserdata1.ExtractAsDangling();
         void* userdata2 = mUserdata2.ExtractAsDangling();
         if (mCallback) {
-            mCallback(mStatus,
-                      mStatus == WGPURequestAdapterStatus_Success ? ReturnToAPI(std::move(mAdapter))
-                                                                  : nullptr,
+            mCallback(ToAPI(mStatus),
+                      mStatus == wgpu::RequestAdapterStatus::Success
+                          ? ReturnToAPI(std::move(mAdapter))
+                          : nullptr,
                       ToOutputStringView(mMessage), userdata1, userdata2);
         }
     }
@@ -101,7 +102,7 @@ class RequestAdapterEvent : public TrackedEvent {
 
     // Note that the message is optional because we want to return nullptr when it wasn't set
     // instead of a pointer to an empty string.
-    WGPURequestAdapterStatus mStatus;
+    wgpu::RequestAdapterStatus mStatus = wgpu::RequestAdapterStatus::Success;
     std::string mMessage;
 
     // The adapter is created when we call RequestAdapter(F). It is guaranteed to be alive
@@ -219,19 +220,19 @@ Future Instance::APIRequestAdapter(const RequestAdapterOptions* options,
     cmd.instanceId = GetWireHandle(client).id;
     cmd.future = {futureIDInternal};
     cmd.adapterObjectHandle = adapter->GetWireHandle(client);
-    cmd.options = ToAPI(options);
+    cmd.options = ToWireCmd(options);
 
     client->SerializeCommand(cmd);
     return {futureIDInternal};
 }
 
 WireResult Client::DoInstanceRequestAdapterCallback(ObjectId instanceId,
-                                                    WGPUFuture future,
-                                                    WGPURequestAdapterStatus status,
-                                                    WGPUStringView message,
-                                                    const WGPUAdapterInfo* info,
-                                                    const WGPULimits* limits,
-                                                    Span<const WGPUFeatureName> features) {
+                                                    Future future,
+                                                    wgpu::RequestAdapterStatus status,
+                                                    StringView message,
+                                                    const AdapterInfo* info,
+                                                    const Limits* limits,
+                                                    Span<const wgpu::FeatureName> features) {
     return SetFutureReady<RequestAdapterEvent>(instanceId, future.id, status, message, info, limits,
                                                features);
 }

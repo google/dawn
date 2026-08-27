@@ -25,6 +25,8 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+{% from 'dawn/cpp_macros.tmpl' import as_annotated_dawnType with context %}
+
 // Command handlers & doers
 {% for command in cmd_records["return command"] %}
     {% set Suffix = command.name.CamelCase() %}
@@ -35,15 +37,8 @@
             {%- if not loop.first -%}, {% endif %}
             {%- if member.handle_type -%}
                 {{as_wireType(member.handle_type)}} {{as_varName(member.name)}}
-            {%- elif member.length and member.constant_length != 1 -%}
-                {% set length = "dawn::detail::DynamicExtent<size_t>" %}
-                {% if member.length == "constant" %}
-                    {% set length = member.constant_length %}
-                {% endif %}
-                {% set element_type = "std::remove_pointer_t<" + decorate(as_cType(member.type.name, True), member) + ">" %}
-                ityp::span<size_t, {{element_type}}, {{length}}> {{as_varName(member.name)}}
             {%- else -%}
-                {{as_annotated_wireType(member)}}
+                {{as_annotated_dawnType(member)}}
             {%- endif -%}
         {%- endfor -%}
     );

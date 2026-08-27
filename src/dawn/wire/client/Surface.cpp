@@ -72,7 +72,7 @@ void Surface::APIConfigure(const SurfaceConfiguration* config) {
 
     SurfaceConfigureCmd cmd;
     cmd.self = ToAPI(this);
-    cmd.config = ToAPI(config);
+    cmd.config = ToWireCmd(config);
     GetClient()->SerializeCommand(cmd);
 }
 

@@ -38,25 +38,25 @@ namespace dawn::wire::server {
 
 WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
                                           Known<WGPUInstance> instance,
-                                          WGPUFuture future,
+                                          Future future,
                                           ObjectHandle deviceHandle,
-                                          WGPUFuture deviceLostFuture,
-                                          const WGPUDeviceDescriptor* descriptor) {
+                                          Future deviceLostFuture,
+                                          const DeviceDescriptor* descriptor) {
     Reserved<WGPUDevice> device;
     WIRE_TRY(Allocate(&device, deviceHandle, AllocationState::Reserved));
 
     auto userdata = MakeUserdata<RequestDeviceUserdata>();
     userdata->instanceId = instance.id;
-    userdata->future = future;
+    userdata->future = ToAPI(future);
     userdata->device = device.AsHandle();
-    userdata->deviceLostFuture = deviceLostFuture;
+    userdata->deviceLostFuture = ToAPI(deviceLostFuture);
 
     // Update the descriptor with the device lost callback associated with this request.
     auto deviceLostUserdata = MakeUserdata<DeviceLostUserdata>();
     deviceLostUserdata->instanceId = instance.id;
-    deviceLostUserdata->future = deviceLostFuture;
+    deviceLostUserdata->future = ToAPI(deviceLostFuture);
 
-    WGPUDeviceDescriptor desc = *descriptor;
+    WGPUDeviceDescriptor desc = *ToAPI(descriptor);
     desc.deviceLostCallbackInfo =
         MakeCallbackInfo<WGPUDeviceLostCallbackInfo, &Server::OnDeviceLost>(
             deviceLostUserdata.release());
@@ -85,9 +85,9 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
                                      WGPUStringView message) {
     ReturnAdapterRequestDeviceCallbackCmd cmd = {};
     cmd.instanceId = data->instanceId;
-    cmd.future = data->future;
-    cmd.status = status;
-    cmd.message = message;
+    cmd.future = FromAPI(data->future);
+    cmd.status = FromAPI(status);
+    cmd.message = FromAPI(message);
 
     if (status != WGPURequestDeviceStatus_Success) {
         DAWN_ASSERT(device == nullptr);
@@ -101,8 +101,8 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     // the request to preserve callback ordering.
     FreeMembers<WGPUSupportedFeatures> supportedFeatures(mProcs);
     mProcs->deviceGetFeatures(device, &supportedFeatures);
-    // SAFETY: WebGPU API guarantees that the returned features are valid.
-    Span<const WGPUFeatureName> DAWN_UNSAFE_BUFFERS(
+    // TODO(crbug/526537254): Use spanified structs on the server.
+    Span<const WGPUFeatureName> DAWN_UNSAFE_TODO(
         features(supportedFeatures.features, supportedFeatures.featureCount));
     for (WGPUFeatureName feature : features) {
         if (!IsFeatureSupported(feature)) {
@@ -110,13 +110,13 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
             mProcs->deviceRelease(device);
             device = nullptr;
 
-            cmd.status = WGPURequestDeviceStatus_Error;
-            cmd.message = ToOutputStringView("Requested feature not supported.");
+            cmd.status = wgpu::RequestDeviceStatus::Error;
+            cmd.message = FromAPI(ToOutputStringView("Requested feature not supported."));
             SerializeCommand(cmd);
             return;
         }
     }
-    cmd.features = features;
+    cmd.features = FromAPI(features);
 
     // Query and report the adapter limits, including all known extension limits.
     // TODO(crbug.com/421950205): Use dawn::utils::ComboLimits here.
@@ -130,13 +130,13 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     compatLimits.chain.next = &texelCopyBufferRowAlignmentLimits.chain;
 
     mProcs->deviceGetLimits(device, &limits);
-    cmd.limits = &limits;
+    cmd.limits = FromAPI(&limits);
 
     // Assign the handle and allocated status if the device is created successfully.
     Known<WGPUDevice> reservation;
     if (FillReservation(data->device, device, &reservation) == WireResult::FatalError) {
-        cmd.status = WGPURequestDeviceStatus_CallbackCancelled;
-        cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
+        cmd.status = wgpu::RequestDeviceStatus::CallbackCancelled;
+        cmd.message = FromAPI(ToOutputStringView("Destroyed before request was fulfilled."));
         SerializeCommand(cmd);
         return;
     }

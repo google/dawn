@@ -33,10 +33,13 @@
 #include <optional>
 
 #include "dawn/wire/ObjectType_autogen.h"
+#include "dawn/wire/dawn_platform.h"
 #include "src/dawn/wire/BufferConsumer.h"
 #include "src/dawn/wire/ObjectHandle.h"
 #include "src/dawn/wire/WireResult.h"
 #include "src/utils/span.h"
+
+{% from 'dawn/cpp_macros.tmpl' import as_annotated_dawnType, as_dawnType with context %}
 
 namespace dawn::wire {
 
@@ -145,19 +148,8 @@ namespace dawn::wire {
         {% for member in command.members %}
             {% if member.is_length %}
                 //* Skip as it's included in the span just below.
-            {% elif member.length and member.constant_length != 1 %}
-                {% set length = "dawn::detail::DynamicExtent<size_t>" %}
-                {% if member.length == "constant" %}
-                    {% set length = member.constant_length %}
-                {% endif %}
-                {% set element_type = "std::remove_pointer_t<" + decorate(as_cType(member.type.name, True), member) + ">" %}
-                {% if is_wire_data_only(member) %}
-                    //* If the member is data only, we do not copy the data, so it will be volatile.
-                    {% set element_type = "volatile " + element_type %}
-                {% endif %}
-                ityp::span<size_t, {{element_type}}, {{length}}> {{as_varName(member.name)}};
             {% else %}
-                {{as_annotated_cType(member)}}{};
+                {{as_annotated_dawnType(member, is_volatile=is_wire_data_only(member))}}{};
             {% endif %}
         {% endfor %}
     };

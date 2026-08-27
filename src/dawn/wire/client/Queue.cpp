@@ -56,24 +56,22 @@ class WorkDoneEvent : public TrackedEvent {
 
     EventType GetType() override { return kType; }
 
-    WireResult ReadyHook(FutureID futureID,
-                         WGPUQueueWorkDoneStatus status,
-                         WGPUStringView message) {
+    WireResult ReadyHook(FutureID futureID, wgpu::QueueWorkDoneStatus status, StringView message) {
         mStatus = status;
-        mMessage = ToString(message);
+        mMessage = message;
         return WireResult::Success;
     }
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPUQueueWorkDoneStatus_CallbackCancelled;
+            mStatus = wgpu::QueueWorkDoneStatus::CallbackCancelled;
             mMessage = "A valid external Instance reference no longer exists.";
         }
         void* userdata1 = mUserdata1.ExtractAsDangling();
         void* userdata2 = mUserdata2.ExtractAsDangling();
         if (mCallback) {
-            mCallback(mStatus, ToOutputStringView(mMessage), userdata1, userdata2);
+            mCallback(ToAPI(mStatus), ToOutputStringView(mMessage), userdata1, userdata2);
         }
     }
 
@@ -81,7 +79,7 @@ class WorkDoneEvent : public TrackedEvent {
     raw_ptr<void> mUserdata1;
     raw_ptr<void> mUserdata2;
 
-    WGPUQueueWorkDoneStatus mStatus = WGPUQueueWorkDoneStatus_Success;
+    wgpu::QueueWorkDoneStatus mStatus = wgpu::QueueWorkDoneStatus::Success;
     std::string mMessage;
 };
 
@@ -136,9 +134,9 @@ void Queue::APISubmit(Span<CommandBuffer* const> commands) {
 }
 
 WireResult Client::DoQueueWorkDoneCallback(ObjectId instanceId,
-                                           WGPUFuture future,
-                                           WGPUQueueWorkDoneStatus status,
-                                           WGPUStringView message) {
+                                           Future future,
+                                           wgpu::QueueWorkDoneStatus status,
+                                           StringView message) {
     return SetFutureReady<WorkDoneEvent>(instanceId, future.id, status, message);
 }
 
@@ -235,10 +233,10 @@ void Queue::APIWriteTexture(const TexelCopyTextureInfo* destination,
 
     QueueWriteTextureCmd cmd;
     cmd.queueId = GetWireHandle(GetClient()).id;
-    cmd.destination = ToAPI(destination);
+    cmd.destination = ToWireCmd(destination);
     cmd.data = data;
-    cmd.dataLayout = ToAPI(dataLayout);
-    cmd.writeSize = ToAPI(writeSize);
+    cmd.dataLayout = ToWireCmd(dataLayout);
+    cmd.writeSize = ToWireCmd(writeSize);
 
     GetClient()->SerializeCommand(cmd);
 }
@@ -266,10 +264,10 @@ void Queue::WriteTextureXL(const TexelCopyTextureInfo* destination,
 
     QueueWriteTextureXlCmd cmd;
     cmd.queueId = GetWireHandle(GetClient()).id;
-    cmd.destination = ToAPI(destination);
+    cmd.destination = ToWireCmd(destination);
     cmd.dataSize = data.size();
-    cmd.dataLayout = ToAPI(dataLayout);
-    cmd.writeSize = ToAPI(writeSize);
+    cmd.dataLayout = ToWireCmd(dataLayout);
+    cmd.writeSize = ToWireCmd(writeSize);
     // SAFETY: These Spans are NEVER supposed to be read/serialized, so nullptr is fine.
     // The members are not serialized because skip_serialize, but are Spans so that on
     // the deserialization side we have well-formed members.

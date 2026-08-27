@@ -392,8 +392,7 @@ TEST_F(WireSpecificCommandTests, CreateComputePipelineAsyncIdReuseAfterInjectedU
         [&](DeviceCreateComputePipelineAsyncCmd* cmd) {
             requestA = *cmd;
             // Manually fix the shader module since the [de]serialization can't handle objects.
-            const_cast<WGPUComputePipelineDescriptor*>(cmd->descriptor)->compute.module =
-                shader.Get();
+            const_cast<ComputePipelineDescriptor*>(cmd->descriptor)->compute.module = shader.Get();
         });
 
     UnregisterObjectCmd unregisterA = {};
@@ -412,8 +411,7 @@ TEST_F(WireSpecificCommandTests, CreateComputePipelineAsyncIdReuseAfterInjectedU
             cmd->pipelineObjectHandle.generation = requestA.pipelineObjectHandle.generation + 1;
             requestB = *cmd;
             // Manually fix the shader module since the [de]serialization can't handle objects.
-            const_cast<WGPUComputePipelineDescriptor*>(cmd->descriptor)->compute.module =
-                shader.Get();
+            const_cast<ComputePipelineDescriptor*>(cmd->descriptor)->compute.module = shader.Get();
         });
 
     EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, NotNull(), _))
@@ -474,9 +472,9 @@ TEST_F(WireSpecificCommandTests, CreateRenderPipelineAsyncIdReuseAfterInjectedUn
         [&](DeviceCreateRenderPipelineAsyncCmd* cmd) {
             requestA = *cmd;
             // Manually fix the shader module since the [de]serialization can't handle objects.
-            auto* desc = const_cast<WGPURenderPipelineDescriptor*>(cmd->descriptor);
+            auto* desc = const_cast<RenderPipelineDescriptor*>(cmd->descriptor);
             desc->vertex.module = shader.Get();
-            const_cast<WGPUFragmentState*>(desc->fragment)->module = shader.Get();
+            const_cast<FragmentState*>(desc->fragment)->module = shader.Get();
         });
 
     UnregisterObjectCmd unregisterA = {};
@@ -495,9 +493,9 @@ TEST_F(WireSpecificCommandTests, CreateRenderPipelineAsyncIdReuseAfterInjectedUn
             cmd->pipelineObjectHandle.generation = requestA.pipelineObjectHandle.generation + 1;
             requestB = *cmd;
             // Manually fix the shader module since the [de]serialization can't handle objects.
-            auto* desc = const_cast<WGPURenderPipelineDescriptor*>(cmd->descriptor);
+            auto* desc = const_cast<RenderPipelineDescriptor*>(cmd->descriptor);
             desc->vertex.module = shader.Get();
-            const_cast<WGPUFragmentState*>(desc->fragment)->module = shader.Get();
+            const_cast<FragmentState*>(desc->fragment)->module = shader.Get();
         });
 
     EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, NotNull(), _))
