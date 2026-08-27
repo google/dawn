@@ -38,7 +38,6 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
             ///////////////////////////////////////////////////////////////////
         case LanguageFeature::kSizedBindingArray:
         case LanguageFeature::kTexelBuffers:
-        case LanguageFeature::kSwizzleAssignment:
             return FeatureStatus::kUnsafeExperimental;
 
             ////////////////////////////////////////////////////////////////////
@@ -58,6 +57,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
         case LanguageFeature::kLinearIndexing:
         case LanguageFeature::kBufferView:
         case LanguageFeature::kFragmentDepth:
+        case LanguageFeature::kSwizzleAssignment:
             return FeatureStatus::kShippedWithKillswitch;
 
             ////////////////////////////////////////////////////////////////////
