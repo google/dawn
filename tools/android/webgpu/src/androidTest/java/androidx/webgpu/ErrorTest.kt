@@ -69,4 +69,42 @@ class ErrorTest {
       }
     }
   }
+
+  @Test
+  fun testRecurringUncapturedErrorCallbackDoesNotDoubleFree() {
+    runBlocking {
+      val webGpu = createWebGpu(dispatcher)
+      val device = webGpu.device
+      testScope.launch {
+        webGpu.processEventsLoop()
+      }
+      try {
+        webGpu.execute {
+          // 1st uncaptured error -> invokes uncapturedErrorCallback (without fix, deletes userData1)
+          assertThrows(ValidationException::class.java) {
+            device.createTexture(
+              GPUTextureDescriptor(
+                usage = TextureUsage.None,
+                size = GPUExtent3D(0)
+              )
+            )
+          }
+
+          // 2nd uncaptured error -> invokes uncapturedErrorCallback again.
+          assertThrows(ValidationException::class.java) {
+            device.createTexture(
+              GPUTextureDescriptor(
+                usage = TextureUsage.None,
+                size = GPUExtent3D(0)
+              )
+            )
+          }
+        }
+      } finally {
+        webGpu.close()
+        testScope.cancel()
+        (dispatcher as? ExecutorCoroutineDispatcher)?.close()
+      }
+    }
+  }
 }

@@ -78,9 +78,28 @@
                                 {% set userdata = 'userdata1' %}
                             //* User data is used to carry the JNI context (env) for use by the
                             //* callback.
+                            {% if member.type.name.get() in ['uncaptured error callback', 'dawn load cache data callback', 'dawn store cache data callback'] %}
+                            std::shared_ptr<UserData> userData1 = static_cast<UserData *>({{ userdata }})->shared_from_this();
+                            {% else %}
                             std::unique_ptr<UserData> userData1{static_cast<UserData *>({{ userdata }})};
-                            JNIEnv *env = NULL;
+                            {% endif %}
+                            {% if member.type.name.get() == 'request device callback' %}
+                            // This implicitly relies on the descriptor (which contains the error/device loss callbacks)
+                            // being processed before the callback parameter in wgpuAdapterRequestDevice's arguments list.
+                            // Since ConvertInternal processes arguments in order, c->recurringCallbacks will be correctly populated before we reach here.
+                            if (status == WGPURequestDeviceStatus_Success && device != nullptr) {
+                                RegisterDeviceCallbacks(device, userData1->recurringCallbacks);
+                                userData1->recurringCallbacks.clear();
+                            }
+                            {% endif %}
+                            {% if member.type.name.get() == 'device lost callback' %}
+                            if (device != nullptr) {
+                                // `device` is `WGPUDevice const *`, so we must dereference it to get the handle.
+                                FreeDeviceCallbacks(*device);
+                            }
+                            {% endif %}
                             JavaVM* jvm = userData1->jvm;
+                            JNIEnv *env = NULL;
                             //* Deal with difference in signatures between Oracle's jni.h and Android's.
                             #ifdef _JAVASOFT_JNI_H_  //* Oracle's jni.h violates the JNI spec.
                                 jvm->AttachCurrentThread(reinterpret_cast<void**>(&env), NULL);
@@ -177,13 +196,43 @@
 
                             env->CallVoidMethod(userData1->executor, executeMethodID, runnable);
                         };
-                        //* The user data is owned by the callback and freed when it is called.
-                        callbackInfo.{{ userdata }} = std::unique_ptr<UserData>(new UserData({
-                          .callback = env->NewGlobalRef(inStruct.{{member.name.camelCase()}}),
-                          .executor = env->NewGlobalRef(inStruct.{{as_varName(member.name)}}Executor),
-                          .jvm = c->jvm
-                        })).release();
+                        {% if member.type.name.get() in ['uncaptured error callback', 'dawn load cache data callback', 'dawn store cache data callback'] %}
+                        auto newUserDataShared = std::make_shared<UserData>();
+                        newUserDataShared->callback = env->NewGlobalRef(inStruct.{{member.name.camelCase()}});
+                        newUserDataShared->executor = env->NewGlobalRef(inStruct.{{as_varName(member.name)}}Executor);
+                        newUserDataShared->jvm = c->jvm;
+                        c->recurringCallbacks.push_back(newUserDataShared);
+                        callbackInfo.{{ userdata }} = newUserDataShared.get();
+                        {% else %}
+                        UserData* newUserData = new UserData();
+                        newUserData->callback = env->NewGlobalRef(inStruct.{{member.name.camelCase()}});
+                        newUserData->executor = env->NewGlobalRef(inStruct.{{as_varName(member.name)}}Executor);
+                        newUserData->jvm = c->jvm;
+                        {% if member.type.name.get() == 'request device callback' %}
+                        newUserData->recurringCallbacks = std::move(c->recurringCallbacks);
+                        {% endif %}
+                        callbackInfo.{{ userdata }} = newUserData;
+                        {% endif %}
                     }
+                    {% if member.type.name.get() == 'device lost callback' %}
+                    else {
+                        auto& callbackInfo = outStruct->{{as_varName(member.name)}}Info;
+                        callbackInfo = {};
+                        {% if find_by_name(callbackInfoType.members, 'mode') %}
+                            callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
+                        {% endif %}
+                        callbackInfo.callback = [](
+                            {%- for callbackArg in member.type.arguments %}
+                                {{- as_annotated_cType(callbackArg) }}{{ ', ' if not loop.last }}
+                            {%- endfor -%}
+                            , void* userdata1, void* userdata2) {
+                            if (device != nullptr) {
+                                // `device` is `WGPUDevice const *`, so we must dereference it to get the handle.
+                                FreeDeviceCallbacks(*device);
+                            }
+                        };
+                    }
+                    {% endif %}
                 {% elif member.type.category != 'kotlin type' %}
                     auto& in = inStruct.{{member.name.camelCase()}};
                     auto& out = outStruct->{{member.name.camelCase()}};

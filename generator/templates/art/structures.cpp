@@ -30,6 +30,8 @@
 
 #include <cassert>
 #include <string>
+#include <mutex>
+#include <unordered_map>
 
 #include <jni.h>
 #include <webgpu/webgpu.h>
@@ -43,6 +45,53 @@
 // into the native Dawn API.
 
 namespace dawn::kotlin_api {
+
+static std::mutex gDeviceCallbacksMutex;
+static std::unordered_map<WGPUDevice, std::vector<std::shared_ptr<UserData>>> gDeviceCallbacks;
+
+UserData::~UserData() {
+    if (jvm) {
+        JNIEnv* env = nullptr;
+        bool needsDetach = false;
+        if (jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) == JNI_EDETACHED) {
+#ifdef _JAVASOFT_JNI_H_
+            if (jvm->AttachCurrentThread(reinterpret_cast<void**>(&env), nullptr) == JNI_OK) {
+                needsDetach = true;
+            }
+#else
+            if (jvm->AttachCurrentThread(&env, nullptr) == JNI_OK) {
+                needsDetach = true;
+            }
+#endif
+        }
+        if (env) {
+            if (callback) env->DeleteGlobalRef(callback);
+            if (executor) env->DeleteGlobalRef(executor);
+        }
+        if (needsDetach) {
+            jvm->DetachCurrentThread();
+        }
+    }
+}
+
+void RegisterDeviceCallbacks(WGPUDevice device, const std::vector<std::shared_ptr<UserData>>& callbacks) {
+    if (callbacks.empty()) return;
+    std::lock_guard<std::mutex> lock(gDeviceCallbacksMutex);
+    auto& list = gDeviceCallbacks[device];
+    list.insert(list.end(), callbacks.begin(), callbacks.end());
+}
+
+void FreeDeviceCallbacks(WGPUDevice device) {
+    std::vector<std::shared_ptr<UserData>> callbacksToFree;
+    {
+        std::lock_guard<std::mutex> lock(gDeviceCallbacksMutex);
+        auto it = gDeviceCallbacks.find(device);
+        if (it != gDeviceCallbacks.end()) {
+            callbacksToFree = std::move(it->second);
+            gDeviceCallbacks.erase(it);
+        }
+    }
+}
 
 // Helper functions to call the correct JNIEnv::Call*Method depending on what return type we expect.
 void CallGetter(JNIEnv* env, jmethodID getter, jobject obj, jboolean* result) {

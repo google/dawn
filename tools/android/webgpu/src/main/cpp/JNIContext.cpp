@@ -27,6 +27,10 @@
 
 #include "JNIContext.h"
 
+#include <cassert>
+
+#include "structures.h"
+
 namespace dawn::kotlin_api {
 
 JNIContext::JNIContext(JNIEnv* env) : env(env) {

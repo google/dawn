@@ -176,6 +176,13 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             }
         {% endif %}
     {% endif %}
+    {% if object and object.name.get() == 'device' %}
+        // Note: We intentionally only register recurring callbacks for WGPUDevice, as it is
+        // the only object in Dawn with a terminal lifecycle event (device lost callback)
+        // that guarantees safe cleanup. Instance does not have recurring callbacks in dawn.json.
+        RegisterDeviceCallbacks(handle, c.recurringCallbacks);
+        c.recurringCallbacks.clear();
+    {% endif %}
     {% if _kotlin_return %}
         {% if _kotlin_return.type.name.get() in ['void const *', 'void *'] %}
             size_t size = args.size;
@@ -185,6 +192,13 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
                   size = static_cast<size_t>(totalBufferSize) - args.offset;
                 }
             {% endif %}
+        {% endif %}
+        {% if object and method.name.get() == 'create device' %}
+            if (result != nullptr) {
+                // Transfer callbacks to the newly created device.
+                RegisterDeviceCallbacks(result, c.recurringCallbacks);
+            }
+            c.recurringCallbacks.clear();
         {% endif %}
         {{ convert_to_kotlin("args." + as_varName(_kotlin_return.name) if _kotlin_return.annotation == '*' else 'result',
                              'result_kt',

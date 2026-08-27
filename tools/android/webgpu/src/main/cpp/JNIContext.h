@@ -30,6 +30,7 @@
 
 #include <jni.h>
 
+#include <memory>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -74,6 +75,8 @@ class JNIContext : dawn::NonMovable {
         mAllocationsToFree.push_back({alloc, [](void* p) { delete[] static_cast<T*>(p); }});
         return alloc;
     }
+
+    std::vector<std::shared_ptr<struct UserData>> recurringCallbacks;
 
   private:
     struct Allocation {

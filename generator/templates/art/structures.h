@@ -26,43 +26,25 @@
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <jni.h>
 #include <webgpu/webgpu.h>
+#include <vector>
+
+#include <memory>
 
 namespace dawn::kotlin_api {
 
 class JNIContext;
 
-struct UserData {
+struct UserData : public std::enable_shared_from_this<UserData> {
     jobject callback;
     jobject executor;
     JavaVM *jvm;
+    std::vector<std::shared_ptr<UserData>> recurringCallbacks;
 
-    ~UserData() {
-        if (!jvm) return;
-        JNIEnv *env = nullptr;
-        jint envStat = jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
-        bool didAttach = false;
-
-        if (envStat == JNI_EDETACHED) {
-            //* Deal with difference in signatures between Oracle's jni.h and Android's.
-            #ifdef _JAVASOFT_JNI_H_  //* Oracle's jni.h violates the JNI spec.
-                if (jvm->AttachCurrentThread(reinterpret_cast<void**>(&env), NULL) == JNI_OK) {
-            #else
-                if (jvm->AttachCurrentThread(&env, NULL) == JNI_OK) {
-            #endif
-                didAttach = true;
-            }
-        }
-
-        if (env) {
-            if (callback) env->DeleteGlobalRef(callback);
-            if (executor) env->DeleteGlobalRef(executor);
-        }
-
-        if (didAttach) {
-            jvm->DetachCurrentThread();
-        }
-    }
+    ~UserData();
 };
+
+void RegisterDeviceCallbacks(WGPUDevice device, const std::vector<std::shared_ptr<UserData>>& callbacks);
+void FreeDeviceCallbacks(WGPUDevice device);
 
 // Converts Kotlin objects representing Dawn structures into native structures that can be passed
 // into the native Dawn API.
