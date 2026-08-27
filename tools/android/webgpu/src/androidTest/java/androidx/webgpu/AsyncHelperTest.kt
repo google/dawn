@@ -109,6 +109,7 @@ class AsyncHelperTest {
         )
 
         /* Call an asynchronous method, converted from a callback pattern by a helper. */
+        @Suppress("UNUSED_VARIABLE")
         val unused = device.createRenderPipelineAndAwait(
           GPURenderPipelineDescriptor(
             vertex = GPUVertexState(module = shaderModule), fragment = GPUFragmentState(
@@ -134,7 +135,8 @@ class AsyncHelperTest {
 
         /* Launch the function in a new coroutine, giving us a job handle we can cancel. */
         val job = launch {
-          var unused = device.createRenderPipelineAndAwait(
+          @Suppress("UNUSED_VARIABLE")
+          val unused = device.createRenderPipelineAndAwait(
             GPURenderPipelineDescriptor(
               vertex = GPUVertexState(module = shaderModule),
               fragment = GPUFragmentState(

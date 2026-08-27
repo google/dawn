@@ -148,9 +148,7 @@ class AdapterTest {
     assertThrows(
       "Adapter should be consumed after one device request", WebGpuException::class.java
     ) {
-      runBlocking {
-        val secondDeviceStatus = adapter.requestDevice()
-      }
+      runBlocking { adapter.requestDevice() }
     }
   }
 
