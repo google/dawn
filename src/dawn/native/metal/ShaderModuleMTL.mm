@@ -374,6 +374,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
     req.tintOptions.extensions.disable_demote_to_helper =
         device->IsToggleEnabled(Toggle::DisableDemoteToHelper);
+    req.tintOptions.extensions.enable_tensors = device->IsToggleEnabled(Toggle::MetalEnableTensors);
 
     req.limits = LimitsForCompilationRequest::Create(device->GetLimits().v1);
     req.adapterSupportedLimits = UnsafeUnserializedValue(
