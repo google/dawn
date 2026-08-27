@@ -284,8 +284,9 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
 // Apple Silicon due to our workaround that introduces volatile instructions.
 // See https://crbug.com/533785363
 TEST_P(MultisampledSamplingTest, ImplicitDerivativeFromU32Div) {
-    // TODO(crbug.com/468061892): Fails on Windows 11/AMD RX 5500 XT w/ backend validation.
-    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D12() && IsBackendValidationEnabled());
+    // TODO(crbug.com/468061892): Fails on Windows 11 D3D12 (AMD w/ backend validation, NVIDIA).
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsD3D12() &&
+                          (IsAMD() && IsBackendValidationEnabled() || IsNvidia()));
 
     // Texture 256x256 with 2 mip levels.
     wgpu::TextureDescriptor texDesc;
