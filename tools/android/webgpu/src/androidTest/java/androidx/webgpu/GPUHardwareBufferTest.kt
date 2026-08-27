@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -453,6 +453,39 @@ class GPUHardwareBufferTest {
                 populateTextureWithSolidColor(wrapper, width, height, r = 0, g = 255.toByte(), b = 0, a = 255.toByte())
 
                 assertPixelColor(rgbBuffer, 0, 255, 0)
+                wrapper.close()
+                rgbBuffer.close()
+            }
+        }
+    }
+
+    @Test
+    @MediumTest
+    @ApiRequirement(minApi = 26, onlySkipOnEmulator = true)
+    fun testAHBChainingAndDepth() {
+        runBlocking {
+            val unused = webGpu.execute {
+                val width = 64
+                val height = 64
+
+                val (rgbBuffer, wrapper) = createWrappedHardwareBuffer(
+                    width, height,
+                    textureUsage = TextureUsage.RenderAttachment or TextureUsage.CopySrc
+                )
+
+                assertNotNull(wrapper)
+                assertNotNull(wrapper.texture)
+
+                wrapper.beginAccess(null)
+                val fenceFd = wrapper.endAccess()
+
+                if (fenceFd != null) {
+                    wrapper.beginAccess(arrayOf(fenceFd))
+                    val fenceFd2 = wrapper.endAccess()
+                    fenceFd2?.close()
+                    fenceFd.close()
+                }
+
                 wrapper.close()
                 rgbBuffer.close()
             }

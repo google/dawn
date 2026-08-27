@@ -178,7 +178,8 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createTextureNative(JNI
     wgpu::TextureDescriptor texDesc = {};
     texDesc.usage = static_cast<wgpu::TextureUsage>(usage);
     texDesc.dimension = wgpu::TextureDimension::e2D;
-    texDesc.size = {props.size.width, props.size.height, props.size.depthOrArrayLayers};
+    uint32_t depth = props.size.depthOrArrayLayers == 0 ? 1 : props.size.depthOrArrayLayers;
+    texDesc.size = {props.size.width, props.size.height, depth};
     texDesc.format = props.format;
     texDesc.mipLevelCount = 1;
     texDesc.sampleCount = 1;
@@ -194,11 +195,12 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createTextureNative(JNI
     // The Java wrapper and AhbTextureWrapper independently release references on close().
     // We explicitly add a reference here for the Java object to assume ownership of.
     wgpuTextureAddRef(texture.Get());
-    auto* wrapper = new AhbTextureWrapper{stm, texture, nullptr, nullptr, ahb, device};
+    auto* wrapper = new AhbTextureWrapper{
+        std::move(stm), std::move(texture), nullptr, nullptr, ahb, std::move(device)};
 
     jobject texture_kt =
         env->NewObject(classes->texture, env->GetMethodID(classes->texture, "<init>", "(J)V"),
-                       reinterpret_cast<jlong>(texture.Get()));
+                       reinterpret_cast<jlong>(wrapper->texture.Get()));
 
     jclass wrapperClz = classes->gpuHardwareBufferTexture;
     jmethodID wrapperInit =
@@ -364,11 +366,13 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createExternalTextureNa
     // The Java wrapper and AhbTextureWrapper independently release references on close().
     // We explicitly add a reference here for the Java object to assume ownership of.
     wgpuExternalTextureAddRef(externalTexture.Get());
-    auto* wrapper = new AhbTextureWrapper{stm, texture, view, externalTexture, ahb, device};
+    auto* wrapper = new AhbTextureWrapper{
+        std::move(stm),   std::move(texture), std::move(view), std::move(externalTexture), ahb,
+        std::move(device)};
 
     jobject extTex_kt = env->NewObject(classes->externalTexture,
                                        env->GetMethodID(classes->externalTexture, "<init>", "(J)V"),
-                                       reinterpret_cast<jlong>(externalTexture.Get()));
+                                       reinterpret_cast<jlong>(wrapper->externalTexture.Get()));
 
     jclass wrapperClz = classes->gpuHardwareBufferExternalTexture;
     jmethodID wrapperInit =
