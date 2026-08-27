@@ -129,8 +129,13 @@ struct State {
             });
     }
 
-    /// Creates a type with every atomic replaced by its element type.
+    /// Replaces atomic types with their element types, preserving types without atomics.
     const core::type::Type* CreateDeatomicizedType(const core::type::Type* type) {
+        // Preserve non-atomic structs because struct types are nominal.
+        if (!ContainsAtomic(type)) {
+            return type;
+        }
+
         if (auto* str = type->As<core::type::Struct>()) {
             return CreateDeatomicizedStruct(str);
         }
@@ -153,12 +158,7 @@ struct State {
 
         Vector<core::type::Manager::StructMemberDesc, 4> new_members;
         for (auto* member : original->Members()) {
-            auto* member_type = member->Type();
-
-            if (ContainsAtomic(member_type)) {
-                member_type = CreateDeatomicizedType(member_type);
-            }
-
+            auto* member_type = CreateDeatomicizedType(member->Type());
             new_members.Push({member->Name(), member_type, member->Attributes()});
         }
 
@@ -171,7 +171,7 @@ struct State {
     /// Creates a replacement array type when its element type contains an atomic.
     const core::type::Type* CreateDeatomicizedArrayType(const core::type::Array* arr) {
         auto* elem = arr->ElemType();
-        auto* new_elem = ContainsAtomic(elem) ? CreateDeatomicizedType(elem) : elem;
+        auto* new_elem = CreateDeatomicizedType(elem);
 
         if (new_elem == elem) {
             return arr;

@@ -746,5 +746,90 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+// Do not clone a nested structure that does not contain atomics. Structure types are nominal, so
+// changing an access to use a cloned type would make values of the original type invalid to store.
+TEST_F(SplitWorkgroupAtomicsTest, PreserveNonAtomicNestedStructType) {
+    auto* inner_ty =
+        ty.Struct(mod.symbols.New("Inner"), {
+                                                {mod.symbols.New("old_value"), ty.i32()},
+                                                {mod.symbols.New("exchanged"), ty.bool_()},
+                                            });
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("S"), {
+                                            {mod.symbols.New("result"), inner_ty},
+                                            {mod.symbols.New("counter"), ty.atomic<u32>()},
+                                        });
+
+    auto* var = b.Var("wg", ty.ptr(workgroup, str_ty));
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(b.Constant(1_u), b.Constant(1_u), b.Constant(1_u));
+    b.Append(func->Block(), [&] {
+        auto* result = b.Access(ty.ptr(workgroup, inner_ty), var, 0_u);
+        b.Store(result, b.Construct(inner_ty, 0_i, false));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+Inner = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+S = struct @align(4) {
+  result:Inner @offset(0)
+  counter:atomic<u32> @offset(8)
+}
+
+$B1: {  # root
+  %wg:ptr<workgroup, S, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<workgroup, Inner, read_write> = access %wg, 0u
+    %4:Inner = construct 0i, false
+    store %3, %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+Inner = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+S = struct @align(4) {
+  result:Inner @offset(0)
+  counter:atomic<u32> @offset(8)
+}
+
+S_data = struct @align(4) {
+  result:Inner @offset(0)
+  counter:u32 @offset(8)
+}
+
+$B1: {  # root
+  %counter:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %data:ptr<workgroup, S_data, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:ptr<workgroup, Inner, read_write> = access %data, 0u
+    %5:Inner = construct 0i, false
+    store %4, %5
+    ret
+  }
+}
+)";
+    Run(SplitWorkgroupAtomics);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise
