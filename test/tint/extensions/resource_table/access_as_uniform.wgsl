@@ -1,3 +1,5 @@
+// flags: --msl-version 3.2
+
 enable chromium_experimental_resource_table;
 
 @group(1) @binding(0) var<uniform> index : u32;

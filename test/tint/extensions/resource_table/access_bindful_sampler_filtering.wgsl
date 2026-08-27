@@ -1,4 +1,4 @@
-// flags: --treat-samplers-as-filtering
+// flags: --treat-samplers-as-filtering --msl-version 3.2
 
 enable chromium_experimental_resource_table;
 

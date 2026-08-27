@@ -783,11 +783,14 @@ void Functional::CheckVar(const Var* var) {
             return;
         }
     } else if (mv->AddressSpace() == AddressSpace::kUniform) {
-        if (!(mv->StoreType()->IsConstructible() || mv->StoreType()->Is<core::type::Buffer>()) ||
-            !mv->StoreType()->IsHostShareable()) {
-            AddError(var) << "vars in the 'uniform' address space must be host-shareable and "
-                             "constructible or a buffer";
-            return;
+        if (!ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+            if (!(mv->StoreType()->IsConstructible() ||
+                  mv->StoreType()->Is<core::type::Buffer>()) ||
+                !mv->StoreType()->IsHostShareable()) {
+                AddError(var) << "vars in the 'uniform' address space must be host-shareable and "
+                                 "constructible or a buffer";
+                return;
+            }
         }
     } else if (mv->AddressSpace() == AddressSpace::kImmediate) {
         if (mv->StoreType() && !mv->StoreType()->IsHostShareable()) {

@@ -72,6 +72,7 @@
 #include "src/tint/lang/msl/writer/raise/module_constant.h"
 #include "src/tint/lang/msl/writer/raise/module_scope_vars.h"
 #include "src/tint/lang/msl/writer/raise/polyfill_bool_vector_dynamic_stores.h"
+#include "src/tint/lang/msl/writer/raise/resource_table_helper.h"
 #include "src/tint/lang/msl/writer/raise/shader_io.h"
 #include "src/tint/lang/msl/writer/raise/simd_ballot.h"
 #include "src/tint/lang/msl/writer/raise/switch_return.h"
@@ -150,6 +151,9 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
         TINT_CHECK_RESULT(core::ir::transform::PreventInfiniteLoops(module));
     }
+
+    msl::writer::raise::ResourceTableHelper helper;
+    TINT_CHECK_RESULT(core::ir::transform::ResourceTable(module, options.resource_table, &helper));
 
     {
         core::ir::transform::BinaryPolyfillConfig binary_polyfills{};

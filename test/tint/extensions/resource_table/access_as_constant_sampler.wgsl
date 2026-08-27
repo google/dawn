@@ -1,3 +1,5 @@
+// flags: --msl-version 3.2
+
 enable chromium_experimental_resource_table;
 
 @fragment fn fs() -> @location(0) vec4f {

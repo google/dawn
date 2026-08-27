@@ -1,32 +1,49 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-$B1: {  # root
-  %o:ptr<storage, u32, read_write> = var undef @binding_point(0, 0)
-}
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-%fs = @fragment func():void {
-  $B2: {
-    %3:bool = hasResource<sampler> 0i
-    if %3 [t: $B3] {  # if_1
-      $B3: {  # true
-        %4:u32 = load %o
-        %5:u32 = add %4, 1u
-        store %o, %5
-        exit_if  # if_1
-      }
-    }
-    %6:bool = hasResource<sampler_comparison> 1i
-    if %6 [t: $B4] {  # if_2
-      $B4: {  # true
-        %7:u32 = load %o
-        %8:u32 = add %7, 1u
-        store %o, %8
-        exit_if  # if_2
-      }
-    }
-    ret
+struct tint_resource_table_metadata_struct {
+  /* 0x0000 */ uint array_length;
+  /* 0x0004 */ tint_array<uint, 1> bindings;
+};
+
+struct tint_module_vars_struct {
+  device uint* o;
+  const device tint_resource_table_metadata_struct* tint_resource_table_metadata;
+};
+
+fragment void fs(device uint* o [[buffer(0)]], const device tint_resource_table_metadata_struct* tint_resource_table_metadata [[buffer(29)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.o=o, .tint_resource_table_metadata=tint_resource_table_metadata};
+  uint const v = uint(0);
+  bool v_1 = false;
+  if ((v < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    uint2 const v_2 = uint2((*tint_module_vars.tint_resource_table_metadata).bindings[v]);
+    v_1 = any((v_2 == uint2(40u, 41u)));
+  } else {
+    v_1 = false;
+  }
+  if (v_1) {
+    (*tint_module_vars.o) = ((*tint_module_vars.o) + 1u);
+  }
+  uint const v_3 = uint(1);
+  bool v_4 = false;
+  if ((v_3 < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    v_4 = ((*tint_module_vars.tint_resource_table_metadata).bindings[v_3] == 42u);
+  } else {
+    v_4 = false;
+  }
+  if (v_4) {
+    (*tint_module_vars.o) = ((*tint_module_vars.o) + 1u);
   }
 }
-Failed to generate: resource tables not supported by the MSL backend
-
-tint executable returned error: exit status 1

@@ -63,6 +63,8 @@ tint_add_target(tint_lang_msl_writer_raise lib
   lang/msl/writer/raise/polyfill_bool_vector_dynamic_stores.h
   lang/msl/writer/raise/raise.cc
   lang/msl/writer/raise/raise.h
+  lang/msl/writer/raise/resource_table_helper.cc
+  lang/msl/writer/raise/resource_table_helper.h
   lang/msl/writer/raise/shader_io.cc
   lang/msl/writer/raise/shader_io.h
   lang/msl/writer/raise/simd_ballot.cc

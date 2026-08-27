@@ -1,3 +1,5 @@
+// flags: --msl-version 3.2
+
 enable chromium_experimental_resource_table;
 
 @group(0) @binding(0) var<storage, read_write> o : u32;

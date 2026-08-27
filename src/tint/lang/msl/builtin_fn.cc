@@ -138,6 +138,10 @@ const char* str(BuiltinFn i) {
             return "pointer_offset";
         case BuiltinFn::kVolatileZero:
             return "volatile_zero";
+        case BuiltinFn::kResourceLoad:
+            return "resource_load";
+        case BuiltinFn::kReinterpretCast:
+            return "reinterpret_cast";
     }
     return "<unknown>";
 }
@@ -169,6 +173,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSample:
         case BuiltinFn::kSampleCompare:
         case BuiltinFn::kSimdgroupLoad:
+        case BuiltinFn::kResourceLoad:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};
 
         case BuiltinFn::kWrite:
@@ -198,6 +203,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kPointerOffset:
         case BuiltinFn::kVolatileZero:
         case BuiltinFn::kMadsat:
+        case BuiltinFn::kReinterpretCast:
             break;
     }
     return core::ir::Instruction::Accesses{};

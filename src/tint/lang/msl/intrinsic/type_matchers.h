@@ -30,6 +30,7 @@
 
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/type/manager.h"
+#include "src/tint/lang/core/type/resource_table.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/msl/type/bias.h"
 #include "src/tint/lang/msl/type/gradient.h"
@@ -113,6 +114,27 @@ inline bool MatchPackedVec3(core::intrinsic::MatchState&, const core::type::Type
 inline const core::type::Vector* BuildPackedVec3(core::intrinsic::MatchState& state,
                                                  const core::type::Type* el) {
     return state.types.Get<core::type::Vector>(el, 3u, /* packed */ true);
+}
+
+inline bool MatchResourceTable(core::intrinsic::MatchState&,
+                               const core::type::Type* ty,
+                               const core::type::Type*& T) {
+    if (ty->Is<core::intrinsic::Any>()) {
+        T = ty;
+        return true;
+    }
+
+    if (auto* a = ty->As<core::type::ResourceTable>()) {
+        T = a->GetBindingType();
+        return true;
+    }
+    return false;
+}
+
+inline const core::type::ResourceTable* BuildResourceTable(core::intrinsic::MatchState& state,
+                                                           const core::type::Type*,
+                                                           const core::type::Type* T) {
+    return state.types.Get<core::type::ResourceTable>(T);
 }
 
 }  // namespace tint::msl::intrinsic

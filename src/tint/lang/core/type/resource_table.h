@@ -48,6 +48,9 @@ class ResourceTable final : public Castable<ResourceTable, core::type::Type> {
 
     const core::type::Type* GetBindingType() const { return binding_type_; }
 
+    /// @copydoc core::type::Type::Align
+    uint32_t Align() const override { return 1; }
+
     /// @copydoc core::type::Type::Elements
     core::type::TypeAndCount Elements(const core::type::Type* type_if_invalid = nullptr,
                                       uint32_t count_if_invalid = 0) const override;

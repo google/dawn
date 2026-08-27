@@ -76,18 +76,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
     }
 
-    for (auto* i : ir.Instructions()) {
-        auto* call = i->As<core::ir::CoreBuiltinCall>();
-        if (!call) {
-            continue;
-        }
-
-        if (call->Func() == core::BuiltinFn::kGetResource ||
-            call->Func() == core::BuiltinFn::kHasResource) {
-            return Failure("resource tables not supported by the MSL backend");
-        }
-    }
-
     // Check for unsupported shader IO builtins.
     auto check_io_attributes = [&](const core::IOAttributes& attributes) -> Result<SuccessType> {
         if (attributes.builtin == core::BuiltinValue::kCullDistance) {

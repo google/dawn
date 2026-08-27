@@ -159,6 +159,8 @@ type __packed_vec3<T>
 
 type string
 
+type resource_table<T>
+
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
 ////////////////////////////////////////////////////////////////////////////////
@@ -453,9 +455,41 @@ implicit(N: num, T: scalar) fn os_log(string, f32, f32, f32, vec<N, T>)
 implicit(T: scalar) fn os_log(string, u32, u32, T)
 implicit(N: num, T: scalar) fn os_log(string, u32, u32, vec<N, T>)
 
-implicit(S: address_space, A: access) fn pointer_offset<T>(ptr<S, runtime_array<u8>, A>, u32) -> ptr<S, T, A>
-implicit(S: address_space, A: access, N: num) fn pointer_offset<T>(ptr<S, array<u8, N>, A>, u32) -> ptr<S, T, A>
-implicit(T, S: address_space, A: access) fn pointer_offset(ptr<S, T, A>, u32) -> ptr<S, T, A>
-implicit(T1, S: address_space, A: access) fn pointer_offset<T2>(ptr<S, T1, A>, u32) -> ptr<S, T2, A>
+implicit(S: address_space, A: access)
+  fn pointer_offset<T>(ptr<S, runtime_array<u8>, A>, u32) -> ptr<S, T, A>
+implicit(S: address_space, A: access, N: num)
+  fn pointer_offset<T>(ptr<S, array<u8, N>, A>, u32) -> ptr<S, T, A>
+implicit(T, S: address_space, A: access)
+  fn pointer_offset(ptr<S, T, A>, u32) -> ptr<S, T, A>
+implicit(T1, S: address_space, A: access)
+  fn pointer_offset<T2>(ptr<S, T1, A>, u32) -> ptr<S, T2, A>
 
 fn volatile_zero() -> u32
+
+implicit(T: fiu32) fn resource_load(resource_table<texture_1d<T> >, u32) -> texture_1d<T>
+implicit(T: fiu32) fn resource_load(resource_table<texture_2d<T> >, u32) -> texture_2d<T>
+implicit(T: fiu32) fn resource_load(resource_table<texture_2d_array<T> >, u32) -> texture_2d_array<T>
+implicit(T: fiu32) fn resource_load(resource_table<texture_3d<T> >, u32) -> texture_3d<T>
+implicit(T: fiu32) fn resource_load(resource_table<texture_cube<T> >, u32) -> texture_cube<T>
+implicit(T: fiu32) fn resource_load(resource_table<texture_cube_array<T> >, u32) -> texture_cube_array<T>
+implicit(T: fiu32) fn resource_load(resource_table<texture_multisampled_2d<T> >, u32) -> texture_multisampled_2d<T>
+
+fn resource_load(resource_table<texture_depth_2d>, u32) -> texture_depth_2d
+fn resource_load(resource_table<texture_depth_2d_array>, u32) -> texture_depth_2d_array
+fn resource_load(resource_table<texture_depth_cube>, u32) -> texture_depth_cube
+fn resource_load(resource_table<texture_depth_cube_array>, u32) -> texture_depth_cube_array
+fn resource_load(resource_table<texture_depth_multisampled_2d>, u32) -> texture_depth_multisampled_2d
+
+implicit(F: texel_format, A: access)
+  fn resource_load(resource_table<texture_storage_1d<F, A> >, u32) -> texture_storage_1d<F, A>
+implicit(F: texel_format, A: access)
+  fn resource_load(resource_table<texture_storage_2d<F, A> >, u32) -> texture_storage_2d<F, A>
+implicit(F: texel_format, A: access)
+  fn resource_load(resource_table<texture_storage_2d_array<F, A> >, u32) -> texture_storage_2d_array<F, A>
+implicit(F: texel_format, A: access)
+  fn resource_load(resource_table<texture_storage_3d<F, A> >, u32) -> texture_storage_3d<F, A>
+
+fn resource_load(resource_table<sampler>, u32) -> sampler
+fn resource_load(resource_table<sampler_comparison>, u32) -> sampler_comparison
+
+implicit(T) fn reinterpret_cast<K>(T) -> K

@@ -1,18 +1,79 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-$B1: {  # root
-  %index:ptr<uniform, u32, read> = var undef @binding_point(1, 0)
-}
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-%fs = @fragment func():void {
-  $B2: {
-    %3:u32 = load %index
-    %4:texture_3d<f32> = getResource<texture_3d<f32>> %3
-    %5:vec4<f32> = textureLoad %4, vec3<i32>(0i), 0i
-    %texture_load:vec4<f32> = let %5
-    ret
+struct tint_resource_table_metadata_struct {
+  /* 0x0000 */ uint array_length;
+  /* 0x0004 */ tint_array<uint, 1> bindings;
+};
+
+struct tint_module_vars_struct {
+  const constant uint* index;
+  const constant ulong* tint_resource_table;
+  const device tint_resource_table_metadata_struct* tint_resource_table_metadata;
+};
+
+struct tint_resource_table_struct_texture_3d_f32 {
+  texture3d<float, access::sample> resource;
+};
+
+fragment void fs(const constant uint* index [[buffer(0)]], const constant ulong* tint_resource_table [[buffer(28)]], const device tint_resource_table_metadata_struct* tint_resource_table_metadata [[buffer(29)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.index=index, .tint_resource_table=tint_resource_table, .tint_resource_table_metadata=tint_resource_table_metadata};
+  uint const v = (*tint_module_vars.index);
+  bool v_1 = false;
+  if ((v < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    uint2 const v_2 = uint2((*tint_module_vars.tint_resource_table_metadata).bindings[v]);
+    v_1 = any((v_2 == uint2(16u, 17u)));
+  } else {
+    v_1 = false;
   }
+  uint v_3 = 0u;
+  if (v_1) {
+    v_3 = v;
+  } else {
+    v_3 = (0u + (*tint_module_vars.tint_resource_table_metadata).array_length);
+  }
+  texture3d<float, access::sample> const v_4 = reinterpret_cast<const constant tint_resource_table_struct_texture_3d_f32*>(tint_module_vars.tint_resource_table)[v_3].resource;
+  bool v_5 = false;
+  if ((v < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    uint2 const v_6 = uint2((*tint_module_vars.tint_resource_table_metadata).bindings[v]);
+    v_5 = any((v_6 == uint2(16u, 17u)));
+  } else {
+    v_5 = false;
+  }
+  uint v_7 = 0u;
+  if (v_5) {
+    v_7 = v;
+  } else {
+    v_7 = (0u + (*tint_module_vars.tint_resource_table_metadata).array_length);
+  }
+  bool v_8 = false;
+  if ((v < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    uint2 const v_9 = uint2((*tint_module_vars.tint_resource_table_metadata).bindings[v]);
+    v_8 = any((v_9 == uint2(16u, 17u)));
+  } else {
+    v_8 = false;
+  }
+  uint v_10 = 0u;
+  if (v_8) {
+    v_10 = v;
+  } else {
+    v_10 = (0u + (*tint_module_vars.tint_resource_table_metadata).array_length);
+  }
+  texture3d<float, access::sample> const v_11 = reinterpret_cast<const constant tint_resource_table_struct_texture_3d_f32*>(tint_module_vars.tint_resource_table)[v_10].resource;
+  uint const v_12 = (reinterpret_cast<const constant tint_resource_table_struct_texture_3d_f32*>(tint_module_vars.tint_resource_table)[v_7].resource.get_num_mip_levels() - 1u);
+  uint const v_13 = min(uint(0), v_12);
+  uint3 const v_14 = (uint3(v_11.get_width(v_13), v_11.get_height(v_13), v_11.get_depth(v_13)) - uint3(1u));
+  float4 const texture_load = v_4.read(min(uint3(int3(0)), v_14), v_13);
 }
-Failed to generate: resource tables not supported by the MSL backend
-
-tint executable returned error: exit status 1

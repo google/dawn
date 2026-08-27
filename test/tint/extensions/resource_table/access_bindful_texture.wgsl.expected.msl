@@ -1,17 +1,65 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-$B1: {  # root
-  %t:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-}
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-%fs = @fragment func():vec4<f32> [@location(0)] {
-  $B2: {
-    %3:sampler = getResource<sampler> 0i
-    %4:texture_2d<f32> = load %t
-    %5:vec4<f32> = textureSample %4, %3, vec2<f32>(0.0f)
-    ret %5
+struct tint_resource_table_metadata_struct {
+  /* 0x0000 */ uint array_length;
+  /* 0x0004 */ tint_array<uint, 1> bindings;
+};
+
+struct tint_module_vars_struct {
+  texture2d<float, access::sample> t;
+  const constant ulong* tint_resource_table;
+  const device tint_resource_table_metadata_struct* tint_resource_table_metadata;
+};
+
+struct tint_resource_table_struct_sampler {
+  sampler resource;
+};
+
+struct fs_outputs {
+  float4 tint_symbol [[color(0)]];
+};
+
+float4 fs_inner(tint_module_vars_struct tint_module_vars) {
+  uint const v = uint(0);
+  bool v_1 = false;
+  if ((v < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    uint2 const v_2 = uint2((*tint_module_vars.tint_resource_table_metadata).bindings[v]);
+    v_1 = any((v_2 == uint2(40u, 41u)));
+  } else {
+    v_1 = false;
   }
+  bool const has_resource = v_1;
+  uint v_3 = 0u;
+  if (has_resource) {
+    v_3 = (*tint_module_vars.tint_resource_table_metadata).bindings[v];
+  } else {
+    v_3 = 41u;
+  }
+  uint v_4 = 0u;
+  if (has_resource) {
+    v_4 = v;
+  } else {
+    v_4 = (4u + (*tint_module_vars.tint_resource_table_metadata).array_length);
+  }
+  return tint_module_vars.t.sample(reinterpret_cast<const constant tint_resource_table_struct_sampler*>(tint_module_vars.tint_resource_table)[v_4].resource, float2(0.0f));
 }
-Failed to generate: resource tables not supported by the MSL backend
 
-tint executable returned error: exit status 1
+fragment fs_outputs fs(texture2d<float, access::sample> t [[texture(0)]], const constant ulong* tint_resource_table [[buffer(28)]], const device tint_resource_table_metadata_struct* tint_resource_table_metadata [[buffer(29)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=t, .tint_resource_table=tint_resource_table, .tint_resource_table_metadata=tint_resource_table_metadata};
+  fs_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = fs_inner(tint_module_vars);
+  return tint_wrapper_result;
+}

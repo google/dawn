@@ -97,6 +97,8 @@ enum class BuiltinFn : uint8_t {
     kOsLog,
     kPointerOffset,
     kVolatileZero,
+    kResourceLoad,
+    kReinterpretCast,
     kNone,
 };
 

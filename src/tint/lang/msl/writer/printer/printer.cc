@@ -83,6 +83,7 @@
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/resource_table.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/string.h"
@@ -112,6 +113,8 @@ using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::msl::writer {
 namespace {
+
+constexpr std::string_view kResourceName = "resource";
 
 /// @returns true if @p ident is an MSL keyword that needs to be avoided
 bool IsKeyword(std::string_view ident);
@@ -187,6 +190,7 @@ class Printer : public tint::TextGenerator {
 
     Hashset<const core::type::Struct*, 16> host_shareable_structs_;
     Hashset<const core::type::Struct*, 4> emitted_structs_;
+    Hashmap<const core::type::ResourceTable*, Symbol, 4> resource_table_to_name_;
 
     /// The current function being emitted
     const core::ir::Function* current_function_ = nullptr;
@@ -1083,6 +1087,26 @@ class Printer : public tint::TextGenerator {
             out << " " << volatile_zero_name_;
             return;
         }
+        if (c->Func() == msl::BuiltinFn::kReinterpretCast) {
+            TINT_IR_ASSERT(ir_, !c->ExplicitTemplateParams().IsEmpty());
+
+            auto& tmpl = c->ExplicitTemplateParams()[0];
+            TINT_IR_ASSERT(ir_, std::holds_alternative<const core::type::Type*>(tmpl));
+
+            out << "reinterpret_cast<";
+            EmitType(out, std::get<const core::type::Type*>(tmpl));
+            out << ">(";
+            EmitValue(out, c->Args()[0]);
+            out << ")";
+            return;
+        }
+        if (c->Func() == msl::BuiltinFn::kResourceLoad) {
+            EmitValue(out, c->Args()[0]);
+            out << "[";
+            EmitValue(out, c->Args()[1]);
+            out << "]." << kResourceName;
+            return;
+        }
 
         // Some builtins need special-casing for the name they use.
         if (c->Func() == msl::BuiltinFn::kOsLog) {
@@ -1486,6 +1510,27 @@ class Printer : public tint::TextGenerator {
                 out << "simdgroup_";
                 EmitType(out, sm->Type());
                 out << sm->Columns() << "x" << sm->Rows();
+            },
+            [&](const core::type::ResourceTable* rt) {
+                auto rt_sym = resource_table_to_name_.GetOrAdd(rt, [&] {
+                    auto sym = ir_.symbols.New("tint_resource_table_struct_" +
+                                               rt->GetBindingType()->IdentifierName());
+
+                    TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+                    Line() << "\nstruct " << sym.Name() << " {";
+                    current_buffer_->IncrementIndent();
+                    {
+                        auto l = Line();
+                        EmitType(l, rt->GetBindingType());
+                        l << " " << kResourceName << ";";
+                    }
+                    current_buffer_->DecrementIndent();
+                    Line() << "};";
+
+                    return sym;
+                });
+
+                out << "const constant " << rt_sym.Name() << "*";
             },
 
             TINT_ICE_ON_NO_MATCH);

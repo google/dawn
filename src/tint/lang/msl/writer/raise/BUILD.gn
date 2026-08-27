@@ -67,6 +67,8 @@ if (tint_build_msl_writer) {
       "polyfill_bool_vector_dynamic_stores.h",
       "raise.cc",
       "raise.h",
+      "resource_table_helper.cc",
+      "resource_table_helper.h",
       "shader_io.cc",
       "shader_io.h",
       "simd_ballot.cc",
