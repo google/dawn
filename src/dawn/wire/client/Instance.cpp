@@ -222,7 +222,7 @@ Future Instance::APIRequestAdapter(const RequestAdapterOptions* options,
     cmd.adapterObjectHandle = adapter->GetWireHandle(client);
     cmd.options = ToWireCmd(options);
 
-    client->SerializeCommand(cmd);
+    client->SerializeCommand(std::move(cmd));
     return {futureIDInternal};
 }
 

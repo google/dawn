@@ -183,7 +183,7 @@ void Client::Unregister(ObjectBase* obj, ObjectType type) {
     UnregisterObjectCmd cmd;
     cmd.objectType = type;
     cmd.objectId = obj->GetWireHandle(this).id;
-    SerializeCommand(cmd);
+    SerializeCommand(std::move(cmd));
 
     ReclaimReservation(obj, type);
 }

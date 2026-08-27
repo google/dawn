@@ -276,7 +276,7 @@ Queue* Device::GetQueue() {
         DeviceGetQueueCmd cmd;
         cmd.self = ToAPI(this);
         cmd.result = mQueue->GetWireHandle(client);
-        client->SerializeCommand(cmd);
+        client->SerializeCommand(std::move(cmd));
     }
     return mQueue.Get();
 }
@@ -365,7 +365,7 @@ Future Device::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInf
     cmd.deviceId = GetWireHandle(client).id;
     cmd.instanceId = GetInstance()->GetWireHandle(client).id;
     cmd.future = {futureIDInternal};
-    client->SerializeCommand(cmd);
+    client->SerializeCommand(std::move(cmd));
     return {futureIDInternal};
 }
 
@@ -382,7 +382,7 @@ void Device::APIInjectError(wgpu::ErrorType type, StringView message) {
     cmd.self = ToAPI(this);
     cmd.type = type;
     cmd.message = ToWireCmd(message);
-    GetClient()->SerializeCommand(cmd);
+    GetClient()->SerializeCommand(std::move(cmd));
 }
 
 Buffer* Device::APICreateBuffer(const BufferDescriptor* descriptor) {
@@ -438,7 +438,7 @@ Future Device::CreatePipelineAsync(Descriptor const* descriptor, const CallbackI
     cmd.future = {futureIDInternal};
     cmd.pipelineObjectHandle = pipeline->GetWireHandle(client);
 
-    client->SerializeCommand(cmd);
+    client->SerializeCommand(std::move(cmd));
     return {futureIDInternal};
 }
 
@@ -477,7 +477,7 @@ void Device::APIDestroy() {
 
     DeviceDestroyCmd cmd;
     cmd.self = ToAPI(this);
-    GetClient()->SerializeCommand(cmd);
+    GetClient()->SerializeCommand(std::move(cmd));
 }
 
 template <typename PipelineT, typename CmdT>
@@ -489,7 +489,7 @@ Ref<PipelineT> Device::CreateErrorPipeline(WGPUStringView label) {
     cmd.self = ToAPI(this);
     cmd.label = label;
     cmd.result = pipeline->GetWireHandle(client);
-    client->SerializeCommand(cmd);
+    client->SerializeCommand(std::move(cmd));
 
     return pipeline;
 }

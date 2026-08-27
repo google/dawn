@@ -261,7 +261,7 @@ Buffer* Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
     });
 
     wireClient->SerializeCommand(
-        cmd,
+        std::move(cmd),
         // Extensions to replace fields skipped by skip_serialize.
         CommandExtension{memoryHandleCreateInfoLength,
                          [&](Span<volatile std::byte> serializeBuffer) {
@@ -292,7 +292,7 @@ Buffer* Buffer::CreateError(Device* device, const BufferDescriptor* descriptor) 
     cmd.self = ToAPI(device);
     cmd.descriptor = ToWireCmd(descriptor);
     cmd.result = buffer->GetWireHandle(client);
-    client->SerializeCommand(cmd);
+    client->SerializeCommand(std::move(cmd));
 
     return ReturnToAPI2(std::move(buffer));
 }
@@ -394,7 +394,7 @@ Future Buffer::APIMapAsync(wgpu::MapMode mode,
     cmd.offset = offset;
     cmd.size = size;
 
-    client->SerializeCommand(cmd);
+    client->SerializeCommand(std::move(cmd));
     return {futureIDInternal};
 }
 
@@ -504,7 +504,7 @@ void Buffer::APIUnmap() {
         cmd.dataUpdateInfo = DAWN_UNSAFE_BUFFERS(Span<const std::byte>(
             static_cast<const std::byte*>(nullptr), memoryDataUpdateInfoLength));
 
-        client->SerializeCommand(cmd,
+        client->SerializeCommand(std::move(cmd),
                                  // Extensions to replace fields skipped by skip_serialize.
                                  CommandExtension{memoryDataUpdateInfoLength,
                                                   [&](Span<volatile std::byte> serializeBuffer) {
@@ -518,7 +518,7 @@ void Buffer::APIUnmap() {
 
     BufferUnmapCmd unmapCmd{};
     unmapCmd.self = ToAPI(this);
-    client->SerializeCommand(unmapCmd);
+    client->SerializeCommand(std::move(unmapCmd));
 }
 
 void Buffer::APIDestroy() {
@@ -533,7 +533,7 @@ void Buffer::APIDestroy() {
 
     BufferDestroyCmd cmd{};
     cmd.self = ToAPI(this);
-    client->SerializeCommand(cmd);
+    client->SerializeCommand(std::move(cmd));
 }
 
 wgpu::BufferUsage Buffer::APIGetUsage() const {

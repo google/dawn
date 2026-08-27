@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
+#include <utility>
 
 #include "src/dawn/wire/server/Server.h"
 
@@ -54,7 +55,7 @@ void Server::OnShaderModuleGetCompilationInfo(ShaderModuleGetCompilationInfoUser
     cmd.status = FromAPI(status);
     cmd.info = FromAPI(info);
 
-    SerializeCommand(cmd);
+    SerializeCommand(std::move(cmd));
 }
 
 }  // namespace dawn::wire::server

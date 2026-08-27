@@ -25,9 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <limits>
 #include <memory>
 #include <new>
+#include <utility>
 
 #include "src/dawn/wire/server/Server.h"
 #include "src/utils/assert.h"
@@ -44,7 +44,7 @@ void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data,
     cmd.status = FromAPI(status);
     cmd.message = FromAPI(message);
 
-    SerializeCommand(cmd);
+    SerializeCommand(std::move(cmd));
 }
 
 WireResult Server::DoQueueOnSubmittedWorkDone(Known<WGPUQueue> queue,

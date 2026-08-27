@@ -82,17 +82,17 @@ class ChunkedCommandSerializer {
     void SetCommandSerializerForDisconnect(CommandSerializer* serializer);
 
     template <typename Cmd>
-    void SerializeCommand(const Cmd& cmd) {
-        SerializeCommandImpl(
-            cmd, [](const Cmd& cmd, size_t requiredSize, SerializeBuffer* serializeBuffer) {
-                return cmd.Serialize(requiredSize, serializeBuffer);
-            });
+    void SerializeCommand(Cmd&& cmd) {
+        SerializeCommandImpl(std::forward<Cmd>(cmd), [](const Cmd& cmd, size_t requiredSize,
+                                                        SerializeBuffer* serializeBuffer) {
+            return cmd.Serialize(requiredSize, serializeBuffer);
+        });
     }
 
     template <typename Cmd, typename... Extensions>
-    void SerializeCommand(const Cmd& cmd, CommandExtension&& e, Extensions&&... es) {
+    void SerializeCommand(Cmd&& cmd, CommandExtension&& e, Extensions&&... es) {
         SerializeCommandImpl(
-            cmd,
+            std::forward<Cmd>(cmd),
             [](const Cmd& cmd, size_t requiredSize, SerializeBuffer* serializeBuffer) {
                 return cmd.Serialize(requiredSize, serializeBuffer);
             },
@@ -100,11 +100,11 @@ class ChunkedCommandSerializer {
     }
 
     template <typename Cmd, typename... Extensions>
-    void SerializeCommand(const Cmd& cmd,
+    void SerializeCommand(Cmd&& cmd,
                           const ObjectIdProvider& objectIdProvider,
                           Extensions&&... extensions) {
         SerializeCommandImpl(
-            cmd,
+            std::forward<Cmd>(cmd),
             [&objectIdProvider](const Cmd& cmd, size_t requiredSize,
                                 SerializeBuffer* serializeBuffer) {
                 return cmd.Serialize(requiredSize, serializeBuffer, objectIdProvider);
@@ -112,11 +112,14 @@ class ChunkedCommandSerializer {
             std::forward<Extensions>(extensions)...);
     }
 
+    template <typename Cmd, typename... Args>
+    void SerializeCommand(Cmd&, Args&&...) = delete;
+
     void Flush();
 
   private:
     template <typename Cmd, typename SerializeCmdFn, typename... Extensions>
-    void SerializeCommandImpl(const Cmd& cmd,
+    void SerializeCommandImpl(Cmd&& cmd,
                               SerializeCmdFn&& SerializeCmd,
                               Extensions&&... extensions) {
         size_t commandSize = cmd.GetRequiredSize();

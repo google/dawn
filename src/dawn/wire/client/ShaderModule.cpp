@@ -132,7 +132,7 @@ ShaderModule* ShaderModule::Create(Device* device, const ShaderModuleDescriptor*
         cmd.descriptor = ToWireCmd(&desc);
         cmd.errorMessage = ToOutputStringView(errorMessage);
         cmd.result = shaderModule->GetWireHandle(client);
-        client->SerializeCommand(cmd);
+        client->SerializeCommand(std::move(cmd));
         return ReturnToAPI2(std::move(shaderModule));
     }
 
@@ -147,7 +147,7 @@ ShaderModule* ShaderModule::Create(Device* device, const ShaderModuleDescriptor*
     cmd.self = ToAPI(device);
     cmd.descriptor = ToWireCmd(&desc);
     cmd.result = shaderModule->GetWireHandle(client);
-    client->SerializeCommand(cmd);
+    client->SerializeCommand(std::move(cmd));
     return ReturnToAPI2(std::move(shaderModule));
 }
 
@@ -285,7 +285,7 @@ Future ShaderModule::APIGetCompilationInfo(const WGPUCompilationInfoCallbackInfo
     cmd.instanceId = GetInstance()->GetWireHandle(GetClient()).id;
     cmd.future = {futureIDInternal};
 
-    GetClient()->SerializeCommand(cmd);
+    GetClient()->SerializeCommand(std::move(cmd));
     return {futureIDInternal};
 }
 

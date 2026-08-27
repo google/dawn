@@ -106,7 +106,7 @@ void Queue::APISubmit(Span<CommandBuffer* const> commands) {
     QueueSubmitCmd cmd;
     cmd.self = ToAPI(this);
     cmd.commands = ToAPI(commands);
-    GetClient()->SerializeCommand(cmd);
+    GetClient()->SerializeCommand(std::move(cmd));
 
     // Immediately request a callback for OnSubmittedWorkDone to update mCompletedSubmitIndex before
     // any OnSubmittedWorkDone callbacks from the application.
@@ -157,7 +157,7 @@ Future Queue::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callba
     cmd.instanceId = GetInstance()->GetWireHandle(client).id;
     cmd.future = {futureIDInternal};
 
-    client->SerializeCommand(cmd);
+    client->SerializeCommand(std::move(cmd));
     return {futureIDInternal};
 }
 
@@ -173,7 +173,7 @@ void Queue::APIWriteBuffer(Buffer* buffer, uint64_t bufferOffset, Span<const std
     cmd.bufferOffset = bufferOffset;
     cmd.data = data;
 
-    GetClient()->SerializeCommand(cmd);
+    GetClient()->SerializeCommand(std::move(cmd));
 }
 
 void Queue::WriteBufferXL(Buffer* buffer, uint64_t bufferOffset, Span<const std::byte> data) {
@@ -211,7 +211,7 @@ void Queue::WriteBufferXL(Buffer* buffer, uint64_t bufferOffset, Span<const std:
         Span<const std::byte>(static_cast<const std::byte*>(nullptr), memoryDataUpdateInfoLength));
 
     client->SerializeCommand(
-        cmd,
+        std::move(cmd),
         // Extensions to replace fields skipped by skip_serialize.
         CommandExtension{memoryHandleCreateInfoLength,
                          [&](Span<volatile std::byte> serializeBuffer) {
@@ -238,7 +238,7 @@ void Queue::APIWriteTexture(const TexelCopyTextureInfo* destination,
     cmd.dataLayout = ToWireCmd(dataLayout);
     cmd.writeSize = ToWireCmd(writeSize);
 
-    GetClient()->SerializeCommand(cmd);
+    GetClient()->SerializeCommand(std::move(cmd));
 }
 
 void Queue::WriteTextureXL(const TexelCopyTextureInfo* destination,
@@ -277,7 +277,7 @@ void Queue::WriteTextureXL(const TexelCopyTextureInfo* destination,
         Span<const std::byte>(static_cast<const std::byte*>(nullptr), memoryDataUpdateInfoLength));
 
     client->SerializeCommand(
-        cmd,
+        std::move(cmd),
         // Extensions to replace fields skipped by skip_serialize.
         CommandExtension{memoryHandleCreateInfoLength,
                          [&](Span<volatile std::byte> serializeBuffer) {

@@ -25,9 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <algorithm>
+#include <utility>
 
-#include "absl/types/span.h"  // TODO(343500108): Use std::span when we have C++20.
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/wire/SupportedFeatures.h"
 #include "src/dawn/wire/server/ObjectStorage.h"
@@ -66,7 +65,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
 
     if (status != WGPURequestAdapterStatus_Success) {
         DAWN_ASSERT(adapter == nullptr);
-        SerializeCommand(cmd);
+        SerializeCommand(std::move(cmd));
         return;
     }
 
@@ -74,7 +73,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     if (FillReservation(data->adapter, adapter) == WireResult::FatalError) {
         cmd.status = wgpu::RequestAdapterStatus::CallbackCancelled;
         cmd.message = FromAPI(ToOutputStringView("Destroyed before request was fulfilled."));
-        SerializeCommand(cmd);
+        SerializeCommand(std::move(cmd));
         return;
     }
 
@@ -137,7 +136,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     mProcs->adapterGetLimits(adapter, &limits);
     cmd.limits = FromAPI(&limits);
 
-    SerializeCommand(cmd);
+    SerializeCommand(std::move(cmd));
 }
 
 }  // namespace dawn::wire::server

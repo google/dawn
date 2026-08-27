@@ -135,7 +135,7 @@ using namespace dawn::wire::client;
                 {% endfor %}
 
                 //* Allocate space to send the command and copy the value args over.
-                self->GetClient()->SerializeCommand(cmd);
+                self->GetClient()->SerializeCommand(std::move(cmd));
 
                 {% if method.returns and method.returns.type.category == "object" %}
                     return ToAPI(returnObject);

@@ -206,7 +206,7 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
     cmd.message = FromAPI(message);
 
     if (!isSuccess) {
-        SerializeCommand(cmd);
+        SerializeCommand(std::move(cmd));
         return;
     }
 
@@ -231,7 +231,7 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
                 // extension serialization to serialize into this span directly.
                 cmd.readDataUpdateInfo = DAWN_UNSAFE_BUFFERS(Span<const std::byte>(
                     static_cast<const std::byte*>(nullptr), dataUpdateInfoLength));
-                SerializeCommand(cmd,
+                SerializeCommand(std::move(cmd),
                                  // Extensions to replace fields skipped by skip_serialize.
                                  CommandExtension{dataUpdateInfoLength,
                                                   [&](Span<volatile std::byte> serializeBuffer) {
@@ -245,7 +245,7 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
             break;
         }
         case WGPUMapMode_Write: {
-            SerializeCommand(cmd);
+            SerializeCommand(std::move(cmd));
             break;
         }
         default:

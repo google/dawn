@@ -51,17 +51,20 @@ void ChunkedCommandSerializer::SerializeChunkedCommand(Span<const std::byte> all
     // Constant regarding the size of the WireChunkedCommandCmd that can be computed once.
     static size_t kWireChunkedCmdPrefixSize = ChunkedCommandCmd{0, 0, {}}.GetRequiredSize();
 
-    ChunkedCommandCmd cmd;
-    cmd.id = mNextChunkedCommandId++;
-    cmd.size = allocatedBuffer.size();
+    uint64_t commandId = mNextChunkedCommandId++;
+    size_t totalSize = allocatedBuffer.size();
 
     while (!allocatedBuffer.empty()) {
         size_t chunkSize =
             std::min(allocatedBuffer.size(), mMaxAllocationSize - kWireChunkedCmdPrefixSize);
+
+        ChunkedCommandCmd cmd;
+        cmd.id = commandId;
+        cmd.size = totalSize;
         cmd.chunkData = allocatedBuffer.TakeFirst(chunkSize);
         DAWN_ASSERT(cmd.GetRequiredSize() <= mMaxAllocationSize);
 
-        SerializeCommand(cmd);
+        SerializeCommand(std::move(cmd));
     }
 }
 

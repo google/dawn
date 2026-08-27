@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <utility>
+
 #include "dawn/wire/Wire.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/wire/WireResult.h"
@@ -38,7 +40,7 @@ void Server::OnUncapturedError(ObjectHandle device, WGPUErrorType type, WGPUStri
     cmd.type = FromAPI(type);
     cmd.message = FromAPI(message);
 
-    SerializeCommand(cmd);
+    SerializeCommand(std::move(cmd));
     Flush();
 }
 
@@ -52,7 +54,7 @@ void Server::OnDeviceLost(DeviceLostUserdata* userdata,
     cmd.reason = FromAPI(reason);
     cmd.message = FromAPI(message);
 
-    SerializeCommand(cmd);
+    SerializeCommand(std::move(cmd));
 }
 
 void Server::OnLogging(ObjectHandle device, WGPULoggingType type, WGPUStringView message) {
@@ -61,7 +63,7 @@ void Server::OnLogging(ObjectHandle device, WGPULoggingType type, WGPUStringView
     cmd.type = FromAPI(type);
     cmd.message = FromAPI(message);
 
-    SerializeCommand(cmd);
+    SerializeCommand(std::move(cmd));
 }
 
 WireResult Server::DoDevicePopErrorScope(Known<WGPUDevice> device,
@@ -90,7 +92,7 @@ void Server::OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
     cmd.type = FromAPI(type);
     cmd.message = FromAPI(message);
 
-    SerializeCommand(cmd);
+    SerializeCommand(std::move(cmd));
 }
 
 WireResult Server::DoDeviceCreateComputePipelineAsync(Known<WGPUDevice> device,
@@ -129,7 +131,7 @@ void Server::OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* d
         cmd.status = wgpu::CreatePipelineAsyncStatus::CallbackCancelled;
         cmd.message = FromAPI(ToOutputStringView("Destroyed before request was fulfilled."));
     }
-    SerializeCommand(cmd);
+    SerializeCommand(std::move(cmd));
 }
 
 WireResult Server::DoDeviceCreateRenderPipelineAsync(Known<WGPUDevice> device,
@@ -168,7 +170,7 @@ void Server::OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* da
         cmd.status = wgpu::CreatePipelineAsyncStatus::CallbackCancelled;
         cmd.message = FromAPI(ToOutputStringView("Destroyed before request was fulfilled."));
     }
-    SerializeCommand(cmd);
+    SerializeCommand(std::move(cmd));
 }
 
 }  // namespace dawn::wire::server

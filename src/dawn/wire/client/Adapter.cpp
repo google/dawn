@@ -299,7 +299,7 @@ Future Adapter::APIRequestDevice(const DeviceDescriptor* descriptor,
     cmd.deviceLostFuture = {device->APIGetLostFuture().id};
     cmd.descriptor = ToWireCmd(&wireDescriptor);
 
-    client->SerializeCommand(cmd);
+    client->SerializeCommand(std::move(cmd));
     return {futureIDInternal};
 }
 

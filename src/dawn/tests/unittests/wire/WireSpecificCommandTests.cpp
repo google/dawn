@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <span>
+#include <utility>
 
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireClient.h"
@@ -59,12 +60,15 @@ using testing::WithArg;
 class WireSpecificCommandTests : public WireTest {
   protected:
     template <typename Cmd>
-    void AddSpecificServerCmd(const Cmd& cmd) {
+    void AddSpecificServerCmd(Cmd&& cmd) {
         CommandSerializer* c2s = GetC2SSerializer();
         ChunkedCommandSerializer serializer(c2s);
 
-        serializer.SerializeCommand(cmd, *GetWireClient()->GetImplForTesting());
+        serializer.SerializeCommand(std::forward<Cmd>(cmd), *GetWireClient()->GetImplForTesting());
     }
+
+    template <typename Cmd>
+    void AddSpecificServerCmd(Cmd&) = delete;
 
     // Intercept a command that will be sent from the client to the server. This involves first
     // capturing the command, deserializing it as if we were the server, and then re-injecting it
@@ -87,7 +91,7 @@ class WireSpecificCommandTests : public WireTest {
 
         modifier(&cmd);
         c2sBuf->SetOffsetForTesting(startOffset);
-        AddSpecificServerCmd(cmd);
+        AddSpecificServerCmd(std::move(cmd));
     }
 
   private:
@@ -117,7 +121,7 @@ TEST_F(WireSpecificCommandTests, UpdateMappedDataAfterDeviceDestroy_MappedAtCrea
     // Force a device destroy without giving the wire::client a chance to unmap client-side buffers.
     DeviceDestroyCmd cmd;
     cmd.self = device.Get();
-    AddSpecificServerCmd(cmd);
+    AddSpecificServerCmd(std::move(cmd));
 
     EXPECT_CALL(api, DeviceDestroy(apiDevice)).Times(1);
     FlushClient();
@@ -160,7 +164,7 @@ TEST_F(WireSpecificCommandTests, UpdateMappedDataAfterDeviceDestroy_MapWriteOffs
     // Force a device destroy without giving the wire::client a chance to unmap client-side buffers.
     DeviceDestroyCmd cmd;
     cmd.self = device.Get();
-    AddSpecificServerCmd(cmd);
+    AddSpecificServerCmd(std::move(cmd));
 
     EXPECT_CALL(api, DeviceDestroy(apiDevice)).Times(1);
     FlushClient();
@@ -207,7 +211,7 @@ TEST_F(WireSpecificCommandTests, RequestDeviceIdReuseAfterInjectedUnregister) {
     UnregisterObjectCmd unregisterA = {};
     unregisterA.objectType = ObjectType::Device;
     unregisterA.objectId = requestA.deviceObjectHandle.id;
-    AddSpecificServerCmd(unregisterA);
+    AddSpecificServerCmd(std::move(unregisterA));
 
     // Add a second request for a device that attempts to reuse the same id that was originally
     // reserved for the first request.
@@ -308,7 +312,7 @@ TEST_F(WireSpecificCommandTests, RequestAdapterIdReuseAfterInjectedUnregister) {
     UnregisterObjectCmd unregisterA = {};
     unregisterA.objectType = ObjectType::Adapter;
     unregisterA.objectId = requestA.adapterObjectHandle.id;
-    AddSpecificServerCmd(unregisterA);
+    AddSpecificServerCmd(std::move(unregisterA));
 
     // Add a second request for an adapter that attempts to reuse the same id that was originally
     // reserved for the first request.
@@ -398,7 +402,7 @@ TEST_F(WireSpecificCommandTests, CreateComputePipelineAsyncIdReuseAfterInjectedU
     UnregisterObjectCmd unregisterA = {};
     unregisterA.objectType = ObjectType::ComputePipeline;
     unregisterA.objectId = requestA.pipelineObjectHandle.id;
-    AddSpecificServerCmd(unregisterA);
+    AddSpecificServerCmd(std::move(unregisterA));
 
     DeviceCreateComputePipelineAsyncCmd requestB = {};
     InterceptServerCmd<DeviceCreateComputePipelineAsyncCmd>(
@@ -480,7 +484,7 @@ TEST_F(WireSpecificCommandTests, CreateRenderPipelineAsyncIdReuseAfterInjectedUn
     UnregisterObjectCmd unregisterA = {};
     unregisterA.objectType = ObjectType::RenderPipeline;
     unregisterA.objectId = requestA.pipelineObjectHandle.id;
-    AddSpecificServerCmd(unregisterA);
+    AddSpecificServerCmd(std::move(unregisterA));
 
     DeviceCreateRenderPipelineAsyncCmd requestB = {};
     InterceptServerCmd<DeviceCreateRenderPipelineAsyncCmd>(

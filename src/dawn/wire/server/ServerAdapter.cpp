@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <utility>
 #include <vector>
 
 #include "absl/types/span.h"  // TODO(343500108): Use std::span when we have C++20.
@@ -91,7 +92,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
 
     if (status != WGPURequestDeviceStatus_Success) {
         DAWN_ASSERT(device == nullptr);
-        SerializeCommand(cmd);
+        SerializeCommand(std::move(cmd));
         return;
     }
 
@@ -109,7 +110,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
 
             cmd.status = wgpu::RequestDeviceStatus::Error;
             cmd.message = FromAPI(ToOutputStringView("Requested feature not supported."));
-            SerializeCommand(cmd);
+            SerializeCommand(std::move(cmd));
             return;
         }
     }
@@ -134,14 +135,14 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     if (FillReservation(data->device, device, &reservation) == WireResult::FatalError) {
         cmd.status = wgpu::RequestDeviceStatus::CallbackCancelled;
         cmd.message = FromAPI(ToOutputStringView("Destroyed before request was fulfilled."));
-        SerializeCommand(cmd);
+        SerializeCommand(std::move(cmd));
         return;
     }
     DAWN_ASSERT(reservation.data != nullptr);
     reservation->info->server = this;
     reservation->info->self = reservation.AsHandle();
     SetForwardingDeviceCallbacks(reservation);
-    SerializeCommand(cmd);
+    SerializeCommand(std::move(cmd));
 }
 
 }  // namespace dawn::wire::server

@@ -73,7 +73,7 @@ void Surface::APIConfigure(const SurfaceConfiguration* config) {
     SurfaceConfigureCmd cmd;
     cmd.self = ToAPI(this);
     cmd.config = ToWireCmd(config);
-    GetClient()->SerializeCommand(cmd);
+    GetClient()->SerializeCommand(std::move(cmd));
 }
 
 wgpu::Status Surface::APIPresent() {
@@ -84,7 +84,7 @@ wgpu::Status Surface::APIPresent() {
 
     SurfacePresentCmd cmd;
     cmd.self = ToAPI(this);
-    GetClient()->SerializeCommand(cmd);
+    GetClient()->SerializeCommand(std::move(cmd));
 
     // The only synchronous error is if the surface isn't configured.
     // Otherwise, we let the server report errors via the device.
@@ -96,7 +96,7 @@ void Surface::APIUnconfigure() {
 
     SurfaceUnconfigureCmd cmd;
     cmd.self = ToAPI(this);
-    GetClient()->SerializeCommand(cmd);
+    GetClient()->SerializeCommand(std::move(cmd));
 }
 
 wgpu::TextureFormat Surface::APIGetPreferredFormat([[maybe_unused]] Adapter* adapter) const {
@@ -136,7 +136,7 @@ void Surface::APIGetCurrentTexture(SurfaceTexture* surfaceTexture) {
     cmd.surfaceId = GetWireHandle(wireClient).id;
     cmd.textureHandle = texture->GetWireHandle(wireClient);
     cmd.configuredDeviceId = mConfiguredDevice->GetWireHandle(wireClient).id;
-    wireClient->SerializeCommand(cmd);
+    wireClient->SerializeCommand(std::move(cmd));
 
     surfaceTexture->status = wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal;
     surfaceTexture->texture = ReturnToAPI2(std::move(texture));

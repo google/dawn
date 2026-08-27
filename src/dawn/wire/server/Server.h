@@ -220,14 +220,17 @@ class Server : public ServerBase {
            bool useSpontaneousCallbacks);
 
     template <typename Cmd>
-    void SerializeCommand(const Cmd& cmd) {
-        mSerializer->SerializeCommand(cmd);
+    void SerializeCommand(Cmd&& cmd) {
+        mSerializer->SerializeCommand(std::forward<Cmd>(cmd));
     }
 
     template <typename Cmd, typename... Extensions>
-    void SerializeCommand(const Cmd& cmd, Extensions&&... es) {
-        mSerializer->SerializeCommand(cmd, std::forward<Extensions>(es)...);
+    void SerializeCommand(Cmd&& cmd, Extensions&&... es) {
+        mSerializer->SerializeCommand(std::forward<Cmd>(cmd), std::forward<Extensions>(es)...);
     }
+
+    template <typename Cmd, typename... Args>
+    void SerializeCommand(Cmd&, Args&&...) = delete;
 
     // Wrapper RAII helper for structs with FreeMember calls.
     template <typename Struct>

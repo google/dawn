@@ -97,14 +97,18 @@ class Client : public ClientBase {
     void ReclaimInstanceReservation(const ReservedInstance& reservation);
 
     template <typename Cmd>
-    void SerializeCommand(const Cmd& cmd) {
-        mSerializer.SerializeCommand(cmd, *this);
+    void SerializeCommand(Cmd&& cmd) {
+        mSerializer.SerializeCommand(std::forward<Cmd>(cmd), *this);
     }
 
     template <typename Cmd, typename... Extensions>
-    void SerializeCommand(const Cmd& cmd, Extensions&&... es) {
-        mSerializer.SerializeCommand(cmd, *this, std::forward<Extensions>(es)...);
+    void SerializeCommand(Cmd&& cmd, Extensions&&... es) {
+        mSerializer.SerializeCommand(std::forward<Cmd>(cmd), *this,
+                                     std::forward<Extensions>(es)...);
     }
+
+    template <typename Cmd, typename... Args>
+    void SerializeCommand(Cmd&, Args&&...) = delete;
 
     void Disconnect();
     bool IsDisconnected() const;

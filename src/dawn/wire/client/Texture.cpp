@@ -45,7 +45,7 @@ Texture* Texture::Create(Device* device, const TextureDescriptor* descriptor) {
     Ref<Texture> texture = wireClient->Make<Texture>(device, descriptor);
     cmd.result = texture->GetWireHandle(wireClient);
 
-    wireClient->SerializeCommand(cmd);
+    wireClient->SerializeCommand(std::move(cmd));
 
     return ReturnToAPI2(std::move(texture));
 }
@@ -59,7 +59,7 @@ Texture* Texture::CreateError(Device* device, const TextureDescriptor* descripto
     cmd.self = ToAPI(device);
     cmd.descriptor = ToWireCmd(descriptor);
     cmd.result = texture->GetWireHandle(client);
-    client->SerializeCommand(cmd);
+    client->SerializeCommand(std::move(cmd));
 
     return ReturnToAPI2(std::move(texture));
 }
