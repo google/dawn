@@ -199,7 +199,6 @@ enum class Toggle {
     VulkanDisallowNPOTDepthStencilMipmaps,
     VulkanReplaceUnsignedCompareZero,
     VulkanUseCooperativeMatrixRobustBufferAccess,
-    MetalEnableTensors,
 
     // Once all backends have been updated to be thread safe for waiting, we can remove this toggle.
     WaitIsThreadSafe,

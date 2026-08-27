@@ -179,8 +179,6 @@ struct Options {
     std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo>
         group_to_argument_buffer_info;
 
-    bool enable_tensors = false;
-
     std::unordered_map<uint32_t, uint32_t> pixel_local_attachments;
     tint::msl::validate::MslVersion msl_version = tint::msl::validate::MslVersion::kMsl_2_3;
 #endif
@@ -520,10 +518,6 @@ When specified, automatically enables MSL validation)",
     auto& dynamic_offset = options.Add<StringOption>(
         "dynamic-offset",
         R"(Mapping for dynamic buffers to be attached to the entry point, format is GROUP.BINDING=OFFSET, comma separated. BINDING is the BindingIndex, not @binding BindingNumber))");
-
-    auto& enable_tensors = options.Add<BoolOption>(
-        "enable-tensors", "Enable Metal 4 tensor operations in MSL", Default{false});
-    TINT_DEFER(opts->enable_tensors = *enable_tensors.value);
 
     // Default to validating against MSL 2.3, which corresponds to macOS 11.0.
     tint::Vector<EnumName<tint::msl::validate::MslVersion>, 2> msl_version_enum_names{
@@ -1216,7 +1210,6 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
     gen_options.use_argument_buffers = options.use_argument_buffers;
     gen_options.group_to_argument_buffer_info = options.group_to_argument_buffer_info;
     gen_options.array_length_from_constants = GenerateArrayLengthFromConstants(ir, options.ep_name);
-    gen_options.extensions.enable_tensors = options.enable_tensors;
 
     auto entry_point = inspector.GetEntryPoint(options.ep_name);
     gen_options.non_constant_zero_offset = tint::RoundUp(4U, entry_point.immediate_data_size);

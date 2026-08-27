@@ -162,11 +162,7 @@ struct Options {
         /// Set to `true` to disable demote to helper transform
         bool disable_demote_to_helper = false;
 
-        /// Set to `true` to enable the use of Metal Tensors for subgroup matrix.
-        /// TODO(553457231): Enable in fuzzers when implementation is complete.
-        bool enable_tensors = false;
-
-        TINT_REFLECT(Extensions, disable_demote_to_helper, enable_tensors);
+        TINT_REFLECT(Extensions, disable_demote_to_helper);
         TINT_REFLECT_HASH_CODE(Extensions);
 
         bool operator==(const Extensions&) const = default;
