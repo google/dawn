@@ -196,6 +196,7 @@ Checks:
   - -modernize-use-trailing-return-type  # We don't prefer trailing return types.
   - -readability-inconsistent-ifelse-braces  # Handled by clang-format instead.
   - -readability-redundant-lambda-parameter-list  # We don't prefer [] {} over []() {} for lambdas with no arguments.
+  - -readability-uppercase-literal-suffix  # Tint uses primarily lower case, so triggers a lot.
   - -readability-use-concise-preprocessor-directives  # We don't prefer #ifdef over #if defined.
   # - Zircon kernel code style checks.
   - -fuchsia-default-arguments-calls
@@ -239,7 +240,6 @@ Checks:
   - -readability-static-definition-in-anonymous-namespace
   - -readability-trailing-comma
   - -readability-trivial-switch
-  - -readability-uppercase-literal-suffix
   - -readability-use-anyofallof
   - -readability-use-std-min-max
 
@@ -308,6 +308,7 @@ Checks:
   - -google-readability-braces-around-statements                # readability-braces-around-statements
   - -google-readability-casting                                 # modernize-avoid-c-style-cast
   - -google-readability-function-size                           # readability-function-size
+  - -hicpp-uppercase-literal-suffix                             # readability-uppercase-literal-suffix
   - -llvm-else-after-return                                     # readability-else-after-return
   - -llvm-qualified-auto                                        # readability-qualified-auto
   - -performance-faster-string-find                             # performance-prefer-single-char-overloads
