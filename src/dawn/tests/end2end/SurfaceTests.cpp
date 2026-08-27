@@ -719,6 +719,62 @@ TEST_P(SurfaceTests, Storage) {
     ASSERT_EQ(wgpu::Status::Success, surface.Present());
 }
 
+// Test acquiring a texture from a surface configured with viewFormats.
+TEST_P(SurfaceTests, ConfigureWithViewFormats) {
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceCapabilities caps;
+    surface.GetCapabilities(adapter, &caps);
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+
+    // Reinterpretation between a format and its srgb counterpart is always
+    // allowed; pick the counterpart of whatever the surface prefers.
+    wgpu::TextureFormat viewFormat;
+    switch (config.format) {
+        case wgpu::TextureFormat::BGRA8Unorm:
+            viewFormat = wgpu::TextureFormat::BGRA8UnormSrgb;
+            break;
+        case wgpu::TextureFormat::RGBA8Unorm:
+            viewFormat = wgpu::TextureFormat::RGBA8UnormSrgb;
+            break;
+        default:
+            GTEST_SKIP() << "Preferred surface format has no srgb counterpart";
+    }
+    config.viewFormatCount = 1;
+    config.viewFormats = &viewFormat;
+    // When supported, also request CopySrc so the reinterpreted values can be read back.
+    if (caps.usages & wgpu::TextureUsage::CopySrc) {
+        config.usage |= wgpu::TextureUsage::CopySrc;
+    }
+    surface.Configure(&config);
+
+    wgpu::SurfaceTexture surfaceTexture;
+    surface.GetCurrentTexture(&surfaceTexture);  // aborts on Vulkan before the fix
+
+    // Clear through a view using the reinterpreted format to check the texture really
+    // supports its viewFormats.
+    wgpu::TextureViewDescriptor viewDesc;
+    viewDesc.format = viewFormat;
+    utils::ComboRenderPassDescriptor renderPassDesc({surfaceTexture.texture.CreateView(&viewDesc)});
+    renderPassDesc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    renderPassDesc.cColorAttachments[0].clearValue = {0.5, 0.5, 0.5, 1.0};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    if (surfaceTexture.texture.GetUsage() & wgpu::TextureUsage::CopySrc) {
+        // The sRGB view encodes the linear 0.5 clear value to ~0.735 on store, so the raw
+        // non-sRGB pixels read back as ~187.5 instead of 128 if the reinterpretation took
+        // effect. A gray value keeps the check independent of the BGRA/RGBA channel order.
+        EXPECT_PIXEL_RGBA8_BETWEEN(utils::RGBA8(187, 187, 187, 255),
+                                   utils::RGBA8(188, 188, 188, 255), surfaceTexture.texture, 0, 0);
+    }
+
+    surface.Present();
+}
+
 // TODO(crbug.com/465183957): Implement swap chain for WebGPUBackend.
 DAWN_INSTANTIATE_TEST(SurfaceTests,
                       D3D11Backend(),
