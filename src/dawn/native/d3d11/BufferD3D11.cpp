@@ -34,6 +34,7 @@
 
 #include "dawn/platform/DawnPlatform.h"
 #include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Defer.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/CommandBuffer.h"
@@ -888,6 +889,23 @@ class GPUUsableBuffer::Storage : public RefCounted, NonCopyable {
     bool IsGPUWritable() const { return mD3d11Usage == D3D11_USAGE_DEFAULT; }
     size_t GetSize() const { return mSize; }
 
+    ResultOrError<Span<std::byte>> Map(const ScopedCommandRecordingContext* commandContext,
+                                       D3D11_MAP d3dMapTypeUsed) {
+        D3D11_MAPPED_SUBRESOURCE mappedSubresource;
+        DAWN_TRY(
+            CheckHRESULT(commandContext->Map(GetD3D11Buffer(), /*Subresource=*/0, d3dMapTypeUsed,
+                                             /*MapFlags=*/0, &mappedSubresource),
+                         "ID3D11DeviceContext::Map"));
+        Span<std::byte> data =
+            // SAFETY: The mapped pointer is the size of the whole buffer
+            DAWN_UNSAFE_BUFFERS({static_cast<std::byte*>(mappedSubresource.pData), GetSize()});
+        return data;
+    }
+
+    void Unmap(const ScopedCommandRecordingContext* commandContext) {
+        commandContext->Unmap(GetD3D11Buffer(), /*Subresource=*/0);
+    }
+
   private:
     ComPtr<ID3D11Buffer> mD3d11Buffer;
     uint64_t mRevision = 0;
@@ -1171,48 +1189,23 @@ MaybeError GPUUsableBuffer::SyncStorage(const ScopedCommandRecordingContext* com
 
     // TODO(42241146): This is a slow path. It's usually used by uncommon use cases:
     // - GPU writes a CPU writable buffer.
-    auto MapAndCopy = [](const ScopedCommandRecordingContext* commandContext, Storage* dst,
-                         Span<const std::byte> srcData) -> MaybeError {
-        D3D11_MAPPED_SUBRESOURCE mappedDstResource;
-        DAWN_TRY(CheckHRESULT(
-            commandContext->Map(dst->GetD3D11Buffer(), /*Subresource=*/0, D3D11_MAP_WRITE_DISCARD,
-                                /*MapFlags=*/0, &mappedDstResource),
-            "ID3D11DeviceContext::Map dst"));
-        DAWN_ASSERT(dst->GetSize() >= srcData.size());
-        Span<std::byte> dstData =
-            // SAFETY: The mapped destination pointer contains at least srcData.size() bytes
-            DAWN_UNSAFE_BUFFERS({static_cast<std::byte*>(mappedDstResource.pData), srcData.size()});
-        dstData.CopyFrom(srcData);
-        commandContext->Unmap(dst->GetD3D11Buffer(), /*Subresource=*/0);
-        return {};
-    };
-
     DAWN_ASSERT(dstStorage->IsCPUWritable());
     Storage* stagingStorage;
-    // GetOrCreateStorage returns a buffer of GetAllocatedSize() bytes
     DAWN_TRY_ASSIGN(stagingStorage, GetOrCreateStorage(StorageType::Staging));
     DAWN_TRY(SyncStorage(commandContext, stagingStorage));
-    D3D11_MAPPED_SUBRESOURCE mappedSrcResource;
-    DAWN_TRY(CheckHRESULT(commandContext->Map(stagingStorage->GetD3D11Buffer(),
-                                              /*Subresource=*/0, D3D11_MAP_READ,
-                                              /*MapFlags=*/0, &mappedSrcResource),
-                          "ID3D11DeviceContext::Map src"));
-    DAWN_ASSERT(stagingStorage->GetSize() == GetAllocatedSize());
-    Span<const std::byte> srcData =
-        // SAFETY: The mapped source pointer contains GetAllocatedSize() bytes.
-        DAWN_UNSAFE_BUFFERS({static_cast<const std::byte*>(mappedSrcResource.pData),
-                             checked_cast<size_t>(GetAllocatedSize())});
-    auto result = MapAndCopy(commandContext, dstStorage, srcData);
 
-    commandContext->Unmap(stagingStorage->GetD3D11Buffer(),
-                          /*Subresource=*/0);
+    Span<std::byte> srcData;
+    DAWN_TRY_ASSIGN(srcData, stagingStorage->Map(commandContext, D3D11_MAP_READ));
+    // Make sure to unmap even if mapping dstStorage fails below
+    Defer unmapSrcData;
+    unmapSrcData.Append([&] { stagingStorage->Unmap(commandContext); });
 
-    if (result.IsError()) {
-        return result;
-    }
+    Span<std::byte> dstData;
+    DAWN_TRY_ASSIGN(dstData, dstStorage->Map(commandContext, D3D11_MAP_WRITE_DISCARD));
+    dstData.CopyFrom(srcData);
+    dstStorage->Unmap(commandContext);
 
     dstStorage->SetRevision(mLastUpdatedStorage->GetRevision());
-
     return {};
 }
 
@@ -1275,16 +1268,7 @@ MaybeError GPUUsableBuffer::MapInternal(const ScopedCommandRecordingContext* com
     // Sync previously modified content before mapping.
     DAWN_TRY(SyncStorage(commandContext, mMappableStorage));
 
-    D3D11_MAPPED_SUBRESOURCE mappedResource;
-    DAWN_TRY(CheckHRESULT(commandContext->Map(mMappableStorage->GetD3D11Buffer(),
-                                              /*Subresource=*/0, mD3DMapTypeUsed,
-                                              /*MapFlags=*/0, &mappedResource),
-                          "ID3D11DeviceContext::Map"));
-    DAWN_ASSERT(mMappableStorage->GetSize() <= GetAllocatedSize());
-    // SAFETY: The pointer returned is for the actual memory of the resource and contains at least
-    // GetAllocatedSize() bytes.
-    mMappedData = DAWN_UNSAFE_BUFFERS(
-        {static_cast<std::byte*>(mappedResource.pData), checked_cast<size_t>(GetAllocatedSize())});
+    DAWN_TRY_ASSIGN(mMappedData, mMappableStorage->Map(commandContext, mD3DMapTypeUsed));
 
     return {};
 }
@@ -1292,8 +1276,7 @@ MaybeError GPUUsableBuffer::MapInternal(const ScopedCommandRecordingContext* com
 void GPUUsableBuffer::UnmapInternal(const ScopedCommandRecordingContext* commandContext) {
     DAWN_ASSERT(!mMappedData.empty());
     DAWN_ASSERT(mMappableStorage);
-    commandContext->Unmap(mMappableStorage->GetD3D11Buffer(),
-                          /*Subresource=*/0);
+    mMappableStorage->Unmap(commandContext);
     mMappedData = {};
     // Only increment revision if the buffer was mapped for writing.
     if (mD3DMapTypeUsed != D3D11_MAP_READ) {
