@@ -67,6 +67,16 @@ std::string Buffer::FriendlyName() const {
     return out.str();
 }
 
+std::string Buffer::IdentifierName() const {
+    StringStream out;
+    out << "buffer";
+    auto count_str = count_->FriendlyName();
+    if (!count_str.empty()) {
+        out << "_" << count_str;
+    }
+    return out.str();
+}
+
 Buffer* Buffer::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<Buffer>(count_->Clone(ctx));
 }

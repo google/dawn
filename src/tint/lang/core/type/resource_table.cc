@@ -53,6 +53,12 @@ std::string ResourceTable::FriendlyName() const {
     return str.str();
 }
 
+std::string ResourceTable::IdentifierName() const {
+    std::stringstream str;
+    str << "resource_table_" << binding_type_->IdentifierName();
+    return str.str();
+}
+
 core::type::TypeAndCount ResourceTable::Elements(
     [[maybe_unused]] const core::type::Type* type_if_unused,
     uint32_t count_if_invalid) const {

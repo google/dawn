@@ -88,6 +88,9 @@ class Array : public Castable<Array, Type> {
     /// declared in WGSL.
     std::string FriendlyName() const override;
 
+    /// @returns the name for this type in an identifier safe string.
+    std::string IdentifierName() const override;
+
     /// @copydoc Type::Elements
     TypeAndCount Elements(const Type* type_if_invalid = nullptr,
                           uint32_t count_if_invalid = 0) const override;

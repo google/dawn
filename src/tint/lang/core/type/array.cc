@@ -108,6 +108,17 @@ std::string Array::FriendlyName() const {
     return out.str();
 }
 
+std::string Array::IdentifierName() const {
+    StringStream out;
+    out << "array_" << element_->IdentifierName();
+
+    auto count_str = count_->FriendlyName();
+    if (!count_str.empty()) {
+        out << "_" << count_str;
+    }
+    return out.str();
+}
+
 uint32_t Array::Size() const {
     return size_;
 }

@@ -62,6 +62,12 @@ std::string StorageTexture::FriendlyName() const {
     return out.str();
 }
 
+std::string StorageTexture::IdentifierName() const {
+    StringStream out;
+    out << "texture_storage_" << Dim() << "_" << texel_format_ << "_" << access_;
+    return out.str();
+}
+
 StorageTexture* StorageTexture::Clone(CloneContext& ctx) const {
     auto* ty = subtype_->Clone(ctx);
     return ctx.dst.mgr->Get<StorageTexture>(Dim(), texel_format_, access_, ty);

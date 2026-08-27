@@ -57,6 +57,9 @@ class Vector : public Castable<Vector, type::Type> {
     /// declared in WGSL.
     std::string FriendlyName() const override;
 
+    /// @returns the name for this type in an identifier safe string.
+    std::string IdentifierName() const override;
+
     /// @returns the number of elements in the vector
     uint32_t Width() const { return width_; }
 

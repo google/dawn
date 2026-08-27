@@ -58,6 +58,16 @@ std::string Reference::FriendlyName() const {
     return out.str();
 }
 
+std::string Reference::IdentifierName() const {
+    StringStream out;
+    out << "ref_";
+    if (AddressSpace() != core::AddressSpace::kUndefined) {
+        out << AddressSpace() << "_";
+    }
+    out << StoreType()->IdentifierName() << "_" << Access();
+    return out.str();
+}
+
 Reference::~Reference() = default;
 
 Reference* Reference::Clone(CloneContext& ctx) const {

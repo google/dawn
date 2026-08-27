@@ -80,6 +80,13 @@ TEST_F(BindingArrayTest, FriendlyName) {
     EXPECT_EQ(a->FriendlyName(), "binding_array<texture_2d<f32>, 3>");
 }
 
+TEST_F(BindingArrayTest, IdentifierName) {
+    Manager ty;
+    auto* t = ty.sampled_texture(TextureDimension::k2d, ty.f32());
+    auto* a = ty.binding_array(t, 3u);
+    EXPECT_EQ(a->IdentifierName(), "binding_array_texture_2d_f32_3");
+}
+
 TEST_F(BindingArrayTest, Element) {
     Manager ty;
     auto* t = ty.sampled_texture(TextureDimension::k2d, ty.f32());
@@ -115,7 +122,14 @@ TEST_F(BindingArrayTest, RuntimeCount_FriendlyName) {
     Manager ty;
     auto* t = ty.sampled_texture(TextureDimension::k2d, ty.f32());
     auto* a = ty.Get<BindingArray>(t, ty.Get<RuntimeArrayCount>());
-    EXPECT_EQ(a->FriendlyName(), "binding_array<texture_2d<f32>, >");
+    EXPECT_EQ(a->FriendlyName(), "binding_array<texture_2d<f32>>");
+}
+
+TEST_F(BindingArrayTest, RuntimeCount_IdentifierName) {
+    Manager ty;
+    auto* t = ty.sampled_texture(TextureDimension::k2d, ty.f32());
+    auto* a = ty.Get<BindingArray>(t, ty.Get<RuntimeArrayCount>());
+    EXPECT_EQ(a->IdentifierName(), "binding_array_texture_2d_f32");
 }
 
 TEST_F(BindingArrayTest, Clone) {

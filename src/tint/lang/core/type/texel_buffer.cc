@@ -60,6 +60,12 @@ std::string TexelBuffer::FriendlyName() const {
     return out.str();
 }
 
+std::string TexelBuffer::IdentifierName() const {
+    StringStream out;
+    out << "texel_buffer_" << texel_format_ << "_" << access_;
+    return out.str();
+}
+
 TexelBuffer* TexelBuffer::Clone(CloneContext& ctx) const {
     auto* ty = subtype_->Clone(ctx);
     return ctx.dst.mgr->Get<TexelBuffer>(texel_format_, access_, ty);

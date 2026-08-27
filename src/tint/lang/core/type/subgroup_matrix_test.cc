@@ -130,6 +130,24 @@ TEST_F(SubgroupMatrixTest, FriendlyName_Result) {
     EXPECT_EQ(m.FriendlyName(), "subgroup_matrix_result<u32, 32, 32>");
 }
 
+TEST_F(SubgroupMatrixTest, IdentifierName_Left) {
+    I8 i8;
+    SubgroupMatrix m{SubgroupMatrixKind::kLeft, &i8, 2, 4};
+    EXPECT_EQ(m.IdentifierName(), "subgroup_matrix_left_i8_2_4");
+}
+
+TEST_F(SubgroupMatrixTest, IdentifierName_Right) {
+    F32 f32;
+    SubgroupMatrix m{SubgroupMatrixKind::kRight, &f32, 8, 8};
+    EXPECT_EQ(m.IdentifierName(), "subgroup_matrix_right_f32_8_8");
+}
+
+TEST_F(SubgroupMatrixTest, IdentifierName_Result) {
+    U32 u32;
+    SubgroupMatrix m{SubgroupMatrixKind::kResult, &u32, 32, 32};
+    EXPECT_EQ(m.IdentifierName(), "subgroup_matrix_result_u32_32_32");
+}
+
 TEST_F(SubgroupMatrixTest, Clone) {
     Manager ty;
     auto* a = ty.subgroup_matrix(SubgroupMatrixKind::kResult, ty.i32(), 3u, 4u);

@@ -104,6 +104,19 @@ TEST_F(VectorTest, FriendlyName_Packed) {
     EXPECT_EQ(v->FriendlyName(), "__packed_vec3<f32>");
 }
 
+TEST_F(VectorTest, IdentifierName) {
+    Manager ty;
+    auto* v = ty.vec3f();
+    EXPECT_EQ(v->IdentifierName(), "vec3_f32");
+}
+
+TEST_F(VectorTest, IdentifierName_Packed) {
+    Manager ty;
+    auto* f32 = ty.f32();
+    auto* v = ty.Get<Vector>(f32, 3u, true);
+    EXPECT_EQ(v->IdentifierName(), "packed_vec3_f32");
+}
+
 TEST_F(VectorTest, Clone) {
     Manager ty;
     auto* a = ty.vec2i();

@@ -57,6 +57,9 @@ class SampledTexture final : public Castable<SampledTexture, Texture> {
     /// declared in WGSL.
     std::string FriendlyName() const override;
 
+    /// @returns the name for this type in an identifier safe string.
+    std::string IdentifierName() const override;
+
     /// @param ctx the clone context
     /// @returns a clone of this type
     SampledTexture* Clone(CloneContext& ctx) const override;

@@ -59,7 +59,22 @@ uint32_t BindingArray::Align() const {
 
 std::string BindingArray::FriendlyName() const {
     StringStream out;
-    out << "binding_array<" << element_->FriendlyName() << ", " << count_->FriendlyName() << ">";
+    out << "binding_array<" << element_->FriendlyName();
+    auto count_str = count_->FriendlyName();
+    if (!count_str.empty()) {
+        out << ", " << count_str;
+    }
+    out << ">";
+    return out.str();
+}
+
+std::string BindingArray::IdentifierName() const {
+    StringStream out;
+    out << "binding_array_" << element_->IdentifierName();
+    auto count_str = count_->FriendlyName();
+    if (!count_str.empty()) {
+        out << "_" << count_str;
+    }
     return out.str();
 }
 

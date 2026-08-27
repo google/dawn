@@ -1222,8 +1222,8 @@ TEST_F(IR_ValidatorTest, BindingArrayRuntimeCount) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(R"(:2:3 error: var: binding_array count must be a constant expression
-  %m:ptr<handle, binding_array<texture_2d<f32>, >, read> = var undef @binding_point(0, 0)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"));
+  %m:ptr<handle, binding_array<texture_2d<f32>>, read> = var undef @binding_point(0, 0)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"));
 }
 
 TEST_F(IR_ValidatorTest, BindingArrayNonSampledTexture) {

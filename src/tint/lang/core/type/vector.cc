@@ -80,6 +80,15 @@ std::string Vector::FriendlyName() const {
     return out.str();
 }
 
+std::string Vector::IdentifierName() const {
+    StringStream out;
+    if (packed_) {
+        out << "packed_";
+    }
+    out << "vec" << width_ << "_" << subtype_->IdentifierName();
+    return out.str();
+}
+
 uint32_t Vector::Size() const {
     return subtype_->Size() * width_;
 }

@@ -92,6 +92,18 @@ TEST_F(PointerTest, FriendlyNameWithAddressSpace) {
     EXPECT_EQ(r->FriendlyName(), "ptr<workgroup, i32, read>");
 }
 
+TEST_F(PointerTest, IdentifierName) {
+    Manager ty;
+    auto* r = ty.ptr(core::AddressSpace::kUndefined, ty.i32(), core::Access::kRead);
+    EXPECT_EQ(r->IdentifierName(), "ptr_i32_read");
+}
+
+TEST_F(PointerTest, FIdentifierNameWithAddressSpace) {
+    Manager ty;
+    auto* r = ty.ptr(core::AddressSpace::kWorkgroup, ty.i32(), core::Access::kRead);
+    EXPECT_EQ(r->IdentifierName(), "ptr_workgroup_i32_read");
+}
+
 TEST_F(PointerTest, Clone) {
     Manager ty;
     auto* a = ty.ptr(core::AddressSpace::kStorage, ty.i32(), core::Access::kReadWrite);

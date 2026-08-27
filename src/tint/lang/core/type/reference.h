@@ -54,6 +54,9 @@ class Reference final : public Castable<Reference, MemoryView> {
     /// declared in WGSL.
     std::string FriendlyName() const override;
 
+    /// @returns the name for this type in an identifier safe string.
+    std::string IdentifierName() const override;
+
     /// @param ctx the clone context
     /// @returns a clone of this type
     Reference* Clone(CloneContext& ctx) const override;

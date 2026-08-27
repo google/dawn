@@ -47,6 +47,10 @@ class Function final : public Castable<Function, Type> {
     /// declared in WGSL.
     std::string FriendlyName() const override;
 
+    /// @returns the name for this type that closely resembles how it would be
+    /// declared in WGSL.
+    std::string IdentifierName() const override;
+
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other
     bool Equals(const UniqueNode& other) const override;

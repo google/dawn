@@ -86,6 +86,13 @@ TEST_F(MatrixTest, FriendlyName) {
     EXPECT_EQ(m.FriendlyName(), "mat2x3<i32>");
 }
 
+TEST_F(MatrixTest, IdentifierName) {
+    I32 i32;
+    Vector c{&i32, 3};
+    Matrix m{&c, 2};
+    EXPECT_EQ(m.IdentifierName(), "mat2x3_i32");
+}
+
 TEST_F(MatrixTest, Clone) {
     Manager ty;
     auto* a = ty.mat4x3(ty.i32());

@@ -92,6 +92,18 @@ TEST_F(ReferenceTest, FriendlyNameWithAddressSpace) {
     EXPECT_EQ(r->FriendlyName(), "ref<workgroup, i32, read>");
 }
 
+TEST_F(ReferenceTest, IdentifierName) {
+    Manager ty;
+    auto* r = ty.ref(core::AddressSpace::kUndefined, ty.i32(), core::Access::kRead);
+    EXPECT_EQ(r->IdentifierName(), "ref_i32_read");
+}
+
+TEST_F(ReferenceTest, IdentifierNameWithAddressSpace) {
+    Manager ty;
+    auto* r = ty.ref(core::AddressSpace::kWorkgroup, ty.i32(), core::Access::kRead);
+    EXPECT_EQ(r->IdentifierName(), "ref_workgroup_i32_read");
+}
+
 TEST_F(ReferenceTest, Clone) {
     Manager ty;
     auto* a = ty.ref(core::AddressSpace::kStorage, ty.i32(), core::Access::kReadWrite);

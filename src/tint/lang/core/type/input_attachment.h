@@ -54,6 +54,9 @@ class InputAttachment final : public Castable<InputAttachment, Texture> {
     /// declared in WGSL.
     std::string FriendlyName() const override;
 
+    /// @returns the name for this type in an identifier safe string.
+    std::string IdentifierName() const override;
+
     /// @param ctx the clone context
     /// @returns a clone of this type
     InputAttachment* Clone(CloneContext& ctx) const override;

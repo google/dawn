@@ -49,6 +49,7 @@ TEST_F(TexelBufferTest, Creation) {
     EXPECT_EQ(a->Access(), core::Access::kReadWrite);
     EXPECT_EQ(a->Dim(), TextureDimension::k1d);
     EXPECT_EQ(a->FriendlyName(), "texel_buffer<rgba32float, read_write>");
+    EXPECT_EQ(a->IdentifierName(), "texel_buffer_rgba32float_read_write");
 
     auto* b = ty.texel_buffer(core::TexelFormat::kRgba32Float, core::Access::kRead);
     EXPECT_TRUE(b->Type()->Is<F32>());

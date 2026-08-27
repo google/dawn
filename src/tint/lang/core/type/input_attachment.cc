@@ -58,6 +58,12 @@ std::string InputAttachment::FriendlyName() const {
     return out.str();
 }
 
+std::string InputAttachment::IdentifierName() const {
+    StringStream out;
+    out << "input_attachment" << "_" << type_->IdentifierName();
+    return out.str();
+}
+
 InputAttachment* InputAttachment::Clone(CloneContext& ctx) const {
     auto* ty = type_->Clone(ctx);
     return ctx.dst.mgr->Get<InputAttachment>(ty);

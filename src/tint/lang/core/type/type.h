@@ -88,6 +88,9 @@ class Type : public Castable<Type, UniqueNode> {
     /// declared in WGSL.
     virtual std::string FriendlyName() const = 0;
 
+    /// @returns the name for this type in a format that can be used in an identifier
+    virtual std::string IdentifierName() const;
+
     /// @returns the inner most pointee type if this is a pointer, `this`
     /// otherwise
     const Type* UnwrapPtr() const;

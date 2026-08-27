@@ -71,6 +71,12 @@ TEST_F(AtomicTest, FriendlyName) {
     EXPECT_EQ(a->FriendlyName(), "atomic<i32>");
 }
 
+TEST_F(AtomicTest, IdentifierName) {
+    Manager ty;
+    auto* a = ty.atomic(ty.i32());
+    EXPECT_EQ(a->IdentifierName(), "atomic_i32");
+}
+
 TEST_F(AtomicTest, Clone) {
     Manager ty;
     auto* atomic = ty.atomic(ty.i32());

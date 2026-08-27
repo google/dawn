@@ -68,6 +68,9 @@ class Matrix final : public Castable<Matrix, Type> {
     /// declared in WGSL.
     std::string FriendlyName() const override;
 
+    /// @returns the name for this type in an identifier safe string.
+    std::string IdentifierName() const override;
+
     /// @returns the size in bytes of the type. This may include tail padding.
     uint32_t Size() const override;
 

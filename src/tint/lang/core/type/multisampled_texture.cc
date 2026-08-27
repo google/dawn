@@ -58,6 +58,12 @@ std::string MultisampledTexture::FriendlyName() const {
     return out.str();
 }
 
+std::string MultisampledTexture::IdentifierName() const {
+    StringStream out;
+    out << "texture_multisampled_" << Dim() << "_" << type_->IdentifierName();
+    return out.str();
+}
+
 MultisampledTexture* MultisampledTexture::Clone(CloneContext& ctx) const {
     auto* ty = type_->Clone(ctx);
     return ctx.dst.mgr->Get<MultisampledTexture>(Dim(), ty);

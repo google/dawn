@@ -71,6 +71,12 @@ std::string Matrix::FriendlyName() const {
     return out.str();
 }
 
+std::string Matrix::IdentifierName() const {
+    StringStream out;
+    out << "mat" << columns_ << "x" << rows_ << "_" << subtype_->IdentifierName();
+    return out.str();
+}
+
 uint32_t Matrix::Size() const {
     return column_type_->Align() * Columns();
 }

@@ -58,6 +58,9 @@ class ResourceTable final : public Castable<ResourceTable, core::type::Type> {
     /// @returns the friendly name for this type
     std::string FriendlyName() const override;
 
+    /// @returns the name for this type in an identifier safe string.
+    std::string IdentifierName() const override;
+
     bool IsHandle() const override { return true; }
 
     /// @param ctx the clone context

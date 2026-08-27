@@ -77,6 +77,9 @@ class SubgroupMatrix : public Castable<SubgroupMatrix, Type> {
     /// declared in WGSL.
     std::string FriendlyName() const override;
 
+    /// @returns the name for this type in an identifier safe string.
+    std::string IdentifierName() const override;
+
     /// @param ctx the clone context
     /// @returns a clone of this type
     SubgroupMatrix* Clone(CloneContext& ctx) const override;

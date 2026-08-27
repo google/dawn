@@ -114,6 +114,13 @@ TEST_F(StorageTextureTest, FriendlyName) {
     EXPECT_EQ(s->FriendlyName(), "texture_storage_2d_array<rgba32float, read_write>");
 }
 
+TEST_F(StorageTextureTest, IdentifierName) {
+    Manager ty;
+    auto* s = ty.storage_texture(TextureDimension::k2dArray, core::TexelFormat::kRgba32Float,
+                                 core::Access::kReadWrite);
+    EXPECT_EQ(s->IdentifierName(), "texture_storage_2d_array_rgba32float_read_write");
+}
+
 TEST_F(StorageTextureTest, F32) {
     Manager ty;
     auto* s = ty.storage_texture(TextureDimension::k2dArray, core::TexelFormat::kRgba32Float,

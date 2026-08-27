@@ -109,6 +109,12 @@ TEST_F(SampledTextureTest, FriendlyName) {
     EXPECT_EQ(s.FriendlyName(), "texture_3d<f32>");
 }
 
+TEST_F(SampledTextureTest, IdentifierName) {
+    F32 f32;
+    SampledTexture s(TextureDimension::k3d, &f32);
+    EXPECT_EQ(s.IdentifierName(), "texture_3d_f32");
+}
+
 TEST_F(SampledTextureTest, Clone) {
     Manager ty;
     auto* a = ty.sampled_texture(TextureDimension::kCube, ty.f32());

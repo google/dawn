@@ -62,10 +62,17 @@ std::string SwizzleView::FriendlyName() const {
     if (AddressSpace() != core::AddressSpace::kUndefined) {
         out << AddressSpace() << ", ";
     }
-    out << StoreType()->FriendlyName() << ", " << Access();
-    out << ", " << from_;
-    out << ", " << to_;
-    out << ">";
+    out << StoreType()->FriendlyName() << ", " << Access() << ", " << from_ << ", " << to_ << ">";
+    return out.str();
+}
+
+std::string SwizzleView::IdentifierName() const {
+    StringStream out;
+    out << "swizzle_";
+    if (AddressSpace() != core::AddressSpace::kUndefined) {
+        out << AddressSpace() << "_";
+    }
+    out << StoreType()->IdentifierName() << "_" << Access() << "_" << from_ << "_" << to_;
     return out.str();
 }
 

@@ -98,6 +98,12 @@ TEST_F(InputAttachmentTest, FriendlyName) {
     EXPECT_EQ(s.FriendlyName(), "input_attachment<f32>");
 }
 
+TEST_F(InputAttachmentTest, IdentifierName) {
+    F32 f32;
+    InputAttachment s(&f32);
+    EXPECT_EQ(s.IdentifierName(), "input_attachment_f32");
+}
+
 TEST_F(InputAttachmentTest, Clone) {
     Manager ty;
     auto* a = ty.input_attachment(ty.f32());

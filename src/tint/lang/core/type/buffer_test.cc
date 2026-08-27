@@ -41,6 +41,7 @@ TEST_F(BufferTest, Creation_Unsized) {
         auto* b = ty.unsized_buffer();
         EXPECT_EQ(b->Size(), 0u);
         EXPECT_EQ(b->FriendlyName(), "buffer");
+        EXPECT_EQ(b->IdentifierName(), "buffer");
     }
     {
         core::type::Manager mgr;
@@ -56,6 +57,7 @@ TEST_F(BufferTest, Creation_Sized) {
         auto* b = ty.buffer(16);
         EXPECT_EQ(b->Size(), 16u);
         EXPECT_EQ(b->FriendlyName(), "buffer<16>");
+        EXPECT_EQ(b->IdentifierName(), "buffer_16");
     }
     {
         core::type::Manager mgr;

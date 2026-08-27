@@ -62,6 +62,12 @@ std::string Atomic::FriendlyName() const {
     return out.str();
 }
 
+std::string Atomic::IdentifierName() const {
+    StringStream out;
+    out << "atomic_" << subtype_->IdentifierName();
+    return out.str();
+}
+
 uint32_t Atomic::Size() const {
     return subtype_->Size();
 }

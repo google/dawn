@@ -63,6 +63,10 @@ Type::Type(size_t hash, core::type::Flags flags) : Base(hash), flags_(flags) {
 
 Type::~Type() = default;
 
+std::string Type::IdentifierName() const {
+    return FriendlyName();
+}
+
 const Type* Type::UnwrapPtr() const {
     auto* type = this;
     if (auto* ptr = type->As<Pointer>()) {

@@ -42,6 +42,10 @@ std::string Function::FriendlyName() const {
     return "<function>";
 }
 
+std::string Function::IdentifierName() const {
+    return "function";
+}
+
 bool Function::Equals(const UniqueNode& other) const {
     return other.Is<Function>();
 }

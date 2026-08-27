@@ -58,6 +58,12 @@ std::string SampledTexture::FriendlyName() const {
     return out.str();
 }
 
+std::string SampledTexture::IdentifierName() const {
+    StringStream out;
+    out << "texture_" << Dim() << "_" << type_->IdentifierName();
+    return out.str();
+}
+
 SampledTexture* SampledTexture::Clone(CloneContext& ctx) const {
     auto* ty = type_->Clone(ctx);
     return ctx.dst.mgr->Get<SampledTexture>(Dim(), ty);
