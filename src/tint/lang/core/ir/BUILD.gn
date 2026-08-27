@@ -163,6 +163,7 @@ libtint_source_set("ir") {
     "user_call.h",
     "validator.cc",
     "validator.h",
+    "validator_types.cc",
     "value.cc",
     "value.h",
     "var.cc",
