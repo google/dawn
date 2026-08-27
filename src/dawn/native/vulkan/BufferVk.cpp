@@ -328,17 +328,15 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
             // For host visible buffers do initialization on CPU to avoid a GPU write that
             // interferes with using the UploadData() fast path.
             if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-                DAWN_TRY(
-                    MapMemoryAndPerformOperation(0, checked_cast<size_t>(mAllocatedSize.value()),
-                                                 [](std::span<std::byte> mapped) {
-                                                     std::ranges::fill(mapped, std::byte(0x01));
-                                                 }));
+                DAWN_TRY(MapMemoryAndPerformOperation(
+                    0, checked_cast<size_t>(mAllocatedSize.value()),
+                    [](Span<std::byte> mapped) { std::ranges::fill(mapped, std::byte(0x01)); }));
             }
             if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
                 paddingClearSize > 0) {
                 DAWN_TRY(MapMemoryAndPerformOperation(
                     checked_cast<size_t>(paddingClearOffset), paddingClearSize,
-                    [&paddingClearSize](std::span<std::byte> mapped) {
+                    [&paddingClearSize](Span<std::byte> mapped) {
                         DAWN_CHECK(mapped.size() == paddingClearSize);
                         std::ranges::fill(mapped, std::byte(0x0));
                     }));
@@ -670,28 +668,26 @@ MaybeError Buffer::UploadData(uint64_t bufferOffset, Span<const std::byte> data)
     uint64_t mapSize = needsZeroInitialization ? mAllocatedSize.value() : data.size();
     uint64_t mapOffset = needsZeroInitialization ? 0 : bufferOffset;
 
-    return MapMemoryAndPerformOperation(
+    return MapMemoryAndPerformOperation(  //
         checked_cast<size_t>(mapOffset), checked_cast<size_t>(mapSize),
-        [&](std::span<std::byte> mapped) {
-            uint64_t dstOffset = 0;
+        [&](Span<std::byte> mapped) {
+            size_t dstOffset = 0;
             if (needsZeroInitialization) {
                 DAWN_ASSERT(mapped.size() == mAllocatedSize);
                 std::ranges::fill(mapped, std::byte(0x0));
                 GetDevice()->IncrementLazyClearCountForTesting();
-                dstOffset = bufferOffset;
+                dstOffset = checked_cast<size_t>(bufferOffset);
             }
-            // The buffer is always initialized here, either by explicit zero initialization
-            // above or memcpy below.
+            // The buffer is always initialized here, either by explicit zero initialization above
+            // or memcpy below.
             SetInitialized(true);
 
-            DAWN_ASSERT(mapped.size() >= dstOffset + data.size());
-            // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-            DAWN_UNSAFE_TODO(memcpy(mapped.data() + dstOffset, data.data(), data.size()));
+            mapped.subspan(dstOffset).CopyPrefixFrom(data);
         });
 }
 
 template <typename F>
-MaybeError Buffer::MapMemoryAndPerformOperation(uint64_t requestedOffset,
+MaybeError Buffer::MapMemoryAndPerformOperation(size_t requestedOffset,
                                                 size_t requestedSize,
                                                 F&& op) {
     Device* device = ToBackend(GetDevice());
@@ -702,7 +698,7 @@ MaybeError Buffer::MapMemoryAndPerformOperation(uint64_t requestedOffset,
 
     VkDeviceMemory deviceMemory = ToBackend(mMemoryAllocation.GetResourceHeap())->GetMemory();
     Span<std::byte> memory;
-    uint64_t realOffset = requestedOffset;
+    size_t realOffset = requestedOffset;
 
     if (isMappable) {
         // Mappable buffers are already persistently mapped.

@@ -106,7 +106,7 @@ class Buffer final : public BufferBase {
     // unmapped/flushed if necessary. The op function receives a span of exactly the requested
     // size.
     template <typename F>
-    MaybeError MapMemoryAndPerformOperation(uint64_t requestedOffset, size_t requestedSize, F&& op);
+    MaybeError MapMemoryAndPerformOperation(size_t requestedOffset, size_t requestedSize, F&& op);
 
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
     MaybeError FinalizeMapImpl(BufferState newState) override;
