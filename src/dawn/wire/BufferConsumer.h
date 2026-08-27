@@ -97,13 +97,15 @@ class BufferConsumer {
         if (byteCount) {
             *byteCount = *size;
         }
-
-        // TODO(https://crbug.com/528027992): Use ReinterpretSpan once we fix alignment check that
-        // currently fails on Android AMD. This should be solvable by ensuring that
-        // dawn::wire::CommandSerializer::GetCmdSpace returns std::max_align_t aligned memory
-        // address.
-        *out = DAWN_UNSAFE_TODO(
-            Span<T>(reinterpret_cast<T*>(mData.first(sizeof(T) * count).data()), count));
+        // SAFETY: Normally ReinterpretSpan requires trivially copyable data types, but volatile
+        // types cannot be trivially copyable AND usable in a Span because of the requirement for
+        // C++20 iterator that the type satisfies std::indirectly_readable (to satisfy this we need
+        // to manually implement the volatile constructors and assignment operators thereby making
+        // them not trivially_copyable). Since the trivially copyable restriction is to protect from
+        // overlaying types with managed state onto the data, and we own the structs passed through
+        // here and can guarantee that they do not manage additional state, we allow reinterpreting
+        // the data here.
+        *out = DAWN_UNSAFE_BUFFERS(ReinterpretSpan<T>(mData.first(sizeof(T) * count)));
         return WireResult::Success;
     }
 
