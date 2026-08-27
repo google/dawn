@@ -45,6 +45,7 @@ class JNIClasses {
         jclass gpuCallbackRunnable;
         jclass gpuCallbackErrorTypeRunnable;
         jclass gpuCallbackVoidRunnable;
+        jclass dawnException;
         jclass stringClass;
         jclass gpuHardwareBufferExternalTexture;
         jclass gpuHardwareBufferTexture;

@@ -97,8 +97,7 @@ class BufferTest {
   fun bufferMapFailureTest() {
     runBlocking {
       val unused = webGpu.execute {
-        //TODO(b/452516879): Catch a more specific exception type.
-        assertThrows(Error::class.java) {
+        assertThrows(DawnException::class.java) {
           device.createBuffer(
             GPUBufferDescriptor(
               usage = BufferUsage.Vertex,
@@ -252,9 +251,8 @@ class BufferTest {
 
         assertEquals(BufferMapState.Unmapped, buffer.mapState)
 
-        //TODO(b/452516879): Catch a more specific exception type.
         // Should not be able to get the mapped range after unmapping.
-        assertThrows(Error::class.java) {
+        assertThrows(DawnException::class.java) {
           buffer.getMappedRange(0, bufferSize)
         }
       }
