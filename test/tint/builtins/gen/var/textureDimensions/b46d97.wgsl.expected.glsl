@@ -16,7 +16,7 @@ uniform f_TintTextureUniformData_ubo {
 uniform highp isampler2D f_arg_0;
 uint textureDimensions_b46d97() {
   int arg_1 = 1;
-  uint v_2 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_2 = (v_1.metadata[0u].x - 1u);
   uint res = uvec2(textureSize(f_arg_0, int(min(uint(arg_1), v_2)))).x;
   return res;
 }
@@ -39,7 +39,7 @@ uniform TintTextureUniformData_1_ubo {
 uniform highp isampler2D arg_0;
 uint textureDimensions_b46d97() {
   int arg_1 = 1;
-  uint v_2 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_2 = (v_1.metadata[0u].x - 1u);
   uint res = uvec2(textureSize(arg_0, int(min(uint(arg_1), v_2)))).x;
   return res;
 }
@@ -66,7 +66,7 @@ uniform highp isampler2D v_arg_0;
 layout(location = 0) flat out uint tint_interstage_location0;
 uint textureDimensions_b46d97() {
   int arg_1 = 1;
-  uint v_1 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_1 = (v.metadata[0u].x - 1u);
   uint res = uvec2(textureSize(v_arg_0, int(min(uint(arg_1), v_1)))).x;
   return res;
 }

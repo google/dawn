@@ -30,23 +30,27 @@
 
 #include "src/tint/lang/core/constant/eval.h"
 #include "src/tint/lang/core/intrinsic/table.h"
-#include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/access.h"
+#include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/constexpr_if.h"
+#include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/core_binary.h"
+#include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/core_unary.h"
 #include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/value.h"
 
 namespace tint::core::ir {
+class Builder;
 
 /// An evaluator to take a given `ir::Value` and return the result of evaluating the expression.
 class Evaluator {
   public:
     /// Constructor
     /// @param builder the ir builder
-    explicit Evaluator(ir::Builder& builder);
+    explicit Evaluator(ir::Builder& builder, bool eval_override = true);
     /// Destructor
     ~Evaluator();
 
@@ -55,9 +59,21 @@ class Evaluator {
     /// @returns the generated constant or a failure result.
     diag::Result<core::ir::Constant*> Evaluate(core::ir::Value* src);
 
-  private:
     using EvalResult = Result<const core::constant::Value*>;
 
+    /// Evaluate the binary operator `op` on `lhs` and `rhs`
+    /// @param op the operation
+    /// @param result_ty the result type
+    /// @param lhs the lhs value
+    /// @param rhs the rhs value
+    /// @param src the source location
+    EvalResult EvalCoreBinary(BinaryOp op,
+                              const core::type::Type* result_ty,
+                              core::ir::Value* lhs,
+                              core::ir::Value* rhs,
+                              const Source& src = {});
+
+  private:
     diag::Diagnostic& AddError(Source src);
     Source SourceOf(core::ir::Instruction* val);
 
@@ -75,6 +91,7 @@ class Evaluator {
     ir::Builder& b_;
     diag::List diagnostics_;
     core::constant::Eval const_eval_;
+    bool eval_override_ = true;
 };
 
 namespace eval {

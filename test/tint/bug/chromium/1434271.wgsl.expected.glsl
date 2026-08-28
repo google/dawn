@@ -164,8 +164,8 @@ void export_level_inner(uvec3 coord) {
     uvec4 v_1 = v.inner[0u];
     uint dst_offset = (coord.x << ((coord.y * v_1.x) & 31u));
     uvec4 v_2 = v.inner[0u];
-    uint src_offset = ((coord.x - 2u) + ((coord.y >> (2u & 31u)) * v_2.x));
-    uint v_3 = min((src_offset << (0u & 31u)), (uint(buf_in.weights.length()) - 1u));
+    uint src_offset = ((coord.x - 2u) + ((coord.y >> 2u) * v_2.x));
+    uint v_3 = min((src_offset << 0u), (uint(buf_in.weights.length()) - 1u));
     float a = buf_in.weights[v_3];
     uint v_4 = min((src_offset + 1u), (uint(buf_in.weights.length()) - 1u));
     float b = buf_in.weights[v_4];

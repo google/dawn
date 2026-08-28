@@ -6,6 +6,6 @@ buffer v_block_1_ssbo {
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_2 = ((min(uint(0), (((128u - 0u) / 4u) - 1u)) * 4u) / 4u);
-  v_1.inner[v_2] = 2u;
+  min(uint(0), (32u - 1u));
+  v_1.inner[0u] = 2u;
 }

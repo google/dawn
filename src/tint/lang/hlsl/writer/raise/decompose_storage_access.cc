@@ -188,7 +188,7 @@ struct State {
                 }
             }
 
-            b.DivideWithResult(call->DetachResult(), len, u32(arr_ty->ImplicitStride()));
+            b.DivideReplaceResult(call->DetachResult(), len, u32(arr_ty->ImplicitStride()));
         });
         call->Destroy();
     }

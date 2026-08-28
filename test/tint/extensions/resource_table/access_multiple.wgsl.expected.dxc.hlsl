@@ -22,7 +22,7 @@ void fs() {
   uint v_3 = uint(int(1));
   bool v_4 = false;
   if ((v_3 < tint_resource_table_metadata.Load(0u))) {
-    v_4 = (tint_resource_table_metadata.Load((4u + (v_3 * 4u))) == 9u);
+    v_4 = (tint_resource_table_metadata.Load(8u) == 9u);
   } else {
     v_4 = false;
   }
@@ -37,7 +37,7 @@ void fs() {
   uint v_6 = uint(int(2));
   bool v_7 = false;
   if ((v_6 < tint_resource_table_metadata.Load(0u))) {
-    v_7 = (tint_resource_table_metadata.Load((4u + (v_6 * 4u))) == 20u);
+    v_7 = (tint_resource_table_metadata.Load(12u) == 20u);
   } else {
     v_7 = false;
   }

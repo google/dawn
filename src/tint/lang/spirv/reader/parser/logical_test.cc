@@ -57,19 +57,28 @@ TEST_P(SpirvParser_FOrdLogicalTest, Scalar) {
     %v2float = OpTypeVector %f32 2
       %v2one = OpConstantComposite %v2float %one %one
       %v2two = OpConstantComposite %v2float %two %two
+%ptr_Function_f32 = OpTypePointer Function %f32
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
+          %x = OpVariable %ptr_Function_f32 Function %one
+          %y = OpVariable %ptr_Function_f32 Function %two
+        %lhs = OpLoad %f32 %x
+        %rhs = OpLoad %f32 %y
           %1 = OpFOrd)" +
-                  params.spv_name + R"( %bool %one %two
+                  params.spv_name + R"( %bool %lhs %rhs
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = )" + params.wgsl_name +
-                  R"( 1.0f, 2.0f
+    %2:ptr<function, f32, read_write> = var 1.0f
+    %3:ptr<function, f32, read_write> = var 2.0f
+    %4:f32 = load %2
+    %5:f32 = load %3
+    %6:bool = )" + params.wgsl_name +
+                  R"( %4, %5
     ret
   }
 }
@@ -93,19 +102,28 @@ TEST_P(SpirvParser_FOrdLogicalTest, Vector) {
     %v2float = OpTypeVector %f32 2
       %v2one = OpConstantComposite %v2float %one %one
       %v2two = OpConstantComposite %v2float %two %two
+%ptr_Function_v2float = OpTypePointer Function %v2float
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
+          %x = OpVariable %ptr_Function_v2float Function %v2one
+          %y = OpVariable %ptr_Function_v2float Function %v2two
+        %lhs = OpLoad %v2float %x
+        %rhs = OpLoad %v2float %y
           %1 = OpFOrd)" +
-                  params.spv_name + R"( %v2bool %v2one %v2two
+                  params.spv_name + R"( %v2bool %lhs %rhs
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = )" +
-                  params.wgsl_name + R"( vec2<f32>(1.0f), vec2<f32>(2.0f)
+    %2:ptr<function, vec2<f32>, read_write> = var vec2<f32>(1.0f)
+    %3:ptr<function, vec2<f32>, read_write> = var vec2<f32>(2.0f)
+    %4:vec2<f32> = load %2
+    %5:vec2<f32> = load %3
+    %6:vec2<bool> = )" +
+                  params.wgsl_name + R"( %4, %5
     ret
   }
 }
@@ -139,20 +157,29 @@ TEST_P(SpirvParser_FUnordLogicalTest, FOrd_Scalar) {
     %v2float = OpTypeVector %f32 2
       %v2one = OpConstantComposite %v2float %one %one
       %v2two = OpConstantComposite %v2float %two %two
+%ptr_Function_f32 = OpTypePointer Function %f32
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
+          %x = OpVariable %ptr_Function_f32 Function %one
+          %y = OpVariable %ptr_Function_f32 Function %two
+        %lhs = OpLoad %f32 %x
+        %rhs = OpLoad %f32 %y
           %1 = OpFUnord)" +
-                  params.spv_name + R"( %bool %one %two
+                  params.spv_name + R"( %bool %lhs %rhs
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = )" + params.wgsl_name +
-                  R"( 1.0f, 2.0f
-    %3:bool = not %2
+    %2:ptr<function, f32, read_write> = var 1.0f
+    %3:ptr<function, f32, read_write> = var 2.0f
+    %4:f32 = load %2
+    %5:f32 = load %3
+    %6:bool = )" + params.wgsl_name +
+                  R"( %4, %5
+    %7:bool = not %6
     ret
   }
 }
@@ -176,20 +203,29 @@ TEST_P(SpirvParser_FUnordLogicalTest, FOrd_Vector) {
     %v2float = OpTypeVector %f32 2
       %v2one = OpConstantComposite %v2float %one %one
       %v2two = OpConstantComposite %v2float %two %two
+%ptr_Function_v2float = OpTypePointer Function %v2float
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
+          %x = OpVariable %ptr_Function_v2float Function %v2one
+          %y = OpVariable %ptr_Function_v2float Function %v2two
+        %lhs = OpLoad %v2float %x
+        %rhs = OpLoad %v2float %y
           %1 = OpFUnord)" +
-                  params.spv_name + R"( %v2bool %v2one %v2two
+                  params.spv_name + R"( %v2bool %lhs %rhs
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = )" +
-                  params.wgsl_name + R"( vec2<f32>(1.0f), vec2<f32>(2.0f)
-    %3:vec2<bool> = not %2
+    %2:ptr<function, vec2<f32>, read_write> = var vec2<f32>(1.0f)
+    %3:ptr<function, vec2<f32>, read_write> = var vec2<f32>(2.0f)
+    %4:vec2<f32> = load %2
+    %5:vec2<f32> = load %3
+    %6:vec2<bool> = )" +
+                  params.wgsl_name + R"( %4, %5
+    %7:vec2<bool> = not %6
     ret
   }
 }
@@ -572,19 +608,28 @@ TEST_P(SpirvParser_LogicalTest, Scalar) {
       %false = OpConstantFalse %bool
      %v2true = OpConstantComposite %v2bool %true %true
     %v2false = OpConstantComposite %v2bool %false %false
+%ptr_Function_bool = OpTypePointer Function %bool
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
+          %x = OpVariable %ptr_Function_bool Function %true
+          %y = OpVariable %ptr_Function_bool Function %false
+        %lhs = OpLoad %bool %x
+        %rhs = OpLoad %bool %y
           %1 = OpLogical)" +
-                  params.spv_name + R"( %bool %true %false
+                  params.spv_name + R"( %bool %lhs %rhs
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = )" + params.wgsl_name +
-                  R"( true, false
+    %2:ptr<function, bool, read_write> = var true
+    %3:ptr<function, bool, read_write> = var false
+    %4:bool = load %2
+    %5:bool = load %3
+    %6:bool = )" + params.wgsl_name +
+                  R"( %4, %5
     ret
   }
 }
@@ -606,19 +651,28 @@ TEST_P(SpirvParser_LogicalTest, Vector) {
       %false = OpConstantFalse %bool
      %v2true = OpConstantComposite %v2bool %true %true
     %v2false = OpConstantComposite %v2bool %false %false
+%ptr_Function_v2bool = OpTypePointer Function %v2bool
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
+          %x = OpVariable %ptr_Function_v2bool Function %v2true
+          %y = OpVariable %ptr_Function_v2bool Function %v2false
+        %lhs = OpLoad %v2bool %x
+        %rhs = OpLoad %v2bool %y
           %1 = OpLogical)" +
-                  params.spv_name + R"( %v2bool %v2true %v2false
+                  params.spv_name + R"( %v2bool %lhs %rhs
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = )" +
-                  params.wgsl_name + R"( vec2<bool>(true), vec2<bool>(false)
+    %2:ptr<function, vec2<bool>, read_write> = var vec2<bool>(true)
+    %3:ptr<function, vec2<bool>, read_write> = var vec2<bool>(false)
+    %4:vec2<bool> = load %2
+    %5:vec2<bool> = load %3
+    %6:vec2<bool> = )" +
+                  params.wgsl_name + R"( %4, %5
     ret
   }
 }

@@ -249,11 +249,12 @@ $B1: {  # root
 TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexInitNoOverrides) {
     core::ir::Override* o = nullptr;
     b.Append(mod.root_block, [&] {
-        auto* add = b.Add(2_u, 4_u);
+        auto* add = b.Append(mod.CreateInstruction<core::ir::CoreBinary>(
+            b.InstructionResult(ty.u32()), BinaryOp::kAdd, b.Constant(2_u), b.Constant(4_u)));
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
-        o->SetInitializer(add);
+        o->SetInitializer(add->Result());
     });
 
     auto* func = b.Function("foo", ty.u32());
@@ -291,11 +292,12 @@ $B1: {  # root
 TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexInitComponentOverride) {
     core::ir::Override* o = nullptr;
     b.Append(mod.root_block, [&] {
-        auto* add = b.Add(2_u, 4_u);
+        auto* add = b.Append(mod.CreateInstruction<core::ir::CoreBinary>(
+            b.InstructionResult(ty.u32()), BinaryOp::kAdd, b.Constant(2_u), b.Constant(4_u)));
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
-        o->SetInitializer(add);
+        o->SetInitializer(add->Result());
     });
 
     auto* func = b.Function("foo", ty.u32());
@@ -1657,8 +1659,8 @@ TEST_F(IR_SubstituteOverridesTest, ConstExprIfInsideKernel) {
         auto* constexpr_if = b.ConstExprIf(o);
         constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
-            auto* k4 = b.Add(10_u, 5_u);
-            auto* k = b.Divide(k4, x);
+            auto* k4 = b.Add(x, 5_u);
+            auto* k = b.Divide(k4, 10_u);
             auto* k2 = b.Equal(k, 10_u);
             b.ExitIf(constexpr_if, k2);
         });
@@ -1678,8 +1680,8 @@ $B1: {  # root
   $B2: {
     %4:bool = constexpr_if %y [t: $B3, f: $B4] {  # constexpr_if_1
       $B3: {  # true
-        %5:u32 = add 10u, 5u
-        %6:u32 = div %5, %x
+        %5:u32 = add %x, 5u
+        %6:u32 = div %5, 10u
         %7:bool = eq %6, 10u
         exit_if %7  # constexpr_if_1
       }

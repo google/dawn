@@ -316,8 +316,7 @@ TEST_F(SpirvWriter_ReplaceUnsignedCompareZeroTest, BothZero) {
     auto* src = R"(
 %foo = func():bool {
   $B1: {
-    %2:bool = eq 0u, 0u
-    ret %2
+    ret true
   }
 }
 )";
@@ -326,8 +325,7 @@ TEST_F(SpirvWriter_ReplaceUnsignedCompareZeroTest, BothZero) {
     auto* expect = R"(
 %foo = func():bool {
   $B1: {
-    %2:bool = lt 0u, 1u
-    ret %2
+    ret true
   }
 }
 )";

@@ -168,12 +168,10 @@ $B1: {  # root
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:u32 = div 0u, 4u
-    %4:u32 = mod 0u, 4u
-    %5:ptr<uniform, vec4<u32>, read> = access %1, 0u, %3
-    %6:vec4<u32> = load %5
-    %7:u32 = access %6, %4
-    %len:u32 = let %7
+    %3:ptr<uniform, vec4<u32>, read> = access %1, 0u, 0u
+    %4:vec4<u32> = load %3
+    %5:u32 = access %4, 0u
+    %len:u32 = let %5
     ret
   }
 }
@@ -227,12 +225,10 @@ $B1: {  # root
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:u32 = div 0u, 4u
-    %4:u32 = mod 0u, 4u
-    %5:ptr<uniform, vec4<u32>, read> = access %1, 0u, %3
-    %6:vec4<u32> = load %5
-    %7:u32 = access %6, %4
-    %len:u32 = let %7
+    %3:ptr<uniform, vec4<u32>, read> = access %1, 0u, 0u
+    %4:vec4<u32> = load %3
+    %5:u32 = access %4, 0u
+    %len:u32 = let %5
     ret
   }
 }
@@ -286,12 +282,10 @@ $B1: {  # root
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:u32 = div 42u, 4u
-    %4:u32 = mod 42u, 4u
-    %5:ptr<uniform, vec4<u32>, read> = access %1, 0u, %3
-    %6:vec4<u32> = load %5
-    %7:u32 = access %6, %4
-    %len:u32 = let %7
+    %3:ptr<uniform, vec4<u32>, read> = access %1, 0u, 10u
+    %4:vec4<u32> = load %3
+    %5:u32 = access %4, 2u
+    %len:u32 = let %5
     ret
   }
 }
@@ -349,13 +343,10 @@ $B1: {  # root
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:u32 = add 0u, 1u
-    %5:u32 = div %4, 4u
-    %6:u32 = mod %4, 4u
-    %7:ptr<uniform, vec4<u32>, read> = access %2, 0u, %5
-    %8:vec4<u32> = load %7
-    %9:u32 = access %8, %6
-    %len:u32 = let %9
+    %4:ptr<uniform, vec4<u32>, read> = access %2, 0u, 0u
+    %5:vec4<u32> = load %4
+    %6:u32 = access %5, 1u
+    %len:u32 = let %6
     ret
   }
 }
@@ -414,13 +405,10 @@ $B1: {  # root
   $B2: {
     %4:binding_array<texture_2d<f32>, 3> = load %1
     %5:texture_2d<f32> = access %4, 1u
-    %6:u32 = add 0u, 1u
-    %7:u32 = div %6, 4u
-    %8:u32 = mod %6, 4u
-    %9:ptr<uniform, vec4<u32>, read> = access %2, 0u, %7
-    %10:vec4<u32> = load %9
-    %11:u32 = access %10, %8
-    %len:u32 = let %11
+    %6:ptr<uniform, vec4<u32>, read> = access %2, 0u, 0u
+    %7:vec4<u32> = load %6
+    %8:u32 = access %7, 1u
+    %len:u32 = let %8
     ret
   }
 }
@@ -481,13 +469,10 @@ $B1: {  # root
     %4:binding_array<texture_2d<f32>, 3> = load %1
     %5:texture_2d<f32> = access %4, 1i
     %6:u32 = convert 1i
-    %7:u32 = add 0u, %6
-    %8:u32 = div %7, 4u
-    %9:u32 = mod %7, 4u
-    %10:ptr<uniform, vec4<u32>, read> = access %2, 0u, %8
-    %11:vec4<u32> = load %10
-    %12:u32 = access %11, %9
-    %len:u32 = let %12
+    %7:ptr<uniform, vec4<u32>, read> = access %2, 0u, 0u
+    %8:vec4<u32> = load %7
+    %9:u32 = access %8, 1u
+    %len:u32 = let %9
     ret
   }
 }
@@ -544,18 +529,14 @@ $B1: {  # root
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:u32 = div 0u, 4u
-    %4:u32 = mod 0u, 4u
-    %5:ptr<uniform, vec4<u32>, read> = access %1, 0u, %3
-    %6:vec4<u32> = load %5
-    %7:u32 = access %6, %4
-    %len:u32 = let %7
-    %9:u32 = div 0u, 4u
-    %10:u32 = mod 0u, 4u
-    %11:ptr<uniform, vec4<u32>, read> = access %1, 0u, %9
-    %12:vec4<u32> = load %11
-    %13:u32 = access %12, %10
-    %len2:u32 = let %13
+    %3:ptr<uniform, vec4<u32>, read> = access %1, 0u, 0u
+    %4:vec4<u32> = load %3
+    %5:u32 = access %4, 0u
+    %len:u32 = let %5
+    %7:ptr<uniform, vec4<u32>, read> = access %1, 0u, 0u
+    %8:vec4<u32> = load %7
+    %9:u32 = access %8, 0u
+    %len2:u32 = let %9
     ret
   }
 }
@@ -612,18 +593,14 @@ $B1: {  # root
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:u32 = div 0u, 4u
-    %4:u32 = mod 0u, 4u
-    %5:ptr<uniform, vec4<u32>, read> = access %1, 0u, %3
-    %6:vec4<u32> = load %5
-    %7:u32 = access %6, %4
-    %len:u32 = let %7
-    %9:u32 = div 0u, 4u
-    %10:u32 = mod 0u, 4u
-    %11:ptr<uniform, vec4<u32>, read> = access %1, 0u, %9
-    %12:vec4<u32> = load %11
-    %13:u32 = access %12, %10
-    %len2:u32 = let %13
+    %3:ptr<uniform, vec4<u32>, read> = access %1, 0u, 0u
+    %4:vec4<u32> = load %3
+    %5:u32 = access %4, 0u
+    %len:u32 = let %5
+    %7:ptr<uniform, vec4<u32>, read> = access %1, 0u, 0u
+    %8:vec4<u32> = load %7
+    %9:u32 = access %8, 0u
+    %len2:u32 = let %9
     ret
   }
 }

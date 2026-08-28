@@ -6093,16 +6093,14 @@ $B1: {  # root
   $B2: {
     %3:ptr<workgroup, atomic<i32>, read_write> = access %v, 1u
     %4:ptr<function, i32, read_write> = var 0i
-    %5:i32 = sub 0i, 123i
-    %6:void = hlsl.InterlockedAdd %3, %5, %4
-    %7:i32 = load %4
-    %x:i32 = let %7
-    %9:ptr<workgroup, atomic<u32>, read_write> = access %v, 2u
-    %10:ptr<function, u32, read_write> = var 0u
-    %11:u32 = sub 0u, 123u
-    %12:void = hlsl.InterlockedAdd %9, %11, %10
-    %13:u32 = load %10
-    %y:u32 = let %13
+    %5:void = hlsl.InterlockedAdd %3, -123i, %4
+    %6:i32 = load %4
+    %x:i32 = let %6
+    %8:ptr<workgroup, atomic<u32>, read_write> = access %v, 2u
+    %9:ptr<function, u32, read_write> = var 0u
+    %10:void = hlsl.InterlockedAdd %8, 4294967173u, %9
+    %11:u32 = load %9
+    %y:u32 = let %11
     ret
   }
 }

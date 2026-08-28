@@ -15,7 +15,7 @@ uniform f_TintTextureUniformData_ubo {
 } v_1;
 uniform highp usampler2DArray f_arg_0;
 uvec2 textureDimensions_9e0794() {
-  uint v_2 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_2 = (v_1.metadata[0u].x - 1u);
   uvec2 res = uvec2(textureSize(f_arg_0, int(min(uint(1), v_2))).xy);
   return res;
 }
@@ -37,7 +37,7 @@ uniform TintTextureUniformData_1_ubo {
 } v_1;
 uniform highp usampler2DArray arg_0;
 uvec2 textureDimensions_9e0794() {
-  uint v_2 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_2 = (v_1.metadata[0u].x - 1u);
   uvec2 res = uvec2(textureSize(arg_0, int(min(uint(1), v_2))).xy);
   return res;
 }
@@ -63,7 +63,7 @@ uniform v_TintTextureUniformData_ubo {
 uniform highp usampler2DArray v_arg_0;
 layout(location = 0) flat out uvec2 tint_interstage_location0;
 uvec2 textureDimensions_9e0794() {
-  uint v_1 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_1 = (v.metadata[0u].x - 1u);
   uvec2 res = uvec2(textureSize(v_arg_0, int(min(uint(1), v_1))).xy);
   return res;
 }

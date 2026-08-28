@@ -55,7 +55,7 @@ void main() {
   buffer.GetDimensions(v_9);
   uint v_10 = asuint(int(0));
   uint v_11 = asuint(int(64));
-  uint v_12 = (v_10 + select((((v_11 != 0u) & (7u != 0u)) & (7u > (4294967295u / v_11))), 4294967295u, (v_11 * 7u)));
+  uint v_12 = (v_10 + select((((v_11 != 0u) & true) & (7u > (4294967295u / v_11))), 4294967295u, (v_11 * 7u)));
   uint v_13 = select((v_12 < v_10), 4294967295u, v_12);
   uint v_14 = (v_13 + 8u);
   bool v_15 = (select((v_14 < v_13), 4294967295u, v_14) <= (v_9 / 4u));
@@ -66,7 +66,7 @@ void main() {
   buffer.GetDimensions(v_18);
   uint v_19 = asuint(int(0));
   uint v_20 = asuint(int(64));
-  uint v_21 = (v_19 + select((((v_20 != 0u) & (7u != 0u)) & (7u > (4294967295u / v_20))), 4294967295u, (v_20 * 7u)));
+  uint v_21 = (v_19 + select((((v_20 != 0u) & true) & (7u > (4294967295u / v_20))), 4294967295u, (v_20 * 7u)));
   uint v_22 = select((v_21 < v_19), 4294967295u, v_21);
   uint v_23 = (v_22 + 8u);
   bool v_24 = (select((v_23 < v_22), 4294967295u, v_23) <= (v_18 / 4u));
@@ -77,7 +77,7 @@ void main() {
   buffer.GetDimensions(v_27);
   uint v_28 = asuint(int(0));
   uint v_29 = asuint(int(64));
-  uint v_30 = (v_28 + select((((v_29 != 0u) & (7u != 0u)) & (7u > (4294967295u / v_29))), 4294967295u, (v_29 * 7u)));
+  uint v_30 = (v_28 + select((((v_29 != 0u) & true) & (7u > (4294967295u / v_29))), 4294967295u, (v_29 * 7u)));
   uint v_31 = select((v_30 < v_28), 4294967295u, v_30);
   uint v_32 = (v_31 + 8u);
   bool v_33 = (select((v_32 < v_31), 4294967295u, v_32) <= (v_27 / 4u));
@@ -88,7 +88,7 @@ void main() {
   buffer.GetDimensions(v_36);
   uint v_37 = asuint(int(0));
   uint v_38 = asuint(int(64));
-  uint v_39 = (v_37 + select((((v_38 != 0u) & (7u != 0u)) & (7u > (4294967295u / v_38))), 4294967295u, (v_38 * 7u)));
+  uint v_39 = (v_37 + select((((v_38 != 0u) & true) & (7u > (4294967295u / v_38))), 4294967295u, (v_38 * 7u)));
   uint v_40 = select((v_39 < v_37), 4294967295u, v_39);
   uint v_41 = (v_40 + 8u);
   bool v_42 = (select((v_41 < v_40), 4294967295u, v_41) <= (v_36 / 4u));
@@ -99,7 +99,7 @@ void main() {
   buffer.GetDimensions(v_45);
   uint v_46 = asuint(int(0));
   uint v_47 = asuint(int(64));
-  uint v_48 = (v_46 + select((((v_47 != 0u) & (7u != 0u)) & (7u > (4294967295u / v_47))), 4294967295u, (v_47 * 7u)));
+  uint v_48 = (v_46 + select((((v_47 != 0u) & true) & (7u > (4294967295u / v_47))), 4294967295u, (v_47 * 7u)));
   uint v_49 = select((v_48 < v_46), 4294967295u, v_48);
   uint v_50 = (v_49 + 8u);
   bool v_51 = (select((v_50 < v_49), 4294967295u, v_50) <= (v_45 / 4u));

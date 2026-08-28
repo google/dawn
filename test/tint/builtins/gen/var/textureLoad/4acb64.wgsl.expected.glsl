@@ -22,7 +22,7 @@ vec4 textureLoad_4acb64() {
   uint v_3 = arg_2;
   int v_4 = arg_3;
   uint v_5 = min(v_3, (uint(textureSize(f_arg_0, 0).z) - 1u));
-  uint v_6 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_6 = (v_1.metadata[0u].x - 1u);
   uint v_7 = min(uint(v_4), v_6);
   uvec2 v_8 = (uvec2(textureSize(f_arg_0, int(v_7)).xy) - uvec2(1u));
   ivec2 v_9 = ivec2(min(uvec2(v_2), v_8));
@@ -55,7 +55,7 @@ vec4 textureLoad_4acb64() {
   uint v_3 = arg_2;
   int v_4 = arg_3;
   uint v_5 = min(v_3, (uint(textureSize(arg_0, 0).z) - 1u));
-  uint v_6 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_6 = (v_1.metadata[0u].x - 1u);
   uint v_7 = min(uint(v_4), v_6);
   uvec2 v_8 = (uvec2(textureSize(arg_0, int(v_7)).xy) - uvec2(1u));
   ivec2 v_9 = ivec2(min(uvec2(v_2), v_8));
@@ -92,7 +92,7 @@ vec4 textureLoad_4acb64() {
   uint v_2 = arg_2;
   int v_3 = arg_3;
   uint v_4 = min(v_2, (uint(textureSize(v_arg_0, 0).z) - 1u));
-  uint v_5 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_5 = (v.metadata[0u].x - 1u);
   uint v_6 = min(uint(v_3), v_5);
   uvec2 v_7 = (uvec2(textureSize(v_arg_0, int(v_6)).xy) - uvec2(1u));
   ivec2 v_8 = ivec2(min(uvec2(v_1), v_7));

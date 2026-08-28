@@ -29,12 +29,12 @@ void main_inner(uvec3 GlobalInvocationID) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
   uvec2 v_4 = srcTexCoord;
-  uint v_5 = (v_2.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_5 = (v_2.metadata[0u].x - 1u);
   uint v_6 = min(uint(0), v_5);
   ivec2 v_7 = ivec2(min(v_4, (uvec2(textureSize(src, int(v_6))) - uvec2(1u))));
   vec4 srcColor = texelFetch(src, v_7, int(v_6));
   uvec2 v_8 = dstTexCoord;
-  uint v_9 = (v_2.metadata[(1u / 4u)][(1u % 4u)] - 1u);
+  uint v_9 = (v_2.metadata[0u].y - 1u);
   uint v_10 = min(uint(0), v_9);
   ivec2 v_11 = ivec2(min(v_8, (uvec2(textureSize(dst, int(v_10))) - uvec2(1u))));
   vec4 dstColor = texelFetch(dst, v_11, int(v_10));

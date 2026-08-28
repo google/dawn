@@ -42,7 +42,7 @@ TEST_F(IR_BlockTest, Terminator_Empty) {
 
 TEST_F(IR_BlockTest, Terminator_None) {
     auto* blk = b.Block();
-    blk->Append(b.Add(1_u, 2_u)->AsInstruction());
+    blk->Append(b.Let("v", b.Constant(u32(0))));
     EXPECT_EQ(blk->Terminator(), nullptr);
 }
 

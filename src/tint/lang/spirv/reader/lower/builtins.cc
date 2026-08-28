@@ -451,7 +451,7 @@ struct State {
             auto* div = b.Divide(x, y);
             auto* floor = b.Call(res_ty, core::BuiltinFn::kFloor, div);
             auto* mul = b.Multiply(y, floor);
-            b.SubtractWithResult(call->DetachResult(), x, mul);
+            b.SubtractReplaceResult(call->DetachResult(), x, mul);
         });
         call->Destroy();
     }
@@ -614,7 +614,7 @@ struct State {
                 rhs = b.Bitcast(lhs->Type(), rhs)->Result();
             }
 
-            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs);
+            b.BinaryReplaceResult(call->DetachResult(), op, lhs, rhs);
         });
         call->Destroy();
     }
@@ -639,7 +639,7 @@ struct State {
                 rhs = b.Bitcast(arg_ty, rhs)->Result();
             }
 
-            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs);
+            b.BinaryReplaceResult(call->DetachResult(), op, lhs, rhs);
         });
         call->Destroy();
     }
@@ -670,7 +670,7 @@ struct State {
                 rhs = b.Bitcast(arg_ty, rhs)->Result();
             }
 
-            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs);
+            b.BinaryReplaceResult(call->DetachResult(), op, lhs, rhs);
         });
         call->Destroy();
     }
@@ -852,7 +852,7 @@ struct State {
                 auto* v = b.Multiply(I, N);
                 v = b.Multiply(v, N);
                 v = b.Multiply(v, 2.0_f);
-                b.SubtractWithResult(call->DetachResult(), I, v);
+                b.SubtractReplaceResult(call->DetachResult(), I, v);
             } else {
                 b.CallWithResult(call->DetachResult(), core::BuiltinFn::kReflect,
                                  Vector<core::ir::Value*, 2>{I, N});
@@ -1186,7 +1186,7 @@ struct State {
                     auto* r3 = b.Construct(ty.vec3(elem_ty), r_20, r_21, r_22);
 
                     auto* m = b.Construct(mat_ty, r1, r2, r3);
-                    b.MultiplyWithResult(call->DetachResult(), inv_det, m);
+                    b.MultiplyReplaceResult(call->DetachResult(), inv_det, m);
                     break;
                 }
                 case 4: {
@@ -1289,7 +1289,7 @@ struct State {
                     auto* r4 = b.Construct(ty.vec4(elem_ty), r_30, r_31, r_32, r_33);
 
                     auto* m = b.Construct(mat_ty, r1, r2, r3, r4);
-                    b.MultiplyWithResult(call->DetachResult(), inv_det, m);
+                    b.MultiplyReplaceResult(call->DetachResult(), inv_det, m);
                     break;
                 }
                 default: {

@@ -51,7 +51,7 @@ void main_inner(uvec3 GlobalInvocationID) {
     bool v_12 = false;
     if (success) {
       ivec2 v_13 = ivec2(dstTexCoord);
-      uint v_14 = (v_2.metadata[(1u / 4u)][(1u % 4u)] - 1u);
+      uint v_14 = (v_2.metadata[0u].y - 1u);
       uint v_15 = min(uint(0), v_14);
       uvec2 v_16 = (uvec2(textureSize(dst, int(v_15))) - uvec2(1u));
       ivec2 v_17 = ivec2(min(uvec2(v_13), v_16));
@@ -67,13 +67,13 @@ void main_inner(uvec3 GlobalInvocationID) {
       srcTexCoord.y = ((srcSize.y - srcTexCoord.y) - 1u);
     }
     ivec2 v_19 = ivec2(srcTexCoord);
-    uint v_20 = (v_2.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+    uint v_20 = (v_2.metadata[0u].x - 1u);
     uint v_21 = min(uint(0), v_20);
     uvec2 v_22 = (uvec2(textureSize(src, int(v_21))) - uvec2(1u));
     ivec2 v_23 = ivec2(min(uvec2(v_19), v_22));
     vec4 srcColor = texelFetch(src, v_23, int(v_21));
     ivec2 v_24 = ivec2(dstTexCoord);
-    uint v_25 = (v_2.metadata[(1u / 4u)][(1u % 4u)] - 1u);
+    uint v_25 = (v_2.metadata[0u].y - 1u);
     uint v_26 = min(uint(0), v_25);
     uvec2 v_27 = (uvec2(textureSize(dst, int(v_26))) - uvec2(1u));
     ivec2 v_28 = ivec2(min(uvec2(v_24), v_27));

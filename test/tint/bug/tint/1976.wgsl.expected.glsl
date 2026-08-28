@@ -16,7 +16,7 @@ uniform TintTextureUniformData_1_ubo {
 uniform highp sampler2DMS texture0;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_2 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_2 = (v_1.metadata[0u].x - 1u);
   uint v_3 = min(uint(0), v_2);
   uvec2 v_4 = (uvec2(textureSize(texture0)) - uvec2(1u));
   ivec2 v_5 = ivec2(min(uvec2(ivec2(0)), v_4));

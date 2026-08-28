@@ -72,7 +72,7 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         float4 _67_p = _66_j;
         float2 _skTemp5 = frac(_57_k);
         float2 _68_d = _skTemp5;
-        float2 v_6 = clamp(((_68_d - (0.0f).xx) / ((1.0f).xx - (0.0f).xx)), (0.0f).xx, (1.0f).xx);
+        float2 v_6 = clamp(((_68_d - (0.0f).xx) / (1.0f).xx), (0.0f).xx, (1.0f).xx);
         float2 _skTemp6 = (v_6 * (v_6 * ((3.0f).xx - ((2.0f).xx * v_6))));
         float2 _69_e = _skTemp6;
         float4 _71_g = (0.0f).xxxx;

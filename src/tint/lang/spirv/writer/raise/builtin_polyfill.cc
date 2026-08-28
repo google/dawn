@@ -1629,7 +1629,7 @@ struct State {
             }
 
             auto* scalar_mat = b.Construct(sm_ty, scalar);
-            b.BinaryWithResult<spirv::ir::Binary>(builtin->DetachResult(), op, mat, scalar_mat);
+            b.BinaryReplaceResult<spirv::ir::Binary>(builtin->DetachResult(), op, mat, scalar_mat);
         });
         builtin->Destroy();
     }

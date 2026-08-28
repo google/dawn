@@ -36,7 +36,7 @@ void main_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_local_inde
   barrier();
   uvec4 v_5 = v.inner[0u];
   uint filterOffset = tint_div_u32((v_5.x - 1u), 2u);
-  uint v_6 = (v_2.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_6 = (v_2.metadata[0u].x - 1u);
   uvec2 dims = uvec2(textureSize(inputTex_samp, int(min(uint(0), v_6))));
   uvec4 v_7 = v.inner[0u];
   uvec2 v_8 = ((WorkGroupID.xy * uvec2(v_7.y, 4u)) + (LocalInvocationID.xy * uvec2(4u, 1u)));

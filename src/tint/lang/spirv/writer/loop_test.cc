@@ -320,7 +320,8 @@ TEST_F(SpirvWriterTest, Loop_UseResultFromBodyInContinuing) {
     b.Append(func->Block(), [&] {
         auto* loop = b.Loop();
         b.Append(loop->Body(), [&] {
-            auto* result = b.Equal(1_i, 2_i);
+            auto* l = b.Let("l", 1_i);
+            auto* result = b.Equal(l, 2_i);
             b.Continue(loop);
 
             b.Append(loop->Continuing(), [&] {  //
@@ -347,10 +348,10 @@ TEST_F(SpirvWriterTest, Loop_UseResultFromBodyInContinuing) {
                OpLoopMerge %8 %6 None
                OpBranch %5
           %5 = OpLabel
-          %9 = OpIEqual %bool %int_1 %int_2
+         %11 = OpIEqual %bool %l %int_2
                OpBranch %6
           %6 = OpLabel
-               OpBranchConditional %9 %8 %7
+               OpBranchConditional %11 %8 %7
           %8 = OpLabel
                OpReturn
                OpFunctionEnd

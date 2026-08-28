@@ -328,7 +328,7 @@ TEST_F(HlslWriterTest, BuiltinStorageAtomicSub) {
 RWByteAddressBuffer v : register(u0);
 void main() {
   int v_1 = int(0);
-  v.InterlockedAdd(16u, asint((asuint(int(0)) - asuint(int(123)))), v_1);
+  v.InterlockedAdd(16u, int(-123), v_1);
   int x = v_1;
 }
 
@@ -352,7 +352,7 @@ TEST_F(HlslWriterTest, BuiltinStorageAtomicSubDirect) {
 RWByteAddressBuffer v : register(u0);
 void main() {
   int v_1 = int(0);
-  v.InterlockedAdd(0u, asint((asuint(int(0)) - asuint(int(123)))), v_1);
+  v.InterlockedAdd(0u, int(-123), v_1);
   int x = v_1;
 }
 
@@ -657,10 +657,10 @@ void main_inner(uint tint_local_index) {
   }
   GroupMemoryBarrierWithGroupSync();
   int v_3 = int(0);
-  InterlockedAdd(v.a, (int(0) - int(123)), v_3);
+  InterlockedAdd(v.a, int(-123), v_3);
   int x = v_3;
   uint v_4 = 0u;
-  InterlockedAdd(v.b, (0u - 123u), v_4);
+  InterlockedAdd(v.b, 4294967173u, v_4);
   uint x_1 = v_4;
 }
 
@@ -2418,8 +2418,9 @@ void main() {
   uint4 v_2 = (uint4((v).xxxx) >> v_1);
   uint4 v_3 = (v_2 & uint4((255u).xxxx));
   uint4 v_4 = uint4(0u, 8u, 16u, 24u);
-  uint4 v_5 = (uint4((3u).xxxx) >> v_4);
-  uint a = dot(v_3, (v_5 & uint4((255u).xxxx)));
+  uint4 v_5 = uint4((3u).xxxx);
+  uint4 v_6 = uint4((255u).xxxx);
+  uint a = dot(v_3, uint4(3u, 0u, 0u, 0u));
 }
 
 )");
@@ -2535,8 +2536,10 @@ void main() {
   int4 v_2 = asint((uint4((v).xxxx) << v_1));
   int4 v_3 = (v_2 >> uint4((24u).xxxx));
   uint4 v_4 = uint4(24u, 16u, 8u, 0u);
-  int4 v_5 = asint((uint4((3u).xxxx) << v_4));
-  int a = dot(v_3, (v_5 >> uint4((24u).xxxx)));
+  uint4 v_5 = uint4((3u).xxxx);
+  asint(uint4(50331648u, 196608u, 768u, 3u));
+  uint4 v_6 = uint4((24u).xxxx);
+  int a = dot(v_3, int4(int(3), int(0), int(0), int(0)));
 }
 
 )");

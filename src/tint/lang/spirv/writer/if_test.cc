@@ -71,7 +71,8 @@ TEST_F(SpirvWriterTest, If_FalseEmpty) {
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         b.Append(i->True(), [&] {
-            b.Add(1_i, 1_i);
+            auto* l = b.Let("l", 1_i);
+            b.Add(l, 1_i);
             b.ExitIf(i);
         });
         b.Append(i->False(), [&] {  //
@@ -89,12 +90,13 @@ TEST_F(SpirvWriterTest, If_FalseEmpty) {
     auto result = Generate();
     ASSERT_EQ(result, Success) << result.Failure() << output_;
     EXPECT_INST(R"(
+          %4 = OpLabel
                OpSelectionMerge %5 None
                OpBranchConditional %true %6 %5
           %6 = OpLabel
-         %10 = OpBitcast %uint %int_1
-         %13 = OpBitcast %uint %int_1
-         %14 = OpIAdd %uint %10 %13
+         %12 = OpBitcast %uint %l
+         %13 = OpBitcast %uint %l
+         %14 = OpIAdd %uint %12 %13
          %15 = OpBitcast %int %14
                OpBranch %5
           %5 = OpLabel
@@ -111,7 +113,8 @@ TEST_F(SpirvWriterTest, If_TrueEmpty) {
             b.ExitIf(i);
         });
         b.Append(i->False(), [&] {
-            b.Add(1_i, 1_i);
+            auto* l = b.Let("l", 1_i);
+            b.Add(l, 1_i);
             b.ExitIf(i);
         });
         b.Return(func);
@@ -130,14 +133,15 @@ TEST_F(SpirvWriterTest, If_TrueEmpty) {
                OpSelectionMerge %5 None
                OpBranchConditional %true %5 %6
           %6 = OpLabel
-         %10 = OpBitcast %uint %int_1
-         %13 = OpBitcast %uint %int_1
-         %14 = OpIAdd %uint %10 %13
+         %12 = OpBitcast %uint %l
+         %13 = OpBitcast %uint %l
+         %14 = OpIAdd %uint %12 %13
          %15 = OpBitcast %int %14
                OpBranch %5
           %5 = OpLabel
                OpReturn
                OpFunctionEnd
+
 )");
 }
 

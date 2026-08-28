@@ -411,7 +411,7 @@ struct State {
             auto* one_minus_x = b.Subtract(one, args[0]);
             auto* div = b.Divide(one_plus_x, one_minus_x);
             auto* log = b.Call(result_ty, core::BuiltinFn::kLog, div);
-            b.MultiplyWithResult(call->DetachResult(), log, half);
+            b.MultiplyReplaceResult(call->DetachResult(), log, half);
         });
         call->Destroy();
     }
@@ -833,7 +833,7 @@ struct State {
             auto* low64 = b.Convert(ty.u64(), low);
             auto* high64 = b.Convert(ty.u64(), high);
             auto* shifted_high = b.ShiftLeft(high64, b.Convert(ty.u64(), b.Constant(u32(32))));
-            b.OrWithResult(bitcast->DetachResult(), shifted_high, low64);
+            b.OrReplaceResult(bitcast->DetachResult(), shifted_high, low64);
         });
         bitcast->Destroy();
     }
@@ -1558,7 +1558,7 @@ struct State {
 
             auto* lower = b.Swizzle(ty.u32(), bc, {0});
             auto* upper = b.ShiftLeft(b.Swizzle(ty.u32(), bc, {1}), 16_u);
-            b.OrWithResult(call->DetachResult(), lower, upper);
+            b.OrReplaceResult(call->DetachResult(), lower, upper);
         });
         call->Destroy();
     }
@@ -1626,7 +1626,7 @@ struct State {
             auto* conv = b.Convert(ty.vec2u(), round);
             auto* lower = b.Swizzle(ty.u32(), conv, {0});
             auto* upper = b.ShiftLeft(b.Swizzle(ty.u32(), conv, {1}), 16_u);
-            b.OrWithResult(call->DetachResult(), lower, upper);
+            b.OrReplaceResult(call->DetachResult(), lower, upper);
         });
         call->Destroy();
     }
@@ -1638,7 +1638,7 @@ struct State {
             auto* y = b.ShiftRight(args[0], 16_u);
             auto* conv = b.Construct(ty.vec2u(), x, y);
             auto* flt_conv = b.Convert(ty.vec2f(), conv);
-            b.DivideWithResult(call->DetachResult(), flt_conv, 0xffff_f);
+            b.DivideReplaceResult(call->DetachResult(), flt_conv, 0xffff_f);
         });
         call->Destroy();
     }
@@ -1695,7 +1695,7 @@ struct State {
             auto* y = b.ShiftLeft(b.Swizzle(ty.u32(), conv, {1}), 8_u);
             auto* z = b.ShiftLeft(b.Swizzle(ty.u32(), conv, {2}), 16_u);
             auto* w = b.ShiftLeft(b.Swizzle(ty.u32(), conv, {3}), 24_u);
-            b.OrWithResult(call->DetachResult(), x, b.Or(y, b.Or(z, w)));
+            b.OrReplaceResult(call->DetachResult(), x, b.Or(y, b.Or(z, w)));
         });
         call->Destroy();
     }
@@ -1710,7 +1710,7 @@ struct State {
             auto* w = b.ShiftRight(val, 24_u);
             auto* cons = b.Construct(ty.vec4u(), x, y, z, w);
             auto* conv = b.Convert(ty.vec4f(), cons);
-            b.DivideWithResult(call->DetachResult(), conv, 255_f);
+            b.DivideReplaceResult(call->DetachResult(), conv, 255_f);
         });
         call->Destroy();
     }
@@ -1941,10 +1941,10 @@ struct State {
 
             switch (call->Func()) {
                 case core::BuiltinFn::kSubgroupInclusiveAdd:
-                    b.AddWithResult(call->DetachResult(), exclusive_call, arg1);
+                    b.AddReplaceResult(call->DetachResult(), exclusive_call, arg1);
                     break;
                 case core::BuiltinFn::kSubgroupInclusiveMul:
-                    b.MultiplyWithResult(call->DetachResult(), exclusive_call, arg1);
+                    b.MultiplyReplaceResult(call->DetachResult(), exclusive_call, arg1);
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);

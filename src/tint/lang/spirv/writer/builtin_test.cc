@@ -176,10 +176,9 @@ TEST_F(SpirvWriterTest, Builtin_Abs_u32) {
 TEST_F(SpirvWriterTest, Builtin_Abs_i32) {
     auto* func = b.Function("foo", MakeScalarType(kI32));
     b.Append(func->Block(), [&] {
-        auto* arg = MakeScalarValue(kI32);
+        auto* arg = b.Let("arg", MakeScalarValue(kI32));
         auto* result = b.Call(MakeScalarType(kI32), core::BuiltinFn::kAbs, arg);
         b.Return(func, result);
-        mod.SetName(arg, "arg");
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -191,8 +190,8 @@ TEST_F(SpirvWriterTest, Builtin_Abs_i32) {
     auto result = Generate();
     ASSERT_EQ(result, Success) << result.Failure() << output_;
     EXPECT_INST(R"(
-          %6 = OpBitcast %uint %arg
-          %8 = OpNot %uint %6
+          %7 = OpBitcast %uint %arg
+          %8 = OpNot %uint %7
           %9 = OpIAdd %uint %8 %uint_1
          %11 = OpBitcast %int %9
          %12 = OpExtInst %int %13 SMax %arg %11

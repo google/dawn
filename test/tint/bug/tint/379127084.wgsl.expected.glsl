@@ -83,7 +83,7 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         vec4 _67_p = _66_j;
         vec2 _skTemp5 = fract(_57_k);
         vec2 _68_d = _skTemp5;
-        vec2 v_11 = clamp(((_68_d - vec2(0.0f)) / (vec2(1.0f) - vec2(0.0f))), vec2(0.0f), vec2(1.0f));
+        vec2 v_11 = clamp(((_68_d - vec2(0.0f)) / vec2(1.0f)), vec2(0.0f), vec2(1.0f));
         vec2 _skTemp6 = (v_11 * (v_11 * (vec2(3.0f) - (vec2(2.0f) * v_11))));
         vec2 _69_e = _skTemp6;
         vec4 _71_g = vec4(0.0f);

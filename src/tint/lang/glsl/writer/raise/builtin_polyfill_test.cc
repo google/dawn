@@ -495,19 +495,22 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, InsertBits) {
 TEST_F(GlslWriter_BuiltinPolyfillTest, FMA_f32) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* x = b.Splat(ty.vec3f(), 1_f);
-        auto* y = b.Splat(ty.vec3f(), 2_f);
-        auto* z = b.Splat(ty.vec3f(), 3_f);
+        auto* x = b.Let("x", b.Splat(ty.vec3f(), 1_f));
+        auto* y = b.Let("y", b.Splat(ty.vec3f(), 2_f));
+        auto* z = b.Let("z", b.Splat(ty.vec3f(), 3_f));
 
-        b.Let("x", b.Call(ty.vec3f(), core::BuiltinFn::kFma, x, y, z));
+        b.Let("res", b.Call(ty.vec3f(), core::BuiltinFn::kFma, x, y, z));
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec3<f32> = fma vec3<f32>(1.0f), vec3<f32>(2.0f), vec3<f32>(3.0f)
-    %x:vec3<f32> = let %2
+    %x:vec3<f32> = let vec3<f32>(1.0f)
+    %y:vec3<f32> = let vec3<f32>(2.0f)
+    %z:vec3<f32> = let vec3<f32>(3.0f)
+    %5:vec3<f32> = fma %x, %y, %z
+    %res:vec3<f32> = let %5
     ret
   }
 }
@@ -517,9 +520,12 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, FMA_f32) {
     auto* expect = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec3<f32> = mul vec3<f32>(1.0f), vec3<f32>(2.0f)
-    %3:vec3<f32> = add %2, vec3<f32>(3.0f)
-    %x:vec3<f32> = let %3
+    %x:vec3<f32> = let vec3<f32>(1.0f)
+    %y:vec3<f32> = let vec3<f32>(2.0f)
+    %z:vec3<f32> = let vec3<f32>(3.0f)
+    %5:vec3<f32> = mul %x, %y
+    %6:vec3<f32> = add %5, %z
+    %res:vec3<f32> = let %6
     ret
   }
 }
@@ -554,9 +560,7 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, FMA_f16) {
     auto* expect = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec3<f16> = mul vec3<f16>(1.0h), vec3<f16>(2.0h)
-    %3:vec3<f16> = add %2, vec3<f16>(3.0h)
-    %x:vec3<f16> = let %3
+    %x:vec3<f16> = let vec3<f16>(5.0h)
     ret
   }
 }

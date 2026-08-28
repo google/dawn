@@ -1468,15 +1468,16 @@ TEST_F(IR_ValidatorTest, Binary_MissingOperands) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    auto* add = sb.Add(sb.Constant(1_i), sb.Constant(2_i))->AsInstruction<CoreBinary>();
+    auto* let = sb.Let("l", sb.Constant(1_i));
+    auto* add = sb.Add(let, sb.Constant(2_i))->AsInstruction<CoreBinary>();
     add->ClearOperands();
     sb.Return(f);
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:5 error: binary: expected exactly 2 operands, got 0
-    %2:i32 = add
+                testing::HasSubstr(R"(:4:5 error: binary: expected exactly 2 operands, got 0
+    %3:i32 = add
     ^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -1485,15 +1486,16 @@ TEST_F(IR_ValidatorTest, Binary_MissingResult) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    auto* add = sb.Add(sb.Constant(1_i), sb.Constant(2_i))->AsInstruction<CoreBinary>();
+    auto* let = sb.Let("l", sb.Constant(1_i));
+    auto* add = sb.Add(let, sb.Constant(2_i))->AsInstruction<CoreBinary>();
     add->ClearResults();
     sb.Return(f);
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:5 error: binary: expected exactly 1 results, got 0
-    undef = add 1i, 2i
+                testing::HasSubstr(R"(:4:5 error: binary: expected exactly 1 results, got 0
+    undef = add %l, 2i
     ^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -1534,7 +1536,8 @@ TEST_F(IR_ValidatorTest, Binary_LogicalAnd) {
 TEST_F(IR_ValidatorTest, Binary_Valid) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Add(b.Constant(1_i), b.Constant(2_i));
+        auto* let = b.Let("l", b.Constant(1_i));
+        b.Add(let, b.Constant(2_i));
         b.Return(func);
     });
 
@@ -1545,7 +1548,8 @@ TEST_F(IR_ValidatorTest, Binary_Valid) {
 TEST_F(IR_ValidatorTest, Binary_TooManyOperands) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* add = b.Add(b.Constant(1_i), b.Constant(2_i))->AsInstruction<CoreBinary>();
+        auto* let = b.Let("l", b.Constant(1_i));
+        auto* add = b.Add(let, b.Constant(2_i))->AsInstruction<CoreBinary>();
         add->PushOperand(b.Constant(3_i));
         b.Return(func);
     });
@@ -1553,8 +1557,8 @@ TEST_F(IR_ValidatorTest, Binary_TooManyOperands) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:5 error: binary: expected exactly 2 operands, got 3
-    %2:i32 = add 1i, 2i, 3i
+                testing::HasSubstr(R"(:4:5 error: binary: expected exactly 2 operands, got 3
+    %3:i32 = add %l, 2i, 3i
     ^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -1562,7 +1566,8 @@ TEST_F(IR_ValidatorTest, Binary_TooManyOperands) {
 TEST_F(IR_ValidatorTest, Binary_MismatchedResultType) {
     auto* fn = b.Function("my_func", ty.void_());
     b.Append(fn->Block(), [&] {
-        b.Binary(BinaryOp::kAdd, ty.f32(), 1_i, 2_i);
+        auto* let = b.Let("l", b.Constant(1_i));
+        b.Binary(BinaryOp::kAdd, ty.f32(), let, 2_i);
         b.Return(fn);
     });
 
@@ -1771,8 +1776,9 @@ TEST_F(IR_ValidatorTest, Scoping_UseBeforeDecl) {
     auto* f = b.Function("my_func", ty.void_());
 
     b.Append(f->Block(), [&] {
-        auto* x = b.Add(1_i, 1_i);
-        auto* y = b.Add(2_i, 3_i);
+        auto* l = b.Let("l", 2_i);
+        auto* x = b.Add(l, 1_i);
+        auto* y = b.Add(l, 3_i);
         if (auto* x_inst = x->AsInstruction()->As<Binary>()) {
             x_inst->SetOperand(0, y);
         }
@@ -1781,8 +1787,8 @@ TEST_F(IR_ValidatorTest, Scoping_UseBeforeDecl) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:18 error: binary: %3 is not in scope
-    %2:i32 = add %3, 1i
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:4:18 error: binary: %4 is not in scope
+    %3:i32 = add %4, 1i
                  ^^
 )")) << res.Failure();
 }
@@ -1877,7 +1883,8 @@ TEST_F(IR_ValidatorTest, OverrideNotAtModuleScope) {
 }
 
 TEST_F(IR_ValidatorTest, InstructionInRootBlockWithoutOverrideCap) {
-    b.Append(mod.root_block, [&] { b.Add(3_u, 2_u); });
+    mod.root_block->Append(mod.CreateInstruction<core::ir::CoreBinary>(
+        b.InstructionResult(ty.u32()), BinaryOp::kAdd, b.Constant(u32(3)), b.Constant(u32(2))));
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
@@ -2101,15 +2108,14 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(IR_ValidatorTest, ValueArrayCount_NotInRootBlock) {
     mod.properties.Add(Property::kAllowOverrides);
 
-    core::ir::Value* count_val = nullptr;
+    core::ir::Instruction* count_val = nullptr;
     auto* func = b.Function("func", ty.void_());
-    b.Append(func->Block(), [&] {
-        count_val = b.Add(2_u, 3_u);
-        b.Return(func);
-    });
+    count_val = func->Block()->Append(b.Append(mod.CreateInstruction<core::ir::CoreBinary>(
+        b.InstructionResult(ty.u32()), BinaryOp::kAdd, b.Constant(u32(2)), b.Constant(u32(3)))));
+    func->Block()->Append(b.Append(b.Return(func)));
 
     b.Append(mod.root_block, [&] {
-        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(count_val);
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(count_val->Result());
         auto* a1 = ty.Get<core::type::Array>(ty.i32(), cnt, 4u);
         b.Var("a", ty.ptr(workgroup, a1, core::Access::kReadWrite));
     });

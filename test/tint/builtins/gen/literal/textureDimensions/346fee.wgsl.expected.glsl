@@ -15,7 +15,7 @@ uniform f_TintTextureUniformData_ubo {
 } v_1;
 uniform highp usamplerCubeArray f_arg_0;
 uvec2 textureDimensions_346fee() {
-  uvec2 res = uvec2(textureSize(f_arg_0, int(min(1u, (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u)))).xy);
+  uvec2 res = uvec2(textureSize(f_arg_0, int(min(1u, (v_1.metadata[0u].x - 1u)))).xy);
   return res;
 }
 void main() {
@@ -36,7 +36,7 @@ uniform TintTextureUniformData_1_ubo {
 } v_1;
 uniform highp usamplerCubeArray arg_0;
 uvec2 textureDimensions_346fee() {
-  uvec2 res = uvec2(textureSize(arg_0, int(min(1u, (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u)))).xy);
+  uvec2 res = uvec2(textureSize(arg_0, int(min(1u, (v_1.metadata[0u].x - 1u)))).xy);
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -61,7 +61,7 @@ uniform v_TintTextureUniformData_ubo {
 uniform highp usamplerCubeArray v_arg_0;
 layout(location = 0) flat out uvec2 tint_interstage_location0;
 uvec2 textureDimensions_346fee() {
-  uvec2 res = uvec2(textureSize(v_arg_0, int(min(1u, (v.metadata[(0u / 4u)][(0u % 4u)] - 1u)))).xy);
+  uvec2 res = uvec2(textureSize(v_arg_0, int(min(1u, (v.metadata[0u].x - 1u)))).xy);
   return res;
 }
 VertexOutput vertex_main_inner() {

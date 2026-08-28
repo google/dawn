@@ -66,20 +66,21 @@ TEST_F(IR_ReferencedModuleDeclsTest, DirectUse) {
     // Referenced.
     auto* var_a = mod.root_block->Append(b.Var<workgroup, u32>("a"));
     auto* var_b = mod.root_block->Append(b.Var<workgroup, u32>("b"));
-    auto* inst_1 = mod.root_block->Append(b.Add(1_i, 2_i)->AsInstruction());
-    auto* over_a = mod.root_block->Append(b.Override("o", inst_1));
+    auto* over_a = mod.root_block->Append(b.Override("o", b.Constant(1_i)));
     over_a->As<core::ir::Override>()->SetOverrideId(OverrideId{1});
+    core::ir::Instruction* inst_1 = nullptr;
+    b.Append(mod.root_block, [&] { inst_1 = b.Add(over_a, 2_i)->AsInstruction(); });
 
     // Not referenced.
     mod.root_block->Append(b.Var<workgroup, u32>("c"));
-    mod.root_block->Append(b.Override("p", ty.i32()));
-    mod.root_block->Append(b.Multiply(2_i, 4_i)->AsInstruction());
+    auto* over_p = mod.root_block->Append(b.Override("p", ty.i32()));
+    mod.root_block->Append(b.Multiply(over_p, 4_i)->AsInstruction());
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {  //
         b.Load(var_a);
         b.Load(var_b);
-        b.Let("c", over_a);
+        b.Let("c", inst_1);
         b.Return(foo);
     });
 
@@ -87,18 +88,18 @@ TEST_F(IR_ReferencedModuleDeclsTest, DirectUse) {
 $B1: {  # root
   %a:ptr<workgroup, u32, read_write> = var undef
   %b:ptr<workgroup, u32, read_write> = var undef
-  %3:i32 = add 1i, 2i
-  %o:i32 = override %3 @id(1)
+  %o:i32 = override 1i @id(1)
+  %4:i32 = add %o, 2i
   %c:ptr<workgroup, u32, read_write> = var undef
   %p:i32 = override undef
-  %7:i32 = mul 2i, 4i
+  %7:i32 = mul %p, 4i
 }
 
 %foo = func():void {
   $B2: {
     %9:u32 = load %a
     %10:u32 = load %b
-    %c_1:i32 = let %o  # %c_1: 'c'
+    %c_1:i32 = let %4  # %c_1: 'c'
     ret
   }
 }
@@ -106,7 +107,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     ReferencedModuleDecls<Module> vars(mod);
-    EXPECT_THAT(vars.TransitiveReferences(foo), ElementsAre(var_a, var_b, over_a, inst_1));
+    EXPECT_THAT(vars.TransitiveReferences(foo), ElementsAre(var_a, var_b, inst_1, over_a));
 }
 
 TEST_F(IR_ReferencedModuleDeclsTest, DirectUse_DeclarationOrder) {

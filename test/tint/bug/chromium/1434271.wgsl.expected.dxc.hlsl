@@ -175,10 +175,10 @@ void export_level_inner(uint3 coord) {
   tex_out.GetDimensions(v.x, v.y);
   if (all((coord.xy < uint2(v)))) {
     uint dst_offset = (coord.x << ((coord.y * ubo[0u].x) & 31u));
-    uint src_offset = ((coord.x - 2u) + ((coord.y >> (2u & 31u)) * ubo[0u].x));
+    uint src_offset = ((coord.x - 2u) + ((coord.y >> 2u) * ubo[0u].x));
     uint v_1 = 0u;
     buf_in.GetDimensions(v_1);
-    float a = asfloat(buf_in.Load((0u + (min((src_offset << (0u & 31u)), ((v_1 / 4u) - 1u)) * 4u))));
+    float a = asfloat(buf_in.Load((0u + (min((src_offset << 0u), ((v_1 / 4u) - 1u)) * 4u))));
     uint v_2 = 0u;
     buf_in.GetDimensions(v_2);
     float b = asfloat(buf_in.Load((0u + (min((src_offset + 1u), ((v_2 / 4u) - 1u)) * 4u))));

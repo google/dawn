@@ -291,7 +291,7 @@ struct State {
                         b.InsertBefore(call, [&] {
                             auto* apparent_size = b.Access<vec2u>(params, 12_u);
                             auto* vec2u_1_1 = b.Splat<vec2u>(1_u);
-                            b.AddWithResult(call->DetachResult(), apparent_size, vec2u_1_1);
+                            b.AddReplaceResult(call->DetachResult(), apparent_size, vec2u_1_1);
                         });
                         call->Destroy();
                     } else if (call->Func() == core::BuiltinFn::kTextureLoad) {

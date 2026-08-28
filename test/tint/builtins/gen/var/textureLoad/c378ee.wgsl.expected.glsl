@@ -18,7 +18,7 @@ uvec4 textureLoad_c378ee() {
   ivec2 arg_1 = ivec2(1);
   int arg_2 = 1;
   ivec2 v_2 = arg_1;
-  uint v_3 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_3 = (v_1.metadata[0u].x - 1u);
   uint v_4 = min(uint(arg_2), v_3);
   uvec2 v_5 = (uvec2(textureSize(f_arg_0)) - uvec2(1u));
   ivec2 v_6 = ivec2(min(uvec2(v_2), v_5));
@@ -46,7 +46,7 @@ uvec4 textureLoad_c378ee() {
   ivec2 arg_1 = ivec2(1);
   int arg_2 = 1;
   ivec2 v_2 = arg_1;
-  uint v_3 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_3 = (v_1.metadata[0u].x - 1u);
   uint v_4 = min(uint(arg_2), v_3);
   uvec2 v_5 = (uvec2(textureSize(arg_0)) - uvec2(1u));
   ivec2 v_6 = ivec2(min(uvec2(v_2), v_5));
@@ -78,7 +78,7 @@ uvec4 textureLoad_c378ee() {
   ivec2 arg_1 = ivec2(1);
   int arg_2 = 1;
   ivec2 v_1 = arg_1;
-  uint v_2 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_2 = (v.metadata[0u].x - 1u);
   uint v_3 = min(uint(arg_2), v_2);
   uvec2 v_4 = (uvec2(textureSize(v_arg_0)) - uvec2(1u));
   ivec2 v_5 = ivec2(min(uvec2(v_1), v_4));

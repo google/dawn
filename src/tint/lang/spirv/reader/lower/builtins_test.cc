@@ -202,10 +202,9 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat3x3f) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(
-            ty.mat3x3<f32>(), spirv::BuiltinFn::kInverse,
-            b.Construct(ty.mat3x3<f32>(), b.Splat(ty.vec3f(), 10_f), b.Splat(ty.vec3f(), 20_f),
-                        b.Splat(ty.vec3f(), 30_f)));
+        auto* m = b.Let("m", b.Construct(ty.mat3x3<f32>(), b.Splat(ty.vec3f(), 10_f),
+                                         b.Splat(ty.vec3f(), 20_f), b.Splat(ty.vec3f(), 30_f)));
+        b.Call<spirv::ir::BuiltinCall>(ty.mat3x3<f32>(), spirv::BuiltinFn::kInverse, m);
         b.Return(ep);
     });
 
@@ -213,7 +212,8 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat3x3f) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:mat3x3<f32> = construct vec3<f32>(10.0f), vec3<f32>(20.0f), vec3<f32>(30.0f)
-    %3:mat3x3<f32> = spirv.inverse %2
+    %m:mat3x3<f32> = let %2
+    %4:mat3x3<f32> = spirv.inverse %m
     ret
   }
 }
@@ -225,49 +225,50 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat3x3f) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:mat3x3<f32> = construct vec3<f32>(10.0f), vec3<f32>(20.0f), vec3<f32>(30.0f)
-    %3:f32 = determinant %2
-    %4:f32 = div 1.0f, %3
-    %5:f32 = access %2, 0u, 0u
-    %6:f32 = access %2, 0u, 1u
-    %7:f32 = access %2, 0u, 2u
-    %8:f32 = access %2, 1u, 0u
-    %9:f32 = access %2, 1u, 1u
-    %10:f32 = access %2, 1u, 2u
-    %11:f32 = access %2, 2u, 0u
-    %12:f32 = access %2, 2u, 1u
-    %13:f32 = access %2, 2u, 2u
-    %14:f32 = mul %9, %13
-    %15:f32 = mul %10, %12
-    %16:f32 = sub %14, %15
-    %17:f32 = mul %7, %12
-    %18:f32 = mul %6, %13
-    %19:f32 = sub %17, %18
-    %20:f32 = mul %6, %10
-    %21:f32 = mul %7, %9
-    %22:f32 = sub %20, %21
-    %23:f32 = mul %10, %11
-    %24:f32 = mul %8, %13
-    %25:f32 = sub %23, %24
-    %26:f32 = mul %5, %13
-    %27:f32 = mul %7, %11
-    %28:f32 = sub %26, %27
-    %29:f32 = mul %7, %8
-    %30:f32 = mul %5, %10
-    %31:f32 = sub %29, %30
-    %32:f32 = mul %8, %12
-    %33:f32 = mul %9, %11
-    %34:f32 = sub %32, %33
-    %35:f32 = mul %6, %11
-    %36:f32 = mul %5, %12
-    %37:f32 = sub %35, %36
-    %38:f32 = mul %5, %9
-    %39:f32 = mul %6, %8
-    %40:f32 = sub %38, %39
-    %41:vec3<f32> = construct %16, %19, %22
-    %42:vec3<f32> = construct %25, %28, %31
-    %43:vec3<f32> = construct %34, %37, %40
-    %44:mat3x3<f32> = construct %41, %42, %43
-    %45:mat3x3<f32> = mul %4, %44
+    %m:mat3x3<f32> = let %2
+    %4:f32 = determinant %m
+    %5:f32 = div 1.0f, %4
+    %6:f32 = access %m, 0u, 0u
+    %7:f32 = access %m, 0u, 1u
+    %8:f32 = access %m, 0u, 2u
+    %9:f32 = access %m, 1u, 0u
+    %10:f32 = access %m, 1u, 1u
+    %11:f32 = access %m, 1u, 2u
+    %12:f32 = access %m, 2u, 0u
+    %13:f32 = access %m, 2u, 1u
+    %14:f32 = access %m, 2u, 2u
+    %15:f32 = mul %10, %14
+    %16:f32 = mul %11, %13
+    %17:f32 = sub %15, %16
+    %18:f32 = mul %8, %13
+    %19:f32 = mul %7, %14
+    %20:f32 = sub %18, %19
+    %21:f32 = mul %7, %11
+    %22:f32 = mul %8, %10
+    %23:f32 = sub %21, %22
+    %24:f32 = mul %11, %12
+    %25:f32 = mul %9, %14
+    %26:f32 = sub %24, %25
+    %27:f32 = mul %6, %14
+    %28:f32 = mul %8, %12
+    %29:f32 = sub %27, %28
+    %30:f32 = mul %8, %9
+    %31:f32 = mul %6, %11
+    %32:f32 = sub %30, %31
+    %33:f32 = mul %9, %13
+    %34:f32 = mul %10, %12
+    %35:f32 = sub %33, %34
+    %36:f32 = mul %7, %12
+    %37:f32 = mul %6, %13
+    %38:f32 = sub %36, %37
+    %39:f32 = mul %6, %10
+    %40:f32 = mul %7, %9
+    %41:f32 = sub %39, %40
+    %42:vec3<f32> = construct %17, %20, %23
+    %43:vec3<f32> = construct %26, %29, %32
+    %44:vec3<f32> = construct %35, %38, %41
+    %45:mat3x3<f32> = construct %42, %43, %44
+    %46:mat3x3<f32> = mul %5, %45
     ret
   }
 }
@@ -279,10 +280,9 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat3x3h) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(
-            ty.mat3x3<f16>(), spirv::BuiltinFn::kInverse,
-            b.Construct(ty.mat3x3<f16>(), b.Splat(ty.vec3h(), 10_h), b.Splat(ty.vec3h(), 20_h),
-                        b.Splat(ty.vec3h(), 30_h)));
+        auto* m = b.Let("m", b.Construct(ty.mat3x3<f16>(), b.Splat(ty.vec3h(), 10_h),
+                                         b.Splat(ty.vec3h(), 20_h), b.Splat(ty.vec3h(), 30_h)));
+        b.Call<spirv::ir::BuiltinCall>(ty.mat3x3<f16>(), spirv::BuiltinFn::kInverse, m);
         b.Return(ep);
     });
 
@@ -290,7 +290,8 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat3x3h) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:mat3x3<f16> = construct vec3<f16>(10.0h), vec3<f16>(20.0h), vec3<f16>(30.0h)
-    %3:mat3x3<f16> = spirv.inverse %2
+    %m:mat3x3<f16> = let %2
+    %4:mat3x3<f16> = spirv.inverse %m
     ret
   }
 }
@@ -302,49 +303,50 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat3x3h) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:mat3x3<f16> = construct vec3<f16>(10.0h), vec3<f16>(20.0h), vec3<f16>(30.0h)
-    %3:f16 = determinant %2
-    %4:f16 = div 1.0h, %3
-    %5:f16 = access %2, 0u, 0u
-    %6:f16 = access %2, 0u, 1u
-    %7:f16 = access %2, 0u, 2u
-    %8:f16 = access %2, 1u, 0u
-    %9:f16 = access %2, 1u, 1u
-    %10:f16 = access %2, 1u, 2u
-    %11:f16 = access %2, 2u, 0u
-    %12:f16 = access %2, 2u, 1u
-    %13:f16 = access %2, 2u, 2u
-    %14:f16 = mul %9, %13
-    %15:f16 = mul %10, %12
-    %16:f16 = sub %14, %15
-    %17:f16 = mul %7, %12
-    %18:f16 = mul %6, %13
-    %19:f16 = sub %17, %18
-    %20:f16 = mul %6, %10
-    %21:f16 = mul %7, %9
-    %22:f16 = sub %20, %21
-    %23:f16 = mul %10, %11
-    %24:f16 = mul %8, %13
-    %25:f16 = sub %23, %24
-    %26:f16 = mul %5, %13
-    %27:f16 = mul %7, %11
-    %28:f16 = sub %26, %27
-    %29:f16 = mul %7, %8
-    %30:f16 = mul %5, %10
-    %31:f16 = sub %29, %30
-    %32:f16 = mul %8, %12
-    %33:f16 = mul %9, %11
-    %34:f16 = sub %32, %33
-    %35:f16 = mul %6, %11
-    %36:f16 = mul %5, %12
-    %37:f16 = sub %35, %36
-    %38:f16 = mul %5, %9
-    %39:f16 = mul %6, %8
-    %40:f16 = sub %38, %39
-    %41:vec3<f16> = construct %16, %19, %22
-    %42:vec3<f16> = construct %25, %28, %31
-    %43:vec3<f16> = construct %34, %37, %40
-    %44:mat3x3<f16> = construct %41, %42, %43
-    %45:mat3x3<f16> = mul %4, %44
+    %m:mat3x3<f16> = let %2
+    %4:f16 = determinant %m
+    %5:f16 = div 1.0h, %4
+    %6:f16 = access %m, 0u, 0u
+    %7:f16 = access %m, 0u, 1u
+    %8:f16 = access %m, 0u, 2u
+    %9:f16 = access %m, 1u, 0u
+    %10:f16 = access %m, 1u, 1u
+    %11:f16 = access %m, 1u, 2u
+    %12:f16 = access %m, 2u, 0u
+    %13:f16 = access %m, 2u, 1u
+    %14:f16 = access %m, 2u, 2u
+    %15:f16 = mul %10, %14
+    %16:f16 = mul %11, %13
+    %17:f16 = sub %15, %16
+    %18:f16 = mul %8, %13
+    %19:f16 = mul %7, %14
+    %20:f16 = sub %18, %19
+    %21:f16 = mul %7, %11
+    %22:f16 = mul %8, %10
+    %23:f16 = sub %21, %22
+    %24:f16 = mul %11, %12
+    %25:f16 = mul %9, %14
+    %26:f16 = sub %24, %25
+    %27:f16 = mul %6, %14
+    %28:f16 = mul %8, %12
+    %29:f16 = sub %27, %28
+    %30:f16 = mul %8, %9
+    %31:f16 = mul %6, %11
+    %32:f16 = sub %30, %31
+    %33:f16 = mul %9, %13
+    %34:f16 = mul %10, %12
+    %35:f16 = sub %33, %34
+    %36:f16 = mul %7, %12
+    %37:f16 = mul %6, %13
+    %38:f16 = sub %36, %37
+    %39:f16 = mul %6, %10
+    %40:f16 = mul %7, %9
+    %41:f16 = sub %39, %40
+    %42:vec3<f16> = construct %17, %20, %23
+    %43:vec3<f16> = construct %26, %29, %32
+    %44:vec3<f16> = construct %35, %38, %41
+    %45:mat3x3<f16> = construct %42, %43, %44
+    %46:mat3x3<f16> = mul %5, %45
     ret
   }
 }
@@ -356,10 +358,10 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat4x4f) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(
-            ty.mat4x4<f32>(), spirv::BuiltinFn::kInverse,
-            b.Construct(ty.mat4x4<f32>(), b.Splat(ty.vec4f(), 10_f), b.Splat(ty.vec4f(), 20_f),
-                        b.Splat(ty.vec4f(), 30_f), b.Splat(ty.vec4f(), 40_f)));
+        auto* m = b.Let(
+            "m", b.Construct(ty.mat4x4<f32>(), b.Splat(ty.vec4f(), 10_f), b.Splat(ty.vec4f(), 20_f),
+                             b.Splat(ty.vec4f(), 30_f), b.Splat(ty.vec4f(), 40_f)));
+        b.Call<spirv::ir::BuiltinCall>(ty.mat4x4<f32>(), spirv::BuiltinFn::kInverse, m);
         b.Return(ep);
     });
 
@@ -367,7 +369,8 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat4x4f) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:mat4x4<f32> = construct vec4<f32>(10.0f), vec4<f32>(20.0f), vec4<f32>(30.0f), vec4<f32>(40.0f)
-    %3:mat4x4<f32> = spirv.inverse %2
+    %m:mat4x4<f32> = let %2
+    %4:mat4x4<f32> = spirv.inverse %m
     ret
   }
 }
@@ -379,167 +382,168 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat4x4f) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:mat4x4<f32> = construct vec4<f32>(10.0f), vec4<f32>(20.0f), vec4<f32>(30.0f), vec4<f32>(40.0f)
-    %3:f32 = determinant %2
-    %4:f32 = div 1.0f, %3
-    %5:f32 = access %2, 0u, 0u
-    %6:f32 = access %2, 0u, 1u
-    %7:f32 = access %2, 0u, 2u
-    %8:f32 = access %2, 0u, 3u
-    %9:f32 = access %2, 1u, 0u
-    %10:f32 = access %2, 1u, 1u
-    %11:f32 = access %2, 1u, 2u
-    %12:f32 = access %2, 1u, 3u
-    %13:f32 = access %2, 2u, 0u
-    %14:f32 = access %2, 2u, 1u
-    %15:f32 = access %2, 2u, 2u
-    %16:f32 = access %2, 2u, 3u
-    %17:f32 = access %2, 3u, 0u
-    %18:f32 = access %2, 3u, 1u
-    %19:f32 = access %2, 3u, 2u
-    %20:f32 = access %2, 3u, 3u
-    %21:f32 = mul %15, %20
-    %22:f32 = mul %16, %19
-    %23:f32 = sub %21, %22
-    %24:f32 = mul %14, %20
-    %25:f32 = mul %16, %18
-    %26:f32 = sub %24, %25
-    %27:f32 = mul %14, %19
-    %28:f32 = mul %15, %18
-    %29:f32 = sub %27, %28
-    %30:f32 = mul %11, %20
-    %31:f32 = mul %12, %19
-    %32:f32 = sub %30, %31
-    %33:f32 = mul %10, %20
-    %34:f32 = mul %12, %18
-    %35:f32 = sub %33, %34
-    %36:f32 = mul %10, %19
-    %37:f32 = mul %11, %18
-    %38:f32 = sub %36, %37
-    %39:f32 = mul %11, %16
-    %40:f32 = mul %12, %15
-    %41:f32 = sub %39, %40
-    %42:f32 = mul %10, %16
-    %43:f32 = mul %12, %14
-    %44:f32 = sub %42, %43
-    %45:f32 = mul %10, %15
-    %46:f32 = mul %11, %14
-    %47:f32 = sub %45, %46
-    %48:f32 = mul %13, %20
-    %49:f32 = mul %16, %17
-    %50:f32 = sub %48, %49
-    %51:f32 = mul %13, %19
-    %52:f32 = mul %15, %17
-    %53:f32 = sub %51, %52
-    %54:f32 = mul %9, %20
-    %55:f32 = mul %12, %17
-    %56:f32 = sub %54, %55
-    %57:f32 = mul %9, %19
-    %58:f32 = mul %11, %17
-    %59:f32 = sub %57, %58
-    %60:f32 = mul %9, %16
-    %61:f32 = mul %12, %13
-    %62:f32 = sub %60, %61
-    %63:f32 = mul %9, %15
-    %64:f32 = mul %11, %13
-    %65:f32 = sub %63, %64
-    %66:f32 = mul %13, %18
-    %67:f32 = mul %14, %17
-    %68:f32 = sub %66, %67
-    %69:f32 = mul %9, %18
-    %70:f32 = mul %10, %17
-    %71:f32 = sub %69, %70
-    %72:f32 = mul %9, %14
-    %73:f32 = mul %10, %13
-    %74:f32 = sub %72, %73
-    %75:f32 = negation %6
-    %76:f32 = mul %10, %23
-    %77:f32 = mul %11, %26
-    %78:f32 = mul %12, %29
-    %79:f32 = sub %76, %77
-    %80:f32 = add %79, %78
-    %81:f32 = mul %75, %23
-    %82:f32 = mul %7, %26
-    %83:f32 = mul %8, %29
-    %84:f32 = add %81, %82
-    %85:f32 = sub %84, %83
-    %86:f32 = mul %6, %32
-    %87:f32 = mul %7, %35
-    %88:f32 = mul %8, %38
-    %89:f32 = sub %86, %87
-    %90:f32 = add %89, %88
-    %91:f32 = mul %75, %41
-    %92:f32 = mul %7, %44
-    %93:f32 = mul %8, %47
-    %94:f32 = add %91, %92
-    %95:f32 = sub %94, %93
-    %96:f32 = negation %9
-    %97:f32 = negation %5
-    %98:f32 = mul %96, %23
-    %99:f32 = mul %11, %50
-    %100:f32 = mul %12, %53
-    %101:f32 = add %98, %99
-    %102:f32 = sub %101, %100
-    %103:f32 = mul %5, %23
-    %104:f32 = mul %7, %50
-    %105:f32 = mul %8, %53
-    %106:f32 = sub %103, %104
-    %107:f32 = add %106, %105
-    %108:f32 = mul %97, %32
-    %109:f32 = mul %7, %56
-    %110:f32 = mul %8, %59
-    %111:f32 = add %108, %109
-    %112:f32 = sub %111, %110
-    %113:f32 = mul %5, %41
-    %114:f32 = mul %7, %62
-    %115:f32 = mul %8, %65
-    %116:f32 = sub %113, %114
-    %117:f32 = add %116, %115
-    %118:f32 = mul %9, %26
-    %119:f32 = mul %10, %50
-    %120:f32 = mul %12, %68
-    %121:f32 = sub %118, %119
-    %122:f32 = add %121, %120
-    %123:f32 = mul %97, %26
-    %124:f32 = mul %6, %50
-    %125:f32 = mul %8, %68
-    %126:f32 = add %123, %124
-    %127:f32 = sub %126, %125
-    %128:f32 = mul %5, %35
-    %129:f32 = mul %6, %56
-    %130:f32 = mul %8, %71
-    %131:f32 = sub %128, %129
-    %132:f32 = add %131, %130
-    %133:f32 = mul %97, %44
-    %134:f32 = mul %6, %62
-    %135:f32 = mul %8, %74
-    %136:f32 = add %133, %134
-    %137:f32 = sub %136, %135
-    %138:f32 = mul %96, %29
-    %139:f32 = mul %10, %53
-    %140:f32 = mul %11, %68
-    %141:f32 = add %138, %139
-    %142:f32 = sub %141, %140
-    %143:f32 = mul %5, %29
-    %144:f32 = mul %6, %53
-    %145:f32 = mul %7, %68
-    %146:f32 = sub %143, %144
-    %147:f32 = add %146, %145
-    %148:f32 = mul %97, %38
-    %149:f32 = mul %6, %59
-    %150:f32 = mul %7, %71
-    %151:f32 = add %148, %149
-    %152:f32 = sub %151, %150
-    %153:f32 = mul %5, %47
-    %154:f32 = mul %6, %65
-    %155:f32 = mul %7, %74
-    %156:f32 = sub %153, %154
-    %157:f32 = add %156, %155
-    %158:vec4<f32> = construct %80, %85, %90, %95
-    %159:vec4<f32> = construct %102, %107, %112, %117
-    %160:vec4<f32> = construct %122, %127, %132, %137
-    %161:vec4<f32> = construct %142, %147, %152, %157
-    %162:mat4x4<f32> = construct %158, %159, %160, %161
-    %163:mat4x4<f32> = mul %4, %162
+    %m:mat4x4<f32> = let %2
+    %4:f32 = determinant %m
+    %5:f32 = div 1.0f, %4
+    %6:f32 = access %m, 0u, 0u
+    %7:f32 = access %m, 0u, 1u
+    %8:f32 = access %m, 0u, 2u
+    %9:f32 = access %m, 0u, 3u
+    %10:f32 = access %m, 1u, 0u
+    %11:f32 = access %m, 1u, 1u
+    %12:f32 = access %m, 1u, 2u
+    %13:f32 = access %m, 1u, 3u
+    %14:f32 = access %m, 2u, 0u
+    %15:f32 = access %m, 2u, 1u
+    %16:f32 = access %m, 2u, 2u
+    %17:f32 = access %m, 2u, 3u
+    %18:f32 = access %m, 3u, 0u
+    %19:f32 = access %m, 3u, 1u
+    %20:f32 = access %m, 3u, 2u
+    %21:f32 = access %m, 3u, 3u
+    %22:f32 = mul %16, %21
+    %23:f32 = mul %17, %20
+    %24:f32 = sub %22, %23
+    %25:f32 = mul %15, %21
+    %26:f32 = mul %17, %19
+    %27:f32 = sub %25, %26
+    %28:f32 = mul %15, %20
+    %29:f32 = mul %16, %19
+    %30:f32 = sub %28, %29
+    %31:f32 = mul %12, %21
+    %32:f32 = mul %13, %20
+    %33:f32 = sub %31, %32
+    %34:f32 = mul %11, %21
+    %35:f32 = mul %13, %19
+    %36:f32 = sub %34, %35
+    %37:f32 = mul %11, %20
+    %38:f32 = mul %12, %19
+    %39:f32 = sub %37, %38
+    %40:f32 = mul %12, %17
+    %41:f32 = mul %13, %16
+    %42:f32 = sub %40, %41
+    %43:f32 = mul %11, %17
+    %44:f32 = mul %13, %15
+    %45:f32 = sub %43, %44
+    %46:f32 = mul %11, %16
+    %47:f32 = mul %12, %15
+    %48:f32 = sub %46, %47
+    %49:f32 = mul %14, %21
+    %50:f32 = mul %17, %18
+    %51:f32 = sub %49, %50
+    %52:f32 = mul %14, %20
+    %53:f32 = mul %16, %18
+    %54:f32 = sub %52, %53
+    %55:f32 = mul %10, %21
+    %56:f32 = mul %13, %18
+    %57:f32 = sub %55, %56
+    %58:f32 = mul %10, %20
+    %59:f32 = mul %12, %18
+    %60:f32 = sub %58, %59
+    %61:f32 = mul %10, %17
+    %62:f32 = mul %13, %14
+    %63:f32 = sub %61, %62
+    %64:f32 = mul %10, %16
+    %65:f32 = mul %12, %14
+    %66:f32 = sub %64, %65
+    %67:f32 = mul %14, %19
+    %68:f32 = mul %15, %18
+    %69:f32 = sub %67, %68
+    %70:f32 = mul %10, %19
+    %71:f32 = mul %11, %18
+    %72:f32 = sub %70, %71
+    %73:f32 = mul %10, %15
+    %74:f32 = mul %11, %14
+    %75:f32 = sub %73, %74
+    %76:f32 = negation %7
+    %77:f32 = mul %11, %24
+    %78:f32 = mul %12, %27
+    %79:f32 = mul %13, %30
+    %80:f32 = sub %77, %78
+    %81:f32 = add %80, %79
+    %82:f32 = mul %76, %24
+    %83:f32 = mul %8, %27
+    %84:f32 = mul %9, %30
+    %85:f32 = add %82, %83
+    %86:f32 = sub %85, %84
+    %87:f32 = mul %7, %33
+    %88:f32 = mul %8, %36
+    %89:f32 = mul %9, %39
+    %90:f32 = sub %87, %88
+    %91:f32 = add %90, %89
+    %92:f32 = mul %76, %42
+    %93:f32 = mul %8, %45
+    %94:f32 = mul %9, %48
+    %95:f32 = add %92, %93
+    %96:f32 = sub %95, %94
+    %97:f32 = negation %10
+    %98:f32 = negation %6
+    %99:f32 = mul %97, %24
+    %100:f32 = mul %12, %51
+    %101:f32 = mul %13, %54
+    %102:f32 = add %99, %100
+    %103:f32 = sub %102, %101
+    %104:f32 = mul %6, %24
+    %105:f32 = mul %8, %51
+    %106:f32 = mul %9, %54
+    %107:f32 = sub %104, %105
+    %108:f32 = add %107, %106
+    %109:f32 = mul %98, %33
+    %110:f32 = mul %8, %57
+    %111:f32 = mul %9, %60
+    %112:f32 = add %109, %110
+    %113:f32 = sub %112, %111
+    %114:f32 = mul %6, %42
+    %115:f32 = mul %8, %63
+    %116:f32 = mul %9, %66
+    %117:f32 = sub %114, %115
+    %118:f32 = add %117, %116
+    %119:f32 = mul %10, %27
+    %120:f32 = mul %11, %51
+    %121:f32 = mul %13, %69
+    %122:f32 = sub %119, %120
+    %123:f32 = add %122, %121
+    %124:f32 = mul %98, %27
+    %125:f32 = mul %7, %51
+    %126:f32 = mul %9, %69
+    %127:f32 = add %124, %125
+    %128:f32 = sub %127, %126
+    %129:f32 = mul %6, %36
+    %130:f32 = mul %7, %57
+    %131:f32 = mul %9, %72
+    %132:f32 = sub %129, %130
+    %133:f32 = add %132, %131
+    %134:f32 = mul %98, %45
+    %135:f32 = mul %7, %63
+    %136:f32 = mul %9, %75
+    %137:f32 = add %134, %135
+    %138:f32 = sub %137, %136
+    %139:f32 = mul %97, %30
+    %140:f32 = mul %11, %54
+    %141:f32 = mul %12, %69
+    %142:f32 = add %139, %140
+    %143:f32 = sub %142, %141
+    %144:f32 = mul %6, %30
+    %145:f32 = mul %7, %54
+    %146:f32 = mul %8, %69
+    %147:f32 = sub %144, %145
+    %148:f32 = add %147, %146
+    %149:f32 = mul %98, %39
+    %150:f32 = mul %7, %60
+    %151:f32 = mul %8, %72
+    %152:f32 = add %149, %150
+    %153:f32 = sub %152, %151
+    %154:f32 = mul %6, %48
+    %155:f32 = mul %7, %66
+    %156:f32 = mul %8, %75
+    %157:f32 = sub %154, %155
+    %158:f32 = add %157, %156
+    %159:vec4<f32> = construct %81, %86, %91, %96
+    %160:vec4<f32> = construct %103, %108, %113, %118
+    %161:vec4<f32> = construct %123, %128, %133, %138
+    %162:vec4<f32> = construct %143, %148, %153, %158
+    %163:mat4x4<f32> = construct %159, %160, %161, %162
+    %164:mat4x4<f32> = mul %5, %163
     ret
   }
 }
@@ -551,10 +555,10 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat4x4h) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(
-            ty.mat4x4<f16>(), spirv::BuiltinFn::kInverse,
-            b.Construct(ty.mat4x4<f16>(), b.Splat(ty.vec4h(), 10_h), b.Splat(ty.vec4h(), 20_h),
-                        b.Splat(ty.vec4h(), 30_h), b.Splat(ty.vec4h(), 40_h)));
+        auto* m = b.Let(
+            "m", b.Construct(ty.mat4x4<f16>(), b.Splat(ty.vec4h(), 10_h), b.Splat(ty.vec4h(), 20_h),
+                             b.Splat(ty.vec4h(), 30_h), b.Splat(ty.vec4h(), 40_h)));
+        b.Call<spirv::ir::BuiltinCall>(ty.mat4x4<f16>(), spirv::BuiltinFn::kInverse, m);
         b.Return(ep);
     });
 
@@ -562,7 +566,8 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat4x4h) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:mat4x4<f16> = construct vec4<f16>(10.0h), vec4<f16>(20.0h), vec4<f16>(30.0h), vec4<f16>(40.0h)
-    %3:mat4x4<f16> = spirv.inverse %2
+    %m:mat4x4<f16> = let %2
+    %4:mat4x4<f16> = spirv.inverse %m
     ret
   }
 }
@@ -574,167 +579,168 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat4x4h) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:mat4x4<f16> = construct vec4<f16>(10.0h), vec4<f16>(20.0h), vec4<f16>(30.0h), vec4<f16>(40.0h)
-    %3:f16 = determinant %2
-    %4:f16 = div 1.0h, %3
-    %5:f16 = access %2, 0u, 0u
-    %6:f16 = access %2, 0u, 1u
-    %7:f16 = access %2, 0u, 2u
-    %8:f16 = access %2, 0u, 3u
-    %9:f16 = access %2, 1u, 0u
-    %10:f16 = access %2, 1u, 1u
-    %11:f16 = access %2, 1u, 2u
-    %12:f16 = access %2, 1u, 3u
-    %13:f16 = access %2, 2u, 0u
-    %14:f16 = access %2, 2u, 1u
-    %15:f16 = access %2, 2u, 2u
-    %16:f16 = access %2, 2u, 3u
-    %17:f16 = access %2, 3u, 0u
-    %18:f16 = access %2, 3u, 1u
-    %19:f16 = access %2, 3u, 2u
-    %20:f16 = access %2, 3u, 3u
-    %21:f16 = mul %15, %20
-    %22:f16 = mul %16, %19
-    %23:f16 = sub %21, %22
-    %24:f16 = mul %14, %20
-    %25:f16 = mul %16, %18
-    %26:f16 = sub %24, %25
-    %27:f16 = mul %14, %19
-    %28:f16 = mul %15, %18
-    %29:f16 = sub %27, %28
-    %30:f16 = mul %11, %20
-    %31:f16 = mul %12, %19
-    %32:f16 = sub %30, %31
-    %33:f16 = mul %10, %20
-    %34:f16 = mul %12, %18
-    %35:f16 = sub %33, %34
-    %36:f16 = mul %10, %19
-    %37:f16 = mul %11, %18
-    %38:f16 = sub %36, %37
-    %39:f16 = mul %11, %16
-    %40:f16 = mul %12, %15
-    %41:f16 = sub %39, %40
-    %42:f16 = mul %10, %16
-    %43:f16 = mul %12, %14
-    %44:f16 = sub %42, %43
-    %45:f16 = mul %10, %15
-    %46:f16 = mul %11, %14
-    %47:f16 = sub %45, %46
-    %48:f16 = mul %13, %20
-    %49:f16 = mul %16, %17
-    %50:f16 = sub %48, %49
-    %51:f16 = mul %13, %19
-    %52:f16 = mul %15, %17
-    %53:f16 = sub %51, %52
-    %54:f16 = mul %9, %20
-    %55:f16 = mul %12, %17
-    %56:f16 = sub %54, %55
-    %57:f16 = mul %9, %19
-    %58:f16 = mul %11, %17
-    %59:f16 = sub %57, %58
-    %60:f16 = mul %9, %16
-    %61:f16 = mul %12, %13
-    %62:f16 = sub %60, %61
-    %63:f16 = mul %9, %15
-    %64:f16 = mul %11, %13
-    %65:f16 = sub %63, %64
-    %66:f16 = mul %13, %18
-    %67:f16 = mul %14, %17
-    %68:f16 = sub %66, %67
-    %69:f16 = mul %9, %18
-    %70:f16 = mul %10, %17
-    %71:f16 = sub %69, %70
-    %72:f16 = mul %9, %14
-    %73:f16 = mul %10, %13
-    %74:f16 = sub %72, %73
-    %75:f16 = negation %6
-    %76:f16 = mul %10, %23
-    %77:f16 = mul %11, %26
-    %78:f16 = mul %12, %29
-    %79:f16 = sub %76, %77
-    %80:f16 = add %79, %78
-    %81:f16 = mul %75, %23
-    %82:f16 = mul %7, %26
-    %83:f16 = mul %8, %29
-    %84:f16 = add %81, %82
-    %85:f16 = sub %84, %83
-    %86:f16 = mul %6, %32
-    %87:f16 = mul %7, %35
-    %88:f16 = mul %8, %38
-    %89:f16 = sub %86, %87
-    %90:f16 = add %89, %88
-    %91:f16 = mul %75, %41
-    %92:f16 = mul %7, %44
-    %93:f16 = mul %8, %47
-    %94:f16 = add %91, %92
-    %95:f16 = sub %94, %93
-    %96:f16 = negation %9
-    %97:f16 = negation %5
-    %98:f16 = mul %96, %23
-    %99:f16 = mul %11, %50
-    %100:f16 = mul %12, %53
-    %101:f16 = add %98, %99
-    %102:f16 = sub %101, %100
-    %103:f16 = mul %5, %23
-    %104:f16 = mul %7, %50
-    %105:f16 = mul %8, %53
-    %106:f16 = sub %103, %104
-    %107:f16 = add %106, %105
-    %108:f16 = mul %97, %32
-    %109:f16 = mul %7, %56
-    %110:f16 = mul %8, %59
-    %111:f16 = add %108, %109
-    %112:f16 = sub %111, %110
-    %113:f16 = mul %5, %41
-    %114:f16 = mul %7, %62
-    %115:f16 = mul %8, %65
-    %116:f16 = sub %113, %114
-    %117:f16 = add %116, %115
-    %118:f16 = mul %9, %26
-    %119:f16 = mul %10, %50
-    %120:f16 = mul %12, %68
-    %121:f16 = sub %118, %119
-    %122:f16 = add %121, %120
-    %123:f16 = mul %97, %26
-    %124:f16 = mul %6, %50
-    %125:f16 = mul %8, %68
-    %126:f16 = add %123, %124
-    %127:f16 = sub %126, %125
-    %128:f16 = mul %5, %35
-    %129:f16 = mul %6, %56
-    %130:f16 = mul %8, %71
-    %131:f16 = sub %128, %129
-    %132:f16 = add %131, %130
-    %133:f16 = mul %97, %44
-    %134:f16 = mul %6, %62
-    %135:f16 = mul %8, %74
-    %136:f16 = add %133, %134
-    %137:f16 = sub %136, %135
-    %138:f16 = mul %96, %29
-    %139:f16 = mul %10, %53
-    %140:f16 = mul %11, %68
-    %141:f16 = add %138, %139
-    %142:f16 = sub %141, %140
-    %143:f16 = mul %5, %29
-    %144:f16 = mul %6, %53
-    %145:f16 = mul %7, %68
-    %146:f16 = sub %143, %144
-    %147:f16 = add %146, %145
-    %148:f16 = mul %97, %38
-    %149:f16 = mul %6, %59
-    %150:f16 = mul %7, %71
-    %151:f16 = add %148, %149
-    %152:f16 = sub %151, %150
-    %153:f16 = mul %5, %47
-    %154:f16 = mul %6, %65
-    %155:f16 = mul %7, %74
-    %156:f16 = sub %153, %154
-    %157:f16 = add %156, %155
-    %158:vec4<f16> = construct %80, %85, %90, %95
-    %159:vec4<f16> = construct %102, %107, %112, %117
-    %160:vec4<f16> = construct %122, %127, %132, %137
-    %161:vec4<f16> = construct %142, %147, %152, %157
-    %162:mat4x4<f16> = construct %158, %159, %160, %161
-    %163:mat4x4<f16> = mul %4, %162
+    %m:mat4x4<f16> = let %2
+    %4:f16 = determinant %m
+    %5:f16 = div 1.0h, %4
+    %6:f16 = access %m, 0u, 0u
+    %7:f16 = access %m, 0u, 1u
+    %8:f16 = access %m, 0u, 2u
+    %9:f16 = access %m, 0u, 3u
+    %10:f16 = access %m, 1u, 0u
+    %11:f16 = access %m, 1u, 1u
+    %12:f16 = access %m, 1u, 2u
+    %13:f16 = access %m, 1u, 3u
+    %14:f16 = access %m, 2u, 0u
+    %15:f16 = access %m, 2u, 1u
+    %16:f16 = access %m, 2u, 2u
+    %17:f16 = access %m, 2u, 3u
+    %18:f16 = access %m, 3u, 0u
+    %19:f16 = access %m, 3u, 1u
+    %20:f16 = access %m, 3u, 2u
+    %21:f16 = access %m, 3u, 3u
+    %22:f16 = mul %16, %21
+    %23:f16 = mul %17, %20
+    %24:f16 = sub %22, %23
+    %25:f16 = mul %15, %21
+    %26:f16 = mul %17, %19
+    %27:f16 = sub %25, %26
+    %28:f16 = mul %15, %20
+    %29:f16 = mul %16, %19
+    %30:f16 = sub %28, %29
+    %31:f16 = mul %12, %21
+    %32:f16 = mul %13, %20
+    %33:f16 = sub %31, %32
+    %34:f16 = mul %11, %21
+    %35:f16 = mul %13, %19
+    %36:f16 = sub %34, %35
+    %37:f16 = mul %11, %20
+    %38:f16 = mul %12, %19
+    %39:f16 = sub %37, %38
+    %40:f16 = mul %12, %17
+    %41:f16 = mul %13, %16
+    %42:f16 = sub %40, %41
+    %43:f16 = mul %11, %17
+    %44:f16 = mul %13, %15
+    %45:f16 = sub %43, %44
+    %46:f16 = mul %11, %16
+    %47:f16 = mul %12, %15
+    %48:f16 = sub %46, %47
+    %49:f16 = mul %14, %21
+    %50:f16 = mul %17, %18
+    %51:f16 = sub %49, %50
+    %52:f16 = mul %14, %20
+    %53:f16 = mul %16, %18
+    %54:f16 = sub %52, %53
+    %55:f16 = mul %10, %21
+    %56:f16 = mul %13, %18
+    %57:f16 = sub %55, %56
+    %58:f16 = mul %10, %20
+    %59:f16 = mul %12, %18
+    %60:f16 = sub %58, %59
+    %61:f16 = mul %10, %17
+    %62:f16 = mul %13, %14
+    %63:f16 = sub %61, %62
+    %64:f16 = mul %10, %16
+    %65:f16 = mul %12, %14
+    %66:f16 = sub %64, %65
+    %67:f16 = mul %14, %19
+    %68:f16 = mul %15, %18
+    %69:f16 = sub %67, %68
+    %70:f16 = mul %10, %19
+    %71:f16 = mul %11, %18
+    %72:f16 = sub %70, %71
+    %73:f16 = mul %10, %15
+    %74:f16 = mul %11, %14
+    %75:f16 = sub %73, %74
+    %76:f16 = negation %7
+    %77:f16 = mul %11, %24
+    %78:f16 = mul %12, %27
+    %79:f16 = mul %13, %30
+    %80:f16 = sub %77, %78
+    %81:f16 = add %80, %79
+    %82:f16 = mul %76, %24
+    %83:f16 = mul %8, %27
+    %84:f16 = mul %9, %30
+    %85:f16 = add %82, %83
+    %86:f16 = sub %85, %84
+    %87:f16 = mul %7, %33
+    %88:f16 = mul %8, %36
+    %89:f16 = mul %9, %39
+    %90:f16 = sub %87, %88
+    %91:f16 = add %90, %89
+    %92:f16 = mul %76, %42
+    %93:f16 = mul %8, %45
+    %94:f16 = mul %9, %48
+    %95:f16 = add %92, %93
+    %96:f16 = sub %95, %94
+    %97:f16 = negation %10
+    %98:f16 = negation %6
+    %99:f16 = mul %97, %24
+    %100:f16 = mul %12, %51
+    %101:f16 = mul %13, %54
+    %102:f16 = add %99, %100
+    %103:f16 = sub %102, %101
+    %104:f16 = mul %6, %24
+    %105:f16 = mul %8, %51
+    %106:f16 = mul %9, %54
+    %107:f16 = sub %104, %105
+    %108:f16 = add %107, %106
+    %109:f16 = mul %98, %33
+    %110:f16 = mul %8, %57
+    %111:f16 = mul %9, %60
+    %112:f16 = add %109, %110
+    %113:f16 = sub %112, %111
+    %114:f16 = mul %6, %42
+    %115:f16 = mul %8, %63
+    %116:f16 = mul %9, %66
+    %117:f16 = sub %114, %115
+    %118:f16 = add %117, %116
+    %119:f16 = mul %10, %27
+    %120:f16 = mul %11, %51
+    %121:f16 = mul %13, %69
+    %122:f16 = sub %119, %120
+    %123:f16 = add %122, %121
+    %124:f16 = mul %98, %27
+    %125:f16 = mul %7, %51
+    %126:f16 = mul %9, %69
+    %127:f16 = add %124, %125
+    %128:f16 = sub %127, %126
+    %129:f16 = mul %6, %36
+    %130:f16 = mul %7, %57
+    %131:f16 = mul %9, %72
+    %132:f16 = sub %129, %130
+    %133:f16 = add %132, %131
+    %134:f16 = mul %98, %45
+    %135:f16 = mul %7, %63
+    %136:f16 = mul %9, %75
+    %137:f16 = add %134, %135
+    %138:f16 = sub %137, %136
+    %139:f16 = mul %97, %30
+    %140:f16 = mul %11, %54
+    %141:f16 = mul %12, %69
+    %142:f16 = add %139, %140
+    %143:f16 = sub %142, %141
+    %144:f16 = mul %6, %30
+    %145:f16 = mul %7, %54
+    %146:f16 = mul %8, %69
+    %147:f16 = sub %144, %145
+    %148:f16 = add %147, %146
+    %149:f16 = mul %98, %39
+    %150:f16 = mul %7, %60
+    %151:f16 = mul %8, %72
+    %152:f16 = add %149, %150
+    %153:f16 = sub %152, %151
+    %154:f16 = mul %6, %48
+    %155:f16 = mul %7, %66
+    %156:f16 = mul %8, %75
+    %157:f16 = sub %154, %155
+    %158:f16 = add %157, %156
+    %159:vec4<f16> = construct %81, %86, %91, %96
+    %160:vec4<f16> = construct %103, %108, %113, %118
+    %161:vec4<f16> = construct %123, %128, %133, %138
+    %162:vec4<f16> = construct %143, %148, %153, %158
+    %163:mat4x4<f16> = construct %159, %160, %161, %162
+    %164:mat4x4<f16> = mul %5, %163
     ret
   }
 }
@@ -2342,14 +2348,20 @@ TEST_F(SpirvReader_BuiltinsTest, FaceForward_Scalar) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kFaceForward, 50_f, 60_f, 70_f);
+        auto* x = b.Let("x", 50_f);
+        auto* y = b.Let("y", 60_f);
+        auto* z = b.Let("z", 70_f);
+        b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kFaceForward, x, y, z);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = spirv.face_forward 50.0f, 60.0f, 70.0f
+    %x:f32 = let 50.0f
+    %y:f32 = let 60.0f
+    %z:f32 = let 70.0f
+    %5:f32 = spirv.face_forward %x, %y, %z
     ret
   }
 }
@@ -2361,10 +2373,13 @@ TEST_F(SpirvReader_BuiltinsTest, FaceForward_Scalar) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = negation 50.0f
-    %3:f32 = mul 60.0f, 70.0f
-    %4:bool = lt %3, 0.0f
-    %5:f32 = select %2, 50.0f, %4
+    %x:f32 = let 50.0f
+    %y:f32 = let 60.0f
+    %z:f32 = let 70.0f
+    %5:f32 = negation %x
+    %6:f32 = mul %y, %z
+    %7:bool = lt %6, 0.0f
+    %8:f32 = select %5, %x, %7
     ret
   }
 }
@@ -2410,14 +2425,18 @@ TEST_F(SpirvReader_BuiltinsTest, Reflect_Scalar) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kReflect, 50_f, 60_f);
+        auto* x = b.Let("x", 50_f);
+        auto* y = b.Let("y", 60_f);
+        b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kReflect, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = spirv.reflect 50.0f, 60.0f
+    %x:f32 = let 50.0f
+    %y:f32 = let 60.0f
+    %4:f32 = spirv.reflect %x, %y
     ret
   }
 }
@@ -2429,10 +2448,12 @@ TEST_F(SpirvReader_BuiltinsTest, Reflect_Scalar) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = mul 50.0f, 60.0f
-    %3:f32 = mul %2, 60.0f
-    %4:f32 = mul %3, 2.0f
-    %5:f32 = sub 50.0f, %4
+    %x:f32 = let 50.0f
+    %y:f32 = let 60.0f
+    %4:f32 = mul %x, %y
+    %5:f32 = mul %4, %y
+    %6:f32 = mul %5, 2.0f
+    %7:f32 = sub %x, %6
     ret
   }
 }
@@ -4149,16 +4170,20 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 50_i);
+        auto* y = b.Let("y", 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 50_i, 10_u);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.)" +
-               params.ir + R"(<i32> 50i, 10u
+    %x:i32 = let 50i
+    %y:u32 = let 10u
+    %4:i32 = spirv.)" +
+               params.ir + R"(<i32> %x, %y
     ret
   }
 }
@@ -4170,9 +4195,11 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 10u
-    %3:i32 = )" + params.ir +
-                  R"( 50i, %2
+    %x:i32 = let 50i
+    %y:u32 = let 10u
+    %4:i32 = bitcast<i32> %y
+    %5:i32 = )" + params.ir +
+                  R"( %x, %4
     ret
   }
 }
@@ -4186,16 +4213,20 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 10_u);
+        auto* y = b.Let("y", 50_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_u, 50_i);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.)" +
-               params.ir + R"(<i32> 10u, 50i
+    %x:u32 = let 10u
+    %y:i32 = let 50i
+    %4:i32 = spirv.)" +
+               params.ir + R"(<i32> %x, %y
     ret
   }
 }
@@ -4207,10 +4238,12 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 50i
-    %3:u32 = )" + params.ir +
-                  R"( 10u, %2
-    %4:i32 = bitcast<i32> %3
+    %x:u32 = let 10u
+    %y:i32 = let 50i
+    %4:u32 = bitcast<u32> %y
+    %5:u32 = )" + params.ir +
+                  R"( %x, %4
+    %6:i32 = bitcast<i32> %5
     ret
   }
 }
@@ -4224,16 +4257,20 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_UnsignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 10_u);
+        auto* y = b.Let("y", 20_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_u, 20_u);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.)" +
-               params.ir + R"(<i32> 10u, 20u
+    %x:u32 = let 10u
+    %y:u32 = let 20u
+    %4:i32 = spirv.)" +
+               params.ir + R"(<i32> %x, %y
     ret
   }
 }
@@ -4245,9 +4282,11 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = )" + params.ir +
-                  R"( 10u, 20u
-    %3:i32 = bitcast<i32> %2
+    %x:u32 = let 10u
+    %y:u32 = let 20u
+    %4:u32 = )" + params.ir +
+                  R"( %x, %y
+    %5:i32 = bitcast<i32> %4
     ret
   }
 }
@@ -4261,16 +4300,20 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 50_i);
+        auto* y = b.Let("y", 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 50_i, 10_u);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.)" +
-               params.ir + R"(<u32> 50i, 10u
+    %x:i32 = let 50i
+    %y:u32 = let 10u
+    %4:u32 = spirv.)" +
+               params.ir + R"(<u32> %x, %y
     ret
   }
 }
@@ -4282,10 +4325,12 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 10u
-    %3:i32 = )" + params.ir +
-                  R"( 50i, %2
-    %4:u32 = bitcast<u32> %3
+    %x:i32 = let 50i
+    %y:u32 = let 10u
+    %4:i32 = bitcast<i32> %y
+    %5:i32 = )" + params.ir +
+                  R"( %x, %4
+    %6:u32 = bitcast<u32> %5
     ret
   }
 }
@@ -4299,16 +4344,20 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 10_u);
+        auto* y = b.Let("y", 50_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 10_u, 50_i);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.)" +
-               params.ir + R"(<u32> 10u, 50i
+    %x:u32 = let 10u
+    %y:i32 = let 50i
+    %4:u32 = spirv.)" +
+               params.ir + R"(<u32> %x, %y
     ret
   }
 }
@@ -4320,9 +4369,11 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 50i
-    %3:u32 = )" + params.ir +
-                  R"( 10u, %2
+    %x:u32 = let 10u
+    %y:i32 = let 50i
+    %4:u32 = bitcast<u32> %y
+    %5:u32 = )" + params.ir +
+                  R"( %x, %4
     ret
   }
 }
@@ -4336,16 +4387,20 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_SignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 50_i);
+        auto* y = b.Let("y", 60_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 50_i, 60_i);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.)" +
-               params.ir + R"(<u32> 50i, 60i
+    %x:i32 = let 50i
+    %y:i32 = let 60i
+    %4:u32 = spirv.)" +
+               params.ir + R"(<u32> %x, %y
     ret
   }
 }
@@ -4357,9 +4412,11 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = )" + params.ir +
-                  R"( 50i, 60i
-    %3:u32 = bitcast<u32> %2
+    %x:i32 = let 50i
+    %y:i32 = let 60i
+    %4:i32 = )" + params.ir +
+                  R"( %x, %y
+    %5:u32 = bitcast<u32> %4
     ret
   }
 }
@@ -4373,17 +4430,20 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<i32>>(50_i), b.Splat<vec2<u32>>(10_u));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(50_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(10_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.)" +
-               params.ir + R"(<i32> vec2<i32>(50i), vec2<u32>(10u)
+    %x:vec2<i32> = let vec2<i32>(50i)
+    %y:vec2<u32> = let vec2<u32>(10u)
+    %4:vec2<i32> = spirv.)" +
+               params.ir + R"(<i32> %x, %y
     ret
   }
 }
@@ -4395,10 +4455,12 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
-    %3:vec2<i32> = )" +
+    %x:vec2<i32> = let vec2<i32>(50i)
+    %y:vec2<u32> = let vec2<u32>(10u)
+    %4:vec2<i32> = bitcast<vec2<i32>> %y
+    %5:vec2<i32> = )" +
                   params.ir +
-                  R"( vec2<i32>(50i), %2
+                  R"( %x, %4
     ret
   }
 }
@@ -4412,17 +4474,20 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<u32>>(10_u), b.Splat<vec2<i32>>(50_i));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(10_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(50_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.)" +
-               params.ir + R"(<i32> vec2<u32>(10u), vec2<i32>(50i)
+    %x:vec2<u32> = let vec2<u32>(10u)
+    %y:vec2<i32> = let vec2<i32>(50i)
+    %4:vec2<i32> = spirv.)" +
+               params.ir + R"(<i32> %x, %y
     ret
   }
 }
@@ -4434,11 +4499,13 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(50i)
-    %3:vec2<u32> = )" +
+    %x:vec2<u32> = let vec2<u32>(10u)
+    %y:vec2<i32> = let vec2<i32>(50i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<u32> = )" +
                   params.ir +
-                  R"( vec2<u32>(10u), %2
-    %4:vec2<i32> = bitcast<vec2<i32>> %3
+                  R"( %x, %4
+    %6:vec2<i32> = bitcast<vec2<i32>> %5
     ret
   }
 }
@@ -4452,17 +4519,20 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_UnsignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<u32>>(10_u), b.Splat<vec2<u32>>(20_u));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(10_u));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(20_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.)" +
-               params.ir + R"(<i32> vec2<u32>(10u), vec2<u32>(20u)
+    %x:vec2<u32> = let vec2<u32>(10u)
+    %y:vec2<u32> = let vec2<u32>(20u)
+    %4:vec2<i32> = spirv.)" +
+               params.ir + R"(<i32> %x, %y
     ret
   }
 }
@@ -4474,10 +4544,12 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = )" +
+    %x:vec2<u32> = let vec2<u32>(10u)
+    %y:vec2<u32> = let vec2<u32>(20u)
+    %4:vec2<u32> = )" +
                   params.ir +
-                  R"( vec2<u32>(10u), vec2<u32>(20u)
-    %3:vec2<i32> = bitcast<vec2<i32>> %2
+                  R"( %x, %y
+    %5:vec2<i32> = bitcast<vec2<i32>> %4
     ret
   }
 }
@@ -4491,17 +4563,20 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<i32>>(50_i), b.Splat<vec2<u32>>(10_u));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(50_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(10_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.)" +
-               params.ir + R"(<u32> vec2<i32>(50i), vec2<u32>(10u)
+    %x:vec2<i32> = let vec2<i32>(50i)
+    %y:vec2<u32> = let vec2<u32>(10u)
+    %4:vec2<u32> = spirv.)" +
+               params.ir + R"(<u32> %x, %y
     ret
   }
 }
@@ -4513,11 +4588,13 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
-    %3:vec2<i32> = )" +
+    %x:vec2<i32> = let vec2<i32>(50i)
+    %y:vec2<u32> = let vec2<u32>(10u)
+    %4:vec2<i32> = bitcast<vec2<i32>> %y
+    %5:vec2<i32> = )" +
                   params.ir +
-                  R"( vec2<i32>(50i), %2
-    %4:vec2<u32> = bitcast<vec2<u32>> %3
+                  R"( %x, %4
+    %6:vec2<u32> = bitcast<vec2<u32>> %5
     ret
   }
 }
@@ -4531,17 +4608,20 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<u32>>(10_u), b.Splat<vec2<i32>>(50_i));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(10_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(50_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.)" +
-               params.ir + R"(<u32> vec2<u32>(10u), vec2<i32>(50i)
+    %x:vec2<u32> = let vec2<u32>(10u)
+    %y:vec2<i32> = let vec2<i32>(50i)
+    %4:vec2<u32> = spirv.)" +
+               params.ir + R"(<u32> %x, %y
     ret
   }
 }
@@ -4553,10 +4633,12 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(50i)
-    %3:vec2<u32> = )" +
+    %x:vec2<u32> = let vec2<u32>(10u)
+    %y:vec2<i32> = let vec2<i32>(50i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<u32> = )" +
                   params.ir +
-                  R"( vec2<u32>(10u), %2
+                  R"( %x, %4
     ret
   }
 }
@@ -4570,17 +4652,20 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_SignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<i32>>(50_i), b.Splat<vec2<i32>>(60_i));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(50_i));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(60_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.)" +
-               params.ir + R"(<u32> vec2<i32>(50i), vec2<i32>(60i)
+    %x:vec2<i32> = let vec2<i32>(50i)
+    %y:vec2<i32> = let vec2<i32>(60i)
+    %4:vec2<u32> = spirv.)" +
+               params.ir + R"(<u32> %x, %y
     ret
   }
 }
@@ -4592,10 +4677,12 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = )" +
+    %x:vec2<i32> = let vec2<i32>(50i)
+    %y:vec2<i32> = let vec2<i32>(60i)
+    %4:vec2<i32> = )" +
                   params.ir +
-                  R"( vec2<i32>(50i), vec2<i32>(60i)
-    %3:vec2<u32> = bitcast<vec2<u32>> %2
+                  R"( %x, %y
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     ret
   }
 }
@@ -4624,16 +4711,20 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 50_i);
+        auto* y = b.Let("y", 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 50_i, 10_u);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.)" +
-               params.ir + R"(<i32> 50i, 10u
+    %x:i32 = let 50i
+    %y:u32 = let 10u
+    %4:i32 = spirv.)" +
+               params.ir + R"(<i32> %x, %y
     ret
   }
 }
@@ -4645,9 +4736,11 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 10u
-    %3:i32 = )" + params.wgsl +
-                  R"( 50i, %2
+    %x:i32 = let 50i
+    %y:u32 = let 10u
+    %4:i32 = bitcast<i32> %y
+    %5:i32 = )" + params.wgsl +
+                  R"( %x, %4
     ret
   }
 }
@@ -4661,16 +4754,20 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 10_u);
+        auto* y = b.Let("y", 50_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_u, 50_i);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.)" +
-               params.ir + R"(<i32> 10u, 50i
+    %x:u32 = let 10u
+    %y:i32 = let 50i
+    %4:i32 = spirv.)" +
+               params.ir + R"(<i32> %x, %y
     ret
   }
 }
@@ -4682,9 +4779,11 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 10u
-    %3:i32 = )" + params.wgsl +
-                  R"( %2, 50i
+    %x:u32 = let 10u
+    %y:i32 = let 50i
+    %4:i32 = bitcast<i32> %x
+    %5:i32 = )" + params.wgsl +
+                  R"( %4, %y
     ret
   }
 }
@@ -4698,16 +4797,20 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_UnsignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 10_u);
+        auto* y = b.Let("y", 20_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_u, 20_u);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.)" +
-               params.ir + R"(<i32> 10u, 20u
+    %x:u32 = let 10u
+    %y:u32 = let 20u
+    %4:i32 = spirv.)" +
+               params.ir + R"(<i32> %x, %y
     ret
   }
 }
@@ -4719,10 +4822,12 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 10u
-    %3:i32 = bitcast<i32> 20u
-    %4:i32 = )" + params.wgsl +
-                  R"( %2, %3
+    %x:u32 = let 10u
+    %y:u32 = let 20u
+    %4:i32 = bitcast<i32> %x
+    %5:i32 = bitcast<i32> %y
+    %6:i32 = )" + params.wgsl +
+                  R"( %4, %5
     ret
   }
 }
@@ -4736,16 +4841,20 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 50_i);
+        auto* y = b.Let("y", 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 50_i, 10_u);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.)" +
-               params.ir + R"(<u32> 50i, 10u
+    %x:i32 = let 50i
+    %y:u32 = let 10u
+    %4:u32 = spirv.)" +
+               params.ir + R"(<u32> %x, %y
     ret
   }
 }
@@ -4757,10 +4866,12 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 10u
-    %3:i32 = )" + params.wgsl +
-                  R"( 50i, %2
-    %4:u32 = bitcast<u32> %3
+    %x:i32 = let 50i
+    %y:u32 = let 10u
+    %4:i32 = bitcast<i32> %y
+    %5:i32 = )" + params.wgsl +
+                  R"( %x, %4
+    %6:u32 = bitcast<u32> %5
     ret
   }
 }
@@ -4774,16 +4885,20 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 10_u);
+        auto* y = b.Let("y", 50_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 10_u, 50_i);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.)" +
-               params.ir + R"(<u32> 10u, 50i
+    %x:u32 = let 10u
+    %y:i32 = let 50i
+    %4:u32 = spirv.)" +
+               params.ir + R"(<u32> %x, %y
     ret
   }
 }
@@ -4795,10 +4910,12 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 10u
-    %3:i32 = )" + params.wgsl +
-                  R"( %2, 50i
-    %4:u32 = bitcast<u32> %3
+    %x:u32 = let 10u
+    %y:i32 = let 50i
+    %4:i32 = bitcast<i32> %x
+    %5:i32 = )" + params.wgsl +
+                  R"( %4, %y
+    %6:u32 = bitcast<u32> %5
     ret
   }
 }
@@ -4812,16 +4929,20 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_SignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 50_i);
+        auto* y = b.Let("y", 60_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 50_i, 60_i);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.)" +
-               params.ir + R"(<u32> 50i, 60i
+    %x:i32 = let 50i
+    %y:i32 = let 60i
+    %4:u32 = spirv.)" +
+               params.ir + R"(<u32> %x, %y
     ret
   }
 }
@@ -4833,9 +4954,11 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = )" + params.wgsl +
-                  R"( 50i, 60i
-    %3:u32 = bitcast<u32> %2
+    %x:i32 = let 50i
+    %y:i32 = let 60i
+    %4:i32 = )" + params.wgsl +
+                  R"( %x, %y
+    %5:u32 = bitcast<u32> %4
     ret
   }
 }
@@ -4849,17 +4972,20 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<i32>>(50_i), b.Splat<vec2<u32>>(10_u));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(50_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(10_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.)" +
-               params.ir + R"(<i32> vec2<i32>(50i), vec2<u32>(10u)
+    %x:vec2<i32> = let vec2<i32>(50i)
+    %y:vec2<u32> = let vec2<u32>(10u)
+    %4:vec2<i32> = spirv.)" +
+               params.ir + R"(<i32> %x, %y
     ret
   }
 }
@@ -4871,10 +4997,12 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
-    %3:vec2<i32> = )" +
+    %x:vec2<i32> = let vec2<i32>(50i)
+    %y:vec2<u32> = let vec2<u32>(10u)
+    %4:vec2<i32> = bitcast<vec2<i32>> %y
+    %5:vec2<i32> = )" +
                   params.wgsl +
-                  R"( vec2<i32>(50i), %2
+                  R"( %x, %4
     ret
   }
 }
@@ -4888,17 +5016,20 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<u32>>(10_u), b.Splat<vec2<i32>>(50_i));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(10_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(50_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.)" +
-               params.ir + R"(<i32> vec2<u32>(10u), vec2<i32>(50i)
+    %x:vec2<u32> = let vec2<u32>(10u)
+    %y:vec2<i32> = let vec2<i32>(50i)
+    %4:vec2<i32> = spirv.)" +
+               params.ir + R"(<i32> %x, %y
     ret
   }
 }
@@ -4910,10 +5041,12 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
-    %3:vec2<i32> = )" +
+    %x:vec2<u32> = let vec2<u32>(10u)
+    %y:vec2<i32> = let vec2<i32>(50i)
+    %4:vec2<i32> = bitcast<vec2<i32>> %x
+    %5:vec2<i32> = )" +
                   params.wgsl +
-                  R"( %2, vec2<i32>(50i)
+                  R"( %4, %y
     ret
   }
 }
@@ -4927,17 +5060,20 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_UnsignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<u32>>(10_u), b.Splat<vec2<u32>>(20_u));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(10_u));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(20_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.)" +
-               params.ir + R"(<i32> vec2<u32>(10u), vec2<u32>(20u)
+    %x:vec2<u32> = let vec2<u32>(10u)
+    %y:vec2<u32> = let vec2<u32>(20u)
+    %4:vec2<i32> = spirv.)" +
+               params.ir + R"(<i32> %x, %y
     ret
   }
 }
@@ -4949,11 +5085,13 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
-    %3:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(20u)
-    %4:vec2<i32> = )" +
+    %x:vec2<u32> = let vec2<u32>(10u)
+    %y:vec2<u32> = let vec2<u32>(20u)
+    %4:vec2<i32> = bitcast<vec2<i32>> %x
+    %5:vec2<i32> = bitcast<vec2<i32>> %y
+    %6:vec2<i32> = )" +
                   params.wgsl +
-                  R"( %2, %3
+                  R"( %4, %5
     ret
   }
 }
@@ -4967,17 +5105,20 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<i32>>(50_i), b.Splat<vec2<u32>>(10_u));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(50_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(10_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.)" +
-               params.ir + R"(<u32> vec2<i32>(50i), vec2<u32>(10u)
+    %x:vec2<i32> = let vec2<i32>(50i)
+    %y:vec2<u32> = let vec2<u32>(10u)
+    %4:vec2<u32> = spirv.)" +
+               params.ir + R"(<u32> %x, %y
     ret
   }
 }
@@ -4989,11 +5130,13 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
-    %3:vec2<i32> = )" +
+    %x:vec2<i32> = let vec2<i32>(50i)
+    %y:vec2<u32> = let vec2<u32>(10u)
+    %4:vec2<i32> = bitcast<vec2<i32>> %y
+    %5:vec2<i32> = )" +
                   params.wgsl +
-                  R"( vec2<i32>(50i), %2
-    %4:vec2<u32> = bitcast<vec2<u32>> %3
+                  R"( %x, %4
+    %6:vec2<u32> = bitcast<vec2<u32>> %5
     ret
   }
 }
@@ -5007,17 +5150,20 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<u32>>(10_u), b.Splat<vec2<i32>>(50_i));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(10_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(50_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.)" +
-               params.ir + R"(<u32> vec2<u32>(10u), vec2<i32>(50i)
+    %x:vec2<u32> = let vec2<u32>(10u)
+    %y:vec2<i32> = let vec2<i32>(50i)
+    %4:vec2<u32> = spirv.)" +
+               params.ir + R"(<u32> %x, %y
     ret
   }
 }
@@ -5029,11 +5175,13 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
-    %3:vec2<i32> = )" +
+    %x:vec2<u32> = let vec2<u32>(10u)
+    %y:vec2<i32> = let vec2<i32>(50i)
+    %4:vec2<i32> = bitcast<vec2<i32>> %x
+    %5:vec2<i32> = )" +
                   params.wgsl +
-                  R"( %2, vec2<i32>(50i)
-    %4:vec2<u32> = bitcast<vec2<u32>> %3
+                  R"( %4, %y
+    %6:vec2<u32> = bitcast<vec2<u32>> %5
     ret
   }
 }
@@ -5047,17 +5195,20 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_SignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<i32>>(50_i), b.Splat<vec2<i32>>(60_i));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(50_i));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(60_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.)" +
-               params.ir + R"(<u32> vec2<i32>(50i), vec2<i32>(60i)
+    %x:vec2<i32> = let vec2<i32>(50i)
+    %y:vec2<i32> = let vec2<i32>(60i)
+    %4:vec2<u32> = spirv.)" +
+               params.ir + R"(<u32> %x, %y
     ret
   }
 }
@@ -5069,10 +5220,12 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = )" +
+    %x:vec2<i32> = let vec2<i32>(50i)
+    %y:vec2<i32> = let vec2<i32>(60i)
+    %4:vec2<i32> = )" +
                   params.wgsl +
-                  R"( vec2<i32>(50i), vec2<i32>(60i)
-    %3:vec2<u32> = bitcast<vec2<u32>> %2
+                  R"( %x, %y
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     ret
   }
 }
@@ -5483,16 +5636,20 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedSigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 2_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 1_i, 2_i);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.)" +
-               params.spv_name + R"(<i32> 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:i32 = spirv.)" +
+               params.spv_name + R"(<i32> %x, %y
     ret
   }
 }
@@ -5503,8 +5660,10 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = )" + params.wgsl_name +
-                  R"( 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:i32 = )" + params.wgsl_name +
+                  R"( %x, %y
     ret
   }
 }
@@ -5517,16 +5676,20 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedUnsigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 8_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 1_i, 8_u);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.)" +
-               params.spv_name + R"(<i32> 1i, 8u
+    %x:i32 = let 1i
+    %y:u32 = let 8u
+    %4:i32 = spirv.)" +
+               params.spv_name + R"(<i32> %x, %y
     ret
   }
 }
@@ -5537,9 +5700,11 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedUnsigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 8u
-    %3:i32 = )" + params.wgsl_name +
-                  R"( 1i, %2
+    %x:i32 = let 1i
+    %y:u32 = let 8u
+    %4:i32 = bitcast<i32> %y
+    %5:i32 = )" + params.wgsl_name +
+                  R"( %x, %4
     ret
   }
 }
@@ -5552,16 +5717,20 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedSigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 1_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 8_u, 1_i);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.)" +
-               params.spv_name + R"(<i32> 8u, 1i
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:i32 = spirv.)" +
+               params.spv_name + R"(<i32> %x, %y
     ret
   }
 }
@@ -5572,10 +5741,12 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:u32 = )" + params.wgsl_name +
-                  R"( 8u, %2
-    %4:i32 = bitcast<i32> %3
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:u32 = bitcast<u32> %y
+    %5:u32 = )" + params.wgsl_name +
+                  R"( %x, %4
+    %6:i32 = bitcast<i32> %5
     ret
   }
 }
@@ -5588,16 +5759,20 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedUnsigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 8_u, 9_u);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.)" +
-               params.spv_name + R"(<i32> 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:i32 = spirv.)" +
+               params.spv_name + R"(<i32> %x, %y
     ret
   }
 }
@@ -5608,9 +5783,11 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedUnsigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = )" + params.wgsl_name +
-                  R"( 8u, 9u
-    %3:i32 = bitcast<i32> %2
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:u32 = )" + params.wgsl_name +
+                  R"( %x, %y
+    %5:i32 = bitcast<i32> %4
     ret
   }
 }
@@ -5623,16 +5800,20 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedUnsigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 8_u, 9_u);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.)" +
-               params.spv_name + R"(<u32> 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:u32 = spirv.)" +
+               params.spv_name + R"(<u32> %x, %y
     ret
   }
 }
@@ -5643,8 +5824,10 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedUnsigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = )" + params.wgsl_name +
-                  R"( 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:u32 = )" + params.wgsl_name +
+                  R"( %x, %y
     ret
   }
 }
@@ -5657,16 +5840,20 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedSigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 1_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 8_u, 1_i);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.)" +
-               params.spv_name + R"(<u32> 8u, 1i
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:u32 = spirv.)" +
+               params.spv_name + R"(<u32> %x, %y
     ret
   }
 }
@@ -5677,9 +5864,11 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedSigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:u32 = )" + params.wgsl_name +
-                  R"( 8u, %2
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:u32 = bitcast<u32> %y
+    %5:u32 = )" + params.wgsl_name +
+                  R"( %x, %4
     ret
   }
 }
@@ -5692,16 +5881,20 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedUnsigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 8_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 1_i, 8_u);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.)" +
-               params.spv_name + R"(<u32> 1i, 8u
+    %x:i32 = let 1i
+    %y:u32 = let 8u
+    %4:u32 = spirv.)" +
+               params.spv_name + R"(<u32> %x, %y
     ret
   }
 }
@@ -5712,10 +5905,12 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedUnsigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 8u
-    %3:i32 = )" + params.wgsl_name +
-                  R"( 1i, %2
-    %4:u32 = bitcast<u32> %3
+    %x:i32 = let 1i
+    %y:u32 = let 8u
+    %4:i32 = bitcast<i32> %y
+    %5:i32 = )" + params.wgsl_name +
+                  R"( %x, %4
+    %6:u32 = bitcast<u32> %5
     ret
   }
 }
@@ -5728,16 +5923,20 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedSigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 2_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 1_i, 2_i);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.)" +
-               params.spv_name + R"(<u32> 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:u32 = spirv.)" +
+               params.spv_name + R"(<u32> %x, %y
     ret
   }
 }
@@ -5748,9 +5947,11 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedSigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = )" + params.wgsl_name +
-                  R"( 1i, 2i
-    %3:u32 = bitcast<u32> %2
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:i32 = )" + params.wgsl_name +
+                  R"( %x, %y
+    %5:u32 = bitcast<u32> %4
     ret
   }
 }
@@ -5763,17 +5964,20 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedSigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(2_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.)" +
-               params.spv_name + R"(<i32> vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<i32> = spirv.)" +
+               params.spv_name + R"(<i32> %x, %y
     ret
   }
 }
@@ -5784,8 +5988,10 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = )" +
-                  params.wgsl_name + R"( vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<i32> = )" +
+                  params.wgsl_name + R"( %x, %y
     ret
   }
 }
@@ -5798,17 +6004,20 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedUnsigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(8_u));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(8_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.)" +
-               params.spv_name + R"(<i32> vec2<i32>(1i), vec2<u32>(8u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(8u)
+    %4:vec2<i32> = spirv.)" +
+               params.spv_name + R"(<i32> %x, %y
     ret
   }
 }
@@ -5819,9 +6028,11 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedUnsigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
-    %3:vec2<i32> = )" +
-                  params.wgsl_name + R"( vec2<i32>(1i), %2
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(8u)
+    %4:vec2<i32> = bitcast<vec2<i32>> %y
+    %5:vec2<i32> = )" +
+                  params.wgsl_name + R"( %x, %4
     ret
   }
 }
@@ -5834,17 +6045,20 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedSigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(1_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.)" +
-               params.spv_name + R"(<i32> vec2<u32>(8u), vec2<i32>(1i)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<i32> = spirv.)" +
+               params.spv_name + R"(<i32> %x, %y
     ret
   }
 }
@@ -5855,10 +6069,12 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<u32> = )" +
-                  params.wgsl_name + R"( vec2<u32>(8u), %2
-    %4:vec2<i32> = bitcast<vec2<i32>> %3
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<u32> = )" +
+                  params.wgsl_name + R"( %x, %4
+    %6:vec2<i32> = bitcast<vec2<i32>> %5
     ret
   }
 }
@@ -5871,17 +6087,20 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedUnsigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.)" +
-               params.spv_name + R"(<i32> vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = spirv.)" +
+               params.spv_name + R"(<i32> %x, %y
     ret
   }
 }
@@ -5892,9 +6111,11 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedUnsigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = )" +
-                  params.wgsl_name + R"( vec2<u32>(8u), vec2<u32>(9u)
-    %3:vec2<i32> = bitcast<vec2<i32>> %2
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = )" +
+                  params.wgsl_name + R"( %x, %y
+    %5:vec2<i32> = bitcast<vec2<i32>> %4
     ret
   }
 }
@@ -5907,17 +6128,20 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedUnsigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.)" +
-               params.spv_name + R"(<u32> vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = spirv.)" +
+               params.spv_name + R"(<u32> %x, %y
     ret
   }
 }
@@ -5928,8 +6152,10 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedUnsigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = )" +
-                  params.wgsl_name + R"( vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = )" +
+                  params.wgsl_name + R"( %x, %y
     ret
   }
 }
@@ -5942,17 +6168,20 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedSigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(1_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.)" +
-               params.spv_name + R"(<u32> vec2<u32>(8u), vec2<i32>(1i)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<u32> = spirv.)" +
+               params.spv_name + R"(<u32> %x, %y
     ret
   }
 }
@@ -5963,9 +6192,11 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedSigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<u32> = )" +
-                  params.wgsl_name + R"( vec2<u32>(8u), %2
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<u32> = )" +
+                  params.wgsl_name + R"( %x, %4
     ret
   }
 }
@@ -5978,17 +6209,20 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedUnsigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(8_u));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(8_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.)" +
-               params.spv_name + R"(<u32> vec2<i32>(1i), vec2<u32>(8u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(8u)
+    %4:vec2<u32> = spirv.)" +
+               params.spv_name + R"(<u32> %x, %y
     ret
   }
 }
@@ -5999,10 +6233,12 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedUnsigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
-    %3:vec2<i32> = )" +
-                  params.wgsl_name + R"( vec2<i32>(1i), %2
-    %4:vec2<u32> = bitcast<vec2<u32>> %3
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(8u)
+    %4:vec2<i32> = bitcast<vec2<i32>> %y
+    %5:vec2<i32> = )" +
+                  params.wgsl_name + R"( %x, %4
+    %6:vec2<u32> = bitcast<vec2<u32>> %5
     ret
   }
 }
@@ -6015,17 +6251,20 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedSigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(2_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.)" +
-               params.spv_name + R"(<u32> vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<u32> = spirv.)" +
+               params.spv_name + R"(<u32> %x, %y
     ret
   }
 }
@@ -6036,9 +6275,11 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedSigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = )" +
-                  params.wgsl_name + R"( vec2<i32>(1i), vec2<i32>(2i)
-    %3:vec2<u32> = bitcast<vec2<u32>> %2
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<i32> = )" +
+                  params.wgsl_name + R"( %x, %y
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     ret
   }
 }
@@ -6058,15 +6299,19 @@ TEST_P(SpirvReader_IntegerTest, Scalar_SignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 1_i, 2_i);
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 2_i);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.)" +
-               param.spv_name + R"( 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:bool = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6077,8 +6322,10 @@ TEST_P(SpirvReader_IntegerTest, Scalar_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = )" + param.wgsl_name +
-                  R"( 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:bool = )" + param.wgsl_name +
+                  R"( %x, %y
     ret
   }
 }
@@ -6091,15 +6338,19 @@ TEST_P(SpirvReader_IntegerTest, Scalar_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 1_i, 8_u);
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 8_u);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.)" +
-               param.spv_name + R"( 1i, 8u
+    %x:i32 = let 1i
+    %y:u32 = let 8u
+    %4:bool = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6110,9 +6361,11 @@ TEST_P(SpirvReader_IntegerTest, Scalar_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 8u
-    %3:bool = )" + param.wgsl_name +
-                  R"( 1i, %2
+    %x:i32 = let 1i
+    %y:u32 = let 8u
+    %4:i32 = bitcast<i32> %y
+    %5:bool = )" + param.wgsl_name +
+                  R"( %x, %4
     ret
   }
 }
@@ -6125,15 +6378,19 @@ TEST_P(SpirvReader_IntegerTest, Scalar_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 8_u, 1_i);
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 1_i);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.)" +
-               param.spv_name + R"( 8u, 1i
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:bool = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6144,9 +6401,11 @@ TEST_P(SpirvReader_IntegerTest, Scalar_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:bool = )" + param.wgsl_name +
-                  R"( 8u, %2
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:u32 = bitcast<u32> %y
+    %5:bool = )" + param.wgsl_name +
+                  R"( %x, %4
     ret
   }
 }
@@ -6159,15 +6418,19 @@ TEST_P(SpirvReader_IntegerTest, Scalar_UnsignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 8_u, 9_u);
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 9_u);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.)" +
-               param.spv_name + R"( 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:bool = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6178,8 +6441,10 @@ TEST_P(SpirvReader_IntegerTest, Scalar_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = )" + param.wgsl_name +
-                  R"( 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:bool = )" + param.wgsl_name +
+                  R"( %x, %y
     ret
   }
 }
@@ -6192,16 +6457,19 @@ TEST_P(SpirvReader_IntegerTest, Vector_SignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<i32>>(1_i),
-                                       b.Splat<vec2<i32>>(2_i));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(2_i));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.)" +
-               param.spv_name + R"( vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<bool> = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6212,8 +6480,10 @@ TEST_P(SpirvReader_IntegerTest, Vector_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = )" +
-                  param.wgsl_name + R"( vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<bool> = )" +
+                  param.wgsl_name + R"( %x, %y
     ret
   }
 }
@@ -6226,16 +6496,19 @@ TEST_P(SpirvReader_IntegerTest, Vector_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<i32>>(1_i),
-                                       b.Splat<vec2<u32>>(8_u));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(8_u));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.)" +
-               param.spv_name + R"( vec2<i32>(1i), vec2<u32>(8u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(8u)
+    %4:vec2<bool> = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6246,9 +6519,11 @@ TEST_P(SpirvReader_IntegerTest, Vector_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
-    %3:vec2<bool> = )" +
-                  param.wgsl_name + R"( vec2<i32>(1i), %2
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(8u)
+    %4:vec2<i32> = bitcast<vec2<i32>> %y
+    %5:vec2<bool> = )" +
+                  param.wgsl_name + R"( %x, %4
     ret
   }
 }
@@ -6261,16 +6536,19 @@ TEST_P(SpirvReader_IntegerTest, Vector_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<u32>>(8_u),
-                                       b.Splat<vec2<i32>>(1_i));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(1_i));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.)" +
-               param.spv_name + R"( vec2<u32>(8u), vec2<i32>(1i)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<bool> = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6281,9 +6559,11 @@ TEST_P(SpirvReader_IntegerTest, Vector_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<bool> = )" +
-                  param.wgsl_name + R"( vec2<u32>(8u), %2
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<bool> = )" +
+                  param.wgsl_name + R"( %x, %4
     ret
   }
 }
@@ -6296,16 +6576,19 @@ TEST_P(SpirvReader_IntegerTest, Vector_UnsignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<u32>>(8_u),
-                                       b.Splat<vec2<u32>>(9_u));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.)" +
-               param.spv_name + R"( vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<bool> = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6316,8 +6599,10 @@ TEST_P(SpirvReader_IntegerTest, Vector_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = )" +
-                  param.wgsl_name + R"( vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<bool> = )" +
+                  param.wgsl_name + R"( %x, %y
     ret
   }
 }
@@ -6337,15 +6622,19 @@ TEST_P(SpirvReader_SignedIntegerTest, Scalar_SignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 1_i, 2_i);
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 2_i);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.)" +
-               param.spv_name + R"( 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:bool = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6356,8 +6645,10 @@ TEST_P(SpirvReader_SignedIntegerTest, Scalar_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = )" + param.wgsl_name +
-                  R"( 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:bool = )" + param.wgsl_name +
+                  R"( %x, %y
     ret
   }
 }
@@ -6370,15 +6661,19 @@ TEST_P(SpirvReader_SignedIntegerTest, Scalar_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 1_i, 8_u);
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 8_u);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.)" +
-               param.spv_name + R"( 1i, 8u
+    %x:i32 = let 1i
+    %y:u32 = let 8u
+    %4:bool = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6389,9 +6684,11 @@ TEST_P(SpirvReader_SignedIntegerTest, Scalar_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 8u
-    %3:bool = )" + param.wgsl_name +
-                  R"( 1i, %2
+    %x:i32 = let 1i
+    %y:u32 = let 8u
+    %4:i32 = bitcast<i32> %y
+    %5:bool = )" + param.wgsl_name +
+                  R"( %x, %4
     ret
   }
 }
@@ -6404,15 +6701,19 @@ TEST_P(SpirvReader_SignedIntegerTest, Scalar_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 8_u, 1_i);
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 1_i);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.)" +
-               param.spv_name + R"( 8u, 1i
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:bool = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6423,9 +6724,11 @@ TEST_P(SpirvReader_SignedIntegerTest, Scalar_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 8u
-    %3:bool = )" + param.wgsl_name +
-                  R"( %2, 1i
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:i32 = bitcast<i32> %x
+    %5:bool = )" + param.wgsl_name +
+                  R"( %4, %y
     ret
   }
 }
@@ -6438,15 +6741,19 @@ TEST_P(SpirvReader_SignedIntegerTest, Scalar_UnsignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 8_u, 9_u);
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 9_u);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.)" +
-               param.spv_name + R"( 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:bool = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6457,10 +6764,12 @@ TEST_P(SpirvReader_SignedIntegerTest, Scalar_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 8u
-    %3:i32 = bitcast<i32> 9u
-    %4:bool = )" + param.wgsl_name +
-                  R"( %2, %3
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:i32 = bitcast<i32> %x
+    %5:i32 = bitcast<i32> %y
+    %6:bool = )" + param.wgsl_name +
+                  R"( %4, %5
     ret
   }
 }
@@ -6473,16 +6782,19 @@ TEST_P(SpirvReader_SignedIntegerTest, Vector_SignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<i32>>(1_i),
-                                       b.Splat<vec2<i32>>(2_i));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(2_i));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.)" +
-               param.spv_name + R"( vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<bool> = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6493,8 +6805,10 @@ TEST_P(SpirvReader_SignedIntegerTest, Vector_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = )" +
-                  param.wgsl_name + R"( vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<bool> = )" +
+                  param.wgsl_name + R"( %x, %y
     ret
   }
 }
@@ -6507,16 +6821,19 @@ TEST_P(SpirvReader_SignedIntegerTest, Vector_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<i32>>(1_i),
-                                       b.Splat<vec2<u32>>(8_u));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(8_u));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.)" +
-               param.spv_name + R"( vec2<i32>(1i), vec2<u32>(8u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(8u)
+    %4:vec2<bool> = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6527,9 +6844,11 @@ TEST_P(SpirvReader_SignedIntegerTest, Vector_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
-    %3:vec2<bool> = )" +
-                  param.wgsl_name + R"( vec2<i32>(1i), %2
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(8u)
+    %4:vec2<i32> = bitcast<vec2<i32>> %y
+    %5:vec2<bool> = )" +
+                  param.wgsl_name + R"( %x, %4
     ret
   }
 }
@@ -6542,16 +6861,19 @@ TEST_P(SpirvReader_SignedIntegerTest, Vector_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<u32>>(8_u),
-                                       b.Splat<vec2<i32>>(1_i));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(1_i));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.)" +
-               param.spv_name + R"( vec2<u32>(8u), vec2<i32>(1i)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<bool> = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6562,9 +6884,11 @@ TEST_P(SpirvReader_SignedIntegerTest, Vector_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
-    %3:vec2<bool> = )" +
-                  param.wgsl_name + R"( %2, vec2<i32>(1i)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<i32> = bitcast<vec2<i32>> %x
+    %5:vec2<bool> = )" +
+                  param.wgsl_name + R"( %4, %y
     ret
   }
 }
@@ -6577,16 +6901,19 @@ TEST_P(SpirvReader_SignedIntegerTest, Vector_UnsignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<u32>>(8_u),
-                                       b.Splat<vec2<u32>>(9_u));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.)" +
-               param.spv_name + R"( vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<bool> = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6597,10 +6924,12 @@ TEST_P(SpirvReader_SignedIntegerTest, Vector_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
-    %3:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(9u)
-    %4:vec2<bool> = )" +
-                  param.wgsl_name + R"( %2, %3
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = bitcast<vec2<i32>> %x
+    %5:vec2<i32> = bitcast<vec2<i32>> %y
+    %6:vec2<bool> = )" +
+                  param.wgsl_name + R"( %4, %5
     ret
   }
 }
@@ -6623,15 +6952,19 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_SignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 1_i, 2_i);
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 2_i);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.)" +
-               param.spv_name + R"( 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:bool = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6642,10 +6975,12 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:u32 = bitcast<u32> 2i
-    %4:bool = )" + param.wgsl_name +
-                  R"( %2, %3
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:u32 = bitcast<u32> %x
+    %5:u32 = bitcast<u32> %y
+    %6:bool = )" + param.wgsl_name +
+                  R"( %4, %5
     ret
   }
 }
@@ -6658,15 +6993,19 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 1_i, 8_u);
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 8_u);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.)" +
-               param.spv_name + R"( 1i, 8u
+    %x:i32 = let 1i
+    %y:u32 = let 8u
+    %4:bool = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6677,9 +7016,11 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:bool = )" + param.wgsl_name +
-                  R"( %2, 8u
+    %x:i32 = let 1i
+    %y:u32 = let 8u
+    %4:u32 = bitcast<u32> %x
+    %5:bool = )" + param.wgsl_name +
+                  R"( %4, %y
     ret
   }
 }
@@ -6692,15 +7033,19 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 8_u, 1_i);
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 1_i);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.)" +
-               param.spv_name + R"( 8u, 1i
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:bool = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6711,9 +7056,11 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:bool = )" + param.wgsl_name +
-                  R"( 8u, %2
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:u32 = bitcast<u32> %y
+    %5:bool = )" + param.wgsl_name +
+                  R"( %x, %4
     ret
   }
 }
@@ -6726,15 +7073,19 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_UnsignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 8_u, 9_u);
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 9_u);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.)" +
-               param.spv_name + R"( 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:bool = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6745,8 +7096,10 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = )" + param.wgsl_name +
-                  R"( 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:bool = )" + param.wgsl_name +
+                  R"( %x, %y
     ret
   }
 }
@@ -6759,16 +7112,19 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Vector_SignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<i32>>(1_i),
-                                       b.Splat<vec2<i32>>(2_i));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(2_i));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.)" +
-               param.spv_name + R"( vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<bool> = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6779,10 +7135,12 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Vector_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
-    %4:vec2<bool> = )" +
-                  param.wgsl_name + R"( %2, %3
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %x
+    %5:vec2<u32> = bitcast<vec2<u32>> %y
+    %6:vec2<bool> = )" +
+                  param.wgsl_name + R"( %4, %5
     ret
   }
 }
@@ -6795,16 +7153,19 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Vector_SignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<i32>>(1_i),
-                                       b.Splat<vec2<u32>>(8_u));
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(8_u));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.)" +
-               param.spv_name + R"( vec2<i32>(1i), vec2<u32>(8u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(8u)
+    %4:vec2<bool> = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6815,9 +7176,11 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Vector_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<bool> = )" +
-                  param.wgsl_name + R"( %2, vec2<u32>(8u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(8u)
+    %4:vec2<u32> = bitcast<vec2<u32>> %x
+    %5:vec2<bool> = )" +
+                  param.wgsl_name + R"( %4, %y
     ret
   }
 }
@@ -6830,16 +7193,19 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Vector_UnsignedSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<u32>>(8_u),
-                                       b.Splat<vec2<i32>>(1_i));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(1_i));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.)" +
-               param.spv_name + R"( vec2<u32>(8u), vec2<i32>(1i)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<bool> = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6850,9 +7216,11 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Vector_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<bool> = )" +
-                  param.wgsl_name + R"( vec2<u32>(8u), %2
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<bool> = )" +
+                  param.wgsl_name + R"( %x, %4
     ret
   }
 }
@@ -6865,16 +7233,19 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Vector_UnsignedUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<u32>>(8_u),
-                                       b.Splat<vec2<u32>>(9_u));
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.)" +
-               param.spv_name + R"( vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<bool> = spirv.)" +
+               param.spv_name + R"( %x, %y
     ret
   }
 }
@@ -6885,8 +7256,10 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Vector_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = )" +
-                  param.wgsl_name + R"( vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<bool> = )" +
+                  param.wgsl_name + R"( %x, %y
     ret
   }
 }
@@ -6906,16 +7279,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedUnsigned_Unsign
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               8_u, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_left_logical<u32> 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:u32 = spirv.shift_left_logical<u32> %x, %y
     ret
   }
 }
@@ -6926,7 +7303,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedUnsigned_Unsign
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = shl 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:u32 = shl %x, %y
     ret
   }
 }
@@ -6939,16 +7318,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedSigned_Unsigned
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 1_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               8_u, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_left_logical<u32> 8u, 1i
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:u32 = spirv.shift_left_logical<u32> %x, %y
     ret
   }
 }
@@ -6959,8 +7342,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedSigned_Unsigned
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:u32 = shl 8u, %2
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:u32 = bitcast<u32> %y
+    %5:u32 = shl %x, %4
     ret
   }
 }
@@ -6973,16 +7358,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedUnsigned_Unsigned
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               1_i, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_left_logical<u32> 1i, 9u
+    %x:i32 = let 1i
+    %y:u32 = let 9u
+    %4:u32 = spirv.shift_left_logical<u32> %x, %y
     ret
   }
 }
@@ -6993,8 +7382,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedUnsigned_Unsigned
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = shl 1i, 9u
-    %3:u32 = bitcast<u32> %2
+    %x:i32 = let 1i
+    %y:u32 = let 9u
+    %4:i32 = shl %x, %y
+    %5:u32 = bitcast<u32> %4
     ret
   }
 }
@@ -7007,16 +7398,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedSigned_Unsigned) 
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 2_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               1_i, 2_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_left_logical<u32> 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:u32 = spirv.shift_left_logical<u32> %x, %y
     ret
   }
 }
@@ -7027,9 +7422,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedSigned_Unsigned) 
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 2i
-    %3:i32 = shl 1i, %2
-    %4:u32 = bitcast<u32> %3
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:u32 = bitcast<u32> %y
+    %5:i32 = shl %x, %4
+    %6:u32 = bitcast<u32> %5
     ret
   }
 }
@@ -7042,16 +7439,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedUnsigned_Signed
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               8_u, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_left_logical<i32> 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:i32 = spirv.shift_left_logical<i32> %x, %y
     ret
   }
 }
@@ -7062,8 +7463,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedUnsigned_Signed
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = shl 8u, 9u
-    %3:i32 = bitcast<i32> %2
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:u32 = shl %x, %y
+    %5:i32 = bitcast<i32> %4
     ret
   }
 }
@@ -7076,16 +7479,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedSigned_Signed) 
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 1_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               8_u, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_left_logical<i32> 8u, 1i
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:i32 = spirv.shift_left_logical<i32> %x, %y
     ret
   }
 }
@@ -7096,9 +7503,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedSigned_Signed) 
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:u32 = shl 8u, %2
-    %4:i32 = bitcast<i32> %3
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:u32 = bitcast<u32> %y
+    %5:u32 = shl %x, %4
+    %6:i32 = bitcast<i32> %5
     ret
   }
 }
@@ -7111,16 +7520,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedUnsigned_Signed) 
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               1_i, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_left_logical<i32> 1i, 9u
+    %x:i32 = let 1i
+    %y:u32 = let 9u
+    %4:i32 = spirv.shift_left_logical<i32> %x, %y
     ret
   }
 }
@@ -7131,7 +7544,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedUnsigned_Signed) 
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = shl 1i, 9u
+    %x:i32 = let 1i
+    %y:u32 = let 9u
+    %4:i32 = shl %x, %y
     ret
   }
 }
@@ -7144,16 +7559,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedSigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 2_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               1_i, 2_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_left_logical<i32> 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:i32 = spirv.shift_left_logical<i32> %x, %y
     ret
   }
 }
@@ -7164,8 +7583,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 2i
-    %3:i32 = shl 1i, %2
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:u32 = bitcast<u32> %y
+    %5:i32 = shl %x, %4
     ret
   }
 }
@@ -7178,16 +7599,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedUnsigned_Unsign
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_left_logical<u32> vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = spirv.shift_left_logical<u32> %x, %y
     ret
   }
 }
@@ -7198,7 +7623,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedUnsigned_Unsign
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = shl vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = shl %x, %y
     ret
   }
 }
@@ -7211,16 +7638,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedSigned_Unsigned
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(1_i));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_left_logical<u32> vec2<u32>(8u), vec2<i32>(1i)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<u32> = spirv.shift_left_logical<u32> %x, %y
     ret
   }
 }
@@ -7231,8 +7662,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedSigned_Unsigned
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<u32> = shl vec2<u32>(8u), %2
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<u32> = shl %x, %4
     ret
   }
 }
@@ -7245,16 +7678,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedUnsigned_Unsigned
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_left_logical<u32> vec2<i32>(1i), vec2<u32>(9u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = spirv.shift_left_logical<u32> %x, %y
     ret
   }
 }
@@ -7265,8 +7702,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedUnsigned_Unsigned
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = shl vec2<i32>(1i), vec2<u32>(9u)
-    %3:vec2<u32> = bitcast<vec2<u32>> %2
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = shl %x, %y
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     ret
   }
 }
@@ -7279,16 +7718,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedSigned_Unsigned) 
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(2_i));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_left_logical<u32> vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<u32> = spirv.shift_left_logical<u32> %x, %y
     ret
   }
 }
@@ -7299,9 +7742,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedSigned_Unsigned) 
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
-    %3:vec2<i32> = shl vec2<i32>(1i), %2
-    %4:vec2<u32> = bitcast<vec2<u32>> %3
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<i32> = shl %x, %4
+    %6:vec2<u32> = bitcast<vec2<u32>> %5
     ret
   }
 }
@@ -7314,16 +7759,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedUnsigned_Signed
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_left_logical<i32> vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = spirv.shift_left_logical<i32> %x, %y
     ret
   }
 }
@@ -7334,8 +7783,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedUnsigned_Signed
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = shl vec2<u32>(8u), vec2<u32>(9u)
-    %3:vec2<i32> = bitcast<vec2<i32>> %2
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = shl %x, %y
+    %5:vec2<i32> = bitcast<vec2<i32>> %4
     ret
   }
 }
@@ -7348,16 +7799,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedSigned_Signed) 
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(1_i));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_left_logical<i32> vec2<u32>(8u), vec2<i32>(1i)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<i32> = spirv.shift_left_logical<i32> %x, %y
     ret
   }
 }
@@ -7368,9 +7823,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedSigned_Signed) 
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<u32> = shl vec2<u32>(8u), %2
-    %4:vec2<i32> = bitcast<vec2<i32>> %3
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<u32> = shl %x, %4
+    %6:vec2<i32> = bitcast<vec2<i32>> %5
     ret
   }
 }
@@ -7383,16 +7840,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedUnsigned_Signed) 
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_left_logical<i32> vec2<i32>(1i), vec2<u32>(9u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = spirv.shift_left_logical<i32> %x, %y
     ret
   }
 }
@@ -7403,7 +7864,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedUnsigned_Signed) 
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = shl vec2<i32>(1i), vec2<u32>(9u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = shl %x, %y
     ret
   }
 }
@@ -7416,16 +7879,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedSigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(2_i));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_left_logical<i32> vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<i32> = spirv.shift_left_logical<i32> %x, %y
     ret
   }
 }
@@ -7436,8 +7903,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
-    %3:vec2<i32> = shl vec2<i32>(1i), %2
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<i32> = shl %x, %4
     ret
   }
 }
@@ -7450,16 +7919,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedUnsigned_Unsig
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               8_u, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_right_logical<u32> 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:u32 = spirv.shift_right_logical<u32> %x, %y
     ret
   }
 }
@@ -7470,7 +7943,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedUnsigned_Unsig
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = shr 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:u32 = shr %x, %y
     ret
   }
 }
@@ -7483,16 +7958,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedSigned_Unsigne
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 1_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               8_u, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_right_logical<u32> 8u, 1i
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:u32 = spirv.shift_right_logical<u32> %x, %y
     ret
   }
 }
@@ -7503,8 +7982,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedSigned_Unsigne
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:u32 = shr 8u, %2
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:u32 = bitcast<u32> %y
+    %5:u32 = shr %x, %4
     ret
   }
 }
@@ -7517,16 +7998,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedUnsigned_Unsigne
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               1_i, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_right_logical<u32> 1i, 9u
+    %x:i32 = let 1i
+    %y:u32 = let 9u
+    %4:u32 = spirv.shift_right_logical<u32> %x, %y
     ret
   }
 }
@@ -7537,8 +8022,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedUnsigned_Unsigne
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:u32 = shr %2, 9u
+    %x:i32 = let 1i
+    %y:u32 = let 9u
+    %4:u32 = bitcast<u32> %x
+    %5:u32 = shr %4, %y
     ret
   }
 }
@@ -7551,16 +8038,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedSigned_Unsigned)
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 2_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               1_i, 2_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_right_logical<u32> 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:u32 = spirv.shift_right_logical<u32> %x, %y
     ret
   }
 }
@@ -7571,9 +8062,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedSigned_Unsigned)
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:u32 = bitcast<u32> 2i
-    %4:u32 = shr %2, %3
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:u32 = bitcast<u32> %x
+    %5:u32 = bitcast<u32> %y
+    %6:u32 = shr %4, %5
     ret
   }
 }
@@ -7586,16 +8079,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedUnsigned_Signe
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               8_u, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_right_logical<i32> 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:i32 = spirv.shift_right_logical<i32> %x, %y
     ret
   }
 }
@@ -7606,8 +8103,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedUnsigned_Signe
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = shr 8u, 9u
-    %3:i32 = bitcast<i32> %2
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:u32 = shr %x, %y
+    %5:i32 = bitcast<i32> %4
     ret
   }
 }
@@ -7620,16 +8119,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedSigned_Signed)
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 1_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               8_u, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_right_logical<i32> 8u, 1i
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:i32 = spirv.shift_right_logical<i32> %x, %y
     ret
   }
 }
@@ -7640,9 +8143,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedSigned_Signed)
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:u32 = shr 8u, %2
-    %4:i32 = bitcast<i32> %3
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:u32 = bitcast<u32> %y
+    %5:u32 = shr %x, %4
+    %6:i32 = bitcast<i32> %5
     ret
   }
 }
@@ -7655,16 +8160,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedUnsigned_Signed)
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               1_i, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_right_logical<i32> 1i, 9u
+    %x:i32 = let 1i
+    %y:u32 = let 9u
+    %4:i32 = spirv.shift_right_logical<i32> %x, %y
     ret
   }
 }
@@ -7675,9 +8184,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedUnsigned_Signed)
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:u32 = shr %2, 9u
-    %4:i32 = bitcast<i32> %3
+    %x:i32 = let 1i
+    %y:u32 = let 9u
+    %4:u32 = bitcast<u32> %x
+    %5:u32 = shr %4, %y
+    %6:i32 = bitcast<i32> %5
     ret
   }
 }
@@ -7690,16 +8201,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedSigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 2_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               1_i, 2_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_right_logical<i32> 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:i32 = spirv.shift_right_logical<i32> %x, %y
     ret
   }
 }
@@ -7710,10 +8225,12 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:u32 = bitcast<u32> 2i
-    %4:u32 = shr %2, %3
-    %5:i32 = bitcast<i32> %4
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:u32 = bitcast<u32> %x
+    %5:u32 = bitcast<u32> %y
+    %6:u32 = shr %4, %5
+    %7:i32 = bitcast<i32> %6
     ret
   }
 }
@@ -7726,16 +8243,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedUnsigned_Unsig
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_right_logical<u32> vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = spirv.shift_right_logical<u32> %x, %y
     ret
   }
 }
@@ -7746,7 +8267,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedUnsigned_Unsig
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = shr vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = shr %x, %y
     ret
   }
 }
@@ -7759,16 +8282,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedSigned_Unsigne
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(1_i));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_right_logical<u32> vec2<u32>(8u), vec2<i32>(1i)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<u32> = spirv.shift_right_logical<u32> %x, %y
     ret
   }
 }
@@ -7779,8 +8306,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedSigned_Unsigne
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<u32> = shr vec2<u32>(8u), %2
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<u32> = shr %x, %4
     ret
   }
 }
@@ -7793,16 +8322,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedUnsigned_Unsigne
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_right_logical<u32> vec2<i32>(1i), vec2<u32>(9u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = spirv.shift_right_logical<u32> %x, %y
     ret
   }
 }
@@ -7813,8 +8346,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedUnsigned_Unsigne
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<u32> = shr %2, vec2<u32>(9u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = bitcast<vec2<u32>> %x
+    %5:vec2<u32> = shr %4, %y
     ret
   }
 }
@@ -7827,16 +8362,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedSigned_Unsigned)
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(2_i));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_right_logical<u32> vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<u32> = spirv.shift_right_logical<u32> %x, %y
     ret
   }
 }
@@ -7847,9 +8386,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedSigned_Unsigned)
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
-    %4:vec2<u32> = shr %2, %3
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %x
+    %5:vec2<u32> = bitcast<vec2<u32>> %y
+    %6:vec2<u32> = shr %4, %5
     ret
   }
 }
@@ -7862,16 +8403,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedUnsigned_Signe
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_right_logical<i32> vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = spirv.shift_right_logical<i32> %x, %y
     ret
   }
 }
@@ -7882,8 +8427,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedUnsigned_Signe
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = shr vec2<u32>(8u), vec2<u32>(9u)
-    %3:vec2<i32> = bitcast<vec2<i32>> %2
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = shr %x, %y
+    %5:vec2<i32> = bitcast<vec2<i32>> %4
     ret
   }
 }
@@ -7896,16 +8443,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedSigned_Signed)
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(1_i));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_right_logical<i32> vec2<u32>(8u), vec2<i32>(1i)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<i32> = spirv.shift_right_logical<i32> %x, %y
     ret
   }
 }
@@ -7916,9 +8467,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedSigned_Signed)
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<u32> = shr vec2<u32>(8u), %2
-    %4:vec2<i32> = bitcast<vec2<i32>> %3
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<u32> = shr %x, %4
+    %6:vec2<i32> = bitcast<vec2<i32>> %5
     ret
   }
 }
@@ -7931,16 +8484,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedUnsigned_Signed)
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_right_logical<i32> vec2<i32>(1i), vec2<u32>(9u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = spirv.shift_right_logical<i32> %x, %y
     ret
   }
 }
@@ -7951,9 +8508,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedUnsigned_Signed)
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<u32> = shr %2, vec2<u32>(9u)
-    %4:vec2<i32> = bitcast<vec2<i32>> %3
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = bitcast<vec2<u32>> %x
+    %5:vec2<u32> = shr %4, %y
+    %6:vec2<i32> = bitcast<vec2<i32>> %5
     ret
   }
 }
@@ -7966,16 +8525,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedSigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(2_i));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_right_logical<i32> vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<i32> = spirv.shift_right_logical<i32> %x, %y
     ret
   }
 }
@@ -7986,10 +8549,12 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %3:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
-    %4:vec2<u32> = shr %2, %3
-    %5:vec2<i32> = bitcast<vec2<i32>> %4
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %x
+    %5:vec2<u32> = bitcast<vec2<u32>> %y
+    %6:vec2<u32> = shr %4, %5
+    %7:vec2<i32> = bitcast<vec2<i32>> %6
     ret
   }
 }
@@ -8002,16 +8567,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedUnsigned_Un
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               8_u, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_right_arithmetic<u32> 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:u32 = spirv.shift_right_arithmetic<u32> %x, %y
     ret
   }
 }
@@ -8022,9 +8591,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedUnsigned_Un
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 8u
-    %3:i32 = shr %2, 9u
-    %4:u32 = bitcast<u32> %3
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:i32 = bitcast<i32> %x
+    %5:i32 = shr %4, %y
+    %6:u32 = bitcast<u32> %5
     ret
   }
 }
@@ -8037,16 +8608,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedSigned_Unsi
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 1_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               8_u, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_right_arithmetic<u32> 8u, 1i
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:u32 = spirv.shift_right_arithmetic<u32> %x, %y
     ret
   }
 }
@@ -8057,10 +8632,12 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedSigned_Unsi
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 8u
-    %3:u32 = bitcast<u32> 1i
-    %4:i32 = shr %2, %3
-    %5:u32 = bitcast<u32> %4
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:i32 = bitcast<i32> %x
+    %5:u32 = bitcast<u32> %y
+    %6:i32 = shr %4, %5
+    %7:u32 = bitcast<u32> %6
     ret
   }
 }
@@ -8073,16 +8650,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedUnsigned_Unsi
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               1_i, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_right_arithmetic<u32> 1i, 9u
+    %x:i32 = let 1i
+    %y:u32 = let 9u
+    %4:u32 = spirv.shift_right_arithmetic<u32> %x, %y
     ret
   }
 }
@@ -8093,8 +8674,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedUnsigned_Unsi
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = shr 1i, 9u
-    %3:u32 = bitcast<u32> %2
+    %x:i32 = let 1i
+    %y:u32 = let 9u
+    %4:i32 = shr %x, %y
+    %5:u32 = bitcast<u32> %4
     ret
   }
 }
@@ -8107,16 +8690,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedSigned_Unsign
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 2_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               1_i, 2_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_right_arithmetic<u32> 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:u32 = spirv.shift_right_arithmetic<u32> %x, %y
     ret
   }
 }
@@ -8127,9 +8714,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedSigned_Unsign
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 2i
-    %3:i32 = shr 1i, %2
-    %4:u32 = bitcast<u32> %3
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:u32 = bitcast<u32> %y
+    %5:i32 = shr %x, %4
+    %6:u32 = bitcast<u32> %5
     ret
   }
 }
@@ -8142,16 +8731,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedUnsigned_Si
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               8_u, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_right_arithmetic<i32> 8u, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:i32 = spirv.shift_right_arithmetic<i32> %x, %y
     ret
   }
 }
@@ -8162,8 +8755,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedUnsigned_Si
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 8u
-    %3:i32 = shr %2, 9u
+    %x:u32 = let 8u
+    %y:u32 = let 9u
+    %4:i32 = bitcast<i32> %x
+    %5:i32 = shr %4, %y
     ret
   }
 }
@@ -8176,16 +8771,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedSigned_Sign
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 8_u);
+        auto* y = b.Let("y", 1_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               8_u, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_right_arithmetic<i32> 8u, 1i
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:i32 = spirv.shift_right_arithmetic<i32> %x, %y
     ret
   }
 }
@@ -8196,9 +8795,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedSigned_Sign
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast<i32> 8u
-    %3:u32 = bitcast<u32> 1i
-    %4:i32 = shr %2, %3
+    %x:u32 = let 8u
+    %y:i32 = let 1i
+    %4:i32 = bitcast<i32> %x
+    %5:u32 = bitcast<u32> %y
+    %6:i32 = shr %4, %5
     ret
   }
 }
@@ -8211,16 +8812,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedUnsigned_Sign
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 9_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               1_i, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_right_arithmetic<i32> 1i, 9u
+    %x:i32 = let 1i
+    %y:u32 = let 9u
+    %4:i32 = spirv.shift_right_arithmetic<i32> %x, %y
     ret
   }
 }
@@ -8231,7 +8836,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedUnsigned_Sign
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = shr 1i, 9u
+    %x:i32 = let 1i
+    %y:u32 = let 9u
+    %4:i32 = shr %x, %y
     ret
   }
 }
@@ -8244,16 +8851,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedSigned_Signed
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 2_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               1_i, 2_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_right_arithmetic<i32> 1i, 2i
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:i32 = spirv.shift_right_arithmetic<i32> %x, %y
     ret
   }
 }
@@ -8264,8 +8875,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedSigned_Signed
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 2i
-    %3:i32 = shr 1i, %2
+    %x:i32 = let 1i
+    %y:i32 = let 2i
+    %4:u32 = bitcast<u32> %y
+    %5:i32 = shr %x, %4
     ret
   }
 }
@@ -8278,16 +8891,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedUnsigned_Un
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_right_arithmetic<u32> vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = spirv.shift_right_arithmetic<u32> %x, %y
     ret
   }
 }
@@ -8298,9 +8915,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedUnsigned_Un
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
-    %3:vec2<i32> = shr %2, vec2<u32>(9u)
-    %4:vec2<u32> = bitcast<vec2<u32>> %3
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = bitcast<vec2<i32>> %x
+    %5:vec2<i32> = shr %4, %y
+    %6:vec2<u32> = bitcast<vec2<u32>> %5
     ret
   }
 }
@@ -8313,16 +8932,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedSigned_Unsi
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(1_i));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_right_arithmetic<u32> vec2<u32>(8u), vec2<i32>(1i)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<u32> = spirv.shift_right_arithmetic<u32> %x, %y
     ret
   }
 }
@@ -8333,10 +8956,12 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedSigned_Unsi
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
-    %3:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %4:vec2<i32> = shr %2, %3
-    %5:vec2<u32> = bitcast<vec2<u32>> %4
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<i32> = bitcast<vec2<i32>> %x
+    %5:vec2<u32> = bitcast<vec2<u32>> %y
+    %6:vec2<i32> = shr %4, %5
+    %7:vec2<u32> = bitcast<vec2<u32>> %6
     ret
   }
 }
@@ -8349,16 +8974,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedUnsigned_Unsi
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_right_arithmetic<u32> vec2<i32>(1i), vec2<u32>(9u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<u32> = spirv.shift_right_arithmetic<u32> %x, %y
     ret
   }
 }
@@ -8369,8 +8998,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedUnsigned_Unsi
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = shr vec2<i32>(1i), vec2<u32>(9u)
-    %3:vec2<u32> = bitcast<vec2<u32>> %2
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = shr %x, %y
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     ret
   }
 }
@@ -8383,16 +9014,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedSigned_Unsign
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(2_i));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_right_arithmetic<u32> vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<u32> = spirv.shift_right_arithmetic<u32> %x, %y
     ret
   }
 }
@@ -8403,9 +9038,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedSigned_Unsign
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
-    %3:vec2<i32> = shr vec2<i32>(1i), %2
-    %4:vec2<u32> = bitcast<vec2<u32>> %3
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<i32> = shr %x, %4
+    %6:vec2<u32> = bitcast<vec2<u32>> %5
     ret
   }
 }
@@ -8418,16 +9055,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedUnsigned_Si
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_right_arithmetic<i32> vec2<u32>(8u), vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = spirv.shift_right_arithmetic<i32> %x, %y
     ret
   }
 }
@@ -8438,8 +9079,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedUnsigned_Si
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
-    %3:vec2<i32> = shr %2, vec2<u32>(9u)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = bitcast<vec2<i32>> %x
+    %5:vec2<i32> = shr %4, %y
     ret
   }
 }
@@ -8452,16 +9095,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedSigned_Sign
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<u32>>(8_u));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(1_i));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_right_arithmetic<i32> vec2<u32>(8u), vec2<i32>(1i)
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<i32> = spirv.shift_right_arithmetic<i32> %x, %y
     ret
   }
 }
@@ -8472,9 +9119,11 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedSigned_Sign
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
-    %3:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
-    %4:vec2<i32> = shr %2, %3
+    %x:vec2<u32> = let vec2<u32>(8u)
+    %y:vec2<i32> = let vec2<i32>(1i)
+    %4:vec2<i32> = bitcast<vec2<i32>> %x
+    %5:vec2<u32> = bitcast<vec2<u32>> %y
+    %6:vec2<i32> = shr %4, %5
     ret
   }
 }
@@ -8487,16 +9136,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedUnsigned_Sign
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<u32>>(9_u));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_right_arithmetic<i32> vec2<i32>(1i), vec2<u32>(9u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = spirv.shift_right_arithmetic<i32> %x, %y
     ret
   }
 }
@@ -8507,7 +9160,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedUnsigned_Sign
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = shr vec2<i32>(1i), vec2<u32>(9u)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<u32> = let vec2<u32>(9u)
+    %4:vec2<i32> = shr %x, %y
     ret
   }
 }
@@ -8520,16 +9175,20 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedSigned_Signed
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
+        auto* x = b.Let("x", b.Splat<vec2<i32>>(1_i));
+        auto* y = b.Let("y", b.Splat<vec2<i32>>(2_i));
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
-                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()}, x,
+                                               y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_right_arithmetic<i32> vec2<i32>(1i), vec2<i32>(2i)
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<i32> = spirv.shift_right_arithmetic<i32> %x, %y
     ret
   }
 }
@@ -8540,8 +9199,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedSigned_Signed
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
-    %3:vec2<i32> = shr vec2<i32>(1i), %2
+    %x:vec2<i32> = let vec2<i32>(1i)
+    %y:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<u32> = bitcast<vec2<u32>> %y
+    %5:vec2<i32> = shr %x, %4
     ret
   }
 }
@@ -9110,14 +9771,18 @@ TEST_F(SpirvReader_BuiltinsTest, FMod_Scalar) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kFMod, 1_f, 2_f);
+        auto* x = b.Let("x", 1_f);
+        auto* y = b.Let("y", 2_f);
+        b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kFMod, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = spirv.f_mod 1.0f, 2.0f
+    %x:f32 = let 1.0f
+    %y:f32 = let 2.0f
+    %4:f32 = spirv.f_mod %x, %y
     ret
   }
 }
@@ -9128,10 +9793,12 @@ TEST_F(SpirvReader_BuiltinsTest, FMod_Scalar) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = div 1.0f, 2.0f
-    %3:f32 = floor %2
-    %4:f32 = mul 2.0f, %3
-    %5:f32 = sub 1.0f, %4
+    %x:f32 = let 1.0f
+    %y:f32 = let 2.0f
+    %4:f32 = div %x, %y
+    %5:f32 = floor %4
+    %6:f32 = mul %y, %5
+    %7:f32 = sub %x, %6
     ret
   }
 }
@@ -9144,15 +9811,18 @@ TEST_F(SpirvReader_BuiltinsTest, FMod_Vector) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2f(), spirv::BuiltinFn::kFMod, b.Splat<vec2<f32>>(1_f),
-                                       b.Splat<vec2<f32>>(2_f));
+        auto* x = b.Let("x", b.Splat<vec2<f32>>(1_f));
+        auto* y = b.Let("y", b.Splat<vec2<f32>>(2_f));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2f(), spirv::BuiltinFn::kFMod, x, y);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = spirv.f_mod vec2<f32>(1.0f), vec2<f32>(2.0f)
+    %x:vec2<f32> = let vec2<f32>(1.0f)
+    %y:vec2<f32> = let vec2<f32>(2.0f)
+    %4:vec2<f32> = spirv.f_mod %x, %y
     ret
   }
 }
@@ -9163,10 +9833,12 @@ TEST_F(SpirvReader_BuiltinsTest, FMod_Vector) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = div vec2<f32>(1.0f), vec2<f32>(2.0f)
-    %3:vec2<f32> = floor %2
-    %4:vec2<f32> = mul vec2<f32>(2.0f), %3
-    %5:vec2<f32> = sub vec2<f32>(1.0f), %4
+    %x:vec2<f32> = let vec2<f32>(1.0f)
+    %y:vec2<f32> = let vec2<f32>(2.0f)
+    %4:vec2<f32> = div %x, %y
+    %5:vec2<f32> = floor %4
+    %6:vec2<f32> = mul %y, %5
+    %7:vec2<f32> = sub %x, %6
     ret
   }
 }
@@ -9239,8 +9911,9 @@ TEST_F(SpirvReader_BuiltinsTest, OuterProduct_Vector) {
 
     b.Append(ep->Block(), [&] {  //
         // Call the OuterProduct builtin function
-        b.Call<spirv::ir::BuiltinCall>(ty.mat2x4<f32>(), spirv::BuiltinFn::kOuterProduct,
-                                       b.Splat<vec4<f32>>(1_f), b.Splat<vec2<f32>>(2_f));
+        auto* x = b.Let("x", b.Splat<vec4<f32>>(1_f));
+        auto* y = b.Let("y", b.Splat<vec2<f32>>(2_f));
+        b.Call<spirv::ir::BuiltinCall>(ty.mat2x4<f32>(), spirv::BuiltinFn::kOuterProduct, x, y);
         b.Return(ep);
     });
 
@@ -9248,7 +9921,9 @@ TEST_F(SpirvReader_BuiltinsTest, OuterProduct_Vector) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:mat2x4<f32> = spirv.outer_product vec4<f32>(1.0f), vec2<f32>(2.0f)
+    %x:vec4<f32> = let vec4<f32>(1.0f)
+    %y:vec2<f32> = let vec2<f32>(2.0f)
+    %4:mat2x4<f32> = spirv.outer_product %x, %y
     ret
   }
 }
@@ -9262,27 +9937,29 @@ TEST_F(SpirvReader_BuiltinsTest, OuterProduct_Vector) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = access vec2<f32>(2.0f), 0u
-    %3:f32 = access vec4<f32>(1.0f), 0u
-    %4:f32 = mul %3, %2
-    %5:f32 = access vec4<f32>(1.0f), 1u
-    %6:f32 = mul %5, %2
-    %7:f32 = access vec4<f32>(1.0f), 2u
-    %8:f32 = mul %7, %2
-    %9:f32 = access vec4<f32>(1.0f), 3u
-    %10:f32 = mul %9, %2
-    %11:vec4<f32> = construct %4, %6, %8, %10
-    %12:f32 = access vec2<f32>(2.0f), 1u
-    %13:f32 = access vec4<f32>(1.0f), 0u
-    %14:f32 = mul %13, %12
-    %15:f32 = access vec4<f32>(1.0f), 1u
-    %16:f32 = mul %15, %12
-    %17:f32 = access vec4<f32>(1.0f), 2u
-    %18:f32 = mul %17, %12
-    %19:f32 = access vec4<f32>(1.0f), 3u
-    %20:f32 = mul %19, %12
-    %21:vec4<f32> = construct %14, %16, %18, %20
-    %22:mat2x4<f32> = construct %11, %21
+    %x:vec4<f32> = let vec4<f32>(1.0f)
+    %y:vec2<f32> = let vec2<f32>(2.0f)
+    %4:f32 = access %y, 0u
+    %5:f32 = access %x, 0u
+    %6:f32 = mul %5, %4
+    %7:f32 = access %x, 1u
+    %8:f32 = mul %7, %4
+    %9:f32 = access %x, 2u
+    %10:f32 = mul %9, %4
+    %11:f32 = access %x, 3u
+    %12:f32 = mul %11, %4
+    %13:vec4<f32> = construct %6, %8, %10, %12
+    %14:f32 = access %y, 1u
+    %15:f32 = access %x, 0u
+    %16:f32 = mul %15, %14
+    %17:f32 = access %x, 1u
+    %18:f32 = mul %17, %14
+    %19:f32 = access %x, 2u
+    %20:f32 = mul %19, %14
+    %21:f32 = access %x, 3u
+    %22:f32 = mul %21, %14
+    %23:vec4<f32> = construct %16, %18, %20, %22
+    %24:mat2x4<f32> = construct %13, %23
     ret
   }
 }

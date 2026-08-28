@@ -6,7 +6,8 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 shared int arg_0;
 int atomicSub_77883a() {
-  int res = atomicAdd(arg_0, int((~(uint(1)) + 1u)));
+  uint v_1 = ~(uint(1));
+  int res = atomicAdd(arg_0, int(4294967295u));
   return res;
 }
 void compute_main_inner(uint tint_local_index) {

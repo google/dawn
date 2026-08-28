@@ -12,7 +12,7 @@ float4 fs_inner() {
   uint v = uint(int(0));
   bool v_1 = false;
   if ((v < tint_resource_table_metadata.Load(0u))) {
-    uint3 v_2 = uint3((tint_resource_table_metadata.Load((4u + (v * 4u)))).xxx);
+    uint3 v_2 = uint3((tint_resource_table_metadata.Load(4u)).xxx);
     v_1 = any((v_2 == uint3(6u, 7u, 34u)));
   } else {
     v_1 = false;
@@ -20,7 +20,7 @@ float4 fs_inner() {
   bool has_resource = v_1;
   uint v_3 = 0u;
   if (has_resource) {
-    v_3 = tint_resource_table_metadata.Load((4u + (v * 4u)));
+    v_3 = tint_resource_table_metadata.Load(4u);
   } else {
     v_3 = 6u;
   }

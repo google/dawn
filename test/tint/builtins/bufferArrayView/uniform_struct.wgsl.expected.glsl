@@ -10,7 +10,6 @@ buffer out_block_1_ssbo {
 } v_2;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_3 = (32u + (min(uint(0), ((96u / 48u) - 1u)) * 48u));
-  uvec4 v_4 = v_1.inner[(v_3 / 16u)];
-  v_2.inner = uintBitsToFloat(mix(v_4.xy, v_4.zw, bvec2((((v_3 & 15u) >> 2u) == 2u))));
+  min(uint(0), (2u - 1u));
+  v_2.inner = uintBitsToFloat(v_1.inner[2u].xy);
 }

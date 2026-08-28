@@ -97,7 +97,7 @@ TEST_F(IR_ValueDeathTest, Destroy_HasSource) {
         {
             Module mod;
             Builder b{mod};
-            auto* val = b.Add(1_i, 2_i);
+            auto* val = b.Let("l", u32(0))->Result();
             val->Destroy();
         },
         "internal compiler error");

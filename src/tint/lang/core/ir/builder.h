@@ -45,6 +45,7 @@
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/core_unary.h"
 #include "src/tint/lang/core/ir/discard.h"
+#include "src/tint/lang/core/ir/evaluator.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/exit_switch.h"
@@ -615,21 +616,33 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Value* Binary(BinaryOp op, const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return BinaryWithResult(InstructionResult(type), op, std::forward<LHS>(lhs),
-                                std::forward<RHS>(rhs));
+        return BinaryReplaceResult(InstructionResult(type), op, std::forward<LHS>(lhs),
+                                   std::forward<RHS>(rhs));
     }
 
     /// Creates an op for `lhs kind rhs`
     /// @param op the binary operator
-    /// @param result the result of the binary expression
+    /// @param result the result of the binary expression to replace
     /// @param lhs the left-hand-side of the operation
     /// @param rhs the right-hand-side of the operation
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::Value* BinaryWithResult(ir::InstructionResult* result, BinaryOp op, LHS&& lhs, RHS&& rhs) {
+    ir::Value* BinaryReplaceResult(ir::InstructionResult* result,
+                                   BinaryOp op,
+                                   LHS&& lhs,
+                                   RHS&& rhs) {
         CheckForNonDeterministicEvaluation<LHS, RHS>();
         auto* lhs_val = Value(std::forward<LHS>(lhs));
         auto* rhs_val = Value(std::forward<RHS>(rhs));
+        if (op != BinaryOp::kLogicalAnd && op != BinaryOp::kLogicalOr) {
+            auto res = Evaluator{*this, false}.EvalCoreBinary(op, result->Type(), lhs_val, rhs_val);
+            if (res == Success && res.Get()) {
+                auto* cnst = Constant(res.Get());
+                result->ReplaceAllUsesWith(cnst);
+                result->Destroy();
+                return cnst;
+            }
+        }
         return Append(ir.CreateInstruction<ir::CoreBinary>(result, op, lhs_val, rhs_val))->Result();
     }
 
@@ -657,7 +670,10 @@ class Builder {
     /// @returns the operation
     template <typename KLASS, typename LHS, typename RHS>
         requires(tint::traits::IsTypeOrDerived<KLASS, ir::Binary>)
-    ir::Value* BinaryWithResult(ir::InstructionResult* result, BinaryOp op, LHS&& lhs, RHS&& rhs) {
+    ir::Value* BinaryReplaceResult(ir::InstructionResult* result,
+                                   BinaryOp op,
+                                   LHS&& lhs,
+                                   RHS&& rhs) {
         CheckForNonDeterministicEvaluation<LHS, RHS>();
         auto* lhs_val = Value(std::forward<LHS>(lhs));
         auto* rhs_val = Value(std::forward<RHS>(rhs));
@@ -677,10 +693,7 @@ class Builder {
         TINT_ASSERT(lhs_value);
         TINT_ASSERT(rhs_value);
         TINT_ASSERT(lhs_value->Type() == rhs_value->Type());
-
-        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(lhs_value->Type()), op,
-                                                           lhs_value, rhs_value))
-            ->Result();
+        return BinaryReplaceResult(InstructionResult(lhs_value->Type()), op, lhs_value, rhs_value);
     }
 
     /// Creates an And operation
@@ -702,13 +715,14 @@ class Builder {
     }
 
     /// Creates an Or operation
+    /// @param result the result to replace
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::Value* OrWithResult(ir::InstructionResult* result, LHS&& lhs, RHS&& rhs) {
-        return BinaryWithResult(result, BinaryOp::kOr, std::forward<LHS>(lhs),
-                                std::forward<RHS>(rhs));
+    ir::Value* OrReplaceResult(ir::InstructionResult* result, LHS&& lhs, RHS&& rhs) {
+        return BinaryReplaceResult(result, BinaryOp::kOr, std::forward<LHS>(lhs),
+                                   std::forward<RHS>(rhs));
     }
 
     /// Creates an Xor operation
@@ -721,6 +735,7 @@ class Builder {
     }
 
     /// Creates a Binary op
+    /// @param result the result to replace
     /// @param op the operator
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
@@ -733,9 +748,7 @@ class Builder {
         TINT_ASSERT(lhs_value);
         TINT_ASSERT(rhs_value);
         auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
-        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(type), op, lhs_value,
-                                                           rhs_value))
-            ->Result();
+        return BinaryReplaceResult(InstructionResult(type), op, lhs_value, rhs_value);
     }
 
     /// Creates an Equal operation
@@ -808,10 +821,8 @@ class Builder {
         auto* rhs_value = Value(std::forward<RHS>(rhs));
         TINT_ASSERT(lhs_value);
         TINT_ASSERT(rhs_value);
-        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(lhs_value->Type()),
-                                                           BinaryOp::kShiftLeft, lhs_value,
-                                                           rhs_value))
-            ->Result();
+        return BinaryReplaceResult(InstructionResult(lhs_value->Type()), BinaryOp::kShiftLeft,
+                                   lhs_value, rhs_value);
     }
 
     /// Creates an ShiftRight operation
@@ -825,10 +836,8 @@ class Builder {
         auto* rhs_value = Value(std::forward<RHS>(rhs));
         TINT_ASSERT(lhs_value);
         TINT_ASSERT(rhs_value);
-        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(lhs_value->Type()),
-                                                           BinaryOp::kShiftRight, lhs_value,
-                                                           rhs_value))
-            ->Result();
+        return BinaryReplaceResult(InstructionResult(lhs_value->Type()), BinaryOp::kShiftRight,
+                                   lhs_value, rhs_value);
     }
 
     /// Creates a binary expression with a computed type
@@ -859,9 +868,7 @@ class Builder {
             result_type = lhs_type;
         }
 
-        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(result_type), op,
-                                                           lhs_value, rhs_value))
-            ->Result();
+        return BinaryReplaceResult(InstructionResult(result_type), op, lhs_value, rhs_value);
     }
 
     /// Creates an Add operation
@@ -875,14 +882,14 @@ class Builder {
     }
 
     /// Creates an Add operation
-    /// @param result the result
+    /// @param result the result to replace
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::Value* AddWithResult(ir::InstructionResult* result, LHS&& lhs, RHS&& rhs) {
-        return BinaryWithResult(result, BinaryOp::kAdd, std::forward<LHS>(lhs),
-                                std::forward<RHS>(rhs));
+    ir::Value* AddReplaceResult(ir::InstructionResult* result, LHS&& lhs, RHS&& rhs) {
+        return BinaryReplaceResult(result, BinaryOp::kAdd, std::forward<LHS>(lhs),
+                                   std::forward<RHS>(rhs));
     }
 
     /// Creates a Subtract operation
@@ -896,13 +903,14 @@ class Builder {
     }
 
     /// Creates a Subtract operation
+    /// @param result the result to replace
     /// @param lhs the lhs of the subtract
     /// @param rhs the rhs of the subtract
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::Value* SubtractWithResult(ir::InstructionResult* result, LHS&& lhs, RHS&& rhs) {
-        return BinaryWithResult(result, BinaryOp::kSubtract, std::forward<LHS>(lhs),
-                                std::forward<RHS>(rhs));
+    ir::Value* SubtractReplaceResult(ir::InstructionResult* result, LHS&& lhs, RHS&& rhs) {
+        return BinaryReplaceResult(result, BinaryOp::kSubtract, std::forward<LHS>(lhs),
+                                   std::forward<RHS>(rhs));
     }
 
     /// Creates an Multiply operation
@@ -947,19 +955,18 @@ class Builder {
             result_type = lhs_type;
         }
 
-        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(result_type),
-                                                           BinaryOp::kMultiply, lhs_value,
-                                                           rhs_value))
-            ->Result();
+        return BinaryReplaceResult(InstructionResult(result_type), BinaryOp::kMultiply, lhs_value,
+                                   rhs_value);
     }
 
     /// Creates an Multiply operation
+    /// @param result the result to replace
     /// @param lhs the lhs of the multiply
     /// @param rhs the rhs of the multiply
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::Value* MultiplyWithResult(ir::InstructionResult* result, LHS&& lhs, RHS&& rhs) {
-        return BinaryWithResult(result, BinaryOp::kMultiply, lhs, rhs);
+    ir::Value* MultiplyReplaceResult(ir::InstructionResult* result, LHS&& lhs, RHS&& rhs) {
+        return BinaryReplaceResult(result, BinaryOp::kMultiply, lhs, rhs);
     }
 
     /// Creates an Divide operation
@@ -973,13 +980,14 @@ class Builder {
     }
 
     /// Creates an Divide operation
+    /// @param result the result to replace
     /// @param lhs the lhs of the divide
     /// @param rhs the rhs of the divide
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::Value* DivideWithResult(ir::InstructionResult* result, LHS&& lhs, RHS&& rhs) {
-        return BinaryWithResult(result, BinaryOp::kDivide, std::forward<LHS>(lhs),
-                                std::forward<RHS>(rhs));
+    ir::Value* DivideReplaceResult(ir::InstructionResult* result, LHS&& lhs, RHS&& rhs) {
+        return BinaryReplaceResult(result, BinaryOp::kDivide, std::forward<LHS>(lhs),
+                                   std::forward<RHS>(rhs));
     }
 
     /// Creates an Modulo operation

@@ -18,7 +18,7 @@ uvec4 textureLoad_1c562a() {
   uvec3 arg_1 = uvec3(1u);
   uint arg_2 = 1u;
   uvec3 v_2 = arg_1;
-  uint v_3 = min(arg_2, (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u));
+  uint v_3 = min(arg_2, (v_1.metadata[0u].x - 1u));
   ivec3 v_4 = ivec3(min(v_2, (uvec3(textureSize(f_arg_0, int(v_3))) - uvec3(1u))));
   uvec4 res = texelFetch(f_arg_0, v_4, int(v_3));
   return res;
@@ -44,7 +44,7 @@ uvec4 textureLoad_1c562a() {
   uvec3 arg_1 = uvec3(1u);
   uint arg_2 = 1u;
   uvec3 v_2 = arg_1;
-  uint v_3 = min(arg_2, (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u));
+  uint v_3 = min(arg_2, (v_1.metadata[0u].x - 1u));
   ivec3 v_4 = ivec3(min(v_2, (uvec3(textureSize(arg_0, int(v_3))) - uvec3(1u))));
   uvec4 res = texelFetch(arg_0, v_4, int(v_3));
   return res;
@@ -74,7 +74,7 @@ uvec4 textureLoad_1c562a() {
   uvec3 arg_1 = uvec3(1u);
   uint arg_2 = 1u;
   uvec3 v_1 = arg_1;
-  uint v_2 = min(arg_2, (v.metadata[(0u / 4u)][(0u % 4u)] - 1u));
+  uint v_2 = min(arg_2, (v.metadata[0u].x - 1u));
   ivec3 v_3 = ivec3(min(v_1, (uvec3(textureSize(v_arg_0, int(v_2))) - uvec3(1u))));
   uvec4 res = texelFetch(v_arg_0, v_3, int(v_2));
   return res;

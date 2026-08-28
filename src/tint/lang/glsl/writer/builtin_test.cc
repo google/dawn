@@ -335,7 +335,8 @@ void main_inner(uint tint_local_index) {
     atomicExchange(v.b, 0u);
   }
   barrier();
-  int x = atomicAdd(v.a, int((~(uint(123)) + 1u)));
+  uint v_1 = ~(uint(123));
+  int x = atomicAdd(v.a, int(4294967173u));
   uint y = atomicAdd(v.b, -(123u));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -927,7 +928,7 @@ uniform f_TintTextureUniformData_ubo {
 } v_1;
 uniform highp sampler2D f_v;
 void main() {
-  uvec2 x = uvec2(textureSize(f_v, int(min(3u, (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u)))));
+  uvec2 x = uvec2(textureSize(f_v, int(min(3u, (v_1.metadata[0u].x - 1u)))));
 }
 )");
 }
@@ -1036,9 +1037,8 @@ TEST_F(GlslWriterTest, ExtractBits) {
 precision highp int;
 
 void main() {
-  uint v = min(2u, 32u);
-  int v_1 = int(v);
-  uint x = bitfieldExtract(1u, v_1, int(min(3u, (32u - v))));
+  int v = int(min(2u, 32u));
+  uint x = bitfieldExtract(1u, v, int(min(3u, 30u)));
 }
 )");
 }
@@ -1056,9 +1056,8 @@ TEST_F(GlslWriterTest, InsertBits) {
 precision highp int;
 
 void main() {
-  uint v = min(3u, 32u);
-  int v_1 = int(v);
-  uint x = bitfieldInsert(1u, 2u, v_1, int(min(4u, (32u - v))));
+  int v = int(min(3u, 32u));
+  uint x = bitfieldInsert(1u, 2u, v, int(min(4u, 29u)));
 }
 )");
 }
@@ -1440,11 +1439,11 @@ void main() {
 TEST_F(GlslWriterTest, BuiltinFMA_f32) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* x = b.Splat(ty.vec3f(), 1_f);
-        auto* y = b.Splat(ty.vec3f(), 2_f);
-        auto* z = b.Splat(ty.vec3f(), 3_f);
+        auto* x = b.Let("x", b.Splat(ty.vec3f(), 1_f));
+        auto* y = b.Let("y", b.Splat(ty.vec3f(), 2_f));
+        auto* z = b.Let("z", b.Splat(ty.vec3f(), 3_f));
 
-        b.Let("x", b.Call(ty.vec3f(), core::BuiltinFn::kFma, x, y, z));
+        b.Let("res", b.Call(ty.vec3f(), core::BuiltinFn::kFma, x, y, z));
         b.Return(func);
     });
 
@@ -1454,7 +1453,10 @@ TEST_F(GlslWriterTest, BuiltinFMA_f32) {
 precision highp int;
 
 void main() {
-  vec3 x = ((vec3(1.0f) * vec3(2.0f)) + vec3(3.0f));
+  vec3 x = vec3(1.0f);
+  vec3 y = vec3(2.0f);
+  vec3 z = vec3(3.0f);
+  vec3 res = ((x * y) + z);
 }
 )");
 }
@@ -1477,7 +1479,7 @@ precision highp int;
 #extension GL_AMD_gpu_shader_half_float: require
 
 void main() {
-  f16vec3 x = ((f16vec3(1.0hf) * f16vec3(2.0hf)) + f16vec3(3.0hf));
+  f16vec3 x = f16vec3(5.0hf);
 }
 )");
 }

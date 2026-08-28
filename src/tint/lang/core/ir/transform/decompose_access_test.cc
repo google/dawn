@@ -6821,8 +6821,7 @@ $B1: {  # root
 
 %foo = func():void {
   $B2: {
-    %3:u32 = div 100u, 4u
-    %a:u32 = let %3
+    %a:u32 = let 25u
     ret
   }
 }
@@ -6873,8 +6872,7 @@ $B1: {  # root
 
 %foo = func():void {
   $B2: {
-    %3:u32 = div 100u, 16u
-    %a:u32 = let %3
+    %a:u32 = let 6u
     ret
   }
 }
@@ -6940,8 +6938,7 @@ $B1: {  # root
 
 %foo = func():void {
   $B2: {
-    %3:u32 = div 100u, 32u
-    %a:u32 = let %3
+    %a:u32 = let 3u
     ret
   }
 }
@@ -7527,16 +7524,15 @@ $B1: {  # root
 
 %foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
   $B2: {
-    %6:u32 = div 0u, 4u
-    %7:u32 = mul %offset, 8u
-    %8:u32 = div %7, 4u
-    %9:u32 = add %6, %8
-    %10:u32 = mul %stride, 8u
-    %11:u32 = div %10, 4u
-    %12:void = subgroupMatrixStore<col_major> %v, %9, %m, %11 @align(8)
-    %13:ptr<storage, u32, read_write> = access %v, 0u
-    %14:u32 = load %13
-    %15:f32 = bitcast<f32> %14
+    %6:u32 = mul %offset, 8u
+    %7:u32 = div %6, 4u
+    %8:u32 = add 0u, %7
+    %9:u32 = mul %stride, 8u
+    %10:u32 = div %9, 4u
+    %11:void = subgroupMatrixStore<col_major> %v, %8, %m, %10 @align(8)
+    %12:ptr<storage, u32, read_write> = access %v, 0u
+    %13:u32 = load %12
+    %14:f32 = bitcast<f32> %13
     ret
   }
 }
@@ -7589,16 +7585,15 @@ $B1: {  # root
 
 %foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
   $B2: {
-    %6:u32 = div 0u, 4u
-    %7:u32 = mul %offset, 16u
-    %8:u32 = div %7, 4u
-    %9:u32 = add %6, %8
-    %10:u32 = mul %stride, 16u
-    %11:u32 = div %10, 4u
-    %12:void = subgroupMatrixStore<col_major> %v, %9, %m, %11 @align(16)
-    %13:ptr<storage, u32, read_write> = access %v, 0u
-    %14:u32 = load %13
-    %15:f32 = bitcast<f32> %14
+    %6:u32 = mul %offset, 16u
+    %7:u32 = div %6, 4u
+    %8:u32 = add 0u, %7
+    %9:u32 = mul %stride, 16u
+    %10:u32 = div %9, 4u
+    %11:void = subgroupMatrixStore<col_major> %v, %8, %m, %10 @align(16)
+    %12:ptr<storage, u32, read_write> = access %v, 0u
+    %13:u32 = load %12
+    %14:f32 = bitcast<f32> %13
     ret
   }
 }
@@ -7651,16 +7646,15 @@ $B1: {  # root
 
 %foo = func(%m:subgroup_matrix_left<f16, 8, 8>, %offset:u32, %stride:u32):void {
   $B2: {
-    %6:u32 = div 0u, 4u
-    %7:u32 = mul %offset, 16u
-    %8:u32 = div %7, 4u
-    %9:u32 = add %6, %8
-    %10:u32 = mul %stride, 16u
-    %11:u32 = div %10, 4u
-    %12:void = subgroupMatrixStore<col_major> %v, %9, %m, %11 @align(16)
-    %13:ptr<storage, u32, read_write> = access %v, 0u
-    %14:u32 = load %13
-    %15:f32 = bitcast<f32> %14
+    %6:u32 = mul %offset, 16u
+    %7:u32 = div %6, 4u
+    %8:u32 = add 0u, %7
+    %9:u32 = mul %stride, 16u
+    %10:u32 = div %9, 4u
+    %11:void = subgroupMatrixStore<col_major> %v, %8, %m, %10 @align(16)
+    %12:ptr<storage, u32, read_write> = access %v, 0u
+    %13:u32 = load %12
+    %14:f32 = bitcast<f32> %13
     ret
   }
 }
@@ -7730,16 +7724,15 @@ $B1: {  # root
 
 %foo = func(%offset:u32, %stride:u32):void {
   $B2: {
-    %5:u32 = div 4u, 2u
-    %6:u32 = mul %offset, 4u
-    %7:u32 = div %6, 2u
-    %8:u32 = add %5, %7
-    %9:u32 = mul %stride, 4u
-    %10:u32 = div %9, 2u
-    %11:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %v, %8, %10 @align(4)
-    %12:ptr<workgroup, u16, read_write> = access %v, 0u
-    %13:u16 = load %12
-    %14:f16 = bitcast<f16> %13
+    %5:u32 = mul %offset, 4u
+    %6:u32 = div %5, 2u
+    %7:u32 = add 2u, %6
+    %8:u32 = mul %stride, 4u
+    %9:u32 = div %8, 2u
+    %10:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %v, %7, %9 @align(4)
+    %11:ptr<workgroup, u16, read_write> = access %v, 0u
+    %12:u16 = load %11
+    %13:f16 = bitcast<f16> %12
     ret
   }
 }
@@ -7809,16 +7802,15 @@ $B1: {  # root
 
 %foo = func(%offset:u32, %stride:u32):void {
   $B2: {
-    %5:u32 = div 8u, 2u
-    %6:u32 = mul %offset, 8u
-    %7:u32 = div %6, 2u
-    %8:u32 = add %5, %7
-    %9:u32 = mul %stride, 8u
-    %10:u32 = div %9, 2u
-    %11:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %v, %8, %10 @align(8)
-    %12:ptr<workgroup, u16, read_write> = access %v, 0u
-    %13:u16 = load %12
-    %14:f16 = bitcast<f16> %13
+    %5:u32 = mul %offset, 8u
+    %6:u32 = div %5, 2u
+    %7:u32 = add 4u, %6
+    %8:u32 = mul %stride, 8u
+    %9:u32 = div %8, 2u
+    %10:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %v, %7, %9 @align(8)
+    %11:ptr<workgroup, u16, read_write> = access %v, 0u
+    %12:u16 = load %11
+    %13:f16 = bitcast<f16> %12
     ret
   }
 }
@@ -7888,16 +7880,15 @@ $B1: {  # root
 
 %foo = func(%offset:u32, %stride:u32):void {
   $B2: {
-    %5:u32 = div 16u, 2u
-    %6:u32 = mul %offset, 16u
-    %7:u32 = div %6, 2u
-    %8:u32 = add %5, %7
-    %9:u32 = mul %stride, 16u
-    %10:u32 = div %9, 2u
-    %11:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %v, %8, %10 @align(16)
-    %12:ptr<workgroup, u16, read_write> = access %v, 0u
-    %13:u16 = load %12
-    %14:f16 = bitcast<f16> %13
+    %5:u32 = mul %offset, 16u
+    %6:u32 = div %5, 2u
+    %7:u32 = add 8u, %6
+    %8:u32 = mul %stride, 16u
+    %9:u32 = div %8, 2u
+    %10:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %v, %7, %9 @align(16)
+    %11:ptr<workgroup, u16, read_write> = access %v, 0u
+    %12:u16 = load %11
+    %13:f16 = bitcast<f16> %12
     ret
   }
 }
@@ -7967,16 +7958,15 @@ $B1: {  # root
 
 %foo = func(%offset:u32, %stride:u32):void {
   $B2: {
-    %5:u32 = div 16u, 2u
-    %6:u32 = mul %offset, 16u
-    %7:u32 = div %6, 2u
-    %8:u32 = add %5, %7
-    %9:u32 = mul %stride, 16u
-    %10:u32 = div %9, 2u
-    %11:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %v, %8, %10 @align(16)
-    %12:ptr<workgroup, u16, read_write> = access %v, 0u
-    %13:u16 = load %12
-    %14:f16 = bitcast<f16> %13
+    %5:u32 = mul %offset, 16u
+    %6:u32 = div %5, 2u
+    %7:u32 = add 8u, %6
+    %8:u32 = mul %stride, 16u
+    %9:u32 = div %8, 2u
+    %10:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %v, %7, %9 @align(16)
+    %11:ptr<workgroup, u16, read_write> = access %v, 0u
+    %12:u16 = load %11
+    %13:f16 = bitcast<f16> %12
     ret
   }
 }
@@ -9531,13 +9521,7 @@ $B1: {  # root
     %3:ptr<storage, u16, read_write> = access %v, 0u
     %4:u16 = load %3
     %5:f16 = bitcast<f16> %4
-    %6:u32 = div 4u, 2u
-    %7:u32 = mul 0u, 4u
-    %8:u32 = div %7, 2u
-    %9:u32 = add %6, %8
-    %10:u32 = mul 8u, 4u
-    %11:u32 = div %10, 2u
-    %12:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major> %v, %9, %11 @align(4)
+    %6:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major> %v, 2u, 16u @align(4)
     ret
   }
 }
@@ -9610,13 +9594,7 @@ $B1: {  # root
     %4:u16 = load %3
     %5:f16 = bitcast<f16> %4
     %6:subgroup_matrix_left<f32, 8, 8> = construct
-    %7:u32 = div 4u, 2u
-    %8:u32 = mul 0u, 4u
-    %9:u32 = div %8, 2u
-    %10:u32 = add %7, %9
-    %11:u32 = mul 8u, 4u
-    %12:u32 = div %11, 2u
-    %13:void = subgroupMatrixStore<row_major> %v, %10, %6, %12 @align(4)
+    %7:void = subgroupMatrixStore<row_major> %v, 2u, %6, 16u @align(4)
     ret
   }
 }

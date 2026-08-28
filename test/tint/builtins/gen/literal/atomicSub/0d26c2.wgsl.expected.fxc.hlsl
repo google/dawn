@@ -7,7 +7,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 groupshared uint arg_0;
 uint atomicSub_0d26c2() {
   uint v = 0u;
-  InterlockedAdd(arg_0, (0u - 1u), v);
+  InterlockedAdd(arg_0, 4294967295u, v);
   uint res = v;
   return res;
 }

@@ -317,7 +317,7 @@ struct State {
 
         b.InsertBefore(call, [&] {
             auto* mul = b.Multiply(args[0], args[1]);
-            b.AddWithResult(call->DetachResult(), mul, args[2]);
+            b.AddReplaceResult(call->DetachResult(), mul, args[2]);
         });
         call->Destroy();
     }

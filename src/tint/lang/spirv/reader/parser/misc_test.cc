@@ -341,8 +341,7 @@ TEST_F(SpirvParserTest, OpUnreachable_InsideLoop) {
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
-        %2:bool = or true, true
-        if %2 [t: $B4, f: $B5] {  # if_1
+        if true [t: $B4, f: $B5] {  # if_1
           $B4: {  # true
             unreachable
           }
@@ -510,8 +509,7 @@ TEST_F(SpirvParserTest, OpKill_InsideLoop) {
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
-        %2:bool = or true, true
-        if %2 [t: $B4, f: $B5] {  # if_1
+        if true [t: $B4, f: $B5] {  # if_1
           $B4: {  # true
             discard
             ret

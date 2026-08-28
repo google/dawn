@@ -7,7 +7,7 @@ uniform TintTextureUniformData_1_ubo {
 uniform highp isampler2D arg_0;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_1 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_1 = (v.metadata[0u].x - 1u);
   uint v_2 = min(uint(0), v_1);
   uint v_3 = (uvec2(textureSize(arg_0, int(v_2))).x - 1u);
   ivec2 v_4 = ivec2(uvec2(min(uint(1), v_3), 0u));

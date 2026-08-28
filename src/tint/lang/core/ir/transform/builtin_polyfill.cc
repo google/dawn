@@ -516,7 +516,7 @@ struct State {
         } else if (type->Is<core::type::F32>()) {
             value = b.Constant(f32(kRadToDeg));
         }
-        b.InsertBefore(call, [&] { b.MultiplyWithResult(call->DetachResult(), arg, value); });
+        b.InsertBefore(call, [&] { b.MultiplyReplaceResult(call->DetachResult(), arg, value); });
         call->Destroy();
     }
 
@@ -562,7 +562,7 @@ struct State {
 
             // Smoothstep is a well defined function.
             // result = t * t * (3.0 - 2.0 * t);
-            b.MultiplyWithResult(
+            b.MultiplyReplaceResult(
                 call->DetachResult(), t_clamped,
                 b.Multiply(t_clamped, b.Subtract(three, b.Multiply(two, t_clamped))));
         });
@@ -755,7 +755,7 @@ struct State {
             auto* dpdy = b.Call(type, core::BuiltinFn::kDpdyFine, value);
             auto* abs_dpdx = b.Call(type, core::BuiltinFn::kAbs, dpdx);
             auto* abs_dpdy = b.Call(type, core::BuiltinFn::kAbs, dpdy);
-            b.AddWithResult(call->DetachResult(), abs_dpdx, abs_dpdy);
+            b.AddReplaceResult(call->DetachResult(), abs_dpdx, abs_dpdy);
         });
         call->Destroy();
     }
@@ -826,7 +826,7 @@ struct State {
                                       b.LessThan(offset, 32_u));
                     auto* result_lhs = b.And(s3, mask_as_result_type(mask));
                     auto* result_rhs = b.And(e, mask_as_result_type(b.Complement(mask)->Result()));
-                    b.OrWithResult(call->DetachResult(), result_lhs, result_rhs);
+                    b.OrReplaceResult(call->DetachResult(), result_lhs, result_rhs);
                 });
                 call->Destroy();
             } break;
@@ -856,7 +856,7 @@ struct State {
         } else if (type->Is<core::type::F32>()) {
             value = b.Constant(f32(kDegToRad));
         }
-        b.InsertBefore(call, [&] { b.MultiplyWithResult(call->DetachResult(), arg, value); });
+        b.InsertBefore(call, [&] { b.MultiplyReplaceResult(call->DetachResult(), arg, value); });
         call->Destroy();
     }
 
@@ -884,7 +884,7 @@ struct State {
             auto* factor = b.Multiply(-2.0_f, dot);
             auto* vfactor = b.Construct(vec_ty, factor);
             auto* mul = b.Multiply(vfactor, e2);
-            b.AddWithResult(call->DetachResult(), e1, mul);
+            b.AddReplaceResult(call->DetachResult(), e1, mul);
         });
         call->Destroy();
     }

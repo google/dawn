@@ -1262,17 +1262,21 @@ TEST_F(SpirvParserTest, Var_OpSpecConstantTrue_NoSpecId) {
         %f32 = OpTypeFloat 32
       %vec4f = OpTypeVector %f32 4
           %c = OpSpecConstantTrue %bool
+        %ptr = OpTypePointer Function %bool
      %voidfn = OpTypeFunction %void
        %main = OpFunction %void None %voidfn
  %main_entry = OpLabel
+          %v = OpVariable %ptr Function
           %b = OpLogicalAnd %bool %c %c
+               OpStore %v %b
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = and true, true
+    %2:ptr<function, bool, read_write> = var undef
+    store %2, true
     ret
   }
 }
@@ -1325,17 +1329,21 @@ TEST_F(SpirvParserTest, Var_OpSpecConstantFalse_NoSpecId) {
         %f32 = OpTypeFloat 32
       %vec4f = OpTypeVector %f32 4
           %c = OpSpecConstantFalse %bool
+        %ptr = OpTypePointer Function %bool
      %voidfn = OpTypeFunction %void
        %main = OpFunction %void None %voidfn
  %main_entry = OpLabel
+          %v = OpVariable %ptr Function
           %b = OpLogicalAnd %bool %c %c
+               OpStore %v %b
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = and false, false
+    %2:ptr<function, bool, read_write> = var undef
+    store %2, false
     ret
   }
 }
@@ -1363,13 +1371,12 @@ TEST_F(SpirvParserTest, Var_OpSpecConstantOp_LogicalAnd) {
 )",
               R"(
 $B1: {  # root
-  %1:bool = and false, true
-  %myconst:bool = override %1
+  %myconst:bool = override false
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:bool = and %myconst, %myconst
+    %3:bool = and %myconst, %myconst
     ret
   }
 }
@@ -1397,13 +1404,12 @@ TEST_F(SpirvParserTest, Var_OpSpecConstantOp_LogicalOr) {
 )",
               R"(
 $B1: {  # root
-  %1:bool = or false, true
-  %myconst:bool = override %1
+  %myconst:bool = override true
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:bool = or %myconst, %myconst
+    %3:bool = or %myconst, %myconst
     ret
   }
 }
@@ -1465,13 +1471,12 @@ TEST_F(SpirvParserTest, Var_OpSpecConstantOp_LogicalEqual) {
 )",
               R"(
 $B1: {  # root
-  %1:bool = eq true, false
-  %myconst:bool = override %1
+  %myconst:bool = override false
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:bool = eq %myconst, %myconst
+    %3:bool = eq %myconst, %myconst
     ret
   }
 }
@@ -1499,13 +1504,12 @@ TEST_F(SpirvParserTest, Var_OpSpecConstantOp_LogicalNotEqual) {
 )",
               R"(
 $B1: {  # root
-  %1:bool = neq true, false
-  %myconst:bool = override %1
+  %myconst:bool = override true
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:bool = neq %myconst, %myconst
+    %3:bool = neq %myconst, %myconst
     ret
   }
 }
@@ -2316,13 +2320,12 @@ TEST_F(SpirvParserTest, Var_OpSpecConstantOp_UDiv) {
 )",
               R"(
 $B1: {  # root
-  %1:u32 = div 1u, 2u
-  %myconst:u32 = override %1
+  %myconst:u32 = override 0u
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:u32 = let %myconst
+    %3:u32 = let %myconst
     ret
   }
 }
@@ -2351,13 +2354,12 @@ TEST_F(SpirvParserTest, Var_OpSpecConstantOp_UMod) {
 )",
               R"(
 $B1: {  # root
-  %1:u32 = mod 1u, 2u
-  %myconst:u32 = override %1
+  %myconst:u32 = override 1u
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:u32 = let %myconst
+    %3:u32 = let %myconst
     ret
   }
 }

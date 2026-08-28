@@ -2013,8 +2013,7 @@ $B1: {  # root
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:u32 = div 128u, 4u
-    %5:ptr<storage, array<u32>, read_write> = bufferArrayView<array<u32>> %gv, 0u, 128u, 256u
+    %4:ptr<storage, array<u32>, read_write> = bufferArrayView<array<u32>> %gv, 0u, 128u, 256u
     ret
   }
 }

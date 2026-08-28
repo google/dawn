@@ -337,21 +337,20 @@ $B1: {  # root
 }
 
 TEST_F(IR_SingleEntryPointTest, DirectOverridesWithInitializer) {
-    Value* init1 = nullptr;
-    Value* init2 = nullptr;
-    Value* init3 = nullptr;
-    b.Append(mod.root_block, [&] {
-        init1 = b.Multiply(2_i, 4_i);
-        auto* x = b.Multiply(2_i, 4_i);
-        init2 = b.Add(x, 4_i);
+    auto* init1 = mod.root_block->Append(b.Append(mod.CreateInstruction<core::ir::CoreBinary>(
+        b.InstructionResult(ty.i32()), BinaryOp::kMultiply, b.Constant(2_i), b.Constant(4_i))));
+    auto* x = mod.root_block->Append(b.Append(mod.CreateInstruction<core::ir::CoreBinary>(
+        b.InstructionResult(ty.i32()), BinaryOp::kMultiply, b.Constant(2_i), b.Constant(4_i))));
+    auto* init2 = mod.root_block->Append(b.Append(mod.CreateInstruction<core::ir::CoreBinary>(
+        b.InstructionResult(ty.i32()), BinaryOp::kAdd, x->Result(), b.Constant(4_i))));
+    auto* y = mod.root_block->Append(b.Append(mod.CreateInstruction<core::ir::CoreBinary>(
+        b.InstructionResult(ty.i32()), BinaryOp::kMultiply, b.Constant(3_i), b.Constant(5_i))));
+    auto* init3 = mod.root_block->Append(b.Append(mod.CreateInstruction<core::ir::CoreBinary>(
+        b.InstructionResult(ty.i32()), BinaryOp::kAdd, y->Result(), b.Constant(5_i))));
 
-        auto* y = b.Multiply(3_i, 5_i);
-        init3 = b.Add(y, 5_i);
-    });
-
-    auto* o1 = Override("o1", 1, init1);
-    auto* o2 = Override("o2", 2, init2);
-    auto* o3 = Override("o3", 3, init3);
+    auto* o1 = Override("o1", 1, init1->Result());
+    auto* o2 = Override("o2", 2, init2->Result());
+    auto* o3 = Override("o3", 3, init3->Result());
 
     EntryPoint("foo", {o1, o2});
     EntryPoint("bar", {o3});

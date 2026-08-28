@@ -8,7 +8,7 @@ layout(local_size_x = 6, local_size_y = 1, local_size_z = 1) in;
 void main() {
   {
     uvec2 tint_loop_idx = uvec2(4294967295u);
-    uint level = v.metadata[(0u / 4u)][(0u % 4u)];
+    uint level = v.metadata[0u].x;
     while(true) {
       if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;

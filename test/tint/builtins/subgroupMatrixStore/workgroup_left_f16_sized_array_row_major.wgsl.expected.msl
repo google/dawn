@@ -64,13 +64,13 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   }
   (threadgroup_barrier(mem_flags::mem_threadgroup));
   simdgroup_half8x8 const m = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
-  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out0) + (0u * 4u)), ulong((16u * 2u)), ulong2(0ul), false));
-  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out1) + (0u * 8u)), ulong((16u * 4u)), ulong2(0ul), false));
-  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out2) + (0u * 16u)), ulong((16u * 8u)), ulong2(0ul), false));
-  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out3) + (0u * 16u)), ulong((16u * 8u)), ulong2(0ul), false));
+  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out0) + 0u), ulong(32u), ulong2(0ul), false));
+  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out1) + 0u), ulong(64u), ulong2(0ul), false));
+  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out2) + 0u), ulong(128u), ulong2(0ul), false));
+  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out3) + 0u), ulong(128u), ulong2(0ul), false));
   (simdgroup_store(m, (&(*tint_module_vars.out4)[0u]), ulong(16u), ulong2(0ul), false));
-  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out5) + (0u * 4u)), ulong((16u * 2u)), ulong2(0ul), false));
-  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out6) + (0u * 8u)), ulong((16u * 4u)), ulong2(0ul), false));
+  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out5) + 0u), ulong(32u), ulong2(0ul), false));
+  (simdgroup_store(m, reinterpret_cast<threadgroup half*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out6) + 0u), ulong(64u), ulong2(0ul), false));
 }
 
 [[max_total_threads_per_threadgroup(64)]]

@@ -15,7 +15,7 @@ uniform f_TintTextureUniformData_ubo {
 } v_1;
 uniform highp sampler2D f_arg_0;
 vec4 textureLoad_439e2a() {
-  uint v_2 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_2 = (v_1.metadata[0u].x - 1u);
   uint v_3 = min(uint(1), v_2);
   ivec2 v_4 = ivec2(min(uvec2(1u), (uvec2(textureSize(f_arg_0, int(v_3))) - uvec2(1u))));
   vec4 res = texelFetch(f_arg_0, v_4, int(v_3));
@@ -39,7 +39,7 @@ uniform TintTextureUniformData_1_ubo {
 } v_1;
 uniform highp sampler2D arg_0;
 vec4 textureLoad_439e2a() {
-  uint v_2 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_2 = (v_1.metadata[0u].x - 1u);
   uint v_3 = min(uint(1), v_2);
   ivec2 v_4 = ivec2(min(uvec2(1u), (uvec2(textureSize(arg_0, int(v_3))) - uvec2(1u))));
   vec4 res = texelFetch(arg_0, v_4, int(v_3));
@@ -67,7 +67,7 @@ uniform v_TintTextureUniformData_ubo {
 uniform highp sampler2D v_arg_0;
 layout(location = 0) flat out vec4 tint_interstage_location0;
 vec4 textureLoad_439e2a() {
-  uint v_1 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_1 = (v.metadata[0u].x - 1u);
   uint v_2 = min(uint(1), v_1);
   ivec2 v_3 = ivec2(min(uvec2(1u), (uvec2(textureSize(v_arg_0, int(v_2))) - uvec2(1u))));
   vec4 res = texelFetch(v_arg_0, v_3, int(v_2));

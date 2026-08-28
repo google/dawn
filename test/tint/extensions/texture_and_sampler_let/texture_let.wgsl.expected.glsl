@@ -9,7 +9,7 @@ uniform f_TintTextureUniformData_ubo {
 } v;
 uniform highp sampler2D f_tex;
 void main() {
-  uint v_1 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_1 = (v.metadata[0u].x - 1u);
   uint v_2 = min(uint(0), v_1);
   uvec2 v_3 = (uvec2(textureSize(f_tex, int(v_2))) - uvec2(1u));
   ivec2 v_4 = ivec2(min(uvec2(ivec2(1)), v_3));

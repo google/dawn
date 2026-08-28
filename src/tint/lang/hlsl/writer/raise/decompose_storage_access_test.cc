@@ -2477,10 +2477,9 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:ptr<function, i32, read_write> = var 0i
-    %4:i32 = sub 0i, 123i
-    %5:void = %v.InterlockedAdd 16u, %4, %3
-    %6:i32 = load %3
-    %x:i32 = let %6
+    %4:void = %v.InterlockedAdd 16u, -123i, %3
+    %5:i32 = load %3
+    %x:i32 = let %5
     ret
   }
 }
@@ -2559,12 +2558,11 @@ $B1: {  # root
     %4:u32 = mul %3, 32u
     %5:u32 = mul %3, 4u
     %6:ptr<function, i32, read_write> = var 0i
-    %7:i32 = sub 0i, 123i
-    %8:u32 = add 16u, %4
-    %9:u32 = add %8, %5
-    %10:void = %v.InterlockedAdd %9, %7, %6
-    %11:i32 = load %6
-    %x:i32 = let %11
+    %7:u32 = add 16u, %4
+    %8:u32 = add %7, %5
+    %9:void = %v.InterlockedAdd %8, -123i, %6
+    %10:i32 = load %6
+    %x:i32 = let %10
     ret
   }
 }
@@ -2608,10 +2606,9 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:ptr<function, i32, read_write> = var 0i
-    %4:i32 = sub 0i, 123i
-    %5:void = %v.InterlockedAdd 0u, %4, %3
-    %6:i32 = load %3
-    %x:i32 = let %6
+    %4:void = %v.InterlockedAdd 0u, -123i, %3
+    %5:i32 = load %3
+    %x:i32 = let %5
     ret
   }
 }

@@ -37,11 +37,17 @@ struct tint_module_vars_struct {
 kernel void v(device tint_array<uint, 1024>* out0 [[buffer(0)]], device tint_array<int2, 1024>* out1 [[buffer(1)]], device tint_array<tint_packed_vec3_f32_array_element, 1024>* out2 [[buffer(2)]], device tint_array<uint4, 1024>* out3 [[buffer(3)]], device tint_array<half, 1024>* out4 [[buffer(4)]], device tint_array<half2, 1024>* out5 [[buffer(5)]], device tint_array<tint_packed_vec3_f16_array_element, 1024>* out6 [[buffer(6)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.out0=out0, .out1=out1, .out2=out2, .out3=out3, .out4=out4, .out5=out5, .out6=out6};
   simdgroup_half8x8 const m = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
-  (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out0) + (as_type<uint>(0) * 4u)), ulong((16u * 2u)), ulong2(0ul), true));
-  (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out1) + (as_type<uint>(0) * 8u)), ulong((16u * 4u)), ulong2(0ul), true));
-  (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out2) + (as_type<uint>(0) * 16u)), ulong((16u * 8u)), ulong2(0ul), true));
-  (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out3) + (as_type<uint>(0) * 16u)), ulong((16u * 8u)), ulong2(0ul), true));
+  (as_type<uint>(0));
+  (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out0) + 0u), ulong(32u), ulong2(0ul), true));
+  (as_type<uint>(0));
+  (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out1) + 0u), ulong(64u), ulong2(0ul), true));
+  (as_type<uint>(0));
+  (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out2) + 0u), ulong(128u), ulong2(0ul), true));
+  (as_type<uint>(0));
+  (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out3) + 0u), ulong(128u), ulong2(0ul), true));
   (simdgroup_store(m, (&(*tint_module_vars.out4)[0]), ulong(16u), ulong2(0ul), true));
-  (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out5) + (as_type<uint>(0) * 4u)), ulong((16u * 2u)), ulong2(0ul), true));
-  (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out6) + (as_type<uint>(0) * 8u)), ulong((16u * 4u)), ulong2(0ul), true));
+  (as_type<uint>(0));
+  (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out5) + 0u), ulong(32u), ulong2(0ul), true));
+  (as_type<uint>(0));
+  (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out6) + 0u), ulong(64u), ulong2(0ul), true));
 }

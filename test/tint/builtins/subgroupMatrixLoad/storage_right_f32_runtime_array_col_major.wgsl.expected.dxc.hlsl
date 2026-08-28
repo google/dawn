@@ -14,7 +14,7 @@ void main() {
   uint v_1 = 0u;
   in0.GetDimensions(v_1);
   uint v_2 = asuint(int(0));
-  uint v_3 = (v_2 + select((((16u != 0u) & (7u != 0u)) & (7u > (4294967295u / 16u))), 4294967295u, (16u * 7u)));
+  uint v_3 = (v_2 + select(false, 4294967295u, 112u));
   uint v_4 = select((v_3 < v_2), 4294967295u, v_3);
   uint v_5 = (v_4 + 8u);
   bool v_6 = (select((v_5 < v_4), 4294967295u, v_5) <= (v_1 / 4u));
@@ -23,7 +23,7 @@ void main() {
   v.GetDimensions(v_7);
   uint v_8 = asuint(int(0));
   uint v_9 = asuint(int(16));
-  uint v_10 = (v_8 + select((((v_9 != 0u) & (7u != 0u)) & (7u > (4294967295u / v_9))), 4294967295u, (v_9 * 7u)));
+  uint v_10 = (v_8 + select((((v_9 != 0u) & true) & (7u > (4294967295u / v_9))), 4294967295u, (v_9 * 7u)));
   uint v_11 = select((v_10 < v_8), 4294967295u, v_10);
   uint v_12 = (v_11 + 8u);
   bool v_13 = (select((v_12 < v_11), 4294967295u, v_12) <= (v_7 / 4u));
@@ -31,7 +31,7 @@ void main() {
   uint v_14 = 0u;
   in1.GetDimensions(v_14);
   uint v_15 = asuint(int(0));
-  uint v_16 = (v_15 + select((((16u != 0u) & (7u != 0u)) & (7u > (4294967295u / 16u))), 4294967295u, (16u * 7u)));
+  uint v_16 = (v_15 + select(false, 4294967295u, 112u));
   uint v_17 = select((v_16 < v_15), 4294967295u, v_16);
   uint v_18 = (v_17 + 4u);
   bool v_19 = (select((v_18 < v_17), 4294967295u, v_18) <= (v_14 / 8u));
@@ -40,7 +40,7 @@ void main() {
   v.GetDimensions(v_20);
   uint v_21 = asuint(int(0));
   uint v_22 = asuint(int(16));
-  uint v_23 = (v_21 + select((((v_22 != 0u) & (7u != 0u)) & (7u > (4294967295u / v_22))), 4294967295u, (v_22 * 7u)));
+  uint v_23 = (v_21 + select((((v_22 != 0u) & true) & (7u > (4294967295u / v_22))), 4294967295u, (v_22 * 7u)));
   uint v_24 = select((v_23 < v_21), 4294967295u, v_23);
   uint v_25 = (v_24 + 8u);
   bool v_26 = (select((v_25 < v_24), 4294967295u, v_25) <= (v_20 / 4u));
@@ -48,7 +48,7 @@ void main() {
   uint v_27 = 0u;
   in2.GetDimensions(v_27);
   uint v_28 = asuint(int(0));
-  uint v_29 = (v_28 + select((((16u != 0u) & (7u != 0u)) & (7u > (4294967295u / 16u))), 4294967295u, (16u * 7u)));
+  uint v_29 = (v_28 + select(false, 4294967295u, 112u));
   uint v_30 = select((v_29 < v_28), 4294967295u, v_29);
   uint v_31 = (v_30 + 2u);
   bool v_32 = (select((v_31 < v_30), 4294967295u, v_31) <= (v_27 / 16u));
@@ -57,7 +57,7 @@ void main() {
   v.GetDimensions(v_33);
   uint v_34 = asuint(int(0));
   uint v_35 = asuint(int(16));
-  uint v_36 = (v_34 + select((((v_35 != 0u) & (7u != 0u)) & (7u > (4294967295u / v_35))), 4294967295u, (v_35 * 7u)));
+  uint v_36 = (v_34 + select((((v_35 != 0u) & true) & (7u > (4294967295u / v_35))), 4294967295u, (v_35 * 7u)));
   uint v_37 = select((v_36 < v_34), 4294967295u, v_36);
   uint v_38 = (v_37 + 8u);
   bool v_39 = (select((v_38 < v_37), 4294967295u, v_38) <= (v_33 / 4u));
@@ -65,7 +65,7 @@ void main() {
   uint v_40 = 0u;
   in3.GetDimensions(v_40);
   uint v_41 = asuint(int(0));
-  uint v_42 = (v_41 + select((((16u != 0u) & (7u != 0u)) & (7u > (4294967295u / 16u))), 4294967295u, (16u * 7u)));
+  uint v_42 = (v_41 + select(false, 4294967295u, 112u));
   uint v_43 = select((v_42 < v_41), 4294967295u, v_42);
   uint v_44 = (v_43 + 2u);
   bool v_45 = (select((v_44 < v_43), 4294967295u, v_44) <= (v_40 / 16u));
@@ -74,7 +74,7 @@ void main() {
   v.GetDimensions(v_46);
   uint v_47 = asuint(int(0));
   uint v_48 = asuint(int(16));
-  uint v_49 = (v_47 + select((((v_48 != 0u) & (7u != 0u)) & (7u > (4294967295u / v_48))), 4294967295u, (v_48 * 7u)));
+  uint v_49 = (v_47 + select((((v_48 != 0u) & true) & (7u > (4294967295u / v_48))), 4294967295u, (v_48 * 7u)));
   uint v_50 = select((v_49 < v_47), 4294967295u, v_49);
   uint v_51 = (v_50 + 8u);
   bool v_52 = (select((v_51 < v_50), 4294967295u, v_51) <= (v_46 / 4u));
@@ -82,7 +82,7 @@ void main() {
   uint v_53 = 0u;
   in5.GetDimensions(v_53);
   uint v_54 = asuint(int(0));
-  uint v_55 = (v_54 + select((((16u != 0u) & (7u != 0u)) & (7u > (4294967295u / 16u))), 4294967295u, (16u * 7u)));
+  uint v_55 = (v_54 + select(false, 4294967295u, 112u));
   uint v_56 = select((v_55 < v_54), 4294967295u, v_55);
   uint v_57 = (v_56 + 8u);
   bool v_58 = (select((v_57 < v_56), 4294967295u, v_57) <= (v_53 / 4u));
@@ -91,7 +91,7 @@ void main() {
   v.GetDimensions(v_59);
   uint v_60 = asuint(int(0));
   uint v_61 = asuint(int(16));
-  uint v_62 = (v_60 + select((((v_61 != 0u) & (7u != 0u)) & (7u > (4294967295u / v_61))), 4294967295u, (v_61 * 7u)));
+  uint v_62 = (v_60 + select((((v_61 != 0u) & true) & (7u > (4294967295u / v_61))), 4294967295u, (v_61 * 7u)));
   uint v_63 = select((v_62 < v_60), 4294967295u, v_62);
   uint v_64 = (v_63 + 8u);
   bool v_65 = (select((v_64 < v_63), 4294967295u, v_64) <= (v_59 / 4u));
@@ -99,7 +99,7 @@ void main() {
   uint v_66 = 0u;
   in6.GetDimensions(v_66);
   uint v_67 = asuint(int(0));
-  uint v_68 = (v_67 + select((((16u != 0u) & (7u != 0u)) & (7u > (4294967295u / 16u))), 4294967295u, (16u * 7u)));
+  uint v_68 = (v_67 + select(false, 4294967295u, 112u));
   uint v_69 = select((v_68 < v_67), 4294967295u, v_68);
   uint v_70 = (v_69 + 4u);
   bool v_71 = (select((v_70 < v_69), 4294967295u, v_70) <= (v_66 / 8u));
@@ -108,7 +108,7 @@ void main() {
   v.GetDimensions(v_72);
   uint v_73 = asuint(int(0));
   uint v_74 = asuint(int(16));
-  uint v_75 = (v_73 + select((((v_74 != 0u) & (7u != 0u)) & (7u > (4294967295u / v_74))), 4294967295u, (v_74 * 7u)));
+  uint v_75 = (v_73 + select((((v_74 != 0u) & true) & (7u > (4294967295u / v_74))), 4294967295u, (v_74 * 7u)));
   uint v_76 = select((v_75 < v_73), 4294967295u, v_75);
   uint v_77 = (v_76 + 8u);
   bool v_78 = (select((v_77 < v_76), 4294967295u, v_77) <= (v_72 / 4u));

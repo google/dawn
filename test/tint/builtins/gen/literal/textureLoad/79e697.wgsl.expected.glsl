@@ -17,7 +17,7 @@ uniform highp isampler2DArray f_arg_0;
 ivec4 textureLoad_79e697() {
   uint v_2 = (uint(textureSize(f_arg_0, 0).z) - 1u);
   uint v_3 = min(uint(1), v_2);
-  uint v_4 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_4 = (v_1.metadata[0u].x - 1u);
   uint v_5 = min(uint(1), v_4);
   uvec2 v_6 = (uvec2(textureSize(f_arg_0, int(v_5)).xy) - uvec2(1u));
   ivec2 v_7 = ivec2(min(uvec2(ivec2(1)), v_6));
@@ -45,7 +45,7 @@ uniform highp isampler2DArray arg_0;
 ivec4 textureLoad_79e697() {
   uint v_2 = (uint(textureSize(arg_0, 0).z) - 1u);
   uint v_3 = min(uint(1), v_2);
-  uint v_4 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_4 = (v_1.metadata[0u].x - 1u);
   uint v_5 = min(uint(1), v_4);
   uvec2 v_6 = (uvec2(textureSize(arg_0, int(v_5)).xy) - uvec2(1u));
   ivec2 v_7 = ivec2(min(uvec2(ivec2(1)), v_6));
@@ -77,7 +77,7 @@ layout(location = 0) flat out ivec4 tint_interstage_location0;
 ivec4 textureLoad_79e697() {
   uint v_1 = (uint(textureSize(v_arg_0, 0).z) - 1u);
   uint v_2 = min(uint(1), v_1);
-  uint v_3 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_3 = (v.metadata[0u].x - 1u);
   uint v_4 = min(uint(1), v_3);
   uvec2 v_5 = (uvec2(textureSize(v_arg_0, int(v_4)).xy) - uvec2(1u));
   ivec2 v_6 = ivec2(min(uvec2(ivec2(1)), v_5));

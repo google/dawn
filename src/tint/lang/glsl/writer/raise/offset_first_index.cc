@@ -90,7 +90,7 @@ struct State {
         // Load the offset from the immediate data structure and add it to the index.
         b.InsertAfter(index, [&] {
             auto* offset = config.immediate_data.GetValue(b, immediate_entry);
-            b.AddWithResult(offset_index, index, offset);
+            b.AddReplaceResult(offset_index, index, offset);
         });
     }
 

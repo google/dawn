@@ -602,8 +602,7 @@ TEST_F(SpirvParserTest, FaceForward_Scalar) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = add 50.0f, 50.0f
-    %3:f32 = spirv.face_forward %2, 60.0f, 70.0f
+    %2:f32 = spirv.face_forward 100.0f, 60.0f, 70.0f
     ret
   }
 }
@@ -640,10 +639,8 @@ TEST_F(SpirvParserTest, Reflect_Scalar) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = add 50.0f, 50.0f
-    %3:f32 = add 60.0f, 60.0f
-    %4:f32 = spirv.reflect %2, %3
-    %5:f32 = let %4
+    %2:f32 = spirv.reflect 100.0f, 120.0f
+    %3:f32 = let %2
     ret
   }
 }
@@ -662,10 +659,8 @@ TEST_F(SpirvParserTest, Reflect_Vector) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = add vec2<f32>(50.0f, 60.0f), vec2<f32>(50.0f, 60.0f)
-    %3:vec2<f32> = add vec2<f32>(60.0f, 50.0f), vec2<f32>(60.0f, 50.0f)
-    %4:vec2<f32> = spirv.reflect %2, %3
-    %5:vec2<f32> = let %4
+    %2:vec2<f32> = spirv.reflect vec2<f32>(100.0f, 120.0f), vec2<f32>(120.0f, 100.0f)
+    %3:vec2<f32> = let %2
     ret
   }
 }

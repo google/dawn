@@ -13,7 +13,7 @@ void main_inner(uvec3 GlobalInvocationId) {
   uint v_1 = min(((GlobalInvocationId.y * 128u) + GlobalInvocationId.x), (uint(result.values.length()) - 1u));
   int v_2 = int(GlobalInvocationId.x);
   ivec2 v_3 = ivec2(v_2, int(GlobalInvocationId.y));
-  uint v_4 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uint v_4 = (v.metadata[0u].x - 1u);
   uint v_5 = min(uint(0), v_4);
   uvec2 v_6 = (uvec2(textureSize(tex, int(v_5))) - uvec2(1u));
   ivec2 v_7 = ivec2(min(uvec2(v_3), v_6));
