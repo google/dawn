@@ -453,7 +453,7 @@ deps = {
   },
 
   'third_party/EGL-Registry/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/EGL-Registry@3d7796b3721d93976b6bfe536aa97bbc4bce8667',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/EGL-Registry@5961a7fe64cf8a126890ced6f13d69e0a1e1b83e',
   },
 
   # WebGPU CTS - Used both by the dawn_node tests and transitively by Chromium.
