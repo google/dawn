@@ -28,6 +28,7 @@
 #include "src/dawn/wire/server/Server.h"
 
 #include "dawn/wire/WireServer.h"
+#include "src/dawn/wire/server/ServerInlineMemoryTransferService.h"
 
 namespace dawn::wire::server {
 

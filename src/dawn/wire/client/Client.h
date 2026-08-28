@@ -147,8 +147,6 @@ class Client : public ClientBase {
     bool mDisconnected = false;
 };
 
-std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
-
 // Right now, the Cmds are implemented with dawn::wire::* structs, but throughout the client code,
 // we are using dawn::wire::client::* structs. We don't currently generate helpers to go from
 // dawn::wire::client::* -> dawn::wire::*, but we do generate helpers to go to/from both and the C

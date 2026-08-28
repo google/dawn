@@ -326,9 +326,6 @@ class Server : public ServerBase {
     std::weak_ptr<Server> mSelf;
 };
 
-std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
-
 }  // namespace server
 }  // namespace dawn::wire
-
 #endif  // SRC_DAWN_WIRE_SERVER_SERVER_H_

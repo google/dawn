@@ -25,10 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "src/dawn/wire/server/ServerInlineMemoryTransferService.h"
+
 #include <cstring>
 #include <memory>
 
 #include "dawn/wire/WireServer.h"
+#include "src/dawn/wire/InlineSharedMemoryManager.h"
 #include "src/dawn/wire/server/Server.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
@@ -74,9 +77,10 @@ class InlineMemoryTransferService : public MemoryTransferService {
 
     std::unique_ptr<MemoryHandle> DeserializeMemoryHandle(
         std::span<const std::byte> creationData) override {
-        if (!creationData.empty()) {
+        if (creationData.size() != sizeof(SharedMemoryHandle)) {
             return nullptr;
         }
+
         return std::make_unique<MemoryHandleImpl>();
     }
 };

@@ -45,6 +45,11 @@ namespace dawn::wire {
 
 // Identifies a SharedMemory reference in an InlineSharedMemoryManager.
 using SharedMemoryID = TypedInteger<struct SharedMemoryIDT, uint64_t>;
+static constexpr SharedMemoryID kInvalidSharedMemoryID = SharedMemoryID(0u);
+
+struct SharedMemoryHandle {
+    SharedMemoryID id = kInvalidSharedMemoryID;
+};
 
 // A ref-counted shared memory allocation.
 class SharedMemory : public RefCounted {

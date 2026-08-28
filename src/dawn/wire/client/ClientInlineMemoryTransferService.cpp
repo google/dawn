@@ -25,17 +25,19 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <cstring>
+#include "src/dawn/wire/client/ClientInlineMemoryTransferService.h"
+
 #include <memory>
-#include <new>
 #include <utility>
 
 #include "dawn/wire/WireClient.h"
+#include "src/dawn/wire/InlineSharedMemoryManager.h"
 #include "src/dawn/wire/client/Client.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 #include "src/utils/heap_array.h"
 #include "src/utils/numeric.h"
+#include "src/utils/span.h"
 
 namespace dawn::wire::client {
 
@@ -49,9 +51,14 @@ class InlineMemoryTransferService : public MemoryTransferService {
 
         ~MemoryHandleImpl() override = default;
 
-        size_t GetSerializeCreateSize() const override { return 0; }
+        size_t GetSerializeCreateSize() const override { return sizeof(SharedMemoryHandle); }
         void SerializeCreate(std::span<volatile std::byte> serializeSpace) const override {
             DAWN_ASSERT(serializeSpace.size() == GetSerializeCreateSize());
+
+            //  When we serialize a handle backed by staging data, the ID will always be
+            // `kInvalidSharedMemoryID`.
+            SharedMemoryHandle handle{kInvalidSharedMemoryID};
+            Span<volatile std::byte>(serializeSpace).CopyFrom(ByteSpanFromRef(handle));
         }
 
         std::span<std::byte> GetData() const override { return mStagingData; }
@@ -89,8 +96,56 @@ class InlineMemoryTransferService : public MemoryTransferService {
         HeapArray<std::byte> mStagingData;
     };
 
+    class MemoryHandleWithSharedMemoryImpl : public MemoryHandle {
+      public:
+        MemoryHandleWithSharedMemoryImpl(
+            std::shared_ptr<InlineSharedMemoryManager> sharedMemoryManager,
+            Ref<SharedMemory> sharedMemory)
+            : mSharedMemoryManager(std::move(sharedMemoryManager)),
+              mSharedMemory(std::move(sharedMemory)) {}
+
+        ~MemoryHandleWithSharedMemoryImpl() override = default;
+
+        size_t GetSerializeCreateSize() const override { return sizeof(SharedMemoryHandle); }
+
+        void SerializeCreate(std::span<volatile std::byte> serializeSpace) const override {
+            DAWN_ASSERT(serializeSpace.size() == GetSerializeCreateSize());
+
+            // When we serialize a handle backend by shared memory, the ID will never be
+            // `kInvalidSharedMemoryID`.
+            SharedMemoryID id = mSharedMemoryManager->PutOnWireAndGetID(mSharedMemory.Get());
+            SharedMemoryHandle handle{id};
+            Span<volatile std::byte>(serializeSpace).CopyFrom(ByteSpanFromRef(handle));
+        }
+
+        std::span<std::byte> GetData() const override { return mSharedMemory->GetMappedSpan(); }
+
+        size_t GetSerializeDataUpdateSize(size_t offset, size_t size) const override { return 0; }
+
+        void SerializeDataUpdate(std::span<volatile std::byte> serializeData,
+                                 size_t offset,
+                                 size_t size) const override {
+            DAWN_ASSERT(serializeData.size() == GetSerializeDataUpdateSize(offset, size));
+        }
+
+        bool DeserializeDataUpdate(std::span<const std::byte> deserializeData,
+                                   size_t offset,
+                                   size_t size) override {
+            DAWN_ASSERT(deserializeData.size() == 0u);
+            return true;
+        }
+
+      private:
+        std::shared_ptr<InlineSharedMemoryManager> mSharedMemoryManager;
+        Ref<SharedMemory> mSharedMemory;
+    };
+
   public:
     InlineMemoryTransferService() {}
+    explicit InlineMemoryTransferService(
+        std::shared_ptr<InlineSharedMemoryManager> sharedMemoryManager)
+        : mSharedMemoryManager(std::move(sharedMemoryManager)) {}
+
     ~InlineMemoryTransferService() override = default;
 
     std::unique_ptr<MemoryHandle> CreateMemoryHandle(size_t size) override {
@@ -101,10 +156,41 @@ class InlineMemoryTransferService : public MemoryTransferService {
 
         return std::make_unique<MemoryHandleImpl>(std::move(stagingData));
     }
+
+    std::unique_ptr<MemoryHandle> CreateMemoryHandle(size_t size,
+                                                     MemoryHandleUse memoryHandleUse) override {
+        if (CanUseSharedMemoryInWire(size, memoryHandleUse)) {
+            Ref<SharedMemory> sharedMemory = mSharedMemoryManager->CreateSharedMemory(size);
+            if (sharedMemory != nullptr) {
+                return std::make_unique<MemoryHandleWithSharedMemoryImpl>(mSharedMemoryManager,
+                                                                          std::move(sharedMemory));
+            }
+        }
+        return CreateMemoryHandle(size);
+    }
+
+  private:
+    bool CanUseSharedMemoryInWire(size_t size, MemoryHandleUse memoryHandleUse) const {
+        if (mSharedMemoryManager == nullptr) {
+            return false;
+        }
+        if (size == 0) {
+            return false;
+        }
+
+        return memoryHandleUse == MemoryHandleUse::MappedBuffer;
+    }
+
+    std::shared_ptr<InlineSharedMemoryManager> mSharedMemoryManager;
 };
 
 std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService() {
     return std::make_unique<InlineMemoryTransferService>();
+}
+
+std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService(
+    std::shared_ptr<InlineSharedMemoryManager> sharedMemoryManager) {
+    return std::make_unique<InlineMemoryTransferService>(std::move(sharedMemoryManager));
 }
 
 }  // namespace dawn::wire::client

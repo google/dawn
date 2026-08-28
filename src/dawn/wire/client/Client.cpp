@@ -31,6 +31,7 @@
 
 #include "src/dawn/common/Compiler.h"
 #include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/wire/client/ClientInlineMemoryTransferService.h"
 #include "src/dawn/wire/client/Device.h"
 
 namespace dawn::wire::client {

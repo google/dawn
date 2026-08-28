@@ -112,7 +112,16 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
     // Create a handle for sharing memory with the server.
     // This may fail and return nullptr.
     class MemoryHandle;
-    virtual std::unique_ptr<MemoryHandle> CreateMemoryHandle(size_t size) = 0;
+
+    enum class MemoryHandleUse : uint8_t {
+        BulkData,
+        MappedAtCreationData,
+        MappedBuffer,
+    };
+    // TODO(386255678): Remove the one-parameter overload when it is no longer used in Chromium.
+    virtual std::unique_ptr<MemoryHandle> CreateMemoryHandle(size_t size);
+    virtual std::unique_ptr<MemoryHandle> CreateMemoryHandle(size_t size,
+                                                             MemoryHandleUse memoryHandleUse);
 
     class DAWN_WIRE_EXPORT MemoryHandle {
       public:
