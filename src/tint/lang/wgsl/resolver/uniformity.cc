@@ -80,7 +80,7 @@ struct CallSiteTag {
     enum {
         CallSiteRequiredToBeUniform,
         CallSiteNoRestriction,
-    } tag;
+    } tag{};
     wgsl::DiagnosticSeverity severity = wgsl::DiagnosticSeverity::kUndefined;
 };
 

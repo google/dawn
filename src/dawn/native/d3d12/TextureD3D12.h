@@ -134,9 +134,9 @@ class Texture final : public TextureBase {
 
     // Barriers implementation details.
     struct StateAndDecay {
-        D3D12_RESOURCE_STATES lastState;
+        D3D12_RESOURCE_STATES lastState{};
         ExecutionSerial lastDecaySerial;
-        bool isValidToDecay;
+        bool isValidToDecay = false;
 
         bool operator==(const StateAndDecay& other) const = default;
     };
@@ -154,7 +154,7 @@ class Texture final : public TextureBase {
                                     ExecutionSerial pendingCommandSerial);
     void HandleTransitionSpecialCases(CommandRecordingContext* commandContext);
 
-    D3D12_RESOURCE_FLAGS mD3D12ResourceFlags;
+    D3D12_RESOURCE_FLAGS mD3D12ResourceFlags{};
     ResourceHeapAllocation mResourceAllocation;
 
     Ref<d3d::KeyedMutex> mKeyedMutex;

@@ -52,7 +52,8 @@ class array : private ::std::array<Value, Size> {
     static_assert(Size <= std::numeric_limits<size_t>::max());
 
   public:
-    constexpr array() = default;
+    // SAFETY: caller ensures array with primitive value gets initialized.
+    constexpr array() = default;  // NOLINT(cppcoreguidelines-pro-type-member-init)
 
     template <typename... Values>
     explicit(false) constexpr array(Values&&... values) : Base{std::forward<Values>(values)...} {}

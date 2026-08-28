@@ -79,8 +79,8 @@ class DualSourceBlendTests : public DawnTest {
     }
 
     struct TestParams {
-        wgpu::BlendFactor srcBlendFactor;
-        wgpu::BlendFactor dstBlendFactor;
+        wgpu::BlendFactor srcBlendFactor{};
+        wgpu::BlendFactor dstBlendFactor{};
         utils::RGBA8 baseColor;
         utils::RGBA8 testColorIndex0;
         utils::RGBA8 testColorIndex1;

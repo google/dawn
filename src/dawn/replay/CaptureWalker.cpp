@@ -142,7 +142,7 @@ MaybeError DeserializeResourceData(ReadHead& readHead, schema::ObjectType type, 
 #define AS_DESERIALIZE_RESOURCE_DATA_CASE(NAME, TYPE)                                            \
     case schema::ObjectType::NAME: {                                                             \
         if constexpr (!std::is_same_v<TYPE, InvalidData> && !std::is_same_v<TYPE, DeviceData>) { \
-            TYPE data;                                                                           \
+            TYPE data{};                                                                         \
             DAWN_TRY(Deserialize(readHead, &data));                                              \
             *out = std::move(data);                                                              \
         } else {                                                                                 \

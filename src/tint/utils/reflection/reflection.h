@@ -101,7 +101,7 @@ Result<SuccessType> CheckAllFieldsReflected() {
     using R = typename CLASS::Reflection;
     using Fields = typename R::Fields;
     Vector<ReflectedFieldInfo, std::tuple_size_v<Fields>> fields;
-    AlignedStorage<CLASS> obj;
+    AlignedStorage<CLASS> obj{};
     R::ForeachField(obj.Get(), [&](auto&& field, std::string_view name) {
         using T = std::decay_t<decltype(field)>;
         size_t offset = static_cast<size_t>(reinterpret_cast<const std::byte*>(&field) -

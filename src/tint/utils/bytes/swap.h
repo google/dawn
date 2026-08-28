@@ -45,10 +45,10 @@ namespace tint::bytes {
 template <typename T>
 [[nodiscard]] inline T Swap(T value) {
     static_assert(std::is_integral_v<T>);
-    std::array<std::byte, sizeof(T)> bytes;
+    std::array<std::byte, sizeof(T)> bytes{};
     tint::Copy(std::span<std::byte, sizeof(T)>{bytes}, value);
     std::ranges::reverse(bytes);
-    T out;
+    T out{};
     tint::Copy(&out, 1, std::span<std::byte, sizeof(T)>{bytes});
     return out;
 }

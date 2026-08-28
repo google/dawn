@@ -66,10 +66,10 @@ class SwapChain : public SwapChainBase {
 
     struct Config {
         // Information that's passed to the D3D12 swapchain creation call.
-        UINT bufferCount;
-        UINT swapChainFlags;
-        DXGI_FORMAT format;
-        DXGI_USAGE usage;
+        UINT bufferCount = 0;
+        UINT swapChainFlags = 0;
+        DXGI_FORMAT format{};
+        DXGI_USAGE usage = 0;
     };
     const Config& GetConfig() const;
 

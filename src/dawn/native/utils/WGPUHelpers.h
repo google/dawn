@@ -157,7 +157,7 @@ ResultOrError<Ref<BindGroupBase>> MakeBindGroup(
 // null-terminated as TraceEvent only supports const char*
 struct TraceLabel : public NonCopyable {
     std::string storage;
-    const char* label;
+    const char* label = nullptr;
 };
 TraceLabel GetLabelForTrace(StringView label);
 const char* GetLabelForTrace(const std::string& label);

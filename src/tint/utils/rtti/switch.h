@@ -311,7 +311,7 @@ inline auto Switch(T* object, ARGS&&... args) {
         }
     }
 
-    AlignedStorage<std::conditional_t<kHasReturnType, ReturnType, uint8_t>> return_storage;
+    AlignedStorage<std::conditional_t<kHasReturnType, ReturnType, uint8_t>> return_storage{};
     auto* result = &return_storage.Get();
 
     const ::tint::TypeInfo& type_info = object->TypeInfo();

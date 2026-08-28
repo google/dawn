@@ -127,66 +127,66 @@ struct MapUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectHandle buffer;
-    ObjectId instanceId;
-    Future future;
-    size_t offset;
-    size_t size;
-    wgpu::MapMode mode;
+    ObjectId instanceId = 0;
+    Future future{};
+    size_t offset = 0;
+    size_t size = 0;
+    wgpu::MapMode mode{};
 };
 
 struct ErrorScopeUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectHandle device;
-    ObjectId instanceId;
-    Future future;
+    ObjectId instanceId = 0;
+    Future future{};
 };
 
 struct ShaderModuleGetCompilationInfoUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
-    ObjectId instanceId;
-    Future future;
+    ObjectId instanceId = 0;
+    Future future{};
 };
 
 struct QueueWorkDoneUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectHandle queue;
-    ObjectId instanceId;
-    Future future;
+    ObjectId instanceId = 0;
+    Future future{};
 };
 
 struct CreatePipelineAsyncUserData : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectHandle device;
-    ObjectId instanceId;
-    Future future;
+    ObjectId instanceId = 0;
+    Future future{};
     ObjectHandle pipeline;
 };
 
 struct RequestAdapterUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
-    ObjectId instanceId;
-    Future future;
+    ObjectId instanceId = 0;
+    Future future{};
     ObjectHandle adapter;
 };
 
 struct RequestDeviceUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
-    ObjectId instanceId;
-    Future future;
+    ObjectId instanceId = 0;
+    Future future{};
     ObjectHandle device;
 };
 
 struct DeviceLostUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
-    ObjectId instanceId;
-    Future future;
+    ObjectId instanceId = 0;
+    Future future{};
 };
 
 class Server : public ServerBase {

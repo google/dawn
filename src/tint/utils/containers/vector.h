@@ -1111,7 +1111,8 @@ class Vector {
 
     /// The internal structure for the vector with a small array.
     struct ImplWithSmallArray {
-        std::array<TStorage, N> small_arr;
+        // SAFETY: container guarantees initializations.
+        std::array<TStorage, N> small_arr;  // NOLINT(cppcoreguidelines-pro-type-member-init)
         // SAFETY: The small array always has a fixed capacity of N elements.
         internal::Slice<T> slice = {
             DAWN_UNSAFE_BUFFERS(std::span<T>{&small_arr[0].Get(), N}),

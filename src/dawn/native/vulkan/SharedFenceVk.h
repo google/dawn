@@ -61,7 +61,7 @@ class SharedFence final : public SharedFenceBase {
 
     MaybeError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;
 
-    wgpu::SharedFenceType mType;
+    wgpu::SharedFenceType mType{};
     SystemHandle mHandle;
 };
 

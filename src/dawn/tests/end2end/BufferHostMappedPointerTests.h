@@ -66,7 +66,7 @@ class BufferHostMappedPointerTests : public DawnTestWithParams<BufferHostMappedP
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override;
     void SetUp() override;
 
-    uint32_t mRequiredAlignment;
+    uint32_t mRequiredAlignment = 0;
 };
 
 }  // namespace dawn

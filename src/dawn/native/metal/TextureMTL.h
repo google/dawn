@@ -97,7 +97,7 @@ class Texture final : public TextureBase {
     absl::InlinedVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat> mMtlPlaneTextures;
 
     MTLPixelFormat mMtlFormat = MTLPixelFormatInvalid;
-    MTLTextureType mMtlTextureType;
+    MTLTextureType mMtlTextureType{};
     MTLTextureUsage mMtlUsage = 0;
 
     CFRef<IOSurfaceRef> mIOSurface = nullptr;

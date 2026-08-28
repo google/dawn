@@ -81,7 +81,7 @@ class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
     Accesses GetSideEffects() const override;
 
   private:
-    core::BuiltinFn func_;
+    core::BuiltinFn func_ = core::BuiltinFn::kNone;
 };
 
 }  // namespace tint::core::ir

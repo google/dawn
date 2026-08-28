@@ -52,7 +52,7 @@ class PipelineLayout final : public PipelineLayoutBase {
     // get correct VkPipelineLayout. Also allow for BindGroupLayout specialization.
     struct Specialization {
         PerBindGroup<BindGroupLayout::Specialization> bindGroups = {};
-        uint32_t pushConstantBytes;
+        uint32_t pushConstantBytes = 0;
         uint32_t framebufferFetchAttachmentCount = 0;
 
         template <typename H>

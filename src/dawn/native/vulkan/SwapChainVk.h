@@ -58,19 +58,19 @@ class SwapChain : public SwapChainBase {
 
     struct Config {
         // Information that's passed to vulkan swapchain creation.
-        VkPresentModeKHR presentMode;
+        VkPresentModeKHR presentMode{};
         VkExtent2D extent{};
         VkImageUsageFlags usage = 0;
-        VkFormat format;
-        VkColorSpaceKHR colorSpace;
+        VkFormat format{};
+        VkColorSpaceKHR colorSpace{};
         uint32_t targetImageCount = 0;
-        VkSurfaceTransformFlagBitsKHR transform;
-        VkCompositeAlphaFlagBitsKHR alphaMode;
+        VkSurfaceTransformFlagBitsKHR transform{};
+        VkCompositeAlphaFlagBitsKHR alphaMode{};
 
         // Redundant information but as WebGPU enums to create the wgpu::Texture that
         // encapsulates the native swapchain texture.
-        wgpu::TextureUsage wgpuUsage;
-        wgpu::TextureFormat wgpuFormat;
+        wgpu::TextureUsage wgpuUsage{};
+        wgpu::TextureFormat wgpuFormat{};
 
         // Information about the blit workarounds we need to do (if any)
         bool needsBlit = false;

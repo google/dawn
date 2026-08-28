@@ -68,7 +68,7 @@ enum class TextureQuery : uint8_t {
 struct EmulatedTextureBuiltin {
     // The index in the UBO of emulated builtin data.
     uint32_t index = 0;
-    TextureQuery query;
+    TextureQuery query{};
     // The group is needed to dirty bind groups when changing pipelines.
     // TODO(crbug.com/408065421): Remove the need for this by not dirtying the whole BingGroup in
     // this case.

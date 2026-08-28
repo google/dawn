@@ -881,7 +881,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSampleSinglePlane) {
     }
 
     struct RotationExpectation {
-        wgpu::ExternalTextureRotation rotation;
+        wgpu::ExternalTextureRotation rotation{};
         bool mirrored = false;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;
@@ -977,7 +977,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipTextureLoadSinglePlaneNotSquare) {
                         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
     struct RotationExpectation {
-        wgpu::ExternalTextureRotation rotation;
+        wgpu::ExternalTextureRotation rotation = wgpu::ExternalTextureRotation::Rotate0Degrees;
         bool mirrored = false;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;
@@ -1149,7 +1149,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSampleMultiplanar) {
     }
 
     struct RotationExpectation {
-        wgpu::ExternalTextureRotation rotation;
+        wgpu::ExternalTextureRotation rotation = wgpu::ExternalTextureRotation::Rotate0Degrees;
         bool mirrored = false;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;
@@ -1245,7 +1245,7 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
     struct CropExpectation {
         wgpu::Origin2D cropOrigin;
         wgpu::Extent2D cropSize{};
-        wgpu::ExternalTextureRotation rotation;
+        wgpu::ExternalTextureRotation rotation = wgpu::ExternalTextureRotation::Rotate0Degrees;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;
         utils::RGBA8 lowerLeftColor;
@@ -1492,7 +1492,7 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
     struct CropExpectation {
         wgpu::Origin2D cropOrigin;
         wgpu::Extent2D cropSize{};
-        wgpu::ExternalTextureRotation rotation;
+        wgpu::ExternalTextureRotation rotation = wgpu::ExternalTextureRotation::Rotate0Degrees;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;
         utils::RGBA8 lowerLeftColor;

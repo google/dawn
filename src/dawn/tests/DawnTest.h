@@ -274,7 +274,7 @@ class DawnTestEnvironment : public testing::Environment {
     bool mHasVendorIdFilter = false;
     uint32_t mVendorIdFilter = 0;
     bool mHasBackendTypeFilter = false;
-    wgpu::BackendType mBackendTypeFilter;
+    wgpu::BackendType mBackendTypeFilter = wgpu::BackendType::Undefined;
     bool mHasWebGPUInnerBackendTypeFilter = false;
     wgpu::BackendType mWebGPUInnerBackendTypeFilter = wgpu::BackendType::Undefined;
     bool mWebGPUInnerForceFallbackAdapter = false;
@@ -825,7 +825,7 @@ class DawnTestBase {
     struct ReadbackSlot {
         wgpu::Device device;
         wgpu::Buffer buffer;
-        uint64_t bufferSize;
+        uint64_t bufferSize = 0;
         std::string label;
         raw_ptr<const void> mappedData = nullptr;
     };
@@ -847,10 +847,10 @@ class DawnTestBase {
     void CheckReplayedReadbackBuffers(std::span<ReadbackSlot> existingReadbacks);
 
     struct DeferredExpectation {
-        const char* file;
-        int line;
-        size_t readbackSlot;
-        uint64_t size;
+        const char* file = nullptr;
+        int line = 0;
+        size_t readbackSlot = 0;
+        uint64_t size = 0;
         uint32_t rowBytes = 0;
         uint32_t bytesPerRow = 0;
         std::unique_ptr<detail::Expectation> expectation;

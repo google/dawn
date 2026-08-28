@@ -56,7 +56,7 @@ class ResourceHeapAllocation : public ResourceMemoryAllocation {
 
   private:
     ComPtr<ID3D12Resource> mResource;
-    ResourceHeapKind mResourceHeapKind;
+    ResourceHeapKind mResourceHeapKind = ResourceHeapKind::InvalidEnum;
 };
 
 }  // namespace dawn::native::d3d12

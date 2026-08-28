@@ -84,7 +84,7 @@ class PhysicalDevice : public d3d::PhysicalDevice {
 
     const bool mIsSharedD3D11Device;
     ComPtr<ID3D11Device> mD3D11Device;
-    D3D_FEATURE_LEVEL mFeatureLevel;
+    D3D_FEATURE_LEVEL mFeatureLevel = D3D_FEATURE_LEVEL_1_0_GENERIC;
     DeviceInfo mDeviceInfo = {};
     uint32_t mUAVSlotCount = 0;
 };

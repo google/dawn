@@ -135,12 +135,12 @@ class EncoderVisitor {
 };
 
 struct CommandBufferData {
-    ReadHead* readHead;
+    ReadHead* readHead = nullptr;
 };
 
 struct RenderBundleData {
     schema::RenderBundle bundle;
-    ReadHead* readHead;
+    ReadHead* readHead = nullptr;
 };
 
 // This is needed to map a command to a deserialization data type.

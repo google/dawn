@@ -90,7 +90,7 @@ class StagingDescriptorAllocator {
     const uint32_t mBlockSize = 0;      // Size of the block of descriptors (in bytes).
     const uint32_t mHeapSize = 0;       // Size of the heap (in number of descriptors).
 
-    D3D12_DESCRIPTOR_HEAP_TYPE mHeapType;
+    D3D12_DESCRIPTOR_HEAP_TYPE mHeapType{};
 
     SerialQueue<ExecutionSerial, CPUDescriptorHeapAllocation> mAllocationsToDelete;
 };

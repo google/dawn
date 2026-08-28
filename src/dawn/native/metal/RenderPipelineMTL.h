@@ -68,9 +68,9 @@ class RenderPipeline final : public RenderPipelineBase {
     NSRef<MTLVertexDescriptor> MakeVertexDesc() const;
     NSRef<MTLDepthStencilDescriptor> MakeDepthStencilDesc();
 
-    MTLPrimitiveType mMtlPrimitiveTopology;
-    MTLWinding mMtlFrontFace;
-    MTLCullMode mMtlCullMode;
+    MTLPrimitiveType mMtlPrimitiveTopology{};
+    MTLWinding mMtlFrontFace{};
+    MTLCullMode mMtlCullMode{};
     NSPRef<id<MTLRenderPipelineState>> mMtlRenderPipelineState;
     NSPRef<id<MTLDepthStencilState>> mMtlDepthStencilState;
     PerVertexBuffer<uint32_t> mMtlVertexBufferIndices;

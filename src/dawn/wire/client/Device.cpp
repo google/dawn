@@ -233,7 +233,7 @@ class Device::DeviceLostEvent : public TrackedEvent {
     raw_ptr<void> mUserdata2 = nullptr;
 
     struct State {
-        wgpu::DeviceLostReason reason;
+        wgpu::DeviceLostReason reason{};
         std::string message;
     };
     MutexProtected<State> mState;

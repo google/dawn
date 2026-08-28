@@ -238,7 +238,7 @@ class Matrix {
     constexpr static Self Identity()
         requires(Cols == Rows)
     {
-        std::array<Scalar, Rows> scales;
+        std::array<Scalar, Rows> scales{};
         scales.fill(1);
         return Scale(Column{scales});
     }

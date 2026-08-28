@@ -69,7 +69,7 @@ class RenderPipeline final : public RenderPipelineBase {
     D3D12_DEPTH_STENCIL_DESC ComputeDepthStencilDesc();
 
     Ref<PipelineLayoutHandle> mPipelineLayoutHandle;
-    D3D12_PRIMITIVE_TOPOLOGY mD3d12PrimitiveTopology;
+    D3D12_PRIMITIVE_TOPOLOGY mD3d12PrimitiveTopology{};
     ComPtr<ID3D12PipelineState> mPipelineState;
 };
 

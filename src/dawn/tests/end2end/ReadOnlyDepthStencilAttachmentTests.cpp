@@ -65,7 +65,7 @@ class ReadOnlyDepthStencilAttachmentTests
     }
 
     struct TestSpec {
-        wgpu::TextureAspect readonlyAspects;
+        wgpu::TextureAspect readonlyAspects = wgpu::TextureAspect::All;
         std::optional<wgpu::TextureAspect> sampledAspect = std::nullopt;
 
         wgpu::CompareFunction depthCompare = wgpu::CompareFunction::Always;

@@ -29,8 +29,6 @@ Checks:
 
   ## P0. Most likely to help with hardening.
   #- -readability-inconsistent-declaration-parameter-name  # in webgpu.h and src/tint
-  ## - Memory initialization
-  #- -cppcoreguidelines-pro-type-member-init  # remains need manual fixes
   ## - Other memory safety
   #- -bugprone-casting-through-void
   #- -bugprone-return-const-ref-from-parameter

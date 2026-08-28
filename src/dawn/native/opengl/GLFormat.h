@@ -44,7 +44,7 @@ struct GLFormat {
     // OpenGL has different functions depending on the format component type, for example
     // glClearBufferfv is only valid on formats with the Float ComponentType
     enum ComponentType { Float, Int, Uint, DepthStencil };
-    ComponentType componentType;
+    ComponentType componentType{};
 };
 
 using GLFormatTable = ityp::array<FormatIndex, GLFormat, kKnownFormatCount>;
