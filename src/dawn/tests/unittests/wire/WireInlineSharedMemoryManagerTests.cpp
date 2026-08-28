@@ -38,6 +38,7 @@
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/wire/InlineSharedMemoryManager.h"
 #include "src/dawn/wire/client/ClientInlineMemoryTransferService.h"
+#include "src/dawn/wire/server/ServerInlineMemoryTransferService.h"
 #include "src/utils/platform.h"
 
 namespace dawn::wire {
@@ -51,6 +52,11 @@ class InlineSharedMemoryManagerTest : public testing::Test {
 #endif
         mManager = CreateInlineSharedMemoryManager();
     }
+
+    static constexpr std::array<std::byte, 8> kExpectedData = {
+        std::byte(0), std::byte(1), std::byte(2), std::byte(3),
+        std::byte(4), std::byte(5), std::byte(6), std::byte(7)};
+    static constexpr size_t kSize = kExpectedData.size();
 
     std::shared_ptr<InlineSharedMemoryManager> mManager;
 };
@@ -183,11 +189,6 @@ class ClientInlineMemoryTransferServiceTest : public InlineSharedMemoryManagerTe
     using MemoryHandle = client::MemoryTransferService::MemoryHandle;
     using MemoryHandleUse = client::MemoryTransferService::MemoryHandleUse;
 
-    static constexpr std::array<std::byte, 8> kExpectedData = {
-        std::byte(0), std::byte(1), std::byte(2), std::byte(3),
-        std::byte(4), std::byte(5), std::byte(6), std::byte(7)};
-    static constexpr size_t kSize = kExpectedData.size();
-
     // Reads back a `SharedMemoryHandle` serialized by `MemoryHandle::SerializeCreate`.
     static SharedMemoryHandle ReadSerializedHandle(Span<const std::byte> serialized) {
         EXPECT_EQ(sizeof(SharedMemoryHandle), serialized.size());
@@ -295,6 +296,79 @@ TEST_F(ClientInlineMemoryTransferServiceTest, StagingHandle_SerializeDataUpdate)
                                 0u, kSize);
 
     EXPECT_THAT(serialized, testing::ElementsAreArray(kExpectedData));
+}
+
+// Tests for the server-side `InlineMemoryTransferService` created with a non-null
+// `InlineSharedMemoryManager`.
+class ServerInlineMemoryTransferServiceTest : public InlineSharedMemoryManagerTest {
+  protected:
+    void SetUp() override {
+        InlineSharedMemoryManagerTest::SetUp();
+
+        mClientService = client::CreateInlineMemoryTransferService(mManager);
+        mServerService = server::CreateInlineMemoryTransferService(mManager);
+        ASSERT_NE(nullptr, mClientService);
+        ASSERT_NE(nullptr, mServerService);
+    }
+
+    using ClientMemoryHandle = client::MemoryTransferService::MemoryHandle;
+    using ClientMemoryHandleUse = client::MemoryTransferService::MemoryHandleUse;
+    using ServerMemoryHandle = server::MemoryTransferService::MemoryHandle;
+
+    struct HandlePair {
+        std::unique_ptr<ClientMemoryHandle> clientHandle;
+        std::unique_ptr<ServerMemoryHandle> serverHandle;
+    };
+
+    // Creates a shared-memory-backed client handle, serializes its `SharedMemoryHandle` into a byte
+    // vector, and deserializes the `SharedMemoryHandle` into a server handle through
+    // `DeserializeMemoryHandle`.
+    HandlePair CreateSharedMemoryHandlePair() {
+        HandlePair pair;
+        pair.clientHandle =
+            mClientService->CreateMemoryHandle(kSize, ClientMemoryHandleUse::MappedBuffer);
+        EXPECT_NE(nullptr, pair.clientHandle);
+
+        std::vector<std::byte> createData(pair.clientHandle->GetSerializeCreateSize());
+        pair.clientHandle->SerializeCreate(
+            std::span<volatile std::byte>(createData.data(), createData.size()));
+
+        pair.serverHandle = mServerService->DeserializeMemoryHandle(
+            std::span<const std::byte>(createData.data(), createData.size()));
+        EXPECT_NE(nullptr, pair.serverHandle);
+        return pair;
+    }
+
+    std::unique_ptr<client::MemoryTransferService> mClientService;
+    std::unique_ptr<server::MemoryTransferService> mServerService;
+};
+
+// Test that deserializing a data update copies the shared memory into the target buffer.
+TEST_F(ServerInlineMemoryTransferServiceTest, DeserializeDataUpdate_CopiesSharedMemoryIntoTarget) {
+    HandlePair pair = CreateSharedMemoryHandlePair();
+
+    std::span<std::byte> clientData = pair.clientHandle->GetData();
+    Span<std::byte>(clientData).CopyFrom(kExpectedData);
+
+    EXPECT_EQ(0u, pair.serverHandle->GetSerializeDataUpdateSize(0u, kSize));
+
+    std::vector<std::byte> target(kSize);
+    EXPECT_TRUE(pair.serverHandle->DeserializeDataUpdate(
+        std::span<const std::byte>(), 0u, kSize,
+        std::span<std::byte>(target.data(), target.size())));
+    EXPECT_THAT(target, testing::ElementsAreArray(kExpectedData));
+}
+
+// Test that serializing a data update copies the data into the shared memory.
+TEST_F(ServerInlineMemoryTransferServiceTest, SerializeDataUpdate_CopiesDataIntoSharedMemory) {
+    HandlePair pair = CreateSharedMemoryHandlePair();
+
+    std::vector<std::byte> data(kSize);
+    Span<std::byte>(data).CopyFrom(kExpectedData);
+    pair.serverHandle->SerializeDataUpdate(std::span<volatile std::byte>(), 0u, kSize, data);
+
+    std::span<std::byte> clientData = pair.clientHandle->GetData();
+    EXPECT_THAT(clientData, testing::ElementsAreArray(kExpectedData));
 }
 
 }  // namespace

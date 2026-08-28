@@ -31,11 +31,17 @@
 #include <memory>
 
 #include "dawn/wire/WireServer.h"
+#include "src/dawn/wire/InlineSharedMemoryManager.h"
 
 namespace dawn::wire::server {
 
 // Creates the server-side inline memory transfer service.
 std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
+
+// Creates an inline memory transfer service that can back transfers with the shared memory
+// allocations owned by `sharedMemoryManager`.
+std::unique_ptr<server::MemoryTransferService> CreateInlineMemoryTransferService(
+    std::shared_ptr<InlineSharedMemoryManager> sharedMemoryManager);
 
 }  // namespace dawn::wire::server
 

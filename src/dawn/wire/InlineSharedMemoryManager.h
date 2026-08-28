@@ -54,7 +54,7 @@ struct SharedMemoryHandle {
 // A ref-counted shared memory allocation.
 class SharedMemory : public RefCounted {
   public:
-    SharedMemory(SystemHandle handle, Span<std::byte> data);
+    SharedMemory(SystemHandle handle, Span<std::byte> data, uint64_t allocatedSize);
     ~SharedMemory() override;
 
     Span<std::byte> GetMappedSpan() const { return mData; }
@@ -62,9 +62,13 @@ class SharedMemory : public RefCounted {
     // The underlying OS handle of the shared memory.
     const SystemHandle& GetSystemHandle() const { return mHandle; }
 
+    // The real size of the OS allocation, which may be larger than GetMappedSpan().size().
+    uint64_t GetAllocatedSize() const { return mAllocatedSize; }
+
   private:
     SystemHandle mHandle;
     Span<std::byte> mData;
+    uint64_t mAllocatedSize = 0u;
 };
 
 // `InlineSharedMemoryManager` manages all the shared memory allocations for inline memory transfer

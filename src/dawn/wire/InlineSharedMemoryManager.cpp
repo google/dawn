@@ -35,8 +35,8 @@
 
 namespace dawn::wire {
 
-SharedMemory::SharedMemory(SystemHandle handle, Span<std::byte> data)
-    : mHandle(std::move(handle)), mData(data) {}
+SharedMemory::SharedMemory(SystemHandle handle, Span<std::byte> data, uint64_t allocatedSize)
+    : mHandle(std::move(handle)), mData(data), mAllocatedSize(allocatedSize) {}
 
 SharedMemory::~SharedMemory() {}
 
