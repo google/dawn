@@ -697,17 +697,22 @@ TEST_F(SpirvParserTest, LogicalNot_Scalar) {
      %v2bool = OpTypeVector %bool 2
        %true = OpConstantTrue %bool
      %v2true = OpConstantComposite %v2bool %true %true
+        %ptr = OpTypePointer Function %bool
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpLogicalNot %bool %true
+          %v = OpVariable %ptr Function %true
+          %l = OpLoad %bool %v
+          %1 = OpLogicalNot %bool %l
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = not true
+    %2:ptr<function, bool, read_write> = var true
+    %3:bool = load %2
+    %4:bool = not %3
     ret
   }
 }
@@ -726,17 +731,22 @@ TEST_F(SpirvParserTest, LogicalNot_Vector) {
      %v2bool = OpTypeVector %bool 2
        %true = OpConstantTrue %bool
      %v2true = OpConstantComposite %v2bool %true %true
+        %ptr = OpTypePointer Function %v2bool
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpLogicalNot %v2bool %v2true
+          %x = OpVariable %ptr Function %v2true
+          %l = OpLoad %v2bool %x
+          %1 = OpLogicalNot %v2bool %l
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = not vec2<bool>(true)
+    %2:ptr<function, vec2<bool>, read_write> = var vec2<bool>(true)
+    %3:vec2<bool> = load %2
+    %4:vec2<bool> = not %3
     ret
   }
 }

@@ -1056,6 +1056,13 @@ class Builder {
     template <typename VAL>
     ir::Value* UnaryReplaceResult(InstructionResult* result, UnaryOp op, VAL&& val) {
         auto* value = Value(std::forward<VAL>(val));
+        auto res = Evaluator{*this, false}.EvalCoreUnary(op, result->Type(), value);
+        if (res == Success && res.Get()) {
+            auto* cnst = Constant(res.Get());
+            result->ReplaceAllUsesWith(cnst);
+            result->Destroy();
+            return cnst;
+        }
         return Append(ir.CreateInstruction<ir::CoreUnary>(result, op, value))->Result();
     }
 

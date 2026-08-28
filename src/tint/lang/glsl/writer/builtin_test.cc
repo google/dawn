@@ -335,8 +335,7 @@ void main_inner(uint tint_local_index) {
     atomicExchange(v.b, 0u);
   }
   barrier();
-  uint v_1 = ~(uint(123));
-  int x = atomicAdd(v.a, int(4294967173u));
+  int x = atomicAdd(v.a, -123);
   uint y = atomicAdd(v.b, -(123u));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

@@ -2935,8 +2935,7 @@ TEST_F(SpirvParserTest, Loop_Continue_HasBreakUnless) {
         unreachable
       }
       $B3: {  # continuing
-        %2:bool = not false
-        break_if %2  # -> [t: exit_loop loop_1, f: $B2]
+        break_if true  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     ret
@@ -3256,8 +3255,7 @@ TEST_F(SpirvParserTest, Loop_Loop_InnerContinueBreaks) {
                 unreachable
               }
               $B7: {  # continuing
-                %2:bool = not true
-                break_if %2  # -> [t: exit_loop loop_2, f: $B6]
+                break_if false  # -> [t: exit_loop loop_2, f: $B6]
               }
             }
             continue  # -> $B3
@@ -4799,8 +4797,7 @@ TEST_F(SpirvParserTest, Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd
       }
       $B3: {  # continuing
         %2:i32 = spirv.add<i32> 1i, 1i
-        %3:bool = not true
-        break_if %3  # -> [t: exit_loop loop_1, f: $B2]
+        break_if false  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     ret
@@ -4855,8 +4852,7 @@ TEST_F(SpirvParserTest, Branch_LoopBreak_FromContinueConstructTail) {
         unreachable
       }
       $B3: {  # continuing
-        %2:bool = not true
-        break_if %2  # -> [t: exit_loop loop_1, f: $B2]
+        break_if false  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     ret
@@ -5341,11 +5337,10 @@ TEST_F(SpirvParserTest, BranchConditional_Back_MultiBlock_LoopBreak_OnFalse) {
         continue  # -> $B3
       }
       $B3: {  # continuing
-        %4:bool = not true
-        break_if %4  # -> [t: exit_loop loop_1, f: $B2]
+        break_if false  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
-    %5:i32 = spirv.add<i32> 3i, 3i
+    %4:i32 = spirv.add<i32> 3i, 3i
     ret
   }
 }

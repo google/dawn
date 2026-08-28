@@ -6,7 +6,7 @@ fn main() {
 
     continuing {
       v = v_1;
-      break if !(true);
+      break if false;
     }
   }
   let v_2 = v;
@@ -18,7 +18,7 @@ fn main() {
 
       continuing {
         v_3 = 1u;
-        break if !(true);
+        break if false;
       }
     }
   }

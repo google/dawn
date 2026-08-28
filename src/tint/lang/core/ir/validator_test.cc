@@ -1693,7 +1693,8 @@ TEST_F(IR_ValidatorTest, Unary_MissingOperands) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    auto* u = b.Negation(2_f)->AsInstruction<CoreUnary>();
+    auto* l = sb.Let("l", 2_f);
+    auto* u = b.Negation(l)->AsInstruction<CoreUnary>();
     u->ClearOperands();
     sb.Append(u);
     sb.Return(f);
@@ -1701,8 +1702,8 @@ TEST_F(IR_ValidatorTest, Unary_MissingOperands) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:5 error: unary: expected exactly 1 operands, got 0
-    %2:f32 = negation
+                testing::HasSubstr(R"(:4:5 error: unary: expected exactly 1 operands, got 0
+    %3:f32 = negation
     ^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -1711,7 +1712,8 @@ TEST_F(IR_ValidatorTest, Unary_MissingResults) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    auto* u = b.Negation(2_f)->AsInstruction<CoreUnary>();
+    auto* l = sb.Let("l", 2_f);
+    auto* u = b.Negation(l)->AsInstruction<CoreUnary>();
     u->ClearResults();
     sb.Append(u);
     sb.Return(f);
@@ -1719,9 +1721,9 @@ TEST_F(IR_ValidatorTest, Unary_MissingResults) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:5 error: unary: expected exactly 1 results, got 0
-    undef = negation 2.0f
-    ^^^^^^^^^^^^^^^^^^^^^
+                testing::HasSubstr(R"(:4:5 error: unary: expected exactly 1 results, got 0
+    undef = negation %l
+    ^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1740,7 +1742,8 @@ TEST_F(IR_ValidatorTest, Unary_TooManyOperands) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         // Manually create a negation with an extra operand.
-        auto* neg = b.Negation(b.Constant(1_i))->AsInstruction<CoreUnary>();
+        auto* l = b.Let("l", 1_i);
+        auto* neg = b.Negation(l)->AsInstruction<CoreUnary>();
         neg->PushOperand(b.Constant(2_i));
         b.Return(func);
     });
@@ -1748,8 +1751,8 @@ TEST_F(IR_ValidatorTest, Unary_TooManyOperands) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:5 error: unary: expected exactly 1 operands, got 2
-    %2:i32 = negation 1i, 2i
+                testing::HasSubstr(R"(:4:5 error: unary: expected exactly 1 operands, got 2
+    %3:i32 = negation %l, 2i
     ^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }

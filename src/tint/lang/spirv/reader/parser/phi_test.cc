@@ -1209,15 +1209,13 @@ $B1: {  # root
           $B7: {  # continuing
             %9:u32 = spirv.add<u32> %7, %8
             %10:u32 = let %6
-            %11:bool = not true
-            break_if %11 next_iteration: [ %7, %9 ]  # -> [t: exit_loop loop_2, f: $B6]
+            break_if false next_iteration: [ %7, %9 ]  # -> [t: exit_loop loop_2, f: $B6]
           }
         }
         continue  # -> $B4
       }
       $B4: {  # continuing
-        %12:bool = not true
-        break_if %12  # -> [t: exit_loop loop_1, f: $B3]
+        break_if false  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     ret
@@ -1437,16 +1435,15 @@ TEST_F(SpirvParserTest, Phi_UseInPhiCountsAsUse) {
         R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = not true
-    %3:bool = if true [t: $B2, f: $B3] {  # if_1
+    %2:bool = if true [t: $B2, f: $B3] {  # if_1
       $B2: {  # true
-        exit_if %2  # if_1
+        exit_if false  # if_1
       }
       $B3: {  # false
         exit_if true  # if_1
       }
     }
-    %4:bool = let %3
+    %3:bool = let %2
     ret
   }
 }
@@ -2339,15 +2336,14 @@ TEST_F(SpirvParserTest, Phi_Propagated_BreakIf) {
         continue  # -> $B4
       }
       $B4: {  # continuing
-        %4:bool = not true
-        break_if %4 next_iteration: [ %3 ] exit_loop: [ %3 ]  # -> [t: exit_loop loop_1, f: $B3]
+        break_if false next_iteration: [ %3 ] exit_loop: [ %3 ]  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     loop [i: $B7, b: $B8, c: $B9] {  # loop_2
       $B7: {  # initializer
         next_iteration %2  # -> $B8
       }
-      $B8 (%5:bool): {  # body
+      $B8 (%4:bool): {  # body
         continue  # -> $B9
       }
       $B9: {  # continuing

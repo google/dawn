@@ -278,22 +278,29 @@ Evaluator::EvalResult Evaluator::EvalSwizzle(core::ir::Swizzle* s) {
 }
 
 Evaluator::EvalResult Evaluator::EvalUnary(core::ir::CoreUnary* u) {
-    intrinsic::Context context{u->TableData(), b_.ir.Types(), b_.ir.symbols};
+    return EvalCoreUnary(u->Op(), u->Result()->Type(), u->Val(), SourceOf(u));
+}
 
-    auto overload = core::intrinsic::LookupUnary(context, u->Op(), u->Val()->Type(),
-                                                 core::EvaluationStage::kOverride);
+Evaluator::EvalResult Evaluator::EvalCoreUnary(UnaryOp op,
+                                               const core::type::Type* result_ty,
+                                               core::ir::Value* input,
+                                               const Source& source) {
+    intrinsic::Context context{core::intrinsic::Dialect::kData, b_.ir.Types(), b_.ir.symbols};
+
+    auto overload =
+        core::intrinsic::LookupUnary(context, op, result_ty, core::EvaluationStage::kOverride);
     if (overload != Success) {
-        AddError(SourceOf(u)) << overload.Failure().Plain();
+        AddError(source) << overload.Failure().Plain();
         return Failure();
     }
 
     auto const_eval_fn = overload->const_eval_fn;
     if (!const_eval_fn) {
-        AddError(SourceOf(u)) << "invalid unary expression";
+        AddError(source) << "invalid unary expression";
         return Failure();
     }
 
-    auto val = EvalValue(u->Val());
+    auto val = EvalValue(input);
     if (val != Success) {
         return Failure();
     }
@@ -302,7 +309,7 @@ Evaluator::EvalResult Evaluator::EvalUnary(core::ir::CoreUnary* u) {
         return nullptr;
     }
 
-    auto r = (const_eval_.*const_eval_fn)(u->Result()->Type(), Vector{val.Get()}, SourceOf(u));
+    auto r = (const_eval_.*const_eval_fn)(result_ty, Vector{val.Get()}, source);
     if (r != Success) {
         return Failure();
     }

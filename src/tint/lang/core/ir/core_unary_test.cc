@@ -41,43 +41,41 @@ using IR_UnaryTest = IRTestHelper;
 using IR_UnaryDeathTest = IR_UnaryTest;
 
 TEST_F(IR_UnaryTest, CreateComplement) {
-    auto* inst = b.Complement(4_i)->AsInstruction<CoreUnary>();
+    auto* l = b.Let("l", 4_i);
+    auto* inst = b.Complement(l)->AsInstruction<CoreUnary>();
 
     ASSERT_TRUE(inst->Is<Unary>());
     EXPECT_EQ(inst->Op(), UnaryOp::kComplement);
 
-    ASSERT_TRUE(inst->Val()->Is<Constant>());
-    auto lhs = inst->Val()->As<Constant>()->Value();
-    ASSERT_TRUE(lhs->Is<core::constant::Scalar<i32>>());
-    EXPECT_EQ(4_i, lhs->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
+    ASSERT_NE(nullptr, inst->Val()->AsInstruction<core::ir::Let>());
+    ASSERT_EQ(l->Result(), inst->Val());
 }
 
 TEST_F(IR_UnaryTest, CreateNegation) {
-    auto* inst = b.Negation(4_i)->AsInstruction<CoreUnary>();
+    auto* l = b.Let("l", 4_i);
+    auto* inst = b.Negation(l)->AsInstruction<CoreUnary>();
 
     ASSERT_TRUE(inst->Is<Unary>());
     EXPECT_EQ(inst->Op(), UnaryOp::kNegation);
 
-    ASSERT_TRUE(inst->Val()->Is<Constant>());
-    auto lhs = inst->Val()->As<Constant>()->Value();
-    ASSERT_TRUE(lhs->Is<core::constant::Scalar<i32>>());
-    EXPECT_EQ(4_i, lhs->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
+    ASSERT_NE(nullptr, inst->Val()->AsInstruction<core::ir::Let>());
+    ASSERT_EQ(l->Result(), inst->Val());
 }
 
 TEST_F(IR_UnaryTest, CreateNot) {
-    auto* inst = b.Not(true)->AsInstruction<CoreUnary>();
+    auto* l = b.Let("l", true);
+    auto* inst = b.Not(l)->AsInstruction<CoreUnary>();
 
     ASSERT_TRUE(inst->Is<Unary>());
     EXPECT_EQ(inst->Op(), UnaryOp::kNot);
 
-    ASSERT_TRUE(inst->Val()->Is<Constant>());
-    auto lhs = inst->Val()->As<Constant>()->Value();
-    ASSERT_TRUE(lhs->Is<core::constant::Scalar<bool>>());
-    EXPECT_EQ(true, lhs->As<core::constant::Scalar<bool>>()->ValueAs<bool>());
+    ASSERT_NE(nullptr, inst->Val()->AsInstruction<core::ir::Let>());
+    ASSERT_EQ(l->Result(), inst->Val());
 }
 
 TEST_F(IR_UnaryTest, Usage) {
-    auto* inst = b.Negation(4_i)->AsInstruction<CoreUnary>();
+    auto* l = b.Let("l", 4_i);
+    auto* inst = b.Negation(l)->AsInstruction<CoreUnary>();
 
     EXPECT_EQ(inst->Op(), UnaryOp::kNegation);
 
@@ -86,14 +84,16 @@ TEST_F(IR_UnaryTest, Usage) {
 }
 
 TEST_F(IR_UnaryTest, Result) {
-    auto* inst = b.Negation(4_i)->AsInstruction<CoreUnary>();
+    auto* l = b.Let("l", 4_i);
+    auto* inst = b.Negation(l)->AsInstruction<CoreUnary>();
     EXPECT_EQ(inst->Results().Length(), 1u);
     EXPECT_TRUE(inst->Result()->Is<InstructionResult>());
     EXPECT_EQ(inst->Result()->Instruction(), inst);
 }
 
 TEST_F(IR_UnaryTest, Clone) {
-    auto* inst = b.Complement(4_i)->AsInstruction<CoreUnary>();
+    auto* l = b.Let("l", 4_i);
+    auto* inst = b.Complement(l)->AsInstruction<CoreUnary>();
     auto* new_inst = clone_ctx.Clone(inst);
 
     EXPECT_NE(inst, new_inst);
@@ -102,9 +102,9 @@ TEST_F(IR_UnaryTest, Clone) {
 
     EXPECT_EQ(UnaryOp::kComplement, new_inst->Op());
 
-    auto new_val = new_inst->Val()->As<Constant>()->Value();
-    ASSERT_TRUE(new_val->Is<core::constant::Scalar<i32>>());
-    EXPECT_EQ(4_i, new_val->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
+    auto* new_val = new_inst->As<CoreUnary>()->Val();
+    ASSERT_NE(nullptr, new_val->AsInstruction<core::ir::Let>());
+    EXPECT_EQ(l->Result(), new_val);
 }
 
 }  // namespace

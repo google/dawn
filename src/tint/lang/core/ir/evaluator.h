@@ -73,6 +73,16 @@ class Evaluator {
                               core::ir::Value* rhs,
                               const Source& src = {});
 
+    /// Evaluate the unary operator `op` on `input`
+    /// @param op the operation
+    /// @param result_ty the result type
+    /// @param input the input value
+    /// @param src the source location
+    EvalResult EvalCoreUnary(UnaryOp op,
+                             const core::type::Type* result_ty,
+                             core::ir::Value* input,
+                             const Source& src = {});
+
   private:
     diag::Diagnostic& AddError(Source src);
     Source SourceOf(core::ir::Instruction* val);

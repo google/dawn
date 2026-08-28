@@ -4206,13 +4206,12 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract) {
     %4:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
     %5:subgroup_matrix_left<f32, 8, 8> = msl.convert<subgroup_matrix_left<f32, 8, 8>> %3
     %6:subgroup_matrix_right<f32, 8, 8> = msl.make_diagonal_simdgroup_matrix<subgroup_matrix_right<f32, 8, 8>> 1.0f
-    %7:f32 = negation 3.0f
-    %8:subgroup_matrix_result<f32, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_result<f32, 8, 8>> %7
-    %9:subgroup_matrix_result<f32, 8, 8> = load %4
-    %10:void = msl.simdgroup_multiply_accumulate %9, %5, %6, %8
-    %11:subgroup_matrix_result<f32, 8, 8> = load %4
-    %12:subgroup_matrix_result<f32, 8, 8> = msl.convert<subgroup_matrix_result<f32, 8, 8>> %11
-    %r:subgroup_matrix_result<f32, 8, 8> = let %12
+    %7:subgroup_matrix_result<f32, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_result<f32, 8, 8>> -3.0f
+    %8:subgroup_matrix_result<f32, 8, 8> = load %4
+    %9:void = msl.simdgroup_multiply_accumulate %8, %5, %6, %7
+    %10:subgroup_matrix_result<f32, 8, 8> = load %4
+    %11:subgroup_matrix_result<f32, 8, 8> = msl.convert<subgroup_matrix_result<f32, 8, 8>> %10
+    %r:subgroup_matrix_result<f32, 8, 8> = let %11
     ret
   }
 }

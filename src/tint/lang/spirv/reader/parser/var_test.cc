@@ -1437,13 +1437,12 @@ TEST_F(SpirvParserTest, Var_OpSpecConstantOp_LogicalNot) {
 )",
               R"(
 $B1: {  # root
-  %1:bool = not false
-  %myconst:bool = override %1
+  %myconst:bool = override true
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:bool = not %myconst
+    %3:bool = not %myconst
     ret
   }
 }

@@ -293,9 +293,8 @@ $B1: {  # root
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:i32 = negation 123i
-    %4:i32 = atomicAdd %v, %3
-    %x:i32 = let %4
+    %3:i32 = atomicAdd %v, -123i
+    %x:i32 = let %3
     ret
   }
 }
