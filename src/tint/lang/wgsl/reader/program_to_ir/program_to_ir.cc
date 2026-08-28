@@ -981,7 +981,7 @@ class Impl {
                 if (!val) {
                     return;
                 }
-                core::ir::Instruction* inst = nullptr;
+                core::ir::Value* value = nullptr;
                 switch (expr->op) {
                     case core::UnaryOp::kAddressOf:
                     case core::UnaryOp::kIndirection:
@@ -990,20 +990,22 @@ class Impl {
                         Bind(expr, val);
                         return;
                     case core::UnaryOp::kComplement: {
-                        inst = impl.builder_.Complement(val);
+                        value = impl.builder_.Complement(val);
                         break;
                     }
                     case core::UnaryOp::kNegation: {
-                        inst = impl.builder_.Negation(val);
+                        value = impl.builder_.Negation(val);
                         break;
                     }
                     case core::UnaryOp::kNot: {
-                        inst = impl.builder_.Not(val);
+                        value = impl.builder_.Not(val);
                         break;
                     }
                 }
-                impl.current_block_->Append(inst);
-                Bind(expr, inst->Result());
+                if (auto* inst = value->AsInstruction()) {
+                    impl.current_block_->Append(inst);
+                }
+                Bind(expr, value);
             }
 
             void EmitCall(const ast::CallExpression* expr) {

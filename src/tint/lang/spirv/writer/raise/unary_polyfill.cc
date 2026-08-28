@@ -107,7 +107,7 @@ struct State {
             auto* f32_ty = ty.MatchWidth(ty.f32(), type);
             auto* f32_val = b.Convert(f32_ty, val);
             auto* f32_neg = b.Negation(f32_val);
-            b.ConvertWithResult(unary->DetachResult(), f32_neg->Result());
+            b.ConvertWithResult(unary->DetachResult(), f32_neg);
         });
         unary->Destroy();
     }

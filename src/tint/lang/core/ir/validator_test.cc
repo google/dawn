@@ -1634,22 +1634,20 @@ TEST_F(IR_ValidatorTest, Unary_Value_Nullptr) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    sb.Negation(nullptr);
+    auto* l = b.Let("l", 1_u);
+    auto* neg = sb.Negation(l)->AsInstruction<CoreUnary>();
+    neg->SetOperand(0, nullptr);
     sb.Return(f);
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: unary: result is undefined
-    undef = negation undef
-    ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:23 error: unary: operand is undefined
+    %2:u32 = negation undef
+                      ^^^^^
 
 :2:3 note: in block
   $B1: {
   ^^^
-
-:3:22 error: unary: operand is undefined
-    undef = negation undef
-                     ^^^^^
 )")) << res.Failure();
 }
 
@@ -1695,7 +1693,7 @@ TEST_F(IR_ValidatorTest, Unary_MissingOperands) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    auto* u = b.Negation(2_f);
+    auto* u = b.Negation(2_f)->AsInstruction<CoreUnary>();
     u->ClearOperands();
     sb.Append(u);
     sb.Return(f);
@@ -1713,7 +1711,7 @@ TEST_F(IR_ValidatorTest, Unary_MissingResults) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    auto* u = b.Negation(2_f);
+    auto* u = b.Negation(2_f)->AsInstruction<CoreUnary>();
     u->ClearResults();
     sb.Append(u);
     sb.Return(f);
@@ -1730,7 +1728,7 @@ TEST_F(IR_ValidatorTest, Unary_MissingResults) {
 TEST_F(IR_ValidatorTest, Unary_Valid) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Negation(b.Constant(1_i));
+        b.Negation(b.Constant(1_i))->AsInstruction<CoreUnary>();
         b.Return(func);
     });
 
@@ -1742,7 +1740,7 @@ TEST_F(IR_ValidatorTest, Unary_TooManyOperands) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         // Manually create a negation with an extra operand.
-        auto* neg = b.Negation(b.Constant(1_i));
+        auto* neg = b.Negation(b.Constant(1_i))->AsInstruction<CoreUnary>();
         neg->PushOperand(b.Constant(2_i));
         b.Return(func);
     });
@@ -1760,7 +1758,7 @@ TEST_F(IR_ValidatorTest, Unary_OperandWrongType) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* l = b.Let("x", b.Zero(ty.mat4x4<f32>()));
-        b.Negation(l->Result());
+        b.Negation(l->Result())->AsInstruction<CoreUnary>();
         b.Return(func);
     });
 

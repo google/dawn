@@ -825,7 +825,7 @@ struct State {
                     auto* s3 = b.Call(result_ty, core::BuiltinFn::kSelect, f3, t3,
                                       b.LessThan(offset, 32_u));
                     auto* result_lhs = b.And(s3, mask_as_result_type(mask));
-                    auto* result_rhs = b.And(e, mask_as_result_type(b.Complement(mask)->Result()));
+                    auto* result_rhs = b.And(e, mask_as_result_type(b.Complement(mask)));
                     b.OrReplaceResult(call->DetachResult(), result_lhs, result_rhs);
                 });
                 call->Destroy();

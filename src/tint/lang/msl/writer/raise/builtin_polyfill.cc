@@ -1390,7 +1390,7 @@ struct State {
             auto* tmp = b.Var(ty.ptr<function>(result_ty));
             auto* val = ConvertSubgroupMatrixToLeft(sm_ty, mat);
             auto* identity = MakeSubgroupRightMatrix(sm_ty, One(sm_ty));
-            auto* acc = MakeSubgroupAccumulatorMatrix(result_ty, b.Negation(scalar)->Result());
+            auto* acc = MakeSubgroupAccumulatorMatrix(result_ty, b.Negation(scalar));
 
             // Note: We need to use a `load` instruction to pass the variable, as the intrinsic
             // definition expects a value type (as we do not have reference types in the IR). The

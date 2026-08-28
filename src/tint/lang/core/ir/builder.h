@@ -1049,25 +1049,32 @@ class Builder {
     }
 
     /// Creates an op for `op val`
+    /// @param result the instruction result
     /// @param op the unary operator
     /// @param val the value of the operation
     /// @returns the operation
     template <typename VAL>
-    ir::CoreUnary* Unary(UnaryOp op, VAL&& val) {
+    ir::Value* UnaryReplaceResult(InstructionResult* result, UnaryOp op, VAL&& val) {
         auto* value = Value(std::forward<VAL>(val));
+        return Append(ir.CreateInstruction<ir::CoreUnary>(result, op, value))->Result();
+    }
 
-        core::ir::InstructionResult* result = nullptr;
-        if (value) {
-            result = InstructionResult(value->Type());
-        }
-        return Append(ir.CreateInstruction<ir::CoreUnary>(result, op, value));
+    /// Creates an op for `op val`
+    /// @param op the unary operator
+    /// @param val the value of the operation
+    /// @returns the operation
+    template <typename VAL>
+    ir::Value* Unary(UnaryOp op, VAL&& val) {
+        auto* value = Value(std::forward<VAL>(val));
+        TINT_ASSERT(value);
+        return UnaryReplaceResult(InstructionResult(value->Type()), op, value);
     }
 
     /// Creates a Complement operation
     /// @param val the value
     /// @returns the operation
     template <typename VAL>
-    ir::CoreUnary* Complement(VAL&& val) {
+    ir::Value* Complement(VAL&& val) {
         return Unary(UnaryOp::kComplement, std::forward<VAL>(val));
     }
 
@@ -1075,7 +1082,7 @@ class Builder {
     /// @param val the value
     /// @returns the operation
     template <typename VAL>
-    ir::CoreUnary* Negation(VAL&& val) {
+    ir::Value* Negation(VAL&& val) {
         return Unary(UnaryOp::kNegation, std::forward<VAL>(val));
     }
 
@@ -1083,7 +1090,7 @@ class Builder {
     /// @param val the value
     /// @returns the operation
     template <typename VAL>
-    ir::CoreUnary* Not(VAL&& val) {
+    ir::Value* Not(VAL&& val) {
         return Unary(UnaryOp::kNot, std::forward<VAL>(val));
     }
 

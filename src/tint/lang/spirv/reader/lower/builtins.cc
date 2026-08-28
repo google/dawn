@@ -465,7 +465,7 @@ struct State {
             if (val->Type() != neg_ty) {
                 val = b.Bitcast(neg_ty, val)->Result();
             }
-            val = b.Negation(val)->Result();
+            val = b.Negation(val);
 
             if (neg_ty != res_ty) {
                 val = b.Bitcast(res_ty, val)->Result();
@@ -479,7 +479,7 @@ struct State {
         auto* val = call->Args()[0];
         auto* result_ty = call->Result()->Type();
         b.InsertBefore(call, [&] {
-            auto* complement = b.Complement(val)->Result();
+            auto* complement = b.Complement(val);
             if (val->Type() != result_ty) {
                 complement = b.Bitcast(result_ty, complement)->Result();
             }

@@ -3808,7 +3808,9 @@ class Parser {
             }
             if (false_id == merge_id && true_is_header) {
                 auto* val = b_.Not(cond);
-                EmitWithoutSpvResult(val);
+                if (auto* inst = val->AsInstruction()) {
+                    EmitWithoutSpvResult(inst);
+                }
                 EmitWithoutResult(b_.BreakIf(loop, val));
                 return true;
             }
@@ -4445,7 +4447,11 @@ class Parser {
                    uint32_t first_operand_idx = 2) {
         auto* val = Value(inst.GetSingleWordOperand(first_operand_idx));
         auto* unary = b_.Unary(op, val);
-        Emit(unary, inst.result_id());
+        if (auto* unary_inst = unary->AsInstruction()) {
+            Emit(unary_inst, inst.result_id());
+        } else {
+            AddValue(inst.result_id(), unary);
+        }
     }
 
     /// @param inst the SPIR-V instruction
@@ -4470,12 +4476,16 @@ class Parser {
         auto* lhs = Value(inst.GetSingleWordOperand(2));
         auto* rhs = Value(inst.GetSingleWordOperand(3));
         auto* binary = b_.Binary(op, Type(inst.type_id()), lhs, rhs);
-        if (auto* res = binary->AsInstruction()) {
-            EmitWithoutSpvResult(res);
+        if (auto* binary_inst = binary->AsInstruction()) {
+            EmitWithoutSpvResult(binary_inst);
         }
 
         auto* inv = b_.Not(binary);
-        Emit(inv, inst.result_id());
+        if (auto* inv_inst = inv->AsInstruction()) {
+            Emit(inv_inst, inst.result_id());
+        } else {
+            AddValue(inst.result_id(), inv);
+        }
     }
 
     /// @param inst the SPIR-V instruction for OpCompositeExtract
