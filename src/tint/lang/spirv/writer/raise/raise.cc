@@ -215,6 +215,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     raise::PolyfillConfig config = {
+        .disable_robustness = options.disable_robustness,
         .use_vulkan_memory_model = options.extensions.use_vulkan_memory_model,
         .version = options.spirv_version,
         .texture_sample_compare_depth_cube_array =

@@ -1431,7 +1431,41 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_ScalarCondition_VectorOperands_Sp
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleDown_Clamped) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleDown_WithoutRobustness) {
+    auto* func = b.Function("foo", ty.i32());
+    func->SetStage(core::ir::Function::PipelineStage::kFragment);
+    func->SetReturnLocation(0);
+
+    b.Append(func->Block(), [&] {
+        auto* val = b.Let("val", 1_i);
+        auto* delta = b.Let("delta", 1_u);
+        auto* result = b.Call(ty.i32(), core::BuiltinFn::kSubgroupShuffleDown, val, delta);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():i32 [@location(0)] {
+  $B1: {
+    %val:i32 = let 1i
+    %delta:u32 = let 1u
+    %4:i32 = subgroupShuffleDown %val, %delta
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    PolyfillConfig config{
+        .disable_robustness = true,
+    };
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleDown_WithRobustness) {
     auto* func = b.Function("foo", ty.i32());
     func->SetStage(core::ir::Function::PipelineStage::kFragment);
     func->SetReturnLocation(0);
@@ -1485,7 +1519,41 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleUp_Clamped) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleUp_WithoutRobustness) {
+    auto* func = b.Function("foo", ty.i32());
+    func->SetStage(core::ir::Function::PipelineStage::kFragment);
+    func->SetReturnLocation(0);
+
+    b.Append(func->Block(), [&] {
+        auto* val = b.Let("val", 1_i);
+        auto* delta = b.Let("delta", 1_u);
+        auto* result = b.Call(ty.i32(), core::BuiltinFn::kSubgroupShuffleUp, val, delta);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():i32 [@location(0)] {
+  $B1: {
+    %val:i32 = let 1i
+    %delta:u32 = let 1u
+    %4:i32 = subgroupShuffleUp %val, %delta
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    PolyfillConfig config{
+        .disable_robustness = true,
+    };
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleUp_WithRobustness) {
     auto* func = b.Function("foo", ty.i32());
     func->SetStage(core::ir::Function::PipelineStage::kFragment);
     func->SetReturnLocation(0);
@@ -1539,7 +1607,41 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleXor_Clamped) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleXor_WithoutRobustness) {
+    auto* func = b.Function("foo", ty.i32());
+    func->SetStage(core::ir::Function::PipelineStage::kFragment);
+    func->SetReturnLocation(0);
+
+    b.Append(func->Block(), [&] {
+        auto* val = b.Let("val", 1_i);
+        auto* mask = b.Let("mask", 1_u);
+        auto* result = b.Call(ty.i32(), core::BuiltinFn::kSubgroupShuffleXor, val, mask);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():i32 [@location(0)] {
+  $B1: {
+    %val:i32 = let 1i
+    %mask:u32 = let 1u
+    %4:i32 = subgroupShuffleXor %val, %mask
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    PolyfillConfig config{
+        .disable_robustness = true,
+    };
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleXor_WithRobustness) {
     auto* func = b.Function("foo", ty.i32());
     func->SetStage(core::ir::Function::PipelineStage::kFragment);
     func->SetReturnLocation(0);
@@ -4094,7 +4196,44 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, InputAttachmentLoad) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle_WithoutRobustness) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kSubgroupShuffle, 1_i, 1_i));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:i32 = subgroupShuffle 1i, 1i
+    %a:i32 = let %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:u32 = bitcast<u32> 1i
+    %3:i32 = subgroupShuffle 1i, %2
+    %a:i32 = let %3
+    ret
+  }
+}
+)";
+
+    PolyfillConfig config{
+        .disable_robustness = true,
+    };
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle_WithRobustness) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kSubgroupShuffle, 1_i, 1_i));
@@ -4249,7 +4388,43 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupBroadcastConstSignedId) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupBroadcast_WithoutRobustness) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kSubgroupBroadcast, 1_i, 1_i));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:i32 = subgroupBroadcast 1i, 1i
+    %a:i32 = let %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:i32 = subgroupBroadcast 1i, 1u
+    %a:i32 = let %2
+    ret
+  }
+}
+)";
+
+    PolyfillConfig config{
+        .disable_robustness = true,
+    };
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupBroadcast_WithRobustness) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kSubgroupBroadcast, 1_i, 1_i));

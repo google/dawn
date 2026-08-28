@@ -1354,6 +1354,10 @@ struct State {
             builtin->SetArg(1, cast->Result());
         }
 
+        if (config.disable_robustness) {
+            return;
+        }
+
         /// Polyfill a `subgroupShuffleX` builtin call with one that has clamped the arg2 param
         auto* shuffle_id = builtin->Args()[1];
         CreateSubgroupLastIdIfNeeded();
@@ -1368,6 +1372,10 @@ struct State {
     /// Handles SubgroupShuffleDown(), SubgroupShuffleUp(), SubgroupShuffleXor() builtins.
     /// @param builtin the builtin call instruction
     void SubgroupShuffleDirection(core::ir::CoreBuiltinCall* builtin) {
+        if (config.disable_robustness) {
+            return;
+        }
+
         TINT_IR_ASSERT(ir, builtin->Args().size() == 2);
         // The second argument is either 'delta' or 'mask'.
         // Both must be bound by [0, subgroup_size)
@@ -1420,6 +1428,10 @@ struct State {
             id = b.Constant(id->As<core::ir::Constant>()->Value()->ValueAs<u32>());
         }
         builtin->SetArg(1, id);
+
+        if (config.disable_robustness) {
+            return;
+        }
 
         CreateSubgroupLastIdIfNeeded();
 

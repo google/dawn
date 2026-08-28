@@ -39,6 +39,7 @@ class Module;
 namespace tint::spirv::writer::raise {
 
 struct PolyfillConfig {
+    bool disable_robustness = false;
     bool use_vulkan_memory_model = false;
     SpvVersion version = SpvVersion::kSpv13;
     bool texture_sample_compare_depth_cube_array = false;
