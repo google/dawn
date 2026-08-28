@@ -342,8 +342,12 @@ class BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
         //    but otherwise this finishes on the same path as #2.
         // 4. Event was created for an error and `mBuffer` was always null. This uses
         //    `mErrorMessage`` and `mStatus` as set in the constructor when running the callback.
-        RecursiveMutex::AutoLock lock;
         Ref<BufferBase> buffer = mBuffer.Promote();
+        // Note that because the lock is a member of the Buffer, and because we need to hold the
+        // lock for the duration of this function if it exists, we declare the lock after the Ref to
+        // ensure that the lock is released before potentially the last Ref of the buffer is
+        // dropped. This addresses a bug found in crbug.com/552762484.
+        RecursiveMutex::AutoLock lock;
         if (buffer) {
             // Locking the mutex provides synchronization so that either path #1 or #2 is taken if
             // Complete() and Unmap() race on different threads.
