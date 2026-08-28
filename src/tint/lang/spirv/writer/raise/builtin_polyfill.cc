@@ -1369,16 +1369,8 @@ struct State {
     /// @param builtin the builtin call instruction
     void SubgroupShuffleDirection(core::ir::CoreBuiltinCall* builtin) {
         TINT_IR_ASSERT(ir, builtin->Args().size() == 2);
-        // The second argument is either 'id' , 'delta', or 'mask'.
-        // All must be bound by [0, subgroup_size)
-        auto* arg2 = builtin->Args()[1];
-        // arg2 must be an unsigned integer scalar, so bitcast if necessary.
-        if (arg2->Type()->IsSignedIntegerScalar()) {
-            auto* cast = b.Bitcast(ty.u32(), arg2);
-            cast->InsertBefore(builtin);
-            builtin->SetArg(1, cast->Result());
-        }
-
+        // The second argument is either 'delta' or 'mask'.
+        // Both must be bound by [0, subgroup_size)
         auto* delta = builtin->Args()[1];
 
         CreateSubgroupLastIdIfNeeded();
