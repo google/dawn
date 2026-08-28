@@ -544,6 +544,11 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 
     bool usesExternalFormat = properties.format == wgpu::TextureFormat::OpaqueYCbCrAndroid;
     if (usesExternalFormat) {
+        // Multi-layer YCbCr AHBs shouldn't be possible to create but validate it just in case.
+        DAWN_INVALID_IF(properties.size.depthOrArrayLayers != 1,
+                        "Resource layers (%d) is not 1 for YCbCr formats.",
+                        properties.size.depthOrArrayLayers);
+
         // When using the opaque YUV texture formats, only the TextureBinding usage is valid.
         properties.usage &= wgpu::TextureUsage::TextureBinding;
     }
