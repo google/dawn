@@ -87,17 +87,16 @@ void PipelineStateTracker::RSSetState(ID3D11RasterizerState* rasterizerState) {
 }
 
 void PipelineStateTracker::OMSetBlendState(ID3D11BlendState* blendState,
-                                           const FLOAT blendFactor[4],
+                                           const std::array<float, 4>& blendFactor,
                                            UINT sampleMask) {
-    if (mBlendState == blendState && mSampleMask == sampleMask &&
-        DAWN_UNSAFE_TODO(std::memcmp(mBlendFactor.data(), blendFactor, sizeof(mBlendFactor))) ==
-            0) {
+    if (mBlendState == blendState && mSampleMask == sampleMask && mBlendFactor == blendFactor) {
         return;
     }
     mBlendState = blendState;
     mSampleMask = sampleMask;
-    DAWN_UNSAFE_TODO(std::memcpy(mBlendFactor.data(), blendFactor, sizeof(mBlendFactor)));
-    mCommandContext->GetD3D11DeviceContext3()->OMSetBlendState(blendState, blendFactor, sampleMask);
+    mBlendFactor = blendFactor;
+    mCommandContext->GetD3D11DeviceContext3()->OMSetBlendState(blendState, blendFactor.data(),
+                                                               sampleMask);
 }
 
 void PipelineStateTracker::OMSetDepthStencilState(ID3D11DepthStencilState* depthStencilState,

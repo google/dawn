@@ -267,8 +267,8 @@ class ImmediateTracker : public T {
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
             commandContext->WriteUniformBufferRange(
                 immediateRangeStartOffset,
-                this->mContent.template Get<uint32_t>(immediateContentStartOffset),
-                size * kImmediateElementByteSize);
+                this->mContent.GetDataBytes(immediateContentStartOffset,
+                                            size * kImmediateElementByteSize));
         }
 
         // Reset all dirty bits after uploading.

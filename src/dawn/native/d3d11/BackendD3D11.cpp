@@ -71,8 +71,8 @@ MaybeError ValidateRequestOptions(const UnpackedPtr<RequestAdapterOptions>& opti
 
     if (auto* luidOptions = options.Get<d3d::RequestAdapterOptionsLUID>()) {
         DAWN_INVALID_IF(
-            DAWN_UNSAFE_TODO(
-                memcmp(&adapterDesc.AdapterLuid, &luidOptions->adapterLUID, sizeof(LUID))) != 0,
+            adapterDesc.AdapterLuid.LowPart != luidOptions->adapterLUID.LowPart ||
+                adapterDesc.AdapterLuid.HighPart != luidOptions->adapterLUID.HighPart,
             "RequestAdapterOptionsLUID and RequestAdapterOptionsD3D11Device don't match.");
     }
 

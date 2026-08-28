@@ -51,7 +51,9 @@ class PipelineStateTracker {
     void PSSetShader(ID3D11PixelShader* pixelShader);
     void CSSetShader(ID3D11ComputeShader* computeShader);
     void RSSetState(ID3D11RasterizerState* rasterizerState);
-    void OMSetBlendState(ID3D11BlendState* blendState, const FLOAT blendFactor[4], UINT sampleMask);
+    void OMSetBlendState(ID3D11BlendState* blendState,
+                         const std::array<float, 4>& blendFactor,
+                         UINT sampleMask);
     void OMSetDepthStencilState(ID3D11DepthStencilState* depthStencilState, UINT stencilRef);
 
   private:

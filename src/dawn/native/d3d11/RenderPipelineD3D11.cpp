@@ -288,7 +288,7 @@ void RenderPipeline::ApplyNow(PipelineStateTracker* tracker,
 
 void RenderPipeline::ApplyBlendState(PipelineStateTracker* tracker,
                                      const std::array<float, 4>& blendColor) {
-    tracker->OMSetBlendState(mBlendState.Get(), blendColor.data(), GetSampleMask());
+    tracker->OMSetBlendState(mBlendState.Get(), blendColor, GetSampleMask());
 }
 
 void RenderPipeline::ApplyDepthStencilState(PipelineStateTracker* tracker,

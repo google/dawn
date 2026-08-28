@@ -178,12 +178,14 @@ void ScopedCommandRecordingContext::Flush1(D3D11_CONTEXT_TYPE ContextType, HANDL
 }
 
 void ScopedCommandRecordingContext::WriteUniformBufferRange(uint32_t offset,
-                                                            const void* data,
-                                                            size_t size) const {
+                                                            Span<const std::byte> data) const {
     DAWN_ASSERT(offset < CommandRecordingContext::kMaxImmediateSlotsD3D11);
-    DAWN_ASSERT(size <=
+    DAWN_ASSERT(data.size() <=
                 sizeof(uint32_t) * (CommandRecordingContext::kMaxImmediateSlotsD3D11 - offset));
-    DAWN_UNSAFE_TODO(std::memcpy(&Get()->mUniformBufferData[offset], data, size));
+
+    // 'offset' is in slots space
+    auto slots = Span<uint32_t>(Get()->mUniformBufferData).subspan(offset);
+    SpanAsWritableBytes(slots).subspan(0, data.size()).CopyFrom(data);
     Get()->mUniformBufferDirty = true;
 }
 

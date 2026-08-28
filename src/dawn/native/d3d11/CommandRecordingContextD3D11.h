@@ -185,7 +185,7 @@ class ScopedCommandRecordingContext : NonCopyable {
     void Flush1(D3D11_CONTEXT_TYPE ContextType, HANDLE hEvent) const;
 
     // Write immediate data to the uniform buffer.
-    void WriteUniformBufferRange(uint32_t offset, const void* data, size_t size) const;
+    void WriteUniformBufferRange(uint32_t offset, Span<const std::byte> data) const;
     MaybeError FlushUniformBuffer() const;
 
     MaybeError AcquireKeyedMutex(Ref<d3d::KeyedMutex> keyedMutex) const;

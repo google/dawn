@@ -72,12 +72,11 @@ size_t Sha3CacheFuncs::operator()(const Sha3_256::Output& key) const {
     // Given that the randomness of SHA3 is very good across all bits (avalanche effect),
     // sampling from two distant parts of the hash and combining them results in a good hash value
     // suitable for hash table distribution, while being more performant than hashing all 32 bytes.
-    return DAWN_UNSAFE_TODO(
-        absl::HashOf(absl::MakeSpan(key.data(), 8),
-                     absl::MakeSpan(key.data() + Sha3_256::kByteOutputLength - 8, 8)));
+    auto k = absl::MakeSpan(key);
+    return absl::HashOf(k.first(8), k.last(8));
 }
 bool Sha3CacheFuncs::operator()(const Sha3_256::Output& a, const Sha3_256::Output& b) const {
-    return DAWN_UNSAFE_TODO(std::memcmp(a.data(), b.data(), sizeof(Sha3_256::Output))) == 0;
+    return a == b;
 }
 
 namespace {
