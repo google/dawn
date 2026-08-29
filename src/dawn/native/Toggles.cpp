@@ -838,6 +838,9 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Disable clamping of subgroupMatrixLoad/Store on storage buffers if "
       "cooperativeMatrixRobustBufferAccess == VK_TRUE",
       "https://crbug.com/548005877", ToggleStage::Device}},
+    {Toggle::MetalEnableTensors,
+     {"metal_enable_tensors", "Enable the use of Metal 4 Tensor Operations for subgroup matrix.",
+      "https://crbug.com/550350271", ToggleStage::Adapter}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "
