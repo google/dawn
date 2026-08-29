@@ -346,7 +346,7 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
 // Test that the wire is able to send structures that contain objects
 TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
     static constexpr int NUM_BINDINGS = 3;
-    wgpu::BindGroupLayoutEntry entries[NUM_BINDINGS]{
+    std::array<wgpu::BindGroupLayoutEntry, NUM_BINDINGS> entries = {{
         {
             .binding = 0,
             .visibility = wgpu::ShaderStage::Vertex,
@@ -363,10 +363,10 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
             .visibility = wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment,
             .buffer = {nullptr, wgpu::BufferBindingType::Uniform, false, 0},
         },
-    };
+    }};
     wgpu::BindGroupLayoutDescriptor bglDescriptor = {};
     bglDescriptor.entryCount = NUM_BINDINGS;
-    bglDescriptor.entries = entries;
+    bglDescriptor.entries = entries.data();
 
     wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDescriptor);
     WGPUBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
