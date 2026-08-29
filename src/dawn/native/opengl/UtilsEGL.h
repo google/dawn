@@ -34,6 +34,7 @@
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/opengl/DisplayEGL.h"
 #include "src/utils/non_movable.h"
+#include "src/utils/span.h"
 
 namespace dawn::native::opengl {
 
@@ -50,7 +51,7 @@ class WrappedEGLSync : public RefCounted, NonMovable {
     static ResultOrError<Ref<WrappedEGLSync>> Create(DisplayEGL* display,
                                                      const OpenGLFunctions&,
                                                      EGLenum type,
-                                                     const EGLint* attribs);
+                                                     Span<const EGLint> attribs);
     static ResultOrError<Ref<WrappedEGLSync>> AcquireExternal(DisplayEGL* display, EGLSync sync);
 
     EGLSync Get() const;

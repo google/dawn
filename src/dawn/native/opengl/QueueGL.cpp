@@ -44,6 +44,7 @@
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/compiler.h"
 #include "src/utils/numeric.h"
+#include "src/utils/span.h"
 
 namespace dawn::native::opengl {
 
@@ -236,7 +237,7 @@ MaybeError Queue::SubmitFenceSync() {
         SubmitMode::Passive, [&](const OpenGLFunctions& gl) -> MaybeError {
             Ref<WrappedEGLSync> sync;
             DisplayEGL* display = ToBackend(device->GetPhysicalDevice())->GetDisplay();
-            DAWN_TRY_ASSIGN(sync, WrappedEGLSync::Create(display, gl, mEGLSyncType, nullptr));
+            DAWN_TRY_ASSIGN(sync, WrappedEGLSync::Create(display, gl, mEGLSyncType, {}));
 
             // Signal the sync if it is EGL_SYNC_REUSABLE_KHR. On the other hand,
             // EGL_SYNC_FENCE_KHR has its signal scheduled on creation.
@@ -280,8 +281,7 @@ ResultOrError<Ref<SharedFence>> Queue::GetOrCreateSharedFence(ExecutionSerial la
         SubmitMode::Passive, [&](const OpenGLFunctions& gl) -> ResultOrError<Ref<SharedFence>> {
             if (sync == nullptr) {
                 DisplayEGL* display = ToBackend(device->GetPhysicalDevice())->GetDisplay();
-                DAWN_TRY_ASSIGN(sync,
-                                WrappedEGLSync::Create(display, gl, requestedSyncType, nullptr));
+                DAWN_TRY_ASSIGN(sync, WrappedEGLSync::Create(display, gl, requestedSyncType, {}));
             }
             DAWN_ASSERT(sync != nullptr);
 

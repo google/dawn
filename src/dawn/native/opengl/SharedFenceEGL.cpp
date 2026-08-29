@@ -35,6 +35,7 @@
 #include "src/dawn/native/opengl/DisplayEGL.h"
 #include "src/dawn/native/opengl/EGLFunctions.h"
 #include "src/dawn/native/opengl/PhysicalDeviceGL.h"
+#include "src/utils/span.h"
 
 namespace dawn::native::opengl {
 ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(
@@ -47,11 +48,11 @@ ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(
 
     SystemHandle handleForSyncCreation = SystemHandle::Duplicate(descriptor->handle);
 
-    const EGLint attribs[] = {
+    const auto attribs = std::array<EGLint, 3>({
         EGL_SYNC_NATIVE_FENCE_FD_ANDROID,
         handleForSyncCreation.Get(),
         EGL_NONE,
-    };
+    });
 
     return device->ExecuteGL(
         ExecutionQueueBase::SubmitMode::Passive,
@@ -60,8 +61,8 @@ ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(
             Ref<WrappedEGLSync> sync;
             EGLint fdForSharedFence;
 
-            DAWN_TRY_ASSIGN(
-                sync, WrappedEGLSync::Create(display, gl, EGL_SYNC_NATIVE_FENCE_ANDROID, attribs));
+            DAWN_TRY_ASSIGN(sync, WrappedEGLSync::Create(display, gl, EGL_SYNC_NATIVE_FENCE_ANDROID,
+                                                         Span<const EGLint>(attribs)));
 
             // If EGLSync creation succeeded, the sync now owns the handle.
             handleForSyncCreation.Detach();
