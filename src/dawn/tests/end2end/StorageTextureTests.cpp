@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "src/utils/span.h"
+
 #ifdef UNSAFE_BUFFERS_BUILD
 // TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
 #pragma allow_unsafe_buffers
@@ -855,25 +857,23 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
                                    wgpu::TextureFormat format,
                                    const wgpu::Extent3D& size) {
         const std::vector<uint8_t>& expectedData = GetExpectedData(format, size.depthOrArrayLayers);
-        CheckOutputStorageTexture(storageTexture, format, size, expectedData.data(),
-                                  expectedData.size());
+        CheckOutputStorageTexture(storageTexture, format, size, expectedData);
     }
 
     void CheckOutputStorageTexture(wgpu::Texture storageTexture,
                                    wgpu::TextureFormat format,
                                    const wgpu::Extent3D& size,
-                                   const uint8_t* expectedData,
-                                   size_t expectedDataSize) {
-        CheckOutputStorageTexture(storageTexture, format, 0, size, expectedData, expectedDataSize);
+                                   dawn::Span<const uint8_t> expectedData) {
+        CheckOutputStorageTexture(storageTexture, format, 0, size, expectedData);
     }
 
     void CheckOutputStorageTexture(wgpu::Texture storageTexture,
                                    wgpu::TextureFormat format,
                                    uint32_t mipLevel,
                                    const wgpu::Extent3D& size,
-                                   const uint8_t* expectedData,
-                                   size_t expectedDataSize) {
-        // Copy the content from the write-only storage texture to the result buffer.
+                                   dawn::Span<const uint8_t> expectedData) {
+        // Copy the content from the write-only storage texture to the result
+        // buffer.
         wgpu::BufferDescriptor descriptor;
         descriptor.size =
             utils::RequiredBytesInCopy(kTextureBytesPerRowAlignment, size.height, size, format);
@@ -901,9 +901,9 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
                     kTextureBytesPerRowAlignment * (size.height * z + y);
                 const size_t expectedDataOffset =
                     static_cast<size_t>(texelSize) * size.width * (size.height * z + y);
-                EXPECT_BUFFER_U32_RANGE_EQ(
-                    reinterpret_cast<const uint32_t*>(expectedData + expectedDataOffset),
-                    resultBuffer, resultBufferOffset, texelSize);
+                EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(
+                                               expectedData.subspan(expectedDataOffset).data()),
+                                           resultBuffer, resultBufferOffset, texelSize);
             }
         }
     }
@@ -1253,7 +1253,7 @@ TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInRenderP
                                         kCommonWriteOnlyZeroInitTestCodeFragment);
     std::vector<uint8_t> expectedData = GetExpectedData();
     CheckOutputStorageTexture(writeonlyStorageTexture, wgpu::TextureFormat::R32Uint,
-                              {kWidth, kHeight}, expectedData.data(), expectedData.size());
+                              {kWidth, kHeight}, expectedData);
 }
 
 // Verify that the texture is correctly cleared to 0 before its first usage as a write-only storage
@@ -1270,7 +1270,7 @@ TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInCompute
                                          kCommonWriteOnlyZeroInitTestCodeCompute);
     std::vector<uint8_t> expectedData = GetExpectedData();
     CheckOutputStorageTexture(writeonlyStorageTexture, wgpu::TextureFormat::R32Uint,
-                              {kWidth, kHeight}, expectedData.data(), expectedData.size());
+                              {kWidth, kHeight}, expectedData);
 }
 
 DAWN_INSTANTIATE_TEST(StorageTextureZeroInitTests,
@@ -1348,8 +1348,7 @@ fn main(@builtin(local_invocation_id) local_id: vec3<u32>) {
         }
 
         CheckOutputStorageTexture(readWriteStorageTexture, format, {kWidth, kHeight},
-                                  reinterpret_cast<const uint8_t*>(expectedModifiedData.data()),
-                                  expectedModifiedData.size() * sizeof(uint32_t));
+                                  expectedModifiedData);
     }
 };
 
@@ -1367,10 +1366,11 @@ TEST_P(ReadWriteStorageTextureTests, ReadWriteStorageTextureInFragmentShader) {
     DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageTexturesInFragmentStage < 1);
 
     std::array<uint32_t, kWidth * kHeight> inputData{};
-    std::array<uint32_t, kWidth * kHeight> expectedData{};
+    std::array<std::byte, sizeof(uint32_t) * kWidth * kHeight> expectedData{};
+    auto expectedDataSpan = dawn::Span<std::byte>(expectedData);
     for (size_t i = 0; i < inputData.size(); ++i) {
         inputData[i] = i + 1;
-        expectedData[i] = inputData[i] * 2;
+        dawn::ReinterpretSpan<uint32_t>(expectedDataSpan)[i] = inputData[i] * 2;
     }
 
     wgpu::Texture readWriteStorageTexture = CreateTextureWithTestData(
@@ -1426,8 +1426,7 @@ TEST_P(ReadWriteStorageTextureTests, ReadWriteStorageTextureInFragmentShader) {
 
     CheckOutputStorageTexture(readWriteStorageTexture, wgpu::TextureFormat::R32Uint,
                               {kWidth, kHeight},
-                              reinterpret_cast<const uint8_t*>(expectedData.data()),
-                              expectedData.size() * sizeof(uint32_t));
+                              dawn::ReinterpretSpan<const uint8_t>(expectedDataSpan));
 }
 
 // Verify read-only storage texture can work correctly in compute shaders.
@@ -1573,9 +1572,10 @@ TEST_P(ReadWriteStorageTextureTests, ReadWriteInPipelineLayoutAndWriteOnlyInShad
     // TODO(crbug.com/40238674): Fails on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
-    std::array<uint32_t, kWidth * kHeight> expectedData{};
-    for (size_t i = 0; i < expectedData.size(); ++i) {
-        expectedData[i] = i + 1;
+    std::array<std::byte, sizeof(uint32_t) * kWidth * kHeight> expectedData{};
+    auto expectedDataSpan = dawn::Span<std::byte>(expectedData);
+    for (size_t i = 0; i < expectedData.size() / sizeof(uint32_t); ++i) {
+        dawn::ReinterpretSpan<uint32_t>(expectedDataSpan)[i] = i + 1;
     }
 
     wgpu::Texture storageTexture = CreateTexture(
@@ -1616,8 +1616,7 @@ fn main(
     queue.Submit(1, &commandBuffer);
 
     CheckOutputStorageTexture(storageTexture, wgpu::TextureFormat::R32Uint, {kWidth, kHeight},
-                              reinterpret_cast<const uint8_t*>(expectedData.data()),
-                              expectedData.size() * sizeof(uint32_t));
+                              dawn::ReinterpretSpan<const uint8_t>(expectedDataSpan));
 }
 
 // Tests reading from mip level 0 of a mipLevelCount = 3 texture using a TEXTURE_BINDING

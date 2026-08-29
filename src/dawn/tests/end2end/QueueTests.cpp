@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <array>
+
 #include "src/utils/span.h"
 
 #ifdef UNSAFE_BUFFERS_BUILD
@@ -234,17 +236,18 @@ TEST_P(QueueWriteBufferTests, WriteUniformBufferWithVariousOffsetAndSizeAlignmen
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     constexpr size_t kElementCount = 16;
-    uint32_t data[kElementCount] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    std::array<uint32_t, kElementCount> data = {1, 2,  3,  4,  5,  6,  7,  8,
+                                                9, 10, 11, 12, 13, 14, 15, 16};
     constexpr size_t kElementBytes = sizeof(data[0]);
-    queue.WriteBuffer(buffer, 0, data, sizeof(data));
-    EXPECT_BUFFER_U32_RANGE_EQ(data, buffer, 0, kElementCount);
+    queue.WriteBuffer(buffer, 0, data.data(), sizeof(data));
+    EXPECT_BUFFER_U32_RANGE_EQ(data.data(), buffer, 0, kElementCount);
 
     // Alignments: offset -- 4, size -- 4
     size_t offset = 1;
     data[offset] = 100;
     size_t size = kElementBytes;
     queue.WriteBuffer(buffer, offset * kElementBytes, &data[offset], size);
-    EXPECT_BUFFER_U32_RANGE_EQ(data, buffer, 0, kElementCount);
+    EXPECT_BUFFER_U32_RANGE_EQ(data.data(), buffer, 0, kElementCount);
 
     // Alignments: offset -- 16, size -- 16
     offset = 4;
@@ -254,7 +257,7 @@ TEST_P(QueueWriteBufferTests, WriteUniformBufferWithVariousOffsetAndSizeAlignmen
     data[offset + 3] = 104;
     size = 4 * kElementBytes;
     queue.WriteBuffer(buffer, offset * kElementBytes, &data[offset], size);
-    EXPECT_BUFFER_U32_RANGE_EQ(data, buffer, 0, kElementCount);
+    EXPECT_BUFFER_U32_RANGE_EQ(data.data(), buffer, 0, kElementCount);
 
     // Alignments: offset -- 4, size -- 16
     offset = 10;
@@ -263,14 +266,14 @@ TEST_P(QueueWriteBufferTests, WriteUniformBufferWithVariousOffsetAndSizeAlignmen
     data[offset + 2] = 107;
     data[offset + 3] = 108;
     queue.WriteBuffer(buffer, offset * kElementBytes, &data[offset], size);
-    EXPECT_BUFFER_U32_RANGE_EQ(data, buffer, 0, kElementCount);
+    EXPECT_BUFFER_U32_RANGE_EQ(data.data(), buffer, 0, kElementCount);
 
     // Alignments: offset -- 16, size -- 4
     offset = 12;
     data[offset] = 109;
     size = kElementBytes;
     queue.WriteBuffer(buffer, offset * kElementBytes, &data[offset], size);
-    EXPECT_BUFFER_U32_RANGE_EQ(data, buffer, 0, kElementCount);
+    EXPECT_BUFFER_U32_RANGE_EQ(data.data(), buffer, 0, kElementCount);
 }
 
 DAWN_INSTANTIATE_TEST(QueueWriteBufferTests,
