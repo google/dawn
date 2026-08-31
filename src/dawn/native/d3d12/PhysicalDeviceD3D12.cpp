@@ -212,10 +212,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT linearAlgebraSupport = {};
         hr = mD3d12Device->CheckFeatureSupport(D3D12_FEATURE_LINEAR_ALGEBRA_SUPPORT,
                                                &linearAlgebraSupport, sizeof(linearAlgebraSupport));
-        // Subgroup matrix produces incorrect results on the Intel driver 101.8974, so disable the
-        // feature on that specific driver version. Only the last two version fields participate in
-        // the comparison (see IntelWindowsDriverVersion).
-        const gpu_info::IntelWindowsDriverVersion kBuggyDriverVersion = {32, 0, 101, 8974};
+        // Subgroup matrix produces incorrect results on Intel drivers through 101.8991, so disable
+        // the feature on those driver versions. Only the last two version fields participate in the
+        // comparison (see IntelWindowsDriverVersion).
+        const gpu_info::IntelWindowsDriverVersion kBuggyDriverVersion = {32, 0, 101, 8991};
         const bool isBuggyIntelDriver =
             gpu_info::IsIntel(GetVendorId()) &&
             gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) <= kBuggyDriverVersion;
