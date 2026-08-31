@@ -31,8 +31,8 @@
 #include <compare>
 #include <string>
 
-#include "absl/container/inlined_vector.h"
 #include "dawn/common/GPUInfo_autogen.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::gpu_info {
 
@@ -56,7 +56,7 @@ class DriverVersion {
     std::strong_ordering operator<=>(const DriverVersion& other) const;
 
   private:
-    absl::InlinedVector<uint16_t, kMaxVersionFields> mDriverVersion;
+    HeapArray<uint16_t> mDriverVersion;
 };
 
 class IntelWindowsDriverVersion {

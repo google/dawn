@@ -53,7 +53,7 @@ DriverVersion::DriverVersion() = default;
 
 DriverVersion::DriverVersion(const std::initializer_list<uint16_t>& version) {
     DAWN_CHECK(version.size() <= kMaxVersionFields);
-    mDriverVersion.assign(version.begin(), version.end());
+    mDriverVersion = HeapArrayFrom(version);
 }
 
 uint16_t& DriverVersion::operator[](size_t i) {
@@ -72,8 +72,8 @@ std::string DriverVersion::ToString() const {
     std::ostringstream oss;
     if (!mDriverVersion.empty()) {
         // Convert all but the last element to avoid a trailing "."
-        std::copy(mDriverVersion.begin(), DAWN_UNSAFE_TODO(mDriverVersion.end() - 1),
-                  std::ostream_iterator<uint16_t>(oss, "."));
+        auto data = mDriverVersion.subspan(0, mDriverVersion.size() - 1);
+        std::copy(data.begin(), data.end(), std::ostream_iterator<uint16_t>(oss, "."));
         // Add the last element
         oss << mDriverVersion.back();
     }

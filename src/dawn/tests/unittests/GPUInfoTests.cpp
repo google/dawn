@@ -68,5 +68,11 @@ TEST(GPUInfo, GetGen) {
     EXPECT_EQ(gpu_info::GetIntelGen(0x8086, 0x7D00), gpu_info::IntelGen::Xe);
     EXPECT_EQ(gpu_info::GetIntelGen(0x8086, 0x6400), gpu_info::IntelGen::Xe2);
 }
+
+TEST(GPUInfo, DriverVersionToString) {
+    gpu_info::DriverVersion version = {20, 19, 15, 5107};
+    EXPECT_EQ("20.19.15.5107", version.ToString());
+}
+
 }  // anonymous namespace
 }  // namespace dawn
