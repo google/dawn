@@ -2232,19 +2232,20 @@ TEST_F(IR_ValidatorTest, Scoping_IfResultUsedInTrueBlock) {
 }
 
 TEST_F(IR_ValidatorTest, CorrectDomainQuantizeF16) {
-    auto* func = b.Function("foo", ty.f32());
+    auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, 65504_f)
-                              ->AsInstruction<CoreBuiltinCall>();
-        b.ir.SetSource(call_func, Source{{5, 7}});
-        b.Return(func, call_func->Result());
+        auto* l = b.Let("l", 1_f);
+        auto* call = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, l)->AsInstruction<Call>();
+        call->SetArg(0, b.Constant(65504_f));
+        b.Return(func);
     });
 
     auto* src = R"(
-%foo = func():f32 {
+%foo = func():void {
   $B1: {
-    %2:f32 = quantizeToF16 65504.0f
-    ret %2
+    %l:f32 = let 1.0f
+    %3:f32 = quantizeToF16 65504.0f
+    ret
   }
 }
 )";
@@ -2255,19 +2256,17 @@ TEST_F(IR_ValidatorTest, CorrectDomainQuantizeF16) {
 }
 
 TEST_F(IR_ValidatorTest, IncorrectDomainQuantizeF16) {
-    auto* func = b.Function("foo", ty.f32());
+    auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, 65505_f)
-                              ->AsInstruction<CoreBuiltinCall>();
-        b.ir.SetSource(call_func, Source{{5, 7}});
-        b.Return(func, call_func->Result());
+        b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, 65505_f);
+        b.Return(func);
     });
 
     auto* src = R"(
-%foo = func():f32 {
+%foo = func():void {
   $B1: {
     %2:f32 = quantizeToF16 65505.0f
-    ret %2
+    ret
   }
 }
 )";
@@ -2275,24 +2274,24 @@ TEST_F(IR_ValidatorTest, IncorrectDomainQuantizeF16) {
 
     auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason, "5:7 error: value 65505.0 cannot be represented as 'f16'");
+    EXPECT_EQ(res.Failure().reason, "error: value 65505.0 cannot be represented as 'f16'");
 }
 
 TEST_F(IR_ValidatorTest, CorrectDomainSubgroupsShuffleXor) {
-    auto* func = b.Function("foo", ty.f32());
+    auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* e = b.Let("a", 777_f);
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffleXor, e, 127_u)
-                              ->AsInstruction<CoreBuiltinCall>();
-        b.Return(func, call_func->Result());
+        b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffleXor, e, 127_u)
+            ->AsInstruction<CoreBuiltinCall>();
+        b.Return(func);
     });
 
     auto* src = R"(
-%foo = func():f32 {
+%foo = func():void {
   $B1: {
     %a:f32 = let 777.0f
     %3:f32 = subgroupShuffleXor %a, 127u
-    ret %3
+    ret
   }
 }
 )";
@@ -2905,10 +2904,10 @@ TEST_F(IR_ValidatorTest, IncorrectPack2x16Float) {
 TEST_F(IR_ValidatorTest, CorrectPack2x16Float) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
-        auto* e = b.Splat(ty.vec2f(), 4.0_f);
+        auto* l = b.Let("l", b.Splat(ty.vec2f(), 4.0_f));
         auto* call_func =
-            b.Call(ty.u32(), core::BuiltinFn::kPack2X16Float, e)->AsInstruction<CoreBuiltinCall>();
-        b.ir.SetSource(call_func, Source{{5, 7}});
+            b.Call(ty.u32(), core::BuiltinFn::kPack2X16Float, l)->AsInstruction<CoreBuiltinCall>();
+        call_func->SetArg(0, b.Splat(ty.vec2f(), 4.0_f));
         b.Return(func, call_func->Result());
     });
     ASSERT_EQ(ir::Validate(mod), Success);
@@ -2916,8 +2915,9 @@ TEST_F(IR_ValidatorTest, CorrectPack2x16Float) {
     auto* src = R"(
 %foo = func():u32 {
   $B1: {
-    %2:u32 = pack2x16float vec2<f32>(4.0f)
-    ret %2
+    %l:vec2<f32> = let vec2<f32>(4.0f)
+    %3:u32 = pack2x16float vec2<f32>(4.0f)
+    ret %3
   }
 }
 )";
@@ -2932,7 +2932,6 @@ TEST_F(IR_ValidatorTest, CorrectDomainShiftLeft) {
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", 16_u);
         auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.u32(), e1, 17_u)->AsInstruction();
-        b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func);
     });
     ASSERT_EQ(ir::Validate(mod), Success);

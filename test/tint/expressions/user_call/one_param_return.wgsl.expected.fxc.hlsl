@@ -1,7 +1,7 @@
 
 int c(int z) {
-  int a = asint((asuint(int(1)) + asuint(z)));
-  a = asint((asuint(a) + asuint(int(2))));
+  int a = asint((1u + asuint(z)));
+  a = asint((asuint(a) + 2u));
   return a;
 }
 

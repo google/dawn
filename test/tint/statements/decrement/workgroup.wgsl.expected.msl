@@ -14,7 +14,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
     (*tint_module_vars.i) = 0;
   }
   (threadgroup_barrier(mem_flags::mem_threadgroup));
-  (*tint_module_vars.i) = as_type<int>((as_type<uint>((*tint_module_vars.i)) - as_type<uint>(1)));
+  (*tint_module_vars.i) = as_type<int>((as_type<uint>((*tint_module_vars.i)) - 1u));
 }
 
 [[max_total_threads_per_threadgroup(1)]]

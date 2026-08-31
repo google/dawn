@@ -5,7 +5,7 @@ struct main_inputs {
 
 groupshared uint v[16];
 void foo() {
-  v[0u] = asuint(1.0f);
+  v[0u] = 1065353216u;
 }
 
 void main_inner(uint tint_local_index) {

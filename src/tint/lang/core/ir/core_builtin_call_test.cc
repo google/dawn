@@ -74,7 +74,8 @@ TEST_F(IR_CoreBuiltinCallDeathTest, Fail_NoneFunction) {
         {
             Module mod;
             Builder b{mod};
-            b.Call(mod.Types().f32(), core::BuiltinFn::kNone);
+            b.Append(mod.CreateInstruction<core::ir::CoreBuiltinCall>(
+                b.InstructionResult(mod.Types().f32()), core::BuiltinFn::kNone));
         },
         "internal compiler error");
 }

@@ -721,9 +721,8 @@ TEST_F(SpirvReader_TransposeRowMajorTest, WriteStorageMatrix) {
     // };
     // @group(0) @binding(0) var<storage, read_write> s : S;
     //
-    // @compute @workgroup_size(1)
-    // fn f() {
-    //   s.m = mat2x3<f32>(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
+    // fn f(m : mat2x3<f32>) {
+    //   s.m = m;
     // }
     auto* matrix_member = ty.Get<core::type::StructMember>(mod.symbols.New("m"), ty.mat2x3<f32>(),
                                                            0u, 8u, 8u, 24u, core::IOAttributes{});
@@ -735,9 +734,10 @@ TEST_F(SpirvReader_TransposeRowMajorTest, WriteStorageMatrix) {
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
 
-    auto* f = b.ComputeFunction("f");
+    auto* f = b.Function("f", ty.void_());
+    auto* m = b.FunctionParam("m", ty.mat2x3<f32>());
+    f->SetParams({m});
     b.Append(f->Block(), [&] {
-        auto* m = b.Construct(ty.mat2x3<f32>(), 1_f, 2_f, 3_f, 4_f, 5_f, 6_f);
         auto* a = b.Access<ptr<storage, mat2x3<f32>, read_write>>(var, 0_u);
         b.Store(a, m);
         b.Return(f);
@@ -752,11 +752,10 @@ $B1: {  # root
   %s:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
 }
 
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%f = func(%m:mat2x3<f32>):void {
   $B2: {
-    %3:mat2x3<f32> = construct 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f
     %4:ptr<storage, mat2x3<f32>, read_write> = access %s, 0u
-    store %4, %3
+    store %4, %m
     ret
   }
 }
@@ -777,11 +776,10 @@ $B1: {  # root
   %s:ptr<storage, S_1, read_write> = var undef @binding_point(0, 0)
 }
 
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%f = func(%m:mat2x3<f32>):void {
   $B2: {
-    %3:mat2x3<f32> = construct 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f
     %4:ptr<storage, mat3x2<f32>, read_write> = access %s, 0u
-    %5:mat3x2<f32> = transpose %3
+    %5:mat3x2<f32> = transpose %m
     store %4, %5
     ret
   }
@@ -800,9 +798,8 @@ TEST_F(SpirvReader_TransposeRowMajorTest, WriteStorageMatrix_Square) {
     // };
     // @group(0) @binding(0) var<storage, read_write> s : S;
     //
-    // @compute @workgroup_size(1)
-    // fn f() {
-    //   s.m = mat3x3<f32>(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
+    // fn f(m : mat3x3<f32>) {
+    //   s.m = m;
     // }
     auto* matrix_member = ty.Get<core::type::StructMember>(mod.symbols.New("m"), ty.mat3x3<f32>(),
                                                            0u, 8u, 16u, 48u, core::IOAttributes{});
@@ -814,9 +811,10 @@ TEST_F(SpirvReader_TransposeRowMajorTest, WriteStorageMatrix_Square) {
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
 
-    auto* f = b.ComputeFunction("f");
+    auto* f = b.Function("f", ty.void_());
+    auto* m = b.FunctionParam("m", ty.mat3x3<f32>());
+    f->SetParams({m});
     b.Append(f->Block(), [&] {
-        auto* m = b.Construct(ty.mat3x3<f32>(), 1_f, 2_f, 3_f, 4_f, 5_f, 6_f, 7_f, 8_f, 9_f);
         auto* a = b.Access<ptr<storage, mat3x3<f32>, read_write>>(var, 0_u);
         b.Store(a, m);
         b.Return(f);
@@ -831,11 +829,10 @@ $B1: {  # root
   %s:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
 }
 
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%f = func(%m:mat3x3<f32>):void {
   $B2: {
-    %3:mat3x3<f32> = construct 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f
     %4:ptr<storage, mat3x3<f32>, read_write> = access %s, 0u
-    store %4, %3
+    store %4, %m
     ret
   }
 }
@@ -856,11 +853,10 @@ $B1: {  # root
   %s:ptr<storage, S_1, read_write> = var undef @binding_point(0, 0)
 }
 
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%f = func(%m:mat3x3<f32>):void {
   $B2: {
-    %3:mat3x3<f32> = construct 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f
     %4:ptr<storage, mat3x3<f32>, read_write> = access %s, 0u
-    %5:mat3x3<f32> = transpose %3
+    %5:mat3x3<f32> = transpose %m
     store %4, %5
     ret
   }
@@ -1690,13 +1686,10 @@ TEST_F(SpirvReader_TransposeRowMajorTest, InsertInStructConstructor) {
     //   @offset(32) m2 : mat4x2<f32>,
     //   @offset(64) @row_major m3 : mat4x2<f32>,
     // };
-    // @group(0) @binding(0) var<uniform> s : S;
+    // @group(0) @binding(0) var<storage, read_write> s : S;
     //
-    // @compute @workgroup_size(1)
-    // fn f() {
-    //   let m1 = mat2x3<f32>();
-    //   let m2 = mat4x2<f32>();
-    //   s = S(m, m2, m2);
+    // fn f(m1 : mat2x3<f32>, m2 : mat4x2<f32>) {
+    //   s = S(m1, m2, m2);
     // }
     auto* matrix_member_0 = ty.Get<core::type::StructMember>(mod.symbols.New("m"), ty.mat2x3<f32>(),
                                                              0u, 0u, 8u, 24u, core::IOAttributes{});
@@ -1716,11 +1709,11 @@ TEST_F(SpirvReader_TransposeRowMajorTest, InsertInStructConstructor) {
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
 
-    auto* f = b.ComputeFunction("f");
+    auto* f = b.Function("f", ty.void_());
+    auto* m1 = b.FunctionParam("m1", ty.mat2x3<f32>());
+    auto* m2 = b.FunctionParam("m2", ty.mat4x2<f32>());
+    f->SetParams({m1, m2});
     b.Append(f->Block(), [&] {
-        auto* m1 = b.Construct(ty.mat2x3<f32>());
-        auto* m2 = b.Construct(ty.mat4x2<f32>());
-
         b.Store(var, b.Construct(strct, m1, m2, m2));
         b.Return(f);
     });
@@ -1736,11 +1729,9 @@ $B1: {  # root
   %s:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
 }
 
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%f = func(%m1:mat2x3<f32>, %m2:mat4x2<f32>):void {
   $B2: {
-    %3:mat2x3<f32> = construct
-    %4:mat4x2<f32> = construct
-    %5:S = construct %3, %4, %4
+    %5:S = construct %m1, %m2, %m2
     store %s, %5
     ret
   }
@@ -1766,13 +1757,11 @@ $B1: {  # root
   %s:ptr<storage, S_1, read_write> = var undef @binding_point(0, 0)
 }
 
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%f = func(%m1:mat2x3<f32>, %m2:mat4x2<f32>):void {
   $B2: {
-    %3:mat2x3<f32> = construct
-    %4:mat4x2<f32> = construct
-    %5:mat3x2<f32> = transpose %3
-    %6:mat2x4<f32> = transpose %4
-    %7:S_1 = construct %5, %4, %6
+    %5:mat3x2<f32> = transpose %m1
+    %6:mat2x4<f32> = transpose %m2
+    %7:S_1 = construct %5, %m2, %6
     store %s, %7
     ret
   }
@@ -1789,13 +1778,10 @@ TEST_F(SpirvReader_TransposeRowMajorTest, InsertInStructConstructor_Square) {
     //   @offset(48) m2 : mat4x4<f32>,
     //   @offset(102) @row_major m3 : mat4x4<f32>,
     // };
-    // @group(0) @binding(0) var<uniform> s : S;
+    // @group(0) @binding(0) var<storage, read_write> s : S;
     //
-    // @compute @workgroup_size(1)
-    // fn f() {
-    //   let m1 = mat3x3<f32>();
-    //   let m2 = mat4x4<f32>();
-    //   s = S(m, m2, m2);
+    // fn f(m1 : mat3x3<f32>, m2 : mat4x4<f32>) {
+    //   s = S(m1, m2, m2);
     // }
     auto* matrix_member_0 = ty.Get<core::type::StructMember>(
         mod.symbols.New("m0"), ty.mat3x3<f32>(), 0u, 0u, 16u, 48u, core::IOAttributes{});
@@ -1815,11 +1801,11 @@ TEST_F(SpirvReader_TransposeRowMajorTest, InsertInStructConstructor_Square) {
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
 
-    auto* f = b.ComputeFunction("f");
+    auto* f = b.Function("f", ty.void_());
+    auto* m1 = b.FunctionParam("m1", ty.mat3x3<f32>());
+    auto* m2 = b.FunctionParam("m2", ty.mat4x4<f32>());
+    f->SetParams({m1, m2});
     b.Append(f->Block(), [&] {
-        auto* m1 = b.Construct(ty.mat3x3<f32>());
-        auto* m2 = b.Construct(ty.mat4x4<f32>());
-
         b.Store(var, b.Construct(strct, m1, m2, m2));
         b.Return(f);
     });
@@ -1835,11 +1821,9 @@ $B1: {  # root
   %s:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
 }
 
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%f = func(%m1:mat3x3<f32>, %m2:mat4x4<f32>):void {
   $B2: {
-    %3:mat3x3<f32> = construct
-    %4:mat4x4<f32> = construct
-    %5:S = construct %3, %4, %4
+    %5:S = construct %m1, %m2, %m2
     store %s, %5
     ret
   }
@@ -1865,13 +1849,11 @@ $B1: {  # root
   %s:ptr<storage, S_1, read_write> = var undef @binding_point(0, 0)
 }
 
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%f = func(%m1:mat3x3<f32>, %m2:mat4x4<f32>):void {
   $B2: {
-    %3:mat3x3<f32> = construct
-    %4:mat4x4<f32> = construct
-    %5:mat3x3<f32> = transpose %3
-    %6:mat4x4<f32> = transpose %4
-    %7:S_1 = construct %5, %4, %6
+    %5:mat3x3<f32> = transpose %m1
+    %6:mat4x4<f32> = transpose %m2
+    %7:S_1 = construct %5, %m2, %6
     store %s, %7
     ret
   }
@@ -4137,9 +4119,8 @@ TEST_F(SpirvReader_TransposeRowMajorTest, FunctionConstruct) {
     //   @offset(16) @row_major m : mat2x3<f32>,
     // };
     //
-    // @compute @workgroup_size(1)
-    // fn f() {
-    //   var<function> s = S(mat2x3(vec3f(0.f), vec3(1.f)));
+    // fn f(m : mat2x3<f32>) {
+    //   var<function> s = S(m);
     //   let x : mat2x3<f32> = s.m;
     // }
 
@@ -4149,10 +4130,11 @@ TEST_F(SpirvReader_TransposeRowMajorTest, FunctionConstruct) {
 
     auto* strct = ty.Struct(mod.symbols.New("S"), Vector{matrix_member});
 
-    auto* f = b.ComputeFunction("f");
+    auto* f = b.Function("f", ty.void_());
+    auto* m = b.FunctionParam("m", ty.mat2x3<f32>());
+    f->SetParams({m});
     b.Append(f->Block(), [&] {
-        auto* init = b.Construct(
-            strct, b.Composite(ty.mat2x3<f32>(), b.Splat<vec3<f32>>(0_f), b.Splat<vec3<f32>>(1_f)));
+        auto* init = b.Construct(strct, m);
         auto* var = b.Var("s", ty.ptr<function>(strct));
         var->SetInitializer(init->Result());
 
@@ -4165,13 +4147,13 @@ S = struct @align(8) {
   m:mat2x3<f32> @offset(16) @size(24), @row_major
 }
 
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%f = func(%m:mat2x3<f32>):void {
   $B1: {
-    %2:S = construct mat2x3<f32>(vec3<f32>(0.0f), vec3<f32>(1.0f))
-    %s:ptr<function, S, read_write> = var %2
-    %4:ptr<function, mat2x3<f32>, read_write> = access %s, 0u
-    %5:mat2x3<f32> = load %4
-    %x:mat2x3<f32> = let %5
+    %3:S = construct %m
+    %s:ptr<function, S, read_write> = var %3
+    %5:ptr<function, mat2x3<f32>, read_write> = access %s, 0u
+    %6:mat2x3<f32> = load %5
+    %x:mat2x3<f32> = let %6
     ret
   }
 }
@@ -4188,15 +4170,15 @@ S_1 = struct @align(8) {
   m:mat3x2<f32> @offset(16)
 }
 
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%f = func(%m:mat2x3<f32>):void {
   $B1: {
-    %2:mat3x2<f32> = transpose mat2x3<f32>(vec3<f32>(0.0f), vec3<f32>(1.0f))
-    %3:S_1 = construct %2
-    %s:ptr<function, S_1, read_write> = var %3
-    %5:ptr<function, mat3x2<f32>, read_write> = access %s, 0u
-    %6:mat3x2<f32> = load %5
-    %7:mat2x3<f32> = transpose %6
-    %x:mat2x3<f32> = let %7
+    %3:mat3x2<f32> = transpose %m
+    %4:S_1 = construct %3
+    %s:ptr<function, S_1, read_write> = var %4
+    %6:ptr<function, mat3x2<f32>, read_write> = access %s, 0u
+    %7:mat3x2<f32> = load %6
+    %8:mat2x3<f32> = transpose %7
+    %x:mat2x3<f32> = let %8
     ret
   }
 }
@@ -4211,9 +4193,8 @@ TEST_F(SpirvReader_TransposeRowMajorTest, FunctionConstruct_Square) {
     //   @offset(16) @row_major m : mat3x3<f32>,
     // };
     //
-    // @compute @workgroup_size(1)
-    // fn f() {
-    //   var<function> s = S(mat3x3(vec3f(0.f), vec3(1.f), vec3(2.f)));
+    // fn f(m : mat3x3<f32>) {
+    //   var<function> s = S(m);
     //   let x : mat3x3<f32> = s.m;
     // }
 
@@ -4223,11 +4204,11 @@ TEST_F(SpirvReader_TransposeRowMajorTest, FunctionConstruct_Square) {
 
     auto* strct = ty.Struct(mod.symbols.New("S"), Vector{matrix_member});
 
-    auto* f = b.ComputeFunction("f");
+    auto* f = b.Function("f", ty.void_());
+    auto* m = b.FunctionParam("m", ty.mat3x3<f32>());
+    f->SetParams({m});
     b.Append(f->Block(), [&] {
-        auto* init =
-            b.Construct(strct, b.Composite(ty.mat3x3<f32>(), b.Splat<vec3<f32>>(0_f),
-                                           b.Splat<vec3<f32>>(1_f), b.Splat<vec3<f32>>(2_f)));
+        auto* init = b.Construct(strct, m);
         auto* var = b.Var("s", ty.ptr<function>(strct));
         var->SetInitializer(init->Result());
 
@@ -4240,13 +4221,13 @@ S = struct @align(16) {
   m:mat3x3<f32> @offset(16), @row_major
 }
 
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%f = func(%m:mat3x3<f32>):void {
   $B1: {
-    %2:S = construct mat3x3<f32>(vec3<f32>(0.0f), vec3<f32>(1.0f), vec3<f32>(2.0f))
-    %s:ptr<function, S, read_write> = var %2
-    %4:ptr<function, mat3x3<f32>, read_write> = access %s, 0u
-    %5:mat3x3<f32> = load %4
-    %x:mat3x3<f32> = let %5
+    %3:S = construct %m
+    %s:ptr<function, S, read_write> = var %3
+    %5:ptr<function, mat3x3<f32>, read_write> = access %s, 0u
+    %6:mat3x3<f32> = load %5
+    %x:mat3x3<f32> = let %6
     ret
   }
 }
@@ -4263,15 +4244,15 @@ S_1 = struct @align(16) {
   m:mat3x3<f32> @offset(16)
 }
 
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%f = func(%m:mat3x3<f32>):void {
   $B1: {
-    %2:mat3x3<f32> = transpose mat3x3<f32>(vec3<f32>(0.0f), vec3<f32>(1.0f), vec3<f32>(2.0f))
-    %3:S_1 = construct %2
-    %s:ptr<function, S_1, read_write> = var %3
-    %5:ptr<function, mat3x3<f32>, read_write> = access %s, 0u
-    %6:mat3x3<f32> = load %5
-    %7:mat3x3<f32> = transpose %6
-    %x:mat3x3<f32> = let %7
+    %3:mat3x3<f32> = transpose %m
+    %4:S_1 = construct %3
+    %s:ptr<function, S_1, read_write> = var %4
+    %6:ptr<function, mat3x3<f32>, read_write> = access %s, 0u
+    %7:mat3x3<f32> = load %6
+    %8:mat3x3<f32> = transpose %7
+    %x:mat3x3<f32> = let %8
     ret
   }
 }

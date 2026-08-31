@@ -1,10 +1,9 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 93
+; Bound: 88
 ; Schema: 0
                OpCapability Shader
-         %59 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main"
                OpExecutionMode %main OriginUpperLeft
@@ -65,11 +64,9 @@
 %_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
    %float_n1 = OpConstant %float -1
       %false = OpConstantFalse %bool
-  %float_n16 = OpConstant %float -16
-%float_15_9899998 = OpConstant %float 15.9899998
-         %63 = OpTypeSampledImage %15
+         %59 = OpTypeSampledImage %15
     %v2float = OpTypeVector %float 2
-         %65 = OpConstantNull %v2float
+         %61 = OpConstantNull %v2float
 %foo_member_initialize = OpFunction %void None %21
          %22 = OpLabel
         %vb2 = OpVariable %_ptr_Function_v2bool Function %27
@@ -99,46 +96,44 @@
          %55 = OpLabel
          %56 = OpLoad %15 %my_texture None
          %57 = OpLoad %18 %my_sampler None
-         %58 = OpExtInst %float %59 NClamp %float_0 %float_n16 %float_15_9899998
-         %62 = OpSampledImage %63 %56 %57
-          %r = OpImageSampleImplicitLod %v4float %62 %65 Bias %58
+         %58 = OpSampledImage %59 %56 %57
+          %r = OpImageSampleImplicitLod %v4float %58 %61 Bias %float_0
                OpBranch %54
          %54 = OpLabel
                OpReturn
                OpFunctionEnd
 %foo_default_initialize = OpFunction %void None %21
-         %68 = OpLabel
+         %64 = OpLabel
       %vb2_0 = OpVariable %_ptr_Function_v2bool Function %27
-         %70 = OpAccessChain %_ptr_Private_float %my_global %uint_2
-         %71 = OpLoad %float %70 None
-         %72 = OpFOrdNotEqual %bool %71 %float_0
-         %73 = OpAccessChain %_ptr_Function_bool %vb2_0 %uint_0
-               OpStore %73 %72 None
-         %74 = OpAccessChain %_ptr_Uniform_v4uint %6 %uint_0 %uint_0
-         %75 = OpLoad %v4uint %74 None
-         %76 = OpCompositeExtract %uint %75 0
-         %77 = OpBitcast %float %76
-         %78 = OpFOrdEqual %bool %77 %float_n1
-         %79 = OpAccessChain %_ptr_Function_bool %vb2_0 %uint_0
-               OpStore %79 %78 None
+         %66 = OpAccessChain %_ptr_Private_float %my_global %uint_2
+         %67 = OpLoad %float %66 None
+         %68 = OpFOrdNotEqual %bool %67 %float_0
+         %69 = OpAccessChain %_ptr_Function_bool %vb2_0 %uint_0
+               OpStore %69 %68 None
+         %70 = OpAccessChain %_ptr_Uniform_v4uint %6 %uint_0 %uint_0
+         %71 = OpLoad %v4uint %70 None
+         %72 = OpCompositeExtract %uint %71 0
+         %73 = OpBitcast %float %72
+         %74 = OpFOrdEqual %bool %73 %float_n1
+         %75 = OpAccessChain %_ptr_Function_bool %vb2_0 %uint_0
+               OpStore %75 %74 None
                OpStore %vb2_0 %27 None
-         %80 = OpAccessChain %_ptr_Function_bool %vb2_0 %uint_0
-         %81 = OpLoad %bool %80 None
-               OpSelectionMerge %82 None
-               OpBranchConditional %81 %83 %82
-         %83 = OpLabel
-         %84 = OpLoad %15 %my_texture None
-         %85 = OpLoad %18 %my_sampler None
-         %86 = OpExtInst %float %59 NClamp %float_0 %float_n16 %float_15_9899998
-         %87 = OpSampledImage %63 %84 %85
-        %r_0 = OpImageSampleImplicitLod %v4float %87 %65 Bias %86
-               OpBranch %82
-         %82 = OpLabel
+         %76 = OpAccessChain %_ptr_Function_bool %vb2_0 %uint_0
+         %77 = OpLoad %bool %76 None
+               OpSelectionMerge %78 None
+               OpBranchConditional %77 %79 %78
+         %79 = OpLabel
+         %80 = OpLoad %15 %my_texture None
+         %81 = OpLoad %18 %my_sampler None
+         %82 = OpSampledImage %59 %80 %81
+        %r_0 = OpImageSampleImplicitLod %v4float %82 %61 Bias %float_0
+               OpBranch %78
+         %78 = OpLabel
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %21
-         %90 = OpLabel
-         %91 = OpFunctionCall %void %foo_member_initialize
-         %92 = OpFunctionCall %void %foo_default_initialize
+         %85 = OpLabel
+         %86 = OpFunctionCall %void %foo_member_initialize
+         %87 = OpFunctionCall %void %foo_default_initialize
                OpReturn
                OpFunctionEnd

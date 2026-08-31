@@ -22,12 +22,12 @@ void main_inner(uint3 lid, uint tint_local_index) {
   int init = int(lid.z);
   {
     int S = init;
-    for( ; (S < asint(U[3u].x)); S = asint((asuint(S) + asuint(int(8))))) {
+    for( ; (S < asint(U[3u].x)); S = asint((asuint(S) + 8u))) {
     }
   }
   {
     int s_group = int(0);
-    for( ; (s_group < asint(U[3u].z)); s_group = asint((asuint(s_group) + asuint(int(8))))) {
+    for( ; (s_group < asint(U[3u].z)); s_group = asint((asuint(s_group) + 8u))) {
       outputs[lid.z][lid.x] = tint_v4f32_to_v4u32(src_image2d.Load(int3(int2(uint2((uint(asint(U[3u].x))).xx)), int(0))));
       GroupMemoryBarrierWithGroupSync();
       uint4 result = outputs[lid.z][lid.x];

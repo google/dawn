@@ -17,8 +17,7 @@ void foo() {
       v4u[i] = 1u;
       v2b[i] = true;
       {
-        uint v = uint(i);
-        i = int((v + uint(1)));
+        i = int((uint(i) + 1u));
       }
     }
   }
@@ -34,8 +33,7 @@ void main() {
       }
       foo();
       {
-        uint v_1 = uint(i);
-        i = int((v_1 + uint(1)));
+        i = int((uint(i) + 1u));
       }
     }
   }

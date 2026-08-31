@@ -555,10 +555,9 @@ $B1: {  # root
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:u16 = bitcast<u16> 0.0h
-    %5:ptr<workgroup, u16, read_write> = access %data, 0u
-    store %5, %4
-    %6:void = atomicStore %y, 0u
+    %4:ptr<workgroup, u16, read_write> = access %data, 0u
+    store %4, 0u16
+    %5:void = atomicStore %y, 0u
     ret
   }
 }

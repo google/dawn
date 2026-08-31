@@ -4199,15 +4199,19 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, InputAttachmentLoad) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle_WithoutRobustness) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kSubgroupShuffle, 1_i, 1_i));
+        auto* id = b.Let("id", 1_i);
+        auto* val = b.Let("val", 1_i);
+        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kSubgroupShuffle, id, val));
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:i32 = subgroupShuffle 1i, 1i
-    %a:i32 = let %2
+    %id:i32 = let 1i
+    %val:i32 = let 1i
+    %4:i32 = subgroupShuffle %id, %val
+    %a:i32 = let %4
     ret
   }
 }
@@ -4217,9 +4221,11 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle_WithoutRobustness) {
     auto* expect = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 1i
-    %3:i32 = subgroupShuffle 1i, %2
-    %a:i32 = let %3
+    %id:i32 = let 1i
+    %val:i32 = let 1i
+    %4:u32 = bitcast<u32> %val
+    %5:i32 = subgroupShuffle %id, %4
+    %a:i32 = let %5
     ret
   }
 }
@@ -4236,15 +4242,19 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle_WithoutRobustness) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle_WithRobustness) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kSubgroupShuffle, 1_i, 1_i));
+        auto* id = b.Let("id", 1_i);
+        auto* val = b.Let("val", 1_i);
+        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kSubgroupShuffle, id, val));
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:i32 = subgroupShuffle 1i, 1i
-    %a:i32 = let %2
+    %id:i32 = let 1i
+    %val:i32 = let 1i
+    %4:i32 = subgroupShuffle %id, %val
+    %a:i32 = let %4
     ret
   }
 }
@@ -4261,11 +4271,13 @@ $B1: {  # root
     %3:u32 = subgroupAdd 1u
     %4:u32 = sub %3, 1u
     store %tint_subgroup_last_id, %4
-    %5:u32 = bitcast<u32> 1i
-    %6:u32 = load %tint_subgroup_last_id
-    %7:u32 = min %5, %6
-    %8:i32 = subgroupShuffle 1i, %7
-    %a:i32 = let %8
+    %id:i32 = let 1i
+    %val:i32 = let 1i
+    %7:u32 = bitcast<u32> %val
+    %8:u32 = load %tint_subgroup_last_id
+    %9:u32 = min %7, %8
+    %10:i32 = subgroupShuffle %id, %9
+    %a:i32 = let %10
     ret
   }
 }
@@ -4309,11 +4321,10 @@ $B1: {  # root
     %4:u32 = subgroupAdd 1u
     %5:u32 = sub %4, 1u
     store %tint_subgroup_last_id, %5
-    %6:u32 = bitcast<u32> 1i
-    %7:u32 = load %tint_subgroup_last_id
-    %8:u32 = min %6, %7
-    %9:i32 = subgroupShuffle 1i, %8
-    %a:i32 = let %9
+    %6:u32 = load %tint_subgroup_last_id
+    %7:u32 = min 1u, %6
+    %8:i32 = subgroupShuffle 1i, %7
+    %a:i32 = let %8
     ret
   }
 }
@@ -4374,11 +4385,10 @@ $B1: {  # root
     %4:u32 = subgroupAdd 1u
     %5:u32 = sub %4, 1u
     store %tint_subgroup_last_id, %5
-    %6:u32 = bitcast<u32> 1i
-    %7:u32 = load %tint_subgroup_last_id
-    %8:u32 = min %6, %7
-    %9:i32 = subgroupShuffle 1i, %8
-    %a:i32 = let %9
+    %6:u32 = load %tint_subgroup_last_id
+    %7:u32 = min 1u, %6
+    %8:i32 = subgroupShuffle 1i, %7
+    %a:i32 = let %8
     ret
   }
 }
@@ -5920,7 +5930,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_i8) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* v = b.Var("v", ty.ptr(function, mat, read_write));
-        b.Let("r", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarAdd, b.Load(v), 3_i));
+        auto* ld = b.Load(v);
+        auto* l = b.Let("l", 3_i);
+        b.Let("r", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarAdd, ld, l));
         b.Return(func);
     });
 
@@ -5929,8 +5941,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_i8) {
   $B1: {
     %v:ptr<function, subgroup_matrix_result<i8, 8, 8>, read_write> = var undef
     %3:subgroup_matrix_result<i8, 8, 8> = load %v
-    %4:subgroup_matrix_result<i8, 8, 8> = subgroupMatrixScalarAdd %3, 3i
-    %r:subgroup_matrix_result<i8, 8, 8> = let %4
+    %l:i32 = let 3i
+    %5:subgroup_matrix_result<i8, 8, 8> = subgroupMatrixScalarAdd %3, %l
+    %r:subgroup_matrix_result<i8, 8, 8> = let %5
     ret
   }
 }
@@ -5942,11 +5955,12 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_i8) {
   $B1: {
     %v:ptr<function, subgroup_matrix_result<i8, 8, 8>, read_write> = var undef
     %3:subgroup_matrix_result<i8, 8, 8> = load %v
-    %4:i32 = clamp 3i, -128i, 127i
-    %5:i8 = spirv.s_convert<i8> %4
-    %6:subgroup_matrix_result<i8, 8, 8> = construct %5
-    %7:subgroup_matrix_result<i8, 8, 8> = add %3, %6
-    %r:subgroup_matrix_result<i8, 8, 8> = let %7
+    %l:i32 = let 3i
+    %5:i32 = clamp %l, -128i, 127i
+    %6:i8 = spirv.s_convert<i8> %5
+    %7:subgroup_matrix_result<i8, 8, 8> = construct %6
+    %8:subgroup_matrix_result<i8, 8, 8> = add %3, %7
+    %r:subgroup_matrix_result<i8, 8, 8> = let %8
     ret
   }
 }
@@ -6006,7 +6020,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract_u8) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* v = b.Var("v", ty.ptr(function, mat, read_write));
-        b.Let("r", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarSubtract, b.Load(v), 3_u));
+        auto* ld = b.Load(v);
+        auto* l = b.Let("l", 3_u);
+        b.Let("r", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarSubtract, ld, l));
         b.Return(func);
     });
 
@@ -6015,8 +6031,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract_u8) {
   $B1: {
     %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var undef
     %3:subgroup_matrix_result<u8, 8, 8> = load %v
-    %4:subgroup_matrix_result<u8, 8, 8> = subgroupMatrixScalarSubtract %3, 3u
-    %r:subgroup_matrix_result<u8, 8, 8> = let %4
+    %l:u32 = let 3u
+    %5:subgroup_matrix_result<u8, 8, 8> = subgroupMatrixScalarSubtract %3, %l
+    %r:subgroup_matrix_result<u8, 8, 8> = let %5
     ret
   }
 }
@@ -6028,11 +6045,12 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract_u8) {
   $B1: {
     %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var undef
     %3:subgroup_matrix_result<u8, 8, 8> = load %v
-    %4:u32 = clamp 3u, 0u, 255u
-    %5:u8 = spirv.u_convert<u8> %4
-    %6:subgroup_matrix_result<u8, 8, 8> = construct %5
-    %7:subgroup_matrix_result<u8, 8, 8> = sub %3, %6
-    %r:subgroup_matrix_result<u8, 8, 8> = let %7
+    %l:u32 = let 3u
+    %5:u32 = clamp %l, 0u, 255u
+    %6:u8 = spirv.u_convert<u8> %5
+    %7:subgroup_matrix_result<u8, 8, 8> = construct %6
+    %8:subgroup_matrix_result<u8, 8, 8> = sub %3, %7
+    %r:subgroup_matrix_result<u8, 8, 8> = let %8
     ret
   }
 }
@@ -6092,7 +6110,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarMultiply_u8) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* v = b.Var("v", ty.ptr(function, mat, read_write));
-        b.Let("r", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarMultiply, b.Load(v), 3_u));
+        auto* ld = b.Load(v);
+        auto* l = b.Let("l", 3_u);
+        b.Let("r", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarMultiply, ld, l));
         b.Return(func);
     });
 
@@ -6101,8 +6121,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarMultiply_u8) {
   $B1: {
     %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var undef
     %3:subgroup_matrix_result<u8, 8, 8> = load %v
-    %4:subgroup_matrix_result<u8, 8, 8> = subgroupMatrixScalarMultiply %3, 3u
-    %r:subgroup_matrix_result<u8, 8, 8> = let %4
+    %l:u32 = let 3u
+    %5:subgroup_matrix_result<u8, 8, 8> = subgroupMatrixScalarMultiply %3, %l
+    %r:subgroup_matrix_result<u8, 8, 8> = let %5
     ret
   }
 }
@@ -6114,11 +6135,12 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarMultiply_u8) {
   $B1: {
     %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var undef
     %3:subgroup_matrix_result<u8, 8, 8> = load %v
-    %4:u32 = clamp 3u, 0u, 255u
-    %5:u8 = spirv.u_convert<u8> %4
-    %6:subgroup_matrix_result<u8, 8, 8> = construct %5
-    %7:subgroup_matrix_result<u8, 8, 8> = mul %3, %6
-    %r:subgroup_matrix_result<u8, 8, 8> = let %7
+    %l:u32 = let 3u
+    %5:u32 = clamp %l, 0u, 255u
+    %6:u8 = spirv.u_convert<u8> %5
+    %7:subgroup_matrix_result<u8, 8, 8> = construct %6
+    %8:subgroup_matrix_result<u8, 8, 8> = mul %3, %7
+    %r:subgroup_matrix_result<u8, 8, 8> = let %8
     ret
   }
 }
@@ -6135,15 +6157,16 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixConstruct_i8) {
 
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        b.Let("r", b.Construct(mat, 3_i));
+        b.Let("r", b.Construct(mat, b.Let("l", 3_i)));
         b.Return(func);
     });
 
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:subgroup_matrix_result<i8, 8, 8> = construct 3i
-    %r:subgroup_matrix_result<i8, 8, 8> = let %2
+    %l:i32 = let 3i
+    %3:subgroup_matrix_result<i8, 8, 8> = construct %l
+    %r:subgroup_matrix_result<i8, 8, 8> = let %3
     ret
   }
 }
@@ -6153,10 +6176,11 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixConstruct_i8) {
     auto* expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = clamp 3i, -128i, 127i
-    %3:i8 = spirv.s_convert<i8> %2
-    %4:subgroup_matrix_result<i8, 8, 8> = construct %3
-    %r:subgroup_matrix_result<i8, 8, 8> = let %4
+    %l:i32 = let 3i
+    %3:i32 = clamp %l, -128i, 127i
+    %4:i8 = spirv.s_convert<i8> %3
+    %5:subgroup_matrix_result<i8, 8, 8> = construct %4
+    %r:subgroup_matrix_result<i8, 8, 8> = let %5
     ret
   }
 }
@@ -6173,15 +6197,16 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixConstruct_u8) {
 
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        b.Let("r", b.Construct(mat, 3_u));
+        b.Let("r", b.Construct(mat, b.Let("l", 3_u)));
         b.Return(func);
     });
 
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:subgroup_matrix_result<u8, 8, 8> = construct 3u
-    %r:subgroup_matrix_result<u8, 8, 8> = let %2
+    %l:u32 = let 3u
+    %3:subgroup_matrix_result<u8, 8, 8> = construct %l
+    %r:subgroup_matrix_result<u8, 8, 8> = let %3
     ret
   }
 }
@@ -6191,10 +6216,11 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixConstruct_u8) {
     auto* expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = clamp 3u, 0u, 255u
-    %3:u8 = spirv.u_convert<u8> %2
-    %4:subgroup_matrix_result<u8, 8, 8> = construct %3
-    %r:subgroup_matrix_result<u8, 8, 8> = let %4
+    %l:u32 = let 3u
+    %3:u32 = clamp %l, 0u, 255u
+    %4:u8 = spirv.u_convert<u8> %3
+    %5:subgroup_matrix_result<u8, 8, 8> = construct %4
+    %r:subgroup_matrix_result<u8, 8, 8> = let %5
     ret
   }
 }

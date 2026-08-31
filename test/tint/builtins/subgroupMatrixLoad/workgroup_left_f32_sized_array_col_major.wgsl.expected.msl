@@ -67,58 +67,40 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   }
   (threadgroup_barrier(mem_flags::mem_threadgroup));
   tint_array_lengths_struct const v_2 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)};
-  (as_type<uint>(0));
   simdgroup_float8x8 v_3 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
   (simdgroup_load(v_3, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.in0) + 0u), ulong(16u), ulong2(0ul), true));
   simdgroup_float8x8 const m0 = v_3;
-  uint const v_4 = as_type<uint>(0);
-  uint const v_5 = as_type<uint>(16);
-  bool const v_6 = (addsat(madsat(v_5, 7u, v_4), 8u) <= v_2.tint_array_length_0_0);
-  (simdgroup_store(m0, reinterpret_cast<device float*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, v_4, v_6) * 4u)), ulong((select(8u, v_5, v_6) * 1u)), ulong2(0ul), true));
-  (as_type<uint>(0));
+  bool const v_4 = (120u <= v_2.tint_array_length_0_0);
+  (simdgroup_store(m0, reinterpret_cast<device float*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, 0u, v_4) * 4u)), ulong((select(8u, 16u, v_4) * 1u)), ulong2(0ul), true));
+  simdgroup_float8x8 v_5 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+  (simdgroup_load(v_5, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.in1) + 0u), ulong(32u), ulong2(0ul), true));
+  simdgroup_float8x8 const m1 = v_5;
+  bool const v_6 = (120u <= v_2.tint_array_length_0_0);
+  (simdgroup_store(m1, reinterpret_cast<device float*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, 0u, v_6) * 4u)), ulong((select(8u, 16u, v_6) * 1u)), ulong2(0ul), true));
   simdgroup_float8x8 v_7 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  (simdgroup_load(v_7, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.in1) + 0u), ulong(32u), ulong2(0ul), true));
-  simdgroup_float8x8 const m1 = v_7;
-  uint const v_8 = as_type<uint>(0);
-  uint const v_9 = as_type<uint>(16);
-  bool const v_10 = (addsat(madsat(v_9, 7u, v_8), 8u) <= v_2.tint_array_length_0_0);
-  (simdgroup_store(m1, reinterpret_cast<device float*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, v_8, v_10) * 4u)), ulong((select(8u, v_9, v_10) * 1u)), ulong2(0ul), true));
-  (as_type<uint>(0));
+  (simdgroup_load(v_7, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.in2) + 0u), ulong(64u), ulong2(0ul), true));
+  simdgroup_float8x8 const m2 = v_7;
+  bool const v_8 = (120u <= v_2.tint_array_length_0_0);
+  (simdgroup_store(m2, reinterpret_cast<device float*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, 0u, v_8) * 4u)), ulong((select(8u, 16u, v_8) * 1u)), ulong2(0ul), true));
+  simdgroup_float8x8 v_9 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+  (simdgroup_load(v_9, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.in3) + 0u), ulong(64u), ulong2(0ul), true));
+  simdgroup_float8x8 const m3 = v_9;
+  bool const v_10 = (120u <= v_2.tint_array_length_0_0);
+  (simdgroup_store(m3, reinterpret_cast<device float*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, 0u, v_10) * 4u)), ulong((select(8u, 16u, v_10) * 1u)), ulong2(0ul), true));
   simdgroup_float8x8 v_11 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  (simdgroup_load(v_11, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.in2) + 0u), ulong(64u), ulong2(0ul), true));
-  simdgroup_float8x8 const m2 = v_11;
-  uint const v_12 = as_type<uint>(0);
-  uint const v_13 = as_type<uint>(16);
-  bool const v_14 = (addsat(madsat(v_13, 7u, v_12), 8u) <= v_2.tint_array_length_0_0);
-  (simdgroup_store(m2, reinterpret_cast<device float*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, v_12, v_14) * 4u)), ulong((select(8u, v_13, v_14) * 1u)), ulong2(0ul), true));
-  (as_type<uint>(0));
-  simdgroup_float8x8 v_15 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  (simdgroup_load(v_15, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.in3) + 0u), ulong(64u), ulong2(0ul), true));
-  simdgroup_float8x8 const m3 = v_15;
-  uint const v_16 = as_type<uint>(0);
-  uint const v_17 = as_type<uint>(16);
-  bool const v_18 = (addsat(madsat(v_17, 7u, v_16), 8u) <= v_2.tint_array_length_0_0);
-  (simdgroup_store(m3, reinterpret_cast<device float*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, v_16, v_18) * 4u)), ulong((select(8u, v_17, v_18) * 1u)), ulong2(0ul), true));
-  (as_type<uint>(0));
-  simdgroup_float8x8 v_19 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  (simdgroup_load(v_19, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.in5) + 0u), ulong(16u), ulong2(0ul), true));
-  simdgroup_float8x8 const m5 = v_19;
-  uint const v_20 = as_type<uint>(0);
-  uint const v_21 = as_type<uint>(16);
-  bool const v_22 = (addsat(madsat(v_21, 7u, v_20), 8u) <= v_2.tint_array_length_0_0);
-  (simdgroup_store(m5, reinterpret_cast<device float*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, v_20, v_22) * 4u)), ulong((select(8u, v_21, v_22) * 1u)), ulong2(0ul), true));
-  (as_type<uint>(0));
-  simdgroup_float8x8 v_23 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  (simdgroup_load(v_23, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.in6) + 0u), ulong(32u), ulong2(0ul), true));
-  simdgroup_float8x8 const m6 = v_23;
-  uint const v_24 = as_type<uint>(0);
-  uint const v_25 = as_type<uint>(16);
-  bool const v_26 = (addsat(madsat(v_25, 7u, v_24), 8u) <= v_2.tint_array_length_0_0);
-  (simdgroup_store(m6, reinterpret_cast<device float*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, v_24, v_26) * 4u)), ulong((select(8u, v_25, v_26) * 1u)), ulong2(0ul), true));
+  (simdgroup_load(v_11, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.in5) + 0u), ulong(16u), ulong2(0ul), true));
+  simdgroup_float8x8 const m5 = v_11;
+  bool const v_12 = (120u <= v_2.tint_array_length_0_0);
+  (simdgroup_store(m5, reinterpret_cast<device float*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, 0u, v_12) * 4u)), ulong((select(8u, 16u, v_12) * 1u)), ulong2(0ul), true));
+  simdgroup_float8x8 v_13 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+  (simdgroup_load(v_13, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.in6) + 0u), ulong(32u), ulong2(0ul), true));
+  simdgroup_float8x8 const m6 = v_13;
+  bool const v_14 = (120u <= v_2.tint_array_length_0_0);
+  (simdgroup_store(m6, reinterpret_cast<device float*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, 0u, v_14) * 4u)), ulong((select(8u, 16u, v_14) * 1u)), ulong2(0ul), true));
 }
 
 [[max_total_threads_per_threadgroup(64)]]
-kernel void v_27(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_6* v_28 [[threadgroup(0)]], device tint_array<uint, 1>* out [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.in0=(&(*v_28).tint_symbol), .in1=(&(*v_28).tint_symbol_1), .in2=(&(*v_28).tint_symbol_2), .in3=(&(*v_28).tint_symbol_3), .in5=(&(*v_28).tint_symbol_4), .in6=(&(*v_28).tint_symbol_5), .out=out, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+kernel void v_15(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_6* v_16 [[threadgroup(0)]], device tint_array<uint, 1>* out [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.in0=(&(*v_16).tint_symbol), .in1=(&(*v_16).tint_symbol_1), .in2=(&(*v_16).tint_symbol_2), .in3=(&(*v_16).tint_symbol_3), .in5=(&(*v_16).tint_symbol_4), .in6=(&(*v_16).tint_symbol_5), .out=out, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   (main_inner(tint_local_index, tint_module_vars));
 }

@@ -31,7 +31,7 @@ void foo() {
 void main() {
   {
     int i = int(0);
-    for( ; (i < int(2)); i = asint((asuint(i) + asuint(int(1))))) {
+    for( ; (i < int(2)); i = asint((asuint(i) + 1u))) {
       foo();
     }
   }

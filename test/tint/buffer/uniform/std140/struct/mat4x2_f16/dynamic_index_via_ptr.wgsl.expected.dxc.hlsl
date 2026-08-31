@@ -12,7 +12,7 @@ cbuffer cbuffer_a : register(b0) {
 };
 static int counter = int(0);
 int i() {
-  counter = asint((asuint(counter) + asuint(int(1))));
+  counter = asint((asuint(counter) + 1u));
   return counter;
 }
 

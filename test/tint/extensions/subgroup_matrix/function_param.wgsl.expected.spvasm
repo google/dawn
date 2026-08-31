@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 190
+; Bound: 100
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -25,12 +25,6 @@
                OpMemberName %S_Nested 0 "s"
                OpName %S_Nested "S_Nested"
                OpName %m_nested_struct "m_nested_struct"
-               OpMemberName %umul_extended_result_u32 0 "lower"
-               OpMemberName %umul_extended_result_u32 1 "upper"
-               OpName %umul_extended_result_u32 "umul_extended_result_u32"
-               OpMemberName %add_carry_result_u32 0 "result"
-               OpMemberName %add_carry_result_u32 1 "carry"
-               OpName %add_carry_result_u32 "add_carry_result_u32"
                OpName %main "main"
                OpName %m_0 "m"
                OpName %m_array_0 "m_array"
@@ -62,26 +56,21 @@
    %S_Nested = OpTypeStruct %S
          %25 = OpTypeFunction %void %8 %_arr_8_uint_4 %_arr__arr_8_uint_4_uint_4 %S %S_Nested
 %_ptr_StorageBuffer__runtimearr_float = OpTypePointer StorageBuffer %_runtimearr_float
-        %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
-     %int_64 = OpConstant %int 64
-%umul_extended_result_u32 = OpTypeStruct %uint %uint
-     %uint_7 = OpConstant %uint 7
+   %uint_456 = OpConstant %uint 456
        %bool = OpTypeBool
-%uint_4294967295 = OpConstant %uint 4294967295
-%add_carry_result_u32 = OpTypeStruct %uint %uint
+    %uint_64 = OpConstant %uint 64
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
-        %167 = OpTypeFunction %void
+         %77 = OpTypeFunction %void
 %_ptr_Function_8 = OpTypePointer Function %8
-        %171 = OpConstantNull %8
+         %81 = OpConstantNull %8
 %_ptr_Function__arr_8_uint_4 = OpTypePointer Function %_arr_8_uint_4
-        %174 = OpConstantNull %_arr_8_uint_4
+         %84 = OpConstantNull %_arr_8_uint_4
 %_ptr_Function__arr__arr_8_uint_4_uint_4 = OpTypePointer Function %_arr__arr_8_uint_4_uint_4
-        %177 = OpConstantNull %_arr__arr_8_uint_4_uint_4
+         %87 = OpConstantNull %_arr__arr_8_uint_4_uint_4
 %_ptr_Function_S = OpTypePointer Function %S
-        %180 = OpConstantNull %S
+         %90 = OpConstantNull %S
 %_ptr_Function_S_Nested = OpTypePointer Function %S_Nested
-        %183 = OpConstantNull %S_Nested
+         %93 = OpConstantNull %S_Nested
         %foo = OpFunction %void None %25
           %m = OpFunctionParameter %8
     %m_array = OpFunctionParameter %_arr_8_uint_4
@@ -91,147 +80,62 @@
          %26 = OpLabel
          %27 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
          %29 = OpArrayLength %uint %1 0
-         %30 = OpBitcast %uint %int_0
-         %33 = OpBitcast %uint %int_64
-         %35 = OpUMulExtended %umul_extended_result_u32 %33 %uint_7
-         %38 = OpCompositeExtract %uint %35 0
-         %39 = OpCompositeExtract %uint %35 1
-         %40 = OpIEqual %bool %39 %uint_0
-         %42 = OpSelect %uint %40 %38 %uint_4294967295
-         %44 = OpIAddCarry %add_carry_result_u32 %30 %42
-         %46 = OpCompositeExtract %uint %44 0
-         %47 = OpCompositeExtract %uint %44 1
-         %48 = OpIEqual %bool %47 %uint_0
-         %49 = OpSelect %uint %48 %46 %uint_4294967295
-         %50 = OpIAddCarry %add_carry_result_u32 %49 %uint_8
-         %51 = OpCompositeExtract %uint %50 0
-         %52 = OpCompositeExtract %uint %50 1
-         %53 = OpIEqual %bool %52 %uint_0
-         %54 = OpSelect %uint %53 %51 %uint_4294967295
-         %55 = OpULessThanEqual %bool %54 %29
-         %56 = OpSelect %uint %55 %30 %uint_0
-         %57 = OpSelect %uint %55 %33 %uint_8
-         %58 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %59 = OpAccessChain %_ptr_StorageBuffer_float %58 %56
-               OpCooperativeMatrixStoreKHR %59 %m %uint_0 %57 NonPrivatePointer
-         %62 = OpCompositeExtract %8 %m_array 0
-         %63 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %64 = OpArrayLength %uint %1 0
-         %65 = OpBitcast %uint %int_0
-         %66 = OpBitcast %uint %int_64
-         %67 = OpUMulExtended %umul_extended_result_u32 %66 %uint_7
-         %68 = OpCompositeExtract %uint %67 0
-         %69 = OpCompositeExtract %uint %67 1
-         %70 = OpIEqual %bool %69 %uint_0
-         %71 = OpSelect %uint %70 %68 %uint_4294967295
-         %72 = OpIAddCarry %add_carry_result_u32 %65 %71
-         %73 = OpCompositeExtract %uint %72 0
-         %74 = OpCompositeExtract %uint %72 1
-         %75 = OpIEqual %bool %74 %uint_0
-         %76 = OpSelect %uint %75 %73 %uint_4294967295
-         %77 = OpIAddCarry %add_carry_result_u32 %76 %uint_8
-         %78 = OpCompositeExtract %uint %77 0
-         %79 = OpCompositeExtract %uint %77 1
-         %80 = OpIEqual %bool %79 %uint_0
-         %81 = OpSelect %uint %80 %78 %uint_4294967295
-         %82 = OpULessThanEqual %bool %81 %64
-         %83 = OpSelect %uint %82 %65 %uint_0
-         %84 = OpSelect %uint %82 %66 %uint_8
-         %85 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %86 = OpAccessChain %_ptr_StorageBuffer_float %85 %83
-               OpCooperativeMatrixStoreKHR %86 %62 %uint_0 %84 NonPrivatePointer
-         %88 = OpCompositeExtract %8 %m_nested_array 1 2
-         %89 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %90 = OpArrayLength %uint %1 0
-         %91 = OpBitcast %uint %int_0
-         %92 = OpBitcast %uint %int_64
-         %93 = OpUMulExtended %umul_extended_result_u32 %92 %uint_7
-         %94 = OpCompositeExtract %uint %93 0
-         %95 = OpCompositeExtract %uint %93 1
-         %96 = OpIEqual %bool %95 %uint_0
-         %97 = OpSelect %uint %96 %94 %uint_4294967295
-         %98 = OpIAddCarry %add_carry_result_u32 %91 %97
-         %99 = OpCompositeExtract %uint %98 0
-        %100 = OpCompositeExtract %uint %98 1
-        %101 = OpIEqual %bool %100 %uint_0
-        %102 = OpSelect %uint %101 %99 %uint_4294967295
-        %103 = OpIAddCarry %add_carry_result_u32 %102 %uint_8
-        %104 = OpCompositeExtract %uint %103 0
-        %105 = OpCompositeExtract %uint %103 1
-        %106 = OpIEqual %bool %105 %uint_0
-        %107 = OpSelect %uint %106 %104 %uint_4294967295
-        %108 = OpULessThanEqual %bool %107 %90
-        %109 = OpSelect %uint %108 %91 %uint_0
-        %110 = OpSelect %uint %108 %92 %uint_8
-        %111 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-        %112 = OpAccessChain %_ptr_StorageBuffer_float %111 %109
-               OpCooperativeMatrixStoreKHR %112 %88 %uint_0 %110 NonPrivatePointer
-        %114 = OpCompositeExtract %8 %m_struct 0
-        %115 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-        %116 = OpArrayLength %uint %1 0
-        %117 = OpBitcast %uint %int_0
-        %118 = OpBitcast %uint %int_64
-        %119 = OpUMulExtended %umul_extended_result_u32 %118 %uint_7
-        %120 = OpCompositeExtract %uint %119 0
-        %121 = OpCompositeExtract %uint %119 1
-        %122 = OpIEqual %bool %121 %uint_0
-        %123 = OpSelect %uint %122 %120 %uint_4294967295
-        %124 = OpIAddCarry %add_carry_result_u32 %117 %123
-        %125 = OpCompositeExtract %uint %124 0
-        %126 = OpCompositeExtract %uint %124 1
-        %127 = OpIEqual %bool %126 %uint_0
-        %128 = OpSelect %uint %127 %125 %uint_4294967295
-        %129 = OpIAddCarry %add_carry_result_u32 %128 %uint_8
-        %130 = OpCompositeExtract %uint %129 0
-        %131 = OpCompositeExtract %uint %129 1
-        %132 = OpIEqual %bool %131 %uint_0
-        %133 = OpSelect %uint %132 %130 %uint_4294967295
-        %134 = OpULessThanEqual %bool %133 %116
-        %135 = OpSelect %uint %134 %117 %uint_0
-        %136 = OpSelect %uint %134 %118 %uint_8
-        %137 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-        %138 = OpAccessChain %_ptr_StorageBuffer_float %137 %135
-               OpCooperativeMatrixStoreKHR %138 %114 %uint_0 %136 NonPrivatePointer
-        %140 = OpCompositeExtract %20 %m_nested_struct 0 1
-        %141 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-        %142 = OpArrayLength %uint %1 0
-        %143 = OpBitcast %uint %int_0
-        %144 = OpBitcast %uint %int_64
-        %145 = OpUMulExtended %umul_extended_result_u32 %144 %uint_7
-        %146 = OpCompositeExtract %uint %145 0
-        %147 = OpCompositeExtract %uint %145 1
-        %148 = OpIEqual %bool %147 %uint_0
-        %149 = OpSelect %uint %148 %146 %uint_4294967295
-        %150 = OpIAddCarry %add_carry_result_u32 %143 %149
-        %151 = OpCompositeExtract %uint %150 0
-        %152 = OpCompositeExtract %uint %150 1
-        %153 = OpIEqual %bool %152 %uint_0
-        %154 = OpSelect %uint %153 %151 %uint_4294967295
-        %155 = OpIAddCarry %add_carry_result_u32 %154 %uint_8
-        %156 = OpCompositeExtract %uint %155 0
-        %157 = OpCompositeExtract %uint %155 1
-        %158 = OpIEqual %bool %157 %uint_0
-        %159 = OpSelect %uint %158 %156 %uint_4294967295
-        %160 = OpULessThanEqual %bool %159 %142
-        %161 = OpSelect %uint %160 %143 %uint_0
-        %162 = OpSelect %uint %160 %144 %uint_8
-        %163 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-        %164 = OpAccessChain %_ptr_StorageBuffer_float %163 %161
-               OpCooperativeMatrixStoreKHR %164 %140 %uint_0 %162 NonPrivatePointer
+         %30 = OpULessThanEqual %bool %uint_456 %29
+         %33 = OpSelect %uint %30 %uint_0 %uint_0
+         %34 = OpSelect %uint %30 %uint_64 %uint_8
+         %36 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %37 = OpAccessChain %_ptr_StorageBuffer_float %36 %33
+               OpCooperativeMatrixStoreKHR %37 %m %uint_0 %34 NonPrivatePointer
+         %40 = OpCompositeExtract %8 %m_array 0
+         %41 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %42 = OpArrayLength %uint %1 0
+         %43 = OpULessThanEqual %bool %uint_456 %42
+         %44 = OpSelect %uint %43 %uint_0 %uint_0
+         %45 = OpSelect %uint %43 %uint_64 %uint_8
+         %46 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %47 = OpAccessChain %_ptr_StorageBuffer_float %46 %44
+               OpCooperativeMatrixStoreKHR %47 %40 %uint_0 %45 NonPrivatePointer
+         %49 = OpCompositeExtract %8 %m_nested_array 1 2
+         %50 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %51 = OpArrayLength %uint %1 0
+         %52 = OpULessThanEqual %bool %uint_456 %51
+         %53 = OpSelect %uint %52 %uint_0 %uint_0
+         %54 = OpSelect %uint %52 %uint_64 %uint_8
+         %55 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %56 = OpAccessChain %_ptr_StorageBuffer_float %55 %53
+               OpCooperativeMatrixStoreKHR %56 %49 %uint_0 %54 NonPrivatePointer
+         %58 = OpCompositeExtract %8 %m_struct 0
+         %59 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %60 = OpArrayLength %uint %1 0
+         %61 = OpULessThanEqual %bool %uint_456 %60
+         %62 = OpSelect %uint %61 %uint_0 %uint_0
+         %63 = OpSelect %uint %61 %uint_64 %uint_8
+         %64 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %65 = OpAccessChain %_ptr_StorageBuffer_float %64 %62
+               OpCooperativeMatrixStoreKHR %65 %58 %uint_0 %63 NonPrivatePointer
+         %67 = OpCompositeExtract %20 %m_nested_struct 0 1
+         %68 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %69 = OpArrayLength %uint %1 0
+         %70 = OpULessThanEqual %bool %uint_456 %69
+         %71 = OpSelect %uint %70 %uint_0 %uint_0
+         %72 = OpSelect %uint %70 %uint_64 %uint_8
+         %73 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %74 = OpAccessChain %_ptr_StorageBuffer_float %73 %71
+               OpCooperativeMatrixStoreKHR %74 %67 %uint_0 %72 NonPrivatePointer
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %167
-        %168 = OpLabel
-        %m_0 = OpVariable %_ptr_Function_8 Function %171
-  %m_array_0 = OpVariable %_ptr_Function__arr_8_uint_4 Function %174
-%m_nested_array_0 = OpVariable %_ptr_Function__arr__arr_8_uint_4_uint_4 Function %177
- %m_struct_0 = OpVariable %_ptr_Function_S Function %180
-%m_nested_struct_0 = OpVariable %_ptr_Function_S_Nested Function %183
-        %184 = OpLoad %8 %m_0 None
-        %185 = OpLoad %_arr_8_uint_4 %m_array_0 None
-        %186 = OpLoad %_arr__arr_8_uint_4_uint_4 %m_nested_array_0 None
-        %187 = OpLoad %S %m_struct_0 None
-        %188 = OpLoad %S_Nested %m_nested_struct_0 None
-        %189 = OpFunctionCall %void %foo %184 %185 %186 %187 %188
+       %main = OpFunction %void None %77
+         %78 = OpLabel
+        %m_0 = OpVariable %_ptr_Function_8 Function %81
+  %m_array_0 = OpVariable %_ptr_Function__arr_8_uint_4 Function %84
+%m_nested_array_0 = OpVariable %_ptr_Function__arr__arr_8_uint_4_uint_4 Function %87
+ %m_struct_0 = OpVariable %_ptr_Function_S Function %90
+%m_nested_struct_0 = OpVariable %_ptr_Function_S_Nested Function %93
+         %94 = OpLoad %8 %m_0 None
+         %95 = OpLoad %_arr_8_uint_4 %m_array_0 None
+         %96 = OpLoad %_arr__arr_8_uint_4_uint_4 %m_nested_array_0 None
+         %97 = OpLoad %S %m_struct_0 None
+         %98 = OpLoad %S_Nested %m_nested_struct_0 None
+         %99 = OpFunctionCall %void %foo %94 %95 %96 %97 %98
                OpReturn
                OpFunctionEnd

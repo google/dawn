@@ -2611,10 +2611,9 @@ int g() {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   int arr[4] = int[4](0, 0, 0, 0);
-  uint v = uint(f());
-  uint v_1 = min(uint(int((v + uint(1)))), 3u);
+  uint v = min(uint(int((uint(f()) + 1u))), 3u);
   int y = g();
-  int x = arr[v_1];
+  int x = arr[v];
 }
 )");
 }

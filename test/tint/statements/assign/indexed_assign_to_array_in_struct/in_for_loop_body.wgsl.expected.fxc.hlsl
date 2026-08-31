@@ -16,7 +16,7 @@ void main() {
   OuterS s1 = (OuterS)0;
   {
     int i = int(0);
-    for( ; (i < int(4)); i = asint((asuint(i) + asuint(int(1))))) {
+    for( ; (i < int(4)); i = asint((asuint(i) + 1u))) {
       uint v_1 = uniforms[0u].x;
       InnerS tint_array_copy[8] = s1.a1;
       InnerS v_2 = v;

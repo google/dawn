@@ -22,12 +22,12 @@ struct S {
 };
 
 int foo(tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.counter) = as_type<int>((as_type<uint>((*tint_module_vars.counter)) + as_type<uint>(1)));
+  (*tint_module_vars.counter) = as_type<int>((as_type<uint>((*tint_module_vars.counter)) + 1u));
   return (*tint_module_vars.counter);
 }
 
 int bar(tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.counter) = as_type<int>((as_type<uint>((*tint_module_vars.counter)) + as_type<uint>(2)));
+  (*tint_module_vars.counter) = as_type<int>((as_type<uint>((*tint_module_vars.counter)) + 2u));
   return (*tint_module_vars.counter);
 }
 
@@ -39,6 +39,6 @@ kernel void v() {
   thread S* const p = (&x);
   thread int4* const v_1 = (&(*p).a[min(uint(foo(tint_module_vars)), 3u)]);
   int const v_2 = bar(tint_module_vars);
-  int const v_3 = as_type<int>((as_type<uint>((*v_1)[min(uint(v_2), 3u)]) + as_type<uint>(5)));
+  int const v_3 = as_type<int>((as_type<uint>((*v_1)[min(uint(v_2), 3u)]) + 5u));
   (*v_1)[min(uint(v_2), 3u)] = v_3;
 }

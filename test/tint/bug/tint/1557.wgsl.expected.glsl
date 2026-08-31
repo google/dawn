@@ -18,8 +18,7 @@ void g() {
       if ((j >= 1)) {
         break;
       }
-      uint v_1 = uint(j);
-      j = int((v_1 + uint(1)));
+      j = int((uint(j) + 1u));
       int k = f();
       {
         uint tint_low_inc = (tint_loop_idx.x - 1u);
@@ -32,12 +31,12 @@ void g() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uvec4 v_2 = v.inner[0u];
-  switch(int(v_2.x)) {
+  uvec4 v_1 = v.inner[0u];
+  switch(int(v_1.x)) {
     case 0:
     {
-      uvec4 v_3 = v.inner[0u];
-      switch(int(v_3.x)) {
+      uvec4 v_2 = v.inner[0u];
+      switch(int(v_2.x)) {
         case 0:
         {
           break;

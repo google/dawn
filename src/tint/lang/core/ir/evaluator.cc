@@ -363,13 +363,23 @@ Evaluator::EvalResult Evaluator::EvalCoreBinary(core::BinaryOp op,
 }
 
 Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* c) {
-    intrinsic::Context context{c->TableData(), b_.ir.Types(), b_.ir.symbols};
+    return EvalCoreBuiltinCall(c->Func(), c->Result()->Type(), c->Args(),
+                               c->ExplicitTemplateParams(), SourceOf(c));
+}
+
+Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(
+    core::BuiltinFn fn,
+    const core::type::Type* result_ty,
+    VectorRef<core::ir::Value*> args,
+    VectorRef<core::ir::TemplateParameter> explicit_params,
+    const Source& source) {
+    intrinsic::Context context{core::intrinsic::Dialect::kData, b_.ir.Types(), b_.ir.symbols};
 
     Vector<const core::type::Type*, 0> arg_types;
-    arg_types.Reserve(c->Args().size());
-    Vector<const core::constant::Value*, 0> args;
-    args.Reserve(c->Args().size());
-    for (auto* arg : c->Args()) {
+    arg_types.Reserve(args.Length());
+    Vector<const core::constant::Value*, 0> arg_values;
+    arg_values.Reserve(arg_values.Length());
+    for (auto* arg : args) {
         arg_types.Push(arg->Type());
 
         TINT_CHECK_RESULT_UNWRAP(val, EvalValue(arg));
@@ -377,14 +387,15 @@ Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* 
         if (!val) {
             return nullptr;
         }
-        args.Push(val);
+        arg_values.Push(val);
     }
 
-    auto overload = core::intrinsic::LookupFn(context, c->FriendlyName().c_str(), c->FuncId(),
-                                              c->ExplicitTemplateParams(), arg_types,
-                                              core::EvaluationStage::kOverride);
+    auto eval_stage =
+        eval_override_ ? core::EvaluationStage::kOverride : core::EvaluationStage::kConstant;
+    auto overload = core::intrinsic::LookupFn(context, core::str(fn), static_cast<size_t>(fn),
+                                              explicit_params, arg_types, eval_stage);
     if (overload != Success) {
-        AddError(SourceOf(c)) << overload.Failure();
+        AddError(source) << overload.Failure();
         return Failure();
     }
 
@@ -396,7 +407,7 @@ Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* 
         return nullptr;
     }
 
-    auto r = (const_eval_.*const_eval_fn)(c->Result()->Type(), args, SourceOf(c));
+    auto r = (const_eval_.*const_eval_fn)(result_ty, arg_values, source);
     if (r != Success) {
         return Failure();
     }

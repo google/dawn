@@ -178,10 +178,9 @@ $B1: {  # root
 %foo = func():vec2<u32> {
   $B2: {
     %3:texture_2d<f32> = load %v
-    %4:i32 = bitcast<i32> 3u
-    %5:vec2<i32> = glsl.textureSize %3, %4
-    %6:vec2<u32> = bitcast<vec2<u32>> %5
-    ret %6
+    %4:vec2<i32> = glsl.textureSize %3, 3i
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
+    ret %5
   }
 }
 )";

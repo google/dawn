@@ -30,6 +30,7 @@
 %_ptr_Function_uint = OpTypePointer Function %uint
      %uint_0 = OpConstant %uint 0
      %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
        %main = OpFunction %void None %3
           %4 = OpLabel
           %j = OpVariable %_ptr_Function_int Function
@@ -92,9 +93,8 @@
                OpStore %50 %49 None
          %51 = OpLoad %int %i None
          %52 = OpBitcast %uint %51
-         %53 = OpBitcast %uint %int_2
-         %54 = OpIAdd %uint %52 %53
-         %55 = OpBitcast %int %54
+         %53 = OpIAdd %uint %52 %uint_2
+         %55 = OpBitcast %int %53
                OpStore %i %55 None
                OpBranch %12
          %13 = OpLabel

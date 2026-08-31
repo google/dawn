@@ -61,17 +61,11 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   }
   (threadgroup_barrier(mem_flags::mem_threadgroup));
   simdgroup_float8x8 const m = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  (as_type<uint>(0));
   (simdgroup_store(m, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out0) + 0u), ulong(16u), ulong2(0ul), false));
-  (as_type<uint>(0));
   (simdgroup_store(m, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out1) + 0u), ulong(32u), ulong2(0ul), false));
-  (as_type<uint>(0));
   (simdgroup_store(m, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out2) + 0u), ulong(64u), ulong2(0ul), false));
-  (as_type<uint>(0));
   (simdgroup_store(m, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out3) + 0u), ulong(64u), ulong2(0ul), false));
-  (as_type<uint>(0));
   (simdgroup_store(m, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out5) + 0u), ulong(16u), ulong2(0ul), false));
-  (as_type<uint>(0));
   (simdgroup_store(m, reinterpret_cast<threadgroup float*>(reinterpret_cast<threadgroup char*>(tint_module_vars.out6) + 0u), ulong(32u), ulong2(0ul), false));
 }
 

@@ -33,7 +33,7 @@ void main() {
       v3b[i] = true;
       v4b[i] = true;
       {
-        i = asint((asuint(i) + asuint(int(1))));
+        i = asint((asuint(i) + 1u));
       }
     }
   }

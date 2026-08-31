@@ -565,17 +565,19 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastU32ToVec2U16) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, Sign) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* arg = b.FunctionParam("arg", ty.f32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Call(ty.f32(), core::BuiltinFn::kSign, -1_f));
+        b.Let("a", b.Call(ty.f32(), core::BuiltinFn::kSign, arg));
         b.Return(func);
     });
 
     auto* src = R"(
-%foo = @fragment func():void {
+%foo = func(%arg:f32):void {
   $B1: {
-    %2:f32 = sign -1.0f
-    %a:f32 = let %2
+    %3:f32 = sign %arg
+    %a:f32 = let %3
     ret
   }
 }
@@ -583,11 +585,11 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Sign) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = @fragment func():void {
+%foo = func(%arg:f32):void {
   $B1: {
-    %2:i32 = hlsl.sign -1.0f
-    %3:f32 = convert %2
-    %a:f32 = let %3
+    %3:i32 = hlsl.sign %arg
+    %4:f32 = convert %3
+    %a:f32 = let %4
     ret
   }
 }
@@ -598,18 +600,19 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Sign) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, SignVec) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* arg = b.FunctionParam("arg", ty.vec3i());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        b.Let("a",
-              b.Call(ty.vec3i(), core::BuiltinFn::kSign, b.Composite(ty.vec3i(), 1_i, 2_i, 3_i)));
+        b.Let("a", b.Call(ty.vec3i(), core::BuiltinFn::kSign, arg));
         b.Return(func);
     });
 
     auto* src = R"(
-%foo = @fragment func():void {
+%foo = func(%arg:vec3<i32>):void {
   $B1: {
-    %2:vec3<i32> = sign vec3<i32>(1i, 2i, 3i)
-    %a:vec3<i32> = let %2
+    %3:vec3<i32> = sign %arg
+    %a:vec3<i32> = let %3
     ret
   }
 }
@@ -617,10 +620,10 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SignVec) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = @fragment func():void {
+%foo = func(%arg:vec3<i32>):void {
   $B1: {
-    %2:vec3<i32> = hlsl.sign vec3<i32>(1i, 2i, 3i)
-    %a:vec3<i32> = let %2
+    %3:vec3<i32> = hlsl.sign %arg
+    %a:vec3<i32> = let %3
     ret
   }
 }

@@ -175,6 +175,15 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
             func_params.Push(s);
         }
 
+        core::ir::FunctionParam* bias = nullptr;
+        for (const auto& arg : params.args) {
+            if (std::string(arg.name) == "bias") {
+                bias = b.FunctionParam("bias", ty.f32());
+                func_params.Push(bias);
+                break;
+            }
+        }
+
         auto* func = b.Function("foo", result_ty);
         func->SetParams(std::move(func_params));
 
@@ -199,8 +208,12 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
                 if (arg.width > 1) {
                     value = b.Splat(ty.vec(value->Type(), arg.width), value);
                 }
-                args.Push(value);
-                mod.SetName(value, arg.name);
+                if (std::string(arg.name) == "bias") {
+                    args.Push(bias);
+                } else {
+                    args.Push(value);
+                    mod.SetName(value, arg.name);
+                }
             }
             auto* result = b.Call(result_ty, function, std::move(args));
             if (result_ty->Is<core::type::Void>()) {
@@ -222,21 +235,39 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
 
         auto* eb = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
         b.Append(eb->Block(), [&] {
+            core::ir::Instruction* bias_load = nullptr;
+            if (bias) {
+                auto* var_bias = b.Var("vbias", ty.ptr(core::AddressSpace::kFunction, ty.f32()));
+                bias_load = b.Load(var_bias);
+            }
             auto* m = b.Load(var_t);
 
             if (s) {
                 auto* n = b.Load(var_s);
 
+                Vector<core::ir::Value*, 3> call_args;
+                call_args.Push(m->Result());
+                call_args.Push(n->Result());
+                if (bias_load) {
+                    call_args.Push(bias_load->Result());
+                }
                 if (function == core::BuiltinFn::kTextureStore) {
-                    b.Call(func, m, n);
+                    b.CallWithResult(b.InstructionResult(func->ReturnType()), func, call_args);
                 } else {
-                    b.Let("r", b.Call(func, m, n));
+                    b.Let("r", b.CallWithResult(b.InstructionResult(func->ReturnType()), func,
+                                                call_args));
                 }
             } else {
+                Vector<core::ir::Value*, 2> call_args;
+                call_args.Push(m->Result());
+                if (bias_load) {
+                    call_args.Push(bias_load->Result());
+                }
                 if (function == core::BuiltinFn::kTextureStore) {
-                    b.Call(func, m);
+                    b.CallWithResult(b.InstructionResult(func->ReturnType()), func, call_args);
                 } else {
-                    b.Let("r", b.Call(func, m));
+                    b.Let("r", b.CallWithResult(b.InstructionResult(func->ReturnType()), func,
+                                                call_args));
                 }
             }
             b.Return(eb);
@@ -465,9 +496,9 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 2, kF32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
             {
-                "OpExtInst %float %15 NClamp %bias %float_n16 %float_15_9899998",
+                "OpExtInst %float %16 NClamp %bias %float_n16 %float_15_9899998",
                 "OpSampledImage %20 %t %s",
-                "OpImageSampleImplicitLod %v4float %19 %coords Bias %14",
+                "OpImageSampleImplicitLod %v4float %19 %coords Bias %15",
             },
         },
         TextureBuiltinTestCase{
@@ -477,9 +508,9 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 2, kF32}, {"bias", 1, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
             {
-                "OpExtInst %float %15 NClamp %bias %float_n16 %float_15_9899998",
+                "OpExtInst %float %16 NClamp %bias %float_n16 %float_15_9899998",
                 "OpSampledImage %20 %t %s",
-                "OpImageSampleImplicitLod %v4float %19 %coords Bias|ConstOffset %14 %offset",
+                "OpImageSampleImplicitLod %v4float %19 %coords Bias|ConstOffset %15 %offset",
             },
         },
         TextureBuiltinTestCase{
@@ -489,11 +520,11 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
             {
-                "OpExtInst %float %15 NClamp %bias %float_n16 %float_15_9899998",
+                "OpExtInst %float %16 NClamp %bias %float_n16 %float_15_9899998",
                 "OpSampledImage %20 %t %s",
                 "OpConvertSToF %float %array_idx",
                 "OpCompositeConstruct %v3float %coords %21",
-                "OpImageSampleImplicitLod %v4float %19 %25 Bias %14",
+                "OpImageSampleImplicitLod %v4float %19 %25 Bias %15",
             },
         },
         TextureBuiltinTestCase{
@@ -503,11 +534,11 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"bias", 1, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
             {
-                "OpExtInst %float %15 NClamp %bias %float_n16 %float_15_9899998",
+                "OpExtInst %float %16 NClamp %bias %float_n16 %float_15_9899998",
                 "OpSampledImage %20 %t %s",
                 "OpConvertSToF %float %array_idx",
                 "OpCompositeConstruct %v3float %coords %21",
-                "OpImageSampleImplicitLod %v4float %19 %25 Bias|ConstOffset %14 %offset",
+                "OpImageSampleImplicitLod %v4float %19 %25 Bias|ConstOffset %15 %offset",
             },
         },
         TextureBuiltinTestCase{
@@ -517,9 +548,9 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 3, kF32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
             {
-                "OpExtInst %float %15 NClamp %bias %float_n16 %float_15_9899998",
+                "OpExtInst %float %16 NClamp %bias %float_n16 %float_15_9899998",
                 "OpSampledImage %20 %t %s",
-                "OpImageSampleImplicitLod %v4float %19 %coords Bias %14",
+                "OpImageSampleImplicitLod %v4float %19 %coords Bias %15",
             },
         },
         TextureBuiltinTestCase{
@@ -529,9 +560,9 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 3, kF32}, {"bias", 1, kF32}, {"offset", 3, kI32}},
             {"result", 4, kF32},
             {
-                "OpExtInst %float %15 NClamp %bias %float_n16 %float_15_9899998",
+                "OpExtInst %float %16 NClamp %bias %float_n16 %float_15_9899998",
                 "OpSampledImage %20 %t %s",
-                "OpImageSampleImplicitLod %v4float %19 %coords Bias|ConstOffset %14 %offset",
+                "OpImageSampleImplicitLod %v4float %19 %coords Bias|ConstOffset %15 %offset",
             },
         },
         TextureBuiltinTestCase{
@@ -541,9 +572,9 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 3, kF32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
             {
-                "OpExtInst %float %15 NClamp %bias %float_n16 %float_15_9899998",
+                "OpExtInst %float %16 NClamp %bias %float_n16 %float_15_9899998",
                 "OpSampledImage %20 %t %s",
-                "OpImageSampleImplicitLod %v4float %19 %coords Bias %14",
+                "OpImageSampleImplicitLod %v4float %19 %coords Bias %15",
             },
         },
         TextureBuiltinTestCase{
@@ -553,11 +584,11 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 3, kF32}, {"array_idx", 1, kI32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
             {
-                "OpExtInst %float %15 NClamp %bias %float_n16 %float_15_9899998",
+                "OpExtInst %float %16 NClamp %bias %float_n16 %float_15_9899998",
                 "OpSampledImage %20 %t %s",
                 "OpConvertSToF %float %array_idx",
                 "OpCompositeConstruct %v4float %coords %21",
-                "OpImageSampleImplicitLod %v4float %19 %24 Bias %14",
+                "OpImageSampleImplicitLod %v4float %19 %24 Bias %15",
             },
         }),
     PrintCase);

@@ -30,7 +30,7 @@
 namespace tint::spirv::reader {
 namespace {
 
-std::string Preamble() {
+std::string Preamble(const std::string& names = "") {
     return R"(
   OpCapability Shader
   OpCapability Float16
@@ -38,7 +38,8 @@ std::string Preamble() {
   OpMemoryModel Logical GLSL450
   OpEntryPoint GLCompute %100 "main"
   OpExecutionMode %100 LocalSize 1 1 1
-
+)" + names +
+           R"(
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
 
@@ -78,12 +79,16 @@ std::string Preamble() {
   %modf_result_type = OpTypeStruct %float %float
   %modf_v2_result_type = OpTypeStruct %v2float %v2float
   %ptr_function_modf_result_type = OpTypePointer Function %modf_result_type
+  %ptr_function_modf_v2_result_type = OpTypePointer Function %modf_v2_result_type
 
   %frexp_result_type_unsigned = OpTypeStruct %float %uint
   %frexp_result_type_signed = OpTypeStruct %float %int
   %frexp_v2_result_type_unsigned = OpTypeStruct %v2float %v2uint
   %frexp_v2_result_type_signed = OpTypeStruct %v2float %v2int
   %ptr_function_frexp_result_type_unsigned = OpTypePointer Function %frexp_result_type_unsigned
+  %ptr_function_frexp_result_type_signed = OpTypePointer Function %frexp_result_type_signed
+  %ptr_function_frexp_v2_result_type_unsigned = OpTypePointer Function %frexp_v2_result_type_unsigned
+  %ptr_function_frexp_v2_result_type_signed = OpTypePointer Function %frexp_v2_result_type_signed
 
   %v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
   %v2uint_20_10 = OpConstantComposite %v2uint %uint_20 %uint_10
@@ -111,8 +116,49 @@ std::string Preamble() {
   %mat3v3half_50_60_70 = OpConstantComposite %mat3v3half %v3half_50_60_70 %v3half_50_60_70 %v3half_50_60_70
   %mat4v4half_50_50_50_50 = OpConstantComposite %mat4v4half %v4half_50_50_50_50 %v4half_50_50_50_50 %v4half_50_50_50_50 %v4half_50_50_50_50
 
-  %100 = OpFunction %void None %voidfn
-  %entry = OpLabel
+  %fn_float_float = OpTypeFunction %float %float
+  %fn_float_v2float = OpTypeFunction %float %v2float
+  %fn_float_v3float = OpTypeFunction %float %v3float
+  %fn_float_v4float = OpTypeFunction %float %v4float
+  %fn_v2float_v2float = OpTypeFunction %v2float %v2float
+  %fn_v3float_v3float = OpTypeFunction %v3float %v3float
+  %fn_v4float_v4float = OpTypeFunction %v4float %v4float
+  %fn_int_int = OpTypeFunction %int %int
+  %fn_v2int_v2int = OpTypeFunction %v2int %v2int
+  %fn_uint_uint = OpTypeFunction %uint %uint
+  %fn_v2uint_v2uint = OpTypeFunction %v2uint %v2uint
+
+  %fn_float_float_float = OpTypeFunction %float %float %float
+  %fn_float_v2float_v2float = OpTypeFunction %float %v2float %v2float
+  %fn_v2float_v2float_v2float = OpTypeFunction %v2float %v2float %v2float
+  %fn_v3float_v3float_v3float = OpTypeFunction %v3float %v3float %v3float
+  %fn_float_float_int = OpTypeFunction %float %float %int
+  %fn_v2float_v2float_v2int = OpTypeFunction %v2float %v2float %v2int
+
+  %fn_float_float_float_float = OpTypeFunction %float %float %float %float
+  %fn_v2float_v2float_v2float_v2float = OpTypeFunction %v2float %v2float %v2float %v2float
+
+  %fn_uint_v2float = OpTypeFunction %uint %v2float
+  %fn_uint_v4float = OpTypeFunction %uint %v4float
+  %fn_v2float_uint = OpTypeFunction %v2float %uint
+  %fn_v4float_uint = OpTypeFunction %v4float %uint
+
+  %fn_float_mat2v2float = OpTypeFunction %float %mat2v2float
+  %fn_float_mat3v3float = OpTypeFunction %float %mat3v3float
+  %fn_float_mat4v4float = OpTypeFunction %float %mat4v4float
+  %fn_half_mat2v2half = OpTypeFunction %half %mat2v2half
+  %fn_half_mat3v3half = OpTypeFunction %half %mat3v3half
+  %fn_half_mat4v4half = OpTypeFunction %half %mat4v4half
+
+  %fn_modf_float = OpTypeFunction %modf_result_type %float
+  %fn_modf_v2float = OpTypeFunction %modf_v2_result_type %v2float
+  %fn_frexp_u_float = OpTypeFunction %frexp_result_type_unsigned %float
+  %fn_frexp_s_float = OpTypeFunction %frexp_result_type_signed %float
+  %fn_frexp_u_v2float = OpTypeFunction %frexp_v2_result_type_unsigned %v2float
+  %fn_frexp_s_v2float = OpTypeFunction %frexp_v2_result_type_signed %v2float
+  %fn_void_float = OpTypeFunction %void %float
+  %fn_void_v2float = OpTypeFunction %void %v2float
+  %fn_void_rectify = OpTypeFunction %void %int %v2int %uint %v2uint
 )";
 }
 
@@ -148,268 +194,412 @@ using SpirvReaderTest_GlslStd450_Inting_Inting = SpirvReaderTestWithParam<GlslSt
 using SpirvReaderTest_GlslStd450_Uinting_Uinting = SpirvReaderTestWithParam<GlslStd450Case>;
 
 TEST_P(SpirvReaderTest_GlslStd450_Float_Floating, Scalar) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %float None %fn_float_float
+     %x = OpFunctionParameter %float
+     %foo_entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %float_50
-     %2 = OpCopyObject %float %1
+                  GetParam().opcode + R"( %x
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %float %foo %float_50
      OpReturn
      OpFunctionEnd
   )",
 
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:f32):f32 {
   $B1: {
-    %2:f32 = )" + GetParam().wgsl_func +
-                  R"( 50.0f
-    %3:f32 = let %2
-    ret
+    %3:f32 = )" + GetParam().wgsl_func +
+                  R"( %x
+    ret %3
   }
 }
 )");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Float_Floating, Vector) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %float None %fn_float_v2float
+     %x = OpFunctionParameter %v2float
+     %foo_entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %v2float_50_60
-     %2 = OpCopyObject %float %1
+                  GetParam().opcode + R"( %x
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %float %foo %v2float_50_60
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec2<f32>):f32 {
   $B1: {
-    %2:f32 = )" + GetParam().wgsl_func +
-                  R"( vec2<f32>(50.0f, 60.0f)
-    %3:f32 = let %2
-    ret
+    %3:f32 = )" + GetParam().wgsl_func +
+                  R"( %x
+    ret %3
   }
 }
 )");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Float_FloatingFloating, Scalar) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+  OpName %y "y"
+)") + R"(
+     %foo = OpFunction %float None %fn_float_float_float
+     %x = OpFunctionParameter %float
+     %y = OpFunctionParameter %float
+     %foo_entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %float_50 %float_60
-     %2 = OpCopyObject %float %1
+                  GetParam().opcode + R"( %x %y
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %float %foo %float_50 %float_60
      OpReturn
      OpFunctionEnd
   )",
+
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:f32, %y:f32):f32 {
   $B1: {
-    %2:f32 = )" + GetParam().wgsl_func +
-                  R"( 50.0f, 60.0f
-    %3:f32 = let %2
-    ret
+    %4:f32 = )" + GetParam().wgsl_func +
+                  R"( %x, %y
+    ret %4
   }
 }
 )");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Float_FloatingFloating, Vector) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+  OpName %y "y"
+)") + R"(
+     %foo = OpFunction %float None %fn_float_v2float_v2float
+     %x = OpFunctionParameter %v2float
+     %y = OpFunctionParameter %v2float
+     %foo_entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %v2float_50_60 %v2float_60_50
-     %2 = OpCopyObject %float %1
+                  GetParam().opcode + R"( %x %y
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %float %foo %v2float_50_60 %v2float_60_50
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec2<f32>, %y:vec2<f32>):f32 {
   $B1: {
-    %2:f32 = )" + GetParam().wgsl_func +
-                  R"( vec2<f32>(50.0f, 60.0f), vec2<f32>(60.0f, 50.0f)
-    %3:f32 = let %2
-    ret
+    %4:f32 = )" + GetParam().wgsl_func +
+                  R"( %x, %y
+    ret %4
   }
 }
 )");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Floating_Floating, Scalar) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %float None %fn_float_float
+     %x = OpFunctionParameter %float
+     %foo_entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %float_50
-     %2 = OpCopyObject %float %1
+                  GetParam().opcode + R"( %x
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %float %foo %float_50
      OpReturn
      OpFunctionEnd
   )",
+
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:f32):f32 {
   $B1: {
-    %2:f32 = )" + GetParam().wgsl_func +
-                  R"( 50.0f
-    %3:f32 = let %2
-    ret
+    %3:f32 = )" + GetParam().wgsl_func +
+                  R"( %x
+    ret %3
   }
 })");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Floating_Floating, Vector) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %v2float None %fn_v2float_v2float
+     %x = OpFunctionParameter %v2float
+     %foo_entry = OpLabel
      %1 = OpExtInst %v2float %glsl )" +
-                  GetParam().opcode + R"( %v2float_50_60
-     %2 = OpCopyObject %v2float %1
+                  GetParam().opcode + R"( %x
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %v2float %foo %v2float_50_60
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec2<f32>):vec2<f32> {
   $B1: {
-    %2:vec2<f32> = )" +
+    %3:vec2<f32> = )" +
                   GetParam().wgsl_func +
-                  R"( vec2<f32>(50.0f, 60.0f)
-    %3:vec2<f32> = let %2
-    ret
+                  R"( %x
+    ret %3
   }
 }
 )");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingFloating, Scalar) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+  OpName %y "y"
+)") + R"(
+     %foo = OpFunction %float None %fn_float_float_float
+     %x = OpFunctionParameter %float
+     %y = OpFunctionParameter %float
+     %foo_entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %float_50 %float_60
-     %2 = OpCopyObject %float %1
+                  GetParam().opcode + R"( %x %y
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %float %foo %float_50 %float_60
      OpReturn
      OpFunctionEnd
   )",
+
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:f32, %y:f32):f32 {
   $B1: {
-    %2:f32 = )" + GetParam().wgsl_func +
-                  R"( 50.0f, 60.0f
-    %3:f32 = let %2
-    ret
+    %4:f32 = )" + GetParam().wgsl_func +
+                  R"( %x, %y
+    ret %4
   }
 }
 )");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingFloating, Vector) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+  OpName %y "y"
+)") + R"(
+     %foo = OpFunction %v2float None %fn_v2float_v2float_v2float
+     %x = OpFunctionParameter %v2float
+     %y = OpFunctionParameter %v2float
+     %foo_entry = OpLabel
      %1 = OpExtInst %v2float %glsl )" +
-                  GetParam().opcode + R"( %v2float_50_60 %v2float_60_50
-     %2 = OpCopyObject %v2float %1
+                  GetParam().opcode + R"( %x %y
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %v2float %foo %v2float_50_60 %v2float_60_50
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec2<f32>, %y:vec2<f32>):vec2<f32> {
   $B1: {
-    %2:vec2<f32> = )" +
+    %4:vec2<f32> = )" +
                   GetParam().wgsl_func +
-                  R"( vec2<f32>(50.0f, 60.0f), vec2<f32>(60.0f, 50.0f)
-    %3:vec2<f32> = let %2
-    ret
+                  R"( %x, %y
+    ret %4
   }
 }
 )");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+  OpName %y "y"
+  OpName %z "z"
+)") + R"(
+     %foo = OpFunction %float None %fn_float_float_float_float
+     %x = OpFunctionParameter %float
+     %y = OpFunctionParameter %float
+     %z = OpFunctionParameter %float
+     %foo_entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %float_50 %float_60 %float_70
-     %2 = OpCopyObject %float %1
+                  GetParam().opcode + R"( %x %y %z
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %float %foo %float_50 %float_60 %float_70
      OpReturn
      OpFunctionEnd
   )",
+
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:f32, %y:f32, %z:f32):f32 {
   $B1: {
-    %2:f32 = )" + GetParam().wgsl_func +
-                  R"( 50.0f, 60.0f, 70.0f
-    %3:f32 = let %2
-    ret
+    %5:f32 = )" + GetParam().wgsl_func +
+                  R"( %x, %y, %z
+    ret %5
   }
 }
 )");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+  OpName %y "y"
+  OpName %z "z"
+)") + R"(
+     %foo = OpFunction %v2float None %fn_v2float_v2float_v2float_v2float
+     %x = OpFunctionParameter %v2float
+     %y = OpFunctionParameter %v2float
+     %z = OpFunctionParameter %v2float
+     %foo_entry = OpLabel
      %1 = OpExtInst %v2float %glsl )" +
                   GetParam().opcode +
-                  R"( %v2float_50_60 %v2float_60_50 %v2float_70_70
-     %2 = OpCopyObject %v2float %1
+                  R"( %x %y %z
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %v2float %foo %v2float_50_60 %v2float_60_50 %v2float_70_70
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec2<f32>, %y:vec2<f32>, %z:vec2<f32>):vec2<f32> {
   $B1: {
-    %2:vec2<f32> = )" +
+    %5:vec2<f32> = )" +
                   GetParam().wgsl_func +
-                  R"( vec2<f32>(50.0f, 60.0f), vec2<f32>(60.0f, 50.0f), vec2<f32>(70.0f)
-    %3:vec2<f32> = let %2
-    ret
+                  R"( %x, %y, %z
+    ret %5
   }
 }
 )");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingInting, Scalar) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+  OpName %y "y"
+)") + R"(
+     %foo = OpFunction %float None %fn_float_float_int
+     %x = OpFunctionParameter %float
+     %y = OpFunctionParameter %int
+     %foo_entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %float_50 %int_30
-     %2 = OpCopyObject %float %1
+                  GetParam().opcode + R"( %x %y
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %float %foo %float_50 %int_30
      OpReturn
      OpFunctionEnd
   )",
+
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:f32, %y:i32):f32 {
   $B1: {
-    %2:f32 = )" + GetParam().wgsl_func +
-                  R"( 50.0f, 30i
-    %3:f32 = let %2
-    ret
+    %4:f32 = )" + GetParam().wgsl_func +
+                  R"( %x, %y
+    ret %4
   }
 }
 )");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingInting, Vector) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+  OpName %y "y"
+)") + R"(
+     %foo = OpFunction %v2float None %fn_v2float_v2float_v2int
+     %x = OpFunctionParameter %v2float
+     %y = OpFunctionParameter %v2int
+     %foo_entry = OpLabel
      %1 = OpExtInst %v2float %glsl )" +
                   GetParam().opcode +
-                  R"( %v2float_50_60 %v2int_30_40
-     %2 = OpCopyObject %v2float %1
+                  R"( %x %y
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %v2float %foo %v2float_50_60 %v2int_30_40
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec2<f32>, %y:vec2<i32>):vec2<f32> {
   $B1: {
-    %2:vec2<f32> = )" +
+    %4:vec2<f32> = )" +
                   GetParam().wgsl_func +
-                  R"( vec2<f32>(50.0f, 60.0f), vec2<i32>(30i, 40i)
-    %3:vec2<f32> = let %2
-    ret
+                  R"( %x, %y
+    ret %4
   }
 }
 )");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Float3_Float3Float3, SpirvParser) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+  OpName %y "y"
+)") + R"(
+     %foo = OpFunction %v3float None %fn_v3float_v3float_v3float
+     %x = OpFunctionParameter %v3float
+     %y = OpFunctionParameter %v3float
+     %foo_entry = OpLabel
      %1 = OpExtInst %v3float %glsl )" +
                   GetParam().opcode +
-                  R"( %v3float_50_60_70 %v3float_60_70_50
-     %2 = OpCopyObject %v3float %1
+                  R"( %x %y
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %v3float %foo %v3float_50_60_70 %v3float_60_70_50
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec3<f32>, %y:vec3<f32>):vec3<f32> {
   $B1: {
-    %2:vec3<f32> = )" +
+    %4:vec3<f32> = )" +
                   GetParam().wgsl_func +
-                  R"( vec3<f32>(50.0f, 60.0f, 70.0f), vec3<f32>(60.0f, 70.0f, 50.0f)
-    %3:vec3<f32> = let %2
-    ret
+                  R"( %x, %y
+    ret %4
   }
 }
 )");
@@ -486,43 +676,61 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
                              {"SmoothStep", "smoothstep"}}));
 
 TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting, Scalar) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %int None %fn_int_int
+     %x = OpFunctionParameter %int
+     %foo_entry = OpLabel
      %1 = OpExtInst %int %glsl )" +
                   GetParam().opcode +
-                  R"( %int_30
-     %2 = OpCopyObject %int %1
+                  R"( %x
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %int %foo %int_30
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:i32):i32 {
   $B1: {
-    %2:i32 = )" + GetParam().wgsl_func +
-                  R"( 30i
-    %3:i32 = let %2
-    ret
+    %3:i32 = )" + GetParam().wgsl_func +
+                  R"( %x
+    ret %3
   }
 }
 )");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting, Vector) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %v2int None %fn_v2int_v2int
+     %x = OpFunctionParameter %v2int
+     %foo_entry = OpLabel
      %1 = OpExtInst %v2int %glsl )" +
                   GetParam().opcode +
-                  R"( %v2int_30_40
-     %2 = OpCopyObject %v2int %1
+                  R"( %x
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %v2int %foo %v2int_30_40
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec2<i32>):vec2<i32> {
   $B1: {
-    %2:vec2<i32> = )" +
+    %3:vec2<i32> = )" +
                   GetParam().wgsl_func +
-                  R"( vec2<i32>(30i, 40i)
-    %3:vec2<i32> = let %2
-    ret
+                  R"( %x
+    ret %3
   }
 }
 )");
@@ -534,43 +742,61 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
                                            GlslStd450Case{"FindSMsb", "firstLeadingBit"}));
 
 TEST_P(SpirvReaderTest_GlslStd450_Uinting_Uinting, Scalar) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %uint None %fn_uint_uint
+     %x = OpFunctionParameter %uint
+     %foo_entry = OpLabel
      %1 = OpExtInst %uint %glsl )" +
                   GetParam().opcode +
-                  R"( %uint_10
-     %2 = OpCopyObject %uint %1
+                  R"( %x
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %uint %foo %uint_10
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:u32):u32 {
   $B1: {
-    %2:u32 = )" + GetParam().wgsl_func +
-                  R"( 10u
-    %3:u32 = let %2
-    ret
+    %3:u32 = )" + GetParam().wgsl_func +
+                  R"( %x
+    ret %3
   }
 }
 )");
 }
 
 TEST_P(SpirvReaderTest_GlslStd450_Uinting_Uinting, Vector) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %v2uint None %fn_v2uint_v2uint
+     %x = OpFunctionParameter %v2uint
+     %foo_entry = OpLabel
      %1 = OpExtInst %v2uint %glsl )" +
                   GetParam().opcode +
-                  R"( %v2uint_10_20
-     %2 = OpCopyObject %v2uint %1
+                  R"( %x
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %v2uint %foo %v2uint_10_20
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec2<u32>):vec2<u32> {
   $B1: {
-    %2:vec2<u32> = )" +
+    %3:vec2<u32> = )" +
                   GetParam().wgsl_func +
-                  R"( vec2<u32>(10u, 20u)
-    %3:vec2<u32> = let %2
-    ret
+                  R"( %x
+    ret %3
   }
 }
 )");
@@ -587,72 +813,108 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
 
 TEST_F(SpirvReaderTest, Normalize_Scalar) {
     // Scalar normalize maps to sign.
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %float %glsl Normalize %float_50
-     %2 = OpCopyObject %float %1
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %float None %fn_float_float
+     %x = OpFunctionParameter %float
+     %foo_entry = OpLabel
+     %1 = OpExtInst %float %glsl Normalize %x
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %float %foo %float_50
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:f32):f32 {
   $B1: {
-    %2:f32 = sign 50.0f
-    %3:f32 = let %2
-    ret
+    %3:f32 = sign %x
+    ret %3
   }
 }
 )");
 }
 
 TEST_F(SpirvReaderTest, Normalize_Vector2) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2float %glsl Normalize %v2float_50_60
-     %2 = OpCopyObject %v2float %1
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %v2float None %fn_v2float_v2float
+     %x = OpFunctionParameter %v2float
+     %foo_entry = OpLabel
+     %1 = OpExtInst %v2float %glsl Normalize %x
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %v2float %foo %v2float_50_60
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec2<f32>):vec2<f32> {
   $B1: {
-    %2:vec2<f32> = normalize vec2<f32>(50.0f, 60.0f)
-    %3:vec2<f32> = let %2
-    ret
+    %3:vec2<f32> = normalize %x
+    ret %3
   }
 }
 )");
 }
 
 TEST_F(SpirvReaderTest, Normalize_Vector3) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v3float %glsl Normalize %v3float_50_60_70
-     %2 = OpCopyObject %v3float %1
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %v3float None %fn_v3float_v3float
+     %x = OpFunctionParameter %v3float
+     %foo_entry = OpLabel
+     %1 = OpExtInst %v3float %glsl Normalize %x
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %v3float %foo %v3float_50_60_70
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec3<f32>):vec3<f32> {
   $B1: {
-    %2:vec3<f32> = normalize vec3<f32>(50.0f, 60.0f, 70.0f)
-    %3:vec3<f32> = let %2
-    ret
+    %3:vec3<f32> = normalize %x
+    ret %3
   }
 }
 )");
 }
 
 TEST_F(SpirvReaderTest, Normalize_Vector4) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v4float %glsl Normalize %v4float_50_50_50_50
-     %2 = OpCopyObject %v4float %1
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %v4float None %fn_v4float_v4float
+     %x = OpFunctionParameter %v4float
+     %foo_entry = OpLabel
+     %1 = OpExtInst %v4float %glsl Normalize %x
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %v4float %foo %v4float_50_50_50_50
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec4<f32>):vec4<f32> {
   $B1: {
-    %2:vec4<f32> = normalize vec4<f32>(50.0f)
-    %3:vec4<f32> = let %2
-    ret
+    %3:vec4<f32> = normalize %x
+    ret %3
   }
 }
 )");
@@ -667,48 +929,66 @@ TEST_F(SpirvReaderTest, RectifyOperandsAndResult_FindUMsb) {
     //   SPIR-V unsigned arg -> keep it
     //      signed result -> cast result to signed
     //      unsigned result -> keep it
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %a "a"
+  OpName %b "b"
+  OpName %c "c"
+  OpName %d "d"
+)") + R"(
+     %foo = OpFunction %void None %fn_void_rectify
+     %a = OpFunctionParameter %int
+     %b = OpFunctionParameter %v2int
+     %c = OpFunctionParameter %uint
+     %d = OpFunctionParameter %v2uint
+     %foo_entry = OpLabel
+
      ; signed arg
      ;    signed result
-     %1 = OpExtInst %int %glsl FindUMsb %int_30
-     %2 = OpExtInst %v2int %glsl FindUMsb %v2int_30_40
+     %1 = OpExtInst %int %glsl FindUMsb %a
+     %2 = OpExtInst %v2int %glsl FindUMsb %b
 
      ; signed arg
      ;    unsigned result
-     %3 = OpExtInst %uint %glsl FindUMsb %int_30
-     %4 = OpExtInst %v2uint %glsl FindUMsb %v2int_30_40
+     %3 = OpExtInst %uint %glsl FindUMsb %a
+     %4 = OpExtInst %v2uint %glsl FindUMsb %b
 
      ; unsigned arg
      ;    signed result
-     %5 = OpExtInst %int %glsl FindUMsb %uint_10
-     %6 = OpExtInst %v2int %glsl FindUMsb %v2uint_10_20
+     %5 = OpExtInst %int %glsl FindUMsb %c
+     %6 = OpExtInst %v2int %glsl FindUMsb %d
 
      ; unsigned arg
      ;    unsigned result
-     %7 = OpExtInst %uint %glsl FindUMsb %uint_10
-     %8 = OpExtInst %v2uint %glsl FindUMsb %v2uint_10_20
+     %7 = OpExtInst %uint %glsl FindUMsb %c
+     %8 = OpExtInst %v2uint %glsl FindUMsb %d
+     OpReturn
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %void %foo %int_30 %v2int_30_40 %uint_10 %v2uint_10_20
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%a:i32, %b:vec2<i32>, %c:u32, %d:vec2<u32>):void {
   $B1: {
-    %2:u32 = bitcast<u32> 30i
-    %3:u32 = firstLeadingBit %2
-    %4:i32 = bitcast<i32> %3
-    %5:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(30i, 40i)
-    %6:vec2<u32> = firstLeadingBit %5
-    %7:vec2<i32> = bitcast<vec2<i32>> %6
-    %8:u32 = bitcast<u32> 30i
-    %9:u32 = firstLeadingBit %8
-    %10:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(30i, 40i)
-    %11:vec2<u32> = firstLeadingBit %10
-    %12:u32 = firstLeadingBit 10u
-    %13:i32 = bitcast<i32> %12
-    %14:vec2<u32> = firstLeadingBit vec2<u32>(10u, 20u)
-    %15:vec2<i32> = bitcast<vec2<i32>> %14
-    %16:u32 = firstLeadingBit 10u
-    %17:vec2<u32> = firstLeadingBit vec2<u32>(10u, 20u)
+    %6:u32 = bitcast<u32> %a
+    %7:u32 = firstLeadingBit %6
+    %8:i32 = bitcast<i32> %7
+    %9:vec2<u32> = bitcast<vec2<u32>> %b
+    %10:vec2<u32> = firstLeadingBit %9
+    %11:vec2<i32> = bitcast<vec2<i32>> %10
+    %12:u32 = bitcast<u32> %a
+    %13:u32 = firstLeadingBit %12
+    %14:vec2<u32> = bitcast<vec2<u32>> %b
+    %15:vec2<u32> = firstLeadingBit %14
+    %16:u32 = firstLeadingBit %c
+    %17:i32 = bitcast<i32> %16
+    %18:vec2<u32> = firstLeadingBit %d
+    %19:vec2<i32> = bitcast<vec2<i32>> %18
+    %20:u32 = firstLeadingBit %c
+    %21:vec2<u32> = firstLeadingBit %d
     ret
   }
 }
@@ -730,22 +1010,38 @@ using SpirvReaderTest_GlslStd450_DataPacking = SpirvReaderTestWithParam<DataPack
 
 TEST_P(SpirvReaderTest_GlslStd450_DataPacking, Valid) {
     auto param = GetParam();
-    EXPECT_IR(Preamble() + R"(
+    auto fn_ty = param.vec_size == 2 ? "%fn_uint_v2float" : "%fn_uint_v4float";
+    auto in_ty = param.vec_size == 2 ? "%v2float" : "%v4float";
+    auto in_val = param.vec_size == 2 ? "%v2float_50_60" : "%v4float_50_50_50_50";
+    auto wgsl_in_ty = "vec" + std::to_string(param.vec_size) + "<f32>";
+
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+  %foo = OpFunction %uint None )" +
+                  fn_ty + R"(
+  %x = OpFunctionParameter )" +
+                  in_ty + R"(
+  %foo_entry = OpLabel
   %1 = OpExtInst %uint %glsl )" +
-                  param.opcode +
-                  (param.vec_size == 2 ? " %v2float_50_60" : " %v4float_50_50_50_50") + R"(
-  %2 = OpCopyObject %uint %1
+                  param.opcode + R"( %x
+  OpReturnValue %1
+  OpFunctionEnd
+
+  %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+  %res = OpFunctionCall %uint %foo )" +
+                  in_val + R"(
   OpReturn
   OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:)" +
+                  wgsl_in_ty + R"():u32 {
   $B1: {
-    %2:u32 = )" + param.wgsl_func +
-                  " vec" + std::to_string(param.vec_size) + "<f32>(50.0f" +
-                  (param.vec_size == 4 ? "" : ", 60.0f") + R"()
-    %3:u32 = let %2
-    ret
+    %3:u32 = )" + param.wgsl_func +
+                  R"( %x
+    ret %3
   }
 }
 )");
@@ -765,25 +1061,36 @@ using SpirvReaderTest_GlslStd450_DataUnpacking = SpirvReaderTestWithParam<DataPa
 TEST_P(SpirvReaderTest_GlslStd450_DataUnpacking, Valid) {
     auto param = GetParam();
     auto type = param.vec_size == 2 ? "%v2float" : "%v4float";
+    auto fn_ty = param.vec_size == 2 ? "%fn_v2float_uint" : "%fn_v4float_uint";
     auto wgsl_type = "vec" + std::to_string(param.vec_size) + "<f32>";
 
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+  %foo = OpFunction )" +
+                  type + R"( None )" + fn_ty + R"(
+  %x = OpFunctionParameter %uint
+  %foo_entry = OpLabel
   %1 = OpExtInst )" +
-                  type + std::string(" %glsl ") + param.opcode + R"( %uint_10
-  %2 = OpCopyObject )" +
-                  type + R"( %1
+                  type + std::string(" %glsl ") + param.opcode + R"( %x
+  OpReturnValue %1
+  OpFunctionEnd
+
+  %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+  %res = OpFunctionCall )" +
+                  type + R"( %foo %uint_10
   OpReturn
   OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:u32):)" +
+                  wgsl_type + R"( {
   $B1: {
-    %2:)" + wgsl_type +
-                  " = " + param.wgsl_func +
-                  R"( 10u
     %3:)" + wgsl_type +
-                  R"( = let %2
-    ret
+                  " = " + param.wgsl_func +
+                  R"( %x
+    ret %3
   }
 }
 )");
@@ -800,9 +1107,11 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
 
 struct DeterminantData {
     std::string in;
+    std::string in_type;
     std::string out;
     std::string ty;
     std::string ty_name;
+    std::string fn_type;
 };
 
 [[maybe_unused]] inline std::ostream& operator<<(std::ostream& out, DeterminantData c) {
@@ -815,22 +1124,33 @@ using SpirvReaderTest_GlslStd450_Determinant = SpirvReaderTestWithParam<Determin
 TEST_P(SpirvReaderTest_GlslStd450_Determinant, Test) {
     auto param = GetParam();
 
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %)" +
+                  param.ty_name + R"( None %)" + param.fn_type + R"(
+     %x = OpFunctionParameter %)" +
+                  param.in_type + R"(
+     %foo_entry = OpLabel
      %1 = OpExtInst %)" +
-                  param.ty_name + R"( %glsl Determinant %)" + param.in + R"(
-     %2 = OpCopyObject %)" +
-                  param.ty_name + R"( %1
+                  param.ty_name + R"( %glsl Determinant %x
+     OpReturnValue %1
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %)" +
+                  param.ty_name + R"( %foo %)" + param.in + R"(
      OpReturn
      OpFunctionEnd
   )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:)" +
+                  param.out + R"():)" + param.ty + R"( {
   $B1: {
-    %2:)" + param.ty +
-                  R"( = determinant )" + param.out + R"(
     %3:)" + param.ty +
-                  R"( = let %2
-    ret
+                  R"( = determinant %x
+    ret %3
   }
 }
 )");
@@ -839,22 +1159,35 @@ TEST_P(SpirvReaderTest_GlslStd450_Determinant, Test) {
 INSTANTIATE_TEST_SUITE_P(
     SpirvReader,
     SpirvReaderTest_GlslStd450_Determinant,
-    ::testing::Values(
-        DeterminantData{"mat2v2float_50_60", "mat2x2<f32>(vec2<f32>(50.0f, 60.0f))", "f32",
-                        "float"},
-        DeterminantData{"mat3v3float_50_60_70", "mat3x3<f32>(vec3<f32>(50.0f, 60.0f, 70.0f))",
-                        "f32", "float"},
-        DeterminantData{"mat4v4float_50_50_50_50", "mat4x4<f32>(vec4<f32>(50.0f))", "f32", "float"},
-        DeterminantData{"mat2v2half_50_60", "mat2x2<f16>(vec2<f16>(50.0h, 60.0h))", "f16", "half"},
-        DeterminantData{"mat3v3half_50_60_70", "mat3x3<f16>(vec3<f16>(50.0h, 60.0h, 70.0h))", "f16",
-                        "half"},
-        DeterminantData{"mat4v4half_50_50_50_50", "mat4x4<f16>(vec4<f16>(50.0h))", "f16", "half"}));
+    ::testing::Values(DeterminantData{"mat2v2float_50_60", "mat2v2float", "mat2x2<f32>", "f32",
+                                      "float", "fn_float_mat2v2float"},
+                      DeterminantData{"mat3v3float_50_60_70", "mat3v3float", "mat3x3<f32>", "f32",
+                                      "float", "fn_float_mat3v3float"},
+                      DeterminantData{"mat4v4float_50_50_50_50", "mat4v4float", "mat4x4<f32>",
+                                      "f32", "float", "fn_float_mat4v4float"},
+                      DeterminantData{"mat2v2half_50_60", "mat2v2half", "mat2x2<f16>", "f16",
+                                      "half", "fn_half_mat2v2half"},
+                      DeterminantData{"mat3v3half_50_60_70", "mat3v3half", "mat3x3<f16>", "f16",
+                                      "half", "fn_half_mat3v3half"},
+                      DeterminantData{"mat4v4half_50_50_50_50", "mat4v4half", "mat4x4<f16>", "f16",
+                                      "half", "fn_half_mat4v4half"}));
 
 TEST_F(SpirvReaderTest, ModfStruct_Store) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %void None %fn_void_float
+     %x = OpFunctionParameter %float
+     %foo_entry = OpLabel
      %1 = OpVariable %ptr_function_modf_result_type Function
-     %2 = OpExtInst %modf_result_type %glsl ModfStruct %float_50
+     %2 = OpExtInst %modf_result_type %glsl ModfStruct %x
      OpStore %1 %2
+     OpReturn
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %void %foo %float_50
      OpReturn
      OpFunctionEnd
   )",
@@ -869,14 +1202,14 @@ __modf_result_f32 = struct @align(4) {
   whole:f32 @offset(4)
 }
 
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:f32):void {
   $B1: {
-    %2:ptr<function, tint_symbol_2, read_write> = var undef
-    %3:__modf_result_f32 = modf 50.0f
-    %4:f32 = access %3, 0u
-    %5:f32 = access %3, 1u
-    %6:tint_symbol_2 = construct %4, %5
-    store %2, %6
+    %3:ptr<function, tint_symbol_2, read_write> = var undef
+    %4:__modf_result_f32 = modf %x
+    %5:f32 = access %4, 0u
+    %6:f32 = access %4, 1u
+    %7:tint_symbol_2 = construct %5, %6
+    store %3, %7
     ret
   }
 }
@@ -884,9 +1217,20 @@ __modf_result_f32 = struct @align(4) {
 }
 
 TEST_F(SpirvReaderTest, ModfStruct_Scalar) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %modf_result_type %glsl ModfStruct %float_50
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %float None %fn_float_float
+     %x = OpFunctionParameter %float
+     %foo_entry = OpLabel
+     %1 = OpExtInst %modf_result_type %glsl ModfStruct %x
      %2 = OpCompositeExtract %float %1 0
+     OpReturnValue %2
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %float %foo %float_50
      OpReturn
      OpFunctionEnd
   )",
@@ -901,23 +1245,34 @@ __modf_result_f32 = struct @align(4) {
   whole:f32 @offset(4)
 }
 
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:f32):f32 {
   $B1: {
-    %2:__modf_result_f32 = modf 50.0f
-    %3:f32 = access %2, 0u
-    %4:f32 = access %2, 1u
-    %5:tint_symbol_2 = construct %3, %4
-    %6:f32 = access %5, 0u
-    ret
+    %3:__modf_result_f32 = modf %x
+    %4:f32 = access %3, 0u
+    %5:f32 = access %3, 1u
+    %6:tint_symbol_2 = construct %4, %5
+    %7:f32 = access %6, 0u
+    ret %7
   }
 }
 )");
 }
 
 TEST_F(SpirvReaderTest, ModfStruct_Vector) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %modf_v2_result_type %glsl ModfStruct %v2float_50_60
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %v2float None %fn_v2float_v2float
+     %x = OpFunctionParameter %v2float
+     %foo_entry = OpLabel
+     %1 = OpExtInst %modf_v2_result_type %glsl ModfStruct %x
      %2 = OpCompositeExtract %v2float %1 0
+     OpReturnValue %2
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %v2float %foo %v2float_50_60
      OpReturn
      OpFunctionEnd
   )",
@@ -932,24 +1287,35 @@ __modf_result_vec2_f32 = struct @align(8) {
   whole:vec2<f32> @offset(8)
 }
 
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec2<f32>):vec2<f32> {
   $B1: {
-    %2:__modf_result_vec2_f32 = modf vec2<f32>(50.0f, 60.0f)
-    %3:vec2<f32> = access %2, 0u
-    %4:vec2<f32> = access %2, 1u
-    %5:tint_symbol_2 = construct %3, %4
-    %6:vec2<f32> = access %5, 0u
-    ret
+    %3:__modf_result_vec2_f32 = modf %x
+    %4:vec2<f32> = access %3, 0u
+    %5:vec2<f32> = access %3, 1u
+    %6:tint_symbol_2 = construct %4, %5
+    %7:vec2<f32> = access %6, 0u
+    ret %7
   }
 }
 )");
 }
 
 TEST_F(SpirvReaderTest, FrexpStruct_Store) {
-    EXPECT_IR(Preamble() + R"(
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %void None %fn_void_float
+     %x = OpFunctionParameter %float
+     %foo_entry = OpLabel
      %1 = OpVariable %ptr_function_frexp_result_type_unsigned Function
-     %2 = OpExtInst %frexp_result_type_unsigned %glsl FrexpStruct %float_50
+     %2 = OpExtInst %frexp_result_type_unsigned %glsl FrexpStruct %x
      OpStore %1 %2
+     OpReturn
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %void %foo %float_50
      OpReturn
      OpFunctionEnd
   )",
@@ -964,15 +1330,15 @@ __frexp_result_f32 = struct @align(4) {
   exp:i32 @offset(4)
 }
 
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:f32):void {
   $B1: {
-    %2:ptr<function, tint_symbol_2, read_write> = var undef
-    %3:__frexp_result_f32 = frexp 50.0f
-    %4:f32 = access %3, 0u
-    %5:i32 = access %3, 1u
-    %6:u32 = bitcast<u32> %5
-    %7:tint_symbol_2 = construct %4, %6
-    store %2, %7
+    %3:ptr<function, tint_symbol_2, read_write> = var undef
+    %4:__frexp_result_f32 = frexp %x
+    %5:f32 = access %4, 0u
+    %6:i32 = access %4, 1u
+    %7:u32 = bitcast<u32> %6
+    %8:tint_symbol_2 = construct %5, %7
+    store %3, %8
     ret
   }
 }
@@ -980,10 +1346,21 @@ __frexp_result_f32 = struct @align(4) {
 }
 
 TEST_F(SpirvReaderTest, FrexpStruct_ScalarUnsigned) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %frexp_result_type_unsigned %glsl FrexpStruct %float_50
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %void None %fn_void_float
+     %x = OpFunctionParameter %float
+     %foo_entry = OpLabel
+     %1 = OpExtInst %frexp_result_type_unsigned %glsl FrexpStruct %x
      %2 = OpCompositeExtract %float %1 0
      %3 = OpCompositeExtract %uint %1 1
+     OpReturn
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %void %foo %float_50
      OpReturn
      OpFunctionEnd
   )",
@@ -998,15 +1375,15 @@ __frexp_result_f32 = struct @align(4) {
   exp:i32 @offset(4)
 }
 
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:f32):void {
   $B1: {
-    %2:__frexp_result_f32 = frexp 50.0f
-    %3:f32 = access %2, 0u
-    %4:i32 = access %2, 1u
-    %5:u32 = bitcast<u32> %4
-    %6:tint_symbol_2 = construct %3, %5
-    %7:f32 = access %6, 0u
-    %8:u32 = access %6, 1u
+    %3:__frexp_result_f32 = frexp %x
+    %4:f32 = access %3, 0u
+    %5:i32 = access %3, 1u
+    %6:u32 = bitcast<u32> %5
+    %7:tint_symbol_2 = construct %4, %6
+    %8:f32 = access %7, 0u
+    %9:u32 = access %7, 1u
     ret
   }
 }
@@ -1014,10 +1391,21 @@ __frexp_result_f32 = struct @align(4) {
 }
 
 TEST_F(SpirvReaderTest, FrexpStruct_ScalarSigned) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %frexp_result_type_signed %glsl FrexpStruct %float_50
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %void None %fn_void_float
+     %x = OpFunctionParameter %float
+     %foo_entry = OpLabel
+     %1 = OpExtInst %frexp_result_type_signed %glsl FrexpStruct %x
      %2 = OpCompositeExtract %float %1 0
      %3 = OpCompositeExtract %int %1 1
+     OpReturn
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %void %foo %float_50
      OpReturn
      OpFunctionEnd
   )",
@@ -1032,14 +1420,14 @@ __frexp_result_f32 = struct @align(4) {
   exp:i32 @offset(4)
 }
 
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:f32):void {
   $B1: {
-    %2:__frexp_result_f32 = frexp 50.0f
-    %3:f32 = access %2, 0u
-    %4:i32 = access %2, 1u
-    %5:tint_symbol_2 = construct %3, %4
-    %6:f32 = access %5, 0u
-    %7:i32 = access %5, 1u
+    %3:__frexp_result_f32 = frexp %x
+    %4:f32 = access %3, 0u
+    %5:i32 = access %3, 1u
+    %6:tint_symbol_2 = construct %4, %5
+    %7:f32 = access %6, 0u
+    %8:i32 = access %6, 1u
     ret
   }
 }
@@ -1047,10 +1435,21 @@ __frexp_result_f32 = struct @align(4) {
 }
 
 TEST_F(SpirvReaderTest, FrexpStruct_VectorUnsigned) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %frexp_v2_result_type_unsigned %glsl FrexpStruct %v2float_50_60
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %void None %fn_void_v2float
+     %x = OpFunctionParameter %v2float
+     %foo_entry = OpLabel
+     %1 = OpExtInst %frexp_v2_result_type_unsigned %glsl FrexpStruct %x
      %2 = OpCompositeExtract %v2float %1 0
      %3 = OpCompositeExtract %v2uint %1 1
+     OpReturn
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %void %foo %v2float_50_60
      OpReturn
      OpFunctionEnd
   )",
@@ -1065,15 +1464,15 @@ __frexp_result_vec2_f32 = struct @align(8) {
   exp:vec2<i32> @offset(8)
 }
 
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec2<f32>):void {
   $B1: {
-    %2:__frexp_result_vec2_f32 = frexp vec2<f32>(50.0f, 60.0f)
-    %3:vec2<f32> = access %2, 0u
-    %4:vec2<i32> = access %2, 1u
-    %5:vec2<u32> = bitcast<vec2<u32>> %4
-    %6:tint_symbol_2 = construct %3, %5
-    %7:vec2<f32> = access %6, 0u
-    %8:vec2<u32> = access %6, 1u
+    %3:__frexp_result_vec2_f32 = frexp %x
+    %4:vec2<f32> = access %3, 0u
+    %5:vec2<i32> = access %3, 1u
+    %6:vec2<u32> = bitcast<vec2<u32>> %5
+    %7:tint_symbol_2 = construct %4, %6
+    %8:vec2<f32> = access %7, 0u
+    %9:vec2<u32> = access %7, 1u
     ret
   }
 }
@@ -1081,10 +1480,21 @@ __frexp_result_vec2_f32 = struct @align(8) {
 }
 
 TEST_F(SpirvReaderTest, FrexpStruct_VectorSigned) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %frexp_v2_result_type_signed %glsl FrexpStruct %v2float_50_60
+    EXPECT_IR(Preamble(R"(  OpName %foo "foo"
+  OpName %x "x"
+)") + R"(
+     %foo = OpFunction %void None %fn_void_v2float
+     %x = OpFunctionParameter %v2float
+     %foo_entry = OpLabel
+     %1 = OpExtInst %frexp_v2_result_type_signed %glsl FrexpStruct %x
      %2 = OpCompositeExtract %v2float %1 0
      %3 = OpCompositeExtract %v2int %1 1
+     OpReturn
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %res = OpFunctionCall %void %foo %v2float_50_60
      OpReturn
      OpFunctionEnd
   )",
@@ -1099,14 +1509,14 @@ __frexp_result_vec2_f32 = struct @align(8) {
   exp:vec2<i32> @offset(8)
 }
 
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%x:vec2<f32>):void {
   $B1: {
-    %2:__frexp_result_vec2_f32 = frexp vec2<f32>(50.0f, 60.0f)
-    %3:vec2<f32> = access %2, 0u
-    %4:vec2<i32> = access %2, 1u
-    %5:tint_symbol_2 = construct %3, %4
-    %6:vec2<f32> = access %5, 0u
-    %7:vec2<i32> = access %5, 1u
+    %3:__frexp_result_vec2_f32 = frexp %x
+    %4:vec2<f32> = access %3, 0u
+    %5:vec2<i32> = access %3, 1u
+    %6:tint_symbol_2 = construct %4, %5
+    %7:vec2<f32> = access %6, 0u
+    %8:vec2<i32> = access %6, 1u
     ret
   }
 }

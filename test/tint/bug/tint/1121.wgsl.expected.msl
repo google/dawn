@@ -170,7 +170,7 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
                 tint_loop_idx_1.x = tint_low_inc_1;
                 uint const tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
                 tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-                x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)));
+                x = as_type<int>((as_type<uint>(x) + 1u));
               }
               continue;
             }
@@ -181,7 +181,7 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
                 tint_loop_idx_1.x = tint_low_inc_1;
                 uint const tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
                 tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-                x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)));
+                x = as_type<int>((as_type<uint>(x) + 1u));
               }
               continue;
             }
@@ -192,7 +192,7 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
             tint_loop_idx_1.x = tint_low_inc_1;
             uint const tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
             tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-            x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)));
+            x = as_type<int>((as_type<uint>(x) + 1u));
           }
         }
       }
@@ -201,7 +201,7 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
         tint_loop_idx.x = tint_low_inc;
         uint const tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        y = as_type<int>((as_type<uint>(y) + as_type<uint>(1)));
+        y = as_type<int>((as_type<uint>(y) + 1u));
       }
     }
   }

@@ -3085,12 +3085,17 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVecF32) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* val0 = b.FunctionParam("val0", ty.f32());
+    auto* val1 = b.FunctionParam("val1", ty.f32());
+    auto* val2 = b.FunctionParam("val2", ty.f32());
+    auto* val3 = b.FunctionParam("val3", ty.f32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({val0, val1, val2, val3});
     b.Append(func->Block(), [&] {
-        b.StoreVectorElement(var, 0_u, 2_f);
-        b.StoreVectorElement(var, 1_u, 4_f);
-        b.StoreVectorElement(var, 2_u, 8_f);
-        b.StoreVectorElement(var, 3_u, 16_f);
+        b.StoreVectorElement(var, 0_u, val0);
+        b.StoreVectorElement(var, 1_u, val1);
+        b.StoreVectorElement(var, 2_u, val2);
+        b.StoreVectorElement(var, 3_u, val3);
         b.Return(func);
     });
 
@@ -3099,12 +3104,12 @@ $B1: {  # root
   %v:ptr<storage, vec4<f32>, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val0:f32, %val1:f32, %val2:f32, %val3:f32):void {
   $B2: {
-    store_vector_element %v, 0u, 2.0f
-    store_vector_element %v, 1u, 4.0f
-    store_vector_element %v, 2u, 8.0f
-    store_vector_element %v, 3u, 16.0f
+    store_vector_element %v, 0u, %val0
+    store_vector_element %v, 1u, %val1
+    store_vector_element %v, 2u, %val2
+    store_vector_element %v, 3u, %val3
     ret
   }
 }
@@ -3116,16 +3121,16 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val0:f32, %val1:f32, %val2:f32, %val3:f32):void {
   $B2: {
-    %3:u32 = bitcast<u32> 2.0f
-    %4:void = %v.Store 0u, %3
-    %5:u32 = bitcast<u32> 4.0f
-    %6:void = %v.Store 4u, %5
-    %7:u32 = bitcast<u32> 8.0f
-    %8:void = %v.Store 8u, %7
-    %9:u32 = bitcast<u32> 16.0f
-    %10:void = %v.Store 12u, %9
+    %7:u32 = bitcast<u32> %val0
+    %8:void = %v.Store 0u, %7
+    %9:u32 = bitcast<u32> %val1
+    %10:void = %v.Store 4u, %9
+    %11:u32 = bitcast<u32> %val2
+    %12:void = %v.Store 8u, %11
+    %13:u32 = bitcast<u32> %val3
+    %14:void = %v.Store 12u, %13
     ret
   }
 }
@@ -3140,9 +3145,11 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreScalar) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* val = b.FunctionParam("val", ty.f32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({val});
     b.Append(func->Block(), [&] {
-        b.Store(var, 2_f);
+        b.Store(var, val);
         b.Return(func);
     });
 
@@ -3151,9 +3158,9 @@ $B1: {  # root
   %v:ptr<storage, f32, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:f32):void {
   $B2: {
-    store %v, 2.0f
+    store %v, %val
     ret
   }
 }
@@ -3165,10 +3172,10 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:f32):void {
   $B2: {
-    %3:u32 = bitcast<u32> 2.0f
-    %4:void = %v.Store 0u, %3
+    %4:u32 = bitcast<u32> %val
+    %5:void = %v.Store 0u, %4
     ret
   }
 }
@@ -3223,9 +3230,11 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVectorElement) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* val = b.FunctionParam("val", ty.f32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({val});
     b.Append(func->Block(), [&] {
-        b.StoreVectorElement(var, 1_u, 2_f);
+        b.StoreVectorElement(var, 1_u, val);
         b.Return(func);
     });
 
@@ -3234,9 +3243,9 @@ $B1: {  # root
   %v:ptr<storage, vec3<f32>, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:f32):void {
   $B2: {
-    store_vector_element %v, 1u, 2.0f
+    store_vector_element %v, 1u, %val
     ret
   }
 }
@@ -3248,10 +3257,10 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:f32):void {
   $B2: {
-    %3:u32 = bitcast<u32> 2.0f
-    %4:void = %v.Store 4u, %3
+    %4:u32 = bitcast<u32> %val
+    %5:void = %v.Store 4u, %4
     ret
   }
 }
@@ -3306,9 +3315,11 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVector) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* val = b.FunctionParam("val", ty.vec3f());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({val});
     b.Append(func->Block(), [&] {
-        b.Store(var, b.Composite(ty.vec3f(), 2_f, 3_f, 4_f));
+        b.Store(var, val);
         b.Return(func);
     });
 
@@ -3317,9 +3328,9 @@ $B1: {  # root
   %v:ptr<storage, vec3<f32>, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:vec3<f32>):void {
   $B2: {
-    store %v, vec3<f32>(2.0f, 3.0f, 4.0f)
+    store %v, %val
     ret
   }
 }
@@ -3331,10 +3342,10 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:vec3<f32>):void {
   $B2: {
-    %3:vec3<u32> = bitcast<vec3<u32>> vec3<f32>(2.0f, 3.0f, 4.0f)
-    %4:void = %v.Store3 0u, %3
+    %4:vec3<u32> = bitcast<vec3<u32>> %val
+    %5:void = %v.Store3 0u, %4
     ret
   }
 }
@@ -3390,10 +3401,12 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreMatrixElement) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* val = b.FunctionParam("val", ty.f32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({val});
     b.Append(func->Block(), [&] {
         b.StoreVectorElement(
-            b.Access(ty.ptr<storage, vec3<f32>, core::Access::kReadWrite>(), var, 1_u), 2_u, 5_f);
+            b.Access(ty.ptr<storage, vec3<f32>, core::Access::kReadWrite>(), var, 1_u), 2_u, val);
         b.Return(func);
     });
 
@@ -3402,10 +3415,10 @@ $B1: {  # root
   %v:ptr<storage, mat2x3<f32>, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:f32):void {
   $B2: {
-    %3:ptr<storage, vec3<f32>, read_write> = access %v, 1u
-    store_vector_element %3, 2u, 5.0f
+    %4:ptr<storage, vec3<f32>, read_write> = access %v, 1u
+    store_vector_element %4, 2u, %val
     ret
   }
 }
@@ -3417,10 +3430,10 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:f32):void {
   $B2: {
-    %3:u32 = bitcast<u32> 5.0f
-    %4:void = %v.Store 24u, %3
+    %4:u32 = bitcast<u32> %val
+    %5:void = %v.Store 24u, %4
     ret
   }
 }
@@ -3477,10 +3490,11 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreMatrixColumn) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* val = b.FunctionParam("val", ty.vec3f());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({val});
     b.Append(func->Block(), [&] {
-        b.Store(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kReadWrite>(), var, 1_u),
-                b.Splat<vec3<f32>>(5_f));
+        b.Store(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kReadWrite>(), var, 1_u), val);
         b.Return(func);
     });
 
@@ -3489,10 +3503,10 @@ $B1: {  # root
   %v:ptr<storage, mat2x3<f32>, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:vec3<f32>):void {
   $B2: {
-    %3:ptr<storage, vec3<f32>, read_write> = access %v, 1u
-    store %3, vec3<f32>(5.0f)
+    %4:ptr<storage, vec3<f32>, read_write> = access %v, 1u
+    store %4, %val
     ret
   }
 }
@@ -3504,10 +3518,10 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:vec3<f32>):void {
   $B2: {
-    %3:vec3<u32> = bitcast<vec3<u32>> vec3<f32>(5.0f)
-    %4:void = %v.Store3 16u, %3
+    %4:vec3<u32> = bitcast<vec3<u32>> %val
+    %5:void = %v.Store3 16u, %4
     ret
   }
 }
@@ -3670,9 +3684,11 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreArrayElement) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* val = b.FunctionParam("val", ty.f32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({val});
     b.Append(func->Block(), [&] {
-        b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var, 3_u), 1_f);
+        b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var, 3_u), val);
         b.Return(func);
     });
 
@@ -3681,10 +3697,10 @@ $B1: {  # root
   %v:ptr<storage, array<f32, 5>, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:f32):void {
   $B2: {
-    %3:ptr<storage, f32, read_write> = access %v, 3u
-    store %3, 1.0f
+    %4:ptr<storage, f32, read_write> = access %v, 3u
+    store %4, %val
     ret
   }
 }
@@ -3696,10 +3712,10 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:f32):void {
   $B2: {
-    %3:u32 = bitcast<u32> 1.0f
-    %4:void = %v.Store 12u, %3
+    %4:u32 = bitcast<u32> %val
+    %5:void = %v.Store 12u, %4
     ret
   }
 }
@@ -3832,9 +3848,11 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreStructMember) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* val = b.FunctionParam("val", ty.f32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({val});
     b.Append(func->Block(), [&] {
-        b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var, 1_u), 3_f);
+        b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var, 1_u), val);
         b.Return(func);
     });
 
@@ -3848,10 +3866,10 @@ $B1: {  # root
   %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:f32):void {
   $B2: {
-    %3:ptr<storage, f32, read_write> = access %v, 1u
-    store %3, 3.0f
+    %4:ptr<storage, f32, read_write> = access %v, 1u
+    store %4, %val
     ret
   }
 }
@@ -3868,10 +3886,10 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:f32):void {
   $B2: {
-    %3:u32 = bitcast<u32> 3.0f
-    %4:void = %v.Store 4u, %3
+    %4:u32 = bitcast<u32> %val
+    %5:void = %v.Store 4u, %4
     ret
   }
 }
@@ -3957,9 +3975,11 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreStructNested) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* val = b.FunctionParam("val", ty.f32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({val});
     b.Append(func->Block(), [&] {
-        b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var, 1_u, 0_u), 2_f);
+        b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var, 1_u, 0_u), val);
         b.Return(func);
     });
 
@@ -3983,10 +4003,10 @@ $B1: {  # root
   %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:f32):void {
   $B2: {
-    %3:ptr<storage, f32, read_write> = access %v, 1u, 0u
-    store %3, 2.0f
+    %4:ptr<storage, f32, read_write> = access %v, 1u, 0u
+    store %4, %val
     ret
   }
 }
@@ -4013,10 +4033,10 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func():void {
+%foo = func(%val:f32):void {
   $B2: {
-    %3:u32 = bitcast<u32> 2.0f
-    %4:void = %v.Store 16u, %3
+    %4:u32 = bitcast<u32> %val
+    %5:void = %v.Store 16u, %4
     ret
   }
 }

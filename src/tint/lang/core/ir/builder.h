@@ -1242,9 +1242,16 @@ class Builder {
     ir::Value* CallReplaceResult(core::ir::InstructionResult* result,
                                  core::BuiltinFn func,
                                  ARGS&&... args) {
-        return Append(ir.CreateInstruction<ir::CoreBuiltinCall>(
-                          result, func, Values(std::forward<ARGS>(args)...)))
-            ->Result();
+        auto values = Values(std::forward<ARGS>(args)...);
+
+        auto res = Evaluator{*this, false}.EvalCoreBuiltinCall(func, result->Type(), values);
+        if (res == Success && res.Get()) {
+            auto* cnst = Constant(res.Get());
+            result->ReplaceAllUsesWith(cnst);
+            result->Destroy();
+            return cnst;
+        }
+        return Append(ir.CreateInstruction<ir::CoreBuiltinCall>(result, func, values))->Result();
     }
 
     /// Creates a core builtin call instruction
@@ -1343,6 +1350,15 @@ class Builder {
                                          VectorRef<core::ir::TemplateParameter> explicit_params,
                                          ARGS&&... args) {
         auto values = Values(std::forward<ARGS>(args)...);
+
+        auto res = Evaluator{*this, false}.EvalCoreBuiltinCall(func, result->Type(), values,
+                                                               explicit_params);
+        if (res == Success && res.Get()) {
+            auto* cnst = Constant(res.Get());
+            result->ReplaceAllUsesWith(cnst);
+            result->Destroy();
+            return cnst;
+        }
         return CallExplicitWithResult<ir::CoreBuiltinCall>(result, func, explicit_params, values)
             ->Result();
     }

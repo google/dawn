@@ -13,7 +13,7 @@ void a() {
     }
     default:
     {
-      a_1 = asint((asuint(a_1) + asuint(int(2))));
+      a_1 = asint((asuint(a_1) + 2u));
       break;
     }
   }

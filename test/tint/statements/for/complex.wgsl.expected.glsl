@@ -23,15 +23,13 @@ void main() {
         break;
       }
       some_loop_body();
-      uint v_1 = uint(i);
-      j = int((v_1 * uint(30)));
+      j = int((uint(i) * 30u));
       {
         uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        uint v_2 = uint(i);
-        i = int((v_2 + uint(1)));
+        i = int((uint(i) + 1u));
       }
     }
   }

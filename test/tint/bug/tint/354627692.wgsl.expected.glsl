@@ -25,12 +25,10 @@ void main() {
               break;
             }
             if ((i > 5)) {
-              uint v_1 = uint(i);
-              i = int((v_1 * uint(2)));
+              i = int((uint(i) * 2u));
               break;
             } else {
-              uint v_2 = uint(i);
-              i = int((v_2 * uint(2)));
+              i = int((uint(i) * 2u));
               break;
             }
             /* unreachable */

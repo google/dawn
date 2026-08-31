@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 28
+; Bound: 27
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -16,33 +16,32 @@
 %_ptr_Function_int = OpTypePointer Function %int
       %int_1 = OpConstant %int 1
        %uint = OpTypeInt 32 0
-      %int_2 = OpConstant %int 2
+     %uint_2 = OpConstant %uint 2
        %void = OpTypeVoid
-         %18 = OpTypeFunction %void
+         %17 = OpTypeFunction %void
           %c = OpFunction %int None %3
           %4 = OpLabel
           %a = OpVariable %_ptr_Function_int Function
                OpStore %a %int_1
           %8 = OpLoad %int %a None
          %10 = OpBitcast %uint %8
-         %11 = OpBitcast %uint %int_2
-         %13 = OpIAdd %uint %10 %11
-         %14 = OpBitcast %int %13
-               OpStore %a %14 None
-         %15 = OpLoad %int %a None
-               OpReturnValue %15
+         %11 = OpIAdd %uint %10 %uint_2
+         %13 = OpBitcast %int %11
+               OpStore %a %13 None
+         %14 = OpLoad %int %a None
+               OpReturnValue %14
                OpFunctionEnd
-          %b = OpFunction %void None %18
-         %19 = OpLabel
+          %b = OpFunction %void None %17
+         %18 = OpLabel
         %b_0 = OpVariable %_ptr_Function_int Function
-         %20 = OpFunctionCall %int %c
-               OpStore %b_0 %20
-         %22 = OpLoad %int %b_0 None
-         %23 = OpFunctionCall %int %c
+         %19 = OpFunctionCall %int %c
+               OpStore %b_0 %19
+         %21 = OpLoad %int %b_0 None
+         %22 = OpFunctionCall %int %c
+         %23 = OpBitcast %uint %21
          %24 = OpBitcast %uint %22
-         %25 = OpBitcast %uint %23
-         %26 = OpIAdd %uint %24 %25
-         %27 = OpBitcast %int %26
-               OpStore %b_0 %27 None
+         %25 = OpIAdd %uint %23 %24
+         %26 = OpBitcast %int %25
+               OpStore %b_0 %26 None
                OpReturn
                OpFunctionEnd

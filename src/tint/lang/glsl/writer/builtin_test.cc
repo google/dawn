@@ -1008,7 +1008,8 @@ void main() {
 TEST_F(GlslWriterTest, CountOneBits) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kCountOneBits, 1_u));
+        auto* a = b.Let("a", 1_u);
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kCountOneBits, a));
         b.Return(func);
     });
 
@@ -1018,7 +1019,8 @@ TEST_F(GlslWriterTest, CountOneBits) {
 precision highp int;
 
 void main() {
-  uint x = uint(bitCount(1u));
+  uint a = 1u;
+  uint x = uint(bitCount(a));
 }
 )");
 }
@@ -1026,7 +1028,10 @@ void main() {
 TEST_F(GlslWriterTest, ExtractBits) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kExtractBits, 1_u, 2_u, 3_u));
+        auto* v = b.Let("v", 1_u);
+        auto* offset = b.Let("offset", 2_u);
+        auto* count = b.Let("count", 3_u);
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kExtractBits, v, offset, count));
         b.Return(func);
     });
 
@@ -1036,8 +1041,12 @@ TEST_F(GlslWriterTest, ExtractBits) {
 precision highp int;
 
 void main() {
-  int v = int(min(2u, 32u));
-  uint x = bitfieldExtract(1u, v, int(min(3u, 30u)));
+  uint v = 1u;
+  uint offset = 2u;
+  uint count = 3u;
+  uint v_1 = min(offset, 32u);
+  int v_2 = int(v_1);
+  uint x = bitfieldExtract(v, v_2, int(min(count, (32u - v_1))));
 }
 )");
 }
@@ -1045,7 +1054,11 @@ void main() {
 TEST_F(GlslWriterTest, InsertBits) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kInsertBits, 1_u, 2_u, 3_u, 4_u));
+        auto* v = b.Let("v", 1_u);
+        auto* n = b.Let("n", 2_u);
+        auto* offset = b.Let("offset", 3_u);
+        auto* count = b.Let("count", 4_u);
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kInsertBits, v, n, offset, count));
         b.Return(func);
     });
 
@@ -1055,8 +1068,13 @@ TEST_F(GlslWriterTest, InsertBits) {
 precision highp int;
 
 void main() {
-  int v = int(min(3u, 32u));
-  uint x = bitfieldInsert(1u, 2u, v, int(min(4u, 29u)));
+  uint v = 1u;
+  uint n = 2u;
+  uint offset = 3u;
+  uint count = 4u;
+  uint v_1 = min(offset, 32u);
+  int v_2 = int(v_1);
+  uint x = bitfieldInsert(v, n, v_2, int(min(count, (32u - v_1))));
 }
 )");
 }
@@ -2827,7 +2845,8 @@ TEST_F(GlslWriterTest, BuiltinTextureSampleBias_2d) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, 3_f));
+        auto* bias = b.Let("b", 3_f);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, bias));
         b.Return(func);
     });
 
@@ -2838,7 +2857,8 @@ precision highp int;
 
 uniform highp sampler2D f_t_s;
 void main() {
-  vec4 x = texture(f_t_s, vec2(1.0f, 2.0f), clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float b = 3.0f;
+  vec4 x = texture(f_t_s, vec2(1.0f, 2.0f), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 )");
 }
@@ -2862,8 +2882,9 @@ TEST_F(GlslWriterTest, BuiltinTextureSampleBias_2d_Offset) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
+        auto* bias = b.Let("b", 3_f);
         b.Let("x",
-              b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, 3_f, offset));
+              b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, bias, offset));
         b.Return(func);
     });
 
@@ -2874,7 +2895,8 @@ precision highp int;
 
 uniform highp sampler2D f_t_s;
 void main() {
-  vec4 x = textureOffset(f_t_s, vec2(1.0f, 2.0f), ivec2(4, 5), clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float b = 3.0f;
+  vec4 x = textureOffset(f_t_s, vec2(1.0f, 2.0f), ivec2(4, 5), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 )");
 }
@@ -2898,8 +2920,9 @@ TEST_F(GlslWriterTest, BuiltinTextureSampleBias_2d_Array) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x",
-              b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, array_idx, 3_f));
+        auto* bias = b.Let("b", 3_f);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, array_idx,
+                                     bias));
         b.Return(func);
     });
 
@@ -2911,7 +2934,8 @@ precision highp int;
 uniform highp sampler2DArray f_t_s;
 void main() {
   vec2 v = vec2(1.0f, 2.0f);
-  vec4 x = texture(f_t_s, vec3(v, float(4u)), clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float b = 3.0f;
+  vec4 x = texture(f_t_s, vec3(v, float(4u)), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 )");
 }
@@ -2936,8 +2960,9 @@ TEST_F(GlslWriterTest, BuiltinTextureSampleBias_2d_Array_Offset) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
+        auto* bias = b.Let("b", 3_f);
         b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, array_idx,
-                                     3_f, offset));
+                                     bias, offset));
         b.Return(func);
     });
 
@@ -2949,7 +2974,8 @@ precision highp int;
 uniform highp sampler2DArray f_t_s;
 void main() {
   vec2 v = vec2(1.0f, 2.0f);
-  vec4 x = textureOffset(f_t_s, vec3(v, float(4u)), ivec2(4, 5), clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float b = 3.0f;
+  vec4 x = textureOffset(f_t_s, vec3(v, float(4u)), ivec2(4, 5), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 )");
 }
@@ -2972,7 +2998,8 @@ TEST_F(GlslWriterTest, BuiltinTextureSampleBias_3d) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, 3_f));
+        auto* bias = b.Let("b", 3_f);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, bias));
         b.Return(func);
     });
 
@@ -2983,7 +3010,8 @@ precision highp int;
 
 uniform highp sampler3D f_t_s;
 void main() {
-  vec4 x = texture(f_t_s, vec3(1.0f, 2.0f, 3.0f), clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float b = 3.0f;
+  vec4 x = texture(f_t_s, vec3(1.0f, 2.0f, 3.0f), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 )");
 }
@@ -3007,8 +3035,9 @@ TEST_F(GlslWriterTest, BuiltinTextureSampleBias_3d_Offset) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
+        auto* bias = b.Let("b", 3_f);
         b.Let("x",
-              b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, 3_f, offset));
+              b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, bias, offset));
         b.Return(func);
     });
 
@@ -3019,7 +3048,8 @@ precision highp int;
 
 uniform highp sampler3D f_t_s;
 void main() {
-  vec4 x = textureOffset(f_t_s, vec3(1.0f, 2.0f, 3.0f), ivec3(4, 5, 6), clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float b = 3.0f;
+  vec4 x = textureOffset(f_t_s, vec3(1.0f, 2.0f, 3.0f), ivec3(4, 5, 6), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 )");
 }
@@ -3042,7 +3072,8 @@ TEST_F(GlslWriterTest, BuiltinTextureSampleBias_Cube) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, 3_f));
+        auto* bias = b.Let("b", 3_f);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, bias));
         b.Return(func);
     });
 
@@ -3053,7 +3084,8 @@ precision highp int;
 
 uniform highp samplerCube f_t_s;
 void main() {
-  vec4 x = texture(f_t_s, vec3(1.0f, 2.0f, 3.0f), clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float b = 3.0f;
+  vec4 x = texture(f_t_s, vec3(1.0f, 2.0f, 3.0f), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 )");
 }
@@ -3077,8 +3109,9 @@ TEST_F(GlslWriterTest, BuiltinTextureSampleBias_Cube_Array) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x",
-              b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, array_idx, 3_f));
+        auto* bias = b.Let("b", 3_f);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, array_idx,
+                                     bias));
         b.Return(func);
     });
 
@@ -3094,7 +3127,8 @@ precision highp int;
 uniform highp samplerCubeArray f_t_s;
 void main() {
   vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  vec4 x = texture(f_t_s, vec4(v, float(4u)), clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float b = 3.0f;
+  vec4 x = texture(f_t_s, vec4(v, float(4u)), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 )");
 }

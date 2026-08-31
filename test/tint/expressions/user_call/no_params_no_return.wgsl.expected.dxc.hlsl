@@ -1,7 +1,7 @@
 
 void c() {
   int a = int(1);
-  a = asint((asuint(a) + asuint(int(2))));
+  a = asint((asuint(a) + 2u));
 }
 
 [numthreads(1, 1, 1)]

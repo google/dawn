@@ -27,10 +27,10 @@ kernel void v(device int* v_1 [[buffer(0)]]) {
               break;
             }
             if ((i > 5)) {
-              i = as_type<int>((as_type<uint>(i) * as_type<uint>(2)));
+              i = as_type<int>((as_type<uint>(i) * 2u));
               break;
             } else {
-              i = as_type<int>((as_type<uint>(i) * as_type<uint>(2)));
+              i = as_type<int>((as_type<uint>(i) * 2u));
               break;
             }
             /* unreachable */

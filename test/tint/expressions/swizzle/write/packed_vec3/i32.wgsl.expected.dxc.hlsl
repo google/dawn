@@ -2,9 +2,9 @@
 RWByteAddressBuffer U : register(u0);
 [numthreads(1, 1, 1)]
 void f() {
-  U.Store3(0u, asuint(int3(int(1), int(2), int(3))));
-  U.Store(0u, asuint(int(1)));
-  U.Store(4u, asuint(int(2)));
-  U.Store(8u, asuint(int(3)));
+  U.Store3(0u, uint3(1u, 2u, 3u));
+  U.Store(0u, 1u);
+  U.Store(4u, 2u);
+  U.Store(8u, 3u);
 }
 

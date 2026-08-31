@@ -5,5 +5,5 @@ using namespace metal;
 kernel void v() {
   int i = 123;
   thread int* const p = (&i);
-  int const u = as_type<int>((as_type<uint>((*p)) + as_type<uint>(1)));
+  int const u = as_type<int>((as_type<uint>((*p)) + 1u));
 }

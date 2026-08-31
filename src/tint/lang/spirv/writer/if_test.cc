@@ -95,9 +95,8 @@ TEST_F(SpirvWriterTest, If_FalseEmpty) {
                OpBranchConditional %true %6 %5
           %6 = OpLabel
          %12 = OpBitcast %uint %l
-         %13 = OpBitcast %uint %l
-         %14 = OpIAdd %uint %12 %13
-         %15 = OpBitcast %int %14
+         %13 = OpIAdd %uint %12 %uint_1
+         %15 = OpBitcast %int %13
                OpBranch %5
           %5 = OpLabel
                OpReturn
@@ -134,14 +133,12 @@ TEST_F(SpirvWriterTest, If_TrueEmpty) {
                OpBranchConditional %true %5 %6
           %6 = OpLabel
          %12 = OpBitcast %uint %l
-         %13 = OpBitcast %uint %l
-         %14 = OpIAdd %uint %12 %13
-         %15 = OpBitcast %int %14
+         %13 = OpIAdd %uint %12 %uint_1
+         %15 = OpBitcast %int %13
                OpBranch %5
           %5 = OpLabel
                OpReturn
                OpFunctionEnd
-
 )");
 }
 

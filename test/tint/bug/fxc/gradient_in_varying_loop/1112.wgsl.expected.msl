@@ -47,7 +47,7 @@ float4 main_inner(float2 vUV, tint_module_vars_struct tint_module_vars) {
         v_2 = (offset.y > 1.0f);
       }
       if (v_2) {
-        i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+        i = as_type<int>((as_type<uint>(i) + 1u));
         {
           uint const tint_low_inc = (tint_loop_idx.x - 1u);
           tint_loop_idx.x = tint_low_inc;
@@ -57,7 +57,7 @@ float4 main_inner(float2 vUV, tint_module_vars_struct tint_module_vars) {
         continue;
       }
       float const sampleDepth = 0.0f;
-      i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+      i = as_type<int>((as_type<uint>(i) + 1u));
       {
         uint const tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;

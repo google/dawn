@@ -8,7 +8,7 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 uniform highp samplerCubeArray f_arg_0_arg_1;
 vec4 textureSampleBias_eed7c4() {
-  vec4 res = texture(f_arg_0_arg_1, vec4(vec3(1.0f), float(1)), clamp(1.0f, -16.0f, 15.9899997711181640625f));
+  vec4 res = texture(f_arg_0_arg_1, vec4(vec3(1.0f), float(1)), 1.0f);
   return res;
 }
 void main() {

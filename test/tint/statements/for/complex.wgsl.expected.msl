@@ -25,13 +25,13 @@ kernel void f() {
         break;
       }
       (some_loop_body());
-      j = as_type<int>((as_type<uint>(i) * as_type<uint>(30)));
+      j = as_type<int>((as_type<uint>(i) * 30u));
       {
         uint const tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
         uint const tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+        i = as_type<int>((as_type<uint>(i) + 1u));
       }
     }
   }

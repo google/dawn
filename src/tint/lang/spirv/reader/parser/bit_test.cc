@@ -1290,22 +1290,36 @@ TEST_F(SpirvParserTest, Bitcast_Scalar) {
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %foo "foo"
+               OpName %param "param"
        %void = OpTypeVoid
        %uint = OpTypeInt 32 0
       %float = OpTypeFloat 32
-        %two = OpConstant %float 2
     %void_fn = OpTypeFunction %void
+      %fn_ty = OpTypeFunction %uint %float
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-          %1 = OpBitcast %uint %two
                OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %uint None %fn_ty
+      %param = OpFunctionParameter %float
+  %foo_start = OpLabel
+          %1 = OpBitcast %uint %param
+               OpReturnValue %1
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast<u32> 2.0f
     ret
+  }
+}
+%foo = func(%param:f32):u32 {
+  $B2: {
+    %4:u32 = bitcast<u32> %param
+    ret %4
   }
 }
 )");
@@ -1317,26 +1331,39 @@ TEST_F(SpirvParserTest, Bitcast_Vector) {
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %foo "foo"
+               OpName %param "param"
        %void = OpTypeVoid
        %uint = OpTypeInt 32 0
       %float = OpTypeFloat 32
      %v2uint = OpTypeVector %uint 2
     %v2float = OpTypeVector %float 2
-      %eight = OpConstant %uint 8
-    %v2eight = OpConstantComposite %v2uint %eight %eight
     %void_fn = OpTypeFunction %void
+      %fn_ty = OpTypeFunction %v2float %v2uint
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-          %1 = OpBitcast %v2float %v2eight
                OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %v2float None %fn_ty
+      %param = OpFunctionParameter %v2uint
+  %foo_start = OpLabel
+          %1 = OpBitcast %v2float %param
+               OpReturnValue %1
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = bitcast<vec2<f32>> vec2<u32>(8u)
     ret
+  }
+}
+%foo = func(%param:vec2<u32>):vec2<f32> {
+  $B2: {
+    %4:vec2<f32> = bitcast<vec2<f32>> %param
+    ret %4
   }
 }
 )");
@@ -1604,23 +1631,35 @@ TEST_F(SpirvParserTest, QuantizeToF16_Scalar) {
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %foo "foo"
+               OpName %param "param"
        %void = OpTypeVoid
       %float = OpTypeFloat 32
-        %one = OpConstant %float 1
-    %v2float = OpTypeVector %float 2
-      %v2one = OpConstantComposite %v2float %one %one
     %void_fn = OpTypeFunction %void
+      %fn_ty = OpTypeFunction %float %float
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-          %1 = OpQuantizeToF16 %float %one
                OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %float None %fn_ty
+      %param = OpFunctionParameter %float
+  %foo_start = OpLabel
+          %1 = OpQuantizeToF16 %float %param
+               OpReturnValue %1
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = quantizeToF16 1.0f
     ret
+  }
+}
+%foo = func(%param:f32):f32 {
+  $B2: {
+    %4:f32 = quantizeToF16 %param
+    ret %4
   }
 }
 )");
@@ -1632,23 +1671,36 @@ TEST_F(SpirvParserTest, QuantizeToF16_Vector) {
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %foo "foo"
+               OpName %param "param"
        %void = OpTypeVoid
       %float = OpTypeFloat 32
-        %one = OpConstant %float 1
     %v2float = OpTypeVector %float 2
-      %v2one = OpConstantComposite %v2float %one %one
     %void_fn = OpTypeFunction %void
+      %fn_ty = OpTypeFunction %v2float %v2float
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-          %1 = OpQuantizeToF16 %v2float %v2one
                OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %v2float None %fn_ty
+      %param = OpFunctionParameter %v2float
+  %foo_start = OpLabel
+          %1 = OpQuantizeToF16 %v2float %param
+               OpReturnValue %1
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = quantizeToF16 vec2<f32>(1.0f)
     ret
+  }
+}
+%foo = func(%param:vec2<f32>):vec2<f32> {
+  $B2: {
+    %4:vec2<f32> = quantizeToF16 %param
+    ret %4
   }
 }
 )");

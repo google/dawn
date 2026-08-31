@@ -15,50 +15,49 @@ uniform a_block_1_ubo {
 } v;
 int counter = 0;
 int i() {
-  uint v_1 = uint(counter);
-  counter = int((v_1 + uint(1)));
+  counter = int((uint(counter) + 1u));
   return counter;
 }
-mat4x3 v_2(uint start_byte_offset) {
+mat4x3 v_1(uint start_byte_offset) {
   return mat4x3(uintBitsToFloat(v.inner[(start_byte_offset / 16u)].xyz), uintBitsToFloat(v.inner[((16u + start_byte_offset) / 16u)].xyz), uintBitsToFloat(v.inner[((32u + start_byte_offset) / 16u)].xyz), uintBitsToFloat(v.inner[((48u + start_byte_offset) / 16u)].xyz));
 }
-Inner v_3(uint start_byte_offset) {
-  return Inner(v_2(start_byte_offset));
+Inner v_2(uint start_byte_offset) {
+  return Inner(v_1(start_byte_offset));
 }
-Inner[4] v_4(uint start_byte_offset) {
+Inner[4] v_3(uint start_byte_offset) {
   Inner a[4] = Inner[4](Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))));
   {
-    uint v_5 = 0u;
-    v_5 = 0u;
+    uint v_4 = 0u;
+    v_4 = 0u;
     while(true) {
-      uint v_6 = v_5;
-      if ((v_6 >= 4u)) {
+      uint v_5 = v_4;
+      if ((v_5 >= 4u)) {
         break;
       }
-      a[v_6] = v_3((start_byte_offset + (v_6 * 64u)));
+      a[v_5] = v_2((start_byte_offset + (v_5 * 64u)));
       {
-        v_5 = (v_6 + 1u);
+        v_4 = (v_5 + 1u);
       }
     }
   }
   return a;
 }
-Outer v_7(uint start_byte_offset) {
-  return Outer(v_4(start_byte_offset));
+Outer v_6(uint start_byte_offset) {
+  return Outer(v_3(start_byte_offset));
 }
-Outer[4] v_8(uint start_byte_offset) {
+Outer[4] v_7(uint start_byte_offset) {
   Outer a[4] = Outer[4](Outer(Inner[4](Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))))), Outer(Inner[4](Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))))), Outer(Inner[4](Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))))), Outer(Inner[4](Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f))))));
   {
-    uint v_9 = 0u;
-    v_9 = 0u;
+    uint v_8 = 0u;
+    v_8 = 0u;
     while(true) {
-      uint v_10 = v_9;
-      if ((v_10 >= 4u)) {
+      uint v_9 = v_8;
+      if ((v_9 >= 4u)) {
         break;
       }
-      a[v_10] = v_7((start_byte_offset + (v_10 * 256u)));
+      a[v_9] = v_6((start_byte_offset + (v_9 * 256u)));
       {
-        v_9 = (v_10 + 1u);
+        v_8 = (v_9 + 1u);
       }
     }
   }
@@ -66,16 +65,16 @@ Outer[4] v_8(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_11 = (min(uint(i()), 3u) * 256u);
-  uint v_12 = (min(uint(i()), 3u) * 64u);
-  uint v_13 = (min(uint(i()), 3u) * 16u);
-  Outer l_a[4] = v_8(0u);
-  Outer l_a_i = v_7(v_11);
-  Inner l_a_i_a[4] = v_4(v_11);
-  Inner l_a_i_a_i = v_3((v_11 + v_12));
-  mat4x3 l_a_i_a_i_m = v_2((v_11 + v_12));
-  vec3 l_a_i_a_i_m_i = uintBitsToFloat(v.inner[(((v_11 + v_12) + v_13) / 16u)].xyz);
-  uint v_14 = (((v_11 + v_12) + v_13) + (min(uint(i()), 2u) * 4u));
-  uvec4 v_15 = v.inner[(v_14 / 16u)];
-  float l_a_i_a_i_m_i_i = uintBitsToFloat(v_15[((v_14 & 15u) >> 2u)]);
+  uint v_10 = (min(uint(i()), 3u) * 256u);
+  uint v_11 = (min(uint(i()), 3u) * 64u);
+  uint v_12 = (min(uint(i()), 3u) * 16u);
+  Outer l_a[4] = v_7(0u);
+  Outer l_a_i = v_6(v_10);
+  Inner l_a_i_a[4] = v_3(v_10);
+  Inner l_a_i_a_i = v_2((v_10 + v_11));
+  mat4x3 l_a_i_a_i_m = v_1((v_10 + v_11));
+  vec3 l_a_i_a_i_m_i = uintBitsToFloat(v.inner[(((v_10 + v_11) + v_12) / 16u)].xyz);
+  uint v_13 = (((v_10 + v_11) + v_12) + (min(uint(i()), 2u) * 4u));
+  uvec4 v_14 = v.inner[(v_13 / 16u)];
+  float l_a_i_a_i_m_i_i = uintBitsToFloat(v_14[((v_13 & 15u) >> 2u)]);
 }

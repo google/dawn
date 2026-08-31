@@ -436,10 +436,10 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_Frexp_UserDeclaredResultStruct) {
                                                              {mod.symbols.New("exp"), ty.i32()},
                                                          });
 
-    auto* f = b.Function("f", ty.f32());
+    auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* c = b.Call(str_ty, BuiltinFn::kFrexp, 1_f);
-        b.Return(f, b.Access<f32>(c, 0_u));
+        b.Call(str_ty, BuiltinFn::kFrexp, b.Let("l", 1_f));
+        b.Return(f);
     });
 
     auto res = ir::Validate(mod);
@@ -447,8 +447,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_Frexp_UserDeclaredResultStruct) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(error: frexp: call result type '__frexp_result_f32' does not match builtin return type '__frexp_result_f32'
-    %2:__frexp_result_f32 = frexp 1.0f
+            R"(:9:29 error: frexp: call result type '__frexp_result_f32' does not match builtin return type '__frexp_result_f32'
+    %3:__frexp_result_f32 = frexp %l
                             ^^^^^
 )")) << res.Failure();
 }
@@ -463,10 +463,10 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_Modf_UserDeclaredResultStruct) {
                                  {mod.symbols.New("whole"), ty.vec4f()},
                              });
 
-    auto* f = b.Function("f", ty.vec4f());
+    auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* c = b.Call(str_ty, BuiltinFn::kModf, b.Splat<vec4f>(1_f));
-        b.Return(f, b.Access<vec4f>(c, 0_u));
+        b.Call(str_ty, BuiltinFn::kModf, b.Let("l", b.Splat<vec4f>(1_f)));
+        b.Return(f);
     });
 
     auto res = ir::Validate(mod);
@@ -474,8 +474,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_Modf_UserDeclaredResultStruct) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(error: modf: call result type '__modf_result_vec4_f32' does not match builtin return type '__modf_result_vec4_f32'
-    %2:__modf_result_vec4_f32 = modf vec4<f32>(1.0f)
+            R"(:9:33 error: modf: call result type '__modf_result_vec4_f32' does not match builtin return type '__modf_result_vec4_f32'
+    %3:__modf_result_vec4_f32 = modf %l
                                 ^^^^
 )")) << res.Failure();
 }

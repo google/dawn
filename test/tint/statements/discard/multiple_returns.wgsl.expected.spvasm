@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 105
+; Bound: 103
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -58,7 +58,6 @@
      %v2bool = OpTypeVector %bool 2
 %_ptr_Function_uint = OpTypePointer Function %uint
      %uint_1 = OpConstant %uint 1
-      %int_1 = OpConstant %int 1
       %int_5 = OpConstant %int 5
        %main = OpFunction %void None %15
          %16 = OpLabel
@@ -113,23 +112,23 @@
                OpSelectionMerge %72 None
                OpBranchConditional %71 %73 %72
          %73 = OpLabel
-         %95 = OpLoad %int %i None
-         %96 = OpConvertSToF %float %95
-         %97 = OpAccessChain %_ptr_StorageBuffer_float %5 %uint_0
-         %98 = OpLoad %bool %continue_execution None
-               OpSelectionMerge %99 None
-               OpBranchConditional %98 %100 %99
-        %100 = OpLabel
-               OpStore %97 %96 None
-               OpBranch %99
-         %99 = OpLabel
-        %101 = OpLoad %bool %continue_execution None
-        %102 = OpLogicalNot %bool %101
-               OpSelectionMerge %103 None
-               OpBranchConditional %102 %104 %103
-        %104 = OpLabel
+         %93 = OpLoad %int %i None
+         %94 = OpConvertSToF %float %93
+         %95 = OpAccessChain %_ptr_StorageBuffer_float %5 %uint_0
+         %96 = OpLoad %bool %continue_execution None
+               OpSelectionMerge %97 None
+               OpBranchConditional %96 %98 %97
+         %98 = OpLabel
+               OpStore %95 %94 None
+               OpBranch %97
+         %97 = OpLabel
+         %99 = OpLoad %bool %continue_execution None
+        %100 = OpLogicalNot %bool %99
+               OpSelectionMerge %101 None
+               OpBranchConditional %100 %102 %101
+        %102 = OpLabel
                OpKill
-        %103 = OpLabel
+        %101 = OpLabel
                OpReturn
          %72 = OpLabel
                OpBranch %48
@@ -148,13 +147,12 @@
                OpStore %85 %84 None
          %86 = OpLoad %int %i None
          %87 = OpBitcast %uint %86
-         %88 = OpBitcast %uint %int_1
-         %90 = OpIAdd %uint %87 %88
-         %91 = OpBitcast %int %90
-               OpStore %i %91 None
-         %92 = OpLoad %int %i None
-         %93 = OpIEqual %bool %92 %int_5
-               OpBranchConditional %93 %50 %49
+         %88 = OpIAdd %uint %87 %uint_1
+         %89 = OpBitcast %int %88
+               OpStore %i %89 None
+         %90 = OpLoad %int %i None
+         %91 = OpIEqual %bool %90 %int_5
+               OpBranchConditional %91 %50 %49
          %50 = OpLabel
          %51 = OpLoad %bool %continue_execution None
          %52 = OpLogicalNot %bool %51

@@ -5,5 +5,5 @@ using namespace metal;
 kernel void f0() {
   int const a = 2147483647;
   int const b = 1;
-  int const c = as_type<int>((as_type<uint>(a) + as_type<uint>(1)));
+  int const c = as_type<int>((as_type<uint>(a) + 1u));
 }

@@ -24,8 +24,7 @@ void main() {
       }
       if (tint_continue) {
         {
-          uint v = uint(i_1);
-          i_1 = int((v + uint(1)));
+          i_1 = int((uint(i_1) + 1u));
         }
         continue;
       }
@@ -43,14 +42,12 @@ void main() {
       }
       if (tint_continue_1) {
         {
-          uint v = uint(i_1);
-          i_1 = int((v + uint(1)));
+          i_1 = int((uint(i_1) + 1u));
         }
         continue;
       }
       {
-        uint v = uint(i_1);
-        i_1 = int((v + uint(1)));
+        i_1 = int((uint(i_1) + 1u));
       }
     }
   }

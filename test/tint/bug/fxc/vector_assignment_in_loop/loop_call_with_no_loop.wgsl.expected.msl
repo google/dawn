@@ -32,7 +32,7 @@ kernel void v() {
       }
       (foo(tint_module_vars));
       {
-        i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+        i = as_type<int>((as_type<uint>(i) + 1u));
       }
     }
   }

@@ -40,12 +40,12 @@ void foo(device tint_array<int, 4>* const arg) {
       }
       if (tint_continue) {
         {
-          i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+          i = as_type<int>((as_type<uint>(i) + 1u));
         }
         continue;
       }
       {
-        i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+        i = as_type<int>((as_type<uint>(i) + 1u));
       }
     }
   }

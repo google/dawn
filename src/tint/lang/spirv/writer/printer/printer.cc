@@ -475,6 +475,10 @@ class Printer {
                         spv::Op::OpConstant,
                         {Type(ty), id, U32Operand(constant->ValueAs<f16>().BitsRepresentation())});
                 },
+                [&](const core::type::U16*) {
+                    module_.PushType(spv::Op::OpConstant,
+                                     {Type(ty), id, U32Operand(constant->ValueAs<u16>())});
+                },
                 [&](const core::type::Vector* vec) {
                     OperandList operands = {Type(ty), id};
                     for (uint32_t i = 0; i < vec->Width(); i++) {

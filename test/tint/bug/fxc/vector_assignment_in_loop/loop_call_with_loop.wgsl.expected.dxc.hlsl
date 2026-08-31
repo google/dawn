@@ -16,7 +16,7 @@ void foo() {
       v4u[i] = 1u;
       v2b[i] = true;
       {
-        i = asint((asuint(i) + asuint(int(1))));
+        i = asint((asuint(i) + 1u));
       }
     }
   }
@@ -33,7 +33,7 @@ void main() {
       }
       foo();
       {
-        i = asint((asuint(i) + asuint(int(1))));
+        i = asint((asuint(i) + 1u));
       }
     }
   }

@@ -3329,14 +3329,11 @@ $B1: {  # root
 %foo = func():subgroup_matrix_result<f32, 8, 4> {
   $B2: {
     %3:u32 = arrayLength %arr
-    %4:u32 = mulSat 4u, 7u
-    %5:u32 = addSat 0u, %4
-    %6:u32 = addSat %5, 4u
-    %7:bool = lte %6, %3
-    %8:u32 = select 0u, 0u, %7
-    %9:u32 = select 4u, 4u, %7
-    %10:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %8, %9
-    ret %10
+    %4:bool = lte 32u, %3
+    %5:u32 = select 0u, 0u, %4
+    %6:u32 = select 4u, 4u, %4
+    %7:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %5, %6
+    ret %7
   }
 }
 )";
@@ -3400,14 +3397,11 @@ $B1: {  # root
 %foo = func():subgroup_matrix_result<f32, 8, 4> {
   $B2: {
     %3:u32 = arrayLength %arr
-    %4:u32 = mulSat 4u, 7u
-    %5:u32 = addSat 0u, %4
-    %6:u32 = addSat %5, 4u
-    %7:bool = lte %6, %3
-    %8:u32 = select 0u, 0u, %7
-    %9:u32 = select 4u, 4u, %7
-    %10:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %8, %9
-    ret %10
+    %4:bool = lte 32u, %3
+    %5:u32 = select 0u, 0u, %4
+    %6:u32 = select 4u, 4u, %4
+    %7:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %5, %6
+    ret %7
   }
 }
 )";
@@ -3548,14 +3542,11 @@ $B1: {  # root
 %foo = func():subgroup_matrix_result<f32, 8, 4> {
   $B2: {
     %3:u32 = arrayLength %arr
-    %4:u32 = mulSat 4u, 7u
-    %5:u32 = addSat 16u, %4
-    %6:u32 = addSat %5, 4u
-    %7:bool = lte %6, %3
-    %8:u32 = select 0u, 16u, %7
-    %9:u32 = select 4u, 4u, %7
-    %10:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %8, %9
-    ret %10
+    %4:bool = lte 48u, %3
+    %5:u32 = select 0u, 16u, %4
+    %6:u32 = select 4u, 4u, %4
+    %7:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %5, %6
+    ret %7
   }
 }
 )";
@@ -3620,14 +3611,11 @@ $B1: {  # root
 %foo = func():subgroup_matrix_result<i8, 8, 4> {
   $B2: {
     %3:u32 = arrayLength %arr
-    %4:u32 = mulSat 1u, 7u
-    %5:u32 = addSat 0u, %4
-    %6:u32 = addSat %5, 1u
-    %7:bool = lte %6, %3
-    %8:u32 = select 0u, 0u, %7
-    %9:u32 = select 1u, 1u, %7
-    %10:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, col_major> %arr, %8, %9
-    ret %10
+    %4:bool = lte 8u, %3
+    %5:u32 = select 0u, 0u, %4
+    %6:u32 = select 1u, 1u, %4
+    %7:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, col_major> %arr, %5, %6
+    ret %7
   }
 }
 )";
@@ -3692,14 +3680,11 @@ $B1: {  # root
 %foo = func():subgroup_matrix_result<u8, 8, 4> {
   $B2: {
     %3:u32 = arrayLength %arr
-    %4:u32 = mulSat 1u, 7u
-    %5:u32 = addSat 0u, %4
-    %6:u32 = addSat %5, 1u
-    %7:bool = lte %6, %3
-    %8:u32 = select 0u, 0u, %7
-    %9:u32 = select 1u, 1u, %7
-    %10:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, col_major> %arr, %8, %9
-    ret %10
+    %4:bool = lte 8u, %3
+    %5:u32 = select 0u, 0u, %4
+    %6:u32 = select 1u, 1u, %4
+    %7:subgroup_matrix_result<u8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 4>, col_major> %arr, %5, %6
+    ret %7
   }
 }
 )";
@@ -4845,13 +4830,10 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>):void {
   $B2: {
     %4:u32 = arrayLength %arr
-    %5:u32 = mulSat 4u, 7u
-    %6:u32 = addSat 0u, %5
-    %7:u32 = addSat %6, 4u
-    %8:bool = lte %7, %4
-    %9:u32 = select 0u, 0u, %8
-    %10:u32 = select 4u, 4u, %8
-    %11:void = subgroupMatrixStore<col_major> %arr, %9, %value, %10
+    %5:bool = lte 32u, %4
+    %6:u32 = select 0u, 0u, %5
+    %7:u32 = select 4u, 4u, %5
+    %8:void = subgroupMatrixStore<col_major> %arr, %6, %value, %7
     ret
   }
 }
@@ -4917,13 +4899,10 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>):void {
   $B2: {
     %4:u32 = arrayLength %arr
-    %5:u32 = mulSat 4u, 7u
-    %6:u32 = addSat 0u, %5
-    %7:u32 = addSat %6, 4u
-    %8:bool = lte %7, %4
-    %9:u32 = select 0u, 0u, %8
-    %10:u32 = select 4u, 4u, %8
-    %11:void = subgroupMatrixStore<col_major> %arr, %9, %value, %10
+    %5:bool = lte 32u, %4
+    %6:u32 = select 0u, 0u, %5
+    %7:u32 = select 4u, 4u, %5
+    %8:void = subgroupMatrixStore<col_major> %arr, %6, %value, %7
     ret
   }
 }
@@ -5068,13 +5047,10 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>):void {
   $B2: {
     %4:u32 = arrayLength %arr
-    %5:u32 = mulSat 4u, 7u
-    %6:u32 = addSat 0u, %5
-    %7:u32 = addSat %6, 4u
-    %8:bool = lte %7, %4
-    %9:u32 = select 0u, 0u, %8
-    %10:u32 = select 4u, 4u, %8
-    %11:void = subgroupMatrixStore<col_major> %arr, %9, %value, %10
+    %5:bool = lte 32u, %4
+    %6:u32 = select 0u, 0u, %5
+    %7:u32 = select 4u, 4u, %5
+    %8:void = subgroupMatrixStore<col_major> %arr, %6, %value, %7
     ret
   }
 }
@@ -5141,13 +5117,10 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<i8, 8, 4>):void {
   $B2: {
     %4:u32 = arrayLength %arr
-    %5:u32 = mulSat 1u, 7u
-    %6:u32 = addSat 0u, %5
-    %7:u32 = addSat %6, 1u
-    %8:bool = lte %7, %4
-    %9:u32 = select 0u, 0u, %8
-    %10:u32 = select 1u, 1u, %8
-    %11:void = subgroupMatrixStore<col_major> %arr, %9, %value, %10
+    %5:bool = lte 8u, %4
+    %6:u32 = select 0u, 0u, %5
+    %7:u32 = select 1u, 1u, %5
+    %8:void = subgroupMatrixStore<col_major> %arr, %6, %value, %7
     ret
   }
 }
@@ -5214,13 +5187,10 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<u8, 8, 4>):void {
   $B2: {
     %4:u32 = arrayLength %arr
-    %5:u32 = mulSat 1u, 7u
-    %6:u32 = addSat 0u, %5
-    %7:u32 = addSat %6, 1u
-    %8:bool = lte %7, %4
-    %9:u32 = select 0u, 0u, %8
-    %10:u32 = select 1u, 1u, %8
-    %11:void = subgroupMatrixStore<col_major> %arr, %9, %value, %10
+    %5:bool = lte 8u, %4
+    %6:u32 = select 0u, 0u, %5
+    %7:u32 = select 1u, 1u, %5
+    %8:void = subgroupMatrixStore<col_major> %arr, %6, %value, %7
     ret
   }
 }

@@ -37,8 +37,7 @@ bool func_3() {
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        uint v_3 = uint(i);
-        i = int((v_3 + uint(1)));
+        i = int((uint(i) + 1u));
       }
     }
   }

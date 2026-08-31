@@ -941,11 +941,11 @@ TEST_F(IR_ValueToLetTest, NameMe1) {
 TEST_F(IR_ValueToLetTest, NameMe2) {
     auto* fn = b.Function("F", ty.void_());
     b.Append(fn->Block(), [&] {
-        auto* i = b.Name("i", b.Max(1_i, 2_i));
+        auto* i = b.Let("i", 1_i);
         auto* v = b.Var<function>("v", i);
-        auto* x = b.Name("x", b.Max(3_i, 4_i));
-        auto* y = b.Name("y", b.Load(v));
-        auto* z = b.Name("z", b.Add(y, x));
+        auto* x = b.Name("x", b.Load(v));
+        auto* y = b.Name("y", b.Max(x, 4_i));
+        auto* z = b.Name("z", b.Add(y, 3_i));
         b.Store(v, z);
         b.Return(fn);
     });
@@ -953,11 +953,11 @@ TEST_F(IR_ValueToLetTest, NameMe2) {
     auto* src = R"(
 %F = func():void {
   $B1: {
-    %i:i32 = max 1i, 2i
+    %i:i32 = let 1i
     %v:ptr<function, i32, read_write> = var %i
-    %x:i32 = max 3i, 4i
-    %y:i32 = load %v
-    %z:i32 = add %y, %x
+    %x:i32 = load %v
+    %y:i32 = max %x, 4i
+    %z:i32 = add %y, 3i
     store %v, %z
     ret
   }
@@ -968,11 +968,11 @@ TEST_F(IR_ValueToLetTest, NameMe2) {
     auto* expect = R"(
 %F = func():void {
   $B1: {
-    %i:i32 = max 1i, 2i
+    %i:i32 = let 1i
     %v:ptr<function, i32, read_write> = var %i
-    %x:i32 = max 3i, 4i
-    %y:i32 = load %v
-    %z:i32 = add %y, %x
+    %x:i32 = load %v
+    %y:i32 = max %x, 4i
+    %z:i32 = add %y, 3i
     store %v, %z
     ret
   }

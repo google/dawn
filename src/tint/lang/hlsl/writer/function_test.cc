@@ -460,7 +460,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithWOStorageBufferStore) {
               R"(
 RWByteAddressBuffer coord : register(u0, space1);
 void main() {
-  coord.Store(4u, asuint(2.0f));
+  coord.Store(4u, 1073741824u);
 }
 
 )");
@@ -499,7 +499,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithStorageBufferStore) {
               R"(
 RWByteAddressBuffer coord : register(u0, space1);
 void main() {
-  coord.Store(4u, asuint(2.0f));
+  coord.Store(4u, 1073741824u);
 }
 
 )");

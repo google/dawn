@@ -521,7 +521,7 @@ fn main_inner(vs_INTERP9 : vec3<f32>, vs_INTERP4 : vec4<f32>, vs_INTERP8 : vec3<
   u_xlat0.x = dot(u_xlat3, vec4<f32>(4.0f, 3.0f, 2.0f, 1.0f));
   u_xlat0.x = (-(u_xlat0.x) + 4.0f);
   u_xlatu0 = u32(u_xlat0.x);
-  u_xlati0 = (bitcast<i32>(u_xlatu0) << bitcast<u32>(2i));
+  u_xlati0 = (bitcast<i32>(u_xlatu0) << 2u);
   let v_35 = (vs_INTERP8.yyy * v_3._MainLightWorldToShadow[((u_xlati0 + 1i) / 4i)][((u_xlati0 + 1i) % 4i)].xyz);
   u_xlat2 = vec4<f32>(v_35.xyz, u_xlat2.w);
   let v_36 = ((v_3._MainLightWorldToShadow[(u_xlati0 / 4i)][(u_xlati0 % 4i)].xyz * vs_INTERP8.xxx) + u_xlat2.xyz);
@@ -1455,7 +1455,7 @@ fn main_inner(vs_INTERP9 : vec3<f32>, vs_INTERP4 : vec4<f32>, vs_INTERP8 : vec3<
           u_xlat88 = (u_xlat88 + u_xlat11.x);
           u_xlati87 = i32(u_xlat88);
         }
-        u_xlati87 = (u_xlati87 << bitcast<u32>(2i));
+        u_xlati87 = (u_xlati87 << 2u);
         u_xlat11 = (vs_INTERP8.yyyy * v_3._AdditionalLightsWorldToShadow[((u_xlati87 + 1i) / 4i)][((u_xlati87 + 1i) % 4i)]);
         u_xlat11 = ((v_3._AdditionalLightsWorldToShadow[(u_xlati87 / 4i)][(u_xlati87 % 4i)] * vs_INTERP8.xxxx) + u_xlat11);
         u_xlat11 = ((v_3._AdditionalLightsWorldToShadow[((u_xlati87 + 2i) / 4i)][((u_xlati87 + 2i) % 4i)] * vs_INTERP8.zzzz) + u_xlat11);
@@ -1789,7 +1789,7 @@ fn main_inner(vs_INTERP9 : vec3<f32>, vs_INTERP4 : vec4<f32>, vs_INTERP8 : vec3<
       if ((u_xlati88 != 0i)) {
         u_xlati88 = i32(v_4._AdditionalLightsLightTypes[u_xlati84].tint_element);
         u_xlati11 = select(1i, 0i, (u_xlati88 != 0i));
-        u_xlati37 = (u_xlati84 << bitcast<u32>(2i));
+        u_xlati37 = (u_xlati84 << 2u);
         if ((u_xlati11 != 0i)) {
           let v_402 = (vs_INTERP8.yyy * v_4._AdditionalLightsWorldToLights[((u_xlati37 + 1i) / 4i)][((u_xlati37 + 1i) % 4i)].xyw);
           u_xlat11 = vec4<f32>(v_402.x, u_xlat11.y, v_402.yz);
@@ -1939,7 +1939,7 @@ fn main_inner(vs_INTERP9 : vec3<f32>, vs_INTERP4 : vec4<f32>, vs_INTERP8 : vec3<
     }
 
     continuing {
-      u_xlatu_loop_1 = (u_xlatu_loop_1 + bitcast<u32>(1i));
+      u_xlatu_loop_1 = (u_xlatu_loop_1 + 1u);
     }
   }
   let v_448 = u_xlat5.xyz;

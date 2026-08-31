@@ -17,11 +17,11 @@
           %a = OpConstant %int 2147483647
           %b = OpConstant %int 1
        %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
          %f0 = OpFunction %void None %3
           %4 = OpLabel
           %9 = OpBitcast %uint %a
-         %10 = OpBitcast %uint %b
-         %11 = OpIAdd %uint %9 %10
-          %c = OpBitcast %int %11
+         %10 = OpIAdd %uint %9 %uint_1
+          %c = OpBitcast %int %10
                OpReturn
                OpFunctionEnd

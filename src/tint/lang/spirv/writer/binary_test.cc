@@ -400,9 +400,8 @@ TEST_F(SpirvWriterTest, Binary_Chain) {
     auto result = Generate();
     ASSERT_EQ(result, Success) << result.Failure() << output_;
     EXPECT_INST("OpBitcast %uint %l");
-    EXPECT_INST("OpBitcast %uint %int_2");
-    EXPECT_INST("OpISub %uint %8 %9");
-    EXPECT_INST("OpIAdd %uint %13 %14");
+    EXPECT_INST("OpISub %uint %8 %uint_2");
+    EXPECT_INST("OpIAdd %uint %12 %13");
 }
 
 TEST_F(SpirvWriterTest, Divide_u32_u32) {

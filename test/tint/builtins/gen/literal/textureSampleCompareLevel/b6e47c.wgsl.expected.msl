@@ -11,7 +11,7 @@ struct tint_module_vars_struct {
 };
 
 float textureSampleCompareLevel_b6e47c(tint_module_vars_struct tint_module_vars) {
-  float res = tint_module_vars.arg_0.sample_compare(tint_module_vars.arg_1, float2(1.0f), max(1, 0), 1.0f, level(0u), int2(1));
+  float res = tint_module_vars.arg_0.sample_compare(tint_module_vars.arg_1, float2(1.0f), 1, 1.0f, level(0u), int2(1));
   return res;
 }
 
@@ -32,7 +32,7 @@ struct tint_module_vars_struct {
 };
 
 float textureSampleCompareLevel_b6e47c(tint_module_vars_struct tint_module_vars) {
-  float res = tint_module_vars.arg_0.sample_compare(tint_module_vars.arg_1, float2(1.0f), max(1, 0), 1.0f, level(0u), int2(1));
+  float res = tint_module_vars.arg_0.sample_compare(tint_module_vars.arg_1, float2(1.0f), 1, 1.0f, level(0u), int2(1));
   return res;
 }
 
@@ -63,7 +63,7 @@ struct vertex_main_outputs {
 };
 
 float textureSampleCompareLevel_b6e47c(tint_module_vars_struct tint_module_vars) {
-  float res = tint_module_vars.arg_0.sample_compare(tint_module_vars.arg_1, float2(1.0f), max(1, 0), 1.0f, level(0u), int2(1));
+  float res = tint_module_vars.arg_0.sample_compare(tint_module_vars.arg_1, float2(1.0f), 1, 1.0f, level(0u), int2(1));
   return res;
 }
 

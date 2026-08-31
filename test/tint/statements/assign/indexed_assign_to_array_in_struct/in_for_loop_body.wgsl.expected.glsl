@@ -27,8 +27,7 @@ void main() {
       uvec4 v_2 = v_1.inner[0u];
       s1.a1[min(v_2.x, 7u)] = v;
       {
-        uint v_3 = uint(i);
-        i = int((v_3 + uint(1)));
+        i = int((uint(i) + 1u));
       }
     }
   }

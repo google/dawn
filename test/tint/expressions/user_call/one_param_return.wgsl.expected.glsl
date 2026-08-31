@@ -1,17 +1,15 @@
 #version 310 es
 
 int c(int z) {
-  uint v = uint(1);
-  int a = int((v + uint(z)));
-  uint v_1 = uint(a);
-  a = int((v_1 + uint(2)));
+  int a = int((1u + uint(z)));
+  a = int((uint(a) + 2u));
   return a;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   int b_1 = c(2);
-  int v_2 = b_1;
-  int v_3 = c(3);
-  uint v_4 = uint(v_2);
-  b_1 = int((v_4 + uint(v_3)));
+  int v = b_1;
+  int v_1 = c(3);
+  uint v_2 = uint(v);
+  b_1 = int((v_2 + uint(v_1)));
 }

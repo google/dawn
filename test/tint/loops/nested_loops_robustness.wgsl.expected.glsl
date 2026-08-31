@@ -9,8 +9,7 @@ int f() {
       if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;
       }
-      uint v = uint(i);
-      i = int((v + uint(1)));
+      i = int((uint(i) + 1u));
       if ((i > 4)) {
         return 1;
       }
@@ -20,8 +19,7 @@ int f() {
           if (all(equal(tint_loop_idx_1, uvec2(0u)))) {
             break;
           }
-          uint v_1 = uint(j);
-          j = int((v_1 + uint(1)));
+          j = int((uint(j) + 1u));
           if ((j > 4)) {
             return 2;
           }

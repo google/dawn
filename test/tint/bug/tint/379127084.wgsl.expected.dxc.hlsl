@@ -60,8 +60,8 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
           float4 _skTemp3 = step(_59_m.xyxy, _62_f);
           _62_f = (_62_f - (_skTemp3 * _59_m.xyxy));
         }
-        float _63_g = permutationsSampler_1_Texture.SampleBias(permutationsSampler_1_Sampler, float2(float2(((_62_f.x + 0.5f) * 0.00390625f), 0.5f)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f)).x;
-        float _64_h = permutationsSampler_1_Texture.SampleBias(permutationsSampler_1_Sampler, float2(float2(((_62_f.z + 0.5f) * 0.00390625f), 0.5f)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f)).x;
+        float _63_g = permutationsSampler_1_Texture.SampleBias(permutationsSampler_1_Sampler, float2(float2(((_62_f.x + 0.5f) * 0.00390625f), 0.5f)), -0.47499999403953552246f).x;
+        float _64_h = permutationsSampler_1_Texture.SampleBias(permutationsSampler_1_Sampler, float2(float2(((_62_f.z + 0.5f) * 0.00390625f), 0.5f)), -0.47499999403953552246f).x;
         float2 _65_i = float2(_63_g, _64_h);
         if (false) {
           float2 _skTemp4 = floor(((_65_i * (255.0f).xx) + (0.5f).xx));
@@ -85,13 +85,13 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
             }
             float _73_i = ((float(_72_h) + 0.5f) * 0.25f);
             float v_7 = float(_67_p.x);
-            float4 _74_j = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, float2(v_7, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
+            float4 _74_j = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, float2(v_7, float(_73_i)), -0.47499999403953552246f);
             float v_8 = float(_67_p.y);
-            float4 _75_k = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, float2(v_8, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
+            float4 _75_k = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, float2(v_8, float(_73_i)), -0.47499999403953552246f);
             float v_9 = float(_67_p.w);
-            float4 _76_l = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, float2(v_9, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
+            float4 _76_l = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, float2(v_9, float(_73_i)), -0.47499999403953552246f);
             float v_10 = float(_67_p.z);
-            float4 _77_m = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, float2(v_10, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
+            float4 _77_m = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, float2(v_10, float(_73_i)), -0.47499999403953552246f);
             float2 _78_n = _68_d;
             float _skTemp7 = dot((((_74_j.yw + (_74_j.xz * 0.00390625f)) * 2.0f) - 1.0f), _78_n);
             float _79_o = _skTemp7;
@@ -115,7 +115,7 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
               tint_loop_idx_1.x = tint_low_inc_1;
               uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
               tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-              _72_h = asint((asuint(_72_h) + asuint(int(1))));
+              _72_h = asint((asuint(_72_h) + 1u));
               if ((_72_h >= int(4))) { break; }
             }
           }
@@ -137,7 +137,7 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        _61_o = asint((asuint(_61_o) + asuint(int(1))));
+        _61_o = asint((asuint(_61_o) + 1u));
       }
     }
   }

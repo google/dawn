@@ -3,7 +3,7 @@
 shared uint v[16];
 void foo() {
   uint v_1 = ((min(uint(0), (4u - 1u)) * 8u) / 4u);
-  v[v_1] = floatBitsToUint(1.0f);
+  v[v_1] = 1065353216u;
 }
 void main_inner(uint tint_local_index) {
   {

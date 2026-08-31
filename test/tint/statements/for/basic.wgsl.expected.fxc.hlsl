@@ -6,7 +6,7 @@ void some_loop_body() {
 void f() {
   {
     int i = int(0);
-    for( ; (i < int(5)); i = asint((asuint(i) + asuint(int(1))))) {
+    for( ; (i < int(5)); i = asint((asuint(i) + 1u))) {
       some_loop_body();
     }
   }

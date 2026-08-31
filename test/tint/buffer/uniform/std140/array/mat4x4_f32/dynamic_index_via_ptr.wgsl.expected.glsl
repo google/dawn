@@ -10,26 +10,25 @@ buffer s_block_1_ssbo {
 } v_1;
 int counter = 0;
 int i() {
-  uint v_2 = uint(counter);
-  counter = int((v_2 + uint(1)));
+  counter = int((uint(counter) + 1u));
   return counter;
 }
-mat4 v_3(uint start_byte_offset) {
+mat4 v_2(uint start_byte_offset) {
   return mat4(uintBitsToFloat(v.inner[(start_byte_offset / 16u)]), uintBitsToFloat(v.inner[((16u + start_byte_offset) / 16u)]), uintBitsToFloat(v.inner[((32u + start_byte_offset) / 16u)]), uintBitsToFloat(v.inner[((48u + start_byte_offset) / 16u)]));
 }
-mat4[4] v_4(uint start_byte_offset) {
+mat4[4] v_3(uint start_byte_offset) {
   mat4 a[4] = mat4[4](mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)), mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)), mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)), mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)));
   {
-    uint v_5 = 0u;
-    v_5 = 0u;
+    uint v_4 = 0u;
+    v_4 = 0u;
     while(true) {
-      uint v_6 = v_5;
-      if ((v_6 >= 4u)) {
+      uint v_5 = v_4;
+      if ((v_5 >= 4u)) {
         break;
       }
-      a[v_6] = v_3((start_byte_offset + (v_6 * 64u)));
+      a[v_5] = v_2((start_byte_offset + (v_5 * 64u)));
       {
-        v_5 = (v_6 + 1u);
+        v_4 = (v_5 + 1u);
       }
     }
   }
@@ -37,12 +36,12 @@ mat4[4] v_4(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_7 = (min(uint(i()), 3u) * 64u);
-  uint v_8 = (min(uint(i()), 3u) * 16u);
-  mat4 l_a[4] = v_4(0u);
-  mat4 l_a_i = v_3(v_7);
-  vec4 l_a_i_i = uintBitsToFloat(v.inner[((v_7 + v_8) / 16u)]);
-  uint v_9 = (v_7 + v_8);
-  uvec4 v_10 = v.inner[(v_9 / 16u)];
-  v_1.inner = (((uintBitsToFloat(v_10[((v_9 & 15u) >> 2u)]) + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
+  uint v_6 = (min(uint(i()), 3u) * 64u);
+  uint v_7 = (min(uint(i()), 3u) * 16u);
+  mat4 l_a[4] = v_3(0u);
+  mat4 l_a_i = v_2(v_6);
+  vec4 l_a_i_i = uintBitsToFloat(v.inner[((v_6 + v_7) / 16u)]);
+  uint v_8 = (v_6 + v_7);
+  uvec4 v_9 = v.inner[(v_8 / 16u)];
+  v_1.inner = (((uintBitsToFloat(v_9[((v_8 & 15u) >> 2u)]) + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
 }

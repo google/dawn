@@ -16,7 +16,7 @@ void foo_member_initialize() {
   uvec4 v_2 = v.inner[0u];
   vb2 = bvec2((uintBitsToFloat(v_2.x) == -1.0f), false);
   if (vb2.x) {
-    vec4 r = texture(f_my_texture_my_sampler, vec2(0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+    vec4 r = texture(f_my_texture_my_sampler, vec2(0.0f), 0.0f);
   }
 }
 void foo_default_initialize() {
@@ -26,7 +26,7 @@ void foo_default_initialize() {
   vb2.x = (uintBitsToFloat(v_3.x) == -1.0f);
   vb2 = bvec2(false);
   if (vb2.x) {
-    vec4 r = texture(f_my_texture_my_sampler, vec2(0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+    vec4 r = texture(f_my_texture_my_sampler, vec2(0.0f), 0.0f);
   }
 }
 void main() {

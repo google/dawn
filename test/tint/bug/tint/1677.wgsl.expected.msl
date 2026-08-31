@@ -23,7 +23,7 @@ struct tint_module_vars_struct {
 };
 
 void main_inner(uint3 id, tint_module_vars_struct tint_module_vars) {
-  int3 const pos = as_type<int3>((as_type<uint3>(int3((*tint_module_vars.input).position)) - as_type<uint3>(int3(0))));
+  int3 const pos = as_type<int3>((as_type<uint3>(int3((*tint_module_vars.input).position)) - uint3(0u)));
 }
 
 [[max_total_threads_per_threadgroup(1)]]

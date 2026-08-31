@@ -1,10 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 57
+; Bound: 55
 ; Schema: 0
                OpCapability Shader
-         %29 = OpExtInstImport "GLSL.std.450"
+         %28 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
@@ -34,53 +34,51 @@
       %int_0 = OpConstant %int 0
     %counter = OpVariable %_ptr_Private_int Private %int_0
          %13 = OpTypeFunction %int
-      %int_1 = OpConstant %int 1
-       %void = OpTypeVoid
-         %24 = OpTypeFunction %void
      %uint_1 = OpConstant %uint 1
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
     %uint_16 = OpConstant %uint 16
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %mat2v4float = OpTypeMatrix %v4float 2
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
-         %45 = OpTypeFunction %mat2v4float %uint
+         %43 = OpTypeFunction %mat2v4float %uint
           %i = OpFunction %int None %13
          %14 = OpLabel
          %15 = OpLoad %int %counter None
          %16 = OpBitcast %uint %15
-         %17 = OpBitcast %uint %int_1
-         %19 = OpIAdd %uint %16 %17
-         %20 = OpBitcast %int %19
-               OpStore %counter %20 None
-         %21 = OpLoad %int %counter None
-               OpReturnValue %21
+         %17 = OpIAdd %uint %16 %uint_1
+         %19 = OpBitcast %int %17
+               OpStore %counter %19 None
+         %20 = OpLoad %int %counter None
+               OpReturnValue %20
                OpFunctionEnd
-          %f = OpFunction %void None %24
-         %25 = OpLabel
-         %26 = OpFunctionCall %int %i
-         %27 = OpBitcast %uint %26
-         %28 = OpExtInst %uint %29 UMin %27 %uint_1
-         %31 = OpIMul %uint %28 %uint_16
-        %l_m = OpFunctionCall %mat2v4float %37 %uint_0
-         %39 = OpUDiv %uint %31 %uint_16
-         %40 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %39
-         %42 = OpLoad %v4uint %40 None
-      %l_m_i = OpBitcast %v4float %42
+          %f = OpFunction %void None %23
+         %24 = OpLabel
+         %25 = OpFunctionCall %int %i
+         %26 = OpBitcast %uint %25
+         %27 = OpExtInst %uint %28 UMin %26 %uint_1
+         %29 = OpIMul %uint %27 %uint_16
+        %l_m = OpFunctionCall %mat2v4float %35 %uint_0
+         %37 = OpUDiv %uint %29 %uint_16
+         %38 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %37
+         %40 = OpLoad %v4uint %38 None
+      %l_m_i = OpBitcast %v4float %40
                OpReturn
                OpFunctionEnd
-         %37 = OpFunction %mat2v4float None %45
+         %35 = OpFunction %mat2v4float None %43
 %start_byte_offset = OpFunctionParameter %uint
-         %46 = OpLabel
-         %47 = OpUDiv %uint %start_byte_offset %uint_16
-         %48 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %47
-         %49 = OpLoad %v4uint %48 None
-         %50 = OpBitcast %v4float %49
-         %51 = OpIAdd %uint %uint_16 %start_byte_offset
-         %52 = OpUDiv %uint %51 %uint_16
-         %53 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %52
-         %54 = OpLoad %v4uint %53 None
-         %55 = OpBitcast %v4float %54
-         %56 = OpCompositeConstruct %mat2v4float %50 %55
-               OpReturnValue %56
+         %44 = OpLabel
+         %45 = OpUDiv %uint %start_byte_offset %uint_16
+         %46 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %45
+         %47 = OpLoad %v4uint %46 None
+         %48 = OpBitcast %v4float %47
+         %49 = OpIAdd %uint %uint_16 %start_byte_offset
+         %50 = OpUDiv %uint %49 %uint_16
+         %51 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %50
+         %52 = OpLoad %v4uint %51 None
+         %53 = OpBitcast %v4float %52
+         %54 = OpCompositeConstruct %mat2v4float %48 %53
+               OpReturnValue %54
                OpFunctionEnd

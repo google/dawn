@@ -4224,17 +4224,19 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract) {
 }
 
 TEST_F(MslWriter_BuiltinPolyfillTest, Tanh_f32) {
-    auto* func = b.ComputeFunction("main");
+    auto* arg = b.FunctionParam("arg", ty.f32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        b.Let("r", b.Call(ty.f32(), core::BuiltinFn::kTanh, 1_f));
+        b.Let("r", b.Call(ty.f32(), core::BuiltinFn::kTanh, arg));
         b.Return(func);
     });
 
     auto* src = R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%arg:f32):void {
   $B1: {
-    %2:f32 = tanh 1.0f
-    %r:f32 = let %2
+    %3:f32 = tanh %arg
+    %r:f32 = let %3
     ret
   }
 }
@@ -4252,17 +4254,19 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Tanh_f32) {
 }
 
 TEST_F(MslWriter_BuiltinPolyfillTest, Tanh_NoFlag_f16) {
-    auto* func = b.ComputeFunction("main");
+    auto* arg = b.FunctionParam("arg", ty.f16());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        b.Let("r", b.Call(ty.f16(), core::BuiltinFn::kTanh, 1_h));
+        b.Let("r", b.Call(ty.f16(), core::BuiltinFn::kTanh, arg));
         b.Return(func);
     });
 
     auto* src = R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%arg:f16):void {
   $B1: {
-    %2:f16 = tanh 1.0h
-    %r:f16 = let %2
+    %3:f16 = tanh %arg
+    %r:f16 = let %3
     ret
   }
 }
@@ -4280,17 +4284,19 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Tanh_NoFlag_f16) {
 }
 
 TEST_F(MslWriter_BuiltinPolyfillTest, Tanh_f16) {
-    auto* func = b.ComputeFunction("main");
+    auto* arg = b.FunctionParam("arg", ty.f16());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        b.Let("r", b.Call(ty.f16(), core::BuiltinFn::kTanh, 1_h));
+        b.Let("r", b.Call(ty.f16(), core::BuiltinFn::kTanh, arg));
         b.Return(func);
     });
 
     auto* src = R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%arg:f16):void {
   $B1: {
-    %2:f16 = tanh 1.0h
-    %r:f16 = let %2
+    %3:f16 = tanh %arg
+    %r:f16 = let %3
     ret
   }
 }
@@ -4298,12 +4304,12 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Tanh_f16) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%arg:f16):void {
   $B1: {
-    %2:f32 = convert 1.0h
-    %3:f32 = tanh %2
-    %4:f16 = convert %3
-    %r:f16 = let %4
+    %3:f32 = convert %arg
+    %4:f32 = tanh %3
+    %5:f16 = convert %4
+    %r:f16 = let %5
     ret
   }
 }
@@ -4318,18 +4324,18 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Tanh_f16) {
 }
 
 TEST_F(MslWriter_BuiltinPolyfillTest, Tanh_vec2_f16) {
-    auto* func = b.ComputeFunction("main");
+    auto* arg = b.FunctionParam("arg", ty.vec2<f16>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        b.Let("r", b.Call(ty.vec2(ty.f16()), core::BuiltinFn::kTanh,
-                          b.Construct(ty.vec2<f16>(), 1_h, 2_h)));
+        b.Let("r", b.Call(ty.vec2(ty.f16()), core::BuiltinFn::kTanh, arg));
         b.Return(func);
     });
 
     auto* src = R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%arg:vec2<f16>):void {
   $B1: {
-    %2:vec2<f16> = construct 1.0h, 2.0h
-    %3:vec2<f16> = tanh %2
+    %3:vec2<f16> = tanh %arg
     %r:vec2<f16> = let %3
     ret
   }
@@ -4338,10 +4344,9 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Tanh_vec2_f16) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = func(%arg:vec2<f16>):void {
   $B1: {
-    %2:vec2<f16> = construct 1.0h, 2.0h
-    %3:vec2<f32> = convert %2
+    %3:vec2<f32> = convert %arg
     %4:vec2<f32> = tanh %3
     %5:vec2<f16> = convert %4
     %r:vec2<f16> = let %5

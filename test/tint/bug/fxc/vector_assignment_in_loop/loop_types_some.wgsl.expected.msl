@@ -27,7 +27,7 @@ kernel void v() {
       v2u[i] = 1u;
       v2b[i] = true;
       {
-        i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+        i = as_type<int>((as_type<uint>(i) + 1u));
       }
     }
   }

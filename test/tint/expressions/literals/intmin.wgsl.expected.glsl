@@ -2,8 +2,7 @@
 
 int add_int_min_explicit() {
   int a = (-2147483647 - 1);
-  uint v = uint(a);
-  int b = int((v + uint(1)));
+  int b = int((uint(a) + 1u));
   int c = -2147483647;
   return c;
 }

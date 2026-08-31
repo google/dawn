@@ -571,10 +571,10 @@ TEST_F(HlslWriterTest, AccessStorageStoreVector) {
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer v : register(u0);
 void main() {
-  v.Store(0u, asuint(2.0f));
-  v.Store(4u, asuint(4.0f));
-  v.Store(8u, asuint(8.0f));
-  v.Store(12u, asuint(16.0f));
+  v.Store(0u, 1073741824u);
+  v.Store(4u, 1082130432u);
+  v.Store(8u, 1090519040u);
+  v.Store(12u, 1098907648u);
 }
 
 )");
@@ -1654,7 +1654,7 @@ TEST_F(HlslWriterTest, AccessStoreScalar) {
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer v : register(u0);
 void main() {
-  v.Store(0u, asuint(2.0f));
+  v.Store(0u, 1073741824u);
 }
 
 )");
@@ -1698,7 +1698,7 @@ TEST_F(HlslWriterTest, AccessStoreVectorElement) {
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer v : register(u0);
 void main() {
-  v.Store(4u, asuint(2.0f));
+  v.Store(4u, 1073741824u);
 }
 
 )");
@@ -1742,7 +1742,7 @@ TEST_F(HlslWriterTest, AccessStoreVector) {
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer v : register(u0);
 void main() {
-  v.Store3(0u, asuint(float3(2.0f, 3.0f, 4.0f)));
+  v.Store3(0u, uint3(1073741824u, 1077936128u, 1082130432u));
 }
 
 )");
@@ -1787,7 +1787,7 @@ TEST_F(HlslWriterTest, AccessStoreMatrixElement) {
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer v : register(u0);
 void main() {
-  v.Store(24u, asuint(5.0f));
+  v.Store(24u, 1084227584u);
 }
 
 )");
@@ -1833,7 +1833,7 @@ TEST_F(HlslWriterTest, AccessStoreMatrixColumn) {
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer v : register(u0);
 void main() {
-  v.Store4(16u, asuint((5.0f).xxxx));
+  v.Store4(16u, (1084227584u).xxxx);
 }
 
 )");
@@ -1936,7 +1936,7 @@ TEST_F(HlslWriterTest, AccessStoreArrayElement) {
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer v : register(u0);
 void main() {
-  v.Store(12u, asuint(1.0f));
+  v.Store(12u, 1065353216u);
 }
 
 )");
@@ -2026,7 +2026,7 @@ TEST_F(HlslWriterTest, AccessStoreStructMember) {
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer v : register(u0);
 void main() {
-  v.Store(4u, asuint(3.0f));
+  v.Store(4u, 1077936128u);
 }
 
 )");
@@ -2090,7 +2090,7 @@ TEST_F(HlslWriterTest, AccessStoreStructNested) {
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer v : register(u0);
 void main() {
-  v.Store(16u, asuint(2.0f));
+  v.Store(16u, 1073741824u);
 }
 
 )");
@@ -2370,7 +2370,7 @@ cbuffer cbuffer_tint_storage_buffer_dynamic_offsets : register(b12, space11) {
 };
 void main() {
   float3 a = asfloat(array_1.Load3((48u + tint_storage_buffer_dynamic_offsets[0u].w)));
-  array_1.Store3((80u + tint_storage_buffer_dynamic_offsets[0u].w), asuint((0.0f).xxx));
+  array_1.Store3((80u + tint_storage_buffer_dynamic_offsets[0u].w), (0u).xxx);
   uint b = vec2_u32.Load((4u + tint_storage_buffer_dynamic_offsets[1u].x));
   vec2_u32.Store((4u + tint_storage_buffer_dynamic_offsets[1u].x), 42u);
   float16_t c = vec4_f16.Load<float16_t>((6u + tint_storage_buffer_dynamic_offsets[1u].y));

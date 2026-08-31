@@ -11,8 +11,7 @@ buffer input_block_1_ssbo {
   Input inner;
 } v;
 void main_inner(uvec3 id) {
-  uvec3 v_1 = uvec3(v.inner.position);
-  ivec3 pos = ivec3((v_1 - uvec3(ivec3(0))));
+  ivec3 pos = ivec3((uvec3(v.inner.position) - uvec3(0u)));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

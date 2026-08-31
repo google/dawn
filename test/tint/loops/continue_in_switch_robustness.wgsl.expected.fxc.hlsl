@@ -3,7 +3,7 @@
 void f() {
   {
     int i = int(0);
-    for( ; (i < int(4)); i = asint((asuint(i) + asuint(int(1))))) {
+    for( ; (i < int(4)); i = asint((asuint(i) + 1u))) {
       bool tint_continue = false;
       switch(i) {
         case int(0):

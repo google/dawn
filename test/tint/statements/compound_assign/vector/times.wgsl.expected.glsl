@@ -11,6 +11,5 @@ buffer v_block_1_ssbo {
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uvec4 v_2 = uvec4(v_1.inner.a);
-  v_1.inner.a = ivec4((v_2 * uvec4(ivec4(2))));
+  v_1.inner.a = ivec4((uvec4(v_1.inner.a) * uvec4(2u)));
 }

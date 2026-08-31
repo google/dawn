@@ -17,18 +17,18 @@ void foo() {
         }
         default:
         {
-          buffer.Store((0u + (uint(i) * 4u)), asuint(int(2)));
+          buffer.Store((0u + (uint(i) * 4u)), 2u);
           break;
         }
       }
       if (tint_continue) {
         {
-          i = asint((asuint(i) + asuint(int(1))));
+          i = asint((asuint(i) + 1u));
         }
         continue;
       }
       {
-        i = asint((asuint(i) + asuint(int(1))));
+        i = asint((asuint(i) + 1u));
       }
     }
   }

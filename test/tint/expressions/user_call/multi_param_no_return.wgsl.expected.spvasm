@@ -17,10 +17,12 @@
         %int = OpTypeInt 32 1
           %7 = OpTypeFunction %void %int %int %int
        %uint = OpTypeInt 32 0
-      %int_1 = OpConstant %int 1
+     %uint_1 = OpConstant %uint 1
 %_ptr_Function_int = OpTypePointer Function %int
+     %uint_2 = OpConstant %uint 2
+         %30 = OpTypeFunction %void
+      %int_1 = OpConstant %int 1
       %int_2 = OpConstant %int 2
-         %32 = OpTypeFunction %void
       %int_3 = OpConstant %int 3
       %int_4 = OpConstant %int 4
       %int_5 = OpConstant %int 5
@@ -31,30 +33,28 @@
           %z = OpFunctionParameter %int
           %8 = OpLabel
           %a = OpVariable %_ptr_Function_int Function
-         %10 = OpBitcast %uint %int_1
-         %12 = OpBitcast %uint %x
-         %13 = OpIAdd %uint %10 %12
-         %14 = OpBitcast %int %13
-         %15 = OpBitcast %uint %14
-         %16 = OpBitcast %uint %y
-         %17 = OpIAdd %uint %15 %16
-         %18 = OpBitcast %int %17
-         %19 = OpBitcast %uint %18
-         %20 = OpBitcast %uint %z
-         %21 = OpIAdd %uint %19 %20
-         %22 = OpBitcast %int %21
-               OpStore %a %22
-         %25 = OpLoad %int %a None
-         %26 = OpBitcast %uint %25
-         %27 = OpBitcast %uint %int_2
-         %29 = OpIAdd %uint %26 %27
-         %30 = OpBitcast %int %29
-               OpStore %a %30 None
+         %10 = OpBitcast %uint %x
+         %11 = OpIAdd %uint %uint_1 %10
+         %13 = OpBitcast %int %11
+         %14 = OpBitcast %uint %13
+         %15 = OpBitcast %uint %y
+         %16 = OpIAdd %uint %14 %15
+         %17 = OpBitcast %int %16
+         %18 = OpBitcast %uint %17
+         %19 = OpBitcast %uint %z
+         %20 = OpIAdd %uint %18 %19
+         %21 = OpBitcast %int %20
+               OpStore %a %21
+         %24 = OpLoad %int %a None
+         %25 = OpBitcast %uint %24
+         %26 = OpIAdd %uint %25 %uint_2
+         %28 = OpBitcast %int %26
+               OpStore %a %28 None
                OpReturn
                OpFunctionEnd
-          %b = OpFunction %void None %32
-         %33 = OpLabel
-         %34 = OpFunctionCall %void %c %int_1 %int_2 %int_3
+          %b = OpFunction %void None %30
+         %31 = OpLabel
+         %32 = OpFunctionCall %void %c %int_1 %int_2 %int_3
          %36 = OpFunctionCall %void %c %int_4 %int_5 %int_6
                OpReturn
                OpFunctionEnd

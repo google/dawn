@@ -48,7 +48,7 @@ kernel void v() {
           tint_loop_idx.x = tint_low_inc;
           uint const tint_carry = uint((tint_low_inc == 4294967295u));
           tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-          i = as_type<int>((as_type<uint>(i) + as_type<uint>(2)));
+          i = as_type<int>((as_type<uint>(i) + 2u));
         }
         continue;
       }
@@ -57,7 +57,7 @@ kernel void v() {
         tint_loop_idx.x = tint_low_inc;
         uint const tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        i = as_type<int>((as_type<uint>(i) + as_type<uint>(2)));
+        i = as_type<int>((as_type<uint>(i) + 2u));
       }
     }
   }

@@ -1,7 +1,7 @@
 
 int c(int x, int y, int z) {
-  int a = asint((asuint(asint((asuint(asint((asuint(int(1)) + asuint(x)))) + asuint(y)))) + asuint(z)));
-  a = asint((asuint(a) + asuint(int(2))));
+  int a = asint((asuint(asint((asuint(asint((1u + asuint(x)))) + asuint(y)))) + asuint(z)));
+  a = asint((asuint(a) + 2u));
   return a;
 }
 

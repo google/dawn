@@ -47,14 +47,15 @@ class WgslWriter_RaiseTest : public core::ir::transform::TransformTest {
 TEST_F(WgslWriter_RaiseTest, BuiltinConversion) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {  //
-        b.Max(i32(1), i32(2));
+        b.Max(b.Let("l", i32(1)), i32(2));
         b.Return(f);
     });
 
     auto* src = R"(
 %f = func():void {
   $B1: {
-    %2:i32 = max 1i, 2i
+    %l:i32 = let 1i
+    %3:i32 = max %l, 2i
     ret
   }
 }
@@ -64,8 +65,9 @@ TEST_F(WgslWriter_RaiseTest, BuiltinConversion) {
     auto* expect = R"(
 %f = func():void {
   $B1: {
-    %2:i32 = wgsl.max 1i, 2i
-    undef = phony %2
+    %l:i32 = let 1i
+    %3:i32 = wgsl.max %l, 2i
+    undef = phony %3
     ret
   }
 }
@@ -184,7 +186,7 @@ TEST_F(WgslWriter_RaiseTest, BuiltinShadowedByUserFunction) {
 
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {  //
-        b.Min(1_u, 2_u);
+        b.Min(b.Let("l", 1_u), 2_u);
         b.Return(f);
     });
 
@@ -197,7 +199,8 @@ TEST_F(WgslWriter_RaiseTest, BuiltinShadowedByUserFunction) {
 }
 %f = func():void {
   $B2: {
-    %6:u32 = min 1u, 2u
+    %l:u32 = let 1u
+    %7:u32 = min %l, 2u
     ret
   }
 }
@@ -213,8 +216,9 @@ TEST_F(WgslWriter_RaiseTest, BuiltinShadowedByUserFunction) {
 }
 %f = func():void {
   $B2: {
-    %6:u32 = wgsl.min 1u, 2u
-    undef = phony %6
+    %l:u32 = let 1u
+    %7:u32 = wgsl.min %l, 2u
+    undef = phony %7
     ret
   }
 }

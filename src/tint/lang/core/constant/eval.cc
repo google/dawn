@@ -48,7 +48,9 @@
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/struct.h"
+#include "src/tint/lang/core/type/u16.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/containers/transform.h"
@@ -1334,6 +1336,10 @@ Eval::Result Eval::bitcast(const core::type::Type* ty,
             [&](const core::type::F16*) -> tint::Result<SuccessType> {
                 return push_16_bits(element->ValueAs<f16>().BitsRepresentation());
             },
+            [&](const core::type::U16*) -> tint::Result<SuccessType> {
+                return push_16_bits(element->ValueAs<u16>());
+            },
+            [&](const core::type::U64*) -> tint::Result<SuccessType> { return Failure(); },
             TINT_ICE_ON_NO_MATCH);
     };
     if (src_count == 1) {
@@ -1395,6 +1401,15 @@ Eval::Result Eval::bitcast(const core::type::Type* ty,
                 els.Push(r.Get());
                 return true;
             },
+            [&](const core::type::U16*) {  //
+                auto r = CreateScalar(source, dst_el_ty, u16(v));
+                if (r != Success) {
+                    return false;
+                }
+                els.Push(r.Get());
+                return true;
+            },
+            [&](const core::type::U64*) { return false; },  //
             TINT_ICE_ON_NO_MATCH);
     };
 

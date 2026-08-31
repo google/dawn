@@ -87,9 +87,9 @@ void _skslMain(FSIn _stageIn, thread FSOut* const _stageOut, tint_array_lengths_
           _62_f = (_62_f - (_skTemp3 * _59_m.xyxy));
         }
         float2 const v = float2(float2(((_62_f.x + 0.5f) * 0.00390625f), 0.5f));
-        float const _63_g = tint_module_vars.permutationsSampler_1_Texture.sample(tint_module_vars.permutationsSampler_1_Sampler, v, bias(clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f))).x;
+        float const _63_g = tint_module_vars.permutationsSampler_1_Texture.sample(tint_module_vars.permutationsSampler_1_Sampler, v, bias(-0.47499999403953552246f)).x;
         float2 const v_1 = float2(float2(((_62_f.z + 0.5f) * 0.00390625f), 0.5f));
-        float const _64_h = tint_module_vars.permutationsSampler_1_Texture.sample(tint_module_vars.permutationsSampler_1_Sampler, v_1, bias(clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f))).x;
+        float const _64_h = tint_module_vars.permutationsSampler_1_Texture.sample(tint_module_vars.permutationsSampler_1_Sampler, v_1, bias(-0.47499999403953552246f)).x;
         float2 _65_i = float2(_63_g, _64_h);
         if (false) {
           float2 const _skTemp4 = floor(((_65_i * float2(255.0f)) + float2(0.5f)));
@@ -114,16 +114,16 @@ void _skslMain(FSIn _stageIn, thread FSOut* const _stageOut, tint_array_lengths_
             float const _73_i = ((float(_72_h) + 0.5f) * 0.25f);
             float const v_3 = float(_67_p.x);
             float2 const v_4 = float2(v_3, float(_73_i));
-            float4 const _74_j = tint_module_vars.noiseSampler_1_Texture.sample(tint_module_vars.noiseSampler_1_Sampler, v_4, bias(clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f)));
+            float4 const _74_j = tint_module_vars.noiseSampler_1_Texture.sample(tint_module_vars.noiseSampler_1_Sampler, v_4, bias(-0.47499999403953552246f));
             float const v_5 = float(_67_p.y);
             float2 const v_6 = float2(v_5, float(_73_i));
-            float4 const _75_k = tint_module_vars.noiseSampler_1_Texture.sample(tint_module_vars.noiseSampler_1_Sampler, v_6, bias(clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f)));
+            float4 const _75_k = tint_module_vars.noiseSampler_1_Texture.sample(tint_module_vars.noiseSampler_1_Sampler, v_6, bias(-0.47499999403953552246f));
             float const v_7 = float(_67_p.w);
             float2 const v_8 = float2(v_7, float(_73_i));
-            float4 const _76_l = tint_module_vars.noiseSampler_1_Texture.sample(tint_module_vars.noiseSampler_1_Sampler, v_8, bias(clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f)));
+            float4 const _76_l = tint_module_vars.noiseSampler_1_Texture.sample(tint_module_vars.noiseSampler_1_Sampler, v_8, bias(-0.47499999403953552246f));
             float const v_9 = float(_67_p.z);
             float2 const v_10 = float2(v_9, float(_73_i));
-            float4 const _77_m = tint_module_vars.noiseSampler_1_Texture.sample(tint_module_vars.noiseSampler_1_Sampler, v_10, bias(clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f)));
+            float4 const _77_m = tint_module_vars.noiseSampler_1_Texture.sample(tint_module_vars.noiseSampler_1_Sampler, v_10, bias(-0.47499999403953552246f));
             float2 _78_n = _68_d;
             float const _skTemp7 = dot((((_74_j.yw + (_74_j.xz * 0.00390625f)) * 2.0f) - 1.0f), _78_n);
             float _79_o = _skTemp7;
@@ -147,7 +147,7 @@ void _skslMain(FSIn _stageIn, thread FSOut* const _stageOut, tint_array_lengths_
               tint_loop_idx_1.x = tint_low_inc_1;
               uint const tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
               tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-              _72_h = as_type<int>((as_type<uint>(_72_h) + as_type<uint>(1)));
+              _72_h = as_type<int>((as_type<uint>(_72_h) + 1u));
               if ((_72_h >= 4)) { break; }
             }
           }
@@ -169,7 +169,7 @@ void _skslMain(FSIn _stageIn, thread FSOut* const _stageOut, tint_array_lengths_
         tint_loop_idx.x = tint_low_inc;
         uint const tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        _61_o = as_type<int>((as_type<uint>(_61_o) + as_type<uint>(1)));
+        _61_o = as_type<int>((as_type<uint>(_61_o) + 1u));
       }
     }
   }

@@ -26,8 +26,7 @@ void main() {
       v2u[i] = 1u;
       v2b[i] = true;
       {
-        uint v = uint(i);
-        i = int((v + uint(1)));
+        i = int((uint(i) + 1u));
       }
     }
   }

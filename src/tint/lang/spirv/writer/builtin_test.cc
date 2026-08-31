@@ -52,7 +52,8 @@ TEST_P(Builtin_1arg, Scalar) {
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Call(MakeScalarType(params.type), params.function, MakeScalarValue(params.type));
+        b.Call(MakeScalarType(params.type), params.function,
+               b.Let("l", MakeScalarValue(params.type)));
         b.Return(func);
     });
 
@@ -65,7 +66,8 @@ TEST_P(Builtin_1arg, Vector) {
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Call(MakeVectorType(params.type), params.function, MakeVectorValue(params.type));
+        b.Call(MakeVectorType(params.type), params.function,
+               b.Let("l", MakeVectorValue(params.type)));
         b.Return(func);
     });
 
@@ -1525,8 +1527,8 @@ TEST_P(Builtin_2arg, Scalar) {
 
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        b.Call(MakeScalarType(params.type), params.function, MakeScalarValue(params.type),
-               MakeScalarValue(params.type));
+        b.Call(MakeScalarType(params.type), params.function,
+               b.Let("l", MakeScalarValue(params.type)), MakeScalarValue(params.type));
         b.Return(func);
     });
 
@@ -1539,8 +1541,8 @@ TEST_P(Builtin_2arg, Vector) {
 
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        b.Call(MakeVectorType(params.type), params.function, MakeVectorValue(params.type),
-               MakeVectorValue(params.type));
+        b.Call(MakeVectorType(params.type), params.function,
+               b.Let("l", MakeVectorValue(params.type)), MakeVectorValue(params.type));
         b.Return(func);
     });
 
@@ -1866,8 +1868,9 @@ TEST_P(Builtin_3arg, Scalar) {
 
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        b.Call(MakeScalarType(params.type), params.function, MakeScalarValue(params.type),
-               MakeScalarValue(params.type), MakeScalarValue(params.type));
+        b.Call(MakeScalarType(params.type), params.function,
+               b.Let("l", MakeScalarValue(params.type)), MakeScalarValue(params.type),
+               MakeScalarValue(params.type));
         b.Return(func);
     });
 
@@ -1880,8 +1883,9 @@ TEST_P(Builtin_3arg, Vector) {
 
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        b.Call(MakeVectorType(params.type), params.function, MakeVectorValue(params.type),
-               MakeVectorValue(params.type), MakeVectorValue(params.type));
+        b.Call(MakeVectorType(params.type), params.function,
+               b.Let("l", MakeVectorValue(params.type)), MakeVectorValue(params.type),
+               MakeVectorValue(params.type));
         b.Return(func);
     });
 

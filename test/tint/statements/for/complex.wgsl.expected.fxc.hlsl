@@ -23,13 +23,13 @@ void f() {
         break;
       }
       some_loop_body();
-      j = asint((asuint(i) * asuint(int(30))));
+      j = asint((asuint(i) * 30u));
       {
         uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        i = asint((asuint(i) + asuint(int(1))));
+        i = asint((asuint(i) + 1u));
       }
     }
   }

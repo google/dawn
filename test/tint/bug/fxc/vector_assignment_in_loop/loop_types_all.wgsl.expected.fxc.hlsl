@@ -15,7 +15,7 @@ void main() {
   bool4 v4b = (false).xxxx;
   {
     int i = int(0);
-    for( ; (i < int(2)); i = asint((asuint(i) + asuint(int(1))))) {
+    for( ; (i < int(2)); i = asint((asuint(i) + 1u))) {
       int v = i;
       float2 v_1 = v2f;
       float2 v_2 = float2((1.0f).xx);

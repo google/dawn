@@ -45,8 +45,8 @@ fn main(@builtin(local_invocation_index) gl_LocalInvocationIndex : u32, @builtin
   var u_xlat_precise_bvec4 : vec4<bool>;
   var u_xlat_precise_uvec4 : vec4<u32>;
   u_xlatu0 = (vec2<u32>(gl_LocalInvocationIndex, gl_LocalInvocationIndex) & vec2<u32>(31u, 96u));
-  u_xlati4 = (bitcast<i32>(gl_GlobalInvocationID.x) << bitcast<u32>(2i));
-  u_xlat4 = bitcast<f32>(v._Input_buf[((u_xlati4 >> bitcast<u32>(2i)) + 0i)]);
+  u_xlati4 = (bitcast<i32>(gl_GlobalInvocationID.x) << 2u);
+  u_xlat4 = bitcast<f32>(v._Input_buf[((u_xlati4 >> 2u) + 0i)]);
   u_xlati4 = bitcast<i32>(select(0u, 4294967295u, (bitcast<i32>(u_xlat4) == bitcast<i32>(gl_LocalInvocationIndex))));
   let v_2 = (bitcast<i32>(gl_LocalInvocationIndex) & 31i);
   param = 0i;
@@ -102,8 +102,8 @@ fn main(@builtin(local_invocation_index) gl_LocalInvocationIndex : u32, @builtin
   u_xlati0 = countOneBits(u_xlati0);
   u_xlatb0 = (u_xlati0 == 32i);
   u_xlati0 = select(0i, 1i, u_xlatb0);
-  u_xlati2 = (bitcast<i32>(gl_LocalInvocationIndex) << bitcast<u32>(2i));
-  let v_4 = (u_xlati2 >> bitcast<u32>(2i));
+  u_xlati2 = (bitcast<i32>(gl_LocalInvocationIndex) << 2u);
+  let v_4 = (u_xlati2 >> 2u);
   v_1._Output_origX0X_buf[v_4] = bitcast<u32>(u_xlati0);
 }
 

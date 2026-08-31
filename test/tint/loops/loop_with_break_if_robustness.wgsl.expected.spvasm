@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 73
+; Bound: 71
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -33,10 +33,9 @@
 %_ptr_Function_uint = OpTypePointer Function %uint
      %uint_0 = OpConstant %uint 0
      %uint_1 = OpConstant %uint 1
-      %int_1 = OpConstant %int 1
       %false = OpConstantFalse %bool
        %void = OpTypeVoid
-         %70 = OpTypeFunction %void
+         %68 = OpTypeFunction %void
           %f = OpFunction %int None %3
           %4 = OpLabel
 %return_value = OpVariable %_ptr_Function_int Function %7
@@ -65,9 +64,9 @@
                OpSelectionMerge %38 None
                OpBranchConditional %36 %39 %38
          %39 = OpLabel
-         %66 = OpLoad %int %i None
+         %64 = OpLoad %int %i None
                OpStore %continue_execution %false None
-               OpStore %return_value %66 None
+               OpStore %return_value %64 None
                OpBranch %38
          %38 = OpLabel
          %40 = OpLoad %bool %continue_execution None
@@ -93,27 +92,26 @@
                OpStore %56 %55 None
          %57 = OpLoad %int %i None
          %58 = OpBitcast %uint %57
-         %59 = OpBitcast %uint %int_1
-         %61 = OpIAdd %uint %58 %59
-         %62 = OpBitcast %int %61
-               OpStore %i %62 None
-         %63 = OpLoad %int %i None
-         %64 = OpIEqual %bool %63 %int_4
-               OpBranchConditional %64 %17 %16
+         %59 = OpIAdd %uint %58 %uint_1
+         %60 = OpBitcast %int %59
+               OpStore %i %60 None
+         %61 = OpLoad %int %i None
+         %62 = OpIEqual %bool %61 %int_4
+               OpBranchConditional %62 %17 %16
          %17 = OpLabel
          %18 = OpLoad %bool %continue_execution None
                OpSelectionMerge %19 None
                OpBranchConditional %18 %20 %19
          %20 = OpLabel
-         %65 = OpLoad %int %i None
-               OpStore %return_value %65 None
+         %63 = OpLoad %int %i None
+               OpStore %return_value %63 None
                OpBranch %19
          %19 = OpLabel
          %21 = OpLoad %int %return_value None
                OpReturnValue %21
                OpFunctionEnd
-       %main = OpFunction %void None %70
-         %71 = OpLabel
-         %72 = OpFunctionCall %int %f
+       %main = OpFunction %void None %68
+         %69 = OpLabel
+         %70 = OpFunctionCall %int %f
                OpReturn
                OpFunctionEnd

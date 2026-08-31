@@ -44,9 +44,8 @@ void main() {
     uint v_5 = min(uint(v_2), v_4);
     uint v_6 = min(uint(v_3), 3u);
     int v_7 = idx3();
-    uint v_8 = uint(v_1.inner[v_5].a[v_6][min(uint(v_7), 3u)]);
-    int v_9 = int((v_8 + uint(1)));
-    v_1.inner[v_5].a[v_6][min(uint(v_7), 3u)] = v_9;
+    int v_8 = int((uint(v_1.inner[v_5].a[v_6][min(uint(v_7), 3u)]) + 1u));
+    v_1.inner[v_5].a[v_6][min(uint(v_7), 3u)] = v_8;
     while(true) {
       if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;
@@ -60,15 +59,14 @@ void main() {
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        int v_10 = idx4();
-        int v_11 = idx5();
-        uint v_12 = (uint(v_1.inner.length()) - 1u);
-        uint v_13 = min(uint(v_10), v_12);
-        uint v_14 = min(uint(v_11), 3u);
-        int v_15 = idx6();
-        uint v_16 = uint(v_1.inner[v_13].a[v_14][min(uint(v_15), 3u)]);
-        int v_17 = int((v_16 + uint(1)));
-        v_1.inner[v_13].a[v_14][min(uint(v_15), 3u)] = v_17;
+        int v_9 = idx4();
+        int v_10 = idx5();
+        uint v_11 = (uint(v_1.inner.length()) - 1u);
+        uint v_12 = min(uint(v_9), v_11);
+        uint v_13 = min(uint(v_10), 3u);
+        int v_14 = idx6();
+        int v_15 = int((uint(v_1.inner[v_12].a[v_13][min(uint(v_14), 3u)]) + 1u));
+        v_1.inner[v_12].a[v_13][min(uint(v_14), 3u)] = v_15;
       }
     }
   }

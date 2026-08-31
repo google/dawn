@@ -6,6 +6,6 @@
 fn main() {
   var srcValue : vec4<u32>;
   srcValue = textureLoad(Src, vec2<i32>());
-  srcValue.x = (srcValue.x + bitcast<u32>(1i));
+  srcValue.x = (srcValue.x + 1u);
   textureStore(Dst, vec2<i32>(), srcValue);
 }

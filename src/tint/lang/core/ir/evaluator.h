@@ -71,7 +71,7 @@ class Evaluator {
                               const core::type::Type* result_ty,
                               core::ir::Value* lhs,
                               core::ir::Value* rhs,
-                              const Source& src = {});
+                              const Source& source = {});
 
     /// Evaluate the unary operator `op` on `input`
     /// @param op the operation
@@ -81,7 +81,20 @@ class Evaluator {
     EvalResult EvalCoreUnary(UnaryOp op,
                              const core::type::Type* result_ty,
                              core::ir::Value* input,
-                             const Source& src = {});
+                             const Source& source = {});
+
+    /// Evaluate the core builtin call on `args`
+    /// @param fn the core builtin function
+    /// @param result_ty the result type
+    /// @param args the argument values
+    /// @param explicit_params the explicit template parameters
+    /// @param src the source location
+    EvalResult EvalCoreBuiltinCall(
+        core::BuiltinFn fn,
+        const core::type::Type* result_ty,
+        VectorRef<core::ir::Value*> args,
+        VectorRef<core::ir::TemplateParameter> explicit_params = tint::Empty,
+        const Source& source = {});
 
   private:
     diag::Diagnostic& AddError(Source src);

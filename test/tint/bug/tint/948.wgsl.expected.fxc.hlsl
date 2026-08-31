@@ -42,11 +42,11 @@ float4x4 getFrameData_f1_(inout float frameID) {
   float x_25 = asfloat(x_20[6u].w);
   fX = (x_15 / x_25);
   float x_37 = fX;
-  float4 x_40 = frameMapTexture.SampleBias(frameMapSampler, float2(x_37, 0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+  float4 x_40 = frameMapTexture.SampleBias(frameMapSampler, float2(x_37, 0.0f), 0.0f);
   float x_44 = fX;
-  float4 x_47 = frameMapTexture.SampleBias(frameMapSampler, float2(x_44, 0.25f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+  float4 x_47 = frameMapTexture.SampleBias(frameMapSampler, float2(x_44, 0.25f), 0.0f);
   float x_51 = fX;
-  float4 x_54 = frameMapTexture.SampleBias(frameMapSampler, float2(x_51, 0.5f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+  float4 x_54 = frameMapTexture.SampleBias(frameMapSampler, float2(x_51, 0.5f), 0.0f);
   float4 v = float4(x_40.x, x_40.y, x_40.z, x_40.w);
   float4 v_1 = float4(x_47.x, x_47.y, x_47.z, x_47.w);
   return float4x4(v, v_1, float4(x_54.x, x_54.y, x_54.z, x_54.w), (0.0f).xxxx);
@@ -102,7 +102,7 @@ void main_1() {
         {
           float2 x_150 = tileID;
           float2 x_154 = asfloat(x_20[5u].zw);
-          float4 x_156 = tileMapsTexture1.SampleBias(tileMapsSampler, ((x_150 + (0.5f).xx) / x_154), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+          float4 x_156 = tileMapsTexture1.SampleBias(tileMapsSampler, ((x_150 + (0.5f).xx) / x_154), 0.0f);
           frameID_1 = x_156.x;
           break;
         }
@@ -110,7 +110,7 @@ void main_1() {
         {
           float2 x_136 = tileID;
           float2 x_140 = asfloat(x_20[5u].zw);
-          float4 x_142 = tileMapsTexture0.SampleBias(tileMapsSampler, ((x_136 + (0.5f).xx) / x_140), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+          float4 x_142 = tileMapsTexture0.SampleBias(tileMapsSampler, ((x_136 + (0.5f).xx) / x_140), 0.0f);
           frameID_1 = x_142.x;
           break;
         }
@@ -121,7 +121,7 @@ void main_1() {
       }
       float x_166 = frameID_1;
       float x_169 = asfloat(x_20[6u].w);
-      float4 x_172 = animationMapTexture.SampleBias(animationMapSampler, float2(((x_166 + 0.5f) / x_169), 0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+      float4 x_172 = animationMapTexture.SampleBias(animationMapSampler, float2(((x_166 + 0.5f) / x_169), 0.0f), 0.0f);
       animationData = x_172;
       float x_174 = animationData.y;
       if ((x_174 > 0.0f)) {
@@ -216,7 +216,7 @@ void main_1() {
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         int x_304 = i;
-        i = asint((asuint(x_304) + asuint(int(1))));
+        i = asint((asuint(x_304) + 1u));
       }
     }
   }

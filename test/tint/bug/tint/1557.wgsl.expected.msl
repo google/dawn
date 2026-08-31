@@ -20,7 +20,7 @@ void g() {
       if ((j >= 1)) {
         break;
       }
-      j = as_type<int>((as_type<uint>(j) + as_type<uint>(1)));
+      j = as_type<int>((as_type<uint>(j) + 1u));
       int k = f();
       {
         uint const tint_low_inc = (tint_loop_idx.x - 1u);

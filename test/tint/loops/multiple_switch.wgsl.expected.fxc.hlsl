@@ -4,7 +4,7 @@ void main() {
   int i = int(0);
   {
     int i_1 = int(0);
-    for( ; (i_1 < int(2)); i_1 = asint((asuint(i_1) + asuint(int(1))))) {
+    for( ; (i_1 < int(2)); i_1 = asint((asuint(i_1) + 1u))) {
       bool tint_continue = false;
       switch(i_1) {
         case int(0):

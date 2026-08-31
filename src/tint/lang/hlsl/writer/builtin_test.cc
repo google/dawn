@@ -788,7 +788,8 @@ INSTANTIATE_TEST_SUITE_P(HlslWriterTest,
 TEST_F(HlslWriterTest, BuiltinSignScalar) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.f16(), core::BuiltinFn::kSign, 1_h));
+        auto* a = b.Let("a", 1_h);
+        b.Let("x", b.Call(ty.f16(), core::BuiltinFn::kSign, a));
         b.Return(func);
     });
 
@@ -796,7 +797,8 @@ TEST_F(HlslWriterTest, BuiltinSignScalar) {
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void main() {
-  float16_t x = float16_t(sign(float16_t(1.0h)));
+  float16_t a = float16_t(1.0h);
+  float16_t x = float16_t(sign(a));
 }
 
 )");
@@ -805,8 +807,8 @@ void main() {
 TEST_F(HlslWriterTest, BuiltinSignVector) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("x",
-              b.Call(ty.vec3f(), core::BuiltinFn::kSign, b.Composite(ty.vec3f(), 1_f, 2_f, 3_f)));
+        auto* a = b.Let("a", b.Composite(ty.vec3f(), 1_f, 2_f, 3_f));
+        b.Let("x", b.Call(ty.vec3f(), core::BuiltinFn::kSign, a));
         b.Return(func);
     });
 
@@ -814,7 +816,8 @@ TEST_F(HlslWriterTest, BuiltinSignVector) {
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void main() {
-  float3 x = float3(sign(float3(1.0f, 2.0f, 3.0f)));
+  float3 a = float3(1.0f, 2.0f, 3.0f);
+  float3 x = float3(sign(a));
 }
 
 )");
@@ -2519,7 +2522,10 @@ TEST_F(HlslWriterTest, BuiltinDot4I8PackedPolyfill) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* u = b.Var("u", 2_u);
-        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kDot4I8Packed, b.Load(u), u32(3_u)));
+        auto* v = b.Var("v", 3_u);
+        auto* ld_u = b.Load(u);
+        auto* ld_v = b.Load(v);
+        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kDot4I8Packed, ld_u, ld_v));
         b.Return(func);
     });
 
@@ -2531,15 +2537,15 @@ TEST_F(HlslWriterTest, BuiltinDot4I8PackedPolyfill) {
     EXPECT_EQ(output_.hlsl, R"(
 void main() {
   uint u = 2u;
-  uint v = u;
-  uint4 v_1 = uint4(24u, 16u, 8u, 0u);
-  int4 v_2 = asint((uint4((v).xxxx) << v_1));
-  int4 v_3 = (v_2 >> uint4((24u).xxxx));
-  uint4 v_4 = uint4(24u, 16u, 8u, 0u);
-  uint4 v_5 = uint4((3u).xxxx);
-  asint(uint4(50331648u, 196608u, 768u, 3u));
-  uint4 v_6 = uint4((24u).xxxx);
-  int a = dot(v_3, int4(int(3), int(0), int(0), int(0)));
+  uint v = 3u;
+  uint v_1 = u;
+  uint v_2 = v;
+  uint4 v_3 = uint4(24u, 16u, 8u, 0u);
+  int4 v_4 = asint((uint4((v_1).xxxx) << v_3));
+  int4 v_5 = (v_4 >> uint4((24u).xxxx));
+  uint4 v_6 = uint4(24u, 16u, 8u, 0u);
+  int4 v_7 = asint((uint4((v_2).xxxx) << v_6));
+  int a = dot(v_5, (v_7 >> uint4((24u).xxxx)));
 }
 
 )");
@@ -2978,7 +2984,8 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_2d) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, 3_f));
+        auto* bias = b.Let("b", 3_f);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, bias));
         b.Return(func);
     });
 
@@ -2988,7 +2995,8 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_2d) {
 Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void main() {
-  float4 x = v.SampleBias(v_1, float2(1.0f, 2.0f), clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float b = 3.0f;
+  float4 x = v.SampleBias(v_1, float2(1.0f, 2.0f), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 
 )");
@@ -3013,8 +3021,9 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_2d_Offset) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
+        auto* bias = b.Let("b", 3_f);
         b.Let("x",
-              b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, 3_f, offset));
+              b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, bias, offset));
         b.Return(func);
     });
 
@@ -3024,7 +3033,8 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_2d_Offset) {
 Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void main() {
-  float4 x = v.SampleBias(v_1, float2(1.0f, 2.0f), clamp(3.0f, -16.0f, 15.9899997711181640625f), int2(int(4), int(5)));
+  float b = 3.0f;
+  float4 x = v.SampleBias(v_1, float2(1.0f, 2.0f), clamp(b, -16.0f, 15.9899997711181640625f), int2(int(4), int(5)));
 }
 
 )");
@@ -3049,8 +3059,9 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_2d_Array) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x",
-              b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, array_idx, 3_f));
+        auto* bias = b.Let("b", 3_f);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, array_idx,
+                                     bias));
         b.Return(func);
     });
 
@@ -3061,7 +3072,8 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void main() {
   float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float b = 3.0f;
+  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 
 )");
@@ -3087,8 +3099,9 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_2d_Array_Offset) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
+        auto* bias = b.Let("b", 3_f);
         b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, array_idx,
-                                     3_f, offset));
+                                     bias, offset));
         b.Return(func);
     });
 
@@ -3099,7 +3112,8 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void main() {
   float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), clamp(3.0f, -16.0f, 15.9899997711181640625f), int2(int(4), int(5)));
+  float b = 3.0f;
+  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), clamp(b, -16.0f, 15.9899997711181640625f), int2(int(4), int(5)));
 }
 
 )");
@@ -3123,7 +3137,8 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_3d) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, 3_f));
+        auto* bias = b.Let("b", 3_f);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, bias));
         b.Return(func);
     });
 
@@ -3133,7 +3148,8 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_3d) {
 Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void main() {
-  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float b = 3.0f;
+  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 
 )");
@@ -3158,8 +3174,9 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_3d_Offset) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
+        auto* bias = b.Let("b", 3_f);
         b.Let("x",
-              b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, 3_f, offset));
+              b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, bias, offset));
         b.Return(func);
     });
 
@@ -3169,7 +3186,8 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_3d_Offset) {
 Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void main() {
-  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), clamp(3.0f, -16.0f, 15.9899997711181640625f), int3(int(4), int(5), int(6)));
+  float b = 3.0f;
+  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), clamp(b, -16.0f, 15.9899997711181640625f), int3(int(4), int(5), int(6)));
 }
 
 )");
@@ -3193,7 +3211,8 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_Cube) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, 3_f));
+        auto* bias = b.Let("b", 3_f);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, bias));
         b.Return(func);
     });
 
@@ -3203,7 +3222,8 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_Cube) {
 TextureCube<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void main() {
-  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float b = 3.0f;
+  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 
 )");
@@ -3228,8 +3248,9 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_Cube_Array) {
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x",
-              b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, array_idx, 3_f));
+        auto* bias = b.Let("b", 3_f);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, array_idx,
+                                     bias));
         b.Return(func);
     });
 
@@ -3240,7 +3261,8 @@ TextureCubeArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void main() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.SampleBias(v_1, float4(v_2, float(4u)), clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float b = 3.0f;
+  float4 x = v.SampleBias(v_1, float4(v_2, float(4u)), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 
 )");

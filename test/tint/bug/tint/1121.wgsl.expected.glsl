@@ -174,36 +174,33 @@ void main_inner(uvec3 GlobalInvocationID) {
                 tint_loop_idx_1.x = tint_low_inc_1;
                 uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
                 tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-                uint v_44 = uint(x);
-                x = int((v_44 + uint(1)));
+                x = int((uint(x) + 1u));
               }
               continue;
             }
-            uint v_45 = min(tileId, 3u);
-            uint offset = atomicAdd(v.inner.data[v_45].count, 1u);
-            uvec4 v_46 = v_1.inner[1u];
-            if ((offset >= v_46.x)) {
+            uint v_44 = min(tileId, 3u);
+            uint offset = atomicAdd(v.inner.data[v_44].count, 1u);
+            uvec4 v_45 = v_1.inner[1u];
+            if ((offset >= v_45.x)) {
               {
                 uint tint_low_inc_1 = (tint_loop_idx_1.x - 1u);
                 tint_loop_idx_1.x = tint_low_inc_1;
                 uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
                 tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-                uint v_44 = uint(x);
-                x = int((v_44 + uint(1)));
+                x = int((uint(x) + 1u));
               }
               continue;
             }
-            uint v_47 = min(tileId, 3u);
-            uint v_48 = min(offset, 63u);
-            v.inner.data[v_47].lightId[v_48] = GlobalInvocationID.x;
+            uint v_46 = min(tileId, 3u);
+            uint v_47 = min(offset, 63u);
+            v.inner.data[v_46].lightId[v_47] = GlobalInvocationID.x;
           }
           {
             uint tint_low_inc_1 = (tint_loop_idx_1.x - 1u);
             tint_loop_idx_1.x = tint_low_inc_1;
             uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
             tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-            uint v_44 = uint(x);
-            x = int((v_44 + uint(1)));
+            x = int((uint(x) + 1u));
           }
         }
       }
@@ -212,8 +209,7 @@ void main_inner(uvec3 GlobalInvocationID) {
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        uint v_49 = uint(y);
-        y = int((v_49 + uint(1)));
+        y = int((uint(y) + 1u));
       }
     }
   }

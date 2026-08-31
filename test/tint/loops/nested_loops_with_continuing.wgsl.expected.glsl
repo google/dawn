@@ -26,8 +26,7 @@ int f() {
             tint_loop_idx_1.x = tint_low_inc_1;
             uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
             tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-            uint v = uint(j);
-            j = int((v + uint(1)));
+            j = int((uint(j) + 1u));
           }
         }
       }

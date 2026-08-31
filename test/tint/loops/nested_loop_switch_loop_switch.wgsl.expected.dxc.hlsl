@@ -45,7 +45,7 @@ void main() {
                   tint_loop_idx_1.x = tint_low_inc_1;
                   uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
                   tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-                  j = asint((asuint(j) + asuint(int(2))));
+                  j = asint((asuint(j) + 2u));
                 }
                 continue;
               }
@@ -54,7 +54,7 @@ void main() {
                 tint_loop_idx_1.x = tint_low_inc_1;
                 uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
                 tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-                j = asint((asuint(j) + asuint(int(2))));
+                j = asint((asuint(j) + 2u));
               }
             }
           }
@@ -72,7 +72,7 @@ void main() {
           tint_loop_idx.x = tint_low_inc;
           uint tint_carry = uint((tint_low_inc == 4294967295u));
           tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-          i = asint((asuint(i) + asuint(int(2))));
+          i = asint((asuint(i) + 2u));
         }
         continue;
       }
@@ -81,7 +81,7 @@ void main() {
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        i = asint((asuint(i) + asuint(int(2))));
+        i = asint((asuint(i) + 2u));
       }
     }
   }

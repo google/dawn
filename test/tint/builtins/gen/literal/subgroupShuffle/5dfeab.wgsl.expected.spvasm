@@ -4,12 +4,12 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 37
+; Bound: 34
 ; Schema: 0
                OpCapability Shader
                OpCapability GroupNonUniformShuffle
                OpCapability GroupNonUniformArithmetic
-         %18 = OpExtInstImport "GLSL.std.450"
+         %15 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
                OpExecutionMode %fragment_main OriginUpperLeft
@@ -34,36 +34,33 @@
           %9 = OpConstantNull %uint
 %tint_subgroup_last_id = OpVariable %_ptr_Private_uint Private %9
          %11 = OpTypeFunction %v4float
-        %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
+     %uint_1 = OpConstant %uint 1
      %uint_3 = OpConstant %uint 3
     %float_1 = OpConstant %float 1
-         %21 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+         %19 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
        %void = OpTypeVoid
-         %28 = OpTypeFunction %void
-     %uint_1 = OpConstant %uint 1
+         %26 = OpTypeFunction %void
 %_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
      %uint_0 = OpConstant %uint 0
 %subgroupShuffle_5dfeab = OpFunction %v4float None %11
          %12 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function
-         %13 = OpBitcast %uint %int_1
-         %16 = OpLoad %uint %tint_subgroup_last_id None
-         %17 = OpExtInst %uint %18 UMin %13 %16
-         %19 = OpGroupNonUniformShuffle %v4float %uint_3 %21 %17
-               OpStore %res %19
-         %25 = OpLoad %v4float %res None
-               OpReturnValue %25
+         %13 = OpLoad %uint %tint_subgroup_last_id None
+         %14 = OpExtInst %uint %15 UMin %uint_1 %13
+         %17 = OpGroupNonUniformShuffle %v4float %uint_3 %19 %14
+               OpStore %res %17
+         %23 = OpLoad %v4float %res None
+               OpReturnValue %23
                OpFunctionEnd
-%fragment_main = OpFunction %void None %28
-         %29 = OpLabel
-         %30 = OpGroupNonUniformIAdd %uint %uint_3 Reduce %uint_1
-         %32 = OpISub %uint %30 %uint_1
-               OpStore %tint_subgroup_last_id %32 None
-         %33 = OpFunctionCall %v4float %subgroupShuffle_5dfeab
-         %34 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %34 %33 None
+%fragment_main = OpFunction %void None %26
+         %27 = OpLabel
+         %28 = OpGroupNonUniformIAdd %uint %uint_3 Reduce %uint_1
+         %29 = OpISub %uint %28 %uint_1
+               OpStore %tint_subgroup_last_id %29 None
+         %30 = OpFunctionCall %v4float %subgroupShuffle_5dfeab
+         %31 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
+               OpStore %31 %30 None
                OpReturn
                OpFunctionEnd
 ;
@@ -72,12 +69,12 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 37
+; Bound: 34
 ; Schema: 0
                OpCapability Shader
                OpCapability GroupNonUniformShuffle
                OpCapability GroupNonUniformArithmetic
-         %18 = OpExtInstImport "GLSL.std.450"
+         %15 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
@@ -102,35 +99,32 @@
           %9 = OpConstantNull %uint
 %tint_subgroup_last_id = OpVariable %_ptr_Private_uint Private %9
          %11 = OpTypeFunction %v4float
-        %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
+     %uint_1 = OpConstant %uint 1
      %uint_3 = OpConstant %uint 3
     %float_1 = OpConstant %float 1
-         %21 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+         %19 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
        %void = OpTypeVoid
-         %28 = OpTypeFunction %void
-     %uint_1 = OpConstant %uint 1
+         %26 = OpTypeFunction %void
 %_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
      %uint_0 = OpConstant %uint 0
 %subgroupShuffle_5dfeab = OpFunction %v4float None %11
          %12 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function
-         %13 = OpBitcast %uint %int_1
-         %16 = OpLoad %uint %tint_subgroup_last_id None
-         %17 = OpExtInst %uint %18 UMin %13 %16
-         %19 = OpGroupNonUniformShuffle %v4float %uint_3 %21 %17
-               OpStore %res %19
-         %25 = OpLoad %v4float %res None
-               OpReturnValue %25
+         %13 = OpLoad %uint %tint_subgroup_last_id None
+         %14 = OpExtInst %uint %15 UMin %uint_1 %13
+         %17 = OpGroupNonUniformShuffle %v4float %uint_3 %19 %14
+               OpStore %res %17
+         %23 = OpLoad %v4float %res None
+               OpReturnValue %23
                OpFunctionEnd
-%compute_main = OpFunction %void None %28
-         %29 = OpLabel
-         %30 = OpGroupNonUniformIAdd %uint %uint_3 Reduce %uint_1
-         %32 = OpISub %uint %30 %uint_1
-               OpStore %tint_subgroup_last_id %32 None
-         %33 = OpFunctionCall %v4float %subgroupShuffle_5dfeab
-         %34 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %34 %33 None
+%compute_main = OpFunction %void None %26
+         %27 = OpLabel
+         %28 = OpGroupNonUniformIAdd %uint %uint_3 Reduce %uint_1
+         %29 = OpISub %uint %28 %uint_1
+               OpStore %tint_subgroup_last_id %29 None
+         %30 = OpFunctionCall %v4float %subgroupShuffle_5dfeab
+         %31 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
+               OpStore %31 %30 None
                OpReturn
                OpFunctionEnd

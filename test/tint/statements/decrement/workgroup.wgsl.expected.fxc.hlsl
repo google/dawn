@@ -9,7 +9,7 @@ void main_inner(uint tint_local_index) {
     i = int(0);
   }
   GroupMemoryBarrierWithGroupSync();
-  i = asint((asuint(i) - asuint(int(1))));
+  i = asint((asuint(i) - 1u));
 }
 
 [numthreads(1, 1, 1)]

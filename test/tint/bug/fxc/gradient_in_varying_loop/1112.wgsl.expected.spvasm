@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 110
+; Bound: 108
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -59,11 +59,11 @@
       %int_1 = OpConstant %int 1
 %sampleDepth = OpConstant %float 0
        %true = OpConstantTrue %bool
+     %uint_1 = OpConstant %uint 1
 %_ptr_Function_uint = OpTypePointer Function %uint
      %uint_0 = OpConstant %uint 0
-     %uint_1 = OpConstant %uint 1
        %void = OpTypeVoid
-        %106 = OpTypeFunction %void
+        %104 = OpTypeFunction %void
  %main_inner = OpFunction %v4float None %16
         %vUV = OpFunctionParameter %v2float
          %17 = OpLabel
@@ -107,8 +107,8 @@
          %61 = OpLabel
                OpBranch %60
          %62 = OpLabel
-         %96 = OpCompositeExtract %float %offset 1
-         %65 = OpFOrdLessThan %bool %96 %sampleDepth
+         %95 = OpCompositeExtract %float %offset 1
+         %65 = OpFOrdLessThan %bool %95 %sampleDepth
                OpBranch %60
          %60 = OpLabel
          %63 = OpPhi %bool %true %61 %65 %62
@@ -117,8 +117,8 @@
          %67 = OpLabel
                OpBranch %66
          %68 = OpLabel
-         %97 = OpCompositeExtract %float %offset 0
-         %70 = OpFOrdGreaterThan %bool %97 %float_1
+         %96 = OpCompositeExtract %float %offset 0
+         %70 = OpFOrdGreaterThan %bool %96 %float_1
                OpBranch %66
          %66 = OpLabel
          %69 = OpPhi %bool %true %67 %70 %68
@@ -127,50 +127,48 @@
          %72 = OpLabel
                OpBranch %71
          %73 = OpLabel
-         %98 = OpCompositeExtract %float %offset 1
-         %75 = OpFOrdGreaterThan %bool %98 %float_1
+         %97 = OpCompositeExtract %float %offset 1
+         %75 = OpFOrdGreaterThan %bool %97 %float_1
                OpBranch %71
          %71 = OpLabel
          %74 = OpPhi %bool %true %72 %75 %73
                OpSelectionMerge %76 None
                OpBranchConditional %74 %77 %76
          %77 = OpLabel
-         %99 = OpLoad %int %i None
-        %100 = OpBitcast %uint %99
-        %101 = OpBitcast %uint %int_1
-        %102 = OpIAdd %uint %100 %101
-        %103 = OpBitcast %int %102
-               OpStore %i %103 None
+         %98 = OpLoad %int %i None
+         %99 = OpBitcast %uint %98
+        %100 = OpIAdd %uint %99 %uint_1
+        %101 = OpBitcast %int %100
+               OpStore %i %101 None
                OpBranch %31
          %76 = OpLabel
          %78 = OpLoad %int %i None
          %79 = OpBitcast %uint %78
-         %80 = OpBitcast %uint %int_1
-         %81 = OpIAdd %uint %79 %80
-         %82 = OpBitcast %int %81
+         %80 = OpIAdd %uint %79 %uint_1
+         %82 = OpBitcast %int %80
                OpStore %i %82 None
                OpBranch %31
          %31 = OpLabel
          %83 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
          %86 = OpLoad %uint %83 None
 %tint_low_inc = OpISub %uint %86 %uint_1
-         %89 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
-               OpStore %89 %tint_low_inc None
-         %90 = OpIEqual %bool %tint_low_inc %uint_4294967295
- %tint_carry = OpSelect %uint %90 %uint_1 %uint_0
-         %92 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
-         %93 = OpLoad %uint %92 None
-         %94 = OpISub %uint %93 %tint_carry
-         %95 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
-               OpStore %95 %94 None
+         %88 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
+               OpStore %88 %tint_low_inc None
+         %89 = OpIEqual %bool %tint_low_inc %uint_4294967295
+ %tint_carry = OpSelect %uint %89 %uint_1 %uint_0
+         %91 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
+         %92 = OpLoad %uint %91 None
+         %93 = OpISub %uint %92 %tint_carry
+         %94 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
+               OpStore %94 %93 None
                OpBranch %32
          %33 = OpLabel
                OpReturnValue %34
                OpFunctionEnd
-       %main = OpFunction %void None %106
-        %107 = OpLabel
-        %108 = OpLoad %v2float %main_loc0_Input None
-        %109 = OpFunctionCall %v4float %main_inner %108
-               OpStore %main_loc0_Output %109 None
+       %main = OpFunction %void None %104
+        %105 = OpLabel
+        %106 = OpLoad %v2float %main_loc0_Input None
+        %107 = OpFunctionCall %v4float %main_inner %106
+               OpStore %main_loc0_Output %107 None
                OpReturn
                OpFunctionEnd
