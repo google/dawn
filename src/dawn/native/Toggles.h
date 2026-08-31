@@ -180,6 +180,7 @@ enum class Toggle {
     BlobCacheHashValidation,
     DecomposeUniformBuffers,
     D3D12DecomposeWorkgroupAccess,
+    D3D12PolyfillF16CeilFloor,
     CollapseSubgroupMinMax,
     VulkanEnableF16OnNvidia,
     EnableRenderDocProcessInjection,

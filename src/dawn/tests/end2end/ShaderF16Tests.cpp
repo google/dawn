@@ -149,6 +149,88 @@ TEST_P(ShaderF16Tests, BasicShaderF16FeaturesTest) {
     EXPECT_BUFFER_U32_RANGE_EQ(expected, bufferOut, 0, 1);
 }
 
+// Verify f16 ceil and floor results for divisions that underflow to zero and for ordinary positive
+// and negative values.
+TEST_P(ShaderF16Tests, CeilFloorOfDivisionUnderflow) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsD3D12());
+    DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::ShaderF16));
+
+    const char* computeShader = R"(
+        enable f16;
+
+        @group(0) @binding(0) var<storage, read_write> values : array<u32>;
+
+        @compute @workgroup_size(1)
+        fn main() {
+            // Inputs:
+            //   values[0] = 0x8401 (-0.000061094760894775390625h)
+            //   values[1] = 0x7000
+            //   values[2] = 0xf400
+            //   values[3] = 0xbe00 (-1.5h)
+            //   values[4] = 0x3e00 (+1.5h)
+            let a        = f16(unpack2x16float(values[0]).x);
+            let divisor0 = f16(unpack2x16float(values[1]).x);
+            let divisor1 = f16(unpack2x16float(values[2]).x);
+            let negative = f16(unpack2x16float(values[3]).x);
+            let positive = f16(unpack2x16float(values[4]).x);
+
+            // Each division has a single use so that DXC can reproduce the problematic optimized
+            // ceil or floor expression instead of materializing the quotient for another use.
+            values[5] = pack2x16float(vec2f(f32(floor(a / divisor0)), 0.0));
+            values[6] = pack2x16float(vec2f(f32(ceil(a / divisor1)), 0.0));
+
+            // Also verify ordinary negative and positive inputs to ensure that the polyfill does
+            // not only handle values that underflow to zero.
+            values[7]  = pack2x16float(vec2f(f32(floor(negative)), 0.0));
+            values[8]  = pack2x16float(vec2f(f32(ceil(negative)), 0.0));
+            values[9]  = pack2x16float(vec2f(f32(floor(positive)), 0.0));
+            values[10] = pack2x16float(vec2f(f32(ceil(positive)), 0.0));
+        }
+    )";
+
+    wgpu::Buffer buffer =
+        utils::CreateBufferFromData(device, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+                                    {
+                                        0x00008401u,  // Small negative dividend
+                                        0x00007000u,  // Positive divisor
+                                        0x0000f400u,  // Negative divisor
+                                        0x0000be00u,  // -1.5h
+                                        0x00003e00u,  // +1.5h
+                                        0u,           // floor(negative underflow)
+                                        0u,           // ceil(positive underflow)
+                                        0u,           // floor(-1.5h)
+                                        0u,           // ceil(-1.5h)
+                                        0u,           // floor(+1.5h)
+                                        0u,           // ceil(+1.5h)
+                                    });
+
+    wgpu::ComputePipelineDescriptor descriptor;
+    descriptor.compute.module = utils::CreateShaderModule(device, computeShader);
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bindGroup);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // floor(-0.0h) must be -0.0h and ceil(+0.0h) must be +0.0h.
+    uint32_t expected[] = {
+        0x00008000u,  // floor(-0.0h) = -0.0h
+        0x00000000u,  // ceil(+0.0h) = +0.0h
+        0x0000c000u,  // floor(-1.5h) = -2.0h
+        0x0000bc00u,  // ceil(-1.5h) = -1.0h
+        0x00003c00u,  // floor(+1.5h) = +1.0h
+        0x00004000u,  // ceil(+1.5h) = +2.0h
+    };
+    EXPECT_BUFFER_U32_RANGE_EQ(expected, buffer, uint64_t{5} * sizeof(uint32_t), 6);
+}
+
 // Test that fragment shader use f16 vector type as render target output.
 TEST_P(ShaderF16Tests, RenderPipelineIOF16_RenderTarget) {
     // TODO(crbug.com/523211962): Produces incorrect result on Pixel 10.

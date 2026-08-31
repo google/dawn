@@ -379,6 +379,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     {
         raise::BuiltinPolyfillConfig config;
         config.polyfill_trunc = (options.compiler == Options::Compiler::kFXC);
+        config.polyfill_f16_ceil_floor = options.workarounds.polyfill_f16_ceil_floor;
         config.use_hlsl_2021_select = (options.compiler == Options::Compiler::kDXC_2021);
         TINT_CHECK_RESULT(raise::BuiltinPolyfill(module, config));
     }

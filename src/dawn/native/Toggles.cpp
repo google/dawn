@@ -756,6 +756,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Decompose workgroup memory variables into flat scalar arrays and rewrite accesses as "
       "element-wise loads/stores with bitcasts on selected Intel GPUs on D3D12",
       "https://crbug.com/341991439", ToggleStage::Device}},
+    {Toggle::D3D12PolyfillF16CeilFloor,
+     {"d3d12_polyfill_f16_ceil_floor",
+      "Polyfill f16 ceil and floor operations on selected Intel GPUs using DXC to avoid incorrect "
+      "results for values that underflow to zero.",
+      "", ToggleStage::Device}},
     {Toggle::CollapseSubgroupMinMax,
      {"collapse_subgroup_min_max",
       "Collapse redundant subgroup min and max operations (e.g., subgroupMin(subgroupMin(x))) into "

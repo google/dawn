@@ -148,6 +148,13 @@ struct State {
                     case core::BuiltinFn::kAtomicCompareExchangeWeak:
                         call_worklist.push_back([this, call] { AtomicCompareExchangeWeak(call); });
                         break;
+                    case core::BuiltinFn::kCeil:
+                    case core::BuiltinFn::kFloor:
+                        if (config.polyfill_f16_ceil_floor &&
+                            call->Result()->Type()->DeepestElement()->Is<core::type::F16>()) {
+                            call_worklist.push_back([this, call] { PolyfillF16CeilFloor(call); });
+                        }
+                        break;
                     case core::BuiltinFn::kCountOneBits:
                         call_worklist.push_back([this, call] {
                             BitcastToIntOverloadCall(call);  // See crbug.com/tint/1550.
@@ -552,6 +559,38 @@ struct State {
         trunc->InsertBefore(call);
 
         call->Destroy();
+    }
+
+    void PolyfillF16CeilFloor(core::ir::CoreBuiltinCall* call) {
+        auto* value = call->Args()[0];
+        auto* type = value->Type();
+        core::ir::CoreBuiltinCall* select = nullptr;
+        core::ir::CoreBuiltinCall* zero_select = nullptr;
+        b.InsertBefore(call, [&] {
+            auto* f32_type = ty.MatchWidth(ty.f32(), type);
+            auto* f32_value = b.Convert(f32_type, value);
+            auto* truncated = b.Call(f32_type, core::BuiltinFn::kTrunc, f32_value)->Result();
+            auto* one = b.MatchWidth(1_f, f32_type);
+
+            core::ir::Value* adjusted = nullptr;
+            core::ir::Value* condition = nullptr;
+            if (call->Func() == core::BuiltinFn::kFloor) {
+                adjusted = b.Subtract(truncated, one);
+                condition = b.LessThan(f32_value, truncated);
+            } else {
+                adjusted = b.Add(truncated, one);
+                condition = b.GreaterThan(f32_value, truncated);
+            }
+
+            select = b.Call(f32_type, core::BuiltinFn::kSelect, truncated, adjusted, condition);
+            auto* converted = b.Convert(type, select->Result());
+            auto* is_zero = b.Equal(value, b.Zero(type));
+            zero_select = b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect,
+                                           converted, value, is_zero);
+        });
+        call->Destroy();
+        Select(select);
+        Select(zero_select);
     }
 
     /// Replaces an identity bitcast result with the value.

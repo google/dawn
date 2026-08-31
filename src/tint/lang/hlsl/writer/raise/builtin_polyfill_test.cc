@@ -7583,6 +7583,80 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Select_2021) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriter_BuiltinPolyfillTest, PolyfillF16Ceil) {
+    auto* value = b.FunctionParam<f16>("value");
+    auto* func = b.Function("foo", ty.f16());
+    func->SetParams({value});
+    b.Append(func->Block(),
+             [&] { b.Return(func, b.Call(ty.f16(), core::BuiltinFn::kCeil, value)); });
+
+    auto* src = R"(
+%foo = func(%value:f16):f16 {
+  $B1: {
+    %3:f16 = ceil %value
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{.polyfill_f16_ceil_floor = true});
+
+    auto* expect = R"(
+%foo = func(%value:f16):f16 {
+  $B1: {
+    %3:f32 = convert %value
+    %4:f32 = trunc %3
+    %5:f32 = add %4, 1.0f
+    %6:bool = gt %3, %4
+    %7:f32 = hlsl.ternary %4, %5, %6
+    %8:f16 = convert %7
+    %9:bool = eq %value, 0.0h
+    %10:f16 = hlsl.ternary %8, %value, %9
+    ret %10
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, PolyfillVecF16Floor) {
+    auto* value = b.FunctionParam<vec3<f16>>("value");
+    auto* func = b.Function("foo", ty.vec3<f16>());
+    func->SetParams({value});
+    b.Append(func->Block(),
+             [&] { b.Return(func, b.Call(ty.vec3<f16>(), core::BuiltinFn::kFloor, value)); });
+
+    auto* src = R"(
+%foo = func(%value:vec3<f16>):vec3<f16> {
+  $B1: {
+    %3:vec3<f16> = floor %value
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{.polyfill_f16_ceil_floor = true});
+
+    auto* expect = R"(
+%foo = func(%value:vec3<f16>):vec3<f16> {
+  $B1: {
+    %3:vec3<f32> = convert %value
+    %4:vec3<f32> = trunc %3
+    %5:vec3<f32> = sub %4, vec3<f32>(1.0f)
+    %6:vec3<bool> = lt %3, %4
+    %7:vec3<f32> = hlsl.ternary %4, %5, %6
+    %8:vec3<f16> = convert %7
+    %9:vec3<bool> = eq %value, vec3<f16>(0.0h)
+    %10:vec3<f16> = hlsl.ternary %8, %value, %9
+    ret %10
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriter_BuiltinPolyfillTest, Trunc) {
     auto* a = b.FunctionParam<f32>("a");
     auto* func = b.Function("foo", ty.f32());

@@ -792,6 +792,15 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::D3D12DecomposeWorkgroupAccess, true);
     }
 
+    // This workaround is needed on Intel Gen12 and Xe2 GPUs using DXC.
+    // See https://issues.chromium.org/issues/42251226 for more information.
+    if (deviceToggles->IsEnabled(Toggle::UseDXC) && (gpu_info::IsIntelGen12LP(vendorId, deviceId) ||
+                                                     gpu_info::IsIntelGen12HP(vendorId, deviceId) ||
+                                                     gpu_info::IsIntelXe2LPG(vendorId, deviceId) ||
+                                                     gpu_info::IsIntelXe2HPG(vendorId, deviceId))) {
+        deviceToggles->Default(Toggle::D3D12PolyfillF16CeilFloor, true);
+    }
+
     // Currently this workaround is only needed on Intel Gen9, Gen9.5 and Gen11 GPUs.
     // See http://crbug.com/1161355 for more information.
     if (gpu_info::IsIntelGen9(vendorId, deviceId) || gpu_info::IsIntelGen11(vendorId, deviceId)) {

@@ -154,12 +154,16 @@ struct Options {
         /// Set to `true` to collapse redundant subgroup min and max operations
         bool collapse_subgroup_min_max = false;
 
+        /// Set to `true` to polyfill f16 `ceil` and `floor` builtins.
+        bool polyfill_f16_ceil_floor = false;
+
         TINT_REFLECT(Workarounds,
                      scalarize_max_min_clamp,
                      polyfill_reflect_vec2_f32,
                      polyfill_subgroup_broadcast_f16,
                      d3d12_decompose_workgroup_access,
-                     collapse_subgroup_min_max);
+                     collapse_subgroup_min_max,
+                     polyfill_f16_ceil_floor);
         bool operator==(const Workarounds&) const = default;
     };
 

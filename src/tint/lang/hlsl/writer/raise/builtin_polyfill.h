@@ -43,6 +43,9 @@ struct BuiltinPolyfillConfig {
     /// Set to `true` to polyfill `trunc()`.
     bool polyfill_trunc = false;
 
+    /// Set to `true` to polyfill `ceil()` and `floor()` on f16 values.
+    bool polyfill_f16_ceil_floor = false;
+
     /// Set to `true` to use HLSL 2021's `select()` instead of a ternary operator.
     bool use_hlsl_2021_select = false;
 };
