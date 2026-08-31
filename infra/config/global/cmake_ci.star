@@ -31,6 +31,7 @@ load("@chromium-luci//builder_config.star", "builder_config")
 load("@chromium-luci//ci.star", "ci")
 load("@chromium-luci//consoles.star", "consoles")
 load("@chromium-luci//gardener_rotations.star", "gardener_rotations")
+load("@chromium-luci//gpu.star", "gpu")
 load("//cmake_shared.star", "cmake_builder_defaults")
 load("//constants.star", "siso")
 
@@ -38,8 +39,7 @@ ci.defaults.set(
     executable = "recipe:dawn/cmake",
     builder_group = "ci",
     bucket = "ci",
-    pool = "luci.chromium.gpu.ci",
-    builderless = True,
+    pool = gpu.ci.POOL,
     triggered_by = ["primary-poller"],
     build_numbers = True,
     contact_team_email = "chrome-gpu-infra@google.com",
@@ -54,7 +54,7 @@ ci.defaults.set(
 
 def dawn_ci_linux_cmake_builder(**kwargs):
     kwargs = cmake_builder_defaults.apply_linux_cmake_builder_defaults(kwargs)
-    ci.builder(**kwargs)
+    gpu.ci.linux_builder(**kwargs)
 
 def dawn_ci_mac_cmake_builder(**kwargs):
     """Adds a Dawn/Mac/CMake CI builder.
@@ -63,7 +63,7 @@ def dawn_ci_mac_cmake_builder(**kwargs):
         **kwargs: Builder arguments to forward on to ci.builder()
     """
     kwargs = cmake_builder_defaults.apply_mac_cmake_builder_defaults(kwargs)
-    ci.builder(**kwargs)
+    gpu.ci.mac_builder(**kwargs)
 
 def dawn_ci_win_cmake_builder(**kwargs):
     """Adds a Dawn/Win/CMake CI builder.
@@ -72,7 +72,7 @@ def dawn_ci_win_cmake_builder(**kwargs):
         **kwargs: Builder arguments to forward on to ci.builder()
     """
     kwargs = cmake_builder_defaults.apply_win_cmake_builder_defaults(kwargs)
-    ci.builder(**kwargs)
+    gpu.ci.windows_builder(**kwargs)
 
 dawn_ci_linux_cmake_builder(
     name = "dawn-linux-x64-sws-cmake-dbg",

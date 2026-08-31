@@ -27,6 +27,7 @@
 
 """Try Dawn builders using CMake for the build system instead of GN."""
 
+load("@chromium-luci//gpu.star", "gpu")
 load("@chromium-luci//try.star", "try_")
 load("//cmake_shared.star", "cmake_builder_defaults")
 load("//constants.star", "siso")
@@ -37,8 +38,7 @@ try_.defaults.set(
     executable = "recipe:dawn/cmake",
     builder_group = "try",
     bucket = "try",
-    pool = "luci.chromium.gpu.try",
-    builderless = True,
+    pool = gpu.try_.POOL,
     build_numbers = True,
     list_view = "try",
     cq_group = "Dawn-CQ",
@@ -59,48 +59,7 @@ def apply_cq_builder_defaults(kwargs):
     ))
     return kwargs
 
-def apply_linux_cq_builder_defaults(kwargs):
-    """Sets default arguments for Linux CMake CQ builders.
-
-    Args:
-        kwargs: The kwargs for creating a try builder.
-
-    Returns:
-        |kwargs| with Linux/CMake defaults set.
-    """
-    kwargs = cmake_builder_defaults.apply_linux_cmake_builder_defaults(kwargs)
-    kwargs = apply_cq_builder_defaults(kwargs)
-    return kwargs
-
-def apply_mac_cq_builder_defaults(kwargs):
-    """Sets default arguments for Mac CMake CQ builders.
-
-    Args:
-        kwargs: The kwargs for creating a try builder.
-
-    Returns:
-        |kwargs| with Mac/CMake defaults set.
-    """
-    kwargs = cmake_builder_defaults.apply_mac_cmake_builder_defaults(kwargs)
-    kwargs = apply_cq_builder_defaults(kwargs)
-    return kwargs
-
-def apply_win_cq_builder_defaults(kwargs):
-    """Sets default arguments for Win CMake CQ builders.
-
-    Args:
-        kwargs: The kwargs for creating a try builder.
-
-    Returns:
-        |kwargs| with Win/CMake defaults set.
-    """
-    kwargs = cmake_builder_defaults.apply_win_cmake_builder_defaults(kwargs)
-    kwargs = apply_cq_builder_defaults(kwargs)
-    return kwargs
-
-def add_builder_to_main_and_milestone_cq_groups(kwargs):
-    # Dawn standalone builders run fine unbranched on branched CLs.
-    try_.builder(**kwargs)
+def add_builder_to_milestone_cq_group(kwargs):
     for milestone in ACTIVE_MILESTONES.keys():
         # TODO(crbug.com/459517292): Figure out why the legacy builders were
         # marked as experimental and remove the need for that.
@@ -111,16 +70,22 @@ def add_builder_to_main_and_milestone_cq_groups(kwargs):
         )
 
 def dawn_linux_cmake_cq_tester(**kwargs):
-    kwargs = apply_linux_cq_builder_defaults(kwargs)
-    add_builder_to_main_and_milestone_cq_groups(kwargs)
+    kwargs = cmake_builder_defaults.apply_linux_cmake_builder_defaults(kwargs)
+    kwargs = apply_cq_builder_defaults(kwargs)
+    gpu.try_.linux_optional_builder(**kwargs)
+    add_builder_to_milestone_cq_group(kwargs)
 
 def dawn_mac_cmake_cq_tester(**kwargs):
-    kwargs = apply_mac_cq_builder_defaults(kwargs)
-    add_builder_to_main_and_milestone_cq_groups(kwargs)
+    kwargs = cmake_builder_defaults.apply_mac_cmake_builder_defaults(kwargs)
+    kwargs = apply_cq_builder_defaults(kwargs)
+    gpu.try_.mac_optional_builder(**kwargs)
+    add_builder_to_milestone_cq_group(kwargs)
 
 def dawn_win_cmake_cq_tester(**kwargs):
-    kwargs = apply_win_cq_builder_defaults(kwargs)
-    add_builder_to_main_and_milestone_cq_groups(kwargs)
+    kwargs = cmake_builder_defaults.apply_win_cmake_builder_defaults(kwargs)
+    kwargs = apply_cq_builder_defaults(kwargs)
+    gpu.try_.win_optional_builder(**kwargs)
+    add_builder_to_milestone_cq_group(kwargs)
 
 ## CQ Builders
 
