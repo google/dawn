@@ -1,0 +1,8 @@
+{
+  "dawn-linux-x64-builder-rel": {
+    "additional_compile_targets": [
+      "default"
+    ]
+  },
+  "dawn-linux-x64-nvidia-gtx1660-exp-rel": {}
+}

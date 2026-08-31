@@ -399,6 +399,16 @@ gpu.try_.linux_manual_builder(
     gn_args = "ci/dawn-linux-x64-builder-rel",
 )
 
+gpu.try_.win_manual_builder(
+    name = "dawn-try-linux-x64-nvidia-gtx1660-exp-rel",
+    description_html = "Tests release Dawn on Linux/x64 on NVIDIA GTX 1660 GPUs w/ experimental OS/driver configs. Manual only.",
+    mirrors = [
+        "ci/dawn-linux-x64-builder-rel",
+        "ci/dawn-linux-x64-nvidia-gtx1660-exp-rel",
+    ],
+    gn_args = "ci/dawn-linux-x64-builder-rel",
+)
+
 gpu.try_.linux_manual_builder(
     name = "dawn-try-linux-x64-nvidia-gtx1660-rel",
     description_html = "Tests release Dawn on Linux/x64 on NVIDIA GTX 1660 GPUs. Manual only.",

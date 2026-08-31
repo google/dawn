@@ -461,6 +461,7 @@
       }
     ]
   },
+  "dawn-linux-x64-nvidia-gtx1660-exp-rel": {},
   "dawn-linux-x64-nvidia-gtx1660-rel": {
     "gtest_tests": [
       {
