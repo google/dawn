@@ -5919,7 +5919,7 @@ TEST_F(IR_DecomposeAccessTest, BufferLength_Sized_FromType) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* call = b.Call(ty.u32(), core::BuiltinFn::kBufferLength, var);
-        b.Let("a", call->Result());
+        b.Let("a", call);
         b.Return(func);
     });
 
@@ -5964,7 +5964,7 @@ TEST_F(IR_DecomposeAccessTest, BufferLength_Unsized) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* call = b.Call(ty.u32(), core::BuiltinFn::kBufferLength, var);
-        b.Let("a", call->Result());
+        b.Let("a", call);
         b.Return(func);
     });
 
@@ -6011,7 +6011,7 @@ TEST_F(IR_DecomposeAccessTest, ArrayLength_U32) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* call = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, var);
-        b.Let("a", call->Result());
+        b.Let("a", call);
         b.Return(func);
     });
 
@@ -6057,7 +6057,7 @@ TEST_F(IR_DecomposeAccessTest, ArrayLength_F16) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* call = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, var);
-        b.Let("a", call->Result());
+        b.Let("a", call);
         b.Return(func);
     });
 
@@ -6107,7 +6107,7 @@ TEST_F(IR_DecomposeAccessTest, ArrayLength_StructMinF16) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* call = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, var);
-        b.Let("a", call->Result());
+        b.Let("a", call);
         b.Return(func);
     });
 
@@ -6175,7 +6175,7 @@ TEST_F(IR_DecomposeAccessTest, ArrayLength_StructMinF16_Offset_Access) {
         auto* call =
             b.Call(ty.u32(), core::BuiltinFn::kArrayLength,
                    b.Access(ty.ptr(storage, ty.runtime_array(sb), core::Access::kRead), var, 1_u));
-        b.Let("a", call->Result());
+        b.Let("a", call);
         b.Return(func);
     });
 
@@ -6255,7 +6255,7 @@ TEST_F(IR_DecomposeAccessTest, ArrayLength_StructMinF16_Offset_BufferView) {
                                     core::BuiltinFn::kBufferView,
                                     Vector<TemplateParameter, 1>{ty.runtime_array(sb)}, var, 64_u);
         auto* call = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, view);
-        b.Let("a", call->Result());
+        b.Let("a", call);
         b.Return(func);
     });
 
@@ -6339,7 +6339,7 @@ TEST_F(IR_DecomposeAccessTest, ArrayLength_StructMinF16_Offset_BufferView_Runtim
                            core::BuiltinFn::kBufferView,
                            Vector<TemplateParameter, 1>{ty.runtime_array(sb)}, var, b.Load(val));
         auto* call = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, view);
-        b.Let("a", call->Result());
+        b.Let("a", call);
         b.Return(func);
     });
 
@@ -6431,7 +6431,7 @@ TEST_F(IR_DecomposeAccessTest, ArrayLength_StructMinF16_Offset_Both) {
         auto* call =
             b.Call(ty.u32(), core::BuiltinFn::kArrayLength,
                    b.Access(ty.ptr(storage, ty.runtime_array(sb), core::Access::kRead), view, 1_u));
-        b.Let("a", call->Result());
+        b.Let("a", call);
         b.Return(func);
     });
 
@@ -6793,7 +6793,7 @@ TEST_F(IR_DecomposeAccessTest, ArrayLength_BufferArrayView_Size_U32) {
             ty.ptr(storage, arr_ty, core::Access::kReadWrite), core::BuiltinFn::kBufferArrayView,
             Vector<TemplateParameter, 1>{arr_ty}, var, 16_u, 100_u);
         auto* len = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, call);
-        b.Let("a", len->Result());
+        b.Let("a", len);
         b.Return(func);
     });
 
@@ -6844,7 +6844,7 @@ TEST_F(IR_DecomposeAccessTest, ArrayLength_BufferArrayView_Size_Vec4f) {
             ty.ptr(storage, arr_ty, core::Access::kReadWrite), core::BuiltinFn::kBufferArrayView,
             Vector<TemplateParameter, 1>{arr_ty}, var, 16_u, 100_u);
         auto* len = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, call);
-        b.Let("a", len->Result());
+        b.Let("a", len);
         b.Return(func);
     });
 
@@ -6900,7 +6900,7 @@ TEST_F(IR_DecomposeAccessTest, ArrayLength_BufferArrayView_Size_Struct) {
             ty.ptr(storage, arr_ty, core::Access::kReadWrite), core::BuiltinFn::kBufferArrayView,
             Vector<TemplateParameter, 1>{arr_ty}, var, 16_u, 100_u);
         auto* len = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, call);
-        b.Let("a", len->Result());
+        b.Let("a", len);
         b.Return(func);
     });
 
@@ -6970,7 +6970,7 @@ TEST_F(IR_DecomposeAccessTest, ArrayLength_BufferArrayView_Size_RuntimeStruct) {
             Vector<TemplateParameter, 1>{str_}, var, offset, size);
         auto* access = b.Access(ty.ptr(storage, ty.runtime_array(ty.f32())), call, 1_u);
         auto* len = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, access);
-        b.Let("a", len->Result());
+        b.Let("a", len);
         b.Return(func);
     });
 
@@ -7045,7 +7045,7 @@ TEST_F(IR_DecomposeAccessTest, ArrayLength_BufferView_Length_U32) {
             Vector<TemplateParameter, 1>{str_}, var, offset, length);
         auto* access = b.Access(ty.ptr(storage, arr_ty), call, 1_u);
         auto* len = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, access);
-        b.Let("a", len->Result());
+        b.Let("a", len);
         b.Return(func);
     });
 

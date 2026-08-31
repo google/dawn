@@ -510,7 +510,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // broadcast the resulting subgroup ID to the rest of the invocations in the subgroup.
         MakeSubgroupIdCounter(builder);
         auto* id = builder.Load(tint_subgroup_id);
-        return builder.Call<u32>(core::BuiltinFn::kSubgroupBroadcastFirst, id)->Result();
+        return builder.Call<u32>(core::BuiltinFn::kSubgroupBroadcastFirst, id);
     }
 
     core::ir::Value* PolyfillNumSubgroups(core::ir::Builder& builder) {
@@ -527,7 +527,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         MakeSubgroupIdCounter(builder);
         TINT_IR_ASSERT(ir, tint_subgroup_id_counter);
         builder.Call<void>(core::BuiltinFn::kWorkgroupBarrier);
-        return builder.Call<u32>(core::BuiltinFn::kAtomicLoad, tint_subgroup_id_counter)->Result();
+        return builder.Call<u32>(core::BuiltinFn::kAtomicLoad, tint_subgroup_id_counter);
     }
 
     core::ir::Value* GetSubgroupSize(core::ir::Builder& builder) {

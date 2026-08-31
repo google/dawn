@@ -92,7 +92,7 @@ struct State {
             auto* complement = b.Complement(unsigned_value);
             auto* plus_one = b.Add(complement, b.MatchWidth(u32(1), unsigned_type));
             auto* result = b.Bitcast(signed_type, plus_one);
-            unary->Result()->ReplaceAllUsesWith(result->Result());
+            unary->Result()->ReplaceAllUsesWith(result);
         });
         unary->Destroy();
     }
@@ -112,7 +112,7 @@ struct State {
             auto* uint_rhs = b.Bitcast(unsigned_rhs_ty, binary->RHS());
             auto* uint_binary = b.Binary(binary->Op(), unsigned_result_ty, uint_lhs, uint_rhs);
             auto* bitcast = b.Bitcast(signed_result_ty, uint_binary);
-            binary->Result()->ReplaceAllUsesWith(bitcast->Result());
+            binary->Result()->ReplaceAllUsesWith(bitcast);
         });
         binary->Destroy();
     }
@@ -130,7 +130,7 @@ struct State {
             auto* unsigned_binary =
                 b.Binary(binary->Op(), unsigned_ty, unsigned_lhs, binary->RHS());
             auto* bitcast = b.Bitcast(signed_ty, unsigned_binary);
-            binary->Result()->ReplaceAllUsesWith(bitcast->Result());
+            binary->Result()->ReplaceAllUsesWith(bitcast);
         });
         binary->Destroy();
     }

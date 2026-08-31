@@ -301,7 +301,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             config.immediate_data_layout.GetValue(builder, core::InternalImmediate::kFragDepthMin);
         auto* max =
             config.immediate_data_layout.GetValue(builder, core::InternalImmediate::kFragDepthMax);
-        return builder.Clamp(frag_depth, min, max)->Result();
+        return builder.Clamp(frag_depth, min, max);
     }
 
     /// @copydoc ShaderIO::BackendState::NeedsVertexPointSize

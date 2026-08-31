@@ -428,7 +428,7 @@ struct State {
     /// Set the subgroup_last_id_ variable from an entry point.
     void SetSubgroupLastIdForEntryPoint(core::ir::Function* ep) {
         b.InsertBefore(ep->Block()->Front(), [&] {
-            core::ir::Instruction* count = b.Call(ty.u32(), core::BuiltinFn::kSubgroupAdd, 1_u);
+            auto* count = b.Call(ty.u32(), core::BuiltinFn::kSubgroupAdd, 1_u);
             b.Store(subgroup_last_id_, b.Subtract(count, 1_u));
         });
     }
@@ -920,19 +920,21 @@ struct State {
                               ? static_cast<const core::type::Type*>(ty.f32())
                               : ty.vec4f();
 
-        core::ir::Instruction* result =
-            b.Call<spirv::ir::BuiltinCall>(result_ty, function, std::move(function_args));
-        result->InsertBefore(builtin);
+        core::ir::Value* result = nullptr;
 
-        // If this is not a depth comparison but we are sampling a depth texture, extract the first
-        // component to get the scalar f32 that SPIR-V expects.
-        if (!depth && texture_ty->GetDepth() == type::Depth::kDepth) {
-            result = b.Access(ty.f32(), result, 0_u);
-            result->InsertBefore(builtin);
-        }
+        b.InsertBefore(builtin, [&] {
+            result = b.Call<spirv::ir::BuiltinCall>(result_ty, function, std::move(function_args))
+                         ->Result();
+
+            // If this is not a depth comparison but we are sampling a depth texture, extract the
+            // first component to get the scalar f32 that SPIR-V expects.
+            if (!depth && texture_ty->GetDepth() == type::Depth::kDepth) {
+                result = b.Access(ty.f32(), result, 0_u)->Result();
+            }
+        });
 
         if (polyfill_depth_cube_array) {
-            b.InsertAfter(result, [&] {
+            b.InsertBefore(builtin, [&] {
                 // This is an imperfect polyfill for builtin intrinsic to do PCF style shadows.
                 // See: crbug.com/467015399
                 // To do a complete polyfill we would have to properly do bilinear interpolation
@@ -945,12 +947,13 @@ struct State {
                 // sample mip0 which is identical to TextureSampleCompareLevel but not
                 // TextureSampleCompare.
                 result = b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kDot, result,
-                                                        b.Splat(ty.vec4f(), b.Constant(0.25_f)));
+                                                        b.Splat(ty.vec4f(), b.Constant(0.25_f)))
+                             ->Result();
             });
         }
 
         if (polyfill_depth_2d) {
-            b.InsertAfter(result, [&] {
+            b.InsertBefore(builtin, [&] {
                 // Bilinear interpolation for 2D sampleCompare (2D polyfill).
                 // result from OpImageDrefGather (textureGatherCompare) is vec4f:
                 // [0]: (i,   j+1)
@@ -978,7 +981,7 @@ struct State {
             });
         }
 
-        result->SetResult(builtin->DetachResult());
+        builtin->Result()->ReplaceAllUsesWith(result);
         builtin->Destroy();
     }
 
@@ -1280,11 +1283,11 @@ struct State {
         // Replace the builtin call with a call to the spirv.dot intrinsic.
         Vector<core::ir::Value*, 4> args;
         for (uint32_t i = 0; i < vec->Width(); i++) {
-            auto* el = b.Access(ty.f32(), arg, u32(i));
-            auto* scalar_call = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, el);
-            args.Push(scalar_call->Result());
-            el->InsertBefore(builtin);
-            scalar_call->InsertBefore(builtin);
+            b.InsertBefore(builtin, [&] {
+                auto* el = b.Access(ty.f32(), arg, u32(i));
+                auto* scalar_call = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, el);
+                args.Push(scalar_call);
+            });
         }
         auto* construct = b.ConstructWithResult(builtin->DetachResult(), std::move(args));
         construct->InsertBefore(builtin);
@@ -1349,9 +1352,10 @@ struct State {
         auto* arg2 = builtin->Args()[1];
         // arg2 must be an unsigned integer scalar, so bitcast if necessary.
         if (arg2->Type()->IsSignedIntegerScalar()) {
-            auto* cast = b.Bitcast(ty.u32(), arg2);
-            cast->InsertBefore(builtin);
-            builtin->SetArg(1, cast->Result());
+            b.InsertBefore(builtin, [&] {
+                auto* cast = b.Bitcast(ty.u32(), arg2);
+                builtin->SetArg(1, cast);
+            });
         }
 
         if (config.disable_robustness) {
@@ -1365,7 +1369,7 @@ struct State {
         b.InsertBefore(builtin, [&] {
             auto* last_id = b.Load(subgroup_last_id_);
             auto* clamp_via_min = b.Min(shuffle_id, last_id);
-            builtin->SetArg(1, clamp_via_min->Result());
+            builtin->SetArg(1, clamp_via_min);
         });
     }
 
@@ -1384,7 +1388,7 @@ struct State {
         CreateSubgroupLastIdIfNeeded();
         CreateSubgroupInvocationIdIfNeeded();
 
-        core::ir::CoreBuiltinCall* call = nullptr;
+        core::ir::Value* call = nullptr;
         b.InsertAfter(builtin, [&] {
             auto* ret_ty = builtin->Result()->Type();
             auto* result = b.InstructionResult(ret_ty);
@@ -1409,11 +1413,14 @@ struct State {
             }
 
             auto* cmp = b.LessThanEqual(id, b.Load(subgroup_last_id_));
-            call = b.CallWithResult(result, core::BuiltinFn::kSelect, b.Zero(ret_ty), builtin, cmp);
+            call =
+                b.CallReplaceResult(result, core::BuiltinFn::kSelect, b.Zero(ret_ty), builtin, cmp);
         });
 
         // Make sure the select gets converted to proper SPIR-V select
-        Select(call);
+        if (auto* call_inst = call->AsInstruction<core::ir::CoreBuiltinCall>()) {
+            Select(call_inst);
+        }
     }
 
     /// Handle a SubgroupBroadcast() builtin.
@@ -1435,7 +1442,7 @@ struct State {
 
         CreateSubgroupLastIdIfNeeded();
 
-        core::ir::CoreBuiltinCall* call = nullptr;
+        core::ir::Value* call = nullptr;
         b.InsertAfter(builtin, [&] {
             auto* ret_ty = builtin->Result()->Type();
             auto* result = b.InstructionResult(ret_ty);
@@ -1444,11 +1451,14 @@ struct State {
             builtin->Result()->ReplaceAllUsesWith(result);
 
             auto* cmp = b.LessThanEqual(id, b.Load(subgroup_last_id_));
-            call = b.CallWithResult(result, core::BuiltinFn::kSelect, b.Zero(ret_ty), builtin, cmp);
+            call =
+                b.CallReplaceResult(result, core::BuiltinFn::kSelect, b.Zero(ret_ty), builtin, cmp);
         });
 
         // Make sure the select gets converted to proper SPIR-V select
-        Select(call);
+        if (auto* call_inst = call->AsInstruction<core::ir::CoreBuiltinCall>()) {
+            Select(call_inst);
+        }
     }
 
     /// Handle a QuadBroadcast() builtin.

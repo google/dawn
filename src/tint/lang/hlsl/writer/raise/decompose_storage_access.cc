@@ -582,16 +582,16 @@ struct State {
         if (is_f16 || is_u16) {
             cast = from;
         } else {
-            cast = b.Bitcast(cast_ty, from)->Result();
+            cast = b.Bitcast(cast_ty, from);
         }
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), fn, var, offset, cast);
     }
 
     // Creates the appropriate load instructions for the given result type.
-    core::ir::Call* MakeLoad(core::ir::Instruction* inst,
-                             core::ir::Var* var,
-                             const core::type::Type* result_ty,
-                             core::ir::Value* offset) {
+    core::ir::Value* MakeLoad(core::ir::Instruction* inst,
+                              core::ir::Var* var,
+                              const core::type::Type* result_ty,
+                              core::ir::Value* offset) {
         if (result_ty->IsNumericScalarOrVector()) {
             return MakeScalarOrVectorLoad(var, result_ty, offset);
         }
@@ -600,15 +600,15 @@ struct State {
             result_ty,  //
             [&](const core::type::Struct* s) {
                 auto* fn = GetLoadFunctionFor(inst, var, s);
-                return b.Call(fn, offset);
+                return b.Call(fn, offset)->Result();
             },
             [&](const core::type::Matrix* m) {
                 auto* fn = GetLoadFunctionFor(inst, var, m);
-                return b.Call(fn, offset);
+                return b.Call(fn, offset)->Result();
             },  //
             [&](const core::type::Array* a) {
                 auto* fn = GetLoadFunctionFor(inst, var, a);
-                return b.Call(fn, offset);
+                return b.Call(fn, offset)->Result();
             },  //
             TINT_ICE_ON_NO_MATCH);
     }
@@ -620,9 +620,9 @@ struct State {
     //
     // The `f16` type is special in that `f16` uses a templated load in HLSL `Load<float16_t>`
     // and returns the correct type, so there is no bitcast.
-    core::ir::Call* MakeScalarOrVectorLoad(core::ir::Var* var,
-                                           const core::type::Type* result_ty,
-                                           core::ir::Value* offset) {
+    core::ir::Value* MakeScalarOrVectorLoad(core::ir::Var* var,
+                                            const core::type::Type* result_ty,
+                                            core::ir::Value* offset) {
         bool is_f16 = result_ty->DeepestElement()->Is<core::type::F16>();
         bool is_u16 = result_ty->DeepestElement()->Is<core::type::U16>();
 
@@ -657,11 +657,11 @@ struct State {
         }
 
         auto* builtin = b.MemberCall<hlsl::ir::MemberBuiltinCall>(load_ty, fn, var, offset);
-        core::ir::Call* res = nullptr;
+        core::ir::Value* res = nullptr;
 
         // Do not bitcast `f16` or `u16` conversions as they use templated Load instructions
         if (is_f16 || is_u16) {
-            res = builtin;
+            res = builtin->Result();
         } else {
             res = b.Bitcast(result_ty, builtin->Result());
         }
@@ -689,8 +689,7 @@ struct State {
             b.Append(fn->Block(), [&] {
                 Vector<core::ir::Value*, 4> values;
                 for (const auto* mem : s->Members()) {
-                    values.Push(
-                        MakeLoad(inst, var, mem->Type(), b.Add(p, u32(mem->Offset())))->Result());
+                    values.Push(MakeLoad(inst, var, mem->Type(), b.Add(p, u32(mem->Offset()))));
                 }
 
                 b.Return(fn, b.Construct(s, values));
@@ -745,7 +744,7 @@ struct State {
                 for (size_t i = 0; i < mat->Columns(); ++i) {
                     auto* add = b.Add(p, u32(i * mat->ColumnStride()));
                     auto* load = MakeLoad(inst, var, mat->ColumnType(), add);
-                    values.Push(load->Result());
+                    values.Push(load);
                 }
 
                 b.Return(fn, b.Construct(mat, values));
@@ -1006,7 +1005,7 @@ struct State {
         b.InsertBefore(inst, [&] {
             auto* off = OffsetToValue(offset);
             auto* call = MakeLoad(inst, var, inst->Result()->Type(), off);
-            inst->Result()->ReplaceAllUsesWith(call->Result());
+            inst->Result()->ReplaceAllUsesWith(call);
         });
         inst->Destroy();
     }
@@ -1023,7 +1022,7 @@ struct State {
 
             auto* result =
                 MakeScalarOrVectorLoad(var, lve->Result()->Type(), OffsetToValue(offset));
-            lve->Result()->ReplaceAllUsesWith(result->Result());
+            lve->Result()->ReplaceAllUsesWith(result);
         });
 
         lve->Destroy();

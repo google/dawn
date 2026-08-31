@@ -377,7 +377,7 @@ INSTANTIATE_TEST_SUITE_P(
             {
                 "%13 = OpSampledImage %14 %t %s",
                 "OpImageSampleImplicitLod %v4float %13 %coords None",
-                "%result = OpCompositeExtract %float",
+                "%20 = OpCompositeExtract %float",
             },
         },
         TextureBuiltinTestCase{
@@ -389,7 +389,7 @@ INSTANTIATE_TEST_SUITE_P(
             {
                 "%13 = OpSampledImage %14 %t %s",
                 "OpImageSampleImplicitLod %v4float %13 %coords ConstOffset %offset",
-                "%result = OpCompositeExtract %float",
+                "%24 = OpCompositeExtract %float",
             },
         },
         TextureBuiltinTestCase{
@@ -401,7 +401,7 @@ INSTANTIATE_TEST_SUITE_P(
             {
                 "%13 = OpSampledImage %14 %t %s",
                 "OpImageSampleImplicitLod %v4float %13 %coords None",
-                "%result = OpCompositeExtract %float",
+                "%20 = OpCompositeExtract %float",
             },
         },
         TextureBuiltinTestCase{
@@ -415,7 +415,7 @@ INSTANTIATE_TEST_SUITE_P(
                 "%15 = OpConvertSToF %float %array_idx",
                 "%19 = OpCompositeConstruct %v3float %coords %15",
                 "OpImageSampleImplicitLod %v4float %13 %19 None",
-                "%result = OpCompositeExtract %float",
+                "%25 = OpCompositeExtract %float",
             },
         },
         TextureBuiltinTestCase{
@@ -429,7 +429,7 @@ INSTANTIATE_TEST_SUITE_P(
                 "%15 = OpConvertSToF %float %array_idx",
                 "%19 = OpCompositeConstruct %v3float %coords %15",
                 "OpImageSampleImplicitLod %v4float %13 %19 ConstOffset %offset",
-                "%result = OpCompositeExtract %float",
+                "%28 = OpCompositeExtract %float",
             },
         },
         TextureBuiltinTestCase{
@@ -799,7 +799,7 @@ INSTANTIATE_TEST_SUITE_P(
                 "%13 = OpSampledImage %14 %t %s",
                 "%15 = OpConvertSToF %float %lod",
                 "OpImageSampleExplicitLod %v4float %13 %coords Lod %15",
-                "%result = OpCompositeExtract %float",
+                "%23 = OpCompositeExtract %float",
             },
         },
         TextureBuiltinTestCase{
@@ -812,7 +812,7 @@ INSTANTIATE_TEST_SUITE_P(
                 "%13 = OpSampledImage %14 %t %s",
                 "%15 = OpConvertSToF %float %lod",
                 "OpImageSampleExplicitLod %v4float %13 %coords Lod|ConstOffset %15 %offset",
-                "%result = OpCompositeExtract %float",
+                "%26 = OpCompositeExtract %float",
             },
         },
         TextureBuiltinTestCase{
@@ -827,7 +827,7 @@ INSTANTIATE_TEST_SUITE_P(
                 "%19 = OpCompositeConstruct %v3float %coords %15",
                 "%23 = OpConvertSToF %float %lod",
                 "OpImageSampleExplicitLod %v4float %13 %19 Lod %23",
-                "%result = OpCompositeExtract %float",
+                "%27 = OpCompositeExtract %float",
             },
         },
         TextureBuiltinTestCase{
@@ -842,7 +842,7 @@ INSTANTIATE_TEST_SUITE_P(
                 "%19 = OpCompositeConstruct %v3float %coords %15",
                 "%23 = OpConvertSToF %float %lod",
                 "OpImageSampleExplicitLod %v4float %13 %19 Lod|ConstOffset %23 %offset",
-                "%result = OpCompositeExtract %float",
+                "%30 = OpCompositeExtract %float",
             },
         },
         TextureBuiltinTestCase{
@@ -855,7 +855,7 @@ INSTANTIATE_TEST_SUITE_P(
                 "%13 = OpSampledImage %14 %t %s",
                 "%15 = OpConvertSToF %float %lod",
                 "OpImageSampleExplicitLod %v4float %13 %coords Lod %15",
-                "%result = OpCompositeExtract %float",
+                "%23 = OpCompositeExtract %float",
             },
         },
         TextureBuiltinTestCase{
@@ -1994,7 +1994,7 @@ TEST_F(SpirvWriterTest, TextureSampleBaseClampToEdge_2d_f32) {
          %24 = OpFSub %v2float %25 %21
          %27 = OpExtInst %v2float %28 NClamp %coords %21 %24
          %29 = OpSampledImage %30 %texture %sampler
-     %result = OpImageSampleExplicitLod %v4float %29 %27 Lod %float_0
+         %31 = OpImageSampleExplicitLod %v4float %29 %27 Lod %float_0
 )");
 }
 

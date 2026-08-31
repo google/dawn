@@ -3217,7 +3217,7 @@ TEST_F(SpirvReader_AtomicsTest, ArrayLength) {
         auto* a = b.Access(ty.ptr<storage, u32, read_write>(), buffer, 1_i);
         b.Call<spirv::ir::BuiltinCall>(ty.void_(), spirv::BuiltinFn::kAtomicStore, a, 1_u, 0_u,
                                        1_u);
-        b.Call<core::ir::CoreBuiltinCall>(ty.u32(), core::BuiltinFn::kArrayLength, buffer);
+        b.Call(ty.u32(), core::BuiltinFn::kArrayLength, buffer);
         b.Return(f);
     });
 

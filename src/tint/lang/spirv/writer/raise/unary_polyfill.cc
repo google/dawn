@@ -119,7 +119,7 @@ struct State {
             auto* f32_ty = ty.MatchWidth(ty.f32(), type);
             auto* f32_val = b.Convert(f32_ty, val);
             auto* f32_abs = b.Call(f32_ty, core::BuiltinFn::kAbs, f32_val);
-            b.ConvertWithResult(builtin->DetachResult(), f32_abs->Result());
+            b.ConvertWithResult(builtin->DetachResult(), f32_abs);
         });
         builtin->Destroy();
     }
@@ -137,7 +137,7 @@ struct State {
             auto* u32_val = b.Bitcast(uint_ty, val);
             auto* mask = b.MatchWidth(0x80000000_u, uint_ty);
             auto* xor_res = b.Xor(u32_val, mask);
-            b.BitcastWithResult(unary->DetachResult(), xor_res);
+            b.BitcastReplaceResult(unary->DetachResult(), xor_res);
         });
         unary->Destroy();
     }
@@ -155,7 +155,7 @@ struct State {
             auto* u32_val = b.Bitcast(uint_ty, val);
             auto* mask = b.MatchWidth(0x7FFFFFFF_u, uint_ty);
             auto* and_res = b.And(u32_val, mask);
-            b.BitcastWithResult(builtin->DetachResult(), and_res);
+            b.BitcastReplaceResult(builtin->DetachResult(), and_res);
         });
         builtin->Destroy();
     }

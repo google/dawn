@@ -140,7 +140,7 @@ struct State {
                 b.InsertBefore(call, [&] {
                     auto len =
                         b.Call(ty.u32(), BuiltinFn::kBufferLength, call->Args()[param->Index()]);
-                    call->AppendArg(len->Result());
+                    call->AppendArg(len);
                 });
             }
 
@@ -206,7 +206,7 @@ struct State {
                 size = b.InsertBitcastIfNeeded(ty.u32(), size);
                 if (ty_offset != 0) {
                     // Avoid potential underflow if size < ty_offset.
-                    size = b.Call(ty.u32(), BuiltinFn::kMax, size, u32(ty_offset))->Result();
+                    size = b.Call(ty.u32(), BuiltinFn::kMax, size, u32(ty_offset));
                     size = b.Subtract(size, u32(ty_offset));
                 }
                 size = b.Divide(size, u32(ty_stride));

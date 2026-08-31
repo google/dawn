@@ -229,7 +229,7 @@ struct State {
             clamped_idx = b.Constant(u32(const_idx->Value()->ValueAs<uint32_t>()));
         } else if (IndexMayOutOfBound(idx, limit)) {
             // Clamp it to the dynamic limit.
-            clamped_idx = b.Min(CastToU32(idx), limit)->Result();
+            clamped_idx = b.Min(CastToU32(idx), limit);
         }
 
         if (clamped_idx != nullptr) {
@@ -352,7 +352,7 @@ struct State {
         auto clamp_level = [&](uint32_t idx) {
             auto* num_levels = b.Call(ty.u32(), core::BuiltinFn::kTextureNumLevels, args[0]);
             auto* limit = b.Subtract(num_levels, 1_u);
-            clamped_level = b.Min(CastToU32(args[idx]), limit)->Result();
+            clamped_level = b.Min(CastToU32(args[idx]), limit);
             call->SetOperand(CoreBuiltinCall::kArgsOperandOffset + idx, clamped_level);
         };
 
@@ -366,7 +366,7 @@ struct State {
                                        : b.Call(type, core::BuiltinFn::kTextureDimensions, args[0]);
             auto* limit = b.Subtract(dims, one);
             call->SetOperand(CoreBuiltinCall::kArgsOperandOffset + idx,
-                             b.Min(CastToU32(args[idx]), limit)->Result());
+                             b.Min(CastToU32(args[idx]), limit));
         };
 
         // Helper for clamping the array index.
@@ -374,7 +374,7 @@ struct State {
             auto* num_layers = b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, args[0]);
             auto* limit = b.Subtract(num_layers, 1_u);
             call->SetOperand(CoreBuiltinCall::kArgsOperandOffset + idx,
-                             b.Min(CastToU32(args[idx]), limit)->Result());
+                             b.Min(CastToU32(args[idx]), limit));
         };
 
         // Helper for clamping the sample index.
@@ -382,7 +382,7 @@ struct State {
             auto* num_samples = b.Call(ty.u32(), core::BuiltinFn::kTextureNumSamples, args[0]);
             auto* limit = b.Subtract(num_samples, 1_u);
             call->SetOperand(CoreBuiltinCall::kArgsOperandOffset + idx,
-                             b.Min(CastToU32(args[idx]), limit)->Result());
+                             b.Min(CastToU32(args[idx]), limit));
         };
 
         // Select which arguments to clamp based on the function overload.
@@ -475,7 +475,7 @@ struct State {
             }
         } else {
             stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-            stride = b.Max(stride, u32(min_stride))->Result();
+            stride = b.Max(stride, u32(min_stride));
         }
         call->SetArg(stride_index, stride);
 
@@ -494,7 +494,7 @@ struct State {
             array_length = b.Constant(u32(arr_ty->ConstantCount().value()));
         } else {
             TINT_IR_ASSERT(ir, arr_ty->Count()->Is<type::RuntimeArrayCount>());
-            array_length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, arr)->Result(0);
+            array_length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, arr);
         }
 
         // If the array length, offset, and stride are all constants, then we can determine if the
@@ -520,13 +520,11 @@ struct State {
             stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
             auto* last_slice =
                 b.Call(ty.u32(), BuiltinFn::kAddSat, offset,
-                       b.Call(ty.u32(), BuiltinFn::kMulSat, stride, u32(major_dim - 1)))
-                    ->Result();
+                       b.Call(ty.u32(), BuiltinFn::kMulSat, stride, u32(major_dim - 1)));
             auto* end = b.Call(ty.u32(), BuiltinFn::kAddSat, last_slice, u32(min_stride));
             auto* in_bounds = b.LessThanEqual(end, array_length);
-            offset = b.Call(ty.u32(), BuiltinFn::kSelect, 0_u, offset, in_bounds)->Result();
-            stride =
-                b.Call(ty.u32(), BuiltinFn::kSelect, u32(min_stride), stride, in_bounds)->Result();
+            offset = b.Call(ty.u32(), BuiltinFn::kSelect, 0_u, offset, in_bounds);
+            stride = b.Call(ty.u32(), BuiltinFn::kSelect, u32(min_stride), stride, in_bounds);
             call->SetArg(1, offset);
             call->SetArg(stride_index, stride);
         });
@@ -633,7 +631,7 @@ struct State {
             } else if (call->Func() == BuiltinFn::kBufferArrayView && call->Args().size() > 3) {
                 length = call->Args()[3];
             } else {
-                length = b.Call(ty.u32(), BuiltinFn::kBufferLength, call->Args()[0])->Result();
+                length = b.Call(ty.u32(), BuiltinFn::kBufferLength, call->Args()[0]);
             }
 
             // Handle constant arguments.
@@ -666,7 +664,7 @@ struct State {
                 offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
                 if (total_required_size) {
                     total_required_size =
-                        b.Call(ty.u32(), BuiltinFn::kAddSat, total_required_size, offset)->Result();
+                        b.Call(ty.u32(), BuiltinFn::kAddSat, total_required_size, offset);
                 } else {
                     TINT_IR_ASSERT(ir, size && !const_size);
                     total_required_size = offset;
@@ -677,11 +675,10 @@ struct State {
                 // PropagateBufferSizes performed a round down on the argument which may have
                 // resulted in a 0 length array.
                 size = b.InsertBitcastIfNeeded(ty.u32(), size);
-                size = b.Call(ty.u32(), BuiltinFn::kMax, size, b.Constant(u32(ty_required_size)))
-                           ->Result();
+                size = b.Call(ty.u32(), BuiltinFn::kMax, size, b.Constant(u32(ty_required_size)));
                 if (total_required_size) {
                     total_required_size =
-                        b.Call(ty.u32(), BuiltinFn::kAddSat, total_required_size, size)->Result();
+                        b.Call(ty.u32(), BuiltinFn::kAddSat, total_required_size, size);
                 } else {
                     // offset must have been 0.
                     TINT_IR_ASSERT(ir, offset && const_offset);
@@ -712,12 +709,12 @@ struct State {
 
             auto* len_less_than = b.LessThan(length, total_required_size);
             auto* offset_select = b.Call(ty.u32(), BuiltinFn::kSelect, offset, 0_u, len_less_than);
-            call->SetArg(1, offset_select->Result());
-            Instruction* size_select = nullptr;
+            call->SetArg(1, offset_select);
+            Value* size_select = nullptr;
             if (size) {
                 size_select = b.Call(ty.u32(), BuiltinFn::kSelect, size,
                                      b.Constant(u32(ty_required_size)), len_less_than);
-                call->SetArg(2, size_select->Result());
+                call->SetArg(2, size_select);
             }
         });
     }

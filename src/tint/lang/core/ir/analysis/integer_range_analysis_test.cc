@@ -14589,7 +14589,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_F32) {
     func->AppendParam(param);
 
     b.Append(func->Block(), [&] {
-        call_min = b.Min(param, 1.0_f);
+        call_min = b.Min(param, 1.0_f)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -14621,7 +14621,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_Vector_I32) {
 
     b.Append(func->Block(), [&] {
         auto* vec4_const = b.Construct(ty.vec4i(), 1_i, 2_i, 3_i, 4_i);
-        call_min = b.Min(param, vec4_const);
+        call_min = b.Min(param, vec4_const)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -14654,7 +14654,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_Vector_U32) {
 
     b.Append(func->Block(), [&] {
         auto* vec2_const = b.Construct(ty.vec2u(), 1_u, 2_u);
-        call_min = b.Min(param, vec2_const);
+        call_min = b.Min(param, vec2_const)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -14688,7 +14688,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_BothInvalidRange_I32) {
     func->AppendParam(param2);
 
     b.Append(func->Block(), [&] {
-        call_min = b.Min(param1, param2);
+        call_min = b.Min(param1, param2)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -14720,7 +14720,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_BothInvalidRange_U32) {
     func->AppendParam(param2);
 
     b.Append(func->Block(), [&] {
-        call_min = b.Min(param1, param2);
+        call_min = b.Min(param1, param2)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -14777,7 +14777,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothAreConstantValues_I3
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // call_min = min(idx, idy);
-                call_min = b.Min(loadx, loady);
+                call_min = b.Min(loadx, loady)->AsInstruction<CoreBuiltinCall>();
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -14906,7 +14906,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothAreConstantValues_U3
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // call_min = min(idx, idy);
-                call_min = b.Min(loadx, loady);
+                call_min = b.Min(loadx, loady)->AsInstruction<CoreBuiltinCall>();
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -15035,7 +15035,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothValidRange_I32) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // call_min = min(idx, idy);
-                call_min = b.Min(loadx, loady);
+                call_min = b.Min(loadx, loady)->AsInstruction<CoreBuiltinCall>();
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -15164,7 +15164,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothValidRange_U32) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // call_min = min(idx, idy);
-                call_min = b.Min(loadx, loady);
+                call_min = b.Min(loadx, loady)->AsInstruction<CoreBuiltinCall>();
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -15267,7 +15267,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_FirstIsInvalidRange_Inva
 
     b.Append(func->Block(), [&] {
         auto* max_i32 = b.Constant(i32::Highest());
-        call_min = b.Min(param, max_i32);
+        call_min = b.Min(param, max_i32)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -15299,7 +15299,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_FirstIsInvalidRange_Inva
 
     b.Append(func->Block(), [&] {
         auto* max_u32 = b.Constant(u32::Highest());
-        call_min = b.Min(param, max_u32);
+        call_min = b.Min(param, max_u32)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -15331,7 +15331,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_SecondIsInvalidRange_Inv
 
     b.Append(func->Block(), [&] {
         auto* max_i32 = b.Constant(i32::Highest());
-        call_min = b.Min(max_i32, param);
+        call_min = b.Min(max_i32, param)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -15363,7 +15363,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_SecondIsInvalidRange_Inv
 
     b.Append(func->Block(), [&] {
         auto* max_u32 = b.Constant(u32::Highest());
-        call_min = b.Min(max_u32, param);
+        call_min = b.Min(max_u32, param)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -15410,7 +15410,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_FirstIsInvalidRange_I32)
 
             // call_min = min(param, idx);
             auto* loadx = b.Load(idx);
-            call_min = b.Min(param, loadx);
+            call_min = b.Min(param, loadx)->AsInstruction<CoreBuiltinCall>();
 
             b.Continue(loop);
         });
@@ -15496,7 +15496,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_FirstIsInvalidRange_U32)
 
             // call_min = min(param, idx);
             auto* loadx = b.Load(idx);
-            call_min = b.Min(param, loadx);
+            call_min = b.Min(param, loadx)->AsInstruction<CoreBuiltinCall>();
 
             b.Continue(loop);
         });
@@ -15582,7 +15582,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_SecondIsInvalidRange_I32
 
             // call_min = min(idx, param);
             auto* loadx = b.Load(idx);
-            call_min = b.Min(loadx, param);
+            call_min = b.Min(loadx, param)->AsInstruction<CoreBuiltinCall>();
 
             b.Continue(loop);
         });
@@ -15668,7 +15668,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_SecondIsInvalidRange_U32
 
             // call_min = min(idx, param);
             auto* loadx = b.Load(idx);
-            call_min = b.Min(loadx, param);
+            call_min = b.Min(loadx, param)->AsInstruction<CoreBuiltinCall>();
 
             b.Continue(loop);
         });
@@ -15738,7 +15738,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_F32) {
     func->AppendParam(param);
 
     b.Append(func->Block(), [&] {
-        call_max = b.Max(param, 1.0_f);
+        call_max = b.Max(param, 1.0_f)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -15770,7 +15770,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_Vector_I32) {
 
     b.Append(func->Block(), [&] {
         auto* vec4_const = b.Construct(ty.vec4i(), 1_i, 2_i, 3_i, 4_i);
-        call_max = b.Max(param, vec4_const);
+        call_max = b.Max(param, vec4_const)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -15803,7 +15803,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_Vector_U32) {
 
     b.Append(func->Block(), [&] {
         auto* vec2_const = b.Construct(ty.vec2u(), 1_u, 2_u);
-        call_max = b.Max(param, vec2_const);
+        call_max = b.Max(param, vec2_const)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -15837,7 +15837,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_BothInvalidRange_I32) {
     func->AppendParam(param2);
 
     b.Append(func->Block(), [&] {
-        call_max = b.Max(param1, param2);
+        call_max = b.Max(param1, param2)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -15869,7 +15869,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_BothInvalidRange_U32) {
     func->AppendParam(param2);
 
     b.Append(func->Block(), [&] {
-        call_max = b.Max(param1, param2);
+        call_max = b.Max(param1, param2)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -15926,7 +15926,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothAreConstantValues_I3
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // call_max = max(idx, idy);
-                call_max = b.Max(loadx, loady);
+                call_max = b.Max(loadx, loady)->AsInstruction<CoreBuiltinCall>();
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -16055,7 +16055,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothAreConstantValues_U3
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // call_max = max(idx, idy);
-                call_max = b.Max(loadx, loady);
+                call_max = b.Max(loadx, loady)->AsInstruction<CoreBuiltinCall>();
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -16184,7 +16184,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothValidRange_I32) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // call_max = max(idx, idy);
-                call_max = b.Max(loadx, loady);
+                call_max = b.Max(loadx, loady)->AsInstruction<CoreBuiltinCall>();
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -16313,7 +16313,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothValidRange_U32) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // call_max = max(idx, idy);
-                call_max = b.Max(loadx, loady);
+                call_max = b.Max(loadx, loady)->AsInstruction<CoreBuiltinCall>();
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -16416,7 +16416,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_FirstIsInvalidRange_Inva
 
     b.Append(func->Block(), [&] {
         auto* min_i32 = b.Constant(i32::Lowest());
-        call_max = b.Max(param, min_i32);
+        call_max = b.Max(param, min_i32)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -16448,7 +16448,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_FirstIsInvalidRange_Inva
 
     b.Append(func->Block(), [&] {
         auto* min_u32 = b.Constant(u32::Lowest());
-        call_max = b.Max(param, min_u32);
+        call_max = b.Max(param, min_u32)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -16480,7 +16480,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_SecondIsInvalidRange_Inv
 
     b.Append(func->Block(), [&] {
         auto* min_i32 = b.Constant(i32::Lowest());
-        call_max = b.Max(min_i32, param);
+        call_max = b.Max(min_i32, param)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -16512,7 +16512,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_SecondIsInvalidRange_Inv
 
     b.Append(func->Block(), [&] {
         auto* min_u32 = b.Constant(u32::Lowest());
-        call_max = b.Max(min_u32, param);
+        call_max = b.Max(min_u32, param)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -16559,7 +16559,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_FirstIsInvalidRange_I32)
 
             // call_max = max(param, idx);
             auto* loadx = b.Load(idx);
-            call_max = b.Max(param, loadx);
+            call_max = b.Max(param, loadx)->AsInstruction<CoreBuiltinCall>();
 
             b.Continue(loop);
         });
@@ -16645,7 +16645,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_FirstIsInvalidRange_U32)
 
             // call_max = max(param, idx);
             auto* loadx = b.Load(idx);
-            call_max = b.Max(param, loadx);
+            call_max = b.Max(param, loadx)->AsInstruction<CoreBuiltinCall>();
 
             b.Continue(loop);
         });
@@ -16731,7 +16731,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_SecondIsInvalidRange_I32
 
             // call_max = max(idx, param);
             auto* loadx = b.Load(idx);
-            call_max = b.Max(loadx, param);
+            call_max = b.Max(loadx, param)->AsInstruction<CoreBuiltinCall>();
 
             b.Continue(loop);
         });
@@ -16817,7 +16817,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_SecondIsInvalidRange_U32
 
             // call_max = max(idx, param);
             auto* loadx = b.Load(idx);
-            call_max = b.Max(loadx, param);
+            call_max = b.Max(loadx, param)->AsInstruction<CoreBuiltinCall>();
 
             b.Continue(loop);
         });
@@ -16889,9 +16889,9 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Builtin_Input_Success_I32) {
 
     b.Append(func->Block(), [&] {
         auto* bound1 = b.Constant(-5_i);
-        call_min = b.Min(bound1, param);
+        call_min = b.Min(bound1, param)->AsInstruction<CoreBuiltinCall>();
         auto* bound2 = b.Constant(3_i);
-        call_max = b.Max(bound2, call_min);
+        call_max = b.Max(bound2, call_min)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -16942,9 +16942,9 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Builtin_Input_Success_U32) {
 
     b.Append(func->Block(), [&] {
         auto* bound1 = b.Constant(5_u);
-        call_min = b.Min(bound1, param);
+        call_min = b.Min(bound1, param)->AsInstruction<CoreBuiltinCall>();
         auto* bound2 = b.Constant(3_u);
-        call_max = b.Max(bound2, call_min);
+        call_max = b.Max(bound2, call_min)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -16997,9 +16997,9 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Builtin_Input_Success_I32) {
 
     b.Append(func->Block(), [&] {
         auto* bound1 = b.Constant(-3_i);
-        call_max = b.Max(bound1, param);
+        call_max = b.Max(bound1, param)->AsInstruction<CoreBuiltinCall>();
         auto* bound2 = b.Constant(5_i);
-        call_min = b.Min(bound2, call_max);
+        call_min = b.Min(bound2, call_max)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -17050,9 +17050,9 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Builtin_Input_Success_U32) {
 
     b.Append(func->Block(), [&] {
         auto* bound1 = b.Constant(5_u);
-        call_max = b.Max(bound1, param);
+        call_max = b.Max(bound1, param)->AsInstruction<CoreBuiltinCall>();
         auto* bound2 = b.Constant(3_u);
-        call_min = b.Min(bound2, call_max);
+        call_min = b.Min(bound2, call_max)->AsInstruction<CoreBuiltinCall>();
         b.Return(func);
     });
 
@@ -17169,7 +17169,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_LHS_Negative_I32) {
 
         // call_min = min(5, call_max)
         // The range of call_min is [-3, 5]
-        call_min = b.Min(b.Constant(5_i), call_max);
+        call_min = b.Min(b.Constant(5_i), call_max)->AsInstruction<CoreBuiltinCall>();
 
         // modulo = call_min % 2
         modulo = b.Modulo(call_min, 2_i)->AsInstruction<Binary>();
@@ -17220,13 +17220,13 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_NonConstant_I32) {
         auto* call_max_param1 = b.Max(b.Constant(3_i), param1);
         // call_min_param1 = min(6, call_max_param1)
         // The range of call_min_param1 is [3, 6]
-        call_min_param1 = b.Min(b.Constant(6_i), call_max_param1);
+        call_min_param1 = b.Min(b.Constant(6_i), call_max_param1)->AsInstruction<CoreBuiltinCall>();
 
         // call_max_param2 = max(2, param2)
         auto* call_max_param2 = b.Max(b.Constant(2_i), param2);
         // call_min_param2 = min(4, call_max_param2)
         // The range of call_min is [2, 4]
-        call_min_param2 = b.Min(b.Constant(4_i), call_max_param2);
+        call_min_param2 = b.Min(b.Constant(4_i), call_max_param2)->AsInstruction<CoreBuiltinCall>();
 
         // modulo = call_min_param1 % call_min_param1
         modulo = b.Modulo(call_min_param1, call_min_param2)->AsInstruction<Binary>();
@@ -17280,13 +17280,13 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_NonConstant_U32) {
         auto* call_max_param1 = b.Max(b.Constant(3_u), param1);
         // call_min_param1 = min(6, call_max_param1)
         // The range of call_min_param1 is [3, 6]
-        call_min_param1 = b.Min(b.Constant(6_u), call_max_param1);
+        call_min_param1 = b.Min(b.Constant(6_u), call_max_param1)->AsInstruction<CoreBuiltinCall>();
 
         // call_max_param2 = max(2, param2)
         auto* call_max_param2 = b.Max(b.Constant(2_u), param2);
         // call_min_param2 = min(4, call_max_param2)
         // The range of call_min is [2, 4]
-        call_min_param2 = b.Min(b.Constant(4_u), call_max_param2);
+        call_min_param2 = b.Min(b.Constant(4_u), call_max_param2)->AsInstruction<CoreBuiltinCall>();
 
         // modulo = call_min_param1 % call_min_param2
         modulo = b.Modulo(call_min_param1, call_min_param2)->AsInstruction<Binary>();

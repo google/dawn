@@ -1560,8 +1560,8 @@ TEST_F(IR_ResourceTableTest, GetResource_GetSamplerIndexFromMetadata) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         core::ir::Load* tex = b.Load(tex_var);
-        core::ir::Instruction* sam = b.CallExplicit(sampler_ty, core::BuiltinFn::kGetResource,
-                                                    Vector<TemplateParameter, 1>{sampler_ty}, 1_u);
+        auto* sam = b.CallExplicit(sampler_ty, core::BuiltinFn::kGetResource,
+                                   Vector<TemplateParameter, 1>{sampler_ty}, 1_u);
 
         b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureSample, tex, sam,
                b.Splat(ty.vec2<f32>(), 0_f));

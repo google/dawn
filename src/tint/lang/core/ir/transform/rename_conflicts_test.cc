@@ -973,7 +973,8 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinFn_ShadowedBy_RootBlockVa
 
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {  //
-        auto* res = b.Max(1_i, 2_i)->Result();
+        auto* l = b.Let("l", 1_i);
+        auto* res = b.Max(l, 2_i);
         b.Return(fn, res);
     });
 
@@ -984,8 +985,9 @@ $B1: {  # root
 
 %f = func():i32 {
   $B2: {
-    %3:i32 = max 1i, 2i
-    ret %3
+    %l:i32 = let 1i
+    %4:i32 = max %l, 2i
+    ret %4
   }
 }
 )";
@@ -1006,7 +1008,8 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinFn_ShadowedBy_RootBlockVa
 
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {  //
-        auto* res = b.Max(1_i, 2_i)->Result();
+        auto* l = b.Let("l", 1_i);
+        auto* res = b.Max(l, 2_i);
         b.Return(fn, res);
     });
 
@@ -1017,8 +1020,9 @@ $B1: {  # root
 
 %f = func():i32 {
   $B2: {
-    %3:i32 = max 1i, 2i
-    ret %3
+    %l:i32 = let 1i
+    %4:i32 = max %l, 2i
+    ret %4
   }
 }
 )";
@@ -1031,8 +1035,9 @@ $B1: {  # root
 
 %f = func():i32 {
   $B2: {
-    %3:i32 = max 1i, 2i
-    ret %3
+    %l:i32 = let 1i
+    %4:i32 = max %l, 2i
+    ret %4
   }
 }
 )";

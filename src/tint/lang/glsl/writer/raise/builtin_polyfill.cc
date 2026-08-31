@@ -353,8 +353,7 @@ struct State {
 
             auto* swap = b.Call<glsl::ir::BuiltinCall>(
                 type, glsl::BuiltinFn::kAtomicCompSwap,
-                Vector<core::ir::Value*, 3>{dest, bitcast_cmp_value->Result(),
-                                            bitcast_value->Result()});
+                Vector<core::ir::Value*, 3>{dest, bitcast_cmp_value, bitcast_value});
 
             auto* exchanged = b.Equal(swap, compare_value);
 
@@ -369,8 +368,8 @@ struct State {
             auto args = call->Args();
 
             if (args[1]->Type()->Is<core::type::I32>()) {
-                b.CallWithResult(call->DetachResult(), core::BuiltinFn::kAtomicAdd, args[0],
-                                 b.Negation(args[1]));
+                b.CallReplaceResult(call->DetachResult(), core::BuiltinFn::kAtomicAdd, args[0],
+                                    b.Negation(args[1]));
             } else {
                 // Negating a u32 isn't possible in the IR, so pass a fake GLSL function and
                 // handle in the printer.
@@ -387,7 +386,7 @@ struct State {
         // value
         b.InsertBefore(call, [&] {
             auto args = call->Args();
-            b.CallWithResult(
+            b.CallReplaceResult(
                 call->DetachResult(), core::BuiltinFn::kAtomicOr, args[0],
                 b.Zero(args[0]->Type()->UnwrapPtr()->As<core::type::Atomic>()->Type()));
         });
@@ -447,8 +446,8 @@ struct State {
                 auto* v2 = ty.vec2(inner_ty);
 
                 auto pack_unpack = [&](core::ir::Value* item) {
-                    auto* r = b.Call(ty.u32(), core::BuiltinFn::kPack2X16Float, item)->Result();
-                    return b.Call(v2, core::BuiltinFn::kUnpack2X16Float, r)->Result();
+                    auto* r = b.Call(ty.u32(), core::BuiltinFn::kPack2X16Float, item);
+                    return b.Call(v2, core::BuiltinFn::kUnpack2X16Float, r);
                 };
 
                 if (auto* vec = type->As<core::type::Vector>()) {

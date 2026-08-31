@@ -235,7 +235,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* var = args[0];
             auto* one = One(call->Result()->Type());
-            b.CallWithResult(call->DetachResult(), fn, var, one);
+            b.CallReplaceResult(call->DetachResult(), fn, var, one);
         });
         call->Destroy();
     }
@@ -245,7 +245,7 @@ struct State {
 
         b.InsertBefore(call, [&] {
             auto* var = args[0];
-            b.CallWithResult(call->DetachResult(), fn, var);
+            b.CallReplaceResult(call->DetachResult(), fn, var);
         });
         call->Destroy();
     }
@@ -256,7 +256,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* var = args[0];
             auto* val = args[3];
-            b.CallWithResult(call->DetachResult(), fn, var, val);
+            b.CallReplaceResult(call->DetachResult(), fn, var, val);
         });
         call->Destroy();
     }
@@ -502,8 +502,8 @@ struct State {
                         TINT_IR_ASSERT(ir, el_ty->Is<core::type::Atomic>());
 
                         b.InsertBefore(ld, [&] {
-                            b.CallWithResult(ld->DetachResult(), core::BuiltinFn::kAtomicLoad,
-                                             ld->From());
+                            b.CallReplaceResult(ld->DetachResult(), core::BuiltinFn::kAtomicLoad,
+                                                ld->From());
                         });
                         ld->Destroy();
                     }

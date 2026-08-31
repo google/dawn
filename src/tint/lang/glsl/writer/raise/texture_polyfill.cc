@@ -535,7 +535,7 @@ struct State {
                     new_args.Push(b.Constant(0_i));
                 } else {
                     // Make sure the LOD is a i32
-                    new_args.Push(b.Bitcast(ty.i32(), args[idx++])->Result());
+                    new_args.Push(b.Bitcast(ty.i32(), args[idx++]));
                 }
             }
 
@@ -560,7 +560,7 @@ struct State {
                 result = b.Swizzle(ret_type, result, {0, 1})->Result();
             }
 
-            b.BitcastWithResult(call->DetachResult(), result)->Result();
+            b.BitcastReplaceResult(call->DetachResult(), result);
         });
         call->Destroy();
     }
@@ -592,7 +592,7 @@ struct State {
             auto* new_call = b.Call<glsl::ir::BuiltinCall>(ty.vec(ty.i32(), 3), func, new_args);
 
             auto* swizzle = b.Swizzle(ty.i32(), new_call, {2});
-            b.BitcastWithResult(call->DetachResult(), swizzle->Result());
+            b.BitcastReplaceResult(call->DetachResult(), swizzle->Result());
         });
         call->Destroy();
     }
@@ -906,8 +906,8 @@ struct State {
                     auto* dpdx = b.Call(coords->Type(), core::BuiltinFn::kDpdx, coords);
                     auto* dpdy = b.Call(coords->Type(), core::BuiltinFn::kDpdy, coords);
 
-                    params.Push(dpdx->Result());
-                    params.Push(dpdy->Result());
+                    params.Push(dpdx);
+                    params.Push(dpdy);
                 } else {
                     fn = glsl::BuiltinFn::kTextureOffset;
                 }
@@ -1174,8 +1174,8 @@ struct State {
                     auto* dpdx = b.Call(coords->Type(), core::BuiltinFn::kDpdx, coords);
                     auto* dpdy = b.Call(coords->Type(), core::BuiltinFn::kDpdy, coords);
 
-                    params.Push(dpdx->Result());
-                    params.Push(dpdy->Result());
+                    params.Push(dpdx);
+                    params.Push(dpdy);
                 } else {
                     fn = glsl::BuiltinFn::kTextureOffset;
                 }

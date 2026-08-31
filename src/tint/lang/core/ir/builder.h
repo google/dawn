@@ -1005,7 +1005,7 @@ class Builder {
     /// @param rhs the rhs of the min
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::CoreBuiltinCall* Min(LHS&& lhs, RHS&& rhs) {
+    ir::Value* Min(LHS&& lhs, RHS&& rhs) {
         CheckForNonDeterministicEvaluation<LHS, RHS>();
         auto* lhs_value = Value(std::forward<LHS>(lhs));
         auto* rhs_value = Value(std::forward<RHS>(rhs));
@@ -1015,12 +1015,28 @@ class Builder {
         return Call(lhs_value->Type(), core::BuiltinFn::kMin, lhs_value, rhs_value);
     }
 
+    /// Creates a Min operation
+    /// @param result the result to replace
+    /// @param lhs the lhs of the min
+    /// @param rhs the rhs of the min
+    /// @returns the operation
+    template <typename LHS, typename RHS>
+    ir::Value* MinReplaceResult(InstructionResult* result, LHS&& lhs, RHS&& rhs) {
+        CheckForNonDeterministicEvaluation<LHS, RHS>();
+        auto* lhs_value = Value(std::forward<LHS>(lhs));
+        auto* rhs_value = Value(std::forward<RHS>(rhs));
+        TINT_ASSERT(lhs_value);
+        TINT_ASSERT(rhs_value);
+
+        return CallReplaceResult(result, core::BuiltinFn::kMin, lhs_value, rhs_value);
+    }
+
     /// Creates a Max operation
     /// @param lhs the lhs of the max
     /// @param rhs the rhs of the max
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::CoreBuiltinCall* Max(LHS&& lhs, RHS&& rhs) {
+    ir::Value* Max(LHS&& lhs, RHS&& rhs) {
         CheckForNonDeterministicEvaluation<LHS, RHS>();
         auto* lhs_value = Value(std::forward<LHS>(lhs));
         auto* rhs_value = Value(std::forward<RHS>(rhs));
@@ -1030,13 +1046,29 @@ class Builder {
         return Call(lhs_value->Type(), core::BuiltinFn::kMax, lhs_value, rhs_value);
     }
 
+    /// Creates a Max operation
+    /// @param result the result to replace
+    /// @param lhs the lhs of the max
+    /// @param rhs the rhs of the max
+    /// @returns the operation
+    template <typename LHS, typename RHS>
+    ir::Value* MaxReplaceResult(InstructionResult* result, LHS&& lhs, RHS&& rhs) {
+        CheckForNonDeterministicEvaluation<LHS, RHS>();
+        auto* lhs_value = Value(std::forward<LHS>(lhs));
+        auto* rhs_value = Value(std::forward<RHS>(rhs));
+        TINT_ASSERT(lhs_value);
+        TINT_ASSERT(rhs_value);
+
+        return CallReplaceResult(result, core::BuiltinFn::kMax, lhs_value, rhs_value);
+    }
+
     /// Creates a Clamp operation
     /// @param val the value to clamp
     /// @param min the min value
     /// @param max the max value
     /// @returns the operation
     template <typename VAL, typename MIN, typename MAX>
-    ir::CoreBuiltinCall* Clamp(VAL&& val, MIN&& min, MAX&& max) {
+    ir::Value* Clamp(VAL&& val, MIN&& min, MAX&& max) {
         CheckForNonDeterministicEvaluation<VAL, MIN, MAX>();
         auto* val_value = Value(std::forward<VAL>(val));
         auto* min_value = Value(std::forward<MIN>(min));
@@ -1046,6 +1078,25 @@ class Builder {
         TINT_ASSERT(max_value);
 
         return Call(val_value->Type(), core::BuiltinFn::kClamp, val_value, min_value, max_value);
+    }
+
+    /// Creates a Clamp operation
+    /// @param result the result to replace
+    /// @param val the value to clamp
+    /// @param min the min value
+    /// @param max the max value
+    /// @returns the operation
+    template <typename VAL, typename MIN, typename MAX>
+    ir::Value* ClampReplaceResult(InstructionResult* result, VAL&& val, MIN&& min, MAX&& max) {
+        CheckForNonDeterministicEvaluation<VAL, MIN, MAX>();
+        auto* val_value = Value(std::forward<VAL>(val));
+        auto* min_value = Value(std::forward<MIN>(min));
+        auto* max_value = Value(std::forward<MAX>(max));
+        TINT_ASSERT(val_value);
+        TINT_ASSERT(min_value);
+        TINT_ASSERT(max_value);
+
+        return CallReplaceResult(result, core::BuiltinFn::kClamp, val_value, min_value, max_value);
     }
 
     /// Creates an op for `op val`
@@ -1106,10 +1157,10 @@ class Builder {
     /// @param val the value being bitcast
     /// @returns the instruction
     template <typename VAL>
-    ir::CoreBuiltinCall* Bitcast(const core::type::Type* type, VAL&& val) {
+    ir::Value* Bitcast(const core::type::Type* type, VAL&& val) {
         return CallExplicit(type, core::BuiltinFn::kBitcast,
                             Vector<core::ir::TemplateParameter, 1>{type},
-                            Vector{Value(std::forward<VAL>(val))});
+                            Value(std::forward<VAL>(val)));
     }
 
     /// Creates a bitcast instruction
@@ -1117,7 +1168,7 @@ class Builder {
     /// @param val the value being bitcast
     /// @returns the instruction
     template <typename TYPE, typename VAL>
-    ir::CoreBuiltinCall* Bitcast(VAL&& val) {
+    ir::Value* Bitcast(VAL&& val) {
         auto* type = ir.Types().Get<TYPE>();
         auto* value = Value(std::forward<VAL>(val));
         return Bitcast(type, value);
@@ -1128,11 +1179,11 @@ class Builder {
     /// @param val the value being bitcast
     /// @returns the instruction
     template <typename VAL>
-    ir::CoreBuiltinCall* BitcastWithResult(ir::InstructionResult* result, VAL&& val) {
-        return CallExplicitWithResult<ir::CoreBuiltinCall>(
-            result, core::BuiltinFn::kBitcast,
-            Vector<core::ir::TemplateParameter, 1>{result->Type()},
-            Vector{Value(std::forward<VAL>(val))});
+    ir::Value* BitcastReplaceResult(ir::InstructionResult* result, VAL&& val) {
+        auto* value = Value(std::forward<VAL>(val));
+        return CallExplicitReplaceResult(result, core::BuiltinFn::kBitcast,
+                                         Vector<core::ir::TemplateParameter, 1>{result->Type()},
+                                         value);
     }
 
     /// Creates a discard instruction
@@ -1188,11 +1239,12 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename... ARGS>
-    ir::CoreBuiltinCall* CallWithResult(core::ir::InstructionResult* result,
-                                        core::BuiltinFn func,
-                                        ARGS&&... args) {
+    ir::Value* CallReplaceResult(core::ir::InstructionResult* result,
+                                 core::BuiltinFn func,
+                                 ARGS&&... args) {
         return Append(ir.CreateInstruction<ir::CoreBuiltinCall>(
-            result, func, Values(std::forward<ARGS>(args)...)));
+                          result, func, Values(std::forward<ARGS>(args)...)))
+            ->Result();
     }
 
     /// Creates a core builtin call instruction
@@ -1201,8 +1253,9 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename... ARGS>
-    ir::CoreBuiltinCall* Call(const core::type::Type* type, core::BuiltinFn func, ARGS&&... args) {
-        return CallWithResult(InstructionResult(type), func, Values(std::forward<ARGS>(args)...));
+    ir::Value* Call(const core::type::Type* type, core::BuiltinFn func, ARGS&&... args) {
+        return CallReplaceResult(InstructionResult(type), func,
+                                 Values(std::forward<ARGS>(args)...));
     }
 
     /// Creates a core builtin call instruction
@@ -1211,9 +1264,10 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename TYPE, typename... ARGS>
-    ir::CoreBuiltinCall* Call(core::BuiltinFn func, ARGS&&... args) {
+    ir::Value* Call(core::BuiltinFn func, ARGS&&... args) {
         auto* type = ir.Types().Get<TYPE>();
-        return CallWithResult(InstructionResult(type), func, Values(std::forward<ARGS>(args)...));
+        return CallReplaceResult(InstructionResult(type), func,
+                                 Values(std::forward<ARGS>(args)...));
     }
 
     /// Creates a builtin call instruction with an existing instruction result
@@ -1239,7 +1293,8 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename... ARGS>
-        requires(tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>)
+        requires(tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall> &&
+                 !tint::traits::IsTypeOrDerived<KLASS, ir::CoreBuiltinCall>)
     KLASS* CallWithResult(ir::InstructionResult* result, FUNC func, ARGS&&... args) {
         return Append(
             ir.CreateInstruction<KLASS>(result, func, Values(std::forward<ARGS>(args)...)));
@@ -1268,12 +1323,28 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename... ARGS>
-    ir::CoreBuiltinCall* CallExplicit(const core::type::Type* type,
-                                      core::BuiltinFn func,
-                                      VectorRef<core::ir::TemplateParameter> explicit_params,
-                                      ARGS&&... args) {
-        return CallExplicitWithResult<core::ir::CoreBuiltinCall>(
-            InstructionResult(type), func, explicit_params, Values(std::forward<ARGS>(args)...));
+    ir::Value* CallExplicit(const core::type::Type* type,
+                            core::BuiltinFn func,
+                            VectorRef<core::ir::TemplateParameter> explicit_params,
+                            ARGS&&... args) {
+        return CallExplicitReplaceResult(InstructionResult(type), func, explicit_params, args...);
+    }
+
+    /// Creates a core builtin call instruction with explicit parameters
+    /// @param result the result to replace
+    /// @param type the return type of the call
+    /// @param func the builtin function to call
+    /// @param explicit_params the explicit parameters
+    /// @param args the call arguments
+    /// @returns the instruction
+    template <typename... ARGS>
+    ir::Value* CallExplicitReplaceResult(InstructionResult* result,
+                                         core::BuiltinFn func,
+                                         VectorRef<core::ir::TemplateParameter> explicit_params,
+                                         ARGS&&... args) {
+        auto values = Values(std::forward<ARGS>(args)...);
+        return CallExplicitWithResult<ir::CoreBuiltinCall>(result, func, explicit_params, values)
+            ->Result();
     }
 
     /// Creates a builtin call instruction
@@ -1398,15 +1469,7 @@ class Builder {
     /// @param val the value to be converted
     /// @returns either result of the conversion or original value
     ir::Value* InsertBitcastIfNeeded(const core::type::Type* to, ir::Value* val) {
-        return val->Type()->Equals(*to) ? val : Bitcast(to, val)->Result();
-    }
-
-    /// Adds a call to bitcast if destination type is different then the instruction's type
-    /// @param to the type converted to
-    /// @param inst the instruction to be converted
-    /// @returns either result of the conversion or original instruction
-    ir::Instruction* InsertBitcastIfNeeded(const core::type::Type* to, ir::Instruction* inst) {
-        return inst->Result()->Type()->Equals(*to) ? inst : Bitcast(to, inst);
+        return val->Type()->Equals(*to) ? val : Bitcast(to, val);
     }
 
     /// Creates a value constructor instruction with an existing instruction result

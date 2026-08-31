@@ -271,15 +271,16 @@ TEST_F(IR_ValidatorTest, CallToNonFunctionTarget) {
 TEST_F(IR_ValidatorTest, CallToBuiltin_MissingResult) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, 1_f);
+        auto* arg = b.Let("arg", 1_f);
+        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, arg)->AsInstruction<CoreBuiltinCall>();
         c->SetResults(Vector{static_cast<ir::InstructionResult*>(nullptr)});
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: abs: result is undefined
-    undef = abs 1.0f
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:4:5 error: abs: result is undefined
+    undef = abs %arg
     ^^^^^
 )")) << res.Failure();
 }
@@ -287,7 +288,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_MissingResult) {
 TEST_F(IR_ValidatorTest, CallToBuiltin_MismatchResultType) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, 1_f);
+        auto* arg = b.Let("arg", 1_f);
+        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, arg)->AsInstruction<CoreBuiltinCall>();
         c->Result()->SetType(ty.i32());
         b.Return(f);
     });
@@ -297,8 +299,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_MismatchResultType) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:3:14 error: abs: call result type 'i32' does not match builtin return type 'f32'
-    %2:i32 = abs 1.0f
+            R"(:4:14 error: abs: call result type 'i32' does not match builtin return type 'f32'
+    %3:i32 = abs %arg
              ^^^
 )")) << res.Failure();
 }
@@ -309,7 +311,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_MissingArg) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result());
+        auto* c =
+            b.Call(ty.f32(), BuiltinFn::kAbs, load->Result())->AsInstruction<CoreBuiltinCall>();
         c->SetOperands(Vector{static_cast<ir::Value*>(nullptr)});
         b.Return(f);
     });
@@ -328,7 +331,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_OutOfScopeArg) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result());
+        auto* c =
+            b.Call(ty.f32(), BuiltinFn::kAbs, load->Result())->AsInstruction<CoreBuiltinCall>();
         auto* new_load = b.Load(i);
         c->SetOperands(Vector{new_load->Result()});
         b.Return(f);
@@ -348,7 +352,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_TooFewResults) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* too_few_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result());
+        auto* too_few_call =
+            b.Call(ty.f32(), BuiltinFn::kAbs, load->Result())->AsInstruction<CoreBuiltinCall>();
         too_few_call->ClearResults();
         b.Return(f);
     });
@@ -368,7 +373,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_TooManyResults) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* too_many_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result());
+        auto* too_many_call =
+            b.Call(ty.f32(), BuiltinFn::kAbs, load->Result())->AsInstruction<CoreBuiltinCall>();
         too_many_call->SetResults(Vector{b.InstructionResult<f32>(), b.InstructionResult<f32>()});
         b.Return(f);
     });
@@ -388,7 +394,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_TooFewArgs) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* too_few_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result());
+        auto* too_few_call =
+            b.Call(ty.f32(), BuiltinFn::kAbs, load->Result())->AsInstruction<CoreBuiltinCall>();
         too_few_call->ClearOperands();
         b.Return(f);
     });
@@ -406,7 +413,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_TooManyArgs) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* too_many_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result());
+        auto* too_many_call =
+            b.Call(ty.f32(), BuiltinFn::kAbs, load->Result())->AsInstruction<CoreBuiltinCall>();
         too_many_call->SetOperands(Vector{load->Result(), load->Result()});
         b.Return(f);
     });

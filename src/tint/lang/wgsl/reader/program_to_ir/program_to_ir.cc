@@ -1044,7 +1044,7 @@ class Impl {
                 // If this is a builtin function, emit the specific builtin value
                 if (auto* b = sem->Target()->As<sem::BuiltinFn>()) {
                     if (b->Fn() == wgsl::BuiltinFn::kBitcast) {
-                        inst = impl.builder_.Bitcast(ty, args[0]);
+                        inst = impl.builder_.Bitcast(ty, args[0])->AsInstruction();
                     } else {
                         auto* call =
                             impl.builder_.Call<wgsl::ir::BuiltinCall>(ty, b->Fn(), std::move(args));

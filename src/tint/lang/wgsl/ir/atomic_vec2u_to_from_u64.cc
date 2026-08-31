@@ -146,7 +146,7 @@ struct State {
                                                   ? core::BuiltinFn::kAtomicStoreMax
                                                   : core::BuiltinFn::kAtomicStoreMin;
 
-                    b.CallWithResult(call->DetachResult(), core_fn, ptr_atomic, casted_u64);
+                    b.CallReplaceResult(call->DetachResult(), core_fn, ptr_atomic, casted_u64);
                     call->Destroy();
                 },
                 [&](core::ir::CoreBuiltinCall* call) {

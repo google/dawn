@@ -37,18 +37,22 @@ using IR_CoreBuiltinCallTest = IRTestHelper;
 using IR_CoreBuiltinCallDeathTest = IR_CoreBuiltinCallTest;
 
 TEST_F(IR_CoreBuiltinCallTest, Usage) {
-    auto* arg1 = b.Constant(1_u);
-    auto* arg2 = b.Constant(2_u);
-    auto* builtin = b.Call(mod.Types().f32(), core::BuiltinFn::kAbs, arg1, arg2);
+    auto* arg1 = b.Let("arg1", 1_u);
+    auto* arg2 = b.Let("arg2", 2_u);
+    auto* builtin = b.Call(mod.Types().f32(), core::BuiltinFn::kAbs, arg1, arg2)
+                        ->AsInstruction<CoreBuiltinCall>();
 
-    EXPECT_THAT(arg1->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{builtin, 0u}));
-    EXPECT_THAT(arg2->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{builtin, 1u}));
+    EXPECT_THAT(arg1->Result()->UsagesUnsorted(),
+                testing::UnorderedElementsAre(Usage{builtin, 0u}));
+    EXPECT_THAT(arg2->Result()->UsagesUnsorted(),
+                testing::UnorderedElementsAre(Usage{builtin, 1u}));
 }
 
 TEST_F(IR_CoreBuiltinCallTest, Result) {
-    auto* arg1 = b.Constant(1_u);
-    auto* arg2 = b.Constant(2_u);
-    auto* builtin = b.Call(mod.Types().f32(), core::BuiltinFn::kAbs, arg1, arg2);
+    auto* arg1 = b.Let("arg1", 1_u);
+    auto* arg2 = b.Let("arg2", 2_u);
+    auto* builtin = b.Call(mod.Types().f32(), core::BuiltinFn::kAbs, arg1, arg2)
+                        ->AsInstruction<CoreBuiltinCall>();
 
     EXPECT_EQ(builtin->Results().Length(), 1u);
     EXPECT_TRUE(builtin->Result()->Is<InstructionResult>());
@@ -76,7 +80,10 @@ TEST_F(IR_CoreBuiltinCallDeathTest, Fail_NoneFunction) {
 }
 
 TEST_F(IR_CoreBuiltinCallTest, Clone) {
-    auto* builtin = b.Call(mod.Types().f32(), core::BuiltinFn::kAbs, 1_u, 2_u);
+    auto* arg1 = b.Let("arg1", 1_u);
+    auto* arg2 = b.Let("arg2", 2_u);
+    auto* builtin = b.Call(mod.Types().f32(), core::BuiltinFn::kAbs, arg1, arg2)
+                        ->AsInstruction<CoreBuiltinCall>();
 
     auto* new_b = clone_ctx.Clone(builtin);
 
@@ -89,15 +96,13 @@ TEST_F(IR_CoreBuiltinCallTest, Clone) {
     auto args = new_b->Args();
     EXPECT_EQ(2u, args.size());
 
-    auto* val0 = args[0]->As<Constant>()->Value();
-    EXPECT_EQ(1_u, val0->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
-
-    auto* val1 = args[1]->As<Constant>()->Value();
-    EXPECT_EQ(2_u, val1->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+    EXPECT_EQ(args[0], arg1->Result());
+    EXPECT_EQ(args[1], arg2->Result());
 }
 
 TEST_F(IR_CoreBuiltinCallTest, CloneNoArgs) {
-    auto* builtin = b.Call(mod.Types().f32(), core::BuiltinFn::kAbs);
+    auto* builtin =
+        b.Call(mod.Types().f32(), core::BuiltinFn::kAbs)->AsInstruction<CoreBuiltinCall>();
 
     auto* new_b = clone_ctx.Clone(builtin);
     EXPECT_NE(builtin->Result(), new_b->Result());
@@ -110,7 +115,9 @@ TEST_F(IR_CoreBuiltinCallTest, CloneNoArgs) {
 }
 
 TEST_F(IR_CoreBuiltinCallTest, CloneWithExplicitParams) {
-    auto* builtin = b.Call(mod.Types().i32(), core::BuiltinFn::kAbs, 1_u);
+    auto* arg1 = b.Let("arg1", 1_u);
+    auto* builtin =
+        b.Call(mod.Types().i32(), core::BuiltinFn::kAbs, arg1)->AsInstruction<CoreBuiltinCall>();
     builtin->SetExplicitTemplateParams(Vector<TemplateParameter, 1>{mod.Types().i32()});
 
     auto* new_b = clone_ctx.Clone(builtin);

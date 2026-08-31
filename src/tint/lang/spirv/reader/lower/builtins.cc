@@ -303,7 +303,7 @@ struct State {
                 value = b.Convert(type, value)->Result();
             }
 
-            value = b.Call(type, fn, Vector{value})->Result();
+            value = b.Call(type, fn, Vector{value});
 
             if (type != orig_type) {
                 value = b.Convert(call->Result()->Type(), value)->Result();
@@ -345,7 +345,7 @@ struct State {
                 value = b.Convert(type, value)->Result();
             }
 
-            core::ir::Value* c = b.Call(type, fn, Vector{value})->Result();
+            core::ir::Value* c = b.Call(type, fn, Vector{value});
 
             if (type != call->Result()->Type()) {
                 c = b.Convert(call->Result()->Type(), c)->Result();
@@ -367,7 +367,7 @@ struct State {
                 value = b.Convert(type, value)->Result();
             }
 
-            core::ir::Value* c = b.Call(type, fn, Vector{value, id})->Result();
+            core::ir::Value* c = b.Call(type, fn, Vector{value, id});
 
             if (type != call->Result()->Type()) {
                 c = b.Convert(call->Result()->Type(), c)->Result();
@@ -389,7 +389,7 @@ struct State {
             }
 
             core::ir::Value* c =
-                b.Call(type, core::BuiltinFn::kSubgroupBroadcastFirst, Vector{value})->Result();
+                b.Call(type, core::BuiltinFn::kSubgroupBroadcastFirst, Vector{value});
 
             if (type != call->Result()->Type()) {
                 c = b.Convert(call->Result()->Type(), c)->Result();
@@ -436,7 +436,8 @@ struct State {
         auto* true_ = call->Args()[1];
         auto* false_ = call->Args()[2];
         b.InsertBefore(call, [&] {
-            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, false_, true_, cond);
+            b.CallReplaceResult(call->DetachResult(), core::BuiltinFn::kSelect, false_, true_,
+                                cond);
         });
         call->Destroy();
     }
@@ -463,12 +464,12 @@ struct State {
         auto* neg_ty = ty.MatchWidth(ty.i32(), val->Type());
         b.InsertBefore(call, [&] {
             if (val->Type() != neg_ty) {
-                val = b.Bitcast(neg_ty, val)->Result();
+                val = b.Bitcast(neg_ty, val);
             }
             val = b.Negation(val);
 
             if (neg_ty != res_ty) {
-                val = b.Bitcast(res_ty, val)->Result();
+                val = b.Bitcast(res_ty, val);
             }
             call->Result()->ReplaceAllUsesWith(val);
         });
@@ -481,7 +482,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* complement = b.Complement(val);
             if (val->Type() != result_ty) {
-                complement = b.Bitcast(result_ty, complement)->Result();
+                complement = b.Bitcast(result_ty, complement);
             }
             call->Result()->ReplaceAllUsesWith(complement);
         });
@@ -494,7 +495,7 @@ struct State {
 
             auto* arg = call->Args()[0];
             if (arg->Type()->IsUnsignedIntegerScalarOrVector()) {
-                arg = b.Bitcast(ty.MatchWidth(ty.i32(), result_ty), arg)->Result();
+                arg = b.Bitcast(ty.MatchWidth(ty.i32(), result_ty), arg);
             }
 
             b.ConvertWithResult(call->DetachResult(), arg);
@@ -508,7 +509,7 @@ struct State {
 
             auto* arg = call->Args()[0];
             if (arg->Type()->IsSignedIntegerScalarOrVector()) {
-                arg = b.Bitcast(ty.MatchWidth(ty.u32(), result_ty), arg)->Result();
+                arg = b.Bitcast(ty.MatchWidth(ty.u32(), result_ty), arg);
             }
 
             b.ConvertWithResult(call->DetachResult(), arg);
@@ -521,9 +522,10 @@ struct State {
             auto* res_ty = call->Result()->Type();
             auto deepest = res_ty->DeepestElement();
 
-            auto* res = b.Convert(ty.MatchWidth(ty.i32(), res_ty), call->Args()[0])->Result();
+            core::ir::Value* res =
+                b.Convert(ty.MatchWidth(ty.i32(), res_ty), call->Args()[0])->Result();
             if (deepest->IsUnsignedIntegerScalar()) {
-                res = b.Bitcast(res_ty, res)->Result();
+                res = b.Bitcast(res_ty, res);
             }
             call->Result()->ReplaceAllUsesWith(res);
         });
@@ -540,12 +542,12 @@ struct State {
 
         b.InsertBefore(call, [&] {
             if (rhs->Type() != op_ty) {
-                rhs = b.Bitcast(op_ty, rhs)->Result();
+                rhs = b.Bitcast(op_ty, rhs);
             }
 
             auto* c = b.Binary(op, op_ty, lhs, rhs);
             if (res_ty != op_ty) {
-                c = b.Bitcast(res_ty, c)->Result();
+                c = b.Bitcast(res_ty, c);
             }
             call->Result()->ReplaceAllUsesWith(c);
         });
@@ -582,15 +584,15 @@ struct State {
 
         b.InsertBefore(call, [&] {
             if (lhs->Type() != op_ty) {
-                lhs = b.Bitcast(op_ty, lhs)->Result();
+                lhs = b.Bitcast(op_ty, lhs);
             }
             if (rhs->Type() != op_ty) {
-                rhs = b.Bitcast(op_ty, rhs)->Result();
+                rhs = b.Bitcast(op_ty, rhs);
             }
 
             auto* c = b.Binary(op, op_ty, lhs, rhs);
             if (res_ty != op_ty) {
-                c = b.Bitcast(res_ty, c)->Result();
+                c = b.Bitcast(res_ty, c);
             }
             call->Result()->ReplaceAllUsesWith(c);
         });
@@ -611,7 +613,7 @@ struct State {
 
         b.InsertBefore(call, [&] {
             if (rhs->Type() != lhs->Type()) {
-                rhs = b.Bitcast(lhs->Type(), rhs)->Result();
+                rhs = b.Bitcast(lhs->Type(), rhs);
             }
 
             b.BinaryReplaceResult(call->DetachResult(), op, lhs, rhs);
@@ -633,10 +635,10 @@ struct State {
         auto* arg_ty = ty.MatchWidth(ty.i32(), call->Result()->Type());
         b.InsertBefore(call, [&] {
             if (lhs->Type() != arg_ty) {
-                lhs = b.Bitcast(arg_ty, lhs)->Result();
+                lhs = b.Bitcast(arg_ty, lhs);
             }
             if (rhs->Type() != arg_ty) {
-                rhs = b.Bitcast(arg_ty, rhs)->Result();
+                rhs = b.Bitcast(arg_ty, rhs);
             }
 
             b.BinaryReplaceResult(call->DetachResult(), op, lhs, rhs);
@@ -664,10 +666,10 @@ struct State {
         auto* arg_ty = ty.MatchWidth(ty.u32(), call->Result()->Type());
         b.InsertBefore(call, [&] {
             if (lhs->Type() != arg_ty) {
-                lhs = b.Bitcast(arg_ty, lhs)->Result();
+                lhs = b.Bitcast(arg_ty, lhs);
             }
             if (rhs->Type() != arg_ty) {
-                rhs = b.Bitcast(arg_ty, rhs)->Result();
+                rhs = b.Bitcast(arg_ty, rhs);
             }
 
             b.BinaryReplaceResult(call->DetachResult(), op, lhs, rhs);
@@ -703,17 +705,19 @@ struct State {
 
             for (auto* arg : args) {
                 if (arg->Type()->IsUnsignedIntegerScalarOrVector()) {
-                    arg = b.Bitcast(ty.MatchWidth(ty.i32(), result_ty), arg)->Result();
+                    arg = b.Bitcast(ty.MatchWidth(ty.i32(), result_ty), arg);
                 }
                 new_args.Push(arg);
             }
 
-            auto* new_call = b.Call(result_ty, func, new_args);
+            const bool unsigned_res = result_ty->DeepestElement() == ty.u32();
+            auto* new_call_ty = unsigned_res ? ty.MatchWidth(ty.i32(), result_ty) : result_ty;
 
-            core::ir::Value* replacement = new_call->Result();
-            if (result_ty->DeepestElement() == ty.u32()) {
-                new_call->Result()->SetType(ty.MatchWidth(ty.i32(), result_ty));
-                replacement = b.Bitcast(result_ty, replacement)->Result();
+            auto* new_call = b.Call(new_call_ty, func, new_args);
+
+            core::ir::Value* replacement = new_call;
+            if (unsigned_res) {
+                replacement = b.Bitcast(result_ty, replacement);
             }
             call->Result()->ReplaceAllUsesWith(replacement);
         });
@@ -753,17 +757,19 @@ struct State {
 
             for (auto* arg : args) {
                 if (arg->Type()->IsSignedIntegerScalarOrVector()) {
-                    arg = b.Bitcast(ty.MatchWidth(ty.u32(), result_ty), arg)->Result();
+                    arg = b.Bitcast(ty.MatchWidth(ty.u32(), result_ty), arg);
                 }
                 new_args.Push(arg);
             }
 
-            auto* new_call = b.Call(result_ty, func, new_args);
+            const bool signed_res = result_ty->DeepestElement() == ty.i32();
+            auto* new_call_ty = signed_res ? ty.MatchWidth(ty.u32(), result_ty) : result_ty;
 
-            core::ir::Value* replacement = new_call->Result();
-            if (result_ty->DeepestElement() == ty.i32()) {
-                new_call->Result()->SetType(ty.MatchWidth(ty.u32(), result_ty));
-                replacement = b.Bitcast(result_ty, replacement)->Result();
+            auto* new_call = b.Call(new_call_ty, func, new_args);
+
+            core::ir::Value* replacement = new_call;
+            if (signed_res) {
+                replacement = b.Bitcast(result_ty, replacement);
             }
             call->Result()->ReplaceAllUsesWith(replacement);
         });
@@ -791,7 +797,7 @@ struct State {
             if (arg->Type()->IsScalar()) {
                 fn = core::BuiltinFn::kSign;
             }
-            b.CallWithResult(call->DetachResult(), fn, Vector<core::ir::Value*, 1>{arg});
+            b.CallReplaceResult(call->DetachResult(), fn, Vector<core::ir::Value*, 1>{arg});
         });
         call->Destroy();
     }
@@ -803,11 +809,10 @@ struct State {
             auto* arg_ty = arg->Type();
             auto* ret_ty = call->Result()->Type();
 
-            auto* v =
-                b.Call(arg_ty, core::BuiltinFn::kFirstTrailingBit, Vector<core::ir::Value*, 1>{arg})
-                    ->Result();
+            auto* v = b.Call(arg_ty, core::BuiltinFn::kFirstTrailingBit,
+                             Vector<core::ir::Value*, 1>{arg});
             if (arg_ty != ret_ty) {
-                v = b.Bitcast(ret_ty, v)->Result();
+                v = b.Bitcast(ret_ty, v);
             }
             call->Result()->ReplaceAllUsesWith(v);
         });
@@ -834,8 +839,8 @@ struct State {
                 auto* s = b.Swizzle(src_ty, c, {0});
                 call->Result()->ReplaceAllUsesWith(s->Result());
             } else {
-                b.CallWithResult(call->DetachResult(), core::BuiltinFn::kRefract,
-                                 Vector<core::ir::Value*, 3>{I, N, eta});
+                b.CallReplaceResult(call->DetachResult(), core::BuiltinFn::kRefract,
+                                    Vector<core::ir::Value*, 3>{I, N, eta});
             }
         });
         call->Destroy();
@@ -854,8 +859,8 @@ struct State {
                 v = b.Multiply(v, 2.0_f);
                 b.SubtractReplaceResult(call->DetachResult(), I, v);
             } else {
-                b.CallWithResult(call->DetachResult(), core::BuiltinFn::kReflect,
-                                 Vector<core::ir::Value*, 2>{I, N});
+                b.CallReplaceResult(call->DetachResult(), core::BuiltinFn::kReflect,
+                                    Vector<core::ir::Value*, 2>{I, N});
             }
         });
         call->Destroy();
@@ -872,9 +877,10 @@ struct State {
                 auto* neg = b.Negation(N);
                 auto* sel = b.Multiply(I, Nref);
                 sel = b.LessThan(sel, b.Zero(sel->Type()));
-                b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, neg, N, sel);
+                b.CallReplaceResult(call->DetachResult(), core::BuiltinFn::kSelect, neg, N, sel);
             } else {
-                b.CallWithResult(call->DetachResult(), core::BuiltinFn::kFaceForward, N, I, Nref);
+                b.CallReplaceResult(call->DetachResult(), core::BuiltinFn::kFaceForward, N, I,
+                                    Nref);
             }
         });
         call->Destroy();
@@ -904,10 +910,10 @@ struct State {
 
         b.InsertBefore(call, [&] {
             auto* c = b.Call(frexp_result_ty, core::BuiltinFn::kFrexp, x);
-            auto* exp = b.Access(ty.MatchWidth(ty.i32(), result_ty), c, 1_u)->Result();
+            core::ir::Value* exp = b.Access(ty.MatchWidth(ty.i32(), result_ty), c, 1_u)->Result();
 
             if (i->Type()->UnwrapPtr()->DeepestElement()->IsUnsignedIntegerScalar()) {
-                exp = b.Bitcast(i->Type()->UnwrapPtr(), exp)->Result();
+                exp = b.Bitcast(i->Type()->UnwrapPtr(), exp);
             }
             b.Store(i, exp);
 
@@ -925,13 +931,13 @@ struct State {
 
         b.InsertBefore(call, [&] {
             if (offset->Type()->IsSignedIntegerScalar()) {
-                offset = b.Bitcast(ty.u32(), offset)->Result();
+                offset = b.Bitcast(ty.u32(), offset);
             }
             if (count->Type()->IsSignedIntegerScalar()) {
-                count = b.Bitcast(ty.u32(), count)->Result();
+                count = b.Bitcast(ty.u32(), count);
             }
-            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kInsertBits, e, newbits, offset,
-                             count);
+            b.CallReplaceResult(call->DetachResult(), core::BuiltinFn::kInsertBits, e, newbits,
+                                offset, count);
         });
         call->Destroy();
     }
@@ -947,20 +953,20 @@ struct State {
             auto* call_ty = ty.MatchWidth(ty.u32(), e->Type());
 
             if (e->Type()->DeepestElement()->IsSignedIntegerScalar()) {
-                e = b.Bitcast(call_ty, e)->Result();
+                e = b.Bitcast(call_ty, e);
                 cast_result = true;
             }
 
             if (offset->Type()->IsSignedIntegerScalar()) {
-                offset = b.Bitcast(ty.u32(), offset)->Result();
+                offset = b.Bitcast(ty.u32(), offset);
             }
             if (count->Type()->IsSignedIntegerScalar()) {
-                count = b.Bitcast(ty.u32(), count)->Result();
+                count = b.Bitcast(ty.u32(), count);
             }
 
-            auto* res = b.Call(call_ty, core::BuiltinFn::kExtractBits, e, offset, count)->Result();
+            auto* res = b.Call(call_ty, core::BuiltinFn::kExtractBits, e, offset, count);
             if (cast_result) {
-                res = b.Bitcast(call->Result()->Type(), res)->Result();
+                res = b.Bitcast(call->Result()->Type(), res);
             }
             call->Result()->ReplaceAllUsesWith(res);
         });
@@ -978,20 +984,20 @@ struct State {
             auto* call_ty = ty.MatchWidth(ty.i32(), e->Type());
 
             if (e->Type()->DeepestElement()->IsUnsignedIntegerScalar()) {
-                e = b.Bitcast(call_ty, e)->Result();
+                e = b.Bitcast(call_ty, e);
                 cast_result = true;
             }
 
             if (offset->Type()->IsSignedIntegerScalar()) {
-                offset = b.Bitcast(ty.u32(), offset)->Result();
+                offset = b.Bitcast(ty.u32(), offset);
             }
             if (count->Type()->IsSignedIntegerScalar()) {
-                count = b.Bitcast(ty.u32(), count)->Result();
+                count = b.Bitcast(ty.u32(), count);
             }
 
-            auto* res = b.Call(call_ty, core::BuiltinFn::kExtractBits, e, offset, count)->Result();
+            auto* res = b.Call(call_ty, core::BuiltinFn::kExtractBits, e, offset, count);
             if (cast_result) {
-                res = b.Bitcast(call->Result()->Type(), res)->Result();
+                res = b.Bitcast(call->Result()->Type(), res);
             }
             call->Result()->ReplaceAllUsesWith(res);
         });
@@ -1005,9 +1011,9 @@ struct State {
             auto* res_ty = call->Result()->Type();
             auto* arg_ty = arg->Type();
 
-            auto* bc = b.Call(arg_ty, core::BuiltinFn::kCountOneBits, arg)->Result();
+            auto* bc = b.Call(arg_ty, core::BuiltinFn::kCountOneBits, arg);
             if (res_ty != arg_ty) {
-                bc = b.Bitcast(res_ty, bc)->Result();
+                bc = b.Bitcast(res_ty, bc);
             }
             call->Result()->ReplaceAllUsesWith(bc);
         });
@@ -1022,12 +1028,12 @@ struct State {
             auto* shift = args[1];
 
             if (!shift->Type()->IsUnsignedIntegerScalarOrVector()) {
-                shift = b.Bitcast(ty.MatchWidth(ty.u32(), shift->Type()), shift)->Result();
+                shift = b.Bitcast(ty.MatchWidth(ty.u32(), shift->Type()), shift);
             }
 
             auto* bin = b.Binary(core::BinaryOp::kShiftLeft, base->Type(), base, shift);
             if (base->Type() != call->Result()->Type()) {
-                bin = b.Bitcast(call->Result()->Type(), bin)->Result();
+                bin = b.Bitcast(call->Result()->Type(), bin);
             }
             call->Result()->ReplaceAllUsesWith(bin);
         });
@@ -1043,15 +1049,15 @@ struct State {
 
             auto* u_ty = ty.MatchWidth(ty.u32(), base->Type());
             if (!base->Type()->IsUnsignedIntegerScalarOrVector()) {
-                base = b.Bitcast(u_ty, base)->Result();
+                base = b.Bitcast(u_ty, base);
             }
             if (!shift->Type()->IsUnsignedIntegerScalarOrVector()) {
-                shift = b.Bitcast(u_ty, shift)->Result();
+                shift = b.Bitcast(u_ty, shift);
             }
 
             auto* bin = b.Binary(core::BinaryOp::kShiftRight, u_ty, base, shift);
             if (u_ty != call->Result()->Type()) {
-                bin = b.Bitcast(call->Result()->Type(), bin)->Result();
+                bin = b.Bitcast(call->Result()->Type(), bin);
             }
             call->Result()->ReplaceAllUsesWith(bin);
         });
@@ -1067,15 +1073,15 @@ struct State {
 
             auto* s_ty = ty.MatchWidth(ty.i32(), base->Type());
             if (!base->Type()->IsSignedIntegerScalarOrVector()) {
-                base = b.Bitcast(s_ty, base)->Result();
+                base = b.Bitcast(s_ty, base);
             }
             if (!shift->Type()->IsUnsignedIntegerScalarOrVector()) {
-                shift = b.Bitcast(ty.MatchWidth(ty.u32(), shift->Type()), shift)->Result();
+                shift = b.Bitcast(ty.MatchWidth(ty.u32(), shift->Type()), shift);
             }
 
             auto* bin = b.Binary(core::BinaryOp::kShiftRight, s_ty, base, shift);
             if (s_ty != call->Result()->Type()) {
-                bin = b.Bitcast(call->Result()->Type(), bin)->Result();
+                bin = b.Bitcast(call->Result()->Type(), bin);
             }
             call->Result()->ReplaceAllUsesWith(bin);
         });

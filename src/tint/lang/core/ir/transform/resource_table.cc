@@ -312,7 +312,7 @@ struct State {
 
                 auto* rhs = b.Construct(conv_ty, vals);
                 auto* cmp = b.Equal(lhs, rhs);
-                eq = b.Call(ty.bool_(), core::BuiltinFn::kAny, cmp)->Result();
+                eq = b.Call(ty.bool_(), core::BuiltinFn::kAny, cmp);
             } else {
                 ResourceType resource_ty = core::type::TypeToResourceType(binding_type);
                 eq = b.Equal(type_id, u32(resource_ty));
@@ -588,7 +588,7 @@ struct State {
 
                 // Sampler and texture matched, just call
                 b.Append(check->True(), [&] {
-                    core::ir::Call* c = b.Call(result_ty, call->Func());
+                    core::ir::Call* c = b.Call(result_ty, call->Func())->AsInstruction<Call>();
                     for (ir::Value* arg : call->Args()) {
                         c->AppendArg(arg);
                     }

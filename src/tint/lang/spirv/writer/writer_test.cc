@@ -703,7 +703,7 @@ TEST_F(SpirvWriterTest, Alignment_CooperativeMatrixLoad) {
             mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
             Vector<core::ir::TemplateParameter, 2>{mat_ty, core::Majorness::kRowMajor}, v, 0_u,
             8_u);
-        ld->SetAlignment(64);
+        ld->AsInstruction()->SetAlignment(64);
         b.Return(ep);
     });
 
@@ -726,7 +726,7 @@ TEST_F(SpirvWriterTest, Alignment_CooperativeMatrixStore) {
         auto* st = b.CallExplicit(
             ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
             Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, v, 0_u, m, 8_u);
-        st->SetAlignment(64);
+        st->AsInstruction()->SetAlignment(64);
         b.Return(ep);
     });
 

@@ -377,7 +377,7 @@ struct State {
             auto* sub = b.Subtract(mul, one);
             auto* sqrt = b.Call(result_ty, core::BuiltinFn::kSqrt, sub);
             auto* add = b.Add(args[0], sqrt);
-            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kLog, add);
+            b.CallReplaceResult(call->DetachResult(), core::BuiltinFn::kLog, add);
         });
         call->Destroy();
     }
@@ -396,7 +396,7 @@ struct State {
             auto* add_one = b.Add(mul, one);
             auto* sqrt = b.Call(result_ty, core::BuiltinFn::kSqrt, add_one);
             auto* add = b.Add(args[0], sqrt);
-            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kLog, add);
+            b.CallReplaceResult(call->DetachResult(), core::BuiltinFn::kLog, add);
         });
         call->Destroy();
     }
@@ -551,8 +551,8 @@ struct State {
         auto* type = call->Result()->Type();
         Vector<core::ir::Value*, 4> args;
         b.InsertBefore(call, [&] {
-            args.Push(b.Call(type, core::BuiltinFn::kFloor, val)->Result());
-            args.Push(b.Call(type, core::BuiltinFn::kCeil, val)->Result());
+            args.Push(b.Call(type, core::BuiltinFn::kFloor, val));
+            args.Push(b.Call(type, core::BuiltinFn::kCeil, val));
             args.Push(b.LessThan(val, b.Zero(type)));
         });
         auto* trunc = b.ir.CreateInstruction<hlsl::ir::Ternary>(call->DetachResult(), args);
@@ -564,12 +564,12 @@ struct State {
     void PolyfillF16CeilFloor(core::ir::CoreBuiltinCall* call) {
         auto* value = call->Args()[0];
         auto* type = value->Type();
-        core::ir::CoreBuiltinCall* select = nullptr;
-        core::ir::CoreBuiltinCall* zero_select = nullptr;
+        core::ir::Value* select = nullptr;
+        core::ir::Value* zero_select = nullptr;
         b.InsertBefore(call, [&] {
             auto* f32_type = ty.MatchWidth(ty.f32(), type);
             auto* f32_value = b.Convert(f32_type, value);
-            auto* truncated = b.Call(f32_type, core::BuiltinFn::kTrunc, f32_value)->Result();
+            auto* truncated = b.Call(f32_type, core::BuiltinFn::kTrunc, f32_value);
             auto* one = b.MatchWidth(1_f, f32_type);
 
             core::ir::Value* adjusted = nullptr;
@@ -583,14 +583,18 @@ struct State {
             }
 
             select = b.Call(f32_type, core::BuiltinFn::kSelect, truncated, adjusted, condition);
-            auto* converted = b.Convert(type, select->Result());
+            auto* converted = b.Convert(type, select);
             auto* is_zero = b.Equal(value, b.Zero(type));
-            zero_select = b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect,
-                                           converted, value, is_zero);
+            zero_select = b.CallReplaceResult(call->DetachResult(), core::BuiltinFn::kSelect,
+                                              converted, value, is_zero);
         });
         call->Destroy();
-        Select(select);
-        Select(zero_select);
+        if (auto* sel_inst = select->AsInstruction<core::ir::CoreBuiltinCall>()) {
+            Select(sel_inst);
+        }
+        if (auto* zero_inst = zero_select->AsInstruction<core::ir::CoreBuiltinCall>()) {
+            Select(zero_inst);
+        }
     }
 
     /// Replaces an identity bitcast result with the value.
@@ -1649,7 +1653,7 @@ struct State {
 
             auto* lower = b.Splat(ty.vec2f(), -1_f);
             auto* upper = b.Splat(ty.vec2f(), 1_f);
-            b.Clamp(scale, lower, upper)->SetResult(call->DetachResult());
+            b.ClampReplaceResult(call->DetachResult(), scale, lower, upper);
         });
         call->Destroy();
     }
@@ -1716,7 +1720,7 @@ struct State {
 
             auto* lower = b.Splat(ty.vec4f(), -1_f);
             auto* upper = b.Splat(ty.vec4f(), 1_f);
-            b.Clamp(scale, lower, upper)->SetResult(call->DetachResult());
+            b.ClampReplaceResult(call->DetachResult(), scale, lower, upper);
         });
         call->Destroy();
     }
@@ -1976,7 +1980,7 @@ struct State {
 
             auto* arg1 = call->Args()[0];
             auto call_type = arg1->Type();
-            auto* exclusive_call = b.Call<core::ir::CoreBuiltinCall>(call_type, builtin_sel, arg1);
+            auto* exclusive_call = b.Call(call_type, builtin_sel, arg1);
 
             switch (call->Func()) {
                 case core::BuiltinFn::kSubgroupInclusiveAdd:
@@ -2243,21 +2247,24 @@ struct State {
 
     void AddSat(core::ir::CoreBuiltinCall* call) {
         auto* type = call->Result()->Type();
-        core::ir::CoreBuiltinCall* select = nullptr;
+        core::ir::Value* select = nullptr;
         b.InsertBefore(call, [&] {
             auto* add = b.Add(call->Args()[0], call->Args()[1]);
             auto* lt = b.LessThan(add, call->Args()[0]);
             core::ir::Value* sat = (type->Is<core::type::Vector>() ? b.Splat(type, u32(0xffffffff))
                                                                    : b.Constant(u32(0xffffffff)));
-            select = b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, add, sat, lt);
+            select =
+                b.CallReplaceResult(call->DetachResult(), core::BuiltinFn::kSelect, add, sat, lt);
         });
         call->Destroy();
-        Select(select);
+        if (auto* sel_inst = select->AsInstruction<core::ir::CoreBuiltinCall>()) {
+            Select(sel_inst);
+        }
     }
 
     void MulSat(core::ir::CoreBuiltinCall* call) {
         auto* type = call->Result()->Type();
-        core::ir::CoreBuiltinCall* select = nullptr;
+        core::ir::Value* select = nullptr;
         b.InsertBefore(call, [&] {
             auto* add = b.Multiply(call->Args()[0], call->Args()[1]);
             auto* arg0_ne_0 = b.NotEqual(call->Args()[0], b.Zero(type));
@@ -2268,11 +2275,13 @@ struct State {
             auto* gt = b.GreaterThan(call->Args()[1], div);
             auto* logical_and = b.And(arg0_ne_0, arg1_ne_0);
             logical_and = b.And(logical_and, gt);
-            select = b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, add, sat,
-                                      logical_and);
+            select = b.CallReplaceResult(call->DetachResult(), core::BuiltinFn::kSelect, add, sat,
+                                         logical_and);
         });
         call->Destroy();
-        Select(select);
+        if (auto* sel_inst = select->AsInstruction<core::ir::CoreBuiltinCall>()) {
+            Select(sel_inst);
+        }
     }
 };
 

@@ -433,8 +433,7 @@ struct State {
         b.InsertBefore(builtin, [&] {
             auto* offset = builtin->Args()[2];
             auto* clamped = b.Min(offset, 31_u);
-            builtin->SetOperand(core::ir::CoreBuiltinCall::kArgsOperandOffset + 2,
-                                clamped->Result());
+            builtin->SetOperand(core::ir::CoreBuiltinCall::kArgsOperandOffset + 2, clamped);
         });
     }
 
@@ -447,7 +446,7 @@ struct State {
             if (arg0->Type()->Is<core::type::Scalar>()) {
                 // Calls to `distance` with a scalar argument are replaced with `abs(a - b)`.
                 auto* sub = b.Subtract(arg0, arg1);
-                b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kAbs, sub);
+                b.CallReplaceResult(builtin->DetachResult(), core::BuiltinFn::kAbs, sub);
             } else {
                 b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(),
                                                        msl::BuiltinFn::kDistance, arg0, arg1);
@@ -548,8 +547,9 @@ struct State {
         auto* arg = builtin->Args()[0];
         if (arg->Type()->Is<core::type::Scalar>()) {
             // Calls to `length` with a scalar argument are replaced with `abs`.
-            auto* call = b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kAbs, arg);
-            call->InsertBefore(builtin);
+            b.InsertBefore(builtin, [&] {
+                b.CallReplaceResult(builtin->DetachResult(), core::BuiltinFn::kAbs, arg);
+            });
         } else {
             auto* call = b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(),
                                                                 msl::BuiltinFn::kLength, arg);
@@ -592,8 +592,7 @@ struct State {
         ir.properties.Add(core::ir::Property::kAllow16BitFloats);
         b.InsertBefore(builtin, [&] {
             auto* convert = b.Convert<vec2<f16>>(builtin->Args()[0]);
-            auto* bitcast = b.Bitcast(ty.u32(), convert);
-            bitcast->SetResult(builtin->DetachResult());
+            b.BitcastReplaceResult(builtin->DetachResult(), convert);
         });
         builtin->Destroy();
     }
@@ -626,8 +625,8 @@ struct State {
                 auto* zero = b.Zero(type);
                 auto* sign = b.Call(type, core::BuiltinFn::kSelect, neg_one, pos_one,
                                     b.GreaterThan(arg, zero));
-                b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kSelect, sign, zero,
-                                 b.Equal(arg, zero));
+                b.CallReplaceResult(builtin->DetachResult(), core::BuiltinFn::kSelect, sign, zero,
+                                    b.Equal(arg, zero));
             } else {
                 b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(),
                                                        msl::BuiltinFn::kSign, arg);
@@ -799,7 +798,7 @@ struct State {
                 const uint32_t kArrayIndex = 2;
                 auto* index_arg = builtin->Args()[kArrayIndex];
                 if (index_arg->Type()->IsSignedIntegerScalar()) {
-                    builtin->SetArg(kArrayIndex, b.Max(index_arg, b.Zero<i32>())->Result());
+                    builtin->SetArg(kArrayIndex, b.Max(index_arg, b.Zero<i32>()));
                 }
             }
         });
@@ -1084,7 +1083,7 @@ struct State {
 
             auto* lower = b.Splat(ty.vec2f(), -1_f);
             auto* upper = b.Splat(ty.vec2f(), 1_f);
-            b.Clamp(scale, lower, upper)->SetResult(builtin->DetachResult());
+            b.ClampReplaceResult(builtin->DetachResult(), scale, lower, upper);
         });
         builtin->Destroy();
     }
@@ -1104,7 +1103,7 @@ struct State {
 
             auto* lower = b.Splat(ty.vec2f(), 0_f);
             auto* upper = b.Splat(ty.vec2f(), 1_f);
-            b.Clamp(scale, lower, upper)->SetResult(builtin->DetachResult());
+            b.ClampReplaceResult(builtin->DetachResult(), scale, lower, upper);
         });
         builtin->Destroy();
     }
@@ -1458,13 +1457,12 @@ struct State {
             if (arg->Type()->IsSignedIntegerScalarOrVector()) {
                 auto* flip = b.Complement(use_arg);
                 use_arg = b.Call(u32_ty, core::BuiltinFn::kSelect, flip, use_arg,
-                                 b.LessThan(use_arg, b.MatchWidth(u32(0x80000000), arg->Type())))
-                              ->Result();
+                                 b.LessThan(use_arg, b.MatchWidth(u32(0x80000000), arg->Type())));
             }
             auto* clz = b.Call(u32_ty, core::BuiltinFn::kCountLeadingZeros, use_arg);
             core::ir::Value* result = b.Subtract(c31, clz);
             if (arg->Type()->IsSignedIntegerScalarOrVector()) {
-                result = b.Bitcast(arg->Type(), result)->Result();
+                result = b.Bitcast(arg->Type(), result);
             }
             builtin->Result()->ReplaceAllUsesWith(result);
         });
@@ -1487,7 +1485,7 @@ struct State {
                 n1 = b.MatchWidth(i32(-1), arg->Type());
             }
             auto* eq = b.Equal(arg, b.Zero(arg->Type()));
-            b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kSelect, ctz, n1, eq);
+            b.CallReplaceResult(builtin->DetachResult(), core::BuiltinFn::kSelect, ctz, n1, eq);
         });
         builtin->Destroy();
     }

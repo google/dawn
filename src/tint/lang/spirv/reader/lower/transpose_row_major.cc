@@ -194,8 +194,7 @@ struct State {
                         member_type,
                         [&](const core::type::Matrix*) {
                             new_operands.Push(b.Call(new_struct_ty->Members()[i]->Type(),
-                                                     core::BuiltinFn::kTranspose, operand)
-                                                  ->Result());
+                                                     core::BuiltinFn::kTranspose, operand));
                         },
                         [&](const core::type::Array*) {
                             // TODO(437140112): Add support for arrays of matrices
@@ -353,7 +352,7 @@ struct State {
 
         b.InsertBefore(access, [&] {
             auto* m = b.Access(mat_ty, access->Object(), mat_indices);
-            auto* t = b.Call(RewriteType(mat_ty, true), core::BuiltinFn::kTranspose, m)->Result();
+            auto* t = b.Call(RewriteType(mat_ty, true), core::BuiltinFn::kTranspose, m);
 
             if (static_cast<uint32_t>(matrix_index) != indices.size() - 1) {
                 auto access_indices = Vector<core::ir::Value*, 4>{
@@ -425,7 +424,7 @@ struct State {
                     // We're replacing the load, which means the source must have been a transposed
                     // matrix, so we need to get the load result as if it was row-major decorated.
                     auto* new_res = b.InstructionResult(RewriteType(ld->Result()->Type(), true));
-                    b.CallWithResult(ld->DetachResult(), core::BuiltinFn::kTranspose, new_res);
+                    b.CallReplaceResult(ld->DetachResult(), core::BuiltinFn::kTranspose, new_res);
                     ld->SetResult(new_res);
                 });
             },
@@ -483,7 +482,7 @@ struct State {
                     // Storing the full matrix
                     b.InsertBefore(store, [&] {
                         auto* from = b.Call(to_ty, core::BuiltinFn::kTranspose, store->From());
-                        store->SetFrom(from->Result());
+                        store->SetFrom(from);
                     });
                 },
                 [&](const core::type::Array*) {
@@ -610,8 +609,7 @@ struct State {
                         auto* inner_fn = TransposeArrayHelper(nested);
                         transposed = b.Call(to_ty->ElemType(), inner_fn, cur)->Result();
                     } else {
-                        transposed =
-                            b.Call(to_ty->ElemType(), core::BuiltinFn::kTranspose, cur)->Result();
+                        transposed = b.Call(to_ty->ElemType(), core::BuiltinFn::kTranspose, cur);
                     }
 
                     auto* slot = b.Access(ty.ptr(function, to_ty->ElemType()), res, idx);

@@ -166,7 +166,7 @@ struct State {
                 core::ir::Value* ret = nullptr;
 
                 ret = b.Divide(x, y);
-                ret = b.Call(type, core::BuiltinFn::kTrunc, ret)->Result();
+                ret = b.Call(type, core::BuiltinFn::kTrunc, ret);
                 ret = b.Multiply(y, ret);
                 ret = b.Subtract(x, ret);
                 b.Return(f, ret);

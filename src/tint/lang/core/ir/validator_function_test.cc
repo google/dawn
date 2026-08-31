@@ -3041,7 +3041,8 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ModuleScopeRuntimeExpression) {
     auto* v = b.Var("v", ty.ptr(workgroup, ty.atomic(ty.u32())));
     mod.root_block->Append(v);
 
-    auto* load = b.Call(ty.u32(), core::BuiltinFn::kAtomicLoad, v->Result(0));
+    auto* load = b.Call(ty.u32(), core::BuiltinFn::kAtomicLoad, v->Result(0))
+                     ->AsInstruction<CoreBuiltinCall>();
     mod.root_block->Append(load);
 
     f->SetWorkgroupSize({load->Result(0), b.Constant(1_u), b.Constant(1_u)});

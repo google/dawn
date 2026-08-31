@@ -51,7 +51,7 @@ struct State {
     core::type::Manager& ty{ir.Types()};
 
     struct DecodeResult {
-        core::ir::InstructionResult* value = nullptr;
+        core::ir::Value* value = nullptr;
         core::ir::Value* multiply = nullptr;
     };
 
@@ -131,7 +131,7 @@ struct State {
             b.Divide(b.Convert<vec4f>(shr), b.Composite<vec4f>(511_f, 511_f, 511_f, 1_f));
         auto* decoded = b.Call<vec4f>(core::BuiltinFn::kMax, normalized, b.Splat<vec4f>(-1_f));
 
-        return {decoded->Result(), scaled};
+        return {decoded, scaled};
     }
 };
 

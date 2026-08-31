@@ -1707,14 +1707,16 @@ class Parser {
     }
 
     /// Emit an instruction to the current block.
-    /// @param inst the instruction to emit
-    void EmitWithoutSpvResult(core::ir::Instruction* inst) {
-        current_block_->Append(inst);
-        TINT_ASSERT(inst->Results().Length() == 1u);
+    /// @param value the value to emit
+    void EmitWithoutSpvResult(core::ir::Value* value) {
+        if (auto* inst = value->AsInstruction()) {
+            current_block_->Append(inst);
+            TINT_ASSERT(inst->Results().Length() == 1u);
+        }
     }
 
     /// Emit an instruction to the current block.
-    /// @param inst the instruction to emit
+    /// @param value the value to emit
     void EmitWithoutResult(core::ir::Instruction* inst) {
         TINT_ASSERT(inst->Results().IsEmpty());
         current_block_->Append(inst);
@@ -2630,6 +2632,14 @@ class Parser {
             << "subgroup scope required for GroupNonUniform instructions";
     }
 
+    void EmitOrAdd(core::ir::Value* value, uint32_t result_id) {
+        if (auto* inst = value->AsInstruction()) {
+            Emit(inst, result_id);
+        } else {
+            AddValue(result_id, value);
+        }
+    }
+
     void EmitSubgroupBitwise(spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
         ValidateScope(inst);
 
@@ -2637,7 +2647,7 @@ class Parser {
         TINT_ASSERT(static_cast<spv::GroupOperation>(group) == spv::GroupOperation::Reduce)
             << "GroupNonUniformBitwise operations require a Reduce group operation";
 
-        Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 4)), inst.result_id());
+        EmitOrAdd(b_.Call(Type(inst.type_id()), fn, Args(inst, 4)), inst.result_id());
     }
 
     void EmitSubgroupMul(spvtools::opt::Instruction& inst) {
@@ -2657,7 +2667,7 @@ class Parser {
                           "`InclusiveScan`, or `ExclusiveScan`";
         }
 
-        Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 4)), inst.result_id());
+        EmitOrAdd(b_.Call(Type(inst.type_id()), fn, Args(inst, 4)), inst.result_id());
     }
 
     void EmitSubgroupAdd(spvtools::opt::Instruction& inst) {
@@ -2677,7 +2687,7 @@ class Parser {
                           "`InclusiveScan`, or `ExclusiveScan`";
         }
 
-        Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 4)), inst.result_id());
+        EmitOrAdd(b_.Call(Type(inst.type_id()), fn, Args(inst, 4)), inst.result_id());
     }
 
     void EmitSubgroupMinMax(spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
@@ -2687,7 +2697,7 @@ class Parser {
         TINT_ASSERT(static_cast<spv::GroupOperation>(group) == spv::GroupOperation::Reduce)
             << "group operand Reduce required for `Min`/`Max` instructions";
 
-        Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 4)), inst.result_id());
+        EmitOrAdd(b_.Call(Type(inst.type_id()), fn, Args(inst, 4)), inst.result_id());
     }
 
     void EmitSubgroupMinMax(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
@@ -2729,7 +2739,7 @@ class Parser {
 
     void EmitSubgroupBuiltin(spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
         ValidateScope(inst);
-        Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 3)), inst.result_id());
+        EmitOrAdd(b_.Call(Type(inst.type_id()), fn, Args(inst, 3)), inst.result_id());
     }
 
     Result<SuccessType> EmitSubgroupBallotBitCount(spvtools::opt::Instruction& inst) {
@@ -2763,9 +2773,9 @@ class Parser {
 
         auto* pred_val = Value(ballot_inst->GetSingleWordInOperand(1));
         auto* conv = b_.Convert<u32>(pred_val);
-        EmitWithoutSpvResult(conv);
+        EmitWithoutSpvResult(conv->Result());
 
-        Emit(b_.Call(Type(inst.type_id()), fn, conv), inst.result_id());
+        EmitOrAdd(b_.Call(Type(inst.type_id()), fn, conv), inst.result_id());
         return Success;
     }
 
@@ -2776,21 +2786,21 @@ class Parser {
         auto* first = b_.Call<spirv::ir::BuiltinCall>(
             val->Type(), spirv::BuiltinFn::kGroupNonUniformBroadcastFirst,
             Vector{Value(inst.GetSingleWordInOperand(0)), val});
-        EmitWithoutSpvResult(first);
+        EmitWithoutSpvResult(first->Result());
 
         // If NaNs and INFs are supported in the future, this lowering will remain correct as long
         // as floating-point equality comparisons use ordered-and-equal (OpFOrdEqual) semantics.
-        auto* eq = b_.Equal(val, first)->AsInstruction();
+        auto* eq = b_.Equal(val, first);
         EmitWithoutSpvResult(eq);
 
-        core::ir::Value* eq_val = eq->Result();
+        core::ir::Value* eq_val = eq;
         if (val->Type()->Is<core::type::Vector>()) {
             auto* all_call = b_.Call(ty_.bool_(), core::BuiltinFn::kAll, eq);
             EmitWithoutSpvResult(all_call);
-            eq_val = all_call->Result();
+            eq_val = all_call;
         }
 
-        Emit(b_.Call(ty_.bool_(), core::BuiltinFn::kSubgroupAll, eq_val), inst.result_id());
+        EmitOrAdd(b_.Call(ty_.bool_(), core::BuiltinFn::kSubgroupAll, eq_val), inst.result_id());
     }
 
     struct IfBranchValue {
@@ -3464,7 +3474,7 @@ class Parser {
         auto* texel_ty = texel->Type();
         if (texel_ty->IsScalar()) {
             auto* c = b_.Construct(ty_.vec4(texel_ty), texel);
-            EmitWithoutSpvResult(c);
+            EmitWithoutSpvResult(c->Result());
             texel = c->Result();
         } else {
             auto* vec_ty = texel_ty->As<core::type::Vector>();
@@ -3477,7 +3487,7 @@ class Parser {
                 c = b_.Construct(ty_.vec4(vec_ty->Type()), texel, b_.Zero(vec_ty->Type()));
             }
             if (c != nullptr) {
-                EmitWithoutSpvResult(c);
+                EmitWithoutSpvResult(c->Result());
                 texel = c->Result();
             }
         }
@@ -3534,10 +3544,11 @@ class Parser {
         auto* access =
             b_.Access(ty_.ptr(ptr->AddressSpace(), ty->Members().Back()->Type(), ptr->Access()),
                       strct, u32(field_index));
-        EmitWithoutSpvResult(access);
+        EmitWithoutSpvResult(access->Result());
 
-        Emit(b_.Call(Type(inst.type_id()), core::BuiltinFn::kArrayLength, Vector{access->Result()}),
-             inst.result_id());
+        EmitOrAdd(
+            b_.Call(Type(inst.type_id()), core::BuiltinFn::kArrayLength, Vector{access->Result()}),
+            inst.result_id());
     }
 
     void EmitControlBarrier(const spvtools::opt::Instruction& inst) {
@@ -3596,13 +3607,14 @@ class Parser {
             << "Atomic operations on floating point values not supported.";
 
         EmitWithoutSpvResult(b_.Call<spirv::ir::BuiltinCall>(
-            ty_.void_(), spirv::BuiltinFn::kAtomicStore, Args(inst, 0)));
+                                   ty_.void_(), spirv::BuiltinFn::kAtomicStore, Args(inst, 0))
+                                 ->Result());
     }
 
     void EmitBitcast(const spvtools::opt::Instruction& inst) {
         auto val = Value(inst.GetSingleWordInOperand(0));
         auto ty = Type(inst.type_id());
-        Emit(b_.Bitcast(ty, val), inst.result_id());
+        EmitOrAdd(b_.Bitcast(ty, val), inst.result_id());
     }
 
     core::ir::ControlInstruction* StopWalkingAt(uint32_t id) {
@@ -3809,7 +3821,7 @@ class Parser {
             if (false_id == merge_id && true_is_header) {
                 auto* val = b_.Not(cond);
                 if (auto* inst = val->AsInstruction()) {
-                    EmitWithoutSpvResult(inst);
+                    EmitWithoutSpvResult(inst->Result());
                 }
                 EmitWithoutResult(b_.BreakIf(loop, val));
                 return true;
@@ -3828,7 +3840,7 @@ class Parser {
         // the condition variable.
         if (iter->second.condition) {
             auto* premerge_cond = b_.Load(iter->second.condition);
-            EmitWithoutSpvResult(premerge_cond);
+            EmitWithoutSpvResult(premerge_cond->Result());
             premerge_if_->SetOperand(core::ir::If::kConditionOperandOffset,
                                      premerge_cond->Result());
         }
@@ -3870,9 +3882,7 @@ class Parser {
         // unreachable.
         if (true_id == false_id) {
             auto* binary = b_.Binary(core::BinaryOp::kOr, cond->Type(), cond, b_.Constant(true));
-            if (auto* res = binary->AsInstruction()) {
-                EmitWithoutSpvResult(res);
-            }
+            EmitWithoutSpvResult(binary);
             cond = binary;
         }
 
@@ -4070,7 +4080,7 @@ class Parser {
     }
 
     void EmitBuiltinCall(const spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
-        Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 2)), inst.result_id());
+        EmitOrAdd(b_.Call(Type(inst.type_id()), fn, Args(inst, 2)), inst.result_id());
     }
 
     void EmitSpirvExplicitBuiltinCall(const spvtools::opt::Instruction& inst,
@@ -4138,7 +4148,7 @@ class Parser {
     /// @param inst the SPIR-V instruction for OpCopyMemory
     void EmitCopyMemory(const spvtools::opt::Instruction& inst) {
         auto load = b_.Load(Value(inst.GetSingleWordOperand(1)));
-        EmitWithoutSpvResult(load);
+        EmitWithoutSpvResult(load->Result());
         EmitWithoutResult(b_.Store(Value(inst.GetSingleWordOperand(0)), load));
     }
 
@@ -4365,8 +4375,8 @@ class Parser {
             auto* whole = b_.Access(mem_ty, call, 1_u);
 
             EmitWithoutSpvResult(call);
-            EmitWithoutSpvResult(fract);
-            EmitWithoutSpvResult(whole);
+            EmitWithoutSpvResult(fract->Result());
+            EmitWithoutSpvResult(whole->Result());
             Emit(b_.Construct(spv_ty, fract, whole), inst.result_id());
             return Success;
         }
@@ -4385,18 +4395,17 @@ class Parser {
             auto* call = b_.Call(result_ty, wgsl_fn, operands);
             auto* fract = b_.Access(mem_ty, call, 0_u);
             auto* exp = b_.Access(ty_.MatchWidth(ty_.i32(), mem_ty), call, 1_u);
-            auto* exp_res = exp->Result();
+            core::ir::Value* exp_res = exp->Result();
 
             EmitWithoutSpvResult(call);
-            EmitWithoutSpvResult(fract);
-            EmitWithoutSpvResult(exp);
+            EmitWithoutSpvResult(fract->Result());
+            EmitWithoutSpvResult(exp->Result());
 
             if (auto* str = spv_ty->As<core::type::Struct>()) {
                 auto* exp_ty = str->Members()[1]->Type();
                 if (exp_ty->DeepestElement()->IsUnsignedIntegerScalar()) {
-                    auto* uexp = b_.Bitcast(exp_ty, exp);
-                    exp_res = uexp->Result();
-                    EmitWithoutSpvResult(uexp);
+                    exp_res = b_.Bitcast(exp_ty, exp);
+                    EmitWithoutSpvResult(exp_res);
                 }
             }
 
@@ -4404,7 +4413,7 @@ class Parser {
             return Success;
         }
         if (wgsl_fn != core::BuiltinFn::kNone) {
-            Emit(b_.Call(spv_ty, wgsl_fn, operands), inst.result_id());
+            EmitOrAdd(b_.Call(spv_ty, wgsl_fn, operands), inst.result_id());
             return Success;
         }
 
@@ -4476,9 +4485,7 @@ class Parser {
         auto* lhs = Value(inst.GetSingleWordOperand(2));
         auto* rhs = Value(inst.GetSingleWordOperand(3));
         auto* binary = b_.Binary(op, Type(inst.type_id()), lhs, rhs);
-        if (auto* binary_inst = binary->AsInstruction()) {
-            EmitWithoutSpvResult(binary_inst);
-        }
+        EmitWithoutSpvResult(binary);
 
         auto* inv = b_.Not(binary);
         if (auto* inv_inst = inv->AsInstruction()) {
@@ -4514,8 +4521,8 @@ class Parser {
         auto* ptr_ty = ty_.ptr(function, object->Type());
         auto* access = b_.Access(ptr_ty, tmp, std::move(indices));
 
-        EmitWithoutSpvResult(tmp);
-        EmitWithoutSpvResult(access);
+        EmitWithoutSpvResult(tmp->Result());
+        EmitWithoutSpvResult(access->Result());
         EmitWithoutResult(b_.Store(access, object));
         Emit(b_.Load(tmp), inst.result_id());
     }
@@ -4534,7 +4541,7 @@ class Parser {
         auto* tmp = b_.Var(
             ty_.ptr(core::AddressSpace::kFunction, Type(inst.type_id()), core::Access::kReadWrite));
         tmp->SetInitializer(vector);
-        EmitWithoutSpvResult(tmp);
+        EmitWithoutSpvResult(tmp->Result());
         EmitWithoutResult(b_.StoreVectorElement(tmp, index, component));
         Emit(b_.Load(tmp), inst.result_id());
     }
@@ -4563,7 +4570,7 @@ class Parser {
             }
             auto* swizzle_type = ty_.MatchWidth(el_ty, current_indices.Length());
             auto* swizzle = b_.Swizzle(swizzle_type, current_vector, current_indices);
-            EmitWithoutSpvResult(swizzle);
+            EmitWithoutSpvResult(swizzle->Result());
             swizzles.Push(swizzle->Result());
             current_indices.Clear();
         };

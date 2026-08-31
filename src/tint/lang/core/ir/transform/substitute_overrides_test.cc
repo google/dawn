@@ -394,7 +394,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithSubgroupShuffle) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* shuffle_func = b.Call(ty.u32(), core::BuiltinFn::kSubgroupShuffle, 1_u, o);
-        b.Return(func, shuffle_func->Result());
+        b.Return(func, shuffle_func);
     });
 
     auto* src = R"(
@@ -437,7 +437,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithQuantizeF16) {
     auto* func = b.Function("foo", ty.f32());
     b.Append(func->Block(), [&] {
         auto* shuffle_func = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, o);
-        b.Return(func, shuffle_func->Result());
+        b.Return(func, shuffle_func);
     });
 
     auto* src = R"(
@@ -1880,7 +1880,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideConstruct) {
         auto* e = b.Construct(ty.vec4h(), o0, o1, o2, o3);
         // auto* e = b.Splat(ty.vec4h(), 1.0_h);
         auto* call_func = b.Call(ty.vec4(ty.f16()), core::BuiltinFn::kCeil, e);
-        global = b.Var<private_>("global", call_func->Result());
+        global = b.Var<private_>("global", call_func);
         // global = b.Var<private_>("global", e);//e->Result());
     });
 
@@ -3076,16 +3076,19 @@ struct SubgroupMatrixSizes : public TransformTestWithParam<SubgroupMatrixSizesPa
         const bool load = std::get<4>(GetParam());
         auto* mat_ty = MatrixType();
         if (load) {
-            return b.CallExplicit(
-                mat_ty, BuiltinFn::kSubgroupMatrixLoad,
-                Vector<TemplateParameter, 2>{
-                    mat_ty, col_major ? Majorness::kColMajor : Majorness::kRowMajor},
-                pointer, offset, stride);
+            return b
+                .CallExplicit(mat_ty, BuiltinFn::kSubgroupMatrixLoad,
+                              Vector<TemplateParameter, 2>{
+                                  mat_ty, col_major ? Majorness::kColMajor : Majorness::kRowMajor},
+                              pointer, offset, stride)
+                ->AsInstruction<CoreBuiltinCall>();
         } else {
-            return b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
-                                  Vector<TemplateParameter, 1>{col_major ? Majorness::kColMajor
-                                                                         : Majorness::kRowMajor},
-                                  pointer, offset, object, stride);
+            return b
+                .CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                              Vector<TemplateParameter, 1>{col_major ? Majorness::kColMajor
+                                                                     : Majorness::kRowMajor},
+                              pointer, offset, object, stride)
+                ->AsInstruction<CoreBuiltinCall>();
         }
     }
 };
@@ -3313,8 +3316,7 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView) {
         auto* view = b.CallExplicit(
             ty.ptr(workgroup, ty.runtime_array(ArrayElemType())), BuiltinFn::kBufferView,
             Vector<TemplateParameter, 1>{ty.runtime_array(ArrayElemType())}, v, o->Result());
-        MakeCall(view->Result(), value, b.Constant(u32(0)),
-                 b.Constant(u32(MinStride() / ArrayStride())));
+        MakeCall(view, value, b.Constant(u32(0)), b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
@@ -3357,8 +3359,7 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_SizedParam) {
         auto* view = b.CallExplicit(
             ty.ptr(workgroup, ty.runtime_array(ArrayElemType())), BuiltinFn::kBufferView,
             Vector<TemplateParameter, 1>{ty.runtime_array(ArrayElemType())}, p, o->Result());
-        MakeCall(view->Result(), value, b.Constant(u32(0)),
-                 b.Constant(u32(MinStride() / ArrayStride())));
+        MakeCall(view, value, b.Constant(u32(0)), b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
     auto* bar = b.Function("bar", ty.void_());
@@ -3408,8 +3409,7 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferView_Result) {
         auto* arr_ty = ty.array(ArrayElemType(), array_size / ArrayStride() - 1);
         auto* view = b.CallExplicit(ty.ptr(workgroup, arr_ty), BuiltinFn::kBufferView,
                                     Vector<TemplateParameter, 1>{arr_ty}, p, o->Result());
-        MakeCall(view->Result(), value, b.Constant(u32(0)),
-                 b.Constant(u32(MinStride() / ArrayStride())));
+        MakeCall(view, value, b.Constant(u32(0)), b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
     auto* bar = b.Function("bar", ty.void_());
@@ -3456,8 +3456,7 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferArrayView_SizeParam) {
         auto* view = b.CallExplicit(
             ty.ptr(workgroup, ty.runtime_array(ArrayElemType())), BuiltinFn::kBufferArrayView,
             Vector<TemplateParameter, 1>{ty.runtime_array(ArrayElemType())}, v, 0_u, o->Result());
-        MakeCall(view->Result(), value, b.Constant(u32(0)),
-                 b.Constant(u32(MinStride() / ArrayStride())));
+        MakeCall(view, value, b.Constant(u32(0)), b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 

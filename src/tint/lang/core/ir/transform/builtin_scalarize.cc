@@ -121,7 +121,7 @@ struct State {
 
                 auto* scalar_call =
                     b.Call(scalar_return_type, builtin->Func(), std::move(scalar_args));
-                args.Push(scalar_call->Result());
+                args.Push(scalar_call);
             }
             // Places result back into a vector.
             b.ConstructWithResult(builtin->DetachResult(), std::move(args));

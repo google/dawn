@@ -1741,7 +1741,8 @@ TEST_F(IR_ValidatorTest, Alignment_NotPowerOf2) {
     b.Append(foo->Block(), [&] {
         auto* ld =
             b.CallExplicit(mat_ty, BuiltinFn::kSubgroupMatrixLoad,
-                           Vector<TemplateParameter, 2>{mat_ty, Majorness::kColMajor}, p, 0_u, 8_u);
+                           Vector<TemplateParameter, 2>{mat_ty, Majorness::kColMajor}, p, 0_u, 8_u)
+                ->AsInstruction<CoreBuiltinCall>();
         ld->SetAlignment(5);
         b.Return(foo);
     });
@@ -1760,7 +1761,8 @@ TEST_F(IR_ValidatorTest, Alignment_TooLarge) {
     b.Append(foo->Block(), [&] {
         auto* ld =
             b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
-                           Vector<TemplateParameter, 1>{Majorness::kColMajor}, p, 0_u, m, 8_u);
+                           Vector<TemplateParameter, 1>{Majorness::kColMajor}, p, 0_u, m, 8_u)
+                ->AsInstruction<CoreBuiltinCall>();
         ld->SetAlignment(512);
         b.Return(foo);
     });

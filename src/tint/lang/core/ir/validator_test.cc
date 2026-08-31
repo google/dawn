@@ -201,7 +201,8 @@ TEST_F(IR_ValidatorTest, RootBlock_ModuleScopeRuntimeExpression) {
     auto* v = b.Var("v", ty.ptr(workgroup, ty.atomic(ty.u32())));
     mod.root_block->Append(v);
 
-    auto* load = b.Call(ty.u32(), core::BuiltinFn::kAtomicLoad, v->Result(0));
+    auto* load = b.Call(ty.u32(), core::BuiltinFn::kAtomicLoad, v->Result(0))
+                     ->AsInstruction<CoreBuiltinCall>();
     mod.root_block->Append(load);
 
     auto res = ir::Validate(mod);
@@ -223,7 +224,8 @@ TEST_F(IR_ValidatorTest, RootBlock_VarWithRuntimeInitializer) {
 
     // This will also cause the same error on atomicLoad as above, but this test is interested in
     // the later error for the var.
-    auto* init = b.Call(ty.u32(), core::BuiltinFn::kAtomicLoad, v);
+    auto* init =
+        b.Call(ty.u32(), core::BuiltinFn::kAtomicLoad, v)->AsInstruction<CoreBuiltinCall>();
     mod.root_block->Append(init);
     mod.root_block->Append(b.Var("a", init));
 
@@ -2232,7 +2234,8 @@ TEST_F(IR_ValidatorTest, Scoping_IfResultUsedInTrueBlock) {
 TEST_F(IR_ValidatorTest, CorrectDomainQuantizeF16) {
     auto* func = b.Function("foo", ty.f32());
     b.Append(func->Block(), [&] {
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, 65504_f);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, 65504_f)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2254,7 +2257,8 @@ TEST_F(IR_ValidatorTest, CorrectDomainQuantizeF16) {
 TEST_F(IR_ValidatorTest, IncorrectDomainQuantizeF16) {
     auto* func = b.Function("foo", ty.f32());
     b.Append(func->Block(), [&] {
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, 65505_f);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, 65505_f)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2278,7 +2282,8 @@ TEST_F(IR_ValidatorTest, CorrectDomainSubgroupsShuffleXor) {
     auto* func = b.Function("foo", ty.f32());
     b.Append(func->Block(), [&] {
         auto* e = b.Let("a", 777_f);
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffleXor, e, 127_u);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffleXor, e, 127_u)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.Return(func, call_func->Result());
     });
 
@@ -2304,7 +2309,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffleXor) {
         auto* v = b.Constant(128_u);
         b.ir.SetSource(v, Source{{5, 7}});
 
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffleXor, e, v);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffleXor, e, v)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
 
@@ -2335,7 +2341,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffleDown) {
         auto* v = b.Constant(128_u);
         b.ir.SetSource(v, Source{{5, 7}});
 
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffleDown, e, v);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffleDown, e, v)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2364,7 +2371,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffle) {
         auto* v = b.Constant(128_u);
         b.ir.SetSource(v, Source{{5, 7}});
 
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffle, e, v);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffle, e, v)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2394,7 +2402,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffle_SignedHigh) {
         auto* v = b.Constant(128_i);
         b.ir.SetSource(v, Source{{5, 7}});
 
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffle, e, v);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffle, e, v)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2424,7 +2433,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffle_SignedLow) {
         auto* v = b.Constant(-128_i);
         b.ir.SetSource(v, Source{{5, 7}});
 
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffle, e, v);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSubgroupShuffle, e, v)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2452,7 +2462,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainkExtractBits) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* e = b.Let("a", 123_u);
-        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kExtractBits, e, 13_u, 23_u);
+        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kExtractBits, e, 13_u, 23_u)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2479,7 +2490,8 @@ TEST_F(IR_ValidatorTest, CorrectDomainkExtractBits) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* e = b.Let("a", 123_u);
-        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kExtractBits, e, 13_u, 13_u);
+        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kExtractBits, e, 13_u, 13_u)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2504,7 +2516,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainkExtractBits_Vec) {
     auto* func = b.Function("foo", ty.vec4i());
     b.Append(func->Block(), [&] {
         auto* e = b.Let("a", b.Splat(ty.vec4i(), -3_i));
-        auto* call_func = b.Call(ty.vec4i(), core::BuiltinFn::kExtractBits, e, 13_u, 23_u);
+        auto* call_func = b.Call(ty.vec4i(), core::BuiltinFn::kExtractBits, e, 13_u, 23_u)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2532,7 +2545,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainkInsertBits_Vec) {
     b.Append(func->Block(), [&] {
         auto* e = b.Let("a", b.Splat(ty.vec4u(), 3_u));
         auto* newBits = b.Let("b", b.Splat(ty.vec4u(), 4_u));
-        auto* call_func = b.Call(ty.vec4u(), core::BuiltinFn::kInsertBits, e, newBits, 13_u, 23_u);
+        auto* call_func = b.Call(ty.vec4u(), core::BuiltinFn::kInsertBits, e, newBits, 13_u, 23_u)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2561,7 +2575,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainkInsertBits) {
     b.Append(func->Block(), [&] {
         auto* e = b.Let("a", 3_u);
         auto* newBits = b.Let("b", 4_u);
-        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kInsertBits, e, newBits, 13_u, 23_u);
+        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kInsertBits, e, newBits, 13_u, 23_u)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2590,7 +2605,8 @@ TEST_F(IR_ValidatorTest, CorrectDomainkInsertBits) {
     b.Append(func->Block(), [&] {
         auto* e = b.Let("a", 3_u);
         auto* newBits = b.Let("b", 4_u);
-        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kInsertBits, e, newBits, 7_u, 7_u);
+        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kInsertBits, e, newBits, 7_u, 7_u)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2616,7 +2632,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainClamp) {
     auto* func = b.Function("foo", ty.f32());
     b.Append(func->Block(), [&] {
         auto* val = b.Let("a", 3_f);
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kClamp, val, 2_f, 1_f);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kClamp, val, 2_f, 1_f)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2643,7 +2660,8 @@ TEST_F(IR_ValidatorTest, CorrectDomainClamp) {
     auto* func = b.Function("foo", ty.f32());
     b.Append(func->Block(), [&] {
         auto* val = b.Let("a", 3_f);
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kClamp, val, 1_f, 2_f);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kClamp, val, 1_f, 2_f)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2670,7 +2688,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainClamp_Vec) {
         auto* e = b.Let("b", b.Splat(ty.vec4h(), 4_h));
         auto* low = b.Splat(ty.vec4h(), 4_h);
         auto* high = b.Splat(ty.vec4h(), 2_h);
-        auto* call_func = b.Call(ty.vec4h(), core::BuiltinFn::kClamp, e, low, high);
+        auto* call_func = b.Call(ty.vec4h(), core::BuiltinFn::kClamp, e, low, high)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2697,7 +2716,8 @@ TEST_F(IR_ValidatorTest, CorrectDomainSmoothstep) {
     auto* func = b.Function("foo", ty.f32());
     b.Append(func->Block(), [&] {
         auto* val = b.Let("a", 3_f);
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSmoothstep, val, 1_f, 2_f);
+        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kSmoothstep, val, 1_f, 2_f)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2724,7 +2744,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainSmoothstep_Vec) {
         auto* e = b.Let("b", b.Splat(ty.vec4h(), 4_h));
         auto* edge0 = b.Splat(ty.vec4h(), 3_h);
         auto* edge1 = b.Splat(ty.vec4h(), 3_h);
-        auto* call_func = b.Call(ty.vec4h(), core::BuiltinFn::kSmoothstep, edge0, edge1, e);
+        auto* call_func = b.Call(ty.vec4h(), core::BuiltinFn::kSmoothstep, edge0, edge1, e)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2752,7 +2773,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainLdexp_Vec) {
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", b.Splat(ty.vec4f(), 4_f));
         auto* e2 = b.Splat(ty.vec4i(), 267_i);
-        auto* call_func = b.Call(ty.vec4(ty.f32()), core::BuiltinFn::kLdexp, e1, e2);
+        auto* call_func = b.Call(ty.vec4(ty.f32()), core::BuiltinFn::kLdexp, e1, e2)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2779,7 +2801,8 @@ TEST_F(IR_ValidatorTest, CorrectDomainLdexp_Vec) {
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", b.Splat(ty.vec4h(), 4_h));
         auto* e2 = b.Splat(ty.vec4i(), 10_i);
-        auto* call_func = b.Call(ty.vec4(ty.f16()), core::BuiltinFn::kLdexp, e1, e2);
+        auto* call_func = b.Call(ty.vec4(ty.f16()), core::BuiltinFn::kLdexp, e1, e2)
+                              ->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2804,7 +2827,8 @@ TEST_F(IR_ValidatorTest, IncorrectDomainLdexp) {
     auto* func = b.Function("foo", ty.f16());
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", 16.0_h);
-        auto* call_func = b.Call(ty.f16(), core::BuiltinFn::kLdexp, e1, 17_i);
+        auto* call_func =
+            b.Call(ty.f16(), core::BuiltinFn::kLdexp, e1, 17_i)->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2830,7 +2854,8 @@ TEST_F(IR_ValidatorTest, CorrectDomainLdexp) {
     auto* func = b.Function("foo", ty.f32());
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", 16.0_f);
-        auto* call_func = b.Call(ty.f32(), core::BuiltinFn::kLdexp, e1, 17_i);
+        auto* call_func =
+            b.Call(ty.f32(), core::BuiltinFn::kLdexp, e1, 17_i)->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2855,7 +2880,8 @@ TEST_F(IR_ValidatorTest, IncorrectPack2x16Float) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* e = b.Splat(ty.vec2f(), 65505_f);
-        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kPack2X16Float, e);
+        auto* call_func =
+            b.Call(ty.u32(), core::BuiltinFn::kPack2X16Float, e)->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2880,7 +2906,8 @@ TEST_F(IR_ValidatorTest, CorrectPack2x16Float) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* e = b.Splat(ty.vec2f(), 4.0_f);
-        auto* call_func = b.Call(ty.u32(), core::BuiltinFn::kPack2X16Float, e);
+        auto* call_func =
+            b.Call(ty.u32(), core::BuiltinFn::kPack2X16Float, e)->AsInstruction<CoreBuiltinCall>();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -2904,7 +2931,7 @@ TEST_F(IR_ValidatorTest, CorrectDomainShiftLeft) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", 16_u);
-        auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.u32(), e1, 17_u);
+        auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.u32(), e1, 17_u)->AsInstruction();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func);
     });
@@ -2929,7 +2956,7 @@ TEST_F(IR_ValidatorTest, IncorrectDomainShiftLeft) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", 16_u);
-        auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.u32(), e1, 32_u);
+        auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.u32(), e1, 32_u)->AsInstruction();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func);
     });
@@ -2958,7 +2985,7 @@ TEST_F(IR_ValidatorTest, IncorrectDomainShiftRight_Vec) {
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", b.Splat(ty.vec4i(), 4_i));
         auto* e2 = b.Splat(ty.vec4u(), 33_u);
-        auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.vec4i(), e1, e2);
+        auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.vec4i(), e1, e2)->AsInstruction();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func);
     });
@@ -2986,7 +3013,7 @@ TEST_F(IR_ValidatorTest, CorrectDomainDiv) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", 16_u);
-        auto* call_func = b.Binary(core::BinaryOp::kDivide, ty.u32(), e1, 17_u);
+        auto* call_func = b.Binary(core::BinaryOp::kDivide, ty.u32(), e1, 17_u)->AsInstruction();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func);
     });
@@ -3011,7 +3038,7 @@ TEST_F(IR_ValidatorTest, IncorrectDomainDiv) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", 16_u);
-        auto* call_func = b.Binary(core::BinaryOp::kDivide, ty.u32(), e1, 0_u);
+        auto* call_func = b.Binary(core::BinaryOp::kDivide, ty.u32(), e1, 0_u)->AsInstruction();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func);
     });
@@ -3038,7 +3065,7 @@ TEST_F(IR_ValidatorTest, IncorrectDomainModulo_Vec) {
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", b.Splat(ty.vec4i(), 4_i));
         auto* e2 = b.Splat(ty.vec4i(), 0_i);
-        auto* call_func = b.Binary(core::BinaryOp::kModulo, ty.vec4i(), e1, e2);
+        auto* call_func = b.Binary(core::BinaryOp::kModulo, ty.vec4i(), e1, e2)->AsInstruction();
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func);
     });

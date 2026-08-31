@@ -301,7 +301,7 @@ struct State {
                         // the original builtin as the callee is expecting a value.
                         b.InsertBefore(call, [&] {
                             if (buffer) {
-                                len = b.Call<u32>(BuiltinFn::kBufferLength, arg)->Result();
+                                len = b.Call<u32>(BuiltinFn::kBufferLength, arg);
                             } else {
                                 if (struct_index) {
                                     auto* ptr_ty = arg->Type()->As<type::Pointer>();
@@ -312,7 +312,7 @@ struct State {
                                                    arg, struct_index)
                                               ->Result();
                                 }
-                                len = b.Call<u32>(BuiltinFn::kArrayLength, arg)->Result();
+                                len = b.Call<u32>(BuiltinFn::kArrayLength, arg);
                             }
                         });
                     }
