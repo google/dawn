@@ -1493,16 +1493,17 @@ class Builder {
     /// @param args the arguments to the constructor
     /// @returns the instruction
     template <typename... ARGS>
-    ir::Construct* ConstructWithResult(ir::InstructionResult* result, ARGS&&... args) {
+    ir::Value* ConstructReplaceResult(ir::InstructionResult* result, ARGS&&... args) {
         return Append(
-            ir.CreateInstruction<ir::Construct>(result, Values(std::forward<ARGS>(args)...)));
+                   ir.CreateInstruction<ir::Construct>(result, Values(std::forward<ARGS>(args)...)))
+            ->Result();
     }
 
     /// Creates a value constructor instruction to the template type T
     /// @param args the arguments to the constructor
     /// @returns the instruction
     template <typename T, typename... ARGS>
-    ir::Construct* Construct(ARGS&&... args) {
+    ir::Value* Construct(ARGS&&... args) {
         auto* type = ir.Types().Get<T>();
         return Construct(type, std::forward<ARGS>(args)...);
     }
@@ -1512,8 +1513,8 @@ class Builder {
     /// @param args the arguments to the constructor
     /// @returns the instruction
     template <typename... ARGS>
-    ir::Construct* Construct(const core::type::Type* type, ARGS&&... args) {
-        return ConstructWithResult(InstructionResult(type), Values(std::forward<ARGS>(args)...));
+    ir::Value* Construct(const core::type::Type* type, ARGS&&... args) {
+        return ConstructReplaceResult(InstructionResult(type), Values(std::forward<ARGS>(args)...));
     }
 
     /// Creates a load instruction with an existing result

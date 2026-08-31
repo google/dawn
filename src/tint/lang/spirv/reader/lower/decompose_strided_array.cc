@@ -218,7 +218,7 @@ struct State {
         b.InsertBefore(construct, [&] {
             Vector<core::ir::Value*, 8> new_operands;
             for (auto* operand : construct->Operands()) {
-                new_operands.Push(b.Construct(padded_struct_type, operand)->Result(0));
+                new_operands.Push(b.Construct(padded_struct_type, operand));
             }
             construct->SetOperands(new_operands);
         });

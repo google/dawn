@@ -484,7 +484,7 @@ struct State {
 
             elements.Push(el);
         }
-        return b.Construct(dst, std::move(elements))->Result();
+        return b.Construct(dst, std::move(elements));
     }
 };
 

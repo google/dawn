@@ -155,7 +155,7 @@ TEST_F(IR_ValidatorTest, RootBlock_LetWithAllowModuleScopeLets) {
 }
 
 TEST_F(IR_ValidatorTest, RootBlock_Construct) {
-    mod.root_block->Append(b.Construct(ty.vec2f(), 1_f, 2_f));
+    mod.root_block->Append(b.Construct(ty.vec2f(), 1_f, 2_f)->AsInstruction());
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
@@ -169,7 +169,7 @@ TEST_F(IR_ValidatorTest, RootBlock_Construct) {
 }
 
 TEST_F(IR_ValidatorTest, RootBlock_ConstructWithAllowModuleScopeLets) {
-    mod.root_block->Append(b.Construct(ty.vec2f(), 1_f, 2_f));
+    mod.root_block->Append(b.Construct(ty.vec2f(), 1_f, 2_f)->AsInstruction());
 
     mod.properties.Add(ir::Property::kAllowModuleScopeLets);
     auto res = ir::Validate(mod);
@@ -621,7 +621,7 @@ TEST_F(IR_ValidatorTest, Construct_NullResult) {
 
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* c = b.Construct(str_ty, 1_i, 2_u);
+        auto* c = b.Construct(str_ty, 1_i, 2_u)->AsInstruction<Construct>();
         c->SetResult(nullptr);
         b.Return(f);
     });
@@ -643,7 +643,7 @@ TEST_F(IR_ValidatorTest, Construct_EmptyResult) {
 
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* c = b.Construct(str_ty, 1_i, 2_u);
+        auto* c = b.Construct(str_ty, 1_i, 2_u)->AsInstruction<Construct>();
         c->ClearResults();
         b.Return(f);
     });

@@ -593,11 +593,11 @@ struct State {
                         auto* conv = b.Convert(ty.i32(), result);
                         func->Block()->Prepend(conv);
 
-                        auto* construct = b.Construct(mask_ty, conv);
+                        auto* construct = b.Construct(mask_ty, conv)->AsInstruction();
                         construct->InsertAfter(conv);
                         result = construct->Result();
                     } else {
-                        auto* construct = b.Construct(mask_ty, result);
+                        auto* construct = b.Construct(mask_ty, result)->AsInstruction();
                         func->Block()->Prepend(construct);
                         result = construct->Result();
                     }
@@ -733,7 +733,7 @@ struct State {
             },  //
             TINT_ICE_ON_NO_MATCH);
 
-        return b.Construct(type, params)->Result();
+        return b.Construct(type, params);
     }
 };
 

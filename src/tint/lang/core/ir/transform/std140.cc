@@ -249,7 +249,7 @@ struct State {
                 args.Push(access->Result());
             }
         }
-        return b.Construct(mat, std::move(args))->Result();
+        return b.Construct(mat, std::move(args));
     }
 
     /// Convert a value that may contain decomposed matrices to a value with the original type.

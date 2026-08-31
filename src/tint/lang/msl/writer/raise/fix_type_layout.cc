@@ -511,7 +511,7 @@ struct State {
                         mat->ColumnType(), msl::BuiltinFn::kConvert, packed_col);
                     columns.Push(unpacked_col->Result());
                 }
-                return b.Construct(unpacked_type, std::move(columns))->Result();
+                return b.Construct(unpacked_type, std::move(columns));
             },
             [&](const core::type::Struct* str) {
                 return b.Call(LoadPackedStructHelper(str, packed_ptr), from)->Result();
@@ -627,7 +627,7 @@ struct State {
                         LoadPackedToUnpacked(unpacked_member_type, packed_member_ptr->Result());
                     members.Push(unpacked_member);
                 }
-                b.Return(func, b.Construct(unpacked_str, std::move(members))->Result());
+                b.Return(func, b.Construct(unpacked_str, std::move(members)));
             });
 
             return func;

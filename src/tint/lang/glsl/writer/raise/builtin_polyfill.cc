@@ -357,7 +357,7 @@ struct State {
 
             auto* exchanged = b.Equal(swap, compare_value);
 
-            auto* result = b.Construct(result_type, swap, exchanged)->Result();
+            auto* result = b.Construct(result_type, swap, exchanged);
             call->Result()->ReplaceAllUsesWith(result);
         });
         call->Destroy();
@@ -424,7 +424,7 @@ struct State {
         b.InsertBefore(call, [&] {
             core::ir::Value* cond = args[2];
             if (val_ty->Is<core::type::Vector>() && !bool_ty->Is<core::type::Vector>()) {
-                cond = b.Construct(ty.MatchWidth(ty.bool_(), val_ty), cond)->Result();
+                cond = b.Construct(ty.MatchWidth(ty.bool_(), val_ty), cond);
             }
 
             b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), glsl::BuiltinFn::kMix,
@@ -464,7 +464,7 @@ struct State {
                             rhs = pack_unpack(rhs);
                             rhs = b.Swizzle(inner_ty, rhs, {0})->Result();
 
-                            ret = b.Construct(type, lhs, rhs)->Result();
+                            ret = b.Construct(type, lhs, rhs);
                             break;
                         }
                         default: {
@@ -474,12 +474,12 @@ struct State {
                             core::ir::Value* rhs = b.Swizzle(v2, val, {2, 3})->Result();
                             rhs = pack_unpack(rhs);
 
-                            ret = b.Construct(type, lhs, rhs)->Result();
+                            ret = b.Construct(type, lhs, rhs);
                             break;
                         }
                     }
                 } else {
-                    ret = b.Construct(v2, val)->Result();
+                    ret = b.Construct(v2, val);
                     ret = pack_unpack(ret);
                     ret = b.Swizzle(type, ret, {0})->Result();
                 }

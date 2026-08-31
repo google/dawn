@@ -676,7 +676,7 @@ struct State {
             }
 
             // Reconstruct the original result type from the individual dimensions.
-            b.ConstructWithResult(builtin->DetachResult(), std::move(values));
+            b.ConstructReplaceResult(builtin->DetachResult(), std::move(values));
         });
         builtin->Destroy();
     }
@@ -849,7 +849,7 @@ struct State {
                 tex_type->Dim() == core::type::TextureDimension::kCubeArray) {
                 bias_idx = 3;
             }
-            args[bias_idx] = b.Construct(ty.Get<msl::type::Bias>(), args[bias_idx])->Result();
+            args[bias_idx] = b.Construct(ty.Get<msl::type::Bias>(), args[bias_idx]);
         });
         // Call the `sample()` member function.
         auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
@@ -885,7 +885,7 @@ struct State {
         b.InsertBefore(builtin, [&] {
             // Insert a constant zero LOD argument.
             // The LOD goes before the offset if there is one, otherwise at the end.
-            auto* lod = b.Construct(ty.Get<msl::type::Level>(), u32(0))->Result();
+            auto* lod = b.Construct(ty.Get<msl::type::Level>(), u32(0));
             if (has_offset) {
                 args.Insert(args.Length() - 1, lod);
             } else {
@@ -936,7 +936,7 @@ struct State {
                 case core::type::TextureDimension::kNone:
                     TINT_IR_UNREACHABLE(ir);
             }
-            args[grad_idx] = b.Construct(ty.Get<msl::type::Gradient>(dim), ddx, ddy)->Result();
+            args[grad_idx] = b.Construct(ty.Get<msl::type::Gradient>(dim), ddx, ddy);
 
             // Resize the argument list as the gradient argument only takes up one argument.
             // Move the offset argument back one place if present.
@@ -973,7 +973,7 @@ struct State {
                 // Remove level for 1d.
                 args.Resize(args.Length() - 1);
             } else {
-                args[lod_idx] = b.Construct(ty.Get<msl::type::Level>(), args[lod_idx])->Result();
+                args[lod_idx] = b.Construct(ty.Get<msl::type::Level>(), args[lod_idx]);
             }
             // Call the `sample()` member function.
             auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(

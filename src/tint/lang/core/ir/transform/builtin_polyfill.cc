@@ -338,7 +338,7 @@ struct State {
             auto* vec4u = ty.vec4u();
             auto* vec4i = ty.vec4i();
 
-            core::ir::Value* v = b.Construct(vec4u, arg)->Result();
+            core::ir::Value* v = b.Construct(vec4u, arg);
             // Shift left to put the 8th bit of each number into the sign bit location, we then
             // convert to an i32 and shift back, so the sign bit will be set as needed. The bits
             // outside the bottom 8 are then masked off.
@@ -362,7 +362,7 @@ struct State {
             auto* vec4f = ty.vec4f();
             auto* vec4u = ty.vec4u();
 
-            core::ir::Value* v = b.Construct(vec4u, arg)->Result();
+            core::ir::Value* v = b.Construct(vec4u, arg);
             v = b.ShiftRight(v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u));
             v = b.And(v, b.Splat(vec4u, 0xff_u));
             v = b.Convert(vec4f, v)->Result();
@@ -798,7 +798,7 @@ struct State {
                         mask = b.Convert<i32>(mask)->Result();
                     }
                     if (auto* vec = result_ty->As<type::Vector>()) {
-                        mask = b.Construct(vec, mask)->Result();
+                        mask = b.Construct(vec, mask);
                     }
                     return mask;
                 };

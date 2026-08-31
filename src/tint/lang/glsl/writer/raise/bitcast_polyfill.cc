@@ -196,7 +196,7 @@ struct State {
                         auto* right =
                             b.Call<glsl::ir::BuiltinCall>(ty.u32(), glsl::BuiltinFn::kPackFloat2X16,
                                                           b.Swizzle(ty.vec2h(), input, {2, 3}));
-                        packed = b.Construct(ty.vec2u(), left, right)->Result();
+                        packed = b.Construct(ty.vec2u(), left, right);
                     } else {
                         TINT_IR_UNREACHABLE(ir);
                     }
@@ -277,7 +277,7 @@ struct State {
                             ty.vec2h(), glsl::BuiltinFn::kUnpackFloat2X16,
                             b.Swizzle(ty.u32(), conv, {1}));
 
-                        val = b.Construct(dst_f16_type, left, right)->Result();
+                        val = b.Construct(dst_f16_type, left, right);
                     } else {
                         val = b.Call<glsl::ir::BuiltinCall>(ty.vec2h(),
                                                             glsl::BuiltinFn::kUnpackFloat2X16, conv)

@@ -237,7 +237,7 @@ struct State {
                 for (uint32_t i = 0; i < str->Members().Length(); i++) {
                     construct_args.Push(backend->GetInput(builder, input_idx++));
                 }
-                args.Push(builder.Construct(param->Type(), construct_args)->Result());
+                args.Push(builder.Construct(param->Type(), construct_args));
             } else {
                 args.Push(backend->GetInput(builder, input_idx++));
             }

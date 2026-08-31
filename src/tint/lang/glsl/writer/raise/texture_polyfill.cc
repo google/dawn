@@ -400,9 +400,8 @@ struct State {
                         // Add a new coord item so it's a vec2.
                         auto arg = call->Args()[1];
                         b.InsertBefore(call, [&] {
-                            call->SetArg(1,
-                                         b.Construct(ty.vec2(arg->Type()), arg, b.Zero(arg->Type()))
-                                             ->Result());
+                            call->SetArg(
+                                1, b.Construct(ty.vec2(arg->Type()), arg, b.Zero(arg->Type())));
                         });
                         break;
                     }
@@ -411,8 +410,7 @@ struct State {
                         // Add a new coord item so it's a vec2.
                         auto arg = call->Args()[2];
                         b.InsertBefore(call, [&] {
-                            call->SetArg(2,
-                                         b.Construct(ty.vec2(arg->Type()), arg, 0.5_f)->Result());
+                            call->SetArg(2, b.Construct(ty.vec2(arg->Type()), arg, 0.5_f));
                         });
                         break;
                     }
@@ -639,7 +637,7 @@ struct State {
                 case core::type::TextureDimension::k2dArray: {
                     auto* coord = b.InsertConvertIfNeeded(ty.vec2i(), args[idx++]);
                     auto* ary_idx = b.InsertConvertIfNeeded(ty.i32(), args[idx++]);
-                    call_args.Push(b.Construct(ty.vec3i(), coord, ary_idx)->Result());
+                    call_args.Push(b.Construct(ty.vec3i(), coord, ary_idx));
 
                     if (!is_storage) {
                         call_args.Push(b.InsertConvertIfNeeded(ty.i32(), args[idx++]));
@@ -701,7 +699,7 @@ struct State {
                 TINT_IR_ASSERT(ir, coords_ty);
 
                 auto* new_coords = b.Construct(ty.vec3i(), coords, array);
-                new_args.Push(new_coords->Result());
+                new_args.Push(new_coords);
 
                 new_args.Push(args[idx++]);
             } else {
@@ -749,15 +747,13 @@ struct State {
                     params.Push(coords);
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(
-                        b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[idx++]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[idx++])));
                     break;
                 case core::type::TextureDimension::kCube:
                     params.Push(coords);
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(
-                        b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++])));
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);
@@ -804,15 +800,13 @@ struct State {
                     params.Push(coords);
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(
-                        b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[idx++]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[idx++])));
                     break;
                 case core::type::TextureDimension::kCube:
                     params.Push(coords);
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(
-                        b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++])));
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);
@@ -855,7 +849,7 @@ struct State {
             switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d:
                     if (is_depth) {
-                        coords = b.Construct(ty.vec3f(), coords, depth_ref)->Result();
+                        coords = b.Construct(ty.vec3f(), coords, depth_ref);
                     }
                     params.Push(coords);
 
@@ -872,20 +866,19 @@ struct State {
                         new_coords.Push(b.Value(depth_ref));
                         ++vec_width;
                     }
-                    params.Push(b.Construct(ty.vec(ty.f32(), vec_width), new_coords)->Result());
+                    params.Push(b.Construct(ty.vec(ty.f32(), vec_width), new_coords));
                     break;
                 }
                 case core::type::TextureDimension::k3d:
                 case core::type::TextureDimension::kCube:
                     if (is_depth) {
-                        coords = b.Construct(ty.vec4f(), coords, depth_ref)->Result();
+                        coords = b.Construct(ty.vec4f(), coords, depth_ref);
                     }
                     params.Push(coords);
                     break;
                 case core::type::TextureDimension::kCubeArray:
                     is_array = true;
-                    params.Push(
-                        b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++])));
 
                     if (is_depth) {
                         params.Push(b.Value(depth_ref));
@@ -945,7 +938,7 @@ struct State {
                     new_coords.Push(coords);
                     new_coords.Push(b.Convert<f32>(args[idx++])->Result());
 
-                    params.Push(b.Construct(ty.vec3f(), new_coords)->Result());
+                    params.Push(b.Construct(ty.vec3f(), new_coords));
                     break;
                 }
                 case core::type::TextureDimension::k3d:
@@ -953,8 +946,7 @@ struct State {
                     params.Push(coords);
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(
-                        b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++])));
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);
@@ -1004,7 +996,7 @@ struct State {
                     break;
                 case core::type::TextureDimension::k2d:
                     if (is_depth) {
-                        coords = b.Construct(ty.vec3f(), coords, depth_ref)->Result();
+                        coords = b.Construct(ty.vec3f(), coords, depth_ref);
                     }
                     params.Push(coords);
 
@@ -1020,20 +1012,19 @@ struct State {
                         new_coords.Push(b.Value(depth_ref));
                         ++vec_width;
                     }
-                    params.Push(b.Construct(ty.vec(ty.f32(), vec_width), new_coords)->Result());
+                    params.Push(b.Construct(ty.vec(ty.f32(), vec_width), new_coords));
                     break;
                 }
                 case core::type::TextureDimension::k3d:
                 case core::type::TextureDimension::kCube:
                     if (is_depth) {
                         needs_ext = tex_type->Dim() == core::type::TextureDimension::kCube;
-                        coords = b.Construct(ty.vec4f(), coords, depth_ref)->Result();
+                        coords = b.Construct(ty.vec4f(), coords, depth_ref);
                     }
                     params.Push(coords);
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(
-                        b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++])));
 
                     if (is_depth) {
                         needs_ext = true;
@@ -1084,7 +1075,7 @@ struct State {
                     new_coords.Push(coords);
                     new_coords.Push(b.Convert<f32>(args[idx++])->Result());
 
-                    params.Push(b.Construct(ty.vec3f(), new_coords)->Result());
+                    params.Push(b.Construct(ty.vec3f(), new_coords));
                     break;
                 }
                 case core::type::TextureDimension::k3d:
@@ -1092,8 +1083,7 @@ struct State {
                     params.Push(coords);
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(
-                        b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++])));
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);
@@ -1133,7 +1123,7 @@ struct State {
             core::ir::Value* coords = args[idx++];
             switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d:
-                    coords = b.Construct(ty.vec3f(), coords, args[idx++])->Result();
+                    coords = b.Construct(ty.vec3f(), coords, args[idx++]);
                     params.Push(coords);
 
                     break;
@@ -1145,17 +1135,16 @@ struct State {
                     new_coords.Push(b.Convert<f32>(args[idx++])->Result());
                     new_coords.Push(b.Value(args[idx++]));
 
-                    params.Push(b.Construct(ty.vec4f(), new_coords)->Result());
+                    params.Push(b.Construct(ty.vec4f(), new_coords));
                     break;
                 }
                 case core::type::TextureDimension::kCube:
-                    coords = b.Construct(ty.vec4f(), coords, args[idx++])->Result();
+                    coords = b.Construct(ty.vec4f(), coords, args[idx++]);
                     params.Push(coords);
                     break;
                 case core::type::TextureDimension::kCubeArray:
                     is_array = true;
-                    params.Push(
-                        b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++])));
 
                     params.Push(b.Value(args[idx++]));
                     break;
@@ -1208,7 +1197,7 @@ struct State {
             bool is_depth = tex_type->Is<core::type::DepthTexture>();
             switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d:
-                    coords = b.Construct(ty.vec3f(), coords, args[idx++])->Result();
+                    coords = b.Construct(ty.vec3f(), coords, args[idx++]);
                     params.Push(coords);
 
                     break;
@@ -1220,18 +1209,17 @@ struct State {
                     new_coords.Push(b.Convert<f32>(args[idx++])->Result());
                     new_coords.Push(b.Value(args[idx++]));
 
-                    params.Push(b.Construct(ty.vec4f(), new_coords)->Result());
+                    params.Push(b.Construct(ty.vec4f(), new_coords));
                     break;
                 }
                 case core::type::TextureDimension::kCube:
-                    coords = b.Construct(ty.vec4f(), coords, args[idx++])->Result();
+                    coords = b.Construct(ty.vec4f(), coords, args[idx++]);
                     params.Push(coords);
                     break;
                 case core::type::TextureDimension::kCubeArray:
                     is_array = true;
 
-                    params.Push(
-                        b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++])));
 
                     params.Push(b.Value(args[idx++]));
                     break;

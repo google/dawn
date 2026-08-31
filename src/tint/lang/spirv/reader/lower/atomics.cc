@@ -381,7 +381,7 @@ struct State {
                 }
             }
 
-            b.ConstructWithResult(ld->DetachResult(), std::move(member_values));
+            b.ConstructReplaceResult(ld->DetachResult(), std::move(member_values));
         });
         ld->Destroy();
     }
@@ -449,7 +449,7 @@ struct State {
                 elem_values.Push(elem_ld->Result());
             }
 
-            b.ConstructWithResult(ld->DetachResult(), std::move(elem_values));
+            b.ConstructReplaceResult(ld->DetachResult(), std::move(elem_values));
         });
         ld->Destroy();
     }

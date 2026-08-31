@@ -490,100 +490,99 @@ struct State {
                                                             pointer, memory, memory_semantics);
         };
 
-        // Create the replacement call instruction.
-        core::ir::Call* call = nullptr;
-        switch (builtin->Func()) {
-            case core::BuiltinFn::kAtomicAdd:
-                call = build(spirv::BuiltinFn::kAtomicIAdd);
-                call->AppendArg(builtin->Args()[1]);
-                break;
-            case core::BuiltinFn::kAtomicAnd:
-                call = build(spirv::BuiltinFn::kAtomicAnd);
-                call->AppendArg(builtin->Args()[1]);
-                break;
-            case core::BuiltinFn::kAtomicCompareExchangeWeak: {
-                auto* cmp = builtin->Args()[1];
-                auto* value = builtin->Args()[2];
-                auto* int_ty = value->Type();
-                call =
-                    b.Call<spirv::ir::BuiltinCall>(int_ty, spirv::BuiltinFn::kAtomicCompareExchange,
-                                                   pointer, memory, memory_semantics);
-                call->AppendArg(memory_semantics);
-                call->AppendArg(value);
-                call->AppendArg(cmp);
-                call->InsertBefore(builtin);
+        b.InsertBefore(builtin, [&] {
+            // Create the replacement call instruction.
+            core::ir::Call* call = nullptr;
+            switch (builtin->Func()) {
+                case core::BuiltinFn::kAtomicAdd:
+                    call = build(spirv::BuiltinFn::kAtomicIAdd);
+                    call->AppendArg(builtin->Args()[1]);
+                    break;
+                case core::BuiltinFn::kAtomicAnd:
+                    call = build(spirv::BuiltinFn::kAtomicAnd);
+                    call->AppendArg(builtin->Args()[1]);
+                    break;
+                case core::BuiltinFn::kAtomicCompareExchangeWeak: {
+                    auto* cmp = builtin->Args()[1];
+                    auto* value = builtin->Args()[2];
+                    auto* int_ty = value->Type();
+                    call = b.Call<spirv::ir::BuiltinCall>(int_ty,
+                                                          spirv::BuiltinFn::kAtomicCompareExchange,
+                                                          pointer, memory, memory_semantics);
+                    call->AppendArg(memory_semantics);
+                    call->AppendArg(value);
+                    call->AppendArg(cmp);
 
-                // Compare the original value to the comparator to see if an exchange happened.
-                auto* original = call->Result();
-                core::ir::Value* compare = nullptr;
-                b.InsertBefore(builtin, [&] { compare = b.Equal(original, cmp); });
+                    // Compare the original value to the comparator to see if an exchange happened.
+                    auto* original = call->Result();
+                    core::ir::Value* compare = b.Equal(original, cmp);
 
-                // Construct the atomicCompareExchange result structure.
-                call = b.ConstructWithResult(builtin->DetachResult(), Vector{original, compare});
-                break;
-            }
-            case core::BuiltinFn::kAtomicExchange:
-                call = build(spirv::BuiltinFn::kAtomicExchange);
-                call->AppendArg(builtin->Args()[1]);
-                break;
-            case core::BuiltinFn::kAtomicLoad:
-                call = build(spirv::BuiltinFn::kAtomicLoad);
-                break;
-            case core::BuiltinFn::kAtomicOr:
-                call = build(spirv::BuiltinFn::kAtomicOr);
-                call->AppendArg(builtin->Args()[1]);
-                break;
-            case core::BuiltinFn::kAtomicMax:
-                if (result_ty->IsSignedIntegerScalar()) {
-                    call = build(spirv::BuiltinFn::kAtomicSMax);
-                } else {
-                    call = build(spirv::BuiltinFn::kAtomicUMax);
+                    // Construct the atomicCompareExchange result structure.
+                    b.ConstructReplaceResult(builtin->DetachResult(), Vector{original, compare});
+                    break;
                 }
-                call->AppendArg(builtin->Args()[1]);
-                break;
-            case core::BuiltinFn::kAtomicMin:
-                if (result_ty->IsSignedIntegerScalar()) {
-                    call = build(spirv::BuiltinFn::kAtomicSMin);
-                } else {
-                    call = build(spirv::BuiltinFn::kAtomicUMin);
-                }
-                call->AppendArg(builtin->Args()[1]);
-                break;
-            case core::BuiltinFn::kAtomicStoreMax: {
-                call = build(spirv::BuiltinFn::kAtomicUMax);
-                call->AppendArg(builtin->Args()[1]);
-                call->Result()->SetType(ty.u64());
-                break;
-            }
-            case core::BuiltinFn::kAtomicStoreMin:
-                call = build(spirv::BuiltinFn::kAtomicUMin);
-                call->AppendArg(builtin->Args()[1]);
-                call->Result()->SetType(ty.u64());
-                break;
-            case core::BuiltinFn::kAtomicStore:
-                if (addrspace == core::AddressSpace::kWorkgroup &&
-                    config.replace_workgroup_atomic_store_with_exchange) {
+                case core::BuiltinFn::kAtomicExchange:
                     call = build(spirv::BuiltinFn::kAtomicExchange);
                     call->AppendArg(builtin->Args()[1]);
-                    call->SetResult(b.InstructionResult(builtin->Args()[1]->Type()));
-                } else {
-                    call = build(spirv::BuiltinFn::kAtomicStore);
+                    break;
+                case core::BuiltinFn::kAtomicLoad:
+                    call = build(spirv::BuiltinFn::kAtomicLoad);
+                    break;
+                case core::BuiltinFn::kAtomicOr:
+                    call = build(spirv::BuiltinFn::kAtomicOr);
                     call->AppendArg(builtin->Args()[1]);
+                    break;
+                case core::BuiltinFn::kAtomicMax:
+                    if (result_ty->IsSignedIntegerScalar()) {
+                        call = build(spirv::BuiltinFn::kAtomicSMax);
+                    } else {
+                        call = build(spirv::BuiltinFn::kAtomicUMax);
+                    }
+                    call->AppendArg(builtin->Args()[1]);
+                    break;
+                case core::BuiltinFn::kAtomicMin:
+                    if (result_ty->IsSignedIntegerScalar()) {
+                        call = build(spirv::BuiltinFn::kAtomicSMin);
+                    } else {
+                        call = build(spirv::BuiltinFn::kAtomicUMin);
+                    }
+                    call->AppendArg(builtin->Args()[1]);
+                    break;
+                case core::BuiltinFn::kAtomicStoreMax: {
+                    call = build(spirv::BuiltinFn::kAtomicUMax);
+                    call->AppendArg(builtin->Args()[1]);
+                    call->Result()->SetType(ty.u64());
+                    break;
                 }
-                break;
-            case core::BuiltinFn::kAtomicSub:
-                call = build(spirv::BuiltinFn::kAtomicISub);
-                call->AppendArg(builtin->Args()[1]);
-                break;
-            case core::BuiltinFn::kAtomicXor:
-                call = build(spirv::BuiltinFn::kAtomicXor);
-                call->AppendArg(builtin->Args()[1]);
-                break;
-            default:
-                TINT_IR_UNREACHABLE(ir) << "unhandled atomic builtin";
-        }
+                case core::BuiltinFn::kAtomicStoreMin:
+                    call = build(spirv::BuiltinFn::kAtomicUMin);
+                    call->AppendArg(builtin->Args()[1]);
+                    call->Result()->SetType(ty.u64());
+                    break;
+                case core::BuiltinFn::kAtomicStore:
+                    if (addrspace == core::AddressSpace::kWorkgroup &&
+                        config.replace_workgroup_atomic_store_with_exchange) {
+                        call = build(spirv::BuiltinFn::kAtomicExchange);
+                        call->AppendArg(builtin->Args()[1]);
+                        call->SetResult(b.InstructionResult(builtin->Args()[1]->Type()));
+                    } else {
+                        call = build(spirv::BuiltinFn::kAtomicStore);
+                        call->AppendArg(builtin->Args()[1]);
+                    }
+                    break;
+                case core::BuiltinFn::kAtomicSub:
+                    call = build(spirv::BuiltinFn::kAtomicISub);
+                    call->AppendArg(builtin->Args()[1]);
+                    break;
+                case core::BuiltinFn::kAtomicXor:
+                    call = build(spirv::BuiltinFn::kAtomicXor);
+                    call->AppendArg(builtin->Args()[1]);
+                    break;
+                default:
+                    TINT_IR_UNREACHABLE(ir) << "unhandled atomic builtin";
+            }
+        });
 
-        call->InsertBefore(builtin);
         builtin->Destroy();
     }
 
@@ -658,10 +657,11 @@ struct State {
                 Vector<core::ir::Value*, 4> elements;
                 elements.Resize(vec->Width(), args[0]);
 
-                auto* construct =
-                    b.Construct(ty.vec(ty.bool_(), vec->Width()), std::move(elements));
-                construct->InsertBefore(builtin);
-                args[0] = construct->Result();
+                core::ir::Value* construct = nullptr;
+                b.InsertBefore(builtin, [&] {
+                    construct = b.Construct(ty.vec(ty.bool_(), vec->Width()), std::move(elements));
+                });
+                args[0] = construct;
             }
         }
 
@@ -769,9 +769,10 @@ struct State {
         // Construct a new coordinate vector.
         auto num_coords = vec->Width();
         auto* coord_ty = ty.vec(element_ty, num_coords + 1);
-        auto* construct = b.Construct(coord_ty, Vector{coords, array_idx});
-        construct->InsertBefore(insertion_point);
-        return construct->Result();
+        core::ir::Value* construct = nullptr;
+        b.InsertBefore(insertion_point,
+                       [&] { construct = b.Construct(coord_ty, Vector{coords, array_idx}); });
+        return construct;
     }
 
     /// Handle a textureSample*() builtin.
@@ -1289,8 +1290,8 @@ struct State {
                 args.Push(scalar_call);
             });
         }
-        auto* construct = b.ConstructWithResult(builtin->DetachResult(), std::move(args));
-        construct->InsertBefore(builtin);
+        b.InsertBefore(builtin,
+                       [&] { b.ConstructReplaceResult(builtin->DetachResult(), std::move(args)); });
         builtin->Destroy();
     }
 

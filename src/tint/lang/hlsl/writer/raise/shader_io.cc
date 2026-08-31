@@ -567,8 +567,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             auto* e0 = builder.Load(builder.Access<ptr<immediate, u32>>(str, 0_u));
             auto* e1 = builder.Load(builder.Access<ptr<immediate, u32>>(str, 1_u));
             auto* e2 = builder.Load(builder.Access<ptr<immediate, u32>>(str, 2_u));
-            return builder.Construct(ty.vec3u(), e0->Result(), e1->Result(), e2->Result())
-                ->Result();
+            return builder.Construct(ty.vec3u(), e0->Result(), e1->Result(), e2->Result());
         }
 
         auto index = input_indices[idx];
@@ -581,7 +580,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             auto* w = builder.Access(ty.f32(), v, 3_u);
             auto* div = builder.Divide(1.0_f, w);
             auto* swizzle = builder.Swizzle(ty.vec3f(), v, {0, 1, 2});
-            v = builder.Construct(ty.vec4f(), swizzle, div)->Result();
+            v = builder.Construct(ty.vec4f(), swizzle, div);
         } else if (config.immediate_data_layout.HasImmediate(
                        core::InternalImmediate::kFirstVertexOffset) &&
                    inputs[idx].attributes.builtin == core::BuiltinValue::kVertexIndex) {
@@ -614,7 +613,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             for (size_t i = 0; i < dst_vec_ty->Elements().count; ++i) {
                 init.Push(builder.Access<f32>(src_array, u32(src_array_first_index + i))->Result());
             }
-            dst_value = builder.Construct(dst_vec_ty, std::move(init))->Result();
+            dst_value = builder.Construct(dst_vec_ty, std::move(init));
         } else {
             TINT_IR_ASSERT(ir, outputs[output_index].type->As<core::type::Scalar>());
             dst_value = builder.Access<f32>(src_array, u32(src_array_first_index))->Result();
@@ -659,7 +658,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         }
 
         TINT_IR_ASSERT(ir, output_values.Length() == output_struct->Members().Length());
-        return builder.Construct(output_struct, std::move(output_values))->Result();
+        return builder.Construct(output_struct, std::move(output_values));
     }
 };
 }  // namespace

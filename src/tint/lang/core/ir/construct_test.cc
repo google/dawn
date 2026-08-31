@@ -40,7 +40,7 @@ using IR_ConstructDeathTest = IR_ConstructTest;
 TEST_F(IR_ConstructTest, Usage) {
     auto* arg1 = b.Constant(true);
     auto* arg2 = b.Constant(false);
-    auto* c = b.Construct(mod.Types().f32(), arg1, arg2);
+    auto* c = b.Construct(mod.Types().f32(), arg1, arg2)->AsInstruction<Construct>();
 
     EXPECT_THAT(arg1->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{c, 0u}));
     EXPECT_THAT(arg2->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{c, 1u}));
@@ -49,7 +49,7 @@ TEST_F(IR_ConstructTest, Usage) {
 TEST_F(IR_ConstructTest, Result) {
     auto* arg1 = b.Constant(true);
     auto* arg2 = b.Constant(false);
-    auto* c = b.Construct(mod.Types().f32(), arg1, arg2);
+    auto* c = b.Construct(mod.Types().f32(), arg1, arg2)->AsInstruction<Construct>();
 
     EXPECT_EQ(c->Results().Length(), 1u);
     EXPECT_TRUE(c->Result()->Is<InstructionResult>());
@@ -69,7 +69,7 @@ TEST_F(IR_ConstructDeathTest, Fail_NullType) {
 TEST_F(IR_ConstructTest, Clone) {
     auto* arg1 = b.Constant(true);
     auto* arg2 = b.Constant(false);
-    auto* c = b.Construct(mod.Types().f32(), arg1, arg2);
+    auto* c = b.Construct(mod.Types().f32(), arg1, arg2)->AsInstruction<Construct>();
 
     auto* new_c = clone_ctx.Clone(c);
 
@@ -88,7 +88,7 @@ TEST_F(IR_ConstructTest, Clone) {
 }
 
 TEST_F(IR_ConstructTest, CloneEmpty) {
-    auto* c = b.Construct(mod.Types().f32());
+    auto* c = b.Construct(mod.Types().f32())->AsInstruction<Construct>();
 
     auto* new_c = clone_ctx.Clone(c);
     EXPECT_NE(c->Result(), new_c->Result());

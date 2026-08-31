@@ -407,7 +407,7 @@ TEST_F(HlslWriterReplaceSubgroupMatrixInitTest, Construct_Value) {
     b.Append(func->Block(), [&] {
         auto* construct = b.Construct(ty.subgroup_matrix_result(ty.f32(), 16, 8), 1.0_f);
         auto* v = b.Var("v", function, ty.subgroup_matrix_result(ty.f32(), 16, 8));
-        v->SetInitializer(construct->Result());
+        v->SetInitializer(construct);
         b.Return(func);
     });
 
@@ -439,11 +439,11 @@ TEST_F(HlslWriterReplaceSubgroupMatrixInitTest, Construct_Value) {
 TEST_F(HlslWriterReplaceSubgroupMatrixInitTest, Construct_Value_Array) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        auto* arg = b.Construct(ty.subgroup_matrix_result(ty.f32(), 16, 8), 1.0_f)->Result();
+        auto* arg = b.Construct(ty.subgroup_matrix_result(ty.f32(), 16, 8), 1.0_f);
         auto* construct = b.Construct(ty.array(ty.subgroup_matrix_result(ty.f32(), 16, 8), 4u),
                                       Vector{arg, arg, arg, arg});
         auto* v = b.Var("v", function, ty.array(ty.subgroup_matrix_result(ty.f32(), 16, 8), 4u));
-        v->SetInitializer(construct->Result());
+        v->SetInitializer(construct);
         b.Return(func);
     });
 
@@ -487,7 +487,7 @@ TEST_F(HlslWriterReplaceSubgroupMatrixInitTest, Construct_Value_Struct) {
         auto* arg = b.Construct(ty.subgroup_matrix_result(ty.f32(), 16, 8), 1.0_f);
         auto* construct = b.Construct(s, 42_u, arg, 1.0_f);
         auto* v = b.Var("v", function, s);
-        v->SetInitializer(construct->Result());
+        v->SetInitializer(construct);
         b.Return(func);
     });
 

@@ -88,7 +88,7 @@ struct State {
                     auto* add = b.Binary(op, mat->ColumnType(), lhs_col, rhs_col);
                     args.Push(add);
                 }
-                b.ConstructWithResult(binary->DetachResult(), std::move(args));
+                b.ConstructReplaceResult(binary->DetachResult(), std::move(args));
             };
 
             switch (binary->Op()) {
@@ -153,7 +153,7 @@ struct State {
             }
 
             // Reconstruct the result matrix from the converted columns.
-            b.ConstructWithResult(convert->DetachResult(), std::move(args));
+            b.ConstructReplaceResult(convert->DetachResult(), std::move(args));
         });
 
         convert->Destroy();

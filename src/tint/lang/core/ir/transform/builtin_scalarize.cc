@@ -124,7 +124,7 @@ struct State {
                 args.Push(scalar_call);
             }
             // Places result back into a vector.
-            b.ConstructWithResult(builtin->DetachResult(), std::move(args));
+            b.ConstructReplaceResult(builtin->DetachResult(), std::move(args));
         });
         builtin->Destroy();
     }

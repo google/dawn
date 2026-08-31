@@ -739,7 +739,7 @@ struct State {
                 TINT_ASSERT(vec && vec->Width() == 4);
 
                 auto* z = b.Zero(call_ty);
-                res = b.Construct(call->Result()->Type(), res, z, z, z)->Result();
+                res = b.Construct(call->Result()->Type(), res, z, z, z);
             }
             call->Result()->ReplaceAllUsesWith(res);
         });
@@ -941,7 +941,7 @@ struct State {
                 TINT_ASSERT(vec && vec->Width() == 4);
 
                 auto* z = b.Zero(call_ty);
-                res = b.Construct(call->Result()->Type(), res, z, z, z)->Result();
+                res = b.Construct(call->Result()->Type(), res, z, z, z);
             }
 
             call->Result()->ReplaceAllUsesWith(res);
@@ -1017,7 +1017,7 @@ struct State {
             if (core::type::IsTextureArray(tex_ty->Dim())) {
                 core::ir::Value* layers =
                     b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, image);
-                res = b.Construct(ty.MatchWidth(ty.u32(), type), res, layers)->Result();
+                res = b.Construct(ty.MatchWidth(ty.u32(), type), res, layers);
             }
 
             if (type->IsSignedIntegerScalarOrVector()) {

@@ -491,7 +491,7 @@ struct State {
                                           args[0], cmp, args[2], original_value);
 
             auto* o = b.Load(original_value);
-            b.ConstructWithResult(call->DetachResult(), o, b.Equal(o, cmp));
+            b.ConstructReplaceResult(call->DetachResult(), o, b.Equal(o, cmp));
         });
         call->Destroy();
     }
@@ -652,7 +652,7 @@ struct State {
         b.InsertBefore(bitcast, [&] {
             auto* source = bitcast->Args()[0];
             if (castToSrcType) {
-                source = b.Construct(src_type, source)->Result();
+                source = b.Construct(src_type, source);
             }
             b.CallWithResult<hlsl::ir::BuiltinCall>(bitcast->DetachResult(), fn, source);
         });
@@ -719,7 +719,7 @@ struct State {
                         auto* v1 = b.Or(a1, b.Access(ty.u32(), v, 1_u));
                         auto* a2 = b.Access(ty.u32(), v, 2_u);
                         auto* v2 = b.Or(a2, b.Access(ty.u32(), v, 3_u));
-                        v = b.Construct(ty.vec2(ty.u32()), v1, v2)->Result();
+                        v = b.Construct(ty.vec2(ty.u32()), v1, v2);
                     }
                     if (dst_type->DeepestElement()->Is<core::type::F32>()) {
                         v = b.Call<hlsl::ir::BuiltinCall>(dst_type, BuiltinFn::kAsfloat, v)
@@ -788,17 +788,19 @@ struct State {
                 b.Append(f->Block(), [&] {
                     const core::type::Type* uint_ty = ty.MatchWidth(ty.u32(), src_type);
 
-                    core::ir::Instruction* v = nullptr;
+                    core::ir::Value* v = nullptr;
                     tint::Switch(
-                        src_type->DeepestElement(),                            //
-                        [&](const core::type::U32*) { v = b.Let("v", src); },  //
+                        src_type->DeepestElement(),                                      //
+                        [&](const core::type::U32*) { v = b.Let("v", src)->Result(); },  //
                         [&](const core::type::I32*) {
                             v = b.Let("v", b.Call<hlsl::ir::BuiltinCall>(uint_ty,
-                                                                         BuiltinFn::kAsuint, src));
+                                                                         BuiltinFn::kAsuint, src))
+                                    ->Result();
                         },
                         [&](const core::type::F32*) {
                             v = b.Let("v", b.Call<hlsl::ir::BuiltinCall>(uint_ty,
-                                                                         BuiltinFn::kAsuint, src));
+                                                                         BuiltinFn::kAsuint, src))
+                                    ->Result();
                         },
                         TINT_ICE_ON_NO_MATCH);
 
@@ -1091,7 +1093,7 @@ struct State {
                     } else {
                         lvl = b.InsertConvertIfNeeded(ty.i32(), args[2]);
                     }
-                    call_args.Push(b.Construct(ty.vec2i(), coord, lvl)->Result());
+                    call_args.Push(b.Construct(ty.vec2i(), coord, lvl));
                     break;
                 }
                 case core::type::TextureDimension::k2d: {
@@ -1107,7 +1109,7 @@ struct State {
                         } else {
                             lvl = b.InsertConvertIfNeeded(ty.i32(), args[2]);
                         }
-                        call_args.Push(b.Construct(ty.vec3i(), coord, lvl)->Result());
+                        call_args.Push(b.Construct(ty.vec3i(), coord, lvl));
                     }
                     break;
                 }
@@ -1120,7 +1122,7 @@ struct State {
                     } else {
                         lvl = b.InsertConvertIfNeeded(ty.i32(), args[3]);
                     }
-                    call_args.Push(b.Construct(ty.vec4i(), coord, ary_idx, lvl)->Result());
+                    call_args.Push(b.Construct(ty.vec4i(), coord, ary_idx, lvl));
                     break;
                 }
                 case core::type::TextureDimension::k3d: {
@@ -1131,7 +1133,7 @@ struct State {
                     } else {
                         lvl = b.InsertConvertIfNeeded(ty.i32(), args[2]);
                     }
-                    call_args.Push(b.Construct(ty.vec4i(), coord, lvl)->Result());
+                    call_args.Push(b.Construct(ty.vec4i(), coord, lvl));
                     break;
                 }
                 default:
@@ -1177,7 +1179,7 @@ struct State {
                 auto* new_coords =
                     b.Construct(ty.vec3(coords_ty->Type()), coords,
                                 b.InsertConvertIfNeeded(coords_ty->Type(), array_idx));
-                new_args.Push(new_coords->Result());
+                new_args.Push(new_coords);
 
                 new_args.Push(args[3]);
             } else {
@@ -1242,16 +1244,14 @@ struct State {
                     offset_idx = is_depth ? 3 : 4;
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(
-                        b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[idx++]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[idx++])));
                     offset_idx = is_depth ? 4 : 5;
                     break;
                 case core::type::TextureDimension::kCube:
                     params.Push(coords);
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(
-                        b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++])));
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);
@@ -1289,7 +1289,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3])));
                     params.Push(args[4]);
                     if (args.size() > 5) {
                         params.Push(args[5]);
@@ -1300,7 +1300,7 @@ struct State {
                     params.Push(args[3]);
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3])));
                     params.Push(args[4]);
                     break;
                 default:
@@ -1336,7 +1336,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3])));
                     if (args.size() > 4) {
                         params.Push(args[4]);
                     }
@@ -1349,7 +1349,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3])));
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);
@@ -1390,7 +1390,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3])));
                     params.Push(args[4]);
 
                     if (args.size() > 5) {
@@ -1407,7 +1407,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3])));
                     params.Push(args[4]);
                     break;
                 default:
@@ -1447,7 +1447,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3])));
                     params.Push(args[4]);
 
                     if (args.size() > 5) {
@@ -1463,7 +1463,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3])));
                     params.Push(args[4]);
                     break;
                 default:
@@ -1500,7 +1500,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3])));
                     params.Push(args[4]);
                     params.Push(args[5]);
 
@@ -1519,7 +1519,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3])));
                     params.Push(args[4]);
                     params.Push(args[5]);
                     break;
@@ -1557,7 +1557,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3])));
                     params.Push(b.InsertConvertIfNeeded(ty.f32(), args[4]));  // Level
                     if (args.size() > 5) {
                         params.Push(args[5]);
@@ -1573,7 +1573,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3])));
                     params.Push(b.InsertConvertIfNeeded(ty.f32(), args[4]));  // Level
                     break;
                 default:
@@ -1861,8 +1861,8 @@ struct State {
             auto* arg_sign = BuildSign(arg);
             fract = b.Multiply(arg_sign, fract);
             // Replace the call with new result struct
-            b.ConstructWithResult(call->DetachResult(), fract,
-                                  b.Convert(arg_i32_ty, b.Load(exp_out)));
+            b.ConstructReplaceResult(call->DetachResult(), fract,
+                                     b.Convert(arg_i32_ty, b.Load(exp_out)));
         });
         call->Destroy();
     }
@@ -1877,7 +1877,7 @@ struct State {
             auto* call_result =
                 b.Call<hlsl::ir::BuiltinCall>(arg_ty, hlsl::BuiltinFn::kModf, arg, b.Load(whole));
             // Replace the call with new result struct
-            b.ConstructWithResult(call->DetachResult(), call_result, b.Load(whole));
+            b.ConstructReplaceResult(call->DetachResult(), call_result, b.Load(whole));
         });
         call->Destroy();
     }

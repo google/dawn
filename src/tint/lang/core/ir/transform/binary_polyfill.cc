@@ -163,7 +163,7 @@ struct State {
         /// Helper to splat a value to match the vector width of the result type if necessary.
         auto maybe_splat = [&](ir::Value* value) -> ir::Value* {
             if (value->Type()->Is<type::Scalar>() && result_ty->Is<core::type::Vector>()) {
-                return b.Construct(result_ty, value)->Result();
+                return b.Construct(result_ty, value);
             }
             return value;
         };

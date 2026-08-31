@@ -333,7 +333,8 @@ struct State {
                 // Create a placeholder construct instruction for the lengths structure that will be
                 // filled in later when we know all of the structure members.
                 TINT_IR_ASSERT(ir, lengths_constructor == nullptr);
-                lengths_constructor = b.ConstructWithResult(ir.CreateValue<InstructionResult>());
+                lengths_constructor = b.ConstructReplaceResult(ir.CreateValue<InstructionResult>())
+                                          ->AsInstruction<Construct>();
                 lengths_constructor->InsertBefore(func->Block()->Front());
                 return lengths_constructor->Result();
             }

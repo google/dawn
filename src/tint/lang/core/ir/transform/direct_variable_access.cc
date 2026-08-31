@@ -403,13 +403,13 @@ struct State {
                             args.Push(chain.view_length);
                         }
                         auto* values = b.Construct(array, std::move(args));
-                        new_args.Push(values->Result());
+                        new_args.Push(values);
                     }
                     // If the chain access contains indices, then pass these as an array of u32.
                     if (size_t array_len = chain.indices.Length(); array_len > 0) {
                         auto* array = ty.array(ty.u32(), static_cast<uint32_t>(array_len));
                         auto* indices = b.Construct(array, std::move(chain.indices));
-                        new_args.Push(indices->Result());
+                        new_args.Push(indices);
                     }
                     // Record the parameter shape for the variant's signature.
                     signature.Add(i, chain.shape);

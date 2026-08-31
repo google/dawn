@@ -1547,10 +1547,10 @@ class Parser {
                 args.Push(Value(arg));
             }
 
-            auto* construct = b_.Construct(iter->second.type, args);
-            current_block_->Append(construct);
-            AddValue(id, construct->Result());
-            return construct->Result();
+            core::ir::Value* construct = nullptr;
+            b_.Append(current_block_, [&] { construct = b_.Construct(iter->second.type, args); });
+            AddValue(id, construct);
+            return construct;
         }
 
         return std::nullopt;
@@ -3474,21 +3474,21 @@ class Parser {
         auto* texel_ty = texel->Type();
         if (texel_ty->IsScalar()) {
             auto* c = b_.Construct(ty_.vec4(texel_ty), texel);
-            EmitWithoutSpvResult(c->Result());
-            texel = c->Result();
+            EmitWithoutSpvResult(c);
+            texel = c;
         } else {
             auto* vec_ty = texel_ty->As<core::type::Vector>();
             TINT_ASSERT(vec_ty);
 
-            core::ir::Instruction* c = nullptr;
+            core::ir::Value* c = nullptr;
             if (vec_ty->Width() == 2) {
                 c = b_.Construct(ty_.vec4(vec_ty->Type()), texel, b_.Zero(vec_ty));
             } else if (vec_ty->Width() == 3) {
                 c = b_.Construct(ty_.vec4(vec_ty->Type()), texel, b_.Zero(vec_ty->Type()));
             }
             if (c != nullptr) {
-                EmitWithoutSpvResult(c->Result());
-                texel = c->Result();
+                EmitWithoutSpvResult(c);
+                texel = c;
             }
         }
 
@@ -4377,7 +4377,7 @@ class Parser {
             EmitWithoutSpvResult(call);
             EmitWithoutSpvResult(fract->Result());
             EmitWithoutSpvResult(whole->Result());
-            Emit(b_.Construct(spv_ty, fract, whole), inst.result_id());
+            EmitOrAdd(b_.Construct(spv_ty, fract, whole), inst.result_id());
             return Success;
         }
         if (wgsl_fn == core::BuiltinFn::kFrexp) {
@@ -4409,7 +4409,7 @@ class Parser {
                 }
             }
 
-            Emit(b_.Construct(spv_ty, fract, exp_res), inst.result_id());
+            EmitOrAdd(b_.Construct(spv_ty, fract, exp_res), inst.result_id());
             return Success;
         }
         if (wgsl_fn != core::BuiltinFn::kNone) {
@@ -4530,7 +4530,7 @@ class Parser {
     /// @param inst the SPIR-V instruction for OpCompositeConstruct
     void EmitConstruct(const spvtools::opt::Instruction& inst) {
         auto* construct = b_.Construct(Type(inst.type_id()), Args(inst, 2));
-        Emit(construct, inst.result_id());
+        EmitOrAdd(construct, inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpVectorInsertDynamic
@@ -4610,7 +4610,7 @@ class Parser {
             AddValue(inst.result_id(), swizzles[0]);
         } else {
             // There were multiple swizzles, so we combine them all to produce the final result.
-            Emit(b_.Construct(result_ty, swizzles), inst.result_id());
+            EmitOrAdd(b_.Construct(result_ty, swizzles), inst.result_id());
         }
     }
 

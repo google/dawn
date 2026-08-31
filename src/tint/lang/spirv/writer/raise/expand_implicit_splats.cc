@@ -96,9 +96,9 @@ struct State {
         Vector<core::ir::Value*, 4> args;
         args.Resize(vec->Width(), inst->Operands()[operand_idx]);
 
-        auto* construct = b.Construct(vec, std::move(args));
-        construct->InsertBefore(inst);
-        inst->SetOperand(operand_idx, construct->Result());
+        core::ir::Value* construct = nullptr;
+        b.InsertBefore(inst, [&] { construct = b.Construct(vec, std::move(args)); });
+        inst->SetOperand(operand_idx, construct);
     }
 
     /// Replace scalar operands to binary instructions that produce vectors.

@@ -368,8 +368,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             auto* user_center_w = builder.Divide(1_f, interpolated_w);
 
             auto* viewport_user_center_z = ViewportMappedFragDepth(builder, user_center_z);
-            value = builder.Construct(ty.vec4f(), plus_p5, viewport_user_center_z, user_center_w)
-                        ->Result();
+            value = builder.Construct(ty.vec4f(), plus_p5, viewport_user_center_z, user_center_w);
         }
 
         return value;

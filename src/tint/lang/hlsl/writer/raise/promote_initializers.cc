@@ -110,7 +110,7 @@ struct State {
             }
         }
 
-        Vector<core::ir::Construct*, 4> const_worklist;
+        Vector<core::ir::Value*, 4> const_worklist;
         for (auto& item : worklist) {
             if (auto* res = As<core::ir::InstructionResult>(item.val)) {
                 // If the value isn't already a `let`, put it into a `let`.
@@ -132,20 +132,22 @@ struct State {
         while (!const_worklist.IsEmpty()) {
             auto item = const_worklist.Pop();
 
-            auto args = item->Args();
-            for (size_t i = 0; i < args.size(); ++i) {
-                auto ret = ProcessConstant(args[i], item, i);
-                if (ret.has_value()) {
-                    const_worklist.Insert(0, *ret);
+            if (auto* inst = item->AsInstruction<core::ir::Construct>()) {
+                auto args = inst->Args();
+                for (size_t i = 0; i < args.size(); ++i) {
+                    auto ret = ProcessConstant(args[i], inst, i);
+                    if (ret.has_value()) {
+                        const_worklist.Insert(0, *ret);
+                    }
                 }
             }
         }
     }
 
     // Process a constant operand and replace if it's a struct initializer
-    std::optional<core::ir::Construct*> ProcessConstant(core::ir::Value* operand,
-                                                        core::ir::Construct* parent,
-                                                        size_t idx) {
+    std::optional<core::ir::Value*> ProcessConstant(core::ir::Value* operand,
+                                                    core::ir::Construct* parent,
+                                                    size_t idx) {
         auto* const_val = operand->As<core::ir::Constant>();
         TINT_IR_ASSERT(ir, const_val);
 
@@ -153,17 +155,15 @@ struct State {
             return std::nullopt;
         }
 
-        auto* let = b.Let(const_val->Type());
+        core::ir::Value* construct = nullptr;
+        core::ir::Let* let = nullptr;
+        b.InsertBefore(parent, [&] {
+            Vector<core::ir::Value*, 4> new_args = GatherArgs(const_val);
 
-        Vector<core::ir::Value*, 4> new_args = GatherArgs(const_val);
-
-        auto* construct = b.Construct(const_val->Type(), new_args);
-        let->SetValue(construct->Result());
-
-        // Put the `let` in before the `construct` value that we're based off of
-        let->InsertBefore(parent);
-        // Put the new `construct` in before the `let`.
-        construct->InsertBefore(let);
+            construct = b.Construct(const_val->Type(), new_args);
+            let = b.Let(const_val->Type());
+            let->SetValue(construct);
+        });
 
         // Replace the argument in the originating `construct` with the new `let`.
         parent->SetArg(idx, let->Result());
@@ -173,10 +173,10 @@ struct State {
 
     // Determine if this is a root block var which contains a struct initializer and, if
     // so, setup the instruction for the needed replacement.
-    std::optional<core::ir::Construct*> HoistModuleScopeLetToConstruct(bool is_root_block,
-                                                                       core::ir::Instruction* inst,
-                                                                       core::ir::Let* let,
-                                                                       core::ir::Constant* val) {
+    std::optional<core::ir::Value*> HoistModuleScopeLetToConstruct(bool is_root_block,
+                                                                   core::ir::Instruction* inst,
+                                                                   core::ir::Let* let,
+                                                                   core::ir::Constant* val) {
         // Only care about root-block variables
         if (!is_root_block || !inst->Is<core::ir::Var>()) {
             return std::nullopt;
@@ -190,11 +190,13 @@ struct State {
         // make further changes, if they're necessary, easier.
         Vector<core::ir::Value*, 4> args = GatherArgs(val);
 
-        // Turn the `constant` into a `construct` call and replace the value of the `let` that
-        // was created.
-        auto* construct = b.Construct(val->Type(), args);
-        let->SetValue(construct->Result());
-        construct->InsertBefore(let);
+        core::ir::Value* construct = nullptr;
+        b.InsertBefore(let, [&] {
+            // Turn the `constant` into a `construct` call and replace the value of the `let` that
+            // was created.
+            construct = b.Construct(val->Type(), args);
+        });
+        let->SetValue(construct);
 
         return {construct};
     }

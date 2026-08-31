@@ -147,7 +147,7 @@ struct State {
                 for (uint32_t i = 0; i < arr->ConstantCount().value(); i++) {
                     args.Push(el);
                 }
-                return b.Construct(arr, std::move(args))->Result();
+                return b.Construct(arr, std::move(args));
             },
             [&](const core::type::Struct* s) {
                 Vector<core::ir::Value*, 8> args;
@@ -158,7 +158,7 @@ struct State {
                         args.Push(b.Zero(member->Type()));
                     }
                 }
-                return b.Construct(s, std::move(args))->Result();
+                return b.Construct(s, std::move(args));
             },
             TINT_ICE_ON_NO_MATCH);
     }

@@ -422,10 +422,10 @@ struct State {
                     col_elements.Push(result);
                 }
 
-                auto* row_vector = b.Construct(ty.vec(elem_ty, rows), col_elements)->Result();
+                auto* row_vector = b.Construct(ty.vec(elem_ty, rows), col_elements);
                 col_vectors.Push(row_vector);
             }
-            b.ConstructWithResult(call->DetachResult(), col_vectors);
+            b.ConstructReplaceResult(call->DetachResult(), col_vectors);
         });
 
         call->Destroy();
@@ -831,8 +831,8 @@ struct State {
                 auto* src_ty = I->Type();
                 auto* vec_ty = ty.vec(src_ty, 2);
                 auto* zero = b.Zero(src_ty);
-                I = b.Construct(vec_ty, I, zero)->Result();
-                N = b.Construct(vec_ty, N, zero)->Result();
+                I = b.Construct(vec_ty, I, zero);
+                N = b.Construct(vec_ty, N, zero);
 
                 auto* c = b.Call(vec_ty, core::BuiltinFn::kRefract,
                                  Vector<core::ir::Value*, 3>{I, N, eta});
@@ -1152,7 +1152,7 @@ struct State {
 
                     auto* r1 = b.Construct(ty.vec2(elem_ty), r_00, r_01);
                     auto* r2 = b.Construct(ty.vec2(elem_ty), r_10, r_11);
-                    b.ConstructWithResult(call->DetachResult(), r1, r2);
+                    b.ConstructReplaceResult(call->DetachResult(), r1, r2);
                     break;
                 }
                 case 3: {

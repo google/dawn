@@ -154,14 +154,15 @@ struct State {
                 auto& rov = rovs[mem->Index()];
                 auto* mem_ty = mem->Type();
                 TINT_IR_ASSERT(ir, mem_ty->Is<core::type::Scalar>());
-                core::ir::Instruction* from = b.Load(rov.var);
+                core::ir::Value* from = b.Load(rov.var)->Result();
                 // Load returns a vec4, so we need to swizzle the first element
                 from = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
-                    ty.vec4(rov.subtype), tint::hlsl::BuiltinFn::kLoad, from, coord);
-                from = b.Swizzle(rov.subtype, from, {0});
+                            ty.vec4(rov.subtype), tint::hlsl::BuiltinFn::kLoad, from, coord)
+                           ->Result();
+                from = b.Swizzle(rov.subtype, from, {0})->Result();
                 if (mem_ty != rov.subtype) {
                     // ROV and struct member types don't match
-                    from = b.Convert(mem_ty, from);
+                    from = b.Convert(mem_ty, from)->Result();
                 }
                 auto* to = b.Access(ty.ptr<private_>(mem_ty), pixel_local_var, u32(mem->Index()));
                 b.Store(to, from);
@@ -174,12 +175,13 @@ struct State {
                 auto& rov = rovs[mem->Index()];
                 auto* mem_ty = mem->Type();
                 TINT_IR_ASSERT(ir, mem_ty->Is<core::type::Scalar>());
-                core::ir::Instruction* from =
-                    b.Access(ty.ptr<private_>(mem_ty), pixel_local_var, u32(mem->Index()));
-                from = b.Load(from);
+                core::ir::Value* from =
+                    b.Access(ty.ptr<private_>(mem_ty), pixel_local_var, u32(mem->Index()))
+                        ->Result();
+                from = b.Load(from)->Result();
                 if (mem_ty != rov.subtype) {
                     // ROV and struct member types don't match
-                    from = b.Convert(rov.subtype, from);
+                    from = b.Convert(rov.subtype, from)->Result();
                 }
                 // Store requires a vec4
                 from = b.Construct(ty.vec4(rov.subtype), from);

@@ -82,11 +82,11 @@ struct State {
             for (uint32_t r = 0; r < col->Width(); r++) {
                 values.Push(scalars[c * col->Width() + r]);
             }
-            columns.Push(b.Construct(col, std::move(values))->Result());
+            columns.Push(b.Construct(col, std::move(values)));
         }
 
         // Construct the matrix from the column vectors and replace the original instruction.
-        b.ConstructWithResult(construct->DetachResult(), std::move(columns));
+        b.ConstructReplaceResult(construct->DetachResult(), std::move(columns));
         construct->Destroy();
     }
 };

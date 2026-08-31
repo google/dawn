@@ -319,7 +319,7 @@ struct State {
                 args[2], original_value);
 
             auto* o = b.Load(original_value);
-            b.ConstructWithResult(call->DetachResult(), o, b.Equal(o, cmp));
+            b.ConstructReplaceResult(call->DetachResult(), o, b.Equal(o, cmp));
         });
         call->Destroy();
     }

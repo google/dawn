@@ -187,10 +187,10 @@ struct State {
             // the result type. If we have a mixed scalar/vector, construct a vector of the scalar
             // type which makes the polyfill simpler.
             if (lhs->Type() != res_ty) {
-                lhs = b.Construct(res_ty, lhs)->Result();
+                lhs = b.Construct(res_ty, lhs);
             }
             if (rhs->Type() != res_ty) {
-                rhs = b.Construct(res_ty, rhs)->Result();
+                rhs = b.Construct(res_ty, rhs);
             }
 
             auto* func = CreateFloatModuloPolyfill(res_ty);

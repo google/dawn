@@ -818,7 +818,7 @@ TEST_F(IR_ValidatorTest, Store_NoValueType) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
-        auto* val = b.Construct(ty.u32(), 42_u);
+        auto* val = b.Construct(ty.u32(), 42_u)->AsInstruction<Construct>();
         val->Result()->SetType(nullptr);
 
         b.Append(mod.CreateInstruction<ir::Store>(var->Result(), val->Result()));

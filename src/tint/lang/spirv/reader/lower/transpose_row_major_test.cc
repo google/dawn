@@ -4136,7 +4136,7 @@ TEST_F(SpirvReader_TransposeRowMajorTest, FunctionConstruct) {
     b.Append(f->Block(), [&] {
         auto* init = b.Construct(strct, m);
         auto* var = b.Var("s", ty.ptr<function>(strct));
-        var->SetInitializer(init->Result());
+        var->SetInitializer(init);
 
         b.Let("x", b.Load(b.Access<ptr<function, mat2x3<f32>>>(var, 0_u)));
         b.Return(f);
@@ -4210,7 +4210,7 @@ TEST_F(SpirvReader_TransposeRowMajorTest, FunctionConstruct_Square) {
     b.Append(f->Block(), [&] {
         auto* init = b.Construct(strct, m);
         auto* var = b.Var("s", ty.ptr<function>(strct));
-        var->SetInitializer(init->Result());
+        var->SetInitializer(init);
 
         b.Let("x", b.Load(b.Access<ptr<function, mat3x3<f32>>>(var, 0_u)));
         b.Return(f);

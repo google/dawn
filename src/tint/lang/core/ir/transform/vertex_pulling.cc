@@ -276,7 +276,7 @@ struct State {
                 }
             }
         }
-        param->ReplaceAllUsesWith(b.Construct(str, std::move(construct_args))->Result());
+        param->ReplaceAllUsesWith(b.Construct(str, std::move(construct_args)));
     }
 
     /// Load a vertex attribute.
@@ -331,7 +331,7 @@ struct State {
             for (uint32_t i = src_width; i < dst_width; i++) {
                 values.Push(i == 3 ? one() : b.Zero(elem_ty));
             }
-            value = b.Construct(shader_type, std::move(values))->Result();
+            value = b.Construct(shader_type, std::move(values));
         }
 
         return value;
@@ -422,27 +422,27 @@ struct State {
             case VertexFormat::kUint16x4: {
                 auto* xy = load_ivec(0, 16, ty.vec2u());
                 auto* zw = load_ivec(1, 16, ty.vec2u());
-                return b.Construct<vec4u>(xy, zw)->Result();
+                return b.Construct<vec4u>(xy, zw);
             }
             case VertexFormat::kUint32:
                 return load_u32(0);
             case VertexFormat::kUint32x2: {
                 auto* x = load_u32(0);
                 auto* y = load_u32(1);
-                return b.Construct<vec2u>(x, y)->Result();
+                return b.Construct<vec2u>(x, y);
             }
             case VertexFormat::kUint32x3: {
                 auto* x = load_u32(0);
                 auto* y = load_u32(1);
                 auto* z = load_u32(2);
-                return b.Construct<vec3u>(x, y, z)->Result();
+                return b.Construct<vec3u>(x, y, z);
             }
             case VertexFormat::kUint32x4: {
                 auto* x = load_u32(0);
                 auto* y = load_u32(1);
                 auto* z = load_u32(2);
                 auto* w = load_u32(3);
-                return b.Construct<vec4u>(x, y, z, w)->Result();
+                return b.Construct<vec4u>(x, y, z, w);
             }
 
             // Formats that are always i32 in the shader (or vectors of i32).
@@ -468,27 +468,27 @@ struct State {
             case VertexFormat::kSint16x4: {
                 auto* xy = load_ivec(0, 16, ty.vec2i());
                 auto* zw = load_ivec(1, 16, ty.vec2i());
-                return b.Construct<vec4i>(xy, zw)->Result();
+                return b.Construct<vec4i>(xy, zw);
             }
             case VertexFormat::kSint32:
                 return load_i32(0);
             case VertexFormat::kSint32x2: {
                 auto* x = load_i32(0);
                 auto* y = load_i32(1);
-                return b.Construct<vec2i>(x, y)->Result();
+                return b.Construct<vec2i>(x, y);
             }
             case VertexFormat::kSint32x3: {
                 auto* x = load_i32(0);
                 auto* y = load_i32(1);
                 auto* z = load_i32(2);
-                return b.Construct<vec3i>(x, y, z)->Result();
+                return b.Construct<vec3i>(x, y, z);
             }
             case VertexFormat::kSint32x4: {
                 auto* x = load_i32(0);
                 auto* y = load_i32(1);
                 auto* z = load_i32(2);
                 auto* w = load_i32(3);
-                return b.Construct<vec4i>(x, y, z, w)->Result();
+                return b.Construct<vec4i>(x, y, z, w);
             }
 
             // Unsigned normalized formats.
@@ -546,7 +546,7 @@ struct State {
                 // 0000xxxx, 0000yyyy, 0000zzzz, 0000wwww
                 auto* unpack0 = b.Call<vec2f>(core::BuiltinFn::kUnpack2X16Unorm, word0);
                 auto* unpack1 = b.Call<vec2f>(core::BuiltinFn::kUnpack2X16Unorm, word1);
-                return float_value(b.Construct<vec4f>(unpack0, unpack1)->Result());
+                return float_value(b.Construct<vec4f>(unpack0, unpack1));
             }
 
             // Signed normalized formats.
@@ -596,7 +596,7 @@ struct State {
                 // 0000xxxx, 0000yyyy, 0000zzzz, 0000wwww
                 auto* unpack0 = b.Call<vec2f>(core::BuiltinFn::kUnpack2X16Snorm, word0);
                 auto* unpack1 = b.Call<vec2f>(core::BuiltinFn::kUnpack2X16Snorm, word1);
-                return float_value(b.Construct<vec4f>(unpack0, unpack1)->Result());
+                return float_value(b.Construct<vec4f>(unpack0, unpack1));
             }
 
             // F16 formats that can either be f16 or f32 in the shader.
@@ -636,12 +636,12 @@ struct State {
                     // xxxx, yyyy, zzzz, wwww
                     auto* bitcast0 = b.Bitcast<vec2h>(word0);
                     auto* bitcast1 = b.Bitcast<vec2h>(word1);
-                    return b.Construct<vec4h>(bitcast0, bitcast1)->Result();
+                    return b.Construct<vec4h>(bitcast0, bitcast1);
                 } else {
                     // 0000xxxx, 0000yyyy, 0000zzzz, 0000wwww
                     auto* unpack0 = b.Call<vec2f>(core::BuiltinFn::kUnpack2X16Float, word0);
                     auto* unpack1 = b.Call<vec2f>(core::BuiltinFn::kUnpack2X16Float, word1);
-                    return b.Construct<vec4f>(unpack0, unpack1)->Result();
+                    return b.Construct<vec4f>(unpack0, unpack1);
                 }
             }
 
@@ -652,20 +652,20 @@ struct State {
             case VertexFormat::kFloat32x2: {
                 auto* x = load_f32(0);
                 auto* y = load_f32(1);
-                return float_value(b.Construct<vec2f>(x, y)->Result());
+                return float_value(b.Construct<vec2f>(x, y));
             }
             case VertexFormat::kFloat32x3: {
                 auto* x = load_f32(0);
                 auto* y = load_f32(1);
                 auto* z = load_f32(2);
-                return float_value(b.Construct<vec3f>(x, y, z)->Result());
+                return float_value(b.Construct<vec3f>(x, y, z));
             }
             case VertexFormat::kFloat32x4: {
                 auto* x = load_f32(0);
                 auto* y = load_f32(1);
                 auto* z = load_f32(2);
                 auto* w = load_f32(3);
-                return float_value(b.Construct<vec4f>(x, y, z, w)->Result());
+                return float_value(b.Construct<vec4f>(x, y, z, w));
             }
 
             // Miscellaneous other formats that need custom handling.

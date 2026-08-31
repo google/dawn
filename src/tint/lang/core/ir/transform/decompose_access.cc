@@ -969,7 +969,7 @@ struct State {
             auto loads = MakeNLoads(var, array_idx, num_array_eles);
             MaybeAddAlignment(loads[0]->As<InstructionResult>()->Instruction(), result_ty->Align());
             auto* construct = b.Construct(vec_ty, loads);
-            return BitcastOrConvertIfNeeded(result_ty, construct->Result())->AsInstruction();
+            return BitcastOrConvertIfNeeded(result_ty, construct)->AsInstruction();
         }
 
         auto* access = b.Access(BaseEleTypePtr(), var, array_idx);
@@ -1067,12 +1067,11 @@ struct State {
             construct_args.Push(l->Result());
         }
         if (loads[0]->Result()->Type() == ty.u32()) {
-            value =
-                b.Construct(ty.vec(ty.u32(), static_cast<uint32_t>(loads.Length())), construct_args)
-                    ->Result();
+            value = b.Construct(ty.vec(ty.u32(), static_cast<uint32_t>(loads.Length())),
+                                construct_args);
         } else if (loads[0]->Result()->Type() == ty.vec2u()) {
             if (loads.Length() > 1) {
-                value = b.Construct(ty.vec4u(), construct_args)->Result();
+                value = b.Construct(ty.vec4u(), construct_args);
             } else {
                 value = loads[0]->Result();
             }
@@ -1153,9 +1152,9 @@ struct State {
             auto* vec_ty = ty.vec(ty.u16(), num_loads);
             auto* construct = b.Construct(vec_ty, loads);
             if (vec_ty != result_ty) {
-                return b.Bitcast(result_ty, construct->Result())->AsInstruction();
+                return b.Bitcast(result_ty, construct)->AsInstruction();
             }
-            return construct;
+            return construct->AsInstruction();
         } else if (BaseEleType() == ty.u32()) {
             if (result_ty->Width() == 2) {
                 return b.Bitcast(result_ty, loads[0])->AsInstruction();
@@ -1165,10 +1164,10 @@ struct State {
             // A vec3 occupies the same two words as a vec4, so bitcast as a vec4 and swizzle out
             // the last element.
             if (result_ty->Width() == 3) {
-                auto* bc = b.Bitcast(ty.vec4(result_ty->Type()), construct->Result());
+                auto* bc = b.Bitcast(ty.vec4(result_ty->Type()), construct);
                 return b.Swizzle(result_ty, bc, {0, 1, 2});
             }
-            return b.Bitcast(result_ty, construct->Result())->AsInstruction();
+            return b.Bitcast(result_ty, construct)->AsInstruction();
         } else if (BaseEleType() == ty.vec2u()) {
             TINT_IR_ASSERT(ir, result_ty->Width() == 4);
             TINT_IR_ASSERT(ir, (result_ty->DeepestElement()->IsAnyOf<type::F16, type::U16>()));

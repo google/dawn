@@ -341,7 +341,7 @@ struct State {
             auto* converted = ConvertIfNeeded(dst_member->Type(), extracted);
             construct_args.Push(converted);
         }
-        return b.Construct(dst_struct, std::move(construct_args))->Result();
+        return b.Construct(dst_struct, std::move(construct_args));
     }
 
     /// Recursively convert an array type to/from the explicitly laid out version.

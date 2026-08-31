@@ -1074,7 +1074,7 @@ class Impl {
                         inst = call;
                     }
                 } else if (sem->Target()->As<sem::ValueConstructor>()) {
-                    inst = impl.builder_.Construct(ty, std::move(args));
+                    inst = impl.builder_.Construct(ty, std::move(args))->AsInstruction();
                 } else if (sem->Target()->Is<sem::ValueConversion>()) {
                     inst = impl.builder_.Convert(ty, args[0]);
                 } else if (expr->target->identifier->Is<ast::TemplatedIdentifier>()) {
