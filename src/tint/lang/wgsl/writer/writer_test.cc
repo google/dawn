@@ -1076,5 +1076,79 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
+TEST_F(WgslIRWriterTest, AddSat_Scalar) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* pa = b.FunctionParam("a", ty.u32());
+    auto* pb = b.FunctionParam("b", ty.u32());
+    fn->SetParams({pa, pb});
+
+    b.Append(fn->Block(), [&] {
+        b.Let("res", b.Call(ty.u32(), core::BuiltinFn::kAddSat, pa, pb));
+        b.Return(fn);
+    });
+
+    RUN_TEST(R"(
+fn f(a : u32, b : u32) {
+  let v = (a + b);
+  let res = select(v, 4294967295u, (v < a));
+}
+)");
+}
+
+TEST_F(WgslIRWriterTest, AddSat_Vector) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* pa = b.FunctionParam("a", ty.vec2u());
+    auto* pb = b.FunctionParam("b", ty.vec2u());
+    fn->SetParams({pa, pb});
+
+    b.Append(fn->Block(), [&] {
+        b.Let("res", b.Call(ty.vec2u(), core::BuiltinFn::kAddSat, pa, pb));
+        b.Return(fn);
+    });
+
+    RUN_TEST(R"(
+fn f(a : vec2<u32>, b : vec2<u32>) {
+  let v = (a + b);
+  let res = select(v, vec2<u32>(4294967295u), (v < a));
+}
+)");
+}
+
+TEST_F(WgslIRWriterTest, MulSat_Scalar) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* pa = b.FunctionParam("a", ty.u32());
+    auto* pb = b.FunctionParam("b", ty.u32());
+    fn->SetParams({pa, pb});
+
+    b.Append(fn->Block(), [&] {
+        b.Let("res", b.Call(ty.u32(), core::BuiltinFn::kMulSat, pa, pb));
+        b.Return(fn);
+    });
+
+    RUN_TEST(R"(
+fn f(a : u32, b : u32) {
+  let res = select((a * b), 4294967295u, (((a != 0u) & (a != 0u)) & (b > (4294967295u / a))));
+}
+)");
+}
+
+TEST_F(WgslIRWriterTest, MulSat_Vector) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* pa = b.FunctionParam("a", ty.vec2u());
+    auto* pb = b.FunctionParam("b", ty.vec2u());
+    fn->SetParams({pa, pb});
+
+    b.Append(fn->Block(), [&] {
+        b.Let("res", b.Call(ty.vec2u(), core::BuiltinFn::kMulSat, pa, pb));
+        b.Return(fn);
+    });
+
+    RUN_TEST(R"(
+fn f(a : vec2<u32>, b : vec2<u32>) {
+  let res = select((a * b), vec2<u32>(4294967295u), (((a != vec2<u32>()) & (a != vec2<u32>())) & (b > (vec2<u32>(4294967295u) / a))));
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::wgsl::writer

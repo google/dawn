@@ -274,9 +274,12 @@ void ReplaceAddSat(core::ir::Builder& b, core::ir::CoreBuiltinCall* call) {
     b.InsertBefore(call, [&] {
         auto* add = b.Add(lhs, rhs);
         auto* lt = b.LessThan(add, lhs);
-        auto* splat = b.Splat(call->Result()->Type(), b.Constant(core::u32(0xffffffff)));
+        auto* sat = b.Constant(core::u32(0xffffffff));
+        if (call->Result()->Type()->Is<core::type::Vector>()) {
+            sat = b.Splat(call->Result()->Type(), sat);
+        }
         b.CallWithResult<wgsl::ir::BuiltinCall>(call->DetachResult(), wgsl::BuiltinFn::kSelect, add,
-                                                splat, lt);
+                                                sat, lt);
     });
     call->Destroy();
 }
@@ -289,13 +292,16 @@ void ReplaceMulSat(core::ir::Builder& b, core::ir::CoreBuiltinCall* call) {
         auto* mul = b.Multiply(lhs, rhs);
         auto* lhs_ne_0 = b.NotEqual(lhs, b.Zero(ty));
         auto* rhs_ne_0 = b.NotEqual(lhs, b.Zero(ty));
-        auto* splat = b.Splat(ty, b.Constant(core::u32(0xffffffff)));
-        auto* div = b.Divide(splat, lhs);
+        auto* sat = b.Constant(core::u32(0xffffffff));
+        if (call->Result()->Type()->Is<core::type::Vector>()) {
+            sat = b.Splat(call->Result()->Type(), sat);
+        }
+        auto* div = b.Divide(sat, lhs);
         auto* gt = b.GreaterThan(rhs, div);
         auto* logical_and = b.And(lhs_ne_0, rhs_ne_0);
         logical_and = b.And(logical_and, gt);
         b.CallWithResult<wgsl::ir::BuiltinCall>(call->DetachResult(), wgsl::BuiltinFn::kSelect, mul,
-                                                splat, logical_and);
+                                                sat, logical_and);
     });
     call->Destroy();
 }
