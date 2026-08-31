@@ -151,17 +151,14 @@ class ExistingD3D12ResourceBackend : public SharedBufferMemoryTestBackend {
 
     ComPtr<ID3D12Device> CreateD3D12Device(const wgpu::Device& device,
                                            bool createWarpDevice = false) {
-        ComPtr<IDXGIAdapter> dxgiAdapter = nullptr;
+        if (!createWarpDevice) {
+            return native::d3d12::GetD3D12Device(device.Get());
+        }
+
         ComPtr<IDXGIFactory4> dxgiFactory;
         CreateDXGIFactory2(0, IID_PPV_ARGS(&dxgiFactory));
-        if (createWarpDevice) {
-            dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&dxgiAdapter));
-        } else {
-            dxgiAdapter = native::d3d::GetDXGIAdapter(device.GetAdapter().Get());
-            DXGI_ADAPTER_DESC adapterDesc;
-            dxgiAdapter->GetDesc(&adapterDesc);
-            dxgiFactory->EnumAdapterByLuid(adapterDesc.AdapterLuid, IID_PPV_ARGS(&dxgiAdapter));
-        }
+        ComPtr<IDXGIAdapter> dxgiAdapter;
+        dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&dxgiAdapter));
 
         ComPtr<ID3D12Device> d3d12Device;
 
