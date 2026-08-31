@@ -802,6 +802,9 @@ gpu.ci.linux_builder(
     builder_spec = builder_config.builder_spec(
         gclient_config = builder_config.gclient_config(
             config = "dawn",
+            apply_configs = [
+                "checkout_mesa",
+            ],
         ),
         chromium_config = builder_config.chromium_config(
             config = "dawn_base",
@@ -845,6 +848,9 @@ gpu.ci.linux_builder(
     builder_spec = builder_config.builder_spec(
         gclient_config = builder_config.gclient_config(
             config = "dawn",
+            apply_configs = [
+                "checkout_mesa",
+            ],
         ),
         chromium_config = builder_config.chromium_config(
             config = "dawn_base",
@@ -888,6 +894,9 @@ gpu.ci.linux_builder(
     builder_spec = builder_config.builder_spec(
         gclient_config = builder_config.gclient_config(
             config = "dawn",
+            apply_configs = [
+                "checkout_mesa",
+            ],
         ),
         chromium_config = builder_config.chromium_config(
             config = "dawn_base",
@@ -931,6 +940,9 @@ gpu.ci.linux_builder(
     builder_spec = builder_config.builder_spec(
         gclient_config = builder_config.gclient_config(
             config = "dawn",
+            apply_configs = [
+                "checkout_mesa",
+            ],
         ),
         chromium_config = builder_config.chromium_config(
             config = "dawn_base",
@@ -977,6 +989,9 @@ gpu.ci.linux_builder(
     builder_spec = builder_config.builder_spec(
         gclient_config = builder_config.gclient_config(
             config = "dawn",
+            apply_configs = [
+                "checkout_mesa",
+            ],
         ),
         chromium_config = builder_config.chromium_config(
             config = "dawn_base",
