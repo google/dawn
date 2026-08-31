@@ -29,11 +29,11 @@
 
 load("@chromium-luci//args.star", "args")
 load("@chromium-luci//builder_config.star", "builder_config")
-load("@chromium-luci//builders.star", "os")
 load("@chromium-luci//ci.star", "ci")
 load("@chromium-luci//consoles.star", "consoles")
 load("@chromium-luci//gardener_rotations.star", "gardener_rotations")
 load("@chromium-luci//gn_args.star", "gn_args")
+load("@chromium-luci//gpu.star", "gpu")
 load("@chromium-luci//targets.star", "targets")
 load("//constants.star", "siso")
 
@@ -41,7 +41,7 @@ ci.defaults.set(
     executable = "recipe:dawn/gn_v2",
     builder_group = "ci",
     bucket = "ci",
-    pool = "luci.chromium.gpu.ci",
+    pool = gpu.ci.POOL,
     triggered_by = ["primary-poller"],
     build_numbers = True,
     contact_team_email = "chrome-gpu-infra@google.com",
@@ -51,7 +51,6 @@ ci.defaults.set(
     shadow_siso_project = siso.project.DEFAULT_UNTRUSTED,
     siso_remote_jobs = siso.remote_jobs.DEFAULT,
     thin_tester_cores = 2,
-    builderless = True,
     notifies = ["gardener-notifier"],
     gardener_rotations = gardener_rotations.rotation("dawn", None, None),
 )
@@ -67,24 +66,7 @@ targets.builder_defaults.set(
 # Parent Builders                                                              #
 ################################################################################
 
-def dawn_linux_parent_builder(**kwargs):
-    kwargs.setdefault("cores", 8)
-    kwargs.setdefault("os", os.LINUX_DEFAULT)
-    kwargs.setdefault("ssd", None)
-    ci.builder(**kwargs)
-
-def dawn_mac_parent_builder(**kwargs):
-    kwargs.setdefault("cpu", "arm64")
-    kwargs.setdefault("os", os.MAC_DEFAULT)
-    ci.builder(**kwargs)
-
-def dawn_win_parent_builder(**kwargs):
-    kwargs.setdefault("cores", 8)
-    kwargs.setdefault("os", os.WINDOWS_DEFAULT)
-    kwargs.setdefault("ssd", None)
-    ci.builder(**kwargs)
-
-dawn_linux_parent_builder(
+gpu.ci.linux_builder(
     name = "dawn-android-arm-builder-rel",
     description_html = "Compiles release Dawn test binaries for Android/arm",
     schedule = "triggered",
@@ -124,7 +106,7 @@ dawn_linux_parent_builder(
     ),
 )
 
-dawn_linux_parent_builder(
+gpu.ci.linux_builder(
     name = "dawn-android-arm64-builder-rel",
     description_html = "Compiles release Dawn test binaries for Android/arm64",
     schedule = "triggered",
@@ -164,7 +146,7 @@ dawn_linux_parent_builder(
     ),
 )
 
-dawn_linux_parent_builder(
+gpu.ci.linux_builder(
     name = "dawn-linux-x64-builder-dbg",
     description_html = "Compile debug Dawn test binaries for Linux/x64",
     schedule = "triggered",
@@ -205,7 +187,7 @@ dawn_linux_parent_builder(
     ),
 )
 
-dawn_linux_parent_builder(
+gpu.ci.linux_builder(
     name = "dawn-linux-x64-builder-rel",
     description_html = "Compiles release Dawn test binaries for Linux/x64",
     schedule = "triggered",
@@ -247,7 +229,7 @@ dawn_linux_parent_builder(
     ),
 )
 
-dawn_linux_parent_builder(
+gpu.ci.linux_builder(
     name = "dawn-linux-x64-builder-tsan",
     description_html = "Compiles release Dawn test binaries for Linux/x64 w/ TSAN enabled",
     schedule = "triggered",
@@ -285,7 +267,7 @@ dawn_linux_parent_builder(
     ),
 )
 
-dawn_linux_parent_builder(
+gpu.ci.linux_builder(
     name = "dawn-linux-x86-builder-dbg",
     description_html = "Compiles debug Dawn test binaries for Linux/x86",
     schedule = "triggered",
@@ -326,7 +308,7 @@ dawn_linux_parent_builder(
     ),
 )
 
-dawn_linux_parent_builder(
+gpu.ci.linux_builder(
     name = "dawn-linux-x86-builder-rel",
     description_html = "Compiles release Dawn test binaries for Linux/x86",
     schedule = "triggered",
@@ -367,7 +349,7 @@ dawn_linux_parent_builder(
     ),
 )
 
-dawn_mac_parent_builder(
+gpu.ci.mac_builder(
     name = "dawn-mac-arm64-builder-rel",
     description_html = "Compiles release Dawn test binaries for Mac/arm64",
     schedule = "triggered",
@@ -408,7 +390,7 @@ dawn_mac_parent_builder(
     ),
 )
 
-dawn_mac_parent_builder(
+gpu.ci.mac_builder(
     name = "dawn-mac-x64-builder-dbg",
     description_html = "Compiles debug Dawn test binaries for Mac/x64",
     schedule = "triggered",
@@ -448,7 +430,7 @@ dawn_mac_parent_builder(
     ),
 )
 
-dawn_mac_parent_builder(
+gpu.ci.mac_builder(
     name = "dawn-mac-x64-builder-rel",
     description_html = "Compiles release Dawn test binaries for Mac/x64",
     schedule = "triggered",
@@ -488,7 +470,7 @@ dawn_mac_parent_builder(
     ),
 )
 
-dawn_win_parent_builder(
+gpu.ci.windows_builder(
     name = "dawn-win-arm64-builder-rel",
     description_html = "Compiles release Dawn test binaries for Windows/arm64",
     schedule = "triggered",
@@ -528,7 +510,7 @@ dawn_win_parent_builder(
     ),
 )
 
-dawn_win_parent_builder(
+gpu.ci.windows_builder(
     name = "dawn-win-x64-builder-asan",
     description_html = "Compiles release Dawn test binaries for Windows/x64 with ASAN enabled",
     schedule = "triggered",
@@ -569,7 +551,7 @@ dawn_win_parent_builder(
     ),
 )
 
-dawn_win_parent_builder(
+gpu.ci.windows_builder(
     name = "dawn-win-x64-builder-dbg",
     description_html = "Compiles debug Dawn test binaries for Windows/x64",
     schedule = "triggered",
@@ -609,7 +591,7 @@ dawn_win_parent_builder(
     ),
 )
 
-dawn_win_parent_builder(
+gpu.ci.windows_builder(
     name = "dawn-win-x64-builder-msvc-dbg",
     description_html = "Compiles debug Dawn test binaries for Windows/x64 using MSVC",
     schedule = "triggered",
@@ -651,7 +633,7 @@ dawn_win_parent_builder(
     ),
 )
 
-dawn_win_parent_builder(
+gpu.ci.windows_builder(
     name = "dawn-win-x64-builder-msvc-rel",
     description_html = "Compiles release Dawn test binaries for Windows/x64 using MSVC",
     schedule = "triggered",
@@ -693,7 +675,7 @@ dawn_win_parent_builder(
     ),
 )
 
-dawn_win_parent_builder(
+gpu.ci.windows_builder(
     name = "dawn-win-x64-builder-rel",
     description_html = "Compiles release Dawn test binaries for Windows/x64",
     schedule = "triggered",
@@ -733,7 +715,7 @@ dawn_win_parent_builder(
     ),
 )
 
-dawn_win_parent_builder(
+gpu.ci.windows_builder(
     name = "dawn-win-x86-builder-dbg",
     description_html = "Compiles debug Dawn test binaries for Windows/x86",
     schedule = "triggered",
@@ -771,7 +753,7 @@ dawn_win_parent_builder(
     ),
 )
 
-dawn_win_parent_builder(
+gpu.ci.windows_builder(
     name = "dawn-win-x86-builder-rel",
     description_html = "Compiles release Dawn test binaries for Windows/x86",
     schedule = "triggered",
@@ -813,7 +795,7 @@ dawn_win_parent_builder(
 # Fuzz Builders                                                                #
 ################################################################################
 
-dawn_linux_parent_builder(
+gpu.ci.linux_builder(
     name = "dawn-linux-x64-fuzz-dbg",
     description_html = "Compiles and runs debug Dawn binaries for 'tools/run fuzz' for Linux/x64",
     schedule = "triggered",
@@ -856,7 +838,7 @@ dawn_linux_parent_builder(
     ),
 )
 
-dawn_linux_parent_builder(
+gpu.ci.linux_builder(
     name = "dawn-linux-x64-fuzz-rel",
     description_html = "Compiles and runs release Dawn binaries for 'tools/run fuzz' for Linux/x64",
     schedule = "triggered",
@@ -899,7 +881,7 @@ dawn_linux_parent_builder(
     ),
 )
 
-dawn_linux_parent_builder(
+gpu.ci.linux_builder(
     name = "dawn-linux-x86-fuzz-dbg",
     description_html = "Compiles and runs debug Dawn binaries for 'tools/run fuzz' for Linux/x86",
     schedule = "triggered",
@@ -942,7 +924,7 @@ dawn_linux_parent_builder(
     ),
 )
 
-dawn_linux_parent_builder(
+gpu.ci.linux_builder(
     name = "dawn-linux-x86-fuzz-rel",
     description_html = "Compiles and runs release Dawn binaries for 'tools/run fuzz' for Linux/x86",
     schedule = "triggered",
@@ -985,7 +967,7 @@ dawn_linux_parent_builder(
     ),
 )
 
-dawn_linux_parent_builder(
+gpu.ci.linux_builder(
     name = "dawn-linux-x64-sws-clusterfuzz",
     description_html = "Generates ClusterFuzz corpora using Linux/x64 binaries and data from running with SwiftShader",
     # Run daily at 5PM Pacific.
