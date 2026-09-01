@@ -27,8 +27,10 @@
 
 #include "src/tint/lang/glsl/writer/printer/printer.h"
 
+#include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/enums.h"
@@ -228,7 +230,7 @@ class Printer : public tint::TextGenerator {
         struct_to_padding_struct_ids_;
 
     /// Block to emit for a continuing
-    std::function<void()> emit_continuing_;
+    std::vector<std::unique_ptr<std::function<void()>>> emit_continuing_;
 
     /// @returns `true` if @p ident should be renamed
     bool ShouldRename(std::string_view ident) {
@@ -506,8 +508,9 @@ class Printer : public tint::TextGenerator {
     void EmitDiscard() { Line() << "discard;"; }
 
     void EmitContinue(const core::ir::Continue* c) {
-        if (emit_continuing_) {
-            emit_continuing_();
+        if (!emit_continuing_.empty()) {
+            auto fn = emit_continuing_.back().get();
+            (*fn)();
         }
         if (c->Block() != c->Loop()->Body()) {
             Line() << "continue;";
@@ -527,18 +530,17 @@ class Printer : public tint::TextGenerator {
         //   }
         // }
 
-        auto emit_continuing = [&] {
-            Line() << "{";
-            {
-                const ScopedIndent si(current_buffer_);
-                EmitBlock(l->Continuing());
-            }
-            Line() << "}";
-        };
-        TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-
         Line() << "{";
         {
+            emit_continuing_.push_back(std::make_unique<std::function<void()>>([&] {
+                Line() << "{";
+                {
+                    const ScopedIndent si(current_buffer_);
+                    EmitBlock(l->Continuing());
+                }
+                Line() << "}";
+            }));
+
             ScopedIndent init(current_buffer_);
             EmitBlock(l->Initializer());
 
@@ -548,6 +550,8 @@ class Printer : public tint::TextGenerator {
                 EmitBlock(l->Body());
             }
             Line() << "}";
+
+            emit_continuing_.pop_back();
         }
         Line() << "}";
     }

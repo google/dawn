@@ -211,7 +211,7 @@ class Printer : public tint::TextGenerator {
     const core::ir::Block* current_block_ = nullptr;
 
     /// Block to emit for a continuing
-    std::function<void()> emit_continuing_;
+    std::vector<std::unique_ptr<std::function<void()>>> emit_continuing_;
 
     /// `true` if the linalg.h header has been included.
     bool linalg_included = false;
@@ -494,8 +494,9 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitContinue(const core::ir::Continue* c) {
-        if (emit_continuing_) {
-            emit_continuing_();
+        if (!emit_continuing_.empty()) {
+            auto fn = emit_continuing_.back().get();
+            (*fn)();
         }
         if (c->Block() != c->Loop()->Body()) {
             Line() << "continue;";
@@ -558,20 +559,19 @@ class Printer : public tint::TextGenerator {
                 Line() << "while(true) {";
             }
 
-            auto emit_continuing = [&] {
-                if (uses_for_loop_update) {
-                    return;
-                }
-                Line() << "{";
-                {
-                    const ScopedIndent si(current_buffer_);
-                    EmitBlock(l->Continuing());
-                }
-                Line() << "}";
-            };
-            TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-
             {
+                emit_continuing_.push_back(std::make_unique<std::function<void()>>([&] {
+                    if (uses_for_loop_update) {
+                        return;
+                    }
+                    Line() << "{";
+                    {
+                        const ScopedIndent si(current_buffer_);
+                        EmitBlock(l->Continuing());
+                    }
+                    Line() << "}";
+                }));
+
                 const ScopedIndent si(current_buffer_);
                 if (has_loop_condition) {
                     EmitBlock(l->Body(), [&analysis](const core::ir::Instruction* inst) {
@@ -580,6 +580,8 @@ class Printer : public tint::TextGenerator {
                 } else {
                     EmitBlock(l->Body());
                 }
+
+                emit_continuing_.pop_back();
             }
             Line() << "}";
         }
