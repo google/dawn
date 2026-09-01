@@ -31,9 +31,9 @@
 #include <cstdint>
 #include <utility>
 
-#include "partition_alloc/pointers/raw_ptr.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn {
 
@@ -55,15 +55,16 @@ class SerialStorage {
         explicit Iterator(StorageIterator start);
         Iterator& operator++();
 
-        bool operator==(const Iterator& other) const = default;
+        bool operator==(const Iterator& other) const;
         Value& operator*() const;
 
       private:
         StorageIterator mStorageIterator;
         // Special case the mSerialIterator when it should be equal to mStorageIterator.begin()
         // otherwise we could ask mStorageIterator.begin() when mStorageIterator is mStorage.end()
-        // which is invalid. mStorageIterator.begin() is tagged with a nullptr.
-        raw_ptr<Value, AllowPtrArithmetic> mSerialIterator;
+        // which is invalid. mStorageIterator.begin() is tagged with a nullptr-constructed Span.
+        // TODO(https://crbug.com/526537224): Use RawSpan.
+        Span<Value> mSerialIterator;
     };
 
     class ConstIterator {
@@ -71,12 +72,13 @@ class SerialStorage {
         explicit ConstIterator(ConstStorageIterator start);
         ConstIterator& operator++();
 
-        bool operator==(const ConstIterator& other) const = default;
+        bool operator==(const ConstIterator& other) const;
         const Value& operator*() const;
 
       private:
         ConstStorageIterator mStorageIterator;
-        raw_ptr<const Value, AllowPtrArithmetic> mSerialIterator;
+        // TODO(https://crbug.com/526537224): Use RawSpan.
+        Span<const Value> mSerialIterator;
     };
 
     class BeginEnd {
@@ -224,20 +226,17 @@ typename SerialStorage<Derived>::Iterator SerialStorage<Derived>::BeginEnd::end(
 
 template <typename Derived>
 SerialStorage<Derived>::Iterator::Iterator(typename SerialStorage<Derived>::StorageIterator start)
-    : mStorageIterator(start), mSerialIterator(nullptr) {}
+    : mStorageIterator(start), mSerialIterator() {}
 
 template <typename Derived>
 typename SerialStorage<Derived>::Iterator& SerialStorage<Derived>::Iterator::operator++() {
-    Value* vectorData = mStorageIterator->second.data();
-
-    if (mSerialIterator == nullptr) {
-        mSerialIterator = DAWN_UNSAFE_TODO(vectorData + 1);
-    } else {
-        DAWN_UNSAFE_TODO(mSerialIterator++);
+    if (mSerialIterator.data() == nullptr) {
+        mSerialIterator = mStorageIterator->second;
     }
+    mSerialIterator.TakeFirst(1);
 
-    if (mSerialIterator >= DAWN_UNSAFE_TODO(vectorData + mStorageIterator->second.size())) {
-        mSerialIterator = nullptr;
+    if (mSerialIterator.empty()) {
+        mSerialIterator = {};
         mStorageIterator++;
     }
 
@@ -245,11 +244,18 @@ typename SerialStorage<Derived>::Iterator& SerialStorage<Derived>::Iterator::ope
 }
 
 template <typename Derived>
+bool SerialStorage<Derived>::Iterator::operator==(const Iterator& other) const {
+    return mStorageIterator == other.mStorageIterator &&
+           mSerialIterator.data() == other.mSerialIterator.data() &&
+           mSerialIterator.size() == other.mSerialIterator.size();
+}
+
+template <typename Derived>
 typename SerialStorage<Derived>::Value& SerialStorage<Derived>::Iterator::operator*() const {
-    if (mSerialIterator == nullptr) {
+    if (mSerialIterator.data() == nullptr) {
         return *mStorageIterator->second.begin();
     }
-    return *mSerialIterator;
+    return mSerialIterator.front();
 }
 
 // SerialStorage::ConstBeginEnd
@@ -276,21 +282,18 @@ typename SerialStorage<Derived>::ConstIterator SerialStorage<Derived>::ConstBegi
 template <typename Derived>
 SerialStorage<Derived>::ConstIterator::ConstIterator(
     typename SerialStorage<Derived>::ConstStorageIterator start)
-    : mStorageIterator(start), mSerialIterator(nullptr) {}
+    : mStorageIterator(start), mSerialIterator() {}
 
 template <typename Derived>
 typename SerialStorage<Derived>::ConstIterator&
 SerialStorage<Derived>::ConstIterator::operator++() {
-    const Value* vectorData = mStorageIterator->second.data();
-
-    if (mSerialIterator == nullptr) {
-        mSerialIterator = vectorData + 1;
-    } else {
-        mSerialIterator++;
+    if (mSerialIterator.data() == nullptr) {
+        mSerialIterator = mStorageIterator->second;
     }
+    mSerialIterator.TakeFirst(1);
 
-    if (mSerialIterator >= vectorData + mStorageIterator->second.size()) {
-        mSerialIterator = nullptr;
+    if (mSerialIterator.empty() && mSerialIterator.data() != nullptr) {
+        mSerialIterator = {};
         mStorageIterator++;
     }
 
@@ -298,12 +301,19 @@ SerialStorage<Derived>::ConstIterator::operator++() {
 }
 
 template <typename Derived>
+bool SerialStorage<Derived>::ConstIterator::operator==(const ConstIterator& other) const {
+    return mStorageIterator == other.mStorageIterator &&
+           mSerialIterator.data() == other.mSerialIterator.data() &&
+           mSerialIterator.size() == other.mSerialIterator.size();
+}
+
+template <typename Derived>
 const typename SerialStorage<Derived>::Value& SerialStorage<Derived>::ConstIterator::operator*()
     const {
-    if (mSerialIterator == nullptr) {
+    if (mSerialIterator.data() == nullptr) {
         return *mStorageIterator->second.begin();
     }
-    return *mSerialIterator;
+    return mSerialIterator.front();
 }
 
 }  // namespace dawn
