@@ -56,49 +56,32 @@ void DumpIRIfEnabled([[maybe_unused]] const Module& ir,
 #endif
 }
 
-/// The core IR validator.
-class Validator {
-  public:
-    /// Create a core validator
-    /// @param mod the module to be validated
-    /// @param source the source of the program, WGSL or IR
-    Validator(Module& mod, ErrorSource error_source) : mod_(mod), error_source_(error_source) {}
+}  // namespace
 
-    /// Destructor
-    ~Validator() = default;
+Validator::Validator(Module& mod, ErrorSource error_source)
+    : ir_(mod), error_source_(error_source) {}
 
-    /// Runs the validator over the module provided during construction
-    /// @returns success or failure
-
-    Result<SuccessType> Run() {
-        if (error_source_ == ErrorSource::kIr) {
-            validator::Structural s(mod_, diagnostics_);
-            s.Validate();
-        }
-
-        // Only run the functional validation if we are structurally valid
-        if (!diagnostics_.ContainsErrors()) {
-            validator::Functional f(mod_, diagnostics_, error_source_);
-            f.Validate();
-        }
-
-        if (diagnostics_.ContainsErrors()) {
-            if (error_source_ == ErrorSource::kIr) {
-                const StyledText disassembly = ir::Disassembler(mod_).Text();
-                diagnostics_.AddNote(Source{}) << "# Disassembly\n" << disassembly;
-            }
-            return Failure{diagnostics_.Str()};
-        }
-        return Success;
+Result<SuccessType> Validator::Run() {
+    if (error_source_ == ErrorSource::kIr) {
+        validator::Structural s(ir_, diag_);
+        s.Validate();
     }
 
-  private:
-    Module& mod_;
-    ErrorSource error_source_ = ErrorSource::kIr;
-    diag::List diagnostics_;
-};
+    // Only run the functional validation if we are structurally valid
+    if (!diag_.ContainsErrors()) {
+        validator::Functional f(ir_, diag_, error_source_);
+        f.Validate();
+    }
 
-}  // namespace
+    if (diag_.ContainsErrors()) {
+        if (error_source_ == ErrorSource::kIr) {
+            const StyledText disassembly = ir::Disassembler(ir_).Text();
+            diag_.AddNote(Source{}) << "# Disassembly\n" << disassembly;
+        }
+        return Failure{diag_.Str()};
+    }
+    return Success;
+}
 
 Result<SuccessType> Validate(Module& mod, std::string_view msg) {
     DumpIRIfEnabled(mod, msg);

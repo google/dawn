@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_CORE_IR_VALIDATOR_H_
 
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result.h"
 
 namespace tint::core::ir {
@@ -36,6 +37,28 @@ namespace tint::core::ir {
 enum class ErrorSource {
     kWgsl,
     kIr,
+};
+
+/// The core IR validator.
+class Validator {
+  public:
+    /// Create a core validator
+    /// @param mod the module to be validated
+    /// @param source the source of the program, WGSL or IR
+    Validator(Module& mod, ErrorSource error_source);
+
+    /// Destructor
+    ~Validator() = default;
+
+    /// Runs the validator over the module provided during construction
+    /// @returns success or failure
+
+    Result<SuccessType> Run();
+
+  private:
+    Module& ir_;
+    ErrorSource error_source_ = ErrorSource::kIr;
+    diag::List diag_;
 };
 
 /// Validates the module @p ir is correctly formed
