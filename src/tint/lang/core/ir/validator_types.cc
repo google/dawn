@@ -350,6 +350,43 @@ bool Structural::CheckStruct(const core::type::Struct* str,
     return true;
 }
 
+bool Structural::CheckStructMemberAttributes(const core::type::StructMember* member,
+                                             std::function<diag::Diagnostic&()> make_diag) {
+    const auto checkers = IOAttributeCheckersFor(member->Attributes(), /*skip_builtins*/ false);
+    for (const auto* checker : checkers) {
+        auto res = checker->check(member->Type(), member->Attributes(), ir_.properties,
+                                  IOAttributeUsage::kUndefinedUsage);
+        if (res != Success) {
+            make_diag() << res.Failure();
+            return false;
+        }
+        if (!checker->type_check(member->Type(), ir_.properties)) {
+            make_diag() << ToString(checker->kind) << " " << checker->type_error;
+            return false;
+        }
+    }
+
+    if (member->Attributes().location.has_value()) {
+        if (ir_.properties.Contains(Property::kAllowLocationForNumericComposites)) {
+            if (!member->Type()->UnwrapPtrOrRef()->IsNumericScalarOrVector() &&
+                !member->Type()->UnwrapPtrOrRef()->Is<core::type::Struct>()) {
+                make_diag() << "struct member with a location attribute must be a numeric scalar, "
+                               "a numeric vector or a struct, but has type "
+                            << member->Type()->FriendlyName();
+                return false;
+            }
+        } else {
+            if (!member->Type()->UnwrapPtrOrRef()->IsNumericScalarOrVector()) {
+                make_diag() << "struct member with a location attribute must be "
+                               "a numeric scalar or vector, but has type "
+                            << member->Type()->FriendlyName();
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 bool Structural::CheckRef(const core::type::Reference* ref,
                           std::function<diag::Diagnostic&()>& diag,
                           const core::type::Type* root) {

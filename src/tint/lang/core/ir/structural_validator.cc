@@ -40,11 +40,8 @@
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
-#include "src/tint/lang/core/type/function.h"
-#include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
-#include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/containers/predicates.h"
@@ -91,134 +88,6 @@ Structural::Structural(const Module& ir, diag::List& diagnostics)
     : ir_(ir), diag_(diagnostics), referenced_module_vars_(ir) {}
 
 Structural::~Structural() = default;
-
-Disassembler& Structural::Disassemble() {
-    if (!disassembler_) {
-        disassembler_.emplace(ir::Disassembler(ir_));
-    }
-    return *disassembler_;
-}
-
-void Structural::Validate() {
-    RunStructuralSoundnessChecks();
-
-    CheckForRecursion();
-    CheckForOrphanedInstructions();
-    CheckStageRestrictedInstructions();
-}
-
-void Structural::QueueTasks(std::function<void()> begin,
-                            std::function<void()> mid,
-                            std::function<void()> end) {
-    tasks_.Push(end);
-    tasks_.Push(mid);
-    tasks_.Push(begin);
-}
-
-std::function<void()> Structural::QueueNestedTasks(std::function<void()> begin,
-                                                   std::function<void()> mid,
-                                                   std::function<void()> end) {
-    return [this, begin, mid, end] { QueueTasks(begin, mid, end); };
-}
-
-std::function<void()> Structural::PushControlStack(const ControlInstruction* ctrl) {
-    return [this, ctrl] { control_stack_.Push(ctrl); };
-}
-
-std::function<void()> Structural::PopControlStack() {
-    return [this] { control_stack_.Pop(); };
-}
-
-std::function<void()> Structural::BeginBlockTask(const Block* blk) {
-    return [this, blk] {
-        if (!blk->IsEmpty()) {
-            BeginBlock(blk);
-        }
-    };
-}
-
-std::function<void()> Structural::EndBlockTask(const Block* blk) {
-    return [this, blk] {
-        if (!blk->IsEmpty()) {
-            EndBlock();
-        }
-    };
-}
-
-void Structural::CheckForRecursion() {
-    TINT_CHECK_ERRORS();
-
-    ReferencedFunctions<const Module> referenced_functions(ir_);
-    for (auto& func : ir_.functions) {
-        auto& refs = referenced_functions.TransitiveReferences(func);
-        if (refs.Contains(func)) {
-            // TODO(434684891): Consider improving this error with more information.
-            AddError(func) << "recursive function calls are not allowed";
-            return;
-        }
-    }
-}
-
-void Structural::CheckForOrphanedInstructions() {
-    TINT_CHECK_ERRORS();
-
-    // Check for orphaned instructions.
-    for (auto* inst : ir_.Instructions()) {
-        if (!visited_instructions_.Contains(inst)) {
-            AddError(inst) << "orphaned instruction: " << inst->FriendlyName();
-        }
-    }
-}
-
-void Structural::CheckStageRestrictedInstructions() {
-    TINT_CHECK_ERRORS();
-
-    // Check for instructions being used in stages that do not support them.
-    for (const auto& i : stage_restricted_instructions_) {
-        const auto& inst = i.key;
-        const auto& stages = i.value;
-        const auto* f = ContainingFunction(inst);
-        if (f == nullptr) {
-            continue;
-        }
-
-        if (f->IsEntryPoint() && !stages.Contains(f->Stage())) {
-            AddError(inst) << "cannot be used in a " << f->Stage() << " shader";
-        } else {
-            for (const Function* ep : ContainingEndPoints(f)) {
-                if (!stages.Contains(ep->Stage())) {
-                    AddError(inst) << "cannot be used in a " << ep->Stage() << " shader";
-                }
-            }
-        }
-    }
-}
-
-void Structural::RunStructuralSoundnessChecks() {
-    {
-        scope_stack_.Push();
-        TINT_DEFER(scope_stack_.Pop());
-
-        CheckRootBlock(ir_.root_block);
-
-        for (auto& func : ir_.functions) {
-            if (!all_functions_.Add(func)) {
-                AddError(func) << "function " << NameOf(func) << " added to module multiple times";
-            }
-            scope_stack_.Add(func);
-        }
-
-        for (auto& func : ir_.functions) {
-            block_to_function_.Add(func->Block(), func);
-            CheckFunction(func);
-        }
-    }
-
-    TINT_ASSERT(scope_stack_.IsEmpty());
-    TINT_ASSERT(tasks_.IsEmpty());
-    TINT_ASSERT(control_stack_.IsEmpty());
-    TINT_ASSERT(block_stack_.IsEmpty());
-}
 
 diag::Diagnostic& Structural::AddError(const Instruction* inst) {
     auto src = Disassemble().InstructionSource(inst);
@@ -515,6 +384,25 @@ bool Structural::CheckResults(const ir::Instruction* inst, std::optional<size_t>
     return passed;
 }
 
+bool Structural::CheckResultsAndOperandRange(const ir::Instruction* inst,
+                                             size_t num_results,
+                                             size_t min_operands,
+                                             std::optional<size_t> max_operands = {}) {
+    // Intentionally avoiding short-circuiting here
+    bool results_passed = CheckResults(inst, num_results);
+    bool operands_passed = CheckOperands(inst, min_operands, max_operands);
+    return results_passed && operands_passed;
+}
+
+bool Structural::CheckResultsAndOperands(const ir::Instruction* inst,
+                                         size_t num_results,
+                                         size_t num_operands) {
+    // Intentionally avoiding short-circuiting here
+    bool results_passed = CheckResults(inst, num_results);
+    bool operands_passed = CheckOperands(inst, num_operands);
+    return results_passed && operands_passed;
+}
+
 bool Structural::CheckOperand(const Instruction* inst, size_t idx) {
     auto* operand = inst->Operand(idx);
 
@@ -627,23 +515,286 @@ bool Structural::CheckOperands(const ir::Instruction* inst, std::optional<size_t
     return passed;
 }
 
-bool Structural::CheckResultsAndOperandRange(const ir::Instruction* inst,
-                                             size_t num_results,
-                                             size_t min_operands,
-                                             std::optional<size_t> max_operands = {}) {
-    // Intentionally avoiding short-circuiting here
-    bool results_passed = CheckResults(inst, num_results);
-    bool operands_passed = CheckOperands(inst, min_operands, max_operands);
-    return results_passed && operands_passed;
+void Structural::CheckOperandsMatchTarget(const Instruction* source_inst,
+                                          size_t source_operand_offset,
+                                          size_t source_operand_count,
+                                          const CastableBase* target,
+                                          VectorRef<const Value*> target_values) {
+    if (source_operand_count != target_values.Length()) {
+        auto values = [&](size_t n) { return n == 1 ? " value" : " values"; };
+        AddError(source_inst) << "provides " << source_operand_count << values(source_operand_count)
+                              << " but " << NameOf(target) << " expects " << target_values.Length()
+                              << values(target_values.Length());
+        AddDeclarationNote(target);
+    }
+    size_t count = std::min(source_operand_count, target_values.Length());
+    for (size_t i = 0; i < count; i++) {
+        auto* source_value = source_inst->Operand(source_operand_offset + i);
+        auto* target_value = target_values[i];
+        if (!source_value || !target_value) {
+            continue;  // Caller should be checking operands are not null
+        }
+        auto* source_type = source_value->Type();
+        auto* target_type = target_value->Type();
+        if (source_type != target_type) {
+            AddError(source_inst, source_operand_offset + i)
+                << "operand with type " << NameOf(source_type) << " does not match "
+                << NameOf(target) << " target type " << NameOf(target_type);
+            AddDeclarationNote(target_value);
+        }
+    }
 }
 
-bool Structural::CheckResultsAndOperands(const ir::Instruction* inst,
-                                         size_t num_results,
-                                         size_t num_operands) {
-    // Intentionally avoiding short-circuiting here
-    bool results_passed = CheckResults(inst, num_results);
-    bool operands_passed = CheckOperands(inst, num_operands);
-    return results_passed && operands_passed;
+void Structural::QueueTasks(std::function<void()> begin,
+                            std::function<void()> mid,
+                            std::function<void()> end) {
+    tasks_.Push(end);
+    tasks_.Push(mid);
+    tasks_.Push(begin);
+}
+
+std::function<void()> Structural::QueueNestedTasks(std::function<void()> begin,
+                                                   std::function<void()> mid,
+                                                   std::function<void()> end) {
+    return [this, begin, mid, end] { QueueTasks(begin, mid, end); };
+}
+
+void Structural::QueueBlock(const Block* blk) {
+    QueueTasks([this, blk] { BeginBlock(blk); }, [] {}, [this] { EndBlock(); });
+}
+
+void Structural::QueueInstructions(const Instruction* inst) {
+    TINT_CHECK_ERRORS();
+
+    // Note, the ordering here is very specific. The `CheckInstruction` will push both more control
+    // blocks but also result validation. So, you can change the ordering of the tasks if you change
+    // the ordering of these calls.
+    tasks_.Push([this, inst] {
+        // Tasks are processed LIFO, so push the next instruction to the stack before checking the
+        // current instruction, which may need to add more blocks to the stack itself.
+        if (inst->next) {
+            QueueInstructions(inst->next);
+        }
+        CheckInstruction(inst);
+    });
+}
+
+std::function<void()> Structural::PushControlStack(const ControlInstruction* ctrl) {
+    return [this, ctrl] { control_stack_.Push(ctrl); };
+}
+
+std::function<void()> Structural::PopControlStack() {
+    return [this] { control_stack_.Pop(); };
+}
+
+std::function<void()> Structural::BeginBlockTask(const Block* blk) {
+    return [this, blk] {
+        if (!blk->IsEmpty()) {
+            BeginBlock(blk);
+        }
+    };
+}
+
+std::function<void()> Structural::EndBlockTask(const Block* blk) {
+    return [this, blk] {
+        if (!blk->IsEmpty()) {
+            EndBlock();
+        }
+    };
+}
+
+void Structural::ProcessTasks() {
+    while (!tasks_.IsEmpty()) {
+        tasks_.Pop()();
+    }
+}
+
+void Structural::BeginBlock(const Block* blk) {
+    scope_stack_.Push();
+    block_stack_.Push(blk);
+
+    if (auto* mb = blk->As<MultiInBlock>()) {
+        for (auto* param : mb->Params()) {
+            if (!param->Alive()) {
+                AddError(param) << "destroyed parameter found in block parameter list";
+                return;
+            }
+            if (!param->Block()) {
+                AddError(param) << "block parameter has nullptr parent block";
+                return;
+            } else if (param->Block() != mb) {
+                AddError(param) << "block parameter has incorrect parent block";
+                AddNote(param->Block()) << "parent block declared here";
+                return;
+            }
+
+            CheckType(param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); });
+
+            if (param->Type()->Is<core::type::Void>()) {
+                AddError(param) << "block parameter type cannot be void";
+            }
+            if (param->Type()->Is<core::type::Reference>()) {
+                AddError(param) << "block parameter type cannot be a reference";
+            }
+
+            scope_stack_.Add(param);
+        }
+    }
+
+    if (!blk->Terminator()) {
+        AddError(blk) << "block does not end in a terminator instruction";
+    }
+
+    // Validate the instructions w.r.t. the parent block
+    for (auto* inst : *blk) {
+        if (inst->Block() != blk) {
+            AddError(inst) << "block instruction does not have same block as parent";
+            AddNote(blk) << "in block";
+        }
+    }
+
+    // Enqueue validation of the instructions of the block
+    if (!blk->IsEmpty()) {
+        QueueInstructions(blk->Instructions());
+    }
+}
+
+void Structural::EndBlock() {
+    scope_stack_.Pop();
+    block_stack_.Pop();
+}
+
+const ir::Function* Structural::ContainingFunction(const ir::Instruction* inst) {
+    if (inst->Block() == ir_.root_block) {
+        return nullptr;
+    }
+
+    return block_to_function_.GetOrAdd(inst->Block(), [&] {  //
+        return ContainingFunction(inst->Block()->Parent());
+    });
+}
+
+Hashset<const ir::Function*, 4> Structural::ContainingEndPoints(const ir::Function* f) {
+    if (!f) {
+        return {};
+    }
+
+    Hashset<const ir::Function*, 4> result{};
+    Hashset<const ir::Function*, 4> visited{f};
+
+    auto call_sites = user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>()).Vector();
+    while (!call_sites.IsEmpty()) {
+        auto call_site = call_sites.Pop();
+        auto calling_function = ContainingFunction(call_site);
+        if (!calling_function) {
+            continue;
+        }
+
+        if (visited.Contains(calling_function)) {
+            continue;
+        }
+        visited.Add(calling_function);
+
+        if (calling_function->IsEntryPoint()) {
+            result.Add(calling_function);
+        }
+
+        for (auto new_call_sites : user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>())) {
+            call_sites.Push(new_call_sites);
+        }
+    }
+
+    return result;
+}
+
+Disassembler& Structural::Disassemble() {
+    if (!disassembler_) {
+        disassembler_.emplace(ir::Disassembler(ir_));
+    }
+    return *disassembler_;
+}
+
+void Structural::Validate() {
+    RunStructuralSoundnessChecks();
+
+    CheckForRecursion();
+    CheckForOrphanedInstructions();
+    CheckStageRestrictedInstructions();
+}
+
+void Structural::RunStructuralSoundnessChecks() {
+    {
+        scope_stack_.Push();
+        TINT_DEFER(scope_stack_.Pop());
+
+        CheckRootBlock(ir_.root_block);
+
+        for (auto& func : ir_.functions) {
+            if (!all_functions_.Add(func)) {
+                AddError(func) << "function " << NameOf(func) << " added to module multiple times";
+            }
+            scope_stack_.Add(func);
+        }
+
+        for (auto& func : ir_.functions) {
+            block_to_function_.Add(func->Block(), func);
+            CheckFunction(func);
+        }
+    }
+
+    TINT_ASSERT(scope_stack_.IsEmpty());
+    TINT_ASSERT(tasks_.IsEmpty());
+    TINT_ASSERT(control_stack_.IsEmpty());
+    TINT_ASSERT(block_stack_.IsEmpty());
+}
+
+void Structural::CheckForRecursion() {
+    TINT_CHECK_ERRORS();
+
+    ReferencedFunctions<const Module> referenced_functions(ir_);
+    for (auto& func : ir_.functions) {
+        auto& refs = referenced_functions.TransitiveReferences(func);
+        if (refs.Contains(func)) {
+            // TODO(434684891): Consider improving this error with more information.
+            AddError(func) << "recursive function calls are not allowed";
+            return;
+        }
+    }
+}
+
+void Structural::CheckForOrphanedInstructions() {
+    TINT_CHECK_ERRORS();
+
+    // Check for orphaned instructions.
+    for (auto* inst : ir_.Instructions()) {
+        if (!visited_instructions_.Contains(inst)) {
+            AddError(inst) << "orphaned instruction: " << inst->FriendlyName();
+        }
+    }
+}
+
+void Structural::CheckStageRestrictedInstructions() {
+    TINT_CHECK_ERRORS();
+
+    // Check for instructions being used in stages that do not support them.
+    for (const auto& i : stage_restricted_instructions_) {
+        const auto& inst = i.key;
+        const auto& stages = i.value;
+        const auto* f = ContainingFunction(inst);
+        if (f == nullptr) {
+            continue;
+        }
+
+        if (f->IsEntryPoint() && !stages.Contains(f->Stage())) {
+            AddError(inst) << "cannot be used in a " << f->Stage() << " shader";
+        } else {
+            for (const Function* ep : ContainingEndPoints(f)) {
+                if (!stages.Contains(ep->Stage())) {
+                    AddError(inst) << "cannot be used in a " << ep->Stage() << " shader";
+                }
+            }
+        }
+    }
 }
 
 void Structural::CheckRootBlock(const Block* blk) {
@@ -748,87 +899,6 @@ void Structural::CheckOnlyUsedInRootBlock(const Instruction* inst) {
     }
 
     CheckInstruction(inst);
-}
-
-void Structural::ProcessTasks() {
-    while (!tasks_.IsEmpty()) {
-        tasks_.Pop()();
-    }
-}
-
-void Structural::QueueBlock(const Block* blk) {
-    QueueTasks([this, blk] { BeginBlock(blk); }, [] {}, [this] { EndBlock(); });
-}
-
-void Structural::BeginBlock(const Block* blk) {
-    scope_stack_.Push();
-    block_stack_.Push(blk);
-
-    if (auto* mb = blk->As<MultiInBlock>()) {
-        for (auto* param : mb->Params()) {
-            if (!param->Alive()) {
-                AddError(param) << "destroyed parameter found in block parameter list";
-                return;
-            }
-            if (!param->Block()) {
-                AddError(param) << "block parameter has nullptr parent block";
-                return;
-            } else if (param->Block() != mb) {
-                AddError(param) << "block parameter has incorrect parent block";
-                AddNote(param->Block()) << "parent block declared here";
-                return;
-            }
-
-            CheckType(param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); });
-
-            if (param->Type()->Is<core::type::Void>()) {
-                AddError(param) << "block parameter type cannot be void";
-            }
-            if (param->Type()->Is<core::type::Reference>()) {
-                AddError(param) << "block parameter type cannot be a reference";
-            }
-
-            scope_stack_.Add(param);
-        }
-    }
-
-    if (!blk->Terminator()) {
-        AddError(blk) << "block does not end in a terminator instruction";
-    }
-
-    // Validate the instructions w.r.t. the parent block
-    for (auto* inst : *blk) {
-        if (inst->Block() != blk) {
-            AddError(inst) << "block instruction does not have same block as parent";
-            AddNote(blk) << "in block";
-        }
-    }
-
-    // Enqueue validation of the instructions of the block
-    if (!blk->IsEmpty()) {
-        QueueInstructions(blk->Instructions());
-    }
-}
-
-void Structural::EndBlock() {
-    scope_stack_.Pop();
-    block_stack_.Pop();
-}
-
-void Structural::QueueInstructions(const Instruction* inst) {
-    TINT_CHECK_ERRORS();
-
-    // Note, the ordering here is very specific. The `CheckInstruction` will push both more control
-    // blocks but also result validation. So, you can change the ordering of the tasks if you change
-    // the ordering of these calls.
-    tasks_.Push([this, inst] {
-        // Tasks are processed LIFO, so push the next instruction to the stack before checking the
-        // current instruction, which may need to add more blocks to the stack itself.
-        if (inst->next) {
-            QueueInstructions(inst->next);
-        }
-        CheckInstruction(inst);
-    });
 }
 
 void Structural::CheckInstruction(const Instruction* inst) {
@@ -949,85 +1019,6 @@ void Structural::CheckVar(const Var* var) {
     }
 }
 
-const ir::Function* Structural::ContainingFunction(const ir::Instruction* inst) {
-    if (inst->Block() == ir_.root_block) {
-        return nullptr;
-    }
-
-    return block_to_function_.GetOrAdd(inst->Block(), [&] {  //
-        return ContainingFunction(inst->Block()->Parent());
-    });
-}
-
-Hashset<const ir::Function*, 4> Structural::ContainingEndPoints(const ir::Function* f) {
-    if (!f) {
-        return {};
-    }
-
-    Hashset<const ir::Function*, 4> result{};
-    Hashset<const ir::Function*, 4> visited{f};
-
-    auto call_sites = user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>()).Vector();
-    while (!call_sites.IsEmpty()) {
-        auto call_site = call_sites.Pop();
-        auto calling_function = ContainingFunction(call_site);
-        if (!calling_function) {
-            continue;
-        }
-
-        if (visited.Contains(calling_function)) {
-            continue;
-        }
-        visited.Add(calling_function);
-
-        if (calling_function->IsEntryPoint()) {
-            result.Add(calling_function);
-        }
-
-        for (auto new_call_sites : user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>())) {
-            call_sites.Push(new_call_sites);
-        }
-    }
-
-    return result;
-}
-
-bool Structural::CheckStructMemberAttributes(const core::type::StructMember* member,
-                                             std::function<diag::Diagnostic&()> make_diag) {
-    const auto checkers = IOAttributeCheckersFor(member->Attributes(), /*skip_builtins*/ false);
-    for (const auto* checker : checkers) {
-        auto res = checker->check(member->Type(), member->Attributes(), ir_.properties,
-                                  IOAttributeUsage::kUndefinedUsage);
-        if (res != Success) {
-            make_diag() << res.Failure();
-            return false;
-        }
-        if (!checker->type_check(member->Type(), ir_.properties)) {
-            make_diag() << ToString(checker->kind) << " " << checker->type_error;
-            return false;
-        }
-    }
-
-    if (member->Attributes().location.has_value()) {
-        if (ir_.properties.Contains(Property::kAllowLocationForNumericComposites)) {
-            if (!member->Type()->UnwrapPtrOrRef()->IsNumericScalarOrVector() &&
-                !member->Type()->UnwrapPtrOrRef()->Is<core::type::Struct>()) {
-                make_diag() << "struct member with a location attribute must be a numeric scalar, "
-                               "a numeric vector or a struct, but has type "
-                            << member->Type()->FriendlyName();
-                return false;
-            }
-        } else {
-            if (!member->Type()->UnwrapPtrOrRef()->IsNumericScalarOrVector()) {
-                make_diag() << "struct member with a location attribute must be "
-                               "a numeric scalar or vector, but has type "
-                            << member->Type()->FriendlyName();
-                return false;
-            }
-        }
-    }
-    return true;
-}
 void Structural::CheckLet(const Let* l) {
     CheckResultsAndOperands(l, Let::kNumResults, Let::kNumOperands);
 }
@@ -1489,36 +1480,6 @@ void Structural::CheckPhony(const Phony* p) {
 
     if (!CheckResultsAndOperands(p, Phony::kNumResults, Phony::kNumOperands)) {
         return;
-    }
-}
-
-void Structural::CheckOperandsMatchTarget(const Instruction* source_inst,
-                                          size_t source_operand_offset,
-                                          size_t source_operand_count,
-                                          const CastableBase* target,
-                                          VectorRef<const Value*> target_values) {
-    if (source_operand_count != target_values.Length()) {
-        auto values = [&](size_t n) { return n == 1 ? " value" : " values"; };
-        AddError(source_inst) << "provides " << source_operand_count << values(source_operand_count)
-                              << " but " << NameOf(target) << " expects " << target_values.Length()
-                              << values(target_values.Length());
-        AddDeclarationNote(target);
-    }
-    size_t count = std::min(source_operand_count, target_values.Length());
-    for (size_t i = 0; i < count; i++) {
-        auto* source_value = source_inst->Operand(source_operand_offset + i);
-        auto* target_value = target_values[i];
-        if (!source_value || !target_value) {
-            continue;  // Caller should be checking operands are not null
-        }
-        auto* source_type = source_value->Type();
-        auto* target_type = target_value->Type();
-        if (source_type != target_type) {
-            AddError(source_inst, source_operand_offset + i)
-                << "operand with type " << NameOf(source_type) << " does not match "
-                << NameOf(target) << " target type " << NameOf(target_type);
-            AddDeclarationNote(target_value);
-        }
     }
 }
 
