@@ -143,12 +143,34 @@ targets.mixin(
 )
 
 targets.mixin(
+    name = "tint_ir_mesa_merge",
+    merge = targets.merge(
+        script = "//scripts/merge_scripts/generate_tint_fuzz_corpora.py",
+        args = [
+            "--fuzzer-name",
+            "tint_ir_mesa_fuzzer",
+        ],
+    ),
+)
+
+targets.mixin(
     name = "tint_wgsl_merge",
     merge = targets.merge(
         script = "//scripts/merge_scripts/generate_tint_fuzz_corpora.py",
         args = [
             "--fuzzer-name",
             "tint_wgsl_fuzzer",
+        ],
+    ),
+)
+
+targets.mixin(
+    name = "tint_wgsl_mesa_merge",
+    merge = targets.merge(
+        script = "//scripts/merge_scripts/generate_tint_fuzz_corpora.py",
+        args = [
+            "--fuzzer-name",
+            "tint_wgsl_mesa_fuzzer",
         ],
     ),
 )

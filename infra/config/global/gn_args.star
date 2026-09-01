@@ -130,6 +130,13 @@ gn_args.config(
 )
 
 gn_args.config(
+    name = "tint_build_mesa",
+    args = {
+        "tint_build_mesa": True,
+    },
+)
+
+gn_args.config(
     name = "linux",
     args = {
         "target_os": "linux",

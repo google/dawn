@@ -820,12 +820,14 @@ gpu.ci.linux_builder(
             "linux_clang",
             "non_component",
             "debug",
+            "tint_build_mesa",
             "x64",
         ],
     ),
     targets = targets.bundle(
         targets = [
             "tint_fuzzer_corpus_check_tests",
+            "tint_mesa_fuzzer_corpus_check_tests",
         ],
         mixins = [
             "gpu_linux_gce_stable",
@@ -866,12 +868,14 @@ gpu.ci.linux_builder(
             "linux_clang",
             "non_component",
             "release_with_dchecks",
+            "tint_build_mesa",
             "x64",
         ],
     ),
     targets = targets.bundle(
         targets = [
             "tint_fuzzer_corpus_check_tests",
+            "tint_mesa_fuzzer_corpus_check_tests",
         ],
         mixins = [
             "gpu_linux_gce_stable",
@@ -894,9 +898,6 @@ gpu.ci.linux_builder(
     builder_spec = builder_config.builder_spec(
         gclient_config = builder_config.gclient_config(
             config = "dawn",
-            apply_configs = [
-                "checkout_mesa",
-            ],
         ),
         chromium_config = builder_config.chromium_config(
             config = "dawn_base",
@@ -940,9 +941,6 @@ gpu.ci.linux_builder(
     builder_spec = builder_config.builder_spec(
         gclient_config = builder_config.gclient_config(
             config = "dawn",
-            apply_configs = [
-                "checkout_mesa",
-            ],
         ),
         chromium_config = builder_config.chromium_config(
             config = "dawn_base",
@@ -1009,12 +1007,14 @@ gpu.ci.linux_builder(
             "linux_clang",
             "release_with_dchecks",
             "tint_build_ir_binary",
+            "tint_build_mesa",
             "x64",
         ],
     ),
     targets = targets.bundle(
         targets = [
             "tint_fuzzer_corpus_generate_tests",
+            "tint_mesa_fuzzer_corpus_generate_tests",
             "wire_trace_gtests",
         ],
         mixins = [

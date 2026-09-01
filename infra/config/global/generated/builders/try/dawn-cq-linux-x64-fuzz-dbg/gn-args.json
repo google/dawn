@@ -7,6 +7,7 @@
     "target_cpu": "x64",
     "target_os": "linux",
     "tint_build_hlsl_writer": true,
+    "tint_build_mesa": true,
     "tint_build_msl_writer": true,
     "tint_build_spv_reader": true,
     "tint_build_spv_writer": true,

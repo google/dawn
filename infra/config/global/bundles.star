@@ -129,10 +129,26 @@ targets.bundle(
 )
 
 targets.bundle(
+    name = "tint_mesa_fuzzer_corpus_check_tests",
+    targets = [
+        "tint_ir_mesa_fuzzer_corpus_check_tests",
+        "tint_wgsl_mesa_fuzzer_corpus_check_tests",
+    ],
+)
+
+targets.bundle(
     name = "tint_fuzzer_corpus_generate_tests",
     targets = [
         "tint_ir_fuzzer_corpus_generate_tests",
         "tint_wgsl_fuzzer_corpus_generate_tests",
+    ],
+)
+
+targets.bundle(
+    name = "tint_mesa_fuzzer_corpus_generate_tests",
+    targets = [
+        "tint_ir_mesa_fuzzer_corpus_generate_tests",
+        "tint_wgsl_mesa_fuzzer_corpus_generate_tests",
     ],
 )
 

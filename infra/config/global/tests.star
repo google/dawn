@@ -341,6 +341,21 @@ targets.tests.isolated_script_test(
 )
 
 targets.tests.isolated_script_test(
+    name = "tint_ir_mesa_fuzzer_corpus_check_tests",
+    mixins = [
+        "result_adapter_single",
+        "tint_fuzzer_corpus_common_args",
+        "true_noop_merge",
+    ],
+    args = [
+        "-check",
+        "-ir",
+        "-mesa",
+    ],
+    binary = "fuzzer_corpus_tests",
+)
+
+targets.tests.isolated_script_test(
     name = "tint_ir_fuzzer_corpus_generate_tests",
     mixins = [
         "result_adapter_single",
@@ -350,6 +365,21 @@ targets.tests.isolated_script_test(
     ],
     args = [
         "-ir",
+    ],
+    binary = "fuzzer_corpus_tests",
+)
+
+targets.tests.isolated_script_test(
+    name = "tint_ir_mesa_fuzzer_corpus_generate_tests",
+    mixins = [
+        "result_adapter_single",
+        "tint_fuzzer_corpus_common_args",
+        "tint_fuzzer_corpus_generate_args",
+        "tint_ir_mesa_merge",
+    ],
+    args = [
+        "-ir",
+        "-mesa",
     ],
     binary = "fuzzer_corpus_tests",
 )
@@ -384,12 +414,47 @@ targets.tests.isolated_script_test(
 )
 
 targets.tests.isolated_script_test(
+    name = "tint_wgsl_mesa_fuzzer_corpus_check_tests",
+    mixins = [
+        "result_adapter_single",
+        "tint_fuzzer_corpus_common_args",
+        "true_noop_merge",
+        targets.mixin(
+            swarming = targets.swarming(
+                # These tests normally take ~15 minutes, but can flakily hit the
+                # default 20 minute I/O timeout and cannot currently be sharded.
+                io_timeout_sec = 1800,
+            ),
+        ),
+    ],
+    args = [
+        "-check",
+        "-mesa",
+    ],
+    binary = "fuzzer_corpus_tests",
+)
+
+targets.tests.isolated_script_test(
     name = "tint_wgsl_fuzzer_corpus_generate_tests",
     mixins = [
         "result_adapter_single",
         "tint_fuzzer_corpus_common_args",
         "tint_fuzzer_corpus_generate_args",
         "tint_wgsl_merge",
+    ],
+    binary = "fuzzer_corpus_tests",
+)
+
+targets.tests.isolated_script_test(
+    name = "tint_wgsl_mesa_fuzzer_corpus_generate_tests",
+    mixins = [
+        "result_adapter_single",
+        "tint_fuzzer_corpus_common_args",
+        "tint_fuzzer_corpus_generate_args",
+        "tint_wgsl_mesa_merge",
+    ],
+    args = [
+        "-mesa",
     ],
     binary = "fuzzer_corpus_tests",
 )
