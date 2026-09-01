@@ -164,6 +164,7 @@ libtint_source_set("ir") {
     "validator.cc",
     "validator.h",
     "validator_function.cc",
+    "validator_io.cc",
     "validator_types.cc",
     "value.cc",
     "value.h",

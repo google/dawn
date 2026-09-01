@@ -101,6 +101,7 @@ cc_library(
     "user_call.cc",
     "validator.cc",
     "validator_function.cc",
+    "validator_io.cc",
     "validator_types.cc",
     "value.cc",
     "var.cc",
