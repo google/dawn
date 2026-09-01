@@ -32,6 +32,7 @@ import (
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/execwrapper"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"github.com/stretchr/testify/require"
 )
@@ -442,4 +443,90 @@ func TestLoadExperimentSettings(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPrepareBinariesWithRuntimeDeps(t *testing.T) {
+	fs := oswrapper.CreateFSTestOSWrapper()
+
+	// Create a test build directory and the fuzzer binary
+	_ = fs.MkdirAll("/build", 0755)
+	_ = fs.WriteFile("/build/tint_wgsl_fuzzer", []byte("fuzzer-binary"), 0755)
+
+	// Create runtime_deps file
+	depsContent := "tint_wgsl_fuzzer\nlib/libswiftshader.so\nlibvulkan.so.1\nsrc/some_other_dep.dat\n"
+	_ = fs.WriteFile("/build/tint_wgsl_fuzzer.runtime_deps", []byte(depsContent), 0644)
+
+	// Create test runtime dependencies to copy
+	_ = fs.MkdirAll("/build/lib", 0755)
+	_ = fs.WriteFile("/build/lib/libswiftshader.so", []byte("swiftshader-binary"), 0755)
+	_ = fs.WriteFile("/build/libvulkan.so.1", []byte("vulkan-binary"), 0755)
+	_ = fs.MkdirAll("/build/src", 0755)
+	_ = fs.WriteFile("/build/src/some_other_dep.dat", []byte("some-data"), 0644)
+
+	ew := execwrapper.NewTestExecWrapperForSuccess([]byte("main\n"), nil)
+
+	cfg := &taskConfig{
+		mainConfig: mainConfig{
+			build:       "/build",
+			osWrapper:   fs,
+			execWrapper: ew,
+		},
+	}
+
+	settings := &ExperimentSettings{
+		Hash: "mock-hash",
+	}
+
+	binDir := "/experiment/bin"
+	err := prepareBinaries(cfg, settings, binDir, []string{"tint_wgsl_fuzzer"})
+	require.NoError(t, err)
+
+	// Verify binary was copied
+	require.True(t, fileutils.IsFile("/experiment/bin/tint_wgsl_fuzzer", fs))
+	contentBin, _ := fs.ReadFile("/experiment/bin/tint_wgsl_fuzzer")
+	require.Equal(t, "fuzzer-binary", string(contentBin))
+
+	// Verify runtime dependencies were copied
+	require.True(t, fileutils.IsFile("/experiment/bin/lib/libswiftshader.so", fs))
+	contentLib, _ := fs.ReadFile("/experiment/bin/lib/libswiftshader.so")
+	require.Equal(t, "swiftshader-binary", string(contentLib))
+
+	// Verify versioned runtime dependencies were copied
+	require.True(t, fileutils.IsFile("/experiment/bin/libvulkan.so.1", fs))
+	contentVul, _ := fs.ReadFile("/experiment/bin/libvulkan.so.1")
+	require.Equal(t, "vulkan-binary", string(contentVul))
+
+	// Verify non-library dependencies were NOT copied
+	require.False(t, fileutils.IsFile("/experiment/bin/src/some_other_dep.dat", fs))
+}
+
+func TestPrepareBinariesNoRuntimeDeps(t *testing.T) {
+	fs := oswrapper.CreateFSTestOSWrapper()
+
+	// Create a test build directory and the fuzzer binary
+	_ = fs.MkdirAll("/build", 0755)
+	_ = fs.WriteFile("/build/tint_wgsl_fuzzer", []byte("fuzzer-binary"), 0755)
+
+	ew := execwrapper.NewTestExecWrapperForSuccess([]byte("main\n"), nil)
+
+	cfg := &taskConfig{
+		mainConfig: mainConfig{
+			build:       "/build",
+			osWrapper:   fs,
+			execWrapper: ew,
+		},
+	}
+
+	settings := &ExperimentSettings{
+		Hash: "mock-hash",
+	}
+
+	binDir := "/experiment/bin"
+	err := prepareBinaries(cfg, settings, binDir, []string{"tint_wgsl_fuzzer"})
+	require.NoError(t, err)
+
+	// Verify binary was copied
+	require.True(t, fileutils.IsFile("/experiment/bin/tint_wgsl_fuzzer", fs))
+	contentBin, _ := fs.ReadFile("/experiment/bin/tint_wgsl_fuzzer")
+	require.Equal(t, "fuzzer-binary", string(contentBin))
 }

@@ -679,28 +679,82 @@ func prepareBinaries(t *taskConfig, settings *ExperimentSettings, binDir string,
 			}
 
 			for _, fuzzer := range fuzzers {
-				srcPath := filepath.Join(t.build, fuzzer+fileutils.ExeExt)
-				dstPath := filepath.Join(binDir, fuzzer+fileutils.ExeExt)
-				if err := fileutils.CopyFile(dstPath, srcPath, t.osWrapper); err != nil {
-					return fmt.Errorf("failed to copy built binary %s to bin folder: %w", fuzzer, err)
-				}
-			}
-
-			files, err := t.osWrapper.ReadDir(t.build)
-			if err == nil {
-				for _, f := range files {
-					if !f.IsDir() {
-						ext := filepath.Ext(f.Name())
-						if ext == ".so" || ext == ".dylib" || ext == ".dll" {
-							srcLib := filepath.Join(t.build, f.Name())
-							dstLib := filepath.Join(binDir, f.Name())
-							_ = fileutils.CopyFile(dstLib, srcLib, t.osWrapper)
-						}
-					}
+				err := copyFuzzerAndDependencies(t, fuzzer, binDir)
+				if err != nil {
+					return err
 				}
 			}
 			return nil
 		})
+}
+
+// copyFuzzerAndDependencies makes a copy of a fuzzer binary and its runtime dependencies in the target bin folder. The runtime dependencies come from the GN output file <fuzzer>.runtime_deps, but only includes the dynamic libraries listed there and none of the harness/framework files.
+func copyFuzzerAndDependencies(t *taskConfig, fuzzer string, binDir string) error {
+	srcPath := filepath.Join(t.build, fuzzer+fileutils.ExeExt)
+	dstPath := filepath.Join(binDir, fuzzer+fileutils.ExeExt)
+	if err := fileutils.CopyFile(dstPath, srcPath, t.osWrapper); err != nil {
+		return fmt.Errorf("failed to copy built binary %s to bin folder: %w", fuzzer, err)
+	}
+
+	runtimeDepsPath := filepath.Join(t.build, fuzzer+".runtime_deps")
+	if fileutils.IsFile(runtimeDepsPath, t.osWrapper) {
+		depsBytes, err := t.osWrapper.ReadFile(runtimeDepsPath)
+		if err != nil {
+			return fmt.Errorf("failed to read runtime deps for %s: %w", fuzzer, err)
+		}
+
+		depsStr := string(depsBytes)
+		for line := range strings.SplitSeq(depsStr, "\n") {
+			line = strings.TrimSpace(line)
+			if line == "" {
+				continue
+			}
+
+			// Skip copying the fuzzer binary itself, as it was copied above
+			if line == fuzzer || line == fuzzer+fileutils.ExeExt {
+				continue
+			}
+
+			// Only copy if it's a shared library
+			if !isSharedLibrary(line) {
+				continue
+			}
+
+			srcDep := filepath.Join(t.build, line)
+			dstDep := filepath.Join(binDir, line)
+
+			// Ensure parent directory exists
+			if err := t.osWrapper.MkdirAll(filepath.Dir(dstDep), 0755); err != nil {
+				return fmt.Errorf("failed to create directory for runtime dependency %s: %w", line, err)
+			}
+
+			info, err := t.osWrapper.Stat(srcDep)
+			if err != nil {
+				return fmt.Errorf("runtime dependency %s missing: %w", srcDep, err)
+			}
+
+			if !info.IsDir() {
+				// Note: Go resolves symlinks automatically in the os package, so using CopyFile leads to symlinks (e.g. libvulkan.so.1) in the destination folder being real files with the correct content.
+				if err := fileutils.CopyFile(dstDep, srcDep, t.osWrapper); err != nil {
+					return fmt.Errorf("failed to copy runtime dependency %s to bin folder: %w", line, err)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+// isSharedLibrary returns true if the path points to a shared library file (e.g. .so, .dylib, .dll, or versioned variants like .so.1).
+func isSharedLibrary(path string) bool {
+	ext := filepath.Ext(path)
+	if ext == ".so" || ext == ".dylib" || ext == ".dll" {
+		return true
+	}
+	// Handle versioned shared libraries (e.g. libvulkan.so.1)
+	if strings.Contains(path, ".so.") || strings.Contains(path, ".dylib.") {
+		return true
+	}
+	return false
 }
 
 // runMicrobenchmark executes a short fuzzer run to determine the execution
