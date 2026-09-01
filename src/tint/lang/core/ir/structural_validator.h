@@ -307,7 +307,7 @@ class Structural {
     /// @param inst the instruction
     /// @param count the number of results to check
     /// @returns true if the results count is as expected and none are null
-    bool CheckResults(const ir::Instruction* inst, std::optional<size_t> count);
+    bool CheckResults(const ir::Instruction* inst, std::optional<size_t> count = {});
 
     /// Checks the given operand is not null and its type is not null
     /// @param inst the instruction
@@ -331,7 +331,7 @@ class Structural {
     /// @param inst the instruction
     /// @param count the number of operands to check
     /// @returns true if the operands count is as expected and none are null
-    bool CheckOperands(const ir::Instruction* inst, std::optional<size_t> count);
+    bool CheckOperands(const ir::Instruction* inst, std::optional<size_t> count = {});
 
     /// Checks the number of results for @p inst are exactly equal to @p num_results and the number
     /// of operands is correctly. Both results and operands are confirmed to be non-null.
@@ -344,7 +344,7 @@ class Structural {
     bool CheckResultsAndOperandRange(const ir::Instruction* inst,
                                      size_t num_results,
                                      size_t min_operands,
-                                     std::optional<size_t> max_operands);
+                                     std::optional<size_t> max_operands = {});
 
     /// Checks the number of results and operands for @p inst are exactly equal to num_results
     /// and num_operands, respectively, and that none of them are null.
