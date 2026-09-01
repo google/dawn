@@ -28,7 +28,7 @@
 #include "src/tint/lang/hlsl/writer/raise/localize_struct_array_assignment.h"
 
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 
 namespace tint::hlsl::writer::raise {
 namespace {

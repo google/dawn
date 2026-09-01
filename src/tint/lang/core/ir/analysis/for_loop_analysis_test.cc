@@ -34,7 +34,7 @@
 #include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/utils/result.h"
 
 namespace tint::core::ir::analysis {

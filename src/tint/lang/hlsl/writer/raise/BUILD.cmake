@@ -84,6 +84,7 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_raise lib
   tint_lang_core_intrinsic
   tint_lang_core_ir
   tint_lang_core_ir_transform
+  tint_lang_core_ir_validator
   tint_lang_core_type
   tint_lang_hlsl
   tint_lang_hlsl_intrinsic
@@ -140,6 +141,7 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_raise_test test
   tint_lang_core_ir
   tint_lang_core_ir_transform
   tint_lang_core_ir_transform_test
+  tint_lang_core_ir_validator
   tint_lang_core_type
   tint_lang_hlsl
   tint_lang_hlsl_intrinsic
@@ -181,8 +183,8 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_raise_fuzz fuzz
   tint_cmd_fuzz_common
   tint_lang_core
   tint_lang_core_constant
-  tint_lang_core_intrinsic
   tint_lang_core_ir
+  tint_lang_core_ir_validator
   tint_lang_core_type
   tint_lang_hlsl_writer_raise
   tint_utils

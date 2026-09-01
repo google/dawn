@@ -29,7 +29,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 

@@ -61,6 +61,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/ir:unittests",
       "${tint_src_dir}/lang/core/ir/analysis:unittests",
       "${tint_src_dir}/lang/core/ir/transform:unittests",
+      "${tint_src_dir}/lang/core/ir/validator:unittests",
       "${tint_src_dir}/lang/core/type:unittests",
       "${tint_src_dir}/utils",
       "${tint_src_dir}/utils:unittests",

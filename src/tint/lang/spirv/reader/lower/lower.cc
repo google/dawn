@@ -29,7 +29,7 @@
 
 #include "src/tint/lang/core/ir/transform/dead_code_elimination.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/spirv/reader/lower/atomics.h"
 #include "src/tint/lang/spirv/reader/lower/builtins.h"
 #include "src/tint/lang/spirv/reader/lower/decompose_strided_array.h"

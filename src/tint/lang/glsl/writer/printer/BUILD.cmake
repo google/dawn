@@ -51,6 +51,7 @@ tint_target_add_dependencies(tint_lang_glsl_writer_printer lib
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
+  tint_lang_core_ir_validator
   tint_lang_core_type
   tint_lang_glsl
   tint_lang_glsl_intrinsic

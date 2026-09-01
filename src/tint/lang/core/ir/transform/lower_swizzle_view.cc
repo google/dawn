@@ -34,7 +34,7 @@
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/swizzle.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/swizzle_view.h"
 #include "src/tint/lang/core/type/vector.h"

@@ -34,7 +34,7 @@
 #include "src/tint/cmd/fuzz/common/init.h"
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/utils/compiler.h"
 
 #if TINT_BUILD_IR_BINARY

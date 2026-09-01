@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_MODULE_SCOPE_VARS_H_
 #define SRC_TINT_LANG_MSL_WRITER_RAISE_MODULE_SCOPE_VARS_H_
 
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/utils/result.h"
 
 // Forward declarations.

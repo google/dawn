@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_RAISE_UNARY_POLYFILL_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_RAISE_UNARY_POLYFILL_H_
 
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/utils/result.h"
 
 // Forward declarations.

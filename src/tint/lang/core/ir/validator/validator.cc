@@ -25,21 +25,17 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/validator.h"
-
-#if TINT_ENABLE_IR_DUMPING
-#include <iostream>
-#endif
+#include "src/tint/lang/core/ir/validator/validator.h"
 
 #include <algorithm>
 
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/constexpr_if.h"
 #include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/functional_validator.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/referenced_functions.h"
 #include "src/tint/lang/core/ir/unused.h"
+#include "src/tint/lang/core/ir/validator/functional_validator.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/void.h"
@@ -47,7 +43,6 @@
 #include "src/tint/utils/internal_limits.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/rtti/switch.h"
-#include "src/tint/utils/text/styled_text_printer.h"
 #include "src/tint/utils/text/text_style.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
@@ -59,25 +54,7 @@ using namespace tint::core::fluent_types;  // NOLINT
         }                             \
     } while (false)
 
-namespace tint::core::ir {
-namespace validator {
-namespace {
-
-/// Prints out the current IR state, iff ir.dump_ir_when_validating is set.
-void DumpIRIfEnabled([[maybe_unused]] const Module& ir,
-                     [[maybe_unused]] const std::string_view msg) {
-#if TINT_ENABLE_IR_DUMPING
-    if (ir.dump_ir_when_validating) {
-        auto printer = StyledTextPrinter::Create(stdout);
-        std::cout << "=========================================================\n";
-        std::cout << "== IR dump " << msg << ":\n";
-        std::cout << "=========================================================\n";
-        printer->Print(Disassembler(ir).Text());
-    }
-#endif
-}
-
-}  // namespace
+namespace tint::core::ir::validator {
 
 Validator::Validator(Module& mod, ErrorSource error_source)
     : ir_(mod), error_source_(error_source), referenced_module_vars_(ir_) {}
@@ -911,40 +888,4 @@ void Validator::CheckOnlyUsedInRootBlock(const Instruction* inst) {
     CheckInstruction(inst);
 }
 
-}  // namespace validator
-
-Result<SuccessType> Validate(Module& mod, std::string_view msg) {
-    validator::DumpIRIfEnabled(mod, msg);
-    validator::Validator v(mod, ErrorSource::kIr);
-    return v.Run();
-}
-
-Result<SuccessType> Validate(Module& mod, ErrorSource source) {
-    validator::DumpIRIfEnabled(mod, "");
-    validator::Validator v(mod, source);
-    return v.Run();
-}
-
-void AssertValid(Module& mod, std::string_view msg) {
-    validator::DumpIRIfEnabled(mod, msg);
-
-#if TINT_ENABLE_IR_VALIDATION_ASSERTS
-    if (mod.enable_validation_asserts) {
-        validator::Validator v(mod, ErrorSource::kIr);
-        auto result = v.Run();
-        if (result != Success) {
-            TINT_ICE() << "\n========================================================="
-                       << "\n== IR validation failed " << msg << ":"
-                       << "\n=========================================================\n"
-                       << result.Failure().reason;
-        }
-    }
-#endif
-}
-
-void AssertNoUnsupportedProperties(const Module& mod, Properties unsupported_properties) {
-    auto check = mod.properties & unsupported_properties;
-    TINT_IR_ASSERT(mod, check.Empty()) << "unsupported property '" << *check.begin() << "'";
-}
-
-}  // namespace tint::core::ir
+}  // namespace tint::core::ir::validator

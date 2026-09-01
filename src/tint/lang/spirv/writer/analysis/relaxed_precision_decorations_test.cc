@@ -29,7 +29,7 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/lang/spirv/type/image.h"
 #include "src/tint/lang/spirv/type/literal.h"

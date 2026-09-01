@@ -131,6 +131,7 @@ tint_target_add_dependencies(tint_lang_core_ir_binary_fuzz fuzz
   tint_lang_core_intrinsic
   tint_lang_core_ir
   tint_lang_core_ir_binary
+  tint_lang_core_ir_validator
   tint_lang_core_type
   tint_utils
   tint_utils_bytes

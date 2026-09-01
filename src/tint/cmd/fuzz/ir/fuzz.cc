@@ -42,7 +42,7 @@
 
 #if TINT_BUILD_WGSL_READER
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #endif

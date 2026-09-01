@@ -26,7 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/ir/multi_in_block.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validator.h"
 #include "src/tint/lang/core/type/function.h"
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/u32.h"

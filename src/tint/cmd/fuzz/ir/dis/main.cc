@@ -36,7 +36,7 @@
 #include "src/tint/lang/core/ir/binary/decode.h"
 #include "src/tint/lang/core/ir/binary/encode.h"
 #include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/spirv/writer/writer.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/command/args.h"

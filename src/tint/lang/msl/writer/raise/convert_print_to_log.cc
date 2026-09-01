@@ -32,7 +32,7 @@
 
 #include "src/tint/lang/core/constant/string.h"
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
 

@@ -32,7 +32,7 @@
 #include "src/tint/lang/core/ir/exit.h"
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/switch.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/hlsl/builtin_fn.h"
 #include "src/tint/lang/hlsl/ir/builtin_call.h"

@@ -42,7 +42,7 @@
 #include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/terminator.h"
 #include "src/tint/lang/core/ir/traverse.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/utils/math/math.h"
 #include "src/utils/numeric.h"

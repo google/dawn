@@ -37,6 +37,7 @@
 include(lang/core/ir/analysis/BUILD.cmake)
 include(lang/core/ir/binary/BUILD.cmake)
 include(lang/core/ir/transform/BUILD.cmake)
+include(lang/core/ir/validator/BUILD.cmake)
 
 ################################################################################
 # Target:    tint_lang_core_ir
@@ -99,8 +100,6 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/function.h
   lang/core/ir/function_param.cc
   lang/core/ir/function_param.h
-  lang/core/ir/functional_validator.cc
-  lang/core/ir/functional_validator.h
   lang/core/ir/if.cc
   lang/core/ir/if.h
   lang/core/ir/instruction.cc
@@ -157,12 +156,6 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/unused.h
   lang/core/ir/user_call.cc
   lang/core/ir/user_call.h
-  lang/core/ir/validator.cc
-  lang/core/ir/validator.h
-  lang/core/ir/validator_function.cc
-  lang/core/ir/validator_instructions.cc
-  lang/core/ir/validator_io.cc
-  lang/core/ir/validator_types.cc
   lang/core/ir/value.cc
   lang/core/ir/value.h
   lang/core/ir/var.cc
@@ -242,15 +235,6 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/traverse_test.cc
   lang/core/ir/unreachable_test.cc
   lang/core/ir/user_call_test.cc
-  lang/core/ir/validator_access_test.cc
-  lang/core/ir/validator_builtin_test.cc
-  lang/core/ir/validator_call_test.cc
-  lang/core/ir/validator_flow_control_test.cc
-  lang/core/ir/validator_function_test.cc
-  lang/core/ir/validator_test.cc
-  lang/core/ir/validator_test.h
-  lang/core/ir/validator_type_test.cc
-  lang/core/ir/validator_value_test.cc
   lang/core/ir/value_test.cc
   lang/core/ir/var_test.cc
 )

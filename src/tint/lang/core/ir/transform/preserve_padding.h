@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_PRESERVE_PADDING_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_PRESERVE_PADDING_H_
 
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/utils/result.h"
 
 // Forward declarations.

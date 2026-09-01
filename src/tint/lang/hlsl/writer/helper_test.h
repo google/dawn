@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/hlsl/validate/validate.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
 #include "src/tint/utils/command/command.h"

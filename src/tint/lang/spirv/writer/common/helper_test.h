@@ -37,7 +37,7 @@
 #include "spirv-tools/libspirv.hpp"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/spirv/writer/common/spv_dump_test.h"
 #include "src/tint/lang/spirv/writer/writer.h"

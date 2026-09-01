@@ -32,7 +32,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/traverse.h"
 #include "src/tint/lang/core/ir/unreachable.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/hlsl/ir/builtin_call.h"
 

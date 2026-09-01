@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_VALIDATOR_H_
-#define SRC_TINT_LANG_CORE_IR_VALIDATOR_H_
+#ifndef SRC_TINT_LANG_CORE_IR_VALIDATOR_VALIDATOR_H_
+#define SRC_TINT_LANG_CORE_IR_VALIDATOR_VALIDATOR_H_
 
 #include <cstdint>
 #include <functional>
@@ -70,6 +70,7 @@
 #include "src/tint/lang/core/ir/unary.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/swizzle_view.h"
@@ -80,14 +81,7 @@
 #include "src/tint/utils/rtti/castable.h"
 #include "src/tint/utils/text/styled_text.h"
 
-namespace tint::core::ir {
-
-enum class ErrorSource {
-    kWgsl,
-    kIr,
-};
-
-namespace validator {
+namespace tint::core::ir::validator {
 
 /// How an attribute is being used, a tuple of the shader stage and IO direction
 enum class IOAttributeUsage : uint8_t {
@@ -981,28 +975,6 @@ class Validator {
     Hashmap<const core::type::Type*, uint64_t, 16> max_nest_depth_{};
 };
 
-}  // namespace validator
+}  // namespace tint::core::ir::validator
 
-/// Validates the module @p ir is correctly formed
-/// @param mod the module to validate
-/// @param msg the msg to accompany the output
-/// @returns success or failure
-Result<SuccessType> Validate(Module& mod, std::string_view msg = "");
-/// Validates the module @p ir is correctly formed
-/// @param mod the module to validate
-/// @param source the source we're validating from
-/// @returns success or failure
-Result<SuccessType> Validate(Module& mod, ErrorSource source);
-
-/// Validates the module @p ir is correctly formed, iff required by the build configuration.
-/// @param mod the module to transform
-/// @param msg the msg to accompany the output
-void AssertValid(Module& mod, std::string_view msg = "");
-
-/// Check if @p mod contains any of the properties in @p unsupported_properties.
-/// Raises a Tint ICE with the name of first unsupported property that was found.
-void AssertNoUnsupportedProperties(const Module& mod, Properties unsupported_properties);
-
-}  // namespace tint::core::ir
-
-#endif  // SRC_TINT_LANG_CORE_IR_VALIDATOR_H_
+#endif  // SRC_TINT_LANG_CORE_IR_VALIDATOR_VALIDATOR_H_

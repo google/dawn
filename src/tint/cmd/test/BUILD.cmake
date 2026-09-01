@@ -50,6 +50,7 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_lang_core_intrinsic_test
   tint_lang_core_ir_analysis_test
   tint_lang_core_ir_transform_test
+  tint_lang_core_ir_validator_test
   tint_lang_core_ir_test
   tint_lang_core_type_test
   tint_lang_core_test

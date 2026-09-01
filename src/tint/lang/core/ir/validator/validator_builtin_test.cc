@@ -28,8 +28,8 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/lang/core/ir/validator_test.h"
+#include "src/tint/lang/core/ir/validator/validator.h"
+#include "src/tint/lang/core/ir/validator/validator_test.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"

@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_FUNCTIONAL_VALIDATOR_H_
-#define SRC_TINT_LANG_CORE_IR_FUNCTIONAL_VALIDATOR_H_
+#ifndef SRC_TINT_LANG_CORE_IR_VALIDATOR_FUNCTIONAL_VALIDATOR_H_
+#define SRC_TINT_LANG_CORE_IR_VALIDATOR_FUNCTIONAL_VALIDATOR_H_
 
 #include <string>
 
@@ -61,7 +61,7 @@
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/unary.h"
 #include "src/tint/lang/core/ir/user_call.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
@@ -229,4 +229,4 @@ class Functional {
 
 }  // namespace tint::core::ir::validator
 
-#endif  // SRC_TINT_LANG_CORE_IR_FUNCTIONAL_VALIDATOR_H_
+#endif  // SRC_TINT_LANG_CORE_IR_VALIDATOR_FUNCTIONAL_VALIDATOR_H_

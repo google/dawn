@@ -53,6 +53,7 @@ cc_binary(
     "//src/tint/lang/core/intrinsic:test",
     "//src/tint/lang/core/ir/analysis:test",
     "//src/tint/lang/core/ir/transform:test",
+    "//src/tint/lang/core/ir/validator:test",
     "//src/tint/lang/core/ir:test",
     "//src/tint/lang/core/type:test",
     "//src/tint/lang/core:test",

@@ -28,7 +28,7 @@
 #include <string>
 
 #include "src/tint/cmd/bench/bench.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 
 #if TINT_BUILD_IS_MSVC

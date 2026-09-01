@@ -30,7 +30,7 @@
 #include <span>
 
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/spirv/reader/lower/lower.h"
 #include "src/tint/lang/spirv/reader/parser/parser.h"
 

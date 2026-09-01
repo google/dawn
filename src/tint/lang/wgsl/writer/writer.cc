@@ -29,7 +29,7 @@
 
 #include <memory>
 
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
