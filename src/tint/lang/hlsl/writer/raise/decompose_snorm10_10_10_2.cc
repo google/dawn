@@ -113,23 +113,57 @@ struct State {
     }
 
     DecodeResult Decode(core::ir::Value* input) {
-        // Reconstruct integer values:
-        auto* scaled = b.Multiply(input, b.Composite<vec4f>(1023_f, 1023_f, 1023_f, 3_f));
-        auto* rounded = b.Call<vec4f>(core::BuiltinFn::kRound, scaled);
+        auto* float_ty = input->Type();
+        auto* int_ty = ty.MatchWidth(ty.i32(), float_ty);
+        auto* uint_ty = ty.MatchWidth(ty.u32(), float_ty);
+
+        uint32_t width = 1;
+        if (auto* vec = float_ty->As<core::type::Vector>()) {
+            width = vec->Width();
+        }
 
         // Sign-extend:
-        // The shift left values (22, 22, 22, 30) here differ from vertex pulling's
+        // The shift left values (22 for 10-bit XYZ, 30 for 2-bit W) differ from vertex pulling's
         // (22, 12, 2, 0) because the input components have already been unpacked into separate
         // vector lanes by the hardware fetcher before reaching the shader. We only need to
         // sign-extend each lane's value (10 bits for XYZ, 2 bits for W) in-place.
-        auto* s32s = b.Convert<vec4i>(rounded);
-        auto* shl = b.ShiftLeft(s32s, b.Composite<vec4u>(22_u, 22_u, 22_u, 30_u));
-        auto* shr = b.ShiftRight(shl, b.Composite<vec4u>(22_u, 22_u, 22_u, 30_u));
+        // 10-bit signed normalized format parameters (XYZ components):
+        const auto kScale10 = 1023_f;
+        const auto kShift10 = 22_u;
+        const auto kDiv10 = 511_f;
+
+        // 2-bit signed normalized format parameters (W component):
+        const auto kScale2 = 3_f;
+        const auto kShift2 = 30_u;
+        const auto kDiv2 = 1_f;
+
+        core::ir::Value* scale = nullptr;
+        core::ir::Value* shift = nullptr;
+        core::ir::Value* div = nullptr;
+
+        if (width == 4) {
+            scale = b.Composite<vec4f>(kScale10, kScale10, kScale10, kScale2);
+            shift = b.Composite<vec4u>(kShift10, kShift10, kShift10, kShift2);
+            div = b.Composite<vec4f>(kDiv10, kDiv10, kDiv10, kDiv2);
+        } else {
+            scale = b.MatchWidth(kScale10, float_ty);
+            shift = b.MatchWidth(kShift10, uint_ty);
+            div = b.MatchWidth(kDiv10, float_ty);
+        }
+        auto* min_val = b.MatchWidth(-1_f, float_ty);
+
+        // Reconstruct integer values:
+        auto* scaled = b.Multiply(input, scale);
+        auto* rounded = b.Call(float_ty, core::BuiltinFn::kRound, scaled);
+
+        // Sign-extend:
+        auto* s32s = b.Convert(int_ty, rounded);
+        auto* shl = b.ShiftLeft(s32s, shift);
+        auto* shr = b.ShiftRight(shl, shift);
 
         // Normalize:
-        auto* normalized =
-            b.Divide(b.Convert<vec4f>(shr), b.Composite<vec4f>(511_f, 511_f, 511_f, 1_f));
-        auto* decoded = b.Call<vec4f>(core::BuiltinFn::kMax, normalized, b.Splat<vec4f>(-1_f));
+        auto* normalized = b.Divide(b.Convert(float_ty, shr), div);
+        auto* decoded = b.Call(float_ty, core::BuiltinFn::kMax, normalized, min_val);
 
         return {decoded, scaled};
     }

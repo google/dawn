@@ -203,5 +203,182 @@ Inputs = struct @align(16) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterDecomposeSnorm10_10_10_2Test, DecomposeScalar) {
+    auto* inputs =
+        ty.Struct(mod.symbols.New("Inputs"), {
+                                                 {mod.symbols.New("pos"), ty.f32(), Location(0u)},
+                                             });
+
+    auto* func = b.Function("foo", ty.vec4f(), core::ir::Function::PipelineStage::kVertex);
+    func->SetReturnBuiltin(core::BuiltinValue::kPosition);
+    auto* param = b.FunctionParam("input", inputs);
+    func->AppendParam(param);
+
+    b.Append(func->Block(), [&] {
+        auto* pos_val = b.Access(ty.f32(), param, 0_u);
+        auto* out = b.Construct<vec4f>(pos_val, 0_f, 0_f, 1_f);
+        b.Return(func, out);
+    });
+
+    auto* src = R"(
+Inputs = struct @align(4) {
+  pos:f32 @offset(0), @location(0)
+}
+
+%foo = @vertex func(%input:Inputs):vec4<f32> [@position] {
+  $B1: {
+    %3:f32 = access %input, 0u
+    %4:vec4<f32> = construct %3, 0.0f, 0.0f, 1.0f
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Inputs = struct @align(4) {
+  pos:f32 @offset(0), @location(0)
+}
+
+%foo = @vertex func(%input:Inputs):vec4<f32> [@position] {
+  $B1: {
+    %3:f32 = access %input, 0u
+    %4:f32 = mul %3, 1023.0f
+    %5:f32 = round %4
+    %6:i32 = convert %5
+    %7:i32 = shl %6, 22u
+    %8:i32 = shr %7, 22u
+    %9:f32 = convert %8
+    %10:f32 = div %9, 511.0f
+    %11:f32 = max %10, -1.0f
+    %12:vec4<f32> = construct %11, 0.0f, 0.0f, 1.0f
+    ret %12
+  }
+}
+)";
+
+    Run(DecomposeSnorm10_10_10_2, std::vector<uint32_t>{0u});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeSnorm10_10_10_2Test, DecomposeVec2) {
+    auto* inputs =
+        ty.Struct(mod.symbols.New("Inputs"), {
+                                                 {mod.symbols.New("pos"), ty.vec2f(), Location(0u)},
+                                             });
+
+    auto* func = b.Function("foo", ty.vec4f(), core::ir::Function::PipelineStage::kVertex);
+    func->SetReturnBuiltin(core::BuiltinValue::kPosition);
+    auto* param = b.FunctionParam("input", inputs);
+    func->AppendParam(param);
+
+    b.Append(func->Block(), [&] {
+        auto* pos_val = b.Access(ty.vec2f(), param, 0_u);
+        auto* out = b.Construct<vec4f>(pos_val, 0_f, 1_f);
+        b.Return(func, out);
+    });
+
+    auto* src = R"(
+Inputs = struct @align(8) {
+  pos:vec2<f32> @offset(0), @location(0)
+}
+
+%foo = @vertex func(%input:Inputs):vec4<f32> [@position] {
+  $B1: {
+    %3:vec2<f32> = access %input, 0u
+    %4:vec4<f32> = construct %3, 0.0f, 1.0f
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Inputs = struct @align(8) {
+  pos:vec2<f32> @offset(0), @location(0)
+}
+
+%foo = @vertex func(%input:Inputs):vec4<f32> [@position] {
+  $B1: {
+    %3:vec2<f32> = access %input, 0u
+    %4:vec2<f32> = mul %3, vec2<f32>(1023.0f)
+    %5:vec2<f32> = round %4
+    %6:vec2<i32> = convert %5
+    %7:vec2<i32> = shl %6, vec2<u32>(22u)
+    %8:vec2<i32> = shr %7, vec2<u32>(22u)
+    %9:vec2<f32> = convert %8
+    %10:vec2<f32> = div %9, vec2<f32>(511.0f)
+    %11:vec2<f32> = max %10, vec2<f32>(-1.0f)
+    %12:vec4<f32> = construct %11, 0.0f, 1.0f
+    ret %12
+  }
+}
+)";
+
+    Run(DecomposeSnorm10_10_10_2, std::vector<uint32_t>{0u});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeSnorm10_10_10_2Test, DecomposeVec3) {
+    auto* inputs =
+        ty.Struct(mod.symbols.New("Inputs"), {
+                                                 {mod.symbols.New("pos"), ty.vec3f(), Location(0u)},
+                                             });
+
+    auto* func = b.Function("foo", ty.vec4f(), core::ir::Function::PipelineStage::kVertex);
+    func->SetReturnBuiltin(core::BuiltinValue::kPosition);
+    auto* param = b.FunctionParam("input", inputs);
+    func->AppendParam(param);
+
+    b.Append(func->Block(), [&] {
+        auto* pos_val = b.Access(ty.vec3f(), param, 0_u);
+        auto* out = b.Construct<vec4f>(pos_val, 1_f);
+        b.Return(func, out);
+    });
+
+    auto* src = R"(
+Inputs = struct @align(16) {
+  pos:vec3<f32> @offset(0), @location(0)
+}
+
+%foo = @vertex func(%input:Inputs):vec4<f32> [@position] {
+  $B1: {
+    %3:vec3<f32> = access %input, 0u
+    %4:vec4<f32> = construct %3, 1.0f
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Inputs = struct @align(16) {
+  pos:vec3<f32> @offset(0), @location(0)
+}
+
+%foo = @vertex func(%input:Inputs):vec4<f32> [@position] {
+  $B1: {
+    %3:vec3<f32> = access %input, 0u
+    %4:vec3<f32> = mul %3, vec3<f32>(1023.0f)
+    %5:vec3<f32> = round %4
+    %6:vec3<i32> = convert %5
+    %7:vec3<i32> = shl %6, vec3<u32>(22u)
+    %8:vec3<i32> = shr %7, vec3<u32>(22u)
+    %9:vec3<f32> = convert %8
+    %10:vec3<f32> = div %9, vec3<f32>(511.0f)
+    %11:vec3<f32> = max %10, vec3<f32>(-1.0f)
+    %12:vec4<f32> = construct %11, 1.0f
+    ret %12
+  }
+}
+)";
+
+    Run(DecomposeSnorm10_10_10_2, std::vector<uint32_t>{0u});
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise
