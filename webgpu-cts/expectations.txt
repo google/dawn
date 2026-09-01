@@ -1575,6 +1575,17 @@ crbug.com/546173500 [ android-sm-s926b ] webgpu:shader,execution,robust_access_v
 # Flaky timeout on Xclipse GPUs
 crbug.com/543960651 [ android-sm-s926b ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos:* [ Failure ]
 
+# Xclipse GPUs subgroup failures
+crbug.com/555812876 [ android-sm-s926b ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[111,3] [ Failure ]
+crbug.com/555812876 [ android-sm-s926b ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[13,10] [ Failure ]
+crbug.com/555812876 [ android-sm-s926b ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[13,53] [ Failure ]
+crbug.com/555812876 [ android-sm-s926b ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[15,15] [ Failure ]
+crbug.com/555812876 [ android-sm-s926b ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[19,13] [ Failure ]
+crbug.com/555812876 [ android-sm-s926b ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[3,111] [ Failure ]
+crbug.com/555812876 [ android-sm-s926b ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[3,35] [ Failure ]
+crbug.com/555812876 [ android-sm-s926b ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[35,3] [ Failure ]
+crbug.com/555812876 [ android-sm-s926b ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[53,13] [ Failure ]
+
 # Untriaged Xclipse failures.
 crbug.com/543960651 [ android-sm-s926b ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:* [ Failure ]
 crbug.com/543960651 [ android-sm-s926b ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:* [ Failure ]
