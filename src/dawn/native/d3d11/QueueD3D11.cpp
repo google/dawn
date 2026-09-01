@@ -449,10 +449,9 @@ MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
 
     Texture* texture = ToBackend(destination.texture);
     DAWN_TRY(texture->SynchronizeTextureBeforeUse(&commandContext));
-    return texture->Write(
-        &commandContext, subresources, destination.origin, writeSizePixel,
-        DAWN_UNSAFE_TODO(reinterpret_cast<const uint8_t*>(data.data()) + dataLayout.offset),
-        dataLayout.bytesPerRow, dataLayout.rowsPerImage);
+    return texture->Write(&commandContext, subresources, destination.origin, writeSizePixel,
+                          data.subspan(static_cast<size_t>(dataLayout.offset)),
+                          dataLayout.bytesPerRow, dataLayout.rowsPerImage);
 }
 
 bool Queue::HasPendingCommands() const {

@@ -87,7 +87,7 @@ class Texture final : public TextureBase {
                      const SubresourceRange& subresources,
                      const Origin3D& origin,
                      const Extent3D& size,
-                     const uint8_t* data,
+                     Span<const std::byte> data,
                      uint32_t bytesPerRow,
                      uint32_t rowsPerImage);
     using ReadCallback = std::function<MaybeError(const uint8_t* data, size_t offset, size_t size)>;
@@ -179,7 +179,7 @@ class Texture final : public TextureBase {
                              const SubresourceRange& subresources,
                              const Origin3D& origin,
                              const Extent3D& size,
-                             const uint8_t* data,
+                             Span<const std::byte> data,
                              uint32_t bytesPerRow,
                              uint32_t rowsPerImage);
 
@@ -188,7 +188,7 @@ class Texture final : public TextureBase {
                                          const SubresourceRange& subresources,
                                          const Origin3D& origin,
                                          const Extent3D& size,
-                                         const uint8_t* data,
+                                         Span<const std::byte> data,
                                          uint32_t bytesPerRow,
                                          uint32_t rowsPerImage);
 

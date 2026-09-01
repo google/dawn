@@ -442,8 +442,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                     scopedMap.GetMappedData().subspan(checked_cast<size_t>(bufferOffset));
                 uint64_t bytesPerRow = blockInfo.ToBytes(src.blocksPerRow);
                 DAWN_TRY(texture->Write(commandContext, subresources, dst.origin.ToOrigin3D(),
-                                        copy->copySize.ToExtent3D(),
-                                        reinterpret_cast<uint8_t*>(data.data()),
+                                        copy->copySize.ToExtent3D(), data,
                                         dchecked_cast<uint32_t>(bytesPerRow),
                                         dchecked_cast<uint32_t>(src.rowsPerImage)));
                 break;
