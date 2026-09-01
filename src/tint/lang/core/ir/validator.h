@@ -51,7 +51,6 @@
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
-#include "src/tint/lang/core/ir/io_attribute_validator.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
@@ -90,6 +89,61 @@ enum class ErrorSource {
 
 namespace validator {
 
+/// How an attribute is being used, a tuple of the shader stage and IO direction
+enum class IOAttributeUsage : uint8_t {
+    kComputeInputUsage,
+    kComputeOutputUsage,
+    kComputeResourceUsage,
+    kFragmentInputUsage,
+    kFragmentOutputUsage,
+    kFragmentResourceUsage,
+    kVertexInputUsage,
+    kVertexOutputUsage,
+    kVertexResourceUsage,
+    kUndefinedUsage,
+};
+std::string ToString(IOAttributeUsage value);
+
+/// The IO direction of an operation.
+enum class IODirection : uint8_t {
+    kInput,
+    kOutput,
+    kResource,
+};
+std::string_view ToString(IODirection value);
+
+/// Annotations that can be associated with a value that are used for shader IO,
+/// e.g. binding_points, @location, being in workgroup address space, etc.
+/// These are a subset of IOAttributes.
+enum class IOAnnotation : uint8_t {
+    /// @group + @binding
+    kBindingPoint,
+    /// @location
+    kLocation,
+    /// @builtin(...)
+    kBuiltin,
+    /// Pointer to Workgroup address space
+    kWorkgroup,
+    /// @color
+    kColor,
+};
+std::string ToString(IOAnnotation value);
+
+/// The kind of shader IO being validated.
+enum class ShaderIOKind : uint8_t {
+    kInputParam,
+    kResultValue,
+    kModuleScopeVar,
+};
+std::string ToString(ShaderIOKind value);
+
+/// State for validating IO attributes that needs to shared across impl invocations within the same
+/// entry point.
+struct IOAttributeContext {
+    Hashmap<BuiltinValue, uint32_t, 4> input_builtins;
+    Hashmap<BuiltinValue, uint32_t, 4> output_builtins;
+};
+
 /// State for validating blend_src attributes shared across multiple passes within the same entry
 /// point.
 struct BlendSrcContext {
@@ -105,6 +159,40 @@ using SupportedStages = tint::EnumSet<Function::PipelineStage>;
 /// The core IR validator.
 class Validator {
   public:
+    /// IOAttributeChecker is the interface used to check that a usage of an IO attribute
+    /// meets the spec rules for a given context.
+    struct IOAttributeChecker {
+        /// What kinda of IO attribute is being checked
+        IOAttributeKind kind;
+
+        /// What combination of stage and IO direction is this attribute legal for.
+        EnumSet<IOAttributeUsage> valid_usages;
+
+        /// What type of shader IO values is this attribute legal for.
+        EnumSet<ShaderIOKind> valid_io_kinds;
+
+        /// Implements the validation logic for a specific attribute.
+        using CheckFn = Result<SuccessType, std::string>(const core::type::Type* ty,
+                                                         const IOAttributes& attr,
+                                                         const Properties& prop,
+                                                         IOAttributeUsage usage);
+
+        /// The validation function.
+        CheckFn* const check;
+
+        /// Implements logic for checking if the given type is valid or not. Is not a data entry
+        /// (i.e. a type or set of types), because types are part of the IR module and created at
+        /// runtime.
+        using TypeCheckFn = bool(const core::type::Type* type, const Properties& props);
+
+        /// @see #TypeCheckFn
+        TypeCheckFn* const type_check;
+
+        /// Message for logging if the type check fails. Cannot be easily generated at runtime,
+        /// because the type check is a function, not just a data entry.
+        const char* type_error;
+    };
+
     /// Create a core validator
     /// @param mod the module to be validated
     /// @param source the source of the program, WGSL or IR
@@ -842,6 +930,10 @@ class Validator {
     std::function<void()> BeginBlockTask(const Block* blk);
     /// @returns a task that finishes processing @p blk if it is not empty
     std::function<void()> EndBlockTask(const Block* blk);
+
+    /// @returns all the appropriate IOAttributeCheckers for @p attr
+    Vector<const IOAttributeChecker*, 4> IOAttributeCheckersFor(const IOAttributes& attr,
+                                                                bool skip_builtin);
 
     /// ScopeStack holds a stack of values that are currently in scope
     struct ScopeStack {
