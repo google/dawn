@@ -54,7 +54,6 @@ tint_target_add_dependencies(tint_lang_null_writer lib
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
-  tint_lang_core_ir_type
   tint_lang_core_type
   tint_lang_null_writer_common
   tint_lang_null_writer_raise

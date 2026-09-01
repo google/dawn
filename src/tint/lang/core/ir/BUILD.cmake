@@ -37,7 +37,6 @@
 include(lang/core/ir/analysis/BUILD.cmake)
 include(lang/core/ir/binary/BUILD.cmake)
 include(lang/core/ir/transform/BUILD.cmake)
-include(lang/core/ir/type/BUILD.cmake)
 
 ################################################################################
 # Target:    tint_lang_core_ir
@@ -46,6 +45,8 @@ include(lang/core/ir/type/BUILD.cmake)
 tint_add_target(tint_lang_core_ir lib
   lang/core/ir/access.cc
   lang/core/ir/access.h
+  lang/core/ir/array_count.cc
+  lang/core/ir/array_count.h
   lang/core/ir/binary.cc
   lang/core/ir/binary.h
   lang/core/ir/block.cc
@@ -173,7 +174,6 @@ tint_target_add_dependencies(tint_lang_core_ir lib
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_intrinsic
-  tint_lang_core_ir_type
   tint_lang_core_type
   tint_utils
   tint_utils_containers
@@ -261,7 +261,6 @@ tint_target_add_dependencies(tint_lang_core_ir_test test
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
-  tint_lang_core_ir_type
   tint_lang_core_type
   tint_utils
   tint_utils_containers

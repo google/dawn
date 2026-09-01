@@ -57,7 +57,6 @@ tint_target_add_dependencies(tint_lang_hlsl_writer lib
   tint_lang_core_ir
   tint_lang_core_ir_analysis
   tint_lang_core_ir_transform
-  tint_lang_core_ir_type
   tint_lang_core_type
   tint_lang_hlsl_writer_common
   tint_lang_hlsl_writer_printer
@@ -112,7 +111,6 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_test test
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
-  tint_lang_core_ir_type
   tint_lang_core_type
   tint_lang_hlsl_validate
   tint_lang_hlsl_writer
@@ -155,7 +153,6 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_fuzz fuzz
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
-  tint_lang_core_ir_type
   tint_lang_core_type
   tint_lang_hlsl_validate
   tint_lang_hlsl_writer

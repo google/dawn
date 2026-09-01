@@ -93,7 +93,6 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/core/intrinsic",
         "${tint_src_dir}/lang/core/ir",
         "${tint_src_dir}/lang/core/ir:unittests",
-        "${tint_src_dir}/lang/core/ir/type",
         "${tint_src_dir}/lang/core/type",
         "${tint_src_dir}/lang/hlsl",
         "${tint_src_dir}/lang/hlsl/intrinsic",

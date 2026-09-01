@@ -59,7 +59,6 @@ tint_target_add_dependencies(tint_cmd_fuzz_common lib
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
-  tint_lang_core_ir_type
   tint_lang_core_type
   tint_utils
   tint_utils_bytes

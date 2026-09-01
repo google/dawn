@@ -29,6 +29,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/intrinsic/dialect.h"
+#include "src/tint/lang/core/ir/array_count.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_switch.h"
@@ -36,7 +37,6 @@
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
-#include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/type/array.h"

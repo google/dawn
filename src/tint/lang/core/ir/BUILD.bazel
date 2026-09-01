@@ -44,6 +44,7 @@ cc_library(
   name = "ir",
   srcs = [
     "access.cc",
+    "array_count.cc",
     "binary.cc",
     "block.cc",
     "block_param.cc",
@@ -107,6 +108,7 @@ cc_library(
   ],
   hdrs = [
     "access.h",
+    "array_count.h",
     "binary.h",
     "block.h",
     "block_param.h",
@@ -173,7 +175,6 @@ cc_library(
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/intrinsic",
-    "//src/tint/lang/core/ir/type",
     "//src/tint/lang/core/type",
     "//src/tint/utils",
     "//src/tint/utils/containers",
@@ -258,7 +259,6 @@ cc_library(
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/ir",
-    "//src/tint/lang/core/ir/type",
     "//src/tint/lang/core/type",
     "//src/tint/utils",
     "//src/tint/utils/containers",

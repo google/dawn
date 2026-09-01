@@ -58,7 +58,6 @@ if (tint_build_fuzzer_vulkan_support && tint_build_fuzzers &&
       "${tint_src_dir}/lang/core/ir/binary",
       "${tint_src_dir}/lang/core/ir/binary:fuzz",
       "${tint_src_dir}/lang/core/ir/transform:fuzz",
-      "${tint_src_dir}/lang/core/ir/type",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/bytes",

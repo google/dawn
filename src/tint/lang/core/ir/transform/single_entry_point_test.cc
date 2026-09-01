@@ -30,8 +30,8 @@
 #include <utility>
 
 #include "src/tint/lang/core/enums.h"
+#include "src/tint/lang/core/ir/array_count.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
-#include "src/tint/lang/core/ir/type/array_count.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT

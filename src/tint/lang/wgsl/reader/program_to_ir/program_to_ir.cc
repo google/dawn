@@ -31,6 +31,7 @@
 #include <variant>
 
 #include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/ir/array_count.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/exit_if.h"
@@ -42,7 +43,6 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
-#include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"

@@ -30,9 +30,9 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "src/tint/lang/core/ir/array_count.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/function_param.h"
-#include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/abstract_float.h"

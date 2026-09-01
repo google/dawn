@@ -34,9 +34,9 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/ir/array_count.h"
 #include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
-#include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"
 

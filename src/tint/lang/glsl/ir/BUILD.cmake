@@ -94,7 +94,6 @@ tint_target_add_dependencies(tint_lang_glsl_ir_test test
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
-  tint_lang_core_ir_type
   tint_lang_core_ir_test
   tint_lang_core_type
   tint_lang_glsl

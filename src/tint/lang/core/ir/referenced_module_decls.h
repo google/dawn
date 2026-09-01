@@ -28,13 +28,13 @@
 #ifndef SRC_TINT_LANG_CORE_IR_REFERENCED_MODULE_DECLS_H_
 #define SRC_TINT_LANG_CORE_IR_REFERENCED_MODULE_DECLS_H_
 
+#include "src/tint/lang/core/ir/array_count.h"
 #include "src/tint/lang/core/ir/constexpr_if.h"
 #include "src/tint/lang/core/ir/control_instruction.h"
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/override.h"
-#include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"

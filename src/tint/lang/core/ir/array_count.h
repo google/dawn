@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TYPE_ARRAY_COUNT_H_
-#define SRC_TINT_LANG_CORE_IR_TYPE_ARRAY_COUNT_H_
+#ifndef SRC_TINT_LANG_CORE_IR_ARRAY_COUNT_H_
+#define SRC_TINT_LANG_CORE_IR_ARRAY_COUNT_H_
 
 #include <string>
 
@@ -64,4 +64,4 @@ class ValueArrayCount final : public Castable<ValueArrayCount, core::type::Array
 
 }  // namespace tint::core::ir::type
 
-#endif  // SRC_TINT_LANG_CORE_IR_TYPE_ARRAY_COUNT_H_
+#endif  // SRC_TINT_LANG_CORE_IR_ARRAY_COUNT_H_
