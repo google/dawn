@@ -72,6 +72,7 @@
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/swizzle_view.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/containers/hashset.h"
@@ -106,6 +107,46 @@ class Structural {
     Structural& operator=(Structural&&) = delete;
 
   private:
+    /// Helper for walking a type that maybe a struct, calling an impl function for the type and
+    /// each of
+    /// its members.
+    /// @param ctx a context object to pass to the implementation function
+    /// @param type the type to walk
+    /// @param attr the attributes for @p type
+    /// @param impl a function with the signature `void(const core::type::Type*, const
+    /// IOAttributes&,
+    ///             CTX&)` that is called for each type.
+    template <typename CTX, typename IMPL>
+    void WalkTypeAndMembers(CTX& ctx,
+                            const core::type::Type* type,
+                            const IOAttributes& attr,
+                            IMPL&& impl) {
+        impl(ctx, type, attr);
+        tint::Switch(
+            type, [&](const core::type::Struct* s) { WalkStructMembers(ctx, s, impl); },
+            [&](const core::type::Array* a) { WalkArrayElements(ctx, a, impl); });
+    }
+
+    /// Helper that walks the members of a struct, called from WalkTypeAndMembers and its helpers
+    /// @param ctx a context object to pass to the impl function
+    /// @param str the struct to walk the members of
+    /// @param impl an impl function to be run, see WalkTypeAndMembers for details
+    template <typename CTX, typename IMPL>
+    void WalkStructMembers(CTX& ctx, const core::type::Struct* str, IMPL&& impl) {
+        for (auto* member : str->Members()) {
+            WalkTypeAndMembers(ctx, member->Type(), member->Attributes(), impl);
+        }
+    }
+
+    /// Helper that walks an array's element type, called from WalkTypeAndMembers and its helpers
+    /// @param ctx a context object to pass to the impl function
+    /// @param arr the array to walk the element type of
+    /// @param impl an impl function to be run, see WalkTypeAndMembers for details
+    template <typename CTX, typename IMPL>
+    void WalkArrayElements(CTX& ctx, const core::type::Array* arr, IMPL&& impl) {
+        WalkTypeAndMembers(ctx, arr->ElemType(), IOAttributes{}, impl);
+    }
+
     /// Runs validation to confirm the structural soundness of the module.
     /// Also runs any validation that is not dependent on the entire module being
     /// sound and sets up data structures for later checks.

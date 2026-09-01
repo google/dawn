@@ -85,49 +85,6 @@ bool TransitivelyHolds(const Block* block, const Instruction* inst) {
     return false;
 }
 
-template <typename CTX, typename IMPL>
-void WalkTypeAndMembers(CTX& ctx,
-                        const core::type::Type* type,
-                        const IOAttributes& attr,
-                        IMPL&& impl);
-/// Helper that walks the members of a struct, called from WalkTypeAndMembers and its helpers
-/// @param ctx a context object to pass to the impl function
-/// @param str the struct to walk the members of
-/// @param impl an impl function to be run, see WalkTypeAndMembers for details
-template <typename CTX, typename IMPL>
-void WalkStructMembers(CTX& ctx, const core::type::Struct* str, IMPL&& impl) {
-    for (auto* member : str->Members()) {
-        WalkTypeAndMembers(ctx, member->Type(), member->Attributes(), impl);
-    }
-}
-
-/// Helper that walks an array's element type, called from WalkTypeAndMembers and its helpers
-/// @param ctx a context object to pass to the impl function
-/// @param arr the array to walk the element type of
-/// @param impl an impl function to be run, see WalkTypeAndMembers for details
-template <typename CTX, typename IMPL>
-void WalkArrayElements(CTX& ctx, const core::type::Array* arr, IMPL&& impl) {
-    WalkTypeAndMembers(ctx, arr->ElemType(), IOAttributes{}, impl);
-}
-
-/// Helper for walking a type that maybe a struct, calling an impl function for the type and each of
-/// its members.
-/// @param ctx a context object to pass to the implementation function
-/// @param type the type to walk
-/// @param attr the attributes for @p type
-/// @param impl a function with the signature `void(const core::type::Type*, const IOAttributes&,
-///             CTX&)` that is called for each type.
-template <typename CTX, typename IMPL>
-void WalkTypeAndMembers(CTX& ctx,
-                        const core::type::Type* type,
-                        const IOAttributes& attr,
-                        IMPL&& impl) {
-    impl(ctx, type, attr);
-    tint::Switch(
-        type, [&](const core::type::Struct* s) { WalkStructMembers(ctx, s, impl); },
-        [&](const core::type::Array* a) { WalkArrayElements(ctx, a, impl); });
-}
-
 }  // namespace
 
 Structural::Structural(const Module& ir, diag::List& diagnostics)
@@ -186,6 +143,23 @@ std::function<void()> Structural::EndBlockTask(const Block* blk) {
             EndBlock();
         }
     };
+}
+
+void Structural::CheckFrontFacingIfBool(const CastableBase* msg_anchor,
+                                        const IOAttributes& attr,
+                                        const core::type::Type* ty,
+                                        const std::string& err) {
+    if (ty->Is<core::type::Bool>() && attr.builtin != BuiltinValue::kFrontFacing) {
+        AddError(msg_anchor) << err;
+    }
+}
+
+void Structural::CheckNotBool(const CastableBase* msg_anchor,
+                              const core::type::Type* ty,
+                              const std::string& err) {
+    if (ty->Is<core::type::Bool>()) {
+        AddError(msg_anchor) << err;
+    }
 }
 
 void Structural::CheckForRecursion() {
@@ -689,69 +663,6 @@ bool Structural::CheckResultsAndOperands(const ir::Instruction* inst,
     return results_passed && operands_passed;
 }
 
-bool Structural::CheckNestDepth(const core::type::Type* type,
-                                std::function<diag::Diagnostic&()> diag) {
-    if (type == nullptr) {
-        return true;
-    }
-
-    struct Task {
-        const core::type::Type* type;
-        uint64_t depth;
-    };
-
-    Vector<Task, 16> tasks;
-    tasks.Push({type, 0});
-
-    while (!tasks.IsEmpty()) {
-        auto [cur, depth] = tasks.Pop();
-
-        // Unwrap memory views
-        if (auto* view = cur->As<core::type::MemoryView>()) {
-            cur = view->StoreType();
-        }
-
-        if (cur == nullptr) {
-            continue;
-        }
-
-        auto max_depth = max_nest_depth_.Get(cur);
-        if (max_depth && *max_depth.value >= depth) {
-            // A deeper depth has already been tested for this type
-            continue;
-        }
-        max_nest_depth_.Replace(cur, depth);
-
-        if (depth > internal_limits::kMaxNestDepthOfCompositeType) {
-            diag() << "type has a nesting depth that exceeds the maximum of "
-                   << internal_limits::kMaxNestDepthOfCompositeType;
-            return false;
-        }
-
-        auto elems = cur->Elements();
-        if (elems.count == 0) {
-            // Not a composite type, so no further work needed
-            continue;
-        }
-
-        // cur is a composite type so need to check all of the contained elements
-        uint64_t next_depth = depth + 1;
-        if (elems.type) {
-            // Homogeneous elements, i.e. is an array, vec, etc, so only need to enqueue one type
-            tasks.Push({elems.type, next_depth});
-        } else {
-            // Heterogeneous elements, so need to enqueue each type
-            for (uint32_t i = 0; i < elems.count; i++) {
-                if (auto* elem_type = cur->Element(i)) {
-                    tasks.Push({elem_type, next_depth});
-                }
-            }
-        }
-    }
-
-    return true;
-}
-
 void Structural::CheckRootBlock(const Block* blk) {
     block_stack_.Push(blk);
     TINT_DEFER(block_stack_.Pop());
@@ -854,173 +765,6 @@ void Structural::CheckOnlyUsedInRootBlock(const Instruction* inst) {
     }
 
     CheckInstruction(inst);
-}
-
-void Structural::CheckFunction(const Function* func) {
-    // Scope holds the parameters and block
-    scope_stack_.Push();
-    TINT_DEFER(scope_stack_.Pop());
-
-    // The recursion checks require this to be true as it will be asserted by the
-    // referenced_functions helper.
-    func->ForEachUseUnsorted([&](const Usage& use) {
-        if (use.instruction->As<UserCall>() || use.instruction->As<Return>()) {
-            return;
-        }
-        AddError(use.instruction, use.operand_index) << "function may not be used as a operand";
-    });
-
-    if (!func->Type() || !func->Type()->Is<core::type::Function>()) {
-        AddError(func) << "functions must have type '<function>'";
-        return;
-    }
-
-    // Note: This is not a validator error because Function::SetBlock() asserts that the block is
-    // not null, and the disassembler will crash if this is not null. This should only be hit due
-    // to some sort of corruption, not a bad shader/programmer error.
-    TINT_ASSERT(func->Block()) << "root block for function is undefined";
-
-    if (func->Block()->Is<ir::MultiInBlock>()) {
-        AddError(func) << "root block for function cannot be a multi-in block";
-        return;
-    }
-
-    Hashset<const FunctionParam*, 4> param_set{};
-    for (auto* param : func->Params()) {
-        if (!CheckFunctionParam(func, param, param_set)) {
-            return;
-        }
-
-        scope_stack_.Add(param);
-    }
-
-    // TODO(516717234): Move to functional
-    CheckType(func->ReturnType(), [&]() -> diag::Diagnostic& { return AddError(func); });
-
-    // TODO(516717234): Determine what below to move to function.
-
-    ValidateIOAttributes(func);
-    CheckWorkgroupSize(func);
-    CheckSubgroupSize(func);
-
-    CheckEntryPoint(func);
-
-    QueueBlock(func->Block());
-    ProcessTasks();
-}
-
-void Structural::CheckEntryPoint(const Function* func) {
-    if (!func->IsEntryPoint()) {
-        return;
-    }
-
-    ValidateShaderIOAnnotations(func, func->ReturnType(), std::nullopt, func->ReturnAttributes(),
-                                ShaderIOKind::kResultValue);
-
-    WalkTypeAndMembers(func, func->ReturnType(), func->ReturnAttributes(),
-                       [this](const Function* f, const core::type::Type* t, const IOAttributes&) {
-                           CheckNotBool(f, t, "entry point returns can not be 'bool'");
-                       });
-
-    for (auto var : referenced_module_vars_.TransitiveReferences(func)) {
-        const auto* mv = var->Result()->Type()->As<core::type::MemoryView>();
-        const auto* ty = var->Result()->Type()->UnwrapPtrOrRef();
-        const auto attr = var->Attributes();
-        if (!mv || !ty) {
-            continue;
-        }
-
-        switch (mv->AddressSpace()) {
-            case AddressSpace::kIn:
-            case AddressSpace::kOut:
-                break;
-            default:
-                continue;
-        }
-
-        if (func->IsFragment() && mv->AddressSpace() == AddressSpace::kIn) {
-            WalkTypeAndMembers(var, ty, attr, [this](const auto* v, const auto* t, const auto& a) {
-                CheckFrontFacingIfBool(v, a, t,
-                                       "input address space values referenced by fragment shaders "
-                                       "can only be 'bool' if decorated with "
-                                       "@builtin(front_facing)");
-            });
-        } else {
-            WalkTypeAndMembers(var, ty, attr, [this](const auto* v, const auto* t, const auto&) {
-                CheckNotBool(v, t,
-                             "IO address space values referenced by shader entry points can "
-                             "only be 'bool' if in the input space, used only by fragment "
-                             "shaders and decorated with @builtin(front_facing)");
-            });
-        }
-    }
-}
-
-bool Structural::CheckFunctionParam(const Function* func,
-                                    const FunctionParam* param,
-                                    Hashset<const FunctionParam*, 4>& param_set) {
-    if (!param->Alive()) {
-        AddError(param) << "destroyed parameter found in function parameter list";
-        return false;
-    }
-
-    if (!param_set.Add(param)) {
-        AddError(param) << "function parameter is not unique";
-        return false;
-    }
-
-    if (!param->Type()) {
-        AddError(param) << "function parameter has nullptr type";
-        return false;
-    }
-
-    if (!param->Function()) {
-        AddError(param) << "function parameter has nullptr parent function";
-        return false;
-    }
-
-    if (param->Function() != func) {
-        AddError(param) << "function parameter has incorrect parent function";
-        AddNote(param->Function()) << "parent function declared here";
-        return false;
-    }
-
-    // TODO(516717234): Move to functional
-    CheckType(param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); });
-
-    // TODO(516717234): Move to functional
-    if (func->IsFragment()) {
-        WalkTypeAndMembers(param, param->Type(), param->Attributes(),
-                           [this](const auto* p, const auto* t, const auto& a) {
-                               CheckFrontFacingIfBool(
-                                   p, a, t,
-                                   "fragment entry point params can only be a bool if "
-                                   "decorated with @builtin(front_facing)");
-                           });
-    } else if (func->IsEntryPoint()) {
-        WalkTypeAndMembers(
-            param, param->Type(), param->Attributes(),
-            [this](const auto* p, const auto* t, const auto&) {
-                CheckNotBool(p, t, "entry point params can only be a bool for fragment shaders");
-            });
-    }
-
-    // TODO(516717234): Move to functional
-    if (func->IsEntryPoint()) {
-        ValidateShaderIOAnnotations(param, param->Type(), param->BindingPoint(),
-                                    param->Attributes(), ShaderIOKind::kInputParam);
-    } else {
-        if (param->BindingPoint().has_value()) {
-            AddError(param) << "input param to non-entry point function has a binding point set";
-            return false;
-        }
-
-        if (param->Builtin().has_value()) {
-            AddError(param) << "builtins can only be decorated on entry point params";
-            return false;
-        }
-    }
-    return true;
 }
 
 void Structural::ValidateIOAttributes(const Function* func) {
@@ -1242,155 +986,6 @@ void Structural::ValidateIOAttributesImpl(IOAttributeContext& ctx,
         });
 }
 
-void Structural::CheckFrontFacingIfBool(const CastableBase* msg_anchor,
-                                        const IOAttributes& attr,
-                                        const core::type::Type* ty,
-                                        const std::string& err) {
-    if (ty->Is<core::type::Bool>() && attr.builtin != BuiltinValue::kFrontFacing) {
-        AddError(msg_anchor) << err;
-    }
-}
-
-void Structural::CheckNotBool(const CastableBase* msg_anchor,
-                              const core::type::Type* ty,
-                              const std::string& err) {
-    if (ty->Is<core::type::Bool>()) {
-        AddError(msg_anchor) << err;
-    }
-}
-
-void Structural::CheckWorkgroupSize(const Function* func) {
-    if (!func->IsCompute()) {
-        if (func->WorkgroupSize().has_value()) {
-            AddError(func) << "@workgroup_size only valid on compute entry point";
-        }
-        return;
-    }
-
-    if (!func->WorkgroupSize().has_value()) {
-        AddError(func) << "compute entry point requires @workgroup_size";
-        return;
-    }
-
-    auto workgroup_sizes = func->WorkgroupSize().value();
-    // The number parameters cannot be checked here, since it is stored internally as a 3 element
-    // array, so will always have 3 elements at this point.
-    TINT_ASSERT(workgroup_sizes.size() == 3);
-
-    uint64_t total_size = 1;
-
-    std::optional<const core::type::Type*> sizes_ty;
-    for (auto* size : workgroup_sizes) {
-        if (!size || !size->Type()) {
-            AddError(func) << "a @workgroup_size param is undefined or missing a type";
-            return;
-        }
-
-        auto* ty = size->Type();
-        if (!ty->IsAnyOf<core::type::I32, core::type::U32>()) {
-            AddError(func) << "@workgroup_size params must be an 'i32' or 'u32', received "
-                           << NameOf(ty);
-            return;
-        }
-
-        if (!sizes_ty.has_value()) {
-            sizes_ty = ty;
-        }
-
-        if (sizes_ty != ty) {
-            AddError(func) << "@workgroup_size params must be all 'i32's or all 'u32's";
-            return;
-        }
-
-        if (auto* c = size->As<ir::Constant>()) {
-            if (c->Value()->ValueAs<int64_t>() <= 0) {
-                AddError(func) << "@workgroup_size params must be greater than 0";
-                return;
-            }
-            total_size *= c->Value()->ValueAs<uint64_t>();
-
-            constexpr uint64_t kMaxGridSize = 0xffffffff;
-            if (total_size > kMaxGridSize) {
-                AddError(func) << "workgroup grid size cannot exceed 0x" << std::hex
-                               << kMaxGridSize;
-            }
-            continue;
-        }
-
-        if (!ir_.properties.Contains(Property::kAllowOverrides)) {
-            AddError(func) << "@workgroup_size param is not a constant value, and IR property "
-                              "'AllowOverrides' is not enabled";
-            return;
-        }
-
-        if (auto* r = size->As<ir::InstructionResult>()) {
-            if (!r->Instruction()) {
-                AddError(func) << "instruction for @workgroup_size param is not defined";
-                return;
-            }
-
-            if (r->Instruction()->Block() != ir_.root_block) {
-                AddError(func) << "@workgroup_size param defined by non-module scope value";
-                return;
-            }
-
-            // Since above, it is already checked if the value is in the root block, it is assumed
-            // to be pipeline creatable here, i.e. const/override or derived from consts and
-            // overrides.
-            // If that is not true, that indicates an issue in CheckRootBlock().
-            continue;
-        }
-
-        AddError(func) << "@workgroup_size must be an InstructionResult or a Constant";
-    }
-}
-
-void Structural::CheckSubgroupSize(const Function* func) {
-    // @subgroup_size is optional
-    if (!func->SubgroupSize().has_value()) {
-        return;
-    }
-
-    auto subgroup_size = func->SubgroupSize().value();
-    if (subgroup_size == nullptr) {
-        AddError(func) << "a @subgroup_size param must have a value";
-        return;
-    }
-
-    if (!subgroup_size->Type()) {
-        AddError(func) << "a @subgroup_size param is missing a type";
-        return;
-    }
-
-    if (subgroup_size->Is<core::ir::Constant>()) {
-        return;
-    }
-
-    if (!ir_.properties.Contains(Property::kAllowOverrides)) {
-        AddError(func) << "@subgroup_size param is not a constant value, and IR property "
-                          "'AllowOverrides' is not enabled";
-        return;
-    }
-
-    if (auto* r = subgroup_size->As<ir::InstructionResult>()) {
-        if (!r->Instruction()) {
-            AddError(func) << "instruction for @subgroup_size param is not defined";
-            return;
-        }
-
-        if (r->Instruction()->Block() != ir_.root_block) {
-            AddError(func) << "@subgroup_size param defined by non-module scope value";
-            return;
-        }
-
-        if (r->Instruction()->Is<core::ir::Override>()) {
-            return;
-        }
-    }
-
-    AddError(func) << "@subgroup_size must be an InstructionResult or a Constant";
-}
-
 void Structural::ProcessTasks() {
     while (!tasks_.IsEmpty()) {
         tasks_.Pop()();
@@ -1547,7 +1142,6 @@ void Structural::CheckVar(const Var* var) {
         return;
     }
 
-    // TODO(516717234): Remove when ValidateShaderIOAnnotations are moved to function validator
     auto* result_type = var->Result()->Type();
     auto* mv = result_type->As<core::type::MemoryView>();
     if (!mv) {
@@ -1574,7 +1168,6 @@ void Structural::CheckVar(const Var* var) {
         }
     }
 
-    // TODO(516717234): Move to functional validator
     CheckBindingPoint(var, var->Result(0)->Type(), var->Attributes(),
                       ShaderIOKind::kModuleScopeVar);
 
@@ -1584,7 +1177,6 @@ void Structural::CheckVar(const Var* var) {
                            Function::PipelineStage::kUndefined, IODirection::kResource);
     }
 
-    // TODO(516717234): Move to functional validator
     if (var->Block() == ir_.root_block) {
         if (mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut) {
             ValidateShaderIOAnnotations(var, var->Result()->Type(), var->BindingPoint(),
