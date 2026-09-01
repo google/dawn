@@ -620,7 +620,7 @@ MaybeError Texture::ClearTexture(const OpenGLFunctions& gl,
         DAWN_TRY_ASSIGN(srcBuffer, Buffer::CreateInternalBuffer(device, &descriptor, false));
 
         // Fill the buffer with clear color
-        srcBuffer->GetMappedRange().FillBytes(std::byte(clearColor));
+        std::ranges::fill(srcBuffer->GetMappedRange(), std::byte(clearColor));
         DAWN_TRY(srcBuffer->Unmap());
 
         DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_UNPACK_BUFFER, srcBuffer->GetHandle()));

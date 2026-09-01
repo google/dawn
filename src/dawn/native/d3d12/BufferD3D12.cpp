@@ -749,7 +749,7 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
     if (GetInternalUsage() & wgpu::BufferUsage::MapWrite) {
         DAWN_TRY(MapInternal(true, static_cast<size_t>(offset), static_cast<size_t>(size),
                              "D3D12 map at clear buffer"));
-        mMappedData.FillBytes(std::byte(clearValue));
+        std::ranges::fill(mMappedData, std::byte(clearValue));
         UnmapImpl(GetState(), BufferState::Unmapped);
     } else if (clearValue == 0u) {
         DAWN_TRY(device->ClearBufferToZero(commandContext, this, offset, size));
@@ -759,7 +759,7 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
         DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
             size, kCopyBufferToBufferOffsetAlignment,
             [&](UploadReservation reservation) -> MaybeError {
-                reservation.mappedData.FillBytes(std::byte(clearValue));
+                std::ranges::fill(reservation.mappedData, std::byte(clearValue));
                 device->CopyFromStagingToBufferHelper(commandContext, reservation.buffer.Get(),
                                                       reservation.offsetInBuffer, this, offset,
                                                       size);

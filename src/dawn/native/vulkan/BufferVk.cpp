@@ -330,7 +330,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
             if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
                 DAWN_TRY(MapMemoryAndPerformOperation(
                     0, checked_cast<size_t>(mAllocatedSize.value()),
-                    [](Span<std::byte> mapped) { mapped.FillBytes(std::byte(0x01)); }));
+                    [](Span<std::byte> mapped) { std::ranges::fill(mapped, std::byte(0x01)); }));
             }
             if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
                 paddingClearSize > 0) {
@@ -338,7 +338,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
                     checked_cast<size_t>(paddingClearOffset), paddingClearSize,
                     [&paddingClearSize](Span<std::byte> mapped) {
                         DAWN_CHECK(mapped.size() == paddingClearSize);
-                        mapped.FillBytes(std::byte(0x0));
+                        std::ranges::fill(mapped, std::byte(0x0));
                     }));
             }
         } else {
@@ -581,7 +581,8 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     // The real mapped pointer is never returned for zero sized buffers. MappedAtCreation buffers
     // are initialized in BufferBase already.
     if (NeedsInitialization() && GetSize() > 0 && newState == BufferState::Mapped) {
-        GetMappedRangeImpl(0, checked_cast<size_t>(GetAllocatedSize())).FillBytes(std::byte(0u));
+        std::ranges::fill(GetMappedRangeImpl(0, checked_cast<size_t>(GetAllocatedSize())),
+                          std::byte(0u));
         GetDevice()->IncrementLazyClearCountForTesting();
         SetInitialized(true);
 
@@ -673,7 +674,7 @@ MaybeError Buffer::UploadData(uint64_t bufferOffset, Span<const std::byte> data)
             size_t dstOffset = 0;
             if (needsZeroInitialization) {
                 DAWN_ASSERT(mapped.size() == mAllocatedSize);
-                mapped.FillBytes(std::byte(0x0));
+                std::ranges::fill(mapped, std::byte(0x0));
                 GetDevice()->IncrementLazyClearCountForTesting();
                 dstOffset = checked_cast<size_t>(bufferOffset);
             }

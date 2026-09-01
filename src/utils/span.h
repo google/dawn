@@ -31,7 +31,6 @@
 #include <algorithm>
 #include <concepts>
 #include <cstdint>
-#include <cstring>
 #include <functional>
 #include <limits>
 #include <memory>
@@ -40,7 +39,6 @@
 #include <span>
 #include <utility>
 
-#include "src/utils/compiler.h"
 #include "src/utils/numeric.h"
 #include "src/utils/underlying_type.h"
 
@@ -429,22 +427,6 @@ class SpanBase : private SpanStorage<Index, PtrType, Extent> {
             std::add_const_t<std::remove_reference_t<std::ranges::range_reference_t<R>>>;
         SpanBase<RElement, Index, const RElement*> other(std::forward<R>(range));
         first(other.size()).CopyFrom(other);
-    }
-
-    // Fills the span with the specified byte value.
-    // This is necessary as a workaround for ASAN which can cause timeouts (especially for fuzzers)
-    // because std::ranges::fill performs byte-by-byte stores without loop idiom recognition.
-    void FillBytes(std::byte value)
-        requires(std::is_same_v<T, std::byte>)
-    {
-        if (empty()) {
-            return;
-        }
-#if DAWN_ASAN_ENABLED()
-        std::memset(data(), static_cast<int>(value), size_bytes());
-#else
-        std::ranges::fill(*this, value);
-#endif
     }
 
   private:

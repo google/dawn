@@ -890,7 +890,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
 
             DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
                 uploadSize, blockInfo.byteSize, [&](UploadReservation reservation) -> MaybeError {
-                    reservation.mappedData.FillBytes(std::byte(clearColor));
+                    std::ranges::fill(reservation.mappedData, std::byte(clearColor));
 
                     for (uint32_t level = range.baseMipLevel;
                          level < range.baseMipLevel + range.levelCount; ++level) {

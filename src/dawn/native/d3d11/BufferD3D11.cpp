@@ -249,8 +249,9 @@ class UploadBuffer final : public Buffer {
                              uint8_t clearValue,
                              uint64_t offset,
                              uint64_t size) override {
-        mUploadData.subspan(checked_cast<size_t>(offset), checked_cast<size_t>(size))
-            .FillBytes(std::byte{clearValue});
+        std::ranges::fill(
+            mUploadData.subspan(checked_cast<size_t>(offset), checked_cast<size_t>(size)),
+            std::byte{clearValue});
         return {};
     }
 

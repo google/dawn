@@ -1343,7 +1343,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
 
         DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
             uploadSize, blockInfo.byteSize, [&](UploadReservation reservation) -> MaybeError {
-                reservation.mappedData.FillBytes(std::byte(uClearColor));
+                std::ranges::fill(reservation.mappedData, std::byte(uClearColor));
 
                 std::vector<VkBufferImageCopy> regions;
                 for (uint32_t level = range.baseMipLevel;
