@@ -692,6 +692,53 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzle_MiddleOfChain) 
 )");
 }
 
+TEST_F(ProgramToIRAccessorTest, Accessor_Var_SingleElementSwizzleOfSwizzle) {
+    // var a: vec4<f32>;
+    // let b = a.zyx.x
+
+    auto* a = Var("a", ty.vec4<f32>(), core::AddressSpace::kFunction);
+    auto* expr = Decl(Let("b", MemberAccessor(MemberAccessor(a, "zyx"), "x")));
+    WrapInFunction(Decl(a), expr);
+
+    auto m = Build();
+    ASSERT_EQ(m, Success);
+
+    EXPECT_EQ(Dis(m.Get()),
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %a:ptr<function, vec4<f32>, read_write> = var undef
+    %3:f32 = load_vector_element %a, 2u
+    %b:f32 = let %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(ProgramToIRAccessorTest,
+       Accessor_Var_SingleElementSwizzleOfSwizzle_WithoutSwizzleAssignment) {
+    // var a: vec4<f32>;
+    // let b = a.zyx.x
+
+    auto* a = Var("a", ty.vec4<f32>(), core::AddressSpace::kFunction);
+    auto* expr = Decl(Let("b", MemberAccessor(MemberAccessor(a, "zyx"), "x")));
+    WrapInFunction(Decl(a), expr);
+
+    auto m = Build(wgsl::AllowedFeatures{});
+    ASSERT_EQ(m, Success);
+
+    EXPECT_EQ(Dis(m.Get()),
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %a:ptr<function, vec4<f32>, read_write> = var undef
+    %3:f32 = load_vector_element %a, 2u
+    %b:f32 = let %3
+    ret
+  }
+}
+)");
+}
+
 TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleIndex) {
     // let a: vec3<u32> = vec3()
     // let b = a[2]

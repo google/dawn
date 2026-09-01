@@ -49,10 +49,11 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
     IRProgramTestBase() = default;
     ~IRProgramTestBase() override = default;
 
-    /// Builds a core-dialect module from this ProgramBuilder.
+    /// Builds a core-dialect module from this ProgramBuilder with the given allowed features.
+    /// @param allowed_features the allowed features for resolving
     /// @returns the generated core-dialect module
-    Result<core::ir::Module> Build() {
-        Program program{resolver::Resolve(*this)};
+    Result<core::ir::Module> Build(const wgsl::AllowedFeatures& allowed_features) {
+        Program program{resolver::Resolve(*this, allowed_features)};
         if (!program.IsValid()) {
             return Failure{program.Diagnostics().Str()};
         }
@@ -65,6 +66,10 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
         TINT_CHECK_RESULT(core::ir::Validate(result));
         return result;
     }
+
+    /// Builds a core-dialect module from this ProgramBuilder.
+    /// @returns the generated core-dialect module
+    Result<core::ir::Module> Build() { return Build(wgsl::AllowedFeatures::Everything()); }
 
     /// Build the module from the given WGSL.
     /// @param wgsl the WGSL to convert to IR

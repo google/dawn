@@ -3553,19 +3553,17 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                 // A single element swizzle is just the type of the vector.
                 ty = vec->Type();
 
-                // If we're extracting from a memory view that will need to be loaded, we return a
-                // reference.
-                if (memory_view && !memory_view->Is<core::type::SwizzleView>()) {
-                    ty = b.create<core::type::Reference>(memory_view->AddressSpace(), ty,
-                                                         memory_view->Access());
-                } else if (memory_view && memory_view->Is<core::type::SwizzleView>() &&
-                           allowed_features_.features.contains(
-                               wgsl::LanguageFeature::kSwizzleAssignment)) {
-                    // If the swizzle assignment language feature is enabled, a single element
-                    // swizzle into a swizzle view must also be a swizzle view.
-                    ty = b.create<core::type::SwizzleView>(memory_view->AddressSpace(), ty,
-                                                           memory_view->Access(), vec->Width(),
-                                                           static_cast<uint32_t>(size));
+                // If we're extracting from a swizzle view, we return a swizzle view. If extracting
+                // from another memory view, we return a reference (which will need to be loaded).
+                if (memory_view) {
+                    if (memory_view->Is<core::type::SwizzleView>()) {
+                        ty = b.create<core::type::SwizzleView>(memory_view->AddressSpace(), ty,
+                                                               memory_view->Access(), vec->Width(),
+                                                               static_cast<uint32_t>(size));
+                    } else {
+                        ty = b.create<core::type::Reference>(memory_view->AddressSpace(), ty,
+                                                             memory_view->Access());
+                    }
                 }
             } else {
                 if (memory_view) {

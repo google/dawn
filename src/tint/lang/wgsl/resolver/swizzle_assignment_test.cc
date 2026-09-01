@@ -53,6 +53,22 @@ TEST_F(ResolverSwizzleAssignmentTest, LanguageFeatureDisabled) {
         R"(1:2 error: cannot assign to value of type 'swizzle<private, vec2<f32>, read_write, 4, 2>')");
 }
 
+TEST_F(ResolverSwizzleAssignmentTest, LanguageFeatureDisabled_ChainedSingleElementSwizzle) {
+    // var v : vec4f;
+    // v.xy.x = 1.0;
+    GlobalVar("v", ty.vec4<f32>(), core::AddressSpace::kPrivate);
+
+    WrapInFunction(Assign(MemberAccessor(Source{{1, 2}}, MemberAccessor("v", "xy"), "x"), 1_f));
+
+    wgsl::AllowedFeatures allowed_features{};
+
+    Resolver resolver{this, allowed_features};
+    EXPECT_FALSE(resolver.Resolve());
+    EXPECT_EQ(
+        resolver.error(),
+        R"(1:2 error: cannot assign to value of type 'swizzle<private, f32, read_write, 2, 1>')");
+}
+
 TEST_F(ResolverSwizzleAssignmentTest, SimpleSwizzleAssignment) {
     // var v : vec4f;
     // v.xy = vec2(1);
