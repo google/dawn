@@ -221,14 +221,14 @@ func runExperiment(t *taskConfig) error {
 		return err
 	}
 
-	tasks, err := calculateTasks(t, config, machineResultsDir)
+	tasks, err := calculateExperimentTasks(t, config, machineResultsDir)
 	if err != nil {
 		return err
 	}
 
-	pendingTasks := queueRemainingTasks(t, tasks)
+	pendingTasks := queueRemainingExperimentTasks(t, tasks)
 
-	if err = runPendingTasks(t, pendingTasks, config, perfScores, binDir, needsBurnIn); err != nil {
+	if err = runPendingExperimentTasks(t, pendingTasks, config, perfScores, binDir, needsBurnIn); err != nil {
 		return err
 	}
 
@@ -452,12 +452,12 @@ func generateResultsDirIfNeeded(t *taskConfig) (string, error) {
 	return machineResultsDir, nil
 }
 
-// calculateTasks creates the full list of ExperimentTasks based on the
+// calculateExperimentTasks creates the full list of ExperimentTasks based on the
 // experiment configuration. It iterates through all fuzzers and their
 // corresponding corpora, producing tasks for each combination and
 // duration.
 // Returns a slice of ExperimentTask if successful, otherwise an error.
-func calculateTasks(t *taskConfig, settings ExperimentSettings, machineResultsDir string) ([]ExperimentTask, error) {
+func calculateExperimentTasks(t *taskConfig, settings ExperimentSettings, machineResultsDir string) ([]ExperimentTask, error) {
 	corporaDir := filepath.Join(t.experimentPath, kExperimentCorporaSubDir)
 	var tasks []ExperimentTask
 	for _, fuzzer := range settings.Fuzzers {
@@ -473,7 +473,7 @@ func calculateTasks(t *taskConfig, settings ExperimentSettings, machineResultsDi
 		}
 
 		for _, corpus := range corpora {
-			fuzzerTasks, err := calculateTasksForFuzzer(fuzzer, corpus, corporaDir, machineResultsDir, &settings)
+			fuzzerTasks, err := calculateExperimentTasksForFuzzer(fuzzer, corpus, corporaDir, machineResultsDir, &settings)
 			if err != nil {
 				return nil, err
 			}
@@ -485,12 +485,12 @@ func calculateTasks(t *taskConfig, settings ExperimentSettings, machineResultsDi
 	return tasks, nil
 }
 
-// queueRemainingTasks filters the list of tasks to identify those that are
+// queueRemainingExperimentTasks filters the list of tasks to identify those that are
 // pending or were interrupted, based on the presence and content of a
 // state.json file in the task directory. It also ensures the task's corpus
 // directory is prepared.
 // Returns a slice of ExperimentTask containing only the remaining tasks to be run.
-func queueRemainingTasks(t *taskConfig, tasks []ExperimentTask) []ExperimentTask {
+func queueRemainingExperimentTasks(t *taskConfig, tasks []ExperimentTask) []ExperimentTask {
 	// Queue up pending/interrupted tasks
 	var pendingTasks []ExperimentTask
 	for _, task := range tasks {
@@ -515,10 +515,10 @@ func queueRemainingTasks(t *taskConfig, tasks []ExperimentTask) []ExperimentTask
 	return pendingTasks
 }
 
-// runPendingTasks executes the provided list of experiment tasks using a parallel worker pool.
+// runPendingExperimentTasks executes the provided list of experiment tasks using a parallel worker pool.
 // It manages worker synchronization and context cancellation. It returns the first error
 // encountered
-func runPendingTasks(t *taskConfig, pendingTasks []ExperimentTask, settings ExperimentSettings, perfScores map[string]float64, binDir string, needsBurnIn bool) error {
+func runPendingExperimentTasks(t *taskConfig, pendingTasks []ExperimentTask, settings ExperimentSettings, perfScores map[string]float64, binDir string, needsBurnIn bool) error {
 	if len(pendingTasks) == 0 {
 		return nil
 	}
@@ -560,7 +560,7 @@ func runPendingTasks(t *taskConfig, pendingTasks []ExperimentTask, settings Expe
 						return
 					}
 					score := perfScores[task.FuzzerName]
-					if err := executeTask(ctx, t, binDir, task, score, timeoutVal); err != nil {
+					if err := executeExperimentTask(ctx, t, binDir, task, score, timeoutVal); err != nil {
 						if !errors.Is(err, context.Canceled) && !errors.Is(err, context.DeadlineExceeded) {
 							errChan <- err
 							cancel()
@@ -829,9 +829,9 @@ func runBurnIn(t *taskConfig, settings *ExperimentSettings) error {
 	return nil
 }
 
-// calculateTasksForFuzzer creates the list of ExperimentTasks for a specific
+// calculateExperimentTasksForFuzzer creates the list of ExperimentTasks for a specific
 // fuzzer and corpus combination based on the experiment durations.
-func calculateTasksForFuzzer(fuzzer string, corpus CorpusDef, corporaDir string, machineDir string, settings *ExperimentSettings) ([]ExperimentTask, error) {
+func calculateExperimentTasksForFuzzer(fuzzer string, corpus CorpusDef, corporaDir string, machineDir string, settings *ExperimentSettings) ([]ExperimentTask, error) {
 	var tasks []ExperimentTask
 	cPath := filepath.Join(corporaDir, corpus.Path)
 
@@ -869,9 +869,9 @@ func calculateTasksForFuzzer(fuzzer string, corpus CorpusDef, corporaDir string,
 	return tasks, nil
 }
 
-// executeTask runs a single fuzzer iteration, manages its state file,
+// executeExperimentTask runs a single fuzzer iteration, manages its state file,
 // and captures the output logs and performance data.
-func executeTask(ctx context.Context, t *taskConfig, binDir string, task ExperimentTask, score float64, timeoutVal int) error {
+func executeExperimentTask(ctx context.Context, t *taskConfig, binDir string, task ExperimentTask, score float64, timeoutVal int) error {
 	statePath := filepath.Join(task.TaskDir, kExperimentTaskStateFile)
 
 	// Update state to running

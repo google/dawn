@@ -140,7 +140,7 @@ func TestGenerateTasksForFuzzer(t *testing.T) {
 		},
 	}
 
-	tasks, err := calculateTasksForFuzzer("tint_wgsl_fuzzer", corpus, "/root/corpora", "/root/results/default", settings)
+	tasks, err := calculateExperimentTasksForFuzzer("tint_wgsl_fuzzer", corpus, "/root/corpora", "/root/results/default", settings)
 
 	require.NoError(t, err)
 	require.Len(t, tasks, 7)

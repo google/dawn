@@ -86,4 +86,16 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
+// Some tooling wants dawn.googlesource.com/dawn for the import, but other tooling wants the local path, so provide an
+// explicit mapping
+replace (
+	dawn.googlesource.com/dawn/tools/src/execwrapper => ./tools/src/execwrapper
+	dawn.googlesource.com/dawn/tools/src/fileutils => ./tools/src/fileutils
+	dawn.googlesource.com/dawn/tools/src/glob => ./tools/src/glob
+	dawn.googlesource.com/dawn/tools/src/oswrapper => ./tools/src/oswrapper
+	dawn.googlesource.com/dawn/tools/src/progressbar => ./tools/src/progressbar
+	dawn.googlesource.com/dawn/tools/src/transform => ./tools/src/transform
+	dawn.googlesource.com/dawn/tools/src/utils => ./tools/src/utils
+)
+
 exclude github.com/sergi/go-diff v1.2.0

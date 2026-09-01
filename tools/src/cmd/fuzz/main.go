@@ -84,6 +84,7 @@ const (
 	TaskModeBisect
 	TaskModeBisectStep
 	TaskModeExperiment
+	TaskModeAnalyze
 )
 
 type FuzzMode int
@@ -128,6 +129,7 @@ type mainConfig struct {
 	temporaryOut       bool
 	numProcesses       int
 	experimentPath     string
+	analyzePath        string
 	machineName        string
 	osWrapper          oswrapper.OSWrapper
 	execWrapper        execwrapper.ExecWrapper
@@ -140,13 +142,14 @@ func showUsage() {
 	_, _ = fmt.Fprintln(out, `
 fuzz is a helper for running the tint fuzzer executables and other related tasks
 
-fuzz has 6, mutually exclusive, tasks that it can perform:
+fuzz has 7, mutually exclusive, tasks that it can perform:
 1. Run a fuzzer locally, requires no additional flag.
 2. Check that a fuzzer successfully handles contents of -inputs, requires -check flag
 3. Generate a fuzzer corpus based on contents of -inputs, requires -generate flag
 4. Triage a specific fuzzer crash, requires -triage flag
 5. Bisect a specific fuzzer crash test case, requires -bisect flag
 6. Run performance and benchmarking experiments, requires -experiment flag
+7. Analyze data from experiment runs, requires -analyze flag
 
 usage:
   fuzz [flags...]`)
@@ -184,6 +187,7 @@ func main() {
 	flag.BoolVar(&c.isFix, "is-fix", false, "internal flag used by git bisect run to indicate if we are bisecting a fix")
 	flag.BoolVar(&c.skipInputTypeCheck, "skip-input-type-check", false, "bypass the heuristic text/binary input file type check")
 	flag.StringVar(&c.experimentPath, "experiment", "", "run an experiment using the configuration at <root> (WIP feature)")
+	flag.StringVar(&c.analyzePath, "analyze", "", "analyze data from an experiment at <root>  (WIP feature)")
 	flag.StringVar(&c.machineName, "machine", "", "machine name to identify results")
 	flag.IntVar(&c.timeout, "timeout", 60, "override the default timeout (in seconds) for triage and bisect modes")
 	flag.Parse()
@@ -209,9 +213,12 @@ func main() {
 	if c.experimentPath != "" {
 		modeCount++
 	}
+	if c.analyzePath != "" {
+		modeCount++
+	}
 
 	if !c.bisectStep && modeCount > 1 {
-		fmt.Println("cannot set more than one of -check, -generate, -triage, -bisect, and -experiment flags at the same time")
+		fmt.Println("cannot set more than one of -check, -generate, -triage, -bisect, -experiment, and -analyze flags at the same time")
 		os.Exit(1)
 	}
 
@@ -228,6 +235,8 @@ func main() {
 		c.cmdMode = TaskModeBisect
 	case c.experimentPath != "":
 		c.cmdMode = TaskModeExperiment
+	case c.analyzePath != "":
+		c.cmdMode = TaskModeAnalyze
 	default:
 		c.cmdMode = TaskModeRun
 	}
@@ -338,8 +347,8 @@ func (t *taskConfig) atGitHash(hash string, fn func() error) error {
 func run(c *mainConfig) error {
 	// Verify / create the directories needed for writing
 	switch c.cmdMode {
-	case TaskModeExperiment:
-		// output/build directory checking is part of runExperiment, since the expected locations/content are based on
+	case TaskModeExperiment, TaskModeAnalyze:
+		// output/build directory checking is part of runExperiment/Analyze, since the expected locations/content are based on
 		// the values in the experiment config file.
 	case TaskModeRun, TaskModeCheck, TaskModeGenerate, TaskModeTriage:
 		// These modes allow for using a temporary directory
@@ -419,6 +428,8 @@ func run(c *mainConfig) error {
 			err = runBisectStep(t)
 		case TaskModeExperiment:
 			err = runExperiment(t)
+		case TaskModeAnalyze:
+			err = runAnalyze(t)
 		default:
 			err = fmt.Errorf("unknown task mode %v", t.taskMode)
 		}
@@ -468,7 +479,7 @@ func generateTaskConfig(tm TaskMode, c *mainConfig) (*taskConfig, error) {
 		if c.fuzzMode == FuzzModeIr {
 			dependencies = append(dependencies, depConfig{"ir_fuzz_as", &t.assembler})
 		}
-	case TaskModeExperiment:
+	case TaskModeExperiment, TaskModeAnalyze:
 		// No dependencies required to be pre-validated by this helper
 	}
 
