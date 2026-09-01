@@ -39,6 +39,7 @@
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
+#include "src/utils/platform.h"
 
 namespace dawn::native::vulkan {
 
@@ -69,12 +70,22 @@ DAWN_TEST_PARAM_STRUCT(ImageWrappingParams,
 class VulkanImageWrappingTestBase : public DawnTestWithParams<ImageWrappingParams> {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        return {wgpu::FeatureName::DawnInternalUsages};
+        return {
+            wgpu::FeatureName::DawnInternalUsages,
+#if DAWN_PLATFORM_IS(CHROMEOS)
+            wgpu::FeatureName::SharedFenceSyncFD,
+#else
+            wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD,
+#endif
+        };
     }
 
   public:
     void SetUp() override {
         DawnTestWithParams::SetUp();
+        if (IsSkipped() || HasFatalFailure()) {
+            return;
+        }
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
         // TODO(dawn:1552): Nvidia doesn't seem to correctly reflect whether an import requires a
@@ -301,7 +312,7 @@ class VulkanImageWrappingUsageTests : public VulkanImageWrappingTestBase {
   public:
     void SetUp() override {
         VulkanImageWrappingTestBase::SetUp();
-        if (UsesWire()) {
+        if (IsSkipped() || HasFatalFailure()) {
             return;
         }
 
@@ -1015,7 +1026,8 @@ TEST_P(VulkanImageWrappingUsageTests, SRGBReinterpretation) {
 class VulkanImageWrappingMultithreadTests : public VulkanImageWrappingUsageTests {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        std::vector<wgpu::FeatureName> features;
+        std::vector<wgpu::FeatureName> features =
+            VulkanImageWrappingUsageTests::GetRequiredFeatures();
         // TODO(crbug.com/dawn/1678): DawnWire doesn't support thread safe API yet.
         if (!UsesWire()) {
             features.push_back(wgpu::FeatureName::ImplicitDeviceSynchronization);
@@ -1025,6 +1037,9 @@ class VulkanImageWrappingMultithreadTests : public VulkanImageWrappingUsageTests
 
     void SetUp() override {
         VulkanImageWrappingUsageTests::SetUp();
+        if (IsSkipped() || HasFatalFailure()) {
+            return;
+        }
         // TODO(crbug.com/dawn/1678): DawnWire doesn't support thread safe API yet.
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     }
