@@ -93,20 +93,34 @@ MaybeError ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial waitSerial, Na
         return {};
     }
 
+    // Check whether the serial has even been flushed. If it hasn't we need to flush it before we
+    // can even wait for it.
+    if (waitSerial > GetLastSubmittedCommandSerial()) {
+        auto deviceGuard = GetDevice()->GetGuard();
+        switch (GetDevice()->GetState()) {
+            case DeviceBase::State::Alive:
+                break;
+            case DeviceBase::State::Disconnecting:
+                GetDevice()->Disconnect();
+                return {};
+            case DeviceBase::State::Disconnected:
+            case DeviceBase::State::Destroyed:
+                return {};
+            case DeviceBase::State::BeingCreated:
+                DAWN_UNREACHABLE();
+        }
+        // Check submitted command serial again since it could have been incremented already.
+        if (waitSerial > GetLastSubmittedCommandSerial()) {
+            // Serial has not been submitted yet. Submit it now.
+            DAWN_TRY(EnsureCommandsFlushed(waitSerial));
+        }
+    }
+
     // We currently have two differing implementations for this function depending on whether the
     // backend supports thread safe waits. Note that while currently only the Metal backend
     // explicitly enables thread safe wait, the main blocking backend is D3D11 which is using the
     // value of |mCompletedSerial| within it's implementation of |CheckAndUpdateCompletedSerials|.
     if (GetDevice()->IsToggleEnabled(Toggle::WaitIsThreadSafe)) {
-        if (waitSerial > GetLastSubmittedCommandSerial()) {
-            auto deviceGuard = GetDevice()->GetGuard();
-            // Check submitted command serial again since it could have been incremented already.
-            if (waitSerial > GetLastSubmittedCommandSerial()) {
-                // Serial has not been submitted yet. Submit it now.
-                DAWN_TRY(EnsureCommandsFlushed(waitSerial));
-            }
-        }
-
         if (timeout > Nanoseconds(0u)) {
             // We should never need to wait for queue serials after the device has been
             // Disconnected.
@@ -122,11 +136,6 @@ MaybeError ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial waitSerial, Na
     } else {
         // Otherwise, we need to acquire the device lock first.
         auto deviceGuard = GetDevice()->GetGuard();
-        if (waitSerial > GetLastSubmittedCommandSerial()) {
-            // Serial has not been submitted yet. Submit it now.
-            DAWN_TRY(EnsureCommandsFlushed(waitSerial));
-        }
-
         if (timeout > Nanoseconds(0u)) {
             // We should never need to wait for queue serials after the device has been
             // Disconnected.

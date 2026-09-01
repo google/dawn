@@ -552,7 +552,7 @@ void DeviceBase::Destroy(DestroyReason reason) {
     }
 
     // Move away from the Alive state now so that the application cannot use this device anymore.
-    auto state = mState.exchange(State::BeingDisconnected);
+    SetDisconnectingIfAlive();
 
     // This function may be called re-entrantly inside APITick(). Tick triggers callbacks
     // inside which the application may destroy the device. Thus, we should be careful not
@@ -564,7 +564,7 @@ void DeviceBase::Destroy(DestroyReason reason) {
     // from Tick() whether or not there is any more pending work.
 
     // Skip handling device facilities if they haven't even been created (or failed doing so)
-    if (state != State::BeingCreated) {
+    if (mState != State::BeingCreated) {
         // The device is being destroyed so it will be lost, call the application callback.
         HandleDeviceLost(wgpu::DeviceLostReason::Destroyed, "Device was destroyed.");
 
@@ -577,41 +577,9 @@ void DeviceBase::Destroy(DestroyReason reason) {
         // DestroyImpl() as it may relinquish resources that will be freed by backends in the
         // DestroyImpl() call.
         DestroyObjects();
-    }
 
-    // Disconnect the device, depending on which state we are currently in.
-    switch (state) {
-        // The GPU timeline was never started so we don't have to wait.
-        case State::BeingCreated:
-        // The GPU is no longer functional so we don't wait.
-        case State::Disconnected:
-            break;
-
-        // The device is alive so we need to wait for all in-flight work.
-        case State::Alive:
-        // The device was placed in an error state as a result of unexpected errors which we can no
-        // longer recover from.
-        case State::BeingDisconnected:
-            // Wait for all GPU work to complete before proceeding with destruction.
-            // Ignore errors so that we can continue with destruction.
-            IgnoreErrors(mQueue->WaitForIdleForDestruction());
-
-            // Call TickImpl once last time to clean up resources
-            // Ignore errors so that we can continue with destruction
-            IgnoreErrors(TickImpl());
-            break;
-
-        // If we are already destroyed we should've skipped this work entirely.
-        case State::Destroyed:
-            DAWN_UNREACHABLE();
-            break;
-    }
-
-    if (state != State::BeingCreated) {
-        // The GPU timeline is finished.
-        mQueue->AssumeCommandsComplete();
-        DAWN_CHECK(mQueue->GetCompletedCommandSerial() >= mQueue->GetLastSubmittedCommandSerial());
-        mQueue->Tick(mQueue->GetCompletedCommandSerial());
+        // Disconnect the GPU timeline if it hasn't been disconnected already.
+        Disconnect();
     }
 
     // At this point GPU operations are always finished, so we are in the disconnected state.
@@ -685,10 +653,7 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
     }
 
     if (type == InternalErrorType::DeviceLost) {
-        // Transition to a non-alive state if we are currently alive so that the application can no
-        // longer use the device.
-        State prev = State::Alive;
-        mState.compare_exchange_strong(prev, State::BeingDisconnected, std::memory_order::acq_rel);
+        SetDisconnectingIfAlive();
     }
 
     // Re-enable validation on device loss or OOM to avoid unpredictable behaviors afterwards.
@@ -944,6 +909,39 @@ DeviceBase::State DeviceBase::GetState() const {
 bool DeviceBase::IsLost() const {
     DAWN_CHECK(mState != State::BeingCreated);
     return mState != State::Alive;
+}
+
+void DeviceBase::SetDisconnectingIfAlive() {
+    State state = State::Alive;
+    mState.compare_exchange_strong(state, State::Disconnecting, std::memory_order::acq_rel);
+}
+
+void DeviceBase::Disconnect() {
+    DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
+    switch (mState) {
+        case State::Alive:
+        case State::Destroyed:
+            DAWN_UNREACHABLE();
+        case State::BeingCreated:
+        case State::Disconnected:
+            return;
+        case State::Disconnecting:
+            break;
+    }
+    DAWN_ASSERT(mQueue != nullptr);
+
+    // Wait for all GPU work to complete before proceeding with destruction.
+    IgnoreErrors(mQueue->WaitForIdleForDestruction());
+
+    // Wait for all GPU work to complete before proceeding with destruction.
+    IgnoreErrors(TickImpl());
+
+    // The GPU timeline is finished.
+    mQueue->AssumeCommandsComplete();
+    DAWN_CHECK(mQueue->GetCompletedCommandSerial() >= mQueue->GetLastSubmittedCommandSerial());
+    mQueue->Tick(mQueue->GetCompletedCommandSerial());
+
+    mState = State::Disconnected;
 }
 
 ApiObjectList* DeviceBase::GetObjectTrackingList(ObjectType type) {
@@ -1598,6 +1596,9 @@ bool DeviceBase::APITick() {
 }
 
 MaybeError DeviceBase::Tick() {
+    if (mState == State::Disconnecting) {
+        Disconnect();
+    }
     if (IsLost() || !mQueue->HasScheduledCommands()) {
         return {};
     }

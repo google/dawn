@@ -350,7 +350,7 @@ class DeviceBase : public ErrorSink,
     //     (both for the application calling WebGPU, or re-entrant calls). No work exists on
     //     the GPU timeline.
     //   - Alive: the device is usable and might have work happening on the GPU timeline.
-    //   - BeingDisconnected: the device is no longer usable because we are waiting for all
+    //   - Disconnecting: the device is no longer usable because we are waiting for all
     //     work on the GPU timeline to finish. (this is to make validation prevent the
     //     application from adding more work during the transition from Alive to
     //     Disconnected)
@@ -360,12 +360,14 @@ class DeviceBase : public ErrorSink,
     enum class State {
         BeingCreated,
         Alive,
-        BeingDisconnected,
+        Disconnecting,
         Disconnected,
         Destroyed,
     };
     State GetState() const;
     bool IsLost() const;
+    void SetDisconnectingIfAlive();
+    void Disconnect();
     ApiObjectList* GetObjectTrackingList(ObjectType type);
     const ApiObjectList* GetObjectTrackingList(ObjectType type) const;
 
