@@ -1628,6 +1628,51 @@ TEST(SpanDeathTest, CopyPrefixFromSizeMismatch) {
     EXPECT_DEATH_IF_SUPPORTED(dst_sp.CopyPrefixFrom(src_sp), "");
 }
 
+TEST(SpanTest, FillBytes) {
+    // Fill dynamic extent span (std::byte)
+    {
+        std::array<std::byte, 5> data = {};
+        Span<std::byte> sp{data};
+        sp.FillBytes(std::byte{0x7F});
+        EXPECT_THAT(data, testing::ElementsAre(std::byte{0x7F}, std::byte{0x7F}, std::byte{0x7F},
+                                               std::byte{0x7F}, std::byte{0x7F}));
+    }
+
+    // Fill fixed extent span
+    {
+        std::array<std::byte, 3> data = {};
+        Span<std::byte, 3> sp{data};
+        sp.FillBytes(std::byte{0xAB});
+        EXPECT_THAT(data, testing::ElementsAre(std::byte{0xAB}, std::byte{0xAB}, std::byte{0xAB}));
+    }
+
+    // Fill ityp::span with custom index
+    {
+        std::array<std::byte, 3> data = {};
+        // SAFETY: This is viewing data, just with typed indices.
+        ityp::span<Index, std::byte> DAWN_UNSAFE_BUFFERS(sp(data.data(), Index{3u}));
+        sp.FillBytes(std::byte{0x42});
+        EXPECT_THAT(data, testing::ElementsAre(std::byte{0x42}, std::byte{0x42}, std::byte{0x42}));
+    }
+
+    // Fill subspan
+    {
+        std::array<std::byte, 5> data = {std::byte{1}, std::byte{2}, std::byte{3}, std::byte{4},
+                                         std::byte{5}};
+        Span<std::byte> sp{data};
+        sp.subspan(1, 3).FillBytes(std::byte{0});
+        EXPECT_THAT(data, testing::ElementsAre(std::byte{1}, std::byte{0}, std::byte{0},
+                                               std::byte{0}, std::byte{5}));
+    }
+
+    // Fill empty span
+    {
+        Span<std::byte> empty_sp;
+        empty_sp.FillBytes(std::byte{0xFF});
+        EXPECT_TRUE(empty_sp.empty());
+    }
+}
+
 TEST(SpanTest, Constructor_CArray) {
     int arr[] = {1, 2, 3, 4};
     const int constArr[] = {5, 6, 7};

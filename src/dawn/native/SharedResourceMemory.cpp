@@ -204,7 +204,7 @@ MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
             // it is never called again after the initial buffer creation, so zero-initialize
             // manually here.
             if (!descriptor->initialized) {
-                std::ranges::fill(resource->GetFullMappedAllocatedRange(), std::byte{0});
+                resource->GetFullMappedAllocatedRange().FillBytes(std::byte{0});
             }
             resource->SetInitialized(true);
         } else {

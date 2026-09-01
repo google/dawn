@@ -656,11 +656,11 @@ MaybeError BufferBase::MapAtCreation() {
         // actually get initialized when the staging data is copied in. (But we mark the main buffer
         // as initialized now.)
         if (!usingStagingBuffer) {
-            std::ranges::fill(GetFullMappedAllocatedRange(), std::byte{0});
+            GetFullMappedAllocatedRange().FillBytes(std::byte{0});
             device->IncrementLazyClearCountForTesting();
         }
     } else if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-        std::ranges::fill(GetFullMappedAllocatedRange(), std::byte{1});
+        GetFullMappedAllocatedRange().FillBytes(std::byte{1});
     }
     // Mark the buffer as initialized since we don't want to later clear it using the GPU since that
     // would overwrite what the client wrote using the CPU.
