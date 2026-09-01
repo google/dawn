@@ -387,16 +387,14 @@ class VectorIterator {
     /// @param n the number of elements
     /// @returns a new VectorIterator regressed by @p n elements
     VectorIterator operator-(std::ptrdiff_t n) const {
+        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
+        // are satisfied by the caller (i.e., not incrementing past end() or decrementing before
+        // begin()).
+        auto* new_ptr = DAWN_UNSAFE_BUFFERS(FORWARD ? ptr_ - n : ptr_ + n);
 #if TINT_VECTOR_MUTATION_CHECKS_ENABLED
-        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
-        // are satisfied by the caller (i.e., not incrementing past end() or decrementing before
-        // begin()).
-        return VectorIterator{DAWN_UNSAFE_BUFFERS(FORWARD ? ptr_ - n : ptr_ + n), iterator_count_};
+        return VectorIterator{new_ptr, iterator_count_};
 #else
-        // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
-        // are satisfied by the caller (i.e., not incrementing past end() or decrementing before
-        // begin()).
-        return VectorIterator{DAWN_UNSAFE_BUFFERS(FORWARD ? ptr_ - n : ptr_ + n)};
+        return VectorIterator{new_ptr};
 #endif
     }
 
@@ -405,8 +403,7 @@ class VectorIterator {
     std::ptrdiff_t operator-(const VectorIterator& other) const {
         // SAFETY: Pointer arithmetic is bounds-safe assuming standard STL iteration preconditions
         // are satisfied by the caller, both iterators refer to the same vector allocation.
-        return FORWARD ? DAWN_UNSAFE_BUFFERS(ptr_ - other.ptr_)
-                       : DAWN_UNSAFE_BUFFERS(other.ptr_ - ptr_);
+        return DAWN_UNSAFE_BUFFERS(FORWARD ? ptr_ - other.ptr_ : other.ptr_ - ptr_);
     }
 
   private:
@@ -899,10 +896,8 @@ class Vector {
     const const_reverse_iterator rbegin() const {
         // SAFETY: Implements the STL behaviour of rbegin() being one beyond the end of the
         // allocation, so depends on caller following the same restrictions, i.e. not dereferencing.
-        return const_reverse_iterator{
-                   DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len),
-                   &iterator_count_} +
-               1;
+        const auto* past_end = DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len);
+        return const_reverse_iterator{past_end, &iterator_count_} + 1;
     }
 
     /// @returns a reverse iterator to one element before the first element of the vector
@@ -925,31 +920,32 @@ class Vector {
     iterator end() {
         // SAFETY: Implements the STL behaviour of end() being one beyond the end of the allocation,
         // so depends on caller following the same restrictions, i.e. not dereferencing.
-        return iterator{DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len)};
+        auto* past_end = DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len);
+        return iterator{past_end};
     }
 
     /// @returns a forward iterator to one-pass the last element of the vector
     const const_iterator end() const {
         // SAFETY: Implements the STL behaviour of end() being one beyond the end of the allocation,
         // so depends on caller following the same restrictions, i.e. not dereferencing.
-        return const_iterator{DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len)};
+        const auto* past_end = DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len);
+        return const_iterator{past_end};
     }
 
     /// @returns a reverse iterator to the last element of the vector
     reverse_iterator rbegin() {
         // SAFETY: Implements the STL behaviour of rbegin() being one beyond the end of the
         // allocation, so depends on caller following the same restrictions, i.e. not dereferencing.
-        return reverse_iterator{DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len)} +
-               1;
+        auto* past_end = DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len);
+        return reverse_iterator{past_end} + 1;
     }
 
     /// @returns a reverse iterator to the last element of the vector
     const const_reverse_iterator rbegin() const {
         // SAFETY: Implements the STL behaviour of rbegin() being one beyond the end of the
         // allocation, so depends on caller following the same restrictions, i.e. not dereferencing.
-        return const_reverse_iterator{
-                   DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len)} +
-               1;
+        const auto* past_end = DAWN_UNSAFE_BUFFERS(impl_.slice.buffer.data() + impl_.slice.len);
+        return const_reverse_iterator{past_end} + 1;
     }
 
     /// @returns a reverse iterator to one element before the first element of the vector
@@ -1061,8 +1057,8 @@ class Vector {
                 impl_.slice = other_impl.slice;
                 other_impl.slice = {};
                 if constexpr (N2 > 0) {
-                    // SAFETY: The small array always has a fixed capacity of N2 elements.
                     other_impl.slice.buffer =
+                        // SAFETY: The small array always has a fixed capacity of N2 elements.
                         DAWN_UNSAFE_BUFFERS(std::span{&other_impl.small_arr[0].Get(), N2});
                 }
                 return;
@@ -1114,8 +1110,8 @@ class Vector {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     struct ImplWithSmallArray {
         std::array<TStorage, N> small_arr;
-        // SAFETY: The small array always has a fixed capacity of N elements.
         internal::Slice<T> slice = {
+            // SAFETY: The small array always has a fixed capacity of N elements.
             DAWN_UNSAFE_BUFFERS(std::span<T>{&small_arr[0].Get(), N}),
             0,
         };
@@ -1127,8 +1123,8 @@ class Vector {
                 // SAFETY: The small array always has a fixed capacity of N elements.
                 slice.buffer = DAWN_UNSAFE_BUFFERS(std::span<T>{&small_arr[0].Get(), N});
             } else {
-                // SAFETY: The newly allocated heap array has a capacity of new_cap elements.
                 slice.buffer =
+                    // SAFETY: The newly allocated heap array has a capacity of new_cap elements.
                     DAWN_UNSAFE_BUFFERS(std::span<T>{Bitcast<T*>(new TStorage[new_cap]), new_cap});
             }
         }
