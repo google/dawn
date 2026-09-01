@@ -68,7 +68,6 @@ enum class Toggle {
     DisableRobustness,
     MetalEnableVertexPulling,
     AllowUnsafeAPIs,
-    AllowExperimentalSnorm10_10_10_2,
     FlushBeforeClientWaitSync,
     UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
     EmitHLSLDebugSymbols,
