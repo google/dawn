@@ -417,8 +417,8 @@ TEST_F(IR_ValidatorTest, StructureMember_SizeTooSmall) {
     auto* str_ty =
         ty.Struct(mod.symbols.New("S"),
                   Vector{
-                      ty.Get<type::StructMember>(mod.symbols.New("a"), ty.array<u32, 3>(), 0u, 0u,
-                                                 4u, 4u, IOAttributes{}),
+                      ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.array<u32, 3>(), 0u,
+                                                       0u, 4u, 4u, IOAttributes{}),
                   });
     mod.root_block->Append(b.Var("my_struct", private_, str_ty));
 
@@ -553,11 +553,12 @@ TEST_F(IR_ValidatorTest, StructMember_Pointer_WithProperty) {
 }
 
 TEST_F(IR_ValidatorTest, StructMember_Texture) {
-    auto* str_ty = ty.Struct(
-        mod.symbols.New("MyStruct"),
-        {
-            {mod.symbols.New("t"), ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), {}},
-        });
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"),
+                             {
+                                 {mod.symbols.New("t"),
+                                  ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+                                  {}},
+                             });
     auto* v = b.Var(ty.ptr(private_, str_ty));
     mod.root_block->Append(v);
 
@@ -571,11 +572,12 @@ TEST_F(IR_ValidatorTest, StructMember_Texture) {
 }
 
 TEST_F(IR_ValidatorTest, StructMember_Texture_WithProperty) {
-    auto* str_ty = ty.Struct(
-        mod.symbols.New("MyStruct"),
-        {
-            {mod.symbols.New("t"), ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), {}},
-        });
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"),
+                             {
+                                 {mod.symbols.New("t"),
+                                  ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+                                  {}},
+                             });
     auto* v = b.Var(ty.ptr(private_, str_ty));
     mod.root_block->Append(v);
 
@@ -818,8 +820,8 @@ TEST_F(IR_ValidatorTest, FunctionParam_InvalidTypeForHandleAddressSpace) {
 }
 
 TEST_F(IR_ValidatorTest, FunctionParam_InvalidHandlePointer) {
-    auto* type =
-        ty.ptr(AddressSpace::kHandle, ty.sampled_texture(type::TextureDimension::k1d, ty.f32()));
+    auto* type = ty.ptr(AddressSpace::kHandle,
+                        ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32()));
     auto* fn = b.Function("my_func", ty.void_());
     fn->SetParams(Vector{b.FunctionParam(type)});
     b.Append(fn->Block(), [&] {  //
@@ -1394,7 +1396,7 @@ TEST_P(Type_StorageTextureDimension, Test) {
         ASSERT_NE(res, Success) << res.Failure();
         EXPECT_THAT(res.Failure().reason,
                     testing::HasSubstr(
-                        dim != type::TextureDimension::kNone
+                        dim != core::type::TextureDimension::kNone
                             ? R"(:2:3 error: var: dimension ')" + std::string(ToString(dim)) +
                                   R"(' for storage textures does not in WGSL yet)"
                             : R"(:2:3 error: var: invalid texture dimension 'none')"))

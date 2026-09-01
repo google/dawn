@@ -65,8 +65,8 @@ struct State {
     /// Maps a variable and type to the store function
     Hashmap<VarTypePair, core::ir::Function*, 2> var_and_type_to_store_fn_{};
 
-    const type::Type* base_ty_ = nullptr;
-    const type::Pointer* base_ptr_ty_ = nullptr;
+    const core::type::Type* base_ty_ = nullptr;
+    const core::type::Pointer* base_ptr_ty_ = nullptr;
 
     diag::Diagnostic MakeError(const Source& src) {
         diag::Diagnostic error{};
@@ -95,7 +95,7 @@ struct State {
             }
 
             // Always decompose buffer types, otherwise depend on the options.
-            if (var_ty->StoreType()->Is<type::Buffer>()) {
+            if (var_ty->StoreType()->Is<core::type::Buffer>()) {
                 var_worklist.Push(var);
             } else if ((var_ty->AddressSpace() == AddressSpace::kStorage && options.storage) ||
                        (var_ty->AddressSpace() == AddressSpace::kUniform && options.uniform) ||
@@ -118,7 +118,7 @@ struct State {
             SetBaseEleType(var);
 
             // Figure the final type early to check for potential size issues.
-            const type::Array* array_ty = nullptr;
+            const core::type::Array* array_ty = nullptr;
             if (!var_ty->StoreType()->HasFixedFootprint()) {
                 // Use a runtime-sized array of the base type.
                 array_ty = ty.runtime_array(BaseEleType());
@@ -235,12 +235,12 @@ struct State {
         return false;
     }
 
-    const type::Type* BaseEleType() { return base_ty_; }
+    const core::type::Type* BaseEleType() { return base_ty_; }
 
-    const type::Pointer* BaseEleTypePtr() { return base_ptr_ty_; }
+    const core::type::Pointer* BaseEleTypePtr() { return base_ptr_ty_; }
 
     // Returns the number of BaseEleType elements need to represent `type` rounded up.
-    diag::Result<uint32_t> NumBaseElementsChecked(const type::Type* type,
+    diag::Result<uint32_t> NumBaseElementsChecked(const core::type::Type* type,
                                                   Instruction* source_inst) {
         uint64_t num_elements = static_cast<uint64_t>(type->Size());
         num_elements = (num_elements + BaseEleType()->Size() - 1) / BaseEleType()->Size();
@@ -252,7 +252,7 @@ struct State {
         return static_cast<uint32_t>(num_elements);
     }
 
-    uint32_t NumBaseElements(const type::Type* type) {
+    uint32_t NumBaseElements(const core::type::Type* type) {
         uint64_t num_elements = static_cast<uint64_t>(type->Size());
         num_elements = (num_elements + BaseEleType()->Size() - 1) / BaseEleType()->Size();
         return static_cast<uint32_t>(num_elements);
@@ -281,12 +281,12 @@ struct State {
         core::ir::Value* byte_length_expr = nullptr;
     };
 
-    bool ContainsAtomic(const type::Type* type) const {
+    bool ContainsAtomic(const core::type::Type* type) const {
         return tint::Switch(
             type,  //
-            [&](const type::Atomic*) { return true; },
-            [&](const type::Array* array_ty) { return ContainsAtomic(array_ty->ElemType()); },
-            [&](const type::Struct* struct_ty) {
+            [&](const core::type::Atomic*) { return true; },
+            [&](const core::type::Array* array_ty) { return ContainsAtomic(array_ty->ElemType()); },
+            [&](const core::type::Struct* struct_ty) {
                 for (auto* member : struct_ty->Members()) {
                     if (ContainsAtomic(member->Type())) {
                         return true;
@@ -297,19 +297,21 @@ struct State {
             [&](Default) { return false; });
     }
 
-    uint32_t SmallestElementSize(const type::Type* type) {
+    uint32_t SmallestElementSize(const core::type::Type* type) {
         return tint::Switch(
             type,  //
-            [&](const type::Scalar* scalar) { return scalar->Size(); },
-            [&](const type::Vector* vector) {
-                if (vector->Width() == 3 || vector->Type()->Is<type::F16>()) {
+            [&](const core::type::Scalar* scalar) { return scalar->Size(); },
+            [&](const core::type::Vector* vector) {
+                if (vector->Width() == 3 || vector->Type()->Is<core::type::F16>()) {
                     return vector->Type()->Size();
                 }
                 return type->Size();
             },
-            [&](const type::Matrix* matrix) { return SmallestElementSize(matrix->ColumnType()); },
-            [&](const type::Array* array) { return SmallestElementSize(array->ElemType()); },
-            [&](const type::Struct* str) {
+            [&](const core::type::Matrix* matrix) {
+                return SmallestElementSize(matrix->ColumnType());
+            },
+            [&](const core::type::Array* array) { return SmallestElementSize(array->ElemType()); },
+            [&](const core::type::Struct* str) {
                 uint32_t size = std::numeric_limits<uint32_t>::max();
                 for (auto* member : str->Members()) {
                     size = std::min(size, SmallestElementSize(member->Type()));
@@ -358,7 +360,7 @@ struct State {
                                 // array element type so we cannot choose a larger size unless we
                                 // know they will be representable in those terms. For safety, pick
                                 // an upper bound of the array element type size.
-                                auto* ptr_ty = call->Args()[0]->Type()->As<type::Pointer>();
+                                auto* ptr_ty = call->Args()[0]->Type()->As<core::type::Pointer>();
                                 return SmallestElementSize(ptr_ty->StoreType());
                             }
                             if (call->Func() == core::BuiltinFn::kBufferLength) {
@@ -448,7 +450,8 @@ struct State {
     // Calculates the index of the vector element containing the byte at (byte_idx %
     // src_ty->Size()). Assumes the upper bits of byte_idx have already been used to access the
     // correct vector array element in the underlying variable.
-    core::ir::Value* CalculateVectorOffset(core::ir::Value* byte_idx, const type::Vector* src_ty) {
+    core::ir::Value* CalculateVectorOffset(core::ir::Value* byte_idx,
+                                           const core::type::Vector* src_ty) {
         if (auto* byte_cnst = byte_idx->As<core::ir::Constant>()) {
             return b.Value(u32((byte_cnst->Value()->ValueAs<uint32_t>() % src_ty->Size()) /
                                src_ty->Type()->Size()));
@@ -718,7 +721,7 @@ struct State {
 
     void BufferView(core::ir::CoreBuiltinCall* call,
                     core::ir::Var* var,
-                    const type::Type* obj_type,
+                    const core::type::Type* obj_type,
                     OffsetData data) {
         b.InsertBefore(call, [&] {
             // Record offset, size (for bufferArrayView), and length (if present).
@@ -732,14 +735,14 @@ struct State {
                 UpdateLengthData(call->Args()[2], &data);
             }
         });
-        obj_type = call->Result()->Type()->As<type::Pointer>()->StoreType();
+        obj_type = call->Result()->Type()->As<core::type::Pointer>()->StoreType();
 
         AccessUses(call, var, obj_type, data);
     }
 
     void AccessUses(core::ir::Instruction* inst,
                     core::ir::Var* var,
-                    const type::Type* obj_ty,
+                    const core::type::Type* obj_ty,
                     OffsetData offset) {
         auto usages = inst->Result()->UsagesSorted();
         while (!usages.IsEmpty()) {
@@ -943,12 +946,12 @@ struct State {
     core::ir::Value* BitcastOrConvertIfNeeded(const core::type::Type* result_ty,
                                               core::ir::Value* from) {
         Value* value = from;
-        if (result_ty->DeepestElement()->Is<type::Bool>()) {
+        if (result_ty->DeepestElement()->Is<core::type::Bool>()) {
             auto* new_ty = ty.MatchWidth(ty.u32(), result_ty);
             value = b.InsertBitcastIfNeeded(new_ty, from);
             return b.Convert(result_ty, value)->Result();
         }
-        if (from->Type()->DeepestElement()->Is<type::Bool>()) {
+        if (from->Type()->DeepestElement()->Is<core::type::Bool>()) {
             auto* new_ty = ty.MatchWidth(ty.u32(), from->Type());
             value = b.Convert(new_ty, from)->Result();
         }
@@ -975,7 +978,7 @@ struct State {
         auto* access = b.Access(BaseEleTypePtr(), var, array_idx);
 
         ir::Instruction* load = nullptr;
-        if (auto* vec_ty = BaseEleType()->As<type::Vector>()) {
+        if (auto* vec_ty = BaseEleType()->As<core::type::Vector>()) {
             auto* vec_idx = CalculateVectorOffset(byte_idx, vec_ty);
             load = b.LoadVectorElement(access, vec_idx);
         } else {
@@ -990,13 +993,13 @@ struct State {
 
     // Currently this could only be f16, but in the future that will not be true.
     core::ir::Access* ExtractScalar2Bytes(core::ir::Instruction* load,
-                                          const type::Type* result_ty,
+                                          const core::type::Type* result_ty,
                                           core::ir::Value* byte_idx) {
         // We will bitcast the load to a vector of result_ty and then extract the element that we
         // want.
         const uint32_t load_size = load->Result()->Type()->Size();
         uint32_t num_eles = load_size / result_ty->Size();
-        const type::Type* vec_ty = ty.vec(result_ty, num_eles);
+        const core::type::Type* vec_ty = ty.vec(result_ty, num_eles);
         core::ir::Value* element_index = nullptr;
         if (auto* cnst = byte_idx->As<core::ir::Constant>()) {
             if (cnst->Value()->ValueAs<uint32_t>() % 4 == 0) {
@@ -1170,7 +1173,8 @@ struct State {
             return b.Bitcast(result_ty, construct)->AsInstruction();
         } else if (BaseEleType() == ty.vec2u()) {
             TINT_IR_ASSERT(ir, result_ty->Width() == 4);
-            TINT_IR_ASSERT(ir, (result_ty->DeepestElement()->IsAnyOf<type::F16, type::U16>()));
+            TINT_IR_ASSERT(
+                ir, (result_ty->DeepestElement()->IsAnyOf<core::type::F16, core::type::U16>()));
             return b.Bitcast(result_ty, loads[0])->AsInstruction();
         }
         TINT_IR_ASSERT(ir, BaseEleType() == ty.vec4u());
@@ -1348,9 +1352,9 @@ struct State {
     // 2. An offset (possibly runtime value) from a bufferView call.
     void ArrayLength(core::ir::CoreBuiltinCall* call,
                      core::ir::Var* var,
-                     const type::Type* type,
+                     const core::type::Type* type,
                      OffsetData data) {
-        auto* array_ty = type->As<type::Array>();
+        auto* array_ty = type->As<core::type::Array>();
         TINT_IR_ASSERT(ir, array_ty && array_ty->Count()->Is<core::type::RuntimeArrayCount>());
         auto* ptr_ty = var->Result()->Type()->As<core::type::Pointer>();
 
@@ -1452,18 +1456,20 @@ struct State {
     // 1. The bufferLength has a third operand added by DirectVariableAccess that represents the
     //    lowest limit encountered.
     // 2. The buffer is sized and we can use that directly from the type.
-    void BufferLength(core::ir::CoreBuiltinCall* call, core::ir::Var* var, const type::Type* type) {
+    void BufferLength(core::ir::CoreBuiltinCall* call,
+                      core::ir::Var* var,
+                      const core::type::Type* type) {
         auto* buffer_ty = type->As<core::type::Buffer>();
-        TINT_IR_ASSERT(ir, buffer_ty && (buffer_ty->Count()->Is<type::RuntimeArrayCount>() ||
-                                         buffer_ty->Count()->Is<type::ConstantArrayCount>()));
+        TINT_IR_ASSERT(ir, buffer_ty && (buffer_ty->Count()->Is<core::type::RuntimeArrayCount>() ||
+                                         buffer_ty->Count()->Is<core::type::ConstantArrayCount>()));
 
         if (call->Args().size() > 1) {
             // Direct variable access encoded a lower limit.
             call->Result()->ReplaceAllUsesWith(call->Args()[1]);
-        } else if (auto* cnst = buffer_ty->Count()->As<type::ConstantArrayCount>()) {
+        } else if (auto* cnst = buffer_ty->Count()->As<core::type::ConstantArrayCount>()) {
             call->Result()->ReplaceAllUsesWith(b.Constant(u32(cnst->value)));
         } else {
-            TINT_IR_ASSERT(ir, buffer_ty->Count()->Is<type::RuntimeArrayCount>());
+            TINT_IR_ASSERT(ir, buffer_ty->Count()->Is<core::type::RuntimeArrayCount>());
             b.InsertBefore(call, [&] {
                 // arrayLength(var) * BaseEleType()->Size()
                 core::ir::Value* value = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, var);
@@ -1489,7 +1495,7 @@ struct State {
         if (num_array_eles > 1) {
             // This should only happen if the base type is u16 and a 4-byte scalar is being stored.
             TINT_IR_ASSERT(ir, num_array_eles == 2);
-            TINT_IR_ASSERT(ir, BaseEleType()->Is<type::U16>());
+            TINT_IR_ASSERT(ir, BaseEleType()->Is<core::type::U16>());
             auto* vec_ty = ty.vec(BaseEleType(), num_array_eles);
             auto* cast = BitcastOrConvertIfNeeded(vec_ty, from);
             for (uint32_t i = 0; i < num_array_eles; i++) {
@@ -1529,7 +1535,7 @@ struct State {
     //        bitcast the entire vector to u32(s) and store.
     //    ii. Otherwise, store each element at successive indices.
     void MakeVectorStore(core::ir::Var* var, core::ir::Value* from, core::ir::Value* byte_idx) {
-        auto* st_ty = from->Type()->As<type::Vector>();
+        auto* st_ty = from->Type()->As<core::type::Vector>();
         // Number of array elements need to store the scalar.
         auto num_array_eles = NumBaseElements(st_ty);
         auto* array_idx = OffsetValueToArrayIndex(byte_idx);
@@ -1537,7 +1543,7 @@ struct State {
         // We're storing a vector so we need break down `from` into appropriate `BaseEleType()`
         // bits. The base type size will be less than or equal to the store size, but may be a
         // scalar or a vector.
-        if (BaseEleType()->Is<type::Vector>()) {
+        if (BaseEleType()->Is<core::type::Vector>()) {
             // | Base type | Possible store sizes            | # Array Ele |
             // | vec2u     | vec2u, vec4u, vec4h (NOT vec3u) | 1 or 2      |
             // | vec4u     | vec4u                           | 1           |
@@ -1568,7 +1574,7 @@ struct State {
             // Case A: Vector element is smaller than base type.
             // This occurs when storing vec<N, f16> but the base type is u32.
             if (st_ele_ty->Size() < BaseEleType()->Size()) {
-                TINT_IR_ASSERT(ir, BaseEleType()->Is<type::U32>());
+                TINT_IR_ASSERT(ir, BaseEleType()->Is<core::type::U32>());
                 TINT_IR_ASSERT(ir, st_ele_ty->Size() == 2);  // f16 or similar 2-byte type
 
                 // vec3<f16> forces a u16 base type, so width must be even here.
@@ -1638,20 +1644,20 @@ struct State {
                    core::ir::Value* byte_idx) {
         tint::Switch(
             from->Type(),  //
-            [&](const type::Struct* s) {
+            [&](const core::type::Struct* s) {
                 auto* fn = GetStoreFunctionFor(inst, var, s);
                 b.Call(fn, byte_idx, from);
             },
-            [&](const type::Matrix* m) {
+            [&](const core::type::Matrix* m) {
                 auto* fn = GetStoreFunctionFor(inst, var, m);
                 b.Call(fn, byte_idx, from);
             },
-            [&](const type::Array* a) {
+            [&](const core::type::Array* a) {
                 auto* fn = GetStoreFunctionFor(inst, var, a);
                 b.Call(fn, byte_idx, from);
             },
-            [&](const type::Vector*) { MakeVectorStore(var, from, byte_idx); },
-            [&](const type::Scalar*) { MakeScalarStore(var, from, byte_idx); },
+            [&](const core::type::Vector*) { MakeVectorStore(var, from, byte_idx); },
+            [&](const core::type::Scalar*) { MakeScalarStore(var, from, byte_idx); },
             TINT_ICE_ON_NO_MATCH);
     }
 

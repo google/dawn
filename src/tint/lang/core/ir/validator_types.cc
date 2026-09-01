@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/structural_validator.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/buffer.h"
@@ -70,7 +70,7 @@ struct Pending {
 
 }  // namespace
 
-void Structural::CheckType(const core::type::Type* root, std::function<diag::Diagnostic&()> diag) {
+void Validator::CheckType(const core::type::Type* root, std::function<diag::Diagnostic&()> diag) {
     if (root == nullptr) {
         return;
     }
@@ -171,8 +171,8 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
     }
 }
 
-bool Structural::CheckNestDepth(const core::type::Type* type,
-                                std::function<diag::Diagnostic&()> diag) {
+bool Validator::CheckNestDepth(const core::type::Type* type,
+                               std::function<diag::Diagnostic&()> diag) {
     if (type == nullptr) {
         return true;
     }
@@ -234,8 +234,8 @@ bool Structural::CheckNestDepth(const core::type::Type* type,
     return true;
 }
 
-bool Structural::CheckStruct(const core::type::Struct* str,
-                             std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckStruct(const core::type::Struct* str,
+                            std::function<diag::Diagnostic&()>& diag) {
     uint32_t cur_offset = 0;
     for (auto* member : str->Members()) {
         if (member->Type()->Is<core::type::Void>()) {
@@ -350,8 +350,8 @@ bool Structural::CheckStruct(const core::type::Struct* str,
     return true;
 }
 
-bool Structural::CheckStructMemberAttributes(const core::type::StructMember* member,
-                                             std::function<diag::Diagnostic&()> make_diag) {
+bool Validator::CheckStructMemberAttributes(const core::type::StructMember* member,
+                                            std::function<diag::Diagnostic&()> make_diag) {
     const auto checkers = IOAttributeCheckersFor(member->Attributes(), /*skip_builtins*/ false);
     for (const auto* checker : checkers) {
         auto res = checker->check(member->Type(), member->Attributes(), ir_.properties,
@@ -387,9 +387,9 @@ bool Structural::CheckStructMemberAttributes(const core::type::StructMember* mem
     return true;
 }
 
-bool Structural::CheckRef(const core::type::Reference* ref,
-                          std::function<diag::Diagnostic&()>& diag,
-                          const core::type::Type* root) {
+bool Validator::CheckRef(const core::type::Reference* ref,
+                         std::function<diag::Diagnostic&()>& diag,
+                         const core::type::Type* root) {
     if (ref->StoreType()->Is<core::type::Void>()) {
         diag() << "references to void are not permitted";
         return false;
@@ -408,8 +408,7 @@ bool Structural::CheckRef(const core::type::Reference* ref,
     return true;
 }
 
-bool Structural::CheckPtr(const core::type::Pointer* ptr,
-                          std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckPtr(const core::type::Pointer* ptr, std::function<diag::Diagnostic&()>& diag) {
     if (ptr->StoreType()->Is<core::type::Void>()) {
         diag() << "pointers to void are not permitted";
         return false;
@@ -463,8 +462,8 @@ bool Structural::CheckPtr(const core::type::Pointer* ptr,
 
 // 8-bit integer types are guarded by the Allow8BitIntegers property.
 // They can be used as the component type of a subgroup matrix without the property.
-bool Structural::Check8BitInteger(std::function<diag::Diagnostic&()>& diag,
-                                  const core::type::Type* parent) {
+bool Validator::Check8BitInteger(std::function<diag::Diagnostic&()>& diag,
+                                 const core::type::Type* parent) {
     if (!Is<core::type::SubgroupMatrix>(parent) &&
         !ir_.properties.Contains(Property::kAllow8BitIntegers)) {
         diag() << "8-bit integer types are not permitted";
@@ -474,7 +473,7 @@ bool Structural::Check8BitInteger(std::function<diag::Diagnostic&()>& diag,
 }
 
 // 16-bit integer types are guarded by the Allow16BitIntegers property.
-bool Structural::Check16BitInteger(std::function<diag::Diagnostic&()>& diag) {
+bool Validator::Check16BitInteger(std::function<diag::Diagnostic&()>& diag) {
     if (!ir_.properties.Contains(Property::kAllow16BitIntegers)) {
         diag() << "16-bit integer types are not permitted";
         return false;
@@ -483,7 +482,7 @@ bool Structural::Check16BitInteger(std::function<diag::Diagnostic&()>& diag) {
 }
 
 // 64-bit integer types are guarded by the Allow64BitIntegers property.
-bool Structural::Check64BitInteger(std::function<diag::Diagnostic&()>& diag) {
+bool Validator::Check64BitInteger(std::function<diag::Diagnostic&()>& diag) {
     if (!ir_.properties.Contains(Property::kAllow64BitIntegers)) {
         diag() << "64-bit integer types are not permitted";
         return false;
@@ -492,7 +491,7 @@ bool Structural::Check64BitInteger(std::function<diag::Diagnostic&()>& diag) {
 }
 
 // 16-bit float types are guarded by the Allow16BitFloats property.
-bool Structural::Check16BitFloat(std::function<diag::Diagnostic&()>& diag) {
+bool Validator::Check16BitFloat(std::function<diag::Diagnostic&()>& diag) {
     if (!ir_.properties.Contains(Property::kAllow16BitFloats)) {
         diag() << "16-bit float types are not permitted";
         return false;
@@ -500,8 +499,7 @@ bool Structural::Check16BitFloat(std::function<diag::Diagnostic&()>& diag) {
     return true;
 }
 
-bool Structural::CheckArray(const core::type::Array* arr,
-                            std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckArray(const core::type::Array* arr, std::function<diag::Diagnostic&()>& diag) {
     if (!arr->ElemType()->HasCreationFixedFootprint()) {
         diag() << "array elements, " << NameOf(arr) << ", must have creation-fixed footprint";
         return false;
@@ -541,8 +539,8 @@ bool Structural::CheckArray(const core::type::Array* arr,
     return true;
 }
 
-bool Structural::CheckVector(const core::type::Vector* vec,
-                             std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckVector(const core::type::Vector* vec,
+                            std::function<diag::Diagnostic&()>& diag) {
     if (!vec->Type()->IsScalar()) {
         diag() << "vector elements, " << NameOf(vec) << ", must be scalars";
         return false;
@@ -550,8 +548,8 @@ bool Structural::CheckVector(const core::type::Vector* vec,
     return true;
 }
 
-bool Structural::CheckMatrix(const core::type::Matrix* mat,
-                             std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckMatrix(const core::type::Matrix* mat,
+                            std::function<diag::Diagnostic&()>& diag) {
     if (!mat->Type()->IsFloatScalar()) {
         diag() << "matrix elements, " << NameOf(mat) << ", must be float scalars";
         return false;
@@ -559,8 +557,8 @@ bool Structural::CheckMatrix(const core::type::Matrix* mat,
     return true;
 }
 
-bool Structural::CheckAtomic(const core::type::Atomic* atom,
-                             std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckAtomic(const core::type::Atomic* atom,
+                            std::function<diag::Diagnostic&()>& diag) {
     // Prior to lowering we allow for atomic operations on vec2u to support the
     // AtomicVec2UMinMax feature.
     if (auto* vec = atom->Type()->As<core::type::Vector>()) {
@@ -576,8 +574,8 @@ bool Structural::CheckAtomic(const core::type::Atomic* atom,
     return true;
 }
 
-bool Structural::CheckSampledTexture(const core::type::SampledTexture* s,
-                                     std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckSampledTexture(const core::type::SampledTexture* s,
+                                    std::function<diag::Diagnostic&()>& diag) {
     if (!s->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
         diag() << "invalid sampled texture sample type: " << NameOf(s->Type());
         return false;
@@ -585,8 +583,8 @@ bool Structural::CheckSampledTexture(const core::type::SampledTexture* s,
     return true;
 }
 
-bool Structural::CheckMultisampledTexture(const core::type::MultisampledTexture* ms,
-                                          std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckMultisampledTexture(const core::type::MultisampledTexture* ms,
+                                         std::function<diag::Diagnostic&()>& diag) {
     if (!ms->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
         diag() << "invalid multisampled texture sample type: " << NameOf(ms->Type());
         return false;
@@ -603,8 +601,8 @@ bool Structural::CheckMultisampledTexture(const core::type::MultisampledTexture*
     return true;
 }
 
-bool Structural::CheckStorageTexture(const core::type::StorageTexture* storage,
-                                     std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckStorageTexture(const core::type::StorageTexture* storage,
+                                    std::function<diag::Diagnostic&()>& diag) {
     switch (storage->Dim()) {
         case core::type::TextureDimension::kCube:
         case core::type::TextureDimension::kCubeArray:
@@ -620,8 +618,8 @@ bool Structural::CheckStorageTexture(const core::type::StorageTexture* storage,
     return true;
 }
 
-bool Structural::CheckInputAttachment(const core::type::InputAttachment* ia,
-                                      std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckInputAttachment(const core::type::InputAttachment* ia,
+                                     std::function<diag::Diagnostic&()>& diag) {
     if (!ia->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
         diag() << "invalid input attachment component type: " << NameOf(ia->Type());
         return false;
@@ -629,9 +627,9 @@ bool Structural::CheckInputAttachment(const core::type::InputAttachment* ia,
     return true;
 }
 
-bool Structural::CheckSubgroupMatrix(const core::type::SubgroupMatrix* m,
-                                     std::function<diag::Diagnostic&()>& diag,
-                                     core::AddressSpace addrspace) {
+bool Validator::CheckSubgroupMatrix(const core::type::SubgroupMatrix* m,
+                                    std::function<diag::Diagnostic&()>& diag,
+                                    core::AddressSpace addrspace) {
     if (!m->Type()
              ->IsAnyOf<core::type::F16, core::type::F32, core::type::I8, core::type::I32,
                        core::type::U8, core::type::U32>()) {
@@ -645,9 +643,9 @@ bool Structural::CheckSubgroupMatrix(const core::type::SubgroupMatrix* m,
     return true;
 }
 
-bool Structural::CheckBindingArray(const core::type::BindingArray* ba,
-                                   std::function<diag::Diagnostic&()>& diag,
-                                   core::AddressSpace addrspace) {
+bool Validator::CheckBindingArray(const core::type::BindingArray* ba,
+                                  std::function<diag::Diagnostic&()>& diag,
+                                  core::AddressSpace addrspace) {
     if (!ba->Count()->Is<core::type::ConstantArrayCount>()) {
         diag() << "binding_array count must be a constant expression";
         return false;
@@ -674,8 +672,8 @@ bool Structural::CheckBindingArray(const core::type::BindingArray* ba,
     return true;
 }
 
-bool Structural::CheckBuffer(const core::type::Buffer* buf,
-                             std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckBuffer(const core::type::Buffer* buf,
+                            std::function<diag::Diagnostic&()>& diag) {
     if (!ir_.properties.Contains(Property::kAllowBufferTypes)) {
         diag() << "buffer types are not allowed in this context";
         return false;
@@ -692,8 +690,8 @@ bool Structural::CheckBuffer(const core::type::Buffer* buf,
     return true;
 }
 
-bool Structural::CheckSwizzleView(const core::type::SwizzleView* sv,
-                                  std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckSwizzleView(const core::type::SwizzleView* sv,
+                                 std::function<diag::Diagnostic&()>& diag) {
     if (!ir_.properties.Contains(Property::kAllowSwizzleView)) {
         diag() << "swizzle view is not allowed in this module";
         return false;

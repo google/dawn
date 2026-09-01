@@ -55,6 +55,7 @@ tint_target_add_dependencies(tint_lang_wgsl_ir lib
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
+  tint_lang_core_ir_type
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_intrinsic
@@ -95,6 +96,7 @@ tint_target_add_dependencies(tint_lang_wgsl_ir_test test
   tint_lang_core_ir
   tint_lang_core_ir_transform
   tint_lang_core_ir_transform_test
+  tint_lang_core_ir_type
   tint_lang_core_ir_test
   tint_lang_core_type
   tint_lang_wgsl

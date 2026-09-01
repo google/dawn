@@ -56,9 +56,9 @@ struct State {
         // Find and replace matrix constructors that take scalar operands.
         for (auto inst : ir.Instructions()) {
             if (auto* construct = inst->As<Construct>()) {
-                if (construct->Result()->Type()->As<type::Matrix>()) {
+                if (construct->Result()->Type()->As<core::type::Matrix>()) {
                     if (construct->Operands().Length() > 0 &&
-                        construct->Operands()[0]->Type()->Is<type::Scalar>()) {
+                        construct->Operands()[0]->Type()->Is<core::type::Scalar>()) {
                         b.InsertBefore(construct, [&] {  //
                             ReplaceConstructor(construct);
                         });
@@ -71,7 +71,7 @@ struct State {
     /// Replace a matrix construct instruction.
     /// @param construct the instruction to replace
     void ReplaceConstructor(Construct* construct) {
-        auto* mat = construct->Result()->Type()->As<type::Matrix>();
+        auto* mat = construct->Result()->Type()->As<core::type::Matrix>();
         auto* col = mat->ColumnType();
         const auto& scalars = construct->Operands();
 

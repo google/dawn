@@ -77,15 +77,15 @@ struct State {
             }
 
             auto* root = RootIdentifier(call->Args()[0]);
-            auto* buffer_ty = root->Type()->UnwrapPtr()->As<type::Buffer>();
-            if (buffer_ty->Count()->Is<type::RuntimeArrayCount>()) {
+            auto* buffer_ty = root->Type()->UnwrapPtr()->As<core::type::Buffer>();
+            if (buffer_ty->Count()->Is<core::type::RuntimeArrayCount>()) {
                 if (auto* param = root->As<FunctionParam>()) {
                     calls.GetOrAddZero(param).Push(call);
                 }
                 return;
             }
 
-            TINT_IR_ASSERT(ir, buffer_ty->Count()->Is<type::ConstantArrayCount>());
+            TINT_IR_ASSERT(ir, buffer_ty->Count()->Is<core::type::ConstantArrayCount>());
             call->AppendArg(b.Constant(u32(buffer_ty->ConstantCount().value())));
         });
 
@@ -118,7 +118,7 @@ struct State {
             TraceRoots(param, roots);
             if (roots.Count() == 1) {
                 auto* root = roots.Vector()[0];
-                auto* buffer_ty = root->Type()->UnwrapPtr()->As<type::Buffer>();
+                auto* buffer_ty = root->Type()->UnwrapPtr()->As<core::type::Buffer>();
                 auto count = buffer_ty->ConstantCount();
                 if (count != std::nullopt) {
                     auto param_calls = calls.Get(param);
@@ -182,15 +182,15 @@ struct State {
         uint32_t ty_offset = 0;
         uint32_t ty_stride = 0;
         TINT_IR_ASSERT(ir, !store_ty->HasFixedFootprint());
-        if (auto* str_ty = store_ty->As<type::Struct>()) {
+        if (auto* str_ty = store_ty->As<core::type::Struct>()) {
             auto last = str_ty->Members().Back();
             auto last_ty = last->Type();
-            TINT_IR_ASSERT(ir, last_ty->Is<type::Array>());
+            TINT_IR_ASSERT(ir, last_ty->Is<core::type::Array>());
             ty_offset = last->Offset();
-            ty_stride = last_ty->As<type::Array>()->ImplicitStride();
+            ty_stride = last_ty->As<core::type::Array>()->ImplicitStride();
         } else {
-            TINT_IR_ASSERT(ir, store_ty->Is<type::Array>());
-            ty_stride = store_ty->As<type::Array>()->ImplicitStride();
+            TINT_IR_ASSERT(ir, store_ty->Is<core::type::Array>());
+            ty_stride = store_ty->As<core::type::Array>()->ImplicitStride();
         }
         if (auto* size_cnst = size->As<Constant>()) {
             auto size_value = size_cnst->Value()->ValueAs<uint32_t>();
@@ -236,10 +236,10 @@ struct State {
             auto* root = RootIdentifier(arg);
             if (auto* root_param = root->As<FunctionParam>()) {
                 auto* store_ty = root_param->Type()->UnwrapPtr();
-                TINT_IR_ASSERT(ir, store_ty->Is<type::Buffer>());
-                auto* buffer_ty = store_ty->As<type::Buffer>();
+                TINT_IR_ASSERT(ir, store_ty->Is<core::type::Buffer>());
+                auto* buffer_ty = store_ty->As<core::type::Buffer>();
                 auto* count = buffer_ty->Count();
-                if (count->Is<type::RuntimeArrayCount>()) {
+                if (count->Is<core::type::RuntimeArrayCount>()) {
                     TraceRoots(root_param, roots);
                 } else {
                     roots.Add(root_param);

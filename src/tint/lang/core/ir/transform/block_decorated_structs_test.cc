@@ -398,7 +398,7 @@ TEST_F(IR_BlockDecoratedStructsTest, ImmediateAlreadyHasBlockAttribute) {
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
                                                                  {mod.symbols.New("i"), ty.i32()},
                                                              });
-    structure->SetStructFlag(type::kBlock);
+    structure->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var(ty.ptr(immediate, structure));
     mod.root_block->Append(buffer);

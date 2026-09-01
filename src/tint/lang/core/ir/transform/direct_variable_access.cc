@@ -64,7 +64,7 @@ struct RootModuleScopeVar {
 /// These roots are passed by pointer parameter.
 struct RootPtrParameter {
     /// The parameter pointer type
-    const type::Pointer* type = nullptr;
+    const core::type::Pointer* type = nullptr;
 
     /// @return a hash value for this object
     tint::HashCode HashCode() const { return Hash(type); }
@@ -79,7 +79,7 @@ using AccessRoot = std::variant<RootModuleScopeVar, RootPtrParameter>;
 /// MemberAccess is an access operator to a struct member.
 struct MemberAccess {
     /// The member being accessed
-    const type::StructMember* member;
+    const core::type::StructMember* member;
 
     /// @return a hash member for this object
     tint::HashCode HashCode() const { return Hash(member); }
@@ -491,7 +491,7 @@ struct State {
 
                             // For each access operation...
                             for (auto idx : access->Indices()) {
-                                if (auto* str = obj_ty->As<type::Struct>()) {
+                                if (auto* str = obj_ty->As<core::type::Struct>()) {
                                     // Struct type accesses must be constant, representing the index
                                     // of the member being accessed.
                                     TINT_IR_ASSERT(ir, idx->Is<Constant>());
@@ -504,7 +504,7 @@ struct State {
 
                                 // Array or matrix access.
                                 // Convert index to u32 if it isn't already.
-                                if (!idx->Type()->Is<type::U32>()) {
+                                if (!idx->Type()->Is<core::type::U32>()) {
                                     idx = b.Convert(ty.u32(), idx)->Result();
                                 }
 
@@ -566,8 +566,8 @@ struct State {
                                 chain.shape.root = RootModuleScopeVar{var};
                             } else {
                                 // Root pointer is a function-scope 'var'
-                                chain.shape.root =
-                                    RootPtrParameter{var->Result()->Type()->As<type::Pointer>()};
+                                chain.shape.root = RootPtrParameter{
+                                    var->Result()->Type()->As<core::type::Pointer>()};
                             }
                             chain.root_ptr = var->Result();
                             return nullptr;
@@ -577,7 +577,7 @@ struct State {
                 },
                 [&](FunctionParam* param) {
                     // Root pointer is a parameter of the caller
-                    chain.shape.root = RootPtrParameter{param->Type()->As<type::Pointer>()};
+                    chain.shape.root = RootPtrParameter{param->Type()->As<core::type::Pointer>()};
                     chain.root_ptr = param;
                     return nullptr;
                 },  //
@@ -672,7 +672,7 @@ struct State {
                     // Handle types are passed by value, turn them into a pointer type for the
                     // access chain call.
                     auto* access_type = old_param->Type();
-                    if (!access_type->Is<type::Pointer>()) {
+                    if (!access_type->Is<core::type::Pointer>()) {
                         TINT_IR_ASSERT(ir, access_type->IsHandle());
                         access_type = ty.ptr<handle>(access_type);
                     }
@@ -731,7 +731,7 @@ struct State {
                 }
 
                 // Replaced handles need the final load after the access chain.
-                if (!old_param->Type()->Is<type::Pointer>()) {
+                if (!old_param->Type()->Is<core::type::Pointer>()) {
                     replacement = b.Load(replacement)->Result();
                 }
 
@@ -762,7 +762,7 @@ struct State {
         }
     }
 
-    bool TransformHandle(const type::Type* param) const {
+    bool TransformHandle(const core::type::Type* param) const {
         if (!param->IsHandle()) {
             return false;
         }
@@ -770,7 +770,7 @@ struct State {
             return true;
         }
         return options.transform_handle == HandleTransformLevel::kExternal &&
-               param->Is<type::ExternalTexture>();
+               param->Is<core::type::ExternalTexture>();
     }
 
     /// @return true if @p param is a parameter that requires transforming, based on the
@@ -779,7 +779,7 @@ struct State {
     bool NeedsTransforming(FunctionParam* param) const {
         auto* param_type = param->Type();
 
-        if (auto* ptr = param_type->As<type::Pointer>()) {
+        if (auto* ptr = param_type->As<core::type::Pointer>()) {
             // DVA needs to be updated if handles start to be passed by pointer.
             TINT_IR_ASSERT(ir, ptr->AddressSpace() != core::AddressSpace::kHandle);
             switch (ptr->AddressSpace()) {

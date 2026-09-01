@@ -41,7 +41,7 @@ namespace {
 
 void Run(Module& ir) {
     Builder builder{ir};
-    type::Manager& ty{ir.Types()};
+    core::type::Manager& ty{ir.Types()};
 
     if (ir.root_block->IsEmpty()) {
         return;
@@ -67,7 +67,7 @@ void Run(Module& ir) {
         auto* store_ty = ptr->StoreType();
 
         if (auto* str = store_ty->As<core::type::Struct>()) {
-            if (str->StructFlags().Contains(type::kBlock)) {
+            if (str->StructFlags().Contains(core::type::kBlock)) {
                 // The struct already has a block attribute, so we don't need to do anything here.
                 continue;
             }
@@ -75,7 +75,7 @@ void Run(Module& ir) {
                 // We know the original struct will only ever be used as the store type of a buffer,
                 // so just mark it as a block-decorated struct.
                 // TODO(crbug.com/tint/745): Remove the const_cast.
-                const_cast<type::Struct*>(str)->SetStructFlag(type::kBlock);
+                const_cast<core::type::Struct*>(str)->SetStructFlag(core::type::kBlock);
                 continue;
             }
         }

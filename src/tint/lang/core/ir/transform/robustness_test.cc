@@ -58,7 +58,7 @@ struct BindingVariableCase {
     bool enabled;
     bool ignore_bindings;
 };
-inline std::ostream& operator<<(std::ostream& out, BindingVariableCase c) {
+[[maybe_unused]] inline std::ostream& operator<<(std::ostream& out, BindingVariableCase c) {
     return out << "enabled: " << c.enabled << ", ignore_bindings: " << c.ignore_bindings;
 }
 using IR_BindingVariableRobustnessTest = TransformTestWithParam<BindingVariableCase>;
@@ -1798,7 +1798,8 @@ $B1: {  # root
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureDimensions) {
     auto* texture = b.Var(
-        "texture", ty.ptr(handle, ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), read));
+        "texture",
+        ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -1838,7 +1839,8 @@ $B1: {  # root
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureDimensions_WithLevel) {
     auto* texture = b.Var(
-        "texture", ty.ptr(handle, ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), read));
+        "texture",
+        ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -1892,7 +1894,8 @@ $B1: {  # root
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Sampled1D) {
     auto* texture = b.Var(
-        "texture", ty.ptr(handle, ty.sampled_texture(type::TextureDimension::k1d, ty.f32()), read));
+        "texture",
+        ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32()), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -1986,7 +1989,8 @@ $B1: {  # root
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Sampled2D) {
     auto* texture = b.Var(
-        "texture", ty.ptr(handle, ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), read));
+        "texture",
+        ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -2079,9 +2083,9 @@ $B1: {  # root
 }
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Sampled2DArray) {
-    auto* texture =
-        b.Var("texture",
-              ty.ptr(handle, ty.sampled_texture(type::TextureDimension::k2dArray, ty.f32()), read));
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32()), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -2186,7 +2190,8 @@ $B1: {  # root
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Sampled3D) {
     auto* texture = b.Var(
-        "texture", ty.ptr(handle, ty.sampled_texture(type::TextureDimension::k3d, ty.f32()), read));
+        "texture",
+        ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k3d, ty.f32()), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -2279,9 +2284,9 @@ $B1: {  # root
 }
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Multisampled2D) {
-    auto* texture =
-        b.Var("texture",
-              ty.ptr(handle, ty.multisampled_texture(type::TextureDimension::k2d, ty.f32()), read));
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.multisampled_texture(core::type::TextureDimension::k2d, ty.f32()), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -2375,7 +2380,7 @@ $B1: {  # root
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Depth2D) {
     auto* texture =
-        b.Var("texture", ty.ptr(handle, ty.depth_texture(type::TextureDimension::k2d), read));
+        b.Var("texture", ty.ptr(handle, ty.depth_texture(core::type::TextureDimension::k2d), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -2468,8 +2473,8 @@ $B1: {  # root
 }
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Depth2DArray) {
-    auto* texture =
-        b.Var("texture", ty.ptr(handle, ty.depth_texture(type::TextureDimension::k2dArray), read));
+    auto* texture = b.Var(
+        "texture", ty.ptr(handle, ty.depth_texture(core::type::TextureDimension::k2dArray), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -2573,9 +2578,9 @@ $B1: {  # root
 }
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_DepthMultisampled2D) {
-    auto* texture =
-        b.Var("texture",
-              ty.ptr(handle, ty.depth_multisampled_texture(type::TextureDimension::k2d), read));
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.depth_multisampled_texture(core::type::TextureDimension::k2d), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -2755,7 +2760,8 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Storage1D) {
     auto format = core::TexelFormat::kRgba8Unorm;
     auto* texture = b.Var(
         "texture",
-        ty.ptr(handle, ty.storage_texture(type::TextureDimension::k1d, format, read_write), read));
+        ty.ptr(handle, ty.storage_texture(core::type::TextureDimension::k1d, format, read_write),
+               read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -2842,7 +2848,8 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Storage2D) {
     auto format = core::TexelFormat::kRgba8Unorm;
     auto* texture = b.Var(
         "texture",
-        ty.ptr(handle, ty.storage_texture(type::TextureDimension::k2d, format, read_write), read));
+        ty.ptr(handle, ty.storage_texture(core::type::TextureDimension::k2d, format, read_write),
+               read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -2927,10 +2934,11 @@ $B1: {  # root
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Storage2DArray) {
     auto format = core::TexelFormat::kRgba8Unorm;
-    auto* texture = b.Var(
-        "texture",
-        ty.ptr(handle, ty.storage_texture(type::TextureDimension::k2dArray, format, read_write),
-               read));
+    auto* texture =
+        b.Var("texture",
+              ty.ptr(handle,
+                     ty.storage_texture(core::type::TextureDimension::k2dArray, format, read_write),
+                     read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -3026,7 +3034,8 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Storage3D) {
     auto format = core::TexelFormat::kRgba8Unorm;
     auto* texture = b.Var(
         "texture",
-        ty.ptr(handle, ty.storage_texture(type::TextureDimension::k3d, format, read_write), read));
+        ty.ptr(handle, ty.storage_texture(core::type::TextureDimension::k3d, format, read_write),
+               read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -3115,9 +3124,9 @@ $B1: {  # root
 
 TEST_P(IR_BindingVariableRobustnessTest, NoModify_TextureStore) {
     auto format = core::TexelFormat::kRgba8Unorm;
-    auto* texture =
-        b.Var("texture",
-              ty.ptr(handle, ty.storage_texture(type::TextureDimension::k2d, format, write), read));
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.storage_texture(core::type::TextureDimension::k2d, format, write), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 

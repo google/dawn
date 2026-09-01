@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/texture.h"
 
@@ -81,7 +82,7 @@ struct State {
                 inst,  //
                 [&](ir::Access* access) {
                     // Check if accesses into this object should be clamped.
-                    if (access->Object()->Type()->Is<type::Pointer>()) {
+                    if (access->Object()->Type()->Is<core::type::Pointer>()) {
                         if (ShouldClamp(access->Object())) {
                             accesses.Push(access);
                         }
@@ -133,7 +134,7 @@ struct State {
 
         // Clamp load-vector-element instructions.
         for (auto* lve : vector_loads) {
-            auto* vec = lve->From()->Type()->UnwrapPtr()->As<type::Vector>();
+            auto* vec = lve->From()->Type()->UnwrapPtr()->As<core::type::Vector>();
             b.InsertBefore(lve, [&] {  //
                 ClampOperand(lve, LoadVectorElement::kIndexOperandOffset,
                              b.Constant(u32(vec->Width() - 1u)));
@@ -142,7 +143,7 @@ struct State {
 
         // Clamp store-vector-element instructions.
         for (auto* sve : vector_stores) {
-            auto* vec = sve->To()->Type()->UnwrapPtr()->As<type::Vector>();
+            auto* vec = sve->To()->Type()->UnwrapPtr()->As<core::type::Vector>();
             b.InsertBefore(sve, [&] {  //
                 ClampOperand(sve, StoreVectorElement::kIndexOperandOffset,
                              b.Constant(u32(vec->Width() - 1u)));
@@ -175,7 +176,7 @@ struct State {
     /// @param value the value to check. The value's type must be type::Pointer.
     /// @returns true if pointer accesses in @p param should be clamped
     bool ShouldClamp(Value* value) {
-        auto* ptr = value->Type()->As<type::Pointer>();
+        auto* ptr = value->Type()->As<core::type::Pointer>();
         TINT_IR_ASSERT(ir, ptr);
         switch (ptr->AddressSpace()) {
             case AddressSpace::kFunction:
@@ -206,8 +207,8 @@ struct State {
             return value;
         }
 
-        const type::Type* type = ty.u32();
-        if (auto* vec = value->Type()->As<type::Vector>()) {
+        const core::type::Type* type = ty.u32();
+        if (auto* vec = value->Type()->As<core::type::Vector>()) {
             type = ty.vec(type, vec->Width());
         }
         return b.Convert(type, value)->Result();
@@ -261,7 +262,7 @@ struct State {
             return true;
         }
 
-        TINT_IR_ASSERT(ir, const_limit->Value()->Type()->Is<type::U32>());
+        TINT_IR_ASSERT(ir, const_limit->Value()->Type()->Is<core::type::U32>());
         uint32_t const_limit_value = const_limit->Value()->ValueAs<uint32_t>();
 
         using SignedIntegerRange = ir::analysis::IntegerRangeInfo::SignedIntegerRange;
@@ -294,17 +295,17 @@ struct State {
             // Determine the limit of the type being indexed into.
             auto maxAllowedIndex = tint::Switch(
                 type,  //
-                [&](const type::Vector* vec) -> ir::Value* {
+                [&](const core::type::Vector* vec) -> ir::Value* {
                     return b.Constant(u32(vec->Width() - 1u));
                 },
-                [&](const type::Matrix* mat) -> ir::Value* {
+                [&](const core::type::Matrix* mat) -> ir::Value* {
                     return b.Constant(u32(mat->Columns() - 1u));
                 },
-                [&](const type::Array* arr) -> ir::Value* {
+                [&](const core::type::Array* arr) -> ir::Value* {
                     if (arr->ConstantCount()) {
                         return b.Constant(u32(arr->ConstantCount().value() - 1u));
                     }
-                    TINT_IR_ASSERT(ir, arr->Count()->Is<type::RuntimeArrayCount>());
+                    TINT_IR_ASSERT(ir, arr->Count()->Is<core::type::RuntimeArrayCount>());
 
                     // Skip clamping runtime-sized array indices if requested.
                     if (config.disable_runtime_sized_array_index_clamping) {
@@ -315,7 +316,7 @@ struct State {
                     if (i > 0) {
                         // Generate a pointer to the runtime-sized array if it isn't the base of
                         // this access instruction.
-                        auto* base_ptr = object->Type()->As<type::Pointer>();
+                        auto* base_ptr = object->Type()->As<core::type::Pointer>();
                         TINT_IR_ASSERT(ir, base_ptr != nullptr);
                         TINT_IR_ASSERT(ir, i == 1);
                         auto* arr_ptr = ty.ptr(base_ptr->AddressSpace(), arr, base_ptr->Access());
@@ -344,7 +345,7 @@ struct State {
     /// @param call the texture builtin call instruction
     void ClampTextureCallArgs(ir::CoreBuiltinCall* call) {
         const auto& args = call->Args();
-        auto* texture = args[0]->Type()->As<type::Texture>();
+        auto* texture = args[0]->Type()->As<core::type::Texture>();
 
         // Helper for clamping the level argument.
         // Keep hold of the clamped value to use for clamping the coordinates.
@@ -359,7 +360,7 @@ struct State {
         // Helper for clamping the coordinates.
         auto clamp_coords = [&](uint32_t idx) {
             auto* arg_ty = args[idx]->Type();
-            const type::Type* type = ty.MatchWidth(ty.u32(), arg_ty);
+            const core::type::Type* type = ty.MatchWidth(ty.u32(), arg_ty);
             auto* one = b.MatchWidth(1_u, arg_ty);
             auto* dims = clamped_level ? b.Call(type, core::BuiltinFn::kTextureDimensions, args[0],
                                                 clamped_level)
@@ -395,13 +396,14 @@ struct State {
             }
             case core::BuiltinFn::kTextureLoad: {
                 uint32_t next_arg = 2u;
-                if (type::IsTextureArray(texture->Dim())) {
+                if (core::type::IsTextureArray(texture->Dim())) {
                     clamp_array_index(next_arg++);
                 }
-                if (texture->IsAnyOf<type::SampledTexture, type::DepthTexture>()) {
+                if (texture->IsAnyOf<core::type::SampledTexture, core::type::DepthTexture>()) {
                     clamp_level(next_arg++);
                 }
-                if (texture->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture>()) {
+                if (texture->IsAnyOf<core::type::MultisampledTexture,
+                                     core::type::DepthMultisampledTexture>()) {
                     clamp_sample_index(next_arg++);
                 }
                 clamp_coords(1u);  // Must run after clamp_level
@@ -429,7 +431,7 @@ struct State {
         bool col_major = true;
         Value* stride = nullptr;
         uint32_t stride_index = 0;
-        const type::SubgroupMatrix* matrix_ty = nullptr;
+        const core::type::SubgroupMatrix* matrix_ty = nullptr;
         if (call->Func() == BuiltinFn::kSubgroupMatrixLoad) {
             TINT_IR_ASSERT(
                 ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[1]));
@@ -437,9 +439,9 @@ struct State {
                         core::Majorness::kColMajor;
             stride = args[2];
             stride_index = 2;
-            matrix_ty = call->Result()->Type()->As<type::SubgroupMatrix>();
+            matrix_ty = call->Result()->Type()->As<core::type::SubgroupMatrix>();
         } else if (call->Func() == BuiltinFn::kSubgroupMatrixStore) {
-            matrix_ty = args[2]->Type()->As<type::SubgroupMatrix>();
+            matrix_ty = args[2]->Type()->As<core::type::SubgroupMatrix>();
             TINT_IR_ASSERT(
                 ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[0]));
             col_major = std::get<core::Majorness>(call->ExplicitTemplateParams()[0]) ==
@@ -493,7 +495,7 @@ struct State {
         if (arr_ty->ConstantCount()) {
             array_length = b.Constant(u32(arr_ty->ConstantCount().value()));
         } else {
-            TINT_IR_ASSERT(ir, arr_ty->Count()->Is<type::RuntimeArrayCount>());
+            TINT_IR_ASSERT(ir, arr_ty->Count()->Is<core::type::RuntimeArrayCount>());
             array_length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, arr);
         }
 
@@ -559,12 +561,12 @@ struct State {
                     }
                 },
                 [&](const CoreBuiltinCall* call) {
-                    const type::SubgroupMatrix* mat_ty = nullptr;
+                    const core::type::SubgroupMatrix* mat_ty = nullptr;
                     if (call->Func() == BuiltinFn::kSubgroupMatrixLoad) {
-                        mat_ty = call->Result()->Type()->As<type::SubgroupMatrix>();
+                        mat_ty = call->Result()->Type()->As<core::type::SubgroupMatrix>();
                     }
                     if (call->Func() == BuiltinFn::kSubgroupMatrixStore) {
-                        mat_ty = call->Args()[2]->Type()->As<type::SubgroupMatrix>();
+                        mat_ty = call->Args()[2]->Type()->As<core::type::SubgroupMatrix>();
                     }
                     if (mat_ty) {
                         uint32_t mat_size =
@@ -597,16 +599,16 @@ struct State {
         if (store_ty->HasFixedFootprint()) {
             ty_required_size = store_ty->Size();
         } else {
-            if (auto* str_ty = store_ty->As<type::Struct>()) {
+            if (auto* str_ty = store_ty->As<core::type::Struct>()) {
                 auto last = str_ty->Members().Back();
                 auto last_ty = last->Type();
-                TINT_IR_ASSERT(ir, last_ty->Is<type::Array>());
+                TINT_IR_ASSERT(ir, last_ty->Is<core::type::Array>());
                 ty_offset = last->Offset();
-                ty_stride = last_ty->As<type::Array>()->ImplicitStride();
+                ty_stride = last_ty->As<core::type::Array>()->ImplicitStride();
                 ty_required_size = ty_offset + ty_stride;
             } else {
-                TINT_IR_ASSERT(ir, store_ty->Is<type::Array>());
-                ty_stride = store_ty->As<type::Array>()->ImplicitStride();
+                TINT_IR_ASSERT(ir, store_ty->Is<core::type::Array>());
+                ty_stride = store_ty->As<core::type::Array>()->ImplicitStride();
                 ty_required_size = ty_stride;
             }
         }

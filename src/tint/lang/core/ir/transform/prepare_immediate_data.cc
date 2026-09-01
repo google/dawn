@@ -135,7 +135,7 @@ struct State {
 
         auto* immediate_struct =
             ty.Struct(ir.symbols.New("tint_immediate_data_struct"), std::move(members));
-        immediate_struct->SetStructFlag(type::kBlock);
+        immediate_struct->SetStructFlag(core::type::kBlock);
         layout.var = b.Var("tint_immediate_data", core::AddressSpace::kImmediate, immediate_struct);
         ir.root_block->Append(layout.var);
 

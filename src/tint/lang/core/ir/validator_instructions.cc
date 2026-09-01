@@ -31,8 +31,8 @@
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/constexpr_if.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
-#include "src/tint/lang/core/ir/structural_validator.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/vector.h"
@@ -63,7 +63,7 @@ bool TransitivelyHolds(const Block* block, const Instruction* inst) {
 }
 
 }  // namespace
-void Structural::CheckInstruction(const Instruction* inst) {
+void Validator::CheckInstruction(const Instruction* inst) {
     visited_instructions_.Add(inst);
     if (!inst->Alive()) {
         AddError(inst) << "destroyed instruction found in instruction list";
@@ -123,7 +123,7 @@ void Structural::CheckInstruction(const Instruction* inst) {
         TINT_ICE_ON_NO_MATCH);
 }
 
-void Structural::CheckOverride(const Override* o) {
+void Validator::CheckOverride(const Override* o) {
     if (!CheckResultsAndOperands(o, Override::kNumResults, Override::kNumOperands)) {
         return;
     }
@@ -133,7 +133,7 @@ void Structural::CheckOverride(const Override* o) {
     }
 }
 
-void Structural::CheckVar(const Var* var) {
+void Validator::CheckVar(const Var* var) {
     if (!CheckResultsAndOperands(var, Var::kNumResults, Var::kNumOperands)) {
         return;
     }
@@ -181,11 +181,11 @@ void Structural::CheckVar(const Var* var) {
     }
 }
 
-void Structural::CheckLet(const Let* l) {
+void Validator::CheckLet(const Let* l) {
     CheckResultsAndOperands(l, Let::kNumResults, Let::kNumOperands);
 }
 
-void Structural::CheckCall(const Call* call) {
+void Validator::CheckCall(const Call* call) {
     tint::Switch(
         call,                                                            //
         [&](const BuiltinCall* c) { CheckBuiltinCall(c); },              //
@@ -212,7 +212,7 @@ void Structural::CheckCall(const Call* call) {
         });
 }
 
-void Structural::CheckBuiltinCall(const BuiltinCall* call) {
+void Validator::CheckBuiltinCall(const BuiltinCall* call) {
     // This check cannot be more precise, since until intrinsic lookup below, it is unknown what
     // number of operands are expected, but still need to enforce things are in scope,
     // have types, etc.
@@ -252,7 +252,7 @@ void Structural::CheckBuiltinCall(const BuiltinCall* call) {
     CheckCoreBuiltinCall(bc);
 }
 
-void Structural::CheckCoreBuiltinCall(const CoreBuiltinCall* call) {
+void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call) {
     if (ir_.properties.Contains(Property::kDisallowVectorMinMaxClamp)) {
         switch (call->Func()) {
             case core::BuiltinFn::kClamp:
@@ -281,26 +281,26 @@ void Structural::CheckCoreBuiltinCall(const CoreBuiltinCall* call) {
     }
 }
 
-void Structural::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
+void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
     // This check cannot be more precise, since until intrinsic lookup below, it is unknown what
     // number of operands are expected, but still need to enforce things are in scope,
     // have types, etc.
     CheckResults(call, MemberBuiltinCall::kNumResults) || !CheckOperands(call);
 }
 
-void Structural::CheckConstruct(const Construct* construct) {
+void Validator::CheckConstruct(const Construct* construct) {
     CheckResultsAndOperandRange(construct, Construct::kNumResults, Construct::kMinOperands);
 }
 
-void Structural::CheckConvert(const Convert* convert) {
+void Validator::CheckConvert(const Convert* convert) {
     CheckResultsAndOperands(convert, Convert::kNumResults, Convert::kNumOperands);
 }
 
-void Structural::CheckDiscard(const tint::core::ir::Discard* discard) {
+void Validator::CheckDiscard(const tint::core::ir::Discard* discard) {
     CheckResultsAndOperands(discard, Discard::kNumResults, Discard::kNumOperands);
 }
 
-void Structural::CheckUserCall(const UserCall* call) {
+void Validator::CheckUserCall(const UserCall* call) {
     CheckResultsAndOperandRange(call, UserCall::kNumResults, UserCall::kMinOperands);
 
     if (!call->Target()) {
@@ -309,11 +309,11 @@ void Structural::CheckUserCall(const UserCall* call) {
     }
 }
 
-void Structural::CheckAccess(const Access* a) {
+void Validator::CheckAccess(const Access* a) {
     CheckResultsAndOperandRange(a, Access::kNumResults, Access::kMinNumOperands);
 }
 
-void Structural::CheckBinary(const Binary* b) {
+void Validator::CheckBinary(const Binary* b) {
     if (!CheckResultsAndOperands(b, Binary::kNumResults, Binary::kNumOperands)) {
         return;
     }
@@ -327,11 +327,11 @@ void Structural::CheckBinary(const Binary* b) {
     }
 }
 
-void Structural::CheckUnary(const Unary* u) {
+void Validator::CheckUnary(const Unary* u) {
     CheckResultsAndOperands(u, Unary::kNumResults, Unary::kNumOperands);
 }
 
-void Structural::CheckIf(const If* if_) {
+void Validator::CheckIf(const If* if_) {
     CheckResults(if_);
     CheckOperands(if_, If::kNumOperands);
 
@@ -373,7 +373,7 @@ void Structural::CheckIf(const If* if_) {
         PopControlStack());
 }
 
-void Structural::CheckLoop(const Loop* l) {
+void Validator::CheckLoop(const Loop* l) {
     CheckResults(l);
     CheckOperands(l, 0);
 
@@ -424,7 +424,7 @@ void Structural::CheckLoop(const Loop* l) {
                PopControlStack());
 }
 
-void Structural::CheckSwitch(const Switch* s) {
+void Validator::CheckSwitch(const Switch* s) {
     CheckResults(s);
     CheckOperands(s, Switch::kNumOperands);
 
@@ -444,11 +444,11 @@ void Structural::CheckSwitch(const Switch* s) {
         PopControlStack());
 }
 
-void Structural::CheckSwizzle(const Swizzle* s) {
+void Validator::CheckSwizzle(const Swizzle* s) {
     CheckResultsAndOperands(s, Swizzle::kNumResults, Swizzle::kNumOperands);
 }
 
-void Structural::CheckTerminator(const Terminator* b) {
+void Validator::CheckTerminator(const Terminator* b) {
     // All terminators should have zero results
     if (!CheckResults(b, 0)) {
         return;
@@ -475,7 +475,7 @@ void Structural::CheckTerminator(const Terminator* b) {
     }
 }
 
-void Structural::CheckBreakIf(const BreakIf* b) {
+void Validator::CheckBreakIf(const BreakIf* b) {
     auto* loop = b->Loop();
     if (loop == nullptr) {
         AddError(b) << "has no associated loop";
@@ -497,7 +497,7 @@ void Structural::CheckBreakIf(const BreakIf* b) {
                              exit_values.size(), loop, loop->Results());
 }
 
-void Structural::CheckContinue(const Continue* c) {
+void Validator::CheckContinue(const Continue* c) {
     auto* loop = c->Loop();
     if (loop == nullptr) {
         AddError(c) << "has no associated loop";
@@ -517,7 +517,7 @@ void Structural::CheckContinue(const Continue* c) {
     }
 }
 
-void Structural::CheckExit(const Exit* e) {
+void Validator::CheckExit(const Exit* e) {
     if (control_stack_.IsEmpty()) {
         AddError(e) << "found outside all control instructions";
         return;
@@ -539,7 +539,7 @@ void Structural::CheckExit(const Exit* e) {
         TINT_ICE_ON_NO_MATCH);
 }
 
-void Structural::CheckNextIteration(const NextIteration* n) {
+void Validator::CheckNextIteration(const NextIteration* n) {
     auto* loop = n->Loop();
     if (loop == nullptr) {
         AddError(n) << "has no associated loop";
@@ -560,14 +560,14 @@ void Structural::CheckNextIteration(const NextIteration* n) {
     }
 }
 
-void Structural::CheckExitIf(const ExitIf* e) {
+void Validator::CheckExitIf(const ExitIf* e) {
     if (control_stack_.Back() != e->If()) {
         AddError(e) << "if target jumps over other control instructions";
         AddNote(control_stack_.Back()) << "first control instruction jumped";
     }
 }
 
-void Structural::CheckReturn(const Return* ret) {
+void Validator::CheckReturn(const Return* ret) {
     if (!CheckOperands(ret, Return::kMinOperands, Return::kMaxOperands)) {
         return;
     }
@@ -586,11 +586,11 @@ void Structural::CheckReturn(const Return* ret) {
     }
 }
 
-void Structural::CheckUnreachable(const Unreachable* u) {
+void Validator::CheckUnreachable(const Unreachable* u) {
     CheckResultsAndOperands(u, Unreachable::kNumResults, Unreachable::kNumOperands);
 }
 
-void Structural::CheckControlsAllowingIf(const Exit* exit, const Instruction* control) {
+void Validator::CheckControlsAllowingIf(const Exit* exit, const Instruction* control) {
     bool found = false;
     for (auto ctrl : tint::Reverse(control_stack_)) {
         if (ctrl == control) {
@@ -610,31 +610,31 @@ void Structural::CheckControlsAllowingIf(const Exit* exit, const Instruction* co
     }
 }
 
-void Structural::CheckExitSwitch(const ExitSwitch* s) {
+void Validator::CheckExitSwitch(const ExitSwitch* s) {
     CheckControlsAllowingIf(s, s->ControlInstruction());
 }
 
-void Structural::CheckExitLoop(const ExitLoop* l) {
+void Validator::CheckExitLoop(const ExitLoop* l) {
     CheckControlsAllowingIf(l, l->ControlInstruction());
 }
 
-void Structural::CheckLoad(const Load* l) {
+void Validator::CheckLoad(const Load* l) {
     CheckResultsAndOperands(l, Load::kNumResults, Load::kNumOperands);
 }
 
-void Structural::CheckStore(const Store* s) {
+void Validator::CheckStore(const Store* s) {
     CheckResultsAndOperands(s, Store::kNumResults, Store::kNumOperands);
 }
 
-void Structural::CheckLoadVectorElement(const LoadVectorElement* l) {
+void Validator::CheckLoadVectorElement(const LoadVectorElement* l) {
     CheckResultsAndOperands(l, LoadVectorElement::kNumResults, LoadVectorElement::kNumOperands);
 }
 
-void Structural::CheckStoreVectorElement(const StoreVectorElement* s) {
+void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
     CheckResultsAndOperands(s, StoreVectorElement::kNumResults, StoreVectorElement::kNumOperands);
 }
 
-void Structural::CheckPhony(const Phony* p) {
+void Validator::CheckPhony(const Phony* p) {
     if (!ir_.properties.Contains(Property::kAllowPhonyInstructions)) {
         AddError(p) << "missing property 'kAllowPhonyInstructions'";
         return;

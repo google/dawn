@@ -43,7 +43,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 class IR_PreservePaddingTest : public TransformTest {
   protected:
-    const type::Struct* MakeStructWithoutPadding() {
+    const core::type::Struct* MakeStructWithoutPadding() {
         auto* structure =
             ty.Struct(mod.symbols.New("MyStruct"), {
                                                        {mod.symbols.New("a"), ty.vec4u()},
@@ -53,7 +53,7 @@ class IR_PreservePaddingTest : public TransformTest {
         return structure;
     }
 
-    const type::Struct* MakeStructWithTrailingPadding() {
+    const core::type::Struct* MakeStructWithTrailingPadding() {
         auto* structure =
             ty.Struct(mod.symbols.New("MyStruct"), {
                                                        {mod.symbols.New("a"), ty.vec4u()},
@@ -62,7 +62,7 @@ class IR_PreservePaddingTest : public TransformTest {
         return structure;
     }
 
-    const type::Struct* MakeStructWithInternalPadding() {
+    const core::type::Struct* MakeStructWithInternalPadding() {
         auto* structure =
             ty.Struct(mod.symbols.New("MyStruct"), {
                                                        {mod.symbols.New("a"), ty.vec4u()},

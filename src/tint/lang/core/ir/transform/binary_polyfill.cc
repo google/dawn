@@ -58,10 +58,10 @@ struct State {
     SymbolTable& sym{ir.symbols};
 
     /// Map from integer type to its divide helper function.
-    Hashmap<const type::Type*, Function*, 4> int_div_helpers{};
+    Hashmap<const core::type::Type*, Function*, 4> int_div_helpers{};
 
     /// Map from integer type to its modulo helper function.
-    Hashmap<const type::Type*, Function*, 4> int_mod_helpers{};
+    Hashmap<const core::type::Type*, Function*, 4> int_mod_helpers{};
 
     /// Process the module.
     void Process() {
@@ -110,7 +110,7 @@ struct State {
             // Generate a name for the helper function.
             StringStream name;
             name << "tint_" << (is_div ? "div_" : "mod_");
-            if (auto* vec = result_ty->As<type::Vector>()) {
+            if (auto* vec = result_ty->As<core::type::Vector>()) {
                 name << "v" << vec->Width() << vec->Type()->FriendlyName();
             } else {
                 name << result_ty->FriendlyName();
@@ -162,7 +162,7 @@ struct State {
 
         /// Helper to splat a value to match the vector width of the result type if necessary.
         auto maybe_splat = [&](ir::Value* value) -> ir::Value* {
-            if (value->Type()->Is<type::Scalar>() && result_ty->Is<core::type::Vector>()) {
+            if (value->Type()->Is<core::type::Scalar>() && result_ty->Is<core::type::Vector>()) {
                 return b.Construct(result_ty, value);
             }
             return value;

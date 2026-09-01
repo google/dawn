@@ -155,7 +155,7 @@ struct State {
             }
         }
 
-        Switch(
+        tint::Switch(
             inst,  //
             [&](core::ir::Loop* loop) {
                 // Initializer's scope encompasses the body and continuing
@@ -295,7 +295,7 @@ struct State {
     /// @returns the new name
     Symbol Rename(CastableBase* thing, std::string_view old_name) {
         Symbol new_name = ir.symbols.New(old_name);
-        Switch(
+        tint::Switch(
             thing,  //
             [&](core::ir::Value* value) { ir.SetName(value, new_name); },
             [&](core::type::Struct* str) { str->SetName(new_name); },  //

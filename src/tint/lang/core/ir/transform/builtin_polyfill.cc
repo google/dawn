@@ -791,13 +791,13 @@ struct State {
                 auto* newbits = call->Args()[1];
                 auto* result_ty = e->Type();
                 auto* uint_ty = ty.MatchWidth(ty.u32(), result_ty);
-                const bool result_is_signed = result_ty->DeepestElement()->Is<type::I32>();
+                const bool result_is_signed = result_ty->DeepestElement()->Is<core::type::I32>();
 
                 auto mask_as_result_type = [&](Value* mask) {
                     if (result_is_signed) {
                         mask = b.Convert<i32>(mask)->Result();
                     }
-                    if (auto* vec = result_ty->As<type::Vector>()) {
+                    if (auto* vec = result_ty->As<core::type::Vector>()) {
                         mask = b.Construct(vec, mask);
                     }
                     return mask;
@@ -948,7 +948,7 @@ struct State {
     void TextureSampleBiasClamp(ir::CoreBuiltinCall* call) {
         b.InsertBefore(call, [&] {
             auto* texture_type = call->Args()[0]->Type()->As<core::type::Texture>();
-            bool is_array_texture = type::IsTextureArray(texture_type->Dim());
+            bool is_array_texture = core::type::IsTextureArray(texture_type->Dim());
             const uint32_t kBiasParameterIndex = is_array_texture ? 4 : 3;
             auto* bias_parameter = call->Args()[kBiasParameterIndex];
             // TODO(crbug.com/371033198): Consider applying clamp here if 'bias_parameter' is a

@@ -25,17 +25,17 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/structural_validator.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/void.h"
 
 namespace tint::core::ir::validator {
 
-void Structural::ValidateShaderIOAnnotations(const CastableBase* msg_anchor,
-                                             const core::type::Type* ty,
-                                             const std::optional<BindingPoint>& binding_point,
-                                             const IOAttributes& attr,
-                                             ShaderIOKind kind) {
+void Validator::ValidateShaderIOAnnotations(const CastableBase* msg_anchor,
+                                            const core::type::Type* ty,
+                                            const std::optional<BindingPoint>& binding_point,
+                                            const IOAttributes& attr,
+                                            ShaderIOKind kind) {
     EnumSet<IOAnnotation> annotations;
 
     // Since there is no entries in the set at this point, this should never fail.
@@ -152,7 +152,7 @@ void Structural::ValidateShaderIOAnnotations(const CastableBase* msg_anchor,
     }
 }
 
-void Structural::ValidateIOAttributes(const Function* func) {
+void Validator::ValidateIOAttributes(const Function* func) {
     const auto stage = func->Stage();
     struct Task {
         const CastableBase* anchor;
@@ -250,20 +250,20 @@ void Structural::ValidateIOAttributes(const Function* func) {
     }
 }
 
-void Structural::ValidateIOAttributesImpl(IOAttributeContext& ctx,
-                                          const CastableBase* msg_anchor,
-                                          const core::type::Type* ty,
-                                          const IOAttributes& attr,
-                                          Function::PipelineStage stage,
-                                          IODirection dir,
-                                          ShaderIOKind io_kind) {
+void Validator::ValidateIOAttributesImpl(IOAttributeContext& ctx,
+                                         const CastableBase* msg_anchor,
+                                         const core::type::Type* ty,
+                                         const IOAttributes& attr,
+                                         Function::PipelineStage stage,
+                                         IODirection dir,
+                                         ShaderIOKind io_kind) {
     bool skip_builtins = ir_.properties.Contains(Property::kAllowBackendSpecificShaderIO) &&
                          io_kind == ShaderIOKind::kModuleScopeVar;
     const IOAttributeUsage usage = IOAttributeUsageFor(stage, dir);
     WalkTypeAndMembers(
         *this, ty, attr,
         [&ctx, msg_anchor, usage, io_kind, skip_builtins, dir](
-            Structural& v, const core::type::Type* t, const IOAttributes& a) {
+            Validator& v, const core::type::Type* t, const IOAttributes& a) {
             const auto checkers = IOAttributeCheckersFor(a, skip_builtins);
             if (checkers.IsEmpty()) {
                 return;
@@ -371,27 +371,27 @@ void Structural::ValidateIOAttributesImpl(IOAttributeContext& ctx,
         });
 }
 
-void Structural::CheckNotBool(const CastableBase* msg_anchor,
-                              const core::type::Type* ty,
-                              const std::string& err) {
+void Validator::CheckNotBool(const CastableBase* msg_anchor,
+                             const core::type::Type* ty,
+                             const std::string& err) {
     if (ty->Is<core::type::Bool>()) {
         AddError(msg_anchor) << err;
     }
 }
 
-void Structural::CheckFrontFacingIfBool(const CastableBase* msg_anchor,
-                                        const IOAttributes& attr,
-                                        const core::type::Type* ty,
-                                        const std::string& err) {
+void Validator::CheckFrontFacingIfBool(const CastableBase* msg_anchor,
+                                       const IOAttributes& attr,
+                                       const core::type::Type* ty,
+                                       const std::string& err) {
     if (ty->Is<core::type::Bool>() && attr.builtin != BuiltinValue::kFrontFacing) {
         AddError(msg_anchor) << err;
     }
 }
 
-void Structural::CheckBlendSrc(BlendSrcContext& ctx,
-                               const CastableBase* target,
-                               const core::type::Type* ty,
-                               const IOAttributes& attr) {
+void Validator::CheckBlendSrc(BlendSrcContext& ctx,
+                              const CastableBase* target,
+                              const core::type::Type* ty,
+                              const IOAttributes& attr) {
     if (attr.blend_src.has_value()) {
         if (!ir_.properties.Contains(Property::kAllowBackendSpecificShaderIO)) {
             AddError(target) << "blend_src cannot be used on non-struct-member types";
@@ -432,10 +432,10 @@ void Structural::CheckBlendSrc(BlendSrcContext& ctx,
     }
 }
 
-void Structural::CheckBlendSrcImpl(BlendSrcContext& ctx,
-                                   const CastableBase* target,
-                                   const core::type::Type* ty,
-                                   const IOAttributes& attr) {
+void Validator::CheckBlendSrcImpl(BlendSrcContext& ctx,
+                                  const CastableBase* target,
+                                  const core::type::Type* ty,
+                                  const IOAttributes& attr) {
     if (!attr.blend_src.has_value()) {
         return;
     }
@@ -470,14 +470,14 @@ void Structural::CheckBlendSrcImpl(BlendSrcContext& ctx,
     }
 }
 
-void Structural::CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locations,
-                               const CastableBase* target,
-                               const IOAttributes& attr,
-                               const Function::PipelineStage stage,
-                               const core::type::Type* type,
-                               const IODirection dir) {
+void Validator::CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locations,
+                              const CastableBase* target,
+                              const IOAttributes& attr,
+                              const Function::PipelineStage stage,
+                              const core::type::Type* type,
+                              const IODirection dir) {
     struct WalkContext {
-        Structural* validator;
+        Validator* validator;
         Hashmap<uint32_t, const CastableBase*, 4>& locations;
         const CastableBase* target;
         const Function::PipelineStage stage;
@@ -518,11 +518,11 @@ void Structural::CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locati
         });
 }
 
-void Structural::CheckInterpolation(const CastableBase* anchor,
-                                    const core::type::Type* ty,
-                                    const IOAttributes& attr,
-                                    const Function::PipelineStage stage,
-                                    const IODirection dir) {
+void Validator::CheckInterpolation(const CastableBase* anchor,
+                                   const core::type::Type* ty,
+                                   const IOAttributes& attr,
+                                   const Function::PipelineStage stage,
+                                   const IODirection dir) {
     if (!ty) {
         return;
     }
@@ -613,10 +613,10 @@ void Structural::CheckInterpolation(const CastableBase* anchor,
         });
 }
 
-void Structural::CheckBindingPoint(const CastableBase* anchor,
-                                   const core::type::Type* ty,
-                                   const IOAttributes& attr,
-                                   const ShaderIOKind& io_kind) {
+void Validator::CheckBindingPoint(const CastableBase* anchor,
+                                  const core::type::Type* ty,
+                                  const IOAttributes& attr,
+                                  const ShaderIOKind& io_kind) {
     const auto& binding_point = attr.binding_point;
     auto address_space = AddressSpace::kUndefined;
     if (const auto* mv = ty->As<core::type::MemoryView>()) {

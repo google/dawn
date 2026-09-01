@@ -26,14 +26,14 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/ir/multi_in_block.h"
-#include "src/tint/lang/core/ir/structural_validator.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/function.h"
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/u32.h"
 
 namespace tint::core::ir::validator {
 
-void Structural::CheckEntryPoint(const Function* func) {
+void Validator::CheckEntryPoint(const Function* func) {
     if (!func->IsEntryPoint()) {
         return;
     }
@@ -80,7 +80,7 @@ void Structural::CheckEntryPoint(const Function* func) {
     }
 }
 
-void Structural::CheckFunction(const Function* func) {
+void Validator::CheckFunction(const Function* func) {
     // Scope holds the parameters and block
     scope_stack_.Push();
     TINT_DEFER(scope_stack_.Pop());
@@ -130,9 +130,9 @@ void Structural::CheckFunction(const Function* func) {
     ProcessTasks();
 }
 
-bool Structural::CheckFunctionParam(const Function* func,
-                                    const FunctionParam* param,
-                                    Hashset<const FunctionParam*, 4>& param_set) {
+bool Validator::CheckFunctionParam(const Function* func,
+                                   const FunctionParam* param,
+                                   Hashset<const FunctionParam*, 4>& param_set) {
     if (!param->Alive()) {
         AddError(param) << "destroyed parameter found in function parameter list";
         return false;
@@ -194,7 +194,7 @@ bool Structural::CheckFunctionParam(const Function* func,
     return true;
 }
 
-void Structural::CheckWorkgroupSize(const Function* func) {
+void Validator::CheckWorkgroupSize(const Function* func) {
     if (!func->IsCompute()) {
         if (func->WorkgroupSize().has_value()) {
             AddError(func) << "@workgroup_size only valid on compute entry point";
@@ -280,7 +280,7 @@ void Structural::CheckWorkgroupSize(const Function* func) {
     }
 }
 
-void Structural::CheckSubgroupSize(const Function* func) {
+void Validator::CheckSubgroupSize(const Function* func) {
     // @subgroup_size is optional
     if (!func->SubgroupSize().has_value()) {
         return;
