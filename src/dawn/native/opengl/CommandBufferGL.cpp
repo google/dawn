@@ -306,8 +306,8 @@ class VertexStateBufferBindingTracker {
     raw_ptr<Buffer> mIndexBuffer = nullptr;
 
     VertexBufferMask mDirtyVertexBuffers;
-    PerVertexBuffer<Buffer*> mVertexBuffers;
-    PerVertexBuffer<uint64_t> mVertexBufferOffsets;
+    PerVertexBuffer<Buffer*> mVertexBuffers{};
+    PerVertexBuffer<uint64_t> mVertexBufferOffsets{};
 
     int32_t mBaseVertex = 0;
     uint32_t mFirstInstance = 0;

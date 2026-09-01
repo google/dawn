@@ -44,11 +44,7 @@ struct RenderPassDescriptor;
 class TextureViewBase;
 
 struct BlitColorToColorWithDrawPipelineKey {
-    BlitColorToColorWithDrawPipelineKey() {
-        colorTargetFormats.fill(wgpu::TextureFormat::Undefined);
-    }
-
-    PerColorAttachment<wgpu::TextureFormat> colorTargetFormats;
+    PerColorAttachment<wgpu::TextureFormat> colorTargetFormats{};
     ColorAttachmentMask attachmentsToExpandResolve;
     ColorAttachmentMask resolveTargetsMask;
     wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;

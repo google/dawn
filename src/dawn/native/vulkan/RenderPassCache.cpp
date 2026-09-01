@@ -71,10 +71,10 @@ class RenderPassCreateInfo {
         createInfo.pNext = nullptr;
     }
 
-    PerColorAttachment<VkAttachmentReference> colorAttachmentRefs;
-    PerColorAttachment<VkAttachmentReference> resolveAttachmentRefs;
-    PerColorAttachment<VkAttachmentReference> inputAttachmentRefs;
-    PerColorAttachment<VkAttachmentReference> framebufferFetchAttachmentRefs;
+    PerColorAttachment<VkAttachmentReference> colorAttachmentRefs{};
+    PerColorAttachment<VkAttachmentReference> resolveAttachmentRefs{};
+    PerColorAttachment<VkAttachmentReference> inputAttachmentRefs{};
+    PerColorAttachment<VkAttachmentReference> framebufferFetchAttachmentRefs{};
     VkAttachmentReference depthStencilAttachmentRef = {};
 
     std::array<VkAttachmentDescription, kMaxAttachmentCount> attachmentDescs = {};
@@ -130,10 +130,10 @@ class RenderPassCreateInfo2 {
         createInfo.pCorrelatedViewMasks = nullptr;
     }
 
-    PerColorAttachment<VkAttachmentReference2> colorAttachmentRefs;
-    PerColorAttachment<VkAttachmentReference2> resolveAttachmentRefs;
-    PerColorAttachment<VkAttachmentReference2> inputAttachmentRefs;
-    PerColorAttachment<VkAttachmentReference2> framebufferFetchAttachmentRefs;
+    PerColorAttachment<VkAttachmentReference2> colorAttachmentRefs{};
+    PerColorAttachment<VkAttachmentReference2> resolveAttachmentRefs{};
+    PerColorAttachment<VkAttachmentReference2> inputAttachmentRefs{};
+    PerColorAttachment<VkAttachmentReference2> framebufferFetchAttachmentRefs{};
     VkAttachmentReference2 depthStencilAttachmentRef = {};
 
     std::array<VkAttachmentDescription2, kMaxAttachmentCount> attachmentDescs = {};

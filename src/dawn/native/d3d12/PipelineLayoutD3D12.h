@@ -100,8 +100,8 @@ class PipelineLayout final : public PipelineLayoutBase {
     ResultOrError<Ref<PipelineLayoutHandle>> CreatePipelineLayoutHandle(
         const ImmediateMask& pipelineImmediateMask);
 
-    PerBindGroup<uint32_t> mCbvUavSrvRootParameterIndices;
-    PerBindGroup<uint32_t> mSamplerRootParameterIndices;
+    PerBindGroup<uint32_t> mCbvUavSrvRootParameterIndices{};
+    PerBindGroup<uint32_t> mSamplerRootParameterIndices{};
     PerBindGroup<ityp::vector<BindingIndex, uint32_t>> mDynamicUniformRootParameterIndices;
     DynamicStorageBufferInfo mDynamicStorageBufferInfo;
     uint32_t mDynamicStorageBufferCount = 0;

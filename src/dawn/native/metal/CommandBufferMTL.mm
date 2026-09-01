@@ -993,9 +993,9 @@ class VertexBufferTracker {
   private:
     // All the indices in these arrays are Dawn vertex buffer indices
     VertexBufferMask mDirtyVertexBuffers;
-    PerVertexBuffer<id<MTLBuffer>> mVertexBuffers;
-    PerVertexBuffer<NSUInteger> mVertexBufferOffsets;
-    PerVertexBuffer<uint32_t> mVertexBufferBindingSizes;
+    PerVertexBuffer<id<MTLBuffer>> mVertexBuffers{};
+    PerVertexBuffer<NSUInteger> mVertexBufferOffsets{};
+    PerVertexBuffer<uint32_t> mVertexBufferBindingSizes{};
 
     raw_ptr<StorageBufferLengthTracker> mLengthTracker;
 };

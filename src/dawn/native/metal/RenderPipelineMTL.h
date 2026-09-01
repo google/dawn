@@ -73,7 +73,7 @@ class RenderPipeline final : public RenderPipelineBase {
     MTLCullMode mMtlCullMode{};
     NSPRef<id<MTLRenderPipelineState>> mMtlRenderPipelineState;
     NSPRef<id<MTLDepthStencilState>> mMtlDepthStencilState;
-    PerVertexBuffer<uint32_t> mMtlVertexBufferIndices;
+    PerVertexBuffer<uint32_t> mMtlVertexBufferIndices{};
 
     wgpu::ShaderStage mStagesRequiringStorageBufferLength = wgpu::ShaderStage::None;
 };

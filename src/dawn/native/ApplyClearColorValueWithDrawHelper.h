@@ -47,7 +47,7 @@ struct RenderPassDescriptor;
 
 struct KeyOfApplyClearColorValueWithDrawPipelines {
     ColorAttachmentIndex colorAttachmentCount{};
-    PerColorAttachment<wgpu::TextureFormat> colorTargetFormats;
+    PerColorAttachment<wgpu::TextureFormat> colorTargetFormats{};
     ColorAttachmentMask colorTargetsToApplyClearColorValue;
     uint32_t sampleCount = 0;
     wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;

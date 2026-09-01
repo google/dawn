@@ -55,7 +55,7 @@ class AHBFunctions {
 // supplementary information.
 struct AHBSharedTextureMemoryProperties {
     SharedTextureMemoryProperties properties;
-    bool isProtected;
+    bool isProtected = false;
 };
 
 AHBSharedTextureMemoryProperties GetAHBSharedTextureMemoryProperties(

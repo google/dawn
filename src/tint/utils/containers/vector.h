@@ -1110,9 +1110,10 @@ class Vector {
     using TStorage = AlignedStorage<T>;
 
     /// The internal structure for the vector with a small array.
+    // SAFETY: tint::Vector guarantees the memory gets initialized before it's exposed.
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     struct ImplWithSmallArray {
-        // SAFETY: container guarantees initializations.
-        std::array<TStorage, N> small_arr;  // NOLINT(cppcoreguidelines-pro-type-member-init)
+        std::array<TStorage, N> small_arr;
         // SAFETY: The small array always has a fixed capacity of N elements.
         internal::Slice<T> slice = {
             DAWN_UNSAFE_BUFFERS(std::span<T>{&small_arr[0].Get(), N}),

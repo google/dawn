@@ -87,7 +87,7 @@ TEST_F(EnumeratorTest, StdVector) {
 // Test that Enumerate works with ityp::array
 TEST_F(EnumeratorTest, ITypArray) {
     // Empty array
-    ityp::array<Int, uint32_t, 0> emptyThing;
+    ityp::array<Int, uint32_t, 0> emptyThing{};
     CheckEmpty(emptyThing);
 
     // Non-empty array

@@ -70,9 +70,9 @@ struct RenderPassCacheQuery {
 
     ColorAttachmentMask colorMask;
     ColorAttachmentMask resolveTargetMask;
-    PerColorAttachment<wgpu::TextureFormat> colorFormats;
-    PerColorAttachment<wgpu::LoadOp> colorLoadOp;
-    PerColorAttachment<wgpu::StoreOp> colorStoreOp;
+    PerColorAttachment<wgpu::TextureFormat> colorFormats{};
+    PerColorAttachment<wgpu::LoadOp> colorLoadOp{};
+    PerColorAttachment<wgpu::StoreOp> colorStoreOp{};
     ColorAttachmentMask expandResolveMask;
     ColorAttachmentMask renderToSingleSampleMask;
 

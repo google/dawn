@@ -73,7 +73,7 @@
     {%- elif member.default_value != None -%}
         {{" "}}= {{member.default_value}};
     {%- else -%}
-        {{assert(member.default_value == None)}};
+        {{" "}}= {};
     {%- endif -%}
 {%- endmacro -%}
 

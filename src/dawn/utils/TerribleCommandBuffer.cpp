@@ -32,8 +32,12 @@
 
 namespace dawn::utils {
 
+// SAFETY: mBackingBuffer will be suballocated into serialized cmds, which will be initialized.
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 TerribleCommandBuffer::TerribleCommandBuffer() : mBuffer(mBackingBuffer) {}
 
+// SAFETY: mBackingBuffer will be suballocated into serialized cmds, which will be initialized.
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 TerribleCommandBuffer::TerribleCommandBuffer(dawn::wire::CommandHandler* handler)
     : mHandler(handler), mBuffer(mBackingBuffer) {}
 
