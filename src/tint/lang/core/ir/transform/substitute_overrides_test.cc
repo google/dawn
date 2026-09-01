@@ -3094,6 +3094,8 @@ struct SubgroupMatrixSizes : public TransformTestWithParam<SubgroupMatrixSizesPa
 };
 
 TEST_P(SubgroupMatrixSizes, Stride_TooSmallForType) {
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* mat_ty = MatrixType();
 
     if (MinStride() < ArrayStride()) {
@@ -3127,6 +3129,8 @@ TEST_P(SubgroupMatrixSizes, Stride_TooSmallForType) {
 }
 
 TEST_P(SubgroupMatrixSizes, Stride_TooLarge) {
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* mat_ty = MatrixType();
 
     Var* v = nullptr;
@@ -3153,6 +3157,8 @@ TEST_P(SubgroupMatrixSizes, Stride_TooLarge) {
 }
 
 TEST_P(SubgroupMatrixSizes, Offset_TooLarge) {
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* mat_ty = MatrixType();
 
     Var* v = nullptr;
@@ -3179,6 +3185,8 @@ TEST_P(SubgroupMatrixSizes, Offset_TooLarge) {
 }
 
 TEST_P(SubgroupMatrixSizes, Pointer_TooSmallForType_MinStride) {
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();
@@ -3218,6 +3226,8 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmallForType_MinStride) {
 }
 
 TEST_P(SubgroupMatrixSizes, Storage_TooSmallForType) {
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();
@@ -3254,6 +3264,8 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmallForType) {
 }
 
 TEST_P(SubgroupMatrixSizes, Storage_TooSmallForType_NonConstStride) {
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();
@@ -3291,6 +3303,9 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmallForType_NonConstStride) {
 }
 
 TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView) {
+    mod.properties.Add(ir::Property::kAllowBufferTypes);
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();
@@ -3307,7 +3322,6 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView) {
         o = b.Override("o", ty.u32());
         o->SetOverrideId({1});
         v = b.Var("v", ty.ptr(workgroup, ty.buffer(array_size)));
-        v->SetBindingPoint(0, 0);
     });
     auto* foo = b.Function("foo", ty.void_());
     auto* value = b.FunctionParam("mat", mat_ty);
@@ -3333,6 +3347,9 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView) {
 }
 
 TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_SizedParam) {
+    mod.properties.Add(ir::Property::kAllowBufferTypes);
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();
@@ -3353,7 +3370,7 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_SizedParam) {
     });
     auto* foo = b.Function("foo", ty.void_());
     auto* value = b.FunctionParam("mat", mat_ty);
-    auto* p = b.FunctionParam("p", ty.buffer(array_size));
+    auto* p = b.FunctionParam("p", ty.ptr(workgroup, ty.buffer(array_size), read_write));
     foo->SetParams({value, p});
     b.Append(foo->Block(), [&] {
         auto* view = b.CallExplicit(
@@ -3383,6 +3400,9 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_SizedParam) {
 }
 
 TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferView_Result) {
+    mod.properties.Add(ir::Property::kAllowBufferTypes);
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* type = std::get<0>(GetParam())(ty);
     auto* mat_ty = MatrixType();
 
@@ -3403,7 +3423,7 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferView_Result) {
     });
     auto* foo = b.Function("foo", ty.void_());
     auto* value = b.FunctionParam("mat", mat_ty);
-    auto* p = b.FunctionParam("p", ty.buffer(2 * array_size));
+    auto* p = b.FunctionParam("p", ty.ptr(workgroup, ty.buffer(2 * array_size), read_write));
     foo->SetParams({value, p});
     b.Append(foo->Block(), [&] {
         auto* arr_ty = ty.array(ArrayElemType(), array_size / ArrayStride() - 1);
@@ -3431,6 +3451,9 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferView_Result) {
 }
 
 TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferArrayView_SizeParam) {
+    mod.properties.Add(ir::Property::kAllowBufferTypes);
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* type = std::get<0>(GetParam())(ty);
     auto* mat_ty = MatrixType();
 
@@ -3447,7 +3470,6 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferArrayView_SizeParam) {
         o = b.Override("o", ty.u32());
         o->SetOverrideId({1});
         v = b.Var("v", ty.ptr(workgroup, ty.buffer(2 * array_size)));
-        v->SetBindingPoint(0, 0);
     });
     auto* foo = b.Function("foo", ty.void_());
     auto* value = b.FunctionParam("mat", mat_ty);
@@ -3471,6 +3493,8 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferArrayView_SizeParam) {
 }
 
 TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_Access_Array) {
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* type = std::get<0>(GetParam())(ty);
     auto* mat_ty = MatrixType();
 
@@ -3511,6 +3535,8 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_Access_Array) {
 }
 
 TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_Access_Array_Offset) {
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* type = std::get<0>(GetParam())(ty);
     auto* mat_ty = MatrixType();
 
@@ -3551,6 +3577,8 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_Access_Array_Offset) {
 }
 
 TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_StructMember) {
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* type = std::get<0>(GetParam())(ty);
     auto* mat_ty = MatrixType();
 
@@ -3596,6 +3624,9 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_StructMember) {
 }
 
 TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_Access_Array) {
+    mod.properties.Add(ir::Property::kAllowBufferTypes);
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();
@@ -3642,6 +3673,9 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_Access_Array) {
 }
 
 TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_Access_Struct) {
+    mod.properties.Add(ir::Property::kAllowBufferTypes);
+    mod.properties.Add(ir::Property::kAllow16BitFloats);
+
     auto* type = std::get<0>(GetParam())(ty);
     const bool load = std::get<4>(GetParam());
     auto* mat_ty = MatrixType();

@@ -685,13 +685,11 @@ Disassembler& Validator::Disassemble() {
 }
 
 Result<SuccessType> Validator::Run() {
-    if (error_source_ == ErrorSource::kIr) {
-        RunStructuralSoundnessChecks();
+    RunStructuralSoundnessChecks();
 
-        CheckForRecursion();
-        CheckForOrphanedInstructions();
-        CheckStageRestrictedInstructions();
-    }
+    CheckForRecursion();
+    CheckForOrphanedInstructions();
+    CheckStageRestrictedInstructions();
 
     // Only run the functional validation if we are structurally valid
     if (!diag_.ContainsErrors()) {
