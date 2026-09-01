@@ -684,8 +684,27 @@ func prepareBinaries(t *taskConfig, settings *ExperimentSettings, binDir string,
 					return err
 				}
 			}
+
+			if err := copyLlvmTools(t, binDir); err != nil {
+				return err
+			}
 			return nil
 		})
+}
+
+// copyLlvmTools copies the LLVM coverage tools to the bin directory.
+func copyLlvmTools(t *taskConfig, binDir string) error {
+	llvmBinDir := filepath.Join(fileutils.DawnRoot(t.osWrapper), "third_party", "llvm-build", "Release+Asserts", "bin")
+	tools := []string{"llvm-profdata", "llvm-cov"}
+	for _, tool := range tools {
+		toolExe := tool + fileutils.ExeExt
+		srcPath := filepath.Join(llvmBinDir, toolExe)
+		dstPath := filepath.Join(binDir, toolExe)
+		if err := fileutils.CopyFile(dstPath, srcPath, t.osWrapper); err != nil {
+			return fmt.Errorf("failed to copy %s to bin folder: %w", tool, err)
+		}
+	}
+	return nil
 }
 
 // copyFuzzerAndDependencies makes a copy of a fuzzer binary and its runtime dependencies in the target bin folder. The runtime dependencies come from the GN output file <fuzzer>.runtime_deps, but only includes the dynamic libraries listed there and none of the harness/framework files.

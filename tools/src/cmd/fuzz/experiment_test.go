@@ -452,6 +452,11 @@ func TestPrepareBinariesWithRuntimeDeps(t *testing.T) {
 	_ = fs.MkdirAll("/build", 0755)
 	_ = fs.WriteFile("/build/tint_wgsl_fuzzer", []byte("fuzzer-binary"), 0755)
 
+	// Create mock LLVM tools
+	_ = fs.MkdirAll("third_party/llvm-build/Release+Asserts/bin", 0755)
+	_ = fs.WriteFile("third_party/llvm-build/Release+Asserts/bin/llvm-profdata", []byte("mock-profdata"), 0755)
+	_ = fs.WriteFile("third_party/llvm-build/Release+Asserts/bin/llvm-cov", []byte("mock-cov"), 0755)
+
 	// Create runtime_deps file
 	depsContent := "tint_wgsl_fuzzer\nlib/libswiftshader.so\nlibvulkan.so.1\nsrc/some_other_dep.dat\n"
 	_ = fs.WriteFile("/build/tint_wgsl_fuzzer.runtime_deps", []byte(depsContent), 0644)
@@ -498,6 +503,15 @@ func TestPrepareBinariesWithRuntimeDeps(t *testing.T) {
 
 	// Verify non-library dependencies were NOT copied
 	require.False(t, fileutils.IsFile("/experiment/bin/src/some_other_dep.dat", fs))
+
+	// Verify LLVM tools were copied
+	require.True(t, fileutils.IsFile("/experiment/bin/llvm-profdata", fs))
+	contentProfdata, _ := fs.ReadFile("/experiment/bin/llvm-profdata")
+	require.Equal(t, "mock-profdata", string(contentProfdata))
+
+	require.True(t, fileutils.IsFile("/experiment/bin/llvm-cov", fs))
+	contentCov, _ := fs.ReadFile("/experiment/bin/llvm-cov")
+	require.Equal(t, "mock-cov", string(contentCov))
 }
 
 func TestPrepareBinariesNoRuntimeDeps(t *testing.T) {
@@ -506,6 +520,11 @@ func TestPrepareBinariesNoRuntimeDeps(t *testing.T) {
 	// Create a test build directory and the fuzzer binary
 	_ = fs.MkdirAll("/build", 0755)
 	_ = fs.WriteFile("/build/tint_wgsl_fuzzer", []byte("fuzzer-binary"), 0755)
+
+	// Create mock LLVM tools
+	_ = fs.MkdirAll("third_party/llvm-build/Release+Asserts/bin", 0755)
+	_ = fs.WriteFile("third_party/llvm-build/Release+Asserts/bin/llvm-profdata", []byte("mock-profdata"), 0755)
+	_ = fs.WriteFile("third_party/llvm-build/Release+Asserts/bin/llvm-cov", []byte("mock-cov"), 0755)
 
 	ew := execwrapper.NewTestExecWrapperForSuccess([]byte("main\n"), nil)
 
@@ -525,8 +544,17 @@ func TestPrepareBinariesNoRuntimeDeps(t *testing.T) {
 	err := prepareBinaries(cfg, settings, binDir, []string{"tint_wgsl_fuzzer"})
 	require.NoError(t, err)
 
-	// Verify binary was copied
+	// Verify fuzzer binary was copied
 	require.True(t, fileutils.IsFile("/experiment/bin/tint_wgsl_fuzzer", fs))
 	contentBin, _ := fs.ReadFile("/experiment/bin/tint_wgsl_fuzzer")
 	require.Equal(t, "fuzzer-binary", string(contentBin))
+
+	// Verify LLVM tools were copied
+	require.True(t, fileutils.IsFile("/experiment/bin/llvm-profdata", fs))
+	contentProfdata, _ := fs.ReadFile("/experiment/bin/llvm-profdata")
+	require.Equal(t, "mock-profdata", string(contentProfdata))
+
+	require.True(t, fileutils.IsFile("/experiment/bin/llvm-cov", fs))
+	contentCov, _ := fs.ReadFile("/experiment/bin/llvm-cov")
+	require.Equal(t, "mock-cov", string(contentCov))
 }

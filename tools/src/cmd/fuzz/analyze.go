@@ -594,7 +594,7 @@ func getOrRunCoverage(t *taskConfig, machine string, fuzzer string, corpus Corpu
 		return coverage, err
 	}
 
-	if err := mergeProfrawFiles(t, profrawFiles, profdataPath); err != nil {
+	if err := mergeProfrawFiles(t, binDir, profrawFiles, profdataPath); err != nil {
 		return coverage, err
 	}
 
@@ -639,8 +639,11 @@ func findProfrawFiles(dir string) ([]string, error) {
 }
 
 // mergeProfrawFiles combines multiple .profraw files into a single sparse .profdata file using llvm-profdata.
-func mergeProfrawFiles(t *taskConfig, inputs []string, output string) error {
-	llvmProfDataPath := filepath.Join(fileutils.DawnRoot(t.osWrapper), "third_party", "llvm-build", "Release+Asserts", "bin", "llvm-profdata"+fileutils.ExeExt)
+func mergeProfrawFiles(t *taskConfig, binDir string, inputs []string, output string) error {
+	llvmProfDataPath := filepath.Join(binDir, "llvm-profdata"+fileutils.ExeExt)
+	if !fileutils.IsExe(llvmProfDataPath, t.osWrapper) {
+		return fmt.Errorf("hermetic LLVM tool 'llvm-profdata' not found in experiment bin directory: %s", llvmProfDataPath)
+	}
 
 	mergeArgs := []string{"merge", "-o", output, "-sparse=true"}
 	mergeArgs = append(mergeArgs, inputs...)
@@ -654,6 +657,11 @@ func mergeProfrawFiles(t *taskConfig, inputs []string, output string) error {
 func generateLcovReport(t *taskConfig, fuzzer string, binDir string, output string, inputs string) error {
 	scriptPath := filepath.Join(fileutils.DawnRoot(t.osWrapper), "tools", "code_coverage", "coverage.py")
 
+	llvmCovPath := filepath.Join(binDir, "llvm-cov"+fileutils.ExeExt)
+	if !fileutils.IsExe(llvmCovPath, t.osWrapper) {
+		return fmt.Errorf("hermetic LLVM tool 'llvm-cov' not found in experiment bin directory: %s", llvmCovPath)
+	}
+
 	cmdArgs := []string{
 		scriptPath,
 		fuzzer,
@@ -662,6 +670,7 @@ func generateLcovReport(t *taskConfig, fuzzer string, binDir string, output stri
 		"-o", output,
 		"--format", "lcov",
 		"-p", inputs,
+		"--coverage-tools-dir", binDir,
 	}
 
 	if _, err := t.runCmd("vpython3", cmdArgs...); err != nil {

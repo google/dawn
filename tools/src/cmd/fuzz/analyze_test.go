@@ -30,6 +30,8 @@ package main
 import (
 	"testing"
 
+	"dawn.googlesource.com/dawn/tools/src/execwrapper"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"github.com/stretchr/testify/require"
 )
 
@@ -137,4 +139,72 @@ func TestCalculateStats(t *testing.T) {
 	require.Equal(t, 2, pt.N)
 	require.InDelta(t, 55.0, pt.CovAvg, 0.001)
 	require.InDelta(t, 10.0, pt.NormSecsAvg, 0.001)
+}
+
+func TestMergeProfrawFiles_MissingTools(t *testing.T) {
+	fs := oswrapper.CreateFSTestOSWrapper()
+	ew := execwrapper.NewTestExecWrapperForSuccess(nil, nil)
+
+	cfg := &taskConfig{
+		mainConfig: mainConfig{
+			osWrapper:   fs,
+			execWrapper: ew,
+		},
+	}
+
+	err := mergeProfrawFiles(cfg, "/experiment/bin", []string{"a.profraw"}, "coverage.profdata")
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "hermetic LLVM tool 'llvm-profdata' not found in experiment bin directory")
+}
+
+func TestMergeProfrawFiles_Success(t *testing.T) {
+	fs := oswrapper.CreateFSTestOSWrapper()
+	_ = fs.MkdirAll("/experiment/bin", 0755)
+	_ = fs.WriteFile("/experiment/bin/llvm-profdata", []byte("mock-profdata"), 0755)
+
+	ew := execwrapper.NewTestExecWrapperForSuccess([]byte("merged output"), nil)
+
+	cfg := &taskConfig{
+		mainConfig: mainConfig{
+			osWrapper:   fs,
+			execWrapper: ew,
+		},
+	}
+
+	err := mergeProfrawFiles(cfg, "/experiment/bin", []string{"/inputs/a.profraw"}, "/outputs/coverage.profdata")
+	require.NoError(t, err)
+}
+
+func TestGenerateLcovReport_MissingTools(t *testing.T) {
+	fs := oswrapper.CreateFSTestOSWrapper()
+	ew := execwrapper.NewTestExecWrapperForSuccess(nil, nil)
+
+	cfg := &taskConfig{
+		mainConfig: mainConfig{
+			osWrapper:   fs,
+			execWrapper: ew,
+		},
+	}
+
+	err := generateLcovReport(cfg, "fuzzer", "/experiment/bin", "/outputs", "/inputs/coverage.profdata")
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "hermetic LLVM tool 'llvm-cov' not found in experiment bin directory")
+}
+
+func TestGenerateLcovReport_Success(t *testing.T) {
+	fs := oswrapper.CreateFSTestOSWrapper()
+	_ = fs.MkdirAll("/experiment/bin", 0755)
+	_ = fs.WriteFile("/experiment/bin/llvm-cov", []byte("mock-cov"), 0755)
+
+	ew := execwrapper.NewTestExecWrapperForSuccess([]byte("report generated"), nil)
+
+	cfg := &taskConfig{
+		mainConfig: mainConfig{
+			osWrapper:   fs,
+			execWrapper: ew,
+		},
+	}
+
+	err := generateLcovReport(cfg, "fuzzer", "/experiment/bin", "/outputs", "/inputs/coverage.profdata")
+	require.NoError(t, err)
 }
