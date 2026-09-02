@@ -47,6 +47,8 @@ if (tint_build_msl_writer) {
     sources = [
       "bias.cc",
       "bias.h",
+      "cooperative_tensor.cc",
+      "cooperative_tensor.h",
       "gradient.cc",
       "gradient.h",
       "level.cc",
@@ -75,20 +77,28 @@ if (tint_build_unittests) {
     tint_unittests_source_set("unittests") {
       sources = [
         "bias_test.cc",
+        "cooperative_tensor_test.cc",
         "gradient_test.cc",
         "level_test.cc",
       ]
       deps = [
         "${dawn_root}/src/utils",
         "${tint_src_dir}:gmock_and_gtest",
+        "${tint_src_dir}/api/common",
+        "${tint_src_dir}/lang/core",
         "${tint_src_dir}/lang/core/type",
+        "${tint_src_dir}/lang/core/type:unittests",
         "${tint_src_dir}/lang/msl/type",
+        "${tint_src_dir}/utils",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/ice",
         "${tint_src_dir}/utils/macros",
         "${tint_src_dir}/utils/math",
         "${tint_src_dir}/utils/memory",
+        "${tint_src_dir}/utils/reflection",
         "${tint_src_dir}/utils/rtti",
+        "${tint_src_dir}/utils/symbol",
+        "${tint_src_dir}/utils/text",
       ]
     }
   }
