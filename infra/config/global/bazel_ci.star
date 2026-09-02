@@ -31,15 +31,14 @@ load("@chromium-luci//builder_config.star", "builder_config")
 load("@chromium-luci//ci.star", "ci")
 load("@chromium-luci//consoles.star", "consoles")
 load("@chromium-luci//gardener_rotations.star", "gardener_rotations")
-load("//bazel_shared.star", "bazel_builder_defaults")
+load("@chromium-luci//gpu.star", "gpu")
 load("//constants.star", "siso")
 
 ci.defaults.set(
     executable = "recipe:dawn/bazel",
     builder_group = "ci",
     bucket = "ci",
-    pool = "luci.chromium.gpu.ci",
-    builderless = True,
+    pool = gpu.ci.POOL,
     triggered_by = ["primary-poller"],
     build_numbers = True,
     contact_team_email = "chrome-gpu-infra@google.com",
@@ -52,17 +51,9 @@ ci.defaults.set(
     gardener_rotations = gardener_rotations.rotation("dawn", None, None),
 )
 
-def dawn_ci_linux_bazel_builder(**kwargs):
-    kwargs = bazel_builder_defaults.apply_linux_bazel_builder_defaults(kwargs)
-    ci.builder(**kwargs)
-
-def dawn_ci_mac_bazel_builder(**kwargs):
-    kwargs = bazel_builder_defaults.apply_mac_bazel_builder_defaults(kwargs)
-    ci.builder(**kwargs)
-
 ## CI Builders
 
-dawn_ci_linux_bazel_builder(
+gpu.ci.linux_builder(
     name = "dawn-linux-x64-bazel-dbg",
     description_html = "Compiles Tint targets for Linux/x64 using Bazel in Debug mode",
     properties = {
@@ -89,7 +80,7 @@ dawn_ci_linux_bazel_builder(
     ),
 )
 
-dawn_ci_linux_bazel_builder(
+gpu.ci.linux_builder(
     name = "dawn-linux-x64-bazel-rel",
     description_html = "Compiles Tint targets for Linux/x64 using Bazel",
     properties = {
@@ -116,7 +107,7 @@ dawn_ci_linux_bazel_builder(
     ),
 )
 
-dawn_ci_mac_bazel_builder(
+gpu.ci.mac_builder(
     name = "dawn-mac-arm64-bazel-dbg",
     description_html = "Compiles Tint targets for Mac/arm64 using Bazel in Debug mode",
     properties = {
@@ -143,7 +134,7 @@ dawn_ci_mac_bazel_builder(
     ),
 )
 
-dawn_ci_mac_bazel_builder(
+gpu.ci.mac_builder(
     name = "dawn-mac-arm64-bazel-rel",
     description_html = "Compiles Tint targets for Mac/arm64 using Bazel",
     properties = {

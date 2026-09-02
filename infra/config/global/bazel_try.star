@@ -27,8 +27,8 @@
 
 """Try Dawn builders using Bazel for the build system instead of GN or CMake."""
 
+load("@chromium-luci//gpu.star", "gpu")
 load("@chromium-luci//try.star", "try_")
-load("//bazel_shared.star", "bazel_builder_defaults")
 load("//constants.star", "siso")
 load("//location_filters.star", "inclusion_filters")
 
@@ -36,10 +36,10 @@ try_.defaults.set(
     executable = "recipe:dawn/bazel",
     builder_group = "try",
     bucket = "try",
-    pool = "luci.chromium.gpu.try",
-    builderless = True,
+    pool = gpu.try_.POOL,
     build_numbers = True,
     list_view = "try",
+    cq_group = "Dawn-CQ",
     contact_team_email = "chrome-gpu-infra@google.com",
     service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
     siso_project = siso.project.DEFAULT_UNTRUSTED,
@@ -48,32 +48,20 @@ try_.defaults.set(
 
 ## Templates
 
-def bazel_try_builder(**kwargs):
-    """Declares a try builder and registers it as an optional verifier on CQ.
-
-    Args:
-        **kwargs: Arguments to pass to try_.builder.
-    """
+def apply_cq_builder_defaults(kwargs):
     kwargs.setdefault("max_concurrent_builds", 3)
     kwargs.setdefault("cq_settings", try_.cq_settings(
         location_filters = inclusion_filters.bazel_cq_file_inclusions,
     ))
-    name = kwargs["name"]
-    try_.builder(**kwargs)
-    luci.cq_tryjob_verifier(
-        cq_group = "Dawn-CQ",
-        builder = "dawn:try/" + name,
-        experiment_percentage = 0,
-        location_filters = inclusion_filters.bazel_cq_file_inclusions,
-    )
+    return kwargs
 
 def bazel_linux_try_builder(**kwargs):
-    kwargs = bazel_builder_defaults.apply_linux_bazel_builder_defaults(kwargs)
-    bazel_try_builder(**kwargs)
+    kwargs = apply_cq_builder_defaults(kwargs)
+    gpu.try_.linux_optional_builder(**kwargs)
 
 def bazel_mac_try_builder(**kwargs):
-    kwargs = bazel_builder_defaults.apply_mac_bazel_builder_defaults(kwargs)
-    bazel_try_builder(**kwargs)
+    kwargs = apply_cq_builder_defaults(kwargs)
+    gpu.try_.mac_optional_builder(**kwargs)
 
 ## CQ Builders
 
