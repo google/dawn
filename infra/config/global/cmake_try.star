@@ -27,7 +27,6 @@
 
 """Try Dawn builders using CMake for the build system instead of GN."""
 
-load("@chromium-luci//builders.star", "cpu", "os")
 load("@chromium-luci//gpu.star", "gpu")
 load("@chromium-luci//try.star", "try_")
 load("//cmake_shared.star", "cmake_builder_defaults")
@@ -148,9 +147,6 @@ dawn_mac_cmake_cq_tester(
         "target_cpu": "arm64",
         "ubsan": False,
     },
-    # TODO(crbug.com/555304810): Add this to the CQ once the CI equivalent is
-    # shown to be stable.
-    cq_settings = try_.cq_settings(includable_only = True),
 )
 
 dawn_mac_cmake_cq_tester(
@@ -166,47 +162,6 @@ dawn_mac_cmake_cq_tester(
         "target_cpu": "arm64",
         "ubsan": False,
     },
-    # TODO(crbug.com/555304810): Add this to the CQ once the CI equivalent is
-    # shown to be stable.
-    cq_settings = try_.cq_settings(includable_only = True),
-)
-
-dawn_mac_cmake_cq_tester(
-    name = "dawn-cq-mac-x64-cmake-dbg",
-    description_html = "Compiles and tests debug Dawn test binaries for Mac/x64 using CMake and Clang. Blocks CL submission",
-    mirrors = [
-        "ci/dawn-mac-x64-sws-cmake-dbg",
-    ],
-    properties = {
-        "asan": False,
-        "clang": True,
-        "debug": True,
-        "target_cpu": "x64",
-        "ubsan": False,
-    },
-    # Dawn/CMake runs the tests directly on the builder, so the x64 builders
-    # must run on x64 machines.
-    cpu = cpu.X86_64,
-    os = os.MAC_15,
-)
-
-dawn_mac_cmake_cq_tester(
-    name = "dawn-cq-mac-x64-cmake-rel",
-    description_html = "Compiles and tests release Dawn test binaries for Mac/x64 using CMake and Clang. Blocks CL submission",
-    mirrors = [
-        "ci/dawn-mac-x64-sws-cmake-rel",
-    ],
-    properties = {
-        "asan": False,
-        "clang": True,
-        "debug": False,
-        "target_cpu": "x64",
-        "ubsan": False,
-    },
-    # Dawn/CMake runs the tests directly on the builder, so the x64 builders
-    # must run on x64 machines.
-    cpu = cpu.X86_64,
-    os = os.MAC_15,
 )
 
 dawn_win_cmake_cq_tester(
