@@ -58,6 +58,7 @@
 #include "src/dawn/utils/Timer.h"
 #include "src/utils/log.h"
 #include "src/utils/platform.h"
+#include "src/utils/span.h"
 
 // Getting data back from Dawn is done in an async manners so all expectations are "deferred"
 // until the end of the test. Also expectations use a copy to a MapRead buffer to get the data
@@ -225,8 +226,7 @@ class DawnTestEnvironment : public testing::Environment {
     static DawnTestEnvironment* GetEnvironment();
 
     std::vector<AdapterTestParam> GetAvailableAdapterTestParamsForBackends(
-        const BackendTestConfig* params,
-        size_t numParams);
+        dawn::Span<const BackendTestConfig> params);
 
     void SetUp() override;
     void TearDown() override;
@@ -929,13 +929,12 @@ using DawnTest = DawnTestWithParams<>;
 
 // Instantiate the test once for each backend provided after the first argument. Use it like this:
 //     DAWN_INSTANTIATE_TEST(MyTestFixture, MetalBackend, OpenGLBackend)
-#define DAWN_INSTANTIATE_TEST(testName, ...)                                            \
-    const decltype(DAWN_PP_GET_HEAD(__VA_ARGS__)) testName##params[] = {__VA_ARGS__};   \
-    INSTANTIATE_TEST_SUITE_P(                                                           \
-        , testName,                                                                     \
-        testing::ValuesIn(::dawn::detail::GetAvailableAdapterTestParamsForBackends(     \
-            testName##params, sizeof(testName##params) / sizeof(testName##params[0]))), \
-        DawnTestBase::PrintToStringParamName(#testName));                               \
+#define DAWN_INSTANTIATE_TEST(testName, ...)                                          \
+    INSTANTIATE_TEST_SUITE_P(                                                         \
+        , testName,                                                                   \
+        testing::ValuesIn(                                                            \
+            ::dawn::detail::GetAvailableAdapterTestParamsForBackends({__VA_ARGS__})), \
+        DawnTestBase::PrintToStringParamName(#testName));                             \
     GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
 
 #define DAWN_INSTANTIATE_PREFIXED_TEST_P(prefix, testName, ...)                    \
@@ -985,8 +984,7 @@ using DawnTest = DawnTestWithParams<>;
 namespace detail {
 // Helper functions used for DAWN_INSTANTIATE_TEST
 std::vector<AdapterTestParam> GetAvailableAdapterTestParamsForBackends(
-    const BackendTestConfig* params,
-    size_t numParams);
+    dawn::Span<const BackendTestConfig> params);
 
 // All classes used to implement the deferred expectations should inherit from this.
 class Expectation {
@@ -1087,13 +1085,13 @@ template <typename Param, typename... Params>
 auto MakeParamGenerator(std::vector<BackendTestConfig>&& first,
                         std::initializer_list<Params>&&... params) {
     return ParamGenerator<Param, AdapterTestParam, Params...>(
-        ::dawn::detail::GetAvailableAdapterTestParamsForBackends(first.data(), first.size()),
+        ::dawn::detail::GetAvailableAdapterTestParamsForBackends(first),
         std::forward<std::initializer_list<Params>&&>(params)...);
 }
 template <typename Param, typename... Params>
 auto MakeParamGenerator(std::vector<BackendTestConfig>&& first, std::vector<Params>&&... params) {
     return ParamGenerator<Param, AdapterTestParam, Params...>(
-        ::dawn::detail::GetAvailableAdapterTestParamsForBackends(first.data(), first.size()),
+        ::dawn::detail::GetAvailableAdapterTestParamsForBackends(first),
         std::forward<std::vector<Params>&&>(params)...);
 }
 

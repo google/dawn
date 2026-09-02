@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "src/utils/span.h"
+
 #ifdef UNSAFE_BUFFERS_BUILD
 // TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
 #pragma allow_unsafe_buffers
@@ -795,11 +797,9 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
 }
 
 std::vector<AdapterTestParam> DawnTestEnvironment::GetAvailableAdapterTestParamsForBackends(
-    const BackendTestConfig* params,
-    size_t numParams) {
+    dawn::Span<const BackendTestConfig> params) {
     std::vector<AdapterTestParam> testParams;
-    for (size_t i = 0; i < numParams; ++i) {
-        const auto& backendTestParams = params[i];
+    for (const auto& backendTestParams : params) {
         for (const auto& adapterProperties : mAdapterProperties) {
             if (backendTestParams.backendType == adapterProperties.backendType &&
                 adapterProperties.selected) {
@@ -2464,10 +2464,9 @@ bool utils::RGBA8::operator>=(const utils::RGBA8& other) const {
 
 namespace detail {
 std::vector<AdapterTestParam> GetAvailableAdapterTestParamsForBackends(
-    const BackendTestConfig* params,
-    size_t numParams) {
+    dawn::Span<const BackendTestConfig> params) {
     DAWN_ASSERT(gTestEnv != nullptr);
-    return gTestEnv->GetAvailableAdapterTestParamsForBackends(params, numParams);
+    return gTestEnv->GetAvailableAdapterTestParamsForBackends(params);
 }
 
 // Helper classes to set expectations
