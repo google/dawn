@@ -263,4 +263,10 @@ void TestFixedExtentReinterpretSizeMismatch() {
     ReinterpretSpan<uint32_t>(bsp);  // expected-error {{no matching function for call to 'ReinterpretSpan'}}
 }
 
+void TestFillBytesNonByteSpan() {
+    std::array<int, 3> arr = {1, 2, 3};
+    Span<int, 3> sp(arr);
+    sp.FillBytes(std::byte{0});  // expected-error {{invalid reference to function 'FillBytes': constraints not satisfied}}
+}
+
 }  // namespace dawn

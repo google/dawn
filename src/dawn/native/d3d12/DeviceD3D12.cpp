@@ -329,7 +329,7 @@ MaybeError Device::CreateZeroBuffer() {
         zeroBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
 
         DAWN_TRY_ASSIGN(zeroBufferBase, CreateBuffer(&zeroBufferDescriptor));
-        std::ranges::fill(zeroBufferBase->GetMappedRange(), std::byte{0});
+        zeroBufferBase->GetMappedRange().FillBytes(std::byte{0});
         DAWN_TRY(zeroBufferBase->Unmap());
     } else {
         zeroBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -343,7 +343,7 @@ MaybeError Device::CreateZeroBuffer() {
         DAWN_TRY(GetDynamicUploader()->WithUploadReservation(
             kZeroBufferSize, kCopyBufferToBufferOffsetAlignment,
             [&](UploadReservation reservation) -> MaybeError {
-                std::ranges::fill(reservation.mappedData, std::byte{0u});
+                reservation.mappedData.FillBytes(std::byte{0u});
                 CopyFromStagingToBufferHelper(commandContext, reservation.buffer.Get(),
                                               reservation.offsetInBuffer, zeroBufferBase.Get(), 0,
                                               kZeroBufferSize);
