@@ -1143,6 +1143,11 @@ auto Eval::Det4Func(const Source& source, const core::type::Type* elem_ty) {
 }
 
 Eval::Result Eval::ArrayOrStructCtor(const core::type::Type* ty, VectorRef<const Value*> args) {
+    // Cannot evaluate a non-constructible type.
+    if (!ty->IsConstructible()) {
+        return nullptr;
+    }
+
     if (args.IsEmpty()) {
         return mgr.Zero(ty);
     }
@@ -1150,6 +1155,21 @@ Eval::Result Eval::ArrayOrStructCtor(const core::type::Type* ty, VectorRef<const
     if (args.Length() == 1 && args[0]->Type() == ty) {
         // Identity constructor.
         return args[0];
+    }
+
+    // Check if the arg count and types match before folding.
+    auto* invalid_type = mgr.types.invalid();
+    uint32_t invalid_count = std::numeric_limits<uint32_t>::max();
+    auto type_and_count = ty->Elements(invalid_type, invalid_count);
+    if (type_and_count.count == invalid_count || type_and_count.count != args.Length()) {
+        return nullptr;
+    }
+    uint32_t i = 0;
+    for (auto arg : args) {
+        auto* ele_ty = ty->Element(i++);
+        if (ele_ty != arg->Type()) {
+            return nullptr;
+        }
     }
 
     // Multiple arguments. Must be a value constructor.

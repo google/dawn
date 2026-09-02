@@ -7,7 +7,6 @@ int4 tint_mod_v4i32(int4 lhs, int4 rhs) {
 
 [numthreads(1, 1, 1)]
 void foo() {
-  int4 v_2 = asint(v.Load4(0u));
-  v.Store4(0u, asuint(tint_mod_v4i32(v_2, int4((int(2)).xxxx))));
+  v.Store4(0u, asuint(tint_mod_v4i32(asint(v.Load4(0u)), (int(2)).xxxx)));
 }
 

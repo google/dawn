@@ -42,9 +42,10 @@
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
     %v3float = OpTypeVector %float 3
-    %v2float = OpTypeVector %float 2
     %float_1 = OpConstant %float 1
-         %24 = OpConstantComposite %v2float %float_1 %float_1
+         %23 = OpConstantComposite %v3float %float_1 %float_1 %float_1
+    %v2float = OpTypeVector %float 2
+         %26 = OpConstantComposite %v2float %float_1 %float_1
       %v2int = OpTypeVector %int 2
          %28 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
@@ -60,9 +61,8 @@
          %16 = OpLoad %11 %arg_1 None
          %17 = OpSampledImage %18 %15 %16
          %19 = OpConvertSToF %float %int_1
-         %23 = OpCompositeConstruct %v3float %24 %19
-         %27 = OpImageSampleExplicitLod %v4float %17 %23 Grad|ConstOffset %24 %24 %28
-               OpStore %res %27
+         %22 = OpImageSampleExplicitLod %v4float %17 %23 Grad|ConstOffset %26 %26 %28
+               OpStore %res %22
          %32 = OpLoad %v4float %res None
                OpReturnValue %32
                OpFunctionEnd
@@ -117,9 +117,10 @@
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
     %v3float = OpTypeVector %float 3
-    %v2float = OpTypeVector %float 2
     %float_1 = OpConstant %float 1
-         %24 = OpConstantComposite %v2float %float_1 %float_1
+         %23 = OpConstantComposite %v3float %float_1 %float_1 %float_1
+    %v2float = OpTypeVector %float 2
+         %26 = OpConstantComposite %v2float %float_1 %float_1
       %v2int = OpTypeVector %int 2
          %28 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
@@ -135,9 +136,8 @@
          %16 = OpLoad %11 %arg_1 None
          %17 = OpSampledImage %18 %15 %16
          %19 = OpConvertSToF %float %int_1
-         %23 = OpCompositeConstruct %v3float %24 %19
-         %27 = OpImageSampleExplicitLod %v4float %17 %23 Grad|ConstOffset %24 %24 %28
-               OpStore %res %27
+         %22 = OpImageSampleExplicitLod %v4float %17 %23 Grad|ConstOffset %26 %26 %28
+               OpStore %res %22
          %32 = OpLoad %v4float %res None
                OpReturnValue %32
                OpFunctionEnd
@@ -198,9 +198,10 @@
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
     %v3float = OpTypeVector %float 3
-    %v2float = OpTypeVector %float 2
     %float_1 = OpConstant %float 1
-         %26 = OpConstantComposite %v2float %float_1 %float_1
+         %25 = OpConstantComposite %v3float %float_1 %float_1 %float_1
+    %v2float = OpTypeVector %float 2
+         %28 = OpConstantComposite %v2float %float_1 %float_1
       %v2int = OpTypeVector %int 2
          %30 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
@@ -221,9 +222,8 @@
          %18 = OpLoad %7 %arg_1 None
          %19 = OpSampledImage %20 %17 %18
          %21 = OpConvertSToF %float %int_1
-         %25 = OpCompositeConstruct %v3float %26 %21
-         %29 = OpImageSampleExplicitLod %v4float %19 %25 Grad|ConstOffset %26 %26 %30
-               OpStore %res %29
+         %24 = OpImageSampleExplicitLod %v4float %19 %25 Grad|ConstOffset %28 %28 %30
+               OpStore %res %24
          %34 = OpLoad %v4float %res None
                OpReturnValue %34
                OpFunctionEnd

@@ -536,8 +536,8 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_Component_TooSmall) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
-                                          R"(:11:34 error: textureGather: -2 outside range of [0, 3]
-    %7:vec4<i32> = textureGather -2i, %5, %6, %4, vec2<i32>(1i, 3i)
+                                          R"(:10:34 error: textureGather: -2 outside range of [0, 3]
+    %6:vec4<i32> = textureGather -2i, %4, %5, vec2<f32>(1.0f, 2.0f), vec2<i32>(1i, 3i)
                                  ^^^
 )")) << res.Failure();
 }
@@ -568,8 +568,8 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_Component_TooBig) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
-                                          R"(:11:34 error: textureGather: 6 outside range of [0, 3]
-    %7:vec4<i32> = textureGather 6u, %5, %6, %4, vec2<i32>(1i, 3i)
+                                          R"(:10:34 error: textureGather: 6 outside range of [0, 3]
+    %6:vec4<i32> = textureGather 6u, %4, %5, vec2<f32>(1.0f, 2.0f), vec2<i32>(1i, 3i)
                                  ^^
 )")) << res.Failure();
 }
@@ -603,9 +603,9 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_Offset_TooSmall) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
-                    R"(:11:54 error: textureGather: -9 outside range of [-8, 7]
-    %7:vec4<i32> = textureGather 2u, %5, %6, %4, 1i, vec2<i32>(1i, -9i)
-                                                     ^^^^^^^^^^^^^^^^^^
+                    R"(:10:73 error: textureGather: -9 outside range of [-8, 7]
+    %6:vec4<i32> = textureGather 2u, %4, %5, vec2<f32>(1.0f, 2.0f), 1i, vec2<i32>(1i, -9i)
+                                                                        ^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -637,9 +637,9 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_Offset_TooBig) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
-                                          R"(:11:54 error: textureGather: 8 outside range of [-8, 7]
-    %7:vec4<i32> = textureGather 2u, %5, %6, %4, 1i, vec2<i32>(8i, -2i)
-                                                     ^^^^^^^^^^^^^^^^^^
+                                          R"(:10:73 error: textureGather: 8 outside range of [-8, 7]
+    %6:vec4<i32> = textureGather 2u, %4, %5, vec2<f32>(1.0f, 2.0f), 1i, vec2<i32>(8i, -2i)
+                                                                        ^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 

@@ -4,18 +4,17 @@ ByteAddressBuffer tint_resource_table_metadata : register(t29, space5);
 void fs() {
   bool v = false;
   if ((2u < tint_resource_table_metadata.Load(0u))) {
-    uint2 v_1 = uint2((tint_resource_table_metadata.Load(12u)).xx);
-    v = any((v_1 == uint2(1u, 2u)));
+    v = any((uint2((tint_resource_table_metadata.Load(12u)).xx) == uint2(1u, 2u)));
   } else {
     v = false;
   }
-  uint v_2 = 0u;
+  uint v_1 = 0u;
   if (v) {
-    v_2 = 2u;
+    v_1 = 2u;
   } else {
-    v_2 = (0u + tint_resource_table_metadata.Load(0u));
+    v_1 = (0u + tint_resource_table_metadata.Load(0u));
   }
-  uint item_idx = v_2;
-  float4 texture_load = tint_resource_table_array[item_idx].Load(int2(int(0), int(0)));
+  uint item_idx = v_1;
+  float4 texture_load = tint_resource_table_array[item_idx].Load((int(0)).xx);
 }
 

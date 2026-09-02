@@ -7,7 +7,7 @@
 ; Bound: 59
 ; Schema: 0
                OpCapability Shader
-         %26 = OpExtInstImport "GLSL.std.450"
+         %16 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
                OpExecutionMode %fragment_main OriginUpperLeft
@@ -32,15 +32,20 @@
 %_ptr_Function_v4int = OpTypePointer Function %v4int
       %int_1 = OpConstant %int 1
          %12 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
+   %int_n128 = OpConstant %int -128
+         %17 = OpConstantComposite %v4int %int_n128 %int_n128 %int_n128 %int_n128
+    %int_127 = OpConstant %int 127
+         %19 = OpConstantComposite %v4int %int_127 %int_127 %int_127 %int_127
      %v4uint = OpTypeVector %uint 4
+   %uint_255 = OpConstant %uint 255
+         %24 = OpConstantComposite %v4uint %uint_255 %uint_255 %uint_255 %uint_255
      %uint_0 = OpConstant %uint 0
      %uint_8 = OpConstant %uint 8
     %uint_16 = OpConstant %uint 16
     %uint_24 = OpConstant %uint 24
-   %int_n128 = OpConstant %int -128
-    %int_127 = OpConstant %int 127
-   %uint_255 = OpConstant %uint 255
+         %27 = OpConstantComposite %v4uint %uint_0 %uint_8 %uint_16 %uint_24
      %uint_1 = OpConstant %uint 1
+         %34 = OpConstantComposite %v4uint %uint_1 %uint_1 %uint_1 %uint_1
 %_ptr_Function_uint = OpTypePointer Function %uint
        %void = OpTypeVoid
          %54 = OpTypeFunction %void
@@ -51,28 +56,23 @@
         %res = OpVariable %_ptr_Function_uint Function
                OpStore %arg_0 %12
          %14 = OpLoad %v4int %arg_0 None
-         %16 = OpCompositeConstruct %v4uint %uint_0 %uint_8 %uint_16 %uint_24
-         %21 = OpCompositeConstruct %v4int %int_n128 %int_n128 %int_n128 %int_n128
-         %23 = OpCompositeConstruct %v4int %int_127 %int_127 %int_127 %int_127
-         %25 = OpExtInst %v4int %26 SClamp %14 %21 %23
-         %27 = OpBitcast %v4uint %25
-         %28 = OpCompositeConstruct %v4uint %uint_255 %uint_255 %uint_255 %uint_255
-         %30 = OpBitwiseAnd %v4uint %27 %28
-         %31 = OpShiftLeftLogical %v4uint %30 %16
-         %32 = OpCompositeConstruct %v4uint %uint_1 %uint_1 %uint_1 %uint_1
-         %34 = OpCompositeExtract %uint %31 0
-         %35 = OpCompositeExtract %uint %32 0
-         %36 = OpIMul %uint %34 %35
-         %37 = OpCompositeExtract %uint %31 1
-         %38 = OpCompositeExtract %uint %32 1
+         %15 = OpExtInst %v4int %16 SClamp %14 %17 %19
+         %22 = OpBitcast %v4uint %15
+         %23 = OpBitwiseAnd %v4uint %22 %24
+         %26 = OpShiftLeftLogical %v4uint %23 %27
+         %32 = OpCompositeExtract %uint %26 0
+         %33 = OpCompositeExtract %uint %34 0
+         %36 = OpIMul %uint %32 %33
+         %37 = OpCompositeExtract %uint %26 1
+         %38 = OpCompositeExtract %uint %34 1
          %39 = OpIMul %uint %37 %38
          %40 = OpIAdd %uint %36 %39
-         %41 = OpCompositeExtract %uint %31 2
-         %42 = OpCompositeExtract %uint %32 2
+         %41 = OpCompositeExtract %uint %26 2
+         %42 = OpCompositeExtract %uint %34 2
          %43 = OpIMul %uint %41 %42
          %44 = OpIAdd %uint %40 %43
-         %45 = OpCompositeExtract %uint %31 3
-         %46 = OpCompositeExtract %uint %32 3
+         %45 = OpCompositeExtract %uint %26 3
+         %46 = OpCompositeExtract %uint %34 3
          %47 = OpIMul %uint %45 %46
          %48 = OpIAdd %uint %44 %47
                OpStore %res %48
@@ -95,7 +95,7 @@
 ; Bound: 59
 ; Schema: 0
                OpCapability Shader
-         %26 = OpExtInstImport "GLSL.std.450"
+         %16 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
@@ -120,15 +120,20 @@
 %_ptr_Function_v4int = OpTypePointer Function %v4int
       %int_1 = OpConstant %int 1
          %12 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
+   %int_n128 = OpConstant %int -128
+         %17 = OpConstantComposite %v4int %int_n128 %int_n128 %int_n128 %int_n128
+    %int_127 = OpConstant %int 127
+         %19 = OpConstantComposite %v4int %int_127 %int_127 %int_127 %int_127
      %v4uint = OpTypeVector %uint 4
+   %uint_255 = OpConstant %uint 255
+         %24 = OpConstantComposite %v4uint %uint_255 %uint_255 %uint_255 %uint_255
      %uint_0 = OpConstant %uint 0
      %uint_8 = OpConstant %uint 8
     %uint_16 = OpConstant %uint 16
     %uint_24 = OpConstant %uint 24
-   %int_n128 = OpConstant %int -128
-    %int_127 = OpConstant %int 127
-   %uint_255 = OpConstant %uint 255
+         %27 = OpConstantComposite %v4uint %uint_0 %uint_8 %uint_16 %uint_24
      %uint_1 = OpConstant %uint 1
+         %34 = OpConstantComposite %v4uint %uint_1 %uint_1 %uint_1 %uint_1
 %_ptr_Function_uint = OpTypePointer Function %uint
        %void = OpTypeVoid
          %54 = OpTypeFunction %void
@@ -139,28 +144,23 @@
         %res = OpVariable %_ptr_Function_uint Function
                OpStore %arg_0 %12
          %14 = OpLoad %v4int %arg_0 None
-         %16 = OpCompositeConstruct %v4uint %uint_0 %uint_8 %uint_16 %uint_24
-         %21 = OpCompositeConstruct %v4int %int_n128 %int_n128 %int_n128 %int_n128
-         %23 = OpCompositeConstruct %v4int %int_127 %int_127 %int_127 %int_127
-         %25 = OpExtInst %v4int %26 SClamp %14 %21 %23
-         %27 = OpBitcast %v4uint %25
-         %28 = OpCompositeConstruct %v4uint %uint_255 %uint_255 %uint_255 %uint_255
-         %30 = OpBitwiseAnd %v4uint %27 %28
-         %31 = OpShiftLeftLogical %v4uint %30 %16
-         %32 = OpCompositeConstruct %v4uint %uint_1 %uint_1 %uint_1 %uint_1
-         %34 = OpCompositeExtract %uint %31 0
-         %35 = OpCompositeExtract %uint %32 0
-         %36 = OpIMul %uint %34 %35
-         %37 = OpCompositeExtract %uint %31 1
-         %38 = OpCompositeExtract %uint %32 1
+         %15 = OpExtInst %v4int %16 SClamp %14 %17 %19
+         %22 = OpBitcast %v4uint %15
+         %23 = OpBitwiseAnd %v4uint %22 %24
+         %26 = OpShiftLeftLogical %v4uint %23 %27
+         %32 = OpCompositeExtract %uint %26 0
+         %33 = OpCompositeExtract %uint %34 0
+         %36 = OpIMul %uint %32 %33
+         %37 = OpCompositeExtract %uint %26 1
+         %38 = OpCompositeExtract %uint %34 1
          %39 = OpIMul %uint %37 %38
          %40 = OpIAdd %uint %36 %39
-         %41 = OpCompositeExtract %uint %31 2
-         %42 = OpCompositeExtract %uint %32 2
+         %41 = OpCompositeExtract %uint %26 2
+         %42 = OpCompositeExtract %uint %34 2
          %43 = OpIMul %uint %41 %42
          %44 = OpIAdd %uint %40 %43
-         %45 = OpCompositeExtract %uint %31 3
-         %46 = OpCompositeExtract %uint %32 3
+         %45 = OpCompositeExtract %uint %26 3
+         %46 = OpCompositeExtract %uint %34 3
          %47 = OpIMul %uint %45 %46
          %48 = OpIAdd %uint %44 %47
                OpStore %res %48
@@ -183,7 +183,7 @@
 ; Bound: 78
 ; Schema: 0
                OpCapability Shader
-         %31 = OpExtInstImport "GLSL.std.450"
+         %21 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %vertex_main "vertex_main" %vertex_main_position_Output %vertex_main_loc0_Output %vertex_main___point_size_Output
                OpName %vertex_main_position_Output "vertex_main_position_Output"
@@ -217,15 +217,20 @@
 %_ptr_Function_v4int = OpTypePointer Function %v4int
       %int_1 = OpConstant %int 1
          %17 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
+   %int_n128 = OpConstant %int -128
+         %22 = OpConstantComposite %v4int %int_n128 %int_n128 %int_n128 %int_n128
+    %int_127 = OpConstant %int 127
+         %24 = OpConstantComposite %v4int %int_127 %int_127 %int_127 %int_127
      %v4uint = OpTypeVector %uint 4
+   %uint_255 = OpConstant %uint 255
+         %29 = OpConstantComposite %v4uint %uint_255 %uint_255 %uint_255 %uint_255
      %uint_0 = OpConstant %uint 0
      %uint_8 = OpConstant %uint 8
     %uint_16 = OpConstant %uint 16
     %uint_24 = OpConstant %uint 24
-   %int_n128 = OpConstant %int -128
-    %int_127 = OpConstant %int 127
-   %uint_255 = OpConstant %uint 255
+         %32 = OpConstantComposite %v4uint %uint_0 %uint_8 %uint_16 %uint_24
      %uint_1 = OpConstant %uint 1
+         %39 = OpConstantComposite %v4uint %uint_1 %uint_1 %uint_1 %uint_1
 %_ptr_Function_uint = OpTypePointer Function %uint
 %VertexOutput = OpTypeStruct %v4float %uint
          %59 = OpTypeFunction %VertexOutput
@@ -242,28 +247,23 @@
         %res = OpVariable %_ptr_Function_uint Function
                OpStore %arg_0 %17
          %19 = OpLoad %v4int %arg_0 None
-         %21 = OpCompositeConstruct %v4uint %uint_0 %uint_8 %uint_16 %uint_24
-         %26 = OpCompositeConstruct %v4int %int_n128 %int_n128 %int_n128 %int_n128
-         %28 = OpCompositeConstruct %v4int %int_127 %int_127 %int_127 %int_127
-         %30 = OpExtInst %v4int %31 SClamp %19 %26 %28
-         %32 = OpBitcast %v4uint %30
-         %33 = OpCompositeConstruct %v4uint %uint_255 %uint_255 %uint_255 %uint_255
-         %35 = OpBitwiseAnd %v4uint %32 %33
-         %36 = OpShiftLeftLogical %v4uint %35 %21
-         %37 = OpCompositeConstruct %v4uint %uint_1 %uint_1 %uint_1 %uint_1
-         %39 = OpCompositeExtract %uint %36 0
-         %40 = OpCompositeExtract %uint %37 0
-         %41 = OpIMul %uint %39 %40
-         %42 = OpCompositeExtract %uint %36 1
-         %43 = OpCompositeExtract %uint %37 1
+         %20 = OpExtInst %v4int %21 SClamp %19 %22 %24
+         %27 = OpBitcast %v4uint %20
+         %28 = OpBitwiseAnd %v4uint %27 %29
+         %31 = OpShiftLeftLogical %v4uint %28 %32
+         %37 = OpCompositeExtract %uint %31 0
+         %38 = OpCompositeExtract %uint %39 0
+         %41 = OpIMul %uint %37 %38
+         %42 = OpCompositeExtract %uint %31 1
+         %43 = OpCompositeExtract %uint %39 1
          %44 = OpIMul %uint %42 %43
          %45 = OpIAdd %uint %41 %44
-         %46 = OpCompositeExtract %uint %36 2
-         %47 = OpCompositeExtract %uint %37 2
+         %46 = OpCompositeExtract %uint %31 2
+         %47 = OpCompositeExtract %uint %39 2
          %48 = OpIMul %uint %46 %47
          %49 = OpIAdd %uint %45 %48
-         %50 = OpCompositeExtract %uint %36 3
-         %51 = OpCompositeExtract %uint %37 3
+         %50 = OpCompositeExtract %uint %31 3
+         %51 = OpCompositeExtract %uint %39 3
          %52 = OpIMul %uint %50 %51
          %53 = OpIAdd %uint %49 %52
                OpStore %res %53

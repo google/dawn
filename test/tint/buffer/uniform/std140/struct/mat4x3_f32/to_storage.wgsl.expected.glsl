@@ -94,9 +94,7 @@ S[4] v_11(uint start_byte_offset) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_store_and_preserve_padding(v_11(0u));
-  S v_14 = v_3(384u);
-  tint_store_and_preserve_padding_1(uint[1](1u), v_14);
-  mat4x3 v_15 = v_2(400u);
-  tint_store_and_preserve_padding_2(uint[1](3u), v_15);
+  tint_store_and_preserve_padding_1(uint[1](1u), v_3(384u));
+  tint_store_and_preserve_padding_2(uint[1](3u), v_2(400u));
   v_1.inner[1u].m[0u] = uintBitsToFloat(v.inner[2u].xyz).zxy;
 }

@@ -35,6 +35,7 @@
          %23 = OpTypeFunction %void %uint
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
+         %36 = OpConstantComposite %_arr_uint_uint_1 %uint_2
        %bool = OpTypeBool
          %42 = OpConstantNull %str
          %44 = OpTypeFunction %void
@@ -71,8 +72,7 @@
                OpBranch %28
          %29 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %35 = OpCompositeConstruct %_arr_uint_uint_1 %uint_2
-          %r = OpFunctionCall %str %func %35
+          %r = OpFunctionCall %str %func %36
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %44

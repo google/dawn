@@ -788,8 +788,7 @@ $B1: {  # root
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<workgroup, Inner, read_write> = access %wg, 0u
-    %4:Inner = construct 0i, false
-    store %3, %4
+    store %3, Inner(0i, false)
     ret
   }
 }
@@ -820,8 +819,7 @@ $B1: {  # root
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %4:ptr<workgroup, Inner, read_write> = access %data, 0u
-    %5:Inner = construct 0i, false
-    store %4, %5
+    store %4, Inner(0i, false)
     ret
   }
 }

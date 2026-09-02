@@ -2845,10 +2845,9 @@ $B1: {  # root
     %5:ptr<storage, vec3<f32>, read_write> = access %v, 7u, 1u, 3u, 1u
     %6:vec3<f32> = load %5
     %load_matrix_column:vec3<f32> = let %6
-    %8:array<S, 16> = construct
-    store %v, %8
-    %9:ptr<storage, vec3<f32>, read_write> = access %v, 6u, 1u, 4u, 0u
-    store_vector_element %9, 2u, 42.0f
+    store %v, array<S, 16>(S(vec3<u32>(0u), array<mat2x3<f32>, 11>(mat2x3<f32>(vec3<f32>(0.0f)))))
+    %8:ptr<storage, vec3<f32>, read_write> = access %v, 6u, 1u, 4u, 0u
+    store_vector_element %8, 2u, 42.0f
     ret
   }
 }
@@ -2882,85 +2881,84 @@ $B1: {  # root
     %7:__packed_vec3<f32> = load %6
     %8:vec3<f32> = msl.convert %7
     %load_matrix_column:vec3<f32> = let %8
-    %10:array<S, 16> = construct
-    %11:void = call %tint_store_array_packed_vec3, %v, %10
-    %13:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 6u, 1u, 4u, 0u, 0u
-    store_vector_element %13, 2u, 42.0f
+    %10:void = call %tint_store_array_packed_vec3, %v, array<S, 16>(S(vec3<u32>(0u), array<mat2x3<f32>, 11>(mat2x3<f32>(vec3<f32>(0.0f)))))
+    %12:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 6u, 1u, 4u, 0u, 0u
+    store_vector_element %12, 2u, 42.0f
     ret
   }
 }
 %tint_load_array_packed_vec3 = func(%from:ptr<storage, array<S_packed_vec3, 16>, read_write>):array<S, 16> {
   $B3: {
-    %15:ptr<function, array<S, 16>, read_write> = var undef
+    %14:ptr<function, array<S, 16>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
-        %17:bool = gte %idx, 16u
-        if %17 [t: $B7] {  # if_1
+        %16:bool = gte %idx, 16u
+        if %16 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %18:ptr<function, S, read_write> = access %15, %idx
-        %19:ptr<storage, S_packed_vec3, read_write> = access %from, %idx
-        %20:S = call %tint_load_struct_packed_vec3, %19
-        store %18, %20
+        %17:ptr<function, S, read_write> = access %14, %idx
+        %18:ptr<storage, S_packed_vec3, read_write> = access %from, %idx
+        %19:S = call %tint_load_struct_packed_vec3, %18
+        store %17, %19
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %22:u32 = add %idx, 1u
-        next_iteration %22  # -> $B5
+        %21:u32 = add %idx, 1u
+        next_iteration %21  # -> $B5
       }
     }
-    %23:array<S, 16> = load %15
-    ret %23
+    %22:array<S, 16> = load %14
+    ret %22
   }
 }
 %tint_load_struct_packed_vec3 = func(%from_1:ptr<storage, S_packed_vec3, read_write>):S {  # %from_1: 'from'
   $B8: {
-    %25:ptr<storage, __packed_vec3<u32>, read_write> = access %from_1, 0u
-    %26:__packed_vec3<u32> = load %25
-    %27:vec3<u32> = msl.convert %26
-    %28:ptr<storage, array<array<tint_packed_vec3_f32_array_element, 2>, 11>, read_write> = access %from_1, 1u
-    %29:array<mat2x3<f32>, 11> = call %tint_load_array_packed_vec3_1, %28
-    %31:S = construct %27, %29
-    ret %31
+    %24:ptr<storage, __packed_vec3<u32>, read_write> = access %from_1, 0u
+    %25:__packed_vec3<u32> = load %24
+    %26:vec3<u32> = msl.convert %25
+    %27:ptr<storage, array<array<tint_packed_vec3_f32_array_element, 2>, 11>, read_write> = access %from_1, 1u
+    %28:array<mat2x3<f32>, 11> = call %tint_load_array_packed_vec3_1, %27
+    %30:S = construct %26, %28
+    ret %30
   }
 }
 %tint_load_array_packed_vec3_1 = func(%from_2:ptr<storage, array<array<tint_packed_vec3_f32_array_element, 2>, 11>, read_write>):array<mat2x3<f32>, 11> {  # %from_2: 'from'
   $B9: {
-    %33:ptr<function, array<mat2x3<f32>, 11>, read_write> = var undef
+    %32:ptr<function, array<mat2x3<f32>, 11>, read_write> = var undef
     loop [i: $B10, b: $B11, c: $B12] {  # loop_2
       $B10: {  # initializer
         next_iteration 0u  # -> $B11
       }
       $B11 (%idx_1:u32): {  # body
-        %35:bool = gte %idx_1, 11u
-        if %35 [t: $B13] {  # if_2
+        %34:bool = gte %idx_1, 11u
+        if %34 [t: $B13] {  # if_2
           $B13: {  # true
             exit_loop  # loop_2
           }
         }
-        %36:ptr<function, mat2x3<f32>, read_write> = access %33, %idx_1
-        %37:ptr<storage, array<tint_packed_vec3_f32_array_element, 2>, read_write> = access %from_2, %idx_1
-        %38:array<tint_packed_vec3_f32_array_element, 2> = load %37
-        %39:__packed_vec3<f32> = access %38, 0u, 0u
-        %40:vec3<f32> = msl.convert %39
-        %41:__packed_vec3<f32> = access %38, 1u, 0u
-        %42:vec3<f32> = msl.convert %41
-        %43:mat2x3<f32> = construct %40, %42
-        store %36, %43
+        %35:ptr<function, mat2x3<f32>, read_write> = access %32, %idx_1
+        %36:ptr<storage, array<tint_packed_vec3_f32_array_element, 2>, read_write> = access %from_2, %idx_1
+        %37:array<tint_packed_vec3_f32_array_element, 2> = load %36
+        %38:__packed_vec3<f32> = access %37, 0u, 0u
+        %39:vec3<f32> = msl.convert %38
+        %40:__packed_vec3<f32> = access %37, 1u, 0u
+        %41:vec3<f32> = msl.convert %40
+        %42:mat2x3<f32> = construct %39, %41
+        store %35, %42
         continue  # -> $B12
       }
       $B12: {  # continuing
-        %44:u32 = add %idx_1, 1u
-        next_iteration %44  # -> $B11
+        %43:u32 = add %idx_1, 1u
+        next_iteration %43  # -> $B11
       }
     }
-    %45:array<mat2x3<f32>, 11> = load %33
-    ret %45
+    %44:array<mat2x3<f32>, 11> = load %32
+    ret %44
   }
 }
 %tint_store_array_packed_vec3 = func(%to:ptr<storage, array<S_packed_vec3, 16>, read_write>, %value:array<S, 16>):void {
@@ -2970,20 +2968,20 @@ $B1: {  # root
         next_iteration 0u  # -> $B16
       }
       $B16 (%idx_2:u32): {  # body
-        %49:bool = gte %idx_2, 16u
-        if %49 [t: $B18] {  # if_3
+        %48:bool = gte %idx_2, 16u
+        if %48 [t: $B18] {  # if_3
           $B18: {  # true
             exit_loop  # loop_3
           }
         }
-        %50:S = access %value, %idx_2
-        %51:ptr<storage, S_packed_vec3, read_write> = access %to, %idx_2
-        %52:void = call %tint_store_struct_packed_vec3, %51, %50
+        %49:S = access %value, %idx_2
+        %50:ptr<storage, S_packed_vec3, read_write> = access %to, %idx_2
+        %51:void = call %tint_store_struct_packed_vec3, %50, %49
         continue  # -> $B17
       }
       $B17: {  # continuing
-        %54:u32 = add %idx_2, 1u
-        next_iteration %54  # -> $B16
+        %53:u32 = add %idx_2, 1u
+        next_iteration %53  # -> $B16
       }
     }
     ret
@@ -2991,13 +2989,13 @@ $B1: {  # root
 }
 %tint_store_struct_packed_vec3 = func(%to_1:ptr<storage, S_packed_vec3, read_write>, %value_1:S):void {  # %to_1: 'to', %value_1: 'value'
   $B19: {
-    %57:vec3<u32> = access %value_1, 0u
-    %58:ptr<storage, __packed_vec3<u32>, read_write> = access %to_1, 0u
-    %59:__packed_vec3<u32> = msl.convert %57
-    store %58, %59
-    %60:array<mat2x3<f32>, 11> = access %value_1, 1u
-    %61:ptr<storage, array<array<tint_packed_vec3_f32_array_element, 2>, 11>, read_write> = access %to_1, 1u
-    %62:void = call %tint_store_array_packed_vec3_1, %61, %60
+    %56:vec3<u32> = access %value_1, 0u
+    %57:ptr<storage, __packed_vec3<u32>, read_write> = access %to_1, 0u
+    %58:__packed_vec3<u32> = msl.convert %56
+    store %57, %58
+    %59:array<mat2x3<f32>, 11> = access %value_1, 1u
+    %60:ptr<storage, array<array<tint_packed_vec3_f32_array_element, 2>, 11>, read_write> = access %to_1, 1u
+    %61:void = call %tint_store_array_packed_vec3_1, %60, %59
     ret
   }
 }
@@ -3008,27 +3006,27 @@ $B1: {  # root
         next_iteration 0u  # -> $B22
       }
       $B22 (%idx_3:u32): {  # body
-        %67:bool = gte %idx_3, 11u
-        if %67 [t: $B24] {  # if_4
+        %66:bool = gte %idx_3, 11u
+        if %66 [t: $B24] {  # if_4
           $B24: {  # true
             exit_loop  # loop_4
           }
         }
-        %68:mat2x3<f32> = access %value_2, %idx_3
-        %69:ptr<storage, array<tint_packed_vec3_f32_array_element, 2>, read_write> = access %to_2, %idx_3
-        %70:ptr<storage, __packed_vec3<f32>, read_write> = access %69, 0u, 0u
-        %71:vec3<f32> = access %68, 0u
-        %72:__packed_vec3<f32> = msl.convert %71
-        store %70, %72
-        %73:ptr<storage, __packed_vec3<f32>, read_write> = access %69, 1u, 0u
-        %74:vec3<f32> = access %68, 1u
-        %75:__packed_vec3<f32> = msl.convert %74
-        store %73, %75
+        %67:mat2x3<f32> = access %value_2, %idx_3
+        %68:ptr<storage, array<tint_packed_vec3_f32_array_element, 2>, read_write> = access %to_2, %idx_3
+        %69:ptr<storage, __packed_vec3<f32>, read_write> = access %68, 0u, 0u
+        %70:vec3<f32> = access %67, 0u
+        %71:__packed_vec3<f32> = msl.convert %70
+        store %69, %71
+        %72:ptr<storage, __packed_vec3<f32>, read_write> = access %68, 1u, 0u
+        %73:vec3<f32> = access %67, 1u
+        %74:__packed_vec3<f32> = msl.convert %73
+        store %72, %74
         continue  # -> $B23
       }
       $B23: {  # continuing
-        %76:u32 = add %idx_3, 1u
-        next_iteration %76  # -> $B22
+        %75:u32 = add %idx_3, 1u
+        next_iteration %75  # -> $B22
       }
     }
     ret

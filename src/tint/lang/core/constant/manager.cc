@@ -193,6 +193,7 @@ const Value* Manager::Zero(const core::type::Type* type) {
         [&](const core::type::F16*) { return Get(f16(0)); },               //
         [&](const core::type::Bool*) { return Get(false); },               //
         [&](const core::type::Invalid*) { return Invalid(); },             //
+        [&](const core::type::SubgroupMatrix*) { return nullptr; },        //
         TINT_ICE_ON_NO_MATCH);
 }
 

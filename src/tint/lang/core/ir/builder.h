@@ -1494,9 +1494,15 @@ class Builder {
     /// @returns the instruction
     template <typename... ARGS>
     ir::Value* ConstructReplaceResult(ir::InstructionResult* result, ARGS&&... args) {
-        return Append(
-                   ir.CreateInstruction<ir::Construct>(result, Values(std::forward<ARGS>(args)...)))
-            ->Result();
+        auto values = Values(std::forward<ARGS>(args)...);
+        auto res = Evaluator{*this, false}.EvalConstruct(result->Type(), values);
+        if (res == Success && res.Get()) {
+            auto* cnst = Constant(res.Get());
+            result->ReplaceAllUsesWith(cnst);
+            result->Destroy();
+            return cnst;
+        }
+        return Append(ir.CreateInstruction<ir::Construct>(result, values))->Result();
     }
 
     /// Creates a value constructor instruction to the template type T

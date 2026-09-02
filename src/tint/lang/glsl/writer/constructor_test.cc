@@ -51,7 +51,7 @@ TEST_F(GlslWriterTest, Constructor_Type_Float_Large) {
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 float a() {
-  return float(1073741824.0f);
+  return 1073741824.0f;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -76,7 +76,7 @@ TEST_F(GlslWriterTest, Constructor_Type_Float) {
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 float a() {
-  return float(-0.00001200000042445026f);
+  return -0.00001200000042445026f;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -103,7 +103,7 @@ TEST_F(GlslWriterTest, Constructor_Type_F16_Large) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
 float16_t a() {
-  return float16_t(32752.0hf);
+  return 32752.0hf;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -129,7 +129,7 @@ TEST_F(GlslWriterTest, Constructor_Type_F16) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
 float16_t a() {
-  return float16_t(-0.0011997222900390625hf);
+  return -0.0011997222900390625hf;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -154,7 +154,7 @@ TEST_F(GlslWriterTest, Constructor_Type_Bool_False) {
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 bool a() {
-  return bool(false);
+  return false;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -179,7 +179,7 @@ TEST_F(GlslWriterTest, Constructor_Type_Bool_True) {
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 bool a() {
-  return bool(true);
+  return true;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -204,7 +204,7 @@ TEST_F(GlslWriterTest, Constructor_Type_Int) {
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 int a() {
-  return int(-12345);
+  return -12345;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -229,7 +229,7 @@ TEST_F(GlslWriterTest, Constructor_Type_Uint) {
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 uint a() {
-  return uint(12345u);
+  return 12345u;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -606,9 +606,7 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_Complex_F32) {
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 mat4 a() {
-  vec4 v = vec4(2.0f, 3.0f, 4.0f, 8.0f);
-  vec4 v_1 = vec4(0.0f);
-  return mat4(v, v_1, vec4(7.0f), vec4(vec4(42.0f, 21.0f, 6.0f, -5.0f)));
+  return mat4(vec4(2.0f, 3.0f, 4.0f, 8.0f), vec4(0.0f), vec4(7.0f), vec4(42.0f, 21.0f, 6.0f, -5.0f));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -644,9 +642,7 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_Complex_F16) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
 f16mat4 a() {
-  f16vec4 v = f16vec4(2.0hf, 3.0hf, 4.0hf, 8.0hf);
-  f16vec4 v_1 = f16vec4(0.0hf);
-  return f16mat4(v, v_1, f16vec4(7.0hf), f16vec4(f16vec4(42.0hf, 21.0hf, 6.0hf, -5.0hf)));
+  return f16mat4(f16vec4(2.0hf, 3.0hf, 4.0hf, 8.0hf), f16vec4(0.0hf), f16vec4(7.0hf), f16vec4(42.0hf, 21.0hf, 6.0hf, -5.0hf));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -727,7 +723,7 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_Identity_F32) {
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 mat4 a() {
-  return mat4(mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)));
+  return mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -758,7 +754,7 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_Identity_F16) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
 f16mat4 a() {
-  return f16mat4(f16mat4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf)));
+  return f16mat4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

@@ -443,7 +443,7 @@ TEST_F(IR_ValidatorTest, Construct_ExcessiveElements) {
     auto* f = b.Function("my_func", ty.void_());
 
     b.Append(f->Block(), [&] {
-        b.Construct(ty.array(ty.f32(), 40000u));
+        b.Construct(ty.array(ty.f32(), 40000u), b.Let(b.Zero(ty.array(ty.f32(), 40000u))));
         b.Return(f);
     });
 
@@ -465,7 +465,7 @@ TEST_F(IR_ValidatorTest, Construct_Struct_ExcessiveElements) {
     auto* f = b.Function("my_func", ty.void_());
 
     b.Append(f->Block(), [&] {
-        b.Construct(str);
+        b.Construct(str, b.Let("l", b.Zero(str)));
         b.Return(f);
     });
 

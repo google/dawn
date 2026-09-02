@@ -670,14 +670,14 @@ TEST_F(SpirvWriterTest, If_Phi_ConstructNull) {
                OpSelectionMerge %5 None
                OpBranchConditional %true %6 %7
           %6 = OpLabel
-         %11 = OpCopyObject %int %13
                OpBranch %5
           %7 = OpLabel
                OpBranch %5
           %5 = OpLabel
-         %10 = OpPhi %int %11 %6 %int_20 %7
+         %10 = OpPhi %int %int_0 %6 %int_20 %7
                OpReturnValue %10
                OpFunctionEnd
+
 )");
 }
 

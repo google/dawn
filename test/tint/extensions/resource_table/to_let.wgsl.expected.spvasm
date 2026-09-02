@@ -77,8 +77,10 @@
      %v3uint = OpTypeVector %uint 3
      %uint_7 = OpConstant %uint 7
     %uint_34 = OpConstant %uint 34
+         %94 = OpConstantComposite %v3uint %uint_6 %uint_7 %uint_34
      %v3bool = OpTypeVector %bool 3
      %v2uint = OpTypeVector %uint 2
+        %106 = OpConstantComposite %v2uint %uint_40 %uint_41
      %v2bool = OpTypeVector %bool 2
      %uint_4 = OpConstant %uint 4
         %113 = OpTypeSampledImage %4
@@ -97,9 +99,8 @@
          %88 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_1 %uint_2
          %90 = OpLoad %uint %88 None
          %92 = OpCompositeConstruct %v3uint %90 %90 %90
-         %93 = OpCompositeConstruct %v3uint %uint_6 %uint_7 %uint_34
-         %96 = OpIEqual %v3bool %92 %93
-         %35 = OpAny %bool %96
+         %93 = OpIEqual %v3bool %92 %94
+         %35 = OpAny %bool %93
                OpBranch %31
          %33 = OpLabel
                OpBranch %31
@@ -137,9 +138,8 @@
         %101 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_1 %uint_3
         %102 = OpLoad %uint %101 None
         %104 = OpCompositeConstruct %v2uint %102 %102
-        %105 = OpCompositeConstruct %v2uint %uint_40 %uint_41
-        %106 = OpIEqual %v2bool %104 %105
-         %59 = OpAny %bool %106
+        %105 = OpIEqual %v2bool %104 %106
+         %59 = OpAny %bool %105
                OpBranch %55
          %57 = OpLabel
                OpBranch %55

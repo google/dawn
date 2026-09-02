@@ -12,30 +12,29 @@ float4 fs_inner() {
   uint v = uint(int(0));
   bool v_1 = false;
   if ((v < tint_resource_table_metadata.Load(0u))) {
-    uint2 v_2 = uint2((tint_resource_table_metadata.Load(4u)).xx);
-    v_1 = any((v_2 == uint2(40u, 41u)));
+    v_1 = any((uint2((tint_resource_table_metadata.Load(4u)).xx) == uint2(40u, 41u)));
   } else {
     v_1 = false;
   }
   bool has_resource = v_1;
+  uint v_2 = 0u;
+  if (has_resource) {
+    v_2 = tint_resource_table_metadata.Load(4u);
+  } else {
+    v_2 = 41u;
+  }
   uint v_3 = 0u;
   if (has_resource) {
-    v_3 = tint_resource_table_metadata.Load(4u);
+    v_3 = v;
   } else {
-    v_3 = 41u;
+    v_3 = (4u + tint_resource_table_metadata.Load(0u));
   }
-  uint v_4 = 0u;
-  if (has_resource) {
-    v_4 = v;
-  } else {
-    v_4 = (4u + tint_resource_table_metadata.Load(0u));
-  }
-  uint item_idx = v_4;
+  uint item_idx = v_3;
   return t.Sample(tint_resource_table_array_2[item_idx], (0.0f).xx);
 }
 
 fs_outputs fs() {
-  fs_outputs v_5 = {fs_inner()};
-  return v_5;
+  fs_outputs v_4 = {fs_inner()};
+  return v_4;
 }
 

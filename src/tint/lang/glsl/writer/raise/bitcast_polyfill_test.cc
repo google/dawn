@@ -380,10 +380,9 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2F16ToI32) {
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec2<f16> = construct 1.0h, 2.0h
-    %a:vec2<f16> = let %2
-    %4:i32 = bitcast<i32> %a
-    %x:i32 = let %4
+    %a:vec2<f16> = let vec2<f16>(1.0h, 2.0h)
+    %3:i32 = bitcast<i32> %a
+    %x:i32 = let %3
     ret
   }
 }
@@ -393,18 +392,17 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2F16ToI32) {
     auto* expect = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec2<f16> = construct 1.0h, 2.0h
-    %a:vec2<f16> = let %2
-    %4:i32 = call %tint_bitcast_from_16bit, %a
-    %x:i32 = let %4
+    %a:vec2<f16> = let vec2<f16>(1.0h, 2.0h)
+    %3:i32 = call %tint_bitcast_from_16bit, %a
+    %x:i32 = let %3
     ret
   }
 }
 %tint_bitcast_from_16bit = func(%src:vec2<f16>):i32 {
   $B2: {
-    %8:u32 = glsl.packFloat2x16 %src
-    %9:i32 = convert %8
-    ret %9
+    %7:u32 = glsl.packFloat2x16 %src
+    %8:i32 = convert %7
+    ret %8
   }
 }
 )";
@@ -465,10 +463,9 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2F16ToU32) {
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec2<f16> = construct 1.0h, 2.0h
-    %a:vec2<f16> = let %2
-    %4:u32 = bitcast<u32> %a
-    %x:u32 = let %4
+    %a:vec2<f16> = let vec2<f16>(1.0h, 2.0h)
+    %3:u32 = bitcast<u32> %a
+    %x:u32 = let %3
     ret
   }
 }
@@ -478,17 +475,16 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2F16ToU32) {
     auto* expect = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec2<f16> = construct 1.0h, 2.0h
-    %a:vec2<f16> = let %2
-    %4:u32 = call %tint_bitcast_from_16bit, %a
-    %x:u32 = let %4
+    %a:vec2<f16> = let vec2<f16>(1.0h, 2.0h)
+    %3:u32 = call %tint_bitcast_from_16bit, %a
+    %x:u32 = let %3
     ret
   }
 }
 %tint_bitcast_from_16bit = func(%src:vec2<f16>):u32 {
   $B2: {
-    %8:u32 = glsl.packFloat2x16 %src
-    ret %8
+    %7:u32 = glsl.packFloat2x16 %src
+    ret %7
   }
 }
 )";
@@ -550,10 +546,9 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2F16ToF32) {
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec2<f16> = construct 1.0h, 2.0h
-    %a:vec2<f16> = let %2
-    %4:f32 = bitcast<f32> %a
-    %x:f32 = let %4
+    %a:vec2<f16> = let vec2<f16>(1.0h, 2.0h)
+    %3:f32 = bitcast<f32> %a
+    %x:f32 = let %3
     ret
   }
 }
@@ -563,18 +558,17 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2F16ToF32) {
     auto* expect = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec2<f16> = construct 1.0h, 2.0h
-    %a:vec2<f16> = let %2
-    %4:f32 = call %tint_bitcast_from_16bit, %a
-    %x:f32 = let %4
+    %a:vec2<f16> = let vec2<f16>(1.0h, 2.0h)
+    %3:f32 = call %tint_bitcast_from_16bit, %a
+    %x:f32 = let %3
     ret
   }
 }
 %tint_bitcast_from_16bit = func(%src:vec2<f16>):f32 {
   $B2: {
-    %8:u32 = glsl.packFloat2x16 %src
-    %9:f32 = glsl.uintBitsToFloat %8
-    ret %9
+    %7:u32 = glsl.packFloat2x16 %src
+    %8:f32 = glsl.uintBitsToFloat %7
+    ret %8
   }
 }
 )";
@@ -594,10 +588,9 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2I32ToVec4F16) {
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec2<i32> = construct 1i, 2i
-    %a:vec2<i32> = let %2
-    %4:vec4<f16> = bitcast<vec4<f16>> %a
-    %x:vec4<f16> = let %4
+    %a:vec2<i32> = let vec2<i32>(1i, 2i)
+    %3:vec4<f16> = bitcast<vec4<f16>> %a
+    %x:vec4<f16> = let %3
     ret
   }
 }
@@ -607,22 +600,21 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2I32ToVec4F16) {
     auto* expect = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec2<i32> = construct 1i, 2i
-    %a:vec2<i32> = let %2
-    %4:vec4<f16> = call %tint_bitcast_to_16bit, %a
-    %x:vec4<f16> = let %4
+    %a:vec2<i32> = let vec2<i32>(1i, 2i)
+    %3:vec4<f16> = call %tint_bitcast_to_16bit, %a
+    %x:vec4<f16> = let %3
     ret
   }
 }
 %tint_bitcast_to_16bit = func(%src:vec2<i32>):vec4<f16> {
   $B2: {
-    %8:vec2<u32> = convert %src
-    %9:u32 = swizzle %8, x
-    %10:vec2<f16> = glsl.unpackFloat2x16 %9
-    %11:u32 = swizzle %8, y
-    %12:vec2<f16> = glsl.unpackFloat2x16 %11
-    %13:vec4<f16> = construct %10, %12
-    ret %13
+    %7:vec2<u32> = convert %src
+    %8:u32 = swizzle %7, x
+    %9:vec2<f16> = glsl.unpackFloat2x16 %8
+    %10:u32 = swizzle %7, y
+    %11:vec2<f16> = glsl.unpackFloat2x16 %10
+    %12:vec4<f16> = construct %9, %11
+    ret %12
   }
 }
 )";
@@ -642,10 +634,9 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec4F16ToVec2I32) {
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec4<f16> = construct 1.0h, 2.0h, 3.0h, 4.0h
-    %a:vec4<f16> = let %2
-    %4:vec2<i32> = bitcast<vec2<i32>> %a
-    %x:vec2<i32> = let %4
+    %a:vec4<f16> = let vec4<f16>(1.0h, 2.0h, 3.0h, 4.0h)
+    %3:vec2<i32> = bitcast<vec2<i32>> %a
+    %x:vec2<i32> = let %3
     ret
   }
 }
@@ -655,22 +646,21 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec4F16ToVec2I32) {
     auto* expect = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec4<f16> = construct 1.0h, 2.0h, 3.0h, 4.0h
-    %a:vec4<f16> = let %2
-    %4:vec2<i32> = call %tint_bitcast_from_16bit, %a
-    %x:vec2<i32> = let %4
+    %a:vec4<f16> = let vec4<f16>(1.0h, 2.0h, 3.0h, 4.0h)
+    %3:vec2<i32> = call %tint_bitcast_from_16bit, %a
+    %x:vec2<i32> = let %3
     ret
   }
 }
 %tint_bitcast_from_16bit = func(%src:vec4<f16>):vec2<i32> {
   $B2: {
-    %8:vec2<f16> = swizzle %src, xy
-    %9:u32 = glsl.packFloat2x16 %8
-    %10:vec2<f16> = swizzle %src, zw
-    %11:u32 = glsl.packFloat2x16 %10
-    %12:vec2<u32> = construct %9, %11
-    %13:vec2<i32> = convert %12
-    ret %13
+    %7:vec2<f16> = swizzle %src, xy
+    %8:u32 = glsl.packFloat2x16 %7
+    %9:vec2<f16> = swizzle %src, zw
+    %10:u32 = glsl.packFloat2x16 %9
+    %11:vec2<u32> = construct %8, %10
+    %12:vec2<i32> = convert %11
+    ret %12
   }
 }
 )";
@@ -690,10 +680,9 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2U32ToVec4F16) {
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec2<u32> = construct 1u, 2u
-    %a:vec2<u32> = let %2
-    %4:vec4<f16> = bitcast<vec4<f16>> %a
-    %x:vec4<f16> = let %4
+    %a:vec2<u32> = let vec2<u32>(1u, 2u)
+    %3:vec4<f16> = bitcast<vec4<f16>> %a
+    %x:vec4<f16> = let %3
     ret
   }
 }
@@ -703,21 +692,20 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2U32ToVec4F16) {
     auto* expect = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec2<u32> = construct 1u, 2u
-    %a:vec2<u32> = let %2
-    %4:vec4<f16> = call %tint_bitcast_to_16bit, %a
-    %x:vec4<f16> = let %4
+    %a:vec2<u32> = let vec2<u32>(1u, 2u)
+    %3:vec4<f16> = call %tint_bitcast_to_16bit, %a
+    %x:vec4<f16> = let %3
     ret
   }
 }
 %tint_bitcast_to_16bit = func(%src:vec2<u32>):vec4<f16> {
   $B2: {
-    %8:u32 = swizzle %src, x
-    %9:vec2<f16> = glsl.unpackFloat2x16 %8
-    %10:u32 = swizzle %src, y
-    %11:vec2<f16> = glsl.unpackFloat2x16 %10
-    %12:vec4<f16> = construct %9, %11
-    ret %12
+    %7:u32 = swizzle %src, x
+    %8:vec2<f16> = glsl.unpackFloat2x16 %7
+    %9:u32 = swizzle %src, y
+    %10:vec2<f16> = glsl.unpackFloat2x16 %9
+    %11:vec4<f16> = construct %8, %10
+    ret %11
   }
 }
 )";
@@ -737,10 +725,9 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec4F16ToVec2U32) {
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec4<f16> = construct 1.0h, 2.0h, 3.0h, 4.0h
-    %a:vec4<f16> = let %2
-    %4:vec2<u32> = bitcast<vec2<u32>> %a
-    %x:vec2<u32> = let %4
+    %a:vec4<f16> = let vec4<f16>(1.0h, 2.0h, 3.0h, 4.0h)
+    %3:vec2<u32> = bitcast<vec2<u32>> %a
+    %x:vec2<u32> = let %3
     ret
   }
 }
@@ -750,21 +737,20 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec4F16ToVec2U32) {
     auto* expect = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec4<f16> = construct 1.0h, 2.0h, 3.0h, 4.0h
-    %a:vec4<f16> = let %2
-    %4:vec2<u32> = call %tint_bitcast_from_16bit, %a
-    %x:vec2<u32> = let %4
+    %a:vec4<f16> = let vec4<f16>(1.0h, 2.0h, 3.0h, 4.0h)
+    %3:vec2<u32> = call %tint_bitcast_from_16bit, %a
+    %x:vec2<u32> = let %3
     ret
   }
 }
 %tint_bitcast_from_16bit = func(%src:vec4<f16>):vec2<u32> {
   $B2: {
-    %8:vec2<f16> = swizzle %src, xy
-    %9:u32 = glsl.packFloat2x16 %8
-    %10:vec2<f16> = swizzle %src, zw
-    %11:u32 = glsl.packFloat2x16 %10
-    %12:vec2<u32> = construct %9, %11
-    ret %12
+    %7:vec2<f16> = swizzle %src, xy
+    %8:u32 = glsl.packFloat2x16 %7
+    %9:vec2<f16> = swizzle %src, zw
+    %10:u32 = glsl.packFloat2x16 %9
+    %11:vec2<u32> = construct %8, %10
+    ret %11
   }
 }
 )";
@@ -784,10 +770,9 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2F32ToVec4F16) {
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec2<f32> = construct 1.0f, 2.0f
-    %a:vec2<f32> = let %2
-    %4:vec4<f16> = bitcast<vec4<f16>> %a
-    %x:vec4<f16> = let %4
+    %a:vec2<f32> = let vec2<f32>(1.0f, 2.0f)
+    %3:vec4<f16> = bitcast<vec4<f16>> %a
+    %x:vec4<f16> = let %3
     ret
   }
 }
@@ -797,22 +782,21 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2F32ToVec4F16) {
     auto* expect = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec2<f32> = construct 1.0f, 2.0f
-    %a:vec2<f32> = let %2
-    %4:vec4<f16> = call %tint_bitcast_to_16bit, %a
-    %x:vec4<f16> = let %4
+    %a:vec2<f32> = let vec2<f32>(1.0f, 2.0f)
+    %3:vec4<f16> = call %tint_bitcast_to_16bit, %a
+    %x:vec4<f16> = let %3
     ret
   }
 }
 %tint_bitcast_to_16bit = func(%src:vec2<f32>):vec4<f16> {
   $B2: {
-    %8:vec2<u32> = glsl.floatBitsToUint %src
-    %9:u32 = swizzle %8, x
-    %10:vec2<f16> = glsl.unpackFloat2x16 %9
-    %11:u32 = swizzle %8, y
-    %12:vec2<f16> = glsl.unpackFloat2x16 %11
-    %13:vec4<f16> = construct %10, %12
-    ret %13
+    %7:vec2<u32> = glsl.floatBitsToUint %src
+    %8:u32 = swizzle %7, x
+    %9:vec2<f16> = glsl.unpackFloat2x16 %8
+    %10:u32 = swizzle %7, y
+    %11:vec2<f16> = glsl.unpackFloat2x16 %10
+    %12:vec4<f16> = construct %9, %11
+    ret %12
   }
 }
 )";
@@ -832,10 +816,9 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec4F16ToVec2F32) {
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec4<f16> = construct 1.0h, 2.0h, 3.0h, 4.0h
-    %a:vec4<f16> = let %2
-    %4:vec2<f32> = bitcast<vec2<f32>> %a
-    %x:vec2<f32> = let %4
+    %a:vec4<f16> = let vec4<f16>(1.0h, 2.0h, 3.0h, 4.0h)
+    %3:vec2<f32> = bitcast<vec2<f32>> %a
+    %x:vec2<f32> = let %3
     ret
   }
 }
@@ -845,22 +828,21 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec4F16ToVec2F32) {
     auto* expect = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:vec4<f16> = construct 1.0h, 2.0h, 3.0h, 4.0h
-    %a:vec4<f16> = let %2
-    %4:vec2<f32> = call %tint_bitcast_from_16bit, %a
-    %x:vec2<f32> = let %4
+    %a:vec4<f16> = let vec4<f16>(1.0h, 2.0h, 3.0h, 4.0h)
+    %3:vec2<f32> = call %tint_bitcast_from_16bit, %a
+    %x:vec2<f32> = let %3
     ret
   }
 }
 %tint_bitcast_from_16bit = func(%src:vec4<f16>):vec2<f32> {
   $B2: {
-    %8:vec2<f16> = swizzle %src, xy
-    %9:u32 = glsl.packFloat2x16 %8
-    %10:vec2<f16> = swizzle %src, zw
-    %11:u32 = glsl.packFloat2x16 %10
-    %12:vec2<u32> = construct %9, %11
-    %13:vec2<f32> = glsl.uintBitsToFloat %12
-    ret %13
+    %7:vec2<f16> = swizzle %src, xy
+    %8:u32 = glsl.packFloat2x16 %7
+    %9:vec2<f16> = swizzle %src, zw
+    %10:u32 = glsl.packFloat2x16 %9
+    %11:vec2<u32> = construct %8, %10
+    %12:vec2<f32> = glsl.uintBitsToFloat %11
+    ret %12
   }
 }
 )";

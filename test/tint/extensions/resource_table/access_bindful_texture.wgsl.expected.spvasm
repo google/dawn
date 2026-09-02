@@ -74,6 +74,7 @@
      %uint_1 = OpConstant %uint 1
      %v2uint = OpTypeVector %uint 2
     %uint_40 = OpConstant %uint 40
+         %67 = OpConstantComposite %v2uint %uint_40 %uint_41
      %v2bool = OpTypeVector %bool 2
      %uint_4 = OpConstant %uint 4
        %void = OpTypeVoid
@@ -91,9 +92,8 @@
          %61 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_1 %26
          %63 = OpLoad %uint %61 None
          %65 = OpCompositeConstruct %v2uint %63 %63
-         %66 = OpCompositeConstruct %v2uint %uint_40 %uint_41
-         %68 = OpIEqual %v2bool %65 %66
-         %40 = OpAny %bool %68
+         %66 = OpIEqual %v2bool %65 %67
+         %40 = OpAny %bool %66
                OpBranch %36
          %38 = OpLabel
                OpBranch %36

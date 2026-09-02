@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 117
+; Bound: 115
 ; Schema: 0
                OpCapability Shader
                OpCapability RuntimeDescriptorArray
@@ -74,6 +74,7 @@
      %v2uint = OpTypeVector %uint 2
     %uint_16 = OpConstant %uint 16
     %uint_17 = OpConstant %uint 17
+         %97 = OpConstantComposite %v2uint %uint_16 %uint_17
      %v2bool = OpTypeVector %bool 2
          %fs = OpFunction %void None %19
          %20 = OpLabel
@@ -89,9 +90,8 @@
          %92 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_1 %25
          %93 = OpLoad %uint %92 None
          %95 = OpCompositeConstruct %v2uint %93 %93
-         %96 = OpCompositeConstruct %v2uint %uint_16 %uint_17
-         %99 = OpIEqual %v2bool %95 %96
-         %35 = OpAny %bool %99
+         %96 = OpIEqual %v2bool %95 %97
+         %35 = OpAny %bool %96
                OpBranch %31
          %33 = OpLabel
                OpBranch %31
@@ -119,9 +119,8 @@
         %103 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_1 %25
         %104 = OpLoad %uint %103 None
         %105 = OpCompositeConstruct %v2uint %104 %104
-        %106 = OpCompositeConstruct %v2uint %uint_16 %uint_17
-        %107 = OpIEqual %v2bool %105 %106
-         %52 = OpAny %bool %107
+        %106 = OpIEqual %v2bool %105 %97
+         %52 = OpAny %bool %106
                OpBranch %48
          %50 = OpLabel
                OpBranch %48
@@ -132,9 +131,9 @@
          %54 = OpLabel
                OpBranch %53
          %55 = OpLabel
-        %108 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_0
-        %109 = OpLoad %uint %108 None
-         %57 = OpIAdd %uint %uint_0 %109
+        %107 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_0
+        %108 = OpLoad %uint %107 None
+         %57 = OpIAdd %uint %uint_0 %108
                OpBranch %53
          %53 = OpLabel
  %item_idx_0 = OpPhi %uint %25 %54 %57 %55
@@ -146,12 +145,11 @@
                OpSelectionMerge %63 None
                OpBranchConditional %62 %64 %65
          %64 = OpLabel
-        %110 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_1 %25
-        %111 = OpLoad %uint %110 None
-        %112 = OpCompositeConstruct %v2uint %111 %111
-        %113 = OpCompositeConstruct %v2uint %uint_16 %uint_17
-        %114 = OpIEqual %v2bool %112 %113
-         %67 = OpAny %bool %114
+        %109 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_1 %25
+        %110 = OpLoad %uint %109 None
+        %111 = OpCompositeConstruct %v2uint %110 %110
+        %112 = OpIEqual %v2bool %111 %97
+         %67 = OpAny %bool %112
                OpBranch %63
          %65 = OpLabel
                OpBranch %63
@@ -162,9 +160,9 @@
          %69 = OpLabel
                OpBranch %68
          %70 = OpLabel
-        %115 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_0
-        %116 = OpLoad %uint %115 None
-         %72 = OpIAdd %uint %uint_0 %116
+        %113 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_0
+        %114 = OpLoad %uint %113 None
+         %72 = OpIAdd %uint %uint_0 %114
                OpBranch %68
          %68 = OpLabel
  %item_idx_1 = OpPhi %uint %25 %69 %72 %70

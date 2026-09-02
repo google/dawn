@@ -4,7 +4,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 23
+; Bound: 21
 ; Schema: 0
                OpCapability Shader
                OpCapability StorageImageExtendedFormats
@@ -26,22 +26,20 @@
           %7 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
      %v3uint = OpTypeVector %uint 3
-     %v2uint = OpTypeVector %uint 2
      %uint_1 = OpConstant %uint 1
-         %13 = OpConstantComposite %v2uint %uint_1 %uint_1
+         %11 = OpConstantComposite %v3uint %uint_1 %uint_1 %uint_1
     %v4float = OpTypeVector %float 4
     %float_1 = OpConstant %float 1
-         %17 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+         %15 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
 %textureStore_1edb77 = OpFunction %void None %7
           %8 = OpLabel
           %9 = OpLoad %3 %arg_0 None
-         %12 = OpCompositeConstruct %v3uint %13 %uint_1
-               OpImageWrite %9 %12 %17 None
+               OpImageWrite %9 %11 %15 None
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %7
-         %21 = OpLabel
-         %22 = OpFunctionCall %void %textureStore_1edb77
+         %19 = OpLabel
+         %20 = OpFunctionCall %void %textureStore_1edb77
                OpReturn
                OpFunctionEnd
 ;
@@ -50,7 +48,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 23
+; Bound: 21
 ; Schema: 0
                OpCapability Shader
                OpCapability StorageImageExtendedFormats
@@ -72,21 +70,19 @@
           %7 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
      %v3uint = OpTypeVector %uint 3
-     %v2uint = OpTypeVector %uint 2
      %uint_1 = OpConstant %uint 1
-         %13 = OpConstantComposite %v2uint %uint_1 %uint_1
+         %11 = OpConstantComposite %v3uint %uint_1 %uint_1 %uint_1
     %v4float = OpTypeVector %float 4
     %float_1 = OpConstant %float 1
-         %17 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+         %15 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
 %textureStore_1edb77 = OpFunction %void None %7
           %8 = OpLabel
           %9 = OpLoad %3 %arg_0 None
-         %12 = OpCompositeConstruct %v3uint %13 %uint_1
-               OpImageWrite %9 %12 %17 None
+               OpImageWrite %9 %11 %15 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %7
-         %21 = OpLabel
-         %22 = OpFunctionCall %void %textureStore_1edb77
+         %19 = OpLabel
+         %20 = OpFunctionCall %void %textureStore_1edb77
                OpReturn
                OpFunctionEnd

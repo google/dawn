@@ -413,8 +413,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructBuiltin) {
     auto* src = R"(
 %foo = @vertex func():vec4<f32> [@invariant, @position] {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    ret %2
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -427,14 +426,13 @@ $B1: {  # root
 
 %foo_inner = func():vec4<f32> {
   $B2: {
-    %3:vec4<f32> = construct 0.5f
-    ret %3
+    ret vec4<f32>(0.5f)
   }
 }
 %foo = @vertex func():void {
   $B3: {
-    %5:vec4<f32> = call %foo_inner
-    store %foo_position_Output, %5
+    %4:vec4<f32> = call %foo_inner
+    store %foo_position_Output, %4
     ret
   }
 }
@@ -459,8 +457,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructLocation) {
     auto* src = R"(
 %foo = @fragment func():vec4<f32> [@location(1)] {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    ret %2
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -473,14 +470,13 @@ $B1: {  # root
 
 %foo_inner = func():vec4<f32> {
   $B2: {
-    %3:vec4<f32> = construct 0.5f
-    ret %3
+    ret vec4<f32>(0.5f)
   }
 }
 %foo = @fragment func():void {
   $B3: {
-    %5:vec4<f32> = call %foo_inner
-    store %foo_loc1_Output, %5
+    %4:vec4<f32> = call %foo_inner
+    store %foo_loc1_Output, %4
     ret
   }
 }
@@ -541,9 +537,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.0f
-    %3:Outputs = construct %2, 0.25f, 0.75f
-    ret %3
+    ret Outputs(vec4<f32>(0.0f), 0.25f, 0.75f)
   }
 }
 )";
@@ -564,20 +558,18 @@ $B1: {  # root
 
 %foo_inner = func():Outputs {
   $B2: {
-    %5:vec4<f32> = construct 0.0f
-    %6:Outputs = construct %5, 0.25f, 0.75f
-    ret %6
+    ret Outputs(vec4<f32>(0.0f), 0.25f, 0.75f)
   }
 }
 %foo = @vertex func():void {
   $B3: {
-    %8:Outputs = call %foo_inner
-    %9:vec4<f32> = access %8, 0u
-    store %foo_position_Output, %9
-    %10:f32 = access %8, 1u
-    store %foo_loc0_Output, %10
-    %11:f32 = access %8, 2u
-    store %foo_loc1_Output, %11
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    store %foo_position_Output, %7
+    %8:f32 = access %6, 1u
+    store %foo_loc0_Output, %8
+    %9:f32 = access %6, 2u
+    store %foo_loc1_Output, %9
     ret
   }
 }
@@ -626,8 +618,7 @@ Output = struct @align(4) {
 
 %foo = @fragment func():Output {
   $B1: {
-    %2:Output = construct 0.25f, 0.75f
-    ret %2
+    ret Output(0.25f, 0.75f)
   }
 }
 )";
@@ -646,17 +637,16 @@ $B1: {  # root
 
 %foo_inner = func():Output {
   $B2: {
-    %4:Output = construct 0.25f, 0.75f
-    ret %4
+    ret Output(0.25f, 0.75f)
   }
 }
 %foo = @fragment func():void {
   $B3: {
-    %6:Output = call %foo_inner
-    %7:f32 = access %6, 0u
-    store %foo_loc0_idx0_Output, %7
-    %8:f32 = access %6, 1u
-    store %foo_loc0_idx1_Output, %8
+    %5:Output = call %foo_inner
+    %6:f32 = access %5, 0u
+    store %foo_loc0_idx0_Output, %6
+    %7:f32 = access %5, 1u
+    store %foo_loc0_idx1_Output, %7
     ret
   }
 }
@@ -882,8 +872,7 @@ MyStruct = struct @align(4) {
 
 %vert = @vertex func(%input:MyStruct, %ival:i32 [@location(2), @interpolate(flat)]):vec4<f32> [@invariant, @position] {
   $B1: {
-    %4:vec4<f32> = construct 0.5f
-    ret %4
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -902,17 +891,16 @@ $B1: {  # root
 
 %vert_inner = func(%input:MyStruct, %ival:i32):vec4<f32> {
   $B2: {
-    %7:vec4<f32> = construct 0.5f
-    ret %7
+    ret vec4<f32>(0.5f)
   }
 }
 %vert = @vertex func():void {
   $B3: {
-    %9:f32 = load %vert_loc1_Input
-    %10:MyStruct = construct %9
-    %11:i32 = load %vert_loc2_Input
-    %12:vec4<f32> = call %vert_inner, %10, %11
-    store %vert_position_Output, %12
+    %8:f32 = load %vert_loc1_Input
+    %9:MyStruct = construct %8
+    %10:i32 = load %vert_loc2_Input
+    %11:vec4<f32> = call %vert_inner, %9, %10
+    store %vert_position_Output, %11
     ret
   }
 }
@@ -957,8 +945,7 @@ MyStruct = struct @align(4) {
 
 %frag1 = @fragment func():MyStruct {
   $B1: {
-    %2:MyStruct = construct 0.5f
-    ret %2
+    ret MyStruct(0.5f)
   }
 }
 )";
@@ -975,15 +962,14 @@ $B1: {  # root
 
 %frag1_inner = func():MyStruct {
   $B2: {
-    %3:MyStruct = construct 0.5f
-    ret %3
+    ret MyStruct(0.5f)
   }
 }
 %frag1 = @fragment func():void {
   $B3: {
-    %5:MyStruct = call %frag1_inner
-    %6:f32 = access %5, 0u
-    store %frag1_loc1_Output, %6
+    %4:MyStruct = call %frag1_inner
+    %5:f32 = access %4, 0u
+    store %frag1_loc1_Output, %5
     ret
   }
 }
@@ -1076,8 +1062,7 @@ Outputs = struct @align(4) {
 
 %foo = @fragment func():Outputs {
   $B1: {
-    %2:Outputs = construct 0.5f, 2.0f
-    ret %2
+    ret Outputs(0.5f, 2.0f)
   }
 }
 )";
@@ -1102,22 +1087,21 @@ $B1: {  # root
 
 %foo_inner = func():Outputs {
   $B2: {
-    %5:Outputs = construct 0.5f, 2.0f
-    ret %5
+    ret Outputs(0.5f, 2.0f)
   }
 }
 %foo = @fragment func():void {
   $B3: {
-    %7:Outputs = call %foo_inner
-    %8:f32 = access %7, 0u
-    store %foo_loc0_Output, %8
-    %9:f32 = access %7, 1u
-    %10:ptr<immediate, f32, read> = access %tint_immediate_data, 0u
-    %11:f32 = load %10
-    %12:ptr<immediate, f32, read> = access %tint_immediate_data, 1u
-    %13:f32 = load %12
-    %14:f32 = clamp %9, %11, %13
-    store %foo_frag_depth_Output, %14
+    %6:Outputs = call %foo_inner
+    %7:f32 = access %6, 0u
+    store %foo_loc0_Output, %7
+    %8:f32 = access %6, 1u
+    %9:ptr<immediate, f32, read> = access %tint_immediate_data, 0u
+    %10:f32 = load %9
+    %11:ptr<immediate, f32, read> = access %tint_immediate_data, 1u
+    %12:f32 = load %11
+    %13:f32 = clamp %8, %10, %12
+    store %foo_frag_depth_Output, %13
     ret
   }
 }
@@ -1153,8 +1137,7 @@ TEST_F(SpirvWriter_ShaderIOTest, EmitVertexPointSize) {
     auto* src = R"(
 %foo = @vertex func():vec4<f32> [@position] {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    ret %2
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -1168,14 +1151,13 @@ $B1: {  # root
 
 %foo_inner = func():vec4<f32> {
   $B2: {
-    %4:vec4<f32> = construct 0.5f
-    ret %4
+    ret vec4<f32>(0.5f)
   }
 }
 %foo = @vertex func():void {
   $B3: {
-    %6:vec4<f32> = call %foo_inner
-    store %foo_position_Output, %6
+    %5:vec4<f32> = call %foo_inner
+    store %foo_position_Output, %5
     store %foo___point_size_Output, 1.0f
     ret
   }

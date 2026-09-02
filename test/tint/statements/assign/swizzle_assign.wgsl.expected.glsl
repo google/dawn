@@ -23,7 +23,7 @@ void main() {
   v.y = 300u;
   v[min(uint[3](2u, 1u, 0u)[min(idx, 2u)], 3u)] = 400u;
   v.x = (v.x + 500u);
-  v_1.inner.res = uvec4(uvec4(0u).x, uvec4(0u).y, uvec4(0u).z, uvec4(0u).w);
+  v_1.inner.res = uvec4(0u);
   uvec4 v_5 = v_1.inner.res;
   v_1.inner.res = uvec4(v_5.x, uvec2(1u, 2u).y, uvec2(1u, 2u).x, v_5.w);
   uvec4 v_6 = v_1.inner.res;

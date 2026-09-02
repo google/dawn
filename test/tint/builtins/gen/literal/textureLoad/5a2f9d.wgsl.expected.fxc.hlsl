@@ -5,7 +5,7 @@
 RWByteAddressBuffer prevent_dce : register(u0);
 Texture1D<int4> arg_0 : register(t0, space1);
 int4 textureLoad_5a2f9d() {
-  int4 res = arg_0.Load(int2(int(1), int(1)));
+  int4 res = arg_0.Load((int(1)).xx);
   return res;
 }
 
@@ -20,7 +20,7 @@ void fragment_main() {
 RWByteAddressBuffer prevent_dce : register(u0);
 Texture1D<int4> arg_0 : register(t0, space1);
 int4 textureLoad_5a2f9d() {
-  int4 res = arg_0.Load(int2(int(1), int(1)));
+  int4 res = arg_0.Load((int(1)).xx);
   return res;
 }
 
@@ -45,7 +45,7 @@ struct vertex_main_outputs {
 
 Texture1D<int4> arg_0 : register(t0, space1);
 int4 textureLoad_5a2f9d() {
-  int4 res = arg_0.Load(int2(int(1), int(1)));
+  int4 res = arg_0.Load((int(1)).xx);
   return res;
 }
 

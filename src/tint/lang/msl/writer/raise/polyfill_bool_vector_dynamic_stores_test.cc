@@ -71,10 +71,9 @@ TEST_F(MslWriter_PolyfillBoolVectorDynamicStoresTest, DynamicStore_Vec3Bool) {
     %6:vec3<bool> = construct %val
     %7:u32 = convert %idx
     %8:vec3<u32> = construct %7
-    %9:vec3<u32> = construct 0u, 1u, 2u
-    %10:vec3<bool> = eq %8, %9
-    %11:vec3<bool> = select %5, %6, %10
-    store %v, %11
+    %9:vec3<bool> = eq %8, vec3<u32>(0u, 1u, 2u)
+    %10:vec3<bool> = select %5, %6, %9
+    store %v, %10
     ret
   }
 }

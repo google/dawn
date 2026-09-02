@@ -155,7 +155,8 @@ TEST_F(IR_ValidatorTest, RootBlock_LetWithAllowModuleScopeLets) {
 }
 
 TEST_F(IR_ValidatorTest, RootBlock_Construct) {
-    mod.root_block->Append(b.Construct(ty.vec2f(), 1_f, 2_f)->AsInstruction());
+    mod.root_block->Append(mod.CreateInstruction<Construct>(
+        b.InstructionResult(ty.vec2f()), Vector{b.Constant(1_f), b.Constant(2_f)}));
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
@@ -169,7 +170,8 @@ TEST_F(IR_ValidatorTest, RootBlock_Construct) {
 }
 
 TEST_F(IR_ValidatorTest, RootBlock_ConstructWithAllowModuleScopeLets) {
-    mod.root_block->Append(b.Construct(ty.vec2f(), 1_f, 2_f)->AsInstruction());
+    mod.root_block->Append(mod.CreateInstruction<Construct>(
+        b.InstructionResult(ty.vec2f()), Vector{b.Constant(1_f), b.Constant(2_f)}));
 
     mod.properties.Add(ir::Property::kAllowModuleScopeLets);
     auto res = ir::Validate(mod);
@@ -277,8 +279,7 @@ TEST_F(IR_ValidatorTest, Construct_Scalar_TooManyArguments) {
 TEST_F(IR_ValidatorTest, Construct_SubgroupMatrix_WrongArgType) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* l = b.Let("x", b.Zero(ty.i32()));
-        b.Construct(ty.subgroup_matrix_left(ty.f32(), 2, 3), l);
+        b.Construct(ty.subgroup_matrix_left(ty.f32(), 2, 3), b.Zero(ty.i32()));
         b.Return(f);
     });
 
@@ -287,8 +288,8 @@ TEST_F(IR_ValidatorTest, Construct_SubgroupMatrix_WrongArgType) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:4:42 error: construct: subgroup matrix construct argument type 'i32' does not match matrix shader scalar type 'f32'
-    %3:subgroup_matrix_left<f32, 2, 3> = construct %x
+            R"(:3:42 error: construct: subgroup matrix construct argument type 'i32' does not match matrix shader scalar type 'f32'
+    %2:subgroup_matrix_left<f32, 2, 3> = construct 0i
                                          ^^^^^^^^^
 )")) << res.Failure();
 }
@@ -600,15 +601,17 @@ TEST_F(IR_ValidatorTest, Construct_NullArg) {
 
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        b.Construct(str_ty, 1_i, nullptr);
+        auto* l = b.Let("l", 1_i);
+        auto* construct = b.Construct(str_ty, 1_i, l)->AsInstruction<Construct>();
+        construct->SetArg(1, nullptr);
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:8:33 error: construct: operand is undefined
-    %2:MyStruct = construct 1i, undef
+                testing::HasSubstr(R"(:9:33 error: construct: operand is undefined
+    %3:MyStruct = construct 1i, undef
                                 ^^^^^
 )")) << res.Failure();
 }
@@ -621,7 +624,8 @@ TEST_F(IR_ValidatorTest, Construct_NullResult) {
 
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* c = b.Construct(str_ty, 1_i, 2_u)->AsInstruction<Construct>();
+        auto* l = b.Let("l", 1_i);
+        auto* c = b.Construct(str_ty, l, 2_u)->AsInstruction<Construct>();
         c->SetResult(nullptr);
         b.Return(f);
     });
@@ -629,8 +633,8 @@ TEST_F(IR_ValidatorTest, Construct_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:8:5 error: construct: result is undefined
-    undef = construct 1i, 2u
+                testing::HasSubstr(R"(:9:5 error: construct: result is undefined
+    undef = construct %l, 2u
     ^^^^^
 )")) << res.Failure();
 }
@@ -643,7 +647,8 @@ TEST_F(IR_ValidatorTest, Construct_EmptyResult) {
 
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* c = b.Construct(str_ty, 1_i, 2_u)->AsInstruction<Construct>();
+        auto* l = b.Let("l", 1_i);
+        auto* c = b.Construct(str_ty, l, 2_u)->AsInstruction<Construct>();
         c->ClearResults();
         b.Return(f);
     });
@@ -651,8 +656,8 @@ TEST_F(IR_ValidatorTest, Construct_EmptyResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:8:13 error: construct: expected exactly 1 results, got 0
-    undef = construct 1i, 2u
+                testing::HasSubstr(R"(:9:13 error: construct: expected exactly 1 results, got 0
+    undef = construct %l, 2u
             ^^^^^^^^^
 )")) << res.Failure();
 }

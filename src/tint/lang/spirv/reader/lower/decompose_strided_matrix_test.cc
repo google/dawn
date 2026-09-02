@@ -951,8 +951,7 @@ $B1: {  # root
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<private, spirv.explicit_layout_array<vec4<f32>, 4, stride=64>, read_write> = access %var, 1u
-    %4:spirv.explicit_layout_array<vec4<f32>, 4, stride=64> = construct vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f)
-    store %3, %4
+    store %3, spirv.explicit_layout_array<vec4<f32>, 4, stride=64>(vec4<f32>(0.0f))
     ret
   }
 }
@@ -1734,8 +1733,7 @@ $B1: {  # root
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<private, spirv.explicit_layout_array<vec4<f32>, 4, stride=64>, read_write> = access %var, 1u, 2u, 1u
-    %4:spirv.explicit_layout_array<vec4<f32>, 4, stride=64> = construct vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f)
-    store %3, %4
+    store %3, spirv.explicit_layout_array<vec4<f32>, 4, stride=64>(vec4<f32>(0.0f))
     ret
   }
 }
@@ -1799,17 +1797,7 @@ $B1: {  # root
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<private, array<array<spirv.explicit_layout_array<vec4<f32>, 4, stride=64>, 2>, 3>, read_write> = access %var, 1u
-    %4:spirv.explicit_layout_array<vec4<f32>, 4, stride=64> = construct vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f)
-    %5:spirv.explicit_layout_array<vec4<f32>, 4, stride=64> = construct vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f)
-    %6:array<spirv.explicit_layout_array<vec4<f32>, 4, stride=64>, 2> = construct %4, %5
-    %7:spirv.explicit_layout_array<vec4<f32>, 4, stride=64> = construct vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f)
-    %8:spirv.explicit_layout_array<vec4<f32>, 4, stride=64> = construct vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f)
-    %9:array<spirv.explicit_layout_array<vec4<f32>, 4, stride=64>, 2> = construct %7, %8
-    %10:spirv.explicit_layout_array<vec4<f32>, 4, stride=64> = construct vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f)
-    %11:spirv.explicit_layout_array<vec4<f32>, 4, stride=64> = construct vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f), vec4<f32>(0.0f)
-    %12:array<spirv.explicit_layout_array<vec4<f32>, 4, stride=64>, 2> = construct %10, %11
-    %13:array<array<spirv.explicit_layout_array<vec4<f32>, 4, stride=64>, 2>, 3> = construct %6, %9, %12
-    store %3, %13
+    store %3, array<array<spirv.explicit_layout_array<vec4<f32>, 4, stride=64>, 2>, 3>(array<spirv.explicit_layout_array<vec4<f32>, 4, stride=64>, 2>(spirv.explicit_layout_array<vec4<f32>, 4, stride=64>(vec4<f32>(0.0f))))
     ret
   }
 }

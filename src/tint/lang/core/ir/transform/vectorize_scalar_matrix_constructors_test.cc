@@ -54,8 +54,7 @@ TEST_F(IR_VectorizeScalarMatrixConstructorsTest, NoModify_NoOperands) {
     auto* src = R"(
 %foo = func():mat3x3<f32> {
   $B1: {
-    %2:mat3x3<f32> = construct
-    ret %2
+    ret mat3x3<f32>(vec3<f32>(0.0f))
   }
 }
 )";

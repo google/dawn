@@ -11,8 +11,8 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 uniform highp samplerCubeArray f_arg_1_arg_2;
 vec4 textureGather_8578bc() {
-  vec4 v_1 = vec4(vec3(1.0f), float(1u));
-  vec4 res = textureGather(f_arg_1_arg_2, v_1, int(1u));
+  float v_1 = float(1u);
+  vec4 res = textureGather(f_arg_1_arg_2, vec4(1.0f), int(1u));
   return res;
 }
 void main() {
@@ -29,8 +29,8 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 uniform highp samplerCubeArray arg_1_arg_2;
 vec4 textureGather_8578bc() {
-  vec4 v_1 = vec4(vec3(1.0f), float(1u));
-  vec4 res = textureGather(arg_1_arg_2, v_1, int(1u));
+  float v_1 = float(1u);
+  vec4 res = textureGather(arg_1_arg_2, vec4(1.0f), int(1u));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -51,8 +51,8 @@ struct VertexOutput {
 uniform highp samplerCubeArray v_arg_1_arg_2;
 layout(location = 0) flat out vec4 tint_interstage_location0;
 vec4 textureGather_8578bc() {
-  vec4 v = vec4(vec3(1.0f), float(1u));
-  vec4 res = textureGather(v_arg_1_arg_2, v, int(1u));
+  float v = float(1u);
+  vec4 res = textureGather(v_arg_1_arg_2, vec4(1.0f), int(1u));
   return res;
 }
 VertexOutput vertex_main_inner() {

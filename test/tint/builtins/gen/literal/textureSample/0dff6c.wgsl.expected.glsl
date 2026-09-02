@@ -8,7 +8,7 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 uniform highp sampler2DShadow f_arg_0_arg_1;
 float textureSample_0dff6c() {
-  float res = textureOffset(f_arg_0_arg_1, vec3(vec2(1.0f), 0.0f), ivec2(1));
+  float res = textureOffset(f_arg_0_arg_1, vec3(1.0f, 1.0f, 0.0f), ivec2(1));
   return res;
 }
 void main() {

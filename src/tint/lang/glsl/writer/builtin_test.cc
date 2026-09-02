@@ -1448,7 +1448,8 @@ precision highp int;
 
 layout(binding = 0, rgba32f) uniform highp writeonly image2DArray f_v;
 void main() {
-  imageStore(f_v, ivec3(ivec2(1, 2), int(3u)), vec4(0.5f, 0.40000000596046447754f, 0.30000001192092895508f, 1.0f));
+  int v_1 = int(3u);
+  imageStore(f_v, ivec3(1, 2, 3), vec4(0.5f, 0.40000000596046447754f, 0.30000001192092895508f, 1.0f));
 }
 )");
 }
@@ -1966,8 +1967,8 @@ precision highp int;
 
 uniform highp samplerCubeArrayShadow f_t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 2.5f);
-  vec4 x = textureGather(f_t_s, vec4(v, float(6u)), 3.0f);
+  float v = float(6u);
+  vec4 x = textureGather(f_t_s, vec4(1.0f, 2.0f, 2.5f, 6.0f), 3.0f);
 }
 )");
 }
@@ -2008,7 +2009,8 @@ precision highp int;
 
 uniform highp sampler2DArrayShadow f_t_s;
 void main() {
-  vec4 x = textureGatherOffset(f_t_s, vec3(vec2(1.0f, 2.0f), float(6)), 3.0f, ivec2(4, 5));
+  float v = float(6);
+  vec4 x = textureGatherOffset(f_t_s, vec3(1.0f, 2.0f, 6.0f), 3.0f, ivec2(4, 5));
 }
 )");
 }
@@ -2045,8 +2047,7 @@ precision highp int;
 
 uniform highp isampler2D f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  ivec4 x = textureGather(f_t_s, v, int(3u));
+  ivec4 x = textureGather(f_t_s, vec2(1.0f, 2.0f), int(3u));
 }
 )");
 }
@@ -2083,8 +2084,7 @@ precision highp int;
 
 uniform highp isampler2D f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  ivec4 x = textureGatherOffset(f_t_s, v, ivec2(1, 3), int(0u));
+  ivec4 x = textureGatherOffset(f_t_s, vec2(1.0f, 2.0f), ivec2(1, 3), int(0u));
 }
 )");
 }
@@ -2122,9 +2122,8 @@ precision highp int;
 
 uniform highp isampler2DArray f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec3 v_1 = vec3(v, float(1u));
-  ivec4 x = textureGather(f_t_s, v_1, int(1u));
+  float v = float(1u);
+  ivec4 x = textureGather(f_t_s, vec3(1.0f, 2.0f, 1.0f), int(1u));
 }
 )");
 }
@@ -2164,9 +2163,8 @@ precision highp int;
 
 uniform highp isampler2DArray f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec3 v_1 = vec3(v, float(1));
-  ivec4 x = textureGatherOffset(f_t_s, v_1, ivec2(1, 2), int(2u));
+  float v = float(1);
+  ivec4 x = textureGatherOffset(f_t_s, vec3(1.0f, 2.0f, 1.0f), ivec2(1, 2), int(2u));
 }
 )");
 }
@@ -2277,8 +2275,8 @@ precision highp int;
 
 uniform highp sampler2DArrayShadow f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec4 x = textureGather(f_t_s, vec3(v, float(4)), 0.0f);
+  float v = float(4);
+  vec4 x = textureGather(f_t_s, vec3(1.0f, 2.0f, 4.0f), 0.0f);
 }
 )");
 }
@@ -2317,8 +2315,8 @@ precision highp int;
 
 uniform highp sampler2DArrayShadow f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec4 x = textureGatherOffset(f_t_s, vec3(v, float(4u)), 0.0f, ivec2(4, 5));
+  float v = float(4u);
+  vec4 x = textureGatherOffset(f_t_s, vec3(1.0f, 2.0f, 4.0f), 0.0f, ivec2(4, 5));
 }
 )");
 }
@@ -2456,8 +2454,8 @@ precision highp int;
 
 uniform highp sampler2DArray f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec4 x = texture(f_t_s, vec3(v, float(4u)));
+  float v = float(4u);
+  vec4 x = texture(f_t_s, vec3(1.0f, 2.0f, 4.0f));
 }
 )");
 }
@@ -2494,8 +2492,8 @@ precision highp int;
 
 uniform highp sampler2DArray f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec4 x = textureOffset(f_t_s, vec3(v, float(4u)), ivec2(4, 5));
+  float v = float(4u);
+  vec4 x = textureOffset(f_t_s, vec3(1.0f, 2.0f, 4.0f), ivec2(4, 5));
 }
 )");
 }
@@ -2637,8 +2635,8 @@ precision highp int;
 
 uniform highp samplerCubeArray f_t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  vec4 x = texture(f_t_s, vec4(v, float(4u)));
+  float v = float(4u);
+  vec4 x = texture(f_t_s, vec4(1.0f, 2.0f, 3.0f, 4.0f));
 }
 )");
 }
@@ -2672,7 +2670,7 @@ precision highp int;
 
 uniform highp sampler2DShadow f_t_s;
 void main() {
-  float x = texture(f_t_s, vec3(vec2(1.0f, 2.0f), 0.0f));
+  float x = texture(f_t_s, vec3(1.0f, 2.0f, 0.0f));
 }
 )");
 }
@@ -2707,7 +2705,7 @@ precision highp int;
 
 uniform highp sampler2DShadow f_t_s;
 void main() {
-  float x = textureOffset(f_t_s, vec3(vec2(1.0f, 2.0f), 0.0f), ivec2(4, 5));
+  float x = textureOffset(f_t_s, vec3(1.0f, 2.0f, 0.0f), ivec2(4, 5));
 }
 )");
 }
@@ -2742,8 +2740,8 @@ precision highp int;
 
 uniform highp sampler2DArrayShadow f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  float x = texture(f_t_s, vec4(v, float(4u), 0.0f));
+  float v = float(4u);
+  float x = texture(f_t_s, vec4(1.0f, 2.0f, 4.0f, 0.0f));
 }
 )");
 }
@@ -2779,10 +2777,9 @@ precision highp int;
 
 uniform highp sampler2DArrayShadow f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec4 v_1 = vec4(v, float(4u), 0.0f);
-  vec2 v_2 = dFdx(v);
-  float x = textureGradOffset(f_t_s, v_1, v_2, dFdy(v), ivec2(4, 5));
+  float v = float(4u);
+  vec2 v_1 = dFdx(vec2(1.0f, 2.0f));
+  float x = textureGradOffset(f_t_s, vec4(1.0f, 2.0f, 4.0f, 0.0f), v_1, dFdy(vec2(1.0f, 2.0f)), ivec2(4, 5));
 }
 )");
 }
@@ -2821,8 +2818,8 @@ precision highp int;
 
 uniform highp samplerCubeArrayShadow f_t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  float x = texture(f_t_s, vec4(v, float(4u)), 0.0f);
+  float v = float(4u);
+  float x = texture(f_t_s, vec4(1.0f, 2.0f, 3.0f, 4.0f), 0.0f);
 }
 )");
 }
@@ -2933,9 +2930,9 @@ precision highp int;
 
 uniform highp sampler2DArray f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
   float b = 3.0f;
-  vec4 x = texture(f_t_s, vec3(v, float(4u)), clamp(b, -16.0f, 15.9899997711181640625f));
+  float v = float(4u);
+  vec4 x = texture(f_t_s, vec3(1.0f, 2.0f, 4.0f), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 )");
 }
@@ -2973,9 +2970,9 @@ precision highp int;
 
 uniform highp sampler2DArray f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
   float b = 3.0f;
-  vec4 x = textureOffset(f_t_s, vec3(v, float(4u)), ivec2(4, 5), clamp(b, -16.0f, 15.9899997711181640625f));
+  float v = float(4u);
+  vec4 x = textureOffset(f_t_s, vec3(1.0f, 2.0f, 4.0f), ivec2(4, 5), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 )");
 }
@@ -3126,9 +3123,9 @@ precision highp int;
 
 uniform highp samplerCubeArray f_t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
   float b = 3.0f;
-  vec4 x = texture(f_t_s, vec4(v, float(4u)), clamp(b, -16.0f, 15.9899997711181640625f));
+  float v = float(4u);
+  vec4 x = texture(f_t_s, vec4(1.0f, 2.0f, 3.0f, 4.0f), clamp(b, -16.0f, 15.9899997711181640625f));
 }
 )");
 }
@@ -3234,8 +3231,8 @@ precision highp int;
 
 uniform highp sampler2DArray f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec4 x = textureLod(f_t_s, vec3(v, float(4u)), 3.0f);
+  float v = float(4u);
+  vec4 x = textureLod(f_t_s, vec3(1.0f, 2.0f, 4.0f), 3.0f);
 }
 )");
 }
@@ -3272,8 +3269,8 @@ precision highp int;
 
 uniform highp sampler2DArray f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec4 x = textureLodOffset(f_t_s, vec3(v, float(4u)), 3.0f, ivec2(4, 5));
+  float v = float(4u);
+  vec4 x = textureLodOffset(f_t_s, vec3(1.0f, 2.0f, 4.0f), 3.0f, ivec2(4, 5));
 }
 )");
 }
@@ -3417,8 +3414,8 @@ precision highp int;
 
 uniform highp samplerCubeArray f_t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  vec4 x = textureLod(f_t_s, vec4(v, float(4u)), 3.0f);
+  float v = float(4u);
+  vec4 x = textureLod(f_t_s, vec4(1.0f, 2.0f, 3.0f, 4.0f), 3.0f);
 }
 )");
 }
@@ -3452,8 +3449,7 @@ precision highp int;
 
 uniform highp sampler2DShadow f_t_s;
 void main() {
-  vec3 v = vec3(vec2(1.0f, 2.0f), 0.0f);
-  float x = textureLod(f_t_s, v, float(3));
+  float x = textureLod(f_t_s, vec3(1.0f, 2.0f, 0.0f), float(3));
 }
 )");
 }
@@ -3488,8 +3484,7 @@ precision highp int;
 
 uniform highp sampler2DShadow f_t_s;
 void main() {
-  vec3 v = vec3(vec2(1.0f, 2.0f), 0.0f);
-  float x = textureLodOffset(f_t_s, v, float(3), ivec2(4, 5));
+  float x = textureLodOffset(f_t_s, vec3(1.0f, 2.0f, 0.0f), float(3), ivec2(4, 5));
 }
 )");
 }
@@ -3529,9 +3524,8 @@ precision highp int;
 
 uniform highp sampler2DArrayShadow f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec4 v_1 = vec4(v, float(4u), 0.0f);
-  float x = textureLod(f_t_s, v_1, float(3u));
+  float v = float(4u);
+  float x = textureLod(f_t_s, vec4(1.0f, 2.0f, 4.0f, 0.0f), float(3u));
 }
 )");
 }
@@ -3569,9 +3563,8 @@ precision highp int;
 
 uniform highp sampler2DArrayShadow f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec4 v_1 = vec4(v, float(4u), 0.0f);
-  float x = textureLodOffset(f_t_s, v_1, float(3), ivec2(4, 5));
+  float v = float(4u);
+  float x = textureLodOffset(f_t_s, vec4(1.0f, 2.0f, 4.0f, 0.0f), float(3), ivec2(4, 5));
 }
 )");
 }
@@ -3611,9 +3604,8 @@ precision highp int;
 
 uniform highp samplerCubeArrayShadow f_t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  vec4 v_1 = vec4(v, float(4u));
-  float x = textureLod(f_t_s, v_1, 0.0f, float(3u));
+  float v = float(4u);
+  float x = textureLod(f_t_s, vec4(1.0f, 2.0f, 3.0f, 4.0f), 0.0f, float(3u));
 }
 )");
 }
@@ -3649,9 +3641,7 @@ precision highp int;
 
 uniform highp sampler2D f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec2 v_1 = vec2(3.0f, 4.0f);
-  vec4 x = textureGrad(f_t_s, v, v_1, vec2(5.0f, 6.0f));
+  vec4 x = textureGrad(f_t_s, vec2(1.0f, 2.0f), vec2(3.0f, 4.0f), vec2(5.0f, 6.0f));
 }
 )");
 }
@@ -3689,9 +3679,7 @@ precision highp int;
 
 uniform highp sampler2D f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec2 v_1 = vec2(3.0f, 4.0f);
-  vec4 x = textureGradOffset(f_t_s, v, v_1, vec2(5.0f, 6.0f), ivec2(4, 5));
+  vec4 x = textureGradOffset(f_t_s, vec2(1.0f, 2.0f), vec2(3.0f, 4.0f), vec2(5.0f, 6.0f), ivec2(4, 5));
 }
 )");
 }
@@ -3729,10 +3717,8 @@ precision highp int;
 
 uniform highp sampler2DArray f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec2 v_1 = vec2(3.0f, 4.0f);
-  vec2 v_2 = vec2(5.0f, 6.0f);
-  vec4 x = textureGrad(f_t_s, vec3(v, float(4u)), v_1, v_2);
+  float v = float(4u);
+  vec4 x = textureGrad(f_t_s, vec3(1.0f, 2.0f, 4.0f), vec2(3.0f, 4.0f), vec2(5.0f, 6.0f));
 }
 )");
 }
@@ -3771,10 +3757,8 @@ precision highp int;
 
 uniform highp sampler2DArray f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec2 v_1 = vec2(3.0f, 4.0f);
-  vec2 v_2 = vec2(5.0f, 6.0f);
-  vec4 x = textureGradOffset(f_t_s, vec3(v, float(4u)), v_1, v_2, ivec2(4, 5));
+  float v = float(4u);
+  vec4 x = textureGradOffset(f_t_s, vec3(1.0f, 2.0f, 4.0f), vec2(3.0f, 4.0f), vec2(5.0f, 6.0f), ivec2(4, 5));
 }
 )");
 }
@@ -3810,9 +3794,7 @@ precision highp int;
 
 uniform highp sampler3D f_t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  vec3 v_1 = vec3(3.0f, 4.0f, 5.0f);
-  vec4 x = textureGrad(f_t_s, v, v_1, vec3(6.0f, 7.0f, 8.0f));
+  vec4 x = textureGrad(f_t_s, vec3(1.0f, 2.0f, 3.0f), vec3(3.0f, 4.0f, 5.0f), vec3(6.0f, 7.0f, 8.0f));
 }
 )");
 }
@@ -3850,9 +3832,7 @@ precision highp int;
 
 uniform highp sampler3D f_t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  vec3 v_1 = vec3(3.0f, 4.0f, 5.0f);
-  vec4 x = textureGradOffset(f_t_s, v, v_1, vec3(6.0f, 7.0f, 8.0f), ivec3(4, 5, 6));
+  vec4 x = textureGradOffset(f_t_s, vec3(1.0f, 2.0f, 3.0f), vec3(3.0f, 4.0f, 5.0f), vec3(6.0f, 7.0f, 8.0f), ivec3(4, 5, 6));
 }
 )");
 }
@@ -3888,9 +3868,7 @@ precision highp int;
 
 uniform highp samplerCube f_t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  vec3 v_1 = vec3(3.0f, 4.0f, 5.0f);
-  vec4 x = textureGrad(f_t_s, v, v_1, vec3(6.0f, 7.0f, 8.0f));
+  vec4 x = textureGrad(f_t_s, vec3(1.0f, 2.0f, 3.0f), vec3(3.0f, 4.0f, 5.0f), vec3(6.0f, 7.0f, 8.0f));
 }
 )");
 }
@@ -3932,10 +3910,8 @@ precision highp int;
 
 uniform highp samplerCubeArray f_t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  vec3 v_1 = vec3(3.0f, 4.0f, 5.0f);
-  vec3 v_2 = vec3(6.0f, 7.0f, 8.0f);
-  vec4 x = textureGrad(f_t_s, vec4(v, float(4u)), v_1, v_2);
+  float v = float(4u);
+  vec4 x = textureGrad(f_t_s, vec4(1.0f, 2.0f, 3.0f, 4.0f), vec3(3.0f, 4.0f, 5.0f), vec3(6.0f, 7.0f, 8.0f));
 }
 )");
 }
@@ -3969,7 +3945,7 @@ precision highp int;
 
 uniform highp sampler2DShadow f_t_s;
 void main() {
-  float x = texture(f_t_s, vec3(vec2(1.0f, 2.0f), 3.0f));
+  float x = texture(f_t_s, vec3(1.0f, 2.0f, 3.0f));
 }
 )");
 }
@@ -4004,7 +3980,7 @@ precision highp int;
 
 uniform highp sampler2DShadow f_t_s;
 void main() {
-  float x = textureOffset(f_t_s, vec3(vec2(1.0f, 2.0f), 3.0f), ivec2(4, 5));
+  float x = textureOffset(f_t_s, vec3(1.0f, 2.0f, 3.0f), ivec2(4, 5));
 }
 )");
 }
@@ -4040,8 +4016,8 @@ precision highp int;
 
 uniform highp sampler2DArrayShadow f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  float x = texture(f_t_s, vec4(v, float(4u), 3.0f));
+  float v = float(4u);
+  float x = texture(f_t_s, vec4(1.0f, 2.0f, 4.0f, 3.0f));
 }
 )");
 }
@@ -4078,10 +4054,9 @@ precision highp int;
 
 uniform highp sampler2DArrayShadow f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec4 v_1 = vec4(v, float(4u), 3.0f);
-  vec2 v_2 = dFdx(v);
-  float x = textureGradOffset(f_t_s, v_1, v_2, dFdy(v), ivec2(4, 5));
+  float v = float(4u);
+  vec2 v_1 = dFdx(vec2(1.0f, 2.0f));
+  float x = textureGradOffset(f_t_s, vec4(1.0f, 2.0f, 4.0f, 3.0f), v_1, dFdy(vec2(1.0f, 2.0f)), ivec2(4, 5));
 }
 )");
 }
@@ -4115,7 +4090,7 @@ precision highp int;
 
 uniform highp samplerCubeShadow f_t_s;
 void main() {
-  float x = texture(f_t_s, vec4(vec3(1.0f, 2.0f, 3.0f), 3.0f));
+  float x = texture(f_t_s, vec4(1.0f, 2.0f, 3.0f, 3.0f));
 }
 )");
 }
@@ -4155,8 +4130,8 @@ precision highp int;
 
 uniform highp samplerCubeArrayShadow f_t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  float x = texture(f_t_s, vec4(v, float(4u)), 3.0f);
+  float v = float(4u);
+  float x = texture(f_t_s, vec4(1.0f, 2.0f, 3.0f, 4.0f), 3.0f);
 }
 )");
 }
@@ -4190,7 +4165,7 @@ precision highp int;
 
 uniform highp sampler2DShadow f_t_s;
 void main() {
-  float x = texture(f_t_s, vec3(vec2(1.0f, 2.0f), 3.0f));
+  float x = texture(f_t_s, vec3(1.0f, 2.0f, 3.0f));
 }
 )");
 }
@@ -4226,7 +4201,7 @@ precision highp int;
 
 uniform highp sampler2DShadow f_t_s;
 void main() {
-  float x = textureOffset(f_t_s, vec3(vec2(1.0f, 2.0f), 3.0f), ivec2(4, 5));
+  float x = textureOffset(f_t_s, vec3(1.0f, 2.0f, 3.0f), ivec2(4, 5));
 }
 )");
 }
@@ -4262,8 +4237,8 @@ precision highp int;
 
 uniform highp sampler2DArrayShadow f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  float x = texture(f_t_s, vec4(v, float(4u), 3.0f));
+  float v = float(4u);
+  float x = texture(f_t_s, vec4(1.0f, 2.0f, 4.0f, 3.0f));
 }
 )");
 }
@@ -4304,8 +4279,8 @@ precision highp int;
 
 uniform highp sampler2DArrayShadow f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  float x = textureGradOffset(f_t_s, vec4(v, float(4u), 3.0f), vec2(0.0f), vec2(0.0f), ivec2(4, 5));
+  float v = float(4u);
+  float x = textureGradOffset(f_t_s, vec4(1.0f, 2.0f, 4.0f, 3.0f), vec2(0.0f), vec2(0.0f), ivec2(4, 5));
 }
 )");
 }
@@ -4339,7 +4314,7 @@ precision highp int;
 
 uniform highp samplerCubeShadow f_t_s;
 void main() {
-  float x = texture(f_t_s, vec4(vec3(1.0f, 2.0f, 3.0f), 3.0f));
+  float x = texture(f_t_s, vec4(1.0f, 2.0f, 3.0f, 3.0f));
 }
 )");
 }
@@ -4379,8 +4354,8 @@ precision highp int;
 
 uniform highp samplerCubeArrayShadow f_t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  float x = texture(f_t_s, vec4(v, float(4u)), 3.0f);
+  float v = float(4u);
+  float x = texture(f_t_s, vec4(1.0f, 2.0f, 3.0f, 4.0f), 3.0f);
 }
 )");
 }

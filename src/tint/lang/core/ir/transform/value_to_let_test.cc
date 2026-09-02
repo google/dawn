@@ -1015,11 +1015,10 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %4:vec2<f32> = construct 1.0f, 2.0f
-    %5:texture_depth_2d = load %1
-    %6:sampler = load %2
-    %7:vec4<f32> = textureGather %5, %6, %4
-    %x:vec4<f32> = let %7
+    %4:texture_depth_2d = load %1
+    %5:sampler = load %2
+    %6:vec4<f32> = textureGather %4, %5, vec2<f32>(1.0f, 2.0f)
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -1034,11 +1033,10 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %4:vec2<f32> = construct 1.0f, 2.0f
-    %5:texture_depth_2d = load %1
-    %6:sampler = load %2
-    %7:vec4<f32> = textureGather %5, %6, %4
-    %x:vec4<f32> = let %7
+    %4:texture_depth_2d = load %1
+    %5:sampler = load %2
+    %6:vec4<f32> = textureGather %4, %5, vec2<f32>(1.0f, 2.0f)
+    %x:vec4<f32> = let %6
     ret
   }
 }

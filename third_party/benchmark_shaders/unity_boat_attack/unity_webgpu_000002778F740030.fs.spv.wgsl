@@ -1805,7 +1805,7 @@ fn main_inner(vs_INTERP9 : vec3<f32>, vs_INTERP4 : vec4<f32>, vs_INTERP8 : vec3<
           let v_408 = ((u_xlat11.xz * vec2<f32>(0.5f)) + vec2<f32>(0.5f));
           let v_409 = u_xlat11;
           u_xlat11 = vec4<f32>(v_408.x, v_409.y, v_408.y, v_409.w);
-          let v_410 = clamp(u_xlat11.xz, vec2<f32>(0.0f, 0.0f), vec2<f32>(1.0f, 1.0f));
+          let v_410 = clamp(u_xlat11.xz, vec2<f32>(), vec2<f32>(1.0f));
           let v_411 = u_xlat11;
           u_xlat11 = vec4<f32>(v_410.x, v_411.y, v_410.y, v_411.w);
           let v_412 = ((v_4._AdditionalLightsCookieAtlasUVRects[u_xlati84].xy * u_xlat11.xz) + v_4._AdditionalLightsCookieAtlasUVRects[u_xlati84].zw);
@@ -1870,7 +1870,7 @@ fn main_inner(vs_INTERP9 : vec3<f32>, vs_INTERP4 : vec4<f32>, vs_INTERP8 : vec3<
             u_xlat37 = vec3<f32>(v_430.x, u_xlat37.y, v_430.y);
             let v_431 = ((u_xlat37.xz * vec2<f32>(0.5f)) + vec2<f32>(0.5f));
             u_xlat37 = vec3<f32>(v_431.x, u_xlat37.y, v_431.y);
-            let v_432 = clamp(u_xlat37.xz, vec2<f32>(0.0f, 0.0f), vec2<f32>(1.0f, 1.0f));
+            let v_432 = clamp(u_xlat37.xz, vec2<f32>(), vec2<f32>(1.0f));
             u_xlat37 = vec3<f32>(v_432.x, u_xlat37.y, v_432.y);
             let v_433 = ((v_4._AdditionalLightsCookieAtlasUVRects[u_xlati84].xy * u_xlat37.xz) + v_4._AdditionalLightsCookieAtlasUVRects[u_xlati84].zw);
             let v_434 = u_xlat11;

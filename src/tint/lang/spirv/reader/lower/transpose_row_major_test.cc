@@ -910,8 +910,7 @@ $B1: {  # root
 %f = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<storage, vec3<f32>, read_write> = access %s, 0u, 1u
-    %4:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    store %3, %4
+    store %3, vec3<f32>(1.0f, 2.0f, 3.0f)
     ret
   }
 }
@@ -935,22 +934,21 @@ $B1: {  # root
 %f = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<storage, mat3x2<f32>, read_write> = access %s, 0u
-    %4:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %5:void = call %tint_store_row_major_column, %3, 1u, %4
+    %4:void = call %tint_store_row_major_column, %3, 1u, vec3<f32>(1.0f, 2.0f, 3.0f)
     ret
   }
 }
-%tint_store_row_major_column = func(%7:ptr<storage, mat3x2<f32>, read_write>, %8:u32, %9:vec3<f32>):void {
+%tint_store_row_major_column = func(%6:ptr<storage, mat3x2<f32>, read_write>, %7:u32, %8:vec3<f32>):void {
   $B3: {
-    %10:f32 = access %9, 0u
-    %11:ptr<storage, vec2<f32>, read_write> = access %7, 0u
-    store_vector_element %11, %8, %10
-    %12:f32 = access %9, 1u
-    %13:ptr<storage, vec2<f32>, read_write> = access %7, 1u
-    store_vector_element %13, %8, %12
-    %14:f32 = access %9, 2u
-    %15:ptr<storage, vec2<f32>, read_write> = access %7, 2u
-    store_vector_element %15, %8, %14
+    %9:f32 = access %8, 0u
+    %10:ptr<storage, vec2<f32>, read_write> = access %6, 0u
+    store_vector_element %10, %7, %9
+    %11:f32 = access %8, 1u
+    %12:ptr<storage, vec2<f32>, read_write> = access %6, 1u
+    store_vector_element %12, %7, %11
+    %13:f32 = access %8, 2u
+    %14:ptr<storage, vec2<f32>, read_write> = access %6, 2u
+    store_vector_element %14, %7, %13
     ret
   }
 }
@@ -1003,8 +1001,7 @@ $B1: {  # root
 %f = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<storage, vec3<f32>, read_write> = access %s, 0u, 1u
-    %4:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    store %3, %4
+    store %3, vec3<f32>(1.0f, 2.0f, 3.0f)
     ret
   }
 }
@@ -1028,22 +1025,21 @@ $B1: {  # root
 %f = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<storage, mat3x3<f32>, read_write> = access %s, 0u
-    %4:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %5:void = call %tint_store_row_major_column, %3, 1u, %4
+    %4:void = call %tint_store_row_major_column, %3, 1u, vec3<f32>(1.0f, 2.0f, 3.0f)
     ret
   }
 }
-%tint_store_row_major_column = func(%7:ptr<storage, mat3x3<f32>, read_write>, %8:u32, %9:vec3<f32>):void {
+%tint_store_row_major_column = func(%6:ptr<storage, mat3x3<f32>, read_write>, %7:u32, %8:vec3<f32>):void {
   $B3: {
-    %10:f32 = access %9, 0u
-    %11:ptr<storage, vec3<f32>, read_write> = access %7, 0u
-    store_vector_element %11, %8, %10
-    %12:f32 = access %9, 1u
-    %13:ptr<storage, vec3<f32>, read_write> = access %7, 1u
-    store_vector_element %13, %8, %12
-    %14:f32 = access %9, 2u
-    %15:ptr<storage, vec3<f32>, read_write> = access %7, 2u
-    store_vector_element %15, %8, %14
+    %9:f32 = access %8, 0u
+    %10:ptr<storage, vec3<f32>, read_write> = access %6, 0u
+    store_vector_element %10, %7, %9
+    %11:f32 = access %8, 1u
+    %12:ptr<storage, vec3<f32>, read_write> = access %6, 1u
+    store_vector_element %12, %7, %11
+    %13:f32 = access %8, 2u
+    %14:ptr<storage, vec3<f32>, read_write> = access %6, 2u
+    store_vector_element %14, %7, %13
     ret
   }
 }
@@ -3043,8 +3039,7 @@ $B1: {  # root
 %f = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<storage, array<mat2x3<f32>, 4>, read_write> = access %s, 0u
-    %4:array<mat2x3<f32>, 4> = construct
-    store %3, %4
+    store %3, array<mat2x3<f32>, 4>(mat2x3<f32>(vec3<f32>(0.0f)))
     ret
   }
 }
@@ -3068,39 +3063,38 @@ $B1: {  # root
 %f = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<storage, array<mat3x2<f32>, 4>, read_write> = access %s, 0u
-    %4:array<mat2x3<f32>, 4> = construct
-    %5:array<mat3x2<f32>, 4> = call %tint_transpose_row_major_array, %4
-    store %3, %5
+    %4:array<mat3x2<f32>, 4> = call %tint_transpose_row_major_array, array<mat2x3<f32>, 4>(mat2x3<f32>(vec3<f32>(0.0f)))
+    store %3, %4
     ret
   }
 }
-%tint_transpose_row_major_array = func(%7:array<mat2x3<f32>, 4>):array<mat3x2<f32>, 4> {
+%tint_transpose_row_major_array = func(%6:array<mat2x3<f32>, 4>):array<mat3x2<f32>, 4> {
   $B3: {
-    %8:ptr<function, array<mat3x2<f32>, 4>, read_write> = var undef
+    %7:ptr<function, array<mat3x2<f32>, 4>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
-        %10:bool = gte %idx, 4u
-        if %10 [t: $B7] {  # if_1
+        %9:bool = gte %idx, 4u
+        if %9 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %11:mat2x3<f32> = access %7, %idx
-        %12:mat3x2<f32> = transpose %11
-        %13:ptr<function, mat3x2<f32>, read_write> = access %8, %idx
-        store %13, %12
+        %10:mat2x3<f32> = access %6, %idx
+        %11:mat3x2<f32> = transpose %10
+        %12:ptr<function, mat3x2<f32>, read_write> = access %7, %idx
+        store %12, %11
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %14:u32 = add %idx, 1u
-        next_iteration %14  # -> $B5
+        %13:u32 = add %idx, 1u
+        next_iteration %13  # -> $B5
       }
     }
-    %15:array<mat3x2<f32>, 4> = load %8
-    ret %15
+    %14:array<mat3x2<f32>, 4> = load %7
+    ret %14
   }
 }
 )";
@@ -3152,8 +3146,7 @@ $B1: {  # root
 %f = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<storage, array<mat3x3<f32>, 4>, read_write> = access %s, 0u
-    %4:array<mat3x3<f32>, 4> = construct
-    store %3, %4
+    store %3, array<mat3x3<f32>, 4>(mat3x3<f32>(vec3<f32>(0.0f)))
     ret
   }
 }
@@ -3177,39 +3170,38 @@ $B1: {  # root
 %f = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<storage, array<mat3x3<f32>, 4>, read_write> = access %s, 0u
-    %4:array<mat3x3<f32>, 4> = construct
-    %5:array<mat3x3<f32>, 4> = call %tint_transpose_row_major_array, %4
-    store %3, %5
+    %4:array<mat3x3<f32>, 4> = call %tint_transpose_row_major_array, array<mat3x3<f32>, 4>(mat3x3<f32>(vec3<f32>(0.0f)))
+    store %3, %4
     ret
   }
 }
-%tint_transpose_row_major_array = func(%7:array<mat3x3<f32>, 4>):array<mat3x3<f32>, 4> {
+%tint_transpose_row_major_array = func(%6:array<mat3x3<f32>, 4>):array<mat3x3<f32>, 4> {
   $B3: {
-    %8:ptr<function, array<mat3x3<f32>, 4>, read_write> = var undef
+    %7:ptr<function, array<mat3x3<f32>, 4>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
-        %10:bool = gte %idx, 4u
-        if %10 [t: $B7] {  # if_1
+        %9:bool = gte %idx, 4u
+        if %9 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %11:mat3x3<f32> = access %7, %idx
-        %12:mat3x3<f32> = transpose %11
-        %13:ptr<function, mat3x3<f32>, read_write> = access %8, %idx
-        store %13, %12
+        %10:mat3x3<f32> = access %6, %idx
+        %11:mat3x3<f32> = transpose %10
+        %12:ptr<function, mat3x3<f32>, read_write> = access %7, %idx
+        store %12, %11
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %14:u32 = add %idx, 1u
-        next_iteration %14  # -> $B5
+        %13:u32 = add %idx, 1u
+        next_iteration %13  # -> $B5
       }
     }
-    %15:array<mat3x3<f32>, 4> = load %8
-    ret %15
+    %14:array<mat3x3<f32>, 4> = load %7
+    ret %14
   }
 }
 )";
@@ -3283,20 +3275,19 @@ $B1: {  # root
     %3:ptr<storage, array<array<mat2x3<f32>, 4>, 5>, read_write> = access %s, 0u
     %4:array<array<mat2x3<f32>, 4>, 5> = load %3
     %x:array<array<mat2x3<f32>, 4>, 5> = let %4
-    %6:array<array<mat2x3<f32>, 4>, 5> = construct
-    store %3, %6
-    %7:ptr<storage, array<mat2x3<f32>, 4>, read_write> = access %3, 0u
-    %8:array<mat2x3<f32>, 4> = access %x, 1u
-    store %7, %8
-    %9:ptr<storage, mat2x3<f32>, read_write> = access %3, 1u, 2u
-    %10:mat2x3<f32> = access %x, 2u, 3u
-    store %9, %10
-    %11:ptr<storage, vec3<f32>, read_write> = access %3, 2u, 3u, 1u
-    %12:vec3<f32> = access %x, 4u, 3u, 1u
-    store %11, %12
-    %13:ptr<storage, vec3<f32>, read_write> = access %3, 4u, 2u, 0u
-    %14:f32 = access %x, 1u, 3u, 0u, 2u
-    store_vector_element %13, 1u, %14
+    store %3, array<array<mat2x3<f32>, 4>, 5>(array<mat2x3<f32>, 4>(mat2x3<f32>(vec3<f32>(0.0f))))
+    %6:ptr<storage, array<mat2x3<f32>, 4>, read_write> = access %3, 0u
+    %7:array<mat2x3<f32>, 4> = access %x, 1u
+    store %6, %7
+    %8:ptr<storage, mat2x3<f32>, read_write> = access %3, 1u, 2u
+    %9:mat2x3<f32> = access %x, 2u, 3u
+    store %8, %9
+    %10:ptr<storage, vec3<f32>, read_write> = access %3, 2u, 3u, 1u
+    %11:vec3<f32> = access %x, 4u, 3u, 1u
+    store %10, %11
+    %12:ptr<storage, vec3<f32>, read_write> = access %3, 4u, 2u, 0u
+    %13:f32 = access %x, 1u, 3u, 0u, 2u
+    store_vector_element %12, 1u, %13
     ret
   }
 }
@@ -3323,154 +3314,153 @@ $B1: {  # root
     %4:array<array<mat3x2<f32>, 4>, 5> = load %3
     %5:array<array<mat2x3<f32>, 4>, 5> = call %tint_transpose_row_major_array, %4
     %x:array<array<mat2x3<f32>, 4>, 5> = let %5
-    %8:array<array<mat2x3<f32>, 4>, 5> = construct
-    %9:array<array<mat3x2<f32>, 4>, 5> = call %tint_transpose_row_major_array_1, %8
-    store %3, %9
-    %11:ptr<storage, array<mat3x2<f32>, 4>, read_write> = access %3, 0u
-    %12:array<mat2x3<f32>, 4> = access %x, 1u
-    %13:array<mat3x2<f32>, 4> = call %tint_transpose_row_major_array_2, %12
-    store %11, %13
-    %15:ptr<storage, mat3x2<f32>, read_write> = access %3, 1u, 2u
-    %16:mat2x3<f32> = access %x, 2u, 3u
-    %17:mat3x2<f32> = transpose %16
-    store %15, %17
-    %18:ptr<storage, mat3x2<f32>, read_write> = access %3, 2u, 3u
-    %19:vec3<f32> = access %x, 4u, 3u, 1u
-    %20:void = call %tint_store_row_major_column, %18, 1u, %19
-    %22:ptr<storage, mat3x2<f32>, read_write> = access %3, 4u, 2u
-    %23:ptr<storage, vec2<f32>, read_write> = access %22, 1u
-    %24:f32 = access %x, 1u, 3u, 0u, 2u
-    store_vector_element %23, 0u, %24
+    %8:array<array<mat3x2<f32>, 4>, 5> = call %tint_transpose_row_major_array_1, array<array<mat2x3<f32>, 4>, 5>(array<mat2x3<f32>, 4>(mat2x3<f32>(vec3<f32>(0.0f))))
+    store %3, %8
+    %10:ptr<storage, array<mat3x2<f32>, 4>, read_write> = access %3, 0u
+    %11:array<mat2x3<f32>, 4> = access %x, 1u
+    %12:array<mat3x2<f32>, 4> = call %tint_transpose_row_major_array_2, %11
+    store %10, %12
+    %14:ptr<storage, mat3x2<f32>, read_write> = access %3, 1u, 2u
+    %15:mat2x3<f32> = access %x, 2u, 3u
+    %16:mat3x2<f32> = transpose %15
+    store %14, %16
+    %17:ptr<storage, mat3x2<f32>, read_write> = access %3, 2u, 3u
+    %18:vec3<f32> = access %x, 4u, 3u, 1u
+    %19:void = call %tint_store_row_major_column, %17, 1u, %18
+    %21:ptr<storage, mat3x2<f32>, read_write> = access %3, 4u, 2u
+    %22:ptr<storage, vec2<f32>, read_write> = access %21, 1u
+    %23:f32 = access %x, 1u, 3u, 0u, 2u
+    store_vector_element %22, 0u, %23
     ret
   }
 }
-%tint_transpose_row_major_array = func(%25:array<array<mat3x2<f32>, 4>, 5>):array<array<mat2x3<f32>, 4>, 5> {
+%tint_transpose_row_major_array = func(%24:array<array<mat3x2<f32>, 4>, 5>):array<array<mat2x3<f32>, 4>, 5> {
   $B3: {
-    %26:ptr<function, array<array<mat2x3<f32>, 4>, 5>, read_write> = var undef
+    %25:ptr<function, array<array<mat2x3<f32>, 4>, 5>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
-        %28:bool = gte %idx, 5u
-        if %28 [t: $B7] {  # if_1
+        %27:bool = gte %idx, 5u
+        if %27 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %29:array<mat3x2<f32>, 4> = access %25, %idx
-        %30:array<mat2x3<f32>, 4> = call %tint_transpose_row_major_array_3, %29
-        %32:ptr<function, array<mat2x3<f32>, 4>, read_write> = access %26, %idx
-        store %32, %30
+        %28:array<mat3x2<f32>, 4> = access %24, %idx
+        %29:array<mat2x3<f32>, 4> = call %tint_transpose_row_major_array_3, %28
+        %31:ptr<function, array<mat2x3<f32>, 4>, read_write> = access %25, %idx
+        store %31, %29
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %33:u32 = add %idx, 1u
-        next_iteration %33  # -> $B5
+        %32:u32 = add %idx, 1u
+        next_iteration %32  # -> $B5
       }
     }
-    %34:array<array<mat2x3<f32>, 4>, 5> = load %26
-    ret %34
+    %33:array<array<mat2x3<f32>, 4>, 5> = load %25
+    ret %33
   }
 }
-%tint_transpose_row_major_array_3 = func(%35:array<mat3x2<f32>, 4>):array<mat2x3<f32>, 4> {  # %tint_transpose_row_major_array_3: 'tint_transpose_row_major_array'
+%tint_transpose_row_major_array_3 = func(%34:array<mat3x2<f32>, 4>):array<mat2x3<f32>, 4> {  # %tint_transpose_row_major_array_3: 'tint_transpose_row_major_array'
   $B8: {
-    %36:ptr<function, array<mat2x3<f32>, 4>, read_write> = var undef
+    %35:ptr<function, array<mat2x3<f32>, 4>, read_write> = var undef
     loop [i: $B9, b: $B10, c: $B11] {  # loop_2
       $B9: {  # initializer
         next_iteration 0u  # -> $B10
       }
       $B10 (%idx_1:u32): {  # body
-        %38:bool = gte %idx_1, 4u
-        if %38 [t: $B12] {  # if_2
+        %37:bool = gte %idx_1, 4u
+        if %37 [t: $B12] {  # if_2
           $B12: {  # true
             exit_loop  # loop_2
           }
         }
-        %39:mat3x2<f32> = access %35, %idx_1
-        %40:mat2x3<f32> = transpose %39
-        %41:ptr<function, mat2x3<f32>, read_write> = access %36, %idx_1
-        store %41, %40
+        %38:mat3x2<f32> = access %34, %idx_1
+        %39:mat2x3<f32> = transpose %38
+        %40:ptr<function, mat2x3<f32>, read_write> = access %35, %idx_1
+        store %40, %39
         continue  # -> $B11
       }
       $B11: {  # continuing
-        %42:u32 = add %idx_1, 1u
-        next_iteration %42  # -> $B10
+        %41:u32 = add %idx_1, 1u
+        next_iteration %41  # -> $B10
       }
     }
-    %43:array<mat2x3<f32>, 4> = load %36
-    ret %43
+    %42:array<mat2x3<f32>, 4> = load %35
+    ret %42
   }
 }
-%tint_transpose_row_major_array_1 = func(%44:array<array<mat2x3<f32>, 4>, 5>):array<array<mat3x2<f32>, 4>, 5> {  # %tint_transpose_row_major_array_1: 'tint_transpose_row_major_array'
+%tint_transpose_row_major_array_1 = func(%43:array<array<mat2x3<f32>, 4>, 5>):array<array<mat3x2<f32>, 4>, 5> {  # %tint_transpose_row_major_array_1: 'tint_transpose_row_major_array'
   $B13: {
-    %45:ptr<function, array<array<mat3x2<f32>, 4>, 5>, read_write> = var undef
+    %44:ptr<function, array<array<mat3x2<f32>, 4>, 5>, read_write> = var undef
     loop [i: $B14, b: $B15, c: $B16] {  # loop_3
       $B14: {  # initializer
         next_iteration 0u  # -> $B15
       }
       $B15 (%idx_2:u32): {  # body
-        %47:bool = gte %idx_2, 5u
-        if %47 [t: $B17] {  # if_3
+        %46:bool = gte %idx_2, 5u
+        if %46 [t: $B17] {  # if_3
           $B17: {  # true
             exit_loop  # loop_3
           }
         }
-        %48:array<mat2x3<f32>, 4> = access %44, %idx_2
-        %49:array<mat3x2<f32>, 4> = call %tint_transpose_row_major_array_2, %48
-        %50:ptr<function, array<mat3x2<f32>, 4>, read_write> = access %45, %idx_2
-        store %50, %49
+        %47:array<mat2x3<f32>, 4> = access %43, %idx_2
+        %48:array<mat3x2<f32>, 4> = call %tint_transpose_row_major_array_2, %47
+        %49:ptr<function, array<mat3x2<f32>, 4>, read_write> = access %44, %idx_2
+        store %49, %48
         continue  # -> $B16
       }
       $B16: {  # continuing
-        %51:u32 = add %idx_2, 1u
-        next_iteration %51  # -> $B15
+        %50:u32 = add %idx_2, 1u
+        next_iteration %50  # -> $B15
       }
     }
-    %52:array<array<mat3x2<f32>, 4>, 5> = load %45
-    ret %52
+    %51:array<array<mat3x2<f32>, 4>, 5> = load %44
+    ret %51
   }
 }
-%tint_transpose_row_major_array_2 = func(%53:array<mat2x3<f32>, 4>):array<mat3x2<f32>, 4> {  # %tint_transpose_row_major_array_2: 'tint_transpose_row_major_array'
+%tint_transpose_row_major_array_2 = func(%52:array<mat2x3<f32>, 4>):array<mat3x2<f32>, 4> {  # %tint_transpose_row_major_array_2: 'tint_transpose_row_major_array'
   $B18: {
-    %54:ptr<function, array<mat3x2<f32>, 4>, read_write> = var undef
+    %53:ptr<function, array<mat3x2<f32>, 4>, read_write> = var undef
     loop [i: $B19, b: $B20, c: $B21] {  # loop_4
       $B19: {  # initializer
         next_iteration 0u  # -> $B20
       }
       $B20 (%idx_3:u32): {  # body
-        %56:bool = gte %idx_3, 4u
-        if %56 [t: $B22] {  # if_4
+        %55:bool = gte %idx_3, 4u
+        if %55 [t: $B22] {  # if_4
           $B22: {  # true
             exit_loop  # loop_4
           }
         }
-        %57:mat2x3<f32> = access %53, %idx_3
-        %58:mat3x2<f32> = transpose %57
-        %59:ptr<function, mat3x2<f32>, read_write> = access %54, %idx_3
-        store %59, %58
+        %56:mat2x3<f32> = access %52, %idx_3
+        %57:mat3x2<f32> = transpose %56
+        %58:ptr<function, mat3x2<f32>, read_write> = access %53, %idx_3
+        store %58, %57
         continue  # -> $B21
       }
       $B21: {  # continuing
-        %60:u32 = add %idx_3, 1u
-        next_iteration %60  # -> $B20
+        %59:u32 = add %idx_3, 1u
+        next_iteration %59  # -> $B20
       }
     }
-    %61:array<mat3x2<f32>, 4> = load %54
-    ret %61
+    %60:array<mat3x2<f32>, 4> = load %53
+    ret %60
   }
 }
-%tint_store_row_major_column = func(%62:ptr<storage, mat3x2<f32>, read_write>, %63:u32, %64:vec3<f32>):void {
+%tint_store_row_major_column = func(%61:ptr<storage, mat3x2<f32>, read_write>, %62:u32, %63:vec3<f32>):void {
   $B23: {
-    %65:f32 = access %64, 0u
-    %66:ptr<storage, vec2<f32>, read_write> = access %62, 0u
-    store_vector_element %66, %63, %65
-    %67:f32 = access %64, 1u
-    %68:ptr<storage, vec2<f32>, read_write> = access %62, 1u
-    store_vector_element %68, %63, %67
-    %69:f32 = access %64, 2u
-    %70:ptr<storage, vec2<f32>, read_write> = access %62, 2u
-    store_vector_element %70, %63, %69
+    %64:f32 = access %63, 0u
+    %65:ptr<storage, vec2<f32>, read_write> = access %61, 0u
+    store_vector_element %65, %62, %64
+    %66:f32 = access %63, 1u
+    %67:ptr<storage, vec2<f32>, read_write> = access %61, 1u
+    store_vector_element %67, %62, %66
+    %68:f32 = access %63, 2u
+    %69:ptr<storage, vec2<f32>, read_write> = access %61, 2u
+    store_vector_element %69, %62, %68
     ret
   }
 }
@@ -3692,20 +3682,19 @@ $B1: {  # root
     %3:ptr<storage, array<array<mat3x3<f32>, 4>, 5>, read_write> = access %s, 0u
     %4:array<array<mat3x3<f32>, 4>, 5> = load %3
     %x:array<array<mat3x3<f32>, 4>, 5> = let %4
-    %6:array<array<mat3x3<f32>, 4>, 5> = construct
-    store %3, %6
-    %7:ptr<storage, array<mat3x3<f32>, 4>, read_write> = access %3, 0u
-    %8:array<mat3x3<f32>, 4> = access %x, 1u
-    store %7, %8
-    %9:ptr<storage, mat3x3<f32>, read_write> = access %3, 1u, 2u
-    %10:mat3x3<f32> = access %x, 2u, 3u
-    store %9, %10
-    %11:ptr<storage, vec3<f32>, read_write> = access %3, 2u, 3u, 1u
-    %12:vec3<f32> = access %x, 4u, 3u, 1u
-    store %11, %12
-    %13:ptr<storage, vec3<f32>, read_write> = access %3, 4u, 2u, 0u
-    %14:f32 = access %x, 1u, 3u, 0u, 2u
-    store_vector_element %13, 1u, %14
+    store %3, array<array<mat3x3<f32>, 4>, 5>(array<mat3x3<f32>, 4>(mat3x3<f32>(vec3<f32>(0.0f))))
+    %6:ptr<storage, array<mat3x3<f32>, 4>, read_write> = access %3, 0u
+    %7:array<mat3x3<f32>, 4> = access %x, 1u
+    store %6, %7
+    %8:ptr<storage, mat3x3<f32>, read_write> = access %3, 1u, 2u
+    %9:mat3x3<f32> = access %x, 2u, 3u
+    store %8, %9
+    %10:ptr<storage, vec3<f32>, read_write> = access %3, 2u, 3u, 1u
+    %11:vec3<f32> = access %x, 4u, 3u, 1u
+    store %10, %11
+    %12:ptr<storage, vec3<f32>, read_write> = access %3, 4u, 2u, 0u
+    %13:f32 = access %x, 1u, 3u, 0u, 2u
+    store_vector_element %12, 1u, %13
     ret
   }
 }
@@ -3732,96 +3721,95 @@ $B1: {  # root
     %4:array<array<mat3x3<f32>, 4>, 5> = load %3
     %5:array<array<mat3x3<f32>, 4>, 5> = call %tint_transpose_row_major_array, %4
     %x:array<array<mat3x3<f32>, 4>, 5> = let %5
-    %8:array<array<mat3x3<f32>, 4>, 5> = construct
-    %9:array<array<mat3x3<f32>, 4>, 5> = call %tint_transpose_row_major_array, %8
-    store %3, %9
-    %10:ptr<storage, array<mat3x3<f32>, 4>, read_write> = access %3, 0u
-    %11:array<mat3x3<f32>, 4> = access %x, 1u
-    %12:array<mat3x3<f32>, 4> = call %tint_transpose_row_major_array_1, %11
-    store %10, %12
-    %14:ptr<storage, mat3x3<f32>, read_write> = access %3, 1u, 2u
-    %15:mat3x3<f32> = access %x, 2u, 3u
-    %16:mat3x3<f32> = transpose %15
-    store %14, %16
-    %17:ptr<storage, mat3x3<f32>, read_write> = access %3, 2u, 3u
-    %18:vec3<f32> = access %x, 4u, 3u, 1u
-    %19:void = call %tint_store_row_major_column, %17, 1u, %18
-    %21:ptr<storage, mat3x3<f32>, read_write> = access %3, 4u, 2u
-    %22:ptr<storage, vec3<f32>, read_write> = access %21, 1u
-    %23:f32 = access %x, 1u, 3u, 0u, 2u
-    store_vector_element %22, 0u, %23
+    %8:array<array<mat3x3<f32>, 4>, 5> = call %tint_transpose_row_major_array, array<array<mat3x3<f32>, 4>, 5>(array<mat3x3<f32>, 4>(mat3x3<f32>(vec3<f32>(0.0f))))
+    store %3, %8
+    %9:ptr<storage, array<mat3x3<f32>, 4>, read_write> = access %3, 0u
+    %10:array<mat3x3<f32>, 4> = access %x, 1u
+    %11:array<mat3x3<f32>, 4> = call %tint_transpose_row_major_array_1, %10
+    store %9, %11
+    %13:ptr<storage, mat3x3<f32>, read_write> = access %3, 1u, 2u
+    %14:mat3x3<f32> = access %x, 2u, 3u
+    %15:mat3x3<f32> = transpose %14
+    store %13, %15
+    %16:ptr<storage, mat3x3<f32>, read_write> = access %3, 2u, 3u
+    %17:vec3<f32> = access %x, 4u, 3u, 1u
+    %18:void = call %tint_store_row_major_column, %16, 1u, %17
+    %20:ptr<storage, mat3x3<f32>, read_write> = access %3, 4u, 2u
+    %21:ptr<storage, vec3<f32>, read_write> = access %20, 1u
+    %22:f32 = access %x, 1u, 3u, 0u, 2u
+    store_vector_element %21, 0u, %22
     ret
   }
 }
-%tint_transpose_row_major_array = func(%24:array<array<mat3x3<f32>, 4>, 5>):array<array<mat3x3<f32>, 4>, 5> {
+%tint_transpose_row_major_array = func(%23:array<array<mat3x3<f32>, 4>, 5>):array<array<mat3x3<f32>, 4>, 5> {
   $B3: {
-    %25:ptr<function, array<array<mat3x3<f32>, 4>, 5>, read_write> = var undef
+    %24:ptr<function, array<array<mat3x3<f32>, 4>, 5>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
-        %27:bool = gte %idx, 5u
-        if %27 [t: $B7] {  # if_1
+        %26:bool = gte %idx, 5u
+        if %26 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %28:array<mat3x3<f32>, 4> = access %24, %idx
-        %29:array<mat3x3<f32>, 4> = call %tint_transpose_row_major_array_1, %28
-        %30:ptr<function, array<mat3x3<f32>, 4>, read_write> = access %25, %idx
-        store %30, %29
+        %27:array<mat3x3<f32>, 4> = access %23, %idx
+        %28:array<mat3x3<f32>, 4> = call %tint_transpose_row_major_array_1, %27
+        %29:ptr<function, array<mat3x3<f32>, 4>, read_write> = access %24, %idx
+        store %29, %28
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %31:u32 = add %idx, 1u
-        next_iteration %31  # -> $B5
+        %30:u32 = add %idx, 1u
+        next_iteration %30  # -> $B5
       }
     }
-    %32:array<array<mat3x3<f32>, 4>, 5> = load %25
-    ret %32
+    %31:array<array<mat3x3<f32>, 4>, 5> = load %24
+    ret %31
   }
 }
-%tint_transpose_row_major_array_1 = func(%33:array<mat3x3<f32>, 4>):array<mat3x3<f32>, 4> {  # %tint_transpose_row_major_array_1: 'tint_transpose_row_major_array'
+%tint_transpose_row_major_array_1 = func(%32:array<mat3x3<f32>, 4>):array<mat3x3<f32>, 4> {  # %tint_transpose_row_major_array_1: 'tint_transpose_row_major_array'
   $B8: {
-    %34:ptr<function, array<mat3x3<f32>, 4>, read_write> = var undef
+    %33:ptr<function, array<mat3x3<f32>, 4>, read_write> = var undef
     loop [i: $B9, b: $B10, c: $B11] {  # loop_2
       $B9: {  # initializer
         next_iteration 0u  # -> $B10
       }
       $B10 (%idx_1:u32): {  # body
-        %36:bool = gte %idx_1, 4u
-        if %36 [t: $B12] {  # if_2
+        %35:bool = gte %idx_1, 4u
+        if %35 [t: $B12] {  # if_2
           $B12: {  # true
             exit_loop  # loop_2
           }
         }
-        %37:mat3x3<f32> = access %33, %idx_1
-        %38:mat3x3<f32> = transpose %37
-        %39:ptr<function, mat3x3<f32>, read_write> = access %34, %idx_1
-        store %39, %38
+        %36:mat3x3<f32> = access %32, %idx_1
+        %37:mat3x3<f32> = transpose %36
+        %38:ptr<function, mat3x3<f32>, read_write> = access %33, %idx_1
+        store %38, %37
         continue  # -> $B11
       }
       $B11: {  # continuing
-        %40:u32 = add %idx_1, 1u
-        next_iteration %40  # -> $B10
+        %39:u32 = add %idx_1, 1u
+        next_iteration %39  # -> $B10
       }
     }
-    %41:array<mat3x3<f32>, 4> = load %34
-    ret %41
+    %40:array<mat3x3<f32>, 4> = load %33
+    ret %40
   }
 }
-%tint_store_row_major_column = func(%42:ptr<storage, mat3x3<f32>, read_write>, %43:u32, %44:vec3<f32>):void {
+%tint_store_row_major_column = func(%41:ptr<storage, mat3x3<f32>, read_write>, %42:u32, %43:vec3<f32>):void {
   $B13: {
-    %45:f32 = access %44, 0u
-    %46:ptr<storage, vec3<f32>, read_write> = access %42, 0u
-    store_vector_element %46, %43, %45
-    %47:f32 = access %44, 1u
-    %48:ptr<storage, vec3<f32>, read_write> = access %42, 1u
-    store_vector_element %48, %43, %47
-    %49:f32 = access %44, 2u
-    %50:ptr<storage, vec3<f32>, read_write> = access %42, 2u
-    store_vector_element %50, %43, %49
+    %44:f32 = access %43, 0u
+    %45:ptr<storage, vec3<f32>, read_write> = access %41, 0u
+    store_vector_element %45, %42, %44
+    %46:f32 = access %43, 1u
+    %47:ptr<storage, vec3<f32>, read_write> = access %41, 1u
+    store_vector_element %47, %42, %46
+    %48:f32 = access %43, 2u
+    %49:ptr<storage, vec3<f32>, read_write> = access %41, 2u
+    store_vector_element %49, %42, %48
     ret
   }
 }

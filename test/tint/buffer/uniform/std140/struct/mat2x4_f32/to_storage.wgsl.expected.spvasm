@@ -66,6 +66,7 @@
    %uint_256 = OpConstant %uint 256
      %uint_1 = OpConstant %uint 1
 %_arr_uint_uint_1 = OpTypeArray %uint %uint_1
+         %33 = OpConstantComposite %_arr_uint_uint_1 %uint_1
 %_ptr_StorageBuffer_mat2v4float = OpTypePointer StorageBuffer %mat2v4float
      %uint_3 = OpConstant %uint 3
    %uint_272 = OpConstant %uint 272
@@ -91,8 +92,7 @@
          %22 = OpFunctionCall %_arr_S_uint_4_0 %24 %uint_0
          %26 = OpFunctionCall %void %tint_store_and_preserve_padding %22
          %28 = OpFunctionCall %S %29 %uint_256
-         %33 = OpCompositeConstruct %_arr_uint_uint_1 %uint_1
-         %34 = OpFunctionCall %void %tint_store_and_preserve_padding_0 %33 %28
+         %31 = OpFunctionCall %void %tint_store_and_preserve_padding_0 %33 %28
          %36 = OpAccessChain %_ptr_StorageBuffer_mat2v4float %8 %uint_0 %uint_3 %uint_1
          %39 = OpFunctionCall %mat2v4float %40 %uint_272
                OpStore %36 %39 None

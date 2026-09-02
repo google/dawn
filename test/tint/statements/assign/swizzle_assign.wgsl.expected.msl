@@ -38,7 +38,7 @@ kernel void v_2(device Buf* buf [[buffer(0)]]) {
   v[min(v_1[min(idx, 2u)], 3u)] = 400u;
   v.x = (v.x + 500u);
   device uint4* const p = (&(*tint_module_vars.buf).res);
-  (*p) = uint4(uint4(0u).x, uint4(0u).y, uint4(0u).z, uint4(0u).w);
+  (*p) = uint4(0u);
   uint4 const v_6 = (*p);
   (*p) = uint4(v_6.x, uint2(1u, 2u).y, uint2(1u, 2u).x, v_6.w);
   uint4 const v_7 = (*p);

@@ -88,7 +88,7 @@ TEST_F(IR_ConstructTest, Clone) {
 }
 
 TEST_F(IR_ConstructTest, CloneEmpty) {
-    auto* c = b.Construct(mod.Types().f32())->AsInstruction<Construct>();
+    auto* c = mod.CreateInstruction<core::ir::Construct>(b.InstructionResult(mod.Types().f32()));
 
     auto* new_c = clone_ctx.Clone(c);
     EXPECT_NE(c->Result(), new_c->Result());

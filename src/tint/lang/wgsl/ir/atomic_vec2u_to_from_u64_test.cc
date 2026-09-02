@@ -276,8 +276,7 @@ $B1: {  # root
 
 %f = func():void {
   $B2: {
-    %3:vec2<u32> = construct 1u
-    %4:void = wgsl.atomicStoreMax %v, %3
+    %3:void = wgsl.atomicStoreMax %v, vec2<u32>(1u)
     ret
   }
 }
@@ -291,9 +290,8 @@ $B1: {  # root
 
 %f = func():void {
   $B2: {
-    %3:vec2<u32> = construct 1u
-    %4:u64 = bitcast<u64> %3
-    %5:void = atomicStoreMax %v, %4
+    %3:u64 = bitcast<u64> vec2<u32>(1u)
+    %4:void = atomicStoreMax %v, %3
     ret
   }
 }
@@ -325,9 +323,8 @@ $B1: {  # root
 
 %f = func():void {
   $B2: {
-    %3:vec2<u32> = construct 1u
-    %4:u64 = bitcast<u64> %3
-    %5:void = atomicStoreMax %v, %4
+    %3:u64 = bitcast<u64> vec2<u32>(1u)
+    %4:void = atomicStoreMax %v, %3
     ret
   }
 }
@@ -341,8 +338,7 @@ $B1: {  # root
 
 %f = func():void {
   $B2: {
-    %3:vec2<u32> = construct 1u
-    %4:void = wgsl.atomicStoreMax %v, %3
+    %3:void = wgsl.atomicStoreMax %v, vec2<u32>(1u)
     ret
   }
 }
@@ -372,8 +368,7 @@ $B1: {  # root
 
 %f = func():void {
   $B2: {
-    %3:vec2<u32> = construct 1u
-    %4:void = wgsl.atomicStoreMin %v, %3
+    %3:void = wgsl.atomicStoreMin %v, vec2<u32>(1u)
     ret
   }
 }
@@ -387,9 +382,8 @@ $B1: {  # root
 
 %f = func():void {
   $B2: {
-    %3:vec2<u32> = construct 1u
-    %4:u64 = bitcast<u64> %3
-    %5:void = atomicStoreMin %v, %4
+    %3:u64 = bitcast<u64> vec2<u32>(1u)
+    %4:void = atomicStoreMin %v, %3
     ret
   }
 }
@@ -421,9 +415,8 @@ $B1: {  # root
 
 %f = func():void {
   $B2: {
-    %3:vec2<u32> = construct 1u
-    %4:u64 = bitcast<u64> %3
-    %5:void = atomicStoreMin %v, %4
+    %3:u64 = bitcast<u64> vec2<u32>(1u)
+    %4:void = atomicStoreMin %v, %3
     ret
   }
 }
@@ -437,8 +430,7 @@ $B1: {  # root
 
 %f = func():void {
   $B2: {
-    %3:vec2<u32> = construct 1u
-    %4:void = wgsl.atomicStoreMin %v, %3
+    %3:void = wgsl.atomicStoreMin %v, vec2<u32>(1u)
     ret
   }
 }
@@ -463,8 +455,7 @@ TEST_F(AtomicVec2uToFromU64Test, AtomicStoreMin_NoBinding) {
     auto* src = R"(
 %f = func(%param:ptr<storage, atomic<vec2<u32>>, read_write>):void {
   $B1: {
-    %3:vec2<u32> = construct 1u
-    %4:void = wgsl.atomicStoreMin %param, %3
+    %3:void = wgsl.atomicStoreMin %param, vec2<u32>(1u)
     ret
   }
 }
@@ -474,9 +465,8 @@ TEST_F(AtomicVec2uToFromU64Test, AtomicStoreMin_NoBinding) {
     auto* expect = R"(
 %f = func(%param:ptr<storage, atomic<u64>, read_write>):void {
   $B1: {
-    %3:vec2<u32> = construct 1u
-    %4:u64 = bitcast<u64> %3
-    %5:void = atomicStoreMin %param, %4
+    %3:u64 = bitcast<u64> vec2<u32>(1u)
+    %4:void = atomicStoreMin %param, %3
     ret
   }
 }

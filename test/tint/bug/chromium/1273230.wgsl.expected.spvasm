@@ -186,6 +186,7 @@
         %236 = OpTypeFunction %void %v3uint
        %bool = OpTypeBool
     %float_3 = OpConstant %float 3
+        %294 = OpConstantComposite %v3float %float_3 %float_3 %float_3
       %int_1 = OpConstant %int 1
         %316 = OpTypeFunction %v3uint %v3float
         %319 = OpConstantNull %v3float
@@ -460,9 +461,8 @@
         %290 = OpFAdd %v3float %288 %289
         %291 = OpLoad %v3float %p1 None
         %292 = OpFAdd %v3float %290 %291
-        %293 = OpCompositeConstruct %v3float %float_3 %float_3 %float_3
-        %295 = OpFDiv %v3float %292 %293
-               OpStore %center %295
+        %293 = OpFDiv %v3float %292 %294
+               OpStore %center %293
         %297 = OpLoad %v3float %p1 None
         %298 = OpFunctionCall %v3float %toVoxelPos %297
                OpStore %voxelPos_0 %298

@@ -66,7 +66,7 @@ class Evaluator {
     /// @param result_ty the result type
     /// @param lhs the lhs value
     /// @param rhs the rhs value
-    /// @param src the source location
+    /// @param source the source location
     EvalResult EvalCoreBinary(BinaryOp op,
                               const core::type::Type* result_ty,
                               core::ir::Value* lhs,
@@ -77,7 +77,7 @@ class Evaluator {
     /// @param op the operation
     /// @param result_ty the result type
     /// @param input the input value
-    /// @param src the source location
+    /// @param source the source location
     EvalResult EvalCoreUnary(UnaryOp op,
                              const core::type::Type* result_ty,
                              core::ir::Value* input,
@@ -88,13 +88,21 @@ class Evaluator {
     /// @param result_ty the result type
     /// @param args the argument values
     /// @param explicit_params the explicit template parameters
-    /// @param src the source location
+    /// @param source the source location
     EvalResult EvalCoreBuiltinCall(
         core::BuiltinFn fn,
         const core::type::Type* result_ty,
         VectorRef<core::ir::Value*> args,
         VectorRef<core::ir::TemplateParameter> explicit_params = tint::Empty,
         const Source& source = {});
+
+    /// Evaluate construct of `result_ty` with `args`
+    /// @param result_ty the result type
+    /// @param args the argument values
+    /// @param source the source location
+    EvalResult EvalConstruct(const core::type::Type* result_ty,
+                             VectorRef<core::ir::Value*> args,
+                             const Source& source = {});
 
   private:
     diag::Diagnostic& AddError(Source src);

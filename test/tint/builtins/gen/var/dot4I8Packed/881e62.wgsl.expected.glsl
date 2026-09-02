@@ -28,14 +28,9 @@ int tint_int_dot(ivec4 x, ivec4 y) {
 int dot4I8Packed_881e62() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
-  uint v_14 = arg_0;
-  uint v_15 = arg_1;
-  uvec4 v_16 = uvec4(24u, 16u, 8u, 0u);
-  ivec4 v_17 = ivec4((uvec4(v_14) << v_16));
-  ivec4 v_18 = (v_17 >> uvec4(24u));
-  uvec4 v_19 = uvec4(24u, 16u, 8u, 0u);
-  ivec4 v_20 = ivec4((uvec4(v_15) << v_19));
-  int res = tint_int_dot(v_18, (v_20 >> uvec4(24u)));
+  uint v_14 = arg_1;
+  ivec4 v_15 = (ivec4((uvec4(arg_0) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
+  int res = tint_int_dot(v_15, (ivec4((uvec4(v_14) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u)));
   return res;
 }
 void main() {
@@ -69,14 +64,9 @@ int tint_int_dot(ivec4 x, ivec4 y) {
 int dot4I8Packed_881e62() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
-  uint v_14 = arg_0;
-  uint v_15 = arg_1;
-  uvec4 v_16 = uvec4(24u, 16u, 8u, 0u);
-  ivec4 v_17 = ivec4((uvec4(v_14) << v_16));
-  ivec4 v_18 = (v_17 >> uvec4(24u));
-  uvec4 v_19 = uvec4(24u, 16u, 8u, 0u);
-  ivec4 v_20 = ivec4((uvec4(v_15) << v_19));
-  int res = tint_int_dot(v_18, (v_20 >> uvec4(24u)));
+  uint v_14 = arg_1;
+  ivec4 v_15 = (ivec4((uvec4(arg_0) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
+  int res = tint_int_dot(v_15, (ivec4((uvec4(v_14) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u)));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -114,25 +104,20 @@ int tint_int_dot(ivec4 x, ivec4 y) {
 int dot4I8Packed_881e62() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
-  uint v_13 = arg_0;
-  uint v_14 = arg_1;
-  uvec4 v_15 = uvec4(24u, 16u, 8u, 0u);
-  ivec4 v_16 = ivec4((uvec4(v_13) << v_15));
-  ivec4 v_17 = (v_16 >> uvec4(24u));
-  uvec4 v_18 = uvec4(24u, 16u, 8u, 0u);
-  ivec4 v_19 = ivec4((uvec4(v_14) << v_18));
-  int res = tint_int_dot(v_17, (v_19 >> uvec4(24u)));
+  uint v_13 = arg_1;
+  ivec4 v_14 = (ivec4((uvec4(arg_0) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
+  int res = tint_int_dot(v_14, (ivec4((uvec4(v_13) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u)));
   return res;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput v_20 = VertexOutput(vec4(0.0f), 0);
-  v_20.pos = vec4(0.0f);
-  v_20.prevent_dce = dot4I8Packed_881e62();
-  return v_20;
+  VertexOutput v_15 = VertexOutput(vec4(0.0f), 0);
+  v_15.pos = vec4(0.0f);
+  v_15.prevent_dce = dot4I8Packed_881e62();
+  return v_15;
 }
 void main() {
-  VertexOutput v_21 = vertex_main_inner();
-  gl_Position = vec4(v_21.pos.x, -(v_21.pos.y), ((2.0f * v_21.pos.z) - v_21.pos.w), v_21.pos.w);
-  tint_interstage_location0 = v_21.prevent_dce;
+  VertexOutput v_16 = vertex_main_inner();
+  gl_Position = vec4(v_16.pos.x, -(v_16.pos.y), ((2.0f * v_16.pos.z) - v_16.pos.w), v_16.pos.w);
+  tint_interstage_location0 = v_16.prevent_dce;
   gl_PointSize = 1.0f;
 }

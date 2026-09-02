@@ -6,7 +6,8 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D arg_0 : register(t0, space1);
 float textureLoad_9ed19e() {
   int2 v = int2((1u).xx);
-  float res = arg_0.Load(int3(v, int(1u))).x;
+  int v_1 = int(1u);
+  float res = arg_0.Load((int(1)).xxx).x;
   return res;
 }
 
@@ -22,7 +23,8 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D arg_0 : register(t0, space1);
 float textureLoad_9ed19e() {
   int2 v = int2((1u).xx);
-  float res = arg_0.Load(int3(v, int(1u))).x;
+  int v_1 = int(1u);
+  float res = arg_0.Load((int(1)).xxx).x;
   return res;
 }
 
@@ -48,21 +50,22 @@ struct vertex_main_outputs {
 Texture2D arg_0 : register(t0, space1);
 float textureLoad_9ed19e() {
   int2 v = int2((1u).xx);
-  float res = arg_0.Load(int3(v, int(1u))).x;
+  int v_1 = int(1u);
+  float res = arg_0.Load((int(1)).xxx).x;
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_1 = (VertexOutput)0;
-  v_1.pos = (0.0f).xxxx;
-  v_1.prevent_dce = textureLoad_9ed19e();
-  VertexOutput v_2 = v_1;
-  return v_2;
+  VertexOutput v_2 = (VertexOutput)0;
+  v_2.pos = (0.0f).xxxx;
+  v_2.prevent_dce = textureLoad_9ed19e();
+  VertexOutput v_3 = v_2;
+  return v_3;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
-  return v_4;
+  VertexOutput v_4 = vertex_main_inner();
+  vertex_main_outputs v_5 = {v_4.prevent_dce, v_4.pos};
+  return v_5;
 }
 

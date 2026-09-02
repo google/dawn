@@ -4,9 +4,8 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int tint_bitcast_from_f16(vector<float16_t, 2> src) {
-  uint2 v = (uint2(asuint16(src)) & (65535u).xx);
-  uint2 v_1 = (v << uint2(0u, 16u));
-  return asint((v_1.x | v_1.y));
+  uint2 v = ((uint2(asuint16(src)) & (65535u).xx) << uint2(0u, 16u));
+  return asint((v.x | v.y));
 }
 
 int bitcast_6ac6f9() {
@@ -25,9 +24,8 @@ void fragment_main() {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int tint_bitcast_from_f16(vector<float16_t, 2> src) {
-  uint2 v = (uint2(asuint16(src)) & (65535u).xx);
-  uint2 v_1 = (v << uint2(0u, 16u));
-  return asint((v_1.x | v_1.y));
+  uint2 v = ((uint2(asuint16(src)) & (65535u).xx) << uint2(0u, 16u));
+  return asint((v.x | v.y));
 }
 
 int bitcast_6ac6f9() {
@@ -56,9 +54,8 @@ struct vertex_main_outputs {
 
 
 int tint_bitcast_from_f16(vector<float16_t, 2> src) {
-  uint2 v = (uint2(asuint16(src)) & (65535u).xx);
-  uint2 v_1 = (v << uint2(0u, 16u));
-  return asint((v_1.x | v_1.y));
+  uint2 v = ((uint2(asuint16(src)) & (65535u).xx) << uint2(0u, 16u));
+  return asint((v.x | v.y));
 }
 
 int bitcast_6ac6f9() {
@@ -68,16 +65,16 @@ int bitcast_6ac6f9() {
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_2 = (VertexOutput)0;
-  v_2.pos = (0.0f).xxxx;
-  v_2.prevent_dce = bitcast_6ac6f9();
-  VertexOutput v_3 = v_2;
-  return v_3;
+  VertexOutput v_1 = (VertexOutput)0;
+  v_1.pos = (0.0f).xxxx;
+  v_1.prevent_dce = bitcast_6ac6f9();
+  VertexOutput v_2 = v_1;
+  return v_2;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_4 = vertex_main_inner();
-  vertex_main_outputs v_5 = {v_4.prevent_dce, v_4.pos};
-  return v_5;
+  VertexOutput v_3 = vertex_main_inner();
+  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
+  return v_4;
 }
 

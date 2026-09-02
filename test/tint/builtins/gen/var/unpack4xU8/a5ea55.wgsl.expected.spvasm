@@ -33,7 +33,9 @@
      %uint_8 = OpConstant %uint 8
     %uint_16 = OpConstant %uint 16
     %uint_24 = OpConstant %uint 24
+         %15 = OpConstantComposite %v4uint %uint_0 %uint_8 %uint_16 %uint_24
    %uint_255 = OpConstant %uint 255
+         %21 = OpConstantComposite %v4uint %uint_255 %uint_255 %uint_255 %uint_255
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
        %void = OpTypeVoid
          %28 = OpTypeFunction %void
@@ -44,12 +46,10 @@
         %res = OpVariable %_ptr_Function_v4uint Function
                OpStore %arg_0 %uint_1
          %12 = OpLoad %uint %arg_0 None
-         %13 = OpCompositeConstruct %v4uint %uint_0 %uint_8 %uint_16 %uint_24
-         %18 = OpCompositeConstruct %v4uint %12 %12 %12 %12
-         %19 = OpShiftRightLogical %v4uint %18 %13
-         %20 = OpCompositeConstruct %v4uint %uint_255 %uint_255 %uint_255 %uint_255
-         %22 = OpBitwiseAnd %v4uint %19 %20
-               OpStore %res %22
+         %13 = OpCompositeConstruct %v4uint %12 %12 %12 %12
+         %14 = OpShiftRightLogical %v4uint %13 %15
+         %20 = OpBitwiseAnd %v4uint %14 %21
+               OpStore %res %20
          %25 = OpLoad %v4uint %res None
                OpReturnValue %25
                OpFunctionEnd
@@ -95,7 +95,9 @@
      %uint_8 = OpConstant %uint 8
     %uint_16 = OpConstant %uint 16
     %uint_24 = OpConstant %uint 24
+         %15 = OpConstantComposite %v4uint %uint_0 %uint_8 %uint_16 %uint_24
    %uint_255 = OpConstant %uint 255
+         %21 = OpConstantComposite %v4uint %uint_255 %uint_255 %uint_255 %uint_255
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
        %void = OpTypeVoid
          %28 = OpTypeFunction %void
@@ -106,12 +108,10 @@
         %res = OpVariable %_ptr_Function_v4uint Function
                OpStore %arg_0 %uint_1
          %12 = OpLoad %uint %arg_0 None
-         %13 = OpCompositeConstruct %v4uint %uint_0 %uint_8 %uint_16 %uint_24
-         %18 = OpCompositeConstruct %v4uint %12 %12 %12 %12
-         %19 = OpShiftRightLogical %v4uint %18 %13
-         %20 = OpCompositeConstruct %v4uint %uint_255 %uint_255 %uint_255 %uint_255
-         %22 = OpBitwiseAnd %v4uint %19 %20
-               OpStore %res %22
+         %13 = OpCompositeConstruct %v4uint %12 %12 %12 %12
+         %14 = OpShiftRightLogical %v4uint %13 %15
+         %20 = OpBitwiseAnd %v4uint %14 %21
+               OpStore %res %20
          %25 = OpLoad %v4uint %res None
                OpReturnValue %25
                OpFunctionEnd
@@ -166,7 +166,9 @@
      %uint_8 = OpConstant %uint 8
     %uint_16 = OpConstant %uint 16
     %uint_24 = OpConstant %uint 24
+         %20 = OpConstantComposite %v4uint %uint_0 %uint_8 %uint_16 %uint_24
    %uint_255 = OpConstant %uint 255
+         %26 = OpConstantComposite %v4uint %uint_255 %uint_255 %uint_255 %uint_255
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
 %VertexOutput = OpTypeStruct %v4float %v4uint
          %33 = OpTypeFunction %VertexOutput
@@ -183,12 +185,10 @@
         %res = OpVariable %_ptr_Function_v4uint Function
                OpStore %arg_0 %uint_1
          %17 = OpLoad %uint %arg_0 None
-         %18 = OpCompositeConstruct %v4uint %uint_0 %uint_8 %uint_16 %uint_24
-         %23 = OpCompositeConstruct %v4uint %17 %17 %17 %17
-         %24 = OpShiftRightLogical %v4uint %23 %18
-         %25 = OpCompositeConstruct %v4uint %uint_255 %uint_255 %uint_255 %uint_255
-         %27 = OpBitwiseAnd %v4uint %24 %25
-               OpStore %res %27
+         %18 = OpCompositeConstruct %v4uint %17 %17 %17 %17
+         %19 = OpShiftRightLogical %v4uint %18 %20
+         %25 = OpBitwiseAnd %v4uint %19 %26
+               OpStore %res %25
          %30 = OpLoad %v4uint %res None
                OpReturnValue %30
                OpFunctionEnd

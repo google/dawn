@@ -767,8 +767,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinScalar_ShadowedBy_FnVar) 
 %f = func():i32 {
   $B1: {
     %f32:ptr<function, i32, read_write> = var undef
-    %3:i32 = construct
-    ret %3
+    ret 0i
   }
 }
 )";
@@ -794,8 +793,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_FnVar) 
 %f = func():i32 {
   $B1: {
     %i32:ptr<function, i32, read_write> = var undef
-    %3:i32 = construct
-    ret %3
+    ret 0i
   }
 }
 )";
@@ -805,8 +803,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_FnVar) 
 %f = func():i32 {
   $B1: {
     %i32_1:ptr<function, i32, read_write> = var undef
-    %3:i32 = construct
-    ret %3
+    ret 0i
   }
 }
 )";

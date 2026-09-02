@@ -421,27 +421,27 @@ TEST_F(SpirvParserTest, CompositeConstruct_Vector) {
         %u32 = OpTypeInt 32 0
       %vec4u = OpTypeVector %u32 4
     %ep_type = OpTypeFunction %void
-    %fn_type = OpTypeFunction %vec4u
-      %u32_1 = OpConstant %u32 1
-      %u32_2 = OpConstant %u32 2
-      %u32_3 = OpConstant %u32 3
-      %u32_4 = OpConstant %u32 4
+    %fn_type = OpTypeFunction %vec4u %u32 %u32 %u32 %u32
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
                OpReturn
                OpFunctionEnd
 
         %foo = OpFunction %vec4u None %fn_type
+          %a = OpFunctionParameter %u32
+          %b = OpFunctionParameter %u32
+          %c = OpFunctionParameter %u32
+          %d = OpFunctionParameter %u32
   %foo_start = OpLabel
-        %vec = OpCompositeConstruct %vec4u %u32_1 %u32_2 %u32_3 %u32_4
+        %vec = OpCompositeConstruct %vec4u %a %b %c %d
                OpReturnValue %vec
                OpFunctionEnd
 )",
               R"(
-%2 = func():vec4<u32> {
+%2 = func(%3:u32, %4:u32, %5:u32, %6:u32):vec4<u32> {
   $B2: {
-    %3:vec4<u32> = construct 1u, 2u, 3u, 4u
-    ret %3
+    %7:vec4<u32> = construct %3, %4, %5, %6
+    ret %7
   }
 )");
 }
@@ -457,34 +457,34 @@ TEST_F(SpirvParserTest, CompositeConstruct_Matrix) {
       %vec3f = OpTypeVector %f32 3
      %mat4x3 = OpTypeMatrix %vec3f 4
     %ep_type = OpTypeFunction %void
-    %fn_type = OpTypeFunction %mat4x3
-      %f32_1 = OpConstant %f32 1.0
-      %f32_2 = OpConstant %f32 2.0
-      %f32_3 = OpConstant %f32 3.0
+    %fn_type = OpTypeFunction %mat4x3 %f32 %f32 %f32
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
                OpReturn
                OpFunctionEnd
 
         %foo = OpFunction %mat4x3 None %fn_type
+          %a = OpFunctionParameter %f32
+          %b = OpFunctionParameter %f32
+          %c = OpFunctionParameter %f32
   %foo_start = OpLabel
-      %col_0 = OpCompositeConstruct %vec3f %f32_1 %f32_2 %f32_3
-      %col_1 = OpCompositeConstruct %vec3f %f32_2 %f32_3 %f32_1
-      %col_2 = OpCompositeConstruct %vec3f %f32_3 %f32_2 %f32_1
-      %col_3 = OpCompositeConstruct %vec3f %f32_3 %f32_3 %f32_3
+      %col_0 = OpCompositeConstruct %vec3f %a %b %c
+      %col_1 = OpCompositeConstruct %vec3f %b %c %a
+      %col_2 = OpCompositeConstruct %vec3f %c %b %a
+      %col_3 = OpCompositeConstruct %vec3f %c %c %c
         %mat = OpCompositeConstruct %mat4x3 %col_0 %col_1 %col_2 %col_3
                OpReturnValue %mat
                OpFunctionEnd
 )",
               R"(
-%2 = func():mat4x3<f32> {
+%2 = func(%3:f32, %4:f32, %5:f32):mat4x3<f32> {
   $B2: {
-    %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:vec3<f32> = construct 2.0f, 3.0f, 1.0f
-    %5:vec3<f32> = construct 3.0f, 2.0f, 1.0f
-    %6:vec3<f32> = construct 3.0f, 3.0f, 3.0f
-    %7:mat4x3<f32> = construct %3, %4, %5, %6
-    ret %7
+    %6:vec3<f32> = construct %3, %4, %5
+    %7:vec3<f32> = construct %4, %5, %3
+    %8:vec3<f32> = construct %5, %4, %3
+    %9:vec3<f32> = construct %5, %5, %5
+    %10:mat4x3<f32> = construct %6, %7, %8, %9
+    ret %10
   }
 )");
 }
@@ -498,28 +498,29 @@ TEST_F(SpirvParserTest, CompositeConstruct_Array) {
        %void = OpTypeVoid
         %u32 = OpTypeInt 32 0
     %ep_type = OpTypeFunction %void
-      %u32_1 = OpConstant %u32 1
-      %u32_2 = OpConstant %u32 2
-      %u32_3 = OpConstant %u32 3
       %u32_4 = OpConstant %u32 4
      %arr_ty = OpTypeArray %u32 %u32_4
-    %fn_type = OpTypeFunction %arr_ty
+    %fn_type = OpTypeFunction %arr_ty %u32 %u32 %u32 %u32
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
                OpReturn
                OpFunctionEnd
 
         %foo = OpFunction %arr_ty None %fn_type
+          %a = OpFunctionParameter %u32
+          %b = OpFunctionParameter %u32
+          %c = OpFunctionParameter %u32
+          %d = OpFunctionParameter %u32
   %foo_start = OpLabel
-        %arr = OpCompositeConstruct %arr_ty %u32_1 %u32_2 %u32_3 %u32_4
+        %arr = OpCompositeConstruct %arr_ty %a %b %c %d
                OpReturnValue %arr
                OpFunctionEnd
 )",
               R"(
-%2 = func():array<u32, 4> {
+%2 = func(%3:u32, %4:u32, %5:u32, %6:u32):array<u32, 4> {
   $B2: {
-    %3:array<u32, 4> = construct 1u, 2u, 3u, 4u
-    ret %3
+    %7:array<u32, 4> = construct %3, %4, %5, %6
+    ret %7
   }
 )");
 }
@@ -534,28 +535,29 @@ TEST_F(SpirvParserTest, CompositeConstruct_Array_ArrayStride_EqualsElementSize) 
        %void = OpTypeVoid
         %u32 = OpTypeInt 32 0
     %ep_type = OpTypeFunction %void
-      %u32_1 = OpConstant %u32 1
-      %u32_2 = OpConstant %u32 2
-      %u32_3 = OpConstant %u32 3
       %u32_4 = OpConstant %u32 4
      %arr_ty = OpTypeArray %u32 %u32_4
-    %fn_type = OpTypeFunction %arr_ty
+    %fn_type = OpTypeFunction %arr_ty %u32 %u32 %u32 %u32
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
                OpReturn
                OpFunctionEnd
 
         %foo = OpFunction %arr_ty None %fn_type
+          %a = OpFunctionParameter %u32
+          %b = OpFunctionParameter %u32
+          %c = OpFunctionParameter %u32
+          %d = OpFunctionParameter %u32
   %foo_start = OpLabel
-        %arr = OpCompositeConstruct %arr_ty %u32_1 %u32_2 %u32_3 %u32_4
+        %arr = OpCompositeConstruct %arr_ty %a %b %c %d
                OpReturnValue %arr
                OpFunctionEnd
 )",
               R"(
-%2 = func():array<u32, 4> {
+%2 = func(%3:u32, %4:u32, %5:u32, %6:u32):array<u32, 4> {
   $B2: {
-    %3:array<u32, 4> = construct 1u, 2u, 3u, 4u
-    ret %3
+    %7:array<u32, 4> = construct %3, %4, %5, %6
+    ret %7
   }
 )");
 }
@@ -647,28 +649,29 @@ TEST_F(SpirvParserTest, CompositeConstruct_Array_ArrayStride) {
        %void = OpTypeVoid
         %u32 = OpTypeInt 32 0
     %ep_type = OpTypeFunction %void
-      %u32_1 = OpConstant %u32 1
-      %u32_2 = OpConstant %u32 2
-      %u32_3 = OpConstant %u32 3
       %u32_4 = OpConstant %u32 4
      %arr_ty = OpTypeArray %u32 %u32_4
-    %fn_type = OpTypeFunction %arr_ty
+    %fn_type = OpTypeFunction %arr_ty %u32 %u32 %u32 %u32
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
                OpReturn
                OpFunctionEnd
 
         %foo = OpFunction %arr_ty None %fn_type
+          %a = OpFunctionParameter %u32
+          %b = OpFunctionParameter %u32
+          %c = OpFunctionParameter %u32
+          %d = OpFunctionParameter %u32
   %foo_start = OpLabel
-        %arr = OpCompositeConstruct %arr_ty %u32_1 %u32_2 %u32_3 %u32_4
+        %arr = OpCompositeConstruct %arr_ty %a %b %c %d
                OpReturnValue %arr
                OpFunctionEnd
 )",
               R"(
-%2 = func():spirv.explicit_layout_array<u32, 4, stride=16> {
+%2 = func(%3:u32, %4:u32, %5:u32, %6:u32):spirv.explicit_layout_array<u32, 4, stride=16> {
   $B2: {
-    %3:spirv.explicit_layout_array<u32, 4, stride=16> = construct 1u, 2u, 3u, 4u
-    ret %3
+    %7:spirv.explicit_layout_array<u32, 4, stride=16> = construct %3, %4, %5, %6
+    ret %7
   }
 )");
 }
@@ -683,36 +686,37 @@ TEST_F(SpirvParserTest, CompositeConstruct_ArrayOfVec) {
         %u32 = OpTypeInt 32 0
       %vec4u = OpTypeVector %u32 4
     %ep_type = OpTypeFunction %void
-      %u32_1 = OpConstant %u32 1
-      %u32_2 = OpConstant %u32 2
-      %u32_3 = OpConstant %u32 3
       %u32_4 = OpConstant %u32 4
      %arr_ty = OpTypeArray %vec4u %u32_4
-    %fn_type = OpTypeFunction %arr_ty
+    %fn_type = OpTypeFunction %arr_ty %u32 %u32 %u32 %u32
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
                OpReturn
                OpFunctionEnd
 
        %foo = OpFunction %arr_ty None %fn_type
+         %a = OpFunctionParameter %u32
+         %b = OpFunctionParameter %u32
+         %c = OpFunctionParameter %u32
+         %d = OpFunctionParameter %u32
  %foo_start = OpLabel
-       %el_0 = OpCompositeConstruct %vec4u %u32_1 %u32_2 %u32_3 %u32_4
-       %el_1 = OpCompositeConstruct %vec4u %u32_2 %u32_3 %u32_4 %u32_1
-       %el_2 = OpCompositeConstruct %vec4u %u32_3 %u32_4 %u32_1 %u32_2
-       %el_3 = OpCompositeConstruct %vec4u %u32_4 %u32_1 %u32_2 %u32_3
+       %el_0 = OpCompositeConstruct %vec4u %a %b %c %d
+       %el_1 = OpCompositeConstruct %vec4u %b %c %d %a
+       %el_2 = OpCompositeConstruct %vec4u %c %d %a %b
+       %el_3 = OpCompositeConstruct %vec4u %d %a %b %c
         %arr = OpCompositeConstruct %arr_ty %el_0 %el_1 %el_2 %el_3
                OpReturnValue %arr
                OpFunctionEnd
 )",
               R"(
-%2 = func():array<vec4<u32>, 4> {
+%2 = func(%3:u32, %4:u32, %5:u32, %6:u32):array<vec4<u32>, 4> {
   $B2: {
-    %3:vec4<u32> = construct 1u, 2u, 3u, 4u
-    %4:vec4<u32> = construct 2u, 3u, 4u, 1u
-    %5:vec4<u32> = construct 3u, 4u, 1u, 2u
-    %6:vec4<u32> = construct 4u, 1u, 2u, 3u
-    %7:array<vec4<u32>, 4> = construct %3, %4, %5, %6
-    ret %7
+    %7:vec4<u32> = construct %3, %4, %5, %6
+    %8:vec4<u32> = construct %4, %5, %6, %3
+    %9:vec4<u32> = construct %5, %6, %3, %4
+    %10:vec4<u32> = construct %6, %3, %4, %5
+    %11:array<vec4<u32>, 4> = construct %7, %8, %9, %10
+    ret %11
   }
 )");
 }
@@ -727,25 +731,26 @@ TEST_F(SpirvParserTest, CompositeConstruct_Struct) {
         %u32 = OpTypeInt 32 0
       %vec4u = OpTypeVector %u32 4
     %ep_type = OpTypeFunction %void
-      %u32_1 = OpConstant %u32 1
       %u32_2 = OpConstant %u32 2
-      %u32_3 = OpConstant %u32 3
-      %u32_4 = OpConstant %u32 4
      %arr_ty = OpTypeArray %vec4u %u32_2
      %str_ty = OpTypeStruct %u32 %vec4u %arr_ty
-    %fn_type = OpTypeFunction %str_ty
+    %fn_type = OpTypeFunction %str_ty %u32 %u32 %u32 %u32
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
                OpReturn
                OpFunctionEnd
 
         %foo = OpFunction %str_ty None %fn_type
+          %a = OpFunctionParameter %u32
+          %b = OpFunctionParameter %u32
+          %c = OpFunctionParameter %u32
+          %d = OpFunctionParameter %u32
   %foo_start = OpLabel
-       %el_0 = OpCompositeConstruct %vec4u %u32_1 %u32_2 %u32_3 %u32_4
-       %el_1 = OpCompositeConstruct %vec4u %u32_2 %u32_3 %u32_4 %u32_1
-       %el_2 = OpCompositeConstruct %vec4u %u32_3 %u32_4 %u32_1 %u32_2
+       %el_0 = OpCompositeConstruct %vec4u %a %b %c %d
+       %el_1 = OpCompositeConstruct %vec4u %b %c %d %a
+       %el_2 = OpCompositeConstruct %vec4u %c %d %a %b
         %arr = OpCompositeConstruct %arr_ty %el_1 %el_2
-        %str = OpCompositeConstruct %str_ty %u32_4 %el_0 %arr
+        %str = OpCompositeConstruct %str_ty %d %el_0 %arr
                OpReturnValue %str
                OpFunctionEnd
 )",
@@ -761,14 +766,14 @@ tint_symbol_3 = struct @align(16) {
     ret
   }
 }
-%2 = func():tint_symbol_3 {
+%2 = func(%3:u32, %4:u32, %5:u32, %6:u32):tint_symbol_3 {
   $B2: {
-    %3:vec4<u32> = construct 1u, 2u, 3u, 4u
-    %4:vec4<u32> = construct 2u, 3u, 4u, 1u
-    %5:vec4<u32> = construct 3u, 4u, 1u, 2u
-    %6:array<vec4<u32>, 2> = construct %4, %5
-    %7:tint_symbol_3 = construct 4u, %3, %6
-    ret %7
+    %7:vec4<u32> = construct %3, %4, %5, %6
+    %8:vec4<u32> = construct %4, %5, %6, %3
+    %9:vec4<u32> = construct %5, %6, %3, %4
+    %10:array<vec4<u32>, 2> = construct %8, %9
+    %11:tint_symbol_3 = construct %6, %7, %10
+    ret %11
   }
 }
 )");

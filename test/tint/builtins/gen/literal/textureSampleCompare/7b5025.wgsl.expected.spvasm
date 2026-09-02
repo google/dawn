@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 42
+; Bound: 40
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -38,16 +38,15 @@
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
     %v3float = OpTypeVector %float 3
-    %v2float = OpTypeVector %float 2
     %float_1 = OpConstant %float 1
-         %23 = OpConstantComposite %v2float %float_1 %float_1
+         %22 = OpConstantComposite %v3float %float_1 %float_1 %float_1
         %int = OpTypeInt 32 1
       %v2int = OpTypeVector %int 2
       %int_1 = OpConstant %int 1
-         %27 = OpConstantComposite %v2int %int_1 %int_1
+         %25 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_float = OpTypePointer Function %float
        %void = OpTypeVoid
-         %36 = OpTypeFunction %void
+         %34 = OpTypeFunction %void
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
      %uint_0 = OpConstant %uint 0
 %textureSampleCompare_7b5025 = OpFunction %float None %12
@@ -57,16 +56,15 @@
          %15 = OpLoad %10 %arg_1 None
          %16 = OpSampledImage %17 %14 %15
          %18 = OpConvertUToF %float %uint_1
-         %22 = OpCompositeConstruct %v3float %23 %18
-         %26 = OpImageSampleDrefImplicitLod %float %16 %22 %float_1 ConstOffset %27
-               OpStore %res %26
-         %33 = OpLoad %float %res None
-               OpReturnValue %33
+         %21 = OpImageSampleDrefImplicitLod %float %16 %22 %float_1 ConstOffset %25
+               OpStore %res %21
+         %31 = OpLoad %float %res None
+               OpReturnValue %31
                OpFunctionEnd
-%fragment_main = OpFunction %void None %36
-         %37 = OpLabel
-         %38 = OpFunctionCall %float %textureSampleCompare_7b5025
-         %39 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %39 %38 None
+%fragment_main = OpFunction %void None %34
+         %35 = OpLabel
+         %36 = OpFunctionCall %float %textureSampleCompare_7b5025
+         %37 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
+               OpStore %37 %36 None
                OpReturn
                OpFunctionEnd

@@ -86,12 +86,10 @@ $B1: {  # root
     %v:ptr<function, vec3<f32>, read_write> = var undef
     %5:u32 = load %dyn_index
     %6:vec3<f32> = load %v
-    %7:vec3<f32> = construct 1.0f
-    %8:vec3<u32> = construct %5
-    %9:vec3<u32> = construct 0u, 1u, 2u
-    %10:vec3<bool> = eq %8, %9
-    %11:vec3<f32> = select %6, %7, %10
-    store %v, %11
+    %7:vec3<u32> = construct %5
+    %8:vec3<bool> = eq %7, vec3<u32>(0u, 1u, 2u)
+    %9:vec3<f32> = select %6, vec3<f32>(1.0f), %8
+    store %v, %9
     store_vector_element %v, %static_index, 1.0f
     ret
   }
@@ -160,12 +158,10 @@ $B1: {  # root
     %5:ptr<function, vec3<f32>, read_write> = access %v, 0u
     %6:u32 = load %dyn_index
     %7:vec3<f32> = load %5
-    %8:vec3<f32> = construct 1.0f
-    %9:vec3<u32> = construct %6
-    %10:vec3<u32> = construct 0u, 1u, 2u
-    %11:vec3<bool> = eq %9, %10
-    %12:vec3<f32> = select %7, %8, %11
-    store %5, %12
+    %8:vec3<u32> = construct %6
+    %9:vec3<bool> = eq %8, vec3<u32>(0u, 1u, 2u)
+    %10:vec3<f32> = select %7, vec3<f32>(1.0f), %9
+    store %5, %10
     store_vector_element %5, %static_index, 1.0f
     ret
   }
@@ -225,12 +221,10 @@ $B1: {  # root
     %5:ptr<function, vec3<f32>, read_write> = access %v, 0u
     %6:u32 = load %dyn_index
     %7:vec3<f32> = load %5
-    %8:vec3<f32> = construct 1.0f
-    %9:vec3<u32> = construct %6
-    %10:vec3<u32> = construct 0u, 1u, 2u
-    %11:vec3<bool> = eq %9, %10
-    %12:vec3<f32> = select %7, %8, %11
-    store %5, %12
+    %8:vec3<u32> = construct %6
+    %9:vec3<bool> = eq %8, vec3<u32>(0u, 1u, 2u)
+    %10:vec3<f32> = select %7, vec3<f32>(1.0f), %9
+    store %5, %10
     store_vector_element %5, %static_index, 1.0f
     ret
   }
@@ -300,12 +294,10 @@ $B1: {  # root
     %5:ptr<function, vec3<f32>, read_write> = access %v, 0u, 0u
     %6:u32 = load %dyn_index
     %7:vec3<f32> = load %5
-    %8:vec3<f32> = construct 1.0f
-    %9:vec3<u32> = construct %6
-    %10:vec3<u32> = construct 0u, 1u, 2u
-    %11:vec3<bool> = eq %9, %10
-    %12:vec3<f32> = select %7, %8, %11
-    store %5, %12
+    %8:vec3<u32> = construct %6
+    %9:vec3<bool> = eq %8, vec3<u32>(0u, 1u, 2u)
+    %10:vec3<f32> = select %7, vec3<f32>(1.0f), %9
+    store %5, %10
     store_vector_element %5, %static_index, 1.0f
     ret
   }
@@ -386,20 +378,16 @@ $B1: {  # root
     %v:ptr<function, vec3<f32>, read_write> = var undef
     %7:u32 = call %get_dynamic
     %8:vec3<f32> = load %v
-    %9:vec3<f32> = construct 1.0f
-    %10:vec3<u32> = construct %7
-    %11:vec3<u32> = construct 0u, 1u, 2u
-    %12:vec3<bool> = eq %10, %11
-    %13:vec3<f32> = select %8, %9, %12
-    store %v, %13
-    %14:u32 = call %get_static
-    %15:vec3<f32> = load %v
-    %16:vec3<f32> = construct 1.0f
-    %17:vec3<u32> = construct %14
-    %18:vec3<u32> = construct 0u, 1u, 2u
-    %19:vec3<bool> = eq %17, %18
-    %20:vec3<f32> = select %15, %16, %19
-    store %v, %20
+    %9:vec3<u32> = construct %7
+    %10:vec3<bool> = eq %9, vec3<u32>(0u, 1u, 2u)
+    %11:vec3<f32> = select %8, vec3<f32>(1.0f), %10
+    store %v, %11
+    %12:u32 = call %get_static
+    %13:vec3<f32> = load %v
+    %14:vec3<u32> = construct %12
+    %15:vec3<bool> = eq %14, vec3<u32>(0u, 1u, 2u)
+    %16:vec3<f32> = select %13, vec3<f32>(1.0f), %15
+    store %v, %16
     ret
   }
 }
@@ -456,12 +444,10 @@ $B1: {  # root
     %v:ptr<function, vec3<f32>, read_write> = var undef
     %5:u32 = load %dyn_index
     %6:vec3<f32> = load %v
-    %7:vec3<f32> = construct 1.0f
-    %8:vec3<u32> = construct %5
-    %9:vec3<u32> = construct 0u, 1u, 2u
-    %10:vec3<bool> = eq %8, %9
-    %11:vec3<f32> = select %6, %7, %10
-    store %v, %11
+    %7:vec3<u32> = construct %5
+    %8:vec3<bool> = eq %7, vec3<u32>(0u, 1u, 2u)
+    %9:vec3<f32> = select %6, vec3<f32>(1.0f), %8
+    store %v, %9
     store_vector_element %v, %static_index, 1.0f
     ret
   }
@@ -518,12 +504,10 @@ $B1: {  # root
     %static_index:u32 = let 0u
     %5:u32 = load %dyn_index
     %6:vec3<f32> = load %v
-    %7:vec3<f32> = construct 1.0f
-    %8:vec3<u32> = construct %5
-    %9:vec3<u32> = construct 0u, 1u, 2u
-    %10:vec3<bool> = eq %8, %9
-    %11:vec3<f32> = select %6, %7, %10
-    store %v, %11
+    %7:vec3<u32> = construct %5
+    %8:vec3<bool> = eq %7, vec3<u32>(0u, 1u, 2u)
+    %9:vec3<f32> = select %6, vec3<f32>(1.0f), %8
+    store %v, %9
     store_vector_element %v, %static_index, 1.0f
     ret
   }
@@ -665,12 +649,10 @@ $B1: {  # root
     %5:ptr<function, vec4<f32>, read_write> = access %v, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
-    %8:vec4<f32> = construct 1.0f
-    %9:vec4<u32> = construct %6
-    %10:vec4<u32> = construct 0u, 1u, 2u, 3u
-    %11:vec4<bool> = eq %9, %10
-    %12:vec4<f32> = select %7, %8, %11
-    store %5, %12
+    %8:vec4<u32> = construct %6
+    %9:vec4<bool> = eq %8, vec4<u32>(0u, 1u, 2u, 3u)
+    %10:vec4<f32> = select %7, vec4<f32>(1.0f), %9
+    store %5, %10
     store_vector_element %5, %static_index, 1.0f
     ret
   }
@@ -739,12 +721,10 @@ $B1: {  # root
     %5:ptr<function, vec4<f32>, read_write> = access %v, 0u, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
-    %8:vec4<f32> = construct 1.0f
-    %9:vec4<u32> = construct %6
-    %10:vec4<u32> = construct 0u, 1u, 2u, 3u
-    %11:vec4<bool> = eq %9, %10
-    %12:vec4<f32> = select %7, %8, %11
-    store %5, %12
+    %8:vec4<u32> = construct %6
+    %9:vec4<bool> = eq %8, vec4<u32>(0u, 1u, 2u, 3u)
+    %10:vec4<f32> = select %7, vec4<f32>(1.0f), %9
+    store %5, %10
     store_vector_element %5, %static_index, 1.0f
     ret
   }
@@ -803,12 +783,10 @@ $B1: {  # root
     %5:ptr<function, vec4<f32>, read_write> = access %v, 7u, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
-    %8:vec4<f32> = construct 1.0f
-    %9:vec4<u32> = construct %6
-    %10:vec4<u32> = construct 0u, 1u, 2u, 3u
-    %11:vec4<bool> = eq %9, %10
-    %12:vec4<f32> = select %7, %8, %11
-    store %5, %12
+    %8:vec4<u32> = construct %6
+    %9:vec4<bool> = eq %8, vec4<u32>(0u, 1u, 2u, 3u)
+    %10:vec4<f32> = select %7, vec4<f32>(1.0f), %9
+    store %5, %10
     store_vector_element %5, %static_index, 1.0f
     ret
   }
@@ -878,12 +856,10 @@ $B1: {  # root
     %5:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
-    %8:vec4<f32> = construct 1.0f
-    %9:vec4<u32> = construct %6
-    %10:vec4<u32> = construct 0u, 1u, 2u, 3u
-    %11:vec4<bool> = eq %9, %10
-    %12:vec4<f32> = select %7, %8, %11
-    store %5, %12
+    %8:vec4<u32> = construct %6
+    %9:vec4<bool> = eq %8, vec4<u32>(0u, 1u, 2u, 3u)
+    %10:vec4<f32> = select %7, vec4<f32>(1.0f), %9
+    store %5, %10
     store_vector_element %5, %static_index, 1.0f
     ret
   }
@@ -968,20 +944,16 @@ $B1: {  # root
     %7:ptr<function, vec4<f32>, read_write> = access %v, 1u
     %8:u32 = call %get_dynamic
     %9:vec4<f32> = load %7
-    %10:vec4<f32> = construct 1.0f
-    %11:vec4<u32> = construct %8
-    %12:vec4<u32> = construct 0u, 1u, 2u, 3u
-    %13:vec4<bool> = eq %11, %12
-    %14:vec4<f32> = select %9, %10, %13
-    store %7, %14
-    %15:u32 = call %get_static
-    %16:vec4<f32> = load %7
-    %17:vec4<f32> = construct 1.0f
-    %18:vec4<u32> = construct %15
-    %19:vec4<u32> = construct 0u, 1u, 2u, 3u
-    %20:vec4<bool> = eq %18, %19
-    %21:vec4<f32> = select %16, %17, %20
-    store %7, %21
+    %10:vec4<u32> = construct %8
+    %11:vec4<bool> = eq %10, vec4<u32>(0u, 1u, 2u, 3u)
+    %12:vec4<f32> = select %9, vec4<f32>(1.0f), %11
+    store %7, %12
+    %13:u32 = call %get_static
+    %14:vec4<f32> = load %7
+    %15:vec4<u32> = construct %13
+    %16:vec4<bool> = eq %15, vec4<u32>(0u, 1u, 2u, 3u)
+    %17:vec4<f32> = select %14, vec4<f32>(1.0f), %16
+    store %7, %17
     ret
   }
 }
@@ -1041,12 +1013,10 @@ $B1: {  # root
     %5:ptr<function, vec4<f32>, read_write> = access %v, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
-    %8:vec4<f32> = construct 1.0f
-    %9:vec4<u32> = construct %6
-    %10:vec4<u32> = construct 0u, 1u, 2u, 3u
-    %11:vec4<bool> = eq %9, %10
-    %12:vec4<f32> = select %7, %8, %11
-    store %5, %12
+    %8:vec4<u32> = construct %6
+    %9:vec4<bool> = eq %8, vec4<u32>(0u, 1u, 2u, 3u)
+    %10:vec4<f32> = select %7, vec4<f32>(1.0f), %9
+    store %5, %10
     store_vector_element %5, %static_index, 1.0f
     ret
   }
@@ -1106,12 +1076,10 @@ $B1: {  # root
     %5:ptr<private, vec4<f32>, read_write> = access %v, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
-    %8:vec4<f32> = construct 1.0f
-    %9:vec4<u32> = construct %6
-    %10:vec4<u32> = construct 0u, 1u, 2u, 3u
-    %11:vec4<bool> = eq %9, %10
-    %12:vec4<f32> = select %7, %8, %11
-    store %5, %12
+    %8:vec4<u32> = construct %6
+    %9:vec4<bool> = eq %8, vec4<u32>(0u, 1u, 2u, 3u)
+    %10:vec4<f32> = select %7, vec4<f32>(1.0f), %9
+    store %5, %10
     store_vector_element %5, %static_index, 1.0f
     ret
   }
@@ -1236,12 +1204,11 @@ $B1: {  # root
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var undef
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<function, vec4<f32>, read_write> = access %v, %6
-    store %7, %5
-    %8:ptr<function, vec4<f32>, read_write> = access %v, %static_index
-    store %8, %5
+    %5:u32 = load %dyn_index
+    %6:ptr<function, vec4<f32>, read_write> = access %v, %5
+    store %6, vec4<f32>(0.0f)
+    %7:ptr<function, vec4<f32>, read_write> = access %v, %static_index
+    store %7, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1258,26 +1225,25 @@ $B1: {  # root
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var undef
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<function, vec4<f32>, read_write> = access %v, %6
-    switch %6 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
+    %5:u32 = load %dyn_index
+    %6:ptr<function, vec4<f32>, read_write> = access %v, %5
+    switch %5 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
       $B3: {  # case
-        %8:ptr<function, vec4<f32>, read_write> = access %v, 0u
-        store %8, %5
+        %7:ptr<function, vec4<f32>, read_write> = access %v, 0u
+        store %7, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B4: {  # case
-        %9:ptr<function, vec4<f32>, read_write> = access %v, 1u
-        store %9, %5
+        %8:ptr<function, vec4<f32>, read_write> = access %v, 1u
+        store %8, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B5: {  # case
         exit_switch  # switch_1
       }
     }
-    %10:ptr<function, vec4<f32>, read_write> = access %v, %static_index
-    store %10, %5
+    %9:ptr<function, vec4<f32>, read_write> = access %v, %static_index
+    store %9, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1320,12 +1286,11 @@ $B1: {  # root
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var undef
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<function, vec4<f32>, read_write> = access %v, 0u, %6
-    store %7, %5
-    %8:ptr<function, vec4<f32>, read_write> = access %v, 0u, %static_index
-    store %8, %5
+    %5:u32 = load %dyn_index
+    %6:ptr<function, vec4<f32>, read_write> = access %v, 0u, %5
+    store %6, vec4<f32>(0.0f)
+    %7:ptr<function, vec4<f32>, read_write> = access %v, 0u, %static_index
+    store %7, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1346,27 +1311,26 @@ $B1: {  # root
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var undef
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<function, vec4<f32>, read_write> = access %v, 0u, %6
-    %8:ptr<function, mat2x4<f32>, read_write> = access %v, 0u
-    switch %6 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
+    %5:u32 = load %dyn_index
+    %6:ptr<function, vec4<f32>, read_write> = access %v, 0u, %5
+    %7:ptr<function, mat2x4<f32>, read_write> = access %v, 0u
+    switch %5 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
       $B3: {  # case
-        %9:ptr<function, vec4<f32>, read_write> = access %8, 0u
-        store %9, %5
+        %8:ptr<function, vec4<f32>, read_write> = access %7, 0u
+        store %8, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B4: {  # case
-        %10:ptr<function, vec4<f32>, read_write> = access %8, 1u
-        store %10, %5
+        %9:ptr<function, vec4<f32>, read_write> = access %7, 1u
+        store %9, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B5: {  # case
         exit_switch  # switch_1
       }
     }
-    %11:ptr<function, vec4<f32>, read_write> = access %v, 0u, %static_index
-    store %11, %5
+    %10:ptr<function, vec4<f32>, read_write> = access %v, 0u, %static_index
+    store %10, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1403,12 +1367,11 @@ $B1: {  # root
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var undef
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<function, vec4<f32>, read_write> = access %v, 7u, %6
-    store %7, %5
-    %8:ptr<function, vec4<f32>, read_write> = access %v, 7u, %static_index
-    store %8, %5
+    %5:u32 = load %dyn_index
+    %6:ptr<function, vec4<f32>, read_write> = access %v, 7u, %5
+    store %6, vec4<f32>(0.0f)
+    %7:ptr<function, vec4<f32>, read_write> = access %v, 7u, %static_index
+    store %7, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1425,27 +1388,26 @@ $B1: {  # root
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var undef
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<function, vec4<f32>, read_write> = access %v, 7u, %6
-    %8:ptr<function, mat2x4<f32>, read_write> = access %v, 7u
-    switch %6 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
+    %5:u32 = load %dyn_index
+    %6:ptr<function, vec4<f32>, read_write> = access %v, 7u, %5
+    %7:ptr<function, mat2x4<f32>, read_write> = access %v, 7u
+    switch %5 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
       $B3: {  # case
-        %9:ptr<function, vec4<f32>, read_write> = access %8, 0u
-        store %9, %5
+        %8:ptr<function, vec4<f32>, read_write> = access %7, 0u
+        store %8, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B4: {  # case
-        %10:ptr<function, vec4<f32>, read_write> = access %8, 1u
-        store %10, %5
+        %9:ptr<function, vec4<f32>, read_write> = access %7, 1u
+        store %9, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B5: {  # case
         exit_switch  # switch_1
       }
     }
-    %11:ptr<function, vec4<f32>, read_write> = access %v, 7u, %static_index
-    store %11, %5
+    %10:ptr<function, vec4<f32>, read_write> = access %v, 7u, %static_index
+    store %10, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1489,12 +1451,11 @@ $B1: {  # root
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var undef
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, %6
-    store %7, %5
-    %8:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, %static_index
-    store %8, %5
+    %5:u32 = load %dyn_index
+    %6:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, %5
+    store %6, vec4<f32>(0.0f)
+    %7:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, %static_index
+    store %7, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1515,27 +1476,26 @@ $B1: {  # root
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var undef
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, %6
-    %8:ptr<function, mat2x4<f32>, read_write> = access %v, 0u, 7u
-    switch %6 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
+    %5:u32 = load %dyn_index
+    %6:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, %5
+    %7:ptr<function, mat2x4<f32>, read_write> = access %v, 0u, 7u
+    switch %5 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
       $B3: {  # case
-        %9:ptr<function, vec4<f32>, read_write> = access %8, 0u
-        store %9, %5
+        %8:ptr<function, vec4<f32>, read_write> = access %7, 0u
+        store %8, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B4: {  # case
-        %10:ptr<function, vec4<f32>, read_write> = access %8, 1u
-        store %10, %5
+        %9:ptr<function, vec4<f32>, read_write> = access %7, 1u
+        store %9, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B5: {  # case
         exit_switch  # switch_1
       }
     }
-    %11:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, %static_index
-    store %11, %5
+    %10:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, %static_index
+    store %10, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1586,13 +1546,12 @@ $B1: {  # root
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
     %v:ptr<function, mat2x4<f32>, read_write> = var undef
-    %7:vec4<f32> = construct 0.0f
-    %8:u32 = call %get_dynamic
-    %9:ptr<function, vec4<f32>, read_write> = access %v, %8
-    store %9, %7
-    %10:u32 = call %get_static
-    %11:ptr<function, vec4<f32>, read_write> = access %v, %10
-    store %11, %7
+    %7:u32 = call %get_dynamic
+    %8:ptr<function, vec4<f32>, read_write> = access %v, %7
+    store %8, vec4<f32>(0.0f)
+    %9:u32 = call %get_static
+    %10:ptr<function, vec4<f32>, read_write> = access %v, %9
+    store %10, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1619,35 +1578,34 @@ $B1: {  # root
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
     %v:ptr<function, mat2x4<f32>, read_write> = var undef
-    %7:vec4<f32> = construct 0.0f
-    %8:u32 = call %get_dynamic
-    %9:ptr<function, vec4<f32>, read_write> = access %v, %8
-    switch %8 [c: (0u, $B5), c: (1u, $B6), c: (default, $B7)] {  # switch_1
+    %7:u32 = call %get_dynamic
+    %8:ptr<function, vec4<f32>, read_write> = access %v, %7
+    switch %7 [c: (0u, $B5), c: (1u, $B6), c: (default, $B7)] {  # switch_1
       $B5: {  # case
-        %10:ptr<function, vec4<f32>, read_write> = access %v, 0u
-        store %10, %7
+        %9:ptr<function, vec4<f32>, read_write> = access %v, 0u
+        store %9, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B6: {  # case
-        %11:ptr<function, vec4<f32>, read_write> = access %v, 1u
-        store %11, %7
+        %10:ptr<function, vec4<f32>, read_write> = access %v, 1u
+        store %10, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B7: {  # case
         exit_switch  # switch_1
       }
     }
-    %12:u32 = call %get_static
-    %13:ptr<function, vec4<f32>, read_write> = access %v, %12
-    switch %12 [c: (0u, $B8), c: (1u, $B9), c: (default, $B10)] {  # switch_2
+    %11:u32 = call %get_static
+    %12:ptr<function, vec4<f32>, read_write> = access %v, %11
+    switch %11 [c: (0u, $B8), c: (1u, $B9), c: (default, $B10)] {  # switch_2
       $B8: {  # case
-        %14:ptr<function, vec4<f32>, read_write> = access %v, 0u
-        store %14, %7
+        %13:ptr<function, vec4<f32>, read_write> = access %v, 0u
+        store %13, vec4<f32>(0.0f)
         exit_switch  # switch_2
       }
       $B9: {  # case
-        %15:ptr<function, vec4<f32>, read_write> = access %v, 1u
-        store %15, %7
+        %14:ptr<function, vec4<f32>, read_write> = access %v, 1u
+        store %14, vec4<f32>(0.0f)
         exit_switch  # switch_2
       }
       $B10: {  # case
@@ -1692,14 +1650,13 @@ $B1: {  # root
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var undef
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<function, vec4<f32>, read_write> = access %v, %6
-    %p0:ptr<function, vec4<f32>, read_write> = let %7
-    store %p0, %5
-    %9:ptr<function, vec4<f32>, read_write> = access %v, %static_index
-    %p1:ptr<function, vec4<f32>, read_write> = let %9
-    store %p1, %5
+    %5:u32 = load %dyn_index
+    %6:ptr<function, vec4<f32>, read_write> = access %v, %5
+    %p0:ptr<function, vec4<f32>, read_write> = let %6
+    store %p0, vec4<f32>(0.0f)
+    %8:ptr<function, vec4<f32>, read_write> = access %v, %static_index
+    %p1:ptr<function, vec4<f32>, read_write> = let %8
+    store %p1, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1716,26 +1673,25 @@ $B1: {  # root
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var undef
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<function, vec4<f32>, read_write> = access %v, %6
-    switch %6 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
+    %5:u32 = load %dyn_index
+    %6:ptr<function, vec4<f32>, read_write> = access %v, %5
+    switch %5 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
       $B3: {  # case
-        %8:ptr<function, vec4<f32>, read_write> = access %v, 0u
-        store %8, %5
+        %7:ptr<function, vec4<f32>, read_write> = access %v, 0u
+        store %7, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B4: {  # case
-        %9:ptr<function, vec4<f32>, read_write> = access %v, 1u
-        store %9, %5
+        %8:ptr<function, vec4<f32>, read_write> = access %v, 1u
+        store %8, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B5: {  # case
         exit_switch  # switch_1
       }
     }
-    %10:ptr<function, vec4<f32>, read_write> = access %v, %static_index
-    store %10, %5
+    %9:ptr<function, vec4<f32>, read_write> = access %v, %static_index
+    store %9, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1773,12 +1729,11 @@ $B1: {  # root
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<private, vec4<f32>, read_write> = access %v, %6
-    store %7, %5
-    %8:ptr<private, vec4<f32>, read_write> = access %v, %static_index
-    store %8, %5
+    %5:u32 = load %dyn_index
+    %6:ptr<private, vec4<f32>, read_write> = access %v, %5
+    store %6, vec4<f32>(0.0f)
+    %7:ptr<private, vec4<f32>, read_write> = access %v, %static_index
+    store %7, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1795,26 +1750,25 @@ $B1: {  # root
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<private, vec4<f32>, read_write> = access %v, %6
-    switch %6 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
+    %5:u32 = load %dyn_index
+    %6:ptr<private, vec4<f32>, read_write> = access %v, %5
+    switch %5 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
       $B3: {  # case
-        %8:ptr<private, vec4<f32>, read_write> = access %v, 0u
-        store %8, %5
+        %7:ptr<private, vec4<f32>, read_write> = access %v, 0u
+        store %7, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B4: {  # case
-        %9:ptr<private, vec4<f32>, read_write> = access %v, 1u
-        store %9, %5
+        %8:ptr<private, vec4<f32>, read_write> = access %v, 1u
+        store %8, vec4<f32>(0.0f)
         exit_switch  # switch_1
       }
       $B5: {  # case
         exit_switch  # switch_1
       }
     }
-    %10:ptr<private, vec4<f32>, read_write> = access %v, %static_index
-    store %10, %5
+    %9:ptr<private, vec4<f32>, read_write> = access %v, %static_index
+    store %9, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1853,12 +1807,11 @@ $B1: {  # root
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<storage, vec4<f32>, read_write> = access %v, %6
-    store %7, %5
-    %8:ptr<storage, vec4<f32>, read_write> = access %v, %static_index
-    store %8, %5
+    %5:u32 = load %dyn_index
+    %6:ptr<storage, vec4<f32>, read_write> = access %v, %5
+    store %6, vec4<f32>(0.0f)
+    %7:ptr<storage, vec4<f32>, read_write> = access %v, %static_index
+    store %7, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1900,12 +1853,11 @@ $B1: {  # root
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %5:vec4<f32> = construct 0.0f
-    %6:u32 = load %dyn_index
-    %7:ptr<workgroup, vec4<f32>, read_write> = access %v, %6
-    store %7, %5
-    %8:ptr<workgroup, vec4<f32>, read_write> = access %v, %static_index
-    store %8, %5
+    %5:u32 = load %dyn_index
+    %6:ptr<workgroup, vec4<f32>, read_write> = access %v, %5
+    store %6, vec4<f32>(0.0f)
+    %7:ptr<workgroup, vec4<f32>, read_write> = access %v, %static_index
+    store %7, vec4<f32>(0.0f)
     ret
   }
 }
@@ -1974,31 +1926,27 @@ $B1: {  # root
       $B3: {  # case
         %8:ptr<function, vec4<f32>, read_write> = access %v, 0u
         %9:vec4<f32> = load %8
-        %10:vec4<f32> = construct 1.0f
-        %11:vec4<u32> = construct %7
-        %12:vec4<u32> = construct 0u, 1u, 2u, 3u
-        %13:vec4<bool> = eq %11, %12
-        %14:vec4<f32> = select %9, %10, %13
-        store %8, %14
+        %10:vec4<u32> = construct %7
+        %11:vec4<bool> = eq %10, vec4<u32>(0u, 1u, 2u, 3u)
+        %12:vec4<f32> = select %9, vec4<f32>(1.0f), %11
+        store %8, %12
         exit_switch  # switch_1
       }
       $B4: {  # case
-        %15:ptr<function, vec4<f32>, read_write> = access %v, 1u
-        %16:vec4<f32> = load %15
-        %17:vec4<f32> = construct 1.0f
-        %18:vec4<u32> = construct %7
-        %19:vec4<u32> = construct 0u, 1u, 2u, 3u
-        %20:vec4<bool> = eq %18, %19
-        %21:vec4<f32> = select %16, %17, %20
-        store %15, %21
+        %13:ptr<function, vec4<f32>, read_write> = access %v, 1u
+        %14:vec4<f32> = load %13
+        %15:vec4<u32> = construct %7
+        %16:vec4<bool> = eq %15, vec4<u32>(0u, 1u, 2u, 3u)
+        %17:vec4<f32> = select %14, vec4<f32>(1.0f), %16
+        store %13, %17
         exit_switch  # switch_1
       }
       $B5: {  # case
         exit_switch  # switch_1
       }
     }
-    %22:ptr<function, vec4<f32>, read_write> = access %v, %static_index
-    store_vector_element %22, %static_index, 1.0f
+    %18:ptr<function, vec4<f32>, read_write> = access %v, %static_index
+    store_vector_element %18, %static_index, 1.0f
     ret
   }
 }
@@ -2053,13 +2001,11 @@ $B1: {  # root
     %v:ptr<function, vec3<f32>, read_write> = var undef
     %5:i32 = load %dyn_index
     %6:vec3<f32> = load %v
-    %7:vec3<f32> = construct 1.0f
-    %8:u32 = convert %5
-    %9:vec3<u32> = construct %8
-    %10:vec3<u32> = construct 0u, 1u, 2u
-    %11:vec3<bool> = eq %9, %10
-    %12:vec3<f32> = select %6, %7, %11
-    store %v, %12
+    %7:u32 = convert %5
+    %8:vec3<u32> = construct %7
+    %9:vec3<bool> = eq %8, vec3<u32>(0u, 1u, 2u)
+    %10:vec3<f32> = select %6, vec3<f32>(1.0f), %9
+    store %v, %10
     store_vector_element %v, %static_index, 1.0f
     ret
   }
@@ -2094,8 +2040,7 @@ $B1: {  # root
     %v:ptr<function, mat2x3<f32>, read_write> = var undef
     %4:i32 = load %dyn_index
     %5:ptr<function, vec3<f32>, read_write> = access %v, %4
-    %6:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    store %5, %6
+    store %5, vec3<f32>(1.0f, 2.0f, 3.0f)
     ret
   }
 }
@@ -2113,16 +2058,15 @@ $B1: {  # root
     %v:ptr<function, mat2x3<f32>, read_write> = var undef
     %4:i32 = load %dyn_index
     %5:ptr<function, vec3<f32>, read_write> = access %v, %4
-    %6:vec3<f32> = construct 1.0f, 2.0f, 3.0f
     switch %4 [c: (0i, $B3), c: (1i, $B4), c: (default, $B5)] {  # switch_1
       $B3: {  # case
-        %7:ptr<function, vec3<f32>, read_write> = access %v, 0u
-        store %7, %6
+        %6:ptr<function, vec3<f32>, read_write> = access %v, 0u
+        store %6, vec3<f32>(1.0f, 2.0f, 3.0f)
         exit_switch  # switch_1
       }
       $B4: {  # case
-        %8:ptr<function, vec3<f32>, read_write> = access %v, 1u
-        store %8, %6
+        %7:ptr<function, vec3<f32>, read_write> = access %v, 1u
+        store %7, vec3<f32>(1.0f, 2.0f, 3.0f)
         exit_switch  # switch_1
       }
       $B5: {  # case

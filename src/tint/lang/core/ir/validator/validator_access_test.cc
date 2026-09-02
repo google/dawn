@@ -818,7 +818,8 @@ TEST_F(IR_ValidatorTest, Store_NoValueType) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
-        auto* val = b.Construct(ty.u32(), 42_u)->AsInstruction<Construct>();
+        auto* let = b.Let("l", 42_u);
+        auto* val = b.Construct(ty.u32(), let)->AsInstruction<Construct>();
         val->Result()->SetType(nullptr);
 
         b.Append(mod.CreateInstruction<ir::Store>(var->Result(), val->Result()));
@@ -828,8 +829,8 @@ TEST_F(IR_ValidatorTest, Store_NoValueType) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:5:15 error: store: operand type is undefined
-    store %2, %3
+                testing::HasSubstr(R"(:6:15 error: store: operand type is undefined
+    store %2, %4
               ^^
 )")) << res.Failure();
 }

@@ -8,9 +8,9 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 uniform highp sampler2DArrayShadow f_arg_0_arg_1;
 float textureSampleCompare_7b5025() {
-  vec4 v_1 = vec4(vec2(1.0f), float(1u), 1.0f);
+  float v_1 = float(1u);
   vec2 v_2 = dFdx(vec2(1.0f));
-  float res = textureGradOffset(f_arg_0_arg_1, v_1, v_2, dFdy(vec2(1.0f)), ivec2(1));
+  float res = textureGradOffset(f_arg_0_arg_1, vec4(1.0f), v_2, dFdy(vec2(1.0f)), ivec2(1));
   return res;
 }
 void main() {

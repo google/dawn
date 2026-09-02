@@ -428,8 +428,7 @@ TEST_F(GlslWriter_ShaderIOTest, ReturnValue_NonStructBuiltin) {
     auto* src = R"(
 %foo = @vertex func():vec4<f32> [@invariant, @position] {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    ret %2
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -443,22 +442,21 @@ $B1: {  # root
 
 %foo_inner = func():vec4<f32> {
   $B2: {
-    %4:vec4<f32> = construct 0.5f
-    ret %4
+    ret vec4<f32>(0.5f)
   }
 }
 %foo = @vertex func():void {
   $B3: {
-    %6:vec4<f32> = call %foo_inner
-    %7:f32 = swizzle %6, x
-    %8:f32 = swizzle %6, y
-    %9:f32 = negation %8
-    %10:f32 = swizzle %6, z
-    %11:f32 = swizzle %6, w
-    %12:f32 = mul 2.0f, %10
-    %13:f32 = sub %12, %11
-    %14:vec4<f32> = construct %7, %9, %13, %11
-    store %foo_position, %14
+    %5:vec4<f32> = call %foo_inner
+    %6:f32 = swizzle %5, x
+    %7:f32 = swizzle %5, y
+    %8:f32 = negation %7
+    %9:f32 = swizzle %5, z
+    %10:f32 = swizzle %5, w
+    %11:f32 = mul 2.0f, %9
+    %12:f32 = sub %11, %10
+    %13:vec4<f32> = construct %6, %8, %12, %10
+    store %foo_position, %13
     store %foo___point_size, 1.0f
     ret
   }
@@ -484,8 +482,7 @@ TEST_F(GlslWriter_ShaderIOTest, ReturnValue_NonStructLocation) {
     auto* src = R"(
 %foo = @fragment func():vec4<f32> [@location(1)] {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    ret %2
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -498,14 +495,13 @@ $B1: {  # root
 
 %foo_inner = func():vec4<f32> {
   $B2: {
-    %3:vec4<f32> = construct 0.5f
-    ret %3
+    ret vec4<f32>(0.5f)
   }
 }
 %foo = @fragment func():void {
   $B3: {
-    %5:vec4<f32> = call %foo_inner
-    store %foo_loc1_Output, %5
+    %4:vec4<f32> = call %foo_inner
+    store %foo_loc1_Output, %4
     ret
   }
 }
@@ -566,9 +562,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.0f
-    %3:Outputs = construct %2, 0.25f, 0.75f
-    ret %3
+    ret Outputs(vec4<f32>(0.0f), 0.25f, 0.75f)
   }
 }
 )";
@@ -590,28 +584,26 @@ $B1: {  # root
 
 %foo_inner = func():Outputs {
   $B2: {
-    %6:vec4<f32> = construct 0.0f
-    %7:Outputs = construct %6, 0.25f, 0.75f
-    ret %7
+    ret Outputs(vec4<f32>(0.0f), 0.25f, 0.75f)
   }
 }
 %foo = @vertex func():void {
   $B3: {
-    %9:Outputs = call %foo_inner
-    %10:vec4<f32> = access %9, 0u
-    %11:f32 = swizzle %10, x
-    %12:f32 = swizzle %10, y
-    %13:f32 = negation %12
-    %14:f32 = swizzle %10, z
-    %15:f32 = swizzle %10, w
-    %16:f32 = mul 2.0f, %14
-    %17:f32 = sub %16, %15
-    %18:vec4<f32> = construct %11, %13, %17, %15
-    store %foo_position, %18
-    %19:f32 = access %9, 1u
-    store %foo_loc0_Output, %19
-    %20:f32 = access %9, 2u
-    store %foo_loc1_Output, %20
+    %7:Outputs = call %foo_inner
+    %8:vec4<f32> = access %7, 0u
+    %9:f32 = swizzle %8, x
+    %10:f32 = swizzle %8, y
+    %11:f32 = negation %10
+    %12:f32 = swizzle %8, z
+    %13:f32 = swizzle %8, w
+    %14:f32 = mul 2.0f, %12
+    %15:f32 = sub %14, %13
+    %16:vec4<f32> = construct %9, %11, %15, %13
+    store %foo_position, %16
+    %17:f32 = access %7, 1u
+    store %foo_loc0_Output, %17
+    %18:f32 = access %7, 2u
+    store %foo_loc1_Output, %18
     store %foo___point_size, 1.0f
     ret
   }
@@ -660,8 +652,7 @@ Output = struct @align(4) {
 
 %foo = @fragment func():Output {
   $B1: {
-    %2:Output = construct 0.25f, 0.75f
-    ret %2
+    ret Output(0.25f, 0.75f)
   }
 }
 )";
@@ -680,17 +671,16 @@ $B1: {  # root
 
 %foo_inner = func():Output {
   $B2: {
-    %4:Output = construct 0.25f, 0.75f
-    ret %4
+    ret Output(0.25f, 0.75f)
   }
 }
 %foo = @fragment func():void {
   $B3: {
-    %6:Output = call %foo_inner
-    %7:f32 = access %6, 0u
-    store %foo_loc0_idx0_Output, %7
-    %8:f32 = access %6, 1u
-    store %foo_loc0_idx1_Output, %8
+    %5:Output = call %foo_inner
+    %6:f32 = access %5, 0u
+    store %foo_loc0_idx0_Output, %6
+    %7:f32 = access %5, 1u
+    store %foo_loc0_idx1_Output, %7
     ret
   }
 }
@@ -928,8 +918,7 @@ MyStruct = struct @align(4) {
 
 %vert = @vertex func(%input:MyStruct, %ival:i32 [@location(2), @interpolate(flat)]):vec4<f32> [@invariant, @position] {
   $B1: {
-    %4:vec4<f32> = construct 0.5f
-    ret %4
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -949,25 +938,24 @@ $B1: {  # root
 
 %vert_inner = func(%input:MyStruct, %ival:i32):vec4<f32> {
   $B2: {
-    %8:vec4<f32> = construct 0.5f
-    ret %8
+    ret vec4<f32>(0.5f)
   }
 }
 %vert = @vertex func():void {
   $B3: {
-    %10:f32 = load %vert_loc1_Input
-    %11:MyStruct = construct %10
-    %12:i32 = load %vert_loc2_Input
-    %13:vec4<f32> = call %vert_inner, %11, %12
-    %14:f32 = swizzle %13, x
-    %15:f32 = swizzle %13, y
-    %16:f32 = negation %15
-    %17:f32 = swizzle %13, z
-    %18:f32 = swizzle %13, w
-    %19:f32 = mul 2.0f, %17
-    %20:f32 = sub %19, %18
-    %21:vec4<f32> = construct %14, %16, %20, %18
-    store %vert_position, %21
+    %9:f32 = load %vert_loc1_Input
+    %10:MyStruct = construct %9
+    %11:i32 = load %vert_loc2_Input
+    %12:vec4<f32> = call %vert_inner, %10, %11
+    %13:f32 = swizzle %12, x
+    %14:f32 = swizzle %12, y
+    %15:f32 = negation %14
+    %16:f32 = swizzle %12, z
+    %17:f32 = swizzle %12, w
+    %18:f32 = mul 2.0f, %16
+    %19:f32 = sub %18, %17
+    %20:vec4<f32> = construct %13, %15, %19, %17
+    store %vert_position, %20
     store %vert___point_size, 1.0f
     ret
   }
@@ -1013,8 +1001,7 @@ MyStruct = struct @align(4) {
 
 %frag1 = @fragment func():MyStruct {
   $B1: {
-    %2:MyStruct = construct 0.5f
-    ret %2
+    ret MyStruct(0.5f)
   }
 }
 )";
@@ -1031,15 +1018,14 @@ $B1: {  # root
 
 %frag1_inner = func():MyStruct {
   $B2: {
-    %3:MyStruct = construct 0.5f
-    ret %3
+    ret MyStruct(0.5f)
   }
 }
 %frag1 = @fragment func():void {
   $B3: {
-    %5:MyStruct = call %frag1_inner
-    %6:f32 = access %5, 0u
-    store %frag1_loc1_Output, %6
+    %4:MyStruct = call %frag1_inner
+    %5:f32 = access %4, 0u
+    store %frag1_loc1_Output, %5
     ret
   }
 }
@@ -1132,8 +1118,7 @@ Outputs = struct @align(4) {
 
 %foo = @fragment func():Outputs {
   $B1: {
-    %2:Outputs = construct 0.5f, 2.0f
-    ret %2
+    ret Outputs(0.5f, 2.0f)
   }
 }
 )";
@@ -1158,22 +1143,21 @@ $B1: {  # root
 
 %foo_inner = func():Outputs {
   $B2: {
-    %5:Outputs = construct 0.5f, 2.0f
-    ret %5
+    ret Outputs(0.5f, 2.0f)
   }
 }
 %foo = @fragment func():void {
   $B3: {
-    %7:Outputs = call %foo_inner
-    %8:f32 = access %7, 0u
-    store %foo_loc0_Output, %8
-    %9:f32 = access %7, 1u
-    %10:ptr<immediate, f32, read> = access %tint_immediate_data, 0u
-    %11:f32 = load %10
-    %12:ptr<immediate, f32, read> = access %tint_immediate_data, 1u
-    %13:f32 = load %12
-    %14:f32 = clamp %9, %11, %13
-    store %foo_frag_depth, %14
+    %6:Outputs = call %foo_inner
+    %7:f32 = access %6, 0u
+    store %foo_loc0_Output, %7
+    %8:f32 = access %6, 1u
+    %9:ptr<immediate, f32, read> = access %tint_immediate_data, 0u
+    %10:f32 = load %9
+    %11:ptr<immediate, f32, read> = access %tint_immediate_data, 1u
+    %12:f32 = load %11
+    %13:f32 = clamp %8, %10, %12
+    store %foo_frag_depth, %13
     ret
   }
 }
@@ -1213,8 +1197,7 @@ TEST_F(GlslWriter_ShaderIOTest, BGRASwizzleSingleValue) {
     auto* src = R"(
 %vert = @vertex func(%val:vec4<f32> [@location(0)]):vec4<f32> [@invariant, @position] {
   $B1: {
-    %3:vec4<f32> = construct 0.5f
-    ret %3
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -1229,24 +1212,23 @@ $B1: {  # root
 
 %vert_inner = func(%val:vec4<f32>):vec4<f32> {
   $B2: {
-    %6:vec4<f32> = construct 0.5f
-    ret %6
+    ret vec4<f32>(0.5f)
   }
 }
 %vert = @vertex func():void {
   $B3: {
-    %8:vec4<f32> = load %vert_loc0_Input
-    %9:vec4<f32> = swizzle %8, zyxw
-    %10:vec4<f32> = call %vert_inner, %9
-    %11:f32 = swizzle %10, x
-    %12:f32 = swizzle %10, y
-    %13:f32 = negation %12
-    %14:f32 = swizzle %10, z
-    %15:f32 = swizzle %10, w
-    %16:f32 = mul 2.0f, %14
-    %17:f32 = sub %16, %15
-    %18:vec4<f32> = construct %11, %13, %17, %15
-    store %vert_position, %18
+    %7:vec4<f32> = load %vert_loc0_Input
+    %8:vec4<f32> = swizzle %7, zyxw
+    %9:vec4<f32> = call %vert_inner, %8
+    %10:f32 = swizzle %9, x
+    %11:f32 = swizzle %9, y
+    %12:f32 = negation %11
+    %13:f32 = swizzle %9, z
+    %14:f32 = swizzle %9, w
+    %15:f32 = mul 2.0f, %13
+    %16:f32 = sub %15, %14
+    %17:vec4<f32> = construct %10, %12, %16, %14
+    store %vert_position, %17
     store %vert___point_size, 1.0f
     ret
   }
@@ -1298,8 +1280,7 @@ TEST_F(GlslWriter_ShaderIOTest, BGRASwizzleMultipleValueMixedTypes) {
     auto* src = R"(
 %vert = @vertex func(%val1:f32 [@location(5)], %val2:vec2<f32> [@location(0)], %sentinel:vec4<f32> [@location(4)], %val3:vec3<f32> [@location(3)], %val4:vec4<f32> [@location(7)]):vec4<f32> [@invariant, @position] {
   $B1: {
-    %7:vec4<f32> = construct 0.5f
-    ret %7
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -1318,31 +1299,30 @@ $B1: {  # root
 
 %vert_inner = func(%val1:f32, %val2:vec2<f32>, %sentinel:vec4<f32>, %val3:vec3<f32>, %val4:vec4<f32>):vec4<f32> {
   $B2: {
-    %14:vec4<f32> = construct 0.5f
-    ret %14
+    ret vec4<f32>(0.5f)
   }
 }
 %vert = @vertex func():void {
   $B3: {
-    %16:vec4<f32> = load %vert_loc5_Input
-    %17:f32 = swizzle %16, z
-    %18:vec4<f32> = load %vert_loc0_Input
-    %19:vec2<f32> = swizzle %18, zy
-    %20:vec4<f32> = load %vert_loc4_Input
-    %21:vec4<f32> = load %vert_loc3_Input
-    %22:vec3<f32> = swizzle %21, zyx
-    %23:vec4<f32> = load %vert_loc7_Input
-    %24:vec4<f32> = swizzle %23, zyxw
-    %25:vec4<f32> = call %vert_inner, %17, %19, %20, %22, %24
-    %26:f32 = swizzle %25, x
-    %27:f32 = swizzle %25, y
-    %28:f32 = negation %27
-    %29:f32 = swizzle %25, z
-    %30:f32 = swizzle %25, w
-    %31:f32 = mul 2.0f, %29
-    %32:f32 = sub %31, %30
-    %33:vec4<f32> = construct %26, %28, %32, %30
-    store %vert_position, %33
+    %15:vec4<f32> = load %vert_loc5_Input
+    %16:f32 = swizzle %15, z
+    %17:vec4<f32> = load %vert_loc0_Input
+    %18:vec2<f32> = swizzle %17, zy
+    %19:vec4<f32> = load %vert_loc4_Input
+    %20:vec4<f32> = load %vert_loc3_Input
+    %21:vec3<f32> = swizzle %20, zyx
+    %22:vec4<f32> = load %vert_loc7_Input
+    %23:vec4<f32> = swizzle %22, zyxw
+    %24:vec4<f32> = call %vert_inner, %16, %18, %19, %21, %23
+    %25:f32 = swizzle %24, x
+    %26:f32 = swizzle %24, y
+    %27:f32 = negation %26
+    %28:f32 = swizzle %24, z
+    %29:f32 = swizzle %24, w
+    %30:f32 = mul 2.0f, %28
+    %31:f32 = sub %30, %29
+    %32:vec4<f32> = construct %25, %27, %31, %29
+    store %vert_position, %32
     store %vert___point_size, 1.0f
     ret
   }

@@ -34,6 +34,7 @@
      %uint_0 = OpConstant %uint 0
        %void = OpTypeVoid
          %21 = OpTypeFunction %void
+         %24 = OpConstantComposite %_arr_uint_uint_1 %uint_1
        %func = OpFunction %v2float None %12
 %pointer_indices = OpFunctionParameter %_arr_uint_uint_1
          %13 = OpLabel
@@ -44,7 +45,6 @@
                OpFunctionEnd
        %main = OpFunction %void None %21
          %22 = OpLabel
-         %23 = OpCompositeConstruct %_arr_uint_uint_1 %uint_1
-          %r = OpFunctionCall %v2float %func %23
+          %r = OpFunctionCall %v2float %func %24
                OpReturn
                OpFunctionEnd

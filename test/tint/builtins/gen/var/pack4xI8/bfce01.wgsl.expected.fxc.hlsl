@@ -5,10 +5,7 @@
 RWByteAddressBuffer prevent_dce : register(u0);
 uint pack4xI8_bfce01() {
   int4 arg_0 = (int(1)).xxxx;
-  int4 v = arg_0;
-  uint4 v_1 = uint4(0u, 8u, 16u, 24u);
-  uint4 v_2 = ((asuint(v) & uint4((255u).xxxx)) << v_1);
-  uint res = dot(v_2, uint4((1u).xxxx));
+  uint res = dot(((asuint(arg_0) & (255u).xxxx) << uint4(0u, 8u, 16u, 24u)), (1u).xxxx);
   return res;
 }
 
@@ -23,10 +20,7 @@ void fragment_main() {
 RWByteAddressBuffer prevent_dce : register(u0);
 uint pack4xI8_bfce01() {
   int4 arg_0 = (int(1)).xxxx;
-  int4 v = arg_0;
-  uint4 v_1 = uint4(0u, 8u, 16u, 24u);
-  uint4 v_2 = ((asuint(v) & uint4((255u).xxxx)) << v_1);
-  uint res = dot(v_2, uint4((1u).xxxx));
+  uint res = dot(((asuint(arg_0) & (255u).xxxx) << uint4(0u, 8u, 16u, 24u)), (1u).xxxx);
   return res;
 }
 
@@ -51,24 +45,21 @@ struct vertex_main_outputs {
 
 uint pack4xI8_bfce01() {
   int4 arg_0 = (int(1)).xxxx;
-  int4 v = arg_0;
-  uint4 v_1 = uint4(0u, 8u, 16u, 24u);
-  uint4 v_2 = ((asuint(v) & uint4((255u).xxxx)) << v_1);
-  uint res = dot(v_2, uint4((1u).xxxx));
+  uint res = dot(((asuint(arg_0) & (255u).xxxx) << uint4(0u, 8u, 16u, 24u)), (1u).xxxx);
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_3 = (VertexOutput)0;
-  v_3.pos = (0.0f).xxxx;
-  v_3.prevent_dce = pack4xI8_bfce01();
-  VertexOutput v_4 = v_3;
-  return v_4;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
+  v.prevent_dce = pack4xI8_bfce01();
+  VertexOutput v_1 = v;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_5 = vertex_main_inner();
-  vertex_main_outputs v_6 = {v_5.prevent_dce, v_5.pos};
-  return v_6;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
+  return v_3;
 }
 

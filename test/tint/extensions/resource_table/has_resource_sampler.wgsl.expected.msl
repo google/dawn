@@ -28,22 +28,21 @@ fragment void fs(device uint* o [[buffer(0)]], const device tint_resource_table_
   uint const v = uint(0);
   bool v_1 = false;
   if ((v < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
-    uint2 const v_2 = uint2((*tint_module_vars.tint_resource_table_metadata).bindings[v]);
-    v_1 = any((v_2 == uint2(40u, 41u)));
+    v_1 = any((uint2((*tint_module_vars.tint_resource_table_metadata).bindings[v]) == uint2(40u, 41u)));
   } else {
     v_1 = false;
   }
   if (v_1) {
     (*tint_module_vars.o) = ((*tint_module_vars.o) + 1u);
   }
-  uint const v_3 = uint(1);
-  bool v_4 = false;
-  if ((v_3 < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
-    v_4 = ((*tint_module_vars.tint_resource_table_metadata).bindings[v_3] == 42u);
+  uint const v_2 = uint(1);
+  bool v_3 = false;
+  if ((v_2 < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    v_3 = ((*tint_module_vars.tint_resource_table_metadata).bindings[v_2] == 42u);
   } else {
-    v_4 = false;
+    v_3 = false;
   }
-  if (v_4) {
+  if (v_3) {
     (*tint_module_vars.o) = ((*tint_module_vars.o) + 1u);
   }
 }

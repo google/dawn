@@ -11,17 +11,13 @@ void main() {
     case 0u:
     {
       float4 v_2 = m1[0u];
-      float4 v_3 = float4((1.0f).xxxx);
-      uint4 v_4 = uint4((v_1).xxxx);
-      m1[0u] = (((v_4 == uint4(0u, 1u, 2u, 3u))) ? (v_3) : (v_2));
+      m1[0u] = (((uint4((v_1).xxxx) == uint4(0u, 1u, 2u, 3u))) ? ((1.0f).xxxx) : (v_2));
       break;
     }
     case 1u:
     {
-      float4 v_5 = m1[1u];
-      float4 v_6 = float4((1.0f).xxxx);
-      uint4 v_7 = uint4((v_1).xxxx);
-      m1[1u] = (((v_7 == uint4(0u, 1u, 2u, 3u))) ? (v_6) : (v_5));
+      float4 v_3 = m1[1u];
+      m1[1u] = (((uint4((v_1).xxxx) == uint4(0u, 1u, 2u, 3u))) ? ((1.0f).xxxx) : (v_3));
       break;
     }
     default:

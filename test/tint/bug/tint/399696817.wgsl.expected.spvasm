@@ -31,8 +31,12 @@
     %uint_16 = OpConstant %uint 16
      %uint_8 = OpConstant %uint 8
      %uint_0 = OpConstant %uint 0
+         %15 = OpConstantComposite %v4uint %uint_24 %uint_16 %uint_8 %uint_0
       %v4int = OpTypeVector %int 4
+         %23 = OpConstantComposite %v4uint %uint_24 %uint_24 %uint_24 %uint_24
+         %26 = OpConstantComposite %v4uint %uint_0 %uint_8 %uint_16 %uint_24
    %uint_255 = OpConstant %uint 255
+         %28 = OpConstantComposite %v4uint %uint_255 %uint_255 %uint_255 %uint_255
      %uint_2 = OpConstant %uint 2
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
@@ -42,17 +46,13 @@
         %foo = OpFunction %void None %10
          %in = OpFunctionParameter %uint
          %11 = OpLabel
-         %13 = OpCompositeConstruct %v4uint %uint_24 %uint_16 %uint_8 %uint_0
-         %18 = OpCompositeConstruct %v4uint %in %in %in %in
-         %19 = OpShiftLeftLogical %v4uint %18 %13
-         %21 = OpBitcast %v4int %19
-         %22 = OpCompositeConstruct %v4uint %uint_24 %uint_24 %uint_24 %uint_24
-          %x = OpShiftRightArithmetic %v4int %21 %22
-         %24 = OpCompositeConstruct %v4uint %uint_0 %uint_8 %uint_16 %uint_24
-         %25 = OpCompositeConstruct %v4uint %in %in %in %in
-         %26 = OpShiftRightLogical %v4uint %25 %24
-         %27 = OpCompositeConstruct %v4uint %uint_255 %uint_255 %uint_255 %uint_255
-          %y = OpBitwiseAnd %v4uint %26 %27
+         %13 = OpCompositeConstruct %v4uint %in %in %in %in
+         %14 = OpShiftLeftLogical %v4uint %13 %15
+         %21 = OpBitcast %v4int %14
+          %x = OpShiftRightArithmetic %v4int %21 %23
+         %24 = OpCompositeConstruct %v4uint %in %in %in %in
+         %25 = OpShiftRightLogical %v4uint %24 %26
+          %y = OpBitwiseAnd %v4uint %25 %28
           %z = OpAtomicLoad %int %a %uint_2 %uint_0
                OpReturn
                OpFunctionEnd

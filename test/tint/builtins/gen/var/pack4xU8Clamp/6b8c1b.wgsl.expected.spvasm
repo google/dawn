@@ -4,10 +4,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 51
+; Bound: 50
 ; Schema: 0
                OpCapability Shader
-         %23 = OpExtInstImport "GLSL.std.450"
+         %15 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
                OpExecutionMode %fragment_main OriginUpperLeft
@@ -31,14 +31,17 @@
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
      %uint_1 = OpConstant %uint 1
          %11 = OpConstantComposite %v4uint %uint_1 %uint_1 %uint_1 %uint_1
+         %16 = OpConstantNull %v4uint
+   %uint_255 = OpConstant %uint 255
+         %17 = OpConstantComposite %v4uint %uint_255 %uint_255 %uint_255 %uint_255
      %uint_0 = OpConstant %uint 0
      %uint_8 = OpConstant %uint 8
     %uint_16 = OpConstant %uint 16
     %uint_24 = OpConstant %uint 24
-   %uint_255 = OpConstant %uint 255
+         %20 = OpConstantComposite %v4uint %uint_0 %uint_8 %uint_16 %uint_24
 %_ptr_Function_uint = OpTypePointer Function %uint
        %void = OpTypeVoid
-         %46 = OpTypeFunction %void
+         %45 = OpTypeFunction %void
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
 %pack4xU8Clamp_6b8c1b = OpFunction %uint None %6
           %7 = OpLabel
@@ -46,36 +49,32 @@
         %res = OpVariable %_ptr_Function_uint Function
                OpStore %arg_0 %11
          %13 = OpLoad %v4uint %arg_0 None
-         %14 = OpCompositeConstruct %v4uint %uint_0 %uint_8 %uint_16 %uint_24
-         %19 = OpCompositeConstruct %v4uint %uint_0 %uint_0 %uint_0 %uint_0
-         %20 = OpCompositeConstruct %v4uint %uint_255 %uint_255 %uint_255 %uint_255
-         %22 = OpExtInst %v4uint %23 UClamp %13 %19 %20
-         %24 = OpShiftLeftLogical %v4uint %22 %14
-         %25 = OpCompositeConstruct %v4uint %uint_1 %uint_1 %uint_1 %uint_1
-         %26 = OpCompositeExtract %uint %24 0
-         %27 = OpCompositeExtract %uint %25 0
-         %28 = OpIMul %uint %26 %27
-         %29 = OpCompositeExtract %uint %24 1
-         %30 = OpCompositeExtract %uint %25 1
-         %31 = OpIMul %uint %29 %30
-         %32 = OpIAdd %uint %28 %31
-         %33 = OpCompositeExtract %uint %24 2
-         %34 = OpCompositeExtract %uint %25 2
-         %35 = OpIMul %uint %33 %34
-         %36 = OpIAdd %uint %32 %35
-         %37 = OpCompositeExtract %uint %24 3
-         %38 = OpCompositeExtract %uint %25 3
-         %39 = OpIMul %uint %37 %38
-         %40 = OpIAdd %uint %36 %39
-               OpStore %res %40
-         %43 = OpLoad %uint %res None
-               OpReturnValue %43
+         %14 = OpExtInst %v4uint %15 UClamp %13 %16 %17
+         %19 = OpShiftLeftLogical %v4uint %14 %20
+         %25 = OpCompositeExtract %uint %19 0
+         %26 = OpCompositeExtract %uint %11 0
+         %27 = OpIMul %uint %25 %26
+         %28 = OpCompositeExtract %uint %19 1
+         %29 = OpCompositeExtract %uint %11 1
+         %30 = OpIMul %uint %28 %29
+         %31 = OpIAdd %uint %27 %30
+         %32 = OpCompositeExtract %uint %19 2
+         %33 = OpCompositeExtract %uint %11 2
+         %34 = OpIMul %uint %32 %33
+         %35 = OpIAdd %uint %31 %34
+         %36 = OpCompositeExtract %uint %19 3
+         %37 = OpCompositeExtract %uint %11 3
+         %38 = OpIMul %uint %36 %37
+         %39 = OpIAdd %uint %35 %38
+               OpStore %res %39
+         %42 = OpLoad %uint %res None
+               OpReturnValue %42
                OpFunctionEnd
-%fragment_main = OpFunction %void None %46
-         %47 = OpLabel
-         %48 = OpFunctionCall %uint %pack4xU8Clamp_6b8c1b
-         %49 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-               OpStore %49 %48 None
+%fragment_main = OpFunction %void None %45
+         %46 = OpLabel
+         %47 = OpFunctionCall %uint %pack4xU8Clamp_6b8c1b
+         %48 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
+               OpStore %48 %47 None
                OpReturn
                OpFunctionEnd
 ;
@@ -84,10 +83,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 51
+; Bound: 50
 ; Schema: 0
                OpCapability Shader
-         %23 = OpExtInstImport "GLSL.std.450"
+         %15 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
@@ -111,14 +110,17 @@
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
      %uint_1 = OpConstant %uint 1
          %11 = OpConstantComposite %v4uint %uint_1 %uint_1 %uint_1 %uint_1
+         %16 = OpConstantNull %v4uint
+   %uint_255 = OpConstant %uint 255
+         %17 = OpConstantComposite %v4uint %uint_255 %uint_255 %uint_255 %uint_255
      %uint_0 = OpConstant %uint 0
      %uint_8 = OpConstant %uint 8
     %uint_16 = OpConstant %uint 16
     %uint_24 = OpConstant %uint 24
-   %uint_255 = OpConstant %uint 255
+         %20 = OpConstantComposite %v4uint %uint_0 %uint_8 %uint_16 %uint_24
 %_ptr_Function_uint = OpTypePointer Function %uint
        %void = OpTypeVoid
-         %46 = OpTypeFunction %void
+         %45 = OpTypeFunction %void
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
 %pack4xU8Clamp_6b8c1b = OpFunction %uint None %6
           %7 = OpLabel
@@ -126,36 +128,32 @@
         %res = OpVariable %_ptr_Function_uint Function
                OpStore %arg_0 %11
          %13 = OpLoad %v4uint %arg_0 None
-         %14 = OpCompositeConstruct %v4uint %uint_0 %uint_8 %uint_16 %uint_24
-         %19 = OpCompositeConstruct %v4uint %uint_0 %uint_0 %uint_0 %uint_0
-         %20 = OpCompositeConstruct %v4uint %uint_255 %uint_255 %uint_255 %uint_255
-         %22 = OpExtInst %v4uint %23 UClamp %13 %19 %20
-         %24 = OpShiftLeftLogical %v4uint %22 %14
-         %25 = OpCompositeConstruct %v4uint %uint_1 %uint_1 %uint_1 %uint_1
-         %26 = OpCompositeExtract %uint %24 0
-         %27 = OpCompositeExtract %uint %25 0
-         %28 = OpIMul %uint %26 %27
-         %29 = OpCompositeExtract %uint %24 1
-         %30 = OpCompositeExtract %uint %25 1
-         %31 = OpIMul %uint %29 %30
-         %32 = OpIAdd %uint %28 %31
-         %33 = OpCompositeExtract %uint %24 2
-         %34 = OpCompositeExtract %uint %25 2
-         %35 = OpIMul %uint %33 %34
-         %36 = OpIAdd %uint %32 %35
-         %37 = OpCompositeExtract %uint %24 3
-         %38 = OpCompositeExtract %uint %25 3
-         %39 = OpIMul %uint %37 %38
-         %40 = OpIAdd %uint %36 %39
-               OpStore %res %40
-         %43 = OpLoad %uint %res None
-               OpReturnValue %43
+         %14 = OpExtInst %v4uint %15 UClamp %13 %16 %17
+         %19 = OpShiftLeftLogical %v4uint %14 %20
+         %25 = OpCompositeExtract %uint %19 0
+         %26 = OpCompositeExtract %uint %11 0
+         %27 = OpIMul %uint %25 %26
+         %28 = OpCompositeExtract %uint %19 1
+         %29 = OpCompositeExtract %uint %11 1
+         %30 = OpIMul %uint %28 %29
+         %31 = OpIAdd %uint %27 %30
+         %32 = OpCompositeExtract %uint %19 2
+         %33 = OpCompositeExtract %uint %11 2
+         %34 = OpIMul %uint %32 %33
+         %35 = OpIAdd %uint %31 %34
+         %36 = OpCompositeExtract %uint %19 3
+         %37 = OpCompositeExtract %uint %11 3
+         %38 = OpIMul %uint %36 %37
+         %39 = OpIAdd %uint %35 %38
+               OpStore %res %39
+         %42 = OpLoad %uint %res None
+               OpReturnValue %42
                OpFunctionEnd
-%compute_main = OpFunction %void None %46
-         %47 = OpLabel
-         %48 = OpFunctionCall %uint %pack4xU8Clamp_6b8c1b
-         %49 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-               OpStore %49 %48 None
+%compute_main = OpFunction %void None %45
+         %46 = OpLabel
+         %47 = OpFunctionCall %uint %pack4xU8Clamp_6b8c1b
+         %48 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
+               OpStore %48 %47 None
                OpReturn
                OpFunctionEnd
 ;
@@ -164,10 +162,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 70
+; Bound: 69
 ; Schema: 0
                OpCapability Shader
-         %28 = OpExtInstImport "GLSL.std.450"
+         %20 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %vertex_main "vertex_main" %vertex_main_position_Output %vertex_main_loc0_Output %vertex_main___point_size_Output
                OpName %vertex_main_position_Output "vertex_main_position_Output"
@@ -200,20 +198,23 @@
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
      %uint_1 = OpConstant %uint 1
          %16 = OpConstantComposite %v4uint %uint_1 %uint_1 %uint_1 %uint_1
+         %21 = OpConstantNull %v4uint
+   %uint_255 = OpConstant %uint 255
+         %22 = OpConstantComposite %v4uint %uint_255 %uint_255 %uint_255 %uint_255
      %uint_0 = OpConstant %uint 0
      %uint_8 = OpConstant %uint 8
     %uint_16 = OpConstant %uint 16
     %uint_24 = OpConstant %uint 24
-   %uint_255 = OpConstant %uint 255
+         %25 = OpConstantComposite %v4uint %uint_0 %uint_8 %uint_16 %uint_24
 %_ptr_Function_uint = OpTypePointer Function %uint
 %VertexOutput = OpTypeStruct %v4float %uint
-         %51 = OpTypeFunction %VertexOutput
+         %50 = OpTypeFunction %VertexOutput
 %_ptr_Function_VertexOutput = OpTypePointer Function %VertexOutput
-         %55 = OpConstantNull %VertexOutput
+         %54 = OpConstantNull %VertexOutput
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-         %58 = OpConstantNull %v4float
+         %57 = OpConstantNull %v4float
        %void = OpTypeVoid
-         %64 = OpTypeFunction %void
+         %63 = OpTypeFunction %void
     %float_1 = OpConstant %float 1
 %pack4xU8Clamp_6b8c1b = OpFunction %uint None %11
          %12 = OpLabel
@@ -221,49 +222,45 @@
         %res = OpVariable %_ptr_Function_uint Function
                OpStore %arg_0 %16
          %18 = OpLoad %v4uint %arg_0 None
-         %19 = OpCompositeConstruct %v4uint %uint_0 %uint_8 %uint_16 %uint_24
-         %24 = OpCompositeConstruct %v4uint %uint_0 %uint_0 %uint_0 %uint_0
-         %25 = OpCompositeConstruct %v4uint %uint_255 %uint_255 %uint_255 %uint_255
-         %27 = OpExtInst %v4uint %28 UClamp %18 %24 %25
-         %29 = OpShiftLeftLogical %v4uint %27 %19
-         %30 = OpCompositeConstruct %v4uint %uint_1 %uint_1 %uint_1 %uint_1
-         %31 = OpCompositeExtract %uint %29 0
-         %32 = OpCompositeExtract %uint %30 0
-         %33 = OpIMul %uint %31 %32
-         %34 = OpCompositeExtract %uint %29 1
-         %35 = OpCompositeExtract %uint %30 1
-         %36 = OpIMul %uint %34 %35
-         %37 = OpIAdd %uint %33 %36
-         %38 = OpCompositeExtract %uint %29 2
-         %39 = OpCompositeExtract %uint %30 2
-         %40 = OpIMul %uint %38 %39
-         %41 = OpIAdd %uint %37 %40
-         %42 = OpCompositeExtract %uint %29 3
-         %43 = OpCompositeExtract %uint %30 3
-         %44 = OpIMul %uint %42 %43
-         %45 = OpIAdd %uint %41 %44
-               OpStore %res %45
-         %48 = OpLoad %uint %res None
-               OpReturnValue %48
+         %19 = OpExtInst %v4uint %20 UClamp %18 %21 %22
+         %24 = OpShiftLeftLogical %v4uint %19 %25
+         %30 = OpCompositeExtract %uint %24 0
+         %31 = OpCompositeExtract %uint %16 0
+         %32 = OpIMul %uint %30 %31
+         %33 = OpCompositeExtract %uint %24 1
+         %34 = OpCompositeExtract %uint %16 1
+         %35 = OpIMul %uint %33 %34
+         %36 = OpIAdd %uint %32 %35
+         %37 = OpCompositeExtract %uint %24 2
+         %38 = OpCompositeExtract %uint %16 2
+         %39 = OpIMul %uint %37 %38
+         %40 = OpIAdd %uint %36 %39
+         %41 = OpCompositeExtract %uint %24 3
+         %42 = OpCompositeExtract %uint %16 3
+         %43 = OpIMul %uint %41 %42
+         %44 = OpIAdd %uint %40 %43
+               OpStore %res %44
+         %47 = OpLoad %uint %res None
+               OpReturnValue %47
                OpFunctionEnd
-%vertex_main_inner = OpFunction %VertexOutput None %51
-         %52 = OpLabel
-        %out = OpVariable %_ptr_Function_VertexOutput Function %55
-         %56 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %56 %58 None
-         %59 = OpAccessChain %_ptr_Function_uint %out %uint_1
-         %60 = OpFunctionCall %uint %pack4xU8Clamp_6b8c1b
-               OpStore %59 %60 None
-         %61 = OpLoad %VertexOutput %out None
-               OpReturnValue %61
+%vertex_main_inner = OpFunction %VertexOutput None %50
+         %51 = OpLabel
+        %out = OpVariable %_ptr_Function_VertexOutput Function %54
+         %55 = OpAccessChain %_ptr_Function_v4float %out %uint_0
+               OpStore %55 %57 None
+         %58 = OpAccessChain %_ptr_Function_uint %out %uint_1
+         %59 = OpFunctionCall %uint %pack4xU8Clamp_6b8c1b
+               OpStore %58 %59 None
+         %60 = OpLoad %VertexOutput %out None
+               OpReturnValue %60
                OpFunctionEnd
-%vertex_main = OpFunction %void None %64
-         %65 = OpLabel
-         %66 = OpFunctionCall %VertexOutput %vertex_main_inner
-         %67 = OpCompositeExtract %v4float %66 0
-               OpStore %vertex_main_position_Output %67 None
-         %68 = OpCompositeExtract %uint %66 1
-               OpStore %vertex_main_loc0_Output %68 None
+%vertex_main = OpFunction %void None %63
+         %64 = OpLabel
+         %65 = OpFunctionCall %VertexOutput %vertex_main_inner
+         %66 = OpCompositeExtract %v4float %65 0
+               OpStore %vertex_main_position_Output %66 None
+         %67 = OpCompositeExtract %uint %65 1
+               OpStore %vertex_main_loc0_Output %67 None
                OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

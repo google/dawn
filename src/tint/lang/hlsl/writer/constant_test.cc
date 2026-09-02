@@ -849,9 +849,8 @@ struct S {
 
 
 S a() {
-  A v = {(1.0f).xxxx};
-  S v_1 = {v};
-  return v_1;
+  S v = {{(1.0f).xxxx}};
+  return v;
 }
 
 [numthreads(1, 1, 1)]
@@ -1233,13 +1232,12 @@ static const A v = {{int(9), int(10)}};
 static A a = v;
 static const B v_1 = {{{int(5), int(6), int(7), int(8)}}};
 static B b = v_1;
-static const A v_2 = {{int(1), int(2)}};
-static const C v_3 = {v_2};
-static C c = v_3;
-static const int v_4[2] = {int(11), int(12)};
-static int d[2] = v_4;
-static const int v_5[1][2][3] = {{{int(1), int(2), int(3)}, {int(4), int(5), int(6)}}};
-static int e[1][2][3] = v_5;
+static const C v_2 = {{{int(1), int(2)}}};
+static C c = v_2;
+static const int v_3[2] = {int(11), int(12)};
+static int d[2] = v_3;
+static const int v_4[1][2][3] = {{{int(1), int(2), int(3)}, {int(4), int(5), int(6)}}};
+static int e[1][2][3] = v_4;
 [numthreads(1, 1, 1)]
 void main() {
 }

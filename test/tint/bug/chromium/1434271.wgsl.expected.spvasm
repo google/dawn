@@ -218,6 +218,7 @@
 %mat2v3float = OpTypeMatrix %v3float 2
 %_ptr_Function_v3float = OpTypePointer Function %v3float
 %float_0_00999999978 = OpConstant %float 0.00999999978
+         %53 = OpConstantComposite %v3float %float_0_00999999978 %float_0_00999999978 %float_0_00999999978
 %_ptr_Function_VertexOutput = OpTypePointer Function %VertexOutput
          %59 = OpConstantNull %VertexOutput
 %_ptr_Function_v4float = OpTypePointer Function %v4float
@@ -252,9 +253,8 @@
                OpStore %quad_pos %47
          %50 = OpCompositeExtract %v3float %in 0
          %51 = OpLoad %v3float %quad_pos None
-         %52 = OpCompositeConstruct %v3float %float_0_00999999978 %float_0_00999999978 %float_0_00999999978
-         %54 = OpFAdd %v3float %51 %52
-         %55 = OpFSub %v3float %50 %54
+         %52 = OpFAdd %v3float %51 %53
+         %55 = OpFSub %v3float %50 %52
                OpStore %position %55
          %60 = OpAccessChain %_ptr_Function_v4float %out %uint_0
          %62 = OpFunctionCall %mat4v4float %64 %uint_0

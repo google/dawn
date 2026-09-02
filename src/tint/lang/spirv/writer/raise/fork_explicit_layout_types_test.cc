@@ -1242,8 +1242,7 @@ $B1: {  # root
 
 %foo = func():void {
   $B2: {
-    %4:Outer = construct InnerShared(0u), InnerNotShared(0u)
-    store %buffer, %4
+    store %buffer, Outer(InnerShared(0u), InnerNotShared(0u))
     ret
   }
 }
@@ -1283,27 +1282,26 @@ $B1: {  # root
 
 %foo = func():void {
   $B2: {
-    %4:Outer = construct InnerShared(0u), InnerNotShared(0u)
-    %5:Outer_tint_explicit_layout = call %tint_convert_explicit_layout, %4
-    store %buffer, %5
+    %4:Outer_tint_explicit_layout = call %tint_convert_explicit_layout, Outer(InnerShared(0u), InnerNotShared(0u))
+    store %buffer, %4
     ret
   }
 }
 %tint_convert_explicit_layout = func(%tint_source:Outer):Outer_tint_explicit_layout {
   $B3: {
-    %8:InnerShared = access %tint_source, 0u
-    %9:InnerShared_tint_explicit_layout = call %tint_convert_explicit_layout_1, %8
-    %11:InnerNotShared = access %tint_source, 1u
-    %12:Outer_tint_explicit_layout = construct %9, %11
-    ret %12
+    %7:InnerShared = access %tint_source, 0u
+    %8:InnerShared_tint_explicit_layout = call %tint_convert_explicit_layout_1, %7
+    %10:InnerNotShared = access %tint_source, 1u
+    %11:Outer_tint_explicit_layout = construct %8, %10
+    ret %11
   }
 }
 %tint_convert_explicit_layout_1 = func(%tint_source_1:InnerShared):InnerShared_tint_explicit_layout {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
   $B4: {
-    %14:u32 = access %tint_source_1, 0u
-    %15:u32 = access %tint_source_1, 1u
-    %16:InnerShared_tint_explicit_layout = construct %14, %15
-    ret %16
+    %13:u32 = access %tint_source_1, 0u
+    %14:u32 = access %tint_source_1, 1u
+    %15:InnerShared_tint_explicit_layout = construct %13, %14
+    ret %15
   }
 }
 )";

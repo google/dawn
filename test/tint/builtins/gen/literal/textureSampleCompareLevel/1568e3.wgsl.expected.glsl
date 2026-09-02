@@ -11,7 +11,7 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 uniform highp samplerCubeShadow f_arg_0_arg_1;
 float textureSampleCompareLevel_1568e3() {
-  float res = texture(f_arg_0_arg_1, vec4(vec3(1.0f), 1.0f));
+  float res = texture(f_arg_0_arg_1, vec4(1.0f));
   return res;
 }
 void main() {
@@ -28,7 +28,7 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 uniform highp samplerCubeShadow arg_0_arg_1;
 float textureSampleCompareLevel_1568e3() {
-  float res = texture(arg_0_arg_1, vec4(vec3(1.0f), 1.0f));
+  float res = texture(arg_0_arg_1, vec4(1.0f));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -49,7 +49,7 @@ struct VertexOutput {
 uniform highp samplerCubeShadow v_arg_0_arg_1;
 layout(location = 0) flat out float tint_interstage_location0;
 float textureSampleCompareLevel_1568e3() {
-  float res = texture(v_arg_0_arg_1, vec4(vec3(1.0f), 1.0f));
+  float res = texture(v_arg_0_arg_1, vec4(1.0f));
   return res;
 }
 VertexOutput vertex_main_inner() {

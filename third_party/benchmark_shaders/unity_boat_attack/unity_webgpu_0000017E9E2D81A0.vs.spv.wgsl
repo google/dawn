@@ -337,7 +337,7 @@ fn main_inner(in_COLOR0 : vec4<f32>, in_POSITION0 : vec4<f32>, in_NORMAL0 : vec3
   u_xlati43 = ((u_xlati3.z * u_xlati43) + u_xlati3.x);
   u_xlati7.y = ((bitcast<i32>(u_xlatu6.x) * u_xlati5.z) + u_xlati43);
   let v_35 = u_xlatb42;
-  let v_36 = bitcast<vec2<i32>>(((select(vec2<u32>(), vec2<u32>(1u), vec2<bool>(v_35, v_35)) * vec2<u32>(4294967295u, 4294967295u)) & bitcast<vec2<u32>>(u_xlati7)));
+  let v_36 = bitcast<vec2<i32>>(((select(vec2<u32>(), vec2<u32>(1u), vec2<bool>(v_35, v_35)) * vec2<u32>(4294967295u)) & bitcast<vec2<u32>>(u_xlati7)));
   u_xlati3 = vec3<i32>(v_36.xy, u_xlati3.z);
   u_xlatu42 = v_4._APVResIndex_buf[u_xlati3.y].value[0i];
   let v_37 = (u_xlati3.x != 0i);

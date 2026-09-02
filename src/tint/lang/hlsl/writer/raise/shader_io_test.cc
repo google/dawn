@@ -440,8 +440,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOReturnValue_NonStructBuiltin) {
     auto* src = R"(
 %foo = @vertex func():vec4<f32> [@invariant, @position] {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    ret %2
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -454,15 +453,14 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():vec4<f32> {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    ret %2
+    ret vec4<f32>(0.5f)
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %4:vec4<f32> = call %foo_inner
-    %5:foo_outputs = construct %4
-    ret %5
+    %3:vec4<f32> = call %foo_inner
+    %4:foo_outputs = construct %3
+    ret %4
   }
 }
 )";
@@ -483,8 +481,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOReturnValue_NonStructLocation) {
     auto* src = R"(
 %foo = @fragment func():vec4<f32> [@location(1)] {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    ret %2
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -497,15 +494,14 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():vec4<f32> {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    ret %2
+    ret vec4<f32>(0.5f)
   }
 }
 %foo = @fragment func():foo_outputs {
   $B2: {
-    %4:vec4<f32> = call %foo_inner
-    %5:foo_outputs = construct %4
-    ret %5
+    %3:vec4<f32> = call %foo_inner
+    %4:foo_outputs = construct %3
+    ret %4
   }
 }
 )";
@@ -564,9 +560,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.0f
-    %3:Outputs = construct %2, 0.25f, 0.75f
-    ret %3
+    ret Outputs(vec4<f32>(0.0f), 0.25f, 0.75f)
   }
 }
 )";
@@ -587,19 +581,17 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.0f
-    %3:Outputs = construct %2, 0.25f, 0.75f
-    ret %3
+    ret Outputs(vec4<f32>(0.0f), 0.25f, 0.75f)
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %5:Outputs = call %foo_inner
-    %6:vec4<f32> = access %5, 0u
-    %7:f32 = access %5, 1u
-    %8:f32 = access %5, 2u
-    %9:foo_outputs = construct %7, %8, %6
-    ret %9
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:f32 = access %3, 1u
+    %6:f32 = access %3, 2u
+    %7:foo_outputs = construct %5, %6, %4
+    ret %7
   }
 }
 )";
@@ -642,8 +634,7 @@ Output = struct @align(4) {
 
 %foo = @fragment func():Output {
   $B1: {
-    %2:Output = construct 0.25f, 0.75f
-    ret %2
+    ret Output(0.25f, 0.75f)
   }
 }
 )";
@@ -662,17 +653,16 @@ foo_outputs = struct @align(4) {
 
 %foo_inner = func():Output {
   $B1: {
-    %2:Output = construct 0.25f, 0.75f
-    ret %2
+    ret Output(0.25f, 0.75f)
   }
 }
 %foo = @fragment func():foo_outputs {
   $B2: {
-    %4:Output = call %foo_inner
-    %5:f32 = access %4, 0u
-    %6:f32 = access %4, 1u
-    %7:foo_outputs = construct %5, %6
-    ret %7
+    %3:Output = call %foo_inner
+    %4:f32 = access %3, 0u
+    %5:f32 = access %3, 1u
+    %6:foo_outputs = construct %4, %5
+    ret %6
   }
 }
 )";
@@ -815,8 +805,7 @@ $B1: {  # root
 
 %frag = @fragment func():void {
   $B2: {
-    %3:Outputs = construct
-    store %1, %3
+    store %1, Outputs(vec4<f32>(0.0f))
     ret
   }
 }
@@ -835,8 +824,7 @@ $B1: {  # root
 
 %frag = @fragment func():void {
   $B2: {
-    %3:Outputs = construct
-    store %1, %3
+    store %1, Outputs(vec4<f32>(0.0f))
     ret
   }
 }
@@ -1667,10 +1655,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 1> = construct 0.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 1>(0.0f))
   }
 }
 )";
@@ -1689,20 +1674,17 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 1> = construct 0.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 1>(0.0f))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:array<f32, 1> = access %6, 1u
-    %9:f32 = access %8, 0u
-    %10:foo_outputs = construct %7, %9
-    ret %10
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:array<f32, 1> = access %3, 1u
+    %6:f32 = access %5, 0u
+    %7:foo_outputs = construct %4, %6
+    ret %7
   }
 }
 )";
@@ -1740,10 +1722,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 2> = construct 0.0f, 1.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 2>(0.0f, 1.0f))
   }
 }
 )";
@@ -1762,22 +1741,19 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 2> = construct 0.0f, 1.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 2>(0.0f, 1.0f))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:array<f32, 2> = access %6, 1u
-    %9:f32 = access %8, 0u
-    %10:f32 = access %8, 1u
-    %11:vec2<f32> = construct %9, %10
-    %12:foo_outputs = construct %7, %11
-    ret %12
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:array<f32, 2> = access %3, 1u
+    %6:f32 = access %5, 0u
+    %7:f32 = access %5, 1u
+    %8:vec2<f32> = construct %6, %7
+    %9:foo_outputs = construct %4, %8
+    ret %9
   }
 }
 )";
@@ -1815,10 +1791,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 3> = construct 0.0f, 1.0f, 2.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 3>(0.0f, 1.0f, 2.0f))
   }
 }
 )";
@@ -1837,23 +1810,20 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 3> = construct 0.0f, 1.0f, 2.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 3>(0.0f, 1.0f, 2.0f))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:array<f32, 3> = access %6, 1u
-    %9:f32 = access %8, 0u
-    %10:f32 = access %8, 1u
-    %11:f32 = access %8, 2u
-    %12:vec3<f32> = construct %9, %10, %11
-    %13:foo_outputs = construct %7, %12
-    ret %13
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:array<f32, 3> = access %3, 1u
+    %6:f32 = access %5, 0u
+    %7:f32 = access %5, 1u
+    %8:f32 = access %5, 2u
+    %9:vec3<f32> = construct %6, %7, %8
+    %10:foo_outputs = construct %4, %9
+    ret %10
   }
 }
 )";
@@ -1891,10 +1861,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 4> = construct 0.0f, 1.0f, 2.0f, 3.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 4>(0.0f, 1.0f, 2.0f, 3.0f))
   }
 }
 )";
@@ -1913,24 +1880,21 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 4> = construct 0.0f, 1.0f, 2.0f, 3.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 4>(0.0f, 1.0f, 2.0f, 3.0f))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:array<f32, 4> = access %6, 1u
-    %9:f32 = access %8, 0u
-    %10:f32 = access %8, 1u
-    %11:f32 = access %8, 2u
-    %12:f32 = access %8, 3u
-    %13:vec4<f32> = construct %9, %10, %11, %12
-    %14:foo_outputs = construct %7, %13
-    ret %14
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:array<f32, 4> = access %3, 1u
+    %6:f32 = access %5, 0u
+    %7:f32 = access %5, 1u
+    %8:f32 = access %5, 2u
+    %9:f32 = access %5, 3u
+    %10:vec4<f32> = construct %6, %7, %8, %9
+    %11:foo_outputs = construct %4, %10
+    ret %11
   }
 }
 )";
@@ -1968,10 +1932,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 5> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 5>(0.0f, 1.0f, 2.0f, 3.0f, 4.0f))
   }
 }
 )";
@@ -1991,25 +1952,22 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 5> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 5>(0.0f, 1.0f, 2.0f, 3.0f, 4.0f))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:array<f32, 5> = access %6, 1u
-    %9:f32 = access %8, 0u
-    %10:f32 = access %8, 1u
-    %11:f32 = access %8, 2u
-    %12:f32 = access %8, 3u
-    %13:vec4<f32> = construct %9, %10, %11, %12
-    %14:f32 = access %8, 4u
-    %15:foo_outputs = construct %7, %13, %14
-    ret %15
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:array<f32, 5> = access %3, 1u
+    %6:f32 = access %5, 0u
+    %7:f32 = access %5, 1u
+    %8:f32 = access %5, 2u
+    %9:f32 = access %5, 3u
+    %10:vec4<f32> = construct %6, %7, %8, %9
+    %11:f32 = access %5, 4u
+    %12:foo_outputs = construct %4, %10, %11
+    ret %12
   }
 }
 )";
@@ -2047,10 +2005,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 6> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 6>(0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f))
   }
 }
 )";
@@ -2070,27 +2025,24 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 6> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 6>(0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:array<f32, 6> = access %6, 1u
-    %9:f32 = access %8, 0u
-    %10:f32 = access %8, 1u
-    %11:f32 = access %8, 2u
-    %12:f32 = access %8, 3u
-    %13:vec4<f32> = construct %9, %10, %11, %12
-    %14:f32 = access %8, 4u
-    %15:f32 = access %8, 5u
-    %16:vec2<f32> = construct %14, %15
-    %17:foo_outputs = construct %7, %13, %16
-    ret %17
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:array<f32, 6> = access %3, 1u
+    %6:f32 = access %5, 0u
+    %7:f32 = access %5, 1u
+    %8:f32 = access %5, 2u
+    %9:f32 = access %5, 3u
+    %10:vec4<f32> = construct %6, %7, %8, %9
+    %11:f32 = access %5, 4u
+    %12:f32 = access %5, 5u
+    %13:vec2<f32> = construct %11, %12
+    %14:foo_outputs = construct %4, %10, %13
+    ret %14
   }
 }
 )";
@@ -2128,10 +2080,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 7> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 7>(0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f))
   }
 }
 )";
@@ -2151,28 +2100,25 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 7> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 7>(0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:array<f32, 7> = access %6, 1u
-    %9:f32 = access %8, 0u
-    %10:f32 = access %8, 1u
-    %11:f32 = access %8, 2u
-    %12:f32 = access %8, 3u
-    %13:vec4<f32> = construct %9, %10, %11, %12
-    %14:f32 = access %8, 4u
-    %15:f32 = access %8, 5u
-    %16:f32 = access %8, 6u
-    %17:vec3<f32> = construct %14, %15, %16
-    %18:foo_outputs = construct %7, %13, %17
-    ret %18
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:array<f32, 7> = access %3, 1u
+    %6:f32 = access %5, 0u
+    %7:f32 = access %5, 1u
+    %8:f32 = access %5, 2u
+    %9:f32 = access %5, 3u
+    %10:vec4<f32> = construct %6, %7, %8, %9
+    %11:f32 = access %5, 4u
+    %12:f32 = access %5, 5u
+    %13:f32 = access %5, 6u
+    %14:vec3<f32> = construct %11, %12, %13
+    %15:foo_outputs = construct %4, %10, %14
+    ret %15
   }
 }
 )";
@@ -2211,10 +2157,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 8> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 8>(0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f))
   }
 }
 )";
@@ -2234,29 +2177,26 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 8> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), array<f32, 8>(0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:array<f32, 8> = access %6, 1u
-    %9:f32 = access %8, 0u
-    %10:f32 = access %8, 1u
-    %11:f32 = access %8, 2u
-    %12:f32 = access %8, 3u
-    %13:vec4<f32> = construct %9, %10, %11, %12
-    %14:f32 = access %8, 4u
-    %15:f32 = access %8, 5u
-    %16:f32 = access %8, 6u
-    %17:f32 = access %8, 7u
-    %18:vec4<f32> = construct %14, %15, %16, %17
-    %19:foo_outputs = construct %7, %13, %18
-    ret %19
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:array<f32, 8> = access %3, 1u
+    %6:f32 = access %5, 0u
+    %7:f32 = access %5, 1u
+    %8:f32 = access %5, 2u
+    %9:f32 = access %5, 3u
+    %10:vec4<f32> = construct %6, %7, %8, %9
+    %11:f32 = access %5, 4u
+    %12:f32 = access %5, 5u
+    %13:f32 = access %5, 6u
+    %14:f32 = access %5, 7u
+    %15:vec4<f32> = construct %11, %12, %13, %14
+    %16:foo_outputs = construct %4, %10, %15
+    ret %16
   }
 }
 )";
@@ -2294,10 +2234,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:array<f32, 5> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f
-    %3:vec4<f32> = construct 0.5f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(array<f32, 5>(0.0f, 1.0f, 2.0f, 3.0f, 4.0f), vec4<f32>(0.5f))
   }
 }
 )";
@@ -2317,25 +2254,22 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:array<f32, 5> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f
-    %3:vec4<f32> = construct 0.5f
-    %4:Outputs = construct %2, %3
-    ret %4
+    ret Outputs(array<f32, 5>(0.0f, 1.0f, 2.0f, 3.0f, 4.0f), vec4<f32>(0.5f))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:array<f32, 5> = access %6, 0u
-    %8:f32 = access %7, 0u
-    %9:f32 = access %7, 1u
-    %10:f32 = access %7, 2u
-    %11:f32 = access %7, 3u
-    %12:vec4<f32> = construct %8, %9, %10, %11
-    %13:f32 = access %7, 4u
-    %14:vec4<f32> = access %6, 1u
-    %15:foo_outputs = construct %14, %12, %13
-    ret %15
+    %3:Outputs = call %foo_inner
+    %4:array<f32, 5> = access %3, 0u
+    %5:f32 = access %4, 0u
+    %6:f32 = access %4, 1u
+    %7:f32 = access %4, 2u
+    %8:f32 = access %4, 3u
+    %9:vec4<f32> = construct %5, %6, %7, %8
+    %10:f32 = access %4, 4u
+    %11:vec4<f32> = access %3, 1u
+    %12:foo_outputs = construct %11, %9, %10
+    ret %12
   }
 }
 )";
@@ -2386,10 +2320,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 )";
@@ -2412,21 +2343,18 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:f32 = access %6, 1u
-    %9:i32 = access %6, 2u
-    %10:vec3<i32> = access %6, 3u
-    %11:foo_outputs = construct %8, %9, %10, %7
-    ret %11
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:f32 = access %3, 1u
+    %6:i32 = access %3, 2u
+    %7:vec3<i32> = access %3, 3u
+    %8:foo_outputs = construct %5, %6, %7, %4
+    ret %8
   }
 }
 )";
@@ -2478,10 +2406,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 )";
@@ -2504,21 +2429,18 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:f32 = access %6, 1u
-    %9:i32 = access %6, 2u
-    %10:vec3<i32> = access %6, 3u
-    %11:foo_outputs = construct %8, %9, %10, %7
-    ret %11
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:f32 = access %3, 1u
+    %6:i32 = access %3, 2u
+    %7:vec3<i32> = access %3, 3u
+    %8:foo_outputs = construct %5, %6, %7, %4
+    ret %8
   }
 }
 )";
@@ -2573,10 +2495,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 )";
@@ -2598,21 +2517,18 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:f32 = access %6, 1u
-    %9:i32 = access %6, 2u
-    %10:vec3<i32> = access %6, 3u
-    %11:foo_outputs = construct %9, %10, %7
-    ret %11
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:f32 = access %3, 1u
+    %6:i32 = access %3, 2u
+    %7:vec3<i32> = access %3, 3u
+    %8:foo_outputs = construct %6, %7, %4
+    ret %8
   }
 }
 )";
@@ -2666,10 +2582,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 )";
@@ -2691,21 +2604,18 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:f32 = access %6, 1u
-    %9:i32 = access %6, 2u
-    %10:vec3<i32> = access %6, 3u
-    %11:foo_outputs = construct %8, %10, %7
-    ret %11
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:f32 = access %3, 1u
+    %6:i32 = access %3, 2u
+    %7:vec3<i32> = access %3, 3u
+    %8:foo_outputs = construct %5, %7, %4
+    ret %8
   }
 }
 )";
@@ -2759,10 +2669,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 )";
@@ -2784,21 +2691,18 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:f32 = access %6, 1u
-    %9:i32 = access %6, 2u
-    %10:vec3<i32> = access %6, 3u
-    %11:foo_outputs = construct %8, %9, %7
-    ret %11
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:f32 = access %3, 1u
+    %6:i32 = access %3, 2u
+    %7:vec3<i32> = access %3, 3u
+    %8:foo_outputs = construct %5, %6, %4
+    ret %8
   }
 }
 )";
@@ -2852,10 +2756,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 )";
@@ -2876,21 +2777,18 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:f32 = access %6, 1u
-    %9:i32 = access %6, 2u
-    %10:vec3<i32> = access %6, 3u
-    %11:foo_outputs = construct %9, %7
-    ret %11
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:f32 = access %3, 1u
+    %6:i32 = access %3, 2u
+    %7:vec3<i32> = access %3, 3u
+    %8:foo_outputs = construct %6, %4
+    ret %8
   }
 }
 )";
@@ -2943,10 +2841,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 )";
@@ -2966,21 +2861,18 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct %2, 1.0f, 2i, %3
-    ret %4
+    ret Outputs(vec4<f32>(0.5f), 1.0f, 2i, vec3<i32>(3i))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:vec4<f32> = access %6, 0u
-    %8:f32 = access %6, 1u
-    %9:i32 = access %6, 2u
-    %10:vec3<i32> = access %6, 3u
-    %11:foo_outputs = construct %7
-    ret %11
+    %3:Outputs = call %foo_inner
+    %4:vec4<f32> = access %3, 0u
+    %5:f32 = access %3, 1u
+    %6:i32 = access %3, 2u
+    %7:vec3<i32> = access %3, 3u
+    %8:foo_outputs = construct %4
+    ret %8
   }
 }
 )";
@@ -3032,10 +2924,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct 1.0f, %2, 2i, %3
-    ret %4
+    ret Outputs(1.0f, vec4<f32>(0.5f), 2i, vec3<i32>(3i))
   }
 }
 )";
@@ -3057,21 +2946,18 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:vec4<f32> = construct 0.5f
-    %3:vec3<i32> = construct 3i
-    %4:Outputs = construct 1.0f, %2, 2i, %3
-    ret %4
+    ret Outputs(1.0f, vec4<f32>(0.5f), 2i, vec3<i32>(3i))
   }
 }
 %foo = @vertex func():foo_outputs {
   $B2: {
-    %6:Outputs = call %foo_inner
-    %7:f32 = access %6, 0u
-    %8:vec4<f32> = access %6, 1u
-    %9:i32 = access %6, 2u
-    %10:vec3<i32> = access %6, 3u
-    %11:foo_outputs = construct %7, %10, %8
-    ret %11
+    %3:Outputs = call %foo_inner
+    %4:f32 = access %3, 0u
+    %5:vec4<f32> = access %3, 1u
+    %6:i32 = access %3, 2u
+    %7:vec3<i32> = access %3, 3u
+    %8:foo_outputs = construct %4, %7, %5
+    ret %8
   }
 }
 )";
@@ -3103,8 +2989,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_VertexIndex)
 %foo = @vertex func(%vert_idx:u32 [@vertex_index]):vec4<f32> [@position] {
   $B1: {
     %3:u32 = add %vert_idx, %vert_idx
-    %4:vec4<f32> = construct 0.5f
-    ret %4
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -3130,19 +3015,18 @@ $B1: {  # root
 %foo_inner = func(%vert_idx:u32):vec4<f32> {
   $B2: {
     %4:u32 = add %vert_idx, %vert_idx
-    %5:vec4<f32> = construct 0.5f
-    ret %5
+    ret vec4<f32>(0.5f)
   }
 }
 %foo = @vertex func(%inputs:foo_inputs):foo_outputs {
   $B3: {
-    %8:u32 = access %inputs, 0u
-    %9:ptr<immediate, u32, read> = access %tint_immediate_data, 0u
-    %10:u32 = load %9
-    %11:u32 = add %8, %10
-    %12:vec4<f32> = call %foo_inner, %11
-    %13:foo_outputs = construct %12
-    ret %13
+    %7:u32 = access %inputs, 0u
+    %8:ptr<immediate, u32, read> = access %tint_immediate_data, 0u
+    %9:u32 = load %8
+    %10:u32 = add %7, %9
+    %11:vec4<f32> = call %foo_inner, %10
+    %12:foo_outputs = construct %11
+    ret %12
   }
 }
 )";
@@ -3181,8 +3065,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_InstanceInde
 %foo = @vertex func(%inst_idx:u32 [@instance_index]):vec4<f32> [@position] {
   $B1: {
     %3:u32 = add %inst_idx, %inst_idx
-    %4:vec4<f32> = construct 0.5f
-    ret %4
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -3208,19 +3091,18 @@ $B1: {  # root
 %foo_inner = func(%inst_idx:u32):vec4<f32> {
   $B2: {
     %4:u32 = add %inst_idx, %inst_idx
-    %5:vec4<f32> = construct 0.5f
-    ret %5
+    ret vec4<f32>(0.5f)
   }
 }
 %foo = @vertex func(%inputs:foo_inputs):foo_outputs {
   $B3: {
-    %8:u32 = access %inputs, 0u
-    %9:ptr<immediate, u32, read> = access %tint_immediate_data, 0u
-    %10:u32 = load %9
-    %11:u32 = add %8, %10
-    %12:vec4<f32> = call %foo_inner, %11
-    %13:foo_outputs = construct %12
-    ret %13
+    %7:u32 = access %inputs, 0u
+    %8:ptr<immediate, u32, read> = access %tint_immediate_data, 0u
+    %9:u32 = load %8
+    %10:u32 = add %7, %9
+    %11:vec4<f32> = call %foo_inner, %10
+    %12:foo_outputs = construct %11
+    ret %12
   }
 }
 )";
@@ -3262,8 +3144,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_Both) {
 %foo = @vertex func(%vert_idx:u32 [@vertex_index], %inst_idx:u32 [@instance_index]):vec4<f32> [@position] {
   $B1: {
     %4:u32 = add %vert_idx, %inst_idx
-    %5:vec4<f32> = construct 0.5f
-    ret %5
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -3291,23 +3172,22 @@ $B1: {  # root
 %foo_inner = func(%vert_idx:u32, %inst_idx:u32):vec4<f32> {
   $B2: {
     %5:u32 = add %vert_idx, %inst_idx
-    %6:vec4<f32> = construct 0.5f
-    ret %6
+    ret vec4<f32>(0.5f)
   }
 }
 %foo = @vertex func(%inputs:foo_inputs):foo_outputs {
   $B3: {
-    %9:u32 = access %inputs, 0u
-    %10:ptr<immediate, u32, read> = access %tint_immediate_data, 0u
-    %11:u32 = load %10
-    %12:u32 = add %9, %11
-    %13:u32 = access %inputs, 1u
-    %14:ptr<immediate, u32, read> = access %tint_immediate_data, 1u
-    %15:u32 = load %14
-    %16:u32 = add %13, %15
-    %17:vec4<f32> = call %foo_inner, %12, %16
-    %18:foo_outputs = construct %17
-    ret %18
+    %8:u32 = access %inputs, 0u
+    %9:ptr<immediate, u32, read> = access %tint_immediate_data, 0u
+    %10:u32 = load %9
+    %11:u32 = add %8, %10
+    %12:u32 = access %inputs, 1u
+    %13:ptr<immediate, u32, read> = access %tint_immediate_data, 1u
+    %14:u32 = load %13
+    %15:u32 = add %12, %14
+    %16:vec4<f32> = call %foo_inner, %11, %15
+    %17:foo_outputs = construct %16
+    ret %17
   }
 }
 )";
@@ -3354,8 +3234,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_BothReorder)
 %foo = @vertex func(%inst_idx:u32 [@instance_index], %vert_idx:u32 [@vertex_index]):vec4<f32> [@position] {
   $B1: {
     %4:u32 = add %vert_idx, %inst_idx
-    %5:vec4<f32> = construct 0.5f
-    ret %5
+    ret vec4<f32>(0.5f)
   }
 }
 )";
@@ -3383,23 +3262,22 @@ $B1: {  # root
 %foo_inner = func(%inst_idx:u32, %vert_idx:u32):vec4<f32> {
   $B2: {
     %5:u32 = add %vert_idx, %inst_idx
-    %6:vec4<f32> = construct 0.5f
-    ret %6
+    ret vec4<f32>(0.5f)
   }
 }
 %foo = @vertex func(%inputs:foo_inputs):foo_outputs {
   $B3: {
-    %9:u32 = access %inputs, 1u
-    %10:ptr<immediate, u32, read> = access %tint_immediate_data, 1u
-    %11:u32 = load %10
-    %12:u32 = add %9, %11
-    %13:u32 = access %inputs, 0u
-    %14:ptr<immediate, u32, read> = access %tint_immediate_data, 0u
-    %15:u32 = load %14
-    %16:u32 = add %13, %15
-    %17:vec4<f32> = call %foo_inner, %12, %16
-    %18:foo_outputs = construct %17
-    ret %18
+    %8:u32 = access %inputs, 1u
+    %9:ptr<immediate, u32, read> = access %tint_immediate_data, 1u
+    %10:u32 = load %9
+    %11:u32 = add %8, %10
+    %12:u32 = access %inputs, 0u
+    %13:ptr<immediate, u32, read> = access %tint_immediate_data, 0u
+    %14:u32 = load %13
+    %15:u32 = add %12, %14
+    %16:vec4<f32> = call %foo_inner, %11, %15
+    %17:foo_outputs = construct %16
+    ret %17
   }
 }
 )";

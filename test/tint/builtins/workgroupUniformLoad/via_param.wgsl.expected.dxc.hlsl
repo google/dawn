@@ -12,7 +12,7 @@ int foo(uint p_indices[1]) {
 }
 
 int bar() {
-  uint v_2[1] = {0u};
+  uint v_2[1] = (uint[1])0;
   return foo(v_2);
 }
 

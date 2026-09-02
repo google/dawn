@@ -36,25 +36,24 @@ float4 fs_inner(tint_module_vars_struct tint_module_vars) {
   uint const v = uint(0);
   bool v_1 = false;
   if ((v < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
-    uint3 const v_2 = uint3((*tint_module_vars.tint_resource_table_metadata).bindings[v]);
-    v_1 = any((v_2 == uint3(6u, 7u, 34u)));
+    v_1 = any((uint3((*tint_module_vars.tint_resource_table_metadata).bindings[v]) == uint3(6u, 7u, 34u)));
   } else {
     v_1 = false;
   }
   bool const has_resource = v_1;
+  uint v_2 = 0u;
+  if (has_resource) {
+    v_2 = (*tint_module_vars.tint_resource_table_metadata).bindings[v];
+  } else {
+    v_2 = 6u;
+  }
   uint v_3 = 0u;
   if (has_resource) {
-    v_3 = (*tint_module_vars.tint_resource_table_metadata).bindings[v];
+    v_3 = v;
   } else {
-    v_3 = 6u;
+    v_3 = (0u + (*tint_module_vars.tint_resource_table_metadata).array_length);
   }
-  uint v_4 = 0u;
-  if (has_resource) {
-    v_4 = v;
-  } else {
-    v_4 = (0u + (*tint_module_vars.tint_resource_table_metadata).array_length);
-  }
-  return reinterpret_cast<const constant tint_resource_table_struct_texture_2d_f32*>(tint_module_vars.tint_resource_table)[v_4].resource.sample(tint_module_vars.s, float2(0.0f));
+  return reinterpret_cast<const constant tint_resource_table_struct_texture_2d_f32*>(tint_module_vars.tint_resource_table)[v_3].resource.sample(tint_module_vars.s, float2(0.0f));
 }
 
 fragment fs_outputs fs(sampler s [[sampler(0)]], const constant ulong* tint_resource_table [[buffer(28)]], const device tint_resource_table_metadata_struct* tint_resource_table_metadata [[buffer(29)]]) {

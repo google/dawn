@@ -25,6 +25,7 @@
 %_ptr_Private_v4float = OpTypePointer Private %v4float
          %18 = OpConstantNull %v4float
          %20 = OpTypeFunction %void
+         %23 = OpConstantComposite %_arr_uint_uint_1 %uint_1
        %func = OpFunction %void None %13
 %pointer_indices = OpFunctionParameter %_arr_uint_uint_1
          %14 = OpLabel
@@ -35,7 +36,6 @@
                OpFunctionEnd
        %main = OpFunction %void None %20
          %21 = OpLabel
-         %22 = OpCompositeConstruct %_arr_uint_uint_1 %uint_1
-         %23 = OpFunctionCall %void %func %22
+         %22 = OpFunctionCall %void %func %23
                OpReturn
                OpFunctionEnd

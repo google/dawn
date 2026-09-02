@@ -1342,12 +1342,11 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_XYZ) {
 }
 %f = func():f32 {
   $B2: {
-    %4:array<mat3x4<f32>, 5> = construct
-    %5:i32 = call %a, 1i
-    %6:i32 = call %a, 2i
-    %7:i32 = call %a, 3i
-    %8:f32 = access %4, %5, %6, %7
-    ret %8
+    %4:i32 = call %a, 1i
+    %5:i32 = call %a, 2i
+    %6:i32 = call %a, 3i
+    %7:f32 = access array<mat3x4<f32>, 5>(mat3x4<f32>(vec4<f32>(0.0f))), %4, %5, %6
+    ret %7
   }
 }
 )";
@@ -1362,12 +1361,11 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_XYZ) {
 }
 %f = func():f32 {
   $B2: {
-    %4:array<mat3x4<f32>, 5> = construct
-    %5:i32 = call %a, 1i
-    %6:i32 = call %a, 2i
-    %7:i32 = call %a, 3i
-    %8:f32 = access %4, %5, %6, %7
-    ret %8
+    %4:i32 = call %a, 1i
+    %5:i32 = call %a, 2i
+    %6:i32 = call %a, 3i
+    %7:f32 = access array<mat3x4<f32>, 5>(mat3x4<f32>(vec4<f32>(0.0f))), %4, %5, %6
+    ret %7
   }
 }
 )";
@@ -1400,12 +1398,11 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_YXZ) {
 }
 %f = func():f32 {
   $B2: {
-    %4:array<mat3x4<f32>, 5> = construct
-    %5:i32 = call %a, 2i
-    %6:i32 = call %a, 1i
-    %7:i32 = call %a, 3i
-    %8:f32 = access %4, %6, %5, %7
-    ret %8
+    %4:i32 = call %a, 2i
+    %5:i32 = call %a, 1i
+    %6:i32 = call %a, 3i
+    %7:f32 = access array<mat3x4<f32>, 5>(mat3x4<f32>(vec4<f32>(0.0f))), %5, %4, %6
+    ret %7
   }
 }
 )";
@@ -1420,13 +1417,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_YXZ) {
 }
 %f = func():f32 {
   $B2: {
-    %4:array<mat3x4<f32>, 5> = construct
-    %5:i32 = call %a, 2i
-    %6:i32 = let %5
-    %7:i32 = call %a, 1i
-    %8:i32 = call %a, 3i
-    %9:f32 = access %4, %7, %6, %8
-    ret %9
+    %4:i32 = call %a, 2i
+    %5:i32 = let %4
+    %6:i32 = call %a, 1i
+    %7:i32 = call %a, 3i
+    %8:f32 = access array<mat3x4<f32>, 5>(mat3x4<f32>(vec4<f32>(0.0f))), %6, %5, %7
+    ret %8
   }
 }
 )";
@@ -1459,12 +1455,11 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_ZXY) {
 }
 %f = func():f32 {
   $B2: {
-    %4:array<mat3x4<f32>, 5> = construct
-    %5:i32 = call %a, 3i
-    %6:i32 = call %a, 1i
-    %7:i32 = call %a, 2i
-    %8:f32 = access %4, %6, %7, %5
-    ret %8
+    %4:i32 = call %a, 3i
+    %5:i32 = call %a, 1i
+    %6:i32 = call %a, 2i
+    %7:f32 = access array<mat3x4<f32>, 5>(mat3x4<f32>(vec4<f32>(0.0f))), %5, %6, %4
+    ret %7
   }
 }
 )";
@@ -1479,13 +1474,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_ZXY) {
 }
 %f = func():f32 {
   $B2: {
-    %4:array<mat3x4<f32>, 5> = construct
-    %5:i32 = call %a, 3i
-    %6:i32 = let %5
-    %7:i32 = call %a, 1i
-    %8:i32 = call %a, 2i
-    %9:f32 = access %4, %7, %8, %6
-    ret %9
+    %4:i32 = call %a, 3i
+    %5:i32 = let %4
+    %6:i32 = call %a, 1i
+    %7:i32 = call %a, 2i
+    %8:f32 = access array<mat3x4<f32>, 5>(mat3x4<f32>(vec4<f32>(0.0f))), %6, %7, %5
+    ret %8
   }
 }
 )";
@@ -1518,12 +1512,11 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_ZYX) {
 }
 %f = func():f32 {
   $B2: {
-    %4:array<mat3x4<f32>, 5> = construct
-    %5:i32 = call %a, 3i
-    %6:i32 = call %a, 2i
-    %7:i32 = call %a, 1i
-    %8:f32 = access %4, %7, %6, %5
-    ret %8
+    %4:i32 = call %a, 3i
+    %5:i32 = call %a, 2i
+    %6:i32 = call %a, 1i
+    %7:f32 = access array<mat3x4<f32>, 5>(mat3x4<f32>(vec4<f32>(0.0f))), %6, %5, %4
+    ret %7
   }
 }
 )";
@@ -1538,14 +1531,13 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_ZYX) {
 }
 %f = func():f32 {
   $B2: {
-    %4:array<mat3x4<f32>, 5> = construct
-    %5:i32 = call %a, 3i
-    %6:i32 = let %5
-    %7:i32 = call %a, 2i
-    %8:i32 = let %7
-    %9:i32 = call %a, 1i
-    %10:f32 = access %4, %9, %8, %6
-    ret %10
+    %4:i32 = call %a, 3i
+    %5:i32 = let %4
+    %6:i32 = call %a, 2i
+    %7:i32 = let %6
+    %8:i32 = call %a, 1i
+    %9:f32 = access array<mat3x4<f32>, 5>(mat3x4<f32>(vec4<f32>(0.0f))), %8, %7, %5
+    ret %9
   }
 }
 )";

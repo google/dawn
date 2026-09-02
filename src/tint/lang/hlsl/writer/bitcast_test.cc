@@ -147,29 +147,26 @@ TEST_F(HlslWriterTest, BitcastFromVec2F16) {
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 uint tint_bitcast_from_f16_2(vector<float16_t, 2> src) {
-  uint2 v = (uint2(asuint16(src)) & (65535u).xx);
-  uint2 v_1 = (v << uint2(0u, 16u));
-  return (v_1.x | v_1.y);
+  uint2 v = ((uint2(asuint16(src)) & (65535u).xx) << uint2(0u, 16u));
+  return (v.x | v.y);
 }
 
 float tint_bitcast_from_f16_1(vector<float16_t, 2> src) {
-  uint2 v_2 = (uint2(asuint16(src)) & (65535u).xx);
-  uint2 v_3 = (v_2 << uint2(0u, 16u));
-  return asfloat((v_3.x | v_3.y));
+  uint2 v_1 = ((uint2(asuint16(src)) & (65535u).xx) << uint2(0u, 16u));
+  return asfloat((v_1.x | v_1.y));
 }
 
 int tint_bitcast_from_f16(vector<float16_t, 2> src) {
-  uint2 v_4 = (uint2(asuint16(src)) & (65535u).xx);
-  uint2 v_5 = (v_4 << uint2(0u, 16u));
-  return asint((v_5.x | v_5.y));
+  uint2 v_2 = ((uint2(asuint16(src)) & (65535u).xx) << uint2(0u, 16u));
+  return asint((v_2.x | v_2.y));
 }
 
 void main() {
   vector<float16_t, 2> a = vector<float16_t, 2>(float16_t(1.0h), float16_t(2.0h));
-  vector<float16_t, 2> v_6 = a;
-  int b = tint_bitcast_from_f16(v_6);
-  float c = tint_bitcast_from_f16_1(v_6);
-  uint d = tint_bitcast_from_f16_2(v_6);
+  vector<float16_t, 2> v_3 = a;
+  int b = tint_bitcast_from_f16(v_3);
+  float c = tint_bitcast_from_f16_1(v_3);
+  uint d = tint_bitcast_from_f16_2(v_3);
 }
 
 )");
@@ -194,22 +191,19 @@ TEST_F(HlslWriterTest, BitcastToVec2F16) {
     EXPECT_EQ(output_.hlsl, R"(
 vector<float16_t, 2> tint_bitcast_to_f16_2(uint src) {
   uint v = src;
-  uint2 v_1 = uint2(v, v);
-  vector<uint16_t, 2> v16 = vector<uint16_t, 2>(((v_1 >> uint2(0u, 16u)) & (65535u).xx));
+  vector<uint16_t, 2> v16 = vector<uint16_t, 2>(((uint2(v, v) >> uint2(0u, 16u)) & (65535u).xx));
   return asfloat16(v16);
 }
 
 vector<float16_t, 2> tint_bitcast_to_f16_1(float src) {
   uint v = asuint(src);
-  uint2 v_2 = uint2(v, v);
-  vector<uint16_t, 2> v16 = vector<uint16_t, 2>(((v_2 >> uint2(0u, 16u)) & (65535u).xx));
+  vector<uint16_t, 2> v16 = vector<uint16_t, 2>(((uint2(v, v) >> uint2(0u, 16u)) & (65535u).xx));
   return asfloat16(v16);
 }
 
 vector<float16_t, 2> tint_bitcast_to_f16(int src) {
   uint v = asuint(src);
-  uint2 v_3 = uint2(v, v);
-  vector<uint16_t, 2> v16 = vector<uint16_t, 2>(((v_3 >> uint2(0u, 16u)) & (65535u).xx));
+  vector<uint16_t, 2> v16 = vector<uint16_t, 2>(((uint2(v, v) >> uint2(0u, 16u)) & (65535u).xx));
   return asfloat16(v16);
 }
 
@@ -240,29 +234,26 @@ TEST_F(HlslWriterTest, BitcastFromVec4F16) {
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 uint2 tint_bitcast_from_f16_2(vector<float16_t, 4> src) {
-  uint4 v = (uint4(asuint16(src)) & (65535u).xxxx);
-  uint4 v_1 = (v << uint4(0u, 16u, 0u, 16u));
-  return uint2((v_1.x | v_1.y), (v_1.z | v_1.w));
+  uint4 v = ((uint4(asuint16(src)) & (65535u).xxxx) << uint4(0u, 16u, 0u, 16u));
+  return uint2((v.x | v.y), (v.z | v.w));
 }
 
 float2 tint_bitcast_from_f16_1(vector<float16_t, 4> src) {
-  uint4 v_2 = (uint4(asuint16(src)) & (65535u).xxxx);
-  uint4 v_3 = (v_2 << uint4(0u, 16u, 0u, 16u));
-  return asfloat(uint2((v_3.x | v_3.y), (v_3.z | v_3.w)));
+  uint4 v_1 = ((uint4(asuint16(src)) & (65535u).xxxx) << uint4(0u, 16u, 0u, 16u));
+  return asfloat(uint2((v_1.x | v_1.y), (v_1.z | v_1.w)));
 }
 
 int2 tint_bitcast_from_f16(vector<float16_t, 4> src) {
-  uint4 v_4 = (uint4(asuint16(src)) & (65535u).xxxx);
-  uint4 v_5 = (v_4 << uint4(0u, 16u, 0u, 16u));
-  return asint(uint2((v_5.x | v_5.y), (v_5.z | v_5.w)));
+  uint4 v_2 = ((uint4(asuint16(src)) & (65535u).xxxx) << uint4(0u, 16u, 0u, 16u));
+  return asint(uint2((v_2.x | v_2.y), (v_2.z | v_2.w)));
 }
 
 void main() {
   vector<float16_t, 4> a = vector<float16_t, 4>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h), float16_t(4.0h));
-  vector<float16_t, 4> v_6 = a;
-  int2 b = tint_bitcast_from_f16(v_6);
-  float2 c = tint_bitcast_from_f16_1(v_6);
-  uint2 d = tint_bitcast_from_f16_2(v_6);
+  vector<float16_t, 4> v_3 = a;
+  int2 b = tint_bitcast_from_f16(v_3);
+  float2 c = tint_bitcast_from_f16_1(v_3);
+  uint2 d = tint_bitcast_from_f16_2(v_3);
 }
 
 )");

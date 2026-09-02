@@ -16,14 +16,9 @@ uint tint_dot(uint4 lhs, uint4 rhs) {
 uint dot4U8Packed_fbed7b() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
-  uint const v_1 = arg_0;
-  uint const v_2 = arg_1;
-  uint4 const v_3 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_4 = (uint4(v_1) >> v_3);
-  uint4 const v_5 = (v_4 & uint4(255u));
-  uint4 const v_6 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_7 = (uint4(v_2) >> v_6);
-  uint res = tint_dot(v_5, (v_7 & uint4(255u)));
+  uint const v_1 = arg_1;
+  uint4 const v_2 = ((uint4(arg_0) >> uint4(0u, 8u, 16u, 24u)) & uint4(255u));
+  uint res = tint_dot(v_2, ((uint4(v_1) >> uint4(0u, 8u, 16u, 24u)) & uint4(255u)));
   return res;
 }
 
@@ -49,14 +44,9 @@ uint tint_dot(uint4 lhs, uint4 rhs) {
 uint dot4U8Packed_fbed7b() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
-  uint const v_1 = arg_0;
-  uint const v_2 = arg_1;
-  uint4 const v_3 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_4 = (uint4(v_1) >> v_3);
-  uint4 const v_5 = (v_4 & uint4(255u));
-  uint4 const v_6 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_7 = (uint4(v_2) >> v_6);
-  uint res = tint_dot(v_5, (v_7 & uint4(255u)));
+  uint const v_1 = arg_1;
+  uint4 const v_2 = ((uint4(arg_0) >> uint4(0u, 8u, 16u, 24u)) & uint4(255u));
+  uint res = tint_dot(v_2, ((uint4(v_1) >> uint4(0u, 8u, 16u, 24u)) & uint4(255u)));
   return res;
 }
 
@@ -89,14 +79,9 @@ uint tint_dot(uint4 lhs, uint4 rhs) {
 uint dot4U8Packed_fbed7b() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
-  uint const v_1 = arg_0;
-  uint const v_2 = arg_1;
-  uint4 const v_3 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_4 = (uint4(v_1) >> v_3);
-  uint4 const v_5 = (v_4 & uint4(255u));
-  uint4 const v_6 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_7 = (uint4(v_2) >> v_6);
-  uint res = tint_dot(v_5, (v_7 & uint4(255u)));
+  uint const v_1 = arg_1;
+  uint4 const v_2 = ((uint4(arg_0) >> uint4(0u, 8u, 16u, 24u)) & uint4(255u));
+  uint res = tint_dot(v_2, ((uint4(v_1) >> uint4(0u, 8u, 16u, 24u)) & uint4(255u)));
   return res;
 }
 
@@ -108,9 +93,9 @@ VertexOutput vertex_main_inner() {
 }
 
 vertex vertex_main_outputs vertex_main() {
-  VertexOutput const v_8 = vertex_main_inner();
+  VertexOutput const v_3 = vertex_main_inner();
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_pos = v_8.pos;
-  tint_wrapper_result.VertexOutput_prevent_dce = v_8.prevent_dce;
+  tint_wrapper_result.VertexOutput_pos = v_3.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_3.prevent_dce;
   return tint_wrapper_result;
 }

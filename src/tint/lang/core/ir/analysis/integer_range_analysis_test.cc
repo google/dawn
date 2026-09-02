@@ -14628,8 +14628,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_Vector_I32) {
     auto* src = R"(
 %func = func(%param:vec4<i32>):void {
   $B1: {
-    %3:vec4<i32> = construct 1i, 2i, 3i, 4i
-    %4:vec4<i32> = min %param, %3
+    %3:vec4<i32> = min %param, vec4<i32>(1i, 2i, 3i, 4i)
     ret
   }
 }
@@ -14661,8 +14660,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_Vector_U32) {
     auto* src = R"(
 %func = func(%param:vec2<u32>):void {
   $B1: {
-    %3:vec2<u32> = construct 1u, 2u
-    %4:vec2<u32> = min %param, %3
+    %3:vec2<u32> = min %param, vec2<u32>(1u, 2u)
     ret
   }
 }
@@ -15777,8 +15775,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_Vector_I32) {
     auto* src = R"(
 %func = func(%param:vec4<i32>):void {
   $B1: {
-    %3:vec4<i32> = construct 1i, 2i, 3i, 4i
-    %4:vec4<i32> = max %param, %3
+    %3:vec4<i32> = max %param, vec4<i32>(1i, 2i, 3i, 4i)
     ret
   }
 }
@@ -15810,8 +15807,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_Vector_U32) {
     auto* src = R"(
 %func = func(%param:vec2<u32>):void {
   $B1: {
-    %3:vec2<u32> = construct 1u, 2u
-    %4:vec2<u32> = max %param, %3
+    %3:vec2<u32> = max %param, vec2<u32>(1u, 2u)
     ret
   }
 }
@@ -17139,8 +17135,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_LHS_RHS_Vec4I) {
     auto* src = R"(
 %func = func(%param:vec4<i32>):void {
   $B1: {
-    %3:vec4<i32> = construct 1i, 2i, 3i, 4i
-    %4:vec4<i32> = mod %param, %3
+    %3:vec4<i32> = mod %param, vec4<i32>(1i, 2i, 3i, 4i)
     ret
   }
 }

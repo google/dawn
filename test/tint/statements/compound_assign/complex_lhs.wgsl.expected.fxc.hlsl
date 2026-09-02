@@ -22,7 +22,6 @@ void main() {
   int v_2 = asint((asuint(x.a[v][min(uint(v_1), 3u)]) + 5u));
   int4 v_3 = x.a[v];
   int4 v_4 = int4((v_2).xxxx);
-  uint4 v_5 = uint4((uint(v_1)).xxxx);
-  x.a[v] = (((v_5 == uint4(0u, 1u, 2u, 3u))) ? (v_4) : (v_3));
+  x.a[v] = (((uint4((uint(v_1)).xxxx) == uint4(0u, 1u, 2u, 3u))) ? (v_4) : (v_3));
 }
 

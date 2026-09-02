@@ -283,11 +283,17 @@ fn a(pre : i32, p_indices : array<u32, 3u>, post : i32) -> vec4<i32> {
 }
 
 fn b() {
-  a(10i, array<u32, 3u>(u32(1i), u32(2i), u32(3i)), 20i);
+  _ = u32(3i);
+  _ = u32(2i);
+  _ = u32(1i);
+  a(10i, array<u32, 3u>(1u, 2u, 3u), 20i);
 }
 
 fn c() {
-  a(10i, array<u32, 3u>(u32(1i), u32(2i), u32(3i)), 20i);
+  _ = u32(3i);
+  _ = u32(2i);
+  _ = u32(1i);
+  a(10i, array<u32, 3u>(1u, 2u, 3u), 20i);
 }
 
 fn d() {
@@ -800,22 +806,24 @@ fn f0(p : ptr<uniform, vec4<f32>>) -> f32 {
 
 fn f1(p : ptr<uniform, mat3x4<f32>>) -> f32 {
   var res : f32;
+  let one = 1i;
+  let two = 2i;
   {
     // call f0() with inline usage of p
-    res += f0(&(*p)[1]);
+    res += f0(&(*p)[one]);
   }
   {
     // call f0() with pointer-let usage of p
-    let p_vec = &(*p)[1];
+    let p_vec = &(*p)[one];
     res += f0(p_vec);
   }
   {
     // call f0() with inline usage of U
-    res += f0(&U.arr[2].mat[1]);
+    res += f0(&U.arr[two].mat[one]);
   }
   {
     // call f0() with pointer-let usage of U
-    let p_vec = &U.arr[2].mat[1];
+    let p_vec = &U.arr[two].mat[one];
     res += f0(p_vec);
   }
   return res;
@@ -827,7 +835,8 @@ fn f2(p : ptr<uniform, Inner>) -> f32 {
 }
 
 fn f3(p0 : ptr<uniform, InnerArr>, p1 : ptr<uniform, mat3x4<f32>>) -> f32 {
-  let p0_inner = &(*p0)[3];
+  let three = 3i;
+  let p0_inner = &(*p0)[three];
   return f2(p0_inner) + f1(p1);
 }
 
@@ -862,20 +871,24 @@ fn f0_1(p_indices : array<u32, 2u>) -> f32 {
 
 fn f1() -> f32 {
   var res : f32;
-  res = (res + f0(array<u32, 1u>(u32(1i))));
-  res = (res + f0(array<u32, 1u>(u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
+  let one = 1i;
+  let two = 2i;
+  res = (res + f0(array<u32, 1u>(u32(one))));
+  res = (res + f0(array<u32, 1u>(u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
   return res;
 }
 
 fn f1_1(p_indices : array<u32, 1u>) -> f32 {
   let v = p_indices[0u];
   var res : f32;
-  res = (res + f0_1(array<u32, 2u>(v, u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(v, u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
+  let one = 1i;
+  let two = 2i;
+  res = (res + f0_1(array<u32, 2u>(v, u32(one))));
+  res = (res + f0_1(array<u32, 2u>(v, u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
   return res;
 }
 
@@ -884,7 +897,8 @@ fn f2(p_indices : array<u32, 1u>) -> f32 {
 }
 
 fn f3() -> f32 {
-  return (f2(array<u32, 1u>(u32(3i))) + f1());
+  let three = 3i;
+  return (f2(array<u32, 1u>(u32(three))) + f1());
 }
 
 fn f4() -> f32 {
@@ -1039,22 +1053,24 @@ fn f0(p : ptr<storage, vec4<f32>>) -> f32 {
 
 fn f1(p : ptr<storage, mat3x4<f32>>) -> f32 {
   var res : f32;
+  let one = 1i;
+  let two = 2i;
   {
     // call f0() with inline usage of p
-    res += f0(&(*p)[1]);
+    res += f0(&(*p)[one]);
   }
   {
     // call f0() with pointer-let usage of p
-    let p_vec = &(*p)[1];
+    let p_vec = &(*p)[one];
     res += f0(p_vec);
   }
   {
     // call f0() with inline usage of S
-    res += f0(&S.arr[2].mat[1]);
+    res += f0(&S.arr[two].mat[one]);
   }
   {
     // call f0() with pointer-let usage of S
-    let p_vec = &S.arr[2].mat[1];
+    let p_vec = &S.arr[two].mat[one];
     res += f0(p_vec);
   }
   return res;
@@ -1066,7 +1082,8 @@ fn f2(p : ptr<storage, Inner>) -> f32 {
 }
 
 fn f3(p0 : ptr<storage, InnerArr>, p1 : ptr<storage, mat3x4<f32>>) -> f32 {
-  let p0_inner = &(*p0)[3];
+  let three = 3i;
+  let p0_inner = &(*p0)[three];
   return f2(p0_inner) + f1(p1);
 }
 
@@ -1101,20 +1118,24 @@ fn f0_1(p_indices : array<u32, 2u>) -> f32 {
 
 fn f1() -> f32 {
   var res : f32;
-  res = (res + f0(array<u32, 1u>(u32(1i))));
-  res = (res + f0(array<u32, 1u>(u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
+  let one = 1i;
+  let two = 2i;
+  res = (res + f0(array<u32, 1u>(u32(one))));
+  res = (res + f0(array<u32, 1u>(u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
   return res;
 }
 
 fn f1_1(p_indices : array<u32, 1u>) -> f32 {
   let v = p_indices[0u];
   var res : f32;
-  res = (res + f0_1(array<u32, 2u>(v, u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(v, u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
+  let one = 1i;
+  let two = 2i;
+  res = (res + f0_1(array<u32, 2u>(v, u32(one))));
+  res = (res + f0_1(array<u32, 2u>(v, u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
   return res;
 }
 
@@ -1123,7 +1144,8 @@ fn f2(p_indices : array<u32, 1u>) -> f32 {
 }
 
 fn f3() -> f32 {
-  return (f2(array<u32, 1u>(u32(3i))) + f1());
+  let three = 3i;
+  return (f2(array<u32, 1u>(u32(three))) + f1());
 }
 
 fn f4() -> f32 {
@@ -1158,7 +1180,8 @@ fn a(pre : i32, p : ptr<workgroup, vec4<i32>>, post : i32) -> vec4<i32> {
 }
 
 fn b() {
-  a(10, &W[3], 20);
+  let three = 3i;
+  a(10, &W[three], 20);
 }
 )";
 
@@ -1170,7 +1193,8 @@ fn a(pre : i32, p_indices : array<u32, 1u>, post : i32) -> vec4<i32> {
 }
 
 fn b() {
-  a(10i, array<u32, 1u>(u32(3i)), 20i);
+  let three = 3i;
+  a(10i, array<u32, 1u>(u32(three)), 20i);
 }
 )";
 
@@ -1188,7 +1212,8 @@ fn a(pre : i32, p : ptr<workgroup, vec4<i32>>, post : i32) {
 }
 
 fn b() {
-  a(10, &W[3], 20);
+  let three = 3i;
+  a(10, &W[three], 20);
 }
 )";
 
@@ -1200,7 +1225,8 @@ fn a(pre : i32, p_indices : array<u32, 1u>, post : i32) {
 }
 
 fn b() {
-  a(10i, array<u32, 1u>(u32(3i)), 20i);
+  let three = 3i;
+  a(10i, array<u32, 1u>(u32(three)), 20i);
 }
 )";
 
@@ -1230,22 +1256,24 @@ fn f0(p : ptr<workgroup, vec4<f32>>) -> f32 {
 
 fn f1(p : ptr<workgroup, mat3x4<f32>>) -> f32 {
   var res : f32;
+  let one = 1i;
+  let two = 2i;
   {
     // call f0() with inline usage of p
-    res += f0(&(*p)[1]);
+    res += f0(&(*p)[one]);
   }
   {
     // call f0() with pointer-let usage of p
-    let p_vec = &(*p)[1];
+    let p_vec = &(*p)[one];
     res += f0(p_vec);
   }
   {
     // call f0() with inline usage of W
-    res += f0(&W.arr[2].mat[1]);
+    res += f0(&W.arr[two].mat[one]);
   }
   {
     // call f0() with pointer-let usage of W
-    let p_vec = &W.arr[2].mat[1];
+    let p_vec = &W.arr[two].mat[one];
     res += f0(p_vec);
   }
   return res;
@@ -1257,7 +1285,8 @@ fn f2(p : ptr<workgroup, Inner>) -> f32 {
 }
 
 fn f3(p0 : ptr<workgroup, InnerArr>, p1 : ptr<workgroup, mat3x4<f32>>) -> f32 {
-  let p0_inner = &(*p0)[3];
+  let three = 3i;
+  let p0_inner = &(*p0)[three];
   return f2(p0_inner) + f1(p1);
 }
 
@@ -1292,20 +1321,24 @@ fn f0_1(p_indices : array<u32, 2u>) -> f32 {
 
 fn f1() -> f32 {
   var res : f32;
-  res = (res + f0(array<u32, 1u>(u32(1i))));
-  res = (res + f0(array<u32, 1u>(u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
+  let one = 1i;
+  let two = 2i;
+  res = (res + f0(array<u32, 1u>(u32(one))));
+  res = (res + f0(array<u32, 1u>(u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
   return res;
 }
 
 fn f1_1(p_indices : array<u32, 1u>) -> f32 {
   let v = p_indices[0u];
   var res : f32;
-  res = (res + f0_1(array<u32, 2u>(v, u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(v, u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
+  let one = 1i;
+  let two = 2i;
+  res = (res + f0_1(array<u32, 2u>(v, u32(one))));
+  res = (res + f0_1(array<u32, 2u>(v, u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
   return res;
 }
 
@@ -1314,7 +1347,8 @@ fn f2(p_indices : array<u32, 1u>) -> f32 {
 }
 
 fn f3() -> f32 {
-  return (f2(array<u32, 1u>(u32(3i))) + f1());
+  let three = 3i;
+  return (f2(array<u32, 1u>(u32(three))) + f1());
 }
 
 fn f4() -> f32 {
@@ -1539,9 +1573,10 @@ var<private> Ps : str;
 var<private> Pa : array<i32, 4>;
 
 fn b() {
+  let two = 2i;
   a(10, &Pi, 20);
   a(30, &Ps.i, 40);
-  a(50, &Pa[2], 60);
+  a(50, &Pa[two], 60);
 }
 )";
 
@@ -1569,9 +1604,10 @@ fn a_2(pre : i32, p_indices : array<u32, 1u>, post : i32) -> i32 {
 }
 
 fn b() {
+  let two = 2i;
   a(10i, 20i);
   a_1(30i, 40i);
-  a_2(50i, array<u32, 1u>(u32(2i)), 60i);
+  a_2(50i, array<u32, 1u>(u32(two)), 60i);
 }
 )";
 
@@ -1631,22 +1667,24 @@ fn f0(p : ptr<private, vec4<f32>>) -> f32 {
 
 fn f1(p : ptr<private, mat3x4<f32>>) -> f32 {
   var res : f32;
+  let one = 1i;
+  let two = 2i;
   {
     // call f0() with inline usage of p
-    res += f0(&(*p)[1]);
+    res += f0(&(*p)[one]);
   }
   {
     // call f0() with pointer-let usage of p
-    let p_vec = &(*p)[1];
+    let p_vec = &(*p)[one];
     res += f0(p_vec);
   }
   {
     // call f0() with inline usage of P
-    res += f0(&P.arr[2].mat[1]);
+    res += f0(&P.arr[two].mat[one]);
   }
   {
     // call f0() with pointer-let usage of P
-    let p_vec = &P.arr[2].mat[1];
+    let p_vec = &P.arr[two].mat[one];
     res += f0(p_vec);
   }
   return res;
@@ -1658,7 +1696,8 @@ fn f2(p : ptr<private, Inner>) -> f32 {
 }
 
 fn f3(p0 : ptr<private, InnerArr>, p1 : ptr<private, mat3x4<f32>>) -> f32 {
-  let p0_inner = &(*p0)[3];
+  let three = 3i;
+  let p0_inner = &(*p0)[three];
   return f2(p0_inner) + f1(p1);
 }
 
@@ -1693,20 +1732,24 @@ fn f0_1(p_indices : array<u32, 2u>) -> f32 {
 
 fn f1() -> f32 {
   var res : f32;
-  res = (res + f0(array<u32, 1u>(u32(1i))));
-  res = (res + f0(array<u32, 1u>(u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
+  let one = 1i;
+  let two = 2i;
+  res = (res + f0(array<u32, 1u>(u32(one))));
+  res = (res + f0(array<u32, 1u>(u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
   return res;
 }
 
 fn f1_1(p_indices : array<u32, 1u>) -> f32 {
   let v = p_indices[0u];
   var res : f32;
-  res = (res + f0_1(array<u32, 2u>(v, u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(v, u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
-  res = (res + f0_1(array<u32, 2u>(u32(2i), u32(1i))));
+  let one = 1i;
+  let two = 2i;
+  res = (res + f0_1(array<u32, 2u>(v, u32(one))));
+  res = (res + f0_1(array<u32, 2u>(v, u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
+  res = (res + f0_1(array<u32, 2u>(u32(two), u32(one))));
   return res;
 }
 
@@ -1715,7 +1758,8 @@ fn f2(p_indices : array<u32, 1u>) -> f32 {
 }
 
 fn f3() -> f32 {
-  return (f2(array<u32, 1u>(u32(3i))) + f1());
+  let three = 3i;
+  return (f2(array<u32, 1u>(u32(three))) + f1());
 }
 
 fn f4() -> f32 {
@@ -1958,9 +2002,10 @@ fn b() {
   var Fs : str;
   var Fa : array<i32, 4>;
 
+  let two = 2i;
   a(10, &Fi, 20);
   a(30, &Fs.i, 40);
-  a(50, &Fa[2], 60);
+  a(50, &Fa[two], 60);
 }
 )";
 
@@ -1985,9 +2030,10 @@ fn b() {
   var Fi : i32;
   var Fs : str;
   var Fa : array<i32, 4u>;
+  let two = 2i;
   a(10i, &(Fi), 20i);
   a_1(30i, &(Fs), 40i);
-  a_2(50i, &(Fa), array<u32, 1u>(u32(2i)), 60i);
+  a_2(50i, &(Fa), array<u32, 1u>(u32(two)), 60i);
 }
 )";
 
@@ -2154,37 +2200,40 @@ fn fn_w(p : ptr<workgroup, vec4<i32>>) -> vec4<i32> {
 }
 
 fn b() {
+  let zero = 0;
+  let one = 1;
+  let two = 2;
   let I = 3;
   let J = 4;
 
   let u           = fn_u(&U);
   let u_str       = fn_u(&U_str.i);
-  let u_arr0      = fn_u(&U_arr[0]);
-  let u_arr1      = fn_u(&U_arr[1]);
+  let u_arr0      = fn_u(&U_arr[zero]);
+  let u_arr1      = fn_u(&U_arr[one]);
   let u_arrI      = fn_u(&U_arr[I]);
-  let u_arr1_arr0 = fn_u(&U_arr_arr[1][0]);
-  let u_arr2_arrI = fn_u(&U_arr_arr[2][I]);
-  let u_arrI_arr2 = fn_u(&U_arr_arr[I][2]);
+  let u_arr1_arr0 = fn_u(&U_arr_arr[one][zero]);
+  let u_arr2_arrI = fn_u(&U_arr_arr[two][I]);
+  let u_arrI_arr2 = fn_u(&U_arr_arr[I][two]);
   let u_arrI_arrJ = fn_u(&U_arr_arr[I][J]);
 
   let s           = fn_s(&S);
   let s_str       = fn_s(&S_str.i);
-  let s_arr0      = fn_s(&S_arr[0]);
-  let s_arr1      = fn_s(&S_arr[1]);
+  let s_arr0      = fn_s(&S_arr[zero]);
+  let s_arr1      = fn_s(&S_arr[one]);
   let s_arrI      = fn_s(&S_arr[I]);
-  let s_arr1_arr0 = fn_s(&S_arr_arr[1][0]);
-  let s_arr2_arrI = fn_s(&S_arr_arr[2][I]);
-  let s_arrI_arr2 = fn_s(&S_arr_arr[I][2]);
+  let s_arr1_arr0 = fn_s(&S_arr_arr[one][zero]);
+  let s_arr2_arrI = fn_s(&S_arr_arr[two][I]);
+  let s_arrI_arr2 = fn_s(&S_arr_arr[I][two]);
   let s_arrI_arrJ = fn_s(&S_arr_arr[I][J]);
 
   let w           = fn_w(&W);
   let w_str       = fn_w(&W_str.i);
-  let w_arr0      = fn_w(&W_arr[0]);
-  let w_arr1      = fn_w(&W_arr[1]);
+  let w_arr0      = fn_w(&W_arr[zero]);
+  let w_arr1      = fn_w(&W_arr[one]);
   let w_arrI      = fn_w(&W_arr[I]);
-  let w_arr1_arr0 = fn_w(&W_arr_arr[1][0]);
-  let w_arr2_arrI = fn_w(&W_arr_arr[2][I]);
-  let w_arrI_arr2 = fn_w(&W_arr_arr[I][2]);
+  let w_arr1_arr0 = fn_w(&W_arr_arr[one][zero]);
+  let w_arr2_arrI = fn_w(&W_arr_arr[two][I]);
+  let w_arrI_arr2 = fn_w(&W_arr_arr[I][two]);
   let w_arrI_arrJ = fn_w(&W_arr_arr[I][J]);
 }
 )";
@@ -2267,34 +2316,37 @@ fn fn_w_3(p_indices : array<u32, 2u>) -> vec4<i32> {
 }
 
 fn b() {
+  let zero = 0i;
+  let one = 1i;
+  let two = 2i;
   let I = 3i;
   let J = 4i;
   let u = fn_u();
   let u_str = fn_u_1();
-  let u_arr0 = fn_u_2(array<u32, 1u>(u32(0i)));
-  let u_arr1 = fn_u_2(array<u32, 1u>(u32(1i)));
+  let u_arr0 = fn_u_2(array<u32, 1u>(u32(zero)));
+  let u_arr1 = fn_u_2(array<u32, 1u>(u32(one)));
   let u_arrI = fn_u_2(array<u32, 1u>(u32(I)));
-  let u_arr1_arr0 = fn_u_3(array<u32, 2u>(u32(1i), u32(0i)));
-  let u_arr2_arrI = fn_u_3(array<u32, 2u>(u32(2i), u32(I)));
-  let u_arrI_arr2 = fn_u_3(array<u32, 2u>(u32(I), u32(2i)));
+  let u_arr1_arr0 = fn_u_3(array<u32, 2u>(u32(one), u32(zero)));
+  let u_arr2_arrI = fn_u_3(array<u32, 2u>(u32(two), u32(I)));
+  let u_arrI_arr2 = fn_u_3(array<u32, 2u>(u32(I), u32(two)));
   let u_arrI_arrJ = fn_u_3(array<u32, 2u>(u32(I), u32(J)));
   let s = fn_s();
   let s_str = fn_s_1();
-  let s_arr0 = fn_s_2(array<u32, 1u>(u32(0i)));
-  let s_arr1 = fn_s_2(array<u32, 1u>(u32(1i)));
+  let s_arr0 = fn_s_2(array<u32, 1u>(u32(zero)));
+  let s_arr1 = fn_s_2(array<u32, 1u>(u32(one)));
   let s_arrI = fn_s_2(array<u32, 1u>(u32(I)));
-  let s_arr1_arr0 = fn_s_3(array<u32, 2u>(u32(1i), u32(0i)));
-  let s_arr2_arrI = fn_s_3(array<u32, 2u>(u32(2i), u32(I)));
-  let s_arrI_arr2 = fn_s_3(array<u32, 2u>(u32(I), u32(2i)));
+  let s_arr1_arr0 = fn_s_3(array<u32, 2u>(u32(one), u32(zero)));
+  let s_arr2_arrI = fn_s_3(array<u32, 2u>(u32(two), u32(I)));
+  let s_arrI_arr2 = fn_s_3(array<u32, 2u>(u32(I), u32(two)));
   let s_arrI_arrJ = fn_s_3(array<u32, 2u>(u32(I), u32(J)));
   let w = fn_w();
   let w_str = fn_w_1();
-  let w_arr0 = fn_w_2(array<u32, 1u>(u32(0i)));
-  let w_arr1 = fn_w_2(array<u32, 1u>(u32(1i)));
+  let w_arr0 = fn_w_2(array<u32, 1u>(u32(zero)));
+  let w_arr1 = fn_w_2(array<u32, 1u>(u32(one)));
   let w_arrI = fn_w_2(array<u32, 1u>(u32(I)));
-  let w_arr1_arr0 = fn_w_3(array<u32, 2u>(u32(1i), u32(0i)));
-  let w_arr2_arrI = fn_w_3(array<u32, 2u>(u32(2i), u32(I)));
-  let w_arrI_arr2 = fn_w_3(array<u32, 2u>(u32(I), u32(2i)));
+  let w_arr1_arr0 = fn_w_3(array<u32, 2u>(u32(one), u32(zero)));
+  let w_arr2_arrI = fn_w_3(array<u32, 2u>(u32(two), u32(I)));
+  let w_arrI_arr2 = fn_w_3(array<u32, 2u>(u32(I), u32(two)));
   let w_arrI_arrJ = fn_w_3(array<u32, 2u>(u32(I), u32(J)));
 }
 )";
@@ -2317,7 +2369,8 @@ fn b(p : ptr<storage, array<array<array<i32, 9>, 9>, 9>>) -> i32 {
 }
 
 fn c() {
-  let v = b(&S[42]);
+  let fortytwo = 42i;
+  let v = b(&S[fortytwo]);
 }
 )";
 
@@ -2334,7 +2387,8 @@ fn b(p_indices : array<u32, 1u>) -> i32 {
 }
 
 fn c() {
-  let v = b(array<u32, 1u>(u32(42i)));
+  let fortytwo = 42i;
+  let v = b(array<u32, 1u>(u32(fortytwo)));
 }
 )";
 
@@ -2358,7 +2412,8 @@ fn b(p : ptr<storage, array<array<array<i32, 9>, 9>, 9>>) -> i32 {
 }
 
 fn c() {
-  let v = b(&S[42]);
+  let fortytwo = 42i;
+  let v = b(&S[fortytwo]);
 }
 )";
 
@@ -2377,7 +2432,8 @@ fn b(p_indices : array<u32, 1u>) -> i32 {
 }
 
 fn c() {
-  let v = b(array<u32, 1u>(u32(42i)));
+  let fortytwo = 42i;
+  let v = b(array<u32, 1u>(u32(fortytwo)));
 }
 )";
 
@@ -2400,7 +2456,9 @@ fn b(s : ptr<storage, array<array<i32, 9>, 9>>,
 }
 
 fn c() {
-  let v = b(&S[42], &U[24]);
+  let fortytwo = 42i;
+  let twentyfour = 24i;
+  let v = b(&S[fortytwo], &U[twentyfour]);
 }
 )";
 
@@ -2419,7 +2477,9 @@ fn b(s_indices : array<u32, 1u>, u_indices : array<u32, 1u>) -> i32 {
 }
 
 fn c() {
-  let v = b(array<u32, 1u>(u32(42i)), array<u32, 1u>(u32(24i)));
+  let fortytwo = 42i;
+  let twentyfour = 24i;
+  let v = b(array<u32, 1u>(u32(fortytwo)), array<u32, 1u>(u32(twentyfour)));
 }
 )";
 

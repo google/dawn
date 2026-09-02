@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/utils/internal_limits.h"
 #include "src/tint/utils/rtti/switch.h"
 
 namespace tint::core::ir {
@@ -86,7 +87,8 @@ Evaluator::EvalResult Evaluator::EvalValue(core::ir::Value* val) {
         val,  //
         [&](core::ir::Constant* c) { return c->Value(); },
         [&](core::ir::FunctionParam*) { return nullptr; },
-        [&](core::ir::BlockParam*) { return nullptr; },
+        [&](core::ir::BlockParam*) { return nullptr; },  //
+        [&](core::ir::Unused*) { return nullptr; },
         [&](core::ir::InstructionResult* r) {
             return tint::Switch(
                 r->Instruction(),  //
@@ -143,20 +145,25 @@ Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Access* a) {
 }
 
 Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c) {
+    return EvalConstruct(c->Result()->Type(), c->Args(), SourceOf(c));
+}
+
+Evaluator::EvalResult Evaluator::EvalConstruct(const core::type::Type* result_ty,
+                                               VectorRef<core::ir::Value*> args,
+                                               const Source& source) {
     auto table = core::intrinsic::Table<core::intrinsic::Dialect>(b_.ir.Types(), b_.ir.symbols);
 
     // Some transforms create invalid instructions.
-    auto result_ty = c->Result()->Type();
     if (!result_ty) {
         return nullptr;
     }
 
     Vector<const core::type::Type*, 4> arg_types;
-    arg_types.Reserve(c->Args().size());
+    arg_types.Reserve(args.Length());
     Vector<const core::constant::Value*, 4> arg_values;
-    arg_values.Reserve(c->Args().size());
+    arg_values.Reserve(args.Length());
 
-    for (auto* arg : c->Args()) {
+    for (auto* arg : args) {
         arg_types.Push(arg->Type());
 
         TINT_CHECK_RESULT_UNWRAP(val, EvalValue(arg));
@@ -167,20 +174,25 @@ Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c) {
         arg_values.Push(val);
     }
 
+    auto eval_stage =
+        eval_override_ ? core::EvaluationStage::kOverride : core::EvaluationStage::kConstant;
     auto mat_vec = [&](const core::type::Type* type,
                        core::intrinsic::CtorConv intrinsic) -> constant::Eval::Result {
-        auto op = table.Lookup(intrinsic, Vector<TemplateParameter, 1>{type}, arg_types,
-                               core::EvaluationStage::kOverride);
+        auto op =
+            table.Lookup(intrinsic, Vector<TemplateParameter, 1>{type}, arg_types, eval_stage);
         if (op != Success) {
-            AddError(SourceOf(c)) << "unable to find intrinsic for construct: " << op.Failure();
+            AddError(source) << "unable to find intrinsic for construct: " << op.Failure();
+            return Failure();
+        }
+        if (!op->info->flags.Contains(intrinsic::OverloadFlag::kIsConstructor)) {
             return Failure();
         }
         if (!op->const_eval_fn) {
-            AddError(SourceOf(c)) << "unhandled type constructor";
+            AddError(source) << "unhandled type constructor";
             return Failure();
         }
-        TINT_CHECK_RESULT_UNWRAP(
-            r, (const_eval_.*op->const_eval_fn)(result_ty, arg_values, SourceOf(c)));
+        TINT_CHECK_RESULT_UNWRAP(r,
+                                 (const_eval_.*op->const_eval_fn)(result_ty, arg_values, source));
         return r;
     };
 
@@ -202,18 +214,21 @@ Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c) {
         },
         [&](Default) {
             if (!result_ty->Is<core::type::Scalar>()) {
-                AddError(SourceOf(c)) << "unhandled type constructor";
+                AddError(source) << "unhandled type constructor";
                 return core::constant::Eval::Result(nullptr);
             }
             if (arg_values.IsEmpty()) {
-                return const_eval_.Zero(result_ty, arg_values, SourceOf(c));
+                return const_eval_.Zero(result_ty, arg_values, source);
             }
             // For scalars, this must be an identity constructor.
             if (arg_values[0]->Type() != result_ty) {
-                AddError(SourceOf(c)) << "invalid type constructor";
+                AddError(source) << "invalid type constructor";
                 return core::constant::Eval::Result(nullptr);
             }
-            return const_eval_.Identity(result_ty, arg_values, SourceOf(c));
+            if (arg_values.Length() != 1) {
+                return core::constant::Eval::Result(nullptr);
+            }
+            return const_eval_.Identity(result_ty, arg_values, source);
         });
 
     if (r != Success) {

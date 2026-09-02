@@ -10,10 +10,7 @@ struct tint_module_vars_struct {
 
 uint4 unpack4xU8_a5ea55() {
   uint arg_0 = 1u;
-  uint const v = arg_0;
-  uint4 const v_1 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_2 = (uint4(v) >> v_1);
-  uint4 res = (v_2 & uint4(255u));
+  uint4 res = ((uint4(arg_0) >> uint4(0u, 8u, 16u, 24u)) & uint4(255u));
   return res;
 }
 
@@ -33,10 +30,7 @@ struct tint_module_vars_struct {
 
 uint4 unpack4xU8_a5ea55() {
   uint arg_0 = 1u;
-  uint const v = arg_0;
-  uint4 const v_1 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_2 = (uint4(v) >> v_1);
-  uint4 res = (v_2 & uint4(255u));
+  uint4 res = ((uint4(arg_0) >> uint4(0u, 8u, 16u, 24u)) & uint4(255u));
   return res;
 }
 
@@ -63,10 +57,7 @@ struct vertex_main_outputs {
 
 uint4 unpack4xU8_a5ea55() {
   uint arg_0 = 1u;
-  uint const v = arg_0;
-  uint4 const v_1 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_2 = (uint4(v) >> v_1);
-  uint4 res = (v_2 & uint4(255u));
+  uint4 res = ((uint4(arg_0) >> uint4(0u, 8u, 16u, 24u)) & uint4(255u));
   return res;
 }
 
@@ -78,9 +69,9 @@ VertexOutput vertex_main_inner() {
 }
 
 vertex vertex_main_outputs vertex_main() {
-  VertexOutput const v_3 = vertex_main_inner();
+  VertexOutput const v = vertex_main_inner();
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_pos = v_3.pos;
-  tint_wrapper_result.VertexOutput_prevent_dce = v_3.prevent_dce;
+  tint_wrapper_result.VertexOutput_pos = v.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v.prevent_dce;
   return tint_wrapper_result;
 }

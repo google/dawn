@@ -99,9 +99,7 @@ S[4] v_15(uint start_byte_offset) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_store_and_preserve_padding(v_15(0u));
-  S v_18 = v_7(256u);
-  tint_store_and_preserve_padding_1(uint[1](1u), v_18);
-  f16mat2x3 v_19 = v_2(264u);
-  tint_store_and_preserve_padding_2(uint[1](3u), v_19);
+  tint_store_and_preserve_padding_1(uint[1](1u), v_7(256u));
+  tint_store_and_preserve_padding_2(uint[1](3u), v_2(264u));
   v_1.inner[1u].m[0u] = tint_bitcast_to_16bit(v.inner[1u].xy).xyz.zxy;
 }
