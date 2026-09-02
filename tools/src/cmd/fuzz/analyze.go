@@ -44,12 +44,13 @@ import (
 
 // Analyze mode path stems that get used multiple times
 const (
-	kAnalyzeResultsDir = "results"
-	kAnalyzeReportFile = "experiment_report.md"
-	kAnalyzeCsvFile    = "raw_iteration_data.csv"
+	kAnalyzeResultsDir   = "results"
+	kAnalyzeReportFile   = "experiment_report.md"
+	kAnalyzeCsvFile      = "raw_iteration_data.csv"
+	kAnalyzeStatsCsvFile = "calculated_statistics.csv"
 )
 
-// CoverageStats holds the line coverage metrics for a specific code segment.
+// CoverageStats holds the line coverage metrics for a specific code component.
 type CoverageStats struct {
 	LinesFound int     `json:"lines_found"`
 	LinesHit   int     `json:"lines_hit"`
@@ -81,6 +82,9 @@ type IterationData struct {
 // SummaryPoint represents a single statistical data point in a fuzzer's
 // coverage trajectory, summarizing metrics across multiple iterations.
 type SummaryPoint struct {
+	Fuzzer       string
+	Corpus       string
+	Component    string
 	LimitType    string
 	LimitValue   int
 	NormSecsAvg  float64
@@ -138,6 +142,10 @@ func (ac *analyzeConfig) run() error {
 	}
 
 	stats := calculateStats(data)
+	if err := ac.printStatsCSV(stats); err != nil {
+		return err
+	}
+
 	if err := ac.printReport(stats); err != nil {
 		return err
 	}
@@ -364,13 +372,13 @@ func (ac *analyzeConfig) printRawCSV(data []IterationData) error {
 
 // calculateStats computes statistical summaries for coverage percentages,
 // normalized CPU seconds, and coverage rates across fuzzer runs.
-func calculateStats(data []IterationData) map[string][]SummaryPoint {
+func calculateStats(data []IterationData) []SummaryPoint {
 	type accumulatorKey struct {
 		Fuzzer     string
 		Corpus     string
 		LimitType  string
 		LimitValue int
-		Segment    string
+		Component  string
 	}
 
 	type accumulatorVal struct {
@@ -381,7 +389,7 @@ func calculateStats(data []IterationData) map[string][]SummaryPoint {
 	accumulations := make(map[accumulatorKey]*accumulatorVal)
 
 	for _, d := range data {
-		segments := []struct {
+		components := []struct {
 			Name  string
 			Stats CoverageStats
 		}{
@@ -390,9 +398,9 @@ func calculateStats(data []IterationData) map[string][]SummaryPoint {
 			{"DirectX", d.Coverage.DirectX},
 		}
 
-		for _, seg := range segments {
-			if seg.Stats.LinesFound == 0 {
-				continue // skip reporting empty segments (e.g. Mesa if not a Mesa fuzzer)
+		for _, c := range components {
+			if c.Stats.LinesFound == 0 {
+				continue // skip reporting empty components (e.g. Mesa if not a Mesa fuzzer)
 			}
 
 			key := accumulatorKey{
@@ -400,7 +408,7 @@ func calculateStats(data []IterationData) map[string][]SummaryPoint {
 				Corpus:     d.Corpus,
 				LimitType:  d.LimitType,
 				LimitValue: d.LimitValue,
-				Segment:    seg.Name,
+				Component:  c.Name,
 			}
 			val, ok := accumulations[key]
 			if !ok {
@@ -409,7 +417,7 @@ func calculateStats(data []IterationData) map[string][]SummaryPoint {
 			}
 
 			val.NormalizedSecs = append(val.NormalizedSecs, d.NormalizedSecs)
-			val.CoveragePercent = append(val.CoveragePercent, seg.Stats.Percentage)
+			val.CoveragePercent = append(val.CoveragePercent, c.Stats.Percentage)
 		}
 	}
 
@@ -425,8 +433,8 @@ func calculateStats(data []IterationData) map[string][]SummaryPoint {
 		if keys[i].Corpus != keys[j].Corpus {
 			return keys[i].Corpus < keys[j].Corpus
 		}
-		if keys[i].Segment != keys[j].Segment {
-			return keys[i].Segment < keys[j].Segment
+		if keys[i].Component != keys[j].Component {
+			return keys[i].Component < keys[j].Component
 		}
 		if keys[i].LimitType != keys[j].LimitType {
 			return keys[i].LimitType < keys[j].LimitType
@@ -434,7 +442,7 @@ func calculateStats(data []IterationData) map[string][]SummaryPoint {
 		return keys[i].LimitValue < keys[j].LimitValue
 	})
 
-	summaries := make(map[string][]SummaryPoint)
+	var summaries []SummaryPoint
 	for _, k := range keys {
 		val := accumulations[k]
 		coverageAvg, coverageStd := computeAvgAndStdDev(val.CoveragePercent)
@@ -468,8 +476,10 @@ func calculateStats(data []IterationData) map[string][]SummaryPoint {
 			deltaCoverageRate = coverageRate * math.Sqrt(relativeDeltaCoverage*relativeDeltaCoverage+relativeDeltaNormalizedSecs*relativeDeltaNormalizedSecs)
 		}
 
-		sKey := fmt.Sprintf("%s - %s (%s)", k.Fuzzer, k.Corpus, k.Segment)
-		summaries[sKey] = append(summaries[sKey], SummaryPoint{
+		summaries = append(summaries, SummaryPoint{
+			Fuzzer:       k.Fuzzer,
+			Corpus:       k.Corpus,
+			Component:    k.Component,
 			LimitType:    k.LimitType,
 			LimitValue:   k.LimitValue,
 			NormSecsAvg:  normalizedSecsAvg,
@@ -485,8 +495,39 @@ func calculateStats(data []IterationData) map[string][]SummaryPoint {
 	return summaries
 }
 
+// printStatsCSV builds and writes a CSV file containing the calculated statistics.
+func (ac *analyzeConfig) printStatsCSV(stats []SummaryPoint) error {
+	var csvBuilder strings.Builder
+	csvBuilder.WriteString("Fuzzer,Corpus,Component,Samples,LimitType,LimitValue,NormalizedCPUSecondsAvg,NormalizedCPUSecondsSEM,CoveragePercentAvg,CoveragePercentSEM,CoverageRateAvg,CoverageRateSEM\n")
+
+	for _, pt := range stats {
+		csvBuilder.WriteString(fmt.Sprintf("%s,%s,%s,%d,%s,%d,%.4f,%.4f,%.2f,%.2f,%.6f,%.6f\n",
+			pt.Fuzzer,
+			pt.Corpus,
+			pt.Component,
+			pt.N,
+			pt.LimitType,
+			pt.LimitValue,
+			pt.NormSecsAvg,
+			pt.NormSecsSem,
+			pt.CovAvg,
+			pt.CovSem,
+			pt.CovRate,
+			pt.CovRateError,
+		))
+	}
+
+	csvFile := filepath.Join(ac.analyzePath, kAnalyzeStatsCsvFile)
+	if err := ac.osWrapper.WriteFile(csvFile, []byte(csvBuilder.String()), 0644); err != nil {
+		return fmt.Errorf("failed to write calculated statistics CSV file: %w", err)
+	}
+
+	fmt.Printf("Calculated statistics exported successfully to: %s\n", csvFile)
+	return nil
+}
+
 // printReport builds and writes a Markdown report summarizing fuzzer performance and coverage.
-func (ac *analyzeConfig) printReport(summaries map[string][]SummaryPoint) error {
+func (ac *analyzeConfig) printReport(stats []SummaryPoint) error {
 	var reportBuilder strings.Builder
 	reportBuilder.WriteString(fmt.Sprintf("# Experiment Performance and Coverage Report: %s\n\n", ac.settings.Name))
 	reportBuilder.WriteString(fmt.Sprintf("- **Git Hash**: `%s`\n", ac.settings.Hash))
@@ -501,38 +542,41 @@ func (ac *analyzeConfig) printReport(summaries map[string][]SummaryPoint) error 
 
 	reportBuilder.WriteString("\n## Detailed Coverage Summaries\n\n")
 
-	// Sort summaries keys
-	var summariesKeys []string
-	for k := range summaries {
-		summariesKeys = append(summariesKeys, k)
-	}
-	sort.Strings(summariesKeys)
+	headers := []string{"Samples (N)", "Target Limit", "Normalized CPU Seconds (Avg ± SEM)", "Coverage % (Avg ± SEM)", "Coverage Rate (%/sec) (Avg ± SEM)"}
+	var currentGroup string
+	var rows [][]string
 
-	for _, sk := range summariesKeys {
-		points := summaries[sk]
-
-		reportBuilder.WriteString(fmt.Sprintf("### %s\n\n", sk))
-
-		headers := []string{"Samples (N)", "Target Limit", "Normalized CPU Seconds (Avg ± SEM)", "Coverage % (Avg ± SEM)", "Coverage Rate (%/sec) (Avg ± SEM)"}
-		var rows [][]string
-		for _, pt := range points {
-			limitStr := fmt.Sprintf("%d %s", pt.LimitValue, pt.LimitType)
-			normSecsStr := fmt.Sprintf("%.2f ± %.2f", pt.NormSecsAvg, pt.NormSecsSem)
-			covStr := fmt.Sprintf("%.2f%% ± %.2f%%", pt.CovAvg, pt.CovSem)
-			covRateStr := fmt.Sprintf("%.6f ± %.6f", pt.CovRate, pt.CovRateError)
-			nStr := fmt.Sprintf("%d", pt.N)
-
-			rows = append(rows, []string{
-				nStr,
-				limitStr,
-				normSecsStr,
-				covStr,
-				covRateStr,
-			})
+	flushTable := func() {
+		if len(rows) > 0 {
+			reportBuilder.WriteString(fmt.Sprintf("### %s\n\n", currentGroup))
+			reportBuilder.WriteString(formatMarkdownTable(headers, rows))
+			reportBuilder.WriteString("\n")
+			rows = nil
 		}
-		reportBuilder.WriteString(formatMarkdownTable(headers, rows))
-		reportBuilder.WriteString("\n")
 	}
+
+	for _, pt := range stats {
+		group := fmt.Sprintf("%s - %s (%s)", pt.Fuzzer, pt.Corpus, pt.Component)
+		if group != currentGroup {
+			flushTable()
+			currentGroup = group
+		}
+
+		limitStr := fmt.Sprintf("%d %s", pt.LimitValue, pt.LimitType)
+		normSecsStr := fmt.Sprintf("%.2f ± %.2f", pt.NormSecsAvg, pt.NormSecsSem)
+		covStr := fmt.Sprintf("%.2f%% ± %.2f%%", pt.CovAvg, pt.CovSem)
+		covRateStr := fmt.Sprintf("%.6f ± %.6f", pt.CovRate, pt.CovRateError)
+		nStr := fmt.Sprintf("%d", pt.N)
+
+		rows = append(rows, []string{
+			nStr,
+			limitStr,
+			normSecsStr,
+			covStr,
+			covRateStr,
+		})
+	}
+	flushTable()
 
 	// Save Report File
 	reportFile := filepath.Join(ac.analyzePath, kAnalyzeReportFile)
@@ -702,7 +746,7 @@ func findLcovFile(dir string) (string, error) {
 }
 
 // parseLcov parses the contents of an LCOV file and categorizes coverage metrics
-// into Tint Core, Mesa, and DirectX segments based on file paths.
+// into Tint Core, Mesa, and DirectX components based on file paths.
 func parseLcov(content string) IterationCoverage {
 	lines := strings.Split(content, "\n")
 	var currentFile string

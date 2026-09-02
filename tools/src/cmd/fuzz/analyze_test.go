@@ -128,12 +128,10 @@ func TestCalculateStats(t *testing.T) {
 	summaries := calculateStats(data)
 
 	require.Len(t, summaries, 1)
-	tKey := "fuzzerA - corpusA (Tint Core)"
-	points, exists := summaries[tKey]
-	require.True(t, exists)
-	require.Len(t, points, 1)
-
-	pt := points[0]
+	pt := summaries[0]
+	require.Equal(t, "fuzzerA", pt.Fuzzer)
+	require.Equal(t, "corpusA", pt.Corpus)
+	require.Equal(t, "Tint Core", pt.Component)
 	require.Equal(t, "seconds", pt.LimitType)
 	require.Equal(t, 10, pt.LimitValue)
 	require.Equal(t, 2, pt.N)
@@ -207,4 +205,83 @@ func TestGenerateLcovReport_Success(t *testing.T) {
 
 	err := generateLcovReport(cfg, "fuzzer", "/experiment/bin", "/outputs", "/inputs/coverage.profdata")
 	require.NoError(t, err)
+}
+
+func TestPrintStatsCSVAndReport(t *testing.T) {
+	fs := oswrapper.CreateFSTestOSWrapper()
+	_ = fs.MkdirAll("/experiment", 0755)
+
+	ac := &analyzeConfig{
+		taskConfig: &taskConfig{
+			mainConfig: mainConfig{
+				osWrapper:   fs,
+				analyzePath: "/experiment",
+			},
+		},
+		settings: ExperimentSettings{
+			Name: "test_experiment",
+			Hash: "abcdef123",
+		},
+		resultsDir: "/experiment/results",
+		machines:   []string{"machineA"},
+	}
+
+	stats := []SummaryPoint{
+		{
+			Fuzzer:       "fuzzerA",
+			Corpus:       "corpusA",
+			Component:    "Tint Core",
+			LimitType:    "seconds",
+			LimitValue:   10,
+			NormSecsAvg:  9.5,
+			NormSecsSem:  0.5,
+			CovAvg:       55.0,
+			CovSem:       1.2,
+			CovRate:      5.78,
+			CovRateError: 0.1,
+			N:            5,
+		},
+		{
+			Fuzzer:       "fuzzerA",
+			Corpus:       "corpusA",
+			Component:    "Tint Core",
+			LimitType:    "seconds",
+			LimitValue:   20,
+			NormSecsAvg:  19.5,
+			NormSecsSem:  0.8,
+			CovAvg:       65.0,
+			CovSem:       1.5,
+			CovRate:      3.33,
+			CovRateError: 0.12,
+			N:            5,
+		},
+	}
+
+	// 1. Test printStatsCSV
+	err := ac.printStatsCSV(stats)
+	require.NoError(t, err)
+
+	csvContent, err := fs.ReadFile("/experiment/calculated_statistics.csv")
+	require.NoError(t, err)
+
+	expectedCSV := "Fuzzer,Corpus,Component,Samples,LimitType,LimitValue,NormalizedCPUSecondsAvg,NormalizedCPUSecondsSEM,CoveragePercentAvg,CoveragePercentSEM,CoverageRateAvg,CoverageRateSEM\n" +
+		"fuzzerA,corpusA,Tint Core,5,seconds,10,9.5000,0.5000,55.00,1.20,5.780000,0.100000\n" +
+		"fuzzerA,corpusA,Tint Core,5,seconds,20,19.5000,0.8000,65.00,1.50,3.330000,0.120000\n"
+
+	require.Equal(t, expectedCSV, string(csvContent))
+
+	// 2. Test printReport
+	err = ac.printReport(stats)
+	require.NoError(t, err)
+
+	reportContent, err := fs.ReadFile("/experiment/experiment_report.md")
+	require.NoError(t, err)
+
+	reportStr := string(reportContent)
+	require.Contains(t, reportStr, "# Experiment Performance and Coverage Report: test_experiment")
+	require.Contains(t, reportStr, "- **Git Hash**: `abcdef123`")
+	require.Contains(t, reportStr, "### fuzzerA - corpusA (Tint Core)")
+	require.Contains(t, reportStr, "| Samples (N) | Target Limit | Normalized CPU Seconds (Avg ± SEM) | Coverage % (Avg ± SEM) | Coverage Rate (%/sec) (Avg ± SEM) |")
+	require.Contains(t, reportStr, "| 5           | 10 seconds   | 9.50 ± 0.50                        | 55.00% ± 1.20%         | 5.780000 ± 0.100000               |")
+	require.Contains(t, reportStr, "| 5           | 20 seconds   | 19.50 ± 0.80                       | 65.00% ± 1.50%         | 3.330000 ± 0.120000               |")
 }
