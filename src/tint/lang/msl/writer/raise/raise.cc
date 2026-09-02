@@ -86,7 +86,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(
         core::ir::transform::SubstituteOverrides(module, options.substitute_overrides_config));
 
-    TINT_CHECK_RESULT(raise::ValidateSubgroupMatrix(module));
+    TINT_CHECK_RESULT(raise::ValidateSubgroupMatrix(module, options.extensions.enable_tensors));
 
     if (options.workarounds.collapse_subgroup_min_max) {
         TINT_CHECK_RESULT(core::ir::transform::CollapseSubgroupMinMax(module));

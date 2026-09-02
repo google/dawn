@@ -38,12 +38,11 @@ class Module;
 namespace tint::msl::writer::raise {
 
 /// Validates that any subgroup matrix used in the module is valid for the MSL restrictions.
-///  * subtype f16 or f32
-///  * dimensions 8x8
 ///
-/// @param module the module to transform
+/// @param ir the module to transform
+/// @param enable_tensors true if validating against Metal cooperative_tensor constraints
 /// @returns success or failure
-Result<SuccessType> ValidateSubgroupMatrix(core::ir::Module& module);
+Result<SuccessType> ValidateSubgroupMatrix(core::ir::Module& ir, bool enable_tensors);
 
 }  // namespace tint::msl::writer::raise
 

@@ -350,9 +350,11 @@ TEST_P(SubgroupMatrixTest, QueryConfigsMustReturnNonZeroConfigs) {
 // Test that advertised subgroup matrix configurations succeed and configurations with an
 // unadvertised M dimension fail.
 TEST_P(SubgroupMatrixTest, AdvertisedConfigsValidated) {
-    DAWN_TEST_UNSUPPORTED_IF(!IsD3D12());
     DAWN_TEST_UNSUPPORTED_IF(
         !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
+
+    // TODO(crbug.com/492539239): Access violation during test teardown.
+    DAWN_TEST_UNSUPPORTED_IF(IsWindows() && IsVulkan() && IsAMD());
 
     wgpu::AdapterInfo info;
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;

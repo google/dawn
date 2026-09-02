@@ -47,22 +47,48 @@ struct State {
     diag::List diagnostics_{};
 
     /// Process the module.
-    diag::Result<SuccessType> Process() {
+    diag::Result<SuccessType> Process(bool enable_tensors) {
         auto info = core::ir::analysis::GatherSubgroupMatrixInfo(ir);
 
         for (auto& i : info.configs) {
-            if ((i.direction == SubgroupMatrixDirection::kLeft && (i.M != 8 || i.K != 8)) ||
-                (i.direction == SubgroupMatrixDirection::kRight && (i.K != 8 || i.N != 8)) ||
-                (i.direction == SubgroupMatrixDirection::kResult && (i.M != 8 || i.N != 8))) {
-                diagnostics_.AddError(Source{})
-                    << "subgroup_matrix requires dimensions of 8x8 for the selected device";
-                break;
-            }
+            if (enable_tensors) {
+                // All dimensions must be 16 or 32.
+                if (!IsValidCooperativeTensorDim(i.M) || !IsValidCooperativeTensorDim(i.N) ||
+                    !IsValidCooperativeTensorDim(i.K)) {
+                    diagnostics_.AddError(Source{})
+                        << "Pipeline uses subgroup matrix dimensions that are not supported by the "
+                           "device ("
+                        << (i.M != 0 ? i.M : i.K) << "x" << ((i.N != 0 ? i.N : i.K)) << ")";
+                    break;
+                }
+            } else {
+                if ((i.direction == SubgroupMatrixDirection::kLeft && (i.M != 8 || i.K != 8)) ||
+                    (i.direction == SubgroupMatrixDirection::kRight && (i.K != 8 || i.N != 8)) ||
+                    (i.direction == SubgroupMatrixDirection::kResult && (i.M != 8 || i.N != 8))) {
+                    diagnostics_.AddError(Source{})
+                        << "Pipeline uses subgroup matrix dimensions that are not supported by the "
+                           "device ("
+                        << (i.M != 0 ? i.M : i.K) << "x" << ((i.N != 0 ? i.N : i.K)) << ")";
+                    break;
+                }
 
-            if (i.type != SubgroupMatrixType::kF32 && i.type != SubgroupMatrixType::kF16) {
-                diagnostics_.AddError(Source{})
-                    << "subgroup_matrix requires a type of `f32` or `f16` for the selected device";
-                break;
+                if (i.type != SubgroupMatrixType::kF32 && i.type != SubgroupMatrixType::kF16) {
+                    diagnostics_.AddError(Source{}) << "subgroup_matrix requires a type of `f32` "
+                                                       "or `f16` for the selected device";
+                    break;
+                }
+            }
+        }
+
+        for (auto& i : info.multiplies) {
+            if (enable_tensors) {
+                // At least one dimension must be 32.
+                if (i.M != 32 || i.N != 32 || i.K != 32) {
+                    diagnostics_.AddError(Source{}) << "Pipeline uses subgroup matrix multiply "
+                                                       "shape that is not supported by the device ("
+                                                    << i.M << "x" << i.N << "x" << i.K << ")";
+                    break;
+                }
             }
         }
 
@@ -71,14 +97,20 @@ struct State {
         }
         return Success;
     }
+
+    bool IsValidCooperativeTensorDim(uint32_t d) {
+        // cooperative_tensor dimensions must all be 16 or 32.
+        // allow zero as well which signals that the dimension is unused for the given usage kind.
+        return d == 0 || d == 16 || d == 32;
+    }
 };
 
 }  // namespace
 
-Result<SuccessType> ValidateSubgroupMatrix(core::ir::Module& ir) {
+Result<SuccessType> ValidateSubgroupMatrix(core::ir::Module& ir, bool enable_tensors) {
     AssertValid(ir, "before msl.ValidateSubgroupMatrix");
 
-    auto res = State{ir}.Process();
+    auto res = State{ir}.Process(enable_tensors);
     if (res != Success) {
         return Failure{res.Failure().reason.Str()};
     }

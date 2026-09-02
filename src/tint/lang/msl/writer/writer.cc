@@ -51,14 +51,7 @@ namespace {
 Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
     // Check for unsupported types.
     for (auto* ty : ir.Types()) {
-        if (auto* m = ty->As<core::type::SubgroupMatrix>()) {
-            if (!m->Type()->IsAnyOf<core::type::F16, core::type::F32>()) {
-                return Failure("non-float subgroup matrices are not supported by the MSL backend");
-            }
-            if (m->Columns() != 8 || m->Rows() != 8) {
-                return Failure("the MSL backend only supports 8x8 subgroup matrices");
-            }
-        } else if (ty->Is<core::type::TexelBuffer>()) {
+        if (ty->Is<core::type::TexelBuffer>()) {
             // TODO(crbug/382544164): Prototype texel buffer feature
             return Failure("texel buffers are not supported by the MSL backend");
         }
