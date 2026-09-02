@@ -59,9 +59,52 @@ namespace tint::core::ir::validator {
 Validator::Validator(Module& mod, ErrorSource error_source)
     : ir_(mod), error_source_(error_source), referenced_module_vars_(ir_) {}
 
+bool Validator::IsWGSLValidation() const {
+    return error_source_ == ErrorSource::kWgsl;
+}
+
+bool Validator::IsIRValidation() const {
+    return error_source_ == ErrorSource::kIr;
+}
+
+Disassembler& Validator::Disassemble() {
+    if (!disassembler_) {
+        disassembler_.emplace(ir::Disassembler(ir_));
+    }
+    return *disassembler_;
+}
+
+Source Validator::SourceOf(const Function* func) {
+    if (IsWGSLValidation()) {
+        return ir_.SourceOf(func);
+    }
+    return Disassemble().FunctionSource(func);
+}
+
+Source Validator::SourceOf(const FunctionParam* param) {
+    if (IsWGSLValidation()) {
+        return ir_.SourceOf(param);
+    }
+    return Disassemble().FunctionParamSource(param);
+}
+
+Source Validator::SourceOf(const Instruction* inst) {
+    if (IsWGSLValidation()) {
+        return ir_.SourceOf(inst);
+    }
+    return Disassemble().InstructionSource(inst);
+}
+
+Source Validator::SourceOf(const Instruction* inst, size_t idx) {
+    if (IsWGSLValidation()) {
+        return ir_.SourceOf(inst->Operands()[idx]);
+    }
+    return Disassemble().OperandSource(
+        Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
+}
+
 diag::Diagnostic& Validator::AddError(const Instruction* inst) {
-    auto src = Disassemble().InstructionSource(inst);
-    auto& diag = AddError(src) << inst->FriendlyName() << ": ";
+    auto& diag = AddError(SourceOf(inst)) << inst->FriendlyName() << ": ";
 
     if (!block_stack_.IsEmpty()) {
         AddNote(block_stack_.Back()) << "in block";
@@ -74,9 +117,7 @@ diag::Diagnostic& Validator::AddError(const Instruction* inst) {
 }
 
 diag::Diagnostic& Validator::AddError(const Instruction* inst, size_t idx) {
-    auto src =
-        Disassemble().OperandSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
-    auto& diag = AddError(src) << inst->FriendlyName() << ": ";
+    auto& diag = AddError(SourceOf(inst, idx)) << inst->FriendlyName() << ": ";
 
     if (!block_stack_.IsEmpty()) {
         AddNote(block_stack_.Back()) << "in block";
@@ -93,23 +134,23 @@ diag::Diagnostic& Validator::AddError(const InstructionResult* inst) {
 }
 
 diag::Diagnostic& Validator::AddError(const Block* blk) {
+    TINT_IR_ASSERT(ir_, IsIRValidation());
     auto src = Disassemble().BlockSource(blk);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddError(const BlockParam* param) {
+    TINT_IR_ASSERT(ir_, IsIRValidation());
     auto src = Disassemble().BlockParamSource(param);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddError(const Function* func) {
-    auto src = Disassemble().FunctionSource(func);
-    return AddError(src);
+    return AddError(SourceOf(func));
 }
 
 diag::Diagnostic& Validator::AddError(const FunctionParam* param) {
-    auto src = Disassemble().FunctionParamSource(param);
-    return AddError(src);
+    return AddError(SourceOf(param));
 }
 
 diag::Diagnostic& Validator::AddError(const Value* param) {
@@ -127,11 +168,14 @@ diag::Diagnostic& Validator::AddError(const Value* param) {
 
 diag::Diagnostic& Validator::AddError(Source src) {
     auto& diag = diag_.AddError(src);
-    diag.owned_file = Disassemble().File();
+    if (IsIRValidation()) {
+        diag.owned_file = Disassemble().File();
+    }
     return diag;
 }
 
 diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx) {
+    TINT_IR_ASSERT(ir_, IsIRValidation());
     auto src =
         Disassemble().ResultSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
@@ -147,39 +191,40 @@ diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx)
 }
 
 diag::Diagnostic& Validator::AddNote(const Instruction* inst) {
-    auto src = Disassemble().InstructionSource(inst);
-    return AddNote(src);
+    return AddNote(SourceOf(inst));
 }
 
 diag::Diagnostic& Validator::AddNote(const Function* func) {
-    auto src = Disassemble().FunctionSource(func);
-    return AddNote(src);
+    return AddNote(SourceOf(func));
 }
 
 diag::Diagnostic& Validator::AddOperandNote(const Instruction* inst, size_t idx) {
-    auto src =
-        Disassemble().OperandSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
-    return AddNote(src);
+    return AddNote(SourceOf(inst, idx));
 }
 
 diag::Diagnostic& Validator::AddResultNote(const Instruction* inst, size_t idx) {
+    TINT_IR_ASSERT(ir_, IsIRValidation());
     auto src =
         Disassemble().ResultSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddNote(const Block* blk) {
+    TINT_IR_ASSERT(ir_, IsIRValidation());
     auto src = Disassemble().BlockSource(blk);
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddNote(Source src) {
     auto& diag = diag_.AddNote(src);
-    diag.owned_file = Disassemble().File();
+    if (IsIRValidation()) {
+        diag.owned_file = Disassemble().File();
+    }
     return diag;
 }
 
 void Validator::AddDeclarationNote(const Block* block) {
+    TINT_IR_ASSERT(ir_, IsIRValidation());
     auto src = Disassemble().BlockSource(block);
     if (src.file) {
         AddNote(src) << NameOf(block) << " declared here";
@@ -187,6 +232,7 @@ void Validator::AddDeclarationNote(const Block* block) {
 }
 
 void Validator::AddDeclarationNote(const BlockParam* param) {
+    TINT_IR_ASSERT(ir_, IsIRValidation());
     auto src = Disassemble().BlockParamSource(param);
     if (src.file) {
         AddNote(src) << NameOf(param) << " declared here";
@@ -198,14 +244,14 @@ void Validator::AddDeclarationNote(const Function* fn) {
 }
 
 void Validator::AddDeclarationNote(const FunctionParam* param) {
-    auto src = Disassemble().FunctionParamSource(param);
+    auto src = SourceOf(param);
     if (src.file) {
         AddNote(src) << NameOf(param) << " declared here";
     }
 }
 
 void Validator::AddDeclarationNote(const Instruction* inst) {
-    auto src = Disassemble().InstructionSource(inst);
+    auto src = SourceOf(inst);
     if (src.file) {
         AddNote(src) << NameOf(inst) << " declared here";
     }
@@ -239,6 +285,9 @@ StyledText Validator::NameOf(const core::type::Type* ty) {
 }
 
 StyledText Validator::NameOf(const Value* value) {
+    if (IsWGSLValidation()) {
+        return StyledText{} << ir_.NameOf(value).to_str();
+    }
     return Disassemble().NameOf(value);
 }
 
@@ -248,6 +297,7 @@ StyledText Validator::NameOf(const Instruction* inst) {
 }
 
 StyledText Validator::NameOf(const Block* block) {
+    TINT_IR_ASSERT(ir_, IsIRValidation());
     auto parent_name = block->Parent() ? block->Parent()->FriendlyName() : "undef";
     return StyledText{} << style::Instruction(parent_name) << " block "
                         << Disassemble().NameOf(block);
@@ -699,13 +749,6 @@ Hashset<const ir::Function*, 4> Validator::ContainingEndPoints(const ir::Functio
     return result;
 }
 
-Disassembler& Validator::Disassemble() {
-    if (!disassembler_) {
-        disassembler_.emplace(ir::Disassembler(ir_));
-    }
-    return *disassembler_;
-}
-
 Result<SuccessType> Validator::Run() {
     RunStructuralSoundnessChecks();
 
@@ -720,7 +763,7 @@ Result<SuccessType> Validator::Run() {
     }
 
     if (diag_.ContainsErrors()) {
-        if (error_source_ == ErrorSource::kIr) {
+        if (IsIRValidation()) {
             const StyledText disassembly = ir::Disassembler(ir_).Text();
             diag_.AddNote(Source{}) << "# Disassembly\n" << disassembly;
         }

@@ -201,6 +201,13 @@ class Validator {
     Result<SuccessType> Run();
 
   private:
+    // Returns true if we're validating in the context of WGSL. The other option is we're validating
+    // as IR. The primary difference is how const-eval checks are run as the semantics are
+    // different.
+    bool IsWGSLValidation() const;
+    // Returns true if we're validating in the context of IR.
+    bool IsIRValidation() const;
+
     /// Helper for walking a type that maybe a struct, calling an impl function for the type and
     /// each of
     /// its members.
@@ -260,6 +267,11 @@ class Validator {
 
     /// @returns the IR disassembly, performing a disassemble if this is the first call.
     ir::Disassembler& Disassemble();
+
+    Source SourceOf(const Function* func);
+    Source SourceOf(const FunctionParam* param);
+    Source SourceOf(const Instruction* inst);
+    Source SourceOf(const Instruction* inst, size_t idx);
 
     /// Adds an error for the @p inst and highlights the instruction in the disassembly
     /// @param inst the instruction
