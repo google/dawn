@@ -458,13 +458,14 @@ func TestPrepareBinariesWithRuntimeDeps(t *testing.T) {
 	_ = fs.WriteFile("third_party/llvm-build/Release+Asserts/bin/llvm-cov", []byte("mock-cov"), 0755)
 
 	// Create runtime_deps file
-	depsContent := "tint_wgsl_fuzzer\nlib/libswiftshader.so\nlibvulkan.so.1\nsrc/some_other_dep.dat\n"
+	depsContent := "tint_wgsl_fuzzer\nlib/libswiftshader.so\nlibvulkan.so.1\nsrc/some_other_dep.dat\nlvp_icd.json\n"
 	_ = fs.WriteFile("/build/tint_wgsl_fuzzer.runtime_deps", []byte(depsContent), 0644)
 
 	// Create test runtime dependencies to copy
 	_ = fs.MkdirAll("/build/lib", 0755)
 	_ = fs.WriteFile("/build/lib/libswiftshader.so", []byte("swiftshader-binary"), 0755)
 	_ = fs.WriteFile("/build/libvulkan.so.1", []byte("vulkan-binary"), 0755)
+	_ = fs.WriteFile("/build/lvp_icd.json", []byte("icd-json"), 0644)
 	_ = fs.MkdirAll("/build/src", 0755)
 	_ = fs.WriteFile("/build/src/some_other_dep.dat", []byte("some-data"), 0644)
 
@@ -500,6 +501,11 @@ func TestPrepareBinariesWithRuntimeDeps(t *testing.T) {
 	require.True(t, fileutils.IsFile("/experiment/bin/libvulkan.so.1", fs))
 	contentVul, _ := fs.ReadFile("/experiment/bin/libvulkan.so.1")
 	require.Equal(t, "vulkan-binary", string(contentVul))
+
+	// Verify lvp_icd.json was copied
+	require.True(t, fileutils.IsFile("/experiment/bin/lvp_icd.json", fs))
+	contentIcd, _ := fs.ReadFile("/experiment/bin/lvp_icd.json")
+	require.Equal(t, "icd-json", string(contentIcd))
 
 	// Verify non-library dependencies were NOT copied
 	require.False(t, fileutils.IsFile("/experiment/bin/src/some_other_dep.dat", fs))
@@ -557,4 +563,39 @@ func TestPrepareBinariesNoRuntimeDeps(t *testing.T) {
 	require.True(t, fileutils.IsFile("/experiment/bin/llvm-cov", fs))
 	contentCov, _ := fs.ReadFile("/experiment/bin/llvm-cov")
 	require.Equal(t, "mock-cov", string(contentCov))
+}
+
+func TestAppendLibraryArgs(t *testing.T) {
+	fs := oswrapper.CreateFSTestOSWrapper()
+
+	// 1. Empty bin directory
+	_ = fs.MkdirAll("/experiment/bin", 0755)
+	args := []string{"arg1", "arg2"}
+	args = appendLibraryArgs(args, "/experiment/bin", fs)
+	require.Equal(t, []string{"arg1", "arg2"}, args)
+
+	// 2. With DXC and ICD files in bin root
+	_ = fs.WriteFile("/experiment/bin/libdxcompiler.so", []byte("dxc"), 0755)
+	_ = fs.WriteFile("/experiment/bin/lvp_icd.json", []byte("icd"), 0644)
+	_ = fs.WriteFile("/experiment/bin/vk_swiftshader_icd.json", []byte("swiftshader-icd"), 0644)
+
+	args = []string{"arg1", "arg2"}
+	args = appendLibraryArgs(args, "/experiment/bin", fs)
+	require.Contains(t, args, "--dxc=/experiment/bin/libdxcompiler.so")
+	require.Contains(t, args, "--vk_icd=/experiment/bin/lvp_icd.json")
+	require.NotContains(t, args, "--vk_icd=/experiment/bin/vk_swiftshader_icd.json")
+
+	// 3. With DXC and ICD files in subdirectories (nested)
+	fs2 := oswrapper.CreateFSTestOSWrapper()
+	_ = fs2.MkdirAll("/experiment/bin/lib", 0755)
+	_ = fs2.MkdirAll("/experiment/bin/config", 0755)
+	_ = fs2.WriteFile("/experiment/bin/lib/libdxcompiler.so", []byte("dxc"), 0755)
+	_ = fs2.WriteFile("/experiment/bin/config/lvp_icd.json", []byte("icd"), 0644)
+	_ = fs2.WriteFile("/experiment/bin/config/vk_swiftshader_icd.json", []byte("swiftshader-icd"), 0644)
+
+	args2 := []string{"arg1", "arg2"}
+	args2 = appendLibraryArgs(args2, "/experiment/bin", fs2)
+	require.Contains(t, args2, "--dxc=/experiment/bin/lib/libdxcompiler.so")
+	require.Contains(t, args2, "--vk_icd=/experiment/bin/config/lvp_icd.json")
+	require.NotContains(t, args2, "--vk_icd=/experiment/bin/config/vk_swiftshader_icd.json")
 }

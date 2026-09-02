@@ -44,6 +44,8 @@ import (
 	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/glob"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 )
 
 // Experiment mode path stems that get used multiple times
@@ -734,8 +736,8 @@ func copyFuzzerAndDependencies(t *taskConfig, fuzzer string, binDir string) erro
 				continue
 			}
 
-			// Only copy if it's a shared library
-			if !isSharedLibrary(line) {
+			// Only copy if it's a shared library or ICD configuration
+			if !shouldCopyRuntimeDep(line) {
 				continue
 			}
 
@@ -763,17 +765,40 @@ func copyFuzzerAndDependencies(t *taskConfig, fuzzer string, binDir string) erro
 	return nil
 }
 
-// isSharedLibrary returns true if the path points to a shared library file (e.g. .so, .dylib, .dll, or versioned variants like .so.1).
-func isSharedLibrary(path string) bool {
+// shouldCopyRuntimeDep returns true if the path points to a shared library file (e.g. .so, .dylib, .dll, or versioned variants like .so.1) or an ICD configuration file (.json).
+func shouldCopyRuntimeDep(path string) bool {
 	ext := filepath.Ext(path)
-	if ext == ".so" || ext == ".dylib" || ext == ".dll" {
+	if ext == ".so" || ext == ".dylib" || ext == ".dll" || ext == ".json" {
 		return true
 	}
+
 	// Handle versioned shared libraries (e.g. libvulkan.so.1)
 	if strings.Contains(path, ".so.") || strings.Contains(path, ".dylib.") {
 		return true
 	}
 	return false
+}
+
+// appendLibraryArgs searches for DXC and Mesa ICD configurations in the given directory
+// and appends the corresponding flags to the fuzzer arguments if found.
+func appendLibraryArgs(args []string, binDir string, fsReader oswrapper.FilesystemReader) []string {
+	// Find DXC library
+	if files, err := glob.Glob(filepath.Join(binDir, "**dxcompiler*"), fsReader); err == nil {
+		for _, f := range files {
+			ext := filepath.Ext(f)
+			if ext == ".so" || ext == ".dylib" || ext == ".dll" {
+				args = append(args, fmt.Sprintf("--dxc=%s", f))
+				break
+			}
+		}
+	}
+	// Find Mesa ICD JSON
+	if files, err := glob.Glob(filepath.Join(binDir, "**lvp_icd.json"), fsReader); err == nil {
+		if len(files) > 0 {
+			args = append(args, fmt.Sprintf("--vk_icd=%s", files[0]))
+		}
+	}
+	return args
 }
 
 // runMicrobenchmark executes a short fuzzer run to determine the execution
@@ -825,6 +850,7 @@ func runBenchmarkCmd(t *taskConfig, binPath string, corpusPath string, duration 
 	defer t.osWrapper.RemoveAll(tmpOut)
 
 	args := []string{tmpOut, corpusPath, fmt.Sprintf("-timeout=%d", timeoutVal), fmt.Sprintf("-max_total_time=%d", duration)}
+	args = appendLibraryArgs(args, filepath.Dir(binPath), t.osWrapper)
 
 	start := time.Now()
 	out, err := t.runCmd(binPath, args...)
@@ -993,6 +1019,8 @@ func executeExperimentTask(ctx context.Context, t *taskConfig, binDir string, ta
 			args = append(args, "-dict="+absDictPath)
 		}
 	}
+
+	args = appendLibraryArgs(args, binDir, t.osWrapper)
 
 	fmt.Println(fmt.Sprintf("[%s] Starting: %s on %s (%s=%d, iter %d)",
 		time.Now().Format("15:04:05"), task.FuzzerName, task.CorpusName, task.LimitType, task.LimitValue, task.Iteration))
