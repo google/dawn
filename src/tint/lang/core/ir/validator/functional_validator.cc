@@ -1239,8 +1239,8 @@ void Functional::CheckLoad(const Load* l) {
 }
 
 void Functional::CheckStore(const Store* s) {
-    const core::ir::Value* from = s->From();
-    const core::ir::Value* to = s->To();
+    const Value* from = s->From();
+    const Value* to = s->To();
     TINT_ASSERT(from != nullptr);
     TINT_ASSERT(to != nullptr);
 
@@ -1310,7 +1310,7 @@ void Functional::CheckLoadVectorElement(const LoadVectorElement* l) {
         AddError(l, LoadVectorElement::kIndexOperandOffset)
             << "load vector element index must be an integer scalar";
     }
-    if (auto* c = l->Index()->As<core::ir::Constant>()) {
+    if (auto* c = l->Index()->As<Constant>()) {
         uint32_t val = c->Value()->ValueAs<uint32_t>();
 
         const core::type::Vector* vec_ty =
@@ -1353,7 +1353,7 @@ void Functional::CheckStoreVectorElement(const StoreVectorElement* s) {
             << "store vector element index must be an integer scalar";
     }
 
-    const core::ir::Constant* c = s->Index()->As<core::ir::Constant>();
+    const Constant* c = s->Index()->As<Constant>();
     if (c == nullptr) {
         return;
     }
@@ -1527,7 +1527,7 @@ void Functional::CheckUnary(const Unary* u) {
         return;
     }
 
-    const core::ir::Value* result = u->Result(0);
+    const Value* result = u->Result(0);
     if (overload->return_type != result->Type()) {
         AddError(u) << "result value type " << NameOf(result->Type()) << " does not match "
                     << style::Instruction(u->Op()) << " result type "
@@ -1566,7 +1566,7 @@ void Functional::CheckBuiltinCall(const BuiltinCall* call) {
         }
     }
 
-    const core::ir::CoreBuiltinCall* bc = call->As<CoreBuiltinCall>();
+    const CoreBuiltinCall* bc = call->As<CoreBuiltinCall>();
     if (bc == nullptr) {
         return;
     }
@@ -1760,8 +1760,8 @@ void Functional::CheckSmoothstepCall(const CoreBuiltinCall* call) {
 }
 
 void Functional::CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call) {
-    const core::ir::Value* p_arg = call->Args()[0];
-    const core::ir::Value* offset_arg = call->Args()[1];
+    const Value* p_arg = call->Args()[0];
+    const Value* offset_arg = call->Args()[1];
 
     const core::type::Pointer* ptr_ty = p_arg->Type()->As<core::type::Pointer>();
     TINT_ASSERT(ptr_ty);

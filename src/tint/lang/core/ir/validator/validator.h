@@ -142,7 +142,7 @@ struct IOAttributeContext {
 /// point.
 struct BlendSrcContext {
     Function::PipelineStage stage{};
-    Hashmap<uint32_t, const CastableBase*, 4> locations;
+    Hashmap<uint32_t, const Value*, 4> locations;
     Hashset<uint32_t, 2> blend_srcs;
     const core::type::Type* blend_src_type = nullptr;
     IODirection dir{};
@@ -266,18 +266,17 @@ class Validator {
     /// @returns the diagnostic
     diag::Diagnostic& AddError(const Instruction* inst);
 
+    /// Adds an error for the @p inst and highlights the instruction in the disassembly
+    /// @param inst the instruction
+    /// @returns the diagnostic
+    diag::Diagnostic& AddError(const InstructionResult* inst);
+
     /// Adds an error for the @p inst operand at @p idx and highlights the operand in the
     /// disassembly
     /// @param inst the instruction
     /// @param idx the operand index
     /// @returns the diagnostic
     diag::Diagnostic& AddError(const Instruction* inst, size_t idx);
-
-    /// Adds an error for the @p inst result at @p idx and highlgihts the result in the disassembly
-    /// @param inst the instruction
-    /// @param idx the result index
-    /// @returns the diagnostic
-    diag::Diagnostic& AddResultError(const Instruction* inst, size_t idx);
 
     /// Adds an error for the @p block and highlights the block header in the disassembly
     /// @param blk the block
@@ -299,15 +298,21 @@ class Validator {
     /// @returns the diagnostic
     diag::Diagnostic& AddError(const FunctionParam* param);
 
-    /// Adds an error for the castable base @p base and highlights it in the disassembly
-    /// @param base the declaration to add an error for
+    /// Adds an error for the @p param and highlights the parameter in the disassembly
+    /// @param param the parameter
     /// @returns the diagnostic
-    diag::Diagnostic& AddError(const CastableBase* base);
+    diag::Diagnostic& AddError(const Value* param);
 
     /// Adds an error the @p block and highlights the block header in the disassembly
     /// @param src the source lines to highlight
     /// @returns the diagnostic
     diag::Diagnostic& AddError(Source src);
+
+    /// Adds an error for the @p inst result at @p idx and highlgihts the result in the disassembly
+    /// @param inst the instruction
+    /// @param idx the result index
+    /// @returns the diagnostic
+    diag::Diagnostic& AddResultError(const Instruction* inst, size_t idx);
 
     /// Adds a note to @p inst and highlights the instruction in the disassembly
     /// @param inst the instruction
@@ -334,11 +339,6 @@ class Validator {
     /// Adds a note to the diagnostics
     /// @param src the source lines to highlight
     diag::Diagnostic& AddNote(Source src = {});
-
-    /// Adds a note to the diagnostics highlighting where the value instruction or block is
-    /// declared, if it has a source location.
-    /// @param decl the value instruction or block
-    void AddDeclarationNote(const CastableBase* decl);
 
     /// Adds a note to the diagnostics highlighting where the block is declared, if it has a source
     /// location.
@@ -370,9 +370,10 @@ class Validator {
     /// @param res the res
     void AddDeclarationNote(const InstructionResult* res);
 
-    /// @param decl the type, value, instruction or block to get the name for
-    /// @returns the styled name for the given value, instruction or block
-    StyledText NameOf(const CastableBase* decl);
+    /// Adds a note to the diagnostics highlighting where value was declared, if it has a source
+    /// location.
+    /// @param res the res
+    void AddDeclarationNote(const Value* res);
 
     // @param ty the type to get the name for
     /// @returns the styled name for the given type
@@ -608,7 +609,7 @@ class Validator {
     /// @param dir is value being used as an input or an output
     /// @param io_kind is the type of shader IO object the attribute is attached to
     void ValidateIOAttributesImpl(IOAttributeContext& ctx,
-                                  const CastableBase* msg_anchor,
+                                  const Value* msg_anchor,
                                   const core::type::Type* ty,
                                   const IOAttributes& attr,
                                   Function::PipelineStage stage,
@@ -620,7 +621,7 @@ class Validator {
     /// @param attr the IO attributes
     /// @param ty the type
     /// @param err error message to log when check fails
-    void CheckFrontFacingIfBool(const CastableBase* msg_anchor,
+    void CheckFrontFacingIfBool(const Value* msg_anchor,
                                 const IOAttributes& attr,
                                 const core::type::Type* ty,
                                 const std::string& err);
@@ -629,9 +630,7 @@ class Validator {
     /// @param msg_anchor where to attach errors to
     /// @param ty the type
     /// @param err error message to log when check fails
-    void CheckNotBool(const CastableBase* msg_anchor,
-                      const core::type::Type* ty,
-                      const std::string& err);
+    void CheckNotBool(const Value* msg_anchor, const core::type::Type* ty, const std::string& err);
 
     /// Validates the given instruction
     /// @param inst the instruction to validate
@@ -651,7 +650,7 @@ class Validator {
     /// @param binding_point the binding information associated with the value
     /// @param attr IO attributes associated with the values
     /// @param kind the kind Shader IO being performed
-    void ValidateShaderIOAnnotations(const CastableBase* msg_anchor,
+    void ValidateShaderIOAnnotations(const Value* msg_anchor,
                                      const core::type::Type* ty,
                                      const std::optional<BindingPoint>& binding_point,
                                      const IOAttributes& attr,
@@ -671,7 +670,7 @@ class Validator {
     /// @param ty the ty to validate.
     /// @param attr the IO attributes for the object.
     void CheckBlendSrc(BlendSrcContext& ctx,
-                       const CastableBase* target,
+                       const Value* target,
                        const core::type::Type* ty,
                        const IOAttributes& attr);
 
@@ -681,7 +680,7 @@ class Validator {
     /// @param ty the type to validate.
     /// @param attr the IO attributes for the object.
     void CheckBlendSrcImpl(BlendSrcContext& ctx,
-                           const CastableBase* target,
+                           const Value* target,
                            const core::type::Type* ty,
                            const IOAttributes& attr);
 
@@ -692,8 +691,8 @@ class Validator {
     /// @param stage the pipeline stage of the entry point.
     /// @param type the type of the IO object.
     /// @param dir the IO direction (input or output).
-    void CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locations,
-                       const CastableBase* target,
+    void CheckLocation(Hashmap<uint32_t, const Value*, 4>& locations,
+                       const Value* target,
                        const IOAttributes& attr,
                        Function::PipelineStage stage,
                        const core::type::Type* type,
@@ -705,7 +704,7 @@ class Validator {
     /// @param attr the IO attributes of the object.
     /// @param stage the shader stage
     /// @param dir the direction of the IO usage
-    void CheckInterpolation(const CastableBase* anchor,
+    void CheckInterpolation(const Value* anchor,
                             const core::type::Type* ty,
                             const IOAttributes& attr,
                             Function::PipelineStage stage,
@@ -716,7 +715,7 @@ class Validator {
     /// @param ty the type of the IO object
     /// @param attr the IO attributes of the object
     /// @param io_kind the type of shader IO object binding point is attached to
-    void CheckBindingPoint(const CastableBase* anchor,
+    void CheckBindingPoint(const Value* anchor,
                            const core::type::Type* ty,
                            const IOAttributes& attr,
                            const ShaderIOKind& io_kind);
@@ -864,7 +863,19 @@ class Validator {
     void CheckOperandsMatchTarget(const Instruction* source_inst,
                                   size_t source_operand_offset,
                                   size_t source_operand_count,
-                                  const CastableBase* target,
+                                  const MultiInBlock* target,
+                                  VectorRef<const Value*> target_values);
+    /// Validates that the number and types of the source instruction operands match the target's
+    /// values.
+    /// @param source_inst the source instruction
+    /// @param source_operand_offset the index of the first operand of the source instruction
+    /// @param source_operand_count the number of operands of the source instruction
+    /// @param target the receiver of the operand values
+    /// @param target_values the receiver of the operand values
+    void CheckOperandsMatchTarget(const Instruction* source_inst,
+                                  size_t source_operand_offset,
+                                  size_t source_operand_count,
+                                  const ControlInstruction* target,
                                   VectorRef<const Value*> target_values);
 
     /// @param inst the instruction
@@ -951,7 +962,7 @@ class Validator {
 
     SymbolTable symbols_ = SymbolTable::Wrap(ir_.symbols);
     core::type::Manager type_mgr_ = core::type::Manager::Wrap(ir_.Types());
-    core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
+    ReferencedModuleVars<const Module> referenced_module_vars_;
 
     Vector<const ControlInstruction*, 8> control_stack_;
     Vector<const Block*, 8> block_stack_;

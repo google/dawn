@@ -636,7 +636,7 @@ Vector<const Validator::IOAttributeChecker*, 4> Validator::IOAttributeCheckersFo
     return checkers;
 }
 
-void Validator::ValidateShaderIOAnnotations(const CastableBase* msg_anchor,
+void Validator::ValidateShaderIOAnnotations(const Value* msg_anchor,
                                             const core::type::Type* ty,
                                             const std::optional<BindingPoint>& binding_point,
                                             const IOAttributes& attr,
@@ -760,7 +760,7 @@ void Validator::ValidateShaderIOAnnotations(const CastableBase* msg_anchor,
 void Validator::ValidateIOAttributes(const Function* func) {
     const auto stage = func->Stage();
     struct Task {
-        const CastableBase* anchor;
+        const Value* anchor;
         const core::type::Type* type;
         const IOAttributes& attr;
         IODirection dir;
@@ -786,7 +786,7 @@ void Validator::ValidateIOAttributes(const Function* func) {
         }
         if (mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut ||
             mv->AddressSpace() == AddressSpace::kHandle) {
-            tasks.Push({var, mv->StoreType(), var->Attributes(),
+            tasks.Push({var->Result(), mv->StoreType(), var->Attributes(),
                         validator::IODirectionFor(mv->AddressSpace()),
                         ShaderIOKind::kModuleScopeVar});
         }
@@ -856,7 +856,7 @@ void Validator::ValidateIOAttributes(const Function* func) {
 }
 
 void Validator::ValidateIOAttributesImpl(IOAttributeContext& ctx,
-                                         const CastableBase* msg_anchor,
+                                         const Value* msg_anchor,
                                          const core::type::Type* ty,
                                          const IOAttributes& attr,
                                          Function::PipelineStage stage,
@@ -976,7 +976,7 @@ void Validator::ValidateIOAttributesImpl(IOAttributeContext& ctx,
         });
 }
 
-void Validator::CheckNotBool(const CastableBase* msg_anchor,
+void Validator::CheckNotBool(const Value* msg_anchor,
                              const core::type::Type* ty,
                              const std::string& err) {
     if (ty->Is<core::type::Bool>()) {
@@ -984,7 +984,7 @@ void Validator::CheckNotBool(const CastableBase* msg_anchor,
     }
 }
 
-void Validator::CheckFrontFacingIfBool(const CastableBase* msg_anchor,
+void Validator::CheckFrontFacingIfBool(const Value* msg_anchor,
                                        const IOAttributes& attr,
                                        const core::type::Type* ty,
                                        const std::string& err) {
@@ -994,7 +994,7 @@ void Validator::CheckFrontFacingIfBool(const CastableBase* msg_anchor,
 }
 
 void Validator::CheckBlendSrc(BlendSrcContext& ctx,
-                              const CastableBase* target,
+                              const Value* target,
                               const core::type::Type* ty,
                               const IOAttributes& attr) {
     if (attr.blend_src.has_value()) {
@@ -1038,7 +1038,7 @@ void Validator::CheckBlendSrc(BlendSrcContext& ctx,
 }
 
 void Validator::CheckBlendSrcImpl(BlendSrcContext& ctx,
-                                  const CastableBase* target,
+                                  const Value* target,
                                   const core::type::Type* ty,
                                   const IOAttributes& attr) {
     if (!attr.blend_src.has_value()) {
@@ -1075,16 +1075,16 @@ void Validator::CheckBlendSrcImpl(BlendSrcContext& ctx,
     }
 }
 
-void Validator::CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locations,
-                              const CastableBase* target,
+void Validator::CheckLocation(Hashmap<uint32_t, const Value*, 4>& locations,
+                              const Value* target,
                               const IOAttributes& attr,
                               const Function::PipelineStage stage,
                               const core::type::Type* type,
                               const IODirection dir) {
     struct WalkContext {
         Validator* validator;
-        Hashmap<uint32_t, const CastableBase*, 4>& locations;
-        const CastableBase* target;
+        Hashmap<uint32_t, const Value*, 4>& locations;
+        const Value* target;
         const Function::PipelineStage stage;
         const IODirection dir;
     };
@@ -1123,7 +1123,7 @@ void Validator::CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locatio
         });
 }
 
-void Validator::CheckInterpolation(const CastableBase* anchor,
+void Validator::CheckInterpolation(const Value* anchor,
                                    const core::type::Type* ty,
                                    const IOAttributes& attr,
                                    const Function::PipelineStage stage,
@@ -1218,7 +1218,7 @@ void Validator::CheckInterpolation(const CastableBase* anchor,
         });
 }
 
-void Validator::CheckBindingPoint(const CastableBase* anchor,
+void Validator::CheckBindingPoint(const Value* anchor,
                                   const core::type::Type* ty,
                                   const IOAttributes& attr,
                                   const ShaderIOKind& io_kind) {

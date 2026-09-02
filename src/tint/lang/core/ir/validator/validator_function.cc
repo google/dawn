@@ -64,14 +64,14 @@ void Validator::CheckEntryPoint(const Function* func) {
 
         if (func->IsFragment() && mv->AddressSpace() == AddressSpace::kIn) {
             WalkTypeAndMembers(var, ty, attr, [this](const auto* v, const auto* t, const auto& a) {
-                CheckFrontFacingIfBool(v, a, t,
+                CheckFrontFacingIfBool(v->Result(), a, t,
                                        "input address space values referenced by fragment shaders "
                                        "can only be 'bool' if decorated with "
                                        "@builtin(front_facing)");
             });
         } else {
             WalkTypeAndMembers(var, ty, attr, [this](const auto* v, const auto* t, const auto&) {
-                CheckNotBool(v, t,
+                CheckNotBool(v->Result(), t,
                              "IO address space values referenced by shader entry points can "
                              "only be 'bool' if in the input space, used only by fragment "
                              "shaders and decorated with @builtin(front_facing)");
@@ -297,7 +297,7 @@ void Validator::CheckSubgroupSize(const Function* func) {
         return;
     }
 
-    if (subgroup_size->Is<core::ir::Constant>()) {
+    if (subgroup_size->Is<Constant>()) {
         return;
     }
 
@@ -318,7 +318,7 @@ void Validator::CheckSubgroupSize(const Function* func) {
             return;
         }
 
-        if (r->Instruction()->Is<core::ir::Override>()) {
+        if (r->Instruction()->Is<Override>()) {
             return;
         }
     }

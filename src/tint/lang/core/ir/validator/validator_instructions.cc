@@ -145,11 +145,11 @@ void Validator::CheckVar(const Var* var) {
                       << " must be a pointer or a reference";
         return;
     }
-    const core::ir::type::ValueArrayCount* count = nullptr;
+    const type::ValueArrayCount* count = nullptr;
     if (auto* ary = result_type->UnwrapPtr()->As<core::type::Array>()) {
-        count = ary->Count()->As<core::ir::type::ValueArrayCount>();
+        count = ary->Count()->As<type::ValueArrayCount>();
     } else if (auto* buf = result_type->UnwrapPtr()->As<core::type::Buffer>()) {
-        count = buf->Count()->As<core::ir::type::ValueArrayCount>();
+        count = buf->Count()->As<type::ValueArrayCount>();
     }
 
     if (count) {
@@ -164,18 +164,18 @@ void Validator::CheckVar(const Var* var) {
         }
     }
 
-    CheckBindingPoint(var, var->Result(0)->Type(), var->Attributes(),
+    CheckBindingPoint(var->Result(), var->Result(0)->Type(), var->Attributes(),
                       ShaderIOKind::kModuleScopeVar);
 
     auto address_space = mv->AddressSpace();
     if (address_space != AddressSpace::kIn && address_space != AddressSpace::kOut) {
-        CheckInterpolation(var, mv->StoreType(), var->Attributes(),
+        CheckInterpolation(var->Result(), mv->StoreType(), var->Attributes(),
                            Function::PipelineStage::kUndefined, IODirection::kResource);
     }
 
     if (var->Block() == ir_.root_block) {
         if (mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut) {
-            ValidateShaderIOAnnotations(var, var->Result()->Type(), var->BindingPoint(),
+            ValidateShaderIOAnnotations(var->Result(), var->Result()->Type(), var->BindingPoint(),
                                         var->Attributes(), ShaderIOKind::kModuleScopeVar);
         }
     }
@@ -245,7 +245,7 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
     }
     stage_restricted_instructions_.Add(call, stages);
 
-    const core::ir::CoreBuiltinCall* bc = call->As<CoreBuiltinCall>();
+    const CoreBuiltinCall* bc = call->As<CoreBuiltinCall>();
     if (bc == nullptr) {
         return;
     }
@@ -296,7 +296,7 @@ void Validator::CheckConvert(const Convert* convert) {
     CheckResultsAndOperands(convert, Convert::kNumResults, Convert::kNumOperands);
 }
 
-void Validator::CheckDiscard(const tint::core::ir::Discard* discard) {
+void Validator::CheckDiscard(const Discard* discard) {
     CheckResultsAndOperands(discard, Discard::kNumResults, Discard::kNumOperands);
 }
 
@@ -335,14 +335,14 @@ void Validator::CheckIf(const If* if_) {
     CheckResults(if_);
     CheckOperands(if_, If::kNumOperands);
 
-    if (if_->False() && if_->False()->Is<core::ir::MultiInBlock>()) {
+    if (if_->False() && if_->False()->Is<MultiInBlock>()) {
         AddError(if_) << "if false block must be a block";
     }
-    if (if_->True() && if_->True()->Is<core::ir::MultiInBlock>()) {
+    if (if_->True() && if_->True()->Is<MultiInBlock>()) {
         AddError(if_) << "if true block must be a block";
     }
 
-    if (auto* constexpr_if = if_->As<core::ir::ConstExprIf>()) {
+    if (auto* constexpr_if = if_->As<ConstExprIf>()) {
         if (constexpr_if->Results().Length() != 1) {
             AddError(constexpr_if) << "constexpr_if must have exactly one result";
         } else if (!constexpr_if->Result(0)->Type()->Is<core::type::Bool>()) {
@@ -351,12 +351,12 @@ void Validator::CheckIf(const If* if_) {
         if (constexpr_if->False()->IsEmpty()) {
             AddError(constexpr_if) << "constexpr_if must have a false block";
         } else if (!constexpr_if->False()->Terminator() ||
-                   !constexpr_if->False()->Terminator()->Is<core::ir::ExitIf>()) {
+                   !constexpr_if->False()->Terminator()->Is<ExitIf>()) {
             AddError(constexpr_if->False())
                 << "constexpr_if false block terminator must be an exit_if";
         }
         if (!constexpr_if->True()->Terminator() ||
-            !constexpr_if->True()->Terminator()->Is<core::ir::ExitIf>()) {
+            !constexpr_if->True()->Terminator()->Is<ExitIf>()) {
             AddError(constexpr_if->True())
                 << "constexpr_if true block terminator must be an exit_if";
         }
@@ -377,13 +377,13 @@ void Validator::CheckLoop(const Loop* l) {
     CheckResults(l);
     CheckOperands(l, 0);
 
-    if (l->Initializer()->Is<core::ir::MultiInBlock>()) {
+    if (l->Initializer()->Is<MultiInBlock>()) {
         AddError(l->Initializer()) << "loop initializer must be a block";
     }
 
     if (!l->Initializer()->IsEmpty()) {
         if (!l->Initializer()->Terminator() ||
-            !l->Initializer()->Terminator()->Is<core::ir::NextIteration>()) {
+            !l->Initializer()->Terminator()->Is<NextIteration>()) {
             AddError(l->Initializer()) << "loop initializer must have a NextIteration terminator";
         }
     }
@@ -435,7 +435,7 @@ void Validator::CheckSwitch(const Switch* s) {
                 if (cse.selectors.IsEmpty()) {
                     AddError(s) << "case does not have any selectors";
                 }
-                if (cse.block->Is<core::ir::MultiInBlock>()) {
+                if (cse.block->Is<MultiInBlock>()) {
                     AddError(s) << "case block must be a block";
                 }
                 QueueBlock(cse.block);

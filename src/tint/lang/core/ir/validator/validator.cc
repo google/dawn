@@ -88,19 +88,8 @@ diag::Diagnostic& Validator::AddError(const Instruction* inst, size_t idx) {
     return diag;
 }
 
-diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx) {
-    auto src =
-        Disassemble().ResultSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
-    auto& diag = AddError(src) << inst->FriendlyName() << ": ";
-
-    if (!block_stack_.IsEmpty()) {
-        AddNote(block_stack_.Back()) << "in block";
-
-        // Adding the note may trigger a resize and invalidate the error diagnostic reference, so we
-        // need to get a new reference to the error diagnostic here.
-        return *(diag_.end() - 2);
-    }
-    return diag;
+diag::Diagnostic& Validator::AddError(const InstructionResult* inst) {
+    return AddError(inst->Instruction());
 }
 
 diag::Diagnostic& Validator::AddError(const Block* blk) {
@@ -123,18 +112,38 @@ diag::Diagnostic& Validator::AddError(const FunctionParam* param) {
     return AddError(src);
 }
 
-diag::Diagnostic& Validator::AddError(const CastableBase* base) {
+diag::Diagnostic& Validator::AddError(const Value* param) {
     diag::Diagnostic* diag = nullptr;
     tint::Switch(
-        base,  //
-        [&](const Block* block) { diag = &AddError(block); },
-        [&](const BlockParam* param) { diag = &AddError(param); },
-        [&](const Function* fn) { diag = &AddError(fn); },
-        [&](const FunctionParam* param) { diag = &AddError(param); },
-        [&](const Instruction* inst) { diag = &AddError(inst); },
-        [&](const InstructionResult* res) { diag = &AddError(res); });
-    TINT_ASSERT(diag);
+        param,  //
+        [&](const InstructionResult* r) { diag = &AddError(r); },
+        [&](const Function* f) { diag = &AddError(f); },
+        [&](const FunctionParam* f) { diag = &AddError(f); },
+        [&](const BlockParam* b) { diag = &AddError(b); },  //
+        TINT_ICE_ON_NO_MATCH);
+    TINT_IR_ASSERT(ir_, diag);
     return *diag;
+}
+
+diag::Diagnostic& Validator::AddError(Source src) {
+    auto& diag = diag_.AddError(src);
+    diag.owned_file = Disassemble().File();
+    return diag;
+}
+
+diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx) {
+    auto src =
+        Disassemble().ResultSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
+    auto& diag = AddError(src) << inst->FriendlyName() << ": ";
+
+    if (!block_stack_.IsEmpty()) {
+        AddNote(block_stack_.Back()) << "in block";
+
+        // Adding the note may trigger a resize and invalidate the error diagnostic reference, so we
+        // need to get a new reference to the error diagnostic here.
+        return *(diag_.end() - 2);
+    }
+    return diag;
 }
 
 diag::Diagnostic& Validator::AddNote(const Instruction* inst) {
@@ -164,27 +173,10 @@ diag::Diagnostic& Validator::AddNote(const Block* blk) {
     return AddNote(src);
 }
 
-diag::Diagnostic& Validator::AddError(Source src) {
-    auto& diag = diag_.AddError(src);
-    diag.owned_file = Disassemble().File();
-    return diag;
-}
-
 diag::Diagnostic& Validator::AddNote(Source src) {
     auto& diag = diag_.AddNote(src);
     diag.owned_file = Disassemble().File();
     return diag;
-}
-
-void Validator::AddDeclarationNote(const CastableBase* decl) {
-    tint::Switch(
-        decl,  //
-        [&](const Block* block) { AddDeclarationNote(block); },
-        [&](const BlockParam* param) { AddDeclarationNote(param); },
-        [&](const Function* fn) { AddDeclarationNote(fn); },
-        [&](const FunctionParam* param) { AddDeclarationNote(param); },
-        [&](const Instruction* inst) { AddDeclarationNote(inst); },
-        [&](const InstructionResult* res) { AddDeclarationNote(res); });
 }
 
 void Validator::AddDeclarationNote(const Block* block) {
@@ -231,13 +223,13 @@ void Validator::AddDeclarationNote(const InstructionResult* res) {
     }
 }
 
-StyledText Validator::NameOf(const CastableBase* decl) {
-    return tint::Switch(
-        decl,  //
-        [&](const core::type::Type* ty) { return NameOf(ty); },
-        [&](const Value* value) { return NameOf(value); },
-        [&](const Instruction* inst) { return NameOf(inst); },
-        [&](const Block* block) { return NameOf(block); },  //
+void Validator::AddDeclarationNote(const Value* res) {
+    tint::Switch(
+        res,  //
+        [&](const InstructionResult* r) { AddDeclarationNote(r); },
+        [&](const Function* f) { AddDeclarationNote(f); },
+        [&](const FunctionParam* f) { AddDeclarationNote(f); },
+        [&](const BlockParam* b) { AddDeclarationNote(b); },  //
         TINT_ICE_ON_NO_MATCH);
 }
 
@@ -284,12 +276,12 @@ bool Validator::CheckResult(const Instruction* inst, size_t idx) {
         return false;
     }
 
-    if (!inst->Is<core::ir::Call>() && result->Type()->Is<core::type::Void>()) {
+    if (!inst->Is<Call>() && result->Type()->Is<core::type::Void>()) {
         AddResultError(inst, idx) << "result type cannot be void";
         return false;
     }
 
-    if (inst->Is<core::ir::ControlInstruction>()) {
+    if (inst->Is<ControlInstruction>()) {
         if (result->Type()->Is<core::type::Pointer>()) {
             AddResultError(inst, idx) << "result type cannot be a pointer";
             return false;
@@ -488,7 +480,37 @@ bool Validator::CheckOperands(const ir::Instruction* inst, std::optional<size_t>
 void Validator::CheckOperandsMatchTarget(const Instruction* source_inst,
                                          size_t source_operand_offset,
                                          size_t source_operand_count,
-                                         const CastableBase* target,
+                                         const MultiInBlock* target,
+                                         VectorRef<const Value*> target_values) {
+    if (source_operand_count != target_values.Length()) {
+        auto values = [&](size_t n) { return n == 1 ? " value" : " values"; };
+        AddError(source_inst) << "provides " << source_operand_count << values(source_operand_count)
+                              << " but " << NameOf(target) << " expects " << target_values.Length()
+                              << values(target_values.Length());
+        AddDeclarationNote(target);
+    }
+    size_t count = std::min(source_operand_count, target_values.Length());
+    for (size_t i = 0; i < count; i++) {
+        auto* source_value = source_inst->Operand(source_operand_offset + i);
+        auto* target_value = target_values[i];
+        if (!source_value || !target_value) {
+            continue;  // Caller should be checking operands are not null
+        }
+        auto* source_type = source_value->Type();
+        auto* target_type = target_value->Type();
+        if (source_type != target_type) {
+            AddError(source_inst, source_operand_offset + i)
+                << "operand with type " << NameOf(source_type) << " does not match "
+                << NameOf(target) << " target type " << NameOf(target_type);
+            AddDeclarationNote(target_value);
+        }
+    }
+}
+
+void Validator::CheckOperandsMatchTarget(const Instruction* source_inst,
+                                         size_t source_operand_offset,
+                                         size_t source_operand_count,
+                                         const ControlInstruction* target,
                                          VectorRef<const Value*> target_values) {
     if (source_operand_count != target_values.Length()) {
         auto values = [&](size_t n) { return n == 1 ? " value" : " values"; };
@@ -786,7 +808,7 @@ void Validator::CheckRootBlock(const Block* blk) {
     block_stack_.Push(blk);
     TINT_DEFER(block_stack_.Pop());
 
-    Hashset<const core::ir::Value*, 8> pipeline_evaluatable{};
+    Hashset<const Value*, 8> pipeline_evaluatable{};
 
     auto add_evaluatable = [&](const Instruction* inst, const bool is_creatable) {
         if (auto* res = inst->Result(0); res != nullptr && is_creatable) {
@@ -805,7 +827,7 @@ void Validator::CheckRootBlock(const Block* blk) {
             if (!op) {
                 continue;
             }
-            if (op->Is<core::ir::Constant>()) {
+            if (op->Is<Constant>()) {
                 continue;
             }
             if (pipeline_evaluatable.Contains(op)) {
@@ -821,7 +843,7 @@ void Validator::CheckRootBlock(const Block* blk) {
 
         tint::Switch(
             inst,  //
-            [&](const core::ir::Override* o) {
+            [&](const Override* o) {
                 if (ir_.properties.Contains(Property::kAllowOverrides)) {
                     CheckInstruction(o);
                     add_evaluatable(o, is_pipeline_creatable);
@@ -829,8 +851,8 @@ void Validator::CheckRootBlock(const Block* blk) {
                     AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
                 }
             },
-            [&](const core::ir::Var* var) { CheckInstruction(var); },
-            [&](const core::ir::Let* let) {
+            [&](const Var* var) { CheckInstruction(var); },
+            [&](const Let* let) {
                 if (ir_.properties.Contains(Property::kAllowModuleScopeLets)) {
                     CheckInstruction(let);
                     add_evaluatable(let, is_pipeline_creatable);
@@ -838,7 +860,7 @@ void Validator::CheckRootBlock(const Block* blk) {
                     AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
                 }
             },
-            [&](const core::ir::Construct* c) {
+            [&](const Construct* c) {
                 if (ir_.properties.Contains(Property::kAllowModuleScopeLets) ||
                     ir_.properties.Contains(Property::kAllowOverrides)) {
                     CheckInstruction(c);
@@ -853,9 +875,8 @@ void Validator::CheckRootBlock(const Block* blk) {
                 // are only certain expressions and builtins which can be used in an override, which
                 // currently isn't checked.
                 if (ir_.properties.Contains(Property::kAllowOverrides) &&
-                    inst->IsAnyOf<core::ir::Unary, core::ir::Binary, core::ir::BuiltinCall,
-                                  core::ir::Convert, core::ir::Swizzle, core::ir::Access,
-                                  core::ir::ConstExprIf>()) {
+                    inst->IsAnyOf<Unary, Binary, BuiltinCall, Convert, Swizzle, Access,
+                                  ConstExprIf>()) {
                     CheckInstruction(inst);
                     // If overrides are allowed we can have certain regular instructions in the root
                     // block, with the caveat that those instructions can _only_ be used in the root
