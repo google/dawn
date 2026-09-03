@@ -137,7 +137,6 @@ class Functional {
     void CheckRootBlock(const Block* blk);
     void CheckFunction(const Function* func);
     void CheckFunctionParam(const FunctionParam* param);
-    void CheckSubgroupSize(const Function* func);
     void CheckEntryPoint(const Function* func);
     void CheckPositionPresentForVertexOutput(const Function* ep);
     void CheckBlock(const Block* blk);

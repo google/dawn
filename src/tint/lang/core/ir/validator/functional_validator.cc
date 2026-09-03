@@ -421,7 +421,6 @@ void Functional::CheckFunction(const Function* func) {
     }
 
     CheckBlock(func->Block());
-    CheckSubgroupSize(func);
 }
 
 void Functional::CheckEntryPoint(const Function* func) {
@@ -1980,38 +1979,6 @@ void Functional::CheckReturn(const Return* ret) {
     } else if (ret->Value()->Type() != func->ReturnType()) {
         AddError(ret) << "return value type " << NameOf(ret->Value()->Type())
                       << " does not match function return type " << NameOf(func->ReturnType());
-    }
-}
-
-void Functional::CheckSubgroupSize(const Function* func) {
-    // @subgroup_size is optional
-    if (!func->SubgroupSize().has_value()) {
-        return;
-    }
-
-    if (!func->IsCompute()) {
-        AddError(func) << "@subgroup_size only valid on compute entry point";
-        return;
-    }
-
-    auto subgroup_size = func->SubgroupSize().value();
-    auto* ty = subgroup_size->Type();
-    if (!ty->IsAnyOf<core::type::I32, core::type::U32>()) {
-        AddError(func) << "@subgroup_size param must be an 'i32' or 'u32', received " << NameOf(ty);
-        return;
-    }
-
-    if (auto* c = subgroup_size->As<ir::Constant>()) {
-        auto value = c->Value()->ValueAs<int64_t>();
-        if (value <= 0) {
-            AddError(func) << "@subgroup_size param must be greater than 0";
-            return;
-        }
-
-        if (!IsPowerOfTwo<int64_t>(value)) {
-            AddError(func) << "@subgroup_size param must be a power of 2";
-            return;
-        }
     }
 }
 
