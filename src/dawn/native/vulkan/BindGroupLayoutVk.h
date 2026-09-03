@@ -38,17 +38,12 @@
 #include "src/dawn/common/vulkan_platform.h"
 #include "src/dawn/native/BindGroupLayoutInternal.h"
 #include "src/dawn/native/vulkan/BindGroupVk.h"
+#include "src/dawn/native/vulkan/DescriptorSetAllocator.h"
 #include "src/dawn/native/vulkan/SamplerVk.h"
 #include "src/utils/non_copyable.h"
 
-namespace dawn::native {
-class CacheKey;
-}  // namespace dawn::native
-
 namespace dawn::native::vulkan {
 
-struct DescriptorSetAllocation;
-class DescriptorSetAllocator;
 class Device;
 class OwnedDescriptorSet;
 
