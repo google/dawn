@@ -49,5 +49,5 @@ void main() {
   vec2 l_a_i_i = uintBitsToFloat(mix(v_13.xy, v_13.zw, bvec2((((v_12 & 15u) >> 2u) == 2u))));
   uint v_14 = (v_10 + v_11);
   uvec4 v_15 = v.inner[(v_14 / 16u)];
-  v_1.inner = (((uintBitsToFloat(v_15[((v_14 & 15u) >> 2u)]) + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
+  v_1.inner = (((uintBitsToFloat(v_15[((v_14 & 15u) >> 2u)]) + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x);
 }

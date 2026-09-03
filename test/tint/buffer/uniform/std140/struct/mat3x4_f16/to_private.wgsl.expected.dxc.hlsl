@@ -61,8 +61,8 @@ void f() {
   S v_19[4] = v_14(0u);
   p = v_19;
   S v_20 = v_9(256u);
-  p[1u] = v_20;
-  p[3u].m = v_1(264u);
-  p[1u].m[0u] = tint_bitcast_to_f16(u[1u].xy).ywxz;
+  p[int(1)] = v_20;
+  p[int(3)].m = v_1(264u);
+  p[int(1)].m[int(0)] = tint_bitcast_to_f16(u[1u].xy).ywxz;
 }
 

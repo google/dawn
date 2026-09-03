@@ -34,7 +34,7 @@ void f() {
   matrix<float16_t, 3, 4> t = transpose(v_1(64u));
   float16_t l = length(tint_bitcast_to_f16_1(u[0u].zw).xyz.zxy);
   float16_t a = abs(tint_bitcast_to_f16(u[0u].w).x);
-  float16_t v_12 = (t[0u].x + float16_t(l));
+  float16_t v_12 = (t[int(0)].x + float16_t(l));
   s.Store<float16_t>(0u, (v_12 + float16_t(a)));
 }
 

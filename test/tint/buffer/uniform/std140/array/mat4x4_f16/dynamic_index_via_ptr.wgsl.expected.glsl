@@ -62,5 +62,5 @@ void main() {
   f16vec4 l_a_i_i = tint_bitcast_to_16bit(mix(v_19.xy, v_19.zw, bvec2((((v_18 & 15u) >> 2u) == 2u))));
   uint v_20 = (v_16 + v_17);
   uvec4 v_21 = v.inner[(v_20 / 16u)];
-  v_1.inner = (((tint_bitcast_to_16bit_1(v_21[((v_20 & 15u) >> 2u)])[mix(1u, 0u, ((v_20 % 4u) == 0u))] + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
+  v_1.inner = (((tint_bitcast_to_16bit_1(v_21[((v_20 & 15u) >> 2u)])[mix(1u, 0u, ((v_20 % 4u) == 0u))] + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x);
 }

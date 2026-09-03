@@ -21,6 +21,6 @@ void x(inout S p) {
 [numthreads(1, 1, 1)]
 void f() {
   x(s);
-  result.Store(0u, asuint(s.data[3u]));
+  result.Store(0u, asuint(s.data[int(3)]));
 }
 

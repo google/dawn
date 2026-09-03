@@ -37,7 +37,7 @@ void f_inner(uint tint_local_index) {
   uvec4 v_4 = v.inner[0u];
   uint v_5 = min(uint(int(v_4.x)), 63u);
   s.data[v_5] = 1;
-  v_1.inner.member_0 = s.data[3u];
+  v_1.inner.member_0 = s.data[3];
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

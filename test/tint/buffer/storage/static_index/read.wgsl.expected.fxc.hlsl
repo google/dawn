@@ -128,15 +128,15 @@ void main() {
   int v_25 = asint((asuint(v_24) + asuint(int(vec3_u32.y))));
   int v_26 = asint((asuint(asint((asuint(v_25) + asuint(tint_f32_to_i32(vec4_f32.z))))) + asuint(vec4_i32.z)));
   int v_27 = asint((asuint(v_26) + asuint(int(vec4_u32.z))));
-  int v_28 = asint((asuint(v_27) + asuint(tint_f32_to_i32(mat2x2_f32[0u].x))));
-  int v_29 = asint((asuint(v_28) + asuint(tint_f32_to_i32(mat2x3_f32[0u].x))));
-  int v_30 = asint((asuint(v_29) + asuint(tint_f32_to_i32(mat2x4_f32[0u].x))));
-  int v_31 = asint((asuint(v_30) + asuint(tint_f32_to_i32(mat3x2_f32[0u].x))));
-  int v_32 = asint((asuint(v_31) + asuint(tint_f32_to_i32(mat3x3_f32[0u].x))));
-  int v_33 = asint((asuint(v_32) + asuint(tint_f32_to_i32(mat3x4_f32[0u].x))));
-  int v_34 = asint((asuint(v_33) + asuint(tint_f32_to_i32(mat4x2_f32[0u].x))));
-  int v_35 = asint((asuint(v_34) + asuint(tint_f32_to_i32(mat4x3_f32[0u].x))));
-  int v_36 = asint((asuint(v_35) + asuint(tint_f32_to_i32(mat4x4_f32[0u].x))));
-  s.Store(0u, asuint(asint((asuint(asint((asuint(asint((asuint(v_36) + asuint(tint_f32_to_i32(arr2_vec3_f32[0u].x))))) + asuint(struct_inner.scalar_i32)))) + asuint(array_struct_inner[0u].scalar_i32)))));
+  int v_28 = asint((asuint(v_27) + asuint(tint_f32_to_i32(mat2x2_f32[int(0)].x))));
+  int v_29 = asint((asuint(v_28) + asuint(tint_f32_to_i32(mat2x3_f32[int(0)].x))));
+  int v_30 = asint((asuint(v_29) + asuint(tint_f32_to_i32(mat2x4_f32[int(0)].x))));
+  int v_31 = asint((asuint(v_30) + asuint(tint_f32_to_i32(mat3x2_f32[int(0)].x))));
+  int v_32 = asint((asuint(v_31) + asuint(tint_f32_to_i32(mat3x3_f32[int(0)].x))));
+  int v_33 = asint((asuint(v_32) + asuint(tint_f32_to_i32(mat3x4_f32[int(0)].x))));
+  int v_34 = asint((asuint(v_33) + asuint(tint_f32_to_i32(mat4x2_f32[int(0)].x))));
+  int v_35 = asint((asuint(v_34) + asuint(tint_f32_to_i32(mat4x3_f32[int(0)].x))));
+  int v_36 = asint((asuint(v_35) + asuint(tint_f32_to_i32(mat4x4_f32[int(0)].x))));
+  s.Store(0u, asuint(asint((asuint(asint((asuint(asint((asuint(v_36) + asuint(tint_f32_to_i32(arr2_vec3_f32[int(0)].x))))) + asuint(struct_inner.scalar_i32)))) + asuint(array_struct_inner[int(0)].scalar_i32)))));
 }
 

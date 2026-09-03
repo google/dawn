@@ -58,8 +58,8 @@ void main_inner(uvec3 GlobalInvocationID) {
     lightsBuffer.lights[v_15].position.y = uintBitsToFloat(v_16.y);
   }
   mat4 M = v_3(96u);
-  float viewNear = (-(M[3u].z) / (-1.0f + M[2u].z));
-  float viewFar = (-(M[3u].z) / (1.0f + M[2u].z));
+  float viewNear = (-(M[3].z) / (-1.0f + M[2].z));
+  float viewFar = (-(M[3].z) / (1.0f + M[2].z));
   uint v_17 = index;
   uint v_18 = min(v_17, (uint(lightsBuffer.lights.length()) - 1u));
   vec4 lightPos = lightsBuffer.lights[v_18].position;
@@ -74,8 +74,8 @@ void main_inner(uvec3 GlobalInvocationID) {
   vec4 v_23 = lightPos;
   vec4 boxMax = (v_23 + vec4(vec3(lightRadius), 0.0f));
   vec4 frustumPlanes[6] = vec4[6](vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
-  frustumPlanes[4u] = vec4(0.0f, 0.0f, -1.0f, viewNear);
-  frustumPlanes[5u] = vec4(0.0f, 0.0f, 1.0f, -(viewFar));
+  frustumPlanes[4] = vec4(0.0f, 0.0f, -1.0f, viewNear);
+  frustumPlanes[5] = vec4(0.0f, 0.0f, 1.0f, -(viewFar));
   int TILE_SIZE = 16;
   int TILE_COUNT_X = 2;
   int TILE_COUNT_Y = 2;
@@ -112,12 +112,12 @@ void main_inner(uvec3 GlobalInvocationID) {
           uvec2 v_30 = uvec2(v_28);
           vec2 v_31 = (2.0f * vec2(ivec2((v_30 + uvec2(v_29)))));
           vec2 ceilCoord = ((v_31 / uintBitsToFloat(v_2.inner[10u]).xy) - vec2(1.0f));
-          vec2 viewFloorCoord = vec2((((-(viewNear) * floorCoord.x) - (M[2u].x * viewNear)) / M[0u].x), (((-(viewNear) * floorCoord.y) - (M[2u].y * viewNear)) / M[1u].y));
-          vec2 viewCeilCoord = vec2((((-(viewNear) * ceilCoord.x) - (M[2u].x * viewNear)) / M[0u].x), (((-(viewNear) * ceilCoord.y) - (M[2u].y * viewNear)) / M[1u].y));
-          frustumPlanes[0u] = vec4(1.0f, 0.0f, (-(viewFloorCoord.x) / viewNear), 0.0f);
-          frustumPlanes[1u] = vec4(-1.0f, 0.0f, (viewCeilCoord.x / viewNear), 0.0f);
-          frustumPlanes[2u] = vec4(0.0f, 1.0f, (-(viewFloorCoord.y) / viewNear), 0.0f);
-          frustumPlanes[3u] = vec4(0.0f, -1.0f, (viewCeilCoord.y / viewNear), 0.0f);
+          vec2 viewFloorCoord = vec2((((-(viewNear) * floorCoord.x) - (M[2].x * viewNear)) / M[0].x), (((-(viewNear) * floorCoord.y) - (M[2].y * viewNear)) / M[1].y));
+          vec2 viewCeilCoord = vec2((((-(viewNear) * ceilCoord.x) - (M[2].x * viewNear)) / M[0].x), (((-(viewNear) * ceilCoord.y) - (M[2].y * viewNear)) / M[1].y));
+          frustumPlanes[0] = vec4(1.0f, 0.0f, (-(viewFloorCoord.x) / viewNear), 0.0f);
+          frustumPlanes[1] = vec4(-1.0f, 0.0f, (viewCeilCoord.x / viewNear), 0.0f);
+          frustumPlanes[2] = vec4(0.0f, 1.0f, (-(viewFloorCoord.y) / viewNear), 0.0f);
+          frustumPlanes[3] = vec4(0.0f, -1.0f, (viewCeilCoord.y / viewNear), 0.0f);
           float dp = 0.0f;
           {
             uint i = 0u;

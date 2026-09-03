@@ -11,8 +11,8 @@ mat2x3 v_1(uint start_byte_offset) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   p = v_1(0u);
-  p[1u] = uintBitsToFloat(v.inner[0u].xyz);
-  p[1u] = uintBitsToFloat(v.inner[0u].xyz).zxy;
+  p[1] = uintBitsToFloat(v.inner[0u].xyz);
+  p[1] = uintBitsToFloat(v.inner[0u].xyz).zxy;
   uvec4 v_2 = v.inner[1u];
-  p[0u].y = uintBitsToFloat(v_2.x);
+  p[0].y = uintBitsToFloat(v_2.x);
 }

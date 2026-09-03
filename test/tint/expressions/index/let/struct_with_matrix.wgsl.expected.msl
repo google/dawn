@@ -8,7 +8,7 @@ struct S {
 
 float f() {
   S const a = S{};
-  return a.n[2u].y;
+  return a.n[2].y;
 }
 
 [[max_total_threads_per_threadgroup(1)]]

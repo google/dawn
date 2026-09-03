@@ -5,7 +5,7 @@
 RWByteAddressBuffer prevent_dce : register(u0);
 int transpose_d6faec() {
   matrix<float16_t, 3, 2> res = matrix<float16_t, 3, 2>((float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx);
-  return select((res[0u].x == float16_t(0.0h)), int(1), int(0));
+  return select((res[int(0)].x == float16_t(0.0h)), int(1), int(0));
 }
 
 void fragment_main() {
@@ -19,7 +19,7 @@ void fragment_main() {
 RWByteAddressBuffer prevent_dce : register(u0);
 int transpose_d6faec() {
   matrix<float16_t, 3, 2> res = matrix<float16_t, 3, 2>((float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx);
-  return select((res[0u].x == float16_t(0.0h)), int(1), int(0));
+  return select((res[int(0)].x == float16_t(0.0h)), int(1), int(0));
 }
 
 [numthreads(1, 1, 1)]
@@ -43,7 +43,7 @@ struct vertex_main_outputs {
 
 int transpose_d6faec() {
   matrix<float16_t, 3, 2> res = matrix<float16_t, 3, 2>((float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx);
-  return select((res[0u].x == float16_t(0.0h)), int(1), int(0));
+  return select((res[int(0)].x == float16_t(0.0h)), int(1), int(0));
 }
 
 VertexOutput vertex_main_inner() {

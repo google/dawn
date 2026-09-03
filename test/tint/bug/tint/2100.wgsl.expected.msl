@@ -32,7 +32,7 @@ struct main_outputs {
 };
 
 float4 main_inner(tint_module_vars_struct tint_module_vars) {
-  float const x = (*tint_module_vars.tint_member).matrix_view[0u].z;
+  float const x = (*tint_module_vars.tint_member).matrix_view[0].z;
   return float4(x, 0.0f, 0.0f, 1.0f);
 }
 

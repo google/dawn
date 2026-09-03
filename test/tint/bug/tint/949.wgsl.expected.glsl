@@ -96,11 +96,11 @@ mat3 transposeMat3_mf33_(inout mat3 inMatrix) {
   vec3 i1 = vec3(0.0f);
   vec3 i2 = vec3(0.0f);
   mat3 outMatrix = mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f));
-  vec3 x_60 = inMatrix[0u];
+  vec3 x_60 = inMatrix[0];
   i0 = x_60;
-  vec3 x_64 = inMatrix[1u];
+  vec3 x_64 = inMatrix[1];
   i1 = x_64;
-  vec3 x_68 = inMatrix[2u];
+  vec3 x_68 = inMatrix[2];
   i2 = x_68;
   float x_73 = i0.x;
   float x_75 = i1.x;

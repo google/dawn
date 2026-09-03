@@ -101,6 +101,6 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_store_and_preserve_padding(v_21(0u));
   tint_store_and_preserve_padding_1(uint[1](1u), v_13(256u));
-  v_1.inner[3u].m = v_2(264u);
-  v_1.inner[1u].m[0u] = tint_bitcast_to_16bit(v.inner[1u].xy).ywxz;
+  v_1.inner[3].m = v_2(264u);
+  v_1.inner[1].m[0] = tint_bitcast_to_16bit(v.inner[1u].xy).ywxz;
 }

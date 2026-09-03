@@ -141,16 +141,16 @@ void main_inner(uint idx) {
   int v_40 = asint((asuint(v_39) + asuint(int(vec3_u32.y))));
   int v_41 = asint((asuint(asint((asuint(v_40) + asuint(tint_f32_to_i32(vec4_f32.z))))) + asuint(vec4_i32.z)));
   int v_42 = asint((asuint(v_41) + asuint(int(vec4_u32.z))));
-  int v_43 = asint((asuint(v_42) + asuint(tint_f32_to_i32(mat2x2_f32[0u].x))));
-  int v_44 = asint((asuint(v_43) + asuint(tint_f32_to_i32(mat2x3_f32[0u].x))));
-  int v_45 = asint((asuint(v_44) + asuint(tint_f32_to_i32(mat2x4_f32[0u].x))));
-  int v_46 = asint((asuint(v_45) + asuint(tint_f32_to_i32(mat3x2_f32[0u].x))));
-  int v_47 = asint((asuint(v_46) + asuint(tint_f32_to_i32(mat3x3_f32[0u].x))));
-  int v_48 = asint((asuint(v_47) + asuint(tint_f32_to_i32(mat3x4_f32[0u].x))));
-  int v_49 = asint((asuint(v_48) + asuint(tint_f32_to_i32(mat4x2_f32[0u].x))));
-  int v_50 = asint((asuint(v_49) + asuint(tint_f32_to_i32(mat4x3_f32[0u].x))));
-  int v_51 = asint((asuint(v_50) + asuint(tint_f32_to_i32(mat4x4_f32[0u].x))));
-  s.Store(0u, asuint(asint((asuint(v_51) + asuint(tint_f32_to_i32(arr2_vec3_f32[0u].x))))));
+  int v_43 = asint((asuint(v_42) + asuint(tint_f32_to_i32(mat2x2_f32[int(0)].x))));
+  int v_44 = asint((asuint(v_43) + asuint(tint_f32_to_i32(mat2x3_f32[int(0)].x))));
+  int v_45 = asint((asuint(v_44) + asuint(tint_f32_to_i32(mat2x4_f32[int(0)].x))));
+  int v_46 = asint((asuint(v_45) + asuint(tint_f32_to_i32(mat3x2_f32[int(0)].x))));
+  int v_47 = asint((asuint(v_46) + asuint(tint_f32_to_i32(mat3x3_f32[int(0)].x))));
+  int v_48 = asint((asuint(v_47) + asuint(tint_f32_to_i32(mat3x4_f32[int(0)].x))));
+  int v_49 = asint((asuint(v_48) + asuint(tint_f32_to_i32(mat4x2_f32[int(0)].x))));
+  int v_50 = asint((asuint(v_49) + asuint(tint_f32_to_i32(mat4x3_f32[int(0)].x))));
+  int v_51 = asint((asuint(v_50) + asuint(tint_f32_to_i32(mat4x4_f32[int(0)].x))));
+  s.Store(0u, asuint(asint((asuint(v_51) + asuint(tint_f32_to_i32(arr2_vec3_f32[int(0)].x))))));
 }
 
 [numthreads(1, 1, 1)]

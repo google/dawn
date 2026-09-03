@@ -10,7 +10,7 @@ struct tint_module_vars_struct {
 
 int transpose_5edd96() {
   half2x4 res = half2x4(half4(1.0h), half4(1.0h));
-  return select(0, 1, (res[0u].x == 0.0h));
+  return select(0, 1, (res[0].x == 0.0h));
 }
 
 fragment void fragment_main(device int* prevent_dce [[buffer(0)]]) {
@@ -29,7 +29,7 @@ struct tint_module_vars_struct {
 
 int transpose_5edd96() {
   half2x4 res = half2x4(half4(1.0h), half4(1.0h));
-  return select(0, 1, (res[0u].x == 0.0h));
+  return select(0, 1, (res[0].x == 0.0h));
 }
 
 [[max_total_threads_per_threadgroup(1)]]
@@ -55,7 +55,7 @@ struct vertex_main_outputs {
 
 int transpose_5edd96() {
   half2x4 res = half2x4(half4(1.0h), half4(1.0h));
-  return select(0, 1, (res[0u].x == 0.0h));
+  return select(0, 1, (res[0].x == 0.0h));
 }
 
 VertexOutput vertex_main_inner() {

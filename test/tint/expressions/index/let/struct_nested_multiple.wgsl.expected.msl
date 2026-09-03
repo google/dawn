@@ -24,7 +24,7 @@ struct S {
 
 uint f() {
   S const a = S{};
-  return a.n[2u].k[1u];
+  return a.n[2].k[1];
 }
 
 [[max_total_threads_per_threadgroup(1)]]

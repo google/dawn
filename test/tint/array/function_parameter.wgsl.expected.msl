@@ -18,15 +18,15 @@ struct tint_module_vars_struct {
 };
 
 float f1(tint_array<float, 4> a) {
-  return a[3u];
+  return a[3];
 }
 
 float f2(tint_array<tint_array<float, 4>, 3> a) {
-  return a[2u][3u];
+  return a[2][3];
 }
 
 float f3(tint_array<tint_array<tint_array<float, 4>, 3>, 2> a) {
-  return a[1u][2u][3u];
+  return a[1][2][3];
 }
 
 [[max_total_threads_per_threadgroup(1)]]

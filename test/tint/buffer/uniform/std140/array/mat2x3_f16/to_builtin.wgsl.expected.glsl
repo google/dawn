@@ -29,5 +29,5 @@ void main() {
   uvec4 v_7 = v.inner[0u];
   float16_t a = abs(tint_bitcast_to_16bit(v_7.w).x);
   float16_t v_8 = float16_t(a);
-  v_1.inner = ((v_8 + float16_t(l)) + t[0u].x);
+  v_1.inner = ((v_8 + float16_t(l)) + t[0].x);
 }

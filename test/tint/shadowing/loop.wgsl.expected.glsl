@@ -29,5 +29,5 @@ void main() {
       }
     }
   }
-  v.inner[0u] = i;
+  v.inner[0] = i;
 }

@@ -45,5 +45,5 @@ void main() {
   f16mat4x2 l_a_i = v_2(32u);
   f16vec2 l_a_i_i = tint_bitcast_to_16bit(v.inner[2u].y);
   uvec4 v_12 = v.inner[2u];
-  v_1.inner = (((tint_bitcast_to_16bit(v_12.y).x + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
+  v_1.inner = (((tint_bitcast_to_16bit(v_12.y).x + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x);
 }

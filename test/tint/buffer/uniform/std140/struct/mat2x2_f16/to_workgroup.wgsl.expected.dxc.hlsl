@@ -75,9 +75,9 @@ void f_inner(uint tint_local_index) {
   S v_17[4] = v_9(0u);
   w = v_17;
   S v_18 = v_4(256u);
-  w[1u] = v_18;
-  w[3u].m = v_1(260u);
-  w[1u].m[0u] = tint_bitcast_to_f16(u[0u].z).yx;
+  w[int(1)] = v_18;
+  w[int(3)].m = v_1(260u);
+  w[int(1)].m[int(0)] = tint_bitcast_to_f16(u[0u].z).yx;
 }
 
 [numthreads(1, 1, 1)]

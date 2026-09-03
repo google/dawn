@@ -48,9 +48,9 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   }
   (threadgroup_barrier(mem_flags::mem_threadgroup));
   (*tint_module_vars.w) = (*tint_module_vars.u);
-  (*tint_module_vars.w)[1u] = (*tint_module_vars.u)[2u];
-  (*tint_module_vars.w)[3u].m = (*tint_module_vars.u)[2u].m;
-  (*tint_module_vars.w)[1u].m[0u] = (*tint_module_vars.u)[0u].m[1u].ywxz;
+  (*tint_module_vars.w)[1] = (*tint_module_vars.u)[2];
+  (*tint_module_vars.w)[3].m = (*tint_module_vars.u)[2].m;
+  (*tint_module_vars.w)[1].m[0] = (*tint_module_vars.u)[0].m[1].ywxz;
 }
 
 [[max_total_threads_per_threadgroup(1)]]

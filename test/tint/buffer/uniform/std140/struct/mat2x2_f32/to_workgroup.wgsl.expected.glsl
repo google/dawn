@@ -62,9 +62,9 @@ void f_inner(uint tint_local_index) {
   }
   barrier();
   w = v_12(0u);
-  w[1u] = v_6(256u);
-  w[3u].m = v_1(264u);
-  w[1u].m[0u] = uintBitsToFloat(v.inner[1u].xy).yx;
+  w[1] = v_6(256u);
+  w[3].m = v_1(264u);
+  w[1].m[0] = uintBitsToFloat(v.inner[1u].xy).yx;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

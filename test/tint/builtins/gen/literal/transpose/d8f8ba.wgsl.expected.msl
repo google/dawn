@@ -10,7 +10,7 @@ struct tint_module_vars_struct {
 
 int transpose_d8f8ba() {
   float4x3 res = float4x3(float3(1.0f), float3(1.0f), float3(1.0f), float3(1.0f));
-  return select(0, 1, (res[0u].x == 0.0f));
+  return select(0, 1, (res[0].x == 0.0f));
 }
 
 fragment void fragment_main(device int* prevent_dce [[buffer(0)]]) {
@@ -29,7 +29,7 @@ struct tint_module_vars_struct {
 
 int transpose_d8f8ba() {
   float4x3 res = float4x3(float3(1.0f), float3(1.0f), float3(1.0f), float3(1.0f));
-  return select(0, 1, (res[0u].x == 0.0f));
+  return select(0, 1, (res[0].x == 0.0f));
 }
 
 [[max_total_threads_per_threadgroup(1)]]
@@ -55,7 +55,7 @@ struct vertex_main_outputs {
 
 int transpose_d8f8ba() {
   float4x3 res = float4x3(float3(1.0f), float3(1.0f), float3(1.0f), float3(1.0f));
-  return select(0, 1, (res[0u].x == 0.0f));
+  return select(0, 1, (res[0].x == 0.0f));
 }
 
 VertexOutput vertex_main_inner() {

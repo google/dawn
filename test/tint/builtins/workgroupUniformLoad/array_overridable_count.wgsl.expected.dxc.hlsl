@@ -6,7 +6,7 @@ struct main_inputs {
 groupshared int v[128];
 int foo() {
   GroupMemoryBarrierWithGroupSync();
-  int v_1 = v[0u];
+  int v_1 = v[int(0)];
   GroupMemoryBarrierWithGroupSync();
   return v_1;
 }

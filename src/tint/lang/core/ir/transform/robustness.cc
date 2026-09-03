@@ -220,15 +220,9 @@ struct State {
     /// @param limit the limit to clamp to
     void ClampOperand(ir::Instruction* inst, size_t op_idx, ir::Value* limit) {
         auto* idx = inst->Operands()[op_idx];
-        auto* const_idx = idx->As<ir::Constant>();
-        auto* const_limit = limit->As<ir::Constant>();
 
         ir::Value* clamped_idx = nullptr;
-        if (const_idx && const_limit) {
-            TINT_IR_ASSERT(ir, const_idx->Value()->ValueAs<uint32_t>() <=
-                                   const_limit->Value()->ValueAs<uint32_t>());
-            clamped_idx = b.Constant(u32(const_idx->Value()->ValueAs<uint32_t>()));
-        } else if (IndexMayOutOfBound(idx, limit)) {
+        if (IndexMayOutOfBound(idx, limit)) {
             // Clamp it to the dynamic limit.
             clamped_idx = b.Min(CastToU32(idx), limit);
         }
@@ -469,16 +463,8 @@ struct State {
         // Offset and stride are counted in array stride.
         // Note: max comes from situations like 8x8 u8 accessed from an array of vec4u.
         min_stride = std::max(min_stride * matrix_ty->Type()->Size() / arr_stride, 1u);
-
-        // Increase the stride so that it is at least `min_stride` if necessary.
-        if (auto* const_stride = stride->As<Constant>()) {
-            if (const_stride->Value()->ValueAs<uint32_t>() < min_stride) {
-                stride = b.Constant(u32(min_stride));
-            }
-        } else {
-            stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-            stride = b.Max(stride, u32(min_stride));
-        }
+        stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
+        stride = b.Max(stride, u32(min_stride));
         call->SetArg(stride_index, stride);
 
         // If we are not doing full clamping, then clamping the stride is all we need to do.
@@ -497,18 +483,6 @@ struct State {
         } else {
             TINT_IR_ASSERT(ir, arr_ty->Count()->Is<core::type::RuntimeArrayCount>());
             array_length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, arr);
-        }
-
-        // If the array length, offset, and stride are all constants, then we can determine if the
-        // call is in bounds now and skip any predication if so.
-        if (array_length->Is<Constant>() && stride->Is<Constant>() && offset->Is<Constant>()) {
-            uint64_t const_length = array_length->As<Constant>()->Value()->ValueAs<uint64_t>();
-            uint64_t const_stride = stride->As<Constant>()->Value()->ValueAs<uint64_t>();
-            uint64_t const_offset = offset->As<Constant>()->Value()->ValueAs<uint64_t>();
-            uint64_t const_end = const_offset + (const_stride * (major_dim - 1)) + min_stride;
-            if (const_end <= const_length) {
-                return;
-            }
         }
 
         // Binding size is guaranteed to hold enough for `min_stride` matrix. So check if the
@@ -623,7 +597,6 @@ struct State {
         }
 
         b.InsertBefore(call, [&] {
-            uint32_t required_size = 0;
             auto* offset = call->Args()[1];
             auto* size = call->Func() == BuiltinFn::kBufferArrayView ? call->Args()[2] : nullptr;
             // If the length arg exists, use it. Otherwise, insert a bufferLength call.
@@ -636,79 +609,21 @@ struct State {
                 length = b.Call(ty.u32(), BuiltinFn::kBufferLength, call->Args()[0]);
             }
 
-            // Handle constant arguments.
-            bool const_offset = false;
-            bool const_size = false;
-            if (auto* offset_cnst = offset->As<Constant>()) {
-                uint32_t offset_val = offset_cnst->Value()->ValueAs<uint32_t>();
-                required_size += offset_val;
-                const_offset = true;
-                if (!offset->Type()->Is<core::type::U32>()) {
-                    offset = b.Constant(u32(offset_val));
-                }
-            }
+            offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
+            Value* total_required_size = offset;
             if (size) {
-                if (auto* size_cnst = size->As<Constant>()) {
-                    auto size_val = size_cnst->Value()->ValueAs<uint32_t>();
-                    required_size += size_val;
-                    const_size = true;
-                    if (!size->Type()->Is<core::type::U32>()) {
-                        size = b.Constant(u32(size_val));
-                    }
-                }
-            } else {
-                required_size += ty_required_size;
-            }
-
-            Value* total_required_size =
-                required_size == 0 ? nullptr : b.Constant(u32(required_size));
-            if (!const_offset) {
-                offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
-                if (total_required_size) {
-                    total_required_size =
-                        b.Call(ty.u32(), BuiltinFn::kAddSat, total_required_size, offset);
-                } else {
-                    TINT_IR_ASSERT(ir, size && !const_size);
-                    total_required_size = offset;
-                }
-            }
-            if (size && !const_size) {
-                // Use the larger of the size arg or the type required size.
-                // PropagateBufferSizes performed a round down on the argument which may have
-                // resulted in a 0 length array.
                 size = b.InsertBitcastIfNeeded(ty.u32(), size);
-                size = b.Call(ty.u32(), BuiltinFn::kMax, size, b.Constant(u32(ty_required_size)));
-                if (total_required_size) {
-                    total_required_size =
-                        b.Call(ty.u32(), BuiltinFn::kAddSat, total_required_size, size);
-                } else {
-                    // offset must have been 0.
-                    TINT_IR_ASSERT(ir, offset && const_offset);
-                    total_required_size = size;
-                }
+                size = b.Call(ty.u32(), BuiltinFn::kMax, size, u32(ty_required_size));
+                total_required_size =
+                    b.Call(ty.u32(), BuiltinFn::kAddSat, total_required_size, size);
+            } else {
+                total_required_size = b.Call(ty.u32(), BuiltinFn::kAddSat, total_required_size,
+                                             u32(ty_required_size));
             }
 
             // Now check if length < total_required_size
             // If true, this is an invalid memory view and we will try to patch it safely.
             // If false, use the args as is.
-            //
-            // In the bad case we have the liberty to generate anything safe.
-            // So just use offset = 0 and size = required_size.
-            // This will generate at least one element in the runtime array.
-            // This should be always safe as minimum binding sizes ought to be based on these values
-            // via inspection.
-            // TODO(github.com/gpuweb/issues/5410): If this resolution changes we may need to
-            // introduce predication instead of clamping.
-            if (length->Is<Constant>() && total_required_size->Is<Constant>()) {
-                bool cmp = length->As<Constant>()->Value()->ValueAs<uint32_t>() <
-                           total_required_size->As<Constant>()->Value()->ValueAs<uint32_t>();
-                call->SetArg(1, (cmp ? b.Constant(0_u) : offset));
-                if (size) {
-                    call->SetArg(2, (cmp ? b.Constant(u32(ty_required_size)) : size));
-                }
-                return;
-            }
-
             auto* len_less_than = b.LessThan(length, total_required_size);
             auto* offset_select = b.Call(ty.u32(), BuiltinFn::kSelect, offset, 0_u, len_less_than);
             call->SetArg(1, offset_select);

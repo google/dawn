@@ -38,9 +38,9 @@ kernel void v(device tint_array<float, 1>* v_1 [[buffer(0)]], const constant tin
   bool const v_3 = (456u <= v_2.tint_array_length_0_0);
   (simdgroup_store(make_filled_simdgroup_matrix<float, 8, 8>(0.0f), (&(*tint_module_vars.tint_member)[select(0u, 0u, v_3)]), ulong(select(8u, 64u, v_3)), ulong2(0ul), false));
   bool const v_4 = (456u <= v_2.tint_array_length_0_0);
-  (simdgroup_store(tint_array<simdgroup_float8x8, 4>{}[1u], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_4)]), ulong(select(8u, 64u, v_4)), ulong2(0ul), false));
+  (simdgroup_store(tint_array<simdgroup_float8x8, 4>{}[1], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_4)]), ulong(select(8u, 64u, v_4)), ulong2(0ul), false));
   bool const v_5 = (456u <= v_2.tint_array_length_0_0);
-  (simdgroup_store(tint_array<tint_array<simdgroup_float8x8, 4>, 4>{}[2u][3u], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_5)]), ulong(select(8u, 64u, v_5)), ulong2(0ul), false));
+  (simdgroup_store(tint_array<tint_array<simdgroup_float8x8, 4>, 4>{}[2][3], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_5)]), ulong(select(8u, 64u, v_5)), ulong2(0ul), false));
   bool const v_6 = (456u <= v_2.tint_array_length_0_0);
   (simdgroup_store(S{}.l, (&(*tint_module_vars.tint_member)[select(0u, 0u, v_6)]), ulong(select(8u, 64u, v_6)), ulong2(0ul), false));
   bool const v_7 = (456u <= v_2.tint_array_length_0_0);
@@ -48,10 +48,10 @@ kernel void v(device tint_array<float, 1>* v_1 [[buffer(0)]], const constant tin
   bool const v_8 = (456u <= v_2.tint_array_length_0_0);
   (simdgroup_store(make_filled_simdgroup_matrix<float, 8, 8>(42.0f), (&(*tint_module_vars.tint_member)[select(0u, 0u, v_8)]), ulong(select(8u, 64u, v_8)), ulong2(0ul), false));
   bool const v_9 = (456u <= v_2.tint_array_length_0_0);
-  (simdgroup_store(tint_array<simdgroup_float8x8, 2>{make_filled_simdgroup_matrix<float, 8, 8>(42.0f), make_filled_simdgroup_matrix<float, 8, 8>(100.0f)}[1u], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_9)]), ulong(select(8u, 64u, v_9)), ulong2(0ul), false));
+  (simdgroup_store(tint_array<simdgroup_float8x8, 2>{make_filled_simdgroup_matrix<float, 8, 8>(42.0f), make_filled_simdgroup_matrix<float, 8, 8>(100.0f)}[1], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_9)]), ulong(select(8u, 64u, v_9)), ulong2(0ul), false));
   tint_array<simdgroup_float8x8, 2> const v_10 = tint_array<simdgroup_float8x8, 2>{make_filled_simdgroup_matrix<float, 8, 8>(42.0f), make_filled_simdgroup_matrix<float, 8, 8>(100.0f)};
   bool const v_11 = (456u <= v_2.tint_array_length_0_0);
-  (simdgroup_store(tint_array<tint_array<simdgroup_float8x8, 2>, 2>{v_10, tint_array<simdgroup_float8x8, 2>{make_filled_simdgroup_matrix<float, 8, 8>(-7.0f), make_filled_simdgroup_matrix<float, 8, 8>(-42.0f)}}[1u][0u], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_11)]), ulong(select(8u, 64u, v_11)), ulong2(0ul), false));
+  (simdgroup_store(tint_array<tint_array<simdgroup_float8x8, 2>, 2>{v_10, tint_array<simdgroup_float8x8, 2>{make_filled_simdgroup_matrix<float, 8, 8>(-7.0f), make_filled_simdgroup_matrix<float, 8, 8>(-42.0f)}}[1][0], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_11)]), ulong(select(8u, 64u, v_11)), ulong2(0ul), false));
   bool const v_12 = (456u <= v_2.tint_array_length_0_0);
   (simdgroup_store(S{.l=make_filled_simdgroup_matrix<float, 8, 8>(42.0f), .r=make_filled_simdgroup_matrix<float, 8, 8>(100.0f)}.l, (&(*tint_module_vars.tint_member)[select(0u, 0u, v_12)]), ulong(select(8u, 64u, v_12)), ulong2(0ul), false));
   bool const v_13 = (456u <= v_2.tint_array_length_0_0);

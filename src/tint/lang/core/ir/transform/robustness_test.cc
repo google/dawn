@@ -6602,7 +6602,7 @@ S = struct @align(16) {
   $B1: {
     %4:u32 = bufferLength %p
     %5:u32 = bitcast<u32> %o
-    %6:u32 = addSat 20u, %5
+    %6:u32 = addSat %5, 20u
     %7:bool = lt %4, %6
     %8:u32 = select %5, 0u, %7
     %9:ptr<workgroup, S, read_write> = bufferView<S> %p, %8
@@ -6715,7 +6715,7 @@ S = struct @align(16) {
 %foo = func(%p:ptr<storage, buffer, read_write>, %o:i32):void {
   $B1: {
     %4:u32 = bitcast<u32> %o
-    %5:u32 = addSat 20u, %4
+    %5:u32 = addSat %4, 20u
     %6:bool = lt 64u, %5
     %7:u32 = select %4, 0u, %6
     %8:ptr<storage, S, read_write> = bufferView<S> %p, %7, 64u
@@ -7059,7 +7059,7 @@ S = struct @align(8) {
   $B1: {
     %4:u32 = bufferLength %p
     %5:u32 = bitcast<u32> %o
-    %6:u32 = addSat 64u, %5
+    %6:u32 = addSat %5, 64u
     %7:bool = lt %4, %6
     %8:u32 = select %5, 0u, %7
     %9:u32 = select 64u, 32u, %7

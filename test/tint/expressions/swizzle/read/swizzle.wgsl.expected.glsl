@@ -11,5 +11,5 @@ void main() {
   int b = a_1.x;
   ivec4 c = a_1.zzyy;
   S d = S(vec3[3](vec3(0.0f), vec3(0.0f), vec3(0.0f)));
-  vec3 e = d.val[2u].yzx;
+  vec3 e = d.val[2].yzx;
 }

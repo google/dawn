@@ -20,7 +20,7 @@ struct S {
 
 uint f() {
   S a = S{};
-  return a.n[2u];
+  return a.n[2];
 }
 
 [[max_total_threads_per_threadgroup(1)]]

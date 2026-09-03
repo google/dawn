@@ -136,11 +136,11 @@ float3x3 transposeMat3_mf33_(thread float3x3* const inMatrix) {
   float3 i1 = 0.0f;
   float3 i2 = 0.0f;
   float3x3 outMatrix = float3x3(0.0f);
-  float3 const x_60 = (*inMatrix)[0u];
+  float3 const x_60 = (*inMatrix)[0];
   i0 = x_60;
-  float3 const x_64 = (*inMatrix)[1u];
+  float3 const x_64 = (*inMatrix)[1];
   i1 = x_64;
-  float3 const x_68 = (*inMatrix)[2u];
+  float3 const x_68 = (*inMatrix)[2];
   i2 = x_68;
   float const x_73 = i0.x;
   float const x_75 = i1.x;

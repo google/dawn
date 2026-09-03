@@ -49,6 +49,6 @@ void f() {
   matrix<float16_t, 2, 4> l_a[4] = v_6(0u);
   matrix<float16_t, 2, 4> l_a_i = v_1(32u);
   vector<float16_t, 4> l_a_i_i = tint_bitcast_to_f16(a[2u].zw);
-  s.Store<float16_t>(0u, (((tint_bitcast_to_f16_1(a[2u].z).x + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x));
+  s.Store<float16_t>(0u, (((tint_bitcast_to_f16_1(a[2u].z).x + l_a[int(0)][int(0)].x) + l_a_i[int(0)].x) + l_a_i_i.x));
 }
 

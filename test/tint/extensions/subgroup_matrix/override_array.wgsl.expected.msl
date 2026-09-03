@@ -48,10 +48,10 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   simdgroup_float8x8 v_4 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
   (simdgroup_load(v_4, (&(*tint_module_vars.s_var)[select(0u, 0u, v_3)]), ulong(select(8u, 8u, v_3)), ulong2(0ul), false));
   simdgroup_float8x8 const m = v_4;
-  (simdgroup_store(m, (&(*tint_module_vars.wg_var)[0]), ulong(8u), ulong2(0ul), false));
+  (simdgroup_store(m, (&(*tint_module_vars.wg_var)[0u]), ulong(8u), ulong2(0ul), false));
   (threadgroup_barrier(mem_flags::mem_threadgroup));
   simdgroup_float8x8 v_5 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  (simdgroup_load(v_5, (&(*tint_module_vars.wg_var)[0]), ulong(8u), ulong2(0ul), true));
+  (simdgroup_load(v_5, (&(*tint_module_vars.wg_var)[0u]), ulong(8u), ulong2(0ul), true));
   simdgroup_float8x8 const m2 = v_5;
   bool const v_6 = (64u <= v_2.tint_array_length_0_0);
   (simdgroup_store(m2, (&(*tint_module_vars.s_var)[select(0u, 0u, v_6)]), ulong(select(8u, 8u, v_6)), ulong2(0ul), true));

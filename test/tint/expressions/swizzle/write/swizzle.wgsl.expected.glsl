@@ -11,5 +11,5 @@ void main() {
   a_1.x = 1;
   a_1.z = 2;
   S d = S(vec3[3](vec3(0.0f), vec3(0.0f), vec3(0.0f)));
-  d.val[2u].y = 3.0f;
+  d.val[2].y = 3.0f;
 }

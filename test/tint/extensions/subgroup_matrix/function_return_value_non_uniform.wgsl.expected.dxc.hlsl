@@ -103,13 +103,13 @@ void main_inner(uint idx) {
   bool v_29 = (456u <= (v_28 / 4u));
   v_27.Store(buffer, (0u + (select(v_29, 0u, 0u) * 4u)), (select(v_29, 64u, 8u) * 4u), MatrixLayout::RowMajor);
   Matrix_left_f32_8x8 v_30[2] = make_array();
-  Matrix_left_f32_8x8 v_31 = v_30[0u];
+  Matrix_left_f32_8x8 v_31 = v_30[int(0)];
   uint v_32 = 0u;
   buffer.GetDimensions(v_32);
   bool v_33 = (456u <= (v_32 / 4u));
   v_31.Store(buffer, (0u + (select(v_33, 0u, 0u) * 4u)), (select(v_33, 64u, 8u) * 4u), MatrixLayout::RowMajor);
   Matrix_left_f32_8x8 v_34[2][2] = make_nested_array();
-  Matrix_left_f32_8x8 v_35 = v_34[1u][0u];
+  Matrix_left_f32_8x8 v_35 = v_34[int(1)][int(0)];
   uint v_36 = 0u;
   buffer.GetDimensions(v_36);
   bool v_37 = (456u <= (v_36 / 4u));

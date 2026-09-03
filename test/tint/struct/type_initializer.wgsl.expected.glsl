@@ -41,5 +41,5 @@ void main() {
   S1 subexpr_nested_nonempty_with_expr = S2(1, S1(2, x, int((uint(x) + 1u)), nested_nonempty.i.f.d)).f;
   T aosoa_empty[2] = T[2](T(int[2](0, 0)), T(int[2](0, 0)));
   T aosoa_nonempty[2] = T[2](T(int[2](1, 2)), T(int[2](3, 4)));
-  T aosoa_nonempty_with_expr[2] = T[2](T(int[2](1, int((uint(aosoa_nonempty[0u].a[0u]) + 1u)))), aosoa_nonempty[1u]);
+  T aosoa_nonempty_with_expr[2] = T[2](T(int[2](1, int((uint(aosoa_nonempty[0].a[0]) + 1u)))), aosoa_nonempty[1]);
 }

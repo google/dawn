@@ -39,5 +39,5 @@ kernel void foo(device tint_array<int, 10>* output [[buffer(0)]]) {
       }
     }
   }
-  (*tint_module_vars.output)[0u] = i;
+  (*tint_module_vars.output)[0] = i;
 }

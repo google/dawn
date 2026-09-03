@@ -169,17 +169,17 @@ void main_1() {
       param = (x_222 + 0.5f);
       mat4 x_225 = getFrameData_f1_(param);
       frameData = x_225;
-      vec4 x_228 = frameData[0u];
+      vec4 x_228 = frameData[0];
       vec2 x_231 = uintBitsToFloat(v.inner[6u].xy);
       frameSize = (vec2(x_228.w, x_228.z) / x_231);
-      vec4 x_235 = frameData[0u];
+      vec4 x_235 = frameData[0];
       vec2 x_237 = sheetUnits;
       offset_1 = (vec2(x_235.x, x_235.y) * x_237);
-      vec4 x_241 = frameData[2u];
-      vec4 x_244 = frameData[0u];
+      vec4 x_241 = frameData[2];
+      vec4 x_244 = frameData[0];
       vec2 v_8 = vec2(x_241.x, x_241.y);
       ratio = (v_8 / vec2(x_244.w, x_244.z));
-      float x_248 = frameData[2u].z;
+      float x_248 = frameData[2].z;
       if ((x_248 == 1.0f)) {
         vec2 x_252 = tileUV;
         tileUV = vec2(x_252.y, x_252.x);

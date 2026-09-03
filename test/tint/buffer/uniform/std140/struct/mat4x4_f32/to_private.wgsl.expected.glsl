@@ -44,7 +44,7 @@ S[4] v_8(uint start_byte_offset) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   p = v_8(0u);
-  p[1u] = v_2(384u);
-  p[3u].m = v_1(400u);
-  p[1u].m[0u] = uintBitsToFloat(v.inner[2u]).ywxz;
+  p[1] = v_2(384u);
+  p[3].m = v_1(400u);
+  p[1].m[0] = uintBitsToFloat(v.inner[2u]).ywxz;
 }

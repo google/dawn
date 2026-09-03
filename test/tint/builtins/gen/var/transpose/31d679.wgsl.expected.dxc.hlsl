@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int transpose_31d679() {
   float2x2 arg_0 = float2x2((1.0f).xx, (1.0f).xx);
   float2x2 res = transpose(arg_0);
-  return select((res[0u].x == 0.0f), int(1), int(0));
+  return select((res[int(0)].x == 0.0f), int(1), int(0));
 }
 
 void fragment_main() {
@@ -21,7 +21,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int transpose_31d679() {
   float2x2 arg_0 = float2x2((1.0f).xx, (1.0f).xx);
   float2x2 res = transpose(arg_0);
-  return select((res[0u].x == 0.0f), int(1), int(0));
+  return select((res[int(0)].x == 0.0f), int(1), int(0));
 }
 
 [numthreads(1, 1, 1)]
@@ -46,7 +46,7 @@ struct vertex_main_outputs {
 int transpose_31d679() {
   float2x2 arg_0 = float2x2((1.0f).xx, (1.0f).xx);
   float2x2 res = transpose(arg_0);
-  return select((res[0u].x == 0.0f), int(1), int(0));
+  return select((res[int(0)].x == 0.0f), int(1), int(0));
 }
 
 VertexOutput vertex_main_inner() {

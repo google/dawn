@@ -3,7 +3,7 @@
 shared int v[128];
 int foo() {
   barrier();
-  int v_1 = v[0u];
+  int v_1 = v[0];
   barrier();
   return v_1;
 }

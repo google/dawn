@@ -37,9 +37,9 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   half2x3 const v_1 = half2x3(half3(v[0u].packed), half3(v[1u].packed));
   (*tint_module_vars.w)[0u].packed = packed_half3(v_1[0u]);
   (*tint_module_vars.w)[1u].packed = packed_half3(v_1[1u]);
-  (*tint_module_vars.w)[1u].packed = packed_half3(half3((*tint_module_vars.u)[0u].packed));
-  (*tint_module_vars.w)[1u].packed = packed_half3(half3((*tint_module_vars.u)[0u].packed).zxy);
-  (*tint_module_vars.w)[0u].packed.y = (*tint_module_vars.u)[1u].packed.x;
+  (*tint_module_vars.w)[1].packed = packed_half3(half3((*tint_module_vars.u)[0].packed));
+  (*tint_module_vars.w)[1].packed = packed_half3(half3((*tint_module_vars.u)[0].packed).zxy);
+  (*tint_module_vars.w)[0].packed.y = (*tint_module_vars.u)[1].packed.x;
 }
 
 [[max_total_threads_per_threadgroup(1)]]

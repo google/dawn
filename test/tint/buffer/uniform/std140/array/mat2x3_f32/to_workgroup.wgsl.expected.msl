@@ -67,12 +67,12 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   }
   (threadgroup_barrier(mem_flags::mem_threadgroup));
   (tint_store_array_packed_vec3(tint_module_vars.w, tint_load_array_packed_vec3(tint_module_vars.u)));
-  tint_array<tint_packed_vec3_f32_array_element, 2> const v_9 = (*tint_module_vars.u)[2u];
+  tint_array<tint_packed_vec3_f32_array_element, 2> const v_9 = (*tint_module_vars.u)[2];
   float2x3 const v_10 = float2x3(float3(v_9[0u].packed), float3(v_9[1u].packed));
-  (*tint_module_vars.w)[1u][0u].packed = packed_float3(v_10[0u]);
-  (*tint_module_vars.w)[1u][1u].packed = packed_float3(v_10[1u]);
-  (*tint_module_vars.w)[1u][0u].packed = packed_float3(float3((*tint_module_vars.u)[0u][1u].packed).zxy);
-  (*tint_module_vars.w)[1u][0u].packed.x = (*tint_module_vars.u)[0u][1u].packed.x;
+  (*tint_module_vars.w)[1][0u].packed = packed_float3(v_10[0u]);
+  (*tint_module_vars.w)[1][1u].packed = packed_float3(v_10[1u]);
+  (*tint_module_vars.w)[1][0].packed = packed_float3(float3((*tint_module_vars.u)[0][1].packed).zxy);
+  (*tint_module_vars.w)[1][0].packed.x = (*tint_module_vars.u)[0][1].packed.x;
 }
 
 [[max_total_threads_per_threadgroup(1)]]

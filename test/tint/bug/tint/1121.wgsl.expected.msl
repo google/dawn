@@ -75,8 +75,8 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
     (*tint_module_vars.lightsBuffer).lights[min(index, (v.tint_array_length_0_0 - 1u))].position.y = (*tint_module_vars.uniforms).max.y;
   }
   float4x4 M = (*tint_module_vars.uniforms).projectionMatrix;
-  float viewNear = (-(M[3u].z) / (-1.0f + M[2u].z));
-  float viewFar = (-(M[3u].z) / (1.0f + M[2u].z));
+  float viewNear = (-(M[3].z) / (-1.0f + M[2].z));
+  float viewFar = (-(M[3].z) / (1.0f + M[2].z));
   float4 lightPos = (*tint_module_vars.lightsBuffer).lights[min(index, (v.tint_array_length_0_0 - 1u))].position;
   lightPos = ((*tint_module_vars.uniforms).viewMatrix * lightPos);
   lightPos = (lightPos / lightPos.w);
@@ -86,8 +86,8 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
   float4 const v_5 = lightPos;
   float4 boxMax = (v_5 + float4(float3(lightRadius), 0.0f));
   tint_array<float4, 6> frustumPlanes = {};
-  frustumPlanes[4u] = float4(0.0f, 0.0f, -1.0f, viewNear);
-  frustumPlanes[5u] = float4(0.0f, 0.0f, 1.0f, -(viewFar));
+  frustumPlanes[4] = float4(0.0f, 0.0f, -1.0f, viewNear);
+  frustumPlanes[5] = float4(0.0f, 0.0f, 1.0f, -(viewFar));
   int const TILE_SIZE = 16;
   int const TILE_COUNT_X = 2;
   int const TILE_COUNT_Y = 2;
@@ -119,12 +119,12 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
           int2 const v_7 = tilePixel0Idx;
           float2 const v_8 = (2.0f * float2(as_type<int2>((as_type<uint2>(v_7) + as_type<uint2>(int2(TILE_SIZE))))));
           float2 ceilCoord = ((v_8 / (*tint_module_vars.uniforms).fullScreenSize.xy) - float2(1.0f));
-          float2 viewFloorCoord = float2((((-(viewNear) * floorCoord.x) - (M[2u].x * viewNear)) / M[0u].x), (((-(viewNear) * floorCoord.y) - (M[2u].y * viewNear)) / M[1u].y));
-          float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord.x) - (M[2u].x * viewNear)) / M[0u].x), (((-(viewNear) * ceilCoord.y) - (M[2u].y * viewNear)) / M[1u].y));
-          frustumPlanes[0u] = float4(1.0f, 0.0f, (-(viewFloorCoord.x) / viewNear), 0.0f);
-          frustumPlanes[1u] = float4(-1.0f, 0.0f, (viewCeilCoord.x / viewNear), 0.0f);
-          frustumPlanes[2u] = float4(0.0f, 1.0f, (-(viewFloorCoord.y) / viewNear), 0.0f);
-          frustumPlanes[3u] = float4(0.0f, -1.0f, (viewCeilCoord.y / viewNear), 0.0f);
+          float2 viewFloorCoord = float2((((-(viewNear) * floorCoord.x) - (M[2].x * viewNear)) / M[0].x), (((-(viewNear) * floorCoord.y) - (M[2].y * viewNear)) / M[1].y));
+          float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord.x) - (M[2].x * viewNear)) / M[0].x), (((-(viewNear) * ceilCoord.y) - (M[2].y * viewNear)) / M[1].y));
+          frustumPlanes[0] = float4(1.0f, 0.0f, (-(viewFloorCoord.x) / viewNear), 0.0f);
+          frustumPlanes[1] = float4(-1.0f, 0.0f, (viewCeilCoord.x / viewNear), 0.0f);
+          frustumPlanes[2] = float4(0.0f, 1.0f, (-(viewFloorCoord.y) / viewNear), 0.0f);
+          frustumPlanes[3] = float4(0.0f, -1.0f, (viewCeilCoord.y / viewNear), 0.0f);
           float dp = 0.0f;
           {
             uint i = 0u;

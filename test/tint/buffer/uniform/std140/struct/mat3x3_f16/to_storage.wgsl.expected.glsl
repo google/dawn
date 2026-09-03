@@ -103,5 +103,5 @@ void main() {
   tint_store_and_preserve_padding(v_18(0u));
   tint_store_and_preserve_padding_1(uint[1](1u), v_10(256u));
   tint_store_and_preserve_padding_2(uint[1](3u), v_2(264u));
-  v_1.inner[1u].m[0u] = tint_bitcast_to_16bit(v.inner[1u].xy).xyz.zxy;
+  v_1.inner[1].m[0] = tint_bitcast_to_16bit(v.inner[1u].xy).xyz.zxy;
 }

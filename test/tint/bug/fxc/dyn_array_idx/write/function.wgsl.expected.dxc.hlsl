@@ -12,6 +12,6 @@ void f() {
   S s = (S)0;
   uint v = min(uint(asint(ubo[0u].x)), 63u);
   s.data[v] = int(1);
-  result.Store(0u, asuint(s.data[3u]));
+  result.Store(0u, asuint(s.data[int(3)]));
 }
 

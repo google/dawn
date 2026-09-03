@@ -10,11 +10,11 @@ int foo() {
   S dst_struct = (S)0;
   int dst_array[2][4] = (int[2][4])0;
   dst_struct.arr = src;
-  dst_array[1u] = src;
+  dst_array[int(1)] = src;
   v = src;
   dst_struct.arr = src;
-  dst_array[0u] = src;
-  return asint((asuint(asint((asuint(v[0u]) + asuint(dst_struct.arr[0u])))) + asuint(dst_array[0u][0u])));
+  dst_array[int(0)] = src;
+  return asint((asuint(asint((asuint(v[int(0)]) + asuint(dst_struct.arr[int(0)])))) + asuint(dst_array[int(0)][int(0)])));
 }
 
 [numthreads(1, 1, 1)]

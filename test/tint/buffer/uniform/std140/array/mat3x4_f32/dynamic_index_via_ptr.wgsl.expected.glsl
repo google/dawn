@@ -43,5 +43,5 @@ void main() {
   vec4 l_a_i_i = uintBitsToFloat(v.inner[((v_6 + v_7) / 16u)]);
   uint v_8 = (v_6 + v_7);
   uvec4 v_9 = v.inner[(v_8 / 16u)];
-  v_1.inner = (((uintBitsToFloat(v_9[((v_8 & 15u) >> 2u)]) + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
+  v_1.inner = (((uintBitsToFloat(v_9[((v_8 & 15u) >> 2u)]) + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x);
 }

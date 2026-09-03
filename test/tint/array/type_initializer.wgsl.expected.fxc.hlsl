@@ -5,24 +5,24 @@ void main() {
   int x = int(42);
   int empty[4] = (int[4])0;
   int nonempty[4] = {int(1), int(2), int(3), int(4)};
-  int nonempty_with_expr[4] = {int(1), x, asint((asuint(x) + 1u)), nonempty[3u]};
+  int nonempty_with_expr[4] = {int(1), x, asint((asuint(x) + 1u)), nonempty[int(3)]};
   int nested_empty[2][3][4] = (int[2][3][4])0;
   int nested_nonempty[2][3][4] = {{{int(1), int(2), int(3), int(4)}, {int(5), int(6), int(7), int(8)}, {int(9), int(10), int(11), int(12)}}, {{int(13), int(14), int(15), int(16)}, {int(17), int(18), int(19), int(20)}, {int(21), int(22), int(23), int(24)}}};
   int v[4] = {int(1), int(2), x, asint((asuint(x) + 1u))};
-  int v_1[4] = {int(5), int(6), nonempty[2u], asint((asuint(nonempty[3u]) + 1u))};
+  int v_1[4] = {int(5), int(6), nonempty[int(2)], asint((asuint(nonempty[int(3)]) + 1u))};
   int v_2[3][4] = {v, v_1, nonempty};
-  int v_3[3][4] = nested_nonempty[1u];
+  int v_3[3][4] = nested_nonempty[int(1)];
   int nested_nonempty_with_expr[2][3][4] = {v_2, v_3};
   int subexpr_empty = int(0);
   int subexpr_nonempty = int(3);
-  int v_4[4] = {int(1), x, asint((asuint(x) + 1u)), nonempty[3u]};
-  int subexpr_nonempty_with_expr = v_4[2u];
+  int v_4[4] = {int(1), x, asint((asuint(x) + 1u)), nonempty[int(3)]};
+  int subexpr_nonempty_with_expr = v_4[int(2)];
   int subexpr_nested_empty[4] = (int[4])0;
   int subexpr_nested_nonempty[4] = {int(5), int(6), int(7), int(8)};
-  int v_5[4] = {int(1), x, asint((asuint(x) + 1u)), nonempty[3u]};
-  int v_6[4] = nested_nonempty[1u][2u];
+  int v_5[4] = {int(1), x, asint((asuint(x) + 1u)), nonempty[int(3)]};
+  int v_6[4] = nested_nonempty[int(1)][int(2)];
   int v_7[2][4] = {v_5, v_6};
-  int subexpr_nested_nonempty_with_expr[4] = v_7[1u];
-  s.Store(0u, asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(empty[0u]) + asuint(nonempty[0u])))) + asuint(nonempty_with_expr[0u])))) + asuint(nested_empty[0u][0u][0u])))) + asuint(nested_nonempty[0u][0u][0u])))) + asuint(nested_nonempty_with_expr[0u][0u][0u])))) + asuint(subexpr_empty)))) + asuint(subexpr_nonempty)))) + asuint(subexpr_nonempty_with_expr)))) + asuint(subexpr_nested_empty[0u])))) + asuint(subexpr_nested_nonempty[0u])))) + asuint(subexpr_nested_nonempty_with_expr[0u])))));
+  int subexpr_nested_nonempty_with_expr[4] = v_7[int(1)];
+  s.Store(0u, asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(asint((asuint(empty[int(0)]) + asuint(nonempty[int(0)])))) + asuint(nonempty_with_expr[int(0)])))) + asuint(nested_empty[int(0)][int(0)][int(0)])))) + asuint(nested_nonempty[int(0)][int(0)][int(0)])))) + asuint(nested_nonempty_with_expr[int(0)][int(0)][int(0)])))) + asuint(subexpr_empty)))) + asuint(subexpr_nonempty)))) + asuint(subexpr_nonempty_with_expr)))) + asuint(subexpr_nested_empty[int(0)])))) + asuint(subexpr_nested_nonempty[int(0)])))) + asuint(subexpr_nested_nonempty_with_expr[int(0)])))));
 }
 

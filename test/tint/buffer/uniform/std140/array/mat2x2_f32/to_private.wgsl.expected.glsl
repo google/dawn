@@ -37,9 +37,9 @@ mat2[4] v_7(uint start_byte_offset) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   p = v_7(0u);
-  p[1u] = v_2(32u);
-  p[1u][0u] = uintBitsToFloat(v.inner[0u].zw).yx;
+  p[1] = v_2(32u);
+  p[1][0] = uintBitsToFloat(v.inner[0u].zw).yx;
   uvec4 v_10 = v.inner[0u];
-  p[1u][0u].x = uintBitsToFloat(v_10.z);
-  v_1.inner = p[1u][0u].x;
+  p[1][0].x = uintBitsToFloat(v_10.z);
+  v_1.inner = p[1][0].x;
 }

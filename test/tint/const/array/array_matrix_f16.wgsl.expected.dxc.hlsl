@@ -11,6 +11,6 @@ void main() {
   s.GetDimensions(v);
   uint v_1 = (min(0u, ((v / 4u) - 1u)) * 4u);
   matrix<float16_t, 3, 2> v_2[2] = {matrix<float16_t, 3, 2>(vector<float16_t, 2>(float16_t(0.0h), float16_t(1.0h)), vector<float16_t, 2>(float16_t(2.0h), float16_t(3.0h)), vector<float16_t, 2>(float16_t(2.0h), float16_t(3.0h))), matrix<float16_t, 3, 2>(vector<float16_t, 2>(float16_t(0.0h), float16_t(1.0h)), vector<float16_t, 2>(float16_t(2.0h), float16_t(3.0h)), vector<float16_t, 2>(float16_t(2.0h), float16_t(3.0h)))};
-  s.Store((0u + v_1), tint_f16_to_u32(v_2[min(q, 1u)][0u].x));
+  s.Store((0u + v_1), tint_f16_to_u32(v_2[min(q, 1u)][int(0)].x));
 }
 

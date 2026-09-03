@@ -28,6 +28,6 @@ void main() {
   float16_t l = length(tint_bitcast_to_16bit_1(v.inner[0u].zw).ywxz);
   uvec4 v_7 = v.inner[0u];
   float16_t a = abs(tint_bitcast_to_16bit(v_7.z).y);
-  float16_t v_8 = (t[0u].x + float16_t(l));
+  float16_t v_8 = (t[0].x + float16_t(l));
   v_1.inner = (v_8 + float16_t(a));
 }

@@ -18,8 +18,8 @@ mat2x3 v_2(uint start_byte_offset) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_store_and_preserve_padding(v_2(0u));
-  v_1.inner[1u] = uintBitsToFloat(v.inner[0u].xyz);
-  v_1.inner[1u] = uintBitsToFloat(v.inner[0u].xyz).zxy;
+  v_1.inner[1] = uintBitsToFloat(v.inner[0u].xyz);
+  v_1.inner[1] = uintBitsToFloat(v.inner[0u].xyz).zxy;
   uvec4 v_3 = v.inner[1u];
-  v_1.inner[0u].y = uintBitsToFloat(v_3.x);
+  v_1.inner[0].y = uintBitsToFloat(v_3.x);
 }

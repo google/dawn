@@ -20,10 +20,10 @@ void f_inner(uint tint_local_index) {
   }
   barrier();
   w = v_1(0u);
-  w[1u] = tint_bitcast_to_16bit(v.inner[0u].x);
-  w[1u] = tint_bitcast_to_16bit(v.inner[0u].x).yx;
+  w[1] = tint_bitcast_to_16bit(v.inner[0u].x);
+  w[1] = tint_bitcast_to_16bit(v.inner[0u].x).yx;
   uvec4 v_4 = v.inner[0u];
-  w[0u].y = tint_bitcast_to_16bit(v_4.y).x;
+  w[0].y = tint_bitcast_to_16bit(v_4.y).x;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

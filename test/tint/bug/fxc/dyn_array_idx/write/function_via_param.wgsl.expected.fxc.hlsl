@@ -21,6 +21,6 @@ void x(inout S p) {
 void f() {
   S s = (S)0;
   x(s);
-  result.Store(0u, asuint(s.data[3u]));
+  result.Store(0u, asuint(s.data[int(3)]));
 }
 

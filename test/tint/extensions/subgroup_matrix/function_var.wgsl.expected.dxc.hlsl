@@ -31,11 +31,11 @@ void main() {
   uint v_6 = 0u;
   buffer.GetDimensions(v_6);
   bool v_7 = (456u <= (v_6 / 4u));
-  m_array[0u].Store(buffer, (0u + (select(v_7, 0u, 0u) * 4u)), (select(v_7, 64u, 8u) * 4u), MatrixLayout::RowMajor);
+  m_array[int(0)].Store(buffer, (0u + (select(v_7, 0u, 0u) * 4u)), (select(v_7, 64u, 8u) * 4u), MatrixLayout::RowMajor);
   uint v_8 = 0u;
   buffer.GetDimensions(v_8);
   bool v_9 = (456u <= (v_8 / 4u));
-  m_nested_array[1u][2u].Store(buffer, (0u + (select(v_9, 0u, 0u) * 4u)), (select(v_9, 64u, 8u) * 4u), MatrixLayout::RowMajor);
+  m_nested_array[int(1)][int(2)].Store(buffer, (0u + (select(v_9, 0u, 0u) * 4u)), (select(v_9, 64u, 8u) * 4u), MatrixLayout::RowMajor);
   uint v_10 = 0u;
   buffer.GetDimensions(v_10);
   bool v_11 = (456u <= (v_10 / 4u));

@@ -56,7 +56,7 @@
          %17 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %1 %uint_0
          %20 = OpArrayLength %uint %1 0
          %21 = OpIMul %uint %20 %uint_4
-         %23 = OpIAddCarry %add_carry_result_u32 %offset %15
+         %23 = OpIAddCarry %add_carry_result_u32 %15 %offset
          %25 = OpCompositeExtract %uint %23 0
          %26 = OpCompositeExtract %uint %23 1
          %27 = OpIEqual %bool %26 %uint_0

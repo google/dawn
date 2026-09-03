@@ -22,7 +22,7 @@ void compute_main_inner(uint tint_local_index) {
   }
   GroupMemoryBarrierWithGroupSync();
   uint v_3 = 0u;
-  InterlockedExchange(wg[2u][1u][0u], 1u, v_3);
+  InterlockedExchange(wg[int(2)][int(1)][int(0)], 1u, v_3);
 }
 
 [numthreads(1, 1, 1)]

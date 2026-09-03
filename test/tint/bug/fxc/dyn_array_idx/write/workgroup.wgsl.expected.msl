@@ -52,7 +52,7 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   }
   (threadgroup_barrier(mem_flags::mem_threadgroup));
   (*tint_module_vars.s).data[min(uint((*tint_module_vars.ubo).dynamic_idx), 63u)] = 1;
-  (*tint_module_vars.result).out = (*tint_module_vars.s).data[3u];
+  (*tint_module_vars.result).out = (*tint_module_vars.s).data[3];
 }
 
 [[max_total_threads_per_threadgroup(1)]]

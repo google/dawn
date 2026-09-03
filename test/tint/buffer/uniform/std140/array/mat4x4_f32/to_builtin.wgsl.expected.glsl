@@ -17,6 +17,6 @@ void main() {
   float l = length(uintBitsToFloat(v.inner[1u]).ywxz);
   uvec4 v_3 = v.inner[1u];
   float a = abs(uintBitsToFloat(v_3.y));
-  float v_4 = (t[0u].x + float(l));
+  float v_4 = (t[0].x + float(l));
   v_1.inner = (v_4 + float(a));
 }

@@ -45,11 +45,11 @@ kernel void v(device tint_array<uint, 1>* buf [[buffer(0)]]) {
       if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
-      if (((*tint_module_vars.buf)[0u] == 0u)) {
+      if (((*tint_module_vars.buf)[0] == 0u)) {
         break;
       }
       int s = f();
-      (*tint_module_vars.buf)[0u] = 0u;
+      (*tint_module_vars.buf)[0] = 0u;
       {
         uint const tint_low_inc_1 = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc_1;

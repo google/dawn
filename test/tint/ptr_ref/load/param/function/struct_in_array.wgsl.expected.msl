@@ -24,5 +24,5 @@ str func(thread str* const pointer) {
 [[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   tint_array<str, 4> F = {};
-  str const r = func((&F[2u]));
+  str const r = func((&F[2]));
 }

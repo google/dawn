@@ -7,7 +7,7 @@ void main() {
   uint v_3 = 0u;
   v.GetDimensions(v_3);
   uint v_4 = v_3;
-  uint v_5 = (16u + v_2);
-  v_1.Store4(0u, v.Load4((0u + ((((v_4 < (((v_5 < 16u)) ? (4294967295u) : (v_5)))) ? (0u) : (v_2)) * 1u))));
+  uint v_5 = (v_2 + 16u);
+  v_1.Store4(0u, v.Load4((0u + ((((v_4 < (((v_5 < v_2)) ? (4294967295u) : (v_5)))) ? (0u) : (v_2)) * 1u))));
 }
 

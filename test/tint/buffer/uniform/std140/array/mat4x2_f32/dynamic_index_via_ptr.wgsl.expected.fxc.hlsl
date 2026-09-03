@@ -54,6 +54,6 @@ void f() {
   uint4 v_18 = a[(v_17 / 16u)];
   float2 l_a_i_i = asfloat((((((v_17 & 15u) >> 2u) == 2u)) ? (v_18.zw) : (v_18.xy)));
   uint v_19 = (v_15 + v_16);
-  s.Store(0u, asuint((((asfloat(a[(v_19 / 16u)][((v_19 & 15u) >> 2u)]) + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x)));
+  s.Store(0u, asuint((((asfloat(a[(v_19 / 16u)][((v_19 & 15u) >> 2u)]) + l_a[int(0)][int(0)].x) + l_a_i[int(0)].x) + l_a_i_i.x)));
 }
 

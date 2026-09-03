@@ -43,9 +43,9 @@ f16mat4x2[4] v_9(uint start_byte_offset) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   p = v_9(0u);
-  p[1u] = v_2(32u);
-  p[1u][0u] = tint_bitcast_to_16bit(v.inner[0u].y).yx;
+  p[1] = v_2(32u);
+  p[1][0] = tint_bitcast_to_16bit(v.inner[0u].y).yx;
   uvec4 v_12 = v.inner[0u];
-  p[1u][0u].x = tint_bitcast_to_16bit(v_12.y).x;
-  v_1.inner = p[1u][0u].x;
+  p[1][0].x = tint_bitcast_to_16bit(v_12.y).x;
+  v_1.inner = p[1][0].x;
 }

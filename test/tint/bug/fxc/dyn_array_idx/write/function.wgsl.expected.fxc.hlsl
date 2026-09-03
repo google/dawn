@@ -17,6 +17,6 @@ void f() {
   tint_array_copy[v_2] = int(1);
   int v_3[64] = tint_array_copy;
   s.data = v_3;
-  result.Store(0u, asuint(s.data[3u]));
+  result.Store(0u, asuint(s.data[int(3)]));
 }
 

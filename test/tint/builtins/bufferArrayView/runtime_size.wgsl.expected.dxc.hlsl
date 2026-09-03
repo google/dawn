@@ -11,7 +11,8 @@ void main() {
   uint v_3 = 0u;
   v.GetDimensions(v_3);
   uint v_4 = max(v_2, 16u);
-  bool v_5 = (v_3 < v_4);
-  v_1.Store4(0u, v.Load4(((0u + (select(v_5, 0u, 0u) * 1u)) + (min(0u, ((select(v_5, 16u, v_4) / 16u) - 1u)) * 16u))));
+  uint v_5 = (0u + v_4);
+  bool v_6 = (v_3 < select((v_5 < 0u), 4294967295u, v_5));
+  v_1.Store4(0u, v.Load4(((0u + (select(v_6, 0u, 0u) * 1u)) + (min(0u, ((select(v_6, 16u, v_4) / 16u) - 1u)) * 16u))));
 }
 

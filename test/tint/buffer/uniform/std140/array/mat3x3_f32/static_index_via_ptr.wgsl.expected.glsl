@@ -35,5 +35,5 @@ void main() {
   mat3 l_a_i = v_2(96u);
   vec3 l_a_i_i = uintBitsToFloat(v.inner[7u].xyz);
   uvec4 v_6 = v.inner[7u];
-  v_1.inner = (((uintBitsToFloat(v_6.x) + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
+  v_1.inner = (((uintBitsToFloat(v_6.x) + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x);
 }

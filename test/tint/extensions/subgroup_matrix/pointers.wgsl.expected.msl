@@ -35,9 +35,9 @@ void foo(thread simdgroup_float8x8* const m, thread tint_array<simdgroup_float8x
   bool const v = (456u <= tint_array_lengths.tint_array_length_0_0);
   (simdgroup_store((*m), (&(*tint_module_vars.tint_member)[select(0u, 0u, v)]), ulong(select(8u, 64u, v)), ulong2(0ul), false));
   bool const v_1 = (456u <= tint_array_lengths.tint_array_length_0_0);
-  (simdgroup_store((*m_array)[0u], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_1)]), ulong(select(8u, 64u, v_1)), ulong2(0ul), false));
+  (simdgroup_store((*m_array)[0], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_1)]), ulong(select(8u, 64u, v_1)), ulong2(0ul), false));
   bool const v_2 = (456u <= tint_array_lengths.tint_array_length_0_0);
-  (simdgroup_store((*m_nested_array)[1u][2u], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_2)]), ulong(select(8u, 64u, v_2)), ulong2(0ul), false));
+  (simdgroup_store((*m_nested_array)[1][2], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_2)]), ulong(select(8u, 64u, v_2)), ulong2(0ul), false));
   bool const v_3 = (456u <= tint_array_lengths.tint_array_length_0_0);
   (simdgroup_store((*m_struct).l, (&(*tint_module_vars.tint_member)[select(0u, 0u, v_3)]), ulong(select(8u, 64u, v_3)), ulong2(0ul), false));
   bool const v_4 = (456u <= tint_array_lengths.tint_array_length_0_0);

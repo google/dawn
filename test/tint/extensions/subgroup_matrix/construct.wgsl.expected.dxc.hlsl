@@ -21,7 +21,7 @@ void main() {
   Matrix_left_f32_8x8::Splat(0.0f).Store(buffer, (0u + (select(v_1, 0u, 0u) * 4u)), (select(v_1, 64u, 8u) * 4u), MatrixLayout::RowMajor);
   Matrix_left_f32_8x8 v_2 = Matrix_left_f32_8x8::Splat(0.0f);
   Matrix_left_f32_8x8 v_3[4] = {v_2, v_2, v_2, v_2};
-  Matrix_left_f32_8x8 v_4 = v_3[1u];
+  Matrix_left_f32_8x8 v_4 = v_3[int(1)];
   uint v_5 = 0u;
   buffer.GetDimensions(v_5);
   bool v_6 = (456u <= (v_5 / 4u));
@@ -29,7 +29,7 @@ void main() {
   Matrix_left_f32_8x8 v_7 = Matrix_left_f32_8x8::Splat(0.0f);
   Matrix_left_f32_8x8 v_8[4] = {v_7, v_7, v_7, v_7};
   Matrix_left_f32_8x8 v_9[4][4] = {v_8, v_8, v_8, v_8};
-  Matrix_left_f32_8x8 v_10 = v_9[2u][3u];
+  Matrix_left_f32_8x8 v_10 = v_9[int(2)][int(3)];
   uint v_11 = 0u;
   buffer.GetDimensions(v_11);
   bool v_12 = (456u <= (v_11 / 4u));
@@ -52,7 +52,7 @@ void main() {
   bool v_23 = (456u <= (v_22 / 4u));
   Matrix_left_f32_8x8::Splat(42.0f).Store(buffer, (0u + (select(v_23, 0u, 0u) * 4u)), (select(v_23, 64u, 8u) * 4u), MatrixLayout::RowMajor);
   Matrix_left_f32_8x8 v_24[2] = {Matrix_left_f32_8x8::Splat(42.0f), Matrix_left_f32_8x8::Splat(100.0f)};
-  Matrix_left_f32_8x8 v_25 = v_24[1u];
+  Matrix_left_f32_8x8 v_25 = v_24[int(1)];
   uint v_26 = 0u;
   buffer.GetDimensions(v_26);
   bool v_27 = (456u <= (v_26 / 4u));
@@ -60,7 +60,7 @@ void main() {
   Matrix_left_f32_8x8 v_28[2] = {Matrix_left_f32_8x8::Splat(42.0f), Matrix_left_f32_8x8::Splat(100.0f)};
   Matrix_left_f32_8x8 v_29[2] = {Matrix_left_f32_8x8::Splat(-7.0f), Matrix_left_f32_8x8::Splat(-42.0f)};
   Matrix_left_f32_8x8 v_30[2][2] = {v_28, v_29};
-  Matrix_left_f32_8x8 v_31 = v_30[1u][0u];
+  Matrix_left_f32_8x8 v_31 = v_30[int(1)][int(0)];
   uint v_32 = 0u;
   buffer.GetDimensions(v_32);
   bool v_33 = (456u <= (v_32 / 4u));

@@ -66,6 +66,6 @@ void f() {
   uint4 v_19 = a[(v_18 / 16u)];
   vector<float16_t, 3> l_a_i_i = tint_bitcast_to_f16(select((((v_18 & 15u) >> 2u) == 2u), v_19.zw, v_19.xy)).xyz;
   uint v_20 = (v_16 + v_17);
-  s.Store<float16_t>(0u, (((tint_bitcast_to_f16_1(a[(v_20 / 16u)][((v_20 & 15u) >> 2u)])[select(((v_20 % 4u) == 0u), 0u, 1u)] + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x));
+  s.Store<float16_t>(0u, (((tint_bitcast_to_f16_1(a[(v_20 / 16u)][((v_20 & 15u) >> 2u)])[select(((v_20 % 4u) == 0u), 0u, 1u)] + l_a[int(0)][int(0)].x) + l_a_i[int(0)].x) + l_a_i_i.x));
 }
 

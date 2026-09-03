@@ -38,7 +38,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   }
   (threadgroup_barrier(mem_flags::mem_threadgroup));
   threadgroup tint_array<int, 246>* const p = tint_module_vars.W;
-  (*p)[0u] = 42;
+  (*p)[0] = 42;
 }
 
 [[max_total_threads_per_threadgroup(1)]]

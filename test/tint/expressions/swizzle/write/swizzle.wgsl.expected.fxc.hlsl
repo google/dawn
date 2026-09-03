@@ -9,6 +9,6 @@ void a() {
   a_1.x = int(1);
   a_1.z = int(2);
   S d = (S)0;
-  d.val[2u].y = 3.0f;
+  d.val[int(2)].y = 3.0f;
 }
 

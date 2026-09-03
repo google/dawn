@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int transpose_4dc9a1() {
   float2x3 arg_0 = float2x3((1.0f).xxx, (1.0f).xxx);
   float3x2 res = transpose(arg_0);
-  return (((res[0u].x == 0.0f)) ? (int(1)) : (int(0)));
+  return (((res[int(0)].x == 0.0f)) ? (int(1)) : (int(0)));
 }
 
 void fragment_main() {
@@ -21,7 +21,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int transpose_4dc9a1() {
   float2x3 arg_0 = float2x3((1.0f).xxx, (1.0f).xxx);
   float3x2 res = transpose(arg_0);
-  return (((res[0u].x == 0.0f)) ? (int(1)) : (int(0)));
+  return (((res[int(0)].x == 0.0f)) ? (int(1)) : (int(0)));
 }
 
 [numthreads(1, 1, 1)]
@@ -46,7 +46,7 @@ struct vertex_main_outputs {
 int transpose_4dc9a1() {
   float2x3 arg_0 = float2x3((1.0f).xxx, (1.0f).xxx);
   float3x2 res = transpose(arg_0);
-  return (((res[0u].x == 0.0f)) ? (int(1)) : (int(0)));
+  return (((res[int(0)].x == 0.0f)) ? (int(1)) : (int(0)));
 }
 
 VertexOutput vertex_main_inner() {

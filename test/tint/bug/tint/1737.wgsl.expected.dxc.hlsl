@@ -35,8 +35,8 @@ void f_inner(uint tint_local_index) {
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  float x = a[0u];
-  float y = b[0u];
+  float x = a[int(0)];
+  float y = b[int(0)];
 }
 
 [numthreads(1, 1, 1)]

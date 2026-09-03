@@ -15,14 +15,14 @@ int foo() {
   S dst_struct = S(int[4](0, 0, 0, 0));
   int dst_array[2][4] = int[2][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0));
   dst_struct.arr = src;
-  dst_array[1u] = src;
+  dst_array[1] = src;
   dst = src;
   dst_struct.arr = src;
-  dst_array[0u] = src;
-  int v_1 = dst_struct.arr[0u];
-  uint v_2 = uint(dst[0u]);
+  dst_array[0] = src;
+  int v_1 = dst_struct.arr[0];
+  uint v_2 = uint(dst[0]);
   int v_3 = int((v_2 + uint(v_1)));
-  int v_4 = dst_array[0u][0u];
+  int v_4 = dst_array[0][0];
   uint v_5 = uint(v_3);
   return int((v_5 + uint(v_4)));
 }

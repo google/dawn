@@ -23,7 +23,7 @@ struct tint_symbol_1 {
 
 int foo(tint_module_vars_struct tint_module_vars) {
   (threadgroup_barrier(mem_flags::mem_threadgroup));
-  int const v_1 = (*tint_module_vars.v)[0u];
+  int const v_1 = (*tint_module_vars.v)[0];
   (threadgroup_barrier(mem_flags::mem_threadgroup));
   return v_1;
 }

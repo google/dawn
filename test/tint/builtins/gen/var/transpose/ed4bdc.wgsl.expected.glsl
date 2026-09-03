@@ -12,7 +12,7 @@ buffer f_prevent_dce_block_ssbo {
 int transpose_ed4bdc() {
   mat3x2 arg_0 = mat3x2(vec2(1.0f), vec2(1.0f), vec2(1.0f));
   mat2x3 res = transpose(arg_0);
-  return mix(0, 1, (res[0u].x == 0.0f));
+  return mix(0, 1, (res[0].x == 0.0f));
 }
 void main() {
   v.inner = transpose_ed4bdc();
@@ -29,7 +29,7 @@ buffer prevent_dce_block_1_ssbo {
 int transpose_ed4bdc() {
   mat3x2 arg_0 = mat3x2(vec2(1.0f), vec2(1.0f), vec2(1.0f));
   mat2x3 res = transpose(arg_0);
-  return mix(0, 1, (res[0u].x == 0.0f));
+  return mix(0, 1, (res[0].x == 0.0f));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -50,7 +50,7 @@ layout(location = 0) flat out int tint_interstage_location0;
 int transpose_ed4bdc() {
   mat3x2 arg_0 = mat3x2(vec2(1.0f), vec2(1.0f), vec2(1.0f));
   mat2x3 res = transpose(arg_0);
-  return mix(0, 1, (res[0u].x == 0.0f));
+  return mix(0, 1, (res[0].x == 0.0f));
 }
 VertexOutput vertex_main_inner() {
   VertexOutput v = VertexOutput(vec4(0.0f), 0);

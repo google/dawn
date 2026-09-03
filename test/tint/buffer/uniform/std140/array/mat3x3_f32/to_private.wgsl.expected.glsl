@@ -33,9 +33,9 @@ mat3[4] v_3(uint start_byte_offset) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   p = v_3(0u);
-  p[1u] = v_2(96u);
-  p[1u][0u] = uintBitsToFloat(v.inner[1u].xyz).zxy;
+  p[1] = v_2(96u);
+  p[1][0] = uintBitsToFloat(v.inner[1u].xyz).zxy;
   uvec4 v_6 = v.inner[1u];
-  p[1u][0u].x = uintBitsToFloat(v_6.x);
-  v_1.inner = p[1u][0u].x;
+  p[1][0].x = uintBitsToFloat(v_6.x);
+  v_1.inner = p[1][0].x;
 }

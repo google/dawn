@@ -10,10 +10,10 @@ buffer s_block_1_ssbo {
   float16_t inner;
 } v_2;
 float16_t a(f16mat2x4 a_1[4]) {
-  return a_1[0u][0u].x;
+  return a_1[0][0].x;
 }
 float16_t b(f16mat2x4 m) {
-  return m[0u].x;
+  return m[0].x;
 }
 float16_t c(f16vec4 v) {
   return v.x;

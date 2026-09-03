@@ -58,11 +58,11 @@ void f_inner(uint tint_local_index) {
   }
   barrier();
   w = v_7(0u);
-  w[1u] = v_2(32u);
-  w[1u][0u] = tint_bitcast_to_16bit_1(v.inner[0u].zw).xyz.zxy;
+  w[1] = v_2(32u);
+  w[1][0] = tint_bitcast_to_16bit_1(v.inner[0u].zw).xyz.zxy;
   uvec4 v_12 = v.inner[0u];
-  w[1u][0u].x = tint_bitcast_to_16bit(v_12.z).x;
-  v_1.inner = w[1u][0u].x;
+  w[1][0].x = tint_bitcast_to_16bit(v_12.z).x;
+  v_1.inner = w[1][0].x;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

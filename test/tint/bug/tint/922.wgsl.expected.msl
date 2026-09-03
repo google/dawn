@@ -170,14 +170,14 @@ void main1(tint_module_vars_struct tint_module_vars) {
   float4 const x_e52 = (*tint_module_vars.global1).u_Misc0_;
   if ((x_e52.x == 2.0f)) {
     float3 const x_e59 = (*tint_module_vars.a_Normal1);
-    Mat4x2_ const x_e64 = (*tint_module_vars.global1).u_TexMtx[0u];
+    Mat4x2_ const x_e64 = (*tint_module_vars.global1).u_TexMtx[0];
     float3 const x_e65 = (*tint_module_vars.a_Normal1);
     float2 const x_e68 = Mul2(x_e64, float4(x_e65, 1.0f));
     (*tint_module_vars.v_TexCoord) = x_e68.xy;
     return;
   } else {
     float2 const x_e73 = (*tint_module_vars.a_UV1);
-    Mat4x2_ const x_e79 = (*tint_module_vars.global1).u_TexMtx[0u];
+    Mat4x2_ const x_e79 = (*tint_module_vars.global1).u_TexMtx[0];
     float2 const x_e80 = (*tint_module_vars.a_UV1);
     float2 const x_e84 = Mul2(x_e79, float4(x_e80, 1.0f, 1.0f));
     (*tint_module_vars.v_TexCoord) = x_e84.xy;

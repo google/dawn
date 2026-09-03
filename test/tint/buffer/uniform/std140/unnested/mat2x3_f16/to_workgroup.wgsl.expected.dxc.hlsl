@@ -33,9 +33,9 @@ void f_inner(uint tint_local_index) {
   }
   GroupMemoryBarrierWithGroupSync();
   w = v_1(0u);
-  w[1u] = tint_bitcast_to_f16_1(u[0u].xy).xyz;
-  w[1u] = tint_bitcast_to_f16_1(u[0u].xy).xyz.zxy;
-  w[0u].y = tint_bitcast_to_f16(u[0u].z).x;
+  w[int(1)] = tint_bitcast_to_f16_1(u[0u].xy).xyz;
+  w[int(1)] = tint_bitcast_to_f16_1(u[0u].xy).xyz.zxy;
+  w[int(0)].y = tint_bitcast_to_f16(u[0u].z).x;
 }
 
 [numthreads(1, 1, 1)]

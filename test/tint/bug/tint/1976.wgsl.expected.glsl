@@ -18,5 +18,5 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   uint v_2 = min(0u, (v_1.metadata[0u].x - 1u));
   ivec2 v_3 = ivec2(min(uvec2(0u), (uvec2(textureSize(texture0)) - uvec2(1u))));
-  v.inner.colorSamples[0u] = texelFetch(texture0, v_3, int(v_2)).x;
+  v.inner.colorSamples[0] = texelFetch(texture0, v_3, int(v_2)).x;
 }

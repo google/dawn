@@ -8,5 +8,5 @@ mat2x4 m1 = mat2x4(vec4(0.0f), vec4(0.0f));
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   uvec4 v_1 = v.inner[0u];
-  m1[0u][min(v_1.y, 3u)] = 1.0f;
+  m1[0][min(v_1.y, 3u)] = 1.0f;
 }

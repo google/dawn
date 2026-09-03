@@ -26,5 +26,5 @@ void main() {
   uvec4 v_3 = v.inner[0u];
   uint v_4 = min(uint(int(v_3.x)), 3u);
   v_2.inner.data[v_4] = 1;
-  v_1.inner.member_0 = v_2.inner.data[3u];
+  v_1.inner.member_0 = v_2.inner.data[3];
 }

@@ -56,13 +56,13 @@ void main() {
   bool v_10 = (456u <= (v_9 / 4u));
   v_8.Store(buffer, (0u + (select(v_10, 0u, 0u) * 4u)), (select(v_10, 64u, 8u) * 4u), MatrixLayout::RowMajor);
   Matrix_left_f32_8x8 v_11[4] = make_array();
-  Matrix_left_f32_8x8 v_12 = v_11[0u];
+  Matrix_left_f32_8x8 v_12 = v_11[int(0)];
   uint v_13 = 0u;
   buffer.GetDimensions(v_13);
   bool v_14 = (456u <= (v_13 / 4u));
   v_12.Store(buffer, (0u + (select(v_14, 0u, 0u) * 4u)), (select(v_14, 64u, 8u) * 4u), MatrixLayout::RowMajor);
   Matrix_left_f32_8x8 v_15[4][4] = make_nested_array();
-  Matrix_left_f32_8x8 v_16 = v_15[1u][2u];
+  Matrix_left_f32_8x8 v_16 = v_15[int(1)][int(2)];
   uint v_17 = 0u;
   buffer.GetDimensions(v_17);
   bool v_18 = (456u <= (v_17 / 4u));

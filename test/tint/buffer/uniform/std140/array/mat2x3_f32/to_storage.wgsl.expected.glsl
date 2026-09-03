@@ -53,7 +53,7 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_store_and_preserve_padding(v_5(0u));
   tint_store_and_preserve_padding_1(uint[1](1u), v_2(64u));
-  v_1.inner[1u][0u] = uintBitsToFloat(v.inner[1u].xyz).zxy;
+  v_1.inner[1][0] = uintBitsToFloat(v.inner[1u].xyz).zxy;
   uvec4 v_8 = v.inner[1u];
-  v_1.inner[1u][0u].x = uintBitsToFloat(v_8.x);
+  v_1.inner[1][0].x = uintBitsToFloat(v_8.x);
 }

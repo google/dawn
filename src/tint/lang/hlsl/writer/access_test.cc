@@ -227,7 +227,7 @@ struct S {
 [numthreads(1, 1, 1)]
 void main() {
   S v = (S)0;
-  float x = v.c.e[1u];
+  float x = v.c.e[int(1)];
 }
 
 )");

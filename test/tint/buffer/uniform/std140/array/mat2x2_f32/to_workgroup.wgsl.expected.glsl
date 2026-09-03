@@ -47,10 +47,10 @@ void f_inner(uint tint_local_index) {
   }
   barrier();
   w = v_6(0u);
-  w[1u] = v_1(32u);
-  w[1u][0u] = uintBitsToFloat(v.inner[0u].zw).yx;
+  w[1] = v_1(32u);
+  w[1][0] = uintBitsToFloat(v.inner[0u].zw).yx;
   uvec4 v_11 = v.inner[0u];
-  w[1u][0u].x = uintBitsToFloat(v_11.z);
+  w[1][0].x = uintBitsToFloat(v_11.z);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

@@ -92,9 +92,9 @@ void main_inner(uint idx, tint_module_vars_struct tint_module_vars) {
   bool const v_3 = (456u <= v_2.tint_array_length_0_0);
   (simdgroup_store(make_matrix(tint_module_vars), (&(*tint_module_vars.tint_member)[select(0u, 0u, v_3)]), ulong(select(8u, 64u, v_3)), ulong2(0ul), false));
   bool const v_4 = (456u <= v_2.tint_array_length_0_0);
-  (simdgroup_store(make_array(tint_module_vars)[0u], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_4)]), ulong(select(8u, 64u, v_4)), ulong2(0ul), false));
+  (simdgroup_store(make_array(tint_module_vars)[0], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_4)]), ulong(select(8u, 64u, v_4)), ulong2(0ul), false));
   bool const v_5 = (456u <= v_2.tint_array_length_0_0);
-  (simdgroup_store(make_nested_array(tint_module_vars)[1u][0u], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_5)]), ulong(select(8u, 64u, v_5)), ulong2(0ul), false));
+  (simdgroup_store(make_nested_array(tint_module_vars)[1][0], (&(*tint_module_vars.tint_member)[select(0u, 0u, v_5)]), ulong(select(8u, 64u, v_5)), ulong2(0ul), false));
   bool const v_6 = (456u <= v_2.tint_array_length_0_0);
   (simdgroup_store(make_struct(tint_module_vars).l, (&(*tint_module_vars.tint_member)[select(0u, 0u, v_6)]), ulong(select(8u, 64u, v_6)), ulong2(0ul), false));
   bool const v_7 = (456u <= v_2.tint_array_length_0_0);

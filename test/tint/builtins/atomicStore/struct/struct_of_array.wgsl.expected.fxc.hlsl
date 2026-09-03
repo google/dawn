@@ -32,7 +32,7 @@ void compute_main_inner(uint tint_local_index) {
   }
   GroupMemoryBarrierWithGroupSync();
   uint v_3 = 0u;
-  InterlockedExchange(wg.a[4u], 1u, v_3);
+  InterlockedExchange(wg.a[int(4)], 1u, v_3);
 }
 
 [numthreads(1, 1, 1)]

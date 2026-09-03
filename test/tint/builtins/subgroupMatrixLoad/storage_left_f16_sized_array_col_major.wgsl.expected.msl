@@ -64,7 +64,7 @@ kernel void v(const device tint_array<uint, 1024>* in0 [[buffer(0)]], const devi
   bool const v_9 = (116u <= v_1.tint_array_length_0_7);
   (simdgroup_store(m3, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, 0u, v_9) * 4u)), ulong((select(4u, 16u, v_9) * 2u)), ulong2(0ul), true));
   simdgroup_half8x8 v_10 = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
-  (simdgroup_load(v_10, (&(*tint_module_vars.in4)[0]), ulong(16u), ulong2(0ul), true));
+  (simdgroup_load(v_10, (&(*tint_module_vars.in4)[0u]), ulong(16u), ulong2(0ul), true));
   simdgroup_half8x8 const m4 = v_10;
   bool const v_11 = (116u <= v_1.tint_array_length_0_7);
   (simdgroup_store(m4, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out) + (select(0u, 0u, v_11) * 4u)), ulong((select(4u, 16u, v_11) * 2u)), ulong2(0ul), true));

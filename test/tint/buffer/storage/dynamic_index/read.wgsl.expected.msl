@@ -106,16 +106,16 @@ void main_inner(uint idx, tint_module_vars_struct tint_module_vars) {
   int const v_9 = as_type<int>((as_type<uint>(v_8) + as_type<uint>(int(vec3_u32.y))));
   int const v_10 = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(v_9) + as_type<uint>(tint_f32_to_i32(vec4_f32.z))))) + as_type<uint>(vec4_i32.z)));
   int const v_11 = as_type<int>((as_type<uint>(v_10) + as_type<uint>(int(vec4_u32.z))));
-  int const v_12 = as_type<int>((as_type<uint>(v_11) + as_type<uint>(tint_f32_to_i32(mat2x2_f32[0u].x))));
-  int const v_13 = as_type<int>((as_type<uint>(v_12) + as_type<uint>(tint_f32_to_i32(mat2x3_f32[0u].x))));
-  int const v_14 = as_type<int>((as_type<uint>(v_13) + as_type<uint>(tint_f32_to_i32(mat2x4_f32[0u].x))));
-  int const v_15 = as_type<int>((as_type<uint>(v_14) + as_type<uint>(tint_f32_to_i32(mat3x2_f32[0u].x))));
-  int const v_16 = as_type<int>((as_type<uint>(v_15) + as_type<uint>(tint_f32_to_i32(mat3x3_f32[0u].x))));
-  int const v_17 = as_type<int>((as_type<uint>(v_16) + as_type<uint>(tint_f32_to_i32(mat3x4_f32[0u].x))));
-  int const v_18 = as_type<int>((as_type<uint>(v_17) + as_type<uint>(tint_f32_to_i32(mat4x2_f32[0u].x))));
-  int const v_19 = as_type<int>((as_type<uint>(v_18) + as_type<uint>(tint_f32_to_i32(mat4x3_f32[0u].x))));
-  int const v_20 = as_type<int>((as_type<uint>(v_19) + as_type<uint>(tint_f32_to_i32(mat4x4_f32[0u].x))));
-  (*tint_module_vars.s) = as_type<int>((as_type<uint>(v_20) + as_type<uint>(tint_f32_to_i32(arr2_vec3_f32[0u].x))));
+  int const v_12 = as_type<int>((as_type<uint>(v_11) + as_type<uint>(tint_f32_to_i32(mat2x2_f32[0].x))));
+  int const v_13 = as_type<int>((as_type<uint>(v_12) + as_type<uint>(tint_f32_to_i32(mat2x3_f32[0].x))));
+  int const v_14 = as_type<int>((as_type<uint>(v_13) + as_type<uint>(tint_f32_to_i32(mat2x4_f32[0].x))));
+  int const v_15 = as_type<int>((as_type<uint>(v_14) + as_type<uint>(tint_f32_to_i32(mat3x2_f32[0].x))));
+  int const v_16 = as_type<int>((as_type<uint>(v_15) + as_type<uint>(tint_f32_to_i32(mat3x3_f32[0].x))));
+  int const v_17 = as_type<int>((as_type<uint>(v_16) + as_type<uint>(tint_f32_to_i32(mat3x4_f32[0].x))));
+  int const v_18 = as_type<int>((as_type<uint>(v_17) + as_type<uint>(tint_f32_to_i32(mat4x2_f32[0].x))));
+  int const v_19 = as_type<int>((as_type<uint>(v_18) + as_type<uint>(tint_f32_to_i32(mat4x3_f32[0].x))));
+  int const v_20 = as_type<int>((as_type<uint>(v_19) + as_type<uint>(tint_f32_to_i32(mat4x4_f32[0].x))));
+  (*tint_module_vars.s) = as_type<int>((as_type<uint>(v_20) + as_type<uint>(tint_f32_to_i32(arr2_vec3_f32[0].x))));
 }
 
 [[max_total_threads_per_threadgroup(1)]]

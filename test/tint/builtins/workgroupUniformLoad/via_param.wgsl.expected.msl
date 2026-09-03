@@ -29,7 +29,7 @@ int foo(threadgroup int* const p) {
 }
 
 int bar(tint_module_vars_struct tint_module_vars) {
-  return foo((&(*tint_module_vars.v)[0u]));
+  return foo((&(*tint_module_vars.v)[0]));
 }
 
 void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {

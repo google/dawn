@@ -20,7 +20,7 @@ void main_inner(uint tint_local_index) {
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  W[0u] = int(42);
+  W[int(0)] = int(42);
 }
 
 [numthreads(1, 1, 1)]

@@ -21,11 +21,11 @@ void foo(inout Matrix_left_f32_8x8 m, inout Matrix_left_f32_8x8 m_array[4], inou
   uint v_2 = 0u;
   buffer.GetDimensions(v_2);
   bool v_3 = (456u <= (v_2 / 4u));
-  m_array[0u].Store(buffer, (0u + (select(v_3, 0u, 0u) * 4u)), (select(v_3, 64u, 8u) * 4u), MatrixLayout::RowMajor);
+  m_array[int(0)].Store(buffer, (0u + (select(v_3, 0u, 0u) * 4u)), (select(v_3, 64u, 8u) * 4u), MatrixLayout::RowMajor);
   uint v_4 = 0u;
   buffer.GetDimensions(v_4);
   bool v_5 = (456u <= (v_4 / 4u));
-  m_nested_array[1u][2u].Store(buffer, (0u + (select(v_5, 0u, 0u) * 4u)), (select(v_5, 64u, 8u) * 4u), MatrixLayout::RowMajor);
+  m_nested_array[int(1)][int(2)].Store(buffer, (0u + (select(v_5, 0u, 0u) * 4u)), (select(v_5, 64u, 8u) * 4u), MatrixLayout::RowMajor);
   uint v_6 = 0u;
   buffer.GetDimensions(v_6);
   bool v_7 = (456u <= (v_6 / 4u));
