@@ -30,28 +30,19 @@
 
 #include <string>
 
-#include "src/tint/lang/core/intrinsic/table.h"
-#include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/break_if.h"
-#include "src/tint/lang/core/ir/builtin_call.h"
-#include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/continue.h"
-#include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/loop.h"
-#include "src/tint/lang/core/ir/member_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/switch.h"
-#include "src/tint/lang/core/ir/swizzle.h"
-#include "src/tint/lang/core/ir/unary.h"
-#include "src/tint/lang/core/ir/validator/validator.h"
+#include "src/tint/lang/core/ir/validator/validator.h"  // IWYU pragma: export
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
@@ -114,7 +105,6 @@ class Functional {
 
     ir::Disassembler& Disassemble();
 
-    void CheckRootBlock(const Block* blk);
     void CheckFunction(const Function* func);
     void CheckFunctionParam(const FunctionParam* param);
     void CheckEntryPoint(const Function* func);
@@ -122,54 +112,18 @@ class Functional {
     void CheckBlock(const Block* blk);
     void CheckInstruction(const Instruction* inst);
 
-    // Validates the alignment of the given instruction
-    /// @param inst the instruction to validate
-    void CheckAlignment(const Instruction* inst);
-
-    void CheckBuiltinCall(const BuiltinCall* call);
-    void CheckCall(const Call* call);
     void CheckContinue(const Continue* c);
-    void CheckCoreBuiltinCall(const CoreBuiltinCall* call,
-                              const core::intrinsic::Overload& overload);
     void CheckIf(const If* if_);
     void CheckLoop(const Loop* l);
     void CheckLoopBody(const Loop* loop);
     void CheckLoopContinuing(const Loop* loop);
-    void CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call);
     void CheckSwitch(const Switch* s);
     void CheckTerminator(const Terminator* b);
-
-    void CheckSubgroupCall(const CoreBuiltinCall* call);
-    void CheckExtractBitsCall(const CoreBuiltinCall* call);
-    void CheckInsertBitsCall(const CoreBuiltinCall* call);
-    void CheckLdexpCall(const CoreBuiltinCall* call);
-    void CheckQuantizeToF16(const CoreBuiltinCall* call);
-    void CheckPack2x16float(const CoreBuiltinCall* call);
-    void CheckClampCall(const CoreBuiltinCall* call);
-    void CheckSmoothstepCall(const CoreBuiltinCall* call);
-
-    struct UseInfo {
-        Usage use;
-        /// Variable/buffer size
-        uint32_t storage_size{};
-        /// Accumulated offset to the pointer
-        uint32_t offset{};
-        /// Pointed to size
-        uint32_t pointer_size{};
-    };
-
-    void CheckBuffersAndMatrices(const Var* var);
-    bool CheckBufferView(const CoreBuiltinCall* call, const Var* var, uint32_t buffer_size);
-    bool CheckSubgroupMatrixMemory(const CoreBuiltinCall* call,
-                                   const Var* var,
-                                   const UseInfo& info);
 
     Module& ir_;
     diag::List& diag_;
     ErrorSource error_source_;
     std::optional<ir::Disassembler> disassembler_;  // Use Disassemble()
-
-    constant::Eval const_eval_;
 
     SymbolTable symbols_ = SymbolTable::Wrap(ir_.symbols);
     core::type::Manager type_mgr_ = core::type::Manager::Wrap(ir_.Types());

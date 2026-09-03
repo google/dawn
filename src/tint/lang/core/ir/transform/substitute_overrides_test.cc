@@ -417,8 +417,9 @@ $B1: {  # root
     cfg.map[OverrideId{2}] = 125.0;
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason,
-              R"(error: The sourceLaneIndex argument of subgroupShuffle must be less than 128)");
+    EXPECT_EQ(
+        result.Failure().reason,
+        R"(error: subgroupShuffle: The sourceLaneIndex argument of subgroupShuffle must be less than 128)");
 }
 
 TEST_F(IR_SubstituteOverridesTest, OverrideWithQuantizeF16) {
@@ -2341,7 +2342,7 @@ $B1: {  # root
     ASSERT_NE(result, Success);
     EXPECT_EQ(
         result.Failure().reason,
-        R"(error: invalid buffer size (12 bytes) when used with bufferView (16 bytes required))");
+        R"(error: var: invalid buffer size (12 bytes) when used with bufferView (16 bytes required))");
 }
 
 TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_FixedSize_ConstOffset) {
@@ -2386,7 +2387,7 @@ $B1: {  # root
     ASSERT_NE(result, Success);
     EXPECT_EQ(
         result.Failure().reason,
-        R"(error: invalid buffer size (16 bytes) when used with bufferView (20 bytes required))");
+        R"(error: var: invalid buffer size (16 bytes) when used with bufferView (20 bytes required))");
 }
 
 TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_RuntimeArray) {
@@ -2431,7 +2432,7 @@ $B1: {  # root
     ASSERT_NE(result, Success);
     EXPECT_EQ(
         result.Failure().reason,
-        R"(error: invalid buffer size (12 bytes) when used with bufferView (16 bytes required))");
+        R"(error: var: invalid buffer size (12 bytes) when used with bufferView (16 bytes required))");
 }
 
 TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_RuntimeArray_ConstOffset) {
@@ -2476,7 +2477,7 @@ $B1: {  # root
     ASSERT_NE(result, Success);
     EXPECT_EQ(
         result.Failure().reason,
-        R"(error: invalid buffer size (16 bytes) when used with bufferView (20 bytes required))");
+        R"(error: var: invalid buffer size (16 bytes) when used with bufferView (20 bytes required))");
 }
 
 TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_RuntimeStruct) {
@@ -2531,7 +2532,7 @@ $B1: {  # root
     ASSERT_NE(result, Success);
     EXPECT_EQ(
         result.Failure().reason,
-        R"(error: invalid buffer size (16 bytes) when used with bufferView (20 bytes required))");
+        R"(error: var: invalid buffer size (16 bytes) when used with bufferView (20 bytes required))");
 }
 
 TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_RuntimeStruct_ConstOffset) {
@@ -2586,7 +2587,7 @@ $B1: {  # root
     ASSERT_NE(result, Success);
     EXPECT_EQ(
         result.Failure().reason,
-        R"(error: invalid buffer size (20 bytes) when used with bufferView (24 bytes required))");
+        R"(error: var: invalid buffer size (20 bytes) when used with bufferView (24 bytes required))");
 }
 
 TEST_F(IR_SubstituteOverridesTest, BufferView_OverrideSizedOffset) {
@@ -2627,7 +2628,7 @@ $B1: {  # root
     ASSERT_NE(result, Success);
     EXPECT_EQ(
         result.Failure().reason,
-        R"(error: bufferView offset (3 bytes) must be a multiple of result alignment (4 bytes))");
+        R"(error: bufferView: bufferView offset (3 bytes) must be a multiple of result alignment (4 bytes))");
 }
 
 TEST_F(IR_SubstituteOverridesTest, BufferArrayView_BufferSize) {
@@ -2690,7 +2691,7 @@ $B1: {  # root
     ASSERT_NE(result, Success);
     EXPECT_EQ(
         result.Failure().reason,
-        R"(error: invalid buffer size (24 bytes) when used with bufferArrayView (36 bytes required))");
+        R"(error: var: invalid buffer size (24 bytes) when used with bufferArrayView (36 bytes required))");
 }
 
 TEST_F(IR_SubstituteOverridesTest, BufferArrayView_Size) {
@@ -2751,8 +2752,9 @@ $B1: {  # root
     cfg.map[OverrideId{3}] = 16;
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason,
-              R"(error: bufferArrayView has invalid size (16 bytes, requires 20 bytes))");
+    EXPECT_EQ(
+        result.Failure().reason,
+        R"(error: bufferArrayView: bufferArrayView has invalid size (16 bytes, requires 20 bytes))");
 }
 
 TEST_F(IR_SubstituteOverridesTest, BufferArrayView_SizeMultiple) {
@@ -2815,7 +2817,7 @@ $B1: {  # root
     ASSERT_NE(result, Success);
     EXPECT_EQ(
         result.Failure().reason,
-        R"(error: bufferArrayView size (21 bytes) minus type offset (16 bytes) must be a multiple of the type stride (4 bytes))");
+        R"(error: bufferArrayView: bufferArrayView size (21 bytes) minus type offset (16 bytes) must be a multiple of the type stride (4 bytes))");
 }
 
 TEST_F(IR_SubstituteOverridesTest, BufferView_ThroughCall_Unsized) {
@@ -2872,7 +2874,7 @@ $B1: {  # root
     ASSERT_NE(result, Success);
     EXPECT_EQ(
         result.Failure().reason,
-        R"(error: invalid buffer size (12 bytes) when used with bufferView (16 bytes required))");
+        R"(error: var: invalid buffer size (12 bytes) when used with bufferView (16 bytes required))");
 }
 
 TEST_F(IR_SubstituteOverridesTest, BufferView_ThroughCall_SmallerSize) {
@@ -2928,7 +2930,7 @@ $B1: {  # root
     ASSERT_NE(result, Success);
     EXPECT_EQ(
         result.Failure().reason,
-        R"(error: invalid buffer size (16 bytes) when used with bufferView (20 bytes required))");
+        R"(error: var: invalid buffer size (16 bytes) when used with bufferView (20 bytes required))");
 }
 
 TEST_F(IR_SubstituteOverridesTest, Buffer_WorkgroupPtr_ThreeBytes) {
@@ -3706,9 +3708,8 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_Access_Struct) {
     auto* value = b.FunctionParam("mat", mat_ty);
     foo->SetParams({value});
     b.Append(foo->Block(), [&] {
-        auto* view =
-            b.CallExplicit(ty.ptr(storage, S), BuiltinFn::kBufferView,
-                           Vector<TemplateParameter, 1>{ty.runtime_array(ArrayElemType())}, v, 0_u);
+        auto* view = b.CallExplicit(ty.ptr(storage, S), BuiltinFn::kBufferView,
+                                    Vector<TemplateParameter, 1>{S}, v, 0_u);
         auto* access = b.Access(ty.ptr(storage, ty.runtime_array(ArrayElemType())), view, 1_u);
         MakeCall(access->Result(), value, o->Result(),
                  b.Constant(u32(MinStride() / ArrayStride())));

@@ -57,7 +57,10 @@ using namespace tint::core::fluent_types;  // NOLINT
 namespace tint::core::ir::validator {
 
 Validator::Validator(Module& mod, ErrorSource error_source)
-    : ir_(mod), error_source_(error_source), referenced_module_vars_(ir_) {}
+    : ir_(mod),
+      error_source_(error_source),
+      const_eval_(ir_.constant_values, diag_),
+      referenced_module_vars_(ir_) {}
 
 bool Validator::IsWGSLValidation() const {
     return error_source_ == ErrorSource::kWgsl;
@@ -853,7 +856,10 @@ void Validator::CheckStageRestrictedInstructions() {
 
 void Validator::CheckRootBlock(const Block* blk) {
     block_stack_.Push(blk);
-    TINT_DEFER(block_stack_.Pop());
+    TINT_DEFER({
+        block_stack_.Pop();
+        TINT_ASSERT(block_stack_.IsEmpty());
+    });
 
     Hashset<const Value*, 8> pipeline_evaluatable{};
 
@@ -898,7 +904,10 @@ void Validator::CheckRootBlock(const Block* blk) {
                     AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
                 }
             },
-            [&](const Var* var) { CheckInstruction(var); },
+            [&](const Var* var) {
+                CheckInstruction(var);
+                CheckBuffersAndMatrices(var);
+            },
             [&](const Let* let) {
                 if (ir_.properties.Contains(Property::kAllowModuleScopeLets)) {
                     CheckInstruction(let);

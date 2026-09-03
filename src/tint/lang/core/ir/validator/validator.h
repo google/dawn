@@ -195,6 +195,16 @@ class Validator {
     Result<SuccessType> Run();
 
   private:
+    struct UseInfo {
+        Usage use;
+        /// Variable/buffer size
+        uint32_t storage_size{};
+        /// Accumulated offset to the pointer
+        uint32_t offset{};
+        /// Pointed to size
+        uint32_t pointer_size{};
+    };
+
     // Returns true if we're validating in the context of WGSL. The other option is we're validating
     // as IR. The primary difference is how const-eval checks are run as the semantics are
     // different.
@@ -417,7 +427,6 @@ class Validator {
     void CheckLet(const Let* l);
     void CheckCall(const Call* call);
     void CheckBuiltinCall(const BuiltinCall* call);
-    void CheckCoreBuiltinCall(const CoreBuiltinCall* call);
     void CheckMemberBuiltinCall(const MemberBuiltinCall* call);
     void CheckConstruct(const Construct* construct);
     void CheckConvert(const Convert* convert);
@@ -449,6 +458,28 @@ class Validator {
     void CheckCoreBinaryCall(const CoreBinary* call);
     void CheckBinaryDivModCall(const CoreBinary* call);
     void CheckBinaryShiftCall(const CoreBinary* call);
+
+    void CheckCoreBuiltinCall(const CoreBuiltinCall* call,
+                              const core::intrinsic::Overload& overload);
+    void CheckSubgroupCall(const CoreBuiltinCall* call);
+    void CheckExtractBitsCall(const CoreBuiltinCall* call);
+    void CheckInsertBitsCall(const CoreBuiltinCall* call);
+    void CheckLdexpCall(const CoreBuiltinCall* call);
+    void CheckQuantizeToF16(const CoreBuiltinCall* call);
+    void CheckPack2x16float(const CoreBuiltinCall* call);
+    void CheckClampCall(const CoreBuiltinCall* call);
+    void CheckSmoothstepCall(const CoreBuiltinCall* call);
+    void CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call);
+
+    void CheckBuffersAndMatrices(const Var* var);
+    bool CheckBufferView(const CoreBuiltinCall* call, const Var* var, uint32_t buffer_size);
+    bool CheckSubgroupMatrixMemory(const CoreBuiltinCall* call,
+                                   const Var* var,
+                                   const UseInfo& info);
+
+    // Validates the alignment of the given instruction
+    /// @param inst the instruction to validate
+    void CheckAlignment(const Instruction* inst);
 
     void CheckControlsAllowingIf(const Exit* exit, const Instruction* control);
 
@@ -510,6 +541,8 @@ class Validator {
     Module& ir_;
     ErrorSource error_source_ = ErrorSource::kIr;
     diag::List diag_;
+
+    constant::Eval const_eval_;
 
     std::optional<ir::Disassembler> disassembler_;  // Use Disassemble()
 

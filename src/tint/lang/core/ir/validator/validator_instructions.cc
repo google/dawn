@@ -131,6 +131,14 @@ bool ContainsType(const core::type::Type* ty) {
     return found;
 }
 
+const constant::Value* GetConstArg(const CoreBuiltinCall* call, uint32_t param_index) {
+    if ((call->Args().size() <= param_index) || (call->Args()[param_index] == nullptr) ||
+        (!call->Args()[param_index]->Is<ir::Constant>())) {
+        return nullptr;
+    }
+    return call->Args()[param_index]->As<ir::Constant>()->Value();
+}
+
 }  // namespace
 
 uint64_t Validator::ElementsCount(const core::type::Type* root_ty) {
@@ -252,6 +260,11 @@ void Validator::CheckInstruction(const Instruction* inst) {
         [&](const Override* o) { CheckOverride(o); },                      //
         [&](const Var* var) { CheckVar(var); },                            //
         TINT_ICE_ON_NO_MATCH);
+
+    // Only check alignment if the instruction passed previous checks.
+    if (!diag_.ContainsErrors()) {
+        CheckAlignment(inst);
+    }
 }
 
 void Validator::CheckOverride(const Override* o) {
@@ -556,14 +569,34 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
     }
     stage_restricted_instructions_.Add(call, stages);
 
+    TINT_ASSERT(builtin->return_type);
+    if (builtin->return_type != call->Result()->Type()) {
+        AddError(call) << "call result type " << NameOf(call->Result()->Type())
+                       << " does not match builtin return type " << NameOf(builtin->return_type);
+        return;
+    }
+
+    // Check evaluation stage of parameters that are required to be const-expressions.
+    for (uint32_t i = 0; i < builtin->parameters.Length(); i++) {
+        const auto& p = builtin->parameters[i];
+        const auto* arg = call->Args()[i];
+        if (p.is_const && !arg->Is<Constant>()) {
+            AddError(call, BuiltinCall::kArgsOperandOffset + i)
+                << "the " << style::Variable(p.usage) << " argument must be a constant";
+            return;
+        }
+    }
+
     const CoreBuiltinCall* bc = call->As<CoreBuiltinCall>();
     if (bc == nullptr) {
         return;
     }
-    CheckCoreBuiltinCall(bc);
+
+    CheckCoreBuiltinCall(bc, builtin.Get());
 }
 
-void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call) {
+void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
+                                     const core::intrinsic::Overload& overload) {
     if (ir_.properties.Contains(Property::kDisallowVectorMinMaxClamp)) {
         switch (call->Func()) {
             case core::BuiltinFn::kClamp:
@@ -588,6 +621,240 @@ void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call) {
                 break;
             default:
                 break;
+        }
+    }
+
+    auto idx_for_usage = [&](core::ParameterUsage usage) -> std::optional<uint32_t> {
+        for (uint32_t i = 0; i < overload.parameters.Length(); ++i) {
+            auto& p = overload.parameters[i];
+            if (p.usage == usage) {
+                return i;
+            }
+        }
+        return std::nullopt;
+    };
+
+    auto check_arg_in_range = [&](core::ParameterUsage usage, int32_t min, int32_t max) {
+        auto idx_opt = idx_for_usage(usage);
+        if (!idx_opt.has_value()) {
+            return;
+        }
+        uint32_t idx = idx_opt.value();
+        TINT_ASSERT(idx < call->Args().size());
+
+        auto* val = call->Args()[idx];
+        auto* const_val = val->As<ir::Constant>();
+        TINT_ASSERT(const_val);
+        auto* cnst = const_val->Value();
+
+        if (val->Type()->Is<core::type::Vector>()) {
+            for (size_t i = 0; i < cnst->NumElements(); i++) {
+                auto value = cnst->Index(i)->ValueAs<int32_t>();
+                if (value < min || value > max) {
+                    AddError(call, idx)
+                        << value << " outside range of [" << min << ", " << max << "]";
+                    return;
+                }
+            }
+        } else {
+            auto value = cnst->ValueAs<int32_t>();
+            if (value < min || value > max) {
+                AddError(call, idx) << value << " outside range of [" << min << ", " << max << "]";
+                return;
+            }
+        }
+    };
+
+    if (core::IsTexture(call->Func())) {
+        check_arg_in_range(core::ParameterUsage::kComponent, 0, 3);
+        check_arg_in_range(core::ParameterUsage::kOffset, -8, 7);
+    }
+
+    if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
+        call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
+        CheckSubgroupMatrixOpOffset(call);
+    }
+
+    if (!IsWGSLValidation()) {
+        return;
+    }
+
+    switch (call->Func()) {
+        case core::BuiltinFn::kSubgroupShuffle:
+        case core::BuiltinFn::kSubgroupShuffleXor:
+        case core::BuiltinFn::kSubgroupShuffleUp:
+        case core::BuiltinFn::kSubgroupShuffleDown:
+            CheckSubgroupCall(call);
+            break;
+        case core::BuiltinFn::kExtractBits:
+            CheckExtractBitsCall(call);
+            break;
+        case core::BuiltinFn::kInsertBits:
+            CheckInsertBitsCall(call);
+            break;
+        case core::BuiltinFn::kLdexp:
+            CheckLdexpCall(call);
+            break;
+        case core::BuiltinFn::kClamp:
+            CheckClampCall(call);
+            break;
+        case core::BuiltinFn::kSmoothstep:
+            CheckSmoothstepCall(call);
+            break;
+        case core::BuiltinFn::kQuantizeToF16:
+            CheckQuantizeToF16(call);
+            break;
+        case core::BuiltinFn::kPack2X16Float:
+            CheckPack2x16float(call);
+            break;
+        default:
+            break;
+    }
+}
+
+void Validator::CheckSubgroupCall(const CoreBuiltinCall* call) {
+    if (auto const_val = GetConstArg(call, 1)) {
+        auto as_aint = const_val->ValueAs<AInt>();
+        // User friendly param name.
+        std::string paramName = "sourceLaneIndex";
+        switch (call->Func()) {
+            case core::BuiltinFn::kSubgroupShuffleXor:
+                paramName = "mask";
+                break;
+            case core::BuiltinFn::kSubgroupShuffleUp:
+            case core::BuiltinFn::kSubgroupShuffleDown:
+                paramName = "delta";
+                break;
+            default:
+                break;
+        }
+
+        if (as_aint >= tint::internal_limits::kMaxSubgroupSize) {
+            AddError(call, 1) << "The " << paramName << " argument of " << call->FriendlyName()
+                              << " must be less than " << tint::internal_limits::kMaxSubgroupSize;
+        } else if (as_aint < 0) {
+            AddError(call, 1) << "The " << paramName << " argument of " << call->FriendlyName()
+                              << " must be greater than or equal to zero";
+        }
+    }
+}
+
+void Validator::CheckExtractBitsCall(const CoreBuiltinCall* call) {
+    // This can be u32/i32 or vector of those types.
+    auto* param0 = call->Args()[0];
+    auto* const_val_offset = GetConstArg(call, 1);
+    auto* const_val_count = GetConstArg(call, 2);
+    if (const_val_count && const_val_offset) {
+        auto* zero = const_eval_.Zero(param0->Type(), {}, Source{}).Get();
+        auto fakeArgs = Vector{zero, const_val_offset, const_val_count};
+        [[maybe_unused]] auto result =
+            const_eval_.extractBits(param0->Type(), fakeArgs, ir_.SourceOf(call));
+    }
+}
+
+void Validator::CheckInsertBitsCall(const CoreBuiltinCall* call) {
+    // This can be u32/i32 or vector of those types.
+    auto* param0 = call->Args()[0];
+    auto* const_val_offset = GetConstArg(call, 2);
+    auto* const_val_count = GetConstArg(call, 3);
+    if (const_val_count && const_val_offset) {
+        auto* zero = const_eval_.Zero(param0->Type(), {}, Source{}).Get();
+        auto fakeArgs = Vector{zero, zero, const_val_offset, const_val_count};
+        [[maybe_unused]] auto result =
+            const_eval_.insertBits(param0->Type(), fakeArgs, ir_.SourceOf(call));
+    }
+}
+
+void Validator::CheckLdexpCall(const CoreBuiltinCall* call) {
+    auto* param0 = call->Args()[0];
+    if (auto const_val = GetConstArg(call, 1)) {
+        auto* zero = const_eval_.Zero(param0->Type(), {}, Source{}).Get();
+        auto fakeArgs = Vector{zero, const_val};
+        [[maybe_unused]] auto result =
+            const_eval_.ldexp(param0->Type(), fakeArgs, ir_.SourceOf(call));
+    }
+}
+
+void Validator::CheckQuantizeToF16(const CoreBuiltinCall* call) {
+    if (auto const_val = GetConstArg(call, 0)) {
+        [[maybe_unused]] auto result = const_eval_.quantizeToF16(
+            call->Result()->Type(), Vector{const_val}, ir_.SourceOf(call));
+    }
+}
+
+void Validator::CheckPack2x16float(const CoreBuiltinCall* call) {
+    if (auto const_val = GetConstArg(call, 0)) {
+        [[maybe_unused]] auto result = const_eval_.pack2x16float(
+            call->Result()->Type(), Vector{const_val}, ir_.SourceOf(call));
+    }
+}
+
+void Validator::CheckClampCall(const CoreBuiltinCall* call) {
+    auto* const_val_low = GetConstArg(call, 1);
+    auto* const_val_high = GetConstArg(call, 2);
+    if (const_val_low && const_val_high) {
+        auto fakeArgs = Vector{const_val_low, const_val_low, const_val_high};
+        [[maybe_unused]] auto result =
+            const_eval_.clamp(call->Result()->Type(), fakeArgs, ir_.SourceOf(call));
+    }
+}
+
+void Validator::CheckSmoothstepCall(const CoreBuiltinCall* call) {
+    auto* const_val_low = GetConstArg(call, 0);
+    auto* const_val_high = GetConstArg(call, 1);
+    if (const_val_low && const_val_high) {
+        auto fakeArgs = Vector{const_val_low, const_val_high, const_val_high};
+        [[maybe_unused]] auto result =
+            const_eval_.smoothstep(call->Result()->Type(), fakeArgs, ir_.SourceOf(call));
+    }
+}
+
+void Validator::CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call) {
+    const Value* p_arg = call->Args()[0];
+    const Value* offset_arg = call->Args()[1];
+
+    const core::type::Pointer* ptr_ty = p_arg->Type()->As<core::type::Pointer>();
+    TINT_ASSERT(ptr_ty);
+
+    const core::type::Array* arr_ty = ptr_ty->StoreType()->As<core::type::Array>();
+    TINT_ASSERT(arr_ty);
+
+    auto const_count = arr_ty->ConstantCount();
+    if (!const_count.has_value()) {
+        return;
+    }
+
+    const core::type::SubgroupMatrix* mat_ty = nullptr;
+    if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad) {
+        mat_ty = call->Result()->Type()->As<core::type::SubgroupMatrix>();
+    } else if (call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
+        mat_ty = call->Args()[2]->Type()->As<core::type::SubgroupMatrix>();
+    }
+    TINT_ASSERT(mat_ty);
+
+    auto mat_comp_size = mat_ty->Type()->Size();
+    TINT_ASSERT(mat_comp_size > 0);
+
+    auto limit = const_count.value();
+
+    if (auto* offset_const = offset_arg->As<ir::Constant>()) {
+        auto* offset_val = offset_const->Value();
+        uint32_t offset = 0;
+        if (offset_arg->Type()->IsUnsignedIntegerScalar()) {
+            offset = offset_val->ValueAs<u32>();
+        } else if (offset_arg->Type()->IsSignedIntegerScalar()) {
+            auto ival = offset_val->ValueAs<i32>();
+            if (ival < 0) {
+                AddError(call, 1) << "the offset argument of " << call->Func()
+                                  << " must be non-negative";
+                return;
+            }
+            offset = static_cast<uint32_t>(ival);
+        }
+
+        if (offset >= limit) {
+            AddError(call, 1) << "the offset argument of " << call->Func() << " (" << offset
+                              << ") is out of bounds of the array type of size " << limit;
         }
     }
 }

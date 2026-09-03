@@ -2335,8 +2335,9 @@ TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffleXor) {
 
     auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason,
-              R"(5:7 error: The mask argument of subgroupShuffleXor must be less than 128)");
+    EXPECT_EQ(
+        res.Failure().reason,
+        R"(5:7 error: subgroupShuffleXor: The mask argument of subgroupShuffleXor must be less than 128)");
 }
 
 TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffleDown) {
@@ -2365,8 +2366,9 @@ TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffleDown) {
 
     auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason,
-              R"(5:7 error: The delta argument of subgroupShuffleDown must be less than 128)");
+    EXPECT_EQ(
+        res.Failure().reason,
+        R"(5:7 error: subgroupShuffleDown: The delta argument of subgroupShuffleDown must be less than 128)");
 }
 
 TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffle) {
@@ -2397,7 +2399,7 @@ TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffle) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason,
-        R"(5:7 error: The sourceLaneIndex argument of subgroupShuffle must be less than 128)");
+        R"(5:7 error: subgroupShuffle: The sourceLaneIndex argument of subgroupShuffle must be less than 128)");
 }
 
 TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffle_SignedHigh) {
@@ -2428,7 +2430,7 @@ TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffle_SignedHigh) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason,
-        R"(5:7 error: The sourceLaneIndex argument of subgroupShuffle must be less than 128)");
+        R"(5:7 error: subgroupShuffle: The sourceLaneIndex argument of subgroupShuffle must be less than 128)");
 }
 
 TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffle_SignedLow) {
@@ -2460,7 +2462,7 @@ TEST_F(IR_ValidatorTest, IncorrectDomainSubgroupsShuffle_SignedLow) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason,
-        R"(5:7 error: The sourceLaneIndex argument of subgroupShuffle must be greater than or equal to zero)");
+        R"(5:7 error: subgroupShuffle: The sourceLaneIndex argument of subgroupShuffle must be greater than or equal to zero)");
 }
 
 TEST_F(IR_ValidatorTest, IncorrectDomainkExtractBits) {
