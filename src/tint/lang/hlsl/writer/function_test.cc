@@ -955,6 +955,29 @@ TEST_F(HlslWriterTest, WorkgroupStorageSizeSimple) {
     EXPECT_EQ(32u, output_.workgroup_info.storage_size);
 }
 
+TEST_F(HlslWriterTest, WorkgroupStorageSizeBeforeSplitWorkgroupAtomics) {
+    auto* str = ty.Struct(mod.symbols.New("S"), {
+                                                    {mod.symbols.New("data"), ty.u32()},
+                                                    {mod.symbols.New("counter"), ty.atomic<u32>()},
+                                                });
+    auto* var = mod.root_block->Append(b.Var("wg", ty.ptr(workgroup, str)));
+
+    auto* func = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    b.Append(func->Block(), [&] {
+        auto* atomic = b.Access(ty.ptr(workgroup, ty.atomic<u32>()), var, 1_u);
+        b.Call(ty.void_(), core::BuiltinFn::kAtomicStore, atomic, 0_u);
+        b.Return(func);
+    });
+
+    Options options;
+    options.workarounds.d3d12_decompose_workgroup_access = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
+    ASSERT_TRUE(output_.workgroup_storage_size_before_split_workgroup_atomics.has_value());
+    EXPECT_EQ(16u, *output_.workgroup_storage_size_before_split_workgroup_atomics);
+    EXPECT_EQ(32u, output_.workgroup_info.storage_size);
+}
+
 TEST_F(HlslWriterTest, WorkgroupStorageSizeCompoundTypes) {
     Vector members{
         ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,

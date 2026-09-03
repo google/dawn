@@ -128,6 +128,8 @@ override x: u32;
     wgpu::Buffer buffer;
 };
 
+class D3D12DecomposeWorkgroupAccessValidationTest : public DawnTest {};
+
 // Test workgroup size validation with fixed values.
 TEST_P(WorkgroupSizeValidationTest, WithFixedValues) {
     auto CheckShaderWithWorkgroupSize = [this](bool success, uint32_t x, uint32_t y, uint32_t z) {
@@ -459,6 +461,39 @@ TEST_P(WorkgroupSizeValidationTest, WorkgroupAlignValidationDivergence) {
     ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&desc));
 }
 
+// Test that the error identifies when SplitWorkgroupAtomics causes workgroup storage to exceed the
+// limit, even though the original shader is within the limit.
+TEST_P(D3D12DecomposeWorkgroupAccessValidationTest, WorkgroupStorageExceedsLimitAfterTransform) {
+    const uint32_t limit = GetSupportedLimits().maxComputeWorkgroupStorageSize;
+    ASSERT_EQ(limit % 8, 0u);
+    const uint32_t arrayLength = limit / 8;
+
+    std::ostringstream shader;
+    shader << R"(
+struct S {
+    data: u32,
+    counter: atomic<u32>,
+}
+
+var<workgroup> wg: array<S, )"
+           << arrayLength << R"(>;
+
+@compute @workgroup_size(1)
+fn main() {
+    wg[0].data = 1u;
+    atomicStore(&wg[0].counter, 0u);
+})";
+
+    wgpu::ComputePipelineDescriptor desc;
+    desc.compute.module = utils::CreateShaderModule(device, shader.str());
+
+    std::ostringstream expectedError;
+    expectedError << "the SplitWorkgroupAtomics transform increased workgroup storage usage from "
+                  << limit << " bytes to " << limit + limit / 2 << " bytes";
+    ASSERT_DEVICE_ERROR_MSG(device.CreateComputePipeline(&desc),
+                            testing::HasSubstr(expectedError.str()));
+}
+
 // TODO(crbug.com/462151326): Fix pipeline creation error of the inner layer to surface up properly
 // in WebGPUBackend.
 DAWN_INSTANTIATE_TEST(WorkgroupSizeValidationTest,
@@ -469,6 +504,9 @@ DAWN_INSTANTIATE_TEST(WorkgroupSizeValidationTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+DAWN_INSTANTIATE_TEST(D3D12DecomposeWorkgroupAccessValidationTest,
+                      D3D12Backend({"d3d12_decompose_workgroup_access"}));
 
 }  // anonymous namespace
 }  // namespace dawn

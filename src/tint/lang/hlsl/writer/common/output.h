@@ -71,6 +71,9 @@ struct Output {
     /// The subgroup matrix information.
     SubgroupMatrixInfo subgroup_matrix_info{};
 
+    /// The workgroup storage size before SplitWorkgroupAtomics, if the transform was enabled
+    std::optional<uint64_t> workgroup_storage_size_before_split_workgroup_atomics;
+
     /// True if the shader uses vertex_index
     bool has_vertex_index = false;
 

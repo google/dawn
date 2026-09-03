@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_RAISE_H_
 #define SRC_TINT_LANG_HLSL_WRITER_RAISE_RAISE_H_
 
+#include <optional>
+
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/utils/result.h"
 
@@ -38,11 +40,17 @@ class Module;
 
 namespace tint::hlsl::writer {
 
+/// The result of running Raise().
+struct RaiseResult {
+    /// The workgroup storage size before splitting workgroup atomics, if the transform is enabled.
+    std::optional<uint64_t> workgroup_storage_size_before_split_workgroup_atomics;
+};
+
 /// Raise a core IR module to the HLSL dialect of the IR.
 /// @param module the core IR module to raise to HLSL dialect
 /// @param options the printer options
 /// @returns success or failure
-Result<SuccessType> Raise(core::ir::Module& module, const Options& options);
+Result<RaiseResult> Raise(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::hlsl::writer
 

@@ -32,6 +32,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/reflection.h"
 #include "src/tint/lang/core/ir/transform/array_length_from.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
@@ -81,7 +82,9 @@
 
 namespace tint::hlsl::writer {
 
-Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
+Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
+    RaiseResult raise_result;
+
     TINT_CHECK_RESULT(core::ir::transform::SingleEntryPoint(module, options.entry_point_name));
 
     TINT_CHECK_RESULT(
@@ -300,6 +303,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // Split workgroup variables that contain atomics into separate data and atomic variables.
     // Must run after DirectVariableAccess and before DecomposeAccess.
     if (options.workarounds.d3d12_decompose_workgroup_access) {
+        TINT_CHECK_RESULT_UNWRAP(workgroup_info, core::ir::GetWorkgroupInfo(module));
+        raise_result.workgroup_storage_size_before_split_workgroup_atomics =
+            workgroup_info.storage_size;
         TINT_CHECK_RESULT(raise::SplitWorkgroupAtomics(module));
     }
 
@@ -410,7 +416,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // Anything which runs after this needs to handle `Property::kAllowModuleScopedLets`
     TINT_CHECK_RESULT(raise::PromoteInitializers(module));
 
-    return Success;
+    return raise_result;
 }
 
 }  // namespace tint::hlsl::writer

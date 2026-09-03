@@ -258,10 +258,22 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     if (r.stage == SingleShaderStage::Compute) {
         // Validate workgroup size and workgroup storage size.
         Extent3D workgroupSize;
-        DAWN_TRY_ASSIGN(workgroupSize,
-                        ValidateComputeStageWorkgroupSize(
-                            result->workgroup_info, r.usesSubgroupMatrix, r.maxSubgroupSize,
-                            r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
+        auto validationResult = ValidateComputeStageWorkgroupSize(
+            result->workgroup_info, r.usesSubgroupMatrix, r.maxSubgroupSize, r.limits,
+            r.adapterSupportedLimits.UnsafeGetValue());
+        if (result->workgroup_storage_size_before_split_workgroup_atomics.has_value() &&
+            *result->workgroup_storage_size_before_split_workgroup_atomics <=
+                r.limits.maxComputeWorkgroupStorageSize &&
+            result->workgroup_info.storage_size > r.limits.maxComputeWorkgroupStorageSize) {
+            DAWN_TRY_ASSIGN_CONTEXT(
+                workgroupSize, std::move(validationResult),
+                "the SplitWorkgroupAtomics transform increased workgroup storage usage "
+                "from %u bytes to %u bytes",
+                *result->workgroup_storage_size_before_split_workgroup_atomics,
+                result->workgroup_info.storage_size);
+        } else {
+            DAWN_TRY_ASSIGN(workgroupSize, std::move(validationResult));
+        }
 
         if (result->workgroup_info.subgroup_size.has_value()) {
             const uint32_t explicitSubgroupSize = result->workgroup_info.subgroup_size.value();
