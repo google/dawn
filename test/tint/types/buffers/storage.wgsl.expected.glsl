@@ -7,7 +7,6 @@ buffer f_weights_block_ssbo {
   float inner[];
 } v;
 void main() {
-  uint v_1 = (uint(v.inner.length()) - 1u);
-  uint v_2 = min(uint(0), v_1);
-  float a = v.inner[v_2];
+  uint v_1 = min(0u, (uint(v.inner.length()) - 1u));
+  float a = v.inner[v_1];
 }

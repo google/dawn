@@ -104,10 +104,10 @@ float3 loadPosition(uint vertexIndex, tint_array_lengths_struct tint_array_lengt
 void doIgnore(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
   uint g42 = (*tint_module_vars.uniforms).numTriangles;
   uint kj6 = (*tint_module_vars.dbg).value1;
-  uint b53 = atomic_load_explicit((&(*tint_module_vars.counters).values[min(uint(0), (tint_array_lengths.tint_array_length_0_2 - 1u))]), memory_order_relaxed);
-  uint rwg = (*tint_module_vars.indices).values[min(uint(0), (tint_array_lengths.tint_array_length_0_1 - 1u))];
-  float rb5 = (*tint_module_vars.positions).values[min(uint(0), (tint_array_lengths.tint_array_length_0_3 - 1u))];
-  int g55 = atomic_load_explicit((&(*tint_module_vars.LUT).values[min(uint(0), (tint_array_lengths.tint_array_length_0_4 - 1u))]), memory_order_relaxed);
+  uint b53 = atomic_load_explicit((&(*tint_module_vars.counters).values[min(0u, (tint_array_lengths.tint_array_length_0_2 - 1u))]), memory_order_relaxed);
+  uint rwg = (*tint_module_vars.indices).values[min(0u, (tint_array_lengths.tint_array_length_0_1 - 1u))];
+  float rb5 = (*tint_module_vars.positions).values[min(0u, (tint_array_lengths.tint_array_length_0_3 - 1u))];
+  int g55 = atomic_load_explicit((&(*tint_module_vars.LUT).values[min(0u, (tint_array_lengths.tint_array_length_0_4 - 1u))]), memory_order_relaxed);
 }
 
 void main_count_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
@@ -220,10 +220,10 @@ struct tint_module_vars_struct {
 void doIgnore(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
   uint g42 = (*tint_module_vars.uniforms).numTriangles;
   uint kj6 = (*tint_module_vars.dbg).value1;
-  uint b53 = atomic_load_explicit((&(*tint_module_vars.counters).values[min(uint(0), (tint_array_lengths.tint_array_length_0_1 - 1u))]), memory_order_relaxed);
-  uint rwg = (*tint_module_vars.indices).values[min(uint(0), (tint_array_lengths.tint_array_length_0_3 - 1u))];
-  float rb5 = (*tint_module_vars.positions).values[min(uint(0), (tint_array_lengths.tint_array_length_0_4 - 1u))];
-  int g55 = atomic_load_explicit((&(*tint_module_vars.LUT).values[min(uint(0), (tint_array_lengths.tint_array_length_0_2 - 1u))]), memory_order_relaxed);
+  uint b53 = atomic_load_explicit((&(*tint_module_vars.counters).values[min(0u, (tint_array_lengths.tint_array_length_0_1 - 1u))]), memory_order_relaxed);
+  uint rwg = (*tint_module_vars.indices).values[min(0u, (tint_array_lengths.tint_array_length_0_3 - 1u))];
+  float rb5 = (*tint_module_vars.positions).values[min(0u, (tint_array_lengths.tint_array_length_0_4 - 1u))];
+  int g55 = atomic_load_explicit((&(*tint_module_vars.LUT).values[min(0u, (tint_array_lengths.tint_array_length_0_2 - 1u))]), memory_order_relaxed);
 }
 
 void main_create_lut_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
@@ -353,10 +353,10 @@ float3 loadPosition(uint vertexIndex, tint_array_lengths_struct tint_array_lengt
 void doIgnore(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
   uint g42 = (*tint_module_vars.uniforms).numTriangles;
   uint kj6 = (*tint_module_vars.dbg).value1;
-  uint b53 = atomic_load_explicit((&(*tint_module_vars.counters).values[min(uint(0), (tint_array_lengths.tint_array_length_0_4 - 1u))]), memory_order_relaxed);
-  uint rwg = (*tint_module_vars.indices).values[min(uint(0), (tint_array_lengths.tint_array_length_0_1 - 1u))];
-  float rb5 = (*tint_module_vars.positions).values[min(uint(0), (tint_array_lengths.tint_array_length_0_3 - 1u))];
-  int g55 = atomic_load_explicit((&(*tint_module_vars.LUT).values[min(uint(0), (tint_array_lengths.tint_array_length_0_2 - 1u))]), memory_order_relaxed);
+  uint b53 = atomic_load_explicit((&(*tint_module_vars.counters).values[min(0u, (tint_array_lengths.tint_array_length_0_4 - 1u))]), memory_order_relaxed);
+  uint rwg = (*tint_module_vars.indices).values[min(0u, (tint_array_lengths.tint_array_length_0_1 - 1u))];
+  float rb5 = (*tint_module_vars.positions).values[min(0u, (tint_array_lengths.tint_array_length_0_3 - 1u))];
+  int g55 = atomic_load_explicit((&(*tint_module_vars.LUT).values[min(0u, (tint_array_lengths.tint_array_length_0_2 - 1u))]), memory_order_relaxed);
 }
 
 void main_sort_triangles_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {

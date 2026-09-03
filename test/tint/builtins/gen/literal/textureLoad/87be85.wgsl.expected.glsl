@@ -15,14 +15,11 @@ uniform f_TintTextureUniformData_ubo {
 } v_1;
 uniform highp sampler2DArray f_arg_0;
 vec4 textureLoad_87be85() {
-  uint v_2 = (uint(textureSize(f_arg_0, 0).z) - 1u);
-  uint v_3 = min(uint(1), v_2);
-  uint v_4 = (v_1.metadata[0u].x - 1u);
-  uint v_5 = min(uint(1), v_4);
-  uvec2 v_6 = (uvec2(textureSize(f_arg_0, int(v_5)).xy) - uvec2(1u));
-  ivec2 v_7 = ivec2(min(uvec2(ivec2(1)), v_6));
-  ivec3 v_8 = ivec3(v_7, int(v_3));
-  vec4 res = texelFetch(f_arg_0, v_8, int(v_5));
+  uint v_2 = min(1u, (uint(textureSize(f_arg_0, 0).z) - 1u));
+  uint v_3 = min(1u, (v_1.metadata[0u].x - 1u));
+  ivec2 v_4 = ivec2(min(uvec2(1u), (uvec2(textureSize(f_arg_0, int(v_3)).xy) - uvec2(1u))));
+  ivec3 v_5 = ivec3(v_4, int(v_2));
+  vec4 res = texelFetch(f_arg_0, v_5, int(v_3));
   return res;
 }
 void main() {
@@ -43,14 +40,11 @@ uniform TintTextureUniformData_1_ubo {
 } v_1;
 uniform highp sampler2DArray arg_0;
 vec4 textureLoad_87be85() {
-  uint v_2 = (uint(textureSize(arg_0, 0).z) - 1u);
-  uint v_3 = min(uint(1), v_2);
-  uint v_4 = (v_1.metadata[0u].x - 1u);
-  uint v_5 = min(uint(1), v_4);
-  uvec2 v_6 = (uvec2(textureSize(arg_0, int(v_5)).xy) - uvec2(1u));
-  ivec2 v_7 = ivec2(min(uvec2(ivec2(1)), v_6));
-  ivec3 v_8 = ivec3(v_7, int(v_3));
-  vec4 res = texelFetch(arg_0, v_8, int(v_5));
+  uint v_2 = min(1u, (uint(textureSize(arg_0, 0).z) - 1u));
+  uint v_3 = min(1u, (v_1.metadata[0u].x - 1u));
+  ivec2 v_4 = ivec2(min(uvec2(1u), (uvec2(textureSize(arg_0, int(v_3)).xy) - uvec2(1u))));
+  ivec3 v_5 = ivec3(v_4, int(v_2));
+  vec4 res = texelFetch(arg_0, v_5, int(v_3));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -75,25 +69,22 @@ uniform v_TintTextureUniformData_ubo {
 uniform highp sampler2DArray v_arg_0;
 layout(location = 0) flat out vec4 tint_interstage_location0;
 vec4 textureLoad_87be85() {
-  uint v_1 = (uint(textureSize(v_arg_0, 0).z) - 1u);
-  uint v_2 = min(uint(1), v_1);
-  uint v_3 = (v.metadata[0u].x - 1u);
-  uint v_4 = min(uint(1), v_3);
-  uvec2 v_5 = (uvec2(textureSize(v_arg_0, int(v_4)).xy) - uvec2(1u));
-  ivec2 v_6 = ivec2(min(uvec2(ivec2(1)), v_5));
-  ivec3 v_7 = ivec3(v_6, int(v_2));
-  vec4 res = texelFetch(v_arg_0, v_7, int(v_4));
+  uint v_1 = min(1u, (uint(textureSize(v_arg_0, 0).z) - 1u));
+  uint v_2 = min(1u, (v.metadata[0u].x - 1u));
+  ivec2 v_3 = ivec2(min(uvec2(1u), (uvec2(textureSize(v_arg_0, int(v_2)).xy) - uvec2(1u))));
+  ivec3 v_4 = ivec3(v_3, int(v_1));
+  vec4 res = texelFetch(v_arg_0, v_4, int(v_2));
   return res;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput v_8 = VertexOutput(vec4(0.0f), vec4(0.0f));
-  v_8.pos = vec4(0.0f);
-  v_8.prevent_dce = textureLoad_87be85();
-  return v_8;
+  VertexOutput v_5 = VertexOutput(vec4(0.0f), vec4(0.0f));
+  v_5.pos = vec4(0.0f);
+  v_5.prevent_dce = textureLoad_87be85();
+  return v_5;
 }
 void main() {
-  VertexOutput v_9 = vertex_main_inner();
-  gl_Position = vec4(v_9.pos.x, -(v_9.pos.y), ((2.0f * v_9.pos.z) - v_9.pos.w), v_9.pos.w);
-  tint_interstage_location0 = v_9.prevent_dce;
+  VertexOutput v_6 = vertex_main_inner();
+  gl_Position = vec4(v_6.pos.x, -(v_6.pos.y), ((2.0f * v_6.pos.z) - v_6.pos.w), v_6.pos.w);
+  tint_interstage_location0 = v_6.prevent_dce;
   gl_PointSize = 1.0f;
 }

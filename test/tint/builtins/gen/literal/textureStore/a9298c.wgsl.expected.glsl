@@ -7,7 +7,7 @@ precision highp int;
 
 layout(binding = 0, rg32ui) uniform highp uimage2D f_arg_0;
 void textureStore_a9298c() {
-  imageStore(f_arg_0, ivec2(uvec2(1u, 0u)), uvec4(1u));
+  imageStore(f_arg_0, ivec2(1, 0), uvec4(1u));
 }
 void main() {
   textureStore_a9298c();
@@ -19,7 +19,7 @@ void main() {
 
 layout(binding = 0, rg32ui) uniform highp uimage2D arg_0;
 void textureStore_a9298c() {
-  imageStore(arg_0, ivec2(uvec2(1u, 0u)), uvec4(1u));
+  imageStore(arg_0, ivec2(1, 0), uvec4(1u));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

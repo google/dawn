@@ -5,11 +5,8 @@ RWByteAddressBuffer v_1 : register(u1);
 void main() {
   uint v_2 = 0u;
   v_1.GetDimensions(v_2);
-  uint v_3 = ((v_2 / 2u) - 1u);
-  uint v_4 = (min(uint(int(0)), v_3) * 2u);
-  uint v_5 = 0u;
-  v.GetDimensions(v_5);
-  uint v_6 = ((v_5 / 2u) - 1u);
-  v_1.Store<float16_t>((0u + v_4), v.Load<float16_t>((0u + (min(uint(int(0)), v_6) * 2u))));
+  uint v_3 = 0u;
+  v.GetDimensions(v_3);
+  v_1.Store<float16_t>((0u + (min(0u, ((v_2 / 2u) - 1u)) * 2u)), v.Load<float16_t>((0u + (min(0u, ((v_3 / 2u) - 1u)) * 2u))));
 }
 

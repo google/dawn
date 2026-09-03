@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 40
+; Bound: 39
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -36,16 +36,16 @@
       %arg_1 = OpVariable %_ptr_UniformConstant_11 UniformConstant
          %13 = OpTypeFunction %v4float
          %18 = OpTypeSampledImage %8
-        %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
     %v3float = OpTypeVector %float 3
     %float_1 = OpConstant %float 1
-         %23 = OpConstantComposite %v3float %float_1 %float_1 %float_1
+         %20 = OpConstantComposite %v3float %float_1 %float_1 %float_1
+        %int = OpTypeInt 32 1
       %v2int = OpTypeVector %int 2
-         %26 = OpConstantComposite %v2int %int_1 %int_1
+      %int_1 = OpConstant %int 1
+         %23 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
        %void = OpTypeVoid
-         %33 = OpTypeFunction %void
+         %32 = OpTypeFunction %void
 %_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
@@ -55,16 +55,15 @@
          %15 = OpLoad %8 %arg_0 None
          %16 = OpLoad %11 %arg_1 None
          %17 = OpSampledImage %18 %15 %16
-         %19 = OpConvertSToF %float %int_1
-         %22 = OpImageSampleImplicitLod %v4float %17 %23 ConstOffset %26
-               OpStore %res %22
-         %30 = OpLoad %v4float %res None
-               OpReturnValue %30
+         %19 = OpImageSampleImplicitLod %v4float %17 %20 ConstOffset %23
+               OpStore %res %19
+         %29 = OpLoad %v4float %res None
+               OpReturnValue %29
                OpFunctionEnd
-%fragment_main = OpFunction %void None %33
-         %34 = OpLabel
-         %35 = OpFunctionCall %v4float %textureSample_17e988
-         %36 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %36 %35 None
+%fragment_main = OpFunction %void None %32
+         %33 = OpLabel
+         %34 = OpFunctionCall %v4float %textureSample_17e988
+         %35 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
+               OpStore %35 %34 None
                OpReturn
                OpFunctionEnd

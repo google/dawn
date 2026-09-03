@@ -9,10 +9,7 @@ uniform highp isamplerCubeArray t_i;
 uniform highp usamplerCubeArray t_u;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_1 = (v.metadata[0u].x - 1u);
-  uvec2 fdims = uvec2(textureSize(t_f, int(min(uint(1), v_1))).xy);
-  uint v_2 = (v.metadata[0u].y - 1u);
-  uvec2 idims = uvec2(textureSize(t_i, int(min(uint(1), v_2))).xy);
-  uint v_3 = (v.metadata[0u].z - 1u);
-  uvec2 udims = uvec2(textureSize(t_u, int(min(uint(1), v_3))).xy);
+  uvec2 fdims = uvec2(textureSize(t_f, int(min(1u, (v.metadata[0u].x - 1u)))).xy);
+  uvec2 idims = uvec2(textureSize(t_i, int(min(1u, (v.metadata[0u].y - 1u)))).xy);
+  uvec2 udims = uvec2(textureSize(t_u, int(min(1u, (v.metadata[0u].z - 1u)))).xy);
 }

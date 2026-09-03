@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float textureSampleLevel_f3b2c8() {
-  float res = arg_0.SampleLevel(arg_1, (1.0f).xx, float(1u), (int(1)).xx).x;
+  float res = arg_0.SampleLevel(arg_1, (1.0f).xx, 1.0f, (int(1)).xx).x;
   return res;
 }
 
@@ -22,7 +22,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float textureSampleLevel_f3b2c8() {
-  float res = arg_0.SampleLevel(arg_1, (1.0f).xx, float(1u), (int(1)).xx).x;
+  float res = arg_0.SampleLevel(arg_1, (1.0f).xx, 1.0f, (int(1)).xx).x;
   return res;
 }
 
@@ -48,7 +48,7 @@ struct vertex_main_outputs {
 Texture2D arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float textureSampleLevel_f3b2c8() {
-  float res = arg_0.SampleLevel(arg_1, (1.0f).xx, float(1u), (int(1)).xx).x;
+  float res = arg_0.SampleLevel(arg_1, (1.0f).xx, 1.0f, (int(1)).xx).x;
   return res;
 }
 

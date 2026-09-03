@@ -10,7 +10,7 @@ struct tint_module_vars_struct {
 
 void print_9f9178(tint_module_vars_struct tint_module_vars) {
   float3 const v = (*tint_module_vars.tint_print_invocation_id);
-  (os_log_default.log("[ frag fragment_main:L42 position(%f, %f, %f) ] %i", v.x, v.y, v.z, int(true)));
+  (os_log_default.log("[ frag fragment_main:L42 position(%f, %f, %f) ] %i", v.x, v.y, v.z, 1));
 }
 
 void fragment_main_inner(float4 tint_symbol, tint_module_vars_struct tint_module_vars) {
@@ -35,7 +35,7 @@ struct tint_module_vars_struct {
 
 void print_9f9178(tint_module_vars_struct tint_module_vars) {
   uint3 const v = (*tint_module_vars.tint_print_invocation_id);
-  (os_log_default.log("[ comp compute_main:L42 global_invocation_id(%u, %u, %u) ] %i", v.x, v.y, v.z, int(true)));
+  (os_log_default.log("[ comp compute_main:L42 global_invocation_id(%u, %u, %u) ] %i", v.x, v.y, v.z, 1));
 }
 
 void compute_main_inner(uint3 tint_symbol, tint_module_vars_struct tint_module_vars) {
@@ -69,7 +69,7 @@ struct vertex_main_outputs {
 
 void print_9f9178(tint_module_vars_struct tint_module_vars) {
   uint2 const v = (*tint_module_vars.tint_print_invocation_id);
-  (os_log_default.log("[ vert vertex_main:L42 instance=%u, vertex=%u ] %i", v.x, v.y, int(true)));
+  (os_log_default.log("[ vert vertex_main:L42 instance=%u, vertex=%u ] %i", v.x, v.y, 1));
 }
 
 VertexOutput vertex_main_inner(uint tint_symbol, uint tint_symbol_1, tint_module_vars_struct tint_module_vars) {

@@ -8,8 +8,7 @@ struct tint_module_vars_struct {
 [[max_total_threads_per_threadgroup(1)]]
 kernel void d(texture1d<int, access::sample> arg_0 [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
-  (min(uint(0), (tint_module_vars.arg_0.get_num_mip_levels() - 1u)));
-  uint const v = (uint(tint_module_vars.arg_0.get_width()) - 1u);
-  (tint_module_vars.arg_0.read(min(uint(1), v)));
+  (min(0u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u)));
+  (tint_module_vars.arg_0.read(min(1u, (uint(tint_module_vars.arg_0.get_width()) - 1u))));
   float const l = 0.14112000167369842529f;
 }

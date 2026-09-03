@@ -17,7 +17,7 @@ void main() {
   uint v_5 = 0u;
   uint v_6 = uaddCarry(16u, v_3, v_5);
   bool v_7 = (v_4 < mix(4294967295u, v_6, (v_5 == 0u)));
-  uint v_8 = (((mix(v_3, 0u, v_7) * 1u) + (min(uint(0), ((mix(16u, 16u, v_7) / 16u) - 1u)) * 16u)) / 4u);
+  uint v_8 = (((mix(v_3, 0u, v_7) * 1u) + (min(0u, ((mix(16u, 16u, v_7) / 16u) - 1u)) * 16u)) / 4u);
   uint v_9 = (v_8 + 1u);
   uint v_10 = (v_9 + 1u);
   v_2.inner = uvec4(v_1.inner[v_8], v_1.inner[v_9], v_1.inner[v_10], v_1.inner[(v_10 + 1u)]);

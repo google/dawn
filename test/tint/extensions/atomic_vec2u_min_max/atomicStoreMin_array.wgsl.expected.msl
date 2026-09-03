@@ -28,5 +28,5 @@ kernel void compute_main(device tint_array<atomic_ulong, 4>* sb_rw0 [[buffer(0)]
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw0=sb_rw0, .sb_rw1=sb_rw1, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_1=((*tint_module_vars.tint_storage_buffer_sizes)[0u].y / 8u)};
   (atomic_min_explicit((&(*tint_module_vars.sb_rw0)[0u]), as_type<ulong>(uint2(1u)), memory_order_relaxed));
-  (atomic_min_explicit((&(*tint_module_vars.sb_rw1)[min(uint(0), (v.tint_array_length_0_1 - 1u))]), as_type<ulong>(uint2(1u)), memory_order_relaxed));
+  (atomic_min_explicit((&(*tint_module_vars.sb_rw1)[min(0u, (v.tint_array_length_0_1 - 1u))]), as_type<ulong>(uint2(1u)), memory_order_relaxed));
 }

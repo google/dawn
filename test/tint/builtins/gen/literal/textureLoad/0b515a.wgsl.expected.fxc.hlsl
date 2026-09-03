@@ -5,8 +5,6 @@
 RWByteAddressBuffer prevent_dce : register(u0);
 RWTexture2DArray<int4> arg_0 : register(u0, space1);
 int4 textureLoad_0b515a() {
-  int2 v = int2((1u).xx);
-  int v_1 = int(1u);
   int4 res = arg_0.Load(int4(int(1), int(1), int(1), int(0)));
   return res;
 }
@@ -22,8 +20,6 @@ void fragment_main() {
 RWByteAddressBuffer prevent_dce : register(u0);
 RWTexture2DArray<int4> arg_0 : register(u0, space1);
 int4 textureLoad_0b515a() {
-  int2 v = int2((1u).xx);
-  int v_1 = int(1u);
   int4 res = arg_0.Load(int4(int(1), int(1), int(1), int(0)));
   return res;
 }

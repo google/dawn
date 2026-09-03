@@ -10,7 +10,7 @@ struct tint_module_vars_struct {
 
 void textureStore_68ebeb(tint_module_vars_struct tint_module_vars) {
   (const_cast<texture2d<uint, access::read_write>thread &>(tint_module_vars.arg_0).fence());
-  (tint_module_vars.arg_0.write(uint4(1u), uint2(int2(1))));
+  (tint_module_vars.arg_0.write(uint4(1u), uint2(1u)));
   (const_cast<texture2d<uint, access::read_write>thread &>(tint_module_vars.arg_0).fence());
 }
 
@@ -30,7 +30,7 @@ struct tint_module_vars_struct {
 
 void textureStore_68ebeb(tint_module_vars_struct tint_module_vars) {
   (const_cast<texture2d<uint, access::read_write>thread &>(tint_module_vars.arg_0).fence());
-  (tint_module_vars.arg_0.write(uint4(1u), uint2(int2(1))));
+  (tint_module_vars.arg_0.write(uint4(1u), uint2(1u)));
   (const_cast<texture2d<uint, access::read_write>thread &>(tint_module_vars.arg_0).fence());
 }
 

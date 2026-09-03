@@ -3915,13 +3915,12 @@ $B1: {  # root
 
 %foo = func():vec3<bool> {
   $B2: {
-    %3:vec3<u32> = convert vec3<bool>(false)
-    %4:__packed_vec3<u32> = msl.convert %3
-    store %v, %4
-    %5:__packed_vec3<u32> = load %v
-    %6:vec3<u32> = msl.convert %5
-    %7:vec3<bool> = convert %6
-    ret %7
+    %3:__packed_vec3<u32> = msl.convert vec3<u32>(0u)
+    store %v, %3
+    %4:__packed_vec3<u32> = load %v
+    %5:vec3<u32> = msl.convert %4
+    %6:vec3<bool> = convert %5
+    ret %6
   }
 }
 )";

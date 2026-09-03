@@ -8,7 +8,6 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 uniform highp sampler2DArray f_arg_0_arg_1;
 vec4 textureSample_193203() {
-  float v_1 = float(1u);
   vec4 res = textureOffset(f_arg_0_arg_1, vec3(1.0f), ivec2(1));
   return res;
 }

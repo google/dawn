@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 60
+; Bound: 58
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
@@ -47,11 +47,10 @@
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
         %int = OpTypeInt 32 1
       %v2int = OpTypeVector %int 2
-      %int_0 = OpConstant %int 0
      %v2uint = OpTypeVector %uint 2
-         %49 = OpConstantComposite %v2uint %uint_1 %uint_1
+         %47 = OpConstantComposite %v2uint %uint_1 %uint_1
     %v4float = OpTypeVector %float 4
-         %56 = OpTypeFunction %void
+         %54 = OpTypeFunction %void
  %main_inner = OpFunction %void None %16
 %GlobalInvocationId = OpFunctionParameter %v3uint
          %17 = OpLabel
@@ -72,20 +71,19 @@
          %40 = OpCompositeConstruct %v2int %36 %38
          %41 = OpImageQueryLevels %uint %33
          %42 = OpISub %uint %41 %uint_1
-         %43 = OpBitcast %uint %int_0
-         %45 = OpExtInst %uint %30 UMin %43 %42
-         %46 = OpImageQuerySizeLod %v2uint %33 %45
-         %48 = OpISub %v2uint %46 %49
-         %50 = OpBitcast %v2uint %40
-         %51 = OpExtInst %v2uint %30 UMin %50 %48
-         %52 = OpImageFetch %v4float %33 %51 Lod %45
-         %54 = OpCompositeExtract %float %52 0
-               OpStore %31 %54 None
+         %43 = OpExtInst %uint %30 UMin %uint_0 %42
+         %44 = OpImageQuerySizeLod %v2uint %33 %43
+         %46 = OpISub %v2uint %44 %47
+         %48 = OpBitcast %v2uint %40
+         %49 = OpExtInst %v2uint %30 UMin %48 %46
+         %50 = OpImageFetch %v4float %33 %49 Lod %43
+         %52 = OpCompositeExtract %float %50 0
+               OpStore %31 %52 None
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %56
-         %57 = OpLabel
-         %58 = OpLoad %v3uint %main_global_invocation_id_Input None
-         %59 = OpFunctionCall %void %main_inner %58
+       %main = OpFunction %void None %54
+         %55 = OpLabel
+         %56 = OpLoad %v3uint %main_global_invocation_id_Input None
+         %57 = OpFunctionCall %void %main_inner %56
                OpReturn
                OpFunctionEnd

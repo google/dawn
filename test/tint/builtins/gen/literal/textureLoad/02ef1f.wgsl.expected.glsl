@@ -11,8 +11,7 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 layout(binding = 1, r32ui) uniform highp uimage2D f_arg_0;
 uvec4 textureLoad_02ef1f() {
-  uvec2 v_1 = (uvec2(imageSize(f_arg_0)) - uvec2(1u));
-  uvec4 res = imageLoad(f_arg_0, ivec2(min(uvec2(ivec2(1)), v_1)));
+  uvec4 res = imageLoad(f_arg_0, ivec2(min(uvec2(1u), (uvec2(imageSize(f_arg_0)) - uvec2(1u)))));
   return res;
 }
 void main() {
@@ -29,8 +28,7 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 layout(binding = 1, r32ui) uniform highp uimage2D arg_0;
 uvec4 textureLoad_02ef1f() {
-  uvec2 v_1 = (uvec2(imageSize(arg_0)) - uvec2(1u));
-  uvec4 res = imageLoad(arg_0, ivec2(min(uvec2(ivec2(1)), v_1)));
+  uvec4 res = imageLoad(arg_0, ivec2(min(uvec2(1u), (uvec2(imageSize(arg_0)) - uvec2(1u)))));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

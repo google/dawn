@@ -2,7 +2,7 @@
 RWByteAddressBuffer v : register(u0);
 [numthreads(1, 1, 1)]
 void main() {
-  min(uint(int(0)), (32u - 1u));
+  min(0u, (32u - 1u));
   v.Store(0u, 2u);
 }
 

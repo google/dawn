@@ -6,9 +6,8 @@ struct tint_module_vars_struct {
 };
 
 void do_texture_load(array<texture2d<float, access::sample>, 4> ts) {
-  uint const v = min(uint(0), (ts[0].get_num_mip_levels() - 1u));
-  uint2 const v_1 = (uint2(ts[0].get_width(v), ts[0].get_height(v)) - uint2(1u));
-  float4 const texture_load = ts[0].read(min(uint2(int2(0)), v_1), v);
+  uint const v = min(0u, (ts[0].get_num_mip_levels() - 1u));
+  float4 const texture_load = ts[0].read(min(uint2(0u), (uint2(ts[0].get_width(v), ts[0].get_height(v)) - uint2(1u))), v);
 }
 
 fragment void fs(array<texture2d<float, access::sample>, 4> sampled_textures [[texture(0)]]) {

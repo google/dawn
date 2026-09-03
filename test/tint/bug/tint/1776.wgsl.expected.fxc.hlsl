@@ -14,7 +14,6 @@ S v(uint offset) {
 void main() {
   uint v_2 = 0u;
   sb.GetDimensions(v_2);
-  uint v_3 = ((v_2 / 32u) - 1u);
-  S x = v((0u + (min(uint(int(1)), v_3) * 32u)));
+  S x = v((0u + (min(1u, ((v_2 / 32u) - 1u)) * 32u)));
 }
 

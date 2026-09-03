@@ -11,8 +11,7 @@ struct tint_module_vars_struct {
 
 uint4 textureLoad_6bf4b7(tint_module_vars_struct tint_module_vars) {
   uint const v = min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u));
-  uint3 const v_1 = (uint3(tint_module_vars.arg_0.get_width(v), tint_module_vars.arg_0.get_height(v), tint_module_vars.arg_0.get_depth(v)) - uint3(1u));
-  uint4 res = tint_module_vars.arg_0.read(min(uint3(int3(1)), v_1), v);
+  uint4 res = tint_module_vars.arg_0.read(min(uint3(1u), (uint3(tint_module_vars.arg_0.get_width(v), tint_module_vars.arg_0.get_height(v), tint_module_vars.arg_0.get_depth(v)) - uint3(1u))), v);
   return res;
 }
 
@@ -33,8 +32,7 @@ struct tint_module_vars_struct {
 
 uint4 textureLoad_6bf4b7(tint_module_vars_struct tint_module_vars) {
   uint const v = min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u));
-  uint3 const v_1 = (uint3(tint_module_vars.arg_0.get_width(v), tint_module_vars.arg_0.get_height(v), tint_module_vars.arg_0.get_depth(v)) - uint3(1u));
-  uint4 res = tint_module_vars.arg_0.read(min(uint3(int3(1)), v_1), v);
+  uint4 res = tint_module_vars.arg_0.read(min(uint3(1u), (uint3(tint_module_vars.arg_0.get_width(v), tint_module_vars.arg_0.get_height(v), tint_module_vars.arg_0.get_depth(v)) - uint3(1u))), v);
   return res;
 }
 
@@ -65,8 +63,7 @@ struct vertex_main_outputs {
 
 uint4 textureLoad_6bf4b7(tint_module_vars_struct tint_module_vars) {
   uint const v = min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u));
-  uint3 const v_1 = (uint3(tint_module_vars.arg_0.get_width(v), tint_module_vars.arg_0.get_height(v), tint_module_vars.arg_0.get_depth(v)) - uint3(1u));
-  uint4 res = tint_module_vars.arg_0.read(min(uint3(int3(1)), v_1), v);
+  uint4 res = tint_module_vars.arg_0.read(min(uint3(1u), (uint3(tint_module_vars.arg_0.get_width(v), tint_module_vars.arg_0.get_height(v), tint_module_vars.arg_0.get_depth(v)) - uint3(1u))), v);
   return res;
 }
 
@@ -79,9 +76,9 @@ VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
 
 vertex vertex_main_outputs vertex_main(texture3d<uint, access::sample> arg_0 [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
-  VertexOutput const v_2 = vertex_main_inner(tint_module_vars);
+  VertexOutput const v_1 = vertex_main_inner(tint_module_vars);
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_pos = v_2.pos;
-  tint_wrapper_result.VertexOutput_prevent_dce = v_2.prevent_dce;
+  tint_wrapper_result.VertexOutput_pos = v_1.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_1.prevent_dce;
   return tint_wrapper_result;
 }

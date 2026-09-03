@@ -6502,23 +6502,22 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_Depth2D_2DPolyfill_
     %9:vec2<f32> = convert %8
     %10:vec2<f32> = mul %coords, %9
     %11:vec2<f32> = sub %10, vec2<f32>(0.5f)
-    %12:vec2<f32> = convert vec2<i32>(1i, 2i)
-    %13:vec2<f32> = add %11, %12
-    %14:vec2<f32> = floor %13
-    %15:vec2<f32> = sub %13, %14
-    %16:vec2<f32> = add %14, vec2<f32>(0.5f)
-    %17:vec2<f32> = div %16, %9
-    %18:vec4<f32> = spirv.image_dref_gather %6, %17, %dref, 0u
-    %19:f32 = access %18, 0u
-    %20:f32 = access %18, 1u
-    %21:f32 = access %18, 2u
-    %22:f32 = access %18, 3u
-    %23:f32 = access %15, 0u
-    %24:f32 = access %15, 1u
-    %25:f32 = mix %22, %21, %23
-    %26:f32 = mix %19, %20, %23
-    %27:f32 = mix %25, %26, %24
-    ret %27
+    %12:vec2<f32> = add %11, vec2<f32>(1.0f, 2.0f)
+    %13:vec2<f32> = floor %12
+    %14:vec2<f32> = sub %12, %13
+    %15:vec2<f32> = add %13, vec2<f32>(0.5f)
+    %16:vec2<f32> = div %15, %9
+    %17:vec4<f32> = spirv.image_dref_gather %6, %16, %dref, 0u
+    %18:f32 = access %17, 0u
+    %19:f32 = access %17, 1u
+    %20:f32 = access %17, 2u
+    %21:f32 = access %17, 3u
+    %22:f32 = access %14, 0u
+    %23:f32 = access %14, 1u
+    %24:f32 = mix %21, %20, %22
+    %25:f32 = mix %18, %19, %22
+    %26:f32 = mix %24, %25, %23
+    ret %26
   }
 }
 )";
@@ -6627,25 +6626,24 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_Depth2DArray_2DPoly
     %10:vec2<f32> = convert %9
     %11:vec2<f32> = mul %coords, %10
     %12:vec2<f32> = sub %11, vec2<f32>(0.5f)
-    %13:vec2<f32> = convert vec2<i32>(1i, 2i)
-    %14:vec2<f32> = add %12, %13
-    %15:vec2<f32> = floor %14
-    %16:vec2<f32> = sub %14, %15
-    %17:vec2<f32> = add %15, vec2<f32>(0.5f)
-    %18:vec2<f32> = div %17, %10
-    %19:f32 = convert %array_idx
-    %20:vec3<f32> = construct %18, %19
-    %21:vec4<f32> = spirv.image_dref_gather %7, %20, %dref, 0u
-    %22:f32 = access %21, 0u
-    %23:f32 = access %21, 1u
-    %24:f32 = access %21, 2u
-    %25:f32 = access %21, 3u
-    %26:f32 = access %16, 0u
-    %27:f32 = access %16, 1u
-    %28:f32 = mix %25, %24, %26
-    %29:f32 = mix %22, %23, %26
-    %30:f32 = mix %28, %29, %27
-    ret %30
+    %13:vec2<f32> = add %12, vec2<f32>(1.0f, 2.0f)
+    %14:vec2<f32> = floor %13
+    %15:vec2<f32> = sub %13, %14
+    %16:vec2<f32> = add %14, vec2<f32>(0.5f)
+    %17:vec2<f32> = div %16, %10
+    %18:f32 = convert %array_idx
+    %19:vec3<f32> = construct %17, %18
+    %20:vec4<f32> = spirv.image_dref_gather %7, %19, %dref, 0u
+    %21:f32 = access %20, 0u
+    %22:f32 = access %20, 1u
+    %23:f32 = access %20, 2u
+    %24:f32 = access %20, 3u
+    %25:f32 = access %15, 0u
+    %26:f32 = access %15, 1u
+    %27:f32 = mix %24, %23, %25
+    %28:f32 = mix %21, %22, %25
+    %29:f32 = mix %27, %28, %26
+    ret %29
   }
 }
 )";

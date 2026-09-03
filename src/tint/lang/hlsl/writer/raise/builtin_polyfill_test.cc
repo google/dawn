@@ -797,14 +797,13 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_1d_WithI32Lod) {
     auto* expect = R"(
 %foo = func(%t:texture_1d<f32>):u32 {
   $B1: {
-    %3:u32 = convert 3i
-    %4:ptr<function, vec2<u32>, read_write> = var undef
-    %5:ptr<function, u32, read_write> = access %4, 0u
-    %6:ptr<function, u32, read_write> = access %4, 1u
-    %7:void = %t.GetDimensions %3, %5, %6
-    %8:vec2<u32> = load %4
-    %9:u32 = swizzle %8, x
-    ret %9
+    %3:ptr<function, vec2<u32>, read_write> = var undef
+    %4:ptr<function, u32, read_write> = access %3, 0u
+    %5:ptr<function, u32, read_write> = access %3, 1u
+    %6:void = %t.GetDimensions 3u, %4, %5
+    %7:vec2<u32> = load %3
+    %8:u32 = swizzle %7, x
+    ret %8
   }
 }
 )";
@@ -911,15 +910,14 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_2d_WithI32Lod) {
     auto* expect = R"(
 %foo = func(%t:texture_2d<f32>):vec2<u32> {
   $B1: {
-    %3:u32 = convert 3i
-    %4:ptr<function, vec3<u32>, read_write> = var undef
-    %5:ptr<function, u32, read_write> = access %4, 0u
-    %6:ptr<function, u32, read_write> = access %4, 1u
-    %7:ptr<function, u32, read_write> = access %4, 2u
-    %8:void = %t.GetDimensions %3, %5, %6, %7
-    %9:vec3<u32> = load %4
-    %10:vec2<u32> = swizzle %9, xy
-    ret %10
+    %3:ptr<function, vec3<u32>, read_write> = var undef
+    %4:ptr<function, u32, read_write> = access %3, 0u
+    %5:ptr<function, u32, read_write> = access %3, 1u
+    %6:ptr<function, u32, read_write> = access %3, 2u
+    %7:void = %t.GetDimensions 3u, %4, %5, %6
+    %8:vec3<u32> = load %3
+    %9:vec2<u32> = swizzle %8, xy
+    ret %9
   }
 }
 )";
@@ -991,9 +989,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_1DF32) {
     auto* expect = R"(
 %foo = func(%t:texture_1d<f32>):vec4<f32> {
   $B1: {
-    %3:i32 = convert 0u
-    %4:vec4<f32> = %t.Load vec2<i32>(0i)
-    ret %4
+    %3:vec4<f32> = %t.Load vec2<i32>(0i)
+    ret %3
   }
 }
 )";
@@ -1062,9 +1059,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_3DLevelU32) {
     auto* expect = R"(
 %foo = func(%t:texture_3d<f32>):vec4<f32> {
   $B1: {
-    %3:i32 = convert 0u
-    %4:vec4<f32> = %t.Load vec4<i32>(0i)
-    ret %4
+    %3:vec4<f32> = %t.Load vec4<i32>(0i)
+    ret %3
   }
 }
 )";
@@ -1099,9 +1095,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_Multisampled2DI32) {
     auto* expect = R"(
 %foo = func(%t:texture_multisampled_2d<i32>):vec4<i32> {
   $B1: {
-    %3:i32 = convert 0u
-    %4:vec4<i32> = %t.Load vec2<i32>(0i), %3
-    ret %4
+    %3:vec4<i32> = %t.Load vec2<i32>(0i), 0i
+    ret %3
   }
 }
 )";
@@ -1135,10 +1130,9 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_Depth2DLevelF32) {
     auto* expect = R"(
 %foo = func(%t:texture_depth_2d):f32 {
   $B1: {
-    %3:i32 = convert 0u
-    %4:vec4<f32> = %t.Load vec3<i32>(0i)
-    %5:f32 = swizzle %4, x
-    ret %5
+    %3:vec4<f32> = %t.Load vec3<i32>(0i)
+    %4:f32 = swizzle %3, x
+    ret %4
   }
 }
 )";
@@ -1173,11 +1167,9 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_Depth2DArrayLevelF32) {
     auto* expect = R"(
 %foo = func(%t:texture_depth_2d_array):f32 {
   $B1: {
-    %3:i32 = convert 0u
-    %4:i32 = convert 0u
-    %5:vec4<f32> = %t.Load vec4<i32>(0i)
-    %6:f32 = swizzle %5, x
-    ret %6
+    %3:vec4<f32> = %t.Load vec4<i32>(0i)
+    %4:f32 = swizzle %3, x
+    ret %4
   }
 }
 )";
@@ -1212,10 +1204,9 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_DepthMultisampledF32) {
     auto* expect = R"(
 %foo = func(%t:texture_depth_multisampled_2d):f32 {
   $B1: {
-    %3:i32 = convert 0u
-    %4:vec4<f32> = %t.Load vec2<i32>(0i), %3
-    %5:f32 = swizzle %4, x
-    ret %5
+    %3:vec4<f32> = %t.Load vec2<i32>(0i), 0i
+    %4:f32 = swizzle %3, x
+    ret %4
   }
 }
 )";
@@ -1361,8 +1352,7 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:texture_storage_2d_array<rgba32float, read_write> = load %1
-    %4:i32 = convert 3u
-    %5:void = hlsl.textureStore %3, vec3<i32>(1i, 2i, 3i), vec4<f32>(0.5f, 0.40000000596046447754f, 0.30000001192092895508f, 1.0f)
+    %4:void = hlsl.textureStore %3, vec3<i32>(1i, 2i, 3i), vec4<f32>(0.5f, 0.40000000596046447754f, 0.30000001192092895508f, 1.0f)
     ret
   }
 }
@@ -1552,9 +1542,8 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_cube_array = load %1
     %5:sampler_comparison = load %2
-    %6:f32 = convert 6u
-    %7:vec4<f32> = %4.GatherCmp %5, vec4<f32>(1.0f, 2.0f, 2.5f, 6.0f), 3.0f
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.GatherCmp %5, vec4<f32>(1.0f, 2.0f, 2.5f, 6.0f), 3.0f
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -1618,9 +1607,8 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_2d_array = load %1
     %5:sampler_comparison = load %2
-    %6:f32 = convert 6i
-    %7:vec4<f32> = %4.GatherCmp %5, vec3<f32>(1.0f, 2.0f, 6.0f), 3.0f, vec2<i32>(4i, 5i)
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.GatherCmp %5, vec3<f32>(1.0f, 2.0f, 6.0f), 3.0f, vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -1806,9 +1794,8 @@ $B1: {  # root
   $B2: {
     %4:texture_2d_array<i32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 1u
-    %7:vec4<i32> = %4.GatherGreen %5, vec3<f32>(1.0f, 2.0f, 1.0f)
-    %x:vec4<i32> = let %7
+    %6:vec4<i32> = %4.GatherGreen %5, vec3<f32>(1.0f, 2.0f, 1.0f)
+    %x:vec4<i32> = let %6
     ret
   }
 }
@@ -1872,9 +1859,8 @@ $B1: {  # root
   $B2: {
     %4:texture_2d_array<i32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 1i
-    %7:vec4<i32> = %4.GatherBlue %5, vec3<f32>(1.0f, 2.0f, 1.0f), vec2<i32>(1i, 2i)
-    %x:vec4<i32> = let %7
+    %6:vec4<i32> = %4.GatherBlue %5, vec3<f32>(1.0f, 2.0f, 1.0f), vec2<i32>(1i, 2i)
+    %x:vec4<i32> = let %6
     ret
   }
 }
@@ -2056,9 +2042,8 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_2d_array = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4i
-    %7:vec4<f32> = %4.Gather %5, vec3<f32>(1.0f, 2.0f, 4.0f)
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.Gather %5, vec3<f32>(1.0f, 2.0f, 4.0f)
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -2120,9 +2105,8 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_2d_array = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.Gather %5, vec3<f32>(1.0f, 2.0f, 4.0f), vec2<i32>(4i, 5i)
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.Gather %5, vec3<f32>(1.0f, 2.0f, 4.0f), vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -2365,9 +2349,8 @@ $B1: {  # root
   $B2: {
     %4:texture_2d_array<f32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.Sample %5, vec3<f32>(1.0f, 2.0f, 4.0f)
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.Sample %5, vec3<f32>(1.0f, 2.0f, 4.0f)
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -2429,9 +2412,8 @@ $B1: {  # root
   $B2: {
     %4:texture_2d_array<f32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.Sample %5, vec3<f32>(1.0f, 2.0f, 4.0f), vec2<i32>(4i, 5i)
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.Sample %5, vec3<f32>(1.0f, 2.0f, 4.0f), vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -2672,9 +2654,8 @@ $B1: {  # root
   $B2: {
     %4:texture_cube_array<f32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.Sample %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.Sample %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -2854,10 +2835,9 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_2d_array = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.Sample %5, vec3<f32>(1.0f, 2.0f, 4.0f)
-    %8:f32 = swizzle %7, x
-    %x:f32 = let %8
+    %6:vec4<f32> = %4.Sample %5, vec3<f32>(1.0f, 2.0f, 4.0f)
+    %7:f32 = swizzle %6, x
+    %x:f32 = let %7
     ret
   }
 }
@@ -2917,10 +2897,9 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_2d_array = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.Sample %5, vec3<f32>(1.0f, 2.0f, 4.0f), vec2<i32>(4i, 5i)
-    %8:f32 = swizzle %7, x
-    %x:f32 = let %8
+    %6:vec4<f32> = %4.Sample %5, vec3<f32>(1.0f, 2.0f, 4.0f), vec2<i32>(4i, 5i)
+    %7:f32 = swizzle %6, x
+    %x:f32 = let %7
     ret
   }
 }
@@ -2979,10 +2958,9 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_cube_array = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.Sample %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
-    %8:f32 = swizzle %7, x
-    %x:f32 = let %8
+    %6:vec4<f32> = %4.Sample %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
+    %7:f32 = swizzle %6, x
+    %x:f32 = let %7
     ret
   }
 }
@@ -3165,9 +3143,8 @@ $B1: {  # root
   $B2: {
     %4:texture_2d_array<f32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.SampleBias %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.SampleBias %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -3229,9 +3206,8 @@ $B1: {  # root
   $B2: {
     %4:texture_2d_array<f32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.SampleBias %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f, vec2<i32>(4i, 5i)
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.SampleBias %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f, vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -3474,9 +3450,8 @@ $B1: {  # root
   $B2: {
     %4:texture_cube_array<f32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.SampleBias %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), 3.0f
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.SampleBias %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), 3.0f
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -3655,9 +3630,8 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_2d_array = load %1
     %5:sampler_comparison = load %2
-    %6:f32 = convert 4u
-    %7:f32 = %4.SampleCmp %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f
-    %x:f32 = let %7
+    %6:f32 = %4.SampleCmp %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f
+    %x:f32 = let %6
     ret
   }
 }
@@ -3718,9 +3692,8 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_2d_array = load %1
     %5:sampler_comparison = load %2
-    %6:f32 = convert 4u
-    %7:f32 = %4.SampleCmp %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f, vec2<i32>(4i, 5i)
-    %x:f32 = let %7
+    %6:f32 = %4.SampleCmp %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f, vec2<i32>(4i, 5i)
+    %x:f32 = let %6
     ret
   }
 }
@@ -3839,9 +3812,8 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_cube_array = load %1
     %5:sampler_comparison = load %2
-    %6:f32 = convert 4u
-    %7:f32 = %4.SampleCmp %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), 3.0f
-    %x:f32 = let %7
+    %6:f32 = %4.SampleCmp %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), 3.0f
+    %x:f32 = let %6
     ret
   }
 }
@@ -4021,9 +3993,8 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_2d_array = load %1
     %5:sampler_comparison = load %2
-    %6:f32 = convert 4u
-    %7:f32 = %4.SampleCmpLevelZero %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f
-    %x:f32 = let %7
+    %6:f32 = %4.SampleCmpLevelZero %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f
+    %x:f32 = let %6
     ret
   }
 }
@@ -4084,9 +4055,8 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_2d_array = load %1
     %5:sampler_comparison = load %2
-    %6:f32 = convert 4u
-    %7:f32 = %4.SampleCmpLevelZero %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f, vec2<i32>(4i, 5i)
-    %x:f32 = let %7
+    %6:f32 = %4.SampleCmpLevelZero %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f, vec2<i32>(4i, 5i)
+    %x:f32 = let %6
     ret
   }
 }
@@ -4205,9 +4175,8 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_cube_array = load %1
     %5:sampler_comparison = load %2
-    %6:f32 = convert 4u
-    %7:f32 = %4.SampleCmpLevelZero %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), 3.0f
-    %x:f32 = let %7
+    %6:f32 = %4.SampleCmpLevelZero %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), 3.0f
+    %x:f32 = let %6
     ret
   }
 }
@@ -4396,9 +4365,8 @@ $B1: {  # root
   $B2: {
     %4:texture_2d_array<f32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.SampleGrad %5, vec3<f32>(1.0f, 2.0f, 4.0f), vec2<f32>(3.0f, 4.0f), vec2<f32>(6.0f, 7.0f)
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.SampleGrad %5, vec3<f32>(1.0f, 2.0f, 4.0f), vec2<f32>(3.0f, 4.0f), vec2<f32>(6.0f, 7.0f)
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -4462,9 +4430,8 @@ $B1: {  # root
   $B2: {
     %4:texture_2d_array<f32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.SampleGrad %5, vec3<f32>(1.0f, 2.0f, 4.0f), vec2<f32>(3.0f, 4.0f), vec2<f32>(6.0f, 7.0f), vec2<i32>(4i, 5i)
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.SampleGrad %5, vec3<f32>(1.0f, 2.0f, 4.0f), vec2<f32>(3.0f, 4.0f), vec2<f32>(6.0f, 7.0f), vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -4715,9 +4682,8 @@ $B1: {  # root
   $B2: {
     %4:texture_cube_array<f32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.SampleGrad %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), vec3<f32>(3.0f, 4.0f, 5.0f), vec3<f32>(6.0f, 7.0f, 8.0f)
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.SampleGrad %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), vec3<f32>(3.0f, 4.0f, 5.0f), vec3<f32>(6.0f, 7.0f, 8.0f)
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -4960,9 +4926,8 @@ $B1: {  # root
   $B2: {
     %4:texture_2d_array<f32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.SampleLevel %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.SampleLevel %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -5024,9 +4989,8 @@ $B1: {  # root
   $B2: {
     %4:texture_2d_array<f32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.SampleLevel %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f, vec2<i32>(4i, 5i)
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.SampleLevel %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f, vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -5269,9 +5233,8 @@ $B1: {  # root
   $B2: {
     %4:texture_cube_array<f32> = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:vec4<f32> = %4.SampleLevel %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), 3.0f
-    %x:vec4<f32> = let %7
+    %6:vec4<f32> = %4.SampleLevel %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), 3.0f
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -5329,10 +5292,9 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_2d = load %1
     %5:sampler = load %2
-    %6:f32 = convert 3i
-    %7:vec4<f32> = %4.SampleLevel %5, vec2<f32>(1.0f, 2.0f), %6
-    %8:f32 = swizzle %7, x
-    %x:f32 = let %8
+    %6:vec4<f32> = %4.SampleLevel %5, vec2<f32>(1.0f, 2.0f), 3.0f
+    %7:f32 = swizzle %6, x
+    %x:f32 = let %7
     ret
   }
 }
@@ -5391,10 +5353,9 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_2d = load %1
     %5:sampler = load %2
-    %6:f32 = convert 3u
-    %7:vec4<f32> = %4.SampleLevel %5, vec2<f32>(1.0f, 2.0f), %6, vec2<i32>(4i, 5i)
-    %8:f32 = swizzle %7, x
-    %x:f32 = let %8
+    %6:vec4<f32> = %4.SampleLevel %5, vec2<f32>(1.0f, 2.0f), 3.0f, vec2<i32>(4i, 5i)
+    %7:f32 = swizzle %6, x
+    %x:f32 = let %7
     ret
   }
 }
@@ -5453,11 +5414,9 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_2d_array = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:f32 = convert 3i
-    %8:vec4<f32> = %4.SampleLevel %5, vec3<f32>(1.0f, 2.0f, 4.0f), %7
-    %9:f32 = swizzle %8, x
-    %x:f32 = let %9
+    %6:vec4<f32> = %4.SampleLevel %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f
+    %7:f32 = swizzle %6, x
+    %x:f32 = let %7
     ret
   }
 }
@@ -5518,11 +5477,9 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_2d_array = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:f32 = convert 3u
-    %8:vec4<f32> = %4.SampleLevel %5, vec3<f32>(1.0f, 2.0f, 4.0f), %7, vec2<i32>(4i, 5i)
-    %9:f32 = swizzle %8, x
-    %x:f32 = let %9
+    %6:vec4<f32> = %4.SampleLevel %5, vec3<f32>(1.0f, 2.0f, 4.0f), 3.0f, vec2<i32>(4i, 5i)
+    %7:f32 = swizzle %6, x
+    %x:f32 = let %7
     ret
   }
 }
@@ -5581,11 +5538,9 @@ $B1: {  # root
   $B2: {
     %4:texture_depth_cube_array = load %1
     %5:sampler = load %2
-    %6:f32 = convert 4u
-    %7:f32 = convert 3i
-    %8:vec4<f32> = %4.SampleLevel %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), %7
-    %9:f32 = swizzle %8, x
-    %x:f32 = let %9
+    %6:vec4<f32> = %4.SampleLevel %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), 3.0f
+    %7:f32 = swizzle %6, x
+    %x:f32 = let %7
     ret
   }
 }

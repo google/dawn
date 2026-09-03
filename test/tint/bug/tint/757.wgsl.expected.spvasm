@@ -1,11 +1,11 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 92
+; Bound: 89
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
-         %45 = OpExtInstImport "GLSL.std.450"
+         %43 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main" %main_global_invocation_id_Input
                OpExecutionMode %main LocalSize 1 1 1
@@ -51,15 +51,14 @@
         %int = OpTypeInt 32 1
       %v2int = OpTypeVector %int 2
      %uint_0 = OpConstant %uint 0
-      %int_0 = OpConstant %int 0
-         %53 = OpConstantComposite %v2uint %uint_1 %uint_1
+         %50 = OpConstantComposite %v2uint %uint_1 %uint_1
     %v4float = OpTypeVector %float 4
 %_ptr_Function_v4float = OpTypePointer Function %v4float
        %bool = OpTypeBool
 %_ptr_StorageBuffer__runtimearr_float = OpTypePointer StorageBuffer %_runtimearr_float
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
 %_ptr_Function_float = OpTypePointer Function %float
-         %88 = OpTypeFunction %void
+         %85 = OpTypeFunction %void
  %main_inner = OpFunction %void None %16
 %GlobalInvocationID = OpFunctionParameter %v3uint
          %17 = OpLabel
@@ -83,58 +82,56 @@
          %38 = OpImageQuerySizeLod %v3uint %32 %uint_0
          %40 = OpCompositeExtract %uint %38 2
          %41 = OpISub %uint %40 %uint_1
-         %42 = OpBitcast %uint %int_0
-         %44 = OpExtInst %uint %45 UMin %42 %41
-         %46 = OpImageQueryLevels %uint %32
-         %47 = OpISub %uint %46 %uint_1
-         %48 = OpBitcast %uint %int_0
-         %49 = OpExtInst %uint %45 UMin %48 %47
-         %50 = OpImageQuerySizeLod %v3uint %32 %49
-         %51 = OpVectorShuffle %v2uint %50 %50 0 1
-         %52 = OpISub %v2uint %51 %53
-         %54 = OpBitcast %v2uint %37
-         %55 = OpExtInst %v2uint %45 UMin %54 %52
-         %56 = OpCompositeConstruct %v3uint %55 %44
-         %57 = OpImageFetch %v4float %32 %56 Lod %49
-               OpStore %texel %57
+         %42 = OpExtInst %uint %43 UMin %uint_0 %41
+         %44 = OpImageQueryLevels %uint %32
+         %45 = OpISub %uint %44 %uint_1
+         %46 = OpExtInst %uint %43 UMin %uint_0 %45
+         %47 = OpImageQuerySizeLod %v3uint %32 %46
+         %48 = OpVectorShuffle %v2uint %47 %47 0 1
+         %49 = OpISub %v2uint %48 %50
+         %51 = OpBitcast %v2uint %37
+         %52 = OpExtInst %v2uint %43 UMin %51 %49
+         %53 = OpCompositeConstruct %v3uint %52 %42
+         %54 = OpImageFetch %v4float %32 %53 Lod %46
+               OpStore %texel %54
+               OpBranch %58
+         %58 = OpLabel
+               OpStore %i %uint_0
                OpBranch %61
          %61 = OpLabel
-               OpStore %i %uint_0
-               OpBranch %64
-         %64 = OpLabel
-               OpLoopMerge %65 %63 None
+               OpLoopMerge %62 %60 None
+               OpBranch %59
+         %59 = OpLabel
+         %64 = OpLoad %uint %i None
+         %65 = OpULessThan %bool %64 %uint_1
+               OpSelectionMerge %67 None
+               OpBranchConditional %65 %67 %68
+         %68 = OpLabel
                OpBranch %62
+         %67 = OpLabel
+         %69 = OpLoad %uint %flatIndex None
+         %70 = OpLoad %uint %i None
+         %71 = OpIAdd %uint %69 %70
+         %72 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %result %uint_0
+         %74 = OpArrayLength %uint %result 0
+         %75 = OpISub %uint %74 %uint_1
+         %76 = OpExtInst %uint %43 UMin %71 %75
+         %77 = OpAccessChain %_ptr_StorageBuffer_float %result %uint_0 %76
+         %79 = OpAccessChain %_ptr_Function_float %texel %uint_0
+         %81 = OpLoad %float %79 None
+               OpStore %77 %81 None
+               OpBranch %60
+         %60 = OpLabel
+         %82 = OpLoad %uint %i None
+         %83 = OpIAdd %uint %82 %uint_1
+               OpStore %i %83 None
+               OpBranch %61
          %62 = OpLabel
-         %67 = OpLoad %uint %i None
-         %68 = OpULessThan %bool %67 %uint_1
-               OpSelectionMerge %70 None
-               OpBranchConditional %68 %70 %71
-         %71 = OpLabel
-               OpBranch %65
-         %70 = OpLabel
-         %72 = OpLoad %uint %flatIndex None
-         %73 = OpLoad %uint %i None
-         %74 = OpIAdd %uint %72 %73
-         %75 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %result %uint_0
-         %77 = OpArrayLength %uint %result 0
-         %78 = OpISub %uint %77 %uint_1
-         %79 = OpExtInst %uint %45 UMin %74 %78
-         %80 = OpAccessChain %_ptr_StorageBuffer_float %result %uint_0 %79
-         %82 = OpAccessChain %_ptr_Function_float %texel %uint_0
-         %84 = OpLoad %float %82 None
-               OpStore %80 %84 None
-               OpBranch %63
-         %63 = OpLabel
-         %85 = OpLoad %uint %i None
-         %86 = OpIAdd %uint %85 %uint_1
-               OpStore %i %86 None
-               OpBranch %64
-         %65 = OpLabel
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %88
-         %89 = OpLabel
-         %90 = OpLoad %v3uint %main_global_invocation_id_Input None
-         %91 = OpFunctionCall %void %main_inner %90
+       %main = OpFunction %void None %85
+         %86 = OpLabel
+         %87 = OpLoad %v3uint %main_global_invocation_id_Input None
+         %88 = OpFunctionCall %void %main_inner %87
                OpReturn
                OpFunctionEnd

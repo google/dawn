@@ -34,5 +34,5 @@ fragment void v_1(const device tint_array<uchar, 1>* v [[buffer(0)]], device uin
   uint const v_3 = max((tint_div_u32(size, 16u) * 16u), 16u);
   bool const v_4 = (v_2.tint_array_length_0_0 < v_3);
   const device tint_array<uint4, 1>* const p = reinterpret_cast<const device tint_array<uint4, 1>*>(reinterpret_cast<const device char*>(tint_module_vars.v) + select(0u, 0u, v_4));
-  (*tint_module_vars.out) = (*p)[min(uint(0), ((select(v_3, 16u, v_4) / 16u) - 1u))];
+  (*tint_module_vars.out) = (*p)[min(0u, ((select(v_3, 16u, v_4) / 16u) - 1u))];
 }

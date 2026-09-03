@@ -169,7 +169,7 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
 
 float4 textureLoad_8acf41(tint_module_vars_struct tint_module_vars) {
   tint_ExternalTextureParams const v_29 = tint_load_struct_packed_vec3(tint_module_vars.arg_0_params);
-  float4 res = tint_TextureLoadMultiplanarExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_29, min(uint2(int2(1)), ((v_29.apparentSize + uint2(1u)) - uint2(1u))));
+  float4 res = tint_TextureLoadMultiplanarExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_29, min(uint2(1u), ((v_29.apparentSize + uint2(1u)) - uint2(1u))));
   return res;
 }
 
@@ -348,7 +348,7 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
 
 float4 textureLoad_8acf41(tint_module_vars_struct tint_module_vars) {
   tint_ExternalTextureParams const v_29 = tint_load_struct_packed_vec3(tint_module_vars.arg_0_params);
-  float4 res = tint_TextureLoadMultiplanarExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_29, min(uint2(int2(1)), ((v_29.apparentSize + uint2(1u)) - uint2(1u))));
+  float4 res = tint_TextureLoadMultiplanarExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_29, min(uint2(1u), ((v_29.apparentSize + uint2(1u)) - uint2(1u))));
   return res;
 }
 
@@ -537,7 +537,7 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
 
 float4 textureLoad_8acf41(tint_module_vars_struct tint_module_vars) {
   tint_ExternalTextureParams const v_29 = tint_load_struct_packed_vec3(tint_module_vars.arg_0_params);
-  float4 res = tint_TextureLoadMultiplanarExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_29, min(uint2(int2(1)), ((v_29.apparentSize + uint2(1u)) - uint2(1u))));
+  float4 res = tint_TextureLoadMultiplanarExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_29, min(uint2(1u), ((v_29.apparentSize + uint2(1u)) - uint2(1u))));
   return res;
 }
 

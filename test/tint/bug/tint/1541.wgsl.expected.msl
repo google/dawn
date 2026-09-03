@@ -4,6 +4,5 @@ using namespace metal;
 [[max_total_threads_per_threadgroup(1)]]
 kernel void v_1() {
   bool const a = true;
-  uint const v_2 = uint(a);
-  bool v = select(bool((v_2 & uint(true))), true, false);
+  bool v = select(bool((uint(a) & 1u)), true, false);
 }

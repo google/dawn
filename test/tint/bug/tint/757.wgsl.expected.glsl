@@ -13,14 +13,12 @@ void main_inner(uvec3 GlobalInvocationID) {
   uint flatIndex = (((4u * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
   ivec2 v_1 = ivec2(GlobalInvocationID.xy);
-  uint v_2 = (uint(textureSize(myTexture, 0).z) - 1u);
-  uint v_3 = min(uint(0), v_2);
-  uint v_4 = (v.metadata[0u].x - 1u);
-  uint v_5 = min(uint(0), v_4);
-  uvec2 v_6 = (uvec2(textureSize(myTexture, int(v_5)).xy) - uvec2(1u));
-  ivec2 v_7 = ivec2(min(uvec2(v_1), v_6));
-  ivec3 v_8 = ivec3(v_7, int(v_3));
-  vec4 texel = texelFetch(myTexture, v_8, int(v_5));
+  uint v_2 = min(0u, (uint(textureSize(myTexture, 0).z) - 1u));
+  uint v_3 = min(0u, (v.metadata[0u].x - 1u));
+  uvec2 v_4 = (uvec2(textureSize(myTexture, int(v_3)).xy) - uvec2(1u));
+  ivec2 v_5 = ivec2(min(uvec2(v_1), v_4));
+  ivec3 v_6 = ivec3(v_5, int(v_2));
+  vec4 texel = texelFetch(myTexture, v_6, int(v_3));
   {
     uint i = 0u;
     while(true) {
@@ -28,9 +26,9 @@ void main_inner(uvec3 GlobalInvocationID) {
       } else {
         break;
       }
-      uint v_9 = (flatIndex + i);
-      uint v_10 = min(v_9, (uint(result.values.length()) - 1u));
-      result.values[v_10] = texel.x;
+      uint v_7 = (flatIndex + i);
+      uint v_8 = min(v_7, (uint(result.values.length()) - 1u));
+      result.values[v_8] = texel.x;
       {
         i = (i + 1u);
       }

@@ -1,12 +1,12 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 27
+; Bound: 24
 ; Schema: 0
                OpCapability Shader
                OpCapability Sampled1D
                OpCapability ImageQuery
-         %17 = OpExtInstImport "GLSL.std.450"
+         %15 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %d "d"
                OpExecutionMode %d LocalSize 1 1 1
@@ -15,7 +15,7 @@
                OpName %l "l"
                OpDecorate %arg_0 DescriptorSet 0
                OpDecorate %arg_0 Binding 0
-               OpDecorate %23 RelaxedPrecision
+               OpDecorate %20 RelaxedPrecision
                OpDecorate %arg_0 RelaxedPrecision
         %int = OpTypeInt 32 1
           %3 = OpTypeImage %int 1D 0 0 0 1 Unknown
@@ -25,8 +25,7 @@
           %7 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
-      %int_0 = OpConstant %int 0
-      %int_1 = OpConstant %int 1
+     %uint_0 = OpConstant %uint 0
       %v4int = OpTypeVector %int 4
       %float = OpTypeFloat 32
           %l = OpConstant %float 0.141120002
@@ -35,12 +34,10 @@
           %9 = OpLoad %3 %arg_0 None
          %10 = OpImageQueryLevels %uint %9
          %12 = OpISub %uint %10 %uint_1
-         %14 = OpBitcast %uint %int_0
-         %16 = OpExtInst %uint %17 UMin %14 %12
-         %18 = OpImageQuerySizeLod %uint %9 %16
-         %19 = OpISub %uint %18 %uint_1
-         %20 = OpBitcast %uint %int_1
-         %22 = OpExtInst %uint %17 UMin %20 %19
-         %23 = OpImageFetch %v4int %9 %22 Lod %16
+         %14 = OpExtInst %uint %15 UMin %uint_0 %12
+         %17 = OpImageQuerySizeLod %uint %9 %14
+         %18 = OpISub %uint %17 %uint_1
+         %19 = OpExtInst %uint %15 UMin %uint_1 %18
+         %20 = OpImageFetch %v4int %9 %19 Lod %14
                OpReturn
                OpFunctionEnd

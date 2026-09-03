@@ -7,6 +7,5 @@ uniform TintTextureUniformData_1_ubo {
 uniform highp sampler2DArray t_f;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_1 = (v.metadata[0u].x - 1u);
-  uvec2 dims = uvec2(textureSize(t_f, int(min(uint(0), v_1))).xy);
+  uvec2 dims = uvec2(textureSize(t_f, int(min(0u, (v.metadata[0u].x - 1u)))).xy);
 }

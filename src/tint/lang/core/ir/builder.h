@@ -1451,8 +1451,15 @@ class Builder {
     /// @returns the instruction
     template <typename VAL>
     ir::Value* ConvertReplaceResult(ir::InstructionResult* result, VAL&& val) {
-        return Append(ir.CreateInstruction<ir::Convert>(result, Value(std::forward<VAL>(val))))
-            ->Result();
+        auto* value = Value(std::forward<VAL>(val));
+        auto res = Evaluator{*this, false}.EvalConvert(result->Type(), value);
+        if (res == Success && res.Get()) {
+            auto* cnst = Constant(res.Get());
+            result->ReplaceAllUsesWith(cnst);
+            result->Destroy();
+            return cnst;
+        }
+        return Append(ir.CreateInstruction<ir::Convert>(result, value))->Result();
     }
 
     /// Creates a value conversion instruction to the template type T

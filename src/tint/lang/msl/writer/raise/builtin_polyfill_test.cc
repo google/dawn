@@ -1625,11 +1625,10 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureDimensions_2d_WithI32Lod) {
     auto* expect = R"(
 %foo = func(%t:texture_2d<f32>):vec2<u32> {
   $B1: {
-    %3:u32 = convert 3i
-    %4:u32 = %t.get_width %3
-    %5:u32 = %t.get_height %3
-    %6:vec2<u32> = construct %4, %5
-    ret %6
+    %3:u32 = %t.get_width 3u
+    %4:u32 = %t.get_height 3u
+    %5:vec2<u32> = construct %3, %4
+    ret %5
   }
 }
 )";

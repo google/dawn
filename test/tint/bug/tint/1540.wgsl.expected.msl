@@ -8,7 +8,5 @@ struct S {
 [[max_total_threads_per_threadgroup(1)]]
 kernel void v_1() {
   bool b = false;
-  bool const v_2 = b;
-  uint const v_3 = uint(true);
-  S v = S{.e=bool((v_3 & uint(v_2)))};
+  S v = S{.e=bool((1u & uint(b)))};
 }

@@ -609,25 +609,19 @@ $B1: {  # root
 }
 %b = func():void {
   $B3: {
-    %12:u32 = convert 3i
-    %13:u32 = convert 2i
-    %14:u32 = convert 1i
-    %15:vec4<i32> = call %a, 10i, array<u32, 3>(1u, 2u, 3u), 20i
+    %12:vec4<i32> = call %a, 10i, array<u32, 3>(1u, 2u, 3u), 20i
     ret
   }
 }
 %c = func():void {
   $B4: {
-    %17:u32 = convert 3i
-    %18:u32 = convert 2i
-    %19:u32 = convert 1i
-    %20:vec4<i32> = call %a, 10i, array<u32, 3>(1u, 2u, 3u), 20i
+    %14:vec4<i32> = call %a, 10i, array<u32, 3>(1u, 2u, 3u), 20i
     ret
   }
 }
 %d = func():void {
   $B5: {
-    %22:void = call %c
+    %16:void = call %c
     ret
   }
 }
@@ -7892,76 +7886,58 @@ $B1: {  # root
     %J:i32 = let 4i
     %u:vec4<i32> = call %fn_u
     %u_str:vec4<i32> = call %fn_u_1
-    %66:u32 = convert 0i
     %u_arr0:vec4<i32> = call %fn_u_2, array<u32, 1>(0u)
-    %68:u32 = convert 1i
     %u_arr1:vec4<i32> = call %fn_u_2, array<u32, 1>(1u)
-    %70:u32 = convert %I
-    %71:array<u32, 1> = construct %70
-    %u_arrI:vec4<i32> = call %fn_u_2, %71
-    %73:u32 = convert 1i
-    %74:u32 = convert 0i
+    %68:u32 = convert %I
+    %69:array<u32, 1> = construct %68
+    %u_arrI:vec4<i32> = call %fn_u_2, %69
     %u_arr1_arr0:vec4<i32> = call %fn_u_3, array<u32, 2>(1u, 0u)
-    %76:u32 = convert 2i
-    %77:u32 = convert %I
-    %78:array<u32, 2> = construct %76, %77
-    %u_arr2_arrI:vec4<i32> = call %fn_u_3, %78
-    %80:u32 = convert %I
-    %81:u32 = convert 2i
-    %82:array<u32, 2> = construct %80, %81
-    %u_arrI_arr2:vec4<i32> = call %fn_u_3, %82
-    %84:u32 = convert %I
-    %85:u32 = convert %J
-    %86:array<u32, 2> = construct %84, %85
-    %u_arrI_arrJ:vec4<i32> = call %fn_u_3, %86
+    %72:u32 = convert %I
+    %73:array<u32, 2> = construct 2u, %72
+    %u_arr2_arrI:vec4<i32> = call %fn_u_3, %73
+    %75:u32 = convert %I
+    %76:array<u32, 2> = construct %75, 2u
+    %u_arrI_arr2:vec4<i32> = call %fn_u_3, %76
+    %78:u32 = convert %I
+    %79:u32 = convert %J
+    %80:array<u32, 2> = construct %78, %79
+    %u_arrI_arrJ:vec4<i32> = call %fn_u_3, %80
     %s:vec4<i32> = call %fn_s
     %s_str:vec4<i32> = call %fn_s_1
-    %90:u32 = convert 0i
     %s_arr0:vec4<i32> = call %fn_s_2, array<u32, 1>(0u)
-    %92:u32 = convert 1i
     %s_arr1:vec4<i32> = call %fn_s_2, array<u32, 1>(1u)
-    %94:u32 = convert %I
-    %95:array<u32, 1> = construct %94
-    %s_arrI:vec4<i32> = call %fn_s_2, %95
-    %97:u32 = convert 1i
-    %98:u32 = convert 0i
+    %86:u32 = convert %I
+    %87:array<u32, 1> = construct %86
+    %s_arrI:vec4<i32> = call %fn_s_2, %87
     %s_arr1_arr0:vec4<i32> = call %fn_s_3, array<u32, 2>(1u, 0u)
-    %100:u32 = convert 2i
-    %101:u32 = convert %I
-    %102:array<u32, 2> = construct %100, %101
-    %s_arr2_arrI:vec4<i32> = call %fn_s_3, %102
-    %104:u32 = convert %I
-    %105:u32 = convert 2i
-    %106:array<u32, 2> = construct %104, %105
-    %s_arrI_arr2:vec4<i32> = call %fn_s_3, %106
-    %108:u32 = convert %I
-    %109:u32 = convert %J
-    %110:array<u32, 2> = construct %108, %109
-    %s_arrI_arrJ:vec4<i32> = call %fn_s_3, %110
+    %90:u32 = convert %I
+    %91:array<u32, 2> = construct 2u, %90
+    %s_arr2_arrI:vec4<i32> = call %fn_s_3, %91
+    %93:u32 = convert %I
+    %94:array<u32, 2> = construct %93, 2u
+    %s_arrI_arr2:vec4<i32> = call %fn_s_3, %94
+    %96:u32 = convert %I
+    %97:u32 = convert %J
+    %98:array<u32, 2> = construct %96, %97
+    %s_arrI_arrJ:vec4<i32> = call %fn_s_3, %98
     %w:vec4<i32> = call %fn_w
     %w_str:vec4<i32> = call %fn_w_1
-    %114:u32 = convert 0i
     %w_arr0:vec4<i32> = call %fn_w_2, array<u32, 1>(0u)
-    %116:u32 = convert 1i
     %w_arr1:vec4<i32> = call %fn_w_2, array<u32, 1>(1u)
-    %118:u32 = convert %I
-    %119:array<u32, 1> = construct %118
-    %w_arrI:vec4<i32> = call %fn_w_2, %119
-    %121:u32 = convert 1i
-    %122:u32 = convert 0i
+    %104:u32 = convert %I
+    %105:array<u32, 1> = construct %104
+    %w_arrI:vec4<i32> = call %fn_w_2, %105
     %w_arr1_arr0:vec4<i32> = call %fn_w_3, array<u32, 2>(1u, 0u)
-    %124:u32 = convert 2i
-    %125:u32 = convert %I
-    %126:array<u32, 2> = construct %124, %125
-    %w_arr2_arrI:vec4<i32> = call %fn_w_3, %126
-    %128:u32 = convert %I
-    %129:u32 = convert 2i
-    %130:array<u32, 2> = construct %128, %129
-    %w_arrI_arr2:vec4<i32> = call %fn_w_3, %130
-    %132:u32 = convert %I
-    %133:u32 = convert %J
-    %134:array<u32, 2> = construct %132, %133
-    %w_arrI_arrJ:vec4<i32> = call %fn_w_3, %134
+    %108:u32 = convert %I
+    %109:array<u32, 2> = construct 2u, %108
+    %w_arr2_arrI:vec4<i32> = call %fn_w_3, %109
+    %111:u32 = convert %I
+    %112:array<u32, 2> = construct %111, 2u
+    %w_arrI_arr2:vec4<i32> = call %fn_w_3, %112
+    %114:u32 = convert %I
+    %115:u32 = convert %J
+    %116:array<u32, 2> = construct %114, %115
+    %w_arrI_arrJ:vec4<i32> = call %fn_w_3, %116
     ret
   }
 }
@@ -8200,35 +8176,26 @@ $B1: {  # root
 %b = func(%p_indices:array<u32, 1>):i32 {
   $B3: {
     %14:u32 = access %p_indices, 0u
-    %15:u32 = convert 0i
-    %16:u32 = convert 1i
-    %17:u32 = convert 2i
-    %18:array<u32, 4> = construct %14, %15, %16, %17
-    %19:i32 = call %a, 20i, %18, 30i
-    %20:u32 = convert 3i
-    %21:u32 = convert 4i
-    %22:u32 = convert 5i
-    %23:array<u32, 4> = construct %14, %20, %21, %22
-    %24:i32 = call %a, 40i, %23, 50i
-    %25:u32 = convert 6i
-    %26:u32 = convert 7i
-    %27:u32 = convert 8i
-    %28:array<u32, 4> = construct %14, %25, %26, %27
-    %29:i32 = call %a, 60i, %28, 70i
-    %30:u32 = convert %19
-    %31:u32 = convert %24
-    %32:u32 = convert %29
-    %33:array<u32, 4> = construct %14, %30, %31, %32
-    %34:i32 = call %a, 10i, %33, 80i
-    ret %34
+    %15:array<u32, 4> = construct %14, 0u, 1u, 2u
+    %16:i32 = call %a, 20i, %15, 30i
+    %17:array<u32, 4> = construct %14, 3u, 4u, 5u
+    %18:i32 = call %a, 40i, %17, 50i
+    %19:array<u32, 4> = construct %14, 6u, 7u, 8u
+    %20:i32 = call %a, 60i, %19, 70i
+    %21:u32 = convert %16
+    %22:u32 = convert %18
+    %23:u32 = convert %20
+    %24:array<u32, 4> = construct %14, %21, %22, %23
+    %25:i32 = call %a, 10i, %24, 80i
+    ret %25
   }
 }
 %c = func():void {
   $B4: {
     %forty_two:i32 = let 42i
-    %37:u32 = convert %forty_two
-    %38:array<u32, 1> = construct %37
-    %v:i32 = call %b, %38
+    %28:u32 = convert %forty_two
+    %29:array<u32, 1> = construct %28
+    %v:i32 = call %b, %29
     ret
   }
 }

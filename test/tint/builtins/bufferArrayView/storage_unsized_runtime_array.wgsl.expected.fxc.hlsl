@@ -6,7 +6,6 @@ void main() {
   v.GetDimensions(v_1);
   bool v_2 = (v_1 < 64u);
   uint v_3 = ((v_2) ? (0u) : (0u));
-  uint v_4 = ((((v_2) ? (4u) : (64u)) / 4u) - 1u);
-  v.Store(((0u + (v_3 * 1u)) + (min(uint(int(4)), v_4) * 4u)), 4u);
+  v.Store(((0u + (v_3 * 1u)) + (min(4u, ((((v_2) ? (4u) : (64u)) / 4u) - 1u)) * 4u)), 4u);
 }
 

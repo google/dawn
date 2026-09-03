@@ -33,34 +33,33 @@ struct fs_outputs {
 };
 
 float4 fs_inner(tint_module_vars_struct tint_module_vars) {
-  uint const v = uint(0);
-  bool v_1 = false;
-  if ((v < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
-    v_1 = any((uint3((*tint_module_vars.tint_resource_table_metadata).bindings[v]) == uint3(6u, 7u, 34u)));
+  bool v = false;
+  if ((0u < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    v = any((uint3((*tint_module_vars.tint_resource_table_metadata).bindings[0u]) == uint3(6u, 7u, 34u)));
   } else {
-    v_1 = false;
+    v = false;
   }
-  bool const has_resource = v_1;
+  bool const has_resource = v;
+  uint v_1 = 0u;
+  if (has_resource) {
+    v_1 = (*tint_module_vars.tint_resource_table_metadata).bindings[0u];
+  } else {
+    v_1 = 6u;
+  }
   uint v_2 = 0u;
   if (has_resource) {
-    v_2 = (*tint_module_vars.tint_resource_table_metadata).bindings[v];
+    v_2 = 0u;
   } else {
-    v_2 = 6u;
+    v_2 = (0u + (*tint_module_vars.tint_resource_table_metadata).array_length);
   }
-  uint v_3 = 0u;
-  if (has_resource) {
-    v_3 = v;
+  texture2d<float, access::sample> const v_3 = reinterpret_cast<const constant tint_resource_table_struct_texture_2d_f32*>(tint_module_vars.tint_resource_table)[v_2].resource;
+  float4 v_4 = 0.0f;
+  if ((v_1 == 6u)) {
+    v_4 = v_3.sample(tint_module_vars.s, float2(0.0f));
   } else {
-    v_3 = (0u + (*tint_module_vars.tint_resource_table_metadata).array_length);
+    v_4 = float4(0.0f);
   }
-  texture2d<float, access::sample> const v_4 = reinterpret_cast<const constant tint_resource_table_struct_texture_2d_f32*>(tint_module_vars.tint_resource_table)[v_3].resource;
-  float4 v_5 = 0.0f;
-  if ((v_2 == 6u)) {
-    v_5 = v_4.sample(tint_module_vars.s, float2(0.0f));
-  } else {
-    v_5 = float4(0.0f);
-  }
-  return v_5;
+  return v_4;
 }
 
 fragment fs_outputs fs(sampler s [[sampler(0)]], const constant ulong* tint_resource_table [[buffer(28)]], const device tint_resource_table_metadata_struct* tint_resource_table_metadata [[buffer(29)]]) {

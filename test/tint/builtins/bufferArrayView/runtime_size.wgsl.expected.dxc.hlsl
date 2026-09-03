@@ -12,6 +12,6 @@ void main() {
   v.GetDimensions(v_3);
   uint v_4 = max(v_2, 16u);
   bool v_5 = (v_3 < v_4);
-  v_1.Store4(0u, v.Load4(((0u + (select(v_5, 0u, 0u) * 1u)) + (min(uint(int(0)), ((select(v_5, 16u, v_4) / 16u) - 1u)) * 16u))));
+  v_1.Store4(0u, v.Load4(((0u + (select(v_5, 0u, 0u) * 1u)) + (min(0u, ((select(v_5, 16u, v_4) / 16u) - 1u)) * 16u))));
 }
 

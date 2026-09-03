@@ -14,7 +14,6 @@ Light v(uint offset) {
 void main() {
   uint v_2 = 0u;
   lights.GetDimensions(v_2);
-  uint v_3 = ((v_2 / 32u) - 1u);
-  v((0u + (min(uint(int(0)), v_3) * 32u)));
+  v((0u + (min(0u, ((v_2 / 32u) - 1u)) * 32u)));
 }
 

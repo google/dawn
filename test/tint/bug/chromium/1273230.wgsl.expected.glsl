@@ -81,45 +81,41 @@ void doIgnore() {
   uvec4 v_17 = v.inner[0u];
   uint g43 = v_17.x;
   uint kj6 = v_1.inner.value1;
-  uint v_18 = (uint(counters.values.length()) - 1u);
-  uint v_19 = min(uint(0), v_18);
-  uint b53 = atomicOr(counters.values[v_19], 0u);
-  uint v_20 = (uint(indices.values.length()) - 1u);
-  uint v_21 = min(uint(0), v_20);
-  uint rwg = indices.values[v_21];
-  uint v_22 = (uint(positions.values.length()) - 1u);
-  uint v_23 = min(uint(0), v_22);
-  float rb5 = positions.values[v_23];
-  uint v_24 = (uint(LUT.values.length()) - 1u);
-  uint v_25 = min(uint(0), v_24);
-  int g55 = atomicOr(LUT.values[v_25], 0);
+  uint v_18 = min(0u, (uint(counters.values.length()) - 1u));
+  uint b53 = atomicOr(counters.values[v_18], 0u);
+  uint v_19 = min(0u, (uint(indices.values.length()) - 1u));
+  uint rwg = indices.values[v_19];
+  uint v_20 = min(0u, (uint(positions.values.length()) - 1u));
+  float rb5 = positions.values[v_20];
+  uint v_21 = min(0u, (uint(LUT.values.length()) - 1u));
+  int g55 = atomicOr(LUT.values[v_21], 0);
 }
 void main_count_inner(uvec3 GlobalInvocationID) {
   uint triangleIndex = GlobalInvocationID.x;
-  uvec4 v_26 = v.inner[0u];
-  if ((triangleIndex >= v_26.x)) {
+  uvec4 v_22 = v.inner[0u];
+  if ((triangleIndex >= v_22.x)) {
     return;
   }
   doIgnore();
-  uint v_27 = ((3u * triangleIndex) + 0u);
+  uint v_23 = ((3u * triangleIndex) + 0u);
+  uint v_24 = min(v_23, (uint(indices.values.length()) - 1u));
+  uint i0 = indices.values[v_24];
+  uint v_25 = ((3u * i0) + 1u);
+  uint v_26 = min(v_25, (uint(indices.values.length()) - 1u));
+  uint i1 = indices.values[v_26];
+  uint v_27 = ((3u * i0) + 2u);
   uint v_28 = min(v_27, (uint(indices.values.length()) - 1u));
-  uint i0 = indices.values[v_28];
-  uint v_29 = ((3u * i0) + 1u);
-  uint v_30 = min(v_29, (uint(indices.values.length()) - 1u));
-  uint i1 = indices.values[v_30];
-  uint v_31 = ((3u * i0) + 2u);
-  uint v_32 = min(v_31, (uint(indices.values.length()) - 1u));
-  uint i2 = indices.values[v_32];
+  uint i2 = indices.values[v_28];
   vec3 p0 = loadPosition(i0);
   vec3 p1 = loadPosition(i0);
   vec3 p2 = loadPosition(i2);
   vec3 center = (((p0 + p2) + p1) / 3.0f);
   vec3 voxelPos = toVoxelPos(p1);
-  uvec4 v_33 = v.inner[0u];
-  uint lIndex = toIndex1D(v_33.y, p0);
-  uint v_34 = i1;
-  uint v_35 = min(v_34, (uint(LUT.values.length()) - 1u));
-  int triangleOffset = atomicAdd(LUT.values[v_35], 1);
+  uvec4 v_29 = v.inner[0u];
+  uint lIndex = toIndex1D(v_29.y, p0);
+  uint v_30 = i1;
+  uint v_31 = min(v_30, (uint(LUT.values.length()) - 1u));
+  int triangleOffset = atomicAdd(LUT.values[v_31], 1);
 }
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 void main() {

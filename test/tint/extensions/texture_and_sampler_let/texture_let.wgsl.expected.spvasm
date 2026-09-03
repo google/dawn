@@ -1,11 +1,11 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 39
+; Bound: 35
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
-         %21 = OpExtInstImport "GLSL.std.450"
+         %18 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main"
                OpExecutionMode %main OriginUpperLeft
@@ -29,32 +29,28 @@
          %10 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
-        %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+     %uint_0 = OpConstant %uint 0
      %v2uint = OpTypeVector %uint 2
-         %25 = OpConstantComposite %v2uint %uint_1 %uint_1
-      %v2int = OpTypeVector %int 2
-      %int_1 = OpConstant %int 1
-         %27 = OpConstantComposite %v2int %int_1 %int_1
+         %23 = OpConstantComposite %v2uint %uint_1 %uint_1
     %v4float = OpTypeVector %float 4
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-         %38 = OpConstantNull %v2int
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+         %32 = OpConstantNull %v2int
        %main = OpFunction %void None %10
          %11 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function
          %12 = OpLoad %3 %tex None
          %13 = OpImageQueryLevels %uint %12
          %15 = OpISub %uint %13 %uint_1
-         %17 = OpBitcast %uint %int_0
-         %20 = OpExtInst %uint %21 UMin %17 %15
-         %22 = OpImageQuerySizeLod %v2uint %12 %20
-         %24 = OpISub %v2uint %22 %25
-         %26 = OpBitcast %v2uint %27
-         %30 = OpExtInst %v2uint %21 UMin %26 %24
-         %31 = OpImageFetch %v4float %12 %30 Lod %20
-               OpStore %res %31
-         %35 = OpLoad %7 %store None
-         %36 = OpLoad %v4float %res None
-               OpImageWrite %35 %38 %36 None
+         %17 = OpExtInst %uint %18 UMin %uint_0 %15
+         %20 = OpImageQuerySizeLod %v2uint %12 %17
+         %22 = OpISub %v2uint %20 %23
+         %24 = OpExtInst %v2uint %18 UMin %23 %22
+         %25 = OpImageFetch %v4float %12 %24 Lod %17
+               OpStore %res %25
+         %29 = OpLoad %7 %store None
+         %30 = OpLoad %v4float %res None
+               OpImageWrite %29 %32 %30 None
                OpReturn
                OpFunctionEnd

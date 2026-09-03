@@ -21,5 +21,5 @@ struct tint_module_vars_struct {
 kernel void v_1(device tint_array<uchar, 128>* v [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
   device tint_array<uint, 1>* const p = reinterpret_cast<device tint_array<uint, 1>*>(reinterpret_cast<device char*>(tint_module_vars.v) + 0u);
-  (*p)[min(uint(0), (8u - 1u))] = 2u;
+  (*p)[min(0u, (8u - 1u))] = 2u;
 }

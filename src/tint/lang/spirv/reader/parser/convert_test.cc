@@ -159,17 +159,22 @@ TEST_F(SpirvParserTest, ConvertFToU_ScalarUnsigned) {
       %float = OpTypeFloat 32
         %two = OpConstant %float 2
     %void_fn = OpTypeFunction %void
+        %ptr = OpTypePointer Function %float
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpConvertFToU %uint %two
+               %v = OpVariable %ptr Function %two
+              %ld = OpLoad %float %v
+               %1 = OpConvertFToU %uint %ld
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = convert 2.0f
+    %2:ptr<function, f32, read_write> = var 2.0f
+    %3:f32 = load %2
+    %4:u32 = convert %3
     ret
   }
 }
@@ -190,17 +195,22 @@ TEST_F(SpirvParserTest, ConvertFToU_VectorUnsigned) {
         %two = OpConstant %float 2
      %v2_two = OpConstantComposite %v2float %two %two
     %void_fn = OpTypeFunction %void
+        %ptr = OpTypePointer Function %v2float
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpConvertFToU %v2uint %v2_two
+               %v = OpVariable %ptr Function %v2_two
+              %ld = OpLoad %v2float %v
+               %1 = OpConvertFToU %v2uint %ld
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = convert vec2<f32>(2.0f)
+    %2:ptr<function, vec2<f32>, read_write> = var vec2<f32>(2.0f)
+    %3:vec2<f32> = load %2
+    %4:vec2<u32> = convert %3
     ret
   }
 }
@@ -455,17 +465,22 @@ TEST_F(SpirvParserTest, FConvert_ScalarF32ToF16) {
      %float32 = OpTypeFloat 32
      %two     = OpConstant %float32 2
      %void_fn = OpTypeFunction %void
+         %ptr = OpTypePointer Function %float32
 
      %main    = OpFunction %void None %void_fn
      %main_start = OpLabel
-             %1 = OpFConvert %float16 %two
+             %v = OpVariable %ptr Function %two
+            %ld = OpLoad %float32 %v
+             %1 = OpFConvert %float16 %ld
              OpReturn
      OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f16 = convert 2.0f
+    %2:ptr<function, f32, read_write> = var 2.0f
+    %3:f32 = load %2
+    %4:f16 = convert %3
     ret
   }
 }
@@ -484,17 +499,22 @@ TEST_F(SpirvParserTest, FConvert_ScalarF16ToF32) {
      %float32 = OpTypeFloat 32
      %two     = OpConstant %float16 2
      %void_fn = OpTypeFunction %void
+         %ptr = OpTypePointer Function %float16
 
      %main    = OpFunction %void None %void_fn
      %main_start = OpLabel
-             %1 = OpFConvert %float32 %two
+             %v = OpVariable %ptr Function %two
+            %ld = OpLoad %float16 %v
+             %1 = OpFConvert %float32 %ld
              OpReturn
      OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = convert 2.0h
+    %2:ptr<function, f16, read_write> = var 2.0h
+    %3:f16 = load %2
+    %4:f32 = convert %3
     ret
   }
 }
@@ -516,17 +536,22 @@ TEST_F(SpirvParserTest, FConvert_VectorF32ToF16) {
      %two        = OpConstant %float32 2
      %v2_two     = OpConstantComposite %v2float32 %two %two
      %void_fn    = OpTypeFunction %void
+            %ptr = OpTypePointer Function %v2float32
 
      %main       = OpFunction %void None %void_fn
      %main_start = OpLabel
-             %1 = OpFConvert %v2float16 %v2_two
+             %v = OpVariable %ptr Function %v2_two
+            %ld = OpLoad %v2float32 %v
+             %1 = OpFConvert %v2float16 %ld
              OpReturn
      OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f16> = convert vec2<f32>(2.0f)
+    %2:ptr<function, vec2<f32>, read_write> = var vec2<f32>(2.0f)
+    %3:vec2<f32> = load %2
+    %4:vec2<f16> = convert %3
     ret
   }
 }
@@ -548,17 +573,22 @@ TEST_F(SpirvParserTest, FConvert_VectorF16ToF32) {
      %two       = OpConstant %float16 2
      %v2_two    = OpConstantComposite %v2float16 %two %two
      %void_fn    = OpTypeFunction %void
+            %ptr = OpTypePointer Function %v2float16
 
      %main       = OpFunction %void None %void_fn
      %main_start = OpLabel
-             %1 = OpFConvert %v2float32 %v2_two
+             %v = OpVariable %ptr Function %v2_two
+            %ld = OpLoad %v2float16 %v
+             %1 = OpFConvert %v2float32 %ld
              OpReturn
      OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = convert vec2<f16>(2.0h)
+    %2:ptr<function, vec2<f16>, read_write> = var vec2<f16>(2.0h)
+    %3:vec2<f16> = load %2
+    %4:vec2<f32> = convert %3
     ret
   }
 }

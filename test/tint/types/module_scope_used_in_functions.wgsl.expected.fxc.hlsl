@@ -19,9 +19,7 @@ void bar(float a, float b) {
   w = b;
   uint v = 0u;
   storages.GetDimensions(v);
-  uint v_1 = ((v / 4u) - 1u);
-  uint v_2 = (min(uint(int(0)), v_1) * 4u);
-  storages.Store((0u + v_2), asuint(asfloat(uniforms.Load(0u))));
+  storages.Store((0u + (min(0u, ((v / 4u) - 1u)) * 4u)), asuint(asfloat(uniforms.Load(0u))));
   zoo();
 }
 

@@ -11,7 +11,6 @@ uint tint_f16_to_u32(float16_t value) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   uint q = 0u;
-  uint v_1 = (uint(v.inner.length()) - 1u);
-  uint v_2 = min(uint(0), v_1);
-  v.inner[v_2] = tint_f16_to_u32(f16mat3x2[2](f16mat3x2(f16vec2(0.0hf, 1.0hf), f16vec2(2.0hf, 3.0hf), f16vec2(2.0hf, 3.0hf)), f16mat3x2(f16vec2(0.0hf, 1.0hf), f16vec2(2.0hf, 3.0hf), f16vec2(2.0hf, 3.0hf)))[min(q, 1u)][0u].x);
+  uint v_1 = min(0u, (uint(v.inner.length()) - 1u));
+  v.inner[v_1] = tint_f16_to_u32(f16mat3x2[2](f16mat3x2(f16vec2(0.0hf, 1.0hf), f16vec2(2.0hf, 3.0hf), f16vec2(2.0hf, 3.0hf)), f16mat3x2(f16vec2(0.0hf, 1.0hf), f16vec2(2.0hf, 3.0hf), f16vec2(2.0hf, 3.0hf)))[min(q, 1u)][0u].x);
 }

@@ -23,7 +23,7 @@ struct tint_module_vars_struct {
 };
 
 int foo(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
-  return (*tint_module_vars.data)[min(uint(0), (tint_array_lengths.tint_array_length_0_0 - 1u))];
+  return (*tint_module_vars.data)[min(0u, (tint_array_lengths.tint_array_length_0_0 - 1u))];
 }
 
 [[max_total_threads_per_threadgroup(256)]]

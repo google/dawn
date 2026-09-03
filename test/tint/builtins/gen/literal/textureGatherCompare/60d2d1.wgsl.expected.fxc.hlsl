@@ -6,7 +6,6 @@ RWByteAddressBuffer prevent_dce : register(u0);
 TextureCubeArray arg_0 : register(t0, space1);
 SamplerComparisonState arg_1 : register(s1, space1);
 float4 textureGatherCompare_60d2d1() {
-  float v = float(int(1));
   float4 res = arg_0.GatherCmp(arg_1, (1.0f).xxxx, 1.0f);
   return res;
 }
@@ -23,7 +22,6 @@ RWByteAddressBuffer prevent_dce : register(u0);
 TextureCubeArray arg_0 : register(t0, space1);
 SamplerComparisonState arg_1 : register(s1, space1);
 float4 textureGatherCompare_60d2d1() {
-  float v = float(int(1));
   float4 res = arg_0.GatherCmp(arg_1, (1.0f).xxxx, 1.0f);
   return res;
 }
@@ -50,22 +48,21 @@ struct vertex_main_outputs {
 TextureCubeArray arg_0 : register(t0, space1);
 SamplerComparisonState arg_1 : register(s1, space1);
 float4 textureGatherCompare_60d2d1() {
-  float v = float(int(1));
   float4 res = arg_0.GatherCmp(arg_1, (1.0f).xxxx, 1.0f);
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_1 = (VertexOutput)0;
-  v_1.pos = (0.0f).xxxx;
-  v_1.prevent_dce = textureGatherCompare_60d2d1();
-  VertexOutput v_2 = v_1;
-  return v_2;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
+  v.prevent_dce = textureGatherCompare_60d2d1();
+  VertexOutput v_1 = v;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
-  return v_4;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
+  return v_3;
 }
 

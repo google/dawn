@@ -29,15 +29,13 @@ void main_inner(uvec3 GlobalInvocationID) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
   uvec2 v_4 = srcTexCoord;
-  uint v_5 = (v_2.metadata[0u].x - 1u);
-  uint v_6 = min(uint(0), v_5);
-  ivec2 v_7 = ivec2(min(v_4, (uvec2(textureSize(src, int(v_6))) - uvec2(1u))));
-  vec4 srcColor = texelFetch(src, v_7, int(v_6));
-  uvec2 v_8 = dstTexCoord;
-  uint v_9 = (v_2.metadata[0u].y - 1u);
-  uint v_10 = min(uint(0), v_9);
-  ivec2 v_11 = ivec2(min(v_8, (uvec2(textureSize(dst, int(v_10))) - uvec2(1u))));
-  vec4 dstColor = texelFetch(dst, v_11, int(v_10));
+  uint v_5 = min(0u, (v_2.metadata[0u].x - 1u));
+  ivec2 v_6 = ivec2(min(v_4, (uvec2(textureSize(src, int(v_5))) - uvec2(1u))));
+  vec4 srcColor = texelFetch(src, v_6, int(v_5));
+  uvec2 v_7 = dstTexCoord;
+  uint v_8 = min(0u, (v_2.metadata[0u].y - 1u));
+  ivec2 v_9 = ivec2(min(v_7, (uvec2(textureSize(dst, int(v_8))) - uvec2(1u))));
+  vec4 dstColor = texelFetch(dst, v_9, int(v_8));
   bool success = true;
   uvec4 srcColorBits = uvec4(0u);
   uvec4 dstColorBits = tint_v4f32_to_v4u32(dstColor);
@@ -48,20 +46,20 @@ void main_inner(uvec3 GlobalInvocationID) {
       if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;
       }
-      uvec4 v_12 = v_1.inner[0u];
-      if ((i < v_12.w)) {
+      uvec4 v_10 = v_1.inner[0u];
+      if ((i < v_10.w)) {
       } else {
         break;
       }
-      uint v_13 = i;
-      srcColorBits[min(v_13, 3u)] = ConvertToFp16FloatValue(srcColor[min(i, 3u)]);
-      bool v_14 = false;
+      uint v_11 = i;
+      srcColorBits[min(v_11, 3u)] = ConvertToFp16FloatValue(srcColor[min(i, 3u)]);
+      bool v_12 = false;
       if (success) {
-        v_14 = (srcColorBits[min(i, 3u)] == dstColorBits[min(i, 3u)]);
+        v_12 = (srcColorBits[min(i, 3u)] == dstColorBits[min(i, 3u)]);
       } else {
-        v_14 = false;
+        v_12 = false;
       }
-      success = v_14;
+      success = v_12;
       {
         uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
@@ -73,13 +71,13 @@ void main_inner(uvec3 GlobalInvocationID) {
   }
   uint outputIndex = ((GlobalInvocationID.y * uint(size.x)) + GlobalInvocationID.x);
   if (success) {
+    uint v_13 = outputIndex;
+    uint v_14 = min(v_13, (uint(v.result.length()) - 1u));
+    v.result[v_14] = 1u;
+  } else {
     uint v_15 = outputIndex;
     uint v_16 = min(v_15, (uint(v.result.length()) - 1u));
-    v.result[v_16] = 1u;
-  } else {
-    uint v_17 = outputIndex;
-    uint v_18 = min(v_17, (uint(v.result.length()) - 1u));
-    v.result[v_18] = 0u;
+    v.result[v_16] = 0u;
   }
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

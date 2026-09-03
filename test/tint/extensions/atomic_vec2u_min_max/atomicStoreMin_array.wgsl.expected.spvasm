@@ -1,12 +1,12 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 36
+; Bound: 33
 ; Schema: 0
                OpCapability Shader
                OpCapability Int64
                OpCapability Int64Atomics
-         %32 = OpExtInstImport "GLSL.std.450"
+         %29 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
@@ -46,8 +46,6 @@
      %uint_1 = OpConstant %uint 1
          %20 = OpConstantComposite %v2uint %uint_1 %uint_1
 %_ptr_StorageBuffer__runtimearr_ulong = OpTypePointer StorageBuffer %_runtimearr_ulong
-        %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
 %compute_main = OpFunction %void None %14
          %15 = OpLabel
          %16 = OpAccessChain %_ptr_StorageBuffer_ulong %1 %uint_0 %uint_0
@@ -56,10 +54,9 @@
          %24 = OpAccessChain %_ptr_StorageBuffer__runtimearr_ulong %8 %uint_0
          %26 = OpArrayLength %uint %8 0
          %27 = OpISub %uint %26 %uint_1
-         %28 = OpBitcast %uint %int_0
-         %31 = OpExtInst %uint %32 UMin %28 %27
-         %33 = OpAccessChain %_ptr_StorageBuffer_ulong %8 %uint_0 %31
-         %34 = OpBitcast %ulong %20
-         %35 = OpAtomicUMin %ulong %33 %uint_1 %uint_0 %34
+         %28 = OpExtInst %uint %29 UMin %uint_0 %27
+         %30 = OpAccessChain %_ptr_StorageBuffer_ulong %8 %uint_0 %28
+         %31 = OpBitcast %ulong %20
+         %32 = OpAtomicUMin %ulong %30 %uint_1 %uint_0 %31
                OpReturn
                OpFunctionEnd

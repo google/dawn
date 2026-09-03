@@ -9,32 +9,31 @@ Texture2D tint_resource_table_array_1[] : register(t28, space6);
 SamplerState tint_resource_table_array_2[] : register(s28, space7);
 ByteAddressBuffer tint_resource_table_metadata : register(t29, space5);
 float4 fs_inner() {
-  uint v = uint(int(0));
-  bool v_1 = false;
-  if ((v < tint_resource_table_metadata.Load(0u))) {
-    v_1 = any((uint2((tint_resource_table_metadata.Load(4u)).xx) == uint2(40u, 41u)));
+  bool v = false;
+  if ((0u < tint_resource_table_metadata.Load(0u))) {
+    v = any((uint2((tint_resource_table_metadata.Load(4u)).xx) == uint2(40u, 41u)));
   } else {
-    v_1 = false;
+    v = false;
   }
-  bool has_resource = v_1;
+  bool has_resource = v;
+  uint v_1 = 0u;
+  if (has_resource) {
+    v_1 = tint_resource_table_metadata.Load(4u);
+  } else {
+    v_1 = 41u;
+  }
   uint v_2 = 0u;
   if (has_resource) {
-    v_2 = tint_resource_table_metadata.Load(4u);
+    v_2 = 0u;
   } else {
-    v_2 = 41u;
+    v_2 = (4u + tint_resource_table_metadata.Load(0u));
   }
-  uint v_3 = 0u;
-  if (has_resource) {
-    v_3 = v;
-  } else {
-    v_3 = (4u + tint_resource_table_metadata.Load(0u));
-  }
-  uint item_idx = v_3;
+  uint item_idx = v_2;
   return t.Sample(tint_resource_table_array_2[item_idx], (0.0f).xx);
 }
 
 fs_outputs fs() {
-  fs_outputs v_4 = {fs_inner()};
-  return v_4;
+  fs_outputs v_3 = {fs_inner()};
+  return v_3;
 }
 

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 242
+; Bound: 238
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
@@ -87,13 +87,12 @@
 %_ptr_Function_v2uint = OpTypePointer Function %v2uint
         %int = OpTypeInt 32 1
       %v2int = OpTypeVector %int 2
-      %int_0 = OpConstant %int 0
-        %139 = OpConstantComposite %v2uint %uint_1 %uint_1
+        %137 = OpConstantComposite %v2uint %uint_1 %uint_1
 %_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
      %v4bool = OpTypeVector %bool 4
 %_ptr_Function_uint = OpTypePointer Function %uint
-        %238 = OpTypeFunction %void
+        %234 = OpTypeFunction %void
  %aboutEqual = OpFunction %bool None %24
       %value = OpFunctionParameter %float
      %expect = OpFunctionParameter %float
@@ -173,19 +172,18 @@
                OpSelectionMerge %105 None
                OpBranchConditional %104 %106 %107
         %106 = OpLabel
-        %173 = OpLoad %3 %dst None
-        %174 = OpBitcast %v2int %dstTexCoord
-        %175 = OpImageQueryLevels %uint %173
-        %176 = OpISub %uint %175 %uint_1
-        %177 = OpBitcast %uint %int_0
-        %178 = OpExtInst %uint %28 UMin %177 %176
-        %179 = OpImageQuerySizeLod %v2uint %173 %178
-        %180 = OpISub %v2uint %179 %139
-        %181 = OpBitcast %v2uint %174
-        %182 = OpExtInst %v2uint %28 UMin %181 %180
-        %183 = OpImageFetch %v4float %173 %182 Lod %178
-        %184 = OpFOrdEqual %v4bool %183 %nonCoveredColor
-        %109 = OpAll %bool %184
+        %170 = OpLoad %3 %dst None
+        %171 = OpBitcast %v2int %dstTexCoord
+        %172 = OpImageQueryLevels %uint %170
+        %173 = OpISub %uint %172 %uint_1
+        %174 = OpExtInst %uint %28 UMin %uint_0 %173
+        %175 = OpImageQuerySizeLod %v2uint %170 %174
+        %176 = OpISub %v2uint %175 %137
+        %177 = OpBitcast %v2uint %171
+        %178 = OpExtInst %v2uint %28 UMin %177 %176
+        %179 = OpImageFetch %v4float %170 %178 Lod %174
+        %180 = OpFOrdEqual %v4bool %179 %nonCoveredColor
+        %109 = OpAll %bool %180
                OpBranch %105
         %107 = OpLabel
                OpBranch %105
@@ -210,13 +208,13 @@
                OpSelectionMerge %125 None
                OpBranchConditional %124 %126 %125
         %126 = OpLabel
-        %186 = OpCompositeExtract %uint %srcSize 1
-        %187 = OpAccessChain %_ptr_Function_uint %srcTexCoord %uint_1
-        %189 = OpLoad %uint %187 None
-        %190 = OpISub %uint %186 %189
-        %191 = OpISub %uint %190 %uint_1
-        %192 = OpAccessChain %_ptr_Function_uint %srcTexCoord %uint_1
-               OpStore %192 %191 None
+        %182 = OpCompositeExtract %uint %srcSize 1
+        %183 = OpAccessChain %_ptr_Function_uint %srcTexCoord %uint_1
+        %185 = OpLoad %uint %183 None
+        %186 = OpISub %uint %182 %185
+        %187 = OpISub %uint %186 %uint_1
+        %188 = OpAccessChain %_ptr_Function_uint %srcTexCoord %uint_1
+               OpStore %188 %187 None
                OpBranch %125
         %125 = OpLabel
         %127 = OpLoad %3 %src None
@@ -224,105 +222,103 @@
         %131 = OpBitcast %v2int %128
         %132 = OpImageQueryLevels %uint %127
         %133 = OpISub %uint %132 %uint_1
-        %134 = OpBitcast %uint %int_0
-        %136 = OpExtInst %uint %28 UMin %134 %133
-        %137 = OpImageQuerySizeLod %v2uint %127 %136
-        %138 = OpISub %v2uint %137 %139
-        %140 = OpBitcast %v2uint %131
-        %141 = OpExtInst %v2uint %28 UMin %140 %138
-   %srcColor = OpImageFetch %v4float %127 %141 Lod %136
-        %143 = OpLoad %3 %dst None
-        %144 = OpBitcast %v2int %dstTexCoord
-        %145 = OpImageQueryLevels %uint %143
-        %146 = OpISub %uint %145 %uint_1
-        %147 = OpBitcast %uint %int_0
-        %148 = OpExtInst %uint %28 UMin %147 %146
-        %149 = OpImageQuerySizeLod %v2uint %143 %148
-        %150 = OpISub %v2uint %149 %139
-        %151 = OpBitcast %v2uint %144
-        %152 = OpExtInst %v2uint %28 UMin %151 %150
-   %dstColor = OpImageFetch %v4float %143 %152 Lod %148
-        %154 = OpAccessChain %_ptr_Uniform_v4uint %11 %uint_0 %uint_0
-        %155 = OpLoad %v4uint %154 None
-        %156 = OpCompositeExtract %uint %155 1
-        %157 = OpIEqual %bool %156 %uint_2
-               OpSelectionMerge %158 None
-               OpBranchConditional %157 %159 %160
-        %159 = OpLabel
-        %193 = OpLoad %bool %success None
-               OpSelectionMerge %194 None
-               OpBranchConditional %193 %195 %196
+        %134 = OpExtInst %uint %28 UMin %uint_0 %133
+        %135 = OpImageQuerySizeLod %v2uint %127 %134
+        %136 = OpISub %v2uint %135 %137
+        %138 = OpBitcast %v2uint %131
+        %139 = OpExtInst %v2uint %28 UMin %138 %136
+   %srcColor = OpImageFetch %v4float %127 %139 Lod %134
+        %141 = OpLoad %3 %dst None
+        %142 = OpBitcast %v2int %dstTexCoord
+        %143 = OpImageQueryLevels %uint %141
+        %144 = OpISub %uint %143 %uint_1
+        %145 = OpExtInst %uint %28 UMin %uint_0 %144
+        %146 = OpImageQuerySizeLod %v2uint %141 %145
+        %147 = OpISub %v2uint %146 %137
+        %148 = OpBitcast %v2uint %142
+        %149 = OpExtInst %v2uint %28 UMin %148 %147
+   %dstColor = OpImageFetch %v4float %141 %149 Lod %145
+        %151 = OpAccessChain %_ptr_Uniform_v4uint %11 %uint_0 %uint_0
+        %152 = OpLoad %v4uint %151 None
+        %153 = OpCompositeExtract %uint %152 1
+        %154 = OpIEqual %bool %153 %uint_2
+               OpSelectionMerge %155 None
+               OpBranchConditional %154 %156 %157
+        %156 = OpLabel
+        %189 = OpLoad %bool %success None
+               OpSelectionMerge %190 None
+               OpBranchConditional %189 %191 %192
+        %191 = OpLabel
+        %221 = OpCompositeExtract %float %dstColor 0
+        %222 = OpCompositeExtract %float %srcColor 0
+        %194 = OpFunctionCall %bool %aboutEqual %221 %222
+               OpBranch %190
+        %192 = OpLabel
+               OpBranch %190
+        %190 = OpLabel
+        %193 = OpPhi %bool %194 %191 %false %192
+               OpSelectionMerge %195 None
+               OpBranchConditional %193 %196 %197
+        %196 = OpLabel
+        %223 = OpCompositeExtract %float %dstColor 1
+        %224 = OpCompositeExtract %float %srcColor 1
+        %199 = OpFunctionCall %bool %aboutEqual %223 %224
+               OpBranch %195
+        %197 = OpLabel
+               OpBranch %195
         %195 = OpLabel
+        %198 = OpPhi %bool %199 %196 %false %197
+               OpStore %success %198 None
+               OpBranch %155
+        %157 = OpLabel
+        %200 = OpLoad %bool %success None
+               OpSelectionMerge %201 None
+               OpBranchConditional %200 %202 %203
+        %202 = OpLabel
         %225 = OpCompositeExtract %float %dstColor 0
         %226 = OpCompositeExtract %float %srcColor 0
-        %198 = OpFunctionCall %bool %aboutEqual %225 %226
-               OpBranch %194
-        %196 = OpLabel
-               OpBranch %194
-        %194 = OpLabel
-        %197 = OpPhi %bool %198 %195 %false %196
-               OpSelectionMerge %199 None
-               OpBranchConditional %197 %200 %201
-        %200 = OpLabel
+        %205 = OpFunctionCall %bool %aboutEqual %225 %226
+               OpBranch %201
+        %203 = OpLabel
+               OpBranch %201
+        %201 = OpLabel
+        %204 = OpPhi %bool %205 %202 %false %203
+               OpSelectionMerge %206 None
+               OpBranchConditional %204 %207 %208
+        %207 = OpLabel
         %227 = OpCompositeExtract %float %dstColor 1
         %228 = OpCompositeExtract %float %srcColor 1
-        %203 = OpFunctionCall %bool %aboutEqual %227 %228
-               OpBranch %199
-        %201 = OpLabel
-               OpBranch %199
-        %199 = OpLabel
-        %202 = OpPhi %bool %203 %200 %false %201
-               OpStore %success %202 None
-               OpBranch %158
-        %160 = OpLabel
-        %204 = OpLoad %bool %success None
-               OpSelectionMerge %205 None
-               OpBranchConditional %204 %206 %207
+        %210 = OpFunctionCall %bool %aboutEqual %227 %228
+               OpBranch %206
+        %208 = OpLabel
+               OpBranch %206
         %206 = OpLabel
-        %229 = OpCompositeExtract %float %dstColor 0
-        %230 = OpCompositeExtract %float %srcColor 0
-        %209 = OpFunctionCall %bool %aboutEqual %229 %230
-               OpBranch %205
-        %207 = OpLabel
-               OpBranch %205
-        %205 = OpLabel
-        %208 = OpPhi %bool %209 %206 %false %207
-               OpSelectionMerge %210 None
-               OpBranchConditional %208 %211 %212
-        %211 = OpLabel
-        %231 = OpCompositeExtract %float %dstColor 1
-        %232 = OpCompositeExtract %float %srcColor 1
-        %214 = OpFunctionCall %bool %aboutEqual %231 %232
-               OpBranch %210
+        %209 = OpPhi %bool %210 %207 %false %208
+               OpSelectionMerge %211 None
+               OpBranchConditional %209 %212 %213
         %212 = OpLabel
-               OpBranch %210
-        %210 = OpLabel
-        %213 = OpPhi %bool %214 %211 %false %212
-               OpSelectionMerge %215 None
-               OpBranchConditional %213 %216 %217
-        %216 = OpLabel
-        %233 = OpCompositeExtract %float %dstColor 2
-        %234 = OpCompositeExtract %float %srcColor 2
-        %219 = OpFunctionCall %bool %aboutEqual %233 %234
-               OpBranch %215
+        %229 = OpCompositeExtract %float %dstColor 2
+        %230 = OpCompositeExtract %float %srcColor 2
+        %215 = OpFunctionCall %bool %aboutEqual %229 %230
+               OpBranch %211
+        %213 = OpLabel
+               OpBranch %211
+        %211 = OpLabel
+        %214 = OpPhi %bool %215 %212 %false %213
+               OpSelectionMerge %216 None
+               OpBranchConditional %214 %217 %218
         %217 = OpLabel
-               OpBranch %215
-        %215 = OpLabel
-        %218 = OpPhi %bool %219 %216 %false %217
-               OpSelectionMerge %220 None
-               OpBranchConditional %218 %221 %222
-        %221 = OpLabel
-        %235 = OpCompositeExtract %float %dstColor 3
-        %236 = OpCompositeExtract %float %srcColor 3
-        %224 = OpFunctionCall %bool %aboutEqual %235 %236
-               OpBranch %220
-        %222 = OpLabel
-               OpBranch %220
-        %220 = OpLabel
-        %223 = OpPhi %bool %224 %221 %false %222
-               OpStore %success %223 None
-               OpBranch %158
-        %158 = OpLabel
+        %231 = OpCompositeExtract %float %dstColor 3
+        %232 = OpCompositeExtract %float %srcColor 3
+        %220 = OpFunctionCall %bool %aboutEqual %231 %232
+               OpBranch %216
+        %218 = OpLabel
+               OpBranch %216
+        %216 = OpLabel
+        %219 = OpPhi %bool %220 %217 %false %218
+               OpStore %success %219 None
+               OpBranch %155
+        %155 = OpLabel
                OpBranch %72
          %72 = OpLabel
          %75 = OpCompositeExtract %uint %GlobalInvocationID 1
@@ -334,27 +330,27 @@
                OpSelectionMerge %81 None
                OpBranchConditional %80 %82 %83
          %82 = OpLabel
-        %161 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %output %uint_0
-        %163 = OpArrayLength %uint %output 0
-        %164 = OpISub %uint %163 %uint_1
-        %165 = OpExtInst %uint %28 UMin %outputIndex %164
-        %166 = OpAccessChain %_ptr_StorageBuffer_uint %output %uint_0 %165
-               OpStore %166 %uint_1 None
+        %158 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %output %uint_0
+        %160 = OpArrayLength %uint %output 0
+        %161 = OpISub %uint %160 %uint_1
+        %162 = OpExtInst %uint %28 UMin %outputIndex %161
+        %163 = OpAccessChain %_ptr_StorageBuffer_uint %output %uint_0 %162
+               OpStore %163 %uint_1 None
                OpBranch %81
          %83 = OpLabel
-        %168 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %output %uint_0
-        %169 = OpArrayLength %uint %output 0
-        %170 = OpISub %uint %169 %uint_1
-        %171 = OpExtInst %uint %28 UMin %outputIndex %170
-        %172 = OpAccessChain %_ptr_StorageBuffer_uint %output %uint_0 %171
-               OpStore %172 %uint_0 None
+        %165 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %output %uint_0
+        %166 = OpArrayLength %uint %output 0
+        %167 = OpISub %uint %166 %uint_1
+        %168 = OpExtInst %uint %28 UMin %outputIndex %167
+        %169 = OpAccessChain %_ptr_StorageBuffer_uint %output %uint_0 %168
+               OpStore %169 %uint_0 None
                OpBranch %81
          %81 = OpLabel
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %238
-        %239 = OpLabel
-        %240 = OpLoad %v3uint %main_global_invocation_id_Input None
-        %241 = OpFunctionCall %void %main_inner %240
+       %main = OpFunction %void None %234
+        %235 = OpLabel
+        %236 = OpLoad %v3uint %main_global_invocation_id_Input None
+        %237 = OpFunctionCall %void %main_inner %236
                OpReturn
                OpFunctionEnd

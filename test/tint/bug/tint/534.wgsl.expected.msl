@@ -53,10 +53,10 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
   uint2 const v_1 = srcTexCoord;
-  uint const v_2 = min(uint(0), (tint_module_vars.src.get_num_mip_levels() - 1u));
+  uint const v_2 = min(0u, (tint_module_vars.src.get_num_mip_levels() - 1u));
   float4 srcColor = tint_module_vars.src.read(min(v_1, (uint2(tint_module_vars.src.get_width(v_2), tint_module_vars.src.get_height(v_2)) - uint2(1u))), v_2);
   uint2 const v_3 = dstTexCoord;
-  uint const v_4 = min(uint(0), (tint_module_vars.dst.get_num_mip_levels() - 1u));
+  uint const v_4 = min(0u, (tint_module_vars.dst.get_num_mip_levels() - 1u));
   float4 dstColor = tint_module_vars.dst.read(min(v_3, (uint2(tint_module_vars.dst.get_width(v_4), tint_module_vars.dst.get_height(v_4)) - uint2(1u))), v_4);
   bool success = true;
   uint4 srcColorBits = 0u;

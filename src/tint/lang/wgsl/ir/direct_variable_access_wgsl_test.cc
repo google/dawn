@@ -283,16 +283,10 @@ fn a(pre : i32, p_indices : array<u32, 3u>, post : i32) -> vec4<i32> {
 }
 
 fn b() {
-  _ = u32(3i);
-  _ = u32(2i);
-  _ = u32(1i);
   a(10i, array<u32, 3u>(1u, 2u, 3u), 20i);
 }
 
 fn c() {
-  _ = u32(3i);
-  _ = u32(2i);
-  _ = u32(1i);
   a(10i, array<u32, 3u>(1u, 2u, 3u), 20i);
 }
 
@@ -2426,9 +2420,9 @@ fn a(pre : i32, i_indices : array<u32, 4u>, post : i32) -> i32 {
 
 fn b(p_indices : array<u32, 1u>) -> i32 {
   let v_1 = p_indices[0u];
-  let v_2 = a(20i, array<u32, 4u>(v_1, u32(0i), u32(1i), u32(2i)), 30i);
-  let v_3 = a(40i, array<u32, 4u>(v_1, u32(3i), u32(4i), u32(5i)), 50i);
-  return a(10i, array<u32, 4u>(v_1, u32(v_2), u32(v_3), u32(a(60i, array<u32, 4u>(v_1, u32(6i), u32(7i), u32(8i)), 70i))), 80i);
+  let v_2 = a(20i, array<u32, 4u>(v_1, 0u, 1u, 2u), 30i);
+  let v_3 = a(40i, array<u32, 4u>(v_1, 3u, 4u, 5u), 50i);
+  return a(10i, array<u32, 4u>(v_1, u32(v_2), u32(v_3), u32(a(60i, array<u32, 4u>(v_1, 6u, 7u, 8u), 70i))), 80i);
 }
 
 fn c() {

@@ -1,12 +1,12 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 47
+; Bound: 43
 ; Schema: 0
                OpCapability Shader
                OpCapability SampledCubeArray
                OpCapability ImageQuery
-         %24 = OpExtInstImport "GLSL.std.450"
+         %22 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -41,7 +41,6 @@
        %void = OpTypeVoid
          %15 = OpTypeFunction %void
      %uint_1 = OpConstant %uint 1
-      %int_1 = OpConstant %int 1
      %v3uint = OpTypeVector %uint 3
      %v2uint = OpTypeVector %uint 2
 %_ptr_Function_v2uint = OpTypePointer Function %v2uint
@@ -53,26 +52,23 @@
          %17 = OpLoad %3 %t_f None
          %18 = OpImageQueryLevels %uint %17
          %19 = OpISub %uint %18 %uint_1
-         %21 = OpBitcast %uint %int_1
-         %23 = OpExtInst %uint %24 UMin %21 %19
-         %25 = OpImageQuerySizeLod %v3uint %17 %23
-         %27 = OpVectorShuffle %v2uint %25 %25 0 1
-               OpStore %fdims %27
-         %31 = OpLoad %7 %t_i None
-         %32 = OpImageQueryLevels %uint %31
-         %33 = OpISub %uint %32 %uint_1
-         %34 = OpBitcast %uint %int_1
-         %35 = OpExtInst %uint %24 UMin %34 %33
-         %36 = OpImageQuerySizeLod %v3uint %31 %35
-         %37 = OpVectorShuffle %v2uint %36 %36 0 1
-               OpStore %idims %37
-         %39 = OpLoad %11 %t_u None
-         %40 = OpImageQueryLevels %uint %39
-         %41 = OpISub %uint %40 %uint_1
-         %42 = OpBitcast %uint %int_1
-         %43 = OpExtInst %uint %24 UMin %42 %41
-         %44 = OpImageQuerySizeLod %v3uint %39 %43
-         %45 = OpVectorShuffle %v2uint %44 %44 0 1
-               OpStore %udims %45
+         %21 = OpExtInst %uint %22 UMin %uint_1 %19
+         %23 = OpImageQuerySizeLod %v3uint %17 %21
+         %25 = OpVectorShuffle %v2uint %23 %23 0 1
+               OpStore %fdims %25
+         %29 = OpLoad %7 %t_i None
+         %30 = OpImageQueryLevels %uint %29
+         %31 = OpISub %uint %30 %uint_1
+         %32 = OpExtInst %uint %22 UMin %uint_1 %31
+         %33 = OpImageQuerySizeLod %v3uint %29 %32
+         %34 = OpVectorShuffle %v2uint %33 %33 0 1
+               OpStore %idims %34
+         %36 = OpLoad %11 %t_u None
+         %37 = OpImageQueryLevels %uint %36
+         %38 = OpISub %uint %37 %uint_1
+         %39 = OpExtInst %uint %22 UMin %uint_1 %38
+         %40 = OpImageQuerySizeLod %v3uint %36 %39
+         %41 = OpVectorShuffle %v2uint %40 %40 0 1
+               OpStore %udims %41
                OpReturn
                OpFunctionEnd

@@ -66,9 +66,6 @@ fragment void fs(const constant ulong* tint_resource_table [[buffer(28)]], const
   } else {
     v_6 = (0u + (*tint_module_vars.tint_resource_table_metadata).array_length);
   }
-  texture1d<float, access::sample> const v_7 = reinterpret_cast<const constant tint_resource_table_struct_texture_1d_f32*>(tint_module_vars.tint_resource_table)[v_6].resource;
-  uint const v_8 = (reinterpret_cast<const constant tint_resource_table_struct_texture_1d_f32*>(tint_module_vars.tint_resource_table)[v_4].resource.get_num_mip_levels() - 1u);
-  (min(uint(0), v_8));
-  uint const v_9 = (uint(v_7.get_width()) - 1u);
-  float4 const texture_load = v_2.read(min(uint(0), v_9));
+  (min(0u, (reinterpret_cast<const constant tint_resource_table_struct_texture_1d_f32*>(tint_module_vars.tint_resource_table)[v_4].resource.get_num_mip_levels() - 1u)));
+  float4 const texture_load = v_2.read(min(0u, (uint(reinterpret_cast<const constant tint_resource_table_struct_texture_1d_f32*>(tint_module_vars.tint_resource_table)[v_6].resource.get_width()) - 1u)));
 }

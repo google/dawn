@@ -32,10 +32,9 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
   uint flatIndex = (((4u * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
   int2 const v_1 = int2(GlobalInvocationID.xy);
-  uint const v_2 = min(uint(0), (tint_module_vars.myTexture.get_array_size() - 1u));
-  uint const v_3 = min(uint(0), (tint_module_vars.myTexture.get_num_mip_levels() - 1u));
-  uint2 const v_4 = (uint2(tint_module_vars.myTexture.get_width(v_3), tint_module_vars.myTexture.get_height(v_3)) - uint2(1u));
-  float4 texel = tint_module_vars.myTexture.read(min(uint2(v_1), v_4), v_2, v_3);
+  uint const v_2 = min(0u, (tint_module_vars.myTexture.get_num_mip_levels() - 1u));
+  uint2 const v_3 = (uint2(tint_module_vars.myTexture.get_width(v_2), tint_module_vars.myTexture.get_height(v_2)) - uint2(1u));
+  float4 texel = tint_module_vars.myTexture.read(min(uint2(v_1), v_3), min(0u, (tint_module_vars.myTexture.get_array_size() - 1u)), v_2);
   {
     uint i = 0u;
     while(true) {
@@ -52,7 +51,7 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v_5(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d_array<float, access::sample> myTexture [[texture(0)]], device Result* result [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_4(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d_array<float, access::sample> myTexture [[texture(0)]], device Result* result [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.myTexture=myTexture, .result=result, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   (main_inner(GlobalInvocationID, tint_module_vars));
 }

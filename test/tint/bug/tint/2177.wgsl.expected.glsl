@@ -15,7 +15,6 @@ uint f0() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_1 = (uint(v.inner.length()) - 1u);
-  uint v_2 = min(uint(0), v_1);
-  v.inner[v_2] = f0();
+  uint v_1 = min(0u, (uint(v.inner.length()) - 1u));
+  v.inner[v_1] = f0();
 }

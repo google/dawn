@@ -4,7 +4,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 42
+; Bound: 37
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
@@ -37,14 +37,10 @@
      %uint_1 = OpConstant %uint 1
      %v2uint = OpTypeVector %uint 2
          %21 = OpConstantComposite %v2uint %uint_1 %uint_1
-        %int = OpTypeInt 32 1
-      %v2int = OpTypeVector %int 2
-      %int_1 = OpConstant %int 1
-         %23 = OpConstantComposite %v2int %int_1 %int_1
     %v4float = OpTypeVector %float 4
 %_ptr_Function_float = OpTypePointer Function %float
        %void = OpTypeVoid
-         %36 = OpTypeFunction %void
+         %31 = OpTypeFunction %void
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
      %uint_0 = OpConstant %uint 0
 %textureLoad_8ccbe3 = OpFunction %float None %9
@@ -56,19 +52,18 @@
          %16 = OpExtInst %uint %17 UMin %uint_1 %14
          %18 = OpImageQuerySizeLod %v2uint %11 %16
          %20 = OpISub %v2uint %18 %21
-         %22 = OpBitcast %v2uint %23
-         %27 = OpExtInst %v2uint %17 UMin %22 %20
-         %28 = OpImageFetch %v4float %11 %27 Lod %16
-         %30 = OpCompositeExtract %float %28 0
-               OpStore %res %30
-         %33 = OpLoad %float %res None
-               OpReturnValue %33
+         %22 = OpExtInst %v2uint %17 UMin %21 %20
+         %23 = OpImageFetch %v4float %11 %22 Lod %16
+         %25 = OpCompositeExtract %float %23 0
+               OpStore %res %25
+         %28 = OpLoad %float %res None
+               OpReturnValue %28
                OpFunctionEnd
-%fragment_main = OpFunction %void None %36
-         %37 = OpLabel
-         %38 = OpFunctionCall %float %textureLoad_8ccbe3
-         %39 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %39 %38 None
+%fragment_main = OpFunction %void None %31
+         %32 = OpLabel
+         %33 = OpFunctionCall %float %textureLoad_8ccbe3
+         %34 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
+               OpStore %34 %33 None
                OpReturn
                OpFunctionEnd
 ;
@@ -77,7 +72,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 42
+; Bound: 37
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
@@ -110,14 +105,10 @@
      %uint_1 = OpConstant %uint 1
      %v2uint = OpTypeVector %uint 2
          %21 = OpConstantComposite %v2uint %uint_1 %uint_1
-        %int = OpTypeInt 32 1
-      %v2int = OpTypeVector %int 2
-      %int_1 = OpConstant %int 1
-         %23 = OpConstantComposite %v2int %int_1 %int_1
     %v4float = OpTypeVector %float 4
 %_ptr_Function_float = OpTypePointer Function %float
        %void = OpTypeVoid
-         %36 = OpTypeFunction %void
+         %31 = OpTypeFunction %void
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
      %uint_0 = OpConstant %uint 0
 %textureLoad_8ccbe3 = OpFunction %float None %9
@@ -129,19 +120,18 @@
          %16 = OpExtInst %uint %17 UMin %uint_1 %14
          %18 = OpImageQuerySizeLod %v2uint %11 %16
          %20 = OpISub %v2uint %18 %21
-         %22 = OpBitcast %v2uint %23
-         %27 = OpExtInst %v2uint %17 UMin %22 %20
-         %28 = OpImageFetch %v4float %11 %27 Lod %16
-         %30 = OpCompositeExtract %float %28 0
-               OpStore %res %30
-         %33 = OpLoad %float %res None
-               OpReturnValue %33
+         %22 = OpExtInst %v2uint %17 UMin %21 %20
+         %23 = OpImageFetch %v4float %11 %22 Lod %16
+         %25 = OpCompositeExtract %float %23 0
+               OpStore %res %25
+         %28 = OpLoad %float %res None
+               OpReturnValue %28
                OpFunctionEnd
-%compute_main = OpFunction %void None %36
-         %37 = OpLabel
-         %38 = OpFunctionCall %float %textureLoad_8ccbe3
-         %39 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %39 %38 None
+%compute_main = OpFunction %void None %31
+         %32 = OpLabel
+         %33 = OpFunctionCall %float %textureLoad_8ccbe3
+         %34 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
+               OpStore %34 %33 None
                OpReturn
                OpFunctionEnd
 ;
@@ -150,7 +140,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 58
+; Bound: 53
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
@@ -190,20 +180,16 @@
      %uint_1 = OpConstant %uint 1
      %v2uint = OpTypeVector %uint 2
          %24 = OpConstantComposite %v2uint %uint_1 %uint_1
-        %int = OpTypeInt 32 1
-      %v2int = OpTypeVector %int 2
-      %int_1 = OpConstant %int 1
-         %26 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_float = OpTypePointer Function %float
 %VertexOutput = OpTypeStruct %v4float %float
-         %38 = OpTypeFunction %VertexOutput
+         %33 = OpTypeFunction %VertexOutput
 %_ptr_Function_VertexOutput = OpTypePointer Function %VertexOutput
-         %42 = OpConstantNull %VertexOutput
+         %37 = OpConstantNull %VertexOutput
 %_ptr_Function_v4float = OpTypePointer Function %v4float
      %uint_0 = OpConstant %uint 0
-         %46 = OpConstantNull %v4float
+         %41 = OpConstantNull %v4float
        %void = OpTypeVoid
-         %52 = OpTypeFunction %void
+         %47 = OpTypeFunction %void
     %float_1 = OpConstant %float 1
 %textureLoad_8ccbe3 = OpFunction %float None %12
          %13 = OpLabel
@@ -214,32 +200,31 @@
          %19 = OpExtInst %uint %20 UMin %uint_1 %17
          %21 = OpImageQuerySizeLod %v2uint %14 %19
          %23 = OpISub %v2uint %21 %24
-         %25 = OpBitcast %v2uint %26
-         %30 = OpExtInst %v2uint %20 UMin %25 %23
-         %31 = OpImageFetch %v4float %14 %30 Lod %19
-         %32 = OpCompositeExtract %float %31 0
-               OpStore %res %32
-         %35 = OpLoad %float %res None
-               OpReturnValue %35
+         %25 = OpExtInst %v2uint %20 UMin %24 %23
+         %26 = OpImageFetch %v4float %14 %25 Lod %19
+         %27 = OpCompositeExtract %float %26 0
+               OpStore %res %27
+         %30 = OpLoad %float %res None
+               OpReturnValue %30
                OpFunctionEnd
-%vertex_main_inner = OpFunction %VertexOutput None %38
-         %39 = OpLabel
-        %out = OpVariable %_ptr_Function_VertexOutput Function %42
-         %43 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %43 %46 None
-         %47 = OpAccessChain %_ptr_Function_float %out %uint_1
-         %48 = OpFunctionCall %float %textureLoad_8ccbe3
-               OpStore %47 %48 None
-         %49 = OpLoad %VertexOutput %out None
-               OpReturnValue %49
+%vertex_main_inner = OpFunction %VertexOutput None %33
+         %34 = OpLabel
+        %out = OpVariable %_ptr_Function_VertexOutput Function %37
+         %38 = OpAccessChain %_ptr_Function_v4float %out %uint_0
+               OpStore %38 %41 None
+         %42 = OpAccessChain %_ptr_Function_float %out %uint_1
+         %43 = OpFunctionCall %float %textureLoad_8ccbe3
+               OpStore %42 %43 None
+         %44 = OpLoad %VertexOutput %out None
+               OpReturnValue %44
                OpFunctionEnd
-%vertex_main = OpFunction %void None %52
-         %53 = OpLabel
-         %54 = OpFunctionCall %VertexOutput %vertex_main_inner
-         %55 = OpCompositeExtract %v4float %54 0
-               OpStore %vertex_main_position_Output %55 None
-         %56 = OpCompositeExtract %float %54 1
-               OpStore %vertex_main_loc0_Output %56 None
+%vertex_main = OpFunction %void None %47
+         %48 = OpLabel
+         %49 = OpFunctionCall %VertexOutput %vertex_main_inner
+         %50 = OpCompositeExtract %v4float %49 0
+               OpStore %vertex_main_position_Output %50 None
+         %51 = OpCompositeExtract %float %49 1
+               OpStore %vertex_main_loc0_Output %51 None
                OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

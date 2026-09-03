@@ -25,7 +25,7 @@ struct tint_array_lengths_struct {
 void foo(device tint_array<uchar, 1>* const p, uint tint_array_length) {
   bool const v_1 = (tint_array_length < 32u);
   device tint_array<float2, 1>* const p2 = reinterpret_cast<device tint_array<float2, 1>*>(reinterpret_cast<device char*>(p) + select(0u, 0u, v_1));
-  (*p2)[min(uint(0), ((select(32u, 8u, v_1) / 8u) - 1u))].y = 3.0f;
+  (*p2)[min(0u, ((select(32u, 8u, v_1) / 8u) - 1u))].y = 3.0f;
 }
 
 [[max_total_threads_per_threadgroup(1)]]

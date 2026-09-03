@@ -74,95 +74,86 @@ fragment void fs(const constant ulong* tint_resource_table [[buffer(28)]], const
   } else {
     v_6 = (0u + (*tint_module_vars.tint_resource_table_metadata).array_length);
   }
-  texture1d<float, access::sample> const v_7 = reinterpret_cast<const constant tint_resource_table_struct_texture_1d_f32*>(tint_module_vars.tint_resource_table)[v_6].resource;
-  uint const v_8 = (reinterpret_cast<const constant tint_resource_table_struct_texture_1d_f32*>(tint_module_vars.tint_resource_table)[v_4].resource.get_num_mip_levels() - 1u);
-  (min(uint(0), v_8));
-  uint const v_9 = (uint(v_7.get_width()) - 1u);
-  float4 const t1d = v_2.read(min(uint(0), v_9));
-  uint const v_10 = uint(1);
-  bool v_11 = false;
-  if ((v_10 < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
-    v_11 = ((*tint_module_vars.tint_resource_table_metadata).bindings[v_10] == 9u);
+  (min(0u, (reinterpret_cast<const constant tint_resource_table_struct_texture_1d_f32*>(tint_module_vars.tint_resource_table)[v_4].resource.get_num_mip_levels() - 1u)));
+  float4 const t1d = v_2.read(min(0u, (uint(reinterpret_cast<const constant tint_resource_table_struct_texture_1d_f32*>(tint_module_vars.tint_resource_table)[v_6].resource.get_width()) - 1u)));
+  bool v_7 = false;
+  if ((1u < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    v_7 = ((*tint_module_vars.tint_resource_table_metadata).bindings[1u] == 9u);
   } else {
-    v_11 = false;
+    v_7 = false;
   }
-  uint v_12 = 0u;
-  if (v_11) {
-    v_12 = v_10;
+  uint v_8 = 0u;
+  if (v_7) {
+    v_8 = 1u;
   } else {
-    v_12 = (2u + (*tint_module_vars.tint_resource_table_metadata).array_length);
+    v_8 = (2u + (*tint_module_vars.tint_resource_table_metadata).array_length);
   }
-  texture2d<int, access::sample> const v_13 = reinterpret_cast<const constant tint_resource_table_struct_texture_2d_i32*>(tint_module_vars.tint_resource_table)[v_12].resource;
-  bool v_14 = false;
-  if ((v_10 < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
-    v_14 = ((*tint_module_vars.tint_resource_table_metadata).bindings[v_10] == 9u);
+  texture2d<int, access::sample> const v_9 = reinterpret_cast<const constant tint_resource_table_struct_texture_2d_i32*>(tint_module_vars.tint_resource_table)[v_8].resource;
+  bool v_10 = false;
+  if ((1u < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    v_10 = ((*tint_module_vars.tint_resource_table_metadata).bindings[1u] == 9u);
   } else {
-    v_14 = false;
+    v_10 = false;
   }
-  uint v_15 = 0u;
-  if (v_14) {
-    v_15 = v_10;
+  uint v_11 = 0u;
+  if (v_10) {
+    v_11 = 1u;
   } else {
-    v_15 = (2u + (*tint_module_vars.tint_resource_table_metadata).array_length);
+    v_11 = (2u + (*tint_module_vars.tint_resource_table_metadata).array_length);
   }
+  bool v_12 = false;
+  if ((1u < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    v_12 = ((*tint_module_vars.tint_resource_table_metadata).bindings[1u] == 9u);
+  } else {
+    v_12 = false;
+  }
+  uint v_13 = 0u;
+  if (v_12) {
+    v_13 = 1u;
+  } else {
+    v_13 = (2u + (*tint_module_vars.tint_resource_table_metadata).array_length);
+  }
+  texture2d<int, access::sample> const v_14 = reinterpret_cast<const constant tint_resource_table_struct_texture_2d_i32*>(tint_module_vars.tint_resource_table)[v_13].resource;
+  uint const v_15 = min(0u, (reinterpret_cast<const constant tint_resource_table_struct_texture_2d_i32*>(tint_module_vars.tint_resource_table)[v_11].resource.get_num_mip_levels() - 1u));
+  int4 const t2d = v_9.read(min(uint2(0u, 1u), (uint2(v_14.get_width(v_15), v_14.get_height(v_15)) - uint2(1u))), v_15);
   bool v_16 = false;
-  if ((v_10 < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
-    v_16 = ((*tint_module_vars.tint_resource_table_metadata).bindings[v_10] == 9u);
+  if ((2u < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    v_16 = ((*tint_module_vars.tint_resource_table_metadata).bindings[2u] == 20u);
   } else {
     v_16 = false;
   }
   uint v_17 = 0u;
   if (v_16) {
-    v_17 = v_10;
+    v_17 = 2u;
   } else {
-    v_17 = (2u + (*tint_module_vars.tint_resource_table_metadata).array_length);
+    v_17 = (3u + (*tint_module_vars.tint_resource_table_metadata).array_length);
   }
-  texture2d<int, access::sample> const v_18 = reinterpret_cast<const constant tint_resource_table_struct_texture_2d_i32*>(tint_module_vars.tint_resource_table)[v_17].resource;
-  uint const v_19 = (reinterpret_cast<const constant tint_resource_table_struct_texture_2d_i32*>(tint_module_vars.tint_resource_table)[v_15].resource.get_num_mip_levels() - 1u);
-  uint const v_20 = min(uint(0), v_19);
-  uint2 const v_21 = (uint2(v_18.get_width(v_20), v_18.get_height(v_20)) - uint2(1u));
-  int4 const t2d = v_13.read(min(uint2(int2(0, 1)), v_21), v_20);
-  uint const v_22 = uint(2);
-  bool v_23 = false;
-  if ((v_22 < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
-    v_23 = ((*tint_module_vars.tint_resource_table_metadata).bindings[v_22] == 20u);
+  texture3d<uint, access::sample> const v_18 = reinterpret_cast<const constant tint_resource_table_struct_texture_3d_u32*>(tint_module_vars.tint_resource_table)[v_17].resource;
+  bool v_19 = false;
+  if ((2u < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    v_19 = ((*tint_module_vars.tint_resource_table_metadata).bindings[2u] == 20u);
   } else {
-    v_23 = false;
+    v_19 = false;
   }
-  uint v_24 = 0u;
-  if (v_23) {
-    v_24 = v_22;
+  uint v_20 = 0u;
+  if (v_19) {
+    v_20 = 2u;
   } else {
-    v_24 = (3u + (*tint_module_vars.tint_resource_table_metadata).array_length);
+    v_20 = (3u + (*tint_module_vars.tint_resource_table_metadata).array_length);
   }
-  texture3d<uint, access::sample> const v_25 = reinterpret_cast<const constant tint_resource_table_struct_texture_3d_u32*>(tint_module_vars.tint_resource_table)[v_24].resource;
-  bool v_26 = false;
-  if ((v_22 < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
-    v_26 = ((*tint_module_vars.tint_resource_table_metadata).bindings[v_22] == 20u);
+  bool v_21 = false;
+  if ((2u < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    v_21 = ((*tint_module_vars.tint_resource_table_metadata).bindings[2u] == 20u);
   } else {
-    v_26 = false;
+    v_21 = false;
   }
-  uint v_27 = 0u;
-  if (v_26) {
-    v_27 = v_22;
+  uint v_22 = 0u;
+  if (v_21) {
+    v_22 = 2u;
   } else {
-    v_27 = (3u + (*tint_module_vars.tint_resource_table_metadata).array_length);
+    v_22 = (3u + (*tint_module_vars.tint_resource_table_metadata).array_length);
   }
-  bool v_28 = false;
-  if ((v_22 < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
-    v_28 = ((*tint_module_vars.tint_resource_table_metadata).bindings[v_22] == 20u);
-  } else {
-    v_28 = false;
-  }
-  uint v_29 = 0u;
-  if (v_28) {
-    v_29 = v_22;
-  } else {
-    v_29 = (3u + (*tint_module_vars.tint_resource_table_metadata).array_length);
-  }
-  texture3d<uint, access::sample> const v_30 = reinterpret_cast<const constant tint_resource_table_struct_texture_3d_u32*>(tint_module_vars.tint_resource_table)[v_29].resource;
-  uint const v_31 = (reinterpret_cast<const constant tint_resource_table_struct_texture_3d_u32*>(tint_module_vars.tint_resource_table)[v_27].resource.get_num_mip_levels() - 1u);
-  uint const v_32 = min(uint(0), v_31);
-  uint3 const v_33 = (uint3(v_30.get_width(v_32), v_30.get_height(v_32), v_30.get_depth(v_32)) - uint3(1u));
-  uint4 const tcube = v_25.read(min(uint3(int3(2, 1, 0)), v_33), v_32);
+  texture3d<uint, access::sample> const v_23 = reinterpret_cast<const constant tint_resource_table_struct_texture_3d_u32*>(tint_module_vars.tint_resource_table)[v_22].resource;
+  uint const v_24 = min(0u, (reinterpret_cast<const constant tint_resource_table_struct_texture_3d_u32*>(tint_module_vars.tint_resource_table)[v_20].resource.get_num_mip_levels() - 1u));
+  uint4 const tcube = v_18.read(min(uint3(2u, 1u, 0u), (uint3(v_23.get_width(v_24), v_23.get_height(v_24), v_23.get_depth(v_24)) - uint3(1u))), v_24);
 }

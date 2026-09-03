@@ -5,7 +5,7 @@ struct main_inputs {
 
 groupshared uint v[16];
 void foo() {
-  min(uint(int(0)), (4u - 1u));
+  min(0u, (4u - 1u));
   v[0u] = 1065353216u;
 }
 

@@ -1684,13 +1684,12 @@ TEST_F(SpirvParserTest, Var_OpSpecConstantOp_FConvert) {
 )",
               R"(
 $B1: {  # root
-  %1:f32 = convert 1.0h
-  %myconst:f32 = override %1
+  %myconst:f32 = override 1.0f
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:f32 = let %myconst
+    %3:f32 = let %myconst
     ret
   }
 }

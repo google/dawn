@@ -104,6 +104,14 @@ class Evaluator {
                              VectorRef<core::ir::Value*> args,
                              const Source& source = {});
 
+    /// Evaluate conversion of `arg` to `result_ty`
+    /// @param result_ty the result type
+    /// @param arg the argument value
+    /// @param source the source location
+    EvalResult EvalConvert(const core::type::Type* result_ty,
+                           core::ir::Value* arg,
+                           const Source& source = {});
+
   private:
     diag::Diagnostic& AddError(Source src);
     Source SourceOf(core::ir::Instruction* val);

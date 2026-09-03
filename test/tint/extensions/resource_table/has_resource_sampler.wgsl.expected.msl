@@ -25,24 +25,22 @@ struct tint_module_vars_struct {
 
 fragment void fs(device uint* o [[buffer(0)]], const device tint_resource_table_metadata_struct* tint_resource_table_metadata [[buffer(29)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.o=o, .tint_resource_table_metadata=tint_resource_table_metadata};
-  uint const v = uint(0);
+  bool v = false;
+  if ((0u < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    v = any((uint2((*tint_module_vars.tint_resource_table_metadata).bindings[0u]) == uint2(40u, 41u)));
+  } else {
+    v = false;
+  }
+  if (v) {
+    (*tint_module_vars.o) = ((*tint_module_vars.o) + 1u);
+  }
   bool v_1 = false;
-  if ((v < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
-    v_1 = any((uint2((*tint_module_vars.tint_resource_table_metadata).bindings[v]) == uint2(40u, 41u)));
+  if ((1u < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    v_1 = ((*tint_module_vars.tint_resource_table_metadata).bindings[1u] == 42u);
   } else {
     v_1 = false;
   }
   if (v_1) {
-    (*tint_module_vars.o) = ((*tint_module_vars.o) + 1u);
-  }
-  uint const v_2 = uint(1);
-  bool v_3 = false;
-  if ((v_2 < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
-    v_3 = ((*tint_module_vars.tint_resource_table_metadata).bindings[v_2] == 42u);
-  } else {
-    v_3 = false;
-  }
-  if (v_3) {
     (*tint_module_vars.o) = ((*tint_module_vars.o) + 1u);
   }
 }

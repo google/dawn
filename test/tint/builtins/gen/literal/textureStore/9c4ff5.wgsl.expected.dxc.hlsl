@@ -4,7 +4,6 @@
 
 RWTexture2DArray<int4> arg_0 : register(u0, space1);
 void textureStore_9c4ff5() {
-  int v = int(1u);
   arg_0[(int(1)).xxx] = (int(1)).xxxx;
 }
 
@@ -18,7 +17,6 @@ void fragment_main() {
 
 RWTexture2DArray<int4> arg_0 : register(u0, space1);
 void textureStore_9c4ff5() {
-  int v = int(1u);
   arg_0[(int(1)).xxx] = (int(1)).xxxx;
 }
 

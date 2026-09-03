@@ -41,13 +41,12 @@ Particle v_4(uint offset) {
 void main() {
   uint v_7 = 0u;
   particles.GetDimensions(v_7);
-  uint v_8 = ((v_7 / 176u) - 1u);
-  Particle particle = v_4((0u + (min(uint(int(0)), v_8) * 176u)));
-  uint v_9 = sim[0u].x;
-  uint v_10 = min(sim[0u].x, 7u);
+  Particle particle = v_4((0u + (min(0u, ((v_7 / 176u) - 1u)) * 176u)));
+  uint v_8 = sim[0u].x;
+  uint v_9 = min(sim[0u].x, 7u);
   float3 tint_array_copy[8] = particle.position;
-  tint_array_copy[min(v_9, 7u)] = particle.position[v_10];
-  float3 v_11[8] = tint_array_copy;
-  particle.position = v_11;
+  tint_array_copy[min(v_8, 7u)] = particle.position[v_9];
+  float3 v_10[8] = tint_array_copy;
+  particle.position = v_10;
 }
 

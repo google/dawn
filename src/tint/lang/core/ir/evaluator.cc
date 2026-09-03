@@ -238,12 +238,18 @@ Evaluator::EvalResult Evaluator::EvalConstruct(const core::type::Type* result_ty
 }
 
 Evaluator::EvalResult Evaluator::EvalConvert(core::ir::Convert* c) {
-    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(c->Args()[0]));
+    return EvalConvert(c->Result()->Type(), c->Args()[0], SourceOf(c));
+}
+
+Evaluator::EvalResult Evaluator::EvalConvert(const core::type::Type* result_ty,
+                                             core::ir::Value* arg,
+                                             const Source& source) {
+    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(arg));
     // Check if the value could be evaluated
     if (!val) {
         return nullptr;
     }
-    TINT_CHECK_RESULT_UNWRAP(r, const_eval_.Convert(c->Result()->Type(), val, SourceOf(c)));
+    TINT_CHECK_RESULT_UNWRAP(r, const_eval_.Convert(result_ty, val, source));
     return r;
 }
 

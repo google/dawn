@@ -10,9 +10,7 @@ buffer out_block_1_ssbo {
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_2 = (uint(v_1.inner.length()) - 1u);
-  uint v_3 = min(uint(0), v_2);
-  uint v_4 = (uint(v.inner.length()) - 1u);
-  uint v_5 = min(uint(0), v_4);
-  v_1.inner[v_3] = v.inner[v_5];
+  uint v_2 = min(0u, (uint(v_1.inner.length()) - 1u));
+  uint v_3 = min(0u, (uint(v.inner.length()) - 1u));
+  v_1.inner[v_2] = v.inner[v_3];
 }

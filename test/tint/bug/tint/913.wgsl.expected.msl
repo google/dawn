@@ -70,7 +70,7 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
     bool v_4 = false;
     if (success) {
       int2 const v_5 = int2(dstTexCoord);
-      uint const v_6 = min(uint(0), (tint_module_vars.dst.get_num_mip_levels() - 1u));
+      uint const v_6 = min(0u, (tint_module_vars.dst.get_num_mip_levels() - 1u));
       uint2 const v_7 = (uint2(tint_module_vars.dst.get_width(v_6), tint_module_vars.dst.get_height(v_6)) - uint2(1u));
       v_4 = all((tint_module_vars.dst.read(min(uint2(v_5), v_7), v_6) == nonCoveredColor));
     } else {
@@ -83,11 +83,11 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
       srcTexCoord.y = ((srcSize.y - srcTexCoord.y) - 1u);
     }
     int2 const v_8 = int2(srcTexCoord);
-    uint const v_9 = min(uint(0), (tint_module_vars.src.get_num_mip_levels() - 1u));
+    uint const v_9 = min(0u, (tint_module_vars.src.get_num_mip_levels() - 1u));
     uint2 const v_10 = (uint2(tint_module_vars.src.get_width(v_9), tint_module_vars.src.get_height(v_9)) - uint2(1u));
     float4 const srcColor = tint_module_vars.src.read(min(uint2(v_8), v_10), v_9);
     int2 const v_11 = int2(dstTexCoord);
-    uint const v_12 = min(uint(0), (tint_module_vars.dst.get_num_mip_levels() - 1u));
+    uint const v_12 = min(0u, (tint_module_vars.dst.get_num_mip_levels() - 1u));
     uint2 const v_13 = (uint2(tint_module_vars.dst.get_width(v_12), tint_module_vars.dst.get_height(v_12)) - uint2(1u));
     float4 const dstColor = tint_module_vars.dst.read(min(uint2(v_11), v_13), v_12);
     if (((*tint_module_vars.uniforms).channelCount == 2u)) {

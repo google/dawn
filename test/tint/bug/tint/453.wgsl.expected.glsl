@@ -9,11 +9,9 @@ uniform highp usampler2D Src;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   uvec4 srcValue = uvec4(0u);
-  uint v_1 = (v.metadata[0u].x - 1u);
-  uint v_2 = min(uint(0), v_1);
-  uvec2 v_3 = (uvec2(textureSize(Src, int(v_2))) - uvec2(1u));
-  ivec2 v_4 = ivec2(min(uvec2(ivec2(0)), v_3));
-  uvec4 x_22 = texelFetch(Src, v_4, int(v_2));
+  uint v_1 = min(0u, (v.metadata[0u].x - 1u));
+  ivec2 v_2 = ivec2(min(uvec2(0u), (uvec2(textureSize(Src, int(v_1))) - uvec2(1u))));
+  uvec4 x_22 = texelFetch(Src, v_2, int(v_1));
   srcValue = x_22;
   uint x_24 = srcValue.x;
   uint x_25 = (x_24 + 1u);

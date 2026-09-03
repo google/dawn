@@ -9232,9 +9232,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformBroadcast_Constant_BoolScalar) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = convert true
-    %3:u32 = subgroupBroadcast %2, 1u
-    %4:bool = convert %3
+    %2:u32 = subgroupBroadcast 1u, 1u
+    %3:bool = convert %2
     ret
   }
 }
@@ -9267,9 +9266,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformBroadcast_Constant_BoolVector) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec3<u32> = convert vec3<bool>(true, false, true)
-    %3:vec3<u32> = subgroupBroadcast %2, 1u
-    %4:vec3<bool> = convert %3
+    %2:vec3<u32> = subgroupBroadcast vec3<u32>(1u, 0u, 1u), 1u
+    %3:vec3<bool> = convert %2
     ret
   }
 }
@@ -9365,9 +9363,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformBroadcastFirst_Constant_BoolScalar) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = convert true
-    %3:u32 = subgroupBroadcastFirst %2
-    %4:bool = convert %3
+    %2:u32 = subgroupBroadcastFirst 1u
+    %3:bool = convert %2
     ret
   }
 }
@@ -9400,9 +9397,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformBroadcastFirst_Constant_BoolVector) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec3<u32> = convert vec3<bool>(true, false, true)
-    %3:vec3<u32> = subgroupBroadcastFirst %2
-    %4:vec3<bool> = convert %3
+    %2:vec3<u32> = subgroupBroadcastFirst vec3<u32>(1u, 0u, 1u)
+    %3:vec3<bool> = convert %2
     ret
   }
 }
@@ -9498,9 +9494,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformQuadBroadcast_Constant_BoolScalar) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = convert true
-    %3:u32 = quadBroadcast %2, 1u
-    %4:bool = convert %3
+    %2:u32 = quadBroadcast 1u, 1u
+    %3:bool = convert %2
     ret
   }
 }
@@ -9533,9 +9528,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformQuadBroadcast_Constant_BoolVector) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec3<u32> = convert vec3<bool>(true, false, true)
-    %3:vec3<u32> = quadBroadcast %2, 1u
-    %4:vec3<bool> = convert %3
+    %2:vec3<u32> = quadBroadcast vec3<u32>(1u, 0u, 1u), 1u
+    %3:vec3<bool> = convert %2
     ret
   }
 }
@@ -9631,9 +9625,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformQuadSwap_Constant_BoolScalar) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = convert true
-    %3:u32 = quadSwapX %2
-    %4:bool = convert %3
+    %2:u32 = quadSwapX 1u
+    %3:bool = convert %2
     ret
   }
 }
@@ -9666,9 +9659,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformQuadSwap_Constant_BoolVector) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec3<u32> = convert vec3<bool>(true, false, true)
-    %3:vec3<u32> = quadSwapY %2
-    %4:vec3<bool> = convert %3
+    %2:vec3<u32> = quadSwapY vec3<u32>(1u, 0u, 1u)
+    %3:vec3<bool> = convert %2
     ret
   }
 }
@@ -9764,9 +9756,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformShuffle_Constant_BoolScalar) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = convert true
-    %3:u32 = subgroupShuffle %2, 1u
-    %4:bool = convert %3
+    %2:u32 = subgroupShuffle 1u, 1u
+    %3:bool = convert %2
     ret
   }
 }
@@ -9799,9 +9790,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformShuffle_Constant_BoolVector) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec3<u32> = convert vec3<bool>(true, false, true)
-    %3:vec3<u32> = subgroupShuffle %2, 1u
-    %4:vec3<bool> = convert %3
+    %2:vec3<u32> = subgroupShuffle vec3<u32>(1u, 0u, 1u), 1u
+    %3:vec3<bool> = convert %2
     ret
   }
 }
@@ -9897,9 +9887,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformShuffleXor_Constant_BoolScalar) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = convert true
-    %3:u32 = subgroupShuffleXor %2, 1u
-    %4:bool = convert %3
+    %2:u32 = subgroupShuffleXor 1u, 1u
+    %3:bool = convert %2
     ret
   }
 }
@@ -9932,9 +9921,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformShuffleXor_Constant_BoolVector) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec3<u32> = convert vec3<bool>(true, false, true)
-    %3:vec3<u32> = subgroupShuffleXor %2, 1u
-    %4:vec3<bool> = convert %3
+    %2:vec3<u32> = subgroupShuffleXor vec3<u32>(1u, 0u, 1u), 1u
+    %3:vec3<bool> = convert %2
     ret
   }
 }
@@ -10030,9 +10018,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformShuffleDown_Constant_BoolScalar) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = convert true
-    %3:u32 = subgroupShuffleDown %2, 1u
-    %4:bool = convert %3
+    %2:u32 = subgroupShuffleDown 1u, 1u
+    %3:bool = convert %2
     ret
   }
 }
@@ -10065,9 +10052,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformShuffleDown_Constant_BoolVector) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec3<u32> = convert vec3<bool>(true, false, true)
-    %3:vec3<u32> = subgroupShuffleDown %2, 1u
-    %4:vec3<bool> = convert %3
+    %2:vec3<u32> = subgroupShuffleDown vec3<u32>(1u, 0u, 1u), 1u
+    %3:vec3<bool> = convert %2
     ret
   }
 }
@@ -10163,9 +10149,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformShuffleUp_Constant_BoolScalar) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = convert true
-    %3:u32 = subgroupShuffleUp %2, 1u
-    %4:bool = convert %3
+    %2:u32 = subgroupShuffleUp 1u, 1u
+    %3:bool = convert %2
     ret
   }
 }
@@ -10198,9 +10183,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformShuffleUp_Constant_BoolVector) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec3<u32> = convert vec3<bool>(true, false, true)
-    %3:vec3<u32> = subgroupShuffleUp %2, 1u
-    %4:vec3<bool> = convert %3
+    %2:vec3<u32> = subgroupShuffleUp vec3<u32>(1u, 0u, 1u), 1u
+    %3:vec3<bool> = convert %2
     ret
   }
 }
@@ -10360,9 +10344,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformSMin_Scalar_u32) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = convert 1u
-    %3:i32 = subgroupMin %2
-    %4:u32 = convert %3
+    %2:i32 = subgroupMin 1i
+    %3:u32 = convert %2
     ret
   }
 }
@@ -10394,9 +10377,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformSMin_Vector_u32) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec3<i32> = convert vec3<u32>(1u, 3u, 1u)
-    %3:vec3<i32> = subgroupMin %2
-    %4:vec3<u32> = convert %3
+    %2:vec3<i32> = subgroupMin vec3<i32>(1i, 3i, 1i)
+    %3:vec3<u32> = convert %2
     ret
   }
 }
@@ -10492,9 +10474,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformSMax_Scalar_u32) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = convert 1u
-    %3:i32 = subgroupMax %2
-    %4:u32 = convert %3
+    %2:i32 = subgroupMax 1i
+    %3:u32 = convert %2
     ret
   }
 }
@@ -10526,9 +10507,8 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformSMax_Vector_u32) {
     auto expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec3<i32> = convert vec3<u32>(1u, 3u, 1u)
-    %3:vec3<i32> = subgroupMax %2
-    %4:vec3<u32> = convert %3
+    %2:vec3<i32> = subgroupMax vec3<i32>(1i, 3i, 1i)
+    %3:vec3<u32> = convert %2
     ret
   }
 }

@@ -2529,8 +2529,7 @@ TEST_F(SpirvParserTest, NonUniformBallotBitCount_Reduce_FromBallot_Const) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec4<u32> = subgroupBallot true
-    %3:u32 = convert true
-    %4:u32 = subgroupAdd %3
+    %3:u32 = subgroupAdd 1u
     ret
   }
 }
@@ -2602,8 +2601,7 @@ TEST_F(SpirvParserTest, NonUniformBallotBitCount_InclusiveScan_FromBallot) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec4<u32> = subgroupBallot true
-    %3:u32 = convert true
-    %4:u32 = subgroupInclusiveAdd %3
+    %3:u32 = subgroupInclusiveAdd 1u
     ret
   }
 }
@@ -2637,8 +2635,7 @@ TEST_F(SpirvParserTest, NonUniformBallotBitCount_ExclusiveScan_FromBallot) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec4<u32> = subgroupBallot true
-    %3:u32 = convert true
-    %4:u32 = subgroupExclusiveAdd %3
+    %3:u32 = subgroupExclusiveAdd 1u
     ret
   }
 }

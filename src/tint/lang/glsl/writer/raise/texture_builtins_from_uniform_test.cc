@@ -468,11 +468,10 @@ $B1: {  # root
   $B2: {
     %4:binding_array<texture_2d<f32>, 3> = load %1
     %5:texture_2d<f32> = access %4, 1i
-    %6:u32 = convert 1i
-    %7:ptr<uniform, vec4<u32>, read> = access %2, 0u, 0u
-    %8:vec4<u32> = load %7
-    %9:u32 = access %8, 1u
-    %len:u32 = let %9
+    %6:ptr<uniform, vec4<u32>, read> = access %2, 0u, 0u
+    %7:vec4<u32> = load %6
+    %8:u32 = access %7, 1u
+    %len:u32 = let %8
     ret
   }
 }

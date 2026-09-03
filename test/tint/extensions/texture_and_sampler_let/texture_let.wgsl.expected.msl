@@ -8,11 +8,10 @@ struct tint_module_vars_struct {
 
 fragment void v(texture2d<float, access::sample> tex [[texture(0)]], texture2d<float, access::read_write> store [[texture(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tex=tex, .store=store};
-  uint const v_1 = min(uint(0), (tint_module_vars.tex.get_num_mip_levels() - 1u));
-  uint2 const v_2 = (uint2(tint_module_vars.tex.get_width(v_1), tint_module_vars.tex.get_height(v_1)) - uint2(1u));
-  float4 res = tint_module_vars.tex.read(min(uint2(int2(1)), v_2), v_1);
-  float4 const v_3 = res;
+  uint const v_1 = min(0u, (tint_module_vars.tex.get_num_mip_levels() - 1u));
+  float4 res = tint_module_vars.tex.read(min(uint2(1u), (uint2(tint_module_vars.tex.get_width(v_1), tint_module_vars.tex.get_height(v_1)) - uint2(1u))), v_1);
+  float4 const v_2 = res;
   (const_cast<texture2d<float, access::read_write>thread &>(tint_module_vars.store).fence());
-  (tint_module_vars.store.write(v_3, uint2(int2(0))));
+  (tint_module_vars.store.write(v_2, uint2(0u)));
   (const_cast<texture2d<float, access::read_write>thread &>(tint_module_vars.store).fence());
 }

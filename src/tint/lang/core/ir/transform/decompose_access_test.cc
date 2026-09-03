@@ -4069,9 +4069,8 @@ $B1: {  # root
 
 %foo = func():void {
   $B2: {
-    %3:vec4<u32> = convert vec4<bool>(false)
-    %4:ptr<workgroup, vec4<u32>, read_write> = access %v, 0u
-    store %4, %3
+    %3:ptr<workgroup, vec4<u32>, read_write> = access %v, 0u
+    store %3, vec4<u32>(0u)
     ret
   }
 }
@@ -5484,13 +5483,11 @@ $B1: {  # root
     %3:ptr<workgroup, u32, read_write> = access %v, 0u
     store %3, 0u
     %4:bool = access vec2<bool>(false), 0u
-    %5:u32 = convert %4
-    %6:ptr<workgroup, u32, read_write> = access %v, 2u
-    store %6, %5 @align(8)
-    %7:bool = access vec2<bool>(false), 1u
-    %8:u32 = convert %7
-    %9:ptr<workgroup, u32, read_write> = access %v, 3u
-    store %9, %8
+    %5:ptr<workgroup, u32, read_write> = access %v, 2u
+    store %5, 0u @align(8)
+    %6:bool = access vec2<bool>(false), 1u
+    %7:ptr<workgroup, u32, read_write> = access %v, 3u
+    store %7, 0u
     ret
   }
 }
@@ -5556,17 +5553,14 @@ $B1: {  # root
     %3:ptr<workgroup, u32, read_write> = access %v, 0u
     store %3, 0u
     %4:bool = access vec3<bool>(false), 0u
-    %5:u32 = convert %4
-    %6:ptr<workgroup, u32, read_write> = access %v, 4u
-    store %6, %5 @align(16)
-    %7:bool = access vec3<bool>(false), 1u
-    %8:u32 = convert %7
-    %9:ptr<workgroup, u32, read_write> = access %v, 5u
-    store %9, %8
-    %10:bool = access vec3<bool>(false), 2u
-    %11:u32 = convert %10
-    %12:ptr<workgroup, u32, read_write> = access %v, 6u
-    store %12, %11
+    %5:ptr<workgroup, u32, read_write> = access %v, 4u
+    store %5, 0u @align(16)
+    %6:bool = access vec3<bool>(false), 1u
+    %7:ptr<workgroup, u32, read_write> = access %v, 5u
+    store %7, 0u
+    %8:bool = access vec3<bool>(false), 2u
+    %9:ptr<workgroup, u32, read_write> = access %v, 6u
+    store %9, 0u
     ret
   }
 }
@@ -5632,21 +5626,17 @@ $B1: {  # root
     %3:ptr<workgroup, u32, read_write> = access %v, 0u
     store %3, 0u
     %4:bool = access vec4<bool>(false), 0u
-    %5:u32 = convert %4
-    %6:ptr<workgroup, u32, read_write> = access %v, 4u
-    store %6, %5 @align(16)
-    %7:bool = access vec4<bool>(false), 1u
-    %8:u32 = convert %7
-    %9:ptr<workgroup, u32, read_write> = access %v, 5u
-    store %9, %8
-    %10:bool = access vec4<bool>(false), 2u
-    %11:u32 = convert %10
-    %12:ptr<workgroup, u32, read_write> = access %v, 6u
-    store %12, %11
-    %13:bool = access vec4<bool>(false), 3u
-    %14:u32 = convert %13
-    %15:ptr<workgroup, u32, read_write> = access %v, 7u
-    store %15, %14
+    %5:ptr<workgroup, u32, read_write> = access %v, 4u
+    store %5, 0u @align(16)
+    %6:bool = access vec4<bool>(false), 1u
+    %7:ptr<workgroup, u32, read_write> = access %v, 5u
+    store %7, 0u
+    %8:bool = access vec4<bool>(false), 2u
+    %9:ptr<workgroup, u32, read_write> = access %v, 6u
+    store %9, 0u
+    %10:bool = access vec4<bool>(false), 3u
+    %11:ptr<workgroup, u32, read_write> = access %v, 7u
+    store %11, 0u
     ret
   }
 }
