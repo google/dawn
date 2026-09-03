@@ -106,7 +106,7 @@ Source Validator::SourceOf(const Instruction* inst, size_t idx) {
 diag::Diagnostic& Validator::AddError(const Instruction* inst) {
     auto& diag = AddError(SourceOf(inst)) << inst->FriendlyName() << ": ";
 
-    if (!block_stack_.IsEmpty()) {
+    if (IsIRValidation() && !block_stack_.IsEmpty()) {
         AddNote(block_stack_.Back()) << "in block";
 
         // Adding the note may trigger a resize and invalidate the error diagnostic reference, so we
@@ -119,11 +119,11 @@ diag::Diagnostic& Validator::AddError(const Instruction* inst) {
 diag::Diagnostic& Validator::AddError(const Instruction* inst, size_t idx) {
     auto& diag = AddError(SourceOf(inst, idx)) << inst->FriendlyName() << ": ";
 
-    if (!block_stack_.IsEmpty()) {
+    if (IsIRValidation() && !block_stack_.IsEmpty()) {
         AddNote(block_stack_.Back()) << "in block";
 
-        // Adding the note may trigger a resize and invalidate the error diagnostic reference, so we
-        // need to get a new reference to the error diagnostic here.
+        // Adding the note may trigger a resize and invalidate the error diagnostic reference,
+        // so we need to get a new reference to the error diagnostic here.
         return *(diag_.end() - 2);
     }
     return diag;
@@ -180,7 +180,7 @@ diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx)
         Disassemble().ResultSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
-    if (!block_stack_.IsEmpty()) {
+    if (IsIRValidation() && !block_stack_.IsEmpty()) {
         AddNote(block_stack_.Back()) << "in block";
 
         // Adding the note may trigger a resize and invalidate the error diagnostic reference, so we

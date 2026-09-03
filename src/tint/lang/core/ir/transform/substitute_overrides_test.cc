@@ -3365,16 +3365,16 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_SizedParam) {
     b.Append(mod.root_block, [&] {
         o = b.Override("o", ty.u32());
         o->SetOverrideId({1});
-        v = b.Var("v", ty.ptr(storage, ty.unsized_buffer()));
+        v = b.Var("v", ty.ptr(storage, ty.buffer(array_size)));
         v->SetBindingPoint(0, 0);
     });
     auto* foo = b.Function("foo", ty.void_());
     auto* value = b.FunctionParam("mat", mat_ty);
-    auto* p = b.FunctionParam("p", ty.ptr(workgroup, ty.buffer(array_size), read_write));
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.buffer(array_size), read_write));
     foo->SetParams({value, p});
     b.Append(foo->Block(), [&] {
         auto* view = b.CallExplicit(
-            ty.ptr(workgroup, ty.runtime_array(ArrayElemType())), BuiltinFn::kBufferView,
+            ty.ptr(storage, ty.runtime_array(ArrayElemType())), BuiltinFn::kBufferView,
             Vector<TemplateParameter, 1>{ty.runtime_array(ArrayElemType())}, p, o->Result());
         MakeCall(view, value, b.Constant(u32(0)), b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
@@ -3423,11 +3423,11 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_BufferView_Result) {
     });
     auto* foo = b.Function("foo", ty.void_());
     auto* value = b.FunctionParam("mat", mat_ty);
-    auto* p = b.FunctionParam("p", ty.ptr(workgroup, ty.buffer(2 * array_size), read_write));
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer(), read_write));
     foo->SetParams({value, p});
     b.Append(foo->Block(), [&] {
         auto* arr_ty = ty.array(ArrayElemType(), array_size / ArrayStride() - 1);
-        auto* view = b.CallExplicit(ty.ptr(workgroup, arr_ty), BuiltinFn::kBufferView,
+        auto* view = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView,
                                     Vector<TemplateParameter, 1>{arr_ty}, p, o->Result());
         MakeCall(view, value, b.Constant(u32(0)), b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);

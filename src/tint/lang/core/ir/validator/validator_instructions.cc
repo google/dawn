@@ -35,7 +35,9 @@
 #include "src/tint/lang/core/ir/validator/validator.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/vector.h"
+#include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/containers/predicates.h"
 #include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/containers/transform.h"
@@ -182,7 +184,9 @@ void Validator::CheckVar(const Var* var) {
 }
 
 void Validator::CheckLet(const Let* l) {
-    CheckResultsAndOperands(l, Let::kNumResults, Let::kNumOperands);
+    if (!CheckResultsAndOperands(l, Let::kNumResults, Let::kNumOperands)) {
+        return;
+    }
 }
 
 void Validator::CheckCall(const Call* call) {
@@ -289,28 +293,83 @@ void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
 }
 
 void Validator::CheckConstruct(const Construct* construct) {
-    CheckResultsAndOperandRange(construct, Construct::kNumResults, Construct::kMinOperands);
+    if (!CheckResultsAndOperandRange(construct, Construct::kNumResults, Construct::kMinOperands)) {
+        return;
+    }
 }
 
 void Validator::CheckConvert(const Convert* convert) {
-    CheckResultsAndOperands(convert, Convert::kNumResults, Convert::kNumOperands);
+    if (!CheckResultsAndOperands(convert, Convert::kNumResults, Convert::kNumOperands)) {
+        return;
+    }
 }
 
 void Validator::CheckDiscard(const Discard* discard) {
-    CheckResultsAndOperands(discard, Discard::kNumResults, Discard::kNumOperands);
+    if (!CheckResultsAndOperands(discard, Discard::kNumResults, Discard::kNumOperands)) {
+        return;
+    }
 }
 
 void Validator::CheckUserCall(const UserCall* call) {
-    CheckResultsAndOperandRange(call, UserCall::kNumResults, UserCall::kMinOperands);
+    if (!CheckResultsAndOperandRange(call, UserCall::kNumResults, UserCall::kMinOperands)) {
+        return;
+    }
 
     if (!call->Target()) {
         AddError(call, UserCall::kFunctionOperandOffset) << "target not defined or not a function";
         return;
     }
+    if (call->Target()->IsEntryPoint()) {
+        AddError(call, UserCall::kFunctionOperandOffset)
+            << "call target must not have a pipeline stage";
+    }
+
+    if (call->Target()->ReturnType() != call->Result()->Type()) {
+        AddError(call) << "result type does not match function return type";
+        return;
+    }
+
+    auto args = call->Args();
+    auto params = call->Target()->Params();
+    if (args.size() != params.Length()) {
+        AddError(call, UserCall::kFunctionOperandOffset)
+            << "function has " << params.Length() << " parameters, but call provides "
+            << args.size() << " arguments";
+        return;
+    }
+
+    for (size_t i = 0; i < args.size(); i++) {
+        bool allow_mismatch = false;
+        if (auto* arg_buffer_ty = args[i]->Type()->UnwrapPtrOrRef()->As<core::type::Buffer>()) {
+            auto* arg_ptr_ty = args[i]->Type()->As<core::type::Pointer>();
+            if (auto* param_ptr_ty = params[i]->Type()->As<core::type::Pointer>()) {
+                if (auto* param_buffer_ty =
+                        param_ptr_ty->UnwrapPtrOrRef()->As<core::type::Buffer>()) {
+                    allow_mismatch = arg_ptr_ty->AddressSpace() == param_ptr_ty->AddressSpace() &&
+                                     arg_ptr_ty->Access() == param_ptr_ty->Access();
+                    const bool both_constant =
+                        arg_buffer_ty->Count()->Is<core::type::ConstantArrayCount>() &&
+                        param_buffer_ty->Count()->Is<core::type::ConstantArrayCount>();
+                    uint32_t arg_size = arg_buffer_ty->ConstantCount().value_or(0);
+                    uint32_t param_size = param_buffer_ty->ConstantCount().value_or(0);
+                    allow_mismatch &=
+                        param_buffer_ty->Count()->Is<core::type::RuntimeArrayCount>() ||
+                        (both_constant && param_size < arg_size);
+                }
+            }
+        }
+        if (!allow_mismatch && args[i]->Type() != params[i]->Type()) {
+            AddError(call, UserCall::kArgsOperandOffset + i)
+                << "type " << NameOf(params[i]->Type()) << " of function parameter " << i
+                << " does not match argument type " << NameOf(args[i]->Type());
+        }
+    }
 }
 
 void Validator::CheckAccess(const Access* a) {
-    CheckResultsAndOperandRange(a, Access::kNumResults, Access::kMinNumOperands);
+    if (!CheckResultsAndOperandRange(a, Access::kNumResults, Access::kMinNumOperands)) {
+        return;
+    }
 }
 
 void Validator::CheckBinary(const Binary* b) {
@@ -328,7 +387,9 @@ void Validator::CheckBinary(const Binary* b) {
 }
 
 void Validator::CheckUnary(const Unary* u) {
-    CheckResultsAndOperands(u, Unary::kNumResults, Unary::kNumOperands);
+    if (!CheckResultsAndOperands(u, Unary::kNumResults, Unary::kNumOperands)) {
+        return;
+    }
 }
 
 void Validator::CheckIf(const If* if_) {
@@ -445,7 +506,9 @@ void Validator::CheckSwitch(const Switch* s) {
 }
 
 void Validator::CheckSwizzle(const Swizzle* s) {
-    CheckResultsAndOperands(s, Swizzle::kNumResults, Swizzle::kNumOperands);
+    if (!CheckResultsAndOperands(s, Swizzle::kNumResults, Swizzle::kNumOperands)) {
+        return;
+    }
 }
 
 void Validator::CheckTerminator(const Terminator* b) {
@@ -495,6 +558,15 @@ void Validator::CheckBreakIf(const BreakIf* b) {
     auto exit_values = b->ExitValues();
     CheckOperandsMatchTarget(b, b->ArgsOperandOffset() + next_iter_values.size(),
                              exit_values.size(), loop, loop->Results());
+
+    if (!b->Condition()->Type() || !b->Condition()->Type()->Is<core::type::Bool>()) {
+        AddError(b) << "condition must be a 'bool'";
+        return;
+    }
+
+    if (loop->Continuing() != b->Block()) {
+        AddError(b) << "must only be called directly from loop continuing";
+    }
 }
 
 void Validator::CheckContinue(const Continue* c) {
@@ -584,10 +656,26 @@ void Validator::CheckReturn(const Return* ret) {
         AddError(ret) << "function operand does not match containing function";
         return;
     }
+
+    if (func->ReturnType()->Is<core::type::Void>()) {
+        if (ret->HasValue()) {
+            AddError(ret) << "unexpected return value";
+        }
+        return;
+    }
+
+    if (!ret->Value()) {
+        AddError(ret) << "expected return value";
+    } else if (ret->Value()->Type() != func->ReturnType()) {
+        AddError(ret) << "return value type " << NameOf(ret->Value()->Type())
+                      << " does not match function return type " << NameOf(func->ReturnType());
+    }
 }
 
 void Validator::CheckUnreachable(const Unreachable* u) {
-    CheckResultsAndOperands(u, Unreachable::kNumResults, Unreachable::kNumOperands);
+    if (!CheckResultsAndOperands(u, Unreachable::kNumResults, Unreachable::kNumOperands)) {
+        return;
+    }
 }
 
 void Validator::CheckControlsAllowingIf(const Exit* exit, const Instruction* control) {
@@ -616,22 +704,144 @@ void Validator::CheckExitSwitch(const ExitSwitch* s) {
 
 void Validator::CheckExitLoop(const ExitLoop* l) {
     CheckControlsAllowingIf(l, l->ControlInstruction());
+
+    const Instruction* inst = l;
+    const Loop* control = l->Loop();
+    while (inst) {
+        // Found parent loop
+        if (inst->Block()->Parent() == control) {
+            if (inst->Block() == control->Continuing()) {
+                AddError(l) << "loop exit jumps out of continuing block";
+                if (control->Continuing() != l->Block()) {
+                    AddNote(control->Continuing()) << "in continuing block";
+                }
+            } else if (inst->Block() == control->Initializer()) {
+                AddError(l) << "loop exit not permitted in loop initializer";
+                if (control->Initializer() != l->Block()) {
+                    AddNote(control->Initializer()) << "in initializer block";
+                }
+            }
+            break;
+        }
+        inst = inst->Block()->Parent();
+    }
 }
 
 void Validator::CheckLoad(const Load* l) {
-    CheckResultsAndOperands(l, Load::kNumResults, Load::kNumOperands);
+    if (!CheckResultsAndOperands(l, Load::kNumResults, Load::kNumOperands)) {
+        return;
+    }
 }
 
 void Validator::CheckStore(const Store* s) {
-    CheckResultsAndOperands(s, Store::kNumResults, Store::kNumOperands);
+    if (!CheckResultsAndOperands(s, Store::kNumResults, Store::kNumOperands)) {
+        return;
+    }
+}
+
+const core::type::Type* Validator::GetVectorPtrElementType(const Instruction* inst, size_t idx) {
+    auto* operand = inst->Operands()[idx];
+    TINT_ASSERT(operand) << "missing element operand";
+
+    auto* type = operand->Type();
+    TINT_ASSERT(type) << "missing operand type";
+
+    auto* memory_view_ty = type->As<core::type::MemoryView>();
+    if (DAWN_LIKELY(memory_view_ty)) {
+        auto* vec_ty = memory_view_ty->StoreType()->As<core::type::Vector>();
+        if (DAWN_LIKELY(vec_ty)) {
+            return vec_ty->Type();
+        }
+    }
+
+    AddError(inst, idx) << "operand " << NameOf(type) << " must be a pointer to a vector";
+    return nullptr;
 }
 
 void Validator::CheckLoadVectorElement(const LoadVectorElement* l) {
-    CheckResultsAndOperands(l, LoadVectorElement::kNumResults, LoadVectorElement::kNumOperands);
+    if (!CheckResultsAndOperands(l, LoadVectorElement::kNumResults,
+                                 LoadVectorElement::kNumOperands)) {
+        return;
+    }
+
+    const core::type::Type* el_ty =
+        GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset);
+    if (!el_ty) {
+        return;
+    }
+
+    auto* res = l->Result(0);
+    if (res->Type() != el_ty) {
+        AddError(l) << "result type " << NameOf(res->Type())
+                    << " does not match vector pointer element type " << NameOf(el_ty);
+        return;
+    }
+
+    if (!l->Index()->Type()->IsIntegerScalar()) {
+        AddError(l, LoadVectorElement::kIndexOperandOffset)
+            << "load vector element index must be an integer scalar";
+    }
+    if (auto* c = l->Index()->As<Constant>()) {
+        uint32_t val = c->Value()->ValueAs<uint32_t>();
+
+        const core::type::Vector* vec_ty =
+            l->From()->Type()->UnwrapPtrOrRef()->As<core::type::Vector>();
+        TINT_ASSERT(vec_ty);
+
+        if (val >= vec_ty->Width()) {
+            AddError(l, LoadVectorElement::kIndexOperandOffset)
+                << "load vector element index must be in range [0, " << (vec_ty->Width() - 1)
+                << "]";
+        }
+    }
 }
 
 void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
-    CheckResultsAndOperands(s, StoreVectorElement::kNumResults, StoreVectorElement::kNumOperands);
+    if (!CheckResultsAndOperands(s, StoreVectorElement::kNumResults,
+                                 StoreVectorElement::kNumOperands)) {
+        return;
+    }
+
+    const core::type::Type* el_ty =
+        GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset);
+    if (!el_ty) {
+        return;
+    }
+    auto* value = s->Value();
+    if (value->Type() != el_ty) {
+        AddError(s, StoreVectorElement::kValueOperandOffset)
+            << "value type " << NameOf(value->Type())
+            << " does not match vector pointer element type " << NameOf(el_ty);
+        return;
+    }
+
+    // The `GetVectorPtrElementType` has already validated that the pointer exists.
+    const core::type::MemoryView* mv = s->To()->Type()->As<core::type::MemoryView>();
+    if (mv->Access() != core::Access::kWrite && mv->Access() != core::Access::kReadWrite) {
+        AddError(s, StoreVectorElement::kToOperandOffset)
+            << "store_vector_element target operand has a non-writeable access type, "
+            << style::Literal(ToString(mv->Access()));
+        return;
+    }
+
+    if (!s->Index()->Type()->IsIntegerScalar()) {
+        AddError(s, StoreVectorElement::kIndexOperandOffset)
+            << "store vector element index must be an integer scalar";
+    }
+
+    const Constant* c = s->Index()->As<Constant>();
+    if (c == nullptr) {
+        return;
+    }
+
+    uint32_t val = c->Value()->ValueAs<uint32_t>();
+    const core::type::Vector* vec_ty = s->To()->Type()->UnwrapPtrOrRef()->As<core::type::Vector>();
+    TINT_ASSERT(vec_ty);
+
+    if (val >= vec_ty->Width()) {
+        AddError(s, StoreVectorElement::kIndexOperandOffset)
+            << "store vector element index must be in range [0, " << (vec_ty->Width() - 1) << "]";
+    }
 }
 
 void Validator::CheckPhony(const Phony* p) {

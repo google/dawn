@@ -132,7 +132,6 @@ class Functional {
     ir::Disassembler& Disassemble();
 
     bool CanLoad(const core::type::Type* ty);
-    const core::type::Type* GetVectorPtrElementType(const Instruction* inst, size_t idx);
 
     void CheckRootBlock(const Block* blk);
     void CheckFunction(const Function* func);
@@ -148,7 +147,6 @@ class Functional {
 
     void CheckAccess(const Access* a);
     void CheckBinary(const Binary* b);
-    void CheckBreakIf(const BreakIf* b);
     void CheckBuiltinCall(const BuiltinCall* call);
     void CheckCall(const Call* call);
     void CheckConstruct(const Construct* construct);
@@ -156,26 +154,20 @@ class Functional {
     void CheckConvert(const Convert* convert);
     void CheckCoreBuiltinCall(const CoreBuiltinCall* call,
                               const core::intrinsic::Overload& overload);
-    void CheckExit(const Exit* e);
-    void CheckExitLoop(const ExitLoop* l);
     void CheckIf(const If* if_);
     void CheckLet(const Let* l);
     void CheckLoad(const Load* l);
-    void CheckLoadVectorElement(const LoadVectorElement* l);
     void CheckLoop(const Loop* l);
     void CheckLoopBody(const Loop* loop);
     void CheckLoopContinuing(const Loop* loop);
     void CheckMemberBuiltinCall(const MemberBuiltinCall* call);
     void CheckOverride(const Override* o);
-    void CheckReturn(const Return* ret);
     void CheckStore(const Store* s);
-    void CheckStoreVectorElement(const StoreVectorElement* s);
     void CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call);
     void CheckSwitch(const Switch* s);
     void CheckSwizzle(const Swizzle* s);
     void CheckTerminator(const Terminator* b);
     void CheckUnary(const Unary* u);
-    void CheckUserCall(const UserCall* call);
     void CheckVar(const Var* var);
 
     void CheckSubgroupCall(const CoreBuiltinCall* call);

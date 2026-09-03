@@ -592,24 +592,24 @@ void Functional::CheckBlock(const Block* blk) {
 
 void Functional::CheckInstruction(const Instruction* inst) {
     tint::Switch(
-        inst,                                                              //
-        [&](const Access* a) { CheckAccess(a); },                          //
-        [&](const Binary* b) { CheckBinary(b); },                          //
-        [&](const Call* c) { CheckCall(c); },                              //
-        [&](const If* if_) { CheckIf(if_); },                              //
-        [&](const Let* l) { CheckLet(l); },                                //
-        [&](const Load* load) { CheckLoad(load); },                        //
-        [&](const LoadVectorElement* l) { CheckLoadVectorElement(l); },    //
-        [&](const Loop* l) { CheckLoop(l); },                              //
-        [&](const Override* o) { CheckOverride(o); },                      //
-        [&](const Phony*) {},                                              //
-        [&](const Store* s) { CheckStore(s); },                            //
-        [&](const StoreVectorElement* s) { CheckStoreVectorElement(s); },  //
-        [&](const Switch* s) { CheckSwitch(s); },                          //
-        [&](const Swizzle* s) { CheckSwizzle(s); },                        //
-        [&](const Terminator* b) { CheckTerminator(b); },                  //
-        [&](const Unary* u) { CheckUnary(u); },                            //
-        [&](const Var* var) { CheckVar(var); },                            //
+        inst,                                              //
+        [&](const Access* a) { CheckAccess(a); },          //
+        [&](const Binary* b) { CheckBinary(b); },          //
+        [&](const Call* c) { CheckCall(c); },              //
+        [&](const If* if_) { CheckIf(if_); },              //
+        [&](const Let* l) { CheckLet(l); },                //
+        [&](const Load* load) { CheckLoad(load); },        //
+        [&](const LoadVectorElement*) {},                  //
+        [&](const Loop* l) { CheckLoop(l); },              //
+        [&](const Override* o) { CheckOverride(o); },      //
+        [&](const Phony*) {},                              //
+        [&](const Store* s) { CheckStore(s); },            //
+        [&](const StoreVectorElement*) {},                 //
+        [&](const Switch* s) { CheckSwitch(s); },          //
+        [&](const Swizzle* s) { CheckSwizzle(s); },        //
+        [&](const Terminator* b) { CheckTerminator(b); },  //
+        [&](const Unary* u) { CheckUnary(u); },            //
+        [&](const Var* var) { CheckVar(var); },            //
         TINT_ICE_ON_NO_MATCH);
 
     // Only check alignment if the instruction passed previous checks.
@@ -985,7 +985,7 @@ void Functional::CheckCall(const Call* call) {
         [&](const Convert* c) { CheckConvert(c); },                      //
         [&](const Discard*) {},                                          //
         [&](const MemberBuiltinCall* c) { CheckMemberBuiltinCall(c); },  //
-        [&](const UserCall* c) { CheckUserCall(c); },                    //
+        [&](const UserCall*) {},                                         //
         [&](Default) { /* Validation of custom IR instructions */ });
 }
 
@@ -1272,101 +1272,6 @@ void Functional::CheckStore(const Store* s) {
     }
 }
 
-const core::type::Type* Functional::GetVectorPtrElementType(const Instruction* inst, size_t idx) {
-    auto* operand = inst->Operands()[idx];
-    TINT_ASSERT(operand) << "missing element operand";
-
-    auto* type = operand->Type();
-    TINT_ASSERT(type) << "missing operand type";
-
-    auto* memory_view_ty = type->As<core::type::MemoryView>();
-    if (DAWN_LIKELY(memory_view_ty)) {
-        auto* vec_ty = memory_view_ty->StoreType()->As<core::type::Vector>();
-        if (DAWN_LIKELY(vec_ty)) {
-            return vec_ty->Type();
-        }
-    }
-
-    AddError(inst, idx) << "operand " << NameOf(type) << " must be a pointer to a vector";
-    return nullptr;
-}
-
-void Functional::CheckLoadVectorElement(const LoadVectorElement* l) {
-    const core::type::Type* el_ty =
-        GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset);
-    if (!el_ty) {
-        return;
-    }
-
-    auto* res = l->Result(0);
-    if (res->Type() != el_ty) {
-        AddError(l) << "result type " << NameOf(res->Type())
-                    << " does not match vector pointer element type " << NameOf(el_ty);
-        return;
-    }
-
-    if (!l->Index()->Type()->IsIntegerScalar()) {
-        AddError(l, LoadVectorElement::kIndexOperandOffset)
-            << "load vector element index must be an integer scalar";
-    }
-    if (auto* c = l->Index()->As<Constant>()) {
-        uint32_t val = c->Value()->ValueAs<uint32_t>();
-
-        const core::type::Vector* vec_ty =
-            l->From()->Type()->UnwrapPtrOrRef()->As<core::type::Vector>();
-        TINT_ASSERT(vec_ty);
-
-        if (val >= vec_ty->Width()) {
-            AddError(l, LoadVectorElement::kIndexOperandOffset)
-                << "load vector element index must be in range [0, " << (vec_ty->Width() - 1)
-                << "]";
-        }
-    }
-}
-
-void Functional::CheckStoreVectorElement(const StoreVectorElement* s) {
-    const core::type::Type* el_ty =
-        GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset);
-    if (!el_ty) {
-        return;
-    }
-    auto* value = s->Value();
-    if (value->Type() != el_ty) {
-        AddError(s, StoreVectorElement::kValueOperandOffset)
-            << "value type " << NameOf(value->Type())
-            << " does not match vector pointer element type " << NameOf(el_ty);
-        return;
-    }
-
-    // The `GetVectorPtrElementType` has already validated that the pointer exists.
-    const core::type::MemoryView* mv = s->To()->Type()->As<core::type::MemoryView>();
-    if (mv->Access() != core::Access::kWrite && mv->Access() != core::Access::kReadWrite) {
-        AddError(s, StoreVectorElement::kToOperandOffset)
-            << "store_vector_element target operand has a non-writeable access type, "
-            << style::Literal(ToString(mv->Access()));
-        return;
-    }
-
-    if (!s->Index()->Type()->IsIntegerScalar()) {
-        AddError(s, StoreVectorElement::kIndexOperandOffset)
-            << "store vector element index must be an integer scalar";
-    }
-
-    const Constant* c = s->Index()->As<Constant>();
-    if (c == nullptr) {
-        return;
-    }
-
-    uint32_t val = c->Value()->ValueAs<uint32_t>();
-    const core::type::Vector* vec_ty = s->To()->Type()->UnwrapPtrOrRef()->As<core::type::Vector>();
-    TINT_ASSERT(vec_ty);
-
-    if (val >= vec_ty->Width()) {
-        AddError(s, StoreVectorElement::kIndexOperandOffset)
-            << "store vector element index must be in range [0, " << (vec_ty->Width() - 1) << "]";
-    }
-}
-
 void Functional::CheckLoop(const Loop* l) {
     CheckBlock(l->Initializer());
     CheckLoopBody(l);
@@ -1415,11 +1320,11 @@ void Functional::CheckLoopContinuing(const Loop* loop) {
 void Functional::CheckTerminator(const Terminator* b) {
     tint::Switch(
         b,                                                 //
-        [&](const ir::BreakIf* i) { CheckBreakIf(i); },    //
+        [&](const ir::BreakIf*) {},                        //
         [&](const ir::Continue* c) { CheckContinue(c); },  //
-        [&](const ir::Exit* e) { CheckExit(e); },          //
+        [&](const ir::Exit*) {},                           //
         [&](const ir::NextIteration*) {},                  //
-        [&](const ir::Return* ret) { CheckReturn(ret); },  //
+        [&](const ir::Return*) {},                         //
         [&](const ir::TerminateInvocation*) {},            //
         [&](const ir::Unreachable*) {},                    //
         TINT_ICE_ON_NO_MATCH);
@@ -1866,119 +1771,6 @@ void Functional::CheckConvert(const Convert* convert) {
         AddError(convert) << "No defined converter for " << NameOf(value_type) << " -> "
                           << NameOf(result_type);
         return;
-    }
-}
-
-void Functional::CheckUserCall(const UserCall* call) {
-    if (call->Target()->IsEntryPoint()) {
-        AddError(call, UserCall::kFunctionOperandOffset)
-            << "call target must not have a pipeline stage";
-    }
-
-    if (call->Target()->ReturnType() != call->Result()->Type()) {
-        AddError(call) << "result type does not match function return type";
-        return;
-    }
-
-    auto args = call->Args();
-    auto params = call->Target()->Params();
-    if (args.size() != params.Length()) {
-        AddError(call, UserCall::kFunctionOperandOffset)
-            << "function has " << params.Length() << " parameters, but call provides "
-            << args.size() << " arguments";
-        return;
-    }
-
-    for (size_t i = 0; i < args.size(); i++) {
-        bool allow_mismatch = false;
-        if (auto* arg_buffer_ty = args[i]->Type()->UnwrapPtrOrRef()->As<core::type::Buffer>()) {
-            auto* arg_ptr_ty = args[i]->Type()->As<core::type::Pointer>();
-            if (auto* param_ptr_ty = params[i]->Type()->As<core::type::Pointer>()) {
-                if (auto* param_buffer_ty =
-                        param_ptr_ty->UnwrapPtrOrRef()->As<core::type::Buffer>()) {
-                    allow_mismatch = arg_ptr_ty->AddressSpace() == param_ptr_ty->AddressSpace() &&
-                                     arg_ptr_ty->Access() == param_ptr_ty->Access();
-                    const bool both_constant =
-                        arg_buffer_ty->Count()->Is<core::type::ConstantArrayCount>() &&
-                        param_buffer_ty->Count()->Is<core::type::ConstantArrayCount>();
-                    uint32_t arg_size = arg_buffer_ty->ConstantCount().value_or(0);
-                    uint32_t param_size = param_buffer_ty->ConstantCount().value_or(0);
-                    allow_mismatch &=
-                        param_buffer_ty->Count()->Is<core::type::RuntimeArrayCount>() ||
-                        (both_constant && param_size < arg_size);
-                }
-            }
-        }
-        if (!allow_mismatch && args[i]->Type() != params[i]->Type()) {
-            AddError(call, UserCall::kArgsOperandOffset + i)
-                << "type " << NameOf(params[i]->Type()) << " of function parameter " << i
-                << " does not match argument type " << NameOf(args[i]->Type());
-        }
-    }
-}
-
-void Functional::CheckBreakIf(const BreakIf* b) {
-    if (!b->Condition()->Type() || !b->Condition()->Type()->Is<core::type::Bool>()) {
-        AddError(b) << "condition must be a 'bool'";
-        return;
-    }
-
-    auto* loop = b->Loop();
-    TINT_ASSERT(loop);
-
-    if (loop->Continuing() != b->Block()) {
-        AddError(b) << "must only be called directly from loop continuing";
-    }
-}
-
-void Functional::CheckExit(const Exit* e) {
-    tint::Switch(
-        e,                                                 //
-        [&](const ir::ExitIf*) {},                         //
-        [&](const ir::ExitLoop* l) { CheckExitLoop(l); },  //
-        [&](const ir::ExitSwitch*) {},                     //
-        TINT_ICE_ON_NO_MATCH);
-}
-
-void Functional::CheckExitLoop(const ExitLoop* l) {
-    const Instruction* inst = l;
-    const Loop* control = l->Loop();
-    while (inst) {
-        // Found parent loop
-        if (inst->Block()->Parent() == control) {
-            if (inst->Block() == control->Continuing()) {
-                AddError(l) << "loop exit jumps out of continuing block";
-                if (control->Continuing() != l->Block()) {
-                    AddNote(control->Continuing()) << "in continuing block";
-                }
-            } else if (inst->Block() == control->Initializer()) {
-                AddError(l) << "loop exit not permitted in loop initializer";
-                if (control->Initializer() != l->Block()) {
-                    AddNote(control->Initializer()) << "in initializer block";
-                }
-            }
-            break;
-        }
-        inst = inst->Block()->Parent();
-    }
-}
-
-void Functional::CheckReturn(const Return* ret) {
-    auto* func = ret->Func();
-    TINT_ASSERT(func);
-
-    if (func->ReturnType()->Is<core::type::Void>()) {
-        if (ret->HasValue()) {
-            AddError(ret) << "unexpected return value";
-        }
-        return;
-    }
-
-    if (!ret->Value()) {
-        AddError(ret) << "expected return value";
-    } else if (ret->Value()->Type() != func->ReturnType()) {
-        AddError(ret) << "return value type " << NameOf(ret->Value()->Type())
-                      << " does not match function return type " << NameOf(func->ReturnType());
     }
 }
 
