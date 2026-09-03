@@ -123,8 +123,8 @@ void ScopedCommandRecordingContext::CopySubresourceRegion(ID3D11Resource* pDstRe
 }
 
 void ScopedCommandRecordingContext::ClearRenderTargetView(ID3D11RenderTargetView* pRenderTargetView,
-                                                          const FLOAT ColorRGBA[4]) const {
-    Get()->mD3D11DeviceContext3->ClearRenderTargetView(pRenderTargetView, ColorRGBA);
+                                                          Span<const float, 4> colorRGBA) const {
+    Get()->mD3D11DeviceContext3->ClearRenderTargetView(pRenderTargetView, colorRGBA.data());
 }
 
 void ScopedCommandRecordingContext::ClearDepthStencilView(ID3D11DepthStencilView* pDepthStencilView,

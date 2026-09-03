@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_D3D11_COMMANDRECORDINGCONTEXT_D3D11_H_
 
 #include <algorithm>
+#include <array>
 #include <optional>
 #include <utility>
 
@@ -45,6 +46,7 @@
 #include "src/dawn/native/d3d/d3d_platform.h"
 #include "src/dawn/native/d3d11/ImmediatesLayoutD3D11.h"
 #include "src/utils/non_copyable.h"
+#include "src/utils/span.h"
 
 namespace dawn::native::d3d11 {
 
@@ -166,7 +168,7 @@ class ScopedCommandRecordingContext : NonCopyable {
                                UINT SrcSubresource,
                                const D3D11_BOX* pSrcBox) const;
     void ClearRenderTargetView(ID3D11RenderTargetView* pRenderTargetView,
-                               const FLOAT ColorRGBA[4]) const;
+                               Span<const float, 4> colorRGBA) const;
     void ClearDepthStencilView(ID3D11DepthStencilView* pDepthStencilView,
                                UINT ClearFlags,
                                FLOAT Depth,

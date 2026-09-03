@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_D3D11_TEXTURED3D11_H_
 #define SRC_DAWN_NATIVE_D3D11_TEXTURED3D11_H_
 
+#include <array>
 #include <utility>
 #include <vector>
 
@@ -131,7 +132,7 @@ class Texture final : public TextureBase {
     enum class Kind { Normal, Staging, Interim };
 
     struct D3D11ClearValue {
-        float color[4];
+        std::array<float, 4> color;
         float depth;
         uint8_t stencil;
     };
