@@ -90,7 +90,7 @@ class Texture final : public TextureBase {
                      Span<const std::byte> data,
                      uint32_t bytesPerRow,
                      uint32_t rowsPerImage);
-    using ReadCallback = std::function<MaybeError(const uint8_t* data, size_t offset, size_t size)>;
+    using ReadCallback = std::function<MaybeError(Span<const std::byte> data, size_t offset)>;
     MaybeError Read(const ScopedCommandRecordingContext* commandContext,
                     const SubresourceRange& subresources,
                     const Origin3D& origin,
@@ -100,6 +100,11 @@ class Texture final : public TextureBase {
                     ReadCallback callback);
     static MaybeError Copy(const ScopedCommandRecordingContext* commandContext,
                            CopyTextureToTextureCmd* copy);
+
+    // Returns a Span of mappedResource with the correct size:
+    // totalBytes = (depth - 1) × DepthPitch + (heightInBlocks - 1) × RowPitch + bytesPerRow
+    Span<const std::byte> GetMappedData(const D3D11_MAPPED_SUBRESOURCE& mappedResource) const;
+    Span<std::byte> GetMappedData(const D3D11_MAPPED_SUBRESOURCE& mappedResource);
 
     // As D3D11 SRV doesn't support 'Shader4ComponentMapping' for depth-stencil textures, we can't
     // sample the stencil component directly. As a workaround we create an internal R8Uint texture,

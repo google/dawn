@@ -473,17 +473,10 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
 
                 DAWN_TRY(buffer->EnsureDataInitializedAsDestination(commandContext, copy));
 
-                Texture::ReadCallback callback = [&](const uint8_t* data, uint64_t offset,
-                                                     uint64_t size) -> MaybeError {
-                    auto* bytePtr = reinterpret_cast<const std::byte*>(data);
-                    size_t byteSize = checked_cast<size_t>(size);
-
-                    dawn::Span<const std::byte> byteSpan =
-                        // SAFETY: `data` points to at least `size` valid bytes of readable memory.
-                        DAWN_UNSAFE_BUFFERS(dawn::Span<const std::byte>(bytePtr, byteSize));
-
-                    DAWN_TRY(ToBackend(dst.buffer)
-                                 ->Write(commandContext, dst.offset + offset, byteSpan));
+                Texture::ReadCallback callback = [&](Span<const std::byte> data,
+                                                     size_t offset) -> MaybeError {
+                    DAWN_TRY(
+                        ToBackend(dst.buffer)->Write(commandContext, dst.offset + offset, data));
                     return {};
                 };
 

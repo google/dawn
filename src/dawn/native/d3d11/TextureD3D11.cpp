@@ -146,6 +146,40 @@ DepthStencilAspectLayout DepthStencilAspectLayout(DXGI_FORMAT format, Aspect asp
     return {texelSize, componentOffset, componentSize};
 }
 
+template <typename ByteType>
+Span<ByteType> GetMappedDataImpl(const Texture* texture,
+                                 const D3D11_MAPPED_SUBRESOURCE& mappedResource) {
+    uint32_t blockWidth = 1;
+    uint32_t blockHeight = 1;
+    uint32_t blockByteSize = 0;
+
+    const Format& format = texture->GetFormat();
+    DXGI_FORMAT dxgiFormat = d3d::DXGITextureFormat(texture->GetDevice(), format.format);
+    if (d3d::IsDepthStencil(dxgiFormat)) {
+        // DXGI staging textures are 4 or 8 bytes per texel
+        blockByteSize = DepthStencilAspectLayout(dxgiFormat, Aspect::Depth).texelSize;
+    } else {
+        const TexelBlockInfo& blockInfo = format.GetAspectInfo(format.aspects).block;
+        blockWidth = blockInfo.width;
+        blockHeight = blockInfo.height;
+        blockByteSize = blockInfo.byteSize;
+    }
+
+    // This function is currently only used for staging buffers, so we assume no mips.
+    DAWN_ASSERT(texture->GetNumMipLevels() == 1);
+    Extent3D size = texture->GetMipLevelSingleSubresourcePhysicalSize(0, format.aspects);
+    uint32_t widthInBlocks = size.width / blockWidth;
+    uint32_t heightInBlocks = size.height / blockHeight;
+    uint32_t depth = size.depthOrArrayLayers;
+    uint32_t bytesPerRow = widthInBlocks * blockByteSize;
+    size_t totalBytes = size_t{depth - 1} * mappedResource.DepthPitch +
+                        size_t{heightInBlocks - 1} * mappedResource.RowPitch + bytesPerRow;
+
+    // SAFETY: Use the properly compute size for the mapped resource
+    return DAWN_UNSAFE_BUFFERS(
+        Span<ByteType>{static_cast<ByteType*>(mappedResource.pData), totalBytes});
+}
+
 }  // namespace
 
 // static
@@ -831,11 +865,11 @@ MaybeError Texture::WriteDepthStencilInternal(const ScopedCommandRecordingContex
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     const std::byte* pSrcData = data.data();
     for (uint32_t layer = 0; layer < size.depthOrArrayLayers; ++layer) {
-        DAWN_TRY(CheckHRESULT(commandContext->Map(stagingTexture->GetD3D11Resource(), layer,
+        uint32_t subresource = D3D11CalcSubresource(0, layer, stagingTexture->GetNumMipLevels());
+        DAWN_TRY(CheckHRESULT(commandContext->Map(stagingTexture->GetD3D11Resource(), subresource,
                                                   D3D11_MAP_READ, 0, &mappedResource),
                               "D3D11 map staging texture"));
-        // TODO(crbug.com/549088024): To spanify, write a helper that computes the correct span size
-        // from the resource size and the map's RowPitch/DepthPitch.
+        // TODO(crbug.com/549088024): Use GetMappedData
         std::byte* pDstData = static_cast<std::byte*>(mappedResource.pData);
         for (uint32_t y = 0; y < size.height; ++y) {
             const std::byte* pSrcRow = pSrcData;
@@ -849,7 +883,7 @@ MaybeError Texture::WriteDepthStencilInternal(const ScopedCommandRecordingContex
             DAWN_UNSAFE_TODO(pDstData += mappedResource.RowPitch);
             DAWN_UNSAFE_TODO(pSrcData += bytesPerRow);
         }
-        commandContext->Unmap(stagingTexture->GetD3D11Resource(), layer);
+        commandContext->Unmap(stagingTexture->GetD3D11Resource(), subresource);
         DAWN_ASSERT(size.height <= rowsPerImage);
         // Skip the padding rows.
         DAWN_UNSAFE_TODO(pSrcData += static_cast<size_t>(rowsPerImage - size.height) * bytesPerRow);
@@ -869,6 +903,14 @@ MaybeError Texture::WriteDepthStencilInternal(const ScopedCommandRecordingContex
     DAWN_TRY(Texture::CopyInternal(commandContext, &copyCmd));
 
     return {};
+}
+
+Span<const std::byte> Texture::GetMappedData(const D3D11_MAPPED_SUBRESOURCE& mappedResource) const {
+    return GetMappedDataImpl<const std::byte>(this, mappedResource);
+}
+
+Span<std::byte> Texture::GetMappedData(const D3D11_MAPPED_SUBRESOURCE& mappedResource) {
+    return GetMappedDataImpl<std::byte>(this, mappedResource);
 }
 
 MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandContext,
@@ -892,30 +934,33 @@ MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandCont
 
     if (GetDimension() == wgpu::TextureDimension::e2D) {
         for (uint32_t layer = 0; layer < subresources.layerCount; ++layer) {
+            uint32_t subresource = D3D11CalcSubresource(0, layer, GetNumMipLevels());
             // Copy the staging texture to the buffer.
             // The Map() will block until the GPU is done with the texture.
             // TODO(dawn:1705): avoid blocking the CPU.
             D3D11_MAPPED_SUBRESOURCE mappedResource;
-            DAWN_TRY(CheckHRESULT(
-                commandContext->Map(GetD3D11Resource(), layer, D3D11_MAP_READ, 0, &mappedResource),
-                "D3D11 map staging texture"));
+            DAWN_TRY(CheckHRESULT(commandContext->Map(GetD3D11Resource(), subresource,
+                                                      D3D11_MAP_READ, 0, &mappedResource),
+                                  "D3D11 map staging texture"));
 
-            uint8_t* pSrcData = static_cast<uint8_t*>(mappedResource.pData);
-            uint64_t dstOffset = static_cast<uint64_t>(dstBytesPerRow) * dstRowsPerImage * layer;
+            Span<const std::byte> srcSlice = GetMappedData(mappedResource);
+            size_t dstOffset = checked_cast<size_t>(static_cast<uint64_t>(dstBytesPerRow) *
+                                                    dstRowsPerImage * layer);
             if (dstBytesPerRow == bytesPerRow && mappedResource.RowPitch == bytesPerRow) {
                 // If there is no padding in the rows, we can upload the whole image
                 // in one read.
-                DAWN_TRY(callback(pSrcData, checked_cast<size_t>(dstOffset),
-                                  size_t{dstBytesPerRow} * rowsPerImage));
+                auto srcImage = srcSlice.subspan(0, size_t{dstBytesPerRow} * rowsPerImage);
+                DAWN_TRY(callback(srcImage, dstOffset));
             } else if (hasStencil) {
                 // We need to read texel by texel for depth-stencil formats.
                 std::vector<uint8_t> depthOrStencilData(size_t{size.width} * blockInfo.byteSize);
                 const auto aspectLayout = DepthStencilAspectLayout(
                     d3d::DXGITextureFormat(GetDevice(), GetFormat().format), subresources.aspects);
                 DAWN_ASSERT(blockInfo.byteSize == aspectLayout.componentSize);
+                const std::byte* pSrcData = srcSlice.data();
                 for (uint32_t y = 0; y < rowsPerImage; ++y) {
                     // Filter the depth/stencil data out.
-                    uint8_t* src = pSrcData;
+                    const std::byte* src = pSrcData;
                     uint8_t* dst = depthOrStencilData.data();
                     DAWN_UNSAFE_TODO(src += aspectLayout.componentOffset);
                     for (uint32_t x = 0; x < size.width; ++x) {
@@ -923,20 +968,21 @@ MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandCont
                         DAWN_UNSAFE_TODO(src += aspectLayout.texelSize);
                         DAWN_UNSAFE_TODO(dst += aspectLayout.componentSize);
                     }
-                    DAWN_TRY(callback(depthOrStencilData.data(), checked_cast<size_t>(dstOffset),
-                                      bytesPerRow));
+                    auto rowData = SpanAsBytes(Span<const uint8_t>{depthOrStencilData})
+                                       .subspan(0, bytesPerRow);
+                    DAWN_TRY(callback(rowData, dstOffset));
                     dstOffset += dstBytesPerRow;
                     DAWN_UNSAFE_TODO(pSrcData += mappedResource.RowPitch);
                 }
             } else {
                 // Otherwise, we need to read each row separately.
                 for (uint32_t y = 0; y < rowsPerImage; ++y) {
-                    DAWN_TRY(callback(pSrcData, checked_cast<size_t>(dstOffset), bytesPerRow));
+                    auto srcRow = srcSlice.subspan(y * mappedResource.RowPitch, bytesPerRow);
+                    DAWN_TRY(callback(srcRow, dstOffset));
                     dstOffset += dstBytesPerRow;
-                    DAWN_UNSAFE_TODO(pSrcData += mappedResource.RowPitch);
                 }
             }
-            commandContext->Unmap(GetD3D11Resource(), layer);
+            commandContext->Unmap(GetD3D11Resource(), subresource);
         }
         return {};
     }
@@ -950,21 +996,22 @@ MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandCont
         CheckHRESULT(commandContext->Map(GetD3D11Resource(), 0, D3D11_MAP_READ, 0, &mappedResource),
                      "D3D11 map staging texture"));
 
+    Span<const std::byte> srcTexture = GetMappedData(mappedResource);
+
     for (uint32_t z = 0; z < size.depthOrArrayLayers; ++z) {
         uint64_t dstOffset = static_cast<uint64_t>(dstBytesPerRow) * dstRowsPerImage * z;
-        uint8_t* pSrcData = DAWN_UNSAFE_TODO(static_cast<uint8_t*>(mappedResource.pData) +
-                                             size_t{z} * mappedResource.DepthPitch);
+        Span<const std::byte> srcSlice = srcTexture.subspan(z * mappedResource.DepthPitch);
         if (dstBytesPerRow == bytesPerRow && mappedResource.RowPitch == bytesPerRow) {
             // If there is no padding in the rows, we can upload the whole image
             // in one read.
-            DAWN_TRY(callback(pSrcData, checked_cast<size_t>(dstOffset),
-                              size_t{bytesPerRow} * size.height));
+            auto srcImage = srcSlice.subspan(0, size_t{bytesPerRow} * size.height);
+            DAWN_TRY(callback(srcImage, checked_cast<size_t>(dstOffset)));
         } else {
             // Otherwise, we need to read each row separately.
             for (uint32_t y = 0; y < size.height; ++y) {
-                DAWN_TRY(callback(pSrcData, checked_cast<size_t>(dstOffset), bytesPerRow));
+                auto srcRow = srcSlice.subspan(y * mappedResource.RowPitch, bytesPerRow);
+                DAWN_TRY(callback(srcRow, checked_cast<size_t>(dstOffset)));
                 dstOffset += dstBytesPerRow;
-                DAWN_UNSAFE_TODO(pSrcData += mappedResource.RowPitch);
             }
         }
     }
@@ -1143,10 +1190,11 @@ MaybeError Texture::UpdateStencilCopyForView(const ScopedCommandRecordingContext
         rowsPerImage = size.height;
         auto singleRange = SubresourceRange(range.aspects, {0, range.layerCount}, {level, 1});
 
-        Texture::ReadCallback callback = [&](const uint8_t* data, size_t offset,
-                                             size_t length) -> MaybeError {
-            DAWN_UNSAFE_TODO(
-                std::memcpy(static_cast<uint8_t*>(stagingData.data()) + offset, data, length));
+        Texture::ReadCallback callback = [&](Span<const std::byte> data,
+                                             size_t offset) -> MaybeError {
+            SpanAsWritableBytes(Span<uint8_t>(stagingData))
+                .subspan(offset, data.size())
+                .CopyFrom(data);
             return {};
         };
 
