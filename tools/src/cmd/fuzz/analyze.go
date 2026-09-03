@@ -59,12 +59,30 @@ type CoverageStats struct {
 	Percentage float64 `json:"percentage"`
 }
 
-// IterationCoverage aggregates coverage statistics across different project components.
-type IterationCoverage struct {
-	TintCore CoverageStats `json:"tint_core"`
-	Mesa     CoverageStats `json:"mesa"`
-	DirectX  CoverageStats `json:"directx"`
+type CoverageComponent uint8
+
+const (
+	CoverageComponentTint = iota
+	CoverageComponentMesa
+	CoverageComponentDXC
+)
+
+func (c CoverageComponent) String() string {
+	switch c {
+	case CoverageComponentTint:
+		return "Tint"
+	case CoverageComponentMesa:
+		return "Mesa"
+	case CoverageComponentDXC:
+		return "DXC"
+	default:
+		return "<unknown>"
+	}
+
 }
+
+// IterationCoverage aggregates coverage statistics across different project components.
+type IterationCoverage map[CoverageComponent]*CoverageStats
 
 // IterationData holds the raw performance and coverage metrics for a single fuzzer iteration.
 type IterationData struct {
@@ -387,9 +405,9 @@ func (ac *analyzeConfig) calculateIterationCoverageTasks(machine, machineDir, fu
 func (ac *analyzeConfig) printRawCSV() error {
 	var csvBuilder strings.Builder
 	csvBuilder.WriteString("Machine,Fuzzer,Corpus,LimitType,LimitValue,Iteration,PerfScore,ActualSeconds,ActualRuns,NormalizedCPUSeconds," +
-		"TintCore_LinesFound,TintCore_LinesHit,TintCore_CoveragePercent," +
+		"Tint_LinesFound,Tint_LinesHit,Tint_CoveragePercent," +
 		"Mesa_LinesFound,Mesa_LinesHit,Mesa_CoveragePercent," +
-		"DirectX_LinesFound,DirectX_LinesHit,DirectX_CoveragePercent\n")
+		"DXC_LinesFound,DXC_LinesHit,DXC_CoveragePercent\n")
 
 	for _, d := range ac.data {
 		csvBuilder.WriteString(fmt.Sprintf("%s,%s,%s,%s,%d,%d,%.4f,%.2f,%d,%.4f,%d,%d,%.2f,%d,%d,%.2f,%d,%d,%.2f\n",
@@ -403,15 +421,15 @@ func (ac *analyzeConfig) printRawCSV() error {
 			d.ActualSeconds,
 			d.ActualRuns,
 			d.NormalizedSecs,
-			d.Coverage.TintCore.LinesFound,
-			d.Coverage.TintCore.LinesHit,
-			d.Coverage.TintCore.Percentage,
-			d.Coverage.Mesa.LinesFound,
-			d.Coverage.Mesa.LinesHit,
-			d.Coverage.Mesa.Percentage,
-			d.Coverage.DirectX.LinesFound,
-			d.Coverage.DirectX.LinesHit,
-			d.Coverage.DirectX.Percentage,
+			d.Coverage[CoverageComponentTint].LinesFound,
+			d.Coverage[CoverageComponentTint].LinesHit,
+			d.Coverage[CoverageComponentTint].Percentage,
+			d.Coverage[CoverageComponentMesa].LinesFound,
+			d.Coverage[CoverageComponentMesa].LinesHit,
+			d.Coverage[CoverageComponentMesa].Percentage,
+			d.Coverage[CoverageComponentDXC].LinesFound,
+			d.Coverage[CoverageComponentDXC].LinesHit,
+			d.Coverage[CoverageComponentDXC].Percentage,
 		))
 	}
 
@@ -443,17 +461,8 @@ func calculateStats(data []IterationData) []SummaryPoint {
 	accumulations := make(map[accumulatorKey]*accumulatorVal)
 
 	for _, d := range data {
-		components := []struct {
-			Name  string
-			Stats CoverageStats
-		}{
-			{"Tint Core", d.Coverage.TintCore},
-			{"Mesa", d.Coverage.Mesa},
-			{"DirectX", d.Coverage.DirectX},
-		}
-
-		for _, c := range components {
-			if c.Stats.LinesFound == 0 {
+		for comp, stats := range d.Coverage {
+			if stats.LinesFound == 0 {
 				continue // skip reporting empty components (e.g. Mesa if not a Mesa fuzzer)
 			}
 
@@ -462,7 +471,7 @@ func calculateStats(data []IterationData) []SummaryPoint {
 				Corpus:     d.Corpus,
 				LimitType:  d.LimitType,
 				LimitValue: d.LimitValue,
-				Component:  c.Name,
+				Component:  comp.String(),
 			}
 			val, ok := accumulations[key]
 			if !ok {
@@ -471,7 +480,7 @@ func calculateStats(data []IterationData) []SummaryPoint {
 			}
 
 			val.NormalizedSecs = append(val.NormalizedSecs, d.NormalizedSecs)
-			val.CoveragePercent = append(val.CoveragePercent, c.Stats.Percentage)
+			val.CoveragePercent = append(val.CoveragePercent, stats.Percentage)
 		}
 	}
 
@@ -803,48 +812,43 @@ func findLcovFile(dir string) (string, error) {
 }
 
 // parseLcov parses the contents of an LCOV file and categorizes coverage metrics
-// into Tint Core, Mesa, and DirectX components based on file paths.
+// into Tint, Mesa, and DXC components based on file paths.
 func parseLcov(content string) IterationCoverage {
 	lines := strings.Split(content, "\n")
 	var currentFile string
-	var inTintCore, inMesa, inDirectX bool
-
-	metrics := map[string]*CoverageStats{
-		"tint_core": {},
-		"mesa":      {},
-		"directx":   {},
+	currentlyIn := map[CoverageComponent]bool{
+		CoverageComponentTint: false,
+		CoverageComponentMesa: false,
+		CoverageComponentDXC:  false,
 	}
 
+	metrics := IterationCoverage{
+		CoverageComponentTint: {},
+		CoverageComponentMesa: {},
+		CoverageComponentDXC:  {},
+	}
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if after, ok := strings.CutPrefix(line, "SF:"); ok {
 			currentFile = after
 			currentFile = filepath.ToSlash(currentFile)
 
-			inTintCore = strings.Contains(currentFile, "src/tint/") || strings.Contains(currentFile, "src/utils/")
-			inMesa = strings.Contains(currentFile, "third_party/mesa/")
-			inDirectX = strings.Contains(currentFile, "third_party/directx")
+			currentlyIn[CoverageComponentTint] = strings.Contains(currentFile, "src/tint/") || strings.Contains(currentFile, "src/utils/")
+			currentlyIn[CoverageComponentMesa] = strings.Contains(currentFile, "third_party/mesa/")
+			currentlyIn[CoverageComponentDXC] = strings.Contains(currentFile, "third_party/directx")
 		} else if after, ok := strings.CutPrefix(line, "LF:"); ok {
 			val, _ := strconv.Atoi(after)
-			if inTintCore {
-				metrics["tint_core"].LinesFound += val
-			}
-			if inMesa {
-				metrics["mesa"].LinesFound += val
-			}
-			if inDirectX {
-				metrics["directx"].LinesFound += val
+			for comp, in := range currentlyIn {
+				if in {
+					metrics[comp].LinesFound += val
+				}
 			}
 		} else if after, ok := strings.CutPrefix(line, "LH:"); ok {
 			val, _ := strconv.Atoi(after)
-			if inTintCore {
-				metrics["tint_core"].LinesHit += val
-			}
-			if inMesa {
-				metrics["mesa"].LinesHit += val
-			}
-			if inDirectX {
-				metrics["directx"].LinesHit += val
+			for comp, in := range currentlyIn {
+				if in {
+					metrics[comp].LinesHit += val
+				}
 			}
 		}
 	}
@@ -855,11 +859,7 @@ func parseLcov(content string) IterationCoverage {
 		}
 	}
 
-	return IterationCoverage{
-		TintCore: *metrics["tint_core"],
-		Mesa:     *metrics["mesa"],
-		DirectX:  *metrics["directx"],
-	}
+	return metrics
 }
 
 // computeAvgAndStdDev calculates the arithmetic mean and sample standard deviation for a slice of float64.

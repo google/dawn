@@ -56,20 +56,20 @@ end_of_record
 `
 	cov := parseLcov(lcovContent)
 
-	// Tint Core: src/tint (10 LF, 5 LH) + src/utils (20 LF, 15 LH) = 30 LF, 20 LH
-	require.Equal(t, 30, cov.TintCore.LinesFound)
-	require.Equal(t, 20, cov.TintCore.LinesHit)
-	require.InDelta(t, 66.67, cov.TintCore.Percentage, 0.01)
+	// Tint: src/tint (10 LF, 5 LH) + src/utils (20 LF, 15 LH) = 30 LF, 20 LH
+	require.Equal(t, 30, cov[CoverageComponentTint].LinesFound)
+	require.Equal(t, 20, cov[CoverageComponentTint].LinesHit)
+	require.InDelta(t, 66.67, cov[CoverageComponentTint].Percentage, 0.01)
 
 	// Mesa: third_party/mesa (100 LF, 80 LH) = 100 LF, 80 LH
-	require.Equal(t, 100, cov.Mesa.LinesFound)
-	require.Equal(t, 80, cov.Mesa.LinesHit)
-	require.InDelta(t, 80.0, cov.Mesa.Percentage, 0.01)
+	require.Equal(t, 100, cov[CoverageComponentMesa].LinesFound)
+	require.Equal(t, 80, cov[CoverageComponentMesa].LinesHit)
+	require.InDelta(t, 80.0, cov[CoverageComponentMesa].Percentage, 0.01)
 
-	// DirectX: third_party/directx-headers (50 LF, 10 LH) = 50 LF, 10 LH
-	require.Equal(t, 50, cov.DirectX.LinesFound)
-	require.Equal(t, 10, cov.DirectX.LinesHit)
-	require.InDelta(t, 20.0, cov.DirectX.Percentage, 0.01)
+	// DXC: third_party/directx-headers (50 LF, 10 LH) = 50 LF, 10 LH
+	require.Equal(t, 50, cov[CoverageComponentDXC].LinesFound)
+	require.Equal(t, 10, cov[CoverageComponentDXC].LinesHit)
+	require.InDelta(t, 20.0, cov[CoverageComponentDXC].Percentage, 0.01)
 }
 
 func TestStats(t *testing.T) {
@@ -101,7 +101,7 @@ func TestCalculateStats(t *testing.T) {
 			Iteration:      1,
 			NormalizedSecs: 9.0,
 			Coverage: IterationCoverage{
-				TintCore: CoverageStats{
+				CoverageComponentTint: {
 					LinesFound: 100,
 					LinesHit:   50,
 					Percentage: 50.0,
@@ -116,7 +116,7 @@ func TestCalculateStats(t *testing.T) {
 			Iteration:      2,
 			NormalizedSecs: 11.0,
 			Coverage: IterationCoverage{
-				TintCore: CoverageStats{
+				CoverageComponentTint: {
 					LinesFound: 100,
 					LinesHit:   60,
 					Percentage: 60.0,
@@ -131,7 +131,7 @@ func TestCalculateStats(t *testing.T) {
 	pt := summaries[0]
 	require.Equal(t, "fuzzerA", pt.Fuzzer)
 	require.Equal(t, "corpusA", pt.Corpus)
-	require.Equal(t, "Tint Core", pt.Component)
+	require.Equal(t, "Tint", pt.Component)
 	require.Equal(t, "seconds", pt.LimitType)
 	require.Equal(t, 10, pt.LimitValue)
 	require.Equal(t, 2, pt.N)
@@ -230,7 +230,7 @@ func TestPrintStatsCSVAndReport(t *testing.T) {
 		{
 			Fuzzer:       "fuzzerA",
 			Corpus:       "corpusA",
-			Component:    "Tint Core",
+			Component:    "Tint",
 			LimitType:    "seconds",
 			LimitValue:   10,
 			NormSecsAvg:  9.5,
@@ -244,7 +244,7 @@ func TestPrintStatsCSVAndReport(t *testing.T) {
 		{
 			Fuzzer:       "fuzzerA",
 			Corpus:       "corpusA",
-			Component:    "Tint Core",
+			Component:    "Tint",
 			LimitType:    "seconds",
 			LimitValue:   20,
 			NormSecsAvg:  19.5,
@@ -265,8 +265,8 @@ func TestPrintStatsCSVAndReport(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedCSV := "Fuzzer,Corpus,Component,Samples,LimitType,LimitValue,NormalizedCPUSecondsAvg,NormalizedCPUSecondsSEM,CoveragePercentAvg,CoveragePercentSEM,CoverageRateAvg,CoverageRateSEM\n" +
-		"fuzzerA,corpusA,Tint Core,5,seconds,10,9.5000,0.5000,55.00,1.20,5.780000,0.100000\n" +
-		"fuzzerA,corpusA,Tint Core,5,seconds,20,19.5000,0.8000,65.00,1.50,3.330000,0.120000\n"
+		"fuzzerA,corpusA,Tint,5,seconds,10,9.5000,0.5000,55.00,1.20,5.780000,0.100000\n" +
+		"fuzzerA,corpusA,Tint,5,seconds,20,19.5000,0.8000,65.00,1.50,3.330000,0.120000\n"
 
 	require.Equal(t, expectedCSV, string(csvContent))
 
@@ -280,7 +280,7 @@ func TestPrintStatsCSVAndReport(t *testing.T) {
 	reportStr := string(reportContent)
 	require.Contains(t, reportStr, "# Experiment Performance and Coverage Report: test_experiment")
 	require.Contains(t, reportStr, "- **Git Hash**: `abcdef123`")
-	require.Contains(t, reportStr, "### fuzzerA - corpusA (Tint Core)")
+	require.Contains(t, reportStr, "### fuzzerA - corpusA (Tint)")
 	require.Contains(t, reportStr, "| Samples (N) | Target Limit | Normalized CPU Seconds (Avg ± SEM) | Coverage % (Avg ± SEM) | Coverage Rate (%/sec) (Avg ± SEM) |")
 	require.Contains(t, reportStr, "| 5           | 10 seconds   | 9.50 ± 0.50                        | 55.00% ± 1.20%         | 5.780000 ± 0.100000               |")
 	require.Contains(t, reportStr, "| 5           | 20 seconds   | 19.50 ± 0.80                       | 65.00% ± 1.50%         | 3.330000 ± 0.120000               |")
