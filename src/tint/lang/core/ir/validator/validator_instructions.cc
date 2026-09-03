@@ -32,19 +32,70 @@
 #include "src/tint/lang/core/ir/constexpr_if.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
+#include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/ir/validator/validator.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/i32.h"  // IWYU pragma: export
+#include "src/tint/lang/core/type/i8.h"
+#include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/u32.h"  // IWYU pragma: export
+#include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/containers/predicates.h"
 #include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/containers/transform.h"
+#include "src/tint/utils/internal_limits.h"
 #include "src/tint/utils/result.h"
 
 namespace tint::core::ir::validator {
 namespace {
+
+template <typename CTX, typename IMPL>
+void WalkTypeAndMembers(CTX& ctx,
+                        const core::type::Type* type,
+                        const IOAttributes& attr,
+                        IMPL&& impl);
+
+/// Helper that walks the members of a struct, called from WalkTypeAndMembers and its helpers
+/// @param ctx a context object to pass to the impl function
+/// @param str the struct to walk the members of
+/// @param impl an impl function to be run, see WalkTypeAndMembers for details
+template <typename CTX, typename IMPL>
+void WalkStructMembers(CTX& ctx, const core::type::Struct* str, IMPL&& impl) {
+    for (auto* member : str->Members()) {
+        WalkTypeAndMembers(ctx, member->Type(), member->Attributes(), impl);
+    }
+}
+
+/// Helper that walks an array's element type, called from WalkTypeAndMembers and its helpers
+/// @param ctx a context object to pass to the impl function
+/// @param arr the array to walk the element type of
+/// @param impl an impl function to be run, see WalkTypeAndMembers for details
+template <typename CTX, typename IMPL>
+void WalkArrayElements(CTX& ctx, const core::type::Array* arr, IMPL&& impl) {
+    WalkTypeAndMembers(ctx, arr->ElemType(), IOAttributes{}, impl);
+}
+
+/// Helper for walking a type that maybe a struct, calling an impl function for the type and each of
+/// its members.
+/// @param ctx a context object to pass to the implementation function
+/// @param type the type to walk
+/// @param attr the attributes for @p type
+/// @param impl a function that is called for each type with the signature
+///             `void(const core::type::Type*, const IOAttributes&, CTX&)`
+template <typename CTX, typename IMPL>
+void WalkTypeAndMembers(CTX& ctx,
+                        const core::type::Type* type,
+                        const IOAttributes& attr,
+                        IMPL&& impl) {
+    impl(ctx, type, attr);
+    tint::Switch(
+        type, [&](const core::type::Struct* s) { WalkStructMembers(ctx, s, impl); },
+        [&](const core::type::Array* a) { WalkArrayElements(ctx, a, impl); });
+}
 
 /// @returns the parent block of @p block
 const Block* ParentBlockOf(const Block* block) {
@@ -64,7 +115,81 @@ bool TransitivelyHolds(const Block* block, const Instruction* inst) {
     return false;
 }
 
+template <typename T>
+bool ContainsType(const core::type::Type* ty) {
+    bool found = false;
+    WalkTypeAndMembers(found, ty, IOAttributes{},
+                       [&](bool& ctx, const core::type::Type* t, const IOAttributes&) {
+                           if (t != nullptr && t->DeepestElement()->Is<T>()) {
+                               ctx = true;
+                           }
+                       });
+    return found;
+}
+
 }  // namespace
+
+uint64_t Validator::ElementsCount(const core::type::Type* root_ty) {
+    TINT_ASSERT(root_ty);
+
+    Vector<const core::type::Type*, 16> stack;
+    stack.Push(root_ty);
+
+    while (!stack.IsEmpty()) {
+        const core::type::Type* ty = stack.Back();
+
+        if (elements_counts_.Contains(ty)) {
+            stack.Pop();
+            continue;
+        }
+
+        bool children_ready = true;
+        uint64_t count = 0;
+
+        tint::Switch(
+            ty,
+            [&](const core::type::Struct* s) {
+                for (auto* member : s->Members()) {
+                    if (auto res = elements_counts_.Get(member->Type())) {
+                        count += *res;
+                    } else {
+                        stack.Push(member->Type());
+                        children_ready = false;
+                    }
+                }
+            },
+            [&](const core::type::Array* a) {
+                if (auto res = elements_counts_.Get(a->ElemType())) {
+                    uint64_t array_count = 0;
+                    if (auto* const_count = a->Count()->As<core::type::ConstantArrayCount>()) {
+                        array_count = const_count->value;
+                    }
+                    count = array_count * (*res);
+                } else {
+                    stack.Push(a->ElemType());
+                    children_ready = false;
+                }
+            },
+            [&](const core::type::Matrix* m) {
+                if (auto res = elements_counts_.Get(m->ColumnType())) {
+                    count = static_cast<uint64_t>(m->Columns()) * (*res);
+                } else {
+                    stack.Push(m->ColumnType());
+                    children_ready = false;
+                }
+            },
+            [&](const core::type::Vector* v) { count = static_cast<uint64_t>(v->Width()); },
+            [&](Default) { count = 1; });
+
+        if (children_ready) {
+            elements_counts_.Add(ty, count);
+            stack.Pop();
+        }
+    }
+
+    return *elements_counts_.Get(root_ty);
+}
+
 void Validator::CheckInstruction(const Instruction* inst) {
     visited_instructions_.Add(inst);
     if (!inst->Alive()) {
@@ -181,11 +306,166 @@ void Validator::CheckVar(const Var* var) {
                                         var->Attributes(), ShaderIOKind::kModuleScopeVar);
         }
     }
+
+    bool generates_initializer = var->Initializer() != nullptr ||
+                                 mv->AddressSpace() == core::AddressSpace::kPrivate ||
+                                 mv->AddressSpace() == core::AddressSpace::kFunction;
+    if (generates_initializer) {
+        if (ElementsCount(result_type->UnwrapPtrOrRef()) >
+            internal_limits::kMaxArrayConstructorElements) {
+            AddError(var) << "type has excessive number of elements (>"
+                          << internal_limits::kMaxArrayConstructorElements
+                          << ") for an initializer";
+            return;
+        }
+    }
+
+    // Check that initializer and result type match
+    if (var->Initializer()) {
+        if (mv->AddressSpace() != AddressSpace::kFunction &&
+            mv->AddressSpace() != AddressSpace::kPrivate &&
+            mv->AddressSpace() != AddressSpace::kOut) {
+            AddError(var) << "only variables in the function, private, or __out address space may "
+                             "be initialized";
+            return;
+        }
+
+        if (var->Initializer()->Type() != result_type->UnwrapPtrOrRef()) {
+            AddError(var) << "initializer type " << NameOf(var->Initializer()->Type())
+                          << " does not match store type " << NameOf(result_type->UnwrapPtrOrRef());
+            return;
+        }
+    }
+
+    if (var->Block() == ir_.root_block && mv->AddressSpace() == AddressSpace::kFunction) {
+        AddError(var) << "vars in the 'function' address space must be in a function scope";
+        return;
+    }
+    if (var->Block() != ir_.root_block && mv->AddressSpace() != AddressSpace::kFunction) {
+        if (!ir_.properties.Contains(Property::kAllowMslEntryPointInterface) ||
+            mv->AddressSpace() != AddressSpace::kPrivate) {
+            AddError(var) << "vars in a function scope must be in the 'function' address space";
+            return;
+        }
+    }
+
+    if (mv->AddressSpace() != AddressSpace::kStorage &&
+        mv->AddressSpace() != AddressSpace::kHandle) {
+        if (mv->AddressSpace() == AddressSpace::kWorkgroup ||
+            !ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+            if (!mv->StoreType()->HasFixedFootprint()) {
+                AddError(var) << "vars not in the 'storage' or 'handle' address spaces "
+                                 "must have a fixed footprint";
+                return;
+            }
+        }
+    }
+
+    if (ContainsType<core::type::Atomic>(mv->StoreType())) {
+        bool is_workgroup = mv->AddressSpace() == AddressSpace::kWorkgroup;
+        bool is_read_write_storage = mv->AddressSpace() == AddressSpace::kStorage &&
+                                     mv->Access() == core::Access::kReadWrite;
+        if (!is_workgroup && !is_read_write_storage) {
+            AddError(var)
+                << "atomic types may only be used by 'workspace' or read write 'storage' variables";
+            return;
+        }
+    }
+
+    if (var->InputAttachmentIndex().has_value()) {
+        if (mv->AddressSpace() != AddressSpace::kHandle) {
+            AddError(var) << "'@input_attachment_index' is not valid for non-handle var";
+            return;
+        }
+        if (!ir_.properties.Contains(Property::kAllowAnyInputAttachmentIndexType) &&
+            !mv->UnwrapPtrOrRef()->Is<core::type::InputAttachment>()) {
+            AddError(var)
+                << "'@input_attachment_index' is only valid for 'input_attachment' type var";
+            return;
+        }
+    }
+
+    if (mv->AddressSpace() == AddressSpace::kStorage) {
+        if (mv->StoreType() && !mv->StoreType()->IsHostShareable()) {
+            AddError(var) << "vars in the 'storage' address space must be host-shareable";
+            return;
+        }
+        if (mv->Access() != core::Access::kReadWrite && mv->Access() != core::Access::kRead) {
+            AddError(var)
+                << "vars in the 'storage' address space must have access 'read' or 'read-write'";
+            return;
+        }
+    } else if (mv->AddressSpace() == AddressSpace::kUniform) {
+        if (!ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+            if (!(mv->StoreType()->IsConstructible() ||
+                  mv->StoreType()->Is<core::type::Buffer>()) ||
+                !mv->StoreType()->IsHostShareable()) {
+                AddError(var) << "vars in the 'uniform' address space must be host-shareable and "
+                                 "constructible or a buffer";
+                return;
+            }
+        }
+    } else if (mv->AddressSpace() == AddressSpace::kImmediate) {
+        if (mv->StoreType() && !mv->StoreType()->IsHostShareable()) {
+            AddError(var) << "vars in the 'immediate' address space must be host-shareable";
+            return;
+        }
+    } else if (mv->AddressSpace() == core::AddressSpace::kPixelLocal) {
+        if (var->Block() == ir_.root_block) {
+            if (!mv->StoreType()->Is<core::type::Struct>()) {
+                AddError(var) << "pixel_local var must be of type struct";
+                return;
+            }
+        }
+    }
+
+    if (mv->AddressSpace() == AddressSpace::kPrivate) {
+        total_private_bytes_ += mv->StoreType()->Size();
+        if (total_private_bytes_ > internal_limits::kMaxCombinedPrivateVariableSize) {
+            AddError(var) << "total size of private address-space variables exceeds "
+                          << internal_limits::kMaxCombinedPrivateVariableSize << " bytes";
+            return;
+        }
+    }
 }
 
 void Validator::CheckLet(const Let* l) {
     if (!CheckResultsAndOperands(l, Let::kNumResults, Let::kNumOperands)) {
         return;
+    }
+
+    auto* result_ty = l->Result()->Type();
+    if (ElementsCount(result_ty) > internal_limits::kMaxArrayConstructorElements) {
+        AddError(l) << "type has excessive number of elements (>"
+                    << internal_limits::kMaxArrayConstructorElements << ") for an initializer";
+        return;
+    }
+    auto* value_ty = l->Value()->Type();
+    if (value_ty != result_ty) {
+        AddError(l) << "result type " << NameOf(l->Result()->Type())
+                    << " does not match value type " << NameOf(l->Value()->Type());
+    }
+
+    if (ir_.properties.Contains(Property::kAllowAnyLetType)) {
+        if (value_ty->Is<core::type::Void>()) {
+            AddError(l) << "value type cannot be void";
+        }
+        return;
+    }
+
+    if (!value_ty->IsConstructible() && !value_ty->Is<core::type::Pointer>()) {
+        AddError(l) << "value type, " << NameOf(value_ty)
+                    << ", must be a concrete constructible type or a pointer type";
+    }
+
+    if (auto* ptr = result_ty->As<core::type::Pointer>()) {
+        if (ptr->AddressSpace() == AddressSpace::kHandle &&
+            !ir_.properties.Contains(Property::kAllowPointerToHandle)) {
+            AddError(l) << "handle pointer cannot be captured in a let";
+        }
+    } else if (!result_ty->IsConstructible()) {
+        AddError(l) << "result type, " << NameOf(result_ty)
+                    << ", must be a concrete constructible type or a pointer type";
     }
 }
 
@@ -294,6 +574,130 @@ void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
 
 void Validator::CheckConstruct(const Construct* construct) {
     if (!CheckResultsAndOperandRange(construct, Construct::kNumResults, Construct::kMinOperands)) {
+        return;
+    }
+
+    auto* result_type = construct->Result()->Type();
+    if (ElementsCount(result_type) > internal_limits::kMaxArrayConstructorElements) {
+        AddError(construct) << "type has excessive number of elements (>"
+                            << internal_limits::kMaxArrayConstructorElements
+                            << ") for an initializer";
+        return;
+    }
+    if (!result_type->IsConstructible()) {
+        // We only allow `construct` to create non-constructible types when they are structures that
+        // contain pointers and handle types, with the corresponding property enabled.
+        if (!(result_type->Is<core::type::Struct>() &&
+              ir_.properties.Contains(Property::kAllowMslEntryPointInterface))) {
+            AddError(construct) << "type is not constructible";
+            return;
+        }
+    }
+
+    auto args = construct->Args();
+
+    // Zero-value constructors are valid for all constructible types.
+    if (args.empty()) {
+        return;
+    }
+
+    // Check that type type of each argument matches the expected element type of the composite.
+    auto check_args_match_elements = [&] {
+        for (size_t i = 0; i < args.size(); i++) {
+            if (args[i]->Is<ir::Unused>()) {
+                continue;
+            }
+            auto* expected_type = result_type->Element(static_cast<uint32_t>(i));
+            if (args[i]->Type() != expected_type) {
+                AddError(construct, Construct::kArgsOperandOffset + i)
+                    << "type " << NameOf(args[i]->Type()) << " of argument " << i
+                    << " does not match expected type " << NameOf(expected_type);
+            }
+        }
+    };
+
+    if (result_type->Is<core::type::Scalar>()) {
+        // The only valid non-zero scalar constructor is the identity operation.
+        if (args.size() > 1) {
+            AddError(construct) << "scalar construct must not have more than one argument";
+        }
+        if (args[0]->Type() != result_type) {
+            AddError(construct, 0u) << "scalar construct argument type " << NameOf(args[0]->Type())
+                                    << " does not match result type " << NameOf(result_type);
+        }
+        return;
+    }
+
+    if (auto* sg_mat = result_type->As<core::type::SubgroupMatrix>()) {
+        if (args.size() > 1) {
+            AddError(construct) << "subgroup matrix construct must not have more than 1 argument";
+            return;
+        }
+
+        // 8-bit integer matrices use 32-bit shader scalar types in WGSL.
+        // Some backends may support 8-bit integers, in which case they would pass an 8-bit
+        // type for the constructor value instead.
+        const core::type::Type* scalar_ty = sg_mat->Type();
+        if (scalar_ty->Is<core::type::I8>()) {
+            scalar_ty = type_mgr_.i32();
+        } else if (scalar_ty->Is<core::type::U8>()) {
+            scalar_ty = type_mgr_.u32();
+        }
+        if (args[0]->Type() != scalar_ty && args[0]->Type() != sg_mat->Type()) {
+            AddError(construct) << "subgroup matrix construct argument type "
+                                << NameOf(args[0]->Type())
+                                << " does not match matrix shader scalar type "
+                                << NameOf(scalar_ty);
+        }
+        return;
+    }
+
+    if (auto* arr = result_type->As<core::type::Array>()) {
+        if (args.size() != arr->ConstantCount()) {
+            AddError(construct) << "array has " << arr->ConstantCount().value()
+                                << " elements, but construct provides " << args.size()
+                                << " arguments";
+            return;
+        }
+        check_args_match_elements();
+        return;
+    }
+
+    if (auto* str = As<core::type::Struct>(result_type)) {
+        auto members = str->Members();
+        if (args.size() != str->Members().Length()) {
+            AddError(construct) << "structure has " << members.Length()
+                                << " members, but construct provides " << args.size()
+                                << " arguments";
+            return;
+        }
+        check_args_match_elements();
+    }
+
+    auto table = intrinsic::Table<intrinsic::Dialect>(type_mgr_, symbols_);
+    auto arg_types = Transform<4>(args, [&](auto* v) { return v->Type(); });
+    if (auto* vec = result_type->As<core::type::Vector>()) {
+        auto ctor_conv = intrinsic::VectorCtorConv(vec->Width());
+        auto match = table.Lookup(ctor_conv, Vector<TemplateParameter, 1>{vec->Type()},
+                                  std::move(arg_types), core::EvaluationStage::kConstant);
+        if (match != Success ||
+            !match->info->flags.Contains(intrinsic::OverloadFlag::kIsConstructor) ||
+            vec->Type() != arg_types[0]->DeepestElement()) {
+            AddError(construct) << "no matching overload for " << vec->FriendlyName()
+                                << " constructor";
+        }
+        return;
+    }
+
+    if (auto* mat = result_type->As<core::type::Matrix>()) {
+        auto ctor_conv = intrinsic::MatrixCtorConv(mat->Columns(), mat->Rows());
+        auto match = table.Lookup(ctor_conv, Vector<TemplateParameter, 1>{mat->Type()},
+                                  std::move(arg_types), core::EvaluationStage::kConstant);
+        if (match != Success ||
+            !match->info->flags.Contains(intrinsic::OverloadFlag::kIsConstructor)) {
+            AddError(construct) << "no matching overload for " << mat->FriendlyName()
+                                << " constructor";
+        }
         return;
     }
 }
@@ -731,10 +1135,72 @@ void Validator::CheckLoad(const Load* l) {
     if (!CheckResultsAndOperands(l, Load::kNumResults, Load::kNumOperands)) {
         return;
     }
+
+    const Value* from = l->From();
+    TINT_ASSERT(from);
+
+    auto* mv = from->Type()->As<core::type::MemoryView>();
+    if (!mv) {
+        AddError(l, Load::kFromOperandOffset)
+            << "load source operand " << NameOf(from->Type()) << " is not a memory view";
+        return;
+    }
+
+    if (mv->Access() != core::Access::kRead && mv->Access() != core::Access::kReadWrite) {
+        AddError(l, Load::kFromOperandOffset)
+            << "load source operand has a non-readable access type, "
+            << style::Literal(ToString(mv->Access()));
+        return;
+    }
+
+    if (l->Result()->Type() != mv->StoreType()) {
+        AddError(l, Load::kFromOperandOffset)
+            << "result type " << NameOf(l->Result()->Type()) << " does not match source store type "
+            << NameOf(mv->StoreType());
+    }
+
+    if (!CanLoad(mv->StoreType())) {
+        AddError(l, Load::kFromOperandOffset)
+            << "type " << NameOf(mv->StoreType()) << " cannot be loaded";
+        return;
+    }
 }
 
 void Validator::CheckStore(const Store* s) {
     if (!CheckResultsAndOperands(s, Store::kNumResults, Store::kNumOperands)) {
+        return;
+    }
+
+    const Value* from = s->From();
+    const Value* to = s->To();
+    TINT_ASSERT(from != nullptr);
+    TINT_ASSERT(to != nullptr);
+
+    auto* mv = As<core::type::MemoryView>(to->Type());
+    if (!mv) {
+        AddError(s, Store::kToOperandOffset)
+            << "store target operand " << NameOf(to->Type()) << " is not a memory view";
+        return;
+    }
+
+    if (mv->Access() != core::Access::kWrite && mv->Access() != core::Access::kReadWrite) {
+        AddError(s, Store::kToOperandOffset)
+            << "store target operand has a non-writeable access type, "
+            << style::Literal(ToString(mv->Access()));
+        return;
+    }
+
+    const core::type::Type* value_type = from->Type();
+    const core::type::Type* store_type = mv->StoreType();
+    if (value_type != store_type) {
+        AddError(s, Store::kFromOperandOffset)
+            << "value type " << NameOf(value_type) << " does not match store type "
+            << NameOf(store_type);
+        return;
+    }
+
+    if (!store_type->IsConstructible()) {
+        AddError(s) << "store type " << NameOf(store_type) << " is not constructible";
         return;
     }
 }

@@ -472,6 +472,10 @@ class Validator {
     void BeginBlock(const Block* blk);
     void EndBlock();
 
+    /// Calculates the total number elements contained in a type, i.e. the number of values required
+    /// for an initializer.
+    uint64_t ElementsCount(const core::type::Type* ty);
+
     const ir::Function* ContainingFunction(const ir::Instruction* inst);
     Hashset<const ir::Function*, 4> ContainingEndPoints(const ir::Function* f);
 
@@ -527,6 +531,9 @@ class Validator {
     Hashmap<const ir::Instruction*, SupportedStages, 4> stage_restricted_instructions_;
     Hashset<const core::type::Type*, 16> validated_types_{};
     Hashmap<const core::type::Type*, uint64_t, 16> max_nest_depth_{};
+    Hashmap<const core::type::Type*, uint64_t, 16> elements_counts_;
+
+    uint64_t total_private_bytes_ = 0;
 };
 
 }  // namespace tint::core::ir::validator

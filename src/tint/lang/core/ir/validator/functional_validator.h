@@ -105,13 +105,6 @@ class Functional {
     StyledText NameOf(const core::type::Type* ty);
     StyledText NameOf(const Value* value);
 
-    ///
-    /// Calculates the total number elements contained in a type, i.e. the number of values required
-    /// for an initializer.
-    /// @param ty the type to calculate elements for
-    /// @returns the count of elements in the type and all of its children
-    uint64_t ElementsCount(const core::type::Type* ty);
-
     Source SourceOf(const Function* func);
     Source SourceOf(const FunctionParam* param);
     Source SourceOf(const Instruction* inst);
@@ -131,8 +124,6 @@ class Functional {
 
     ir::Disassembler& Disassemble();
 
-    bool CanLoad(const core::type::Type* ty);
-
     void CheckRootBlock(const Block* blk);
     void CheckFunction(const Function* func);
     void CheckFunctionParam(const FunctionParam* param);
@@ -149,26 +140,21 @@ class Functional {
     void CheckBinary(const Binary* b);
     void CheckBuiltinCall(const BuiltinCall* call);
     void CheckCall(const Call* call);
-    void CheckConstruct(const Construct* construct);
     void CheckContinue(const Continue* c);
     void CheckConvert(const Convert* convert);
     void CheckCoreBuiltinCall(const CoreBuiltinCall* call,
                               const core::intrinsic::Overload& overload);
     void CheckIf(const If* if_);
-    void CheckLet(const Let* l);
-    void CheckLoad(const Load* l);
     void CheckLoop(const Loop* l);
     void CheckLoopBody(const Loop* loop);
     void CheckLoopContinuing(const Loop* loop);
     void CheckMemberBuiltinCall(const MemberBuiltinCall* call);
     void CheckOverride(const Override* o);
-    void CheckStore(const Store* s);
     void CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call);
     void CheckSwitch(const Switch* s);
     void CheckSwizzle(const Swizzle* s);
     void CheckTerminator(const Terminator* b);
     void CheckUnary(const Unary* u);
-    void CheckVar(const Var* var);
 
     void CheckSubgroupCall(const CoreBuiltinCall* call);
     void CheckExtractBitsCall(const CoreBuiltinCall* call);
@@ -214,8 +200,6 @@ class Functional {
     Hashset<OverrideId, 8> seen_override_ids_;
     Hashmap<const Loop*, const Continue*, 4> first_continues_;
     Hashset<std::string, 4> entry_point_names_;
-    Hashmap<const core::type::Type*, uint64_t, 16> elements_counts_;
-    uint64_t total_private_bytes_ = 0;
 };
 
 }  // namespace tint::core::ir::validator

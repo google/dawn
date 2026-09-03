@@ -950,4 +950,28 @@ void Validator::CheckOnlyUsedInRootBlock(const Instruction* inst) {
     CheckInstruction(inst);
 }
 
+bool Validator::CanLoad(const core::type::Type* ty) {
+    return tint::Switch(
+        ty,  //
+        [&](const core::type::Array* arr) {
+            if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
+                return false;
+            }
+            return CanLoad(arr->Elements().type);
+        },
+        [&](const core::type::Struct* str) {
+            for (auto* member : str->Members()) {
+                if (member->Type()->Is<core::type::Pointer>() &&
+                    ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+                    continue;
+                }
+                if (!CanLoad(member->Type())) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        [&](Default) { return ty->IsConstructible() || ty->IsHandle(); });
+}
+
 }  // namespace tint::core::ir::validator
