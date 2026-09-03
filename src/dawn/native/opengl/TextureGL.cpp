@@ -464,6 +464,7 @@ MaybeError Texture::ClearTexture(const OpenGLFunctions& gl,
                     }
                     DAWN_TRY(FramebufferTextureHelper(gl, mTarget, GL_DRAW_FRAMEBUFFER, attachment,
                                                       GetTextureHandle(), level, layer));
+                    DAWN_TRY(CheckFramebufferComplete(gl, GL_DRAW_FRAMEBUFFER));
                     DAWN_TRY(DoClear(aspectsToClear));
                 }
             }
@@ -570,12 +571,14 @@ MaybeError Texture::ClearTexture(const OpenGLFunctions& gl,
                         for (GLint z = 0; z < static_cast<GLint>(depth); ++z) {
                             DAWN_GL_TRY(gl, FramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, attachment,
                                                                     GetTextureHandle(), level, z));
+                            DAWN_TRY(CheckFramebufferComplete(gl, GL_DRAW_FRAMEBUFFER));
                             DAWN_TRY(DoClear());
                         }
                     } else {
                         DAWN_TRY(FramebufferTextureHelper(gl, mTarget, GL_DRAW_FRAMEBUFFER,
                                                           attachment, GetTextureHandle(), level,
                                                           layer));
+                        DAWN_TRY(CheckFramebufferComplete(gl, GL_DRAW_FRAMEBUFFER));
                         DAWN_TRY(DoClear());
                     }
 

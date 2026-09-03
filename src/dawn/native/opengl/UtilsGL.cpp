@@ -161,6 +161,8 @@ MaybeError CopyImageSubData(const OpenGLFunctions& gl,
                                                         dstHandle, dstLevel, dst.z + layer));
             }
         }
+        DAWN_TRY(CheckFramebufferComplete(gl, GL_READ_FRAMEBUFFER));
+        DAWN_TRY(CheckFramebufferComplete(gl, GL_DRAW_FRAMEBUFFER));
         DAWN_GL_TRY(
             gl, BlitFramebuffer(src.x, src.y, src.x + size.width, src.y + size.height, dst.x, dst.y,
                                 dst.x + size.width, dst.y + size.height, blitMask, GL_NEAREST));

@@ -26,7 +26,9 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/dawn/native/ErrorData.h"
+#include "src/dawn/native/ErrorInjector.h"
 #include "src/dawn/native/opengl/DeviceGL.h"
+#include "src/dawn/native/opengl/TextureGL.h"
 #include "src/dawn/native/opengl/UtilsGL.h"
 #include "src/dawn/tests/DawnTest.h"
 
@@ -87,6 +89,125 @@ TEST_P(GLFramebufferCompletenessTests, StatusAsString) {
     EXPECT_STREQ("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT",
                  GLFramebufferStatusAsString(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT));
 }
+
+#if defined(DAWN_ENABLE_ERROR_INJECTION)
+
+// Test that Texture::EnsureSubresourceContentInitialized (which calls Texture::ClearTexture)
+// verifies framebuffer completeness before clearing.
+// Injecting GL_FRAMEBUFFER_UNSUPPORTED on glCheckFramebufferStatus mimics OpenGL ES drivers
+// where certain formats (such as floating-point textures on drivers without
+// GL_EXT_color_buffer_float, or drivers returning GL_FRAMEBUFFER_UNSUPPORTED) cannot be attached
+// as complete framebuffer attachments. On such drivers, glClearBuffer* generates
+// GL_INVALID_FRAMEBUFFER_OPERATION and performs no writes; verifying completeness ensures Dawn
+// catches the error instead of silently marking uninitialized/dirty GPU memory as initialized.
+TEST_P(GLFramebufferCompletenessTests, LazyClearChecksCompleteness) {
+    Device* deviceGL = ToBackend(FromAPI(device.Get()));
+    const OpenGLFunctions& gl = deviceGL->GetGL();
+
+    // 1. 2D Color Texture (e.g. RGBA16Float)
+    {
+        wgpu::TextureDescriptor desc;
+        desc.size = {4, 4, 1};
+        desc.format = wgpu::TextureFormat::RGBA16Float;
+        desc.usage = wgpu::TextureUsage::TextureBinding;
+        wgpu::Texture tex = device.CreateTexture(&desc);
+
+        Texture* texGL = ToBackend(FromAPI(tex.Get()));
+
+        EnableErrorInjector();
+        InjectErrorAt(0u);
+        MaybeError err =
+            texGL->EnsureSubresourceContentInitialized(gl, texGL->GetAllSubresources());
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+        EXPECT_EQ(AcquireErrorInjectorCallCount(), 1u);
+        DisableErrorInjector();
+    }
+
+    // 2. Depth/Stencil Texture
+    {
+        wgpu::TextureDescriptor desc;
+        desc.size = {4, 4, 1};
+        desc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+        desc.usage = wgpu::TextureUsage::TextureBinding;
+        wgpu::Texture tex = device.CreateTexture(&desc);
+
+        Texture* texGL = ToBackend(FromAPI(tex.Get()));
+
+        EnableErrorInjector();
+        InjectErrorAt(0u);
+        MaybeError err =
+            texGL->EnsureSubresourceContentInitialized(gl, texGL->GetAllSubresources());
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+        EXPECT_EQ(AcquireErrorInjectorCallCount(), 1u);
+        DisableErrorInjector();
+    }
+
+    // 3. 3D Color Texture
+    {
+        wgpu::TextureDescriptor desc;
+        desc.dimension = wgpu::TextureDimension::e3D;
+        desc.size = {4, 4, 4};
+        desc.format = wgpu::TextureFormat::RGBA8Unorm;
+        desc.usage = wgpu::TextureUsage::TextureBinding;
+        wgpu::Texture tex = device.CreateTexture(&desc);
+
+        Texture* texGL = ToBackend(FromAPI(tex.Get()));
+
+        EnableErrorInjector();
+        InjectErrorAt(0u);
+        MaybeError err =
+            texGL->EnsureSubresourceContentInitialized(gl, texGL->GetAllSubresources());
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+        EXPECT_EQ(AcquireErrorInjectorCallCount(), 1u);
+        DisableErrorInjector();
+    }
+}
+
+// Test that CopyImageSubData checks framebuffer completeness for both read and draw framebuffers.
+TEST_P(GLFramebufferCompletenessTests, CopyImageSubDataChecksCompleteness) {
+    Device* deviceGL = ToBackend(FromAPI(device.Get()));
+    const OpenGLFunctions& gl = deviceGL->GetGL();
+
+    GLuint srcTex = 0;
+    GLuint dstTex = 0;
+    gl.GenTextures(1, &srcTex);
+    gl.GenTextures(1, &dstTex);
+    gl.BindTexture(GL_TEXTURE_2D, srcTex);
+    gl.TexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 4, 4);
+    gl.BindTexture(GL_TEXTURE_2D, dstTex);
+    gl.TexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 4, 4);
+
+    EnableErrorInjector();
+
+    // 1. Error on GL_READ_FRAMEBUFFER (index 0)
+    {
+        InjectErrorAt(0u);
+        MaybeError err = CopyImageSubData(gl, Aspect::Color, srcTex, GL_TEXTURE_2D, 0, {0, 0, 0},
+                                          dstTex, GL_TEXTURE_2D, 0, {0, 0, 0}, {4, 4, 1});
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+        EXPECT_EQ(AcquireErrorInjectorCallCount(), 1u);
+    }
+
+    // 2. Error on GL_DRAW_FRAMEBUFFER (index 1)
+    {
+        InjectErrorAt(1u);
+        MaybeError err = CopyImageSubData(gl, Aspect::Color, srcTex, GL_TEXTURE_2D, 0, {0, 0, 0},
+                                          dstTex, GL_TEXTURE_2D, 0, {0, 0, 0}, {4, 4, 1});
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+        EXPECT_EQ(AcquireErrorInjectorCallCount(), 2u);
+    }
+
+    DisableErrorInjector();
+    gl.DeleteTextures(1, &srcTex);
+    gl.DeleteTextures(1, &dstTex);
+}
+
+#endif  // defined(DAWN_ENABLE_ERROR_INJECTION)
 
 DAWN_INSTANTIATE_TEST(GLFramebufferCompletenessTests, OpenGLESBackend());
 
