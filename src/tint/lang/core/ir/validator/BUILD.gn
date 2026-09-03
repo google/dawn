@@ -45,8 +45,6 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("validator") {
   sources = [
-    "functional_validator.cc",
-    "functional_validator.h",
     "validate.cc",
     "validate.h",
     "validator.cc",

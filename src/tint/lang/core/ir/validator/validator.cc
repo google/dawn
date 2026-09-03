@@ -35,7 +35,6 @@
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/referenced_functions.h"
 #include "src/tint/lang/core/ir/unused.h"
-#include "src/tint/lang/core/ir/validator/functional_validator.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/void.h"
@@ -762,12 +761,6 @@ Result<SuccessType> Validator::Run() {
     CheckForRecursion();
     CheckForOrphanedInstructions();
     CheckStageRestrictedInstructions();
-
-    // Only run the functional validation if we are structurally valid
-    if (!diag_.ContainsErrors()) {
-        validator::Functional f(ir_, diag_, error_source_);
-        f.Validate();
-    }
 
     if (diag_.ContainsErrors()) {
         if (IsIRValidation()) {

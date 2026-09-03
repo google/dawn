@@ -39,8 +39,6 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_core_ir_validator lib
-  lang/core/ir/validator/functional_validator.cc
-  lang/core/ir/validator/functional_validator.h
   lang/core/ir/validator/validate.cc
   lang/core/ir/validator/validate.h
   lang/core/ir/validator/validator.cc

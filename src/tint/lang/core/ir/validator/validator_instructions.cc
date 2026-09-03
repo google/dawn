@@ -1346,8 +1346,16 @@ void Validator::CheckUnary(const Unary* u) {
 }
 
 void Validator::CheckIf(const If* if_) {
-    CheckResults(if_);
-    CheckOperands(if_, If::kNumOperands);
+    if (!CheckResults(if_)) {
+        return;
+    }
+    if (!CheckOperands(if_, If::kNumOperands)) {
+        return;
+    }
+
+    if (!if_->Condition()->Type()->Is<core::type::Bool>()) {
+        AddError(if_, If::kConditionOperandOffset) << "condition type must be 'bool'";
+    }
 
     if (if_->False() && if_->False()->Is<MultiInBlock>()) {
         AddError(if_) << "if false block must be a block";
@@ -1388,8 +1396,12 @@ void Validator::CheckIf(const If* if_) {
 }
 
 void Validator::CheckLoop(const Loop* l) {
-    CheckResults(l);
-    CheckOperands(l, 0);
+    if (!CheckResults(l)) {
+        return;
+    }
+    if (!CheckOperands(l, 0)) {
+        return;
+    }
 
     if (l->Initializer()->Is<MultiInBlock>()) {
         AddError(l->Initializer()) << "loop initializer must be a block";
@@ -1429,23 +1441,85 @@ void Validator::CheckLoop(const Loop* l) {
                    BeginBlockTask(l->Initializer()),
                    QueueNestedTasks(  //
                        BeginBlockTask(l->Body()),
-                       QueueNestedTasks(                     //
-                           BeginBlockTask(l->Continuing()),  //
-                           [] {},                            //
+                       QueueNestedTasks(
+                           BeginBlockTask(l->Continuing()),
+                           [this, l] {
+                               CheckLoopContinuing(l);
+                               first_continues_.Remove(l);
+                           },
                            EndBlockTask(l->Continuing())),
                        EndBlockTask(l->Body())),
                    EndBlockTask(l->Initializer())),
                PopControlStack());
 }
 
+void Validator::CheckLoopContinuing(const Loop* loop) {
+    // Ensure that values used in the loop continuing are not from the loop body, after a continue
+    // instruction.
+    auto* first_continue = first_continues_.GetOr(loop, nullptr);
+    if (first_continue != nullptr) {
+        // Find the instruction in the body block that is or holds the first continue instruction.
+        const Instruction* holds_continue = first_continue;
+        while (holds_continue && holds_continue->Block() &&
+               holds_continue->Block() != loop->Body()) {
+            holds_continue = holds_continue->Block()->Parent();
+        }
+
+        auto check_usage = [&](Usage use) {
+            if (TransitivelyHolds(loop->Continuing(), use.instruction)) {
+                AddError(use.instruction, use.operand_index)
+                    << NameOf(use.instruction->Operands()[use.operand_index])
+                    << " cannot be used in continuing block as it is declared after the first "
+                    << style::Instruction("continue") << " in the loop's body";
+                AddNote(first_continue) << "loop body's first " << style::Instruction("continue");
+            }
+        };
+
+        // Check that all subsequent instruction values are not used in the continuing block.
+        for (auto* inst = holds_continue; inst; inst = inst->next) {
+            for (auto* result : inst->Results()) {
+                result->ForEachUseUnsorted(check_usage);
+            }
+        }
+    }
+}
+
 void Validator::CheckSwitch(const Switch* s) {
-    CheckResults(s);
-    CheckOperands(s, Switch::kNumOperands);
+    if (!CheckResults(s)) {
+        return;
+    }
+    if (!CheckOperands(s, Switch::kNumOperands)) {
+        return;
+    }
+
+    if (!s->Condition()->Type()->IsIntegerScalar()) {
+        auto* cond_ty = s->Condition() ? s->Condition()->Type() : nullptr;
+        AddError(s, Switch::kConditionOperandOffset)
+            << "condition type " << NameOf(cond_ty) << " must be an integer scalar";
+    }
 
     QueueTasks(
         PushControlStack(s),
         [this, s] {
+            bool found_default = false;
+
             for (auto& cse : s->Cases()) {
+                for (const auto& sel : cse.selectors) {
+                    if (sel.IsDefault()) {
+                        if (found_default) {
+                            AddError(s) << "multiple default selectors in switch";
+                        }
+                        found_default = true;
+                    } else if (!sel.val->Type()->IsIntegerScalar()) {
+                        AddError(s) << "case selector type " << NameOf(sel.val->Type())
+                                    << " must be an integer scalar";
+                    } else if (sel.val->Type() != s->Condition()->Type()) {
+                        AddError(s) << "case selector type " << NameOf(sel.val->Type())
+                                    << " must match the switch condition type "
+                                    << NameOf(s->Condition()->Type());
+                    }
+                }
+
                 if (cse.selectors.IsEmpty()) {
                     AddError(s) << "case does not have any selectors";
                 }
@@ -1453,6 +1527,10 @@ void Validator::CheckSwitch(const Switch* s) {
                     AddError(s) << "case block must be a block";
                 }
                 QueueBlock(cse.block);
+            }
+
+            if (!found_default) {
+                AddError(s) << "missing default case for switch";
             }
         },
         PopControlStack());
@@ -1588,6 +1666,8 @@ void Validator::CheckContinue(const Continue* c) {
         CheckOperandsMatchTarget(c, Continue::kArgsOperandOffset, c->Args().size(), cont,
                                  cont->Params());
     }
+
+    first_continues_.Add(loop, c);
 }
 
 void Validator::CheckExit(const Exit* e) {

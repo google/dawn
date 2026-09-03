@@ -437,6 +437,7 @@ class Validator {
     void CheckUnary(const Unary* u);
     void CheckIf(const If* if_);
     void CheckLoop(const Loop* l);
+    void CheckLoopContinuing(const Loop* loop);
     void CheckSwitch(const Switch* s);
     void CheckSwizzle(const Swizzle* s);
     void CheckTerminator(const Terminator* b);
@@ -574,6 +575,7 @@ class Validator {
     Hashmap<const ir::Instruction*, SupportedStages, 4> stage_restricted_instructions_;
     Hashmap<const core::type::Type*, uint64_t, 16> max_nest_depth_{};
     Hashmap<const core::type::Type*, uint64_t, 16> elements_counts_;
+    Hashmap<const Loop*, const Continue*, 4> first_continues_;
 
     uint64_t total_private_bytes_ = 0;
 };

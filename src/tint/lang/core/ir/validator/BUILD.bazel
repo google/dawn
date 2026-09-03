@@ -43,7 +43,6 @@ exports_files(glob(["*.def", "*.tmpl"], allow_empty = True))
 cc_library(
   name = "validator",
   srcs = [
-    "functional_validator.cc",
     "validate.cc",
     "validator.cc",
     "validator_function.cc",
@@ -52,7 +51,6 @@ cc_library(
     "validator_types.cc",
   ],
   hdrs = [
-    "functional_validator.h",
     "validate.h",
     "validator.h",
   ],
