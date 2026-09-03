@@ -178,7 +178,7 @@ func TestLoadExperimentSettings(t *testing.T) {
 					"name": "test_exp",
 					"hash": "abcdef",
 					"fuzzers": ["tint_wgsl_fuzzer"],
-					"wgsl_benchmark_corpus": "bench",
+					"wgsl_normalization_corpus": "bench",
 					"wgsl_corpora": [
 						{"name": "corp1", "path": "test_corp"}
 					],
@@ -191,7 +191,7 @@ func TestLoadExperimentSettings(t *testing.T) {
 			},
 			wantErr: false,
 			validate: func(t *testing.T, settings ExperimentSettings) {
-				require.Nil(t, settings.BenchmarkDuration)
+				require.Nil(t, settings.NormalizationDuration)
 			},
 		},
 		{
@@ -203,7 +203,7 @@ func TestLoadExperimentSettings(t *testing.T) {
 					"name": "test_exp",
 					"hash": "abcdef",
 					"fuzzers": ["tint_wgsl_fuzzer"],
-					"wgsl_benchmark_corpus": "bench",
+					"wgsl_normalization_corpus": "bench",
 					"wgsl_corpora": [
 						{"name": "corp1", "path": "test_corp"}
 					],
@@ -212,13 +212,13 @@ func TestLoadExperimentSettings(t *testing.T) {
 						{"seconds": 10},
 						{"runs": 1000}
 					],
-					"benchmark_duration": 45
+					"normalization_duration": 45
 				}`), 0644)
 			},
 			wantErr: false,
 			validate: func(t *testing.T, settings ExperimentSettings) {
-				require.NotNil(t, settings.BenchmarkDuration)
-				require.Equal(t, 45, *settings.BenchmarkDuration)
+				require.NotNil(t, settings.NormalizationDuration)
+				require.Equal(t, 45, *settings.NormalizationDuration)
 			},
 		},
 		{
@@ -230,7 +230,7 @@ func TestLoadExperimentSettings(t *testing.T) {
 					"name": "test_exp",
 					"hash": "abcdef",
 					"fuzzers": ["tint_wgsl_fuzzer"],
-					"wgsl_benchmark_corpus": "bench",
+					"wgsl_normalization_corpus": "bench",
 					"wgsl_corpora": [
 						{"name": "corp1", "path": "test_corp"}
 					],
@@ -259,7 +259,7 @@ func TestLoadExperimentSettings(t *testing.T) {
 					"name": "test_exp",
 					"hash": "abcdef",
 					"fuzzers": ["tint_wgsl_fuzzer"],
-					"wgsl_benchmark_corpus": "bench",
+					"wgsl_normalization_corpus": "bench",
 					"wgsl_corpora": [
 						{"name": "corp1", "path": "test_corp"}
 					],
@@ -281,7 +281,7 @@ func TestLoadExperimentSettings(t *testing.T) {
 					"name": "test_exp",
 					"hash": "abcdef",
 					"fuzzers": ["tint_wgsl_fuzzer"],
-					"wgsl_benchmark_corpus": "bench",
+					"wgsl_normalization_corpus": "bench",
 					"wgsl_corpora": [
 						{"name": "corp1", "path": "test_corp"}
 					],
@@ -354,7 +354,7 @@ func TestLoadExperimentSettings(t *testing.T) {
 				}`), 0644)
 			},
 			wantErr:     true,
-			errContains: "wgsl_benchmark_corpus is required in experiment.json because WGSL fuzzers are specified",
+			errContains: "wgsl_normalization_corpus is required in experiment.json because WGSL fuzzers are specified",
 		},
 		{
 			name: "Missing WGSL corpora",
@@ -364,7 +364,7 @@ func TestLoadExperimentSettings(t *testing.T) {
 					"name": "test_exp",
 					"hash": "abcdef",
 					"fuzzers": ["tint_wgsl_fuzzer"],
-					"wgsl_benchmark_corpus": "bench",
+					"wgsl_normalization_corpus": "bench",
 					"wgsl_corpora": [],
 					"default_iterations": 2,
 					"durations": [
@@ -383,7 +383,7 @@ func TestLoadExperimentSettings(t *testing.T) {
 					"name": "test_exp",
 					"hash": "abcdef",
 					"fuzzers": ["tint_wgsl_fuzzer"],
-					"wgsl_benchmark_corpus": "bench",
+					"wgsl_normalization_corpus": "bench",
 					"wgsl_corpora": [
 						{"name": "corp1", "path": "test_corp"}
 					],
@@ -394,7 +394,7 @@ func TestLoadExperimentSettings(t *testing.T) {
 				}`), 0644)
 			},
 			wantErr:     true,
-			errContains: "wgsl benchmark corpus directory 'bench' not found under corpora root",
+			errContains: "wgsl normalization corpus directory 'bench' not found under corpora root",
 		},
 		{
 			name: "WGSL corpus directory missing",
@@ -404,7 +404,7 @@ func TestLoadExperimentSettings(t *testing.T) {
 					"name": "test_exp",
 					"hash": "abcdef",
 					"fuzzers": ["tint_wgsl_fuzzer"],
-					"wgsl_benchmark_corpus": "bench",
+					"wgsl_normalization_corpus": "bench",
 					"wgsl_corpora": [
 						{"name": "corp1", "path": "test_corp"}
 					],

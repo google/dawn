@@ -87,8 +87,10 @@ standard corpus and an empty directory as starting points:
     "hash": "4c2395a860ab76b44f7256c25281dfd3a3680192",
     "fuzzers": ["tint_wgsl_fuzzer", "tint_ir_fuzzer"],
     "burnin_enabled": false,
-    "wgsl_benchmark_corpus": "wgsl_seed",
-    "ir_benchmark_corpus": "empty",
+    "normalization_duration": 10,
+    "normalization_iterations": 2,
+    "wgsl_normalization_corpus": "wgsl_seed",
+    "ir_normalization_corpus": "empty",
     "wgsl_corpora": [
         { "name": "wgsl_full", "path": "wgsl_seed" },
         { "name": "wgsl_empty", "path": "empty" }
@@ -111,10 +113,11 @@ standard corpus and an empty directory as starting points:
   out to build the fuzzers. (The tool will be built and run from what
   ever hash the repo is at when you call it, not this version)
 - `fuzzers` are the specific fuzzer binaries to test
-- `burnin_enabled` is turning off burn-in so that the there isn't a 5
-  minute lag when running this experiment, but this should be removed
-  when generating statistically valid data
-- `*_benchmark_corpus` are the a corpora to use when establishing
+- `burnin_enabled`, `normalization_duration`, and
+  `normalization_iterations` are turned down or off in this example so
+  that the setup phases run fast, but these should be removed or
+  increased when generating statistically valid data
+- `*_normalization_corpus` are the corpora to use when establishing
   baselines for normalizing performance numbers between
   machines/environments
 - `*_corpora` are the various starting corpora to experiment using
@@ -168,12 +171,16 @@ The framework guides execution through the following phases:
 3. **Burn-in (Optional)**: If enabled, it executes multiple parallel
    workloads for 5 minutes (`burnin_duration` & `burnin_enabled`) to
    bring the physical host's CPU to a thermal steady state. This
-   prevents throttling and microbenchmark skews during the experiment.
-4. **Microbenchmarking**: It executes a short benchmark (60 seconds)
-   for each fuzzer against its designated benchmark corpus. The
-   resulting execution rate (runs/sec) is saved to `perf_scores.json`
-   and used as a normalization factor to compute "Normalized CPU
-   Seconds" for each fuzzer.
+   prevents throttling and normalization profiling skews during the
+   experiment.
+4. **Normalization**: It executes multiple normalization profiling
+   runs for each fuzzer against its designated normalization corpus
+   (controlled by `normalization_duration` and
+   `normalization_iterations`). The resulting average execution rate
+   (runs/sec) and standard error (SEM) are saved to
+   `normalization_scores.json` and are used to compute "Normalized CPU
+   Seconds" for each fuzzer. All individual profiling runs are
+   archived in `normalization_iterations.csv`.
 5. **Task Execution**: It calculates the Cartesian product of
    experiments (Fuzzer × Corpus × Duration × Iteration). These are run
    concurrently across available CPU cores (configurable via
@@ -225,21 +232,22 @@ The following sections define the full configuration schema for
 
 ### Root Attributes
 
-| Field                   | Type                   | Description                                                                                                                                  |
-|:------------------------|:-----------------------|:---------------------------------------------------------------------------------------------------------------------------------------------|
-| `name`                  | `string`               | A human-readable identifier for the experiment, used in the logging/reports.                                                                 |
-| `hash`                  | `string`               | The Git commit hash checkout from which the binaries should be compiled.                                                                     |
-| `fuzzers`               | `array of strings`     | Fuzzer target names to test(Supported values: `"tint_wgsl_fuzzer"`, `"tint_ir_fuzzer"`, `"tint_wgsl_mesa_fuzzer"`, `"tint_ir_mesa_fuzzer"`). |
-| `timeout`               | `integer` *optional*   | Timeout limit in seconds for a single fuzzer execution on a test case in libFuzzer (defaults to 5).                                          |
-| `benchmark_duration`    | `integer` *optional*   | Execution duration in seconds for the microbenchmarking phase (defaults to 60).                                                              |
-| `burnin_duration`       | `integer` *optional*   | Target duration in seconds for the initial thermal burn-in (defaults to 300).                                                                |
-| `burnin_enabled`        | `boolean` *optional*   | If true, launches parallel workloads to warm up the machine before benching (defaults to true).                                              |
-| `wgsl_benchmark_corpus` | `string`               | Directory path relative to the root `corpora/` to use when microbenchmarking WGSL fuzzers.                                                   |
-| `ir_benchmark_corpus`   | `string`               | Directory path relative to the root `corpora/` to use when microbenchmarking IR fuzzers.                                                     |
-| `wgsl_corpora`          | `array of CorpusDef`   | Corpora definitions available to run with WGSL fuzzers.                                                                                      |
-| `ir_corpora`            | `array of CorpusDef`   | Corpora definitions available to run with IR fuzzers.                                                                                        |
-| `default_iterations`    | `integer`              | The default number of times to repeat every Fuzzer/Corpus/Duration combination if not otherwise specified.                                   |
-| `durations`             | `array of DurationDef` | The target run lengths defining the experiment stopping criteria.                                                                            |
+| Field                       | Type                   | Description                                                                                                                                  |
+|:----------------------------|:-----------------------|:---------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`                      | `string`               | A human-readable identifier for the experiment, used in the logging/reports.                                                                 |
+| `hash`                      | `string`               | The Git commit hash checkout from which the binaries should be compiled.                                                                     |
+| `fuzzers`                   | `array of strings`     | Fuzzer target names to test(Supported values: `"tint_wgsl_fuzzer"`, `"tint_ir_fuzzer"`, `"tint_wgsl_mesa_fuzzer"`, `"tint_ir_mesa_fuzzer"`). |
+| `timeout`                   | `integer` *optional*   | Timeout limit in seconds for a single fuzzer execution on a test case in libFuzzer (defaults to 5).                                          |
+| `burnin_enabled`            | `boolean` *optional*   | If true, launches parallel workloads to warm up the machine before benching (defaults to true).                                              |
+| `burnin_duration`           | `integer` *optional*   | Target duration in seconds for the initial thermal burn-in (defaults to 300).                                                                |
+| `normalization_duration`    | `integer` *optional*   | Execution duration in seconds for each iteration of the normalization microbenchmarking phase (defaults to 60).                              |
+| `normalization_iterations`  | `integer` *optional*   | Number of iterations to perform for normalization microbenchmarking (defaults to 5).                                                         |
+| `wgsl_normalization_corpus` | `string`               | Directory path relative to the root `corpora/` to use when performing normalization on WGSL fuzzers.                                         |
+| `ir_normalization_corpus`   | `string`               | Directory path relative to the root `corpora/` to use when performing normalization on IR fuzzers.                                           |
+| `wgsl_corpora`              | `array of CorpusDef`   | Corpora definitions available to run with WGSL fuzzers.                                                                                      |
+| `ir_corpora`                | `array of CorpusDef`   | Corpora definitions available to run with IR fuzzers.                                                                                        |
+| `default_iterations`        | `integer`              | The default number of times to repeat every Fuzzer/Corpus/Duration combination if not otherwise specified.                                   |
+| `durations`                 | `array of DurationDef` | The target run lengths defining the experiment stopping criteria.                                                                            |
 
 ### `CorpusDef` Format
 

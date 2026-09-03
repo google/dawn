@@ -86,17 +86,19 @@ type IterationCoverage map[CoverageComponent]*CoverageStats
 
 // IterationData holds the raw performance and coverage metrics for a single fuzzer iteration.
 type IterationData struct {
-	Machine        string
-	Fuzzer         string
-	Corpus         string
-	LimitType      string
-	LimitValue     int
-	Iteration      int
-	PerfScore      float64
-	ActualSeconds  float64
-	ActualRuns     int
-	NormalizedSecs float64
-	Coverage       IterationCoverage
+	Machine             string
+	Fuzzer              string
+	Corpus              string
+	LimitType           string
+	LimitValue          int
+	Iteration           int
+	NormalizationScore  float64
+	NormalizationError  float64
+	ActualSeconds       float64
+	ActualRuns          int
+	NormalizedSecs      float64
+	NormalizedSecsError float64
+	Coverage            IterationCoverage
 }
 
 // SummaryPoint represents a single statistical data point in a fuzzer's
@@ -380,47 +382,52 @@ func (ac *analyzeConfig) calculateIterationCoverageTasks(machine, machineDir, fu
 		return nil, fmt.Errorf("incomplete run for %s/%s iter %d\n", fuzzer, corpus.Name, iter)
 	}
 
-	if state.PerfScore <= 0 {
-		return nil, fmt.Errorf("invalid perf score (%f) for %s/%s iter %d\n", state.PerfScore, fuzzer, corpus.Name, iter)
+	if state.NormalizationScore <= 0 {
+		return nil, fmt.Errorf("invalid normalization score (%f) for %s/%s iter %d\n", state.NormalizationScore, fuzzer, corpus.Name, iter)
 	}
 
-	// Normalization: CPU Seconds = (ActualSeconds * PerfScore) / 1000
-	normalizedSecs := (state.ActualSeconds * state.PerfScore) / 1000.0
+	// Normalization: CPU Seconds = (ActualSeconds * NormalizationScore) / 1000
+	normalizedSecs := (state.ActualSeconds * state.NormalizationScore) / 1000.0
+	normalizedSecsErr := (state.ActualSeconds * state.NormalizationError) / 1000.0
 
 	return &IterationData{
-		Machine:        machine,
-		Fuzzer:         fuzzer,
-		Corpus:         corpus.Name,
-		LimitType:      limitType,
-		LimitValue:     limitValue,
-		Iteration:      iter,
-		PerfScore:      state.PerfScore,
-		ActualSeconds:  state.ActualSeconds,
-		ActualRuns:     state.ActualRuns,
-		NormalizedSecs: normalizedSecs,
+		Machine:             machine,
+		Fuzzer:              fuzzer,
+		Corpus:              corpus.Name,
+		LimitType:           limitType,
+		LimitValue:          limitValue,
+		Iteration:           iter,
+		NormalizationScore:  state.NormalizationScore,
+		NormalizationError:  state.NormalizationError,
+		ActualSeconds:       state.ActualSeconds,
+		ActualRuns:          state.ActualRuns,
+		NormalizedSecs:      normalizedSecs,
+		NormalizedSecsError: normalizedSecsErr,
 	}, nil
 }
 
 // printRawCSV builds and writes a CSV file containing the raw metrics of each fuzzer iteration.
 func (ac *analyzeConfig) printRawCSV() error {
 	var csvBuilder strings.Builder
-	csvBuilder.WriteString("Machine,Fuzzer,Corpus,LimitType,LimitValue,Iteration,PerfScore,ActualSeconds,ActualRuns,NormalizedCPUSeconds," +
+	csvBuilder.WriteString("Machine,Fuzzer,Corpus,LimitType,LimitValue,Iteration,NormalizationScore,NormalizationError,ActualSeconds,ActualRuns,NormalizedCPUSeconds,NormalizedCPUSecondsError," +
 		"Tint_LinesFound,Tint_LinesHit,Tint_CoveragePercent," +
 		"Mesa_LinesFound,Mesa_LinesHit,Mesa_CoveragePercent," +
 		"DXC_LinesFound,DXC_LinesHit,DXC_CoveragePercent\n")
 
 	for _, d := range ac.data {
-		csvBuilder.WriteString(fmt.Sprintf("%s,%s,%s,%s,%d,%d,%.4f,%.2f,%d,%.4f,%d,%d,%.2f,%d,%d,%.2f,%d,%d,%.2f\n",
+		csvBuilder.WriteString(fmt.Sprintf("%s,%s,%s,%s,%d,%d,%.4f,%.4f,%.2f,%d,%.4f,%.4f,%d,%d,%.2f,%d,%d,%.2f,%d,%d,%.2f\n",
 			d.Machine,
 			d.Fuzzer,
 			d.Corpus,
 			d.LimitType,
 			d.LimitValue,
 			d.Iteration,
-			d.PerfScore,
+			d.NormalizationScore,
+			d.NormalizationError,
 			d.ActualSeconds,
 			d.ActualRuns,
 			d.NormalizedSecs,
+			d.NormalizedSecsError,
 			d.Coverage[CoverageComponentTint].LinesFound,
 			d.Coverage[CoverageComponentTint].LinesHit,
 			d.Coverage[CoverageComponentTint].Percentage,
@@ -454,8 +461,9 @@ func calculateStats(data []IterationData) []SummaryPoint {
 	}
 
 	type accumulatorVal struct {
-		NormalizedSecs  []float64
-		CoveragePercent []float64
+		NormalizedSecs    []float64
+		NormalizedSecsErr []float64
+		CoveragePercent   []float64
 	}
 
 	accumulations := make(map[accumulatorKey]*accumulatorVal)
@@ -480,6 +488,7 @@ func calculateStats(data []IterationData) []SummaryPoint {
 			}
 
 			val.NormalizedSecs = append(val.NormalizedSecs, d.NormalizedSecs)
+			val.NormalizedSecsErr = append(val.NormalizedSecsErr, d.NormalizedSecsError)
 			val.CoveragePercent = append(val.CoveragePercent, stats.Percentage)
 		}
 	}
@@ -521,7 +530,16 @@ func calculateStats(data []IterationData) []SummaryPoint {
 
 		deltaNormalizedSecs := 0.0
 		if N > 0 {
-			deltaNormalizedSecs = normalizedSecsStd / math.Sqrt(float64(N))
+			statErr := normalizedSecsStd / math.Sqrt(float64(N))
+
+			// Calculate systematic error from NormalizationScore
+			sysErrSum := 0.0
+			for i := range N {
+				sysErrSum += val.NormalizedSecsErr[i]
+			}
+			sysErr := sysErrSum / float64(N)
+
+			deltaNormalizedSecs = math.Sqrt(statErr*statErr + sysErr*sysErr)
 		}
 
 		coverageRate := 0.0

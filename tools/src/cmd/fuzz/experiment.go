@@ -33,7 +33,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"maps"
+	"math"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -72,21 +74,28 @@ type DurationDef struct {
 	Iterations *int `json:"iterations,omitempty"`
 }
 
+// NormalizationScore holds the mean and standard error of the mean (SEM) of the normalization profiling iterations.
+type NormalizationScore struct {
+	Mean float64 `json:"mean"`
+	SEM  float64 `json:"sem"`
+}
+
 // ExperimentSettings represents the structure of the experiment.json settings file.
 type ExperimentSettings struct {
-	Name                string        `json:"name"`
-	Hash                string        `json:"hash"`
-	Fuzzers             []string      `json:"fuzzers"`
-	Timeout             *int          `json:"timeout,omitempty"`
-	BenchmarkDuration   *int          `json:"benchmark_duration,omitempty"`
-	BurnInDuration      *int          `json:"burnin_duration,omitempty"`
-	BurnInEnabled       *bool         `json:"burnin_enabled,omitempty"`
-	WgslBenchmarkCorpus string        `json:"wgsl_benchmark_corpus"`
-	IrBenchmarkCorpus   string        `json:"ir_benchmark_corpus"`
-	WgslCorpora         []CorpusDef   `json:"wgsl_corpora"`
-	IrCorpora           []CorpusDef   `json:"ir_corpora"`
-	DefaultIterations   int           `json:"default_iterations"`
-	Durations           []DurationDef `json:"durations"`
+	Name                    string        `json:"name"`
+	Hash                    string        `json:"hash"`
+	Fuzzers                 []string      `json:"fuzzers"`
+	Timeout                 *int          `json:"timeout,omitempty"`
+	BurnInEnabled           *bool         `json:"burnin_enabled,omitempty"`
+	BurnInDuration          *int          `json:"burnin_duration,omitempty"`
+	NormalizationDuration   *int          `json:"normalization_duration,omitempty"`
+	NormalizationIterations *int          `json:"normalization_iterations,omitempty"`
+	WgslNormalizationCorpus string        `json:"wgsl_normalization_corpus"`
+	IrNormalizationCorpus   string        `json:"ir_normalization_corpus"`
+	WgslCorpora             []CorpusDef   `json:"wgsl_corpora"`
+	IrCorpora               []CorpusDef   `json:"ir_corpora"`
+	DefaultIterations       int           `json:"default_iterations"`
+	Durations               []DurationDef `json:"durations"`
 }
 
 type IterStateStatus string
@@ -134,14 +143,15 @@ func (t *ExperimentLimitType) UnmarshalJSON(b []byte) error {
 
 // IterState tracks the execution status and results of a single fuzzer iteration.
 type IterState struct {
-	Status        IterStateStatus     `json:"status"`
-	StartTime     string              `json:"start_time"`
-	EndTime       string              `json:"end_time"`
-	PerfScore     float64             `json:"perf_score"`
-	LimitType     ExperimentLimitType `json:"limit_type"`
-	LimitValue    int                 `json:"limit_value"`
-	ActualRuns    int                 `json:"actual_runs"`
-	ActualSeconds float64             `json:"actual_seconds"`
+	Status             IterStateStatus     `json:"status"`
+	StartTime          string              `json:"start_time"`
+	EndTime            string              `json:"end_time"`
+	NormalizationScore float64             `json:"normalization_score"`
+	NormalizationError float64             `json:"normalization_error"`
+	LimitType          ExperimentLimitType `json:"limit_type"`
+	LimitValue         int                 `json:"limit_value"`
+	ActualRuns         int                 `json:"actual_runs"`
+	ActualSeconds      float64             `json:"actual_seconds"`
 }
 
 // ExperimentTask represents a single unit of work to be executed by a worker.
@@ -218,19 +228,52 @@ func runExperiment(t *taskConfig) error {
 		return err
 	}
 
-	perfScores, needsBurnIn, err := runMicrobenchmarkIfNeeded(t, machineResultsDir, config)
-	if err != nil {
-		return err
+	// 1. Calculate pending normalization tasks
+	normScoresPath := filepath.Join(machineResultsDir, "normalization_scores.json")
+	normScores := make(map[string]NormalizationScore)
+	if fileutils.IsFile(normScoresPath, t.osWrapper) {
+		normScoresBytes, err := t.osWrapper.ReadFile(normScoresPath)
+		if err == nil {
+			_ = json.Unmarshal(normScoresBytes, &normScores)
+		}
 	}
 
+	var pendingNormalizationTasks []string
+	for _, fuzzer := range config.Fuzzers {
+		if _, ok := normScores[fuzzer]; !ok {
+			pendingNormalizationTasks = append(pendingNormalizationTasks, fuzzer)
+		}
+	}
+
+	// 2. Calculate pending experiment tasks
 	tasks, err := calculateExperimentTasks(t, config, machineResultsDir)
 	if err != nil {
 		return err
 	}
 
-	pendingTasks := queueRemainingExperimentTasks(t, tasks)
+	pendingExperimentTasks := queueRemainingExperimentTasks(t, tasks)
 
-	if err = runPendingExperimentTasks(t, pendingTasks, config, perfScores, binDir, needsBurnIn); err != nil {
+	// 3. Burn-in if either queue has values in it
+	burnInEnabled := true
+	if config.BurnInEnabled != nil {
+		burnInEnabled = *config.BurnInEnabled
+	}
+
+	hasWork := len(pendingNormalizationTasks) > 0 || len(pendingExperimentTasks) > 0
+	if hasWork && burnInEnabled {
+		if err := runBurnIn(t, &config); err != nil {
+			return err
+		}
+	}
+
+	// 4. Run normalization tasks
+	normalizationScores, err := runNormalizationTasks(t, machineResultsDir, config, pendingNormalizationTasks)
+	if err != nil {
+		return err
+	}
+
+	// 5. Run experiment tasks
+	if err = runPendingExperimentTasks(t, pendingExperimentTasks, config, normalizationScores, binDir); err != nil {
 		return err
 	}
 
@@ -275,29 +318,29 @@ func loadExperimentSettings(t *taskConfig, experimentRoot string) (ExperimentSet
 
 	corporaDir := filepath.Join(experimentRoot, kExperimentCorporaSubDir)
 	for mode := range activeModes {
-		benchmarkCorpus := ""
+		normalizationCorpus := ""
 		var corpora []CorpusDef
 
 		switch mode {
 		case FuzzModeWgsl:
-			benchmarkCorpus = settings.WgslBenchmarkCorpus
+			normalizationCorpus = settings.WgslNormalizationCorpus
 			corpora = settings.WgslCorpora
 		case FuzzModeIr:
-			benchmarkCorpus = settings.IrBenchmarkCorpus
+			normalizationCorpus = settings.IrNormalizationCorpus
 			corpora = settings.IrCorpora
 		}
 
-		if benchmarkCorpus == "" {
-			return ExperimentSettings{}, fmt.Errorf("%s_benchmark_corpus is required in experiment.json because %s fuzzers are specified", mode, strings.ToUpper(mode.String()))
+		if normalizationCorpus == "" {
+			return ExperimentSettings{}, fmt.Errorf("%s_normalization_corpus is required in experiment.json because %s fuzzers are specified", mode, strings.ToUpper(mode.String()))
 		}
 
 		if len(corpora) < 1 {
 			return ExperimentSettings{}, fmt.Errorf("at least one %s_corpora definition is required in experiment.json because %s fuzzers are specified", mode, strings.ToUpper(mode.String()))
 		}
 
-		bcPath := filepath.Join(corporaDir, benchmarkCorpus)
+		bcPath := filepath.Join(corporaDir, normalizationCorpus)
 		if !fileutils.IsDir(bcPath, t.osWrapper) {
-			return ExperimentSettings{}, fmt.Errorf("%s benchmark corpus directory '%s' not found under corpora root '%s'", mode, benchmarkCorpus, corporaDir)
+			return ExperimentSettings{}, fmt.Errorf("%s normalization corpus directory '%s' not found under corpora root '%s'", mode, normalizationCorpus, corporaDir)
 		}
 
 		for _, cDef := range corpora {
@@ -393,47 +436,33 @@ func buildExperimentBinariesIfNeeded(t *taskConfig, settings ExperimentSettings)
 	return binDir, nil
 }
 
-// runMicrobenchmarkIfNeeded ensures that performance normalization scores (runs/sec)
+// runNormalizationTasks ensures that normalization scores (runs/sec)
 // exist for all fuzzers in the experiment. It loads existing scores from
-// perf_scores.json if they exist, and runs the microbenchmark for any missing fuzzers,
+// normalization_scores.json if they exist, and runs the normalization for any missing fuzzers,
 // saving the results back to the file.
-// Returns the scores in a map and if whether burn-in is still needed, otherwise an error.
-func runMicrobenchmarkIfNeeded(t *taskConfig, machineResultsDir string, settings ExperimentSettings) (map[string]float64, bool, error) {
-	perfScoresPath := filepath.Join(machineResultsDir, "perf_scores.json")
-	perfScores := make(map[string]float64)
-	if fileutils.IsFile(perfScoresPath, t.osWrapper) {
-		perfScoresBytes, err := t.osWrapper.ReadFile(perfScoresPath)
+// Returns the scores in a map, otherwise an error.
+func runNormalizationTasks(t *taskConfig, machineResultsDir string, settings ExperimentSettings, pending []string) (map[string]NormalizationScore, error) {
+	normScoresPath := filepath.Join(machineResultsDir, "normalization_scores.json")
+	normScores := make(map[string]NormalizationScore)
+	if fileutils.IsFile(normScoresPath, t.osWrapper) {
+		normScoresBytes, err := t.osWrapper.ReadFile(normScoresPath)
 		if err == nil {
-			_ = json.Unmarshal(perfScoresBytes, &perfScores)
+			_ = json.Unmarshal(normScoresBytes, &normScores)
 		}
 	}
 
-	burnInEnabled := true
-	if settings.BurnInEnabled != nil {
-		burnInEnabled = *settings.BurnInEnabled
-	}
-	needsBurnIn := burnInEnabled
-
-	for _, fuzzer := range settings.Fuzzers {
-		if _, ok := perfScores[fuzzer]; !ok {
-			if needsBurnIn {
-				if err := runBurnIn(t, &settings); err != nil {
-					return nil, false, err
-				}
-				needsBurnIn = false
-			}
-			fmt.Println("Running microbenchmark for", fuzzer, "...")
-			score, err := runMicrobenchmark(t, t.experimentPath, fuzzer, &settings)
-			if err != nil {
-				return nil, false, err
-			}
-			perfScores[fuzzer] = score
-			// Save immediately in case the top-level process gets halted
-			scoresBytes, _ := json.MarshalIndent(perfScores, "", "  ")
-			_ = t.osWrapper.WriteFile(perfScoresPath, scoresBytes, 0644)
+	for _, fuzzer := range pending {
+		fmt.Println("Running normalization for", fuzzer, "...")
+		score, err := runNormalization(t, t.experimentPath, fuzzer, &settings, machineResultsDir)
+		if err != nil {
+			return nil, err
 		}
+		normScores[fuzzer] = score
+		// Save immediately in case the top-level process gets halted
+		scoresBytes, _ := json.MarshalIndent(normScores, "", "  ")
+		_ = t.osWrapper.WriteFile(normScoresPath, scoresBytes, 0644)
 	}
-	return perfScores, needsBurnIn, nil
+	return normScores, nil
 }
 
 // generateResultsDirIfNeeded ensures that the results directory for the current
@@ -520,15 +549,9 @@ func queueRemainingExperimentTasks(t *taskConfig, tasks []ExperimentTask) []Expe
 // runPendingExperimentTasks executes the provided list of experiment tasks using a parallel worker pool.
 // It manages worker synchronization and context cancellation. It returns the first error
 // encountered
-func runPendingExperimentTasks(t *taskConfig, pendingTasks []ExperimentTask, settings ExperimentSettings, perfScores map[string]float64, binDir string, needsBurnIn bool) error {
+func runPendingExperimentTasks(t *taskConfig, pendingTasks []ExperimentTask, settings ExperimentSettings, normalizationScores map[string]NormalizationScore, binDir string) error {
 	if len(pendingTasks) == 0 {
 		return nil
-	}
-
-	if needsBurnIn {
-		if err := runBurnIn(t, &settings); err != nil {
-			return err
-		}
 	}
 
 	fmt.Println("Executing pending/incomplete tasks using", t.numProcesses, "parallel jobs...")
@@ -561,7 +584,7 @@ func runPendingExperimentTasks(t *taskConfig, pendingTasks []ExperimentTask, set
 					if !ok {
 						return
 					}
-					score := perfScores[task.FuzzerName]
+					score := normalizationScores[task.FuzzerName]
 					if err := executeExperimentTask(ctx, t, binDir, task, score, timeoutVal); err != nil {
 						if !errors.Is(err, context.Canceled) && !errors.Is(err, context.DeadlineExceeded) {
 							errChan <- err
@@ -801,18 +824,18 @@ func appendLibraryArgs(args []string, binDir string, fsReader oswrapper.Filesyst
 	return args
 }
 
-// runMicrobenchmark executes a short fuzzer run to determine the execution
-// speed (runs/sec) on the current hardware for normalization of results.
-func runMicrobenchmark(t *taskConfig, root string, fuzzer string, settings *ExperimentSettings) (float64, error) {
+// runNormalization executes fuzzer normalization profiling multiple times to determine the execution
+// speed (runs/sec) and its standard error (SEM) on the current hardware for normalization of results.
+func runNormalization(t *taskConfig, root string, fuzzer string, settings *ExperimentSettings, machineResultsDir string) (NormalizationScore, error) {
 	var corpusPath string
 	cfg, _ := fuzzerConfigs[fuzzer]
 	switch cfg.mode {
 	case FuzzModeWgsl:
-		corpusPath = filepath.Join(root, kExperimentCorporaSubDir, settings.WgslBenchmarkCorpus)
+		corpusPath = filepath.Join(root, kExperimentCorporaSubDir, settings.WgslNormalizationCorpus)
 	case FuzzModeIr:
-		corpusPath = filepath.Join(root, kExperimentCorporaSubDir, settings.IrBenchmarkCorpus)
+		corpusPath = filepath.Join(root, kExperimentCorporaSubDir, settings.IrNormalizationCorpus)
 	default:
-		return 1.0, fmt.Errorf("unknown fuzz mode %d", cfg.mode)
+		return NormalizationScore{}, fmt.Errorf("unknown fuzz mode %d", cfg.mode)
 	}
 
 	binPath := filepath.Join(root, kExperimentBinarySubDir, fuzzer+fileutils.ExeExt)
@@ -822,27 +845,60 @@ func runMicrobenchmark(t *taskConfig, root string, fuzzer string, settings *Expe
 		timeoutVal = *settings.Timeout
 	}
 
-	benchmarkDuration := 60
-	if settings.BenchmarkDuration != nil && *settings.BenchmarkDuration > 0 {
-		benchmarkDuration = *settings.BenchmarkDuration
+	normalizationDuration := 60
+	if settings.NormalizationDuration != nil && *settings.NormalizationDuration > 0 {
+		normalizationDuration = *settings.NormalizationDuration
 	}
 
-	actualRuns, elapsed, err := runBenchmarkCmd(t, binPath, corpusPath, benchmarkDuration, timeoutVal)
+	iters := 5
+	if settings.NormalizationIterations != nil && *settings.NormalizationIterations > 0 {
+		iters = *settings.NormalizationIterations
+	}
+
+	csvPath := filepath.Join(machineResultsDir, "normalization_iterations.csv")
+	writeHeader := !fileutils.IsFile(csvPath, t.osWrapper)
+
+	csvFile, err := t.osWrapper.OpenFile(csvPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return 1.0, err
+		return NormalizationScore{}, fmt.Errorf("failed to open normalization CSV: %w", err)
+	}
+	defer csvFile.Close()
+
+	if writeHeader {
+		_, _ = io.WriteString(csvFile, "Fuzzer,Iteration,ActualRuns,ActualSeconds,Score\n")
 	}
 
-	score := float64(actualRuns) / elapsed
-	if score <= 0 {
-		score = 1.0
+	var scores []float64
+
+	for i := 1; i <= iters; i++ {
+		actualRuns, elapsed, err := runNormalizationCmd(t, binPath, corpusPath, normalizationDuration, timeoutVal)
+		if err != nil {
+			return NormalizationScore{}, err
+		}
+
+		score := float64(actualRuns) / elapsed
+		if score <= 0 {
+			score = 1.0
+		}
+		scores = append(scores, score)
+
+		_, _ = io.WriteString(csvFile, fmt.Sprintf("%s,%d,%d,%.2f,%.2f\n", fuzzer, i, actualRuns, elapsed, score))
+		fmt.Printf("  Iteration %d: %d runs in %.2fs (%.2f runs/sec)\n", i, actualRuns, elapsed, score)
 	}
-	fmt.Println(fmt.Sprintf("Microbenchmark result for %s: %d runs in %.2fs (%.2f runs/sec)", fuzzer, actualRuns, elapsed, score))
-	return score, nil
+
+	avg, stdDev := computeAvgAndStdDev(scores)
+	sem := 0.0
+	if len(scores) > 0 {
+		sem = stdDev / math.Sqrt(float64(len(scores)))
+	}
+
+	fmt.Printf("Normalization profiling result for %s: %.2f ± %.2f runs/sec\n", fuzzer, avg, sem)
+	return NormalizationScore{Mean: avg, SEM: sem}, nil
 }
 
-// runBenchmarkCmd runs a single fuzzer benchmark execution for the given duration (in seconds).
+// runNormalizationCmd runs a single fuzzer normalization execution for the given duration (in seconds).
 // It returns the number of runs executed, the actual elapsed time, and any error.
-func runBenchmarkCmd(t *taskConfig, binPath string, corpusPath string, duration int, timeoutVal int) (int, float64, error) {
+func runNormalizationCmd(t *taskConfig, binPath string, corpusPath string, duration int, timeoutVal int) (int, float64, error) {
 	tmpOut, err := t.osWrapper.MkdirTemp("", "perf_out")
 	if err != nil {
 		return 0, 0, err
@@ -861,7 +917,7 @@ func runBenchmarkCmd(t *taskConfig, binPath string, corpusPath string, duration 
 		// fine, unless it exited really fast, since that means it is finding issues quickly, which means that the whole
 		// experimental apparatus is not going to perform as expected
 		if elapsed < 1.0 {
-			return 0, elapsed, fmt.Errorf("microbenchmark terminated too quickly: %w", err)
+			return 0, elapsed, fmt.Errorf("normalization profiling terminated too quickly: %w", err)
 		}
 	}
 
@@ -874,7 +930,7 @@ func runBenchmarkCmd(t *taskConfig, binPath string, corpusPath string, duration 
 }
 
 // runBurnIn runs the burn-in phase.
-// It executes the micro benchmarks for each of the configured fuzzers in parallel matching t.numProcesses to attempt to
+// It executes the normalization benchmarks for each of the configured fuzzers in parallel matching t.numProcesses to attempt to
 // get the physical hardware to a thermal steady state to avoid unexpected throttling mid-experiment.
 func runBurnIn(t *taskConfig, settings *ExperimentSettings) error {
 	burnInDuration := 300
@@ -898,9 +954,9 @@ func runBurnIn(t *taskConfig, settings *ExperimentSettings) error {
 		cfg, _ := fuzzerConfigs[fuzzer]
 		switch cfg.mode {
 		case FuzzModeWgsl:
-			corpusPath = filepath.Join(t.experimentPath, kExperimentCorporaSubDir, settings.WgslBenchmarkCorpus)
+			corpusPath = filepath.Join(t.experimentPath, kExperimentCorporaSubDir, settings.WgslNormalizationCorpus)
 		case FuzzModeIr:
-			corpusPath = filepath.Join(t.experimentPath, kExperimentCorporaSubDir, settings.IrBenchmarkCorpus)
+			corpusPath = filepath.Join(t.experimentPath, kExperimentCorporaSubDir, settings.IrNormalizationCorpus)
 		default:
 			return fmt.Errorf("unknown fuzz mode %d for fuzzer %s", cfg.mode, fuzzer)
 		}
@@ -910,7 +966,7 @@ func runBurnIn(t *taskConfig, settings *ExperimentSettings) error {
 		wg.Add(1)
 		go func(workerID int, f string, cp string, bp string) {
 			defer wg.Done()
-			_, _, err := runBenchmarkCmd(t, bp, cp, burnInDuration, timeoutVal)
+			_, _, err := runNormalizationCmd(t, bp, cp, burnInDuration, timeoutVal)
 			if err != nil {
 				errChan <- fmt.Errorf("burn-in worker %d failed: %w", workerID, err)
 			}
@@ -970,16 +1026,17 @@ func calculateExperimentTasksForFuzzer(fuzzer string, corpus CorpusDef, corporaD
 
 // executeExperimentTask runs a single fuzzer iteration, manages its state file,
 // and captures the output logs and performance data.
-func executeExperimentTask(ctx context.Context, t *taskConfig, binDir string, task ExperimentTask, score float64, timeoutVal int) error {
+func executeExperimentTask(ctx context.Context, t *taskConfig, binDir string, task ExperimentTask, score NormalizationScore, timeoutVal int) error {
 	statePath := filepath.Join(task.TaskDir, kExperimentTaskStateFile)
 
 	// Update state to running
 	state := IterState{
-		Status:     IterStateRunning,
-		StartTime:  time.Now().Format(time.RFC3339),
-		PerfScore:  score,
-		LimitType:  task.LimitType,
-		LimitValue: task.LimitValue,
+		Status:             IterStateRunning,
+		StartTime:          time.Now().Format(time.RFC3339),
+		NormalizationScore: score.Mean,
+		NormalizationError: score.SEM,
+		LimitType:          task.LimitType,
+		LimitValue:         task.LimitValue,
 	}
 	stateBytes, _ := json.MarshalIndent(state, "", "  ")
 	_ = t.osWrapper.WriteFile(statePath, stateBytes, 0644)

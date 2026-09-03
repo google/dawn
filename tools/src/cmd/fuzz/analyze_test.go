@@ -94,12 +94,15 @@ func TestStats(t *testing.T) {
 func TestCalculateStats(t *testing.T) {
 	data := []IterationData{
 		{
-			Fuzzer:         "fuzzerA",
-			Corpus:         "corpusA",
-			LimitType:      "seconds",
-			LimitValue:     10,
-			Iteration:      1,
-			NormalizedSecs: 9.0,
+			Fuzzer:              "fuzzerA",
+			Corpus:              "corpusA",
+			LimitType:           "seconds",
+			LimitValue:          10,
+			Iteration:           1,
+			NormalizationScore:  10.0,
+			NormalizationError:  0.5,
+			NormalizedSecs:      9.0,
+			NormalizedSecsError: 0.45,
 			Coverage: IterationCoverage{
 				CoverageComponentTint: {
 					LinesFound: 100,
@@ -109,12 +112,15 @@ func TestCalculateStats(t *testing.T) {
 			},
 		},
 		{
-			Fuzzer:         "fuzzerA",
-			Corpus:         "corpusA",
-			LimitType:      "seconds",
-			LimitValue:     10,
-			Iteration:      2,
-			NormalizedSecs: 11.0,
+			Fuzzer:              "fuzzerA",
+			Corpus:              "corpusA",
+			LimitType:           "seconds",
+			LimitValue:          10,
+			Iteration:           2,
+			NormalizationScore:  10.0,
+			NormalizationError:  0.5,
+			NormalizedSecs:      11.0,
+			NormalizedSecsError: 0.55,
 			Coverage: IterationCoverage{
 				CoverageComponentTint: {
 					LinesFound: 100,
@@ -137,6 +143,8 @@ func TestCalculateStats(t *testing.T) {
 	require.Equal(t, 2, pt.N)
 	require.InDelta(t, 55.0, pt.CovAvg, 0.001)
 	require.InDelta(t, 10.0, pt.NormSecsAvg, 0.001)
+	// statErr = 1.0, sysErr = 0.5. Total = sqrt(1^2 + 0.5^2) = sqrt(1.25) ~ 1.11803
+	require.InDelta(t, 1.118, pt.NormSecsSem, 0.001)
 }
 
 func TestMergeProfrawFiles_MissingTools(t *testing.T) {
