@@ -28,6 +28,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -37,6 +38,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"unicode/utf8"
 
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
@@ -112,6 +114,7 @@ func runAnalyze(t *taskConfig) error {
 		taskConfig: t,
 		settings:   settings,
 		resultsDir: resultsDir,
+		data:       make([]IterationData, 0),
 	}
 	return ac.run()
 }
@@ -122,6 +125,7 @@ type analyzeConfig struct {
 	settings   ExperimentSettings
 	resultsDir string
 	machines   []string
+	data       []IterationData
 }
 
 // run generates a Markdown performance and coverage report by analyzing
@@ -132,16 +136,16 @@ func (ac *analyzeConfig) run() error {
 		return err
 	}
 
-	data, err := ac.gatherData()
+	err := ac.gatherData()
 	if err != nil {
 		return err
 	}
 
-	if err := ac.printRawCSV(data); err != nil {
+	if err := ac.printRawCSV(); err != nil {
 		return err
 	}
 
-	stats := calculateStats(data)
+	stats := calculateStats(ac.data)
 	if err := ac.printStatsCSV(stats); err != nil {
 		return err
 	}
@@ -187,31 +191,88 @@ func (ac *analyzeConfig) findMachines() error {
 
 // gatherData scans the results directory for each machine, loads performance
 // scores, and generates a list of iteration data for analysis.
-func (ac *analyzeConfig) gatherData() ([]IterationData, error) {
-	var allData []IterationData
-
+func (ac *analyzeConfig) gatherData() error {
 	for _, machine := range ac.machines {
-		machineData, err := ac.gatherMachineData(machine)
+		machineData, err := ac.calculateMachineDataTasks(machine)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		allData = append(allData, machineData...)
+		ac.data = append(ac.data, machineData...)
 	}
 
-	if len(allData) == 0 {
-		return nil, fmt.Errorf("no completed iterations found to analyze")
+	if len(ac.data) == 0 {
+		return fmt.Errorf("no completed iterations found to analyze")
 	}
-	fmt.Printf("Successfully loaded coverage data for %d task iterations.\n", len(allData))
-	return allData, nil
+
+	err := ac.runDataTasks()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Successfully loaded coverage data for %d task iterations.\n", len(ac.data))
+	return nil
 }
 
-// gatherMachineData scans a specific machine's results directory and gathers iteration data for all fuzzers.
-func (ac *analyzeConfig) gatherMachineData(machine string) ([]IterationData, error) {
+// runDataTasks executes all the pending coverage tasks to populate the iteration data
+func (ac *analyzeConfig) runDataTasks() error {
+	fmt.Printf("Processing coverage data for %d task iterations using %d parallel jobs...\n", len(ac.data), ac.numProcesses)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	var errs []error
+	var errsMutex sync.Mutex
+
+	dataChan := make(chan *IterationData, len(ac.data))
+	for i := range ac.data {
+		dataChan <- &ac.data[i]
+	}
+	close(dataChan)
+
+	var wg sync.WaitGroup
+	for i := 0; i < ac.numProcesses; i++ {
+		wg.Go(func() {
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				default:
+				}
+
+				select {
+				case <-ctx.Done():
+					return
+				case d, ok := <-dataChan:
+					if !ok {
+						return
+					}
+					if err := getOrRunCoverage(ac.taskConfig, d); err != nil {
+						errsMutex.Lock()
+						errs = append(errs, err)
+						errsMutex.Unlock()
+						cancel()
+						return
+					}
+				}
+			}
+		})
+	}
+
+	wg.Wait()
+
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+	return nil
+}
+
+// calculateMachineDataTasks calculates tasks for gathering coverage data for all the iterations run by a machine.
+func (ac *analyzeConfig) calculateMachineDataTasks(machine string) ([]IterationData, error) {
 	machineDir := filepath.Join(ac.resultsDir, machine)
 	var machineData []IterationData
 
 	for _, fuzzer := range ac.settings.Fuzzers {
-		fuzzerData, err := ac.gatherFuzzerData(machine, machineDir, fuzzer)
+		fuzzerData, err := ac.calculateFuzzerDataTasks(machine, machineDir, fuzzer)
 		if err != nil {
 			return nil, err
 		}
@@ -220,8 +281,8 @@ func (ac *analyzeConfig) gatherMachineData(machine string) ([]IterationData, err
 	return machineData, nil
 }
 
-// gatherFuzzerData gathers iteration data for a fuzzer across its supported corpora.
-func (ac *analyzeConfig) gatherFuzzerData(machine, machineDir, fuzzer string) ([]IterationData, error) {
+// calculateFuzzerDataTasks calculates tasks for gathering coverage data for a fuzzer across its supported corpora.
+func (ac *analyzeConfig) calculateFuzzerDataTasks(machine, machineDir, fuzzer string) ([]IterationData, error) {
 	var corpora []CorpusDef
 	cfg, ok := fuzzerConfigs[fuzzer]
 	if !ok {
@@ -239,7 +300,7 @@ func (ac *analyzeConfig) gatherFuzzerData(machine, machineDir, fuzzer string) ([
 
 	var fuzzerData []IterationData
 	for _, corpus := range corpora {
-		corpusData, err := ac.gatherCorpusData(machine, machineDir, fuzzer, corpus)
+		corpusData, err := ac.calculateCorpusDataTasks(machine, machineDir, fuzzer, corpus)
 		if err != nil {
 			return nil, err
 		}
@@ -248,8 +309,8 @@ func (ac *analyzeConfig) gatherFuzzerData(machine, machineDir, fuzzer string) ([
 	return fuzzerData, nil
 }
 
-// gatherCorpusData gathers iteration data for a specific fuzzer and corpus across all configured durations and iterations.
-func (ac *analyzeConfig) gatherCorpusData(machine, machineDir, fuzzer string, corpus CorpusDef) ([]IterationData, error) {
+// calculateCorpusDataTasks calculates tasks for gathering coverage data for a specific fuzzer and corpus across all configured durations and iterations.
+func (ac *analyzeConfig) calculateCorpusDataTasks(machine, machineDir, fuzzer string, corpus CorpusDef) ([]IterationData, error) {
 	var corpusData []IterationData
 	for _, dDef := range ac.settings.Durations {
 		limitType := "seconds"
@@ -270,7 +331,7 @@ func (ac *analyzeConfig) gatherCorpusData(machine, machineDir, fuzzer string, co
 		limitStr := fmt.Sprintf("%s_%d", limitType, limitValue)
 
 		for i := 1; i <= iterations; i++ {
-			iterData, err := ac.gatherIterationData(machine, machineDir, fuzzer, corpus, limitType, limitValue, limitStr, i)
+			iterData, err := ac.calculateIterationCoverageTasks(machine, machineDir, fuzzer, corpus, limitType, limitValue, limitStr, i)
 			if err != nil {
 				return nil, err
 			}
@@ -282,8 +343,8 @@ func (ac *analyzeConfig) gatherCorpusData(machine, machineDir, fuzzer string, co
 	return corpusData, nil
 }
 
-// gatherIterationData loads and parses the state and coverage for a single fuzzer iteration.
-func (ac *analyzeConfig) gatherIterationData(machine, machineDir, fuzzer string, corpus CorpusDef, limitType string, limitValue int, limitStr string, iter int) (*IterationData, error) {
+// calculateIterationCoverageTasks calculates a task for gathering coverage data for a single fuzzer iteration.
+func (ac *analyzeConfig) calculateIterationCoverageTasks(machine, machineDir, fuzzer string, corpus CorpusDef, limitType string, limitValue int, limitStr string, iter int) (*IterationData, error) {
 	iterDir := filepath.Join(machineDir, fuzzer, corpus.Name, limitStr, fmt.Sprintf("iter_%d", iter))
 	statePath := filepath.Join(iterDir, "state.json")
 
@@ -305,12 +366,6 @@ func (ac *analyzeConfig) gatherIterationData(machine, machineDir, fuzzer string,
 		return nil, fmt.Errorf("invalid perf score (%f) for %s/%s iter %d\n", state.PerfScore, fuzzer, corpus.Name, iter)
 	}
 
-	// Run or load coverage
-	cov, err := getOrRunCoverage(ac.taskConfig, machine, fuzzer, corpus, limitStr, iter, iterDir)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get/run coverage for %s/%s iter %d: %v\n", fuzzer, corpus.Name, iter, err)
-	}
-
 	// Normalization: CPU Seconds = (ActualSeconds * PerfScore) / 1000
 	normalizedSecs := (state.ActualSeconds * state.PerfScore) / 1000.0
 
@@ -325,39 +380,38 @@ func (ac *analyzeConfig) gatherIterationData(machine, machineDir, fuzzer string,
 		ActualSeconds:  state.ActualSeconds,
 		ActualRuns:     state.ActualRuns,
 		NormalizedSecs: normalizedSecs,
-		Coverage:       cov,
 	}, nil
 }
 
 // printRawCSV builds and writes a CSV file containing the raw metrics of each fuzzer iteration.
-func (ac *analyzeConfig) printRawCSV(data []IterationData) error {
+func (ac *analyzeConfig) printRawCSV() error {
 	var csvBuilder strings.Builder
 	csvBuilder.WriteString("Machine,Fuzzer,Corpus,LimitType,LimitValue,Iteration,PerfScore,ActualSeconds,ActualRuns,NormalizedCPUSeconds," +
 		"TintCore_LinesFound,TintCore_LinesHit,TintCore_CoveragePercent," +
 		"Mesa_LinesFound,Mesa_LinesHit,Mesa_CoveragePercent," +
 		"DirectX_LinesFound,DirectX_LinesHit,DirectX_CoveragePercent\n")
 
-	for _, ci := range data {
+	for _, d := range ac.data {
 		csvBuilder.WriteString(fmt.Sprintf("%s,%s,%s,%s,%d,%d,%.4f,%.2f,%d,%.4f,%d,%d,%.2f,%d,%d,%.2f,%d,%d,%.2f\n",
-			ci.Machine,
-			ci.Fuzzer,
-			ci.Corpus,
-			ci.LimitType,
-			ci.LimitValue,
-			ci.Iteration,
-			ci.PerfScore,
-			ci.ActualSeconds,
-			ci.ActualRuns,
-			ci.NormalizedSecs,
-			ci.Coverage.TintCore.LinesFound,
-			ci.Coverage.TintCore.LinesHit,
-			ci.Coverage.TintCore.Percentage,
-			ci.Coverage.Mesa.LinesFound,
-			ci.Coverage.Mesa.LinesHit,
-			ci.Coverage.Mesa.Percentage,
-			ci.Coverage.DirectX.LinesFound,
-			ci.Coverage.DirectX.LinesHit,
-			ci.Coverage.DirectX.Percentage,
+			d.Machine,
+			d.Fuzzer,
+			d.Corpus,
+			d.LimitType,
+			d.LimitValue,
+			d.Iteration,
+			d.PerfScore,
+			d.ActualSeconds,
+			d.ActualRuns,
+			d.NormalizedSecs,
+			d.Coverage.TintCore.LinesFound,
+			d.Coverage.TintCore.LinesHit,
+			d.Coverage.TintCore.Percentage,
+			d.Coverage.Mesa.LinesFound,
+			d.Coverage.Mesa.LinesHit,
+			d.Coverage.Mesa.Percentage,
+			d.Coverage.DirectX.LinesFound,
+			d.Coverage.DirectX.LinesHit,
+			d.Coverage.DirectX.Percentage,
 		))
 	}
 
@@ -594,12 +648,13 @@ func (ac *analyzeConfig) printReport(stats []SummaryPoint) error {
 
 // getOrRunCoverage retrieves calculated coverage data for an iteration or executes
 // the coverage collection if the data isn't present.
-func getOrRunCoverage(t *taskConfig, machine string, fuzzer string, corpus CorpusDef, limitStr string, iter int, iterDir string) (IterationCoverage, error) {
-	var coverage IterationCoverage
+func getOrRunCoverage(t *taskConfig, d *IterationData) error {
+	limitStr := fmt.Sprintf("%s_%d", d.LimitType, d.LimitValue)
+	iterDir := filepath.Join(t.analyzePath, kAnalyzeResultsDir, d.Machine, d.Fuzzer, d.Corpus, limitStr, fmt.Sprintf("iter_%d", d.Iteration))
 
-	coverageDir, err := filepath.Abs(filepath.Join(t.analyzePath, "coverage", machine, fuzzer, corpus.Name, limitStr, fmt.Sprintf("iter_%d", iter)))
+	coverageDir, err := filepath.Abs(filepath.Join(t.analyzePath, "coverage", d.Machine, d.Fuzzer, d.Corpus, limitStr, fmt.Sprintf("iter_%d", d.Iteration)))
 	if err != nil {
-		return coverage, err
+		return err
 	}
 	coverageJsonPath := filepath.Join(coverageDir, "coverage.json")
 
@@ -607,64 +662,66 @@ func getOrRunCoverage(t *taskConfig, machine string, fuzzer string, corpus Corpu
 	if fileutils.IsFile(coverageJsonPath, t.osWrapper) {
 		covBytes, err := t.osWrapper.ReadFile(coverageJsonPath)
 		if err == nil {
+			var coverage IterationCoverage
 			if err := json.Unmarshal(covBytes, &coverage); err == nil {
-				return coverage, nil
+				d.Coverage = coverage
+				return nil
 			}
 		}
 	}
 
 	// Ensure coverage dir exists
 	if err := t.osWrapper.MkdirAll(coverageDir, 0755); err != nil {
-		return coverage, fmt.Errorf("failed to create coverage dir: %w", err)
+		return fmt.Errorf("failed to create coverage dir: %w", err)
 	}
 
 	binDir, err := filepath.Abs(filepath.Join(t.analyzePath, "bin"))
 	if err != nil {
-		return coverage, err
+		return err
 	}
 
 	// Find .profraw files inside the original iteration directory
 	profrawFiles, err := findProfrawFiles(iterDir)
 	if err != nil {
-		return coverage, fmt.Errorf("failed to scan for .profraw files inside %s: %w", iterDir, err)
+		return fmt.Errorf("failed to scan for .profraw files inside %s: %w", iterDir, err)
 	}
 
 	if len(profrawFiles) == 0 {
-		return coverage, fmt.Errorf("no .profraw file found inside iteration directory '%s' (make sure the experiment ran with coverage enabled)", iterDir)
+		return fmt.Errorf("no .profraw file found inside iteration directory '%s' (make sure the experiment ran with coverage enabled)", iterDir)
 	}
 
 	profdataPath, err := filepath.Abs(filepath.Join(iterDir, "coverage.profdata"))
 	if err != nil {
-		return coverage, err
+		return err
 	}
 
 	if err := mergeProfrawFiles(t, binDir, profrawFiles, profdataPath); err != nil {
-		return coverage, err
+		return err
 	}
 
-	fmt.Printf("Generating coverage for %s/%s (%s) iter %d...\n", fuzzer, corpus.Name, limitStr, iter)
-	if err := generateLcovReport(t, fuzzer, binDir, coverageDir, profdataPath); err != nil {
-		return coverage, err
+	fmt.Printf("Generating coverage for %s/%s/%s (%s) iter %d...\n", d.Machine, d.Fuzzer, d.Corpus, limitStr, d.Iteration)
+	if err := generateLcovReport(t, d.Fuzzer, binDir, coverageDir, profdataPath); err != nil {
+		return err
 	}
 
 	// Parse generated LCOV file
 	lcovFile, err := findLcovFile(coverageDir)
 	if err != nil {
-		return coverage, fmt.Errorf("failed to find generated LCOV file: %w", err)
+		return fmt.Errorf("failed to find generated LCOV file: %w", err)
 	}
 
 	lcovContent, err := t.osWrapper.ReadFile(lcovFile)
 	if err != nil {
-		return coverage, fmt.Errorf("failed to read generated LCOV file: %w", err)
+		return fmt.Errorf("failed to read generated LCOV file: %w", err)
 	}
 
-	coverage = parseLcov(string(lcovContent))
+	d.Coverage = parseLcov(string(lcovContent))
 
 	// Cache result
-	coverageBytes, _ := json.MarshalIndent(coverage, "", "  ")
+	coverageBytes, _ := json.MarshalIndent(d.Coverage, "", "  ")
 	_ = t.osWrapper.WriteFile(coverageJsonPath, coverageBytes, 0644)
 
-	return coverage, nil
+	return nil
 }
 
 // findProfrawFiles recursively searches for and returns a list of all .profraw files within the specified directory.
