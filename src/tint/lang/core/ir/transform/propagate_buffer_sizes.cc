@@ -160,19 +160,12 @@ struct State {
     void AdjustOperands(CoreBuiltinCall* call) {
         auto* store_ty = call->Result()->Type()->UnwrapPtr();
         auto* offset = call->Args()[1];
-        if (auto* offset_cnst = offset->As<Constant>()) {
-            auto offset_value = offset_cnst->Value()->ValueAs<uint32_t>();
-            if ((offset_value & store_ty->Align()) != 0) {
-                call->SetArg(1, b.Constant(u32(offset_value & ~(store_ty->Align() - 1))));
-            }
-        } else {
-            b.InsertBefore(call, [&] {
-                // Modify offset to be aligned to the result store type's alignment.
-                offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
-                offset = b.And(offset, u32(~(store_ty->Align() - 1)));
-                call->SetArg(1, offset);
-            });
-        }
+        b.InsertBefore(call, [&] {
+            // Modify offset to be aligned to the result store type's alignment.
+            offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
+            offset = b.And(offset, u32(~(store_ty->Align() - 1)));
+            call->SetArg(1, offset);
+        });
 
         if (call->Func() == BuiltinFn::kBufferView) {
             return;
@@ -192,31 +185,23 @@ struct State {
             TINT_IR_ASSERT(ir, store_ty->Is<core::type::Array>());
             ty_stride = store_ty->As<core::type::Array>()->ImplicitStride();
         }
-        if (auto* size_cnst = size->As<Constant>()) {
-            auto size_value = size_cnst->Value()->ValueAs<uint32_t>();
-            if ((size_value - ty_offset) % ty_stride != 0) {
-                call->SetArg(
-                    2, b.Constant(
-                           u32((((size_value - ty_offset) / ty_stride) * ty_stride) + ty_offset)));
+
+        b.InsertBefore(call, [&] {
+            // Round down to a multiple of stride, but don't include the struct offset in that
+            // rounding.
+            size = b.InsertBitcastIfNeeded(ty.u32(), size);
+            if (ty_offset != 0) {
+                // Avoid potential underflow if size < ty_offset.
+                size = b.Call(ty.u32(), BuiltinFn::kMax, size, u32(ty_offset));
+                size = b.Subtract(size, u32(ty_offset));
             }
-        } else {
-            b.InsertBefore(call, [&] {
-                // Round down to a multiple of stride, but don't include the struct offset in that
-                // rounding.
-                size = b.InsertBitcastIfNeeded(ty.u32(), size);
-                if (ty_offset != 0) {
-                    // Avoid potential underflow if size < ty_offset.
-                    size = b.Call(ty.u32(), BuiltinFn::kMax, size, u32(ty_offset));
-                    size = b.Subtract(size, u32(ty_offset));
-                }
-                size = b.Divide(size, u32(ty_stride));
-                size = b.Multiply(size, u32(ty_stride));
-                if (ty_offset != 0) {
-                    size = b.Add(size, u32(ty_offset));
-                }
-                call->SetArg(2, size);
-            });
-        }
+            size = b.Divide(size, u32(ty_stride));
+            size = b.Multiply(size, u32(ty_stride));
+            if (ty_offset != 0) {
+                size = b.Add(size, u32(ty_offset));
+            }
+            call->SetArg(2, size);
+        });
     }
 
     /// Find the roots of `param`. Each root is either:
