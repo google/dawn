@@ -392,6 +392,7 @@ source_set("unittests") {
     ":gmock_and_gtest",
     ":nocompile_sources",
     ":utils",
+    "${dawn_abseil_dir}:absl",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
   ]
 

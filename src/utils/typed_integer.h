@@ -292,8 +292,7 @@ class DAWN_TRIVIAL_ABI alignas(T) TypedIntegerImpl {
 
     template <typename H>
     friend H AbslHashValue(H state, const TypedIntegerImpl& value) {
-        H::combine(std::move(state), value.mValue);
-        return std::move(state);
+        return H::combine(std::move(state), value.mValue);
     }
 };
 

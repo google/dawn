@@ -28,6 +28,7 @@
 #include <limits>
 #include <type_traits>
 
+#include "absl/hash/hash.h"
 #include "src/utils/gtest.h"
 #include "src/utils/typed_integer.h"
 #include "src/utils/underlying_type.h"
@@ -40,6 +41,12 @@ class TypedIntegerTest : public testing::Test {
     using Unsigned = TypedInteger<struct UnsignedT, uint32_t>;
     using Signed = TypedInteger<struct SignedT, int32_t>;
 };
+
+// Test that typed integers can be hashed with absl::Hash and produce distinct hashes
+TEST_F(TypedIntegerTest, AbslHash) {
+    EXPECT_NE(absl::Hash<Unsigned>()(Unsigned(1u)), absl::Hash<Unsigned>()(Unsigned(2u)));
+    EXPECT_NE(absl::Hash<Signed>()(Signed(1)), absl::Hash<Signed>()(Signed(2)));
+}
 
 // Test that typed integers can be created and cast and the internal values are identical
 TEST_F(TypedIntegerTest, ConstructionAndCast) {
