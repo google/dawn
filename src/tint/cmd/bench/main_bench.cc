@@ -88,11 +88,8 @@ class ChromePerfReporter final : public benchmark::BenchmarkReporter {
     void Finalize() override {}
 };
 
-bool ParseExtraCommandLineArgs(int argc, char** argv) {
-    // SAFETY: argv comes directly from C main entry point and has at least `argc` valid elements.
-    auto args = DAWN_UNSAFE_BUFFERS(std::span<char* const>(argv, static_cast<size_t>(argc)));
-    for (size_t i = 1; i < args.size(); i++) {
-        std::string_view arg(args[i]);
+bool ParseExtraCommandLineArgs(std::span<char* const> args) {
+    for (std::string_view arg : args.subspan(1u)) {
         if (arg == "--use-chrome-perf-format") {
             use_chrome_perf_format = true;
         } else {
@@ -112,7 +109,9 @@ bool ParseExtraCommandLineArgs(int argc, char** argv) {
 
 int main(int argc, char** argv) {
     benchmark::Initialize(&argc, argv);
-    if (!ParseExtraCommandLineArgs(argc, argv)) {
+    // SAFETY: argv comes directly from C API and has at least `argc` valid elements.
+    auto args = DAWN_UNSAFE_BUFFERS(std::span<char* const>(argv, static_cast<size_t>(argc)));
+    if (!ParseExtraCommandLineArgs(args)) {
         return 1;
     }
     if (use_chrome_perf_format) {
