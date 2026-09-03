@@ -198,6 +198,26 @@ TEST_P(QueueWriteBufferTests, SuperLargeWriteBuffer) {
     EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), buffer, 0, kElements);
 }
 
+// Test using WriteBuffer for large data where size > 4MiB and is not a multiple of 8.
+// Regression test for issue where DynamicUploader's large allocation path did not trim mappedData.
+TEST_P(QueueWriteBufferTests, LargeWriteBufferNonMultipleOf8) {
+    constexpr uint64_t kSize = 4ULL * 1024 * 1024 + 4;
+    constexpr uint64_t kElements = kSize / sizeof(uint32_t);
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = kSize;
+    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    std::vector<uint32_t> expectedData(kElements);
+    for (uint32_t i = 0; i < kElements; ++i) {
+        expectedData[i] = i;
+    }
+
+    queue.WriteBuffer(buffer, 0, expectedData.data(), kSize);
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), buffer, 0, kElements);
+}
+
 // Test using the max buffer size. Regression test for dawn:1985. We don't bother validating the
 // results for this case since that would take a lot longer, just that there are no errors.
 TEST_P(QueueWriteBufferTests, MaxBufferSizeWriteBuffer) {

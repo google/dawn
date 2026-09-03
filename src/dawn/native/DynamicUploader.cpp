@@ -63,7 +63,8 @@ ResultOrError<UploadReservation> DynamicUploader::Reserve(uint64_t allocationSiz
         DAWN_TRY_ASSIGN(stagingBuffer, mDevice->CreateBuffer(&bufferDesc));
 
         UploadReservation reservation;
-        reservation.mappedData = stagingBuffer->GetMappedRange();
+        reservation.mappedData =
+            stagingBuffer->GetMappedRange().first(checked_cast<size_t>(allocationSize));
         reservation.offsetInBuffer = 0;
         reservation.buffer = std::move(stagingBuffer);
         return reservation;
