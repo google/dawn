@@ -106,9 +106,6 @@ class Functional {
     ir::Disassembler& Disassemble();
 
     void CheckFunction(const Function* func);
-    void CheckFunctionParam(const FunctionParam* param);
-    void CheckEntryPoint(const Function* func);
-    void CheckPositionPresentForVertexOutput(const Function* ep);
     void CheckBlock(const Block* blk);
     void CheckInstruction(const Instruction* inst);
 
@@ -131,7 +128,6 @@ class Functional {
 
     Vector<const Block*, 8> block_stack_;
     Hashmap<const Loop*, const Continue*, 4> first_continues_;
-    Hashset<std::string, 4> entry_point_names_;
 };
 
 }  // namespace tint::core::ir::validator

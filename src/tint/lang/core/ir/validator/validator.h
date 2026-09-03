@@ -564,6 +564,7 @@ class Validator {
     Vector<std::function<void()>, 16> tasks_;
 
     Hashset<const Function*, 4> all_functions_;
+    Hashset<std::string, 4> entry_point_names_;
     Hashset<const Instruction*, 4> visited_instructions_;
     Hashset<const core::type::Type*, 16> validated_types_{};
     Hashset<OverrideId, 8> seen_override_ids_;
