@@ -410,8 +410,8 @@ struct State {
                 // to a bool.
                 if (unpacked_type->UnwrapPtr()->IsBoolVector()) {
                     auto* u32_load = b.InstructionResult<u32>();
-                    auto* converted_to_bool = b.ConvertWithResult(lve->DetachResult(), u32_load);
-                    converted_to_bool->InsertAfter(lve);
+                    b.InsertAfter(lve,
+                                  [&] { b.ConvertReplaceResult(lve->DetachResult(), u32_load); });
                     lve->SetResult(u32_load);
                 }
             },
@@ -424,10 +424,10 @@ struct State {
                 // For vectors that were originally booleans we need to convert the bool to a u32
                 // before we store it.
                 if (unpacked_type->UnwrapPtr()->IsBoolVector()) {
-                    auto* converted_to_u32 = b.Convert<u32>(sve->Value());
-                    converted_to_u32->InsertBefore(sve);
+                    core::ir::Value* converted_to_u32 = nullptr;
+                    b.InsertBefore(sve, [&] { converted_to_u32 = b.Convert<u32>(sve->Value()); });
                     sve->SetOperand(core::ir::StoreVectorElement::kValueOperandOffset,
-                                    converted_to_u32->Result());
+                                    converted_to_u32);
                 }
             },
             [&](core::ir::UserCall*) {
@@ -518,7 +518,7 @@ struct State {
             },
             [&](const core::type::Vector* vec) {
                 // Load the packed vector and convert it to the unpacked equivalent.
-                auto* value = b.Load(from)->Result(0);
+                core::ir::Value* value = b.Load(from)->Result(0);
                 if (vec->Type()->Is<core::type::Bool>()) {
                     // The vector was originally a vecN<bool>, which will have been rewritten as a
                     // vecN<u32>. We need to unpack the packed_vecN<u32> to a vecN<u32> and then
@@ -528,14 +528,15 @@ struct State {
                                                              value)
                                     ->Result();
                     }
-                    return b.Convert(ty.MatchWidth(ty.bool_(), vec), value)->Result();
+                    value = b.Convert(ty.MatchWidth(ty.bool_(), vec), value);
                 } else {
-                    return b
-                        .Call<msl::ir::BuiltinCall>(unpacked_type, msl::BuiltinFn::kConvert, value)
-                        ->Result();
+                    value =
+                        b.Call<msl::ir::BuiltinCall>(unpacked_type, msl::BuiltinFn::kConvert, value)
+                            ->Result();
                 }
+                return value;
             },
-            [&](const core::type::Bool*) { return b.Convert<bool>(b.Load(from))->Result(); },
+            [&](const core::type::Bool*) { return b.Convert<bool>(b.Load(from)); },
             TINT_ICE_ON_NO_MATCH);
     }
 
@@ -675,7 +676,7 @@ struct State {
                 // For vectors that were originally booleans we need to convert the value to a
                 // vecN<u32> before storing it.
                 if (vec->Type()->Is<core::type::Bool>()) {
-                    value = b.Convert(ty.MatchWidth(ty.u32(), vec), value)->Result();
+                    value = b.Convert(ty.MatchWidth(ty.u32(), vec), value);
                 }
                 if (packed_type->As<core::type::Vector>()->Packed()) {
                     value =

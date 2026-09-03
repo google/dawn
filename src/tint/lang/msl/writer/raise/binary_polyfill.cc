@@ -93,7 +93,7 @@ struct State {
             auto* int_lhs = b.Convert(int_ty, binary->LHS());
             auto* int_rhs = b.Convert(int_ty, binary->RHS());
             auto* int_binary = b.Binary(binary->Op(), int_ty, int_lhs, int_rhs);
-            b.ConvertWithResult(binary->DetachResult(), int_binary);
+            b.ConvertReplaceResult(binary->DetachResult(), int_binary);
         });
         binary->Destroy();
     }

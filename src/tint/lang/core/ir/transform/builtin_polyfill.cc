@@ -281,7 +281,7 @@ struct State {
             v = b.Multiply(b.Splat(vec4f, 127_f), v);
             v = b.Add(b.Splat(vec4f, 0.5_f), v);
             v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v});
-            v = b.Convert(ty.vec4i(), v)->Result();
+            v = b.Convert(ty.vec4i(), v);
             v = b.Bitcast(vec4u, v);
             v = b.And(v, b.Splat(vec4u, 0xff_u));
             v = b.ShiftLeft(v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u));
@@ -313,7 +313,7 @@ struct State {
             v = b.Multiply(b.Splat(vec4f, 255_f), v);
             v = b.Add(b.Splat(vec4f, 0.5_f), v);
             v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v});
-            v = b.Convert(vec4u, v)->Result();
+            v = b.Convert(vec4u, v);
             v = b.And(v, b.Splat(vec4u, 0xff_u));
             v = b.ShiftLeft(v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u));
 
@@ -345,7 +345,7 @@ struct State {
             v = b.ShiftLeft(v, b.Construct(vec4u, 24_u, 16_u, 8_u, 0_u));
             v = b.Bitcast(vec4i, v);
             v = b.ShiftRight(v, b.Splat(vec4u, 24_u));
-            v = b.Convert(vec4f, v)->Result();
+            v = b.Convert(vec4f, v);
             v = b.Divide(v, b.Splat(vec4f, 127_f));
             v = b.Max(v, b.Splat(vec4f, -1_f));
 
@@ -365,7 +365,7 @@ struct State {
             core::ir::Value* v = b.Construct(vec4u, arg);
             v = b.ShiftRight(v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u));
             v = b.And(v, b.Splat(vec4u, 0xff_u));
-            v = b.Convert(vec4f, v)->Result();
+            v = b.Convert(vec4f, v);
             v = b.Divide(v, b.Splat(vec4f, 255_f));
 
             call->Result()->ReplaceAllUsesWith(v);
@@ -795,7 +795,7 @@ struct State {
 
                 auto mask_as_result_type = [&](Value* mask) {
                     if (result_is_signed) {
-                        mask = b.Convert<i32>(mask)->Result();
+                        mask = b.Convert<i32>(mask);
                     }
                     if (auto* vec = result_ty->As<core::type::Vector>()) {
                         mask = b.Construct(vec, mask);

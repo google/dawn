@@ -1076,7 +1076,7 @@ class Impl {
                 } else if (sem->Target()->As<sem::ValueConstructor>()) {
                     inst = impl.builder_.Construct(ty, std::move(args))->AsInstruction();
                 } else if (sem->Target()->Is<sem::ValueConversion>()) {
-                    inst = impl.builder_.Convert(ty, args[0]);
+                    inst = impl.builder_.Convert(ty, args[0])->AsInstruction();
                 } else if (expr->target->identifier->Is<ast::TemplatedIdentifier>()) {
                     TINT_UNIMPLEMENTED() << "missing templated ident support";
                 } else {

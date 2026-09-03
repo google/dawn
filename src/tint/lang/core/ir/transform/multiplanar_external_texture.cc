@@ -298,9 +298,10 @@ struct State {
                         // Convert the coordinates to unsigned integers if necessary.
                         auto* coords = call->Args()[1];
                         if (coords->Type()->IsSignedIntegerVector()) {
-                            auto* convert = b.Convert(ty.vec2u(), coords);
-                            convert->InsertBefore(call);
-                            coords = convert->Result();
+                            b.InsertBefore(call, [&] {
+                                auto* convert = b.Convert(ty.vec2u(), coords);
+                                coords = convert;
+                            });
                         }
 
                         // Call the `TextureLoadExternal()` helper function.

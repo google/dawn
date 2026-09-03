@@ -214,7 +214,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         }
         auto input_index = input_indices[idx];
         auto* from = input_vars[input_index]->Result();
-        auto* value = builder.Load(from)->Result();
+        core::ir::Value* value = builder.Load(from)->Result();
 
         auto& builtin = inputs[idx].attributes.builtin;
         if (builtin.has_value()) {
@@ -224,14 +224,14 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 case core::BuiltinValue::kPrimitiveIndex:
                 case core::BuiltinValue::kSampleIndex: {
                     // GLSL uses i32 for these, so convert to u32.
-                    value = builder.Convert(ty.u32(), value)->Result();
+                    value = builder.Convert(ty.u32(), value);
                     break;
                 }
                 case core::BuiltinValue::kSampleMask: {
                     // gl_SampleMaskIn is an array of i32. Retrieve the first element and
                     // convert it to u32.
                     auto* elem = builder.Access(ty.i32(), value, 0_u);
-                    value = builder.Convert(ty.u32(), elem)->Result();
+                    value = builder.Convert(ty.u32(), elem);
                     break;
                 }
                 default:
@@ -267,7 +267,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         if (outputs[idx].attributes.builtin == core::BuiltinValue::kSampleMask) {
             auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.i32(), core::Access::kWrite);
             to = builder.Access(ptr, to, 0_u)->Result();
-            value = builder.Convert(ty.i32(), value)->Result();
+            value = builder.Convert(ty.i32(), value);
         } else if (outputs[idx].attributes.builtin == core::BuiltinValue::kPosition) {
             auto* x = builder.Swizzle(ty.f32(), value, {0});
 

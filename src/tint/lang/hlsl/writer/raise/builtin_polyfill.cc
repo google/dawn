@@ -705,7 +705,7 @@ struct State {
                     }
 
                     auto* uint_src_ty = ty.MatchWidth(ty.u32(), src_type);
-                    core::ir::Value* v = b.Convert(uint_src_ty, u16_src)->Result();
+                    core::ir::Value* v = b.Convert(uint_src_ty, u16_src);
 
                     auto width = src_vec->Width();
                     v = b.And(v, b.Splat(uint_src_ty, 0xffff_u));
@@ -836,11 +836,11 @@ struct State {
     // The HLSL `sign` method always returns an `int` result (scalar or vector). In WGSL the result
     // is expected to be the same type as the argument. This injects a cast to the expected WGSL
     // result type after the call to `hlsl.sign`.
-    core::ir::Instruction* BuildSign(core::ir::Value* value) {
+    core::ir::Value* BuildSign(core::ir::Value* value) {
         const auto* result_ty = ty.MatchWidth(ty.i32(), value->Type());
-        core::ir::Instruction* sign =
-            b.Call<hlsl::ir::BuiltinCall>(result_ty, hlsl::BuiltinFn::kSign, value);
-        if (sign->Result()->Type() != value->Type()) {
+        core::ir::Value* sign =
+            b.Call<hlsl::ir::BuiltinCall>(result_ty, hlsl::BuiltinFn::kSign, value)->Result();
+        if (sign->Type() != value->Type()) {
             sign = b.Convert(value->Type(), sign);
         }
         return sign;
@@ -849,7 +849,7 @@ struct State {
     void Sign(core::ir::BuiltinCall* call) {
         b.InsertBefore(call, [&] {
             auto* sign = BuildSign(call->Args()[0]);
-            sign->SetResult(call->DetachResult());
+            call->Result()->ReplaceAllUsesWith(sign);
         });
         call->Destroy();
     }
@@ -1143,15 +1143,15 @@ struct State {
             auto* member_call = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
                 ty.vec4(ret_ty), hlsl::BuiltinFn::kLoad, tex, call_args);
 
-            core::ir::Instruction* builtin = member_call;
+            core::ir::Value* builtin = member_call->Result();
             if (!swizzle.IsEmpty()) {
-                builtin = b.Swizzle(ty.f32(), builtin, swizzle);
+                builtin = b.Swizzle(ty.f32(), builtin, swizzle)->Result();
             } else {
-                if (builtin->Result()->Type() != call->Result()->Type()) {
+                if (builtin->Type() != call->Result()->Type()) {
                     builtin = b.Convert(call->Result()->Type(), builtin);
                 }
             }
-            call->Result()->ReplaceAllUsesWith(builtin->Result());
+            call->Result()->ReplaceAllUsesWith(builtin);
         });
 
         call->Destroy();

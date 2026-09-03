@@ -517,9 +517,9 @@ class Parser {
                             TINT_ICE() << "can't translate UConvert: WGSL does not have concrete "
                                           "integer types of different widths";
                         case spv::Op::OpFConvert:
-                            Emit(b_.Convert(Type(inst.type_id()),
-                                            Value(inst.GetSingleWordInOperand(1))),
-                                 inst.result_id());
+                            EmitOrAdd(b_.Convert(Type(inst.type_id()),
+                                                 Value(inst.GetSingleWordInOperand(1))),
+                                      inst.result_id());
                             break;
                         case spv::Op::OpSNegate:
                             EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSNegate, 3);
@@ -2138,8 +2138,8 @@ class Parser {
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kConvertFToS);
                     break;
                 case spv::Op::OpConvertFToU:
-                    Emit(b_.Convert(Type(inst.type_id()), Value(inst.GetSingleWordOperand(2))),
-                         inst.result_id());
+                    EmitOrAdd(b_.Convert(Type(inst.type_id()), Value(inst.GetSingleWordOperand(2))),
+                              inst.result_id());
                     break;
                 case spv::Op::OpConvertSToF:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kConvertSToF);
@@ -2148,8 +2148,8 @@ class Parser {
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kConvertUToF);
                     break;
                 case spv::Op::OpFConvert:
-                    Emit(b_.Convert(Type(inst.type_id()), Value(inst.GetSingleWordOperand(2))),
-                         inst.result_id());
+                    EmitOrAdd(b_.Convert(Type(inst.type_id()), Value(inst.GetSingleWordOperand(2))),
+                              inst.result_id());
                     break;
                 case spv::Op::OpBitwiseAnd:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kBitwiseAnd);
@@ -2773,7 +2773,7 @@ class Parser {
 
         auto* pred_val = Value(ballot_inst->GetSingleWordInOperand(1));
         auto* conv = b_.Convert<u32>(pred_val);
-        EmitWithoutSpvResult(conv->Result());
+        EmitWithoutSpvResult(conv);
 
         EmitOrAdd(b_.Call(Type(inst.type_id()), fn, conv), inst.result_id());
         return Success;

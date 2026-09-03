@@ -268,7 +268,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
     auto* ep = b.ComputeFunction("main");
     b.Append(ep->Block(), [&] {  //
         auto* coords = b.Zero<vec2u>();
-        texel = b.Convert<vec4f>(b.Splat<vec4h>(1_h))->Result();
+        texel = b.Convert<vec4f>(b.Splat<vec4h>(1_h));
         b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kImageWrite, b.Load(image), coords, texel,
                                 Literal(0u));
         b.Return(ep);
@@ -310,7 +310,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
     b.Append(ep->Block(), [&] {  //
         auto* coords = b.Zero<vec2u>();
         auto* val_h = b.Splat<vec4h>(1_h);
-        converted_f = b.Convert<vec4f>(val_h)->Result();
+        converted_f = b.Convert<vec4f>(val_h);
         tmp1 = b.Let("tmp1", converted_f);
         auto* tmp2 = b.Let("tmp2", tmp1);
         texel = tmp2->Result();
@@ -475,7 +475,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
     auto* ep = b.ComputeFunction("main");
     b.Append(ep->Block(), [&] {  //
         auto* coords = b.Zero<vec2u>();
-        texel = b.Convert<vec4f>(b.Splat<vec4h>(1_h))->Result();
+        texel = b.Convert<vec4f>(b.Splat<vec4h>(1_h));
         b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kImageWrite, b.Load(image), coords, texel,
                                 Literal(0u));
         b.Return(ep);
@@ -605,7 +605,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
     b.Append(ep->Block(), [&] {  //
         auto* coords = b.Zero<vec2u>();
 
-        texel1 = b.Convert<vec4f>(b.Splat<vec4h>(1_h))->Result();
+        texel1 = b.Convert<vec4f>(b.Splat<vec4h>(1_h));
         b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kImageWrite, b.Load(image), coords, texel1,
                                 Literal(0u));
 
@@ -1137,7 +1137,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
     b.Append(ep->Block(), [&] {  //
         auto* coords = b.Zero<vec2u>();
         auto* val_h = b.Splat<vec4h>(1_h);
-        converted_f = b.Convert<vec4f>(val_h)->Result();
+        converted_f = b.Convert<vec4f>(val_h);
         swiz = b.Swizzle(ty.vec4f(), converted_f, {3, 2, 1, 0});
         texel = swiz->Result();
         b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kImageWrite, b.Load(image), coords, texel,

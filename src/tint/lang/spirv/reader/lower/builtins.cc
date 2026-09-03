@@ -300,13 +300,13 @@ struct State {
             auto* type = orig_type;
             if (orig_type->IsUnsignedIntegerScalarOrVector()) {
                 type = ty.MatchWidth(ty.i32(), type);
-                value = b.Convert(type, value)->Result();
+                value = b.Convert(type, value);
             }
 
             value = b.Call(type, fn, Vector{value});
 
             if (type != orig_type) {
-                value = b.Convert(call->Result()->Type(), value)->Result();
+                value = b.Convert(call->Result()->Type(), value);
             }
 
             call->Result()->ReplaceAllUsesWith(value);
@@ -342,13 +342,13 @@ struct State {
         b.InsertBefore(call, [&] {
             if (type->DeepestElement()->Is<core::type::Bool>()) {
                 type = ty.MatchWidth(ty.u32(), type);
-                value = b.Convert(type, value)->Result();
+                value = b.Convert(type, value);
             }
 
             core::ir::Value* c = b.Call(type, fn, Vector{value});
 
             if (type != call->Result()->Type()) {
-                c = b.Convert(call->Result()->Type(), c)->Result();
+                c = b.Convert(call->Result()->Type(), c);
             }
 
             call->Result()->ReplaceAllUsesWith(c);
@@ -364,13 +364,13 @@ struct State {
         b.InsertBefore(call, [&] {
             if (type->DeepestElement()->Is<core::type::Bool>()) {
                 type = ty.MatchWidth(ty.u32(), type);
-                value = b.Convert(type, value)->Result();
+                value = b.Convert(type, value);
             }
 
             core::ir::Value* c = b.Call(type, fn, Vector{value, id});
 
             if (type != call->Result()->Type()) {
-                c = b.Convert(call->Result()->Type(), c)->Result();
+                c = b.Convert(call->Result()->Type(), c);
             }
 
             call->Result()->ReplaceAllUsesWith(c);
@@ -385,14 +385,14 @@ struct State {
         b.InsertBefore(call, [&] {
             if (type->DeepestElement()->Is<core::type::Bool>()) {
                 type = ty.MatchWidth(ty.u32(), type);
-                value = b.Convert(type, value)->Result();
+                value = b.Convert(type, value);
             }
 
             core::ir::Value* c =
                 b.Call(type, core::BuiltinFn::kSubgroupBroadcastFirst, Vector{value});
 
             if (type != call->Result()->Type()) {
-                c = b.Convert(call->Result()->Type(), c)->Result();
+                c = b.Convert(call->Result()->Type(), c);
             }
 
             call->Result()->ReplaceAllUsesWith(c);
@@ -498,7 +498,7 @@ struct State {
                 arg = b.Bitcast(ty.MatchWidth(ty.i32(), result_ty), arg);
             }
 
-            b.ConvertWithResult(call->DetachResult(), arg);
+            b.ConvertReplaceResult(call->DetachResult(), arg);
         });
         call->Destroy();
     }
@@ -512,7 +512,7 @@ struct State {
                 arg = b.Bitcast(ty.MatchWidth(ty.u32(), result_ty), arg);
             }
 
-            b.ConvertWithResult(call->DetachResult(), arg);
+            b.ConvertReplaceResult(call->DetachResult(), arg);
         });
         call->Destroy();
     }
@@ -522,8 +522,7 @@ struct State {
             auto* res_ty = call->Result()->Type();
             auto deepest = res_ty->DeepestElement();
 
-            core::ir::Value* res =
-                b.Convert(ty.MatchWidth(ty.i32(), res_ty), call->Args()[0])->Result();
+            core::ir::Value* res = b.Convert(ty.MatchWidth(ty.i32(), res_ty), call->Args()[0]);
             if (deepest->IsUnsignedIntegerScalar()) {
                 res = b.Bitcast(res_ty, res);
             }

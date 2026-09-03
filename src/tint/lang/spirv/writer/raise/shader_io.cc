@@ -335,7 +335,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         bool should_convert_f16 =
             config.polyfill_f16_io || inputs[idx].attributes.color.has_value();
         if (should_convert_f16 && inputs[idx].type->DeepestElement()->Is<core::type::F16>()) {
-            value = builder.Convert(inputs[idx].type, value)->Result();
+            value = builder.Convert(inputs[idx].type, value);
         }
 
         if (inputs[idx].attributes.builtin == core::BuiltinValue::kPosition &&
@@ -412,7 +412,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
         // Convert f16 values to f32 values if needed.
         if (config.polyfill_f16_io && value->Type()->DeepestElement()->Is<core::type::F16>()) {
-            value = builder.Convert(to->Type()->UnwrapPtr(), value)->Result();
+            value = builder.Convert(to->Type()->UnwrapPtr(), value);
         }
 
         builder.Store(to, value);

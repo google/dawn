@@ -11047,7 +11047,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Success_U32ToI32) {
 
     Convert* convert = nullptr;
     b.Append(func->Block(), [&] {
-        convert = b.Convert<i32>(localInvocationIndex);
+        convert = b.Convert<i32>(localInvocationIndex)->AsInstruction<Convert>();
         b.Return(func);
     });
 
@@ -11089,7 +11089,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Success_I32ToU32) {
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
-            convert = b.Convert<u32>(b.Load(idx));
+            convert = b.Convert<u32>(b.Load(idx))->AsInstruction<Convert>();
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
@@ -11165,7 +11165,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_NegativeI32ToU32) {
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
-            convert = b.Convert<u32>(b.Load(idx));
+            convert = b.Convert<u32>(b.Load(idx))->AsInstruction<Convert>();
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
@@ -11237,7 +11237,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_LargeU32ToI32) {
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
-            convert = b.Convert<i32>(b.Load(idx));
+            convert = b.Convert<i32>(b.Load(idx))->AsInstruction<Convert>();
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
@@ -11308,7 +11308,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_ConvertToNonInteger) {
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
-            convert = b.Convert<f32>(b.Load(idx));
+            convert = b.Convert<f32>(b.Load(idx))->AsInstruction<Convert>();
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {

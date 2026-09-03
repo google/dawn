@@ -401,7 +401,7 @@ struct State {
         auto float_value = [&](core::ir::Value* value) -> core::ir::Value* {
             // If the shader expects an f16 value, convert the value.
             if (shader_element_type->Is<core::type::F16>()) {
-                return b.Convert(ty.MatchWidth(ty.f16(), value->Type()), value)->Result();
+                return b.Convert(ty.MatchWidth(ty.f16(), value->Type()), value);
             }
             return value;
         };

@@ -147,8 +147,8 @@ struct State {
     }
 
     void ReplaceBitcast(core::ir::CoreBuiltinCall* bitcast) {
-        b.InsertBefore(bitcast,
-                       [&] { b.ConvertWithResult(bitcast->DetachResult(), bitcast->Args()[0]); });
+        b.InsertBefore(
+            bitcast, [&] { b.ConvertReplaceResult(bitcast->DetachResult(), bitcast->Args()[0]); });
         bitcast->Destroy();
     }
 

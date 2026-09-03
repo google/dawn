@@ -338,10 +338,10 @@ struct State {
                     if (var_attributes.builtin == core::BuiltinValue::kSampleMask) {
                         // The SPIR-V mask can be either i32 or u32, but WGSL is only u32. So,
                         // convert if necessary.
-                        auto* access =
+                        core::ir::Value* access =
                             b.Access(ld->Result()->Type()->DeepestElement(), ld, u32(0))->Result();
                         if (access->Type()->IsSignedIntegerScalar()) {
-                            access = b.Convert(ty.u32(), access)->Result();
+                            access = b.Convert(ty.u32(), access);
                         }
                         from = access;
                         var_type = ty.u32();
@@ -590,7 +590,7 @@ struct State {
                     // If the SPIR-V mask was an i32, need to convert from the u32 provided by
                     // WGSL.
                     if (mask_ty->ElemType()->IsSignedIntegerScalar()) {
-                        auto* conv = b.Convert(ty.i32(), result);
+                        auto* conv = b.Convert(ty.i32(), result)->AsInstruction();
                         func->Block()->Prepend(conv);
 
                         auto* construct = b.Construct(mask_ty, conv)->AsInstruction();
@@ -612,7 +612,7 @@ struct State {
                 case core::BuiltinValue::kSampleIndex: {
                     auto* idx_ty = var->Result()->Type()->UnwrapPtr();
                     if (idx_ty->IsSignedIntegerScalar()) {
-                        auto* conv = b.Convert(ty.i32(), result);
+                        auto* conv = b.Convert(ty.i32(), result)->AsInstruction();
                         func->Block()->Prepend(conv);
                         result = conv->Result();
                     }
@@ -625,7 +625,8 @@ struct State {
                     auto* idx_ty = var->Result()->Type()->UnwrapPtr();
                     auto* elem_ty = idx_ty->DeepestElement();
                     if (elem_ty->IsSignedIntegerScalar()) {
-                        auto* conv = b.Convert(ty.MatchWidth(ty.i32(), idx_ty), result);
+                        auto* conv =
+                            b.Convert(ty.MatchWidth(ty.i32(), idx_ty), result)->AsInstruction();
                         func->Block()->Prepend(conv);
                         result = conv->Result();
                     }

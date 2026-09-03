@@ -145,7 +145,7 @@ struct State {
         b.InsertBefore(entry_point->Block()->Front(), [&] {
             coord = b.Access(ty.vec4f(), entry_point_param, u32(position_member->Index()));
             coord = b.Swizzle(ty.vec2f(), coord, {0, 1});
-            coord = b.Convert<vec2<u32>>(coord);  // Input type to .Load
+            coord = b.Convert<vec2<u32>>(coord)->AsInstruction();  // Input type to .Load
         });
 
         // Insert copy from ROVs to the struct right after the coord decl
@@ -162,7 +162,7 @@ struct State {
                 from = b.Swizzle(rov.subtype, from, {0})->Result();
                 if (mem_ty != rov.subtype) {
                     // ROV and struct member types don't match
-                    from = b.Convert(mem_ty, from)->Result();
+                    from = b.Convert(mem_ty, from);
                 }
                 auto* to = b.Access(ty.ptr<private_>(mem_ty), pixel_local_var, u32(mem->Index()));
                 b.Store(to, from);
@@ -181,7 +181,7 @@ struct State {
                 from = b.Load(from)->Result();
                 if (mem_ty != rov.subtype) {
                     // ROV and struct member types don't match
-                    from = b.Convert(rov.subtype, from)->Result();
+                    from = b.Convert(rov.subtype, from);
                 }
                 // Store requires a vec4
                 from = b.Construct(ty.vec4(rov.subtype), from);

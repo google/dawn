@@ -107,7 +107,9 @@ struct State {
             b.StoreVectorElement(idx, 0_u, low_inc);
 
             auto* carry = b.Convert<u32>(b.Equal(low_inc, u32::Highest()));
-            ir.SetName(carry->Result(), ir.symbols.New("tint_carry"));
+            if (auto* carry_inst = carry->AsInstruction()) {
+                ir.SetName(carry_inst->Result(), ir.symbols.New("tint_carry"));
+            }
             b.StoreVectorElement(idx, 1_u, b.Subtract(b.LoadVectorElement(idx, 1_u), carry));
         });
     }

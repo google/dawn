@@ -154,7 +154,7 @@ struct State {
                 auto* clamped = b.Clamp(value, limits.low_limit_f, limits.high_limit_f);
                 auto* converted = b.Convert(res_ty, clamped);
 
-                b.Return(func, converted->Result());
+                b.Return(func, converted);
             });
             return func;
         });

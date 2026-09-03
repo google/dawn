@@ -150,7 +150,7 @@ struct State {
                 default:
                     TINT_IR_UNREACHABLE(ir);
             }
-            b.ConvertWithResult(binary->DetachResult(), result);
+            b.ConvertReplaceResult(binary->DetachResult(), result);
         });
         binary->Destroy();
     }

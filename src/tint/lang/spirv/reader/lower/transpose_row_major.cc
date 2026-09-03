@@ -439,7 +439,7 @@ struct State {
                     b.InsertAfter(ld, [&] {
                         auto* v = *idx;
                         if (v->Type()->Is<core::type::I32>()) {
-                            v = b.Convert(ty.u32(), v)->Result();
+                            v = b.Convert(ty.u32(), v);
                         }
                         b.CallWithResult(ld->DetachResult(), load_fn, ld->From(), v);
                     });
@@ -507,7 +507,7 @@ struct State {
         b.InsertAfter(store, [&] {
             auto* v = *vec_idx;
             if (v->Type()->Is<core::type::I32>()) {
-                v = b.Convert(ty.u32(), v)->Result();
+                v = b.Convert(ty.u32(), v);
             }
 
             b.Call(ty.void_(), store_fn, store->To(), v, store->From());

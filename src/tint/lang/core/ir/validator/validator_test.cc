@@ -715,7 +715,7 @@ TEST_F(IR_ValidatorTest, Construct_NonConstructible_WithStructProperty) {
 TEST_F(IR_ValidatorTest, Convert_MissingArg) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* c = b.Convert(ty.i32(), 1_f);
+        auto* c = b.Convert(ty.i32(), b.Let("l", 1_f))->AsInstruction<Convert>();
         c->ClearOperands();
         b.Return(f);
     });
@@ -723,8 +723,8 @@ TEST_F(IR_ValidatorTest, Convert_MissingArg) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:14 error: convert: expected exactly 1 operands, got 0
-    %2:i32 = convert
+                testing::HasSubstr(R"(:4:14 error: convert: expected exactly 1 operands, got 0
+    %3:i32 = convert
              ^^^^^^^
 )")) << res.Failure();
 }
@@ -732,15 +732,16 @@ TEST_F(IR_ValidatorTest, Convert_MissingArg) {
 TEST_F(IR_ValidatorTest, Convert_NullArg) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        b.Convert(ty.i32(), nullptr);
+        auto* c = b.Convert(ty.i32(), b.Let("l", 1_f))->AsInstruction<Convert>();
+        c->SetOperand(0, nullptr);
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:22 error: convert: operand is undefined
-    %2:i32 = convert undef
+                testing::HasSubstr(R"(:4:22 error: convert: operand is undefined
+    %3:i32 = convert undef
                      ^^^^^
 )")) << res.Failure();
 }
@@ -748,7 +749,7 @@ TEST_F(IR_ValidatorTest, Convert_NullArg) {
 TEST_F(IR_ValidatorTest, Convert_MissingResult) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* c = b.Convert(ty.i32(), 1_f);
+        auto* c = b.Convert(ty.i32(), b.Let("l", 1_f))->AsInstruction<Convert>();
         c->ClearResults();
         b.Return(f);
     });
@@ -756,8 +757,8 @@ TEST_F(IR_ValidatorTest, Convert_MissingResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:13 error: convert: expected exactly 1 results, got 0
-    undef = convert 1.0f
+                testing::HasSubstr(R"(:4:13 error: convert: expected exactly 1 results, got 0
+    undef = convert %l
             ^^^^^^^
 )")) << res.Failure();
 }
@@ -765,15 +766,15 @@ TEST_F(IR_ValidatorTest, Convert_MissingResult) {
 TEST_F(IR_ValidatorTest, Convert_NullResult) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* c = b.Convert(ty.i32(), 1_f);
+        auto* c = b.Convert(ty.i32(), b.Let("l", 1_f))->AsInstruction<Convert>();
         c->SetResult(nullptr);
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: convert: result is undefined
-    undef = convert 1.0f
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:4:5 error: convert: result is undefined
+    undef = convert %l
     ^^^^^
 )")) << res.Failure();
 }
@@ -781,7 +782,7 @@ TEST_F(IR_ValidatorTest, Convert_NullResult) {
 TEST_F(IR_ValidatorTest, Convert_MultipleResults) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* c = b.Convert(ty.i32(), 1_f);
+        auto* c = b.Convert(ty.i32(), b.Let("l", 1_f))->AsInstruction<Convert>();
         c->SetResults(Vector{b.InstructionResult(ty.i32()), b.InstructionResult(ty.i32())});
         b.Return(f);
     });
@@ -789,8 +790,8 @@ TEST_F(IR_ValidatorTest, Convert_MultipleResults) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:22 error: convert: expected exactly 1 results, got 2
-    %2:i32, %3:i32 = convert 1.0f
+                testing::HasSubstr(R"(:4:22 error: convert: expected exactly 1 results, got 2
+    %3:i32, %4:i32 = convert %l
                      ^^^^^^^
 )")) << res.Failure();
 }

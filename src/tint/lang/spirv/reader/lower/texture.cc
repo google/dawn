@@ -627,7 +627,7 @@ struct State {
             new_args.Push(swizzle);
             // Array index
             if (!last->Type()->Is<core::type::I32>()) {
-                last = b.Convert(ty.i32(), last)->Result();
+                last = b.Convert(ty.i32(), last);
             }
             new_args.Push(last);
         }
@@ -707,7 +707,7 @@ struct State {
                 core::ir::Value* lod = args[idx++];
 
                 if (!lod->Type()->Is<core::type::I32>()) {
-                    lod = b.Convert(ty.i32(), lod)->Result();
+                    lod = b.Convert(ty.i32(), lod);
                 }
                 new_args.Push(lod);
             } else if (!tex_ty->IsAnyOf<core::type::DepthMultisampledTexture,
@@ -721,7 +721,7 @@ struct State {
                 core::ir::Value* sample = args[idx++];
 
                 if (!sample->Type()->Is<core::type::I32>()) {
-                    sample = b.Convert(ty.i32(), sample)->Result();
+                    sample = b.Convert(ty.i32(), sample);
                 }
                 new_args.Push(sample);
             }
@@ -915,7 +915,7 @@ struct State {
                 // Depth texture LOD in WGSL is i32/u32 but f32 in SPIR-V.
                 // Convert to i32
                 if (tex_ty->Is<core::type::DepthTexture>()) {
-                    lod = b.Convert(ty.i32(), lod)->Result();
+                    lod = b.Convert(ty.i32(), lod);
                 }
                 new_args.Push(lod);
             }
@@ -978,7 +978,7 @@ struct State {
             // WGSL requires a `u32` result component where SPIR-V allows `i32` or `u32`
             core::ir::Value* res = b.Call(ty.MatchWidth(ty.u32(), type), fn, Vector{image});
             if (type->IsSignedIntegerScalarOrVector()) {
-                res = b.Convert(type, res)->Result();
+                res = b.Convert(type, res);
             }
 
             call->Result()->ReplaceAllUsesWith(res);
@@ -1021,7 +1021,7 @@ struct State {
             }
 
             if (type->IsSignedIntegerScalarOrVector()) {
-                res = b.Convert(type, res)->Result();
+                res = b.Convert(type, res);
             }
 
             call->Result()->ReplaceAllUsesWith(res);

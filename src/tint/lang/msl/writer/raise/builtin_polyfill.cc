@@ -508,7 +508,7 @@ struct State {
 
             auto* in = b.Convert(f32_ty, args[0]);
             auto* c = b.Call(f32_ty, core::BuiltinFn::kTanh, in);
-            b.ConvertWithResult(builtin->DetachResult(), c);
+            b.ConvertReplaceResult(builtin->DetachResult(), c);
         });
         builtin->Destroy();
     }
@@ -605,8 +605,8 @@ struct State {
         // Convert the argument to f16 and then back again.
         ir.properties.Add(core::ir::Property::kAllow16BitFloats);
         b.InsertBefore(builtin, [&] {
-            b.ConvertWithResult(builtin->DetachResult(),
-                                b.Convert(ty.MatchWidth(ty.f16(), arg->Type()), arg));
+            b.ConvertReplaceResult(builtin->DetachResult(),
+                                   b.Convert(ty.MatchWidth(ty.f16(), arg->Type()), arg));
         });
         builtin->Destroy();
     }
@@ -653,7 +653,7 @@ struct State {
                 } else {
                     lod = builtin->Args()[1];
                     if (lod->Type()->IsSignedIntegerScalar()) {
-                        lod = b.Convert<u32>(lod)->Result();
+                        lod = b.Convert<u32>(lod);
                     }
                 }
             }
@@ -757,7 +757,7 @@ struct State {
         b.InsertBefore(builtin, [&] {
             // Convert the coordinates to unsigned integers if necessary.
             if (coords->Type()->IsSignedIntegerScalarOrVector()) {
-                coords = b.Convert(ty.MatchWidth(ty.u32(), coords->Type()), coords)->Result();
+                coords = b.Convert(ty.MatchWidth(ty.u32(), coords->Type()), coords);
             }
 
             // Call the `read()` member function.
@@ -1009,7 +1009,7 @@ struct State {
 
             // Convert the coordinates to unsigned integers if necessary.
             if (coords->Type()->IsSignedIntegerScalarOrVector()) {
-                coords = b.Convert(ty.MatchWidth(ty.u32(), coords->Type()), coords)->Result();
+                coords = b.Convert(ty.MatchWidth(ty.u32(), coords->Type()), coords);
             }
 
             // Call the `write()` member function.
@@ -1062,7 +1062,7 @@ struct State {
         ir.properties.Add(core::ir::Property::kAllow16BitFloats);
         b.InsertBefore(builtin, [&] {
             auto* bitcast = b.Bitcast<vec2<f16>>(builtin->Args()[0]);
-            b.ConvertWithResult(builtin->DetachResult(), bitcast);
+            b.ConvertReplaceResult(builtin->DetachResult(), bitcast);
         });
         builtin->Destroy();
     }

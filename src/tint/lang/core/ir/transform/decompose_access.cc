@@ -949,11 +949,11 @@ struct State {
         if (result_ty->DeepestElement()->Is<core::type::Bool>()) {
             auto* new_ty = ty.MatchWidth(ty.u32(), result_ty);
             value = b.InsertBitcastIfNeeded(new_ty, from);
-            return b.Convert(result_ty, value)->Result();
+            return b.Convert(result_ty, value);
         }
         if (from->Type()->DeepestElement()->Is<core::type::Bool>()) {
             auto* new_ty = ty.MatchWidth(ty.u32(), from->Type());
-            value = b.Convert(new_ty, from)->Result();
+            value = b.Convert(new_ty, from);
         }
         return b.InsertBitcastIfNeeded(result_ty, value);
     }

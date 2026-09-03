@@ -211,7 +211,7 @@ struct State {
         if (auto* vec = value->Type()->As<core::type::Vector>()) {
             type = ty.vec(type, vec->Width());
         }
-        return b.Convert(type, value)->Result();
+        return b.Convert(type, value);
     }
 
     /// Clamp operand @p op_idx of @p inst to ensure it is within @p limit.

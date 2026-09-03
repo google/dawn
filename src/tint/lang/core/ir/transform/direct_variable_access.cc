@@ -505,7 +505,7 @@ struct State {
                                 // Array or matrix access.
                                 // Convert index to u32 if it isn't already.
                                 if (!idx->Type()->Is<core::type::U32>()) {
-                                    idx = b.Convert(ty.u32(), idx)->Result();
+                                    idx = b.Convert(ty.u32(), idx);
                                 }
 
                                 ops.Push(IndexAccess{});

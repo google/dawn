@@ -81,7 +81,7 @@ struct State {
             auto* id = b.Load(invocation_id);
             auto* value = call->Args()[0];
             if (value->Type()->DeepestElement()->Is<core::type::Bool>()) {
-                value = b.Convert(ty.MatchWidth(ty.i32(), value->Type()), value)->Result();
+                value = b.Convert(ty.MatchWidth(ty.i32(), value->Type()), value);
             }
 
             auto entry_point_name = ir.NameOf(entry_point).NameView();

@@ -189,7 +189,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* len = b.MemberCall<glsl::ir::MemberBuiltinCall>(ty.i32(), BuiltinFn::kLength,
                                                                   call->Args()[0]);
-            b.ConvertWithResult(call->DetachResult(), len->Result());
+            b.ConvertReplaceResult(call->DetachResult(), len->Result());
         });
         call->Destroy();
     }

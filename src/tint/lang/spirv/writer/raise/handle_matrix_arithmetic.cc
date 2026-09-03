@@ -149,7 +149,7 @@ struct State {
             for (uint32_t c = 0; c < out_mat->Columns(); c++) {
                 auto* col = b.Access(in_mat->ColumnType(), arg, u32(c));
                 auto* new_col = b.Convert(out_mat->ColumnType(), col);
-                args.Push(new_col->Result());
+                args.Push(new_col);
             }
 
             // Reconstruct the result matrix from the converted columns.

@@ -1450,15 +1450,16 @@ class Builder {
     /// @param val the value to be converted
     /// @returns the instruction
     template <typename VAL>
-    ir::Convert* ConvertWithResult(ir::InstructionResult* result, VAL&& val) {
-        return Append(ir.CreateInstruction<ir::Convert>(result, Value(std::forward<VAL>(val))));
+    ir::Value* ConvertReplaceResult(ir::InstructionResult* result, VAL&& val) {
+        return Append(ir.CreateInstruction<ir::Convert>(result, Value(std::forward<VAL>(val))))
+            ->Result();
     }
 
     /// Creates a value conversion instruction to the template type T
     /// @param val the value to be converted
     /// @returns the instruction
     template <typename T, typename VAL>
-    ir::Convert* Convert(VAL&& val) {
+    ir::Value* Convert(VAL&& val) {
         auto* type = ir.Types().Get<T>();
         return Convert(type, std::forward<VAL>(val));
     }
@@ -1468,8 +1469,8 @@ class Builder {
     /// @param val the value to be converted
     /// @returns the instruction
     template <typename VAL>
-    ir::Convert* Convert(const core::type::Type* to, VAL&& val) {
-        return ConvertWithResult(InstructionResult(to), Value(std::forward<VAL>(val)));
+    ir::Value* Convert(const core::type::Type* to, VAL&& val) {
+        return ConvertReplaceResult(InstructionResult(to), Value(std::forward<VAL>(val)));
     }
 
     /// Adds a call to convert if destination type is different then the value's type
@@ -1477,7 +1478,7 @@ class Builder {
     /// @param val the value to be converted
     /// @returns either result of the conversion or original value
     ir::Value* InsertConvertIfNeeded(const core::type::Type* to, ir::Value* val) {
-        return val->Type()->Equals(*to) ? val : Convert(to, val)->Result();
+        return val->Type()->Equals(*to) ? val : Convert(to, val);
     }
 
     /// Adds a call to bitcast if destination type is different then the value's type

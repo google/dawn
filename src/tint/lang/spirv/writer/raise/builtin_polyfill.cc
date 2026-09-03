@@ -724,9 +724,10 @@ struct State {
         if (operands.lod) {
             image_operand_mask |= SpvImageOperandsLodMask;
             if (requires_float_lod && operands.lod->Type()->IsIntegerScalar()) {
-                auto* convert = b.Convert(ty.f32(), operands.lod);
-                convert->InsertBefore(insertion_point);
-                operands.lod = convert->Result();
+                core::ir::Value* convert = nullptr;
+                b.InsertBefore(insertion_point,
+                               [&] { convert = b.Convert(ty.f32(), operands.lod); });
+                operands.lod = convert;
             }
             args.Push(operands.lod);
         }
@@ -761,9 +762,10 @@ struct State {
 
         // Convert the index to match the coordinate type if needed.
         if (array_idx->Type() != element_ty) {
-            auto* array_idx_converted = b.Convert(element_ty, array_idx);
-            array_idx_converted->InsertBefore(insertion_point);
-            array_idx = array_idx_converted->Result();
+            core::ir::Value* array_idx_converted = nullptr;
+            b.InsertBefore(insertion_point,
+                           [&] { array_idx_converted = b.Convert(element_ty, array_idx); });
+            array_idx = array_idx_converted;
         }
 
         // Construct a new coordinate vector.
