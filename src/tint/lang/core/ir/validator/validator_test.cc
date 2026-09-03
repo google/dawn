@@ -2980,9 +2980,9 @@ TEST_F(IR_ValidatorTest, IncorrectDomainShiftLeft) {
 
     auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
-        res.Failure().reason,
-        "5:7 error: shift left value must be less than the bit width of the lhs, which is 32");
+    EXPECT_EQ(res.Failure().reason,
+              "5:7 error: binary: shift left value must be less than the bit width of the lhs, "
+              "which is 32");
 }
 
 TEST_F(IR_ValidatorTest, IncorrectDomainShiftRight_Vec) {
@@ -3009,9 +3009,9 @@ TEST_F(IR_ValidatorTest, IncorrectDomainShiftRight_Vec) {
 
     auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
-        res.Failure().reason,
-        "5:7 error: shift left value must be less than the bit width of the lhs, which is 32");
+    EXPECT_EQ(res.Failure().reason,
+              "5:7 error: binary: shift left value must be less than the bit width of the lhs, "
+              "which is 32");
 }
 
 TEST_F(IR_ValidatorTest, CorrectDomainDiv) {
@@ -3062,7 +3062,7 @@ TEST_F(IR_ValidatorTest, IncorrectDomainDiv) {
 
     auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason, "5:7 error: integer division by zero is invalid");
+    EXPECT_EQ(res.Failure().reason, "5:7 error: binary: integer division by zero is invalid");
 }
 
 TEST_F(IR_ValidatorTest, IncorrectDomainModulo_Vec) {
@@ -3089,7 +3089,7 @@ TEST_F(IR_ValidatorTest, IncorrectDomainModulo_Vec) {
 
     auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason, "5:7 error: integer division by zero is invalid");
+    EXPECT_EQ(res.Failure().reason, "5:7 error: binary: integer division by zero is invalid");
 }
 
 }  // namespace tint::core::ir

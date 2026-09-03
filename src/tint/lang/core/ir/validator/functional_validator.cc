@@ -465,7 +465,7 @@ void Functional::CheckInstruction(const Instruction* inst) {
     tint::Switch(
         inst,                                              //
         [&](const Access*) {},                             //
-        [&](const Binary* b) { CheckBinary(b); },          //
+        [&](const Binary*) {},                             //
         [&](const Call* c) { CheckCall(c); },              //
         [&](const If* if_) { CheckIf(if_); },              //
         [&](const Let*) {},                                //
@@ -479,7 +479,7 @@ void Functional::CheckInstruction(const Instruction* inst) {
         [&](const Switch* s) { CheckSwitch(s); },          //
         [&](const Swizzle*) {},                            //
         [&](const Terminator* b) { CheckTerminator(b); },  //
-        [&](const Unary* u) { CheckUnary(u); },            //
+        [&](const Unary*) {},                              //
         [&](const Var*) {},                                //
         TINT_ICE_ON_NO_MATCH);
 
@@ -532,90 +532,14 @@ void Functional::CheckAlignment(const Instruction* inst) {
 
 void Functional::CheckCall(const Call* call) {
     tint::Switch(
-        call,                                                            //
-        [&](const BuiltinCall* c) { CheckBuiltinCall(c); },              //
-        [&](const Construct*) {},                                        //
-        [&](const Convert*) {},                                          //
-        [&](const Discard*) {},                                          //
-        [&](const MemberBuiltinCall* c) { CheckMemberBuiltinCall(c); },  //
-        [&](const UserCall*) {},                                         //
+        call,                                                //
+        [&](const BuiltinCall* c) { CheckBuiltinCall(c); },  //
+        [&](const Construct*) {},                            //
+        [&](const Convert*) {},                              //
+        [&](const Discard*) {},                              //
+        [&](const MemberBuiltinCall*) {},                    //
+        [&](const UserCall*) {},                             //
         [&](Default) { /* Validation of custom IR instructions */ });
-}
-
-void Functional::CheckBinary(const Binary* b) {
-    intrinsic::Context context{b->TableData(), type_mgr_, symbols_};
-
-    auto overload =
-        core::intrinsic::LookupBinary(context, b->Op(), b->LHS()->Type(), b->RHS()->Type(),
-                                      core::EvaluationStage::kRuntime, /* is_compound */ false);
-    if (overload != Success) {
-        AddError(b) << overload.Failure();
-        return;
-    }
-
-    auto* result = b->Result(0);
-    TINT_ASSERT(result);
-
-    if (overload->return_type != result->Type()) {
-        AddError(b) << "result value type " << NameOf(result->Type()) << " does not match "
-                    << style::Instruction(b->Op()) << " result type "
-                    << NameOf(overload->return_type);
-    }
-
-    if (auto* c = b->As<CoreBinary>()) {
-        CheckCoreBinaryCall(c);
-    }
-}
-
-void Functional::CheckCoreBinaryCall(const CoreBinary* call) {
-    switch (call->Op()) {
-        case core::BinaryOp::kDivide:
-        case core::BinaryOp::kModulo:
-            CheckBinaryDivModCall(call);
-            break;
-        case core::BinaryOp::kShiftLeft:
-        case core::BinaryOp::kShiftRight:
-            CheckBinaryShiftCall(call);
-            break;
-        default:
-            break;
-    }
-}
-
-void Functional::CheckBinaryDivModCall(const CoreBinary* call) {
-    if (error_source_ == ErrorSource::kWgsl) {
-        // Integer division by zero should be checked for the partial evaluation case (only rhs
-        // is const). FP division by zero is only invalid when the whole expression is
-        // constant-evaluated.
-        if (call->RHS()->Type()->IsIntegerScalarOrVector()) {
-            auto rhs_constant = call->RHS()->As<ir::Constant>();
-            if (rhs_constant && rhs_constant->Value()->AnyZero()) {
-                AddError(call) << "integer division by zero is invalid";
-            }
-        }
-    }
-}
-
-void Functional::CheckBinaryShiftCall(const CoreBinary* call) {
-    if (error_source_ == ErrorSource::kWgsl) {
-        // If lhs value is a concrete type, and rhs is a const-expression greater than or equal
-        // to the bit width of lhs, then it is a shader-creation error.
-        const auto* elem_type = call->LHS()->Type()->DeepestElement();
-        const uint32_t bit_width = elem_type->Size() * 8;
-        if (auto* rhs_val_as_const = call->RHS()->As<ir::Constant>()) {
-            auto* rhs_as_value = rhs_val_as_const->Value();
-            for (size_t i = 0, n = rhs_as_value->NumElements(); i < n; i++) {
-                auto* shift_val = n == 1 ? rhs_as_value : rhs_as_value->Index(i);
-                if (shift_val->ValueAs<u32>() >= bit_width) {
-                    AddError(call)
-                        << "shift " << (call->Op() == core::BinaryOp::kShiftLeft ? "left" : "right")
-                        << " value must be less than the bit width of the lhs, which is "
-                        << bit_width;
-                    break;
-                }
-            }
-        }
-    }
 }
 
 void Functional::CheckIf(const If* if_) {
@@ -722,25 +646,6 @@ void Functional::CheckSwitch(const Switch* s) {
 
     if (!found_default) {
         AddError(s) << "missing default case for switch";
-    }
-}
-
-void Functional::CheckUnary(const Unary* u) {
-    TINT_ASSERT(u->Val());
-
-    intrinsic::Context context{u->TableData(), type_mgr_, symbols_};
-    auto overload = core::intrinsic::LookupUnary(context, u->Op(), u->Val()->Type(),
-                                                 core::EvaluationStage::kRuntime);
-    if (overload != Success) {
-        AddError(u) << overload.Failure();
-        return;
-    }
-
-    const Value* result = u->Result(0);
-    if (overload->return_type != result->Type()) {
-        AddError(u) << "result value type " << NameOf(result->Type()) << " does not match "
-                    << style::Instruction(u->Op()) << " result type "
-                    << NameOf(overload->return_type);
     }
 }
 
@@ -1015,28 +920,6 @@ void Functional::CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call) {
             AddError(call, 1) << "the offset argument of " << call->Func() << " (" << offset
                               << ") is out of bounds of the array type of size " << limit;
         }
-    }
-}
-
-void Functional::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
-    auto args = Transform<8>(call->Args(), [&](const ir::Value* v) { return v->Type(); });
-    args.Insert(0, call->Object()->Type());
-
-    intrinsic::Context context{call->TableData(), type_mgr_, symbols_};
-    auto result = core::intrinsic::LookupMemberFn(context, call->FriendlyName().c_str(),
-                                                  call->FuncId(), call->ExplicitTemplateParams(),
-                                                  std::move(args), core::EvaluationStage::kRuntime);
-    if (result != Success) {
-        AddError(call) << result.Failure();
-        return;
-    }
-
-    if (result->return_type != call->Result()->Type()) {
-        // Note: This is not currently tested in core unittests as there are no concrete
-        // MemberBuiltinCall implementations in core IR. This is tested by backend-specific
-        // (e.g. HLSL) validation tests.
-        AddError(call) << "member call result type " << NameOf(call->Result()->Type())
-                       << " does not match builtin return type " << NameOf(result->return_type);
     }
 }
 

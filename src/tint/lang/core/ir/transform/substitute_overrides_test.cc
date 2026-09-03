@@ -532,8 +532,9 @@ $B1: {  # root
     cfg.map[OverrideId{1}] = 125.0;
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason,
-              R"(error: shift left value must be less than the bit width of the lhs, which is 32)");
+    EXPECT_EQ(
+        result.Failure().reason,
+        R"(error: binary: shift left value must be less than the bit width of the lhs, which is 32)");
 }
 
 TEST_F(IR_SubstituteOverridesTest, Override_ShiftRightAmountTooLarge_ConstLHS) {
@@ -607,7 +608,7 @@ $B1: {  # root
     ASSERT_NE(result, Success);
     EXPECT_EQ(
         result.Failure().reason,
-        R"(error: shift right value must be less than the bit width of the lhs, which is 32)");
+        R"(error: binary: shift right value must be less than the bit width of the lhs, which is 32)");
 }
 
 TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexGenError) {

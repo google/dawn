@@ -126,7 +126,6 @@ class Functional {
     /// @param inst the instruction to validate
     void CheckAlignment(const Instruction* inst);
 
-    void CheckBinary(const Binary* b);
     void CheckBuiltinCall(const BuiltinCall* call);
     void CheckCall(const Call* call);
     void CheckContinue(const Continue* c);
@@ -136,11 +135,9 @@ class Functional {
     void CheckLoop(const Loop* l);
     void CheckLoopBody(const Loop* loop);
     void CheckLoopContinuing(const Loop* loop);
-    void CheckMemberBuiltinCall(const MemberBuiltinCall* call);
     void CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call);
     void CheckSwitch(const Switch* s);
     void CheckTerminator(const Terminator* b);
-    void CheckUnary(const Unary* u);
 
     void CheckSubgroupCall(const CoreBuiltinCall* call);
     void CheckExtractBitsCall(const CoreBuiltinCall* call);
@@ -150,10 +147,6 @@ class Functional {
     void CheckPack2x16float(const CoreBuiltinCall* call);
     void CheckClampCall(const CoreBuiltinCall* call);
     void CheckSmoothstepCall(const CoreBuiltinCall* call);
-
-    void CheckCoreBinaryCall(const CoreBinary* call);
-    void CheckBinaryDivModCall(const CoreBinary* call);
-    void CheckBinaryShiftCall(const CoreBinary* call);
 
     struct UseInfo {
         Usage use;

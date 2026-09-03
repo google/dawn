@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/control_instruction.h"
 #include "src/tint/lang/core/ir/convert.h"
+#include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/discard.h"
@@ -444,6 +445,10 @@ class Validator {
     void CheckLoadVectorElement(const LoadVectorElement* l);
     void CheckStoreVectorElement(const StoreVectorElement* s);
     void CheckPhony(const Phony* p);
+
+    void CheckCoreBinaryCall(const CoreBinary* call);
+    void CheckBinaryDivModCall(const CoreBinary* call);
+    void CheckBinaryShiftCall(const CoreBinary* call);
 
     void CheckControlsAllowingIf(const Exit* exit, const Instruction* control);
 
