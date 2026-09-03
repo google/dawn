@@ -68,6 +68,10 @@ binding, and uploading data to the GPU. The rationale for this is the following:
   - Static/Dynamic data: Updating data for each draw is a common use case. It also tests
     the efficiency of resource transitions.
 
+## LiteRT-LM Benchmarks
+
+See [litert_lm_benchmark.md](litert_lm_benchmark.md) for instructions on configuring, building, and running the LiteRT-LM benchmarks with Dawn.
+
 ## Testing with the CTS
 
 There are various ways to test dawn against the [WebGPU CTS](https://github.com/gpuweb/cts).
