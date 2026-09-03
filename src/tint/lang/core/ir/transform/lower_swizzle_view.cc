@@ -137,7 +137,7 @@ struct State {
         auto collapsed = Collapse(swizzle);
 
         b.InsertBefore(load, [&] {
-            core::ir::InstructionResult* new_result = nullptr;
+            core::ir::Value* new_result = nullptr;
             if (accessor_idx || collapsed.indices.Length() == 1) {
                 // Lowers to a single vector element load.
                 auto* idx = accessor_idx ? GetTargetIndex(accessor_idx, collapsed.indices)
@@ -146,8 +146,7 @@ struct State {
             } else {
                 // Extract the target elements from the loaded vector.
                 auto* loaded_vec = b.Load(collapsed.vector);
-                new_result =
-                    b.Swizzle(load->Result()->Type(), loaded_vec, collapsed.indices)->Result();
+                new_result = b.Swizzle(load->Result()->Type(), loaded_vec, collapsed.indices);
             }
             load->Result()->ReplaceAllUsesWith(new_result);
         });

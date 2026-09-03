@@ -144,7 +144,7 @@ struct State {
         core::ir::Instruction* coord = nullptr;
         b.InsertBefore(entry_point->Block()->Front(), [&] {
             coord = b.Access(ty.vec4f(), entry_point_param, u32(position_member->Index()));
-            coord = b.Swizzle(ty.vec2f(), coord, {0, 1});
+            coord = b.Swizzle(ty.vec2f(), coord, {0, 1})->AsInstruction();
             coord = b.Convert<vec2<u32>>(coord)->AsInstruction();  // Input type to .Load
         });
 
@@ -159,7 +159,7 @@ struct State {
                 from = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
                             ty.vec4(rov.subtype), tint::hlsl::BuiltinFn::kLoad, from, coord)
                            ->Result();
-                from = b.Swizzle(rov.subtype, from, {0})->Result();
+                from = b.Swizzle(rov.subtype, from, {0});
                 if (mem_ty != rov.subtype) {
                     // ROV and struct member types don't match
                     from = b.Convert(mem_ty, from);

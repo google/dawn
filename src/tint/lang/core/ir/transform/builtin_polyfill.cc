@@ -1187,7 +1187,7 @@ struct State {
                         auto* broadcasted_v2u32 = b.Call(
                             ty.vec2u(), core::BuiltinFn::kSubgroupBroadcast, v2u32_val, lane_id);
                         auto* broadcasted_v4f16 = b.Bitcast(ty.vec4h(), broadcasted_v2u32);
-                        result = b.Swizzle(vec_ty, broadcasted_v4f16, {0u, 1u, 2u})->Result();
+                        result = b.Swizzle(vec_ty, broadcasted_v4f16, {0u, 1u, 2u});
                         break;
                     }
                     case 4: {  // vec4<f16>

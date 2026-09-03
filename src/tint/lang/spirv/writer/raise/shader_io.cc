@@ -326,8 +326,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 for (uint32_t i = 0; i < width; ++i) {
                     indices.Push(i);
                 }
-                value =
-                    builder.Swizzle(ty.MatchWidth(sampled_ty, orig_ty), value, indices)->Result();
+                value = builder.Swizzle(ty.MatchWidth(sampled_ty, orig_ty), value, indices);
             }
         }
 

@@ -40,14 +40,14 @@ using IR_SwizzleDeathTest = IR_SwizzleTest;
 
 TEST_F(IR_SwizzleTest, SetsUsage) {
     auto* var = b.Var(ty.ptr<function, i32>());
-    auto* a = b.Swizzle(mod.Types().i32(), var, {1u});
+    auto* a = b.Swizzle(mod.Types().i32(), var, {1u})->AsInstruction();
 
     EXPECT_THAT(var->Result()->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{a, 0u}));
 }
 
 TEST_F(IR_SwizzleTest, Results) {
     auto* var = b.Var(ty.ptr<function, i32>());
-    auto* a = b.Swizzle(mod.Types().i32(), var, {1u});
+    auto* a = b.Swizzle(mod.Types().i32(), var, {1u})->AsInstruction();
 
     EXPECT_EQ(a->Results().Length(), 1u);
     EXPECT_TRUE(a->Result()->Is<InstructionResult>());
@@ -100,7 +100,7 @@ TEST_F(IR_SwizzleDeathTest, Fail_IndexOutOfRange) {
 
 TEST_F(IR_SwizzleTest, Clone) {
     auto* var = b.Var(ty.ptr<function, i32>());
-    auto* s = b.Swizzle(mod.Types().i32(), var, {2u});
+    auto* s = b.Swizzle(mod.Types().i32(), var, {2u})->AsInstruction<Swizzle>();
 
     auto* new_var = clone_ctx.Clone(var);
     auto* new_s = clone_ctx.Clone(s);

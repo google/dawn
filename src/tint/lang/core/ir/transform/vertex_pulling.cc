@@ -302,13 +302,13 @@ struct State {
             // truncate the value with a swizzle.
             switch (dst_width) {
                 case 1:
-                    value = b.Swizzle(shader_type, value, Vector{0u})->Result();
+                    value = b.Swizzle(shader_type, value, Vector{0u});
                     break;
                 case 2:
-                    value = b.Swizzle(shader_type, value, Vector{0u, 1u})->Result();
+                    value = b.Swizzle(shader_type, value, Vector{0u, 1u});
                     break;
                 case 3:
-                    value = b.Swizzle(shader_type, value, Vector{0u, 1u, 2u})->Result();
+                    value = b.Swizzle(shader_type, value, Vector{0u, 1u, 2u});
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir) << dst_width;
@@ -507,7 +507,7 @@ struct State {
                 // 000000xx, 000000yy, ********, ********
                 auto* unpack = b.Call<vec4f>(core::BuiltinFn::kUnpack4X8Unorm, word);
                 // 000000xx, 000000yy
-                return float_value(b.Swizzle<vec2f>(unpack, Vector{0u, 1u})->Result());
+                return float_value(b.Swizzle<vec2f>(unpack, Vector{0u, 1u}));
             }
             case VertexFormat::kUnorm8x4: {
                 // wwzzyyxx
@@ -522,7 +522,7 @@ struct State {
                 // 000000xx, 000000yy, 000000zz, 000000ww
                 auto* unpack = b.Call<vec4f>(core::BuiltinFn::kUnpack4X8Unorm, word);
                 // 000000zz, 000000yy, 000000xx, 000000ww
-                return float_value(b.Swizzle<vec4f>(unpack, Vector{2u, 1u, 0u, 3u})->Result());
+                return float_value(b.Swizzle<vec4f>(unpack, Vector{2u, 1u, 0u, 3u}));
             }
             case VertexFormat::kUnorm16: {
                 // ****xxxx
@@ -565,7 +565,7 @@ struct State {
                 // 000000xx, 000000yy, ********, ********
                 auto* unpack = b.Call<vec4f>(core::BuiltinFn::kUnpack4X8Snorm, word);
                 // 000000xx, 000000yy
-                return float_value(b.Swizzle<vec2f>(unpack, Vector{0u, 1u})->Result());
+                return float_value(b.Swizzle<vec2f>(unpack, Vector{0u, 1u}));
             }
             case VertexFormat::kSnorm8x4: {
                 // wwzzyyxx

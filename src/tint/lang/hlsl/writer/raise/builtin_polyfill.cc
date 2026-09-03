@@ -892,7 +892,7 @@ struct State {
 
         const core::type::Type* query_ty = ty.vec(ty.u32(), 3);
         b.InsertBefore(call, [&] {
-            core::ir::Instruction* out = b.Var(ty.ptr(function, query_ty));
+            core::ir::Value* out = b.Var(ty.ptr(function, query_ty))->Result();
 
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(
                 ty.void_(), hlsl::BuiltinFn::kGetDimensions, tex,
@@ -901,7 +901,7 @@ struct State {
                                             b.Access(ty.ptr<function, u32>(), out, 2_u)->Result()});
 
             out = b.Swizzle(ty.u32(), b.Load(out), {2_u});
-            call->Result()->ReplaceAllUsesWith(out->Result());
+            call->Result()->ReplaceAllUsesWith(out);
         });
         call->Destroy();
     }
@@ -938,7 +938,7 @@ struct State {
             // Pass the `level` parameter so the `num_levels` overload is used.
             args.Push(b.Value(0_u));
 
-            core::ir::Instruction* out = b.Var(ty.ptr(function, query_ty));
+            core::ir::Value* out = b.Var(ty.ptr(function, query_ty))->Result();
             for (uint32_t i = 0; i < query_size; ++i) {
                 args.Push(b.Access(ty.ptr<function, u32>(), out, u32(i))->Result());
             }
@@ -947,7 +947,7 @@ struct State {
                                                       tex, args);
 
             out = b.Swizzle(ty.u32(), b.Load(out), swizzle);
-            call->Result()->ReplaceAllUsesWith(out->Result());
+            call->Result()->ReplaceAllUsesWith(out);
         });
         call->Destroy();
     }
@@ -1014,9 +1014,9 @@ struct State {
                 args.Push(b.InsertConvertIfNeeded(ty.u32(), call->Args()[1]));
             }
 
-            core::ir::Instruction* query = b.Var(ty.ptr(function, query_ty));
+            core::ir::Value* query = b.Var(ty.ptr(function, query_ty))->Result();
             if (query_size == 1) {
-                args.Push(query->Result());
+                args.Push(query);
             } else {
                 for (uint32_t i = 0; i < query_size; ++i) {
                     args.Push(b.Access(ty.ptr<function, u32>(), query, u32(i))->Result());
@@ -1025,11 +1025,11 @@ struct State {
 
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kGetDimensions,
                                                       tex, args);
-            query = b.Load(query);
+            query = b.Load(query)->Result();
             if (!swizzle.IsEmpty()) {
                 query = b.Swizzle(ty.MatchWidth(ty.u32(), swizzle.Length()), query, swizzle);
             }
-            call->Result()->ReplaceAllUsesWith(query->Result());
+            call->Result()->ReplaceAllUsesWith(query);
         });
         call->Destroy();
     }
@@ -1044,7 +1044,7 @@ struct State {
 
         const core::type::Type* query_ty = ty.vec(ty.u32(), 3);
         b.InsertBefore(call, [&] {
-            core::ir::Instruction* out = b.Var(ty.ptr(function, query_ty));
+            core::ir::Value* out = b.Var(ty.ptr(function, query_ty))->Result();
 
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(
                 ty.void_(), hlsl::BuiltinFn::kGetDimensions, tex,
@@ -1053,7 +1053,7 @@ struct State {
                                             b.Access(ty.ptr<function, u32>(), out, 2_u)->Result()});
 
             out = b.Swizzle(ty.u32(), b.Load(out), {2_u});
-            call->Result()->ReplaceAllUsesWith(out->Result());
+            call->Result()->ReplaceAllUsesWith(out);
         });
         call->Destroy();
     }
@@ -1145,7 +1145,7 @@ struct State {
 
             core::ir::Value* builtin = member_call->Result();
             if (!swizzle.IsEmpty()) {
-                builtin = b.Swizzle(ty.f32(), builtin, swizzle)->Result();
+                builtin = b.Swizzle(ty.f32(), builtin, swizzle);
             } else {
                 if (builtin->Type() != call->Result()->Type()) {
                     builtin = b.Convert(call->Result()->Type(), builtin);
@@ -1355,14 +1355,15 @@ struct State {
                     TINT_IR_UNREACHABLE(ir);
             }
 
-            core::ir::Instruction* result = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
-                ty.vec4f(), hlsl::BuiltinFn::kSample, tex, params);
+            core::ir::Value* result = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                                           ty.vec4f(), hlsl::BuiltinFn::kSample, tex, params)
+                                          ->Result();
             if (tex_type->Is<core::type::DepthTexture>()) {
                 // Swizzle x from vec4 result for depth textures
                 TINT_IR_ASSERT(ir, call->Result()->Type()->Is<core::type::F32>());
                 result = b.Swizzle(ty.f32(), result, {0});
             }
-            result->SetResult(call->DetachResult());
+            call->Result()->ReplaceAllUsesWith(result);
         });
         call->Destroy();
     }
@@ -1580,14 +1581,15 @@ struct State {
                     TINT_IR_UNREACHABLE(ir);
             }
 
-            core::ir::Instruction* result = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
-                ty.vec4f(), hlsl::BuiltinFn::kSampleLevel, tex, params);
+            core::ir::Value* result = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                                           ty.vec4f(), hlsl::BuiltinFn::kSampleLevel, tex, params)
+                                          ->Result();
             if (tex_type->Is<core::type::DepthTexture>()) {
                 // Swizzle x from vec4 result for depth textures
                 TINT_IR_ASSERT(ir, call->Result()->Type()->Is<core::type::F32>());
                 result = b.Swizzle(ty.f32(), result, {0});
             }
-            result->SetResult(call->DetachResult());
+            call->Result()->ReplaceAllUsesWith(result);
         });
         call->Destroy();
     }

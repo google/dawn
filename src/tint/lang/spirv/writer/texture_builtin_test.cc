@@ -1520,7 +1520,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kU32},
-                                 {"%result = OpImageQuerySizeLod %uint %t %uint_0"},
+                                 {"%10 = OpImageQuerySizeLod %uint %t %uint_0"},
                              },
                              TextureBuiltinTestCase{
                                  kStorageTexture,
@@ -1528,7 +1528,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kU32},
-                                 {"%result = OpImageQuerySize %uint %t"},
+                                 {"%10 = OpImageQuerySize %uint %t"},
                              },
 
                              // 1D explicit Lod.
@@ -1538,7 +1538,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 1, kU32},
-                                 {"%result = OpImageQuerySizeLod %uint %t %lod"},
+                                 {"%10 = OpImageQuerySizeLod %uint %t %lod"},
                              },
 
                              // 2D implicit Lod.
@@ -1548,7 +1548,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
-                                 {"%result = OpImageQuerySizeLod %v2uint %t %uint_0"},
+                                 {"%11 = OpImageQuerySizeLod %v2uint %t %uint_0"},
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
@@ -1558,7 +1558,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  {"result", 2, kU32},
                                  {
                                      "%11 = OpImageQuerySizeLod %v3uint %t %uint_0",
-                                     "%result = OpVectorShuffle %v2uint %11 %11 0 1",
+                                     "%14 = OpVectorShuffle %v2uint %11 %11 0 1",
                                  },
                              },
                              TextureBuiltinTestCase{
@@ -1567,7 +1567,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
-                                 {"%result = OpImageQuerySizeLod %v2uint %t %uint_0"},
+                                 {"%11 = OpImageQuerySizeLod %v2uint %t %uint_0"},
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
@@ -1577,7 +1577,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  {"result", 2, kU32},
                                  {
                                      "%11 = OpImageQuerySizeLod %v3uint %t %uint_0",
-                                     "%result = OpVectorShuffle %v2uint %11 %11 0 1",
+                                     "%14 = OpVectorShuffle %v2uint %11 %11 0 1",
                                  },
                              },
                              TextureBuiltinTestCase{
@@ -1586,7 +1586,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
-                                 {"%result = OpImageQuerySize %v2uint %t"},
+                                 {"%11 = OpImageQuerySize %v2uint %t"},
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
@@ -1594,7 +1594,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
-                                 {"%result = OpImageQuerySizeLod %v2uint %t %uint_0"},
+                                 {"%11 = OpImageQuerySizeLod %v2uint %t %uint_0"},
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
@@ -1604,7 +1604,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  {"result", 2, kU32},
                                  {
                                      "%11 = OpImageQuerySizeLod %v3uint %t %uint_0",
-                                     "%result = OpVectorShuffle %v2uint %11 %11 0 1",
+                                     "%14 = OpVectorShuffle %v2uint %11 %11 0 1",
                                  },
                              },
                              TextureBuiltinTestCase{
@@ -1613,7 +1613,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
-                                 {"%result = OpImageQuerySizeLod %v2uint %t %uint_0"},
+                                 {"%11 = OpImageQuerySizeLod %v2uint %t %uint_0"},
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
@@ -1623,7 +1623,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  {"result", 2, kU32},
                                  {
                                      "%11 = OpImageQuerySizeLod %v3uint %t %uint_0",
-                                     "%result = OpVectorShuffle %v2uint %11 %11 0 1",
+                                     "%14 = OpVectorShuffle %v2uint %11 %11 0 1",
                                  },
                              },
                              TextureBuiltinTestCase{
@@ -1632,7 +1632,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
-                                 {"%result = OpImageQuerySize %v2uint %t"},
+                                 {"%11 = OpImageQuerySize %v2uint %t"},
                              },
                              TextureBuiltinTestCase{
                                  kStorageTexture,
@@ -1640,7 +1640,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
-                                 {"%result = OpImageQuerySize %v2uint %t"},
+                                 {"%11 = OpImageQuerySize %v2uint %t"},
                              },
                              TextureBuiltinTestCase{
                                  kStorageTexture,
@@ -1650,7 +1650,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  {"result", 2, kU32},
                                  {
                                      "%11 = OpImageQuerySize %v3uint %t",
-                                     "%result = OpVectorShuffle %v2uint %11 %11 0 1",
+                                     "%13 = OpVectorShuffle %v2uint %11 %11 0 1",
                                  },
                              },
 
@@ -1661,7 +1661,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 2, kU32},
-                                 {"%result = OpImageQuerySizeLod %v2uint %t %lod"},
+                                 {"%11 = OpImageQuerySizeLod %v2uint %t %lod"},
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
@@ -1671,7 +1671,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  {"result", 2, kU32},
                                  {
                                      "%11 = OpImageQuerySizeLod %v3uint %t %lod",
-                                     "%result = OpVectorShuffle %v2uint %11 %11 0 1",
+                                     "%14 = OpVectorShuffle %v2uint %11 %11 0 1",
                                  },
                              },
                              TextureBuiltinTestCase{
@@ -1680,7 +1680,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 2, kU32},
-                                 {"%result = OpImageQuerySizeLod %v2uint %t %lod"},
+                                 {"%11 = OpImageQuerySizeLod %v2uint %t %lod"},
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
@@ -1690,7 +1690,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  {"result", 2, kU32},
                                  {
                                      "%11 = OpImageQuerySizeLod %v3uint %t %lod",
-                                     "%result = OpVectorShuffle %v2uint %11 %11 0 1",
+                                     "%14 = OpVectorShuffle %v2uint %11 %11 0 1",
                                  },
                              },
                              TextureBuiltinTestCase{
@@ -1699,7 +1699,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 2, kU32},
-                                 {"%result = OpImageQuerySizeLod %v2uint %t %lod"},
+                                 {"%11 = OpImageQuerySizeLod %v2uint %t %lod"},
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
@@ -1709,7 +1709,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  {"result", 2, kU32},
                                  {
                                      "%11 = OpImageQuerySizeLod %v3uint %t %lod",
-                                     "%result = OpVectorShuffle %v2uint %11 %11 0 1",
+                                     "%14 = OpVectorShuffle %v2uint %11 %11 0 1",
                                  },
                              },
                              TextureBuiltinTestCase{
@@ -1718,7 +1718,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 2, kU32},
-                                 {"%result = OpImageQuerySizeLod %v2uint %t %lod"},
+                                 {"%11 = OpImageQuerySizeLod %v2uint %t %lod"},
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
@@ -1728,7 +1728,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  {"result", 2, kU32},
                                  {
                                      "%11 = OpImageQuerySizeLod %v3uint %t %lod",
-                                     "%result = OpVectorShuffle %v2uint %11 %11 0 1",
+                                     "%14 = OpVectorShuffle %v2uint %11 %11 0 1",
                                  },
                              },
 
@@ -1739,7 +1739,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 3, kU32},
-                                 {"%result = OpImageQuerySizeLod %v3uint %t %uint_0"},
+                                 {"%11 = OpImageQuerySizeLod %v3uint %t %uint_0"},
                              },
 
                              // 3D explicit lod.
@@ -1749,7 +1749,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 3, kU32},
-                                 {"%result = OpImageQuerySizeLod %v3uint %t %lod"},
+                                 {"%11 = OpImageQuerySizeLod %v3uint %t %lod"},
                              }),
                          PrintCase);
 
@@ -2064,7 +2064,7 @@ TEST_F(SpirvWriterTest, TextureDimensions_WithRobustness) {
          %14 = OpISub %uint %13 %uint_1
          %16 = OpBitcast %uint %level
          %17 = OpExtInst %uint %18 UMin %16 %14
-       %dims = OpImageQuerySizeLod %v2uint %texture %17
+         %19 = OpImageQuerySizeLod %v2uint %texture %17
 )");
 }
 

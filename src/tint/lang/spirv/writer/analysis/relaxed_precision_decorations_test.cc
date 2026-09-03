@@ -1099,7 +1099,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
         texel = b.Call<ir::BuiltinCall>(ty.vec4f(), BuiltinFn::kImageRead, b.Load(image), coords,
                                         Literal(0u))
                     ->Result();
-        swiz = b.Swizzle(ty.vec4f(), texel, {3, 2, 1, 0});
+        swiz = b.Swizzle(ty.vec4f(), texel, {3, 2, 1, 0})->AsInstruction();
         b.Let("result", b.Multiply(b.Convert<vec4h>(swiz), 2_h));
         b.Return(ep);
     });
@@ -1145,7 +1145,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
         auto* coords = b.Zero<vec2u>();
         auto* val_h = b.Let("val_h", b.Splat<vec4h>(1_h));
         converted_f = b.Convert<vec4f>(val_h);
-        swiz = b.Swizzle(ty.vec4f(), converted_f, {3, 2, 1, 0});
+        swiz = b.Swizzle(ty.vec4f(), converted_f, {3, 2, 1, 0})->AsInstruction();
         texel = swiz->Result();
         b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kImageWrite, b.Load(image), coords, texel,
                                 Literal(0u));

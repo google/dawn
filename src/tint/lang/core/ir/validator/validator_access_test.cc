@@ -1258,7 +1258,7 @@ TEST_F(IR_ValidatorTest, Swizzle_MissingValue) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4f()));
-        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0})->AsInstruction<Swizzle>();
         swizzle->ClearOperands();
         b.Return(f);
     });
@@ -1276,7 +1276,7 @@ TEST_F(IR_ValidatorTest, Swizzle_NullValue) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4f()));
-        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0})->AsInstruction<Swizzle>();
         swizzle->SetOperand(0, nullptr);
         b.Return(f);
     });
@@ -1291,7 +1291,7 @@ TEST_F(IR_ValidatorTest, Swizzle_MissingResult) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4f()));
-        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0})->AsInstruction<Swizzle>();
         swizzle->ClearResults();
         b.Return(f);
     });
@@ -1309,7 +1309,7 @@ TEST_F(IR_ValidatorTest, Swizzle_NullResult) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4f()));
-        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0})->AsInstruction();
         swizzle->SetResult(nullptr);
         b.Return(f);
     });
@@ -1326,7 +1326,7 @@ TEST_F(IR_ValidatorTest, Swizzle_NoIndices) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4f()));
-        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0})->AsInstruction<Swizzle>();
         auto indices = Vector<uint32_t, 0>();
         swizzle->SetIndices(std::move(indices));
         b.Return(f);
@@ -1345,7 +1345,7 @@ TEST_F(IR_ValidatorTest, Swizzle_TooManyIndices) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4f()));
-        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0})->AsInstruction<Swizzle>();
         auto indices = Vector<uint32_t, 5>{1, 1, 1, 1, 1};
         swizzle->SetIndices(std::move(indices));
         b.Return(f);
@@ -1364,7 +1364,7 @@ TEST_F(IR_ValidatorTest, Swizzle_InvalidIndices) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4f()));
-        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4f(), b.Load(var), {3, 2, 1, 0})->AsInstruction<Swizzle>();
         auto indices = Vector<uint32_t, 4>{4, 3, 2, 1};
         swizzle->SetIndices(std::move(indices));
         b.Return(f);

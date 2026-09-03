@@ -593,7 +593,7 @@ struct State {
             }
 
             auto* new_ty = ty.MatchWidth(coords->Type()->DeepestElement(), count);
-            return b.Swizzle(new_ty, coords, swizzle_idx)->Result();
+            return b.Swizzle(new_ty, coords, swizzle_idx);
         };
 
         auto coords_needed = CoordsRequiredForDim(tex_ty->Dim(), is_proj);
@@ -612,8 +612,7 @@ struct State {
         auto* new_coords_ty = ty.MatchWidth(coords_ty->Type(), new_coords_width);
 
         auto* swizzle = mk_coords(new_coords_width);
-        core::ir::Value* last =
-            b.Swizzle(coords_ty->Type(), coords, Vector{new_coords_width})->Result();
+        core::ir::Value* last = b.Swizzle(coords_ty->Type(), coords, Vector{new_coords_width});
 
         if (is_proj) {
             // New coords

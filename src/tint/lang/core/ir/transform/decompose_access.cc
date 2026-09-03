@@ -1088,7 +1088,7 @@ struct State {
         if (result_ty->Width() == 4) {
             load = value;
         } else if (result_ty->Width() == 3) {
-            load = b.Swizzle(ty.vec3u(), value, {0, 1, 2})->Result();
+            load = b.Swizzle(ty.vec3u(), value, {0, 1, 2});
         } else if (result_ty->Width() == 2) {
             if (value->Type()->Size() == result_ty->Size()) {
                 load = value;
@@ -1096,9 +1096,9 @@ struct State {
                 auto* vec_idx = CalculateVectorOffset(byte_idx, ty.vec4u());
                 if (auto* cnst = vec_idx->As<core::ir::Constant>()) {
                     if (cnst->Value()->ValueAs<uint32_t>() == 2u) {
-                        load = b.Swizzle(ty.vec2u(), value, {2, 3})->Result();
+                        load = b.Swizzle(ty.vec2u(), value, {2, 3});
                     } else {
-                        load = b.Swizzle(ty.vec2u(), value, {0, 1})->Result();
+                        load = b.Swizzle(ty.vec2u(), value, {0, 1});
                     }
                 } else {
                     auto* ubo = value;
@@ -1108,7 +1108,7 @@ struct State {
                     auto* sw_rhs = b.Swizzle(ty.vec2u(), ubo, {0, 1});
                     auto* cond = b.Equal(vec_idx, 2_u);
 
-                    Vector<core::ir::Value*, 3> args{sw_rhs->Result(), sw_lhs->Result(), cond};
+                    Vector<core::ir::Value*, 3> args{sw_rhs, sw_lhs, cond};
 
                     load = b.Call(ty.vec2u(), core::BuiltinFn::kSelect, args);
                 }
@@ -1168,7 +1168,7 @@ struct State {
             // the last element.
             if (result_ty->Width() == 3) {
                 auto* bc = b.Bitcast(ty.vec4(result_ty->Type()), construct);
-                return b.Swizzle(result_ty, bc, {0, 1, 2});
+                return b.Swizzle(result_ty, bc, {0, 1, 2})->AsInstruction();
             }
             return b.Bitcast(result_ty, construct)->AsInstruction();
         } else if (BaseEleType() == ty.vec2u()) {
@@ -1188,9 +1188,9 @@ struct State {
             auto* vec_idx = CalculateVectorOffset(byte_idx, ty.vec4u());  // 0 or 2
             if (auto* cnst = vec_idx->As<core::ir::Constant>()) {
                 if (cnst->Value()->ValueAs<uint32_t>() == 2u) {
-                    load = b.Swizzle(ty.vec2u(), loads[0], {2, 3})->Result();
+                    load = b.Swizzle(ty.vec2u(), loads[0], {2, 3});
                 } else {
-                    load = b.Swizzle(ty.vec2u(), loads[0], {0, 1})->Result();
+                    load = b.Swizzle(ty.vec2u(), loads[0], {0, 1});
                 }
             } else {
                 auto* ubo = loads[0];
@@ -1199,25 +1199,25 @@ struct State {
                 // else -> xy
                 auto* sw_rhs = b.Swizzle(ty.vec2u(), ubo, {0, 1});
                 auto* cond = b.Equal(vec_idx, 2_u);
-                auto args = Vector{sw_rhs->Result(), sw_lhs->Result(), cond};
+                auto args = Vector{sw_rhs, sw_lhs, cond};
                 load = b.Call(ty.vec2u(), core::BuiltinFn::kSelect, std::move(args));
             }
             if (result_ty->Width() == 3) {
                 auto* bc = b.Bitcast(ty.vec4(result_ty->Type()), load);
-                return b.Swizzle(result_ty, bc, {0, 1, 2});
+                return b.Swizzle(result_ty, bc, {0, 1, 2})->AsInstruction();
             }
             return b.Bitcast(result_ty, load)->AsInstruction();
         }
 
         // Vec2 ends up being the same as a bitcast u32 to vec2<f16>
         if (result_ty->Width() == 2) {
-            core::ir::Instruction* load = nullptr;
+            core::ir::Value* load = nullptr;
             auto* vec_idx = CalculateVectorOffset(byte_idx, ty.vec4u());  // 0, 1, 2, or 3
             if (auto* cnst = vec_idx->As<core::ir::Constant>()) {
                 const auto vec_idx_val = cnst->Value()->ValueAs<uint32_t>();
                 load = b.Swizzle(ty.u32(), loads[0], {vec_idx_val});
             } else {
-                load = b.Access(ty.u32(), loads[0], vec_idx);
+                load = b.Access(ty.u32(), loads[0], vec_idx)->Result();
             }
             return b.Bitcast(result_ty, load)->AsInstruction();
         }
@@ -1553,7 +1553,7 @@ struct State {
                 b.Store(access, value);
             } else {
                 auto* sub_vec_ty = ty.vec2(st_ty->DeepestElement());
-                Value* first = b.Swizzle(sub_vec_ty, from, {0, 1})->Result();
+                Value* first = b.Swizzle(sub_vec_ty, from, {0, 1});
                 first = BitcastOrConvertIfNeeded(BaseEleType(), first);
                 auto* access = b.Access(BaseEleTypePtr(), var, array_idx);
                 b.Store(access, first);
@@ -1563,7 +1563,7 @@ struct State {
                 } else {
                     array_idx = b.Add(array_idx, 1_u);
                 }
-                Value* second = b.Swizzle(sub_vec_ty, from, {2, 3})->Result();
+                Value* second = b.Swizzle(sub_vec_ty, from, {2, 3});
                 second = BitcastOrConvertIfNeeded(BaseEleType(), second);
                 access = b.Access(BaseEleTypePtr(), var, array_idx);
                 b.Store(access, second);

@@ -391,7 +391,7 @@ struct State {
 
                         b.InsertAfter(call, [&] {
                             auto* s = b.Swizzle(res->Type(), call, Vector<uint32_t, 1>{0});
-                            res->ReplaceAllUsesWith(s->Result());
+                            res->ReplaceAllUsesWith(s);
                         });
                         break;
                     }
@@ -555,7 +555,7 @@ struct State {
             if (tex_ty->Dim() == core::type::TextureDimension::k2dArray ||
                 tex_ty->Dim() == core::type::TextureDimension::kCubeArray) {
                 ret_type = ty.MatchWidth(ty.i32(), call->Result()->Type());
-                result = b.Swizzle(ret_type, result, {0, 1})->Result();
+                result = b.Swizzle(ret_type, result, {0, 1});
             }
 
             b.BitcastReplaceResult(call->DetachResult(), result);
@@ -590,7 +590,7 @@ struct State {
             auto* new_call = b.Call<glsl::ir::BuiltinCall>(ty.vec(ty.i32(), 3), func, new_args);
 
             auto* swizzle = b.Swizzle(ty.i32(), new_call, {2});
-            b.BitcastReplaceResult(call->DetachResult(), swizzle->Result());
+            b.BitcastReplaceResult(call->DetachResult(), swizzle);
         });
         call->Destroy();
     }
@@ -664,14 +664,14 @@ struct State {
             if (source_was_depth) {
                 fetch_ty = ty.vec4f();
             }
-            core::ir::Instruction* new_call =
-                b.Call<glsl::ir::BuiltinCall>(fetch_ty, func, std::move(call_args));
+            core::ir::Value* new_call =
+                b.Call<glsl::ir::BuiltinCall>(fetch_ty, func, std::move(call_args))->Result();
 
             if (source_was_depth) {
                 new_call = b.Swizzle(ty.f32(), new_call, {0});
             }
 
-            call->Result()->ReplaceAllUsesWith(new_call->Result());
+            call->Result()->ReplaceAllUsesWith(new_call);
         });
         call->Destroy();
     }

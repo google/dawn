@@ -248,7 +248,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             Vector<uint32_t, 4> swizzles = {2, 1, 0, 3};
             swizzles.Resize(original_type->Elements(nullptr, 1).count);
 
-            value = builder.Swizzle(original_type, value, swizzles)->Result();
+            value = builder.Swizzle(original_type, value, swizzles);
         }
 
         return value;

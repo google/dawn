@@ -457,21 +457,21 @@ struct State {
                             break;
                         }
                         case 3: {
-                            core::ir::Value* lhs = b.Swizzle(v2, val, {0, 1})->Result();
+                            core::ir::Value* lhs = b.Swizzle(v2, val, {0, 1});
                             lhs = pack_unpack(lhs);
 
-                            core::ir::Value* rhs = b.Swizzle(v2, val, {2, 2})->Result();
+                            core::ir::Value* rhs = b.Swizzle(v2, val, {2, 2});
                             rhs = pack_unpack(rhs);
-                            rhs = b.Swizzle(inner_ty, rhs, {0})->Result();
+                            rhs = b.Swizzle(inner_ty, rhs, {0});
 
                             ret = b.Construct(type, lhs, rhs);
                             break;
                         }
                         default: {
-                            core::ir::Value* lhs = b.Swizzle(v2, val, {0, 1})->Result();
+                            core::ir::Value* lhs = b.Swizzle(v2, val, {0, 1});
                             lhs = pack_unpack(lhs);
 
-                            core::ir::Value* rhs = b.Swizzle(v2, val, {2, 3})->Result();
+                            core::ir::Value* rhs = b.Swizzle(v2, val, {2, 3});
                             rhs = pack_unpack(rhs);
 
                             ret = b.Construct(type, lhs, rhs);
@@ -481,7 +481,7 @@ struct State {
                 } else {
                     ret = b.Construct(v2, val);
                     ret = pack_unpack(ret);
-                    ret = b.Swizzle(type, ret, {0})->Result();
+                    ret = b.Swizzle(type, ret, {0});
                 }
                 b.Return(f, ret);
             });

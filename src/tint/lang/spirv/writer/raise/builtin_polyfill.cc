@@ -1199,18 +1199,20 @@ struct State {
         }
 
         // Call the function.
-        core::ir::Instruction* result = b.CallExplicit<spirv::ir::BuiltinCall>(
-            result_ty, function, Vector<core::ir::TemplateParameter, 1>{ty.u32()},
-            std::move(function_args));
-        result->InsertBefore(builtin);
+        core::ir::Value* result = nullptr;
+        b.InsertBefore(builtin, [&] {
+            result = b.CallExplicit<spirv::ir::BuiltinCall>(
+                          result_ty, function, Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                          std::move(function_args))
+                         ->Result();
 
-        // Swizzle the first two components from the result for arrayed textures.
-        if (is_arrayed) {
-            result = b.Swizzle(builtin->Result()->Type(), result, {0, 1});
-            result->InsertBefore(builtin);
-        }
+            // Swizzle the first two components from the result for arrayed textures.
+            if (is_arrayed) {
+                result = b.Swizzle(builtin->Result()->Type(), result, {0, 1});
+            }
+        });
 
-        result->SetResult(builtin->DetachResult());
+        builtin->Result()->ReplaceAllUsesWith(result);
         builtin->Destroy();
     }
 

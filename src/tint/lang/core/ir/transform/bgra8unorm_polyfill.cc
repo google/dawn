@@ -122,13 +122,16 @@ struct State {
                             index = core::type::IsTextureArray(tex->Dim()) ? 3u : 2u;
                         }
                         auto* texel = call->Args()[index];
-                        auto* swizzle = b.Swizzle(texel->Type(), texel, Vector{2u, 1u, 0u, 3u});
-                        swizzle->InsertBefore(call);
-                        call->SetOperand(index, swizzle->Result());
+                        core::ir::Value* swizzle = nullptr;
+                        b.InsertBefore(call, [&] {
+                            swizzle = b.Swizzle(texel->Type(), texel, Vector{2u, 1u, 0u, 3u});
+                        });
+                        call->SetOperand(index, swizzle);
                     } else if (call->Func() == core::BuiltinFn::kTextureLoad) {
                         // Swizzle the result of a `textureLoad()` builtin.
                         auto* swizzle =
-                            b.Swizzle(call->Result()->Type(), nullptr, Vector{2u, 1u, 0u, 3u});
+                            b.Swizzle(call->Result()->Type(), nullptr, Vector{2u, 1u, 0u, 3u})
+                                ->AsInstruction<Swizzle>();
                         call->Result()->ReplaceAllUsesWith(swizzle->Result());
                         swizzle->InsertAfter(call);
                         swizzle->SetOperand(Swizzle::kObjectOperandOffset, call->Result());

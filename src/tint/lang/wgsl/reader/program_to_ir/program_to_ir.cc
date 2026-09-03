@@ -920,11 +920,12 @@ class Impl {
                             return impl.builder_.Constant(u32(indices[0]));
                         }
 
-                        core::ir::Swizzle* val;
-                        val = impl.builder_.Swizzle(ty, obj, std::move(indices));
+                        auto* val = impl.builder_.Swizzle(ty, obj, std::move(indices));
 
-                        impl.current_block_->Append(val);
-                        Bind(expr, val->Result());
+                        if (auto* val_inst = val->AsInstruction()) {
+                            impl.current_block_->Append(val_inst);
+                        }
+                        Bind(expr, val);
                         return nullptr;
                     },  //
                     TINT_ICE_ON_NO_MATCH);

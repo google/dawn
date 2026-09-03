@@ -4570,8 +4570,8 @@ class Parser {
             }
             auto* swizzle_type = ty_.MatchWidth(el_ty, current_indices.Length());
             auto* swizzle = b_.Swizzle(swizzle_type, current_vector, current_indices);
-            EmitWithoutSpvResult(swizzle->Result());
-            swizzles.Push(swizzle->Result());
+            EmitWithoutSpvResult(swizzle);
+            swizzles.Push(swizzle);
             current_indices.Clear();
         };
 

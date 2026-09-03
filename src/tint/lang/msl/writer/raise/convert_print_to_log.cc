@@ -94,22 +94,22 @@ struct State {
                 case core::ir::Function::PipelineStage::kCompute:
                     ss << "[ comp " << entry_point_name << ":L" << line
                        << " global_invocation_id(%u, %u, %u) ] ";
-                    args.Push(b.Swizzle<u32>(id, Vector{0u})->Result());
-                    args.Push(b.Swizzle<u32>(id, Vector{1u})->Result());
-                    args.Push(b.Swizzle<u32>(id, Vector{2u})->Result());
+                    args.Push(b.Swizzle<u32>(id, Vector{0u}));
+                    args.Push(b.Swizzle<u32>(id, Vector{1u}));
+                    args.Push(b.Swizzle<u32>(id, Vector{2u}));
                     break;
                 case core::ir::Function::PipelineStage::kFragment:
                     ss << "[ frag " << entry_point_name << ":L" << line
                        << " position(%f, %f, %f) ] ";
-                    args.Push(b.Swizzle<f32>(id, Vector{0u})->Result());
-                    args.Push(b.Swizzle<f32>(id, Vector{1u})->Result());
-                    args.Push(b.Swizzle<f32>(id, Vector{2u})->Result());
+                    args.Push(b.Swizzle<f32>(id, Vector{0u}));
+                    args.Push(b.Swizzle<f32>(id, Vector{1u}));
+                    args.Push(b.Swizzle<f32>(id, Vector{2u}));
                     break;
                 case core::ir::Function::PipelineStage::kVertex:
                     ss << "[ vert " << entry_point_name << ":L" << line
                        << " instance=%u, vertex=%u ] ";
-                    args.Push(b.Swizzle<u32>(id, Vector{0u})->Result());
-                    args.Push(b.Swizzle<u32>(id, Vector{1u})->Result());
+                    args.Push(b.Swizzle<u32>(id, Vector{0u}));
+                    args.Push(b.Swizzle<u32>(id, Vector{1u}));
                     break;
                 case core::ir::Function::PipelineStage::kUndefined:
                     TINT_IR_UNREACHABLE(ir);

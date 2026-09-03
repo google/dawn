@@ -1946,10 +1946,11 @@ class Builder {
     /// @param indices the swizzle indices
     /// @returns the instruction
     template <typename OBJ>
-    ir::Swizzle* Swizzle(const core::type::Type* type, OBJ&& object, VectorRef<uint32_t> indices) {
+    ir::Value* Swizzle(const core::type::Type* type, OBJ&& object, VectorRef<uint32_t> indices) {
         auto* obj_val = Value(std::forward<OBJ>(object));
         return Append(ir.CreateInstruction<ir::Swizzle>(InstructionResult(type), obj_val,
-                                                        std::move(indices)));
+                                                        std::move(indices)))
+            ->Result();
     }
 
     /// Creates a new `Swizzle`
@@ -1958,7 +1959,7 @@ class Builder {
     /// @param indices the swizzle indices
     /// @returns the instruction
     template <typename TYPE, typename OBJ>
-    ir::Swizzle* Swizzle(OBJ&& object, VectorRef<uint32_t> indices) {
+    ir::Value* Swizzle(OBJ&& object, VectorRef<uint32_t> indices) {
         auto* type = ir.Types().Get<TYPE>();
         return Swizzle(type, std::forward<OBJ>(object), std::move(indices));
     }
@@ -1969,12 +1970,11 @@ class Builder {
     /// @param indices the swizzle indices
     /// @returns the instruction
     template <typename OBJ>
-    ir::Swizzle* Swizzle(const core::type::Type* type,
-                         OBJ&& object,
-                         std::initializer_list<uint32_t> indices) {
+    ir::Value* Swizzle(const core::type::Type* type,
+                       OBJ&& object,
+                       std::initializer_list<uint32_t> indices) {
         auto* obj_val = Value(std::forward<OBJ>(object));
-        return Append(ir.CreateInstruction<ir::Swizzle>(InstructionResult(type), obj_val,
-                                                        Vector<uint32_t, 4>(indices)));
+        return Swizzle(type, obj_val, Vector<uint32_t, 4>(indices));
     }
 
     /// Name names the value or instruction with @p name

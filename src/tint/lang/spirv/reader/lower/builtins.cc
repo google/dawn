@@ -836,7 +836,7 @@ struct State {
                 auto* c = b.Call(vec_ty, core::BuiltinFn::kRefract,
                                  Vector<core::ir::Value*, 3>{I, N, eta});
                 auto* s = b.Swizzle(src_ty, c, {0});
-                call->Result()->ReplaceAllUsesWith(s->Result());
+                call->Result()->ReplaceAllUsesWith(s);
             } else {
                 b.CallReplaceResult(call->DetachResult(), core::BuiltinFn::kRefract,
                                     Vector<core::ir::Value*, 3>{I, N, eta});
