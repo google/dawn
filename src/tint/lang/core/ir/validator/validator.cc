@@ -190,14 +190,6 @@ diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx)
     return diag;
 }
 
-diag::Diagnostic& Validator::AddNote(const Instruction* inst) {
-    return AddNote(SourceOf(inst));
-}
-
-diag::Diagnostic& Validator::AddNote(const Function* func) {
-    return AddNote(SourceOf(func));
-}
-
 diag::Diagnostic& Validator::AddOperandNote(const Instruction* inst, size_t idx) {
     return AddNote(SourceOf(inst, idx));
 }
@@ -209,10 +201,22 @@ diag::Diagnostic& Validator::AddResultNote(const Instruction* inst, size_t idx) 
     return AddNote(src);
 }
 
+diag::Diagnostic& Validator::AddNote(const Instruction* inst) {
+    return AddNote(SourceOf(inst));
+}
+
+diag::Diagnostic& Validator::AddNote(const Function* func) {
+    return AddNote(SourceOf(func));
+}
+
 diag::Diagnostic& Validator::AddNote(const Block* blk) {
     TINT_IR_ASSERT(ir_, IsIRValidation());
     auto src = Disassemble().BlockSource(blk);
     return AddNote(src);
+}
+
+diag::Diagnostic& Validator::AddNote(const Instruction* inst, size_t idx) {
+    return AddNote(SourceOf(inst, idx));
 }
 
 diag::Diagnostic& Validator::AddNote(Source src) {

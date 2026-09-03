@@ -28,7 +28,6 @@
 #include <limits>
 #include <utility>
 
-#include "src/tint/lang/core/intrinsic/dialect.h"
 #include "src/tint/lang/core/ir/array_count.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
@@ -38,22 +37,13 @@
 #include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
 #include "src/tint/lang/core/ir/unreachable.h"
-#include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
-#include "src/tint/lang/core/type/f16.h"
-#include "src/tint/lang/core/type/f32.h"
-#include "src/tint/lang/core/type/i32.h"
-#include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"
-#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/swizzle_view.h"
-#include "src/tint/lang/core/type/u32.h"
-#include "src/tint/lang/core/type/u64.h"
-#include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/containers/transform.h"
@@ -474,7 +464,7 @@ void Functional::CheckBlock(const Block* blk) {
 void Functional::CheckInstruction(const Instruction* inst) {
     tint::Switch(
         inst,                                              //
-        [&](const Access* a) { CheckAccess(a); },          //
+        [&](const Access*) {},                             //
         [&](const Binary* b) { CheckBinary(b); },          //
         [&](const Call* c) { CheckCall(c); },              //
         [&](const If* if_) { CheckIf(if_); },              //
@@ -482,12 +472,12 @@ void Functional::CheckInstruction(const Instruction* inst) {
         [&](const Load*) {},                               //
         [&](const LoadVectorElement*) {},                  //
         [&](const Loop* l) { CheckLoop(l); },              //
-        [&](const Override* o) { CheckOverride(o); },      //
+        [&](const Override*) {},                           //
         [&](const Phony*) {},                              //
         [&](const Store*) {},                              //
         [&](const StoreVectorElement*) {},                 //
         [&](const Switch* s) { CheckSwitch(s); },          //
-        [&](const Swizzle* s) { CheckSwizzle(s); },        //
+        [&](const Swizzle*) {},                            //
         [&](const Terminator* b) { CheckTerminator(b); },  //
         [&](const Unary* u) { CheckUnary(u); },            //
         [&](const Var*) {},                                //
@@ -540,149 +530,16 @@ void Functional::CheckAlignment(const Instruction* inst) {
     }
 }
 
-void Functional::CheckOverride(const Override* o) {
-    if (o->OverrideId().has_value()) {
-        if (!seen_override_ids_.Add(o->OverrideId().value())) {
-            AddError(o) << "duplicate override id encountered: " << o->OverrideId().value().value;
-            return;
-        }
-    }
-
-    if (!o->Result()->Type()->IsScalar()) {
-        AddError(o) << "override type " << NameOf(o->Result()->Type()) << " is not a scalar";
-        return;
-    }
-
-    if (o->Initializer() && o->Initializer()->Type() != o->Result()->Type()) {
-        AddError(o) << "override type " << NameOf(o->Result()->Type())
-                    << " does not match initializer type " << NameOf(o->Initializer()->Type());
-        return;
-    }
-
-    if (!o->OverrideId().has_value() && (o->Initializer() == nullptr)) {
-        AddError(o) << "must have an id or an initializer";
-        return;
-    }
-}
-
 void Functional::CheckCall(const Call* call) {
     tint::Switch(
         call,                                                            //
         [&](const BuiltinCall* c) { CheckBuiltinCall(c); },              //
         [&](const Construct*) {},                                        //
-        [&](const Convert* c) { CheckConvert(c); },                      //
+        [&](const Convert*) {},                                          //
         [&](const Discard*) {},                                          //
         [&](const MemberBuiltinCall* c) { CheckMemberBuiltinCall(c); },  //
         [&](const UserCall*) {},                                         //
         [&](Default) { /* Validation of custom IR instructions */ });
-}
-
-void Functional::CheckAccess(const Access* a) {
-    auto* obj_view = a->Object()->Type()->As<core::type::MemoryView>();
-    auto* ty = obj_view ? obj_view->StoreType() : a->Object()->Type();
-
-    enum Kind : uint8_t {
-        kPtr,
-        kRef,
-        kValue,
-    };
-    const Kind in_kind = tint::Switch(
-        a->Object()->Type(),                                 //
-        [&](const core::type::Pointer*) { return kPtr; },    //
-        [&](const core::type::Reference*) { return kRef; },  //
-        [&](Default) { return kValue; });
-
-    auto desc_of = [&](Kind kind, const core::type::Type* type) {
-        switch (kind) {
-            case kPtr:
-                return StyledText{}
-                       << style::Type("ptr<", obj_view->AddressSpace(), ", ", type->FriendlyName(),
-                                      ", ", obj_view->Access(), ">");
-            case kRef:
-                return StyledText{}
-                       << style::Type("ref<", obj_view->AddressSpace(), ", ", type->FriendlyName(),
-                                      ", ", obj_view->Access(), ">");
-            default:
-                return NameOf(type);
-        }
-    };
-
-    for (size_t i = 0; i < a->Indices().size(); i++) {
-        auto err = [&]() -> diag::Diagnostic& {
-            return AddError(a, i + Access::kIndicesOperandOffset);
-        };
-
-        auto* index = a->Indices()[i];
-        if (DAWN_UNLIKELY((!index->Type()->IsAnyOf<core::type::I32, core::type::U32>()))) {
-            err() << "index type " << NameOf(index->Type()) << " must be i32 or u32";
-            return;
-        }
-
-        if (!ir_.properties.Contains(Property::kAllowVectorElementPointer)) {
-            if (in_kind != kValue && ty->Is<core::type::Vector>()) {
-                err() << "cannot obtain address of vector element";
-                return;
-            }
-        }
-
-        if (auto* const_index = index->As<ir::Constant>()) {
-            auto* value = const_index->Value();
-            if (value->Type()->IsSignedIntegerScalar()) {
-                // index is a signed integer scalar. Check that the index isn't negative.
-                // If the index is unsigned, we can skip this.
-                auto idx = value->ValueAs<AInt>();
-                if (DAWN_UNLIKELY(idx < 0)) {
-                    err() << "constant index must be positive, got " << idx;
-                    return;
-                }
-            }
-
-            auto idx = value->ValueAs<uint32_t>();
-            auto* el = ty->Element(idx);
-            if (DAWN_UNLIKELY(!el)) {
-                // Is index in bounds?
-                if (auto el_count = ty->Elements().count; el_count != 0 && idx >= el_count) {
-                    err() << "index out of bounds for type " << desc_of(in_kind, ty);
-                    AddNote(a, i + Access::kIndicesOperandOffset)
-                        << "acceptable range: [0.." << (el_count - 1) << "]";
-                    return;
-                }
-                err() << "type " << desc_of(in_kind, ty) << " cannot be indexed";
-                return;
-            }
-            ty = el;
-        } else {
-            auto* el = ty->Elements().type;
-            if (DAWN_UNLIKELY(!el)) {
-                err() << "type " << desc_of(in_kind, ty) << " cannot be dynamically indexed";
-                return;
-            }
-            ty = el;
-        }
-    }
-
-    auto* want = a->Result()->Type();
-    auto* want_view = want->As<core::type::MemoryView>();
-    bool ok = true;
-    if (obj_view) {
-        // Pointer source always means pointer result.
-        ok = (want_view != nullptr) && ty == want_view->StoreType();
-        if (ok) {
-            // Also check that the address space and access modes match.
-            bool base_is_ptr = obj_view->IsAnyOf<core::type::Pointer, core::type::SwizzleView>();
-            ok =
-                base_is_ptr == want_view->IsAnyOf<core::type::Pointer, core::type::SwizzleView>() &&
-                obj_view->AddressSpace() == want_view->AddressSpace() &&
-                obj_view->Access() == want_view->Access();
-        }
-    } else {
-        // Otherwise, result types should exactly match.
-        ok = ty == want;
-    }
-    if (DAWN_UNLIKELY(!ok)) {
-        AddError(a) << "result of access chain is type " << desc_of(in_kind, ty)
-                    << " but instruction type is " << NameOf(want);
-    }
 }
 
 void Functional::CheckBinary(const Binary* b) {
@@ -865,56 +722,6 @@ void Functional::CheckSwitch(const Switch* s) {
 
     if (!found_default) {
         AddError(s) << "missing default case for switch";
-    }
-}
-
-void Functional::CheckSwizzle(const Swizzle* s) {
-    auto* result_ty = s->Result()->Type();
-
-    auto* obj_ty = s->Object()->Type();
-    auto* src_mv = obj_ty->As<core::type::MemoryView>();
-    auto* src_vec =
-        src_mv ? src_mv->StoreType()->As<core::type::Vector>() : obj_ty->As<core::type::Vector>();
-    if (!src_vec) {
-        AddError(s) << "object of swizzle, " << NameOf(s->Object()) << ", is not a vector, "
-                    << NameOf(s->Object()->Type());
-        return;
-    }
-
-    auto indices = s->Indices();
-    if (indices.Length() < Swizzle::kMinNumIndices) {
-        AddError(s) << "expected at least " << Swizzle::kMinNumIndices << " indices";
-        return;
-    }
-
-    if (indices.Length() > Swizzle::kMaxNumIndices) {
-        AddError(s) << "expected at most " << Swizzle::kMaxNumIndices << " indices";
-        return;
-    }
-
-    auto elem_count = src_vec->Elements().count;
-    for (auto& idx : indices) {
-        if (idx > Swizzle::kMaxIndexValue || idx >= elem_count) {
-            AddError(s) << "invalid index value";
-            return;
-        }
-    }
-
-    auto* elem_ty = src_vec->Elements().type;
-    auto* expected_store_ty = type_mgr_.MatchWidth(elem_ty, indices.Length());
-    const core::type::Type* expected_ty = nullptr;
-    if (src_mv) {
-        expected_ty = type_mgr_.Get<core::type::SwizzleView>(
-            src_mv->AddressSpace(), expected_store_ty, src_mv->Access(), src_vec->Width(),
-            static_cast<uint32_t>(indices.Length()));
-    } else {
-        expected_ty = expected_store_ty;
-    }
-
-    if (result_ty != expected_ty) {
-        AddError(s) << "result type " << NameOf(result_ty) << " does not match expected type, "
-                    << NameOf(expected_ty);
-        return;
     }
 }
 
@@ -1230,45 +1037,6 @@ void Functional::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
         // (e.g. HLSL) validation tests.
         AddError(call) << "member call result type " << NameOf(call->Result()->Type())
                        << " does not match builtin return type " << NameOf(result->return_type);
-    }
-}
-
-void Functional::CheckConvert(const Convert* convert) {
-    auto* result_type = convert->Result()->Type();
-    auto* value_type = convert->Operand(Convert::kValueOperandOffset)->Type();
-
-    intrinsic::CtorConv conv_ty;
-    Vector<TemplateParameter, 1> template_type;
-    tint::Switch(
-        result_type,                                                             //
-        [&](const core::type::I32*) { conv_ty = intrinsic::CtorConv::kI32; },    //
-        [&](const core::type::U32*) { conv_ty = intrinsic::CtorConv::kU32; },    //
-        [&](const core::type::U64*) { conv_ty = intrinsic::CtorConv::kU64; },    //
-        [&](const core::type::F32*) { conv_ty = intrinsic::CtorConv::kF32; },    //
-        [&](const core::type::F16*) { conv_ty = intrinsic::CtorConv::kF16; },    //
-        [&](const core::type::Bool*) { conv_ty = intrinsic::CtorConv::kBool; },  //
-        [&](const core::type::Vector* v) {
-            conv_ty = intrinsic::VectorCtorConv(v->Width());
-            template_type.Push(v->Type());
-        },
-        [&](const core::type::Matrix* m) {
-            conv_ty = intrinsic::MatrixCtorConv(m->Columns(), m->Rows());
-            template_type.Push(m->Type());
-        },
-        [&](Default) { conv_ty = intrinsic::CtorConv::kNone; });
-
-    if (conv_ty == intrinsic::CtorConv::kNone) {
-        AddError(convert) << "not defined for result type, " << NameOf(result_type);
-        return;
-    }
-
-    auto table = intrinsic::Table<intrinsic::Dialect>(type_mgr_, symbols_);
-    auto match =
-        table.Lookup(conv_ty, template_type, Vector{value_type}, core::EvaluationStage::kOverride);
-    if (match != Success || !match->info->flags.Contains(intrinsic::OverloadFlag::kIsConverter)) {
-        AddError(convert) << "No defined converter for " << NameOf(value_type) << " -> "
-                          << NameOf(result_type);
-        return;
     }
 }
 

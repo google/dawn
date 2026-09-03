@@ -279,6 +279,7 @@ class Validator {
     diag::Diagnostic& AddNote(const Function* func);
     diag::Diagnostic& AddNote(const Block* blk);
     diag::Diagnostic& AddNote(Source src = {});
+    diag::Diagnostic& AddNote(const Instruction* inst, size_t idx);
 
     diag::Diagnostic& AddOperandNote(const Instruction* inst, size_t idx);
     diag::Diagnostic& AddResultNote(const Instruction* inst, size_t idx);
@@ -526,10 +527,12 @@ class Validator {
 
     Hashset<const Function*, 4> all_functions_;
     Hashset<const Instruction*, 4> visited_instructions_;
+    Hashset<const core::type::Type*, 16> validated_types_{};
+    Hashset<OverrideId, 8> seen_override_ids_;
+
     Hashmap<const ir::Block*, const ir::Function*, 64> block_to_function_{};
     Hashmap<const ir::Function*, Hashset<const ir::UserCall*, 4>, 4> user_func_calls_;
     Hashmap<const ir::Instruction*, SupportedStages, 4> stage_restricted_instructions_;
-    Hashset<const core::type::Type*, 16> validated_types_{};
     Hashmap<const core::type::Type*, uint64_t, 16> max_nest_depth_{};
     Hashmap<const core::type::Type*, uint64_t, 16> elements_counts_;
 

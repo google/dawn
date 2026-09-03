@@ -31,36 +31,26 @@
 #include <string>
 
 #include "src/tint/lang/core/intrinsic/table.h"
-#include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/builtin_call.h"
 #include "src/tint/lang/core/ir/call.h"
-#include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
-#include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/exit.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/if.h"
-#include "src/tint/lang/core/ir/let.h"
-#include "src/tint/lang/core/ir/load.h"
-#include "src/tint/lang/core/ir/load_vector_element.h"
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/member_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/return.h"
-#include "src/tint/lang/core/ir/store.h"
-#include "src/tint/lang/core/ir/store_vector_element.h"
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/unary.h"
-#include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/utils/containers/hashmap.h"
@@ -136,12 +126,10 @@ class Functional {
     /// @param inst the instruction to validate
     void CheckAlignment(const Instruction* inst);
 
-    void CheckAccess(const Access* a);
     void CheckBinary(const Binary* b);
     void CheckBuiltinCall(const BuiltinCall* call);
     void CheckCall(const Call* call);
     void CheckContinue(const Continue* c);
-    void CheckConvert(const Convert* convert);
     void CheckCoreBuiltinCall(const CoreBuiltinCall* call,
                               const core::intrinsic::Overload& overload);
     void CheckIf(const If* if_);
@@ -149,10 +137,8 @@ class Functional {
     void CheckLoopBody(const Loop* loop);
     void CheckLoopContinuing(const Loop* loop);
     void CheckMemberBuiltinCall(const MemberBuiltinCall* call);
-    void CheckOverride(const Override* o);
     void CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call);
     void CheckSwitch(const Switch* s);
-    void CheckSwizzle(const Swizzle* s);
     void CheckTerminator(const Terminator* b);
     void CheckUnary(const Unary* u);
 
@@ -197,7 +183,6 @@ class Functional {
     core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
 
     Vector<const Block*, 8> block_stack_;
-    Hashset<OverrideId, 8> seen_override_ids_;
     Hashmap<const Loop*, const Continue*, 4> first_continues_;
     Hashset<std::string, 4> entry_point_names_;
 };
