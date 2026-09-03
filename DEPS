@@ -23,7 +23,7 @@ vars = {
   'dawn_wasm': False, # Also fetches dependencies required for building WebAssembly.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'dawn_gn_version': 'git_revision:f73e445a29d44030f1904770f37f0af6d6e0fe6d',
+  'dawn_gn_version': 'git_revision:7826279d0e70c08cd639db7c845b9eef56a76bdf',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
@@ -79,7 +79,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': 'c6d0d5135e9336f07ffeb6f02efa94666dadce24',
+  'chromium_revision': '32ba303f0c0b087bbd29afe25cba2054218e4b7a',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -140,7 +140,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@0833022c601133d858cbee4faf6bc5ce556afb14',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@fa754cb8cf5e2f181b070e9eb4f93083cc367696',
     'condition': 'dawn_standalone',
   },
 
@@ -156,7 +156,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@9ef880711f71a40ded3f48d7b3212adfa27ac110',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@939d22db6b65ba6e08b2a1e207f675501cd688aa',
     'condition': 'dawn_standalone',
   },
 
@@ -171,11 +171,11 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@8ca8a372cab9ff143072204053d30fbc2c17bd7a',
+  'url': '{chromium_git}/chromium/src/build@79a1bf83d34af212d9162a2f0c38e2233b42c040',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@450d823868eaee61e2b2cb986e19aec287f16d58',
+  'url': '{chromium_git}/chromium/src/tools/clang@682a3de1d920bcbd7fa4227f8ee9b3b91164e007',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
@@ -197,7 +197,7 @@ deps = {
 
   # For run-tricium-clang-tidy.py
   'third_party/chromium-tools-build/src': {
-    'url': '{chromium_git}/chromium/tools/build@2e34fb835dd33c3cdded33f017982609f2f51c45',
+    'url': '{chromium_git}/chromium/tools/build@a4e658f57673a126caab1bc6bbbe28a0391b1c77',
     'condition': 'dawn_standalone and checkout_clang_tidy',
   },
 
@@ -291,11 +291,11 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@0ca58e376a4281dd6af00d2a0bf33e157f7abf8d',
+    'url': '{chromium_git}/chromium/src/testing@fb6b31635de1c9da38906dbc501cda589f85a337',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/compiler-rt/lib/fuzzer.git' + '@' + '0c7e676c31406858959ad31f2954dcbf0e18319e',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/compiler-rt/lib/fuzzer.git' + '@' + '8c09a8f461575f5fc009c4053a18611e23e3879c',
     'condition': 'dawn_standalone',
   },
   'third_party/googletest/src': {
@@ -304,7 +304,7 @@ deps = {
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@50c971fc0958d8c1fb0adcc97f41b90042fa7c87',
+    'url': '{chromium_git}/catapult.git@6ef72859fa1cbdd2aeaa4147467ab3896ff098ed',
     'condition': 'dawn_standalone',
   },
   'third_party/google_benchmark/src': {
@@ -312,7 +312,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/perfetto': {
-    'url': '{chromium_git}/external/github.com/google/perfetto.git@5dbeaad4ceb91470a835426b52e0cb43a3e5ef10',
+    'url': '{chromium_git}/external/github.com/google/perfetto.git@78c48fcab714ccbd4330e177394867693999b56d',
     'condition': 'dawn_standalone',
   },
 
