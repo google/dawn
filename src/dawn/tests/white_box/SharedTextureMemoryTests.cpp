@@ -981,6 +981,10 @@ T& AsNonConst(const T& rhs) {
 // Test that creating shared texture memory without the required features is an error.
 // Using the memory thereafter produces errors.
 TEST_P(SharedTextureMemoryNoFeatureTests, CreationWithoutFeature) {
+    // TODO(crbug.com/555876250): "Failed to create GBM buffer object" crashes the tests.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia() &&
+                          GetParam().mBackend->Name().find("dma buf") != std::string::npos);
+
     // Create external texture memories with an error filter.
     // We should see a message that the feature is not enabled.
     device.PushErrorScope(wgpu::ErrorFilter::Validation);

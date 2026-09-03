@@ -1126,7 +1126,10 @@ ci.thin_tester(
         run_tests_serially = True,
     ),
     targets = targets.bundle(
-        targets = [],
+        targets = [
+            "real_hardware_common_gtests",
+            "litert_lm_benchmark",
+        ],
         mixins = [
             "linux_nvidia_gtx_1660_experimental",
         ],
