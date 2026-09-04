@@ -994,8 +994,8 @@ void Validator::CheckConstruct(const Construct* construct) {
     auto arg_types = Transform<4>(args, [&](auto* v) { return v->Type(); });
     if (auto* vec = result_type->As<core::type::Vector>()) {
         auto ctor_conv = intrinsic::VectorCtorConv(vec->Width());
-        auto match = table.Lookup(ctor_conv, Vector<TemplateParameter, 1>{vec->Type()},
-                                  std::move(arg_types), core::EvaluationStage::kConstant);
+        auto match = table.Lookup(ctor_conv, Vector<TemplateParameter, 1>{vec->Type()}, arg_types,
+                                  core::EvaluationStage::kConstant);
         if (match != Success ||
             !match->info->flags.Contains(intrinsic::OverloadFlag::kIsConstructor) ||
             vec->Type() != arg_types[0]->DeepestElement()) {
@@ -1007,8 +1007,8 @@ void Validator::CheckConstruct(const Construct* construct) {
 
     if (auto* mat = result_type->As<core::type::Matrix>()) {
         auto ctor_conv = intrinsic::MatrixCtorConv(mat->Columns(), mat->Rows());
-        auto match = table.Lookup(ctor_conv, Vector<TemplateParameter, 1>{mat->Type()},
-                                  std::move(arg_types), core::EvaluationStage::kConstant);
+        auto match = table.Lookup(ctor_conv, Vector<TemplateParameter, 1>{mat->Type()}, arg_types,
+                                  core::EvaluationStage::kConstant);
         if (match != Success ||
             !match->info->flags.Contains(intrinsic::OverloadFlag::kIsConstructor)) {
             AddError(construct) << "no matching overload for " << mat->FriendlyName()
