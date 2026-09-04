@@ -63,7 +63,9 @@ class array {
 
     // Methods that are exactly like std::array
 
-    constexpr bool operator==(const array<Index, Value, Size>& other) const = default;
+    constexpr bool operator==(const array<Index, Value, Size>& other) const {
+        return mPrivate == other.mPrivate;
+    }
 
     constexpr auto begin() { return mPrivate.begin(); }
     constexpr auto begin() const { return mPrivate.begin(); }
