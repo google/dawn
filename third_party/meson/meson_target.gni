@@ -221,8 +221,8 @@ template("_meson_setup") {
       _zstd_include_dir =
           rebase_path("${meson_zstd_dir}/include", root_build_dir)
 
-      _c_args = "-I${_zstd_include_dir}"
-      _cpp_args = "-I${_zstd_include_dir}"
+      _c_args = "-I${_zstd_include_dir} -w"
+      _cpp_args = "-I${_zstd_include_dir} -w"
       _c_link_args = "-fuse-ld=lld -L${_zstd_lib_dir}"
       _cpp_link_args = "-fuse-ld=lld -L${_zstd_lib_dir}"
 
