@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/msl/writer/printer/printer.h"
 
+#include <algorithm>
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
@@ -838,10 +839,10 @@ class Printer : public tint::TextGenerator {
         }
     }
 
-    void EmitVectorAccess(StringStream& out, const core::ir::Value* index) {
+    void EmitVectorAccess(StringStream& out, const core::ir::Value* index, uint32_t max) {
         if (auto* cnst = index->As<core::ir::Constant>()) {
             out << ".";
-            IdxToComponent(out, cnst->Value()->ValueAs<uint32_t>());
+            IdxToComponent(out, std::min(cnst->Value()->ValueAs<uint32_t>(), max));
         } else {
             out << "[";
             EmitValue(out, index);
@@ -853,7 +854,8 @@ class Printer : public tint::TextGenerator {
         auto out = Line();
 
         EmitAndDerefIfNeeded(out, s->To());
-        EmitVectorAccess(out, s->Index());
+        EmitVectorAccess(out, s->Index(),
+                         s->To()->Type()->UnwrapPtr()->As<core::type::Vector>()->Width() - 1);
         out << " = ";
         EmitValue(out, s->Value());
         out << ";";
@@ -861,7 +863,8 @@ class Printer : public tint::TextGenerator {
 
     void EmitLoadVectorElement(StringStream& out, const core::ir::LoadVectorElement* l) {
         EmitAndDerefIfNeeded(out, l->From());
-        EmitVectorAccess(out, l->Index());
+        EmitVectorAccess(out, l->Index(),
+                         l->From()->Type()->UnwrapPtr()->As<core::type::Vector>()->Width() - 1);
     }
 
     /// Emit an if instruction
@@ -964,8 +967,8 @@ class Printer : public tint::TextGenerator {
                     out << "." << NameOf(member);
                     current_type = member->Type();
                 },
-                [&](const core::type::Vector*) {  //
-                    EmitVectorAccess(out, index);
+                [&](const core::type::Vector* vec) {  //
+                    EmitVectorAccess(out, index, vec->Width() - 1);
                 },
                 [&](Default) {
                     out << "[";

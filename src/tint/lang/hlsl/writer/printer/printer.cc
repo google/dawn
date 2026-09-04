@@ -380,10 +380,11 @@ class Printer : public tint::TextGenerator {
 
     void EmitDiscard() { Line() << "discard;"; }
 
-    void EmitVectorAccess(StringStream& out, const core::ir::Value* index) {
+    void EmitVectorAccess(StringStream& out, const core::ir::Value* index, uint32_t max) {
         if (auto* cnst = index->As<core::ir::Constant>()) {
+            uint32_t val = std::min(cnst->Value()->ValueAs<uint32_t>(), max);
             out << ".";
-            switch (cnst->Value()->ValueAs<uint32_t>()) {
+            switch (val) {
                 case 0:
                     out << "x";
                     break;
@@ -411,7 +412,8 @@ class Printer : public tint::TextGenerator {
         auto out = Line();
 
         EmitValue(out, l->To());
-        EmitVectorAccess(out, l->Index());
+        EmitVectorAccess(out, l->Index(),
+                         l->To()->Type()->UnwrapPtr()->As<core::type::Vector>()->Width() - 1);
         out << " = ";
         EmitValue(out, l->Value());
         out << ";";
@@ -419,7 +421,8 @@ class Printer : public tint::TextGenerator {
 
     void EmitLoadVectorElement(StringStream& out, const core::ir::LoadVectorElement* l) {
         EmitValue(out, l->From());
-        EmitVectorAccess(out, l->Index());
+        EmitVectorAccess(out, l->Index(),
+                         l->From()->Type()->UnwrapPtr()->As<core::type::Vector>()->Width() - 1);
     }
 
     void EmitExitSwitch() { Line() << "break;"; }
@@ -1081,9 +1084,9 @@ class Printer : public tint::TextGenerator {
                     out << "." << NameOf(member);
                     current_type = member->Type();
                 },
-                [&](const core::type::Vector*) {
+                [&](const core::type::Vector* vec) {
                     TINT_IR_ASSERT(ir_, index == a->Indices().back());
-                    EmitVectorAccess(out, index);
+                    EmitVectorAccess(out, index, vec->Width() - 1);
                 },
                 [&](Default) {
                     out << "[";

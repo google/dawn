@@ -1924,17 +1924,20 @@ void Validator::CheckLoadVectorElement(const LoadVectorElement* l) {
         AddError(l, LoadVectorElement::kIndexOperandOffset)
             << "load vector element index must be an integer scalar";
     }
-    if (auto* c = l->Index()->As<Constant>()) {
-        uint32_t val = c->Value()->ValueAs<uint32_t>();
 
-        const core::type::Vector* vec_ty =
-            l->From()->Type()->UnwrapPtrOrRef()->As<core::type::Vector>();
-        TINT_ASSERT(vec_ty);
+    if (IsWGSLValidation()) {
+        if (auto* c = l->Index()->As<Constant>()) {
+            uint32_t val = c->Value()->ValueAs<uint32_t>();
 
-        if (val >= vec_ty->Width()) {
-            AddError(l, LoadVectorElement::kIndexOperandOffset)
-                << "load vector element index must be in range [0, " << (vec_ty->Width() - 1)
-                << "]";
+            const core::type::Vector* vec_ty =
+                l->From()->Type()->UnwrapPtrOrRef()->As<core::type::Vector>();
+            TINT_ASSERT(vec_ty);
+
+            if (val >= vec_ty->Width()) {
+                AddError(l, LoadVectorElement::kIndexOperandOffset)
+                    << "load vector element index must be in range [0, " << (vec_ty->Width() - 1)
+                    << "]";
+            }
         }
     }
 }
@@ -1972,18 +1975,22 @@ void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
             << "store vector element index must be an integer scalar";
     }
 
-    const Constant* c = s->Index()->As<Constant>();
-    if (c == nullptr) {
-        return;
-    }
+    if (IsWGSLValidation()) {
+        const Constant* c = s->Index()->As<Constant>();
+        if (c == nullptr) {
+            return;
+        }
 
-    uint32_t val = c->Value()->ValueAs<uint32_t>();
-    const core::type::Vector* vec_ty = s->To()->Type()->UnwrapPtrOrRef()->As<core::type::Vector>();
-    TINT_ASSERT(vec_ty);
+        uint32_t val = c->Value()->ValueAs<uint32_t>();
+        const core::type::Vector* vec_ty =
+            s->To()->Type()->UnwrapPtrOrRef()->As<core::type::Vector>();
+        TINT_ASSERT(vec_ty);
 
-    if (val >= vec_ty->Width()) {
-        AddError(s, StoreVectorElement::kIndexOperandOffset)
-            << "store vector element index must be in range [0, " << (vec_ty->Width() - 1) << "]";
+        if (val >= vec_ty->Width()) {
+            AddError(s, StoreVectorElement::kIndexOperandOffset)
+                << "store vector element index must be in range [0, " << (vec_ty->Width() - 1)
+                << "]";
+        }
     }
 }
 

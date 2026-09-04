@@ -1028,15 +1028,13 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_ConstantIndexOutOfRange) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod);
+    auto res = ir::Validate(mod, ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:4:38 error: load_vector_element: load vector element index must be in range [0, 3]
-    %3:f32 = load_vector_element %2, 7u
-                                     ^^
-)")) << res.Failure();
+            R"(error: load_vector_element: load vector element index must be in range [0, 3])"))
+        << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, StoreVectorElement_NullTo) {
@@ -1187,15 +1185,13 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_ConstantIndexOutOfRange) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod);
+    auto res = ir::Validate(mod, ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:4:30 error: store_vector_element: store vector element index must be in range [0, 1]
-    store_vector_element %2, 7u, 1.0f
-                             ^^
-)")) << res.Failure();
+            R"(error: store_vector_element: store vector element index must be in range [0, 1])"))
+        << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, LoadVectorElement_MismatchedResultType) {
