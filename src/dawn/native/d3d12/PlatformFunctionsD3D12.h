@@ -112,7 +112,6 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
     DynamicLib mD3D12Lib;
     DynamicLib mD3D11Lib;
     DynamicLib mPIXEventRuntimeLib;
-    DynamicLib mDXILLib;
     DynamicLib mDXCompilerLib;
 
 #ifdef DAWN_USE_AGILITY_SDK

@@ -205,23 +205,16 @@ MaybeError PlatformFunctions::EnsureDXCLibraries(std::span<const std::string> se
     // TODO(dawn:766)
     // Statically linked with dxcompiler.lib in UWP
     // currently linked with dxcompiler.lib making CoreApp unable to activate
-    // LoadDXIL and LoadDXCompiler will fail in UWP, but Initialize() can still be
+    // LoadDXCompiler will fail in UWP, but Initialize() can still be
     // successfully executed.
 
-    if (mDXILLib.Valid()) {
-        // The libraries are already loaded, no need to load them again.
-        DAWN_CHECK(mDXCompilerLib.Valid());
+    if (mDXCompilerLib.Valid()) {
+        // The library is already loaded, no need to load it again.
         return {};
     }
 
-    DynamicLib dxilLib;
-    std::string error;
-    // DXIL must be loaded before DXC, otherwise shader signing is unavailable
-    if (!dxilLib.Open("dxil.dll", searchPaths, &error)) {
-        return DAWN_INTERNAL_ERROR(std::move(error));
-    }
-
     DynamicLib dxCompilerLib;
+    std::string error;
     if (!dxCompilerLib.Open("dxcompiler.dll", searchPaths, &error)) {
         return DAWN_INTERNAL_ERROR(std::move(error));
     }
@@ -231,7 +224,6 @@ MaybeError PlatformFunctions::EnsureDXCLibraries(std::span<const std::string> se
     }
 
     mDXCompilerLib = std::move(dxCompilerLib);
-    mDXILLib = std::move(dxilLib);
     return {};
 }
 #endif  // DAWN_USE_BUILT_DXC

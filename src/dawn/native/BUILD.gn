@@ -617,6 +617,9 @@ source_set("sources") {
     if (dawn_use_built_dxc) {
       deps += [ "${dawn_dxc_gn_dir}:dxcompiler" ]
       defines += [ "DAWN_USE_BUILT_DXC" ]
+
+      # TODO(crbug.com/557202206): Clean up after Chromium removes dxil.dll
+      # packaging.
       data_deps += [ "${dawn_dxc_gn_dir}:copy_dxil_dll" ]
     }
     libs += [ "dxguid.lib" ]

@@ -165,9 +165,7 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "This setting is used to test bindgroup encoding.",
       "https://crbug.com/dawn/155", ToggleStage::Device}},
     {Toggle::UseDXC,
-     {"use_dxc",
-      "Use DXC instead of FXC for compiling HLSL when both dxcompiler.dll and dxil.dll is "
-      "available.",
+     {"use_dxc", "Use DXC instead of FXC for compiling HLSL when dxcompiler.dll is available.",
       "https://crbug.com/dawn/402", ToggleStage::Adapter}},
     {Toggle::DisableRobustness,
      {"disable_robustness", "Disable robust buffer access", "https://crbug.com/dawn/480",

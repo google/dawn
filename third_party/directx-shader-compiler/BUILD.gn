@@ -2546,6 +2546,8 @@ executable("dxc") {
 
 # Define a target to copy the DXIL signing library, dxil.dll, to the output
 # directory
+# TODO(crbug.com/557202206): Clean up this target after Chromium removes
+# dxil.dll from packaging.
 if (is_win) {
   import("//build/config/win/visual_studio_version.gni")
 
