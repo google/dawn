@@ -1948,6 +1948,10 @@ class Builder {
     template <typename OBJ>
     ir::Value* Swizzle(const core::type::Type* type, OBJ&& object, VectorRef<uint32_t> indices) {
         auto* obj_val = Value(std::forward<OBJ>(object));
+        auto res = Evaluator{*this, false}.EvalSwizzle(type, obj_val, indices);
+        if (res == Success && res.Get()) {
+            return Constant(res.Get());
+        }
         return Append(ir.CreateInstruction<ir::Swizzle>(InstructionResult(type), obj_val,
                                                         std::move(indices)))
             ->Result();

@@ -5660,8 +5660,8 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessVec2u_StoreVec4u) {
     b.Append(func->Block(), [&] {
         b.Store(b.Access(ty.ptr(storage, ty.vec2u(), core::Access::kReadWrite), var, 0_u),
                 b.Zero(ty.vec2u()));
-        b.Store(b.Access(ty.ptr(storage, ty.vec4u(), core::Access::kReadWrite), var, 1_u),
-                b.Zero(ty.vec4u()));
+        auto* l = b.Let("l", b.Zero(ty.vec4u()));
+        b.Store(b.Access(ty.ptr(storage, ty.vec4u(), core::Access::kReadWrite), var, 1_u), l);
         b.Return(func);
     });
 
@@ -5679,8 +5679,9 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, vec2<u32>, read_write> = access %v, 0u
     store %3, vec2<u32>(0u)
-    %4:ptr<storage, vec4<u32>, read_write> = access %v, 1u
-    store %4, vec4<u32>(0u)
+    %l:vec4<u32> = let vec4<u32>(0u)
+    %5:ptr<storage, vec4<u32>, read_write> = access %v, 1u
+    store %5, %l
     ret
   }
 }
@@ -5702,12 +5703,13 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, vec2<u32>, read_write> = access %v, 0u
     store %3, vec2<u32>(0u)
-    %4:vec2<u32> = swizzle vec4<u32>(0u), xy
-    %5:ptr<storage, vec2<u32>, read_write> = access %v, 2u
-    store %5, %4
-    %6:vec2<u32> = swizzle vec4<u32>(0u), zw
-    %7:ptr<storage, vec2<u32>, read_write> = access %v, 3u
-    store %7, %6
+    %l:vec4<u32> = let vec4<u32>(0u)
+    %5:vec2<u32> = swizzle %l, xy
+    %6:ptr<storage, vec2<u32>, read_write> = access %v, 2u
+    store %6, %5
+    %7:vec2<u32> = swizzle %l, zw
+    %8:ptr<storage, vec2<u32>, read_write> = access %v, 3u
+    store %8, %7
     ret
   }
 }

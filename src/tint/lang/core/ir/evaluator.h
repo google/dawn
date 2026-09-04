@@ -112,6 +112,10 @@ class Evaluator {
                            core::ir::Value* arg,
                            const Source& source = {});
 
+    EvalResult EvalSwizzle(const core::type::Type* result_ty,
+                           core::ir::Value* object,
+                           VectorRef<uint32_t> indices);
+
   private:
     diag::Diagnostic& AddError(Source src);
     Source SourceOf(core::ir::Instruction* val);

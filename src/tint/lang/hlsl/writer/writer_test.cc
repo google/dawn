@@ -197,8 +197,8 @@ TEST_F(HlslWriterTest, AtomicStoreMax) {
 RWByteAddressBuffer sb : register(u0);
 [numthreads(1, 1, 1)]
 void main() {
-  uint64_t v = uint64_t((1u).xx.x);
-  uint64_t v_1 = uint64_t((1u).xx.y);
+  uint64_t v = uint64_t(1u);
+  uint64_t v_1 = uint64_t(1u);
   sb.InterlockedMax64(0u, ((v_1 << uint64_t(32u)) | v));
 }
 
@@ -231,8 +231,8 @@ TEST_F(HlslWriterTest, AtomicStoreMin) {
 RWByteAddressBuffer sb : register(u0);
 [numthreads(1, 1, 1)]
 void main() {
-  uint64_t v = uint64_t((1u).xx.x);
-  uint64_t v_1 = uint64_t((1u).xx.y);
+  uint64_t v = uint64_t(1u);
+  uint64_t v_1 = uint64_t(1u);
   sb.InterlockedMin64(0u, ((v_1 << uint64_t(32u)) | v));
 }
 

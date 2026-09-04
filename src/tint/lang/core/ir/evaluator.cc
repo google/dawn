@@ -288,13 +288,19 @@ Evaluator::EvalResult Evaluator::EvalConstExprIf(core::ir::ConstExprIf* c) {
 }
 
 Evaluator::EvalResult Evaluator::EvalSwizzle(core::ir::Swizzle* s) {
-    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(s->Object()));
+    return EvalSwizzle(s->Result()->Type(), s->Object(), s->Indices());
+}
+
+Evaluator::EvalResult Evaluator::EvalSwizzle(const core::type::Type* result_ty,
+                                             core::ir::Value* object,
+                                             VectorRef<uint32_t> indices) {
+    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(object));
     // Check if the value could be evaluated
     if (!val) {
         return nullptr;
     }
 
-    TINT_CHECK_RESULT_UNWRAP(r, const_eval_.Swizzle(s->Result()->Type(), val, s->Indices()));
+    TINT_CHECK_RESULT_UNWRAP(r, const_eval_.Swizzle(result_ty, val, indices));
     return r;
 }
 

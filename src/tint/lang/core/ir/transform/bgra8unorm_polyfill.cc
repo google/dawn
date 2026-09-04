@@ -130,7 +130,7 @@ struct State {
                     } else if (call->Func() == core::BuiltinFn::kTextureLoad) {
                         // Swizzle the result of a `textureLoad()` builtin.
                         auto* swizzle =
-                            b.Swizzle(call->Result()->Type(), nullptr, Vector{2u, 1u, 0u, 3u})
+                            b.Swizzle(call->Result()->Type(), call, Vector{2u, 1u, 0u, 3u})
                                 ->AsInstruction<Swizzle>();
                         call->Result()->ReplaceAllUsesWith(swizzle->Result());
                         swizzle->InsertAfter(call);
