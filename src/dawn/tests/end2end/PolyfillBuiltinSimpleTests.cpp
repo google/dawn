@@ -471,6 +471,9 @@ TEST_P(PolyfillBuiltinSimpleTests, PolyfillFloatUnary) {
 // Test dynamic indexing into a boolean vector. This is a minimal reproducer for a suspected driver
 // bug on Intel Mac (crbug.com/540789158).
 TEST_P(PolyfillBuiltinSimpleTests, BoolVectorDynamicIndexStore) {
+    // TODO(crbug.com/556809584): Driver crash on Intel Windows Vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsIntel() && IsVulkan());
+
     // Initial v is <true, true, true>.
     std::string shader = R"(
         struct Input {
