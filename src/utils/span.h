@@ -541,8 +541,11 @@ concept LegalByteReinterpretAs =
     (!std::is_const_v<ByteType> || std::is_const_v<T>) &&
     // Ensure we are not casting away volatility.
     (!std::is_volatile_v<ByteType> || std::is_volatile_v<T>) &&
-    // For fixed-extent spans, ensure the byte size is a multiple of the target type.
-    (IsDynamicExtent<size_t, ByteExtent> || ByteExtent % sizeof(T) == 0u);
+    // For fixed-extent spans, ensure the byte size is a multiple of the target type and fits in the
+    // Index type.
+    (IsDynamicExtent<size_t, ByteExtent> ||
+     (ByteExtent % sizeof(T) == 0u &&
+      ByteExtent / sizeof(T) < size_t{UnderlyingType<Index>{DynamicExtent<Index>}}));
 
 template <typename T, typename Index, typename ByteType, size_t ByteExtent>
     requires(LegalByteReinterpretAs<T, Index, ByteType, ByteExtent>)
@@ -577,7 +580,7 @@ constexpr auto ReinterpretSpanImpl(Span<ByteType, ByteExtent> s) {
         // SAFETY: We checked for proper alignment, size, strict aliasing rules, and started the
         // lifetime of the array.
         return DAWN_UNSAFE_BUFFERS(
-            ityp::span<Index, T>{ptr, Index{UnderlyingType<Index>(s.size_bytes() / sizeof(T))}});
+            ityp::span<Index, T>{ptr, checked_cast<Index>(s.size_bytes() / sizeof(T))});
     } else {
         constexpr Index kTargetExtent =
             Index{static_cast<UnderlyingType<Index>>(ByteExtent / sizeof(T))};

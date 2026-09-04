@@ -41,6 +41,7 @@ namespace dawn {
 static constexpr std::array<int, 5> kSpanData = {1, 2, 3, 4, 5};
 
 using Index = TypedInteger<struct IndexT, uint32_t>;
+using Index8 = TypedInteger<struct IndexT, uint8_t>;
 using IndexSizeT = TypedInteger<struct IndexT, size_t>;
 
 struct FakeRange {
@@ -198,6 +199,13 @@ void TestReinterpretSpan() {
             auto r6 = ReinterpretSpan<volatile char, Index>(cv_s); // expected-error {{no matching function for call}}
         }
     }
+    {
+        // ityp::span inputs disallowed.
+        std::array<std::byte, 4> bytes;
+        auto ityp_s = ityp::span<Index, std::byte>{bytes.data(), Index{4u}};
+        auto r1 = ReinterpretSpan<int>(ityp_s);        // expected-error {{no matching function for call}}
+        auto r2 = ReinterpretSpan<int, Index>(ityp_s); // expected-error {{no matching function for call}}
+    }
 }
 
 void TestCopyFromIncompatibleTypes() {
@@ -261,6 +269,19 @@ void TestFixedExtentReinterpretSizeMismatch() {
     alignas(uint32_t) std::array<std::byte, 7> bytes{};
     Span<std::byte, 7> bsp{bytes};
     ReinterpretSpan<uint32_t>(bsp);  // expected-error {{no matching function for call to 'ReinterpretSpan'}}
+}
+
+void TestFixedExtentReinterpretIndexOverflow() {
+    {
+        alignas(uint32_t) std::array<std::byte, 256> bytes{};
+        Span<std::byte, 256> bsp{bytes};
+        ReinterpretSpan<uint8_t, Index8>(bsp);  // expected-error {{no matching function for call to 'ReinterpretSpan'}}
+    }
+    {
+        alignas(uint32_t) std::array<std::byte, 255> bytes{};
+        Span<std::byte, 255> bsp{bytes};
+        ReinterpretSpan<uint8_t, Index8>(bsp);  // expected-error {{no matching function for call to 'ReinterpretSpan'}}
+    }
 }
 
 void TestFillBytesNonByteSpan() {

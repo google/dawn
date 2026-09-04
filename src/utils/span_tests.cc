@@ -1386,6 +1386,17 @@ TEST(SpanDeathTest, ReinterpretSpan) {
         EXPECT_DEATH_IF_SUPPORTED(ReinterpretSpan<uint32_t>(bsp), "");
         EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint32_t, Index>(bsp)), "");
     }
+    // Index check fails.
+    {
+        std::array<std::byte, 256> bytes{};
+        auto bsp = Span<std::byte>(bytes);
+        EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint8_t, Index8>(bsp)), "");
+    }
+    {
+        std::array<std::byte, 255> bytes{};
+        auto bsp = Span<std::byte>(bytes);
+        EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint8_t, Index8>(bsp)), "");
+    }
 }
 
 TEST(SpanTest, SpanFromRef) {
