@@ -205,6 +205,20 @@ class Validator {
         uint32_t pointer_size{};
     };
 
+    /// ScopeStack holds a stack of values that are currently in scope
+    struct ScopeStack {
+        void Push() { stack_.Push({}); }
+        void Pop() { stack_.Pop(); }
+        void Add(const Value* value) { stack_.Back().Add(value); }
+        bool Contains(const Value* value) {
+            return stack_.Any([&](auto& v) { return v.Contains(value); });
+        }
+        bool IsEmpty() const { return stack_.IsEmpty(); }
+
+      private:
+        Vector<Hashset<const Value*, 8>, 4> stack_;
+    };
+
     // Returns true if we're validating in the context of WGSL. The other option is we're validating
     // as IR. The primary difference is how const-eval checks are run as the semantics are
     // different.
@@ -269,23 +283,32 @@ class Validator {
 
     ir::Disassembler& Disassemble();
 
+    /// Retrieves the source location information for the given item. The source value depends on if
+    /// we are in WGSL or IR mode, it is either the original WGSL source information or the IR
+    /// disassembly source information.
     Source SourceOf(const Function* func);
     Source SourceOf(const FunctionParam* param);
     Source SourceOf(const Instruction* inst);
     Source SourceOf(const Instruction* inst, size_t idx);
 
+    /// Adds an error with the given item as the error source. If we are in IR validation mode the
+    /// IR disassembly is attached to the end of the diagnostics.
     diag::Diagnostic& AddError(const Instruction* inst);
     diag::Diagnostic& AddError(const InstructionResult* inst);
     diag::Diagnostic& AddError(const Instruction* inst, size_t idx);
-    diag::Diagnostic& AddError(const Block* blk);
-    diag::Diagnostic& AddError(const BlockParam* param);
     diag::Diagnostic& AddError(const Function* func);
     diag::Diagnostic& AddError(const FunctionParam* param);
     diag::Diagnostic& AddError(const Value* param);
     diag::Diagnostic& AddError(Source src);
+    // Note, may only be called in IR validation
+    diag::Diagnostic& AddError(const Block* blk);
+    // Note, may only be called in IR validation
+    diag::Diagnostic& AddError(const BlockParam* param);
 
+    /// Adds an error where the source is the result of an instruction.
     diag::Diagnostic& AddResultError(const Instruction* inst, size_t idx);
 
+    /// Adds a note to the diagnostics attached at the source of the given object.
     diag::Diagnostic& AddNote(const Instruction* inst);
     diag::Diagnostic& AddNote(const Function* func);
     diag::Diagnostic& AddNote(const Block* blk);
@@ -295,25 +318,49 @@ class Validator {
     diag::Diagnostic& AddOperandNote(const Instruction* inst, size_t idx);
     diag::Diagnostic& AddResultNote(const Instruction* inst, size_t idx);
 
-    void AddDeclarationNote(const Block* block);
-    void AddDeclarationNote(const BlockParam* param);
+    /// Adds a note to the diagnostics pointing out where the given item is declared.
     void AddDeclarationNote(const Function* fn);
     void AddDeclarationNote(const FunctionParam* param);
     void AddDeclarationNote(const Instruction* inst);
     void AddDeclarationNote(const InstructionResult* res);
     void AddDeclarationNote(const Value* res);
+    /// Note, may only be called in IR validation
+    void AddDeclarationNote(const Block* block);
+    /// Note, may only be called in IR validation
+    void AddDeclarationNote(const BlockParam* param);
 
+    /// Returns the "name" of the given item. Maybe the user provided name, or the IR ID or the
+    /// friendly name for the item depending on the validation mode.
     StyledText NameOf(const core::type::Type* ty);
     StyledText NameOf(const Value* v);
     StyledText NameOf(const Instruction* inst);
+    /// Note, may only be called in IR validation
     StyledText NameOf(const Block* block);
+
+    /// Calculates the total number elements contained in a type, i.e. the number of values required
+    /// for an initializer.
+    uint64_t ElementsCount(const core::type::Type* ty);
+
+    const ir::Function* ContainingFunction(const ir::Instruction* inst);
+    Hashset<const ir::Function*, 4> ContainingEndPoints(const ir::Function* f);
+
+    Vector<const IOAttributeChecker*, 4> IOAttributeCheckersFor(const IOAttributes& attr,
+                                                                bool skip_builtin);
+
+    const core::type::Type* GetVectorPtrElementType(const Instruction* inst, size_t idx);
+    bool CanLoad(const core::type::Type* ty);
 
     bool CheckResult(const Instruction* inst, size_t idx);
     bool CheckResults(const ir::Instruction* inst, std::optional<size_t> count = {});
+    /// Validates the results and operands for the given instruction and also makes sure they match
+    /// the given counts. The operands are checked as a range of `min_operands < operand_count <
+    /// max_operands`
     bool CheckResultsAndOperandRange(const ir::Instruction* inst,
                                      size_t num_results,
                                      size_t min_operands,
                                      std::optional<size_t> max_operands = {});
+    /// Validates the results and operands for the given instruction and also makes sure they match
+    /// the given counts. The counts must match exactly.
     bool CheckResultsAndOperands(const ir::Instruction* inst,
                                  size_t num_results,
                                  size_t num_operands);
@@ -361,8 +408,6 @@ class Validator {
     /// NOTE: Expects to be called by CheckType, i.e. on a 'root' type, not in the middle a walk of
     ///       elements of a composite..
     bool CheckNestDepth(const core::type::Type* type, std::function<diag::Diagnostic&()> diag);
-    const core::type::Type* GetVectorPtrElementType(const Instruction* inst, size_t idx);
-    bool CanLoad(const core::type::Type* ty);
 
     void CheckRootBlock(const Block* blk);
     void CheckOnlyUsedInRootBlock(const Instruction* inst);
@@ -484,12 +529,14 @@ class Validator {
 
     void CheckControlsAllowingIf(const Exit* exit, const Instruction* control);
 
+    /// Validates that the number and types of the source instruction operands match the target's
+    /// values. This is used for things like an exit instruction to validate that the target block
+    /// matches the types and operand count returned by the exit.
     void CheckOperandsMatchTarget(const Instruction* source_inst,
                                   size_t source_operand_offset,
                                   size_t source_operand_count,
                                   const MultiInBlock* target,
                                   VectorRef<const Value*> target_values);
-
     void CheckOperandsMatchTarget(const Instruction* source_inst,
                                   size_t source_operand_offset,
                                   size_t source_operand_count,
@@ -510,34 +557,10 @@ class Validator {
     void BeginBlock(const Block* blk);
     void EndBlock();
 
-    /// Calculates the total number elements contained in a type, i.e. the number of values required
-    /// for an initializer.
-    uint64_t ElementsCount(const core::type::Type* ty);
-
-    const ir::Function* ContainingFunction(const ir::Instruction* inst);
-    Hashset<const ir::Function*, 4> ContainingEndPoints(const ir::Function* f);
-
     std::function<void()> PushControlStack(const ControlInstruction* ctrl);
     std::function<void()> PopControlStack();
     std::function<void()> BeginBlockTask(const Block* blk);
     std::function<void()> EndBlockTask(const Block* blk);
-
-    Vector<const IOAttributeChecker*, 4> IOAttributeCheckersFor(const IOAttributes& attr,
-                                                                bool skip_builtin);
-
-    /// ScopeStack holds a stack of values that are currently in scope
-    struct ScopeStack {
-        void Push() { stack_.Push({}); }
-        void Pop() { stack_.Pop(); }
-        void Add(const Value* value) { stack_.Back().Add(value); }
-        bool Contains(const Value* value) {
-            return stack_.Any([&](auto& v) { return v.Contains(value); });
-        }
-        bool IsEmpty() const { return stack_.IsEmpty(); }
-
-      private:
-        Vector<Hashset<const Value*, 8>, 4> stack_;
-    };
 
     Module& ir_;
     ErrorSource error_source_ = ErrorSource::kIr;
