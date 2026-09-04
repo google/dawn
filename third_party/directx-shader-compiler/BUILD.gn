@@ -911,29 +911,40 @@ llvm_tablegen("clang-Driver-Options-inc") {
 
 clang_diag_gen("Analysis") {
 }
+
 clang_diag_gen("AST") {
 }
+
 clang_diag_gen("Comment") {
 }
+
 clang_diag_gen("Common") {
 }
+
 clang_diag_gen("Driver") {
 }
+
 clang_diag_gen("Frontend") {
 }
+
 clang_diag_gen("Lex") {
 }
+
 clang_diag_gen("Parse") {
 }
+
 clang_diag_gen("Sema") {
 }
+
 clang_diag_gen("Serialization") {
 }
+
 clang_tablegen("DiagnosticGroups-inc") {
   args = [ "-gen-clang-diag-groups" ]
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/Diagnostic.td"
   output_name = "/tools/clang/include/clang/Basic/DiagnosticGroups.inc"
 }
+
 clang_tablegen("AttrList-inc") {
   args = [
     "-gen-clang-attr-list",
@@ -943,6 +954,7 @@ clang_tablegen("AttrList-inc") {
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/Attr.td"
   output_name = "/tools/clang/include/clang/Basic/AttrList.inc"
 }
+
 clang_tablegen("AttrHasAttributeImpl-inc") {
   args = [
     "-gen-clang-attr-has-attribute-impl",
@@ -977,6 +989,7 @@ clang_tablegen("Attrs-inc") {
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/Attr.td"
   output_name = "/tools/clang/include/clang/AST/Attrs.inc"
 }
+
 clang_tablegen("AttrImpl-inc") {
   args = [
     "-gen-clang-attr-impl",
@@ -986,6 +999,7 @@ clang_tablegen("AttrImpl-inc") {
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/Attr.td"
   output_name = "/tools/clang/include/clang/AST/AttrImpl.inc"
 }
+
 clang_tablegen("AttrDump-inc") {
   args = [
     "-gen-clang-attr-dump",
@@ -995,6 +1009,7 @@ clang_tablegen("AttrDump-inc") {
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/Attr.td"
   output_name = "/tools/clang/include/clang/AST/AttrDump.inc"
 }
+
 clang_tablegen("AttrVisitor-inc") {
   args = [
     "-gen-clang-attr-ast-visitor",
@@ -1004,42 +1019,50 @@ clang_tablegen("AttrVisitor-inc") {
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/Attr.td"
   output_name = "/tools/clang/include/clang/AST/AttrVisitor.inc"
 }
+
 clang_tablegen("StmtNodes-inc") {
   args = [ "-gen-clang-stmt-nodes" ]
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/StmtNodes.td"
   output_name = "/tools/clang/include/clang/AST/StmtNodes.inc"
 }
+
 clang_tablegen("DeclNodes-inc") {
   args = [ "-gen-clang-decl-nodes" ]
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/DeclNodes.td"
   output_name = "/tools/clang/include/clang/AST/DeclNodes.inc"
 }
+
 clang_tablegen("CommentNodes-inc") {
   args = [ "-gen-clang-comment-nodes" ]
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/CommentNodes.td"
   output_name = "/tools/clang/include/clang/AST/CommentNodes.inc"
 }
+
 clang_tablegen("CommentHTMLTags-inc") {
   args = [ "-gen-clang-comment-html-tags" ]
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/AST/CommentHTMLTags.td"
   output_name = "/tools/clang/include/clang/AST/CommentHTMLTags.inc"
 }
+
 clang_tablegen("CommentHTMLTagsProperties-inc") {
   args = [ "-gen-clang-comment-html-tags-properties" ]
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/AST/CommentHTMLTags.td"
   output_name = "/tools/clang/include/clang/AST/CommentHTMLTagsProperties.inc"
 }
+
 clang_tablegen("CommentHTMLNamedCharacterReferences-inc") {
   args = [ "-gen-clang-comment-html-named-character-references" ]
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/AST/CommentHTMLNamedCharacterReferences.td"
   output_name =
       "/tools/clang/include/clang/AST/CommentHTMLNamedCharacterReferences.inc"
 }
+
 clang_tablegen("CommentCommandInfo-inc") {
   args = [ "-gen-clang-comment-command-info" ]
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/AST/CommentCommands.td"
   output_name = "/tools/clang/include/clang/AST/CommentCommandInfo.inc"
 }
+
 clang_tablegen("CommentCommandList-inc") {
   args = [ "-gen-clang-comment-command-list" ]
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/AST/CommentCommands.td"
@@ -1059,6 +1082,7 @@ ClangASTDeps = [
   ":CommentCommandInfo-inc",
   ":CommentCommandList-inc",
 ]
+
 clang_tablegen("AttrTemplateInstantiate-inc") {
   args = [
     "-gen-clang-attr-template-instantiate",
@@ -1068,6 +1092,7 @@ clang_tablegen("AttrTemplateInstantiate-inc") {
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/Attr.td"
   output_name = "/tools/clang/include/clang/Sema/AttrTemplateInstantiate.inc"
 }
+
 clang_tablegen("AttrParsedAttrList-inc") {
   args = [
     "-gen-clang-attr-parsed-attr-list",
@@ -1077,6 +1102,7 @@ clang_tablegen("AttrParsedAttrList-inc") {
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/Attr.td"
   output_name = "/tools/clang/include/clang/Sema/AttrParsedAttrList.inc"
 }
+
 clang_tablegen("AttrParsedAttrKinds-inc") {
   args = [
     "-gen-clang-attr-parsed-attr-kinds",
@@ -1086,6 +1112,7 @@ clang_tablegen("AttrParsedAttrKinds-inc") {
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/Attr.td"
   output_name = "/tools/clang/include/clang/Sema/AttrParsedAttrKinds.inc"
 }
+
 clang_tablegen("AttrSpellingListIndex-inc") {
   args = [
     "-gen-clang-attr-spelling-index",
@@ -1095,6 +1122,7 @@ clang_tablegen("AttrSpellingListIndex-inc") {
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/Attr.td"
   output_name = "/tools/clang/include/clang/Sema/AttrSpellingListIndex.inc"
 }
+
 clang_tablegen("AttrParsedAttrImpl-inc") {
   args = [
     "-gen-clang-attr-parsed-attr-impl",
@@ -1111,6 +1139,7 @@ ClangSemaDeps = [
   ":AttrSpellingListIndex-inc",
   ":AttrParsedAttrImpl-inc",
 ]
+
 clang_tablegen("AttrParserStringSwitches-inc") {
   args = [
     "-gen-clang-attr-parser-string-switches",
@@ -1120,6 +1149,7 @@ clang_tablegen("AttrParserStringSwitches-inc") {
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/Attr.td"
   output_name = "/tools/clang/include/clang/Parse/AttrParserStringSwitches.inc"
 }
+
 clang_tablegen("AttrPCHRead-inc") {
   args = [
     "-gen-clang-attr-pch-read",
@@ -1129,6 +1159,7 @@ clang_tablegen("AttrPCHRead-inc") {
   td_file = "$dawn_dxc_dir/tools/clang/include/clang/Basic/Attr.td"
   output_name = "/tools/clang/include/clang/Serialization/AttrPCHRead.inc"
 }
+
 clang_tablegen("AttrPCHWrite-inc") {
   args = [
     "-gen-clang-attr-pch-write",
@@ -1166,26 +1197,31 @@ add_hlsl_hctgen("DxcDisassembler-inc") {
   output = "/tools/clang/tools/dxcompiler/DxcDisassembler.inc"
   build_dir = true
 }
+
 add_hlsl_hctgen("DxilValidation-inc") {
   mode = "DxilValidationInc"
   output = "/include/dxc/DxilValidation/DxilValidation.inc"
   build_dir = true
 }
+
 add_hlsl_hctgen("DxcOptimizer-inc") {
   mode = "DxcOptimizer"
   output = "/lib/HLSL/DxcOptimizer.inc"
   build_dir = true
 }
+
 add_hlsl_hctgen("DxilValidationImpl-inc") {
   mode = "DxilValidation"
   output = "/lib/DxilValidation/DxilValidationImpl.inc"
   build_dir = true
 }
+
 add_hlsl_hctgen("gen_intrin_main_tables_15-h") {
   mode = "DxilIntrinsicTables"
   output = "/tools/clang/lib/Sema/gen_intrin_main_tables_15.h"
   build_dir = true
 }
+
 add_hlsl_hctgen("DxilPIXPasses-inc") {
   mode = "DxilPIXPasses"
   output = "/lib/DxilPIXPasses/DxilPIXPasses.inc"
@@ -1404,6 +1440,7 @@ dxcompiler_sourceset("lib_analysis") {
     "$dawn_dxc_dir/lib/Analysis/regionprinter.cpp",
   ]
 }
+
 dxcompiler_sourceset("lib_asmparser") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1412,6 +1449,7 @@ dxcompiler_sourceset("lib_asmparser") {
     "$dawn_dxc_dir/lib/AsmParser/Parser.cpp",
   ]
 }
+
 dxcompiler_sourceset("lib_bitcode") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1423,10 +1461,12 @@ dxcompiler_sourceset("lib_bitcode") {
     "$dawn_dxc_dir/lib/Bitcode/Writer/ValueEnumerator.cpp",
   ]
 }
+
 dxcompiler_sourceset("lib_dxcbindingtable") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [ "$dawn_dxc_dir/lib/DxcBindingTable/DxcBindingTable.cpp" ]
 }
+
 dxcompiler_sourceset("lib_dxilcompression") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1434,6 +1474,7 @@ dxcompiler_sourceset("lib_dxilcompression") {
     "$dawn_dxc_dir/lib/DxilCompression/miniz.c",
   ]
 }
+
 dxcompiler_sourceset("lib_dxildia") {
   target_type = "static_library"  # Ensure unused globals are stripped
   if (is_win) {
@@ -1463,6 +1504,7 @@ dxcompiler_sourceset("lib_dxildia") {
     ]
   }
 }
+
 dxcompiler_sourceset("lib_dxilpixpasses") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1485,6 +1527,7 @@ dxcompiler_sourceset("lib_dxilpixpasses") {
     "$dawn_dxc_dir/lib/DxilPIXPasses/PixPassHelpers.cpp",
   ]
 }
+
 dxcompiler_sourceset("lib_dxilrootsignature") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1494,6 +1537,7 @@ dxcompiler_sourceset("lib_dxilrootsignature") {
     "$dawn_dxc_dir/lib/DxilRootSignature/DxilRootSignatureValidator.cpp",
   ]
 }
+
 dxcompiler_sourceset("lib_dxilvalidation") {
   target_type = "static_library"  # Ensure unused globals are stripped
   deps = [
@@ -1510,6 +1554,7 @@ dxcompiler_sourceset("lib_dxilvalidation") {
     "${target_gen_dir}/include/dxc/DxilValidation",
   ]
 }
+
 dxcompiler_sourceset("lib_hlsl") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1571,10 +1616,12 @@ dxcompiler_sourceset("lib_irreader") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [ "$dawn_dxc_dir/lib/IRReader/IRReader.cpp" ]
 }
+
 dxcompiler_sourceset("lib_linker") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [ "$dawn_dxc_dir/lib/Linker/LinkModules.cpp" ]
 }
+
 dxcompiler_sourceset("lib_mc") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1629,6 +1676,7 @@ dxcompiler_sourceset("lib_mc") {
     "$dawn_dxc_dir/lib/MC/YAML.cpp",
   ]
 }
+
 dxcompiler_sourceset("lib_object") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1651,10 +1699,12 @@ dxcompiler_sourceset("lib_object") {
     "$dawn_dxc_dir/lib/Object/SymbolicFile.cpp",
   ]
 }
+
 dxcompiler_sourceset("lib_passprinters") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [ "$dawn_dxc_dir/lib/PassPrinters/PassPrinters.cpp" ]
 }
+
 dxcompiler_sourceset("lib_profiledata") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1669,6 +1719,7 @@ dxcompiler_sourceset("lib_profiledata") {
     "$dawn_dxc_dir/lib/ProfileData/SampleProfWriter.cpp",
   ]
 }
+
 dxcompiler_sourceset("lib_target") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1681,6 +1732,7 @@ dxcompiler_sourceset("lib_target") {
     "$dawn_dxc_dir/lib/Target/TargetSubtargetInfo.cpp",
   ]
 }
+
 dxcompiler_sourceset("lib_transforms") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1822,6 +1874,7 @@ dxcompiler_sourceset("lib_transforms") {
     "$dawn_dxc_dir/lib/Transforms/Utils/ValueMapper.cpp",
   ]
 }
+
 dxcompiler_sourceset("lib_astmatchers") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1829,6 +1882,7 @@ dxcompiler_sourceset("lib_astmatchers") {
     "$dawn_dxc_dir/tools/clang/lib/ASTMatchers/ASTMatchersInternal.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_lib_ast") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1891,6 +1945,7 @@ dxcompiler_sourceset("clang_lib_ast") {
     "$dawn_dxc_dir/tools/clang/lib/AST/VTableBuilder.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_lib_analysis") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1916,6 +1971,7 @@ dxcompiler_sourceset("clang_lib_analysis") {
     "$dawn_dxc_dir/tools/clang/lib/Analysis/UninitializedValues.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_lib_basic") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1946,6 +2002,7 @@ dxcompiler_sourceset("clang_lib_basic") {
     "$dawn_dxc_dir/tools/clang/lib/Basic/Warnings.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_lib_codegen") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1997,6 +2054,7 @@ dxcompiler_sourceset("clang_lib_codegen") {
     "$dawn_dxc_dir/tools/clang/lib/CodeGen/TargetInfo.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_lib_driver") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -2018,6 +2076,7 @@ dxcompiler_sourceset("clang_lib_driver") {
     "$dawn_dxc_dir/tools/clang/lib/Driver/Types.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_lib_edit") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -2025,6 +2084,7 @@ dxcompiler_sourceset("clang_lib_edit") {
     "$dawn_dxc_dir/tools/clang/lib/Edit/EditedSource.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_lib_format") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -2038,6 +2098,7 @@ dxcompiler_sourceset("clang_lib_format") {
     "$dawn_dxc_dir/tools/clang/lib/Format/WhitespaceManager.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_lib_frontend") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -2072,6 +2133,7 @@ dxcompiler_sourceset("clang_lib_frontend") {
     "$dawn_dxc_dir/tools/clang/lib/Frontend/VerifyDiagnosticConsumer.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_lib_index") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -2082,22 +2144,27 @@ dxcompiler_sourceset("clang_lib_index") {
 
 # Targets that handle generating embedded HLSL headers
 embed_hlsl_target_dir = "$target_gen_dir/HLSLEmbeddedHeaders"
+
 embed_hlsl_header("enable_if") {
   input = "$dawn_dxc_dir/tools/clang/lib/Headers/hlsl/enable_if"
   output = "$embed_hlsl_target_dir/enable_if.inc"
 }
+
 embed_hlsl_header("vector_utils") {
   input = "$dawn_dxc_dir/tools/clang/lib/Headers/hlsl/vector_utils"
   output = "$embed_hlsl_target_dir/vector_utils.inc"
 }
+
 embed_hlsl_header("type_traits") {
   input = "$dawn_dxc_dir/tools/clang/lib/Headers/hlsl/type_traits"
   output = "$embed_hlsl_target_dir/type_traits.inc"
 }
+
 embed_hlsl_header("dx_linalg") {
   input = "$dawn_dxc_dir/tools/clang/lib/Headers/hlsl/dx/linalg.h"
   output = "$embed_hlsl_target_dir/dx/linalg.h.inc"
 }
+
 generate_embedded_hlsl_headers("hlsl_embedded_headers") {
   deps = [
     ":dx_linalg",
@@ -2158,6 +2225,7 @@ dxcompiler_sourceset("clang_lib_lex") {
     "$dawn_dxc_dir/tools/clang/lib/Lex/TokenLexer.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_lib_parse") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -2180,6 +2248,7 @@ dxcompiler_sourceset("clang_lib_parse") {
     "$dawn_dxc_dir/tools/clang/lib/Parse/Parser.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_lib_rewrite") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -2190,6 +2259,7 @@ dxcompiler_sourceset("clang_lib_rewrite") {
     "$dawn_dxc_dir/tools/clang/lib/Rewrite/TokenRewriter.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_lib_sema") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -2244,6 +2314,7 @@ dxcompiler_sourceset("clang_lib_sema") {
     "$dawn_dxc_dir/tools/clang/lib/Sema/TypeLocBuilder.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_lib_tooling") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -2258,6 +2329,7 @@ dxcompiler_sourceset("clang_lib_tooling") {
     "$dawn_dxc_dir/tools/clang/lib/Tooling/Tooling.cpp",
   ]
 }
+
 dxcompiler_sourceset("clang_tools_libclang") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -2286,6 +2358,7 @@ dxcompiler_sourceset("clang_tools_libclang") {
     "$dawn_dxc_dir/tools/clang/tools/libclang/dxcrewriteunused.cpp",
   ]
 }
+
 dxcompiler_sourceset("lib_ir") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -2475,6 +2548,7 @@ executable("dxc") {
 # directory
 if (is_win) {
   import("//build/config/win/visual_studio_version.gni")
+
   copy("copy_dxil_dll") {
     sources =
         [ "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxil.dll" ]
