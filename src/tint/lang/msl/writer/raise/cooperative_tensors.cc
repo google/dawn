@@ -77,6 +77,7 @@ struct State {
                 tint::Switch(
                     inst,                                                  //
                     [&](core::ir::Construct* c) { ProcessConstruct(c); },  //
+                    [&](core::ir::Let* let) { ProcessLet(let); },          //
                     [&](core::ir::Var* var) { ProcessVar(var); },          //
                     TINT_ICE_ON_NO_MATCH);
             }
@@ -128,6 +129,31 @@ struct State {
             value_to_local_var.Add(c->Result(), var);
         });
         c->Destroy();
+    }
+
+    /// Process a `let` instruction to replace its value.
+    /// @param let the let instruction
+    void ProcessLet(core::ir::Let* let) {
+        auto* sm_ty = let->Result()->Type()->As<core::type::SubgroupMatrix>();
+
+        // TODO(555437691): Handle aggregates.
+        TINT_IR_ASSERT(ir, sm_ty);
+
+        auto* init = let->Value();
+        auto* local_var = value_to_local_var.GetOr(init, nullptr);
+        TINT_IR_ASSERT(ir, local_var);
+
+        if (init->NumUsages() == 1u && local_var->Block() == let->Block()) {
+            // If the initializer value is only used here and was declared in the same block,
+            // then we can just take the local variable that it allocated and use that directly.
+            ir.SetName(local_var, ir.NameOf(let));
+            value_to_local_var.Add(let->Result(), local_var);
+            let->Destroy();
+        } else {
+            // TODO(555778427): Copy the contents of the initializer cooperative_tensor into this
+            // variable.
+            TINT_IR_UNIMPLEMENTED(ir);
+        }
     }
 
     /// Process a `var` instruction to replace its type and initializer.

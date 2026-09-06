@@ -198,5 +198,38 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithSingleUseInitializer) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_CooperativeTensorsTest, LetWithSingleUseInitializer) {
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        b.Let("acc", b.Construct(ty.subgroup_matrix_result(ty.f16(), 32, 16)));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:subgroup_matrix_result<f16, 32, 16> = construct
+    %acc:subgroup_matrix_result<f16, 32, 16> = let %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:void = msl.fill_cooperative_tensor %acc, 0.0h
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise
