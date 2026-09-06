@@ -52,6 +52,9 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
+    /// A map from a subgroup matrix value to the local var that contains the cooperative_tensor.
+    Hashmap<const core::ir::Value*, core::ir::Var*, 8> value_to_local_var{};
+
     /// Process the module.
     void Process() {
         // Take a copy of the functions since we may introduce helper functions.
@@ -72,8 +75,9 @@ struct State {
             });
             for (auto* inst : worklist) {
                 tint::Switch(
-                    inst,                                          //
-                    [&](core::ir::Var* var) { ProcessVar(var); },  //
+                    inst,                                                  //
+                    [&](core::ir::Construct* c) { ProcessConstruct(c); },  //
+                    [&](core::ir::Var* var) { ProcessVar(var); },          //
                     TINT_ICE_ON_NO_MATCH);
             }
         }
@@ -96,6 +100,36 @@ struct State {
             [](Default) { return false; });
     }
 
+    /// Process a `construct` instruction.
+    /// @param c the construct instruction
+    void ProcessConstruct(core::ir::Construct* c) {
+        auto* sm_ty = c->Result()->Type()->As<core::type::SubgroupMatrix>();
+
+        // TODO(555437691): Handle aggregates.
+        TINT_IR_ASSERT(ir, sm_ty);
+
+        auto args = c->Args();
+        core::ir::Value* value = nullptr;
+        if (args.size() > 0) {
+            value = args[0];
+        } else {
+            value = b.Zero(sm_ty->Type());
+        }
+
+        // Declare a local variable to hold the result of the construct and then use a helper to
+        // fill it with the constructor value.
+        b.InsertAfter(c, [&] {
+            auto* tensor_type = ToCooperativeTensor(sm_ty);
+            auto* ptr_type = ty.ptr(function, tensor_type, read_write);
+            auto* var = b.Var(ptr_type);
+
+            b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kFillCooperativeTensor, var, value);
+
+            value_to_local_var.Add(c->Result(), var);
+        });
+        c->Destroy();
+    }
+
     /// Process a `var` instruction to replace its type and initializer.
     /// @param var the var instruction
     void ProcessVar(core::ir::Var* var) {
@@ -109,10 +143,28 @@ struct State {
         auto* tensor_type = ToCooperativeTensor(sm_ty);
         var->Result()->SetType(ty.ptr(ptr->AddressSpace(), tensor_type, ptr->Access()));
 
-        // Use a helper to fill the cooperative_tensor with zero values.
-        auto* fill = b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kFillCooperativeTensor, var,
-                                             b.Zero(sm_ty->Type()));
-        fill->InsertAfter(var);
+        auto* init = var->Initializer();
+        if (init) {
+            auto* local_var = value_to_local_var.GetOr(init, nullptr);
+            TINT_IR_ASSERT(ir, local_var);
+
+            if (init->NumUsages() == 1u && local_var->Block() == var->Block()) {
+                // If the initializer value is only used here and was declared in the same block,
+                // then we can just take the local variable that it allocated and use that directly.
+                ir.SetName(local_var, ir.NameOf(var));
+                var->Result()->ReplaceAllUsesWith(local_var->Result());
+                var->Destroy();
+            } else {
+                // TODO(555778427): Copy the contents of the initializer cooperative_tensor into
+                // this variable.
+                TINT_IR_UNIMPLEMENTED(ir);
+            }
+        } else {
+            // Use a helper to fill the cooperative_tensor with zero values.
+            auto* fill = b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kFillCooperativeTensor, var,
+                                                 b.Zero(sm_ty->Type()));
+            fill->InsertAfter(var);
+        }
     }
 
     /// @returns the cooperative tensor equivalent of @p sm

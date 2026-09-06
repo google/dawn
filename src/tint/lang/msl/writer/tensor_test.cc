@@ -97,6 +97,112 @@ kernel void entry() {
 )");
 }
 
+TEST_F(MslWriterTensorTest, VarWithZeroConstruct) {
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        b.Var<function>("lhs", b.Construct(ty.subgroup_matrix_left(ty.f16(), 32, 32)));
+        b.Var<function>("rhs", b.Construct(ty.subgroup_matrix_right(ty.f16(), 32, 32)));
+        b.Var<function>("acc", b.Construct(ty.subgroup_matrix_result(ty.f16(), 32, 32)));
+        b.Return(ep);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+#include <MetalPerformancePrimitives/MetalPerformancePrimitives.h>
+
+template<uint M, uint N, uint K,
+         mpp::tensor_ops::matmul2d_descriptor::mode O>
+constant constexpr auto tint_matmul2d_descriptor =
+  mpp::tensor_ops::matmul2d_descriptor(M, N, K, false, false, false, O);
+
+template<uint M, uint N, uint K,
+         mpp::tensor_ops::matmul2d_descriptor::mode O = mpp::tensor_ops::matmul2d_descriptor::mode::multiply>
+using tint_matmul2d_operation =
+  mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
+
+using tint_left_input_32_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+             .get_left_input_cooperative_tensor<half, half, half>());
+using tint_right_input_32_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+             .get_right_input_cooperative_tensor<half, half, half>());
+using tint_destination_32_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+             .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
+
+template<typename T, typename V>
+void tint_fill_cooperative_tensor(thread T* dst, V value) {
+  for (uint i = 0; i < dst->get_capacity(); i++) {
+    dst->set(i, value);
+  }
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void entry() {
+  tint_left_input_32_32_32_half_half lhs;
+  (tint_fill_cooperative_tensor((&lhs), 0.0h));
+  tint_right_input_32_32_32_half_half rhs;
+  (tint_fill_cooperative_tensor((&rhs), 0.0h));
+  tint_destination_32_32_32_half_half acc;
+  (tint_fill_cooperative_tensor((&acc), 0.0h));
+}
+)");
+}
+
+TEST_F(MslWriterTensorTest, VarWithValueConstruct) {
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        b.Var<function>("lhs", b.Construct(ty.subgroup_matrix_left(ty.f16(), 32, 32), 1.0_h));
+        b.Var<function>("rhs", b.Construct(ty.subgroup_matrix_right(ty.f16(), 32, 32), 2.0_h));
+        b.Var<function>("acc", b.Construct(ty.subgroup_matrix_result(ty.f16(), 32, 32), 3.0_h));
+        b.Return(ep);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+#include <MetalPerformancePrimitives/MetalPerformancePrimitives.h>
+
+template<uint M, uint N, uint K,
+         mpp::tensor_ops::matmul2d_descriptor::mode O>
+constant constexpr auto tint_matmul2d_descriptor =
+  mpp::tensor_ops::matmul2d_descriptor(M, N, K, false, false, false, O);
+
+template<uint M, uint N, uint K,
+         mpp::tensor_ops::matmul2d_descriptor::mode O = mpp::tensor_ops::matmul2d_descriptor::mode::multiply>
+using tint_matmul2d_operation =
+  mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
+
+using tint_left_input_32_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+             .get_left_input_cooperative_tensor<half, half, half>());
+using tint_right_input_32_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+             .get_right_input_cooperative_tensor<half, half, half>());
+using tint_destination_32_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+             .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
+
+template<typename T, typename V>
+void tint_fill_cooperative_tensor(thread T* dst, V value) {
+  for (uint i = 0; i < dst->get_capacity(); i++) {
+    dst->set(i, value);
+  }
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void entry() {
+  tint_left_input_32_32_32_half_half lhs;
+  (tint_fill_cooperative_tensor((&lhs), 1.0h));
+  tint_right_input_32_32_32_half_half rhs;
+  (tint_fill_cooperative_tensor((&rhs), 2.0h));
+  tint_destination_32_32_32_half_half acc;
+  (tint_fill_cooperative_tensor((&acc), 3.0h));
+}
+)");
+}
+
 TEST_F(MslWriterTensorTest, MultipleGeometries) {
     auto* ep = b.ComputeFunction("entry");
     b.Append(ep->Block(), [&] {
