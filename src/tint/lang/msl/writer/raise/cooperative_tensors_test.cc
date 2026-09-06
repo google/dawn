@@ -198,6 +198,46 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithSingleUseInitializer) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_CooperativeTensorsTest, VarWithMultipleUseInitializer) {
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* init = b.Construct(ty.subgroup_matrix_result(ty.f16(), 32, 16));
+        b.Var("acc1", init);
+        b.Var("acc2", init);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:subgroup_matrix_result<f16, 32, 16> = construct
+    %acc1:ptr<function, subgroup_matrix_result<f16, 32, 16>, read_write> = var %2
+    %acc2:ptr<function, subgroup_matrix_result<f16, 32, 16>, read_write> = var %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:void = msl.fill_cooperative_tensor %2, 0.0h
+    %acc1:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %5:void = msl.copy_cooperative_tensor %acc1, %2
+    %acc2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %7:void = msl.copy_cooperative_tensor %acc2, %2
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_CooperativeTensorsTest, LetWithSingleUseInitializer) {
     auto* ep = b.ComputeFunction("entry");
     b.Append(ep->Block(), [&] {
@@ -221,6 +261,162 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetWithSingleUseInitializer) {
   $B1: {
     %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %acc, 0.0h
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_CooperativeTensorsTest, LetWithMultipleUseInitializer) {
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* init = b.Construct(ty.subgroup_matrix_result(ty.f16(), 32, 16));
+        b.Let("acc1", init);
+        b.Let("acc2", init);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:subgroup_matrix_result<f16, 32, 16> = construct
+    %acc1:subgroup_matrix_result<f16, 32, 16> = let %2
+    %acc2:subgroup_matrix_result<f16, 32, 16> = let %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:void = msl.fill_cooperative_tensor %2, 0.0h
+    %acc1:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %5:void = msl.copy_cooperative_tensor %acc1, %2
+    %acc2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %7:void = msl.copy_cooperative_tensor %acc2, %2
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_CooperativeTensorsTest, LetChains) {
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* init = b.Construct(ty.subgroup_matrix_result(ty.f16(), 32, 16));
+        auto* acc1 = b.Let("acc1", init);
+        b.Let("acc2", acc1);
+        auto* acc3 = b.Let("acc3", acc1);
+        b.Let("acc4", acc1);
+        b.Let("acc5", acc3);
+        b.Let("acc6", acc3);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:subgroup_matrix_result<f16, 32, 16> = construct
+    %acc1:subgroup_matrix_result<f16, 32, 16> = let %2
+    %acc2:subgroup_matrix_result<f16, 32, 16> = let %acc1
+    %acc3:subgroup_matrix_result<f16, 32, 16> = let %acc1
+    %acc4:subgroup_matrix_result<f16, 32, 16> = let %acc1
+    %acc5:subgroup_matrix_result<f16, 32, 16> = let %acc3
+    %acc6:subgroup_matrix_result<f16, 32, 16> = let %acc3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %acc1:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:void = msl.fill_cooperative_tensor %acc1, 0.0h
+    %acc2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %5:void = msl.copy_cooperative_tensor %acc2, %acc1
+    %acc3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %7:void = msl.copy_cooperative_tensor %acc3, %acc1
+    %acc4:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:void = msl.copy_cooperative_tensor %acc4, %acc1
+    %acc5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %11:void = msl.copy_cooperative_tensor %acc5, %acc3
+    %acc6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %13:void = msl.copy_cooperative_tensor %acc6, %acc3
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_CooperativeTensorsTest, LetVar_SingleUseInit_AcrossBlocks) {
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* init1 = b.Construct(ty.subgroup_matrix_result(ty.f16(), 32, 16));
+        auto* init2 = b.Construct(ty.subgroup_matrix_result(ty.f16(), 32, 16));
+        auto* acc1 = b.Let("acc1", init1);
+        auto* acc2 = b.Let("acc2", init2);
+        auto* loop = b.Loop();
+        b.Append(loop->Body(), [&] {
+            b.Let("inner_let", acc1);
+            b.Var("inner_var", acc2);
+            b.ExitLoop(loop);
+        });
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:subgroup_matrix_result<f16, 32, 16> = construct
+    %3:subgroup_matrix_result<f16, 32, 16> = construct
+    %acc1:subgroup_matrix_result<f16, 32, 16> = let %2
+    %acc2:subgroup_matrix_result<f16, 32, 16> = let %3
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
+        %inner_let:subgroup_matrix_result<f16, 32, 16> = let %acc1
+        %inner_var:ptr<function, subgroup_matrix_result<f16, 32, 16>, read_write> = var %acc2
+        exit_loop  # loop_1
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %acc1:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:void = msl.fill_cooperative_tensor %acc1, 0.0h
+    %acc2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %5:void = msl.fill_cooperative_tensor %acc2, 0.0h
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
+        %inner_let:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+        %7:void = msl.copy_cooperative_tensor %inner_let, %acc1
+        %inner_var:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+        %9:void = msl.copy_cooperative_tensor %inner_var, %acc2
+        exit_loop  # loop_1
+      }
+    }
     ret
   }
 }

@@ -200,6 +200,7 @@ class Printer : public tint::TextGenerator {
     std::string tensor_operation_template_;
 
     std::string fill_cooperative_tensor_;
+    std::string copy_cooperative_tensor_;
 
     // We declare type aliases for cooperative tensors using the templated matmul2d operation alias.
     // Build a map from MNK dimensions + input/result types to the set of alias names for that
@@ -1171,6 +1172,27 @@ class Printer : public tint::TextGenerator {
             EmitAndTakeAddressIfNeeded(out, c->Args()[0]);
             out << ", ";
             EmitValue(out, c->Args()[1]);
+            out << ")";
+            return;
+        }
+        if (c->Func() == BuiltinFn::kCopyCooperativeTensor) {
+            if (copy_cooperative_tensor_.empty()) {
+                TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+
+                copy_cooperative_tensor_ = UniqueIdentifier("tint_copy_cooperative_tensor");
+                Line();
+                Line() << "template<typename T>";
+                Line() << "void " << copy_cooperative_tensor_
+                       << "(thread T* dst, const thread T* src) {";
+                Line() << "  for (uint i = 0; i < dst->get_capacity(); i++) {";
+                Line() << "    dst->set(i, src->get(i));";
+                Line() << "  }";
+                Line() << "}";
+            }
+            out << copy_cooperative_tensor_ << "(";
+            EmitAndTakeAddressIfNeeded(out, c->Args()[0]);
+            out << ", ";
+            EmitAndTakeAddressIfNeeded(out, c->Args()[1]);
             out << ")";
             return;
         }

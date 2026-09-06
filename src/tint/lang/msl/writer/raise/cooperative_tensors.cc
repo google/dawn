@@ -55,6 +55,9 @@ struct State {
     /// A map from a subgroup matrix value to the local var that contains the cooperative_tensor.
     Hashmap<const core::ir::Value*, core::ir::Var*, 8> value_to_local_var{};
 
+    /// The set of local variables that are shared across multiple uses.
+    Hashset<const core::ir::Var*, 8> shared_local_vars{};
+
     /// Process the module.
     void Process() {
         // Take a copy of the functions since we may introduce helper functions.
@@ -101,6 +104,15 @@ struct State {
             [](Default) { return false; });
     }
 
+    /// Register @p var as the local variable for the value @p val.
+    /// If the value is used multiple times, the local variable is marked as shared.
+    void RegisterLocalVar(core::ir::Value* val, core::ir::Var* var) {
+        if (val->NumUsages() > 1u) {
+            shared_local_vars.Add(var);
+        }
+        value_to_local_var.Add(val, var);
+    }
+
     /// Process a `construct` instruction.
     /// @param c the construct instruction
     void ProcessConstruct(core::ir::Construct* c) {
@@ -126,7 +138,7 @@ struct State {
 
             b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kFillCooperativeTensor, var, value);
 
-            value_to_local_var.Add(c->Result(), var);
+            RegisterLocalVar(c->Result(), var);
         });
         c->Destroy();
     }
@@ -143,17 +155,27 @@ struct State {
         auto* local_var = value_to_local_var.GetOr(init, nullptr);
         TINT_IR_ASSERT(ir, local_var);
 
-        if (init->NumUsages() == 1u && local_var->Block() == let->Block()) {
-            // If the initializer value is only used here and was declared in the same block,
+        if (!shared_local_vars.Contains(local_var) && local_var->Block() == let->Block()) {
+            // If the initializer value is not shared, and was declared in the same block,
             // then we can just take the local variable that it allocated and use that directly.
             ir.SetName(local_var, ir.NameOf(let));
-            value_to_local_var.Add(let->Result(), local_var);
-            let->Destroy();
+            RegisterLocalVar(let->Result(), local_var);
         } else {
-            // TODO(555778427): Copy the contents of the initializer cooperative_tensor into this
-            // variable.
-            TINT_IR_UNIMPLEMENTED(ir);
+            // Declare a new local variable and copy the contents of the initializer
+            // cooperative_tensor into it.
+            b.InsertAfter(let, [&] {
+                auto* tensor_type = ToCooperativeTensor(sm_ty);
+                auto* ptr_type = ty.ptr(function, tensor_type, read_write);
+                auto* var = b.Var(ptr_type);
+                ir.SetName(var, ir.NameOf(let));
+
+                b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor, var,
+                                        local_var);
+
+                RegisterLocalVar(let->Result(), var);
+            });
         }
+        let->Destroy();
     }
 
     /// Process a `var` instruction to replace its type and initializer.
@@ -174,16 +196,18 @@ struct State {
             auto* local_var = value_to_local_var.GetOr(init, nullptr);
             TINT_IR_ASSERT(ir, local_var);
 
-            if (init->NumUsages() == 1u && local_var->Block() == var->Block()) {
-                // If the initializer value is only used here and was declared in the same block,
+            if (!shared_local_vars.Contains(local_var) && local_var->Block() == var->Block()) {
+                // If the initializer value is not shared, and was declared in the same block, then
                 // then we can just take the local variable that it allocated and use that directly.
                 ir.SetName(local_var, ir.NameOf(var));
                 var->Result()->ReplaceAllUsesWith(local_var->Result());
                 var->Destroy();
             } else {
-                // TODO(555778427): Copy the contents of the initializer cooperative_tensor into
-                // this variable.
-                TINT_IR_UNIMPLEMENTED(ir);
+                // Copy the contents of the initializer cooperative_tensor into this variable.
+                var->SetInitializer(nullptr);
+                auto* copy = b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor,
+                                                     var, local_var);
+                copy->InsertAfter(var);
             }
         } else {
             // Use a helper to fill the cooperative_tensor with zero values.

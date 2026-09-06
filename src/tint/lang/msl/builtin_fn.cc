@@ -132,6 +132,8 @@ const char* str(BuiltinFn i) {
             return "simdgroup_multiply";
         case BuiltinFn::kSimdgroupMultiplyAccumulate:
             return "simdgroup_multiply_accumulate";
+        case BuiltinFn::kCopyCooperativeTensor:
+            return "copy_cooperative_tensor";
         case BuiltinFn::kFillCooperativeTensor:
             return "fill_cooperative_tensor";
         case BuiltinFn::kOsLog:
@@ -166,6 +168,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kQuadShuffleXor:
         case BuiltinFn::kAtomicMaxExplicit:
         case BuiltinFn::kAtomicMinExplicit:
+        case BuiltinFn::kCopyCooperativeTensor:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad, core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kAtomicLoadExplicit:

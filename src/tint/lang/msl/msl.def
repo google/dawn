@@ -448,6 +448,9 @@ fn convert(u32) -> u64
     subgroup_matrix<subgroup_matrix_kind_right, S, C, K>,
     subgroup_matrix<subgroup_matrix_kind_result, S, C, R>)
 
+@stage("compute") implicit(KIND: subgroup_matrix_kind, IT: subgroup_matrix_elements, RT: subgroup_matrix_elements, M: num, N: num, K: num)
+  fn copy_cooperative_tensor(ptr<function, cooperative_tensor<KIND, M, N, K, IT, RT>, read_write>,
+                             ptr<function, cooperative_tensor<KIND, M, N, K, IT, RT>, read_write>)
 @stage("compute") implicit(IT: subgroup_matrix_elements, RT: subgroup_matrix_elements, M: num, N: num, K: num)
   fn fill_cooperative_tensor(ptr<function, cooperative_tensor<subgroup_matrix_kind_left, M, N, K, IT, RT>, read_write>, IT)
 @stage("compute") implicit(IT: subgroup_matrix_elements, RT: subgroup_matrix_elements, M: num, N: num, K: num)
