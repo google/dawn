@@ -88,6 +88,7 @@ if (tint_build_unittests) {
         "let_test.cc",
         "loop_test.cc",
         "return_test.cc",
+        "tensor_test.cc",
         "type_test.cc",
         "var_test.cc",
         "writer_test.cc",

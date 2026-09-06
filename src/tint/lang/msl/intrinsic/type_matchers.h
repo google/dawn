@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/type/resource_table.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/msl/type/bias.h"
+#include "src/tint/lang/msl/type/cooperative_tensor.h"
 #include "src/tint/lang/msl/type/gradient.h"
 #include "src/tint/lang/msl/type/level.h"
 
@@ -135,6 +136,47 @@ inline const core::type::ResourceTable* BuildResourceTable(core::intrinsic::Matc
                                                            const core::type::Type*,
                                                            const core::type::Type* T) {
     return state.types.Get<core::type::ResourceTable>(T);
+}
+
+inline bool MatchCooperativeTensor(core::intrinsic::MatchState&,
+                                   const core::type::Type* ty,
+                                   core::intrinsic::Number& KIND,
+                                   core::intrinsic::Number& M,
+                                   core::intrinsic::Number& N,
+                                   core::intrinsic::Number& K,
+                                   const core::type::Type*& IT,
+                                   const core::type::Type*& RT) {
+    if (ty->Is<core::intrinsic::Any>()) {
+        M = core::intrinsic::Number::any;
+        N = core::intrinsic::Number::any;
+        K = core::intrinsic::Number::any;
+        KIND = core::intrinsic::Number::any;
+        IT = ty;
+        RT = ty;
+        return true;
+    }
+    if (auto* ct = ty->As<type::CooperativeTensor>()) {
+        M = ct->M();
+        N = ct->N();
+        K = ct->K();
+        KIND = core::intrinsic::Number(static_cast<uint32_t>(ct->Kind()));
+        IT = ct->InputType();
+        RT = ct->ResultType();
+        return true;
+    }
+    return false;
+}
+
+inline const type::CooperativeTensor* BuildCooperativeTensor(core::intrinsic::MatchState& state,
+                                                             const core::type::Type*,
+                                                             core::intrinsic::Number S,
+                                                             core::intrinsic::Number M,
+                                                             core::intrinsic::Number N,
+                                                             core::intrinsic::Number K,
+                                                             const core::type::Type* IT,
+                                                             const core::type::Type* RT) {
+    return state.types.Get<type::CooperativeTensor>(
+        static_cast<core::SubgroupMatrixKind>(S.Value()), M.Value(), N.Value(), K.Value(), IT, RT);
 }
 
 }  // namespace tint::msl::intrinsic

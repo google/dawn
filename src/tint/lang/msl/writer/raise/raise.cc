@@ -66,6 +66,7 @@
 #include "src/tint/lang/msl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/msl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/msl/writer/raise/convert_print_to_log.h"
+#include "src/tint/lang/msl/writer/raise/cooperative_tensors.h"
 #include "src/tint/lang/msl/writer/raise/decompose_buffer.h"
 #include "src/tint/lang/msl/writer/raise/fix_type_layout.h"
 #include "src/tint/lang/msl/writer/raise/fix_u32_div_mod.h"
@@ -287,6 +288,10 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     }
 
     TINT_CHECK_RESULT(raise::ModuleScopeVars(module));
+
+    if (options.extensions.enable_tensors) {
+        TINT_CHECK_RESULT(raise::CooperativeTensors(module));
+    }
 
     TINT_CHECK_RESULT(raise::BinaryPolyfill(module));
 

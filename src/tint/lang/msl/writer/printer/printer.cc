@@ -103,6 +103,7 @@
 #include "src/tint/lang/msl/ir/member_builtin_call.h"
 #include "src/tint/lang/msl/ir/memory_order.h"
 #include "src/tint/lang/msl/type/bias.h"
+#include "src/tint/lang/msl/type/cooperative_tensor.h"
 #include "src/tint/lang/msl/type/gradient.h"
 #include "src/tint/lang/msl/type/level.h"
 #include "src/tint/lang/msl/writer/common/options.h"
@@ -194,6 +195,43 @@ class Printer : public tint::TextGenerator {
     Hashset<const core::type::Struct*, 16> host_shareable_structs_;
     Hashset<const core::type::Struct*, 4> emitted_structs_;
     Hashmap<const core::type::ResourceTable*, Symbol, 4> resource_table_to_name_;
+
+    /// The name of the templated alias for matmul2d operations, if emitted.
+    std::string tensor_operation_template_;
+
+    std::string fill_cooperative_tensor_;
+
+    // We declare type aliases for cooperative tensors using the templated matmul2d operation alias.
+    // Build a map from MNK dimensions + input/result types to the set of alias names for that
+    // operation shape.
+    struct TensorConfig {
+        uint32_t m;
+        uint32_t n;
+        uint32_t k;
+        const core::type::Type* input_type;
+        const core::type::Type* result_type;
+
+        bool operator==(const TensorConfig& other) const {
+            return m == other.m && n == other.n && k == other.k && input_type == other.input_type &&
+                   result_type == other.input_type;
+        }
+        struct Hasher {
+            HashCode operator()(const TensorConfig& cfg) const {
+                auto hash = Hash(cfg.m);
+                hash = HashCombine(hash, cfg.n);
+                hash = HashCombine(hash, cfg.k);
+                hash = HashCombine(hash, cfg.input_type);
+                hash = HashCombine(hash, cfg.result_type);
+                return hash;
+            }
+        };
+    };
+    struct TensorAliases {
+        std::string left;
+        std::string right;
+        std::string result;
+    };
+    Hashmap<TensorConfig, TensorAliases, 4, TensorConfig::Hasher> tensor_config_to_aliases_;
 
     /// The current function being emitted
     const core::ir::Function* current_function_ = nullptr;
@@ -696,8 +734,10 @@ class Printer : public tint::TextGenerator {
             EmitValue(out, v->Initializer());
         } else if (space == core::AddressSpace::kPrivate ||
                    space == core::AddressSpace::kFunction) {
-            out << " = ";
-            EmitZeroValue(out, ptr->UnwrapPtr());
+            if (!ptr->StoreType()->Is<type::CooperativeTensor>()) {
+                out << " = ";
+                EmitZeroValue(out, ptr->StoreType());
+            }
         }
         out << ";";
     }
@@ -1114,6 +1154,26 @@ class Printer : public tint::TextGenerator {
             out << "]." << kResourceName;
             return;
         }
+        if (c->Func() == BuiltinFn::kFillCooperativeTensor) {
+            if (fill_cooperative_tensor_.empty()) {
+                TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+
+                fill_cooperative_tensor_ = UniqueIdentifier("tint_fill_cooperative_tensor");
+                Line();
+                Line() << "template<typename T, typename V>";
+                Line() << "void " << fill_cooperative_tensor_ << "(thread T* dst, V value) {";
+                Line() << "  for (uint i = 0; i < dst->get_capacity(); i++) {";
+                Line() << "    dst->set(i, value);";
+                Line() << "  }";
+                Line() << "}";
+            }
+            out << fill_cooperative_tensor_ << "(";
+            EmitAndTakeAddressIfNeeded(out, c->Args()[0]);
+            out << ", ";
+            EmitValue(out, c->Args()[1]);
+            out << ")";
+            return;
+        }
 
         // Some builtins need special-casing for the name they use.
         if (c->Func() == msl::BuiltinFn::kOsLog) {
@@ -1509,6 +1569,9 @@ class Printer : public tint::TextGenerator {
                 }
             },                                                 //
             [&](const msl::type::Level*) { out << "level"; },  //
+            [&](const msl::type::CooperativeTensor* tensor) {
+                out << GetCooperativeTensorTypeAlias(tensor);
+            },
             [&](const core::type::SubgroupMatrix* sm) {
                 TINT_IR_ASSERT(ir_, (sm->Type()->IsAnyOf<core::type::F32, core::type::F16>()));
                 TINT_IR_ASSERT(ir_, sm->Columns() == 8);
@@ -1870,6 +1933,89 @@ class Printer : public tint::TextGenerator {
         Line(&str_buf) << "};";
 
         preamble_buffer_.Append(str_buf);
+    }
+
+    std::string GetTensorOperationTemplate() {
+        if (tensor_operation_template_.empty()) {
+            TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+
+            Line();
+            Line() << "#include <MetalPerformancePrimitives/MetalPerformancePrimitives.h>";
+            Line();
+
+            // Declare the matmul2d_descriptor object.
+            std::string descriptor_name = UniqueIdentifier("tint_matmul2d_descriptor");
+            Line() << "template<uint M, uint N, uint K,";
+            Line() << "         mpp::tensor_ops::matmul2d_descriptor::mode O>";
+            Line() << "constant constexpr auto " << descriptor_name << " =";
+            Line() << "  mpp::tensor_ops::matmul2d_descriptor(M, N, K, false, false, false, O);";
+            Line();
+
+            // Declare an alias for the matmul2d operation type.
+            tensor_operation_template_ = UniqueIdentifier("tint_matmul2d_operation");
+            Line() << "template<uint M, uint N, uint K,";
+            Line() << "         mpp::tensor_ops::matmul2d_descriptor::mode O = "
+                      "mpp::tensor_ops::matmul2d_descriptor::mode::multiply>";
+            Line() << "using " << tensor_operation_template_ << " =";
+            Line() << "  mpp::tensor_ops::matmul2d<" << descriptor_name
+                   << "<M, N, K, O>, execution_simdgroup>;";
+        }
+        return tensor_operation_template_;
+    }
+
+    std::string GetCooperativeTensorTypeAlias(const type::CooperativeTensor* tensor) {
+        // Get or emit the type aliases for the left/right/result cooperative tensors that match the
+        // operation shape used by `tensor`.
+        TensorConfig cfg = {
+            .m = tensor->M(),
+            .n = tensor->N(),
+            .k = tensor->K(),
+            .input_type = tensor->InputType(),
+            .result_type = tensor->ResultType(),
+        };
+        auto type_aliases = tensor_config_to_aliases_.GetOrAdd(cfg, [&] {
+            auto operation = GetTensorOperationTemplate();
+
+            TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+            Line();
+
+            StringStream input_type;
+            StringStream result_type;
+            EmitType(input_type, tensor->InputType());
+            EmitType(result_type, tensor->ResultType());
+            auto emit_tensor = [&](const char* tensor_kind, std::string_view left_type,
+                                   std::string_view right_type) {
+                StringStream name_stream;
+                name_stream << "tint_" << tensor_kind << "_" << tensor->M() << "_" << tensor->N()
+                            << "_" << tensor->K() << "_" << input_type.str() << "_"
+                            << result_type.str();
+                auto name = UniqueIdentifier(name_stream.str());
+                Line() << "using " << name << " =";
+                Line() << "  decltype(declval<" << operation << "<" << tensor->M() << ", "
+                       << tensor->N() << ", " << tensor->K() << ">>()";
+                Line() << "             .get_" << tensor_kind << "_cooperative_tensor<" << left_type
+                       << ", " << right_type << ", " << result_type.str() << ">());";
+                return name;
+            };
+
+            TensorAliases aliases;
+            aliases.left = emit_tensor("left_input", input_type.str(), input_type.str());
+            aliases.right = emit_tensor("right_input", input_type.str(), input_type.str());
+            aliases.result = emit_tensor("destination", aliases.left, aliases.right);
+            return aliases;
+        });
+
+        // Pick the alias that corresponds the the cooperative_tensor kind that we are emitting.
+        switch (tensor->Kind()) {
+            case core::SubgroupMatrixKind::kLeft:
+                return type_aliases.left;
+            case core::SubgroupMatrixKind::kRight:
+                return type_aliases.right;
+            case core::SubgroupMatrixKind::kResult:
+                return type_aliases.result;
+            case core::SubgroupMatrixKind::kUndefined:
+                TINT_IR_UNREACHABLE(ir_);
+        }
     }
 
     /// Handles core::ir::Constant values

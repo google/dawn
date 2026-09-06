@@ -95,6 +95,7 @@ tint_add_target(tint_lang_msl_writer_test test
   lang/msl/writer/let_test.cc
   lang/msl/writer/loop_test.cc
   lang/msl/writer/return_test.cc
+  lang/msl/writer/tensor_test.cc
   lang/msl/writer/type_test.cc
   lang/msl/writer/var_test.cc
   lang/msl/writer/writer_test.cc

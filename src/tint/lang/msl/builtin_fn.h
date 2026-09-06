@@ -94,6 +94,7 @@ enum class BuiltinFn : uint8_t {
     kSimdgroupStore,
     kSimdgroupMultiply,
     kSimdgroupMultiplyAccumulate,
+    kFillCooperativeTensor,
     kOsLog,
     kPointerOffset,
     kVolatileZero,

@@ -132,6 +132,8 @@ const char* str(BuiltinFn i) {
             return "simdgroup_multiply";
         case BuiltinFn::kSimdgroupMultiplyAccumulate:
             return "simdgroup_multiply_accumulate";
+        case BuiltinFn::kFillCooperativeTensor:
+            return "fill_cooperative_tensor";
         case BuiltinFn::kOsLog:
             return "os_log";
         case BuiltinFn::kPointerOffset:
@@ -178,6 +180,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
 
         case BuiltinFn::kWrite:
         case BuiltinFn::kSimdgroupStore:
+        case BuiltinFn::kFillCooperativeTensor:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kDistance:
