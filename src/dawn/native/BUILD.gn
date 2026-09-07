@@ -459,6 +459,7 @@ source_set("sources") {
     "ValidationUtils.cpp",
     "ValidationUtils.h",
     "VisitableMembers.h",
+    "WaitAnySystemEvent.cpp",
     "WaitAnySystemEvent.h",
     "WaitListEvent.cpp",
     "WaitListEvent.h",

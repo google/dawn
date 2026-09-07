@@ -268,6 +268,7 @@ set(sources
     "Toggles.cpp"
     "utils/WGPUHelpers.cpp"
     "ValidationUtils.cpp"
+    "WaitAnySystemEvent.cpp"
     "WaitListEvent.cpp"
     "webgpu_absl_format.cpp"
 )
