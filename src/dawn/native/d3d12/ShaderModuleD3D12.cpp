@@ -294,6 +294,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.tintOptions.disable_workgroup_init =
         device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.hlsl.tintOptions.workarounds.d3d12_decompose_workgroup_access =
+        stage == SingleShaderStage::Compute &&
         device->IsToggleEnabled(Toggle::D3D12DecomposeWorkgroupAccess);
     req.hlsl.tintOptions.disable_polyfill_integer_div_mod =
         device->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
