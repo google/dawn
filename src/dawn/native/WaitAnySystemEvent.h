@@ -45,8 +45,10 @@
 #endif
 
 #include "absl/container/inlined_vector.h"
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/native/SystemEvent.h"
 #include "src/utils/log.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 
@@ -71,19 +73,17 @@ T ToMillisecondsGeneric(Nanoseconds timeout) {
 
 // WaitAnySystemEvent on an iterator range converts those iterators to the
 // platform-specific wait handles, and then waits on them.
-template <typename It>
-[[nodiscard]] bool WaitAnySystemEvent(It begin, It end, Nanoseconds timeout) {
-    static_assert(std::is_same_v<typename std::iterator_traits<It>::value_type,
-                                 std::pair<const SystemEventReceiver&, bool*>>);
-    size_t count = sign_cast(std::distance(begin, end));
-    if (count == 0) {
+[[nodiscard]] inline bool WaitAnySystemEvent(
+    Span<std::pair<const SystemEventReceiver&, bool*>> events,
+    Nanoseconds timeout) {
+    if (events.empty()) {
         return false;
     }
 #if DAWN_PLATFORM_IS(WINDOWS)
     absl::InlinedVector<HANDLE, 4 /* avoid heap allocation for small waits */> handles;
-    handles.reserve(count);
-    for (auto it = begin; it != end; DAWN_UNSAFE_TODO(++it)) {
-        handles.push_back((*it).first.mPrimitive.Get());
+    handles.reserve(events.size());
+    for (const auto& [systemEvent, _] : events) {
+        handles.push_back(systemEvent.mPrimitive.Get());
     }
     DAWN_ASSERT(handles.size() <= MAXIMUM_WAIT_OBJECTS);
     DWORD status = WaitForMultipleObjects(DWORD(handles.size()), handles.data(),
@@ -91,16 +91,16 @@ template <typename It>
     if (status == WAIT_TIMEOUT) {
         return false;
     }
-    DAWN_CHECK(WAIT_OBJECT_0 <= status && status < WAIT_OBJECT_0 + count);
-    const ptrdiff_t completedIndex = sign_cast(status - WAIT_OBJECT_0);
+    DAWN_CHECK(WAIT_OBJECT_0 <= status && status < WAIT_OBJECT_0 + events.size());
+    const size_t completedIndex = checked_cast<size_t>(sign_cast(status - WAIT_OBJECT_0));
 
-    *(*(DAWN_UNSAFE_TODO(begin + completedIndex))).second = true;
+    *events[completedIndex].second = true;
     return true;
 #elif DAWN_PLATFORM_IS(POSIX)
     absl::InlinedVector<pollfd, 4 /* avoid heap allocation for small waits */> pollfds;
-    pollfds.reserve(count);
-    for (auto it = begin; it != end; DAWN_UNSAFE_TODO(++it)) {
-        pollfds.push_back(pollfd{static_cast<int>((*it).first.mPrimitive.Get()), POLLIN, 0});
+    pollfds.reserve(events.size());
+    for (auto [systemEvent, _] : events) {
+        pollfds.push_back(pollfd{static_cast<int>(systemEvent.mPrimitive.Get()), POLLIN, 0});
     }
     int status = 0;
     bool retry = false;
@@ -123,14 +123,13 @@ template <typename It>
         return false;
     }
 
-    size_t i = 0;
-    for (auto it = begin; it != end; DAWN_UNSAFE_TODO(++it), ++i) {
+    for (auto [i, event] : Enumerate(events)) {
         int revents = pollfds[i].revents;
         static constexpr int kAllowedEvents = POLLIN | POLLHUP;
         DAWN_CHECK((revents & kAllowedEvents) == revents);
 
         bool ready = (pollfds[i].revents & POLLIN) != 0;
-        *(*it).second = ready;
+        *event.second = ready;
     }
 
     return true;

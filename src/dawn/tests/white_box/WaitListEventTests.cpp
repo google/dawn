@@ -47,7 +47,7 @@ constexpr uint64_t kMediumDurationNs = 50000000;
 bool WaitOnReceiver(const SystemEventReceiver& receiver, Nanoseconds timeout) {
     bool ready = false;
     std::pair<const SystemEventReceiver&, bool*> event = {receiver, &ready};
-    return WaitAnySystemEvent(&event, DAWN_UNSAFE_TODO(&event + 1), timeout);
+    return WaitAnySystemEvent(SpanFromRef(event), timeout);
 }
 
 class WaitListEventTests : public DawnTest {
