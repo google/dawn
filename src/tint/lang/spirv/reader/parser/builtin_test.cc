@@ -1709,15 +1709,20 @@ TEST_F(SpirvParserTest, VectorExtractDynamic) {
 %float_4 = OpConstant %float 4.0
 %uint_2  = OpConstant %uint 2
 %vec = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+%ptr = OpTypePointer Function %v4float
 %main = OpFunction %void None %ep_type
 %entry = OpLabel
-  %1 = OpVectorExtractDynamic %float %vec %uint_2
+  %v = OpVariable %ptr Function %vec
+ %ld = OpLoad %v4float %v
+  %1 = OpVectorExtractDynamic %float %ld %uint_2
        OpReturn
        OpFunctionEnd)",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = access vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), 2u
+    %2:ptr<function, vec4<f32>, read_write> = var vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
+    %3:vec4<f32> = load %2
+    %4:f32 = access %3, 2u
     ret
   }
 }

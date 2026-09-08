@@ -82,12 +82,14 @@
 #include "src/tint/lang/core/type/i8.h"     // IWYU pragma: export
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/memory_view.h"
-#include "src/tint/lang/core/type/pointer.h"  // IWYU pragma: export
-#include "src/tint/lang/core/type/type.h"     // IWYU pragma: export
-#include "src/tint/lang/core/type/u16.h"      // IWYU pragma: export
-#include "src/tint/lang/core/type/u32.h"      // IWYU pragma: export
-#include "src/tint/lang/core/type/u64.h"      // IWYU pragma: export
-#include "src/tint/lang/core/type/u8.h"       // IWYU pragma: export
+#include "src/tint/lang/core/type/pointer.h"       // IWYU pragma: export
+#include "src/tint/lang/core/type/reference.h"     // IWYU pragma: export
+#include "src/tint/lang/core/type/swizzle_view.h"  // IWYU pragma: export
+#include "src/tint/lang/core/type/type.h"          // IWYU pragma: export
+#include "src/tint/lang/core/type/u16.h"           // IWYU pragma: export
+#include "src/tint/lang/core/type/u32.h"           // IWYU pragma: export
+#include "src/tint/lang/core/type/u64.h"           // IWYU pragma: export
+#include "src/tint/lang/core/type/u8.h"            // IWYU pragma: export
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"  // IWYU pragma: export
 #include "src/tint/utils/ice/ice.h"
@@ -1914,9 +1916,18 @@ class Builder {
     ir::Value* AccessReplaceResult(ir::InstructionResult* result, OBJ&& object, ARGS&&... indices) {
         CheckForNonDeterministicEvaluation<OBJ, ARGS...>();
         auto* obj_val = Value(std::forward<OBJ>(object));
-        return Append(ir.CreateInstruction<ir::Access>(result, obj_val,
-                                                       Values(std::forward<ARGS>(indices)...)))
-            ->Result();
+        auto values = Values(std::forward<ARGS>(indices)...);
+        // Pointers, references, and swizzle views won't fold, so don't try.
+        if (!result->Type()->Is<core::type::MemoryView>()) {
+            auto res = Evaluator{*this, false}.EvalAccess(obj_val, values);
+            if (res == Success && res.Get()) {
+                auto* cnst = Constant(res.Get());
+                result->ReplaceAllUsesWith(cnst);
+                result->Destroy();
+                return cnst;
+            }
+        }
+        return Append(ir.CreateInstruction<ir::Access>(result, obj_val, values))->Result();
     }
 
     /// Creates a new `Access`

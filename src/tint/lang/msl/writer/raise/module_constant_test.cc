@@ -135,7 +135,8 @@ TEST_F(MslWriter_ModuleConstantTest, ConstStruct) {
 
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
-        auto* access = b.Access(ty.u32(), c, 0_u);
+        auto* access = b.Append(mod.CreateInstruction<core::ir::Access>(
+            b.InstructionResult(ty.u32()), c, Vector{b.Constant(0_u)}));
         auto* r = b.Let("q", access);
         b.Return(func, r);
     });

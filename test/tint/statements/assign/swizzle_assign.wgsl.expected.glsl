@@ -14,9 +14,9 @@ void main() {
   uint idx = 0u;
   uvec4 v = uvec4(1u, 2u, 3u, 4u);
   uvec4 v_2 = v;
-  v = uvec4(v_2.x, uvec2(5u, 6u).y, uvec2(5u, 6u).x, v_2.w);
+  v = uvec4(v_2.x, 6u, 5u, v_2.w);
   uvec4 v_3 = v;
-  v = uvec4(v_3.x, uvec2(99u, 100u).y, uvec2(99u, 100u).x, v_3.w);
+  v = uvec4(v_3.x, 100u, 99u, v_3.w);
   v.z = 200u;
   uvec3 v_4 = (v.xyz * uvec3(100u));
   v = uvec4(v_4.x, v_4.y, v_4.z, v.w);
@@ -25,9 +25,9 @@ void main() {
   v.x = (v.x + 500u);
   v_1.inner.res = uvec4(0u);
   uvec4 v_5 = v_1.inner.res;
-  v_1.inner.res = uvec4(v_5.x, uvec2(1u, 2u).y, uvec2(1u, 2u).x, v_5.w);
+  v_1.inner.res = uvec4(v_5.x, 2u, 1u, v_5.w);
   uvec4 v_6 = v_1.inner.res;
-  v_1.inner.res = uvec4(v_6.x, uvec2(3u, 4u).y, uvec2(3u, 4u).x, v_6.w);
+  v_1.inner.res = uvec4(v_6.x, 4u, 3u, v_6.w);
   v_1.inner.res.z = 5u;
   uvec3 v_7 = (v_1.inner.res.xyz + uvec3(10u));
   v_1.inner.res = uvec4(v_7.x, v_7.y, v_7.z, v_1.inner.res.w);

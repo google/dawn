@@ -915,27 +915,29 @@ TEST_F(HlslWriterPromoteInitializersTest, DuplicateAccessDifferentFunction) {
     auto* a = b.Function("a", ty.void_());
     b.Append(a->Block(), [&] {
         auto* ary = b.Splat(ty.array(ty.f32(), 8), 8_f);
-        b.Access(ty.f32(), ary, 0_u);
+        b.Access(ty.f32(), b.Let("l", ary), 0_u);
         b.Return(a);
     });
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* ary = b.Splat(ty.array(ty.f32(), 8), 8_f);
-        b.Access(ty.f32(), ary, 0_u);
+        b.Access(ty.f32(), b.Let("l2", ary), 0_u);
         b.Return(func);
     });
 
     auto* src = R"(
 %a = func():void {
   $B1: {
-    %2:f32 = access array<f32, 8>(8.0f), 0u
+    %l:array<f32, 8> = let array<f32, 8>(8.0f)
+    %3:f32 = access %l, 0u
     ret
   }
 }
 %foo = @fragment func():void {
   $B2: {
-    %4:f32 = access array<f32, 8>(8.0f), 0u
+    %l2:array<f32, 8> = let array<f32, 8>(8.0f)
+    %6:f32 = access %l2, 0u
     ret
   }
 }
@@ -945,15 +947,15 @@ TEST_F(HlslWriterPromoteInitializersTest, DuplicateAccessDifferentFunction) {
     auto* expect = R"(
 %a = func():void {
   $B1: {
-    %2:array<f32, 8> = let array<f32, 8>(8.0f)
-    %3:f32 = access %2, 0u
+    %l:array<f32, 8> = let array<f32, 8>(8.0f)
+    %3:f32 = access %l, 0u
     ret
   }
 }
 %foo = @fragment func():void {
   $B2: {
-    %5:array<f32, 8> = let array<f32, 8>(8.0f)
-    %6:f32 = access %5, 0u
+    %l2:array<f32, 8> = let array<f32, 8>(8.0f)
+    %6:f32 = access %l2, 0u
     ret
   }
 }

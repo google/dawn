@@ -128,7 +128,8 @@ TEST_F(IR_ValidatorTest, Access_NullIndex) {
     f->SetParams({obj});
 
     b.Append(f->Block(), [&] {
-        b.Access(ty.f32(), obj, nullptr);
+        auto* a = b.Access(ty.f32(), obj, 1_u)->AsInstruction<Access>();
+        a->SetOperand(1, nullptr);
         b.Return(f);
     });
 
@@ -211,10 +212,12 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Ptr) {
 TEST_F(IR_ValidatorTest, Access_StaticallyUnindexableType_Value) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.f32());
-    f->SetParams({obj});
+    auto* obj2 = b.FunctionParam(ty.vec4f());
+    f->SetParams({obj, obj2});
 
     b.Append(f->Block(), [&] {
-        b.Access(ty.f32(), obj, 1_u);
+        auto* a = b.Access(ty.f32(), obj2, 1_u)->AsInstruction<Access>();
+        a->SetOperand(0, obj);
         b.Return(f);
     });
 
@@ -222,7 +225,7 @@ TEST_F(IR_ValidatorTest, Access_StaticallyUnindexableType_Value) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:3:25 error: access: type 'f32' cannot be indexed
-    %3:f32 = access %2, 1u
+    %4:f32 = access %2, 1u
                         ^^
 )")) << res.Failure();
 }

@@ -4034,7 +4034,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_StoreU32) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_StoreU32_Const) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.u32()},
@@ -4088,11 +4088,9 @@ $B1: {  # root
     %3:ptr<storage, u16, read_write> = access %v, 0u
     store %3, 0u16
     %4:ptr<storage, u16, read_write> = access %v, 2u
-    %5:u16 = access vec2<u16>(0u16), 0u
-    store %4, %5 @align(4)
-    %6:ptr<storage, u16, read_write> = access %v, 3u
-    %7:u16 = access vec2<u16>(0u16), 1u
-    store %6, %7
+    store %4, 0u16 @align(4)
+    %5:ptr<storage, u16, read_write> = access %v, 3u
+    store %5, 0u16
     ret
   }
 }
@@ -4262,8 +4260,8 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_StoreVec3h) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u), u16(0));
-        b.Store(b.Access(ty.ptr(storage, ty.vec3h(), core::Access::kReadWrite), var, 1_u),
-                b.Zero(ty.vec3h()));
+        auto* l = b.Let("l", b.Zero(ty.vec3h()));
+        b.Store(b.Access(ty.ptr(storage, ty.vec3h(), core::Access::kReadWrite), var, 1_u), l);
         b.Return(func);
     });
 
@@ -4281,8 +4279,9 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, u16, read_write> = access %v, 0u
     store %3, 0u16
-    %4:ptr<storage, vec3<f16>, read_write> = access %v, 1u
-    store %4, vec3<f16>(0.0h)
+    %l:vec3<f16> = let vec3<f16>(0.0h)
+    %5:ptr<storage, vec3<f16>, read_write> = access %v, 1u
+    store %5, %l
     ret
   }
 }
@@ -4304,15 +4303,19 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, u16, read_write> = access %v, 0u
     store %3, 0u16
-    %4:f16 = access vec3<f16>(0.0h), 0u
-    %5:ptr<storage, u16, read_write> = access %v, 4u
-    store %5, 0u16 @align(8)
-    %6:f16 = access vec3<f16>(0.0h), 1u
-    %7:ptr<storage, u16, read_write> = access %v, 5u
-    store %7, 0u16
-    %8:f16 = access vec3<f16>(0.0h), 2u
-    %9:ptr<storage, u16, read_write> = access %v, 6u
-    store %9, 0u16
+    %l:vec3<f16> = let vec3<f16>(0.0h)
+    %5:f16 = access %l, 0u
+    %6:u16 = bitcast<u16> %5
+    %7:ptr<storage, u16, read_write> = access %v, 4u
+    store %7, %6 @align(8)
+    %8:f16 = access %l, 1u
+    %9:u16 = bitcast<u16> %8
+    %10:ptr<storage, u16, read_write> = access %v, 5u
+    store %10, %9
+    %11:f16 = access %l, 2u
+    %12:u16 = bitcast<u16> %11
+    %13:ptr<storage, u16, read_write> = access %v, 6u
+    store %13, %12
     ret
   }
 }
@@ -4377,18 +4380,14 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, u16, read_write> = access %v, 0u
     store %3, 0u16
-    %4:f16 = access vec4<f16>(0.0h), 0u
-    %5:ptr<storage, u16, read_write> = access %v, 4u
-    store %5, 0u16 @align(8)
-    %6:f16 = access vec4<f16>(0.0h), 1u
-    %7:ptr<storage, u16, read_write> = access %v, 5u
+    %4:ptr<storage, u16, read_write> = access %v, 4u
+    store %4, 0u16 @align(8)
+    %5:ptr<storage, u16, read_write> = access %v, 5u
+    store %5, 0u16
+    %6:ptr<storage, u16, read_write> = access %v, 6u
+    store %6, 0u16
+    %7:ptr<storage, u16, read_write> = access %v, 7u
     store %7, 0u16
-    %8:f16 = access vec4<f16>(0.0h), 2u
-    %9:ptr<storage, u16, read_write> = access %v, 6u
-    store %9, 0u16
-    %10:f16 = access vec4<f16>(0.0h), 3u
-    %11:ptr<storage, u16, read_write> = access %v, 7u
-    store %11, 0u16
     ret
   }
 }
@@ -5050,12 +5049,10 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, u32, read_write> = access %v, 0u
     store %3, 0u
-    %4:u32 = access vec2<u32>(0u), 0u
-    %5:ptr<storage, u32, read_write> = access %v, 2u
-    store %5, %4 @align(8)
-    %6:u32 = access vec2<u32>(0u), 1u
-    %7:ptr<storage, u32, read_write> = access %v, 3u
-    store %7, %6
+    %4:ptr<storage, u32, read_write> = access %v, 2u
+    store %4, 0u @align(8)
+    %5:ptr<storage, u32, read_write> = access %v, 3u
+    store %5, 0u
     ret
   }
 }
@@ -5078,8 +5075,8 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_StoreVec3u) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(b.Access(ty.ptr(storage, ty.u32(), core::Access::kReadWrite), var, 0_u), u32(0));
-        b.Store(b.Access(ty.ptr(storage, ty.vec3u(), core::Access::kReadWrite), var, 1_u),
-                b.Zero(ty.vec3u()));
+        auto* l = b.Let("l", b.Zero(ty.vec3u()));
+        b.Store(b.Access(ty.ptr(storage, ty.vec3u(), core::Access::kReadWrite), var, 1_u), l);
         b.Return(func);
     });
 
@@ -5097,8 +5094,9 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, u32, read_write> = access %v, 0u
     store %3, 0u
-    %4:ptr<storage, vec3<u32>, read_write> = access %v, 1u
-    store %4, vec3<u32>(0u)
+    %l:vec3<u32> = let vec3<u32>(0u)
+    %5:ptr<storage, vec3<u32>, read_write> = access %v, 1u
+    store %5, %l
     ret
   }
 }
@@ -5120,15 +5118,16 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, u32, read_write> = access %v, 0u
     store %3, 0u
-    %4:u32 = access vec3<u32>(0u), 0u
-    %5:ptr<storage, u32, read_write> = access %v, 4u
-    store %5, %4 @align(16)
-    %6:u32 = access vec3<u32>(0u), 1u
-    %7:ptr<storage, u32, read_write> = access %v, 5u
-    store %7, %6
-    %8:u32 = access vec3<u32>(0u), 2u
-    %9:ptr<storage, u32, read_write> = access %v, 6u
-    store %9, %8
+    %l:vec3<u32> = let vec3<u32>(0u)
+    %5:u32 = access %l, 0u
+    %6:ptr<storage, u32, read_write> = access %v, 4u
+    store %6, %5 @align(16)
+    %7:u32 = access %l, 1u
+    %8:ptr<storage, u32, read_write> = access %v, 5u
+    store %8, %7
+    %9:u32 = access %l, 2u
+    %10:ptr<storage, u32, read_write> = access %v, 6u
+    store %10, %9
     ret
   }
 }
@@ -5193,18 +5192,14 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, u32, read_write> = access %v, 0u
     store %3, 0u
-    %4:u32 = access vec4<u32>(0u), 0u
-    %5:ptr<storage, u32, read_write> = access %v, 4u
-    store %5, %4 @align(16)
-    %6:u32 = access vec4<u32>(0u), 1u
-    %7:ptr<storage, u32, read_write> = access %v, 5u
-    store %7, %6
-    %8:u32 = access vec4<u32>(0u), 2u
-    %9:ptr<storage, u32, read_write> = access %v, 6u
-    store %9, %8
-    %10:u32 = access vec4<u32>(0u), 3u
-    %11:ptr<storage, u32, read_write> = access %v, 7u
-    store %11, %10
+    %4:ptr<storage, u32, read_write> = access %v, 4u
+    store %4, 0u @align(16)
+    %5:ptr<storage, u32, read_write> = access %v, 5u
+    store %5, 0u
+    %6:ptr<storage, u32, read_write> = access %v, 6u
+    store %6, 0u
+    %7:ptr<storage, u32, read_write> = access %v, 7u
+    store %7, 0u
     ret
   }
 }
@@ -5269,20 +5264,18 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:ptr<storage, u16, read_write> = access %v, 0u
-    %4:u16 = access vec2<u16>(0u16), 0u
-    store %3, %4 @align(4)
-    %5:ptr<storage, u16, read_write> = access %v, 1u
-    %6:u16 = access vec2<u16>(0u16), 1u
-    store %5, %6
+    store %3, 0u16 @align(4)
+    %4:ptr<storage, u16, read_write> = access %v, 1u
+    store %4, 0u16
     %l:vec2<f16> = let vec2<f16>(0.0h)
-    %8:f16 = access %l, 0u
-    %9:u16 = bitcast<u16> %8
-    %10:ptr<storage, u16, read_write> = access %v, 2u
-    store %10, %9 @align(4)
-    %11:f16 = access %l, 1u
-    %12:u16 = bitcast<u16> %11
-    %13:ptr<storage, u16, read_write> = access %v, 3u
-    store %13, %12
+    %6:f16 = access %l, 0u
+    %7:u16 = bitcast<u16> %6
+    %8:ptr<storage, u16, read_write> = access %v, 2u
+    store %8, %7 @align(4)
+    %9:f16 = access %l, 1u
+    %10:u16 = bitcast<u16> %9
+    %11:ptr<storage, u16, read_write> = access %v, 3u
+    store %11, %10
     ret
   }
 }
@@ -5349,28 +5342,26 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:ptr<storage, u16, read_write> = access %v, 0u
-    %4:u16 = access vec2<u16>(0u16), 0u
-    store %3, %4 @align(4)
-    %5:ptr<storage, u16, read_write> = access %v, 1u
-    %6:u16 = access vec2<u16>(0u16), 1u
-    store %5, %6
+    store %3, 0u16 @align(4)
+    %4:ptr<storage, u16, read_write> = access %v, 1u
+    store %4, 0u16
     %l:vec4<f16> = let vec4<f16>(0.0h)
-    %8:f16 = access %l, 0u
-    %9:u16 = bitcast<u16> %8
-    %10:ptr<storage, u16, read_write> = access %v, 4u
-    store %10, %9 @align(8)
-    %11:f16 = access %l, 1u
-    %12:u16 = bitcast<u16> %11
-    %13:ptr<storage, u16, read_write> = access %v, 5u
-    store %13, %12
-    %14:f16 = access %l, 2u
-    %15:u16 = bitcast<u16> %14
-    %16:ptr<storage, u16, read_write> = access %v, 6u
-    store %16, %15
-    %17:f16 = access %l, 3u
-    %18:u16 = bitcast<u16> %17
-    %19:ptr<storage, u16, read_write> = access %v, 7u
-    store %19, %18
+    %6:f16 = access %l, 0u
+    %7:u16 = bitcast<u16> %6
+    %8:ptr<storage, u16, read_write> = access %v, 4u
+    store %8, %7 @align(8)
+    %9:f16 = access %l, 1u
+    %10:u16 = bitcast<u16> %9
+    %11:ptr<storage, u16, read_write> = access %v, 5u
+    store %11, %10
+    %12:f16 = access %l, 2u
+    %13:u16 = bitcast<u16> %12
+    %14:ptr<storage, u16, read_write> = access %v, 6u
+    store %14, %13
+    %15:f16 = access %l, 3u
+    %16:u16 = bitcast<u16> %15
+    %17:ptr<storage, u16, read_write> = access %v, 7u
+    store %17, %16
     ret
   }
 }
@@ -5435,12 +5426,10 @@ $B1: {  # root
   $B2: {
     %3:ptr<workgroup, u32, read_write> = access %v, 0u
     store %3, 0u
-    %4:bool = access vec2<bool>(false), 0u
-    %5:ptr<workgroup, u32, read_write> = access %v, 2u
-    store %5, 0u @align(8)
-    %6:bool = access vec2<bool>(false), 1u
-    %7:ptr<workgroup, u32, read_write> = access %v, 3u
-    store %7, 0u
+    %4:ptr<workgroup, u32, read_write> = access %v, 2u
+    store %4, 0u @align(8)
+    %5:ptr<workgroup, u32, read_write> = access %v, 3u
+    store %5, 0u
     ret
   }
 }
@@ -5462,9 +5451,10 @@ TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU32_StoreVec3b) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Store(b.Access(ty.ptr(workgroup, ty.u32(), core::Access::kReadWrite), var, 0_u), u32(0));
+        auto* l = b.Let("l", b.Zero(ty.vec3(ty.bool_())));
         b.Store(
             b.Access(ty.ptr(workgroup, ty.vec3(ty.bool_()), core::Access::kReadWrite), var, 1_u),
-            b.Zero(ty.vec3(ty.bool_())));
+            l);
         b.Return(func);
     });
 
@@ -5482,8 +5472,9 @@ $B1: {  # root
   $B2: {
     %3:ptr<workgroup, u32, read_write> = access %v, 0u
     store %3, 0u
-    %4:ptr<workgroup, vec3<bool>, read_write> = access %v, 1u
-    store %4, vec3<bool>(false)
+    %l:vec3<bool> = let vec3<bool>(false)
+    %5:ptr<workgroup, vec3<bool>, read_write> = access %v, 1u
+    store %5, %l
     ret
   }
 }
@@ -5505,15 +5496,19 @@ $B1: {  # root
   $B2: {
     %3:ptr<workgroup, u32, read_write> = access %v, 0u
     store %3, 0u
-    %4:bool = access vec3<bool>(false), 0u
-    %5:ptr<workgroup, u32, read_write> = access %v, 4u
-    store %5, 0u @align(16)
-    %6:bool = access vec3<bool>(false), 1u
-    %7:ptr<workgroup, u32, read_write> = access %v, 5u
-    store %7, 0u
-    %8:bool = access vec3<bool>(false), 2u
-    %9:ptr<workgroup, u32, read_write> = access %v, 6u
-    store %9, 0u
+    %l:vec3<bool> = let vec3<bool>(false)
+    %5:bool = access %l, 0u
+    %6:u32 = convert %5
+    %7:ptr<workgroup, u32, read_write> = access %v, 4u
+    store %7, %6 @align(16)
+    %8:bool = access %l, 1u
+    %9:u32 = convert %8
+    %10:ptr<workgroup, u32, read_write> = access %v, 5u
+    store %10, %9
+    %11:bool = access %l, 2u
+    %12:u32 = convert %11
+    %13:ptr<workgroup, u32, read_write> = access %v, 6u
+    store %13, %12
     ret
   }
 }
@@ -5578,18 +5573,14 @@ $B1: {  # root
   $B2: {
     %3:ptr<workgroup, u32, read_write> = access %v, 0u
     store %3, 0u
-    %4:bool = access vec4<bool>(false), 0u
-    %5:ptr<workgroup, u32, read_write> = access %v, 4u
-    store %5, 0u @align(16)
-    %6:bool = access vec4<bool>(false), 1u
-    %7:ptr<workgroup, u32, read_write> = access %v, 5u
+    %4:ptr<workgroup, u32, read_write> = access %v, 4u
+    store %4, 0u @align(16)
+    %5:ptr<workgroup, u32, read_write> = access %v, 5u
+    store %5, 0u
+    %6:ptr<workgroup, u32, read_write> = access %v, 6u
+    store %6, 0u
+    %7:ptr<workgroup, u32, read_write> = access %v, 7u
     store %7, 0u
-    %8:bool = access vec4<bool>(false), 2u
-    %9:ptr<workgroup, u32, read_write> = access %v, 6u
-    store %9, 0u
-    %10:bool = access vec4<bool>(false), 3u
-    %11:ptr<workgroup, u32, read_write> = access %v, 7u
-    store %11, 0u
     ret
   }
 }
@@ -9405,14 +9396,12 @@ $B1: {  # root
 %foo = func():void {
   $B2: {
     %3:ptr<workgroup, u16, read_write> = access %v, 2u
-    %4:u16 = access vec2<u16>(0u16), 0u
-    store %3, %4 @align(4)
-    %5:ptr<workgroup, u16, read_write> = access %v, 3u
-    %6:u16 = access vec2<u16>(0u16), 1u
-    store %5, %6
-    %7:ptr<workgroup, u16, read_write> = access %v, 8u
-    %8:u16 = load %7
-    %9:f16 = bitcast<f16> %8
+    store %3, 0u16 @align(4)
+    %4:ptr<workgroup, u16, read_write> = access %v, 3u
+    store %4, 0u16
+    %5:ptr<workgroup, u16, read_write> = access %v, 8u
+    %6:u16 = load %5
+    %7:f16 = bitcast<f16> %6
     ret
   }
 }

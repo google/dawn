@@ -35,9 +35,9 @@ float3x3 foo(tint_module_vars_struct tint_module_vars) {
 
 void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   if ((tint_local_index < 1u)) {
-    (*tint_module_vars.v)[0u].packed = packed_float3(float3x3(float3(0.0f), float3(0.0f), float3(0.0f))[0u]);
-    (*tint_module_vars.v)[1u].packed = packed_float3(float3x3(float3(0.0f), float3(0.0f), float3(0.0f))[1u]);
-    (*tint_module_vars.v)[2u].packed = packed_float3(float3x3(float3(0.0f), float3(0.0f), float3(0.0f))[2u]);
+    (*tint_module_vars.v)[0u].packed = packed_float3(float3(0.0f));
+    (*tint_module_vars.v)[1u].packed = packed_float3(float3(0.0f));
+    (*tint_module_vars.v)[2u].packed = packed_float3(float3(0.0f));
   }
   (threadgroup_barrier(mem_flags::mem_threadgroup));
   (foo(tint_module_vars));

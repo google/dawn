@@ -112,9 +112,21 @@ class Evaluator {
                            core::ir::Value* arg,
                            const Source& source = {});
 
+    /// Evaluate swizzle of `object` with `indices`
+    /// @param result_ty the result type
+    /// @param object the object
+    /// @param indices the indices
     EvalResult EvalSwizzle(const core::type::Type* result_ty,
                            core::ir::Value* object,
                            VectorRef<uint32_t> indices);
+
+    /// Evaluate access of `object` with `indices`
+    /// @param object the object
+    /// @param indices the indices
+    /// @param source the source location
+    EvalResult EvalAccess(core::ir::Value* object,
+                          VectorRef<core::ir::Value*> indices,
+                          const Source& source = {});
 
   private:
     diag::Diagnostic& AddError(Source src);

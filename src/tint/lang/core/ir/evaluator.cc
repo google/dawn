@@ -110,15 +110,21 @@ Evaluator::EvalResult Evaluator::EvalValue(core::ir::Value* val) {
 }
 
 Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Access* a) {
-    TINT_CHECK_RESULT_UNWRAP(obj, EvalValue(a->Object()));
+    return EvalAccess(a->Object(), a->Indices(), SourceOf(a));
+}
 
+Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Value* object,
+                                            VectorRef<core::ir::Value*> indices,
+                                            const Source& source) {
     // Some transforms create invalid instructions.
-    if (!a->Object() || !a->Object()->Type()) {
+    if (!object || !object->Type()) {
         return nullptr;
     }
 
-    auto* access_obj_type = a->Object()->Type()->UnwrapPtrOrRef();
-    for (auto* idx : a->Indices()) {
+    TINT_CHECK_RESULT_UNWRAP(obj, EvalValue(object));
+
+    auto* access_obj_type = object->Type()->UnwrapPtrOrRef();
+    for (auto* idx : indices) {
         TINT_CHECK_RESULT_UNWRAP(val, EvalValue(idx));
 
         // Check if the value could be evaluated
@@ -127,8 +133,7 @@ Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Access* a) {
         if (val) {
             TINT_ASSERT(val->Is<core::constant::Value>());
 
-            TINT_CHECK_RESULT_UNWRAP(res,
-                                     const_eval_.Index(obj, access_obj_type, val, SourceOf(a)));
+            TINT_CHECK_RESULT_UNWRAP(res, const_eval_.Index(obj, access_obj_type, val, source));
             index_const = val->ValueAs<u32>();
             obj = res;
         } else {

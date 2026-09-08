@@ -28,9 +28,9 @@ kernel void v_2(device Buf* buf [[buffer(0)]]) {
   uint idx = 0u;
   uint4 v = uint4(1u, 2u, 3u, 4u);
   uint4 const v_3 = v;
-  v = uint4(v_3.x, uint2(5u, 6u).y, uint2(5u, 6u).x, v_3.w);
+  v = uint4(v_3.x, 6u, 5u, v_3.w);
   uint4 const v_4 = v;
-  v = uint4(v_4.x, uint2(99u, 100u).y, uint2(99u, 100u).x, v_4.w);
+  v = uint4(v_4.x, 100u, 99u, v_4.w);
   v.z = 200u;
   uint3 const v_5 = (v.xyz * uint3(100u));
   v = uint4(v_5.x, v_5.y, v_5.z, v.w);
@@ -40,9 +40,9 @@ kernel void v_2(device Buf* buf [[buffer(0)]]) {
   device uint4* const p = (&(*tint_module_vars.buf).res);
   (*p) = uint4(0u);
   uint4 const v_6 = (*p);
-  (*p) = uint4(v_6.x, uint2(1u, 2u).y, uint2(1u, 2u).x, v_6.w);
+  (*p) = uint4(v_6.x, 2u, 1u, v_6.w);
   uint4 const v_7 = (*p);
-  (*p) = uint4(v_7.x, uint2(3u, 4u).y, uint2(3u, 4u).x, v_7.w);
+  (*p) = uint4(v_7.x, 4u, 3u, v_7.w);
   (*p).z = 5u;
   uint3 const v_8 = ((*p).xyz + uint3(10u));
   (*p) = uint4(v_8.x, v_8.y, v_8.z, (*p).w);

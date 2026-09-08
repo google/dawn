@@ -3625,17 +3625,13 @@ $B1: {  # root
     %3:ptr<storage, atomic<u32>, read_write> = access %buffer, 1i
     %4:u32 = atomicAdd %3, 1u
     %5:ptr<storage, atomic<u32>, read_write> = access %buffer, 0u
-    %6:u32 = access array<u32, 4>(0u, 1u, 2u, 3u), 0u
-    %7:void = atomicStore %5, %6
-    %8:ptr<storage, atomic<u32>, read_write> = access %buffer, 1u
-    %9:u32 = access array<u32, 4>(0u, 1u, 2u, 3u), 1u
-    %10:void = atomicStore %8, %9
-    %11:ptr<storage, atomic<u32>, read_write> = access %buffer, 2u
-    %12:u32 = access array<u32, 4>(0u, 1u, 2u, 3u), 2u
-    %13:void = atomicStore %11, %12
-    %14:ptr<storage, atomic<u32>, read_write> = access %buffer, 3u
-    %15:u32 = access array<u32, 4>(0u, 1u, 2u, 3u), 3u
-    %16:void = atomicStore %14, %15
+    %6:void = atomicStore %5, 0u
+    %7:ptr<storage, atomic<u32>, read_write> = access %buffer, 1u
+    %8:void = atomicStore %7, 1u
+    %9:ptr<storage, atomic<u32>, read_write> = access %buffer, 2u
+    %10:void = atomicStore %9, 2u
+    %11:ptr<storage, atomic<u32>, read_write> = access %buffer, 3u
+    %12:void = atomicStore %11, 3u
     ret
   }
 }
@@ -4114,21 +4110,15 @@ $B1: {  # root
     %3:ptr<storage, atomic<u32>, read_write> = access %buffer, 1i, 1u
     %4:u32 = atomicAdd %3, 1u
     %5:ptr<storage, S_atomic, read_write> = access %buffer, 0u
-    %6:S = access array<S, 2>(S(1.0f, 2u), S(3.0f, 4u)), 0u
-    %7:ptr<storage, f32, read_write> = access %5, 0u
-    %8:f32 = access %6, 0u
-    store %7, %8
-    %9:ptr<storage, atomic<u32>, read_write> = access %5, 1u
-    %10:u32 = access %6, 1u
-    %11:void = atomicStore %9, %10
-    %12:ptr<storage, S_atomic, read_write> = access %buffer, 1u
-    %13:S = access array<S, 2>(S(1.0f, 2u), S(3.0f, 4u)), 1u
-    %14:ptr<storage, f32, read_write> = access %12, 0u
-    %15:f32 = access %13, 0u
-    store %14, %15
-    %16:ptr<storage, atomic<u32>, read_write> = access %12, 1u
-    %17:u32 = access %13, 1u
-    %18:void = atomicStore %16, %17
+    %6:ptr<storage, f32, read_write> = access %5, 0u
+    store %6, 1.0f
+    %7:ptr<storage, atomic<u32>, read_write> = access %5, 1u
+    %8:void = atomicStore %7, 2u
+    %9:ptr<storage, S_atomic, read_write> = access %buffer, 1u
+    %10:ptr<storage, f32, read_write> = access %9, 0u
+    store %10, 3.0f
+    %11:ptr<storage, atomic<u32>, read_write> = access %9, 1u
+    %12:void = atomicStore %11, 4u
     ret
   }
 }
@@ -4223,16 +4213,12 @@ $B1: {  # root
     %3:ptr<storage, atomic<u32>, read_write> = access %buffer, 1u, 1u
     %4:u32 = atomicAdd %3, 1u
     %5:ptr<storage, i32, read_write> = access %buffer, 0u
-    %6:i32 = access Outer(1i, Inner(1.0f, 2u)), 0u
-    store %5, %6
-    %7:ptr<storage, Inner_atomic, read_write> = access %buffer, 1u
-    %8:Inner = access Outer(1i, Inner(1.0f, 2u)), 1u
-    %9:ptr<storage, f32, read_write> = access %7, 0u
-    %10:f32 = access %8, 0u
-    store %9, %10
-    %11:ptr<storage, atomic<u32>, read_write> = access %7, 1u
-    %12:u32 = access %8, 1u
-    %13:void = atomicStore %11, %12
+    store %5, 1i
+    %6:ptr<storage, Inner_atomic, read_write> = access %buffer, 1u
+    %7:ptr<storage, f32, read_write> = access %6, 0u
+    store %7, 1.0f
+    %8:ptr<storage, atomic<u32>, read_write> = access %6, 1u
+    %9:void = atomicStore %8, 2u
     ret
   }
 }
@@ -4345,16 +4331,12 @@ $B1: {  # root
     %3:ptr<storage, atomic<u32>, read_write> = access %buffer, 0u, 1u
     %4:u32 = atomicAdd %3, 1u
     %5:ptr<storage, AtomicInner_atomic, read_write> = access %buffer, 0u
-    %6:AtomicInner = access Outer(AtomicInner(1.0f, 2u), NonAtomicInner(3.0f, 4u)), 0u
-    %7:ptr<storage, f32, read_write> = access %5, 0u
-    %8:f32 = access %6, 0u
-    store %7, %8
-    %9:ptr<storage, atomic<u32>, read_write> = access %5, 1u
-    %10:u32 = access %6, 1u
-    %11:void = atomicStore %9, %10
-    %12:ptr<storage, NonAtomicInner, read_write> = access %buffer, 1u
-    %13:NonAtomicInner = access Outer(AtomicInner(1.0f, 2u), NonAtomicInner(3.0f, 4u)), 1u
-    store %12, %13
+    %6:ptr<storage, f32, read_write> = access %5, 0u
+    store %6, 1.0f
+    %7:ptr<storage, atomic<u32>, read_write> = access %5, 1u
+    %8:void = atomicStore %7, 2u
+    %9:ptr<storage, NonAtomicInner, read_write> = access %buffer, 1u
+    store %9, NonAtomicInner(3.0f, 4u)
     ret
   }
 }

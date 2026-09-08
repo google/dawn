@@ -740,21 +740,20 @@ TEST_F(SpirvParserTest, Bug42252062) {
 
          %24 = OpConstantComposite %_struct_18 %23 %int_200
 
+        %ptr = OpTypePointer Function %int
           %2 = OpFunction %void None %10
          %26 = OpLabel
+          %v = OpVariable %ptr Function
          %31 = OpCompositeExtract %int %24 1
+               OpStore %v %31
                OpReturn
                OpFunctionEnd
 )",
               R"(
-tint_symbol_2 = struct @align(4) {
-  tint_symbol:i32 @offset(0)
-  tint_symbol_1:i32 @offset(4)
-}
-
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = access tint_symbol_2(0i, 200i), 1u
+    %2:ptr<function, i32, read_write> = var undef
+    store %2, 200i
     ret
   }
 }

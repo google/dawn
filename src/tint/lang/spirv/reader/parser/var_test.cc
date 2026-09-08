@@ -3028,13 +3028,12 @@ TEST_F(SpirvParserTest, Var_OpSpecConstantOp_CompositeExtract) {
 )",
               R"(
 $B1: {  # root
-  %1:i32 = access vec2<i32>(1i, 2i), 1u
-  %myconst:i32 = override %1
+  %myconst:i32 = override 2i
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:i32 = let %myconst
+    %3:i32 = let %myconst
     ret
   }
 }

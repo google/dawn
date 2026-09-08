@@ -59,8 +59,8 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
       if ((v_8 >= 4u)) {
         break;
       }
-      (*tint_module_vars.w)[v_8][0u].packed = packed_half3(half2x3(half3(0.0h), half3(0.0h))[0u]);
-      (*tint_module_vars.w)[v_8][1u].packed = packed_half3(half2x3(half3(0.0h), half3(0.0h))[1u]);
+      (*tint_module_vars.w)[v_8][0u].packed = packed_half3(half3(0.0h));
+      (*tint_module_vars.w)[v_8][1u].packed = packed_half3(half3(0.0h));
       {
         v_7 = (v_8 + 1u);
       }
