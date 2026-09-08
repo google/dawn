@@ -410,8 +410,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
         if (strcmp("--check-capture-replay", argv[i]) == 0) {
             mCheckCaptureReplay = true;
             // Force WebGPU backend.
-            mBackendTypeFilter = wgpu::BackendType::WebGPU;
-            mHasBackendTypeFilter = true;
+            mBackendTypeFilters = {wgpu::BackendType::WebGPU};
             continue;
         }
 
@@ -508,30 +507,40 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
         constexpr const char kBackendArg[] = "--backend=";
         argLen = sizeof(kBackendArg) - 1;
         if (strncmp(argv[i], kBackendArg, argLen) == 0) {
-            const char* param = argv[i] + argLen;
-            if (strcmp("d3d11", param) == 0) {
-                mBackendTypeFilter = wgpu::BackendType::D3D11;
-            } else if (strcmp("d3d12", param) == 0) {
-                mBackendTypeFilter = wgpu::BackendType::D3D12;
-            } else if (strcmp("metal", param) == 0) {
-                mBackendTypeFilter = wgpu::BackendType::Metal;
-            } else if (strcmp("null", param) == 0) {
-                mBackendTypeFilter = wgpu::BackendType::Null;
-            } else if (strcmp("opengl", param) == 0) {
-                mBackendTypeFilter = wgpu::BackendType::OpenGL;
-            } else if (strcmp("opengles", param) == 0) {
-                mBackendTypeFilter = wgpu::BackendType::OpenGLES;
-            } else if (strcmp("vulkan", param) == 0) {
-                mBackendTypeFilter = wgpu::BackendType::Vulkan;
-            } else if (strcmp("webgpu", param) == 0) {
-                mBackendTypeFilter = wgpu::BackendType::WebGPU;
-            } else {
-                ErrorLog() << "Invalid backend \"" << param
-                           << "\". Valid backends are: d3d12, metal, null, opengl, opengles, "
-                              "vulkan, webgpu.";
+            const std::span args(argv, static_cast<size_t>(argc));
+            const std::string backendList{std::string_view(args[i]).substr(argLen)};
+            if (backendList.empty() || backendList.back() == ',') {
+                ErrorLog() << "Invalid backend list \"" << backendList << "\".";
                 DAWN_UNREACHABLE();
             }
-            mHasBackendTypeFilter = true;
+            std::set<wgpu::BackendType> backendTypes;
+            std::istringstream ss(backendList);
+            std::string backend;
+            while (std::getline(ss, backend, ',')) {
+                if (backend == "d3d11") {
+                    backendTypes.insert(wgpu::BackendType::D3D11);
+                } else if (backend == "d3d12") {
+                    backendTypes.insert(wgpu::BackendType::D3D12);
+                } else if (backend == "metal") {
+                    backendTypes.insert(wgpu::BackendType::Metal);
+                } else if (backend == "null") {
+                    backendTypes.insert(wgpu::BackendType::Null);
+                } else if (backend == "opengl") {
+                    backendTypes.insert(wgpu::BackendType::OpenGL);
+                } else if (backend == "opengles") {
+                    backendTypes.insert(wgpu::BackendType::OpenGLES);
+                } else if (backend == "vulkan") {
+                    backendTypes.insert(wgpu::BackendType::Vulkan);
+                } else if (backend == "webgpu") {
+                    backendTypes.insert(wgpu::BackendType::WebGPU);
+                } else {
+                    ErrorLog() << "Invalid backend \"" << backend
+                               << "\". Valid backends are: d3d11, d3d12, metal, null, opengl, "
+                                  "opengles, vulkan, webgpu.";
+                    DAWN_UNREACHABLE();
+                }
+            }
+            mBackendTypeFilters = std::move(backendTypes);
             continue;
         }
 
@@ -574,7 +583,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                 << "\n\nUsage: " << argv[0]
                 << " [GTEST_FLAGS...] [-w] [-c]\n"
                    "    [--enable-toggles=toggles] [--disable-toggles=toggles]\n"
-                   "    [--backend=x]\n"
+                   "    [--backend=x[,y...]]\n"
                    "    [--adapter-vendor-id=x] "
                    "[--enable-backend-validation[=full,partial,disabled]]\n"
                    "    [--exclusive-device-type-preference=integrated,cpu,discrete]\n\n"
@@ -592,8 +601,8 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                    "  --disable-toggles: Comma-delimited list of Dawn toggles to disable\n"
                    "  --adapter-vendor-id: Select adapter by vendor id to run end2end tests"
                    "on multi-GPU systems \n"
-                   "  --backend: Select adapter by backend type. Valid backends are: d3d12, metal, "
-                   "null, opengl, opengles, vulkan, webgpu\n"
+                   "  --backend: Select adapters by a comma-delimited list of backend types. Valid "
+                   "backends are: d3d11, d3d12, metal, null, opengl, opengles, vulkan, webgpu\n"
                    "  --webgpu-inner-backend: Select inner backend for WebGPU backend. "
                    "Valid backends are: undefined, d3d11, d3d12, metal, null, opengl, opengles, "
                    "vulkan, fallback\n"
@@ -750,9 +759,9 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
             bool selected = true;
 
             // The adapter is deselected if:
-            if (mHasBackendTypeFilter) {
+            if (!mBackendTypeFilters.empty()) {
                 // It doesn't match the backend type, if present.
-                selected &= info.backendType == mBackendTypeFilter;
+                selected &= mBackendTypeFilters.count(info.backendType) != 0;
             }
             if (mHasVendorIdFilter) {
                 // It doesn't match the vendor id, if present.
@@ -955,11 +964,11 @@ uint32_t DawnTestEnvironment::GetVendorIdFilter() const {
 }
 
 bool DawnTestEnvironment::HasBackendTypeFilter() const {
-    return mHasBackendTypeFilter;
+    return !mBackendTypeFilters.empty();
 }
 
-wgpu::BackendType DawnTestEnvironment::GetBackendTypeFilter() const {
-    return mBackendTypeFilter;
+bool DawnTestEnvironment::BackendTypeMatchesFilter(wgpu::BackendType backendType) const {
+    return mBackendTypeFilters.count(backendType) != 0;
 }
 
 bool DawnTestEnvironment::HasWebGPUInnerBackendTypeFilter() const {
@@ -1422,8 +1431,8 @@ bool DawnTestBase::HasBackendTypeFilter() const {
     return gTestEnv->HasBackendTypeFilter();
 }
 
-wgpu::BackendType DawnTestBase::GetBackendTypeFilter() const {
-    return gTestEnv->GetBackendTypeFilter();
+bool DawnTestBase::BackendTypeMatchesFilter(wgpu::BackendType backendType) const {
+    return gTestEnv->BackendTypeMatchesFilter(backendType);
 }
 
 const wgpu::Instance& DawnTestBase::GetInstance() const {

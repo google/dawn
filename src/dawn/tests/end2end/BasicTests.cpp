@@ -49,7 +49,7 @@ TEST_P(BasicTests, VendorIdFilter) {
 TEST_P(BasicTests, BackendType) {
     DAWN_TEST_UNSUPPORTED_IF(!HasBackendTypeFilter());
 
-    ASSERT_EQ(GetAdapterProperties().backendType, GetBackendTypeFilter());
+    ASSERT_TRUE(BackendTypeMatchesFilter(GetAdapterProperties().backendType));
 }
 
 // Test Queue::WriteBuffer changes the content of the buffer, but really this is the most

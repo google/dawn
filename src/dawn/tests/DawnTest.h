@@ -239,7 +239,7 @@ class DawnTestEnvironment : public testing::Environment {
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
     bool HasBackendTypeFilter() const;
-    wgpu::BackendType GetBackendTypeFilter() const;
+    bool BackendTypeMatchesFilter(wgpu::BackendType backendType) const;
     bool HasWebGPUInnerBackendTypeFilter() const;
     wgpu::BackendType GetWebGPUInnerBackendTypeFilter() const;
     bool GetWebGPUInnerForceFallbackAdapter() const;
@@ -273,8 +273,7 @@ class DawnTestEnvironment : public testing::Environment {
     bool mBeginCaptureOnStartup = false;
     bool mHasVendorIdFilter = false;
     uint32_t mVendorIdFilter = 0;
-    bool mHasBackendTypeFilter = false;
-    wgpu::BackendType mBackendTypeFilter = wgpu::BackendType::Undefined;
+    std::set<wgpu::BackendType> mBackendTypeFilters;
     bool mHasWebGPUInnerBackendTypeFilter = false;
     wgpu::BackendType mWebGPUInnerBackendTypeFilter = wgpu::BackendType::Undefined;
     bool mWebGPUInnerForceFallbackAdapter = false;
@@ -376,7 +375,7 @@ class DawnTestBase {
     uint32_t GetVendorIdFilter() const;
 
     bool HasBackendTypeFilter() const;
-    wgpu::BackendType GetBackendTypeFilter() const;
+    bool BackendTypeMatchesFilter(wgpu::BackendType backendType) const;
 
     const wgpu::Instance& GetInstance() const;
     native::Adapter GetAdapter() const;
