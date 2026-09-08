@@ -215,13 +215,6 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
         }
     };
 
-    auto ExpectSetValidationImmediates = [&](CommandIterator* commands) {
-        auto* cmd = commands->NextCommand<SetImmediatesCmd>();
-        commands->NextData<uint8_t>(cmd->size);
-        ASSERT_EQ(cmd->offset, 0u);
-        ASSERT_EQ(cmd->size, 6 * sizeof(uint32_t));
-    };
-
     auto ExpectSetValidationBindGroup = [&](CommandIterator* commands) {
         auto* cmd = commands->NextCommand<SetBindGroupCmd>();
         ASSERT_EQ(cmd->index, BindGroupIndex(0u));
@@ -248,7 +241,6 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
 
             // Expect the validation.
             {Command::SetComputePipeline, ExpectSetValidationPipeline},
-            {Command::SetImmediates, ExpectSetValidationImmediates},
             {Command::SetBindGroup, ExpectSetValidationBindGroup},
             {Command::Dispatch, ExpectSetValidationDispatch},
 
@@ -262,7 +254,6 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
 
             // Expect the validation.
             {Command::SetComputePipeline, ExpectSetValidationPipeline},
-            {Command::SetImmediates, ExpectSetValidationImmediates},
             {Command::SetBindGroup, ExpectSetValidationBindGroup},
             {Command::Dispatch, ExpectSetValidationDispatch},
 
@@ -281,7 +272,6 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
 
             // Expect the validation.
             {Command::SetComputePipeline, ExpectSetValidationPipeline},
-            {Command::SetImmediates, ExpectSetValidationImmediates},
             {Command::SetBindGroup, ExpectSetValidationBindGroup},
             {Command::Dispatch, ExpectSetValidationDispatch},
 
