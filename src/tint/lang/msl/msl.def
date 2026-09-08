@@ -459,8 +459,10 @@ fn convert(u32) -> u64
 @stage("compute") implicit(IT: subgroup_matrix_elements, RT: subgroup_matrix_elements, M: num, N: num, K: num)
   fn fill_cooperative_tensor(ptr<function, cooperative_tensor<subgroup_matrix_kind_result, M, N, K, IT, RT>, read_write>, RT)
 
-@stage("compute") implicit(S: subgroup_matrix_elements, C: num, R: num, AS: workgroup_or_storage, AM: writable)
+@stage("compute") implicit(S: subgroup_matrix_elements, C: num, R: num, AS: workgroup_or_storage, AM: access)
   fn make_tensor_inline(ptr<AS, S, AM>, @const extents: vec2<u32>, stride: u32) -> tensor_inline
+@member_function @stage("compute") implicit(KIND: subgroup_matrix_kind, IT: subgroup_matrix_elements, RT: subgroup_matrix_elements, M: num, N: num, K: num)
+  fn load(cooperative_tensor<KIND, M, N, K, IT, RT>, tensor_inline)
 @member_function @stage("compute") implicit(KIND: subgroup_matrix_kind, IT: subgroup_matrix_elements, RT: subgroup_matrix_elements, M: num, N: num, K: num)
   fn store(cooperative_tensor<KIND, M, N, K, IT, RT>, tensor_inline)
 

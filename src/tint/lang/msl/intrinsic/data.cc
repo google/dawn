@@ -4368,7 +4368,7 @@ constexpr TemplateInfo kTemplates[] = {
   {
     /* [23] */
     /* name */ "AM",
-    /* matcher_indices */ MatcherIndicesIndex(182),
+    /* matcher_indices */ MatcherIndicesIndex(/* invalid */),
     /* kind */ TemplateInfo::Kind::kaccess,
   },
   {
@@ -7613,18 +7613,24 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [46] */
-    /* fn make_tensor_inline[S : subgroup_matrix_elements, C : num, R : num, AS : workgroup_or_storage, AM : writable](ptr<AS, S, AM>, @const extents: vec2<u32>, stride: u32) -> tensor_inline */
+    /* fn make_tensor_inline[S : subgroup_matrix_elements, C : num, R : num, AS : workgroup_or_storage, AM : access](ptr<AS, S, AM>, @const extents: vec2<u32>, stride: u32) -> tensor_inline */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(228),
   },
   {
     /* [47] */
-    /* fn store[KIND : subgroup_matrix_kind, IT : subgroup_matrix_elements, RT : subgroup_matrix_elements, M : num, N : num, K : num](cooperative_tensor<KIND, M, N, K, IT, RT>, tensor_inline) */
+    /* fn load[KIND : subgroup_matrix_kind, IT : subgroup_matrix_elements, RT : subgroup_matrix_elements, M : num, N : num, K : num](cooperative_tensor<KIND, M, N, K, IT, RT>, tensor_inline) */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(229),
   },
   {
     /* [48] */
+    /* fn store[KIND : subgroup_matrix_kind, IT : subgroup_matrix_elements, RT : subgroup_matrix_elements, M : num, N : num, K : num](cooperative_tensor<KIND, M, N, K, IT, RT>, tensor_inline) */
+    /* num overloads */ 1,
+    /* overloads */ OverloadIndex(229),
+  },
+  {
+    /* [49] */
     /* fn os_log[T : scalar](string, u32, u32, u32, T) */
     /* fn os_log[N : num, T : scalar](string, u32, u32, u32, vec<N, T>) */
     /* fn os_log[T : scalar](string, f32, f32, f32, T) */
@@ -7635,7 +7641,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* overloads */ OverloadIndex(175),
   },
   {
-    /* [49] */
+    /* [50] */
     /* fn pointer_offset<T>[S : address_space, A : access](ptr<S, runtime_array<u8>, A>, u32) -> ptr<S, T, A> */
     /* fn pointer_offset<T>[S : address_space, A : access, N : num](ptr<S, array<u8, N>, A>, u32) -> ptr<S, T, A> */
     /* fn pointer_offset[T, S : address_space, A : access](ptr<S, T, A>, u32) -> ptr<S, T, A> */
@@ -7644,13 +7650,13 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* overloads */ OverloadIndex(194),
   },
   {
-    /* [50] */
+    /* [51] */
     /* fn volatile_zero() -> u32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(230),
   },
   {
-    /* [51] */
+    /* [52] */
     /* fn resource_load[T : fiu32](resource_table<texture_1d<T>>, u32) -> texture_1d<T> */
     /* fn resource_load[T : fiu32](resource_table<texture_2d<T>>, u32) -> texture_2d<T> */
     /* fn resource_load[T : fiu32](resource_table<texture_2d_array<T>>, u32) -> texture_2d_array<T> */
@@ -7673,7 +7679,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* overloads */ OverloadIndex(65),
   },
   {
-    /* [52] */
+    /* [53] */
     /* fn reinterpret_cast<K>[T](T) -> K */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(231),

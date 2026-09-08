@@ -129,6 +129,9 @@ struct State {
     /// @param c the construct instruction
     void ProcessCall(core::ir::CoreBuiltinCall* c) {
         switch (c->Func()) {
+            case core::BuiltinFn::kSubgroupMatrixLoad:
+                ReplaceSubgroupMatrixLoad(c);
+                break;
             case core::BuiltinFn::kSubgroupMatrixStore:
                 ReplaceSubgroupMatrixStore(c);
                 break;
@@ -320,6 +323,37 @@ struct State {
         return b.Let(name, b.Call<msl::ir::BuiltinCall>(ty.Get<msl::type::TensorInline>(),
                                                         msl::BuiltinFn::kMakeTensorInline, data,
                                                         extents, stride));
+    }
+
+    void ReplaceSubgroupMatrixLoad(core::ir::CoreBuiltinCall* c) {
+        auto* p = c->Args()[0];
+        auto* offset = c->Args()[1];
+        auto* stride = b.InsertBitcastIfNeeded(ty.u32(), c->Args()[2]);
+
+        auto majorness = std::get<core::Majorness>(c->ExplicitTemplateParams()[1]);
+        if (majorness == core::Majorness::kColMajor) {
+            // TODO(556210460): Add polyfill for column-major layouts.
+            TINT_IR_UNIMPLEMENTED(ir) << "column-major layouts not yet supported";
+        }
+
+        b.InsertAfter(c, [&] {
+            TINT_IR_ASSERT(ir,
+                           std::holds_alternative<core::Majorness>(c->ExplicitTemplateParams()[1]));
+            auto* mat = c->Result()->Type()->As<core::type::SubgroupMatrix>();
+
+            auto* tensor_inline = MakeTensorInline("tint_src_tensor", p, offset, stride, mat);
+
+            // Declare a local variable to hold the loaded cooperative_tensor.
+            auto* tensor_type = ToCooperativeTensor(mat);
+            auto* ptr_type = ty.ptr(function, tensor_type, read_write);
+            auto* var = b.Var(ptr_type);
+
+            // Load the cooperative_tensor value from the tensor_inline.
+            b.MemberCall<msl::ir::MemberBuiltinCall>(ty.void_(), msl::BuiltinFn::kLoad, b.Load(var),
+                                                     tensor_inline);
+
+            RegisterLocalVar(c->Result(), var);
+        });
     }
 
     void ReplaceSubgroupMatrixStore(core::ir::CoreBuiltinCall* c) {

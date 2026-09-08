@@ -138,6 +138,8 @@ const char* str(BuiltinFn i) {
             return "fill_cooperative_tensor";
         case BuiltinFn::kMakeTensorInline:
             return "make_tensor_inline";
+        case BuiltinFn::kLoad:
+            return "load";
         case BuiltinFn::kStore:
             return "store";
         case BuiltinFn::kOsLog:
@@ -183,6 +185,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSampleCompare:
         case BuiltinFn::kSimdgroupLoad:
         case BuiltinFn::kResourceLoad:
+        case BuiltinFn::kLoad:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};
 
         case BuiltinFn::kWrite:

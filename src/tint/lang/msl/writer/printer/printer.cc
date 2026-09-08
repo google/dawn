@@ -1199,8 +1199,8 @@ class Printer : public tint::TextGenerator {
         }
         if (c->Func() == msl::BuiltinFn::kMakeTensorInline) {
             auto args = c->Args();
-            auto* dst = args[0];
-            auto* ptr = dst->Type()->As<core::type::Pointer>();
+            auto* p = args[0];
+            auto* ptr = p->Type()->As<core::type::Pointer>();
             auto* extents = args[1]->As<core::ir::Constant>()->Value();
             auto* stride = args[2];
 
@@ -1209,7 +1209,17 @@ class Printer : public tint::TextGenerator {
             out << " ";
             EmitType(out, ptr->StoreType());
             out << ", dextents<uint, 2>, tensor_inline>(";
-            EmitAndTakeAddressIfNeeded(out, dst);
+            if (ptr->Access() == core::Access::kRead) {
+                out << "const_cast<";
+                EmitAddressSpace(out, ptr->AddressSpace());
+                out << " ";
+                EmitType(out, ptr->StoreType());
+                out << "*>(";
+                EmitAndTakeAddressIfNeeded(out, p);
+                out << ")";
+            } else {
+                EmitAndTakeAddressIfNeeded(out, p);
+            }
             out << ", dextents<uint, 2>(" << extents->Index(0)->ValueAs<uint32_t>() << ", "
                 << extents->Index(1)->ValueAs<uint32_t>() << "), array<uint, 2>({1u, ";
             EmitValue(out, stride);

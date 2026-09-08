@@ -736,5 +736,318 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_CooperativeTensorsTest, SubgroupMatrixLoad_RowMajor) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<f32>, core::Access::kRead>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* mat_ty = ty.subgroup_matrix_left(ty.f32(), 8, 8);
+        auto* mat = b.CallExplicit(
+            mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat_ty, core::Majorness::kRowMajor}, buffer, 0_u,
+            64_u);
+        b.Let("x", mat);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<f32>, read> = var undef @binding_point(0, 0)
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major> %buffer, 0u, 64u
+    %x:subgroup_matrix_left<f32, 8, 8> = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<f32>, read> = var undef @binding_point(0, 0)
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, f32, read> = access %buffer, 0u
+    %4:msl.tensor_inline = msl.make_tensor_inline %3, vec2<u32>(8u), 64u
+    %tint_src_tensor:msl.tensor_inline = let %4
+    %x:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var undef
+    %7:msl.cooperative_tensor_left<8, 32, 8, f32, f32> = load %x
+    %8:void = %7.load %tint_src_tensor
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_CooperativeTensorsTest, DISABLED_SubgroupMatrixLoad_ColMajor) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<f32>, core::Access::kRead>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* mat_ty = ty.subgroup_matrix_left(ty.f32(), 8, 8);
+        auto* mat = b.CallExplicit(
+            mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat_ty, core::Majorness::kColMajor}, buffer, 0_u,
+            64_u);
+        b.Let("x", mat);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<f32>, read> = var undef @binding_point(0, 0)
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major> %buffer, 0u, 64u
+    %x:subgroup_matrix_left<f32, 8, 8> = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+    // TODO(556210460): implement polyfill for column-major layout.
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_CooperativeTensorsTest, SubgroupMatrixLoad_ElementTypeMismatch) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<vec4<f32>>, core::Access::kRead>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* mat_ty = ty.subgroup_matrix_left(ty.f32(), 8, 8);
+        auto* mat = b.CallExplicit(
+            mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat_ty, core::Majorness::kRowMajor}, buffer, 1_u,
+            16_u);
+        b.Let("x", mat);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<vec4<f32>>, read> = var undef @binding_point(0, 0)
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major> %buffer, 1u, 16u
+    %x:subgroup_matrix_left<f32, 8, 8> = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<vec4<f32>>, read> = var undef @binding_point(0, 0)
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, f32, read> = msl.pointer_offset<f32> %buffer, 16u
+    %4:msl.tensor_inline = msl.make_tensor_inline %3, vec2<u32>(8u), 64u
+    %tint_src_tensor:msl.tensor_inline = let %4
+    %x:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var undef
+    %7:msl.cooperative_tensor_left<8, 32, 8, f32, f32> = load %x
+    %8:void = %7.load %tint_src_tensor
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_CooperativeTensorsTest, SubgroupMatrixLoad_RedundantPointerOffset) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<f32>, core::Access::kRead>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* pre_cast = b.CallExplicit<msl::ir::BuiltinCall>(
+            ty.ptr<storage, array<f32>, core::Access::kRead>(), msl::BuiltinFn::kPointerOffset,
+            Vector<core::ir::TemplateParameter, 1>{ty.array<f32>()}, buffer, 0_u);
+        auto* mat_ty = ty.subgroup_matrix_left(ty.f32(), 8, 8);
+        auto* mat = b.CallExplicit(
+            mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat_ty, core::Majorness::kRowMajor}, pre_cast,
+            0_u, 64_u);
+        b.Let("x", mat);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<f32>, read> = var undef @binding_point(0, 0)
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, array<f32>, read> = msl.pointer_offset<array<f32>> %buffer, 0u
+    %4:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major> %3, 0u, 64u
+    %x:subgroup_matrix_left<f32, 8, 8> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<f32>, read> = var undef @binding_point(0, 0)
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, f32, read> = access %buffer, 0u
+    %4:msl.tensor_inline = msl.make_tensor_inline %3, vec2<u32>(8u), 64u
+    %tint_src_tensor:msl.tensor_inline = let %4
+    %x:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var undef
+    %7:msl.cooperative_tensor_left<8, 32, 8, f32, f32> = load %x
+    %8:void = %7.load %tint_src_tensor
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_CooperativeTensorsTest, SubgroupMatrixLoad_SignedOffsetAndStride) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<f32>, core::Access::kRead>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* mat_ty = ty.subgroup_matrix_right(ty.f32(), 8, 8);
+        auto* mat = b.CallExplicit(
+            mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat_ty, core::Majorness::kRowMajor}, buffer, 4_i,
+            32_i);
+        b.Let("x", mat);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<f32>, read> = var undef @binding_point(0, 0)
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:subgroup_matrix_right<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f32, 8, 8>, row_major> %buffer, 4i, 32i
+    %x:subgroup_matrix_right<f32, 8, 8> = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<f32>, read> = var undef @binding_point(0, 0)
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, f32, read> = access %buffer, 4i
+    %4:msl.tensor_inline = msl.make_tensor_inline %3, vec2<u32>(8u), 32u
+    %tint_src_tensor:msl.tensor_inline = let %4
+    %x:ptr<function, msl.cooperative_tensor_right<32, 8, 8, f32, f32>, read_write> = var undef
+    %7:msl.cooperative_tensor_right<32, 8, 8, f32, f32> = load %x
+    %8:void = %7.load %tint_src_tensor
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_CooperativeTensorsTest, SubgroupMatrixLoad_Workgroup) {
+    auto* buffer = b.Var("buffer", ty.ptr<workgroup, array<f16, 256>, read_write>());
+    mod.root_block->Append(buffer);
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* mat_ty = ty.subgroup_matrix_left(ty.f16(), 16, 16);
+        auto* mat = b.CallExplicit(
+            mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat_ty, core::Majorness::kRowMajor}, buffer, 0_u,
+            16_u);
+        b.Let("x", mat);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<workgroup, array<f16, 256>, read_write> = var undef
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:subgroup_matrix_left<f16, 16, 16> = subgroupMatrixLoad<subgroup_matrix_left<f16, 16, 16>, row_major> %buffer, 0u, 16u
+    %x:subgroup_matrix_left<f16, 16, 16> = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<workgroup, array<f16, 256>, read_write> = var undef
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<workgroup, f16, read_write> = access %buffer, 0u
+    %4:msl.tensor_inline = msl.make_tensor_inline %3, vec2<u32>(16u), 16u
+    %tint_src_tensor:msl.tensor_inline = let %4
+    %x:ptr<function, msl.cooperative_tensor_left<16, 32, 16, f16, f16>, read_write> = var undef
+    %7:msl.cooperative_tensor_left<16, 32, 16, f16, f16> = load %x
+    %8:void = %7.load %tint_src_tensor
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise
