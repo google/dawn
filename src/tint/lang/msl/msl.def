@@ -466,6 +466,17 @@ fn convert(u32) -> u64
 @member_function @stage("compute") implicit(KIND: subgroup_matrix_kind, IT: subgroup_matrix_elements, RT: subgroup_matrix_elements, M: num, N: num, K: num)
   fn store(cooperative_tensor<KIND, M, N, K, IT, RT>, tensor_inline)
 
+@stage("compute") implicit(IT: subgroup_matrix_elements, RT: subgroup_matrix_elements,
+                           M: num, N: num, K: num)
+  fn run_tensor_multiply(cooperative_tensor<subgroup_matrix_kind_left, M, N, K, IT, RT>,
+                         cooperative_tensor<subgroup_matrix_kind_right, M, N, K, IT, RT>,
+                         cooperative_tensor<subgroup_matrix_kind_result, M, N, K, IT, RT>)
+@stage("compute") implicit(IT: subgroup_matrix_elements, RT: subgroup_matrix_elements,
+                           M: num, N: num, K: num)
+  fn run_tensor_multiply_accumulate(cooperative_tensor<subgroup_matrix_kind_left, M, N, K, IT, RT>,
+                                    cooperative_tensor<subgroup_matrix_kind_right, M, N, K, IT, RT>,
+                                    cooperative_tensor<subgroup_matrix_kind_result, M, N, K, IT, RT>)
+
 // Compute
 implicit(T: scalar) fn os_log(string, u32, u32, u32, T)
 implicit(N: num, T: scalar) fn os_log(string, u32, u32, u32, vec<N, T>)

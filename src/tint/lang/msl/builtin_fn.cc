@@ -142,6 +142,10 @@ const char* str(BuiltinFn i) {
             return "load";
         case BuiltinFn::kStore:
             return "store";
+        case BuiltinFn::kRunTensorMultiply:
+            return "run_tensor_multiply";
+        case BuiltinFn::kRunTensorMultiplyAccumulate:
+            return "run_tensor_multiply_accumulate";
         case BuiltinFn::kOsLog:
             return "os_log";
         case BuiltinFn::kPointerOffset:
@@ -175,6 +179,8 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kAtomicMaxExplicit:
         case BuiltinFn::kAtomicMinExplicit:
         case BuiltinFn::kCopyCooperativeTensor:
+        case BuiltinFn::kRunTensorMultiply:
+        case BuiltinFn::kRunTensorMultiplyAccumulate:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad, core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kAtomicLoadExplicit:

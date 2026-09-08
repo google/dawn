@@ -99,6 +99,8 @@ enum class BuiltinFn : uint8_t {
     kMakeTensorInline,
     kLoad,
     kStore,
+    kRunTensorMultiply,
+    kRunTensorMultiplyAccumulate,
     kOsLog,
     kPointerOffset,
     kVolatileZero,

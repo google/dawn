@@ -135,6 +135,12 @@ struct State {
             case core::BuiltinFn::kSubgroupMatrixStore:
                 ReplaceSubgroupMatrixStore(c);
                 break;
+            case core::BuiltinFn::kSubgroupMatrixMultiply:
+                ReplaceSubgroupMatrixMultiply(c);
+                break;
+            case core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
+                ReplaceSubgroupMatrixMultiplyAccumulate(c);
+                break;
             default:
                 TINT_IR_UNREACHABLE(ir);
         }
@@ -379,6 +385,66 @@ struct State {
             auto* local_var = value_to_local_var.GetOr(value, nullptr);
             b.MemberCall<msl::ir::MemberBuiltinCall>(ty.void_(), msl::BuiltinFn::kStore,
                                                      b.Load(local_var), tensor_inline);
+        });
+    }
+
+    void ReplaceSubgroupMatrixMultiply(core::ir::CoreBuiltinCall* c) {
+        auto* lhs = c->Args()[0];
+        auto* rhs = c->Args()[1];
+
+        b.InsertAfter(c, [&] {
+            auto* sm_ty = c->Result()->Type()->As<core::type::SubgroupMatrix>();
+
+            // Get the local variables that hold the LHS and RHS cooperative tensors.
+            auto* lhs_var = value_to_local_var.GetOr(lhs, nullptr);
+            auto* rhs_var = value_to_local_var.GetOr(rhs, nullptr);
+            TINT_IR_ASSERT(ir, lhs_var && rhs_var);
+
+            // Declare a local variable for the result cooperative_tensor.
+            auto* tensor_type = ToCooperativeTensor(sm_ty);
+            auto* ptr_type = ty.ptr(function, tensor_type, read_write);
+            auto* result_var = b.Var(ptr_type);
+
+            auto* load_lhs = b.Load(lhs_var);
+            auto* load_rhs = b.Load(rhs_var);
+            auto* load_result = b.Load(result_var);
+            b.Call<msl::ir::BuiltinCall>(ty.void_(), msl::BuiltinFn::kRunTensorMultiply, load_lhs,
+                                         load_rhs, load_result);
+
+            RegisterLocalVar(c->Result(), result_var);
+        });
+    }
+
+    void ReplaceSubgroupMatrixMultiplyAccumulate(core::ir::CoreBuiltinCall* c) {
+        auto* lhs = c->Args()[0];
+        auto* rhs = c->Args()[1];
+        auto* acc = c->Args()[2];
+
+        b.InsertAfter(c, [&] {
+            auto* sm_ty = c->Result()->Type()->As<core::type::SubgroupMatrix>();
+
+            // Get the local variables that hold the LHS and RHS cooperative tensors.
+            auto* lhs_var = value_to_local_var.GetOr(lhs, nullptr);
+            auto* rhs_var = value_to_local_var.GetOr(rhs, nullptr);
+            auto* acc_var = value_to_local_var.GetOr(acc, nullptr);
+            TINT_IR_ASSERT(ir, lhs_var && rhs_var && acc_var);
+
+            // Declare a local variable for the result cooperative_tensor.
+            auto* tensor_type = ToCooperativeTensor(sm_ty);
+            auto* ptr_type = ty.ptr(function, tensor_type, read_write);
+            auto* result_var = b.Var(ptr_type);
+
+            // Copy the contents of the accumulator into the result variable.
+            b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor, result_var,
+                                    acc_var);
+
+            auto* load_lhs = b.Load(lhs_var);
+            auto* load_rhs = b.Load(rhs_var);
+            auto* load_result = b.Load(result_var);
+            b.Call<msl::ir::BuiltinCall>(ty.void_(), msl::BuiltinFn::kRunTensorMultiplyAccumulate,
+                                         load_lhs, load_rhs, load_result);
+
+            RegisterLocalVar(c->Result(), result_var);
         });
     }
 };

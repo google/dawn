@@ -1049,5 +1049,103 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_CooperativeTensorsTest, SubgroupMatrixMultiply) {
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* lhs = b.Construct(ty.subgroup_matrix_left(ty.f32(), 32, 32));
+        auto* rhs = b.Construct(ty.subgroup_matrix_right(ty.f32(), 32, 32));
+        auto* mat = b.CallExplicit(ty.subgroup_matrix_result(ty.f32(), 32, 32),
+                                   core::BuiltinFn::kSubgroupMatrixMultiply,
+                                   Vector<core::ir::TemplateParameter, 1>{ty.f32()}, lhs, rhs);
+        b.Let("x", mat);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:subgroup_matrix_left<f32, 32, 32> = construct
+    %3:subgroup_matrix_right<f32, 32, 32> = construct
+    %4:subgroup_matrix_result<f32, 32, 32> = subgroupMatrixMultiply<f32> %2, %3
+    %x:subgroup_matrix_result<f32, 32, 32> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, msl.cooperative_tensor_left<32, 32, 32, f32, f32>, read_write> = var undef
+    %3:void = msl.fill_cooperative_tensor %2, 0.0f
+    %4:ptr<function, msl.cooperative_tensor_right<32, 32, 32, f32, f32>, read_write> = var undef
+    %5:void = msl.fill_cooperative_tensor %4, 0.0f
+    %x:ptr<function, msl.cooperative_tensor_result<32, 32, 32, f32, f32>, read_write> = var undef
+    %7:msl.cooperative_tensor_left<32, 32, 32, f32, f32> = load %2
+    %8:msl.cooperative_tensor_right<32, 32, 32, f32, f32> = load %4
+    %9:msl.cooperative_tensor_result<32, 32, 32, f32, f32> = load %x
+    %10:void = msl.run_tensor_multiply %7, %8, %9
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_CooperativeTensorsTest, SubgroupMatrixMultiplyAccumulate) {
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* lhs = b.Construct(ty.subgroup_matrix_left(ty.f32(), 32, 32));
+        auto* rhs = b.Construct(ty.subgroup_matrix_right(ty.f32(), 32, 32));
+        auto* acc = b.Construct(ty.subgroup_matrix_result(ty.f32(), 32, 32));
+        auto* mat = b.Call(ty.subgroup_matrix_result(ty.f32(), 32, 32),
+                           core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate, lhs, rhs, acc);
+        b.Let("x", mat);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:subgroup_matrix_left<f32, 32, 32> = construct
+    %3:subgroup_matrix_right<f32, 32, 32> = construct
+    %4:subgroup_matrix_result<f32, 32, 32> = construct
+    %5:subgroup_matrix_result<f32, 32, 32> = subgroupMatrixMultiplyAccumulate %2, %3, %4
+    %x:subgroup_matrix_result<f32, 32, 32> = let %5
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, msl.cooperative_tensor_left<32, 32, 32, f32, f32>, read_write> = var undef
+    %3:void = msl.fill_cooperative_tensor %2, 0.0f
+    %4:ptr<function, msl.cooperative_tensor_right<32, 32, 32, f32, f32>, read_write> = var undef
+    %5:void = msl.fill_cooperative_tensor %4, 0.0f
+    %6:ptr<function, msl.cooperative_tensor_result<32, 32, 32, f32, f32>, read_write> = var undef
+    %7:void = msl.fill_cooperative_tensor %6, 0.0f
+    %x:ptr<function, msl.cooperative_tensor_result<32, 32, 32, f32, f32>, read_write> = var undef
+    %9:void = msl.copy_cooperative_tensor %x, %6
+    %10:msl.cooperative_tensor_left<32, 32, 32, f32, f32> = load %2
+    %11:msl.cooperative_tensor_right<32, 32, 32, f32, f32> = load %4
+    %12:msl.cooperative_tensor_result<32, 32, 32, f32, f32> = load %x
+    %13:void = msl.run_tensor_multiply_accumulate %10, %11, %12
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

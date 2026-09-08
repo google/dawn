@@ -50,6 +50,8 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kAtomicMaxExplicit:
         case BuiltinFn::kAtomicMinExplicit:
         case BuiltinFn::kCopyCooperativeTensor:
+        case BuiltinFn::kRunTensorMultiply:
+        case BuiltinFn::kRunTensorMultiplyAccumulate:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad, core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kAtomicLoadExplicit:

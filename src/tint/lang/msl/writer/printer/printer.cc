@@ -1226,6 +1226,23 @@ class Printer : public tint::TextGenerator {
             out << "}))";
             return;
         }
+        if (c->Func() == msl::BuiltinFn::kRunTensorMultiply ||
+            c->Func() == msl::BuiltinFn::kRunTensorMultiplyAccumulate) {
+            auto tmpl = GetTensorOperationTemplate();
+            auto* tensor = c->Args()[2]->Type()->As<type::CooperativeTensor>();
+            out << tmpl << "<" << tensor->M() << ", " << tensor->N() << ", " << tensor->K();
+            if (c->Func() == msl::BuiltinFn::kRunTensorMultiplyAccumulate) {
+                out << ", mpp::tensor_ops::matmul2d_descriptor::mode::multiply_accumulate";
+            }
+            out << ">().run(";
+            EmitValue(out, c->Args()[0]);
+            out << ", ";
+            EmitValue(out, c->Args()[1]);
+            out << ", ";
+            EmitValue(out, c->Args()[2]);
+            out << ")";
+            return;
+        }
 
         // Some builtins need special-casing for the name they use.
         if (c->Func() == msl::BuiltinFn::kOsLog) {
