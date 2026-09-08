@@ -68,11 +68,13 @@ if (build_with_chromium) {
     deps = [ "${dawn_root}/src/utils:gmock_and_gtest" ]
     sources = [ "//gpu/dawn_unittests_main.cc" ]
   }
+
   source_set("end2end_tests_main") {
     testonly = true
     deps = [ "${dawn_root}/src/utils:gmock_and_gtest" ]
     sources = [ "//gpu/dawn_end2end_tests_main.cc" ]
   }
+
   source_set("perf_tests_main") {
     testonly = true
     deps = [ "${dawn_root}/src/utils:gmock_and_gtest" ]
@@ -446,6 +448,15 @@ dawn_test("dawn_unittests") {
 
   if (tint_build_spv_reader) {
     deps += [ "${dawn_spirv_tools_dir}:spvtools_opt" ]
+  }
+
+  if (checkout_v8 && dawn_node) {
+    sources += [ "${dawn_root}/src/dawn/node/test/NapiV8Test.cpp" ]
+    deps += [
+      "${dawn_root}/src/dawn/node/napi_v8",
+      "//third_party/v8/src:v8",
+      "//third_party/v8/src:v8_libplatform",
+    ]
   }
 
   # When building inside Chromium, use their gtest main function because it is
