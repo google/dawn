@@ -232,16 +232,14 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
 
     // This ObjC block runs on a different thread.
     [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
-        TRACE_EVENT_NESTABLE_ASYNC_END0(DAWN_TRACE_CATEGORY("gpu_work"),
-                                        "DeviceMTL::SubmitPendingCommandBuffer",
-                                        uint64_t{pendingSerial});
+        TRACE_EVENT_END(DAWN_TRACE_CATEGORY("gpu_work"),
+                        perfetto::NamedTrack("DeviceMTL::CommandBuffer", uint64_t{pendingSerial}));
 
         this->UpdateCompletedSerialTo(QueuePriority::Lowest, pendingSerial);
     }];
 
-    TRACE_EVENT_NESTABLE_ASYNC_BEGIN0(DAWN_TRACE_CATEGORY("gpu_work"),
-                                      "DeviceMTL::SubmitPendingCommandBuffer",
-                                      uint64_t{pendingSerial});
+    TRACE_EVENT_BEGIN(DAWN_TRACE_CATEGORY("gpu_work"), "DeviceMTL::SubmitPendingCommandBuffer",
+                      perfetto::NamedTrack("DeviceMTL::CommandBuffer", uint64_t{pendingSerial}));
 
     DAWN_ASSERT(mSharedFence);
     [*pendingCommands encodeSignalEvent:mSharedFence->GetMTLSharedEvent()

@@ -128,8 +128,9 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::In
     bool isAsync) {
     DeviceBase* device = mPipeline->GetDevice();
     if (isAsync) {
-        TRACE_EVENT_END(DAWN_TRACE_CATEGORY(), perfetto::Track::FromPointer(this), "label",
-                        utils::GetLabelForTrace(mPipeline->GetLabel()));
+        TRACE_EVENT_END(DAWN_TRACE_CATEGORY(),
+                        perfetto::NamedTrack::FromPointer("CreatePipelineAsyncEvent", this),
+                        "label", utils::GetLabelForTrace(mPipeline->GetLabel()));
     }
     TRACE_EVENT(DAWN_TRACE_CATEGORY(), "CreatePipelineAsyncEvent::InitializeImpl", "label",
                 utils::GetLabelForTrace(mPipeline->GetLabel()));
@@ -159,7 +160,7 @@ template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
 void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::InitializeAsync() {
     DeviceBase* device = mPipeline->GetDevice();
     TRACE_EVENT_BEGIN(DAWN_TRACE_CATEGORY(), "CreatePipelineAsyncEvent::InitializeAsync",
-                      perfetto::Track::FromPointer(this), "label",
+                      perfetto::NamedTrack::FromPointer("CreatePipelineAsyncEvent", this), "label",
                       utils::GetLabelForTrace(mPipeline->GetLabel()));
 
     auto asyncTask = [event = Ref<CreatePipelineAsyncEvent>(this)] { event->InitializeImpl(true); };

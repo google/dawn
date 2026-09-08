@@ -35,14 +35,7 @@
 
 #if defined(DAWN_USE_PERFETTO)
 
-// TODO(crbug.com/432427382): Remove legacy trace events when all callsites are
-// migrated.
-#ifndef PERFETTO_ENABLE_LEGACY_TRACE_EVENTS
-#define PERFETTO_ENABLE_LEGACY_TRACE_EVENTS 1
-#endif
-
 #include "perfetto/tracing/track_event.h"
-#include "perfetto/tracing/track_event_legacy.h"
 #include "src/dawn/platform/tracing/trace_categories.h"
 
 #else
@@ -52,11 +45,6 @@
 #define TRACE_EVENT_BEGIN(category, name, ...) ((void)0)
 #define TRACE_EVENT_END(category, ...) ((void)0)
 #define TRACE_EVENT_INSTANT(category, name, ...) ((void)0)
-
-// TODO(crbug.com/432427382): Remove legacy trace events when all callsites are
-// migrated. No-op legacy macros (still used at some callsites)
-#define TRACE_EVENT_NESTABLE_ASYNC_BEGIN0(category, name, id) ((void)0)
-#define TRACE_EVENT_NESTABLE_ASYNC_END0(category, name, id) ((void)0)
 
 #endif  // defined(DAWN_USE_PERFETTO)
 
