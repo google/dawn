@@ -30,6 +30,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/traverse.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/msl/builtin_fn.h"
@@ -72,6 +73,12 @@ struct State {
             // Process all instructions in the function that produce subgroup matrix result types.
             Vector<core::ir::Instruction*, 32> worklist;
             core::ir::Traverse(func->Block(), [&](core::ir::Instruction* inst) {
+                if (auto* store = inst->As<core::ir::Store>()) {
+                    if (ContainsSubgroupMatrix(store->From()->Type())) {
+                        worklist.Push(inst);
+                    }
+                    return;
+                }
                 if (inst->Results().Length() != 1u) {
                     return;
                 }
@@ -95,6 +102,7 @@ struct State {
                     [&](core::ir::Construct* c) { ProcessConstruct(c); },   //
                     [&](core::ir::Let* let) { ProcessLet(let); },           //
                     [&](core::ir::Load* load) { ProcessLoad(load); },       //
+                    [&](core::ir::Store* store) { ProcessStore(store); },   //
                     [&](core::ir::Var* var) { ProcessVar(var); },           //
                     TINT_ICE_ON_NO_MATCH);
             }
@@ -237,6 +245,24 @@ struct State {
             RegisterLocalVar(load->Result(), var);
         });
         load->Destroy();
+    }
+
+    /// Process a `store` instruction to copy to the destination variable.
+    /// @param store the store instruction
+    void ProcessStore(core::ir::Store* store) {
+        auto* sm_ty = store->From()->Type()->As<core::type::SubgroupMatrix>();
+
+        // TODO(555437691): Handle aggregates.
+        TINT_IR_ASSERT(ir, sm_ty);
+
+        auto* from_var = value_to_local_var.GetOr(store->From(), nullptr);
+        TINT_IR_ASSERT(ir, from_var);
+
+        b.InsertBefore(store, [&] {
+            b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor, store->To(),
+                                    from_var);
+        });
+        store->Destroy();
     }
 
     /// Process a `var` instruction to replace its type and initializer.
