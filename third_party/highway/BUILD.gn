@@ -1,0 +1,29 @@
+# Copyright 2020 The Chromium Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Copied from V8 //v8/third_party/highway/BUILD.gn
+
+config("libhwy_external_config") {
+  include_dirs = [ "src" ]
+  defines = []
+  if (current_cpu == "x86") {
+    defines += [ "HWY_BROKEN_TARGETS=(HWY_AVX2|HWY_AVX3)" ]
+  }
+  if (current_cpu == "arm" || current_cpu == "arm64") {
+    defines += [ "HWY_BROKEN_TARGETS=HWY_ALL_SVE" ]
+  }
+}
+
+source_set("libhwy") {
+  sources = [
+    "src/hwy/abort.cc",
+    "src/hwy/aligned_allocator.cc",
+    "src/hwy/per_target.cc",
+    "src/hwy/print.cc",
+    "src/hwy/stats.cc",
+    "src/hwy/targets.cc",
+    "src/hwy/timer.cc",
+  ]
+  public_configs = [ ":libhwy_external_config" ]
+}

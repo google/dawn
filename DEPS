@@ -5,6 +5,7 @@ gclient_gn_args_file = 'build/config/gclient_args.gni'
 gclient_gn_args = [
   'android_ndk_version',
   'build_with_chromium',
+  'checkout_v8',
   'dawn_node',
   'dawn_wasm',
   'generate_location_tags',
@@ -95,6 +96,9 @@ vars = {
   # Checkout LiteRT-LM and its data dependencies.
   # Not actually depended on by Dawn/Tint, only used to run benchmark tests on them.
   'checkout_litert_lm': False,
+
+  # Checkout V8 and its dependencies for standalone builds (e.g. CTS runner).
+  'checkout_v8': False,
 
   # Dependency versions for Android builds.
   # These should be all rolled at once to match the values in Chromium.
@@ -816,6 +820,42 @@ deps = {
     ],
     'dep_type': 'cipd',
     'condition': 'checkout_litert_lm',
+  },
+
+  # V8 and its dependencies for standalone builds.
+  'third_party/v8/src': {
+    'url': '{chromium_git}/v8/v8.git@44a3ea5dfba49555118a387c6ea31f57b89de180',
+    'condition': 'dawn_standalone and checkout_v8',
+  },
+
+  'third_party/fp16/src': {
+    'url': '{chromium_git}/external/github.com/Maratyszcza/FP16.git@782eea126dc5c755827be751a099eb01826175cf',
+    'condition': 'dawn_standalone and checkout_v8',
+  },
+
+  'third_party/fast_float/src': {
+    'url': '{chromium_git}/external/github.com/fastfloat/fast_float.git@34164f547b7df3f5d794ff67e9f885c36819ebfc',
+    'condition': 'dawn_standalone and checkout_v8',
+  },
+
+  'third_party/fadec/src': {
+    'url': '{chromium_git}/external/github.com/aengelke/fadec.git@340a7a86117895b7b71e56deac99d96340eab587',
+    'condition': 'dawn_standalone and checkout_v8',
+  },
+
+  'third_party/highway/src': {
+    'url': '{chromium_git}/external/github.com/google/highway.git@2607d3b5b0113992fe84d3848859eae13b3b52c1',
+    'condition': 'dawn_standalone and checkout_v8',
+  },
+
+  'third_party/dragonbox/src': {
+    'url': '{chromium_git}/external/github.com/jk-jeon/dragonbox.git@beeeef91cf6fef89a4d4ba5e95d47ca64ccb3a44',
+    'condition': 'dawn_standalone and checkout_v8',
+  },
+
+  'third_party/simdutf/src': {
+    'url': '{chromium_git}/chromium/src/third_party/simdutf@f7356eed293f8208c40b3c1b344a50bd70971983',
+    'condition': 'dawn_standalone and checkout_v8',
   },
 }
 

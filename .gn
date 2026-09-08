@@ -64,6 +64,11 @@ default_args = {
 
   # Use Siso instead of Ninja.
   use_siso = true
+
+  # Disable V8 features not needed by Dawn standalone builds.
+  v8_enable_i18n_support = false
+  v8_enable_temporal_support = false
+  v8_use_external_startup_data = false
 }
 
 # Export compile_commands.json to build dir for all generated targets.

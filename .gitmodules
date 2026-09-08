@@ -233,3 +233,31 @@
 	path = third_party/litert-lm/src
 	url = https://chromium.googlesource.com/external/github.com/google-ai-edge/LiteRT-LM.git
 	gclient-condition = checkout_litert_lm
+[submodule "third_party/v8/src"]
+	path = third_party/v8/src
+	url = https://chromium.googlesource.com/v8/v8.git
+	gclient-condition = dawn_standalone and checkout_v8
+[submodule "third_party/fp16/src"]
+	path = third_party/fp16/src
+	url = https://chromium.googlesource.com/external/github.com/Maratyszcza/FP16.git
+	gclient-condition = dawn_standalone and checkout_v8
+[submodule "third_party/fast_float/src"]
+	path = third_party/fast_float/src
+	url = https://chromium.googlesource.com/external/github.com/fastfloat/fast_float.git
+	gclient-condition = dawn_standalone and checkout_v8
+[submodule "third_party/fadec/src"]
+	path = third_party/fadec/src
+	url = https://chromium.googlesource.com/external/github.com/aengelke/fadec.git
+	gclient-condition = dawn_standalone and checkout_v8
+[submodule "third_party/highway/src"]
+	path = third_party/highway/src
+	url = https://chromium.googlesource.com/external/github.com/google/highway.git
+	gclient-condition = dawn_standalone and checkout_v8
+[submodule "third_party/dragonbox/src"]
+	path = third_party/dragonbox/src
+	url = https://chromium.googlesource.com/external/github.com/jk-jeon/dragonbox.git
+	gclient-condition = dawn_standalone and checkout_v8
+[submodule "third_party/simdutf/src"]
+	path = third_party/simdutf/src
+	url = https://chromium.googlesource.com/chromium/src/third_party/simdutf
+	gclient-condition = dawn_standalone and checkout_v8

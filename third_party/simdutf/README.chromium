@@ -1,0 +1,17 @@
+Name: simdutf unicode transcoder
+Short Name: simdutf
+URL: https://github.com/simdutf/simdutf
+Version: 7.7.0
+Revision: f7356eed293f8208c40b3c1b344a50bd70971983
+Update Mechanism: Manual
+License: MIT
+License File: LICENSE
+Security Critical: no
+Shipped: no
+CPEPrefix: unknown
+
+Description:
+This library provides fast Unicode functions.
+
+Local Modifications:
+None.

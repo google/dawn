@@ -1,0 +1,16 @@
+Name: dragonbox
+URL: https://github.com/jk-jeon/dragonbox
+Version: N/A
+Revision: beeeef91cf6fef89a4d4ba5e95d47ca64ccb3a44
+Update Mechanism: Autoroll
+License: Apache-with-LLVM-Exception, BSL-1.0
+License File: LICENSE-Apache2-LLVM, LICENSE-Boost
+Shipped: no
+Security Critical: no
+CPEPrefix: unknown
+
+Description:
+A fast float-to-string conversion algorithm.
+
+Local Modifications:
+None

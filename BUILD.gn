@@ -66,6 +66,12 @@ if (dawn_standalone) {
     }
   }
 
+  if (checkout_v8) {
+    group("v8") {
+      deps = [ "//third_party/v8/src:v8" ]
+    }
+  }
+
   group("tests") {
     testonly = true
     deps = [

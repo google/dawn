@@ -1,0 +1,16 @@
+Name: V8
+URL: https://chromium.googlesource.com/v8/v8
+Version: N/A
+Revision: 44a3ea5dfba49555118a387c6ea31f57b89de180
+Update Mechanism: Manual
+License: BSD-3-Clause
+License File: LICENSE
+Shipped: no
+Security Critical: no
+CPEPrefix: unknown
+
+Description:
+V8 is Google's open source JavaScript and WebAssembly engine.
+
+Local Modifications:
+None

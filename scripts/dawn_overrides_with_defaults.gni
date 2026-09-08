@@ -37,6 +37,10 @@ if (!defined(dawn_standalone)) {
   dawn_standalone = false
 }
 
+if (!defined(checkout_v8)) {
+  checkout_v8 = false
+}
+
 if (!defined(dawn_root)) {
   dawn_root = get_path_info("..", "abspath")
 }
