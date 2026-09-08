@@ -28,6 +28,7 @@
 #include "src/tint/lang/msl/writer/raise/cooperative_tensors.h"
 
 #include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/traverse.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
@@ -93,6 +94,7 @@ struct State {
                     [&](core::ir::CoreBuiltinCall* c) { ProcessCall(c); },  //
                     [&](core::ir::Construct* c) { ProcessConstruct(c); },   //
                     [&](core::ir::Let* let) { ProcessLet(let); },           //
+                    [&](core::ir::Load* load) { ProcessLoad(load); },       //
                     [&](core::ir::Var* var) { ProcessVar(var); },           //
                     TINT_ICE_ON_NO_MATCH);
             }
@@ -210,6 +212,31 @@ struct State {
             });
         }
         let->Destroy();
+    }
+
+    /// Process a `load` instruction to copy to a new local variable.
+    /// @param load the load instruction
+    void ProcessLoad(core::ir::Load* load) {
+        auto* sm_ty = load->Result()->Type()->As<core::type::SubgroupMatrix>();
+
+        // TODO(555437691): Handle aggregates.
+        TINT_IR_ASSERT(ir, sm_ty);
+
+        b.InsertAfter(load, [&] {
+            // TODO(557925365): Elide the copy when possible.
+            auto* tensor_type = ToCooperativeTensor(sm_ty);
+            auto* ptr_type = ty.ptr(function, tensor_type, read_write);
+            auto* var = b.Var(ptr_type);
+            if (auto name = ir.NameOf(load); name.IsValid()) {
+                ir.SetName(var, name);
+            }
+
+            b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor, var,
+                                    load->From());
+
+            RegisterLocalVar(load->Result(), var);
+        });
+        load->Destroy();
     }
 
     /// Process a `var` instruction to replace its type and initializer.
