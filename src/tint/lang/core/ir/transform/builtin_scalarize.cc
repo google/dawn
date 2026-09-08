@@ -109,7 +109,7 @@ struct State {
                         // It would be an error to scalarize over different sized vectors.
                         TINT_IR_ASSERT(ir, common_vec_width == vec->Width());
                         auto* access_arg = b.Access(vec->DeepestElement(), e, u32(i));
-                        scalar_args.Push(access_arg->Result());
+                        scalar_args.Push(access_arg);
                     } else {
                         TINT_IR_ASSERT(ir, e->Type()->IsScalar());
                         // This code generalizes for vector functions that additionally take scalar

@@ -406,7 +406,7 @@ struct State {
                         if (member->Attributes().builtin ==
                             core::BuiltinValue::kSubgroupInvocationId) {
                             subgroup_invocation_id =
-                                b.Access(ty.u32(), param, u32(member->Index()))->Result();
+                                b.Access(ty.u32(), param, u32(member->Index()));
                             break;
                         }
                     }
@@ -932,7 +932,7 @@ struct State {
             // If this is not a depth comparison but we are sampling a depth texture, extract the
             // first component to get the scalar f32 that SPIR-V expects.
             if (!depth && texture_ty->GetDepth() == type::Depth::kDepth) {
-                result = b.Access(ty.f32(), result, 0_u)->Result();
+                result = b.Access(ty.f32(), result, 0_u);
             }
         });
 
@@ -1113,7 +1113,7 @@ struct State {
 
         // If we are expecting a scalar result, extract the first component.
         if (expects_scalar_result) {
-            result = b.Access(ty.f32(), result, 0_u);
+            result = b.Access(ty.f32(), result, 0_u)->AsInstruction();
             result->InsertBefore(builtin);
         }
 
@@ -1272,8 +1272,9 @@ struct State {
         texture_call->InsertBefore(builtin);
 
         // Extract the third component to get the number of array layers.
-        auto* extract = b.AccessWithResult(builtin->DetachResult(), texture_call->Result(), 2_u);
-        extract->InsertBefore(builtin);
+        b.InsertBefore(builtin, [&] {
+            b.AccessReplaceResult(builtin->DetachResult(), texture_call->Result(), 2_u);
+        });
         builtin->Destroy();
     }
 

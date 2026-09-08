@@ -683,16 +683,15 @@ struct State {
                     auto chain = Transform(shape->ops, [&](const AccessOp& op) -> Value* {
                         if (auto* v = std::get_if<BufferViewAccess>(&op)) {
                             has_view = true;
-                            Value* offset = b.Access(ty.u32(), args_param, 0_u)->Result();
+                            Value* offset = b.Access(ty.u32(), args_param, 0_u);
                             Value* size = nullptr;
                             Value* length = nullptr;
                             if (v->fn == BuiltinFn::kBufferArrayView) {
-                                size = b.Access(ty.u32(), args_param, 1_u)->Result();
+                                size = b.Access(ty.u32(), args_param, 1_u);
                             }
                             if (v->has_length) {
                                 length = b.Access(ty.u32(), args_param,
-                                                  (v->fn == BuiltinFn::kBufferView ? 1_u : 2_u))
-                                             ->Result();
+                                                  (v->fn == BuiltinFn::kBufferView ? 1_u : 2_u));
                             }
                             auto* call =
                                 b.CallExplicit(v->type, v->fn,
@@ -716,17 +715,16 @@ struct State {
                             return b.Constant(u32(m->member->Index()));
                         }
                         auto* access = b.Access(ty.u32(), indices_param, u32(index_index++));
-                        return access->Result();
+                        return access;
                     });
 
                     if (has_view) {
                         if (chain.Length() > 1) {
                             replacement = b.Access(access_type, root_ptr,
-                                                   ToVector<8>(chain.AsSpan().subspan(1)))
-                                              ->Result();
+                                                   ToVector<8>(chain.AsSpan().subspan(1)));
                         }
                     } else {
-                        replacement = b.Access(access_type, root_ptr, std::move(chain))->Result();
+                        replacement = b.Access(access_type, root_ptr, std::move(chain));
                     }
                 }
 

@@ -955,8 +955,10 @@ class Impl {
 
                 // Create a new access
                 auto* access = impl.builder_.Access(ty, obj, index);
-                impl.current_block_->Append(access);
-                Bind(expr, access->Result());
+                if (auto* access_inst = access->AsInstruction()) {
+                    impl.current_block_->Append(access_inst);
+                }
+                Bind(expr, access);
             }
 
             void EmitBinary(const ast::BinaryExpression* b) {

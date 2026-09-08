@@ -572,7 +572,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
         auto index = input_indices[idx];
 
-        core::ir::Value* v = builder.Access(inputs[idx].type, input_param, u32(index))->Result();
+        core::ir::Value* v = builder.Access(inputs[idx].type, input_param, u32(index));
 
         if (inputs[idx].attributes.builtin == core::BuiltinValue::kPosition) {
             // If this is an input position builtin we need to invert the 'w' component of the
@@ -611,12 +611,12 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             // Create a vector and copy array elements to it
             Vector<core::ir::Value*, 4> init;
             for (size_t i = 0; i < dst_vec_ty->Elements().count; ++i) {
-                init.Push(builder.Access<f32>(src_array, u32(src_array_first_index + i))->Result());
+                init.Push(builder.Access<f32>(src_array, u32(src_array_first_index + i)));
             }
             dst_value = builder.Construct(dst_vec_ty, std::move(init));
         } else {
             TINT_IR_ASSERT(ir, outputs[output_index].type->As<core::type::Scalar>());
-            dst_value = builder.Access<f32>(src_array, u32(src_array_first_index))->Result();
+            dst_value = builder.Access<f32>(src_array, u32(src_array_first_index));
         }
         return dst_value;
     }

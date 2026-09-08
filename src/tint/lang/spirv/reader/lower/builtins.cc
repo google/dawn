@@ -896,7 +896,7 @@ struct State {
             auto* whole = b.Access(result_ty, c, 1_u);
             b.Store(i, whole);
 
-            b.AccessWithResult(call->DetachResult(), c, 0_u);
+            b.AccessReplaceResult(call->DetachResult(), c, 0_u);
         });
         call->Destroy();
     }
@@ -909,14 +909,14 @@ struct State {
 
         b.InsertBefore(call, [&] {
             auto* c = b.Call(frexp_result_ty, core::BuiltinFn::kFrexp, x);
-            core::ir::Value* exp = b.Access(ty.MatchWidth(ty.i32(), result_ty), c, 1_u)->Result();
+            core::ir::Value* exp = b.Access(ty.MatchWidth(ty.i32(), result_ty), c, 1_u);
 
             if (i->Type()->UnwrapPtr()->DeepestElement()->IsUnsignedIntegerScalar()) {
                 exp = b.Bitcast(i->Type()->UnwrapPtr(), exp);
             }
             b.Store(i, exp);
 
-            b.AccessWithResult(call->DetachResult(), c, 0_u);
+            b.AccessReplaceResult(call->DetachResult(), c, 0_u);
         });
         call->Destroy();
     }

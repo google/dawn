@@ -220,7 +220,7 @@ struct State {
         auto access_idx = access_to_vector_index.Get(sve->To());
         TINT_ASSERT(access_idx);
 
-        core::ir::Access* new_access = nullptr;
+        core::ir::Value* new_access = nullptr;
         b.InsertAfter(src_inst, [&] {
             auto* src_ty = src_to->Type()->As<core::type::Pointer>();
             TINT_ASSERT(src_ty);
@@ -251,7 +251,7 @@ struct State {
         auto access_idx = access_to_vector_index.Get(lve->From());
         TINT_ASSERT(access_idx);
 
-        core::ir::Access* new_access = nullptr;
+        core::ir::Value* new_access = nullptr;
         b.InsertAfter(src_inst, [&] {
             auto* src_ty = src_result->Type()->As<core::type::Pointer>();
             TINT_ASSERT(src_ty);
@@ -357,7 +357,7 @@ struct State {
             if (static_cast<uint32_t>(matrix_index) != indices.size() - 1) {
                 auto access_indices = Vector<core::ir::Value*, 4>{
                     indices.subspan(static_cast<size_t>(matrix_index) + 1)};
-                b.AccessWithResult(access->DetachResult(), t, access_indices)->Result();
+                b.AccessReplaceResult(access->DetachResult(), t, access_indices);
             } else {
                 access->Result()->ReplaceAllUsesWith(t);
             }

@@ -105,11 +105,13 @@ struct State {
 
             auto* ptr = object->Type()->As<core::type::Pointer>();
             auto addrspace = ptr->AddressSpace();
-            auto* access_to_vec =
-                b.Access(ty.ptr(addrspace, access.type, ptr->Access()), object, partial_indices);
-            access_to_vec->InsertBefore(access.inst);
+            core::ir::Value* access_to_vec = nullptr;
+            b.InsertBefore(access.inst, [&] {
+                access_to_vec = b.Access(ty.ptr(addrspace, access.type, ptr->Access()), object,
+                                         partial_indices);
+            });
 
-            object = access_to_vec->Result();
+            object = access_to_vec;
         }
 
         // Replace all uses of the original access instruction.

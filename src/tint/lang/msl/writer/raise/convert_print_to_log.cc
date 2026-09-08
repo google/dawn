@@ -229,7 +229,7 @@ struct State {
             if (auto* strct = param->Type()->As<core::type::Struct>()) {
                 for (auto* member : strct->Members()) {
                     if (member->Attributes().builtin == builtin) {
-                        return b.Access(type, param, u32(member->Index()))->Result(0);
+                        return b.Access(type, param, u32(member->Index()));
                     }
                 }
             } else {

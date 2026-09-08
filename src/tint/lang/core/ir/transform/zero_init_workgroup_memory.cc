@@ -263,9 +263,11 @@ struct State {
                 // Check each member for the local invocation index builtin attribute.
                 for (auto* member : str->Members()) {
                     if (member->Attributes().builtin == BuiltinValue::kLocalInvocationIndex) {
-                        auto* access = b.Access(ty.u32(), param, u32(member->Index()));
-                        access->InsertBefore(func->Block()->Front());
-                        return access->Result();
+                        Value* access = nullptr;
+                        b.InsertBefore(func->Block()->Front(), [&] {
+                            access = b.Access(ty.u32(), param, u32(member->Index()));
+                        });
+                        return access;
                     }
                 }
             } else {
@@ -289,7 +291,7 @@ struct State {
     /// @param linear_index the linear index of the single element that will be zeroed
     void GenerateStore(const Store& store, uint32_t total_count, Value* linear_index) {
         // If a bufferView call exists for `store`, use it over the var.
-        auto* to = store.buffer_view ? store.buffer_view->Result() : store.var->Result();
+        Value* to = store.buffer_view ? store.buffer_view->Result() : store.var->Result();
         if (!store.indices.IsEmpty()) {
             // Build the access indices to get to the target element.
             // We walk backwards along the index list so that adjacent invocation store to
@@ -316,7 +318,7 @@ struct State {
                 }
             }
             indices.Reverse();
-            to = b.Access(ty.ptr(workgroup, store.store_type), to, indices)->Result();
+            to = b.Access(ty.ptr(workgroup, store.store_type), to, indices);
         }
 
         // Generate the store instruction.

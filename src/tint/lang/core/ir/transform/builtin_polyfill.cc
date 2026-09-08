@@ -1208,7 +1208,7 @@ struct State {
                 auto* broadcasted_u32 =
                     b.Call(ty.u32(), core::BuiltinFn::kSubgroupBroadcast, u32_val, lane_id);
                 auto* broadcasted_vec = b.Bitcast(ty.vec2h(), broadcasted_u32);
-                result = b.Access(ty.f16(), broadcasted_vec, 0_u)->Result();
+                result = b.Access(ty.f16(), broadcasted_vec, 0_u);
             }
 
             call->Result()->ReplaceAllUsesWith(result);

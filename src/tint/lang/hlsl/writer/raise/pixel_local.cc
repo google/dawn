@@ -143,7 +143,8 @@ struct State {
         // Insert coord decl used to index ROVs at the entry point start
         core::ir::Instruction* coord = nullptr;
         b.InsertBefore(entry_point->Block()->Front(), [&] {
-            coord = b.Access(ty.vec4f(), entry_point_param, u32(position_member->Index()));
+            coord = b.Access(ty.vec4f(), entry_point_param, u32(position_member->Index()))
+                        ->AsInstruction();
             coord = b.Swizzle(ty.vec2f(), coord, {0, 1})->AsInstruction();
             coord = b.Convert<vec2<u32>>(coord)->AsInstruction();  // Input type to .Load
         });
@@ -176,8 +177,7 @@ struct State {
                 auto* mem_ty = mem->Type();
                 TINT_IR_ASSERT(ir, mem_ty->Is<core::type::Scalar>());
                 core::ir::Value* from =
-                    b.Access(ty.ptr<private_>(mem_ty), pixel_local_var, u32(mem->Index()))
-                        ->Result();
+                    b.Access(ty.ptr<private_>(mem_ty), pixel_local_var, u32(mem->Index()));
                 from = b.Load(from)->Result();
                 if (mem_ty != rov.subtype) {
                     // ROV and struct member types don't match

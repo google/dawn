@@ -372,7 +372,7 @@ struct State {
         } else {
             // Make a pointer to the first element of the array that we will access.
             auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
-            data = b.Access(elem_ptr, p, offset)->Result();
+            data = b.Access(elem_ptr, p, offset);
         }
 
         // The tensor extents are the dimensions of the matrix.

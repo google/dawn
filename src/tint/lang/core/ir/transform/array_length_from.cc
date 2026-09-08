@@ -308,10 +308,9 @@ struct State {
                                     auto* ptr_ty = arg->Type()->As<core::type::Pointer>();
                                     auto* str_ty = ptr_ty->UnwrapPtr()->As<core::type::Struct>();
                                     auto* array_ty = str_ty->Members().Back()->Type();
-                                    arg = b.Access(ty.ptr(ptr_ty->AddressSpace(), array_ty,
-                                                          ptr_ty->Access()),
-                                                   arg, struct_index)
-                                              ->Result();
+                                    arg = b.Access(
+                                        ty.ptr(ptr_ty->AddressSpace(), array_ty, ptr_ty->Access()),
+                                        arg, struct_index);
                                 }
                                 len = b.Call<u32>(BuiltinFn::kArrayLength, arg);
                             }
@@ -402,10 +401,11 @@ struct State {
         });
 
         // Extract the length from the structure.
-        auto* length = b.Access<u32>(GetArrayLengthsStructure(ContainingFunction(insertion_point)),
-                                     u32(member_index));
-        length->InsertBefore(insertion_point);
-        return length->Result();
+        core::ir::Value* length = nullptr;
+        auto* structure = GetArrayLengthsStructure(ContainingFunction(insertion_point));
+        b.InsertBefore(insertion_point,
+                       [&] { length = b.Access<u32>(structure, u32(member_index)); });
+        return length;
     }
 
     /// Get (or create, on first call) the uniform buffer that contains the storage buffer sizes.

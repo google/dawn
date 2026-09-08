@@ -156,9 +156,8 @@ TEST_F(IR_DecomposeAccessTest, UniformAccessChainFromUnnamedAccessChain) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* x = b.Access(ty.ptr(uniform, sb, core::Access::kRead), var, 2_u);
-        auto* y = b.Access(ty.ptr(uniform, Inner, core::Access::kRead), x->Result(), 1_u);
-        b.Let("b",
-              b.Load(b.Access(ty.ptr(uniform, ty.u32(), core::Access::kRead), y->Result(), 1_u)));
+        auto* y = b.Access(ty.ptr(uniform, Inner, core::Access::kRead), x, 1_u);
+        b.Let("b", b.Load(b.Access(ty.ptr(uniform, ty.u32(), core::Access::kRead), y, 1_u)));
         b.Return(func);
     });
 
@@ -1793,14 +1792,8 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadU32) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let(
-            "a",
-            b.Load(
-                b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)->Result()));
-        b.Let(
-            "b",
-            b.Load(
-                b.Access(ty.ptr(storage, ty.u32(), core::Access::kReadWrite), var, 1_u)->Result()));
+        b.Let("a", b.Load(b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)));
+        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.u32(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -1871,11 +1864,10 @@ TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_LoadBool) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u)
-                              ->Result()));
+        b.Let("a",
+              b.Load(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u)));
         b.Let("b",
-              b.Load(b.Access(ty.ptr(workgroup, ty.bool_(), core::Access::kReadWrite), var, 1_u)
-                         ->Result()));
+              b.Load(b.Access(ty.ptr(workgroup, ty.bool_(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -1948,12 +1940,9 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadVec2h) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let(
-            "a",
-            b.Load(
-                b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)->Result()));
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.vec2h(), core::Access::kReadWrite), var, 1_u)
-                              ->Result()));
+        b.Let("a", b.Load(b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)));
+        b.Let("b",
+              b.Load(b.Access(ty.ptr(storage, ty.vec2h(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -2025,12 +2014,9 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadVec3h) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let(
-            "a",
-            b.Load(
-                b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)->Result()));
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.vec3h(), core::Access::kReadWrite), var, 1_u)
-                              ->Result()));
+        b.Let("a", b.Load(b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)));
+        b.Let("b",
+              b.Load(b.Access(ty.ptr(storage, ty.vec3h(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -2104,12 +2090,9 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadVec4h) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let(
-            "a",
-            b.Load(
-                b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)->Result()));
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.vec4h(), core::Access::kReadWrite), var, 1_u)
-                              ->Result()));
+        b.Let("a", b.Load(b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)));
+        b.Let("b",
+              b.Load(b.Access(ty.ptr(storage, ty.vec4h(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -2185,12 +2168,9 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadVec2u) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let(
-            "a",
-            b.Load(
-                b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)->Result()));
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.vec2u(), core::Access::kReadWrite), var, 1_u)
-                              ->Result()));
+        b.Let("a", b.Load(b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)));
+        b.Let("b",
+              b.Load(b.Access(ty.ptr(storage, ty.vec2u(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -2269,12 +2249,9 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadVec3u) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let(
-            "a",
-            b.Load(
-                b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)->Result()));
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.vec3u(), core::Access::kReadWrite), var, 1_u)
-                              ->Result()));
+        b.Let("a", b.Load(b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)));
+        b.Let("b",
+              b.Load(b.Access(ty.ptr(storage, ty.vec3u(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -2360,12 +2337,9 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadVec4u) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let(
-            "a",
-            b.Load(
-                b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)->Result()));
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.vec4u(), core::Access::kReadWrite), var, 1_u)
-                              ->Result()));
+        b.Let("a", b.Load(b.Access(ty.ptr(storage, ty.u16(), core::Access::kReadWrite), var, 0_u)));
+        b.Let("b",
+              b.Load(b.Access(ty.ptr(storage, ty.vec4u(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -2455,11 +2429,10 @@ TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_LoadVec2b) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u)
-                              ->Result()));
+        b.Let("a",
+              b.Load(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u)));
         b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec2(ty.bool_()), core::Access::kReadWrite),
-                                   var, 1_u)
-                              ->Result()));
+                                   var, 1_u)));
         b.Return(func);
     });
 
@@ -2538,11 +2511,10 @@ TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_LoadVec3b) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u)
-                              ->Result()));
+        b.Let("a",
+              b.Load(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u)));
         b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec3(ty.bool_()), core::Access::kReadWrite),
-                                   var, 1_u)
-                              ->Result()));
+                                   var, 1_u)));
         b.Return(func);
     });
 
@@ -2628,11 +2600,10 @@ TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_LoadVec4b) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u)
-                              ->Result()));
+        b.Let("a",
+              b.Load(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u)));
         b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec4(ty.bool_()), core::Access::kReadWrite),
-                                   var, 1_u)
-                              ->Result()));
+                                   var, 1_u)));
         b.Return(func);
     });
 
@@ -2724,12 +2695,9 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_LoadVec2u) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let(
-            "a",
-            b.Load(
-                b.Access(ty.ptr(storage, ty.u32(), core::Access::kReadWrite), var, 0_u)->Result()));
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.vec2u(), core::Access::kReadWrite), var, 1_u)
-                              ->Result()));
+        b.Let("a", b.Load(b.Access(ty.ptr(storage, ty.u32(), core::Access::kReadWrite), var, 0_u)));
+        b.Let("b",
+              b.Load(b.Access(ty.ptr(storage, ty.vec2u(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -2800,12 +2768,9 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_LoadVec3u) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let(
-            "a",
-            b.Load(
-                b.Access(ty.ptr(storage, ty.u32(), core::Access::kReadWrite), var, 0_u)->Result()));
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.vec3u(), core::Access::kReadWrite), var, 1_u)
-                              ->Result()));
+        b.Let("a", b.Load(b.Access(ty.ptr(storage, ty.u32(), core::Access::kReadWrite), var, 0_u)));
+        b.Let("b",
+              b.Load(b.Access(ty.ptr(storage, ty.vec3u(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -2879,12 +2844,9 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_LoadVec4u) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let(
-            "a",
-            b.Load(
-                b.Access(ty.ptr(storage, ty.u32(), core::Access::kReadWrite), var, 0_u)->Result()));
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.vec4u(), core::Access::kReadWrite), var, 1_u)
-                              ->Result()));
+        b.Let("a", b.Load(b.Access(ty.ptr(storage, ty.u32(), core::Access::kReadWrite), var, 0_u)));
+        b.Let("b",
+              b.Load(b.Access(ty.ptr(storage, ty.vec4u(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -2958,11 +2920,10 @@ TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU32_LoadVec2b) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u32(), core::Access::kReadWrite), var, 0_u)
-                              ->Result()));
+        b.Let("a",
+              b.Load(b.Access(ty.ptr(workgroup, ty.u32(), core::Access::kReadWrite), var, 0_u)));
         b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec2(ty.bool_()), core::Access::kReadWrite),
-                                   var, 1_u)
-                              ->Result()));
+                                   var, 1_u)));
         b.Return(func);
     });
 
@@ -3033,11 +2994,10 @@ TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU32_LoadVec3b) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u32(), core::Access::kReadWrite), var, 0_u)
-                              ->Result()));
+        b.Let("a",
+              b.Load(b.Access(ty.ptr(workgroup, ty.u32(), core::Access::kReadWrite), var, 0_u)));
         b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec3(ty.bool_()), core::Access::kReadWrite),
-                                   var, 1_u)
-                              ->Result()));
+                                   var, 1_u)));
         b.Return(func);
     });
 
@@ -3111,11 +3071,10 @@ TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU32_LoadVec4b) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u32(), core::Access::kReadWrite), var, 0_u)
-                              ->Result()));
+        b.Let("a",
+              b.Load(b.Access(ty.ptr(workgroup, ty.u32(), core::Access::kReadWrite), var, 0_u)));
         b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec4(ty.bool_()), core::Access::kReadWrite),
-                                   var, 1_u)
-                              ->Result()));
+                                   var, 1_u)));
         b.Return(func);
     });
 
@@ -3191,10 +3150,10 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessVec2u_LoadVec2u) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Load(b.Access(ty.ptr(storage, ty.vec2u(), core::Access::kReadWrite), var, 0_u)
-                              ->Result()));
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.vec2u(), core::Access::kReadWrite), var, 1_u)
-                              ->Result()));
+        b.Let("a",
+              b.Load(b.Access(ty.ptr(storage, ty.vec2u(), core::Access::kReadWrite), var, 0_u)));
+        b.Let("b",
+              b.Load(b.Access(ty.ptr(storage, ty.vec2u(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -3262,10 +3221,10 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessVec2u_LoadVec3u) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Load(b.Access(ty.ptr(storage, ty.vec2u(), core::Access::kReadWrite), var, 0_u)
-                              ->Result()));
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.vec3u(), core::Access::kReadWrite), var, 1_u)
-                              ->Result()));
+        b.Let("a",
+              b.Load(b.Access(ty.ptr(storage, ty.vec2u(), core::Access::kReadWrite), var, 0_u)));
+        b.Let("b",
+              b.Load(b.Access(ty.ptr(storage, ty.vec3u(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -3343,10 +3302,10 @@ TEST_F(IR_DecomposeAccessTest, Storage_AccessVec2u_LoadVec4u) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Load(b.Access(ty.ptr(storage, ty.vec2u(), core::Access::kReadWrite), var, 0_u)
-                              ->Result()));
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.vec4u(), core::Access::kReadWrite), var, 1_u)
-                              ->Result()));
+        b.Let("a",
+              b.Load(b.Access(ty.ptr(storage, ty.vec2u(), core::Access::kReadWrite), var, 0_u)));
+        b.Let("b",
+              b.Load(b.Access(ty.ptr(storage, ty.vec4u(), core::Access::kReadWrite), var, 1_u)));
         b.Return(func);
     });
 
@@ -3417,11 +3376,9 @@ TEST_F(IR_DecomposeAccessTest, Workgroup_AccessVec2u_LoadVec2b) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Let("a",
-              b.Load(b.Access(ty.ptr(workgroup, ty.vec2u(), core::Access::kReadWrite), var, 0_u)
-                         ->Result()));
+              b.Load(b.Access(ty.ptr(workgroup, ty.vec2u(), core::Access::kReadWrite), var, 0_u)));
         b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec2(ty.bool_()), core::Access::kReadWrite),
-                                   var, 1_u)
-                              ->Result()));
+                                   var, 1_u)));
         b.Return(func);
     });
 
@@ -3490,11 +3447,9 @@ TEST_F(IR_DecomposeAccessTest, Workgroup_AccessVec2u_LoadVec3b) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Let("a",
-              b.Load(b.Access(ty.ptr(workgroup, ty.vec2u(), core::Access::kReadWrite), var, 0_u)
-                         ->Result()));
+              b.Load(b.Access(ty.ptr(workgroup, ty.vec2u(), core::Access::kReadWrite), var, 0_u)));
         b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec3(ty.bool_()), core::Access::kReadWrite),
-                                   var, 1_u)
-                              ->Result()));
+                                   var, 1_u)));
         b.Return(func);
     });
 
@@ -3573,11 +3528,9 @@ TEST_F(IR_DecomposeAccessTest, Workgroup_AccessVec2u_LoadVec4b) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Let("a",
-              b.Load(b.Access(ty.ptr(workgroup, ty.vec2u(), core::Access::kReadWrite), var, 0_u)
-                         ->Result()));
+              b.Load(b.Access(ty.ptr(workgroup, ty.vec2u(), core::Access::kReadWrite), var, 0_u)));
         b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec4(ty.bool_()), core::Access::kReadWrite),
-                                   var, 1_u)
-                              ->Result()));
+                                   var, 1_u)));
         b.Return(func);
     });
 

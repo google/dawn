@@ -48,7 +48,7 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
     func->SetParams({arr});
 
     auto* block = func->Block();
-    auto* access = block->Append(b.Access(ty.i32(), arr, 1_i));
+    auto* access = block->Append(b.Access(ty.i32(), arr, 1_i)->AsInstruction());
     block->Append(b.Return(func, access));
 
     auto* expect = R"(
@@ -71,7 +71,7 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, NoModify_ConstantIndex_MatrixValue) {
     func->SetParams({mat});
 
     auto* block = func->Block();
-    auto* access = block->Append(b.Access(ty.f32(), mat, 1_i, 0_i));
+    auto* access = block->Append(b.Access(ty.f32(), mat, 1_i, 0_i)->AsInstruction());
     block->Append(b.Return(func, access));
 
     auto* expect = R"(
@@ -95,7 +95,7 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, NoModify_DynamicIndex_ArrayPointer) {
     func->SetParams({arr, idx});
 
     auto* block = func->Block();
-    auto* access = block->Append(b.Access(ty.ptr<function, i32>(), arr, idx));
+    auto* access = block->Append(b.Access(ty.ptr<function, i32>(), arr, idx)->AsInstruction());
     auto* load = block->Append(b.Load(access));
     block->Append(b.Return(func, load));
 
@@ -121,7 +121,8 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, NoModify_DynamicIndex_MatrixPointer) 
     func->SetParams({mat, idx});
 
     auto* block = func->Block();
-    auto* access = block->Append(b.Access(ty.ptr<function, vec2<f32>>(), mat, idx));
+    auto* access =
+        block->Append(b.Access(ty.ptr<function, vec2<f32>>(), mat, idx)->AsInstruction());
     auto* load = block->Append(b.LoadVectorElement(access, idx));
     block->Append(b.Return(func, load));
 
@@ -147,7 +148,7 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, NoModify_DynamicIndex_VectorValue) {
     func->SetParams({vec, idx});
 
     auto* block = func->Block();
-    auto* access = block->Append(b.Access(ty.f32(), vec, idx));
+    auto* access = block->Append(b.Access(ty.f32(), vec, idx)->AsInstruction());
     block->Append(b.Return(func, access));
 
     auto* expect = R"(
@@ -171,7 +172,7 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, DynamicIndex_ArrayValue) {
     func->SetParams({arr, idx});
 
     auto* block = func->Block();
-    auto* access = block->Append(b.Access(ty.i32(), arr, idx));
+    auto* access = block->Append(b.Access(ty.i32(), arr, idx)->AsInstruction());
     block->Append(b.Return(func, access));
 
     auto* expect = R"(
@@ -197,7 +198,7 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, DynamicIndex_MatrixValue) {
     func->SetParams({mat, idx});
 
     auto* block = func->Block();
-    auto* access = block->Append(b.Access(ty.vec2f(), mat, idx));
+    auto* access = block->Append(b.Access(ty.vec2f(), mat, idx)->AsInstruction());
     block->Append(b.Return(func, access));
 
     auto* expect = R"(
@@ -223,7 +224,7 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, DynamicIndex_VectorValue) {
     func->SetParams({mat, idx});
 
     auto* block = func->Block();
-    auto* access = block->Append(b.Access(ty.f32(), mat, idx, idx));
+    auto* access = block->Append(b.Access(ty.f32(), mat, idx, idx)->AsInstruction());
     block->Append(b.Return(func, access));
 
     auto* expect = R"(
@@ -249,7 +250,7 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, AccessChain) {
     func->SetParams({arr, idx});
 
     auto* block = func->Block();
-    auto* access = block->Append(b.Access(ty.i32(), arr, idx, 1_u, idx));
+    auto* access = block->Append(b.Access(ty.i32(), arr, idx, 1_u, idx)->AsInstruction());
     block->Append(b.Return(func, access));
 
     auto* expect = R"(
@@ -275,7 +276,7 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, AccessChain_SkipConstantIndices) {
     func->SetParams({arr, idx});
 
     auto* block = func->Block();
-    auto* access = block->Append(b.Access(ty.i32(), arr, 1_u, 2_u, idx));
+    auto* access = block->Append(b.Access(ty.i32(), arr, 1_u, 2_u, idx)->AsInstruction());
     block->Append(b.Return(func, access));
 
     auto* expect = R"(
@@ -302,7 +303,7 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Inter
     func->SetParams({arr, idx});
 
     auto* block = func->Block();
-    auto* access = block->Append(b.Access(ty.i32(), arr, 1_u, idx, 2_u, idx));
+    auto* access = block->Append(b.Access(ty.i32(), arr, 1_u, idx, 2_u, idx)->AsInstruction());
     block->Append(b.Return(func, access));
 
     auto* expect = R"(
@@ -335,7 +336,7 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Struc
     func->SetParams({str_val, idx});
 
     auto* block = func->Block();
-    auto* access = block->Append(b.Access(ty.f32(), str_val, 1_u, idx, 0_u));
+    auto* access = block->Append(b.Access(ty.f32(), str_val, 1_u, idx, 0_u)->AsInstruction());
     block->Append(b.Return(func, access));
 
     auto* expect = R"(
@@ -370,9 +371,9 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, MultipleAccessesFromSameSource) {
     func->SetParams({arr, idx_a, idx_b, idx_c});
 
     auto* block = func->Block();
-    block->Append(b.Access(ty.i32(), arr, idx_a));
-    block->Append(b.Access(ty.i32(), arr, idx_b));
-    auto* access_c = block->Append(b.Access(ty.i32(), arr, idx_c));
+    block->Append(b.Access(ty.i32(), arr, idx_a)->AsInstruction());
+    block->Append(b.Access(ty.i32(), arr, idx_b)->AsInstruction());
+    auto* access_c = block->Append(b.Access(ty.i32(), arr, idx_c)->AsInstruction());
     block->Append(b.Return(func, access_c));
 
     auto* expect = R"(
@@ -404,9 +405,9 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, MultipleAccessesFromSameSource_SkipCo
     func->SetParams({arr, idx_a, idx_b, idx_c});
 
     auto* block = func->Block();
-    block->Append(b.Access(ty.i32(), arr, 1_u, 2_u, idx_a));
-    block->Append(b.Access(ty.i32(), arr, 1_u, 2_u, idx_b));
-    auto* access_c = block->Append(b.Access(ty.i32(), arr, 1_u, 2_u, idx_c));
+    block->Append(b.Access(ty.i32(), arr, 1_u, 2_u, idx_a)->AsInstruction());
+    block->Append(b.Access(ty.i32(), arr, 1_u, 2_u, idx_b)->AsInstruction());
+    auto* access_c = block->Append(b.Access(ty.i32(), arr, 1_u, 2_u, idx_c)->AsInstruction());
     block->Append(b.Return(func, access_c));
 
     auto* expect = R"(

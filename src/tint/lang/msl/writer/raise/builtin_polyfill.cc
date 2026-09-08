@@ -478,7 +478,7 @@ struct State {
                     func->SetParams({lhs, rhs});
                     b.Append(func->Block(), [&] {
                         auto* mul = b.Multiply(lhs, rhs);
-                        core::ir::Value* sum = b.Access(el_ty, mul, u32(0))->Result();
+                        core::ir::Value* sum = b.Access(el_ty, mul, u32(0));
                         for (uint32_t i = 1; i < vec->Width(); i++) {
                             sum = b.Add(sum, b.Access(el_ty, mul, u32(i)));
                         }
@@ -1164,7 +1164,7 @@ struct State {
             } else {
                 // Make a pointer to the first element of the array that we will read from.
                 auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
-                src = b.Access(elem_ptr, p, offset)->Result();
+                src = b.Access(elem_ptr, p, offset);
             }
 
             // The origin is always (0, 0), as we use `offset` to set the start of the data.
@@ -1245,7 +1245,7 @@ struct State {
             } else {
                 // Make a pointer to the first element of the array that we will write to.
                 auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
-                dst = b.Access(elem_ptr, p, offset)->Result();
+                dst = b.Access(elem_ptr, p, offset);
             }
 
             // Convert the u32 stride to the ulong that MSL expects.

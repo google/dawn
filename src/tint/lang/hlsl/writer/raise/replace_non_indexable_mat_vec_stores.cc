@@ -117,8 +117,7 @@ struct State {
             if (!indicesButLast.empty()) {
                 // Matrix is in a struct or array, for example
                 matrix = b.Access(ty.ptr(to_ptr->AddressSpace(), mat_ty), to_access->Object(),
-                                  Vector<core::ir::Value*, 4>{indicesButLast})
-                             ->Result();
+                                  Vector<core::ir::Value*, 4>{indicesButLast});
             }
             // Switch over dynamic index, emitting a case for all possible column indices
             auto* index_val = to_access->Indices().back();

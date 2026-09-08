@@ -218,7 +218,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         auto index = input_indices[idx];
         auto* param = input_params[index.param_index];
         if (param->Type()->Is<core::type::Struct>()) {
-            return builder.Access(inputs[idx].type, param, u32(index.member_index))->Result();
+            return builder.Access(inputs[idx].type, param, u32(index.member_index));
         } else {
             return param;
         }

@@ -499,7 +499,7 @@ struct State {
                 // 000000xx, ********, ********, ********
                 auto* unpack = b.Call<vec4f>(core::BuiltinFn::kUnpack4X8Unorm, word);
                 // 000000xx
-                return float_value(b.Access<f32>(unpack, 0_u)->Result());
+                return float_value(b.Access<f32>(unpack, 0_u));
             }
             case VertexFormat::kUnorm8x2: {
                 // ****yyxx
@@ -530,7 +530,7 @@ struct State {
                 // 0000xxxx, ********
                 auto* unpack = b.Call<vec2f>(core::BuiltinFn::kUnpack2X16Unorm, word);
                 // 0000xxxx
-                return float_value(b.Access<f32>(unpack, 0_u)->Result());
+                return float_value(b.Access<f32>(unpack, 0_u));
             }
             case VertexFormat::kUnorm16x2: {
                 // yyyyxxxx
@@ -557,7 +557,7 @@ struct State {
                 // 000000xx, ********, ********, ********
                 auto* unpack = b.Call<vec4f>(core::BuiltinFn::kUnpack4X8Snorm, word);
                 // 000000xx
-                return float_value(b.Access<f32>(unpack, 0_u)->Result());
+                return float_value(b.Access<f32>(unpack, 0_u));
             }
             case VertexFormat::kSnorm8x2: {
                 // ****yyxx
@@ -580,7 +580,7 @@ struct State {
                 // 0000xxxx, ********
                 auto* unpack = b.Call<vec2f>(core::BuiltinFn::kUnpack2X16Snorm, word);
                 // 0000xxxx
-                return float_value(b.Access<f32>(unpack, 0_u)->Result());
+                return float_value(b.Access<f32>(unpack, 0_u));
             }
             case VertexFormat::kSnorm16x2: {
                 // yyyyxxxx
@@ -608,12 +608,12 @@ struct State {
                     // xxxx, ****
                     auto* bitcast = b.Bitcast<vec2h>(word);
                     // xxxx
-                    return b.Access<f16>(bitcast, 0_u)->Result();
+                    return b.Access<f16>(bitcast, 0_u);
                 } else {
                     // 0000xxxx, ********
                     auto* unpack = b.Call<vec2f>(core::BuiltinFn::kUnpack2X16Float, word);
                     // 0000xxxx
-                    return b.Access<f32>(unpack, 0_u)->Result();
+                    return b.Access<f32>(unpack, 0_u);
                 }
             }
             case VertexFormat::kFloat16x2: {

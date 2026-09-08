@@ -284,11 +284,11 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // Load the input from the global variable declared earlier.
         auto* ptr = ty.ptr(core::AddressSpace::kIn, inputs[idx].type, core::Access::kRead);
         auto input_index = input_indices[idx];
-        auto* from = input_vars[input_index]->Result();
+        core::ir::Value* from = input_vars[input_index]->Result();
 
         // SampleMask becomes an array for SPIR-V, so load from the first element.
         if (inputs[idx].attributes.builtin == core::BuiltinValue::kSampleMask) {
-            from = builder.Access(ptr, input_vars[input_index], 0_u)->Result();
+            from = builder.Access(ptr, input_vars[input_index], 0_u);
         }
 
         core::ir::Value* value = builder.Load(from)->Result();
@@ -387,11 +387,11 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // Store the output to the global variable declared earlier.
         auto& output = outputs[idx];
         auto* ptr = ty.ptr(core::AddressSpace::kOut, output.type, core::Access::kWrite);
-        auto* to = output_vars[idx]->Result();
+        core::ir::Value* to = output_vars[idx]->Result();
 
         // SampleMask becomes an array for SPIR-V, so store to the first element.
         if (output.attributes.builtin == core::BuiltinValue::kSampleMask) {
-            to = builder.Access(ptr, to, 0_u)->Result();
+            to = builder.Access(ptr, to, 0_u);
         }
 
         if (output.attributes.builtin == core::BuiltinValue::kPosition) {

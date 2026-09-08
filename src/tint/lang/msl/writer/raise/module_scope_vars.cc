@@ -252,8 +252,7 @@ struct State {
                             func->AppendParam(workgroup_allocation_param);
                         }
                         decl = b.Access(ptr, workgroup_allocation_param,
-                                        u32(workgroup_struct_members.Length()))
-                                   ->Result();
+                                        u32(workgroup_struct_members.Length()));
                         workgroup_struct_members.Push(core::type::Manager::StructMemberDesc{
                             ir.symbols.New(),
                             ptr->StoreType(),
@@ -333,9 +332,9 @@ struct State {
             type = ptr->StoreType();
         }
 
-        auto* access = b.Access(type, struct_value, u32(index));
-        access->InsertBefore(inst);
-        return access->Result();
+        core::ir::Value* access = nullptr;
+        b.InsertBefore(inst, [&] { access = b.Access(type, struct_value, u32(index)); });
+        return access;
     }
 
     /// Get the function that contains an instruction.

@@ -210,8 +210,7 @@ struct State {
 
                     auto* a = b.Access(mem->Type(), from, u32(mem->Index()));
 
-                    AddOutput(output_descriptors, results, a->Result(), Symbol{}, mem->Type(),
-                              mem_attrs);
+                    AddOutput(output_descriptors, results, a, Symbol{}, mem->Type(), mem_attrs);
                     attributes.location = mem_attrs.location;
                 }
             },
@@ -222,16 +221,14 @@ struct State {
                 auto* ary_ty = ary->ElemType();
                 for (size_t i = 0; i < cnt; ++i) {
                     auto* a = b.Access(ary_ty, from, u32(i));
-                    AddOutput(output_descriptors, results, a->Result(), Symbol{}, ary_ty,
-                              attributes);
+                    AddOutput(output_descriptors, results, a, Symbol{}, ary_ty, attributes);
                 }
             },
             [&](const core::type::Matrix* mat) {
                 auto* row_ty = ty.vec(mat->DeepestElement(), mat->Rows());
                 for (size_t i = 0; i < mat->Columns(); ++i) {
                     auto* a = b.Access(row_ty, from, u32(i));
-                    AddOutput(output_descriptors, results, a->Result(), Symbol{}, row_ty,
-                              attributes);
+                    AddOutput(output_descriptors, results, a, Symbol{}, row_ty, attributes);
                 }
             },  //
             TINT_ICE_ON_NO_MATCH);
@@ -339,7 +336,7 @@ struct State {
                         // The SPIR-V mask can be either i32 or u32, but WGSL is only u32. So,
                         // convert if necessary.
                         core::ir::Value* access =
-                            b.Access(ld->Result()->Type()->DeepestElement(), ld, u32(0))->Result();
+                            b.Access(ld->Result()->Type()->DeepestElement(), ld, u32(0));
                         if (access->Type()->IsSignedIntegerScalar()) {
                             access = b.Convert(ty.u32(), access);
                         }
@@ -498,8 +495,9 @@ struct State {
                 },
                 [&](core::ir::LoadVectorElement* lve) {
                     // Replace the vector element load with an access instruction.
-                    auto* access = b.AccessWithResult(lve->DetachResult(), object, lve->Index());
-                    access->InsertBefore(lve);
+                    b.InsertBefore(lve, [&] {
+                        b.AccessReplaceResult(lve->DetachResult(), object, lve->Index());
+                    });
                     to_destroy.Push(lve);
                 },
                 [&](core::ir::Access* a) {

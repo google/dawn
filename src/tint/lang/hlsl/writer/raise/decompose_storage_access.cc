@@ -711,7 +711,7 @@ struct State {
             b.Append(fn->Block(), [&] {
                 for (const auto* mem : s->Members()) {
                     auto* from = b.Access(mem->Type(), obj, u32(mem->Index()));
-                    MakeStore(inst, var, from->Result(), b.Add(p, u32(mem->Offset())));
+                    MakeStore(inst, var, from, b.Add(p, u32(mem->Offset())));
                 }
 
                 b.Return(fn);
@@ -767,7 +767,7 @@ struct State {
                 Vector<core::ir::Value*, 4> values;
                 for (size_t i = 0; i < mat->Columns(); ++i) {
                     auto* from = b.Access(mat->ColumnType(), obj, u32(i));
-                    MakeStore(inst, var, from->Result(), b.Add(p, u32(i * mat->ColumnStride())));
+                    MakeStore(inst, var, from, b.Add(p, u32(i * mat->ColumnStride())));
                 }
 
                 b.Return(fn);
@@ -837,7 +837,7 @@ struct State {
                     auto* from = b.Access(arr->ElemType(), obj, idx);
                     auto* stride = b.Multiply(idx, u32(arr->ImplicitStride()));
                     auto* byte_offset = b.Add(p, stride);
-                    MakeStore(inst, var, from->Result(), byte_offset);
+                    MakeStore(inst, var, from, byte_offset);
                 });
 
                 b.Return(fn);

@@ -256,7 +256,7 @@ struct State {
             auto* i32_type = result_type->Element(1);
             auto* result = b.Var(ty.ptr(function, result_type));
             auto* exp = b.Access(ty.ptr(function, i32_type), result, u32(1));
-            auto args = Vector<core::ir::Value*, 2>{call->Args()[0], exp->Result()};
+            auto args = Vector<core::ir::Value*, 2>{call->Args()[0], exp};
             auto* res =
                 b.Call<glsl::ir::BuiltinCall>(float_type, glsl::BuiltinFn::kFrexp, std::move(args));
             b.Store(b.Access(ty.ptr(function, float_type), result, u32(0)), res);
@@ -275,7 +275,7 @@ struct State {
             auto* element_type = result_type->Element(0);
             auto* result = b.Var(ty.ptr(function, result_type));
             auto* whole = b.Access(ty.ptr(function, element_type), result, u32(1));
-            auto args = Vector<core::ir::Value*, 2>{call->Args()[0], whole->Result()};
+            auto args = Vector<core::ir::Value*, 2>{call->Args()[0], whole};
             auto* res = b.Call<glsl::ir::BuiltinCall>(element_type, glsl::BuiltinFn::kModf,
                                                       std::move(args));
             b.Store(b.Access(ty.ptr(function, element_type), result, u32(0)), res);

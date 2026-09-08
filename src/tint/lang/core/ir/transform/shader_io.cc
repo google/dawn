@@ -252,8 +252,7 @@ struct State {
     void SetOutputs(Builder& builder, Value* inner_result) {
         if (auto* str = inner_result->Type()->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
-                Value* from =
-                    builder.Access(member->Type(), inner_result, u32(member->Index()))->Result();
+                Value* from = builder.Access(member->Type(), inner_result, u32(member->Index()));
                 backend->SetOutput(builder, member->Index(), from);
             }
         } else if (!inner_result->Type()->Is<core::type::Void>()) {

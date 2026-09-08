@@ -106,9 +106,11 @@ void Run(Module& ir) {
         // The structure has been wrapped, so replace all uses of the old variable with a member
         // accessor on the new variable.
         var->Result()->ReplaceAllUsesWith([&](Usage use) -> Value* {
-            auto* access = builder.Access(var->Result()->Type(), new_var, 0_u);
-            access->InsertBefore(use.instruction);
-            return access->Result();
+            Value* access = nullptr;
+            builder.InsertBefore(use.instruction, [&] {
+                access = builder.Access(var->Result()->Type(), new_var, 0_u);
+            });
+            return access;
         });
 
         var->Destroy();

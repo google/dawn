@@ -262,11 +262,11 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         }
 
         // Store the output to the global variable declared earlier.
-        auto* to = output_vars[idx]->Result();
+        core::ir::Value* to = output_vars[idx]->Result();
 
         if (outputs[idx].attributes.builtin == core::BuiltinValue::kSampleMask) {
             auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.i32(), core::Access::kWrite);
-            to = builder.Access(ptr, to, 0_u)->Result();
+            to = builder.Access(ptr, to, 0_u);
             value = builder.Convert(ty.i32(), value);
         } else if (outputs[idx].attributes.builtin == core::BuiltinValue::kPosition) {
             auto* x = builder.Swizzle(ty.f32(), value, {0});

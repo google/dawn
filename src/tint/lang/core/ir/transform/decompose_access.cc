@@ -596,7 +596,7 @@ struct State {
                     if (!lve->Index()->Is<core::ir::Constant>()) {
                         b.InsertBefore(lve, [&] {
                             auto* load = b.Load(lve->From());
-                            b.AccessWithResult(lve->DetachResult(), load, lve->Index());
+                            b.AccessReplaceResult(lve->DetachResult(), load, lve->Index());
                         });
                         lve->Destroy();
                     }
@@ -625,13 +625,11 @@ struct State {
         core::ir::Value* materialized = nullptr;
         b.InsertBefore(a, [&] {
             const_access = b.Access(ty.ptr(core::AddressSpace::kImmediate, const_type), a->Object(),
-                                    const_indices)
-                               ->Result();
+                                    const_indices);
             materialized = b.Load(const_access)->Result();
             if (!non_const_indices.IsEmpty()) {
                 materialized =
-                    b.Access(a->Result()->Type()->UnwrapPtr(), materialized, non_const_indices)
-                        ->Result();
+                    b.Access(a->Result()->Type()->UnwrapPtr(), materialized, non_const_indices);
             }
         });
         a->Result()->ReplaceAllUsesWith(materialized);
@@ -660,7 +658,7 @@ struct State {
                 },
                 [&](core::ir::LoadVectorElement* lve) {
                     b.InsertBefore(lve, [&] {
-                        b.AccessWithResult(lve->DetachResult(), lve->From(), lve->Index());
+                        b.AccessReplaceResult(lve->DetachResult(), lve->From(), lve->Index());
                     });
                     lve->Destroy();
                 },
@@ -1017,7 +1015,7 @@ struct State {
         }
 
         auto* bitcast = b.Bitcast(vec_ty, load);
-        return b.Access(result_ty, bitcast, element_index);
+        return b.Access(result_ty, bitcast, element_index)->AsInstruction<core::ir::Access>();
     }
 
     // When loading a vector we have to take the alignment into account to determine which part of
@@ -1217,7 +1215,7 @@ struct State {
                 const auto vec_idx_val = cnst->Value()->ValueAs<uint32_t>();
                 load = b.Swizzle(ty.u32(), loads[0], {vec_idx_val});
             } else {
-                load = b.Access(ty.u32(), loads[0], vec_idx)->Result();
+                load = b.Access(ty.u32(), loads[0], vec_idx);
             }
             return b.Bitcast(result_ty, load)->AsInstruction();
         }
@@ -1586,8 +1584,7 @@ struct State {
                     (num_u32s == 1) ? b.Bitcast(ty.u32(), from) : b.Bitcast(ty.vec2u(), from);
 
                 for (uint32_t i = 0; i < num_u32s; i++) {
-                    Value* elem =
-                        (num_u32s == 1) ? cast_val : b.Access(ty.u32(), cast_val, u32(i))->Result();
+                    Value* elem = (num_u32s == 1) ? cast_val : b.Access(ty.u32(), cast_val, u32(i));
                     auto* access = b.Access(BaseEleTypePtr(), var, array_idx);
                     auto* store = b.Store(access, elem);
                     if (i == 0) {
@@ -1613,11 +1610,11 @@ struct State {
             uint32_t ratio = st_ele_ty->Size() / BaseEleType()->Size();
             TINT_IR_ASSERT(ir, ratio == 1 || ratio == 2);
             for (uint32_t i = 0; i < num_array_eles; i++) {
-                Value* value = b.Access(st_ele_ty, from, u32(i / ratio))->Result();
+                Value* value = b.Access(st_ele_ty, from, u32(i / ratio));
                 if (ratio == 2) {
                     value = BitcastOrConvertIfNeeded(ty.vec2(BaseEleType()), value);
                     uint32_t sub_idx = i % 2;
-                    value = b.Access(BaseEleType(), value, u32(sub_idx))->Result();
+                    value = b.Access(BaseEleType(), value, u32(sub_idx));
                 } else if (st_ele_ty != BaseEleType()) {
                     value = BitcastOrConvertIfNeeded(BaseEleType(), value);
                 }
@@ -1703,7 +1700,7 @@ struct State {
                     uint32_t mem_offset = static_cast<uint32_t>(member->Offset());
                     OffsetData offset{mem_offset, {start_byte_offset}};
                     auto* byte_idx = OffsetToValue(offset);
-                    auto* from = b.Access(member->Type(), object, u32(member->Index()))->Result();
+                    auto* from = b.Access(member->Type(), object, u32(member->Index()));
                     MakeStore(inst, var, from, byte_idx);
                 }
                 b.Return(fn);
@@ -1736,7 +1733,7 @@ struct State {
                     uint32_t vec_offset = static_cast<uint32_t>(c * m->ColumnStride());
                     OffsetData offset{vec_offset, {start_byte_offset}};
                     auto* byte_idx = OffsetToValue(offset);
-                    auto* from = b.Access(m->ColumnType(), object, u32(c))->Result();
+                    auto* from = b.Access(m->ColumnType(), object, u32(c));
                     MakeStore(inst, var, from, byte_idx);
                 }
                 b.Return(fn);
@@ -1768,7 +1765,7 @@ struct State {
                     auto* stride = b.Multiply(idx, u32(a->ImplicitStride()));
                     OffsetData od{0, {start_byte_offset, stride}};
                     auto* byte_idx = OffsetToValue(od);
-                    auto* from = b.Access(a->ElemType(), object, idx)->Result();
+                    auto* from = b.Access(a->ElemType(), object, idx);
                     MakeStore(inst, var, from, byte_idx);
                 });
 

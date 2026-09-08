@@ -345,26 +345,26 @@ struct State {
 
             auto idx = *var_to_struct_idx.Get(var);
 
-            auto* access = b.Access(type, arg_buffer->second, u32(idx));
-            access->InsertBefore(inst);
+            core::ir::Value* access = nullptr;
+            b.InsertBefore(inst, [&] { access = b.Access(type, arg_buffer->second, u32(idx)); });
 
             auto grp_iter = config.group_to_argument_buffer_info.find(group);
             if (grp_iter == config.group_to_argument_buffer_info.end()) {
-                return access->Result();
+                return access;
             }
 
             auto binding_iter = grp_iter->second.binding_info_to_offset_index.find(binding);
             if (binding_iter == grp_iter->second.binding_info_to_offset_index.end()) {
-                return access->Result();
+                return access;
             }
 
             core::ir::Value* offset_buffer = group_to_dynamic_offset_buffer.GetOr(group, nullptr);
             if (!offset_buffer) {
-                return access->Result();
+                return access;
             }
 
             core::ir::Value* result = nullptr;
-            b.InsertAfter(access, [&] {
+            b.InsertBefore(inst, [&] {
                 auto* offset = b.Access(ty.ptr<storage, u32, read>(), offset_buffer,
                                         b.Constant(u32(binding_iter->second)));
 

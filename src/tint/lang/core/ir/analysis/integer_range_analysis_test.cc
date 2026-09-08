@@ -8698,9 +8698,9 @@ TEST_F(IR_IntegerRangeAnalysisTest, AccessToLocalInvocationID) {
     Access* access_y = nullptr;
     Access* access_z = nullptr;
     b.Append(func->Block(), [&] {
-        access_x = b.Access(ty.u32(), local_invocation_id, 0_u);
-        access_y = b.Access(ty.u32(), local_invocation_id, 1_u);
-        access_z = b.Access(ty.u32(), local_invocation_id, 2_u);
+        access_x = b.Access(ty.u32(), local_invocation_id, 0_u)->AsInstruction<Access>();
+        access_y = b.Access(ty.u32(), local_invocation_id, 1_u)->AsInstruction<Access>();
+        access_z = b.Access(ty.u32(), local_invocation_id, 2_u)->AsInstruction<Access>();
         b.Return(func);
     });
 
@@ -8752,7 +8752,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, NotAccessToFunctionParam) {
     Access* access = nullptr;
     b.Append(func->Block(), [&] {
         auto* dst = b.Var(ty.ptr<function, array<u32, 24u>>());
-        access = b.Access(ty.ptr<function, u32>(), dst, 0_u);
+        access = b.Access(ty.ptr<function, u32>(), dst, 0_u)->AsInstruction<Access>();
         b.Return(func);
     });
 
@@ -8783,9 +8783,9 @@ TEST_F(IR_IntegerRangeAnalysisTest, AccessToFunctionParamNoRange) {
     Access* access_y = nullptr;
     Access* access_z = nullptr;
     b.Append(func->Block(), [&] {
-        access_x = b.Access(ty.u32(), global_invocation_id, 0_u);
-        access_y = b.Access(ty.u32(), global_invocation_id, 1_u);
-        access_z = b.Access(ty.u32(), global_invocation_id, 2_u);
+        access_x = b.Access(ty.u32(), global_invocation_id, 0_u)->AsInstruction<Access>();
+        access_y = b.Access(ty.u32(), global_invocation_id, 1_u)->AsInstruction<Access>();
+        access_z = b.Access(ty.u32(), global_invocation_id, 2_u)->AsInstruction<Access>();
         b.Return(func);
     });
 
@@ -8814,7 +8814,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AccessToNonIntegerFunctionParam) {
     auto* param = b.FunctionParam("param", ty.vec4f());
     func->SetParams({param});
     b.Append(func->Block(), [&] {
-        access = b.Access(ty.f32(), param, 0_u);
+        access = b.Access(ty.f32(), param, 0_u)->AsInstruction<Access>();
         b.Return(func);
     });
 
@@ -8844,7 +8844,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, NonConstantAccessIndex) {
     b.Append(func->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, u32>());
         auto* index = b.Load(var);
-        access_x = b.Access(ty.u32(), local_invocation_id, index);
+        access_x = b.Access(ty.u32(), local_invocation_id, index)->AsInstruction<Access>();
         b.Return(func);
     });
 

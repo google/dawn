@@ -505,8 +505,7 @@ struct State {
                 auto* packed_matrix = b.Load(from);
                 Vector<core::ir::Value*, 4> columns;
                 for (uint32_t col = 0; col < mat->Columns(); col++) {
-                    auto* packed_col =
-                        b.Access(packed_col_type, packed_matrix, u32(col), u32(0))->Result();
+                    auto* packed_col = b.Access(packed_col_type, packed_matrix, u32(col), u32(0));
                     auto* unpacked_col = b.Call<msl::ir::BuiltinCall>(
                         mat->ColumnType(), msl::BuiltinFn::kConvert, packed_col);
                     columns.Push(unpacked_col->Result());
@@ -566,7 +565,8 @@ struct State {
             b.Append(func->Block(), [&] {
                 // Helper to load an array element at a given index.
                 auto load_array_element = [&](core::ir::Value* index) {
-                    auto* packed_el_ptr = b.Access(packed_el_ptr_type, from, index);
+                    auto* packed_el_ptr = b.Access(packed_el_ptr_type, from, index)
+                                              ->AsInstruction<core::ir::Access>();
                     if (packed_vec) {
                         // If the element is a packed vector it will be wrapped in a structure, so
                         // load from the first member of that structure.
@@ -625,7 +625,7 @@ struct State {
                                         packed_ptr_type->Access()),
                                  from, u32(member->Index()));
                     auto* unpacked_member =
-                        LoadPackedToUnpacked(unpacked_member_type, packed_member_ptr->Result());
+                        LoadPackedToUnpacked(unpacked_member_type, packed_member_ptr);
                     members.Push(unpacked_member);
                 }
                 b.Return(func, b.Construct(unpacked_str, std::move(members)));
@@ -665,7 +665,7 @@ struct State {
                 for (uint32_t col = 0; col < mat->Columns(); col++) {
                     auto* packed_col_ptr = b.Access(packed_col_ptr_type, to, u32(col), u32(0));
                     auto* unpacked_col_val = b.Access(mat->ColumnType(), value, u32(col));
-                    StoreUnpackedToPacked(packed_col_ptr->Result(), unpacked_col_val->Result());
+                    StoreUnpackedToPacked(packed_col_ptr, unpacked_col_val);
                 }
             },
             [&](const core::type::Struct* str) {
@@ -716,13 +716,14 @@ struct State {
                 // Helper to store an array element at a given index.
                 auto store_array_element = [&](core::ir::Value* index) {
                     auto* unpacked_el = b.Access(unpacked_el_type, value, index);
-                    auto* packed_el_ptr = b.Access(packed_el_ptr_type, to, index);
+                    auto* packed_el_ptr =
+                        b.Access(packed_el_ptr_type, to, index)->AsInstruction<core::ir::Access>();
                     if (packed_vec) {
                         // If the element is a packed vector it will be wrapped in a structure, so
                         // store to the first member of that structure.
                         packed_el_ptr->AddIndex(b.Constant(u32(0)));
                     }
-                    StoreUnpackedToPacked(packed_el_ptr->Result(), unpacked_el->Result());
+                    StoreUnpackedToPacked(packed_el_ptr->Result(), unpacked_el);
                 };
 
                 // Store to each element of the array in a loop. If the element count is below a
@@ -763,12 +764,12 @@ struct State {
                     auto* unpacked_member_type = member->Type();
                     auto* packed_member_type = RewriteType(unpacked_member_type);
                     auto* unpacked_member =
-                        b.Access(unpacked_member_type, value, u32(member->Index()))->Result();
+                        b.Access(unpacked_member_type, value, u32(member->Index()));
                     auto* packed_member_ptr =
                         b.Access(ty.ptr(packed_ptr_type->AddressSpace(), packed_member_type,
                                         packed_ptr_type->Access()),
                                  to, u32(member->Index()));
-                    StoreUnpackedToPacked(packed_member_ptr->Result(), unpacked_member);
+                    StoreUnpackedToPacked(packed_member_ptr, unpacked_member);
                 }
                 b.Return(func);
             });

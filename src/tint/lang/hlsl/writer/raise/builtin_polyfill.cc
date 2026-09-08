@@ -896,9 +896,9 @@ struct State {
 
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(
                 ty.void_(), hlsl::BuiltinFn::kGetDimensions, tex,
-                Vector<core::ir::Value*, 3>{b.Access(ty.ptr<function, u32>(), out, 0_u)->Result(),
-                                            b.Access(ty.ptr<function, u32>(), out, 1_u)->Result(),
-                                            b.Access(ty.ptr<function, u32>(), out, 2_u)->Result()});
+                Vector<core::ir::Value*, 3>{b.Access(ty.ptr<function, u32>(), out, 0_u),
+                                            b.Access(ty.ptr<function, u32>(), out, 1_u),
+                                            b.Access(ty.ptr<function, u32>(), out, 2_u)});
 
             out = b.Swizzle(ty.u32(), b.Load(out), {2_u});
             call->Result()->ReplaceAllUsesWith(out);
@@ -940,7 +940,7 @@ struct State {
 
             core::ir::Value* out = b.Var(ty.ptr(function, query_ty))->Result();
             for (uint32_t i = 0; i < query_size; ++i) {
-                args.Push(b.Access(ty.ptr<function, u32>(), out, u32(i))->Result());
+                args.Push(b.Access(ty.ptr<function, u32>(), out, u32(i)));
             }
 
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kGetDimensions,
@@ -1019,7 +1019,7 @@ struct State {
                 args.Push(query);
             } else {
                 for (uint32_t i = 0; i < query_size; ++i) {
-                    args.Push(b.Access(ty.ptr<function, u32>(), query, u32(i))->Result());
+                    args.Push(b.Access(ty.ptr<function, u32>(), query, u32(i)));
                 }
             }
 
@@ -1048,9 +1048,9 @@ struct State {
 
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(
                 ty.void_(), hlsl::BuiltinFn::kGetDimensions, tex,
-                Vector<core::ir::Value*, 3>{b.Access(ty.ptr<function, u32>(), out, 0_u)->Result(),
-                                            b.Access(ty.ptr<function, u32>(), out, 1_u)->Result(),
-                                            b.Access(ty.ptr<function, u32>(), out, 2_u)->Result()});
+                Vector<core::ir::Value*, 3>{b.Access(ty.ptr<function, u32>(), out, 0_u),
+                                            b.Access(ty.ptr<function, u32>(), out, 1_u),
+                                            b.Access(ty.ptr<function, u32>(), out, 2_u)});
 
             out = b.Swizzle(ty.u32(), b.Load(out), {2_u});
             call->Result()->ReplaceAllUsesWith(out);

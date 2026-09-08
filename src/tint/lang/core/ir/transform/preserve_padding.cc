@@ -135,7 +135,7 @@ struct State {
                         b.LoopRange(0_u, u32(arr->ConstantCount().value()), 1_u, [&](Value* idx) {
                             auto* el_ptr = b.Access(ty.ptr(storage, arr->ElemType()), target, idx);
                             auto* el_value = b.Access(arr->ElemType(), value_param, idx);
-                            MakeStore(el_ptr->Result(), el_value->Result());
+                            MakeStore(el_ptr, el_value);
                         });
                     },
                     [&](const core::type::Matrix* mat) {
@@ -143,7 +143,7 @@ struct State {
                             auto* col_ptr =
                                 b.Access(ty.ptr(storage, mat->ColumnType()), target, u32(i));
                             auto* col_value = b.Access(mat->ColumnType(), value_param, u32(i));
-                            MakeStore(col_ptr->Result(), col_value->Result());
+                            MakeStore(col_ptr, col_value);
                         }
                     },
                     [&](const core::type::Struct* str) {
@@ -152,7 +152,7 @@ struct State {
                                                      u32(member->Index()));
                             auto* sub_value =
                                 b.Access(member->Type(), value_param, u32(member->Index()));
-                            MakeStore(sub_ptr->Result(), sub_value->Result());
+                            MakeStore(sub_ptr, sub_value);
                         }
                     });
 

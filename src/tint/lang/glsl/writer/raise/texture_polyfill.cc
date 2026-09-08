@@ -493,14 +493,14 @@ struct State {
             return tex;
         }
 
-        core::ir::Instruction* texture_expression = replacement_var;
+        core::ir::Value* texture_expression = replacement_var->Result();
         if (texture_path.index != nullptr) {
             texture_expression =
                 b.Access(ty.ptr<handle>(tex->Type()), texture_expression, texture_path.index);
         }
-        texture_expression = b.Load(texture_expression);
+        texture_expression = b.Load(texture_expression)->Result();
 
-        return texture_expression->Result();
+        return texture_expression;
     }
 
     // `textureDimensions` returns an unsigned scalar / vector in WGSL. `textureSize` and

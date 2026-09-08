@@ -68,7 +68,7 @@ struct State {
                 auto* load = b.Load(lve->From());
                 auto* let = b.Let(load);
                 auto* access = b.Access(lve->Result()->Type(), let, lve->Index());
-                lve->Result()->ReplaceAllUsesWith(access->Result());
+                lve->Result()->ReplaceAllUsesWith(access);
             });
             lve->Destroy();
         }

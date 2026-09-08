@@ -3522,8 +3522,7 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_Access_Array) {
     foo->SetParams({value});
     b.Append(foo->Block(), [&] {
         auto* access = b.Access(ty.ptr(storage, arr_ty), v, o->Result());
-        MakeCall(access->Result(), value, b.Constant(u32(0)),
-                 b.Constant(u32(MinStride() / ArrayStride())));
+        MakeCall(access, value, b.Constant(u32(0)), b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
@@ -3564,8 +3563,7 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_Access_Array_Offset) {
     foo->SetParams({value});
     b.Append(foo->Block(), [&] {
         auto* access = b.Access(ty.ptr(storage, arr_ty), v, 1_u);
-        MakeCall(access->Result(), value, o->Result(),
-                 b.Constant(u32(MinStride() / ArrayStride())));
+        MakeCall(access, value, o->Result(), b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
@@ -3611,8 +3609,7 @@ TEST_P(SubgroupMatrixSizes, Pointer_TooSmall_StructMember) {
     foo->SetParams({value});
     b.Append(foo->Block(), [&] {
         auto* access = b.Access(ty.ptr(storage, arr_ty), v, 1_u);
-        MakeCall(access->Result(), value, o->Result(),
-                 b.Constant(u32(MinStride() / ArrayStride())));
+        MakeCall(access, value, o->Result(), b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
@@ -3658,8 +3655,7 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_Access_Array) {
             b.CallExplicit(ty.ptr(storage, ty.runtime_array(arr_ty)), BuiltinFn::kBufferView,
                            Vector<TemplateParameter, 1>{ty.runtime_array(arr_ty)}, v, o->Result());
         auto* access = b.Access(ty.ptr(storage, arr_ty), view, 1_u);
-        MakeCall(access->Result(), value, b.Constant(u32(0)),
-                 b.Constant(u32(MinStride() / ArrayStride())));
+        MakeCall(access, value, b.Constant(u32(0)), b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 
@@ -3711,8 +3707,7 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_Access_Struct) {
         auto* view = b.CallExplicit(ty.ptr(storage, S), BuiltinFn::kBufferView,
                                     Vector<TemplateParameter, 1>{S}, v, 0_u);
         auto* access = b.Access(ty.ptr(storage, ty.runtime_array(ArrayElemType())), view, 1_u);
-        MakeCall(access->Result(), value, o->Result(),
-                 b.Constant(u32(MinStride() / ArrayStride())));
+        MakeCall(access, value, o->Result(), b.Constant(u32(MinStride() / ArrayStride())));
         b.Return(foo);
     });
 

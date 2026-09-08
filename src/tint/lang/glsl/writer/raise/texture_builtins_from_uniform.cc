@@ -195,7 +195,7 @@ struct State {
             b.Access(ty.ptr<uniform>(ty.vec4u()), texture_uniform_data_, u32(0), index_in_array);
         auto* vec4_value = b.Load(vec4_ptr);
         auto* u32_value = b.Access(ty.u32(), vec4_value, index_in_vector);
-        return u32_value->Result();
+        return u32_value;
     }
 
     Result<SuccessType> TextureFromUniform(core::ir::BuiltinCall* call) {

@@ -142,9 +142,11 @@ struct State {
         // Update uses of the user defined immediate data variable.
         if (user_defined_immediates) {
             user_defined_immediates->Result()->ReplaceAllUsesWith([&](Usage use) {
-                auto* access = b.Access(user_defined_immediates->Result()->Type(), layout.var, 0_u);
-                access->InsertBefore(use.instruction);
-                return access->Result();
+                Value* access = nullptr;
+                b.InsertBefore(use.instruction, [&] {
+                    access = b.Access(user_defined_immediates->Result()->Type(), layout.var, 0_u);
+                });
+                return access;
             });
             user_defined_immediates->Destroy();
         }
@@ -161,7 +163,7 @@ Value* ImmediateDataLayout::GetPointer(Builder& b, InternalImmediate immediate) 
     auto index = u32(*itr.value);
     auto* str = var->Result()->Type()->UnwrapPtr()->As<core::type::Struct>();
     auto* type = str->Members()[index]->Type();
-    return b.Access(b.ir.Types().ptr(core::AddressSpace::kImmediate, type), var, index)->Result();
+    return b.Access(b.ir.Types().ptr(core::AddressSpace::kImmediate, type), var, index);
 }
 
 Value* ImmediateDataLayout::GetValue(Builder& b, InternalImmediate immediate) const {

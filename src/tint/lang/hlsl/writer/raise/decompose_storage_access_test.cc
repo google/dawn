@@ -88,9 +88,8 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, AccessChainFromUnnamedAccessChain) 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* x = b.Access(ty.ptr(storage, sb, core::Access::kReadWrite), var, 2_u);
-        auto* y = b.Access(ty.ptr(storage, Inner, core::Access::kReadWrite), x->Result(), 1_u);
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.u32(), core::Access::kReadWrite), y->Result(),
-                                   1_u)));
+        auto* y = b.Access(ty.ptr(storage, Inner, core::Access::kReadWrite), x, 1_u);
+        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.u32(), core::Access::kReadWrite), y, 1_u)));
         b.Return(func);
     });
 

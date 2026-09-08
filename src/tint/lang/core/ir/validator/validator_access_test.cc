@@ -53,7 +53,7 @@ TEST_F(IR_ValidatorTest, Access_NoOperands) {
     f->SetParams({obj});
 
     b.Append(f->Block(), [&] {
-        auto* access = b.Access(ty.f32(), obj, 0_i);
+        auto* access = b.Access(ty.f32(), obj, 0_i)->AsInstruction<Access>();
         access->ClearOperands();
         b.Return(f);
     });
@@ -92,7 +92,7 @@ TEST_F(IR_ValidatorTest, Access_NoResults) {
     f->SetParams({obj});
 
     b.Append(f->Block(), [&] {
-        auto* access = b.Access(ty.f32(), obj, 0_i);
+        auto* access = b.Access(ty.f32(), obj, 0_i)->AsInstruction<Access>();
         access->ClearResults();
         b.Return(f);
     });

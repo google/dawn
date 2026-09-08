@@ -3544,11 +3544,10 @@ class Parser {
         auto* access =
             b_.Access(ty_.ptr(ptr->AddressSpace(), ty->Members().Back()->Type(), ptr->Access()),
                       strct, u32(field_index));
-        EmitWithoutSpvResult(access->Result());
+        EmitWithoutSpvResult(access);
 
-        EmitOrAdd(
-            b_.Call(Type(inst.type_id()), core::BuiltinFn::kArrayLength, Vector{access->Result()}),
-            inst.result_id());
+        EmitOrAdd(b_.Call(Type(inst.type_id()), core::BuiltinFn::kArrayLength, Vector{access}),
+                  inst.result_id());
     }
 
     void EmitControlBarrier(const spvtools::opt::Instruction& inst) {
@@ -4375,8 +4374,8 @@ class Parser {
             auto* whole = b_.Access(mem_ty, call, 1_u);
 
             EmitWithoutSpvResult(call);
-            EmitWithoutSpvResult(fract->Result());
-            EmitWithoutSpvResult(whole->Result());
+            EmitWithoutSpvResult(fract);
+            EmitWithoutSpvResult(whole);
             EmitOrAdd(b_.Construct(spv_ty, fract, whole), inst.result_id());
             return Success;
         }
@@ -4395,11 +4394,11 @@ class Parser {
             auto* call = b_.Call(result_ty, wgsl_fn, operands);
             auto* fract = b_.Access(mem_ty, call, 0_u);
             auto* exp = b_.Access(ty_.MatchWidth(ty_.i32(), mem_ty), call, 1_u);
-            core::ir::Value* exp_res = exp->Result();
+            core::ir::Value* exp_res = exp;
 
             EmitWithoutSpvResult(call);
-            EmitWithoutSpvResult(fract->Result());
-            EmitWithoutSpvResult(exp->Result());
+            EmitWithoutSpvResult(fract);
+            EmitWithoutSpvResult(exp);
 
             if (auto* str = spv_ty->As<core::type::Struct>()) {
                 auto* exp_ty = str->Members()[1]->Type();
@@ -4446,7 +4445,7 @@ class Parser {
         }
 
         auto* access = b_.Access(Type(inst.type_id(), access_mode), base, std::move(indices));
-        Emit(access, inst.result_id());
+        EmitOrAdd(access, inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction
@@ -4504,7 +4503,7 @@ class Parser {
         }
         auto* object = Value(inst.GetSingleWordOperand(composite_index));
         auto* access = b_.Access(Type(inst.type_id()), object, std::move(indices));
-        Emit(access, inst.result_id());
+        EmitOrAdd(access, inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpCompositeInsert
@@ -4522,7 +4521,7 @@ class Parser {
         auto* access = b_.Access(ptr_ty, tmp, std::move(indices));
 
         EmitWithoutSpvResult(tmp->Result());
-        EmitWithoutSpvResult(access->Result());
+        EmitWithoutSpvResult(access);
         EmitWithoutResult(b_.Store(access, object));
         Emit(b_.Load(tmp), inst.result_id());
     }

@@ -81,8 +81,7 @@ TEST_F(IRChangeImmediateToUniformTest, PushConstantAccessChain) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* x = b.Access(ty.ptr(immediate, Inner, core::Access::kRead), var, 1_u);
-        b.Let("b",
-              b.Load(b.Access(ty.ptr(immediate, ty.u32(), core::Access::kRead), x->Result(), 1_u)));
+        b.Let("b", b.Load(b.Access(ty.ptr(immediate, ty.u32(), core::Access::kRead), x, 1_u)));
         b.Return(func);
     });
 

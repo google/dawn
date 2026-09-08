@@ -224,7 +224,7 @@ struct State {
                 core::type::CreateAtomicCompareExchangeResult(ty, ir.symbols, val->Type());
 
             auto* bi = b.Call(strct, core::BuiltinFn::kAtomicCompareExchangeWeak, var, comp, val);
-            b.AccessWithResult(call->DetachResult(), bi, 0_u);
+            b.AccessReplaceResult(call->DetachResult(), bi, 0_u);
         });
         call->Destroy();
     }
@@ -365,7 +365,7 @@ struct State {
                 auto* member = dst_str->Members()[i];
                 auto* member_ptr_ty =
                     ty.ptr(ptr_ty->AddressSpace(), member->Type(), ptr_ty->Access());
-                auto* member_ptr = b.Access(member_ptr_ty, base_ptr, u32(i))->Result();
+                auto* member_ptr = b.Access(member_ptr_ty, base_ptr, u32(i));
 
                 auto* member_ld = b.Load(member_ptr);
                 member_values.Push(member_ld->Result());
@@ -399,10 +399,10 @@ struct State {
                 auto* member = dst_str->Members()[i];
                 auto* member_ptr_ty =
                     ty.ptr(ptr_ty->AddressSpace(), member->Type(), ptr_ty->Access());
-                auto* member_ptr = b.Access(member_ptr_ty, base_ptr, u32(i))->Result();
+                auto* member_ptr = b.Access(member_ptr_ty, base_ptr, u32(i));
 
                 auto* src_member_ty = src_str->Members()[i]->Type();
-                auto* member_val = b.Access(src_member_ty, src_val, u32(i))->Result();
+                auto* member_val = b.Access(src_member_ty, src_val, u32(i));
 
                 b.Store(member_ptr, member_val);
 
@@ -432,7 +432,7 @@ struct State {
             for (uint32_t i = 0; i < *count; ++i) {
                 auto* elem_ptr_ty =
                     ty.ptr(ptr_ty->AddressSpace(), dst_arr->ElemType(), ptr_ty->Access());
-                auto* elem_ptr = b.Access(elem_ptr_ty, base_ptr, u32(i))->Result();
+                auto* elem_ptr = b.Access(elem_ptr_ty, base_ptr, u32(i));
 
                 auto* elem_ld = b.Load(elem_ptr);
                 // If the element type does not match between the source and
@@ -468,9 +468,9 @@ struct State {
             for (uint32_t i = 0; i < *count; ++i) {
                 auto* elem_ptr_ty =
                     ty.ptr(ptr_ty->AddressSpace(), dst_arr->ElemType(), ptr_ty->Access());
-                auto* elem_ptr = b.Access(elem_ptr_ty, base_ptr, u32(i))->Result();
+                auto* elem_ptr = b.Access(elem_ptr_ty, base_ptr, u32(i));
 
-                auto* elem_val = b.Access(src_arr->ElemType(), src_val, u32(i))->Result();
+                auto* elem_val = b.Access(src_arr->ElemType(), src_val, u32(i));
 
                 b.Store(elem_ptr, elem_val);
 

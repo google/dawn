@@ -337,7 +337,7 @@ struct State {
         for (uint32_t i = 0; i < dst_struct->Members().Length(); i++) {
             auto* src_member = src_struct->Members()[i];
             auto* dst_member = dst_struct->Members()[i];
-            auto* extracted = b.Access(src_member->Type(), input, u32(i))->Result();
+            auto* extracted = b.Access(src_member->Type(), input, u32(i));
             auto* converted = ConvertIfNeeded(dst_member->Type(), extracted);
             construct_args.Push(converted);
         }
@@ -357,7 +357,7 @@ struct State {
         // Convert each element one at a time, writing into the local variable.
         auto* result = b.Var(ty.ptr<function>(dst_array));
         b.LoopRange(0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
-            auto* extracted = b.Access(src_array->ElemType(), input, idx)->Result();
+            auto* extracted = b.Access(src_array->ElemType(), input, idx);
             auto* converted = ConvertIfNeeded(dst_array->ElemType(), extracted);
             auto* dst_ptr = b.Access(ty.ptr(function, dst_array->ElemType()), result, idx);
             b.Store(dst_ptr, converted);

@@ -193,7 +193,7 @@ struct State {
                 for (size_t i = 0; i < collapsed.indices.Length(); i++) {
                     auto* access = b.Access(vec_ty->Type(), rhs, b.Constant(u32(i)));
                     uint32_t target_index = collapsed.indices[i];
-                    new_vec_args[target_index] = access->Result();
+                    new_vec_args[target_index] = access;
                 }
 
                 // For indices which were not referenced in the swizzle, fill in the old vals from
@@ -201,7 +201,7 @@ struct State {
                 for (uint32_t i = 0; i < vec_ty->Width(); i++) {
                     if (new_vec_args[i] == nullptr) {
                         auto* access = b.Access(vec_ty->Type(), old_vec, b.Constant(u32(i)));
-                        new_vec_args[i] = access->Result();
+                        new_vec_args[i] = access;
                     }
                 }
 
@@ -265,7 +265,7 @@ struct State {
         }
         auto* arr_ty = ty.array(ty.u32(), static_cast<uint32_t>(indices.Length()));
         auto* arr_val = b.Composite(arr_ty, std::move(const_indices));
-        return b.Access(ty.u32(), arr_val, accessor_idx)->Result();
+        return b.Access(ty.u32(), arr_val, accessor_idx);
     }
 };
 

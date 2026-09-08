@@ -474,7 +474,7 @@ struct State {
             if (auto* constant = src->As<core::ir::Constant>()) {
                 el = b.Constant(constant->Value()->Index(i));
             } else {
-                el = b.Access(src_elements.type, src, u32(i))->Result();
+                el = b.Access(src_elements.type, src, u32(i));
             }
 
             // Recurse to convert strided matrices nested in arrays if needed.

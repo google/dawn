@@ -436,7 +436,7 @@ struct State {
 
                 b.InsertBefore(access, [&] {
                     auto* new_access = b.Access(atomic_ptr_ty, atomic_var, analysis.array_indices);
-                    access->Result()->ReplaceAllUsesWith(new_access->Result());
+                    access->Result()->ReplaceAllUsesWith(new_access);
                 });
             } else {
                 // Use the atomic variable directly when there is no outer array.

@@ -179,10 +179,12 @@ struct State {
                         // Extract a non-constant intermediate source using an access instruction
                         // that we insert immediately after the definition of the root source
                         // object.
-                        auto* intermediate_source = b.Access(to_replace.dynamic_index_source_type,
-                                                             source_object, partial_access.indices);
-                        b.InsertInBlockAfter(source_object, [&] { b.Append(intermediate_source); });
-                        return intermediate_source->Result();
+                        core::ir::Value* intermediate_source = nullptr;
+                        b.InsertInBlockAfter(source_object, [&] {
+                            intermediate_source = b.Access(to_replace.dynamic_index_source_type,
+                                                           source_object, partial_access.indices);
+                        });
+                        return intermediate_source;
                     });
             }
 
@@ -229,14 +231,16 @@ struct State {
             }
 
             auto addrspace = var->Type()->As<core::type::Pointer>()->AddressSpace();
-            core::ir::Instruction* new_access =
-                b.Access(ty.ptr(addrspace, access_type, core::Access::kReadWrite), var, indices);
-            new_access->InsertBefore(access);
+            core::ir::Value* new_access = nullptr;
+            b.InsertBefore(access, [&] {
+                new_access = b.Access(ty.ptr(addrspace, access_type, core::Access::kReadWrite), var,
+                                      indices);
+            });
 
             core::ir::Instruction* load = nullptr;
             if (to_replace.vector_access_type) {
-                load = b.LoadVectorElementWithResult(access->DetachResult(), new_access->Result(),
-                                                     vector_index);
+                load =
+                    b.LoadVectorElementWithResult(access->DetachResult(), new_access, vector_index);
             } else {
                 load = b.LoadWithResult(access->DetachResult(), new_access);
             }

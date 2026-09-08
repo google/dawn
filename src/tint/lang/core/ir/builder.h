@@ -1911,11 +1911,12 @@ class Builder {
     /// @param indices the access indices
     /// @returns the instruction
     template <typename OBJ, typename... ARGS>
-    ir::Access* AccessWithResult(ir::InstructionResult* result, OBJ&& object, ARGS&&... indices) {
+    ir::Value* AccessReplaceResult(ir::InstructionResult* result, OBJ&& object, ARGS&&... indices) {
         CheckForNonDeterministicEvaluation<OBJ, ARGS...>();
         auto* obj_val = Value(std::forward<OBJ>(object));
         return Append(ir.CreateInstruction<ir::Access>(result, obj_val,
-                                                       Values(std::forward<ARGS>(indices)...)));
+                                                       Values(std::forward<ARGS>(indices)...)))
+            ->Result();
     }
 
     /// Creates a new `Access`
@@ -1924,9 +1925,9 @@ class Builder {
     /// @param indices the access indices
     /// @returns the instruction
     template <typename OBJ, typename... ARGS>
-    ir::Access* Access(const core::type::Type* type, OBJ&& object, ARGS&&... indices) {
-        return AccessWithResult(InstructionResult(type), std::forward<OBJ>(object),
-                                Values(std::forward<ARGS>(indices)...));
+    ir::Value* Access(const core::type::Type* type, OBJ&& object, ARGS&&... indices) {
+        return AccessReplaceResult(InstructionResult(type), std::forward<OBJ>(object),
+                                   Values(std::forward<ARGS>(indices)...));
     }
 
     /// Creates a new `Access`
@@ -1935,7 +1936,7 @@ class Builder {
     /// @param indices the access indices
     /// @returns the instruction
     template <typename TYPE, typename OBJ, typename... ARGS>
-    ir::Access* Access(OBJ&& object, ARGS&&... indices) {
+    ir::Value* Access(OBJ&& object, ARGS&&... indices) {
         auto* type = ir.Types().Get<TYPE>();
         return Access(type, std::forward<OBJ>(object), std::forward<ARGS>(indices)...);
     }

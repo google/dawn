@@ -246,7 +246,7 @@ struct State {
                 args.Push(b.Load(access)->Result());
             } else {
                 auto* access = b.Access(mat->ColumnType(), root, column_indices);
-                args.Push(access->Result());
+                args.Push(access);
             }
         }
         return b.Construct(mat, std::move(args));
@@ -282,7 +282,7 @@ struct State {
                                 // Extract and convert the member.
                                 auto* type = input_str->Element(index);
                                 auto* extract = b.Access(type, input, u32(index));
-                                args.Push(Convert(extract->Result(), member->Type()));
+                                args.Push(Convert(extract, member->Type()));
                                 index++;
                             }
                         }
@@ -303,7 +303,7 @@ struct State {
                 b.LoopRange(0_u, u32(arr->ConstantCount().value()), 1_u, [&](Value* idx) {
                     // Convert arr[idx] and store to new_arr[idx];
                     auto* to = b.Access(ty.ptr(function, arr->ElemType()), new_arr, idx);
-                    auto* from = b.Access(el_ty, source, idx)->Result();
+                    auto* from = b.Access(el_ty, source, idx);
                     b.Store(to, Convert(from, arr->ElemType()));
                 });
                 return b.Load(new_arr)->Result();
@@ -403,7 +403,7 @@ struct State {
                             current_type = ty.ptr(uniform, RewriteType(current_type));
                         }
                         auto* new_access = b.Access(current_type, replacement, std::move(indices));
-                        replacement = new_access->Result();
+                        replacement = new_access;
                     }
 
                     // Replace every instruction that uses the original access instruction.
@@ -427,7 +427,7 @@ struct State {
                     if (!replacement->Type()->Is<core::type::Pointer>()) {
                         // We have loaded a decomposed matrix and reconstructed it, so this is now
                         // extracting from a value type.
-                        b.AccessWithResult(load->DetachResult(), replacement, load->Index());
+                        b.AccessReplaceResult(load->DetachResult(), replacement, load->Index());
                         load->Destroy();
                     } else {
                         // There was no decomposed matrix on the path to this instruction so just

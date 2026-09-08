@@ -314,7 +314,7 @@ struct State {
                         TINT_IR_ASSERT(ir, base_ptr != nullptr);
                         TINT_IR_ASSERT(ir, i == 1);
                         auto* arr_ptr = ty.ptr(base_ptr->AddressSpace(), arr, base_ptr->Access());
-                        object = b.Access(arr_ptr, object, indices[0])->Result();
+                        object = b.Access(arr_ptr, object, indices[0]);
                     }
 
                     // Use the `arrayLength` builtin to get the limit of a runtime-sized array.
