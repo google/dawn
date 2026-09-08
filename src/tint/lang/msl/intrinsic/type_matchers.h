@@ -36,6 +36,7 @@
 #include "src/tint/lang/msl/type/cooperative_tensor.h"
 #include "src/tint/lang/msl/type/gradient.h"
 #include "src/tint/lang/msl/type/level.h"
+#include "src/tint/lang/msl/type/tensor_inline.h"
 
 namespace tint::msl::intrinsic {
 
@@ -177,6 +178,21 @@ inline const type::CooperativeTensor* BuildCooperativeTensor(core::intrinsic::Ma
                                                              const core::type::Type* RT) {
     return state.types.Get<type::CooperativeTensor>(
         static_cast<core::SubgroupMatrixKind>(S.Value()), M.Value(), N.Value(), K.Value(), IT, RT);
+}
+
+inline bool MatchTensorInline(core::intrinsic::MatchState&, const core::type::Type* ty) {
+    if (ty->Is<core::intrinsic::Any>()) {
+        return true;
+    }
+    if (ty->Is<msl::type::TensorInline>()) {
+        return true;
+    }
+    return false;
+}
+
+inline const core::type::Type* BuildTensorInline(core::intrinsic::MatchState& state,
+                                                 const core::type::Type*) {
+    return state.types.Get<type::TensorInline>();
 }
 
 }  // namespace tint::msl::intrinsic

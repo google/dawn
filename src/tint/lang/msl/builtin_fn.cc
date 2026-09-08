@@ -136,6 +136,10 @@ const char* str(BuiltinFn i) {
             return "copy_cooperative_tensor";
         case BuiltinFn::kFillCooperativeTensor:
             return "fill_cooperative_tensor";
+        case BuiltinFn::kMakeTensorInline:
+            return "make_tensor_inline";
+        case BuiltinFn::kStore:
+            return "store";
         case BuiltinFn::kOsLog:
             return "os_log";
         case BuiltinFn::kPointerOffset:
@@ -184,6 +188,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kWrite:
         case BuiltinFn::kSimdgroupStore:
         case BuiltinFn::kFillCooperativeTensor:
+        case BuiltinFn::kStore:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kDistance:
@@ -210,6 +215,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kVolatileZero:
         case BuiltinFn::kMadsat:
         case BuiltinFn::kReinterpretCast:
+        case BuiltinFn::kMakeTensorInline:
             break;
     }
     return core::ir::Instruction::Accesses{};

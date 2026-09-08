@@ -106,6 +106,7 @@
 #include "src/tint/lang/msl/type/cooperative_tensor.h"
 #include "src/tint/lang/msl/type/gradient.h"
 #include "src/tint/lang/msl/type/level.h"
+#include "src/tint/lang/msl/type/tensor_inline.h"
 #include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/lang/msl/writer/common/printer_support.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
@@ -1196,6 +1197,25 @@ class Printer : public tint::TextGenerator {
             out << ")";
             return;
         }
+        if (c->Func() == msl::BuiltinFn::kMakeTensorInline) {
+            auto args = c->Args();
+            auto* dst = args[0];
+            auto* ptr = dst->Type()->As<core::type::Pointer>();
+            auto* extents = args[1]->As<core::ir::Constant>()->Value();
+            auto* stride = args[2];
+
+            out << "tensor<";
+            EmitAddressSpace(out, ptr->AddressSpace());
+            out << " ";
+            EmitType(out, ptr->StoreType());
+            out << ", dextents<uint, 2>, tensor_inline>(";
+            EmitAndTakeAddressIfNeeded(out, dst);
+            out << ", dextents<uint, 2>(" << extents->Index(0)->ValueAs<uint32_t>() << ", "
+                << extents->Index(1)->ValueAs<uint32_t>() << "), array<uint, 2>({1u, ";
+            EmitValue(out, stride);
+            out << "}))";
+            return;
+        }
 
         // Some builtins need special-casing for the name they use.
         if (c->Func() == msl::BuiltinFn::kOsLog) {
@@ -1594,6 +1614,7 @@ class Printer : public tint::TextGenerator {
             [&](const msl::type::CooperativeTensor* tensor) {
                 out << GetCooperativeTensorTypeAlias(tensor);
             },
+            [&](const msl::type::TensorInline*) { out << "auto"; },  //
             [&](const core::type::SubgroupMatrix* sm) {
                 TINT_IR_ASSERT(ir_, (sm->Type()->IsAnyOf<core::type::F32, core::type::F16>()));
                 TINT_IR_ASSERT(ir_, sm->Columns() == 8);

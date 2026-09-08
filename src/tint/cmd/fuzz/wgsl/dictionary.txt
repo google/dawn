@@ -227,6 +227,7 @@
 "error"
 "exp"
 "exp2"
+"extents"
 "extractBits"
 "f16"
 "f32"

@@ -33,7 +33,9 @@
 #include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/msl/builtin_fn.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
+#include "src/tint/lang/msl/ir/member_builtin_call.h"
 #include "src/tint/lang/msl/type/cooperative_tensor.h"
+#include "src/tint/lang/msl/type/tensor_inline.h"
 
 namespace tint::msl::writer::raise {
 namespace {
@@ -74,14 +76,24 @@ struct State {
                 }
                 if (ContainsSubgroupMatrix(inst->Result()->Type()->UnwrapPtr())) {
                     worklist.Push(inst);
+                } else if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
+                    switch (call->Func()) {
+                        case core::BuiltinFn::kSubgroupMatrixStore: {
+                            worklist.Push(inst);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
                 }
             });
             for (auto* inst : worklist) {
                 tint::Switch(
-                    inst,                                                  //
-                    [&](core::ir::Construct* c) { ProcessConstruct(c); },  //
-                    [&](core::ir::Let* let) { ProcessLet(let); },          //
-                    [&](core::ir::Var* var) { ProcessVar(var); },          //
+                    inst,                                                   //
+                    [&](core::ir::CoreBuiltinCall* c) { ProcessCall(c); },  //
+                    [&](core::ir::Construct* c) { ProcessConstruct(c); },   //
+                    [&](core::ir::Let* let) { ProcessLet(let); },           //
+                    [&](core::ir::Var* var) { ProcessVar(var); },           //
                     TINT_ICE_ON_NO_MATCH);
             }
         }
@@ -111,6 +123,19 @@ struct State {
             shared_local_vars.Add(var);
         }
         value_to_local_var.Add(val, var);
+    }
+
+    /// Process a `call` instruction to replace its type and initializer.
+    /// @param c the construct instruction
+    void ProcessCall(core::ir::CoreBuiltinCall* c) {
+        switch (c->Func()) {
+            case core::BuiltinFn::kSubgroupMatrixStore:
+                ReplaceSubgroupMatrixStore(c);
+                break;
+            default:
+                TINT_IR_UNREACHABLE(ir);
+        }
+        c->Destroy();
     }
 
     /// Process a `construct` instruction.
@@ -239,6 +264,88 @@ struct State {
             case core::SubgroupMatrixKind::kUndefined:
                 TINT_IR_UNREACHABLE(ir);
         }
+    }
+
+    void ElideRedundantPointerOffset(core::ir::Value*& p) {
+        if (auto* pre_cast = p->AsInstruction<msl::ir::BuiltinCall>()) {
+            if (pre_cast->Func() == msl::BuiltinFn::kPointerOffset &&
+                pre_cast->Args()[1] == b.Constant(u32(0))) {
+                p = pre_cast->Args()[0];
+
+                if (pre_cast->Result()->NumUsages() == 1) {
+                    pre_cast->Destroy();
+                }
+            }
+        }
+    }
+
+    core::ir::Let* MakeTensorInline(std::string_view name,
+                                    core::ir::Value* p,
+                                    core::ir::Value* offset,
+                                    core::ir::Value* stride,
+                                    const core::type::SubgroupMatrix* mat) {
+        ElideRedundantPointerOffset(p);
+
+        auto* ptr = p->Type()->As<core::type::Pointer>();
+        auto* arr = ptr->StoreType()->As<core::type::Array>();
+        const uint32_t arr_stride = arr->ImplicitStride();
+
+        auto* mat_ele = mat->Type();
+
+        core::ir::Value* data = nullptr;
+        if (arr->ElemType() != mat_ele) {
+            // MSL requires that pointee type match matrix element type.
+            // Use pointer offset to generate the correct pointer.
+            // Note: the offset needs converted to bytes.
+            offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
+            offset = b.Multiply(offset, u32(arr_stride));
+            data = b.CallExplicit<msl::ir::BuiltinCall>(
+                        ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()),
+                        msl::BuiltinFn::kPointerOffset,
+                        Vector<core::ir::TemplateParameter, 1>{mat_ele}, p, offset)
+                       ->Result();
+
+            // Stride is changed to elements_per_row which is in terms of matrix element type.
+            stride = b.Multiply(stride, u32(arr_stride / mat_ele->Size()));
+        } else {
+            // Make a pointer to the first element of the array that we will access.
+            auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
+            data = b.Access(elem_ptr, p, offset)->Result();
+        }
+
+        // The tensor extents are the dimensions of the matrix.
+        auto* extents = b.Composite(ty.vec2u(), u32(mat->Columns()), u32(mat->Rows()));
+
+        // Create a tensor_inline from the data pointer.
+        return b.Let(name, b.Call<msl::ir::BuiltinCall>(ty.Get<msl::type::TensorInline>(),
+                                                        msl::BuiltinFn::kMakeTensorInline, data,
+                                                        extents, stride));
+    }
+
+    void ReplaceSubgroupMatrixStore(core::ir::CoreBuiltinCall* c) {
+        auto* p = c->Args()[0];
+        auto* offset = c->Args()[1];
+        auto* value = c->Args()[2];
+        auto* stride = b.InsertBitcastIfNeeded(ty.u32(), c->Args()[3]);
+
+        auto majorness = std::get<core::Majorness>(c->ExplicitTemplateParams()[0]);
+        if (majorness == core::Majorness::kColMajor) {
+            // TODO(556210460): Add polyfill for column-major layouts.
+            TINT_IR_UNIMPLEMENTED(ir) << "column-major layouts not yet supported";
+        }
+
+        b.InsertAfter(c, [&] {
+            TINT_IR_ASSERT(ir,
+                           std::holds_alternative<core::Majorness>(c->ExplicitTemplateParams()[0]));
+            auto* mat = value->Type()->As<core::type::SubgroupMatrix>();
+
+            auto* tensor_inline = MakeTensorInline("tint_dst_tensor", p, offset, stride, mat);
+
+            // Store the cooperative_tensor value to the tensor_inline.
+            auto* local_var = value_to_local_var.GetOr(value, nullptr);
+            b.MemberCall<msl::ir::MemberBuiltinCall>(ty.void_(), msl::BuiltinFn::kStore,
+                                                     b.Load(local_var), tensor_inline);
+        });
     }
 };
 

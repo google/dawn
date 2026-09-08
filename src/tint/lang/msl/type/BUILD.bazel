@@ -47,12 +47,14 @@ cc_library(
     "cooperative_tensor.cc",
     "gradient.cc",
     "level.cc",
+    "tensor_inline.cc",
   ],
   hdrs = [
     "bias.h",
     "cooperative_tensor.h",
     "gradient.h",
     "level.h",
+    "tensor_inline.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -81,6 +83,7 @@ cc_library(
     "cooperative_tensor_test.cc",
     "gradient_test.cc",
     "level_test.cc",
+    "tensor_inline_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

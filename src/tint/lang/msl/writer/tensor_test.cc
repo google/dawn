@@ -295,5 +295,194 @@ kernel void entry() {
 )");
 }
 
+TEST_F(MslWriterTensorTest, SubgroupMatrixStore_RowMajor) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<f16, 8192>, read_write>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* mat = b.Construct(ty.subgroup_matrix_left(ty.f16(), 32, 32));
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, buffer,
+                       0_u, mat, 64_u);
+        b.Return(ep);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_module_vars_struct {
+  device tint_array<half, 8192>* tint_member;
+};
+
+#include <MetalPerformancePrimitives/MetalPerformancePrimitives.h>
+
+template<uint M, uint N, uint K,
+         mpp::tensor_ops::matmul2d_descriptor::mode O>
+constant constexpr auto tint_matmul2d_descriptor =
+  mpp::tensor_ops::matmul2d_descriptor(M, N, K, false, false, false, O);
+
+template<uint M, uint N, uint K,
+         mpp::tensor_ops::matmul2d_descriptor::mode O = mpp::tensor_ops::matmul2d_descriptor::mode::multiply>
+using tint_matmul2d_operation =
+  mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
+
+using tint_left_input_32_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+             .get_left_input_cooperative_tensor<half, half, half>());
+using tint_right_input_32_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+             .get_right_input_cooperative_tensor<half, half, half>());
+using tint_destination_32_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+             .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
+
+template<typename T, typename V>
+void tint_fill_cooperative_tensor(thread T* dst, V value) {
+  for (uint i = 0; i < dst->get_capacity(); i++) {
+    dst->set(i, value);
+  }
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void entry(device tint_array<half, 8192>* v [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v};
+  tint_left_input_32_32_32_half_half v_1;
+  (tint_fill_cooperative_tensor((&v_1), 0.0h));
+  auto const tint_dst_tensor = tensor<device half, dextents<uint, 2>, tensor_inline>((&(*tint_module_vars.tint_member)[0u]), dextents<uint, 2>(32, 32), array<uint, 2>({1u, 64u}));
+  (v_1.store(tint_dst_tensor));
+}
+)");
+}
+
+TEST_F(MslWriterTensorTest, DISABLED_SubgroupMatrixStore_ColMajor) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<f16, 8192>, read_write>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* mat = b.Construct(ty.subgroup_matrix_left(ty.f16(), 32, 32));
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kColMajor}, buffer,
+                       0_u, mat, 64_u);
+        b.Return(ep);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+      // TODO(556210460): implement polyfill for column-major layout.
+)");
+}
+
+TEST_F(MslWriterTensorTest, SubgroupMatrixStore_Workgroup) {
+    auto* buffer = b.Var("buffer", ty.ptr<workgroup, array<f16, 1024>, read_write>());
+    mod.root_block->Append(buffer);
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* mat = b.Construct(ty.subgroup_matrix_left(ty.f16(), 32, 32));
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, buffer,
+                       0_u, mat, 32_u);
+        b.Return(ep);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_module_vars_struct {
+  threadgroup tint_array<half, 1024>* tint_member;
+};
+
+#include <MetalPerformancePrimitives/MetalPerformancePrimitives.h>
+
+template<uint M, uint N, uint K,
+         mpp::tensor_ops::matmul2d_descriptor::mode O>
+constant constexpr auto tint_matmul2d_descriptor =
+  mpp::tensor_ops::matmul2d_descriptor(M, N, K, false, false, false, O);
+
+template<uint M, uint N, uint K,
+         mpp::tensor_ops::matmul2d_descriptor::mode O = mpp::tensor_ops::matmul2d_descriptor::mode::multiply>
+using tint_matmul2d_operation =
+  mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
+
+using tint_left_input_32_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+             .get_left_input_cooperative_tensor<half, half, half>());
+using tint_right_input_32_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+             .get_right_input_cooperative_tensor<half, half, half>());
+using tint_destination_32_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+             .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
+
+template<typename T, typename V>
+void tint_fill_cooperative_tensor(thread T* dst, V value) {
+  for (uint i = 0; i < dst->get_capacity(); i++) {
+    dst->set(i, value);
+  }
+}
+
+struct tint_symbol_1 {
+  tint_array<half, 1024> tint_symbol;
+};
+
+void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  {
+    uint v = 0u;
+    v = tint_local_index;
+    while(true) {
+      uint const v_1 = v;
+      if ((v_1 >= 1024u)) {
+        break;
+      }
+      (*tint_module_vars.tint_member)[v_1] = 0.0h;
+      {
+        v = (v_1 + 1u);
+      }
+    }
+  }
+  (threadgroup_barrier(mem_flags::mem_threadgroup));
+  tint_left_input_32_32_32_half_half v_2;
+  (tint_fill_cooperative_tensor((&v_2), 0.0h));
+  auto const tint_dst_tensor = tensor<threadgroup half, dextents<uint, 2>, tensor_inline>((&(*tint_module_vars.tint_member)[0u]), dextents<uint, 2>(32, 32), array<uint, 2>({1u, 32u}));
+  (v_2.store(tint_dst_tensor));
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_3 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=(&(*v_3).tint_symbol)};
+  (entry_inner(tint_local_index, tint_module_vars));
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::msl::writer

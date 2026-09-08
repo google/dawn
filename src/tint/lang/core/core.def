@@ -271,6 +271,7 @@ enum usages {
   compare_value
   elements
   exp
+  extents
   group_operation
   height
   i

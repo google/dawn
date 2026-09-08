@@ -49,6 +49,8 @@ tint_add_target(tint_lang_msl_type lib
   lang/msl/type/gradient.h
   lang/msl/type/level.cc
   lang/msl/type/level.h
+  lang/msl/type/tensor_inline.cc
+  lang/msl/type/tensor_inline.h
 )
 
 tint_target_add_dependencies(tint_lang_msl_type lib
@@ -83,6 +85,7 @@ tint_add_target(tint_lang_msl_type_test test
   lang/msl/type/cooperative_tensor_test.cc
   lang/msl/type/gradient_test.cc
   lang/msl/type/level_test.cc
+  lang/msl/type/tensor_inline_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_msl_type_test test

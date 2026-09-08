@@ -53,6 +53,8 @@ if (tint_build_msl_writer) {
       "gradient.h",
       "level.cc",
       "level.h",
+      "tensor_inline.cc",
+      "tensor_inline.h",
     ]
     deps = [
       "${dawn_root}/src/utils",
@@ -80,6 +82,7 @@ if (tint_build_unittests) {
         "cooperative_tensor_test.cc",
         "gradient_test.cc",
         "level_test.cc",
+        "tensor_inline_test.cc",
       ]
       deps = [
         "${dawn_root}/src/utils",
