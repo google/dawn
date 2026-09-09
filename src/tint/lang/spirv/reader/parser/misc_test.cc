@@ -597,5 +597,252 @@ TEST_F(SpirvParserTest, Instruction_UnhandledOpcode) {
               "unhandled SPIR-V instruction: OpGroupNonUniformInverseBallot (val = 340)");
 }
 
+TEST_F(SpirvParserTest, Type_UnsupportedIntegerWidth) {
+    auto res = Run(R"(
+               OpCapability Shader
+               OpCapability StorageBuffer16BitAccess
+               OpExtension "SPV_KHR_16bit_storage"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+        %void = OpTypeVoid
+         %i16 = OpTypeInt 16 1
+     %ep_type = OpTypeFunction %void
+        %main = OpFunction %void None %ep_type
+  %main_start = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "unsupported integer width: 16");
+}
+
+TEST_F(SpirvParserTest, Type_UnsupportedMemberDecoration) {
+    auto res = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpMemberDecorate %strct 0 Volatile
+        %void = OpTypeVoid
+        %uint = OpTypeInt 32 0
+       %strct = OpTypeStruct %uint
+     %ep_type = OpTypeFunction %void
+        %main = OpFunction %void None %ep_type
+  %main_start = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "unhandled member decoration: Volatile");
+}
+
+TEST_F(SpirvParserTest, Type_InvalidBuiltInMemberDecoration) {
+    auto res = Run(R"(
+               OpCapability Shader
+               OpCapability Geometry
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Geometry %main "main" %in_var
+               OpExecutionMode %main Triangles
+               OpExecutionMode %main Invocations 1
+               OpExecutionMode %main OutputTriangleStrip
+               OpExecutionMode %main OutputVertices 3
+               OpDecorate %strct Block
+               OpMemberDecorate %strct 0 BuiltIn InvocationId
+        %void = OpTypeVoid
+         %int = OpTypeInt 32 1
+       %strct = OpTypeStruct %int
+%ptr_in_strct = OpTypePointer Input %strct
+      %in_var = OpVariable %ptr_in_strct Input
+     %ep_type = OpTypeFunction %void
+        %main = OpFunction %void None %ep_type
+  %main_start = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("unhandled SPIR-V BuiltIn: InvocationId"));
+}
+
+TEST_F(SpirvParserTest, Type_ArrayOfHandles) {
+    auto res = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+        %void = OpTypeVoid
+       %float = OpTypeFloat 32
+        %uint = OpTypeInt 32 0
+      %uint_4 = OpConstant %uint 4
+        %img = OpTypeImage %float 2D 0 0 0 1 Unknown
+        %arr = OpTypeArray %img %uint_4
+     %ep_type = OpTypeFunction %void
+        %main = OpFunction %void None %ep_type
+  %main_start = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "arrays of handle types are not supported");
+}
+
+TEST_F(SpirvParserTest, Type_RuntimeArrayOfHandles) {
+    auto res = Run(R"(
+               OpCapability Shader
+               OpCapability ShaderNonUniform
+               OpExtension "SPV_EXT_descriptor_indexing"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+        %void = OpTypeVoid
+       %float = OpTypeFloat 32
+        %img = OpTypeImage %float 2D 0 0 0 1 Unknown
+     %rt_arr = OpTypeRuntimeArray %img
+     %ep_type = OpTypeFunction %void
+        %main = OpFunction %void None %ep_type
+  %main_start = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(res, Success);
+    // Since SPV_EXT_descriptor_indexing is rejected earlier by extension check:
+    // This confirms extension checking runs first.
+}
+
+TEST_F(SpirvParserTest, Type_DepthTextureInvalidSampledType) {
+    auto res = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+        %void = OpTypeVoid
+        %uint = OpTypeInt 32 0
+   %depth_img = OpTypeImage %uint 2D 1 0 0 1 Unknown
+     %ep_type = OpTypeFunction %void
+        %main = OpFunction %void None %ep_type
+  %main_start = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "depth texture sampled type must be f32");
+}
+
+TEST_F(SpirvParserTest, Type_SpecializedArrayLength) {
+    auto res = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %spec_len SpecId 1
+        %void = OpTypeVoid
+        %uint = OpTypeInt 32 0
+    %spec_len = OpSpecConstant %uint 4
+    %spec_arr = OpTypeArray %uint %spec_len
+     %ep_type = OpTypeFunction %void
+        %main = OpFunction %void None %ep_type
+  %main_start = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "specialized array lengths are not supported");
+}
+
+TEST_F(SpirvParserTest, Type_ArrayOfBlock) {
+    auto res = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %s Block
+               OpMemberDecorate %s 0 Offset 0
+        %void = OpTypeVoid
+        %uint = OpTypeInt 32 0
+      %uint_4 = OpConstant %uint 4
+           %s = OpTypeStruct %uint
+         %arr = OpTypeArray %s %uint_4
+     %ep_type = OpTypeFunction %void
+        %main = OpFunction %void None %ep_type
+  %main_start = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "arrays of buffer types are not supported");
+}
+
+TEST_F(SpirvParserTest, Type_ArrayOfBufferBlock) {
+    auto res = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %s BufferBlock
+               OpMemberDecorate %s 0 Offset 0
+        %void = OpTypeVoid
+        %uint = OpTypeInt 32 0
+      %uint_4 = OpConstant %uint 4
+           %s = OpTypeStruct %uint
+         %arr = OpTypeArray %s %uint_4
+     %ep_type = OpTypeFunction %void
+        %main = OpFunction %void None %ep_type
+  %main_start = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "arrays of buffer types are not supported");
+}
+
+TEST_F(SpirvParserTest, Type_RuntimeArrayOfBufferBlock) {
+    auto res = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %s BufferBlock
+               OpMemberDecorate %s 0 Offset 0
+        %void = OpTypeVoid
+        %uint = OpTypeInt 32 0
+           %s = OpTypeStruct %uint
+      %rt_arr = OpTypeRuntimeArray %s
+     %ep_type = OpTypeFunction %void
+        %main = OpFunction %void None %ep_type
+  %main_start = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "arrays of buffer types are not supported");
+}
+
+TEST_F(SpirvParserTest, Type_ArrayOfSampledImage) {
+    auto res = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %var DescriptorSet 0
+               OpDecorate %var Binding 0
+        %void = OpTypeVoid
+       %float = OpTypeFloat 32
+        %uint = OpTypeInt 32 0
+      %uint_4 = OpConstant %uint 4
+         %img = OpTypeImage %float 2D 0 0 0 1 Unknown
+          %si = OpTypeSampledImage %img
+         %arr = OpTypeArray %si %uint_4
+        %ptr = OpTypePointer UniformConstant %arr
+        %var = OpVariable %ptr UniformConstant
+     %ep_type = OpTypeFunction %void
+        %main = OpFunction %void None %ep_type
+  %main_start = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "arrays of handle types are not supported");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

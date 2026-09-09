@@ -3558,7 +3558,69 @@ TEST_F(SpirvParserTest, Var_UnhandledDecoration) {
                OpFunctionEnd
 )");
     EXPECT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason, "unhandled decoration 21");
+    EXPECT_EQ(result.Failure().reason, "unhandled decoration Volatile");
+}
+
+TEST_F(SpirvParserTest, UniformVar_ArrayOfUniformBuffers) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %1 "main"
+               OpExecutionMode %1 LocalSize 1 1 1
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %str Block
+               OpDecorate %var DescriptorSet 1
+               OpDecorate %var Binding 2
+        %void = OpTypeVoid
+        %uint = OpTypeInt 32 0
+      %uint_0 = OpConstant %uint 0
+      %uint_4 = OpConstant %uint 4
+         %str = OpTypeStruct %uint
+     %arr_str = OpTypeArray %str %uint_4
+%_ptr_Uniform_arr = OpTypePointer Uniform %arr_str
+%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+          %5 = OpTypeFunction %void
+        %var = OpVariable %_ptr_Uniform_arr Uniform
+          %1 = OpFunction %void None %5
+          %7 = OpLabel
+      %access = OpAccessChain %_ptr_Uniform_uint %var %uint_0 %uint_0
+        %val = OpLoad %uint %access
+               OpReturn
+               OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason, "arrays of buffer types are not supported");
+}
+
+TEST_F(SpirvParserTest, StorageVar_ArrayOfStorageBuffers) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %1 "main"
+               OpExecutionMode %1 LocalSize 1 1 1
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %str BufferBlock
+               OpDecorate %var DescriptorSet 1
+               OpDecorate %var Binding 2
+        %void = OpTypeVoid
+        %uint = OpTypeInt 32 0
+      %uint_0 = OpConstant %uint 0
+      %uint_4 = OpConstant %uint 4
+         %str = OpTypeStruct %uint
+     %arr_str = OpTypeArray %str %uint_4
+%_ptr_Uniform_arr = OpTypePointer Uniform %arr_str
+%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+          %5 = OpTypeFunction %void
+        %var = OpVariable %_ptr_Uniform_arr Uniform
+          %1 = OpFunction %void None %5
+          %7 = OpLabel
+      %access = OpAccessChain %_ptr_Uniform_uint %var %uint_0 %uint_0
+        %val = OpLoad %uint %access
+               OpReturn
+               OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason, "arrays of buffer types are not supported");
 }
 
 }  // namespace
