@@ -2119,7 +2119,7 @@ TEST_P(ResourceTableTests, AddUniqueSamplersOverLimit) {
         if (shouldSucceed) {
             queue.Submit(1, &commands);
         } else {
-            ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+            EXPECT_DEVICE_LOSS(queue.Submit(1, &commands));
         }
     };
 

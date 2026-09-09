@@ -72,8 +72,7 @@ class ResourceTable::SamplerIndexPool {
         if (inserted) {
             // Grab a new one
             if (mUnused.empty()) {
-                // TODO(crbug.com/512089609): Make this an Internal error as this is unrecoverable.
-                return DAWN_VALIDATION_ERROR("No more unique sampler indices available");
+                return DAWN_INTERNAL_ERROR("No more unique sampler indices available");
             }
             entry.index = mUnused.back();
             mUnused.pop_back();

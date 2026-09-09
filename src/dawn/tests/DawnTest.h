@@ -176,6 +176,32 @@ MATCHER_P(CHandleIs, cType, "") {
 
 #define ASSERT_DEVICE_ERROR(statement) ASSERT_DEVICE_ERROR_MSG(statement, testing::_)
 
+#define EXPECT_DEVICE_LOSS_REASON_MSG_ON(device, reason, statement, matcher)               \
+    do {                                                                                   \
+        FlushWire();                                                                       \
+        bool deviceLost = false;                                                           \
+        EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), reason, matcher))   \
+            .WillOnce([&](const wgpu::Device&, wgpu::DeviceLostReason, wgpu::StringView) { \
+                deviceLost = true;                                                         \
+            })                                                                             \
+            .RetiresOnSaturation();                                                        \
+        statement;                                                                         \
+        instance.ProcessEvents();                                                          \
+        FlushWire();                                                                       \
+        EXPECT_TRUE(deviceLost);                                                           \
+    } while (0)
+
+#define EXPECT_DEVICE_LOSS_MSG_ON(device, statement, matcher) \
+    EXPECT_DEVICE_LOSS_REASON_MSG_ON(device, wgpu::DeviceLostReason::Unknown, statement, matcher)
+
+#define EXPECT_DEVICE_LOSS_ON(device, statement) \
+    EXPECT_DEVICE_LOSS_MSG_ON(device, statement, testing::_)
+
+#define EXPECT_DEVICE_LOSS_MSG(statement, matcher) \
+    EXPECT_DEVICE_LOSS_MSG_ON(this->device, statement, matcher)
+
+#define EXPECT_DEVICE_LOSS(statement) EXPECT_DEVICE_LOSS_MSG(statement, testing::_)
+
 struct GLFWwindow;
 
 void InitDawnEnd2EndTestEnvironment(int argc, char** argv);

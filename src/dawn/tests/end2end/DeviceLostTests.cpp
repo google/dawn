@@ -626,6 +626,19 @@ TEST_P(DeviceLostTest, SetLabelAfterDeviceLoss) {
     buffer.SetLabel(label.c_str());
 }
 
+// Test that EXPECT_DEVICE_LOSS catches device loss when device is lost
+TEST_P(DeviceLostTest, ExpectDeviceLoss) {
+    EXPECT_DEVICE_LOSS(
+        device.ForceLoss(wgpu::DeviceLostReason::Unknown, "Device lost for testing"));
+}
+
+// Test that EXPECT_DEVICE_LOSS_MSG catches device loss and matches the error message
+TEST_P(DeviceLostTest, ExpectDeviceLossMsg) {
+    EXPECT_DEVICE_LOSS_MSG(
+        device.ForceLoss(wgpu::DeviceLostReason::Unknown, "Device lost for testing"),
+        testing::HasSubstr("Device lost for testing"));
+}
+
 DAWN_INSTANTIATE_TEST(DeviceLostTest,
                       D3D11Backend(),
                       D3D12Backend(),
