@@ -30,7 +30,13 @@
 
 #include <jni.h>
 
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
+#include <limits>
 #include <memory>
+#include <new>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -42,10 +48,6 @@ namespace dawn::kotlin_api {
 // A helper context class to use while processing JNI calls.
 //
 //  - Frees memory that's allocated (or referenced) during the processing of the call.
-//
-// TODO(330293719): Consider using a bump allocator for Alloc/AllocArray. Since we require that the
-// types allocated have a default destructor, we could just free a few large allocations instead of
-// small ones. We could also allocate the first bytes on the stack itself.
 class JNIContext : dawn::NonMovable {
   public:
     explicit JNIContext(JNIEnv* env);
@@ -62,31 +64,46 @@ class JNIContext : dawn::NonMovable {
     T* Alloc() {
         static_assert(std::is_trivially_destructible_v<T>);
         static_assert(std::is_trivially_constructible_v<T>);
-        T* alloc = new T();
-        mAllocationsToFree.push_back({alloc, [](void* p) { delete static_cast<T*>(p); }});
-        return alloc;
+        return new (AllocateRaw(sizeof(T), alignof(T))) T();
     }
 
     template <typename T>
     T* AllocArray(size_t count) {
         static_assert(std::is_trivially_destructible_v<T>);
         static_assert(std::is_trivially_constructible_v<T>);
-        T* alloc = new T[count]();
-        mAllocationsToFree.push_back({alloc, [](void* p) { delete[] static_cast<T*>(p); }});
-        return alloc;
+
+        if (count > std::numeric_limits<size_t>::max() / sizeof(T)) {
+            env->ThrowNew(env->FindClass("java/lang/IllegalArgumentException"),
+                          "Array size overflow");
+            return nullptr;
+        }
+
+        T* ptr = static_cast<T*>(AllocateRaw(sizeof(T) * count, alignof(T)));
+        if (ptr != nullptr) {
+            std::memset(ptr, 0, sizeof(T) * count);
+        }
+        return ptr;
     }
 
     std::vector<std::shared_ptr<struct UserData>> recurringCallbacks;
 
   private:
-    struct Allocation {
-        void* ptr;
-        void (*deleter)(void*);
-    };
+    void* AllocateRaw(size_t size, size_t alignment);
 
     std::vector<std::pair<jstring, const char*>> mStringsToRelease;
     std::vector<std::pair<jintArray, jint*>> mIntArraysToRelease;
-    std::vector<Allocation> mAllocationsToFree;
+
+    static constexpr size_t kInlineBufferSize = 512;
+    alignas(std::max_align_t) std::byte mInlineBuffer[kInlineBufferSize];
+    size_t mInlineOffset = 0;
+
+    struct BumpBlock {
+        std::unique_ptr<std::byte[]> data;
+        size_t size;
+        size_t offset;
+    };
+    std::vector<BumpBlock> mBumpBlocks;
+    static constexpr size_t kDefaultBumpBlockSize = 4096;
 };
 
 }  // namespace dawn::kotlin_api
