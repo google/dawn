@@ -513,14 +513,34 @@ MaybeError Surface::Configure(const SurfaceConfiguration* configIn) {
     return {};
 }
 
+void Surface::DetachSwapChain(SwapChainBase* swapChain) {
+    DAWN_ASSERT(swapChain != nullptr);
+    DAWN_ASSERT(swapChain->GetSurface() == this);
+
+    if (mSwapChain.Get() == swapChain) {
+        swapChain->DetachFromSurface();
+        mSwapChain = nullptr;
+        // A failed Configure() with another device leaves the previous swapchain attached, in
+        // which case the surface stays configured with that other device.
+        if (mCurrentDevice.Get() == swapChain->GetDevice()) {
+            mCurrentDevice = nullptr;
+        }
+    } else if (mRecycledSwapChain.Get() == swapChain) {
+        swapChain->DetachFromSurface();
+        mRecycledSwapChain = nullptr;
+    } else {
+        DAWN_UNREACHABLE();
+    }
+}
+
 MaybeError Surface::Unconfigure() {
     if (IsError()) {
         DAWN_CHECK(mSwapChain == nullptr);
         DAWN_CHECK(mCurrentDevice == nullptr);
         return DAWN_VALIDATION_ERROR("%s is invalid.", this);
     }
+    // Unconfiguring an unconfigured surface is a no-op.
     mCurrentDevice = nullptr;
-    DAWN_INVALID_IF(!mSwapChain.Get(), "%s is not configured.", this);
 
     if (mSwapChain != nullptr) {
         if (mRecycledSwapChain != nullptr) {
