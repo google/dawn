@@ -133,6 +133,7 @@ idlgen("idlgen_webgpu_h") {
   depends = [ "interop/WebGPUCommon.tmpl" ]
   output = "$interop_gen_dir/WebGPU.h"
 }
+
 idlgen("idlgen_webgpu_cpp") {
   template = "interop/WebGPU.cpp.tmpl"
   idls = [
@@ -261,6 +262,7 @@ action("gen_napi_symbols") {
 
 if (is_win) {
   import("//build/config/clang/clang.gni")
+
   action("napi_symbols_lib") {
     inputs = [ "$dawn_node_gen_dir/NapiSymbols.def" ]
     outputs = [ "$dawn_node_gen_dir/NapiSymbols.lib" ]
@@ -289,6 +291,7 @@ copy("copy_index_js") {
   sources = [ "$dawn_root/src/dawn/node/index.js" ]
   outputs = [ "$root_build_dir/index.js" ]
 }
+
 copy("copy_cts_js") {
   sources = [ "$dawn_root/src/dawn/node/cts.cjs" ]
   outputs = [ "$root_build_dir/cts.cjs" ]

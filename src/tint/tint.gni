@@ -161,6 +161,7 @@ template("tint_benchmarks_source_set") {
 #           (e.g. IR binary) are included in the build
 ###############################################################################
 import("//testing/libfuzzer/fuzzer_test.gni")
+
 template("tint_fuzz_source_set") {
   source_set(target_name) {
     forward_variables_from(invoker, "*", [ "configs" ])

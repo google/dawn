@@ -32,6 +32,7 @@ template("generate_version_include") {
   if (!defined(invoker.input_file)) {
     # No input file, generate one
     assert(false, "Fix gen_version.py so that it outputs to a file")
+
     action(target_name) {
       script = "${dawn_dxc_dir}/utils/version/gen_version.py"
       outputs = [ "${target_gen_dir}/${invoker.output_file}" ]
