@@ -136,6 +136,63 @@ func TestGatherWgslFiles(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name:      "Adaptive comment stripping",
+			inputsDir: "/in",
+			outDir:    "/out",
+			setupFS: func(t *testing.T, fs oswrapper.FSTestOSWrapper) {
+				require.NoError(t, fs.MkdirAll("/in", 0777))
+				require.NoError(t, fs.MkdirAll("/out", 0777))
+
+				// Case 1: No comments
+				require.NoError(t, fs.WriteFile("/in/case1.wgsl", []byte("fn main() {}"), 0666))
+
+				// Case 2: Comments but no copyright
+				require.NoError(t, fs.WriteFile("/in/case2.wgsl", []byte("// This is a comment\nfn main() {}"), 0666))
+
+				// Case 3: Copyright but no other comments
+				copyrightNoComments := []byte("// Copyright 2020 The Dawn & Tint Authors\n//\n// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nfn main() {}")
+				require.NoError(t, fs.WriteFile("/in/case3.wgsl", copyrightNoComments, 0666))
+
+				// Case 4: Copyright and other comments
+				copyrightAndComments := []byte("// Copyright 2020 The Dawn & Tint Authors\n//\n// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\n// This is a comment\nfn main() {}")
+				require.NoError(t, fs.WriteFile("/in/case4.wgsl", copyrightAndComments, 0666))
+			},
+			wantErr: false,
+			verify: func(t *testing.T, fs oswrapper.FSTestOSWrapper) {
+				// Case 1 validation: Just copied as-is
+				content1, err := fs.ReadFile("/out/case1.wgsl")
+				require.NoError(t, err)
+				require.Equal(t, "fn main() {}", string(content1))
+				_, err = fs.Stat("/out/case1_no_comments.wgsl")
+				require.Error(t, err)
+
+				// Case 2 validation: Copied as-is, and a copy without comments
+				content2, err := fs.ReadFile("/out/case2.wgsl")
+				require.NoError(t, err)
+				require.Equal(t, "// This is a comment\nfn main() {}", string(content2))
+
+				content2NoComments, err := fs.ReadFile("/out/case2_no_comments.wgsl")
+				require.NoError(t, err)
+				require.Equal(t, "\nfn main() {}", string(content2NoComments))
+
+				// Case 3 validation: Only one copy with copyright removed
+				content3, err := fs.ReadFile("/out/case3.wgsl")
+				require.NoError(t, err)
+				require.Equal(t, "fn main() {}", string(content3))
+				_, err = fs.Stat("/out/case3_no_comments.wgsl")
+				require.Error(t, err)
+
+				// Case 4 validation: Two copies, one with copyright notice removed and one with notice and all other comments removed
+				content4, err := fs.ReadFile("/out/case4.wgsl")
+				require.NoError(t, err)
+				require.Equal(t, "// This is a comment\nfn main() {}", string(content4))
+
+				content4NoComments, err := fs.ReadFile("/out/case4_no_comments.wgsl")
+				require.NoError(t, err)
+				require.Equal(t, "\nfn main() {}", string(content4NoComments))
+			},
+		},
 	}
 
 	for _, tc := range tests {
