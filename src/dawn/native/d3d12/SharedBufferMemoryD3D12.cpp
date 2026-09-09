@@ -264,11 +264,6 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
         device->GetDeviceInfo().isUMA ? MemorySegment::Local : MemorySegment::NonLocal,
         descriptor->size);
 
-    // Consider the imported heap as already resident. Lock it because it is externally
-    // allocated.
-    device->GetResidencyManager()->TrackResidentAllocation(heap.get());
-    DAWN_TRY(device->GetResidencyManager()->LockAllocation(heap.get()));
-
     ComPtr<ID3D12Resource> placedResource;
     DAWN_TRY(CheckOutOfMemoryHRESULT(
         device->GetD3D12Device()->CreatePlacedResource(heap->GetD3D12Heap(), 0, &resourceDescriptor,
