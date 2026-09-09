@@ -283,6 +283,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                     .allow_dynamic_immediate_indices = false,
                 }));
 
+    // DecomposeAccess can introduce selects that need lowered, but ShaderIO requires subgroup
+    // builtins to have already been lowered.
+    raise::PolyfillConfig rerun_config = config;
+    rerun_config.rerun = true;
+    TINT_CHECK_RESULT(raise::BuiltinPolyfill(module, rerun_config));
+
     // BlockDecoratedStructs must run again to wrap the decomposed immediate array in a block
     // struct, as SPIR-V requires push constant variables to be typed as a struct. Storage and
     // uniform variables already carry a block struct from the earlier run and are left untouched.

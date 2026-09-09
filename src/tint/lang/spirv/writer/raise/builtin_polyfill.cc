@@ -207,6 +207,15 @@ struct State {
         worklist.reserve(128);
 
         for (auto* inst : ir.Instructions()) {
+            // When re-running target a specific subset of builtins to polyfill.
+            if (config.rerun) {
+                if (auto* builtin = inst->As<core::ir::CoreBuiltinCall>()) {
+                    if (builtin->Func() == core::BuiltinFn::kSelect) {
+                        worklist.push_back([this, builtin] { Select(builtin); });
+                    }
+                }
+                continue;
+            }
             // Replace types for instruction results if necessary
             for (auto* result : inst->Results()) {
                 if (auto* replacement = ReplacementType(ty, result->Type())) {

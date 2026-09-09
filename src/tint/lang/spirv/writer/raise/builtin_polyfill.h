@@ -46,6 +46,7 @@ struct PolyfillConfig {
     bool texture_sample_compare_2d_polyfill = false;
     bool cooperative_matrix_stride_is_matrix_elements = false;
     bool replace_workgroup_atomic_store_with_exchange = false;
+    bool rerun = false;
 };
 
 /// BuiltinPolyfill is a transform that replaces calls to builtins with polyfills and calls to
