@@ -35,6 +35,7 @@
 #include "src/dawn/utils/TestUtils.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn {
 namespace {
@@ -254,11 +255,11 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
 
                 uint32_t copiedWidthInBytes = utils::GetTexelBlockSizeInBytes(GetParam().mFormat) *
                                               copySize.width / blockWidth;
-                uint8_t* d = data.data();
+                dawn::Span<uint8_t> d = data;
                 for (uint32_t z = 0; z < depthOrArrayLayers; ++z) {
                     for (uint32_t row = 0; row < copySize.height / blockHeight; ++row) {
-                        std::fill_n(d, copiedWidthInBytes, 1);
-                        DAWN_UNSAFE_TODO(d += bytesPerRow);
+                        size_t offset = (z * rowsPerImage + row) * bytesPerRow;
+                        std::ranges::fill(d.subspan(offset, copiedWidthInBytes), 1);
                     }
                 }
                 EXPECT_BUFFER_U8_RANGE_EQ(data.data(), bufferDst, 0, bufferSize);
