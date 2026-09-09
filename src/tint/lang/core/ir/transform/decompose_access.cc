@@ -918,7 +918,7 @@ struct State {
             TINT_IR_ASSERT(ir, num_array_eles == 2);
             auto* vec_ty = ty.vec(BaseEleType(), num_array_eles);
             auto loads = MakeNLoads(var, array_idx, num_array_eles);
-            MaybeAddAlignment(loads[0]->As<InstructionResult>()->Instruction(), result_ty->Align());
+            MaybeAddAlignment(loads[0]->AsInstruction(), result_ty->Align());
             auto* construct = b.Construct(vec_ty, loads);
             return BitcastOrConvertIfNeeded(result_ty, construct)->AsInstruction();
         }
@@ -1085,7 +1085,7 @@ struct State {
         auto* array_idx = OffsetValueToArrayIndex(byte_idx);
         uint32_t num_loads = NumBaseElements(result_ty);
         auto loads = MakeNLoads(var, array_idx, num_loads);
-        MaybeAddAlignment(loads[0]->As<InstructionResult>()->Instruction(), result_ty->Align());
+        MaybeAddAlignment(loads[0]->AsInstruction(), result_ty->Align());
 
         // Since this vector has 2-byte elements, there are only a few possibilities:
         // 1. Base type is u16

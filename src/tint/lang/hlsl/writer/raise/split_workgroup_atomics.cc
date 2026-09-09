@@ -323,10 +323,7 @@ struct State {
                 usages.Push(child_usage);
             }
 
-            auto* object_result = access->Object()->As<core::ir::InstructionResult>();
-            TINT_IR_ASSERT(ir, object_result);
-
-            auto* parent = object_result->Instruction()->As<core::ir::Access>();
+            auto* parent = access->Object()->AsInstruction<core::ir::Access>();
             if (!parent) {
                 continue;
             }

@@ -445,13 +445,13 @@ struct State {
     /// @param builtin the builtin call instruction
     void ArrayLength(core::ir::CoreBuiltinCall* builtin) {
         // Strip away any let instructions to get to the original struct member access instruction.
-        auto* ptr = builtin->Args()[0]->As<core::ir::InstructionResult>();
-        while (auto* let = tint::As<core::ir::Let>(ptr->Instruction())) {
-            ptr = let->Value()->As<core::ir::InstructionResult>();
+        auto* ptr = builtin->Args()[0];
+        while (auto* let = ptr->AsInstruction<core::ir::Let>()) {
+            ptr = let->Value();
         }
         TINT_IR_ASSERT(ir, ptr);
 
-        auto* access = ptr->Instruction()->As<core::ir::Access>();
+        auto* access = ptr->AsInstruction<core::ir::Access>();
         TINT_IR_ASSERT(ir, access);
         TINT_IR_ASSERT(ir, access->Indices().size() == 1u);
         TINT_IR_ASSERT(ir, access->Object()->Type()->UnwrapPtr()->Is<core::type::Struct>());

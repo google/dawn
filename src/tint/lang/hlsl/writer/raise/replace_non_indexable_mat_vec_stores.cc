@@ -62,11 +62,9 @@ struct State {
             return true;
         }
         // Also check for lets to constant, which is a common use-case
-        if (auto* result = value->As<core::ir::InstructionResult>()) {
-            if (auto* let = result->Instruction()->As<core::ir::Let>()) {
-                if (let->Value()->Is<core::ir::Constant>()) {
-                    return true;
-                }
+        if (auto* let = value->AsInstruction<core::ir::Let>()) {
+            if (let->Value()->Is<core::ir::Constant>()) {
+                return true;
             }
         }
         return false;
@@ -166,11 +164,7 @@ struct State {
             return;
         }
         // Must be storing via an access
-        auto* to = store->To()->As<core::ir::InstructionResult>();
-        if (!to) {
-            return;
-        }
-        auto* to_access = to->Instruction()->As<core::ir::Access>();
+        auto* to_access = store->To()->AsInstruction<core::ir::Access>();
         if (!to_access) {
             return;
         }

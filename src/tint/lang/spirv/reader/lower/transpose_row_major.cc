@@ -212,17 +212,15 @@ struct State {
     // This is a store vector element that is going to a matrix which we've transposed the size of.
     // So, we need to swap the index on this store with the last index of the source access.
     void ReplaceStoreVectorElement(core::ir::StoreVectorElement* sve) {
-        auto* src_to = sve->To()->As<core::ir::InstructionResult>();
-        TINT_ASSERT(src_to);
-
-        auto* src_inst = src_to->Instruction();
+        auto* src_inst = sve->To()->AsInstruction();
+        TINT_ASSERT(src_inst);
 
         auto access_idx = access_to_vector_index.Get(sve->To());
         TINT_ASSERT(access_idx);
 
         core::ir::Value* new_access = nullptr;
         b.InsertAfter(src_inst, [&] {
-            auto* src_ty = src_to->Type()->As<core::type::Pointer>();
+            auto* src_ty = src_inst->Result()->Type()->As<core::type::Pointer>();
             TINT_ASSERT(src_ty);
 
             auto* src_mat = src_ty->StoreType()->As<core::type::Matrix>();
@@ -230,7 +228,7 @@ struct State {
 
             auto* new_ptr =
                 ty.ptr(src_ty->AddressSpace(), ty.vec(src_mat->Type(), src_mat->Rows()));
-            new_access = b.Access(new_ptr, src_to, Vector{sve->Index()});
+            new_access = b.Access(new_ptr, src_inst, Vector{sve->Index()});
 
             b.InsertAfter(sve,
                           [&] { b.StoreVectorElement(new_access, *access_idx, sve->Value()); });
@@ -243,17 +241,15 @@ struct State {
     // This is a load vector element that is coming from a matrix which we've transposed the size
     // of. So, we need to swap the index on this load with the last index of the source access.
     void ReplaceLoadVectorElement(core::ir::LoadVectorElement* lve) {
-        auto* src_result = lve->From()->As<core::ir::InstructionResult>();
-        TINT_ASSERT(src_result);
-
-        auto* src_inst = src_result->Instruction();
+        auto* src_inst = lve->From()->AsInstruction();
+        TINT_ASSERT(src_inst);
 
         auto access_idx = access_to_vector_index.Get(lve->From());
         TINT_ASSERT(access_idx);
 
         core::ir::Value* new_access = nullptr;
         b.InsertAfter(src_inst, [&] {
-            auto* src_ty = src_result->Type()->As<core::type::Pointer>();
+            auto* src_ty = src_inst->Result()->Type()->As<core::type::Pointer>();
             TINT_ASSERT(src_ty);
 
             auto* src_mat = src_ty->StoreType()->As<core::type::Matrix>();
@@ -261,7 +257,7 @@ struct State {
 
             auto* new_ptr =
                 ty.ptr(src_ty->AddressSpace(), ty.vec(src_mat->Type(), src_mat->Rows()));
-            new_access = b.Access(new_ptr, src_result, Vector{lve->Index()});
+            new_access = b.Access(new_ptr, src_inst, Vector{lve->Index()});
 
             b.InsertAfter(lve, [&] {
                 b.LoadVectorElementWithResult(lve->DetachResult(), new_access, *access_idx);

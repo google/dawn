@@ -937,19 +937,17 @@ class Impl {
                 // If the object is an unnamed value (a subexpression, not a let) and is the result
                 // of another access, then we can just append the index to that access.
                 if (!impl.mod.NameOf(obj).IsValid()) {
-                    if (auto* inst_res = obj->As<core::ir::InstructionResult>()) {
-                        if (auto* access = inst_res->Instruction()->As<core::ir::Access>()) {
-                            access->AddIndex(index);
-                            access->Result()->SetType(ty);
-                            bindings_.Remove(expr->object);
-                            // Move the access after the index expression.
-                            if (impl.current_block_->Back() != access) {
-                                impl.current_block_->Remove(access);
-                                impl.current_block_->Append(access);
-                            }
-                            Bind(expr, access->Result());
-                            return;
+                    if (auto* access = obj->AsInstruction<core::ir::Access>()) {
+                        access->AddIndex(index);
+                        access->Result()->SetType(ty);
+                        bindings_.Remove(expr->object);
+                        // Move the access after the index expression.
+                        if (impl.current_block_->Back() != access) {
+                            impl.current_block_->Remove(access);
+                            impl.current_block_->Append(access);
                         }
+                        Bind(expr, access->Result());
+                        return;
                     }
                 }
 
@@ -1209,7 +1207,7 @@ class Impl {
 
             void EndShortCircuit(const ast::BinaryExpression* b) {
                 auto res = GetValue(b);
-                auto* src = res->As<core::ir::InstructionResult>()->Instruction();
+                auto* src = res->AsInstruction();
                 auto* if_ = src->As<core::ir::If>();
                 TINT_ASSERT(if_);
                 auto rhs = GetValue(b->rhs);

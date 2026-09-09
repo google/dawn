@@ -120,7 +120,7 @@ struct State {
     /// Lowers a load from a swizzle view.
     /// @param load the load instruction to lower
     void LowerLoad(core::ir::Load* load) {
-        auto* inst = load->From()->As<core::ir::InstructionResult>()->Instruction();
+        auto* inst = load->From()->AsInstruction();
         auto* swizzle = inst->As<core::ir::Swizzle>();
 
         // If loading through an accessor on a swizzle view (i.e. v.zyx[0]), extract the accessor
@@ -128,10 +128,7 @@ struct State {
         core::ir::Value* accessor_idx = nullptr;
         if (auto* access = inst->As<core::ir::Access>()) {
             accessor_idx = access->Indices()[0];
-            swizzle = access->Object()
-                          ->As<core::ir::InstructionResult>()
-                          ->Instruction()
-                          ->As<core::ir::Swizzle>();
+            swizzle = access->Object()->AsInstruction()->As<core::ir::Swizzle>();
         }
 
         auto collapsed = Collapse(swizzle);
