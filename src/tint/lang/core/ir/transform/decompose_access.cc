@@ -273,11 +273,9 @@ struct State {
         uint32_t byte_struct_offset = 0;
 
         // The byte size of a bufferArrayView call
-        uint32_t byte_size = 0;
         core::ir::Value* byte_size_expr = nullptr;
 
         // The byte length of a bufferView or bufferArrayView call
-        uint32_t byte_length = 0;
         core::ir::Value* byte_length_expr = nullptr;
     };
 
@@ -440,10 +438,6 @@ struct State {
     // array of vec4u.
     // Note, this must be called inside a builder insert block (Append, InsertBefore, etc)
     core::ir::Value* OffsetValueToArrayIndex(core::ir::Value* val) {
-        if (auto* cnst = val->As<core::ir::Constant>()) {
-            auto v = cnst->Value()->ValueAs<uint32_t>();
-            return b.Value(u32(v / BaseEleType()->Size()));
-        }
         return b.Divide(val, u32(BaseEleType()->Size()));
     }
 
@@ -452,10 +446,6 @@ struct State {
     // correct vector array element in the underlying variable.
     core::ir::Value* CalculateVectorOffset(core::ir::Value* byte_idx,
                                            const core::type::Vector* src_ty) {
-        if (auto* byte_cnst = byte_idx->As<core::ir::Constant>()) {
-            return b.Value(u32((byte_cnst->Value()->ValueAs<uint32_t>() % src_ty->Size()) /
-                               src_ty->Type()->Size()));
-        }
         // Note: Using bitwise-and and shift instead of modulo and divide here was necessary to
         // avoid an FXC miscompile. See https://crbug.com/454366353.
         return b.ShiftRight(b.And(byte_idx, b.Constant(u32(src_ty->Size() - 1))),
@@ -480,66 +470,26 @@ struct State {
     // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
     // Note, size is always in bytes.
     void UpdateSizeData(core::ir::Value* v, OffsetData* data) {
-        tint::Switch(
-            v,  //
-            [&](core::ir::Constant* idx_value) {
-                TINT_IR_ASSERT(ir, data->byte_size == 0);
-                data->byte_size = idx_value->Value()->ValueAs<uint32_t>();
-            },
-            [&](core::ir::Value* val) {
-                TINT_IR_ASSERT(ir, data->byte_size_expr == nullptr);
-                auto* idx = val;
-                idx = b.InsertConvertIfNeeded(ty.u32(), val);
-                data->byte_size_expr = idx;
-            },
-            TINT_ICE_ON_NO_MATCH);
-    }
-
-    // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
-    core::ir::Value* SizeToValue(OffsetData* data) {
-        if (data->byte_size_expr) {
-            TINT_IR_ASSERT(ir, data->byte_size == 0);
-            return data->byte_size_expr;
-        }
-        return b.Constant(u32(data->byte_size));
+        TINT_IR_ASSERT(ir, data->byte_size_expr == nullptr);
+        auto* idx = v;
+        idx = b.InsertConvertIfNeeded(ty.u32(), idx);
+        data->byte_size_expr = idx;
     }
 
     /// @returns true if data has size information.
-    bool HasSizeData(const OffsetData& data) {
-        return data.byte_size != 0 || data.byte_size_expr != nullptr;
-    }
+    bool HasSizeData(const OffsetData& data) { return data.byte_size_expr != nullptr; }
 
     // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
     // Note, length is always in bytes.
     void UpdateLengthData(core::ir::Value* v, OffsetData* data) {
-        tint::Switch(
-            v,  //
-            [&](core::ir::Constant* idx_value) {
-                TINT_IR_ASSERT(ir, data->byte_length == 0);
-                data->byte_length = idx_value->Value()->ValueAs<uint32_t>();
-            },
-            [&](core::ir::Value* val) {
-                TINT_IR_ASSERT(ir, data->byte_length_expr == nullptr);
-                auto* idx = val;
-                idx = b.InsertConvertIfNeeded(ty.u32(), val);
-                data->byte_length_expr = idx;
-            },
-            TINT_ICE_ON_NO_MATCH);
-    }
-
-    // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
-    core::ir::Value* LengthToValue(OffsetData* data) {
-        if (data->byte_length_expr) {
-            TINT_IR_ASSERT(ir, data->byte_length == 0);
-            return data->byte_length_expr;
-        }
-        return b.Constant(u32(data->byte_length));
+        TINT_IR_ASSERT(ir, data->byte_length_expr == nullptr);
+        auto* idx = v;
+        idx = b.InsertConvertIfNeeded(ty.u32(), idx);
+        data->byte_length_expr = idx;
     }
 
     /// @returns true if data has length information.
-    bool HasLengthData(const OffsetData& data) {
-        return data.byte_length != 0 || data.byte_length_expr != nullptr;
-    }
+    bool HasLengthData(const OffsetData& data) { return data.byte_length_expr != nullptr; }
 
     // Sets the alignment of `inst` to `align` if:
     // * The decompose alignment is smaller than `align`
@@ -1399,9 +1349,9 @@ struct State {
             bool has_length = HasLengthData(data);
             core::ir::Value* len = nullptr;
             if (has_size) {
-                len = SizeToValue(&data);
+                len = data.byte_size_expr;
             } else if (has_length) {
-                len = LengthToValue(&data);
+                len = data.byte_length_expr;
             } else {
                 TINT_IR_ASSERT(ir, ptr_ty->AddressSpace() != core::AddressSpace::kUniform &&
                                        ptr_ty->AddressSpace() != core::AddressSpace::kWorkgroup);
