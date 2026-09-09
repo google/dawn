@@ -31,6 +31,7 @@
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn {
 namespace {
@@ -49,10 +50,8 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
   public:
     ~InternalShaderExpectation() override = default;
 
-    InternalShaderExpectation(const uint64_t* values,
-                              const unsigned int count,
-                              const uint32_t quantizationMask) {
-        mExpected.assign(values, DAWN_UNSAFE_TODO(values + count));
+    InternalShaderExpectation(dawn::Span<const uint64_t> values, const uint32_t quantizationMask) {
+        mExpected.assign(values.begin(), values.end());
         mQuantizationMask = quantizationMask;
     }
 
@@ -206,8 +205,7 @@ class QueryInternalShaderTests : public DawnTest {
             GetExpectedResults(timestampValues, start, firstQuery, queryCount, period);
 
         EXPECT_BUFFER(timestampsBuffer, 0, size,
-                      new InternalShaderExpectation(expected.data(), size / sizeof(uint64_t),
-                                                    quantizationMask))
+                      new InternalShaderExpectation(expected, quantizationMask))
             << "Conversion test for period:" << period << " firstQuery:" << firstQuery
             << " queryCount:" << queryCount << " destinationOffset:" << destinationOffset
             << " quantizationMask: 0x" << std::hex << quantizationMask;
