@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <cstddef>
 #include <utility>
 #include <vector>
 
@@ -72,7 +73,7 @@ std::ostream& operator<<(std::ostream& os, const Event& event) {
 using Events = std::vector<Event>;
 
 struct RefTracker {
-    explicit constexpr RefTracker(nullptr_t) : mId(0), mEvents(nullptr) {}
+    explicit constexpr RefTracker(std::nullptr_t) : mId(0), mEvents(nullptr) {}
 
     constexpr RefTracker(const RefTracker& other) = default;
 

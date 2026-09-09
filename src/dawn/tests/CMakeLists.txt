@@ -26,6 +26,17 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ################################################################################
+# Generated mock WebGPU API used by dawn_unittests
+################################################################################
+
+DawnJSONGenerator(
+    TARGET "mock_api"
+    PRINT_NAME "Dawn mock WebGPU API"
+    OUTPUT_HEADERS DAWN_MOCK_WEBGPU_GEN_HEADERS
+    OUTPUT_SOURCES DAWN_MOCK_WEBGPU_GEN_SOURCES
+)
+
+################################################################################
 # dawn_test_infra - Code shared by all test kinds
 ################################################################################
 
@@ -34,8 +45,11 @@ add_library(dawn_test_infra OBJECT
     "AdapterTestConfig.h"
     "DawnTest.cpp"
     "DawnTest.h"
+    "MockCallback.h"
+    "ParamGenerator.h"
     "PartitionAllocSupport.cpp"
     "PartitionAllocSupport.h"
+    "StringViewMatchers.h"
     "ToggleParser.cpp"
     "ToggleParser.h"
     "mocks/platform/CachingInterfaceMock.cpp"
@@ -49,14 +63,28 @@ target_link_libraries(dawn_test_infra PRIVATE
     dawn_crash_handler
     absl::stacktrace
     absl::symbolize
+    dawn_common
+    dawn_internal_config
     dawn_native
+    dawn_platform
+    dawn_proc
+    dawn_system_utils
+    dawn_test_utils
     dawn_wgpu_utils
     dawncpp
     gmock
+    partition_alloc
 )
 
 if (DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
-    target_link_libraries(dawn_test_infra PRIVATE glfw)
+    target_link_libraries(dawn_test_infra PRIVATE
+        glfw
+        dawn::dawn_glfw
+    )
+endif()
+
+if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
+    target_link_libraries(dawn_test_infra PRIVATE replay)
 endif()
 
 ################################################################################
@@ -448,6 +476,326 @@ target_link_libraries(dawn_end2end_tests PRIVATE
     dawn_internal_config
     dawn_end2end_test_objects
     dawn_whitebox_test_objects
+    dawn_test_infra
+    gmock
+    partition_alloc
+)
+
+################################################################################
+# dawn_native_unittest_mocks - Native implementation mocks used by unit tests
+################################################################################
+
+set(native_unittest_mock_sources
+    ${DAWN_MOCK_WEBGPU_GEN_HEADERS}
+    ${DAWN_MOCK_WEBGPU_GEN_SOURCES}
+    "unittests/native/mocks/BindGroupLayoutMock.cpp"
+    "unittests/native/mocks/BindGroupLayoutMock.h"
+    "unittests/native/mocks/BindGroupMock.cpp"
+    "unittests/native/mocks/BindGroupMock.h"
+    "unittests/native/mocks/BufferMock.cpp"
+    "unittests/native/mocks/BufferMock.h"
+    "unittests/native/mocks/CommandBufferMock.cpp"
+    "unittests/native/mocks/CommandBufferMock.h"
+    "unittests/native/mocks/ComputePipelineMock.cpp"
+    "unittests/native/mocks/ComputePipelineMock.h"
+    "unittests/native/mocks/DawnMockTest.cpp"
+    "unittests/native/mocks/DawnMockTest.h"
+    "unittests/native/mocks/DeviceMock.cpp"
+    "unittests/native/mocks/DeviceMock.h"
+    "unittests/native/mocks/ExternalTextureMock.cpp"
+    "unittests/native/mocks/ExternalTextureMock.h"
+    "unittests/native/mocks/PipelineLayoutMock.cpp"
+    "unittests/native/mocks/PipelineLayoutMock.h"
+    "unittests/native/mocks/QuerySetMock.cpp"
+    "unittests/native/mocks/QuerySetMock.h"
+    "unittests/native/mocks/QueueMock.cpp"
+    "unittests/native/mocks/QueueMock.h"
+    "unittests/native/mocks/RenderPipelineMock.cpp"
+    "unittests/native/mocks/RenderPipelineMock.h"
+    "unittests/native/mocks/SamplerMock.cpp"
+    "unittests/native/mocks/SamplerMock.h"
+    "unittests/native/mocks/ShaderModuleMock.cpp"
+    "unittests/native/mocks/ShaderModuleMock.h"
+    "unittests/native/mocks/TextureMock.cpp"
+    "unittests/native/mocks/TextureMock.h"
+)
+
+add_library(dawn_native_unittest_mocks OBJECT ${native_unittest_mock_sources})
+common_compile_options(dawn_native_unittest_mocks)
+if (MSVC)
+    # The generated mock implementation exceeds the default COFF section limit.
+    target_compile_options(dawn_native_unittest_mocks PRIVATE "/bigobj")
+endif()
+target_include_directories(dawn_native_unittest_mocks PRIVATE "${DAWN_BUILD_GEN_DIR}")
+target_link_libraries(dawn_native_unittest_mocks PRIVATE
+    dawn_common
+    dawn_internal_config
+    dawn_native
+    dawn_native_objects
+    dawn_proc
+    dawn_test_infra
+    dawncpp
+    gmock
+)
+
+################################################################################
+# dawn_unittest_objects
+################################################################################
+
+set(unittest_sources
+    "${Dawn_SOURCE_DIR}/src/dawn/wire/client/ClientMemoryTransferService_mock.cpp"
+    "${Dawn_SOURCE_DIR}/src/dawn/wire/client/ClientMemoryTransferService_mock.h"
+    "${Dawn_SOURCE_DIR}/src/dawn/wire/server/ServerMemoryTransferService_mock.cpp"
+    "${Dawn_SOURCE_DIR}/src/dawn/wire/server/ServerMemoryTransferService_mock.h"
+    "${Dawn_SOURCE_DIR}/src/utils/assert_test.cc"
+    "${Dawn_SOURCE_DIR}/src/utils/heap_array_test.cc"
+    "${Dawn_SOURCE_DIR}/src/utils/numeric_test.cc"
+    "${Dawn_SOURCE_DIR}/src/utils/span_tests.cc"
+    "${Dawn_SOURCE_DIR}/src/utils/typed_integer_tests.cc"
+    "${Dawn_SOURCE_DIR}/src/utils/underlying_type_tests.cc"
+    "DawnNativeTest.cpp"
+    "DawnNativeTest.h"
+    "unittests/AlgebraTests.cpp"
+    "unittests/AsyncTaskTests.cpp"
+    "unittests/BitSetRangeIteratorTests.cpp"
+    "unittests/BuddyAllocatorTests.cpp"
+    "unittests/BuddyMemoryAllocatorTests.cpp"
+    "unittests/ChainUtilsTests.cpp"
+    "unittests/CommandAllocatorTests.cpp"
+    "unittests/CommandLineParserTests.cpp"
+    "unittests/ContentLessObjectCacheTests.cpp"
+    "unittests/CppAPITests.cpp"
+    "unittests/DefaultTests.cpp"
+    "unittests/EnumClassBitmasksTests.cpp"
+    "unittests/EnumMaskIteratorTests.cpp"
+    "unittests/EnumeratorTests.cpp"
+    "unittests/ErrorTests.cpp"
+    "unittests/FeatureTests.cpp"
+    "unittests/GPUInfoTests.cpp"
+    "unittests/GetProcAddressTests.cpp"
+    "unittests/ITypArrayTests.cpp"
+    "unittests/ITypBitsetTests.cpp"
+    "unittests/ITypStackVecTests.cpp"
+    "unittests/ITypVectorTests.cpp"
+    "unittests/LRUCacheTests.cpp"
+    "unittests/LinkedListTests.cpp"
+    "unittests/MathTests.cpp"
+    "unittests/MemoryBlockAllocatorTests.cpp"
+    "unittests/MutexProtectedTests.cpp"
+    "unittests/MutexTests.cpp"
+    "unittests/NumericTests.cpp"
+    "unittests/ObjectBaseTests.cpp"
+    "unittests/PerStageTests.cpp"
+    "unittests/PerThreadProcTests.cpp"
+    "unittests/PlacementAllocatedTests.cpp"
+    "unittests/RangeTests.cpp"
+    "unittests/RefBaseTests.cpp"
+    "unittests/RefCountedTests.cpp"
+    "unittests/ResultTests.cpp"
+    "unittests/RingBufferAllocatorTests.cpp"
+    "unittests/SerialMapTests.cpp"
+    "unittests/SerialQueueTests.cpp"
+    "unittests/Sha3Tests.cpp"
+    "unittests/SlabAllocatorTests.cpp"
+    "unittests/StringsTests.cpp"
+    "unittests/SubresourceStorageTests.cpp"
+    "unittests/SystemUtilsTests.cpp"
+    "unittests/ToBackendTests.cpp"
+    "unittests/ToggleTests.cpp"
+    "unittests/UnicodeTests.cpp"
+    "unittests/WeakRefTests.cpp"
+    "unittests/WorkerTaskPoolTests.cpp"
+    "unittests/native/AllowedErrorTests.cpp"
+    "unittests/native/BlobCacheTests.cpp"
+    "unittests/native/BlobTests.cpp"
+    "unittests/native/BufferBaseTests.cpp"
+    "unittests/native/CacheRequestTests.cpp"
+    "unittests/native/CommandBufferEncodingTests.cpp"
+    "unittests/native/CreatePipelineAsyncEventTests.cpp"
+    "unittests/native/DestroyObjectTests.cpp"
+    "unittests/native/DeviceAsyncTaskTests.cpp"
+    "unittests/native/DeviceCreationTests.cpp"
+    "unittests/native/DeviceMutexTests.cpp"
+    "unittests/native/ErrorMonadTests.cpp"
+    "unittests/native/ImmediatesTrackerTests.cpp"
+    "unittests/native/LimitsTests.cpp"
+    "unittests/native/MemoryInstrumentationTests.cpp"
+    "unittests/native/ObjectContentHasherTests.cpp"
+    "unittests/native/ShaderModuleTests.cpp"
+    "unittests/native/SkipValidationTests.cpp"
+    "unittests/native/StreamTests.cpp"
+    "unittests/validation/BindGroupValidationTests.cpp"
+    "unittests/validation/BufferValidationTests.cpp"
+    "unittests/validation/CommandBufferValidationTests.cpp"
+    "unittests/validation/CompatValidationTests.cpp"
+    "unittests/validation/ComputeIndirectValidationTests.cpp"
+    "unittests/validation/ComputeValidationTests.cpp"
+    "unittests/validation/CopyCommandsValidationTests.cpp"
+    "unittests/validation/CopyTextureForBrowserTests.cpp"
+    "unittests/validation/DebugMarkerValidationTests.cpp"
+    "unittests/validation/DeviceValidationTests.cpp"
+    "unittests/validation/DrawIndirectValidationTests.cpp"
+    "unittests/validation/DrawVertexAndIndexBufferOOBValidationTests.cpp"
+    "unittests/validation/DynamicStateCommandValidationTests.cpp"
+    "unittests/validation/ErrorScopeValidationTests.cpp"
+    "unittests/validation/ExternalTextureTests.cpp"
+    "unittests/validation/GetBindGroupLayoutValidationTests.cpp"
+    "unittests/validation/ImmediateDataTests.cpp"
+    "unittests/validation/IndexBufferValidationTests.cpp"
+    "unittests/validation/InternalUsageValidationTests.cpp"
+    "unittests/validation/LabelTests.cpp"
+    "unittests/validation/MinimumBufferSizeValidationTests.cpp"
+    "unittests/validation/MultiDrawIndirectValidationTests.cpp"
+    "unittests/validation/MultipleDeviceTests.cpp"
+    "unittests/validation/ObjectCachingTests.cpp"
+    "unittests/validation/OverridableConstantsValidationTests.cpp"
+    "unittests/validation/PipelineAndPassCompatibilityTests.cpp"
+    "unittests/validation/PixelLocalStorageTests.cpp"
+    "unittests/validation/QueryValidationTests.cpp"
+    "unittests/validation/QueueOnSubmittedWorkDoneValidationTests.cpp"
+    "unittests/validation/QueueSubmitValidationTests.cpp"
+    "unittests/validation/QueueWriteBufferValidationTests.cpp"
+    "unittests/validation/QueueWriteTextureValidationTests.cpp"
+    "unittests/validation/RenderBundleValidationTests.cpp"
+    "unittests/validation/RenderPassDescriptorValidationTests.cpp"
+    "unittests/validation/RenderPipelineValidationTests.cpp"
+    "unittests/validation/ResourceTableValidationTests.cpp"
+    "unittests/validation/ResourceUsageTrackingTests.cpp"
+    "unittests/validation/SamplerValidationTests.cpp"
+    "unittests/validation/ShaderModuleValidationTests.cpp"
+    "unittests/validation/StorageTextureValidationTests.cpp"
+    "unittests/validation/TexelBufferValidationTests.cpp"
+    "unittests/validation/TextureSubresourceTests.cpp"
+    "unittests/validation/TextureValidationTests.cpp"
+    "unittests/validation/TextureViewValidationTests.cpp"
+    "unittests/validation/ToggleValidationTests.cpp"
+    "unittests/validation/UnsafeAPIValidationTests.cpp"
+    "unittests/validation/ValidationTest.cpp"
+    "unittests/validation/ValidationTest.h"
+    "unittests/validation/VertexBufferValidationTests.cpp"
+    "unittests/validation/VertexStateValidationTests.cpp"
+    "unittests/validation/WGSLFeatureValidationTests.cpp"
+    "unittests/validation/WritableBufferBindingAliasingValidationTests.cpp"
+    "unittests/validation/WritableTextureBindingAliasingValidationTests.cpp"
+    "unittests/validation/WriteBufferTests.cpp"
+    "unittests/wire/WireAdapterTests.cpp"
+    "unittests/wire/WireArgumentTests.cpp"
+    "unittests/wire/WireBasicTests.cpp"
+    "unittests/wire/WireBufferMappingTests.cpp"
+    "unittests/wire/WireConfusionDeathTests.cpp"
+    "unittests/wire/WireCreatePipelineAsyncTests.cpp"
+    "unittests/wire/WireDeviceLifetimeTests.cpp"
+    "unittests/wire/WireDisconnectTests.cpp"
+    "unittests/wire/WireErrorCallbackTests.cpp"
+    "unittests/wire/WireExtensionTests.cpp"
+    "unittests/wire/WireFutureTest.cpp"
+    "unittests/wire/WireFutureTest.h"
+    "unittests/wire/WireInjectBufferTests.cpp"
+    "unittests/wire/WireInjectInstanceTests.cpp"
+    "unittests/wire/WireInjectSurfaceTests.cpp"
+    "unittests/wire/WireInjectTextureTests.cpp"
+    "unittests/wire/WireInstanceTests.cpp"
+    "unittests/wire/WireMemoryTransferServiceTests.cpp"
+    "unittests/wire/WireOptionalTests.cpp"
+    "unittests/wire/WireQueueTests.cpp"
+    "unittests/wire/WireShaderModuleTests.cpp"
+    "unittests/wire/WireSpecificCommandTests.cpp"
+    "unittests/wire/WireTest.cpp"
+    "unittests/wire/WireTest.h"
+)
+
+set(unittest_conditional_private_depends)
+
+# RawPtrTests.cpp is intentionally omitted. GN enables it only when the real
+# PartitionAlloc dangling-pointer checks are configured. CMake currently
+# provides only Dawn's header-only no-op raw_ptr compatibility target.
+
+if (WIN32)
+    list(APPEND unittest_sources
+        "unittests/WindowsUtilsTests.cpp"
+        "unittests/wire/WireInlineSharedMemoryManagerTests.cpp"
+    )
+endif()
+
+if (DAWN_ENABLE_D3D12)
+    list(APPEND unittest_sources
+        "unittests/d3d12/CopySplitTests.cpp"
+    )
+endif()
+
+if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
+    list(APPEND unittest_sources
+        "unittests/replay/CaptureWalkerTests.cpp"
+    )
+    list(APPEND unittest_conditional_private_depends replay)
+endif()
+
+if (TINT_BUILD_SPV_READER)
+    list(APPEND unittest_conditional_private_depends SPIRV-Tools-opt)
+endif()
+
+if (DAWN_ENABLE_VULKAN)
+    # Both tests require Vulkan headers. MemoryTypeSelectorTests also depends on
+    # implementation code compiled only when the Vulkan backend is enabled.
+    list(APPEND unittest_sources
+        "unittests/validation/YCbCrValidationTests.cpp"
+        "unittests/vulkan/MemoryTypeSelectorTests.cpp"
+    )
+    list(APPEND unittest_conditional_private_depends Vulkan::Headers)
+
+    if (UNIX AND NOT ANDROID AND NOT APPLE)
+        list(APPEND unittest_sources
+            "unittests/DRMUtilsTests.cpp"
+        )
+    endif()
+endif()
+
+add_library(dawn_unittest_objects OBJECT ${unittest_sources})
+common_compile_options(dawn_unittest_objects)
+# Wire unit tests include the generated mock WebGPU header.
+add_dependencies(dawn_unittest_objects dawn_native_unittest_mocks)
+if (MSVC)
+    # Some unit test translation units exceed the default COFF section limit.
+    target_compile_options(dawn_unittest_objects PRIVATE "/bigobj")
+endif()
+target_include_directories(dawn_unittest_objects PRIVATE "${DAWN_BUILD_GEN_DIR}")
+target_link_libraries(dawn_unittest_objects PRIVATE
+    absl::flat_hash_map
+    absl::str_format
+    absl_strings
+    dawn_common
+    dawn_crash_handler
+    dawn_internal_config
+    dawn_native
+    dawn_native_objects
+    dawn_platform
+    dawn_proc
+    dawn_shared_utils
+    dawn_shared_utils_chromium_test_compat
+    dawn_system_utils
+    dawn_test_infra
+    dawn_test_utils
+    dawn_wgpu_utils
+    dawn_wire
+    dawncpp
+    gmock
+    libtint
+    partition_alloc
+
+    ${unittest_conditional_private_depends}
+)
+
+################################################################################
+# dawn_unittests
+################################################################################
+
+add_executable(dawn_unittests "UnittestsMain.cpp")
+common_compile_options(dawn_unittests)
+target_link_libraries(dawn_unittests PRIVATE
+    absl::flat_hash_map
+    dawn_internal_config
+    dawn_native_unittest_mocks
+    dawn_unittest_objects
     dawn_test_infra
     gmock
     partition_alloc

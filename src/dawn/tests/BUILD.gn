@@ -437,14 +437,16 @@ dawn_test("dawn_unittests") {
     sources += [ "unittests/replay/CaptureWalkerTests.cpp" ]
   }
 
-  if (dawn_enable_vulkan && (is_chromeos || is_linux)) {
-    sources += [ "unittests/DRMUtilsTests.cpp" ]
-  }
+  if (dawn_enable_vulkan) {
+    sources += [
+      "unittests/validation/YCbCrValidationTests.cpp",
+      "unittests/vulkan/MemoryTypeSelectorTests.cpp",
+    ]
 
-  sources += [
-    "unittests/validation/YCbCrValidationTests.cpp",
-    "unittests/vulkan/MemoryTypeSelectorTests.cpp",
-  ]
+    if (is_chromeos || is_linux) {
+      sources += [ "unittests/DRMUtilsTests.cpp" ]
+    }
+  }
 
   if (tint_build_spv_reader) {
     deps += [ "${dawn_spirv_tools_dir}:spvtools_opt" ]
