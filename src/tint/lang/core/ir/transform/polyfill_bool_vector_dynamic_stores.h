@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_POLYFILL_BOOL_VECTOR_DYNAMIC_STORES_H_
-#define SRC_TINT_LANG_MSL_WRITER_RAISE_POLYFILL_BOOL_VECTOR_DYNAMIC_STORES_H_
+#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_POLYFILL_BOOL_VECTOR_DYNAMIC_STORES_H_
+#define SRC_TINT_LANG_CORE_IR_TRANSFORM_POLYFILL_BOOL_VECTOR_DYNAMIC_STORES_H_
 
 #include "src/tint/utils/result.h"
 
@@ -35,13 +35,15 @@ namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::msl::writer::raise {
+namespace tint::core::ir::transform {
 
 /// PolyfillBoolVectorDynamicStores is a transform that replaces dynamic writes to boolean vector
 /// elements with a branchless select-based whole vector write operation to work around driver bugs
-/// on some Intel GPUs on macOS.
+/// on some Intel GPUs.
+/// @param ir the module to transform
+/// @returns success or failure
 Result<SuccessType> PolyfillBoolVectorDynamicStores(core::ir::Module& ir);
 
-}  // namespace tint::msl::writer::raise
+}  // namespace tint::core::ir::transform
 
-#endif  // SRC_TINT_LANG_MSL_WRITER_RAISE_POLYFILL_BOOL_VECTOR_DYNAMIC_STORES_H_
+#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_POLYFILL_BOOL_VECTOR_DYNAMIC_STORES_H_

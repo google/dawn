@@ -150,6 +150,10 @@ struct Options {
         /// comparisons against one.
         bool replace_unsigned_compare_zero = false;
 
+        /// Set to `true` to polyfill dynamic component stores on boolean vectors with a branchless
+        /// select-based whole vector write operation.
+        bool polyfill_bool_vec_dynamic_store = false;
+
         TINT_REFLECT(Workarounds,
                      polyfill_case_switch,
                      scalarize_max_min_clamp,
@@ -167,7 +171,8 @@ struct Options {
                      cooperative_matrix_stride_is_matrix_elements,
                      collapse_subgroup_min_max,
                      replace_workgroup_atomic_store_with_exchange,
-                     replace_unsigned_compare_zero);
+                     replace_unsigned_compare_zero,
+                     polyfill_bool_vec_dynamic_store);
     };
 
     /// Any options which are controlled by the presence/absence of a vulkan extension.

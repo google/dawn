@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/msl/writer/raise/polyfill_bool_vector_dynamic_stores.h"
+#include "src/tint/lang/core/ir/transform/polyfill_bool_vector_dynamic_stores.h"
 
 #include <utility>
 
@@ -35,12 +35,12 @@
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-namespace tint::msl::writer::raise {
+namespace tint::core::ir::transform {
 namespace {
 
-using MslWriter_PolyfillBoolVectorDynamicStoresTest = core::ir::transform::TransformTest;
+using IR_PolyfillBoolVectorDynamicStoresTest = TransformTest;
 
-TEST_F(MslWriter_PolyfillBoolVectorDynamicStoresTest, DynamicStore_Vec3Bool) {
+TEST_F(IR_PolyfillBoolVectorDynamicStoresTest, DynamicStore_Vec3Bool) {
     auto* func = b.Function("foo", ty.void_());
     auto* idx_param = b.FunctionParam("idx", ty.i32());
     auto* val_param = b.FunctionParam("val", ty.bool_());
@@ -84,7 +84,7 @@ TEST_F(MslWriter_PolyfillBoolVectorDynamicStoresTest, DynamicStore_Vec3Bool) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PolyfillBoolVectorDynamicStoresTest, ConstantStore_Vec3Bool_NoChange) {
+TEST_F(IR_PolyfillBoolVectorDynamicStoresTest, ConstantStore_Vec3Bool_NoChange) {
     auto* func = b.Function("foo", ty.void_());
     auto* val_param = b.FunctionParam("val", ty.bool_());
     func->SetParams({val_param});
@@ -114,4 +114,4 @@ TEST_F(MslWriter_PolyfillBoolVectorDynamicStoresTest, ConstantStore_Vec3Bool_NoC
 }
 
 }  // namespace
-}  // namespace tint::msl::writer::raise
+}  // namespace tint::core::ir::transform

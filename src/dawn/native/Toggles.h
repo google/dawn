@@ -225,7 +225,7 @@ enum class Toggle {
     GLDefer,
     DisableTransientAttachment,
     AutoMapBackendBuffer,
-    MetalPolyfillBoolVecDynamicStore,
+    PolyfillBoolVecDynamicStore,
 
     EnumCount,
     InvalidEnum = EnumCount,

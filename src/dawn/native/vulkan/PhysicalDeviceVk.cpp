@@ -1218,6 +1218,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         }
     }
 
+    if (IsWindows() && gpu_info::IsIntel(GetVendorId())) {
+        // Dynamically indexed stores on boolean vectors cause crashes on Intel Windows Vulkan
+        // (crbug.com/556809584).
+        deviceToggles->Default(Toggle::PolyfillBoolVecDynamicStore, true);
+    }
+
     // The environment can request to various options for depth-stencil formats that could be
     // unavailable. Override the decision if it is not applicable.
     bool supportsD32s8 = IsDepthStencilFormatSupported(VK_FORMAT_D32_SFLOAT_S8_UINT);

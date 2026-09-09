@@ -516,5 +516,34 @@ TEST_F(SpirvWriterTest, StoreVectorElement_DynamicIndex) {
 )");
 }
 
+TEST_F(SpirvWriterTest, StoreVectorElement_DynamicIndex_Bool_Polyfill) {
+    auto* idx = b.FunctionParam("idx", ty.i32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({idx});
+    b.Append(func->Block(), [&] {
+        auto* vec_var = b.Var("vec", ty.ptr<function, vec3<bool>>());
+        b.StoreVectorElement(vec_var, idx, b.Constant(true));
+        b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.i32()));
+        b.Return(eb);
+    });
+
+    Options options;
+    options.workarounds.polyfill_bool_vec_dynamic_store = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST(R"(
+         %17 = OpLoad %v3bool %vec None
+         %19 = OpCompositeConstruct %v3uint %14 %14 %14
+         %20 = OpIEqual %v3bool %19 %21
+         %24 = OpSelect %v3bool %20 %25 %17
+               OpStore %vec %24 None
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

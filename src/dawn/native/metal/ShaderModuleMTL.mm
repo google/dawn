@@ -370,7 +370,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.workarounds.fix_u32_div_mod =
         device->IsToggleEnabled(Toggle::MetalFixU32DivMod);
     req.tintOptions.workarounds.polyfill_bool_vec_dynamic_store =
-        device->IsToggleEnabled(Toggle::MetalPolyfillBoolVecDynamicStore);
+        device->IsToggleEnabled(Toggle::PolyfillBoolVecDynamicStore);
 
     req.tintOptions.extensions.disable_demote_to_helper =
         device->IsToggleEnabled(Toggle::DisableDemoteToHelper);

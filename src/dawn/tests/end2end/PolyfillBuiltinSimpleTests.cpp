@@ -471,9 +471,6 @@ TEST_P(PolyfillBuiltinSimpleTests, PolyfillFloatUnary) {
 // Test dynamic indexing into a boolean vector. This is a minimal reproducer for a suspected driver
 // bug on Intel Mac (crbug.com/540789158).
 TEST_P(PolyfillBuiltinSimpleTests, BoolVectorDynamicIndexStore) {
-    // TODO(crbug.com/556809584): Driver crash on Intel Windows Vulkan.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsIntel() && IsVulkan());
-
     // Initial v is <true, true, true>.
     std::string shader = R"(
         struct Input {
@@ -531,8 +528,9 @@ DAWN_INSTANTIATE_TEST(PolyfillBuiltinSimpleTests,
                       WebGPUBackend(),
                       D3D12Backend({"scalarize_max_min_clamp"}),
                       MetalBackend({"scalarize_max_min_clamp"}),
-                      MetalBackend({"metal_polyfill_bool_vec_dynamic_store"}),
+                      MetalBackend({"polyfill_bool_vec_dynamic_store"}),
                       VulkanBackend({"scalarize_max_min_clamp"}),
+                      VulkanBackend({"polyfill_bool_vec_dynamic_store"}),
                       VulkanBackend({"vulkan_polyfill_switch_with_if"}),
                       VulkanBackend({"spirv_polyfill_float_negation", "spirv_polyfill_float_abs"}),
                       D3D11Backend({"scalarize_max_min_clamp"}),

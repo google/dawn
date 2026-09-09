@@ -545,7 +545,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 
         // Dynamically indexed stores on boolean vectors cause problems on Intel Mac
         // (crbug.com/540789158).
-        deviceToggles->Default(Toggle::MetalPolyfillBoolVecDynamicStore, true);
+        deviceToggles->Default(Toggle::PolyfillBoolVecDynamicStore, true);
 
         if ([NSProcessInfo.processInfo
                 isOperatingSystemAtLeastVersion:NSOperatingSystemVersion{12, 0, 0}]) {

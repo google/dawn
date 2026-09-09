@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/ir/transform/conversion_polyfill.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
+#include "src/tint/lang/core/ir/transform/polyfill_bool_vector_dynamic_stores.h"
 #include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
 #include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
@@ -72,7 +73,6 @@
 #include "src/tint/lang/msl/writer/raise/fix_u32_div_mod.h"
 #include "src/tint/lang/msl/writer/raise/module_constant.h"
 #include "src/tint/lang/msl/writer/raise/module_scope_vars.h"
-#include "src/tint/lang/msl/writer/raise/polyfill_bool_vector_dynamic_stores.h"
 #include "src/tint/lang/msl/writer/raise/resource_table_helper.h"
 #include "src/tint/lang/msl/writer/raise/shader_io.h"
 #include "src/tint/lang/msl/writer/raise/simd_ballot.h"
@@ -318,7 +318,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(raise::SwitchReturn(module));
 
     if (options.workarounds.polyfill_bool_vec_dynamic_store) {
-        TINT_CHECK_RESULT(raise::PolyfillBoolVectorDynamicStores(module));
+        TINT_CHECK_RESULT(core::ir::transform::PolyfillBoolVectorDynamicStores(module));
     }
 
     // These transforms need to be run last as various transforms introduce terminator arguments,

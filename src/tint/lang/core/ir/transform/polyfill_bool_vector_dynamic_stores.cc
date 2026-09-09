@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/msl/writer/raise/polyfill_bool_vector_dynamic_stores.h"
+#include "src/tint/lang/core/ir/transform/polyfill_bool_vector_dynamic_stores.h"
 
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/builder.h"
@@ -35,7 +35,7 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/ice/ice.h"
 
-namespace tint::msl::writer::raise {
+namespace tint::core::ir::transform {
 
 namespace {
 
@@ -115,11 +115,11 @@ struct State {
 }  // namespace
 
 Result<SuccessType> PolyfillBoolVectorDynamicStores(core::ir::Module& ir) {
-    AssertValid(ir, "before msl.PolyfillBoolVectorDynamicStores");
+    AssertValid(ir, "before core.PolyfillBoolVectorDynamicStores");
 
     State{ir}.Process();
 
     return Success;
 }
 
-}  // namespace tint::msl::writer::raise
+}  // namespace tint::core::ir::transform

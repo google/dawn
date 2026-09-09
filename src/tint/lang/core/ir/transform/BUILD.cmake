@@ -74,6 +74,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/multiplanar_external_texture.cc
   lang/core/ir/transform/multiplanar_external_texture.h
   lang/core/ir/transform/multiplanar_options.h
+  lang/core/ir/transform/polyfill_bool_vector_dynamic_stores.cc
+  lang/core/ir/transform/polyfill_bool_vector_dynamic_stores.h
   lang/core/ir/transform/prepare_immediate_data.cc
   lang/core/ir/transform/prepare_immediate_data.h
   lang/core/ir/transform/preserve_padding.cc
@@ -166,6 +168,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/helper_test.h
   lang/core/ir/transform/lower_swizzle_view_test.cc
   lang/core/ir/transform/multiplanar_external_texture_test.cc
+  lang/core/ir/transform/polyfill_bool_vector_dynamic_stores_test.cc
   lang/core/ir/transform/prepare_immediate_data_test.cc
   lang/core/ir/transform/preserve_padding_test.cc
   lang/core/ir/transform/prevent_infinite_loops_test.cc
