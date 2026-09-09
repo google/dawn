@@ -1606,6 +1606,11 @@ struct Decoder {
     }
 
     core::Majorness Majorness(pb::Majorness in) {
+        if (!Majorness_IsValid(in)) {
+            err_ << "invalid majorness, " << std::to_string(in) << "\n";
+            return core::Majorness::kUndefined;
+        }
+
         switch (in) {
             case pb::Majorness::row_major:
                 return core::Majorness::kRowMajor;
