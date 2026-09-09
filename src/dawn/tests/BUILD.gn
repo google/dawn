@@ -105,7 +105,6 @@ if (!dawn_use_built_dxc && build_with_chromium && is_win) {
   copy("copy_dxc_binary") {
     sources = [
       "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxcompiler.dll",
-      "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxil.dll",
     ]
 
     outputs = [ "$root_out_dir/{{source_file_part}}" ]
@@ -142,10 +141,7 @@ template("dawn_test") {
         if (!defined(deps)) {
           deps = []
         }
-        deps += [
-          "${dawn_dxc_gn_dir}:copy_dxil_dll",
-          "${dawn_dxc_gn_dir}:dxcompiler",
-        ]
+        deps += [ "${dawn_dxc_gn_dir}:dxcompiler" ]
       } else {
         if (!defined(data_deps)) {
           data_deps = []

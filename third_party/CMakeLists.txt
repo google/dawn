@@ -359,13 +359,6 @@ function(AddSubdirectoryDXC)
             "LIBRARY_OUTPUT_DIRECTORY" "${CMAKE_BINARY_DIR}"
         )
     endif()
-
-    # Create a target that copies dxil.dll from the platform SDK
-    if (WIN32)
-        AddCopyWindowsSDKDLLTarget("copy_dxil_dll" "dxil.dll")
-        # Make dxc target depend on copy_dxil_dll
-        add_dependencies(dxc copy_dxil_dll)
-    endif()
 endfunction()
 
 if (DAWN_USE_BUILT_DXC)
