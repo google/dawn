@@ -466,4 +466,328 @@ TEST_F(NapiV8Test, InvalidArgumentsAndErrorHandling) {
               napi_string_expected);
 }
 
+// ============================================================================
+// Object & Property Tests
+// ============================================================================
+
+TEST_F(NapiV8Test, ObjectsAndNamedProperties) {
+    napi_value obj;
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+    napi_valuetype type;
+    ASSERT_EQ(napi_typeof(env_, obj, &type), napi_ok);
+    EXPECT_EQ(type, napi_object);
+
+    // Initially property does not exist
+    bool has_prop = true;
+    ASSERT_EQ(napi_has_named_property(env_, obj, "foo", &has_prop), napi_ok);
+    EXPECT_FALSE(has_prop);
+
+    napi_value get_val;
+    ASSERT_EQ(napi_get_named_property(env_, obj, "foo", &get_val), napi_ok);
+    ASSERT_EQ(napi_typeof(env_, get_val, &type), napi_ok);
+    EXPECT_EQ(type, napi_undefined);
+
+    // Set named property
+    napi_value str_val;
+    ASSERT_EQ(napi_create_string_utf8(env_, "bar", NAPI_AUTO_LENGTH, &str_val), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env_, obj, "foo", str_val), napi_ok);
+
+    // Check has property is true
+    ASSERT_EQ(napi_has_named_property(env_, obj, "foo", &has_prop), napi_ok);
+    EXPECT_TRUE(has_prop);
+
+    // Get property value
+    ASSERT_EQ(napi_get_named_property(env_, obj, "foo", &get_val), napi_ok);
+    char buf[16];
+    size_t written = 0;
+    ASSERT_EQ(napi_get_value_string_utf8(env_, get_val, buf, sizeof(buf), &written), napi_ok);
+    EXPECT_STREQ(buf, "bar");
+    EXPECT_EQ(written, 3u);
+}
+
+TEST_F(NapiV8Test, ObjectsAndValueProperties) {
+    napi_value obj;
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+
+    // 1. Initially, non-existent properties return false for has_property and undefined for
+    // get_property
+    napi_value non_existent_key;
+    ASSERT_EQ(napi_create_string_utf8(env_, "missing", NAPI_AUTO_LENGTH, &non_existent_key),
+              napi_ok);
+    bool has_prop = true;
+    ASSERT_EQ(napi_has_property(env_, obj, non_existent_key, &has_prop), napi_ok);
+    EXPECT_FALSE(has_prop);
+
+    napi_value missing_val;
+    ASSERT_EQ(napi_get_property(env_, obj, non_existent_key, &missing_val), napi_ok);
+    napi_valuetype val_type;
+    ASSERT_EQ(napi_typeof(env_, missing_val, &val_type), napi_ok);
+    EXPECT_EQ(val_type, napi_undefined);
+
+    // 2. Non-existent symbol returns false
+    napi_value missing_sym;
+    ASSERT_EQ(napi_create_symbol(env_, nullptr, &missing_sym), napi_ok);
+    ASSERT_EQ(napi_has_property(env_, obj, missing_sym, &has_prop), napi_ok);
+    EXPECT_FALSE(has_prop);
+
+    // 3. String key
+    napi_value key_str, val_num;
+    ASSERT_EQ(napi_create_string_utf8(env_, "key1", NAPI_AUTO_LENGTH, &key_str), napi_ok);
+    ASSERT_EQ(napi_create_int32(env_, 1234, &val_num), napi_ok);
+    ASSERT_EQ(napi_set_property(env_, obj, key_str, val_num), napi_ok);
+
+    has_prop = false;
+    ASSERT_EQ(napi_has_property(env_, obj, key_str, &has_prop), napi_ok);
+    EXPECT_TRUE(has_prop);
+
+    napi_value get_val;
+    ASSERT_EQ(napi_get_property(env_, obj, key_str, &get_val), napi_ok);
+    int32_t num = 0;
+    ASSERT_EQ(napi_get_value_int32(env_, get_val, &num), napi_ok);
+    EXPECT_EQ(num, 1234);
+
+    // 4. Symbol key
+    napi_value sym_key, sym_val;
+    ASSERT_EQ(napi_create_symbol(env_, nullptr, &sym_key), napi_ok);
+    ASSERT_EQ(napi_create_string_utf8(env_, "sym_value", NAPI_AUTO_LENGTH, &sym_val), napi_ok);
+    ASSERT_EQ(napi_set_property(env_, obj, sym_key, sym_val), napi_ok);
+
+    ASSERT_EQ(napi_has_property(env_, obj, sym_key, &has_prop), napi_ok);
+    EXPECT_TRUE(has_prop);
+
+    ASSERT_EQ(napi_get_property(env_, obj, sym_key, &get_val), napi_ok);
+    char buf[16];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, get_val, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "sym_value");
+}
+
+TEST_F(NapiV8Test, ObjectPropertyNames) {
+    // 1. Empty object returns array of length 0
+    napi_value empty_obj;
+    ASSERT_EQ(napi_create_object(env_, &empty_obj), napi_ok);
+    napi_value empty_names;
+    ASSERT_EQ(napi_get_property_names(env_, empty_obj, &empty_names), napi_ok);
+    uint32_t empty_len = 999;
+    ASSERT_EQ(napi_get_array_length(env_, empty_names, &empty_len), napi_ok);
+    EXPECT_EQ(empty_len, 0u);
+
+    // 2. Object with properties
+    napi_value obj;
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+
+    napi_value val1, val2, val3;
+    ASSERT_EQ(napi_create_int32(env_, 1, &val1), napi_ok);
+    ASSERT_EQ(napi_create_int32(env_, 2, &val2), napi_ok);
+    ASSERT_EQ(napi_create_int32(env_, 3, &val3), napi_ok);
+
+    ASSERT_EQ(napi_set_named_property(env_, obj, "alpha", val1), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env_, obj, "beta", val2), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env_, obj, "gamma", val3), napi_ok);
+
+    napi_value names;
+    ASSERT_EQ(napi_get_property_names(env_, obj, &names), napi_ok);
+    napi_valuetype type;
+    ASSERT_EQ(napi_typeof(env_, names, &type), napi_ok);
+    EXPECT_EQ(type, napi_object);
+
+    uint32_t len = 0;
+    ASSERT_EQ(napi_get_array_length(env_, names, &len), napi_ok);
+    EXPECT_EQ(len, 3u);
+
+    napi_value elem0, elem1, elem2;
+    ASSERT_EQ(napi_get_element(env_, names, 0, &elem0), napi_ok);
+    ASSERT_EQ(napi_get_element(env_, names, 1, &elem1), napi_ok);
+    ASSERT_EQ(napi_get_element(env_, names, 2, &elem2), napi_ok);
+
+    char buf[16];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, elem0, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "alpha");
+    ASSERT_EQ(napi_get_value_string_utf8(env_, elem1, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "beta");
+    ASSERT_EQ(napi_get_value_string_utf8(env_, elem2, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "gamma");
+}
+
+TEST_F(NapiV8Test, ObjectPrototypeProperties) {
+    napi_value obj;
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+
+    // "toString" is on Object.prototype: has_property and has_named_property return true
+    bool has_prop = false;
+    ASSERT_EQ(napi_has_named_property(env_, obj, "toString", &has_prop), napi_ok);
+    EXPECT_TRUE(has_prop);
+
+    napi_value to_string_key;
+    ASSERT_EQ(napi_create_string_utf8(env_, "toString", NAPI_AUTO_LENGTH, &to_string_key), napi_ok);
+    ASSERT_EQ(napi_has_property(env_, obj, to_string_key, &has_prop), napi_ok);
+    EXPECT_TRUE(has_prop);
+
+    napi_value fn_val;
+    ASSERT_EQ(napi_get_named_property(env_, obj, "toString", &fn_val), napi_ok);
+    napi_valuetype type;
+    ASSERT_EQ(napi_typeof(env_, fn_val, &type), napi_ok);
+    EXPECT_EQ(type, napi_function);
+}
+
+// ============================================================================
+// Array Tests
+// ============================================================================
+
+TEST_F(NapiV8Test, ArraysAndElements) {
+    // 1. Create empty array
+    napi_value arr;
+    ASSERT_EQ(napi_create_array(env_, &arr), napi_ok);
+    napi_valuetype type;
+    ASSERT_EQ(napi_typeof(env_, arr, &type), napi_ok);
+    EXPECT_EQ(type, napi_object);
+
+    uint32_t len = 999;
+    ASSERT_EQ(napi_get_array_length(env_, arr, &len), napi_ok);
+    EXPECT_EQ(len, 0u);
+
+    // 2. Set elements
+    napi_value str1, str2;
+    ASSERT_EQ(napi_create_string_utf8(env_, "first", NAPI_AUTO_LENGTH, &str1), napi_ok);
+    ASSERT_EQ(napi_create_string_utf8(env_, "second", NAPI_AUTO_LENGTH, &str2), napi_ok);
+
+    ASSERT_EQ(napi_set_element(env_, arr, 0, str1), napi_ok);
+    ASSERT_EQ(napi_set_element(env_, arr, 1, str2), napi_ok);
+
+    ASSERT_EQ(napi_get_array_length(env_, arr, &len), napi_ok);
+    EXPECT_EQ(len, 2u);
+
+    // 3. Get element
+    napi_value elem_val;
+    ASSERT_EQ(napi_get_element(env_, arr, 1, &elem_val), napi_ok);
+    char buf[16];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, elem_val, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "second");
+
+    // 4. Out-of-bounds get element returns undefined
+    napi_value oob_val;
+    ASSERT_EQ(napi_get_element(env_, arr, 99, &oob_val), napi_ok);
+    ASSERT_EQ(napi_typeof(env_, oob_val, &type), napi_ok);
+    EXPECT_EQ(type, napi_undefined);
+
+    // 5. Sparse array: setting element at index 5 grows length to 6
+    napi_value str_sparse;
+    ASSERT_EQ(napi_create_string_utf8(env_, "sparse", NAPI_AUTO_LENGTH, &str_sparse), napi_ok);
+    ASSERT_EQ(napi_set_element(env_, arr, 5, str_sparse), napi_ok);
+    ASSERT_EQ(napi_get_array_length(env_, arr, &len), napi_ok);
+    EXPECT_EQ(len, 6u);
+
+    // Hole index 3 returns undefined
+    napi_value hole_val;
+    ASSERT_EQ(napi_get_element(env_, arr, 3, &hole_val), napi_ok);
+    ASSERT_EQ(napi_typeof(env_, hole_val, &type), napi_ok);
+    EXPECT_EQ(type, napi_undefined);
+
+    // 6. Create array with length
+    napi_value arr2;
+    ASSERT_EQ(napi_create_array_with_length(env_, 10, &arr2), napi_ok);
+    ASSERT_EQ(napi_get_array_length(env_, arr2, &len), napi_ok);
+    EXPECT_EQ(len, 10u);
+}
+
+TEST_F(NapiV8Test, IndexedPropertiesOnPlainObject) {
+    // JavaScript objects can have indexed elements
+    napi_value obj;
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+
+    napi_value val;
+    ASSERT_EQ(napi_create_string_utf8(env_, "indexed_val", NAPI_AUTO_LENGTH, &val), napi_ok);
+    ASSERT_EQ(napi_set_element(env_, obj, 0, val), napi_ok);
+
+    napi_value get_val;
+    ASSERT_EQ(napi_get_element(env_, obj, 0, &get_val), napi_ok);
+    char buf[32];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, get_val, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "indexed_val");
+
+    bool has_named = false;
+    ASSERT_EQ(napi_has_named_property(env_, obj, "0", &has_named), napi_ok);
+    EXPECT_TRUE(has_named);
+}
+
+TEST_F(NapiV8Test, ObjectAndArrayInvalidArgs) {
+    napi_value obj;
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+    napi_value arr;
+    ASSERT_EQ(napi_create_array(env_, &arr), napi_ok);
+    napi_value key;
+    ASSERT_EQ(napi_create_string_utf8(env_, "k", NAPI_AUTO_LENGTH, &key), napi_ok);
+    napi_value val;
+    ASSERT_EQ(napi_create_int32(env_, 1, &val), napi_ok);
+
+    // 1. napi_create_object / napi_create_array
+    EXPECT_EQ(napi_create_object(nullptr, &obj), napi_invalid_arg);
+    EXPECT_EQ(napi_create_object(env_, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_create_array(nullptr, &arr), napi_invalid_arg);
+    EXPECT_EQ(napi_create_array(env_, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_create_array_with_length(nullptr, 5, &arr), napi_invalid_arg);
+    EXPECT_EQ(napi_create_array_with_length(env_, 5, nullptr), napi_invalid_arg);
+
+    // 2. napi_get_property_names
+    napi_value names;
+    EXPECT_EQ(napi_get_property_names(nullptr, obj, &names), napi_invalid_arg);
+    EXPECT_EQ(napi_get_property_names(env_, nullptr, &names), napi_invalid_arg);
+    EXPECT_EQ(napi_get_property_names(env_, obj, nullptr), napi_invalid_arg);
+
+    // 3. napi_set_property / napi_get_property / napi_has_property
+    napi_value get_res;
+    bool has_res;
+    EXPECT_EQ(napi_set_property(nullptr, obj, key, val), napi_invalid_arg);
+    EXPECT_EQ(napi_set_property(env_, nullptr, key, val), napi_invalid_arg);
+    EXPECT_EQ(napi_set_property(env_, obj, nullptr, val), napi_invalid_arg);
+    EXPECT_EQ(napi_set_property(env_, obj, key, nullptr), napi_invalid_arg);
+
+    EXPECT_EQ(napi_get_property(nullptr, obj, key, &get_res), napi_invalid_arg);
+    EXPECT_EQ(napi_get_property(env_, nullptr, key, &get_res), napi_invalid_arg);
+    EXPECT_EQ(napi_get_property(env_, obj, nullptr, &get_res), napi_invalid_arg);
+    EXPECT_EQ(napi_get_property(env_, obj, key, nullptr), napi_invalid_arg);
+
+    EXPECT_EQ(napi_has_property(nullptr, obj, key, &has_res), napi_invalid_arg);
+    EXPECT_EQ(napi_has_property(env_, nullptr, key, &has_res), napi_invalid_arg);
+    EXPECT_EQ(napi_has_property(env_, obj, nullptr, &has_res), napi_invalid_arg);
+    EXPECT_EQ(napi_has_property(env_, obj, key, nullptr), napi_invalid_arg);
+
+    // 4. napi_set_named_property / napi_get_named_property / napi_has_named_property
+    EXPECT_EQ(napi_set_named_property(nullptr, obj, "k", val), napi_invalid_arg);
+    EXPECT_EQ(napi_set_named_property(env_, nullptr, "k", val), napi_invalid_arg);
+    EXPECT_EQ(napi_set_named_property(env_, obj, nullptr, val), napi_invalid_arg);
+    EXPECT_EQ(napi_set_named_property(env_, obj, "k", nullptr), napi_invalid_arg);
+
+    EXPECT_EQ(napi_get_named_property(nullptr, obj, "k", &get_res), napi_invalid_arg);
+    EXPECT_EQ(napi_get_named_property(env_, nullptr, "k", &get_res), napi_invalid_arg);
+    EXPECT_EQ(napi_get_named_property(env_, obj, nullptr, &get_res), napi_invalid_arg);
+    EXPECT_EQ(napi_get_named_property(env_, obj, "k", nullptr), napi_invalid_arg);
+
+    EXPECT_EQ(napi_has_named_property(nullptr, obj, "k", &has_res), napi_invalid_arg);
+    EXPECT_EQ(napi_has_named_property(env_, nullptr, "k", &has_res), napi_invalid_arg);
+    EXPECT_EQ(napi_has_named_property(env_, obj, nullptr, &has_res), napi_invalid_arg);
+    EXPECT_EQ(napi_has_named_property(env_, obj, "k", nullptr), napi_invalid_arg);
+
+    // 5. napi_get_element / napi_set_element
+    EXPECT_EQ(napi_get_element(nullptr, arr, 0, &get_res), napi_invalid_arg);
+    EXPECT_EQ(napi_get_element(env_, nullptr, 0, &get_res), napi_invalid_arg);
+    EXPECT_EQ(napi_get_element(env_, arr, 0, nullptr), napi_invalid_arg);
+
+    EXPECT_EQ(napi_set_element(nullptr, arr, 0, val), napi_invalid_arg);
+    EXPECT_EQ(napi_set_element(env_, nullptr, 0, val), napi_invalid_arg);
+    EXPECT_EQ(napi_set_element(env_, arr, 0, nullptr), napi_invalid_arg);
+
+    // 6. Calling array_length on non-array
+    uint32_t len = 0;
+    EXPECT_EQ(napi_get_array_length(nullptr, arr, &len), napi_invalid_arg);
+    EXPECT_EQ(napi_get_array_length(env_, nullptr, &len), napi_invalid_arg);
+    EXPECT_EQ(napi_get_array_length(env_, arr, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_get_array_length(env_, obj, &len), napi_array_expected);
+
+    const napi_extended_error_info* info = nullptr;
+    ASSERT_EQ(napi_get_last_error_info(env_, &info), napi_ok);
+    EXPECT_EQ(info->error_code, napi_array_expected);
+    ASSERT_NE(info->error_message, nullptr);
+    EXPECT_STREQ(info->error_message, "An array was expected");
+}
+
 }  // namespace

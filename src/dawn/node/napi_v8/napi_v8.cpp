@@ -82,6 +82,107 @@ napi_status CoerceTo(napi_env env,
     return napi_ok;
 }
 
+// Validates and extracts a v8::Object and its associated Context.
+napi_status UnwrapObject(napi_env env,
+                         napi_value object,
+                         v8::Local<v8::Object>* out_obj,
+                         v8::Local<v8::Context>* out_ctx) {
+    *out_ctx = env->GetContext();
+    v8::MaybeLocal<v8::Object> maybe_obj = dawn::napi_v8::ToV8(object)->ToObject(*out_ctx);
+    if (maybe_obj.IsEmpty()) {
+        return env->SetLastError(napi_object_expected, "An object was expected");
+    }
+    *out_obj = maybe_obj.ToLocalChecked();
+    return napi_ok;
+}
+
+// Creates an internalized V8 string from a UTF-8 C string.
+napi_status CreateInternalizedKey(napi_env env,
+                                  const char* utf8name,
+                                  v8::Local<v8::String>* out_key) {
+    if (!ValidateArgs(env, utf8name)) {
+        return napi_invalid_arg;
+    }
+    v8::MaybeLocal<v8::String> maybe_key =
+        v8::String::NewFromUtf8(env->isolate, utf8name, v8::NewStringType::kInternalized);
+    if (maybe_key.IsEmpty()) {
+        return env->SetLastError(napi_generic_failure, "Failed to create property key");
+    }
+    *out_key = maybe_key.ToLocalChecked();
+    return napi_ok;
+}
+
+// Generic property setter supporting Local<Value> keys or uint32_t indices.
+template <typename KeyType>
+napi_status WriteProperty(napi_env env,
+                          napi_value object,
+                          KeyType key,
+                          napi_value value,
+                          const char* error_message) {
+    if (!ValidateArgs(env, object, value)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Object> obj;
+    v8::Local<v8::Context> ctx;
+    napi_status status = UnwrapObject(env, object, &obj, &ctx);
+    if (status != napi_ok) {
+        return status;
+    }
+    v8::Maybe<bool> res = obj->Set(ctx, key, dawn::napi_v8::ToV8(value));
+    if (res.IsNothing()) {
+        return env->SetLastError(napi_generic_failure, error_message);
+    }
+    return napi_ok;
+}
+
+// Generic property getter supporting Local<Value> keys or uint32_t indices.
+template <typename KeyType>
+napi_status ReadProperty(napi_env env,
+                         napi_value object,
+                         KeyType key,
+                         napi_value* result,
+                         const char* error_message) {
+    if (!ValidateArgs(env, object, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Object> obj;
+    v8::Local<v8::Context> ctx;
+    napi_status status = UnwrapObject(env, object, &obj, &ctx);
+    if (status != napi_ok) {
+        return status;
+    }
+    v8::MaybeLocal<v8::Value> val = obj->Get(ctx, key);
+    if (val.IsEmpty()) {
+        return env->SetLastError(napi_generic_failure, error_message);
+    }
+    *result = dawn::napi_v8::ToNapi(val.ToLocalChecked());
+    return napi_ok;
+}
+
+// Generic property existence check supporting Local<Value> keys or uint32_t indices.
+template <typename KeyType>
+napi_status QueryProperty(napi_env env,
+                          napi_value object,
+                          KeyType key,
+                          bool* result,
+                          const char* error_message) {
+    if (!ValidateArgs(env, object, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Object> obj;
+    v8::Local<v8::Context> ctx;
+    napi_status status = UnwrapObject(env, object, &obj, &ctx);
+    if (status != napi_ok) {
+        return status;
+    }
+    v8::Maybe<bool> has = obj->Has(ctx, key);
+    if (has.IsNothing()) {
+        return env->SetLastError(napi_generic_failure, error_message);
+    }
+    *result = has.FromJust();
+    return napi_ok;
+}
+
 }  // namespace
 
 using dawn::napi_v8::ToNapi;
@@ -355,6 +456,133 @@ napi_status napi_strict_equals(napi_env env, napi_value lhs, napi_value rhs, boo
     }
     *result = ToV8(lhs)->StrictEquals(ToV8(rhs));
     return napi_ok;
+}
+
+// ============================================================================
+// Objects & Properties
+// ============================================================================
+
+napi_status napi_create_object(napi_env env, napi_value* result) {
+    if (!ValidateArgs(env, result)) {
+        return napi_invalid_arg;
+    }
+    *result = ToNapi(v8::Object::New(env->isolate));
+    return napi_ok;
+}
+
+napi_status napi_get_property_names(napi_env env, napi_value object, napi_value* result) {
+    if (!ValidateArgs(env, object, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Object> obj;
+    v8::Local<v8::Context> ctx;
+    napi_status status = UnwrapObject(env, object, &obj, &ctx);
+    if (status != napi_ok) {
+        return status;
+    }
+    v8::MaybeLocal<v8::Array> names = obj->GetPropertyNames(ctx);
+    if (names.IsEmpty()) {
+        return env->SetLastError(napi_generic_failure, "Failed to get property names");
+    }
+    *result = ToNapi(names.ToLocalChecked());
+    return napi_ok;
+}
+
+napi_status napi_set_property(napi_env env, napi_value object, napi_value key, napi_value value) {
+    if (!ValidateArgs(env, key)) {
+        return napi_invalid_arg;
+    }
+    return WriteProperty(env, object, ToV8(key), value, "Failed to set property");
+}
+
+napi_status napi_get_property(napi_env env, napi_value object, napi_value key, napi_value* result) {
+    if (!ValidateArgs(env, key)) {
+        return napi_invalid_arg;
+    }
+    return ReadProperty(env, object, ToV8(key), result, "Failed to get property");
+}
+
+napi_status napi_has_property(napi_env env, napi_value object, napi_value key, bool* result) {
+    if (!ValidateArgs(env, key)) {
+        return napi_invalid_arg;
+    }
+    return QueryProperty(env, object, ToV8(key), result, "Failed to check property");
+}
+
+napi_status napi_set_named_property(napi_env env,
+                                    napi_value object,
+                                    const char* utf8name,
+                                    napi_value value) {
+    v8::Local<v8::String> key;
+    napi_status status = CreateInternalizedKey(env, utf8name, &key);
+    if (status != napi_ok) {
+        return status;
+    }
+    return WriteProperty(env, object, key, value, "Failed to set named property");
+}
+
+napi_status napi_get_named_property(napi_env env,
+                                    napi_value object,
+                                    const char* utf8name,
+                                    napi_value* result) {
+    v8::Local<v8::String> key;
+    napi_status status = CreateInternalizedKey(env, utf8name, &key);
+    if (status != napi_ok) {
+        return status;
+    }
+    return ReadProperty(env, object, key, result, "Failed to get named property");
+}
+
+napi_status napi_has_named_property(napi_env env,
+                                    napi_value object,
+                                    const char* utf8name,
+                                    bool* result) {
+    v8::Local<v8::String> key;
+    napi_status status = CreateInternalizedKey(env, utf8name, &key);
+    if (status != napi_ok) {
+        return status;
+    }
+    return QueryProperty(env, object, key, result, "Failed to check named property");
+}
+
+// ============================================================================
+// Arrays & Indexed Properties
+// ============================================================================
+
+napi_status napi_create_array(napi_env env, napi_value* result) {
+    if (!ValidateArgs(env, result)) {
+        return napi_invalid_arg;
+    }
+    *result = ToNapi(v8::Array::New(env->isolate));
+    return napi_ok;
+}
+
+napi_status napi_create_array_with_length(napi_env env, size_t length, napi_value* result) {
+    if (!ValidateArgs(env, result)) {
+        return napi_invalid_arg;
+    }
+    *result = ToNapi(v8::Array::New(env->isolate, static_cast<int>(length)));
+    return napi_ok;
+}
+
+napi_status napi_get_array_length(napi_env env, napi_value value, uint32_t* result) {
+    if (!ValidateArgs(env, value, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_val = ToV8(value);
+    if (!v8_val->IsArray()) {
+        return env->SetLastError(napi_array_expected, "An array was expected");
+    }
+    *result = v8_val.As<v8::Array>()->Length();
+    return napi_ok;
+}
+
+napi_status napi_get_element(napi_env env, napi_value object, uint32_t index, napi_value* result) {
+    return ReadProperty(env, object, index, result, "Failed to get element");
+}
+
+napi_status napi_set_element(napi_env env, napi_value object, uint32_t index, napi_value value) {
+    return WriteProperty(env, object, index, value, "Failed to set element");
 }
 
 }  // extern "C"
