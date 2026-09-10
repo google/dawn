@@ -65,6 +65,44 @@ class HlslWriterTransformTest : public core::ir::transform::TransformTest {
     }
 };
 
+TEST_F(HlslWriterTransformTest, ShaderIO_NumWorkgroups_NoImmediateOffset) {
+    auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3u());
+    num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
+
+    auto* ep = b.ComputeFunction("foo");
+    ep->SetParams({num_workgroups});
+
+    b.Append(ep->Block(), [&] { b.Return(ep); });
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{
+        .immediate_data_layout = immediate_data,
+    };
+
+    auto result = RunWithFailure(ShaderIO, config);
+    EXPECT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason, "num_workgroups required but no immediate offset provided");
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIO_WorkgroupIndex_NoImmediateOffset) {
+    auto* workgroup_index = b.FunctionParam("wgindex", ty.u32());
+    workgroup_index->SetBuiltin(core::BuiltinValue::kWorkgroupIndex);
+
+    auto* ep = b.ComputeFunction("foo");
+    ep->SetParams({workgroup_index});
+
+    b.Append(ep->Block(), [&] { b.Return(ep); });
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{
+        .immediate_data_layout = immediate_data,
+    };
+
+    auto result = RunWithFailure(ShaderIO, config);
+    EXPECT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason, "num_workgroups required but no immediate offset provided");
+}
+
 TEST_F(HlslWriterTransformTest, ShaderIONoInputsOrOutputs) {
     auto* ep = b.ComputeFunction("foo");
     b.Append(ep->Block(), [&] { b.Return(ep); });
