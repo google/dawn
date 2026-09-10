@@ -146,6 +146,57 @@ DepthStencilAspectLayout DepthStencilAspectLayout(DXGI_FORMAT format, Aspect asp
     return {texelSize, componentOffset, componentSize};
 }
 
+// Copies a 2D region of fixed-size texel components (`componentSize` bytes) between strided
+// source and destination buffers. Used to pack/unpack a single depth or stencil aspect from
+// interleaved D3D11 depth-stencil texels. Optionally invokes `onRowEnd` after each row.
+template <typename OnRowEndFn = std::nullptr_t>
+MaybeError CopyInterleavedTexels2D(Span<std::byte> dst,
+                                   uint32_t dstRowPitch,
+                                   uint32_t dstTexelStride,
+                                   Span<const std::byte> src,
+                                   uint32_t srcRowPitch,
+                                   uint32_t srcTexelStride,
+                                   uint32_t width,
+                                   uint32_t height,
+                                   uint32_t componentSize,
+                                   OnRowEndFn&& onRowEnd = nullptr) {
+    if (width == 0 || height == 0) {
+        return {};
+    }
+
+    DAWN_ASSERT(dstTexelStride >= componentSize);
+    DAWN_ASSERT(srcTexelStride >= componentSize);
+    DAWN_ASSERT(dstRowPitch >= size_t{width} * dstTexelStride);
+    DAWN_ASSERT(srcRowPitch >= size_t{width} * srcTexelStride);
+
+    DAWN_CHECK(dst.size() >= (size_t{height} - 1) * dstRowPitch +
+                                 (size_t{width} - 1) * dstTexelStride + componentSize);
+    DAWN_CHECK(src.size() >= (size_t{height} - 1) * srcRowPitch +
+                                 (size_t{width} - 1) * srcTexelStride + componentSize);
+
+    // SAFETY: Verified by asserts above that dst and src spans contain sufficient capacity
+    // for all `height` rows and `width` texel copies.
+    DAWN_UNSAFE_BUFFERS({
+        std::byte* pDst = dst.data();
+        const std::byte* pSrc = src.data();
+        for (uint32_t y = 0; y < height; ++y) {
+            std::byte* pDstRow = pDst;
+            const std::byte* pSrcRow = pSrc;
+            for (uint32_t x = 0; x < width; ++x) {
+                std::memcpy(pDstRow, pSrcRow, componentSize);
+                pDstRow += dstTexelStride;
+                pSrcRow += srcTexelStride;
+            }
+            if constexpr (!std::is_same_v<OnRowEndFn, std::nullptr_t>) {
+                DAWN_TRY(onRowEnd(y));
+            }
+            pDst += dstRowPitch;
+            pSrc += srcRowPitch;
+        }
+    })
+    return {};
+}
+
 template <typename ByteType>
 Span<ByteType> GetMappedDataImpl(const Texture* texture,
                                  const D3D11_MAPPED_SUBRESOURCE& mappedResource) {
@@ -861,32 +912,34 @@ MaybeError Texture::WriteDepthStencilInternal(const ScopedCommandRecordingContex
     const auto aspectLayout = DepthStencilAspectLayout(
         d3d::DXGITextureFormat(GetDevice(), GetFormat().format), subresources.aspects);
 
+    DAWN_ASSERT(size.height <= rowsPerImage);
+    const size_t bytesPerLayer = static_cast<size_t>(rowsPerImage) * bytesPerRow;
+    DAWN_ASSERT(data.size() >= static_cast<size_t>(size.depthOrArrayLayers - 1) * bytesPerLayer +
+                                   (size.height - 1) * bytesPerRow +
+                                   size.width * aspectLayout.componentSize);
+
     // Map and write to the staging texture.
     D3D11_MAPPED_SUBRESOURCE mappedResource;
-    const std::byte* pSrcData = data.data();
     for (uint32_t layer = 0; layer < size.depthOrArrayLayers; ++layer) {
         uint32_t subresource = D3D11CalcSubresource(0, layer, stagingTexture->GetNumMipLevels());
         DAWN_TRY(CheckHRESULT(commandContext->Map(stagingTexture->GetD3D11Resource(), subresource,
                                                   D3D11_MAP_READ, 0, &mappedResource),
                               "D3D11 map staging texture"));
-        // TODO(crbug.com/549088024): Use GetMappedData
-        std::byte* pDstData = static_cast<std::byte*>(mappedResource.pData);
-        for (uint32_t y = 0; y < size.height; ++y) {
-            const std::byte* pSrcRow = pSrcData;
-            std::byte* pDstRow = pDstData;
-            DAWN_UNSAFE_TODO(pDstRow += aspectLayout.componentOffset);
-            for (uint32_t x = 0; x < size.width; ++x) {
-                DAWN_UNSAFE_TODO(std::memcpy(pDstRow, pSrcRow, aspectLayout.componentSize));
-                DAWN_UNSAFE_TODO(pDstRow += aspectLayout.texelSize);
-                DAWN_UNSAFE_TODO(pSrcRow += aspectLayout.componentSize);
-            }
-            DAWN_UNSAFE_TODO(pDstData += mappedResource.RowPitch);
-            DAWN_UNSAFE_TODO(pSrcData += bytesPerRow);
-        }
+        Span<std::byte> dstSlice = stagingTexture->GetMappedData(mappedResource);
+        Span<const std::byte> srcLayer = data.subspan(layer * bytesPerLayer);
+
+        DAWN_TRY(CopyInterleavedTexels2D(
+            /*dst=*/dstSlice.subspan(aspectLayout.componentOffset),
+            /*dstRowPitch=*/mappedResource.RowPitch,
+            /*dstTexelStride=*/aspectLayout.texelSize,
+            /*src=*/srcLayer,
+            /*srcRowPitch=*/bytesPerRow,
+            /*srcTexelStride=*/aspectLayout.componentSize,
+            /*width=*/size.width,
+            /*height=*/size.height,
+            /*componentSize=*/aspectLayout.componentSize));
+
         commandContext->Unmap(stagingTexture->GetD3D11Resource(), subresource);
-        DAWN_ASSERT(size.height <= rowsPerImage);
-        // Skip the padding rows.
-        DAWN_UNSAFE_TODO(pSrcData += static_cast<size_t>(rowsPerImage - size.height) * bytesPerRow);
     }
 
     // Copy to the dest texture from the staging texture.
@@ -953,27 +1006,28 @@ MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandCont
                 DAWN_TRY(callback(srcImage, dstOffset));
             } else if (hasStencil) {
                 // We need to read texel by texel for depth-stencil formats.
-                std::vector<uint8_t> depthOrStencilData(size_t{size.width} * blockInfo.byteSize);
+                std::vector<uint8_t> depthOrStencilData(size_t{bytesPerRow} * rowsPerImage);
                 const auto aspectLayout = DepthStencilAspectLayout(
                     d3d::DXGITextureFormat(GetDevice(), GetFormat().format), subresources.aspects);
                 DAWN_ASSERT(blockInfo.byteSize == aspectLayout.componentSize);
-                const std::byte* pSrcData = srcSlice.data();
-                for (uint32_t y = 0; y < rowsPerImage; ++y) {
-                    // Filter the depth/stencil data out.
-                    const std::byte* src = pSrcData;
-                    uint8_t* dst = depthOrStencilData.data();
-                    DAWN_UNSAFE_TODO(src += aspectLayout.componentOffset);
-                    for (uint32_t x = 0; x < size.width; ++x) {
-                        DAWN_UNSAFE_TODO(std::memcpy(dst, src, aspectLayout.componentSize));
-                        DAWN_UNSAFE_TODO(src += aspectLayout.texelSize);
-                        DAWN_UNSAFE_TODO(dst += aspectLayout.componentSize);
-                    }
-                    auto rowData = SpanAsBytes(Span<const uint8_t>{depthOrStencilData})
-                                       .subspan(0, bytesPerRow);
-                    DAWN_TRY(callback(rowData, dstOffset));
-                    dstOffset += dstBytesPerRow;
-                    DAWN_UNSAFE_TODO(pSrcData += mappedResource.RowPitch);
-                }
+
+                DAWN_TRY(CopyInterleavedTexels2D(
+                    /*dst=*/SpanAsWritableBytes(Span<uint8_t>{depthOrStencilData}),
+                    /*dstRowPitch=*/bytesPerRow,
+                    /*dstTexelStride=*/aspectLayout.componentSize,
+                    /*src=*/srcSlice.subspan(aspectLayout.componentOffset),
+                    /*srcRowPitch=*/mappedResource.RowPitch,
+                    /*srcTexelStride=*/aspectLayout.texelSize,
+                    /*width=*/size.width,
+                    /*height=*/rowsPerImage,
+                    /*componentSize=*/aspectLayout.componentSize,
+                    /*onRowEnd=*/[&](uint32_t y) -> MaybeError {
+                        auto rowData = SpanAsBytes(Span<const uint8_t>{depthOrStencilData})
+                                           .subspan(size_t{y} * bytesPerRow, bytesPerRow);
+                        DAWN_TRY(callback(rowData, dstOffset));
+                        dstOffset += dstBytesPerRow;
+                        return {};
+                    }));
             } else {
                 // Otherwise, we need to read each row separately.
                 for (uint32_t y = 0; y < rowsPerImage; ++y) {
