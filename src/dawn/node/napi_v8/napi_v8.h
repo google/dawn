@@ -58,12 +58,27 @@ struct napi_handle_scope__ {
     explicit napi_handle_scope__(v8::Isolate* isolate) : scope(isolate) {}
 };
 
+// Internal struct representing callback metadata passed to a native callback
+struct napi_callback_info__ {
+    const v8::FunctionCallbackInfo<v8::Value>* v8_info = nullptr;
+    void* data = nullptr;
+};
+
+// Persistent binding metadata for a registered native function/method/accessor callback
+struct CallbackBinding {
+    napi_env env = nullptr;
+    napi_callback callback = nullptr;
+    void* user_data = nullptr;
+};
+
 // Internal struct representing a Node-API environment (napi_env)
 struct napi_env__ {
     v8::Isolate* isolate = nullptr;
     v8::Global<v8::Context> context;
+    v8::Global<v8::Value> last_exception;
     napi_extended_error_info last_error{};
     std::vector<std::unique_ptr<napi_handle_scope__>> open_handle_scopes;
+    std::vector<std::unique_ptr<CallbackBinding>> callback_bindings;
 
     napi_env__(v8::Isolate* iso, v8::Local<v8::Context> ctx) : isolate(iso), context(iso, ctx) {
         ClearLastError();
@@ -74,6 +89,8 @@ struct napi_env__ {
         while (!open_handle_scopes.empty()) {
             open_handle_scopes.pop_back();
         }
+        last_exception.Reset();
+        callback_bindings.clear();
     }
 
     v8::Local<v8::Context> GetContext() const { return context.Get(isolate); }

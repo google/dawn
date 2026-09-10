@@ -27,6 +27,9 @@
 
 #include "src/dawn/node/napi_v8/napi_v8.h"
 
+#include <algorithm>
+#include <utility>
+
 #include "src/utils/compiler.h"
 
 namespace {
@@ -97,26 +100,26 @@ napi_status UnwrapObject(napi_env env,
 }
 
 // Creates an internalized V8 string from a UTF-8 C string.
-napi_status CreateInternalizedKey(napi_env env,
-                                  const char* utf8name,
-                                  v8::Local<v8::String>* out_key) {
+napi_status CreateInternalizedName(napi_env env,
+                                   const char* utf8name,
+                                   v8::Local<v8::String>* out_name) {
     if (!ValidateArgs(env, utf8name)) {
         return napi_invalid_arg;
     }
-    v8::MaybeLocal<v8::String> maybe_key =
+    v8::MaybeLocal<v8::String> maybe_name =
         v8::String::NewFromUtf8(env->isolate, utf8name, v8::NewStringType::kInternalized);
-    if (maybe_key.IsEmpty()) {
-        return env->SetLastError(napi_generic_failure, "Failed to create property key");
+    if (maybe_name.IsEmpty()) {
+        return env->SetLastError(napi_generic_failure, "Failed to create property name");
     }
-    *out_key = maybe_key.ToLocalChecked();
+    *out_name = maybe_name.ToLocalChecked();
     return napi_ok;
 }
 
-// Generic property setter supporting Local<Value> keys or uint32_t indices.
-template <typename KeyType>
+// Generic property setter supporting Local<Value> names or uint32_t indices.
+template <typename NameType>
 napi_status WriteProperty(napi_env env,
                           napi_value object,
-                          KeyType key,
+                          NameType name,
                           napi_value value,
                           const char* error_message) {
     if (!ValidateArgs(env, object, value)) {
@@ -128,18 +131,18 @@ napi_status WriteProperty(napi_env env,
     if (status != napi_ok) {
         return status;
     }
-    v8::Maybe<bool> res = obj->Set(ctx, key, dawn::napi_v8::ToV8(value));
-    if (res.IsNothing()) {
+    v8::Maybe<bool> res = obj->Set(ctx, name, dawn::napi_v8::ToV8(value));
+    if (!res.FromMaybe(false)) {
         return env->SetLastError(napi_generic_failure, error_message);
     }
     return napi_ok;
 }
 
-// Generic property getter supporting Local<Value> keys or uint32_t indices.
-template <typename KeyType>
+// Generic property getter supporting Local<Value> names or uint32_t indices.
+template <typename NameType>
 napi_status ReadProperty(napi_env env,
                          napi_value object,
-                         KeyType key,
+                         NameType name,
                          napi_value* result,
                          const char* error_message) {
     if (!ValidateArgs(env, object, result)) {
@@ -151,7 +154,7 @@ napi_status ReadProperty(napi_env env,
     if (status != napi_ok) {
         return status;
     }
-    v8::MaybeLocal<v8::Value> val = obj->Get(ctx, key);
+    v8::MaybeLocal<v8::Value> val = obj->Get(ctx, name);
     if (val.IsEmpty()) {
         return env->SetLastError(napi_generic_failure, error_message);
     }
@@ -159,11 +162,11 @@ napi_status ReadProperty(napi_env env,
     return napi_ok;
 }
 
-// Generic property existence check supporting Local<Value> keys or uint32_t indices.
-template <typename KeyType>
+// Generic property existence check supporting Local<Value> names or uint32_t indices.
+template <typename NameType>
 napi_status QueryProperty(napi_env env,
                           napi_value object,
-                          KeyType key,
+                          NameType name,
                           bool* result,
                           const char* error_message) {
     if (!ValidateArgs(env, object, result)) {
@@ -175,11 +178,240 @@ napi_status QueryProperty(napi_env env,
     if (status != napi_ok) {
         return status;
     }
-    v8::Maybe<bool> has = obj->Has(ctx, key);
+    v8::Maybe<bool> has = obj->Has(ctx, name);
     if (has.IsNothing()) {
         return env->SetLastError(napi_generic_failure, error_message);
     }
     *result = has.FromJust();
+    return napi_ok;
+}
+
+// V8 and Node-API use different callback conventions:
+// - V8 callbacks use `void (const v8::FunctionCallbackInfo<v8::Value>&)` and pass user context via
+//   an attached `v8::External` value in `v8_info.Data()`.
+// - Node-API callbacks use `napi_value (*)(napi_env, napi_callback_info)` and retrieve user context
+//   via `napi_get_cb_info()`.
+//
+// `NativeCallbackTrampoline` acts as the universal bridge: it unpacks the persistent
+// `CallbackBinding` from the `v8::External`, constructs a lightweight `napi_callback_info__` stack
+// wrapper referencing the active V8 callback arguments, executes the target `napi_callback`, and
+// forwards the returned `napi_value` back to V8.
+void NativeCallbackTrampoline(const v8::FunctionCallbackInfo<v8::Value>& v8_info) {
+    v8::Local<v8::External> ext = v8_info.Data().As<v8::External>();
+    auto* binding = static_cast<CallbackBinding*>(ext->Value(v8::kExternalPointerTypeTagDefault));
+    napi_env env = binding->env;
+
+    napi_callback_info__ invocation_info;
+    invocation_info.v8_info = &v8_info;
+    invocation_info.data = binding->user_data;
+
+    v8::HandleScope scope(env->isolate);
+    napi_value return_val = binding->callback(env, &invocation_info);
+    if (return_val != nullptr) {
+        v8_info.GetReturnValue().Set(dawn::napi_v8::ToV8(return_val));
+    }
+}
+
+// Base helper to create a `v8::FunctionTemplate` from a v8::Name.
+// To ensure the callback function pointer and user data remain valid across the environment's
+// lifetime, an internal `CallbackBinding` structure is allocated and stored in
+// `env->callback_bindings`. A pointer to this binding is attached to the `v8::FunctionTemplate` as
+// a `v8::External`.
+napi_status CreateFunctionTemplate(napi_env env,
+                                   v8::Local<v8::Name> name,
+                                   napi_callback callback,
+                                   void* user_data,
+                                   v8::Local<v8::FunctionTemplate>* out_template) {
+    auto binding = std::make_unique<CallbackBinding>();
+    binding->env = env;
+    binding->callback = callback;
+    binding->user_data = user_data;
+    CallbackBinding* binding_ptr = binding.get();
+    env->callback_bindings.push_back(std::move(binding));
+
+    v8::Local<v8::External> ext =
+        v8::External::New(env->isolate, binding_ptr, v8::kExternalPointerTypeTagDefault);
+    auto function_template = v8::FunctionTemplate::New(env->isolate, NativeCallbackTrampoline, ext);
+    if (!name.IsEmpty() && name->IsString()) {
+        function_template->SetClassName(name.As<v8::String>());
+    }
+    *out_template = function_template;
+    return napi_ok;
+}
+
+// UTF-8 string wrapper for CreateFunctionTemplate.
+napi_status CreateFunctionTemplate(napi_env env,
+                                   const char* utf8name,
+                                   size_t length,
+                                   napi_callback callback,
+                                   void* user_data,
+                                   v8::Local<v8::FunctionTemplate>* out_template) {
+    v8::Local<v8::Name> name;
+    if (utf8name != nullptr) {
+        int len = (length == NAPI_AUTO_LENGTH) ? -1 : static_cast<int>(length);
+        v8::MaybeLocal<v8::String> v8_name =
+            v8::String::NewFromUtf8(env->isolate, utf8name, v8::NewStringType::kInternalized, len);
+        if (v8_name.IsEmpty()) {
+            return env->SetLastError(napi_generic_failure, "Failed to create function name");
+        }
+        name = v8_name.ToLocalChecked();
+    }
+    return CreateFunctionTemplate(env, name, callback, user_data, out_template);
+}
+
+// Extracts a property name from a Node-API property descriptor.
+napi_status GetDescriptorName(napi_env env,
+                              const napi_property_descriptor& desc,
+                              v8::Local<v8::Name>* out_name) {
+    if (desc.utf8name != nullptr) {
+        v8::MaybeLocal<v8::String> name =
+            v8::String::NewFromUtf8(env->isolate, desc.utf8name, v8::NewStringType::kInternalized);
+        if (name.IsEmpty()) {
+            return env->SetLastError(napi_generic_failure, "Failed to create property name");
+        }
+        *out_name = name.ToLocalChecked();
+        return napi_ok;
+    }
+    if (desc.name != nullptr) {
+        v8::Local<v8::Value> v8_name = dawn::napi_v8::ToV8(desc.name);
+        if (!v8_name->IsName()) {
+            return env->SetLastError(napi_name_expected, "A name or symbol was expected");
+        }
+        *out_name = v8_name.As<v8::Name>();
+        return napi_ok;
+    }
+    return env->SetLastError(napi_invalid_arg, "Property descriptor missing name");
+}
+
+// Validates and extracts a v8::Function and its associated Context.
+napi_status UnwrapFunction(napi_env env,
+                           napi_value function_value,
+                           v8::Local<v8::Function>* out_fn,
+                           v8::Local<v8::Context>* out_ctx) {
+    v8::Local<v8::Value> v8_func = dawn::napi_v8::ToV8(function_value);
+    if (!v8_func->IsFunction()) {
+        return env->SetLastError(napi_function_expected, "A function was expected");
+    }
+    *out_ctx = env->GetContext();
+    *out_fn = v8_func.As<v8::Function>();
+    return napi_ok;
+}
+
+// Unpacks and validates a Node-API argument array into a vector of V8 values.
+napi_status UnpackArgs(napi_env env,
+                       size_t argc,
+                       const napi_value* argv,
+                       std::vector<v8::Local<v8::Value>>* out_args) {
+    if (argc > 0 && argv == nullptr) {
+        return env->SetLastError(napi_invalid_arg, "Invalid argument: null argv");
+    }
+    out_args->resize(argc);
+    for (size_t i = 0; i < argc; ++i) {
+        // SAFETY: The caller guarantees argv points to an array with at least argc elements.
+        napi_value arg = DAWN_UNSAFE_BUFFERS(argv[i]);
+        if (arg == nullptr) {
+            return env->SetLastError(napi_invalid_arg, "Invalid argument in argv");
+        }
+        (*out_args)[i] = dawn::napi_v8::ToV8(arg);
+    }
+    return napi_ok;
+}
+
+// Evaluates the result of a V8 function or constructor invocation within TryCatch.
+template <typename T>
+napi_status ProcessCallResult(napi_env env,
+                              v8::TryCatch& try_catch,
+                              v8::MaybeLocal<T> maybe_result,
+                              napi_value* out_result) {
+    if (try_catch.HasCaught()) {
+        env->last_exception.Reset(env->isolate, try_catch.Exception());
+        return env->SetLastError(napi_pending_exception,
+                                 "An exception was thrown during execution");
+    }
+    if (maybe_result.IsEmpty()) {
+        return env->SetLastError(napi_generic_failure, "Function invocation failed");
+    }
+    if (out_result != nullptr) {
+        *out_result = dawn::napi_v8::ToNapi(maybe_result.ToLocalChecked());
+    }
+    return napi_ok;
+}
+
+// Instantiates a JavaScript function from a native Node-API callback.
+napi_status CreateCallbackFunction(napi_env env,
+                                   v8::Local<v8::Context> ctx,
+                                   v8::Local<v8::Name> name,
+                                   napi_callback callback,
+                                   void* data,
+                                   v8::Local<v8::Function>* out_fn) {
+    if (callback == nullptr) {
+        return napi_ok;
+    }
+    v8::Local<v8::FunctionTemplate> function_template;
+    napi_status status = CreateFunctionTemplate(env, name, callback, data, &function_template);
+    if (status != napi_ok) {
+        return status;
+    }
+    v8::MaybeLocal<v8::Function> maybe_fn = function_template->GetFunction(ctx);
+    if (maybe_fn.IsEmpty()) {
+        return env->SetLastError(napi_generic_failure, "Failed to create callback function");
+    }
+    *out_fn = maybe_fn.ToLocalChecked();
+    return napi_ok;
+}
+// Converts Node-API property attributes to V8 PropertyAttribute.
+v8::PropertyAttribute ToV8PropertyAttribute(napi_property_attributes attributes) {
+    int v8_attr = v8::None;
+    if ((attributes & napi_writable) == 0) {
+        v8_attr |= v8::ReadOnly;
+    }
+    if ((attributes & napi_enumerable) == 0) {
+        v8_attr |= v8::DontEnum;
+    }
+    if ((attributes & napi_configurable) == 0) {
+        v8_attr |= v8::DontDelete;
+    }
+    return static_cast<v8::PropertyAttribute>(v8_attr);
+}
+// Attaches a single property descriptor to an existing JavaScript object.
+napi_status AttachObjectProperty(napi_env env,
+                                 v8::Local<v8::Context> ctx,
+                                 v8::Local<v8::Object> obj,
+                                 const napi_property_descriptor& desc) {
+    v8::Local<v8::Name> name;
+    napi_status status = GetDescriptorName(env, desc, &name);
+    if (status != napi_ok) {
+        return status;
+    }
+
+    v8::PropertyAttribute v8_attr = ToV8PropertyAttribute(desc.attributes);
+    if (desc.method != nullptr) {
+        v8::Local<v8::Function> method_fn;
+        status = CreateCallbackFunction(env, ctx, name, desc.method, desc.data, &method_fn);
+        if (status != napi_ok) {
+            return status;
+        }
+        if (obj->DefineOwnProperty(ctx, name, method_fn, v8_attr).IsNothing()) {
+            return env->SetLastError(napi_generic_failure, "Failed to define method");
+        }
+    } else if (desc.getter != nullptr || desc.setter != nullptr) {
+        v8::Local<v8::Function> getter_fn;
+        status = CreateCallbackFunction(env, ctx, {}, desc.getter, desc.data, &getter_fn);
+        if (status != napi_ok) {
+            return status;
+        }
+        v8::Local<v8::Function> setter_fn;
+        status = CreateCallbackFunction(env, ctx, {}, desc.setter, desc.data, &setter_fn);
+        if (status != napi_ok) {
+            return status;
+        }
+        obj->SetAccessorProperty(name, getter_fn, setter_fn, v8_attr);
+    } else if (desc.value != nullptr) {
+        if (obj->DefineOwnProperty(ctx, name, dawn::napi_v8::ToV8(desc.value), v8_attr)
+                .IsNothing()) {
+            return env->SetLastError(napi_generic_failure, "Failed to set property value");
+        }
+    }
     return napi_ok;
 }
 
@@ -488,61 +720,64 @@ napi_status napi_get_property_names(napi_env env, napi_value object, napi_value*
     return napi_ok;
 }
 
-napi_status napi_set_property(napi_env env, napi_value object, napi_value key, napi_value value) {
-    if (!ValidateArgs(env, key)) {
+napi_status napi_set_property(napi_env env, napi_value object, napi_value name, napi_value value) {
+    if (!ValidateArgs(env, name)) {
         return napi_invalid_arg;
     }
-    return WriteProperty(env, object, ToV8(key), value, "Failed to set property");
+    return WriteProperty(env, object, ToV8(name), value, "Failed to set property");
 }
 
-napi_status napi_get_property(napi_env env, napi_value object, napi_value key, napi_value* result) {
-    if (!ValidateArgs(env, key)) {
+napi_status napi_get_property(napi_env env,
+                              napi_value object,
+                              napi_value name,
+                              napi_value* result) {
+    if (!ValidateArgs(env, name)) {
         return napi_invalid_arg;
     }
-    return ReadProperty(env, object, ToV8(key), result, "Failed to get property");
+    return ReadProperty(env, object, ToV8(name), result, "Failed to get property");
 }
 
-napi_status napi_has_property(napi_env env, napi_value object, napi_value key, bool* result) {
-    if (!ValidateArgs(env, key)) {
+napi_status napi_has_property(napi_env env, napi_value object, napi_value name, bool* result) {
+    if (!ValidateArgs(env, name)) {
         return napi_invalid_arg;
     }
-    return QueryProperty(env, object, ToV8(key), result, "Failed to check property");
+    return QueryProperty(env, object, ToV8(name), result, "Failed to check property");
 }
 
 napi_status napi_set_named_property(napi_env env,
                                     napi_value object,
                                     const char* utf8name,
                                     napi_value value) {
-    v8::Local<v8::String> key;
-    napi_status status = CreateInternalizedKey(env, utf8name, &key);
+    v8::Local<v8::String> name;
+    napi_status status = CreateInternalizedName(env, utf8name, &name);
     if (status != napi_ok) {
         return status;
     }
-    return WriteProperty(env, object, key, value, "Failed to set named property");
+    return WriteProperty(env, object, name, value, "Failed to set named property");
 }
 
 napi_status napi_get_named_property(napi_env env,
                                     napi_value object,
                                     const char* utf8name,
                                     napi_value* result) {
-    v8::Local<v8::String> key;
-    napi_status status = CreateInternalizedKey(env, utf8name, &key);
+    v8::Local<v8::String> name;
+    napi_status status = CreateInternalizedName(env, utf8name, &name);
     if (status != napi_ok) {
         return status;
     }
-    return ReadProperty(env, object, key, result, "Failed to get named property");
+    return ReadProperty(env, object, name, result, "Failed to get named property");
 }
 
 napi_status napi_has_named_property(napi_env env,
                                     napi_value object,
                                     const char* utf8name,
                                     bool* result) {
-    v8::Local<v8::String> key;
-    napi_status status = CreateInternalizedKey(env, utf8name, &key);
+    v8::Local<v8::String> name;
+    napi_status status = CreateInternalizedName(env, utf8name, &name);
     if (status != napi_ok) {
         return status;
     }
-    return QueryProperty(env, object, key, result, "Failed to check named property");
+    return QueryProperty(env, object, name, result, "Failed to check named property");
 }
 
 // ============================================================================
@@ -583,6 +818,216 @@ napi_status napi_get_element(napi_env env, napi_value object, uint32_t index, na
 
 napi_status napi_set_element(napi_env env, napi_value object, uint32_t index, napi_value value) {
     return WriteProperty(env, object, index, value, "Failed to set element");
+}
+
+// ============================================================================
+// Functions, Classes & Callbacks
+// ============================================================================
+
+napi_status napi_create_function(napi_env env,
+                                 const char* utf8name,
+                                 size_t length,
+                                 napi_callback cb,
+                                 void* data,
+                                 napi_value* result) {
+    if (!ValidateArgs(env, cb, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::FunctionTemplate> function_template;
+    napi_status status =
+        CreateFunctionTemplate(env, utf8name, length, cb, data, &function_template);
+    if (status != napi_ok) {
+        return status;
+    }
+    v8::MaybeLocal<v8::Function> fn = function_template->GetFunction(env->GetContext());
+    if (fn.IsEmpty()) {
+        return env->SetLastError(napi_generic_failure, "Failed to create function");
+    }
+    *result = dawn::napi_v8::ToNapi(fn.ToLocalChecked());
+    return napi_ok;
+}
+
+napi_status napi_call_function(napi_env env,
+                               napi_value recv,
+                               napi_value func,
+                               size_t argc,
+                               const napi_value* argv,
+                               napi_value* result) {
+    if (!ValidateArgs(env, func)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Function> fn;
+    v8::Local<v8::Context> ctx;
+    napi_status status = UnwrapFunction(env, func, &fn, &ctx);
+    if (status != napi_ok) {
+        return status;
+    }
+
+    std::vector<v8::Local<v8::Value>> args;
+    status = UnpackArgs(env, argc, argv, &args);
+    if (status != napi_ok) {
+        return status;
+    }
+
+    v8::Local<v8::Value> v8_recv = (recv != nullptr)
+                                       ? dawn::napi_v8::ToV8(recv)
+                                       : v8::Local<v8::Value>(v8::Undefined(env->isolate));
+
+    v8::TryCatch try_catch(env->isolate);
+    v8::MaybeLocal<v8::Value> ret = fn->Call(ctx, v8_recv, static_cast<int>(argc), args.data());
+    return ProcessCallResult(env, try_catch, ret, result);
+}
+
+napi_status napi_get_cb_info(napi_env env,
+                             napi_callback_info cbinfo,
+                             size_t* argc,
+                             napi_value* argv,
+                             napi_value* this_arg,
+                             void** data) {
+    if (!ValidateArgs(env, cbinfo)) {
+        return napi_invalid_arg;
+    }
+    if (data != nullptr) {
+        *data = cbinfo->data;
+    }
+    const auto& info = *(cbinfo->v8_info);
+    if (this_arg != nullptr) {
+        *this_arg = dawn::napi_v8::ToNapi(info.This());
+    }
+    if (argc != nullptr) {
+        size_t available_argc = static_cast<size_t>(info.Length());
+        if (argv != nullptr) {
+            size_t copy_count = std::min(*argc, available_argc);
+            for (size_t i = 0; i < copy_count; ++i) {
+                // SAFETY: When argv is non-null, the caller guarantees it points to a buffer of at
+                // least *argc elements.
+                DAWN_UNSAFE_BUFFERS(argv[i]) = dawn::napi_v8::ToNapi(info[static_cast<int>(i)]);
+            }
+            for (size_t i = copy_count; i < *argc; ++i) {
+                // SAFETY: When argv is non-null, the caller guarantees it points to a buffer of at
+                // least *argc elements.
+                DAWN_UNSAFE_BUFFERS(argv[i]) = dawn::napi_v8::ToNapi(v8::Undefined(env->isolate));
+            }
+        }
+        *argc = available_argc;
+    }
+    return napi_ok;
+}
+
+napi_status napi_new_instance(napi_env env,
+                              napi_value constructor,
+                              size_t argc,
+                              const napi_value* argv,
+                              napi_value* result) {
+    if (!ValidateArgs(env, constructor, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Function> ctor;
+    v8::Local<v8::Context> ctx;
+    napi_status status = UnwrapFunction(env, constructor, &ctor, &ctx);
+    if (status != napi_ok) {
+        return status;
+    }
+
+    std::vector<v8::Local<v8::Value>> args;
+    status = UnpackArgs(env, argc, argv, &args);
+    if (status != napi_ok) {
+        return status;
+    }
+
+    v8::TryCatch try_catch(env->isolate);
+    v8::MaybeLocal<v8::Object> ret = ctor->NewInstance(ctx, static_cast<int>(argc), args.data());
+    return ProcessCallResult(env, try_catch, ret, result);
+}
+
+napi_status napi_define_class(napi_env env,
+                              const char* utf8name,
+                              size_t length,
+                              napi_callback constructor,
+                              void* data,
+                              size_t property_count,
+                              const napi_property_descriptor* properties,
+                              napi_value* result) {
+    if (!ValidateArgs(env, constructor, result)) {
+        return napi_invalid_arg;
+    }
+    if (property_count > 0 && properties == nullptr) {
+        return env->SetLastError(napi_invalid_arg, "Invalid argument: null properties");
+    }
+
+    v8::Local<v8::FunctionTemplate> class_template;
+    napi_status status =
+        CreateFunctionTemplate(env, utf8name, length, constructor, data, &class_template);
+    if (status != napi_ok) {
+        return status;
+    }
+    class_template->InstanceTemplate()->SetInternalFieldCount(1);
+
+    v8::Local<v8::Context> ctx = env->GetContext();
+    v8::MaybeLocal<v8::Function> maybe_ctor = class_template->GetFunction(ctx);
+    if (maybe_ctor.IsEmpty()) {
+        return env->SetLastError(napi_generic_failure, "Failed to create class constructor");
+    }
+    v8::Local<v8::Function> ctor_fn = maybe_ctor.ToLocalChecked();
+
+    v8::Local<v8::Object> proto_obj;
+    if (property_count > 0) {
+        v8::Local<v8::String> proto_name;
+        status = CreateInternalizedName(env, "prototype", &proto_name);
+        if (status != napi_ok) {
+            return status;
+        }
+        v8::Local<v8::Value> proto_val;
+        if (!ctor_fn->Get(ctx, proto_name).ToLocal(&proto_val) || !proto_val->IsObject()) {
+            return env->SetLastError(napi_generic_failure, "Failed to get class prototype object");
+        }
+        proto_obj = proto_val.As<v8::Object>();
+    }
+
+    for (size_t i = 0; i < property_count; ++i) {
+        // SAFETY: The caller guarantees properties points to an array of at least property_count
+        // descriptors.
+        const napi_property_descriptor& prop = DAWN_UNSAFE_BUFFERS(properties[i]);
+        bool is_static = (prop.attributes & napi_static) != 0;
+        v8::Local<v8::Object> target = is_static ? ctor_fn : proto_obj;
+        status = AttachObjectProperty(env, ctx, target, prop);
+        if (status != napi_ok) {
+            return status;
+        }
+    }
+
+    *result = dawn::napi_v8::ToNapi(ctor_fn);
+    return napi_ok;
+}
+
+napi_status napi_define_properties(napi_env env,
+                                   napi_value object,
+                                   size_t property_count,
+                                   const napi_property_descriptor* properties) {
+    if (!ValidateArgs(env, object)) {
+        return napi_invalid_arg;
+    }
+    if (property_count > 0 && properties == nullptr) {
+        return env->SetLastError(napi_invalid_arg, "Invalid argument: null properties");
+    }
+
+    v8::Local<v8::Object> obj;
+    v8::Local<v8::Context> ctx;
+    napi_status status = UnwrapObject(env, object, &obj, &ctx);
+    if (status != napi_ok) {
+        return status;
+    }
+
+    for (size_t i = 0; i < property_count; ++i) {
+        // SAFETY: The caller guarantees properties points to an array of at least property_count
+        // descriptors.
+        const napi_property_descriptor& prop = DAWN_UNSAFE_BUFFERS(properties[i]);
+        status = AttachObjectProperty(env, ctx, obj, prop);
+        if (status != napi_ok) {
+            return status;
+        }
+    }
+    return napi_ok;
 }
 
 }  // extern "C"
