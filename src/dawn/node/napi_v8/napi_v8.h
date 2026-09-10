@@ -33,6 +33,7 @@
 #include <node_api.h>
 #include <node_api_types.h>
 
+#include <algorithm>
 #include <bit>
 #include <cstring>
 #include <memory>
@@ -71,6 +72,42 @@ struct CallbackBinding {
     void* user_data = nullptr;
 };
 
+// Internal struct representing a Node-API reference (napi_ref)
+struct napi_ref__ {
+    napi_env env = nullptr;
+    v8::Global<v8::Value> handle;
+    uint32_t ref_count = 0;
+    void* native_object = nullptr;
+    napi_finalize finalize_cb = nullptr;
+    void* finalize_hint = nullptr;
+
+    bool is_wrap_ref = false;
+    bool is_userland_ref = false;
+
+    napi_ref__(napi_env e,
+               v8::Local<v8::Value> val,
+               uint32_t count,
+               void* native_obj = nullptr,
+               napi_finalize fin_cb = nullptr,
+               void* fin_hint = nullptr,
+               bool wrap_ref = false,
+               bool userland_ref = false);
+
+    ~napi_ref__();
+
+    void SetWeak();
+    void ClearWeak();
+
+    static void WeakCallback(const v8::WeakCallbackInfo<napi_ref__>& data);
+};
+
+// Instance data stored in napi_env
+struct InstanceData {
+    void* data = nullptr;
+    napi_finalize finalize_cb = nullptr;
+    void* finalize_hint = nullptr;
+};
+
 // Internal struct representing a Node-API environment (napi_env)
 struct napi_env__ {
     v8::Isolate* isolate = nullptr;
@@ -79,18 +116,38 @@ struct napi_env__ {
     napi_extended_error_info last_error{};
     std::vector<std::unique_ptr<napi_handle_scope__>> open_handle_scopes;
     std::vector<std::unique_ptr<CallbackBinding>> callback_bindings;
+    std::vector<std::unique_ptr<napi_ref__>> references;
+    InstanceData instance_data{};
 
     napi_env__(v8::Isolate* iso, v8::Local<v8::Context> ctx) : isolate(iso), context(iso, ctx) {
         ClearLastError();
     }
 
     ~napi_env__() {
-        // Automatically close all remaining open handle scopes in LIFO order
-        while (!open_handle_scopes.empty()) {
-            open_handle_scopes.pop_back();
+        if (instance_data.finalize_cb != nullptr) {
+            instance_data.finalize_cb(this, instance_data.data, instance_data.finalize_hint);
+            instance_data.finalize_cb = nullptr;
         }
-        last_exception.Reset();
-        callback_bindings.clear();
+
+        // Finalize all remaining references that have an active finalizer.
+        while (true) {
+            auto it = std::find_if(references.rbegin(), references.rend(),
+                                   [](const auto& r) { return r->finalize_cb != nullptr; });
+            if (it == references.rend()) {
+                break;
+            }
+
+            napi_ref__* ref = it->get();
+            napi_finalize cb = ref->finalize_cb;
+            void* native_object = ref->native_object;
+            void* finalize_hint = ref->finalize_hint;
+
+            // Reset the handle and clear finalize_cb BEFORE calling user code.
+            ref->handle.Reset();
+            ref->finalize_cb = nullptr;
+
+            cb(this, native_object, finalize_hint);
+        }
     }
 
     v8::Local<v8::Context> GetContext() const { return context.Get(isolate); }

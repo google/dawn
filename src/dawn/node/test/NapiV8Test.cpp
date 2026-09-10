@@ -58,6 +58,7 @@ namespace {
 class NapiV8Test : public ::testing::Test {
   protected:
     static void SetUpTestSuite() {
+        v8::V8::SetFlagsFromString("--expose_gc");
         platform_ = v8::platform::NewDefaultPlatform();
         v8::V8::InitializePlatform(platform_.get());
         v8::V8::Initialize();
@@ -94,6 +95,14 @@ class NapiV8Test : public ::testing::Test {
     }
 
     napi_env env_ = nullptr;
+
+    napi_env CreateSubEnv() { return dawn::napi_v8::CreateEnv(isolate_, env_->GetContext()); }
+
+    void DestroySubEnv(napi_env sub_env) { dawn::napi_v8::DestroyEnv(sub_env); }
+
+    void RequestGC() {
+        isolate_->RequestGarbageCollectionForTesting(v8::Isolate::kFullGarbageCollection);
+    }
 
   private:
     static std::unique_ptr<v8::Platform> platform_;
@@ -2006,6 +2015,625 @@ TEST_F(NapiV8Test, ErrorInvalidArguments) {
     EXPECT_EQ(napi_is_error(nullptr, err, &is_err), napi_invalid_arg);
     EXPECT_EQ(napi_is_error(env_, nullptr, &is_err), napi_invalid_arg);
     EXPECT_EQ(napi_is_error(env_, err, nullptr), napi_invalid_arg);
+}
+
+// ============================================================================
+// Stage 6: References, ObjectWrap & Instance Data
+// ============================================================================
+
+TEST_F(NapiV8Test, ReferenceLifecycleStrong) {
+    napi_value obj;
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+    napi_value val;
+    ASSERT_EQ(napi_create_int32(env_, 789, &val), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env_, obj, "id", val), napi_ok);
+
+    napi_ref ref = nullptr;
+    ASSERT_EQ(napi_create_reference(env_, obj, 1, &ref), napi_ok);
+    ASSERT_NE(ref, nullptr);
+
+    napi_value fetched_obj;
+    ASSERT_EQ(napi_get_reference_value(env_, ref, &fetched_obj), napi_ok);
+    ASSERT_NE(fetched_obj, nullptr);
+
+    napi_value read_id;
+    ASSERT_EQ(napi_get_named_property(env_, fetched_obj, "id", &read_id), napi_ok);
+    int32_t id_num = 0;
+    ASSERT_EQ(napi_get_value_int32(env_, read_id, &id_num), napi_ok);
+    EXPECT_EQ(id_num, 789);
+
+    ASSERT_EQ(napi_delete_reference(env_, ref), napi_ok);
+}
+
+TEST_F(NapiV8Test, ReferenceRefAndUnref) {
+    napi_value obj;
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+
+    napi_ref ref = nullptr;
+    ASSERT_EQ(napi_create_reference(env_, obj, 0, &ref), napi_ok);
+    ASSERT_NE(ref, nullptr);
+
+    uint32_t count = 0;
+    ASSERT_EQ(napi_reference_ref(env_, ref, &count), napi_ok);
+    EXPECT_EQ(count, 1u);
+
+    ASSERT_EQ(napi_reference_ref(env_, ref, &count), napi_ok);
+    EXPECT_EQ(count, 2u);
+
+    ASSERT_EQ(napi_reference_unref(env_, ref, &count), napi_ok);
+    EXPECT_EQ(count, 1u);
+
+    ASSERT_EQ(napi_reference_unref(env_, ref, &count), napi_ok);
+    EXPECT_EQ(count, 0u);
+
+    // Unreferencing when count is already 0 should fail
+    EXPECT_EQ(napi_reference_unref(env_, ref, &count), napi_generic_failure);
+
+    ASSERT_EQ(napi_delete_reference(env_, ref), napi_ok);
+}
+
+namespace {
+struct TestNativeData {
+    int value = 0;
+};
+
+napi_value ConstructorWithInternalField(napi_env env, napi_callback_info info) {
+    napi_value this_arg;
+    napi_get_cb_info(env, info, nullptr, nullptr, &this_arg, nullptr);
+    return this_arg;
+}
+}  // namespace
+
+TEST_F(NapiV8Test, ObjectWrapAndUnwrap) {
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(env_, "WrapTestClass", NAPI_AUTO_LENGTH,
+                                ConstructorWithInternalField, nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    napi_value inst;
+    ASSERT_EQ(napi_new_instance(env_, ctor, 0, nullptr, &inst), napi_ok);
+
+    TestNativeData native_data{1234};
+    ASSERT_EQ(napi_wrap(env_, inst, &native_data, nullptr, nullptr, nullptr), napi_ok);
+
+    // Wrapping an already-wrapped object must fail
+    TestNativeData second_data{5678};
+    EXPECT_EQ(napi_wrap(env_, inst, &second_data, nullptr, nullptr, nullptr), napi_invalid_arg);
+
+    void* unwrapped = nullptr;
+    ASSERT_EQ(napi_unwrap(env_, inst, &unwrapped), napi_ok);
+    ASSERT_EQ(unwrapped, &native_data);
+
+    TestNativeData* typed_data = static_cast<TestNativeData*>(unwrapped);
+    EXPECT_EQ(typed_data->value, 1234);
+}
+
+TEST_F(NapiV8Test, ObjectRemoveWrap) {
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(env_, "RemoveWrapTestClass", NAPI_AUTO_LENGTH,
+                                ConstructorWithInternalField, nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    napi_value inst;
+    ASSERT_EQ(napi_new_instance(env_, ctor, 0, nullptr, &inst), napi_ok);
+
+    TestNativeData native_data{5678};
+    ASSERT_EQ(napi_wrap(env_, inst, &native_data, nullptr, nullptr, nullptr), napi_ok);
+
+    void* removed_data = nullptr;
+    ASSERT_EQ(napi_remove_wrap(env_, inst, &removed_data), napi_ok);
+    EXPECT_EQ(removed_data, &native_data);
+
+    void* unwrap_after_remove = nullptr;
+    ASSERT_EQ(napi_unwrap(env_, inst, &unwrap_after_remove), napi_ok);
+    EXPECT_EQ(unwrap_after_remove, nullptr);
+}
+
+TEST_F(NapiV8Test, InstanceData) {
+    TestNativeData sample{999};
+    ASSERT_EQ(napi_set_instance_data(env_, &sample, nullptr, nullptr), napi_ok);
+
+    void* fetched = nullptr;
+    ASSERT_EQ(napi_get_instance_data(env_, &fetched), napi_ok);
+    EXPECT_EQ(fetched, &sample);
+
+    TestNativeData* typed = static_cast<TestNativeData*>(fetched);
+    EXPECT_EQ(typed->value, 999);
+}
+
+namespace {
+void TestInstanceDataFinalizer(napi_env, void* finalize_data, void* finalize_hint) {
+    int* target = static_cast<int*>(finalize_data);
+    int increment = *static_cast<int*>(finalize_hint);
+    *target += increment;
+}
+}  // namespace
+
+TEST_F(NapiV8Test, InstanceDataFinalizerOnEnvDestruction) {
+    napi_env sub_env = CreateSubEnv();
+    int state = 10;
+    int hint = 5;
+    ASSERT_EQ(napi_set_instance_data(sub_env, &state, TestInstanceDataFinalizer, &hint), napi_ok);
+
+    DestroySubEnv(sub_env);
+    EXPECT_EQ(state, 15);
+}
+
+TEST_F(NapiV8Test, ReferencesAndWrapInvalidArguments) {
+    napi_value obj, num;
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+    ASSERT_EQ(napi_create_int32(env_, 100, &num), napi_ok);
+
+    // napi_create_reference
+    napi_ref ref = nullptr;
+    EXPECT_EQ(napi_create_reference(nullptr, obj, 1, &ref), napi_invalid_arg);
+    EXPECT_EQ(napi_create_reference(env_, nullptr, 1, &ref), napi_invalid_arg);
+    EXPECT_EQ(napi_create_reference(env_, obj, 1, nullptr), napi_invalid_arg);
+
+    ASSERT_EQ(napi_create_reference(env_, obj, 1, &ref), napi_ok);
+
+    // napi_delete_reference
+    EXPECT_EQ(napi_delete_reference(nullptr, ref), napi_invalid_arg);
+    EXPECT_EQ(napi_delete_reference(env_, nullptr), napi_invalid_arg);
+
+    // napi_reference_ref & unref
+    uint32_t count = 0;
+    EXPECT_EQ(napi_reference_ref(nullptr, ref, &count), napi_invalid_arg);
+    EXPECT_EQ(napi_reference_ref(env_, nullptr, &count), napi_invalid_arg);
+    EXPECT_EQ(napi_reference_unref(nullptr, ref, &count), napi_invalid_arg);
+    EXPECT_EQ(napi_reference_unref(env_, nullptr, &count), napi_invalid_arg);
+
+    // napi_get_reference_value
+    napi_value get_val;
+    EXPECT_EQ(napi_get_reference_value(nullptr, ref, &get_val), napi_invalid_arg);
+    EXPECT_EQ(napi_get_reference_value(env_, nullptr, &get_val), napi_invalid_arg);
+    EXPECT_EQ(napi_get_reference_value(env_, ref, nullptr), napi_invalid_arg);
+
+    ASSERT_EQ(napi_delete_reference(env_, ref), napi_ok);
+
+    // napi_wrap on plain object without internal fields
+    int sample_native = 0;
+    EXPECT_EQ(napi_wrap(nullptr, obj, &sample_native, nullptr, nullptr, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_wrap(env_, nullptr, &sample_native, nullptr, nullptr, nullptr),
+              napi_invalid_arg);
+    EXPECT_EQ(napi_wrap(env_, num, &sample_native, nullptr, nullptr, nullptr),
+              napi_object_expected);
+    EXPECT_EQ(napi_wrap(env_, obj, &sample_native, nullptr, nullptr, nullptr), napi_invalid_arg);
+
+    // napi_unwrap & remove_wrap
+    void* unwrap_res = nullptr;
+    EXPECT_EQ(napi_unwrap(nullptr, obj, &unwrap_res), napi_invalid_arg);
+    EXPECT_EQ(napi_unwrap(env_, nullptr, &unwrap_res), napi_invalid_arg);
+    EXPECT_EQ(napi_unwrap(env_, obj, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_remove_wrap(nullptr, obj, &unwrap_res), napi_invalid_arg);
+    EXPECT_EQ(napi_remove_wrap(env_, nullptr, &unwrap_res), napi_invalid_arg);
+
+    // instance data
+    void* inst_data = nullptr;
+    EXPECT_EQ(napi_set_instance_data(nullptr, &sample_native, nullptr, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_get_instance_data(nullptr, &inst_data), napi_invalid_arg);
+    EXPECT_EQ(napi_get_instance_data(env_, nullptr), napi_invalid_arg);
+}
+
+struct FinalizerStateTracker {
+    int call_count = 0;
+    bool finalizer_called = false;
+    bool ref_deleted = false;
+    napi_ref ref = nullptr;
+};
+
+void FinalizerDeletingReference(napi_env env, void* finalize_data, void*) {
+    auto* tracker = static_cast<FinalizerStateTracker*>(finalize_data);
+    tracker->call_count++;
+    tracker->finalizer_called = true;
+    if (tracker->ref != nullptr) {
+        if (napi_delete_reference(env, tracker->ref) == napi_ok) {
+            tracker->ref_deleted = true;
+        }
+    }
+}
+
+TEST_F(NapiV8Test, ObjectWrapFinalizerDeletesRef) {
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(env_, "FinalizeClass", NAPI_AUTO_LENGTH,
+                                ConstructorWithInternalField, nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    FinalizerStateTracker tracker;
+    {
+        napi_handle_scope scope;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+
+        napi_value inst;
+        ASSERT_EQ(napi_new_instance(env_, ctor, 0, nullptr, &inst), napi_ok);
+        ASSERT_EQ(
+            napi_wrap(env_, inst, &tracker, FinalizerDeletingReference, nullptr, &tracker.ref),
+            napi_ok);
+        ASSERT_NE(tracker.ref, nullptr);
+
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    // Force GC to reclaim the unreachable instance
+    RequestGC();
+
+    EXPECT_TRUE(tracker.finalizer_called);
+    EXPECT_TRUE(tracker.ref_deleted);
+}
+
+TEST_F(NapiV8Test, DeleteReferenceDoesNotCallFinalizer) {
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(env_, "DeleteRefClass", NAPI_AUTO_LENGTH,
+                                ConstructorWithInternalField, nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    FinalizerStateTracker tracker;
+    napi_value inst;
+    ASSERT_EQ(napi_new_instance(env_, ctor, 0, nullptr, &inst), napi_ok);
+    ASSERT_EQ(napi_wrap(env_, inst, &tracker, FinalizerDeletingReference, nullptr, &tracker.ref),
+              napi_ok);
+    ASSERT_NE(tracker.ref, nullptr);
+
+    // Explicitly deleting the reference must NOT invoke the finalizer
+    ASSERT_EQ(napi_delete_reference(env_, tracker.ref), napi_ok);
+    EXPECT_FALSE(tracker.finalizer_called);
+}
+
+TEST_F(NapiV8Test, EnvDestructionCallsFinalizerWithDeleteRef) {
+    napi_env sub_env = CreateSubEnv();
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(sub_env, "TeardownRefClass", NAPI_AUTO_LENGTH,
+                                ConstructorWithInternalField, nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    FinalizerStateTracker tracker;
+    napi_value inst;
+    ASSERT_EQ(napi_new_instance(sub_env, ctor, 0, nullptr, &inst), napi_ok);
+    ASSERT_EQ(napi_wrap(sub_env, inst, &tracker, FinalizerDeletingReference, nullptr, &tracker.ref),
+              napi_ok);
+
+    // Create an extra strong and weak reference that are intentionally left open
+    napi_ref strong_ref = nullptr;
+    ASSERT_EQ(napi_create_reference(sub_env, inst, 1, &strong_ref), napi_ok);
+    napi_ref weak_ref = nullptr;
+    ASSERT_EQ(napi_create_reference(sub_env, inst, 0, &weak_ref), napi_ok);
+
+    // Destroy sub_env without deleting references beforehand
+    DestroySubEnv(sub_env);
+
+    // Finalizer must have been called during environment teardown, and ref deleted inside
+    EXPECT_TRUE(tracker.finalizer_called);
+    EXPECT_TRUE(tracker.ref_deleted);
+    EXPECT_EQ(tracker.call_count, 1);
+
+    // Force GC after env destruction. Handles were reset during teardown, so no dangling callbacks
+    RequestGC();
+
+    // Verify tracker state has not changed after GC
+    EXPECT_TRUE(tracker.finalizer_called);
+    EXPECT_TRUE(tracker.ref_deleted);
+    EXPECT_EQ(tracker.call_count, 1);
+}
+
+TEST_F(NapiV8Test, EnvDestructionCallsFinalizerWithoutDeleteRef) {
+    napi_env sub_env = CreateSubEnv();
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(sub_env, "TeardownRefNoDeleteClass", NAPI_AUTO_LENGTH,
+                                ConstructorWithInternalField, nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    int finalize_call_count = 0;
+    auto simple_finalizer = [](napi_env, void* finalize_data, void*) {
+        auto* count = static_cast<int*>(finalize_data);
+        (*count)++;
+    };
+
+    napi_value inst;
+    ASSERT_EQ(napi_new_instance(sub_env, ctor, 0, nullptr, &inst), napi_ok);
+    // Wrap with nullptr result ref so user does not delete the ref
+    ASSERT_EQ(napi_wrap(sub_env, inst, &finalize_call_count, simple_finalizer, nullptr, nullptr),
+              napi_ok);
+
+    // Destroy sub_env
+    DestroySubEnv(sub_env);
+
+    // Finalizer must have been called exactly once during environment teardown
+    EXPECT_EQ(finalize_call_count, 1);
+
+    RequestGC();
+    EXPECT_EQ(finalize_call_count, 1);
+}
+
+TEST_F(NapiV8Test, StrongReferenceKeepsWeakReferenceAlive) {
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(env_, "KeepAliveClass", NAPI_AUTO_LENGTH,
+                                ConstructorWithInternalField, nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    napi_ref strong_ref = nullptr;
+    napi_ref weak_ref = nullptr;
+
+    {
+        napi_handle_scope scope;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+
+        napi_value inst;
+        ASSERT_EQ(napi_new_instance(env_, ctor, 0, nullptr, &inst), napi_ok);
+
+        ASSERT_EQ(napi_create_reference(env_, inst, 1, &strong_ref), napi_ok);
+        ASSERT_EQ(napi_create_reference(env_, inst, 0, &weak_ref), napi_ok);
+
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    // Force GC: because strong_ref (count 1) exists, the object must NOT be collected
+    RequestGC();
+
+    napi_value strong_val = nullptr;
+    napi_value weak_val = nullptr;
+    {
+        napi_handle_scope scope;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+
+        ASSERT_EQ(napi_get_reference_value(env_, strong_ref, &strong_val), napi_ok);
+        EXPECT_NE(strong_val, nullptr);
+
+        ASSERT_EQ(napi_get_reference_value(env_, weak_ref, &weak_val), napi_ok);
+        EXPECT_NE(weak_val, nullptr);
+
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    ASSERT_EQ(napi_delete_reference(env_, strong_ref), napi_ok);
+    ASSERT_EQ(napi_delete_reference(env_, weak_ref), napi_ok);
+}
+
+TEST_F(NapiV8Test, MultipleWeakReferencesReclaimed) {
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(env_, "MultipleWeakRefClass", NAPI_AUTO_LENGTH,
+                                ConstructorWithInternalField, nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    napi_ref ref1 = nullptr;
+    napi_ref ref2 = nullptr;
+
+    {
+        napi_handle_scope scope;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+
+        napi_value inst;
+        ASSERT_EQ(napi_new_instance(env_, ctor, 0, nullptr, &inst), napi_ok);
+
+        // Both references start at count 0 (weak)
+        ASSERT_EQ(napi_create_reference(env_, inst, 0, &ref1), napi_ok);
+        ASSERT_EQ(napi_create_reference(env_, inst, 0, &ref2), napi_ok);
+
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    // Force GC: with both references starting at count 0, the object must be collected
+    RequestGC();
+
+    napi_value val1 = nullptr;
+    ASSERT_EQ(napi_get_reference_value(env_, ref1, &val1), napi_ok);
+    EXPECT_EQ(val1, nullptr);
+
+    napi_value val2 = nullptr;
+    ASSERT_EQ(napi_get_reference_value(env_, ref2, &val2), napi_ok);
+    EXPECT_EQ(val2, nullptr);
+
+    ASSERT_EQ(napi_delete_reference(env_, ref1), napi_ok);
+    ASSERT_EQ(napi_delete_reference(env_, ref2), napi_ok);
+}
+
+TEST_F(NapiV8Test, ReferenceWeakPromotionToStrongSurvivesGC) {
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(env_, "PromoClass", NAPI_AUTO_LENGTH, ConstructorWithInternalField,
+                                nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    napi_ref ref = nullptr;
+
+    {
+        napi_handle_scope scope;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+
+        napi_value inst;
+        ASSERT_EQ(napi_new_instance(env_, ctor, 0, nullptr, &inst), napi_ok);
+
+        // Start as weak (count = 0)
+        ASSERT_EQ(napi_create_reference(env_, inst, 0, &ref), napi_ok);
+
+        // Promote to strong (0 -> 1) before closing scope
+        uint32_t count = 0;
+        ASSERT_EQ(napi_reference_ref(env_, ref, &count), napi_ok);
+        EXPECT_EQ(count, 1u);
+
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    // Force GC: because it was promoted to strong, the object must survive
+    RequestGC();
+
+    napi_value val = nullptr;
+    ASSERT_EQ(napi_get_reference_value(env_, ref, &val), napi_ok);
+    EXPECT_NE(val, nullptr);
+
+    ASSERT_EQ(napi_delete_reference(env_, ref), napi_ok);
+}
+
+TEST_F(NapiV8Test, ReferenceDemotionToWeakAllowsGC) {
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(env_, "DemoClass", NAPI_AUTO_LENGTH, ConstructorWithInternalField,
+                                nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    napi_ref ref = nullptr;
+
+    {
+        napi_handle_scope scope;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+
+        napi_value inst;
+        ASSERT_EQ(napi_new_instance(env_, ctor, 0, nullptr, &inst), napi_ok);
+
+        // Start as strong (count = 1)
+        ASSERT_EQ(napi_create_reference(env_, inst, 1, &ref), napi_ok);
+
+        // Demote to weak (1 -> 0)
+        uint32_t count = 0;
+        ASSERT_EQ(napi_reference_unref(env_, ref, &count), napi_ok);
+        EXPECT_EQ(count, 0u);
+
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    // Force GC: object must now be collected
+    RequestGC();
+
+    napi_value val = nullptr;
+    ASSERT_EQ(napi_get_reference_value(env_, ref, &val), napi_ok);
+    EXPECT_EQ(val, nullptr);
+
+    ASSERT_EQ(napi_delete_reference(env_, ref), napi_ok);
+}
+
+TEST_F(NapiV8Test, ObjectWrapInteractingWithExternalReferences) {
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(env_, "WrapInteractClass", NAPI_AUTO_LENGTH,
+                                ConstructorWithInternalField, nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    FinalizerStateTracker tracker;
+    napi_ref strong_ref = nullptr;
+
+    {
+        napi_handle_scope scope;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+
+        napi_value inst;
+        ASSERT_EQ(napi_new_instance(env_, ctor, 0, nullptr, &inst), napi_ok);
+
+        // Wrap with a finalizer (holds an internal weak reference)
+        ASSERT_EQ(
+            napi_wrap(env_, inst, &tracker, FinalizerDeletingReference, nullptr, &tracker.ref),
+            napi_ok);
+
+        // Also create an independent strong reference (count = 1)
+        ASSERT_EQ(napi_create_reference(env_, inst, 1, &strong_ref), napi_ok);
+
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    // Force GC: instance is kept alive by strong_ref, so finalizer must NOT be called
+    RequestGC();
+    EXPECT_FALSE(tracker.finalizer_called);
+
+    // Unref strong_ref (1 -> 0): now only weak references exist
+    uint32_t count = 0;
+    ASSERT_EQ(napi_reference_unref(env_, strong_ref, &count), napi_ok);
+    EXPECT_EQ(count, 0u);
+
+    // Force GC: instance is collected and finalizer IS called
+    RequestGC();
+    EXPECT_TRUE(tracker.finalizer_called);
+    EXPECT_TRUE(tracker.ref_deleted);
+
+    ASSERT_EQ(napi_delete_reference(env_, strong_ref), napi_ok);
+}
+
+TEST_F(NapiV8Test, RemoveWrapClearsFinalizerForUserlandRef) {
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(env_, "RemoveWrapUserClass", NAPI_AUTO_LENGTH,
+                                ConstructorWithInternalField, nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    FinalizerStateTracker tracker;
+
+    {
+        napi_handle_scope scope;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+
+        napi_value inst;
+        ASSERT_EQ(napi_new_instance(env_, ctor, 0, nullptr, &inst), napi_ok);
+        ASSERT_EQ(
+            napi_wrap(env_, inst, &tracker, FinalizerDeletingReference, nullptr, &tracker.ref),
+            napi_ok);
+        ASSERT_NE(tracker.ref, nullptr);
+
+        // Remove the wrap before the instance is GC'd
+        void* unwrapped = nullptr;
+        ASSERT_EQ(napi_remove_wrap(env_, inst, &unwrapped), napi_ok);
+        EXPECT_EQ(unwrapped, &tracker);
+
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    // Force GC: instance is collected, but because wrap was removed, finalizer must NOT run
+    RequestGC();
+    EXPECT_FALSE(tracker.finalizer_called);
+
+    // Userland reference handle is still valid to query or delete
+    napi_value val = nullptr;
+    ASSERT_EQ(napi_get_reference_value(env_, tracker.ref, &val), napi_ok);
+    EXPECT_EQ(val, nullptr);
+
+    ASSERT_EQ(napi_delete_reference(env_, tracker.ref), napi_ok);
+}
+
+TEST_F(NapiV8Test, RemoveWrapDeletesInternalRef) {
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(env_, "RemoveWrapInternalClass", NAPI_AUTO_LENGTH,
+                                ConstructorWithInternalField, nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    FinalizerStateTracker tracker;
+
+    {
+        napi_handle_scope scope;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+
+        napi_value inst;
+        ASSERT_EQ(napi_new_instance(env_, ctor, 0, nullptr, &inst), napi_ok);
+        // Wrap with nullptr result ref (internal runtime ref)
+        ASSERT_EQ(napi_wrap(env_, inst, &tracker, FinalizerDeletingReference, nullptr, nullptr),
+                  napi_ok);
+
+        // Remove wrap
+        void* unwrapped = nullptr;
+        ASSERT_EQ(napi_remove_wrap(env_, inst, &unwrapped), napi_ok);
+        EXPECT_EQ(unwrapped, &tracker);
+
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    // Force GC: instance collected, finalizer must NOT run
+    RequestGC();
+    EXPECT_FALSE(tracker.finalizer_called);
+}
+
+TEST_F(NapiV8Test, RemoveWrapAndEnvDestruction) {
+    napi_env sub_env = CreateSubEnv();
+    napi_value ctor;
+    ASSERT_EQ(napi_define_class(sub_env, "RemoveWrapTeardownClass", NAPI_AUTO_LENGTH,
+                                ConstructorWithInternalField, nullptr, 0, nullptr, &ctor),
+              napi_ok);
+
+    FinalizerStateTracker tracker;
+    napi_value inst;
+    ASSERT_EQ(napi_new_instance(sub_env, ctor, 0, nullptr, &inst), napi_ok);
+    ASSERT_EQ(napi_wrap(sub_env, inst, &tracker, FinalizerDeletingReference, nullptr, &tracker.ref),
+              napi_ok);
+
+    void* unwrapped = nullptr;
+    ASSERT_EQ(napi_remove_wrap(sub_env, inst, &unwrapped), napi_ok);
+    EXPECT_EQ(unwrapped, &tracker);
+
+    // Destroy sub_env without deleting tracker.ref beforehand
+    DestroySubEnv(sub_env);
+
+    // Teardown must NOT call finalizer because wrap was removed
+    EXPECT_FALSE(tracker.finalizer_called);
 }
 
 }  // namespace

@@ -32,6 +32,56 @@
 
 #include "src/utils/compiler.h"
 
+napi_ref__::napi_ref__(napi_env e,
+                       v8::Local<v8::Value> val,
+                       uint32_t count,
+                       void* native_obj,
+                       napi_finalize fin_cb,
+                       void* fin_hint,
+                       bool wrap_ref,
+                       bool userland_ref)
+    : env(e),
+      handle(e->isolate, val),
+      ref_count(count),
+      native_object(native_obj),
+      finalize_cb(fin_cb),
+      finalize_hint(fin_hint),
+      is_wrap_ref(wrap_ref),
+      is_userland_ref(userland_ref) {
+    if (ref_count == 0) {
+        SetWeak();
+    }
+}
+
+napi_ref__::~napi_ref__() {
+    handle.Reset();
+}
+
+void napi_ref__::SetWeak() {
+    handle.SetWeak(this, WeakCallback, v8::WeakCallbackType::kParameter);
+}
+
+void napi_ref__::ClearWeak() {
+    handle.ClearWeak<void>();
+}
+
+void napi_ref__::WeakCallback(const v8::WeakCallbackInfo<napi_ref__>& data) {
+    napi_ref__* self = data.GetParameter();
+    napi_env env = self->env;
+    void* native_object = self->native_object;
+    void* finalize_hint = self->finalize_hint;
+    napi_finalize finalize_cb = self->finalize_cb;
+
+    // Reset the handle and clear finalize_cb before invoking the callback.
+    // The finalize_cb may call napi_delete_reference, which deletes `self`.
+    self->handle.Reset();
+    self->finalize_cb = nullptr;
+
+    if (finalize_cb != nullptr) {
+        finalize_cb(env, native_object, finalize_hint);
+    }
+}
+
 namespace {
 
 // Validates that the environment pointer and all required argument pointers are non-null.
@@ -459,6 +509,22 @@ napi_status CreateError(napi_env env,
         }
     }
     *result = dawn::napi_v8::ToNapi(err);
+    return napi_ok;
+}
+
+napi_status GetWrapObject(napi_env env, napi_value js_object, v8::Local<v8::Object>* out_obj) {
+    if (!ValidateArgs(env, js_object)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(js_object);
+    if (!v8_val->IsObject()) {
+        return env->SetLastError(napi_object_expected, "An object was expected");
+    }
+    v8::Local<v8::Object> obj = v8_val.As<v8::Object>();
+    if (obj->InternalFieldCount() == 0) {
+        return env->SetLastError(napi_invalid_arg, "Object has no internal fields");
+    }
+    *out_obj = obj;
     return napi_ok;
 }
 
@@ -1135,6 +1201,175 @@ napi_status napi_is_error(napi_env env, napi_value value, bool* result) {
         return napi_invalid_arg;
     }
     *result = dawn::napi_v8::ToV8(value)->IsNativeError();
+    return napi_ok;
+}
+
+// ============================================================================
+// References, ObjectWrap & Instance Data
+// ============================================================================
+
+napi_status napi_create_reference(napi_env env,
+                                  napi_value value,
+                                  uint32_t initial_refcount,
+                                  napi_ref* result) {
+    if (!ValidateArgs(env, value, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(value);
+    auto ref = std::make_unique<napi_ref__>(env, v8_val, initial_refcount);
+    *result = ref.get();
+    env->references.push_back(std::move(ref));
+    return napi_ok;
+}
+
+napi_status napi_delete_reference(napi_env env, napi_ref ref) {
+    if (!ValidateArgs(env, ref)) {
+        return napi_invalid_arg;
+    }
+    size_t erased = std::erase_if(
+        env->references, [ref](const std::unique_ptr<napi_ref__>& r) { return r.get() == ref; });
+    if (erased > 0) {
+        return napi_ok;
+    }
+    return env->SetLastError(napi_invalid_arg, "Reference not found");
+}
+
+napi_status napi_reference_ref(napi_env env, napi_ref ref, uint32_t* result) {
+    if (!ValidateArgs(env, ref)) {
+        return napi_invalid_arg;
+    }
+    if (ref->ref_count == 0) {
+        ref->ClearWeak();
+    }
+    ref->ref_count++;
+    if (result != nullptr) {
+        *result = ref->ref_count;
+    }
+    return napi_ok;
+}
+
+napi_status napi_reference_unref(napi_env env, napi_ref ref, uint32_t* result) {
+    if (!ValidateArgs(env, ref)) {
+        return napi_invalid_arg;
+    }
+    if (ref->ref_count == 0) {
+        return env->SetLastError(napi_generic_failure, "Cannot unref a reference with refcount 0");
+    }
+    ref->ref_count--;
+    if (ref->ref_count == 0) {
+        ref->SetWeak();
+    }
+    if (result != nullptr) {
+        *result = ref->ref_count;
+    }
+    return napi_ok;
+}
+
+napi_status napi_get_reference_value(napi_env env, napi_ref ref, napi_value* result) {
+    if (!ValidateArgs(env, ref, result)) {
+        return napi_invalid_arg;
+    }
+    if (ref->handle.IsEmpty()) {
+        *result = nullptr;
+    } else {
+        *result = dawn::napi_v8::ToNapi(ref->handle.Get(env->isolate));
+    }
+    return napi_ok;
+}
+
+napi_status napi_wrap(napi_env env,
+                      napi_value js_object,
+                      void* native_object,
+                      napi_finalize finalize_cb,
+                      void* finalize_hint,
+                      napi_ref* result) {
+    v8::Local<v8::Object> obj;
+    napi_status status = GetWrapObject(env, js_object, &obj);
+    if (status != napi_ok) {
+        return status;
+    }
+    if (obj->GetAlignedPointerFromInternalField(0, v8::kEmbedderDataTypeTagDefault) != nullptr) {
+        return env->SetLastError(napi_invalid_arg, "Object is already wrapped");
+    }
+    obj->SetAlignedPointerInInternalField(0, native_object, v8::kEmbedderDataTypeTagDefault);
+    if (finalize_cb != nullptr || result != nullptr) {
+        auto ref = std::make_unique<napi_ref__>(env, obj, 0, native_object, finalize_cb,
+                                                finalize_hint, /*wrap_ref=*/true,
+                                                /*userland_ref=*/result != nullptr);
+        if (result != nullptr) {
+            *result = ref.get();
+        }
+        env->references.push_back(std::move(ref));
+    }
+    return napi_ok;
+}
+
+napi_status napi_unwrap(napi_env env, napi_value js_object, void** result) {
+    if (!ValidateArgs(env, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Object> obj;
+    napi_status status = GetWrapObject(env, js_object, &obj);
+    if (status != napi_ok) {
+        return status;
+    }
+    *result = obj->GetAlignedPointerFromInternalField(0, v8::kEmbedderDataTypeTagDefault);
+    return napi_ok;
+}
+
+napi_status napi_remove_wrap(napi_env env, napi_value js_object, void** result) {
+    v8::Local<v8::Object> obj;
+    napi_status status = GetWrapObject(env, js_object, &obj);
+    if (status != napi_ok) {
+        return status;
+    }
+    if (result != nullptr) {
+        *result = obj->GetAlignedPointerFromInternalField(0, v8::kEmbedderDataTypeTagDefault);
+    }
+    obj->SetAlignedPointerInInternalField(0, nullptr, v8::kEmbedderDataTypeTagDefault);
+
+    // Find and detach the associated wrap reference
+    auto it = std::find_if(env->references.begin(), env->references.end(), [&](const auto& r) {
+        return r->is_wrap_ref && !r->handle.IsEmpty() && r->handle.Get(env->isolate) == obj;
+    });
+    if (it != env->references.end()) {
+        napi_ref__* ref = it->get();
+        // Clear the finalizer so that it will never run on the detached native object.
+        ref->finalize_cb = nullptr;
+        ref->native_object = nullptr;
+        ref->is_wrap_ref = false;
+
+        if (!ref->is_userland_ref) {
+            // Internal runtime reference: erasing it destroys the unique_ptr, whose
+            // destructor calls handle.Reset(), deregistering the weak callback in V8.
+            env->references.erase(it);
+        }
+    }
+    return napi_ok;
+}
+
+napi_status napi_set_instance_data(napi_env env,
+                                   void* data,
+                                   napi_finalize finalize_cb,
+                                   void* finalize_hint) {
+    if (!ValidateArgs(env)) {
+        return napi_invalid_arg;
+    }
+    if (env->instance_data.finalize_cb != nullptr) {
+        env->instance_data.finalize_cb(env, env->instance_data.data,
+                                       env->instance_data.finalize_hint);
+    }
+    env->instance_data.data = data;
+    env->instance_data.finalize_cb = finalize_cb;
+    env->instance_data.finalize_hint = finalize_hint;
+    return napi_ok;
+}
+
+napi_status napi_get_instance_data(napi_env env, void** data) {
+    if (!ValidateArgs(env, data)) {
+        return napi_invalid_arg;
+    }
+    *data = env->instance_data.data;
     return napi_ok;
 }
 
