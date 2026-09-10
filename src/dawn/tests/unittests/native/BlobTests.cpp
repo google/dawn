@@ -59,7 +59,7 @@ TEST(BlobTests, SizedCreation) {
     std::ranges::copy(std::as_bytes(std::span(data)), b.Data().begin());
 
     // And retrieve the exact contents back.
-    DAWN_UNSAFE_TODO(EXPECT_EQ(memcmp(b.DataPtr(), data, sizeof(data)), 0));
+    EXPECT_TRUE(std::ranges::equal(b.Data(), std::as_bytes(std::span(data))));
 }
 
 // Test that you can create a zero-sized blob.
@@ -77,12 +77,13 @@ TEST(BlobTests, UnsafeCreateWithDeleter) {
     testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
     {
         // Make a blob with a mock deleter.
-        Blob b = Blob::UnsafeCreateWithDeleter(data, sizeof(data), [&] { mockDeleter.Call(); });
+        Blob b = DAWN_UNSAFE_TODO(
+            Blob::UnsafeCreateWithDeleter(data, sizeof(data), [&] { mockDeleter.Call(); }));
         // Check the contents.
         EXPECT_FALSE(b.Empty());
         EXPECT_EQ(b.Size(), sizeof(data));
         ASSERT_EQ(b.DataPtr(), reinterpret_cast<std::byte*>(data));
-        DAWN_UNSAFE_TODO(EXPECT_EQ(memcmp(b.DataPtr(), data, sizeof(data)), 0));
+        EXPECT_TRUE(std::ranges::equal(b.Data(), std::as_bytes(std::span(data))));
 
         // |b| is deleted when this scope exits.
         EXPECT_CALL(mockDeleter, Call());
@@ -96,7 +97,8 @@ TEST(BlobTests, UnsafeCreateWithDeleterZeroSize) {
     testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
     {
         // Make a blob with a mock deleter.
-        Blob b = Blob::UnsafeCreateWithDeleter(data, 0, [&] { mockDeleter.Call(); });
+        Blob b =
+            DAWN_UNSAFE_TODO(Blob::UnsafeCreateWithDeleter(data, 0, [&] { mockDeleter.Call(); }));
         // Check the contents.
         EXPECT_TRUE(b.Empty());
         EXPECT_EQ(b.Size(), 0u);
@@ -114,7 +116,8 @@ TEST(BlobTests, UnsafeCreateWithDeleterEmpty) {
     testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
     {
         // Make a blob with a mock deleter.
-        Blob b = Blob::UnsafeCreateWithDeleter(nullptr, 0, [&] { mockDeleter.Call(); });
+        Blob b = DAWN_UNSAFE_TODO(
+            Blob::UnsafeCreateWithDeleter(nullptr, 0, [&] { mockDeleter.Call(); }));
         // Check the contents.
         EXPECT_TRUE(b.Empty());
         EXPECT_EQ(b.Size(), 0u);
@@ -139,7 +142,7 @@ TEST(BlobTests, MoveConstruct) {
     EXPECT_FALSE(b2.Empty());
     EXPECT_EQ(b2.Size(), 10u);
     ASSERT_NE(b2.DataPtr(), nullptr);
-    DAWN_UNSAFE_TODO(EXPECT_EQ(memcmp(b2.DataPtr(), data, sizeof(data)), 0));
+    EXPECT_TRUE(std::ranges::equal(b2.Data(), std::as_bytes(std::span(data))));
 }
 
 // Test that move assignment moves the data from one blob into another.
@@ -157,7 +160,7 @@ TEST(BlobTests, MoveAssign) {
     EXPECT_FALSE(b2.Empty());
     EXPECT_EQ(b2.Size(), 10u);
     ASSERT_NE(b2.DataPtr(), nullptr);
-    DAWN_UNSAFE_TODO(EXPECT_EQ(memcmp(b2.DataPtr(), data, sizeof(data)), 0));
+    EXPECT_TRUE(std::ranges::equal(b2.Data(), std::as_bytes(std::span(data))));
 }
 
 // Test that move assignment can replace the contents of the moved-to blob.
@@ -169,7 +172,8 @@ TEST(BlobTests, MoveAssignOver) {
 
     // Create another blob with a mock deleter.
     testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
-    Blob b2 = Blob::UnsafeCreateWithDeleter(nullptr, 0, [&] { mockDeleter.Call(); });
+    Blob b2 =
+        DAWN_UNSAFE_TODO(Blob::UnsafeCreateWithDeleter(nullptr, 0, [&] { mockDeleter.Call(); }));
 
     // Move b1 into b2, replacing b2's contents, and expect the deleter to be called.
     EXPECT_CALL(mockDeleter, Call());
@@ -179,7 +183,7 @@ TEST(BlobTests, MoveAssignOver) {
     EXPECT_FALSE(b2.Empty());
     EXPECT_EQ(b2.Size(), 10u);
     ASSERT_NE(b2.DataPtr(), nullptr);
-    DAWN_UNSAFE_TODO(EXPECT_EQ(memcmp(b2.DataPtr(), data, sizeof(data)), 0));
+    EXPECT_TRUE(std::ranges::equal(b2.Data(), std::as_bytes(std::span(data))));
 }
 
 // Test that the offset factory still calls the deleter, with an offsetted view of the data.
@@ -189,7 +193,8 @@ TEST(BlobTests, OffsetMoveConstructor) {
     testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
 
     // Make a blob with a mock deleter.
-    Blob b1 = Blob::UnsafeCreateWithDeleter(data.data(), sizeof(data), [&] { mockDeleter.Call(); });
+    Blob b1 = DAWN_UNSAFE_TODO(
+        Blob::UnsafeCreateWithDeleter(data.data(), sizeof(data), [&] { mockDeleter.Call(); }));
     EXPECT_FALSE(b1.Empty());
     EXPECT_EQ(b1.Size(), 13u);
     EXPECT_EQ(b1.DataPtr(), reinterpret_cast<std::byte*>(data.data()));

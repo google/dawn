@@ -35,6 +35,7 @@
 #include "src/dawn/native/stream/Stream.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 
@@ -42,7 +43,7 @@ namespace dawn::native {
 Blob Blob::Create(size_t size) {
     if (size > 0) {
         uint8_t* ptr = new uint8_t[size];
-        return Blob::UnsafeCreateWithDeleter(ptr, size, [=] { delete[] ptr; });
+        return DAWN_UNSAFE_TODO(Blob::UnsafeCreateWithDeleter(ptr, size, [=] { delete[] ptr; }));
     } else {
         return Blob();
     }
@@ -50,7 +51,10 @@ Blob Blob::Create(size_t size) {
 
 // static
 Blob Blob::Create(Blob&& original, size_t offset, size_t extent) {
-    Blob result(original.mData.subspan(offset, extent), std::move(original.mDeleter));
+    dawn::Span<std::byte> sub = extent == std::dynamic_extent
+                                    ? original.mData.subspan(offset)
+                                    : original.mData.subspan(offset, extent);
+    Blob result(sub, std::move(original.mDeleter));
     original.mData = {};
     original.mDeleter = nullptr;
     return result;
@@ -58,13 +62,12 @@ Blob Blob::Create(Blob&& original, size_t offset, size_t extent) {
 
 // static
 Blob Blob::UnsafeCreateWithDeleter(uint8_t* data, size_t size, std::function<void()> deleter) {
-    return Blob(DAWN_UNSAFE_TODO(std::span<std::byte>(reinterpret_cast<std::byte*>(data), size)),
-                deleter);
+    return Blob(dawn::Span<std::byte>(reinterpret_cast<std::byte*>(data), size), deleter);
 }
 
 Blob::Blob() : mData({}), mDeleter({}) {}
 
-Blob::Blob(std::span<std::byte> data, std::function<void()> deleter)
+Blob::Blob(dawn::Span<std::byte> data, std::function<void()> deleter)
     : mData(data), mDeleter(std::move(deleter)) {}
 
 Blob::Blob(Blob&& rhs) : mData(rhs.mData) {
@@ -94,11 +97,11 @@ bool Blob::Empty() const {
     return mData.empty();
 }
 
-std::span<const std::byte> Blob::Data() const {
+dawn::Span<const std::byte> Blob::Data() const {
     return mData;
 }
 
-std::span<std::byte> Blob::Data() {
+dawn::Span<std::byte> Blob::Data() {
     return mData;
 }
 
@@ -123,7 +126,7 @@ void stream::Stream<Blob>::Write(stream::Sink* s, const Blob& b) {
     size_t size = b.Size();
     StreamIn(s, size);
     if (size > 0) {
-        std::ranges::copy(b.Data(), s->GetSpace(size).begin());
+        dawn::Span<std::byte>(s->GetSpace(size)).CopyFrom(b.Data());
     }
 }
 
@@ -135,7 +138,7 @@ MaybeError stream::Stream<Blob>::Read(stream::Source* s, Blob* b) {
         std::span<const std::byte> src;
         DAWN_TRY_ASSIGN(src, s->Read(size));
         *b = Blob::Create(size);
-        std::ranges::copy(src, b->Data().begin());
+        b->Data().CopyFrom(src);
     } else {
         *b = Blob();
     }
