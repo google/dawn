@@ -243,7 +243,7 @@ class Parser {
         id_stack_.emplace_back();
         {
             TINT_SCOPED_ASSIGNMENT(current_block_, ir_.root_block);
-            EmitSpecConstants();
+            TINT_CHECK_RESULT(EmitSpecConstants());
             TINT_CHECK_RESULT(EmitModuleScopeVariables());
         }
 
@@ -392,7 +392,7 @@ class Parser {
 
     // Generate a module-scope const declaration for each instruction
     // that is OpSpecConstantTrue, OpSpecConstantFalse, or OpSpecConstant.
-    void EmitSpecConstants() {
+    Result<SuccessType> EmitSpecConstants() {
         for (auto& inst : spirv_context_->types_values()) {
             switch (inst.opcode()) {
                 case spv::Op::OpSpecConstantTrue:
@@ -429,8 +429,11 @@ class Parser {
                         [&](const core::type::F16*) {
                             auto bits = constant->AsScalarConstant()->GetU32BitValue();
                             return b_.Constant(f16::FromBits(static_cast<uint16_t>(bits)));
-                        },
-                        TINT_ICE_ON_NO_MATCH);
+                        });
+
+                    if (!value) {
+                        return Failure("unsupported type for OpSpecConstant: " + ty->str());
+                    }
 
                     auto spec_id = GetSpecId(inst);
                     CreateOverride(inst, value, spec_id);
@@ -508,11 +511,13 @@ class Parser {
                             EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kNot, 3);
                             break;
                         case spv::Op::OpSConvert:
-                            TINT_ICE() << "can't translate SConvert: WGSL does not have concrete "
-                                          "integer types of different widths";
+                            return Failure(
+                                "can't translate SConvert: WGSL does not have concrete "
+                                "integer types of different widths");
                         case spv::Op::OpUConvert:
-                            TINT_ICE() << "can't translate UConvert: WGSL does not have concrete "
-                                          "integer types of different widths";
+                            return Failure(
+                                "can't translate UConvert: WGSL does not have concrete "
+                                "integer types of different widths");
                         case spv::Op::OpFConvert:
                             EmitOrAdd(b_.Convert(Type(inst.type_id()),
                                                  Value(inst.GetSingleWordInOperand(1))),
@@ -556,26 +561,37 @@ class Parser {
                                 inst, spirv::BuiltinFn::kShiftRightArithmetic, 3);
                             break;
                         case spv::Op::OpCompositeExtract:
+                            if (!Type(inst.type_id())->IsScalar()) {
+                                return Failure(
+                                    "can't translate OpSpecConstantOp with CompositeExtract that "
+                                    "returns a composite: OpSpecConstantOp maps to a WGSL override "
+                                    "declaration, but WGSL overrides must have scalar type");
+                            }
                             EmitCompositeExtract(inst, 3);
                             break;
                         case spv::Op::OpCompositeInsert:
-                            TINT_ICE() << "can't translate OpSpecConstantOp with CompositeInsert: "
-                                          "OpSpecConstantOp maps to a WGSL override declaration, "
-                                          "but WGSL overrides must have scalar type";
+                            return Failure(
+                                "can't translate OpSpecConstantOp with CompositeInsert: "
+                                "OpSpecConstantOp maps to a WGSL override declaration, "
+                                "but WGSL overrides must have scalar type");
                         case spv::Op::OpVectorShuffle:
-                            TINT_ICE() << "can't translate OpSpecConstantOp with VectorShuffle: "
-                                          "OpSpecConstantOp maps to a WGSL override declaration, "
-                                          "but WGSL overrides must have scalar type";
+                            return Failure(
+                                "can't translate OpSpecConstantOp with VectorShuffle: "
+                                "OpSpecConstantOp maps to a WGSL override declaration, "
+                                "but WGSL overrides must have scalar type");
                         case spv::Op::OpSelect:
-                            TINT_ASSERT(Type(inst.type_id())->IsScalar())
-                                << "can't translate OpSpecConstantOp with Select that returns "
-                                   "a vector: "
-                                   "OpSpecConstantOp maps to a WGSL override declaration, "
-                                   "but WGSL overrides must have scalar type";
+                            if (!Type(inst.type_id())->IsScalar()) {
+                                return Failure(
+                                    "can't translate OpSpecConstantOp with Select that returns "
+                                    "a vector: OpSpecConstantOp maps to a WGSL override "
+                                    "declaration, "
+                                    "but WGSL overrides must have scalar type");
+                            }
                             EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSelect, 3);
                             break;
                         default:
-                            TINT_ICE() << "Unknown spec constant operation: " << op;
+                            return Failure("Unknown spec constant operation: " +
+                                           std::to_string(op));
                     }
 
                     // Restore the saved name, if any, in order to provide that
@@ -589,8 +605,9 @@ class Parser {
                 }
                 case spv::Op::OpSpecConstantComposite: {
                     auto spec_id = GetSpecId(inst);
-                    TINT_ASSERT(!spec_id.has_value())
-                        << "OpSpecConstantCompositeOp not supported when set with a SpecId";
+                    if (spec_id.has_value()) {
+                        return Failure("OpSpecConstantComposite cannot be decorated with SpecId");
+                    }
 
                     auto* cnst = SpvConstant(inst.result_id());
                     if (cnst != nullptr) {
@@ -618,6 +635,7 @@ class Parser {
                     break;
             }
         }
+        return Success;
     }
 
     void RegisterNames() {
@@ -1861,8 +1879,9 @@ class Parser {
                 case spv::Op::OpUndef: {
                     auto* ty = Type(inst.type_id());
 
-                    TINT_ASSERT(!ty->Is<core::type::MemoryView>())
-                        << "cannot create an undef memory view in WGSL";
+                    if (ty->Is<core::type::MemoryView>()) {
+                        return Failure("cannot create an undef memory view in WGSL");
+                    }
 
                     AddValue(inst.result_id(), b_.Zero(ty));
                     break;
@@ -4862,7 +4881,6 @@ class Parser {
 
         if (group || binding) {
             TINT_ASSERT(group && binding);
-
             // Remap any samplers which match an entry in the sampler mappings
             // table.
             if (element_ty->StoreType()->Is<core::type::Sampler>()) {

@@ -3623,5 +3623,150 @@ TEST_F(SpirvParserTest, StorageVar_ArrayOfStorageBuffers) {
     EXPECT_EQ(result.Failure().reason, "arrays of buffer types are not supported");
 }
 
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_CompositeInsert_Unsupported) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+        %void = OpTypeVoid
+         %u32 = OpTypeInt 32 0
+       %v2u32 = OpTypeVector %u32 2
+          %c1 = OpSpecConstant %u32 1
+         %vec = OpSpecConstantComposite %v2u32 %c1 %c1
+          %op = OpSpecConstantOp %v2u32 CompositeInsert %c1 %vec 0
+      %voidfn = OpTypeFunction %void
+        %main = OpFunction %void None %voidfn
+  %main_entry = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("can't translate OpSpecConstantOp with CompositeInsert"));
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_VectorShuffle_Unsupported) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+        %void = OpTypeVoid
+         %u32 = OpTypeInt 32 0
+       %v2u32 = OpTypeVector %u32 2
+          %c1 = OpSpecConstant %u32 1
+         %vec = OpSpecConstantComposite %v2u32 %c1 %c1
+          %op = OpSpecConstantOp %v2u32 VectorShuffle %vec %vec 0 1
+      %voidfn = OpTypeFunction %void
+        %main = OpFunction %void None %voidfn
+  %main_entry = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("can't translate OpSpecConstantOp with VectorShuffle"));
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_SelectVector_Unsupported) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+        %void = OpTypeVoid
+        %bool = OpTypeBool
+      %v2bool = OpTypeVector %bool 2
+         %u32 = OpTypeInt 32 0
+       %v2u32 = OpTypeVector %u32 2
+       %btrue = OpSpecConstantTrue %bool
+      %condvec = OpSpecConstantComposite %v2bool %btrue %btrue
+          %c1 = OpSpecConstant %u32 1
+         %vec = OpSpecConstantComposite %v2u32 %c1 %c1
+          %op = OpSpecConstantOp %v2u32 Select %condvec %vec %vec
+      %voidfn = OpTypeFunction %void
+        %main = OpFunction %void None %voidfn
+  %main_entry = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("can't translate OpSpecConstantOp with Select that returns a vector"));
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_CompositeExtract_Vector_Unsupported) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+        %void = OpTypeVoid
+         %u32 = OpTypeInt 32 0
+       %v2u32 = OpTypeVector %u32 2
+       %strct = OpTypeStruct %v2u32
+          %c1 = OpSpecConstant %u32 1
+         %vec = OpSpecConstantComposite %v2u32 %c1 %c1
+           %s = OpSpecConstantComposite %strct %vec
+          %op = OpSpecConstantOp %v2u32 CompositeExtract %s 0
+      %voidfn = OpTypeFunction %void
+        %main = OpFunction %void None %voidfn
+  %main_entry = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr(
+            "can't translate OpSpecConstantOp with CompositeExtract that returns a composite"));
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_UnhandledOp) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+        %void = OpTypeVoid
+         %f32 = OpTypeFloat 32
+         %f16 = OpTypeFloat 16
+        %half = OpSpecConstant %f32 1.5
+          %op = OpSpecConstantOp %f32 QuantizeToF16 %half
+      %voidfn = OpTypeFunction %void
+        %main = OpFunction %void None %voidfn
+  %main_entry = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("Unknown spec constant operation: 116"));
+}
+
+TEST_F(SpirvParserTest, Var_OpUndef_MemoryView_Unsupported) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+        %void = OpTypeVoid
+         %u32 = OpTypeInt 32 0
+     %ptr_u32 = OpTypePointer Private %u32
+       %undef = OpUndef %ptr_u32
+      %voidfn = OpTypeFunction %void
+        %main = OpFunction %void None %voidfn
+  %main_entry = OpLabel
+                OpReturn
+                OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("cannot create an undef memory view in WGSL"));
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
