@@ -64,18 +64,26 @@ ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t
         case kCVPixelFormatType_OneComponent16:
             return wgpu::TextureFormat::R16Unorm;
         case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
+        case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
         case kCVPixelFormatType_Lossless_420YpCbCr8BiPlanarVideoRange:
+        case kCVPixelFormatType_Lossless_420YpCbCr8BiPlanarFullRange:
             return wgpu::TextureFormat::R8BG8Biplanar420Unorm;
         case kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange:
+        case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
             return wgpu::TextureFormat::R8BG8Biplanar422Unorm;
         case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange:
+        case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
             return wgpu::TextureFormat::R8BG8Biplanar444Unorm;
         case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
+        case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
         case kCVPixelFormatType_Lossless_420YpCbCr10PackedBiPlanarVideoRange:
+        case kCVPixelFormatType_Lossless_420YpCbCr10PackedBiPlanarFullRange:
             return wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm;
         case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
+        case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
             return wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm;
         case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
+        case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
         case kCVPixelFormatType_Lossless_422YpCbCr10PackedBiPlanarVideoRange:
             return wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm;
         case kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar:
