@@ -211,9 +211,6 @@ template("tint_fuzzer_test") {
     exclude_main =
         (defined(invoker.exclude_main) && invoker.exclude_main) || false
 
-    # TODO(https://crbug.com/394563978): Remove once experiment ends.
-    high_end_job_required = true
-
     # TODO(crbug.com/505034799): Determine best migration path for this.
     is_fuzztest_compatible = false
 
