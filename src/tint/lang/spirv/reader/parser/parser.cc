@@ -2614,7 +2614,7 @@ class Parser {
                     EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kAtomicIDecrement);
                     break;
                 case spv::Op::OpControlBarrier:
-                    EmitControlBarrier(inst);
+                    TINT_CHECK_RESULT(EmitControlBarrier(inst));
                     break;
                 case spv::Op::OpArrayLength:
                     EmitArrayLength(inst);
@@ -2725,18 +2725,20 @@ class Parser {
                     EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformShuffleUp);
                     break;
                 case spv::Op::OpGroupNonUniformSMin:
-                    EmitSubgroupMinMax(inst, spirv::BuiltinFn::kGroupNonUniformSMin);
+                    TINT_CHECK_RESULT(
+                        EmitSubgroupMinMax(inst, spirv::BuiltinFn::kGroupNonUniformSMin));
                     break;
                 case spv::Op::OpGroupNonUniformSMax:
-                    EmitSubgroupMinMax(inst, spirv::BuiltinFn::kGroupNonUniformSMax);
+                    TINT_CHECK_RESULT(
+                        EmitSubgroupMinMax(inst, spirv::BuiltinFn::kGroupNonUniformSMax));
                     break;
                 case spv::Op::OpGroupNonUniformUMin:
                 case spv::Op::OpGroupNonUniformFMin:
-                    EmitSubgroupMinMax(inst, core::BuiltinFn::kSubgroupMin);
+                    TINT_CHECK_RESULT(EmitSubgroupMinMax(inst, core::BuiltinFn::kSubgroupMin));
                     break;
                 case spv::Op::OpGroupNonUniformUMax:
                 case spv::Op::OpGroupNonUniformFMax:
-                    EmitSubgroupMinMax(inst, core::BuiltinFn::kSubgroupMax);
+                    TINT_CHECK_RESULT(EmitSubgroupMinMax(inst, core::BuiltinFn::kSubgroupMax));
                     break;
                 case spv::Op::OpGroupNonUniformIAdd:
                 case spv::Op::OpGroupNonUniformFAdd:
@@ -2747,13 +2749,13 @@ class Parser {
                     EmitSubgroupMul(inst);
                     break;
                 case spv::Op::OpGroupNonUniformBitwiseAnd:
-                    EmitSubgroupBitwise(inst, core::BuiltinFn::kSubgroupAnd);
+                    TINT_CHECK_RESULT(EmitSubgroupBitwise(inst, core::BuiltinFn::kSubgroupAnd));
                     break;
                 case spv::Op::OpGroupNonUniformBitwiseOr:
-                    EmitSubgroupBitwise(inst, core::BuiltinFn::kSubgroupOr);
+                    TINT_CHECK_RESULT(EmitSubgroupBitwise(inst, core::BuiltinFn::kSubgroupOr));
                     break;
                 case spv::Op::OpGroupNonUniformBitwiseXor:
-                    EmitSubgroupBitwise(inst, core::BuiltinFn::kSubgroupXor);
+                    TINT_CHECK_RESULT(EmitSubgroupBitwise(inst, core::BuiltinFn::kSubgroupXor));
                     break;
                 case spv::Op::OpIsNan:
                     return Failure(
@@ -2770,7 +2772,7 @@ class Parser {
         return Success;
     }
 
-    void ValidateScope(spvtools::opt::Instruction& inst) {
+    void AssertSubgroupScope(spvtools::opt::Instruction& inst) {
         auto scope_val = Value(inst.GetSingleWordInOperand(0));
         auto* cnst = scope_val->As<core::ir::Constant>();
         TINT_ASSERT(cnst);
@@ -2788,18 +2790,20 @@ class Parser {
         }
     }
 
-    void EmitSubgroupBitwise(spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
-        ValidateScope(inst);
+    Result<SuccessType> EmitSubgroupBitwise(spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
+        AssertSubgroupScope(inst);
 
         auto group = inst.GetSingleWordInOperand(1);
-        TINT_ASSERT(static_cast<spv::GroupOperation>(group) == spv::GroupOperation::Reduce)
-            << "GroupNonUniformBitwise operations require a Reduce group operation";
+        if (static_cast<spv::GroupOperation>(group) != spv::GroupOperation::Reduce) {
+            return Failure("GroupNonUniformBitwise operations require a Reduce group operation");
+        }
 
         EmitOrAdd(b_.Call(Type(inst.type_id()), fn, Args(inst, 4)), inst.result_id());
+        return Success;
     }
 
     void EmitSubgroupMul(spvtools::opt::Instruction& inst) {
-        ValidateScope(inst);
+        AssertSubgroupScope(inst);
 
         core::BuiltinFn fn = core::BuiltinFn::kNone;
 
@@ -2819,7 +2823,7 @@ class Parser {
     }
 
     void EmitSubgroupAdd(spvtools::opt::Instruction& inst) {
-        ValidateScope(inst);
+        AssertSubgroupScope(inst);
 
         core::BuiltinFn fn = core::BuiltinFn::kNone;
 
@@ -2838,22 +2842,25 @@ class Parser {
         EmitOrAdd(b_.Call(Type(inst.type_id()), fn, Args(inst, 4)), inst.result_id());
     }
 
-    void EmitSubgroupMinMax(spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
-        ValidateScope(inst);
+    Result<SuccessType> EmitSubgroupMinMax(spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
+        AssertSubgroupScope(inst);
 
         auto group = inst.GetSingleWordInOperand(1);
-        TINT_ASSERT(static_cast<spv::GroupOperation>(group) == spv::GroupOperation::Reduce)
-            << "group operand Reduce required for `Min`/`Max` instructions";
+        if (static_cast<spv::GroupOperation>(group) != spv::GroupOperation::Reduce) {
+            return Failure("group operand Reduce required for `Min`/`Max` instructions");
+        }
 
         EmitOrAdd(b_.Call(Type(inst.type_id()), fn, Args(inst, 4)), inst.result_id());
+        return Success;
     }
 
-    void EmitSubgroupMinMax(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
-        ValidateScope(inst);
+    Result<SuccessType> EmitSubgroupMinMax(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+        AssertSubgroupScope(inst);
 
         auto group = inst.GetSingleWordInOperand(1);
-        TINT_ASSERT(static_cast<spv::GroupOperation>(group) == spv::GroupOperation::Reduce)
-            << "group operand Reduce required for `Min`/`Max` instructions";
+        if (static_cast<spv::GroupOperation>(group) != spv::GroupOperation::Reduce) {
+            return Failure("group operand Reduce required for `Min`/`Max` instructions");
+        }
 
         Emit(
             b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn,                      //
@@ -2861,6 +2868,7 @@ class Parser {
                                                    b_.Constant(u32(inst.GetSingleWordInOperand(1))),
                                                    Value(inst.GetSingleWordInOperand(2))}),
             inst.result_id());
+        return Success;
     }
 
     void EmitSubgroupBuiltinConstantId(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
@@ -2874,24 +2882,24 @@ class Parser {
         TINT_ASSERT(id->Is<core::ir::Constant>())
             << "non-constant GroupNonUniform `Invocation Id` not supported";
 
-        ValidateScope(inst);
+        AssertSubgroupScope(inst);
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, Args(inst, 2)),
              inst.result_id());
     }
 
     void EmitSubgroupBuiltin(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
-        ValidateScope(inst);
+        AssertSubgroupScope(inst);
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, Args(inst, 2)),
              inst.result_id());
     }
 
     void EmitSubgroupBuiltin(spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
-        ValidateScope(inst);
+        AssertSubgroupScope(inst);
         EmitOrAdd(b_.Call(Type(inst.type_id()), fn, Args(inst, 3)), inst.result_id());
     }
 
     Result<SuccessType> EmitSubgroupBallotBitCount(spvtools::opt::Instruction& inst) {
-        ValidateScope(inst);
+        AssertSubgroupScope(inst);
 
         auto ballot_id = inst.GetSingleWordInOperand(2);
         auto* ballot_inst = spirv_context_->get_def_use_mgr()->GetDef(ballot_id);
@@ -2928,7 +2936,7 @@ class Parser {
     }
 
     void EmitSubgroupAllEqual(spvtools::opt::Instruction& inst) {
-        ValidateScope(inst);
+        AssertSubgroupScope(inst);
 
         auto* val = Value(inst.GetSingleWordInOperand(1));
         auto* first = b_.Call<spirv::ir::BuiltinCall>(
@@ -3698,30 +3706,33 @@ class Parser {
                   inst.result_id());
     }
 
-    void EmitControlBarrier(const spvtools::opt::Instruction& inst) {
+    Result<SuccessType> EmitControlBarrier(const spvtools::opt::Instruction& inst) {
         auto get_constant = [&](uint32_t idx) {
             uint32_t id = inst.GetSingleWordOperand(idx);
-            if (auto* constant = spirv_context_->get_constant_mgr()->FindDeclaredConstant(id)) {
-                return constant->GetU32();
-            }
-            TINT_ICE() << "invalid or missing operands for control barrier";
+            auto* constant = spirv_context_->get_constant_mgr()->FindDeclaredConstant(id);
+            TINT_ASSERT(constant);
+            return constant->GetU32();
         };
 
         uint32_t execution = get_constant(0);
         uint32_t memory = get_constant(1);
         uint32_t semantics = get_constant(2);
 
-        TINT_ASSERT(execution == dawn::to_underlying(spv::Scope::Workgroup))
-            << "unsupported control barrier execution scope: "
-            << "expected Workgroup (2), got: " << execution;
+        if (execution != dawn::to_underlying(spv::Scope::Workgroup)) {
+            return Failure(
+                "unsupported control barrier execution scope: expected Workgroup, got: " +
+                std::string(spv::ScopeToString(spv::Scope(execution))));
+        }
 
         if (semantics & dawn::to_underlying(spv::MemorySemanticsMask::AcquireRelease)) {
             semantics &= ~dawn::to_underlying(spv::MemorySemanticsMask::AcquireRelease);
         } else {
-            TINT_ICE() << "control barrier semantics requires acquire and release";
+            return Failure("control barrier semantics requires acquire and release");
         }
-        TINT_ASSERT(memory == dawn::to_underlying(spv::Scope::Workgroup))
-            << "control barrier requires workgroup memory scope";
+
+        if (memory != dawn::to_underlying(spv::Scope::Workgroup)) {
+            return Failure("control barrier requires workgroup memory scope");
+        }
 
         if (semantics & dawn::to_underlying(spv::MemorySemanticsMask::WorkgroupMemory)) {
             EmitWithoutSpvResult(b_.Call(ty_.void_(), core::BuiltinFn::kWorkgroupBarrier));
@@ -3738,7 +3749,11 @@ class Parser {
             semantics &= ~dawn::to_underlying(spv::MemorySemanticsMask::ImageMemory);
         }
 
-        TINT_ASSERT(!semantics) << "unsupported control barrier semantics: " << semantics;
+        if (semantics != 0) {
+            return Failure("unsupported control barrier semantics: " + std::to_string(semantics));
+        }
+
+        return Success;
     }
 
     void CheckAtomicNotFloat(const spvtools::opt::Instruction& inst) {

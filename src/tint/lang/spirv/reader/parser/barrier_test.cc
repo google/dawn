@@ -188,7 +188,7 @@ TEST_F(SpirvParserTest, ControlBarrier_WorkgroupAndTextureAndStorageBarrier) {
 )");
 }
 
-TEST_F(SpirvParserDeathTest, ControlBarrier_ErrBarrierInvalidExecution) {
+TEST_F(SpirvParserTest, ControlBarrier_ErrBarrierInvalidExecution) {
     auto* src = R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -207,10 +207,15 @@ TEST_F(SpirvParserDeathTest, ControlBarrier_ErrBarrierInvalidExecution) {
                OpReturn
                OpFunctionEnd
   )";
-    EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
+    auto result = Run(src);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr(
+            "unsupported control barrier execution scope: expected Workgroup, got: Subgroup"));
 }
 
-TEST_F(SpirvParserDeathTest, ControlBarrier_ErrBarrierSemanticsMissingAcquireRelease) {
+TEST_F(SpirvParserTest, ControlBarrier_ErrBarrierSemanticsMissingAcquireRelease) {
     auto* src = R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -228,10 +233,13 @@ TEST_F(SpirvParserDeathTest, ControlBarrier_ErrBarrierSemanticsMissingAcquireRel
                OpReturn
                OpFunctionEnd
   )";
-    EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
+    auto result = Run(src);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("control barrier semantics requires acquire and release"));
 }
 
-TEST_F(SpirvParserDeathTest, ControlBarrier_ErrStorageBarrierInvalidMemory) {
+TEST_F(SpirvParserTest, ControlBarrier_ErrStorageBarrierInvalidMemory) {
     auto* src = R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -250,10 +258,13 @@ TEST_F(SpirvParserDeathTest, ControlBarrier_ErrStorageBarrierInvalidMemory) {
                OpReturn
                OpFunctionEnd
   )";
-    EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
+    auto result = Run(src);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("control barrier requires workgroup memory scope"));
 }
 
-TEST_F(SpirvParserDeathTest, ControlBarrier_ErrTextureBarrierInvalidMemory) {
+TEST_F(SpirvParserTest, ControlBarrier_ErrTextureBarrierInvalidMemory) {
     auto* src = R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -272,7 +283,34 @@ TEST_F(SpirvParserDeathTest, ControlBarrier_ErrTextureBarrierInvalidMemory) {
                OpReturn
                OpFunctionEnd
   )";
-    EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
+    auto result = Run(src);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("control barrier requires workgroup memory scope"));
+}
+
+TEST_F(SpirvParserTest, ControlBarrier_ErrUnsupportedSemantics) {
+    auto* src = R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+    %uint_392 = OpConstant %uint 392
+       %main = OpFunction %void None %1
+          %4 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_392
+               OpReturn
+               OpFunctionEnd
+  )";
+    auto result = Run(src);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("unsupported control barrier semantics: 128"));
 }
 
 }  // namespace

@@ -5100,5 +5100,211 @@ TEST_F(SpirvParserTest, NonUniformBitwiseXor_Vector) {
                   SPV_ENV_VULKAN_1_1);
 }
 
+TEST_F(SpirvParserTest, NonUniformBitwise_UnsupportedGroupOperation) {
+    auto* src = R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformArithmetic
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+     %uint_1 = OpConstant %uint 1
+       %void = OpTypeVoid
+    %func_ty = OpTypeFunction %void
+       %main = OpFunction %void None %func_ty
+      %label = OpLabel
+        %res = OpGroupNonUniformBitwiseAnd %uint %uint_3 InclusiveScan %uint_1
+               OpReturn
+               OpFunctionEnd
+)";
+    auto result = Run(src, SPV_ENV_VULKAN_1_1);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("GroupNonUniformBitwise operations require a Reduce group operation"));
+}
+
+TEST_F(SpirvParserTest, NonUniformMinMax_Unsigned_UnsupportedGroupOperation) {
+    auto* src = R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformArithmetic
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+     %uint_1 = OpConstant %uint 1
+       %void = OpTypeVoid
+    %func_ty = OpTypeFunction %void
+       %main = OpFunction %void None %func_ty
+      %label = OpLabel
+        %res = OpGroupNonUniformUMin %uint %uint_3 InclusiveScan %uint_1
+               OpReturn
+               OpFunctionEnd
+)";
+    auto result = Run(src, SPV_ENV_VULKAN_1_1);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("group operand Reduce required for `Min`/`Max` instructions"));
+}
+
+TEST_F(SpirvParserTest, NonUniform_UnsupportedClusteredCapability) {
+    auto* src = R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformClustered
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+     %uint_1 = OpConstant %uint 1
+     %uint_4 = OpConstant %uint 4
+       %void = OpTypeVoid
+    %func_ty = OpTypeFunction %void
+       %main = OpFunction %void None %func_ty
+      %label = OpLabel
+        %res = OpGroupNonUniformIAdd %uint %uint_3 ClusteredReduce %uint_1 %uint_4
+               OpReturn
+               OpFunctionEnd
+)";
+    auto result = Run(src, SPV_ENV_VULKAN_1_1);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("SPIR-V capability 'GroupNonUniformClustered' is not supported"));
+}
+
+TEST_F(SpirvParserTest, NonUniformBallotBitCount_NonBallotValue) {
+    auto* src = R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformBallot
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+     %uint_1 = OpConstant %uint 1
+     %v4uint = OpTypeVector %uint 4
+%const_ballot = OpConstantComposite %v4uint %uint_1 %uint_1 %uint_1 %uint_1
+       %void = OpTypeVoid
+    %func_ty = OpTypeFunction %void
+       %main = OpFunction %void None %func_ty
+      %label = OpLabel
+        %res = OpGroupNonUniformBallotBitCount %uint %uint_3 Reduce %const_ballot
+               OpReturn
+               OpFunctionEnd
+)";
+    auto result = Run(src, SPV_ENV_VULKAN_1_1);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("OpGroupNonUniformBallotBitCount is only supported when Value "
+                                   "is from OpGroupNonUniformBallot"));
+}
+
+TEST_F(SpirvParserTest, NonUniformBroadcast_DynamicInvocationId) {
+    auto* src = R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformBallot
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+     %uint_1 = OpConstant %uint 1
+       %void = OpTypeVoid
+    %func_ty = OpTypeFunction %void
+   %ptr_uint = OpTypePointer Function %uint
+       %main = OpFunction %void None %func_ty
+      %label = OpLabel
+        %var = OpVariable %ptr_uint Function
+               OpStore %var %uint_1
+       %load = OpLoad %uint %var
+        %res = OpGroupNonUniformBroadcast %uint %uint_3 %uint_1 %load
+               OpReturn
+               OpFunctionEnd
+)";
+    auto result = Run(src, SPV_ENV_VULKAN_1_1);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("In SPIR-V 1.4 or earlier, Id must be a constant instruction"));
+}
+
+TEST_F(SpirvParserTest, NonUniform_ScopeSpecConstant) {
+    auto* src = R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformVote
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %uint = OpTypeInt 32 0
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+      %scope = OpSpecConstant %uint 3
+       %void = OpTypeVoid
+    %func_ty = OpTypeFunction %void
+       %main = OpFunction %void None %func_ty
+      %label = OpLabel
+        %res = OpGroupNonUniformAll %bool %scope %true
+               OpReturn
+               OpFunctionEnd
+)";
+    auto result = Run(src, SPV_ENV_VULKAN_1_1);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("Scope ids must be OpConstant when Shader capability is present"));
+}
+
+TEST_F(SpirvParserTest, NonUniform_ScopeWorkgroup) {
+    auto* src = R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformVote
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %uint = OpTypeInt 32 0
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+     %uint_2 = OpConstant %uint 2
+       %void = OpTypeVoid
+    %func_ty = OpTypeFunction %void
+       %main = OpFunction %void None %func_ty
+      %label = OpLabel
+        %res = OpGroupNonUniformAll %bool %uint_2 %true
+               OpReturn
+               OpFunctionEnd
+)";
+    auto result = Run(src, SPV_ENV_VULKAN_1_1);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("Execution scope is limited to Subgroup"));
+}
+
+TEST_F(SpirvParserTest, NonUniformMinMax_Signed_UnsupportedGroupOperation) {
+    auto* src = R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformArithmetic
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+      %int_1 = OpConstant %int 1
+       %void = OpTypeVoid
+    %func_ty = OpTypeFunction %void
+       %main = OpFunction %void None %func_ty
+      %label = OpLabel
+        %res = OpGroupNonUniformSMin %int %uint_3 InclusiveScan %int_1
+               OpReturn
+               OpFunctionEnd
+)";
+    auto result = Run(src, SPV_ENV_VULKAN_1_1);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("group operand Reduce required for `Min`/`Max` instructions"));
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
