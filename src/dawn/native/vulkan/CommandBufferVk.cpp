@@ -687,9 +687,9 @@ struct ProgrammablePassState : public StackAllocated {
             // Use static samplers for YCbCr external textures. However when the toggle is enabled,
             // we use a static sampler for all the single-planar external textures, which helps with
             // testing the code paths on any Vulkan-capable device.
-            if (view->GetFormat().format != wgpu::TextureFormat::OpaqueYCbCrAndroid &&
-                !lastPipeline->GetDevice()->IsToggleEnabled(
-                    Toggle::VulkanForceStaticSamplersForExternalTextures)) {
+            bool isYCbCr = view->GetFormat().format == wgpu::TextureFormat::OpaqueYCbCrAndroid;
+            if (!isYCbCr && !lastPipeline->GetDevice()->IsToggleEnabled(
+                                Toggle::VulkanForceStaticSamplersForExternalTextures)) {
                 continue;
             }
 
@@ -703,7 +703,9 @@ struct ProgrammablePassState : public StackAllocated {
 
             // Tell both the shader that we'll be using a YCbCr external texture at the bindpoint,
             // and tell BindGroupLayouts to use a specific static sampler.
-            s.ycbcrExternalTextures.insert(etBindPoint);
+            if (isYCbCr) {
+                s.ycbcrExternalTextures.insert(etBindPoint);
+            }
             s.layout.bindGroups[etBindPoint.group].staticSamplers[*etInfo.staticSampler] =
                 StaticSamplerSpecialization::From(view, sampler);
         }
