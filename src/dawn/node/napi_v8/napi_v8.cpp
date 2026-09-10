@@ -415,6 +415,53 @@ napi_status AttachObjectProperty(napi_env env,
     return napi_ok;
 }
 
+enum class ErrorType {
+    Error,
+    TypeError,
+    RangeError,
+};
+
+// Helper to create JavaScript Error objects.
+napi_status CreateError(napi_env env,
+                        ErrorType error_type,
+                        napi_value code,
+                        napi_value msg,
+                        napi_value* result) {
+    if (!ValidateArgs(env, msg, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_msg = dawn::napi_v8::ToV8(msg);
+    if (!v8_msg->IsString()) {
+        return env->SetLastError(napi_string_expected, "A string was expected for error message");
+    }
+    v8::Local<v8::String> str_msg = v8_msg.As<v8::String>();
+    v8::Local<v8::Value> err;
+    switch (error_type) {
+        case ErrorType::Error:
+            err = v8::Exception::Error(str_msg);
+            break;
+        case ErrorType::TypeError:
+            err = v8::Exception::TypeError(str_msg);
+            break;
+        case ErrorType::RangeError:
+            err = v8::Exception::RangeError(str_msg);
+            break;
+    }
+    if (code != nullptr) {
+        v8::Local<v8::Context> ctx = env->GetContext();
+        v8::Local<v8::String> code_name;
+        napi_status status = CreateInternalizedName(env, "code", &code_name);
+        if (status != napi_ok) {
+            return status;
+        }
+        if (err.As<v8::Object>()->Set(ctx, code_name, dawn::napi_v8::ToV8(code)).IsNothing()) {
+            return env->SetLastError(napi_generic_failure, "Failed to set error code");
+        }
+    }
+    *result = dawn::napi_v8::ToNapi(err);
+    return napi_ok;
+}
+
 }  // namespace
 
 using dawn::napi_v8::ToNapi;
@@ -1027,6 +1074,67 @@ napi_status napi_define_properties(napi_env env,
             return status;
         }
     }
+    return napi_ok;
+}
+
+// ============================================================================
+// Exceptions & Errors
+// ============================================================================
+
+napi_status napi_create_error(napi_env env, napi_value code, napi_value msg, napi_value* result) {
+    return CreateError(env, ErrorType::Error, code, msg, result);
+}
+
+napi_status napi_create_type_error(napi_env env,
+                                   napi_value code,
+                                   napi_value msg,
+                                   napi_value* result) {
+    return CreateError(env, ErrorType::TypeError, code, msg, result);
+}
+
+napi_status napi_create_range_error(napi_env env,
+                                    napi_value code,
+                                    napi_value msg,
+                                    napi_value* result) {
+    return CreateError(env, ErrorType::RangeError, code, msg, result);
+}
+
+napi_status napi_throw(napi_env env, napi_value error) {
+    if (!ValidateArgs(env, error)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_err = dawn::napi_v8::ToV8(error);
+    env->isolate->ThrowException(v8_err);
+    env->last_exception.Reset(env->isolate, v8_err);
+    return napi_ok;
+}
+
+napi_status napi_is_exception_pending(napi_env env, bool* result) {
+    if (!ValidateArgs(env, result)) {
+        return napi_invalid_arg;
+    }
+    *result = !env->last_exception.IsEmpty();
+    return napi_ok;
+}
+
+napi_status napi_get_and_clear_last_exception(napi_env env, napi_value* result) {
+    if (!ValidateArgs(env, result)) {
+        return napi_invalid_arg;
+    }
+    if (!env->last_exception.IsEmpty()) {
+        *result = dawn::napi_v8::ToNapi(env->last_exception.Get(env->isolate));
+        env->last_exception.Reset();
+    } else {
+        *result = dawn::napi_v8::ToNapi(v8::Undefined(env->isolate));
+    }
+    return napi_ok;
+}
+
+napi_status napi_is_error(napi_env env, napi_value value, bool* result) {
+    if (!ValidateArgs(env, value, result)) {
+        return napi_invalid_arg;
+    }
+    *result = dawn::napi_v8::ToV8(value)->IsNativeError();
     return napi_ok;
 }
 

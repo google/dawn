@@ -1759,4 +1759,253 @@ TEST_F(NapiV8Test, ClassAndPropertyInvalidArgs) {
     EXPECT_EQ(napi_define_properties(env_, obj, 1, nullptr), napi_invalid_arg);
 }
 
+// ============================================================================
+// Stage 5: Errors & Exceptions
+// ============================================================================
+
+TEST_F(NapiV8Test, CreateError) {
+    napi_value msg;
+    ASSERT_EQ(napi_create_string_utf8(env_, "Something went wrong", NAPI_AUTO_LENGTH, &msg),
+              napi_ok);
+
+    napi_value err;
+    ASSERT_EQ(napi_create_error(env_, nullptr, msg, &err), napi_ok);
+
+    bool is_err = false;
+    ASSERT_EQ(napi_is_error(env_, err, &is_err), napi_ok);
+    EXPECT_TRUE(is_err);
+
+    napi_value read_msg;
+    ASSERT_EQ(napi_get_named_property(env_, err, "message", &read_msg), napi_ok);
+    char buf[64];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, read_msg, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "Something went wrong");
+}
+
+TEST_F(NapiV8Test, CreateErrorWithCode) {
+    napi_value code;
+    ASSERT_EQ(napi_create_string_utf8(env_, "ERR_CUSTOM_CODE", NAPI_AUTO_LENGTH, &code), napi_ok);
+    napi_value msg;
+    ASSERT_EQ(napi_create_string_utf8(env_, "Error with code", NAPI_AUTO_LENGTH, &msg), napi_ok);
+
+    napi_value err;
+    ASSERT_EQ(napi_create_error(env_, code, msg, &err), napi_ok);
+
+    napi_value read_code;
+    ASSERT_EQ(napi_get_named_property(env_, err, "code", &read_code), napi_ok);
+    char buf[64];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, read_code, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "ERR_CUSTOM_CODE");
+}
+
+TEST_F(NapiV8Test, CreateTypeError) {
+    napi_value msg;
+    ASSERT_EQ(napi_create_string_utf8(env_, "Invalid type provided", NAPI_AUTO_LENGTH, &msg),
+              napi_ok);
+
+    napi_value err;
+    ASSERT_EQ(napi_create_type_error(env_, nullptr, msg, &err), napi_ok);
+
+    bool is_err = false;
+    ASSERT_EQ(napi_is_error(env_, err, &is_err), napi_ok);
+    EXPECT_TRUE(is_err);
+
+    napi_value read_name;
+    ASSERT_EQ(napi_get_named_property(env_, err, "name", &read_name), napi_ok);
+    char buf[64];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, read_name, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "TypeError");
+}
+
+TEST_F(NapiV8Test, CreateRangeError) {
+    napi_value msg;
+    ASSERT_EQ(napi_create_string_utf8(env_, "Value out of range", NAPI_AUTO_LENGTH, &msg), napi_ok);
+
+    napi_value err;
+    ASSERT_EQ(napi_create_range_error(env_, nullptr, msg, &err), napi_ok);
+
+    bool is_err = false;
+    ASSERT_EQ(napi_is_error(env_, err, &is_err), napi_ok);
+    EXPECT_TRUE(is_err);
+
+    napi_value read_name;
+    ASSERT_EQ(napi_get_named_property(env_, err, "name", &read_name), napi_ok);
+    char buf[64];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, read_name, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "RangeError");
+}
+
+TEST_F(NapiV8Test, IsErrorOnNonErrorTypes) {
+    napi_value num, str, b, obj, null_v, undef_v;
+    ASSERT_EQ(napi_create_int32(env_, 123, &num), napi_ok);
+    ASSERT_EQ(napi_create_string_utf8(env_, "test", NAPI_AUTO_LENGTH, &str), napi_ok);
+    ASSERT_EQ(napi_get_boolean(env_, true, &b), napi_ok);
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+    ASSERT_EQ(napi_get_null(env_, &null_v), napi_ok);
+    ASSERT_EQ(napi_get_undefined(env_, &undef_v), napi_ok);
+
+    bool is_err = true;
+    ASSERT_EQ(napi_is_error(env_, num, &is_err), napi_ok);
+    EXPECT_FALSE(is_err);
+    ASSERT_EQ(napi_is_error(env_, str, &is_err), napi_ok);
+    EXPECT_FALSE(is_err);
+    ASSERT_EQ(napi_is_error(env_, b, &is_err), napi_ok);
+    EXPECT_FALSE(is_err);
+    ASSERT_EQ(napi_is_error(env_, obj, &is_err), napi_ok);
+    EXPECT_FALSE(is_err);
+    ASSERT_EQ(napi_is_error(env_, null_v, &is_err), napi_ok);
+    EXPECT_FALSE(is_err);
+    ASSERT_EQ(napi_is_error(env_, undef_v, &is_err), napi_ok);
+    EXPECT_FALSE(is_err);
+}
+
+TEST_F(NapiV8Test, ThrowAndCatchInCallback) {
+    auto throwing_cb = [](napi_env env, napi_callback_info) -> napi_value {
+        napi_value msg;
+        napi_create_string_utf8(env, "Operation failed", NAPI_AUTO_LENGTH, &msg);
+        napi_value err;
+        napi_create_error(env, nullptr, msg, &err);
+        napi_throw(env, err);
+        return nullptr;
+    };
+
+    napi_value fn;
+    ASSERT_EQ(napi_create_function(env_, "throwFn", NAPI_AUTO_LENGTH, throwing_cb, nullptr, &fn),
+              napi_ok);
+
+    napi_value call_res;
+    EXPECT_EQ(napi_call_function(env_, nullptr, fn, 0, nullptr, &call_res), napi_pending_exception);
+
+    // Verify the caught exception is the exact Error created in the callback
+    napi_value caught_err;
+    ASSERT_EQ(napi_get_and_clear_last_exception(env_, &caught_err), napi_ok);
+    bool is_err = false;
+    ASSERT_EQ(napi_is_error(env_, caught_err, &is_err), napi_ok);
+    EXPECT_TRUE(is_err);
+
+    napi_value read_msg;
+    ASSERT_EQ(napi_get_named_property(env_, caught_err, "message", &read_msg), napi_ok);
+    char buf[64];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, read_msg, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "Operation failed");
+}
+
+TEST_F(NapiV8Test, IsExceptionPendingLifecycle) {
+    bool pending = true;
+    ASSERT_EQ(napi_is_exception_pending(env_, &pending), napi_ok);
+    EXPECT_FALSE(pending);
+
+    auto throwing_cb = [](napi_env env, napi_callback_info) -> napi_value {
+        napi_value msg;
+        napi_create_string_utf8(env, "Pending error test", NAPI_AUTO_LENGTH, &msg);
+        napi_value err;
+        napi_create_error(env, nullptr, msg, &err);
+        napi_throw(env, err);
+        return nullptr;
+    };
+
+    napi_value fn;
+    ASSERT_EQ(napi_create_function(env_, "throwFn", NAPI_AUTO_LENGTH, throwing_cb, nullptr, &fn),
+              napi_ok);
+
+    napi_value call_res;
+    EXPECT_EQ(napi_call_function(env_, nullptr, fn, 0, nullptr, &call_res), napi_pending_exception);
+
+    ASSERT_EQ(napi_is_exception_pending(env_, &pending), napi_ok);
+    EXPECT_TRUE(pending);
+
+    napi_value caught;
+    ASSERT_EQ(napi_get_and_clear_last_exception(env_, &caught), napi_ok);
+
+    ASSERT_EQ(napi_is_exception_pending(env_, &pending), napi_ok);
+    EXPECT_FALSE(pending);
+}
+
+TEST_F(NapiV8Test, GetAndClearLastException) {
+    // When no exception has occurred, get_and_clear returns undefined
+    napi_value no_err;
+    ASSERT_EQ(napi_get_and_clear_last_exception(env_, &no_err), napi_ok);
+    napi_valuetype t;
+    ASSERT_EQ(napi_typeof(env_, no_err, &t), napi_ok);
+    EXPECT_EQ(t, napi_undefined);
+
+    auto throwing_cb = [](napi_env env, napi_callback_info) -> napi_value {
+        napi_value msg;
+        napi_create_string_utf8(env, "Recoverable error", NAPI_AUTO_LENGTH, &msg);
+        napi_value err;
+        napi_create_error(env, nullptr, msg, &err);
+        napi_throw(env, err);
+        return nullptr;
+    };
+
+    napi_value fn;
+    ASSERT_EQ(napi_create_function(env_, "throwFn", NAPI_AUTO_LENGTH, throwing_cb, nullptr, &fn),
+              napi_ok);
+
+    napi_value call_res;
+    EXPECT_EQ(napi_call_function(env_, nullptr, fn, 0, nullptr, &call_res), napi_pending_exception);
+
+    napi_value caught;
+    ASSERT_EQ(napi_get_and_clear_last_exception(env_, &caught), napi_ok);
+    bool is_err = false;
+    ASSERT_EQ(napi_is_error(env_, caught, &is_err), napi_ok);
+    EXPECT_TRUE(is_err);
+
+    napi_value read_msg;
+    ASSERT_EQ(napi_get_named_property(env_, caught, "message", &read_msg), napi_ok);
+    char buf[64];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, read_msg, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "Recoverable error");
+
+    // Subsequent call to get_and_clear returns undefined again
+    napi_value after_clear;
+    ASSERT_EQ(napi_get_and_clear_last_exception(env_, &after_clear), napi_ok);
+    ASSERT_EQ(napi_typeof(env_, after_clear, &t), napi_ok);
+    EXPECT_EQ(t, napi_undefined);
+}
+
+TEST_F(NapiV8Test, ErrorInvalidArguments) {
+    napi_value msg, num, err, res;
+    ASSERT_EQ(napi_create_string_utf8(env_, "msg", NAPI_AUTO_LENGTH, &msg), napi_ok);
+    ASSERT_EQ(napi_create_int32(env_, 123, &num), napi_ok);
+    ASSERT_EQ(napi_create_error(env_, nullptr, msg, &err), napi_ok);
+
+    // napi_create_error
+    EXPECT_EQ(napi_create_error(nullptr, nullptr, msg, &res), napi_invalid_arg);
+    EXPECT_EQ(napi_create_error(env_, nullptr, nullptr, &res), napi_invalid_arg);
+    EXPECT_EQ(napi_create_error(env_, nullptr, msg, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_create_error(env_, nullptr, num, &res), napi_string_expected);
+
+    // napi_create_type_error
+    EXPECT_EQ(napi_create_type_error(nullptr, nullptr, msg, &res), napi_invalid_arg);
+    EXPECT_EQ(napi_create_type_error(env_, nullptr, nullptr, &res), napi_invalid_arg);
+    EXPECT_EQ(napi_create_type_error(env_, nullptr, msg, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_create_type_error(env_, nullptr, num, &res), napi_string_expected);
+
+    // napi_create_range_error
+    EXPECT_EQ(napi_create_range_error(nullptr, nullptr, msg, &res), napi_invalid_arg);
+    EXPECT_EQ(napi_create_range_error(env_, nullptr, nullptr, &res), napi_invalid_arg);
+    EXPECT_EQ(napi_create_range_error(env_, nullptr, msg, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_create_range_error(env_, nullptr, num, &res), napi_string_expected);
+
+    // napi_throw
+    EXPECT_EQ(napi_throw(nullptr, err), napi_invalid_arg);
+    EXPECT_EQ(napi_throw(env_, nullptr), napi_invalid_arg);
+
+    // napi_is_exception_pending
+    bool pending = false;
+    EXPECT_EQ(napi_is_exception_pending(nullptr, &pending), napi_invalid_arg);
+    EXPECT_EQ(napi_is_exception_pending(env_, nullptr), napi_invalid_arg);
+
+    // napi_get_and_clear_last_exception
+    EXPECT_EQ(napi_get_and_clear_last_exception(nullptr, &res), napi_invalid_arg);
+    EXPECT_EQ(napi_get_and_clear_last_exception(env_, nullptr), napi_invalid_arg);
+
+    // napi_is_error
+    bool is_err = false;
+    EXPECT_EQ(napi_is_error(nullptr, err, &is_err), napi_invalid_arg);
+    EXPECT_EQ(napi_is_error(env_, nullptr, &is_err), napi_invalid_arg);
+    EXPECT_EQ(napi_is_error(env_, err, nullptr), napi_invalid_arg);
+}
+
 }  // namespace
