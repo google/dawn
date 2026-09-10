@@ -226,9 +226,6 @@ if (TINT_BUILD_BENCHMARKS OR DAWN_BUILD_BENCHMARKS)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/google_benchmark/src EXCLUDE_FROM_ALL)
 endif()
 
-# Include Windows SDK DLL copying utilities
-include("${CMAKE_CURRENT_SOURCE_DIR}/CopyWindowsSDKDLL.cmake")
-
 # Populates 'targets' with list of all targets under 'dir'
 # Use 'get_all_targets_recursive' instead of this macro
 macro(do_get_all_targets_recursive targets dir)

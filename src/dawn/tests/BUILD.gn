@@ -83,35 +83,6 @@ if (build_with_chromium) {
 }
 
 ###############################################################################
-# Copy target for DXC
-###############################################################################
-
-# Chromium archive scripts are not able to determine whether dawn_built_dxc
-# is defined. Hence, we need to copy the DXC DLLs from the Windows SDK so the
-# scripts always have something to pick up.
-if (!dawn_use_built_dxc && build_with_chromium && is_win) {
-  # The windows_sdk_path is acquired in visual_studio_version.gni.
-  import("//build/config/win/visual_studio_version.gni")
-
-  # Windows 10 SDK version 10.0.20348.0 provides DXC compiler and validator both
-  # of v1.6 and Chromium builds require this SDK version or higher.
-  assert(defined(windows_sdk_path))
-  assert(defined(windows_sdk_version))
-  assert(windows_sdk_path != "")
-  assert(windows_sdk_version != "")
-
-  # Declare a copy target to copy DXC binary from Windows SDK for running Dawn
-  # end-to-end test in Chromium.
-  copy("copy_dxc_binary") {
-    sources = [
-      "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxcompiler.dll",
-    ]
-
-    outputs = [ "$root_out_dir/{{source_file_part}}" ]
-  }
-}
-
-###############################################################################
 # Dawn test template
 ###############################################################################
 template("dawn_test") {
@@ -134,20 +105,12 @@ template("dawn_test") {
       ]
     }
 
-    # Running Dawn tests within Chromium in Windows may require DXC, copy DXC
-    # binary from Windows SDK.
-    if (build_with_chromium && is_win) {
-      if (dawn_use_built_dxc) {
-        if (!defined(deps)) {
-          deps = []
-        }
-        deps += [ "${dawn_dxc_gn_dir}:dxcompiler" ]
-      } else {
-        if (!defined(data_deps)) {
-          data_deps = []
-        }
-        data_deps += [ ":copy_dxc_binary" ]
+    # Running Dawn tests within Chromium in Windows may require DXC.
+    if (build_with_chromium && is_win && dawn_use_built_dxc) {
+      if (!defined(deps)) {
+        deps = []
       }
+      deps += [ "${dawn_dxc_gn_dir}:dxcompiler" ]
     }
   }
 }
