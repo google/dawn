@@ -24,7 +24,7 @@ vars = {
   'dawn_wasm': False, # Also fetches dependencies required for building WebAssembly.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'dawn_gn_version': 'git_revision:4f6a76b64b8279e98004f541f8e136307efe5e01',
+  'dawn_gn_version': 'git_revision:f99972118649814cd21b180eab5ae84df3c5fac7',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
@@ -57,7 +57,7 @@ vars = {
   # reclient CIPD package version
   'reclient_version': 're_client_version:0.185.0.db415f21-gomaip',
   # siso CIPD package version.
-  'siso_version': 'git_revision:efbbe7f1892211b5e9512576843a3c247b6a6d7c',
+  'siso_version': 'git_revision:2f0eb0113740f469481a64760ab8feabe529a5b1',
 
   # CPython 3 CIPD package version for Siso hermetic toolchain.
   'cpython3_version': 'version:3@3.11.9.chromium.38',
@@ -80,7 +80,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': 'fe017cfed41fd7e2e771a82ceffe4fe545fa1e1e',
+  'chromium_revision': '3456e637312130ebb8a12fcc3dbd45fd95db7a30',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -102,7 +102,7 @@ vars = {
 
   # Dependency versions for Android builds.
   # These should be all rolled at once to match the values in Chromium.
-  'android_ndk_version': Str('2@30.0.16138531'),
+  'android_ndk_version': Str('2@30.0.16248370'),
   'android_sdk_build-tools_version': 'version_37.0.0',
   'android_sdk_emulator_version': '9lGp8nTUCRRWGMnI_96HcKfzjnxEJKUcfvfwmA3wXNkC',
   'android_sdk_platform-tools_version': 'qTD9QdBlBf3dyHsN1lJ0RH6AhHxR42Hmg2Ih-Vj4zIEC',
@@ -111,7 +111,7 @@ vars = {
 
 deps = {
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@6f6a5dbf04b734214f3b1f386567d101ec9d607e',
+    'url': '{chromium_git}/chromium/src/buildtools@c202b4a9dac30e789ed6e3b2354efa94357a56f3',
     'condition': 'dawn_standalone',
   },
   'third_party/clang-format/script': {
@@ -144,7 +144,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@a0fd6e66af74304c9b4605665435f4e88849e046',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@08f3e8c0eb66d6de3a048a757d0ff708dbc8ea34',
     'condition': 'dawn_standalone',
   },
 
@@ -154,13 +154,13 @@ deps = {
   },
 
   'third_party/libc++abi/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@fc1897a2c12aa27e703c3ed48b62eba8abf4ce19',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@8ca7c6c3a4f615f5f9a487318e783efc0cfce5c2',
     'condition': 'dawn_standalone',
   },
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@fae87475a0a1aecebdf1c1f6048404777394c588',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@8db6cf6029e4b42459ce47551a54d4b6f89bd35a',
     'condition': 'dawn_standalone',
   },
 
@@ -175,15 +175,15 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@22c2649cd56edc686c69a5dbfe838670ac4f0a91',
+  'url': '{chromium_git}/chromium/src/build@aa37fbfbed902759718cdf281dea5d58bb8fd5d9',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@479a8b14de25cc5ee656fe7fab92ef09d2fd58d8',
+  'url': '{chromium_git}/chromium/src/tools/clang@7f1de04cb83c6a2ad6e191136c0e604fb6729132',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
-    'url': '{chromium_git}/chromium/src/tools/memory@5d0637a3ee7be7801cb6b4c31be2c745e196d554',
+    'url': '{chromium_git}/chromium/src/tools/memory@0732f7097d066a81e673f90862994f76886fc638',
     'condition': 'dawn_standalone',
   },
   'tools/valgrind': {
@@ -201,7 +201,7 @@ deps = {
 
   # For run-tricium-clang-tidy.py
   'third_party/chromium-tools-build/src': {
-    'url': '{chromium_git}/chromium/tools/build@f5c92f1e3c16cf9565d69b36551e01e51c83269c',
+    'url': '{chromium_git}/chromium/tools/build@3bd60d432a416d857387237c8c8fdbd65626256c',
     'condition': 'dawn_standalone and checkout_clang_tidy',
   },
 
@@ -289,17 +289,17 @@ deps = {
 
   # Used for Dawn-side GN arg definitions.
   'tools/mb': {
-    'url': '{chromium_git}/chromium/src/tools/mb@547cfab2f58382880e2dbbde0d8d5f12a280e7a3',
+    'url': '{chromium_git}/chromium/src/tools/mb@661c2e320f2e8d2bf13eb8acb035156da4c0b187',
     'condition': 'dawn_standalone',
   },
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@8fbfdc2f4ab9cc0b42c475752a7ebc540134b0eb',
+    'url': '{chromium_git}/chromium/src/testing@d477a5baad6fd6b2a4e82d0bbd051a3ac6f7b58e',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/compiler-rt/lib/fuzzer.git' + '@' + '8c09a8f461575f5fc009c4053a18611e23e3879c',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/compiler-rt/lib/fuzzer.git' + '@' + '42af2c9785432da898f3a990156f9fb4499af2a0',
     'condition': 'dawn_standalone',
   },
   'third_party/googletest/src': {
@@ -308,7 +308,7 @@ deps = {
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@6ef72859fa1cbdd2aeaa4147467ab3896ff098ed',
+    'url': '{chromium_git}/catapult.git@471aa8aec31a4de79a96b72815180bc9dc71c420',
     'condition': 'dawn_standalone',
   },
   'third_party/google_benchmark/src': {
@@ -316,7 +316,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/perfetto': {
-    'url': '{chromium_git}/external/github.com/google/perfetto.git@3c6ef6dfedd4619318ac9a2c92092f8d0cb52707',
+    'url': '{chromium_git}/external/github.com/google/perfetto.git@5bf94268225caaad92a7551721218fb3d6afbdfc',
     'condition': 'dawn_standalone',
   },
 
@@ -427,7 +427,7 @@ deps = {
   },
 
   'third_party/abseil-cpp': {
-    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@435e7d977fb36fb47854a4c552c0706dad0bd7cf',
+    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@1dea671f173f29a7fa8d87057ad99be181d99a64',
     'condition': 'dawn_standalone',
   },
 
@@ -685,7 +685,7 @@ deps = {
 
   # Misc dependencies inherited from Tint
   'third_party/protobuf': {
-    'url': '{chromium_git}/chromium/src/third_party/protobuf@86791795c9534b4c52f61c27eeb072e51c745e2e',
+    'url': '{chromium_git}/chromium/src/third_party/protobuf@30e9b5d95019db5b0b085b134748e69e7846c903',
     'condition': 'dawn_standalone',
   },
 
@@ -702,13 +702,13 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@a572625cb5090f73bda24fb36c84bba1eaa63b49',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@df749d8b72960990ea952d37e58a0c45e9ba5683',
     'condition': 'dawn_standalone',
   },
 
   # For Android builds in standalone.
   'third_party/android_sdk': {
-    'url': Var('chromium_git') + '/chromium/src/third_party/android_sdk@3b779020106e62287a045d6b58dc1272c10f157f',
+    'url': Var('chromium_git') + '/chromium/src/third_party/android_sdk@d4810b527d0d48e071c6feb018b0468ddc19aa09',
     'condition': 'checkout_android and dawn_standalone',
   },
   'third_party/android_sdk/public': {
@@ -777,7 +777,7 @@ deps = {
     'packages': [
       {
         'package': 'chromium/third_party/android_build_tools/manifest_merger',
-        'version': '8mN5PA56vTCsifJO3G_2Y615rGX0csOApteqjMVBbV4C',
+        'version': 'rbN6Z4kNrab4oL7d2Vn86ZSPTCZiaOjM0HAgtUvKSiYC',
       },
     ],
     'condition': 'checkout_android and dawn_standalone',
