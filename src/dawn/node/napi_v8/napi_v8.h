@@ -106,6 +106,11 @@ struct napi_deferred__ {
     v8::Global<v8::Promise::Resolver> resolver;
 };
 
+// Internal structs representing Node-API types stubbed for link compatibility
+struct napi_async_context__ {};
+struct napi_callback_scope__ {};
+struct napi_async_work__ {};
+
 // Instance data stored in napi_env
 struct InstanceData {
     void* data = nullptr;

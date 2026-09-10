@@ -1738,4 +1738,36 @@ napi_status napi_get_version(node_api_nogc_env env, uint32_t* result) {
     return napi_ok;
 }
 
+// ============================================================================
+// Node-API Stubs
+//
+// The following functions are not used by dawn.node or the CTS runner.
+// However, node-addon-api (<napi-inl.h>) defines inline and virtual destructors
+// for Napi::AsyncContext, Napi::CallbackScope, and Napi::AsyncWorker that
+// reference these symbols. In debug or unoptimized builds, the compiler emits
+// these unused destructors into every translation unit including <napi.h>,
+// requiring these symbols to exist at link time to avoid undefined reference errors.
+// ============================================================================
+
+napi_status napi_async_destroy(napi_env env, napi_async_context async_context) {
+    if (!ValidateArgs(env, async_context)) {
+        return napi_invalid_arg;
+    }
+    return env->SetLastError(napi_generic_failure, "napi_async_destroy is not supported");
+}
+
+napi_status napi_close_callback_scope(napi_env env, napi_callback_scope scope) {
+    if (!ValidateArgs(env, scope)) {
+        return napi_invalid_arg;
+    }
+    return env->SetLastError(napi_generic_failure, "napi_close_callback_scope is not supported");
+}
+
+napi_status napi_delete_async_work(napi_env env, napi_async_work work) {
+    if (!ValidateArgs(env, work)) {
+        return napi_invalid_arg;
+    }
+    return env->SetLastError(napi_generic_failure, "napi_delete_async_work is not supported");
+}
+
 }  // extern "C"
