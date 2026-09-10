@@ -28,6 +28,8 @@
 #include "src/dawn/node/napi_v8/napi_v8.h"
 
 #include <algorithm>
+#include <cstring>
+#include <limits>
 #include <utility>
 
 #include "src/utils/compiler.h"
@@ -526,6 +528,81 @@ napi_status GetWrapObject(napi_env env, napi_value js_object, v8::Local<v8::Obje
     }
     *out_obj = obj;
     return napi_ok;
+}
+
+napi_status GetArrayBuffer(napi_env env, napi_value value, v8::Local<v8::ArrayBuffer>* out_ab) {
+    if (!ValidateArgs(env, value)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(value);
+    if (!v8_val->IsArrayBuffer()) {
+        return env->SetLastError(napi_arraybuffer_expected, "An ArrayBuffer was expected");
+    }
+    *out_ab = v8_val.As<v8::ArrayBuffer>();
+    return napi_ok;
+}
+
+napi_status ConcludeDeferred(napi_env env,
+                             napi_deferred deferred,
+                             napi_value value,
+                             bool is_resolve) {
+    if (!ValidateArgs(env, deferred, value)) {
+        return napi_invalid_arg;
+    }
+    auto it = std::find_if(env->deferreds.begin(), env->deferreds.end(),
+                           [deferred](const auto& d) { return d.get() == deferred; });
+    if (it == env->deferreds.end()) {
+        return env->SetLastError(napi_invalid_arg, "Deferred not found");
+    }
+    v8::Local<v8::Promise::Resolver> resolver = deferred->resolver.Get(env->isolate);
+    v8::Local<v8::Context> ctx = env->GetContext();
+    v8::Maybe<bool> success = is_resolve ? resolver->Resolve(ctx, dawn::napi_v8::ToV8(value))
+                                         : resolver->Reject(ctx, dawn::napi_v8::ToV8(value));
+    env->deferreds.erase(it);
+    if (success.IsNothing() || !success.FromJust()) {
+        return env->SetLastError(napi_generic_failure, is_resolve ? "Failed to resolve promise"
+                                                                  : "Failed to reject promise");
+    }
+    return napi_ok;
+}
+
+#ifndef V8_ENABLE_SANDBOX
+struct ExternalArrayBufferFinalizer {
+    napi_env env;
+    node_api_nogc_finalize finalize_cb;
+    void* finalize_hint;
+};
+
+void ExternalArrayBufferDeleter(void* data, size_t, void* deleter_data) {
+    auto* fin = static_cast<ExternalArrayBufferFinalizer*>(deleter_data);
+    if (fin != nullptr) {
+        if (fin->finalize_cb != nullptr) {
+            fin->finalize_cb(fin->env, data, fin->finalize_hint);
+        }
+        delete fin;
+    }
+}
+#endif
+
+size_t ElementSizeForTypedArray(napi_typedarray_type type) {
+    switch (type) {
+        case napi_int8_array:
+        case napi_uint8_array:
+        case napi_uint8_clamped_array:
+            return 1;
+        case napi_int16_array:
+        case napi_uint16_array:
+            return 2;
+        case napi_int32_array:
+        case napi_uint32_array:
+        case napi_float32_array:
+            return 4;
+        case napi_float64_array:
+        case napi_bigint64_array:
+        case napi_biguint64_array:
+            return 8;
+    }
+    return 0;
 }
 
 }  // namespace
@@ -1370,6 +1447,294 @@ napi_status napi_get_instance_data(napi_env env, void** data) {
         return napi_invalid_arg;
     }
     *data = env->instance_data.data;
+    return napi_ok;
+}
+
+// ============================================================================
+// ArrayBuffer, TypedArray & DataView
+// ============================================================================
+
+napi_status napi_is_arraybuffer(napi_env env, napi_value value, bool* result) {
+    if (!ValidateArgs(env, value, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(value);
+    *result = v8_val->IsArrayBuffer();
+    return napi_ok;
+}
+
+napi_status napi_create_arraybuffer(napi_env env,
+                                    size_t byte_length,
+                                    void** data,
+                                    napi_value* result) {
+    if (!ValidateArgs(env, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::ArrayBuffer> ab = v8::ArrayBuffer::New(env->isolate, byte_length);
+    if (data != nullptr) {
+        *data = ab->Data();
+    }
+    *result = dawn::napi_v8::ToNapi(ab);
+    return napi_ok;
+}
+
+napi_status napi_get_arraybuffer_info(napi_env env,
+                                      napi_value arraybuffer,
+                                      void** data,
+                                      size_t* byte_length) {
+    v8::Local<v8::ArrayBuffer> ab;
+    napi_status status = GetArrayBuffer(env, arraybuffer, &ab);
+    if (status != napi_ok) {
+        return status;
+    }
+    if (data != nullptr) {
+        *data = ab->Data();
+    }
+    if (byte_length != nullptr) {
+        *byte_length = ab->ByteLength();
+    }
+    return napi_ok;
+}
+
+napi_status napi_detach_arraybuffer(napi_env env, napi_value arraybuffer) {
+    v8::Local<v8::ArrayBuffer> ab;
+    napi_status status = GetArrayBuffer(env, arraybuffer, &ab);
+    if (status != napi_ok) {
+        return status;
+    }
+    if (!ab->IsDetachable()) {
+        return env->SetLastError(napi_detachable_arraybuffer_expected,
+                                 "ArrayBuffer is not detachable");
+    }
+    ab->Detach(v8::Local<v8::Value>()).Check();
+    return napi_ok;
+}
+
+napi_status napi_create_external_arraybuffer(napi_env env,
+                                             void* external_data,
+                                             size_t byte_length,
+                                             node_api_nogc_finalize finalize_cb,
+                                             void* finalize_hint,
+                                             napi_value* result) {
+    if (!ValidateArgs(env, result)) {
+        return napi_invalid_arg;
+    }
+#ifdef V8_ENABLE_SANDBOX
+    return env->SetLastError(napi_no_external_buffers_allowed,
+                             "External buffers are not allowed when V8 Sandbox is enabled");
+#else
+    ExternalArrayBufferFinalizer* fin = nullptr;
+    if (finalize_cb != nullptr) {
+        fin = new ExternalArrayBufferFinalizer{env, finalize_cb, finalize_hint};
+    }
+    auto backing_store = v8::ArrayBuffer::NewBackingStore(external_data, byte_length,
+                                                          ExternalArrayBufferDeleter, fin);
+    v8::Local<v8::ArrayBuffer> ab = v8::ArrayBuffer::New(
+        env->isolate, std::shared_ptr<v8::BackingStore>(std::move(backing_store)));
+    *result = dawn::napi_v8::ToNapi(ab);
+    return napi_ok;
+#endif
+}
+
+napi_status napi_is_typedarray(napi_env env, napi_value value, bool* result) {
+    if (!ValidateArgs(env, value, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(value);
+    *result = v8_val->IsTypedArray();
+    return napi_ok;
+}
+
+napi_status napi_create_typedarray(napi_env env,
+                                   napi_typedarray_type type,
+                                   size_t length,
+                                   napi_value arraybuffer,
+                                   size_t byte_offset,
+                                   napi_value* result) {
+    if (!ValidateArgs(env, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::ArrayBuffer> ab;
+    napi_status status = GetArrayBuffer(env, arraybuffer, &ab);
+    if (status != napi_ok) {
+        return status;
+    }
+    size_t element_size = ElementSizeForTypedArray(type);
+    if (element_size == 0) {
+        return env->SetLastError(napi_invalid_arg, "Invalid typedarray type");
+    }
+    if (byte_offset % element_size != 0) {
+        return env->SetLastError(napi_invalid_arg, "Offset must be aligned to element size");
+    }
+    if (length > (std::numeric_limits<size_t>::max() - byte_offset) / element_size ||
+        byte_offset + length * element_size > ab->ByteLength()) {
+        return env->SetLastError(napi_invalid_arg, "Range out of bounds");
+    }
+    v8::Local<v8::TypedArray> ta;
+    switch (type) {
+        case napi_int8_array:
+            ta = v8::Int8Array::New(ab, byte_offset, length);
+            break;
+        case napi_uint8_array:
+            ta = v8::Uint8Array::New(ab, byte_offset, length);
+            break;
+        case napi_uint8_clamped_array:
+            ta = v8::Uint8ClampedArray::New(ab, byte_offset, length);
+            break;
+        case napi_int16_array:
+            ta = v8::Int16Array::New(ab, byte_offset, length);
+            break;
+        case napi_uint16_array:
+            ta = v8::Uint16Array::New(ab, byte_offset, length);
+            break;
+        case napi_int32_array:
+            ta = v8::Int32Array::New(ab, byte_offset, length);
+            break;
+        case napi_uint32_array:
+            ta = v8::Uint32Array::New(ab, byte_offset, length);
+            break;
+        case napi_float32_array:
+            ta = v8::Float32Array::New(ab, byte_offset, length);
+            break;
+        case napi_float64_array:
+            ta = v8::Float64Array::New(ab, byte_offset, length);
+            break;
+        case napi_bigint64_array:
+            ta = v8::BigInt64Array::New(ab, byte_offset, length);
+            break;
+        case napi_biguint64_array:
+            ta = v8::BigUint64Array::New(ab, byte_offset, length);
+            break;
+    }
+    *result = dawn::napi_v8::ToNapi(ta);
+    return napi_ok;
+}
+
+napi_status napi_get_typedarray_info(napi_env env,
+                                     napi_value typedarray,
+                                     napi_typedarray_type* type,
+                                     size_t* length,
+                                     void** data,
+                                     napi_value* arraybuffer,
+                                     size_t* byte_offset) {
+    if (!ValidateArgs(env, typedarray)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(typedarray);
+    if (!v8_val->IsTypedArray()) {
+        return env->SetLastError(napi_invalid_arg, "A TypedArray was expected");
+    }
+    v8::Local<v8::TypedArray> ta = v8_val.As<v8::TypedArray>();
+    if (type != nullptr) {
+        if (v8_val->IsInt8Array()) {
+            *type = napi_int8_array;
+        } else if (v8_val->IsUint8Array()) {
+            *type = napi_uint8_array;
+        } else if (v8_val->IsUint8ClampedArray()) {
+            *type = napi_uint8_clamped_array;
+        } else if (v8_val->IsInt16Array()) {
+            *type = napi_int16_array;
+        } else if (v8_val->IsUint16Array()) {
+            *type = napi_uint16_array;
+        } else if (v8_val->IsInt32Array()) {
+            *type = napi_int32_array;
+        } else if (v8_val->IsUint32Array()) {
+            *type = napi_uint32_array;
+        } else if (v8_val->IsFloat32Array()) {
+            *type = napi_float32_array;
+        } else if (v8_val->IsFloat64Array()) {
+            *type = napi_float64_array;
+        } else if (v8_val->IsBigInt64Array()) {
+            *type = napi_bigint64_array;
+        } else if (v8_val->IsBigUint64Array()) {
+            *type = napi_biguint64_array;
+        }
+    }
+    if (length != nullptr) {
+        *length = ta->Length();
+    }
+    if (byte_offset != nullptr) {
+        *byte_offset = ta->ByteOffset();
+    }
+    if (arraybuffer != nullptr) {
+        *arraybuffer = dawn::napi_v8::ToNapi(ta->Buffer());
+    }
+    if (data != nullptr) {
+        // SAFETY: ta->Buffer() provides data storage of at least ta->ByteOffset() +
+        // ta->ByteLength() bytes.
+        *data = DAWN_UNSAFE_BUFFERS(static_cast<uint8_t*>(ta->Buffer()->Data()) + ta->ByteOffset());
+    }
+    return napi_ok;
+}
+
+// ============================================================================
+// Promises & Scripts
+// ============================================================================
+
+napi_status napi_create_promise(napi_env env, napi_deferred* deferred, napi_value* promise) {
+    if (!ValidateArgs(env, deferred, promise)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Context> ctx = env->GetContext();
+    v8::MaybeLocal<v8::Promise::Resolver> maybe_resolver = v8::Promise::Resolver::New(ctx);
+    if (maybe_resolver.IsEmpty()) {
+        return env->SetLastError(napi_generic_failure, "Failed to create promise resolver");
+    }
+    v8::Local<v8::Promise::Resolver> resolver = maybe_resolver.ToLocalChecked();
+    auto def = std::make_unique<napi_deferred__>();
+    def->resolver.Reset(env->isolate, resolver);
+    *deferred = def.get();
+    *promise = dawn::napi_v8::ToNapi(resolver->GetPromise());
+    env->deferreds.push_back(std::move(def));
+    return napi_ok;
+}
+
+napi_status napi_resolve_deferred(napi_env env, napi_deferred deferred, napi_value resolution) {
+    return ConcludeDeferred(env, deferred, resolution, /*is_resolve=*/true);
+}
+
+napi_status napi_reject_deferred(napi_env env, napi_deferred deferred, napi_value rejection) {
+    return ConcludeDeferred(env, deferred, rejection, /*is_resolve=*/false);
+}
+
+napi_status napi_is_promise(napi_env env, napi_value value, bool* is_promise) {
+    if (!ValidateArgs(env, value, is_promise)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(value);
+    *is_promise = v8_val->IsPromise();
+    return napi_ok;
+}
+
+napi_status napi_run_script(napi_env env, napi_value script, napi_value* result) {
+    if (!ValidateArgs(env, script, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_script = dawn::napi_v8::ToV8(script);
+    if (!v8_script->IsString()) {
+        return env->SetLastError(napi_string_expected, "A string was expected");
+    }
+    v8::Local<v8::Context> ctx = env->GetContext();
+    v8::TryCatch try_catch(env->isolate);
+    v8::MaybeLocal<v8::Script> compiled = v8::Script::Compile(ctx, v8_script.As<v8::String>());
+    if (compiled.IsEmpty()) {
+        env->isolate->ThrowException(try_catch.Exception());
+        return env->SetLastError(napi_generic_failure, "Failed to compile script");
+    }
+    v8::MaybeLocal<v8::Value> eval_result = compiled.ToLocalChecked()->Run(ctx);
+    if (eval_result.IsEmpty()) {
+        env->isolate->ThrowException(try_catch.Exception());
+        return env->SetLastError(napi_generic_failure, "Script execution failed");
+    }
+    *result = dawn::napi_v8::ToNapi(eval_result.ToLocalChecked());
+    return napi_ok;
+}
+
+napi_status napi_get_version(node_api_nogc_env env, uint32_t* result) {
+    if (env == nullptr || result == nullptr) {
+        return napi_invalid_arg;
+    }
+    *result = NAPI_VERSION;
     return napi_ok;
 }
 

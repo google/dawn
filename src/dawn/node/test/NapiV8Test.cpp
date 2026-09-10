@@ -25,6 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
+
 #include <gtest/gtest.h>
 
 #include <array>
@@ -52,23 +55,39 @@
 #include "libplatform/libplatform.h"
 #include "src/dawn/node/napi_v8/napi_v8.h"
 
+#ifndef V8_ENABLE_SANDBOX
+#define V8_ENABLE_SANDBOX 0
+#endif
+
 namespace {
 
-// Test fixture providing an isolated V8 environment and napi_env for each test case.
-class NapiV8Test : public ::testing::Test {
-  protected:
-    static void SetUpTestSuite() {
+// Global test environment managing process-wide V8 platform initialization and teardown.
+class V8Environment : public ::testing::Environment {
+  public:
+    ~V8Environment() override = default;
+
+    void SetUp() override {
         v8::V8::SetFlagsFromString("--expose_gc");
         platform_ = v8::platform::NewDefaultPlatform();
         v8::V8::InitializePlatform(platform_.get());
         v8::V8::Initialize();
     }
 
-    static void TearDownTestSuite() {
+    void TearDown() override {
         v8::V8::Dispose();
         v8::V8::DisposePlatform();
+        platform_.reset();
     }
 
+  private:
+    std::unique_ptr<v8::Platform> platform_;
+};
+
+testing::Environment* const v8_env = testing::AddGlobalTestEnvironment(new V8Environment);
+
+// Test fixture providing an isolated V8 environment and napi_env for each test case.
+class NapiV8Test : public ::testing::Test {
+  protected:
     void SetUp() override {
         allocator_.reset(v8::ArrayBuffer::Allocator::NewDefaultAllocator());
         create_params_.array_buffer_allocator = allocator_.get();
@@ -104,15 +123,15 @@ class NapiV8Test : public ::testing::Test {
         isolate_->RequestGarbageCollectionForTesting(v8::Isolate::kFullGarbageCollection);
     }
 
+    // Executes pending JavaScript microtasks (such as Promise .then() / .catch() callbacks).
+    void RunMicrotasks() { isolate_->PerformMicrotaskCheckpoint(); }
+
   private:
-    static std::unique_ptr<v8::Platform> platform_;
     std::unique_ptr<v8::ArrayBuffer::Allocator> allocator_;
     v8::Isolate::CreateParams create_params_;
     v8::Isolate* isolate_ = nullptr;
     std::optional<v8::HandleScope> handle_scope_;
 };
-
-std::unique_ptr<v8::Platform> NapiV8Test::platform_ = nullptr;
 
 // ============================================================================
 // Scopes Tests
@@ -2634,6 +2653,326 @@ TEST_F(NapiV8Test, RemoveWrapAndEnvDestruction) {
 
     // Teardown must NOT call finalizer because wrap was removed
     EXPECT_FALSE(tracker.finalizer_called);
+}
+
+// ============================================================================
+// Stage 7: Buffers, TypedArrays, DataViews & Promises
+// ============================================================================
+
+TEST_F(NapiV8Test, ArrayBufferCreateAndInfo) {
+    napi_value ab;
+    void* data = nullptr;
+    ASSERT_EQ(napi_create_arraybuffer(env_, 16, &data, &ab), napi_ok);
+    ASSERT_NE(ab, nullptr);
+    ASSERT_NE(data, nullptr);
+
+    bool is_ab = false;
+    ASSERT_EQ(napi_is_arraybuffer(env_, ab, &is_ab), napi_ok);
+    EXPECT_TRUE(is_ab);
+
+    napi_value num;
+    ASSERT_EQ(napi_create_int32(env_, 42, &num), napi_ok);
+    ASSERT_EQ(napi_is_arraybuffer(env_, num, &is_ab), napi_ok);
+    EXPECT_FALSE(is_ab);
+
+    // Write bytes into data pointer
+    auto* bytes = static_cast<uint8_t*>(data);
+    for (uint8_t i = 0; i < 16; ++i) {
+        bytes[i] = i * 10;
+    }
+
+    void* info_data = nullptr;
+    size_t byte_length = 0;
+    ASSERT_EQ(napi_get_arraybuffer_info(env_, ab, &info_data, &byte_length), napi_ok);
+    EXPECT_EQ(info_data, data);
+    EXPECT_EQ(byte_length, 16u);
+
+    auto* read_bytes = static_cast<const uint8_t*>(info_data);
+    for (uint8_t i = 0; i < 16; ++i) {
+        EXPECT_EQ(read_bytes[i], i * 10);
+    }
+}
+
+TEST_F(NapiV8Test, ArrayBufferZeroLength) {
+    napi_value ab;
+    void* data = nullptr;
+    ASSERT_EQ(napi_create_arraybuffer(env_, 0, &data, &ab), napi_ok);
+    ASSERT_NE(ab, nullptr);
+
+    bool is_ab = false;
+    ASSERT_EQ(napi_is_arraybuffer(env_, ab, &is_ab), napi_ok);
+    EXPECT_TRUE(is_ab);
+
+    void* info_data = nullptr;
+    size_t byte_length = 999;
+    ASSERT_EQ(napi_get_arraybuffer_info(env_, ab, &info_data, &byte_length), napi_ok);
+    EXPECT_EQ(byte_length, 0u);
+}
+
+TEST_F(NapiV8Test, ArrayBufferDetach) {
+    napi_value ab;
+    void* data = nullptr;
+    ASSERT_EQ(napi_create_arraybuffer(env_, 32, &data, &ab), napi_ok);
+
+    size_t byte_length = 0;
+    ASSERT_EQ(napi_get_arraybuffer_info(env_, ab, nullptr, &byte_length), napi_ok);
+    EXPECT_EQ(byte_length, 32u);
+
+    ASSERT_EQ(napi_detach_arraybuffer(env_, ab), napi_ok);
+
+    // After detaching, the buffer byte length drops to 0
+    ASSERT_EQ(napi_get_arraybuffer_info(env_, ab, nullptr, &byte_length), napi_ok);
+    EXPECT_EQ(byte_length, 0u);
+}
+
+TEST_F(NapiV8Test, ExternalArrayBufferHandling) {
+    auto finalizer = [](napi_env, void*, void*) {};
+    uint8_t raw_mem[64];
+    napi_value ab = nullptr;
+    napi_status expected_status = V8_ENABLE_SANDBOX ? napi_no_external_buffers_allowed : napi_ok;
+    EXPECT_EQ(napi_create_external_arraybuffer(env_, raw_mem, 64, finalizer, nullptr, &ab),
+              expected_status);
+}
+
+TEST_F(NapiV8Test, TypedArrayOptionalOutParams) {
+    napi_value ab = nullptr;
+    void* data = nullptr;
+    ASSERT_EQ(napi_create_arraybuffer(env_, 16, &data, &ab), napi_ok);
+
+    napi_value ta = nullptr;
+    ASSERT_EQ(napi_create_typedarray(env_, napi_uint16_array, 4, ab, 4, &ta), napi_ok);
+
+    napi_typedarray_type type;
+    ASSERT_EQ(napi_get_typedarray_info(env_, ta, &type, nullptr, nullptr, nullptr, nullptr),
+              napi_ok);
+    EXPECT_EQ(type, napi_uint16_array);
+
+    size_t length = 0;
+    ASSERT_EQ(napi_get_typedarray_info(env_, ta, nullptr, &length, nullptr, nullptr, nullptr),
+              napi_ok);
+    EXPECT_EQ(length, 4u);
+
+    void* out_data = nullptr;
+    ASSERT_EQ(napi_get_typedarray_info(env_, ta, nullptr, nullptr, &out_data, nullptr, nullptr),
+              napi_ok);
+    EXPECT_EQ(out_data, static_cast<char*>(data) + 4);
+
+    size_t byte_offset = 0;
+    ASSERT_EQ(napi_get_typedarray_info(env_, ta, nullptr, nullptr, nullptr, nullptr, &byte_offset),
+              napi_ok);
+    EXPECT_EQ(byte_offset, 4u);
+}
+
+struct TypedArrayTestCase {
+    const char* name;
+    napi_typedarray_type type;
+    size_t element_size;
+};
+
+class TypedArrayAllTypes : public NapiV8Test,
+                           public ::testing::WithParamInterface<TypedArrayTestCase> {};
+
+TEST_P(TypedArrayAllTypes, CorrectTypeAndDimensions) {
+    const auto& test_case = GetParam();
+    napi_value buffer_64 = nullptr;
+    void* buffer_64_data = nullptr;
+    ASSERT_EQ(napi_create_arraybuffer(env_, 64, &buffer_64_data, &buffer_64), napi_ok);
+
+    napi_value ta = nullptr;
+    size_t offset = test_case.element_size;
+    size_t count = 3;
+    ASSERT_EQ(napi_create_typedarray(env_, test_case.type, count, buffer_64, offset, &ta), napi_ok);
+
+    bool is_ta = false;
+    ASSERT_EQ(napi_is_typedarray(env_, ta, &is_ta), napi_ok);
+    EXPECT_TRUE(is_ta);
+
+    napi_typedarray_type detected_type;
+    size_t detected_length = 0;
+    void* detected_data = nullptr;
+    napi_value detected_ab = nullptr;
+    size_t detected_offset = 0;
+    ASSERT_EQ(napi_get_typedarray_info(env_, ta, &detected_type, &detected_length, &detected_data,
+                                       &detected_ab, &detected_offset),
+              napi_ok);
+    EXPECT_EQ(detected_type, test_case.type);
+    EXPECT_EQ(detected_length, count);
+    EXPECT_EQ(detected_offset, offset);
+    EXPECT_EQ(detected_data, static_cast<char*>(buffer_64_data) + offset);
+    ASSERT_NE(detected_ab, nullptr);
+
+    bool is_ab = false;
+    ASSERT_EQ(napi_is_arraybuffer(env_, detected_ab, &is_ab), napi_ok);
+    EXPECT_TRUE(is_ab);
+}
+
+std::string TypedArrayTestName(const ::testing::TestParamInfo<TypedArrayTestCase>& info) {
+    return info.param.name;
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    AllTypes,
+    TypedArrayAllTypes,
+    ::testing::Values(TypedArrayTestCase{"Int8", napi_int8_array, 1},
+                      TypedArrayTestCase{"Uint8", napi_uint8_array, 1},
+                      TypedArrayTestCase{"Uint8Clamped", napi_uint8_clamped_array, 1},
+                      TypedArrayTestCase{"Int16", napi_int16_array, 2},
+                      TypedArrayTestCase{"Uint16", napi_uint16_array, 2},
+                      TypedArrayTestCase{"Int32", napi_int32_array, 4},
+                      TypedArrayTestCase{"Uint32", napi_uint32_array, 4},
+                      TypedArrayTestCase{"Float32", napi_float32_array, 4},
+                      TypedArrayTestCase{"Float64", napi_float64_array, 8},
+                      TypedArrayTestCase{"BigInt64", napi_bigint64_array, 8},
+                      TypedArrayTestCase{"BigUint64", napi_biguint64_array, 8}),
+    TypedArrayTestName);
+
+TEST_F(NapiV8Test, PromiseResolve) {
+    // napi_create_promise creates a JavaScript Promise along with an opaque napi_deferred
+    // handle used by C++ to settle (resolve or reject) the promise.
+    napi_deferred deferred = nullptr;
+    napi_value promise = nullptr;
+    ASSERT_EQ(napi_create_promise(env_, &deferred, &promise), napi_ok);
+    ASSERT_NE(deferred, nullptr);
+    ASSERT_NE(promise, nullptr);
+
+    bool is_prom = false;
+    ASSERT_EQ(napi_is_promise(env_, promise, &is_prom), napi_ok);
+    EXPECT_TRUE(is_prom);
+
+    // Node-API does not expose an API to directly inspect the resolution state or value of a
+    // promise from C++. To observe resolution, expose the promise to JavaScript and attach a
+    // standard .then() callback.
+    napi_value global;
+    ASSERT_EQ(napi_get_global(env_, &global), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env_, global, "testPromise", promise), napi_ok);
+
+    napi_value script_res;
+    napi_value script_src;
+    const char* setup_script =
+        "globalThis.resolvedVal = 0;\n"
+        "testPromise.then(val => { globalThis.resolvedVal = val; });";
+    ASSERT_EQ(napi_create_string_utf8(env_, setup_script, NAPI_AUTO_LENGTH, &script_src), napi_ok);
+    ASSERT_EQ(napi_run_script(env_, script_src, &script_res), napi_ok);
+
+    // Resolve the deferred with an integer value from C++.
+    napi_value res_val;
+    ASSERT_EQ(napi_create_int32(env_, 98765, &res_val), napi_ok);
+    ASSERT_EQ(napi_resolve_deferred(env_, deferred, res_val), napi_ok);
+
+    // Promise .then() callbacks are queued asynchronously as JavaScript microtasks. Drain the
+    // microtask queue so the .then() callback executes and writes to globalThis.resolvedVal.
+    RunMicrotasks();
+
+    // Verify that the JavaScript .then() callback ran and captured the resolved value.
+    napi_value resolved_prop;
+    ASSERT_EQ(napi_get_named_property(env_, global, "resolvedVal", &resolved_prop), napi_ok);
+    int32_t final_val = 0;
+    ASSERT_EQ(napi_get_value_int32(env_, resolved_prop, &final_val), napi_ok);
+    EXPECT_EQ(final_val, 98765);
+}
+
+TEST_F(NapiV8Test, PromiseReject) {
+    // napi_create_promise creates a JavaScript Promise and a C++ napi_deferred handle.
+    napi_deferred deferred = nullptr;
+    napi_value promise = nullptr;
+    ASSERT_EQ(napi_create_promise(env_, &deferred, &promise), napi_ok);
+    ASSERT_NE(deferred, nullptr);
+    ASSERT_NE(promise, nullptr);
+
+    // Attach a JavaScript .catch() callback to observe rejection.
+    napi_value global;
+    ASSERT_EQ(napi_get_global(env_, &global), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env_, global, "testRejectPromise", promise), napi_ok);
+
+    napi_value script_res;
+    napi_value script_src;
+    const char* setup_script =
+        "globalThis.rejectedVal = null;\n"
+        "testRejectPromise.catch(err => { globalThis.rejectedVal = err; });";
+    ASSERT_EQ(napi_create_string_utf8(env_, setup_script, NAPI_AUTO_LENGTH, &script_src), napi_ok);
+    ASSERT_EQ(napi_run_script(env_, script_src, &script_res), napi_ok);
+
+    // Reject the deferred with an error string from C++.
+    napi_value err_val;
+    ASSERT_EQ(napi_create_string_utf8(env_, "something failed", NAPI_AUTO_LENGTH, &err_val),
+              napi_ok);
+    ASSERT_EQ(napi_reject_deferred(env_, deferred, err_val), napi_ok);
+
+    // Drain the microtask queue so the .catch() callback executes.
+    RunMicrotasks();
+
+    // Verify that the JavaScript .catch() callback ran and captured the rejection error.
+    napi_value rejected_prop;
+    ASSERT_EQ(napi_get_named_property(env_, global, "rejectedVal", &rejected_prop), napi_ok);
+    char buf[64];
+    size_t copied = 0;
+    ASSERT_EQ(napi_get_value_string_utf8(env_, rejected_prop, buf, sizeof(buf), &copied), napi_ok);
+    EXPECT_STREQ(buf, "something failed");
+}
+
+TEST_F(NapiV8Test, GetVersion) {
+    uint32_t version = 0;
+    ASSERT_EQ(napi_get_version(env_, &version), napi_ok);
+    EXPECT_EQ(version, static_cast<uint32_t>(NAPI_VERSION));
+}
+
+TEST_F(NapiV8Test, RunScript) {
+    napi_value script;
+    napi_value result;
+    ASSERT_EQ(napi_create_string_utf8(env_, "12 * 34", NAPI_AUTO_LENGTH, &script), napi_ok);
+    ASSERT_EQ(napi_run_script(env_, script, &result), napi_ok);
+
+    int32_t val = 0;
+    ASSERT_EQ(napi_get_value_int32(env_, result, &val), napi_ok);
+    EXPECT_EQ(val, 12 * 34);
+
+    napi_value bad_script;
+    ASSERT_EQ(napi_create_string_utf8(env_, "syntax error {", NAPI_AUTO_LENGTH, &bad_script),
+              napi_ok);
+    EXPECT_EQ(napi_run_script(env_, bad_script, &result), napi_generic_failure);
+    napi_value ex;
+    ASSERT_EQ(napi_get_and_clear_last_exception(env_, &ex), napi_ok);
+    EXPECT_NE(ex, nullptr);
+}
+
+TEST_F(NapiV8Test, BuffersAndPromisesInvalidArgs) {
+    napi_value ab;
+    ASSERT_EQ(napi_create_arraybuffer(env_, 16, nullptr, &ab), napi_ok);
+
+    // Null argument validations
+    EXPECT_EQ(napi_is_arraybuffer(nullptr, ab, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_create_arraybuffer(env_, 16, nullptr, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_get_arraybuffer_info(env_, nullptr, nullptr, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_detach_arraybuffer(env_, nullptr), napi_invalid_arg);
+
+    EXPECT_EQ(napi_is_typedarray(env_, nullptr, nullptr), napi_invalid_arg);
+    napi_value created_ta = nullptr;
+    EXPECT_EQ(napi_create_typedarray(env_, napi_int32_array, 4, ab, 0, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_create_typedarray(env_, napi_int32_array, 4, ab, 1, &created_ta),
+              napi_invalid_arg);
+    EXPECT_EQ(napi_create_typedarray(env_, napi_int32_array, 100, ab, 0, &created_ta),
+              napi_invalid_arg);
+    EXPECT_EQ(napi_get_typedarray_info(env_, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr),
+              napi_invalid_arg);
+
+    EXPECT_EQ(napi_create_promise(env_, nullptr, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_resolve_deferred(env_, nullptr, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_reject_deferred(env_, nullptr, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_is_promise(env_, nullptr, nullptr), napi_invalid_arg);
+
+    uint32_t version = 0;
+    EXPECT_EQ(napi_get_version(nullptr, &version), napi_invalid_arg);
+    EXPECT_EQ(napi_get_version(env_, nullptr), napi_invalid_arg);
+
+    // Type mismatch checks
+    napi_value num;
+    ASSERT_EQ(napi_create_int32(env_, 1, &num), napi_ok);
+    EXPECT_EQ(napi_get_arraybuffer_info(env_, num, nullptr, nullptr), napi_arraybuffer_expected);
+    EXPECT_EQ(napi_detach_arraybuffer(env_, num), napi_arraybuffer_expected);
+    EXPECT_EQ(napi_create_typedarray(env_, napi_int32_array, 4, num, 0, &created_ta),
+              napi_arraybuffer_expected);
+    EXPECT_EQ(napi_get_typedarray_info(env_, num, nullptr, nullptr, nullptr, nullptr, nullptr),
+              napi_invalid_arg);
 }
 
 }  // namespace

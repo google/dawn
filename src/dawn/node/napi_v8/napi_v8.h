@@ -101,6 +101,11 @@ struct napi_ref__ {
     static void WeakCallback(const v8::WeakCallbackInfo<napi_ref__>& data);
 };
 
+// Internal struct representing a Node-API deferred promise (napi_deferred)
+struct napi_deferred__ {
+    v8::Global<v8::Promise::Resolver> resolver;
+};
+
 // Instance data stored in napi_env
 struct InstanceData {
     void* data = nullptr;
@@ -117,6 +122,7 @@ struct napi_env__ {
     std::vector<std::unique_ptr<napi_handle_scope__>> open_handle_scopes;
     std::vector<std::unique_ptr<CallbackBinding>> callback_bindings;
     std::vector<std::unique_ptr<napi_ref__>> references;
+    std::vector<std::unique_ptr<napi_deferred__>> deferreds;
     InstanceData instance_data{};
 
     napi_env__(v8::Isolate* iso, v8::Local<v8::Context> ctx) : isolate(iso), context(iso, ctx) {
