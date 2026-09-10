@@ -961,6 +961,17 @@ crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader
 crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,f16_conversion:f16_mat:inputSource="uniform";cols=4;rows=3 [ Failure ]
 crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,f16_conversion:f16_mat:inputSource="uniform";cols=4;rows=4 [ Failure ]
 
+crbug.com/559244923 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:api,operation,adapter,requestDevice:limits,supported:limit="maxSampledTexturesPerShaderStage" [ Failure ]
+
+crbug.com/558821852 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:api,validation,image_copy,texture_related:origin_alignment:method="CopyB2T";* [ Failure ]
+
+crbug.com/558825526 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_array_2d_coords:stage="c";format="depth32float";mode="m";offset=false [ Failure ]
+crbug.com/558825526 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="v";format="depth32float";filt="nearest";mode="r" [ Failure ]
+
+crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,buffer*View:write:base_type="f16" [ Failure ]
+crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,fma:f32:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,af_arithmetic:negation:inputSource="const";vectorize="_undef_" [ Failure ]
+
 # Win/Snapdragon X Elite failures
 # TODO(crbug.com/452840618): Remove this disable block once the tests are actually running.
 # finder:disable-unused Unused removal disabled until tests are actually enabled
