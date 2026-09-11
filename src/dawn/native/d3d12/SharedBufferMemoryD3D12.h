@@ -51,6 +51,11 @@ class SharedBufferMemory final : public SharedBufferMemoryBase {
         StringView label,
         const SharedBufferMemoryFromWindowsHandleDescriptor* descriptor);
 
+    static ResultOrError<Ref<SharedBufferMemory>> Create(
+        Device* device,
+        StringView label,
+        const SharedBufferMemoryHostPointerDescriptor* descriptor);
+
     ID3D12Resource* GetD3DResource() const;
 
   private:
@@ -64,6 +69,13 @@ class SharedBufferMemory final : public SharedBufferMemoryBase {
                        std::unique_ptr<Heap> heap,
                        ComPtr<ID3D12Resource> resource);
 
+    static ResultOrError<Ref<SharedBufferMemory>> CreateFromHeap(Device* device,
+                                                                 StringView label,
+                                                                 ComPtr<ID3D12Heap> d3d12Heap,
+                                                                 uint64_t size,
+                                                                 const void* heapPointer,
+                                                                 wgpu::BufferUsage blockedUsages);
+
     void DestroyImpl(DestroyReason reason) override;
 
     ResultOrError<Ref<BufferBase>> CreateBufferImpl(
@@ -76,6 +88,8 @@ class SharedBufferMemory final : public SharedBufferMemoryBase {
 
     std::unique_ptr<Heap> mHeap;
     ComPtr<ID3D12Resource> mResource;
+    wgpu::DisposeCallback mHostPointerDisposeCallback = nullptr;
+    raw_ptr<void, DisableDanglingPtrDetection> mHostPointerDisposeUserdata = nullptr;
 };
 
 }  // namespace dawn::native::d3d12

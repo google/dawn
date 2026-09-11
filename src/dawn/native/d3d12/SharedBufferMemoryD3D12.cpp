@@ -30,6 +30,8 @@
 #include <memory>
 #include <utility>
 
+#include "absl/cleanup/cleanup.h"
+#include "src/dawn/common/Math.h"
 #include "src/dawn/native/Buffer.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/d3d/D3DError.h"
@@ -165,7 +167,118 @@ SharedBufferMemory::SharedBufferMemory(Device* device,
       mResource(std::move(resource)) {}
 
 void SharedBufferMemory::DestroyImpl(DestroyReason reason) {
-    ToBackend(GetDevice())->ReferenceUntilUnused(std::move(mResource));
+    SharedBufferMemoryBase::DestroyImpl(reason);
+
+    if (mHostPointerDisposeCallback == nullptr) {
+        ToBackend(GetDevice())->ReferenceUntilUnused(std::move(mResource));
+        return;
+    }
+
+    // The host memory aliased by the heap must outlive both the heap and the resource placed on
+    // it, so the task owns the resource as well: it is only released once the task runs, which
+    // happens after the pending command serial has completed. Releasing the resource from the
+    // task (instead of through Device::ReferenceUntilUnused, which is drained by a different
+    // mechanism) guarantees the resource is released before the heap, and the heap before the
+    // dispose callback.
+    struct DisposeTask : TrackTaskCallback {
+        DisposeTask(ComPtr<ID3D12Resource> resource,
+                    std::unique_ptr<Heap> heap,
+                    wgpu::DisposeCallback callback,
+                    void* userdata)
+            : TrackTaskCallback(nullptr),
+              resource(std::move(resource)),
+              heap(std::move(heap)),
+              callback(callback),
+              userdata(userdata) {}
+        ~DisposeTask() override = default;
+
+        void FinishImpl() override { Dispose(WGPUCallbackStatus_Success); }
+        void HandleDeviceLossImpl() override { Dispose(WGPUCallbackStatus_Error); }
+        void HandleShutDownImpl() override { Dispose(WGPUCallbackStatus_Error); }
+
+        void Dispose(WGPUCallbackStatus status) {
+            resource = nullptr;
+            heap = nullptr;
+            callback(status, userdata);
+        }
+
+        ComPtr<ID3D12Resource> resource;
+        std::unique_ptr<Heap> heap;
+        wgpu::DisposeCallback callback;
+        raw_ptr<void, DisableDanglingPtrDetection> userdata;
+    };
+    std::unique_ptr<DisposeTask> request =
+        std::make_unique<DisposeTask>(std::move(mResource), std::move(mHeap),
+                                      mHostPointerDisposeCallback, mHostPointerDisposeUserdata);
+    mHostPointerDisposeCallback = nullptr;
+    mHostPointerDisposeUserdata = nullptr;
+
+    // TODO(386255678): TrackTaskAfterEventualFlush() only marks the queue as needing a submit; it
+    // doesn't force one to happen immediately. If nothing ever ticks the device again, this task
+    // (and thus disposeCallback) may never run.
+    GetDevice()->GetQueue()->TrackTaskAfterEventualFlush(std::move(request));
+}
+
+// static
+ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::CreateFromHeap(
+    Device* device,
+    StringView label,
+    ComPtr<ID3D12Heap> d3d12Heap,
+    uint64_t size,
+    const void* heapPointer,
+    wgpu::BufferUsage blockedUsages) {
+    D3D12_HEAP_DESC heapDesc = d3d12Heap->GetDesc();
+
+    SharedBufferMemoryProperties properties;
+    DAWN_TRY_ASSIGN(properties,
+                    GetSharedBufferMemoryProperties(device, heapDesc.Properties, heapDesc.Flags,
+                                                    size, blockedUsages));
+
+    // D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER must be specified if and only if
+    // D3D12_HEAP_FLAG_SHARED_CROSS_ADAPTER is set.
+    D3D12_RESOURCE_FLAGS resourceFlags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+    if (heapDesc.Flags & D3D12_HEAP_FLAG_SHARED_CROSS_ADAPTER) {
+        resourceFlags |= D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER;
+    }
+
+    D3D12_RESOURCE_DESC resourceDescriptor;
+    resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    resourceDescriptor.Alignment = 0;
+    resourceDescriptor.Width = size;
+    resourceDescriptor.Height = 1;
+    resourceDescriptor.DepthOrArraySize = 1;
+    resourceDescriptor.MipLevels = 1;
+    resourceDescriptor.Format = DXGI_FORMAT_UNKNOWN;
+    resourceDescriptor.SampleDesc.Count = 1;
+    resourceDescriptor.SampleDesc.Quality = 0;
+    resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    resourceDescriptor.Flags = resourceFlags;
+
+    uint64_t heapSize = heapDesc.SizeInBytes;
+    D3D12_RESOURCE_ALLOCATION_INFO resourceInfo =
+        device->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
+    DAWN_INVALID_IF(resourceInfo.SizeInBytes > heapSize,
+                    "Resource required %u bytes, but heap is %u bytes.", resourceInfo.SizeInBytes,
+                    heapSize);
+    DAWN_INVALID_IF(heapPointer != nullptr &&
+                        !IsPtrAligned(heapPointer, checked_cast<size_t>(resourceInfo.Alignment)),
+                    "Host pointer (%p) did not satisfy required alignment (%u).", heapPointer,
+                    resourceInfo.Alignment);
+    auto heap = std::make_unique<Heap>(
+        std::move(d3d12Heap),
+        device->GetDeviceInfo().isUMA ? MemorySegment::Local : MemorySegment::NonLocal, size);
+
+    ComPtr<ID3D12Resource> placedResource;
+    DAWN_TRY(CheckOutOfMemoryHRESULT(
+        device->GetD3D12Device()->CreatePlacedResource(heap->GetD3D12Heap(), 0, &resourceDescriptor,
+                                                       D3D12_RESOURCE_STATE_COMMON, nullptr,
+                                                       IID_PPV_ARGS(&placedResource)),
+        "ID3D12Device::CreatePlacedResource"));
+
+    auto result = AcquireRef(new SharedBufferMemory(device, label, properties, std::move(heap),
+                                                    std::move(placedResource)));
+    result->Initialize();
+    return result;
 }
 
 // static
@@ -228,52 +341,51 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
                                          sharedMemoryFileHandle, IID_PPV_ARGS(&d3d12Heap)),
                                      "ID3D12Device3::OpenExistingHeapFromFileMapping"));
 
-    D3D12_HEAP_DESC heapDesc = d3d12Heap->GetDesc();
-    D3D12_HEAP_PROPERTIES heapProperties = heapDesc.Properties;
-    D3D12_HEAP_FLAGS heapFlags = heapDesc.Flags;
-    SharedBufferMemoryProperties properties;
-    DAWN_TRY_ASSIGN(properties, GetSharedBufferMemoryProperties(device, heapProperties, heapFlags,
-                                                                descriptor->size));
+    return CreateFromHeap(device, label, std::move(d3d12Heap), descriptor->size, nullptr,
+                          wgpu::BufferUsage::None);
+}
 
-    D3D12_RESOURCE_DESC resourceDescriptor;
-    resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    resourceDescriptor.Alignment = 0;
-    resourceDescriptor.Width = descriptor->size;
-    resourceDescriptor.Height = 1;
-    resourceDescriptor.DepthOrArraySize = 1;
-    resourceDescriptor.MipLevels = 1;
-    resourceDescriptor.Format = DXGI_FORMAT_UNKNOWN;
-    resourceDescriptor.SampleDesc.Count = 1;
-    resourceDescriptor.SampleDesc.Quality = 0;
-    resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-    resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+// static
+ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
+    Device* device,
+    StringView label,
+    const SharedBufferMemoryHostPointerDescriptor* descriptor) {
+    // `disposeCallback` must be called exactly once. If this function returns a SharedBufferMemory,
+    // ownership of the callback is transferred to it and it is called on destruction. Otherwise,
+    // this guard invokes it here with an error status before returning.
+    // TODO(386255678): this only covers errors produced inside this function. It doesn't help if
+    // Device::CreateSharedBufferMemory errors before or after calling this, e.g. due to unpacking
+    // the chained struct, or a device loss / D3D12 error raised elsewhere in the meantime.
+    absl::Cleanup disposeOnFailure = [descriptor] {
+        if (descriptor->disposeCallback) {
+            descriptor->disposeCallback(WGPUCallbackStatus_Error, descriptor->userdata);
+        }
+    };
 
-    // D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER must be specified if and only if
-    // D3D12_HEAP_FLAG_SHARED_CROSS_ADAPTER is set.
-    if (heapDesc.Flags & D3D12_HEAP_FLAG_SHARED_CROSS_ADAPTER) {
-        resourceDescriptor.Flags |= D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER;
-    }
+    DAWN_INVALID_IF(descriptor->pointer == nullptr, "Host pointer is missing.");
+    DAWN_INVALID_IF(descriptor->size == 0, "Shared buffer memory size must not be 0.");
 
-    D3D12_RESOURCE_ALLOCATION_INFO resourceInfo =
-        device->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
-    DAWN_INVALID_IF(resourceInfo.SizeInBytes > descriptor->size,
-                    "Resource required %u bytes, but heap is %u bytes.", resourceInfo.SizeInBytes,
-                    descriptor->size);
-    auto heap = std::make_unique<Heap>(
-        std::move(d3d12Heap),
-        device->GetDeviceInfo().isUMA ? MemorySegment::Local : MemorySegment::NonLocal,
-        descriptor->size);
+    // OpenExistingHeapFromAddress requires the address to be aligned to the D3D12 default resource
+    // placement alignment, or it fails with E_INVALIDARG.
+    DAWN_INVALID_IF(!IsPtrAligned(descriptor->pointer, D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT),
+                    "Host pointer (%p) is not aligned to %u bytes.", descriptor->pointer,
+                    D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT);
 
-    ComPtr<ID3D12Resource> placedResource;
+    ComPtr<ID3D12Device3> d3d12Device3;
+    DAWN_TRY(CheckHRESULT(device->GetD3D12Device()->QueryInterface(IID_PPV_ARGS(&d3d12Device3)),
+                          "QueryInterface ID3D12Device3"));
+
+    ComPtr<ID3D12Heap> d3d12Heap;
     DAWN_TRY(CheckOutOfMemoryHRESULT(
-        device->GetD3D12Device()->CreatePlacedResource(heap->GetD3D12Heap(), 0, &resourceDescriptor,
-                                                       D3D12_RESOURCE_STATE_COMMON, nullptr,
-                                                       IID_PPV_ARGS(&placedResource)),
-        "ID3D12Device::CreatePlacedResource"));
+        d3d12Device3->OpenExistingHeapFromAddress(descriptor->pointer, IID_PPV_ARGS(&d3d12Heap)),
+        "ID3D12Device3::OpenExistingHeapFromAddress"));
 
-    auto result = AcquireRef(new SharedBufferMemory(device, label, properties, std::move(heap),
-                                                    std::move(placedResource)));
-    result->Initialize();
+    Ref<SharedBufferMemory> result;
+    DAWN_TRY_ASSIGN(result, CreateFromHeap(device, label, std::move(d3d12Heap), descriptor->size,
+                                           descriptor->pointer, wgpu::BufferUsage::None));
+    result->mHostPointerDisposeCallback = descriptor->disposeCallback;
+    result->mHostPointerDisposeUserdata = descriptor->userdata;
+    std::move(disposeOnFailure).Cancel();
     return result;
 }
 

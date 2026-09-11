@@ -589,6 +589,122 @@ TEST_P(SharedBufferMemoryTests, ReadWriteSharedMapReadBuffer) {
     ASSERT_EQ(*mappedData, kBufferData2);
 }
 
+// Tests that a buffer with MapWrite|CopySrc usage can be created from shared buffer memory,
+// written via mappedAtCreation, and copied to a destination buffer.
+TEST_P(SharedBufferMemoryTests, MapWriteCopySrcUsageSucceeds) {
+    wgpu::SharedBufferMemory memory =
+        GetParam().mBackend->CreateSharedBufferMemory(device, wgpu::BufferUsage::None, kBufferSize);
+    wgpu::SharedBufferMemoryProperties properties;
+    memory.GetProperties(&properties);
+
+    DAWN_TEST_UNSUPPORTED_IF(!(properties.usage & wgpu::BufferUsage::MapWrite));
+
+    wgpu::BufferDescriptor srcDesc = {};
+    srcDesc.size = kBufferSize;
+    srcDesc.usage = kMapWriteUsages;
+    srcDesc.mappedAtCreation = true;
+    wgpu::Buffer srcBuffer = memory.CreateBuffer(&srcDesc);
+    ASSERT_TRUE(srcBuffer.Get());
+
+    wgpu::SharedBufferMemoryBeginAccessDescriptor beginDesc = {};
+    beginDesc.initialized = false;
+    ASSERT_EQ(wgpu::Status::Success, memory.BeginAccess(srcBuffer, &beginDesc));
+
+    uint32_t* mappedData = static_cast<uint32_t*>(srcBuffer.GetMappedRange(0, kBufferSize));
+    ASSERT_NE(nullptr, mappedData);
+    *mappedData = kBufferData;
+    srcBuffer.Unmap();
+
+    wgpu::BufferDescriptor dstDesc = {};
+    dstDesc.size = kBufferSize;
+    dstDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer dstBuffer = device.CreateBuffer(&dstDesc);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToBuffer(srcBuffer, 0, dstBuffer, 0, kBufferSize);
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    wgpu::SharedBufferMemoryEndAccessState endState = {};
+    ASSERT_EQ(wgpu::Status::Success, memory.EndAccess(srcBuffer, &endState));
+
+    EXPECT_BUFFER_U32_EQ(kBufferData, dstBuffer, 0);
+}
+
+// Tests that a buffer with MapRead|CopyDst usage can be created from shared buffer memory,
+// receive a copy from a source buffer, and expose the expected mapped contents.
+TEST_P(SharedBufferMemoryTests, MapReadCopyDstUsageSucceeds) {
+    wgpu::SharedBufferMemory memory =
+        GetParam().mBackend->CreateSharedBufferMemory(device, wgpu::BufferUsage::None, kBufferSize);
+    wgpu::SharedBufferMemoryProperties properties;
+    memory.GetProperties(&properties);
+
+    DAWN_TEST_UNSUPPORTED_IF(!(properties.usage & wgpu::BufferUsage::MapRead));
+
+    wgpu::BufferDescriptor dstDesc = {};
+    dstDesc.size = kBufferSize;
+    dstDesc.usage = kMapReadUsages;
+    wgpu::Buffer dstBuffer = memory.CreateBuffer(&dstDesc);
+    ASSERT_TRUE(dstBuffer.Get());
+
+    wgpu::Buffer srcBuffer =
+        utils::CreateBufferFromData(device, &kBufferData, kBufferSize, wgpu::BufferUsage::CopySrc);
+
+    wgpu::SharedBufferMemoryBeginAccessDescriptor beginDesc = {};
+    beginDesc.initialized = false;
+    ASSERT_EQ(wgpu::Status::Success, memory.BeginAccess(dstBuffer, &beginDesc));
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToBuffer(srcBuffer, 0, dstBuffer, 0, kBufferSize);
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    MapAsyncAndWait(dstBuffer, wgpu::MapMode::Read, 0, kBufferSize);
+    const uint32_t* mappedData =
+        static_cast<const uint32_t*>(dstBuffer.GetConstMappedRange(0, kBufferSize));
+    ASSERT_NE(nullptr, mappedData);
+    EXPECT_EQ(kBufferData, *mappedData);
+    dstBuffer.Unmap();
+
+    wgpu::SharedBufferMemoryEndAccessState endState = {};
+    ASSERT_EQ(wgpu::Status::Success, memory.EndAccess(dstBuffer, &endState));
+}
+
+// Tests that data provided when importing shared buffer memory is visible to the GPU.
+TEST_P(SharedBufferMemoryTests, InitialDataIsVisibleToGPU) {
+    wgpu::SharedBufferMemory memory = GetParam().mBackend->CreateSharedBufferMemory(
+        device, wgpu::BufferUsage::None, kBufferSize, kBufferData);
+    wgpu::SharedBufferMemoryProperties properties;
+    memory.GetProperties(&properties);
+
+    DAWN_TEST_UNSUPPORTED_IF(!(properties.usage & wgpu::BufferUsage::CopySrc));
+
+    wgpu::BufferDescriptor srcDesc = {};
+    srcDesc.size = kBufferSize;
+    srcDesc.usage = wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer srcBuffer = memory.CreateBuffer(&srcDesc);
+    ASSERT_TRUE(srcBuffer.Get());
+
+    wgpu::BufferDescriptor dstDesc = {};
+    dstDesc.size = kBufferSize;
+    dstDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer dstBuffer = device.CreateBuffer(&dstDesc);
+
+    wgpu::SharedBufferMemoryBeginAccessDescriptor beginDesc = {};
+    beginDesc.initialized = true;
+    ASSERT_EQ(wgpu::Status::Success, memory.BeginAccess(srcBuffer, &beginDesc));
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToBuffer(srcBuffer, 0, dstBuffer, 0, kBufferSize);
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    wgpu::SharedBufferMemoryEndAccessState endState = {};
+    ASSERT_EQ(wgpu::Status::Success, memory.EndAccess(srcBuffer, &endState));
+
+    EXPECT_BUFFER_U32_EQ(kBufferData, dstBuffer, 0);
+}
+
 // Test ensures that a shader can read and write from a shared storage buffer.
 TEST_P(SharedBufferMemoryTests, ReadWriteSharedStorageBuffer) {
     wgpu::SharedBufferMemory memory = GetParam().mBackend->CreateSharedBufferMemory(

@@ -260,6 +260,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::SharedBufferMemoryFromWindowsHandle);
     }
 
+    if (GetDeviceInfo().supportsExistingHeap && GetDeviceInfo().isUMA) {
+        EnableFeature(Feature::SharedBufferMemoryHostPointer);
+    }
+
     if (GetDeviceInfo().supportsTextureCompressionUnaligned) {
         EnableFeature(Feature::TextureCompressionUnaligned);
     }

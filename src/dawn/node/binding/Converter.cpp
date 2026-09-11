@@ -1836,6 +1836,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::FlexibleTextureViews:
         case wgpu::FeatureName::AdapterPropertiesWGPU:
         case wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle:
+        case wgpu::FeatureName::SharedBufferMemoryHostPointer:
         case wgpu::FeatureName::SharedTextureMemoryD3D12Resource:
         case wgpu::FeatureName::Unorm16FormatsForExternalTexture:
         case wgpu::FeatureName::OpaqueYCbCrAndroidForExternalTexture:
