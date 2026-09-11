@@ -46,6 +46,9 @@ class SharedBufferMemoryTestBackend {
     virtual void SetUp() {}
     virtual void TearDown() {}
 
+    // Name used to identify this backend in test names.
+    virtual std::string Name() const = 0;
+
     // The required features for testing this backend.
     virtual std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter& device) const = 0;
 
@@ -59,6 +62,11 @@ class SharedBufferMemoryTestBackend {
     wgpu::SharedFence ImportFenceTo(const wgpu::Device& importingDevice,
                                     const wgpu::SharedFence& fence);
 };
+
+inline std::ostream& operator<<(std::ostream& o, SharedBufferMemoryTestBackend* backend) {
+    o << backend->Name();
+    return o;
+}
 
 using Backend = SharedBufferMemoryTestBackend*;
 DAWN_TEST_PARAM_STRUCT(SharedBufferMemoryTestParams, Backend);

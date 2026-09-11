@@ -28,6 +28,7 @@
 #include <d3d12.h>
 #include <gtest/gtest.h>
 
+#include <string>
 #include <vector>
 
 #include "dawn/native/D3D12Backend.h"
@@ -99,6 +100,8 @@ class ExistingD3D12ResourceBackend : public SharedBufferMemoryTestBackend {
         static ExistingD3D12ResourceBackend b;
         return &b;
     }
+
+    std::string Name() const override { return "ExistingD3D12Resource"; }
 
     std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter& adapter) const override {
         return {wgpu::FeatureName::SharedBufferMemoryD3D12Resource,
@@ -495,6 +498,8 @@ class D3D12SharedMemoryFileHandleWithExtendedUsagesBackend
         return &b;
     }
 
+    std::string Name() const override { return "D3D12SharedMemoryFileHandleWithExtendedUsages"; }
+
     std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter& adapter) const override {
         return {wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle,
                 wgpu::FeatureName::SharedFenceDXGISharedHandle,
@@ -587,6 +592,8 @@ class D3D12SharedMemoryFileHandleBackend : public D3D12SharedMemoryFileHandleBac
         return &b;
     }
 
+    std::string Name() const override { return "D3D12SharedMemoryFileHandle"; }
+
     std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter& adapter) const override {
         return {wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle,
                 wgpu::FeatureName::SharedFenceDXGISharedHandle};
@@ -665,6 +672,8 @@ class D3D12HostPointerBackend : public SharedBufferMemoryTestBackend {
         static D3D12HostPointerBackend b;
         return &b;
     }
+
+    std::string Name() const override { return "D3D12HostPointer"; }
 
     std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter& adapter) const override {
         return {wgpu::FeatureName::SharedBufferMemoryHostPointer,
