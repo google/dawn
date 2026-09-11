@@ -336,3 +336,7 @@ CheckOptions:
     value: Parentheses
   - key: cppcoreguidelines-pro-type-member-init.UseAssignment
     value: true
+  - key: modernize-use-to-underlying.ReplacementFunction
+    value: dawn::to_underlying
+  - key: modernize-use-to-underlying.ReplacementFunctionHeader
+    value: src/utils/numeric.h

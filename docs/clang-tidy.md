@@ -25,6 +25,8 @@ Tips:
 
 * It's recommended to [set up clangd](./development-tips.md) and open a file
   in your IDE to see the errors in context (and to get an autofix button).
+  Note the `FastCheckFilter` option mentioned there.
+
   In VSCode you can `less` the summary file to your terminal and then
   cmd-click/ctrl-click the lines to take you to the exact source line.
 

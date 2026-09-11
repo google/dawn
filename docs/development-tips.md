@@ -53,6 +53,10 @@ For Mac/Linux hosts:
 # This first section applies by default. Additional "fragments" below *also*
 # apply, and may overwrite configs from less-specific fragments.
 # Docs: https://clangd.llvm.org/config
+Diagnostics:
+  ClangTidy:
+    # Enable all Clang-Tidy checks in clangd. If this is too slow, use "Loose".
+    FastCheckFilter: None
 CompileFlags:
   CompilationDatabase: out/Debug
   Add:
