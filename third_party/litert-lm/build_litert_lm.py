@@ -161,6 +161,35 @@ def main():
 
         env = dict(os.environ)
 
+        if platform_name.startswith('macos'):
+            dev_dir = subprocess.check_output(['xcode-select', '-print-path'],
+                                              text=True).strip()
+
+            # Register CIPD Xcode with LaunchServices so Bazel's xcode-locator can find it.
+            xcode_app = Path(dev_dir).parent.parent
+            if xcode_app.suffix == '.app':
+                lsregister = Path(
+                    '/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister'
+                )
+                if lsregister.exists():
+                    subprocess.run([str(lsregister), '-f',
+                                    str(xcode_app)],
+                                   check=False)
+
+            # Query active SDK version so Bazel does not fall back to legacy 10.11.
+            sdk_version = subprocess.check_output(
+                ['xcrun', '--sdk', 'macosx', '--show-sdk-version'],
+                text=True).strip()
+
+            build_cmd.extend([
+                '--repo_env=BAZEL_ALLOW_NON_APPLICATIONS_XCODE=1',
+                f'--repo_env=DEVELOPER_DIR={dev_dir}',
+                f'--macos_sdk_version={sdk_version}',
+            ])
+
+            if platform_name == 'macos_arm64':
+                build_cmd.append('--config=macos_arm64')
+
         # Prepend the hermetic LLVM toolchain bin directory to PATH and set CC/CXX.
         llvm_bin_dir = project_root / 'third_party' / 'llvm-build' / 'Release+Asserts' / 'bin'
         if llvm_bin_dir.exists():

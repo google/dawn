@@ -53,10 +53,11 @@ def run_litert_lm(metric_proto_file_path: Path) -> subprocess.CompletedProcess:
 
     print(f"Executing: {' '.join(cmd)}")
 
-    # The .so files are isolated alongside the binary in the current build out directory,
-    # so explicitly add them to the library path for execution on Linux bots.
+    # The shared libraries (.so / .dylib) are isolated alongside the binary in the current
+    # build out directory, so explicitly add them to the library path for execution on bots.
     env = os.environ.copy()
     env['LD_LIBRARY_PATH'] = f"{Path.cwd()}{os.pathsep}{env.get('LD_LIBRARY_PATH', '')}"
+    env['DYLD_LIBRARY_PATH'] = f"{Path.cwd()}{os.pathsep}{env.get('DYLD_LIBRARY_PATH', '')}"
 
     return subprocess.run(cmd, env=env, check=False)
 

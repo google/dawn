@@ -78,5 +78,22 @@ action("litert_lm_advanced_main") {
       "$root_out_dir/libLiteRtTopKWebGpuSampler.so",
       "$root_out_dir/libLiteRtWebGpuAccelerator.so",
     ]
+  } else if (is_mac) {
+    outputs += [
+      "$root_out_dir/libGemmaModelConstraintProvider.dylib",
+      "$root_out_dir/libLiteRt.dylib",
+      "$root_out_dir/libLiteRtMetalAccelerator.dylib",
+      "$root_out_dir/libLiteRtTopKMetalSampler.dylib",
+      "$root_out_dir/libLiteRtTopKWebGpuSampler.dylib",
+      "$root_out_dir/libLiteRtWebGpuAccelerator.dylib",
+    ]
+    data += [
+      "$root_out_dir/libGemmaModelConstraintProvider.dylib",
+      "$root_out_dir/libLiteRt.dylib",
+      "$root_out_dir/libLiteRtMetalAccelerator.dylib",
+      "$root_out_dir/libLiteRtTopKMetalSampler.dylib",
+      "$root_out_dir/libLiteRtTopKWebGpuSampler.dylib",
+      "$root_out_dir/libLiteRtWebGpuAccelerator.dylib",
+    ]
   }
 }

@@ -1423,6 +1423,7 @@ ci.thin_tester(
     targets = targets.bundle(
         targets = [
             "real_hardware_common_gtests",
+            "litert_lm_benchmark",
         ],
         mixins = [
             "mac_arm64_apple_m2_retina_gpu_stable",
