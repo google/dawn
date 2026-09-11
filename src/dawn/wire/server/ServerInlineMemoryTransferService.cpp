@@ -32,10 +32,12 @@
 #include <utility>
 
 #include "dawn/wire/WireServer.h"
+#include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/wire/InlineSharedMemoryManager.h"
 #include "src/dawn/wire/server/Server.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 
 namespace dawn::wire::server {
 
@@ -78,6 +80,7 @@ class InlineMemoryTransferService : public MemoryTransferService {
       public:
         explicit MemoryHandleWithSharedMemoryImpl(Ref<SharedMemory> sharedMemory)
             : mSharedMemory(std::move(sharedMemory)) {}
+        ~MemoryHandleWithSharedMemoryImpl() override { Release(); }
 
         size_t GetSerializeDataUpdateSize(size_t offset, size_t size) const override {
             // The data is transferred out-of-band through the shared memory, so nothing needs to
@@ -89,8 +92,14 @@ class InlineMemoryTransferService : public MemoryTransferService {
                                  size_t offset,
                                  size_t size,
                                  std::span<const std::byte> data) const override {
+            // This function should not be called when `TryWrapInBuffer()` successfully wraps the
+            // shared memory into a buffer. In that case we don't need to serialize anything as the
+            // data will be directly written into the buffer memory.
+            DAWN_ASSERT(mSharedBufferMemory == nullptr);
+
             DAWN_ASSERT(serializeData.size() == GetSerializeDataUpdateSize(offset, size));
 
+            // Otherwise, copy the data into the shared memory so the client can read it back.
             std::span<std::byte> mapped = mSharedMemory->GetMappedSpan();
             DAWN_ASSERT(data.size() == size);
             DAWN_ASSERT(offset <= mapped.size());
@@ -102,6 +111,13 @@ class InlineMemoryTransferService : public MemoryTransferService {
                                    size_t offset,
                                    size_t size,
                                    std::span<std::byte> target) override {
+            // This function should not be called when `TryWrapInBuffer()` successfully wraps the
+            // shared memory into a buffer. In that case we don't need to serialize anything as the
+            // data will be directly written into the buffer memory.
+            DAWN_ASSERT(mSharedBufferMemory == nullptr);
+
+            // Otherwise, the data from the wire lives in the shared memory. Copy it into the
+            // target.
             std::span<std::byte> mapped = mSharedMemory->GetMappedSpan();
             if (size > target.size() || offset > mapped.size() || size > mapped.size() - offset) {
                 return false;
@@ -110,7 +126,89 @@ class InlineMemoryTransferService : public MemoryTransferService {
             return true;
         }
 
+        WGPUBuffer TryWrapInBuffer(const DawnProcTable* procs,
+                                   WGPUDevice device,
+                                   const WGPUBufferDescriptor* descriptor) override {
+            if (descriptor->usage & (WGPUBufferUsage_Indirect | WGPUBufferUsage_Index)) {
+                return nullptr;
+            }
+
+            if (descriptor->size != mSharedMemory->GetMappedSpan().size()) {
+                return nullptr;
+            }
+
+#if DAWN_PLATFORM_IS(WINDOWS)
+            DAWN_ASSERT(procs != nullptr);
+            if (!procs->deviceHasFeature(device,
+                                         WGPUFeatureName_SharedBufferMemoryFromWindowsHandle)) {
+                return nullptr;
+            }
+
+            WGPUSharedBufferMemoryFromWindowsHandleDescriptor windowsHandleDesc = {};
+            windowsHandleDesc.chain.sType = WGPUSType_SharedBufferMemoryFromWindowsHandleDescriptor;
+            windowsHandleDesc.handle = mSharedMemory->GetSystemHandle().Get();
+            windowsHandleDesc.size = mSharedMemory->GetAllocatedSize();
+
+            WGPUSharedBufferMemoryDescriptor desc = {};
+            desc.nextInChain = &windowsHandleDesc.chain;
+            mSharedBufferMemory = procs->deviceImportSharedBufferMemory(device, &desc);
+#endif
+            mProcs = procs;
+            if (mSharedBufferMemory == nullptr) {
+                Release();
+                return nullptr;
+            }
+
+            WGPUBuffer buffer =
+                mProcs->sharedBufferMemoryCreateBuffer(mSharedBufferMemory, descriptor);
+            if (buffer == nullptr) {
+                Release();
+                return nullptr;
+            }
+
+            // BeginAccess only returns success/failure, so wrap it in a validation error scope to
+            // surface the underlying reason (useful for debugging, even though we only log it).
+            mProcs->devicePushErrorScope(device, WGPUErrorFilter_Validation);
+
+            WGPUSharedBufferMemoryBeginAccessDescriptor beginAccessDesc = {};
+            beginAccessDesc.initialized = true;
+            beginAccessDesc.fenceCount = 0;
+            WGPUStatus status = mProcs->sharedBufferMemoryBeginAccess(mSharedBufferMemory, buffer,
+                                                                      &beginAccessDesc);
+
+            mProcs->devicePopErrorScope(
+                device, {nullptr, WGPUCallbackMode_AllowSpontaneous,
+                         [](WGPUPopErrorScopeStatus popStatus, WGPUErrorType type,
+                            WGPUStringView message, void*, void*) {
+                             if (popStatus == WGPUPopErrorScopeStatus_Success &&
+                                 type != WGPUErrorType_NoError) {
+                                 dawn::InfoLog()
+                                     << "sharedBufferMemoryBeginAccess raised a validation "
+                                        "error: "
+                                     << dawn::ToString(message);
+                             }
+                         },
+                         nullptr, nullptr});
+
+            if (status != WGPUStatus_Success) {
+                Release();
+            }
+
+            return buffer;
+        }
+
       private:
+        void Release() {
+            if (mSharedBufferMemory != nullptr) {
+                DAWN_ASSERT(mProcs != nullptr);
+                mProcs->sharedBufferMemoryRelease(mSharedBufferMemory);
+                mSharedBufferMemory = nullptr;
+            }
+            mProcs = nullptr;
+        }
+
+        WGPUSharedBufferMemory mSharedBufferMemory = nullptr;
+        raw_ptr<const DawnProcTable> mProcs = nullptr;
         Ref<SharedMemory> mSharedMemory;
     };
 

@@ -68,6 +68,15 @@ class BufferMappingTests : public DawnTestWithParams<BufferMappingTestParams> {
                                  GetParam().mFutureCallbackMode == wgpu::CallbackMode::WaitAnyOnly);
     }
 
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+
+        if (SupportsFeatures({wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle})) {
+            requiredFeatures.push_back(wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle);
+        }
+        return requiredFeatures;
+    }
+
     void MapAsyncAndWait(const wgpu::Buffer& buffer,
                          wgpu::MapMode mode,
                          size_t offset,
@@ -763,8 +772,9 @@ TEST_P(BufferMappingTests, WaitForOnSubmittedWorkDoneThenMap) {
 DAWN_INSTANTIATE_TEST_P(BufferMappingTests,
                         {D3D11Backend(), D3D11Backend({"d3d11_disable_cpu_buffers"}),
                          D3D11Backend({"auto_map_backend_buffer", "d3d11_disable_cpu_buffers"}),
-                         D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-                         OpenGLESBackend({"gl_defer"}), VulkanBackend(), WebGPUBackend()},
+                         D3D12Backend(), D3D12Backend().EnableSharedMemoryInWire(), MetalBackend(),
+                         OpenGLBackend(), OpenGLESBackend(), OpenGLESBackend({"gl_defer"}),
+                         VulkanBackend(), WebGPUBackend()},
                         std::initializer_list<wgpu::CallbackMode>{
                             wgpu::CallbackMode::WaitAnyOnly, wgpu::CallbackMode::AllowProcessEvents,
                             wgpu::CallbackMode::AllowSpontaneous});
@@ -949,6 +959,15 @@ DAWN_INSTANTIATE_TEST_P(BufferMappingCallbackTests,
 
 class BufferMappedAtCreationTests : public DawnTest {
   protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+
+        if (SupportsFeatures({wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle})) {
+            requiredFeatures.push_back(wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle);
+        }
+        return requiredFeatures;
+    }
+
     const void* MapAsyncAndWait(const wgpu::Buffer& buffer, wgpu::MapMode mode, size_t size) {
         bool done = false;
         buffer.MapAsync(mode, 0, size, wgpu::CallbackMode::AllowProcessEvents,
@@ -1201,6 +1220,7 @@ DAWN_INSTANTIATE_TEST(BufferMappedAtCreationTests,
                       D3D11Backend({"d3d11_disable_cpu_buffers"}),
                       D3D11Backend({"auto_map_backend_buffer", "d3d11_disable_cpu_buffers"}),
                       D3D12Backend(),
+                      D3D12Backend().EnableSharedMemoryInWire(),
                       D3D12Backend({}, {"use_d3d12_resource_heap_tier2"}),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -1209,7 +1229,16 @@ DAWN_INSTANTIATE_TEST(BufferMappedAtCreationTests,
                       VulkanBackend(),
                       WebGPUBackend());
 
-class BufferTests : public DawnTest {};
+class BufferTests : public DawnTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> features;
+        if (SupportsFeatures({wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle})) {
+            features.push_back(wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle);
+        }
+        return features;
+    }
+};
 
 // Test that creating a zero-buffer is allowed.
 TEST_P(BufferTests, ZeroSizedBuffer) {
@@ -1473,6 +1502,7 @@ TEST_P(BufferTests, CreateBufferOOMMapAsync) {
 DAWN_INSTANTIATE_TEST(BufferTests,
                       D3D11Backend(),
                       D3D12Backend(),
+                      D3D12Backend().EnableSharedMemoryInWire(),
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),

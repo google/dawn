@@ -116,9 +116,44 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
     // Create and register the buffer object.
     Reserved<WGPUBuffer> buffer;
     WIRE_TRY(Allocate(&buffer, bufferHandle));
-    buffer->handle = mProcs->deviceCreateBuffer(device->handle, ToAPI(descriptor));
     buffer->usage = ToAPI(descriptor->usage);
     buffer->mappedAtCreation = descriptor->mappedAtCreation;
+
+    bool isMappable =
+        descriptor->mappedAtCreation != 0u ||
+        ((descriptor->usage & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) !=
+         wgpu::BufferUsage::None);
+
+    // If the buffer is not mappable, create it normally without shared memory.
+    if (!isMappable) {
+        buffer->handle = mProcs->deviceCreateBuffer(device->handle, ToAPI(descriptor));
+        return WireResult::Success;
+    }
+
+    // Return `FatalError` if we fail to deserialize the memory handle.
+    std::unique_ptr<MemoryTransferService::MemoryHandle> memoryHandle =
+        mMemoryTransferService->DeserializeMemoryHandle(memoryHandleCreateInfo);
+    if (memoryHandle == nullptr) {
+        buffer->handle = mProcs->deviceCreateBuffer(device->handle, ToAPI(descriptor));
+        return WireResult::FatalError;
+    }
+
+    // Try to wrap the shared memory into a buffer. Note that:
+    // - `TryWrapInBuffer()` may return a valid buffer, an error buffer or nullptr to align with the
+    //   behavior of `DeviceBase::APICreateBuffer()`.
+    // - When a valid buffer is returned, `beginAccess()` must have been called on it.
+    buffer->handle = memoryHandle->TryWrapInBuffer(mProcs.get(), device->handle, ToAPI(descriptor));
+    if (buffer->handle != nullptr) {
+        buffer->backedWithSharedMemory = true;
+        return buffer->mapState.Use([&](auto mapState) {
+            mapState->memoryHandle = std::move(memoryHandle);
+            return WireResult::Success;
+        });
+    } else {
+        // Returning `nullptr` from `TryWrapInBuffer()` indicates that we failed to wrap the shared
+        // memory into a buffer. Try to create it normally without shared memory.
+        buffer->handle = mProcs->deviceCreateBuffer(device->handle, ToAPI(descriptor));
+    }
 
     // A null buffer indicates that mapping-at-creation failed inside createBuffer. Unmark the
     // buffer as allocated so we will skip freeing it.
@@ -128,18 +163,6 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
         return WireResult::Success;
     }
 
-    bool isMappable =
-        descriptor->mappedAtCreation ||
-        (descriptor->usage & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) !=
-            wgpu::BufferUsage::None;
-
-    std::unique_ptr<MemoryTransferService::MemoryHandle> memoryHandle = nullptr;
-    if (isMappable) {
-        memoryHandle = mMemoryTransferService->DeserializeMemoryHandle(memoryHandleCreateInfo);
-        if (memoryHandle == nullptr) {
-            return WireResult::FatalError;
-        }
-    }
     return buffer->mapState.Use([&](auto mapState) {
         mapState->memoryHandle = std::move(memoryHandle);
         return WireResult::Success;
@@ -152,6 +175,11 @@ WireResult Server::DoBufferUpdateMappedData(Known<WGPUBuffer> buffer,
                                             size_t size) {
     if (size == WGPU_WHOLE_MAP_SIZE) {
         return WireResult::FatalError;
+    }
+
+    // Buffers backed with shared memory are directly shared with client; no deserialization needed.
+    if (buffer->backedWithSharedMemory) {
+        return WireResult::Success;
     }
 
     return buffer->mapState.Use([&](auto mapState) {
@@ -212,6 +240,13 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
     switch (data->mode) {
         case wgpu::MapMode::Read: {
             DAWN_ASSERT(data->size != WGPU_WHOLE_MAP_SIZE);  // Validated in DoBufferMapAsync.
+
+            // Buffers backed with shared memory are directly shared with client; no deserialization
+            // needed.
+            if (buffer->backedWithSharedMemory) {
+                SerializeCommand(std::move(cmd));
+                break;
+            }
 
             buffer->mapState.Use([&](auto mapState) {
                 const std::byte* mappedData = static_cast<const std::byte*>(
