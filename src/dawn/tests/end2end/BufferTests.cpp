@@ -71,8 +71,8 @@ class BufferMappingTests : public DawnTestWithParams<BufferMappingTestParams> {
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         std::vector<wgpu::FeatureName> requiredFeatures = {};
 
-        if (SupportsFeatures({wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle})) {
-            requiredFeatures.push_back(wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle);
+        if (SupportsFeatures({wgpu::FeatureName::SharedBufferMemoryHostPointer})) {
+            requiredFeatures.push_back(wgpu::FeatureName::SharedBufferMemoryHostPointer);
         }
         return requiredFeatures;
     }
@@ -962,8 +962,8 @@ class BufferMappedAtCreationTests : public DawnTest {
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         std::vector<wgpu::FeatureName> requiredFeatures = {};
 
-        if (SupportsFeatures({wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle})) {
-            requiredFeatures.push_back(wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle);
+        if (SupportsFeatures({wgpu::FeatureName::SharedBufferMemoryHostPointer})) {
+            requiredFeatures.push_back(wgpu::FeatureName::SharedBufferMemoryHostPointer);
         }
         return requiredFeatures;
     }
@@ -1233,8 +1233,8 @@ class BufferTests : public DawnTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         std::vector<wgpu::FeatureName> features;
-        if (SupportsFeatures({wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle})) {
-            features.push_back(wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle);
+        if (SupportsFeatures({wgpu::FeatureName::SharedBufferMemoryHostPointer})) {
+            features.push_back(wgpu::FeatureName::SharedBufferMemoryHostPointer);
         }
         return features;
     }

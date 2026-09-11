@@ -137,22 +137,23 @@ class InlineMemoryTransferService : public MemoryTransferService {
                 return nullptr;
             }
 
-#if DAWN_PLATFORM_IS(WINDOWS)
+            DAWN_ASSERT(mSharedMemory != nullptr);
             DAWN_ASSERT(procs != nullptr);
-            if (!procs->deviceHasFeature(device,
-                                         WGPUFeatureName_SharedBufferMemoryFromWindowsHandle)) {
+            if (!procs->deviceHasFeature(device, WGPUFeatureName_SharedBufferMemoryHostPointer)) {
                 return nullptr;
             }
 
-            WGPUSharedBufferMemoryFromWindowsHandleDescriptor windowsHandleDesc = {};
-            windowsHandleDesc.chain.sType = WGPUSType_SharedBufferMemoryFromWindowsHandleDescriptor;
-            windowsHandleDesc.handle = mSharedMemory->GetSystemHandle().Get();
-            windowsHandleDesc.size = mSharedMemory->GetAllocatedSize();
+            WGPUSharedBufferMemoryHostPointerDescriptor hostPointerDesc = {};
+            hostPointerDesc.chain.sType = WGPUSType_SharedBufferMemoryHostPointerDescriptor;
+            hostPointerDesc.pointer = mSharedMemory->GetMappedSpan().data();
+            hostPointerDesc.size = mSharedMemory->GetAllocatedSize();
+            // No-op in `disposeCallback` since the memory is managed outside Dawn native.
+            hostPointerDesc.userdata = nullptr;
+            hostPointerDesc.disposeCallback = [](WGPUCallbackStatus, void*) {};
 
             WGPUSharedBufferMemoryDescriptor desc = {};
-            desc.nextInChain = &windowsHandleDesc.chain;
+            desc.nextInChain = &hostPointerDesc.chain;
             mSharedBufferMemory = procs->deviceImportSharedBufferMemory(device, &desc);
-#endif
             mProcs = procs;
             if (mSharedBufferMemory == nullptr) {
                 Release();
