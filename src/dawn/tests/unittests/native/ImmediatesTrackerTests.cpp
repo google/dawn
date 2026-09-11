@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "src/dawn/native/ComputePipeline.h"
 #include "src/dawn/native/ImmediatesLayout.h"
 #include "src/dawn/native/ImmediatesTracker.h"
@@ -213,10 +208,12 @@ TEST_F(RenderImmediatesTrackerTest, SetClampFragDepth) {
         clampFragDepthStartOffsetBytes + offsetof(ClampFragDepthArgs, minClampFragDepth);
     size_t maxClampFragDepthOffsetBytes =
         clampFragDepthStartOffsetBytes + offsetof(ClampFragDepthArgs, maxClampFragDepth);
-    EXPECT_TRUE(memcmp(tracker.GetContent().Get<float>(minClampFragDepthOffsetBytes),
-                       &minClampFragDepth, sizeof(float)) == 0);
-    EXPECT_TRUE(memcmp(tracker.GetContent().Get<float>(maxClampFragDepthOffsetBytes),
-                       &maxClampFragDepth, sizeof(float)) == 0);
+    EXPECT_TRUE(std::ranges::equal(ByteSpanFromRef(minClampFragDepth),
+                                   tracker.GetContent().GetDataBytes(minClampFragDepthOffsetBytes,
+                                                                     sizeof(minClampFragDepth))));
+    EXPECT_TRUE(std::ranges::equal(ByteSpanFromRef(maxClampFragDepth),
+                                   tracker.GetContent().GetDataBytes(maxClampFragDepthOffsetBytes,
+                                                                     sizeof(maxClampFragDepth))));
 
     device.Destroy();
 }
@@ -240,10 +237,12 @@ TEST_F(RenderImmediatesTrackerTest, SetFirstIndexOffset) {
             1u << offsetof(RenderImmediateTestConstants, firstInstance) / kImmediateElementByteSize;
         EXPECT_TRUE(tracker.GetDirtyBits() == expected);
 
-        EXPECT_TRUE(memcmp(tracker.GetContent().Get<uint32_t>(firstVertexByteOffset), &firstVertex,
-                           sizeof(uint32_t)) == 0);
-        EXPECT_TRUE(memcmp(tracker.GetContent().Get<uint32_t>(firstInstanceByteOffset),
-                           &firstInstance, sizeof(uint32_t)) == 0);
+        EXPECT_TRUE(std::ranges::equal(
+            ByteSpanFromRef(firstVertex),
+            tracker.GetContent().GetDataBytes(firstVertexByteOffset, sizeof(firstVertex))));
+        EXPECT_TRUE(std::ranges::equal(
+            ByteSpanFromRef(firstInstance),
+            tracker.GetContent().GetDataBytes(firstInstanceByteOffset, sizeof(firstInstance))));
     }
 
     // SetFirstVertex()
@@ -258,8 +257,9 @@ TEST_F(RenderImmediatesTrackerTest, SetFirstIndexOffset) {
             1u << offsetof(RenderImmediateTestConstants, firstVertex) / kImmediateElementByteSize;
         EXPECT_TRUE(tracker.GetDirtyBits() == expected);
 
-        EXPECT_TRUE(memcmp(tracker.GetContent().Get<uint32_t>(firstVertexByteOffset), &firstVertex,
-                           sizeof(uint32_t)) == 0);
+        EXPECT_TRUE(std::ranges::equal(
+            ByteSpanFromRef(firstVertex),
+            tracker.GetContent().GetDataBytes(firstVertexByteOffset, sizeof(firstVertex))));
     }
 
     // SetFirstInstance()
@@ -274,8 +274,9 @@ TEST_F(RenderImmediatesTrackerTest, SetFirstIndexOffset) {
             1u << offsetof(RenderImmediateTestConstants, firstInstance) / kImmediateElementByteSize;
         EXPECT_TRUE(tracker.GetDirtyBits() == expected);
 
-        EXPECT_TRUE(memcmp(tracker.GetContent().Get<uint32_t>(firstInstanceByteOffset),
-                           &firstInstance, sizeof(uint32_t)) == 0);
+        EXPECT_TRUE(std::ranges::equal(
+            ByteSpanFromRef(firstInstance),
+            tracker.GetContent().GetDataBytes(firstInstanceByteOffset, sizeof(firstInstance))));
     }
 
     device.Destroy();
@@ -308,13 +309,16 @@ TEST_F(ComputeImmediatesTrackerTest, SetNumWorkgroupDimensions) {
         numWorkgroupsStartByteOffset + offsetof(NumWorkgroupsDimensions, numWorkgroupsY);
     size_t numWorkgroupZByteOffset =
         numWorkgroupsStartByteOffset + offsetof(NumWorkgroupsDimensions, numWorkgroupsZ);
-    EXPECT_TRUE(memcmp(tracker.GetContent().Get<uint32_t>(numWorkgroupXByteOffset), &numWorkgroupsX,
-                       sizeof(uint32_t)) == 0);
+    EXPECT_TRUE(std::ranges::equal(
+        ByteSpanFromRef(numWorkgroupsX),
+        tracker.GetContent().GetDataBytes(numWorkgroupXByteOffset, sizeof(numWorkgroupsX))));
 
-    EXPECT_TRUE(memcmp(tracker.GetContent().Get<uint32_t>(numWorkgroupYByteOffset), &numWorkgroupsY,
-                       sizeof(uint32_t)) == 0);
-    EXPECT_TRUE(memcmp(tracker.GetContent().Get<uint32_t>(numWorkgroupZByteOffset), &numWorkgroupsZ,
-                       sizeof(uint32_t)) == 0);
+    EXPECT_TRUE(std::ranges::equal(
+        ByteSpanFromRef(numWorkgroupsY),
+        tracker.GetContent().GetDataBytes(numWorkgroupYByteOffset, sizeof(numWorkgroupsY))));
+    EXPECT_TRUE(std::ranges::equal(
+        ByteSpanFromRef(numWorkgroupsZ),
+        tracker.GetContent().GetDataBytes(numWorkgroupZByteOffset, sizeof(numWorkgroupsZ))));
     device.Destroy();
 }
 

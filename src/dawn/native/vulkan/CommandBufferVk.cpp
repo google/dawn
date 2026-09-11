@@ -414,10 +414,11 @@ class ImmediateTracker : public T {
             uint32_t pushConstantRangeStartOffset =
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask) *
                 kImmediateElementByteSize;
+            auto data = this->mContent.GetDataBytes(immediateContentStartOffset,
+                                                    size * kImmediateElementByteSize);
             vk.CmdPushConstants(commandBuffer, layout, kImmediateShaderStages,
-                                pushConstantRangeStartOffset,
-                                checked_cast<uint32_t>(size * kImmediateElementByteSize),
-                                this->mContent.template Get<uint32_t>(immediateContentStartOffset));
+                                pushConstantRangeStartOffset, checked_cast<uint32_t>(data.size()),
+                                data.data());
         }
 
         // Reset all dirty bits after uploading.

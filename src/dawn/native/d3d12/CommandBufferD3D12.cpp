@@ -407,7 +407,7 @@ class ImmediateTracker : public T {
         this->UpdateImmediates(offsetof(ComputeImmediates, numWorkgroups), numWorkgroupsDimensions);
     }
 
-    void SetDynamicStorageBufferLength(uint32_t offset, Span<const uint32_t> data) {
+    void SetDynamicStorageBufferLength(uint32_t offset, ityp::span<uint32_t, const uint32_t> data) {
         this->WriteImmediates(offsetof(ImmediateType, storageBufferDynamicLengths) + offset,
                               SpanAsBytes(data));
     }
@@ -432,8 +432,8 @@ class ImmediateTracker : public T {
             SetRootConstant(
                 commandContext->GetCommandList(),
                 ToBackend(lastPipeline)->GetPipelineLayoutHandle()->GetImmediatesParameterIndex(),
-                static_cast<uint32_t>(size),
-                this->mContent.template Get<uint32_t>(immediateContentStartOffset),
+                ReinterpretSpan<const uint32_t>(this->mContent.GetDataBytes(
+                    immediateContentStartOffset, size * kImmediateElementByteSize)),
                 immediateRangeStartOffset);
         }
 
@@ -447,16 +447,17 @@ class ImmediateTracker : public T {
 
     void SetRootConstant(ID3D12GraphicsCommandList* commandList,
                          uint32_t parameterIndex,
-                         uint32_t rootConstantsLength,
-                         const void* rootConstantsData,
+                         Span<const uint32_t> rootConstants,
                          uint32_t registerOffset) const {
         if constexpr (kIsRenderImmediates) {
-            commandList->SetGraphicsRoot32BitConstants(parameterIndex, rootConstantsLength,
-                                                       rootConstantsData, registerOffset);
+            commandList->SetGraphicsRoot32BitConstants(parameterIndex,
+                                                       checked_cast<uint32_t>(rootConstants.size()),
+                                                       rootConstants.data(), registerOffset);
         } else {
             static_assert(kIsComputeImmediates);
-            commandList->SetComputeRoot32BitConstants(parameterIndex, rootConstantsLength,
-                                                      rootConstantsData, registerOffset);
+            commandList->SetComputeRoot32BitConstants(parameterIndex,
+                                                      checked_cast<uint32_t>(rootConstants.size()),
+                                                      rootConstants.data(), registerOffset);
         }
     }
 };
@@ -793,11 +794,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
             uint32_t firstImmediateIndex =
                 pipelineLayout->GetDynamicStorageBufferInfo()[index].firstImmediateIndex;
             immediates->SetDynamicStorageBufferLength(
-                firstImmediateIndex * kImmediateElementByteSize,
-                // TODO(https://crbug.com/532946455): Support constructing a span from
-                // ityp::stack_vec.
-                DAWN_UNSAFE_TODO(Span<const uint32_t>(dynamicStorageBufferLengths.data(),
-                                                      dynamicStorageBufferLengths.size())));
+                firstImmediateIndex * kImmediateElementByteSize, dynamicStorageBufferLengths);
         }
     }
 
