@@ -257,7 +257,7 @@ describe('tests', async () => {
         });
         texture.destroy();
       });
-      assert.ok(() => e?.error.message.includes('maxTextureDimension2D'));
+      assert.ok(() => e?.error.message.includes('exceeded maximum texture size'));
     });
 
   });
