@@ -527,8 +527,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         !shaderF16Enabled ||
         (mDeviceInfo.shaderSubgroupExtendedTypes.shaderSubgroupExtendedTypes == VK_TRUE);
 
-    const bool hasAtomic64Support = mDeviceInfo.HasExt(DeviceExt::ShaderBufferInt64Atomics) &&
-                                    mDeviceInfo.shaderAtomicInt64Features.shaderBufferInt64Atomics;
+    const bool hasAtomic64Support =
+        mDeviceInfo.HasExt(DeviceExt::ShaderBufferInt64Atomics) &&
+        mDeviceInfo.shaderAtomicInt64Features.shaderBufferInt64Atomics &&
+        mDeviceInfo.features.shaderInt64 == VK_TRUE;
 
     if (hasAtomic64Support) {
         EnableFeature(Feature::AtomicVec2uMinMax);

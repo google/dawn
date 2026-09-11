@@ -654,8 +654,9 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         featuresChain.Add(&usedKnobs.shaderSubgroupExtendedTypes);
     }
 
-    if (HasFeature(Feature::AtomicVec2uMinMax) &&
+    if (HasFeature(Feature::AtomicVec2uMinMax) && mDeviceInfo.features.shaderInt64 &&
         mDeviceInfo.shaderAtomicInt64Features.shaderBufferInt64Atomics == VK_TRUE) {
+        usedKnobs.features.shaderInt64 = VK_TRUE;
         usedKnobs.shaderAtomicInt64Features = mDeviceInfo.shaderAtomicInt64Features;
         featuresChain.Add(&usedKnobs.shaderAtomicInt64Features);
     }
