@@ -42,7 +42,6 @@
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/common/ContentLessObjectCache.h"
-#include "src/dawn/common/Defer.h"
 #include "src/dawn/common/Mutex.h"
 #include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/common/RefCountedWithExternalCount.h"
@@ -467,9 +466,6 @@ class DeviceBase : public ErrorSink,
     // This guard won't guarantee the wrapped mutex will be alive if the Device is deleted before
     // ~DeviceGuard. It would crash if such thing happens.
     [[nodiscard]] DeviceGuard GetGuard();
-    // Defers cleanup or finishing functions that happen once the device mutex is released if we are
-    // holding the lock. Otherwise, performs the task now.
-    void DeferIfLocked(std::function<void()> f);
 
     // This method returns true if Feature::ImplicitDeviceSynchronization is turned on and the
     // device is locked by current thread. This method is only enabled when DAWN_ENABLE_ASSERTS is

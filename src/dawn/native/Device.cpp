@@ -2626,33 +2626,9 @@ DeviceGuard DeviceBase::GetGuard() {
 }
 
 DeviceGuard DeviceBase::GetGuardForDelete() {
-    // When acquiring the guard for deletion, we do not currently enable Defer. This is not
-    // currently enforced by any assertions here because it would require making the Defer class
-    // a refcounted object to handle the case when the Device is destroyed while the lock is held,
-    // resulting in a dangling pointer to the Defer owned by the Device. As a proxy assertion,
-    // ~DeviceBase checks that the Defer object is not set.
+    // Keep a strong reference to the mutex so the guard can safely unlock it even if the Device
+    // is deleted while the guard is held.
     return DeviceGuard(this, mMutex.Get());
-}
-
-void DeviceBase::DeferIfLocked(std::function<void()> f) {
-    // If we are not using implicit synchronized mode, we don't have a device-wide lock, so we can
-    // just run the defer task now.
-    if (mMutex == nullptr) {
-        f();
-        return;
-    }
-
-    // If we don't have a Defer, that means we are not locked, so we can just run the defer task
-    // now.
-    if (!mMutex->mDefer) {
-        f();
-        return;
-    }
-
-    // Otherwise, verify that we are only calling this in the thread that is holding the lock and
-    // defer the function.
-    DAWN_ASSERT(mMutex->IsLockedByCurrentThread() && mMutex->mDefer);
-    mMutex->mDefer->Append(std::move(f));
 }
 
 bool DeviceBase::IsLockedByCurrentThreadIfNeeded() const {

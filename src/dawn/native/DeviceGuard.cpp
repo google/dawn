@@ -58,7 +58,6 @@ void DeviceMutex::Lock() {
 
     if (mRecursionStackDepth == 0) {
         DAWN_ASSERT(!isRecursive);
-        mDefer.emplace();
         mOwningThread = currentThread;
 
         double endTime = mPlatform->MonotonicallyIncreasingTime();
@@ -87,13 +86,9 @@ void DeviceMutex::Lock() {
 }
 
 void DeviceMutex::Unlock() {
-    // Optional Defer here is used to destroy the Defer object after releasing the lock.
-    std::optional<class Defer> defer;
-
     mRecursionStackDepth--;
     if (mRecursionStackDepth == 0) {
         mOwningThread = std::thread::id();
-        defer.swap(mDefer);
     }
     RecursiveMutex::Unlock();
 }
