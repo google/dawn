@@ -932,14 +932,13 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
                                         UnpackedPtr<RenderPassDescriptor> descriptor,
                                         UsageValidationMode usageValidationMode,
                                         RenderPassValidationState* validationState) {
-    auto maxColorAttachments =
-        ColorAttachmentIndex{static_cast<uint8_t>(device->GetLimits().v1.maxColorAttachments)};
+    uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
     DAWN_INVALID_IF(
-        descriptor->colorAttachments.size() > maxColorAttachments,
+        descriptor->colorAttachments.untyped_size() > maxColorAttachments,
         "Color attachment count (%u) exceeds the maximum number of color attachments (%u).%s",
-        descriptor->colorAttachments.size(), maxColorAttachments,
+        descriptor->colorAttachments.untyped_size(), maxColorAttachments,
         DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1, maxColorAttachments,
-                                    uint8_t{descriptor->colorAttachments.size()}));
+                                    descriptor->colorAttachments.untyped_size()));
 
     ColorAttachmentFormats colorAttachmentFormats;
     if (const auto* expandResolveRect = descriptor.Get<RenderPassDescriptorResolveRect>()) {

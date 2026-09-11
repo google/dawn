@@ -30,6 +30,7 @@
 
     "_doc": "See docs/dawn/codegen.md",
 
+    "_ REQUIRED VALIDATION": "For each of the index_type addins for structure members, we need to ensure with a test that a validation error is produced when a size_t larger than the maximum value of index_type is passed.",
     "metadata": {
         "addins": {
             "compute pass encoder::set bind group::dynamic offsets": {

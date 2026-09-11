@@ -290,4 +290,14 @@ void TestFillBytesNonByteSpan() {
     sp.FillBytes(std::byte{0});  // expected-error {{invalid reference to function 'FillBytes': constraints not satisfied}}
 }
 
+void TestFillUntypedSize() {
+    // Control case: typed, dynamic extent spans have untyped_size.
+    ityp::span<Index, int>{}.untyped_size();
+
+    ityp::span<Index, int, Index{uint32_t{3u}}>{}.untyped_size();  // expected-error {{invalid reference to function 'untyped_size': constraints not satisfied}}
+    Span<int>{}.untyped_size(); // expected-error {{invalid reference to function 'untyped_size': constraints not satisfied}}
+    Span<int, 3u>{}.untyped_size(); // expected-error {{invalid reference to function 'untyped_size': constraints not satisfied}}
+
+}
+
 }  // namespace dawn

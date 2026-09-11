@@ -868,6 +868,18 @@ TEST(SpanDeathTest, IndexingOversizedIndex) {
 
 // .data() and .size() are tested in every test essentially.
 
+TEST(SpanTest, UntypedSize) {
+    int data[1000];
+    Span<const int> sp{data};
+
+    auto* sp8 = reinterpret_cast<ityp::span<Index8, const int>*>(&sp);
+
+    // size() should return an Index8 that happens to be clamped, but untyped_size() will give the
+    // whole size stored in the span.
+    ASSERT_EQ(sp8->size(), Index8{static_cast<uint8_t>(sp.size())});
+    ASSERT_EQ(sp8->untyped_size(), sp.size());
+}
+
 TEST(SpanTest, Empty) {
     ASSERT_FALSE(Span<const int>{FakeRange{}}.empty());
     // SAFETY: Test for the unsafe constructor.

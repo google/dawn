@@ -172,6 +172,32 @@ TEST_F(RenderPassDescriptorValidationTest, ColorAttachmentOutOfBounds) {
     }
 }
 
+// Test that colorAttachmentCount is checked before dereferencing colorAttachments.
+TEST_F(RenderPassDescriptorValidationTest, ColorAttachmentCountOverLimitsNotAccessed) {
+    // This is a test for dawn::native only.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    // Check that colorAttachments is not accessed if their count is higher that the color
+    // attachment limit.
+    {
+        wgpu::RenderPassDescriptor renderPass;
+        renderPass.colorAttachmentCount = kMaxColorAttachments + 1;
+        renderPass.colorAttachments = nullptr;
+        AssertBeginRenderPassError(&renderPass);
+    }
+
+    // Check that a colorAttachmentCount that would end up being ColorAttachmentIndex{1} still
+    // causes a validation error.
+    {
+        wgpu::RenderPassDescriptor renderPass;
+        renderPass.colorAttachmentCount = 256 + 1;
+        renderPass.colorAttachments = nullptr;
+        AssertBeginRenderPassError(&renderPass);
+    }
+}
+
 // Test sparse color attachment validations
 TEST_F(RenderPassDescriptorValidationTest, SparseColorAttachment) {
     // Having sparse color attachment is valid.

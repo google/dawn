@@ -408,6 +408,37 @@ TEST_F(RenderPipelineValidationTest, ColorTargetStateRequired) {
     }
 }
 
+// Test that targetCount is checked before dereferencing targets.
+TEST_F(RenderPipelineValidationTest, TargetCountOverLimitsNotAccessed) {
+    // This is a test for dawn::native only.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    // Check that targets is not accessed if their count is higher that the color attachment limit.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.cFragment.targetCount = kMaxColorAttachments + 1;
+        descriptor.cFragment.targets = nullptr;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+
+    // Check that a targetCount that would end up being ColorAttachmentIndex{1} still causes a
+    // validation error.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.cFragment.targetCount = 256 + 1;
+        descriptor.cFragment.targets = nullptr;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+}
+
 // Tests that target blend must not be set if the format is undefined.
 TEST_F(RenderPipelineValidationTest, UndefinedColorStateFormatWithBlend) {
     {
@@ -1661,6 +1692,36 @@ TEST_F(RenderPipelineValidationTest, EntryPointNameRequiredIfNoCompatibleEntryPo
     }
 }
 
+// Test that bufferCount is checked before dereferencing buffers.
+TEST_F(RenderPipelineValidationTest, VertexBufferCountOverLimitsNotAccessed) {
+    // This is a test for dawn::native only.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    // Check that buffers is not accessed if their count is higher that the vertex buffer limit.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.vertex.bufferCount = kMaxVertexBuffers + 1;
+        descriptor.vertex.buffers = nullptr;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+
+    // Check that a bufferCount that would end up being VertexBufferSlot{1} still causes a
+    // validation error.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.vertex.bufferCount = 256 + 1;
+        descriptor.vertex.buffers = nullptr;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+}
 // Test that vertex attrib validation is for the correct entryPoint
 TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(

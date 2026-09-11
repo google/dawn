@@ -324,6 +324,14 @@ class SpanBase : private SpanStorage<Index, PtrType, Extent> {
         }
     }
 
+    // Returns the size as size_t. This is needed when ityp::span is used in structures of
+    // dawn_platform.h, to be able to validate that the size passed in the structure fits in Index.
+    constexpr size_t untyped_size() const
+        requires(kIsDynamicExtent && !std::is_same_v<Index, size_t>)
+    {
+        return this->mSize;
+    }
+
     // Returns the footprint in bytes of the elements of this.
     constexpr size_t size_bytes() const noexcept {
         return static_cast<size_t>(static_cast<UnderlyingType<Index>>(size())) *

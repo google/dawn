@@ -197,13 +197,13 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
 
     const CombinedLimits& limits = device->GetLimits();
 
-    auto maxVertexBuffers = VertexBufferSlot{static_cast<uint8_t>(limits.v1.maxVertexBuffers)};
+    uint32_t maxVertexBuffers = limits.v1.maxVertexBuffers;
     DAWN_INVALID_IF(
-        descriptor->buffers.size() > maxVertexBuffers,
+        descriptor->buffers.untyped_size() > maxVertexBuffers,
         "Vertex buffer count (%u) exceeds the maximum number of vertex buffers (%u).%s",
-        descriptor->buffers.size(), maxVertexBuffers,
+        descriptor->buffers.untyped_size(), maxVertexBuffers,
         DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1, maxVertexBuffers,
-                                    uint8_t{descriptor->buffers.size()}));
+                                    descriptor->buffers.untyped_size()));
 
     ShaderModuleEntryPoint entryPoint;
     DAWN_TRY_ASSIGN_CONTEXT(
@@ -656,14 +656,13 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
                         depthStencil->format, descriptor->module, entryPoint);
     }
 
-    auto maxColorAttachments =
-        checked_cast<ColorAttachmentIndex>(device->GetLimits().v1.maxColorAttachments);
+    uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
     DAWN_INVALID_IF(
-        descriptor->targets.size() > maxColorAttachments,
-        "Number of targets (%u) exceeds the maximum (%u).%s", descriptor->targets.size(),
+        descriptor->targets.untyped_size() > maxColorAttachments,
+        "Number of targets (%u) exceeds the maximum (%u).%s", descriptor->targets.untyped_size(),
         maxColorAttachments,
         DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1, maxColorAttachments,
-                                    uint8_t(descriptor->targets.size())));
+                                    descriptor->targets.untyped_size()));
 
     bool usesSrc1 = false;
     bool usesBlendSrc1 = false;

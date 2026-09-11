@@ -103,14 +103,14 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
 
     // Validation for the bind group layouts.
     if (usesResourceTable) {
-        DAWN_INVALID_IF(descriptor->bindGroupLayouts.size() >= kMaxBindGroupsTyped,
+        DAWN_INVALID_IF(descriptor->bindGroupLayouts.untyped_size() >= kMaxBindGroups,
                         "bindGroupLayoutCount (%i) + 1 for the resource table is larger than the "
                         "maximum allowed (%i).",
-                        descriptor->bindGroupLayouts.size(), kMaxBindGroups);
+                        descriptor->bindGroupLayouts.untyped_size(), kMaxBindGroups);
     } else {
-        DAWN_INVALID_IF(descriptor->bindGroupLayouts.size() > kMaxBindGroupsTyped,
+        DAWN_INVALID_IF(descriptor->bindGroupLayouts.untyped_size() > kMaxBindGroups,
                         "bindGroupLayoutCount (%i) is larger than the maximum allowed (%i).",
-                        descriptor->bindGroupLayouts.size(), kMaxBindGroups);
+                        descriptor->bindGroupLayouts.untyped_size(), kMaxBindGroups);
     }
 
     for (auto [i, bgl] : Enumerate(descriptor->bindGroupLayouts)) {
