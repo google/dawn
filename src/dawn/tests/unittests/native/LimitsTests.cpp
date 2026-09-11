@@ -30,6 +30,7 @@
 #include <unordered_set>
 
 #include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Math.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Limits.h"
 
@@ -423,7 +424,7 @@ TEST(Limits, NormalizeLimits) {
     }
     {
         constexpr uint64_t reportedMaxBufferSize = 2147483648;
-        constexpr uint64_t reportedMaxStorageBufferBindingSize = reportedMaxBufferSize - 1;
+        constexpr uint64_t reportedMaxStorageBufferBindingSize = reportedMaxBufferSize - 4;
         CombinedLimits limits = defaults;
         limits.v1.maxStorageBufferBindingSize = reportedMaxStorageBufferBindingSize;
         limits.v1.maxBufferSize = reportedMaxBufferSize;
@@ -432,6 +433,20 @@ TEST(Limits, NormalizeLimits) {
 
         EXPECT_EQ(limits.v1.maxBufferSize, reportedMaxBufferSize);
         EXPECT_EQ(limits.v1.maxStorageBufferBindingSize, reportedMaxStorageBufferBindingSize);
+    }
+    // maxStorageBufferBindingSize is not a multiple of 4, expect alignment down to 4
+    {
+        constexpr uint64_t reportedMaxBufferSize = 2147483648;
+        constexpr uint64_t reportedMaxStorageBufferBindingSize = reportedMaxBufferSize - 1;
+        CombinedLimits limits = defaults;
+        limits.v1.maxStorageBufferBindingSize = reportedMaxStorageBufferBindingSize;
+        limits.v1.maxBufferSize = reportedMaxBufferSize;
+
+        NormalizeLimits(&limits);
+
+        EXPECT_EQ(limits.v1.maxBufferSize, reportedMaxBufferSize);
+        EXPECT_EQ(limits.v1.maxStorageBufferBindingSize,
+                  AlignDown(reportedMaxStorageBufferBindingSize, 4));
     }
     // maxStorageBufferBindingSize is equal to maxBufferSize+1, expect clamping to maxBufferSize
     {

@@ -417,7 +417,7 @@ void NormalizeLimits(CombinedLimits* limits) {
 
     // Additional enforcement for dependent limits.
     limits->v1.maxStorageBufferBindingSize =
-        std::min(limits->v1.maxStorageBufferBindingSize, limits->v1.maxBufferSize);
+        AlignDown(std::min(limits->v1.maxStorageBufferBindingSize, limits->v1.maxBufferSize), 4);
     limits->v1.maxUniformBufferBindingSize =
         std::min(limits->v1.maxUniformBufferBindingSize, limits->v1.maxBufferSize);
 }
