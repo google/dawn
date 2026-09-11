@@ -2679,7 +2679,7 @@ AllocatorMemoryInfo DeviceBase::GetAllocatorMemoryInfo() const {
 
 bool DeviceBase::ReduceMemoryUsage() {
     DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
-    if (ConsumedError(GetQueue()->CheckPassedSerials())) {
+    if (IsLost() || ConsumedError(GetQueue()->CheckPassedSerials())) {
         return false;
     }
     GetDynamicUploader()->Deallocate(GetQueue()->GetCompletedCommandSerial(), /*freeAll=*/true);
