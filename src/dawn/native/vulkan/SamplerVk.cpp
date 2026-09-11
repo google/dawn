@@ -151,6 +151,19 @@ MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
         createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
         createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
         createInfo.anisotropyEnable = VK_FALSE;
+
+        // VUID-VkSamplerCreateInfo-minFilter-01645:
+        // When VkSamplerYcbcrConversionInfo is used with an external format or VK_FORMAT_UNDEFINED,
+        // minFilter and magFilter must be equal to chromaFilter.
+        // TODO(https://crbug.com/497675620): Check for
+        // VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_SEPARATE_RECONSTRUCTION_FILTER_BIT in
+        // the future.
+        const auto& yCbCrDesc = GetYCbCrVkDescriptor();
+        if (yCbCrDesc.externalFormat != 0 || yCbCrDesc.vkFormat == VK_FORMAT_UNDEFINED) {
+            VkFilter chromaFilter = ToVulkanSamplerFilter(yCbCrDesc.vkChromaFilter);
+            createInfo.minFilter = chromaFilter;
+            createInfo.magFilter = chromaFilter;
+        }
     }
 
     DAWN_TRY(CheckVkSuccess(
@@ -210,6 +223,19 @@ StaticSamplerSpecialization StaticSamplerSpecialization::From(const TextureView*
 
         spec.vkFormat = static_cast<VkFormat>(stm->GetYCbCrVkDesc().vkFormat);
         spec.androidExternalFormat = stm->GetYCbCrVkDesc().externalFormat;
+
+        // VUID-VkSamplerCreateInfo-minFilter-01645:
+        // When using an external format or VK_FORMAT_UNDEFINED, minFilter and magFilter must
+        // match the chroma filter.
+        // TODO(https://crbug.com/497675620): Check for
+        // VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_SEPARATE_RECONSTRUCTION_FILTER_BIT in
+        // the future.
+        if (spec.androidExternalFormat != 0 || spec.vkFormat == VK_FORMAT_UNDEFINED) {
+            YCbCrVkDescriptor yCbCrDesc =
+                GetYCbCrForTextureView(spec.vkFormat, spec.androidExternalFormat);
+            spec.minFilter = yCbCrDesc.vkChromaFilter;
+            spec.magFilter = yCbCrDesc.vkChromaFilter;
+        }
     }
 
     return spec;

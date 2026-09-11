@@ -2135,7 +2135,10 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
             // that's going to be used for the ExternalTexture static samplers.
             // TODO(https://crbug.com/497675620): Specialize the conversion at the same time as all
             // the other state, in order to take advantage of hardware YCbCr to RGB conversion when
-            // present.
+            // present. This will also allow specializing chromaFilter to match the sampler
+            // filtering when
+            // VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_SEPARATE_RECONSTRUCTION_FILTER_BIT
+            // is not available for the format.
             DAWN_ASSERT(device->HasFeature(Feature::OpaqueYCbCrAndroidForExternalTexture));
 
             yCbCr = StaticSamplerSpecialization::GetYCbCrForTextureView(
@@ -2298,7 +2301,7 @@ bool TextureView::IsYCbCrFilterable() const {
 }
 
 VkImageLayout TextureView::VulkanImageLayout(wgpu::TextureUsage usage) const {
-    return dawn::native::vulkan::VulkanImageLayout(GetFormat(), usage, GetUsage());
+    return dawn::native::vulkan::VulkanImageLayout(GetFormat(), usage, GetTexture()->GetUsage());
 }
 
 void TextureView::SetLabelImpl() {

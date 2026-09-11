@@ -1187,6 +1187,55 @@ TEST_P(TextureViewTest, DestroyedTexture) {
     wgpu::TextureView view = texture.CreateView(&viewDesc);
 }
 
+// Test sampling a texture view with TextureBinding usage when the texture was created with
+// TextureBinding | StorageBinding during a render pass.
+TEST_P(TextureViewTest, SampledTextureWithStorageBinding) {
+    wgpu::TextureDescriptor texDesc;
+    texDesc.size = {4, 4, 1};
+    texDesc.format = wgpu::TextureFormat::R32Float;
+    texDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding;
+    wgpu::Texture texture = device.CreateTexture(&texDesc);
+
+    wgpu::TextureViewDescriptor viewDesc;
+    viewDesc.usage = wgpu::TextureUsage::TextureBinding;
+    wgpu::TextureView view = texture.CreateView(&viewDesc);
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @vertex fn vs(@builtin(vertex_index) i : u32) -> @builtin(position) vec4f {
+            const pos = array(vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
+            return vec4f(pos[i], 0.0, 1.0);
+        }
+
+        @group(0) @binding(1) var t : texture_2d<f32>;
+        @fragment fn fs(@builtin(position) pos : vec4f) -> @location(0) vec4f {
+            return textureLoad(t, vec2u(0, 0), 0);
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.vertex.module = module;
+    pDesc.cFragment.module = module;
+    pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
+
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                              {
+                                                  {1, view},
+                                              });
+
+    utils::BasicRenderPass renderPass =
+        utils::CreateBasicRenderPass(device, 4, 4, wgpu::TextureFormat::RGBA8Unorm);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bg);
+    pass.Draw(3);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+}
+
 DAWN_INSTANTIATE_TEST(TextureViewTest,
                       D3D11Backend(),
                       D3D12Backend(),
