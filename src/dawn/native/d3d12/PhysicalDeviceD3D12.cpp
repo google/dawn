@@ -212,13 +212,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT linearAlgebraSupport = {};
         hr = mD3d12Device->CheckFeatureSupport(D3D12_FEATURE_LINEAR_ALGEBRA_SUPPORT,
                                                &linearAlgebraSupport, sizeof(linearAlgebraSupport));
-        // Subgroup matrix produces incorrect results on Intel drivers through 101.8991, so disable
-        // the feature on those driver versions. Only the last two version fields participate in the
-        // comparison (see IntelWindowsDriverVersion).
-        const gpu_info::IntelWindowsDriverVersion kBuggyDriverVersion = {32, 0, 101, 8991};
-        const bool isBuggyIntelDriver =
-            gpu_info::IsIntel(GetVendorId()) &&
-            gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) <= kBuggyDriverVersion;
         // Some preview drivers do not report D3D12_LINEAR_ALGEBRA_TIER_1_0, but do return valid
         // operation-specific wave-matrix configurations. Use those configurations as a fallback
         // capability signal while the D3D12 linear-algebra API is still experimental.
@@ -228,7 +221,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
             (SUCCEEDED(hr) &&
              linearAlgebraSupport.LinearAlgebraTier >= D3D12_LINEAR_ALGEBRA_TIER_1_0) ||
             !mDeviceInfo.linAlgWaveMatrixMultiplySupports.empty();
-        if (mDeviceInfo.supportsWaveOps && supportsLinearAlgebra && !isBuggyIntelDriver) {
+        if (mDeviceInfo.supportsWaveOps && supportsLinearAlgebra) {
             EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
         }
     }
@@ -527,6 +520,20 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
                                     feature));
             }
             break;
+        // Subgroup matrix produces incorrect results on Intel drivers through 101.8992.
+        case wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix: {
+            const gpu_info::IntelWindowsDriverVersion kBuggyDriverVersion = {32, 0, 101, 8992};
+            if (gpu_info::IsIntel(GetVendorId()) &&
+                gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) <= kBuggyDriverVersion &&
+                !toggles.IsEnabled(Toggle::D3D12ForceEnableSubgroupMatrixOnBuggyIntelDrivers)) {
+                return FeatureValidationResult(
+                    absl::StrFormat("Intel D3D12 drivers through version 101.8992 require "
+                                    "`d3d12_force_enable_subgroup_matrix_on_buggy_intel_drivers` "
+                                    "to enable %s.",
+                                    feature));
+            }
+            break;
+        }
         default:
             break;
     }

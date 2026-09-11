@@ -181,6 +181,7 @@ enum class Toggle {
     D3D12DecomposeWorkgroupAccess,
     D3D12PolyfillF16CeilFloor,
     CollapseSubgroupMinMax,
+    D3D12ForceEnableSubgroupMatrixOnBuggyIntelDrivers,
     VulkanEnableF16OnNvidia,
     EnableRenderDocProcessInjection,
     VulkanUseDynamicRendering,

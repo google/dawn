@@ -761,6 +761,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Collapse redundant subgroup min and max operations (e.g., subgroupMin(subgroupMin(x))) into "
       "a single operation. This works around a driver crash on some AMD GPUs.",
       "https://crbug.com/508265321", ToggleStage::Device}},
+    {Toggle::D3D12ForceEnableSubgroupMatrixOnBuggyIntelDrivers,
+     {"d3d12_force_enable_subgroup_matrix_on_buggy_intel_drivers",
+      "Force-enable subgroup matrix support on Intel D3D12 drivers through version 101.8992, "
+      "which may produce incorrect results.",
+      "https://crbug.com/558362033", ToggleStage::Adapter}},
     {Toggle::VulkanEnableF16OnNvidia,
      {"vulkan_enable_f16_on_nvidia", "Enables F16 on Nvidia GPUs with Vulkan",
       "https://crbug.com/42251215", ToggleStage::Adapter}},
