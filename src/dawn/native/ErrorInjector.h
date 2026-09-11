@@ -30,6 +30,8 @@
 
 namespace dawn::native {
 
+#if defined(DAWN_ENABLE_ERROR_INJECTION)
+
 template <typename ErrorType>
 struct InjectedErrorResult {
     ErrorType error;
@@ -53,6 +55,8 @@ InjectedErrorResult<ErrorType> MaybeInjectError(ErrorType errorType, ErrorTypes.
     return MaybeInjectError(errorTypes...);
 }
 
+#endif  // defined(DAWN_ENABLE_ERROR_INJECTION)
+
 }  // namespace dawn::native
 
 #if defined(DAWN_ENABLE_ERROR_INJECTION)
@@ -69,10 +73,10 @@ InjectedErrorResult<ErrorType> MaybeInjectError(ErrorType errorType, ErrorTypes.
         return (stmt);                                                                   \
     }()
 
-#else
+#else  // defined(DAWN_ENABLE_ERROR_INJECTION)
 
 #define INJECT_ERROR_OR_RUN(stmt, ...) stmt
 
-#endif
+#endif  // defined(DAWN_ENABLE_ERROR_INJECTION)
 
 #endif  // SRC_DAWN_NATIVE_ERRORINJECTOR_H_

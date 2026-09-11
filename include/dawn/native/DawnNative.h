@@ -234,12 +234,14 @@ DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device);
 
 DAWN_NATIVE_EXPORT bool InstanceProcessEvents(WGPUInstance instance);
 
+#if defined(DAWN_ENABLE_ERROR_INJECTION)
 // ErrorInjector functions used for testing only. Defined in dawn_native/ErrorInjector.cpp
 DAWN_NATIVE_EXPORT void EnableErrorInjector();
 DAWN_NATIVE_EXPORT void DisableErrorInjector();
 DAWN_NATIVE_EXPORT void ClearErrorInjector();
 DAWN_NATIVE_EXPORT uint64_t AcquireErrorInjectorCallCount();
 DAWN_NATIVE_EXPORT void InjectErrorAt(uint64_t index);
+#endif  // defined(DAWN_ENABLE_ERROR_INJECTION)
 
 // The different types of external images
 enum ExternalImageType : uint16_t {
