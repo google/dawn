@@ -574,6 +574,146 @@ TEST_P(SurfaceTests, PresentWithoutGet) {
     ASSERT_EQ(wgpu::Status::Success, presentStatus);
 }
 
+// Releasing a configured surface after its device was destroyed must not crash. Regression test
+// for the Vulkan backend dereferencing the destroyed device's FencedDeleter when the swapchain was
+// detached by the surface destructor.
+TEST_P(SurfaceTests, ReleaseSurfaceAfterDeviceDestroy) {
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+    surface.Configure(&config);
+
+    wgpu::SurfaceTexture surfaceTexture;
+    surface.GetCurrentTexture(&surfaceTexture);
+    ClearTexture(surfaceTexture.texture, {1.0, 0.0, 0.0, 1.0});
+    ASSERT_EQ(wgpu::Status::Success, surface.Present());
+
+    DestroyDevice();
+
+    // The surface is released at the end of the test body, after the device was destroyed.
+}
+
+// Same as ReleaseSurfaceAfterDeviceDestroy but with the swapchain parked as the surface's recycled
+// swapchain by Unconfigure() instead of being the current one.
+TEST_P(SurfaceTests, ReleaseSurfaceAfterUnconfigureThenDeviceDestroy) {
+    // TODO(crbug.com/500766623): Fails due to backend validation errors on
+    // Windows 11/AMD RX 5500 XT w/ D3D12.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D12() && IsBackendValidationEnabled());
+
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+    surface.Configure(&config);
+
+    wgpu::SurfaceTexture surfaceTexture;
+    surface.GetCurrentTexture(&surfaceTexture);
+    ClearTexture(surfaceTexture.texture, {1.0, 0.0, 0.0, 1.0});
+    ASSERT_EQ(wgpu::Status::Success, surface.Present());
+
+    surface.Unconfigure();
+    DestroyDevice();
+}
+
+// Releasing a configured surface after the last external reference to its device was dropped
+// (which destroys the device) must not crash.
+TEST_P(SurfaceTests, ReleaseSurfaceAfterDeviceReleased) {
+    // TODO(crbug.com/500766623): Fails due to backend validation errors on
+    // Windows 11/AMD RX 5500 XT w/ D3D12.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D12() && IsBackendValidationEnabled());
+
+    wgpu::Device device2 = CreateDevice();
+
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+    config.device = device2;
+    surface.Configure(&config);
+
+    wgpu::SurfaceTexture surfaceTexture;
+    surface.GetCurrentTexture(&surfaceTexture);
+    ClearTexture(surfaceTexture.texture, {1.0, 0.0, 0.0, 1.0}, device2);
+    ASSERT_EQ(wgpu::Status::Success, surface.Present());
+
+    surfaceTexture.texture = nullptr;
+    device2 = nullptr;
+}
+
+// A surface configured with a destroyed device can be configured again with a new device.
+TEST_P(SurfaceTests, ReconfigureWithNewDeviceAfterDestroy) {
+    // TODO(crbug.com/dawn/269): Creating the IDXGISwapChain1 for the new device fails with
+    // E_ACCESSDENIED on D3D11 because the swapchain of the destroyed device is still alive, like
+    // in SwitchingDevice.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
+    // TODO(crbug.com/500766623): Fails due to backend validation errors on
+    // Windows 11/AMD RX 5500 XT w/ D3D12.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D12() && IsBackendValidationEnabled());
+
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+    surface.Configure(&config);
+
+    wgpu::SurfaceTexture surfaceTexture;
+    surface.GetCurrentTexture(&surfaceTexture);
+    ClearTexture(surfaceTexture.texture, {1.0, 0.0, 0.0, 1.0});
+    ASSERT_EQ(wgpu::Status::Success, surface.Present());
+
+    DestroyDevice();
+
+    wgpu::Device device2 = CreateDevice();
+    config.device = device2;
+    surface.Configure(&config);
+
+    surface.GetCurrentTexture(&surfaceTexture);
+    ASSERT_EQ(wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal, surfaceTexture.status);
+    ClearTexture(surfaceTexture.texture, {0.0, 1.0, 0.0, 1.0}, device2);
+    ASSERT_EQ(wgpu::Status::Success, surface.Present());
+}
+
+// Unconfiguring a surface after its device was destroyed must not crash. Destroying the device
+// already unconfigured the surface, so this is a no-op like unconfiguring an unconfigured surface.
+TEST_P(SurfaceTests, UnconfigureAfterDeviceDestroy) {
+    // TODO(crbug.com/500766623): Fails due to backend validation errors on
+    // Windows 11/AMD RX 5500 XT w/ D3D12.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D12() && IsBackendValidationEnabled());
+
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+    surface.Configure(&config);
+
+    wgpu::SurfaceTexture surfaceTexture;
+    surface.GetCurrentTexture(&surfaceTexture);
+    ClearTexture(surfaceTexture.texture, {1.0, 0.0, 0.0, 1.0});
+    ASSERT_EQ(wgpu::Status::Success, surface.Present());
+
+    DestroyDevice();
+
+    surface.Unconfigure();
+}
+
+// Getting the current texture or presenting after the device was destroyed must not crash. The
+// surface behaves as if it was unconfigured.
+TEST_P(SurfaceTests, GetCurrentTextureAfterDeviceDestroy) {
+    // TODO(crbug.com/500766623): Fails due to backend validation errors on
+    // Windows 11/AMD RX 5500 XT w/ D3D12.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D12() && IsBackendValidationEnabled());
+
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+    surface.Configure(&config);
+
+    wgpu::SurfaceTexture surfaceTexture;
+    surface.GetCurrentTexture(&surfaceTexture);
+    ClearTexture(surfaceTexture.texture, {1.0, 0.0, 0.0, 1.0});
+    ASSERT_EQ(wgpu::Status::Success, surface.Present());
+
+    DestroyDevice();
+
+    // The surface is unconfigured and has no device anymore, so the validation errors are
+    // reported to the instance.
+    surface.GetCurrentTexture(&surfaceTexture);
+    EXPECT_EQ(surfaceTexture.status, wgpu::SurfaceGetCurrentTextureStatus::Error);
+    EXPECT_EQ(surfaceTexture.texture, nullptr);
+    ASSERT_EQ(wgpu::Status::Error, surface.Present());
+}
+
 // Check that all surfaces must support RenderAttachment.
 TEST_P(SurfaceTests, RenderAttachmentAlwaysSupported) {
     wgpu::Surface surface = CreateTestSurface();

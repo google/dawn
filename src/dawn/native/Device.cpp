@@ -510,7 +510,7 @@ void DeviceBase::DestroyObjects() {
     // can destroy the frontend cache.
 
     // clang-format off
-    static constexpr std::array<ObjectType, 21> kObjectTypeDependencyOrder = {
+    static constexpr std::array<ObjectType, 22> kObjectTypeDependencyOrder = {
         // Encoders first, nothing refers to them.
         ObjectType::ComputePassEncoder,
         ObjectType::RenderPassEncoder,
@@ -533,7 +533,8 @@ void DeviceBase::DestroyObjects() {
         ObjectType::SharedTextureMemory,
         ObjectType::SharedFence,
         ObjectType::ExternalTexture,
-        ObjectType::Texture,  // Note that Textures own the TextureViews.
+        ObjectType::SwapChain,  // Note that SwapChains own their current Texture.
+        ObjectType::Texture,    // Note that Textures own the TextureViews.
         ObjectType::QuerySet,
         ObjectType::Sampler,
         ObjectType::Buffer,

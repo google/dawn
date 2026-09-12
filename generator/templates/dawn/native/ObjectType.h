@@ -44,9 +44,10 @@ namespace {{native_namespace}} {
 
         // Additional internal object types. Keep kExtraObjectTypes in sync when updating.
         BindGroupLayoutInternal,
+        SwapChain,
     };
 
-    constexpr size_t kExtraObjectTypes = 1;
+    constexpr size_t kExtraObjectTypes = 2;
 
     template <typename T>
     using PerObjectType = ityp::array<ObjectType, T, {{len(by_category["object"])}} + kExtraObjectTypes>;

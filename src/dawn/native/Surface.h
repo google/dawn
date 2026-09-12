@@ -119,6 +119,12 @@ class Surface final : public ErrorMonad {
 
     const std::string& GetLabel() const;
 
+    // Called by `swapChain` when its device is destroyed while it is still attached to this
+    // surface. The swapchain is detached and the surface drops it. If it was the current
+    // swapchain the surface becomes unconfigured, as if Unconfigure() had been called, except
+    // that the swapchain cannot be recycled.
+    void DetachSwapChain(SwapChainBase* swapChain);
+
     // Dawn API
     void APIConfigure(const SurfaceConfiguration* config);
     wgpu::Status APIGetCapabilities(AdapterBase* adapter, SurfaceCapabilities* capabilities) const;
