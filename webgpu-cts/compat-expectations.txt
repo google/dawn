@@ -3444,4 +3444,3 @@ crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,bu
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgba8unorm";viewDimension="2d";stage="fragment";access="write";mipLevel=0 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgba8unorm";viewDimension="2d";stage="fragment";access="write";mipLevel=1 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgba8unorm";viewDimension="2d";stage="fragment";access="write";mipLevel=2 [ Failure ]
-crbug.com/0000 [ android-pixel-6 android-t ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
