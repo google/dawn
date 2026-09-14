@@ -542,9 +542,9 @@ MaybeError Surface::GetCapabilities(AdapterBase* adapter, SurfaceCapabilities* c
         [&capabilities](const PhysicalDeviceSurfaceCapabilities& caps) -> MaybeError {
             capabilities->nextInChain = nullptr;
             capabilities->usages = caps.usages;
-            capabilities->formats = utils::AllocateApiSeqFromStdVector(caps.formats);
-            capabilities->presentModes = utils::AllocateApiSeqFromStdVector(caps.presentModes);
-            capabilities->alphaModes = utils::AllocateApiSeqFromStdVector(caps.alphaModes);
+            capabilities->formats = HeapArrayFrom(caps.formats).MoveToSpan();
+            capabilities->presentModes = HeapArrayFrom(caps.presentModes).MoveToSpan();
+            capabilities->alphaModes = HeapArrayFrom(caps.alphaModes).MoveToSpan();
             return {};
         }));
 
@@ -552,9 +552,9 @@ MaybeError Surface::GetCapabilities(AdapterBase* adapter, SurfaceCapabilities* c
 }
 
 void APISurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities capabilities) {
-    utils::FreeApiSeq(&capabilities.formats, &capabilities.formatCount);
-    utils::FreeApiSeq(&capabilities.presentModes, &capabilities.presentModeCount);
-    utils::FreeApiSeq(&capabilities.alphaModes, &capabilities.alphaModeCount);
+    delete[] capabilities.formats;
+    delete[] capabilities.presentModes;
+    delete[] capabilities.alphaModes;
 }
 
 MaybeError Surface::GetCurrentTexture(SurfaceTexture* surfaceTexture) const {
