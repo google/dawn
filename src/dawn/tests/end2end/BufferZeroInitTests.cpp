@@ -147,8 +147,12 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
 
         // TODO(b/513631768): SetInitialized is now skipped for use_blit_for_t2b path.
+        // Blit is also used for the R32Float format when
+        // use_blit_for_non_rgba_float_texture_to_buffer_copy is enabled.
         uint32_t expectedLazyClearCount = spec.lazyClearCount;
-        if (expectedLazyClearCount == 0u && (HasToggleEnabled("use_blit_for_t2b"))) {
+        if (expectedLazyClearCount == 0u &&
+            (HasToggleEnabled("use_blit_for_t2b") ||
+             HasToggleEnabled("use_blit_for_non_rgba_float_texture_to_buffer_copy"))) {
             expectedLazyClearCount = 1u;
         }
 

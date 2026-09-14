@@ -195,6 +195,10 @@ class CopyTests {
             case wgpu::TextureFormat::RG16Float:
             case wgpu::TextureFormat::RGBA16Float:
                 return GetExpectedTextureData16Float(layout);
+            case wgpu::TextureFormat::R32Float:
+            case wgpu::TextureFormat::RG32Float:
+            case wgpu::TextureFormat::RGBA32Float:
+                return GetExpectedTextureData32Float(layout);
             case wgpu::TextureFormat::RGB9E5Ufloat:
                 return GetExpectedTextureDataRGB9E5Ufloat(layout);
             case wgpu::TextureFormat::RG11B10Ufloat:
@@ -266,6 +270,56 @@ class CopyTests {
                     uint8_t v = goodBytes[pixelId % numGoodValues + pixelId % formatByteSize];
 
                     textureData[byteOffsetPerSlice + i] = v;
+                }
+            }
+        }
+        return textureData;
+    }
+
+    // Special function to generate test data for *32Float to avoid NaNs and subnormals
+    // that can be canonicalized or flushed to zero by shaders on some GPUs (e.g. Mali).
+    static std::vector<uint8_t> GetExpectedTextureData32Float(
+        const utils::TextureDataCopyLayout& layout) {
+        // These are some known 4-byte float values that are normal floats (non-NaN, non-subnormal)
+        // and always preserve their exact byte representation across texture load and store.
+        constexpr auto goodBytes = std::to_array<uint8_t>({
+            0x11, 0x22, 0x33, 0x3F,  // ~0.7
+            0x55, 0x66, 0x77, 0x40,  // ~3.86
+            0x99, 0xAA, 0xBB, 0x41,  // ~23.45
+            0x12, 0x34, 0x56, 0x42,  // ~53.55
+            0x78, 0x9A, 0xBC, 0x43,  // ~377.2
+            0xDE, 0xF0, 0x12, 0x44,  // ~587.7
+            0x34, 0x56, 0x78, 0x3E,  // ~0.24
+            0x90, 0x12, 0x34, 0xBF,  // ~ -0.7
+            0x56, 0x78, 0x9A, 0xC0,  // ~ -4.8
+            0xAB, 0xCD, 0xEF, 0xC1,  // ~ -29.9
+            0x10, 0x20, 0x30, 0x40,  // ~2.75
+            0x40, 0x50, 0x60, 0x41,  // ~14.02
+            0x70, 0x80, 0x90, 0x42,  // ~72.25
+            0x21, 0x43, 0x65, 0x43,  // ~229.26
+            0x87, 0xA9, 0xCB, 0x44,  // ~1629.3
+            0xED, 0x0F, 0x2E, 0x3E,  // ~0.17
+        });
+        constexpr uint32_t formatByteSize = 4;
+        constexpr uint32_t numGoodValues = goodBytes.size() / formatByteSize;
+        uint32_t bytesPerTexelBlock = layout.bytesPerRow / layout.texelBlocksPerRow;
+        uint32_t channelsPerTexel = bytesPerTexelBlock / formatByteSize;
+        std::vector<uint8_t> textureData(layout.byteLength);
+        for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
+            const uint32_t byteOffsetPerSlice = layout.bytesPerImage * layer;
+            for (uint32_t y = 0; y < layout.mipSize.height; ++y) {
+                for (uint32_t x = 0; x < layout.mipSize.width; ++x) {
+                    for (uint32_t c = 0; c < channelsPerTexel; ++c) {
+                        uint32_t o = byteOffsetPerSlice + y * layout.bytesPerRow +
+                                     x * bytesPerTexelBlock + c * formatByteSize;
+                        uint32_t idx =
+                            formatByteSize *
+                            ((x * channelsPerTexel + c + 1 + (layer + 1) * y) % numGoodValues);
+                        textureData[o + 0] = goodBytes[idx + 0];
+                        textureData[o + 1] = goodBytes[idx + 1];
+                        textureData[o + 2] = goodBytes[idx + 2];
+                        textureData[o + 3] = goodBytes[idx + 3];
+                    }
                 }
             }
         }
@@ -490,9 +544,12 @@ class CopyTests_T2B : public CopyTests_WithFormatParam {
 
         auto format = GetParam().mTextureFormat;
 
-        // TODO(crbug.com/dawn/2294): diagnose BGRA T2B failures on Pixel 4 OpenGLES
-        DAWN_SUPPRESS_TEST_IF(format == wgpu::TextureFormat::BGRA8Unorm && IsOpenGLES() &&
-                              IsAndroid() && IsQualcomm());
+        // TODO(crbug.com/dawn/2294): diagnose T2B failures on Pixel 4 OpenGLES
+        DAWN_SUPPRESS_TEST_IF((format == wgpu::TextureFormat::BGRA8Unorm ||
+                               format == wgpu::TextureFormat::R16Float ||
+                               format == wgpu::TextureFormat::RG16Float ||
+                               format == wgpu::TextureFormat::RGBA16Float) &&
+                              IsOpenGLES() && IsAndroid() && IsQualcomm());
 
         // TODO(dawn:1913): Many float formats tests failing for Metal backend on Mac Intel.
         DAWN_SUPPRESS_TEST_IF((format == wgpu::TextureFormat::R32Float ||
@@ -2163,57 +2220,65 @@ TEST_P(CopyTests_T2B, Texture3DMipUnaligned) {
     }
 }
 
-DAWN_INSTANTIATE_TEST_P(CopyTests_T2B,
-                        {D3D11Backend(), D3D11Backend({"d3d11_disable_map_on_default_buffers"}),
-                         D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-                         OpenGLESBackend({"gl_defer"}), VulkanBackend(),
-                         VulkanBackend({"use_blit_for_snorm_texture_to_buffer_copy",
-                                        "use_blit_for_bgra8unorm_texture_to_buffer_copy"}),
-                         WebGPUBackend()},
-                        {
-                            wgpu::TextureFormat::R8Unorm,
-                            wgpu::TextureFormat::RG8Unorm,
-                            wgpu::TextureFormat::RGBA8Unorm,
+DAWN_INSTANTIATE_TEST_P(
+    CopyTests_T2B,
+    {D3D11Backend(), D3D11Backend({"d3d11_disable_map_on_default_buffers"}), D3D12Backend(),
+     MetalBackend(), OpenGLBackend(), OpenGLESBackend(), OpenGLESBackend({"gl_defer"}),
+     VulkanBackend(),
+     VulkanBackend({"use_blit_for_snorm_texture_to_buffer_copy",
+                    "use_blit_for_bgra8unorm_texture_to_buffer_copy"}),
+     WebGPUBackend()},
+    {
+        // Note: The formats below provide general T2B copy coverage across backends, and
+        // also record coverage for OpenGL compat toggles:
 
-                            wgpu::TextureFormat::R8Uint,
-                            wgpu::TextureFormat::R8Sint,
+        // Also covers OpenGL compat Toggle::UseBlitForNonRGBAUnormTextureToBufferCopy
+        wgpu::TextureFormat::R8Unorm,
+        wgpu::TextureFormat::RG8Unorm,
 
-                            wgpu::TextureFormat::R16Uint,
-                            wgpu::TextureFormat::R16Sint,
-                            wgpu::TextureFormat::R16Float,
+        wgpu::TextureFormat::RGBA8Unorm,
 
-                            wgpu::TextureFormat::RG16Uint,
-                            wgpu::TextureFormat::RG16Sint,
-                            wgpu::TextureFormat::RG16Float,
+        wgpu::TextureFormat::R8Uint,
+        wgpu::TextureFormat::R8Sint,
 
-                            wgpu::TextureFormat::R32Uint,
-                            wgpu::TextureFormat::R32Sint,
-                            wgpu::TextureFormat::R32Float,
+        wgpu::TextureFormat::R16Uint,
+        wgpu::TextureFormat::R16Sint,
+        wgpu::TextureFormat::R16Float,
 
-                            wgpu::TextureFormat::RG32Float,
-                            wgpu::TextureFormat::RG32Uint,
-                            wgpu::TextureFormat::RG32Sint,
+        wgpu::TextureFormat::RG16Uint,
+        wgpu::TextureFormat::RG16Sint,
+        wgpu::TextureFormat::RG16Float,
 
-                            wgpu::TextureFormat::RGBA16Uint,
-                            wgpu::TextureFormat::RGBA16Sint,
-                            wgpu::TextureFormat::RGBA16Float,
+        wgpu::TextureFormat::R32Uint,
+        wgpu::TextureFormat::R32Sint,
 
-                            wgpu::TextureFormat::RGBA32Float,
+        // Also covers OpenGL compat Toggle::UseBlitForNonRGBAFloatTextureToBufferCopy
+        wgpu::TextureFormat::R32Float,
+        wgpu::TextureFormat::RG32Float,
 
-                            wgpu::TextureFormat::RGB10A2Unorm,
-                            wgpu::TextureFormat::RG11B10Ufloat,
+        wgpu::TextureFormat::RG32Uint,
+        wgpu::TextureFormat::RG32Sint,
 
-                            // Testing OpenGL compat Toggle::UseBlitForRGB9E5UfloatTextureCopy
-                            wgpu::TextureFormat::RGB9E5Ufloat,
+        wgpu::TextureFormat::RGBA16Uint,
+        wgpu::TextureFormat::RGBA16Sint,
+        wgpu::TextureFormat::RGBA16Float,
 
-                            // Testing OpenGL compat Toggle::UseBlitForSnormTextureToBufferCopy
-                            wgpu::TextureFormat::R8Snorm,
-                            wgpu::TextureFormat::RG8Snorm,
-                            wgpu::TextureFormat::RGBA8Snorm,
+        wgpu::TextureFormat::RGBA32Float,
 
-                            // Testing OpenGL compat Toggle::UseBlitForBGRA8UnormTextureToBufferCopy
-                            wgpu::TextureFormat::BGRA8Unorm,
-                        });
+        wgpu::TextureFormat::RGB10A2Unorm,
+        wgpu::TextureFormat::RG11B10Ufloat,
+
+        // Also covers OpenGL compat Toggle::UseBlitForRGB9E5UfloatTextureCopy
+        wgpu::TextureFormat::RGB9E5Ufloat,
+
+        // Also covers OpenGL compat Toggle::UseBlitForSnormTextureToBufferCopy
+        wgpu::TextureFormat::R8Snorm,
+        wgpu::TextureFormat::RG8Snorm,
+        wgpu::TextureFormat::RGBA8Snorm,
+
+        // Also covers OpenGL compat Toggle::UseBlitForBGRA8UnormTextureToBufferCopy
+        wgpu::TextureFormat::BGRA8Unorm,
+    });
 
 class CopyTests_T2B_No_Format_Param : public CopyTests, public DawnTest {};
 
@@ -3330,6 +3395,8 @@ TEST_P(CopyTests_T2T, CopyFromNonZeroMipLevelWithTexelBlockSizeLessThan4Bytes) {
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
     // TODO(crbug.com/473582006): [Capture] issue calling ResolveDeferredExpectationsNow.
     DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+    // TODO(crbug.com/dawn/2294): diagnose T2B failures on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     constexpr std::array<wgpu::TextureFormat, 11> kFormats = {
         {wgpu::TextureFormat::RG8Sint, wgpu::TextureFormat::RG8Uint, wgpu::TextureFormat::RG8Snorm,

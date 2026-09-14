@@ -232,6 +232,8 @@ wgpu::BufferUsage ComputeInternalBufferUsages(const DeviceBase* device,
             device->IsToggleEnabled(Toggle::UseBlitForStencilTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForSnormTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForNonRGBAUnormTextureToBufferCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForNonRGBAFloatTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForRG11B10UfloatTextureCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForFloat16TextureCopy) ||

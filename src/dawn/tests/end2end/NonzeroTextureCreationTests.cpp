@@ -121,6 +121,12 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
         // TODO(dawn:1844): Work around this by clearing layers one by one on Intel.
         DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel() && GetParam().mDepthOrArrayLayers > 6);
 
+        // TODO(crbug.com/556959073): BlitTextureToBuffer cube sampling fails on Pixel 10 OpenGLES
+        // for RG8Unorm small mips.
+        DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES() &&
+                              GetParam().mFormat == wgpu::TextureFormat::RG8Unorm &&
+                              GetParam().mDepthOrArrayLayers == 6 && GetParam().mMip >= 2);
+
         wgpu::TextureDescriptor descriptor;
         descriptor.dimension = GetParam().mDimension;
         descriptor.size.width = kSize;

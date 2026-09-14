@@ -126,6 +126,8 @@ enum class Toggle {
     UseBlitForFloat32TextureCopy,
     UseBlitForT2B,
     UseBlitForB2T,
+    UseBlitForNonRGBAUnormTextureToBufferCopy,
+    UseBlitForNonRGBAFloatTextureToBufferCopy,
     VulkanSplitBufferTextureCopyForArrayLayers,
     GLUseArrayLengthFromUniform,
     D3D11DisableCPUUploadBuffers,

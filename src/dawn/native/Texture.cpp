@@ -564,6 +564,18 @@ bool CopySrcNeedsInternalTextureBindingUsage(const DeviceBase* device, const For
         device->IsToggleEnabled(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy)) {
         return true;
     }
+    // Non-RGBA unorm
+    if ((format.format == wgpu::TextureFormat::R8Unorm ||
+         format.format == wgpu::TextureFormat::RG8Unorm) &&
+        device->IsToggleEnabled(Toggle::UseBlitForNonRGBAUnormTextureToBufferCopy)) {
+        return true;
+    }
+    // Non-RGBA float
+    if ((format.format == wgpu::TextureFormat::R32Float ||
+         format.format == wgpu::TextureFormat::RG32Float) &&
+        device->IsToggleEnabled(Toggle::UseBlitForNonRGBAFloatTextureToBufferCopy)) {
+        return true;
+    }
     // RGB9E5Ufloat
     if (format.format == wgpu::TextureFormat::RGB9E5Ufloat &&
         device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy)) {

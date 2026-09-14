@@ -494,6 +494,16 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use a shader based blit instead of a copy command to copy a buffer to a texture with "
       "supported format.",
       "https://crbug.com/dawn/348653642", ToggleStage::Device}},
+    {Toggle::UseBlitForNonRGBAUnormTextureToBufferCopy,
+     {"use_blit_for_non_rgba_unorm_texture_to_buffer_copy",
+      "Use a blit instead of a copy command to copy non-RGBA unorm textures to a buffer. "
+      "Workaround for OpenGLES.",
+      "https://issues.chromium.org/issues/556959073", ToggleStage::Device}},
+    {Toggle::UseBlitForNonRGBAFloatTextureToBufferCopy,
+     {"use_blit_for_non_rgba_float_texture_to_buffer_copy",
+      "Use a blit instead of a copy command to copy non-RGBA float textures to a buffer. "
+      "Workaround for OpenGLES.",
+      "https://issues.chromium.org/issues/556959073", ToggleStage::Device}},
     {Toggle::VulkanSplitBufferTextureCopyForArrayLayers,
      {"vulkan_split_buffer_texture_copy_for_array_layers",
       "Split a multi-layer buffer-to-texture / texture-to-buffer copy into one vkCmdCopy*Image "
