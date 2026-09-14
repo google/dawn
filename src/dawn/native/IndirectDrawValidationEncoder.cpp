@@ -38,6 +38,7 @@
 
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/common/Strings.h"
 #include "src/dawn/native/BindGroup.h"
@@ -461,7 +462,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         uint64_t inputIndirectSize = 0;
         uint64_t outputParamsOffset = 0;
         uint64_t outputParamsSize = 0;
-        raw_ptr<BatchInfo, AllowPtrArithmetic> batchInfo = nullptr;
+        raw_ptr<BatchInfo> batchInfo = nullptr;
     };
 
     struct Pass {
@@ -650,30 +651,32 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         // batchData is maximally-aligned, so we can suballocate it.
         pass.batchData = HeapArray<std::byte>{checked_cast<size_t>(pass.batchDataSize)};
         for (Batch& batch : pass.batches) {
-            auto placement = pass.batchData.subspan(checked_cast<size_t>(batch.dataBufferOffset),
-                                                    sizeof(BatchInfo));
-            batch.batchInfo = new (placement.data()) BatchInfo();
+            // The batchData contains a BatchInfo followed by a number of IndirectDraw structures.
+            Span<std::byte> batchData = pass.batchData.subspan(
+                checked_cast<size_t>(batch.dataBufferOffset), checked_cast<size_t>(batch.dataSize));
+            auto [batchAllocation, drawAllocation] = batchData.SplitAt(sizeof(BatchInfo));
+
+            batch.batchInfo = new (&ReinterpretSpan<BatchInfo>(batchAllocation)[0]) BatchInfo();
             batch.batchInfo->numDraws = static_cast<uint32_t>(batch.metadata->draws.size());
             batch.batchInfo->flags = pass.flags;
 
-            IndirectDraw* indirectDraw =
-                reinterpret_cast<IndirectDraw*>(DAWN_UNSAFE_TODO(batch.batchInfo.get() + 1));
+            Span<IndirectDraw> indirectDraws = ReinterpretSpan<IndirectDraw>(drawAllocation);
+
             uint64_t outputParamsOffset = batch.outputParamsOffset;
-            for (auto& draw : batch.metadata->draws) {
+            for (auto [i, draw] : Enumerate(batch.metadata->draws)) {
                 // The shader uses this to index an array of u32, hence the division by 4 bytes.
-                indirectDraw->indirectOffset =
+                indirectDraws[i].indirectOffset =
                     static_cast<uint32_t>((draw.inputBufferOffset - batch.inputIndirectOffset) / 4);
                 // The index buffer elements are 64 bit values, and so need to be set as a
                 // low uint32_t and a high uint32_t.
-                indirectDraw->numIndexBufferElementsLow =
+                indirectDraws[i].numIndexBufferElementsLow =
                     static_cast<uint32_t>(draw.numIndexBufferElements & 0xFFFFFFFF);
-                indirectDraw->numIndexBufferElementsHigh =
+                indirectDraws[i].numIndexBufferElementsHigh =
                     static_cast<uint32_t>((draw.numIndexBufferElements >> 32) & 0xFFFFFFFF);
 
                 // This is only used in the GL backend.
-                indirectDraw->indexOffsetAsNumElements =
+                indirectDraws[i].indexOffsetAsNumElements =
                     checked_cast<uint32_t>(draw.indexBufferOffsetInElements);
-                DAWN_UNSAFE_TODO(indirectDraw++);
 
                 // Save the args that point to the validated values in the indirectDrawMetadata.
                 indirectDrawMetadata->SetValidatedIndirectDrawArgs(
