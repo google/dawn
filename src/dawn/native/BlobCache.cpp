@@ -54,11 +54,13 @@ std::vector<std::byte> GenerateHashPrefixedPayload(std::span<const std::byte> va
     const size_t byteSizeWithHash = value.size() + kHashByteSize;
     std::vector<std::byte> result(byteSizeWithHash);
 
-    // Write the hash to the start of the buffer.
-    *DAWN_UNSAFE_TODO(reinterpret_cast<Hash*>(result.data())) = Hasher::Hash(value);
+    auto hash = Hasher::Hash(value);
 
-    // Write the payload after the hash.
-    std::ranges::copy(value, result.begin() + kHashByteSize);
+    // Write the hash to the start of the buffer and the payload afterwards.
+    Span<std::byte> resultSpan{result};
+    resultSpan.TakeFirst(sizeof(Hash)).CopyFrom(ByteSpanFromRef(hash));
+    resultSpan.CopyFrom(value);
+
     return result;
 }
 
@@ -77,20 +79,21 @@ ResultOrError<Blob> CheckAndUnpackHashPrefixedPayload(Blob&& blobWithHash) {
     Blob blob = Blob::Create(std::move(blobWithHash), /*offset=*/kHashByteSize);
     Hash actualHash = Hasher::Hash(blob.Data());
 
-    auto printHash = [](const void* hash) {
+    auto PrintHash = [](const Hash* hash) {
         std::stringstream ss;
-        const uint8_t* hashBytes = static_cast<const uint8_t*>(hash);
-        for (size_t i = 0; i < kHashByteSize; i++) {
-            ss << std::uppercase << std::hex << std::setw(2) << std::setfill('0')
-               << static_cast<int>(DAWN_UNSAFE_TODO(hashBytes[i]));
+        ss << std::uppercase << std::hex << std::setw(2) << std::setfill('0');
+
+        for (std::byte b : ByteSpanFromRef(*hash)) {
+            ss << static_cast<int>(b);
         }
         return ss.str();
     };
+
     // Validate the hash matches the expected hash.
     DAWN_INTERNAL_ERROR_IF(actualHash != *expectedHash,
                            "Blob cache hash validation failed. Loaded blob of size %zu fails the "
                            "hash validation, expected hash: %s, computed hash: %s.",
-                           sizeWithHash, printHash(expectedHash), printHash(&actualHash));
+                           sizeWithHash, PrintHash(expectedHash), PrintHash(&actualHash));
     return std::move(blob);
 }
 
