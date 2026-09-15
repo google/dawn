@@ -167,59 +167,63 @@ package {{ kotlin_package }}
     {% endif %}
 {% endmacro %}
 //* Generates the Builder inner class for flexible initialization.
+//* Only emitted when at least one property is settable to avoid empty builders
+//* flagged by Android API lint (EmptyBuilder).
 {% macro render_builder(structure, members, chain_children_list, default_count, include_optins, has_experimental, chain_children) %}
-    /**
-     * Builder for [{{ kotlin_name(structure) }}].
-     */
-    public class Builder(
-        {% for member in members %}
-            {% if kotlin_default(member) is none %}
-                {% set optin_str = kotlin_member_optin(member, parent=structure, chain_children=chain_children) if include_optins else "" %}
-                {{ kotlin_annotation(member) }}{{ " " ~ optin_str if optin_str else "" }} private val {{ member.name.camelCase() }}: {{ kotlin_declaration(member) }}{{ "," if not loop.last or default_count > 0 }}
-            {% endif %}
-        {% endfor %}
-    ) {
-        {% for member in members %}
-            {% if kotlin_default(member) is not none %}
-                {% set optin_str = kotlin_member_optin(member, parent=structure, chain_children=chain_children) if include_optins else "" %}
-                {{ kotlin_annotation(member) }}{{ " " ~ optin_str if optin_str else "" }} private var {{ member.name.camelCase() }}: {{ kotlin_definition(member) }}
-            {% endif %}
-        {% endfor %}
-        {% for child in chain_children_list %}
-            {% set optin_str = kotlin_member_optin(child, parent=structure, chain_children=chain_children) if include_optins else "" %}
-            {{ optin_str ~ " " if optin_str else "" }}private var {{ child.name.camelCase() }}: {{ kotlin_name(child) }}? = null
-        {% endfor %}
-
-        {% for member in members %}
-            {% if kotlin_default(member) is not none %}
-                {% set optin_str = kotlin_member_optin(member, parent=structure, chain_children=chain_children) if include_optins else "" %}
-                {{ optin_str ~ " " if optin_str else "" }}public fun set{{ member.name.CamelCase() }}({{ kotlin_annotation(member) }} {{ member.name.camelCase() }}: {{ kotlin_declaration(member) }}): Builder = apply {
-                    this.{{ member.name.camelCase() }} = {{ member.name.camelCase() }}
-                }
-            {% endif %}
-        {% endfor %}
-        {% for child in chain_children_list %}
-            {% set optin_str = kotlin_member_optin(child, parent=structure, chain_children=chain_children) if include_optins else "" %}
-            {{ optin_str ~ " " if optin_str else "" }}public fun set{{ child.name.CamelCase() }}({{ child.name.camelCase() }}: {{ kotlin_name(child) }}?): Builder = apply {
-                this.{{ child.name.camelCase() }} = {{ child.name.camelCase() }}
-            }
-        {% endfor %}
-
+    {% if default_count > 0 %}
         /**
-         * Builds the [{{ kotlin_name(structure) }}].
+         * Builder for [{{ kotlin_name(structure) }}].
          */
-        {% if include_optins and has_experimental %}
-            @OptIn(ExperimentalWebGpuApi::class)
-        {% endif %}
-        public fun build(): {{ kotlin_name(structure) }} = {{ kotlin_name(structure) }}(
+        public class Builder(
             {% for member in members %}
-                {{ member.name.camelCase() }} = {{ member.name.camelCase() }},
+                {% if kotlin_default(member) is none %}
+                    {% set optin_str = kotlin_member_optin(member, parent=structure, chain_children=chain_children) if include_optins else "" %}
+                    {{ kotlin_annotation(member) }}{{ " " ~ optin_str if optin_str else "" }} private val {{ member.name.camelCase() }}: {{ kotlin_declaration(member) }}{{ "," if not loop.last or default_count > 0 }}
+                {% endif %}
+            {% endfor %}
+        ) {
+            {% for member in members %}
+                {% if kotlin_default(member) is not none %}
+                    {% set optin_str = kotlin_member_optin(member, parent=structure, chain_children=chain_children) if include_optins else "" %}
+                    {{ kotlin_annotation(member) }}{{ " " ~ optin_str if optin_str else "" }} private var {{ member.name.camelCase() }}: {{ kotlin_definition(member) }}
+                {% endif %}
             {% endfor %}
             {% for child in chain_children_list %}
-                {{ child.name.camelCase() }} = {{ child.name.camelCase() }},
+                {% set optin_str = kotlin_member_optin(child, parent=structure, chain_children=chain_children) if include_optins else "" %}
+                {{ optin_str ~ " " if optin_str else "" }}private var {{ child.name.camelCase() }}: {{ kotlin_name(child) }}? = null
             {% endfor %}
-        )
-    }
+
+            {% for member in members %}
+                {% if kotlin_default(member) is not none %}
+                    {% set optin_str = kotlin_member_optin(member, parent=structure, chain_children=chain_children) if include_optins else "" %}
+                    {{ optin_str ~ " " if optin_str else "" }}public fun set{{ member.name.CamelCase() }}({{ kotlin_annotation(member) }} {{ member.name.camelCase() }}: {{ kotlin_declaration(member) }}): Builder = apply {
+                        this.{{ member.name.camelCase() }} = {{ member.name.camelCase() }}
+                    }
+                {% endif %}
+            {% endfor %}
+            {% for child in chain_children_list %}
+                {% set optin_str = kotlin_member_optin(child, parent=structure, chain_children=chain_children) if include_optins else "" %}
+                {{ optin_str ~ " " if optin_str else "" }}public fun set{{ child.name.CamelCase() }}({{ child.name.camelCase() }}: {{ kotlin_name(child) }}?): Builder = apply {
+                    this.{{ child.name.camelCase() }} = {{ child.name.camelCase() }}
+                }
+            {% endfor %}
+
+            /**
+             * Builds the [{{ kotlin_name(structure) }}].
+             */
+            {% if include_optins and has_experimental %}
+                @OptIn(ExperimentalWebGpuApi::class)
+            {% endif %}
+            public fun build(): {{ kotlin_name(structure) }} = {{ kotlin_name(structure) }}(
+                {% for member in members %}
+                    {{ member.name.camelCase() }} = {{ member.name.camelCase() }},
+                {% endfor %}
+                {% for child in chain_children_list %}
+                    {{ child.name.camelCase() }} = {{ child.name.camelCase() }},
+                {% endfor %}
+            )
+        }
+    {% endif %}
 {% endmacro %}
 {%- if not has_experimental -%}
     public class {{ kotlin_name(structure) }}(
