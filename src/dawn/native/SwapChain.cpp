@@ -57,7 +57,7 @@ TextureDescriptor GetSwapChainBaseTextureDescriptor(SwapChainBase* swapChain) {
 SwapChainBase::SwapChainBase(DeviceBase* device,
                              Surface* surface,
                              const SurfaceConfiguration* config)
-    : mDevice(device),
+    : ApiObjectBase(device, kLabelNotImplemented),
       mWidth(config->width),
       mHeight(config->height),
       mFormat(config->format),
@@ -72,6 +72,7 @@ SwapChainBase::SwapChainBase(DeviceBase* device,
         }
         mViewFormats.push_back(viewFormat);
     }
+    GetObjectTrackingList()->Track(this);
 }
 
 FormatSet SwapChainBase::ComputeViewFormatSet() const {
@@ -90,6 +91,18 @@ SwapChainBase::~SwapChainBase() {
     DAWN_CHECK(!mAttached);
 }
 
+void SwapChainBase::DestroyImpl(DestroyReason reason) {
+    // The surface has a Ref on the swapchains attached to it and detaches them before dropping
+    // that Ref, so a swapchain that is being deleted is already detached. The swapchain can
+    // still be attached when the device is destroyed though: detach it so that its backend
+    // resources are released before the device's, and so that the surface stops using a
+    // swapchain of a destroyed device.
+    if (mAttached) {
+        mSurface->DetachSwapChain(this);
+    }
+    DAWN_ASSERT(!mAttached);
+}
+
 void SwapChainBase::DetachFromSurface() {
     if (mAttached) {
         DetachFromSurfaceImpl();
@@ -99,6 +112,7 @@ void SwapChainBase::DetachFromSurface() {
 }
 
 void SwapChainBase::SetIsAttached() {
+    DAWN_ASSERT(!mAttached);
     mAttached = true;
 }
 
@@ -143,9 +157,10 @@ MaybeError SwapChainBase::Present() {
     return {};
 }
 
-DeviceBase* SwapChainBase::GetDevice() const {
-    return mDevice.Get();
+ObjectType SwapChainBase::GetType() const {
+    return ObjectType::SwapChain;
 }
+
 uint32_t SwapChainBase::GetWidth() const {
     return mWidth;
 }
