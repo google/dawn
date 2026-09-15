@@ -919,14 +919,16 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
         }
     }
 
-    if (auto* str = const_cast<core::type::Struct*>(return_type->As<core::type::Struct>())) {
-        if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, str,
+    if (decl->return_type && return_type->IsConstructible()) {
+        if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, return_type,
                                           decl->return_type->source)) {
             AddNote(decl->return_type)
                 << "while instantiating return type for " << decl->name->symbol.NameView();
             return nullptr;
         }
+    }
 
+    if (auto* str = const_cast<core::type::Struct*>(return_type->As<core::type::Struct>())) {
         switch (decl->PipelineStage()) {
             case ast::PipelineStage::kVertex:
                 str->AddUsage(core::type::PipelineStageUsage::kVertexOutput);
@@ -4610,6 +4612,12 @@ sem::Statement* Resolver::AssignmentStatement(const ast::AssignmentStatement* st
             rhs = Load(Materialize(rhs, lhs_type));
         } else {
             rhs = Load(rhs);
+            if (rhs && rhs->Type()->UnwrapRef()->IsConstructible()) {
+                if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, rhs->Type(),
+                                                  stmt->rhs->source)) {
+                    return false;
+                }
+            }
         }
 
         TINT_RET_IF(!rhs);

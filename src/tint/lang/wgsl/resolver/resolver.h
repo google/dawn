@@ -563,7 +563,7 @@ class Resolver {
     /// Records the address space usage for the given type, and any transient
     /// dependencies of the type. Validates that the type can be used for the
     /// given address space, erroring if it cannot.
-    /// @param sc the address space to apply to the type and transitent types
+    /// @param sc the address space to apply to the type and transient types
     /// @param ty the type to apply the address space on
     /// @param usage the Source of the root variable declaration that uses the
     /// given type and address space. Used for generating sensible error
