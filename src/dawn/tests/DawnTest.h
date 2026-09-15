@@ -850,9 +850,8 @@ class DawnTestBase {
     struct ReadbackSlot {
         wgpu::Device device;
         wgpu::Buffer buffer;
-        uint64_t bufferSize = 0;
         std::string label;
-        raw_ptr<const void> mappedData = nullptr;
+        dawn::Span<const std::byte> mappedData = {};
     };
     std::vector<ReadbackSlot> mReadbackSlots;
 

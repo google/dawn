@@ -32,10 +32,9 @@
 #pragma allow_unsafe_buffers
 #endif
 
-#include "src/dawn/tests/DawnTest.h"
-
 #include <algorithm>
 #include <atomic>
+#include <cstddef>
 #include <cstdio>
 #include <format>
 #include <fstream>
@@ -49,6 +48,8 @@
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
+
+#include "src/dawn/tests/DawnTest.h"
 
 // Need to be included before GLFW/glfw3.h to avoid MSVC warning C4005: 'APIENTRY': macro
 // redefinition
@@ -806,7 +807,7 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
 }
 
 std::vector<AdapterTestParam> DawnTestEnvironment::GetAvailableAdapterTestParamsForBackends(
-    dawn::Span<const BackendTestConfig> params) {
+    Span<const BackendTestConfig> params) {
     std::vector<AdapterTestParam> testParams;
     for (const auto& backendTestParams : params) {
         for (const auto& adapterProperties : mAdapterProperties) {
@@ -2251,7 +2252,6 @@ DawnTestBase::ReadbackReservation DawnTestBase::ReserveReadback(wgpu::Device tar
 
     ReadbackSlot slot;
     slot.device = targetDevice;
-    slot.bufferSize = readbackSize;
     slot.label = readbackLabel;
 
     // Create and initialize the slot buffer so that it won't unexpectedly affect the count of
@@ -2281,19 +2281,26 @@ void DawnTestBase::MapSlotsSynchronously(std::span<ReadbackSlot> readbacks) {
     for (size_t slotIndex = 0; slotIndex < readbacks.size(); ++slotIndex) {
         auto& slot = readbacks[slotIndex];
 
-        slot.buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
-                             wgpu::CallbackMode::AllowProcessEvents,
-                             [&slot, &pendingMaps](wgpu::MapAsyncStatus status, wgpu::StringView) {
-                                 DAWN_ASSERT(status == wgpu::MapAsyncStatus::Success);
-                                 if (status == wgpu::MapAsyncStatus::Success) {
-                                     slot.mappedData = slot.buffer.GetConstMappedRange();
-                                     DAWN_ASSERT(slot.mappedData != nullptr);
-                                 } else {
-                                     slot.mappedData = nullptr;
-                                 }
+        slot.buffer.MapAsync(
+            wgpu::MapMode::Read, 0, wgpu::kWholeMapSize, wgpu::CallbackMode::AllowProcessEvents,
+            [&slot, &pendingMaps](wgpu::MapAsyncStatus status, wgpu::StringView) {
+                DAWN_ASSERT(status == wgpu::MapAsyncStatus::Success);
+                if (status == wgpu::MapAsyncStatus::Success) {
+                    const std::byte* ptr =
+                        static_cast<const std::byte*>(slot.buffer.GetConstMappedRange());
+                    // SAFETY: The buffer is mapped at offset 0 with
+                    // kWholeMapSize, so the range returned by
+                    // GetConstMappedRange() is valid for exactly GetSize()
+                    // bytes, and stays valid until the buffer is unmapped.
+                    slot.mappedData = DAWN_UNSAFE_BUFFERS(
+                        Span<const std::byte>(ptr, static_cast<size_t>(slot.buffer.GetSize())));
+                    DAWN_ASSERT(slot.mappedData.data() != nullptr);
+                } else {
+                    slot.mappedData = {};
+                }
 
-                                 pendingMaps.fetch_sub(1, std::memory_order_release);
-                             });
+                pendingMaps.fetch_sub(1, std::memory_order_release);
+            });
     }
 
     // Busy wait until all map operations are done.
@@ -2304,11 +2311,11 @@ void DawnTestBase::MapSlotsSynchronously(std::span<ReadbackSlot> readbacks) {
 
 void DawnTestBase::ResolveExpectations() {
     for (const auto& expectation : mDeferredExpectations) {
-        EXPECT_TRUE(mReadbackSlots[expectation.readbackSlot].mappedData != nullptr);
+        EXPECT_TRUE(mReadbackSlots[expectation.readbackSlot].mappedData.data() != nullptr);
 
         // Get a pointer to the mapped copy of the data for the expectation.
         const auto& slot = mReadbackSlots[expectation.readbackSlot];
-        const char* data = static_cast<const char*>(slot.mappedData);
+        const char* data = ReinterpretSpan<const char>(slot.mappedData).data();
 
         // Handle the case where the device was lost so the expected data couldn't be read back.
         if (data == nullptr) {
@@ -2396,7 +2403,7 @@ void DawnTestBase::CheckReplayedReadbackBuffers(std::span<ReadbackSlot> existing
 
     for (auto& readback : existingReadbacks) {
         auto replayedBuffer = replay->GetObjectByLabel<wgpu::Buffer>(readback.label);
-        EXPECT_EQ(replayedBuffer.GetSize(), readback.bufferSize);
+        EXPECT_EQ(replayedBuffer.GetSize(), readback.buffer.GetSize());
         EXPECT_TRUE(replayedBuffer.GetUsage() & wgpu::BufferUsage::MapRead);
 
         wgpu::Future f = replayedBuffer.MapAsync(
@@ -2409,20 +2416,25 @@ void DawnTestBase::CheckReplayedReadbackBuffers(std::span<ReadbackSlot> existing
 
         // Compare the raw bytes of originalData and replayData to see if they are an exact match.
         // We use direct for loop here.
-        auto originalData = static_cast<const uint8_t*>(readback.mappedData);
-        auto replayData = static_cast<const uint8_t*>(replayedBuffer.GetConstMappedRange());
-        for (size_t i = 0; i < readback.bufferSize; ++i) {
+        Span<const std::byte> originalData = readback.mappedData;
+        // SAFETY: The buffer has GetSize() bytes, and we map the entire buffer at offset 0.
+        Span<const std::byte> replayData = DAWN_UNSAFE_BUFFERS(Span<const std::byte>(
+            static_cast<const std::byte*>(replayedBuffer.GetConstMappedRange()),
+            static_cast<size_t>(readback.buffer.GetSize())));
+        for (size_t i = 0; i < readback.buffer.GetSize(); ++i) {
             if (originalData[i] != replayData[i]) {
-                testing::AssertionResult result = testing::AssertionFailure()
-                                                  << "Original data[" << i << "] to be "
-                                                  << originalData[i] << ", replayed "
-                                                  << replayData[i] << "\n";
-                if (readback.bufferSize <= 1024) {
+                testing::AssertionResult result =
+                    testing::AssertionFailure()
+                    << "Original data[" << i << "] to be "
+                    << static_cast<uint32_t>(std::to_integer<uint8_t>(originalData[i]))
+                    << ", replayed "
+                    << static_cast<uint32_t>(std::to_integer<uint8_t>(replayData[i])) << "\n";
+                if (readback.buffer.GetSize() <= 1024) {
                     result << "Original:\n";
-                    printBuffer(result, originalData, readback.bufferSize);
+                    printBuffer(result, originalData.data(), originalData.size());
 
                     result << "Replayed:\n";
-                    printBuffer(result, replayData, readback.bufferSize);
+                    printBuffer(result, replayData.data(), replayData.size());
                 }
                 EXPECT_TRUE(result) << " Failure at Capture Replay Check";
                 break;
@@ -2474,7 +2486,7 @@ bool utils::RGBA8::operator>=(const utils::RGBA8& other) const {
 
 namespace detail {
 std::vector<AdapterTestParam> GetAvailableAdapterTestParamsForBackends(
-    dawn::Span<const BackendTestConfig> params) {
+    Span<const BackendTestConfig> params) {
     DAWN_ASSERT(gTestEnv != nullptr);
     return gTestEnv->GetAvailableAdapterTestParamsForBackends(params);
 }
