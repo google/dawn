@@ -355,7 +355,7 @@ void Validator::CheckFunctionParamType(const core::ir::FunctionParam* param,
     // Non-constructible structures are allowed with a property, if all of their members are valid
     // function parameter types.
     auto* struct_ty = param->Type()->As<core::type::Struct>();
-    if (struct_ty && ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+    if (struct_ty && ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates)) {
         for (auto* member : struct_ty->Members()) {
             CheckFunctionParamType(param, member->Type());
         }

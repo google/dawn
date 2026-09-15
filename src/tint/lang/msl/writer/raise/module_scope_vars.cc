@@ -356,6 +356,7 @@ Result<SuccessType> ModuleScopeVars(core::ir::Module& ir) {
 
     ir.properties.Add(core::ir::Property::kAllowAnyLetType);
     ir.properties.Add(core::ir::Property::kAllowMslEntryPointInterface);
+    ir.properties.Add(core::ir::Property::kAllowPointerAndHandleInAggregates);
 
     return Success;
 }

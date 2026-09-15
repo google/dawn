@@ -392,7 +392,7 @@ void Validator::CheckVar(const Var* var) {
     if (mv->AddressSpace() != AddressSpace::kStorage &&
         mv->AddressSpace() != AddressSpace::kHandle) {
         if (mv->AddressSpace() == AddressSpace::kWorkgroup ||
-            !ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+            !ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates)) {
             if (!mv->StoreType()->HasFixedFootprint()) {
                 AddError(var) << "vars not in the 'storage' or 'handle' address spaces "
                                  "must have a fixed footprint";
@@ -903,8 +903,8 @@ void Validator::CheckConstruct(const Construct* construct) {
     if (!result_type->IsConstructible()) {
         // We only allow `construct` to create non-constructible types when they are structures that
         // contain pointers and handle types, with the corresponding property enabled.
-        if (!(result_type->Is<core::type::Struct>() &&
-              ir_.properties.Contains(Property::kAllowMslEntryPointInterface))) {
+        if (!(result_type->IsAnyOf<core::type::Array, core::type::Struct>() &&
+              ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates))) {
             AddError(construct) << "type is not constructible";
             return;
         }

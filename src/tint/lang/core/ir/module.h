@@ -92,6 +92,8 @@ enum class Property : uint8_t {
     kAllowPhonyInstructions,
     /// Allows the PointSize builtin to be used.
     kAllowPointSizeBuiltin,
+    /// Allows pointers and handle types inside arrays and structures.
+    kAllowPointerAndHandleInAggregates,
     /// Allows a pointer to a handle type
     kAllowPointerToHandle,
     /// Allows reference types in the IR
@@ -139,6 +141,7 @@ auto& operator<<(STREAM& out, Property p) {
         CASE(AllowOverrides);
         CASE(AllowPhonyInstructions);
         CASE(AllowPointSizeBuiltin);
+        CASE(AllowPointerAndHandleInAggregates);
         CASE(AllowPointerToHandle);
         CASE(AllowRefTypes);
         CASE(AllowStructMatrixDecorations);

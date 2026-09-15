@@ -519,7 +519,7 @@ TEST_F(IR_ValidatorTest, Access_ExtractPointerFromStruct) {
         b.Return(f);
     });
 
-    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    mod.properties.Add(Property::kAllowPointerAndHandleInAggregates);
     auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }

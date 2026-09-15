@@ -546,7 +546,7 @@ TEST_F(IR_ValidatorTest, StructMember_Pointer_WithProperty) {
     auto* v = b.Var(ty.ptr(private_, str_ty));
     mod.root_block->Append(v);
 
-    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    mod.properties.Add(Property::kAllowPointerAndHandleInAggregates);
 
     auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success);
@@ -581,7 +581,7 @@ TEST_F(IR_ValidatorTest, StructMember_Texture_WithProperty) {
     auto* v = b.Var(ty.ptr(private_, str_ty));
     mod.root_block->Append(v);
 
-    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    mod.properties.Add(Property::kAllowPointerAndHandleInAggregates);
 
     auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success);
@@ -649,7 +649,7 @@ TEST_F(IR_ValidatorTest, StructMember_Sampler_WithProperty) {
     auto* v = b.Var(ty.ptr(private_, str_ty));
     mod.root_block->Append(v);
 
-    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    mod.properties.Add(Property::kAllowPointerAndHandleInAggregates);
 
     auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success);
@@ -858,6 +858,33 @@ TEST_F(IR_ValidatorTest, BufferDisallowed) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr("buffer types are not allowed in this context"));
+}
+
+TEST_F(IR_ValidatorTest, ArrayElement_Pointer) {
+    auto* arr_ty = ty.array<ptr<function, i32>, 4>();
+    auto* v = b.Var(ty.ptr(private_, arr_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:2:3 error: var: array elements, 'array<ptr<function, i32, read_write>, 4>', must have creation-fixed footprint
+  %1:ptr<private, array<ptr<function, i32, read_write>, 4>, read_write> = var undef
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, ArrayElement_Pointer_WithProperty) {
+    auto* arr_ty = ty.array<ptr<function, i32>, 4>();
+    auto* v = b.Var(ty.ptr(private_, arr_ty));
+    mod.root_block->Append(v);
+
+    mod.properties.Add(Property::kAllowPointerAndHandleInAggregates);
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
 }
 
 struct TypeTest : public IRTestParamHelper<std::tuple<

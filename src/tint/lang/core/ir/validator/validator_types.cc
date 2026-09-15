@@ -251,7 +251,7 @@ bool Validator::CheckStruct(const core::type::Struct* str,
             return false;
         }
 
-        if (!ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+        if (!ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates)) {
             if (member->Type()->Is<core::type::Pointer>()) {
                 diag() << "struct member " << member->Index() << " cannot be a pointer type";
                 return false;
@@ -500,7 +500,8 @@ bool Validator::Check16BitFloat(std::function<diag::Diagnostic&()>& diag) {
 }
 
 bool Validator::CheckArray(const core::type::Array* arr, std::function<diag::Diagnostic&()>& diag) {
-    if (!arr->ElemType()->HasCreationFixedFootprint()) {
+    if (!arr->ElemType()->HasCreationFixedFootprint() &&
+        !ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates)) {
         diag() << "array elements, " << NameOf(arr) << ", must have creation-fixed footprint";
         return false;
     }

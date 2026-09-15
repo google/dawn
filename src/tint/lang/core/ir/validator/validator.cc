@@ -968,7 +968,7 @@ bool Validator::CanLoad(const core::type::Type* ty) {
         [&](const core::type::Struct* str) {
             for (auto* member : str->Members()) {
                 if (member->Type()->Is<core::type::Pointer>() &&
-                    ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+                    ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates)) {
                     continue;
                 }
                 if (!CanLoad(member->Type())) {
