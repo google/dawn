@@ -382,21 +382,22 @@ func run(c *mainConfig) error {
 
 	queue := make([]*taskConfig, 0, 1)
 
-	if c.fuzzMode == FuzzModeIr && (c.cmdMode == TaskModeRun || c.cmdMode == TaskModeCheck) {
-		// The default input files are .wgsl files and tint_ir_fuzzer runs on .tirb files, so need
-		// to convert them before running/checking
+	if c.cmdMode == TaskModeRun || c.cmdMode == TaskModeCheck {
+		// Preprocess inputs when pointing at the default test directory:
+		// - Strips comments and copyright headers from .wgsl files
+		// - Converts .wgsl files to .tirb files for IR mode
 		if c.inputs == defaultWgslCorpusDir(c.osWrapper) {
 			origOut := c.out
-			tmp, err := c.osWrapper.MkdirTemp("", "ir_corpus")
+			tmp, err := c.osWrapper.MkdirTemp("", "fuzz_corpus")
 			if err != nil {
-				return fmt.Errorf("failed to create temporary directory for IR corpus: %w", err)
+				return fmt.Errorf("failed to create temporary directory for fuzz corpus: %w", err)
 			}
 			defer c.osWrapper.RemoveAll(tmp)
 
 			c.out = tmp
 			t, err := generateTaskConfig(TaskModeGenerate, c)
 			if err != nil {
-				return fmt.Errorf("failed to generate task config for IR corpus generation: %w", err)
+				return fmt.Errorf("failed to generate task config for fuzz corpus generation: %w", err)
 			}
 			queue = append(queue, t)
 
