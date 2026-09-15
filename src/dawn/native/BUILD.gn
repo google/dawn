@@ -520,6 +520,9 @@ source_set("sources") {
   # WinPIX should be added as third party tools and linked statically
 
   if (dawn_enable_d3d11 || dawn_enable_d3d12) {
+    # dcomp.lib provides DCompositionCreateDevice, used by SwapChainD3D to present
+    # per-pixel-transparent HWND surfaces through a DirectComposition visual.
+    libs += [ "dcomp.lib" ]
     sources += [
       "d3d/BackendD3D.cpp",
       "d3d/BackendD3D.h",
