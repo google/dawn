@@ -36,21 +36,6 @@
 namespace tint::core::ir::validator {
 namespace {
 
-/// @returns true if @p ty meets the basic function parameter rules (i.e. one of constructible,
-///          pointer, handle).
-///
-/// Note: Does not handle corner cases like if certain properties are present.
-bool IsValidFunctionParamType(const core::type::Type* ty) {
-    if (ty->IsConstructible() || ty->IsHandle()) {
-        return true;
-    }
-
-    if (auto* ptr = ty->As<core::type::Pointer>()) {
-        return ptr->AddressSpace() != core::AddressSpace::kHandle;
-    }
-    return false;
-}
-
 /// @returns true if @p ty is a non-struct and decorated with @builtin(position), or if it is a
 /// struct and one of its members is decorated, otherwise false.
 /// @param attr attributes attached to data
@@ -287,6 +272,7 @@ bool Validator::CheckFunctionParam(const Function* func,
     }
 
     CheckType(param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); });
+    CheckFunctionParamType(param, param->Type());
 
     if (func->IsFragment()) {
         WalkTypeAndMembers(param, param->Type(), param->Attributes(),
@@ -319,25 +305,6 @@ bool Validator::CheckFunctionParam(const Function* func,
         }
     }
 
-    bool func_is_entry_point = param->Function()->IsEntryPoint();
-
-    if (!IsValidFunctionParamType(param->Type())) {
-        auto ptr_ty = param->Type()->As<core::type::Pointer>();
-        bool allowed_ptr_to_handle = ir_.properties.Contains(Property::kAllowPointerToHandle) &&
-                                     ptr_ty != nullptr && ptr_ty->StoreType()->IsHandle();
-
-        auto struct_ty = param->Type()->As<core::type::Struct>();
-        if (!allowed_ptr_to_handle &&
-            (!ir_.properties.Contains(Property::kAllowMslEntryPointInterface) ||
-             (struct_ty == nullptr) ||
-             struct_ty->Members().Any([](const core::type::StructMember* m) {
-                 return !IsValidFunctionParamType(m->Type());
-             }))) {
-            AddError(param) << "function parameter type, " << NameOf(param->Type())
-                            << ", must be constructible, a pointer, or a handle";
-        }
-    }
-
     AddressSpace address_space = AddressSpace::kUndefined;
     auto* mv = param->Type()->As<core::type::MemoryView>();
     if (mv) {
@@ -355,7 +322,7 @@ bool Validator::CheckFunctionParam(const Function* func,
         }
     }
 
-    if (func_is_entry_point && !ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+    if (func->IsEntryPoint() && !ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
         if (param->Type()->Is<core::type::Pointer>()) {
             AddError(param) << "entry point parameters cannot be pointers";
         }
@@ -367,6 +334,36 @@ bool Validator::CheckFunctionParam(const Function* func,
     }
 
     return true;
+}
+
+void Validator::CheckFunctionParamType(const core::ir::FunctionParam* param,
+                                       const core::type::Type* ty) {
+    if (ty->IsConstructible() || ty->IsHandle()) {
+        return;
+    }
+
+    // Pointer-to-handle requires a property, every other pointer is OK.
+    if (auto* ptr = ty->As<core::type::Pointer>()) {
+        if (ptr->AddressSpace() == core::AddressSpace::kHandle &&
+            !ir_.properties.Contains(Property::kAllowPointerToHandle)) {
+            AddError(param) << "function parameter with pointer to handle type requires "
+                               "AllowPointerToHandle property";
+        }
+        return;
+    }
+
+    // Non-constructible structures are allowed with a property, if all of their members are valid
+    // function parameter types.
+    auto* struct_ty = param->Type()->As<core::type::Struct>();
+    if (struct_ty && ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+        for (auto* member : struct_ty->Members()) {
+            CheckFunctionParamType(param, member->Type());
+        }
+        return;
+    }
+
+    AddError(param) << "function parameter type, " << NameOf(param->Type())
+                    << ", must be constructible, a pointer, or a handle";
 }
 
 void Validator::CheckWorkgroupSize(const Function* func) {

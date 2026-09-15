@@ -831,8 +831,8 @@ TEST_F(IR_ValidatorTest, FunctionParam_InvalidHandlePointer) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr("function parameter type, 'ptr<handle, texture_1d<f32>, read>', "
-                                   "must be constructible, a pointer, or a handle"))
+                testing::HasSubstr("function parameter with pointer to handle type requires "
+                                   "AllowPointerToHandle property"))
         << res.Failure();
 }
 

@@ -416,6 +416,7 @@ class Validator {
     bool CheckFunctionParam(const Function* func,
                             const FunctionParam* param,
                             Hashset<const FunctionParam*, 4>& param_set);
+    void CheckFunctionParamType(const core::ir::FunctionParam* param, const core::type::Type* ty);
     void CheckEntryPoint(const Function* func);
     void CheckWorkgroupSize(const Function* func);
     void CheckSubgroupSize(const Function* func);
