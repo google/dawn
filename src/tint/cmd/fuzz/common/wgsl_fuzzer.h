@@ -31,6 +31,7 @@
 #include <cstddef>
 #include <functional>
 #include <iostream>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -41,6 +42,7 @@
 #include "src/tint/utils/bytes/buffer_reader.h"
 #include "src/tint/utils/bytes/decoder.h"
 #include "src/tint/utils/containers/enum_set.h"
+#include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/macros/static_init.h"
 #include "src/tint/utils/result.h"
 
@@ -70,6 +72,8 @@ struct Context {
     tint::fuzz::common::Options options;
     /// The properties of the input program
     EnumSet<ProgramProperties> program_properties;
+    /// The cached IR module in binary format, if TINT_BUILD_IR_BINARY is enabled.
+    std::optional<tint::Vector<std::byte, 0>> ir_binary;
 };
 
 /// ProgramFuzzer describes a fuzzer function that takes a WGSL program as input

@@ -151,6 +151,12 @@ tint_target_add_external_dependencies(tint_cmd_fuzz_wgsl_fuzz fuzz
   "thread"
 )
 
+if(TINT_BUILD_IR_BINARY)
+  tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz fuzz
+    tint_lang_core_ir_binary
+  )
+endif(TINT_BUILD_IR_BINARY)
+
 if(TINT_BUILD_WGSL_WRITER)
   tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz fuzz
     tint_lang_wgsl_writer

@@ -72,6 +72,10 @@ if (tint_build_fuzzers && tint_build_wgsl_reader) {
       "${tint_src_dir}/utils/text",
     ]
 
+    if (tint_build_ir_binary) {
+      deps += [ "${tint_src_dir}/lang/core/ir/binary" ]
+    }
+
     if (tint_build_wgsl_writer) {
       deps += [
         "${tint_src_dir}/lang/wgsl/writer",

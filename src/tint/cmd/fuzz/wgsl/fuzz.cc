@@ -48,6 +48,10 @@
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/macros/defer.h"
+
+#if TINT_BUILD_IR_BINARY
+#include "src/tint/lang/core/ir/binary/encode.h"
+#endif
 #include "src/tint/utils/macros/static_init.h"
 #include "src/tint/utils/rtti/switch.h"
 
@@ -167,6 +171,24 @@ void Run(std::string_view wgsl, const Options& options, std::span<const std::byt
     Context context;
     context.options = options;
     context.program_properties = ScanProgramProperties(program);
+
+#if TINT_BUILD_IR_BINARY
+    // Cache the IR module if possible, so the program doesn't need to be lowered for each IR pass
+    if (!program.AST().Enables().Any(tint::wgsl::reader::IsUnsupportedByIR)) {
+        tint::wgsl::reader::IROptions ir_options{
+            .dump_ir_when_validating = options.dump_ir_when_validating,
+            .enable_validation_asserts = !options.disable_ir_validator,
+        };
+        auto ir = tint::wgsl::reader::ProgramToLoweredIR(program, ir_options);
+        if (ir != Success) {
+            return;
+        }
+        auto encoded = tint::core::ir::binary::EncodeToBinary(ir.Get());
+        if (encoded == Success) {
+            context.ir_binary = encoded.Move();
+        }
+    }
+#endif
 
     // Run each of the program fuzzer functions
     tint::fuzz::common::RunFuzzers(Fuzzers(), options, [&](const ProgramFuzzer& fuzzer, size_t) {
