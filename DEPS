@@ -30,7 +30,7 @@ vars = {
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
   'dawn_go_version': 'version:3@1.26.6',
   'dawn_node_version': 'version:2@20.11.0',
-  'agility_sdk_version': 'version:2@1.721.0-preview',
+  'dawn_agility_sdk_version': 'version:2@1.721.0-preview',
   'dawn_bazelisk_version': 'version:3@1.29.0',
   'dawn_llvm-dev_version': 'version:3@22.1.0',
   'dawn_zstd_version': 'Lf-seQJdussz81cZXnez5xIxEdkejDRxKumQpHbHMOUC',
@@ -445,7 +445,7 @@ deps = {
     'packages': [
       {
         'package': 'chromium/third_party/agility-sdk',
-        'version': Var('agility_sdk_version'),
+        'version': Var('dawn_agility_sdk_version'),
       },
     ],
     'condition': 'host_os == "win"',
