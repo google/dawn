@@ -227,16 +227,6 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         mTextureBuiltinsBuffer = ToBackend(std::move(buffer));
     }
 
-    if (IsToggleEnabled(Toggle::GLUseArrayLengthFromUniform) &&
-        mArrayLengthBuffer.Get() == nullptr) {
-        BufferDescriptor desc = {};
-        desc.size = kGLMaxShaderStorageBufferBindingsReported * sizeof(uint32_t);
-        desc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
-        Ref<BufferBase> buffer;
-        DAWN_TRY_ASSIGN(buffer, Buffer::CreateInternalBuffer(this, &desc, false));
-        mArrayLengthBuffer = ToBackend(std::move(buffer));
-    }
-
     return scopedCurrentContext.End();
 }
 
@@ -529,7 +519,6 @@ void Device::DestroyImpl(DestroyReason reason) {
     DAWN_ASSERT(GetState() == State::Disconnected);
 
     mTextureBuiltinsBuffer = nullptr;
-    mArrayLengthBuffer = nullptr;
 }
 
 void Device::MarkGLUsed(ExecutionQueueBase::SubmitMode submitMode) const {
@@ -602,10 +591,6 @@ ContextEGL* Device::GetContext() const {
 
 const Buffer* Device::GetInternalTextureBuiltinsUniformBuffer() const {
     return mTextureBuiltinsBuffer.Get();
-}
-
-const Buffer* Device::GetInternalArrayLengthUniformBuffer() const {
-    return mArrayLengthBuffer.Get();
 }
 
 }  // namespace dawn::native::opengl

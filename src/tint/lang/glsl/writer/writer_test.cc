@@ -343,5 +343,56 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, ArrayLengthFromImmediate) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<u32>>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* length = b.Call<u32>(core::BuiltinFn::kArrayLength, buffer);
+        b.Store(b.Access<ptr<storage, u32>>(buffer, 0_u), length);
+        b.Return(func);
+    });
+
+    Options options;
+    options.disable_robustness = true;
+    options.array_length_from_immediate.buffer_sizes_offset = 4;
+    options.array_length_from_immediate.bindpoint_to_size_index[{0, 0}] = 1;
+
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
+    EXPECT_THAT(output_.glsl,
+                testing::HasSubstr("layout(location = 0) uniform uint tint_immediates[3]"));
+    EXPECT_THAT(output_.glsl, testing::HasSubstr("tint_immediates[2u] / 4u"));
+    EXPECT_THAT(output_.glsl, testing::Not(testing::HasSubstr(".length()")));
+    EXPECT_THAT(output_.glsl, testing::Not(testing::HasSubstr("tint_storage_buffer_sizes_block")));
+}
+
+TEST_F(GlslWriterTest, ArrayLengthFromImmediateWithRemappedBinding) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<u32>>());
+    buffer->SetBindingPoint(1, 2);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* length = b.Call<u32>(core::BuiltinFn::kArrayLength, buffer);
+        b.Store(b.Access<ptr<storage, u32>>(buffer, 0_u), length);
+        b.Return(func);
+    });
+
+    Options options;
+    options.disable_robustness = true;
+    options.bindings.storage[{1, 2}] = {0, 3};
+    options.array_length_from_immediate.buffer_sizes_offset = 0;
+    options.array_length_from_immediate.bindpoint_to_size_index[{1, 2}] = 0;
+
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
+    EXPECT_THAT(output_.glsl, testing::HasSubstr("layout(binding = 3, std430)"));
+    EXPECT_THAT(output_.glsl, testing::HasSubstr("tint_immediates[0u] / 4u"));
+    EXPECT_THAT(output_.glsl, testing::Not(testing::HasSubstr(".length()")));
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

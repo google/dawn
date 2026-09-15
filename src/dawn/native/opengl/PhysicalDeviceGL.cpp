@@ -520,7 +520,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // (crbug.com/42240914): Nividia GLES driver returns wrong value for .length() on
     // SSBO dynamic array.
     deviceToggles->Default(
-        Toggle::GLUseArrayLengthFromUniform,
+        Toggle::GLUseArrayLengthFromImmediate,
         mVendorId == gpu_info::kVendorID_ImgTec || mVendorId == gpu_info::kVendorID_Nvidia);
 
     // Enable the integer range analysis for shader robustness by default if the corresponding

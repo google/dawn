@@ -50,8 +50,10 @@ namespace opengl {
 
 class Device;
 class EmulatedTextureBuiltinRegistrar;
+// NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
 class PipelineLayout;
 struct OpenGLFunctions;
+struct StorageBufferSizeImmediateInfo;
 
 #define COMBINED_SAMPLER_ELEMENT_MEMBERS(X)                                                 \
     X(BindGroupIndex, group)                                                                \
@@ -91,8 +93,8 @@ class ShaderModule final : public ShaderModuleBase {
                                         VertexAttributeMask bgraSwizzleAttributes,
                                         std::vector<CombinedSampler>* combinedSamplersOut,
                                         const PipelineLayout* layout,
+                                        const StorageBufferSizeImmediateInfo& storageBufferSizeInfo,
                                         EmulatedTextureBuiltinRegistrar* emulatedTextureBuiltins,
-                                        bool* needsSSBOLengthUniformBuffer,
                                         Extent3D* workgroupSize);
 
   private:

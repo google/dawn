@@ -48,7 +48,7 @@ struct FuzzedOptions {
     bool enable_integer_range_analysis;
     bool disable_workgroup_init;
     bool disable_polyfill_integer_div_mod;
-    bool use_array_length_from_uniform;
+    bool use_array_length_from_immediate;
     std::unordered_set<uint32_t> bgra_swizzle_locations;
     SubstituteOverridesConfig substitute_overrides_config;
 
@@ -59,7 +59,7 @@ struct FuzzedOptions {
                  enable_integer_range_analysis,
                  disable_workgroup_init,
                  disable_polyfill_integer_div_mod,
-                 use_array_length_from_uniform,
+                 use_array_length_from_immediate,
                  bgra_swizzle_locations,
                  substitute_overrides_config);
     TINT_REFLECT_HASH_CODE(FuzzedOptions);
@@ -101,7 +101,6 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.disable_integer_range_analysis = !fuzzed_options.enable_integer_range_analysis;
     options.disable_workgroup_init = fuzzed_options.disable_workgroup_init;
     options.disable_polyfill_integer_div_mod = fuzzed_options.disable_polyfill_integer_div_mod;
-    options.use_array_length_from_uniform = fuzzed_options.use_array_length_from_uniform;
     options.entry_point_name = ep_name;
     options.bgra_swizzle_locations = fuzzed_options.bgra_swizzle_locations;
     options.substitute_overrides_config = fuzzed_options.substitute_overrides_config;
@@ -114,11 +113,21 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
 
     // Leave some room for user-declared immediate data.
     uint32_t next_immediate_offset = 0x800;
-    auto builtin_immediate = [&next_immediate_offset] {
+    auto builtin_immediate = [&next_immediate_offset](uint32_t count = 1) {
         auto offset = next_immediate_offset;
-        next_immediate_offset += 4;
+        next_immediate_offset += count * 4;
         return offset;
     };
+
+    if (fuzzed_options.use_array_length_from_immediate && !options.bindings.storage.empty()) {
+        options.array_length_from_immediate.buffer_sizes_offset =
+            builtin_immediate(static_cast<uint32_t>(options.bindings.storage.size()));
+        uint32_t size_index = 0;
+        for (const auto& entry : options.bindings.storage) {
+            options.array_length_from_immediate.bindpoint_to_size_index.emplace(entry.first,
+                                                                                size_index++);
+        }
+    }
 
     // Set offsets for immediate data used for certain builtins.
     for (auto& func : module.functions) {

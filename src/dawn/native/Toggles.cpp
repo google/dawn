@@ -512,10 +512,9 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "drivers mis-stride the buffer between layers when bufferImageHeight is padded, corrupting "
       "every layer after the first.",
       "https://issues.chromium.org/issues/520126486", ToggleStage::Device}},
-    {Toggle::GLUseArrayLengthFromUniform,
-     {"gl_use_array_length_from_uniform",
-      "Use arrayLengthFromUniform transform to replace arrayLength() function calls of dynamic "
-      "storage buffers."
+    {Toggle::GLUseArrayLengthFromImmediate,
+     {"gl_use_array_length_from_immediate",
+      "Use immediate data to replace arrayLength() function calls of dynamic storage buffers. "
       "This toggle is only used for workarounds on certain devices. It has no impact on backends "
       "which need "
       "this transform universally (metal, d3d12)",

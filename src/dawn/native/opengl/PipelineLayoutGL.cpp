@@ -99,12 +99,9 @@ PipelineLayout::PipelineLayout(Device* device,
 
     mNumSamplers = samplerIndex;
     mNumSampledTextures = sampledTextureIndex;
-    mNumSSBO = ssboIndex;
 
-    // Set internal uniform bindings as the next unused uboIndex.
+    // Set the internal uniform binding as the next unused uboIndex.
     mInternalTextureBuiltinsUniformBinding = uboIndex;
-    uboIndex++;
-    mInternalArrayLengthUniformBinding = uboIndex;
 }
 
 const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo() const {
@@ -119,16 +116,8 @@ FlatBindingIndex PipelineLayout::GetNumSampledTextures() const {
     return mNumSampledTextures;
 }
 
-FlatBindingIndex PipelineLayout::GetNumSSBO() const {
-    return mNumSSBO;
-}
-
 FlatBindingIndex PipelineLayout::GetInternalTextureBuiltinsUniformBinding() const {
     return mInternalTextureBuiltinsUniformBinding;
-}
-
-FlatBindingIndex PipelineLayout::GetInternalArrayLengthUniformBinding() const {
-    return mInternalArrayLengthUniformBinding;
 }
 
 }  // namespace dawn::native::opengl

@@ -46,13 +46,23 @@ struct RenderImmediates {
     // first index offset
     uint32_t firstVertex = 0;
     uint32_t firstInstance = 0;
+
+    // Vertex and fragment stages can each use a distinct set of storage buffers.
+    std::array<uint32_t, size_t{kMaxStorageBuffersPerShaderStage} * 2> storageBufferSizes;
 };
 
 // Define compute pipeline immediates layout. Append members to expand the layout.
 struct ComputeImmediates {
     UserImmediates userImmediates;
+
+    std::array<uint32_t, kMaxStorageBuffersPerShaderStage> storageBufferSizes;
 };
 DAWN_DISABLE_STRUCT_PADDING_WARNINGS
+
+static_assert(sizeof(RenderImmediates) <=
+              size_t{kMaxImmediateMaskBits} * kImmediateElementByteSize);
+static_assert(sizeof(ComputeImmediates) <=
+              size_t{kMaxImmediateMaskBits} * kImmediateElementByteSize);
 
 }  // namespace dawn::native::opengl
 

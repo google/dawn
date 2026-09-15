@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/glsl/writer/raise/raise.h"
 
+#include <algorithm>
 #include <unordered_map>
 
 #include "src/tint/lang/core/ir/module.h"
@@ -57,6 +58,7 @@
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
+#include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/glsl/writer/common/option_helpers.h"
@@ -90,6 +92,22 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     // PrepareImmediateData must come before any transform that needs internal immediate data.
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
+    uint32_t buffer_sizes_array_elements_num = 0;
+    if (!options.array_length_from_immediate.bindpoint_to_size_index.empty() &&
+        !options.array_length_from_immediate.buffer_sizes_offset.has_value()) {
+        return Failure("array length from immediate requires a buffer sizes offset");
+    }
+    if (options.array_length_from_immediate.buffer_sizes_offset) {
+        for (auto& entry : options.array_length_from_immediate.bindpoint_to_size_index) {
+            buffer_sizes_array_elements_num =
+                std::max(buffer_sizes_array_elements_num, entry.second + 1);
+        }
+        TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
+            core::InternalImmediate::kStorageBufferSizes,
+            options.array_length_from_immediate.buffer_sizes_offset.value(),
+            module.symbols.New("tint_storage_buffer_sizes"),
+            module.Types().array(module.Types().u32(), buffer_sizes_array_elements_num)));
+    }
     if (options.first_instance_offset) {
         TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
             core::InternalImmediate::kFirstInstanceOffset, options.first_instance_offset.value(),
@@ -181,27 +199,20 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // This was moved after the remapper so we need to update the binding info since the options are
     // based on Dawn's _pre-remapping_ binding information. Since we have the remapping info, we
     // just remap it here.
-    if (options.use_array_length_from_uniform) {
-        // Update the binding for the length buffer.
-        BindingPoint length_binding = options.array_length_from_uniform.ubo_binding;
-        auto where = remapper_data.find(length_binding);
-        if (where != remapper_data.end()) {
-            length_binding = where->second;
-        }
-        // Update the index information for the binding that need a length.
+    if (options.array_length_from_immediate.buffer_sizes_offset) {
         std::unordered_map<BindingPoint, uint32_t> size_indices;
-        for (auto& pair : options.array_length_from_uniform.bindpoint_to_size_index) {
+        for (auto& pair : options.array_length_from_immediate.bindpoint_to_size_index) {
             auto& bp = pair.first;
             auto& index = pair.second;
-            where = remapper_data.find(bp);
+            auto where = remapper_data.find(bp);
             if (where != remapper_data.end()) {
                 size_indices[where->second] = index;
             } else {
                 size_indices[bp] = index;
             }
         }
-        TINT_CHECK_RESULT(
-            core::ir::transform::ArrayLengthFromUniform(module, length_binding, size_indices));
+        TINT_CHECK_RESULT(core::ir::transform::ArrayLengthFromImmediates(
+            module, immediate_data_layout, buffer_sizes_array_elements_num, size_indices));
     }
     TINT_CHECK_RESULT(core::ir::transform::BlockDecoratedStructs(module));
 

@@ -31,6 +31,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <tuple>
 
 #include "src/dawn/common/Range.h"
 #include "src/dawn/native/BindGroupLayoutInternal.h"
@@ -39,6 +40,7 @@
 #include "src/dawn/native/opengl/BufferGL.h"
 #include "src/dawn/native/opengl/DeviceGL.h"
 #include "src/dawn/native/opengl/Forward.h"
+#include "src/dawn/native/opengl/ImmediatesLayoutGL.h"
 #include "src/dawn/native/opengl/OpenGLFunctions.h"
 #include "src/dawn/native/opengl/PipelineLayoutGL.h"
 #include "src/dawn/native/opengl/SamplerGL.h"
@@ -69,27 +71,63 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
         }
     }
 
+    if (layout->GetDevice()->IsToggleEnabled(Toggle::GLUseArrayLengthFromImmediate)) {
+        uint32_t storageBufferCount = 0;
+        for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
+            const BindGroupLayoutInternalBase* bgl = layout->GetBindGroupLayout(group);
+            auto& pipelineBindings = mStorageBufferSizeImmediateInfo.bindings[group];
+            for (BindingIndex bindingIndex : bgl->GetBufferIndices()) {
+                const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
+                if (!(bindingInfo.visibility & activeStages) ||
+                    !bgl->IsStorageBufferBinding(bindingIndex)) {
+                    continue;
+                }
+                bool isUsed = false;
+                for (SingleShaderStage stage : IterateStages(activeStages)) {
+                    if (stages[stage].metadata->bindings[group].contains(bindingInfo.binding)) {
+                        isUsed = true;
+                        break;
+                    }
+                }
+                if (isUsed) {
+                    pipelineBindings.push_back(
+                        {bindingIndex, bindingInfo.binding, storageBufferCount++});
+                }
+            }
+        }
+        if (activeStages & StageBit(SingleShaderStage::Compute)) {
+            DAWN_ASSERT(storageBufferCount <=
+                        std::tuple_size_v<decltype(ComputeImmediates::storageBufferSizes)>);
+            pipelineImmediateMask |=
+                GetImmediateBlockBits(offsetof(ComputeImmediates, storageBufferSizes),
+                                      size_t{storageBufferCount} * kImmediateElementByteSize);
+        } else {
+            DAWN_ASSERT(storageBufferCount <=
+                        std::tuple_size_v<decltype(RenderImmediates::storageBufferSizes)>);
+            pipelineImmediateMask |=
+                GetImmediateBlockBits(offsetof(RenderImmediates, storageBufferSizes),
+                                      size_t{storageBufferCount} * kImmediateElementByteSize);
+        }
+    }
+
     // Create an OpenGL shader for each stage and gather the list of combined samplers.
     std::set<CombinedSampler> combinedSamplers;
-    mNeedsSSBOLengthUniformBuffer = false;
     std::vector<GLuint> glShaders;
     EmulatedTextureBuiltinRegistrar emulatedTextureBuiltins(layout);
     for (SingleShaderStage stage : IterateStages(activeStages)) {
         ShaderModule* module = ToBackend(stages[stage].module.Get());
-        bool needsSSBOLengthUniformBuffer = false;
         std::vector<CombinedSampler> stageCombinedSamplers;
         Extent3D localWorkgroupSize;
         GLuint shader;
         DAWN_TRY_ASSIGN(
             shader, module->CompileShader(gl, stages[stage], stage, pipelineImmediateMask,
                                           bgraSwizzleAttributes, &stageCombinedSamplers, layout,
-                                          &emulatedTextureBuiltins, &needsSSBOLengthUniformBuffer,
+                                          mStorageBufferSizeImmediateInfo, &emulatedTextureBuiltins,
                                           &localWorkgroupSize));
         if (stage == SingleShaderStage::Compute) {
             *workgroupSize = localWorkgroupSize;
         }
 
-        mNeedsSSBOLengthUniformBuffer |= needsSSBOLengthUniformBuffer;
         combinedSamplers.insert(stageCombinedSamplers.begin(), stageCombinedSamplers.end());
 
         DAWN_GL_TRY(gl, AttachShader(mProgram, shader));
@@ -215,8 +253,8 @@ bool PipelineGL::NeedsTextureBuiltinUniformBuffer() const {
     return !mEmulatedTextureBuiltinInfo.empty();
 }
 
-bool PipelineGL::NeedsSSBOLengthUniformBuffer() const {
-    return mNeedsSSBOLengthUniformBuffer;
+const StorageBufferSizeImmediateInfo& PipelineGL::GetStorageBufferSizeImmediateInfo() const {
+    return mStorageBufferSizeImmediateInfo;
 }
 
 // EmulatedTextureBuiltinRegistrar

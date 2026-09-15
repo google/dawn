@@ -119,17 +119,15 @@ struct TextureBuiltinsFromUniformOptions {
     TINT_REFLECT(TextureBuiltinsFromUniformOptions, ubo_binding, ubo_contents);
 };
 
-/// Options used to specify a mapping of binding points to indices into a UBO
-/// from which to load buffer sizes.
-struct ArrayLengthFromUniformOptions {
-    /// The binding point to use to generate a uniform buffer from which to read buffer sizes.
-    BindingPoint ubo_binding;
-    /// The mapping from the storage buffer binding points in WGSL binding-point space to the index
-    /// into the uniform buffer where the length of the buffer is stored.
+/// Options used to specify a mapping of binding points to indices into immediate data from which to
+/// load buffer sizes.
+struct ArrayLengthFromImmediateOptions {
+    /// The offset in immediate data where buffer sizes start.
+    std::optional<uint32_t> buffer_sizes_offset;
+    /// The mapping from storage buffer binding points to buffer-size indices.
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
 
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(ArrayLengthFromUniformOptions, ubo_binding, bindpoint_to_size_index);
+    TINT_REFLECT(ArrayLengthFromImmediateOptions, buffer_sizes_offset, bindpoint_to_size_index);
 };
 
 /// Configuration options used for generating GLSL.
@@ -172,9 +170,6 @@ struct Options {
     /// Set to `true` to disable the polyfills on integer division and modulo.
     bool disable_polyfill_integer_div_mod = false;
 
-    /// Set to `true` to run ArrayLengthFromTransform workaround
-    bool use_array_length_from_uniform = false;
-
     /// Set to `true` to use the uniform buffer directly, `false` to decompose into array<vec4u,
     /// ...>.
     bool use_uniform_buffers = false;
@@ -205,10 +200,8 @@ struct Options {
     /// textureQueryLevels/textureSamples directly.
     TextureBuiltinsFromUniformOptions texture_builtins_from_uniform = {};
 
-    /// Options used to specify a mapping of binding points to indices into a UBO
-    /// from which to load buffer sizes. If not specified, emits corresponding GLSL builtins
-    /// length() directly
-    ArrayLengthFromUniformOptions array_length_from_uniform = {};
+    /// Options used to load buffer sizes from immediate data.
+    ArrayLengthFromImmediateOptions array_length_from_immediate = {};
 
     /// A map of SamplerTexturePair to combined sampler names for the
     /// CombineSamplers transform
@@ -230,7 +223,6 @@ struct Options {
                  disable_integer_range_analysis,
                  disable_workgroup_init,
                  disable_polyfill_integer_div_mod,
-                 use_array_length_from_uniform,
                  use_uniform_buffers,
                  entry_point_name,
                  version,
@@ -240,7 +232,7 @@ struct Options {
                  depth_range_offsets,
                  bgra_swizzle_locations,
                  texture_builtins_from_uniform,
-                 array_length_from_uniform,
+                 array_length_from_immediate,
                  sampler_texture_to_name,
                  placeholder_sampler_bind_point,
                  bindings,

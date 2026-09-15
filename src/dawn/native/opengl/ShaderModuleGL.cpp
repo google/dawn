@@ -271,44 +271,20 @@ void GenerateTextureBuiltinFromUniformData(
     }
 }
 
-bool GenerateArrayLengthFromuniformData(
+void GenerateArrayLengthFromImmediateData(
     const BindingInfoArray& moduleBindingInfo,
-    const PipelineLayout* layout,
-    SingleShaderStage stage,
-    tint::glsl::writer::ArrayLengthFromUniformOptions& options) {
-    const PipelineLayout::BindingIndexInfo& indexInfo = layout->GetBindingIndexInfo();
-
-    for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
-        const BindGroupLayoutInternalBase* bgl = layout->GetBindGroupLayout(group);
-
-        for (BindingIndex binding : bgl->GetBufferIndices()) {
-            const BindingInfo& bindingInfo = bgl->GetBindingInfo(binding);
-
-            // Skip bindings that aren't visible to this stage.
-            if (!(bindingInfo.visibility & StageBit(stage))) {
+    const StorageBufferSizeImmediateInfo& storageBufferSizeInfo,
+    tint::glsl::writer::ArrayLengthFromImmediateOptions& options) {
+    for (auto [group, bindingInfos] : Enumerate(storageBufferSizeInfo.bindings)) {
+        for (const auto& bindingInfo : bindingInfos) {
+            if (!moduleBindingInfo[group].contains(bindingInfo.bindingNumber)) {
                 continue;
             }
-
-            switch (std::get<BufferBindingInfo>(bindingInfo.bindingLayout).type) {
-                case wgpu::BufferBindingType::Storage:
-                case kInternalStorageBufferBinding:
-                case wgpu::BufferBindingType::ReadOnlyStorage:
-                case kInternalReadOnlyStorageBufferBinding: {
-                    // Use ssbo index as the indices for the buffer size lookups
-                    // in the array length from uniform transform.
-                    tint::BindingPoint srcBindingPoint = {uint32_t{group},
-                                                          uint32_t{bindingInfo.binding}};
-                    FlatBindingIndex ssboIndex = indexInfo[group][binding];
-                    options.bindpoint_to_size_index.emplace(srcBindingPoint, uint32_t{ssboIndex});
-                    break;
-                }
-                default:
-                    break;
-            }
+            tint::BindingPoint srcBindingPoint = {uint32_t{group},
+                                                  uint32_t{bindingInfo.bindingNumber}};
+            options.bindpoint_to_size_index.emplace(srcBindingPoint, bindingInfo.sizeIndex);
         }
     }
-
-    return options.bindpoint_to_size_index.size() > 0;
 }
 
 }  // namespace
@@ -360,8 +336,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     VertexAttributeMask bgraSwizzleAttributes,
     std::vector<CombinedSampler>* combinedSamplersOut,
     const PipelineLayout* layout,
+    const StorageBufferSizeImmediateInfo& storageBufferSizeInfo,
     EmulatedTextureBuiltinRegistrar* emulatedTextureBuiltins,
-    bool* needsSSBOLengthUniformBuffer,
     Extent3D* workgroupSize) {
     TRACE_EVENT(DAWN_TRACE_CATEGORY(), "TranslateToGLSL");
 
@@ -414,21 +390,16 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.adapterSupportedLimits = UnsafeUnserializedValue(
         LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1));
 
-    if (GetDevice()->IsToggleEnabled(Toggle::GLUseArrayLengthFromUniform)) {
-        *needsSSBOLengthUniformBuffer = GenerateArrayLengthFromuniformData(
-            moduleBindingInfo, layout, stage, req.tintOptions.array_length_from_uniform);
-        if (*needsSSBOLengthUniformBuffer) {
-            req.tintOptions.use_array_length_from_uniform = true;
-            req.tintOptions.array_length_from_uniform.ubo_binding = {
-                .group = kMaxBindGroups + 2,
-                .binding = 0,
-            };
-            bindings.uniform.emplace(
-                req.tintOptions.array_length_from_uniform.ubo_binding,
-                tint::BindingPoint{
-                    .group = 0,
-                    .binding = uint32_t{layout->GetInternalArrayLengthUniformBinding()},
-                });
+    if (GetDevice()->IsToggleEnabled(Toggle::GLUseArrayLengthFromImmediate)) {
+        GenerateArrayLengthFromImmediateData(moduleBindingInfo, storageBufferSizeInfo,
+                                             req.tintOptions.array_length_from_immediate);
+        if (!req.tintOptions.array_length_from_immediate.bindpoint_to_size_index.empty()) {
+            req.tintOptions.array_length_from_immediate.buffer_sizes_offset =
+                stage == SingleShaderStage::Compute
+                    ? GetImmediateByteOffsetInPipeline(&ComputeImmediates::storageBufferSizes,
+                                                       pipelineImmediateMask)
+                    : GetImmediateByteOffsetInPipeline(&RenderImmediates::storageBufferSizes,
+                                                       pipelineImmediateMask);
         }
     }
 
@@ -455,17 +426,20 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
     req.tintOptions.minimum_immediate_size =
         checked_cast<uint32_t>(immediateCount * kImmediateElementByteSize);
-    if (HasImmediates(&RenderImmediates::firstVertex, pipelineImmediateMask)) {
+    if (stage != SingleShaderStage::Compute &&
+        HasImmediates(&RenderImmediates::firstVertex, pipelineImmediateMask)) {
         req.tintOptions.first_vertex_offset = GetImmediateByteOffsetInPipelineIfAny(
             &RenderImmediates::firstVertex, pipelineImmediateMask);
     }
 
-    if (HasImmediates(&RenderImmediates::firstInstance, pipelineImmediateMask)) {
+    if (stage != SingleShaderStage::Compute &&
+        HasImmediates(&RenderImmediates::firstInstance, pipelineImmediateMask)) {
         req.tintOptions.first_instance_offset = GetImmediateByteOffsetInPipelineIfAny(
             &RenderImmediates::firstInstance, pipelineImmediateMask);
     }
 
-    if (HasImmediates(&RenderImmediates::clampFragDepth, pipelineImmediateMask)) {
+    if (stage != SingleShaderStage::Compute &&
+        HasImmediates(&RenderImmediates::clampFragDepth, pipelineImmediateMask)) {
         uint32_t offsetStartBytes = GetImmediateByteOffsetInPipeline(
             &RenderImmediates::clampFragDepth, pipelineImmediateMask);
         req.tintOptions.depth_range_offsets = {offsetStartBytes,
