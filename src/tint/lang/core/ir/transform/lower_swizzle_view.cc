@@ -243,19 +243,12 @@ struct State {
         return result;
     }
 
-    /// Maps an accessor index dynamically or statically to the target swizzle vector element index.
-    /// @param accessor_idx the accessor index (can be static constant or dynamic)
+    /// Maps an accessor index to the target swizzle vector element index.
+    /// @param accessor_idx the accessor index
     /// @param indices the collapsed swizzle indices
     /// @returns the mapped index value
     core::ir::Value* GetTargetIndex(core::ir::Value* accessor_idx,
                                     const tint::Vector<uint32_t, 4>& indices) {
-        // Index is constant.
-        if (auto* const_idx = accessor_idx->As<core::ir::Constant>()) {
-            uint32_t extra_idx = const_idx->Value()->ValueAs<uint32_t>();
-            return b.Constant(u32(indices[extra_idx]));
-        }
-
-        // Index is dynamic, and must be mapped into a composite array at runtime.
         tint::Vector<const core::constant::Value*, 4> const_indices;
         for (uint32_t idx : indices) {
             const_indices.Push(b.ConstantValue(u32(idx)));
