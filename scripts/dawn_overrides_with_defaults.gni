@@ -105,6 +105,10 @@ if (!defined(dawn_dxheaders_dir)) {
   dawn_dxheaders_dir = "//third_party/directx-headers/src"
 }
 
+if (!defined(dawn_agility_sdk_dir)) {
+  dawn_agility_sdk_dir = "//third_party/agility-sdk"
+}
+
 if (!defined(dawn_version_file)) {
   dawn_version_file = ""
 }

@@ -369,3 +369,7 @@ if (TINT_BUILD_MESA)
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/mesa" "${CMAKE_CURRENT_BINARY_DIR}/mesa")
 endif()
 
+if (DAWN_USE_AGILITY_SDK AND NOT TARGET agility-sdk)
+    add_subdirectory(${DAWN_AGILITY_SDK_DIR} "${CMAKE_CURRENT_BINARY_DIR}/agility-sdk")
+endif()
+
