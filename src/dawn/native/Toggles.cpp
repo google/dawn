@@ -479,11 +479,6 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use a blit instead of a copy command to copy float16 texture to a texture or a buffer."
       "Workaround for OpenGLES.",
       "https://crbug.com/381214487", ToggleStage::Device}},
-    {Toggle::UseBlitForFloat32TextureCopy,
-     {"use_blit_for_float_32_texture_copy",
-      "Use a blit instead of a copy command to copy float32 texture to a texture or a buffer."
-      "Workaround for OpenGLES.",
-      "https://crbug.com/381214487", ToggleStage::Device}},
     {Toggle::UseBlitForT2B,
      {"use_blit_for_t2b",
       "Use a compute based blit instead of a copy command to copy texture with supported format to "

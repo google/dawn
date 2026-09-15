@@ -496,11 +496,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // renderable.
     // TODO(crbug.com/556959073): turn on after fix.
     deviceToggles->Default(Toggle::UseBlitForRG11B10UfloatTextureCopy, false);
-
-    // Use compute shader blit to emulate float32 texture to buffer copies if not color renderable.
-    // Note: GL_EXT_color_buffer_float is required so default to false.
-    deviceToggles->Default(Toggle::UseBlitForFloat32TextureCopy, false);
-
     // Use a blit to emulate stencil-only buffer-to-texture copies.
     deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);
 

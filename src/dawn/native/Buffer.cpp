@@ -237,7 +237,6 @@ wgpu::BufferUsage ComputeInternalBufferUsages(const DeviceBase* device,
             device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForRG11B10UfloatTextureCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForFloat16TextureCopy) ||
-            device->IsToggleEnabled(Toggle::UseBlitForFloat32TextureCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForT2B);
         if (useComputeForT2B) {
             if (device->CanAddStorageUsageToBufferWithoutSideEffects(kInternalStorageBuffer, usage,

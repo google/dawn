@@ -1198,13 +1198,7 @@ bool ShouldUseTextureToBufferBlit(const DeviceBase* device,
         device->IsToggleEnabled(Toggle::UseBlitForFloat16TextureCopy)) {
         return true;
     }
-    // float32
-    if ((format.format == wgpu::TextureFormat::R32Float ||
-         format.format == wgpu::TextureFormat::RG32Float ||
-         format.format == wgpu::TextureFormat::RGBA32Float) &&
-        device->IsToggleEnabled(Toggle::UseBlitForFloat32TextureCopy)) {
-        return true;
-    }
+
     // Depth
     if (aspect == Aspect::Depth &&
         ((format.format == wgpu::TextureFormat::Depth16Unorm &&

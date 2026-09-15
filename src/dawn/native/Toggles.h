@@ -123,7 +123,6 @@ enum class Toggle {
     UseBlitForRGB9E5UfloatTextureCopy,
     UseBlitForRG11B10UfloatTextureCopy,
     UseBlitForFloat16TextureCopy,
-    UseBlitForFloat32TextureCopy,
     UseBlitForT2B,
     UseBlitForB2T,
     UseBlitForNonRGBAUnormTextureToBufferCopy,
