@@ -39,6 +39,7 @@ U64::U64()
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,
+               Flag::kHostShareable,
            }) {}
 
 U64::~U64() = default;
