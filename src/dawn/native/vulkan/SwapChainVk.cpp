@@ -32,7 +32,6 @@
 #include <utility>
 
 #include "src/dawn/common/Compiler.h"
-#include "src/dawn/common/Range.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/Surface.h"
@@ -296,33 +295,34 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
             "Vulkan SwapChain must support %s with sRGB colorspace.", config.wgpuFormat));
     }
 
-    // Only the identity transform with opaque alpha is supported for now.
+    // Only the identity transform is supported for now.
     DAWN_INVALID_IF(
         (surfaceInfo.capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) == 0,
         "Vulkan SwapChain must support the identity transform.");
 
     config.transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 
-    config.alphaMode = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-#if !DAWN_PLATFORM_IS(ANDROID)
-    DAWN_INVALID_IF(
-        (surfaceInfo.capabilities.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) == 0,
-        "Vulkan SwapChain must support opaque alpha.");
-#else
-    // TODO(dawn:286): investigate composite alpha for WebGPU native
-    std::array<VkCompositeAlphaFlagBitsKHR, 4u> compositeAlphaFlags = {
-        VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
-        VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
-        VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
-        VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
-    };
-    for (uint32_t i : Range(4u)) {
-        if (surfaceInfo.capabilities.supportedCompositeAlpha & compositeAlphaFlags[i]) {
-            config.alphaMode = compositeAlphaFlags[i];
+    // Choose the Vulkan alpha mode by directly converting from the WebGPU enum. PhysicalDeviceVk
+    // only reports the alpha modes the surface supports, Surface.cpp resolves Auto and validates
+    // the rest, so the mode asked for here is always available.
+    switch (GetAlphaMode()) {
+        case wgpu::CompositeAlphaMode::Opaque:
+            config.alphaMode = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
             break;
-        }
+        case wgpu::CompositeAlphaMode::Premultiplied:
+            config.alphaMode = VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR;
+            break;
+        case wgpu::CompositeAlphaMode::Unpremultiplied:
+            config.alphaMode = VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR;
+            break;
+        case wgpu::CompositeAlphaMode::Inherit:
+            config.alphaMode = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
+            break;
+        case wgpu::CompositeAlphaMode::Auto:
+        default:
+            DAWN_UNREACHABLE();
     }
-#endif  // #if !DAWN_PLATFORM_IS(ANDROID)
+    DAWN_CHECK((surfaceInfo.capabilities.supportedCompositeAlpha & config.alphaMode) != 0);
 
     // Choose the number of images for the swapchain= and clamp it to the min and max from the
     // surface capabilities. maxImageCount = 0 means there is no limit.
