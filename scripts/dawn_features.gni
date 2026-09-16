@@ -26,6 +26,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import("//build/config/clang/clang.gni")
+import("//build/config/sanitizers/sanitizers.gni")
 import("//build_overrides/build.gni")
 import("dawn_overrides_with_defaults.gni")
 
@@ -33,6 +34,12 @@ declare_args() {
   # Sets defaults for other features so that we build as much as possible on the
   # current host OS.
   dawn_maximal = false
+}
+
+if (dawn_maximal && !is_wasm) {
+  assert(
+      use_libfuzzer,
+      "dawn_maximal=true also requires use_libfuzzer=true to build fuzzer targets")
 }
 
 declare_args() {
@@ -43,7 +50,6 @@ declare_args() {
 
 if (build_with_chromium) {
   import("//build/config/ozone.gni")
-  import("//build/config/sanitizers/sanitizers.gni")
 
   dawn_use_x11 = ozone_platform_x11
   dawn_use_wayland = false

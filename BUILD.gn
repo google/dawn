@@ -59,9 +59,6 @@ if (dawn_standalone) {
       assert(
           dawn_node,
           "dawn_build_node_bindings requires dawn_node to be set in .gclient")
-      assert(
-          !defined(use_libfuzzer) || !use_libfuzzer,
-          "Building dawn node bindings with use_libfuzzer currently not supported")
       deps += [ "src/dawn/node:dawn_node" ]
     }
   }

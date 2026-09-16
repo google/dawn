@@ -8,8 +8,8 @@ as a dependency).
 Especially useful for any change or refactor that affects multiple backends.
 
 - Use `scripts/standalone-maximal.gclient` instead of `standalone.gclient`.
-- Set the `dawn_maximal = true` GN arg to default to building as many targets
-  as possible given your host OS.
+- Set the `dawn_maximal = true` and `use_libfuzzer = true` GN args to default to
+  building as many targets as possible given your host OS.
 - Build all targets (target `all`, which is the default if none is specified).
 - Develop on Linux or Mac, and set up build directories that cross-compile for
   other OSes (see [building.md](building.md)).
