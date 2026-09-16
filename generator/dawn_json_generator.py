@@ -1351,6 +1351,11 @@ def as_wasmType(x):
 
     if isinstance(x, AnnotatedTypedMember):
         if x.annotation == 'value':
+            # The Wasm C ABI passes WGPUStringView arguments indirectly. Mark
+            # them as pointers so Emscripten converts BigInt addresses for
+            # MEMORY64. This does not apply to structure return values.
+            if x.type.name.get() == 'string view':
+                return 'p'
             x = x.type
         elif '*' in x.annotation:
             return 'p'
