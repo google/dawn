@@ -20,5 +20,7 @@
 *.tmpl.inc  eol=lf
 *.inl       eol=lf
 *.txt       eol=lf
+*.toml      eol=lf
+*.lock      eol=lf
 *.bat       eol=crlf
 *_nocompile.nc eol=lf linguist-language=C++

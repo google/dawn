@@ -69,3 +69,8 @@ if (is_android) {
   limit_android_deps = true
   enable_java_templates = true
 }
+
+vpython_spec_files = [
+  "//vpython.toml",
+  "//vpython.toml.uv.lock",
+]
