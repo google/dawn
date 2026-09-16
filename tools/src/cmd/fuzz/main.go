@@ -29,6 +29,8 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -44,6 +46,8 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/progressbar"
 	"dawn.googlesource.com/dawn/tools/src/transform"
 	"dawn.googlesource.com/dawn/tools/src/utils"
+
+	"golang.org/x/sync/errgroup"
 )
 
 // TODO(crbug.com/416755658): Add unittest coverage when exec calls are done
@@ -531,25 +535,35 @@ func checkFuzzer(t *taskConfig) error {
 	defer pb.Stop()
 	var numDone uint32
 
-	routine := func() error {
-		for file := range remaining {
-			atomic.AddUint32(&numDone, 1)
-			pb.Update(progressbar.Status{
-				Total: len(files),
-				Segments: []progressbar.Segment{
-					{Count: int(atomic.LoadUint32(&numDone))},
-				},
-			})
+	eg, ctx := errgroup.WithContext(utils.CancelOnInterruptContext(context.Background()))
+	for i := 0; i < t.numProcesses; i++ {
+		eg.Go(func() error {
+			for {
+				select {
+				case <-ctx.Done():
+					return ctx.Err()
+				case file, ok := <-remaining:
+					if !ok {
+						return nil
+					}
+					atomic.AddUint32(&numDone, 1)
+					pb.Update(progressbar.Status{
+						Total: len(files),
+						Segments: []progressbar.Segment{
+							{Count: int(atomic.LoadUint32(&numDone))},
+						},
+					})
 
-			if out, err := t.runCmd(t.fuzzer, file); err != nil {
-				_, fuzzer := filepath.Split(t.fuzzer)
-				return fmt.Errorf("fuzzer '%s' failed to process file '%s' with error: %w\nOutput:\n%s", fuzzer, file, err, string(out))
+					if out, err := t.runCmd(t.fuzzer, file); err != nil {
+						_, fuzzer := filepath.Split(t.fuzzer)
+						return fmt.Errorf("fuzzer '%s' failed to process file '%s' with error: %w\nOutput:\n%s", fuzzer, file, err, string(out))
+					}
+				}
 			}
-		}
-		return nil
+		})
 	}
 
-	if err := utils.RunConcurrent(t.numProcesses, routine); err != nil {
+	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return err
 	}
 
