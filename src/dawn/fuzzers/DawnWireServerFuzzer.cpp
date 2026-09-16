@@ -89,7 +89,7 @@ int DawnWireServerFuzzer::Initialize(int* argc, char*** argv) {
 int DawnWireServerFuzzer::Run(const uint8_t* data,
                               size_t size,
                               bool (*AdapterSupported)(const wgpu::Adapter&),
-                              bool supportsErrorInjection) {
+                              bool useErrorInjectionIfSupported) {
     std::unique_ptr<dawn::native::Instance> instance = std::make_unique<dawn::native::Instance>();
 
     // We require at least the injected error index.
@@ -102,16 +102,19 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
         commands{reinterpret_cast<const std::byte*>(data), size});
 
     // Get and consume the injected error index.
-    uint64_t injectedErrorIndex =
+    [[maybe_unused]] uint64_t injectedErrorIndex =
         dawn::ReinterpretSpan<const uint64_t>(commands.TakeFirst(sizeof(uint64_t)))[0];
 
-    if (supportsErrorInjection) {
+    if (useErrorInjectionIfSupported) {
+        // If error injection is not enabled in the build we'll just fuzz without it.
+#if defined(DAWN_ENABLE_ERROR_INJECTION)
         dawn::native::EnableErrorInjector();
 
         // Clear the error injector since it has the previous run's call counts.
         dawn::native::ClearErrorInjector();
 
         dawn::native::InjectErrorAt(injectedErrorIndex);
+#endif
     }
 
     sAdapterSupported = AdapterSupported;
