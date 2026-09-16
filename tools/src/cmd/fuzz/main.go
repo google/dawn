@@ -535,6 +535,8 @@ func checkFuzzer(t *taskConfig) error {
 	defer pb.Stop()
 	var numDone uint32
 
+	failureChan := make(chan error, len(files))
+
 	eg, ctx := errgroup.WithContext(utils.CancelOnInterruptContext(context.Background()))
 	for i := 0; i < t.numProcesses; i++ {
 		eg.Go(func() error {
@@ -556,7 +558,7 @@ func checkFuzzer(t *taskConfig) error {
 
 					if out, err := t.runCmd(t.fuzzer, file); err != nil {
 						_, fuzzer := filepath.Split(t.fuzzer)
-						return fmt.Errorf("fuzzer '%s' failed to process file '%s' with error: %w\nOutput:\n%s", fuzzer, file, err, string(out))
+						failureChan <- fmt.Errorf("fuzzer '%s' failed to process file '%s' with error: %w\nOutput:\n%s", fuzzer, file, err, string(out))
 					}
 				}
 			}
@@ -565,6 +567,16 @@ func checkFuzzer(t *taskConfig) error {
 
 	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return err
+	}
+
+	close(failureChan)
+
+	if len(failureChan) > 0 {
+		runFailures := make([]error, 0, len(failureChan))
+		for err := range failureChan {
+			runFailures = append(runFailures, err)
+		}
+		return errors.Join(runFailures...)
 	}
 
 	fmt.Println("done")
