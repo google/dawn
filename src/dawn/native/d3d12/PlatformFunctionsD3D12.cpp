@@ -155,7 +155,12 @@ void PlatformFunctions::EnsureAgilitySDKDeviceFactory() {
     DAWN_CHECK(
         SUCCEEDED(d3d12GetInterface(CLSID_D3D12SDKConfiguration, IID_PPV_ARGS(&sdkConfig1))));
 
-    DAWN_CHECK(SUCCEEDED(sdkConfig1->CreateDeviceFactory(D3D12_PREVIEW_SDK_VERSION, ".\\D3D12\\",
+    std::string baseDir = std::string(".") + GetPathSeparator();
+    if (auto moduleDirectory = GetModuleDirectory()) {
+        baseDir = std::move(*moduleDirectory);
+    }
+    std::string sdkPath = std::move(baseDir) + "D3D12" + GetPathSeparator();
+    DAWN_CHECK(SUCCEEDED(sdkConfig1->CreateDeviceFactory(D3D12_PREVIEW_SDK_VERSION, sdkPath.c_str(),
                                                          IID_PPV_ARGS(&mDeviceFactory))));
 
     // Allow the factory to return an existing compatible device rather than
