@@ -57,6 +57,8 @@ class Buffer final : public BufferBase {
 
     void TrackUsage() { MarkUsedInPendingCommands(); }
 
+    const void* GetMappedDataForTesting() const { return mMappedData.data(); }
+
   private:
     Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor);
     ~Buffer() override;
