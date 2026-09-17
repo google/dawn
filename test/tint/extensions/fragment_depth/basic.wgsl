@@ -1,3 +1,4 @@
+// flags: --glsl-has-conservative-depth
 requires fragment_depth;
 
 @fragment

@@ -194,6 +194,7 @@ struct Options {
 
 #if TINT_BUILD_GLSL_WRITER
     bool glsl_desktop = false;
+    bool glsl_has_conservative_depth = false;
     std::vector<uint32_t> bgra_swizzle;
 #endif  // TINT_BUILD_GLSL_WRITER
 };
@@ -488,6 +489,11 @@ Valid values are 1.3 and 1.4)",
     auto& glsl_desktop = options.Add<BoolOption>(
         "glsl-desktop", "Set the version to the desktop GL instead of ES", Default{false});
     TINT_DEFER(opts->glsl_desktop = *glsl_desktop.value);
+
+    auto& glsl_has_conservative_depth = options.Add<BoolOption>(
+        "glsl-has-conservative-depth", "Set to true to enable GL_EXT_conservative_depth extension",
+        Default{false});
+    TINT_DEFER(opts->glsl_has_conservative_depth = *glsl_has_conservative_depth.value);
 
     auto& bgra_swizzle =
         options.Add<StringOption>("bgra-swizzle", "BGRA swizzle indices", Default{""});
@@ -1435,6 +1441,7 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
 
     gen_options.entry_point_name = options.ep_name;
     gen_options.disable_robustness = !options.enable_robustness;
+    gen_options.has_gl_ext_conservative_depth = options.glsl_has_conservative_depth;
 
     // Run SubstituteOverrides to replace override instructions with constants.
     // This needs to run after SingleEntryPoint which removes unused overrides.

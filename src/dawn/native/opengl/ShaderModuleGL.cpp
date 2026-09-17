@@ -472,6 +472,9 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.tintOptions.use_uniform_buffers =
         !GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);
 
+    req.tintOptions.has_gl_ext_conservative_depth =
+        gl.IsGLExtensionSupported("GL_EXT_conservative_depth");
+
     CacheResult<GLSLCompilation> compilationResult;
     DAWN_TRY_LOAD_OR_RUN(
         compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromValidatedBlob,

@@ -354,12 +354,6 @@ crbug.com/535351717 [ android-pixel-6 ] webgpu:api,validation,min_buffer_binding
 # Triaged or Manually-Added Flakes and Failures
 ################################################################################
 
-# Incorrect extension used for fragment depth
-crbug.com/457993779 [ android ] webgpu:api,operation,rendering,depth:fragment_depth_qualifiers:mode="greater" [ Failure ]
-crbug.com/457993779 [ android ] webgpu:api,operation,rendering,depth:fragment_depth_qualifiers:mode="less" [ Failure ]
-crbug.com/457993779 [ linux ] webgpu:api,operation,rendering,depth:fragment_depth_qualifiers:mode="greater" [ Failure ]
-crbug.com/457993779 [ linux ] webgpu:api,operation,rendering,depth:fragment_depth_qualifiers:mode="less" [ Failure ]
-
 # Generates GL_OUT_OF_MEMORY
 crbug.com/361372970 [ android arm ] webgpu:api,validation,image_copy,layout_related:copy_end_overflows_u64:method="WriteTexture" [ Failure ]
 

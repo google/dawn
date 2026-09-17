@@ -1239,12 +1239,11 @@ class Printer : public tint::TextGenerator {
                 EmitExtension(kOESSampleVariables);
             }
 
-            if (attrs.builtin == tint::core::BuiltinValue::kFragDepth) {
+            if (options_.has_gl_ext_conservative_depth &&
+                attrs.builtin == tint::core::BuiltinValue::kFragDepth) {
                 if (attrs.depth_mode == core::BuiltinDepthMode::kGreater ||
                     attrs.depth_mode == core::BuiltinDepthMode::kLess) {
-                    if (options_.version.IsES()) {
-                        EmitExtension(kEXTConservativeDepth);
-                    }
+                    EmitExtension(kEXTConservativeDepth);
                     std::string depth_layout_qualifier =
                         (attrs.depth_mode == core::BuiltinDepthMode::kGreater) ? "depth_greater"
                                                                                : "depth_less";
