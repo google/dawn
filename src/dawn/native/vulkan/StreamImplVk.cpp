@@ -121,7 +121,11 @@ template <>
 void stream::Stream<VkDescriptorSetLayoutBindingFlagsCreateInfo>::Write(
     stream::Sink* sink,
     const VkDescriptorSetLayoutBindingFlagsCreateInfo& t) {
-    StreamIn(sink, Iterable(t.pBindingFlags, t.bindingCount));
+    auto bindingFlags =
+        // SAFETY: pBindingFlags must point at bindingCount valid entries.
+        DAWN_UNSAFE_BUFFERS(Span<const VkDescriptorBindingFlags>{t.pBindingFlags, t.bindingCount});
+
+    StreamIn(sink, bindingFlags);
     SerializePnext(sink, &t);
 }
 
@@ -129,7 +133,11 @@ template <>
 void stream::Stream<VkDescriptorSetLayoutCreateInfo>::Write(
     stream::Sink* sink,
     const VkDescriptorSetLayoutCreateInfo& t) {
-    StreamIn(sink, t.flags, Iterable(t.pBindings, t.bindingCount));
+    auto bindings =
+        // SAFETY: pBindings must point at bindingCount valid entries.
+        DAWN_UNSAFE_BUFFERS(Span<const VkDescriptorSetLayoutBinding>{t.pBindings, t.bindingCount});
+
+    StreamIn(sink, t.flags, bindings);
     SerializePnext<VkDescriptorSetLayoutBindingFlagsCreateInfo>(sink, &t);
 }
 
@@ -141,9 +149,14 @@ void stream::Stream<VkPushConstantRange>::Write(stream::Sink* sink, const VkPush
 template <>
 void stream::Stream<VkPipelineLayoutCreateInfo>::Write(stream::Sink* sink,
                                                        const VkPipelineLayoutCreateInfo& t) {
+    auto pushConstantRanges =
+        // SAFETY: pPushConstantRanges must point at pushConstantRangeCount valid entries.
+        DAWN_UNSAFE_BUFFERS(
+            Span<const VkPushConstantRange>{t.pPushConstantRanges, t.pushConstantRangeCount});
+
     // The set layouts are not serialized here because they are pointers to backend objects.
     // They need to be cross-referenced with the frontend objects and serialized from there.
-    StreamIn(sink, t.flags, Iterable(t.pPushConstantRanges, t.pushConstantRangeCount));
+    StreamIn(sink, t.flags, pushConstantRanges);
     SerializePnext(sink, &t);
 }
 
@@ -170,16 +183,27 @@ void stream::Stream<VkSpecializationMapEntry>::Write(stream::Sink* sink,
 template <>
 void stream::Stream<VkSpecializationInfo>::Write(stream::Sink* sink,
                                                  const VkSpecializationInfo& t) {
-    StreamIn(sink, Iterable(t.pMapEntries, t.mapEntryCount),
-             Iterable(static_cast<const uint8_t*>(t.pData), t.dataSize));
+    auto mapEntries =
+        // SAFETY: pMapEntries must point at mapEntryCount valid entries.
+        DAWN_UNSAFE_BUFFERS(Span<const VkSpecializationMapEntry>{t.pMapEntries, t.mapEntryCount});
+
+    auto data =
+        // SAFETY: pData must point at dataSize valid bytes.
+        DAWN_UNSAFE_BUFFERS(
+            Span<const std::byte>{static_cast<const std::byte*>(t.pData), t.dataSize});
+
+    StreamIn(sink, mapEntries, data);
 }
 
 template <>
 void stream::Stream<VkPipelineShaderStageCreateInfo>::Write(
     stream::Sink* sink,
     const VkPipelineShaderStageCreateInfo& t) {
+    // SAFETY: pName must be a valid C string.
+    std::string_view name = DAWN_UNSAFE_BUFFERS(t.pName);
+
     // The shader module is not serialized here because it is a pointer to a backend object.
-    StreamIn(sink, t.flags, t.stage, Iterable(t.pName, strlen(t.pName)), t.pSpecializationInfo);
+    StreamIn(sink, t.flags, t.stage, name, t.pSpecializationInfo);
     SerializePnext<VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT>(sink, &t);
 }
 
@@ -212,8 +236,19 @@ template <>
 void stream::Stream<VkPipelineVertexInputStateCreateInfo>::Write(
     stream::Sink* sink,
     const VkPipelineVertexInputStateCreateInfo& t) {
-    StreamIn(sink, t.flags, Iterable(t.pVertexBindingDescriptions, t.vertexBindingDescriptionCount),
-             Iterable(t.pVertexAttributeDescriptions, t.vertexAttributeDescriptionCount));
+    auto vertexBindingDescriptions =
+        // SAFETY: pVertexBindingDescriptions must point at vertexBindingDescriptionCount valid
+        // entries.
+        DAWN_UNSAFE_BUFFERS(Span<const VkVertexInputBindingDescription>{
+            t.pVertexBindingDescriptions, t.vertexBindingDescriptionCount});
+
+    auto vertexAttributeDescriptions =
+        // SAFETY: pVertexAttributeDescriptions must point at vertexAttributeDescriptionCount valid
+        // entries.
+        DAWN_UNSAFE_BUFFERS(Span<const VkVertexInputAttributeDescription>{
+            t.pVertexAttributeDescriptions, t.vertexAttributeDescriptionCount});
+
+    StreamIn(sink, t.flags, vertexBindingDescriptions, vertexAttributeDescriptions);
     SerializePnext(sink, &t);
 }
 
@@ -257,8 +292,15 @@ template <>
 void stream::Stream<VkPipelineViewportStateCreateInfo>::Write(
     stream::Sink* sink,
     const VkPipelineViewportStateCreateInfo& t) {
-    StreamIn(sink, t.flags, Iterable(t.pViewports, t.viewportCount),
-             Iterable(t.pScissors, t.scissorCount));
+    auto viewports =
+        // SAFETY: pViewports must point at viewportCount valid entries.
+        DAWN_UNSAFE_BUFFERS(Span<const VkViewport>{t.pViewports, t.viewportCount});
+
+    auto scissors =
+        // SAFETY: pScissors must point at scissorCount valid entries.
+        DAWN_UNSAFE_BUFFERS(Span<const VkRect2D>{t.pScissors, t.scissorCount});
+
+    StreamIn(sink, t.flags, viewports, scissors);
     SerializePnext(sink, &t);
 }
 
@@ -309,8 +351,12 @@ template <>
 void stream::Stream<VkPipelineColorBlendStateCreateInfo>::Write(
     stream::Sink* sink,
     const VkPipelineColorBlendStateCreateInfo& t) {
-    StreamIn(sink, t.flags, t.logicOpEnable, t.logicOp, Iterable(t.pAttachments, t.attachmentCount),
-             t.blendConstants);
+    auto attachments =
+        // SAFETY: pAttachments must point at attachmentCount valid entries.
+        DAWN_UNSAFE_BUFFERS(
+            Span<const VkPipelineColorBlendAttachmentState>{t.pAttachments, t.attachmentCount});
+
+    StreamIn(sink, t.flags, t.logicOpEnable, t.logicOp, attachments, t.blendConstants);
     SerializePnext(sink, &t);
 }
 
@@ -318,7 +364,11 @@ template <>
 void stream::Stream<VkPipelineDynamicStateCreateInfo>::Write(
     stream::Sink* sink,
     const VkPipelineDynamicStateCreateInfo& t) {
-    StreamIn(sink, t.flags, Iterable(t.pDynamicStates, t.dynamicStateCount));
+    auto dynamicStates =
+        // SAFETY: pDynamicStates must point at dynamicStateCount valid entries.
+        DAWN_UNSAFE_BUFFERS(Span<const VkDynamicState>{t.pDynamicStates, t.dynamicStateCount});
+
+    StreamIn(sink, t.flags, dynamicStates);
     SerializePnext(sink, &t);
 }
 
@@ -353,15 +403,18 @@ void stream::Stream<vulkan::RenderPassCacheQuery>::Write(stream::Sink* sink,
 template <>
 void stream::Stream<VkGraphicsPipelineCreateInfo>::Write(stream::Sink* sink,
                                                          const VkGraphicsPipelineCreateInfo& t) {
+    auto stages =
+        // SAFETY: pStages must point at stageCount valid entries.
+        DAWN_UNSAFE_BUFFERS(Span<const VkPipelineShaderStageCreateInfo>{t.pStages, t.stageCount});
+
     // The pipeline layout and render pass are not serialized here because they are pointers to
     // backend objects. They need to be cross-referenced with the frontend objects and
     // serialized from there. The base pipeline information is also currently not serialized since
     // we do not use them in our backend implementation. If we decide to use them later on, they
     // also need to be cross-referenced from the frontend.
-    StreamIn(sink, t.flags, Iterable(t.pStages, t.stageCount), t.pVertexInputState,
-             t.pInputAssemblyState, t.pTessellationState, t.pViewportState, t.pRasterizationState,
-             t.pMultisampleState, t.pDepthStencilState, t.pColorBlendState, t.pDynamicState,
-             t.subpass);
+    StreamIn(sink, t.flags, stages, t.pVertexInputState, t.pInputAssemblyState,
+             t.pTessellationState, t.pViewportState, t.pRasterizationState, t.pMultisampleState,
+             t.pDepthStencilState, t.pColorBlendState, t.pDynamicState, t.subpass);
     SerializePnext<VkPipelineRobustnessCreateInfo, VkPipelineRenderingCreateInfoKHR>(sink, &t);
 }
 
@@ -369,8 +422,13 @@ template <>
 void stream::Stream<VkPipelineRenderingCreateInfoKHR>::Write(
     stream::Sink* sink,
     const VkPipelineRenderingCreateInfoKHR& t) {
-    StreamIn(sink, t.viewMask, Iterable(t.pColorAttachmentFormats, t.colorAttachmentCount),
-             t.depthAttachmentFormat, t.stencilAttachmentFormat);
+    auto colorAttachmentFormats =
+        // SAFETY: pColorAttachmentFormats must point at colorAttachmentCount valid entries.
+        DAWN_UNSAFE_BUFFERS(
+            Span<const VkFormat>{t.pColorAttachmentFormats, t.colorAttachmentCount});
+
+    StreamIn(sink, t.viewMask, colorAttachmentFormats, t.depthAttachmentFormat,
+             t.stencilAttachmentFormat);
 }
 
 }  // namespace dawn::native

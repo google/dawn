@@ -338,17 +338,13 @@ class Stream<T[N]> {
   public:
     static void Write(Sink* s, const T (&t)[N]) {
         static_assert(N > 0);
-        for (size_t i = 0; i < N; i++) {
-            StreamIn(s, DAWN_UNSAFE_TODO(t[i]));
-        }
+        StreamIn(s, Span<const T, N>{t});
     }
 
     static MaybeError Read(Source* s, T (*t)[N]) {
         static_assert(N > 0);
-        for (size_t i = 0; i < N; i++) {
-            DAWN_TRY(StreamOut(s, &(*t)[i]));
-        }
-        return {};
+        Span<T, N> sp{t};
+        return StreamOut(s, &sp);
     }
 };
 
@@ -378,6 +374,33 @@ class Stream<std::vector<T>> {
         }
         return {};
     }
+};
+
+// Stream specialization for Span.
+template <typename T>
+class Stream<Span<T>> {
+  public:
+    static void Write(Sink* s, const Span<T>& v) {
+        StreamIn(s, v.size());
+        for (const T& it : v) {
+            StreamIn(s, it);
+        }
+    }
+
+    // Read is not implemented since the spans are preallocated.
+};
+
+// Stream specialization for fixed size Span.
+template <typename T, size_t Extent>
+class Stream<Span<T, Extent>> {
+  public:
+    static void Write(Sink* s, const Span<T>& v) {
+        for (const T& it : v) {
+            StreamIn(s, it);
+        }
+    }
+
+    // Read is not implemented since the spans are preallocated.
 };
 
 // Stream specialization for std::array<T, Size> of fundamental types T.
@@ -663,35 +686,6 @@ class Stream<std::variant<Types...>> {
         DAWN_TRY(StreamOut(source, &value));
         *t = VariantType(std::move(value));
         return {};
-    }
-};
-
-// Helper class to contain the begin/end iterators of an iterable.
-namespace detail {
-template <typename Iterator>
-struct Iterable {
-    Iterator begin;
-    Iterator end;
-};
-}  // namespace detail
-
-// Helper for making detail::Iterable from a pointer and count.
-template <typename T>
-auto Iterable(const T* ptr, size_t count) {
-    using Iterator = const T*;
-    return detail::Iterable<Iterator>{ptr, DAWN_UNSAFE_TODO(ptr + count)};
-}
-
-// Stream specialization for detail::Iterable which writes the number of elements,
-// followed by the elements.
-template <typename Iterator>
-class Stream<detail::Iterable<Iterator>> {
-  public:
-    static void Write(stream::Sink* sink, const detail::Iterable<Iterator>& iter) {
-        StreamIn(sink, std::distance(iter.begin, iter.end));
-        for (auto it = iter.begin; it != iter.end; DAWN_UNSAFE_TODO(++it)) {
-            StreamIn(sink, *it);
-        }
     }
 };
 

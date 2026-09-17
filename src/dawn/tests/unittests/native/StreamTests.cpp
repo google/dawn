@@ -118,27 +118,6 @@ TEST(SerializeTests, CallsWrite) {
     StreamIn(&sink, a);
 }
 
-// Test that ByteVectorSink calls Write on all elements of an iterable.
-TEST(SerializeTests, StreamInIterable) {
-    constexpr size_t kIterableSize = 100;
-
-    std::vector<A> vec(kIterableSize);
-    auto iterable = Iterable(vec.data(), kIterableSize);
-
-    // Expect write to be called for each element
-    for (const auto& a : vec) {
-        EXPECT_CALL(a, WriteMock(NotNull(), Ref(a))).Times(1);
-    }
-
-    ByteVectorSink sink;
-    StreamIn(&sink, iterable);
-
-    // Expecting the size of the container.
-    ByteVectorSink expected;
-    StreamIn(&expected, kIterableSize);
-    EXPECT_THAT(sink, VectorEq(expected));
-}
-
 // Test that ByteVectorSink calls Write on all nested members of a struct.
 TEST(SerializeTests, StreamInNested) {
     ByteVectorSink sink;
@@ -404,6 +383,41 @@ TEST(SerializeTests, ItypArray) {
     EXPECT_CACHE_KEY_EQ(input, expected);
 }
 
+// Test that ByteVectorSink serializes C-style arrays
+TEST(SerializeTests, CStyleArray) {
+    const int input[5] = {1, 7, 4, 8, 4};
+
+    // Expect all values.
+    ByteVectorSink expected;
+    StreamIn(&expected, 1, 7, 4, 8, 4);
+
+    EXPECT_CACHE_KEY_EQ(input, expected);
+}
+
+// Test that ByteVectorSink serializes fixed extent spans
+TEST(SerializeTests, SpanFixedExtent) {
+    const std::array<int, 6> data = {9, 3, 5, 7, 8, 6};
+    Span<const int, 6> input = data;
+
+    // Expect all values.
+    ByteVectorSink expected;
+    StreamIn(&expected, 9, 3, 5, 7, 8, 6);
+
+    EXPECT_CACHE_KEY_EQ(input, expected);
+}
+
+// Test that ByteVectorSink serializes dynamic extent spans
+TEST(SerializeTests, SpanDynamicExtent) {
+    const std::array<int, 4> data = {9, 8, 6, 2};
+    Span<const int> input = data;
+
+    // Expect all values.
+    ByteVectorSink expected;
+    StreamIn(&expected, size_t{4}, 9, 8, 6, 2);
+
+    EXPECT_CACHE_KEY_EQ(input, expected);
+}
+
 // Test that ByteVectorSink serializes absl::flat_hash_map as expected.
 TEST(SerializeTests, AbslFlatHashMap) {
     absl::flat_hash_map<uint32_t, std::string_view> m;
@@ -612,6 +626,27 @@ TEST(StreamTests, SerializeDeserializeItypArray) {
     // Check every element of the out array is the same as in.
     for (TypedIntegerForTest i = TypedIntegerForTest(); i < in.size(); i++) {
         EXPECT_EQ(in[i], out[i]);
+    }
+}
+
+// Test that serializing then deserializing a C-style array yields the same data.
+// Tested here instead of in the type-parameterized tests since C-style arrays are just pointers and
+// don't actually contain the data.
+TEST(StreamTests, SerializeDeserializeCStyleArray) {
+    const int in[5] = {1, 7, 4, 8, 4};
+
+    ByteVectorSink sink;
+    StreamIn(&sink, in);
+    BlobSource src(Blob::Create(sink));
+
+    int out[5] = {0, 0, 0, 0, 0};
+    auto err = StreamOut(&src, &out);
+    EXPECT_FALSE(err.IsError());
+
+    Span<const int, 5> inSpan(in);
+    Span<int, 5> outSpan(out);
+    for (size_t i = 0; i < inSpan.size(); i++) {
+        EXPECT_EQ(inSpan[i], outSpan[i]);
     }
 }
 
