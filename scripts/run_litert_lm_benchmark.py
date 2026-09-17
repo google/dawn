@@ -36,11 +36,14 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 
 
 def run_litert_lm(metric_proto_file_path: Path) -> subprocess.CompletedProcess:
     repo_root = Path(__file__).resolve().parent.parent
-    binary_path = Path.cwd() / 'litert_lm_advanced_main'
+    binary_name = ('litert_lm_advanced_main.exe'
+                   if sys.platform == 'win32' else 'litert_lm_advanced_main')
+    binary_path = Path.cwd() / binary_name
     model_path = repo_root / 'third_party' / 'litert-lm' / 'data' / 'model.litertlm'
 
     cmd = [

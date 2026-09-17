@@ -102,17 +102,22 @@ def main():
         # can resolve targets.
         platform_name = get_platform_name()
 
-        # Determine Dawn monolithic library name for current platform.
+        # Determine Dawn monolithic library name for current platform. MSVC
+        # emits `webgpu_dawn.dll` with no `lib` prefix, but the prebuilt LiteRT
+        # accelerators import it as `libwebgpu_dawn.dll`.
         if platform_name.startswith('macos'):
             dawn_lib_name = 'libwebgpu_dawn.dylib'
+            gn_dawn_lib_name = 'libwebgpu_dawn.dylib'
         elif platform_name.startswith('windows'):
             dawn_lib_name = 'libwebgpu_dawn.dll'
+            gn_dawn_lib_name = 'webgpu_dawn.dll'
         else:
             dawn_lib_name = 'libwebgpu_dawn.so'
+            gn_dawn_lib_name = 'libwebgpu_dawn.so'
 
         # Find the locally compiled Dawn library in the active GN build
         # directory.
-        local_dawn_lib = dest_path.parent / dawn_lib_name
+        local_dawn_lib = dest_path.parent / gn_dawn_lib_name
         if not local_dawn_lib.exists():
             print(
                 f"Error: Local Dawn library (libwebgpu_dawn) not found in GN output directory: {local_dawn_lib}",
@@ -141,8 +146,13 @@ def main():
         dest_dawn_path.symlink_to(local_dawn_lib)
 
         # Isolate Bazel's output_user_root to the GN output directory to prevent stale
-        # caches across checkouts, or filesystem inconsistencies.
-        bazel_user_root = dest_path.parent / '.bazel_root'
+        # caches across checkouts, or filesystem inconsistencies. On Windows use a
+        # short path instead, as MSVC's link.exe fails with LNK1181 on paths beyond
+        # MAX_PATH even when long paths are enabled.
+        if platform_name.startswith('windows'):
+            bazel_user_root = Path(dest_path.anchor) / '_b'
+        else:
+            bazel_user_root = dest_path.parent / '.bazel_root'
 
         # Compile the target using Bazelisk inside LiteRT-LM's standalone
         # workspace.
@@ -191,8 +201,9 @@ def main():
                 build_cmd.append('--config=macos_arm64')
 
         # Prepend the hermetic LLVM toolchain bin directory to PATH and set CC/CXX.
+        # Windows uses the MSVC toolchain that Bazel autodetects instead.
         llvm_bin_dir = project_root / 'third_party' / 'llvm-build' / 'Release+Asserts' / 'bin'
-        if llvm_bin_dir.exists():
+        if llvm_bin_dir.exists() and not platform_name.startswith('windows'):
             env['PATH'] = f"{llvm_bin_dir}:{env.get('PATH', '')}"
 
             # Explicitly set CC and CXX to the hermetic compilers so Bazel's
@@ -208,9 +219,16 @@ def main():
             'clean',
             '--expunge',
         ]
-        subprocess.run(clean_cmd, cwd=litert_lm_dir, env=env)
+        # `executable` is required because Bazelisk has no `.exe` suffix on Windows.
+        subprocess.run(clean_cmd,
+                       cwd=litert_lm_dir,
+                       env=env,
+                       executable=str(bazelisk_path))
 
-        proc = subprocess.run(build_cmd, cwd=litert_lm_dir, env=env)
+        proc = subprocess.run(build_cmd,
+                              cwd=litert_lm_dir,
+                              env=env,
+                              executable=str(bazelisk_path))
         if proc.returncode != 0:
             print("Error: Bazel build failed.", file=sys.stderr)
             sys.exit(proc.returncode)
@@ -228,6 +246,8 @@ def main():
 
     # Locate and copy the compiled binary into the GN target directory.
     compiled_path = litert_lm_dir / 'bazel-bin' / BAZEL_BIN_SUBPATH
+    if platform_name.startswith('windows'):
+        compiled_path = compiled_path.with_suffix('.exe')
     if not compiled_path.exists():
         print(
             f"Error: Compiled binary not found at expected path: {compiled_path}",
@@ -247,6 +267,13 @@ def main():
                 dest_file = dest_path.parent / f.name
                 shutil.copy2(f, dest_file)
                 dest_file.chmod(0o755)
+
+    # TODO(crbug.com/562894778): Investigate why the Windows prebuilts import
+    # `libwebgpu_dawn.dll` when Dawn's MSVC builds emit `webgpu_dawn.dll`.
+    if gn_dawn_lib_name != dawn_lib_name:
+        dest_dawn_file = dest_path.parent / dawn_lib_name
+        shutil.copy2(local_dawn_lib, dest_dawn_file)
+        dest_dawn_file.chmod(0o755)
 
     print("Build and copy successful.")
 
