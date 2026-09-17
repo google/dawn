@@ -147,8 +147,8 @@ HRESULT SerializeRootParameter1_0(Device* device,
     D3D12_ROOT_SIGNATURE_DESC rootSignatureDescriptor;
     rootSignatureDescriptor.NumParameters = static_cast<uint32_t>(rootParameters1_0.size());
     rootSignatureDescriptor.pParameters = rootParameters1_0.data();
-    rootSignatureDescriptor.NumStaticSamplers = 0;
-    rootSignatureDescriptor.pStaticSamplers = nullptr;
+    rootSignatureDescriptor.NumStaticSamplers = rootSignature1_1.Desc_1_1.NumStaticSamplers;
+    rootSignatureDescriptor.pStaticSamplers = rootSignature1_1.Desc_1_1.pStaticSamplers;
     rootSignatureDescriptor.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
     return device->GetFunctions()->d3d12SerializeRootSignature(

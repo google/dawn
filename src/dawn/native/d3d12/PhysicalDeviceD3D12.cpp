@@ -743,9 +743,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // disable this toggle.
     // Additionally, DESCRIPTORS_STATIC_KEEPING_BUFFER_BOUNDS_CHECKS was only added in the
     // Windows 10 2018 Spring Creator's Update. Force disable the toggle if we do not have
-    // at least WWDM 2.4.
+    // at least WWDM 2.4, except on WARP where the WDDM version is not encoded in the driver
+    // version.
+    // TODO(crbug.com/562563488): Use capability probing instead to avoid WDDM version checks.
     // https://microsoft.github.io/DirectX-Specs/d3d/ResourceBinding.html#flags-added-in-root-signature-version-11
-    if (!GetDeviceInfo().supportsRootSignatureVersion1_1 || GetDriverVersion()[0] < 24) {
+    if (!GetDeviceInfo().supportsRootSignatureVersion1_1 ||
+        (!gpu_info::IsMicrosoftWARP(mVendorId, mDeviceId) && GetDriverVersion()[0] < 24)) {
         deviceToggles->ForceSet(Toggle::D3D12UseRootSignatureVersion1_1, false);
     } else {
         deviceToggles->Default(Toggle::D3D12UseRootSignatureVersion1_1,
