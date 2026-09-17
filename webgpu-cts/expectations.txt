@@ -965,6 +965,19 @@ crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader
 crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,fma:f32:inputSource="const";vectorize="_undef_" [ Failure ]
 crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,af_arithmetic:negation:inputSource="const";vectorize="_undef_" [ Failure ]
 
+# Linux/GTX 1660 failures when going to 595.91
+crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format="sint32x4"* [ Skip ]
+crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,subgroupMul:data_types:* [ Skip ]
+crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:* [ Skip ]
+crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:api,operation,texture_view,texture_component_swizzle:read_swizzle:* [ Skip ]
+crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Skip ]
+
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,command_buffer,copyTextureToTexture:* [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,command_buffer,image_copy:* [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:* [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:* [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d:* [ Failure ]
+
 # Win/Snapdragon X Elite failures
 # TODO(crbug.com/452840618): Remove this disable block once the tests are actually running.
 # finder:disable-unused Unused removal disabled until tests are actually enabled
