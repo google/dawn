@@ -322,6 +322,7 @@ TEST_P(StaticSamplerTest, AddressMode) {
     // TODO(crbug.com/523272955): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
+    // TODO(crbug.com/562508894): Fails on WARP
     DAWN_SUPPRESS_TEST_IF(IsWARP());
     // TODO(crbug.com/465184301): Fix static sampler feature.
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
@@ -349,6 +350,7 @@ TEST_P(StaticSamplerTest, PassThroughUserFunctionParameters) {
     // TODO(crbug.com/523272955): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
+    // TODO(crbug.com/562508894): Fails on WARP
     DAWN_SUPPRESS_TEST_IF(IsWARP());
     // TODO(crbug.com/465184301): Fix static sampler feature.
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
@@ -375,7 +377,6 @@ TEST_P(StaticSamplerTest, PassThroughUserFunctionParameters) {
 // mSamplerDescriptorCount. SamplerHeapCache::GetOrCreate must also exclude them to avoid OOB
 // writes in the descriptor heap.
 TEST_P(StaticSamplerTest, SamplerDiscrepancyOOB) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
     // TODO(crbug.com/465184301): Fix static sampler feature.
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 

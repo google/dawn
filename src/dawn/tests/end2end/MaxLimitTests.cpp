@@ -157,10 +157,6 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                     continue;
                 }
 #endif
-                if (IsWARP()) {
-                    maxBufferBindingSize =
-                        std::min(maxBufferBindingSize, uint64_t{512} * 1024 * 1024);
-                }
                 maxBufferBindingSize = Align(maxBufferBindingSize - 3u, 4);
                 shader = R"(
                   struct Buf {

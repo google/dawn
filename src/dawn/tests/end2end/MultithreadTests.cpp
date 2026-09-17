@@ -2182,8 +2182,6 @@ class MultithreadTimestampQueryTests : public MultithreadTests {
 // Test resolving timestamp queries on multiple threads. ResolveQuerySet() will create temp
 // resources internally so we need to make sure they are thread safe.
 TEST_P(MultithreadTimestampQueryTests, ResolveQuerySets_InParallel) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());  // Flaky on WARP
-
     // TODO(crbug.com/451389800): [Capture] implement query set.
     DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 

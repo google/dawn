@@ -238,9 +238,6 @@ TEST_P(ComputeDispatchTests, IndirectBasicWithoutNumWorkgroups) {
 
 // Test no-op indirect
 TEST_P(ComputeDispatchTests, IndirectNoop) {
-    // TODO(crbug.com/446944886): Flaky with WARP.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
-
     // All dimensions are 0s
     IndirectTest({0, 0, 0}, 0);
 
@@ -270,8 +267,6 @@ TEST_P(ComputeDispatchTests, MaxWorkgroups) {
     // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 #endif
-    // TODO(crbug.com/435074717): Flaky on WARP.
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     uint32_t max = GetSupportedLimits().maxComputeWorkgroupsPerDimension;
 
@@ -285,9 +280,6 @@ TEST_P(ComputeDispatchTests, MaxWorkgroups) {
 // Test indirect dispatches exceeding the max limit are noop-ed.
 TEST_P(ComputeDispatchTests, ExceedsMaxWorkgroupsNoop) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
-
-    // TODO(crbug.com/458102532): Flaky with WARP.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
 
     uint32_t max = GetSupportedLimits().maxComputeWorkgroupsPerDimension;
 
@@ -309,7 +301,6 @@ TEST_P(ComputeDispatchTests, ExceedsMaxWorkgroupsNoop) {
 
 // Test indirect dispatches exceeding the max limit with an offset are noop-ed.
 TEST_P(ComputeDispatchTests, ExceedsMaxWorkgroupsWithOffsetNoop) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     uint32_t max = GetSupportedLimits().maxComputeWorkgroupsPerDimension;
@@ -532,7 +523,6 @@ TEST_P(ComputeMultipleDispatchesTests, IndirectOffset) {
     // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 #endif
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     // Control case: One DispatchWorkgroupsIndirect call
     IndirectTest({0, 0, 0, 2, 3, 4}, {3 * sizeof(uint32_t)});
@@ -562,7 +552,6 @@ TEST_P(ComputeMultipleDispatchesTests, IndirectOffset) {
 // Test indirect dispatches exceeding the max limit with an offset are noop-ed.
 TEST_P(ComputeMultipleDispatchesTests, ExceedsMaxWorkgroupsWithOffsetNoop) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
 #if DAWN_PLATFORM_IS(32_BIT)
     // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
@@ -702,8 +691,6 @@ class ComputeLinearIndexingDispatchTests : public DawnTestWithParams<LinearParam
 };
 
 TEST_P(ComputeLinearIndexingDispatchTests, Indirect) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     uint32_t max = GetSupportedLimits().maxComputeWorkgroupsPerDimension;
 
     const auto builtin = GetParam().mLinearBuiltin;
