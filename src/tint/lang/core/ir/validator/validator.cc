@@ -368,9 +368,9 @@ bool Validator::CheckResult(const Instruction* inst, size_t idx) {
 
     if (check_size) {
         if (ty->Size() > tint::internal_limits::kMaxTemporaryStorageSize) {
-            AddResultError(inst, idx)
-                << "result type size (" << ty->Size() << ") exceeds maximum allowed ("
-                << tint::internal_limits::kMaxTemporaryStorageSize << ")";
+            AddError(inst, idx) << "result type size (" << ty->Size()
+                                << ") exceeds maximum allowed ("
+                                << tint::internal_limits::kMaxTemporaryStorageSize << ")";
             return false;
         }
     }

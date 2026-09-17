@@ -924,6 +924,8 @@ TEST_F(ResolverValueConstructorValidationTest, Array_TooManyElements) {
               "found 5");
 }
 
+// TODO(562321106): Move this test to WgslToIR test once IR validator is called as part of
+// converting WGSL to IR
 TEST_F(ResolverValueConstructorValidationTest, Array_ExcessiveNumberOfElements) {
     // array<i32, 40000u>(0i, 2i, 3i, ..., 39999i);
     SetSource(Source::Location({12, 34}));
@@ -936,7 +938,7 @@ TEST_F(ResolverValueConstructorValidationTest, Array_ExcessiveNumberOfElements) 
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array constructor has excessive number of elements (>32767)");
+              "12:34 error: array constructor has excessive number of elements (>32768)");
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Array_Runtime) {

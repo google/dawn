@@ -2694,6 +2694,8 @@ bool Validator::StructureInitializer(const ast::CallExpression* ctor,
 bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
                                  const sem::Array* array_type) const {
     auto& values = ctor->args;
+    // TODO(562321106): Remove this check once IR validator is called as part of converting WGSL to
+    // IR
     if (values.Length() > internal_limits::kMaxArrayConstructorElements) {
         AddError(ctor->target->source) << "array constructor has excessive number of elements (>"
                                        << internal_limits::kMaxArrayConstructorElements << ")";

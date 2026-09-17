@@ -1,5 +1,5 @@
 
-static bool v[32767] = (bool[32767])0;
+static bool v[8192] = (bool[8192])0;
 [numthreads(1, 1, 1)]
 void f() {
 }

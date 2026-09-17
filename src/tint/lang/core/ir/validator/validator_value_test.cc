@@ -427,15 +427,14 @@ TEST_F(IR_ValidatorTest, Var_ExcessiveElements) {
     auto* f = b.Function("my_func", ty.void_());
 
     b.Append(f->Block(), [&] {
-        b.Var(ty.ptr<function>(ty.array(ty.f32(), 40000u)));
+        b.Var(ty.ptr<function>(ty.array(ty.f16(), 40000u)));
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr("type has excessive number of elements (>32767) for an initializer"))
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("result type size (80000) exceeds maximum allowed (65536)"))
         << res.Failure();
 }
 
@@ -449,9 +448,8 @@ TEST_F(IR_ValidatorTest, Construct_ExcessiveElements) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr("type has excessive number of elements (>32767) for an initializer"))
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("result type size (160000) exceeds maximum allowed (65536)"))
         << res.Failure();
 }
 
@@ -471,16 +469,15 @@ TEST_F(IR_ValidatorTest, Construct_Struct_ExcessiveElements) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr("type has excessive number of elements (>32767) for an initializer"))
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("result type size (160000) exceeds maximum allowed (65536)"))
         << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Var_CombinedPrivateSizeExceedsLimit) {
     b.Append(mod.root_block, [&] {
-        for (uint32_t i = 0; i < 128; i++) {
-            b.Var(ty.ptr<private_>(ty.array<vec4u, 8000u>()));
+        for (uint32_t i = 0; i < 1024; i++) {
+            b.Var(ty.ptr<private_>(ty.array<vec4u, 2048u>()));
         }
     });
 
@@ -1332,14 +1329,13 @@ TEST_F(IR_ValidatorTest, Let_ExcessiveElements) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr("type has excessive number of elements (>32767) for an initializer"))
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("result type size (160000) exceeds maximum allowed (65536)"))
         << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Let_ExceedsSizeLimit) {
-    auto* arr_ty = ty.array(ty.i32(), 4000000u);
+    auto* arr_ty = ty.array(ty.vec4u(), 32u * 1024);
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         b.Let("l", b.Construct(arr_ty));

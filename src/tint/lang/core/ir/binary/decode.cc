@@ -1512,11 +1512,6 @@ struct Decoder {
             err_ << "cannot create a splat of type " << type->FriendlyName() << "\n";
             return b.InvalidConstant()->Value();
         }
-        if (DAWN_UNLIKELY(num_elements > internal_limits::kMaxArrayConstructorElements)) {
-            err_ << "array constructor has excessive number of elements (>"
-                 << internal_limits::kMaxArrayConstructorElements << ")\n";
-            return b.InvalidConstant()->Value();
-        }
         auto* value = ConstantValue(splat_in.elements());
         for (uint32_t i = 0; i < num_elements; i++) {
             auto* el_type = type->Element(i);
