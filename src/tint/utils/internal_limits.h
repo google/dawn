@@ -41,10 +41,6 @@ namespace tint::internal_limits {
 // Limits the nest depth of composite types
 constexpr size_t kMaxNestDepthOfCompositeType = 255;
 
-// Limits the number of elements appearing in the constructor for an array
-// TODO(562321106): Remove this limit once IR validator is called as part of converting WGSL to IR
-constexpr size_t kMaxArrayConstructorElements = 32LL * 1024;
-
 // Limits the number of elements in an array type
 constexpr int64_t kMaxArrayElementCount = 64LL * 1024;
 
