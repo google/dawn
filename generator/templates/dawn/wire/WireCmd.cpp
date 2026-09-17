@@ -201,7 +201,7 @@
     {% endif %}
 
     //* Returns the required transfer size for `record` in addition to the transfer structure.
-    [[maybe_unused]] size_t {{Return}}{{name}}GetExtraRequiredSize([[maybe_unused]] const {{RecordName}}& record) {
+    [[nodiscard]] size_t {{Return}}{{name}}GetExtraRequiredSize([[maybe_unused]] const {{RecordName}}& record) {
         size_t result = 0;
 
         //* Gather how much space will be needed for the extension chain.
@@ -272,7 +272,7 @@
 
     //* Serializes `record` into `transfer`, using `buffer` to get more space for pointed-to data
     //* and `provider` to serialize objects.
-    [[maybe_unused]] WireResult {{Return}}{{name}}Serialize(
+    [[nodiscard]] WireResult {{Return}}{{name}}Serialize(
         const {{RecordName}}& record,
         volatile {{TransferStructName}}* transfer,
         [[maybe_unused]] SerializeBuffer* buffer
@@ -399,7 +399,7 @@
     //* Deserializes `transfer` into `record` getting more serialized data from `buffer` and `size`
     //* if needed, using `allocator` to store pointed-to values and `resolver` to translate object
     //* Ids to actual objects.
-    [[maybe_unused]] WireResult {{Return}}{{name}}Deserialize(
+    [[nodiscard]] WireResult {{Return}}{{name}}Deserialize(
         {{RecordName}}* record,
         const volatile {{TransferStructName}}* transfer,
         DeserializeBuffer* deserializeBuffer,

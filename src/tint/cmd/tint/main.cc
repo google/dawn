@@ -980,9 +980,9 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 /// @param inspector the inspector
 /// @param ir the module to generate
 /// @returns true on success
-[[maybe_unused]] bool GenerateSpirv([[maybe_unused]] const Options& options,
-                                    [[maybe_unused]] tint::inspector::Inspector& inspector,
-                                    [[maybe_unused]] tint::core::ir::Module& ir) {
+[[nodiscard]] bool GenerateSpirv([[maybe_unused]] const Options& options,
+                                 [[maybe_unused]] tint::inspector::Inspector& inspector,
+                                 [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_SPV_WRITER
     tint::spirv::writer::Options gen_options;
     if (options.rename_all) {
@@ -1192,9 +1192,9 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
 /// @param inspector the inspector
 /// @param ir the module to generate
 /// @returns true on success
-[[maybe_unused]] bool GenerateMsl([[maybe_unused]] const Options& options,
-                                  [[maybe_unused]] tint::inspector::Inspector& inspector,
-                                  [[maybe_unused]] tint::core::ir::Module& ir) {
+[[nodiscard]] bool GenerateMsl([[maybe_unused]] const Options& options,
+                               [[maybe_unused]] tint::inspector::Inspector& inspector,
+                               [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_MSL_WRITER
     // Set up the backend options.
     tint::msl::writer::Options gen_options;
@@ -1282,9 +1282,9 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
 /// @param inspector the inspector
 /// @param ir the module to generate
 /// @returns true on success
-[[maybe_unused]] bool GenerateHlsl([[maybe_unused]] const Options& options,
-                                   [[maybe_unused]] tint::inspector::Inspector& inspector,
-                                   [[maybe_unused]] tint::core::ir::Module& ir) {
+[[nodiscard]] bool GenerateHlsl([[maybe_unused]] const Options& options,
+                                [[maybe_unused]] tint::inspector::Inspector& inspector,
+                                [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_HLSL_WRITER
     const bool for_fxc = options.format == Format::kHlslFxc;
     // Set up the backend options.
@@ -1420,9 +1420,9 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
 /// @param inspector the inspector
 /// @param ir the module to generate
 /// @returns true on success
-[[maybe_unused]] bool GenerateGlsl([[maybe_unused]] const Options& options,
-                                   [[maybe_unused]] tint::inspector::Inspector& inspector,
-                                   [[maybe_unused]] tint::core::ir::Module& ir) {
+[[nodiscard]] bool GenerateGlsl([[maybe_unused]] const Options& options,
+                                [[maybe_unused]] tint::inspector::Inspector& inspector,
+                                [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_GLSL_WRITER
     tint::glsl::writer::Options gen_options;
     gen_options.strip_all_names = options.rename_all;
