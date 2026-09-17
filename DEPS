@@ -176,7 +176,7 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@9eae7c82c57b9e64a85bcf3a246821dffd9d4d5e',
+  'url': '{chromium_git}/chromium/src/build@a56d226360eb0b3eaf423bfbf3cfe35a19e4951a',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
@@ -290,13 +290,13 @@ deps = {
 
   # Used for Dawn-side GN arg definitions.
   'tools/mb': {
-    'url': '{chromium_git}/chromium/src/tools/mb@661c2e320f2e8d2bf13eb8acb035156da4c0b187',
+    'url': '{chromium_git}/chromium/src/tools/mb@bc1e980982da362c3009ea605d18e755b1bca755',
     'condition': 'dawn_standalone',
   },
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@c643e243d3c79b5c411a4232f264b718cb740c83',
+    'url': '{chromium_git}/chromium/src/testing@a83fd5d31fe6492996f78fb63bdb56428ce8dfda',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
