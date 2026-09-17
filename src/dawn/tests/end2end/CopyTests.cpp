@@ -2238,31 +2238,36 @@ DAWN_INSTANTIATE_TEST_P(
 
         wgpu::TextureFormat::RGBA8Unorm,
 
+        // Also covers OpenGL compat Toggle::UseBlitForUintTextureToBufferCopy and
+        // Toggle::UseBlitForSintTextureToBufferCopy
         wgpu::TextureFormat::R8Uint,
         wgpu::TextureFormat::R8Sint,
-
+        wgpu::TextureFormat::RG8Uint,
+        wgpu::TextureFormat::RG8Sint,
+        wgpu::TextureFormat::RGBA8Uint,
+        wgpu::TextureFormat::RGBA8Sint,
         wgpu::TextureFormat::R16Uint,
         wgpu::TextureFormat::R16Sint,
-        wgpu::TextureFormat::R16Float,
-
         wgpu::TextureFormat::RG16Uint,
         wgpu::TextureFormat::RG16Sint,
-        wgpu::TextureFormat::RG16Float,
-
+        wgpu::TextureFormat::RGBA16Uint,
+        wgpu::TextureFormat::RGBA16Sint,
         wgpu::TextureFormat::R32Uint,
         wgpu::TextureFormat::R32Sint,
+        wgpu::TextureFormat::RG32Uint,
+        wgpu::TextureFormat::RG32Sint,
+        wgpu::TextureFormat::RGB10A2Uint,
+
+        wgpu::TextureFormat::RGBA32Uint,
+        wgpu::TextureFormat::RGBA32Sint,
 
         // Also covers OpenGL compat Toggle::UseBlitForNonRGBAFloatTextureToBufferCopy
+        wgpu::TextureFormat::R16Float,
+        wgpu::TextureFormat::RG16Float,
         wgpu::TextureFormat::R32Float,
         wgpu::TextureFormat::RG32Float,
 
-        wgpu::TextureFormat::RG32Uint,
-        wgpu::TextureFormat::RG32Sint,
-
-        wgpu::TextureFormat::RGBA16Uint,
-        wgpu::TextureFormat::RGBA16Sint,
         wgpu::TextureFormat::RGBA16Float,
-
         wgpu::TextureFormat::RGBA32Float,
 
         wgpu::TextureFormat::RGB10A2Unorm,
@@ -2456,6 +2461,28 @@ DAWN_INSTANTIATE_TEST_P(CopyTests_T2B_Compat,
 
                             // Testing OpenGL compat Toggle::UseBlitForRGB9E5UfloatTextureCopy
                             wgpu::TextureFormat::RGB9E5Ufloat,
+
+                            // Testing OpenGL compat Toggle::UseBlitForUintTextureToBufferCopy and
+                            // Toggle::UseBlitForSintTextureToBufferCopy
+                            wgpu::TextureFormat::R8Uint,
+                            wgpu::TextureFormat::R8Sint,
+                            wgpu::TextureFormat::RG8Uint,
+                            wgpu::TextureFormat::RG8Sint,
+                            wgpu::TextureFormat::RGBA8Uint,
+                            wgpu::TextureFormat::RGBA8Sint,
+
+                            wgpu::TextureFormat::R16Sint,
+                            wgpu::TextureFormat::RG16Sint,
+                            wgpu::TextureFormat::RGBA16Sint,
+
+                            wgpu::TextureFormat::R32Uint,
+                            wgpu::TextureFormat::R32Sint,
+                            wgpu::TextureFormat::RG32Uint,
+                            wgpu::TextureFormat::RG32Sint,
+                            wgpu::TextureFormat::RGBA32Uint,
+                            wgpu::TextureFormat::RGBA32Sint,
+
+                            wgpu::TextureFormat::RGB10A2Uint,
                         });
 
 // Test that copying an entire texture with 256-byte aligned dimensions works

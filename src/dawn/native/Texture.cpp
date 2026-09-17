@@ -576,6 +576,31 @@ bool CopySrcNeedsInternalTextureBindingUsage(const DeviceBase* device, const For
         device->IsToggleEnabled(Toggle::UseBlitForNonRGBAFloatTextureToBufferCopy)) {
         return true;
     }
+    // Uint
+    if ((format.format == wgpu::TextureFormat::R8Uint ||
+         format.format == wgpu::TextureFormat::RG8Uint ||
+         format.format == wgpu::TextureFormat::RGBA8Uint ||
+         format.format == wgpu::TextureFormat::R16Uint ||
+         format.format == wgpu::TextureFormat::RG16Uint ||
+         format.format == wgpu::TextureFormat::RGBA16Uint ||
+         format.format == wgpu::TextureFormat::R32Uint ||
+         format.format == wgpu::TextureFormat::RG32Uint ||
+         format.format == wgpu::TextureFormat::RGB10A2Uint) &&
+        device->IsToggleEnabled(Toggle::UseBlitForUintTextureToBufferCopy)) {
+        return true;
+    }
+    // Sint
+    if ((format.format == wgpu::TextureFormat::R8Sint ||
+         format.format == wgpu::TextureFormat::RG8Sint ||
+         format.format == wgpu::TextureFormat::RGBA8Sint ||
+         format.format == wgpu::TextureFormat::R16Sint ||
+         format.format == wgpu::TextureFormat::RG16Sint ||
+         format.format == wgpu::TextureFormat::RGBA16Sint ||
+         format.format == wgpu::TextureFormat::R32Sint ||
+         format.format == wgpu::TextureFormat::RG32Sint) &&
+        device->IsToggleEnabled(Toggle::UseBlitForSintTextureToBufferCopy)) {
+        return true;
+    }
     // RGB9E5Ufloat
     if (format.format == wgpu::TextureFormat::RGB9E5Ufloat &&
         device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy)) {

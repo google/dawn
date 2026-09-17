@@ -490,6 +490,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::UseBlitForNonRGBAUnormTextureToBufferCopy, true);
         deviceToggles->Default(Toggle::UseBlitForNonRGBAFloatTextureToBufferCopy, true);
         deviceToggles->Default(Toggle::UseBlitForFloat16TextureCopy, true);
+        deviceToggles->Default(Toggle::UseBlitForUintTextureToBufferCopy, true);
+        deviceToggles->Default(Toggle::UseBlitForSintTextureToBufferCopy, true);
     }
 
     // Use compute shader blit to emulate rg11b10ufloat texture to buffer copies if not color
