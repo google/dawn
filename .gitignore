@@ -24,6 +24,7 @@
 /third_party/cpython3/host
 /third_party/cpython3/linux-amd64
 /third_party/depot_tools
+/third_party/direct3d-warp/bin/
 /third_party/directx-shader-compiler/src
 /third_party/directx-headers/src
 /third_party/dragonbox/src

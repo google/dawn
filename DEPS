@@ -31,6 +31,7 @@ vars = {
   'dawn_go_version': 'version:3@1.26.6',
   'dawn_node_version': 'version:2@20.11.0',
   'dawn_agility_sdk_version': 'version:2@1.721.0-preview',
+  'dawn_direct3d_warp_version': 'version:3@1.65535.20-preview.chromium.1',
   'dawn_bazelisk_version': 'version:3@1.29.0',
   'dawn_llvm-dev_version': 'version:3@22.1.0',
   'dawn_zstd_version': 'Lf-seQJdussz81cZXnez5xIxEdkejDRxKumQpHbHMOUC',
@@ -449,6 +450,17 @@ deps = {
       },
     ],
     'condition': 'host_os == "win"',
+    'dep_type': 'cipd',
+  },
+
+  'third_party/direct3d-warp/bin/': {
+    'packages': [
+      {
+        'package': 'infra/3pp/direct3d-warp',
+        'version': Var('dawn_direct3d_warp_version'),
+      },
+    ],
+    'condition': 'dawn_standalone and host_os == "win"',
     'dep_type': 'cipd',
   },
 

@@ -924,6 +924,10 @@ dawn_test("dawn_end2end_tests") {
     "${dawn_root}/src/utils/chromium_test_compat",
   ]
 
+  if (dawn_standalone && (dawn_enable_d3d11 || dawn_enable_d3d12)) {
+    data_deps = [ "${dawn_direct3d_warp_dir}:copy_direct3d_warp" ]
+  }
+
   sources = []
   libs = []
 
