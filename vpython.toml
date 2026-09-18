@@ -3,5 +3,6 @@ dependencies = [
   'psutil==5.8.0+chromium.3',
   'markupsafe==2.0.1',
   'mako==1.2.3',
-  "pyyaml==5.4.1+chromium.1; sys_platform == 'linux' and platform_machine == 'x86_64'"
+  "pyyaml==5.4.1+chromium.1; sys_platform == 'linux' and platform_machine == 'x86_64'",
+  'requests==2.34.2'
 ]
