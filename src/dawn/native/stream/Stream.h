@@ -627,7 +627,7 @@ class Stream<std::variant<Types...>> {
         size_t typeId;
         DAWN_TRY(StreamOut(source, &typeId));
         if (typeId >= sizeof...(Types)) {
-            return DAWN_VALIDATION_ERROR("Invalid variant type id");
+            return DAWN_INTERNAL_ERROR("Invalid variant type id");
         } else {
             return ReadImpl<0, Types...>(source, t, typeId);
         }
