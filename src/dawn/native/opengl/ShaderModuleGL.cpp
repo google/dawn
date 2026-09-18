@@ -558,8 +558,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             std::vector<char> buffer(infoLogLength);
             DAWN_GL_TRY(gl, GetShaderInfoLog(shader, infoLogLength, nullptr, &buffer[0]));
             DAWN_GL_TRY(gl, DeleteShader(shader));
-            return DAWN_VALIDATION_ERROR("%s\nProgram compilation failed:\n%s", source,
-                                         buffer.data());
+            return DAWN_FORMAT_INTERNAL_ERROR("%s\nProgram compilation failed:\n%s", source,
+                                              buffer.data());
         }
     }
 

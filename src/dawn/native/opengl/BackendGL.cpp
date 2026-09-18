@@ -92,7 +92,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         DAWN_TRY_ASSIGN(display, std::move(maybeDisplay));
 
         if (!display->egl->HasExt(EGLExt::CreateContextRobustness)) {
-            return DAWN_VALIDATION_ERROR("EGL_EXT_create_context_robustness is required.");
+            return DAWN_INTERNAL_ERROR("EGL_EXT_create_context_robustness is required.");
         }
         if (!display->egl->HasExt(EGLExt::FenceSync) &&
             !display->egl->HasExt(EGLExt::ReusableSync)) {

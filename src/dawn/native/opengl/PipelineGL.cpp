@@ -148,7 +148,7 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
         if (infoLogLength > 1) {
             std::vector<char> buffer(infoLogLength);
             DAWN_GL_TRY(gl, GetProgramInfoLog(mProgram, infoLogLength, nullptr, &buffer[0]));
-            return DAWN_VALIDATION_ERROR("Program link failed:\n%s", buffer.data());
+            return DAWN_FORMAT_INTERNAL_ERROR("Program link failed:\n%s", buffer.data());
         }
     }
 
