@@ -90,7 +90,6 @@ namespace dawn::wire {
     };
 
     struct CmdHeader {
-        uint64_t commandSize = 0;
         WireCmd commandId{};
 
         CmdHeader() = default;
@@ -124,9 +123,9 @@ namespace dawn::wire {
 
         //* Serialize the structure and everything it points to into serializeBuffer which must be
         //* big enough to contain all the data (as queried from GetRequiredSize).
-        WireResult Serialize(size_t commandSize, SerializeBuffer* serializeBuffer, const ObjectIdProvider& objectIdProvider) const;
+        WireResult Serialize(SerializeBuffer* serializeBuffer, const ObjectIdProvider& objectIdProvider) const;
         // Override which produces a FatalError if any object is used.
-        WireResult Serialize(size_t commandSize, SerializeBuffer* serializeBuffer) const;
+        WireResult Serialize(SerializeBuffer* serializeBuffer) const;
 
         //* Deserializes the structure from a buffer, consuming a maximum of *size bytes. When this
         //* function returns, buffer and size will be updated by the number of bytes consumed to

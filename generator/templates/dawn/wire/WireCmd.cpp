@@ -193,7 +193,7 @@
     };
 
     {% if is_cmd %}
-        static_assert(offsetof({{TransferStructName}}, commandSize) == 0);
+        static_assert(offsetof({{TransferStructName}}, commandId) == 0);
     {% endif -%}
 
     {% if record.chained %}
@@ -565,17 +565,15 @@
 
     {% if command.may_have_dawn_object %}
         WireResult {{Cmd}}::Serialize(
-            size_t commandSize,
             SerializeBuffer* serializeBuffer,
             const ObjectIdProvider& provider) const {
             volatile {{TransferStructName}}* transfer;
             WIRE_TRY(serializeBuffer->Next(&transfer));
-            transfer->commandSize = commandSize;
             return ({{Name}}Serialize(*this, transfer, serializeBuffer, provider));
         }
-        WireResult {{Cmd}}::Serialize(size_t commandSize, SerializeBuffer* serializeBuffer) const {
+        WireResult {{Cmd}}::Serialize(SerializeBuffer* serializeBuffer) const {
             ErrorObjectIdProvider provider;
-            return Serialize(commandSize, serializeBuffer, provider);
+            return Serialize(serializeBuffer, provider);
         }
 
         WireResult {{Cmd}}::Deserialize(
@@ -591,17 +589,15 @@
             return Deserialize(deserializeBuffer, allocator, resolver);
         }
     {% else %}
-        WireResult {{Cmd}}::Serialize(size_t commandSize, SerializeBuffer* serializeBuffer) const {
+        WireResult {{Cmd}}::Serialize(SerializeBuffer* serializeBuffer) const {
             volatile {{TransferStructName}}* transfer;
             WIRE_TRY(serializeBuffer->Next(&transfer));
-            transfer->commandSize = commandSize;
             return ({{Name}}Serialize(*this, transfer, serializeBuffer));
         }
         WireResult {{Cmd}}::Serialize(
-            size_t commandSize,
             SerializeBuffer* serializeBuffer,
             const ObjectIdProvider&) const {
-            return Serialize(commandSize, serializeBuffer);
+            return Serialize(serializeBuffer);
         }
 
         WireResult {{Cmd}}::Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator) {
