@@ -152,9 +152,8 @@ class ChunkedCommandSerializer {
                 // command.
                 SerializeBuffer cmdSerializeBuffer(cmdBuffer);
                 WireResult rCmd = SerializeCmd(cmd, &cmdSerializeBuffer);
-                if (rCmd != WireResult::Success || rExts != WireResult::Success) [[unlikely]] {
-                    mSerializer->OnSerializeError();
-                }
+
+                DAWN_CHECK(rCmd == WireResult::Success && rExts == WireResult::Success);
             }
             return;
         }
@@ -173,10 +172,9 @@ class ChunkedCommandSerializer {
         // Now that the command's extension members have been updated, we can serialise the command.
         SerializeBuffer cmdSerializeBuffer(cmdBuffer);
         WireResult rCmd = SerializeCmd(cmd, &cmdSerializeBuffer);
-        if (rCmd != WireResult::Success || rExts != WireResult::Success) [[unlikely]] {
-            mSerializer->OnSerializeError();
-            return;
-        }
+
+        DAWN_CHECK(rCmd == WireResult::Success && rExts == WireResult::Success);
+
         SerializeChunkedCommand(cmdSpace);
     }
 

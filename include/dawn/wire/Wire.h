@@ -53,6 +53,7 @@ class DAWN_WIRE_EXPORT CommandSerializer {
     virtual std::optional<std::span<volatile std::byte>> GetCommandSpace(size_t size) = 0;
     virtual bool Flush() = 0;
     virtual size_t GetMaximumAllocationSize() const = 0;
+    // TODO(crbug.com/560062638): Unused, remove this once Chromium removes its implementation.
     virtual void OnSerializeError();
 };
 
