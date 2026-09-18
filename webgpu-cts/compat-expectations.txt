@@ -2469,6 +2469,10 @@ crbug.com/517803869 [ android-pixel-10 ] webgpu:api,operation,command_buffer,que
 # Pixel 10 drops instance during/before getCompilationInfo
 crbug.com/563037173 [ android-pixel-10 ] webgpu:shader,validation,const_assert,const_assert:evaluation_stage:scope="module";stage="constant" [ Failure ]
 
+# Pixel 10 crashes for vector assignment tests.
+crbug.com/563038131 [ android-pixel-10 ] webgpu:shader,execution,statement,assignment,vector:vector_constant_index:elementType="bool";width=2 [ Failure ]
+crbug.com/563038131 [ android-pixel-10 ] webgpu:shader,execution,statement,assignment,vector:vector_dynamic_index:elementType="i32";width=3;indexType="u32" [ Failure ]
+
 # mapAsync early rejection cases
 crbug.com/487349982 webgpu:api,validation,buffer,mapping:getMappedRange,state,mapped: [ Failure ]
 crbug.com/487349982 webgpu:api,validation,buffer,mapping:getMappedRange,state,mappedAgain: [ Failure ]
