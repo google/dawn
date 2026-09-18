@@ -320,25 +320,6 @@ TEST(ErrorTests, TRY_RESULT_CLEANUP_Cleanup) {
     ASSERT_TRUE(tryCleanup);
 }
 
-// Check DAWN_TRY_ASSIGN can override return value when needed.
-TEST(ErrorTests, TRY_RESULT_CLEANUP_OverrideReturn) {
-    auto ReturnError = []() -> ResultOrError<int*> {
-        return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
-    };
-
-    auto Try = [ReturnError]() -> bool {
-        [[maybe_unused]] int* result = nullptr;
-        DAWN_TRY_ASSIGN_WITH_CLEANUP(result, ReturnError(), {}, true);
-
-        // DAWN_TRY_ASSIGN_WITH_CLEANUP should return before this point
-        EXPECT_FALSE(true);
-        return false;
-    };
-
-    bool result = Try();
-    ASSERT_TRUE(result);
-}
-
 // Check a MaybeError can be DAWN_TRIED in a function that returns an ResultOrError
 // Check DAWN_TRY handles errors correctly.
 TEST(ErrorTests, TRY_ConversionToErrorOrResult) {

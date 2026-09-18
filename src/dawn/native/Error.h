@@ -213,50 +213,22 @@ std::string MakeIncreaseLimitMessage(std::string_view limitName, T adapterLimitV
 // Argument helpers are used to determine which macro implementations should be called when
 // overloading with different number of variables.
 #define DAWN_ERROR_UNIMPLEMENTED_MACRO_(...) DAWN_UNREACHABLE()
-#define DAWN_ERROR_GET_5TH_ARG_HELPER_(_1, _2, _3, _4, NAME, ...) NAME
-#define DAWN_ERROR_GET_5TH_ARG_(args) DAWN_ERROR_GET_5TH_ARG_HELPER_ args
 
-// DAWN_TRY_ASSIGN_WITH_CLEANUP is overloaded with 2 version so that users can override the
-// return value of the macro when necessary. This is particularly useful if the function
-// calling the macro may want to return void instead of the error, i.e. in a test where we may
-// just want to assert and fail if the assign cannot go through. In both the cleanup and return
-// clauses, users can use the `DAWN_LOCAL_VAR(Error)` variable to access the pointer to the
-// acquired error.
+// Example usage:
+//  Result res;
+//  DAWN_TRY_ASSIGN_WITH_CLEANUP(
+//      res, GetResultOrErrorFunction(), {
+//          AddAdditionalErrorInformation(DAWN_LOCAL_VAR(Error).get());
+//      });
 //
-// Example usages:
-//     3 Argument Case:
-//          Result res;
-//          DAWN_TRY_ASSIGN_WITH_CLEANUP(
-//              res, GetResultOrErrorFunction(), {
-//                  AddAdditionalErrorInformation(DAWN_LOCAL_VAR(Error).get());
-//              });
-//
-//     4 Argument Case:
-//          bool FunctionThatReturnsBool() {
-//              DAWN_TRY_ASSIGN_WITH_CLEANUP(
-//                  res, GetResultOrErrorFunction(), {
-//                      AddAdditionalErrorInformation(DAWN_LOCAL_VAR(Error).get());
-//                  },
-//                  false
-//              );
-//          }
-#define DAWN_TRY_ASSIGN_WITH_CLEANUP(...)                                       \
-    DAWN_ERROR_GET_5TH_ARG_((__VA_ARGS__, DAWN_TRY_ASSIGN_WITH_CLEANUP_IMPL_4_, \
-                             DAWN_TRY_ASSIGN_WITH_CLEANUP_IMPL_3_,              \
-                             DAWN_ERROR_UNIMPLEMENTED_MACRO_))                  \
-    (__VA_ARGS__)
-
-#define DAWN_TRY_ASSIGN_WITH_CLEANUP_IMPL_3_(VAR, EXPR, BODY) \
-    DAWN_TRY_ASSIGN_WITH_CLEANUP_IMPL_4_(VAR, EXPR, BODY, std::move(DAWN_LOCAL_VAR(Error)))
-
-#define DAWN_TRY_ASSIGN_WITH_CLEANUP_IMPL_4_(VAR, EXPR, BODY, RET)              \
+#define DAWN_TRY_ASSIGN_WITH_CLEANUP(VAR, EXPR, BODY)                           \
     {                                                                           \
         auto DAWN_LOCAL_VAR(Result) = EXPR;                                     \
         if (DAWN_LOCAL_VAR(Result).IsError()) [[unlikely]] {                    \
             auto DAWN_LOCAL_VAR(Error) = DAWN_LOCAL_VAR(Result).AcquireError(); \
             {BODY} /* comment to force the formatter to insert a newline */     \
             DAWN_APPEND_ERROR_BACKTRACE(DAWN_LOCAL_VAR(Error));                 \
-            return (RET);                                                       \
+            return (std::move(DAWN_LOCAL_VAR(Error)));                          \
         }                                                                       \
         VAR = DAWN_LOCAL_VAR(Result).AcquireSuccess();                          \
     }                                                                           \
