@@ -392,6 +392,9 @@ crbug.com/492228014 [ android-pixel-6 android-t ] webgpu:api,validation,capabili
 # These failures prevent further tests from executing. These will likely be fixed by a driver update.
 crbug.com/495510120 [ android-pixel-10 ] webgpu:shader,execution,memory_layout:* [ Skip ]
 
+# Flaky context loss on Pixel 6
+crbug.com/563346599 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Failure ]
+
 # These failures are the result of upgrading the Pixel 10 devices from OS image
 # BD3A.250721.001 to CP1A.260405.005. They should be investigated further, but
 # need to be blanked skipped in the beginning in order to unblock the upgrade.
@@ -2107,10 +2110,6 @@ crbug.com/0000 [ android-pixel-4 ] webgpu:web_platform,copyToTexture,canvas:colo
 crbug.com/0000 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:canvasType="offscreen";dstColorFormat="r16float";dstAlphaMode="opaque";srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/0000 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:canvasType="offscreen";dstColorFormat="rgba8unorm";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/0000 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:canvasType="offscreen";dstColorFormat="rgba8unorm";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:canvasType="offscreen";contextName="webgl";dstColorFormat="rgba8unorm";srcPremultiplied=false;dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:canvasType="offscreen";contextName="webgl";dstColorFormat="rgba8unorm";srcPremultiplied=true;dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:canvasType="offscreen";contextName="webgl";dstColorFormat="rgba8unorm-srgb";srcPremultiplied=false;dstAlphaMode="opaque";srcDoFlipYDuringCopy=true [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:canvasType="offscreen";contextName="webgl2";dstColorFormat="bgra8unorm-srgb";srcPremultiplied=false;dstAlphaMode="opaque";srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,copyToTexture,image:copy_subrect_from_2D_Canvas:srcDoFlipYDuringCopy=false;dstPremultiplied=false [ Failure ]
 crbug.com/0000 [ android-pixel-4 dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation no-asan no-clang-coverage nvidia release-x64 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-service-worker win ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
