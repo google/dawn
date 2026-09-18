@@ -62,9 +62,6 @@ struct Output {
     core::ir::Function::PipelineStage pipeline_stage =
         core::ir::Function::PipelineStage::kUndefined;
 
-    /// Indices into the array_length_from_uniform binding that are statically used.
-    std::unordered_set<uint32_t> used_array_length_from_uniform_indices;
-
     /// The workgroup size information, if the entry point was a compute shader
     WorkgroupInfo workgroup_info{};
 

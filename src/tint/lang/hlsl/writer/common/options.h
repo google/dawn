@@ -48,45 +48,30 @@ namespace tint::hlsl::writer {
 /// D3D11_PS_INPUT_REGISTER_COUNT == D3D12_PS_INPUT_REGISTER_COUNT
 constexpr uint32_t kMaxInterStageLocations = 30;
 
-/// Options used to specify a mapping of binding points to indices into a UBO
-/// from which to load buffer sizes, or to load them from immediate blocks.
-/// TODO(crbug.com/366291600): Remove ubo_binding after switch to immediates.
-struct ArrayLengthFromUniformOptions {
-    /// The HLSL binding point to use to generate a uniform buffer from which to read buffer sizes.
-    BindingPoint ubo_binding;
+/// Options used to load buffer sizes from immediate data.
+struct ArrayLengthFromImmediateOptions {
     /// The offset in immediate block for buffer sizes.
     std::optional<uint32_t> buffer_sizes_offset{};
     /// The mapping from the storage buffer binding points in WGSL binding-point space to the index
-    /// into the uniform buffer where the length of the buffer is stored.
+    /// into the immediate data where the length of the buffer is stored.
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(ArrayLengthFromUniformOptions,
-                 ubo_binding,
-                 buffer_sizes_offset,
-                 bindpoint_to_size_index);
-    bool operator==(const ArrayLengthFromUniformOptions&) const = default;
+    TINT_REFLECT(ArrayLengthFromImmediateOptions, buffer_sizes_offset, bindpoint_to_size_index);
+    bool operator==(const ArrayLengthFromImmediateOptions&) const = default;
 };
 
-/// Options used to specify a mapping of binding points to indices into a UBO
-/// from which to load buffer offsets, or to load them from immediate blocks.
-/// TODO(crbug.com/366291600): Remove ubo_binding after switch to immediates.
-struct ArrayOffsetFromUniformOptions {
-    /// The HLSL binding point to use to generate a uniform buffer from which to read buffer
-    /// offsets.
-    BindingPoint ubo_binding;
+/// Options used to load buffer offsets from immediate data.
+struct ArrayOffsetFromImmediateOptions {
     /// The offset in immediate block for buffer offsets.
     std::optional<uint32_t> buffer_offsets_offset{};
     /// The mapping from the storage buffer binding points in WGSL binding-point space to the index
-    /// into the uniform buffer where the offset into the buffer is stored.
+    /// into the immediate data where the offset into the buffer is stored.
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_offset_index;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(ArrayOffsetFromUniformOptions,
-                 ubo_binding,
-                 buffer_offsets_offset,
-                 bindpoint_to_offset_index);
-    bool operator==(const ArrayOffsetFromUniformOptions&) const = default;
+    TINT_REFLECT(ArrayOffsetFromImmediateOptions, buffer_offsets_offset, bindpoint_to_offset_index);
+    bool operator==(const ArrayOffsetFromImmediateOptions&) const = default;
 };
 
 /// Data for a single pixel local attachment
@@ -233,13 +218,11 @@ struct Options {
     /// The downstream compiler which will be used
     Compiler compiler = Compiler::kDXC_2021;
 
-    /// Options used to specify a mapping of binding points to indices into a UBO
-    /// from which to load buffer sizes.
-    ArrayLengthFromUniformOptions array_length_from_uniform = {};
+    /// Options used to load buffer sizes from immediate data.
+    ArrayLengthFromImmediateOptions array_length_from_immediate = {};
 
-    /// Options used to specify a mapping of binding points to indices into a UBO
-    /// from which to load buffer offsets.
-    ArrayOffsetFromUniformOptions array_offset_from_uniform = {};
+    /// Options used to load buffer offsets from immediate data.
+    ArrayOffsetFromImmediateOptions array_offset_from_immediate = {};
 
     /// Interstage locations actually used as inputs in the next stage of the pipeline.
     /// This is potentially used for truncating unused interstage outputs at current shader stage.
@@ -288,8 +271,8 @@ struct Options {
                  workarounds,
                  extensions,
                  compiler,
-                 array_length_from_uniform,
-                 array_offset_from_uniform,
+                 array_length_from_immediate,
+                 array_offset_from_immediate,
                  interstage_locations,
                  immediate_binding_point,
                  first_index_offset,
