@@ -2466,6 +2466,9 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,error_scope:current_sc
 # due to enough other failures being skipped.
 crbug.com/517803869 [ android-pixel-10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,reuse:*;noop="before" [ Failure ]
 
+# Pixel 10 drops instance during/before getCompilationInfo
+crbug.com/563037173 [ android-pixel-10 ] webgpu:shader,validation,const_assert,const_assert:evaluation_stage:scope="module";stage="constant" [ Failure ]
+
 # mapAsync early rejection cases
 crbug.com/487349982 webgpu:api,validation,buffer,mapping:getMappedRange,state,mapped: [ Failure ]
 crbug.com/487349982 webgpu:api,validation,buffer,mapping:getMappedRange,state,mappedAgain: [ Failure ]
