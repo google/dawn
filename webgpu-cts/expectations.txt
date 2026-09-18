@@ -395,6 +395,9 @@ crbug.com/495510120 [ android-pixel-10 ] webgpu:shader,execution,memory_layout:*
 # Flaky context loss on Pixel 6
 crbug.com/563346599 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Failure ]
 
+# Flaky failure on Pixel 6
+crbug.com/563349870 [ android-pixel-6 ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_slice_with_diff_mip_levels:* [ Failure ]
+
 # These failures are the result of upgrading the Pixel 10 devices from OS image
 # BD3A.250721.001 to CP1A.260405.005. They should be investigated further, but
 # need to be blanked skipped in the beginning in order to unblock the upgrade.
