@@ -35,9 +35,11 @@
 #include <algorithm>
 #include <array>
 #include <ostream>
+#include <span>
 #include <sstream>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "src/dawn/common/Constants.h"
@@ -110,8 +112,12 @@ class ColorExpectation : public detail::CustomTextureExpectation {
     uint32_t DataSize() override { return ColorType::kDataSize; }
 
     testing::AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size == sizeof(ColorType) * mExpected.size());
-        const ColorType* actual = static_cast<const ColorType*>(data);
+        size_t expectedSize = sizeof(ColorType) * mExpected.size();
+        DAWN_ASSERT(size == expectedSize);
+        // SAFETY: `data` contains at least `mExpected.size()` ColorType elements as verified by the
+        // assertion above.
+        auto actual = DAWN_UNSAFE_BUFFERS(
+            std::span<const ColorType>(static_cast<const ColorType*>(data), mExpected.size()));
 
         for (size_t i = 0; i < mExpected.size(); ++i) {
             if (!AreEqual(mExpected[i], actual[i])) {
@@ -404,6 +410,7 @@ class CopyTests {
 
     static BufferSpec MinimumBufferSpec(
         wgpu::Extent3D copyExtent,
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         uint32_t overrideBytesPerRow = kStrideComputeDefault,
         uint32_t overrideRowsPerImage = kStrideComputeDefault,
         wgpu::TextureFormat format = kDefaultFormat,
@@ -423,8 +430,10 @@ class CopyTests {
             Align(utils::RequiredBytesInCopy(bytesPerRow, rowsPerImage, copyExtent, format), 4);
         return {totalDataSize, 0, bytesPerRow, rowsPerImage};
     }
+
     static void CopyTextureData(uint32_t bytesPerTexelBlock,
                                 const void* srcData,
+                                // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
                                 uint32_t widthInBlocks,
                                 uint32_t heightInBlocks,
                                 uint32_t depthInBlocks,
@@ -433,15 +442,24 @@ class CopyTests {
                                 void* dstData,
                                 uint32_t dstBytesPerRow,
                                 uint32_t dstRowsPerImage) {
+        size_t rowBytes = static_cast<size_t>(widthInBlocks) * bytesPerTexelBlock;
         for (unsigned int z = 0; z < depthInBlocks; ++z) {
             uint32_t srcDepthOffset = z * srcBytesPerRow * srcRowsPerImage;
             uint32_t dstDepthOffset = z * dstBytesPerRow * dstRowsPerImage;
             for (unsigned int y = 0; y < heightInBlocks; ++y) {
-                memcpy(static_cast<uint8_t*>(dstData) + dstDepthOffset +
-                           static_cast<size_t>(y) * dstBytesPerRow,
-                       static_cast<const uint8_t*>(srcData) + srcDepthOffset +
-                           static_cast<size_t>(y) * srcBytesPerRow,
-                       static_cast<size_t>(widthInBlocks) * bytesPerTexelBlock);
+                // SAFETY: Caller ensures dstData and srcData have enough space for the copy region.
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                auto dstSpan = DAWN_UNSAFE_BUFFERS(
+                    std::span<uint8_t>(static_cast<uint8_t*>(dstData) + dstDepthOffset +
+                                           static_cast<size_t>(y) * dstBytesPerRow,
+                                       rowBytes));
+                // SAFETY: Caller ensures dstData and srcData have enough space for the copy region.
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                auto srcSpan = DAWN_UNSAFE_BUFFERS(
+                    std::span<const uint8_t>(static_cast<const uint8_t*>(srcData) + srcDepthOffset +
+                                                 static_cast<size_t>(y) * srcBytesPerRow,
+                                             rowBytes));
+                std::ranges::copy(srcSpan, dstSpan.begin());
             }
         }
     }
@@ -671,7 +689,7 @@ class CopyTests_T2B : public CopyTests_WithFormatParam {
         for (uint32_t layer = textureSpec.copyOrigin.z; layer < maxArrayLayer; ++layer) {
             // Copy the data used to create the upload buffer in the specified copy region to have
             // the same format as the expected buffer data.
-            std::fill(expected.begin(), expected.end(), 0x00);
+            std::ranges::fill(expected, 0x00);
 
             const uint32_t texelIndexOffset = copyLayout.bytesPerImage * layer;
             const uint32_t expectedTexelArrayDataStartIndex =
@@ -679,11 +697,14 @@ class CopyTests_T2B : public CopyTests_WithFormatParam {
                 bytesPerTexel * (textureSpec.copyOrigin.x +
                                  textureSpec.copyOrigin.y * copyLayout.texelBlocksPerRow);
 
-            CopyTextureData(bytesPerTexel,
-                            textureArrayData.data() + expectedTexelArrayDataStartIndex,
-                            copySize.width, copySize.height, copyDepth, copyLayout.bytesPerRow,
-                            copyLayout.rowsPerImage, expected.data(), bufferSpec.bytesPerRow,
-                            bufferSpec.rowsPerImage);
+            // SAFETY: expectedTexelArrayDataStartIndex is within textureArrayData.
+            auto* srcData = DAWN_UNSAFE_BUFFERS(
+                textureArrayData
+                    .data() +  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                expectedTexelArrayDataStartIndex);
+            CopyTextureData(bytesPerTexel, srcData, copySize.width, copySize.height, copyDepth,
+                            copyLayout.bytesPerRow, copyLayout.rowsPerImage, expected.data(),
+                            bufferSpec.bytesPerRow, bufferSpec.rowsPerImage);
 
             std::ostringstream errorMsgSs;
             errorMsgSs << "Texture to Buffer copy failed copying region [("
@@ -698,10 +719,12 @@ class CopyTests_T2B : public CopyTests_WithFormatParam {
                        << " and bytes per row " << bufferSpec.bytesPerRow << "\n";
 
             if (useMappableBuffer) {
-                const auto* mappedPtr = static_cast<const uint8_t*>(buffer.GetConstMappedRange());
+                // SAFETY: buffer was created with bufferSpec.size bytes and is mapped for reading.
+                auto mappedSpan = DAWN_UNSAFE_BUFFERS(std::span<const uint8_t>(
+                    static_cast<const uint8_t*>(buffer.GetConstMappedRange()), bufferSpec.size));
                 for (size_t i = 0; i < expected.size(); ++i) {
-                    if (mappedPtr[bufferOffset + i] != expected[i]) {
-                        EXPECT_EQ(mappedPtr[bufferOffset + i], expected[i])
+                    if (mappedSpan[bufferOffset + i] != expected[i]) {
+                        EXPECT_EQ(mappedSpan[bufferOffset + i], expected[i])
                             << "with i=" << i << "\n"
                             << errorMsgSs.str();
                         break;
@@ -815,7 +838,10 @@ class CopyTests_B2T : public CopyTests_WithFormatParam {
             descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
             descriptor.mappedAtCreation = true;
             buffer = device.CreateBuffer(&descriptor);
-            memcpy(buffer.GetMappedRange(), bufferData.data(), bufferData.size());
+            // SAFETY: buffer was created with size `bufferData.size()` and is mapped at creation.
+            auto mappedSpan = DAWN_UNSAFE_BUFFERS(std::span<uint8_t>(
+                static_cast<uint8_t*>(buffer.GetMappedRange()), bufferData.size()));
+            std::ranges::copy(bufferData, mappedSpan.begin());
             buffer.Unmap();
         }
 
@@ -857,9 +883,11 @@ class CopyTests_B2T : public CopyTests_WithFormatParam {
             // Copy and pack the data used to create the buffer in the specified copy region to have
             // the same format as the expected texture data.
             std::vector<PixelType> expected(texelCountPerLayer);
-            CopyTextureData(bytesPerTexel, bufferData.data() + bufferOffset, copySize.width,
-                            copySize.height, copyDepth, bufferSpec.bytesPerRow,
-                            bufferSpec.rowsPerImage, expected.data(),
+            // SAFETY: bufferOffset is within bufferData.
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            const auto* srcData = DAWN_UNSAFE_BUFFERS(bufferData.data() + bufferOffset);
+            CopyTextureData(bytesPerTexel, srcData, copySize.width, copySize.height, copyDepth,
+                            bufferSpec.bytesPerRow, bufferSpec.rowsPerImage, expected.data(),
                             copySize.width * bytesPerTexel, copySize.height);
 
             EXPECT_TEXTURE_EQ(
@@ -896,6 +924,7 @@ class CopyTests_T2TBase : public CopyTests, public Parent {
         wgpu::TextureDimension srcDimension,
         wgpu::TextureDimension dstDimension,
         bool copyWithinSameTexture = false,
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         wgpu::TextureViewDimension srcBindingViewDimension = wgpu::TextureViewDimension::Undefined,
         wgpu::TextureViewDimension dstBindingViewDimension =
             wgpu::TextureViewDimension::Undefined) {
@@ -1024,7 +1053,7 @@ class CopyTests_T2TBase : public CopyTests, public Parent {
                 // For each source texture array slice involved in the copy, emulate the T2T copy
                 // on the CPU side by "copying" the copy data from the "source texture"
                 // (srcTextureCopyData) to the "destination texture" (expectedDstDataPerSlice).
-                std::fill(expectedDstDataPerSlice.begin(), expectedDstDataPerSlice.end(), 0);
+                std::ranges::fill(expectedDstDataPerSlice, 0);
 
                 const uint32_t srcBytesOffset = srcDataCopyLayout.bytesPerImage * slice;
 
@@ -1045,10 +1074,13 @@ class CopyTests_T2TBase : public CopyTests, public Parent {
                 // the data of the destination texture since the dstSpec.copyOrigin.z-th layer).
                 uint64_t outputBufferExpectationBytesOffset =
                     static_cast<uint64_t>(dstDataCopyLayout.bytesPerImage) * slice;
-                EXPECT_BUFFER_U32_RANGE_EQ(
-                    reinterpret_cast<const uint32_t*>(expectedDstDataPerSlice.data()), outputBuffer,
-                    outputBufferExpectationBytesOffset,
-                    validDataSizePerDstTextureLayer / sizeof(uint32_t));
+                // SAFETY: expectedDstDataPerSlice has at least validDataSizePerDstTextureLayer
+                // bytes.
+                const uint32_t* expectedData = DAWN_UNSAFE_BUFFERS(
+                    reinterpret_cast<const uint32_t*>(expectedDstDataPerSlice.data()));
+                EXPECT_BUFFER_U32_RANGE_EQ(expectedData, outputBuffer,
+                                           outputBufferExpectationBytesOffset,
+                                           validDataSizePerDstTextureLayer / sizeof(uint32_t));
             }
         }
     }
@@ -1116,6 +1148,7 @@ class CopyTests_B2B : public DawnTest {
   protected:
     // This is the same signature as CopyBufferToBuffer except that the buffers are replaced by
     // only their size.
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
     void DoTest(uint64_t sourceSize,
                 uint64_t sourceOffset,
                 uint64_t destinationSize,
@@ -1147,8 +1180,13 @@ class CopyTests_B2B : public DawnTest {
         // Check destination is exactly the expected content.
         EXPECT_BUFFER_U32_RANGE_EQ(zeroes.data(), destination, 0,
                                    destinationOffset / sizeof(uint32_t));
-        EXPECT_BUFFER_U32_RANGE_EQ(sourceData.data() + sourceOffset / sizeof(uint32_t), destination,
-                                   destinationOffset, copySize / sizeof(uint32_t));
+        size_t sourceElementOffset = sourceOffset / sizeof(uint32_t);
+        // SAFETY: sourceElementOffset is within sourceData.
+        const uint32_t* expectedSourceData = DAWN_UNSAFE_BUFFERS(
+            sourceData.data() +  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            sourceElementOffset);
+        EXPECT_BUFFER_U32_RANGE_EQ(expectedSourceData, destination, destinationOffset,
+                                   copySize / sizeof(uint32_t));
         uint64_t copyEnd = destinationOffset + copySize;
         EXPECT_BUFFER_U32_RANGE_EQ(zeroes.data(), destination, copyEnd,
                                    (destinationSize - copyEnd) / sizeof(uint32_t));
@@ -1159,6 +1197,7 @@ class ClearBufferTests : public DawnTest {
   protected:
     // This is the same signature as ClearBuffer except that the buffers are replaced by
     // only their size.
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
     void DoTest(uint64_t bufferSize, uint64_t clearOffset, uint64_t clearSize) {
         DAWN_ASSERT(bufferSize % 4 == 0);
         DAWN_ASSERT(clearSize % 4 == 0);
@@ -1184,8 +1223,13 @@ class ClearBufferTests : public DawnTest {
         EXPECT_BUFFER_U32_RANGE_EQ(bufferData.data(), buffer, 0, clearOffset / sizeof(uint32_t));
         EXPECT_BUFFER_U8_RANGE_EQ(fillData.data(), buffer, clearOffset, clearSize);
         uint64_t clearEnd = clearOffset + clearSize;
-        EXPECT_BUFFER_U32_RANGE_EQ(bufferData.data() + clearEnd / sizeof(uint32_t), buffer,
-                                   clearEnd, (bufferSize - clearEnd) / sizeof(uint32_t));
+        size_t clearEndElementOffset = clearEnd / sizeof(uint32_t);
+        // SAFETY: clearEndElementOffset is within bufferData.
+        const uint32_t* expectedEndData = DAWN_UNSAFE_BUFFERS(
+            bufferData.data() +  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            clearEndElementOffset);
+        EXPECT_BUFFER_U32_RANGE_EQ(expectedEndData, buffer, clearEnd,
+                                   (bufferSize - clearEnd) / sizeof(uint32_t));
     }
 };
 
@@ -1566,9 +1610,11 @@ TEST_P(CopyTests_T2B, MappableBufferBeforeAndAfterBytesNotOverwritten) {
     const std::vector<uint8_t> kExpectedFirstBytes(kCopyOffset, 97);
     const std::vector<uint8_t> kExpectedLastBytes(kNumPastCopyBytes, 99);
     {
-        auto ptr = static_cast<uint8_t*>(buffer.GetMappedRange());
-        memcpy(ptr, kExpectedFirstBytes.data(), kExpectedFirstBytes.size());
-        memcpy(ptr + kPastCopyOffset, kExpectedLastBytes.data(), kExpectedLastBytes.size());
+        // SAFETY: buffer was created with bufferDesc.size bytes and is mapped at creation.
+        auto mapped = DAWN_UNSAFE_BUFFERS(
+            std::span<uint8_t>(static_cast<uint8_t*>(buffer.GetMappedRange()), bufferDesc.size));
+        std::ranges::copy(kExpectedFirstBytes, mapped.begin());
+        std::ranges::copy(kExpectedLastBytes, mapped.subspan(kPastCopyOffset).begin());
         buffer.Unmap();
     }
 
@@ -1599,20 +1645,22 @@ TEST_P(CopyTests_T2B, MappableBufferBeforeAndAfterBytesNotOverwritten) {
     }
 
     // Check copied bytes
-    const auto* bufferReadPtr = static_cast<const uint8_t*>(buffer.GetConstMappedRange());
+    // SAFETY: buffer has buffer.GetSize() bytes and is mapped for reading.
+    auto bufferReadSpan = DAWN_UNSAFE_BUFFERS(std::span<const uint8_t>(
+        static_cast<const uint8_t*>(buffer.GetConstMappedRange()), buffer.GetSize()));
     for (size_t i = 0; i < textureArrayData.size(); ++i) {
-        EXPECT_EQ(bufferReadPtr[kCopyOffset + i], textureArrayData[i])
+        EXPECT_EQ(bufferReadSpan[kCopyOffset + i], textureArrayData[i])
             << "failed at [" << kCopyOffset + i << "]";
     }
 
     // Check that the first & last bytes outside copied region remain intact after the copy.
     for (size_t i = 0; i < kCopyOffset; ++i) {
-        EXPECT_EQ(bufferReadPtr[i], kExpectedFirstBytes[i]) << "failed at [" << i << "]";
+        EXPECT_EQ(bufferReadSpan[i], kExpectedFirstBytes[i]) << "failed at [" << i << "]";
     }
 
     for (size_t i = 0; i < kNumPastCopyBytes; ++i) {
         const size_t idx = kPastCopyOffset + i;
-        EXPECT_EQ(bufferReadPtr[idx], kExpectedLastBytes[i]) << "failed at [" << idx << "]";
+        EXPECT_EQ(bufferReadSpan[idx], kExpectedLastBytes[i]) << "failed at [" << idx << "]";
     }
 
     buffer.Unmap();
@@ -2335,8 +2383,198 @@ TEST_P(CopyTests_T2B_No_Format_Param, CopyOneRowWithDepth32Float) {
     queue.Submit(1, &commandBuffer);
 
     std::array<float, kPixelsPerRow> expectedValues{};
-    std::fill(expectedValues.begin(), expectedValues.end(), kClearDepthValue);
+    std::ranges::fill(expectedValues, kClearDepthValue);
     EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedValues.data(), buffer, kBufferCopyOffset, kPixelsPerRow);
+}
+
+// An expectation for RG11B10Ufloat buffer content that can correctly compare different NaN values
+class ExpectRG11B10Ufloat : public detail::Expectation {
+  public:
+    explicit ExpectRG11B10Ufloat(std::vector<uint32_t> expected) : mExpected(std::move(expected)) {}
+
+    testing::AssertionResult Check(const void* data, size_t size) override {
+        size_t expectedSize = sizeof(uint32_t) * mExpected.size();
+        DAWN_ASSERT(size == expectedSize);
+
+        // SAFETY: `data` contains at least `mExpected.size()` uint32_t elements as verified by the
+        // assertion above.
+        auto actual = DAWN_UNSAFE_BUFFERS(
+            std::span<const uint32_t>(static_cast<const uint32_t*>(data), mExpected.size()));
+
+        for (size_t i = 0; i < mExpected.size(); ++i) {
+            uint32_t expectedValue = mExpected[i];
+            uint32_t actualValue = actual[i];
+
+            if (!RG11B10UfloatMatch(expectedValue, actualValue)) {
+                testing::AssertionResult result = testing::AssertionFailure()
+                                                  << "Expected data[" << i << "] to be "
+                                                  << expectedValue << ", actual " << actualValue
+                                                  << "\n";
+                return result;
+            }
+        }
+        return testing::AssertionSuccess();
+    }
+
+  private:
+    // Bit layout of a RG11B10Ufloat texel packed in a u32:
+    // [10:0] = R (float11), [21:11] = G (float11), [31:22] = B (float10).
+    static constexpr uint32_t kRShift = 0;
+    static constexpr uint32_t kGShift = 11;
+    static constexpr uint32_t kBShift = 22;
+    static constexpr uint32_t kFloat11Mask = 0x7FF;
+    static constexpr uint32_t kFloat10Mask = 0x3FF;
+
+    // float11 is 5 exponent bits + 6 mantissa bits, float10 is 5 exponent bits + 5 mantissa bits.
+    // Both are NaN when all exponent bits are set and the mantissa is non-zero.
+    static constexpr uint32_t kFloat11MantissaMask = 0x3F;
+    static constexpr uint32_t kFloat11ExponentMask = 0x7C0;
+    static constexpr uint32_t kFloat10MantissaMask = 0x1F;
+    static constexpr uint32_t kFloat10ExponentMask = 0x3E0;
+
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+    static bool RG11B10UfloatMatch(uint32_t expected, uint32_t actual) {
+        const uint32_t expectedR = (expected >> kRShift) & kFloat11Mask;
+        const uint32_t expectedG = (expected >> kGShift) & kFloat11Mask;
+        const uint32_t expectedB = (expected >> kBShift) & kFloat10Mask;
+
+        const uint32_t actualR = (actual >> kRShift) & kFloat11Mask;
+        const uint32_t actualG = (actual >> kGShift) & kFloat11Mask;
+        const uint32_t actualB = (actual >> kBShift) & kFloat10Mask;
+
+        return Float11Match(expectedR, actualR) && Float11Match(expectedG, actualG) &&
+               Float10Match(expectedB, actualB);
+    }
+
+    static bool Float11Match(uint32_t expected, uint32_t actual) {
+        DAWN_ASSERT((expected & ~kFloat11Mask) == 0);
+        DAWN_ASSERT((actual & ~kFloat11Mask) == 0);
+
+        if (IsFloat11NaN(expected)) {
+            return IsFloat11NaN(actual);
+        }
+
+        return expected == actual;
+    }
+
+    static bool Float10Match(uint32_t expected, uint32_t actual) {
+        DAWN_ASSERT((expected & ~kFloat10Mask) == 0);
+        DAWN_ASSERT((actual & ~kFloat10Mask) == 0);
+
+        if (IsFloat10NaN(expected)) {
+            return IsFloat10NaN(actual);
+        }
+
+        return expected == actual;
+    }
+
+    static bool IsFloat11NaN(uint32_t value) {
+        DAWN_ASSERT((value & ~kFloat11Mask) == 0);
+        return ((value & kFloat11ExponentMask) == kFloat11ExponentMask) &&
+               ((value & kFloat11MantissaMask) != 0);
+    }
+
+    static bool IsFloat10NaN(uint32_t value) {
+        DAWN_ASSERT((value & ~kFloat10Mask) == 0);
+        return ((value & kFloat10ExponentMask) == kFloat10ExponentMask) &&
+               ((value & kFloat10MantissaMask) != 0);
+    }
+
+    std::vector<uint32_t> mExpected;
+};
+
+// Test that texture-to-buffer copy for RG11B10Ufloat works correctly, cloned from CTS:
+// webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="rg11b10ufloat";dimension="2d"
+// (subcase: copySizeInBlocks={5,4,1}, originInBlocks={3,2,0}, mipLevel=1, textureSize=[16,12,1]).
+TEST_P(CopyTests_T2B_No_Format_Param, RG11B10UfloatMipLevel) {
+    // TODO(dawn:1913): RG11B10Ufloat copy failing for Metal backend on Mac Intel.
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsIntel() && IsMetal());
+    // TODO(dawn:1935): RG11B10Ufloat copy failing for D3D11 and OpenGLES backends on Intel Gen12.
+    DAWN_SUPPRESS_TEST_IF((IsD3D11() || IsOpenGLES()) && IsIntelGen12());
+
+    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RG11B10Ufloat;
+    constexpr uint32_t kMipLevel = 1;
+    constexpr uint32_t kTextureWidth = 16;
+    constexpr uint32_t kTextureHeight = 12;
+    constexpr uint32_t kMipWidth = kTextureWidth >> kMipLevel;    // 8
+    constexpr uint32_t kMipHeight = kTextureHeight >> kMipLevel;  // 6
+
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.format = kFormat;
+    textureDesc.size = {kTextureWidth, kTextureHeight, 1};
+    textureDesc.mipLevelCount = kMipLevel + 1;
+    textureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+    // Prepare test data matching CTS DataArrayGenerator for CopyB2T
+    constexpr uint32_t kCopyWidth = 5;
+    constexpr uint32_t kCopyHeight = 4;
+    constexpr uint32_t kOriginX = 3;
+    constexpr uint32_t kOriginY = 2;
+    constexpr uint32_t kUploadBytesPerRow = 256;
+    constexpr uint32_t kUploadRowsPerImage = kCopyHeight + 1;
+    constexpr uint32_t kUploadBufferSize = kUploadBytesPerRow * kCopyHeight;
+
+    std::vector<uint8_t> uploadData(kUploadBufferSize);
+    for (size_t i = 0; i < uploadData.size(); ++i) {
+        uploadData[i] = static_cast<uint8_t>(((static_cast<uint64_t>(i) * i * i + i) % 251) + 1);
+    }
+
+    wgpu::BufferDescriptor uploadBufferDesc;
+    uploadBufferDesc.size = kUploadBufferSize;
+    uploadBufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer uploadBuffer = device.CreateBuffer(&uploadBufferDesc);
+    queue.WriteBuffer(uploadBuffer, 0, uploadData.data(), uploadData.size());
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    // Copy buffer data to texture sub-box at mipLevel 1
+    wgpu::TexelCopyBufferInfo srcBufferView =
+        utils::CreateTexelCopyBufferInfo(uploadBuffer, 0, kUploadBytesPerRow, kUploadRowsPerImage);
+    wgpu::TexelCopyTextureInfo dstTextureView =
+        utils::CreateTexelCopyTextureInfo(texture, kMipLevel, {kOriginX, kOriginY, 0});
+    wgpu::Extent3D copyExtent = {kCopyWidth, kCopyHeight, 1};
+    encoder.CopyBufferToTexture(&srcBufferView, &dstTextureView, &copyExtent);
+
+    // Copy entire mipLevel 1 to destination buffer
+    constexpr uint32_t kDstBytesPerRow = 256;
+    constexpr uint32_t kDstRowsPerImage = kMipHeight;
+    constexpr uint32_t kDstBufferSize = kDstBytesPerRow * kMipHeight;
+
+    wgpu::BufferDescriptor dstBufferDesc;
+    dstBufferDesc.size = kDstBufferSize;
+    dstBufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer dstBuffer = device.CreateBuffer(&dstBufferDesc);
+
+    wgpu::TexelCopyTextureInfo srcTextureView =
+        utils::CreateTexelCopyTextureInfo(texture, kMipLevel, {0, 0, 0});
+    wgpu::TexelCopyBufferInfo dstBufferView =
+        utils::CreateTexelCopyBufferInfo(dstBuffer, 0, kDstBytesPerRow, kDstRowsPerImage);
+    wgpu::Extent3D fullMipExtent = {kMipWidth, kMipHeight, 1};
+    encoder.CopyTextureToBuffer(&srcTextureView, &dstBufferView, &fullMipExtent);
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Compute expected data for the full mip level (8x6 texels)
+    for (uint32_t y = 0; y < kMipHeight; ++y) {
+        std::vector<uint32_t> expectedRow(kMipWidth, 0);
+        for (uint32_t x = 0; x < kMipWidth; ++x) {
+            if (x >= kOriginX && x < kOriginX + kCopyWidth && y >= kOriginY &&
+                y < kOriginY + kCopyHeight) {
+                uint32_t dx = x - kOriginX;
+                uint32_t dy = y - kOriginY;
+                size_t offset = size_t{dy} * kUploadBytesPerRow + dx * sizeof(uint32_t);
+                uint32_t val = static_cast<uint32_t>(uploadData[offset]) |
+                               (static_cast<uint32_t>(uploadData[offset + 1]) << 8) |
+                               (static_cast<uint32_t>(uploadData[offset + 2]) << 16) |
+                               (static_cast<uint32_t>(uploadData[offset + 3]) << 24);
+                expectedRow[x] = val;
+            }
+        }
+        EXPECT_BUFFER(dstBuffer, uint64_t{y} * kDstBytesPerRow,
+                      uint64_t{kMipWidth} * sizeof(uint32_t), new ExpectRG11B10Ufloat(expectedRow));
+    }
 }
 
 DAWN_INSTANTIATE_TEST(CopyTests_T2B_No_Format_Param,
@@ -2347,6 +2585,7 @@ DAWN_INSTANTIATE_TEST(CopyTests_T2B_No_Format_Param,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       OpenGLESBackend({"gl_defer"}),
+                      OpenGLESBackend({"use_blit_for_rg11b10ufloat_texture_copy"}),
                       VulkanBackend(),
                       VulkanBackend({"use_blit_for_depth32float_texture_to_buffer_copy"}),
                       WebGPUBackend());
@@ -4038,8 +4277,10 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
             WaitABit();
         }
 
-        uint8_t* uploadData = static_cast<uint8_t*>(uploadBuffer.GetMappedRange());
-        memcpy(uploadData, expectedData.data(), expectedData.size());
+        // SAFETY: uploadBuffer is mapped for writing with at least expectedData.size() bytes.
+        auto uploadSpan = DAWN_UNSAFE_BUFFERS(std::span<uint8_t>(
+            static_cast<uint8_t*>(uploadBuffer.GetMappedRange()), expectedData.size()));
+        std::ranges::copy(expectedData, uploadSpan.begin());
         uploadBuffer.Unmap();
 
         wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
@@ -4167,13 +4408,16 @@ class T2TCopyFromDirtyHeapTests : public DawnTest {
         uploadBufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
         uploadBufferDesc.mappedAtCreation = true;
         wgpu::Buffer uploadBuffer = device.CreateBuffer(&uploadBufferDesc);
-
-        memcpy(uploadBuffer.GetMappedRange(), expectedData->data(), kBufferSize);
+        // SAFETY: uploadBuffer was created with size kBufferSize and is mapped at creation.
+        auto uploadSpan = DAWN_UNSAFE_BUFFERS(std::span<uint32_t>(
+            static_cast<uint32_t*>(uploadBuffer.GetMappedRange()), expectedData->size()));
+        std::ranges::copy(*expectedData, uploadSpan.begin());
         uploadBuffer.Unmap();
 
         return uploadBuffer;
     }
 
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
     wgpu::Texture Create2DTexture(uint32_t textureSize, uint32_t layerCount, uint32_t levelCount) {
         wgpu::TextureDescriptor colorTextureDesc = {};
         colorTextureDesc.format = kFormat;
@@ -4185,6 +4429,7 @@ class T2TCopyFromDirtyHeapTests : public DawnTest {
     }
 
     void Initialize2DTexture(wgpu::Texture texture,
+                             // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
                              uint32_t layerCount,
                              uint32_t levelCount,
                              wgpu::Buffer uploadBuffer) {
@@ -4250,8 +4495,10 @@ class T2TCopyFromDirtyHeapTests : public DawnTest {
             WaitABit();
         }
 
-        const uint32_t* readbackData =
-            static_cast<const uint32_t*>(readbackBuffer.GetConstMappedRange());
+        // SAFETY: readbackBuffer was created with kBufferSize bytes and is mapped for reading.
+        auto readbackData = DAWN_UNSAFE_BUFFERS(std::span<const uint32_t>(
+            static_cast<const uint32_t*>(readbackBuffer.GetConstMappedRange()),
+            kBufferSize / sizeof(uint32_t)));
         for (uint32_t y = 0; y < stagingTextureSize; ++y) {
             for (uint32_t x = 0; x < stagingTextureSize * (kBytesPerBlock / sizeof(uint32_t));
                  ++x) {
@@ -4392,8 +4639,10 @@ TEST_P(CopyTests_MemoryLeak, T2BLeakUninitializedPadding) {
     // Map and inspect the padding.
     {
         MapAsyncAndWait(destinationBuffer, wgpu::MapMode::Read, 0, destinationBufferSize);
-        const uint8_t* readbackData =
-            static_cast<const uint8_t*>(destinationBuffer.GetConstMappedRange());
+        // SAFETY: destinationBuffer was mapped with destinationBufferSize bytes.
+        auto readbackData = DAWN_UNSAFE_BUFFERS(std::span<const uint8_t>(
+            static_cast<const uint8_t*>(destinationBuffer.GetConstMappedRange()),
+            destinationBufferSize));
 
         // The first texel is at ptr[kOffset]. Depth16Unorm is 2 bytes.
         // Row 0 texel: ptr[kOffset] ... ptr[kOffset + 1]

@@ -798,33 +798,100 @@ constexpr std::string_view kEncodeRGB9E5UfloatInU32 = DAWN_MULTILINE(
 // Storing rg11b10ufloat texel values
 // Reference:
 // https://www.khronos.org/opengl/wiki/Small_Float_Formats
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_packed_float.txt
 constexpr std::string_view kEncodeRG11B10UfloatInU32 = DAWN_MULTILINE(
+    const kF32SignShift = 31u;
+    const kF32MantissaBits = 23u;
+    const kF32MantissaMask = 0x7FFFFFu;
+    const kF32ExponentBits = 8u;
+    const kF32ImplicitOne = 1u << kF32MantissaBits;
+    // Note the exponent masks/values below apply to the exponent field once it has been
+    // shifted down by kF32MantissaBits.
+    const kF32ExponentMask = (1u << kF32ExponentBits) - 1u;
+    const kF32InfNanExponent = kF32ExponentMask;  // all exponent bits set: Inf or NaN
+
+    // Both float11 and float10 have 5 exponent bits, so they share these values.
+    const kSmallFloatExponentBits = 5u;
+    const kSmallFloatInfNanExponent = (1u << kSmallFloatExponentBits) - 1u;  // 31
+    const kSmallFloatMaxExponent = kSmallFloatInfNanExponent - 1u;  // largest finite exponent
+    const kExponentBiasDelta = 112;  // f32 bias (127) - small float bias (15)
+
+    // Per channel parameters.
+    const kFloat11MantissaBits = 6u;
+    const kFloat10MantissaBits = 5u;
+    const kFloat11MaxFinite = 65024.0;  // 2^15 * (1 + 63/64)
+    const kFloat10MaxFinite = 64512.0;  // 2^15 * (1 + 31/32)
+
+    // Packing layout: [10:0] = R, [21:11] = G, [31:22] = B.
+    const kRedShift = 0u;
+    const kGreenShift = 11u;
+    const kBlueShift = 22u;
+
+    fn floatToSmallFloat(val: f32, mantissaBits: u32, maxFinite: f32) -> u32 {
+        let mantissaMask = (1u << mantissaBits) - 1u;
+        let maxFiniteBits = (kSmallFloatMaxExponent << mantissaBits) | mantissaMask;
+        // Number of mantissa bits dropped when converting from f32 to the small float.
+        let mantissaShift = kF32MantissaBits - mantissaBits;
+
+        let f_bits = bitcast<u32>(val);
+        let sign = (f_bits >> kF32SignShift) & 1u;
+        let exp = (f_bits >> kF32MantissaBits) & kF32ExponentMask;
+        let mant = f_bits & kF32MantissaMask;
+
+        if (exp == kF32InfNanExponent) {
+            if (mant != 0u) {
+                // NaN.
+                return (kSmallFloatInfNanExponent << mantissaBits) | mantissaMask;
+            }
+            // +Inf is kept, -Inf is clamped to 0 because small floats are unsigned.
+            return select(kSmallFloatInfNanExponent << mantissaBits, 0u, sign != 0u);
+        }
+        if (sign != 0u) {
+            // Negative.
+            return 0u;
+        }
+        if (val >= maxFinite) {
+            return maxFiniteBits;
+        }
+
+        let biased_exp = i32(exp) - kExponentBiasDelta;
+        if (biased_exp <= 0) {
+            // The value is denormalized (or zero) in the small float format.
+            let shift = u32(1 - biased_exp) + mantissaShift;
+            if (shift > 31u) {
+                return 0u;
+            }
+            let full_mant = kF32ImplicitOne | mant;
+            let round_bit = 1u << (shift - 1u);
+            let rounded = full_mant + round_bit;
+            let res_mant = rounded >> shift;
+            if (res_mant > mantissaMask) {
+                // Rounding overflowed into the smallest normalized value.
+                return 1u << mantissaBits;
+            }
+            return res_mant;
+        } else {
+            let round_bit = 1u << (mantissaShift - 1u);
+            let rounded = mant + round_bit;
+            var b_exp = biased_exp;
+            var r_mant = rounded;
+            if (rounded >= kF32ImplicitOne) {
+                // Rounding overflowed the mantissa, carry into the exponent.
+                b_exp += 1;
+                r_mant = 0u;
+                if (b_exp >= i32(kSmallFloatInfNanExponent)) {
+                    return maxFiniteBits;
+                }
+            }
+            return (u32(b_exp) << mantissaBits) | ((r_mant >> mantissaShift) & mantissaMask);
+        }
+    }
+
     fn encodeVectorInU32General(v: vec4f) -> u32 {
-        const n_rg = 6;    // number of mantissa bits (RG)
-        const n_b = 5;     // number of mantissa bits (B)
-        const e_max = 31;  // max exponent
-        const b = 15;      // exponent bias
-
-        // Calculate the exponent (biased)
-        let rbe = select(i32(floor(log2(v.r))), -b, v.r == 0.0);
-        let gbe = select(i32(floor(log2(v.g))), -b, v.g == 0.0);
-        let bbe = select(i32(floor(log2(v.b))), -b, v.b == 0.0);
-
-        // Calculate the exponent bits value.
-        let re = clamp(rbe + b, 0, e_max);
-        let ge = clamp(gbe + b, 0, e_max);
-        let be = clamp(bbe + b, 0, e_max);
-
-        // Calculate the mantissa for each component.
-        let rm = u32(round( select(v.r * exp2(-f32(re - b)) - 1.0, v.r * exp2(f32(b-1)), re == 0) * f32(1 << n_rg) ));
-        let gm = u32(round( select(v.g * exp2(-f32(ge - b)) - 1.0, v.g * exp2(f32(b-1)), ge == 0) * f32(1 << n_rg) ));
-        let bm = u32(round( select(v.b * exp2(-f32(be - b)) - 1.0, v.b * exp2(f32(b-1)), be == 0) * f32(1 << n_b) ));
-
-        let red = u32(re << n_rg) | rm;
-        let green = u32(ge << n_rg) | gm;
-        let blue = u32(be << n_b) | bm;
-
-        return (blue << 22) | (green << 11) | red;
+        let red = floatToSmallFloat(v.r, kFloat11MantissaBits, kFloat11MaxFinite);
+        let green = floatToSmallFloat(v.g, kFloat11MantissaBits, kFloat11MaxFinite);
+        let blue = floatToSmallFloat(v.b, kFloat10MantissaBits, kFloat10MaxFinite);
+        return (blue << kBlueShift) | (green << kGreenShift) | (red << kRedShift);
     }
 );
 
