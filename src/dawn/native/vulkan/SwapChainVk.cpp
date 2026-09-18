@@ -739,6 +739,8 @@ ResultOrError<VkSurfaceKHR> CreateVulkanSurface(InstanceBase* instance,
             break;
     }
 
+    // TODO(536639352): This will probably require special attention as we split the error types
+    // apart. Figure out if this should be Internal or Validation, or Unknown.
     return DAWN_VALIDATION_ERROR("Unsupported surface type (%s) for Vulkan.", surface->GetType());
 }
 
