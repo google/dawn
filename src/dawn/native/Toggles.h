@@ -230,6 +230,7 @@ enum class Toggle {
     DisableTransientAttachment,
     AutoMapBackendBuffer,
     PolyfillBoolVecDynamicStore,
+    VulkanRelaxMaxInterStageShaderVariables,
 
     EnumCount,
     InvalidEnum = EnumCount,

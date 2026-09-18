@@ -136,9 +136,12 @@ constexpr bool SafeGreaterThan(T a, U b) {
 
 }  // anonymous namespace
 
-PhysicalDevice::PhysicalDevice(VulkanInstance* vulkanInstance, VkPhysicalDevice physicalDevice)
+PhysicalDevice::PhysicalDevice(InstanceBase* instance,
+                               VulkanInstance* vulkanInstance,
+                               VkPhysicalDevice physicalDevice)
     : PhysicalDeviceBase(wgpu::BackendType::Vulkan),
       mVkPhysicalDevice(physicalDevice),
+      mInstance(instance),
       mVulkanInstance(vulkanInstance) {}
 
 PhysicalDevice::~PhysicalDevice() = default;
@@ -884,8 +887,18 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     // multisampling. Vulkan does not provide a reliable way of enforcing this so must potentially
     // use another vec4f slot to emulate this behavior. So on any WebGPU Vulkan backend
     // `maxVertexOutputComponents` must be no less than 72 = (16 * 4 + 8).
-    if (vkLimits.maxVertexOutputComponents < baseLimits.v1.maxInterStageShaderVariables * 4 + 8 ||
-        vkLimits.maxFragmentInputComponents < baseLimits.v1.maxInterStageShaderVariables * 4 + 8) {
+    // Some PowerVR (ImgTec) drivers only report the Vulkan-spec-guaranteed floor of 64 for
+    // maxVertexOutputComponents/maxFragmentInputComponents, below WebGPU's default tiered
+    // requirement. Rather than discarding the whole physical device (which prevents using the
+    // Vulkan backend), accept that floor for these devices. 64 components leave room for 14
+    // inter-stage variables (14 * 4 + 8) instead of the 16 required above.
+    uint32_t interStageShaderVariablesBase = baseLimits.v1.maxInterStageShaderVariables;
+    if (gpu_info::IsImgTec(GetVendorId()) &&
+        mInstance->GetTogglesState().IsEnabled(Toggle::VulkanRelaxMaxInterStageShaderVariables)) {
+        interStageShaderVariablesBase = std::min(interStageShaderVariablesBase, 14u);
+    }
+    if (vkLimits.maxVertexOutputComponents < interStageShaderVariablesBase * 4 + 8 ||
+        vkLimits.maxFragmentInputComponents < interStageShaderVariablesBase * 4 + 8) {
         return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxInterStageShaderVariables");
     }
     // Reserve 1 for position and 1 for emulated fragment pixel center.

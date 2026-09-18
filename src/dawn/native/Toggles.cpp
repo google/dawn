@@ -946,6 +946,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Workaround a driver bug on some Intel GPUs where dynamic component stores on "
       "boolean vectors fail.",
       "https://crbug.com/540789158", ToggleStage::Device}},
+    {Toggle::VulkanRelaxMaxInterStageShaderVariables,
+     {"vulkan_relax_max_inter_stage_shader_variables",
+      "Relax the maxInterStageShaderVariables floor for ImgTec (PowerVR) devices on Vulkan. "
+      "Some ImgTec drivers only report 64, which is below the WebGPU requirement. Enabling this "
+      "toggle accepts the limit of 64 instead of rejecting the adapter entirely.",
+      "https://g-issues.chromium.org/issues/559589664", ToggleStage::Instance}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
