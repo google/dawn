@@ -63,8 +63,7 @@ class SerialStorage {
         // Special case the mSerialIterator when it should be equal to mStorageIterator.begin()
         // otherwise we could ask mStorageIterator.begin() when mStorageIterator is mStorage.end()
         // which is invalid. mStorageIterator.begin() is tagged with a nullptr-constructed Span.
-        // TODO(https://crbug.com/526537224): Use RawSpan.
-        Span<Value> mSerialIterator;
+        RawSpan<Value> mSerialIterator;
     };
 
     class ConstIterator {
@@ -77,8 +76,7 @@ class SerialStorage {
 
       private:
         ConstStorageIterator mStorageIterator;
-        // TODO(https://crbug.com/526537224): Use RawSpan.
-        Span<const Value> mSerialIterator;
+        RawSpan<const Value> mSerialIterator;
     };
 
     class BeginEnd {
