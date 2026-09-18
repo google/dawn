@@ -668,6 +668,9 @@ crbug.com/364917742 [ android-pixel-6 ] webgpu:api,operation,command_buffer,imag
 crbug.com/364917742 [ android-pixel-6 ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:*;format="astc-*-unorm";dimension="2d" [ Failure ]
 crbug.com/364917742 [ android-pixel-6 ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:*;format="astc-*-unorm";dimension="3d" [ Failure ]
 
+# Flaky failure on Pixel 6.
+crbug.com/563042093 [ android-pixel-6 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ RetryOnFailure ]
+
 # robust_access_vertex on Intel
 crbug.com/406978227 [ intel-0x9bc5 ] webgpu:shader,execution,robust_access_vertex:* [ RetryOnFailure ]
 crbug.com/406978227 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
