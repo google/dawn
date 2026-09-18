@@ -450,9 +450,13 @@ dawn_test("dawn_unittests") {
   }
 
   if (checkout_v8 && dawn_node) {
-    sources += [ "${dawn_root}/src/dawn/node/test/NapiV8Test.cpp" ]
+    sources += [
+      "${dawn_root}/src/dawn/node/test/NapiV8Test.cpp",
+      "${dawn_root}/src/dawn/node/test/PolyfillsTest.cpp",
+    ]
     deps += [
       "${dawn_root}/src/dawn/node/napi_v8",
+      "${dawn_root}/src/dawn/node/standalone:polyfills",
       "//third_party/v8/src:v8",
       "//third_party/v8/src:v8_libplatform",
     ]
