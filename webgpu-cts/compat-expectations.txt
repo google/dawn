@@ -401,6 +401,20 @@ crbug.com/341282603 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,q
 crbug.com/341282605 [ intel-0x4680 linux ] webgpu:shader,execution,limits:switch_case_selectors: [ Failure ]
 crbug.com/341282605 [ intel-0x9bc5 ] webgpu:shader,execution,limits:switch_case_selectors: [ Failure ]
 
+# Intel UHD 770 failures
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r32float";dstFormat="r32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg32float";dstFormat="rg32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="r32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="rg32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="r32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="rg32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="r32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="rg32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="r32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="rg32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="r32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="rg32float";dimension="2d" [ Failure ]
+
 # sample_texture_combos test is failing on all Compat platforms
 crbug.com/402772749 [ angle-opengl arch-x86_64 desktop display-server-x memory_ge_16gb nvidia-0x2184 release ubuntu ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
 
@@ -2495,17 +2509,7 @@ crbug.com/0000 [ intel-0x9bc5 linux renderer-skia-gl ] webgpu:api,operation,comm
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgb10a2unorm";dstFormat="rgb10a2unorm";dimension="3d" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="3d" [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus-stencil8" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="r32float";dimension="2d" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="rg32float";dimension="2d" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="r32float";dimension="2d" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="rg32float";dimension="2d" [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyT2B";aspect="stencil-only" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="r32float";dimension="2d" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="rg32float";dimension="2d" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="r32float";dimension="2d" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="rg32float";dimension="2d" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="r32float";dimension="2d" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="rg32float";dimension="2d" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,compute,basic:large_dispatch:dispatchSize="maximum" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="queue-op";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="queue-op";writeOps=["storage","b2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
