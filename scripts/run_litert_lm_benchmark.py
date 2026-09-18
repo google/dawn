@@ -50,6 +50,13 @@ def run_litert_lm(metric_proto_file_path: Path) -> subprocess.CompletedProcess:
         str(binary_path),
         '--benchmark',
         '--backend=gpu',
+        # Run pipeline compilation and weight upload synchronously during Init
+        # Executor so background threads do not race with and spike Prefill speed.
+        # TODO(crbug.com/562993169): Remove num_threads_to_compile and
+        # num_threads_to_upload if this can be fixed upstream since it seems like
+        # a benchmark bug.
+        '--num_threads_to_compile=0',
+        '--num_threads_to_upload=0',
         f'--model_path={model_path}',
         f'--metric_proto_file_path={metric_proto_file_path}',
     ]
