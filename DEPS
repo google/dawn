@@ -449,7 +449,7 @@ deps = {
         'version': Var('dawn_agility_sdk_version'),
       },
     ],
-    'condition': 'host_os == "win"',
+    'condition': 'checkout_win',
     'dep_type': 'cipd',
   },
 
@@ -460,7 +460,7 @@ deps = {
         'version': Var('dawn_direct3d_warp_version'),
       },
     ],
-    'condition': 'dawn_standalone and host_os == "win"',
+    'condition': 'dawn_standalone and checkout_win',
     'dep_type': 'cipd',
   },
 
