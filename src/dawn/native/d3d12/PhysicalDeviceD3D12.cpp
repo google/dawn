@@ -305,7 +305,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 
     if (featureLevels.MaxSupportedFeatureLevel == D3D_FEATURE_LEVEL_11_0 &&
         featureData.ResourceBindingTier < D3D12_RESOURCE_BINDING_TIER_2) {
-        return DAWN_VALIDATION_ERROR(
+        return DAWN_INTERNAL_ERROR(
             "At least Resource Binding Tier 2 is required for D3D12 Feature Level 11.0 "
             "devices.");
     }
@@ -1004,7 +1004,7 @@ MaybeError PhysicalDevice::ValidateUseOfD3D12() const {
     // D3D12 is no longer allowed on 4th Generation Intel Processor Graphics.
     // https://www.intel.com/content/www/us/en/support/articles/000057520/graphics.html
     if (gpu_info::IsIntelGen7(vendorId, deviceId)) {
-        return DAWN_VALIDATION_ERROR("D3D12 backend is not allowed on Intel gen-7 GPUs.");
+        return DAWN_INTERNAL_ERROR("D3D12 backend is not allowed on Intel gen-7 GPUs.");
     }
 
     return {};
