@@ -1150,10 +1150,12 @@ MaybeError EncodeTimestampsToNanosecondsConversion(CommandEncoder* encoder,
                                                 paramsBuffer.Get());
 }
 
-bool ShouldUseTextureToBufferBlit(const DeviceBase* device,
+bool ShouldUseTextureToBufferBlit(const TextureBase* texture,
                                   const Format& format,
                                   const Aspect& aspect,
                                   const Extent3D& copySize) {
+    const DeviceBase* device = texture->GetDevice();
+
     // Noop copy, do not use blit.
     if (copySize.width == 0 || copySize.height == 0 || copySize.depthOrArrayLayers == 0) {
         return false;
@@ -1179,6 +1181,48 @@ bool ShouldUseTextureToBufferBlit(const DeviceBase* device,
     if ((format.format == wgpu::TextureFormat::R32Float ||
          format.format == wgpu::TextureFormat::RG32Float) &&
         device->IsToggleEnabled(Toggle::UseBlitForNonRGBAFloatTextureToBufferCopy)) {
+        return true;
+    }
+    // Uint
+    if ((format.format == wgpu::TextureFormat::R8Uint ||
+         format.format == wgpu::TextureFormat::RG8Uint ||
+         format.format == wgpu::TextureFormat::RGBA8Uint ||
+         format.format == wgpu::TextureFormat::R16Uint ||
+         format.format == wgpu::TextureFormat::RG16Uint ||
+         format.format == wgpu::TextureFormat::RGBA16Uint ||
+         format.format == wgpu::TextureFormat::R32Uint ||
+         format.format == wgpu::TextureFormat::RG32Uint ||
+         format.format == wgpu::TextureFormat::RGB10A2Uint) &&
+        device->IsToggleEnabled(Toggle::UseBlitForUintTextureToBufferCopy)) {
+        // Compat mode GL (no flexible texture views) forces a cube texture to be bound as
+        // texture_cube<T>. The compute blit path can use textureGather in WGSL for int texture and
+        // has no support for mip level, so cannot use blit.
+        // TODO(crbug.com/562077184): Uint/Sint cube textures in compat therefore fall back to
+        // the glReadPixels path in the GL backend, whose format/type support is not guaranteed by
+        // the GLES spec for all integer formats.
+        if (!device->HasFlexibleTextureViews() &&
+            texture->GetCompatibilityTextureBindingViewDimension() ==
+                wgpu::TextureViewDimension::Cube) {
+            return false;
+        }
+        return true;
+    }
+    // Sint
+    if ((format.format == wgpu::TextureFormat::R8Sint ||
+         format.format == wgpu::TextureFormat::RG8Sint ||
+         format.format == wgpu::TextureFormat::RGBA8Sint ||
+         format.format == wgpu::TextureFormat::R16Sint ||
+         format.format == wgpu::TextureFormat::RG16Sint ||
+         format.format == wgpu::TextureFormat::RGBA16Sint ||
+         format.format == wgpu::TextureFormat::R32Sint ||
+         format.format == wgpu::TextureFormat::RG32Sint) &&
+        device->IsToggleEnabled(Toggle::UseBlitForSintTextureToBufferCopy)) {
+        // Same limitation as for Uint above.
+        if (!device->HasFlexibleTextureViews() &&
+            texture->GetCompatibilityTextureBindingViewDimension() ==
+                wgpu::TextureViewDimension::Cube) {
+            return false;
+        }
         return true;
     }
     // RGB9E5Ufloat
@@ -1951,7 +1995,7 @@ void CommandEncoder::APICopyTextureToBuffer(const TexelCopyTextureInfo* sourceOr
             auto aspect = ConvertAspect(format, source.aspect);
 
             // Workaround to use compute pass to emulate texture to buffer copy
-            if (ShouldUseTextureToBufferBlit(GetDevice(), format, aspect, *copySize)) {
+            if (ShouldUseTextureToBufferBlit(source.texture, format, aspect, *copySize)) {
                 // This function might create new resources. Need to lock the Device.
                 // TODO(crbug.com/dawn/1618): In future, all temp resources should be created at
                 // Command Submit time, so the locking would be removed from here at that point.
@@ -2179,7 +2223,7 @@ void CommandEncoder::APIInjectValidationError(StringView messageIn) {
     mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator*) -> MaybeError {
-            return DAWN_MAKE_ERROR(InternalErrorType::Validation, std::string(message));
+            return DAWN_MAKE_VALIDATION_ERROR(std::string(message));
         },
         "injecting validation error: %s.", message);
 }

@@ -2272,10 +2272,6 @@ TEST_P(CaptureAndReplayTests, MappedBufferDestroyed) {
 // put values in it via render pass. Then capture it in an empty render pass.
 // On replay we read the values via a compute shader.
 TEST_P(CaptureAndReplayTests, CaptureDepth24Plus) {
-    // TODO(477645283): This fails only on WARP and after it fails, all following tests
-    // fail to create a device.
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     constexpr uint32_t kNumLayers = 6;
     auto [cPipeline, commands] = [&]() {
         wgpu::Texture texture = CreateTexture(
@@ -2802,8 +2798,6 @@ class CaptureAndReplaySurfaceTests : public CaptureAndReplayTests {
 };
 
 TEST_P(CaptureAndReplaySurfaceTests, TestSurface) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     wgpu::Surface surface = wgpu::glfw::CreateSurfaceForWindow(instance, mWindow.get());
     surface.SetLabel("mySurface");
 
@@ -2851,8 +2845,6 @@ TEST_P(CaptureAndReplaySurfaceTests, TestSurface) {
 }
 
 TEST_P(CaptureAndReplaySurfaceTests, MultiFrame) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     wgpu::Surface surface = wgpu::glfw::CreateSurfaceForWindow(instance, mWindow.get());
     surface.SetLabel("mySurface");
 

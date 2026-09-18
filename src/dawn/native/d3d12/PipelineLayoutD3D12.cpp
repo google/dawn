@@ -147,8 +147,8 @@ HRESULT SerializeRootParameter1_0(Device* device,
     D3D12_ROOT_SIGNATURE_DESC rootSignatureDescriptor;
     rootSignatureDescriptor.NumParameters = static_cast<uint32_t>(rootParameters1_0.size());
     rootSignatureDescriptor.pParameters = rootParameters1_0.data();
-    rootSignatureDescriptor.NumStaticSamplers = 0;
-    rootSignatureDescriptor.pStaticSamplers = nullptr;
+    rootSignatureDescriptor.NumStaticSamplers = rootSignature1_1.Desc_1_1.NumStaticSamplers;
+    rootSignatureDescriptor.pStaticSamplers = rootSignature1_1.Desc_1_1.pStaticSamplers;
     rootSignatureDescriptor.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
     return device->GetFunctions()->d3d12SerializeRootSignature(
@@ -166,24 +166,17 @@ ResultOrError<Ref<PipelineLayout>> PipelineLayout::Create(
 }
 
 MaybeError PipelineLayout::Initialize() {
-    BindGroupMask bindGroupMask = GetBindGroupLayoutsMask();
-    BindGroupIndex highestBindGroupIndex = GetHighestBitIndexPlusOne(bindGroupMask);
     PerBindGroup<const CachedObject*> cachedObjects;
-    for (BindGroupIndex i : Range(highestBindGroupIndex)) {
-        if (bindGroupMask[i]) {
-            cachedObjects[i] = GetBindGroupLayout(i);
-        } else {
-            cachedObjects[i] = GetDevice()->GetEmptyBindGroupLayout()->GetInternalBindGroupLayout();
-        }
+    cachedObjects.fill(GetDevice()->GetEmptyBindGroupLayout()->GetInternalBindGroupLayout());
+
+    for (BindGroupIndex i : GetBindGroupLayoutsMask()) {
+        cachedObjects[i] = GetBindGroupLayout(i);
     }
 
     // Record bind group layout objects and user immediate data size into pipeline layout cache key.
     // It represents pipeline layout base attributes and ignored future changes caused by internal
     // immediate data size from pipeline.
-    uint32_t numSetLayoutsWithHoles =
-        static_cast<uint32_t>(GetHighestBitIndexPlusOne(bindGroupMask));
-    StreamIn(&mCacheKey, stream::Iterable(cachedObjects.data(), numSetLayoutsWithHoles),
-             GetImmediateDataRangeByteSize());
+    StreamIn(&mCacheKey, cachedObjects, UsesResourceTable(), GetImmediateDataRangeByteSize());
 
     DAWN_TRY(BuildBaseRootParameters());
 

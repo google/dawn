@@ -393,7 +393,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTexture) {
     // TODO(crbug.com/522869943): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(/*testDepth=*/false);
 
@@ -546,7 +545,6 @@ TEST_P(MultisampledRenderingTest, ResolveOneOfMultipleTargets) {
     // TODO(dawn:1550) Workaround introduces a bug on Qualcomm GPUs, but is necessary for ARM GPUs.
     DAWN_TEST_UNSUPPORTED_IF(IsAndroid() && IsQualcomm() &&
                              HasToggleEnabled("resolve_multiple_attachments_in_separate_passes"));
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -1086,8 +1084,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverage) {
     // TODO(crbug.com/522869943): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-    // TODO(crbug.com/458113207): Flaky w/ WARP.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
 
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;
     constexpr bool kAlphaToCoverageEnabled = true;
@@ -1141,8 +1137,6 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCo
     DAWN_TEST_UNSUPPORTED_IF(IsAndroid() && IsQualcomm() &&
                              HasToggleEnabled("resolve_multiple_attachments_in_separate_passes"));
 
-    // TODO(crbug.com/458113207): Flaky w/ WARP.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -1274,8 +1268,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndSamp
     // at the same time. See the issue: https://github.com/gpuweb/gpuweb/issues/959.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && !IsApple());
 
-    // TODO(crbug.com/458113207): Flaky w/ WARP.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
 
     constexpr float kMSAACoverage = 0.50f;
     constexpr uint32_t kSampleMask = kFirstSampleMaskBit | kThirdSampleMaskBit;
@@ -1320,8 +1312,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndRast
     // TODO(dawn:1550) Fails on ARM-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
-    // TODO(crbug.com/458113207): Flaky w/ WARP.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
 
     // Fails on Xclipse GPUs.
     DAWN_SUPPRESS_TEST_IF(IsSamsung());

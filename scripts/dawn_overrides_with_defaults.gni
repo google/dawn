@@ -109,6 +109,10 @@ if (!defined(dawn_agility_sdk_dir)) {
   dawn_agility_sdk_dir = "//third_party/agility-sdk"
 }
 
+if (!defined(dawn_direct3d_warp_dir)) {
+  dawn_direct3d_warp_dir = "//third_party/direct3d-warp"
+}
+
 if (!defined(dawn_version_file)) {
   dawn_version_file = ""
 }

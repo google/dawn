@@ -95,7 +95,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-09-14 07:14:52AM
+# Last rolled: 2026-09-17 07:30:47AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -354,12 +354,6 @@ crbug.com/535351717 [ android-pixel-6 ] webgpu:api,validation,min_buffer_binding
 # Triaged or Manually-Added Flakes and Failures
 ################################################################################
 
-# Incorrect extension used for fragment depth
-crbug.com/457993779 [ android ] webgpu:api,operation,rendering,depth:fragment_depth_qualifiers:mode="greater" [ Failure ]
-crbug.com/457993779 [ android ] webgpu:api,operation,rendering,depth:fragment_depth_qualifiers:mode="less" [ Failure ]
-crbug.com/457993779 [ linux ] webgpu:api,operation,rendering,depth:fragment_depth_qualifiers:mode="greater" [ Failure ]
-crbug.com/457993779 [ linux ] webgpu:api,operation,rendering,depth:fragment_depth_qualifiers:mode="less" [ Failure ]
-
 # Generates GL_OUT_OF_MEMORY
 crbug.com/361372970 [ android arm ] webgpu:api,validation,image_copy,layout_related:copy_end_overflows_u64:method="WriteTexture" [ Failure ]
 
@@ -406,6 +400,20 @@ crbug.com/341282603 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,q
 
 crbug.com/341282605 [ intel-0x4680 linux ] webgpu:shader,execution,limits:switch_case_selectors: [ Failure ]
 crbug.com/341282605 [ intel-0x9bc5 ] webgpu:shader,execution,limits:switch_case_selectors: [ Failure ]
+
+# Intel UHD 770 failures
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r32float";dstFormat="r32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg32float";dstFormat="rg32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="r32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="rg32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="r32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="rg32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="r32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="rg32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="r32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="rg32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="r32float";dimension="2d" [ Failure ]
+crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="rg32float";dimension="2d" [ Failure ]
 
 # sample_texture_combos test is failing on all Compat platforms
 crbug.com/402772749 [ angle-opengl arch-x86_64 desktop display-server-x memory_ge_16gb nvidia-0x2184 release ubuntu ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
@@ -659,6 +667,9 @@ crbug.com/364917742 [ android-pixel-6 ] webgpu:api,operation,command_buffer,imag
 crbug.com/364917742 [ android-pixel-6 ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:*;format="astc-*-unorm";dimension="3d" [ Failure ]
 crbug.com/364917742 [ android-pixel-6 ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:*;format="astc-*-unorm";dimension="2d" [ Failure ]
 crbug.com/364917742 [ android-pixel-6 ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:*;format="astc-*-unorm";dimension="3d" [ Failure ]
+
+# Flaky failure on Pixel 6.
+crbug.com/563042093 [ android-pixel-6 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ RetryOnFailure ]
 
 # robust_access_vertex on Intel
 crbug.com/406978227 [ intel-0x9bc5 ] webgpu:shader,execution,robust_access_vertex:* [ RetryOnFailure ]
@@ -961,11 +972,6 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,culling
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,culling_tests:culling:frontFace="cw";cullMode="back" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,culling_tests:culling:frontFace="cw";cullMode="front" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,culling_tests:culling:frontFace="cw";cullMode="none" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,attachments:format="r16uint" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,attachments:format="rgba16uint" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,component_count:format="r16uint" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,component_count:format="rg16uint" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,component_count:format="rgba16uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod=* [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,storage_texture,read_only:basic:* [ Skip ]
@@ -974,23 +980,6 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,texture_view,texture_co
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,texture_view,write:format:method=* [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,encoding,cmds,setImmediates:* [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,encoding,encoder_open_state:* [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_related:bytes_per_row_alignment:method="CopyT2B";format="r16uint";dimension="1d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_related:bytes_per_row_alignment:method="CopyT2B";format="r16uint";dimension="2d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_related:bytes_per_row_alignment:method="CopyT2B";format="r16uint";dimension="3d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_related:bytes_per_row_alignment:method="CopyT2B";format="rg16uint";dimension="1d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_related:bytes_per_row_alignment:method="CopyT2B";format="rg16uint";dimension="2d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_related:bytes_per_row_alignment:method="CopyT2B";format="rg16uint";dimension="3d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_related:bytes_per_row_alignment:method="CopyT2B";format="rgba16uint";dimension="1d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_related:bytes_per_row_alignment:method="CopyT2B";format="rgba16uint";dimension="2d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_related:bytes_per_row_alignment:method="CopyT2B";format="rgba16uint";dimension="3d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_texture_copies:offset_and_bytesPerRow:format="r16uint";copyType="CopyT2B";dimension="2d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_texture_copies:offset_and_bytesPerRow:format="r16uint";copyType="CopyT2B";dimension="3d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_texture_copies:offset_and_bytesPerRow:format="rg16uint";copyType="CopyT2B";dimension="1d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_texture_copies:offset_and_bytesPerRow:format="rg16uint";copyType="CopyT2B";dimension="2d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_texture_copies:offset_and_bytesPerRow:format="rg16uint";copyType="CopyT2B";dimension="3d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_texture_copies:offset_and_bytesPerRow:format="rgba16uint";copyType="CopyT2B";dimension="1d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_texture_copies:offset_and_bytesPerRow:format="rgba16uint";copyType="CopyT2B";dimension="2d" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_texture_copies:offset_and_bytesPerRow:format="rgba16uint";copyType="CopyT2B";dimension="3d" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,texture_related:format:method="WriteTexture";depthOrArrayLayers=32;dimension="3d";format="astc-10x10-unorm" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,texture_related:format:method="WriteTexture";depthOrArrayLayers=32;dimension="3d";format="astc-10x10-unorm-srgb" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,texture_related:format:method="WriteTexture";depthOrArrayLayers=32;dimension="3d";format="astc-10x5-unorm" [ Skip ]
@@ -1917,10 +1906,6 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pass,resolve:ren
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pass,resolve:render_pass_resolve:colorFormat="rgb10a2unorm";separateResolvePass=false;storeOperation="store" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,depth_stencil_attachment_only:depthStencilFormat="stencil8";storeOperation="store" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,multiple_color_attachments:storeOperation1="discard";storeOperation2="store" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,attachments:format="rg16sint" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,attachments:format="rg16uint" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,component_count:format="r32sint" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,component_count:format="r8sint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,primitive_topology:basic:topology="line-strip";indirect=true;primitiveRestart=true [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,primitive_topology:basic:topology="point-list";indirect=true;primitiveRestart=false [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,sample_mask:alpha_to_coverage_mask:interpolated=true;sampleCount=4;rasterizationMask=13 [ Skip ]
@@ -1929,28 +1914,17 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,sample_
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=15 [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,rendering,stencil:stencil_read_write_mask:format="depth24plus-stencil8";maskType="write";stencilRefValue=2 [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth16unorm" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="r16uint" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rg16uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rg8snorm" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth16unorm" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="r16uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="r8snorm" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rg16uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rg8snorm" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rgba16uint" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="r16uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="r8snorm" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rg16uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rg8snorm" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rgba16uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rgba32sint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rgba32uint" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="r16uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="r8snorm" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rg16uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rg8snorm" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgb9e5ufloat" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba16uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba32float" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba32uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba8snorm" [ Skip ]
@@ -1959,7 +1933,6 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limi
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:createRenderPipeline,at_over:limitTest="atDefault";testValueName="atLimit";async=true;items=[] [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:createRenderPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=false;items=[] [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:createRenderPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=true;items=[] [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,buffer_texture_copies:offset_and_bytesPerRow:format="r16uint";copyType="CopyT2B";dimension="1d" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,image_copy,texture_related:format:method="WriteTexture";depthOrArrayLayers=32;dimension="3d";format="astc-12x12-unorm" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,render_pipeline,depth_stencil_state:stencil_write:isAsync=false;format="depth24plus-stencil8";faceAndOpType="frontFailOp";op="_undef_" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,render_pipeline,inter_stage:max_variables_count,input:isAsync=false;builtins="compat" [ Skip ]
@@ -1983,7 +1956,6 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,robust_access_vertex
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=false [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=false [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x4";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=false [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba16uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="direct";bufferOffset="non-zero";querySetOffset="zero";alpha=1 [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,command_buffer,render,render_bundle:basic: [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,labels:object_has_descriptor_label:name="createCommandEncoder" [ Skip ]
@@ -1999,7 +1971,6 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,memory_sync,texture,sam
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="queue-op";first={"op":"storage","in":"compute-pass-encoder"};second={"op":"storage","in":"compute-pass-encoder"} [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,queue,writeBuffer:array_types:arrayType="Uint8Array";useArrayBuffer=true [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pass,resolve:render_pass_resolve:colorFormat="rg8unorm";separateResolvePass=false;storeOperation="store" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,attachments:format="r8uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,primitive_topology:basic:topology="line-list";indirect=true;primitiveRestart=false [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=1 [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,attachments:format="rg11b10ufloat" [ Skip ]
@@ -2174,7 +2145,6 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,rendering,draw:vertex_a
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,rendering,stencil:stencil_failOp_operation:format="depth24plus-stencil8";failOp="increment-clamp";initialStencil=255 [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="r16float" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rg8uint" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="r32sint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="Sample";format="rgba32uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,sampling,filter_mode:minFilter,nearest:format="r16snorm" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:array_stride_zero:format="sint32" [ Skip ]
@@ -2332,7 +2302,6 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,rendering,draw:vertex_a
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,rendering,stencil:stencil_failOp_operation:format="stencil8";failOp="decrement-clamp";initialStencil=0 [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,buffer:map_partial_buffer:mapMode=2 [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="bgra8unorm" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rg32uint" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgb10a2unorm" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,sampling,filter_mode:magFilter,linear:format="rg32float" [ Skip ]
@@ -2500,6 +2469,13 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,error_scope:current_sc
 # due to enough other failures being skipped.
 crbug.com/517803869 [ android-pixel-10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,reuse:*;noop="before" [ Failure ]
 
+# Pixel 10 drops instance during/before getCompilationInfo
+crbug.com/563037173 [ android-pixel-10 ] webgpu:shader,validation,const_assert,const_assert:evaluation_stage:scope="module";stage="constant" [ Failure ]
+
+# Pixel 10 crashes for vector assignment tests.
+crbug.com/563038131 [ android-pixel-10 ] webgpu:shader,execution,statement,assignment,vector:vector_constant_index:elementType="bool";width=2 [ Failure ]
+crbug.com/563038131 [ android-pixel-10 ] webgpu:shader,execution,statement,assignment,vector:vector_dynamic_index:elementType="i32";width=3;indexType="u32" [ Failure ]
+
 # mapAsync early rejection cases
 crbug.com/487349982 webgpu:api,validation,buffer,mapping:getMappedRange,state,mapped: [ Failure ]
 crbug.com/487349982 webgpu:api,validation,buffer,mapping:getMappedRange,state,mappedAgain: [ Failure ]
@@ -2536,7 +2512,9 @@ crbug.com/538691038 [ android-pixel-10 ] webgpu:shader,validation,functions,alia
 # Autogenerated Failure expectations. Please triage.
 # ##ROLLER_AUTOGENERATED_FAILURES##
 ################################################################################
+crbug.com/0000 [ intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r32float";dstFormat="r32float";dimension="2d" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r32float";dstFormat="r32float";dimension="3d" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg32float";dstFormat="rg32float";dimension="2d" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux renderer-skia-gl ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg32float";dstFormat="rg32float";dimension="3d" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgb10a2unorm";dstFormat="rgb10a2unorm";dimension="3d" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="3d" [ Failure ]
@@ -3161,6 +3139,9 @@ crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limit
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipelineLayout,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";visibility=5;order="shiftByHalf" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipelineLayout,at_over:limitTest="overMaximum";testValueName="atLimit";visibility=3;order="shiftByHalf" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipelineLayout,at_over:limitTest="underDefault";testValueName="atLimit";visibility=1;order="shiftByHalf" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,createBindGroupLayout:binding_type:entry1={"storageTexture":{"access":"read-only","format":"r32uint"}};entry2={"storageTexture":{"access":"read-only","format":"r32uint"}} [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,createBindGroupLayout:binding_type:entry1={"storageTexture":{"access":"read-only","format":"r32uint"}};entry2={} [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,createBindGroupLayout:binding_type:entry1={};entry2={"storageTexture":{"access":"read-only","format":"r32uint"}} [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,encoding,encoder_open_state:compute_pass_commands:command="setImmediates" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,validation,encoding,encoder_open_state:compute_pass_commands:command="setImmediates" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,encoding,encoder_open_state:compute_pass_commands:command="setImmediates" [ Failure ]
@@ -3288,6 +3269,7 @@ crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,t
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rgba8snorm";aspect="all" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rgba8uint";aspect="all" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rgba8unorm";aspect="all" [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,statement,assignment,vector:vector_dynamic_index:elementType="i32";width=3;indexType="u32" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,value_init:scalars:addressSpace="private";type="u32" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,value_init:struct:addressSpace="private" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="fragment_depth" [ Failure ]

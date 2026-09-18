@@ -186,7 +186,7 @@ class InstanceBase final : public ErrorSink, public RefCounted {
     void GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist);
 
     // ErrorSink implementation
-    void ConsumeError(std::unique_ptr<ErrorData> error,
+    void ConsumeError(std::unique_ptr<InternalError> error,
                       InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
 
     absl::flat_hash_set<std::string> mWarningMessages;

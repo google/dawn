@@ -31,6 +31,7 @@
 #include <memory>
 #include <vector>
 
+#include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/vulkan_platform.h"
 #include "src/dawn/native/PhysicalDevice.h"
@@ -46,7 +47,9 @@ class VulkanInstance;
 
 class PhysicalDevice : public PhysicalDeviceBase {
   public:
-    PhysicalDevice(VulkanInstance* vulkanInstance, VkPhysicalDevice physicalDevice);
+    PhysicalDevice(InstanceBase* instance,
+                   VulkanInstance* vulkanInstance,
+                   VkPhysicalDevice physicalDevice);
     ~PhysicalDevice() override;
 
     // PhysicalDeviceBase Implementation
@@ -124,15 +127,16 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     // Sets core feature level as not being supported and stores `error` with
     // reason why core isn't supported.
-    void SetCoreNotSupported(std::unique_ptr<ErrorData> error);
+    void SetCoreNotSupported(std::unique_ptr<InternalError> error);
 
     VkPhysicalDevice mVkPhysicalDevice;
+    raw_ptr<InstanceBase> mInstance;
     Ref<VulkanInstance> mVulkanInstance;
     VulkanDeviceInfo mDeviceInfo = {};
 
     std::optional<uint32_t> mDefaultComputeSubgroupSize;
     bool mSupportsCoreFeatureLevel = true;
-    mutable std::unique_ptr<ErrorData> mCoreError;
+    mutable std::unique_ptr<InternalError> mCoreError;
 
 #if DAWN_PLATFORM_IS(ANDROID)
     std::unique_ptr<AHBFunctions> mAHBFunctions;

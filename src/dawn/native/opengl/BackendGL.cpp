@@ -92,7 +92,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         DAWN_TRY_ASSIGN(display, std::move(maybeDisplay));
 
         if (!display->egl->HasExt(EGLExt::CreateContextRobustness)) {
-            return DAWN_VALIDATION_ERROR("EGL_EXT_create_context_robustness is required.");
+            return DAWN_INTERNAL_ERROR("EGL_EXT_create_context_robustness is required.");
         }
         if (!display->egl->HasExt(EGLExt::FenceSync) &&
             !display->egl->HasExt(EGLExt::ReusableSync)) {
@@ -112,7 +112,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
     // A helper function used to give more context before printing the EGL loading error.
     auto SwallowDiscoveryError = [&](MaybeError maybeError) {
         if (maybeError.IsError()) {
-            std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+            std::unique_ptr<InternalError> error = maybeError.AcquireError();
             error->AppendContext("trying to discover a %s adapter.", GetType());
             GetInstance()->ConsumedErrorAndWarnOnce(std::move(error));
         }

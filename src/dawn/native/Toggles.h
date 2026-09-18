@@ -127,6 +127,8 @@ enum class Toggle {
     UseBlitForB2T,
     UseBlitForNonRGBAUnormTextureToBufferCopy,
     UseBlitForNonRGBAFloatTextureToBufferCopy,
+    UseBlitForUintTextureToBufferCopy,
+    UseBlitForSintTextureToBufferCopy,
     VulkanSplitBufferTextureCopyForArrayLayers,
     GLUseArrayLengthFromImmediate,
     D3D11DisableCPUUploadBuffers,
@@ -228,6 +230,7 @@ enum class Toggle {
     DisableTransientAttachment,
     AutoMapBackendBuffer,
     PolyfillBoolVecDynamicStore,
+    VulkanRelaxMaxInterStageShaderVariables,
 
     EnumCount,
     InvalidEnum = EnumCount,

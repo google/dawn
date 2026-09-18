@@ -540,8 +540,6 @@ TEST_P(ExternalTextureTests, SampleTextureView) {
 // Tests that textureDimensions WGSL built-in function works when a texture view is used for an
 // externalTexture binding.
 TEST_P(ExternalTextureTests, TextureDimensionsWithTextureView) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());  // Flaky on WARP
-
     // TODO(crbug.com/522868202): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && (IsVulkan() || IsOpenGLES()));
 
@@ -1818,8 +1816,6 @@ TEST_P(ExternalTextureTests, MultipleBindings) {
 //
 // Case with all in the same bindgroup layout.
 TEST_P(ExternalTextureTests, SampleDifferentKindsSameBindGroup) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     // Create our three test external of different kinds as well as the expected data.
     std::vector<wgpu::ExternalTexture> externalTextures;
     std::vector<utils::RGBA8> colors;
@@ -1893,8 +1889,6 @@ TEST_P(ExternalTextureTests, SampleDifferentKindsSameBindGroup) {
 
 // Case with all in different bind group layouts.
 TEST_P(ExternalTextureTests, SampleDifferentKindsDifferentBindGroups) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     // Create our three test external of different kinds as well as the expected data.
     std::vector<wgpu::ExternalTexture> externalTextures;
     std::vector<utils::RGBA8> colors;

@@ -54,9 +54,7 @@ class WireDeserializeAllocator : public DeserializeAllocator {
 
     std::array<std::byte, kDefaultBufferSize> mStaticBuffer{};
     std::vector<HeapArray<std::byte>> mAllocations;
-    // TODO(https://crbug.com/526537224): Maybe use RawSpan instead of Span, but we will need to
-    // verify that works with the static buffer also.
-    Span<std::byte> mCurrentBuffer = mStaticBuffer;
+    RawSpan<std::byte> mCurrentBuffer = mStaticBuffer;
 };
 }  // namespace dawn::wire
 

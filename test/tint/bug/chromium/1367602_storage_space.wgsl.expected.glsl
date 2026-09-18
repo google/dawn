@@ -2,12 +2,12 @@
 
 
 struct A {
-  float a[65535];
+  float a[8192];
 };
 
 layout(binding = 0, std430)
 buffer v_block_1_ssbo {
-  int inner[65535];
+  int inner[8192];
 } v_1;
 layout(binding = 1, std430)
 buffer b_block_1_ssbo {

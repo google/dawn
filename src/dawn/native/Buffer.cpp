@@ -66,7 +66,7 @@ namespace dawn::native {
 
 namespace {
 
-std::unique_ptr<ErrorData> ConcurrentUseError() {
+std::unique_ptr<InternalError> ConcurrentUseError() {
     return DAWN_VALIDATION_ERROR("Concurrent buffer operations are not allowed");
 }
 
@@ -234,6 +234,8 @@ wgpu::BufferUsage ComputeInternalBufferUsages(const DeviceBase* device,
             device->IsToggleEnabled(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForNonRGBAUnormTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForNonRGBAFloatTextureToBufferCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForUintTextureToBufferCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForSintTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForRG11B10UfloatTextureCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForFloat16TextureCopy) ||

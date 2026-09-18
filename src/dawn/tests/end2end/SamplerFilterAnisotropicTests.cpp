@@ -294,7 +294,6 @@ TEST_P(SamplerFilterAnisotropicTest, SlantedPlaneMipmap) {
     // requires EXT_texture_filter_anisotropic
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
                              HasToggleEnabled("gl_force_es_31_and_no_extensions"));
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
     // Fails on Xclipse with ANGLE Vulkan.
     DAWN_SUPPRESS_TEST_IF(IsSamsung() && IsOpenGLES() && IsANGLE());
 

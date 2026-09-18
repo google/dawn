@@ -33,7 +33,7 @@ namespace tint::hlsl::writer {
 namespace {
 
 TEST(TintCheckAllFieldsReflected, HlslWriterCommonOptionsTest) {
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(ArrayLengthFromUniformOptions);
+    TINT_ASSERT_ALL_FIELDS_REFLECTED(ArrayLengthFromImmediateOptions);
     TINT_ASSERT_ALL_FIELDS_REFLECTED(ExternalMultiplanarTexture);
     TINT_ASSERT_ALL_FIELDS_REFLECTED(ExternalYCBCRTexture);
     TINT_ASSERT_ALL_FIELDS_REFLECTED(Bindings);

@@ -28,6 +28,8 @@
 #include "src/dawn/node/napi_v8/napi_v8.h"
 
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <limits>
 #include <utility>
@@ -522,11 +524,41 @@ napi_status GetWrapObject(napi_env env, napi_value js_object, v8::Local<v8::Obje
     if (!v8_val->IsObject()) {
         return env->SetLastError(napi_object_expected, "An object was expected");
     }
-    v8::Local<v8::Object> obj = v8_val.As<v8::Object>();
-    if (obj->InternalFieldCount() == 0) {
-        return env->SetLastError(napi_invalid_arg, "Object has no internal fields");
+    *out_obj = v8_val.As<v8::Object>();
+    return napi_ok;
+}
+
+// Returns the key used to retrieve the private member of a wrapper object.
+// The name "node:napi:wrapper" is used for the key. The namespace should ensure
+// no conflict with user names.
+v8::Local<v8::Private> GetWrapperKey(napi_env env) {
+    if (env->wrapper_key.IsEmpty()) {
+        v8::Local<v8::String> name = v8::String::NewFromUtf8Literal(
+            env->isolate, "node:napi:wrapper", v8::NewStringType::kInternalized);
+        env->wrapper_key.Reset(env->isolate, v8::Private::New(env->isolate, name));
     }
-    *out_obj = obj;
+    return env->wrapper_key.Get(env->isolate);
+}
+
+// Retrieves the `napi_ref__` previously attached to `js_object` by napi_wrap().
+// Returns napi_invalid_arg if the object is not wrapped.
+napi_status GetWrapReference(napi_env env,
+                             napi_value js_object,
+                             v8::Local<v8::Object>* out_obj,
+                             napi_ref__** out_ref) {
+    napi_status status = GetWrapObject(env, js_object, out_obj);
+    if (status != napi_ok) {
+        return status;
+    }
+    v8::Local<v8::Value> val;
+    if (!(*out_obj)->GetPrivate(env->GetContext(), GetWrapperKey(env)).ToLocal(&val)) {
+        return env->SetLastError(napi_generic_failure, "Failed to read the object's wrapper");
+    }
+    if (!val->IsExternal()) {
+        return env->SetLastError(napi_invalid_arg, "Object is not wrapped");
+    }
+    *out_ref =
+        static_cast<napi_ref__*>(val.As<v8::External>()->Value(v8::kExternalPointerTypeTagDefault));
     return napi_ok;
 }
 
@@ -633,7 +665,7 @@ napi_status napi_open_handle_scope(napi_env env, napi_handle_scope* result) {
     if (!ValidateArgs(env, result)) {
         return napi_invalid_arg;
     }
-    env->open_handle_scopes.push_back(std::make_unique<napi_handle_scope__>(env->isolate));
+    env->open_handle_scopes.push_back(std::make_unique<napi_standard_handle_scope__>(env->isolate));
     *result = env->open_handle_scopes.back().get();
     return napi_ok;
 }
@@ -646,6 +678,44 @@ napi_status napi_close_handle_scope(napi_env env, napi_handle_scope scope) {
         return env->SetLastError(napi_handle_scope_mismatch, "Handle scope closed out of order");
     }
     env->open_handle_scopes.pop_back();
+    return napi_ok;
+}
+
+napi_status napi_open_escapable_handle_scope(napi_env env, napi_escapable_handle_scope* result) {
+    if (!ValidateArgs(env, result)) {
+        return napi_invalid_arg;
+    }
+    auto scope = std::make_unique<napi_escapable_handle_scope__>(env->isolate);
+    *result = scope.get();
+    env->open_handle_scopes.push_back(std::move(scope));
+    return napi_ok;
+}
+
+napi_status napi_close_escapable_handle_scope(napi_env env, napi_escapable_handle_scope scope) {
+    if (!ValidateArgs(env, scope)) {
+        return napi_invalid_arg;
+    }
+    if (env->open_handle_scopes.empty() || env->open_handle_scopes.back().get() != scope) {
+        return env->SetLastError(napi_handle_scope_mismatch, "Handle scope closed out of order");
+    }
+    env->open_handle_scopes.pop_back();
+    return napi_ok;
+}
+
+napi_status napi_escape_handle(napi_env env,
+                               napi_escapable_handle_scope scope,
+                               napi_value src,
+                               napi_value* result) {
+    if (!ValidateArgs(env, scope, src, result)) {
+        return napi_invalid_arg;
+    }
+    if (scope->escape_called) {
+        return env->SetLastError(napi_escape_called_twice,
+                                 "Handle already escaped from this scope");
+    }
+    scope->escape_called = true;
+    v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(src);
+    *result = dawn::napi_v8::ToNapi(scope->scope.Escape(v8_val));
     return napi_ok;
 }
 
@@ -717,6 +787,22 @@ napi_status napi_create_int64(napi_env env, int64_t value, napi_value* result) {
     return napi_ok;
 }
 
+napi_status napi_create_bigint_int64(napi_env env, int64_t value, napi_value* result) {
+    if (!ValidateArgs(env, result)) {
+        return napi_invalid_arg;
+    }
+    *result = dawn::napi_v8::ToNapi(v8::BigInt::New(env->isolate, value));
+    return napi_ok;
+}
+
+napi_status napi_create_bigint_uint64(napi_env env, uint64_t value, napi_value* result) {
+    if (!ValidateArgs(env, result)) {
+        return napi_invalid_arg;
+    }
+    *result = dawn::napi_v8::ToNapi(v8::BigInt::NewFromUnsigned(env->isolate, value));
+    return napi_ok;
+}
+
 napi_status napi_create_string_utf8(napi_env env,
                                     const char* str,
                                     size_t length,
@@ -764,6 +850,38 @@ napi_status napi_get_value_uint32(napi_env env, napi_value value, uint32_t* resu
 napi_status napi_get_value_int64(napi_env env, napi_value value, int64_t* result) {
     return ExtractNumber<v8::Integer>(env, value, result, "An integer was expected",
                                       [](auto v, auto ctx) { return v->ToInteger(ctx); });
+}
+
+napi_status napi_get_value_bigint_int64(napi_env env,
+                                        napi_value value,
+                                        int64_t* result,
+                                        bool* lossless) {
+    if (!ValidateArgs(env, value, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(value);
+    if (!v8_val->IsBigInt()) {
+        return env->SetLastError(napi_bigint_expected, "BigInt expected");
+    }
+    v8::Local<v8::BigInt> bi = v8_val.As<v8::BigInt>();
+    *result = bi->Int64Value(lossless);
+    return napi_ok;
+}
+
+napi_status napi_get_value_bigint_uint64(napi_env env,
+                                         napi_value value,
+                                         uint64_t* result,
+                                         bool* lossless) {
+    if (!ValidateArgs(env, value, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(value);
+    if (!v8_val->IsBigInt()) {
+        return env->SetLastError(napi_bigint_expected, "BigInt expected");
+    }
+    v8::Local<v8::BigInt> bi = v8_val.As<v8::BigInt>();
+    *result = bi->Uint64Value(lossless);
+    return napi_ok;
 }
 
 napi_status napi_get_value_bool(napi_env env, napi_value value, bool* result) {
@@ -877,6 +995,29 @@ napi_status napi_strict_equals(napi_env env, napi_value lhs, napi_value rhs, boo
         return napi_invalid_arg;
     }
     *result = ToV8(lhs)->StrictEquals(ToV8(rhs));
+    return napi_ok;
+}
+
+napi_status napi_instanceof(napi_env env, napi_value object, napi_value constructor, bool* result) {
+    if (!ValidateArgs(env, object, constructor, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_obj = dawn::napi_v8::ToV8(object);
+    v8::Local<v8::Value> v8_ctor = dawn::napi_v8::ToV8(constructor);
+    if (!v8_ctor->IsObject()) {
+        return env->SetLastError(napi_object_expected, "Constructor must be an object");
+    }
+    v8::Local<v8::Context> ctx = env->GetContext();
+    v8::TryCatch try_catch(env->isolate);
+    v8::Maybe<bool> res = v8_obj->InstanceOf(ctx, v8_ctor.As<v8::Object>());
+    if (res.IsNothing()) {
+        if (try_catch.HasCaught()) {
+            env->isolate->ThrowException(try_catch.Exception());
+            env->last_exception.Reset(env->isolate, try_catch.Exception());
+        }
+        return env->SetLastError(napi_generic_failure, "InstanceOf check failed");
+    }
+    *result = res.FromJust();
     return napi_ok;
 }
 
@@ -1002,6 +1143,15 @@ napi_status napi_get_array_length(napi_env env, napi_value value, uint32_t* resu
     return napi_ok;
 }
 
+napi_status napi_is_array(napi_env env, napi_value value, bool* result) {
+    if (!ValidateArgs(env, value, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(value);
+    *result = v8_val->IsArray();
+    return napi_ok;
+}
+
 napi_status napi_get_element(napi_env env, napi_value object, uint32_t index, napi_value* result) {
     return ReadProperty(env, object, index, result, "Failed to get element");
 }
@@ -1104,6 +1254,21 @@ napi_status napi_get_cb_info(napi_env env,
     return napi_ok;
 }
 
+napi_status napi_get_new_target(napi_env env, napi_callback_info cbinfo, napi_value* result) {
+    if (!ValidateArgs(env, cbinfo, result)) {
+        return napi_invalid_arg;
+    }
+    if (cbinfo->v8_info == nullptr) {
+        return env->SetLastError(napi_invalid_arg, "Callback info has no V8 info");
+    }
+    v8::Local<v8::Value> new_target = cbinfo->v8_info->NewTarget();
+    if (new_target.IsEmpty()) {
+        new_target = v8::Undefined(env->isolate);
+    }
+    *result = dawn::napi_v8::ToNapi(new_target);
+    return napi_ok;
+}
+
 napi_status napi_new_instance(napi_env env,
                               napi_value constructor,
                               size_t argc,
@@ -1151,7 +1316,6 @@ napi_status napi_define_class(napi_env env,
     if (status != napi_ok) {
         return status;
     }
-    class_template->InstanceTemplate()->SetInternalFieldCount(1);
 
     v8::Local<v8::Context> ctx = env->GetContext();
     v8::MaybeLocal<v8::Function> maybe_ctor = class_template->GetFunction(ctx);
@@ -1281,6 +1445,29 @@ napi_status napi_is_error(napi_env env, napi_value value, bool* result) {
     return napi_ok;
 }
 
+void napi_fatal_error(const char* location,
+                      size_t location_len,
+                      const char* message,
+                      size_t message_len) {
+    std::string loc =
+        (location != nullptr)
+            ? (location_len == NAPI_AUTO_LENGTH ? location : std::string(location, location_len))
+            : "";
+    std::string msg =
+        (message != nullptr)
+            ? (message_len == NAPI_AUTO_LENGTH ? message : std::string(message, message_len))
+            : "";
+    fprintf(stderr, "FATAL ERROR in %s: %s\n", loc.c_str(), msg.c_str());
+    fflush(stderr);
+    std::abort();
+}
+
+static napi_module* g_registered_module = nullptr;
+
+void napi_module_register(napi_module* mod) {
+    g_registered_module = mod;
+}
+
 // ============================================================================
 // References, ObjectWrap & Instance Data
 // ============================================================================
@@ -1365,19 +1552,31 @@ napi_status napi_wrap(napi_env env,
     if (status != napi_ok) {
         return status;
     }
-    if (obj->GetAlignedPointerFromInternalField(0, v8::kEmbedderDataTypeTagDefault) != nullptr) {
+    v8::Local<v8::Context> ctx = env->GetContext();
+    v8::Local<v8::Private> key = GetWrapperKey(env);
+
+    v8::Maybe<bool> has_wrapper = obj->HasPrivate(ctx, key);
+    if (has_wrapper.IsNothing()) {
+        return env->SetLastError(napi_generic_failure, "Failed to read the object's wrapper");
+    }
+    if (has_wrapper.FromJust()) {
         return env->SetLastError(napi_invalid_arg, "Object is already wrapped");
     }
-    obj->SetAlignedPointerInInternalField(0, native_object, v8::kEmbedderDataTypeTagDefault);
-    if (finalize_cb != nullptr || result != nullptr) {
-        auto ref = std::make_unique<napi_ref__>(env, obj, 0, native_object, finalize_cb,
-                                                finalize_hint, /*wrap_ref=*/true,
-                                                /*userland_ref=*/result != nullptr);
-        if (result != nullptr) {
-            *result = ref.get();
-        }
-        env->references.push_back(std::move(ref));
+
+    // A reference is created even when the caller asks for neither a finalizer nor a napi_ref:
+    // it is what holds the native pointer for napi_unwrap() to read back.
+    auto ref = std::make_unique<napi_ref__>(env, obj, 0, native_object, finalize_cb, finalize_hint,
+                                            /*wrap_ref=*/true,
+                                            /*userland_ref=*/result != nullptr);
+    v8::Local<v8::External> ext =
+        v8::External::New(env->isolate, ref.get(), v8::kExternalPointerTypeTagDefault);
+    if (obj->SetPrivate(ctx, key, ext).IsNothing()) {
+        return env->SetLastError(napi_generic_failure, "Failed to attach the object's wrapper");
     }
+    if (result != nullptr) {
+        *result = ref.get();
+    }
+    env->references.push_back(std::move(ref));
     return napi_ok;
 }
 
@@ -1386,42 +1585,94 @@ napi_status napi_unwrap(napi_env env, napi_value js_object, void** result) {
         return napi_invalid_arg;
     }
     v8::Local<v8::Object> obj;
-    napi_status status = GetWrapObject(env, js_object, &obj);
+    napi_ref__* ref = nullptr;
+    napi_status status = GetWrapReference(env, js_object, &obj, &ref);
     if (status != napi_ok) {
         return status;
     }
-    *result = obj->GetAlignedPointerFromInternalField(0, v8::kEmbedderDataTypeTagDefault);
+    *result = ref->native_object;
     return napi_ok;
 }
 
 napi_status napi_remove_wrap(napi_env env, napi_value js_object, void** result) {
     v8::Local<v8::Object> obj;
-    napi_status status = GetWrapObject(env, js_object, &obj);
+    napi_ref__* ref = nullptr;
+    napi_status status = GetWrapReference(env, js_object, &obj, &ref);
     if (status != napi_ok) {
         return status;
     }
     if (result != nullptr) {
-        *result = obj->GetAlignedPointerFromInternalField(0, v8::kEmbedderDataTypeTagDefault);
+        *result = ref->native_object;
     }
-    obj->SetAlignedPointerInInternalField(0, nullptr, v8::kEmbedderDataTypeTagDefault);
-
-    // Find and detach the associated wrap reference
-    auto it = std::find_if(env->references.begin(), env->references.end(), [&](const auto& r) {
-        return r->is_wrap_ref && !r->handle.IsEmpty() && r->handle.Get(env->isolate) == obj;
-    });
-    if (it != env->references.end()) {
-        napi_ref__* ref = it->get();
-        // Clear the finalizer so that it will never run on the detached native object.
-        ref->finalize_cb = nullptr;
-        ref->native_object = nullptr;
-        ref->is_wrap_ref = false;
-
-        if (!ref->is_userland_ref) {
-            // Internal runtime reference: erasing it destroys the unique_ptr, whose
-            // destructor calls handle.Reset(), deregistering the weak callback in V8.
-            env->references.erase(it);
-        }
+    if (obj->DeletePrivate(env->GetContext(), GetWrapperKey(env)).IsNothing()) {
+        return env->SetLastError(napi_generic_failure, "Failed to detach the object's wrapper");
     }
+
+    // Detach the reference, clearing the finalizer so it never runs on the removed native object.
+    ref->finalize_cb = nullptr;
+    ref->native_object = nullptr;
+    ref->is_wrap_ref = false;
+
+    if (!ref->is_userland_ref) {
+        // Internal runtime reference: erasing it destroys the unique_ptr, whose
+        // destructor calls handle.Reset(), deregistering the weak callback in V8.
+        std::erase_if(env->references,
+                      [ref](const std::unique_ptr<napi_ref__>& r) { return r.get() == ref; });
+    }
+    return napi_ok;
+}
+
+napi_status napi_add_finalizer(napi_env env,
+                               napi_value js_object,
+                               void* finalize_data,
+                               napi_finalize finalize_cb,
+                               void* finalize_hint,
+                               napi_ref* result) {
+    if (!ValidateArgs(env, js_object)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> val = dawn::napi_v8::ToV8(js_object);
+    if (!val->IsObject()) {
+        return env->SetLastError(napi_object_expected, "Object expected");
+    }
+    auto ref = std::make_unique<napi_ref__>(env, val, 0, finalize_data, finalize_cb, finalize_hint,
+                                            /*wrap_ref=*/false,
+                                            /*userland_ref=*/result != nullptr);
+    if (result != nullptr) {
+        *result = ref.get();
+    }
+    env->references.push_back(std::move(ref));
+    return napi_ok;
+}
+
+napi_status napi_create_external(napi_env env,
+                                 void* data,
+                                 napi_finalize finalize_cb,
+                                 void* finalize_hint,
+                                 napi_value* result) {
+    if (!ValidateArgs(env, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::External> ext =
+        v8::External::New(env->isolate, data, v8::kExternalPointerTypeTagDefault);
+    if (finalize_cb != nullptr) {
+        auto ref = std::make_unique<napi_ref__>(env, ext, 0, data, finalize_cb, finalize_hint,
+                                                /*wrap_ref=*/false, /*userland_ref=*/false);
+        env->references.push_back(std::move(ref));
+    }
+    *result = dawn::napi_v8::ToNapi(ext);
+    return napi_ok;
+}
+
+napi_status napi_get_value_external(napi_env env, napi_value value, void** result) {
+    if (!ValidateArgs(env, value, result)) {
+        return napi_invalid_arg;
+    }
+    v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(value);
+    if (!v8_val->IsExternal()) {
+        return env->SetLastError(napi_invalid_arg, "Value is not an external");
+    }
+    *result = v8_val.As<v8::External>()->Value(v8::kExternalPointerTypeTagDefault);
     return napi_ok;
 }
 

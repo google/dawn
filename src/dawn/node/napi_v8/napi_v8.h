@@ -53,10 +53,24 @@
 #include <v8.h>
 #pragma clang diagnostic pop
 
-// Internal struct representing a handle scope
+// Internal structs representing handle scopes
 struct napi_handle_scope__ {
+    virtual ~napi_handle_scope__() = default;
+};
+
+struct napi_standard_handle_scope__ : public napi_handle_scope__ {
     v8::HandleScope scope;
-    explicit napi_handle_scope__(v8::Isolate* isolate) : scope(isolate) {}
+    explicit napi_standard_handle_scope__(v8::Isolate* isolate) : scope(isolate) {}
+};
+
+struct napi_escapable_handle_scope__ : public napi_handle_scope__ {
+    v8::EscapableHandleScope scope;
+
+    // A scope can promote at most one handle. V8 only guards this with a DCHECK, so the second
+    // request would silently overwrite the first in a release build.
+    bool escape_called = false;
+
+    explicit napi_escapable_handle_scope__(v8::Isolate* isolate) : scope(isolate) {}
 };
 
 // Internal struct representing callback metadata passed to a native callback
@@ -129,6 +143,11 @@ struct napi_env__ {
     std::vector<std::unique_ptr<napi_ref__>> references;
     std::vector<std::unique_ptr<napi_deferred__>> deferreds;
     InstanceData instance_data{};
+
+    // Private key under which napi_wrap() stores the `napi_ref__` binding a JavaScript object to
+    // its native object. Lazily created by GetWrapperKey(). Being a v8::Private, the property is
+    // invisible to JavaScript, so it cannot be observed, enumerated or tampered with by scripts.
+    v8::Global<v8::Private> wrapper_key;
 
     napi_env__(v8::Isolate* iso, v8::Local<v8::Context> ctx) : isolate(iso), context(iso, ctx) {
         ClearLastError();

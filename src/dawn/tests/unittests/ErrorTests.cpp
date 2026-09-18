@@ -54,7 +54,7 @@ TEST(ErrorTests, Error_Error) {
     MaybeError result = ReturnError();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -76,7 +76,7 @@ TEST(ErrorTests, ResultOrError_Error) {
     ResultOrError<int*> result = ReturnError();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -114,7 +114,7 @@ TEST(ErrorTests, TRY_Error) {
     MaybeError result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -140,8 +140,8 @@ TEST(ErrorTests, TRY_AddsToBacktrace) {
     MaybeError doubleResult = DoubleTry();
     ASSERT_TRUE(doubleResult.IsError());
 
-    std::unique_ptr<ErrorData> singleData = singleResult.AcquireError();
-    std::unique_ptr<ErrorData> doubleData = doubleResult.AcquireError();
+    std::unique_ptr<InternalError> singleData = singleResult.AcquireError();
+    std::unique_ptr<InternalError> doubleData = doubleResult.AcquireError();
 
     // Backtraces are only added in debug mode.
 #if defined(DAWN_ENABLE_ASSERTS)
@@ -191,7 +191,7 @@ TEST(ErrorTests, TRY_RESULT_Error) {
     ResultOrError<int*> result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -217,8 +217,8 @@ TEST(ErrorTests, TRY_RESULT_AddsToBacktrace) {
     ResultOrError<int*> doubleResult = DoubleTry();
     ASSERT_TRUE(doubleResult.IsError());
 
-    std::unique_ptr<ErrorData> singleData = singleResult.AcquireError();
-    std::unique_ptr<ErrorData> doubleData = doubleResult.AcquireError();
+    std::unique_ptr<InternalError> singleData = singleResult.AcquireError();
+    std::unique_ptr<InternalError> doubleData = doubleResult.AcquireError();
 
     // Backtraces are only added in debug mode.
 #if defined(DAWN_ENABLE_ASSERTS)
@@ -244,7 +244,7 @@ TEST(ErrorTests, TRY_RESULT_ConversionToError) {
     MaybeError result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -265,7 +265,7 @@ TEST(ErrorTests, TRY_RESULT_ConversionToErrorNonPointer) {
     MaybeError result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -315,28 +315,9 @@ TEST(ErrorTests, TRY_RESULT_CLEANUP_Cleanup) {
     ResultOrError<int*> result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
     ASSERT_TRUE(tryCleanup);
-}
-
-// Check DAWN_TRY_ASSIGN can override return value when needed.
-TEST(ErrorTests, TRY_RESULT_CLEANUP_OverrideReturn) {
-    auto ReturnError = []() -> ResultOrError<int*> {
-        return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
-    };
-
-    auto Try = [ReturnError]() -> bool {
-        [[maybe_unused]] int* result = nullptr;
-        DAWN_TRY_ASSIGN_WITH_CLEANUP(result, ReturnError(), {}, true);
-
-        // DAWN_TRY_ASSIGN_WITH_CLEANUP should return before this point
-        EXPECT_FALSE(true);
-        return false;
-    };
-
-    bool result = Try();
-    ASSERT_TRUE(result);
 }
 
 // Check a MaybeError can be DAWN_TRIED in a function that returns an ResultOrError
@@ -354,7 +335,7 @@ TEST(ErrorTests, TRY_ConversionToErrorOrResult) {
     ResultOrError<int*> result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -373,7 +354,7 @@ TEST(ErrorTests, TRY_ConversionToErrorOrResultNonPointer) {
     ResultOrError<int> result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 

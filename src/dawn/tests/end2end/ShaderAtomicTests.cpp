@@ -412,7 +412,6 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
 TEST_P(ShaderAtomicTests, WorkgroupAtomicArray) {
     // Suppression for Mali gpus.
     DAWN_SUPPRESS_TEST_IF(IsARM());
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     // Test code only supports up to 256 workgroup size.
     DAWN_ASSERT(GetParam().mWorkgroupSizeParameter <= 256);

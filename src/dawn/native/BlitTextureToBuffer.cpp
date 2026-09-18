@@ -129,7 +129,15 @@ constexpr std::string_view kFloatTextureCube = DAWN_MULTILINE(  //
     @group(0) @binding(0) var src_tex : texture_cube<f32>;
 );
 
-constexpr std::string_view kUintTexture = DAWN_MULTILINE(
+constexpr std::string_view kUintTexture1D = DAWN_MULTILINE(
+    fn textureLoadGeneral(tex: texture_1d<u32>, coords: vec3u, level: u32) -> vec4<u32> {
+        //
+        return textureLoad(tex, coords.x, level);
+    }
+    @group(0) @binding(0) var src_tex : texture_1d<u32>;
+);
+
+constexpr std::string_view kUintTexture2D = DAWN_MULTILINE(
     fn textureLoadGeneral(tex: texture_2d<u32>, coords: vec3u, level: u32) -> vec4<u32> {
         //
         return textureLoad(tex, coords.xy, level);
@@ -137,12 +145,20 @@ constexpr std::string_view kUintTexture = DAWN_MULTILINE(
     @group(0) @binding(0) var src_tex : texture_2d<u32>;
 );
 
-constexpr std::string_view kUintTextureArray = DAWN_MULTILINE(
+constexpr std::string_view kUintTexture2DArray = DAWN_MULTILINE(
     fn textureLoadGeneral(tex: texture_2d_array<u32>, coords: vec3u, level: u32) -> vec4<u32> {
         //
         return textureLoad(tex, coords.xy, coords.z, level);
     }
     @group(0) @binding(0) var src_tex : texture_2d_array<u32>;
+);
+
+constexpr std::string_view kUintTexture3D = DAWN_MULTILINE(
+    fn textureLoadGeneral(tex: texture_3d<u32>, coords: vec3u, level: u32) -> vec4<u32> {
+        //
+        return textureLoad(tex, coords, level);
+    }
+    @group(0) @binding(0) var src_tex : texture_3d<u32>;
 );
 
 // textureSampleLevel doesn't support texture_cube<u32>
@@ -156,6 +172,58 @@ constexpr std::string_view kUintTextureCube = DAWN_MULTILINE(
         return vec4<u32>(textureGather(0, tex, default_sampler, sample_coords).w);
     }
     @group(0) @binding(0) var src_tex : texture_cube<u32>;
+);
+
+constexpr std::string_view kSintTexture1D = DAWN_MULTILINE(
+    fn textureLoadGeneral(tex: texture_1d<i32>, coords: vec3u, level: u32) -> vec4<i32> {
+        //
+        return textureLoad(tex, coords.x, level);
+    }
+    @group(0) @binding(0) var src_tex : texture_1d<i32>;
+);
+
+constexpr std::string_view kSintTexture2D = DAWN_MULTILINE(
+    fn textureLoadGeneral(tex: texture_2d<i32>, coords: vec3u, level: u32) -> vec4<i32> {
+        //
+        return textureLoad(tex, coords.xy, level);
+    }
+    @group(0) @binding(0) var src_tex : texture_2d<i32>;
+);
+
+constexpr std::string_view kSintTexture2DArray = DAWN_MULTILINE(
+    fn textureLoadGeneral(tex: texture_2d_array<i32>, coords: vec3u, level: u32) -> vec4<i32> {
+        //
+        return textureLoad(tex, coords.xy, coords.z, level);
+    }
+    @group(0) @binding(0) var src_tex : texture_2d_array<i32>;
+);
+
+constexpr std::string_view kSintTexture3D = DAWN_MULTILINE(
+    fn textureLoadGeneral(tex: texture_3d<i32>, coords: vec3u, level: u32) -> vec4<i32> {
+        //
+        return textureLoad(tex, coords, level);
+    }
+    @group(0) @binding(0) var src_tex : texture_3d<i32>;
+);
+
+constexpr std::string_view kTexelVector4F32 = DAWN_MULTILINE(
+    alias TexelVector4 = vec4f;
+);
+constexpr std::string_view kTexelVector4U32 = DAWN_MULTILINE(
+    alias TexelVector4 = vec4<u32>;
+);
+constexpr std::string_view kTexelVector4I32 = DAWN_MULTILINE(
+    alias TexelVector4 = vec4<i32>;
+);
+
+constexpr std::string_view kTexelVector2F32 = DAWN_MULTILINE(
+    alias TexelVector2 = vec2f;
+);
+constexpr std::string_view kTexelVector2U32 = DAWN_MULTILINE(
+    alias TexelVector2 = vec2<u32>;
+);
+constexpr std::string_view kTexelVector2I32 = DAWN_MULTILINE(
+    alias TexelVector2 = vec2<i32>;
 );
 
 constexpr std::string_view kEncodeRGBA8UnormInU32 = DAWN_MULTILINE(
@@ -172,6 +240,20 @@ constexpr std::string_view kEncodeRGBA8SnormInU32 = DAWN_MULTILINE(
     }
 );
 
+constexpr std::string_view kEncodeRGBA8UintInU32 = DAWN_MULTILINE(
+    fn encodeVectorInU32General(v: vec4<u32>) -> u32 {
+        //
+        return pack4xU8(v);
+    }
+);
+
+constexpr std::string_view kEncodeRGBA8SintInU32 = DAWN_MULTILINE(
+    fn encodeVectorInU32General(v: vec4<i32>) -> u32 {
+        //
+        return pack4xI8(v);
+    }
+);
+
 // Storing and swizzling bgra8unorm texel values and convert to u32.
 constexpr std::string_view kEncodeBGRA8UnormInU32 = DAWN_MULTILINE(
     fn encodeVectorInU32General(v: vec4f) -> u32 {
@@ -184,6 +266,27 @@ constexpr std::string_view kEncodeRG16FloatInU32 = DAWN_MULTILINE(
     fn encodeVectorInU32General(v: vec2f) -> u32 {
         //
         return pack2x16float(v);
+    }
+);
+
+constexpr std::string_view kEncodeRG16UintInU32 = DAWN_MULTILINE(
+    fn encodeVectorInU32General(v: vec2<u32>) -> u32 {
+        //
+        return (v.x & 0xffffu) | ((v.y & 0xffffu) << 16u);
+    }
+);
+
+constexpr std::string_view kEncodeRG16SintInU32 = DAWN_MULTILINE(
+    fn encodeVectorInU32General(v: vec2<i32>) -> u32 {
+        //
+        return (bitcast<u32>(v.x) & 0xffffu) | ((bitcast<u32>(v.y) & 0xffffu) << 16u);
+    }
+);
+
+constexpr std::string_view kEncodeRGB10A2UintInU32 = DAWN_MULTILINE(
+    fn encodeVectorInU32General(v: vec4<u32>) -> u32 {
+        //
+        return (v.r & 0x3ffu) | ((v.g & 0x3ffu) << 10u) | ((v.b & 0x3ffu) << 20u) | ((v.a & 0x3u) << 30u);
     }
 );
 
@@ -396,9 +499,9 @@ constexpr std::string_view kNonMultipleOf4OffsetStart = DAWN_MULTILINE(
 constexpr std::string_view kPackR8ToU32 = DAWN_MULTILINE(
         // Result bits to store into dst_buf
         var result: u32 = 0u;
-        // Storing xnorm8 texel values
-        // later called by pack4x8xnorm to convert to u32.
-        var v: vec4<f32>;
+        // Storing texel values
+        // later called by encodeVectorInU32General to convert to u32.
+        var v: TexelVector4;
 
         // dstBuf value is used for starting part.
         var mask: u32 = 0xffffffffu;
@@ -534,9 +637,9 @@ constexpr std::string_view kPackR8ToU32 = DAWN_MULTILINE(
 constexpr std::string_view kPackRG8ToU32 = DAWN_MULTILINE(
         // Result bits to store into dst_buf
         var result: u32 = 0u;
-        // Storing snorm8 texel values
-        // later called by pack4x8xnorm to convert to u32.
-        var v: vec4<f32>;
+        // Storing texel values
+        // later called by encodeVectorInU32General to convert to u32.
+        var v: TexelVector4;
 
         // dstBuf value is used for starting part.
         var mask: u32 = 0xffffffffu;
@@ -569,9 +672,9 @@ constexpr std::string_view kPackRG8ToU32 = DAWN_MULTILINE(
 constexpr std::string_view kPackR16ToU32 = DAWN_MULTILINE(
         // Result bits to store into dst_buf
         var result: u32 = 0u;
-        // Storing half texel values
-        // later called by pack2x16unorm to convert to u32.
-        var v: vec2f;
+        // Storing half/integer texel values
+        // later called by encodeVectorInU32General to convert to u32.
+        var v: TexelVector2;
 
         // dstBuf value is used for starting part.
         var mask: u32 = 0xffffffffu;
@@ -598,13 +701,13 @@ constexpr std::string_view kPackR16ToU32 = DAWN_MULTILINE(
 );
 
 constexpr std::string_view kPackRG16ToU32 = DAWN_MULTILINE(  //
-        let v: vec2f = textureLoadGeneral(src_tex, coord0, params.mipLevel).rg;
+        let v = textureLoadGeneral(src_tex, coord0, params.mipLevel).rg;
         let result = encodeVectorInU32General(v);
 );
 
 // Load RGBA16 and pack to 2 uint4_t
 constexpr std::string_view kLoadRGBA16ToU32 = DAWN_MULTILINE(
-        let v: vec4f = textureLoadGeneral(src_tex, coord0, params.mipLevel);
+        let v = textureLoadGeneral(src_tex, coord0, params.mipLevel);
         // dstOffset is based on 8 bytes so we need to multiply by 2 to get uint32 offset.
         let uintOffset = dstOffset << 1;
         dst_buf[uintOffset] = encodeVectorInU32General(v.rg);
@@ -695,33 +798,100 @@ constexpr std::string_view kEncodeRGB9E5UfloatInU32 = DAWN_MULTILINE(
 // Storing rg11b10ufloat texel values
 // Reference:
 // https://www.khronos.org/opengl/wiki/Small_Float_Formats
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_packed_float.txt
 constexpr std::string_view kEncodeRG11B10UfloatInU32 = DAWN_MULTILINE(
+    const kF32SignShift = 31u;
+    const kF32MantissaBits = 23u;
+    const kF32MantissaMask = 0x7FFFFFu;
+    const kF32ExponentBits = 8u;
+    const kF32ImplicitOne = 1u << kF32MantissaBits;
+    // Note the exponent masks/values below apply to the exponent field once it has been
+    // shifted down by kF32MantissaBits.
+    const kF32ExponentMask = (1u << kF32ExponentBits) - 1u;
+    const kF32InfNanExponent = kF32ExponentMask;  // all exponent bits set: Inf or NaN
+
+    // Both float11 and float10 have 5 exponent bits, so they share these values.
+    const kSmallFloatExponentBits = 5u;
+    const kSmallFloatInfNanExponent = (1u << kSmallFloatExponentBits) - 1u;  // 31
+    const kSmallFloatMaxExponent = kSmallFloatInfNanExponent - 1u;  // largest finite exponent
+    const kExponentBiasDelta = 112;  // f32 bias (127) - small float bias (15)
+
+    // Per channel parameters.
+    const kFloat11MantissaBits = 6u;
+    const kFloat10MantissaBits = 5u;
+    const kFloat11MaxFinite = 65024.0;  // 2^15 * (1 + 63/64)
+    const kFloat10MaxFinite = 64512.0;  // 2^15 * (1 + 31/32)
+
+    // Packing layout: [10:0] = R, [21:11] = G, [31:22] = B.
+    const kRedShift = 0u;
+    const kGreenShift = 11u;
+    const kBlueShift = 22u;
+
+    fn floatToSmallFloat(val: f32, mantissaBits: u32, maxFinite: f32) -> u32 {
+        let mantissaMask = (1u << mantissaBits) - 1u;
+        let maxFiniteBits = (kSmallFloatMaxExponent << mantissaBits) | mantissaMask;
+        // Number of mantissa bits dropped when converting from f32 to the small float.
+        let mantissaShift = kF32MantissaBits - mantissaBits;
+
+        let f_bits = bitcast<u32>(val);
+        let sign = (f_bits >> kF32SignShift) & 1u;
+        let exp = (f_bits >> kF32MantissaBits) & kF32ExponentMask;
+        let mant = f_bits & kF32MantissaMask;
+
+        if (exp == kF32InfNanExponent) {
+            if (mant != 0u) {
+                // NaN.
+                return (kSmallFloatInfNanExponent << mantissaBits) | mantissaMask;
+            }
+            // +Inf is kept, -Inf is clamped to 0 because small floats are unsigned.
+            return select(kSmallFloatInfNanExponent << mantissaBits, 0u, sign != 0u);
+        }
+        if (sign != 0u) {
+            // Negative.
+            return 0u;
+        }
+        if (val >= maxFinite) {
+            return maxFiniteBits;
+        }
+
+        let biased_exp = i32(exp) - kExponentBiasDelta;
+        if (biased_exp <= 0) {
+            // The value is denormalized (or zero) in the small float format.
+            let shift = u32(1 - biased_exp) + mantissaShift;
+            if (shift > 31u) {
+                return 0u;
+            }
+            let full_mant = kF32ImplicitOne | mant;
+            let round_bit = 1u << (shift - 1u);
+            let rounded = full_mant + round_bit;
+            let res_mant = rounded >> shift;
+            if (res_mant > mantissaMask) {
+                // Rounding overflowed into the smallest normalized value.
+                return 1u << mantissaBits;
+            }
+            return res_mant;
+        } else {
+            let round_bit = 1u << (mantissaShift - 1u);
+            let rounded = mant + round_bit;
+            var b_exp = biased_exp;
+            var r_mant = rounded;
+            if (rounded >= kF32ImplicitOne) {
+                // Rounding overflowed the mantissa, carry into the exponent.
+                b_exp += 1;
+                r_mant = 0u;
+                if (b_exp >= i32(kSmallFloatInfNanExponent)) {
+                    return maxFiniteBits;
+                }
+            }
+            return (u32(b_exp) << mantissaBits) | ((r_mant >> mantissaShift) & mantissaMask);
+        }
+    }
+
     fn encodeVectorInU32General(v: vec4f) -> u32 {
-        const n_rg = 6;    // number of mantissa bits (RG)
-        const n_b = 5;     // number of mantissa bits (B)
-        const e_max = 31;  // max exponent
-        const b = 15;      // exponent bias
-
-        // Calculate the exponent (biased)
-        let rbe = select(i32(floor(log2(v.r))), -b, v.r == 0.0);
-        let gbe = select(i32(floor(log2(v.g))), -b, v.g == 0.0);
-        let bbe = select(i32(floor(log2(v.b))), -b, v.b == 0.0);
-
-        // Calculate the exponent bits value.
-        let re = clamp(rbe + b, 0, e_max);
-        let ge = clamp(gbe + b, 0, e_max);
-        let be = clamp(bbe + b, 0, e_max);
-
-        // Calculate the mantissa for each component.
-        let rm = u32(round( select(v.r * exp2(-f32(re - b)) - 1.0, v.r * exp2(f32(b-1)), re == 0) * f32(1 << n_rg) ));
-        let gm = u32(round( select(v.g * exp2(-f32(ge - b)) - 1.0, v.g * exp2(f32(b-1)), ge == 0) * f32(1 << n_rg) ));
-        let bm = u32(round( select(v.b * exp2(-f32(be - b)) - 1.0, v.b * exp2(f32(b-1)), be == 0) * f32(1 << n_b) ));
-
-        let red = u32(re << n_rg) | rm;
-        let green = u32(ge << n_rg) | gm;
-        let blue = u32(be << n_b) | bm;
-
-        return (blue << 22) | (green << 11) | red;
+        let red = floatToSmallFloat(v.r, kFloat11MantissaBits, kFloat11MaxFinite);
+        let green = floatToSmallFloat(v.g, kFloat11MantissaBits, kFloat11MaxFinite);
+        let blue = floatToSmallFloat(v.b, kFloat10MantissaBits, kFloat10MaxFinite);
+        return (blue << kBlueShift) | (green << kGreenShift) | (red << kRedShift);
     }
 );
 
@@ -745,6 +915,47 @@ constexpr std::string_view kLoadRGBA32Float = DAWN_MULTILINE(  //
         dst_buf[uintOffset + 1u] = v.g;
         dst_buf[uintOffset + 2u] = v.b;
         dst_buf[uintOffset + 3u] = v.a;
+);
+
+constexpr std::string_view kLoadR32Uint = DAWN_MULTILINE(  //
+        dst_buf[dstOffset] = textureLoadGeneral(src_tex, coord0, params.mipLevel).r;
+);
+constexpr std::string_view kLoadR32Sint = DAWN_MULTILINE(  //
+        dst_buf[dstOffset] = bitcast<u32>(textureLoadGeneral(src_tex, coord0, params.mipLevel).r);
+);
+constexpr std::string_view kLoadRG32Uint =
+    DAWN_MULTILINE(
+        let v = textureLoadGeneral(src_tex, coord0, params.mipLevel);
+        // dstOffset is based on 8 bytes so we need to multiply by 2.
+        let uintOffset = dstOffset << 1;
+        dst_buf[uintOffset] = v.r;
+        dst_buf[uintOffset + 1u] = v.g;
+);
+constexpr std::string_view kLoadRG32Sint =
+    DAWN_MULTILINE(
+        let v = textureLoadGeneral(src_tex, coord0, params.mipLevel);
+        // dstOffset is based on 8 bytes so we need to multiply by 2.
+        let uintOffset = dstOffset << 1;
+        dst_buf[uintOffset] = bitcast<u32>(v.r);
+        dst_buf[uintOffset + 1u] = bitcast<u32>(v.g);
+);
+constexpr std::string_view kLoadRGBA32Uint = DAWN_MULTILINE(  //
+        let v = textureLoadGeneral(src_tex, coord0, params.mipLevel);
+        // dstOffset is based on 16 bytes so we need to multiply by 4.
+        let uintOffset = dstOffset << 2;
+        dst_buf[uintOffset] = v.r;
+        dst_buf[uintOffset + 1u] = v.g;
+        dst_buf[uintOffset + 2u] = v.b;
+        dst_buf[uintOffset + 3u] = v.a;
+);
+constexpr std::string_view kLoadRGBA32Sint = DAWN_MULTILINE(  //
+        let v = textureLoadGeneral(src_tex, coord0, params.mipLevel);
+        // dstOffset is based on 16 bytes so we need to multiply by 4.
+        let uintOffset = dstOffset << 2;
+        dst_buf[uintOffset] = bitcast<u32>(v.r);
+        dst_buf[uintOffset + 1u] = bitcast<u32>(v.g);
+        dst_buf[uintOffset + 2u] = bitcast<u32>(v.b);
+        dst_buf[uintOffset + 3u] = bitcast<u32>(v.a);
 );
 
 ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
@@ -793,14 +1004,50 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
         switch (viewDimension) {
             // Stencil cannot have e1D texture.
             case wgpu::TextureViewDimension::e2D:
-                shader += kUintTexture;
+                shader += kUintTexture2D;
                 break;
             case wgpu::TextureViewDimension::e2DArray:
-                shader += kUintTextureArray;
+                shader += kUintTexture2DArray;
                 break;
             case wgpu::TextureViewDimension::Cube:
                 shader += kCubeCoordCommon;
                 shader += kUintTextureCube;
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    };
+    auto AppendUintTextureHead = [&]() {
+        switch (viewDimension) {
+            case wgpu::TextureViewDimension::e1D:
+                shader += kUintTexture1D;
+                break;
+            case wgpu::TextureViewDimension::e2D:
+                shader += kUintTexture2D;
+                break;
+            case wgpu::TextureViewDimension::e2DArray:
+                shader += kUintTexture2DArray;
+                break;
+            case wgpu::TextureViewDimension::e3D:
+                shader += kUintTexture3D;
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    };
+    auto AppendSintTextureHead = [&]() {
+        switch (viewDimension) {
+            case wgpu::TextureViewDimension::e1D:
+                shader += kSintTexture1D;
+                break;
+            case wgpu::TextureViewDimension::e2D:
+                shader += kSintTexture2D;
+                break;
+            case wgpu::TextureViewDimension::e2DArray:
+                shader += kSintTexture2DArray;
+                break;
+            case wgpu::TextureViewDimension::e3D:
+                shader += kSintTexture3D;
                 break;
             default:
                 DAWN_UNREACHABLE();
@@ -813,6 +1060,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             AppendFloatTextureHead();
             shader += kDstBufferU32;
             shader += format.IsSnorm() ? kEncodeRGBA8SnormInU32 : kEncodeRGBA8UnormInU32;
+            shader += kTexelVector4F32;
             shader += kCommonHead;
             shader += kNonMultipleOf4OffsetStart;
             shader += kPackR8ToU32;
@@ -824,6 +1072,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             AppendFloatTextureHead();
             shader += kDstBufferU32;
             shader += format.IsSnorm() ? kEncodeRGBA8SnormInU32 : kEncodeRGBA8UnormInU32;
+            shader += kTexelVector4F32;
             shader += kCommonHead;
             shader += kNonMultipleOf4OffsetStart;
             shader += kPackRG8ToU32;
@@ -840,6 +1089,70 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kPackRGBAToU32;
             shader += kCommonEnd;
             textureSampleType = wgpu::TextureSampleType::Float;
+            break;
+        case wgpu::TextureFormat::R8Uint:
+            AppendUintTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRGBA8UintInU32;
+            shader += kTexelVector4U32;
+            shader += kCommonHead;
+            shader += kNonMultipleOf4OffsetStart;
+            shader += kPackR8ToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::Uint;
+            break;
+        case wgpu::TextureFormat::R8Sint:
+            AppendSintTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRGBA8SintInU32;
+            shader += kTexelVector4I32;
+            shader += kCommonHead;
+            shader += kNonMultipleOf4OffsetStart;
+            shader += kPackR8ToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::Sint;
+            break;
+        case wgpu::TextureFormat::RG8Uint:
+            AppendUintTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRGBA8UintInU32;
+            shader += kTexelVector4U32;
+            shader += kCommonHead;
+            shader += kNonMultipleOf4OffsetStart;
+            shader += kPackRG8ToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::Uint;
+            break;
+        case wgpu::TextureFormat::RG8Sint:
+            AppendSintTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRGBA8SintInU32;
+            shader += kTexelVector4I32;
+            shader += kCommonHead;
+            shader += kNonMultipleOf4OffsetStart;
+            shader += kPackRG8ToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::Sint;
+            break;
+        case wgpu::TextureFormat::RGBA8Uint:
+            AppendUintTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRGBA8UintInU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kPackRGBAToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::Uint;
+            break;
+        case wgpu::TextureFormat::RGBA8Sint:
+            AppendSintTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRGBA8SintInU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kPackRGBAToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::Sint;
             break;
         case wgpu::TextureFormat::BGRA8Unorm:
             AppendFloatTextureHead();
@@ -871,21 +1184,152 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonEnd;
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
+        case wgpu::TextureFormat::RGB10A2Uint:
+            AppendUintTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRGB10A2UintInU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kPackRGBAToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::Uint;
+            break;
         case wgpu::TextureFormat::R16Float:
+            AppendFloatTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRG16FloatInU32;
+            shader += kTexelVector2F32;
+            shader += kCommonHead;
+            shader += kNonMultipleOf4OffsetStart;
+            shader += kPackR16ToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
+            break;
         case wgpu::TextureFormat::RG16Float:
             AppendFloatTextureHead();
             shader += kDstBufferU32;
             shader += kEncodeRG16FloatInU32;
             shader += kCommonHead;
-            if (format.format == wgpu::TextureFormat::R16Float) {
-                shader += kNonMultipleOf4OffsetStart;
-                shader += kPackR16ToU32;
-            } else {
-                shader += kCommonStart;
-                shader += kPackRG16ToU32;
-            }
+            shader += kCommonStart;
+            shader += kPackRG16ToU32;
             shader += kCommonEnd;
             textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
+            break;
+        case wgpu::TextureFormat::R16Uint:
+            AppendUintTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRG16UintInU32;
+            shader += kTexelVector2U32;
+            shader += kCommonHead;
+            shader += kNonMultipleOf4OffsetStart;
+            shader += kPackR16ToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::Uint;
+            break;
+        case wgpu::TextureFormat::RG16Uint:
+            AppendUintTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRG16UintInU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kPackRG16ToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::Uint;
+            break;
+        case wgpu::TextureFormat::R16Sint:
+            AppendSintTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRG16SintInU32;
+            shader += kTexelVector2I32;
+            shader += kCommonHead;
+            shader += kNonMultipleOf4OffsetStart;
+            shader += kPackR16ToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::Sint;
+            break;
+        case wgpu::TextureFormat::RG16Sint:
+            AppendSintTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRG16SintInU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kPackRG16ToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::Sint;
+            break;
+        case wgpu::TextureFormat::RGBA16Uint:
+            AppendUintTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRG16UintInU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kLoadRGBA16ToU32;
+            shader += "}";
+            textureSampleType = wgpu::TextureSampleType::Uint;
+            break;
+        case wgpu::TextureFormat::RGBA16Sint:
+            AppendSintTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRG16SintInU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kLoadRGBA16ToU32;
+            shader += "}";
+            textureSampleType = wgpu::TextureSampleType::Sint;
+            break;
+        case wgpu::TextureFormat::R32Uint:
+            AppendUintTextureHead();
+            shader += kDstBufferU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kLoadR32Uint;
+            shader += "}";
+            textureSampleType = wgpu::TextureSampleType::Uint;
+            break;
+        case wgpu::TextureFormat::R32Sint:
+            AppendSintTextureHead();
+            shader += kDstBufferU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kLoadR32Sint;
+            shader += "}";
+            textureSampleType = wgpu::TextureSampleType::Sint;
+            break;
+        case wgpu::TextureFormat::RG32Uint:
+            AppendUintTextureHead();
+            shader += kDstBufferU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kLoadRG32Uint;
+            shader += "}";
+            textureSampleType = wgpu::TextureSampleType::Uint;
+            break;
+        case wgpu::TextureFormat::RG32Sint:
+            AppendSintTextureHead();
+            shader += kDstBufferU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kLoadRG32Sint;
+            shader += "}";
+            textureSampleType = wgpu::TextureSampleType::Sint;
+            break;
+        case wgpu::TextureFormat::RGBA32Uint:
+            AppendUintTextureHead();
+            shader += kDstBufferU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kLoadRGBA32Uint;
+            shader += "}";
+            textureSampleType = wgpu::TextureSampleType::Uint;
+            break;
+        case wgpu::TextureFormat::RGBA32Sint:
+            AppendSintTextureHead();
+            shader += kDstBufferU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kLoadRGBA32Sint;
+            shader += "}";
+            textureSampleType = wgpu::TextureSampleType::Sint;
             break;
         case wgpu::TextureFormat::RGBA16Float:
             AppendFloatTextureHead();
@@ -1065,6 +1509,25 @@ bool IsFormatSupportedByTextureToBufferBlit(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::R32Float:
         case wgpu::TextureFormat::RG32Float:
         case wgpu::TextureFormat::RGBA32Float:
+        case wgpu::TextureFormat::R8Uint:
+        case wgpu::TextureFormat::R8Sint:
+        case wgpu::TextureFormat::RG8Uint:
+        case wgpu::TextureFormat::RG8Sint:
+        case wgpu::TextureFormat::RGBA8Uint:
+        case wgpu::TextureFormat::RGBA8Sint:
+        case wgpu::TextureFormat::R16Uint:
+        case wgpu::TextureFormat::R16Sint:
+        case wgpu::TextureFormat::RG16Uint:
+        case wgpu::TextureFormat::RG16Sint:
+        case wgpu::TextureFormat::RGBA16Uint:
+        case wgpu::TextureFormat::RGBA16Sint:
+        case wgpu::TextureFormat::R32Uint:
+        case wgpu::TextureFormat::R32Sint:
+        case wgpu::TextureFormat::RG32Uint:
+        case wgpu::TextureFormat::RG32Sint:
+        case wgpu::TextureFormat::RGBA32Uint:
+        case wgpu::TextureFormat::RGBA32Sint:
+        case wgpu::TextureFormat::RGB10A2Uint:
         case wgpu::TextureFormat::Depth16Unorm:
         case wgpu::TextureFormat::Depth24Plus:
         case wgpu::TextureFormat::Depth32Float:

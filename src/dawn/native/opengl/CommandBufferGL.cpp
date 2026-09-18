@@ -1000,6 +1000,53 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                             DAWN_ASSERT(texture->GetArrayLayers() == 6);
                             const uint64_t bytesPerImage =
                                 blockInfo.ToBytes(dst.blocksPerRow * dst.rowsPerImage);
+
+                            // Integer (Uint/Sint) cube textures cannot take the compute blit path
+                            // in compat mode (see ShouldUseTextureToBufferBlit() in
+                            // CommandEncoder.cpp. Since glReadPixels might not support such
+                            // format/type, query GL_IMPLEMENTATION_COLOR_READ_FORMAT/TYPE first.
+                            // These are queried from the currently bound read framebuffer, so
+                            // attach the first face and check upfront, before doing any readback,
+                            // to fail the copy loudly instead of returning garbage.
+                            // TODO(crbug.com/562077184): revisit when query for all formats are
+                            // implemented.
+                            const bool isIntegerColor =
+                                src.aspect == Aspect::Color &&
+                                (formatInfo.GetAspectInfo(Aspect::Color).baseType ==
+                                     TextureComponentType::Uint ||
+                                 formatInfo.GetAspectInfo(Aspect::Color).baseType ==
+                                     TextureComponentType::Sint);
+                            // RGBA32Uint/RGBA32Sint are skipped: RGBA_INTEGER + UNSIGNED_INT/INT is
+                            // the only integer format/type combination the GLES spec guarantees
+                            // glReadPixels to support, so no query is needed for them.
+                            const bool isGuaranteedReadFormat =
+                                formatInfo.format == wgpu::TextureFormat::RGBA32Uint ||
+                                formatInfo.format == wgpu::TextureFormat::RGBA32Sint;
+                            if (isIntegerColor && !isGuaranteedReadFormat) {
+                                GLenum firstCubeMapTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X +
+                                                            dchecked_cast<uint32_t>(src.origin.z);
+                                DAWN_GL_TRY(
+                                    gl, FramebufferTexture2D(
+                                            GL_READ_FRAMEBUFFER, glAttachment, firstCubeMapTarget,
+                                            texture->GetTextureHandle(), src.mipLevel));
+                                DAWN_TRY(CheckFramebufferComplete(gl, GL_READ_FRAMEBUFFER));
+
+                                GLint implFormat = 0;
+                                GLint implType = 0;
+                                DAWN_GL_TRY(gl, GetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT,
+                                                            &implFormat));
+                                DAWN_GL_TRY(
+                                    gl, GetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &implType));
+                                DAWN_INTERNAL_ERROR_IF(
+                                    static_cast<GLenum>(implFormat) != glFormat ||
+                                        static_cast<GLenum>(implType) != glType,
+                                    "glReadPixels of an integer cube texture requires "
+                                    "format/type (%#x, %#x) but the implementation only supports "
+                                    "(%#x, %#x).",
+                                    glFormat, glType, static_cast<GLenum>(implFormat),
+                                    static_cast<GLenum>(implType));
+                            }
+
                             for (TexelCount z{0u}; z < copySize.depthOrArrayLayers; ++z) {
                                 GLenum cubeMapTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X +
                                                        dchecked_cast<uint32_t>(z + src.origin.z);

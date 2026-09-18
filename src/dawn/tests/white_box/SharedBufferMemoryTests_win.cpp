@@ -238,6 +238,7 @@ TEST_P(SharedBufferMemoryExistingD3D12ResourceTests, NullResourceFailure) {
 // Validate that importing an ID3D12Resource across devices results in failure. This is tested by
 // creating a resource with a WARP device and attempting to use it on a non-WARP device.
 TEST_P(SharedBufferMemoryExistingD3D12ResourceTests, CrossDeviceResourceImportFailure) {
+    // Test must be run on a non-WARP 'device'
     DAWN_TEST_UNSUPPORTED_IF(IsWARP());
     ComPtr<ID3D12Device> warpDevice =
         static_cast<ExistingD3D12ResourceBackend*>(GetParam().mBackend)

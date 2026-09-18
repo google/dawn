@@ -716,8 +716,6 @@ class MaxArrayLengthTest : public DawnTestWithParams<MaxArrayLengthTestParams> {
         DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() || IsSwiftshader() || IsANGLESwiftShader() ||
                               IsOpenGLES());
 
-        // Warp runs into memory issues.
-        DAWN_SUPPRESS_TEST_IF(IsWARP());
 
         // TODO(crbug.com/473894293): [Capture] buffer mapping: investigate.
         DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());

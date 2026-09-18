@@ -2694,12 +2694,6 @@ bool Validator::StructureInitializer(const ast::CallExpression* ctor,
 bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
                                  const sem::Array* array_type) const {
     auto& values = ctor->args;
-    if (values.Length() > internal_limits::kMaxArrayConstructorElements) {
-        AddError(ctor->target->source) << "array constructor has excessive number of elements (>"
-                                       << internal_limits::kMaxArrayConstructorElements << ")";
-        return false;
-    }
-
     auto* elem_ty = array_type->ElemType();
     for (auto* value : values) {
         auto* value_ty = sem_.TypeOf(value)->UnwrapRef();

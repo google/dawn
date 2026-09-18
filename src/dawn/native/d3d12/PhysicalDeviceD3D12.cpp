@@ -305,7 +305,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 
     if (featureLevels.MaxSupportedFeatureLevel == D3D_FEATURE_LEVEL_11_0 &&
         featureData.ResourceBindingTier < D3D12_RESOURCE_BINDING_TIER_2) {
-        return DAWN_VALIDATION_ERROR(
+        return DAWN_INTERNAL_ERROR(
             "At least Resource Binding Tier 2 is required for D3D12 Feature Level 11.0 "
             "devices.");
     }
@@ -743,9 +743,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // disable this toggle.
     // Additionally, DESCRIPTORS_STATIC_KEEPING_BUFFER_BOUNDS_CHECKS was only added in the
     // Windows 10 2018 Spring Creator's Update. Force disable the toggle if we do not have
-    // at least WWDM 2.4.
+    // at least WWDM 2.4, except on WARP where the WDDM version is not encoded in the driver
+    // version.
+    // TODO(crbug.com/562563488): Use capability probing instead to avoid WDDM version checks.
     // https://microsoft.github.io/DirectX-Specs/d3d/ResourceBinding.html#flags-added-in-root-signature-version-11
-    if (!GetDeviceInfo().supportsRootSignatureVersion1_1 || GetDriverVersion()[0] < 24) {
+    if (!GetDeviceInfo().supportsRootSignatureVersion1_1 ||
+        (!gpu_info::IsMicrosoftWARP(mVendorId, mDeviceId) && GetDriverVersion()[0] < 24)) {
         deviceToggles->ForceSet(Toggle::D3D12UseRootSignatureVersion1_1, false);
     } else {
         deviceToggles->Default(Toggle::D3D12UseRootSignatureVersion1_1,
@@ -1001,7 +1004,7 @@ MaybeError PhysicalDevice::ValidateUseOfD3D12() const {
     // D3D12 is no longer allowed on 4th Generation Intel Processor Graphics.
     // https://www.intel.com/content/www/us/en/support/articles/000057520/graphics.html
     if (gpu_info::IsIntelGen7(vendorId, deviceId)) {
-        return DAWN_VALIDATION_ERROR("D3D12 backend is not allowed on Intel gen-7 GPUs.");
+        return DAWN_INTERNAL_ERROR("D3D12 backend is not allowed on Intel gen-7 GPUs.");
     }
 
     return {};

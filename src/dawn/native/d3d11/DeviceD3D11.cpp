@@ -439,7 +439,7 @@ MaybeError Device::CheckDebugLayerAndGenerateErrors() {
     auto error = DAWN_INTERNAL_ERROR("The D3D11 debug layer reported uncaught errors.");
 
     const uint64_t emittedErrors =
-        AppendDebugLayerMessagesToError(infoQueue.Get(), totalErrors, error.get());
+        AppendDebugLayerMessagesToError(infoQueue.Get(), totalErrors, error->GetData());
     if (emittedErrors == 0) {
         return {};
     }

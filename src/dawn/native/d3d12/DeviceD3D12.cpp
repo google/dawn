@@ -750,7 +750,7 @@ MaybeError Device::CheckDebugLayerAndGenerateErrors() {
 
     auto error = DAWN_INTERNAL_ERROR("The D3D12 debug layer reported uncaught errors.");
 
-    AppendDebugLayerMessagesToError(infoQueue.Get(), totalErrors, error.get());
+    AppendDebugLayerMessagesToError(infoQueue.Get(), totalErrors, error->GetData());
 
     return error;
 }

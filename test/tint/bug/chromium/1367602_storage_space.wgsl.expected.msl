@@ -14,15 +14,15 @@ struct tint_array {
 };
 
 struct A {
-  /* 0x0000 */ tint_array<float, 65535> a;
+  /* 0x0000 */ tint_array<float, 8192> a;
 };
 
 struct tint_module_vars_struct {
-  const device tint_array<int, 65535>* v;
+  const device tint_array<int, 8192>* v;
   const device A* b;
 };
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v_1(const device tint_array<int, 65535>* v [[buffer(0)]], const device A* b [[buffer(1)]]) {
+kernel void v_1(const device tint_array<int, 8192>* v [[buffer(0)]], const device A* b [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v, .b=b};
 }

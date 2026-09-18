@@ -112,7 +112,7 @@ class EncodingContext {
 
   private:
     // Functions to handle encoder errors
-    void HandleError(std::unique_ptr<ErrorData> error);
+    void HandleError(std::unique_ptr<InternalError> error);
 
     inline bool ConsumedError(MaybeError maybeError) {
         if (maybeError.IsError()) [[unlikely]] {
@@ -125,7 +125,7 @@ class EncodingContext {
     template <typename... Args>
     inline bool ConsumedError(MaybeError maybeError, const char* formatStr, const Args&... args) {
         if (maybeError.IsError()) [[unlikely]] {
-            std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+            std::unique_ptr<InternalError> error = maybeError.AcquireError();
             if (error->GetType() == InternalErrorType::Validation) {
                 std::string out;
                 absl::UntypedFormatSpec format(formatStr);
@@ -222,7 +222,7 @@ class EncodingContext {
     std::vector<std::string_view> mDebugGroupLabels;
 
     Status mStatus = Status::Open;
-    std::unique_ptr<ErrorData> mError;
+    std::unique_ptr<InternalError> mError;
 };
 
 }  // namespace dawn::native

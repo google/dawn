@@ -472,6 +472,9 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.tintOptions.use_uniform_buffers =
         !GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);
 
+    req.tintOptions.has_gl_ext_conservative_depth =
+        gl.IsGLExtensionSupported("GL_EXT_conservative_depth");
+
     CacheResult<GLSLCompilation> compilationResult;
     DAWN_TRY_LOAD_OR_RUN(
         compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromValidatedBlob,
@@ -555,8 +558,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             std::vector<char> buffer(infoLogLength);
             DAWN_GL_TRY(gl, GetShaderInfoLog(shader, infoLogLength, nullptr, &buffer[0]));
             DAWN_GL_TRY(gl, DeleteShader(shader));
-            return DAWN_VALIDATION_ERROR("%s\nProgram compilation failed:\n%s", source,
-                                         buffer.data());
+            return DAWN_FORMAT_INTERNAL_ERROR("%s\nProgram compilation failed:\n%s", source,
+                                              buffer.data());
         }
     }
 

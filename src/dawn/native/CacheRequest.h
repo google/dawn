@@ -47,7 +47,7 @@ namespace dawn::native {
 
 namespace detail {
 
-void LogCacheError(std::unique_ptr<ErrorData> error);
+void LogCacheError(std::unique_ptr<InternalError> error);
 
 }  // namespace detail
 

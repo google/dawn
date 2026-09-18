@@ -174,6 +174,9 @@ struct Options {
     /// ...>.
     bool use_uniform_buffers = false;
 
+    /// Set to `true` if the driver supports the GL_EXT_conservative_depth extension.
+    bool has_gl_ext_conservative_depth = false;
+
     /// The entry point name to emit
     std::string entry_point_name;
 
@@ -224,6 +227,7 @@ struct Options {
                  disable_workgroup_init,
                  disable_polyfill_integer_div_mod,
                  use_uniform_buffers,
+                 has_gl_ext_conservative_depth,
                  entry_point_name,
                  version,
                  minimum_immediate_size,

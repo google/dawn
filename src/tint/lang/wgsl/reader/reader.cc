@@ -30,6 +30,7 @@
 #include <limits>
 #include <utility>
 
+#include "src/tint/lang/core/ir/validator/validator.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ir/atomic_vec2u_to_from_u64.h"
 #include "src/tint/lang/wgsl/reader/lower/lower.h"
@@ -53,7 +54,11 @@ Program Parse(const Source::File* file, const Options& options) {
 
 Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options) {
     Program program = Parse(file, options);
-    return ProgramToLoweredIR(program);
+    auto ir = ProgramToLoweredIR(program);
+    if (ir == Success) {
+        TINT_CHECK_RESULT(core::ir::Validate(ir.Get(), core::ir::ErrorSource::kWgsl));
+    }
+    return ir;
 }
 
 Result<core::ir::Module> ProgramToLoweredIR(const Program& program, const IROptions& options) {

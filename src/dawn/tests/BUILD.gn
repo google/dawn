@@ -450,9 +450,13 @@ dawn_test("dawn_unittests") {
   }
 
   if (checkout_v8 && dawn_node) {
-    sources += [ "${dawn_root}/src/dawn/node/test/NapiV8Test.cpp" ]
+    sources += [
+      "${dawn_root}/src/dawn/node/test/NapiV8Test.cpp",
+      "${dawn_root}/src/dawn/node/test/PolyfillsTest.cpp",
+    ]
     deps += [
       "${dawn_root}/src/dawn/node/napi_v8",
+      "${dawn_root}/src/dawn/node/standalone:polyfills",
       "//third_party/v8/src:v8",
       "//third_party/v8/src:v8_libplatform",
     ]
@@ -923,6 +927,10 @@ dawn_test("dawn_end2end_tests") {
     ":white_box_tests_sources",
     "${dawn_root}/src/utils/chromium_test_compat",
   ]
+
+  if (dawn_standalone && (dawn_enable_d3d11 || dawn_enable_d3d12)) {
+    data_deps = [ "${dawn_direct3d_warp_dir}:copy_direct3d_warp" ]
+  }
 
   sources = []
   libs = []

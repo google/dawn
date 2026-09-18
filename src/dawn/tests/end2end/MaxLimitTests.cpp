@@ -157,10 +157,6 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                     continue;
                 }
 #endif
-                if (IsWARP()) {
-                    maxBufferBindingSize =
-                        std::min(maxBufferBindingSize, uint64_t{512} * 1024 * 1024);
-                }
                 maxBufferBindingSize = Align(maxBufferBindingSize - 3u, 4);
                 shader = R"(
                   struct Buf {
@@ -884,6 +880,9 @@ TEST_P(MaxLimitTests, MaxBufferSizes) {
 // Verifies creating a bind group with a buffer of size maxStorageBufferBindingSize
 // succeeds for both Storage and ReadOnlyStorage buffer types.
 TEST_P(MaxLimitTests, CreateBindGroupMaxStorageBufferBindingSize) {
+    // TODO(crbug.com/562922243): triggers context loss on Swiftshader
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLESwiftShader());
+
     dawn::utils::ComboLimits supportedLimits;
     GetSupportedLimits().UnlinkedCopyTo(&supportedLimits);
 

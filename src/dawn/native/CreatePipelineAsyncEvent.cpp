@@ -108,7 +108,7 @@ template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
 CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::CreatePipelineAsyncEvent(
     DeviceBase* device,
     const CreatePipelineAsyncCallbackInfo& callbackInfo,
-    std::unique_ptr<ErrorData> error,
+    std::unique_ptr<InternalError> error,
     StringView label)
     : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode), Completed{}),
       mCallback(callbackInfo.callback),

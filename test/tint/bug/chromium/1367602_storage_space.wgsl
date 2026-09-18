@@ -1,8 +1,8 @@
 @group(0) @binding(0)
-var<storage> v : array<i32, 65535>;
+var<storage> v : array<i32, 8192>;
 
 struct A {
-  a : array<f32, 65535>,
+  a : array<f32, 8192>,
 }
 @group(0) @binding(1)
 var<storage> b : A;

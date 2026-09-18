@@ -162,10 +162,10 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
             uint32_t{HasFeature(Feature::SharedFenceSyncFD)} +
             uint32_t{HasFeature(Feature::SharedFenceVkSemaphoreZirconHandle)} >
         1) {
-        return DAWN_VALIDATION_ERROR("At most one of %s, %s, and %s may be enabled.",
-                                     wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD,
-                                     wgpu::FeatureName::SharedFenceSyncFD,
-                                     wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle);
+        return DAWN_FORMAT_INTERNAL_ERROR("At most one of %s, %s, and %s may be enabled.",
+                                          wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD,
+                                          wgpu::FeatureName::SharedFenceSyncFD,
+                                          wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle);
     }
     if (HasFeature(Feature::SharedFenceVkSemaphoreOpaqueFD)) {
         mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(
@@ -1280,7 +1280,7 @@ void Device::PerformIdleTasksImpl() {
     if (mMonolithicPipelineCache) {
         MaybeError maybeError = mMonolithicPipelineCache->StoreOnIdle();
         if (maybeError.IsError()) {
-            std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+            std::unique_ptr<InternalError> error = maybeError.AcquireError();
             EmitLog(wgpu::LoggingType::Error, error->GetFormattedMessage().c_str());
             return;
         }

@@ -50,9 +50,10 @@
 #pragma clang diagnostic ignored "-Wunique-object-duplication"
 #pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
 #include <v8.h>
-#pragma clang diagnostic pop
 
 #include "libplatform/libplatform.h"
+#pragma clang diagnostic pop
+
 #include "src/dawn/node/napi_v8/napi_v8.h"
 
 #ifndef V8_ENABLE_SANDBOX
@@ -2143,9 +2144,11 @@ TEST_F(NapiV8Test, ObjectRemoveWrap) {
     ASSERT_EQ(napi_remove_wrap(env_, inst, &removed_data), napi_ok);
     EXPECT_EQ(removed_data, &native_data);
 
+    // Once the wrap has been removed the object is no longer wrapped, so unwrapping it fails
+    // rather than reporting a null native object.
     void* unwrap_after_remove = nullptr;
-    ASSERT_EQ(napi_unwrap(env_, inst, &unwrap_after_remove), napi_ok);
-    EXPECT_EQ(unwrap_after_remove, nullptr);
+    EXPECT_EQ(napi_unwrap(env_, inst, &unwrap_after_remove), napi_invalid_arg);
+    EXPECT_EQ(napi_remove_wrap(env_, inst, &unwrap_after_remove), napi_invalid_arg);
 }
 
 TEST_F(NapiV8Test, InstanceData) {
@@ -2210,14 +2213,15 @@ TEST_F(NapiV8Test, ReferencesAndWrapInvalidArguments) {
 
     ASSERT_EQ(napi_delete_reference(env_, ref), napi_ok);
 
-    // napi_wrap on plain object without internal fields
+    // napi_wrap argument validation. Any object can be wrapped, not just an instance of a class
+    // declared with napi_define_class().
     int sample_native = 0;
     EXPECT_EQ(napi_wrap(nullptr, obj, &sample_native, nullptr, nullptr, nullptr), napi_invalid_arg);
     EXPECT_EQ(napi_wrap(env_, nullptr, &sample_native, nullptr, nullptr, nullptr),
               napi_invalid_arg);
     EXPECT_EQ(napi_wrap(env_, num, &sample_native, nullptr, nullptr, nullptr),
               napi_object_expected);
-    EXPECT_EQ(napi_wrap(env_, obj, &sample_native, nullptr, nullptr, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_wrap(env_, obj, &sample_native, nullptr, nullptr, nullptr), napi_ok);
 
     // napi_unwrap & remove_wrap
     void* unwrap_res = nullptr;
@@ -2973,6 +2977,303 @@ TEST_F(NapiV8Test, BuffersAndPromisesInvalidArgs) {
               napi_arraybuffer_expected);
     EXPECT_EQ(napi_get_typedarray_info(env_, num, nullptr, nullptr, nullptr, nullptr, nullptr),
               napi_invalid_arg);
+}
+
+TEST_F(NapiV8Test, EscapableHandleScope) {
+    napi_escapable_handle_scope scope;
+    ASSERT_EQ(napi_open_escapable_handle_scope(env_, &scope), napi_ok);
+    napi_value val;
+    ASSERT_EQ(napi_create_int32(env_, 42, &val), napi_ok);
+    napi_value escaped;
+    ASSERT_EQ(napi_escape_handle(env_, scope, val, &escaped), napi_ok);
+    ASSERT_EQ(napi_close_escapable_handle_scope(env_, scope), napi_ok);
+
+    int32_t result = 0;
+    ASSERT_EQ(napi_get_value_int32(env_, escaped, &result), napi_ok);
+    EXPECT_EQ(result, 42);
+}
+
+TEST_F(NapiV8Test, BigInt) {
+    napi_value bi_val;
+    int64_t in_val = -123456789012345LL;
+    ASSERT_EQ(napi_create_bigint_int64(env_, in_val, &bi_val), napi_ok);
+
+    int64_t out_val = 0;
+    bool lossless = false;
+    ASSERT_EQ(napi_get_value_bigint_int64(env_, bi_val, &out_val, &lossless), napi_ok);
+    EXPECT_EQ(out_val, in_val);
+    EXPECT_TRUE(lossless);
+
+    napi_value ubi_val;
+    uint64_t in_uval = 987654321098765ULL;
+    ASSERT_EQ(napi_create_bigint_uint64(env_, in_uval, &ubi_val), napi_ok);
+
+    uint64_t out_uval = 0;
+    ASSERT_EQ(napi_get_value_bigint_uint64(env_, ubi_val, &out_uval, &lossless), napi_ok);
+    EXPECT_EQ(out_uval, in_uval);
+    EXPECT_TRUE(lossless);
+}
+
+namespace {
+void SetBoolFinalizer(napi_env, void* finalize_data, void*) {
+    *static_cast<bool*>(finalize_data) = true;
+}
+}  // namespace
+
+TEST_F(NapiV8Test, AddFinalizer) {
+    bool finalized = false;
+    napi_ref ref = nullptr;
+    {
+        napi_handle_scope scope;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+
+        napi_value obj;
+        ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+
+        ASSERT_EQ(napi_add_finalizer(env_, obj, &finalized, SetBoolFinalizer, nullptr, &ref),
+                  napi_ok);
+        EXPECT_NE(ref, nullptr);
+        EXPECT_FALSE(finalized);
+
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    RequestGC();
+    EXPECT_TRUE(finalized);
+}
+
+TEST_F(NapiV8Test, EscapableHandleScopeReleasesNonEscapedHandles) {
+    bool escaped_finalized = false;
+    bool dropped_finalized = false;
+    napi_value escaped = nullptr;
+
+    {
+        napi_escapable_handle_scope scope;
+        ASSERT_EQ(napi_open_escapable_handle_scope(env_, &scope), napi_ok);
+
+        napi_value kept, dropped;
+        ASSERT_EQ(napi_create_object(env_, &kept), napi_ok);
+        ASSERT_EQ(napi_create_object(env_, &dropped), napi_ok);
+        ASSERT_EQ(
+            napi_add_finalizer(env_, kept, &escaped_finalized, SetBoolFinalizer, nullptr, nullptr),
+            napi_ok);
+        ASSERT_EQ(napi_add_finalizer(env_, dropped, &dropped_finalized, SetBoolFinalizer, nullptr,
+                                     nullptr),
+                  napi_ok);
+
+        ASSERT_EQ(napi_escape_handle(env_, scope, kept, &escaped), napi_ok);
+        ASSERT_EQ(napi_close_escapable_handle_scope(env_, scope), napi_ok);
+    }
+
+    RequestGC();
+
+    // The escaped handle was promoted into the enclosing scope, so its object is still rooted.
+    EXPECT_FALSE(escaped_finalized);
+    // The handle that did not escape was released along with the scope.
+    EXPECT_TRUE(dropped_finalized);
+}
+
+TEST_F(NapiV8Test, EscapeHandleOnlySucceedsOncePerScope) {
+    napi_escapable_handle_scope scope;
+    ASSERT_EQ(napi_open_escapable_handle_scope(env_, &scope), napi_ok);
+
+    napi_value first, second;
+    ASSERT_EQ(napi_create_int32(env_, 1, &first), napi_ok);
+    ASSERT_EQ(napi_create_int32(env_, 2, &second), napi_ok);
+
+    napi_value escaped = nullptr;
+    ASSERT_EQ(napi_escape_handle(env_, scope, first, &escaped), napi_ok);
+
+    // The second request must be rejected rather than overwriting the handle already promoted.
+    napi_value escaped_again = nullptr;
+    EXPECT_EQ(napi_escape_handle(env_, scope, second, &escaped_again), napi_escape_called_twice);
+
+    ASSERT_EQ(napi_close_escapable_handle_scope(env_, scope), napi_ok);
+
+    int32_t value = 0;
+    ASSERT_EQ(napi_get_value_int32(env_, escaped, &value), napi_ok);
+    EXPECT_EQ(value, 1);
+}
+
+TEST_F(NapiV8Test, IsArray) {
+    napi_value arr, obj, num;
+    ASSERT_EQ(napi_create_array(env_, &arr), napi_ok);
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+    ASSERT_EQ(napi_create_int32(env_, 7, &num), napi_ok);
+
+    bool result = false;
+    ASSERT_EQ(napi_is_array(env_, arr, &result), napi_ok);
+    EXPECT_TRUE(result);
+    ASSERT_EQ(napi_is_array(env_, obj, &result), napi_ok);
+    EXPECT_FALSE(result);
+    ASSERT_EQ(napi_is_array(env_, num, &result), napi_ok);
+    EXPECT_FALSE(result);
+
+    EXPECT_EQ(napi_is_array(nullptr, arr, &result), napi_invalid_arg);
+    EXPECT_EQ(napi_is_array(env_, nullptr, &result), napi_invalid_arg);
+    EXPECT_EQ(napi_is_array(env_, arr, nullptr), napi_invalid_arg);
+}
+
+TEST_F(NapiV8Test, InstanceOf) {
+    napi_value src, ctor_a, ctor_b;
+    ASSERT_EQ(napi_create_string_utf8(env_, "(class A {})", NAPI_AUTO_LENGTH, &src), napi_ok);
+    ASSERT_EQ(napi_run_script(env_, src, &ctor_a), napi_ok);
+    ASSERT_EQ(napi_create_string_utf8(env_, "(class B {})", NAPI_AUTO_LENGTH, &src), napi_ok);
+    ASSERT_EQ(napi_run_script(env_, src, &ctor_b), napi_ok);
+
+    napi_value inst;
+    ASSERT_EQ(napi_new_instance(env_, ctor_a, 0, nullptr, &inst), napi_ok);
+
+    bool result = false;
+    ASSERT_EQ(napi_instanceof(env_, inst, ctor_a, &result), napi_ok);
+    EXPECT_TRUE(result);
+    ASSERT_EQ(napi_instanceof(env_, inst, ctor_b, &result), napi_ok);
+    EXPECT_FALSE(result);
+
+    napi_value num;
+    ASSERT_EQ(napi_create_int32(env_, 1, &num), napi_ok);
+    EXPECT_EQ(napi_instanceof(env_, inst, num, &result), napi_object_expected);
+
+    // A non-callable constructor makes JavaScript throw, which is surfaced as a pending exception.
+    napi_value plain;
+    ASSERT_EQ(napi_create_object(env_, &plain), napi_ok);
+    EXPECT_EQ(napi_instanceof(env_, inst, plain, &result), napi_generic_failure);
+    bool pending = false;
+    ASSERT_EQ(napi_is_exception_pending(env_, &pending), napi_ok);
+    EXPECT_TRUE(pending);
+    napi_value exception;
+    ASSERT_EQ(napi_get_and_clear_last_exception(env_, &exception), napi_ok);
+
+    EXPECT_EQ(napi_instanceof(nullptr, inst, ctor_a, &result), napi_invalid_arg);
+    EXPECT_EQ(napi_instanceof(env_, nullptr, ctor_a, &result), napi_invalid_arg);
+    EXPECT_EQ(napi_instanceof(env_, inst, nullptr, &result), napi_invalid_arg);
+    EXPECT_EQ(napi_instanceof(env_, inst, ctor_a, nullptr), napi_invalid_arg);
+}
+
+namespace {
+struct NewTargetRecord {
+    napi_status status = napi_generic_failure;
+    bool is_undefined = false;
+    bool matches_callee = false;
+    napi_value callee = nullptr;
+};
+
+napi_value RecordNewTarget(napi_env env, napi_callback_info info) {
+    void* data = nullptr;
+    napi_value this_arg = nullptr;
+    napi_get_cb_info(env, info, nullptr, nullptr, &this_arg, &data);
+    auto* record = static_cast<NewTargetRecord*>(data);
+
+    napi_value new_target = nullptr;
+    record->status = napi_get_new_target(env, info, &new_target);
+
+    napi_valuetype type = napi_object;
+    napi_typeof(env, new_target, &type);
+    record->is_undefined = type == napi_undefined;
+    napi_strict_equals(env, new_target, record->callee, &record->matches_callee);
+    return this_arg;
+}
+}  // namespace
+
+TEST_F(NapiV8Test, GetNewTarget) {
+    NewTargetRecord record;
+    napi_value fn;
+    ASSERT_EQ(napi_create_function(env_, "Target", NAPI_AUTO_LENGTH, RecordNewTarget, &record, &fn),
+              napi_ok);
+    record.callee = fn;
+
+    // Called as a plain function, new.target is undefined.
+    napi_value global, call_result;
+    ASSERT_EQ(napi_get_global(env_, &global), napi_ok);
+    ASSERT_EQ(napi_call_function(env_, global, fn, 0, nullptr, &call_result), napi_ok);
+    EXPECT_EQ(record.status, napi_ok);
+    EXPECT_TRUE(record.is_undefined);
+    EXPECT_FALSE(record.matches_callee);
+
+    // Called as a constructor, new.target is the function being constructed.
+    napi_value inst;
+    ASSERT_EQ(napi_new_instance(env_, fn, 0, nullptr, &inst), napi_ok);
+    EXPECT_EQ(record.status, napi_ok);
+    EXPECT_FALSE(record.is_undefined);
+    EXPECT_TRUE(record.matches_callee);
+
+    napi_value target = nullptr;
+    EXPECT_EQ(napi_get_new_target(env_, nullptr, &target), napi_invalid_arg);
+}
+
+TEST_F(NapiV8Test, External) {
+    TestNativeData data{4321};
+    napi_value ext;
+    ASSERT_EQ(napi_create_external(env_, &data, nullptr, nullptr, &ext), napi_ok);
+
+    napi_valuetype type = napi_undefined;
+    ASSERT_EQ(napi_typeof(env_, ext, &type), napi_ok);
+    EXPECT_EQ(type, napi_external);
+
+    void* retrieved = nullptr;
+    ASSERT_EQ(napi_get_value_external(env_, ext, &retrieved), napi_ok);
+    EXPECT_EQ(retrieved, &data);
+    EXPECT_EQ(static_cast<TestNativeData*>(retrieved)->value, 4321);
+
+    napi_value obj;
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+    EXPECT_EQ(napi_get_value_external(env_, obj, &retrieved), napi_invalid_arg);
+
+    EXPECT_EQ(napi_create_external(nullptr, &data, nullptr, nullptr, &ext), napi_invalid_arg);
+    EXPECT_EQ(napi_create_external(env_, &data, nullptr, nullptr, nullptr), napi_invalid_arg);
+    EXPECT_EQ(napi_get_value_external(nullptr, ext, &retrieved), napi_invalid_arg);
+    EXPECT_EQ(napi_get_value_external(env_, nullptr, &retrieved), napi_invalid_arg);
+    EXPECT_EQ(napi_get_value_external(env_, ext, nullptr), napi_invalid_arg);
+}
+
+TEST_F(NapiV8Test, UnwrapObjectThatWasNeverWrapped) {
+    napi_value obj;
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+
+    void* unwrapped = nullptr;
+    EXPECT_EQ(napi_unwrap(env_, obj, &unwrapped), napi_invalid_arg);
+    EXPECT_EQ(napi_remove_wrap(env_, obj, &unwrapped), napi_invalid_arg);
+}
+
+TEST_F(NapiV8Test, WrapIsInvisibleToJavaScript) {
+    napi_value obj;
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+
+    TestNativeData data{11};
+    ASSERT_EQ(napi_wrap(env_, obj, &data, nullptr, nullptr, nullptr), napi_ok);
+
+    // Wrapping must not add anything a script can see.
+    napi_value names;
+    ASSERT_EQ(napi_get_property_names(env_, obj, &names), napi_ok);
+    uint32_t length = 1;
+    ASSERT_EQ(napi_get_array_length(env_, names, &length), napi_ok);
+    EXPECT_EQ(length, 0u);
+
+    bool has = true;
+    ASSERT_EQ(napi_has_named_property(env_, obj, "node:napi:wrapper", &has), napi_ok);
+    EXPECT_FALSE(has);
+}
+
+TEST_F(NapiV8Test, UnwrapIgnoresLookalikeProperty) {
+    napi_value obj;
+    ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+
+    // An ordinary property whose name matches the private key's description, holding a value of
+    // the same shape a wrapper uses, must not be mistaken for one.
+    TestNativeData decoy{99};
+    napi_value ext;
+    ASSERT_EQ(napi_create_external(env_, &decoy, nullptr, nullptr, &ext), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env_, obj, "node:napi:wrapper", ext), napi_ok);
+
+    void* unwrapped = nullptr;
+    EXPECT_EQ(napi_unwrap(env_, obj, &unwrapped), napi_invalid_arg);
+    EXPECT_EQ(unwrapped, nullptr);
+
+    // The decoy also must not stop the object from being wrapped for real.
+    TestNativeData real{42};
+    ASSERT_EQ(napi_wrap(env_, obj, &real, nullptr, nullptr, nullptr), napi_ok);
+    ASSERT_EQ(napi_unwrap(env_, obj, &unwrapped), napi_ok);
+    EXPECT_EQ(unwrapped, &real);
 }
 
 }  // namespace

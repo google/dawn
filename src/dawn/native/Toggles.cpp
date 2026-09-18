@@ -499,6 +499,16 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use a blit instead of a copy command to copy non-RGBA float textures to a buffer. "
       "Workaround for OpenGLES.",
       "https://issues.chromium.org/issues/556959073", ToggleStage::Device}},
+    {Toggle::UseBlitForUintTextureToBufferCopy,
+     {"use_blit_for_uint_texture_to_buffer_copy",
+      "Use a blit instead of a copy command to copy uint textures to a buffer. "
+      "Workaround for OpenGLES.",
+      "https://issues.chromium.org/issues/556959073", ToggleStage::Device}},
+    {Toggle::UseBlitForSintTextureToBufferCopy,
+     {"use_blit_for_sint_texture_to_buffer_copy",
+      "Use a blit instead of a copy command to copy sint textures to a buffer. "
+      "Workaround for OpenGLES.",
+      "https://issues.chromium.org/issues/556959073", ToggleStage::Device}},
     {Toggle::VulkanSplitBufferTextureCopyForArrayLayers,
      {"vulkan_split_buffer_texture_copy_for_array_layers",
       "Split a multi-layer buffer-to-texture / texture-to-buffer copy into one vkCmdCopy*Image "
@@ -936,6 +946,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Workaround a driver bug on some Intel GPUs where dynamic component stores on "
       "boolean vectors fail.",
       "https://crbug.com/540789158", ToggleStage::Device}},
+    {Toggle::VulkanRelaxMaxInterStageShaderVariables,
+     {"vulkan_relax_max_inter_stage_shader_variables",
+      "Relax the maxInterStageShaderVariables floor for ImgTec (PowerVR) devices on Vulkan. "
+      "Some ImgTec drivers only report 64, which is below the WebGPU requirement. Enabling this "
+      "toggle accepts the limit of 64 instead of rejecting the adapter entirely.",
+      "https://g-issues.chromium.org/issues/559589664", ToggleStage::Instance}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};

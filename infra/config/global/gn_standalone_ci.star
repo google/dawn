@@ -684,6 +684,7 @@ gpu.ci.windows_builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
+                "checkout_litert_lm",
             ],
         ),
         chromium_config = builder_config.chromium_config(

@@ -347,19 +347,6 @@ void Validator::CheckVar(const Var* var) {
         }
     }
 
-    bool generates_initializer = var->Initializer() != nullptr ||
-                                 mv->AddressSpace() == core::AddressSpace::kPrivate ||
-                                 mv->AddressSpace() == core::AddressSpace::kFunction;
-    if (generates_initializer) {
-        if (ElementsCount(result_type->UnwrapPtrOrRef()) >
-            internal_limits::kMaxArrayConstructorElements) {
-            AddError(var) << "type has excessive number of elements (>"
-                          << internal_limits::kMaxArrayConstructorElements
-                          << ") for an initializer";
-            return;
-        }
-    }
-
     // Check that initializer and result type match
     if (var->Initializer()) {
         if (mv->AddressSpace() != AddressSpace::kFunction &&
@@ -475,11 +462,6 @@ void Validator::CheckLet(const Let* l) {
     }
 
     auto* result_ty = l->Result()->Type();
-    if (ElementsCount(result_ty) > internal_limits::kMaxArrayConstructorElements) {
-        AddError(l) << "type has excessive number of elements (>"
-                    << internal_limits::kMaxArrayConstructorElements << ") for an initializer";
-        return;
-    }
     auto* value_ty = l->Value()->Type();
     if (value_ty != result_ty) {
         AddError(l) << "result type " << NameOf(l->Result()->Type())
@@ -894,12 +876,6 @@ void Validator::CheckConstruct(const Construct* construct) {
     }
 
     auto* result_type = construct->Result()->Type();
-    if (ElementsCount(result_type) > internal_limits::kMaxArrayConstructorElements) {
-        AddError(construct) << "type has excessive number of elements (>"
-                            << internal_limits::kMaxArrayConstructorElements
-                            << ") for an initializer";
-        return;
-    }
     if (!result_type->IsConstructible()) {
         // We only allow `construct` to create non-constructible types when they are structures that
         // contain pointers and handle types, with the corresponding property enabled.

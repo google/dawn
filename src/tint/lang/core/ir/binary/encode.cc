@@ -830,10 +830,6 @@ struct Encoder {
     void ConstantValueSplat(pb::ConstantValueSplat& splat_out,
                             const core::constant::Splat* splat_in) {
         splat_out.set_type(Type(splat_in->type));
-        if (DAWN_UNLIKELY(splat_in->count > internal_limits::kMaxArrayConstructorElements)) {
-            err_ << "array constructor has excessive number of elements (>"
-                 << internal_limits::kMaxArrayConstructorElements << ")\n";
-        }
         splat_out.set_elements(ConstantValue(splat_in->el));
         splat_out.set_count(static_cast<uint32_t>(splat_in->count));
     }

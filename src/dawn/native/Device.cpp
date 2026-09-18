@@ -615,7 +615,7 @@ void DeviceBase::APIDestroy() {
     Destroy(DestroyReason::EarlyDestroy);
 }
 
-void DeviceBase::HandleEncoderError(std::unique_ptr<ErrorData> error) {
+void DeviceBase::HandleEncoderError(std::unique_ptr<InternalError> error) {
     HandleError(std::move(error));
 }
 
@@ -625,19 +625,19 @@ void DeviceBase::HandleDeviceLost(wgpu::DeviceLostReason reason, std::string_vie
     }
 }
 
-void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
+void DeviceBase::HandleError(std::unique_ptr<InternalError> error,
                              InternalErrorType additionalAllowedErrors,
                              wgpu::DeviceLostReason lostReason,
                              ForwardToErrorScope forwardToErrorScope) {
     auto deviceGuard = GetGuard();
-    AppendDebugLayerMessages(error.get());
+    AppendDebugLayerMessages(error->GetData());
 
     InternalErrorType type = error->GetType();
     if (type != InternalErrorType::Validation) {
         // D3D device can provide additional device removed reason. We would
         // like to query and log the device removed reason if the error is
         // not validation error.
-        AppendDeviceLostMessage(error.get());
+        AppendDeviceLostMessage(error->GetData());
     }
 
     InternalErrorType allowedErrors = InternalErrorType::Validation | additionalAllowedErrors;
@@ -714,7 +714,7 @@ void DeviceBase::HandleErrorGeneratingAsyncTask(Ref<ErrorGeneratingAsyncTask> ta
     });
 }
 
-void DeviceBase::ConsumeError(std::unique_ptr<ErrorData> error,
+void DeviceBase::ConsumeError(std::unique_ptr<InternalError> error,
                               InternalErrorType additionalAllowedErrors) {
     DAWN_CHECK(error != nullptr);
     HandleError(std::move(error), additionalAllowedErrors);
@@ -796,7 +796,7 @@ Future DeviceBase::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbac
                     DAWN_CHECK(task->IsCompleted() || completionType != EventCompletionType::Ready);
                     if (task->IsCompleted() && task->IsError() &&
                         pendingTask.captureErrorType == ToWGPUErrorType(task->GetErrorType())) {
-                        std::unique_ptr<ErrorData> error = task->AcquireError();
+                        std::unique_ptr<InternalError> error = task->AcquireError();
                         mScope->CaptureError(ToWGPUErrorType(error->GetType()),
                                              error->GetMessage());
                     }
@@ -1247,7 +1247,7 @@ BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* rawDescriptor) {
 
     // 2. Error handling.
     Ref<BufferBase> buffer;
-    std::unique_ptr<ErrorData> deferredError;
+    std::unique_ptr<InternalError> deferredError;
     if (resultOrError.IsSuccess()) [[likely]] {
         buffer = resultOrError.AcquireSuccess();
     } else {
@@ -1455,7 +1455,7 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
     TRACE_EVENT(DAWN_TRACE_CATEGORY(), "DeviceBase::APICreateShaderModule", "label", label.label);
 
     Ref<ShaderModuleBase> shaderModule;
-    std::unique_ptr<ErrorData> errorData;
+    std::unique_ptr<InternalError> errorData;
     auto creationResult = CreateShaderModule(descriptor, /*internalExtensions=*/{});
     if (creationResult.IsSuccess()) {
         // CreateShaderModule can succeed but still return a shader module which failed compilation.
@@ -1498,7 +1498,7 @@ ShaderModuleBase* DeviceBase::APICreateErrorShaderModule(const ShaderModuleDescr
         this, descriptor ? descriptor->label : nullptr, std::move(compilationMessages));
     auto log = result->GetCompilationLog();
 
-    std::unique_ptr<ErrorData> errorData = DAWN_VALIDATION_ERROR(
+    std::unique_ptr<InternalError> errorData = DAWN_VALIDATION_ERROR(
         "Error in calling %s.CreateShaderModule(%s).\n%s", this, descriptor, log);
     ConsumeError(std::move(errorData));
 
@@ -1943,8 +1943,14 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {
     }
 
     message = utils::NormalizeMessageString(message);
-    HandleError(DAWN_MAKE_ERROR(FromWGPUErrorType(type), std::string(message)),
-                InternalErrorType::OutOfMemory);
+
+    InternalErrorType errorType = FromWGPUErrorType(type);
+    if (errorType == InternalErrorType::Validation) {
+        HandleError(DAWN_MAKE_VALIDATION_ERROR(std::string(message)));
+    } else {
+        HandleError(DAWN_MAKE_INTERNAL_ERROR(errorType, std::string(message)),
+                    InternalErrorType::OutOfMemory);
+    }
 }
 
 void DeviceBase::APIValidateTextureDescriptor(const TextureDescriptor* descriptorOrig) {

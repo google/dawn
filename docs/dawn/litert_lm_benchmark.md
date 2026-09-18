@@ -35,6 +35,20 @@ Includes `Init Tokenizer`, `Init LLM metadata`, and `TextToTokenIds`.
 
 *WebGPU relevance:* Not relevant. These are host-side CPU operations (SentencePiece tokenization, protobuf decoding) that do not execute WebGPU code.
 
+## Prerequisites (Windows)
+
+Linux and macOS need no setup beyond `gclient sync`. Windows builds LiteRT-LM with
+Bazel and MSVC, which requires the [upstream
+prerequisites](https://github.com/google-ai-edge/LiteRT-LM/blob/main/docs/getting-started/build-and-run.md#deploy_to_windows):
+Visual Studio 2022, Git for Windows, Python 3, and a JDK with `JAVA_HOME` set.
+
+Two machine settings are also required:
+
+- **Developer Mode** (Settings → System → For developers), so Bazel and `cargo-bazel`
+  can create symlinks without elevation. Without it the build fails with `os error 1314`.
+- **`LongPathsEnabled`** set to `1` under
+  `HKLM\SYSTEM\CurrentControlSet\Control\FileSystem`.
+
 ## 1. Fetch dependencies
 
 LiteRT-LM sources, prebuilt accelerators, and benchmark model weights are managed conditionally in [`DEPS`](../../DEPS) to keep checkout sizes small for developers who do not need them.
@@ -88,9 +102,9 @@ autoninja -C out/active litert_lm
 1. GN first builds Dawn's monolithic shared library:
    - Linux: `out/active/libwebgpu_dawn.so`
    - macOS: `out/active/libwebgpu_dawn.dylib`
-   - Windows: `out/active/libwebgpu_dawn.dll`
+   - Windows: `out/active/webgpu_dawn.dll` (also copied to `out/active/libwebgpu_dawn.dll`)
 2. GN executes [`third_party/litert-lm/build_litert_lm.py`](../../third_party/litert-lm/build_litert_lm.py), which:
-   - Configures Bazelisk with the hermetic Clang/LLVM toolchain from Dawn's `third_party/llvm-build`.
+   - Configures Bazelisk with the hermetic Clang/LLVM toolchain from Dawn's `third_party/llvm-build` (on Linux/macOS) or Visual Studio toolchain (on Windows).
    - Links against the newly compiled local `libwebgpu_dawn` and platform prebuilts.
    - Builds the Bazel target `//runtime/engine:litert_lm_advanced_main`.
    - Copies the resulting `litert_lm_advanced_main` binary and required shared libraries into `out/active/`.
@@ -119,7 +133,12 @@ DYLD_LIBRARY_PATH=out/active ./out/active/litert_lm_advanced_main \
 
 ### Windows
 
-TODO: Not yet supported.
+```powershell
+.\out\active\litert_lm_advanced_main.exe `
+  --benchmark `
+  --backend=gpu `
+  --model_path=third_party\litert-lm\data\model.litertlm
+```
 
 ## Troubleshooting
 

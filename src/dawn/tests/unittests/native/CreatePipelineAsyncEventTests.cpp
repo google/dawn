@@ -88,8 +88,8 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateRende
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(
-            DAWN_MAKE_ERROR(InternalErrorType::Validation, std::string(kErrorMessage)))));
+        .WillByDefault(testing::Return(
+            testing::ByMove(DAWN_MAKE_VALIDATION_ERROR(std::string(kErrorMessage)))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
 
@@ -120,7 +120,7 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationInternalErrorInCreateRenderP
 
     ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
         .WillByDefault(testing::Return(testing::ByMove(
-            DAWN_MAKE_ERROR(InternalErrorType::Internal, std::string(kErrorMessage)))));
+            DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::Internal, std::string(kErrorMessage)))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
 
@@ -175,8 +175,8 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateCompu
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(
-            DAWN_MAKE_ERROR(InternalErrorType::Validation, std::string(kErrorMessage)))));
+        .WillByDefault(testing::Return(
+            testing::ByMove(DAWN_MAKE_VALIDATION_ERROR(std::string(kErrorMessage)))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
 
@@ -200,7 +200,7 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationInternalErrorInCreateCompute
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(DAWN_MAKE_ERROR(
+        .WillByDefault(testing::Return(testing::ByMove(DAWN_MAKE_INTERNAL_ERROR(
             dawn::native::InternalErrorType::Internal, std::string(kErrorMessage)))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));

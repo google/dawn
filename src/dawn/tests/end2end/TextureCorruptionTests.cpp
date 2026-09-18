@@ -305,7 +305,6 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
     }
 
     void DoTest() {
-        DAWN_SUPPRESS_TEST_IF(IsWARP());
         // TODO(dawn:1859): Fix it on D3D11 Intel.
         DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel() && GetParam().mArrayLayerCount > 12);
 

@@ -487,15 +487,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // For OpenGL ES, use compute shader blit to emulate texture to buffer copies to work around
     // glReadPixels not guaranteed support for certain format/type combinations.
     if (gl.GetVersion().IsES()) {
+        deviceToggles->Default(Toggle::UseBlitForRG11B10UfloatTextureCopy, true);
         deviceToggles->Default(Toggle::UseBlitForNonRGBAUnormTextureToBufferCopy, true);
         deviceToggles->Default(Toggle::UseBlitForNonRGBAFloatTextureToBufferCopy, true);
         deviceToggles->Default(Toggle::UseBlitForFloat16TextureCopy, true);
+        deviceToggles->Default(Toggle::UseBlitForUintTextureToBufferCopy, true);
+        deviceToggles->Default(Toggle::UseBlitForSintTextureToBufferCopy, true);
     }
 
-    // Use compute shader blit to emulate rg11b10ufloat texture to buffer copies if not color
-    // renderable.
-    // TODO(crbug.com/556959073): turn on after fix.
-    deviceToggles->Default(Toggle::UseBlitForRG11B10UfloatTextureCopy, false);
     // Use a blit to emulate stencil-only buffer-to-texture copies.
     deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);
 

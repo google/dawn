@@ -32,14 +32,36 @@ import("dawn_overrides_with_defaults.gni")
 
 declare_args() {
   # Sets defaults for other features so that we build as much as possible on the
-  # current host OS.
+  # current build configuration. May be set to false, true, or "sanitizers".
+  #
+  # Unfortunately it's not possible to enable literally everything in one build.
+  # See below for details on what we attempt to enable (or assert is enabled).
   dawn_maximal = false
 }
+assert(dawn_maximal == false || dawn_maximal == true ||
+       dawn_maximal == "sanitizers")
 
-if (dawn_maximal && !is_wasm) {
-  assert(
-      use_libfuzzer,
-      "dawn_maximal=true also requires use_libfuzzer=true to build fuzzer targets")
+if (current_toolchain == default_toolchain) {
+  if (dawn_maximal == true) {
+    assert(
+        !using_sanitizer,
+        "Set dawn_maximal=\"sanitizers\" if you want a sanitizer build or coverage-guided fuzzers; otherwise, disable coverage-guided fuzzing with use_sanitizer_coverage=false")
+    if (!is_win) {
+      # Can't build fuzzers for Windows without ASan. If you need this, use
+      # dawn_maximal="sanitizers" use_libfuzzer=true is_asan=true.
+      assert(
+          use_libfuzzer,
+          "Fuzzer targets are available on this config, so dawn_maximal requires them. Set use_libfuzzer=true")
+    }
+  } else if (dawn_maximal == "sanitizers") {
+    # Note this disables RawPtrTests.
+    assert(using_sanitizer)
+    assert(!(is_mac && host_os == "linux"),
+           "Building for Mac on Linux is not supported with sanitizers")
+    assert(
+        use_libfuzzer,
+        "Fuzzer targets are available on this config, so dawn_maximal requires them. Set use_libfuzzer=true")
+  }
 }
 
 declare_args() {
@@ -126,19 +148,19 @@ declare_args() {
 
   # Enables the compilation of Dawn's OpenGL backend
   # (best effort, non-conformant)
-  dawn_enable_desktop_gl = dawn_maximal || (is_linux && !is_chromeos)
+  dawn_enable_desktop_gl = dawn_maximal != false || (is_linux && !is_chromeos)
 
   # Enables the compilation of Dawn's OpenGLES backend
   # (WebGPU/Compat subset)
   # Disables OpenGLES when compiling for UWP, since UWP only supports d3d
-  dawn_enable_opengles = dawn_maximal || (is_linux && !is_chromeos) ||
+  dawn_enable_opengles = dawn_maximal != false || (is_linux && !is_chromeos) ||
                          (is_win && !dawn_is_winuwp) || is_android
 
   # Enables the compilation of Dawn's Vulkan backend
   # Disables vulkan when compiling for UWP, since UWP only supports d3d
-  dawn_enable_vulkan =
-      dawn_maximal || is_linux || is_chromeos || (is_win && !dawn_is_winuwp) ||
-      is_fuchsia || is_android || dawn_use_swiftshader
+  dawn_enable_vulkan = dawn_maximal != false || is_linux || is_chromeos ||
+                       (is_win && !dawn_is_winuwp) || is_fuchsia ||
+                       is_android || dawn_use_swiftshader
 
   # Enables error injection for faking failures to native API calls
   dawn_enable_error_injection = is_debug || use_fuzzing_engine
