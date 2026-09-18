@@ -2223,7 +2223,7 @@ void CommandEncoder::APIInjectValidationError(StringView messageIn) {
     mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator*) -> MaybeError {
-            return DAWN_MAKE_ERROR(InternalErrorType::Validation, std::string(message));
+            return DAWN_MAKE_VALIDATION_ERROR(std::string(message));
         },
         "injecting validation error: %s.", message);
 }

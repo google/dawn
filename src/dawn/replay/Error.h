@@ -73,7 +73,7 @@ using VisitResult = ResultOrError<VisitStatus>;
 //   return SomethingOfTypeT; // for ResultOrError<T>
 //
 // Returning an error is done via:
-//   return DAWN_MAKE_ERROR(errorType, "My error message");
+//   return DAWN_MAKE_INTERNAL_ERROR(errorType, "My error message");
 //
 // but shorthand version for specific error types are preferred:
 //   return DAWN_INTERNAL_ERROR("My error message with details %s", details);

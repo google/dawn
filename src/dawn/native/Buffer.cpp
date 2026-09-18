@@ -66,7 +66,7 @@ namespace dawn::native {
 
 namespace {
 
-std::unique_ptr<ErrorData> ConcurrentUseError() {
+std::unique_ptr<InternalError> ConcurrentUseError() {
     return DAWN_VALIDATION_ERROR("Concurrent buffer operations are not allowed");
 }
 

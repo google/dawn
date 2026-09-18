@@ -112,7 +112,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
     // A helper function used to give more context before printing the EGL loading error.
     auto SwallowDiscoveryError = [&](MaybeError maybeError) {
         if (maybeError.IsError()) {
-            std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+            std::unique_ptr<InternalError> error = maybeError.AcquireError();
             error->AppendContext("trying to discover a %s adapter.", GetType());
             GetInstance()->ConsumedErrorAndWarnOnce(std::move(error));
         }

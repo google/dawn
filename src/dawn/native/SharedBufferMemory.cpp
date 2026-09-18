@@ -156,7 +156,7 @@ BufferBase* SharedBufferMemoryBase::APICreateBuffer(const BufferDescriptor* rawD
     // 2. Error handling. Defer descriptor / allocation errors until after we've tried to map, so
     // that errors from mapping take priority. This mirrors DeviceBase::APICreateBuffer.
     Ref<BufferBase> buffer;
-    std::unique_ptr<ErrorData> deferredError;
+    std::unique_ptr<InternalError> deferredError;
     const bool createSucceeded = resultOrError.IsSuccess();
     if (createSucceeded) [[likely]] {
         buffer = resultOrError.AcquireSuccess();

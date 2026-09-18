@@ -59,7 +59,7 @@ class ErrorSink {
                                      const char* formatStr,
                                      const Args&... args) {
         if (maybeError.IsError()) [[unlikely]] {
-            std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+            std::unique_ptr<InternalError> error = maybeError.AcquireError();
             if (static_cast<uint32_t>(error->GetType()) &
                 (static_cast<uint32_t>(additionalAllowedErrors) |
                  static_cast<uint32_t>(InternalErrorType::Validation))) {
@@ -98,7 +98,7 @@ class ErrorSink {
                                      const char* formatStr,
                                      const Args&... args) {
         if (resultOrError.IsError()) [[unlikely]] {
-            std::unique_ptr<ErrorData> error = resultOrError.AcquireError();
+            std::unique_ptr<InternalError> error = resultOrError.AcquireError();
             if (static_cast<uint32_t>(error->GetType()) &
                 (static_cast<uint32_t>(additionalAllowedErrors) |
                  static_cast<uint32_t>(InternalErrorType::Validation))) {
@@ -122,7 +122,7 @@ class ErrorSink {
 
   private:
     virtual void ConsumeError(
-        std::unique_ptr<ErrorData> error,
+        std::unique_ptr<InternalError> error,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) = 0;
 };
 

@@ -1853,7 +1853,7 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
     return subgroupMatrixConfigs;
 }
 
-void PhysicalDevice::SetCoreNotSupported(std::unique_ptr<ErrorData> error) {
+void PhysicalDevice::SetCoreNotSupported(std::unique_ptr<InternalError> error) {
     DAWN_ASSERT(mSupportsCoreFeatureLevel);
     mSupportsCoreFeatureLevel = false;
     DAWN_ASSERT(error);

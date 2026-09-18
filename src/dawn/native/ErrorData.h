@@ -50,11 +50,11 @@ enum class InternalErrorType : uint32_t;
 
 class [[nodiscard]] ErrorData {
   public:
-    [[nodiscard]] static std::unique_ptr<ErrorData> Create(InternalErrorType type,
-                                                           std::string message,
-                                                           const char* file,
-                                                           const char* function,
-                                                           int line);
+    [[nodiscard]] static ErrorData Create(InternalErrorType type,
+                                          std::string message,
+                                          const char* file,
+                                          const char* function,
+                                          int line);
     ErrorData(InternalErrorType type, std::string message);
 
     struct BacktraceRecord {

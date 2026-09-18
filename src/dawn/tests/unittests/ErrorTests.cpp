@@ -54,7 +54,7 @@ TEST(ErrorTests, Error_Error) {
     MaybeError result = ReturnError();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -76,7 +76,7 @@ TEST(ErrorTests, ResultOrError_Error) {
     ResultOrError<int*> result = ReturnError();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -114,7 +114,7 @@ TEST(ErrorTests, TRY_Error) {
     MaybeError result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -140,8 +140,8 @@ TEST(ErrorTests, TRY_AddsToBacktrace) {
     MaybeError doubleResult = DoubleTry();
     ASSERT_TRUE(doubleResult.IsError());
 
-    std::unique_ptr<ErrorData> singleData = singleResult.AcquireError();
-    std::unique_ptr<ErrorData> doubleData = doubleResult.AcquireError();
+    std::unique_ptr<InternalError> singleData = singleResult.AcquireError();
+    std::unique_ptr<InternalError> doubleData = doubleResult.AcquireError();
 
     // Backtraces are only added in debug mode.
 #if defined(DAWN_ENABLE_ASSERTS)
@@ -191,7 +191,7 @@ TEST(ErrorTests, TRY_RESULT_Error) {
     ResultOrError<int*> result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -217,8 +217,8 @@ TEST(ErrorTests, TRY_RESULT_AddsToBacktrace) {
     ResultOrError<int*> doubleResult = DoubleTry();
     ASSERT_TRUE(doubleResult.IsError());
 
-    std::unique_ptr<ErrorData> singleData = singleResult.AcquireError();
-    std::unique_ptr<ErrorData> doubleData = doubleResult.AcquireError();
+    std::unique_ptr<InternalError> singleData = singleResult.AcquireError();
+    std::unique_ptr<InternalError> doubleData = doubleResult.AcquireError();
 
     // Backtraces are only added in debug mode.
 #if defined(DAWN_ENABLE_ASSERTS)
@@ -244,7 +244,7 @@ TEST(ErrorTests, TRY_RESULT_ConversionToError) {
     MaybeError result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -265,7 +265,7 @@ TEST(ErrorTests, TRY_RESULT_ConversionToErrorNonPointer) {
     MaybeError result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -315,7 +315,7 @@ TEST(ErrorTests, TRY_RESULT_CLEANUP_Cleanup) {
     ResultOrError<int*> result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
     ASSERT_TRUE(tryCleanup);
 }
@@ -335,7 +335,7 @@ TEST(ErrorTests, TRY_ConversionToErrorOrResult) {
     ResultOrError<int*> result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -354,7 +354,7 @@ TEST(ErrorTests, TRY_ConversionToErrorOrResultNonPointer) {
     ResultOrError<int> result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<InternalError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 

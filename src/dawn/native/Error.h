@@ -31,6 +31,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "src/dawn/common/Result.h"
 #include "src/dawn/native/ErrorData.h"
@@ -46,12 +47,44 @@ enum class InternalErrorType : uint32_t {
     OutOfMemory = 8
 };
 
+class InternalError {
+  public:
+    static std::unique_ptr<InternalError> Create(ErrorData data) {
+        return std::make_unique<InternalError>(std::move(data));
+    }
+
+    explicit InternalError(ErrorData&& d) : mData(std::move(d)) {}
+
+    InternalErrorType GetType() const { return mData.GetType(); }
+    const std::string& GetMessage() const { return mData.GetMessage(); }
+    const std::vector<ErrorData::BacktraceRecord>& GetBacktrace() const {
+        return mData.GetBacktrace();
+    }
+    const std::vector<std::string>& GetContexts() const { return mData.GetContexts(); }
+    std::string GetFormattedMessage() const { return mData.GetFormattedMessage(); }
+
+    void AppendContext(std::string context) { mData.AppendContext(std::move(context)); }
+    template <typename... Args>
+    void AppendContext(const char* formatStr, const Args&... args) {
+        mData.AppendContext(formatStr, args...);
+    }
+    void AppendBacktrace(const char* file, const char* function, int line) {
+        mData.AppendBacktrace(file, function, line);
+    }
+    void AppendDebugGroup(std::string_view label) { mData.AppendDebugGroup(label); }
+
+    ErrorData* GetData() { return &mData; }
+
+  private:
+    ErrorData mData;
+};
+
 // MaybeError and ResultOrError are meant to be used as return value for function that are not
 // expected to, but might fail. The handling of error is potentially much slower than successes.
-using MaybeError = Result<void, ErrorData>;
+using MaybeError = Result<void, InternalError>;
 
 template <typename T>
-using ResultOrError = Result<T, ErrorData>;
+using ResultOrError = Result<T, InternalError>;
 
 namespace detail {
 
@@ -82,7 +115,7 @@ struct IsResultOrError<ResultOrError<T>> {
 //   return SomethingOfTypeT; // for ResultOrError<T>
 //
 // Returning an error is done via:
-//   return DAWN_MAKE_ERROR(errorType, "My error message");
+//   return DAWN_MAKE_INTERNAL_ERROR(errorType, "My error message");
 //
 // but shorthand version for specific error types are preferred:
 //   return DAWN_VALIDATION_ERROR("My error message with details %s", details);
@@ -110,44 +143,53 @@ struct IsResultOrError<ResultOrError<T>> {
 //   - Unimplemented: same as Internal except it puts "unimplemented" in the error message for
 //     more clarity.
 
-#define DAWN_MAKE_ERROR(TYPE, MESSAGE) \
+#define DAWN_MAKE_ERROR_DATA(TYPE, MESSAGE) \
     ::dawn::native::ErrorData::Create(TYPE, MESSAGE, __FILE__, __func__, __LINE__)
 
-#define DAWN_VALIDATION_ERROR(...) \
-    DAWN_MAKE_ERROR(InternalErrorType::Validation, absl::StrFormat(__VA_ARGS__))
+#define DAWN_MAKE_INTERNAL_ERROR(TYPE, MESSAGE) \
+    ::dawn::native::InternalError::Create(DAWN_MAKE_ERROR_DATA(TYPE, MESSAGE))
 
-#define DAWN_INVALID_IF(EXPR, ...)                                                           \
-    if (EXPR) [[unlikely]] {                                                                 \
-        return DAWN_MAKE_ERROR(InternalErrorType::Validation, absl::StrFormat(__VA_ARGS__)); \
-    }                                                                                        \
-    for (;;)                                                                                 \
+#define DAWN_MAKE_VALIDATION_ERROR(MESSAGE) \
+    ::dawn::native::InternalError::Create(  \
+        DAWN_MAKE_ERROR_DATA(InternalErrorType::Validation, MESSAGE))
+
+#define DAWN_VALIDATION_ERROR(...) DAWN_MAKE_VALIDATION_ERROR(absl::StrFormat(__VA_ARGS__))
+
+#define DAWN_INVALID_IF(EXPR, ...)                                       \
+    if (EXPR) [[unlikely]] {                                             \
+        return DAWN_MAKE_VALIDATION_ERROR(absl::StrFormat(__VA_ARGS__)); \
+    }                                                                    \
+    for (;;)                                                             \
     break
 
 // DAWN_DEVICE_LOST_ERROR means that there was a real unrecoverable native device lost error.
 // We can't even do a graceful shutdown because the Device is gone.
-#define DAWN_DEVICE_LOST_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::DeviceLost, MESSAGE)
+#define DAWN_DEVICE_LOST_ERROR(MESSAGE) \
+    DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::DeviceLost, MESSAGE)
 
 // DAWN_INTERNAL_ERROR means Dawn hit an unexpected error in the backend and should try to
 // gracefully shut down.
-#define DAWN_INTERNAL_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::Internal, MESSAGE)
+#define DAWN_INTERNAL_ERROR(MESSAGE) DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::Internal, MESSAGE)
 
 #define DAWN_FORMAT_INTERNAL_ERROR(...) \
-    DAWN_MAKE_ERROR(InternalErrorType::Internal, absl::StrFormat(__VA_ARGS__))
+    DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::Internal, absl::StrFormat(__VA_ARGS__))
 
-#define DAWN_INTERNAL_ERROR_IF(EXPR, ...)                                                  \
-    if (EXPR) [[unlikely]] {                                                               \
-        return DAWN_MAKE_ERROR(InternalErrorType::Internal, absl::StrFormat(__VA_ARGS__)); \
-    }                                                                                      \
-    for (;;)                                                                               \
+#define DAWN_INTERNAL_ERROR_IF(EXPR, ...)                              \
+    if (EXPR) [[unlikely]] {                                           \
+        return DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::Internal,   \
+                                        absl::StrFormat(__VA_ARGS__)); \
+    }                                                                  \
+    for (;;)                                                           \
     break
 
 #define DAWN_UNIMPLEMENTED_ERROR(MESSAGE) \
-    DAWN_MAKE_ERROR(InternalErrorType::Internal, std::string("Unimplemented: ") + MESSAGE)
+    DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::Internal, std::string("Unimplemented: ") + MESSAGE)
 
 // DAWN_OUT_OF_MEMORY_ERROR means we ran out of memory. It may be used as a signal internally in
 // Dawn to free up unused resources. Or, it may bubble up to the application to signal an allocation
 // was too large or they should free some existing resources.
-#define DAWN_OUT_OF_MEMORY_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::OutOfMemory, MESSAGE)
+#define DAWN_OUT_OF_MEMORY_ERROR(MESSAGE) \
+    DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::OutOfMemory, MESSAGE)
 
 template <typename T>
 std::string MakeIncreaseLimitMessage(std::string_view limitName, T adapterLimitValue) {

@@ -139,7 +139,7 @@ void PipelineCache::Initialize() {
         mDevice->fn.CreatePipelineCache(mDevice->GetVkDevice(), &createInfo, nullptr, &*mHandle),
         "CreatePipelineCache");
     if (maybeError.IsError()) {
-        std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+        std::unique_ptr<InternalError> error = maybeError.AcquireError();
         mDevice->EmitLog(wgpu::LoggingType::Info, error->GetFormattedMessage().c_str());
         return;
     }

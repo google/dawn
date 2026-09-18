@@ -1280,7 +1280,7 @@ void Device::PerformIdleTasksImpl() {
     if (mMonolithicPipelineCache) {
         MaybeError maybeError = mMonolithicPipelineCache->StoreOnIdle();
         if (maybeError.IsError()) {
-            std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+            std::unique_ptr<InternalError> error = maybeError.AcquireError();
             EmitLog(wgpu::LoggingType::Error, error->GetFormattedMessage().c_str());
             return;
         }

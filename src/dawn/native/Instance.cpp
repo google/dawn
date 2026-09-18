@@ -711,7 +711,7 @@ EventManager* InstanceBase::GetEventManager() {
     return &mEventManager;
 }
 
-void InstanceBase::ConsumeError(std::unique_ptr<ErrorData> error,
+void InstanceBase::ConsumeError(std::unique_ptr<InternalError> error,
                                 InternalErrorType additionalAllowedErrors) {
     // Note: `additionalAllowedErrors` is ignored. The instance considers every type of error to be
     // an error that is logged.
