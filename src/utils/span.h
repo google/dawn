@@ -40,6 +40,7 @@
 #include <span>
 #include <utility>
 
+#include "partition_alloc/pointers/raw_ptr.h"
 #include "src/utils/compiler.h"
 #include "src/utils/numeric.h"
 #include "src/utils/underlying_type.h"
@@ -72,6 +73,22 @@ inline constexpr Index DynamicExtent = std::numeric_limits<Index>::max();
 template <typename Index, Index Extent>
 inline constexpr bool IsDynamicExtent = Extent == DynamicExtent<Index>;
 
+template <typename Ptr, typename NewT>
+struct ReturnPtrTypeImpl;
+
+template <typename OldT, typename NewT>
+struct ReturnPtrTypeImpl<OldT*, NewT> {
+    using type = NewT*;
+};
+
+template <typename OldT, typename NewT>
+struct ReturnPtrTypeImpl<raw_ptr<OldT>, NewT> {
+    using type = raw_ptr<NewT>;
+};
+
+template <typename Ptr, typename NewT>
+using ReturnPtrType = typename ReturnPtrTypeImpl<Ptr, NewT>::type;
+
 template <typename T,
           HasUnsignedUnderlyingType Index,
           typename PtrType,
@@ -83,10 +100,16 @@ class SpanBase;
 template <typename T, size_t Extent = detail::DynamicExtent<size_t>>
 using Span = detail::SpanBase<T, size_t, T*, Extent>;
 
+template <typename T, size_t Extent = detail::DynamicExtent<size_t>>
+using RawSpan = detail::SpanBase<T, size_t, raw_ptr<T>, Extent>;
+
 namespace ityp {
 // A replacement for std::span<T> but with a different index type (like a TypedInteger).
 template <typename Index, typename T, Index Extent = dawn::detail::DynamicExtent<Index>>
 using span = dawn::detail::SpanBase<T, Index, T*, Extent>;
+
+template <typename Index, typename T, Index Extent = dawn::detail::DynamicExtent<Index>>
+using raw_span = dawn::detail::SpanBase<T, Index, raw_ptr<T>, Extent>;
 }  // namespace ityp
 
 }  // namespace dawn
@@ -135,6 +158,12 @@ template <typename Index, typename PtrType, Index Extent>
     requires IsDynamicExtent<Index, Extent>
 struct SpanStorage<Index, PtrType, Extent> {
     constexpr SpanStorage() noexcept = default;
+    constexpr SpanStorage(const SpanStorage&) noexcept = default;
+    constexpr SpanStorage& operator=(const SpanStorage&) noexcept = default;
+    // Explicitly copy on move so that regardless of PtrType, we guarantee that move does not
+    // invalidate the original value to match std::span.
+    constexpr SpanStorage(SpanStorage&& other) noexcept : SpanStorage(other) {}
+    constexpr SpanStorage& operator=(SpanStorage&& other) noexcept { return *this = other; }
     constexpr SpanStorage(size_t size, PtrType data) noexcept : mSize(size), mData(data) {
         if constexpr (sizeof(size_t) >= sizeof(Index)) {
             DAWN_CHECK(size < size_t{UnderlyingType<Index>{DynamicExtent<Index>}});
@@ -150,6 +179,12 @@ template <typename Index, typename PtrType, Index Extent>
     requires(!IsDynamicExtent<Index, Extent>)
 struct SpanStorage<Index, PtrType, Extent> {
     constexpr SpanStorage() noexcept = default;
+    constexpr SpanStorage(const SpanStorage&) noexcept = default;
+    constexpr SpanStorage& operator=(const SpanStorage&) noexcept = default;
+    // Explicitly copy on move so that regardless of PtrType, we guarantee that move does not
+    // invalidate the original value to match std::span.
+    constexpr SpanStorage(SpanStorage&& other) noexcept : SpanStorage(other) {}
+    constexpr SpanStorage& operator=(SpanStorage&& other) noexcept { return *this = other; }
     constexpr explicit SpanStorage(PtrType data) noexcept : mData(data) {}
     constexpr SpanStorage(size_t size, PtrType data) noexcept : mData(data) {
         if constexpr (Extent != Index{}) {
@@ -257,12 +292,14 @@ class SpanBase : private SpanStorage<Index, PtrType, Extent> {
         : Storage(checked_cast<size_t>(range.size()), range.data()) {}
 
     // Constructor converting a dynamic extent Span to a fixed one.
-    explicit constexpr SpanBase(SpanBase<T, Index, PtrType, DynamicExtent<Index>>& other)
+    template <typename OtherPtrType>
+    explicit constexpr SpanBase(SpanBase<T, Index, OtherPtrType, DynamicExtent<Index>>& other)
         requires(!kIsDynamicExtent)
         : Storage(other.data()) {
         DAWN_CHECK(other.size() == Extent);
     }
-    explicit constexpr SpanBase(const SpanBase<T, Index, PtrType, DynamicExtent<Index>>& other)
+    template <typename OtherPtrType>
+    explicit constexpr SpanBase(const SpanBase<T, Index, OtherPtrType, DynamicExtent<Index>>& other)
         requires(!kIsDynamicExtent)
         : Storage(other.data()) {
         DAWN_CHECK(other.size() == Extent);
@@ -305,7 +342,7 @@ class SpanBase : private SpanStorage<Index, PtrType, Extent> {
     constexpr reference operator[](Index index) const noexcept { return at(index); }
 
     // Returns a pointer at the contents of this.
-    constexpr pointer data() const noexcept { return this->mData; }
+    constexpr pointer data() const noexcept { return std::to_address(this->mData); }
 
     // Observers
 
@@ -470,73 +507,56 @@ class SpanBase : private SpanStorage<Index, PtrType, Extent> {
     constexpr std::span<T, kStdExtent> as_std_span() const {
         if constexpr (kIsDynamicExtent) {
             // SAFETY: This is the same allocation and size as this.
-            return DAWN_UNSAFE_BUFFERS(std::span<T, kStdExtent>(this->mData, this->mSize));
+            return DAWN_UNSAFE_BUFFERS(std::span<T, kStdExtent>(data(), this->mSize));
         } else {
             if constexpr (Extent != Index{}) {
                 DAWN_CHECK(this->mData != nullptr);
             }
             // SAFETY: This is the same allocation and size as this.
-            return DAWN_UNSAFE_BUFFERS(std::span<T, kStdExtent>(this->mData, kStdExtent));
+            return DAWN_UNSAFE_BUFFERS(std::span<T, kStdExtent>(data(), kStdExtent));
         }
     }
 };
 
 }  // namespace detail
 
-// Converts a `Span<[const|volatile] T>` to a `Span<[const|volatile] std::byte>`.
+// Converts a `[Raw]Span<[const|volatile] T>` to a `[Raw]Span<[const|volatile] std::byte>`.
 // Mirrors Chromium's base::as_[writable_]bytes but with std::byte.
 template <typename T, typename Index, typename PtrType, Index Extent>
 constexpr auto SpanAsBytes(detail::SpanBase<T, Index, PtrType, Extent> s) {
+    using ByteType =
+        std::conditional_t<std::is_volatile_v<T>, const volatile std::byte, const std::byte>;
+    using ResultPtrType = detail::ReturnPtrType<PtrType, ByteType>;
+
     if constexpr (detail::IsDynamicExtent<Index, Extent>) {
-        if constexpr (std::is_volatile_v<T>) {
-            // SAFETY: `s.data()` points to at least `s.size_bytes()` bytes of data.
-            return DAWN_UNSAFE_BUFFERS(Span<const volatile std::byte>{
-                reinterpret_cast<const volatile std::byte*>(s.data()), s.size_bytes()});
-        } else {
-            // SAFETY: `s.data()` points to at least `s.size_bytes()` bytes of data.
-            return DAWN_UNSAFE_BUFFERS(Span<const std::byte>{
-                reinterpret_cast<const std::byte*>(s.data()), s.size_bytes()});
-        }
+        // SAFETY: `s.data()` points to at least `s.size_bytes()` bytes of data.
+        return DAWN_UNSAFE_BUFFERS(detail::SpanBase<ByteType, size_t, ResultPtrType>{
+            reinterpret_cast<ByteType*>(s.data()), s.size_bytes()});
     } else {
         constexpr size_t kByteExtent =
             static_cast<size_t>(static_cast<UnderlyingType<Index>>(Extent)) * sizeof(T);
-        if constexpr (std::is_volatile_v<T>) {
-            // SAFETY: `s.data()` points to at least `s.size_bytes()` bytes of data.
-            return DAWN_UNSAFE_BUFFERS(Span<const volatile std::byte, kByteExtent>{
-                reinterpret_cast<const volatile std::byte*>(s.data())});
-        } else {
-            // SAFETY: `s.data()` points to at least `s.size_bytes()` bytes of data.
-            return DAWN_UNSAFE_BUFFERS(
-                Span<const std::byte, kByteExtent>{reinterpret_cast<const std::byte*>(s.data())});
-        }
+        // SAFETY: `s.data()` points to at least `s.size_bytes()` bytes of data.
+        return DAWN_UNSAFE_BUFFERS(detail::SpanBase<ByteType, size_t, ResultPtrType, kByteExtent>{
+            reinterpret_cast<ByteType*>(s.data())});
     }
 }
 
 template <typename T, typename Index, typename PtrType, Index Extent>
     requires(!std::is_const_v<T>)
 constexpr auto SpanAsWritableBytes(detail::SpanBase<T, Index, PtrType, Extent> s) {
+    using ByteType = std::conditional_t<std::is_volatile_v<T>, volatile std::byte, std::byte>;
+    using ResultPtrType = detail::ReturnPtrType<PtrType, ByteType>;
+
     if constexpr (detail::IsDynamicExtent<Index, Extent>) {
-        if constexpr (std::is_volatile_v<T>) {
-            // SAFETY: `s.data()` points to at least `s.size_bytes()` bytes of data.
-            return DAWN_UNSAFE_BUFFERS(Span<volatile std::byte>{
-                reinterpret_cast<volatile std::byte*>(s.data()), s.size_bytes()});
-        } else {
-            // SAFETY: `s.data()` points to at least `s.size_bytes()` bytes of data.
-            return DAWN_UNSAFE_BUFFERS(
-                Span<std::byte>{reinterpret_cast<std::byte*>(s.data()), s.size_bytes()});
-        }
+        // SAFETY: `s.data()` points to at least `s.size_bytes()` bytes of data.
+        return DAWN_UNSAFE_BUFFERS(detail::SpanBase<ByteType, size_t, ResultPtrType>{
+            reinterpret_cast<ByteType*>(s.data()), s.size_bytes()});
     } else {
         constexpr size_t kByteExtent =
             static_cast<size_t>(static_cast<UnderlyingType<Index>>(Extent)) * sizeof(T);
-        if constexpr (std::is_volatile_v<T>) {
-            // SAFETY: `s.data()` points to at least `s.size_bytes()` bytes of data.
-            return DAWN_UNSAFE_BUFFERS(Span<volatile std::byte, kByteExtent>{
-                reinterpret_cast<volatile std::byte*>(s.data())});
-        } else {
-            // SAFETY: `s.data()` points to at least `s.size_bytes()` bytes of data.
-            return DAWN_UNSAFE_BUFFERS(
-                Span<std::byte, kByteExtent>{reinterpret_cast<std::byte*>(s.data())});
-        }
+        // SAFETY: `s.data()` points to at least `s.size_bytes()` bytes of data.
+        return DAWN_UNSAFE_BUFFERS(detail::SpanBase<ByteType, size_t, ResultPtrType, kByteExtent>{
+            reinterpret_cast<ByteType*>(s.data())});
     }
 }
 
@@ -555,9 +575,9 @@ concept LegalByteReinterpretAs =
      (ByteExtent % sizeof(T) == 0u &&
       ByteExtent / sizeof(T) < size_t{UnderlyingType<Index>{DynamicExtent<Index>}}));
 
-template <typename T, typename Index, typename ByteType, size_t ByteExtent>
+template <typename T, typename Index, typename ByteType, typename PtrType, size_t ByteExtent>
     requires(LegalByteReinterpretAs<T, Index, ByteType, ByteExtent>)
-constexpr auto ReinterpretSpanImpl(Span<ByteType, ByteExtent> s) {
+constexpr auto ReinterpretSpanImpl(SpanBase<ByteType, size_t, PtrType, ByteExtent> s) {
     // Check for proper alignment of the target type.
     DAWN_CHECK(reinterpret_cast<uintptr_t>(s.data()) % alignof(T) == 0u);
 
@@ -581,40 +601,46 @@ constexpr auto ReinterpretSpanImpl(Span<ByteType, ByteExtent> s) {
     // valid de facto, but it is technically not standard-compliant.
     auto* ptr = std::launder(reinterpret_cast<T*>(s.data()));
 
+    using ResultPtrType = ReturnPtrType<PtrType, T>;
+
     if constexpr (IsDynamicExtent<size_t, ByteExtent>) {
         // Check that the size is a multiple of the target type.
         DAWN_CHECK(s.size_bytes() % sizeof(T) == 0u);
 
         // SAFETY: We checked for proper alignment, size, strict aliasing rules, and started the
         // lifetime of the array.
-        return DAWN_UNSAFE_BUFFERS(
-            ityp::span<Index, T>{ptr, checked_cast<Index>(s.size_bytes() / sizeof(T))});
+        return DAWN_UNSAFE_BUFFERS(SpanBase<T, Index, ResultPtrType, DynamicExtent<Index>>{
+            ptr, checked_cast<Index>(s.size_bytes() / sizeof(T))});
     } else {
         constexpr Index kTargetExtent =
             Index{static_cast<UnderlyingType<Index>>(ByteExtent / sizeof(T))};
         // SAFETY: We checked for proper alignment, size, strict aliasing rules, and started the
         // lifetime of the array.
-        return DAWN_UNSAFE_BUFFERS(ityp::span<Index, T, kTargetExtent>{ptr});
+        return DAWN_UNSAFE_BUFFERS(SpanBase<T, Index, ResultPtrType, kTargetExtent>{ptr});
     }
 }
 }  // namespace detail
 
-// Converts a `Span<[const|volatile] std::byte>` to a `Span<[const|volatile] T>`.
-// Mirrors Chromium's base::subtle::reinterpret_span with some minor differences:
+// Converts a `[Raw]Span<[const|volatile] std::byte>` to a
+// `[Raw]Span<Index, [const|volatile] T>`. Mirrors Chromium's base::subtle::reinterpret_span
+// with some minor differences:
 //   - Allows for volatile qualifiers as long as they are not cast away.
 //   - Provides a less strict requirement for std::is_trivially_copyable<T> if using the
 //     alternative overload along with the UNSAFE_BUFFER suppressions.
 template <typename T,
           typename Index = size_t,
           typename ByteType,
+          typename PtrType,
           size_t ByteExtent = detail::DynamicExtent<size_t>>
     requires(detail::LegalByteReinterpretAs<T, Index, ByteType, ByteExtent>)
-DAWN_UNSAFE_BUFFER_USAGE constexpr auto ReinterpretSpan(Span<ByteType, ByteExtent> s) {
-    return detail::ReinterpretSpanImpl<T, Index, ByteType, ByteExtent>(s);
+DAWN_UNSAFE_BUFFER_USAGE constexpr auto ReinterpretSpan(
+    detail::SpanBase<ByteType, size_t, PtrType, ByteExtent> s) {
+    return detail::ReinterpretSpanImpl<T, Index>(s);
 }
 template <typename T,
           typename Index = size_t,
           typename ByteType,
+          typename PtrType,
           size_t ByteExtent = detail::DynamicExtent<size_t>>
     requires(
         // This function effectively "creates" objects by overlaying a type onto raw bytes,
@@ -622,9 +648,9 @@ template <typename T,
         // internal invariant. Therefore, we restrict this function to trivially copyable types.
         std::is_trivially_copyable_v<T> &&
         detail::LegalByteReinterpretAs<T, Index, ByteType, ByteExtent>)
-constexpr auto ReinterpretSpan(Span<ByteType, ByteExtent> s) {
+constexpr auto ReinterpretSpan(detail::SpanBase<ByteType, size_t, PtrType, ByteExtent> s) {
     // SAFETY: We don't need to worry about ctors/dtors since T is trivially copyable.
-    return detail::ReinterpretSpanImpl<T, Index, ByteType, ByteExtent>(s);
+    return detail::ReinterpretSpanImpl<T, Index>(s);
 }
 
 // Converts a `[const] T&` to a `Span<[const] T, 1>`.

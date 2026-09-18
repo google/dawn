@@ -35,18 +35,16 @@ import("../../scripts/dawn_overrides_with_defaults.gni")
 import("//build_overrides/build.gni")
 import("${dawn_root}/scripts/dawn_nocompile.gni")
 
-# Use Chromium's dcheck_always_on when available so that we respect it when
-# running tests on the GPU builders
-if (build_with_chromium) {
-  import("//build/config/dcheck_always_on.gni")
-} else {
-  dcheck_always_on = false
-}
+import("//build/config/dcheck_always_on.gni")
+import("//build/config/sanitizers/sanitizers.gni")
 
-if (build_with_chromium) {
-  import("//build/config/sanitizers/sanitizers.gni")
-} else {
-  use_fuzzing_engine = false
+# When embedded by Chrome, partition_alloc and the dangling pointer detector
+# are already initialized. Dawn shouldn't attempt to initialize them again. This
+# variable is useful to avoid double initialization of the library.
+dawn_enable_partition_alloc = false
+if (dawn_standalone && defined(dawn_partition_alloc_dir)) {
+  import("//build_overrides/partition_alloc.gni")
+  dawn_enable_partition_alloc = enable_dangling_raw_ptr_checks_default
 }
 
 # Centralized config for -Weverything and its suppressions.
@@ -312,8 +310,12 @@ config("internal_config") {
     configs += [ ":raw_ptr_check" ]
   }
 
-  if (dawn_always_assert || dcheck_always_on || is_debug ||
-      use_fuzzing_engine) {
+  # Use Chromium's dcheck_always_on when available so that we respect it when
+  # running tests on the GPU builders. If we are not building with Chromium, we
+  # ignore dcheck_always_on and rely on either dawn_always_assert or the build
+  # type (is_debug) to enable asserts.
+  if (dawn_always_assert || (build_with_chromium && dcheck_always_on) ||
+      is_debug || use_fuzzing_engine) {
     defines += [ "DAWN_ENABLE_ASSERTS" ]
   }
 
@@ -360,6 +362,7 @@ static_library("utils") {
   }
 
   public_configs = [ ":internal_config" ]
+  public_deps = [ "${dawn_root}/src/dawn/partition_alloc:raw_ptr" ]
 }
 
 source_set("crash_handler") {
@@ -404,6 +407,10 @@ source_set("unittests") {
     "typed_integer_tests.cc",
     "underlying_type_tests.cc",
   ]
+
+  if (dawn_enable_partition_alloc) {
+    sources += [ "raw_span_tests.cc" ]
+  }
 }
 
 ###############################################################################
