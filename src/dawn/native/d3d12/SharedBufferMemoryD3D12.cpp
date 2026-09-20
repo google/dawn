@@ -34,6 +34,7 @@
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/Buffer.h"
 #include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/Instance.h"
 #include "src/dawn/native/d3d/D3DError.h"
 #include "src/dawn/native/d3d/SharedFenceD3D.h"
 #include "src/dawn/native/d3d/UtilsD3D.h"
@@ -169,7 +170,7 @@ SharedBufferMemory::SharedBufferMemory(Device* device,
 void SharedBufferMemory::DestroyImpl(DestroyReason reason) {
     SharedBufferMemoryBase::DestroyImpl(reason);
 
-    if (mHostPointerDisposeCallback == nullptr) {
+    if (!mHostPointerDispose.has_value()) {
         ToBackend(GetDevice())->ReferenceUntilUnused(std::move(mResource));
         return;
     }
@@ -180,43 +181,39 @@ void SharedBufferMemory::DestroyImpl(DestroyReason reason) {
     // task (instead of through Device::ReferenceUntilUnused, which is drained by a different
     // mechanism) guarantees the resource is released before the heap, and the heap before the
     // dispose callback.
-    struct DisposeTask : TrackTaskCallback {
-        DisposeTask(ComPtr<ID3D12Resource> resource,
-                    std::unique_ptr<Heap> heap,
-                    wgpu::DisposeCallback callback,
-                    void* userdata)
-            : TrackTaskCallback(nullptr),
+    class DisposeEvent : public EventManager::TrackedEvent {
+      public:
+        DisposeEvent(DeviceBase* device,
+                     ComPtr<ID3D12Resource> resource,
+                     std::unique_ptr<Heap> heap,
+                     WGPUDisposeCallbackInfo dispose)
+            : TrackedEvent(static_cast<wgpu::CallbackMode>(dispose.mode),
+                           device->GetQueue(),
+                           device->GetQueue()->GetPendingCommandSerial()),
               resource(std::move(resource)),
               heap(std::move(heap)),
-              callback(callback),
-              userdata(userdata) {}
-        ~DisposeTask() override = default;
+              mCallback(dispose.callback),
+              mUserdata1(dispose.userdata1),
+              mUserdata2(dispose.userdata2) {}
+        ~DisposeEvent() override = default;
 
-        void FinishImpl() override { Dispose(WGPUCallbackStatus_Success); }
-        void HandleDeviceLossImpl() override { Dispose(WGPUCallbackStatus_Error); }
-        void HandleShutDownImpl() override { Dispose(WGPUCallbackStatus_Error); }
-
-        void Dispose(WGPUCallbackStatus status) {
+      private:
+        void Complete(EventCompletionType) override {
             resource = nullptr;
             heap = nullptr;
-            callback(status, userdata);
+            mCallback(WGPUCallbackStatus_Success, mUserdata1, mUserdata2);
         }
 
         ComPtr<ID3D12Resource> resource;
         std::unique_ptr<Heap> heap;
-        wgpu::DisposeCallback callback;
-        raw_ptr<void, DisableDanglingPtrDetection> userdata;
+        WGPUDisposeCallback mCallback = nullptr;
+        raw_ptr<void> mUserdata1 = nullptr;
+        raw_ptr<void> mUserdata2 = nullptr;
     };
-    std::unique_ptr<DisposeTask> request =
-        std::make_unique<DisposeTask>(std::move(mResource), std::move(mHeap),
-                                      mHostPointerDisposeCallback, mHostPointerDisposeUserdata);
-    mHostPointerDisposeCallback = nullptr;
-    mHostPointerDisposeUserdata = nullptr;
 
-    // TODO(386255678): TrackTaskAfterEventualFlush() only marks the queue as needing a submit; it
-    // doesn't force one to happen immediately. If nothing ever ticks the device again, this task
-    // (and thus disposeCallback) may never run.
-    GetDevice()->GetQueue()->TrackTaskAfterEventualFlush(std::move(request));
+    GetInstance()->GetEventManager()->TrackEvent(AcquireRef(new DisposeEvent(
+        GetDevice(), std::move(mResource), std::move(mHeap), mHostPointerDispose.value())));
+    mHostPointerDispose = std::nullopt;
 }
 
 // static
@@ -357,8 +354,9 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     // Device::CreateSharedBufferMemory errors before or after calling this, e.g. due to unpacking
     // the chained struct, or a device loss / D3D12 error raised elsewhere in the meantime.
     absl::Cleanup disposeOnFailure = [descriptor] {
-        if (descriptor->disposeCallback) {
-            descriptor->disposeCallback(WGPUCallbackStatus_Error, descriptor->userdata);
+        if (descriptor->disposeCallbackInfo.callback != nullptr) {
+            const WGPUDisposeCallbackInfo& dispose = descriptor->disposeCallbackInfo;
+            dispose.callback(WGPUCallbackStatus_Error, dispose.userdata1, dispose.userdata2);
         }
     };
 
@@ -383,8 +381,7 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     Ref<SharedBufferMemory> result;
     DAWN_TRY_ASSIGN(result, CreateFromHeap(device, label, std::move(d3d12Heap), descriptor->size,
                                            descriptor->pointer, wgpu::BufferUsage::None));
-    result->mHostPointerDisposeCallback = descriptor->disposeCallback;
-    result->mHostPointerDisposeUserdata = descriptor->userdata;
+    result->mHostPointerDispose = descriptor->disposeCallbackInfo;
     std::move(disposeOnFailure).Cancel();
     return result;
 }

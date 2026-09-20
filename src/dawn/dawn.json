@@ -2031,11 +2031,18 @@
         ]
     },
     "dispose callback": {
-        "category": "function pointer",
+        "category": "callback function",
         "tags": ["dawn", "native"],
         "args": [
-            {"name": "status", "type": "callback status"},
-            {"name": "userdata", "type": "void *"}
+            {"name": "status", "type": "callback status"}
+        ]
+    },
+    "dispose callback info": {
+        "category": "callback info",
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "mode", "type": "callback mode"},
+            {"name": "callback", "type": "dispose callback", "default": "nullptr"}
         ]
     },
     "shared buffer memory host pointer descriptor": {
@@ -2046,8 +2053,7 @@
         "members": [
             {"name": "pointer", "type": "void *"},
             {"name": "size", "type": "uint64_t"},
-            {"name": "dispose callback", "type": "dispose callback"},
-            {"name": "userdata", "type": "void *"}
+            {"name": "dispose callback info", "type": "dispose callback info"}
         ]
     },
     "shared texture memory": {

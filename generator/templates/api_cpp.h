@@ -799,7 +799,8 @@ template <typename CInfoT, typename CppArgs>
 struct CArgConverter;
 {% set SpecialCallbackInfos = [
            "device lost callback info", "uncaptured error callback info",
-           "dawn load cache data callback info", "dawn store cache data callback info" ] %}
+           "dawn load cache data callback info", "dawn store cache data callback info",
+           "dispose callback"] %}
 {% for type in by_category["callback info"] if type.name.get() not in SpecialCallbackInfos %}
     {% set CallbackType = find_by_name(type.members, "callback").type %}
     template <>

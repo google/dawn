@@ -88,8 +88,7 @@ class SharedBufferMemory final : public SharedBufferMemoryBase {
 
     std::unique_ptr<Heap> mHeap;
     ComPtr<ID3D12Resource> mResource;
-    wgpu::DisposeCallback mHostPointerDisposeCallback = nullptr;
-    raw_ptr<void, DisableDanglingPtrDetection> mHostPointerDisposeUserdata = nullptr;
+    std::optional<WGPUDisposeCallbackInfo> mHostPointerDispose;
 };
 
 }  // namespace dawn::native::d3d12
