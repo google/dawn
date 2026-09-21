@@ -860,6 +860,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
     {Toggle::MetalEnableTensors,
      {"metal_enable_tensors", "Enable the use of Metal 4 Tensor Operations for subgroup matrix.",
       "https://crbug.com/550350271", ToggleStage::Adapter}},
+    {Toggle::AllowAlphaToCoverageNotBlendable,
+     {"allow_alpha_to_coverage_not_blendable",
+      "Killswitch for a fix to the validation where non-blendable formats where allowed for "
+      "alphaToCoverageEnabled",
+      "https://crbug.com/550350271", ToggleStage::Device}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "

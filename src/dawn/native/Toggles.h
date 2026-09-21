@@ -204,6 +204,7 @@ enum class Toggle {
     VulkanReplaceUnsignedCompareZero,
     VulkanUseCooperativeMatrixRobustBufferAccess,
     MetalEnableTensors,
+    AllowAlphaToCoverageNotBlendable,
 
     // Once all backends have been updated to be thread safe for waiting, we can remove this toggle.
     WaitIsThreadSafe,
