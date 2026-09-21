@@ -34,6 +34,7 @@
 #include <string>
 
 #include "src/tint/lang/core/enums.h"
+#include "src/tint/lang/core/ir/array_count.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
@@ -3582,6 +3583,41 @@ override o : i32 = bitcast<i32>(v);
 fn f() -> i32 {
   return o;
 }
+)");
+}
+
+TEST_F(IRToProgramTest, Override_ArraySize) {
+    b.Append(b.ir.root_block, [&] {
+        auto* o = b.Override("o", ty.i32());
+        o->SetOverrideId(OverrideId{10});
+
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(o->Result());
+        auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 0_u);
+        b.Var("v", ty.ref(workgroup, ary, read_write));
+    });
+
+    EXPECT_WGSL(R"(
+@id(10) override o : i32;
+
+var<workgroup> v : array<i32, o>;
+)");
+}
+
+TEST_F(IRToProgramTest, Override_ArraySize_Expression) {
+    b.Append(b.ir.root_block, [&] {
+        auto* wgsize = b.Override("wgsize", ty.i32());
+        wgsize->SetOverrideId(OverrideId{10});
+
+        auto* mul = b.Multiply(wgsize, 2_i);
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(mul);
+        auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 0_u);
+        b.Var("v", ty.ref(workgroup, ary, read_write));
+    });
+
+    EXPECT_WGSL(R"(
+@id(10) override wgsize : i32;
+
+var<workgroup> v : array<i32, (wgsize * 2i)>;
 )");
 }
 

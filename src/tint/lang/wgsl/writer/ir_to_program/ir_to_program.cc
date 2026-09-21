@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
+#include "src/tint/lang/core/ir/array_count.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/break_if.h"
@@ -1039,14 +1040,16 @@ class State {
                 }
 
                 auto el = Type(a->ElemType());
-                if (a->Count()->Is<core::type::RuntimeArrayCount>()) {
-                    return b.ty.array(el);
-                }
-                auto count = a->ConstantCount();
-                if (!count) {
-                    TINT_IR_ICE(mod) << core::type::Array::kErrExpectedConstantCount;
-                }
-                return b.ty.array(el, u32(count.value()));
+                return tint::Switch(
+                    a->Count(),
+                    [&](const core::type::RuntimeArrayCount*) { return b.ty.array(el); },
+                    [&](const core::type::ConstantArrayCount* count) {
+                        return b.ty.array(el, u32(count->value));
+                    },
+                    [&](const core::ir::type::ValueArrayCount* count) {
+                        return b.ty.array(el, Expr(count->value));
+                    },
+                    TINT_ICE_ON_NO_MATCH);
             },
             [&](const core::type::Struct* s) { return Struct(s); },
             [&](const core::type::Atomic* a) { return b.ty.atomic(Type(a->Type())); },
@@ -1292,7 +1295,7 @@ class State {
     /// creates a phony assignment with @p expr.
     void Bind(const core::ir::Value* value, const ast::Expression* expr) {
         TINT_IR_ASSERT(mod, value);
-        if (value->IsUsed()) {
+        if (value->IsUsed() || current_function_ == nullptr) {
             if (!bindings_.Add(value, ValueBinding{.ast_expr = expr})) {
                 TINT_IR_ICE(mod) << "Bind(" << value->TypeInfo().name
                                  << ") called twice for same value";
