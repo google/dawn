@@ -37,6 +37,15 @@ class Module;
 
 namespace tint::hlsl::writer::raise {
 
+enum class SplitMode : uint8_t {
+    kSubgroupMatrix,
+    kAll,
+};
+
+struct SplitWorkgroupAtomicsConfig {
+    SplitMode mode = SplitMode::kSubgroupMatrix;
+};
+
 /// SplitWorkgroupAtomics is a transform that splits workgroup variables containing atomic members
 /// into two separate variables:
 ///   1. A data variable with the same layout but atomic<T> replaced by T (preserving the space as
@@ -55,8 +64,10 @@ namespace tint::hlsl::writer::raise {
 ///     atomic variables are left untouched.
 ///
 /// @param ir the module to transform
+/// @param config the transform options
 /// @returns success or failure
-Result<SuccessType> SplitWorkgroupAtomics(core::ir::Module& ir);
+Result<SuccessType> SplitWorkgroupAtomics(core::ir::Module& ir,
+                                          const SplitWorkgroupAtomicsConfig& config);
 
 }  // namespace tint::hlsl::writer::raise
 

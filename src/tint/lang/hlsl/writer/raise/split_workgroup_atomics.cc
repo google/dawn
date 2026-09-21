@@ -67,10 +67,11 @@ struct AtomicLeaf {
 
 /// State for the transform.
 struct State {
-    explicit State(core::ir::Module& module) : ir(module) {}
-
     /// The IR module.
     core::ir::Module& ir;
+
+    // The transform options
+    const SplitWorkgroupAtomicsConfig& config;
 
     /// The IR builder.
     core::ir::Builder b{ir};
@@ -83,6 +84,9 @@ struct State {
         core::ir::Var* var;
         Vector<uint32_t, 4> member_path;
     };
+
+    /// Cache for deatomicized struct types.
+    Hashmap<const core::type::Struct*, const core::type::Struct*, 4> deatomicized_structs_{};
 
     /// Checks whether a type contains an atomic.
     bool ContainsAtomic(const core::type::Type* type) const {
@@ -183,6 +187,27 @@ struct State {
         return ty.array(new_elem, arr->ConstantCount().value());
     }
 
+    bool UsedWithSubgroupMatrix(core::ir::Value* v) {
+        for (auto& use : v->UsagesUnsorted()) {
+            bool used = tint::Switch(
+                use->instruction,
+                [&](core::ir::Access* a) { return UsedWithSubgroupMatrix(a->Result()); },
+                [&](core::ir::Let* let) { return UsedWithSubgroupMatrix(let->Result()); },
+                [&](core::ir::CoreBuiltinCall* call) {
+                    if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
+                        call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
+                        return true;
+                    }
+                    return false;
+                },
+                [&](Default) { return false; });
+            if (used) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /// Process the module.
     void Process() {
         if (ir.root_block->IsEmpty()) {
@@ -204,6 +229,11 @@ struct State {
             }
 
             if (ptr_ty->AddressSpace() != core::AddressSpace::kWorkgroup) {
+                continue;
+            }
+
+            if (config.mode == SplitMode::kSubgroupMatrix &&
+                !UsedWithSubgroupMatrix(var->Result())) {
                 continue;
             }
 
@@ -451,17 +481,15 @@ struct State {
             access->Result()->SetType(ty.ptr(ptr_ty->AddressSpace(), store_ty, ptr_ty->Access()));
         }
     }
-
-    /// Cache for deatomicized struct types.
-    Hashmap<const core::type::Struct*, const core::type::Struct*, 4> deatomicized_structs_;
 };
 
 }  // namespace
 
-Result<SuccessType> SplitWorkgroupAtomics(core::ir::Module& ir) {
+Result<SuccessType> SplitWorkgroupAtomics(core::ir::Module& ir,
+                                          const SplitWorkgroupAtomicsConfig& config) {
     core::ir::AssertValid(ir, "before hlsl.SplitWorkgroupAtomics");
 
-    State state{ir};
+    State state{ir, config};
     state.Process();
     return Success;
 }

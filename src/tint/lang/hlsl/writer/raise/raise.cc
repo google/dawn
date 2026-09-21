@@ -296,11 +296,15 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     // Split workgroup variables that contain atomics into separate data and atomic variables.
     // Must run after DirectVariableAccess and before DecomposeAccess.
-    if (options.workarounds.d3d12_decompose_workgroup_access) {
-        TINT_CHECK_RESULT_UNWRAP(workgroup_info, core::ir::GetWorkgroupInfo(module));
+    if (auto workgroup_res = core::ir::GetWorkgroupInfo(module); workgroup_res == Success) {
+        raise::SplitWorkgroupAtomicsConfig config;
+        config.mode = options.workarounds.d3d12_decompose_workgroup_access
+                          ? raise::SplitMode::kAll
+                          : raise::SplitMode::kSubgroupMatrix;
+        auto workgroup_info = workgroup_res.Get();
         raise_result.workgroup_storage_size_before_split_workgroup_atomics =
             workgroup_info.storage_size;
-        TINT_CHECK_RESULT(raise::SplitWorkgroupAtomics(module));
+        TINT_CHECK_RESULT(raise::SplitWorkgroupAtomics(module, config));
     }
 
     // DecomposeStorageAccess must come after Robustness and DirectVariableAccess
