@@ -125,44 +125,45 @@ class TierArchInfoTest_TieredMaxLimits : public TierArchInfoTestBase {
 };
 
 // TODO(https://issues.chromium.org/467170771): Test extension limits as well.
-#define ENUM_LIST_LIMITS                                           \
-    /*                   field name                  */            \
-    ENUM_LIMIT_PROPERTY(maxTextureDimension1D)                     \
-    ENUM_LIMIT_PROPERTY(maxTextureDimension2D)                     \
-    ENUM_LIMIT_PROPERTY(maxTextureDimension3D)                     \
-    ENUM_LIMIT_PROPERTY(maxTextureArrayLayers)                     \
-    ENUM_LIMIT_PROPERTY(maxBindGroups)                             \
-    ENUM_LIMIT_PROPERTY(maxBindGroupsPlusVertexBuffers)            \
-    ENUM_LIMIT_PROPERTY(maxBindingsPerBindGroup)                   \
-    ENUM_LIMIT_PROPERTY(maxDynamicUniformBuffersPerPipelineLayout) \
-    ENUM_LIMIT_PROPERTY(maxDynamicStorageBuffersPerPipelineLayout) \
-    ENUM_LIMIT_PROPERTY(maxSampledTexturesPerShaderStage)          \
-    ENUM_LIMIT_PROPERTY(maxSamplersPerShaderStage)                 \
-    ENUM_LIMIT_PROPERTY(maxStorageBuffersPerShaderStage)           \
-    ENUM_LIMIT_PROPERTY(maxStorageTexturesPerShaderStage)          \
-    ENUM_LIMIT_PROPERTY(maxUniformBuffersPerShaderStage)           \
-    ENUM_LIMIT_PROPERTY(maxUniformBufferBindingSize)               \
-    ENUM_LIMIT_PROPERTY(maxStorageBufferBindingSize)               \
-    ENUM_LIMIT_PROPERTY(minUniformBufferOffsetAlignment)           \
-    ENUM_LIMIT_PROPERTY(minStorageBufferOffsetAlignment)           \
-    ENUM_LIMIT_PROPERTY(maxVertexBuffers)                          \
-    ENUM_LIMIT_PROPERTY(maxBufferSize)                             \
-    ENUM_LIMIT_PROPERTY(maxVertexAttributes)                       \
-    ENUM_LIMIT_PROPERTY(maxVertexBufferArrayStride)                \
-    ENUM_LIMIT_PROPERTY(maxInterStageShaderVariables)              \
-    ENUM_LIMIT_PROPERTY(maxColorAttachments)                       \
-    ENUM_LIMIT_PROPERTY(maxColorAttachmentBytesPerSample)          \
-    ENUM_LIMIT_PROPERTY(maxComputeWorkgroupStorageSize)            \
-    ENUM_LIMIT_PROPERTY(maxComputeInvocationsPerWorkgroup)         \
-    ENUM_LIMIT_PROPERTY(maxComputeWorkgroupSizeX)                  \
-    ENUM_LIMIT_PROPERTY(maxComputeWorkgroupSizeY)                  \
-    ENUM_LIMIT_PROPERTY(maxComputeWorkgroupSizeZ)                  \
-    ENUM_LIMIT_PROPERTY(maxComputeWorkgroupsPerDimension)          \
-    ENUM_LIMIT_PROPERTY(maxImmediateSize)                          \
-    ENUM_LIMIT_PROPERTY(maxStorageBuffersInVertexStage)            \
-    ENUM_LIMIT_PROPERTY(maxStorageTexturesInVertexStage)           \
-    ENUM_LIMIT_PROPERTY(maxStorageBuffersInFragmentStage)          \
-    ENUM_LIMIT_PROPERTY(maxStorageTexturesInFragmentStage)
+// The indices are used to match the column in the map below.
+#define ENUM_LIST_LIMITS                                                    \
+    /*                   field name                  */                     \
+    ENUM_LIMIT_PROPERTY(maxTextureDimension1D)                     /*  0 */ \
+    ENUM_LIMIT_PROPERTY(maxTextureDimension2D)                     /*  1 */ \
+    ENUM_LIMIT_PROPERTY(maxTextureDimension3D)                     /*  2 */ \
+    ENUM_LIMIT_PROPERTY(maxTextureArrayLayers)                     /*  3 */ \
+    ENUM_LIMIT_PROPERTY(maxBindGroups)                             /*  4 */ \
+    ENUM_LIMIT_PROPERTY(maxBindGroupsPlusVertexBuffers)            /*  5 */ \
+    ENUM_LIMIT_PROPERTY(maxBindingsPerBindGroup)                   /*  6 */ \
+    ENUM_LIMIT_PROPERTY(maxDynamicUniformBuffersPerPipelineLayout) /*  7 */ \
+    ENUM_LIMIT_PROPERTY(maxDynamicStorageBuffersPerPipelineLayout) /*  8 */ \
+    ENUM_LIMIT_PROPERTY(maxSampledTexturesPerShaderStage)          /*  9 */ \
+    ENUM_LIMIT_PROPERTY(maxSamplersPerShaderStage)                 /* 10 */ \
+    ENUM_LIMIT_PROPERTY(maxStorageBuffersPerShaderStage)           /* 11 */ \
+    ENUM_LIMIT_PROPERTY(maxStorageTexturesPerShaderStage)          /* 12 */ \
+    ENUM_LIMIT_PROPERTY(maxUniformBuffersPerShaderStage)           /* 13 */ \
+    ENUM_LIMIT_PROPERTY(maxUniformBufferBindingSize)               /* 14 */ \
+    ENUM_LIMIT_PROPERTY(maxStorageBufferBindingSize)               /* 15 */ \
+    ENUM_LIMIT_PROPERTY(minUniformBufferOffsetAlignment)           /* 16 */ \
+    ENUM_LIMIT_PROPERTY(minStorageBufferOffsetAlignment)           /* 17 */ \
+    ENUM_LIMIT_PROPERTY(maxVertexBuffers)                          /* 18 */ \
+    ENUM_LIMIT_PROPERTY(maxBufferSize)                             /* 19 */ \
+    ENUM_LIMIT_PROPERTY(maxVertexAttributes)                       /* 20 */ \
+    ENUM_LIMIT_PROPERTY(maxVertexBufferArrayStride)                /* 21 */ \
+    ENUM_LIMIT_PROPERTY(maxInterStageShaderVariables)              /* 22 */ \
+    ENUM_LIMIT_PROPERTY(maxColorAttachments)                       /* 23 */ \
+    ENUM_LIMIT_PROPERTY(maxColorAttachmentBytesPerSample)          /* 24 */ \
+    ENUM_LIMIT_PROPERTY(maxComputeWorkgroupStorageSize)            /* 25 */ \
+    ENUM_LIMIT_PROPERTY(maxComputeInvocationsPerWorkgroup)         /* 26 */ \
+    ENUM_LIMIT_PROPERTY(maxComputeWorkgroupSizeX)                  /* 27 */ \
+    ENUM_LIMIT_PROPERTY(maxComputeWorkgroupSizeY)                  /* 28 */ \
+    ENUM_LIMIT_PROPERTY(maxComputeWorkgroupSizeZ)                  /* 29 */ \
+    ENUM_LIMIT_PROPERTY(maxComputeWorkgroupsPerDimension)          /* 30 */ \
+    ENUM_LIMIT_PROPERTY(maxImmediateSize)                          /* 31 */ \
+    ENUM_LIMIT_PROPERTY(maxStorageBuffersInVertexStage)            /* 32 */ \
+    ENUM_LIMIT_PROPERTY(maxStorageTexturesInVertexStage)           /* 33 */ \
+    ENUM_LIMIT_PROPERTY(maxStorageBuffersInFragmentStage)          /* 34 */ \
+    ENUM_LIMIT_PROPERTY(maxStorageTexturesInFragmentStage)         /* 35 */
 
 static const int kNumElements =
 #define ENUM_LIMIT_PROPERTY(fieldName) 1 +
@@ -182,6 +183,7 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, ExhaustiveTestAllFields) {
 
     // clang-format off
     {
+//                                                               0      1      2     3     4  5   6     7   8  9   10  11  12 13  14     15          16   17   18 19          20  21    22  23 24   25     26    27    28    29  30     31  32  33 34  36
 // AMD
 device_map["Metal_AMD_Radeon_Pro_5300M"]                    = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 48, 16, 10, 8, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535, 64, 10, 8, 10, 8,};
 device_map["Metal_AMD_Radeon_Pro_555X"]                     = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 48, 16, 10, 8, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535,  0, 10, 8, 10, 8,};
@@ -189,14 +191,14 @@ device_map["Metal_AMD_Radeon_Pro_555X_alt1"]                = {  16384, 16384, 2
 device_map["Metal_AMD_Radeon_Pro_560X"]                     = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 48, 16, 10, 8, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535, 64, 10, 8, 10, 8,};
 device_map["D3D11_Radeon_RX_5500_XT"]                       = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 48, 16, 16, 8, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535, 64, 16, 8, 16, 8,};
 device_map["D3D12_Radeon_RX_5500_XT"]                       = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 48, 16, 16, 8, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535, 64, 16, 8, 16, 8,};
-device_map["Vulkan_Radeon_RX_5500_XT"]                      = {  16384, 16384, 2048, 2048, 4, 24, 1000, 8, 4, 16, 16, 16, 4, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535, 64, 16, 4, 16, 4,};
+device_map["Vulkan_Radeon_RX_5500_XT"]                      = {  16384, 16384, 2048, 2048, 4, 24, 1000,  8, 4, 16, 16, 16, 4, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535, 64, 16, 4, 16, 4,};
 
 // Apple
 device_map["Metal_Apple_M2"]                                = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 48, 16, 10, 8, 12, 65536, 4294967292, 256, 256, 8, 4294967292, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535, 64, 10, 8, 10, 8,};
 
 // ARM
-device_map["OpenGLES_Mali_G78_compat"]                      = {   8192,  8192, 2048,  256, 4, 24, 1000,  8, 4, 16, 16,  8, 4, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 16, 8, 128, 32768,  256,  256,  256, 64, 65535, 64,  0, 0, 4, 4,};
-device_map["OpenGLES_Mali_G78_compat_alt1"]                 = {   8192,  8192, 2048,  256, 4, 24, 1000,  8, 4, 16, 16,  8, 4, 12, 65536,  268435456, 256, 256, 8, 2147483648, 30, 2048, 16, 8, 128, 32768,  256,  256,  256, 64, 65535, 64,  0, 0, 4, 4,};
+device_map["OpenGLES_Mali_G78_compat"]                      = {   8192,  8192, 2048,  256, 4, 24, 1000,  8, 4, 16, 16,  8, 4, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 16, 8, 128, 32768,  256,  256,  256, 64, 65535, 64,  0, 0,  4, 4,};
+device_map["OpenGLES_Mali_G78_compat_alt1"]                 = {   8192,  8192, 2048,  256, 4, 24, 1000,  8, 4, 16, 16,  8, 4, 12, 65536,  268435456, 256, 256, 8, 2147483648, 30, 2048, 16, 8, 128, 32768,  256,  256,  256, 64, 65535, 64,  0, 0,  4, 4,};
 device_map["Vulkan_Mali_G78"]                               = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 48, 16, 16, 8, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8, 128, 32768,  256,  256,  256, 64, 65535, 64, 16, 8, 16, 8,};
 device_map["Vulkan_Mali_G78_alt1"]                          = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 48, 16, 16, 8, 12, 65536,  268435456, 256, 256, 8, 4294967292, 30, 2048, 28, 8, 128, 32768,  256,  256,  256, 64, 65535, 64, 16, 8, 16, 8,};
 
@@ -244,7 +246,7 @@ device_map["Vulkan_Qualcomm_R__Adreno_TM__X1_85_GPU"]       = {  16384, 16384, 2
 
 // SwiftShader
 device_map["OpenGLES_ANGLE__Google__Vulkan_1_3_0__SwiftShader_Device__Subzero___0x0000C0DE____SwiftShader_driver_5_0_0__compat"]
-                                                            = {  8192, 8192, 2048, 256, 4, 24, 1000, 10, 8, 16, 16, 16, 8, 12, 65536, 1073741824, 256, 256, 8, 2147483648, 16, 2048, 16, 8, 128, 32768, 256, 256, 256, 64, 65535, 64, 16, 8, 16, 8,};
+                                                            = {   8192,  8192, 2048,  256, 4, 24, 1000, 10, 8, 16, 16, 16, 8, 12, 65536, 1073741824, 256, 256, 8, 2147483648, 16, 2048, 16, 8, 128, 32768,  256,  256,  256, 64, 65535, 64, 16, 8, 16, 8,};
     }
     // clang-format on
 
@@ -319,94 +321,95 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, ExhaustiveTestAllFeatures) {
 
     using enum wgpu::FeatureName;
 
+    // The indices are used to match the column in the map below.
     std::set all_feature_enums = {
-        CoreFeaturesAndLimits,
-        DepthClipControl,
-        Depth32FloatStencil8,
-        TextureCompressionBC,
-        TextureCompressionBCSliced3D,
-        TextureCompressionETC2,
-        TextureCompressionASTC,
-        TextureCompressionASTCSliced3D,
-        TimestampQuery,
-        IndirectFirstInstance,
-        ShaderF16,
-        RG11B10UfloatRenderable,
-        BGRA8UnormStorage,
-        Float32Filterable,
-        Float32Blendable,
-        ClipDistances,
-        DualSourceBlending,
-        Subgroups,
-        TextureFormatsTier1,
-        TextureFormatsTier2,
-        PrimitiveIndex,
-        TextureComponentSwizzle,
-        SubgroupSizeControl,
-        DawnInternalUsages,
-        DawnMultiPlanarFormats,
-        DawnNative,
-        ChromiumExperimentalTimestampQueryInsidePasses,
-        ImplicitDeviceSynchronization,
-        TransientAttachments,
-        MSAARenderToSingleSampled,
-        D3D11MultithreadProtected,
-        ANGLETextureSharing,
-        PixelLocalStorageCoherent,
-        PixelLocalStorageNonCoherent,
-        Unorm16TextureFormats,
-        MultiPlanarFormatExtendedUsages,
-        MultiPlanarFormatP010,
-        HostMappedPointer,
-        MultiPlanarRenderTargets,
-        MultiPlanarFormatNv12a,
-        FramebufferFetch,
-        BufferMapExtendedUsages,
-        AdapterPropertiesMemoryHeaps,
-        AdapterPropertiesD3D,
-        AdapterPropertiesVk,
-        DawnFormatCapabilities,
-        DawnDrmFormatCapabilities,
-        MultiPlanarFormatNv16,
-        MultiPlanarFormatNv24,
-        MultiPlanarFormatP210,
-        MultiPlanarFormatP410,
-        SharedTextureMemoryVkDedicatedAllocation,
-        SharedTextureMemoryAHardwareBuffer,
-        SharedTextureMemoryDmaBuf,
-        SharedTextureMemoryOpaqueFD,
-        SharedTextureMemoryZirconHandle,
-        SharedTextureMemoryDXGISharedHandle,
-        SharedTextureMemoryD3D11Texture2D,
-        SharedTextureMemoryIOSurface,
-        SharedTextureMemoryEGLImage,
-        SharedFenceVkSemaphoreOpaqueFD,
-        SharedFenceSyncFD,
-        SharedFenceVkSemaphoreZirconHandle,
-        SharedFenceDXGISharedHandle,
-        SharedFenceMTLSharedEvent,
-        SharedBufferMemoryD3D12Resource,
-        StaticSamplers,
-        YCbCrVulkanSamplers,
-        ShaderModuleCompilationOptions,
-        DawnLoadResolveTexture,
-        DawnPartialLoadResolveTexture,
-        MultiDrawIndirect,
-        DawnTexelCopyBufferRowAlignment,
-        FlexibleTextureViews,
-        ChromiumExperimentalSubgroupMatrix,
-        SharedFenceEGLSync,
-        DawnDeviceAllocatorControl,
-        AdapterPropertiesWGPU,
-        SharedBufferMemoryFromWindowsHandle,
-        SharedTextureMemoryD3D12Resource,
-        ChromiumExperimentalSamplingResourceTable,
-        AtomicVec2uMinMax,
-        Unorm16FormatsForExternalTexture,
-        Unorm16Filterable,
-        TextureCompressionUnaligned,
-        BufferMapWriteExtendedUsages,
-        SharedBufferMemoryHostPointer,
+        CoreFeaturesAndLimits,                          /*  0 */
+        DepthClipControl,                               /*  1 */
+        Depth32FloatStencil8,                           /*  2 */
+        TextureCompressionBC,                           /*  3 */
+        TextureCompressionBCSliced3D,                   /*  4 */
+        TextureCompressionETC2,                         /*  5 */
+        TextureCompressionASTC,                         /*  6 */
+        TextureCompressionASTCSliced3D,                 /*  7 */
+        TimestampQuery,                                 /*  8 */
+        IndirectFirstInstance,                          /*  9 */
+        ShaderF16,                                      /* 10 */
+        RG11B10UfloatRenderable,                        /* 11 */
+        BGRA8UnormStorage,                              /* 12 */
+        Float32Filterable,                              /* 13 */
+        Float32Blendable,                               /* 14 */
+        ClipDistances,                                  /* 15 */
+        DualSourceBlending,                             /* 16 */
+        Subgroups,                                      /* 17 */
+        TextureFormatsTier1,                            /* 18 */
+        TextureFormatsTier2,                            /* 19 */
+        PrimitiveIndex,                                 /* 20 */
+        TextureComponentSwizzle,                        /* 21 */
+        SubgroupSizeControl,                            /* 22 */
+        DawnInternalUsages,                             /* 23 */
+        DawnMultiPlanarFormats,                         /* 24 */
+        DawnNative,                                     /* 25 */
+        ChromiumExperimentalTimestampQueryInsidePasses, /* 26 */
+        ImplicitDeviceSynchronization,                  /* 27 */
+        TransientAttachments,                           /* 28 */
+        MSAARenderToSingleSampled,                      /* 29 */
+        D3D11MultithreadProtected,                      /* 30 */
+        ANGLETextureSharing,                            /* 31 */
+        PixelLocalStorageCoherent,                      /* 32 */
+        PixelLocalStorageNonCoherent,                   /* 33 */
+        Unorm16TextureFormats,                          /* 34 */
+        MultiPlanarFormatExtendedUsages,                /* 35 */
+        MultiPlanarFormatP010,                          /* 36 */
+        HostMappedPointer,                              /* 37 */
+        MultiPlanarRenderTargets,                       /* 38 */
+        MultiPlanarFormatNv12a,                         /* 39 */
+        FramebufferFetch,                               /* 40 */
+        BufferMapExtendedUsages,                        /* 41 */
+        AdapterPropertiesMemoryHeaps,                   /* 42 */
+        AdapterPropertiesD3D,                           /* 43 */
+        AdapterPropertiesVk,                            /* 44 */
+        DawnFormatCapabilities,                         /* 45 */
+        DawnDrmFormatCapabilities,                      /* 46 */
+        MultiPlanarFormatNv16,                          /* 47 */
+        MultiPlanarFormatNv24,                          /* 48 */
+        MultiPlanarFormatP210,                          /* 49 */
+        MultiPlanarFormatP410,                          /* 50 */
+        SharedTextureMemoryVkDedicatedAllocation,       /* 51 */
+        SharedTextureMemoryAHardwareBuffer,             /* 52 */
+        SharedTextureMemoryDmaBuf,                      /* 53 */
+        SharedTextureMemoryOpaqueFD,                    /* 54 */
+        SharedTextureMemoryZirconHandle,                /* 55 */
+        SharedTextureMemoryDXGISharedHandle,            /* 56 */
+        SharedTextureMemoryD3D11Texture2D,              /* 57 */
+        SharedTextureMemoryIOSurface,                   /* 58 */
+        SharedTextureMemoryEGLImage,                    /* 59 */
+        SharedFenceVkSemaphoreOpaqueFD,                 /* 60 */
+        SharedFenceSyncFD,                              /* 61 */
+        SharedFenceVkSemaphoreZirconHandle,             /* 62 */
+        SharedFenceDXGISharedHandle,                    /* 63 */
+        SharedFenceMTLSharedEvent,                      /* 64 */
+        SharedBufferMemoryD3D12Resource,                /* 65 */
+        StaticSamplers,                                 /* 66 */
+        YCbCrVulkanSamplers,                            /* 67 */
+        ShaderModuleCompilationOptions,                 /* 68 */
+        DawnLoadResolveTexture,                         /* 69 */
+        DawnPartialLoadResolveTexture,                  /* 70 */
+        MultiDrawIndirect,                              /* 71 */
+        DawnTexelCopyBufferRowAlignment,                /* 72 */
+        FlexibleTextureViews,                           /* 73 */
+        ChromiumExperimentalSubgroupMatrix,             /* 74 */
+        SharedFenceEGLSync,                             /* 75 */
+        DawnDeviceAllocatorControl,                     /* 76 */
+        AdapterPropertiesWGPU,                          /* 77 */
+        SharedBufferMemoryFromWindowsHandle,            /* 78 */
+        SharedTextureMemoryD3D12Resource,               /* 79 */
+        ChromiumExperimentalSamplingResourceTable,      /* 80 */
+        AtomicVec2uMinMax,                              /* 81 */
+        Unorm16FormatsForExternalTexture,               /* 82 */
+        Unorm16Filterable,                              /* 83 */
+        TextureCompressionUnaligned,                    /* 84 */
+        BufferMapWriteExtendedUsages,                   /* 85 */
+        SharedBufferMemoryHostPointer,                  /* 86 */
     };
 
     auto AddDevice = [&](const std::vector<int>& vec, std::string device_str) {
@@ -434,16 +437,17 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, ExhaustiveTestAllFeatures) {
 
     // clang-format off
     {
+//         0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86
 // AMD
 AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0}, "Metal_AMD_Radeon_Pro_5300M");
 AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0}, "Metal_AMD_Radeon_Pro_555X");
 AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0}, "Metal_AMD_Radeon_Pro_560X");
 AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0}, "D3D11_Radeon_RX_5500_XT");
 if (IsDXC()) {
-    AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0}, "D3D12_Radeon_RX_5500_XT");
-    AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0}, "D3D12_Radeon_RX_5500_XT");
+AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0}, "D3D12_Radeon_RX_5500_XT");
+AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0}, "D3D12_Radeon_RX_5500_XT");
 } else {
-    AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0}, "D3D12_Radeon_RX_5500_XT");
+AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0}, "D3D12_Radeon_RX_5500_XT");
 }
 AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0}, "Vulkan_Radeon_RX_5500_XT");
 
@@ -516,9 +520,9 @@ AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 // Qualcomm
 AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0}, "D3D11_Qualcomm_R__Adreno_TM__X1_85_GPU");
 if (IsDXC()) {
-    AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1}, "D3D12_Qualcomm_R__Adreno_TM__X1_85_GPU");
+AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1}, "D3D12_Qualcomm_R__Adreno_TM__X1_85_GPU");
 } else {
-    AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1}, "D3D12_Qualcomm_R__Adreno_TM__X1_85_GPU");
+AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1}, "D3D12_Qualcomm_R__Adreno_TM__X1_85_GPU");
 }
 AddDevice({1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0}, "Vulkan_Qualcomm_R__Adreno_TM__X1_85_GPU");
 
