@@ -108,6 +108,7 @@ enum class DeviceExt : uint32_t {
     DepthClipEnable,
     ImageDrmFormatModifier,
     Swapchain,
+    SwapchainMutableFormat,
     QueueFamilyForeign,
     Robustness2,
     DisplayTiming,
