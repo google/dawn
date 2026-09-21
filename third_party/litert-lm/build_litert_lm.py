@@ -211,20 +211,7 @@ def main():
             env['CC'] = str(llvm_bin_dir / 'clang')
             env['CXX'] = str(llvm_bin_dir / 'clang++')
 
-        # Unconditionally clean the Bazel workspace before building to prevent
-        # filesystem inconsistency errors on the bots.
-        clean_cmd = [
-            str(bazelisk_path),
-            f"--output_user_root={bazel_user_root}",
-            'clean',
-            '--expunge',
-        ]
         # `executable` is required because Bazelisk has no `.exe` suffix on Windows.
-        subprocess.run(clean_cmd,
-                       cwd=litert_lm_dir,
-                       env=env,
-                       executable=str(bazelisk_path))
-
         proc = subprocess.run(build_cmd,
                               cwd=litert_lm_dir,
                               env=env,
