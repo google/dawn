@@ -129,10 +129,6 @@ class InlineMemoryTransferService : public MemoryTransferService {
         WGPUBuffer TryWrapInBuffer(const DawnProcTable* procs,
                                    WGPUDevice device,
                                    const WGPUBufferDescriptor* descriptor) override {
-            if (descriptor->usage & (WGPUBufferUsage_Indirect | WGPUBufferUsage_Index)) {
-                return nullptr;
-            }
-
             if (descriptor->size != mSharedMemory->GetMappedSpan().size()) {
                 return nullptr;
             }
