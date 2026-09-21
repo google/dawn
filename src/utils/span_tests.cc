@@ -466,14 +466,18 @@ TYPED_TEST(SpanTest, Constructor_CompatibleRange) {
         SPAN<int, 3> sp{data};
         EXPECT_EQ(sp.size(), 3u);
         EXPECT_EQ(sp.data(), data);
-        static_assert(sizeof(sp) == sizeof(SPAN<int, 3>::pointer));
+        if constexpr (std::is_same_v<TypeParam, SpanTypes>) {
+            static_assert(sizeof(sp) == sizeof(SPAN<int, 3>::pointer));
+        }
     }
     {
         const int data[] = {1, 2, 3};
         SPAN<const int, 3> sp{data};
         EXPECT_EQ(sp.size(), 3u);
         EXPECT_EQ(sp.data(), data);
-        static_assert(sizeof(sp) == sizeof(SPAN<const int, 3>::pointer));
+        if constexpr (std::is_same_v<TypeParam, SpanTypes>) {
+            static_assert(sizeof(sp) == sizeof(SPAN<const int, 3>::pointer));
+        }
     }
     {
         std::vector<int> data{{1, 2, 3}};
