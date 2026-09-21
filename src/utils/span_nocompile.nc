@@ -366,8 +366,18 @@ void TestItypSpanFromCArray() {
 
     // Disallowed case: ityp::span<Index, int> must not implicitly construct
     // from a non-typed C-style array or non-typed range.
-    ityp::span<Index, int> typed_sp(arr); // expected-error {{no matching constructor for initialization}}
-    ityp::raw_span<Index, int> raw_typed_sp(arr); // expected-error {{no matching constructor for initialization}}
+    ityp::span<Index, int> typed_sp(arr);                   // expected-error@span.h:* {{ityp::span cannot be constructed from a C array type}}
+    ityp::raw_span<Index, int> raw_typed_sp(arr);           // expected-error@span.h:* {{ityp::span cannot be constructed from a C array type}}
+    ityp::span<Index, int, Index{5u}> typed_sized_sp(arr);  // expected-error@span.h:* {{ityp::span cannot be constructed from a C array type}}
+
+    // Cannot construct if element type is wrong
+    Span<unsigned int> wrong_sp(arr);           // expected-error {{no matching constructor for initialization}}
+    Span<unsigned int, 5> sized_wrong_sp(arr);  // expected-error {{no matching constructor for initialization}}
+
+    // Cannot construct if static span size is wrong
+    Span<int, 6> size6_sp(arr);  // expected-error@span.h:* {{Span cannot be constructed from this C array type}}
+    Span<int, 5> size5_sp(arr);
+    Span<int, 4> size4_sp(arr);  // expected-error@span.h:* {{Span cannot be constructed from this C array type}}
 }
 
 void TestItypSpanFromInitializerList() {
@@ -385,7 +395,6 @@ void TestItypSpanFromInitializerList() {
     ityp::span<Index, const int> typed_sp(list); // expected-error {{no matching constructor for initialization}}
     ityp::raw_span<Index, const int> raw_typed_sp(list); // expected-error {{no matching constructor for initialization}}
 }
-
 
 void TestFixedExtentTakeFirst() {
     std::array<int, 3> arr = {1, 2, 3};

@@ -374,6 +374,7 @@ source_set("crash_handler") {
   public_deps = [ "${dawn_abseil_dir}:absl" ]
 }
 
+# Negative compile tests. See dawn_nocompile_source_set for how to write these.
 dawn_nocompile_source_set("nocompile_sources") {
   deps = [ ":utils" ]
   sources = [

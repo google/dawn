@@ -38,6 +38,7 @@
 #include <new>
 #include <ranges>
 #include <span>
+#include <type_traits>
 #include <utility>
 
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -240,10 +241,18 @@ class SpanBase : private SpanStorage<Index, PtrType, Extent> {
 
     // Constructor from a C-style array.
     template <typename ElementType, size_t N>
-        requires LegalDataConversion<ElementType, T> && std::same_as<Index, size_t> &&
-                 (kIsDynamicExtent || Extent == N)
-    explicit constexpr SpanBase(ElementType (&arr)[N]) noexcept
-        : Storage(checked_cast<size_t>(N), arr) {}
+        requires LegalDataConversion<ElementType, T>
+    explicit constexpr SpanBase(ElementType (&arr)[N]) noexcept : Storage(N, arr) {
+        // Use `static_assert` here instead of `requires` so that ALL attempts at construction from
+        // a C array (with a compatible element type) use this overload, rather than silently
+        // casting to T* or being treated as a range.
+        static_assert(std::same_as<Index, size_t>,
+                      "ityp::span cannot be constructed from a C array type. "
+                      "Use the (T*, size) constructor instead.");
+        static_assert(kIsDynamicExtent || uint64_t{Extent} == N,
+                      "Span cannot be constructed from this C array type. "
+                      "If necessary, explicitly cast the T[N] to a T*.");
+    }
 
     // Constructor from an initializer list.
     // This is needed because until C++26's P3016R6, std::initializer_list does not have a .data()
