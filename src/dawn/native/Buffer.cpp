@@ -358,9 +358,23 @@ class BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
             // Complete() and Unmap() race on different threads.
             lock = RecursiveMutex::AutoLock(&buffer->mPendingMapMutex);
             if (mStatus == WGPUMapAsyncStatus_Success) {
-                // Complete() happened before Unmap().
-                DAWN_CHECK(buffer->mPendingMapEvent);
-                buffer->mPendingMapEvent = nullptr;
+                DAWN_CHECK(buffer->mPendingMapEvent == this);
+
+                // Before completing a map event, we need to be certain that any work on the buffer
+                // has actually completed. To guarantee this, any thread handling an execution
+                // failure (e.g. Metal command buffer completion handler or Vulkan fence status
+                // check) **must** mark the device lost before advancing the serial (which allows
+                // events that assume successful execution, like this one, to complete).
+                bool deviceLost = buffer->GetDevice()->IsLost();  // Atomic operation.
+                if (deviceLost) {
+                    // The device was lost while MapAsync was pending. Ensure we don't complete the
+                    // MapAsync by aborting the map now before proceeding.
+                    std::ignore = buffer->UnmapEarly(BufferState::Unmapped,
+                                                     "Device was lost before MapAsync completed.");
+                    buffer->mState.notify_all();  // Notify the wait() in UnmapInternal().
+                } else {
+                    buffer->mPendingMapEvent = nullptr;
+                }
             }
         }
 
@@ -374,7 +388,7 @@ class BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
 
         DAWN_CHECK(buffer);
         MaybeError result = buffer->FinalizeMap(BufferState::Mapped);
-        buffer->mState.notify_all();
+        buffer->mState.notify_all();  // Notify the wait() in UnmapInternal().
         if (result.IsError()) {
             auto error = result.AcquireError();
             DAWN_CHECK(error->GetType() != InternalErrorType::Validation);
@@ -968,6 +982,23 @@ MaybeError BufferBase::Unmap(bool forDestroy) {
     return {};
 }
 
+Ref<BufferBase::MapAsyncEvent> BufferBase::UnmapEarly(BufferState newState,
+                                                      std::string_view abortMessage) {
+    DAWN_ASSERT(mPendingMapMutex.IsLockedByCurrentThread());
+
+    if (!mPendingMapEvent) {
+        return nullptr;
+    }
+
+    mPendingMapEvent->UnmapEarly(abortMessage);
+
+    BufferState exchangedState = mState.exchange(newState, std::memory_order::acq_rel);
+    DAWN_CHECK(exchangedState == BufferState::PendingMap);
+    // Don't mState.notify_all(), we might not be ready to do that yet. The caller handles it.
+
+    return std::move(mPendingMapEvent);
+}
+
 MaybeError BufferBase::UnmapInternal(bool forDestroy) {
     BufferState state = mState.load(std::memory_order::acquire);
 
@@ -983,17 +1014,11 @@ MaybeError BufferBase::UnmapInternal(bool forDestroy) {
             // `mPendingMapEvent` is always reset while holding the mutex. If Complete() ran and
             // already reset the event then map is about to complete. If not, reset here and do an
             // early unmap.
-            event = std::move(mPendingMapEvent);
-            if (event) {
-                // This modifies status in MapAsyncEvent which signals the map has been aborted. It
-                // must happen with mutex locked.
-                event->UnmapEarly(forDestroy ? "Buffer was destroyed before mapping was resolved."
-                                             : "Buffer was unmapped before mapping was resolved.");
-
-                BufferState exchangedState =
-                    mState.exchange(BufferState::InUse, std::memory_order::acq_rel);
-                DAWN_CHECK(exchangedState == BufferState::PendingMap);
-            }
+            // This modifies status in MapAsyncEvent which signals the map has been aborted. It
+            // must happen with mutex locked.
+            event = UnmapEarly(BufferState::InUse,
+                               forDestroy ? "Buffer was destroyed before mapping was resolved."
+                                          : "Buffer was unmapped before mapping was resolved.");
         }
 
         if (event) {
@@ -1006,7 +1031,8 @@ MaybeError BufferBase::UnmapInternal(bool forDestroy) {
             return {};
         }
 
-        // Wait until FinalizeMap() finishes before falling through to a regular unmap.
+        // Wait for the notify_all() in Complete() so we know that FinalizeMap() is done before
+        // falling through to a regular unmap.
         mState.wait(BufferState::PendingMap, std::memory_order::acquire);
     }
 

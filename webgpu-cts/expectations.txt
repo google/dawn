@@ -1577,6 +1577,11 @@ crbug.com/546173500 [ android-sm-s926b ] webgpu:shader,execution,robust_access_v
 crbug.com/546173500 [ android-sm-s926b ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=true;* [ Failure ]
 crbug.com/546173500 [ android-sm-s926b ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;* [ Failure ]
 
+# Metal Command Buffer Submission errors
+crbug.com/558180182 [ mac ] webgpu:api,operation,command_buffer,queries,timestampQuery:many_query_sets:numQuerySets=65536;stage="render" [ Failure ]
+crbug.com/558180182 [ apple mac ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
+crbug.com/558180182 [ apple mac ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
+
 # Flaky timeout on Xclipse GPUs
 crbug.com/543960651 [ android-sm-s926b ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos:* [ Failure ]
 
@@ -1762,7 +1767,6 @@ crbug.com/0000 [ dawn-backend-validation intel linux ] webgpu:api,operation,comm
 crbug.com/0000 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:compressed_textures,unaligned_mip_level_0:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="etc2-rgb8unorm-srgb" [ Failure ]
 crbug.com/0000 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:compressed_textures,unaligned_mip_level_0:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="etc2-rgba8unorm" [ Failure ]
 crbug.com/0000 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:compressed_textures,unaligned_mip_level_0:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="etc2-rgba8unorm-srgb" [ Failure ]
-crbug.com/0000 [ intel mac ] webgpu:api,operation,command_buffer,queries,timestampQuery:many_query_sets:numQuerySets=65536;stage="render" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,compute,basic:large_dispatch:dispatchSize="maximum" [ Failure ]
 crbug.com/0000 [ apple mac ] webgpu:api,operation,compute_pipeline,overrides:workgroup_size:isAsync=true;type="i32";size=16;v="x" [ Failure ]
 crbug.com/0000 [ amd mac ] webgpu:api,operation,render_pass,resolve:render_pass_resolve:colorFormat="bgra8unorm-srgb";separateResolvePass=false;storeOperation="discard" [ Failure ]

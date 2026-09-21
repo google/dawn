@@ -240,6 +240,8 @@ DAWN_NATIVE_EXPORT void EnableErrorInjector();
 DAWN_NATIVE_EXPORT void DisableErrorInjector();
 DAWN_NATIVE_EXPORT void ClearErrorInjector();
 DAWN_NATIVE_EXPORT uint64_t AcquireErrorInjectorCallCount();
+// TODO(https://crbug.com/562254224): Introduce "categories" or something to make it so that tests
+// don't have to specify/predict the exact number of injectable backend API calls in the backend.
 DAWN_NATIVE_EXPORT void InjectErrorAt(uint64_t index);
 #endif  // defined(DAWN_ENABLE_ERROR_INJECTION)
 

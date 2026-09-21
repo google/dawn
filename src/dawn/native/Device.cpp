@@ -904,12 +904,15 @@ void DeviceBase::APIForceLoss(wgpu::DeviceLostReason reason, StringView messageI
 }
 
 DeviceBase::State DeviceBase::GetState() const {
+    // This method must be thread-safe/atomic.
     return mState;
 }
 
 bool DeviceBase::IsLost() const {
-    DAWN_CHECK(mState != State::BeingCreated);
-    return mState != State::Alive;
+    // This method must be thread-safe/atomic.
+    auto state = mState.load();
+    DAWN_CHECK(state != State::BeingCreated);
+    return state != State::Alive;
 }
 
 void DeviceBase::SetDisconnectingIfAlive() {
@@ -932,10 +935,9 @@ void DeviceBase::Disconnect() {
     DAWN_ASSERT(mQueue != nullptr);
 
     // Wait for all GPU work to complete before proceeding with destruction.
-    IgnoreErrors(mQueue->WaitForIdleForDestruction());
-
-    // Wait for all GPU work to complete before proceeding with destruction.
-    IgnoreErrors(TickImpl());
+    // ConsumedError ensures that we pick up any errors that should trigger the DeviceLost callback.
+    std::ignore = ConsumedError(mQueue->WaitForIdleForDestruction());
+    std::ignore = ConsumedError(TickImpl());
 
     // The GPU timeline is finished.
     mQueue->AssumeCommandsComplete();

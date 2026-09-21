@@ -269,6 +269,8 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     std::optional<Span<std::byte>> GetMappedRangeInternal(size_t offset,
                                                           size_t size,
                                                           bool writable);
+    [[nodiscard]] Ref<MapAsyncEvent> UnmapEarly(BufferState newState,
+                                                std::string_view abortMessage);
     MaybeError UnmapInternal(bool forDestroy);
 
     // Updates internal state to reflect that the buffer is now mapped.

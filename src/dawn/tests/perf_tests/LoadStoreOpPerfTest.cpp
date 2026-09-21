@@ -117,6 +117,9 @@ class LoadStoreOpPerfTest : public DawnPerfTestWithParams<LoadStoreOpParams> {
 };
 
 void LoadStoreOpPerfTest::SetUpPerfTest() {
+    // TODO(crbug.com/558180182): Causes Metal command buffer failed: Insufficient Memory.
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
         device, {
                     {0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float},
@@ -330,6 +333,9 @@ class StoreOpDepthPerfTest : public DawnPerfTestWithParams<StoreOpParams> {
 };
 
 void StoreOpDepthPerfTest::SetUpPerfTest() {
+    // TODO(crbug.com/558180182): Causes Metal command buffer failed: Insufficient Memory.
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
     const char* vs = R"(
         @vertex
         fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {

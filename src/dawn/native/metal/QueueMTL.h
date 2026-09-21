@@ -31,6 +31,8 @@
 #import <Metal/Metal.h>
 
 #include <map>
+#include <optional>
+#include <string>
 
 #include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/common/SerialMap.h"
@@ -66,6 +68,9 @@ class Queue final : public QueueBase {
     MaybeError Initialize();
     void UpdateCommandsScheduledEvents(ExecutionSerial scheduledSerial);
 
+    MaybeError CheckExecutionError() const;
+    void SetExecutionError(std::string error);
+
     MaybeError SubmitImpl(Span<CommandBufferBase* const> commands) override;
     bool HasPendingCommands() const override;
     MaybeError SubmitPendingCommandsImpl() override;
@@ -79,12 +84,14 @@ class Queue final : public QueueBase {
 
     // The following fields will be accessed in an async Metal command buffer handler that can be
     // fired on a different thread so we guard access to them with mutexes.
-    // We need to keep the last submitted command buffer around to call waitUntilScheduled on it
-    // for WaitForCommandsToBeScheduled. Note that what's mutex protected is just the pointer to the
-    // last submitted command buffer; the command buffer itself is safe to use across threads.
+    // - We need to keep the last submitted command buffer around to call waitUntilScheduled on it
+    //   for WaitForCommandsToBeScheduled. Note that what's mutex protected is just the pointer to
+    //   the last submitted command buffer; the command buffer itself is safe to use across threads.
     MutexProtected<NSPRef<id<MTLCommandBuffer>>> mLastSubmittedCommands;
     MutexProtected<SerialMap<ExecutionSerial, Ref<EventManager::TrackedEvent>>>
         mCommandsScheduledEvents;
+    // - Error message from the Metal command-buffer-completed handler if completion failed.
+    MutexProtected<std::optional<std::string>> mExecutionError;
 
     // A shared event that can be exported for synchronization with other users of Metal.
     // MTLSharedEvent is not available until macOS 10.14+ so use just `id`.

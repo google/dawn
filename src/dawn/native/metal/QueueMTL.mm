@@ -27,14 +27,18 @@
 
 #include "src/dawn/native/metal/QueueMTL.h"
 
+#include "absl/strings/str_format.h"
 #include "dawn/native/MetalBackend.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "src/dawn/common/FutureUtils.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/CallbackTaskManager.h"
 #include "src/dawn/native/CommandValidation.h"
 #include "src/dawn/native/Commands.h"
+#include "src/dawn/native/Device.h"
 #include "src/dawn/native/DynamicUploader.h"
+#include "src/dawn/native/ErrorInjector.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/PhysicalDevice.h"
 #include "src/dawn/native/metal/CommandBufferMTL.h"
@@ -200,7 +204,29 @@ CommandRecordingContext* Queue::GetPendingCommandContext(SubmitMode submitMode) 
     return &mCommandContext;
 }
 
+MaybeError Queue::CheckExecutionError() const {
+    return mExecutionError.Use([](auto executionError) -> MaybeError {
+        if (executionError->has_value()) {
+            return DAWN_INTERNAL_ERROR(executionError->value());
+        }
+        return {};
+    });
+}
+
+void Queue::SetExecutionError(std::string error) {
+    mExecutionError.Use([&](auto executionError) {
+        if (!executionError->has_value()) {
+            *executionError = std::move(error);
+        }
+    });
+}
+
 MaybeError Queue::SubmitPendingCommandBuffer() {
+    // Ensure that if there's been an error, we never try to submit anything. This is also where
+    // we propagate the device loss and error message from a Metal command buffer execution error
+    // (for example when this is called by Tick(), which happens even if nothing is pending).
+    DAWN_TRY(CheckExecutionError());
+
     if (!mCommandContext.NeedsSubmit()) {
         return {};
     }
@@ -231,9 +257,36 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
     }];
 
     // This ObjC block runs on a different thread.
-    [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
+    [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
         TRACE_EVENT_END(DAWN_TRACE_CATEGORY("gpu_work"),
                         perfetto::NamedTrack("DeviceMTL::CommandBuffer", uint64_t{pendingSerial}));
+
+        {
+            // Make sure we didn't disconnect the device before it finished executing.
+            // This is just a safety check to make sure we didn't mess up the state of the device
+            // somehow while it was still executing. It doesn't need to be in the same critical
+            // section with the SetDisconnectingIfAlive and UpdateCompletedSerialTo.
+            auto deviceState = this->GetDevice()->GetState();  // Atomic operation.
+            DAWN_CHECK(deviceState == DeviceBase::State::Alive ||
+                       deviceState == DeviceBase::State::Disconnecting);
+        }
+
+        MTLCommandBufferStatus status =
+            INJECT_ERROR_OR_RUN(commandBuffer.status, MTLCommandBufferStatusError);
+        if (status == MTLCommandBufferStatusError) [[unlikely]] {
+            NSError* error = commandBuffer.error;
+            this->SetExecutionError(
+                error ? absl::StrFormat("Metal command buffer failed: %s (domain=%s, code=%ld)",
+                                        [[error localizedDescription] UTF8String],
+                                        [[error domain] UTF8String], error.code)
+                      : "Metal command buffer failed (with unspecified error)");
+
+            // Since we're not holding any lock here, we need to set the device as lost immediately
+            // *before* updating the serial (as well as before any subsequent command buffers update
+            // the serial). Otherwise, Dawn may assume that since the serial was advanced, the
+            // command buffer actually completed doing its work.
+            this->GetDevice()->SetDisconnectingIfAlive();  // Atomic operation.
+        }
 
         this->UpdateCompletedSerialTo(QueuePriority::Lowest, pendingSerial);
     }];
