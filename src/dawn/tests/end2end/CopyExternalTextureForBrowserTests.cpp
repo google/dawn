@@ -327,7 +327,7 @@ TEST_P(CopyExternalTextureForBrowserTests_Basic, Copy) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm() &&
                           srcCopyRect != CopyRect::TopLeft);
 
-    // TODO(crbug.com/42240670): On D3D12 WARP with DXC (DXIL), WARP's ShaderJIT crashes in
+    // TODO(crbug.com/563423066): On D3D12 WARP with DXC (DXIL), WARP's ShaderJIT crashes in
     // Implement_DXIL_ShuffleVector.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
 
