@@ -855,6 +855,10 @@ TEST_P(SurfaceTests, ConfigureWithViewFormats) {
     // mode: viewFormats must match the format there.
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
+    // TODO(crbug.com/564910787): Fails due to backend validation errors on Windows 11 AMD RX 5500
+    // XT.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D12() && IsBackendValidationEnabled());
+
     wgpu::Surface surface = CreateTestSurface();
     wgpu::SurfaceCapabilities caps;
     surface.GetCapabilities(adapter, &caps);
