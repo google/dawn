@@ -1441,7 +1441,7 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
             }
             break;
 
-        case wgpu::FeatureName::ShaderF16:
+        case wgpu::FeatureName::ShaderF16: {
             if (!toggles.IsEnabled(Toggle::DecomposeUniformBuffers) &&
                 mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_FALSE) {
                 return FeatureValidationResult(
@@ -1449,14 +1449,16 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
                                     "if `decompose_uniform_buffers` is not used",
                                     feature));
             }
-            // TODO(crbug.com/42251215): Investigate f16 CTS test failures to enable on Nvidia.
-            if (gpu_info::IsNvidia(mVendorId) &&
+            // Older Nvidia drivers have issues with f16 data types, so gate the feature behind a
+            // toggle. See https://crbug.com/42251215.
+            const gpu_info::DriverVersion kGoodNvidiaDriver = {615, 71, 0, 0};
+            if (gpu_info::IsNvidia(mVendorId) && GetDriverVersion() < kGoodNvidiaDriver &&
                 !toggles.IsEnabled(Toggle::VulkanEnableF16OnNvidia)) {
                 return FeatureValidationResult(
-                    absl::StrFormat("Feature %s is not yet supported on Nvidia GPUs", feature));
+                    absl::StrFormat("Feature %s requires Nvidia driver 615.71 or above", feature));
             }
             break;
-
+        }
         case wgpu::FeatureName::MSAARenderToSingleSampled:
             // Must be using either Dynamic Rendering or CreateRenderPass2 for this feature to be
             // available.
