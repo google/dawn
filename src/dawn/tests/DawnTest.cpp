@@ -1747,6 +1747,11 @@ void DawnTestBase::SetUp() {
     device.GetLimits(deviceLimits.GetLinked());
     queue = device.GetQueue();
 
+    // D3D12 with FXC coverage is not necessary on Qualcomm Windows. D3D11 still uses FXC.
+    if (IsWindows() && IsQualcomm() && IsD3D12() && !IsDXC()) {
+        GTEST_SKIP() << "D3D12 with FXC coverage is not necessary on Qualcomm Windows.";
+    }
+
     mCheckCaptureReplay = gTestEnv->IsCaptureReplayCheckingEnabled();
 
     if (IsCaptureReplayCheckingEnabled()) {

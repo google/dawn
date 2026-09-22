@@ -335,9 +335,6 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
     // crbug.com/358166481
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
-    // TODO(crbug.com/463614521): Flakily causes a device loss on Snapdragon X
-    // Elite SoCs which causes all subsequent tests to fail.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
 
     constexpr wgpu::PresentMode kAllPresentModes[] = {
         wgpu::PresentMode::Immediate,
@@ -387,9 +384,6 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
 
 // Test resizing the surface and without resizing the window.
 TEST_P(SurfaceTests, ResizingSurfaceOnly) {
-    // TODO(crbug.com/468228358): Flaky on Snapdragon X Elite SoCs w/ D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
-
     // TODO(crbug.com/500766623): Fails due to backend validation errors on
     // Windows 11/AMD RX 5500 XT w/ D3D12.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D12() && IsBackendValidationEnabled());
@@ -440,10 +434,6 @@ TEST_P(SurfaceTests, ResizingWindowOnly) {
 TEST_P(SurfaceTests, ResizingWindowAndSurface) {
     // TODO(crbug.com/dawn/1205): Currently failing on new NVIDIA GTX 1660s on Linux/Vulkan.
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());
-
-    // TODO(crbug.com/465497433): Flakily loses device on Snapdragon X Elite
-    // SoCs.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
 
     // TODO(crbug.com/500766623): Fails due to backend validation errors on
     // Windows 11/AMD RX 5500 XT w/ D3D12.

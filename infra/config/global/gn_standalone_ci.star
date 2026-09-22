@@ -1686,6 +1686,14 @@ ci.thin_tester(
             "win11_qualcomm_snapdragon_x_elite_stable",
             "win_snapdragon_x_elite_gtest_args",
         ],
+        per_test_modifications = {
+            "dawn_end2end_no_dxc_tests": targets.remove(
+                reason = "D3D12 with FXC coverage is not necessary on Qualcomm Windows.",
+            ),
+            "dawn_end2end_no_dxc_validation_layers_tests": targets.remove(
+                reason = "D3D12 with FXC coverage is not necessary on Qualcomm Windows.",
+            ),
+        },
     ),
     targets_settings = targets.settings(
         browser_config = targets.browser_config.RELEASE,
