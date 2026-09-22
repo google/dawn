@@ -349,6 +349,10 @@ class Printer : public tint::TextGenerator {
                 // Let declarations capture actual pointers.
                 return true;
             },
+            [&](const core::ir::Load*) {
+                // Load instructions produce real pointers when loading nested pointers.
+                return true;
+            },
             [&](const core::ir::Access* a) {
                 // Access instruction emission always dereferences the source.
                 // We only produce a pointer when extracting a pointer from a composite value.
@@ -1523,7 +1527,7 @@ class Printer : public tint::TextGenerator {
                     if (i > 0) {
                         out << ", ";
                     }
-                    EmitValue(out, arg);
+                    EmitAndTakeAddressIfNeeded(out, arg);
                     i++;
                 }
                 out << "}";

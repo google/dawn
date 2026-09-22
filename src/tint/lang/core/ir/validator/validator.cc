@@ -977,6 +977,9 @@ bool Validator::CanLoad(const core::type::Type* ty) {
             }
             return true;
         },
+        [&](const core::type::Pointer*) {
+            return ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates);
+        },
         [&](Default) { return ty->IsConstructible() || ty->IsHandle(); });
 }
 

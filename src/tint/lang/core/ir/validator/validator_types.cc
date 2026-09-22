@@ -442,7 +442,8 @@ bool Validator::CheckPtr(const core::type::Pointer* ptr, std::function<diag::Dia
         return false;
     }
 
-    if (ptr->StoreType()->Is<core::type::Pointer>()) {
+    if (ptr->StoreType()->Is<core::type::Pointer>() &&
+        !ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates)) {
         diag() << "pointers to pointers are not allowed";
         return false;
     }

@@ -1134,6 +1134,20 @@ TEST_F(IR_ValidatorTest, Convert_PtrToPtr) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Load_PointerFromArray_WithProperty) {
+    auto* arr_ty = ty.array<ptr<function, u32>, 4>();
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function>(arr_ty));
+        b.Load(b.Access(ty.ptr<function, ptr<function, u32>>(), var, 1_u));
+        b.Return(f);
+    });
+
+    mod.properties.Add(Property::kAllowPointerAndHandleInAggregates);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Block_NoTerminator) {
     b.Function("my_func", ty.void_());
 
