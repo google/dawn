@@ -29,12 +29,16 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 #include "src/tint/lang/core/number.h"
+#include "src/tint/lang/core/type/subgroup_matrix.h"
+#include "src/tint/lang/hlsl/ir/builtin_call.h"
 #include "src/tint/lang/hlsl/ir/member_builtin_call.h"
 #include "src/tint/lang/hlsl/type/byte_address_buffer.h"
+#include "src/tint/lang/hlsl/type/matrix_layout.h"
 
 namespace tint::hlsl::writer::raise {
 namespace {
@@ -46,6 +50,12 @@ struct IR_ArrayOffsetFromImmediateTest : core::ir::transform::TransformTest {
     IR_ArrayOffsetFromImmediateTest() {
         mod.properties.Add(core::ir::Property::kAllow16BitFloats,
                            core::ir::Property::kAllowNonCoreTypes);
+    }
+
+    /// @returns the row-major `MatrixLayout` argument of the subgroup matrix load/store builtins
+    core::ir::Constant* RowMajor() {
+        return b.Constant(mod.constant_values.Get<core::constant::Scalar<u32>>(
+            ty.Get<hlsl::type::MatrixLayout>(), u32(hlsl::type::MatrixLayoutEnum::kRowMajor)));
     }
 };
 
@@ -570,6 +580,145 @@ $B1: {  # root
     bindpoint_to_offset_index[{0, 1}] = 5;
     bindpoint_to_offset_index[{0, 2}] = 9;
     Run(ArrayOffsetFromImmediates, immediate_data.Get(), 10u, bindpoint_to_offset_index);
+
+    EXPECT_EQ(expect, str());
+}
+
+// Test that offset is added to a subgroup matrix load, which takes the buffer as an argument
+// rather than being a member call on it.
+TEST_F(IR_ArrayOffsetFromImmediateTest, SubgroupMatrixLoad) {
+    auto* buffer = b.Var("buffer", ty.Get<hlsl::type::ByteAddressBuffer>(core::Access::kRead));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* mat_ty =
+        ty.Get<core::type::SubgroupMatrix>(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u);
+
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] {
+        b.CallExplicit<hlsl::ir::BuiltinCall>(mat_ty, hlsl::BuiltinFn::kLoad,
+                                              Vector<core::ir::TemplateParameter, 1>{mat_ty},
+                                              buffer, 42_u, 32_u, RowMajor());
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:subgroup_matrix_left<f32, 8, 8> = hlsl.Load<subgroup_matrix_left<f32, 8, 8>> %buffer, 42u, 32u, 0u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_immediate_data_struct = struct @align(4), @block {
+  buffer_offsets:array<u32, 3> @offset(0)
+}
+
+$B1: {  # root
+  %buffer:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:ptr<immediate, array<u32, 3>, read> = access %tint_immediate_data, 0u
+    %5:ptr<immediate, u32, read> = access %4, 2u
+    %6:u32 = load %5
+    %7:u32 = add 42u, %6
+    %8:subgroup_matrix_left<f32, 8, 8> = hlsl.Load<subgroup_matrix_left<f32, 8, 8>> %buffer, %7, 32u, 0u
+    ret
+  }
+}
+)";
+
+    core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                  core::InternalImmediate::kStorageBufferOffsets, 0,
+                  mod.symbols.New("buffer_offsets"), ty.array(ty.u32(), 3)),
+              Success);
+    auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
+    ASSERT_EQ(immediate_data, Success);
+
+    std::unordered_map<BindingPoint, uint32_t> bindpoint_to_offset_index;
+    bindpoint_to_offset_index[{0, 0}] = 2;
+    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 3u, bindpoint_to_offset_index);
+
+    EXPECT_EQ(expect, str());
+}
+
+// Test that offset is added to a subgroup matrix store, which is a member call on the matrix and
+// takes the buffer as an argument.
+TEST_F(IR_ArrayOffsetFromImmediateTest, SubgroupMatrixStore) {
+    auto* buffer = b.Var("buffer", ty.Get<hlsl::type::ByteAddressBuffer>(core::Access::kReadWrite));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* mat_ty =
+        ty.Get<core::type::SubgroupMatrix>(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u);
+
+    auto* func = b.Function("foo", ty.void_());
+    auto* mat = b.FunctionParam("mat", mat_ty);
+    func->SetParams({mat});
+    b.Append(func->Block(), [&] {
+        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kStore, mat, buffer,
+                                                  42_u, 32_u, RowMajor());
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
+  $B2: {
+    %4:void = %mat.Store %buffer, 42u, 32u, 0u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_immediate_data_struct = struct @align(4), @block {
+  buffer_offsets:array<u32, 3> @offset(0)
+}
+
+$B1: {  # root
+  %buffer:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+}
+
+%foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
+  $B2: {
+    %5:ptr<immediate, array<u32, 3>, read> = access %tint_immediate_data, 0u
+    %6:ptr<immediate, u32, read> = access %5, 2u
+    %7:u32 = load %6
+    %8:u32 = add 42u, %7
+    %9:void = %mat.Store %buffer, %8, 32u, 0u
+    ret
+  }
+}
+)";
+
+    core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(
+                  core::InternalImmediate::kStorageBufferOffsets, 0,
+                  mod.symbols.New("buffer_offsets"), ty.array(ty.u32(), 3)),
+              Success);
+    auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
+    ASSERT_EQ(immediate_data, Success);
+
+    std::unordered_map<BindingPoint, uint32_t> bindpoint_to_offset_index;
+    bindpoint_to_offset_index[{0, 0}] = 2;
+    Run(ArrayOffsetFromImmediates, immediate_data.Get(), 3u, bindpoint_to_offset_index);
 
     EXPECT_EQ(expect, str());
 }

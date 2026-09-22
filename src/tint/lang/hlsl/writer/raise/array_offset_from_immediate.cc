@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/hlsl/builtin_fn.h"
+#include "src/tint/lang/hlsl/ir/builtin_call.h"
 #include "src/tint/lang/hlsl/ir/member_builtin_call.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -107,19 +108,33 @@ struct State {
         auto usages_unsorted_copy = var->Result()->UsagesUnsorted();
 
         for (auto usage : usages_unsorted_copy) {
+            // Adds the dynamic offset loaded from the immediate block at offset_index to the
+            // call's argument at 'arg_index'.
+            auto add_offset_to_arg = [&](core::ir::Call* call, uint32_t arg_index) {
+                b.InsertBefore(call, [&] {
+                    Value* curr_offset = call->Args()[arg_index];
+                    Value* dyn_offset = LoadDynamicOffset(offset_index);
+                    auto* new_offset = b.Add(curr_offset, dyn_offset);
+                    call->SetArg(arg_index, new_offset);
+                });
+            };
+
             tint::Switch(
                 usage->instruction,
+                [&](hlsl::ir::BuiltinCall* bc) {
+                    // Subgroup matrix loads take the buffer as their first argument:
+                    // `hlsl.Load<matrix> buffer, offset, stride, layout`.
+                    TINT_IR_ASSERT(ir, bc->Func() == hlsl::BuiltinFn::kLoad);
+                    add_offset_to_arg(bc, 1);
+                },
                 [&](hlsl::ir::MemberBuiltinCall* mbc) {
-                    // Adds the dynamic offset loaded from the immediate block at offset_index to
-                    // the mbc's argument at 'arg_index'.
-                    auto add_offset_to_arg = [&](uint32_t arg_index) {
-                        b.InsertBefore(mbc, [&] {
-                            Value* curr_offset = mbc->Args()[arg_index];
-                            Value* dyn_offset = LoadDynamicOffset(offset_index);
-                            auto* new_offset = b.Add(curr_offset, dyn_offset);
-                            mbc->SetArg(arg_index, new_offset);
-                        });
-                    };
+                    // Subgroup matrix stores are called on the matrix and take the buffer as their
+                    // first argument: `matrix.Store buffer, offset, stride, layout`.
+                    if (usage->operand_index >= mbc->ArgsOperandOffset()) {
+                        TINT_IR_ASSERT(ir, mbc->Func() == hlsl::BuiltinFn::kStore);
+                        add_offset_to_arg(mbc, 1);
+                        return;
+                    }
 
                     switch (mbc->Func()) {
                         // Handle all member functions that take a byte_address_buffer and an offset
@@ -157,7 +172,7 @@ struct State {
                         case hlsl::BuiltinFn::kStore2U16:
                         case hlsl::BuiltinFn::kStore3U16:
                         case hlsl::BuiltinFn::kStore4U16:
-                            add_offset_to_arg(0);
+                            add_offset_to_arg(mbc, 0);
                             break;
                         // Ignore the functions below
                         case hlsl::BuiltinFn::kAsint:
