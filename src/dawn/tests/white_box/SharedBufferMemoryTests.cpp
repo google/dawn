@@ -259,7 +259,8 @@ TEST_P(SharedBufferMemoryTests, FenceCountMatchesSignaledValueCount) {
     EXPECT_EQ(memory.BeginAccess(buffer, &beginDesc), wgpu::Status::Success);
 }
 
-// Ensure that EndAccess cannot be called on a mapped or pending mapped buffer.
+// Ensure that EndAccess implicitly unmaps a mapped buffer, but still errors if the buffer is
+// pending map.
 TEST_P(SharedBufferMemoryTests, CallEndAccessOnMappedBuffer) {
     wgpu::SharedBufferMemory memory =
         GetParam().mBackend->CreateSharedBufferMemory(device, kMapWriteUsages, kBufferSize);
@@ -281,7 +282,7 @@ TEST_P(SharedBufferMemoryTests, CallEndAccessOnMappedBuffer) {
                         done = true;
                     });
 
-    // Calling EndAccess should generate an error even if the buffer has not completed being mapped.
+    // Calling EndAccess should generate an error while the buffer is still pending map.
     wgpu::SharedBufferMemoryEndAccessState state;
     ASSERT_DEVICE_ERROR(memory.EndAccess(buffer, &state));
 
@@ -289,8 +290,9 @@ TEST_P(SharedBufferMemoryTests, CallEndAccessOnMappedBuffer) {
         WaitABit();
     }
 
-    // Calling EndAccess should generate an error after being mapped.
-    ASSERT_DEVICE_ERROR(memory.EndAccess(buffer, &state));
+    // Calling EndAccess after the buffer is mapped should succeed and implicitly unmap it.
+    EXPECT_EQ(memory.EndAccess(buffer, &state), wgpu::Status::Success);
+    EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Unmapped);
 }
 
 // Ensure no queue usage can occur before calling BeginAccess.

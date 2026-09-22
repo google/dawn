@@ -291,12 +291,15 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource, EndAccessState* s
             mExclusiveAccess = nullptr;
         }
     } else if constexpr (std::is_same_v<Resource, BufferBase>) {
-        DAWN_INVALID_IF(
-            static_cast<BufferBase*>(resource)->APIGetMapState() != wgpu::BufferMapState::Unmapped,
-            "%s is currently mapped or pending map.", resource);
         DAWN_INVALID_IF(mExclusiveAccess != resource,
                         "Cannot end access with %s on %s which is currently accessed by %s.",
                         resource, this, mExclusiveAccess.Get());
+        auto* buffer = static_cast<BufferBase*>(resource);
+        if (buffer->APIGetMapState() != wgpu::BufferMapState::Unmapped) {
+            // Unmap the buffer on the caller's behalf instead of failing so that EndAccess always
+            // succeeds, regardless of the buffer's map state.
+            DAWN_TRY(buffer->Unmap());
+        }
         mContents->mSharedResourceAccessState = SharedResourceAccessState::NotAccessed;
         mExclusiveAccess = nullptr;
     }
