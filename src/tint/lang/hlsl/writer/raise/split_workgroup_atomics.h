@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_SPLIT_WORKGROUP_ATOMICS_H_
 #define SRC_TINT_LANG_HLSL_WRITER_RAISE_SPLIT_WORKGROUP_ATOMICS_H_
 
+#include <cstdint>
+
 #include "src/tint/utils/result.h"
 
 // Forward declarations.
