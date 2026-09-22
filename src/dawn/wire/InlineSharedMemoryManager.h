@@ -78,7 +78,8 @@ class InlineSharedMemoryManager {
     InlineSharedMemoryManager();
     virtual ~InlineSharedMemoryManager();
 
-    // Creates a new `SharedMemory` of at least `size` bytes.
+    // Creates a new `SharedMemory` of at least `size` bytes. Implementations must guarantee that
+    // the returned memory is zero-initialized.
     virtual Ref<SharedMemory> CreateSharedMemory(size_t size);
 
     // Registers `sharedMemory` for the transfer through dawn wire and returns a unique ID assigned

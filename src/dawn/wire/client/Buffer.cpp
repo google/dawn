@@ -236,7 +236,7 @@ Buffer* Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
         memoryHandleCreateInfoLength = memoryHandle->GetSerializeCreateSize();
 
         // Prevent uninitialized memory from being visible via GetMappedRange().
-        if (mappableForWrite) {
+        if (mappableForWrite && !memoryHandle->IsInitialized()) {
             std::ranges::fill(memoryHandle->GetData(), std::byte(0u));
         }
     }

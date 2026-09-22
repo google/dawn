@@ -128,6 +128,11 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
         MemoryHandle();
         virtual ~MemoryHandle();
 
+        // Returns true if the memory is already known to be zero-initialized, allowing callers to
+        // skip explicitly zeroing it out.
+        // TODO(386255678): Make this function non-virtual once it is implemented in Chromium.
+        virtual bool IsInitialized() const { return false; }
+
         // Get the required serialization size for SerializeCreate
         virtual size_t GetSerializeCreateSize() const = 0;
 
