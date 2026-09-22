@@ -76,6 +76,7 @@ action("litert_lm_advanced_main") {
   data = [
     "data/model.litertlm",
     "//scripts/run_litert_lm_benchmark.py",
+    "//scripts/merge_scripts/merge_litert_lm_benchmark_results.py",
     "$root_out_dir/$_output_name",
   ]
   if (is_linux) {

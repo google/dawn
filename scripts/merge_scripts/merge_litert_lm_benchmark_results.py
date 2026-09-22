@@ -100,9 +100,19 @@ def main() -> int:
         'failures': [],
         'valid': True,
     }
+    if not args.jsons_to_merge:
+        print("Error: No shard output files provided to merge.",
+              file=sys.stderr)
+        merged_results['failures'].append('missing_shard_output')
+        merged_results['valid'] = False
+
     for json_file_str in args.jsons_to_merge:
         json_file = Path(json_file_str)
         if not json_file.exists():
+            print(f"Error: Shard output file '{json_file}' does not exist.",
+                  file=sys.stderr)
+            merged_results['failures'].append('missing_shard_output')
+            merged_results['valid'] = False
             continue
         try:
             with open(json_file, 'r', encoding='utf-8') as f:
@@ -130,9 +140,9 @@ def main() -> int:
             metric_file = pb_path
 
     if not metric_file:
-        print("Warning: No litert_lm_metrics.pb file found to upload.",
+        print("Error: No litert_lm_metrics.pb file found to upload.",
               file=sys.stderr)
-        return 0
+        return 1
 
     # Upload metrics and generated metadata to GCS.
     timestamp = int(time.time())
