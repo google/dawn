@@ -2533,6 +2533,7 @@
             {"value": 21, "name": "primitive index"},
             {"value": 22, "name": "texture component swizzle"},
             {"value": 23, "name": "subgroup size control"},
+            {"value": 24, "name": "texture compression unaligned"},
 
             {"value": 0, "name": "dawn internal usages", "tags": ["dawn"]},
             {"value": 1, "name": "dawn multi planar formats", "tags": ["dawn"]},
@@ -2600,10 +2601,9 @@
             {"value": 62, "name": "unorm16 filterable", "tags": ["dawn"]},
             {"value": 63, "name": "render pass render area", "tags": ["dawn"]},
             {"value": 64, "name": "adapter properties drm", "tags": ["dawn", "native"]},
-            {"value": 65, "name": "texture compression unaligned", "tags": ["dawn"]},
-            {"value": 66, "name": "dawn allow undefined load store op", "tags": ["dawn", "native"]},
-            {"value": 67, "name": "buffer map write extended usages", "tags": ["dawn"]},
-            {"value": 68, "name": "shared buffer memory host pointer", "tags": ["dawn", "native"]}
+            {"value": 65, "name": "dawn allow undefined load store op", "tags": ["dawn", "native"]},
+            {"value": 66, "name": "buffer map write extended usages", "tags": ["dawn"]},
+            {"value": 67, "name": "shared buffer memory host pointer", "tags": ["dawn", "native"]}
         ]
     },
     "filter mode": {
