@@ -88,6 +88,8 @@ class Lexer {
 
     /// @returns view of current line
     std::string_view line() const;
+    /// Updates the cached content of the current line based on the value of location_
+    void update_line();
     /// @returns position in current line
     uint32_t pos() const;
     /// @returns length of current line
@@ -132,6 +134,8 @@ class Lexer {
     Source::File const* const file_;
     /// The current location within the input
     Source::Location location_;
+    /// The cached content of the current line
+    std::string_view line_;
 
     /// The tokens
     std::vector<Token> tokens_;
