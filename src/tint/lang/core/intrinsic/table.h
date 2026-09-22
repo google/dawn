@@ -31,6 +31,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <variant>
 
@@ -40,6 +41,7 @@
 #include "src/tint/lang/core/intrinsic/ctor_conv.h"
 #include "src/tint/lang/core/intrinsic/table_data.h"
 #include "src/tint/lang/core/unary_op.h"
+#include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
@@ -330,7 +332,9 @@ struct Table {
     Result<Overload, StyledText> Lookup(core::UnaryOp op,
                                         const core::type::Type* arg,
                                         EvaluationStage earliest_eval_stage) {
-        return LookupUnary(context, op, arg, earliest_eval_stage);
+        UnaryOpSig cache_key = std::make_tuple(op, arg, earliest_eval_stage);
+        return unary_cache_.GetOrAdd(
+            cache_key, [&] { return LookupUnary(context, op, arg, earliest_eval_stage); });
     }
 
     /// Lookup looks for the binary op overload with the given signature, raising an error
@@ -352,7 +356,10 @@ struct Table {
                                         const core::type::Type* rhs,
                                         EvaluationStage earliest_eval_stage,
                                         bool is_compound) {
-        return LookupBinary(context, op, lhs, rhs, earliest_eval_stage, is_compound);
+        BinaryOpSig cache_key = std::make_tuple(op, lhs, rhs, earliest_eval_stage, is_compound);
+        return binary_cache_.GetOrAdd(cache_key, [&] {
+            return LookupBinary(context, op, lhs, rhs, earliest_eval_stage, is_compound);
+        });
     }
 
     /// Lookup looks for the value constructor or conversion overload for the given CtorConv.
@@ -378,6 +385,18 @@ struct Table {
 
     /// The intrinsic context
     Context context;
+
+    /// Cache for unary operator overloads
+    using UnaryOpSig = std::tuple<core::UnaryOp, const core::type::Type*, EvaluationStage>;
+    Hashmap<UnaryOpSig, Result<Overload, StyledText>, 16> unary_cache_;
+
+    /// Cache for binary operator overloads
+    using BinaryOpSig = std::tuple<core::BinaryOp,
+                                   const core::type::Type*,
+                                   const core::type::Type*,
+                                   EvaluationStage,
+                                   bool>;
+    Hashmap<BinaryOpSig, Result<Overload, StyledText>, 16> binary_cache_;
 };
 
 }  // namespace tint::core::intrinsic
