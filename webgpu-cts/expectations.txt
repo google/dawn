@@ -970,17 +970,23 @@ crbug.com/558827232 [ dawn-no-backend-validation nvidia-0x2184 nvidia_ge_32.0.16
 crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-enabled win11 ] webgpu:shader,execution,expression,unary,af_arithmetic:negation:inputSource="const";vectorize="_undef_" [ Failure ]
 
 # Linux/GTX 1660 failures when going to 595.91
-crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format="sint32x4"* [ Skip ]
-crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,subgroupMul:data_types:* [ Skip ]
+crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="color";srcFactor="dst-alpha";dstFactor="dst" [ Failure ]
 crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:* [ Skip ]
 crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:api,operation,texture_view,texture_component_swizzle:read_swizzle:* [ Skip ]
+crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:format="sint32x4"* [ Skip ]
+crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,subgroupMul:data_types:* [ Skip ]
 crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Skip ]
 
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,command_buffer,copyTextureToTexture:* [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,command_buffer,image_copy:* [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:* [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:* [ Failure ]
-crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d:* [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d* [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_3d_coords:format="bc4-r-unorm";filt="linear";mode="c" [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:stage="v";format="bc5-rg-unorm";filt="nearest";modeU="r";modeV="r";offset=true [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,statement,assignment,vector:vector_dynamic_index:elementType="u32";width=2;indexType="i32" [ Failure ]
+
+crbug.com/563458562 [ linux nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:sourceType="VideoElement";awaitLost=true [ Failure ]
 
 # Win/Snapdragon X Elite failures
 # TODO(crbug.com/452840618): Remove this disable block once the tests are actually running.
