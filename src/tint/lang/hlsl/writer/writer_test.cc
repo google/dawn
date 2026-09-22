@@ -171,6 +171,57 @@ TEST_F(HlslWriterTest, CanGenerate_TexelBufferUnsupported) {
                 testing::HasSubstr("texel buffers are not supported by the HLSL backend"));
 }
 
+TEST_F(HlslWriterTest, CanGenerate_SubgroupMatrix8BitWorkgroupLoadUnsupported) {
+    auto* mat_ty =
+        ty.Get<core::type::SubgroupMatrix>(core::SubgroupMatrixKind::kLeft, ty.i8(), 8u, 8u);
+    auto* wg_var = b.Var("wg", workgroup, ty.array<i8, 256>(), core::Access::kReadWrite);
+    mod.root_block->Append(wg_var);
+
+    auto* ep = b.ComputeFunction("main");
+    b.Append(ep->Block(), [&] {
+        auto* load = b.CallExplicit(
+            mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat_ty, core::Majorness::kRowMajor}, wg_var, 0_u,
+            8_u);
+        b.Let("x", load);
+        b.Return(ep);
+    });
+
+    Options options;
+    options.entry_point_name = "main";
+    options.compiler = Options::Compiler::kDXC_2021;
+    auto result = Generate(options);
+    ASSERT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("8-bit subgroup matrix load and store from workgroup memory are "
+                                   "not supported by the HLSL backend"));
+}
+
+TEST_F(HlslWriterTest, CanGenerate_SubgroupMatrix8BitWorkgroupStoreUnsupported) {
+    auto* mat_ty =
+        ty.Get<core::type::SubgroupMatrix>(core::SubgroupMatrixKind::kLeft, ty.i8(), 8u, 8u);
+    auto* wg_var = b.Var("wg", workgroup, ty.array<i8, 256>(), core::Access::kReadWrite);
+    mod.root_block->Append(wg_var);
+
+    auto* ep = b.ComputeFunction("main");
+    auto* param = b.FunctionParam("param", mat_ty);
+    ep->AppendParam(param);
+    b.Append(ep->Block(), [&] {
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{mat_ty}, wg_var, 0_u, param, 8_u);
+        b.Return(ep);
+    });
+
+    Options options;
+    options.entry_point_name = "main";
+    options.compiler = Options::Compiler::kDXC_2021;
+    auto result = Generate(options);
+    ASSERT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("8-bit subgroup matrix load and store from workgroup memory are "
+                                   "not supported by the HLSL backend"));
+}
+
 TEST_F(HlslWriterTest, AtomicStoreMax) {
     mod.properties.Add(core::ir::Property::kAllow64BitIntegers);
     auto* sb =

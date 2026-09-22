@@ -38,11 +38,14 @@
 #include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/binding_array.h"
+#include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/struct.h"
+#include "src/tint/lang/core/type/subgroup_matrix.h"
 #include "src/tint/lang/core/type/texel_buffer.h"
 #include "src/tint/lang/core/type/u16.h"
+#include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/hlsl/writer/common/option_helpers.h"
 #include "src/tint/lang/hlsl/writer/printer/printer.h"
 #include "src/tint/lang/hlsl/writer/raise/raise.h"
@@ -100,6 +103,25 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
              call->Func() == core::BuiltinFn::kAtomicStoreMin) &&
             options.compiler == Options::Compiler::kFXC) {
             return Failure("64-bit atomic operations are not supported by the HLSL FXC backend");
+        }
+        // TODO(crbug.com/512455144): 8-bit components need additional work to support.
+        if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
+            call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
+            auto* ptr_ty = call->Args()[0]->Type()->As<core::type::Pointer>();
+            if (ptr_ty && ptr_ty->AddressSpace() == core::AddressSpace::kWorkgroup) {
+                const core::type::Type* sm_ty = nullptr;
+                if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad) {
+                    sm_ty = call->Result(0)->Type();
+                } else {
+                    sm_ty = call->Args()[2]->Type();
+                }
+                auto* elem_ty = sm_ty->As<core::type::SubgroupMatrix>()->Type();
+                if (elem_ty->IsAnyOf<core::type::I8, core::type::U8>()) {
+                    return Failure(
+                        "8-bit subgroup matrix load and store from workgroup memory are not "
+                        "supported by the HLSL backend");
+                }
+            }
         }
     }
 
