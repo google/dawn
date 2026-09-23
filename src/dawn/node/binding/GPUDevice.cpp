@@ -95,19 +95,16 @@ constexpr std::string_view str(wgpu::ErrorType ty) {
     }
 }
 
-// There's something broken with Node when attempting to write more than 65536 bytes to cout.
+// There's something broken with Node when attempting to write more than 65536 bytes to stdout.
 // Split the string up into writes of 4k chunks.
 // Likely related: https://github.com/nodejs/node/issues/12921
 void chunkedWrite(wgpu::StringView msg) {
-    while (msg.length != 0) {
-        int n;
-        if (msg.length > 4096) {
-            n = DAWN_UNSAFE_TODO(printf("%.4096s", msg.data));
-        } else {
-            n = DAWN_UNSAFE_TODO(printf("%.*s", static_cast<int>(msg.length), msg.data));
-        }
-        DAWN_UNSAFE_TODO(msg.data += n);
-        msg.length -= dawn::sign_cast(n);
+    std::string_view sv = msg;
+    constexpr size_t kChunkSize = 4096;
+    while (!sv.empty()) {
+        std::string_view chunk = sv.substr(0, kChunkSize);
+        printf("%.*s", static_cast<int>(chunk.size()), chunk.data());
+        sv.remove_prefix(chunk.size());
     }
 }
 
