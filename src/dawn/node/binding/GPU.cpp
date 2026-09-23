@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <span>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -317,8 +318,7 @@ interop::Interface<interop::WGSLLanguageFeatures> GPU::getWgslLanguageFeatures(N
     // ones.
     InteropWGSLFeatureSet featureSet;
     Converter conv(env);
-    for (size_t i = 0; i < supportedFeatures.featureCount; i++) {
-        wgpu::WGSLLanguageFeatureName feature = DAWN_UNSAFE_TODO(supportedFeatures.features[i]);
+    for (wgpu::WGSLLanguageFeatureName feature : WGPU_SPAN(supportedFeatures.feature)) {
         interop::WGSLLanguageFeatureName wgslFeature;
         if (conv(wgslFeature, feature)) {
             featureSet.emplace(wgslFeature);

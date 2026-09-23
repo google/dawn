@@ -48,6 +48,20 @@
 
 namespace wgpu::binding {
 
+namespace detail {
+
+template <typename Ptr, typename Count>
+auto MakeSpan(Ptr ptr, Count count) {
+    // SAFETY: Dawn C API array members are valid for their corresponding count.
+    return DAWN_UNSAFE_BUFFERS(std::span{ptr, static_cast<size_t>(count)});
+}
+
+}  // namespace detail
+
+// TODO(crbug.com/439062058): Temporary helper until the Dawn C++ API exposes std::span directly
+// on structs with array members.
+#define WGPU_SPAN(member) ::wgpu::binding::detail::MakeSpan(member##s, member##Count)
+
 // ImplOfTraits is a traits helper that is used to associate the interop interface type to the
 // binding implementation type.
 template <typename T>
