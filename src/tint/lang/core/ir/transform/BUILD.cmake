@@ -257,7 +257,6 @@ tint_target_add_dependencies(tint_lang_core_ir_transform_fuzz fuzz
   tint_lang_core_ir_validator
   tint_lang_core_type
   tint_utils
-  tint_utils_bytes
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice

@@ -142,7 +142,6 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_raise_fuzz fuzz
   tint_lang_core_type
   tint_lang_wgsl_writer_raise
   tint_utils
-  tint_utils_bytes
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice

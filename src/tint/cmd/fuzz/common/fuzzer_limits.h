@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,10 +25,19 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/utils/bytes/reader.h"
+#ifndef SRC_TINT_CMD_FUZZ_COMMON_FUZZER_LIMITS_H_
+#define SRC_TINT_CMD_FUZZ_COMMON_FUZZER_LIMITS_H_
 
-namespace tint::bytes {
+#include <cstddef>
 
-Reader::~Reader() = default;
+namespace tint::fuzz {
 
-}  // namespace tint::bytes
+/// The maximum length of a decoded vector, set, or map in the fuzzer.
+inline constexpr size_t kMaxCollectionLength = 16;
+
+/// The maximum length of a decoded string in the fuzzer.
+inline constexpr size_t kMaxStringLength = 64;
+
+}  // namespace tint::fuzz
+
+#endif  // SRC_TINT_CMD_FUZZ_COMMON_FUZZER_LIMITS_H_

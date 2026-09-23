@@ -1,4 +1,4 @@
-// Copyright 2024 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,26 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/utils/bytes/buffer_reader.h"
+#include "src/tint/utils/bytes/swap.h"
 
-#include <algorithm>
+// Note: This file exists so CMake + MSVC correctly creates a .lib for
+// this directory.
 
-#include "src/tint/utils/macros/compiler.h"
-#include "src/tint/utils/memory/copy.h"
-
-namespace tint::bytes {
-
-BufferReader::~BufferReader() = default;
-
-size_t BufferReader::Read(std::byte* out, size_t count) {
-    size_t n = std::min(count, data_.size());
-    tint::Copy(out, count, data_.first(n));
-    data_ = data_.subspan(n);
-    return n;
+namespace {
+[[maybe_unused]] int placeholder_symbol = 0;
 }
-
-bool BufferReader::IsEOF() const {
-    return data_.empty();
-}
-
-}  // namespace tint::bytes

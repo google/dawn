@@ -161,7 +161,6 @@ tint_target_add_dependencies(tint_lang_glsl_writer_fuzz fuzz
   tint_lang_glsl_writer_helpers
   tint_lang_glsl_writer_printer
   tint_utils
-  tint_utils_bytes
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
