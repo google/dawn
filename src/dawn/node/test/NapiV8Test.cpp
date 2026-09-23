@@ -3040,12 +3040,15 @@ TEST_F(NapiV8Test, AddFinalizer) {
 
     RequestGC();
     EXPECT_TRUE(finalized);
+
+    // The collected object leaves the reference behind for its owner to release.
+    EXPECT_EQ(napi_delete_reference(env_, ref), napi_ok);
 }
 
 TEST_F(NapiV8Test, EscapableHandleScopeReleasesNonEscapedHandles) {
-    bool escaped_finalized = false;
-    bool dropped_finalized = false;
     napi_value escaped = nullptr;
+    napi_ref kept_ref = nullptr;
+    napi_ref dropped_ref = nullptr;
 
     {
         napi_escapable_handle_scope scope;
@@ -3054,12 +3057,12 @@ TEST_F(NapiV8Test, EscapableHandleScopeReleasesNonEscapedHandles) {
         napi_value kept, dropped;
         ASSERT_EQ(napi_create_object(env_, &kept), napi_ok);
         ASSERT_EQ(napi_create_object(env_, &dropped), napi_ok);
-        ASSERT_EQ(
-            napi_add_finalizer(env_, kept, &escaped_finalized, SetBoolFinalizer, nullptr, nullptr),
-            napi_ok);
-        ASSERT_EQ(napi_add_finalizer(env_, dropped, &dropped_finalized, SetBoolFinalizer, nullptr,
-                                     nullptr),
-                  napi_ok);
+
+        // Weak, so that the references report whether each object survived rather than being the
+        // reason it did. A finalizer would not work here: the escaped object is still reachable at
+        // the end of the test, so its finalizer would not run until the environment is torn down.
+        ASSERT_EQ(napi_create_reference(env_, kept, 0, &kept_ref), napi_ok);
+        ASSERT_EQ(napi_create_reference(env_, dropped, 0, &dropped_ref), napi_ok);
 
         ASSERT_EQ(napi_escape_handle(env_, scope, kept, &escaped), napi_ok);
         ASSERT_EQ(napi_close_escapable_handle_scope(env_, scope), napi_ok);
@@ -3068,9 +3071,17 @@ TEST_F(NapiV8Test, EscapableHandleScopeReleasesNonEscapedHandles) {
     RequestGC();
 
     // The escaped handle was promoted into the enclosing scope, so its object is still rooted.
-    EXPECT_FALSE(escaped_finalized);
+    napi_value kept_value = nullptr;
+    ASSERT_EQ(napi_get_reference_value(env_, kept_ref, &kept_value), napi_ok);
+    EXPECT_NE(kept_value, nullptr);
+
     // The handle that did not escape was released along with the scope.
-    EXPECT_TRUE(dropped_finalized);
+    napi_value dropped_value = nullptr;
+    ASSERT_EQ(napi_get_reference_value(env_, dropped_ref, &dropped_value), napi_ok);
+    EXPECT_EQ(dropped_value, nullptr);
+
+    EXPECT_EQ(napi_delete_reference(env_, kept_ref), napi_ok);
+    EXPECT_EQ(napi_delete_reference(env_, dropped_ref), napi_ok);
 }
 
 TEST_F(NapiV8Test, EscapeHandleOnlySucceedsOncePerScope) {
