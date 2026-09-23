@@ -529,3 +529,112 @@ with just this file as input:
 ```bash
 out/libfuzz/tint_wgsl_fuzzer ./crash-21563a85afd5322d9e17c1c43fd3d4029778d6e7
 ```
+
+## Profiling
+
+It is possible to profile the fuzzers using callgrind from
+[valgrind](https://valgrind.org/). Profiling reports from callgrind
+can be processed using `callgrind_annotate` to get human readable text
+or visualized using
+[KCachegrind](https://kcachegrind.github.io/html/Home.html).
+
+**Note:** `callgrind` is not a sampling profiler (e.g. `perf`), which
+means it traces all the calls during the run which produces more
+complete data about the execution, but at the cost of causing a
+significant (i.e. orders of magnitude) performance hit. If you are
+looking for a fast, approximate profiling tool I would recommend
+looking at using `perf`.
+
+### Prerequisites
+#### System
+
+You will need to have valgrind (and optionally KCachegrind) installed
+on your machine. For APT based machines this looks like:
+
+```bash
+sudo apt get valgrind
+
+# Optionally for visualization
+sudo apt get kcachegrind
+```
+
+**Note:** If you are not running KDE or another QT based DE,
+installing KCachegrind will likely pull in a bunch of framework
+dependencies. Alternatives include: QCachegrind which is a lighter
+weight version of KCachegrind, and
+[gprof2dot](https://github.com/jrfonseca/gprof2dot) which supports
+outputting a variety of profiling formats to Graphviz dot files
+
+#### Build Configuration
+
+Because profiling requires symbol information and is going to be doing
+a bunch of call interception, there are some build flags that must be
+enabled and some that must be disabled in your `args.gn`
+
+```gn
+# If not enabled, profiling will still run, the trace will just be
+# empty
+is_debug = true
+
+# Technically will run with sanitizers on, but execution will likely
+# halt early due to the sanitizers triggering on the profiling
+# hooks. These flags are off by default in args.gn, but if you are
+# working with fuzzers regularly, you may have them enabled for your
+# specific build
+is_asan = false
+is_msan = false
+is_<any other san> = false
+
+```
+
+### Example Workflow
+
+The steps for profiling a hypothetical WGSL fuzzer test case that is
+causing timeouts.
+
+After doing whatever other triage I normally would do and determining
+that this is a performance bottleneck problem that requires
+profiling. The first step will be to actually generate the profiling
+trace.
+
+```bash
+valgrind \
+    --tool=callgrind \
+    --trace-children=yes \
+    --dump-instr=yes \
+    --collect-jumps=yes \
+    out/gn-callgrind/tint_wgsl_fuzzer triage/really_slow.wgsl
+```
+
+* `--trace-children=yes` is required for valgrind to follow flow
+across forks. Without this you will just get a trace of the libfuzzer
+framework
+* `--dump-instr=yes` and `--collect-jumps=yes` are needed to generate
+proper data attributing time up to parents. Without these flags each
+function call will be only assessed the time actually spent in the
+function's code and not include the time of anything it calls into.
+
+**Note:** This profiling can be very slow, this is a start executing
+and go get a snack type of task.
+
+After the profiling is done, I manually process the output, since the
+paths to files in report will be relative to the binary location, i.e
+`out/gn-callgrind`, so will include a leading `../../`. The original
+output file will be something like `callgrind.out.<pid>` where <pid>
+is the process id for the specific invocation.
+
+```bash
+sed -i 's#\./\.\./\.\./#./#g' callgrind.out.<pid> > callgrind.out.fixed.<pid>
+```
+
+And then to visualize and start inspecting the trace
+
+```bash
+kcachegrind callgrind.out.fixed.<pid>
+```
+
+As mentioned you can use `callgrind_annotate`, which is installed as
+part of valgrind, to pull out information like the N most expensive
+functions. The man page for `callgrind_annotate` is relatively brief,
+so I would suggest using your favourite search engine to find examples
+of specific usages.
