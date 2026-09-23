@@ -468,10 +468,13 @@ struct State {
         call->SetArg(stride_index, stride);
 
         // If we are not doing full clamping, then clamping the stride is all we need to do.
-        if (!config.clamp_subgroup_matrix ||
-            (!config.clamp_storage_subgroup_matrix &&
-             arr->Type()->As<core::type::Pointer>()->AddressSpace() ==
-                 core::AddressSpace::kStorage)) {
+        if (!config.clamp_subgroup_matrix) {
+            return;
+        }
+        // Storage accesses that the implementation bounds checks do not need clamping.
+        if (arr->Type()->As<core::type::Pointer>()->AddressSpace() ==
+                core::AddressSpace::kStorage &&
+            (!config.clamp_storage_subgroup_matrix || IsRootVarIgnored(arr))) {
             return;
         }
 

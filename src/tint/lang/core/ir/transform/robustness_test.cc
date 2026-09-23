@@ -3792,6 +3792,70 @@ $B1: {  # root
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
 }
 
+TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_StorageRuntimeArray_DynamicStride_IgnoredBinding) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<f32>()));
+    arr->SetBindingPoint(0, 0);
+    mod.root_block->Append(arr);
+
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8u, 4u);
+
+    auto* func = b.Function("foo", mat);
+    auto* stride = b.FunctionParam<u32>("stride");
+    func->AppendParam(stride);
+    b.Append(func->Block(), [&] {
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr,
+                                    0_u, stride);
+        b.Return(func, load);
+    });
+
+    auto* expect_with_predication = R"(
+$B1: {  # root
+  %arr:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%stride:u32):subgroup_matrix_result<f32, 8, 4> {
+  $B2: {
+    %4:u32 = max %stride, 4u
+    %5:u32 = arrayLength %arr
+    %6:u32 = mulSat %4, 7u
+    %7:u32 = addSat 0u, %6
+    %8:u32 = addSat %7, 4u
+    %9:bool = lte %8, %5
+    %10:u32 = select 0u, 0u, %9
+    %11:u32 = select 4u, %4, %9
+    %12:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %10, %11
+    ret %12
+  }
+}
+)";
+
+    auto* expect_without_predication = R"(
+$B1: {  # root
+  %arr:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%stride:u32):subgroup_matrix_result<f32, 8, 4> {
+  $B2: {
+    %4:u32 = max %stride, 4u
+    %5:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, 0u, %4
+    ret %5
+  }
+}
+)";
+
+    // Bindings that are bounds checked by the implementation are ignored by the transform, so
+    // their subgroup matrix accesses are not clamped either.
+    RobustnessConfig cfg;
+    cfg.clamp_subgroup_matrix = true;
+    if (!GetParam()) {
+        cfg.bindings_ignored = {{0, 0}};
+    }
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
+}
+
 TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_i8_StorageRuntimeArray_DynamicStride_ColMajor) {
     mod.properties.Add(Property::kAllow8BitIntegers);
 
@@ -5295,6 +5359,71 @@ $B1: {  # root
 
     RobustnessConfig cfg;
     cfg.clamp_subgroup_matrix = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
+}
+
+TEST_P(IR_RobustnessTest, SubgroupMatrixStore_StorageRuntimeArray_DynamicStride_IgnoredBinding) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<f32>()));
+    arr->SetBindingPoint(0, 0);
+    mod.root_block->Append(arr);
+
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8u, 4u);
+
+    auto* func = b.Function("foo", ty.void_());
+    auto* value = b.FunctionParam("value", mat);
+    auto* stride = b.FunctionParam<u32>("stride");
+    func->AppendParam(value);
+    func->AppendParam(stride);
+    b.Append(func->Block(), [&] {
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr, 0_u, value, stride);
+        b.Return(func);
+    });
+
+    auto* expect_with_predication = R"(
+$B1: {  # root
+  %arr:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %stride:u32):void {
+  $B2: {
+    %5:u32 = max %stride, 4u
+    %6:u32 = arrayLength %arr
+    %7:u32 = mulSat %5, 7u
+    %8:u32 = addSat 0u, %7
+    %9:u32 = addSat %8, 4u
+    %10:bool = lte %9, %6
+    %11:u32 = select 0u, 0u, %10
+    %12:u32 = select 4u, %5, %10
+    %13:void = subgroupMatrixStore<col_major> %arr, %11, %value, %12
+    ret
+  }
+}
+)";
+
+    auto* expect_without_predication = R"(
+$B1: {  # root
+  %arr:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %stride:u32):void {
+  $B2: {
+    %5:u32 = max %stride, 4u
+    %6:void = subgroupMatrixStore<col_major> %arr, 0u, %value, %5
+    ret
+  }
+}
+)";
+
+    // Bindings that are bounds checked by the implementation are ignored by the transform, so
+    // their subgroup matrix accesses are not clamped either.
+    RobustnessConfig cfg;
+    cfg.clamp_subgroup_matrix = true;
+    if (!GetParam()) {
+        cfg.bindings_ignored = {{0, 0}};
+    }
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
