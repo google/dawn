@@ -175,34 +175,30 @@ void SharedBufferMemory::DestroyImpl(DestroyReason reason) {
         return;
     }
 
-    // The host memory aliased by the heap must outlive both the heap and the resource placed on
-    // it, so the task owns the resource as well: it is only released once the task runs, which
-    // happens after the pending command serial has completed. Releasing the resource from the
-    // task (instead of through Device::ReferenceUntilUnused, which is drained by a different
-    // mechanism) guarantees the resource is released before the heap, and the heap before the
-    // dispose callback.
-    class DisposeEvent : public EventManager::TrackedEvent {
+    // TODO(386255678): Now using `TrackEvent()` will greatly increase the peak memory compared with
+    // `TrackTaskAfterEventualFlush()`. Use TrackEvent again once the peak memory usage issue is
+    // fixed.
+    class DisposeTask : public TrackTaskCallback {
       public:
-        DisposeEvent(DeviceBase* device,
-                     ComPtr<ID3D12Resource> resource,
-                     std::unique_ptr<Heap> heap,
-                     WGPUDisposeCallbackInfo dispose)
-            : TrackedEvent(static_cast<wgpu::CallbackMode>(dispose.mode),
-                           device->GetQueue(),
-                           device->GetQueue()->GetPendingCommandSerial()),
+        DisposeTask(ComPtr<ID3D12Resource> resource,
+                    std::unique_ptr<Heap> heap,
+                    WGPUDisposeCallbackInfo dispose)
+            : TrackTaskCallback(nullptr),
               resource(std::move(resource)),
               heap(std::move(heap)),
               mCallback(dispose.callback),
               mUserdata1(dispose.userdata1),
               mUserdata2(dispose.userdata2) {}
-        ~DisposeEvent() override = default;
+        ~DisposeTask() override = default;
 
-      private:
-        void Complete(EventCompletionType) override {
+        void FinishImpl() override {
             resource = nullptr;
             heap = nullptr;
             mCallback(WGPUCallbackStatus_Success, mUserdata1, mUserdata2);
         }
+
+        void HandleDeviceLossImpl() override { FinishImpl(); }
+        void HandleShutDownImpl() override { FinishImpl(); }
 
         ComPtr<ID3D12Resource> resource;
         std::unique_ptr<Heap> heap;
@@ -211,8 +207,9 @@ void SharedBufferMemory::DestroyImpl(DestroyReason reason) {
         raw_ptr<void> mUserdata2 = nullptr;
     };
 
-    GetInstance()->GetEventManager()->TrackEvent(AcquireRef(new DisposeEvent(
-        GetDevice(), std::move(mResource), std::move(mHeap), mHostPointerDispose.value())));
+    auto disposeTask = std::make_unique<DisposeTask>(std::move(mResource), std::move(mHeap),
+                                                     mHostPointerDispose.value());
+    GetDevice()->GetQueue()->TrackTaskAfterEventualFlush(std::move(disposeTask));
     mHostPointerDispose = std::nullopt;
 }
 
