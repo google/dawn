@@ -367,6 +367,12 @@ struct State {
     /// Process a `let` instruction to replace its value.
     /// @param let the let instruction
     void ProcessLet(core::ir::Let* let) {
+        // If the let is capturing a pointer then just update the result type.
+        if (let->Result()->Type()->Is<core::type::Pointer>()) {
+            let->Result()->SetType(RewriteType(let->Result()->Type()));
+            return;
+        }
+
         auto* init = let->Value();
 
         if (CanTakeLocalTensorVar(init, let)) {

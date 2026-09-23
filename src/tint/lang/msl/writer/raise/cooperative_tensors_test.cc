@@ -1296,6 +1296,59 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetVar_SingleUseInit_AcrossBlocks) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_CooperativeTensorsTest, LetPointer) {
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* matrix_ty = ty.subgroup_matrix_result(ty.f16(), 32, 16);
+        auto* var = b.Var("acc", ty.ptr<function>(ty.array(matrix_ty, 2)));
+        b.Let("whole", var);
+        auto* el = b.Let("el", b.Access(ty.ptr<function>(matrix_ty), var, 1_u));
+        b.Let("el2", el);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %acc:ptr<function, array<subgroup_matrix_result<f16, 32, 16>, 2>, read_write> = var undef
+    %whole:ptr<function, array<subgroup_matrix_result<f16, 32, 16>, 2>, read_write> = let %acc
+    %4:ptr<function, subgroup_matrix_result<f16, 32, 16>, read_write> = access %acc, 1u
+    %el:ptr<function, subgroup_matrix_result<f16, 32, 16>, read_write> = let %4
+    %el2:ptr<function, subgroup_matrix_result<f16, 32, 16>, read_write> = let %el
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
+    %acc:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = var %4
+    %6:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 0u
+    %7:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %6
+    %8:void = msl.fill_cooperative_tensor %7, 0.0h
+    %9:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 1u
+    %10:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %9
+    %11:void = msl.fill_cooperative_tensor %10, 0.0h
+    %whole:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = let %acc
+    %13:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 1u
+    %14:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %13
+    %el:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = let %14
+    %el2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = let %el
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_CooperativeTensorsTest, Access_Array_Element) {
     auto* ep = b.ComputeFunction("entry");
     b.Append(ep->Block(), [&] {

@@ -1117,5 +1117,86 @@ kernel void entry() {
 )");
 }
 
+TEST_F(MslWriterTensorTest, PointerAliases) {
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* matrix_ty = ty.subgroup_matrix_result(ty.f16(), 32, 16);
+        auto* var = b.Var("acc", ty.ptr<function>(ty.array(matrix_ty, 2)));
+        b.Let("whole", var);
+        auto* el = b.Let("el", b.Access(ty.ptr<function>(matrix_ty), var, 1_u));
+        auto* el2 = b.Let("el2", el);
+        auto* load = b.Load(el2);
+        b.Store(b.Access(ty.ptr<function>(matrix_ty), var, 0_u), load);
+        b.Return(ep);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+#include <MetalPerformancePrimitives/MetalPerformancePrimitives.h>
+
+template<uint M, uint N, uint K,
+         mpp::tensor_ops::matmul2d_descriptor::mode O>
+constant constexpr auto tint_matmul2d_descriptor =
+  mpp::tensor_ops::matmul2d_descriptor(M, N, K, false, false, false, O);
+
+template<uint M, uint N, uint K,
+         mpp::tensor_ops::matmul2d_descriptor::mode O = mpp::tensor_ops::matmul2d_descriptor::mode::multiply>
+using tint_matmul2d_operation =
+  mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
+
+using tint_left_input_16_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<16, 32, 32>>()
+             .get_left_input_cooperative_tensor<half, half, half>());
+using tint_right_input_16_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<16, 32, 32>>()
+             .get_right_input_cooperative_tensor<half, half, half>());
+using tint_destination_16_32_32_half_half =
+  decltype(declval<tint_matmul2d_operation<16, 32, 32>>()
+             .get_destination_cooperative_tensor<tint_left_input_16_32_32_half_half, tint_right_input_16_32_32_half_half, half>());
+
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+template<typename T, typename V>
+void tint_fill_cooperative_tensor(thread T* dst, V value) {
+  for (uint i = 0; i < dst->get_capacity(); i++) {
+    dst->set(i, value);
+  }
+}
+
+template<typename T>
+void tint_copy_cooperative_tensor(thread T* dst, const thread T* src) {
+  for (uint i = 0; i < dst->get_capacity(); i++) {
+    dst->set(i, src->get(i));
+  }
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void entry() {
+  tint_destination_16_32_32_half_half v;
+  tint_destination_16_32_32_half_half v_1;
+  tint_array<thread tint_destination_16_32_32_half_half*, 2> acc = tint_array<thread tint_destination_16_32_32_half_half*, 2>{(&v), (&v_1)};
+  (tint_fill_cooperative_tensor(acc[0u], 0.0h));
+  (tint_fill_cooperative_tensor(acc[1u], 0.0h));
+  thread tint_array<thread tint_destination_16_32_32_half_half*, 2>* const whole = (&acc);
+  thread tint_destination_16_32_32_half_half* const el = acc[1u];
+  thread tint_destination_16_32_32_half_half* const el2 = el;
+  tint_destination_16_32_32_half_half v_2;
+  (tint_copy_cooperative_tensor((&v_2), el2));
+  (tint_copy_cooperative_tensor(acc[0u], (&v_2)));
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::msl::writer
