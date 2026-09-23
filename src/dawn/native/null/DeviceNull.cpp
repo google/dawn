@@ -128,6 +128,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     }
     if (auto* d3dProperties = info.Get<AdapterPropertiesD3D>()) {
         d3dProperties->shaderModel = 0;
+        d3dProperties->adapterLUIDLowPart = 0;
+        d3dProperties->adapterLUIDHighPart = 0;
     }
 }
 

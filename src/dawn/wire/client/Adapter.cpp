@@ -173,6 +173,8 @@ void Adapter::SetInfo(const AdapterInfo* info) {
             case wgpu::SType::AdapterPropertiesD3D: {
                 const auto* d3dProperties = reinterpret_cast<const AdapterPropertiesD3D*>(chain);
                 mD3DProperties.shaderModel = d3dProperties->shaderModel;
+                mD3DProperties.adapterLUIDLowPart = d3dProperties->adapterLUIDLowPart;
+                mD3DProperties.adapterLUIDHighPart = d3dProperties->adapterLUIDHighPart;
                 break;
             }
             case wgpu::SType::AdapterPropertiesVk: {
@@ -214,6 +216,8 @@ wgpu::Status Adapter::APIGetInfo(AdapterInfo* info) const {
             case wgpu::SType::AdapterPropertiesD3D: {
                 auto* d3dProperties = reinterpret_cast<AdapterPropertiesD3D*>(chain);
                 d3dProperties->shaderModel = mD3DProperties.shaderModel;
+                d3dProperties->adapterLUIDLowPart = mD3DProperties.adapterLUIDLowPart;
+                d3dProperties->adapterLUIDHighPart = mD3DProperties.adapterLUIDHighPart;
                 break;
             }
             case wgpu::SType::AdapterPropertiesVk: {

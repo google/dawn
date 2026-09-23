@@ -1069,6 +1069,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     if (auto* d3dProperties = info.Get<AdapterPropertiesD3D>()) {
         // Report highest supported shader model version, instead of actual applied version.
         d3dProperties->shaderModel = GetDeviceInfo().highestSupportedShaderModel;
+        d3dProperties->adapterLUIDLowPart = GetAdapterLUID().LowPart;
+        d3dProperties->adapterLUIDHighPart = static_cast<uint32_t>(GetAdapterLUID().HighPart);
     }
     if (auto* subgroupMatrixConfigs = info.Get<AdapterPropertiesSubgroupMatrixConfigs>()) {
         std::vector<SubgroupMatrixConfig> supportedConfigs =

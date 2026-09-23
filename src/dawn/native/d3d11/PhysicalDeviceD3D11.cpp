@@ -434,6 +434,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     }
     if (auto* d3dProperties = info.Get<AdapterPropertiesD3D>()) {
         d3dProperties->shaderModel = GetDeviceInfo().shaderModel;
+        d3dProperties->adapterLUIDLowPart = GetAdapterLUID().LowPart;
+        d3dProperties->adapterLUIDHighPart = static_cast<uint32_t>(GetAdapterLUID().HighPart);
     }
 }
 

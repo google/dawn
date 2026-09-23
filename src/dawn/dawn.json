@@ -4889,7 +4889,9 @@
         "chain roots": ["adapter info"],
         "tags": ["dawn"],
         "members": [
-            {"name": "shader model", "type": "uint32_t"}
+            {"name": "shader model", "type": "uint32_t"},
+            {"name": "adapter LUID low part", "type": "uint32_t"},
+            {"name": "adapter LUID high part", "type": "uint32_t"}
         ]
     },
     "adapter properties vk": {

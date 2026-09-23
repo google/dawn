@@ -228,6 +228,8 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
     WGPUAdapterPropertiesD3D fakeD3DProperties = {};
     fakeD3DProperties.chain.sType = WGPUSType_AdapterPropertiesD3D;
     fakeD3DProperties.shaderModel = 61;
+    fakeD3DProperties.adapterLUIDLowPart = 0x00002B1A;
+    fakeD3DProperties.adapterLUIDHighPart = 0x00000001;
 
     WGPUAdapterPropertiesVk fakeVkProperties = {};
     fakeVkProperties.chain.sType = WGPUSType_AdapterPropertiesVk;
@@ -346,6 +348,8 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                 adapter.GetInfo(reinterpret_cast<wgpu::AdapterInfo*>(&info));
                 // Expect them to match.
                 EXPECT_EQ(d3dProperties.shaderModel, fakeD3DProperties.shaderModel);
+                EXPECT_EQ(d3dProperties.adapterLUIDLowPart, fakeD3DProperties.adapterLUIDLowPart);
+                EXPECT_EQ(d3dProperties.adapterLUIDHighPart, fakeD3DProperties.adapterLUIDHighPart);
 
                 // Get the Vulkan properties.
                 WGPUAdapterPropertiesVk vkProperties = {};
