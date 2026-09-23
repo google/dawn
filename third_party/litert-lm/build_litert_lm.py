@@ -28,6 +28,7 @@
 """Invokes the hermetic Bazelisk binary to build LiteRT-LM and copy the output
 binary to GN's output directory."""
 
+import json
 import os
 from pathlib import Path
 import shutil
@@ -54,6 +55,61 @@ def get_platform_name():
     arch = 'x86_64' if cipd_arch == 'amd64' else cipd_arch
 
     return f"{plat_os}_{arch}"
+
+
+def make_bazel_vc_dir(toolchain, vc_dir):
+    """Creates a stand-in `VC` directory for Bazel's MSVC autodetection.
+
+    Bazel probes the compiler environment by running
+    `VC\\Auxiliary\\Build\\vcvarsall.bat`, which the hermetic toolchain does not
+    ship.
+
+    TODO(crbug.com/563366606): Remove if toolchain package starts shipping
+    vcvarsall.bat, then BAZEL_VC can point at the toolchain's VC directory.
+    """
+    win_sdk = Path(toolchain['win_sdk'])
+
+    # Bazel expects to find cl.exe and friends under `Tools/MSVC/<version>`.
+    tools_dir = vc_dir / 'Tools'
+    (vc_dir / 'Auxiliary' / 'Build').mkdir(parents=True, exist_ok=True)
+    tools_dir.unlink(missing_ok=True)
+    tools_dir.symlink_to(Path(toolchain['path']) / 'VC' / 'Tools',
+                         target_is_directory=True)
+
+    # Bazel invokes this as `vcvarsall.bat amd64 [sdk_version] [-vcvars_ver=..]`.
+    # The version arguments are ignored because the toolchain only contains one
+    # SDK and one toolset. SetEnv.cmd sets INCLUDE, LIB and PATH, but not the
+    # WINDOWSSDKDIR that Bazel also reads back.
+    (vc_dir / 'Auxiliary' / 'Build' / 'vcvarsall.bat').write_text(
+        '@echo off\r\n'
+        f'call "{win_sdk}\\bin\\SetEnv.cmd" /x64\r\n'
+        f'set "WINDOWSSDKDIR={win_sdk}"\r\n')
+
+    return vc_dir
+
+
+def configure_windows_toolchain_env(env, project_root, out_dir):
+    """Points Bazel at Dawn's hermetic Visual Studio toolchain.
+
+    On the bots Visual Studio is not installed machine-wide; gclient unpacks it
+    via depot_tools and records its location in build/win_toolchain.json. Bazel
+    cannot find it on its own, and `bazel.exe` itself fails to start without the
+    MSVC runtime DLLs on PATH.
+    """
+    # `bazel.exe` dynamically links MSVCP140.dll and VCRUNTIME140*.dll. GN
+    # copies those into the build directory, so make them resolvable.
+    path_entries = [str(out_dir)]
+
+    toolchain_json = project_root / 'build' / 'win_toolchain.json'
+    if toolchain_json.exists():
+        toolchain = json.loads(toolchain_json.read_text())
+        path_entries += toolchain['runtime_dirs']
+        # Bazel's cc_configure reads these to locate cl.exe and the SDK.
+        env['BAZEL_VC'] = str(
+            make_bazel_vc_dir(toolchain, out_dir / 'bazel_vc'))
+        env['WINDOWSSDKDIR'] = toolchain['win_sdk']
+
+    env['PATH'] = os.pathsep.join(path_entries + [env.get('PATH', '')])
 
 
 def main():
@@ -200,8 +256,27 @@ def main():
             if platform_name == 'macos_arm64':
                 build_cmd.append('--config=macos_arm64')
 
+        if platform_name.startswith('windows'):
+            configure_windows_toolchain_env(env, project_root,
+                                            dest_path.parent)
+
+            # On the bots Git bash comes from CIPD, so point Bazel at whichever
+            # one is on PATH, overriding LiteRT-LM's .bazelrc hardcoded path.
+            bash_path = shutil.which('bash', path=env['PATH'])
+            if bash_path:
+                build_cmd.append(f'--shell_executable={bash_path}')
+
+            # Bazel runs build-time tools (`[for tool]`) with an empty PATH, and
+            # the bots do not have vcruntime140.dll in C:\Windows\System32. Link
+            # host C++ and Rust tools against the static CRT so they do not
+            # depend on it.
+            build_cmd.extend([
+                '--host_features=static_link_msvcrt',
+                '--@rules_rust//rust/settings:extra_exec_rustc_flag=-Ctarget-feature=+crt-static',
+            ])
+
         # Prepend the hermetic LLVM toolchain bin directory to PATH and set CC/CXX.
-        # Windows uses the MSVC toolchain that Bazel autodetects instead.
+        # Windows uses the MSVC toolchain configured above instead.
         llvm_bin_dir = project_root / 'third_party' / 'llvm-build' / 'Release+Asserts' / 'bin'
         if llvm_bin_dir.exists() and not platform_name.startswith('windows'):
             env['PATH'] = f"{llvm_bin_dir}:{env.get('PATH', '')}"

@@ -72,7 +72,10 @@ action("litert_lm_advanced_main") {
     ]
   }
   deps = [ "//src/dawn/native:webgpu_dawn_shared" ]
-  data_deps = [ "//src/dawn/native:webgpu_dawn_shared" ]
+  data_deps = [
+    "//src/dawn/native:webgpu_dawn_shared",
+    "//testing:test_scripts_shared",
+  ]
   data = [
     "data/model.litertlm",
     "//scripts/run_litert_lm_benchmark.py",
@@ -123,6 +126,10 @@ action("litert_lm_advanced_main") {
       "$root_out_dir/libLiteRtTopKWebGpuSampler.dll",
       "$root_out_dir/libLiteRtWebGpuAccelerator.dll",
       "$root_out_dir/libwebgpu_dawn.dll",
+      "$root_out_dir/msvcp140.dll",
+      "$root_out_dir/msvcp140_atomic_wait.dll",
+      "$root_out_dir/vcruntime140.dll",
+      "$root_out_dir/vcruntime140_1.dll",
     ]
   }
 }
