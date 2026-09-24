@@ -1151,9 +1151,7 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
 #if TINT_BUILD_MSL_WRITER
 tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::core::ir::Module& ir,
                                                                        const std::string& ep_name) {
-    tint::msl::writer::ArrayLengthOptions options{
-        .ubo_binding = 30,
-    };
+    tint::msl::writer::ArrayLengthOptions options{};
 
     tint::core::ir::Function* ep_func = nullptr;
     for (auto* f : ir.functions) {
@@ -1181,7 +1179,7 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
 
         auto* ty = var->Result()->Type()->As<tint::core::type::Pointer>();
         if (ty && ty->AddressSpace() == tint::core::AddressSpace::kStorage &&
-            !ty->HasFixedFootprint()) {
+            !ty->StoreType()->HasFixedFootprint()) {
             if (storage_bindings.insert(*bp).second) {
                 options.bindpoint_to_size_index.emplace(
                     *bp, static_cast<uint32_t>(storage_bindings.size() - 1));
@@ -1189,6 +1187,9 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
         }
     }
 
+    if (!options.bindpoint_to_size_index.empty()) {
+        options.buffer_sizes_offset = 0x800;
+    }
     return options;
 }
 #endif  // TINT_BUILD_MSL_WRITER
@@ -1216,7 +1217,6 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
         ir, options.ep_name, !options.use_argument_buffers, !options.use_argument_buffers);
     gen_options.resource_table = tint::core::ir::transform::GenerateResourceTableConfig(
         ir, options.treat_samplers_as_filtering);
-    // TODO(crbug.com/366291600): Replace ubo with immediate block for end2end tests
     gen_options.immediate_binding_point = tint::BindingPoint{.group = 0u, .binding = 30u};
     gen_options.extensions.disable_demote_to_helper = options.disable_demote_to_helper;
     gen_options.use_argument_buffers = options.use_argument_buffers;

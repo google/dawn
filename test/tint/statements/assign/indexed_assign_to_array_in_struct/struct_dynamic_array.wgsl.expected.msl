@@ -25,10 +25,16 @@ struct OuterS {
   /* 0x0000 */ tint_array<InnerS, 1> a1;
 };
 
+struct tint_immediate_data_struct {
+  /* 0x0000 */ uint tint_non_constant_zero;
+  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad;
+  /* 0x0800 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+};
+
 struct tint_module_vars_struct {
   const constant Uniforms* uniforms;
   device OuterS* s1;
-  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 struct tint_array_lengths_struct {
@@ -36,9 +42,9 @@ struct tint_array_lengths_struct {
 };
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v_1(const constant Uniforms* uniforms [[buffer(0)]], device OuterS* s1 [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .s1=s1, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  tint_array_lengths_struct const v_2 = tint_array_lengths_struct{.tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u)};
+kernel void v_1(const constant Uniforms* uniforms [[buffer(0)]], device OuterS* s1 [[buffer(1)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .s1=s1, .tint_immediate_data=tint_immediate_data};
+  tint_array_lengths_struct const v_2 = tint_array_lengths_struct{.tint_array_length_0_1=(((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] - 0u) / 4u)};
   InnerS v = {};
   (*tint_module_vars.s1).a1[min((*tint_module_vars.uniforms).i, (v_2.tint_array_length_0_1 - 1u))] = v;
 }

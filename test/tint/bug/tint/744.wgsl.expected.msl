@@ -23,12 +23,18 @@ struct Uniforms {
   /* 0x0010 */ uint2 outShape;
 };
 
+struct tint_immediate_data_struct {
+  /* 0x0000 */ uint tint_non_constant_zero;
+  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad;
+  /* 0x0800 */ tint_array<uint, 3> tint_storage_buffer_sizes;
+};
+
 struct tint_module_vars_struct {
   const device Matrix* firstMatrix;
   const device Matrix* secondMatrix;
   device Matrix* resultMatrix;
   const constant Uniforms* uniforms;
-  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 struct tint_array_lengths_struct {
@@ -38,7 +44,7 @@ struct tint_array_lengths_struct {
 };
 
 void main_inner(uint3 global_id, tint_module_vars_struct tint_module_vars) {
-  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u), .tint_array_length_0_3=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u), .tint_array_length_0_0=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u)};
+  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_2=(((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[1u] - 0u) / 4u), .tint_array_length_0_3=(((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[2u] - 0u) / 4u), .tint_array_length_0_0=(((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] - 0u) / 4u)};
   uint2 const resultCell = uint2(global_id.y, global_id.x);
   uint const dimInner = (*tint_module_vars.uniforms).aShape.y;
   uint const dimOutter = (*tint_module_vars.uniforms).outShape.y;
@@ -71,7 +77,7 @@ void main_inner(uint3 global_id, tint_module_vars_struct tint_module_vars) {
 }
 
 [[max_total_threads_per_threadgroup(4)]]
-kernel void v_1(uint3 global_id [[thread_position_in_grid]], const device Matrix* firstMatrix [[buffer(2)]], const device Matrix* secondMatrix [[buffer(3)]], device Matrix* resultMatrix [[buffer(0)]], const constant Uniforms* uniforms [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+kernel void v_1(uint3 global_id [[thread_position_in_grid]], const device Matrix* firstMatrix [[buffer(2)]], const device Matrix* secondMatrix [[buffer(3)]], device Matrix* resultMatrix [[buffer(0)]], const constant Uniforms* uniforms [[buffer(1)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms, .tint_immediate_data=tint_immediate_data};
   (main_inner(global_id, tint_module_vars));
 }

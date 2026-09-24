@@ -17,10 +17,16 @@ struct Result {
   /* 0x0000 */ tint_array<float, 1> values;
 };
 
+struct tint_immediate_data_struct {
+  /* 0x0000 */ uint tint_non_constant_zero;
+  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad;
+  /* 0x0800 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+};
+
 struct tint_module_vars_struct {
   texture2d_array<float, access::sample> myTexture;
   device Result* result;
-  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 struct tint_array_lengths_struct {
@@ -28,7 +34,7 @@ struct tint_array_lengths_struct {
 };
 
 void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
-  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_0=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u)};
+  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_0=(((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] - 0u) / 4u)};
   uint flatIndex = (((4u * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
   int2 const v_1 = int2(GlobalInvocationID.xy);
@@ -51,7 +57,7 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v_4(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d_array<float, access::sample> myTexture [[texture(0)]], device Result* result [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.myTexture=myTexture, .result=result, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+kernel void v_4(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d_array<float, access::sample> myTexture [[texture(0)]], device Result* result [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.myTexture=myTexture, .result=result, .tint_immediate_data=tint_immediate_data};
   (main_inner(GlobalInvocationID, tint_module_vars));
 }

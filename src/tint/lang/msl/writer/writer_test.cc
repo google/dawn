@@ -170,7 +170,7 @@ kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadg
     EXPECT_EQ(output_.workgroup_info.storage_size, 0x100000000ull);
 }
 
-TEST_F(MslWriterTest, NeedsStorageBufferSizes_False) {
+TEST_F(MslWriterTest, ArrayLengthFromImmediate_Unused) {
     auto* var = b.Var("a", ty.ptr<storage, array<u32>>());
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -213,10 +213,9 @@ kernel void entry(device tint_array<uint, 1>* a [[buffer(0)]]) {
   (*tint_module_vars.a)[0u] = 42u;
 }
 )");
-    EXPECT_FALSE(output_.needs_storage_buffer_sizes);
 }
 
-TEST_F(MslWriterTest, NeedsStorageBufferSizes_True) {
+TEST_F(MslWriterTest, ArrayLengthFromImmediate_Used) {
     auto* var = b.Var("a", ty.ptr<storage, array<u32>>());
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -271,7 +270,105 @@ kernel void entry(device tint_array<uint, 1>* a [[buffer(0)]], const constant ti
   (*tint_module_vars.a)[0u] = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] / 4u)}.tint_array_length_0_0;
 }
 )");
-    EXPECT_TRUE(output_.needs_storage_buffer_sizes);
+}
+
+using MslWriterStorageBufferSizesTest = MslWriterTestWithParam<bool>;
+
+TEST_P(MslWriterStorageBufferSizesTest, ConfiguredLayout) {
+    auto* user_data = b.Var<immediate, u32, core::Access::kRead>("user_data");
+    mod.root_block->Append(user_data);
+    auto* output = b.Var<storage, u32>("output");
+    output->SetBindingPoint(0, 0);
+    mod.root_block->Append(output);
+
+    auto* entry = b.ComputeFunction("entry");
+    b.Append(entry->Block(), [&] {
+        b.Store(output, b.Load(user_data));
+        b.Return(entry);
+    });
+
+    Options options;
+    options.disable_robustness = true;
+    options.immediate_binding_point = BindingPoint{0, 30};
+    options.non_constant_zero_offset = 4u;
+    if (GetParam()) {
+        options.array_length_from_constants.buffer_sizes_offset = 64u;
+        options.array_length_from_constants.bindpoint_to_size_index[{0, 0}] = 3u;
+    }
+
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure();
+    if (GetParam()) {
+        EXPECT_THAT(output_.msl,
+                    testing::HasSubstr("tint_array<uint, 4> tint_storage_buffer_sizes;"));
+    } else {
+        EXPECT_THAT(output_.msl, testing::Not(testing::HasSubstr("tint_storage_buffer_sizes")));
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(MslWriterTest, MslWriterStorageBufferSizesTest, testing::Bool());
+
+TEST_F(MslWriterTest, BufferLength_FixedSize_NoMetadata) {
+    mod.properties.Add(core::ir::Property::kAllowBufferTypes);
+    auto* buffer = b.Var("buffer", ty.ptr(workgroup, ty.buffer(64)));
+    mod.root_block->Append(buffer);
+    auto* output = b.Var<storage, u32>("output");
+    output->SetBindingPoint(0, 0);
+    mod.root_block->Append(output);
+
+    auto* length = b.Function("length", ty.u32());
+    auto* parameter = b.FunctionParam("buffer", ty.ptr(workgroup, ty.buffer(64)));
+    length->SetParams({parameter});
+    b.Append(length->Block(),
+             [&] { b.Return(length, b.Call<u32>(core::BuiltinFn::kBufferLength, parameter)); });
+
+    auto* entry = b.ComputeFunction("entry");
+    b.Append(entry->Block(), [&] {
+        b.Store(output, b.Call<u32>(length, buffer));
+        b.Return(entry);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_THAT(output_.msl, testing::HasSubstr("return 64u;"));
+    EXPECT_THAT(output_.msl, testing::Not(testing::HasSubstr("tint_storage_buffer_sizes")));
+}
+
+TEST_F(MslWriterTest, ArrayLengthFromImmediate_MissingOffset) {
+    auto* entry = b.ComputeFunction("entry");
+    b.Append(entry->Block(), [&] { b.Return(entry); });
+
+    Options options;
+    options.array_length_from_constants.bindpoint_to_size_index[{0, 0}] = 0u;
+
+    auto result = Generate(options);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              "array length from immediate requires a buffer sizes offset");
+}
+
+TEST_F(MslWriterTest, ArrayLengthFromImmediate_ZeroOffset) {
+    auto* buffer = b.Var<storage, array<u32>>("buffer");
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+    auto* entry = b.ComputeFunction("entry");
+    b.Append(entry->Block(), [&] {
+        auto* length = b.Call<u32>(core::BuiltinFn::kArrayLength, buffer);
+        b.Store(b.Access<ptr<storage, u32>>(buffer, 0_u), length);
+        b.Return(entry);
+    });
+
+    Options options;
+    options.immediate_binding_point = BindingPoint{0, 30};
+    options.non_constant_zero_offset = 4u;
+    options.array_length_from_constants.buffer_sizes_offset = 0u;
+    options.array_length_from_constants.bindpoint_to_size_index[{0, 0}] = 0u;
+
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_THAT(output_.msl,
+                testing::HasSubstr("/* 0x0000 */ tint_array<uint, 1> tint_storage_buffer_sizes;"));
+    EXPECT_THAT(output_.msl, testing::HasSubstr("tint_storage_buffer_sizes[0u] / 4u"));
 }
 
 TEST_F(MslWriterTest, ImmediateF16) {

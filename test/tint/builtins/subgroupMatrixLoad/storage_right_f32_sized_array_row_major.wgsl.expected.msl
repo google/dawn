@@ -23,6 +23,12 @@ struct tint_packed_vec3_f16_array_element {
   /* 0x0006 */ tint_array<int8_t, 2> tint_pad_1;
 };
 
+struct tint_immediate_data_struct {
+  /* 0x0000 */ uint tint_non_constant_zero;
+  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad_2;
+  /* 0x0800 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+};
+
 struct tint_module_vars_struct {
   const device tint_array<uint, 1024>* in0;
   const device tint_array<int2, 1024>* in1;
@@ -31,7 +37,7 @@ struct tint_module_vars_struct {
   const device tint_array<half2, 1024>* in5;
   const device tint_array<tint_packed_vec3_f16_array_element, 1024>* in6;
   device tint_array<uint, 1>* out;
-  const constant tint_array<uint4, 2>* tint_storage_buffer_sizes;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 struct tint_array_lengths_struct {
@@ -39,9 +45,9 @@ struct tint_array_lengths_struct {
 };
 
 [[max_total_threads_per_threadgroup(64)]]
-kernel void v(const device tint_array<uint, 1024>* in0 [[buffer(0)]], const device tint_array<int2, 1024>* in1 [[buffer(1)]], const device tint_array<tint_packed_vec3_f32_array_element, 1024>* in2 [[buffer(2)]], const device tint_array<uint4, 1024>* in3 [[buffer(3)]], const device tint_array<half2, 1024>* in5 [[buffer(4)]], const device tint_array<tint_packed_vec3_f16_array_element, 1024>* in6 [[buffer(5)]], device tint_array<uint, 1>* out [[buffer(6)]], const constant tint_array<uint4, 2>* tint_storage_buffer_sizes [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.in0=in0, .in1=in1, .in2=in2, .in3=in3, .in5=in5, .in6=in6, .out=out, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  tint_array_lengths_struct const v_1 = tint_array_lengths_struct{.tint_array_length_0_6=((*tint_module_vars.tint_storage_buffer_sizes)[1u].z / 4u)};
+kernel void v(const device tint_array<uint, 1024>* in0 [[buffer(0)]], const device tint_array<int2, 1024>* in1 [[buffer(1)]], const device tint_array<tint_packed_vec3_f32_array_element, 1024>* in2 [[buffer(2)]], const device tint_array<uint4, 1024>* in3 [[buffer(3)]], const device tint_array<half2, 1024>* in5 [[buffer(4)]], const device tint_array<tint_packed_vec3_f16_array_element, 1024>* in6 [[buffer(5)]], device tint_array<uint, 1>* out [[buffer(6)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.in0=in0, .in1=in1, .in2=in2, .in3=in3, .in5=in5, .in6=in6, .out=out, .tint_immediate_data=tint_immediate_data};
+  tint_array_lengths_struct const v_1 = tint_array_lengths_struct{.tint_array_length_0_6=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] / 4u)};
   simdgroup_float8x8 v_2 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
   (simdgroup_load(v_2, reinterpret_cast<const device float*>(reinterpret_cast<const device char*>(tint_module_vars.in0) + 0u), ulong(16u), ulong2(0ul), false));
   simdgroup_float8x8 const m0 = v_2;

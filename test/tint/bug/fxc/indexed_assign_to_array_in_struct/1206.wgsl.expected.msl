@@ -42,10 +42,16 @@ struct Simulation {
   /* 0x0000 */ uint i;
 };
 
+struct tint_immediate_data_struct {
+  /* 0x0000 */ uint tint_non_constant_zero;
+  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad_3;
+  /* 0x0800 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+};
+
 struct tint_module_vars_struct {
   const device Particles_packed_vec3* particles;
   const constant Simulation* sim;
-  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 struct tint_array_lengths_struct {
@@ -62,8 +68,8 @@ Particle tint_load_struct_packed_vec3(const device Particle_packed_vec3* const f
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v_1(const device Particles_packed_vec3* particles [[buffer(0)]], const constant Simulation* sim [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.particles=particles, .sim=sim, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  Particle particle = tint_load_struct_packed_vec3((&(*tint_module_vars.particles).p[min(0u, (tint_array_lengths_struct{.tint_array_length_0_0=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 176u)}.tint_array_length_0_0 - 1u))]));
+kernel void v_1(const device Particles_packed_vec3* particles [[buffer(0)]], const constant Simulation* sim [[buffer(1)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.particles=particles, .sim=sim, .tint_immediate_data=tint_immediate_data};
+  Particle particle = tint_load_struct_packed_vec3((&(*tint_module_vars.particles).p[min(0u, (tint_array_lengths_struct{.tint_array_length_0_0=(((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] - 0u) / 176u)}.tint_array_length_0_0 - 1u))]));
   particle.position[min((*tint_module_vars.sim).i, 7u)] = particle.position[min((*tint_module_vars.sim).i, 7u)];
 }

@@ -55,6 +55,12 @@ struct Dbg {
   /* 0x002c */ float value_f32_3;
 };
 
+struct tint_immediate_data_struct {
+  /* 0x0000 */ uint tint_non_constant_zero;
+  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad_2;
+  /* 0x0800 */ tint_array<uint, 4> tint_storage_buffer_sizes;
+};
+
 struct tint_module_vars_struct {
   const constant Uniforms_packed_vec3* uniforms;
   device U32s* indices;
@@ -62,7 +68,7 @@ struct tint_module_vars_struct {
   device AU32s* counters;
   device AI32s* LUT;
   device Dbg* dbg;
-  const constant tint_array<uint4, 2>* tint_storage_buffer_sizes;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 struct tint_array_lengths_struct {
@@ -108,7 +114,7 @@ void doIgnore(tint_array_lengths_struct tint_array_lengths, tint_module_vars_str
 }
 
 void main_count_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
-  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_3=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u), .tint_array_length_0_4=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].w - 0u) / 4u), .tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u), .tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u)};
+  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_3=(((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[2u] - 0u) / 4u), .tint_array_length_0_4=(((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[3u] - 0u) / 4u), .tint_array_length_0_1=(((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] - 0u) / 4u), .tint_array_length_0_2=(((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[1u] - 0u) / 4u)};
   uint triangleIndex = GlobalInvocationID.x;
   if ((triangleIndex >= (*tint_module_vars.uniforms).numTriangles)) {
     return;
@@ -127,7 +133,7 @@ void main_count_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mod
 }
 
 [[max_total_threads_per_threadgroup(128)]]
-kernel void main_count(uint3 GlobalInvocationID [[thread_position_in_grid]], const constant Uniforms_packed_vec3* uniforms [[buffer(0)]], device U32s* indices [[buffer(1)]], device F32s* positions [[buffer(3)]], device AU32s* counters [[buffer(4)]], device AI32s* LUT [[buffer(2)]], device Dbg* dbg [[buffer(5)]], const constant tint_array<uint4, 2>* tint_storage_buffer_sizes [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .indices=indices, .positions=positions, .counters=counters, .LUT=LUT, .dbg=dbg, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+kernel void main_count(uint3 GlobalInvocationID [[thread_position_in_grid]], const constant Uniforms_packed_vec3* uniforms [[buffer(0)]], device U32s* indices [[buffer(1)]], device F32s* positions [[buffer(3)]], device AU32s* counters [[buffer(4)]], device AI32s* LUT [[buffer(2)]], device Dbg* dbg [[buffer(5)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .indices=indices, .positions=positions, .counters=counters, .LUT=LUT, .dbg=dbg, .tint_immediate_data=tint_immediate_data};
   (main_count_inner(GlobalInvocationID, tint_module_vars));
 }

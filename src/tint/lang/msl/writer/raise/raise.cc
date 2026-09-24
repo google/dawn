@@ -81,7 +81,7 @@
 
 namespace tint::msl::writer {
 
-Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
+Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(core::ir::transform::SingleEntryPoint(module, options.entry_point_name));
 
     TINT_CHECK_RESULT(
@@ -92,8 +92,6 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     if (options.workarounds.collapse_subgroup_min_max) {
         TINT_CHECK_RESULT(core::ir::transform::CollapseSubgroupMinMax(module));
     }
-
-    RaiseResult raise_result;
 
     // VertexPulling must come before BindingRemapper and Robustness.
     if (options.vertex_pulling_config) {
@@ -109,11 +107,16 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     PopulateBindingRelatedOptions(options, remapper_data, multiplanar_map,
                                   array_length_from_constants);
 
+    if (!array_length_from_constants.bindpoint_to_size_index.empty() &&
+        !array_length_from_constants.buffer_sizes_offset.has_value()) {
+        return Failure("array length from immediate requires a buffer sizes offset");
+    }
+
     uint32_t buffer_sizes_array_elements_num = 0;
 
     // PrepareImmediateData must come before any transform that needs internal immediates.
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    if (array_length_from_constants.buffer_sizes_offset) {
+    if (array_length_from_constants.buffer_sizes_offset.has_value()) {
         uint32_t max_index = 0;
         for (auto& entry : array_length_from_constants.bindpoint_to_size_index) {
             max_index = std::max(max_index, entry.second);
@@ -190,26 +193,9 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     TINT_CHECK_RESULT(core::ir::transform::MultiplanarExternalTexture(module, multiplanar_map));
 
-    // TODO(crbug.com/366291600): Replace ArrayLengthFromUniform with ArrayLengthFromImmediates
-    if (array_length_from_constants.ubo_binding) {
-        TINT_CHECK_RESULT_UNWRAP(
-            array_length_from_uniform_result,
-            core::ir::transform::ArrayLengthFromUniform(
-                module, BindingPoint{0u, array_length_from_constants.ubo_binding.value()},
-                array_length_from_constants.bindpoint_to_size_index));
-        raise_result.needs_storage_buffer_sizes =
-            array_length_from_uniform_result.needs_storage_buffer_sizes;
-    }
-
-    if (array_length_from_constants.buffer_sizes_offset) {
-        TINT_IR_ASSERT(module, !array_length_from_constants.ubo_binding);
-        TINT_CHECK_RESULT_UNWRAP(array_length_from_immediate_result,
-                                 core::ir::transform::ArrayLengthFromImmediates(
-                                     module, immediate_data_layout, buffer_sizes_array_elements_num,
-                                     array_length_from_constants.bindpoint_to_size_index));
-        raise_result.needs_storage_buffer_sizes =
-            array_length_from_immediate_result.needs_storage_buffer_sizes;
-    }
+    TINT_CHECK_RESULT(core::ir::transform::ArrayLengthFromImmediates(
+        module, immediate_data_layout, buffer_sizes_array_elements_num,
+        array_length_from_constants.bindpoint_to_size_index));
 
     TINT_CHECK_RESULT(raise::DecomposeBuffer(module));
 
@@ -251,11 +237,6 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
         if (options.immediate_binding_point) {
             cfg.skip_bindings.insert(options.immediate_binding_point.value());
-        }
-
-        if (array_length_from_constants.ubo_binding) {
-            cfg.skip_bindings.insert(
-                BindingPoint{0u, array_length_from_constants.ubo_binding.value()});
         }
 
         if (options.vertex_pulling_config) {
@@ -330,7 +311,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         TINT_CHECK_RESULT(core::ir::transform::ValueToLet(module, cfg));
     }
 
-    return raise_result;
+    return Success;
 }
 
 }  // namespace tint::msl::writer

@@ -78,7 +78,6 @@ using WorkgroupAllocations = std::vector<uint32_t>;
 #define MSL_COMPILATION_MEMBERS(X)                \
     X(std::string, msl)                           \
     X(std::string, remappedEntryPointName)        \
-    X(bool, needsStorageBufferLength)             \
     X(bool, hasInvariantAttribute)                \
     X(WorkgroupAllocations, workgroupAllocations) \
     X(Extent3D, localWorkgroupSize)
@@ -272,8 +271,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 bindings.storage.emplace(srcBindingPoint, dstBindingPoint);
             }
 
-            // Use the ShaderIndex as the indices for the buffer size lookups in the array
-            // length uniform transform.
+            // Use the ShaderIndex as the indices for buffer size lookups in immediate data.
             arrayLengthFromConstants.bindpoint_to_size_index.emplace(srcBindingPoint,
                                                                      dstBindingPoint.binding);
         }
@@ -481,7 +479,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             return MslCompilation{{
                 std::move(msl),
                 r.tintOptions.remapped_entry_point_name,
-                result->needs_storage_buffer_sizes,
                 result->has_invariant_attribute,
                 std::move(result->workgroup_allocations),
                 localSize,
@@ -526,7 +523,6 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
                                    renderPipeline, GetEntryPoint(entryPointName).bindings,
                                    GetStrictMath().value_or(false), pipelineImmediateMask));
 
-    out->needsStorageBufferLength = mslCompilation->needsStorageBufferLength;
     out->workgroupAllocations = std::move(mslCompilation->workgroupAllocations);
     out->localWorkgroupSize = MTLSizeMake(mslCompilation->localWorkgroupSize.width,
                                           mslCompilation->localWorkgroupSize.height,
@@ -614,11 +610,6 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
     labelStream << GetLabel() << "::" << entryPointName;
     SetDebugName(GetDevice(), out->function.Get(), "Dawn_ShaderModule", labelStream.str());
     GetDevice()->GetBlobCache()->EnsureStored(mslCompilation);
-
-    if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
-        GetEntryPoint(entryPointName).usedVertexInputs.any()) {
-        out->needsStorageBufferLength = true;
-    }
 
     // For emitting MSL in error message if render pipeline creation fails.
     out->msl = std::move(mslCompilation->msl);

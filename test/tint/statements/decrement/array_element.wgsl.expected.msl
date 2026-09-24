@@ -13,9 +13,15 @@ struct tint_array {
   T elements[N];
 };
 
+struct tint_immediate_data_struct {
+  /* 0x0000 */ uint tint_non_constant_zero;
+  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad;
+  /* 0x0800 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+};
+
 struct tint_module_vars_struct {
   device tint_array<uint, 1>* a;
-  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 struct tint_array_lengths_struct {
@@ -23,8 +29,8 @@ struct tint_array_lengths_struct {
 };
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v(device tint_array<uint, 1>* a [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  device uint* const v_1 = (&(*tint_module_vars.a)[min(1u, (tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)}.tint_array_length_0_0 - 1u))]);
+kernel void v(device tint_array<uint, 1>* a [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .tint_immediate_data=tint_immediate_data};
+  device uint* const v_1 = (&(*tint_module_vars.a)[min(1u, (tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] / 4u)}.tint_array_length_0_0 - 1u))]);
   (*v_1) = ((*v_1) - 1u);
 }

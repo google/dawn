@@ -17,9 +17,15 @@ struct tint_array_lengths_struct {
   uint tint_array_length_0_0;
 };
 
+struct tint_immediate_data_struct {
+  /* 0x0000 */ uint tint_non_constant_zero;
+  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad;
+  /* 0x0800 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+};
+
 struct tint_module_vars_struct {
   const device tint_array<float, 1>* rarr;
-  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 void vector() {
@@ -44,9 +50,9 @@ void runtime_size_array(tint_array_lengths_struct tint_array_lengths, tint_modul
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void f(const device tint_array<float, 1>* rarr [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.rarr=rarr, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  tint_array_lengths_struct const v_1 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)};
+kernel void f(const device tint_array<float, 1>* rarr [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.rarr=rarr, .tint_immediate_data=tint_immediate_data};
+  tint_array_lengths_struct const v_1 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] / 4u)};
   (vector());
   (v());
   (fixed_size_array());

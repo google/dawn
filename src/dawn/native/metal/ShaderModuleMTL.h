@@ -58,7 +58,6 @@ class ShaderModule final : public ShaderModuleBase {
     struct MetalFunctionData {
         std::string msl;
         NSPRef<id<MTLFunction>> function;
-        bool needsStorageBufferLength = false;
         std::vector<uint32_t> workgroupAllocations;
         MTLSize localWorkgroupSize{};
     };
