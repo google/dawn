@@ -39,7 +39,10 @@
 #include <memory>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
+
+#include "absl/container/linked_hash_map.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundef"
@@ -140,7 +143,11 @@ struct napi_env__ {
     napi_extended_error_info last_error{};
     std::vector<std::unique_ptr<napi_handle_scope__>> open_handle_scopes;
     std::vector<std::unique_ptr<CallbackBinding>> callback_bindings;
-    std::vector<std::unique_ptr<napi_ref__>> references;
+
+    // Keyed by the reference's own address for O(1) erase on napi_delete_reference, while
+    // preserving insertion order so ~napi_env__ can finalize references in reverse creation order.
+    absl::linked_hash_map<napi_ref__*, std::unique_ptr<napi_ref__>> references;
+
     std::vector<std::unique_ptr<napi_deferred__>> deferreds;
     InstanceData instance_data{};
 
@@ -159,15 +166,17 @@ struct napi_env__ {
             instance_data.finalize_cb = nullptr;
         }
 
-        // Finalize all remaining references that have an active finalizer.
+        // Finalize all remaining references that have an active finalizer, most recently created
+        // first. Iteration order is insertion order, which absl::linked_hash_map preserves.
         while (true) {
-            auto it = std::find_if(references.rbegin(), references.rend(),
-                                   [](const auto& r) { return r->finalize_cb != nullptr; });
+            auto it = std::find_if(references.rbegin(), references.rend(), [](const auto& entry) {
+                return entry.second->finalize_cb != nullptr;
+            });
             if (it == references.rend()) {
                 break;
             }
 
-            napi_ref__* ref = it->get();
+            napi_ref__* ref = it->second.get();
             napi_finalize cb = ref->finalize_cb;
             void* native_object = ref->native_object;
             void* finalize_hint = ref->finalize_hint;

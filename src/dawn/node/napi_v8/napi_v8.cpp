@@ -1481,8 +1481,9 @@ napi_status napi_create_reference(napi_env env,
     }
     v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(value);
     auto ref = std::make_unique<napi_ref__>(env, v8_val, initial_refcount);
-    *result = ref.get();
-    env->references.push_back(std::move(ref));
+    napi_ref__* key = ref.get();
+    *result = key;
+    env->references.insert({key, std::move(ref)});
     return napi_ok;
 }
 
@@ -1490,9 +1491,7 @@ napi_status napi_delete_reference(napi_env env, napi_ref ref) {
     if (!ValidateArgs(env, ref)) {
         return napi_invalid_arg;
     }
-    size_t erased = std::erase_if(
-        env->references, [ref](const std::unique_ptr<napi_ref__>& r) { return r.get() == ref; });
-    if (erased > 0) {
+    if (env->references.erase(ref) > 0) {
         return napi_ok;
     }
     return env->SetLastError(napi_invalid_arg, "Reference not found");
@@ -1568,15 +1567,16 @@ napi_status napi_wrap(napi_env env,
     auto ref = std::make_unique<napi_ref__>(env, obj, 0, native_object, finalize_cb, finalize_hint,
                                             /*wrap_ref=*/true,
                                             /*userland_ref=*/result != nullptr);
+    napi_ref__* key_ref = ref.get();
     v8::Local<v8::External> ext =
-        v8::External::New(env->isolate, ref.get(), v8::kExternalPointerTypeTagDefault);
+        v8::External::New(env->isolate, key_ref, v8::kExternalPointerTypeTagDefault);
     if (obj->SetPrivate(ctx, key, ext).IsNothing()) {
         return env->SetLastError(napi_generic_failure, "Failed to attach the object's wrapper");
     }
     if (result != nullptr) {
-        *result = ref.get();
+        *result = key_ref;
     }
-    env->references.push_back(std::move(ref));
+    env->references.insert({key_ref, std::move(ref)});
     return napi_ok;
 }
 
@@ -1616,8 +1616,7 @@ napi_status napi_remove_wrap(napi_env env, napi_value js_object, void** result) 
     if (!ref->is_userland_ref) {
         // Internal runtime reference: erasing it destroys the unique_ptr, whose
         // destructor calls handle.Reset(), deregistering the weak callback in V8.
-        std::erase_if(env->references,
-                      [ref](const std::unique_ptr<napi_ref__>& r) { return r.get() == ref; });
+        env->references.erase(ref);
     }
     return napi_ok;
 }
@@ -1638,10 +1637,11 @@ napi_status napi_add_finalizer(napi_env env,
     auto ref = std::make_unique<napi_ref__>(env, val, 0, finalize_data, finalize_cb, finalize_hint,
                                             /*wrap_ref=*/false,
                                             /*userland_ref=*/result != nullptr);
+    napi_ref__* key_ref = ref.get();
     if (result != nullptr) {
-        *result = ref.get();
+        *result = key_ref;
     }
-    env->references.push_back(std::move(ref));
+    env->references.insert({key_ref, std::move(ref)});
     return napi_ok;
 }
 
@@ -1658,7 +1658,8 @@ napi_status napi_create_external(napi_env env,
     if (finalize_cb != nullptr) {
         auto ref = std::make_unique<napi_ref__>(env, ext, 0, data, finalize_cb, finalize_hint,
                                                 /*wrap_ref=*/false, /*userland_ref=*/false);
-        env->references.push_back(std::move(ref));
+        napi_ref__* key_ref = ref.get();
+        env->references.insert({key_ref, std::move(ref)});
     }
     *result = dawn::napi_v8::ToNapi(ext);
     return napi_ok;
