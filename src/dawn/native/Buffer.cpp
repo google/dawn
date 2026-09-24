@@ -31,6 +31,7 @@
 #include <cstdio>
 #include <cstring>
 #include <limits>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -75,6 +76,18 @@ class ErrorBuffer final : public BufferBase {
     ErrorBuffer(DeviceBase* device, const BufferDescriptor* descriptor)
         : BufferBase(device, descriptor, ObjectBase::kError) {
         mAllocatedSize = descriptor->size;
+
+        if (device->GetState() == DeviceBase::State::Destroyed) {
+            // If the device is destroyed, it can't track the object. Initialize mSelfTrackList
+            // instead for use below.
+            mSelfTrackList.emplace();
+        }
+        // Track the ErrorBuffer for destruction. If the device is destroyed, this will track it on
+        // an internal list so it can be unmapped when the buffer is destroyed.
+        // TODO(crbug.com/42241190): Calling device.Destroy() *again* won't unmap this buffer.
+        // Need to fix this, OR change the spec to disallow mapping-at-creation after the device
+        // is destroyed. (Note it should always be allowed on *non-destroyed* lost devices.)
+        GetObjectTrackingList()->Track(this);
     }
 
   private:
@@ -111,7 +124,15 @@ class ErrorBuffer final : public BufferBase {
 
     void UnmapImpl(BufferState oldState, BufferState newState) override { mFakeMappedData = {}; }
 
+    ApiObjectList* GetObjectTrackingList() override {
+        if (mSelfTrackList) {
+            return &*mSelfTrackList;
+        }
+        return BufferBase::GetObjectTrackingList();
+    }
+
     HeapArray<std::byte> mFakeMappedData;
+    std::optional<ApiObjectList> mSelfTrackList;
 };
 
 // GetMappedRange on a zero-sized buffer returns a pointer to this value.
@@ -491,27 +512,13 @@ BufferBase::BufferBase(DeviceBase* device,
       mSize(descriptor->size),
       mUsage(descriptor->usage),
       mInternalUsage(descriptor->usage),
-      mState(BufferState::Unmapped) {
-    // Track the ErrorBuffer for destruction so it can be unmapped on destruction.
-    // Don't do this if the device is already destroyed, so that CreateBuffer can still return
-    // a mappedAtCreation buffer after device destroy (per spec).
-    // TODO(crbug.com/42241190): Calling device.Destroy() *again* still won't unmap this
-    // buffer. Need to fix this, OR change the spec to disallow mapping-at-creation after the
-    // device is destroyed. (Note it should always be allowed on *non-destroyed* lost devices.)
-    if (device->GetState() != DeviceBase::State::Destroyed) {
-        GetObjectTrackingList()->Track(this);
-    }
-}
+      mState(BufferState::Unmapped) {}
 
 BufferBase::~BufferBase() {
     BufferState state = mState.load(std::memory_order::acquire);
     DAWN_CHECK(state == BufferState::Unmapped || state == BufferState::Destroyed ||
-               state == BufferState::SharedMemoryNoAccess ||
-               // Happens if the buffer was created mappedAtCreation *after* device destroy.
-               // TODO(crbug.com/42241190): This shouldn't be needed once the issue above is fixed,
-               // because then bufferState will just be Destroyed.
-               (state == BufferState::MappedAtCreation &&
-                GetDevice()->GetState() == DeviceBase::State::Destroyed));
+               state == BufferState::SharedMemoryNoAccess);
+    DAWN_CHECK(mMappedRange.data() == nullptr);
 }
 
 void BufferBase::DestroyImpl(DestroyReason reason) {
@@ -545,8 +552,17 @@ void BufferBase::DestroyImpl(DestroyReason reason) {
             }
             case BufferState::Destroyed:
                 DAWN_UNREACHABLE();
+            case BufferState::SharedMemoryNoAccess: {
+                // Since we are destroying this buffer, we need to begin access on it so that we
+                // can handle it as a normal buffer, assuming it is unmapped. Otherwise, if the
+                // buffer was mapped at creation and never unmapped, OnBeginAccess will transition
+                // |mState| to |MappedAtCreation| and this loop will run one more time to unmap it
+                // appropriately.
+                OnBeginAccess();
+                state = BufferState::Unmapped;
+                break;
+            }
             case BufferState::Unmapped:
-            case BufferState::SharedMemoryNoAccess:
                 // Buffer is ready to be destroyed.
                 break;
         }
@@ -839,7 +855,7 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
 
             event =
                 AcquireRef(new MapAsyncEvent(GetDevice(), this, callbackInfo, mLastUsageSerial));
-            mMappedRange = {};
+            DAWN_CHECK(mMappedRange.data() == nullptr);
             DAWN_CHECK(!mPendingMapEvent);
             mPendingMapEvent = event;
             mState.store(BufferState::PendingMap, std::memory_order::release);
@@ -944,11 +960,13 @@ MaybeValError BufferBase::Unmap(bool forDestroy) {
     switch (mState.load(std::memory_order::acquire)) {
         case BufferState::Mapped:
             DAWN_TRY(TransitionState(BufferState::Mapped, BufferState::InUse));
+            mMappedRange = {};
             UnmapImpl(BufferState::Mapped,
                       forDestroy ? BufferState::Destroyed : BufferState::Unmapped);
             break;
         case BufferState::MappedAtCreation:
             DAWN_TRY(TransitionState(BufferState::MappedAtCreation, BufferState::InUse));
+            mMappedRange = {};
             mIsMappedAtCreation = false;
             if (mStagingBuffer != nullptr) {
                 if (forDestroy) {

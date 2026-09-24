@@ -352,8 +352,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // The range of bytes that are currently mapped When MappedAtCreation, the range points at
     // GetAllocatedSize() bytes instead of only GetSize() bytes so that the padding bytes may be
     // initialized.
-    // TODO(https://crbug.com/526537224): Use RawSpan.
-    Span<std::byte> mMappedRange;
+    RawSpan<std::byte> mMappedRange;
 };
 
 }  // namespace dawn::native
