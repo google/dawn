@@ -777,19 +777,19 @@ void Buffer::DestroyImpl(DestroyReason reason) {
 
     if (mHostMappedDisposeCallback) {
         struct DisposeTask : TrackTaskCallback {
-            explicit DisposeTask(wgpu::Callback callback, void* userdata)
-                : TrackTaskCallback(nullptr), callback(callback), userdata(userdata) {}
+            explicit DisposeTask(wgpu::Callback callback, raw_ptr<void> userdata)
+                : TrackTaskCallback(nullptr), callback(callback), userdata(std::move(userdata)) {}
             ~DisposeTask() override = default;
 
-            void FinishImpl() override { callback(userdata); }
-            void HandleDeviceLossImpl() override { callback(userdata); }
-            void HandleShutDownImpl() override { callback(userdata); }
+            void FinishImpl() override { callback(userdata.ExtractAsDangling()); }
+            void HandleDeviceLossImpl() override { callback(userdata.ExtractAsDangling()); }
+            void HandleShutDownImpl() override { callback(userdata.ExtractAsDangling()); }
 
             wgpu::Callback callback;
-            raw_ptr<void, DisableDanglingPtrDetection> userdata;
+            raw_ptr<void> userdata;
         };
-        std::unique_ptr<DisposeTask> request =
-            std::make_unique<DisposeTask>(mHostMappedDisposeCallback, mHostMappedDisposeUserdata);
+        std::unique_ptr<DisposeTask> request = std::make_unique<DisposeTask>(
+            mHostMappedDisposeCallback, std::move(mHostMappedDisposeUserdata));
         mHostMappedDisposeCallback = nullptr;
 
         GetDevice()->GetQueue()->TrackPendingTask(std::move(request));
