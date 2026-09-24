@@ -194,7 +194,8 @@ void SharedBufferMemory::DestroyImpl(DestroyReason reason) {
         void FinishImpl() override {
             resource = nullptr;
             heap = nullptr;
-            mCallback(WGPUCallbackStatus_Success, mUserdata1, mUserdata2);
+            mCallback(WGPUCallbackStatus_Success, mUserdata1.ExtractAsDangling(),
+                      mUserdata2.ExtractAsDangling());
         }
 
         void HandleDeviceLossImpl() override { FinishImpl(); }
