@@ -55,19 +55,19 @@ There's also a helper tool to run the fuzzers locally:
   [`test/tint`](../../test/tint), and using the dictionary in
   `src/tint/cmd/fuzz/wgsl/dictionary.txt` run:
 
-  `tools/run fuzz`
+  `tools/run fuzz run`
 
 - To check that all the test files, [`test/tint`](../../test/tint) by
   default, pass the fuzzers without crashing and then exit, run:
 
-  `tools/run fuzz --check`
+  `tools/run fuzz check`
 
   Note: This is run by Dawn's CQ to check that fuzzers aren't
   accidentally broken.
 
 - To run the local fuzzers using a generated corpus of .wgsl files:
 
-  `tools/run fuzz -inputs out/Fuzzer/wgsl_corpus`
+  `tools/run fuzz run -inputs out/Fuzzer/wgsl_corpus`
 
 Note: The above commands will run in the default WGSL mode only.  If
 you want to run using the IR fuzzer, you need to pass in `--ir` to run
@@ -76,9 +76,9 @@ in IR mode.
 Examples of IR mode:
 
 ```bash
-tools/run fuzz -ir
-tools/run fuzz -ir -inputs out/Fuzzer/ir_corpus
-tools/run fuzz -ir -check
+tools/run fuzz run -ir
+tools/run fuzz run -ir -inputs out/Fuzzer/ir_corpus
+tools/run fuzz check -ir
 ```
 
 `-ir` mode without any provided inputs will convert the default WGSL
@@ -99,7 +99,7 @@ restricted by this initial corpus, since it will mutate and recombine
 the examples to find new and interesting inputs.
 
 The helper tool is capable of producing appropriate corpora from test
-files via the `-generate` flag. `-generate` requires you to also pass
+files via the `generate` subcommand. `generate` requires you to also pass
 in `-out`, since otherwise the output would go to an ephemeral tmp
 directory and not be useable.
 
@@ -109,7 +109,7 @@ To generate a corpus based on the default test files from
 [`test/tint`](../../test/tint) no additional flags are needed
 
 ```bash
-tools/run fuzz -generate -out out/Fuzzer/wgsl_corpus
+tools/run fuzz generate -out out/Fuzzer/wgsl_corpus
 ```
 
 `-inputs` can be used to provide custom inputs to the tool. It will
@@ -117,7 +117,7 @@ use any .wgsl files found in the inputs that don't also include the
 string `.expected.` in their name.
 
 ```bash
-tools/run fuzz -generate -inputs my_super_cool_tests/ -out out/Fuzzer/wgsl_corpus
+tools/run fuzz generate -inputs my_super_cool_tests/ -out out/Fuzzer/wgsl_corpus
 ```
 
 `-out` will overwrite existing files that collide with the output file
@@ -133,14 +133,14 @@ An example of generating and then using a custom WGSL corpus:
 
 ```bash
 autoninja -C out/Fuzzer fuzzer_corpus_tools  # Guarantees the fuzzers and another tooling is present
-tools/run fuzz -generate -inputs my_super_cool_tests/ -out out/Fuzzer/wgsl_corpus
+tools/run fuzz generate -inputs my_super_cool_tests/ -out out/Fuzzer/wgsl_corpus
 
 # And then either
 out/Fuzzer/tint_wgsl_fuzzer -dict=src/tint/cmd/fuzz/wgsl/dictionary.txt out/Fuzzer/wgsl_corpus
 
 # or
 
-tools/run fuzz -inputs out/Fuzzer/wgsl_corpus
+tools/run fuzz run -inputs out/Fuzzer/wgsl_corpus
 ```
 
 #### tint_ir_fuzzer
@@ -161,27 +161,27 @@ inputs with `.expected.` will be filtered out.
 Generating a corpus based on the default WGSL tests:
 
 ```bash
-tools/run fuzz -ir -generate -out out/Fuzzer/wgsl_corpus
+tools/run fuzz generate -ir -out out/Fuzzer/wgsl_corpus
 ```
 
 Generating a corpus based on custom WGSL files:
 
 ```bash
-tools/run fuzz -ir -generate -input my_super_cool_tests/ -out out/Fuzzer/wgsl_corpus
+tools/run fuzz generate -ir -input my_super_cool_tests/ -out out/Fuzzer/wgsl_corpus
 ```
 
 An example of generating and using a custom IR corpus:
 
 ```bash
 autoninja -C out/Fuzzer fuzzer_corpus_tools  # Guarantees the fuzzers and another tooling is present
-tools/run fuzz -ir -generate -inputs my_super_cool_tests/ -out out/Fuzzer/ir_corpus
+tools/run fuzz generate -ir -inputs my_super_cool_tests/ -out out/Fuzzer/ir_corpus
 
 # And then either
 out/Fuzzer/tint_ir_fuzzer out/Fuzzer/ir_corpus
 
 # or
 
-tools/run fuzz -ir -inputs out/Fuzzer/ir_corpus
+tools/run fuzz run -ir -inputs out/Fuzzer/ir_corpus
 ```
 
 #### Minimizing the corpus

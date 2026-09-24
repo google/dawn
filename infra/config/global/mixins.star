@@ -125,7 +125,6 @@ targets.mixin(
 targets.mixin(
     name = "tint_fuzzer_corpus_generate_args",
     args = [
-        "-generate",
         "-out",
         "${ISOLATED_OUTDIR}/clusterfuzz",
     ],

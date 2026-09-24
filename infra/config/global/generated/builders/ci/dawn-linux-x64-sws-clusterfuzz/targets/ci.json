@@ -76,9 +76,9 @@
     "isolated_scripts": [
       {
         "args": [
+          "generate",
           "-ir",
           "--append-cwd-as-build",
-          "-generate",
           "-out",
           "${ISOLATED_OUTDIR}/clusterfuzz"
         ],
@@ -110,10 +110,10 @@
       },
       {
         "args": [
+          "generate",
           "-ir",
           "-mesa",
           "--append-cwd-as-build",
-          "-generate",
           "-out",
           "${ISOLATED_OUTDIR}/clusterfuzz"
         ],
@@ -145,8 +145,8 @@
       },
       {
         "args": [
+          "generate",
           "--append-cwd-as-build",
-          "-generate",
           "-out",
           "${ISOLATED_OUTDIR}/clusterfuzz"
         ],
@@ -178,9 +178,9 @@
       },
       {
         "args": [
+          "generate",
           "-mesa",
           "--append-cwd-as-build",
-          "-generate",
           "-out",
           "${ISOLATED_OUTDIR}/clusterfuzz"
         ],

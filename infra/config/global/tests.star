@@ -334,7 +334,7 @@ targets.tests.isolated_script_test(
         "true_noop_merge",
     ],
     args = [
-        "-check",
+        "check",
         "-ir",
     ],
     binary = "fuzzer_corpus_tests",
@@ -348,7 +348,7 @@ targets.tests.isolated_script_test(
         "true_noop_merge",
     ],
     args = [
-        "-check",
+        "check",
         "-ir",
         "-mesa",
     ],
@@ -364,6 +364,7 @@ targets.tests.isolated_script_test(
         "tint_ir_merge",
     ],
     args = [
+        "generate",
         "-ir",
     ],
     binary = "fuzzer_corpus_tests",
@@ -378,6 +379,7 @@ targets.tests.isolated_script_test(
         "tint_ir_mesa_merge",
     ],
     args = [
+        "generate",
         "-ir",
         "-mesa",
     ],
@@ -408,7 +410,7 @@ targets.tests.isolated_script_test(
         ),
     ],
     args = [
-        "-check",
+        "check",
     ],
     binary = "fuzzer_corpus_tests",
 )
@@ -428,7 +430,7 @@ targets.tests.isolated_script_test(
         ),
     ],
     args = [
-        "-check",
+        "check",
         "-mesa",
     ],
     binary = "fuzzer_corpus_tests",
@@ -442,6 +444,9 @@ targets.tests.isolated_script_test(
         "tint_fuzzer_corpus_generate_args",
         "tint_wgsl_merge",
     ],
+    args = [
+        "generate",
+    ],
     binary = "fuzzer_corpus_tests",
 )
 
@@ -454,6 +459,7 @@ targets.tests.isolated_script_test(
         "tint_wgsl_mesa_merge",
     ],
     args = [
+        "generate",
         "-mesa",
     ],
     binary = "fuzzer_corpus_tests",

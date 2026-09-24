@@ -219,6 +219,7 @@ var (
 		usageArgs:   "[flags]",
 		registerFlags: func(fs *flag.FlagSet, c *mainConfig, irMode *bool) {
 			fs.BoolVar(irMode, "ir", false, "runs using IR fuzzer instead of WGSL fuzzer")
+			fs.BoolVar(&c.mesaMode, "mesa", false, "runs using Mesa fuzzer variants")
 			fs.StringVar(&c.inputs, "corpus", defaultWgslCorpusDir(c.osWrapper), "obsolete, use -inputs instead")
 			fs.StringVar(&c.inputs, "inputs", defaultWgslCorpusDir(c.osWrapper), "the directory that holds the files to use")
 			fs.StringVar(&c.out, "out", "<tmp>", "the directory to store outputs to")

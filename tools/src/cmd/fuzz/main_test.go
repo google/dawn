@@ -442,10 +442,11 @@ func TestParseFlagsSubcommands(t *testing.T) {
 	{
 		cfg := newDefaultMainConfig()
 		var stdout, stderr bytes.Buffer
-		err := parseFlags([]string{"generate", "-out", "/my/corpus", "-ir"}, &cfg, &stdout, &stderr)
+		err := parseFlags([]string{"generate", "-out", "/my/corpus", "-ir", "-mesa"}, &cfg, &stdout, &stderr)
 		require.NoError(t, err)
 		require.Equal(t, TaskModeGenerate, cfg.cmdMode)
 		require.Equal(t, FuzzModeIr, cfg.fuzzMode)
+		require.True(t, cfg.mesaMode)
 		require.Equal(t, "/my/corpus", cfg.out)
 
 		// Missing -out (error)
