@@ -1953,7 +1953,6 @@ ci.thin_tester(
     targets = targets.bundle(
         targets = [
             "real_hardware_win_gtests",
-            "litert_lm_benchmark",
         ],
         mixins = [
             "win10_nvidia_gtx_1660_stable",
