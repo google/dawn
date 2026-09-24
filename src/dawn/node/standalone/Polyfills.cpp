@@ -718,6 +718,12 @@ void RegisterProcess(Napi::Env env, const PolyfillOptions& options, PolyfillCont
     hrtime.Set("bigint", Napi::Function::New(env, HrtimeBigint, "bigint"));
     process.Set("hrtime", hrtime);
 
+    // Libraries detect a Node-like environment via `process?.versions?.node !== undefined`; the
+    // version string itself is not inspected.
+    Napi::Object versions = Napi::Object::New(env);
+    versions.Set("node", Napi::String::New(env, "0.0.0"));
+    process.Set("versions", versions);
+
     Napi::Object env_obj = Napi::Object::New(env);
     if (auto [dawn_flags, is_set] = dawn::GetEnvironmentVar("DAWN_FLAGS"); is_set) {
         env_obj.Set("DAWN_FLAGS", Napi::String::New(env, dawn_flags));
@@ -867,6 +873,35 @@ void RegisterPerformance(Napi::Env env, PolyfillContext* ctx) {
     Napi::Object performance = Napi::Object::New(env);
     performance.Set("now", Napi::Function::New(env, PerformanceNow, "now", ctx));
     env.Global().Set("performance", performance);
+}
+
+// ---------------------------------------------------------------------------
+// TextEncoder
+// ---------------------------------------------------------------------------
+
+void TextEncoderConstructor(const Napi::CallbackInfo&) {}
+
+// Implements TextEncoder.prototype.encode(). V8 holds strings as UTF-16, and its UTF-8 conversion
+// already implements the WHATWG encode algorithm: unpaired surrogates become U+FFFD rather than an
+// error.
+Napi::Value EncodeUtf8(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    std::string utf8;
+    if (info.Length() > 0 && !info[0].IsUndefined()) {
+        utf8 = info[0].ToString().Utf8Value();
+    }
+    Napi::Uint8Array out = Napi::Uint8Array::New(env, utf8.size());
+    std::ranges::copy(utf8, out.Data());
+    return out;
+}
+
+void RegisterTextEncoder(Napi::Env env) {
+    // Only encode() is implemented.
+    Napi::Function ctor = Napi::Function::New(env, TextEncoderConstructor, "TextEncoder");
+    ctor.Get("prototype")
+        .As<Napi::Object>()
+        .Set("encode", Napi::Function::New(env, EncodeUtf8, "encode"));
+    env.Global().Set("TextEncoder", ctor);
 }
 
 // ---------------------------------------------------------------------------
@@ -1034,6 +1069,7 @@ void RegisterPolyfills(Napi::Env env, EventLoop& loop, const PolyfillOptions& op
     RegisterProcess(env, options, ctx);
     RegisterTimers(env, ctx);
     RegisterPerformance(env, ctx);
+    RegisterTextEncoder(env);
     RunBootstrapScript(env);
 }
 

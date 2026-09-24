@@ -952,6 +952,35 @@ TEST_F(PolyfillsTest, MessageEvent) {
     EXPECT_EQ(ToString(res), "true,true,import,a.spec.js,true");
 }
 
+TEST_F(PolyfillsTest, ProcessVersions) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    napi_value res = RunScript(
+        "String(typeof process.versions === 'object' && "
+        "typeof process.versions.node === 'string' && process.versions.node.length > 0)");
+    EXPECT_EQ(ToString(res), "true");
+}
+
+TEST_F(PolyfillsTest, TextEncoder) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    // Non-ASCII input covers all of the UTF-8 sequence lengths: two bytes for e-acute, three for
+    // the arrow and four for the surrogate pair.
+    napi_value res = RunScript(R"(
+        const bytes = new TextEncoder().encode('h\u00e9llo \u2192 \ud83c\udf0d');
+        Array.from(bytes).join(' ')
+    )");
+    EXPECT_EQ(ToString(res), "104 195 169 108 108 111 32 226 134 146 32 240 159 140 141");
+
+    // Undefined input encodes to an empty Uint8Array, and an unpaired surrogate is replaced with
+    // U+FFFD (EF BF BD) rather than throwing.
+    res = RunScript(R"(
+        [new TextEncoder().encode().length,
+         Array.from(new TextEncoder().encode('\ud800')).join(' ')].join(',')
+    )");
+    EXPECT_EQ(ToString(res), "0,239 191 189");
+}
+
 TEST_F(PolyfillsTest, PerformanceNow) {
     dawn::node::standalone::RegisterPolyfills(env_, loop());
 
