@@ -84,9 +84,9 @@ class AsyncHelperTest {
 
         val exception = assertThrowsSuspend(WebGpuException::class.java) {
           /* Call an asynchronous method, converted from a callback pattern by a helper. */
-          val unused = device.createRenderPipelineAndAwait(
+          device.createRenderPipelineAndAwait(
             GPURenderPipelineDescriptor(vertex = GPUVertexState(module = shaderModule))
-          )
+          ).close()
         }
 
         assertEquals(

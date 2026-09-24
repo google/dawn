@@ -188,7 +188,7 @@ class MultisampleStateTest {
     @SdkSuppress(maxSdkVersion = 36) // b/537525245
   @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, onlySkipOnEmulator = true)
   fun verifyDefaultMaskEnablesAllSamplesInMSAARender() = runBlocking {
-    val unused = webGpu.execute {
+    webGpu.execute {
       // Default mask (0xFFFFFFFF or -1) should allow drawing.
       // We draw White on Black background -> Expect White (255).
       val actualValue = executeMsaaTest(
@@ -202,7 +202,7 @@ class MultisampleStateTest {
 
   @Test
   fun verifyZeroMaskDisablesUpdates() = runBlocking {
-    val unused = webGpu.execute {
+    webGpu.execute {
       // Zero mask (0x0) should block all samples from being updated.
       // We draw White on Black background -> Expect Black (0) because the draw was masked out.
       val actualValue = executeMsaaTest(
