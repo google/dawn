@@ -1,29 +1,17 @@
 #include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_immediate_data_struct {
   /* 0x0000 */ uint tint_non_constant_zero;
-  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad;
-  /* 0x0800 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+  /* 0x0004 */ array<int8_t, 2044> tint_pad;
+  /* 0x0800 */ array<uint, 1> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {
   thread float* p;
   threadgroup float* w;
   const device float2* uniforms;
-  device tint_array<float, 1>* storages;
+  device array<float, 1>* storages;
   const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
@@ -64,7 +52,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_1 [[threadgroup(0)]], const device float2* uniforms [[buffer(0)]], device tint_array<float, 1>* storages [[buffer(1)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+kernel void v(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_1 [[threadgroup(0)]], const device float2* uniforms [[buffer(0)]], device array<float, 1>* storages [[buffer(1)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
   thread float p = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.p=(&p), .w=(&(*v_1).tint_symbol), .uniforms=uniforms, .storages=storages, .tint_immediate_data=tint_immediate_data};
   (main_inner(tint_local_index, tint_module_vars));

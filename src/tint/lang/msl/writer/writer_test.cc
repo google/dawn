@@ -122,24 +122,12 @@ TEST_F(MslWriterTest, WorkgroupStorageSize_OverflowAfterAlign) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_module_vars_struct {
-  threadgroup tint_array<uint, 1073741823>* a;
+  threadgroup array<uint, 1073741823>* a;
 };
 
 struct tint_symbol_1 {
-  tint_array<uint, 1073741823> tint_symbol;
+  array<uint, 1073741823> tint_symbol;
 };
 
 void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
@@ -191,24 +179,12 @@ TEST_F(MslWriterTest, ArrayLengthFromImmediate_Unused) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_module_vars_struct {
-  device tint_array<uint, 1>* a;
+  device array<uint, 1>* a;
 };
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void entry(device tint_array<uint, 1>* a [[buffer(0)]]) {
+kernel void entry(device array<uint, 1>* a [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
   (*tint_module_vars.a)[0u] = 42u;
 }
@@ -237,26 +213,14 @@ TEST_F(MslWriterTest, ArrayLengthFromImmediate_Used) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_immediate_data_struct {
   /* 0x0000 */ uint tint_non_constant_zero;
-  /* 0x0004 */ tint_array<int8_t, 60> tint_pad;
-  /* 0x0040 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+  /* 0x0004 */ array<int8_t, 60> tint_pad;
+  /* 0x0040 */ array<uint, 1> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {
-  device tint_array<uint, 1>* a;
+  device array<uint, 1>* a;
   const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
@@ -265,7 +229,7 @@ struct tint_array_lengths_struct {
 };
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void entry(device tint_array<uint, 1>* a [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+kernel void entry(device array<uint, 1>* a [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .tint_immediate_data=tint_immediate_data};
   (*tint_module_vars.a)[0u] = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] / 4u)}.tint_array_length_0_0;
 }
@@ -299,8 +263,7 @@ TEST_P(MslWriterStorageBufferSizesTest, ConfiguredLayout) {
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure();
     if (GetParam()) {
-        EXPECT_THAT(output_.msl,
-                    testing::HasSubstr("tint_array<uint, 4> tint_storage_buffer_sizes;"));
+        EXPECT_THAT(output_.msl, testing::HasSubstr("array<uint, 4> tint_storage_buffer_sizes;"));
     } else {
         EXPECT_THAT(output_.msl, testing::Not(testing::HasSubstr("tint_storage_buffer_sizes")));
     }
@@ -367,7 +330,7 @@ TEST_F(MslWriterTest, ArrayLengthFromImmediate_ZeroOffset) {
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure();
     EXPECT_THAT(output_.msl,
-                testing::HasSubstr("/* 0x0000 */ tint_array<uint, 1> tint_storage_buffer_sizes;"));
+                testing::HasSubstr("/* 0x0000 */ array<uint, 1> tint_storage_buffer_sizes;"));
     EXPECT_THAT(output_.msl, testing::HasSubstr("tint_storage_buffer_sizes[0u] / 4u"));
 }
 
@@ -389,21 +352,9 @@ TEST_F(MslWriterTest, ImmediateF16) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_immediate_data_struct {
   /* 0x0000 */ half user_immediate_data;
-  /* 0x0002 */ tint_array<int8_t, 62> tint_pad;
+  /* 0x0002 */ array<int8_t, 62> tint_pad;
   /* 0x0040 */ uint tint_non_constant_zero;
 };
 
@@ -437,23 +388,11 @@ TEST_F(MslWriterTest, ImmediateVec3F16) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_immediate_data_struct_packed_vec3 {
   /* 0x0000 */ packed_half3 user_immediate_data;
-  /* 0x0006 */ tint_array<int8_t, 58> tint_pad;
+  /* 0x0006 */ array<int8_t, 58> tint_pad;
   /* 0x0040 */ uint tint_non_constant_zero;
-  /* 0x0044 */ tint_array<int8_t, 4> tint_pad_1;
+  /* 0x0044 */ array<int8_t, 4> tint_pad_1;
 };
 
 struct tint_module_vars_struct {
@@ -600,26 +539,14 @@ TEST_F(MslWriterTest, VertexPulling) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_immediate_data_struct {
   /* 0x0000 */ uint tint_non_constant_zero;
-  /* 0x0004 */ tint_array<int8_t, 60> tint_pad;
-  /* 0x0040 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+  /* 0x0004 */ array<int8_t, 60> tint_pad;
+  /* 0x0040 */ array<uint, 1> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {
-  const device tint_array<uint, 1>* tint_vertex_buffer_0;
+  const device array<uint, 1>* tint_vertex_buffer_0;
   const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
@@ -635,7 +562,7 @@ float4 entry_inner(uint tint_vertex_index, tint_module_vars_struct tint_module_v
   return float4(as_type<float>((*tint_module_vars.tint_vertex_buffer_0)[min(tint_vertex_index, (tint_array_lengths_struct{.tint_array_length_0_1=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] / 4u)}.tint_array_length_0_1 - 1u))]), 0.0f, 0.0f, 1.0f);
 }
 
-vertex entry_outputs entry(uint tint_vertex_index [[vertex_id]], const device tint_array<uint, 1>* tint_vertex_buffer_0 [[buffer(1)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+vertex entry_outputs entry(uint tint_vertex_index [[vertex_id]], const device array<uint, 1>* tint_vertex_buffer_0 [[buffer(1)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_vertex_buffer_0=tint_vertex_buffer_0, .tint_immediate_data=tint_immediate_data};
   entry_outputs tint_wrapper_result = {};
   tint_wrapper_result.tint_symbol = entry_inner(tint_vertex_index, tint_module_vars);
@@ -812,24 +739,12 @@ TEST_F(MslWriterTest, BufferView_Workgroup) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_module_vars_struct {
-  threadgroup tint_array<uchar, 32>* v;
+  threadgroup array<uchar, 32>* v;
 };
 
 struct tint_symbol_1 {
-  tint_array<uchar, 32> tint_symbol;
+  array<uchar, 32> tint_symbol;
 };
 
 void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
@@ -891,31 +806,19 @@ TEST_F(MslWriterTest, BufferView_HostStruct_SubFunction) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_module_vars_struct {
-  threadgroup tint_array<uchar, 128>* v;
+  threadgroup array<uchar, 128>* v;
 };
 
 struct S {
   /* 0x0000 */ uint a;
-  /* 0x0004 */ tint_array<int8_t, 28> tint_pad;
+  /* 0x0004 */ array<int8_t, 28> tint_pad;
   /* 0x0020 */ uint b;
-  /* 0x0024 */ tint_array<int8_t, 28> tint_pad_1;
+  /* 0x0024 */ array<int8_t, 28> tint_pad_1;
 };
 
 struct tint_symbol_1 {
-  tint_array<uchar, 128> tint_symbol;
+  array<uchar, 128> tint_symbol;
 };
 
 void foo(tint_module_vars_struct tint_module_vars) {

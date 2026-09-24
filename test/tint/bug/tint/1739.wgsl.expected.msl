@@ -30,31 +30,19 @@ struct tint_ExternalTextureParams {
   float4 ootfParam;
 };
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_packed_vec3_f32_array_element {
   /* 0x0000 */ packed_float3 packed;
-  /* 0x000c */ tint_array<int8_t, 4> tint_pad_1;
+  /* 0x000c */ array<int8_t, 4> tint_pad_1;
 };
 
 struct tint_ExternalTextureParams_packed_vec3 {
   /* 0x0000 */ uint numPlanes;
   /* 0x0004 */ uint doYuvToRgbConversionOnly;
-  /* 0x0008 */ tint_array<int8_t, 8> tint_pad;
+  /* 0x0008 */ array<int8_t, 8> tint_pad;
   /* 0x0010 */ float3x4 yuvToRgbConversionMatrix;
   /* 0x0040 */ tint_TransferFunctionParams srcTransferFunction;
   /* 0x0060 */ tint_TransferFunctionParams dstTransferFunction;
-  /* 0x0080 */ tint_array<tint_packed_vec3_f32_array_element, 3> gamutConversionMatrix;
+  /* 0x0080 */ array<tint_packed_vec3_f32_array_element, 3> gamutConversionMatrix;
   /* 0x00b0 */ float3x2 sampleTransform;
   /* 0x00c8 */ float3x2 loadTransform;
   /* 0x00e0 */ float2 samplePlane0RectMin;
@@ -159,7 +147,7 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
   float3x4 const v_24 = (*from).yuvToRgbConversionMatrix;
   tint_TransferFunctionParams const v_25 = (*from).srcTransferFunction;
   tint_TransferFunctionParams const v_26 = (*from).dstTransferFunction;
-  tint_array<tint_packed_vec3_f32_array_element, 3> const v_27 = (*from).gamutConversionMatrix;
+  array<tint_packed_vec3_f32_array_element, 3> const v_27 = (*from).gamutConversionMatrix;
   float3x3 const v_28 = float3x3(float3(v_27[0u].packed), float3(v_27[1u].packed), float3(v_27[2u].packed));
   return tint_ExternalTextureParams{.numPlanes=v_22, .doYuvToRgbConversionOnly=v_23, .yuvToRgbConversionMatrix=v_24, .srcTransferFunction=v_25, .dstTransferFunction=v_26, .gamutConversionMatrix=v_28, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor, .ootfParam=(*from).ootfParam};
 }

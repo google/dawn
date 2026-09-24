@@ -1,26 +1,14 @@
 #include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_immediate_data_struct {
   /* 0x0000 */ uint tint_non_constant_zero;
-  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad;
-  /* 0x0800 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+  /* 0x0004 */ array<int8_t, 2044> tint_pad;
+  /* 0x0800 */ array<uint, 1> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {
-  device tint_array<float, 1>* tint_member;
+  device array<float, 1>* tint_member;
   const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
@@ -38,17 +26,17 @@ struct S_Nested {
 };
 
 [[max_total_threads_per_threadgroup(64)]]
-kernel void v(device tint_array<float, 1>* v_1 [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+kernel void v(device array<float, 1>* v_1 [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_1, .tint_immediate_data=tint_immediate_data};
   tint_array_lengths_struct const v_2 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] / 4u)};
   simdgroup_float8x8 m = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  tint_array<simdgroup_float8x8, 4> m_array = {};
-  tint_array<tint_array<simdgroup_float8x8, 4>, 4> m_nested_array = {};
+  array<simdgroup_float8x8, 4> m_array = {};
+  array<array<simdgroup_float8x8, 4>, 4> m_nested_array = {};
   S m_struct = {};
   S_Nested m_nested_struct = {};
   simdgroup_float8x8 const m_let = m;
-  tint_array<simdgroup_float8x8, 4> const m_array_let = m_array;
-  tint_array<tint_array<simdgroup_float8x8, 4>, 4> const m_nested_array_let = m_nested_array;
+  array<simdgroup_float8x8, 4> const m_array_let = m_array;
+  array<array<simdgroup_float8x8, 4>, 4> const m_nested_array_let = m_nested_array;
   S const m_struct_let = m_struct;
   S_Nested const m_nested_struct_let = m_nested_struct;
   bool const v_3 = (456u <= v_2.tint_array_length_0_0);

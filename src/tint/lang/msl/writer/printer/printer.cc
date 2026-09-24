@@ -240,42 +240,8 @@ class Printer : public tint::TextGenerator {
     /// The current block being emitted
     const core::ir::Block* current_block_ = nullptr;
 
-    /// Unique name of the tint_array<T, N> template.
-    /// Non-empty only if the template has been generated.
-    std::string array_template_name_;
-
     /// Block to emit for a continuing
     std::vector<std::unique_ptr<std::function<void()>>> emit_continuing_;
-
-    /// @returns the name of the templated `tint_array` helper type, generating it if needed
-    const std::string& ArrayTemplateName() {
-        if (!array_template_name_.empty()) {
-            return array_template_name_;
-        }
-
-        array_template_name_ = UniqueIdentifier("tint_array");
-
-        TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
-        Line();
-        Line() << "template<typename T, size_t N>";
-        Line() << "struct " << array_template_name_ << " {";
-
-        {
-            ScopedIndent si(current_buffer_);
-            Line()
-                << "const constant T& operator[](size_t i) const constant { return elements[i]; }";
-            for (auto* space : {"device", "thread", "threadgroup"}) {
-                Line() << space << " T& operator[](size_t i) " << space
-                       << " { return elements[i]; }";
-                Line() << "const " << space << " T& operator[](size_t i) const " << space
-                       << " { return elements[i]; }";
-            }
-            Line() << "T elements[N];";
-        }
-        Line() << "};";
-
-        return array_template_name_;
-    }
 
     /// Find all structures that are used in host-shareable address spaces and mark them as such so
     /// that we know to pad the properly when we emit them.
@@ -1717,7 +1683,7 @@ class Printer : public tint::TextGenerator {
     /// @param out the output stream
     /// @param arr the array to emit
     void EmitArrayType(StringStream& out, const core::type::Array* arr) {
-        out << ArrayTemplateName() << "<";
+        out << "array<";
         EmitType(out, arr->ElemType());
         out << ", ";
         if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
@@ -1845,10 +1811,10 @@ class Printer : public tint::TextGenerator {
             return;
         }
 
-        // This does not append directly to the preamble because a struct may require other
-        // structs, or the array template, to get emitted before it. So, the struct emits into a
-        // temporary text buffer, then anything it depends on will emit to the preamble first,
-        // and then it copies the text buffer into the preamble.
+        // This does not append directly to the preamble because a struct may require other structs
+        // to get emitted before it. So, the struct emits into a temporary text buffer, then
+        // anything it depends on will emit to the preamble first, and then it copies the text
+        // buffer into the preamble.
         TextBuffer str_buf;
         Line(&str_buf);
         Line(&str_buf) << "struct " << StructName(str) << " {";
@@ -1870,7 +1836,7 @@ class Printer : public tint::TextGenerator {
 
             auto out = Line(&str_buf);
             add_byte_offset_comment(out, msl_offset);
-            out << ArrayTemplateName() << "<int8_t, " << size << "> " << name << ";";
+            out << "array<int8_t, " << size << "> " << name << ";";
         };
 
         str_buf.IncrementIndent();
@@ -1901,8 +1867,8 @@ class Printer : public tint::TextGenerator {
             auto* ty = mem->Type();
 
             // The clip distances builtin is an array, but needs to be emitted as a C-style array
-            // instead of using Tint's array wrapper. Additionally, the builtin attribute needs to
-            // be emitted after the member name and before the array count.
+            // instead of using the `metal::array` class. Additionally, the builtin attribute needs
+            // to be emitted after the member name and before the array count.
             if (mem->Attributes().builtin == core::BuiltinValue::kClipDistances) {
                 auto* arr = ty->As<core::type::Array>();
                 out << "float " << mem_name << " [[clip_distance]] ["

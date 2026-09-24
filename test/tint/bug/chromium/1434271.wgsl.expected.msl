@@ -70,24 +70,12 @@ struct VertexInput {
   float2 quad_pos;
 };
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct RenderParams_packed_vec3 {
   /* 0x0000 */ float4x4 modelViewProjectionMatrix;
   /* 0x0040 */ packed_float3 right;
-  /* 0x004c */ tint_array<int8_t, 4> tint_pad;
+  /* 0x004c */ array<int8_t, 4> tint_pad;
   /* 0x0050 */ packed_float3 up;
-  /* 0x005c */ tint_array<int8_t, 4> tint_pad_1;
+  /* 0x005c */ array<int8_t, 4> tint_pad_1;
 };
 
 struct tint_module_vars_struct {
@@ -132,24 +120,12 @@ vertex vs_main_outputs vs_main(vs_main_inputs inputs [[stage_in]], const constan
 #include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct Particle_packed_vec3 {
   /* 0x0000 */ packed_float3 position;
   /* 0x000c */ float lifetime;
   /* 0x0010 */ float4 color;
   /* 0x0020 */ float2 velocity;
-  /* 0x0028 */ tint_array<int8_t, 8> tint_pad;
+  /* 0x0028 */ array<int8_t, 8> tint_pad;
 };
 
 struct Particle {
@@ -161,18 +137,18 @@ struct Particle {
 
 struct SimulationParams {
   /* 0x0000 */ float deltaTime;
-  /* 0x0004 */ tint_array<int8_t, 12> tint_pad_1;
+  /* 0x0004 */ array<int8_t, 12> tint_pad_1;
   /* 0x0010 */ float4 seed;
 };
 
 struct Particles_packed_vec3 {
-  /* 0x0000 */ tint_array<Particle_packed_vec3, 1> particles;
+  /* 0x0000 */ array<Particle_packed_vec3, 1> particles;
 };
 
 struct tint_immediate_data_struct {
   /* 0x0000 */ uint tint_non_constant_zero;
-  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad_2;
-  /* 0x0800 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+  /* 0x0004 */ array<int8_t, 2044> tint_pad_2;
+  /* 0x0800 */ array<uint, 1> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {
@@ -223,26 +199,14 @@ struct UBO {
   /* 0x0000 */ uint width;
 };
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct Buffer {
-  /* 0x0000 */ tint_array<float, 1> weights;
+  /* 0x0000 */ array<float, 1> weights;
 };
 
 struct tint_immediate_data_struct {
   /* 0x0000 */ uint tint_non_constant_zero;
-  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad;
-  /* 0x0800 */ tint_array<uint, 2> tint_storage_buffer_sizes;
+  /* 0x0004 */ array<int8_t, 2044> tint_pad;
+  /* 0x0800 */ array<uint, 2> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {

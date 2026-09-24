@@ -7,20 +7,8 @@ struct tint_array_lengths_struct {
   uint tint_array_length_0_3;
 };
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct Matrix {
-  /* 0x0000 */ tint_array<float, 1> numbers;
+  /* 0x0000 */ array<float, 1> numbers;
 };
 
 struct Uniforms {
@@ -31,8 +19,8 @@ struct Uniforms {
 
 struct tint_immediate_data_struct {
   /* 0x0000 */ uint tint_non_constant_zero;
-  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad;
-  /* 0x0800 */ tint_array<uint, 3> tint_storage_buffer_sizes;
+  /* 0x0004 */ array<int8_t, 2044> tint_pad;
+  /* 0x0800 */ array<uint, 3> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {
@@ -40,14 +28,14 @@ struct tint_module_vars_struct {
   const device Matrix* secondMatrix;
   device Matrix* resultMatrix;
   const constant Uniforms* uniforms;
-  threadgroup tint_array<tint_array<float, 64>, 64>* mm_Asub;
-  threadgroup tint_array<tint_array<float, 64>, 64>* mm_Bsub;
+  threadgroup array<array<float, 64>, 64>* mm_Asub;
+  threadgroup array<array<float, 64>, 64>* mm_Bsub;
   const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 struct tint_symbol_2 {
-  tint_array<tint_array<float, 64>, 64> tint_symbol;
-  tint_array<tint_array<float, 64>, 64> tint_symbol_1;
+  array<array<float, 64>, 64> tint_symbol;
+  array<array<float, 64>, 64> tint_symbol_1;
 };
 
 float mm_readA(uint row, uint col, tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
@@ -118,9 +106,9 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index, tint_mod
   uint const globalRow = (global_id.y * 4u);
   uint const globalCol = (global_id.x * 4u);
   uint const numTiles = (tint_div_u32(((*tint_module_vars.uniforms).dimInner - 1u), 64u) + 1u);
-  tint_array<float, 16> acc = {};
+  array<float, 16> acc = {};
   float ACached = 0.0f;
-  tint_array<float, 4> BCached = {};
+  array<float, 4> BCached = {};
   {
     uint index = 0u;
     while(true) {

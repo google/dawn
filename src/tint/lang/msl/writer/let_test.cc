@@ -202,10 +202,10 @@ TEST_F(MslWriterTest, LetArrF32) {
 
     auto result = Generate();
     ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 [[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
-  tint_array<float, 3> const l = tint_array<float, 3>{1.0f, 2.0f, 3.0f};
+  array<float, 3> const l = array<float, 3>{1.0f, 2.0f, 3.0f};
 }
 )");
 }
@@ -221,10 +221,10 @@ TEST_F(MslWriterTest, LetArrVec2Bool) {
 
     auto result = Generate();
     ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 [[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
-  tint_array<bool2, 3> const l = tint_array<bool2, 3>{bool2(true, false), bool2(false, true), bool2(true, false)};
+  array<bool2, 3> const l = array<bool2, 3>{bool2(true, false), bool2(false, true), bool2(true, false)};
 }
 )");
 }

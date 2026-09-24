@@ -1,26 +1,14 @@
 #include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_immediate_data_struct {
   /* 0x0000 */ uint tint_non_constant_zero;
-  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad;
-  /* 0x0800 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+  /* 0x0004 */ array<int8_t, 2044> tint_pad;
+  /* 0x0800 */ array<uint, 1> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {
-  device tint_array<atomic_ulong, 1>* a;
+  device array<atomic_ulong, 1>* a;
   const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
@@ -28,7 +16,7 @@ struct tint_array_lengths_struct {
   uint tint_array_length_0_0;
 };
 
-fragment void v(device tint_array<atomic_ulong, 1>* a [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+fragment void v(device array<atomic_ulong, 1>* a [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .tint_immediate_data=tint_immediate_data};
   (atomic_min_explicit((&(*tint_module_vars.a)[min(0u, (tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] / 8u)}.tint_array_length_0_0 - 1u))]), as_type<ulong>(uint2(0u)), memory_order_relaxed));
 }

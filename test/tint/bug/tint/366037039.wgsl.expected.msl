@@ -1,33 +1,21 @@
 #include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_packed_vec3_u32_array_element {
   /* 0x0000 */ packed_uint3 packed;
-  /* 0x000c */ tint_array<int8_t, 4> tint_pad;
+  /* 0x000c */ array<int8_t, 4> tint_pad;
 };
 
 struct S_packed_vec3 {
   /* 0x0000 */ packed_uint3 a;
   /* 0x000c */ uint b;
-  /* 0x0010 */ tint_array<tint_packed_vec3_u32_array_element, 4> c;
+  /* 0x0010 */ array<tint_packed_vec3_u32_array_element, 4> c;
 };
 
 struct S {
   uint3 a;
   uint b;
-  tint_array<uint3, 4> c;
+  array<uint3, 4> c;
 };
 
 struct tint_module_vars_struct {
@@ -40,7 +28,7 @@ struct tint_symbol_1 {
   S_packed_vec3 tint_symbol;
 };
 
-void tint_store_array_packed_vec3(threadgroup tint_array<tint_packed_vec3_u32_array_element, 4>* const to, tint_array<uint3, 4> value) {
+void tint_store_array_packed_vec3(threadgroup array<tint_packed_vec3_u32_array_element, 4>* const to, array<uint3, 4> value) {
   (*to)[0u].packed = packed_uint3(value[0u]);
   (*to)[1u].packed = packed_uint3(value[1u]);
   (*to)[2u].packed = packed_uint3(value[2u]);
@@ -53,7 +41,7 @@ void tint_store_struct_packed_vec3(threadgroup S_packed_vec3* const to, S value)
   (tint_store_array_packed_vec3((&(*to).c), value.c));
 }
 
-void tint_store_and_preserve_padding_1(device tint_array<tint_packed_vec3_u32_array_element, 4>* const target, tint_array<uint3, 4> value_param) {
+void tint_store_and_preserve_padding_1(device array<tint_packed_vec3_u32_array_element, 4>* const target, array<uint3, 4> value_param) {
   {
     uint v = 0u;
     v = 0u;
@@ -76,8 +64,8 @@ void tint_store_and_preserve_padding(device S_packed_vec3* const target, S value
   (tint_store_and_preserve_padding_1((&(*target).c), value_param.c));
 }
 
-tint_array<uint3, 4> tint_load_array_packed_vec3_1(device tint_array<tint_packed_vec3_u32_array_element, 4>* const from) {
-  return tint_array<uint3, 4>{uint3((*from)[0u].packed), uint3((*from)[1u].packed), uint3((*from)[2u].packed), uint3((*from)[3u].packed)};
+array<uint3, 4> tint_load_array_packed_vec3_1(device array<tint_packed_vec3_u32_array_element, 4>* const from) {
+  return array<uint3, 4>{uint3((*from)[0u].packed), uint3((*from)[1u].packed), uint3((*from)[2u].packed), uint3((*from)[3u].packed)};
 }
 
 S tint_load_struct_packed_vec3_1(device S_packed_vec3* const from) {
@@ -86,8 +74,8 @@ S tint_load_struct_packed_vec3_1(device S_packed_vec3* const from) {
   return S{.a=v_2, .b=v_3, .c=tint_load_array_packed_vec3_1((&(*from).c))};
 }
 
-tint_array<uint3, 4> tint_load_array_packed_vec3(const constant tint_array<tint_packed_vec3_u32_array_element, 4>* const from) {
-  return tint_array<uint3, 4>{uint3((*from)[0u].packed), uint3((*from)[1u].packed), uint3((*from)[2u].packed), uint3((*from)[3u].packed)};
+array<uint3, 4> tint_load_array_packed_vec3(const constant array<tint_packed_vec3_u32_array_element, 4>* const from) {
+  return array<uint3, 4>{uint3((*from)[0u].packed), uint3((*from)[1u].packed), uint3((*from)[2u].packed), uint3((*from)[3u].packed)};
 }
 
 S tint_load_struct_packed_vec3(const constant S_packed_vec3* const from) {

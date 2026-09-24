@@ -95,10 +95,10 @@ TEST_F(MslWriterTest, VarArrayF32) {
 
     auto result = Generate();
     ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 [[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
-  tint_array<float, 5> a = {};
+  array<float, 5> a = {};
 }
 )");
 }

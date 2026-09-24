@@ -1,26 +1,14 @@
 #include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_immediate_data_struct {
   /* 0x0000 */ uint tint_non_constant_zero;
-  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad;
-  /* 0x0800 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+  /* 0x0004 */ array<int8_t, 2044> tint_pad;
+  /* 0x0800 */ array<uint, 1> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {
-  device tint_array<uchar, 1>* v;
+  device array<uchar, 1>* v;
   device uint* out;
   const constant tint_immediate_data_struct* tint_immediate_data;
 };
@@ -29,12 +17,12 @@ struct tint_array_lengths_struct {
   uint tint_array_length_0_0;
 };
 
-void foo(device tint_array<uchar, 1>* const p, uint tint_array_length, tint_module_vars_struct tint_module_vars) {
+void foo(device array<uchar, 1>* const p, uint tint_array_length, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.out) = tint_array_length;
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v_1(device tint_array<uchar, 1>* v [[buffer(0)]], device uint* out [[buffer(1)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+kernel void v_1(device array<uchar, 1>* v [[buffer(0)]], device uint* out [[buffer(1)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v, .out=out, .tint_immediate_data=tint_immediate_data};
   (foo(tint_module_vars.v, tint_array_lengths_struct{.tint_array_length_0_0=(*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u]}.tint_array_length_0_0, tint_module_vars));
 }

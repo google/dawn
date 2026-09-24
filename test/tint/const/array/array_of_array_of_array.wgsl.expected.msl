@@ -1,36 +1,24 @@
 #include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_immediate_data_struct {
   /* 0x0000 */ uint tint_non_constant_zero;
-  /* 0x0004 */ tint_array<int8_t, 2044> tint_pad;
-  /* 0x0800 */ tint_array<uint, 1> tint_storage_buffer_sizes;
+  /* 0x0004 */ array<int8_t, 2044> tint_pad;
+  /* 0x0800 */ array<uint, 1> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {
-  device tint_array<uint, 1>* s;
+  device array<uint, 1>* s;
   const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 struct tint_array_lengths_struct {
   uint tint_array_length_0_0;
 };
-const constant tint_array<tint_array<tint_array<uint, 2>, 2>, 2> v = tint_array<tint_array<tint_array<uint, 2>, 2>, 2>{tint_array<tint_array<uint, 2>, 2>{tint_array<uint, 2>{0u, 1u}, tint_array<uint, 2>{2u, 3u}}, tint_array<tint_array<uint, 2>, 2>{tint_array<uint, 2>{4u, 5u}, tint_array<uint, 2>{6u, 7u}}};
+const constant array<array<array<uint, 2>, 2>, 2> v = array<array<array<uint, 2>, 2>, 2>{array<array<uint, 2>, 2>{array<uint, 2>{0u, 1u}, array<uint, 2>{2u, 3u}}, array<array<uint, 2>, 2>{array<uint, 2>{4u, 5u}, array<uint, 2>{6u, 7u}}};
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v_1(device tint_array<uint, 1>* s [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+kernel void v_1(device array<uint, 1>* s [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s, .tint_immediate_data=tint_immediate_data};
   uint q = 0u;
   device uint* const v_2 = (&(*tint_module_vars.s)[min(0u, (tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] / 4u)}.tint_array_length_0_0 - 1u))]);

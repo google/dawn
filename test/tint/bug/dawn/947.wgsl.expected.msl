@@ -18,25 +18,13 @@ struct tint_module_vars_struct {
   const constant Uniforms* uniforms;
 };
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct vs_main_outputs {
   float2 VertexOutputs_texcoords [[user(locn0)]];
   float4 VertexOutputs_position [[position]];
 };
 
 VertexOutputs vs_main_inner(uint VertexIndex, tint_module_vars_struct tint_module_vars) {
-  tint_array<float2, 3> texcoord = tint_array<float2, 3>{float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)};
+  array<float2, 3> texcoord = array<float2, 3>{float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)};
   VertexOutputs output = {};
   output.position = float4(((texcoord[min(VertexIndex, 2u)] * 2.0f) - float2(1.0f)), 0.0f, 1.0f);
   bool flipY = ((*tint_module_vars.uniforms).u_scale.y < 0.0f);

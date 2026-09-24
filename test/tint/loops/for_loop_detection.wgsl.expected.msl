@@ -8,27 +8,15 @@ struct Scalars {
   /* 0x0030 */ int4 i3;
 };
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_module_vars_struct {
   const constant Scalars* U;
   texture2d<uint, access::write> dst_image2d;
   texture2d<float, access::sample> src_image2d;
-  threadgroup tint_array<tint_array<uint4, 32>, 8>* outputs;
+  threadgroup array<array<uint4, 32>, 8>* outputs;
 };
 
 struct tint_symbol_1 {
-  tint_array<tint_array<uint4, 32>, 8> tint_symbol;
+  array<array<uint4, 32>, 8> tint_symbol;
 };
 
 uint4 tint_v4f32_to_v4u32(float4 value) {

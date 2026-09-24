@@ -1,24 +1,12 @@
 #include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_module_vars_struct {
-  threadgroup tint_array<uchar, 1024>* v;
+  threadgroup array<uchar, 1024>* v;
 };
 
 struct tint_symbol_1 {
-  tint_array<uchar, 1024> tint_symbol;
+  array<uchar, 1024> tint_symbol;
 };
 
 void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
@@ -37,7 +25,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
     }
   }
   (threadgroup_barrier(mem_flags::mem_threadgroup));
-  threadgroup tint_array<float, 1>* const view = reinterpret_cast<threadgroup tint_array<float, 1>*>(reinterpret_cast<threadgroup char*>(tint_module_vars.v) + 0u);
+  threadgroup array<float, 1>* const view = reinterpret_cast<threadgroup array<float, 1>*>(reinterpret_cast<threadgroup char*>(tint_module_vars.v) + 0u);
   bool const v_3 = (64u <= 256u);
   simdgroup_float8x8 v_4 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
   (simdgroup_load(v_4, (&(*view)[select(0u, 0u, v_3)]), ulong(select(8u, 8u, v_3)), ulong2(0ul), true));
