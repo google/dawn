@@ -46,7 +46,7 @@
 #include "src/dawn/native/PassResourceUsageTracker.h"
 #include "src/dawn/native/QuerySet.h"
 #include "src/dawn/native/ResourceTable.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

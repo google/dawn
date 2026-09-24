@@ -50,7 +50,7 @@
 #include "src/dawn/native/InternalPipelineStore.h"
 #include "src/dawn/native/Queue.h"
 #include "src/dawn/native/RenderPipeline.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

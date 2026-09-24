@@ -43,7 +43,7 @@
 #include "src/dawn/native/InternalPipelineStore.h"
 #include "src/dawn/native/RenderPassEncoder.h"
 #include "src/dawn/native/RenderPipeline.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/dawn/native/webgpu_absl_format.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"

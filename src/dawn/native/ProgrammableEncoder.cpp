@@ -40,7 +40,7 @@
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/PhysicalDevice.h"
 #include "src/dawn/native/ResourceTable.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/utils/compiler.h"
 #include "src/utils/numeric.h"
 

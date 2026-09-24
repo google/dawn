@@ -39,7 +39,7 @@
 #include "src/dawn/native/ComputePipeline.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/InternalPipelineStore.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 
 namespace dawn::native {
 

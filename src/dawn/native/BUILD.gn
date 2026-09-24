@@ -452,8 +452,8 @@ source_set("sources") {
     "stream/Sink.h",
     "stream/Source.h",
     "stream/Stream.h",
-    "utils/WGPUHelpers.cpp",
-    "utils/WGPUHelpers.h",
+    "utils/NativeHelpers.cpp",
+    "utils/NativeHelpers.h",
     "webgpu_absl_format.cpp",
     "webgpu_absl_format.h",
   ]

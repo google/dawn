@@ -62,7 +62,7 @@
 #include "src/dawn/native/RenderPipeline.h"
 #include "src/dawn/native/ValidationUtils.h"
 #include "src/dawn/native/dawn_platform.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/compiler.h"
 #include "src/utils/non_movable.h"

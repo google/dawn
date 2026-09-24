@@ -47,7 +47,7 @@
 #include "src/dawn/native/PhysicalDevice.h"
 #include "src/dawn/native/Queue.h"
 #include "src/dawn/native/Sampler.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 

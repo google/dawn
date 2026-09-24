@@ -88,7 +88,7 @@
 #include "src/dawn/native/SwapChain.h"
 #include "src/dawn/native/TexelBufferView.h"
 #include "src/dawn/native/Texture.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/dawn/platform/metrics/HistogramMacros.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/compiler.h"

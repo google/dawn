@@ -38,7 +38,7 @@
 #include "src/dawn/native/DeviceGuard.h"
 #include "src/dawn/native/ObjectLabel.h"
 #include "src/dawn/native/Toggles.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 
 namespace dawn::native {
 

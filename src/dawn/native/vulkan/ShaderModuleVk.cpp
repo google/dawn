@@ -51,7 +51,7 @@
 #include "src/dawn/native/ResourceTableDefaultResources.h"
 #include "src/dawn/native/Serializable.h"
 #include "src/dawn/native/TintUtils.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/dawn/native/vulkan/BindGroupLayoutVk.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
 #include "src/dawn/native/vulkan/FencedDeleter.h"

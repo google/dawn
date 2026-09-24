@@ -37,7 +37,7 @@
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/SwapChain.h"
 #include "src/dawn/native/Texture.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/utils/platform.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)

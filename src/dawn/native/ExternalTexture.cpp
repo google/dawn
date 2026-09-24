@@ -37,7 +37,7 @@
 #include "src/dawn/native/Queue.h"
 #include "src/dawn/native/Texture.h"
 #include "src/dawn/native/dawn_platform.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

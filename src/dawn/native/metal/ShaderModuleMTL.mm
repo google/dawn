@@ -47,7 +47,7 @@
 #include "src/dawn/native/metal/UtilsMetal.h"
 #include "src/dawn/native/stream/BlobSource.h"
 #include "src/dawn/native/stream/ByteVectorSink.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/dawn/platform/metrics/HistogramMacros.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 
