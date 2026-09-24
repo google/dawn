@@ -28,7 +28,6 @@
 #ifndef SRC_DAWN_NODE_STANDALONE_POLYFILLS_H_
 #define SRC_DAWN_NODE_STANDALONE_POLYFILLS_H_
 
-#include <functional>
 #include <string>
 #include <vector>
 
@@ -36,18 +35,20 @@
 
 namespace dawn::node::standalone {
 
+class EventLoop;
+
 // Configuration options for polyfill registration.
 struct PolyfillOptions {
     // Values reported by `process.argv`.
     std::vector<std::string> argv;
-
-    // Invoked by `process.exit()`. When unset, `process.exit()` calls std::exit() directly.
-    std::function<void(int32_t)> on_exit;
 };
 
 // Registers Node.js and Web standard polyfills (console, process, fs, path, timers, DOM stubs)
 // into the provided environment's global scope.
-void RegisterPolyfills(Napi::Env env, const PolyfillOptions& options = {});
+//
+// `loop` runs the callbacks passed to setImmediate() and setTimeout(), and is what process.exit()
+// stops. It must outlive `env`.
+void RegisterPolyfills(Napi::Env env, EventLoop& loop, const PolyfillOptions& options = {});
 
 }  // namespace dawn::node::standalone
 

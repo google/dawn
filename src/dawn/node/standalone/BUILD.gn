@@ -66,6 +66,10 @@ if (checkout_v8 && dawn_node) {
 
     public_configs = [ ":polyfills_public_config" ]
 
+    # Public because RegisterPolyfills() takes an EventLoop, so a caller needs
+    # the complete type.
+    public_deps = [ ":event_loop" ]
+
     deps = [
       "${dawn_root}/src/dawn/common",
       "${dawn_root}/src/dawn/node/napi_v8",

@@ -31,7 +31,6 @@
 #include <cctype>
 #include <chrono>
 #include <cstdint>
-#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -43,6 +42,7 @@
 #include <vector>
 
 #include "src/dawn/common/SystemUtils.h"
+#include "src/dawn/node/standalone/EventLoop.h"
 
 namespace dawn::node::standalone {
 
@@ -51,6 +51,10 @@ namespace {
 // State shared by the polyfills that outlives registration. Owned by the `process` object, which
 // deletes it from its finalizer.
 struct PolyfillContext {
+    PolyfillContext(EventLoop& event_loop, PolyfillOptions opts)
+        : loop(event_loop), options(std::move(opts)) {}
+
+    EventLoop& loop;
     PolyfillOptions options;
     std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 };
@@ -675,11 +679,7 @@ Napi::Value Exit(const Napi::CallbackInfo& info) {
     if (info.Length() > 0 && info[0].IsNumber()) {
         code = info[0].As<Napi::Number>().Int32Value();
     }
-    if (ctx != nullptr && ctx->options.on_exit) {
-        ctx->options.on_exit(code);
-    } else {
-        std::exit(code);
-    }
+    ctx->loop.Stop(code);
     return info.Env().Undefined();
 }
 
@@ -745,6 +745,110 @@ void RegisterProcess(Napi::Env env, const PolyfillOptions& options, PolyfillCont
 }
 
 // ---------------------------------------------------------------------------
+// Scheduling / Timers (setImmediate, setTimeout, clearTimeout)
+// ---------------------------------------------------------------------------
+
+// Captures the arguments a timer callback is to be called with: everything from `first` onwards.
+std::vector<Napi::Reference<Napi::Value>> CaptureArgs(const Napi::CallbackInfo& info,
+                                                      size_t first) {
+    std::vector<Napi::Reference<Napi::Value>> args;
+    args.reserve(info.Length() > first ? info.Length() - first : 0);
+    for (size_t i = first; i < info.Length(); ++i) {
+        args.push_back(Napi::Persistent(info[i]));
+    }
+    return args;
+}
+
+// Reads captured arguments back out for a call.
+std::vector<napi_value> ResolveArgs(const std::vector<Napi::Reference<Napi::Value>>& args) {
+    std::vector<napi_value> values;
+    values.reserve(args.size());
+    for (const auto& arg : args) {
+        values.push_back(arg.Value());
+    }
+    return values;
+}
+
+// Implements setImmediate(). Node runs these in the check phase of its event loop, so the task is
+// handed to the embedder rather than run here; the embedder decides when the check phase comes
+// around. V8 has no queue of its own to use instead: macrotasks are not an ECMAScript concept, and
+// the only queue V8 owns is the microtask queue that backs promise reactions.
+//
+// Node returns an Immediate object (with ref(), unref() and clearImmediate() cancellation). The
+// loop has no cancellation for check-phase tasks and nothing in the CTS or Dawn bindings uses the
+// return value, so this returns undefined and clearImmediate is not registered.
+Napi::Value SetImmediate(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    if (info.Length() < 1 || !info[0].IsFunction()) {
+        Napi::TypeError::New(env, "Function expected for setImmediate")
+            .ThrowAsJavaScriptException();
+        return env.Undefined();
+    }
+
+    auto* ctx = static_cast<PolyfillContext*>(info.Data());
+    Napi::FunctionReference fn = Napi::Persistent(info[0].As<Napi::Function>());
+    // Any arguments beyond the callback are forwarded to it.
+    std::vector<Napi::Reference<Napi::Value>> args = CaptureArgs(info, 1);
+    ctx->loop.PostTask(
+        [fn = std::move(fn), args = std::move(args)]() mutable { fn.Call(ResolveArgs(args)); });
+    return env.Undefined();
+}
+
+// Converts a JavaScript delay, which is a possibly fractional count of milliseconds, to the
+// duration the loop measures in.
+EventLoop::Duration DelayFromMilliseconds(double delay_ms) {
+    return std::chrono::duration_cast<EventLoop::Duration>(
+        std::chrono::duration<double, std::milli>(delay_ms));
+}
+
+// Implements setTimeout(). Returns the EventLoop::TimerId as a number to pass to clearTimeout().
+// Node.js returns a Timeout object, but a numeric handle - as on the web - is all the CTS uses.
+Napi::Value SetTimeout(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    if (info.Length() < 1 || !info[0].IsFunction()) {
+        Napi::TypeError::New(env, "Function expected for setTimeout").ThrowAsJavaScriptException();
+        return env.Undefined();
+    }
+
+    double delay_ms = 0.0;
+    if (info.Length() > 1 && info[1].IsNumber()) {
+        delay_ms = info[1].As<Napi::Number>().DoubleValue();
+    }
+    // Match the web platform: negative, NaN and missing delays are treated as zero.
+    if (!(delay_ms > 0.0)) {
+        delay_ms = 0.0;
+    }
+
+    auto* ctx = static_cast<PolyfillContext*>(info.Data());
+    Napi::FunctionReference fn = Napi::Persistent(info[0].As<Napi::Function>());
+    std::vector<Napi::Reference<Napi::Value>> args = CaptureArgs(info, 2);
+    const EventLoop::TimerId id = ctx->loop.PostDelayedTask(
+        [fn = std::move(fn), args = std::move(args)]() mutable { fn.Call(ResolveArgs(args)); },
+        DelayFromMilliseconds(delay_ms));
+    return Napi::Number::New(env, static_cast<double>(id));
+}
+
+// Implements clearTimeout(). Clearing an unknown or already-fired handle is not an error, as
+// required by the standard.
+Napi::Value ClearTimeout(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    auto* ctx = static_cast<PolyfillContext*>(info.Data());
+    if (ctx == nullptr || info.Length() < 1 || !info[0].IsNumber()) {
+        return env.Undefined();
+    }
+
+    const auto id = static_cast<EventLoop::TimerId>(info[0].As<Napi::Number>().DoubleValue());
+    ctx->loop.CancelDelayedTask(id);
+    return env.Undefined();
+}
+
+void RegisterTimers(Napi::Env env, PolyfillContext* ctx) {
+    env.Global().Set("setImmediate", Napi::Function::New(env, SetImmediate, "setImmediate", ctx));
+    env.Global().Set("setTimeout", Napi::Function::New(env, SetTimeout, "setTimeout", ctx));
+    env.Global().Set("clearTimeout", Napi::Function::New(env, ClearTimeout, "clearTimeout", ctx));
+}
+
+// ---------------------------------------------------------------------------
 // performance
 // ---------------------------------------------------------------------------
 
@@ -771,6 +875,13 @@ void RegisterPerformance(Napi::Env env, PolyfillContext* ctx) {
 
 const char* kBootstrapScript = R"bootstrap(
 (function() {
+    // queueMicrotask
+    if (typeof globalThis.queueMicrotask !== 'function') {
+        globalThis.queueMicrotask = function(callback) {
+            Promise.resolve().then(callback);
+        };
+    }
+
     // The callback and promise forms of fs, over the native synchronous calls. Deferring to a
     // microtask is what makes them asynchronous; the work itself still blocks.
     // https://nodejs.org/api/fs.html
@@ -812,13 +923,14 @@ void RunBootstrapScript(Napi::Env env) {
 
 }  // namespace
 
-void RegisterPolyfills(Napi::Env env, const PolyfillOptions& options) {
-    auto* ctx = new PolyfillContext{options};
+void RegisterPolyfills(Napi::Env env, EventLoop& loop, const PolyfillOptions& options) {
+    auto* ctx = new PolyfillContext(loop, options);
 
     RegisterConsole(env);
     RegisterFs(env);
     RegisterPath(env);
     RegisterProcess(env, options, ctx);
+    RegisterTimers(env, ctx);
     RegisterPerformance(env, ctx);
     RunBootstrapScript(env);
 }

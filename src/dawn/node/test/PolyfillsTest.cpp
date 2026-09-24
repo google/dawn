@@ -42,11 +42,11 @@
 #include <string>
 #include <string_view>
 #include <thread>
-#include <unordered_set>
 #include <vector>
 
 #include "src/dawn/common/SystemUtils.h"
 #include "src/dawn/node/napi_v8/napi_v8.h"
+#include "src/dawn/node/standalone/EventLoop.h"
 #include "src/dawn/node/standalone/Polyfills.h"
 #include "src/dawn/node/test/V8TestEnvironment.h"
 
@@ -136,12 +136,20 @@ class PolyfillsTest : public dawn::node::test::V8IsolateTest {
     void SetUp() override {
         V8IsolateTest::SetUp();
         env_ = dawn::napi_v8::CreateEnv(isolate_, context());
+        loop_.emplace(isolate_, dawn::node::test::V8Platform());
     }
 
     void TearDown() override {
+        // Before the environment: a task still queued in the loop owns a reference to the
+        // JavaScript callback it was going to call.
+        loop_.reset();
         dawn::napi_v8::DestroyEnv(env_);
         V8IsolateTest::TearDown();
     }
+
+    // The loop the timer polyfills schedule onto. A test drives it by hand with RunOneIteration()
+    // rather than running it, so that nothing depends on how long anything takes.
+    dawn::node::standalone::EventLoop& loop() { return *loop_; }
 
     napi_value RunScript(const std::string& code) {
         napi_value script_src;
@@ -191,10 +199,14 @@ class PolyfillsTest : public dawn::node::test::V8IsolateTest {
     }
 
     napi_env env_ = nullptr;
+
+  private:
+    // Held by value once SetUp() has an isolate to give it.
+    std::optional<dawn::node::standalone::EventLoop> loop_;
 };
 
 TEST_F(PolyfillsTest, ConsoleGlobals) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     EXPECT_TRUE(
         ToBool(RunScript("typeof console.log === 'function' && "
@@ -205,7 +217,7 @@ TEST_F(PolyfillsTest, ConsoleGlobals) {
 }
 
 TEST_F(PolyfillsTest, ConsoleLogInfoAndDebugWriteLinesToStdout) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     StreamCapture out(std::cout);
     StreamCapture log(std::clog);
@@ -219,7 +231,7 @@ TEST_F(PolyfillsTest, ConsoleLogInfoAndDebugWriteLinesToStdout) {
 }
 
 TEST_F(PolyfillsTest, ConsoleWarnAndErrorAreLabelled) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     StreamCapture out(std::cout);
     StreamCapture log(std::clog);
@@ -232,7 +244,7 @@ TEST_F(PolyfillsTest, ConsoleWarnAndErrorAreLabelled) {
 }
 
 TEST_F(PolyfillsTest, ConsoleJoinsArgumentsWithSpaces) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     StreamCapture out(std::cout);
     RunScript("console.log('a', 1, true, null, undefined, {}, [1, 2]);");
@@ -242,7 +254,7 @@ TEST_F(PolyfillsTest, ConsoleJoinsArgumentsWithSpaces) {
 }
 
 TEST_F(PolyfillsTest, FsExistsSync) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
     std::string file = dir.WriteFile("present.txt", "x");
@@ -257,7 +269,7 @@ TEST_F(PolyfillsTest, FsExistsSync) {
 }
 
 TEST_F(PolyfillsTest, FsReadFileSyncDecodesWithAnEncoding) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
     std::string file = dir.WriteFile("hello.txt", "Hello WebGPU\n");
@@ -275,7 +287,7 @@ TEST_F(PolyfillsTest, FsReadFileSyncDecodesWithAnEncoding) {
 }
 
 TEST_F(PolyfillsTest, FsReadFileSyncReturnsBytesWithoutAnEncoding) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
     // Bytes that are neither printable nor valid UTF-8, so a decoded read could not reproduce
@@ -290,7 +302,7 @@ TEST_F(PolyfillsTest, FsReadFileSyncReturnsBytesWithoutAnEncoding) {
 }
 
 TEST_F(PolyfillsTest, FsReadFileSyncThrowsForAMissingFile) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
 
@@ -298,7 +310,7 @@ TEST_F(PolyfillsTest, FsReadFileSyncThrowsForAMissingFile) {
 }
 
 TEST_F(PolyfillsTest, FsReadFileSyncPreservesNewlinesVerbatim) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
     std::string file = dir.WriteFile("crlf.txt", "a\r\nb\n");
@@ -312,7 +324,7 @@ TEST_F(PolyfillsTest, FsReadFileSyncPreservesNewlinesVerbatim) {
 }
 
 TEST_F(PolyfillsTest, FsReadFileSyncHandlesAnEmptyFile) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
     std::string file = dir.WriteFile("empty.txt", "");
@@ -324,7 +336,7 @@ TEST_F(PolyfillsTest, FsReadFileSyncHandlesAnEmptyFile) {
 // An option the polyfill cannot honour has to be reported, not ignored: quietly returning
 // something that does not match what was asked for is worse than failing.
 TEST_F(PolyfillsTest, FsRejectsUnsupportedOptions) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
     std::string file = dir.WriteFile("hello.txt", "Hello WebGPU");
@@ -346,7 +358,7 @@ TEST_F(PolyfillsTest, FsRejectsUnsupportedOptions) {
 // rejects that encoding outright. We reject it in both: there is no Buffer in this runtime, and
 // handing back Uint8Arrays instead would break the first caller to call toString() on one.
 TEST_F(PolyfillsTest, FsRejectsTheBufferEncoding) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
     std::string file = dir.WriteFile("hello.txt", "Hello WebGPU");
@@ -362,7 +374,7 @@ TEST_F(PolyfillsTest, FsRejectsTheBufferEncoding) {
 }
 
 TEST_F(PolyfillsTest, FsRejectsUncPaths) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     // Node accepts UNC paths; this runtime deliberately refuses them, because Node and
     // std::filesystem disagree about where a UNC root ends. String.raw keeps the backslashes away
@@ -382,7 +394,7 @@ TEST_F(PolyfillsTest, FsRejectsUncPaths) {
 }
 
 TEST_F(PolyfillsTest, FsAcceptsPathsThatMerelyResembleUnc) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
     std::string file = dir.WriteFile("hello.txt", "Hello WebGPU");
@@ -408,7 +420,7 @@ TEST_F(PolyfillsTest, FsAcceptsPathsThatMerelyResembleUnc) {
 }
 
 TEST_F(PolyfillsTest, FsReaddirSync) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
     dir.WriteFile("a.txt", "a");
@@ -421,7 +433,7 @@ TEST_F(PolyfillsTest, FsReaddirSync) {
 }
 
 TEST_F(PolyfillsTest, FsStatSync) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
     std::string file = dir.WriteFile("file.txt", "x");
@@ -433,7 +445,7 @@ TEST_F(PolyfillsTest, FsStatSync) {
 }
 
 TEST_F(PolyfillsTest, FsReadFileCallbackRunsAsynchronously) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
     std::string file = dir.WriteFile("hello.txt", "Hello WebGPU");
@@ -453,7 +465,7 @@ TEST_F(PolyfillsTest, FsReadFileCallbackRunsAsynchronously) {
 }
 
 TEST_F(PolyfillsTest, FsReadFileCallbackReportsFailure) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
 
@@ -468,7 +480,7 @@ TEST_F(PolyfillsTest, FsReadFileCallbackReportsFailure) {
 }
 
 TEST_F(PolyfillsTest, FsPromisesResolve) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
     std::string file = dir.WriteFile("hello.txt", "Hello WebGPU");
@@ -498,7 +510,7 @@ TEST_F(PolyfillsTest, FsPromisesResolve) {
 }
 
 TEST_F(PolyfillsTest, FsPromisesRejectWhenTheSyncCallThrows) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     TempDir dir;
 
@@ -529,7 +541,7 @@ std::string RootedNative(std::string_view posix) {
 }
 
 TEST_F(PolyfillsTest, PathNormalize) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     EXPECT_EQ(ToString(RunScript("_path_polyfill.normalize('/a/b/../c/./d')")), Native("/a/c/d"));
     EXPECT_EQ(ToString(RunScript("_path_polyfill.normalize('a//b')")), Native("a/b"));
@@ -558,7 +570,7 @@ TEST_F(PolyfillsTest, PathNormalize) {
 }
 
 TEST_F(PolyfillsTest, PathJoin) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     EXPECT_EQ(ToString(RunScript("_path_polyfill.join('a', 'b', 'c')")), Native("a/b/c"));
     EXPECT_EQ(ToString(RunScript("_path_polyfill.join('/a', 'b/', '../c')")), Native("/a/c"));
@@ -577,7 +589,7 @@ TEST_F(PolyfillsTest, PathJoin) {
 }
 
 TEST_F(PolyfillsTest, PathDirname) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     // The answer is a slice of the argument, so it comes back in the separator it was written in
     // on either platform.
@@ -604,7 +616,7 @@ TEST_F(PolyfillsTest, PathDirname) {
 }
 
 TEST_F(PolyfillsTest, PathResolve) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     EXPECT_EQ(ToString(RunScript("_path_polyfill.resolve('/a/b', 'c')")), RootedNative("/a/b/c"));
     EXPECT_EQ(ToString(RunScript("_path_polyfill.resolve('/a/b', '../c')")), RootedNative("/a/c"));
@@ -628,7 +640,7 @@ TEST_F(PolyfillsTest, PathResolve) {
 }
 
 TEST_F(PolyfillsTest, PathRelative) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     EXPECT_EQ(ToString(RunScript("_path_polyfill.relative('/a/b', '/a/b/c/d')")), Native("c/d"));
 
@@ -643,7 +655,7 @@ TEST_F(PolyfillsTest, PathRelative) {
 }
 
 TEST_F(PolyfillsTest, PathRejectsUncPaths) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     // The same refusal the fs entry points make, for the same reason: Node and std::filesystem
     // disagree about where a UNC root ends. Any argument can carry the prefix, not just the first.
@@ -658,7 +670,7 @@ TEST_F(PolyfillsTest, PathRejectsUncPaths) {
 // The shapes that have no POSIX spelling to translate. Every expectation here is what
 // path.win32 answers.
 TEST_F(PolyfillsTest, PathDriveLetters) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     // A drive with no root directory names the working directory on that drive, and Node spells
     // the implied here-ness out rather than leaving the bare drive.
@@ -686,7 +698,7 @@ TEST_F(PolyfillsTest, PathDriveLetters) {
 #endif
 
 TEST_F(PolyfillsTest, PathRejectsArgumentsThatAreNotStrings) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     EXPECT_TRUE(Throws("_path_polyfill.normalize()"));
     EXPECT_TRUE(Throws("_path_polyfill.normalize(5)"));
@@ -695,7 +707,7 @@ TEST_F(PolyfillsTest, PathRejectsArgumentsThatAreNotStrings) {
 }
 
 TEST_F(PolyfillsTest, PathSep) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     EXPECT_EQ(ToString(RunScript("_path_polyfill.sep")), Native("/"));
 }
@@ -703,7 +715,7 @@ TEST_F(PolyfillsTest, PathSep) {
 TEST_F(PolyfillsTest, ProcessArgvAndCwd) {
     dawn::node::standalone::PolyfillOptions options;
     options.argv = {"runner", "arg1", "arg2"};
-    dawn::node::standalone::RegisterPolyfills(env_, options);
+    dawn::node::standalone::RegisterPolyfills(env_, loop(), options);
 
     EXPECT_EQ(ToUint32(RunScript("process.argv.length")), 3u);
     EXPECT_EQ(ToString(RunScript("process.argv.join(',')")), "runner,arg1,arg2");
@@ -713,7 +725,7 @@ TEST_F(PolyfillsTest, ProcessArgvAndCwd) {
 }
 
 TEST_F(PolyfillsTest, ProcessArgvIsEmptyByDefault) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     EXPECT_TRUE(ToBool(RunScript("Array.isArray(process.argv)")));
     EXPECT_EQ(ToUint32(RunScript("process.argv.length")), 0u);
@@ -721,46 +733,46 @@ TEST_F(PolyfillsTest, ProcessArgvIsEmptyByDefault) {
 
 TEST_F(PolyfillsTest, ProcessEnvExposesDawnFlags) {
     dawn::ScopedEnvironmentVar dawn_flags("DAWN_FLAGS", "--a-flag");
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     EXPECT_EQ(ToString(RunScript("process.env.DAWN_FLAGS")), "--a-flag");
 }
 
 TEST_F(PolyfillsTest, ProcessEnvIsEmptyWithoutDawnFlags) {
     dawn::ScopedEnvironmentVar dawn_flags("DAWN_FLAGS", nullptr);
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     // `process.env` is not the real environment: only the variables the runner reads are copied
     // into it, so with DAWN_FLAGS unset it is empty.
     EXPECT_EQ(ToUint32(RunScript("Object.keys(process.env).length")), 0u);
 }
 
-TEST_F(PolyfillsTest, ProcessExitCallback) {
-    int32_t exit_code = -1;
-    dawn::node::standalone::PolyfillOptions options;
-    options.on_exit = [&](int32_t code) { exit_code = code; };
-    dawn::node::standalone::RegisterPolyfills(env_, options);
+TEST_F(PolyfillsTest, ProcessExitStopsTheLoop) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     RunScript("process.exit(42)");
-    EXPECT_EQ(exit_code, 42);
+    EXPECT_TRUE(loop().stopped());
+    EXPECT_EQ(loop().exit_code(), 42);
 }
 
 TEST_F(PolyfillsTest, ProcessExitDefaultsToZero) {
-    int32_t exit_code = -1;
-    dawn::node::standalone::PolyfillOptions options;
-    options.on_exit = [&](int32_t code) { exit_code = code; };
-    dawn::node::standalone::RegisterPolyfills(env_, options);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     RunScript("process.exit()");
-    EXPECT_EQ(exit_code, 0);
+    EXPECT_TRUE(loop().stopped());
+    EXPECT_EQ(loop().exit_code(), 0);
+}
 
-    exit_code = -1;
+TEST_F(PolyfillsTest, ProcessExitWithACodeThatIsNotANumberExitsWithZero) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
     RunScript("process.exit('not a number')");
-    EXPECT_EQ(exit_code, 0);
+    EXPECT_TRUE(loop().stopped());
+    EXPECT_EQ(loop().exit_code(), 0);
 }
 
 TEST_F(PolyfillsTest, ProcessStreamWritesAreVerbatim) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     StreamCapture out(std::cout);
     StreamCapture log(std::clog);
@@ -773,7 +785,7 @@ TEST_F(PolyfillsTest, ProcessStreamWritesAreVerbatim) {
 }
 
 TEST_F(PolyfillsTest, ProcessStreamWriteReturnsTrue) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     StreamCapture out(std::cout);
     StreamCapture log(std::clog);
@@ -785,7 +797,7 @@ TEST_F(PolyfillsTest, ProcessStreamWriteReturnsTrue) {
 }
 
 TEST_F(PolyfillsTest, PerformanceNow) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     EXPECT_EQ(ToString(RunScript("typeof performance.now()")), "number");
 
@@ -800,7 +812,7 @@ TEST_F(PolyfillsTest, PerformanceNow) {
 // it runs forwards at all, because performance.now() reports whole and fractional milliseconds
 // and a thousand calls can finish inside one of them; PerformanceNowAdvances covers that.
 TEST_F(PolyfillsTest, PerformanceNowIsMonotonic) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     EXPECT_TRUE(ToBool(RunScript(R"((function() {
         let last = performance.now();
@@ -816,7 +828,7 @@ TEST_F(PolyfillsTest, PerformanceNowIsMonotonic) {
 }
 
 TEST_F(PolyfillsTest, PerformanceNowAdvances) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     double before = ToDouble(RunScript("performance.now()"));
     std::this_thread::sleep_for(kSleepDuration);
@@ -830,7 +842,7 @@ TEST_F(PolyfillsTest, PerformanceNowAdvances) {
 }
 
 TEST_F(PolyfillsTest, HrtimeBigintIsMonotonic) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     EXPECT_EQ(ToString(RunScript("typeof process.hrtime.bigint()")), "bigint");
 
@@ -848,7 +860,7 @@ TEST_F(PolyfillsTest, HrtimeBigintIsMonotonic) {
 }
 
 TEST_F(PolyfillsTest, HrtimeBigintAdvances) {
-    dawn::node::standalone::RegisterPolyfills(env_);
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
 
     RunScript("globalThis.hrtimeStart = process.hrtime.bigint();");
     std::this_thread::sleep_for(kSleepDuration);
@@ -859,6 +871,190 @@ TEST_F(PolyfillsTest, HrtimeBigintAdvances) {
         ToDouble(RunScript("Number(process.hrtime.bigint() - globalThis.hrtimeStart) / 1e6"));
     EXPECT_GE(elapsed_ms, kMinElapsedMs);
     EXPECT_LT(elapsed_ms, kMaxElapsedMs);
+}
+
+TEST_F(PolyfillsTest, SetImmediateQueuesTheCallbackOnTheLoop) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    RunScript(R"(
+        globalThis._immediateRan = false;
+        setImmediate(() => {
+            globalThis._immediateRan = true;
+        });
+    )");
+
+    EXPECT_FALSE(ToBool(RunScript("globalThis._immediateRan")));
+
+    loop().RunOneIteration();
+
+    EXPECT_TRUE(ToBool(RunScript("globalThis._immediateRan")));
+}
+
+// Arguments after the callback are forwarded to it, as Node and the web platform do.
+TEST_F(PolyfillsTest, SetImmediateForwardsExtraArgumentsToTheCallback) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    RunScript(R"(
+        globalThis._immediateArgs = null;
+        setImmediate((a, b) => {
+            globalThis._immediateArgs = [a, b];
+        }, 'x', 42);
+    )");
+
+    loop().RunOneIteration();
+
+    EXPECT_EQ(ToString(RunScript("globalThis._immediateArgs.join(',')")), "x,42");
+}
+
+TEST_F(PolyfillsTest, SetTimeoutQueuesTheCallbackAndClearTimeoutWithdrawsIt) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    RunScript(R"(
+        globalThis._clearedRan = false;
+        globalThis._timeoutRan = false;
+        const handle = setTimeout(() => {
+            globalThis._clearedRan = true;
+        }, 0);
+        clearTimeout(handle);
+        setTimeout(() => {
+            globalThis._timeoutRan = true;
+        }, 0);
+    )");
+
+    loop().RunOneIteration();
+
+    EXPECT_FALSE(ToBool(RunScript("globalThis._clearedRan")));
+    EXPECT_TRUE(ToBool(RunScript("globalThis._timeoutRan")));
+}
+
+TEST_F(PolyfillsTest, QueueMicrotask) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    RunScript(R"(
+        globalThis._microtaskRan = false;
+        queueMicrotask(() => {
+            globalThis._microtaskRan = true;
+        });
+    )");
+
+    EXPECT_FALSE(ToBool(RunScript("globalThis._microtaskRan")));
+
+    RunMicrotasks();
+
+    EXPECT_TRUE(ToBool(RunScript("globalThis._microtaskRan")));
+}
+
+TEST_F(PolyfillsTest, TimerGlobals) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    EXPECT_TRUE(
+        ToBool(RunScript("typeof setImmediate === 'function' && "
+                         "typeof setTimeout === 'function' && "
+                         "typeof clearTimeout === 'function' && "
+                         "typeof queueMicrotask === 'function'")));
+}
+
+// Arguments after the delay are forwarded to the callback, as Node and the web platform do.
+TEST_F(PolyfillsTest, SetTimeoutForwardsExtraArgumentsToTheCallback) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    RunScript(R"(
+        globalThis._timeoutArgs = null;
+        setTimeout((a, b) => {
+            globalThis._timeoutArgs = [a, b];
+        }, 0, 'x', 42);
+    )");
+
+    loop().RunOneIteration();
+
+    EXPECT_EQ(ToString(RunScript("globalThis._timeoutArgs.join(',')")), "x,42");
+}
+
+// Negative, NaN, non-numeric and missing delays are all treated as zero, matching the web
+// platform's clamping rules, so all four of these come due in the very first iteration.
+TEST_F(PolyfillsTest, ADelayThatIsNotAPositiveNumberIsTreatedAsZero) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    RunScript(R"(
+        globalThis._runs = 0;
+        const count = () => { globalThis._runs++; };
+        setTimeout(count, -50);
+        setTimeout(count, NaN);
+        setTimeout(count, 'not a number');
+        setTimeout(count);
+    )");
+
+    loop().RunOneIteration();
+
+    EXPECT_DOUBLE_EQ(ToDouble(RunScript("globalThis._runs")), 4.0);
+}
+
+// The delay reaches the loop as a duration rather than being dropped or rounded to zero. The loop
+// reads the clock inside setTimeout(), between `before` and `after`, so `due` is bounded on both
+// sides by `before + 10s <= due <= after + 10s` regardless of how long RunScript() takes.
+TEST_F(PolyfillsTest, TheDelayIsPassedThroughToTheLoop) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    const auto before = dawn::node::standalone::EventLoop::Clock::now();
+    RunScript("setTimeout(() => {}, 10000)");
+    const auto after = dawn::node::standalone::EventLoop::Clock::now();
+
+    const std::optional<dawn::node::standalone::EventLoop::TimePoint> due = loop().NextDueTime();
+    ASSERT_TRUE(due.has_value());
+    EXPECT_GE(*due, before + std::chrono::seconds(10));
+    EXPECT_LE(*due, after + std::chrono::seconds(10));
+}
+
+TEST_F(PolyfillsTest, TimersRejectCallbacksThatAreNotFunctions) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    EXPECT_TRUE(Throws("setImmediate()"));
+    EXPECT_TRUE(Throws("setImmediate(42)"));
+    EXPECT_TRUE(Throws("setTimeout()"));
+    EXPECT_TRUE(Throws("setTimeout('globalThis.x = 1', 10)"));
+}
+
+// Clearing a handle that was never issued, or one that has already fired, is defined to do nothing
+// rather than to fail.
+TEST_F(PolyfillsTest, ClearingAnUnknownTimerIsNotAnError) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    EXPECT_FALSE(Throws("clearTimeout()"));
+    EXPECT_FALSE(Throws("clearTimeout(undefined)"));
+    EXPECT_FALSE(Throws("clearTimeout('not a handle')"));
+    EXPECT_FALSE(Throws("clearTimeout(9999)"));
+
+    // Clearing twice, and clearing after the timer has already fired, are both no-ops.
+    RunScript(R"(
+        globalThis._ran = false;
+        globalThis._handle = setTimeout(() => {
+            globalThis._ran = true;
+        }, 0);
+    )");
+    loop().RunOneIteration();
+    EXPECT_TRUE(ToBool(RunScript("globalThis._ran")));
+
+    EXPECT_FALSE(Throws("clearTimeout(globalThis._handle)"));
+    EXPECT_FALSE(Throws("clearTimeout(globalThis._handle)"));
+}
+
+// Handles have to be distinct, or clearing one timer would cancel another.
+TEST_F(PolyfillsTest, TimerHandlesAreUnique) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    EXPECT_TRUE(ToBool(RunScript(R"(
+        const noop = () => {};
+        const handles = [setTimeout(noop, 1), setTimeout(noop, 1), setTimeout(noop, 1)];
+        new Set(handles).size === handles.length;
+    )")));
+}
+
+// Node hands back a Timeout object here. The CTS only ever passes the value back to clearTimeout(),
+// so a number is enough.
+TEST_F(PolyfillsTest, SetTimeoutReturnsANumericHandle) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    EXPECT_TRUE(ToBool(RunScript("typeof setTimeout(() => {}, 0) === 'number'")));
 }
 
 }  // namespace
