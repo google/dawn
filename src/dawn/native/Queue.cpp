@@ -476,8 +476,8 @@ MaybeError QueueBase::CopyExternalTextureForBrowserInternal(
     return DoCopyExternalTextureForBrowser(GetDevice(), source, &destination, copySize, options);
 }
 
-MaybeError QueueBase::ValidateSubmit(Span<CommandBufferBase* const> commands,
-                                     BufferSet& buffersFromCommands) const {
+MaybeValError QueueBase::ValidateSubmit(Span<CommandBufferBase* const> commands,
+                                        BufferSet& buffersFromCommands) const {
     TRACE_EVENT(DAWN_TRACE_CATEGORY("validation"), "Queue::ValidateSubmit");
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
@@ -548,15 +548,15 @@ MaybeError QueueBase::ValidateSubmit(Span<CommandBufferBase* const> commands,
     return {};
 }
 
-MaybeError QueueBase::ValidateOnSubmittedWorkDone() const {
+MaybeValError QueueBase::ValidateOnSubmittedWorkDone() const {
     DAWN_TRY(GetDevice()->ValidateObject(this));
     return {};
 }
 
-MaybeError QueueBase::ValidateWriteTexture(const TexelCopyTextureInfo* destination,
-                                           size_t dataSize,
-                                           const TexelCopyBufferLayout& dataLayout,
-                                           const Extent3D* writeSize) const {
+MaybeValError QueueBase::ValidateWriteTexture(const TexelCopyTextureInfo* destination,
+                                              size_t dataSize,
+                                              const TexelCopyBufferLayout& dataLayout,
+                                              const Extent3D* writeSize) const {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
     DAWN_TRY(GetDevice()->ValidateObject(destination->texture));

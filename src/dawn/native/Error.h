@@ -35,7 +35,7 @@
 
 #include "src/dawn/common/Result.h"
 #include "src/dawn/native/ErrorData.h"
-#include "src/dawn/native/webgpu_absl_format.h"
+#include "src/dawn/native/webgpu_absl_format.h"  // IWYU pragma: export
 
 namespace dawn::native {
 
@@ -82,9 +82,12 @@ class InternalError {
 // MaybeError and ResultOrError are meant to be used as return value for function that are not
 // expected to, but might fail. The handling of error is potentially much slower than successes.
 using MaybeError = Result<void, InternalError>;
+using MaybeValError = MaybeError;
 
 template <typename T>
 using ResultOrError = Result<T, InternalError>;
+template <typename T>
+using ResultOrValError = ResultOrError<T>;
 
 namespace detail {
 

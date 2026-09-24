@@ -55,7 +55,7 @@ Ref<T> GetRef(Variant&& variant) {
     return *p;
 }
 
-MaybeError ValidateBindingResource(const DeviceBase* device, const BindingResource* resource) {
+MaybeValError ValidateBindingResource(const DeviceBase* device, const BindingResource* resource) {
     DAWN_INVALID_IF(resource->nextInChain != nullptr, "nextInChain is not null.");
 
     uint32_t resourceCount = uint32_t{resource->buffer != nullptr} +
@@ -95,8 +95,8 @@ MaybeError ValidateBindingResource(const DeviceBase* device, const BindingResour
 
 }  // anonymous namespace
 
-MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
-                                           const ResourceTableDescriptor* descriptor) {
+MaybeValError ValidateResourceTableDescriptor(const DeviceBase* device,
+                                              const ResourceTableDescriptor* descriptor) {
     DAWN_CHECK(descriptor);
 
     DAWN_INVALID_IF(!device->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
@@ -160,7 +160,7 @@ bool ResourceTableBase::IsDestroyed() const {
     return mDestroyed;
 }
 
-MaybeError ResourceTableBase::ValidateCanUseInSubmitNow() const {
+MaybeValError ResourceTableBase::ValidateCanUseInSubmitNow() const {
     DAWN_CHECK(!IsError());
     DAWN_INVALID_IF(IsDestroyed(), "%s used while destroyed.", this);
     return {};
@@ -469,7 +469,7 @@ void ResourceTableBase::UpdateWithDeviceValidation(ResourceTableSlot slot,
     // Perform validation that produces a validation error, but unconditionally mark the slot as
     // used since we need to match client-side validation that doesn't perform these checks.
     if (GetDevice()->ConsumedError(  //
-            ([&]() -> MaybeError {
+            ([&]() -> MaybeValError {
                 DAWN_TRY(GetDevice()->ValidateObject(this));
                 return ValidateBindingResource(GetDevice(), resource);
             })(),

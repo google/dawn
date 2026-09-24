@@ -71,7 +71,7 @@ bool ProgrammableEncoder::NeedsIndirectGPUValidation() const {
     return mNeedsIndirectGPUValidation;
 }
 
-MaybeError ProgrammableEncoder::ValidateProgrammableEncoderEnd() const {
+MaybeValError ProgrammableEncoder::ValidateProgrammableEncoderEnd() const {
     DAWN_INVALID_IF(mDebugGroupStackSize != 0,
                     "PushDebugGroup called %u time(s) without a corresponding PopDebugGroup.",
                     mDebugGroupStackSize);
@@ -95,7 +95,7 @@ void ProgrammableEncoder::APIInsertDebugMarker(StringView markerIn) {
 void ProgrammableEncoder::APIPopDebugGroup() {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_INVALID_IF(mDebugGroupStackSize == 0,
                                 "PopDebugGroup called when no debug groups are currently pushed.");
@@ -127,7 +127,7 @@ void ProgrammableEncoder::APIPushDebugGroup(StringView groupLabelIn) {
         "encoding %s.PushDebugGroup(%s).", this, groupLabel);
 }
 
-MaybeError ProgrammableEncoder::ValidateSetImmediates(uint32_t offset, size_t size) const {
+MaybeValError ProgrammableEncoder::ValidateSetImmediates(uint32_t offset, size_t size) const {
     // Validate offset and size are aligned to 4 bytes.
     DAWN_INVALID_IF(offset % 4 != 0, "offset (%u) is not a multiple of 4", offset);
     DAWN_INVALID_IF(size % 4 != 0, "size (%u) is not a multiple of 4", size);
@@ -143,7 +143,7 @@ MaybeError ProgrammableEncoder::ValidateSetImmediates(uint32_t offset, size_t si
     return {};
 }
 
-MaybeError ProgrammableEncoder::ValidateSetBindGroup(
+MaybeValError ProgrammableEncoder::ValidateSetBindGroup(
     BindGroupIndex index,
     BindGroupBase* group,
     ityp::span<BindingIndex, const uint32_t> dynamicOffsets) const {

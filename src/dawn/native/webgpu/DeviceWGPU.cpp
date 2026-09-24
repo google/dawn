@@ -472,16 +472,16 @@ bool Device::NeedsIndirectGPUValidation() const {
 }
 
 void Device::StartCapture(CaptureStream& commandStream, CaptureStream& contentStream) {
-    MaybeError result = ToBackend(GetQueue())
-                            ->SetCaptureContext(std::unique_ptr<CaptureContext>(
-                                new CaptureContext(this, commandStream, contentStream)));
+    MaybeValError result = ToBackend(GetQueue())
+                               ->SetCaptureContext(std::unique_ptr<CaptureContext>(
+                                   new CaptureContext(this, commandStream, contentStream)));
     [[maybe_unused]] bool hadError =
         ConsumedError(std::move(result), "calling %s.StartCapture()", this);
 }
 
 void Device::EndCapture() {
     if (ToBackend(GetQueue())->IsCapturing()) {
-        MaybeError result = ToBackend(GetQueue())->SetCaptureContext(nullptr);
+        MaybeValError result = ToBackend(GetQueue())->SetCaptureContext(nullptr);
         [[maybe_unused]] bool hadError =
             ConsumedError(std::move(result), "calling %s.EndCapture()", this);
     }

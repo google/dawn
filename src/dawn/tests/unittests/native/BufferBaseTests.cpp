@@ -122,7 +122,8 @@ TEST_F(BufferBaseTest, MapAsyncWhileUsedByQueueFails) {
     EXPECT_CALL(mDeviceErrorCallback,
                 Call(_, wgpu::ErrorType::Validation, HasSubstr(kValidationErrorMessage)));
 
-    ResultOrError<BufferBase::ScopedUseBuffer> validate = mBufferMock->ValidateCanUseOnQueueNow();
+    ResultOrValError<BufferBase::ScopedUseBuffer> validate =
+        mBufferMock->ValidateCanUseOnQueueNow();
     ASSERT_TRUE(validate.IsSuccess());
     auto scopedUse = validate.AcquireSuccess();
 
@@ -137,7 +138,8 @@ TEST_F(BufferBaseTest, UnmapWhileUsedByQueueFails) {
     EXPECT_CALL(mDeviceErrorCallback,
                 Call(_, wgpu::ErrorType::Validation, HasSubstr(kValidationErrorMessage)));
 
-    ResultOrError<BufferBase::ScopedUseBuffer> validate = mBufferMock->ValidateCanUseOnQueueNow();
+    ResultOrValError<BufferBase::ScopedUseBuffer> validate =
+        mBufferMock->ValidateCanUseOnQueueNow();
     ASSERT_TRUE(validate.IsSuccess());
     auto scopedUse = validate.AcquireSuccess();
 

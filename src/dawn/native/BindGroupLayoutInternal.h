@@ -50,7 +50,7 @@
 
 namespace dawn::native {
 
-ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDescriptor(
+ResultOrValError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDescriptor(
     DeviceBase* device,
     const BindGroupLayoutDescriptor* descriptor,
     bool allowInternalBinding = false);

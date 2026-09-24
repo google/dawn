@@ -201,7 +201,7 @@ wgpu::BackendType SwapChainBase::GetBackendType() const {
     return GetDevice()->GetPhysicalDevice()->GetBackendType();
 }
 
-MaybeError SwapChainBase::ValidatePresent() const {
+MaybeValError SwapChainBase::ValidatePresent() const {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_CHECK(mAttached);
 
@@ -212,7 +212,7 @@ MaybeError SwapChainBase::ValidatePresent() const {
     return {};
 }
 
-MaybeError SwapChainBase::ValidateGetCurrentTexture() const {
+MaybeValError SwapChainBase::ValidateGetCurrentTexture() const {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_CHECK(mAttached);
 

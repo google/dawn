@@ -127,7 +127,7 @@ std::string ToTextureSyncScopeResourceUsage(wgpu::TextureUsage syncScopeTextureU
 }  // namespace
 
 // Performs validation of the "synchronization scope" rules of WebGPU.
-MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
+MaybeValError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
     // Buffers can only be used as single-write or multiple read.
     for (size_t i = 0; i < scope.bufferSyncInfos.size(); ++i) {
         const wgpu::BufferUsage usage = scope.bufferSyncInfos[i].usage;
@@ -145,7 +145,7 @@ MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
     for (size_t i = 0; i < scope.textureSyncInfos.size(); ++i) {
         const TextureSubresourceSyncInfo& textureSyncInfo = scope.textureSyncInfos[i];
         DAWN_TRY(textureSyncInfo.Iterate(
-            [&](const SubresourceRange&, const TextureSyncInfo& syncInfo) -> MaybeError {
+            [&](const SubresourceRange&, const TextureSyncInfo& syncInfo) -> MaybeValError {
                 bool readOnly = IsSubset(syncInfo.usage, kReadOnlyTextureUsages);
                 bool singleUse = wgpu::HasZeroOrOneBits(syncInfo.usage);
                 if (readOnly || singleUse) {
@@ -168,10 +168,10 @@ MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
     return {};
 }
 
-MaybeError ValidateTimestampQuery(const DeviceBase* device,
-                                  const QuerySetBase* querySet,
-                                  QueryIndex queryIndex,
-                                  Feature requiredFeature) {
+MaybeValError ValidateTimestampQuery(const DeviceBase* device,
+                                     const QuerySetBase* querySet,
+                                     QueryIndex queryIndex,
+                                     Feature requiredFeature) {
     DAWN_TRY(device->ValidateObject(querySet));
 
     DAWN_INVALID_IF(!device->HasFeature(requiredFeature),
@@ -188,8 +188,8 @@ MaybeError ValidateTimestampQuery(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidatePassTimestampWrites(const DeviceBase* device,
-                                       const PassTimestampWrites* timestampWrites) {
+MaybeValError ValidatePassTimestampWrites(const DeviceBase* device,
+                                          const PassTimestampWrites* timestampWrites) {
     DAWN_INVALID_IF(!device->HasFeature(Feature::TimestampQuery),
                     "Timestamp queries used without the timestamp-query feature enabled.");
 
@@ -225,10 +225,10 @@ MaybeError ValidatePassTimestampWrites(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateWriteBuffer(const DeviceBase* device,
-                               const BufferBase* buffer,
-                               uint64_t bufferOffset,
-                               uint64_t size) {
+MaybeValError ValidateWriteBuffer(const DeviceBase* device,
+                                  const BufferBase* buffer,
+                                  uint64_t bufferOffset,
+                                  uint64_t size) {
     DAWN_TRY(device->ValidateObject(buffer));
 
     DAWN_INVALID_IF(bufferOffset % 4 != 0, "BufferOffset (%u) is not a multiple of 4.",
@@ -246,10 +246,10 @@ MaybeError ValidateWriteBuffer(const DeviceBase* device,
     return {};
 }
 
-ResultOrError<uint64_t> ComputeRequiredBytesInCopy(const TexelBlockInfo& blockInfo,
-                                                   const Extent3D& copySize,
-                                                   uint32_t bytesPerRow,
-                                                   uint32_t rowsPerImage) {
+ResultOrValError<uint64_t> ComputeRequiredBytesInCopy(const TexelBlockInfo& blockInfo,
+                                                      const Extent3D& copySize,
+                                                      uint32_t bytesPerRow,
+                                                      uint32_t rowsPerImage) {
     DAWN_CHECK(copySize.width % blockInfo.width == 0);
     DAWN_CHECK(copySize.height % blockInfo.height == 0);
     if (copySize.depthOrArrayLayers == 0) {
@@ -319,10 +319,10 @@ uint64_t ComputeRequiredBytesInCopy(const TypedTexelBlockInfo& blockInfo,
     return requiredBytesInCopy;
 }
 
-MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
-                                        uint64_t offset,
-                                        uint64_t size,
-                                        BufferSizeType checkBufferSizeType) {
+MaybeValError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
+                                           uint64_t offset,
+                                           uint64_t size,
+                                           BufferSizeType checkBufferSizeType) {
     uint64_t bufferSize = 0;
     switch (checkBufferSizeType) {
         case BufferSizeType::Size:
@@ -363,10 +363,10 @@ void ApplyDefaultTexelCopyBufferLayoutOptions(TexelCopyBufferLayout* layout,
     }
 }
 
-MaybeError ValidateLinearTextureData(const TexelCopyBufferLayout& layout,
-                                     uint64_t byteSize,
-                                     const TexelBlockInfo& blockInfo,
-                                     const Extent3D& copyExtent) {
+MaybeValError ValidateLinearTextureData(const TexelCopyBufferLayout& layout,
+                                        uint64_t byteSize,
+                                        const TexelBlockInfo& blockInfo,
+                                        const Extent3D& copyExtent) {
     DAWN_CHECK(copyExtent.height % blockInfo.height == 0);
     uint32_t heightInBlocks = copyExtent.height / blockInfo.height;
 
@@ -420,8 +420,8 @@ MaybeError ValidateLinearTextureData(const TexelCopyBufferLayout& layout,
     return {};
 }
 
-MaybeError ValidateTexelCopyBufferInfo(DeviceBase const* device,
-                                       const TexelCopyBufferInfo& texelCopyBufferInfo) {
+MaybeValError ValidateTexelCopyBufferInfo(DeviceBase const* device,
+                                          const TexelCopyBufferInfo& texelCopyBufferInfo) {
     DAWN_TRY(device->ValidateObject(texelCopyBufferInfo.buffer));
     auto alignment = kTextureBytesPerRowAlignment;
     if (device->HasFeature(Feature::DawnTexelCopyBufferRowAlignment)) {
@@ -437,9 +437,9 @@ MaybeError ValidateTexelCopyBufferInfo(DeviceBase const* device,
     return {};
 }
 
-MaybeError ValidateTexelCopyTextureInfo(DeviceBase const* device,
-                                        const TexelCopyTextureInfo& textureCopy,
-                                        const Extent3D& copySize) {
+MaybeValError ValidateTexelCopyTextureInfo(DeviceBase const* device,
+                                           const TexelCopyTextureInfo& textureCopy,
+                                           const Extent3D& copySize) {
     const TextureBase* texture = textureCopy.texture;
     DAWN_TRY(device->ValidateObject(texture));
 
@@ -472,9 +472,9 @@ MaybeError ValidateTexelCopyTextureInfo(DeviceBase const* device,
     return {};
 }
 
-MaybeError ValidateTextureCopyRange(DeviceBase const* device,
-                                    const TexelCopyTextureInfo& textureCopy,
-                                    const Extent3D& copySize) {
+MaybeValError ValidateTextureCopyRange(DeviceBase const* device,
+                                       const TexelCopyTextureInfo& textureCopy,
+                                       const Extent3D& copySize) {
     const TextureBase* texture = textureCopy.texture;
     const Format& format = textureCopy.texture->GetFormat();
     const Aspect aspect = ConvertAspect(format, textureCopy.aspect);
@@ -532,7 +532,7 @@ MaybeError ValidateTextureCopyRange(DeviceBase const* device,
 
 // Always returns a single aspect (color, stencil, depth, or ith plane for multi-planar
 // formats).
-ResultOrError<Aspect> SingleAspectUsedByTexelCopyTextureInfo(const TexelCopyTextureInfo& view) {
+ResultOrValError<Aspect> SingleAspectUsedByTexelCopyTextureInfo(const TexelCopyTextureInfo& view) {
     const Format& format = view.texture->GetFormat();
     switch (view.aspect) {
         case wgpu::TextureAspect::All: {
@@ -563,7 +563,7 @@ ResultOrError<Aspect> SingleAspectUsedByTexelCopyTextureInfo(const TexelCopyText
     DAWN_UNREACHABLE();
 }
 
-MaybeError ValidateLinearToDepthStencilCopyRestrictions(const TexelCopyTextureInfo& dst) {
+MaybeValError ValidateLinearToDepthStencilCopyRestrictions(const TexelCopyTextureInfo& dst) {
     Aspect aspectUsed;
     DAWN_TRY_ASSIGN(aspectUsed, SingleAspectUsedByTexelCopyTextureInfo(dst));
 
@@ -581,10 +581,10 @@ MaybeError ValidateLinearToDepthStencilCopyRestrictions(const TexelCopyTextureIn
     return {};
 }
 
-MaybeError ValidateTextureToTextureCopyCommonRestrictions(DeviceBase const* device,
-                                                          const TexelCopyTextureInfo& src,
-                                                          const TexelCopyTextureInfo& dst,
-                                                          const Extent3D& copySize) {
+MaybeValError ValidateTextureToTextureCopyCommonRestrictions(DeviceBase const* device,
+                                                             const TexelCopyTextureInfo& src,
+                                                             const TexelCopyTextureInfo& dst,
+                                                             const Extent3D& copySize) {
     const uint32_t srcSamples = src.texture->GetSampleCount();
     const uint32_t dstSamples = dst.texture->GetSampleCount();
 
@@ -641,10 +641,10 @@ MaybeError ValidateTextureToTextureCopyCommonRestrictions(DeviceBase const* devi
     return {};
 }
 
-MaybeError ValidateTextureToTextureCopyRestrictions(DeviceBase const* device,
-                                                    const TexelCopyTextureInfo& src,
-                                                    const TexelCopyTextureInfo& dst,
-                                                    const Extent3D& copySize) {
+MaybeValError ValidateTextureToTextureCopyRestrictions(DeviceBase const* device,
+                                                       const TexelCopyTextureInfo& src,
+                                                       const TexelCopyTextureInfo& dst,
+                                                       const Extent3D& copySize) {
     // Metal requires texture-to-texture copies happens between texture formats that equal to
     // each other or only have diff on srgb-ness.
     DAWN_INVALID_IF(!src.texture->GetFormat().CopyCompatibleWith(dst.texture->GetFormat()),
@@ -655,9 +655,9 @@ MaybeError ValidateTextureToTextureCopyRestrictions(DeviceBase const* device,
     return ValidateTextureToTextureCopyCommonRestrictions(device, src, dst, copySize);
 }
 
-MaybeError ValidateCanUseAs(const TextureBase* texture,
-                            wgpu::TextureUsage usage,
-                            UsageValidationMode mode) {
+MaybeValError ValidateCanUseAs(const TextureBase* texture,
+                               wgpu::TextureUsage usage,
+                               UsageValidationMode mode) {
     DAWN_CHECK(wgpu::HasZeroOrOneBits(usage));
     switch (mode) {
         case UsageValidationMode::Default:
@@ -673,9 +673,9 @@ MaybeError ValidateCanUseAs(const TextureBase* texture,
     return {};
 }
 
-MaybeError ValidateCanUseAs(const TextureViewBase* textureView,
-                            wgpu::TextureUsage usage,
-                            UsageValidationMode mode) {
+MaybeValError ValidateCanUseAs(const TextureViewBase* textureView,
+                               wgpu::TextureUsage usage,
+                               UsageValidationMode mode) {
     DAWN_CHECK(wgpu::HasZeroOrOneBits(usage));
     DAWN_CHECK(IsSubset(usage, kTextureViewOnlyUsages));
     switch (mode) {
@@ -692,14 +692,14 @@ MaybeError ValidateCanUseAs(const TextureViewBase* textureView,
     return {};
 }
 
-MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage) {
+MaybeValError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage) {
     DAWN_CHECK(wgpu::HasZeroOrOneBits(usage));
     DAWN_INVALID_IF(!(buffer->GetUsage() & usage), "%s usage (%s) doesn't include %s.", buffer,
                     buffer->GetUsage(), usage);
     return {};
 }
 
-MaybeError ValidateCanUseAsInternal(const BufferBase* buffer, wgpu::BufferUsage usage) {
+MaybeValError ValidateCanUseAsInternal(const BufferBase* buffer, wgpu::BufferUsage usage) {
     DAWN_INVALID_IF(!(buffer->GetInternalUsage() & usage),
                     "%s internal usage (%s) doesn't include %s.", buffer,
                     buffer->GetInternalUsage(), usage);
@@ -718,8 +718,8 @@ std::string TextureFormatsToString(const ColorAttachmentFormats& formats) {
 }
 }  // anonymous namespace
 
-MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
-                                                 const ColorAttachmentFormats& formats) {
+MaybeValError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
+                                                    const ColorAttachmentFormats& formats) {
     uint32_t totalByteSize = 0;
     for (const Format* format : formats) {
         totalByteSize = Align(totalByteSize, format->renderTargetComponentAlignment);
@@ -738,7 +738,7 @@ MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidatePLSInfo(
+MaybeValError ValidatePLSInfo(
     const DeviceBase* device,
     uint64_t totalSize,
     ityp::span<size_t, StorageAttachmentInfoForValidation> storageAttachments) {

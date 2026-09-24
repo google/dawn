@@ -580,11 +580,12 @@ BindingInfoType GetShaderBindingType(const ShaderBindingInfo& shaderInfo) {
         [](const InputAttachmentBindingInfo&) { return BindingInfoType::InputAttachment; });
 }
 
-MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* device,
-                                                          const BindGroupLayoutInternalBase* layout,
-                                                          SingleShaderStage entryPointStage,
-                                                          BindingNumber bindingNumber,
-                                                          const ShaderBindingInfo& shaderInfo) {
+MaybeValError ValidateCompatibilityOfSingleBindingWithLayout(
+    const DeviceBase* device,
+    const BindGroupLayoutInternalBase* layout,
+    SingleShaderStage entryPointStage,
+    BindingNumber bindingNumber,
+    const ShaderBindingInfo& shaderInfo) {
     // Check that the binding exists.
     const BindGroupLayoutInternalBase::BindingMap& layoutBindings = layout->GetBindingMap();
 
@@ -622,7 +623,7 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
     // Validation specific to each type of binding.
     return MatchVariant(
         shaderInfo.bindingInfo,
-        [&](const TextureBindingInfo& shaderBindingInfo) -> MaybeError {
+        [&](const TextureBindingInfo& shaderBindingInfo) -> MaybeValError {
             const TextureBindingInfo& bindingLayout =
                 std::get<TextureBindingInfo>(layoutInfo.bindingLayout);
             DAWN_INVALID_IF(
@@ -670,7 +671,7 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                 bindingLayout.viewDimension, shaderBindingInfo.viewDimension);
             return {};
         },
-        [&](const StorageTextureBindingInfo& shaderBindingInfo) -> MaybeError {
+        [&](const StorageTextureBindingInfo& shaderBindingInfo) -> MaybeValError {
             const StorageTextureBindingInfo& bindingLayout =
                 std::get<StorageTextureBindingInfo>(layoutInfo.bindingLayout);
             DAWN_CHECK(bindingLayout.format != wgpu::TextureFormat::Undefined);
@@ -693,7 +694,7 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                             bindingLayout.viewDimension, shaderBindingInfo.viewDimension);
             return {};
         },
-        [&](const TexelBufferBindingInfo& shaderBindingInfo) -> MaybeError {
+        [&](const TexelBufferBindingInfo& shaderBindingInfo) -> MaybeValError {
             const TexelBufferBindingInfo& bindingLayout =
                 std::get<TexelBufferBindingInfo>(layoutInfo.bindingLayout);
             DAWN_CHECK(bindingLayout.format != wgpu::TextureFormat::Undefined);
@@ -710,7 +711,7 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                             bindingLayout.format, shaderBindingInfo.format);
             return {};
         },
-        [&](const BufferBindingInfo& shaderBindingInfo) -> MaybeError {
+        [&](const BufferBindingInfo& shaderBindingInfo) -> MaybeValError {
             const BufferBindingInfo& bindingLayout =
                 std::get<BufferBindingInfo>(layoutInfo.bindingLayout);
             // Binding mismatch between shader and bind group is invalid. For example, a
@@ -737,7 +738,7 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                             shaderBindingInfo.minBindingSize, bindingLayout.minBindingSize);
             return {};
         },
-        [&](const SamplerBindingInfo& shaderBindingInfo) -> MaybeError {
+        [&](const SamplerBindingInfo& shaderBindingInfo) -> MaybeValError {
             wgpu::SamplerBindingType shaderSamplerType = shaderBindingInfo.type;
 
             wgpu::SamplerBindingType bglSamplerType;
@@ -762,11 +763,11 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
 
             return {};
         },
-        [](const ExternalTextureBindingInfo&) -> MaybeError {
+        [](const ExternalTextureBindingInfo&) -> MaybeValError {
             // There are no other things to validate for the external textures.
             return {};
         },
-        [&](const InputAttachmentBindingInfo& shaderBindingInfo) -> MaybeError {
+        [&](const InputAttachmentBindingInfo& shaderBindingInfo) -> MaybeValError {
             // Internal use only, no validation, only assertions.
             const InputAttachmentBindingInfo& bindingLayout =
                 std::get<InputAttachmentBindingInfo>(layoutInfo.bindingLayout);
@@ -794,7 +795,7 @@ MaybeError ValidateCompatibilityWithBindGroupLayout(DeviceBase* device,
     return {};
 }
 
-ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
+ResultOrValError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     const ShaderModuleParseDeviceInfo& deviceInfo,
     tint::inspector::Inspector* inspector,
     const tint::inspector::EntryPoint& entryPoint) {
@@ -1354,7 +1355,7 @@ void ReflectShaderUsingTint(const ShaderModuleParseDeviceInfo& deviceInfo,
 }
 }  // anonymous namespace
 
-ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
+ResultOrValError<Extent3D> ValidateComputeStageWorkgroupSize(
     const tint::WorkgroupInfo& workgroupInfo,
     bool usesSubgroupMatrix,
     uint32_t maxSubgroupSize,
@@ -1522,8 +1523,8 @@ ResultOrError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseReques
         const std::vector<uint32_t>& spirvCode = spirvDesc.spirvCode.UnsafeGetValue();
 
 #ifdef DAWN_ENABLE_SPIRV_VALIDATION
-        MaybeError validationResult = ValidateSpirv(req.logEmitter.UnsafeGetValue(), spirvCode,
-                                                    deviceInfo.toggles.Has(Toggle::UseSpirv14));
+        MaybeValError validationResult = ValidateSpirv(req.logEmitter.UnsafeGetValue(), spirvCode,
+                                                       deviceInfo.toggles.Has(Toggle::UseSpirv14));
         // If SpirV validation error occurs, store it into outputParseResult and return.
         if (validationResult.IsError()) {
             outputParseResult.SetValidationError(validationResult.AcquireError());
@@ -1575,9 +1576,9 @@ RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata
     return bufferSizes;
 }
 
-MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
-                                                   const EntryPointMetadata& entryPoint,
-                                                   const PipelineLayoutBase* layout) {
+MaybeValError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
+                                                      const EntryPointMetadata& entryPoint,
+                                                      const PipelineLayoutBase* layout) {
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         DAWN_TRY_CONTEXT(ValidateCompatibilityWithBindGroupLayout(
                              device, group, entryPoint, layout->GetBindGroupLayout(group)),
@@ -1709,8 +1710,8 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateSubgroupMatrixConfiguration(const tint::SubgroupMatrixInfo& smInfo,
-                                               const std::vector<SubgroupMatrixConfig>& cfg) {
+MaybeValError ValidateSubgroupMatrixConfiguration(const tint::SubgroupMatrixInfo& smInfo,
+                                                  const std::vector<SubgroupMatrixConfig>& cfg) {
     if (cfg.empty()) {
         DAWN_INVALID_IF(!smInfo.configs.empty(),
                         "Shader uses a subgroup matrix, but no subgroup matrix configuration "
@@ -1895,7 +1896,7 @@ void ShaderModuleBase::Initialize() {
 
         CompiledState resultState;
         auto taskMaybeError = [&resultState, shaderModule = static_cast<const ShaderModuleBase*>(
-                                                 this)]() -> MaybeError {
+                                                 this)]() -> MaybeValError {
             // Check blob cache first before calling ParseShaderModule. ShaderModuleParseResult
             // returned from blob cache or ParseShaderModule will hold compilation messages and
             // validation errors if any. ShaderModuleParseResult from ParseShaderModule also

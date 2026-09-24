@@ -83,7 +83,7 @@ void CommandBufferBase::SetEncoderLabel(std::string encoderLabel) {
     mEncoderLabel = encoderLabel;
 }
 
-MaybeError CommandBufferBase::ValidateCanUseInSubmitNow() const {
+MaybeValError CommandBufferBase::ValidateCanUseInSubmitNow() const {
     DAWN_CHECK(!IsError());
 
     DAWN_INVALID_IF(!IsAlive(), "%s cannot be submitted more than once.", this);

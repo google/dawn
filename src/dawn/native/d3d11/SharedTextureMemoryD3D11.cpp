@@ -42,7 +42,7 @@ namespace dawn::native::d3d11 {
 
 namespace {
 
-ResultOrError<SharedTextureMemoryProperties> PropertiesFromD3D11Texture(
+ResultOrValError<SharedTextureMemoryProperties> PropertiesFromD3D11Texture(
     Device* device,
     const ComPtr<ID3D11Texture2D>& d3d11Texture,
     bool isSharedWithHandle) {

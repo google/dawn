@@ -400,7 +400,7 @@ std::vector<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
     return formatModifierPropsVector;
 }
 
-ResultOrError<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
+ResultOrValError<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
     const VulkanFunctions& fn,
     VkPhysicalDevice vkPhysicalDevice,
     VkFormat format,

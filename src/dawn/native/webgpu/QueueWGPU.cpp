@@ -276,7 +276,7 @@ bool Queue::IsCapturing() const {
     return mCaptureContext != nullptr;
 }
 
-MaybeError Queue::SetCaptureContext(std::unique_ptr<CaptureContext> captureContext) {
+MaybeValError Queue::SetCaptureContext(std::unique_ptr<CaptureContext> captureContext) {
     if (captureContext) {
         DAWN_INVALID_IF(mCaptureContext != nullptr, "A capture is already in progress.");
         mCaptureContext = std::move(captureContext);

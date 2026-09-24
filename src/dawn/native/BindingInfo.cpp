@@ -171,9 +171,9 @@ void AccumulateBindingCounts(BindingCounts* bindingCounts, const BindingCounts& 
     }
 }
 
-MaybeError ValidateBindingCounts(const CombinedLimits& limits,
-                                 const BindingCounts& bindingCounts,
-                                 const AdapterBase* adapter) {
+MaybeValError ValidateBindingCounts(const CombinedLimits& limits,
+                                    const BindingCounts& bindingCounts,
+                                    const AdapterBase* adapter) {
     // Prevent combinations that are not supported (static sampler + external texture).
     for (SingleShaderStage stage : IterateStages(kAllStages)) {
         DAWN_INVALID_IF(bindingCounts.staticSamplerCount != 0 &&

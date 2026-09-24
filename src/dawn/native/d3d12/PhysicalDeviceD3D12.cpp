@@ -105,7 +105,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
     DAWN_TRY_ASSIGN(mD3d12Device, GetBackend()->CreateD3DDevice(GetHardwareAdapter()));
 
     // Check if we should block the use of D3D12 on the current device.
-    DAWN_TRY(ValidateUseOfD3D12());
+    DAWN_TRY(CheckD3D12Blocklist());
 
     DAWN_TRY(InitializeDebugLayerFilters());
 
@@ -997,7 +997,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
                            platform->IsFeatureEnabled(platform::Features::kWebGPUUseHLSL2021));
 }
 
-MaybeError PhysicalDevice::ValidateUseOfD3D12() const {
+MaybeError PhysicalDevice::CheckD3D12Blocklist() const {
     uint32_t deviceId = GetDeviceId();
     uint32_t vendorId = GetVendorId();
 

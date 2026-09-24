@@ -110,11 +110,11 @@ const VertexFormatInfo& GetVertexFormatInfo(wgpu::VertexFormat format) {
 
 // Helper functions
 namespace {
-MaybeError ValidateVertexAttribute(DeviceBase* device,
-                                   const VertexAttribute& attribute,
-                                   const EntryPointMetadata& metadata,
-                                   uint64_t vertexBufferStride,
-                                   VertexAttributeMask* attributesSetMask) {
+MaybeValError ValidateVertexAttribute(DeviceBase* device,
+                                      const VertexAttribute& attribute,
+                                      const EntryPointMetadata& metadata,
+                                      uint64_t vertexBufferStride,
+                                      VertexAttributeMask* attributesSetMask) {
     DAWN_TRY(ValidateVertexFormat(attribute.format));
     const VertexFormatInfo& formatInfo = GetVertexFormatInfo(attribute.format);
 
@@ -167,10 +167,10 @@ MaybeError ValidateVertexAttribute(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateVertexBufferLayout(DeviceBase* device,
-                                      const VertexBufferLayout& buffer,
-                                      const EntryPointMetadata& metadata,
-                                      VertexAttributeMask* attributesSetMask) {
+MaybeValError ValidateVertexBufferLayout(DeviceBase* device,
+                                         const VertexBufferLayout& buffer,
+                                         const EntryPointMetadata& metadata,
+                                         VertexAttributeMask* attributesSetMask) {
     DAWN_TRY(ValidateVertexStepMode(buffer.stepMode));
     DAWN_INVALID_IF(buffer.arrayStride > kMaxVertexBufferArrayStride,
                     "Vertex buffer arrayStride (%u) is larger than the maximum array stride (%u).",
@@ -188,7 +188,7 @@ MaybeError ValidateVertexBufferLayout(DeviceBase* device,
     return {};
 }
 
-ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
+ResultOrValError<ShaderModuleEntryPoint> ValidateVertexState(
     DeviceBase* device,
     const VertexState* descriptor,
     const PipelineLayoutBase* layout,
@@ -268,7 +268,8 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
     return entryPoint;
 }
 
-MaybeError ValidatePrimitiveState(const DeviceBase* device, const PrimitiveState* rawDescriptor) {
+MaybeValError ValidatePrimitiveState(const DeviceBase* device,
+                                     const PrimitiveState* rawDescriptor) {
     UnpackedPtr<PrimitiveState> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
     DAWN_INVALID_IF(descriptor->unclippedDepth && !device->HasFeature(Feature::DepthClipControl),
@@ -290,7 +291,7 @@ MaybeError ValidatePrimitiveState(const DeviceBase* device, const PrimitiveState
     return {};
 }
 
-MaybeError ValidateStencilFaceUnused(StencilFaceState face) {
+MaybeValError ValidateStencilFaceUnused(StencilFaceState face) {
     DAWN_INVALID_IF((face.compare != wgpu::CompareFunction::Always) &&
                         (face.compare != wgpu::CompareFunction::Undefined),
                     "compare (%s) is defined and not %s.", face.compare,
@@ -310,9 +311,9 @@ MaybeError ValidateStencilFaceUnused(StencilFaceState face) {
     return {};
 }
 
-MaybeError ValidateDepthStencilState(const DeviceBase* device,
-                                     const DepthStencilState* descriptor,
-                                     const wgpu::PrimitiveTopology topology) {
+MaybeValError ValidateDepthStencilState(const DeviceBase* device,
+                                        const DepthStencilState* descriptor,
+                                        const wgpu::PrimitiveTopology topology) {
     DAWN_TRY_CONTEXT(ValidateCompareFunction(descriptor->depthCompare),
                      "validating depth compare function");
     DAWN_TRY_CONTEXT(ValidateCompareFunction(descriptor->stencilFront.compare),
@@ -407,7 +408,8 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateMultisampleState(const DeviceBase* device, const MultisampleState* descriptor) {
+MaybeValError ValidateMultisampleState(const DeviceBase* device,
+                                       const MultisampleState* descriptor) {
     DAWN_INVALID_IF(!IsValidSampleCount(descriptor->count),
                     "Multisample count (%u) is not supported.", descriptor->count);
 
@@ -418,7 +420,8 @@ MaybeError ValidateMultisampleState(const DeviceBase* device, const MultisampleS
     return {};
 }
 
-MaybeError ValidateBlendComponent(BlendComponent blendComponent, bool dualSourceBlendingEnabled) {
+MaybeValError ValidateBlendComponent(BlendComponent blendComponent,
+                                     bool dualSourceBlendingEnabled) {
     if (!dualSourceBlendingEnabled) {
         DAWN_INVALID_IF(blendComponent.srcFactor == wgpu::BlendFactor::Src1 ||
                             blendComponent.srcFactor == wgpu::BlendFactor::OneMinusSrc1 ||
@@ -452,7 +455,7 @@ MaybeError ValidateBlendComponent(BlendComponent blendComponent, bool dualSource
     return {};
 }
 
-MaybeError ValidateBlendState(DeviceBase* device, const BlendState* descriptor) {
+MaybeValError ValidateBlendState(DeviceBase* device, const BlendState* descriptor) {
     DAWN_TRY(ValidateBlendOperation(descriptor->alpha.operation));
     DAWN_TRY(ValidateBlendFactor(descriptor->alpha.srcFactor));
     DAWN_TRY(ValidateBlendFactor(descriptor->alpha.dstFactor));
@@ -489,7 +492,7 @@ bool BlendStateUsesBlendFactorSrc1(const BlendState& blend) {
            BlendFactorContainsSrc1(blend.color.dstFactor);
 }
 
-MaybeError ValidateColorTargetState(
+MaybeValError ValidateColorTargetState(
     DeviceBase* device,
     const ColorTargetState& descriptor,
     const Format* format,
@@ -555,7 +558,7 @@ MaybeError ValidateColorTargetState(
     return {};
 }
 
-MaybeError ValidateFramebufferInput(
+MaybeValError ValidateFramebufferInput(
     DeviceBase* device,
     const Format* format,
     const EntryPointMetadata::FragmentRenderAttachmentInfo& inputVar) {
@@ -571,10 +574,10 @@ MaybeError ValidateFramebufferInput(
     return {};
 }
 
-MaybeError ValidateColorTargetStatesMatch(ColorAttachmentIndex firstColorTargetIndex,
-                                          const ColorTargetState* const firstColorTargetState,
-                                          ColorAttachmentIndex targetIndex,
-                                          const ColorTargetState* target) {
+MaybeValError ValidateColorTargetStatesMatch(ColorAttachmentIndex firstColorTargetIndex,
+                                             const ColorTargetState* const firstColorTargetState,
+                                             ColorAttachmentIndex targetIndex,
+                                             const ColorTargetState* target) {
     DAWN_INVALID_IF(firstColorTargetState->writeMask != target->writeMask,
                     "targets[%u].writeMask (%s) does not match targets[%u].writeMask (%s).",
                     targetIndex, target->writeMask, firstColorTargetIndex,
@@ -625,11 +628,12 @@ MaybeError ValidateColorTargetStatesMatch(ColorAttachmentIndex firstColorTargetI
     return {};
 }
 
-ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
-                                                            const FragmentState* descriptor,
-                                                            const PipelineLayoutBase* layout,
-                                                            const DepthStencilState* depthStencil,
-                                                            const MultisampleState& multisample) {
+ResultOrValError<ShaderModuleEntryPoint> ValidateFragmentState(
+    DeviceBase* device,
+    const FragmentState* descriptor,
+    const PipelineLayoutBase* layout,
+    const DepthStencilState* depthStencil,
+    const MultisampleState& multisample) {
     DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
 
     ShaderModuleEntryPoint entryPoint;
@@ -778,11 +782,11 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
     return entryPoint;
 }
 
-MaybeError ValidateInterStageMatching(DeviceBase* device,
-                                      const VertexState& vertexState,
-                                      const ShaderModuleEntryPoint& vertexEntryPoint,
-                                      const FragmentState& fragmentState,
-                                      const ShaderModuleEntryPoint& fragmentEntryPoint) {
+MaybeValError ValidateInterStageMatching(DeviceBase* device,
+                                         const VertexState& vertexState,
+                                         const ShaderModuleEntryPoint& vertexEntryPoint,
+                                         const FragmentState& fragmentState,
+                                         const ShaderModuleEntryPoint& fragmentEntryPoint) {
     const EntryPointMetadata& vertexMetadata =
         vertexState.module->GetEntryPoint(vertexEntryPoint.name);
     const EntryPointMetadata& fragmentMetadata =
@@ -877,8 +881,8 @@ bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology) {
            primitiveTopology == wgpu::PrimitiveTopology::TriangleStrip;
 }
 
-MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
-                                            const RenderPipelineDescriptor* descriptor) {
+MaybeValError ValidateRenderPipelineDescriptor(DeviceBase* device,
+                                               const RenderPipelineDescriptor* descriptor) {
     UnpackedPtr<RenderPipelineDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 

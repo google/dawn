@@ -210,9 +210,10 @@ CombinedLimits ReifyDefaultLimits(const CombinedLimits& limits, wgpu::FeatureLev
     return out;
 }
 
-MaybeError ValidateAndUnpackLimitsIn(const Limits* chainedLimits,
-                                     const std::unordered_set<wgpu::FeatureName>& supportedFeatures,
-                                     CombinedLimits* out) {
+MaybeValError ValidateAndUnpackLimitsIn(
+    const Limits* chainedLimits,
+    const std::unordered_set<wgpu::FeatureName>& supportedFeatures,
+    CombinedLimits* out) {
     DAWN_ASSERT(chainedLimits != nullptr);
     DAWN_ASSERT(out != nullptr);
 
@@ -261,8 +262,8 @@ void UnpackLimitsIn(const Limits* chainedLimits, CombinedLimits* out) {
     }
 }
 
-MaybeError ValidateLimits(const CombinedLimits& supportedLimits,
-                          const CombinedLimits& requiredLimits) {
+MaybeValError ValidateLimits(const CombinedLimits& supportedLimits,
+                             const CombinedLimits& requiredLimits) {
 #define X(Scope, Class, limitName, ...)                                                        \
     if (!detail::IsLimitUndefined(requiredLimits.Scope.limitName)) {                           \
         DAWN_TRY_CONTEXT(detail::CheckLimit<detail::LimitClass::Class>::Validate(              \

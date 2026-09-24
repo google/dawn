@@ -869,7 +869,7 @@ void DeviceBase::StoreCachedBlob(const CacheKey& key, const Blob& blob) {
     }
 }
 
-MaybeError DeviceBase::ValidateObject(const ApiObjectBase* object) const {
+MaybeValError DeviceBase::ValidateObject(const ApiObjectBase* object) const {
     DAWN_ASSERT(object != nullptr);
     DAWN_INVALID_IF(object->GetDevice() != this,
                     "%s is associated with %s, and cannot be used with %s.", object,
@@ -879,7 +879,7 @@ MaybeError DeviceBase::ValidateObject(const ApiObjectBase* object) const {
     return {};
 }
 
-MaybeError DeviceBase::IsNotErrorObject(const ApiObjectBase* object) const {
+MaybeValError DeviceBase::IsNotErrorObject(const ApiObjectBase* object) const {
     DAWN_CHECK(!IsValidationEnabled());
     DAWN_ASSERT(object != nullptr);
     DAWN_INVALID_IF(object->IsError(), "%s is invalid due to a previous error.", object);
@@ -887,7 +887,7 @@ MaybeError DeviceBase::IsNotErrorObject(const ApiObjectBase* object) const {
     return {};
 }
 
-MaybeError DeviceBase::ValidateIsAlive() const {
+MaybeValError DeviceBase::ValidateIsAlive() const {
     DAWN_INVALID_IF(mState != State::Alive, "%s is lost.", this);
     return {};
 }
@@ -998,7 +998,7 @@ bool DeviceBase::IsDeviceIdle() {
     return !mQueue->HasScheduledCommands();
 }
 
-ResultOrError<const Format*> DeviceBase::GetInternalFormat(wgpu::TextureFormat format) const {
+ResultOrValError<const Format*> DeviceBase::GetInternalFormat(wgpu::TextureFormat format) const {
     FormatIndex index = ComputeFormatIndex(format);
     DAWN_INVALID_IF(index >= mFormatTable.size(), "Unknown texture format %s.", format);
 
@@ -2281,7 +2281,7 @@ ResultOrError<Ref<SamplerBase>> DeviceBase::CreateSampler(const SamplerDescripto
     return GetOrCreateSampler(&descriptor);
 }
 
-ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
+ResultOrValError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     const ShaderModuleDescriptor* descriptor,
     const std::vector<tint::wgsl::Extension>& internalExtensions) {
     DAWN_TRY(ValidateIsAlive());
@@ -2340,7 +2340,7 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     // Check in-memory shader module cache first, and if missed create a new ShaderModule which may
     // use the BlobCache.
     return GetOrCreate(
-        mCaches->shaderModules, &blueprint, [&]() -> ResultOrError<Ref<ShaderModuleBase>> {
+        mCaches->shaderModules, &blueprint, [&]() -> ResultOrValError<Ref<ShaderModuleBase>> {
             Ref<ShaderModuleBase> shaderModule;
             DAWN_TRY_ASSIGN(shaderModule, CreateShaderModuleImpl(unpacked, internalExtensions));
             shaderModule->SetContentHash(blueprintHash);

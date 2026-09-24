@@ -165,21 +165,21 @@ void DumpShaderFromDescriptor(LogEmitter* logEmitter,
 // returned as ErrorData in ResultOrError (i.e. ResultOrError::IsError() is true).
 ResultOrError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseRequest req);
 
-MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
-                                                   const EntryPointMetadata& entryPoint,
-                                                   const PipelineLayoutBase* layout);
+MaybeValError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
+                                                      const EntryPointMetadata& entryPoint,
+                                                      const PipelineLayoutBase* layout);
 
 // Return extent3D with workgroup size dimension info if it is valid.
 // width = x, height = y, depthOrArrayLength = z.
-ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
+ResultOrValError<Extent3D> ValidateComputeStageWorkgroupSize(
     const tint::WorkgroupInfo& workgroupInfo,
     bool usesSubgroupMatrix,
     uint32_t maxSubgroupSize,
     const LimitsForCompilationRequest& limits,
     const LimitsForCompilationRequest& adapterSupportedlimits);
 
-MaybeError ValidateSubgroupMatrixConfiguration(const tint::SubgroupMatrixInfo& smInfo,
-                                               const std::vector<SubgroupMatrixConfig>& cfg);
+MaybeValError ValidateSubgroupMatrixConfiguration(const tint::SubgroupMatrixInfo& smInfo,
+                                                  const std::vector<SubgroupMatrixConfig>& cfg);
 
 RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
                                                         const PipelineLayoutBase* layout);

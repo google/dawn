@@ -621,7 +621,7 @@ VkFormat ColorVulkanImageFormat(wgpu::TextureFormat format) {
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<wgpu::TextureFormat> FormatFromVkFormat(const Device* device, VkFormat vkFormat) {
+ResultOrValError<wgpu::TextureFormat> FormatFromVkFormat(const Device* device, VkFormat vkFormat) {
     switch (vkFormat) {
 #define X(wgpuFormat, vkFormat) \
     case vkFormat:              \
@@ -846,8 +846,8 @@ VkSampleCountFlagBits VulkanSampleCount(uint32_t sampleCount) {
     DAWN_UNREACHABLE();
 }
 
-MaybeError ValidateVulkanImageCanBeWrapped(const DeviceBase*,
-                                           const UnpackedPtr<TextureDescriptor>& descriptor) {
+MaybeValError ValidateVulkanImageCanBeWrapped(const DeviceBase*,
+                                              const UnpackedPtr<TextureDescriptor>& descriptor) {
     DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
                     "Texture dimension (%s) is not %s.", descriptor->dimension,
                     wgpu::TextureDimension::e2D);

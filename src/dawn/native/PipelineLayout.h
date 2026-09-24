@@ -49,7 +49,7 @@
 
 namespace dawn::native {
 
-ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescriptor(
+ResultOrValError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescriptor(
     DeviceBase*,
     const PipelineLayoutDescriptor* descriptor,
     PipelineCompatibilityToken pipelineCompatibilityToken = kExplicitPCT);

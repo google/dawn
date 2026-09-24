@@ -51,7 +51,7 @@ namespace dawn::native {
 
 class DeviceBase;
 
-ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
+ResultOrValError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
     DeviceBase* device,
     const BindGroupDescriptor* descriptor,
     UsageValidationMode mode);

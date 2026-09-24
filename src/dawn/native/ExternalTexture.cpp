@@ -42,7 +42,7 @@
 
 namespace dawn::native {
 
-MaybeError ValidateExternalTexturePlane(const TextureViewBase* textureView) {
+MaybeValError ValidateExternalTexturePlane(const TextureViewBase* textureView) {
     DAWN_INVALID_IF(
         (textureView->GetUsage() & wgpu::TextureUsage::TextureBinding) == 0,
         "The external texture plane (%s) usage (%s) doesn't include the required usage (%s)",
@@ -63,8 +63,8 @@ MaybeError ValidateExternalTexturePlane(const TextureViewBase* textureView) {
     return {};
 }
 
-MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
-                                             const ExternalTextureDescriptor* descriptor) {
+MaybeValError ValidateExternalTextureDescriptor(const DeviceBase* device,
+                                                const ExternalTextureDescriptor* descriptor) {
     DAWN_ASSERT(descriptor);
     DAWN_ASSERT(descriptor->plane0);
 
@@ -82,7 +82,7 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
     DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane0));
 
     auto CheckPlaneFormat = [](const DeviceBase* device, const Format& format,
-                               uint32_t requiredComponentCount) -> MaybeError {
+                               uint32_t requiredComponentCount) -> MaybeValError {
         DAWN_INVALID_IF(format.aspects != Aspect::Color, "The format (%s) is not a color format.",
                         format.format);
 
@@ -443,7 +443,7 @@ const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& ExternalTextureBase
     return mTextureViews;
 }
 
-MaybeError ExternalTextureBase::ValidateCanUseInSubmitNow() const {
+MaybeValError ExternalTextureBase::ValidateCanUseInSubmitNow() const {
     DAWN_ASSERT(!IsError());
     DAWN_INVALID_IF(mState != ExternalTextureState::Active,
                     "External texture %s used in a submit is not active.", this);
@@ -457,13 +457,13 @@ MaybeError ExternalTextureBase::ValidateCanUseInSubmitNow() const {
     return {};
 }
 
-MaybeError ExternalTextureBase::ValidateRefresh() {
+MaybeValError ExternalTextureBase::ValidateRefresh() {
     DAWN_TRY(GetDevice()->ValidateObject(this));
     DAWN_INVALID_IF(mState == ExternalTextureState::Destroyed, "%s is destroyed.", this);
     return {};
 }
 
-MaybeError ExternalTextureBase::ValidateExpire() {
+MaybeValError ExternalTextureBase::ValidateExpire() {
     DAWN_TRY(GetDevice()->ValidateObject(this));
     DAWN_INVALID_IF(mState != ExternalTextureState::Active, "%s is not active.", this);
     return {};

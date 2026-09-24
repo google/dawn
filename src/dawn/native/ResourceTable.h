@@ -49,8 +49,8 @@ enum class ResourceType : uint32_t;
 
 namespace dawn::native {
 
-MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
-                                           const ResourceTableDescriptor* descriptor);
+MaybeValError ValidateResourceTableDescriptor(const DeviceBase* device,
+                                              const ResourceTableDescriptor* descriptor);
 
 // ResourceTableBase implements the frontend tracking for GPUResourceTable, a sparse array of
 // heterogeneous resources that can be accessed in shaders. It needs logic for multiple aspects:
@@ -81,7 +81,7 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
 
     BufferBase* GetMetadataBuffer() const;
     bool IsDestroyed() const;
-    MaybeError ValidateCanUseInSubmitNow() const;
+    MaybeValError ValidateCanUseInSubmitNow() const;
 
     // Dawn API
     void APIDestroy();

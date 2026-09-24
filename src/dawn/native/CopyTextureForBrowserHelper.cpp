@@ -250,7 +250,7 @@ struct TextureInfo {
 
 // TODO(crbug.com/dawn/856): Expand copyTextureForBrowser to support any
 // non-depth, non-stencil, non-compressed texture format pair copy.
-MaybeError ValidateCopyTextureSourceFormat(const wgpu::TextureFormat srcFormat) {
+MaybeValError ValidateCopyTextureSourceFormat(const wgpu::TextureFormat srcFormat) {
     switch (srcFormat) {
         case wgpu::TextureFormat::BGRA8Unorm:
         case wgpu::TextureFormat::RGBA8Unorm:
@@ -574,10 +574,10 @@ MaybeError DoCopyForBrowser(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateCopyForBrowserDestination(DeviceBase* device,
-                                             const TexelCopyTextureInfo& destination,
-                                             const Extent3D& copySize,
-                                             const CopyTextureForBrowserOptions& options) {
+MaybeValError ValidateCopyForBrowserDestination(DeviceBase* device,
+                                                const TexelCopyTextureInfo& destination,
+                                                const Extent3D& copySize,
+                                                const CopyTextureForBrowserOptions& options) {
     DAWN_TRY(device->ValidateObject(destination.texture));
     DAWN_TRY(destination.texture->ValidateCanUseInSubmitNow());
     DAWN_TRY_CONTEXT(ValidateTexelCopyTextureInfo(device, destination, copySize),
@@ -607,7 +607,7 @@ MaybeError ValidateCopyForBrowserDestination(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateCopyForBrowserOptions(const CopyTextureForBrowserOptions& options) {
+MaybeValError ValidateCopyForBrowserOptions(const CopyTextureForBrowserOptions& options) {
     DAWN_INVALID_IF(options.nextInChain != nullptr, "nextInChain must be nullptr");
 
     DAWN_TRY(ValidateAlphaMode(options.srcAlphaMode));
@@ -625,11 +625,11 @@ MaybeError ValidateCopyForBrowserOptions(const CopyTextureForBrowserOptions& opt
 }
 }  // anonymous namespace
 
-MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
-                                         const TexelCopyTextureInfo* source,
-                                         const TexelCopyTextureInfo* destination,
-                                         const Extent3D* copySize,
-                                         const CopyTextureForBrowserOptions* options) {
+MaybeValError ValidateCopyTextureForBrowser(DeviceBase* device,
+                                            const TexelCopyTextureInfo* source,
+                                            const TexelCopyTextureInfo* destination,
+                                            const Extent3D* copySize,
+                                            const CopyTextureForBrowserOptions* options) {
     // Validate source
     DAWN_TRY(device->ValidateObject(source->texture));
     DAWN_TRY(source->texture->ValidateCanUseInSubmitNow());
@@ -665,11 +665,11 @@ MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateCopyExternalTextureForBrowser(DeviceBase* device,
-                                                 const ImageCopyExternalTexture* source,
-                                                 const TexelCopyTextureInfo* destination,
-                                                 const Extent3D* copySize,
-                                                 const CopyTextureForBrowserOptions* options) {
+MaybeValError ValidateCopyExternalTextureForBrowser(DeviceBase* device,
+                                                    const ImageCopyExternalTexture* source,
+                                                    const TexelCopyTextureInfo* destination,
+                                                    const Extent3D* copySize,
+                                                    const CopyTextureForBrowserOptions* options) {
     // Validate source
     DAWN_TRY(device->ValidateObject(source->externalTexture));
     DAWN_TRY(source->externalTexture->ValidateCanUseInSubmitNow());

@@ -51,7 +51,7 @@
 
 namespace dawn::native {
 
-ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescriptor(
+ResultOrValError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescriptor(
     DeviceBase* device,
     const PipelineLayoutDescriptor* descriptor,
     PipelineCompatibilityToken pipelineCompatibilityToken) {
@@ -221,7 +221,7 @@ Ref<PipelineLayoutBase> PipelineLayoutBase::MakeError(DeviceBase* device, String
 namespace {
 
 // Helper function used to merge multiple TextureSampleTypes for the same binding together.
-ResultOrError<wgpu::TextureSampleType> MostSpecificSampleTypeIfCompatible(
+ResultOrValError<wgpu::TextureSampleType> MostSpecificSampleTypeIfCompatible(
     wgpu::TextureSampleType a,
     wgpu::TextureSampleType b) {
     if (a == b) {
@@ -244,7 +244,7 @@ ResultOrError<wgpu::TextureSampleType> MostSpecificSampleTypeIfCompatible(
 }
 
 // Helper function used to merge multiple SamplerBindingType for the same binding together.
-ResultOrError<wgpu::SamplerBindingType> MostSpecificSamplerTypeIfCompatible(
+ResultOrValError<wgpu::SamplerBindingType> MostSpecificSamplerTypeIfCompatible(
     wgpu::SamplerBindingType a,
     wgpu::SamplerBindingType b) {
     if (a == b) {
@@ -266,8 +266,8 @@ ResultOrError<wgpu::SamplerBindingType> MostSpecificSamplerTypeIfCompatible(
 }
 
 // Merges two entries at the same location, if they are allowed to be merged.
-MaybeError MergeEntries(BindGroupLayoutEntry* modifiedEntry,
-                        const BindGroupLayoutEntry& mergedEntry) {
+MaybeValError MergeEntries(BindGroupLayoutEntry* modifiedEntry,
+                           const BindGroupLayoutEntry& mergedEntry) {
     DAWN_CHECK(modifiedEntry->binding == mergedEntry.binding);
 
     BindingInfoType modifiedType = GetBindingInfoType(modifiedEntry);

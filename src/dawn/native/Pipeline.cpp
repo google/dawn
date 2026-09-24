@@ -89,12 +89,13 @@ uint32_t ComputeNumTextureSamplerCombinations(const dawn::native::EntryPointMeta
 
 }  // namespace
 
-ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* device,
-                                                                const ShaderModuleBase* module,
-                                                                StringView entryPointName,
-                                                                Span<const ConstantEntry> constants,
-                                                                const PipelineLayoutBase* layout,
-                                                                SingleShaderStage stage) {
+ResultOrValError<ShaderModuleEntryPoint> ValidateProgrammableStage(
+    DeviceBase* device,
+    const ShaderModuleBase* module,
+    StringView entryPointName,
+    Span<const ConstantEntry> constants,
+    const PipelineLayoutBase* layout,
+    SingleShaderStage stage) {
     DAWN_TRY(device->ValidateObject(module));
 
     if (!entryPointName.IsUndefined()) {
@@ -343,7 +344,7 @@ const ImmediateMask& PipelineBase::GetImmediateMask() const {
     return mImmediateMask;
 }
 
-MaybeError PipelineBase::ValidateGetBindGroupLayout(BindGroupIndex groupIndex) {
+MaybeValError PipelineBase::ValidateGetBindGroupLayout(BindGroupIndex groupIndex) {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
     DAWN_TRY(GetDevice()->ValidateObject(mLayout.Get()));

@@ -49,7 +49,7 @@
 
 namespace dawn::native::utils {
 
-ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
+ResultOrValError<Ref<ShaderModuleBase>> CreateShaderModule(
     DeviceBase* device,
     const char* source,
     const std::vector<tint::wgsl::Extension>& internalExtensions) {

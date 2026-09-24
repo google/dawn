@@ -48,20 +48,20 @@ class QuerySetBase;
 struct SyncScopeResourceUsage;
 struct TexelBlockInfo;
 
-MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope);
+MaybeValError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope);
 
-MaybeError ValidateTimestampQuery(const DeviceBase* device,
-                                  const QuerySetBase* querySet,
-                                  QueryIndex queryIndex,
-                                  Feature requiredFeature = Feature::TimestampQuery);
+MaybeValError ValidateTimestampQuery(const DeviceBase* device,
+                                     const QuerySetBase* querySet,
+                                     QueryIndex queryIndex,
+                                     Feature requiredFeature = Feature::TimestampQuery);
 
-MaybeError ValidatePassTimestampWrites(const DeviceBase* device,
-                                       const PassTimestampWrites* timestampWrites);
+MaybeValError ValidatePassTimestampWrites(const DeviceBase* device,
+                                          const PassTimestampWrites* timestampWrites);
 
-MaybeError ValidateWriteBuffer(const DeviceBase* device,
-                               const BufferBase* buffer,
-                               uint64_t bufferOffset,
-                               uint64_t size);
+MaybeValError ValidateWriteBuffer(const DeviceBase* device,
+                                  const BufferBase* buffer,
+                                  uint64_t bufferOffset,
+                                  uint64_t size);
 
 template <typename A, typename B>
 DAWN_FORCE_INLINE uint64_t Safe32x32(A a, B b) {
@@ -72,10 +72,10 @@ DAWN_FORCE_INLINE uint64_t Safe32x32(A a, B b) {
 
 // Overload to be used before/during validation. Handles bytesPerRow and rowPerImage being
 // wgpu::kCopyStrideUndefined.
-ResultOrError<uint64_t> ComputeRequiredBytesInCopy(const TexelBlockInfo& blockInfo,
-                                                   const Extent3D& copySize,
-                                                   uint32_t bytesPerRow,
-                                                   uint32_t rowsPerImage);
+ResultOrValError<uint64_t> ComputeRequiredBytesInCopy(const TexelBlockInfo& blockInfo,
+                                                      const Extent3D& copySize,
+                                                      uint32_t bytesPerRow,
+                                                      uint32_t rowsPerImage);
 // Overload to be used post validation, e.g. after ValidateLinearTextureData.
 // Inputs are expected to have defined values, e.g. after ApplyDefaultTexelCopyBufferLayoutOptions.
 uint64_t ComputeRequiredBytesInCopy(const TypedTexelBlockInfo& blockInfo,
@@ -86,26 +86,27 @@ uint64_t ComputeRequiredBytesInCopy(const TypedTexelBlockInfo& blockInfo,
 void ApplyDefaultTexelCopyBufferLayoutOptions(TexelCopyBufferLayout* layout,
                                               const TexelBlockInfo& blockInfo,
                                               const Extent3D& copyExtent);
-MaybeError ValidateLinearTextureData(const TexelCopyBufferLayout& layout,
-                                     uint64_t byteSize,
-                                     const TexelBlockInfo& blockInfo,
-                                     const Extent3D& copyExtent);
-MaybeError ValidateTextureCopyRange(DeviceBase const* device,
-                                    const TexelCopyTextureInfo& textureCopy,
-                                    const Extent3D& copySize);
-ResultOrError<Aspect> SingleAspectUsedByTexelCopyTextureInfo(const TexelCopyTextureInfo& view);
-MaybeError ValidateLinearToDepthStencilCopyRestrictions(const TexelCopyTextureInfo& dst);
+MaybeValError ValidateLinearTextureData(const TexelCopyBufferLayout& layout,
+                                        uint64_t byteSize,
+                                        const TexelBlockInfo& blockInfo,
+                                        const Extent3D& copyExtent);
+MaybeValError ValidateTextureCopyRange(DeviceBase const* device,
+                                       const TexelCopyTextureInfo& textureCopy,
+                                       const Extent3D& copySize);
+ResultOrValError<Aspect> SingleAspectUsedByTexelCopyTextureInfo(const TexelCopyTextureInfo& view);
+MaybeValError ValidateLinearToDepthStencilCopyRestrictions(const TexelCopyTextureInfo& dst);
 
-MaybeError ValidateTexelCopyBufferInfo(DeviceBase const* device,
-                                       const TexelCopyBufferInfo& texelCopyBufferInfo);
-MaybeError ValidateTexelCopyTextureInfo(DeviceBase const* device,
-                                        const TexelCopyTextureInfo& textureCopy,
-                                        const Extent3D& copySize);
+MaybeValError ValidateTexelCopyBufferInfo(DeviceBase const* device,
+                                          const TexelCopyBufferInfo& texelCopyBufferInfo);
+MaybeValError ValidateTexelCopyTextureInfo(DeviceBase const* device,
+                                           const TexelCopyTextureInfo& textureCopy,
+                                           const Extent3D& copySize);
 
-MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
-                                        uint64_t offset,
-                                        uint64_t size,
-                                        BufferSizeType checkBufferSizeType = BufferSizeType::Size);
+MaybeValError ValidateCopySizeFitsInBuffer(
+    const Ref<BufferBase>& buffer,
+    uint64_t offset,
+    uint64_t size,
+    BufferSizeType checkBufferSizeType = BufferSizeType::Size);
 
 // Returns true if [startA, startA + length[ overlaps [startB, startB + length[
 template <typename T>
@@ -119,34 +120,34 @@ bool IsRangeOverlapped(T startA, T startB, T length) {
                          static_cast<uint64_t>(startB) + static_cast<uint64_t>(length) - 1);
 }
 
-MaybeError ValidateTextureToTextureCopyCommonRestrictions(DeviceBase const* device,
-                                                          const TexelCopyTextureInfo& src,
-                                                          const TexelCopyTextureInfo& dst,
-                                                          const Extent3D& copySize);
-MaybeError ValidateTextureToTextureCopyRestrictions(DeviceBase const* device,
-                                                    const TexelCopyTextureInfo& src,
-                                                    const TexelCopyTextureInfo& dst,
-                                                    const Extent3D& copySize);
+MaybeValError ValidateTextureToTextureCopyCommonRestrictions(DeviceBase const* device,
+                                                             const TexelCopyTextureInfo& src,
+                                                             const TexelCopyTextureInfo& dst,
+                                                             const Extent3D& copySize);
+MaybeValError ValidateTextureToTextureCopyRestrictions(DeviceBase const* device,
+                                                       const TexelCopyTextureInfo& src,
+                                                       const TexelCopyTextureInfo& dst,
+                                                       const Extent3D& copySize);
 
-MaybeError ValidateCanUseAs(const TextureBase* textureView,
-                            wgpu::TextureUsage usage,
-                            UsageValidationMode mode);
-MaybeError ValidateCanUseAs(const TextureViewBase* textureView,
-                            wgpu::TextureUsage usage,
-                            UsageValidationMode mode);
-MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage);
-MaybeError ValidateCanUseAsInternal(const BufferBase* buffer, wgpu::BufferUsage usage);
+MaybeValError ValidateCanUseAs(const TextureBase* textureView,
+                               wgpu::TextureUsage usage,
+                               UsageValidationMode mode);
+MaybeValError ValidateCanUseAs(const TextureViewBase* textureView,
+                               wgpu::TextureUsage usage,
+                               UsageValidationMode mode);
+MaybeValError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage);
+MaybeValError ValidateCanUseAsInternal(const BufferBase* buffer, wgpu::BufferUsage usage);
 
 using ColorAttachmentFormats = absl::InlinedVector<const Format*, kMaxColorAttachments>;
-MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
-                                                 const ColorAttachmentFormats& formats);
+MaybeValError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
+                                                    const ColorAttachmentFormats& formats);
 
 struct StorageAttachmentInfoForValidation {
     uint64_t offset = 0;
     // This format is assumed to support StorageAttachment.
     wgpu::TextureFormat format = wgpu::TextureFormat::Undefined;
 };
-MaybeError ValidatePLSInfo(
+MaybeValError ValidatePLSInfo(
     const DeviceBase* device,
     uint64_t totalSize,
     ityp::span<size_t, StorageAttachmentInfoForValidation> storageAttachments);

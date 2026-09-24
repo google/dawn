@@ -112,8 +112,8 @@ class SwapChainBase : public ApiObjectBase {
     raw_ptr<Surface> mSurface = nullptr;
     SwapChainTextureInfo mCurrentTextureInfo;
 
-    MaybeError ValidatePresent() const;
-    MaybeError ValidateGetCurrentTexture() const;
+    MaybeValError ValidatePresent() const;
+    MaybeValError ValidateGetCurrentTexture() const;
 
     // GetCurrentTextureImpl and PresentImpl are guaranteed to be called in an interleaved manner,
     // starting with GetCurrentTextureImpl.

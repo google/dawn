@@ -56,8 +56,8 @@ bool IsFormatSupportedForTexelBuffer(wgpu::TextureFormat format) {
     }
 }
 
-ResultOrError<const Format*> ValidateTexelBufferFormat(DeviceBase* device,
-                                                       wgpu::TextureFormat format) {
+ResultOrValError<const Format*> ValidateTexelBufferFormat(DeviceBase* device,
+                                                          wgpu::TextureFormat format) {
     DAWN_INVALID_IF(format == wgpu::TextureFormat::Undefined, "Texel buffer format is undefined.");
 
     const Format* internalFormat = nullptr;

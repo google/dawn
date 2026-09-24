@@ -41,7 +41,7 @@
 namespace dawn::native::metal {
 
 namespace {
-ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
+ResultOrValError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
     switch (format) {
         case kCVPixelFormatType_64RGBAHalf:
             return wgpu::TextureFormat::RGBA16Float;

@@ -46,7 +46,7 @@ class Queue final : public QueueBase, public ObjectWGPU<WGPUQueue> {
     static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
 
     bool IsCapturing() const;
-    MaybeError SetCaptureContext(std::unique_ptr<CaptureContext> captureContext);
+    MaybeValError SetCaptureContext(std::unique_ptr<CaptureContext> captureContext);
     CaptureContext* GetCaptureContext() const;
 
     // Returns a SharedFence wrapping the inner SharedFence handle.

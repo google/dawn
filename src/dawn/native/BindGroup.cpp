@@ -60,9 +60,9 @@ namespace {
 
 // Helper functions to perform binding-type specific validation
 
-MaybeError ValidateBufferBinding(const DeviceBase* device,
-                                 const BindGroupEntry& entry,
-                                 const BufferBindingInfo& layout) {
+MaybeValError ValidateBufferBinding(const DeviceBase* device,
+                                    const BindGroupEntry& entry,
+                                    const BufferBindingInfo& layout) {
     DAWN_INVALID_IF(entry.buffer == nullptr, "Binding entry buffer not set.");
 
     DAWN_INVALID_IF(entry.sampler != nullptr || entry.textureView != nullptr,
@@ -173,7 +173,7 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateTextureBindGroupEntry(const DeviceBase* device, const BindGroupEntry& entry) {
+MaybeValError ValidateTextureBindGroupEntry(const DeviceBase* device, const BindGroupEntry& entry) {
     DAWN_INVALID_IF(entry.textureView == nullptr, "Binding entry textureView not set.");
 
     DAWN_INVALID_IF(entry.sampler != nullptr || entry.buffer != nullptr,
@@ -190,9 +190,9 @@ MaybeError ValidateTextureBindGroupEntry(const DeviceBase* device, const BindGro
     return {};
 }
 
-MaybeError ValidateCompatibilityModeTextureViewArrayLayer(DeviceBase* device,
-                                                          const TextureViewBase* view,
-                                                          const TextureBase* texture) {
+MaybeValError ValidateCompatibilityModeTextureViewArrayLayer(DeviceBase* device,
+                                                             const TextureViewBase* view,
+                                                             const TextureBase* texture) {
     DAWN_INVALID_IF(
         view->GetBaseArrayLayer() != 0 || view->GetLayerCount() != texture->GetArrayLayers(),
         "Texture binding uses %s with baseArrayLayer (%u) and arrayLayerCount (%u), but must use "
@@ -202,9 +202,9 @@ MaybeError ValidateCompatibilityModeTextureViewArrayLayer(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateTextureBindingViewDimension(DeviceBase* device,
-                                               TextureViewBase* view,
-                                               TextureBase* texture) {
+MaybeValError ValidateTextureBindingViewDimension(DeviceBase* device,
+                                                  TextureViewBase* view,
+                                                  TextureBase* texture) {
     if (!device->HasFlexibleTextureViews()) {
         DAWN_INVALID_IF(
             view->GetDimension() != texture->GetCompatibilityTextureBindingViewDimension(),
@@ -219,10 +219,10 @@ MaybeError ValidateTextureBindingViewDimension(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateSampledTextureBinding(DeviceBase* device,
-                                         const BindGroupEntry& entry,
-                                         const TextureBindingInfo& layout,
-                                         UsageValidationMode mode) {
+MaybeValError ValidateSampledTextureBinding(DeviceBase* device,
+                                            const BindGroupEntry& entry,
+                                            const TextureBindingInfo& layout,
+                                            UsageValidationMode mode) {
     DAWN_TRY(ValidateTextureBindGroupEntry(device, entry));
 
     TextureViewBase* view = entry.textureView;
@@ -260,8 +260,8 @@ MaybeError ValidateSampledTextureBinding(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateTextureViewBindingUsedAsExternalTexture(DeviceBase* device,
-                                                           const BindGroupEntry& entry) {
+MaybeValError ValidateTextureViewBindingUsedAsExternalTexture(DeviceBase* device,
+                                                              const BindGroupEntry& entry) {
     // TODO(crbug.com/398752857): Error message should include that entry is neither an
     // ExternalTexture nor a TextureView when the layout contains an ExternalTexture entry.
     DAWN_TRY(ValidateTextureBindGroupEntry(device, entry));
@@ -292,10 +292,10 @@ MaybeError ValidateTextureViewBindingUsedAsExternalTexture(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateStorageTextureBinding(DeviceBase* device,
-                                         const BindGroupEntry& entry,
-                                         const StorageTextureBindingInfo& layout,
-                                         UsageValidationMode mode) {
+MaybeValError ValidateStorageTextureBinding(DeviceBase* device,
+                                            const BindGroupEntry& entry,
+                                            const StorageTextureBindingInfo& layout,
+                                            UsageValidationMode mode) {
     DAWN_TRY(ValidateTextureBindGroupEntry(device, entry));
 
     TextureViewBase* view = entry.textureView;
@@ -329,10 +329,10 @@ MaybeError ValidateStorageTextureBinding(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateTexelBufferBinding(DeviceBase* device,
-                                      const UnpackedPtr<BindGroupEntry>& entry,
-                                      const TexelBufferBindingInfo& layout,
-                                      UsageValidationMode mode) {
+MaybeValError ValidateTexelBufferBinding(DeviceBase* device,
+                                         const UnpackedPtr<BindGroupEntry>& entry,
+                                         const TexelBufferBindingInfo& layout,
+                                         UsageValidationMode mode) {
     const TexelBufferBindingEntry* texelBufferEntry = entry.Get<TexelBufferBindingEntry>();
     DAWN_INVALID_IF(texelBufferEntry == nullptr, "Expected a texelBufferView.");
 
@@ -358,9 +358,9 @@ MaybeError ValidateTexelBufferBinding(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateSamplerBinding(const DeviceBase* device,
-                                  const BindGroupEntry& entry,
-                                  const SamplerBindingInfo& layout) {
+MaybeValError ValidateSamplerBinding(const DeviceBase* device,
+                                     const BindGroupEntry& entry,
+                                     const SamplerBindingInfo& layout) {
     DAWN_INVALID_IF(entry.sampler == nullptr, "Binding entry sampler not set.");
 
     DAWN_INVALID_IF(entry.sampler->IsYCbCr(),
@@ -400,8 +400,8 @@ MaybeError ValidateSamplerBinding(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateExternalTextureBinding(DeviceBase* device,
-                                          const UnpackedPtr<BindGroupEntry>& entry) {
+MaybeValError ValidateExternalTextureBinding(DeviceBase* device,
+                                             const UnpackedPtr<BindGroupEntry>& entry) {
     auto* externalTextureBindingEntry = entry.Get<ExternalTextureBindingEntry>();
 
     // It is possible to use texture views in lieu of external textures.
@@ -428,7 +428,7 @@ void ForEachUnverifiedBufferBindingIndexImpl(const BindGroupLayoutInternalBase* 
     }
 }
 
-MaybeError ValidateStaticSamplersWithSampledTextures(
+MaybeValError ValidateStaticSamplersWithSampledTextures(
     const UnpackedPtr<BindGroupDescriptor>& descriptor,
     const BindGroupLayoutInternalBase* layout) {
     // Cache the position of all the sampled texture in descriptor->entries to later validate them
@@ -504,7 +504,7 @@ MaybeError ValidateStaticSamplersWithSampledTextures(
 
 }  // anonymous namespace
 
-ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
+ResultOrValError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
     DeviceBase* device,
     const BindGroupDescriptor* descriptorChain,
     UsageValidationMode mode) {
@@ -551,11 +551,11 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
         DAWN_TRY_CONTEXT(
             MatchVariant(
                 bindingInfo.bindingLayout,
-                [&](const BufferBindingInfo& layout) -> MaybeError {
+                [&](const BufferBindingInfo& layout) -> MaybeValError {
                     // TODO(dawn:1485): Validate buffer binding with usage validation mode.
                     return ValidateBufferBinding(device, entry, layout);
                 },
-                [&](const TextureBindingInfo& layout) -> MaybeError {
+                [&](const TextureBindingInfo& layout) -> MaybeValError {
                     DAWN_TRY(ValidateSampledTextureBinding(device, entry, layout, mode));
 
                     if (entry.textureView->IsYCbCr()) {
@@ -564,23 +564,23 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
                     }
                     return {};
                 },
-                [&](const StorageTextureBindingInfo& layout) -> MaybeError {
+                [&](const StorageTextureBindingInfo& layout) -> MaybeValError {
                     return ValidateStorageTextureBinding(device, entry, layout, mode);
                 },
-                [&](const TexelBufferBindingInfo& layout) -> MaybeError {
+                [&](const TexelBufferBindingInfo& layout) -> MaybeValError {
                     return ValidateTexelBufferBinding(device, unpacked, layout, mode);
                 },
-                [&](const SamplerBindingInfo& layout) -> MaybeError {
+                [&](const SamplerBindingInfo& layout) -> MaybeValError {
                     return ValidateSamplerBinding(device, entry, layout);
                 },
-                [&](const StaticSamplerBindingInfo& layout) -> MaybeError {
+                [&](const StaticSamplerBindingInfo& layout) -> MaybeValError {
                     return DAWN_VALIDATION_ERROR("An entry is provided for a static sampler.");
                 },
-                [&](const ExternalTextureBindingInfo& layout) -> MaybeError {
+                [&](const ExternalTextureBindingInfo& layout) -> MaybeValError {
                     return ValidateExternalTextureBinding(device, unpacked);
                 },
 
-                [](const InputAttachmentBindingInfo&) -> MaybeError {
+                [](const InputAttachmentBindingInfo&) -> MaybeValError {
                     // Internal use only. No validation.
                     return {};
                 }),

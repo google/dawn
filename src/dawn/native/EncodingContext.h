@@ -142,7 +142,7 @@ class EncodingContext {
         return false;
     }
 
-    inline MaybeError ValidateCanEncodeOn(const ApiObjectBase* encoder) {
+    inline MaybeValError ValidateCanEncodeOn(const ApiObjectBase* encoder) {
         if (encoder != mCurrentEncoder) [[unlikely]] {
             switch (mStatus) {
                 case Status::ErrorAtCreation:

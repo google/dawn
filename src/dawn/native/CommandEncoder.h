@@ -47,7 +47,7 @@ enum class UsageValidationMode;
 
 Color ClampClearColorValueToLegalRange(const Color& originalColor, const Format& format);
 
-ResultOrError<UnpackedPtr<CommandEncoderDescriptor>> ValidateCommandEncoderDescriptor(
+ResultOrValError<UnpackedPtr<CommandEncoderDescriptor>> ValidateCommandEncoderDescriptor(
     const DeviceBase* device,
     const CommandEncoderDescriptor* descriptor);
 
@@ -128,14 +128,13 @@ class CommandEncoder final : public ApiObjectBase {
 
     [[nodiscard]] InternalUsageScope MakeInternalUsageScope();
 
-
   private:
     CommandEncoder(DeviceBase* device, const UnpackedPtr<CommandEncoderDescriptor>& descriptor);
     CommandEncoder(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
     void DestroyImpl(DestroyReason reason) override;
 
-    MaybeError ValidateFinish() const;
+    MaybeValError ValidateFinish() const;
 
     EncodingContext mEncodingContext;
     absl::flat_hash_set<BufferBase*> mTopLevelBuffers;

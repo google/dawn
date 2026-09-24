@@ -225,7 +225,7 @@ void ComputePassEncoder::APIDispatchWorkgroups(uint32_t workgroupCountX,
                                                uint32_t workgroupCountZ) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 if (workgroupCountX == 0 || workgroupCountY == 0 || workgroupCountZ == 0) {
                     GetDevice()->EmitWarningOnce(absl::StrFormat(
@@ -417,7 +417,7 @@ void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffe
                                                        uint64_t indirectOffset) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
@@ -513,7 +513,7 @@ void ComputePassEncoder::APISetPipeline(ComputePipelineBase* pipeline) {
 void ComputePassEncoder::APISetResourceTable(ResourceTableBase* table) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_INVALID_IF(
                     !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),

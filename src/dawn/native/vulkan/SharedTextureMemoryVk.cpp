@@ -83,7 +83,7 @@ constexpr auto kDrmFormatABGR16161616F =
     DrmFourccCode('A', 'B', '4', 'H'); /* [63:0] A:B:G:R 16:16:16:16 little endian */
 constexpr auto kDrmFormatNV12 = DrmFourccCode('N', 'V', '1', '2'); /* 2x2 subsampled Cr:Cb plane */
 
-[[maybe_unused]] ResultOrError<wgpu::TextureFormat> FormatFromDrmFormat(uint32_t drmFormat) {
+[[maybe_unused]] ResultOrValError<wgpu::TextureFormat> FormatFromDrmFormat(uint32_t drmFormat) {
     switch (drmFormat) {
         case kDrmFormatR8:
             return wgpu::TextureFormat::R8Unorm;

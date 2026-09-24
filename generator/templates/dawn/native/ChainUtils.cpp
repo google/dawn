@@ -117,7 +117,7 @@ struct AdditionalExtensionUnpacker<Root, UnpackedPtrT, detail::AdditionalExtensi
         return result;
     }
     template <>
-    ResultOrError<{{UnpackedPtrT}}> ValidateAndUnpack<{{T}}>(
+    ResultOrValError<{{UnpackedPtrT}}> ValidateAndUnpack<{{T}}>(
         {{UnpackedPtrT}}::PtrType chain) {
         {{UnpackedPtrT}} result(chain);
         for ({{UnpackedPtrT}}::ChainType next = chain->nextInChain;

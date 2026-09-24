@@ -48,12 +48,13 @@ namespace dawn::native {
 class ComputePipelineBase;
 class RenderPipelineBase;
 
-ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* device,
-                                                                const ShaderModuleBase* module,
-                                                                StringView entryPointName,
-                                                                Span<const ConstantEntry> constants,
-                                                                const PipelineLayoutBase* layout,
-                                                                SingleShaderStage stage);
+ResultOrValError<ShaderModuleEntryPoint> ValidateProgrammableStage(
+    DeviceBase* device,
+    const ShaderModuleBase* module,
+    StringView entryPointName,
+    Span<const ConstantEntry> constants,
+    const PipelineLayoutBase* layout,
+    SingleShaderStage stage);
 
 struct ProgrammableStage {
     Ref<ShaderModuleBase> module;
@@ -124,7 +125,7 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     ImmediateMask mUserImmdiateSlots = ImmediateMask(0);
 
   private:
-    MaybeError ValidateGetBindGroupLayout(BindGroupIndex group);
+    MaybeValError ValidateGetBindGroupLayout(BindGroupIndex group);
 
     // Overridden by child classes to perform their initialization when the shaders are ready.
     virtual MaybeError InitializeWithShaders() = 0;

@@ -422,7 +422,7 @@ DXGI_FORMAT DXGITextureFormat(const DeviceBase* device, wgpu::TextureFormat form
     }
 }
 
-ResultOrError<wgpu::TextureFormat> FromUncompressedColorDXGITextureFormat(DXGI_FORMAT format) {
+ResultOrValError<wgpu::TextureFormat> FromUncompressedColorDXGITextureFormat(DXGI_FORMAT format) {
     switch (format) {
 #define X(wgpuFormat, dxgiFormat) \
     case dxgiFormat:              \

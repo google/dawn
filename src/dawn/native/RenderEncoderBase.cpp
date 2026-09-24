@@ -106,7 +106,7 @@ void RenderEncoderBase::APIDraw(uint32_t vertexCount,
                                 uint32_t firstInstance) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 if (vertexCount == 0) {
                     GetDevice()->EmitWarningOnce(absl::StrFormat(
@@ -153,7 +153,7 @@ void RenderEncoderBase::APIDrawIndexed(uint32_t indexCount,
                                        uint32_t firstInstance) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 if (indexCount == 0) {
                     GetDevice()->EmitWarningOnce(absl::StrFormat(
@@ -201,7 +201,7 @@ void RenderEncoderBase::APIDrawIndexed(uint32_t indexCount,
 void RenderEncoderBase::APIDrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
@@ -261,7 +261,7 @@ void RenderEncoderBase::APIDrawIndexedIndirect(BufferBase* indirectBuffer,
                                                uint64_t indirectOffset) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
@@ -330,7 +330,7 @@ void RenderEncoderBase::APIMultiDrawIndirect(BufferBase* indirectBuffer,
                                              uint64_t drawCountBufferOffset) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::MultiDrawIndirect),
                                 "%s is not enabled.", wgpu::FeatureName::MultiDrawIndirect);
@@ -436,7 +436,7 @@ void RenderEncoderBase::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer,
                                                     uint64_t drawCountBufferOffset) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::MultiDrawIndirect),
                                 "%s is not enabled.", wgpu::FeatureName::MultiDrawIndirect);
@@ -542,7 +542,7 @@ void RenderEncoderBase::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer,
 void RenderEncoderBase::APISetPipeline(RenderPipelineBase* pipeline) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(pipeline));
 
@@ -582,7 +582,7 @@ void RenderEncoderBase::APISetIndexBuffer(BufferBase* buffer,
                                           uint64_t size) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(buffer));
                 DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Index));
@@ -642,7 +642,7 @@ void RenderEncoderBase::APISetVertexBuffer(uint32_t slot,
                                            uint64_t size) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_INVALID_IF(slot >= kMaxVertexBuffers,
                                 "Vertex buffer slot (%u) is larger the maximum (%u)", slot,

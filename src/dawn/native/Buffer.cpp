@@ -119,7 +119,7 @@ static uint32_t sZeroSizedMappingData = 0xCAFED00D;
 
 // Validates the combinations of MapRead/MapWrite buffer usages with other usages against the device
 // features.
-MaybeError ValidateBufferUsageCombinations(const DeviceBase* device, wgpu::BufferUsage usage) {
+MaybeValError ValidateBufferUsageCombinations(const DeviceBase* device, wgpu::BufferUsage usage) {
     // With `BufferMapExtendedUsages`, both MapRead and MapWrite can be combined with any other
     // buffer usage.
     if (device->HasFeature(Feature::BufferMapExtendedUsages)) {
@@ -160,7 +160,7 @@ MaybeError ValidateBufferUsageCombinations(const DeviceBase* device, wgpu::Buffe
 
 }  // anonymous namespace
 
-ResultOrError<UnpackedPtr<TexelBufferViewDescriptor>> ValidateTexelBufferViewDescriptor(
+ResultOrValError<UnpackedPtr<TexelBufferViewDescriptor>> ValidateTexelBufferViewDescriptor(
     const BufferBase* buffer,
     const TexelBufferViewDescriptor* descriptor) {
     UnpackedPtr<TexelBufferViewDescriptor> desc;
@@ -413,7 +413,7 @@ class BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
     raw_ptr<void> mUserdata2 = nullptr;
 };
 
-ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
+ResultOrValError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
     DeviceBase* device,
     const BufferDescriptor* descriptor) {
     UnpackedPtr<BufferDescriptor> unpacked;
@@ -750,7 +750,7 @@ BufferBase::ScopedUseBuffer BufferBase::UseInternal() {
     return ScopedUseBuffer(this);
 }
 
-ResultOrError<BufferBase::ScopedUseBuffer> BufferBase::ValidateCanUseOnQueueNow() {
+ResultOrValError<BufferBase::ScopedUseBuffer> BufferBase::ValidateCanUseOnQueueNow() {
     DAWN_CHECK(!IsError());
 
     switch (BufferState state = mState.load(std::memory_order::acquire)) {
@@ -795,7 +795,7 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
         }
 
         WGPUMapAsyncStatus errorStatus = WGPUMapAsyncStatus_Aborted;
-        MaybeError maybeError = [&]() -> MaybeError {
+        MaybeValError maybeError = [&]() -> MaybeValError {
             DAWN_TRY(GetDevice()->ValidateIsAlive());
             errorStatus = WGPUMapAsyncStatus_Error;
             DAWN_TRY(ValidateMapAsync(mode, offset, size));
@@ -940,7 +940,7 @@ void BufferBase::APIUnmap() {
         GetDevice()->ConsumedError(unmap(), "calling %s.Unmap().", this);
 }
 
-MaybeError BufferBase::Unmap(bool forDestroy) {
+MaybeValError BufferBase::Unmap(bool forDestroy) {
     switch (mState.load(std::memory_order::acquire)) {
         case BufferState::Mapped:
             DAWN_TRY(TransitionState(BufferState::Mapped, BufferState::InUse));
@@ -1048,7 +1048,7 @@ MaybeError BufferBase::UnmapInternal(bool forDestroy) {
     return {};
 }
 
-MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode, size_t offset, size_t size) const {
+MaybeValError BufferBase::ValidateMapAsync(wgpu::MapMode mode, size_t offset, size_t size) const {
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
     DAWN_INVALID_IF(mIsHostMapped, "Host-mapped %s cannot be mapped again.", this);
@@ -1137,7 +1137,7 @@ bool BufferBase::CanGetMappedRange(bool writable, size_t offset, size_t size) co
     return true;
 }
 
-MaybeError BufferBase::ValidateUnmap() const {
+MaybeValError BufferBase::ValidateUnmap() const {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_INVALID_IF(mIsHostMapped, "Persistently mapped buffer cannot be unmapped.");
     return {};
@@ -1243,7 +1243,7 @@ ApiObjectList* BufferBase::GetTexelBufferViewTrackingList() {
     return &mTexelBufferViews;
 }
 
-MaybeError BufferBase::TransitionState(BufferState currentState, BufferState desiredState) {
+MaybeValError BufferBase::TransitionState(BufferState currentState, BufferState desiredState) {
     if (mState.compare_exchange_strong(currentState, desiredState, std::memory_order::acq_rel)) {
         return {};
     }

@@ -50,7 +50,7 @@ namespace dawn::native {
 struct CopyTextureToBufferCmd;
 class MemoryDump;
 
-ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
+ResultOrValError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
     DeviceBase* device,
     const BufferDescriptor* descriptor);
 
@@ -76,7 +76,7 @@ wgpu::BufferUsage ComputeInternalBufferUsages(const DeviceBase* device,
                                               wgpu::BufferUsage usage,
                                               size_t bufferSize);
 
-ResultOrError<UnpackedPtr<TexelBufferViewDescriptor>> ValidateTexelBufferViewDescriptor(
+ResultOrValError<UnpackedPtr<TexelBufferViewDescriptor>> ValidateTexelBufferViewDescriptor(
     const BufferBase* buffer,
     const TexelBufferViewDescriptor* descriptor);
 
@@ -145,7 +145,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // Checks that the buffer is ready for use on queue. If successful, changes state to InUse and
     // returns `ScopedUseBuffer` which resets the state when it goes out of scope. Returns a
     // validation error on failure.
-    ResultOrError<ScopedUseBuffer> ValidateCanUseOnQueueNow();
+    ResultOrValError<ScopedUseBuffer> ValidateCanUseOnQueueNow();
 
     // Called when buffer is done being used, on queue or internally. This should only be called
     // from ScopedUseBuffer or if ScopedUseBuffer was released from calling this.
@@ -191,7 +191,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // Internal non-reentrant version of Unmap. This is used in workarounds or additional copies.
     // Note that this will fail if the map event is pending since that should never happen
     // internally.
-    MaybeError Unmap(bool forDestroy = false);
+    MaybeValError Unmap(bool forDestroy = false);
 
     void DumpMemoryStatistics(dawn::native::MemoryDump* dump, const char* prefix) const;
 
@@ -261,8 +261,8 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     virtual bool IsCPUWritableAtCreation() const = 0;
     MaybeError CopyFromStagingBuffer();
 
-    MaybeError ValidateMapAsync(wgpu::MapMode mode, size_t offset, size_t size) const;
-    MaybeError ValidateUnmap() const;
+    MaybeValError ValidateMapAsync(wgpu::MapMode mode, size_t offset, size_t size) const;
+    MaybeValError ValidateUnmap() const;
     bool CanGetMappedRange(bool writable, size_t offset, size_t size) const;
 
     // Return std::nullopt on validation error.
@@ -278,7 +278,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
 
     // Atomically exchanges `currentState` to `desiredState`. Returns a validation error indicating
     // concurrent use if another thread has modified `mState` and compare_exchange() failed.
-    MaybeError TransitionState(BufferState currentState, BufferState desiredState);
+    MaybeValError TransitionState(BufferState currentState, BufferState desiredState);
 
     const uint64_t mSize = 0;
     const wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;

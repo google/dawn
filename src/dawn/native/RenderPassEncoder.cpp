@@ -52,9 +52,9 @@ namespace dawn::native {
 namespace {
 
 // Check the query at queryIndex is unavailable, otherwise it cannot be written.
-MaybeError ValidateQueryIndexOverwrite(QuerySetBase* querySet,
-                                       QueryIndex queryIndex,
-                                       const QueryAvailabilityMap& queryAvailabilityMap) {
+MaybeValError ValidateQueryIndexOverwrite(QuerySetBase* querySet,
+                                          QueryIndex queryIndex,
+                                          const QueryAvailabilityMap& queryAvailabilityMap) {
     auto it = queryAvailabilityMap.find(querySet);
     DAWN_INVALID_IF(it != queryAvailabilityMap.end() && it->second[queryIndex],
                     "Query index %u of %s is written to twice in a render pass.", queryIndex,
@@ -167,7 +167,7 @@ void RenderPassEncoder::End() {
 
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(ValidateProgrammableEncoderEnd());
 
@@ -232,7 +232,7 @@ void RenderPassEncoder::APISetViewport(float x,
                                        float maxDepth) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(ValidateFloat("x", x));
                 DAWN_TRY(ValidateFloat("y", y));
@@ -300,7 +300,7 @@ void RenderPassEncoder::APISetViewport(float x,
 void RenderPassEncoder::APISetScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_INVALID_IF(
                     x < mRenderArea.x ||
@@ -331,7 +331,7 @@ void RenderPassEncoder::APISetResourceTable(ResourceTableBase* table) {
 
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_INVALID_IF(
                     !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
@@ -360,7 +360,7 @@ void RenderPassEncoder::APISetResourceTable(ResourceTableBase* table) {
 void RenderPassEncoder::APIExecuteBundles(Span<RenderBundleBase* const> renderBundles) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 const AttachmentState* attachmentState = GetAttachmentState();
                 bool depthReadOnlyInPass = IsDepthReadOnly();
@@ -439,7 +439,7 @@ void RenderPassEncoder::APIBeginOcclusionQuery(uint32_t queryIndexUntyped) {
 
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_INVALID_IF(mOcclusionQuerySet.Get() == nullptr,
                                 "The occlusionQuerySet in RenderPassDescriptor is not set.");
@@ -479,7 +479,7 @@ void RenderPassEncoder::APIBeginOcclusionQuery(uint32_t queryIndexUntyped) {
 void RenderPassEncoder::APIEndOcclusionQuery() {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_INVALID_IF(!mOcclusionQueryActive, "No occlusion queries are active.");
             }
@@ -538,7 +538,7 @@ void RenderPassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t query
 void RenderPassEncoder::APIPixelLocalStorageBarrier() {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_INVALID_IF(!GetAttachmentState()->HasPixelLocalStorage(),
                                 "%s does not define any pixel local storage.", this);

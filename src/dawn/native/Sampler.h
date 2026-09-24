@@ -39,7 +39,7 @@ namespace dawn::native {
 
 class DeviceBase;
 
-MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor* descriptor);
+MaybeValError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor* descriptor);
 
 class SamplerBase : public ApiObjectBase,
                     public CachedObject,

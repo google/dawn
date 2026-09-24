@@ -55,16 +55,16 @@ class ProgrammableEncoder : public ApiObjectBase {
   protected:
     bool IsValidationEnabled() const;
     bool NeedsIndirectGPUValidation() const;
-    MaybeError ValidateProgrammableEncoderEnd() const;
+    MaybeValError ValidateProgrammableEncoderEnd() const;
 
-    MaybeError ValidateSetImmediates(uint32_t offset, size_t size) const;
+    MaybeValError ValidateSetImmediates(uint32_t offset, size_t size) const;
     void RecordSetImmediates(CommandAllocator* allocator,
                              uint32_t offset,
                              Span<const std::byte> data);
 
     // Compute and render passes do different things on SetBindGroup. These are helper functions
     // for the logic they have in common.
-    MaybeError ValidateSetBindGroup(
+    MaybeValError ValidateSetBindGroup(
         BindGroupIndex index,
         BindGroupBase* group,
         ityp::span<BindingIndex, const uint32_t> dynamicOffsetsIn) const;

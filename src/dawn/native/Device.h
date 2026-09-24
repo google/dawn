@@ -145,10 +145,10 @@ class DeviceBase : public ErrorSink,
         Ref<ErrorGeneratingAsyncTask> task,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None);
 
-    MaybeError ValidateObject(const ApiObjectBase* object) const;
+    MaybeValError ValidateObject(const ApiObjectBase* object) const;
 
     // Similar to ValidateObject, but skips the Device check. Asserts that validation is disabled.
-    MaybeError IsNotErrorObject(const ApiObjectBase* object) const;
+    MaybeValError IsNotErrorObject(const ApiObjectBase* object) const;
 
     InstanceBase* GetInstance() const;
     AdapterBase* GetAdapter() const;
@@ -158,7 +158,7 @@ class DeviceBase : public ErrorSink,
     // Returns the Format corresponding to the wgpu::TextureFormat or an error if the format
     // isn't a valid wgpu::TextureFormat or isn't supported by this device.
     // The pointer returned has the same lifetime as the device.
-    ResultOrError<const Format*> GetInternalFormat(wgpu::TextureFormat format) const;
+    ResultOrValError<const Format*> GetInternalFormat(wgpu::TextureFormat format) const;
 
     // Returns the Format corresponding to the wgpu::TextureFormat and assumes the format is
     // valid (such that the FormatTable contains an entry for it).
@@ -249,7 +249,7 @@ class DeviceBase : public ErrorSink,
     ResultOrError<Ref<SamplerBase>> CreateSampler(
         const SamplerDescriptor* descriptor = nullptr,
         ValidationMode validate = ValidationMode::Validate);
-    ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
+    ResultOrValError<Ref<ShaderModuleBase>> CreateShaderModule(
         const ShaderModuleDescriptor* descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions = {});
     ResultOrError<Ref<SwapChainBase>> CreateSwapChain(Surface* surface,
@@ -322,7 +322,7 @@ class DeviceBase : public ErrorSink,
     void APIPushErrorScope(wgpu::ErrorFilter filter);
     Future APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
 
-    MaybeError ValidateIsAlive() const;
+    MaybeValError ValidateIsAlive() const;
 
     BlobCache* GetBlobCache() const;
     Blob LoadCachedBlob(const CacheKey& key);

@@ -63,7 +63,7 @@ class CommandBufferBase : public ApiObjectBase {
     const std::string& GetEncoderLabel() const;
     void SetEncoderLabel(std::string encoderLabel);
 
-    MaybeError ValidateCanUseInSubmitNow() const;
+    MaybeValError ValidateCanUseInSubmitNow() const;
 
     const CommandBufferResourceUsage& GetResourceUsages() const;
 

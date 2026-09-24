@@ -37,17 +37,17 @@ struct Extent3D;
 struct TexelCopyTextureInfo;
 struct CopyTextureForBrowserOptions;
 
-MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
-                                         const TexelCopyTextureInfo* source,
-                                         const TexelCopyTextureInfo* destination,
-                                         const Extent3D* copySize,
-                                         const CopyTextureForBrowserOptions* options);
+MaybeValError ValidateCopyTextureForBrowser(DeviceBase* device,
+                                            const TexelCopyTextureInfo* source,
+                                            const TexelCopyTextureInfo* destination,
+                                            const Extent3D* copySize,
+                                            const CopyTextureForBrowserOptions* options);
 
-MaybeError ValidateCopyExternalTextureForBrowser(DeviceBase* device,
-                                                 const ImageCopyExternalTexture* source,
-                                                 const TexelCopyTextureInfo* destination,
-                                                 const Extent3D* copySize,
-                                                 const CopyTextureForBrowserOptions* options);
+MaybeValError ValidateCopyExternalTextureForBrowser(DeviceBase* device,
+                                                    const ImageCopyExternalTexture* source,
+                                                    const TexelCopyTextureInfo* destination,
+                                                    const Extent3D* copySize,
+                                                    const CopyTextureForBrowserOptions* options);
 
 MaybeError DoCopyTextureForBrowser(DeviceBase* device,
                                    const TexelCopyTextureInfo* source,

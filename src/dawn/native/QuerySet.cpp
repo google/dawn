@@ -47,7 +47,7 @@ class ErrorQuerySet final : public QuerySetBase {
 
 }  // anonymous namespace
 
-MaybeError ValidateQuerySetDescriptor(DeviceBase* device, const QuerySetDescriptor* descriptor) {
+MaybeValError ValidateQuerySetDescriptor(DeviceBase* device, const QuerySetDescriptor* descriptor) {
     DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr");
 
     DAWN_TRY(ValidateQueryType(descriptor->type));
@@ -145,7 +145,7 @@ void QuerySetBase::MarkQueryAvailable(QueryIndex index) {
     mQueryAvailability[index] = true;
 }
 
-MaybeError QuerySetBase::ValidateCanUseInSubmitNow() const {
+MaybeValError QuerySetBase::ValidateCanUseInSubmitNow() const {
     DAWN_CHECK(!IsError());
     DAWN_INVALID_IF(mState == QuerySetState::Destroyed, "%s used while destroyed.", this);
     return {};

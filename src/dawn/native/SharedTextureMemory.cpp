@@ -144,6 +144,8 @@ MaybeError SharedTextureMemoryBase::GetProperties(SharedTextureMemoryProperties*
             this, ToCppAPI(Feature::SharedTextureMemoryAHardwareBuffer));
     }
 
+    // TODO(536639352): This will probably require special attention as we split the error types
+    // apart. Figure out if this should be Internal or Validation, or Unknown.
     DAWN_TRY(GetChainedProperties(unpacked));
 
     return {};

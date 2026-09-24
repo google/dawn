@@ -87,7 +87,7 @@ SharedResourceMemoryContents* SharedResourceMemory::GetContents() const {
     return mContents.Get();
 }
 
-MaybeError SharedResourceMemory::ValidateResourceCreatedFromSelf(SharedResource* resource) {
+MaybeValError SharedResourceMemory::ValidateResourceCreatedFromSelf(SharedResource* resource) {
     auto* contents = resource->GetSharedResourceMemoryContents();
     DAWN_INVALID_IF(contents == nullptr, "%s was not created from %s.", resource, this);
 

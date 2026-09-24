@@ -108,7 +108,7 @@ class SharedResourceMemory : public ApiObjectBase, public WeakRefSupport<SharedR
     virtual Ref<SharedResourceMemoryContents> CreateContents();
 
     // Validate that the resource was created from this SharedResourceMemory.
-    MaybeError ValidateResourceCreatedFromSelf(SharedResource* resource);
+    MaybeValError ValidateResourceCreatedFromSelf(SharedResource* resource);
 
     template <typename Resource, typename BeginAccessDescriptor>
     MaybeError BeginAccess(Resource* resource, const BeginAccessDescriptor* rawDescriptor);
