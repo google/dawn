@@ -256,7 +256,9 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
         this->UpdateCommandsScheduledEvents(pendingSerial);
     }];
 
-    // This ObjC block runs on a different thread.
+    // This ObjC block runs on a different thread. Note that `this` and thus `device` are guaranteed
+    // to be alive because we won't destroy them until execution has fully completed.
+    DeviceBase* device = GetDevice();  // Not thread-safe, so we call it ahead of time.
     [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
         TRACE_EVENT_END(DAWN_TRACE_CATEGORY("gpu_work"),
                         perfetto::NamedTrack("DeviceMTL::CommandBuffer", uint64_t{pendingSerial}));
@@ -266,7 +268,7 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
             // This is just a safety check to make sure we didn't mess up the state of the device
             // somehow while it was still executing. It doesn't need to be in the same critical
             // section with the SetDisconnectingIfAlive and UpdateCompletedSerialTo.
-            auto deviceState = this->GetDevice()->GetState();  // Atomic operation.
+            auto deviceState = device->GetState();  // Thread-safe.
             DAWN_CHECK(deviceState == DeviceBase::State::Alive ||
                        deviceState == DeviceBase::State::Disconnecting);
         }
@@ -275,20 +277,21 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
             INJECT_ERROR_OR_RUN(commandBuffer.status, MTLCommandBufferStatusError);
         if (status == MTLCommandBufferStatusError) [[unlikely]] {
             NSError* error = commandBuffer.error;
-            this->SetExecutionError(
+            std::string message =
                 error ? absl::StrFormat("Metal command buffer failed: %s (domain=%s, code=%ld)",
                                         [[error localizedDescription] UTF8String],
                                         [[error domain] UTF8String], error.code)
-                      : "Metal command buffer failed (with unspecified error)");
+                      : "Metal command buffer failed (with unspecified error)";
+            this->SetExecutionError(message);  // Thread-safe.
 
             // Since we're not holding any lock here, we need to set the device as lost immediately
             // *before* updating the serial (as well as before any subsequent command buffers update
             // the serial). Otherwise, Dawn may assume that since the serial was advanced, the
             // command buffer actually completed doing its work.
-            this->GetDevice()->SetDisconnectingIfAlive();  // Atomic operation.
+            device->SetDisconnectingIfAlive();  // Thread-safe.
         }
 
-        this->UpdateCompletedSerialTo(QueuePriority::Lowest, pendingSerial);
+        this->UpdateCompletedSerialTo(QueuePriority::Lowest, pendingSerial);  // Thread-safe.
     }];
 
     TRACE_EVENT_BEGIN(DAWN_TRACE_CATEGORY("gpu_work"), "DeviceMTL::SubmitPendingCommandBuffer",
