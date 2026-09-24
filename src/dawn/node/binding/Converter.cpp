@@ -178,8 +178,11 @@ bool Converter::Convert(BufferSource& out, interop::BufferSource in) {
     if (auto* view = std::get_if<interop::ArrayBufferView>(&in)) {
         std::visit(
             [&](auto&& v) {
-                auto arr = v.ArrayBuffer();
-                out.data = DAWN_UNSAFE_TODO(static_cast<uint8_t*>(arr.Data()) + v.ByteOffset());
+                // SAFETY: Node-API does not expose a span directly. ByteOffset() and
+                // ByteLength() represent the view into the backing ArrayBuffer, guaranteeing
+                // the buffer provides storage of at least ByteOffset() + ByteLength() bytes.
+                out.data = DAWN_UNSAFE_BUFFERS(static_cast<uint8_t*>(v.ArrayBuffer().Data()) +
+                                               v.ByteOffset());
                 out.size = v.ByteLength();
                 out.bytesPerElement = v.ElementSize();
             },
