@@ -782,6 +782,24 @@ func copyFuzzerAndDependencies(t *taskConfig, fuzzer string, binDir string) erro
 				if err := fileutils.CopyFile(dstDep, srcDep, t.osWrapper); err != nil {
 					return fmt.Errorf("failed to copy runtime dependency %s to bin folder: %w", line, err)
 				}
+
+				// Make sure relative library_path in ICD JSONs is absolute so Vulkan/Loader can load it from any working directory
+				if filepath.Ext(dstDep) == ".json" {
+					contentBytes, err := t.osWrapper.ReadFile(dstDep)
+					if err == nil {
+						re := regexp.MustCompile(`"library_path"\s*:\s*"(?:\./)?([^/"][^"]*)"`)
+						absBinDir, _ := filepath.Abs(filepath.Dir(dstDep))
+						newContent := re.ReplaceAllStringFunc(string(contentBytes), func(match string) string {
+							m := re.FindStringSubmatch(match)
+							if len(m) > 1 {
+								absLibPath := filepath.Join(absBinDir, m[1])
+								return fmt.Sprintf(`"library_path": "%s"`, absLibPath)
+							}
+							return match
+						})
+						_ = t.osWrapper.WriteFile(dstDep, []byte(newContent), 0644)
+					}
+				}
 			}
 		}
 	}
