@@ -109,8 +109,7 @@ class BufferConsumer {
         return WireResult::Success;
     }
 
-    // TODO(https://crbug.com/526537224): Use RawSpan instead of Span.
-    Span<BufferT> mData = {};
+    RawSpan<BufferT> mData = {};
 };
 
 class SerializeBuffer : public BufferConsumer<volatile std::byte> {

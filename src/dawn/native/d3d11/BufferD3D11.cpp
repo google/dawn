@@ -840,7 +840,7 @@ void Buffer::ScopedMap::Reset() {
 }
 
 Span<std::byte> Buffer::ScopedMap::GetMappedData() const {
-    return mBuffer ? mBuffer->mMappedData : Span<std::byte>{};
+    return mBuffer ? Span<std::byte>(mBuffer->mMappedData) : Span<std::byte>{};
 }
 
 // GPUUsableBuffer::Storage

@@ -64,8 +64,7 @@ struct StageAndDescriptor {
     raw_ptr<ShaderModuleBase> module = nullptr;
     std::string entryPoint;
 
-    // TODO(https://crbug.com/526537224): Use RawSpan.
-    Span<const ConstantEntry> constants;
+    RawSpan<const ConstantEntry> constants;
 };
 
 class PipelineLayoutBase : public ApiObjectBase,
