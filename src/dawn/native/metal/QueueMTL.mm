@@ -256,9 +256,17 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
         this->UpdateCommandsScheduledEvents(pendingSerial);
     }];
 
-    // This ObjC block runs on a different thread. Note that `this` and thus `device` are guaranteed
-    // to be alive because we won't destroy them until execution has fully completed.
-    DeviceBase* device = GetDevice();  // Not thread-safe, so we call it ahead of time.
+    // This callback runs on a thread internal to the Metal driver. Thus, it must be thread-safe.
+    //
+    // This ^() thing is an Objective-C Block, which is kind of like a capture-by-copy C++ lambda.
+    // - Create a Ref to the Queue to use in the Block. We aren't supposed to destroy the device
+    //   (and thus the queue, since there's only one at the moment) until after execution has
+    //   completed, so it's already guaranteed the Queue outlives the callback, but it's safer to
+    //   just hold a ref that guarantees it explicitly. We assume the callback will get called
+    //   eventually and thus not leak.
+    Ref<Queue> queue = this;
+    // - Call GetDevice() beforehand because it is not thread-safe.
+    Ref<DeviceBase> device = GetDevice();
     [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
         TRACE_EVENT_END(DAWN_TRACE_CATEGORY("gpu_work"),
                         perfetto::NamedTrack("DeviceMTL::CommandBuffer", uint64_t{pendingSerial}));
@@ -282,7 +290,7 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
                                         [[error localizedDescription] UTF8String],
                                         [[error domain] UTF8String], error.code)
                       : "Metal command buffer failed (with unspecified error)";
-            this->SetExecutionError(message);  // Thread-safe.
+            queue->SetExecutionError(message);  // Thread-safe.
 
             // Since we're not holding any lock here, we need to set the device as lost immediately
             // *before* updating the serial (as well as before any subsequent command buffers update
@@ -291,7 +299,7 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
             device->SetDisconnectingIfAlive();  // Thread-safe.
         }
 
-        this->UpdateCompletedSerialTo(QueuePriority::Lowest, pendingSerial);  // Thread-safe.
+        queue->UpdateCompletedSerialTo(QueuePriority::Lowest, pendingSerial);  // Thread-safe.
     }];
 
     TRACE_EVENT_BEGIN(DAWN_TRACE_CATEGORY("gpu_work"), "DeviceMTL::SubmitPendingCommandBuffer",
