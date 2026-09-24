@@ -1168,8 +1168,11 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
             config.M = shape.M;
             config.N = shape.N;
             config.K = shape.K;
+            // TODO(564583985): Use the value returned by the query for min/max subgroup size.
             config.componentType = ToWgpuType(dataTypeAB);
             config.resultComponentType = ToWgpuType(dataTypeAcc);
+            config.minSubgroupSize = GetSubgroupMinSize();
+            config.maxSubgroupSize = GetSubgroupMaxSize();
             subgroupMatrixConfigs.push_back(config);
         }
     }

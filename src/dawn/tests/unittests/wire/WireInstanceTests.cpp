@@ -236,9 +236,12 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
     fakeVkProperties.driverVersion = 0x801F6000;
 
     WGPUSubgroupMatrixConfig fakeMatrixConfigs[3] = {
-        {WGPUSubgroupMatrixComponentType_F32, WGPUSubgroupMatrixComponentType_F32, 8, 4, 2},
-        {WGPUSubgroupMatrixComponentType_U32, WGPUSubgroupMatrixComponentType_I32, 4, 8, 16},
-        {WGPUSubgroupMatrixComponentType_F16, WGPUSubgroupMatrixComponentType_F32, 2, 16, 4},
+        {WGPUSubgroupMatrixComponentType_F32, WGPUSubgroupMatrixComponentType_F32, 8, 4, 2,
+         kDefaultSubgroupMinSize, kDefaultSubgroupMaxSize},
+        {WGPUSubgroupMatrixComponentType_U32, WGPUSubgroupMatrixComponentType_I32, 4, 8, 16, 32,
+         32},
+        {WGPUSubgroupMatrixComponentType_F16, WGPUSubgroupMatrixComponentType_F32, 2, 16, 4, 16,
+         128},
     };
 
     WGPUAdapterPropertiesSubgroupMatrixConfigs fakeSubgroupMatrixConfigs = {};
@@ -380,6 +383,12 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                                                fakeSubgroupMatrixConfigs.configs[i].N));
                     DAWN_UNSAFE_TODO(EXPECT_EQ(subgroupMatrixConfigs.configs[i].K,
                                                fakeSubgroupMatrixConfigs.configs[i].K));
+                    DAWN_UNSAFE_TODO(
+                        EXPECT_EQ(subgroupMatrixConfigs.configs[i].minSubgroupSize,
+                                  fakeSubgroupMatrixConfigs.configs[i].minSubgroupSize));
+                    DAWN_UNSAFE_TODO(
+                        EXPECT_EQ(subgroupMatrixConfigs.configs[i].maxSubgroupSize,
+                                  fakeSubgroupMatrixConfigs.configs[i].maxSubgroupSize));
                 }
 
                 // Get the power properties.

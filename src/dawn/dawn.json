@@ -4955,7 +4955,9 @@
             {"name": "result component type", "type": "subgroup matrix component type"},
             {"name": "M", "type": "uint32_t"},
             {"name": "N", "type": "uint32_t"},
-            {"name": "K", "type": "uint32_t"}
+            {"name": "K", "type": "uint32_t"},
+            {"name": "minSubgroupSize", "type": "uint32_t"},
+            {"name": "maxSubgroupSize", "type": "uint32_t"}
         ]
     },
     "adapter properties subgroup matrix configs": {

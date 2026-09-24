@@ -1089,6 +1089,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
             configs[0].M = 32;
             configs[0].N = 32;
             configs[0].K = 32;
+            configs[0].minSubgroupSize = GetSubgroupMinSize();
+            configs[0].maxSubgroupSize = GetSubgroupMaxSize();
 
             subgroupMatrixConfigs->configs = std::move(configs).MoveToSpan();
         } else {
@@ -1101,12 +1103,16 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
             configs[0].M = 8;
             configs[0].N = 8;
             configs[0].K = 8;
+            configs[0].minSubgroupSize = GetSubgroupMinSize();
+            configs[0].maxSubgroupSize = GetSubgroupMaxSize();
 
             configs[1].componentType = wgpu::SubgroupMatrixComponentType::F16;
             configs[1].resultComponentType = wgpu::SubgroupMatrixComponentType::F16;
             configs[1].M = 8;
             configs[1].N = 8;
             configs[1].K = 8;
+            configs[1].minSubgroupSize = GetSubgroupMinSize();
+            configs[1].maxSubgroupSize = GetSubgroupMaxSize();
 
             subgroupMatrixConfigs->configs = std::move(configs).MoveToSpan();
         }

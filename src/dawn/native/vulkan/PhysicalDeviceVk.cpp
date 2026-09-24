@@ -1846,6 +1846,8 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
         config.M = p.MSize;
         config.N = p.NSize;
         config.K = p.KSize;
+        config.minSubgroupSize = GetSubgroupMinSize();
+        config.maxSubgroupSize = GetSubgroupMaxSize();
 
         // Filter out the component types that WebGPU does not support.
         if (!VKComponentTypeToWGPUSubgroupMatrixComponentType(&config.componentType, p.AType)) {
