@@ -225,6 +225,9 @@ class Converter {
     [[nodiscard]] bool Convert(wgpu::VertexBufferLayout& out,
                                const interop::GPUVertexBufferLayout& in);
 
+    [[nodiscard]] bool Convert(wgpu::VertexBufferLayout& out,
+                               const std::optional<interop::GPUVertexBufferLayout>& in);
+
     [[nodiscard]] bool Convert(wgpu::VertexStepMode& out, const interop::GPUVertexStepMode& in);
 
     [[nodiscard]] bool Convert(wgpu::VertexAttribute& out, const interop::GPUVertexAttribute& in);

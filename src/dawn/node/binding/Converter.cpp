@@ -1187,6 +1187,16 @@ bool Converter::Convert(wgpu::VertexBufferLayout& out, const interop::GPUVertexB
            Convert(out.arrayStride, in.arrayStride) && Convert(out.stepMode, in.stepMode);
 }
 
+bool Converter::Convert(wgpu::VertexBufferLayout& out,
+                        const std::optional<interop::GPUVertexBufferLayout>& in) {
+    if (in.has_value()) {
+        return Convert(out, in.value());
+    }
+    out = {};
+    out.stepMode = wgpu::VertexStepMode::Undefined;
+    return true;
+}
+
 bool Converter::Convert(wgpu::VertexState& out, const interop::GPUVertexState& in) {
     out = {};
 
@@ -1194,24 +1204,9 @@ bool Converter::Convert(wgpu::VertexState& out, const interop::GPUVertexState& i
     // identifiers. This is so that using "main\0" doesn't match an entryPoint named "main".
     out.entryPoint = in.entryPoint ? ConvertStringReplacingNull(in.entryPoint.value()) : nullptr;
 
-    wgpu::VertexBufferLayout* outBuffers = nullptr;
-    if (!Convert(out.module, in.module) ||                    //
-        !Convert(outBuffers, out.bufferCount, in.buffers) ||  //
-        !Convert(out.constants, out.constantCount, in.constants)) {
-        return false;
-    }
-
-    // Patch up the unused vertex buffer layouts to use wgpu::VertexStepMode::Undefined.
-    // The converter for optional value will have put the default value of wgpu::VertexBufferLayout
-    // that has wgpu::VertexStepMode::Vertex.
-    out.buffers = outBuffers;
-    for (size_t i = 0; i < in.buffers.size(); i++) {
-        if (!in.buffers[i].has_value()) {
-            DAWN_UNSAFE_TODO(outBuffers[i].stepMode = wgpu::VertexStepMode::Undefined);
-        }
-    }
-
-    return true;
+    return Convert(out.module, in.module) &&                     //
+           Convert(out.buffers, out.bufferCount, in.buffers) &&  //
+           Convert(out.constants, out.constantCount, in.constants);
 }
 
 bool Converter::Convert(wgpu::VertexStepMode& out, const interop::GPUVertexStepMode& in) {
