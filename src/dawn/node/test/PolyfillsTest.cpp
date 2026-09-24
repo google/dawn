@@ -796,6 +796,162 @@ TEST_F(PolyfillsTest, ProcessStreamWriteReturnsTrue) {
     EXPECT_TRUE(ToBool(RunScript("process.stderr.write('x')")));
 }
 
+TEST_F(PolyfillsTest, EventGlobals) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    EXPECT_TRUE(
+        ToBool(RunScript("typeof EventTarget === 'function' && "
+                         "typeof Event === 'function' && "
+                         "typeof CustomEvent === 'function' && "
+                         "typeof MessageEvent === 'function' && "
+                         "typeof DOMException === 'function'")));
+
+    // EventTarget dispatches to both function listeners and { handleEvent } object listeners.
+    EXPECT_EQ(ToString(RunScript(R"(
+        const target = new EventTarget();
+        const log = [];
+        target.addEventListener('test', function(e) {
+            log.push('fn:' + (this === target) + ':' + e.type);
+        });
+        target.addEventListener('test', {
+            tag: 'obj',
+            handleEvent(e) {
+                log.push(this.tag + ':' + e.type);
+            },
+        });
+        target.dispatchEvent(new Event('test'));
+        log.join(',')
+    )")),
+              "fn:true:test,obj:test");
+}
+
+TEST_F(PolyfillsTest, DOMException) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    EXPECT_EQ(ToString(RunScript(R"(
+        const named = new DOMException('bad state', 'InvalidStateError');
+        const unnamed = new DOMException('failed');
+        [
+            named instanceof DOMException,
+            named instanceof Error,
+            named.name,
+            named.message,
+            unnamed.name,
+        ].join(',')
+    )")),
+              "true,true,InvalidStateError,bad state,Error");
+}
+
+TEST_F(PolyfillsTest, EventCancellation) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    RunScript(R"(
+        globalThis._target = new EventTarget();
+        globalThis._target.addEventListener('err', (e) => { e.preventDefault(); });
+        globalThis._target.addEventListener('ok', () => {});
+    )");
+
+    // A cancelable event is cancelled when preventDefault() is called.
+    napi_value res = RunScript(R"(
+        const cancelable = new Event('err', { cancelable: true });
+        [globalThis._target.dispatchEvent(cancelable), cancelable.defaultPrevented].join(',')
+    )");
+    EXPECT_EQ(ToString(res), "false,true");
+
+    // An event that is not cancelable ignores preventDefault().
+    res = RunScript(R"(
+        const plain = new Event('err');
+        [globalThis._target.dispatchEvent(plain), plain.defaultPrevented].join(',')
+    )");
+    EXPECT_EQ(ToString(res), "true,false");
+
+    // A cancelable event where preventDefault() is not called remains uncancelled.
+    res = RunScript(R"(
+        const uncancelled = new Event('ok', { cancelable: true });
+        [globalThis._target.dispatchEvent(uncancelled), uncancelled.defaultPrevented].join(',')
+    )");
+    EXPECT_EQ(ToString(res), "true,false");
+}
+
+TEST_F(PolyfillsTest, EventListenerOnce) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    napi_value res = RunScript(R"(
+        const target = new EventTarget();
+        let once = 0;
+        let always = 0;
+        target.addEventListener('x', () => { once++; }, { once: true });
+        target.addEventListener('x', () => { always++; });
+        target.dispatchEvent(new Event('x'));
+        target.dispatchEvent(new Event('x'));
+        [once, always].join(',')
+    )");
+    EXPECT_EQ(ToString(res), "1,2");
+}
+
+TEST_F(PolyfillsTest, EventTargetDeduplicatesByTypeAndCapture) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    napi_value res = RunScript(R"(
+        const target = new EventTarget();
+        const log = [];
+        const fn = () => { log.push('fn'); };
+        const other = () => { log.push('other'); };
+        target.addEventListener('x', fn);
+        target.addEventListener('x', other);
+        target.addEventListener('x', fn);
+        target.addEventListener('x', fn, false);
+        target.addEventListener('x', fn, { capture: false });
+        target.addEventListener('x', fn, true);
+        target.addEventListener('x', fn, { capture: true });
+        target.dispatchEvent(new Event('x'));
+        const afterBoth = log.join(',');
+
+        log.length = 0;
+        target.removeEventListener('x', fn, false);
+        target.dispatchEvent(new Event('x'));
+        const afterRemoveBubble = log.join(',');
+
+        log.length = 0;
+        target.removeEventListener('x', fn, { capture: true });
+        target.dispatchEvent(new Event('x'));
+        const afterRemoveCapture = log.join(',');
+
+        [afterBoth, afterRemoveBubble, afterRemoveCapture].join(' | ')
+    )");
+    EXPECT_EQ(ToString(res), "fn,other,fn | other,fn | other");
+}
+
+TEST_F(PolyfillsTest, CustomEvent) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    napi_value res = RunScript(R"(
+        const target = new EventTarget();
+        let seen = null;
+        target.addEventListener('bar', (e) => { seen = e; }, { once: true });
+        target.dispatchEvent(new CustomEvent('bar'));
+        [seen instanceof CustomEvent, seen instanceof Event, seen.type].join(',')
+    )");
+    EXPECT_EQ(ToString(res), "true,true,bar");
+}
+
+TEST_F(PolyfillsTest, MessageEvent) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    napi_value res = RunScript(R"(
+        const withData = new MessageEvent('import', { data: { url: 'a.spec.js' } });
+        const withoutData = new MessageEvent('finish');
+        [
+            withData instanceof MessageEvent,
+            withData instanceof Event,
+            withData.type,
+            withData.data.url,
+            withoutData.data === undefined,
+        ].join(',')
+    )");
+    EXPECT_EQ(ToString(res), "true,true,import,a.spec.js,true");
+}
+
 TEST_F(PolyfillsTest, PerformanceNow) {
     dawn::node::standalone::RegisterPolyfills(env_, loop());
 

@@ -875,6 +875,108 @@ void RegisterPerformance(Napi::Env env, PolyfillContext* ctx) {
 
 const char* kBootstrapScript = R"bootstrap(
 (function() {
+    // DOM / Web Event Globals. Only the fields and methods used by Dawn's bindings and the CTS are
+    // implemented.
+    class Event {
+        constructor(type, eventInitDict) {
+            this.type = type;
+            this.cancelable = Boolean(eventInitDict && eventInitDict.cancelable);
+            this.defaultPrevented = false;
+        }
+        preventDefault() {
+            if (this.cancelable) {
+                this.defaultPrevented = true;
+            }
+        }
+    }
+
+    class EventTarget {
+        constructor() {
+            // Keyed by `type` alone (not `(type, capture)`) so dispatchEvent runs listeners in
+            // registration order. There will be at most 2 entries per listener and type (capture
+            // true and false).
+            this._listeners = {};
+        }
+
+        addEventListener(type, listener, options) {
+            if (!listener) {
+                return;
+            }
+
+            if (!this._listeners[type]) {
+                this._listeners[type] = [];
+            }
+
+            const capture = typeof options === 'boolean'
+                ? options : Boolean(options && options.capture);
+            if (this._listeners[type].some(
+                    e => e.listener === listener && e.capture === capture)) {
+                return;
+            }
+
+            const once = Boolean(options && typeof options === 'object' && options.once);
+            this._listeners[type].push({ listener, once, capture });
+        }
+
+        removeEventListener(type, listener, options) {
+            if (!this._listeners[type]) {
+                return;
+            }
+
+            const capture = typeof options === 'boolean'
+                ? options : Boolean(options && options.capture);
+
+            this._listeners[type] = this._listeners[type].filter(
+                e => e.listener !== listener || e.capture !== capture);
+        }
+
+        dispatchEvent(event) {
+            const type = event.type;
+
+            // Copied, since a listener may add or remove listeners while it runs - a 'once'
+            // listener removes itself before being invoked.
+            const entries = this._listeners[type] ? this._listeners[type].slice() : [];
+
+            for (const entry of entries) {
+                if (entry.once) {
+                    this.removeEventListener(type, entry.listener, entry.capture);
+                }
+
+                const listener = entry.listener;
+                if (typeof listener === 'function') {
+                    listener.call(this, event);
+                } else if (listener && typeof listener.handleEvent === 'function') {
+                    listener.handleEvent(event);
+                }
+            }
+
+            // A dispatch reports whether the default action should still be taken.
+            return !event.defaultPrevented;
+        }
+    }
+
+    class DOMException extends Error {
+        constructor(message, name) {
+            super(message);
+            this.name = name || 'Error';
+        }
+    }
+
+    class CustomEvent extends Event {}
+
+    class MessageEvent extends Event {
+        constructor(type, eventInitDict) {
+            super(type, eventInitDict);
+            this.data = eventInitDict ? eventInitDict.data : undefined;
+        }
+    }
+
+    globalThis.Event = Event;
+    globalThis.CustomEvent = CustomEvent;
+    globalThis.EventTarget = EventTarget;
+    globalThis.DOMException = DOMException;
+    globalThis.MessageEvent = MessageEvent;
+
     // queueMicrotask
     if (typeof globalThis.queueMicrotask !== 'function') {
         globalThis.queueMicrotask = function(callback) {
