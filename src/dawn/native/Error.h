@@ -42,7 +42,7 @@ namespace dawn::native {
 enum class InternalErrorType : uint32_t {
     None = 0,
     Validation = 1,
-    DeviceLost = 2,
+    BackendDeviceLost = 2,
     Internal = 4,
     OutOfMemory = 8
 };
@@ -165,10 +165,10 @@ struct IsResultOrError<ResultOrError<T>> {
     for (;;)                                                             \
     break
 
-// DAWN_DEVICE_LOST_ERROR means that there was a real unrecoverable native device lost error.
-// We can't even do a graceful shutdown because the Device is gone.
-#define DAWN_DEVICE_LOST_ERROR(MESSAGE) \
-    DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::DeviceLost, MESSAGE)
+// DAWN_BACKEND_DEVICE_LOST_ERROR means that there was a real unrecoverable native device lost
+// error. We can't even do a graceful shutdown because the Device is gone.
+#define DAWN_BACKEND_DEVICE_LOST_ERROR(MESSAGE) \
+    DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::BackendDeviceLost, MESSAGE)
 
 // DAWN_INTERNAL_ERROR means Dawn hit an unexpected error in the backend and should try to
 // gracefully shut down.

@@ -57,7 +57,7 @@ MaybeError KeyedMutex::AcquireKeyedMutex() {
     msg << "Failed to acquire keyed mutex for external image with " << HRESULTAsString(hr) << " (0x"
         << std::uppercase << std::setfill('0') << std::setw(8) << std::hex << hr << ")";
     if (hr == DXGI_ERROR_DEVICE_REMOVED) {
-        return DAWN_DEVICE_LOST_ERROR(msg.str());
+        return DAWN_BACKEND_DEVICE_LOST_ERROR(msg.str());
     } else {
         return DAWN_INTERNAL_ERROR(msg.str());
     }

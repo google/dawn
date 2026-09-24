@@ -506,7 +506,7 @@ ResultOrError<ExecutionSerial> MonitoredFenceQueue::CheckCompletedSerialsImpl() 
         DAWN_TRY(CheckHRESULT(d3d11Device->GetDeviceRemovedReason(),
                               "ID3D11Device::GetDeviceRemovedReason"));
         // Otherwise, return a generic device lost error.
-        return DAWN_DEVICE_LOST_ERROR("Device lost");
+        return DAWN_BACKEND_DEVICE_LOST_ERROR("Device lost");
     }
 
     DAWN_TRY(RecycleSystemEventReceivers(completedSerial));

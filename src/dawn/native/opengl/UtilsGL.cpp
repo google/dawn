@@ -288,7 +288,7 @@ MaybeError CheckError(const OpenGLFunctions& gl,
         case GL_OUT_OF_MEMORY:
             return DAWN_OUT_OF_MEMORY_ERROR(message);
         case GL_CONTEXT_LOST:
-            return DAWN_DEVICE_LOST_ERROR(message);
+            return DAWN_BACKEND_DEVICE_LOST_ERROR(message);
         default:
             return DAWN_INTERNAL_ERROR(message);
     }

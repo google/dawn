@@ -84,7 +84,7 @@ MaybeError CheckEGL(const EGLFunctions& egl, EGLBoolean result, const char* cont
     if (error == EGL_BAD_ALLOC) {
         return DAWN_OUT_OF_MEMORY_ERROR(message);
     } else if (error == EGL_CONTEXT_LOST) {
-        return DAWN_DEVICE_LOST_ERROR(message);
+        return DAWN_BACKEND_DEVICE_LOST_ERROR(message);
     } else {
         return DAWN_INTERNAL_ERROR(message);
     }

@@ -650,20 +650,20 @@ void DeviceBase::HandleError(std::unique_ptr<InternalError> error,
                              allowedErrors);
 
         // Handle the remainder of this error as if it caused a device lost.
-        type = InternalErrorType::DeviceLost;
+        type = InternalErrorType::BackendDeviceLost;
     }
 
-    if (type == InternalErrorType::DeviceLost) {
+    if (type == InternalErrorType::BackendDeviceLost) {
         SetDisconnectingIfAlive();
     }
 
     // Re-enable validation on device loss or OOM to avoid unpredictable behaviors afterwards.
-    if (type == InternalErrorType::DeviceLost || type == InternalErrorType::OutOfMemory) {
+    if (type == InternalErrorType::BackendDeviceLost || type == InternalErrorType::OutOfMemory) {
         mIsValidationEnabled = true;
     }
 
     const std::string messageStr = error->GetFormattedMessage();
-    if (type == InternalErrorType::DeviceLost) {
+    if (type == InternalErrorType::BackendDeviceLost) {
         HandleDeviceLost(lostReason, messageStr);
 
         // TODO(crbug.com/42240994): Remove this once we no longer need the CallbackTaskManager.
@@ -1323,7 +1323,7 @@ Future DeviceBase::APICreateComputePipelineAsync(
     if (IsLost()) {
         // Device lost error: create an async event that completes when created.
         return GetFuture(AcquireRef(new CreateComputePipelineAsyncEvent(
-            this, callbackInfo, DAWN_DEVICE_LOST_ERROR("Device lost"), descriptor->label)));
+            this, callbackInfo, DAWN_BACKEND_DEVICE_LOST_ERROR("Device lost"), descriptor->label)));
     }
 
     auto resultOrError = CreateUninitializedComputePipeline(descriptor);
@@ -1400,7 +1400,7 @@ Future DeviceBase::APICreateRenderPipelineAsync(
     if (IsLost()) {
         // Device lost error: create an async event that completes when created.
         return GetFuture(AcquireRef(new CreateRenderPipelineAsyncEvent(
-            this, callbackInfo, DAWN_DEVICE_LOST_ERROR("Device lost"), descriptor->label)));
+            this, callbackInfo, DAWN_BACKEND_DEVICE_LOST_ERROR("Device lost"), descriptor->label)));
     }
 
     auto resultOrError = CreateUninitializedRenderPipeline(descriptor);
