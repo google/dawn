@@ -517,6 +517,16 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "drivers mis-stride the buffer between layers when bufferImageHeight is padded, corrupting "
       "every layer after the first.",
       "https://issues.chromium.org/issues/520126486", ToggleStage::Device}},
+    {Toggle::VulkanForceAlphaWriteForAlphaToCoverage,
+     {"vulkan_force_alpha_write_for_alpha_to_coverage",
+      "When alpha-to-coverage is enabled and the alpha channel of color attachment 0 is masked "
+      "off, force the alpha write bit on and set the alpha blend to (src * ZERO + dst * ONE) so "
+      "the value stored is the destination alpha. Workaround for Huawei Maleoon GPUs, whose "
+      "drivers drop the alpha-to-coverage computation when the fragment alpha is not written, "
+      "counting every sample as covered. The destination-preserving blend leaves the "
+      "attachment's alpha channel unchanged, so the workaround is not observable to the "
+      "application. Skipped for non-blendable formats.",
+      "https://issues.chromium.org/issues/525294804", ToggleStage::Device}},
     {Toggle::GLUseArrayLengthFromImmediate,
      {"gl_use_array_length_from_immediate",
       "Use immediate data to replace arrayLength() function calls of dynamic storage buffers. "

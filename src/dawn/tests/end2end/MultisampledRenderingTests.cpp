@@ -77,7 +77,8 @@ class MultisampledRenderingTest : public DawnTest {
         uint32_t sampleMask = 0xFFFFFFFF,
         bool alphaToCoverageEnabled = false,
         bool flipTriangle = false,
-        bool enableExpandResolveLoadOp = false) {
+        bool enableExpandResolveLoadOp = false,
+        wgpu::ColorWriteMask colorWriteMask = wgpu::ColorWriteMask::All) {
         const char* kFsOneOutputWithDepth = R"(
             struct U {
                 color : vec4f,
@@ -114,7 +115,8 @@ class MultisampledRenderingTest : public DawnTest {
             multisampleLoadOps[0] = PipelineMultisampleLoadOp::ExpandResolveTarget;
         }
         return CreateRenderPipelineForTest(fs, 1, testDepth, sampleMask, alphaToCoverageEnabled,
-                                           flipTriangle, multisampleLoadOps);
+                                           flipTriangle, multisampleLoadOps,
+                                           /*firstAttachmentLocation=*/0, colorWriteMask);
     }
 
     wgpu::RenderPipeline CreateRenderPipelineWithTwoOutputsForTest(
@@ -310,7 +312,8 @@ class MultisampledRenderingTest : public DawnTest {
         bool alphaToCoverageEnabled = false,
         bool flipTriangle = false,
         PipelineMultisampleLoadOps multisampleLoadOps = {},
-        uint32_t firstAttachmentLocation = 0) {
+        uint32_t firstAttachmentLocation = 0,
+        wgpu::ColorWriteMask colorWriteMask = wgpu::ColorWriteMask::All) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
 
         // Draw a bottom-right triangle. In standard 4xMSAA pattern, for the pixels on diagonal,
@@ -366,6 +369,7 @@ class MultisampledRenderingTest : public DawnTest {
                 pipelineDescriptor.cTargets[i].format = wgpu::TextureFormat::Undefined;
             } else {
                 pipelineDescriptor.cTargets[i].format = kColorFormat;
+                pipelineDescriptor.cTargets[i].writeMask = colorWriteMask;
                 if (multisampleLoadOps[i] != PipelineMultisampleLoadOp::Ignore) {
                     msaaExpandResolveDescs[i].enabled =
                         multisampleLoadOps[i] == PipelineMultisampleLoadOp::ExpandResolveTarget;
@@ -1123,6 +1127,64 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverage) {
 
         utils::RGBA8 expectedColor = ExpectedMSAAColor(kGreen, msaaCoverage);
         EXPECT_TEXTURE_EQ(&expectedColor, mResolveTexture, {1, 0}, {1, 1});
+    }
+}
+
+// Test that alpha-to-coverage still derives coverage from the fragment alpha when the alpha
+// channel of color target 0 is masked off, and that the masked-off alpha stays unwritten.
+// This is the case the vulkan_force_alpha_write_for_alpha_to_coverage workaround targets: it
+// forces the alpha write bit on so the driver cannot discard the fragment alpha, then pins the
+// alpha blend to (src * ZERO + dst * ONE) so the stored value is the destination alpha.
+TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndAlphaWriteMasked) {
+    // TODO(crbug.com/522869943): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
+    // TODO(crbug.com/458113207): Flaky w/ WARP.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
+
+    constexpr bool kTestDepth = false;
+    constexpr uint32_t kSampleMask = 0xFFFFFFFF;
+    constexpr bool kAlphaToCoverageEnabled = true;
+
+    // Write RGB but not alpha, so alpha-to-coverage has to keep working off an alpha the
+    // pipeline never stores.
+    constexpr wgpu::ColorWriteMask kWriteMaskWithoutAlpha =
+        wgpu::ColorWriteMask::Red | wgpu::ColorWriteMask::Green | wgpu::ColorWriteMask::Blue;
+
+    // Clear alpha to 1.0 while drawing with alpha < 1.0, so an alpha write that leaks through
+    // shows up as a resolved alpha below 255.
+    constexpr wgpu::Color kOpaqueClearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+
+    // alpha = 0.0 checks that coverage is still empty; alpha = 0.5 is the case that can
+    // actually observe a stray alpha write (two of four samples are written).
+    for (float alpha : {0.0f, 0.5f}) {
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
+            kTestDepth, kSampleMask, kAlphaToCoverageEnabled, /*flipTriangle=*/false,
+            /*enableExpandResolveLoadOp=*/false, kWriteMaskWithoutAlpha);
+
+        const wgpu::Color kGreenWithAlpha = {0.0f, 0.8f, 0.0f, alpha};
+
+        {
+            utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+                {mMultisampledColorView}, {mResolveView}, wgpu::LoadOp::Clear, wgpu::LoadOp::Clear,
+                nullptr);
+            renderPass.cColorAttachments[0].clearValue = kOpaqueClearColor;
+
+            EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kGreenWithAlpha);
+        }
+
+        wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+        queue.Submit(1, &commandBuffer);
+
+        // Coverage still follows alpha, so RGB is scaled by it.
+        utils::RGBA8 expectedColor = ExpectedMSAAColor(kGreenWithAlpha, alpha);
+        // No sample writes alpha, so every sample keeps the cleared 1.0.
+        expectedColor.a = 255;
+
+        EXPECT_TEXTURE_EQ(&expectedColor, mResolveTexture, {1, 0}, {1, 1}, 0,
+                          wgpu::TextureAspect::All, /* bytesPerRow */ 0,
+                          /* tolerance */ utils::RGBA8(1, 1, 1, 1));
     }
 }
 
@@ -3151,6 +3213,7 @@ DAWN_INSTANTIATE_TEST(MultisampledRenderingTest,
                       VulkanBackend(),
                       VulkanBackend({"always_resolve_into_zero_level_and_layer"}),
                       VulkanBackend({"resolve_multiple_attachments_in_separate_passes"}),
+                      VulkanBackend({"vulkan_force_alpha_write_for_alpha_to_coverage"}),
                       MetalBackend({"emulate_store_and_msaa_resolve"}),
                       MetalBackend({"always_resolve_into_zero_level_and_layer"}),
                       MetalBackend({"always_resolve_into_zero_level_and_layer",

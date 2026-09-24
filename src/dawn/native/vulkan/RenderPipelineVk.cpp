@@ -660,6 +660,28 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
             colorBlendAttachments[i] = ComputeColorDesc(target, fragmentOutputMask[i]);
         }
 
+        // Force a real but destination-preserving alpha write so the driver cannot strip
+        // the fragment alpha and, with it, the alpha-to-coverage computation. The alpha
+        // blend (src * ZERO + dst * ONE) stores the destination alpha unchanged.
+        if (IsAlphaToCoverageEnabled() &&
+            device->IsToggleEnabled(Toggle::VulkanForceAlphaWriteForAlphaToCoverage)) {
+            constexpr ColorAttachmentIndex kAlphaToCoverageAttachment{uint8_t{0}};
+            DAWN_ASSERT(GetColorAttachmentsMask()[kAlphaToCoverageAttachment]);
+            auto& attachment = colorBlendAttachments[kAlphaToCoverageAttachment];
+
+            // TODO(crbug.com/561839163): We should be able to ASSERT IsBlendable.
+            const Format& format = device->GetValidInternalFormat(
+                GetColorAttachmentFormat(kAlphaToCoverageAttachment));
+            if ((attachment.colorWriteMask & VK_COLOR_COMPONENT_A_BIT) == 0 &&
+                format.IsBlendable()) {
+                attachment.colorWriteMask |= VK_COLOR_COMPONENT_A_BIT;
+                attachment.blendEnable = VK_TRUE;
+                attachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+                attachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+                attachment.alphaBlendOp = VK_BLEND_OP_ADD;
+            }
+        }
+
         colorBlend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
         colorBlend.pNext = nullptr;
         colorBlend.flags = 0;

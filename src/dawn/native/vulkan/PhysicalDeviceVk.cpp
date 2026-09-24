@@ -1149,6 +1149,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // the correct buffer offset when a copy region has layerCount > 1.
         // Split such copies into one region per layer.
         deviceToggles->Default(Toggle::VulkanSplitBufferTextureCopyForArrayLayers, true);
+
+        // crbug.com/525294804: Maleoon drivers drop the alpha-to-coverage computation
+        // when the fragment alpha is not written (masked-off alpha channel), counting
+        // every sample as covered. Force a real -- but destination-preserving -- alpha
+        // write so the driver computes coverage.
+        deviceToggles->Default(Toggle::VulkanForceAlphaWriteForAlphaToCoverage, true);
     }
 
     // Collapse redundant subgroup min and max operations to workaround a driver crash on some AMD
