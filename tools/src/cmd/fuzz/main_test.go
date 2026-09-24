@@ -28,6 +28,11 @@
 package main
 
 import (
+	"bytes"
+	"errors"
+	"flag"
+	"fmt"
+	"runtime"
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
@@ -312,5 +317,271 @@ func TestTaskModeAndFuzzModeString(t *testing.T) {
 
 	for _, tc := range fuzzTests {
 		require.Equal(t, tc.expected, tc.mode.String())
+	}
+}
+
+func TestParseFlagsHelp(t *testing.T) {
+	// Top-level help
+	{
+		cfg := newDefaultMainConfig()
+		var stdout, stderr bytes.Buffer
+		err := parseFlags([]string{"help"}, &cfg, &stdout, &stderr)
+		require.ErrorIs(t, err, flag.ErrHelp)
+		outStr := stdout.String()
+		require.Contains(t, outStr, "Usage:\n  fuzz <subcommand> [flags...] [args...]")
+		require.Contains(t, outStr, "run")
+		require.Contains(t, outStr, "check")
+		require.Contains(t, outStr, "generate")
+		require.Contains(t, outStr, "triage")
+		require.Contains(t, outStr, "bisect")
+		require.Contains(t, outStr, "bisect-step")
+		require.Contains(t, outStr, "experiment")
+		require.Contains(t, outStr, "analyze")
+		require.Contains(t, outStr, "Common Flags")
+		require.Contains(t, outStr, "-build")
+		require.Contains(t, outStr, "-verbose")
+	}
+
+	// Subcommand help via 'fuzz help <subcommand>'
+	subcmds := []string{"run", "check", "generate", "triage", "bisect", "bisect-step", "experiment", "analyze"}
+	for _, sc := range subcmds {
+		t.Run("help_"+sc, func(t *testing.T) {
+			cfg := newDefaultMainConfig()
+			var stdout, stderr bytes.Buffer
+			err := parseFlags([]string{"help", sc}, &cfg, &stdout, &stderr)
+			require.ErrorIs(t, err, flag.ErrHelp)
+			require.Contains(t, stdout.String(), fmt.Sprintf("Usage: fuzz %s", sc))
+			require.Contains(t, stdout.String(), "-build")
+			require.Contains(t, stdout.String(), "-verbose")
+		})
+	}
+
+	// Subcommand help via 'fuzz <subcommand> -h'
+	for _, sc := range subcmds {
+		t.Run("dash_h_"+sc, func(t *testing.T) {
+			cfg := newDefaultMainConfig()
+			var stdout, stderr bytes.Buffer
+			err := parseFlags([]string{sc, "-h"}, &cfg, &stdout, &stderr)
+			require.ErrorIs(t, err, flag.ErrHelp)
+			require.Contains(t, stderr.String(), fmt.Sprintf("Usage: fuzz %s", sc))
+		})
+	}
+
+	// Unknown subcommand help
+	{
+		cfg := newDefaultMainConfig()
+		var stdout, stderr bytes.Buffer
+		err := parseFlags([]string{"help", "nonexistent"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.False(t, errors.Is(err, flag.ErrHelp))
+		require.Contains(t, err.Error(), `unknown subcommand "nonexistent" to get help for`)
+	}
+}
+
+func TestParseFlagsSubcommands(t *testing.T) {
+	// Unknown subcommand
+	{
+		cfg := newDefaultMainConfig()
+		var stdout, stderr bytes.Buffer
+		err := parseFlags([]string{"foobar"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.False(t, errors.Is(err, flag.ErrHelp))
+		require.Contains(t, err.Error(), `unknown subcommand "foobar"`)
+	}
+
+	// Run
+	{
+		cfg := newDefaultMainConfig()
+		var stdout, stderr bytes.Buffer
+		err := parseFlags([]string{"run", "-dump", "-verbose"}, &cfg, &stdout, &stderr)
+		require.NoError(t, err)
+		require.Equal(t, TaskModeRun, cfg.cmdMode)
+		require.Equal(t, FuzzModeWgsl, cfg.fuzzMode)
+		require.True(t, cfg.dump)
+		require.True(t, cfg.verbose)
+		require.Equal(t, runtime.NumCPU(), cfg.numProcesses)
+
+		// With IR and filter
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"run", "-ir", "-filter", "writer"}, &cfg, &stdout, &stderr)
+		require.NoError(t, err)
+		require.Equal(t, FuzzModeIr, cfg.fuzzMode)
+		require.Equal(t, "writer", cfg.filter)
+
+		// Mesa with filter (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"run", "-mesa", "-filter", "writer"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "cannot set -mesa and -filter flags at the same time")
+
+		// Unexpected positional args (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"run", "unexpected"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "unexpected arguments for run")
+	}
+
+	// Check
+	{
+		cfg := newDefaultMainConfig()
+		var stdout, stderr bytes.Buffer
+		err := parseFlags([]string{"check", "-ir", "-j", "3"}, &cfg, &stdout, &stderr)
+		require.NoError(t, err)
+		require.Equal(t, TaskModeCheck, cfg.cmdMode)
+		require.Equal(t, FuzzModeIr, cfg.fuzzMode)
+		require.Equal(t, 3, cfg.numProcesses)
+
+		// Unexpected positional args (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"check", "unexpected"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "unexpected arguments for check")
+	}
+
+	// Generate
+	{
+		cfg := newDefaultMainConfig()
+		var stdout, stderr bytes.Buffer
+		err := parseFlags([]string{"generate", "-out", "/my/corpus", "-ir"}, &cfg, &stdout, &stderr)
+		require.NoError(t, err)
+		require.Equal(t, TaskModeGenerate, cfg.cmdMode)
+		require.Equal(t, FuzzModeIr, cfg.fuzzMode)
+		require.Equal(t, "/my/corpus", cfg.out)
+
+		// Missing -out (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"generate"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "need to specify -out when using generate")
+
+		// Unexpected positional args (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"generate", "-out", "/my/corpus", "unexpected"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "unexpected arguments for generate")
+	}
+
+	// Triage
+	{
+		cfg := newDefaultMainConfig()
+		var stdout, stderr bytes.Buffer
+		err := parseFlags([]string{"triage", "-timeout", "30", "-ir", "crash.tirb"}, &cfg, &stdout, &stderr)
+		require.NoError(t, err)
+		require.Equal(t, TaskModeTriage, cfg.cmdMode)
+		require.Equal(t, FuzzModeIr, cfg.fuzzMode)
+		require.Equal(t, "crash.tirb", cfg.triageFile)
+		require.Equal(t, 30, cfg.timeout)
+
+		// Missing file (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"triage"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "triage requires a test case file path")
+
+		// Multiple files (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"triage", "file1", "file2"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "triage accepts only one test case file path")
+	}
+
+	// Bisect
+	{
+		cfg := newDefaultMainConfig()
+		var stdout, stderr bytes.Buffer
+		err := parseFlags([]string{"bisect", "-known-failing", "abc1234", "crash.wgsl"}, &cfg, &stdout, &stderr)
+		require.NoError(t, err)
+		require.Equal(t, TaskModeBisect, cfg.cmdMode)
+		require.Equal(t, "crash.wgsl", cfg.bisectFile)
+		require.Equal(t, "abc1234", cfg.knownFailing)
+
+		// Missing -known-failing (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"bisect", "crash.wgsl"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "-known-failing flag is required when bisecting")
+
+		// Missing file (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"bisect", "-known-failing", "abc"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "bisect requires a test case file path")
+
+		// Multiple files (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"bisect", "-known-failing", "abc", "f1", "f2"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "bisect accepts only one test case file path")
+	}
+
+	// Bisect-step
+	{
+		cfg := newDefaultMainConfig()
+		var stdout, stderr bytes.Buffer
+		err := parseFlags([]string{"bisect-step", "-is-fix", "crash.wgsl"}, &cfg, &stdout, &stderr)
+		require.NoError(t, err)
+		require.Equal(t, TaskModeBisectStep, cfg.cmdMode)
+		require.True(t, cfg.bisectStep)
+		require.True(t, cfg.isFix)
+		require.Equal(t, "crash.wgsl", cfg.bisectFile)
+
+		// With -bisect flag instead of positional
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"bisect-step", "-bisect", "crash.wgsl"}, &cfg, &stdout, &stderr)
+		require.NoError(t, err)
+		require.Equal(t, "crash.wgsl", cfg.bisectFile)
+
+		// Missing file (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"bisect-step"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "bisect-step requires a test case file path")
+	}
+
+	// Experiment
+	{
+		cfg := newDefaultMainConfig()
+		var stdout, stderr bytes.Buffer
+		err := parseFlags([]string{"experiment", "-machine", "box1", "exp_dir"}, &cfg, &stdout, &stderr)
+		require.NoError(t, err)
+		require.Equal(t, TaskModeExperiment, cfg.cmdMode)
+		require.Equal(t, "exp_dir", cfg.experimentPath)
+		require.Equal(t, "box1", cfg.machineName)
+		require.Equal(t, 1, cfg.numProcesses)
+
+		// Missing dir (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"experiment"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "experiment requires an experiment root directory")
+
+		// Multiple dirs (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"experiment", "d1", "d2"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "experiment accepts only one experiment root directory")
+	}
+
+	// Analyze
+	{
+		cfg := newDefaultMainConfig()
+		var stdout, stderr bytes.Buffer
+		err := parseFlags([]string{"analyze", "-j", "2", "exp_dir"}, &cfg, &stdout, &stderr)
+		require.NoError(t, err)
+		require.Equal(t, TaskModeAnalyze, cfg.cmdMode)
+		require.Equal(t, "exp_dir", cfg.analyzePath)
+		require.Equal(t, 2, cfg.numProcesses)
+
+		// Missing dir (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"analyze"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "analyze requires an experiment root directory")
+
+		// Multiple dirs (error)
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"analyze", "d1", "d2"}, &cfg, &stdout, &stderr)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "analyze accepts only one experiment root directory")
 	}
 }
