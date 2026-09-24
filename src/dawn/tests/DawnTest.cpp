@@ -408,6 +408,16 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
             continue;
         }
 
+        if (strcmp("--assert-developer-mode", argv[i]) == 0) {
+#if DAWN_PLATFORM_IS(WINDOWS)
+            DAWN_CHECK(IsWindowsDeveloperModeEnabled());
+#else
+            ErrorLog() << "--assert-developer-mode is only supported on Windows";
+            DAWN_UNREACHABLE();
+#endif
+            continue;
+        }
+
         if (strcmp("--check-capture-replay", argv[i]) == 0) {
             mCheckCaptureReplay = true;
             // Force WebGPU backend.
@@ -611,7 +621,9 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                    "types. For each backend, tests will run only on adapters that match the first "
                    "available device type\n"
                    "  --run-suppressed-tests: Run all the tests that will be skipped by the macro "
-                   "DAWN_SUPPRESS_TEST_IF()\n";
+                   "DAWN_SUPPRESS_TEST_IF()\n"
+                   "  --assume-developer-mode: Fail loudly if Windows Developer Mode is not "
+                   "enabled\n";
             continue;
         }
 
