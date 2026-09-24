@@ -35,26 +35,12 @@
 #include <climits>
 #include <cmath>
 #include <limits>
-#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundef"
-#pragma clang diagnostic ignored "-Wcast-function-type-strict"
-#pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
-#pragma clang diagnostic ignored "-Wsuggest-destructor-override"
-#pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
-#pragma clang diagnostic ignored "-Wunique-object-duplication"
-#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
-#include <v8.h>
-
-#include "libplatform/libplatform.h"
-#pragma clang diagnostic pop
-
 #include "src/dawn/node/napi_v8/napi_v8.h"
+#include "src/dawn/node/test/V8TestEnvironment.h"
 
 #ifndef V8_ENABLE_SANDBOX
 #define V8_ENABLE_SANDBOX 0
@@ -62,56 +48,19 @@
 
 namespace {
 
-// Global test environment managing process-wide V8 platform initialization and teardown.
-class V8Environment : public ::testing::Environment {
-  public:
-    ~V8Environment() override = default;
-
-    void SetUp() override {
-        v8::V8::SetFlagsFromString("--expose_gc");
-        platform_ = v8::platform::NewDefaultPlatform();
-        v8::V8::InitializePlatform(platform_.get());
-        v8::V8::Initialize();
-    }
-
-    void TearDown() override {
-        v8::V8::Dispose();
-        v8::V8::DisposePlatform();
-        platform_.reset();
-    }
-
-  private:
-    std::unique_ptr<v8::Platform> platform_;
-};
-
-testing::Environment* const v8_env = testing::AddGlobalTestEnvironment(new V8Environment);
-
 // Test fixture providing an isolated V8 environment and napi_env for each test case.
-class NapiV8Test : public ::testing::Test {
+class NapiV8Test : public dawn::node::test::V8IsolateTest {
   protected:
+    NapiV8Test() : V8IsolateTest(v8::MicrotasksPolicy::kAuto) {}
+
     void SetUp() override {
-        allocator_.reset(v8::ArrayBuffer::Allocator::NewDefaultAllocator());
-        create_params_.array_buffer_allocator = allocator_.get();
-        isolate_ = v8::Isolate::New(create_params_);
-        isolate_->Enter();
-
-        // Constructing a v8::HandleScope automatically registers and attaches the scope to the
-        // isolate. All local handles (v8::Local) created by napi_* calls are placed in this
-        // active scope and kept alive until the scope is destroyed in TearDown().
-        handle_scope_.emplace(isolate_);
-
-        v8::Local<v8::Context> context = v8::Context::New(isolate_);
-        context->Enter();
-        env_ = dawn::napi_v8::CreateEnv(isolate_, context);
+        V8IsolateTest::SetUp();
+        env_ = dawn::napi_v8::CreateEnv(isolate_, context());
     }
 
     void TearDown() override {
-        env_->GetContext()->Exit();
         dawn::napi_v8::DestroyEnv(env_);
-        handle_scope_.reset();
-        isolate_->Exit();
-        isolate_->Dispose();
-        allocator_.reset();
+        V8IsolateTest::TearDown();
     }
 
     napi_env env_ = nullptr;
@@ -126,12 +75,6 @@ class NapiV8Test : public ::testing::Test {
 
     // Executes pending JavaScript microtasks (such as Promise .then() / .catch() callbacks).
     void RunMicrotasks() { isolate_->PerformMicrotaskCheckpoint(); }
-
-  private:
-    std::unique_ptr<v8::ArrayBuffer::Allocator> allocator_;
-    v8::Isolate::CreateParams create_params_;
-    v8::Isolate* isolate_ = nullptr;
-    std::optional<v8::HandleScope> handle_scope_;
 };
 
 // ============================================================================

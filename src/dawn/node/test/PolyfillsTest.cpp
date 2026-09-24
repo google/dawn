@@ -36,7 +36,6 @@
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
-#include <memory>
 #include <optional>
 #include <ostream>
 #include <sstream>
@@ -46,23 +45,10 @@
 #include <unordered_set>
 #include <vector>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundef"
-#pragma clang diagnostic ignored "-Wcast-function-type-strict"
-#pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
-#pragma clang diagnostic ignored "-Wsuggest-destructor-override"
-#pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
-#pragma clang diagnostic ignored "-Wunique-object-duplication"
-#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
-#include <v8.h>
-
-#include "libplatform/libplatform.h"
-#pragma clang diagnostic pop
-
 #include "src/dawn/common/SystemUtils.h"
 #include "src/dawn/node/napi_v8/napi_v8.h"
 #include "src/dawn/node/standalone/Polyfills.h"
+#include "src/dawn/node/test/V8TestEnvironment.h"
 
 namespace {
 
@@ -143,29 +129,18 @@ class TempDir {
     std::filesystem::path path_;
 };
 
-class PolyfillsTest : public ::testing::Test {
+class PolyfillsTest : public dawn::node::test::V8IsolateTest {
   protected:
+    PolyfillsTest() : V8IsolateTest(v8::MicrotasksPolicy::kExplicit) {}
+
     void SetUp() override {
-        allocator_.reset(v8::ArrayBuffer::Allocator::NewDefaultAllocator());
-        create_params_.array_buffer_allocator = allocator_.get();
-        isolate_ = v8::Isolate::New(create_params_);
-        isolate_->SetMicrotasksPolicy(v8::MicrotasksPolicy::kExplicit);
-        isolate_->Enter();
-
-        handle_scope_.emplace(isolate_);
-
-        v8::Local<v8::Context> context = v8::Context::New(isolate_);
-        context->Enter();
-        env_ = dawn::napi_v8::CreateEnv(isolate_, context);
+        V8IsolateTest::SetUp();
+        env_ = dawn::napi_v8::CreateEnv(isolate_, context());
     }
 
     void TearDown() override {
-        env_->GetContext()->Exit();
         dawn::napi_v8::DestroyEnv(env_);
-        handle_scope_.reset();
-        isolate_->Exit();
-        isolate_->Dispose();
-        allocator_.reset();
+        V8IsolateTest::TearDown();
     }
 
     napi_value RunScript(const std::string& code) {
@@ -216,12 +191,6 @@ class PolyfillsTest : public ::testing::Test {
     }
 
     napi_env env_ = nullptr;
-
-  private:
-    std::unique_ptr<v8::ArrayBuffer::Allocator> allocator_;
-    v8::Isolate::CreateParams create_params_;
-    v8::Isolate* isolate_ = nullptr;
-    std::optional<v8::HandleScope> handle_scope_;
 };
 
 TEST_F(PolyfillsTest, ConsoleGlobals) {
