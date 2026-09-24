@@ -400,7 +400,7 @@ class Converter {
         requires(!std::same_as<IN, std::string>)
     [[nodiscard]] inline bool Convert(OUT*& out, const std::optional<IN>& in) {
         if (in.has_value()) {
-            auto* el = Allocate<std::remove_const_t<OUT>>();
+            auto* el = Allocate<OUT>();
             if (!Convert(*el, in.value())) {
                 return false;
             }
@@ -431,13 +431,13 @@ class Converter {
             out_count = 0;
             return true;
         }
-        auto* els = Allocate<std::remove_const_t<OUT>>(in.size());
+        auto els = AllocateArray<OUT>(in.size());
         for (size_t i = 0; i < in.size(); i++) {
-            if (!Convert(DAWN_UNSAFE_TODO(els[i]), in[i])) {
+            if (!Convert(els[i], in[i])) {
                 return false;
             }
         }
-        out_els = els;
+        out_els = els.data();
         return Convert(out_count, in.size());
     }
 
@@ -451,14 +451,14 @@ class Converter {
             out_count = 0;
             return true;
         }
-        auto* els = Allocate<std::remove_const_t<OUT>>(in.size());
+        auto els = AllocateArray<OUT>(in.size());
         size_t i = 0;
         for (auto& [key, value] : in) {
-            if (!Convert(DAWN_UNSAFE_TODO(els[i++]), key, value)) {
+            if (!Convert(els[i++], key, value)) {
                 return false;
             }
         }
-        out_els = els;
+        out_els = els.data();
         return Convert(out_count, in.size());
     }
 
@@ -477,7 +477,7 @@ class Converter {
 
     // JS strings can contain the null character, replace it with some other invalid character
     // to preserve the creation of errors in this case.
-    char* ConvertStringReplacingNull(std::string_view in);
+    wgpu::StringView ConvertStringReplacingNull(std::string_view in);
 
     Napi::Env env;
     wgpu::Device device = nullptr;
@@ -494,13 +494,25 @@ class Converter {
     [[nodiscard]] bool Throw(std::string&& message);
     [[nodiscard]] bool Throw(Napi::Error&& error);
 
-    // Allocate() allocates and constructs an array of 'n' elements, and returns a pointer to
-    // the first element. The array is freed when the Converter is destructed.
-    template <typename T>
-    T* Allocate(size_t n = 1) {
-        auto* ptr = new T[n]{};
-        free_.emplace_back([ptr] { delete[] ptr; });
+    // Allocate() allocates and constructs a single element and returns a pointer to it.
+    // The element is freed when the Converter is destructed.
+    template <typename T, typename... ARGS>
+    std::remove_const_t<T>* Allocate(ARGS&&... args) {
+        using ElementType = std::remove_const_t<T>;
+        auto* ptr = new ElementType(std::forward<ARGS>(args)...);
+        free_.emplace_back([ptr] { delete ptr; });
         return ptr;
+    }
+
+    // AllocateArray() allocates and constructs an array of 'n' elements, and returns a span of
+    // them. The array is freed when the Converter is destructed.
+    template <typename T>
+    std::span<std::remove_const_t<T>> AllocateArray(size_t n) {
+        using ElementType = std::remove_const_t<T>;
+        std::vector<ElementType> vec(n);
+        std::span<ElementType> span(vec);
+        free_.emplace_back([_ = std::move(vec)] {});
+        return span;
     }
 
     std::vector<std::function<void()>> free_;

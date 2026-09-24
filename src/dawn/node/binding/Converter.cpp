@@ -27,6 +27,7 @@
 
 #include "src/dawn/node/binding/Converter.h"
 
+#include <algorithm>
 #include <cassert>
 #include <limits>
 #include <sstream>
@@ -2073,19 +2074,10 @@ bool Converter::Convert(wgpu::OptionalBool& out, const std::optional<bool>& in) 
     return true;
 }
 
-char* Converter::ConvertStringReplacingNull(std::string_view in) {
-    char* out = Allocate<char>(in.size() + 1);
-    DAWN_UNSAFE_TODO(out[in.size()] = '\0');
-
-    for (size_t i = 0; i < in.size(); i++) {
-        if (in[i] == '\0') {
-            DAWN_UNSAFE_TODO(out[i] = '#');
-        } else {
-            DAWN_UNSAFE_TODO(out[i] = in[i]);
-        }
-    }
-
-    return out;
+wgpu::StringView Converter::ConvertStringReplacingNull(std::string_view in) {
+    std::span<char> sp = AllocateArray<char>(in.size());
+    std::ranges::replace_copy(in, sp.begin(), '\0', '#');
+    return std::string_view(sp.begin(), sp.end());
 }
 
 bool Converter::Throw(std::string&& message) {
