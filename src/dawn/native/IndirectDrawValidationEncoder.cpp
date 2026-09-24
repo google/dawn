@@ -295,6 +295,17 @@ static const char sRenderValidationShaderSource[] = DAWN_MULTILINE(
             return;
         }
 
+        let numInputParams = numIndirectParamsPerDrawCallInput(drawConstants.flags);
+        let inputIndex = drawConstants.indirectOffsetInElements + id.x * numInputParams;
+        if (!bool(drawConstants.flags & kIndirectFirstInstanceEnabled)) {
+            // firstInstance is always the last parameter
+            let firstInstance = inputParams.data[inputIndex + numInputParams - 1u];
+            if (firstInstance != 0u) {
+                fail(id.x, drawConstants.flags);
+                return;
+            }
+        }
+
         if (!bool(drawConstants.flags & kIndexedDraw)) {
             set_pass_multi(id.x);
             return;
@@ -310,8 +321,7 @@ static const char sRenderValidationShaderSource[] = DAWN_MULTILINE(
         }
 
         let numIndexBufferElementsLow = drawConstants.numIndexBufferElementsLow;
-        let inputOffset = drawConstants.indirectOffsetInElements;
-        let firstIndex = inputParams.data[inputOffset + id.x * numIndirectParamsPerDrawCallInput(drawConstants.flags) + kFirstIndexEntry];
+        let firstIndex = inputParams.data[inputIndex + kFirstIndexEntry];
         if (numIndexBufferElementsHigh == 0u &&
             numIndexBufferElementsLow < firstIndex) {
             fail(id.x, drawConstants.flags);
@@ -321,7 +331,7 @@ static const char sRenderValidationShaderSource[] = DAWN_MULTILINE(
         // Note that this subtraction may underflow, but only when
         // numIndexBufferElementsHigh is 1u. The result is still correct in that case.
         let maxIndexCount = numIndexBufferElementsLow - firstIndex;
-        let indexCount = inputParams.data[inputOffset + id.x * numIndirectParamsPerDrawCallInput(drawConstants.flags) + kIndexCountEntry];
+        let indexCount = inputParams.data[inputIndex + kIndexCountEntry];
         if (indexCount > maxIndexCount) {
             fail(id.x, drawConstants.flags);
             return;
@@ -586,11 +596,14 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         for (auto& draw : multiDraws) {
             // Multi draw metadatas are added even if validation is disabled, because the Metal
             // backend needs to convert all multi draws into an ICB. If validation is disabled,
-            // and the draw doesn't need duplication of base vertex and instance, we can skip
-            // the compute pass. In general, non-indexed multi draws don't need validation.
-            if ((draw.type == IndirectDrawMetadata::DrawType::NonIndexed ||
-                 !device->IsValidationEnabled()) &&
-                !draw.duplicateBaseVertexInstance) {
+            // or a non-indexed draw supports firstInstance, and the draw doesn't need duplication
+            // of base vertex and instance, we can skip the compute pass.
+            const bool drawCanUseValidation =
+                draw.type == IndirectDrawMetadata::DrawType::Indexed ||
+                !device->HasFeature(Feature::IndirectFirstInstance);
+            const bool validationRequired = device->IsValidationEnabled() && drawCanUseValidation;
+            const bool duplicationRequired = draw.duplicateBaseVertexInstance;
+            if (!validationRequired && !duplicationRequired) {
                 // We will use the original indirect buffer directly as the indirect buffer.
                 usageTracker->BufferUsedAs(draw.cmd->indirectBuffer.Get(),
                                            kIndirectBufferForBackendResourceTracking);
@@ -618,8 +631,8 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
     outputParamsSize += outputParamsSizeForMultiDraw;
 
     // If there are no output params to validate, we can skip the rest of the encoding.
-    // The above .empty() checks are not sufficient because there might exist non-indexed multi
-    // draws, which don't need validation.
+    // The above .empty() checks are not sufficient because there might exist multi-draws that
+    // don't need validation.
     if (outputParamsSize == 0) {
         return {};
     }
@@ -783,9 +796,12 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         for (auto& draw : multiDraws) {
             // If the draw meets these conditions, there is no need to run the compute pass,
             // and there is no space allocated for the output params
-            if ((draw.type == IndirectDrawMetadata::DrawType::NonIndexed ||
-                 !device->IsValidationEnabled()) &&
-                !draw.duplicateBaseVertexInstance) {
+            const bool drawCanUseValidation =
+                draw.type == IndirectDrawMetadata::DrawType::Indexed ||
+                !device->HasFeature(Feature::IndirectFirstInstance);
+            const bool validationRequired = device->IsValidationEnabled() && drawCanUseValidation;
+            const bool duplicationRequired = draw.duplicateBaseVertexInstance;
+            if (!validationRequired && !duplicationRequired) {
                 continue;
             }
 
@@ -816,6 +832,9 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
             drawConstants.flags = 0;
             if (device->IsValidationEnabled()) {
                 drawConstants.flags |= kValidationEnabled;
+            }
+            if (device->HasFeature(Feature::IndirectFirstInstance)) {
+                drawConstants.flags |= kIndirectFirstInstanceEnabled;
             }
             if (draw.type == IndirectDrawMetadata::DrawType::Indexed) {
                 drawConstants.flags |= kIndexedDraw;

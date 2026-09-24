@@ -50,3 +50,4 @@ renderPassEncoder.EndPass();
 
 - The number of draw calls executed is `min(maxDrawCount, countBuffer)`, where countBuffer is the number of draw calls specified in the buffer with the offset.
 - The indirect buffer must be created with `wgpu::BufferUsage::Indirect` usage and be large enough to store `maxDrawCount` draw calls.
+- If `wgpu::FeatureName::IndirectFirstInstance` is not enabled, the `firstInstance` field of every draw call encoded in the indirect buffer must be `0`, otherwise the draw call with a non-zero `firstInstance` will be skipped.
