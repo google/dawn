@@ -547,12 +547,6 @@ bool Device::ReduceMemoryUsageImpl() {
     commandContext.Flush();
     GetPlatform()->ReportProgress();
 
-    // Call Trim() to delete any internal resources created by the driver.
-    ComPtr<IDXGIDevice3> dxgiDevice3;
-    if (SUCCEEDED(mD3d11Device.As(&dxgiDevice3))) {
-        dxgiDevice3->Trim();
-    }
-
     return false;
 }
 
