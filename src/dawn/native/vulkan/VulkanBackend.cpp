@@ -86,8 +86,20 @@ WGPUTexture WrapVulkanImage(WGPUDevice device, const ExternalImageDescriptorVk* 
         case ExternalImageType::AHardwareBuffer: {
             const ExternalImageDescriptorAHardwareBuffer* ahbDescriptor =
                 static_cast<const ExternalImageDescriptorAHardwareBuffer*>(descriptor);
-            Ref<TextureBase> texture = backendDevice->CreateTextureWrappingVulkanImage(
-                ahbDescriptor, ahbDescriptor->handle, ahbDescriptor->waitFDs);
+
+            if (backendDevice->ConsumedError(
+                    backendDevice->ValidateTextureWrappingVulkanImage(ahbDescriptor))) {
+                return nullptr;
+            }
+
+            Ref<TextureBase> texture;
+            if (backendDevice->ConsumedError(
+                    backendDevice->CreateTextureWrappingVulkanImage(
+                        ahbDescriptor, ahbDescriptor->handle, ahbDescriptor->waitFDs),
+                    &texture)) {
+                return nullptr;
+            }
+
             return ToAPI(ReturnToAPI(std::move(texture)));
         }
 #elif DAWN_PLATFORM_IS(LINUX)
@@ -95,8 +107,19 @@ WGPUTexture WrapVulkanImage(WGPUDevice device, const ExternalImageDescriptorVk* 
         case ExternalImageType::DmaBuf: {
             const ExternalImageDescriptorFD* fdDescriptor =
                 static_cast<const ExternalImageDescriptorFD*>(descriptor);
-            Ref<TextureBase> texture = backendDevice->CreateTextureWrappingVulkanImage(
-                fdDescriptor, fdDescriptor->memoryFD, fdDescriptor->waitFDs);
+
+            if (backendDevice->ConsumedError(
+                    backendDevice->ValidateTextureWrappingVulkanImage(fdDescriptor))) {
+                return nullptr;
+            }
+
+            Ref<TextureBase> texture;
+            if (backendDevice->ConsumedError(
+                    backendDevice->CreateTextureWrappingVulkanImage(
+                        fdDescriptor, fdDescriptor->memoryFD, fdDescriptor->waitFDs),
+                    &texture)) {
+                return nullptr;
+            }
             return ToAPI(ReturnToAPI(std::move(texture)));
         }
 #endif  // DAWN_PLATFORM_IS(LINUX)

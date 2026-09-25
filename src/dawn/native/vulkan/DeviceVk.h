@@ -105,7 +105,8 @@ class Device final : public DeviceBase {
 
     // Dawn Native API
 
-    Ref<TextureBase> CreateTextureWrappingVulkanImage(
+    MaybeValError ValidateTextureWrappingVulkanImage(const ExternalImageDescriptorVk* descriptor);
+    ResultOrError<Ref<TextureBase>> CreateTextureWrappingVulkanImage(
         const ExternalImageDescriptorVk* descriptor,
         ExternalMemoryHandle memoryHandle,
         const std::vector<ExternalSemaphoreHandle>& waitHandles);

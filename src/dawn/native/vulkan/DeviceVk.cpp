@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "absl/cleanup/cleanup.h"
 #include "dawn/dawn_version.h"
 #include "dawn/native/VulkanBackend.h"
 #include "src/dawn/common/Math.h"
@@ -954,62 +955,71 @@ bool Device::SignalAndExportExternalTexture(
     }());
 }
 
-Ref<TextureBase> Device::CreateTextureWrappingVulkanImage(
+MaybeValError Device::ValidateTextureWrappingVulkanImage(
+    const ExternalImageDescriptorVk* descriptor) {
+    DAWN_TRY(ValidateIsAlive());
+
+    TextureDescriptor reifiedDescriptor =
+        WithTrivialFrontendDefaults(*FromAPI(descriptor->cTextureDescriptor));
+
+    UnpackedPtr<TextureDescriptor> textureDescriptor;
+    DAWN_TRY_ASSIGN(textureDescriptor, ValidateAndUnpack(&reifiedDescriptor));
+
+    DAWN_TRY(
+        ValidateTextureDescriptor(this, textureDescriptor, AllowMultiPlanarTextureFormat::Yes));
+
+    DAWN_TRY_CONTEXT(ValidateVulkanImageCanBeWrapped(this, textureDescriptor),
+                     "validating that a Vulkan image can be wrapped with %s.", textureDescriptor);
+
+    DAWN_INVALID_IF(GetValidInternalFormat(textureDescriptor->format).IsMultiPlanar() &&
+                        !descriptor->isInitialized,
+                    "External textures with multiplanar formats must be initialized.");
+    return {};
+}
+
+ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingVulkanImage(
     const ExternalImageDescriptorVk* descriptor,
     ExternalMemoryHandle memoryHandle,
     const std::vector<ExternalSemaphoreHandle>& waitHandles) {
-    // Initial validation
-    if (ConsumedError(ValidateIsAlive())) {
-        return nullptr;
-    }
-    TextureDescriptor reifiedDescriptor =
-        WithTrivialFrontendDefaults(*FromAPI(descriptor->cTextureDescriptor));
-    UnpackedPtr<TextureDescriptor> textureDescriptor;
-    if (ConsumedError(ValidateAndUnpack(&reifiedDescriptor), &textureDescriptor)) {
-        return nullptr;
-    }
-    if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor,
-                                                AllowMultiPlanarTextureFormat::Yes))) {
-        return nullptr;
-    }
-    if (ConsumedError(ValidateVulkanImageCanBeWrapped(this, textureDescriptor),
-                      "validating that a Vulkan image can be wrapped with %s.",
-                      textureDescriptor)) {
-        return nullptr;
-    }
-    if (GetValidInternalFormat(textureDescriptor->format).IsMultiPlanar() &&
-        !descriptor->isInitialized) {
-        std::ignore = ConsumedError(DAWN_VALIDATION_ERROR(
-            "External textures with multiplanar formats must be initialized."));
-        return nullptr;
-    }
-
     VkDeviceMemory allocation = VK_NULL_HANDLE;
     std::vector<VkSemaphore> waitSemaphores;
     waitSemaphores.reserve(waitHandles.size());
 
     // Cleanup in case of a failure, the image creation doesn't acquire the external objects
-    // if a failure happems.
+    // if a failure happens.
     Ref<ExternalVkImageTexture> result;
-    // TODO(crbug.com/1026480): Consolidate this into a single CreateFromExternal call.
-    if (ConsumedError(ExternalVkImageTexture::Create(this, descriptor, textureDescriptor,
-                                                     mExternalMemoryService.get()),
-                      &result) ||
-        ConsumedError(ImportExternalImage(descriptor, memoryHandle, result->GetHandle(),
-                                          waitHandles, &allocation, &waitSemaphores)) ||
-        ConsumedError(result->BindExternalMemory(descriptor, allocation, waitSemaphores))) {
+
+    // Setup the cleanup handler. In the case where we fail to create the texture we will execute
+    // the cleanup. Otherwise, we cancel it right before returning.
+    absl::Cleanup texture_cleanup = [&] {
         // Delete the Texture if it was created
         result = nullptr;
 
         // Clear image memory
-        fn.FreeMemory(GetVkDevice(), allocation, nullptr);
+        if (allocation != VK_NULL_HANDLE) {
+            fn.FreeMemory(GetVkDevice(), allocation, nullptr);
+        }
 
         // Clear any wait semaphores we were able to import
         for (VkSemaphore semaphore : waitSemaphores) {
             fn.DestroySemaphore(GetVkDevice(), semaphore, nullptr);
         }
-    }
+    };
 
+    TextureDescriptor reifiedDescriptor =
+        WithTrivialFrontendDefaults(*FromAPI(descriptor->cTextureDescriptor));
+
+    // The ValidateTextureWrappingVulkanImage verified that this validated already.
+    UnpackedPtr<TextureDescriptor> textureDescriptor = Unpack(&reifiedDescriptor);
+
+    // TODO(crbug.com/1026480): Consolidate this into a single CreateFromExternal call
+    DAWN_TRY_ASSIGN(result, ExternalVkImageTexture::Create(this, descriptor, textureDescriptor,
+                                                           mExternalMemoryService.get()));
+    DAWN_TRY(ImportExternalImage(descriptor, memoryHandle, result->GetHandle(), waitHandles,
+                                 &allocation, &waitSemaphores));
+    DAWN_TRY(result->BindExternalMemory(descriptor, allocation, waitSemaphores));
+
+    std::move(texture_cleanup).Cancel();
     return result;
 }
 
