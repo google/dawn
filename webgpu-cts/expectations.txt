@@ -487,6 +487,8 @@ crbug.com/42240984 [ android-t arm ] webgpu:api,operation,render_pipeline,sample
 # Some copyTextureToTexture tests fail on Qualcomm Android R (Pixel 4), don't appear to repro on Android T
 crbug.com/42240899 [ android-r dawn-backend-validation ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_aspects:format="depth32float" [ Failure ]
 crbug.com/42240899 [ android-r dawn-no-backend-validation ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_aspects:format="depth32float" [ Failure ]
+crbug.com/42240899 [ android-r ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_aspects:format="depth32float-stencil8" [ Failure ]
+crbug.com/42240899 [ android-r ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_ranges:dimension="1d";copyBoxOffsets={"x":0,"y":0,"z":0,"width":0,"height":0,"depthOrArrayLayers":0};srcCopyLevel=0;dstCopyLevel=0 [ Failure ]
 
 # Miscellaneous flakes
 crbug.com/42241275 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="FullCopyT2B";* [ RetryOnFailure ]
@@ -823,6 +825,7 @@ crbug.com/407147670 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,b
 crbug.com/407147670 [ amd-0x67ef sonoma ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d";sampleCount=1 [ Failure ] # CAT:Accuracy
 crbug.com/407147670 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d";sampleCount=1 [ Failure ] # CAT:Accuracy
 crbug.com/407147670 [ amd mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d";sampleCount=4 [ Failure ] # CAT:Accuracy
+crbug.com/407147670 [ intel sonoma ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d";sampleCount=4 [ Failure ] # CAT:Accuracy
 crbug.com/407147670 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube-array";sampleCount=1 [ Failure ] # CAT:Accuracy
 crbug.com/407147670 [ amd-0x67ef sonoma ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube-array";sampleCount=1 [ Failure ] # CAT:Accuracy
 crbug.com/407147670 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube-array";sampleCount=1 [ Failure ] # CAT:Accuracy
@@ -1114,8 +1117,8 @@ crbug.com/428272702 [ linux no-clang-coverage nvidia-0x2184 nvidia_ge_535.183.01
 crbug.com/432294346 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,workgroupUniformLoad:types:type="ComplexStruct";* [ Failure ] # CAT:Critical
 
 # Seemingly flaky but always flake on retry too (at least some of these)
-crbug.com/432284622 [ intel sequoia webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Failure ]
-crbug.com/432284622 [ intel sequoia webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
+crbug.com/432284622 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Failure ]
+crbug.com/432284622 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 
 # Seemingly flaky but always flake on retry too (at least some of these)
 crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Skip ] # CAT:Accuracy
@@ -1687,6 +1690,8 @@ crbug.com/565375480 [ android-pixel-6 android-t dawn-no-backend-validation webgp
 crbug.com/565375480 [ android-pixel-4 dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ RetryOnFailure ]
 crbug.com/565375480 [ android-pixel-6 android-t dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ RetryOnFailure ]
 crbug.com/565375480 [ dawn-no-backend-validation no-asan no-clang-coverage nvidia release-x64 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-service-worker win ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ RetryOnFailure ]
+crbug.com/565375480 [ android-pixel-6 dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="bgra8unorm";dstPremultiplied=false;srcDoFlipYDuringCopy=false [ RetryOnFailure ]
+crbug.com/565375480 [ android-pixel-4 dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="bgra8unorm";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ RetryOnFailure ]
 
 # concrete_matrix_elements fails on Android T
 crbug.com/565417348 [ android-t ] webgpu:shader,execution,expression,constructor,non_zero:concrete_matrix_elements:* [ Failure ]
@@ -1705,11 +1710,6 @@ crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limit
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxTextureDimension2D:getCurrentTexture,at_over:limitTest="atMaximum";testValueName="atLimit";canvasType="onscreen" [ Failure ]
 crbug.com/0000 [ apple dawn-backend-validation mac ] webgpu:api,validation,createView:texture_view_usage_with_view_format:textureFormat="etc2-rgb8a1unorm";usage=4 [ Failure ]
 crbug.com/0000 [ apple dawn-backend-validation mac ] webgpu:api,validation,createView:texture_view_usage_with_view_format:textureFormat="etc2-rgb8a1unorm-srgb";usage=4 [ Failure ]
-crbug.com/0000 [ android-pixel-4 ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_aspects:format="depth32float-stencil8" [ Failure ]
-crbug.com/0000 [ android-pixel-4 ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_ranges:dimension="1d";copyBoxOffsets={"x":0,"y":0,"z":0,"width":0,"height":0,"depthOrArrayLayers":0};srcCopyLevel=0;dstCopyLevel=0 [ Failure ]
-crbug.com/0000 [ arch-x86_64 dawn-backend-validation graphite-enabled no-asan no-clang-coverage nvidia-0x2184 nvidia_ge_32.0.15.8180 release-x64 target-cpu-64 win11 ] webgpu:api,validation,encoding,cmds,render,draw:vertex_buffer_OOB:type="draw";VBSize="exact";IBSize="oneTooSmall";AStride="oversize" [ Failure ]
-crbug.com/0000 [ arch-x86_64 dawn-backend-validation graphite-enabled no-asan no-clang-coverage nvidia-0x2184 nvidia_ge_32.0.16.1074 release-x64 target-cpu-64 win11 ] webgpu:api,validation,encoding,cmds,render,draw:vertex_buffer_OOB:type="draw";VBSize="exact";IBSize="zero";AStride="exact" [ Failure ]
-crbug.com/0000 [ arch-x86_64 dawn-backend-validation graphite-enabled no-asan no-clang-coverage nvidia-0x2184 nvidia_ge_32.0.16.1074 release-x64 target-cpu-64 win11 ] webgpu:api,validation,encoding,cmds,render,draw:vertex_buffer_OOB:type="draw";VBSize="exact";IBSize="zero";AStride="zero" [ Failure ]
 crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,access,structure,index:buffer_align: [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation intel-0x9bc5 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,af_matrix_subtraction:matrix:inputSource="const";cols=2;rows=4 [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation intel-0x4680 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:subtraction_vector_scalar_compound:inputSource="storage_rw";vectorize_lhs=4 [ Failure ]
@@ -1719,7 +1719,6 @@ crbug.com/0000 [ android-pixel-6 android-t dawn-no-backend-validation ] webgpu:s
 crbug.com/0000 [ android-14 android-pixel-6 dawn-backend-validation ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d_array:stage="v";format="rg11b10ufloat" [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t dawn-no-backend-validation ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d_array:stage="v";format="rg11b10ufloat" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:2d_coords:format="depth32float";filt="nearest";modeU="m";modeV="c";offset=true [ Failure ]
-crbug.com/0000 [ intel sonoma ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d";sampleCount=4 [ Failure ]
 crbug.com/0000 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:weights:stage="compute" [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation no-asan webgpu-dxc-disabled win ] webgpu:shader,execution,limits:struct_members: [ Failure ]
 crbug.com/0000 [ android-r qualcomm ] webgpu:shader,execution,memory_layout:write_layout:* [ Failure ]
@@ -1727,10 +1726,3 @@ crbug.com/0000 [ android-r ] webgpu:shader,execution,shader_io,vertex_builtins:*
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,fma:values:stage="override";type="vec3%3Cf32%3E" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,step:values:stage="override";type="f32" [ Failure ]
 crbug.com/0000 [ intel mac ] webgpu:shader,validation,expression,call,builtin,textureGather:return_type:returnType="vec4%3Cu32%3E";textureType="texture_2d";sampleType="vec4%3Cu32%3E" [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="bgra8unorm";dstPremultiplied=false;srcDoFlipYDuringCopy=false [ Failure ]
-crbug.com/0000 [ android-pixel-4 ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="bgra8unorm";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
-crbug.com/0000 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:canvasType="offscreen";dstColorFormat="r16float";dstAlphaMode="opaque";srcDoFlipYDuringCopy=true [ Failure ]
-crbug.com/0000 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:canvasType="offscreen";dstColorFormat="rgba8unorm";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
-crbug.com/0000 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:canvasType="offscreen";dstColorFormat="rgba8unorm";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
-crbug.com/0000 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="srgb" [ Failure ]
-crbug.com/0000 [ intel mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="srgb" [ Failure ]
