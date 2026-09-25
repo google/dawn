@@ -3066,6 +3066,10 @@ fn main() {
 TEST_P(ShaderTests, SkiaGraphiteVertexShaderBugOnIntelGen9) {
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
+    // TODO(crbug.com/563423066): On D3D12 WARP with DXC (DXIL), WARP's ShaderJIT crashes in
+    // Implement_DXIL_ShuffleVector.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
+
     // This test uses a shader derived from Skia's analytic rrect rendering.
     // It is complex and uses a large number of vertex attributes.
     // The vertex shader calculates the position and other data needed for the rounded rectangle.

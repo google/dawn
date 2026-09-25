@@ -491,42 +491,57 @@ TEST_P(SubgroupMatrixSubgroupSizeControlTest, WorkgroupSizeUsesExplicitSubgroupS
     // A size smaller than the maximum is needed to distinguish explicit-subgroup-size validation
     // from the default maximum-subgroup-size validation.
     DAWN_TEST_UNSUPPORTED_IF(info.subgroupMinSize == info.subgroupMaxSize);
-    const uint32_t subgroupSize = info.subgroupMaxSize / 2;
-    DAWN_TEST_UNSUPPORTED_IF(subgroupSize < info.subgroupMinSize);
-
-    // Intel Gen12 cannot use subgroup size 8 on D3D12 despite advertising it as the minimum.
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12() && IsIntelGen12() && subgroupSize == 8);
 
     bool testedConfig = false;
-    for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
-        const auto& config = subgroupMatrixConfigs.configs[i];
+    for (uint32_t subgroupSize = info.subgroupMinSize; subgroupSize < info.subgroupMaxSize;
+         subgroupSize *= 2) {
+        for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
+            const auto& config = subgroupMatrixConfigs.configs[i];
 
-        std::ostringstream configTrace;
-        configTrace << config;
-        SCOPED_TRACE(configTrace.str());
-        testedConfig = true;
+            std::ostringstream configTrace;
+            configTrace << config << " (subgroupSize=" << subgroupSize << ")";
 
-        std::ostringstream shader;
-        shader << "enable subgroups;\n";
-        shader << "enable subgroup_size_control;\n";
-        shader << "enable chromium_experimental_subgroup_matrix;\n";
-        if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16) {
-            shader << "enable f16;\n";
-        }
-        shader << "alias ResultComponentType = "
-               << ComponentTypeToWgslType(config.resultComponentType) << ";\n";
-        shader << "const M = " << config.M << ";\n";
-        shader << "const N = " << config.N << ";\n";
-        shader << "const SubgroupSize = " << subgroupSize << ";\n";
-        shader << R"(
+            // Intel Gen12 cannot use subgroup size 8 on D3D12 despite advertising it as the
+            // minimum.
+            if (IsD3D12() && IsIntelGen12() && subgroupSize == 8) {
+                std::cout << "Skipping config: " << configTrace.str() << "\n";
+                continue;
+            }
+
+            // TODO(crbug.com/564583985): Remove this skip once SubgroupMatrixConfig exposes
+            // supported subgroup sizes. On D3D12 WARP, 4x4x4 configs are only supported at
+            // subgroup_size(4).
+            if (IsD3D12() && IsWARP() && config.M == 4 && config.N == 4 && config.K == 4 &&
+                subgroupSize != 4) {
+                std::cout << "Skipping config: " << configTrace.str() << "\n";
+                continue;
+            }
+
+            SCOPED_TRACE(configTrace.str());
+            testedConfig = true;
+
+            std::ostringstream shader;
+            shader << "enable subgroups;\n";
+            shader << "enable subgroup_size_control;\n";
+            shader << "enable chromium_experimental_subgroup_matrix;\n";
+            if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16) {
+                shader << "enable f16;\n";
+            }
+            shader << "alias ResultComponentType = "
+                   << ComponentTypeToWgslType(config.resultComponentType) << ";\n";
+            shader << "const M = " << config.M << ";\n";
+            shader << "const N = " << config.N << ";\n";
+            shader << "const SubgroupSize = " << subgroupSize << ";\n";
+            shader << R"(
 @compute @workgroup_size(SubgroupSize) @subgroup_size(SubgroupSize)
 fn main() {
     _ = subgroup_matrix_result<ResultComponentType, N, M>();
 })";
 
-        wgpu::ComputePipelineDescriptor csDesc;
-        csDesc.compute.module = utils::CreateShaderModule(device, shader.str());
-        device.CreateComputePipeline(&csDesc);
+            wgpu::ComputePipelineDescriptor csDesc;
+            csDesc.compute.module = utils::CreateShaderModule(device, shader.str());
+            device.CreateComputePipeline(&csDesc);
+        }
     }
     DAWN_TEST_UNSUPPORTED_IF(!testedConfig);
 }

@@ -1861,6 +1861,10 @@ TEST_P(MultithreadTextureCopyTests, CopyBufferToStencilNoRace) {
 TEST_P(MultithreadTextureCopyTests, CopyTextureForBrowserNoRace) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
 
+    // TODO(crbug.com/563423066): On D3D12 WARP with DXC (DXIL), WARP's ShaderJIT crashes in
+    // Implement_DXIL_ShuffleVector.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
+
     enum class Step {
         Begin,
         WriteTexture,
@@ -1927,6 +1931,10 @@ TEST_P(MultithreadTextureCopyTests, CopyTextureForBrowserNoRace) {
 // Test that error from CopyTextureForBrowser() won't cause deadlock.
 TEST_P(MultithreadTextureCopyTests, CopyTextureForBrowserErrorNoDeadLock) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
+
+    // TODO(crbug.com/563423066): On D3D12 WARP with DXC (DXIL), WARP's ShaderJIT crashes in
+    // Implement_DXIL_ShuffleVector.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
 
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 

@@ -594,6 +594,10 @@ class CopyTextureForBrowser_Basic : public CopyTextureForBrowserTests<DawnTest> 
   protected:
     void DoBasicCopyTest(const wgpu::Extent3D& copySize,
                          const wgpu::CopyTextureForBrowserOptions options = {}) {
+        // TODO(crbug.com/563423066): On D3D12 WARP with DXC (DXIL), WARP's ShaderJIT crashes in
+        // Implement_DXIL_ShuffleVector.
+        DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
+
         TextureSpec textureSpec;
         textureSpec.textureSize = copySize;
 
@@ -1190,6 +1194,10 @@ TEST_P(CopyTextureForBrowser_Formats, ColorConversion) {
     // Skip OpenGL backend on linux because it fails on using *-srgb format as
     // dst texture format
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux() && IsDstFormatSrgbFormats());
+
+    // TODO(crbug.com/563423066): On D3D12 WARP with DXC (DXIL), WARP's ShaderJIT crashes in
+    // Implement_DXIL_ShuffleVector.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
 
     DoColorConversionTest();
 }
