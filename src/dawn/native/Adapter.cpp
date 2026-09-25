@@ -451,19 +451,29 @@ const std::string& AdapterBase::GetName() const {
 
 std::vector<Ref<AdapterBase>> SortAdapters(std::vector<Ref<AdapterBase>> adapters,
                                            const UnpackedPtr<RequestAdapterOptions>& options) {
-    const bool noPowerPreference = options->powerPreference == wgpu::PowerPreference::Undefined;
-    const bool highPerformance = options->powerPreference == wgpu::PowerPreference::HighPerformance;
+    int discreteRank = 1;
+    int integratedRank = 1;
+    switch (options->powerPreference) {
+        case wgpu::PowerPreference::HighPerformance:
+            // Prioritize discrete GPUs in this case.
+            discreteRank = 0;
+            break;
+        case wgpu::PowerPreference::LowPower:
+            // Prioritize integrated GPUs in this case.
+            integratedRank = 0;
+            break;
+        case wgpu::PowerPreference::Undefined:
+            // Deliberately leave both discrete and integrated ranks at 1 so that the original
+            // OS-provided order of adapters is preserved.
+            break;
+    }
 
     const auto ComputeAdapterTypeRank = [&](const Ref<AdapterBase>& a) {
-        if (noPowerPreference) {
-            return 0;
-        }
-
         switch (a->GetPhysicalDevice()->GetAdapterType()) {
             case wgpu::AdapterType::DiscreteGPU:
-                return highPerformance ? 0 : 1;
+                return discreteRank;
             case wgpu::AdapterType::IntegratedGPU:
-                return highPerformance ? 1 : 0;
+                return integratedRank;
             case wgpu::AdapterType::CPU:
                 return 2;
             case wgpu::AdapterType::Unknown:

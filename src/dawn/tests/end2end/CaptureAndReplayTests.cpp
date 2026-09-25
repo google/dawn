@@ -2780,7 +2780,6 @@ class CaptureAndReplaySurfaceTests : public CaptureAndReplayTests {
 
         mWindow.reset();
         mReplayWindow.reset();
-        glfwTerminate();
     }
 
     // Creates a window for a replay surface. DXGI only allows one flip-model swapchain per HWND at
