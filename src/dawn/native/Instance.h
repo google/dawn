@@ -156,6 +156,10 @@ class InstanceBase final : public ErrorSink, public RefCounted {
 
     void DisconnectDawnPlatform();
 
+    // ErrorSink implementation
+    void ConsumeError(std::unique_ptr<InternalError> error,
+                      InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
+
   private:
     explicit InstanceBase(const TogglesState& instanceToggles);
     ~InstanceBase() override;
@@ -184,10 +188,6 @@ class InstanceBase final : public ErrorSink, public RefCounted {
                                    wgpu::PowerPreference powerPreference);
 
     void GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist);
-
-    // ErrorSink implementation
-    void ConsumeError(std::unique_ptr<InternalError> error,
-                      InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
 
     absl::flat_hash_set<std::string> mWarningMessages;
 

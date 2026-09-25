@@ -414,7 +414,8 @@ class BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
             auto error = result.AcquireError();
             DAWN_CHECK(error->GetType() != InternalErrorType::Validation);
             std::string errorMsg = error->GetFormattedMessage();
-            std::ignore = buffer->GetDevice()->ConsumedError(std::move(error));
+
+            buffer->GetDevice()->ConsumeError(std::move(error));
             RunCallback(WGPUMapAsyncStatus_Error, errorMsg);
         } else {
             RunCallback(WGPUMapAsyncStatus_Success, "");
@@ -543,8 +544,7 @@ void BufferBase::DestroyImpl(DestroyReason reason) {
             case BufferState::InUse: {
                 // This is never supposed to happen but another operation is happening concurrently
                 // with API Destroy() call.
-                std::ignore =
-                    GetDevice()->ConsumedError(ConcurrentUseError(), "calling %s.Destroy().", this);
+                GetDevice()->ConsumeError(ConcurrentUseError(), "calling %s.Destroy().", this);
                 while (mState.load(std::memory_order::acquire) == BufferState::InUse) {
                     // Spin loop instead of wait() to avoid overhead of signal in map/unmap.
                 }
@@ -844,9 +844,8 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
         if (maybeError.IsError()) {
             auto error = maybeError.AcquireError();
             event = AcquireRef(new MapAsyncEvent(callbackInfo, error->GetMessage(), errorStatus));
-            std::ignore = GetDevice()->ConsumedError(std::move(error),
-                                                     "calling %s.MapAsync(%s, %u, %u, ...).", this,
-                                                     mode, offset, size);
+            GetDevice()->ConsumeError(std::move(error), "calling %s.MapAsync(%s, %u, %u, ...).",
+                                      this, mode, offset, size);
         } else {
             mMapMode = mode;
             mMapOffset = offset;

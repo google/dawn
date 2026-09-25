@@ -1482,9 +1482,8 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
         // Acquire the device lock for error handling.
         auto deviceGuard = GetGuard();
         // Emit error, including Tint errors and warnings.
-        auto consumedError = ConsumedError(std::move(errorData), InternalErrorType::Internal,
-                                           "calling %s.CreateShaderModule(%s).", this, descriptor);
-        DAWN_CHECK(consumedError);
+        ConsumeError(std::move(errorData), InternalErrorType::Internal,
+                     "calling %s.CreateShaderModule(%s).", this, descriptor);
     }
 
     DAWN_CHECK(errorData == nullptr);

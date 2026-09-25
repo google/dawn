@@ -645,8 +645,7 @@ wgpu::Status Surface::APIPresent() {
     // Validation that the surface is configured. Note this is synchronous
     // validation so it can't be skipped even if the surface is an error.
     if (!GetCurrentDevice()) {
-        std::ignore = mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("%s is in the unconfigured state.", this));
+        mInstance->ConsumeError(DAWN_VALIDATION_ERROR("%s is in the unconfigured state.", this));
         return wgpu::Status::Error;
     }
 

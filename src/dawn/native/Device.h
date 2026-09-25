@@ -500,6 +500,11 @@ class DeviceBase : public ErrorSink,
 
     tint::InternalCompilerErrorCallbackInfo GetTintInternalCompilerErrorCallback();
 
+    // ErrorSink implementation
+    using ErrorSink::ConsumeError;
+    void ConsumeError(std::unique_ptr<InternalError> error,
+                      InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
+
   protected:
     void ForceEnableFeatureForTesting(Feature feature);
 
@@ -611,9 +616,6 @@ class DeviceBase : public ErrorSink,
                      wgpu::DeviceLostReason lostReason = wgpu::DeviceLostReason::Unknown,
                      ForwardToErrorScope forwardToErrorScope = ForwardToErrorScope::Yes);
 
-    // ErrorSink implementation
-    void ConsumeError(std::unique_ptr<InternalError> error,
-                      InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
     void HandleDeviceLost(wgpu::DeviceLostReason reason, std::string_view message);
     ErrorScopeStack* GetErrorScopeStack();
 
