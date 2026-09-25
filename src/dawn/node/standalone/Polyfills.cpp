@@ -34,6 +34,9 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <memory>
+#include <optional>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -41,7 +44,9 @@
 #include <utility>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "src/dawn/common/SystemUtils.h"
+#include "src/dawn/node/napi_v8/napi_v8.h"
 #include "src/dawn/node/standalone/EventLoop.h"
 
 namespace dawn::node::standalone {
@@ -51,12 +56,19 @@ namespace {
 // State shared by the polyfills that outlives registration. Owned by the `process` object, which
 // deletes it from its finalizer.
 struct PolyfillContext {
+    struct RequireContext {
+        PolyfillContext* ctx;
+        std::string from_dir;
+    };
+
     PolyfillContext(EventLoop& event_loop, PolyfillOptions opts)
         : loop(event_loop), options(std::move(opts)) {}
 
     EventLoop& loop;
     PolyfillOptions options;
     std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+    absl::flat_hash_map<std::string, Napi::ObjectReference> module_cache;
+    std::vector<std::unique_ptr<RequireContext>> require_contexts;
 };
 
 void DeletePolyfillContext(const Napi::Env&, PolyfillContext* ctx) {
@@ -215,6 +227,38 @@ bool GetEncodingOption(const Napi::CallbackInfo& info, Encoding* encoding) {
     return true;
 }
 
+bool OpenAndSizeFile(Napi::Env env,
+                     const std::string& path,
+                     std::ifstream* file,
+                     std::streamoff* size) {
+    // Node.js reads the file in binary regardless of the encoding.
+    file->open(path, std::ios::binary | std::ios::ate);
+    if (!file->is_open()) {
+        Napi::Error::New(env, "Failed to open file: " + path).ThrowAsJavaScriptException();
+        return false;
+    }
+
+    *size = file->tellg();
+    if (*size < 0) {
+        Napi::Error::New(env, "Failed to size file: " + path).ThrowAsJavaScriptException();
+        return false;
+    }
+    file->seekg(0, std::ios::beg);
+    return true;
+}
+
+bool ReadFileUtf8(Napi::Env env, const std::string& path, std::string* out) {
+    std::ifstream file;
+    std::streamoff offset = 0;
+    if (!OpenAndSizeFile(env, path, &file, &offset)) {
+        return false;
+    }
+    out->resize(static_cast<size_t>(offset));
+    file.read(out->data(), offset);
+    out->resize(static_cast<size_t>(file.gcount()));
+    return true;
+}
+
 Napi::Value ReadFileSync(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     std::string path;
@@ -223,31 +267,23 @@ Napi::Value ReadFileSync(const Napi::CallbackInfo& info) {
         return env.Undefined();
     }
 
-    // Node.js reads the file in binary regardless of the encoding.
-    std::ifstream file(path, std::ios::binary | std::ios::ate);
-    if (!file.is_open()) {
-        Napi::Error::New(env, "Failed to open file: " + path).ThrowAsJavaScriptException();
-        return env.Undefined();
+    if (encoding == Encoding::kUtf8) {
+        std::string content;
+        if (!ReadFileUtf8(env, path, &content)) {
+            return env.Undefined();
+        }
+        return Napi::String::New(env, content);
     }
 
-    const std::streamoff offset = file.tellg();
-    if (offset < 0) {
-        Napi::Error::New(env, "Failed to size file: " + path).ThrowAsJavaScriptException();
+    std::ifstream file;
+    std::streamoff offset = 0;
+    if (!OpenAndSizeFile(env, path, &file, &offset)) {
         return env.Undefined();
     }
-    const size_t size = static_cast<size_t>(offset);
-
-    file.seekg(0, std::ios::beg);
 
     // Read straight into the object being returned, so the contents are written once.
     // Resize to gcount() in case the file shrank between the seek and the read.
-    if (encoding == Encoding::kUtf8) {
-        std::string content(size, '\0');
-        file.read(content.data(), offset);
-        content.resize(static_cast<size_t>(file.gcount()));
-        return Napi::String::New(env, content);
-    }
-    Napi::ArrayBuffer array_buffer = Napi::ArrayBuffer::New(env, size);
+    Napi::ArrayBuffer array_buffer = Napi::ArrayBuffer::New(env, static_cast<size_t>(offset));
     file.read(static_cast<char*>(array_buffer.Data()), offset);
     return Napi::Uint8Array::New(env, static_cast<size_t>(file.gcount()), array_buffer, 0);
 }
@@ -905,6 +941,191 @@ void RegisterTextEncoder(Napi::Env env) {
 }
 
 // ---------------------------------------------------------------------------
+// require
+// ---------------------------------------------------------------------------
+
+std::optional<Napi::Value> TryGetBuiltinModule(Napi::Env env, std::string_view specifier) {
+    if (specifier.starts_with("node:")) {
+        specifier.remove_prefix(5);
+    }
+    Napi::Object global = env.Global();
+    if (specifier == "fs") {
+        return global.Get("_fs_polyfill");
+    }
+    if (specifier == "path") {
+        return global.Get("_path_polyfill");
+    }
+    if (specifier == "process") {
+        return global.Get("process");
+    }
+    if (specifier == "perf_hooks") {
+        Napi::Object perf_hooks = Napi::Object::New(env);
+        perf_hooks.Set("performance", global.Get("performance"));
+        return perf_hooks;
+    }
+    // `dawn.node` is statically linked into the runner binary and registered on
+    // `globalThis._webgpu_module`.
+    if (std::filesystem::path(specifier).filename() == "dawn.node") {
+        return global.Get("_webgpu_module");
+    }
+    return std::nullopt;
+}
+
+// Returns true if `specifier` is a CommonJS bare package name (such as "ansi-colors" or
+// "pkg/subpath") rather than a relative or absolute filesystem path.
+bool IsBarePackageName(std::string_view specifier) {
+    // If `specifier` starts with an explicit relative path (like `.` or `..`) or a root slash, it
+    // is not a bare package name.
+    static const std::regex kPathPrefix(R"(^(\.\.?$|\.*[/\\]))");
+    if (std::regex_search(specifier.begin(), specifier.end(), kPathPrefix)) {
+        return false;
+    }
+    return !std::filesystem::path(specifier).is_absolute();
+}
+
+// Returns a JavaScript function that takes parameters `(exports, require, module, __filename,
+// __dirname)` and runs `source` as the body. `filename` is the name of the file the source came
+// from. Errors will be reported using their line number in `source` in the given `filename`.
+//
+// Note, this is different than `napi_run_script()`, which immediately executes a top-level script
+// and is not concerned with the file and line number for reporting errors, which is why they have
+// different implementations.
+Napi::Function CompileModuleFunction(Napi::Env env,
+                                     const std::string& source,
+                                     const std::string& filename) {
+    napi_env c_env = env;
+    v8::Isolate* isolate = c_env->isolate;
+    v8::Local<v8::Context> context = c_env->GetContext();
+
+    v8::Local<v8::String> v8_source =
+        dawn::napi_v8::ToV8(Napi::String::New(env, source)).As<v8::String>();
+    v8::Local<v8::String> v8_origin =
+        dawn::napi_v8::ToV8(Napi::String::New(env, filename)).As<v8::String>();
+
+    v8::Local<v8::String> params[] = {
+        v8::String::NewFromUtf8Literal(isolate, "exports"),
+        v8::String::NewFromUtf8Literal(isolate, "require"),
+        v8::String::NewFromUtf8Literal(isolate, "module"),
+        v8::String::NewFromUtf8Literal(isolate, "__filename"),
+        v8::String::NewFromUtf8Literal(isolate, "__dirname"),
+    };
+
+    v8::ScriptOrigin origin(v8_origin);
+    v8::ScriptCompiler::Source script_source(v8_source, origin);
+    v8::MaybeLocal<v8::Function> function;
+    v8::Local<v8::Value> exception;
+    {
+        v8::TryCatch try_catch(isolate);
+        function =
+            v8::ScriptCompiler::CompileFunction(context, &script_source, std::size(params), params);
+        if (function.IsEmpty() || try_catch.HasCaught()) {
+            exception = try_catch.Exception();
+        }
+    }
+    if (!exception.IsEmpty()) {
+        napi_throw(c_env, dawn::napi_v8::ToNapi(exception));
+        return Napi::Function();
+    }
+
+    return Napi::Function(env, dawn::napi_v8::ToNapi(function.ToLocalChecked()));
+}
+
+Napi::Function MakeRequire(Napi::Env env, PolyfillContext* ctx, std::string from_dir);
+
+Napi::Value LoadModule(Napi::Env env, PolyfillContext* ctx, const std::string& resolved_path) {
+    auto cached = ctx->module_cache.find(resolved_path);
+    if (cached != ctx->module_cache.end()) {
+        return cached->second.Value().Get("exports");
+    }
+
+    std::string content;
+    if (!ReadFileUtf8(env, resolved_path, &content)) {
+        return env.Undefined();
+    }
+
+    std::string dirname = DirnamePath(resolved_path);
+    Napi::Object module = Napi::Object::New(env);
+    Napi::Object exports = Napi::Object::New(env);
+    module.Set("exports", exports);
+    module.Set("id", Napi::String::New(env, resolved_path));
+    module.Set("filename", Napi::String::New(env, resolved_path));
+    module.Set("path", Napi::String::New(env, dirname));
+    module.Set("loaded", Napi::Boolean::New(env, false));
+
+    // Cache before running the module body so circular require() calls receive the in-progress
+    // exports object rather than re-entering LoadModule.
+    ctx->module_cache.emplace(resolved_path, Napi::Persistent(module));
+
+    Napi::Function fn = CompileModuleFunction(env, content, resolved_path);
+    if (fn.IsEmpty()) {
+        ctx->module_cache.erase(resolved_path);
+        return env.Undefined();
+    }
+
+    Napi::Function local_require = MakeRequire(env, ctx, dirname);
+    Napi::Value call_result =
+        fn.Call({exports, local_require, module, Napi::String::New(env, resolved_path),
+                 Napi::String::New(env, dirname)});
+    if (call_result.IsEmpty()) {
+        ctx->module_cache.erase(resolved_path);
+        return env.Undefined();
+    }
+
+    module.Set("loaded", Napi::Boolean::New(env, true));
+    return module.Get("exports");
+}
+
+Napi::Value Require(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    if (info.Length() < 1 || !info[0].IsString()) {
+        Napi::TypeError::New(env, "String expected for module specifier")
+            .ThrowAsJavaScriptException();
+        return env.Undefined();
+    }
+
+    std::string specifier = info[0].As<Napi::String>().Utf8Value();
+    if (RejectUncPath(env, specifier)) {
+        return env.Undefined();
+    }
+
+    if (std::optional<Napi::Value> builtin = TryGetBuiltinModule(env, specifier)) {
+        return *builtin;
+    }
+
+    // Bare package names outside `TryGetBuiltinModule` are not resolved against `node_modules`.
+    if (IsBarePackageName(specifier)) {
+        Napi::Error::New(env, "Cannot find module '" + specifier + "'")
+            .ThrowAsJavaScriptException();
+        return env.Undefined();
+    }
+
+    auto* req_ctx = static_cast<PolyfillContext::RequireContext*>(info.Data());
+    std::string from_dir = req_ctx->from_dir;
+    if (from_dir.empty() && !CurrentDirectory(env, &from_dir)) {
+        return env.Undefined();
+    }
+
+    std::string resolved;
+    if (!ResolvePaths(env, {from_dir, specifier}, &resolved)) {
+        return env.Undefined();
+    }
+
+    return LoadModule(env, req_ctx->ctx, resolved);
+}
+
+Napi::Function MakeRequire(Napi::Env env, PolyfillContext* ctx, std::string from_dir) {
+    auto& req_ctx =
+        ctx->require_contexts.emplace_back(std::make_unique<PolyfillContext::RequireContext>(
+            PolyfillContext::RequireContext{ctx, std::move(from_dir)}));
+    return Napi::Function::New(env, Require, "require", req_ctx.get());
+}
+
+// https://nodejs.org/api/modules.html
+void RegisterRequire(Napi::Env env, PolyfillContext* ctx) {
+    env.Global().Set("require", MakeRequire(env, ctx, ""));
+}
+
+// ---------------------------------------------------------------------------
 // bootstrap
 // ---------------------------------------------------------------------------
 
@@ -1070,6 +1291,7 @@ void RegisterPolyfills(Napi::Env env, EventLoop& loop, const PolyfillOptions& op
     RegisterTimers(env, ctx);
     RegisterPerformance(env, ctx);
     RegisterTextEncoder(env);
+    RegisterRequire(env, ctx);
     RunBootstrapScript(env);
 }
 

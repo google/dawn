@@ -116,6 +116,8 @@ class TempDir {
     // Creates a file in the directory and returns its path, for JavaScript.
     std::string WriteFile(const std::string& name, const std::string& contents) const {
         std::filesystem::path file = path_ / name;
+        std::error_code ec;
+        std::filesystem::create_directories(file.parent_path(), ec);
         std::ofstream out(file, std::ios::binary);
         out << contents;
         out.close();
@@ -979,6 +981,146 @@ TEST_F(PolyfillsTest, TextEncoder) {
          Array.from(new TextEncoder().encode('\ud800')).join(' ')].join(',')
     )");
     EXPECT_EQ(ToString(res), "0,239 191 189");
+}
+
+TEST_F(PolyfillsTest, RequireBuiltins) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    napi_value res = RunScript(R"(
+        globalThis._webgpu_module = { marker: 'wgpu' };
+        [
+            require('fs') === globalThis._fs_polyfill,
+            require('node:fs') === globalThis._fs_polyfill,
+            require('path') === globalThis._path_polyfill,
+            require('node:path') === globalThis._path_polyfill,
+            require('process') === globalThis.process,
+            require('node:process') === globalThis.process,
+            require('perf_hooks').performance === globalThis.performance,
+            require('node:perf_hooks').performance === globalThis.performance,
+            require('./dawn.node').marker,
+            require('/any/dir/dawn.node').marker,
+        ].join(',')
+    )");
+    EXPECT_EQ(ToString(res), "true,true,true,true,true,true,true,true,wgpu,wgpu");
+}
+
+TEST_F(PolyfillsTest, RequireModules) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    TempDir dir;
+    // `sub/leaf.cjs` records the `__dirname` and `__filename` arguments passed to its module
+    // wrapper function so we can verify relative resolution from `sub/main.js`. Backslashes are
+    // normalized to '/' so the suffix check holds on Windows too.
+    dir.WriteFile("sub/leaf.cjs", R"(
+        exports.dir = __dirname.replace(/\\/g, '/');
+        exports.file = __filename.replace(/\\/g, '/');
+    )");
+    // `sub/main.js` increments a global counter each time its body executes and re-exports `leaf`.
+    std::string main_mod = dir.WriteFile("sub/main.js", R"(
+        globalThis.loadCount = (globalThis.loadCount || 0) + 1;
+        module.exports = require('./leaf.cjs');
+    )");
+
+    // Require `sub/main.js` twice: the first call executes `main.js` and `leaf.cjs`, and the second
+    // call must return the cached `exports` object without executing `main.js` a second time.
+    RunScript("globalThis.first = require('" + main_mod + "'); globalThis.second = require('" +
+              main_mod + "');");
+
+    EXPECT_TRUE(ToBool(RunScript("globalThis.first.dir.endsWith('/sub')")));
+    EXPECT_TRUE(ToBool(RunScript("globalThis.first.file.endsWith('/sub/leaf.cjs')")));
+    EXPECT_TRUE(ToBool(RunScript("globalThis.first === globalThis.second")));
+    EXPECT_EQ(ToUint32(RunScript("globalThis.loadCount")), 1u);
+}
+
+// `LoadModule` inserts the module into `module_cache` before running its body so a circular
+// `require()` receives the in-progress `exports` object instead of recursing infinitely.
+TEST_F(PolyfillsTest, RequireCircularDependency) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    TempDir dir;
+    // 1. `cycle_a.js` sets `exports.stage = 'a-init'`, then pauses to require `cycle_b.js`.
+    // 2. `cycle_b.js` requires `cycle_a.js` while `cycle_a.js` is still running, so `cycle_b.js`
+    //    observes the in-progress `a.stage` value ('a-init').
+    // 3. `cycle_a.js` resumes and overwrites `exports.stage = 'a-done'`.
+    std::string cycle_a = dir.WriteFile("cycle_a.js", R"(
+        exports.stage = 'a-init';
+        const b = require('./cycle_b.js');
+        exports.seenByB = b.fromA;
+        exports.stage = 'a-done';
+    )");
+    dir.WriteFile("cycle_b.js", R"(
+        const a = require('./cycle_a.js');
+        exports.fromA = a.stage;
+    )");
+
+    RunScript("globalThis.cycle = require('" + cycle_a + "');");
+    EXPECT_EQ(ToString(RunScript("globalThis.cycle.seenByB")), "a-init");
+    EXPECT_EQ(ToString(RunScript("globalThis.cycle.stage")), "a-done");
+}
+
+TEST_F(PolyfillsTest, RequireRejectsInvalidAndBareSpecifiers) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    TempDir dir;
+    dir.WriteFile("hello/t.txt", "module.exports = 'should not load';");
+
+    EXPECT_TRUE(Throws("require()"));
+    EXPECT_TRUE(Throws("require(42)"));
+    EXPECT_TRUE(Throws("require('ansi-colors')"));
+    EXPECT_TRUE(Throws("require('hello/t.txt')"));
+    EXPECT_TRUE(Throws(R"(require(String.raw`\\server\share\a.js`))"));
+    EXPECT_TRUE(Throws("require('" + dir.JsPath() + "/absent.js')"));
+}
+
+// `LoadModule` caches a module's `exports` object before compiling and running its body (to
+// support circular dependencies). If compilation or execution fails, that entry must be erased from
+// `module_cache`; otherwise a second `require()` of the same path would hit the cache and return
+// the half-initialized `exports` object without throwing.
+TEST_F(PolyfillsTest, RequireDoesNotCacheFailedModules) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    TempDir dir;
+    std::string bad_syntax = dir.WriteFile("bad_syntax.js", "const = ;");
+    std::string runtime_throw = dir.WriteFile("runtime_throw.js", R"(
+        exports.partial = true;
+        throw new Error('init failed');
+    )");
+
+    // First call fails to compile; second call verifies the failed module was not left in the
+    // cache.
+    EXPECT_TRUE(Throws("require('" + bad_syntax + "')"));
+    EXPECT_TRUE(Throws("require('" + bad_syntax + "')"));
+
+    // First call throws mid-execution after mutating `exports.partial`; second call verifies the
+    // partial `exports` object was evicted from the cache and throws again.
+    EXPECT_TRUE(Throws("require('" + runtime_throw + "')"));
+    EXPECT_TRUE(Throws("require('" + runtime_throw + "')"));
+}
+
+// require() compiles modules with v8::ScriptCompiler::CompileFunction() so stack traces preserve
+// the source file's 1-based line and column numbers.
+TEST_F(PolyfillsTest, RequireStackTraceLineAndColumn) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    TempDir dir;
+    std::string thrower = dir.WriteFile("thrower.js", "\n\n  throw new Error('boom');");
+    std::string first = dir.WriteFile("first.js", "throw new Error('boom');");
+
+    napi_value res = RunScript(
+        "let thrown = 'no throw';"
+        "try { require('" +
+        thrower +
+        "'); } catch (e) { thrown = e.stack.match(/thrower\\.js:[0-9]+:[0-9]+/)[0]; }"
+        "thrown");
+    EXPECT_EQ(ToString(res), "thrower.js:3:9");
+
+    res = RunScript(
+        "let firstThrown = 'no throw';"
+        "try { require('" +
+        first +
+        "'); } catch (e) { firstThrown = e.stack.match(/first\\.js:[0-9]+:[0-9]+/)[0]; }"
+        "firstThrown");
+    EXPECT_EQ(ToString(res), "first.js:1:7");
 }
 
 TEST_F(PolyfillsTest, PerformanceNow) {
