@@ -92,14 +92,20 @@ class WireFutureTestWithParamsBase : public WireTest, public testing::WithParamI
     //
     //     // Call the API under test
     //     CallImpl(mockCb, this, args...);
-    //     EXPECT_CALL(api, OnAsyncAPI(...)).WillOnce([&] {
-    //         api.CallAsyncAPICallback(...);
-    //     });
+    //     EXPECT_CALL(api, OnAsyncAPI(..., _))
+    //         .WillOnce(testing::WithArg<futureArgIndex>([&](WGPUFuture future) {
+    //             api.CallAsyncAPICallback(..., future);
+    //         }));
     //
     //     FlushClient();
     //     FlushFutures(); // Ensures that the callbacks are ready (if applicable), but NOT called.
     //     EXPECT_CALL(mockCb, Call(...));
     //     FlushCallbacks();  // Calls the callbacks
+    //
+    // OnAsyncAPI passes the backend future as its last argument, after the callback info.
+    // To respond later, use testing::SaveArg<futureArgIndex>(&future) and pass that saved
+    // future to CallAsyncAPICallback. Backend futures are distinct from the client futures
+    // stored in mFutureIDs.
     //
     // Note that in the example above we don't explicitly every call FlushServer and in most cases
     // that is probably the way to go because for Async and Spontaneous events, FlushServer will

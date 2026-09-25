@@ -275,12 +275,12 @@ class WireMemoryTransferServiceTestBase : public WireTest,
         wgpu::MapMode mode = GetParam().mMapMode;
 
         // Mode independent expectations.
-        EXPECT_CALL(api,
-                    OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
-            .WillOnce([&] {
+        EXPECT_CALL(
+            api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _, _))
+            .WillOnce(WithArg<5>([&](WGPUFuture future) {
                 api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
-                                               kEmptyOutputStringView);
-            });
+                                               kEmptyOutputStringView, future);
+            }));
         EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
 
         switch (mode) {
@@ -547,11 +547,12 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, Error) {
                     mMapAsyncCb.Callback());
 
     // Make the server respond to the callback with an error.
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
-        .WillOnce([&] {
+    EXPECT_CALL(api,
+                OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _, _))
+        .WillOnce(WithArg<5>([&](WGPUFuture future) {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Error,
-                                           ToOutputStringView("Validation error"));
-        });
+                                           ToOutputStringView("Validation error"), future);
+        }));
     FlushClient();
 
     // The callback should happen when the server flushes the response.
@@ -590,11 +591,12 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, DeserializeDataUpdateFailur
     }
 
     // Set mode independent expectations for the map async call now.
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
-        .WillOnce([&] {
+    EXPECT_CALL(api,
+                OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _, _))
+        .WillOnce(WithArg<5>([&](WGPUFuture future) {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
-                                           kEmptyOutputStringView);
-        });
+                                           kEmptyOutputStringView, future);
+        }));
 
     switch (mode) {
         case wgpu::MapMode::Read: {

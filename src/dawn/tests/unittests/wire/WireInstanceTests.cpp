@@ -51,6 +51,7 @@ using testing::NotNull;
 using testing::Return;
 using testing::SizedString;
 using testing::WithArg;
+using testing::WithArgs;
 
 class WireInstanceBasicTest : public WireTest {};
 
@@ -91,13 +92,14 @@ TEST_P(WireInstanceTests, RequestAdapterPassesOptions) {
 
         RequestAdapter(&options);
 
-        EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _))
-            .WillOnce(WithArg<1>([&](const WGPURequestAdapterOptions* apiOptions) {
+        EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _, _))
+            .WillOnce(WithArgs<1, 3>([&](const WGPURequestAdapterOptions* apiOptions,
+                                         WGPUFuture future) {
                 EXPECT_EQ(apiOptions->powerPreference,
                           static_cast<WGPUPowerPreference>(options.powerPreference));
                 EXPECT_EQ(apiOptions->forceFallbackAdapter, options.forceFallbackAdapter);
                 api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Error,
-                                                       nullptr, kEmptyOutputStringView);
+                                                       nullptr, kEmptyOutputStringView, future);
             }));
 
         FlushClient();
@@ -139,8 +141,8 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
 
     // Expect the server to receive the message. Then, mock a fake reply.
     WGPUAdapter apiAdapter = api.GetNewAdapter();
-    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _))
-        .WillOnce([&] {
+    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
             EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
 
             EXPECT_CALL(api, AdapterGetInfo(apiAdapter, NotNull()))
@@ -160,8 +162,8 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
                     WithArg<1>([&](WGPUSupportedFeatures* features) { *features = fakeFeatures; }));
 
             api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
-                                                   apiAdapter, kEmptyOutputStringView);
-        });
+                                                   apiAdapter, kEmptyOutputStringView, future);
+        }));
 
     FlushClient();
     FlushFutures();
@@ -263,8 +265,8 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
 
     // Expect the server to receive the message. Then, mock a fake reply.
     WGPUAdapter apiAdapter = api.GetNewAdapter();
-    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _))
-        .WillOnce([&] {
+    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
             EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull())).Times(1);
             EXPECT_CALL(api, AdapterGetFeatures(apiAdapter, NotNull()))
                 .WillOnce(
@@ -312,8 +314,8 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                 }));
 
             api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
-                                                   apiAdapter, kEmptyOutputStringView);
-        });
+                                                   apiAdapter, kEmptyOutputStringView, future);
+        }));
 
     FlushClient();
     FlushFutures();
@@ -419,8 +421,8 @@ TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
 
     // Expect the server to receive the message. Then, mock a fake reply.
     WGPUAdapter apiAdapter = api.GetNewAdapter();
-    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _))
-        .WillOnce([&] {
+    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
             EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
             EXPECT_CALL(api, AdapterGetInfo(apiAdapter, NotNull())).Times(1);
             EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull())).Times(1);
@@ -430,8 +432,8 @@ TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
                     WithArg<1>([&](WGPUSupportedFeatures* features) { *features = fakeFeatures; }));
 
             api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
-                                                   apiAdapter, kEmptyOutputStringView);
-        });
+                                                   apiAdapter, kEmptyOutputStringView, future);
+        }));
 
     FlushClient();
     FlushFutures();
@@ -457,10 +459,12 @@ TEST_P(WireInstanceTests, RequestAdapterError) {
     RequestAdapter(&options);
 
     // Expect the server to receive the message. Then, mock an error.
-    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _)).WillOnce([&] {
-        api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Error, nullptr,
-                                               ToOutputStringView("Some error"));
-    });
+    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
+            api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Error,
+                                                   nullptr, ToOutputStringView("Some error"),
+                                                   future);
+        }));
 
     FlushClient();
     FlushFutures();
@@ -474,8 +478,6 @@ TEST_P(WireInstanceTests, RequestAdapterError) {
         FlushCallbacks();
     });
 }
-
-
 
 // Test that RequestAdapter receives unknown status if the wire is disconnected
 // before the callback happens.
