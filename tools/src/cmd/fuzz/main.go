@@ -469,13 +469,150 @@ func parseSubcommandFlags(args []string, c *mainConfig, stdout, stderr io.Writer
 	return nil
 }
 
-// parseFlags parses the command line arguments to determine the subcommand to run and configures the mainConfig
-// appropriately. If no subcommand is specified, it prints the top-level help and returns flag.ErrHelp.
+func printLegacyUsage(out io.Writer) {
+	_, _ = fmt.Fprintln(out, `
+fuzz is a helper for running the tint fuzzer executables and other related tasks
+
+fuzz has 7, mutually exclusive, tasks that it can perform:
+1. Run a fuzzer locally, requires no additional flag.
+2. Check that a fuzzer successfully handles contents of -inputs, requires -check flag
+3. Generate a fuzzer corpus based on contents of -inputs, requires -generate flag
+4. Triage a specific fuzzer crash, requires -triage flag
+5. Bisect a specific fuzzer crash test case, requires -bisect flag
+6. Run performance and benchmarking experiments, requires -experiment flag
+7. Analyze data from experiment runs, requires -analyze flag
+
+usage:
+  fuzz [flags...]`)
+}
+
+func parseLegacyFlags(args []string, c *mainConfig, stderr io.Writer) error {
+	fs := flag.NewFlagSet("fuzz", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	fs.Usage = func() {
+		printLegacyUsage(stderr)
+		fs.PrintDefaults()
+		_, _ = fmt.Fprintln(stderr, ``)
+	}
+
+	check, generate, irMode := false, false, false
+	fs.BoolVar(&c.verbose, "verbose", false, "print additional output")
+	fs.BoolVar(&check, "check", false, "check that all the end-to-end tests in -inputs do not fail")
+	fs.BoolVar(&generate, "generate", false, "generate fuzzing corpus based on -inputs")
+	fs.BoolVar(&c.dump, "dump", false, "dumps shader input/output from fuzzer")
+	fs.BoolVar(&irMode, "ir", false, "runs using IR fuzzer instead of WGSL fuzzer")
+	fs.BoolVar(&c.mesaMode, "mesa", false, "runs using Mesa fuzzer variants")
+	fs.StringVar(&c.filter, "filter", "", "filter the fuzzing passes run to those with this substring")
+	fs.StringVar(&c.inputs, "corpus", defaultWgslCorpusDir(c.osWrapper), "obsolete, use -inputs instead")
+	fs.StringVar(&c.inputs, "inputs", defaultWgslCorpusDir(c.osWrapper), "the directory that holds the files to use")
+	fs.StringVar(&c.triageFile, "triage", "", "triage a fuzzer crash")
+	fs.StringVar(&c.bisectFile, "bisect", "", "bisect a fuzzer crash")
+	fs.StringVar(&c.knownFailing, "known-failing", "", "known failing git hash or time")
+	fs.StringVar(&c.knownPassing, "known-passing", "", "known passing git hash or time")
+	fs.StringVar(&c.build, "build", defaultBuildDir(c.osWrapper), "the build directory")
+	fs.StringVar(&c.out, "out", "<tmp>", "the directory to store outputs to")
+	fs.IntVar(&c.numProcesses, "j", 0, "number of concurrent fuzzers to run (defaults to 1 for experiments, NumCPU for others)")
+	fs.BoolVar(&c.bisectStep, "bisect-step", false, "internal flag used by git bisect run")
+	fs.BoolVar(&c.isFix, "is-fix", false, "internal flag used by git bisect run to indicate if we are bisecting a fix")
+	fs.BoolVar(&c.skipInputTypeCheck, "skip-input-type-check", false, "bypass the heuristic text/binary input file type check")
+	fs.StringVar(&c.experimentPath, "experiment", "", "run an experiment using the configuration at <root> (WIP feature)")
+	fs.StringVar(&c.analyzePath, "analyze", "", "analyze data from an experiment at <root>  (WIP feature)")
+	fs.StringVar(&c.machineName, "machine", "", "machine name to identify results")
+	fs.IntVar(&c.timeout, "timeout", 60, "override the default timeout (in seconds) for triage and bisect modes")
+
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+
+	if c.mesaMode && c.filter != "" {
+		return fmt.Errorf("cannot set -mesa and -filter flags at the same time, as Mesa fuzzers only run a single specific pass")
+	}
+
+	modeCount := 0
+	if check {
+		modeCount++
+	}
+	if generate {
+		modeCount++
+	}
+	if c.triageFile != "" {
+		modeCount++
+	}
+	if c.bisectFile != "" {
+		modeCount++
+	}
+	if c.experimentPath != "" {
+		modeCount++
+	}
+	if c.analyzePath != "" {
+		modeCount++
+	}
+
+	if !c.bisectStep && modeCount > 1 {
+		return fmt.Errorf("cannot set more than one of -check, -generate, -triage, -bisect, -experiment, and -analyze flags at the same time")
+	}
+
+	switch {
+	case c.bisectStep:
+		c.cmdMode = TaskModeBisectStep
+	case check:
+		c.cmdMode = TaskModeCheck
+	case generate:
+		c.cmdMode = TaskModeGenerate
+	case c.triageFile != "":
+		c.cmdMode = TaskModeTriage
+	case c.bisectFile != "":
+		c.cmdMode = TaskModeBisect
+	case c.experimentPath != "":
+		c.cmdMode = TaskModeExperiment
+	case c.analyzePath != "":
+		c.cmdMode = TaskModeAnalyze
+	default:
+		c.cmdMode = TaskModeRun
+	}
+
+	timeoutSet := false
+	fs.Visit(func(f *flag.Flag) {
+		if f.Name == "timeout" {
+			timeoutSet = true
+		}
+	})
+	if timeoutSet && c.cmdMode != TaskModeTriage && c.cmdMode != TaskModeBisect && c.cmdMode != TaskModeBisectStep {
+		return fmt.Errorf("cannot set -timeout flag outside of triage and bisect modes")
+	}
+
+	if irMode {
+		c.fuzzMode = FuzzModeIr
+	} else {
+		c.fuzzMode = FuzzModeWgsl
+	}
+
+	if c.numProcesses == 0 {
+		// If running experiment default to single thread to avoid overloading system, otherwise try to run as many
+		// threads as possible without swamping
+		if c.cmdMode == TaskModeExperiment {
+			c.numProcesses = 1
+		} else {
+			c.numProcesses = runtime.NumCPU()
+		}
+	}
+
+	if c.numProcesses < 1 {
+		c.numProcesses = 1
+	}
+
+	if c.cmdMode == TaskModeGenerate && (c.out == "" || c.out == "<tmp>") {
+		return fmt.Errorf("need to specify -output when using -generate")
+	}
+
+	return nil
+}
+
+// parseFlags inspects the first flag to determine if the invocation is using the new subcommand based interface or
+// using the legacy interface, and invokes the appropriate flag parsing function based on that.
 func parseFlags(args []string, c *mainConfig, stdout, stderr io.Writer) error {
-	if len(args) == 0 {
-		fmt.Fprintln(stderr, "error: subcommand required")
-		printTopLevelHelp(stderr)
-		return flag.ErrHelp
+	if len(args) == 0 || strings.HasPrefix(args[0], "-") {
+		return parseLegacyFlags(args, c, stderr)
 	}
 
 	return parseSubcommandFlags(args, c, stdout, stderr)
