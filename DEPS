@@ -432,8 +432,9 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
+  # TODO(crbug.com/566128737): Temporarily pin to preview LinAlg version
   'third_party/directx-shader-compiler/src': {
-    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@6462c68345e4166490826560c2d060d0fd224fd0',
+    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@9757d44faa47de7e8d1bb731c30551ec608624f9',
   },
 
   'third_party/directx-headers/src': {
