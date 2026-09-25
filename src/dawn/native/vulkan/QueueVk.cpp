@@ -305,7 +305,7 @@ MaybeError Queue::SubmitPendingCommandsImpl() {
     // Ensure that after calling this method we have a fresh recording context even if one of the
     // DAWN_TRY calls below fail.
     absl::Cleanup recycleContext = [&]() {
-        [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+        std::ignore = GetDevice()->ConsumedError(
             RecycleRecordingContext(), "Recycling recording context after submit failed for %s",
             this);
     };

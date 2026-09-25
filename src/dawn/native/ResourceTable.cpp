@@ -287,8 +287,8 @@ wgpu::Status ResourceTableBase::APIRemove(uint32_t slotIn) {
     // validation.
     Remove(slot);
 
-    [[maybe_unused]] bool error = GetDevice()->ConsumedError(
-        GetDevice()->ValidateObject(this), "validating %s.Remove(%u)", this, slot);
+    std::ignore = GetDevice()->ConsumedError(GetDevice()->ValidateObject(this),
+                                             "validating %s.Remove(%u)", this, slot);
     return wgpu::Status::Success;
 }
 

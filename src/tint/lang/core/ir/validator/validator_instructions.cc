@@ -729,8 +729,7 @@ void Validator::CheckExtractBitsCall(const CoreBuiltinCall* call) {
     if (const_val_count && const_val_offset) {
         auto* zero = const_eval_.Zero(param0->Type(), {}, Source{}).Get();
         auto fakeArgs = Vector{zero, const_val_offset, const_val_count};
-        [[maybe_unused]] auto result =
-            const_eval_.extractBits(param0->Type(), fakeArgs, ir_.SourceOf(call));
+        std::ignore = const_eval_.extractBits(param0->Type(), fakeArgs, ir_.SourceOf(call));
     }
 }
 
@@ -742,8 +741,7 @@ void Validator::CheckInsertBitsCall(const CoreBuiltinCall* call) {
     if (const_val_count && const_val_offset) {
         auto* zero = const_eval_.Zero(param0->Type(), {}, Source{}).Get();
         auto fakeArgs = Vector{zero, zero, const_val_offset, const_val_count};
-        [[maybe_unused]] auto result =
-            const_eval_.insertBits(param0->Type(), fakeArgs, ir_.SourceOf(call));
+        std::ignore = const_eval_.insertBits(param0->Type(), fakeArgs, ir_.SourceOf(call));
     }
 }
 
@@ -752,22 +750,21 @@ void Validator::CheckLdexpCall(const CoreBuiltinCall* call) {
     if (auto const_val = GetConstArg(call, 1)) {
         auto* zero = const_eval_.Zero(param0->Type(), {}, Source{}).Get();
         auto fakeArgs = Vector{zero, const_val};
-        [[maybe_unused]] auto result =
-            const_eval_.ldexp(param0->Type(), fakeArgs, ir_.SourceOf(call));
+        std::ignore = const_eval_.ldexp(param0->Type(), fakeArgs, ir_.SourceOf(call));
     }
 }
 
 void Validator::CheckQuantizeToF16(const CoreBuiltinCall* call) {
     if (auto const_val = GetConstArg(call, 0)) {
-        [[maybe_unused]] auto result = const_eval_.quantizeToF16(
-            call->Result()->Type(), Vector{const_val}, ir_.SourceOf(call));
+        std::ignore = const_eval_.quantizeToF16(call->Result()->Type(), Vector{const_val},
+                                                ir_.SourceOf(call));
     }
 }
 
 void Validator::CheckPack2x16float(const CoreBuiltinCall* call) {
     if (auto const_val = GetConstArg(call, 0)) {
-        [[maybe_unused]] auto result = const_eval_.pack2x16float(
-            call->Result()->Type(), Vector{const_val}, ir_.SourceOf(call));
+        std::ignore = const_eval_.pack2x16float(call->Result()->Type(), Vector{const_val},
+                                                ir_.SourceOf(call));
     }
 }
 
@@ -776,8 +773,7 @@ void Validator::CheckClampCall(const CoreBuiltinCall* call) {
     auto* const_val_high = GetConstArg(call, 2);
     if (const_val_low && const_val_high) {
         auto fakeArgs = Vector{const_val_low, const_val_low, const_val_high};
-        [[maybe_unused]] auto result =
-            const_eval_.clamp(call->Result()->Type(), fakeArgs, ir_.SourceOf(call));
+        std::ignore = const_eval_.clamp(call->Result()->Type(), fakeArgs, ir_.SourceOf(call));
     }
 }
 
@@ -786,8 +782,7 @@ void Validator::CheckSmoothstepCall(const CoreBuiltinCall* call) {
     auto* const_val_high = GetConstArg(call, 1);
     if (const_val_low && const_val_high) {
         auto fakeArgs = Vector{const_val_low, const_val_high, const_val_high};
-        [[maybe_unused]] auto result =
-            const_eval_.smoothstep(call->Result()->Type(), fakeArgs, ir_.SourceOf(call));
+        std::ignore = const_eval_.smoothstep(call->Result()->Type(), fakeArgs, ir_.SourceOf(call));
     }
 }
 

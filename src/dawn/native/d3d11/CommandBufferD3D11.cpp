@@ -1098,7 +1098,7 @@ void CommandBuffer::HandleDebugCommands(
         }
 
         case Command::PopDebugGroup: {
-            [[maybe_unused]] auto cmd = iter->NextCommand<PopDebugGroupCmd>();
+            std::ignore = iter->NextCommand<PopDebugGroupCmd>();
             commandContext->GetD3DUserDefinedAnnotation()->EndEvent();
             break;
         }

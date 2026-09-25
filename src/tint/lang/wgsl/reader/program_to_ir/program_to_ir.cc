@@ -1277,7 +1277,7 @@ class Impl {
         TINT_ICE() << "expression did not resolve to a value";
     }
 
-    void EmitCall(const ast::CallStatement* stmt) { (void)EmitValueExpression(stmt->expr); }
+    void EmitCall(const ast::CallStatement* stmt) { std::ignore = EmitValueExpression(stmt->expr); }
 
     void EmitVariable(const ast::Variable* var) {
         auto* sem = program_.Sem().Get(var);

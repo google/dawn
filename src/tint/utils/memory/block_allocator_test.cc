@@ -49,14 +49,12 @@ TEST_F(BlockAllocatorTest, Empty) {
     Allocator allocator;
 
     EXPECT_EQ(allocator.Count(), 0u);
-    for (int* i : allocator.Objects()) {
-        (void)i;
+    for ([[maybe_unused]] int* i : allocator.Objects()) {
         if ((true)) {  // Workaround for "error: loop will run at most once"
             FAIL() << "BlockAllocator should be empty";
         }
     }
-    for (const int* i : static_cast<const Allocator&>(allocator).Objects()) {
-        (void)i;
+    for ([[maybe_unused]] const int* i : static_cast<const Allocator&>(allocator).Objects()) {
         if ((true)) {  // Workaround for "error: loop will run at most once"
             FAIL() << "BlockAllocator should be empty";
         }

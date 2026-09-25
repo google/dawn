@@ -386,7 +386,7 @@ Future Buffer::APIMapAsync(wgpu::MapMode mode,
         return true;
     });
     if (!success) {
-        [[maybe_unused]] auto id = GetEventManager().SetFutureReady<MapAsyncEvent>(
+        std::ignore = GetEventManager().SetFutureReady<MapAsyncEvent>(
             futureIDInternal, wgpu::MapAsyncStatus::Error,
             "Buffer already has an outstanding map pending.");
         return {futureIDInternal};

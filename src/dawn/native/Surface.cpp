@@ -369,7 +369,7 @@ Surface::Surface(InstanceBase* instance, const UnpackedPtr<SurfaceDescriptor>& d
 
 Surface::~Surface() {
     if (mSwapChain != nullptr) {
-        [[maybe_unused]] bool error = mInstance->ConsumedError(Unconfigure());
+        std::ignore = mInstance->ConsumedError(Unconfigure());
     }
 
     if (mRecycledSwapChain != nullptr) {
@@ -610,10 +610,10 @@ const std::string& Surface::GetLabel() const {
 void Surface::APIConfigure(const SurfaceConfiguration* config) {
     MaybeError maybeError = Configure(config);
     if (!GetCurrentDevice()) {
-        [[maybe_unused]] bool error = mInstance->ConsumedError(std::move(maybeError));
+        std::ignore = mInstance->ConsumedError(std::move(maybeError));
     } else {
-        [[maybe_unused]] bool error = GetCurrentDevice()->ConsumedError(
-            std::move(maybeError), "calling %s.Configure().", this);
+        std::ignore = GetCurrentDevice()->ConsumedError(std::move(maybeError),
+                                                        "calling %s.Configure().", this);
     }
 }
 
@@ -635,9 +635,9 @@ void Surface::APIGetCurrentTexture(SurfaceTexture* surfaceTexture) const {
     MaybeError maybeError = GetCurrentTexture(surfaceTexture);
 
     if (!GetCurrentDevice()) {
-        [[maybe_unused]] bool error = mInstance->ConsumedError(std::move(maybeError));
+        std::ignore = mInstance->ConsumedError(std::move(maybeError));
     } else {
-        [[maybe_unused]] bool error = GetCurrentDevice()->ConsumedError(std::move(maybeError));
+        std::ignore = GetCurrentDevice()->ConsumedError(std::move(maybeError));
     }
 }
 
@@ -645,12 +645,12 @@ wgpu::Status Surface::APIPresent() {
     // Validation that the surface is configured. Note this is synchronous
     // validation so it can't be skipped even if the surface is an error.
     if (!GetCurrentDevice()) {
-        [[maybe_unused]] bool error = mInstance->ConsumedError(
+        std::ignore = mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("%s is in the unconfigured state.", this));
         return wgpu::Status::Error;
     }
 
-    [[maybe_unused]] bool error = GetCurrentDevice()->ConsumedError([&]() -> MaybeValError {
+    std::ignore = GetCurrentDevice()->ConsumedError([&]() -> MaybeValError {
         DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
         DAWN_INVALID_IF(!mSwapChain.Get(), "%s is not successfully configured.", this);
         {
@@ -665,9 +665,9 @@ wgpu::Status Surface::APIPresent() {
 void Surface::APIUnconfigure() {
     MaybeValError maybeError = Unconfigure();
     if (!GetCurrentDevice()) {
-        [[maybe_unused]] bool error = mInstance->ConsumedError(std::move(maybeError));
+        std::ignore = mInstance->ConsumedError(std::move(maybeError));
     } else {
-        [[maybe_unused]] bool error = GetCurrentDevice()->ConsumedError(std::move(maybeError));
+        std::ignore = GetCurrentDevice()->ConsumedError(std::move(maybeError));
     }
 }
 

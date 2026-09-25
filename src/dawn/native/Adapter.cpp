@@ -413,7 +413,7 @@ Future AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
 wgpu::Status AdapterBase::APIGetFormatCapabilities(wgpu::TextureFormat format,
                                                    DawnFormatCapabilities* capabilities) {
     if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::DawnFormatCapabilities)) {
-        [[maybe_unused]] bool hadError = mInstance->ConsumedError(
+        std::ignore = mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature DawnFormatCapabilities is not available."));
         return wgpu::Status::Error;
     }
@@ -426,7 +426,7 @@ wgpu::Status AdapterBase::APIGetFormatCapabilities(wgpu::TextureFormat format,
 
     if (unpacked.Has<DawnDrmFormatCapabilities>() &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::DawnDrmFormatCapabilities)) {
-        [[maybe_unused]] bool hadError = mInstance->ConsumedError(
+        std::ignore = mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature DawnDrmFormatCapabilities is not available."));
         return wgpu::Status::Error;
     }

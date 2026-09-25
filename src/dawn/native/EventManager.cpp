@@ -96,7 +96,7 @@ void WaitQueueSerials(const QueueWaitSerialsMaps& queueWaitSerialMaps, Nanosecon
     // Poll/wait on queues up to the lowest wait serial, but do this once per queue instead of
     // per event so that events with same serial complete at the same time instead of racing.
     for (const auto& [queue, waitSerial] : queueWaitSerialMaps.minWaitSerials) {
-        [[maybe_unused]] bool hadError = queue->GetDevice()->ConsumedError(
+        std::ignore = queue->GetDevice()->ConsumedError(
             queue->WaitForQueueSerial(waitSerial, timeout), "waiting for work in %s.", queue.Get());
     }
 }

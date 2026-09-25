@@ -54,8 +54,7 @@ ResultOrError<Ref<Buffer>> Buffer::CreateInternalBuffer(Device* device,
     }
 
     if (descriptor->mappedAtCreation) {
-        [[maybe_unused]] bool usingStagingBuffer;
-        DAWN_TRY_ASSIGN(usingStagingBuffer, buffer->MapAtCreationInternal());
+        DAWN_TRY_ASSIGN(std::ignore, buffer->MapAtCreationInternal());
     }
 
     return std::move(buffer);

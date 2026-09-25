@@ -178,7 +178,6 @@ MaybeError SwapChainEGL::CreateEGLSurface(const DisplayEGL* display) {
                                           GetSurface());
     }
 
-    // [[maybe_unused]] to prevent unused variable warnings when platform code is disabled.
     [[maybe_unused]] const EGLFunctions& egl = display->egl.get();
     [[maybe_unused]] EGLDisplay eglDisplay = display->GetDisplay();
     Surface* surface = GetSurface();

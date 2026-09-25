@@ -180,8 +180,7 @@ TEST(ErrorTests, TRY_RESULT_Error) {
     };
 
     auto Try = [ReturnError]() -> ResultOrValError<int*> {
-        [[maybe_unused]] int* result = nullptr;
-        DAWN_TRY_ASSIGN(result, ReturnError());
+        DAWN_TRY_ASSIGN(std::ignore, ReturnError());
 
         // DAWN_TRY should return before this point
         EXPECT_FALSE(true);
@@ -235,8 +234,7 @@ TEST(ErrorTests, TRY_RESULT_ConversionToError) {
     };
 
     auto Try = [ReturnError]() -> MaybeValError {
-        [[maybe_unused]] int* result = nullptr;
-        DAWN_TRY_ASSIGN(result, ReturnError());
+        DAWN_TRY_ASSIGN(std::ignore, ReturnError());
 
         return {};
     };
@@ -256,8 +254,7 @@ TEST(ErrorTests, TRY_RESULT_ConversionToErrorNonPointer) {
     };
 
     auto Try = [ReturnError]() -> MaybeValError {
-        [[maybe_unused]] int result = 0;
-        DAWN_TRY_ASSIGN(result, ReturnError());
+        DAWN_TRY_ASSIGN(std::ignore, ReturnError());
 
         return {};
     };
@@ -304,8 +301,7 @@ TEST(ErrorTests, TRY_RESULT_CLEANUP_Cleanup) {
     bool tryCleanup = false;
 
     auto Try = [ReturnError, &tryCleanup]() -> ResultOrValError<int*> {
-        [[maybe_unused]] int* result = nullptr;
-        DAWN_TRY_ASSIGN_WITH_CLEANUP(result, ReturnError(), { tryCleanup = true; });
+        DAWN_TRY_ASSIGN_WITH_CLEANUP(std::ignore, ReturnError(), { tryCleanup = true; });
 
         // DAWN_TRY_ASSIGN_WITH_CLEANUP should return before this point
         EXPECT_FALSE(true);

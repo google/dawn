@@ -116,8 +116,7 @@ TEST_F(TraverseExpressionsTest, Depth) {
     constexpr std::array<size_t, 7> depths = {0, 1, 2, 2, 1, 2, 2};
     {
         TraverseExpressions<TraverseOrder::LeftToRight>(  //
-            root, [&](const Expression* expr, size_t depth) {
-                (void)expr;
+            root, [&]([[maybe_unused]] const Expression* expr, size_t depth) {
                 EXPECT_THAT(depth, depths[j++]);
                 return TraverseAction::Descend;
             });

@@ -177,7 +177,7 @@ void QueueBase::APISubmit(Span<CommandBufferBase* const> commands) {
         commandBuffer->Destroy();
     }
 
-    [[maybe_unused]] bool hadError =
+    std::ignore =
         GetDevice()->ConsumedError(std::move(result), "calling %s.Submit(%s)", this, commands);
 }
 
@@ -319,7 +319,7 @@ void QueueBase::APIWriteBuffer(BufferBase* buffer,
         DAWN_TRY(WriteBuffer(buffer, bufferOffset, data));
         return GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands();
     };
-    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+    std::ignore = GetDevice()->ConsumedError(
         writeBuffer(), "calling %s.WriteBuffer(%s, (%d bytes), data, (%d bytes))", this, buffer,
         bufferOffset, data.size());
 }
@@ -349,9 +349,9 @@ void QueueBase::APIWriteTexture(const TexelCopyTextureInfo* destination,
         DAWN_TRY(WriteTextureInternal(destination, data, *dataLayout, writeSize));
         return GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands();
     };
-    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
-        writeTexture(), "calling %s.WriteTexture(%s, (%u bytes), %s, %s)", this, destination,
-        data.size(), dataLayout, writeSize);
+    std::ignore = GetDevice()->ConsumedError(writeTexture(),
+                                             "calling %s.WriteTexture(%s, (%u bytes), %s, %s)",
+                                             this, destination, data.size(), dataLayout, writeSize);
 }
 
 MaybeError QueueBase::WriteTextureInternal(const TexelCopyTextureInfo* destinationOrig,
@@ -431,7 +431,7 @@ void QueueBase::APICopyTextureForBrowser(const TexelCopyTextureInfo* source,
                                          const TexelCopyTextureInfo* destination,
                                          const Extent3D* copySize,
                                          const CopyTextureForBrowserOptions* options) {
-    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+    std::ignore = GetDevice()->ConsumedError(
         CopyTextureForBrowserInternal(source, destination, copySize, options));
 }
 
@@ -439,7 +439,7 @@ void QueueBase::APICopyExternalTextureForBrowser(const ImageCopyExternalTexture*
                                                  const TexelCopyTextureInfo* destination,
                                                  const Extent3D* copySize,
                                                  const CopyTextureForBrowserOptions* options) {
-    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+    std::ignore = GetDevice()->ConsumedError(
         CopyExternalTextureForBrowserInternal(source, destination, copySize, options));
 }
 

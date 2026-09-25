@@ -123,51 +123,51 @@ void TestTypedIntegerArguments() {
         ityp::span<Index, const int> sp{FakeTypedRange()};
 
         ityp::span<Index, const int>(kSpanData.data(), kSpanData.size()); // expected-error {{no matching constructor for initialization}}
-        (void) sp.at(2); // expected-error {{no viable conversion from}}
-        (void) sp[2]; // expected-error {{no viable overloaded operator[]}}
-        (void) sp.first(2); // expected-error {{no viable conversion from}}
-        (void) sp.last(2); // expected-error {{no viable conversion from}}
-        (void) sp.subspan(2); // expected-error {{no matching member function for call to}}
-        (void) sp.subspan(2, 2); // expected-error {{no matching member function for call to}}
-        (void) sp.SplitAt(2); // expected-error {{no viable conversion}}
-        (void) sp.TakeFirst(2); // expected-error {{no viable conversion}}
+        std::ignore = sp.at(2); // expected-error {{no viable conversion from}}
+        std::ignore = sp[2]; // expected-error {{no viable overloaded operator[]}}
+        std::ignore = sp.first(2); // expected-error {{no viable conversion from}}
+        std::ignore = sp.last(2); // expected-error {{no viable conversion from}}
+        std::ignore = sp.subspan(2); // expected-error {{no matching member function for call to}}
+        std::ignore = sp.subspan(2, 2); // expected-error {{no matching member function for call to}}
+        std::ignore = sp.SplitAt(2); // expected-error {{no viable conversion}}
+        std::ignore = sp.TakeFirst(2); // expected-error {{no viable conversion}}
     }{
         ityp::span<Index, const int, Index{5u}> sp{FakeTypedRange()};
 
         ityp::span<Index, const int, 5>{FakeTypedRange()}; // expected-error {{no viable conversion}}
         ityp::span<Index, const int, Index{5u}>(kSpanData.data(), kSpanData.size()); // expected-error {{no matching constructor for initialization}}
-        (void) sp.at(2); // expected-error {{no viable conversion from}}
-        (void) sp[2]; // expected-error {{no viable overloaded operator[]}}
-        (void) sp.first(2); // expected-error {{no viable conversion from}}
-        (void) sp.last(2); // expected-error {{no viable conversion from}}
-        (void) sp.subspan(2); // expected-error {{no matching member function for call to}}
-        (void) sp.subspan(2, 2); // expected-error {{no matching member function for call to}}
-        (void) sp.SplitAt(2); // expected-error {{no viable conversion}}
+        std::ignore = sp.at(2); // expected-error {{no viable conversion from}}
+        std::ignore = sp[2]; // expected-error {{no viable overloaded operator[]}}
+        std::ignore = sp.first(2); // expected-error {{no viable conversion from}}
+        std::ignore = sp.last(2); // expected-error {{no viable conversion from}}
+        std::ignore = sp.subspan(2); // expected-error {{no matching member function for call to}}
+        std::ignore = sp.subspan(2, 2); // expected-error {{no matching member function for call to}}
+        std::ignore = sp.SplitAt(2); // expected-error {{no viable conversion}}
     }
     {
         ityp::raw_span<Index, const int> sp{FakeTypedRange()};
 
         ityp::raw_span<Index, const int>(kSpanData.data(), kSpanData.size()); // expected-error {{no matching constructor for initialization}}
-        (void) sp.at(2); // expected-error {{no viable conversion from}}
-        (void) sp[2]; // expected-error {{no viable overloaded operator[]}}
-        (void) sp.first(2); // expected-error {{no viable conversion from}}
-        (void) sp.last(2); // expected-error {{no viable conversion from}}
-        (void) sp.subspan(2); // expected-error {{no matching member function for call to}}
-        (void) sp.subspan(2, 2); // expected-error {{no matching member function for call to}}
-        (void) sp.SplitAt(2); // expected-error {{no viable conversion}}
-        (void) sp.TakeFirst(2); // expected-error {{no viable conversion}}
+        std::ignore = sp.at(2); // expected-error {{no viable conversion from}}
+        std::ignore = sp[2]; // expected-error {{no viable overloaded operator[]}}
+        std::ignore = sp.first(2); // expected-error {{no viable conversion from}}
+        std::ignore = sp.last(2); // expected-error {{no viable conversion from}}
+        std::ignore = sp.subspan(2); // expected-error {{no matching member function for call to}}
+        std::ignore = sp.subspan(2, 2); // expected-error {{no matching member function for call to}}
+        std::ignore = sp.SplitAt(2); // expected-error {{no viable conversion}}
+        std::ignore = sp.TakeFirst(2); // expected-error {{no viable conversion}}
     }{
         ityp::raw_span<Index, const int, Index{5u}> sp{FakeTypedRange()};
 
         ityp::raw_span<Index, const int, 5>{FakeTypedRange()}; // expected-error {{no viable conversion}}
         ityp::raw_span<Index, const int, Index{5u}>(kSpanData.data(), kSpanData.size()); // expected-error {{no matching constructor for initialization}}
-        (void) sp.at(2); // expected-error {{no viable conversion from}}
-        (void) sp[2]; // expected-error {{no viable overloaded operator[]}}
-        (void) sp.first(2); // expected-error {{no viable conversion from}}
-        (void) sp.last(2); // expected-error {{no viable conversion from}}
-        (void) sp.subspan(2); // expected-error {{no matching member function for call to}}
-        (void) sp.subspan(2, 2); // expected-error {{no matching member function for call to}}
-        (void) sp.SplitAt(2); // expected-error {{no viable conversion}}
+        std::ignore = sp.at(2); // expected-error {{no viable conversion from}}
+        std::ignore = sp[2]; // expected-error {{no viable overloaded operator[]}}
+        std::ignore = sp.first(2); // expected-error {{no viable conversion from}}
+        std::ignore = sp.last(2); // expected-error {{no viable conversion from}}
+        std::ignore = sp.subspan(2); // expected-error {{no matching member function for call to}}
+        std::ignore = sp.subspan(2, 2); // expected-error {{no matching member function for call to}}
+        std::ignore = sp.SplitAt(2); // expected-error {{no viable conversion}}
     }
 }
 

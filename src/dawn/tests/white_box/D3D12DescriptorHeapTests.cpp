@@ -499,12 +499,10 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverSamplerHeap) {
 
     Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
     auto* allocator = d3dDevice->GetSamplerShaderVisibleDescriptorAllocator();
-    [[maybe_unused]] const uint64_t samplerHeapSize =
-        allocator->GetShaderVisibleHeapSizeForTesting();
 
     // This test is written assuming a certain heap size. If this value is changed, we likely need
     // to update this test.
-    DAWN_ASSERT(samplerHeapSize == 16);
+    DAWN_CHECK(allocator->GetShaderVisibleHeapSizeForTesting() == 16);
 
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
 
@@ -633,12 +631,10 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverSamplerHeapBecauseOfBindingGroup0) {
 
     Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
     auto* allocator = d3dDevice->GetSamplerShaderVisibleDescriptorAllocator();
-    [[maybe_unused]] const uint64_t samplerHeapSize =
-        allocator->GetShaderVisibleHeapSizeForTesting();
 
     // This test is written assuming a certain heap size to trigger. If this value is changed, we
     // likely need to update this test.
-    DAWN_ASSERT(samplerHeapSize == 16);
+    DAWN_ASSERT(allocator->GetShaderVisibleHeapSizeForTesting() == 16);
 
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
 

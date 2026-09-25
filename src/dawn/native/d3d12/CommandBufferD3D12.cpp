@@ -1063,9 +1063,9 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 Buffer* dstBuffer = ToBackend(copy->destination.Get());
 
                 DAWN_TRY(srcBuffer->EnsureDataInitialized(commandContext));
-                [[maybe_unused]] bool cleared;
-                DAWN_TRY_ASSIGN(cleared, dstBuffer->EnsureDataInitializedAsDestination(
-                                             commandContext, copy->destinationOffset, copy->size));
+                DAWN_TRY_ASSIGN(std::ignore,
+                                dstBuffer->EnsureDataInitializedAsDestination(
+                                    commandContext, copy->destinationOffset, copy->size));
 
                 srcBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopySrc);
                 dstBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
@@ -1314,10 +1314,9 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 QuerySet* querySet = ToBackend(cmd->querySet.Get());
                 Buffer* destination = ToBackend(cmd->destination.Get());
 
-                [[maybe_unused]] bool cleared;
-                DAWN_TRY_ASSIGN(cleared, destination->EnsureDataInitializedAsDestination(
-                                             commandContext, cmd->destinationOffset,
-                                             ToQueryStorageSize(cmd->queryCount)));
+                DAWN_TRY_ASSIGN(std::ignore, destination->EnsureDataInitializedAsDestination(
+                                                 commandContext, cmd->destinationOffset,
+                                                 ToQueryStorageSize(cmd->queryCount)));
 
                 // Resolving unavailable queries is undefined behaviour on D3D12, we only can
                 // resolve the available part of sparse queries. In order to resolve the
@@ -1409,9 +1408,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                     data.size(), kCopyBufferToBufferOffsetAlignment,
                     [&](UploadReservation reservation) -> MaybeError {
                         reservation.mappedData.CopyFrom(data);
-                        [[maybe_unused]] bool cleared;
-                        DAWN_TRY_ASSIGN(cleared, dstBuffer->EnsureDataInitializedAsDestination(
-                                                     commandContext, offset, data.size()));
+                        DAWN_TRY_ASSIGN(std::ignore, dstBuffer->EnsureDataInitializedAsDestination(
+                                                         commandContext, offset, data.size()));
 
                         dstBuffer->TrackUsageAndTransitionNow(commandContext,
                                                               wgpu::BufferUsage::CopyDst);

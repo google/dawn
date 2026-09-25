@@ -36,8 +36,7 @@ namespace {
 // Check Dawn is configured to crash when a raw_ptr becomes dangling.
 TEST(RawPtrTests, DanglingPointerCauseCrash) {
     std::unique_ptr<bool> owner = std::make_unique<bool>(true);
-    raw_ptr<bool> ptr = owner.get();
-    (void)ptr;  // Unused
+    raw_ptr<bool> ptr = owner.get();  // Lives until end of scope.
 
     ASSERT_DEATH_IF_SUPPORTED(
         {
@@ -51,16 +50,14 @@ TEST(RawPtrTests, DanglingPointerCauseCrash) {
 // The flag `DisableDanglingPtrDetection` must allow a raw_ptr to dangle.
 TEST(RawPtrTests, DisableDanglingPtrDetection) {
     std::unique_ptr<bool> owner = std::make_unique<bool>(true);
-    raw_ptr<bool, DisableDanglingPtrDetection> ptr = owner.get();
-    (void)ptr;  // Unused
+    raw_ptr<bool, DisableDanglingPtrDetection> ptr = owner.get();  // Lives until end of scope.
     owner.reset();
 }
 
 // The flag `DanglingUntriaged` must allow a raw_ptr to dangle.
 TEST(RawPtrTests, DanglingUntriaged) {
     std::unique_ptr<bool> owner = std::make_unique<bool>(true);
-    raw_ptr<bool, DanglingUntriaged> ptr = owner.get();
-    (void)ptr;  // Unused
+    raw_ptr<bool, DanglingUntriaged> ptr = owner.get();  // Lives until end of scope.
     owner.reset();
 }
 

@@ -532,7 +532,7 @@ void BufferBase::DestroyImpl(DestroyReason reason) {
             case BufferState::Mapped:
             case BufferState::PendingMap:
             case BufferState::MappedAtCreation: {
-                [[maybe_unused]] bool hadError =
+                std::ignore =
                     GetDevice()->ConsumedError(UnmapInternal(true), "calling %s.Destroy().", this);
                 // The buffer state should be unmapped after UnmapInternal() returns. Use that state
                 // in the next compare exchange but another thread can update the state causing this
@@ -543,7 +543,7 @@ void BufferBase::DestroyImpl(DestroyReason reason) {
             case BufferState::InUse: {
                 // This is never supposed to happen but another operation is happening concurrently
                 // with API Destroy() call.
-                [[maybe_unused]] bool hadError =
+                std::ignore =
                     GetDevice()->ConsumedError(ConcurrentUseError(), "calling %s.Destroy().", this);
                 while (mState.load(std::memory_order::acquire) == BufferState::InUse) {
                     // Spin loop instead of wait() to avoid overhead of signal in map/unmap.
@@ -844,9 +844,9 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
         if (maybeError.IsError()) {
             auto error = maybeError.AcquireError();
             event = AcquireRef(new MapAsyncEvent(callbackInfo, error->GetMessage(), errorStatus));
-            [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
-                std::move(error), "calling %s.MapAsync(%s, %u, %u, ...).", this, mode, offset,
-                size);
+            std::ignore = GetDevice()->ConsumedError(std::move(error),
+                                                     "calling %s.MapAsync(%s, %u, %u, ...).", this,
+                                                     mode, offset, size);
         } else {
             mMapMode = mode;
             mMapOffset = offset;
@@ -952,8 +952,7 @@ void BufferBase::APIUnmap() {
         DAWN_TRY(UnmapInternal(false));
         return GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands();
     };
-    [[maybe_unused]] bool hadError =
-        GetDevice()->ConsumedError(unmap(), "calling %s.Unmap().", this);
+    std::ignore = GetDevice()->ConsumedError(unmap(), "calling %s.Unmap().", this);
 }
 
 MaybeValError BufferBase::Unmap(bool forDestroy) {

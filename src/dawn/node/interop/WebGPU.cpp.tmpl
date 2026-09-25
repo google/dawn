@@ -390,7 +390,7 @@ std::ostream& operator<<(std::ostream& o, const {{$.Name}}& dict) {
     return res.Append("while converting member '{{$m.Name}}'");
   }
 {{-    else}}
-  (void)object;
+  std::ignore = object;
 {{-    end}}
 {{- end}}
 

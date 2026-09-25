@@ -475,15 +475,13 @@ void Device::StartCapture(CaptureStream& commandStream, CaptureStream& contentSt
     MaybeValError result = ToBackend(GetQueue())
                                ->SetCaptureContext(std::unique_ptr<CaptureContext>(
                                    new CaptureContext(this, commandStream, contentStream)));
-    [[maybe_unused]] bool hadError =
-        ConsumedError(std::move(result), "calling %s.StartCapture()", this);
+    std::ignore = ConsumedError(std::move(result), "calling %s.StartCapture()", this);
 }
 
 void Device::EndCapture() {
     if (ToBackend(GetQueue())->IsCapturing()) {
         MaybeValError result = ToBackend(GetQueue())->SetCaptureContext(nullptr);
-        [[maybe_unused]] bool hadError =
-            ConsumedError(std::move(result), "calling %s.EndCapture()", this);
+        std::ignore = ConsumedError(std::move(result), "calling %s.EndCapture()", this);
     }
 }
 

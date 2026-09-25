@@ -47,8 +47,7 @@ using namespace tint::core::fluent_types;  // NOLINT
 template <typename T>
 size_t count(const T& range_loopable) {
     size_t n = 0;
-    for (auto it : range_loopable) {
-        (void)it;
+    for ([[maybe_unused]] auto it : range_loopable) {
         n++;
     }
     return n;

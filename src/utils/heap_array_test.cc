@@ -61,14 +61,14 @@ class HeapArrayTest : public ::testing::Test {
 using HeapArrayDeathTest = HeapArrayTest;
 
 TEST_F(HeapArrayTest, KeyTypes) {
-    (void)ityp::HeapArray<TypedInteger<struct KU8, uint8_t>, int>();
-    (void)ityp::HeapArray<TypedInteger<struct KU32, uint32_t>, int>();
-    (void)ityp::HeapArray<TypedInteger<struct KSizeT, size_t>, int>();
+    std::ignore = ityp::HeapArray<TypedInteger<struct KU8, uint8_t>, int>();
+    std::ignore = ityp::HeapArray<TypedInteger<struct KU32, uint32_t>, int>();
+    std::ignore = ityp::HeapArray<TypedInteger<struct KSizeT, size_t>, int>();
 
     enum class E : uint32_t {};
-    (void)ityp::HeapArray<E, int>();
+    std::ignore = ityp::HeapArray<E, int>();
 
-    (void)ityp::HeapArray<uint16_t, int>();
+    std::ignore = ityp::HeapArray<uint16_t, int>();
 }
 
 // Test that values can be set at an index and retrieved from the same index.
@@ -310,9 +310,9 @@ TEST_F(HeapArrayTest, Range) {
     HeapArrayVal arr{Index{10u}};
 
     // Explicit construction.
-    (void)std::span<Val>(arr);
+    std::ignore = std::span<Val>(arr);
     // Dawn's span requires the index type to match.
-    (void)ityp::span<Index, Val>(arr);
+    std::ignore = ityp::span<Index, Val>(arr);
 
     // Spans also allow implicit construction from a range.
     [[maybe_unused]] std::span<Val> s1 = arr;
@@ -324,10 +324,11 @@ TEST_F(HeapArrayTest, Range) {
 TEST_F(HeapArrayDeathTest, SmallIndex) {
     using IndexU8 = TypedInteger<struct IndexU8T, uint8_t>;
     {
-        (void)ityp::HeapArrayFrom<IndexU8>(std::array<int, 254>{});
+        std::ignore = ityp::HeapArrayFrom<IndexU8>(std::array<int, 254>{});
 
         // 255 is invalid because it's reserved as a sentinel value by dawn::SpanBase.
-        EXPECT_DEATH_IF_SUPPORTED((void)ityp::HeapArrayFrom<IndexU8>(std::array<int, 255>{}), "");
+        EXPECT_DEATH_IF_SUPPORTED(
+            std::ignore = ityp::HeapArrayFrom<IndexU8>(std::array<int, 255>{}), "");
     }
 }
 

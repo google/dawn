@@ -201,9 +201,7 @@ struct Options {
 
 /// @param filename the filename to inspect
 /// @returns the inferred format for the filename suffix
-Format InferFormat(const std::string& filename) {
-    (void)filename;
-
+Format InferFormat([[maybe_unused]] const std::string& filename) {
 #if TINT_BUILD_SPV_WRITER
     if (filename.ends_with(".spv")) {
         return Format::kSpirv;

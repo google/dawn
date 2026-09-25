@@ -320,7 +320,7 @@ TEST_F(HlslWriterTest, WorkgroupStorageSize_OverflowAfterAlign) {
     });
 
     // Note: We ignore the result here because it will fail if DXC validation is enabled.
-    [[maybe_unused]] auto result = Generate();
+    std::ignore = Generate();
     EXPECT_EQ(output_.workgroup_info.storage_size, 0x100000000ull);
 }
 

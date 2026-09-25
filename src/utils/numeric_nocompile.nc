@@ -30,7 +30,7 @@
 namespace dawn {
 
 void TestIsDoubleValueRepresentable() {
-    (void) IsDoubleValueRepresentable<double>(0.0);  // expected-error-re@numeric.h:* {{static assertion failed due to requirement '{{.*}}': Unsupported type}}
+    std::ignore = IsDoubleValueRepresentable<double>(0.0);  // expected-error-re@numeric.h:* {{static assertion failed due to requirement '{{.*}}': Unsupported type}}
 }
 
 // Tests for checked_cast

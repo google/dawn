@@ -191,9 +191,9 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     if (dxc.Found()) {
         auto hlsl_shader_model = validate::HlslShaderModel::kSM_6_6;
         bool require_16bit_types = true;
-        [[maybe_unused]] auto validate_res = validate::ValidateUsingDXC(
-            dxc.Path(), output.hlsl, output.entry_point_name, output.pipeline_stage,
-            require_16bit_types, hlsl_shader_model);
+        std::ignore = validate::ValidateUsingDXC(dxc.Path(), output.hlsl, output.entry_point_name,
+                                                 output.pipeline_stage, require_16bit_types,
+                                                 hlsl_shader_model);
     }
 
     return Success;
