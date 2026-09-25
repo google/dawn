@@ -407,27 +407,30 @@ Future AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
 
 wgpu::Status AdapterBase::APIGetFormatCapabilities(wgpu::TextureFormat format,
                                                    DawnFormatCapabilities* capabilities) {
-    if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::DawnFormatCapabilities)) {
-        std::ignore = mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature DawnFormatCapabilities is not available."));
-        return wgpu::Status::Error;
-    }
-    DAWN_CHECK(capabilities != nullptr);
-
     UnpackedPtr<DawnFormatCapabilities> unpacked;
-    if (mInstance->ConsumedError(ValidateAndUnpack(capabilities), &unpacked)) {
-        return wgpu::Status::Error;
-    }
-
-    if (unpacked.Has<DawnDrmFormatCapabilities>() &&
-        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::DawnDrmFormatCapabilities)) {
-        std::ignore = mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature DawnDrmFormatCapabilities is not available."));
+    if (mInstance->ConsumedError(ValidateGetFormatCapabilities(capabilities), &unpacked)) {
         return wgpu::Status::Error;
     }
 
     mPhysicalDevice->PopulateBackendFormatCapabilities(format, unpacked);
     return wgpu::Status::Success;
+}
+
+ResultOrValError<UnpackedPtr<DawnFormatCapabilities>> AdapterBase::ValidateGetFormatCapabilities(
+    DawnFormatCapabilities* capabilities) {
+    DAWN_INVALID_IF(!mSupportedFeatures.IsEnabled(wgpu::FeatureName::DawnFormatCapabilities),
+                    "Feature DawnFormatCapabilities is not available.");
+
+    DAWN_CHECK(capabilities != nullptr);
+
+    UnpackedPtr<DawnFormatCapabilities> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(capabilities));
+
+    DAWN_INVALID_IF(unpacked.Has<DawnDrmFormatCapabilities>() &&
+                        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::DawnDrmFormatCapabilities),
+                    "Feature DawnDrmFormatCapabilities is not available.");
+
+    return unpacked;
 }
 
 const TogglesState& AdapterBase::GetTogglesState() const {
