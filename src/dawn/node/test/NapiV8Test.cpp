@@ -1893,6 +1893,140 @@ TEST_F(NapiV8Test, IsExceptionPendingLifecycle) {
     EXPECT_FALSE(pending);
 }
 
+TEST_F(NapiV8Test, ThrowCaughtByJavaScriptLeavesNoPendingException) {
+    auto throwing_cb = [](napi_env env, napi_callback_info) -> napi_value {
+        napi_value msg;
+        napi_create_string_utf8(env, "Caught by JS", NAPI_AUTO_LENGTH, &msg);
+        napi_value err;
+        napi_create_error(env, nullptr, msg, &err);
+        napi_throw(env, err);
+        return nullptr;
+    };
+
+    napi_value fn;
+    ASSERT_EQ(napi_create_function(env_, "throwFn", NAPI_AUTO_LENGTH, throwing_cb, nullptr, &fn),
+              napi_ok);
+    napi_value global;
+    ASSERT_EQ(napi_get_global(env_, &global), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env_, global, "throwFn", fn), napi_ok);
+
+    napi_value script;
+    ASSERT_EQ(
+        napi_create_string_utf8(env_,
+                                "(() => { try { throwFn(); return 'did not throw'; } catch (e) "
+                                "{ return e.message; } })()",
+                                NAPI_AUTO_LENGTH, &script),
+        napi_ok);
+    napi_value result;
+    ASSERT_EQ(napi_run_script(env_, script, &result), napi_ok);
+    char buf[64];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, result, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "Caught by JS");
+
+    // Once the callback has returned and JavaScript caught the exception, nothing remains pending.
+    bool pending = true;
+    ASSERT_EQ(napi_is_exception_pending(env_, &pending), napi_ok);
+    EXPECT_FALSE(pending);
+}
+
+TEST_F(NapiV8Test, ThrowIsPendingWithinTheNativeCall) {
+    struct Observation {
+        napi_status throw_status = napi_generic_failure;
+        napi_status pending_status = napi_generic_failure;
+        bool pending_after_throw = false;
+    };
+    Observation observation;
+
+    auto throwing_cb = [](napi_env env, napi_callback_info info) -> napi_value {
+        void* data = nullptr;
+        napi_get_cb_info(env, info, nullptr, nullptr, nullptr, &data);
+        auto* obs = static_cast<Observation*>(data);
+
+        napi_value msg;
+        napi_create_string_utf8(env, "Thrown by native code", NAPI_AUTO_LENGTH, &msg);
+        napi_value err;
+        napi_create_error(env, nullptr, msg, &err);
+        obs->throw_status = napi_throw(env, err);
+        obs->pending_status = napi_is_exception_pending(env, &obs->pending_after_throw);
+        return nullptr;
+    };
+
+    napi_value fn;
+    ASSERT_EQ(
+        napi_create_function(env_, "throwFn", NAPI_AUTO_LENGTH, throwing_cb, &observation, &fn),
+        napi_ok);
+    napi_value global;
+    ASSERT_EQ(napi_get_global(env_, &global), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env_, global, "throwFn", fn), napi_ok);
+
+    napi_value script;
+    ASSERT_EQ(napi_create_string_utf8(env_,
+                                      "(() => { try { throwFn(); return 'did not throw'; } "
+                                      "catch (e) { return e.message; } })()",
+                                      NAPI_AUTO_LENGTH, &script),
+              napi_ok);
+    napi_value result;
+    ASSERT_EQ(napi_run_script(env_, script, &result), napi_ok);
+
+    EXPECT_EQ(observation.throw_status, napi_ok);
+    EXPECT_EQ(observation.pending_status, napi_ok);
+    EXPECT_TRUE(observation.pending_after_throw);
+
+    char buf[64];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, result, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "Thrown by native code");
+}
+
+// Clearing a pending exception with napi_get_and_clear_last_exception() before the native callback
+// returns stops it from being thrown into JavaScript.
+TEST_F(NapiV8Test, ClearingThePendingExceptionStopsItReachingJavaScript) {
+    auto withdrawing_cb = [](napi_env env, napi_callback_info) -> napi_value {
+        napi_value msg;
+        napi_create_string_utf8(env, "withdrawn", NAPI_AUTO_LENGTH, &msg);
+        napi_value err;
+        napi_create_error(env, nullptr, msg, &err);
+        napi_throw(env, err);
+
+        bool pending = false;
+        napi_is_exception_pending(env, &pending);
+        if (!pending) {
+            napi_value not_pending;
+            napi_create_string_utf8(env, "not pending", NAPI_AUTO_LENGTH, &not_pending);
+            return not_pending;
+        }
+
+        napi_value caught;
+        napi_get_and_clear_last_exception(env, &caught);
+        napi_value message;
+        napi_get_named_property(env, caught, "message", &message);
+        return message;
+    };
+
+    napi_value fn;
+    ASSERT_EQ(
+        napi_create_function(env_, "withdrawFn", NAPI_AUTO_LENGTH, withdrawing_cb, nullptr, &fn),
+        napi_ok);
+    napi_value global;
+    ASSERT_EQ(napi_get_global(env_, &global), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env_, global, "withdrawFn", fn), napi_ok);
+
+    napi_value script;
+    ASSERT_EQ(napi_create_string_utf8(env_,
+                                      "(() => { try { return withdrawFn(); } "
+                                      "catch (e) { return 'threw: ' + e.message; } })()",
+                                      NAPI_AUTO_LENGTH, &script),
+              napi_ok);
+    napi_value result;
+    ASSERT_EQ(napi_run_script(env_, script, &result), napi_ok);
+    char buf[64];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, result, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "withdrawn");
+
+    bool pending = true;
+    ASSERT_EQ(napi_is_exception_pending(env_, &pending), napi_ok);
+    EXPECT_FALSE(pending);
+}
+
 TEST_F(NapiV8Test, GetAndClearLastException) {
     // When no exception has occurred, get_and_clear returns undefined
     napi_value no_err;
@@ -2876,10 +3010,15 @@ TEST_F(NapiV8Test, RunScript) {
     napi_value bad_script;
     ASSERT_EQ(napi_create_string_utf8(env_, "syntax error {", NAPI_AUTO_LENGTH, &bad_script),
               napi_ok);
-    EXPECT_EQ(napi_run_script(env_, bad_script, &result), napi_generic_failure);
+    EXPECT_EQ(napi_run_script(env_, bad_script, &result), napi_pending_exception);
+    bool pending = false;
+    ASSERT_EQ(napi_is_exception_pending(env_, &pending), napi_ok);
+    EXPECT_TRUE(pending);
     napi_value ex;
     ASSERT_EQ(napi_get_and_clear_last_exception(env_, &ex), napi_ok);
-    EXPECT_NE(ex, nullptr);
+    bool is_error = false;
+    ASSERT_EQ(napi_is_error(env_, ex, &is_error), napi_ok);
+    EXPECT_TRUE(is_error);
 }
 
 TEST_F(NapiV8Test, BuffersAndPromisesInvalidArgs) {
@@ -3091,7 +3230,7 @@ TEST_F(NapiV8Test, InstanceOf) {
     // A non-callable constructor makes JavaScript throw, which is surfaced as a pending exception.
     napi_value plain;
     ASSERT_EQ(napi_create_object(env_, &plain), napi_ok);
-    EXPECT_EQ(napi_instanceof(env_, inst, plain, &result), napi_generic_failure);
+    EXPECT_EQ(napi_instanceof(env_, inst, plain, &result), napi_pending_exception);
     bool pending = false;
     ASSERT_EQ(napi_is_exception_pending(env_, &pending), napi_ok);
     EXPECT_TRUE(pending);

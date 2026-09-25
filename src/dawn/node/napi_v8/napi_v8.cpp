@@ -36,6 +36,25 @@
 
 #include "src/utils/compiler.h"
 
+namespace {
+
+// Hands any exception recorded by napi_throw() to V8 when a native callback returns to JavaScript,
+// and clears env->last_exception so it does not stay pending for later calls. Returns true if an
+// exception was delivered.
+bool DeliverPendingException(napi_env env) {
+    if (env->last_exception.IsEmpty()) {
+        return false;
+    }
+    v8::Local<v8::Value> exception = env->last_exception.Get(env->isolate);
+    env->last_exception.Reset();
+    if (!env->isolate->IsExecutionTerminating()) {
+        env->isolate->ThrowException(exception);
+    }
+    return true;
+}
+
+}  // namespace
+
 napi_ref__::napi_ref__(napi_env e,
                        v8::Local<v8::Value> val,
                        uint32_t count,
@@ -82,7 +101,9 @@ void napi_ref__::WeakCallback(const v8::WeakCallbackInfo<napi_ref__>& data) {
     self->finalize_cb = nullptr;
 
     if (finalize_cb != nullptr) {
+        env->ClearLastError();
         finalize_cb(env, native_object, finalize_hint);
+        DeliverPendingException(env);
     }
 }
 
@@ -260,8 +281,9 @@ void NativeCallbackTrampoline(const v8::FunctionCallbackInfo<v8::Value>& v8_info
     invocation_info.data = binding->user_data;
 
     v8::HandleScope scope(env->isolate);
+    env->ClearLastError();
     napi_value return_val = binding->callback(env, &invocation_info);
-    if (return_val != nullptr) {
+    if (!DeliverPendingException(env) && return_val != nullptr) {
         v8_info.GetReturnValue().Set(dawn::napi_v8::ToV8(return_val));
     }
 }
@@ -1012,8 +1034,9 @@ napi_status napi_instanceof(napi_env env, napi_value object, napi_value construc
     v8::Maybe<bool> res = v8_obj->InstanceOf(ctx, v8_ctor.As<v8::Object>());
     if (res.IsNothing()) {
         if (try_catch.HasCaught()) {
-            env->isolate->ThrowException(try_catch.Exception());
             env->last_exception.Reset(env->isolate, try_catch.Exception());
+            return env->SetLastError(napi_pending_exception,
+                                     "An exception was thrown during the InstanceOf check");
         }
         return env->SetLastError(napi_generic_failure, "InstanceOf check failed");
     }
@@ -1410,9 +1433,10 @@ napi_status napi_throw(napi_env env, napi_value error) {
     if (!ValidateArgs(env, error)) {
         return napi_invalid_arg;
     }
-    v8::Local<v8::Value> v8_err = dawn::napi_v8::ToV8(error);
-    env->isolate->ThrowException(v8_err);
-    env->last_exception.Reset(env->isolate, v8_err);
+    // Record the exception rather than calling Isolate::ThrowException() immediately so native
+    // callers can inspect or clear it with napi_is_exception_pending() and
+    // napi_get_and_clear_last_exception() before DeliverPendingException() hands it to V8.
+    env->last_exception.Reset(env->isolate, dawn::napi_v8::ToV8(error));
     return napi_ok;
 }
 
@@ -1970,16 +1994,10 @@ napi_status napi_run_script(napi_env env, napi_value script, napi_value* result)
     v8::TryCatch try_catch(env->isolate);
     v8::MaybeLocal<v8::Script> compiled = v8::Script::Compile(ctx, v8_script.As<v8::String>());
     if (compiled.IsEmpty()) {
-        env->isolate->ThrowException(try_catch.Exception());
-        return env->SetLastError(napi_generic_failure, "Failed to compile script");
+        return ProcessCallResult(env, try_catch, v8::MaybeLocal<v8::Value>(), nullptr);
     }
     v8::MaybeLocal<v8::Value> eval_result = compiled.ToLocalChecked()->Run(ctx);
-    if (eval_result.IsEmpty()) {
-        env->isolate->ThrowException(try_catch.Exception());
-        return env->SetLastError(napi_generic_failure, "Script execution failed");
-    }
-    *result = dawn::napi_v8::ToNapi(eval_result.ToLocalChecked());
-    return napi_ok;
+    return ProcessCallResult(env, try_catch, eval_result, result);
 }
 
 napi_status napi_get_version(node_api_nogc_env env, uint32_t* result) {
