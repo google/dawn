@@ -29,7 +29,7 @@ kernel void v(device array<uint, 1024>* out0 [[buffer(0)]], device array<int2, 1
   (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out1) + 0u), ulong(64u), ulong2(0ul), false));
   (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out2) + 0u), ulong(128u), ulong2(0ul), false));
   (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out3) + 0u), ulong(128u), ulong2(0ul), false));
-  (simdgroup_store(m, (&(*tint_module_vars.out4)[0u]), ulong(16u), ulong2(0ul), false));
+  (simdgroup_store(m, (&(*tint_module_vars.out4)[0]), ulong(16u), ulong2(0ul), false));
   (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out5) + 0u), ulong(32u), ulong2(0ul), false));
   (simdgroup_store(m, reinterpret_cast<device half*>(reinterpret_cast<device char*>(tint_module_vars.out6) + 0u), ulong(64u), ulong2(0ul), false));
 }

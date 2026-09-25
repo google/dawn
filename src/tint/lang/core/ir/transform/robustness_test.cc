@@ -8872,6 +8872,278 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_I32_Negat
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, SubgroupMatrixLoad_OffsetAndStrideInRange) {
+    auto* arr = b.Var("arr", ty.ptr(workgroup, ty.array<f32, 1024>()));
+    mod.root_block->Append(arr);
+
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8u, 4u);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 4u
+            auto* ifelse = b.If(b.LessThan(b.Load(idx), 4_u));
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // offset: [0u, 3u], stride: [4u, 7u]
+            // The largest element accessed is 3 + 7 * 7 + 4 = 56, which is in bounds.
+            auto* offset = b.Load(idx);
+            auto* stride = b.Add(b.Load(idx), 4_u);
+            b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                           Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr, offset,
+                           stride);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto src = str();
+
+    RobustnessConfig cfg;
+    cfg.clamp_subgroup_matrix = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(src, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, SubgroupMatrixLoad_StrideInRange_OffsetTooLarge) {
+    auto* arr = b.Var("arr", ty.ptr(workgroup, ty.array<f32, 32>()));
+    mod.root_block->Append(arr);
+
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8u, 4u);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 4u
+            auto* ifelse = b.If(b.LessThan(b.Load(idx), 4_u));
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // offset: [0u, 3u], stride: [4u, 7u]
+            // The largest element accessed is 3 + 7 * 7 + 4 = 56, which is out of bounds, so the
+            // predication is still required. The stride does not need to be clamped though.
+            auto* offset = b.Load(idx);
+            auto* stride = b.Add(b.Load(idx), 4_u);
+            b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                           Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr, offset,
+                           stride);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+$B1: {  # root
+  %arr:ptr<workgroup, array<f32, 32>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B4
+      }
+      $B4: {  # body
+        %4:u32 = load %idx
+        %5:bool = lt %4, 4u
+        if %5 [t: $B6, f: $B7] {  # if_1
+          $B6: {  # true
+            exit_if  # if_1
+          }
+          $B7: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:u32 = load %idx
+        %7:u32 = load %idx
+        %8:u32 = add %7, 4u
+        %9:u32 = mulSat %8, 7u
+        %10:u32 = addSat %6, %9
+        %11:u32 = addSat %10, 4u
+        %12:bool = lte %11, 32u
+        %13:u32 = select 0u, %6, %12
+        %14:u32 = select 4u, %8, %12
+        %15:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, %13, %14
+        continue  # -> $B5
+      }
+      $B5: {  # continuing
+        %16:u32 = load %idx
+        %17:u32 = add %16, 1u
+        store %idx, %17
+        next_iteration  # -> $B4
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_subgroup_matrix = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, SubgroupMatrixLoad_StrideTooSmall) {
+    auto* arr = b.Var("arr", ty.ptr(workgroup, ty.array<f32, 1024>()));
+    mod.root_block->Append(arr);
+
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8u, 4u);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 4u
+            auto* ifelse = b.If(b.LessThan(b.Load(idx), 4_u));
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // stride: [0u, 3u], which is smaller than the minimum stride of 4.
+            auto* stride = b.Load(idx);
+            b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                           Vector<TemplateParameter, 2>{mat, Majorness::kColMajor}, arr, 0_u,
+                           stride);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+$B1: {  # root
+  %arr:ptr<workgroup, array<f32, 1024>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B4
+      }
+      $B4: {  # body
+        %4:u32 = load %idx
+        %5:bool = lt %4, 4u
+        if %5 [t: $B6, f: $B7] {  # if_1
+          $B6: {  # true
+            exit_if  # if_1
+          }
+          $B7: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:u32 = load %idx
+        %7:u32 = max %6, 4u
+        %8:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>, col_major> %arr, 0u, %7
+        continue  # -> $B5
+      }
+      $B5: {  # continuing
+        %9:u32 = load %idx
+        %10:u32 = add %9, 1u
+        store %idx, %10
+        next_iteration  # -> $B4
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_subgroup_matrix = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, SubgroupMatrixStore_OffsetAndStrideInRange) {
+    auto* arr = b.Var("arr", ty.ptr(workgroup, ty.array<f32, 1024>()));
+    mod.root_block->Append(arr);
+
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8u, 4u);
+
+    auto* func = b.Function("foo", ty.void_());
+    auto* value = b.FunctionParam("value", mat);
+    func->AppendParam(value);
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 4u
+            auto* ifelse = b.If(b.LessThan(b.Load(idx), 4_u));
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // offset: [0u, 3u], stride: [4u, 7u]
+            // The largest element accessed is 3 + 7 * 7 + 4 = 56, which is in bounds.
+            auto* offset = b.Load(idx);
+            auto* stride = b.Add(b.Load(idx), 4_u);
+            b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                           Vector<TemplateParameter, 1>{Majorness::kColMajor}, arr, offset, value,
+                           stride);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto src = str();
+
+    RobustnessConfig cfg;
+    cfg.clamp_subgroup_matrix = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(src, str());
+}
+
 INSTANTIATE_TEST_SUITE_P(, IR_RobustnessTest, testing::Values(false, true));
 
 INSTANTIATE_TEST_SUITE_P(,

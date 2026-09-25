@@ -233,47 +233,59 @@ struct State {
         }
     }
 
+    /// Get the range of @p value as non-negative bounds, using integer range analysis.
+    /// @param value the value to get the range of
+    /// @returns the inclusive [min, max] range, or std::nullopt if the analysis is disabled, the
+    /// range is unknown, or the value may be negative (which would wrap when bitcast to a u32)
+    std::optional<ir::analysis::IntegerRangeInfo::UnsignedIntegerRange> GetNonNegativeRange(
+        ir::Value* value) {
+        if (!integer_range_analysis.has_value()) {
+            return std::nullopt;
+        }
+
+        using SignedIntegerRange = ir::analysis::IntegerRangeInfo::SignedIntegerRange;
+        using UnsignedIntegerRange = ir::analysis::IntegerRangeInfo::UnsignedIntegerRange;
+
+        const auto& integer_range = integer_range_analysis->GetInfo(value);
+        if (!integer_range.IsValid()) {
+            return std::nullopt;
+        }
+
+        if (std::holds_alternative<UnsignedIntegerRange>(integer_range.range)) {
+            return std::get<UnsignedIntegerRange>(integer_range.range);
+        }
+
+        const auto& range = std::get<SignedIntegerRange>(integer_range.range);
+        if (range.min_bound < 0) {
+            return std::nullopt;
+        }
+        return UnsignedIntegerRange{static_cast<uint64_t>(range.min_bound),
+                                    static_cast<uint64_t>(range.max_bound)};
+    }
+
     /// Check if operand @p idx may be less than 0 or greater than @p limit with integer range
     /// analysis algorithm.
     /// @param idx the index to check
     /// @param limit the upper limit @idx to compare with.
     /// @returns true when @idx may be out of bound, false otherwise
     bool IndexMayOutOfBound(ir::Value* idx, ir::Value* limit) {
-        // Return true when integer range analysis is disabled.
-        if (!integer_range_analysis.has_value()) {
-            return true;
-        }
-
         // Return true when `limit` is not a constant value.
         auto* const_limit = limit->As<ir::Constant>();
         if (!const_limit) {
             return true;
         }
 
-        // Return true when we cannot get a valid range for `idx`.
-        const auto& integer_range = integer_range_analysis->GetInfo(idx);
-        if (!integer_range.IsValid()) {
+        // Return true when we cannot get a valid non-negative range for `idx`.
+        auto range = GetNonNegativeRange(idx);
+        if (!range.has_value()) {
             return true;
         }
 
         TINT_IR_ASSERT(ir, const_limit->Value()->Type()->Is<core::type::U32>());
         uint32_t const_limit_value = const_limit->Value()->ValueAs<uint32_t>();
 
-        using SignedIntegerRange = ir::analysis::IntegerRangeInfo::SignedIntegerRange;
-        using UnsignedIntegerRange = ir::analysis::IntegerRangeInfo::UnsignedIntegerRange;
-
-        // Return true when `idx` may be negative or the upper bound of `idx` is greater than
-        // `limit`.
-        if (std::holds_alternative<UnsignedIntegerRange>(integer_range.range)) {
-            UnsignedIntegerRange range = std::get<UnsignedIntegerRange>(integer_range.range);
-            return range.max_bound > static_cast<uint64_t>(const_limit_value);
-        } else {
-            SignedIntegerRange range = std::get<SignedIntegerRange>(integer_range.range);
-            if (range.min_bound < 0) {
-                return true;
-            }
-            return range.max_bound > static_cast<int64_t>(const_limit_value);
-        }
+        // Return true when the upper bound of `idx` is greater than `limit`.
+        return range->max_bound > static_cast<uint64_t>(const_limit_value);
     }
 
     /// Clamp the indices of an access instruction to ensure they are within the limits of the types
@@ -463,9 +475,17 @@ struct State {
         // Offset and stride are counted in array stride.
         // Note: max comes from situations like 8x8 u8 accessed from an array of vec4u.
         min_stride = std::max(min_stride * matrix_ty->Type()->Size() / arr_stride, 1u);
-        stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-        stride = b.Max(stride, u32(min_stride));
-        call->SetArg(stride_index, stride);
+
+        // Query the ranges before any clamping instructions are inserted.
+        auto stride_range = GetNonNegativeRange(stride);
+        auto offset_range = GetNonNegativeRange(offset);
+
+        // Skip the stride clamp if the stride is known to be at least the minimum valid stride.
+        if (!stride_range.has_value() || stride_range->min_bound < min_stride) {
+            stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
+            stride = b.Max(stride, u32(min_stride));
+            call->SetArg(stride_index, stride);
+        }
 
         // If we are not doing full clamping, then clamping the stride is all we need to do.
         if (!config.clamp_subgroup_matrix) {
@@ -482,6 +502,20 @@ struct State {
         TINT_IR_ASSERT(ir, arr_ty);
         Value* array_length = nullptr;
         if (arr_ty->ConstantCount()) {
+            // Skip the bounds check if the ranges prove that the whole access is in bounds.
+            if (stride_range.has_value() && offset_range.has_value()) {
+                // The stride used is at least `min_stride` after the clamp above.
+                uint64_t max_stride =
+                    std::max(stride_range->max_bound, static_cast<uint64_t>(min_stride));
+                // The beginning of the last row/column is at `offset + (major_dim - 1) * stride`.
+                // We then add another `min_stride` elements to get to the end of the accessed
+                // memory.
+                uint64_t end = offset_range->max_bound + max_stride * (major_dim - 1) +
+                               static_cast<uint64_t>(min_stride);
+                if (end <= arr_ty->ConstantCount().value()) {
+                    return;
+                }
+            }
             array_length = b.Constant(u32(arr_ty->ConstantCount().value()));
         } else {
             TINT_IR_ASSERT(ir, arr_ty->Count()->Is<core::type::RuntimeArrayCount>());
