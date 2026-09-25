@@ -59,6 +59,10 @@ RenderBundleBase::RenderBundleBase(RenderBundleEncoder* encoder,
 }
 
 void RenderBundleBase::DestroyImpl(DestroyReason reason) {
+    // Resource usages contain raw_ptrs to resources (buffers, textures). Clear them before
+    // releasing references in mIndirectDrawMetadata or commands to avoid dangling raw_ptrs.
+    mResourceUsage = {};
+
     mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     FreeCommands(&mCommands);
 

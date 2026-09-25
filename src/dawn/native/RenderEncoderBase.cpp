@@ -70,6 +70,8 @@ RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
       mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {}
 
 void RenderEncoderBase::DestroyImpl(DestroyReason reason) {
+    mUsageTracker = {};
+
     // Remove reference to the attachment state so that we don't have lingering references to
     // it preventing it from being uncached in the device.
     mAttachmentState = nullptr;

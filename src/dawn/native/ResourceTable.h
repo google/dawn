@@ -122,8 +122,8 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     // ResourceTable).
     struct MetadataUpdate {
         ResourceTableSlot slot{0u};  // Slot index to update
-        uint32_t offset = 0;        // Byte offset resource array
-        uint32_t data = 0;          // tint::ResourceType in the low 16 bits
+        uint32_t offset = 0;         // Byte offset resource array
+        uint32_t data = 0;           // tint::ResourceType in the low 16 bits
     };
     struct ResourceDiff {
         using Resource = std::variant<std::monostate, Ref<TextureViewBase>, Ref<SamplerBase>>;
@@ -131,9 +131,10 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
         Resource removed;  // Resource removed from 'slot', if any
         Resource added;    // Resource added to 'slot', if any
     };
-    using ApplyUpdateFn = MaybeError(const std::vector<MetadataUpdate>& metadataUpdates,
-                                     const std::vector<ResourceDiff>& resourceDiffs,
-                                     const absl::flat_hash_set<TextureBase*>& texturesToTransition);
+    using ApplyUpdateFn =
+        MaybeError(const std::vector<MetadataUpdate>& metadataUpdates,
+                   const std::vector<ResourceDiff>& resourceDiffs,
+                   const absl::flat_hash_set<raw_ptr<TextureBase>>& texturesToTransition);
 
     // Wrapper for the code that handles dirty slot updates in the backend so we can run code right
     // after it that ignores unnecessarily dirty textures added while transitioning them for this
@@ -159,8 +160,8 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     struct Updates {
         std::vector<MetadataUpdate> metadataUpdates;
         std::vector<ResourceDiff> resourceDiffs;
-        absl::flat_hash_set<TextureBase*> texturesToTransition;
-        absl::flat_hash_set<TextureBase*> texturesDirtyAfterUpdate;
+        absl::flat_hash_set<raw_ptr<TextureBase>> texturesToTransition;
+        absl::flat_hash_set<raw_ptr<TextureBase>> texturesDirtyAfterUpdate;
     };
     // Fills only texturesToTransition and texturesDirtyAfterUpdate.
     Updates MakeResourcesVisibleExcept(const absl::flat_hash_set<TextureBase*>& writableTextures);
@@ -208,7 +209,7 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
 
     // Textures that are "dirty" for some reason, e.g. destroyed, access change, r/w change. Handled
     // by MakeResourcesVisibleExcept.
-    absl::flat_hash_set<TextureBase*> mDirtyStateTextures;
+    absl::flat_hash_set<raw_ptr<TextureBase>> mDirtyStateTextures;
 };
 
 }  // namespace dawn::native

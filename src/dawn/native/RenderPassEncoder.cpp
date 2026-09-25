@@ -135,13 +135,12 @@ RenderPassEncoder::~RenderPassEncoder() {
 }
 
 void RenderPassEncoder::DestroyImpl(DestroyReason reason) {
-    mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     mCommandBufferState.End();
-
-    RenderEncoderBase::DestroyImpl(reason);
+    mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     // Ensure that the pass has exited. This is done for passes only since validation requires
     // they exit before destruction while bundles do not.
     mEncodingContext->EnsurePassExited(this);
+    RenderEncoderBase::DestroyImpl(reason);
 }
 
 ObjectType RenderPassEncoder::GetType() const {

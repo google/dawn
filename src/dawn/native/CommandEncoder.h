@@ -33,6 +33,7 @@
 
 #include "absl/container/flat_hash_set.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/common/StackAllocated.h"
 #include "src/dawn/native/EncodingContext.h"
 #include "src/dawn/native/Error.h"
@@ -137,9 +138,12 @@ class CommandEncoder final : public ApiObjectBase {
     MaybeValError ValidateFinish() const;
 
     EncodingContext mEncodingContext;
-    absl::flat_hash_set<BufferBase*> mTopLevelBuffers;
-    absl::flat_hash_set<TextureBase*> mTopLevelTextures;
-    absl::flat_hash_set<QuerySetBase*> mUsedQuerySets;
+    // NOTE: these are hot (populated on every copy command) and are moved into
+    // CommandBufferResourceUsage, so they are intentionally left as raw pointers instead of
+    // raw_ptr<T>. See b/551978862.
+    RAW_PTR_EXCLUSION absl::flat_hash_set<BufferBase*> mTopLevelBuffers;
+    RAW_PTR_EXCLUSION absl::flat_hash_set<TextureBase*> mTopLevelTextures;
+    RAW_PTR_EXCLUSION absl::flat_hash_set<QuerySetBase*> mUsedQuerySets;
 
     uint64_t mDebugGroupStackSize = 0;
 

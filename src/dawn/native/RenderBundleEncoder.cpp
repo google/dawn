@@ -149,10 +149,13 @@ RenderBundleEncoder::~RenderBundleEncoder() {
 }
 
 void RenderBundleEncoder::DestroyImpl(DestroyReason reason) {
-    mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     mCommandBufferState.End();
-    RenderEncoderBase::DestroyImpl(reason);
+    // Resource usages contain raw_ptrs to resources held by recorded commands. Clear them
+    // before releasing references in mIndirectDrawMetadata or commands to avoid dangling raw_ptrs.
+    mUsages = {};
+    mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     mBundleEncodingContext.Destroy();
+    RenderEncoderBase::DestroyImpl(reason);
 }
 
 // static

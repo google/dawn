@@ -30,6 +30,8 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
+#include "partition_alloc/pointers/raw_ptr.h"
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/common/ityp_vector.h"
 #include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/PassResourceUsage.h"
@@ -79,9 +81,10 @@ class SyncScopeUsageTracker {
   private:
     void MergeTextureUsage(TextureBase* texture, const TextureSubresourceSyncInfo& textureSyncInfo);
 
-    absl::flat_hash_map<BufferBase*, BufferSyncInfo> mBufferSyncInfos;
-    absl::flat_hash_map<TextureBase*, TextureSubresourceSyncInfo> mTextureSyncInfos;
-    absl::flat_hash_set<ExternalTextureBase*> mExternalTextureUsages;
+    RAW_PTR_EXCLUSION absl::flat_hash_map<BufferBase*, BufferSyncInfo> mBufferSyncInfos;
+    RAW_PTR_EXCLUSION absl::flat_hash_map<TextureBase*, TextureSubresourceSyncInfo>
+        mTextureSyncInfos;
+    RAW_PTR_EXCLUSION absl::flat_hash_set<ExternalTextureBase*> mExternalTextureUsages;
     raw_ptr<ResourceTableBase> mUsedResourceTable = nullptr;
 };
 
@@ -89,7 +92,10 @@ class SyncScopeUsageTracker {
 class ComputePassResourceUsageTracker {
   public:
     ComputePassResourceUsageTracker();
+    ComputePassResourceUsageTracker(ComputePassResourceUsageTracker&&);
     ~ComputePassResourceUsageTracker();
+
+    ComputePassResourceUsageTracker& operator=(ComputePassResourceUsageTracker&&);
 
     void AddDispatch(SyncScopeResourceUsage scope);
     void AddReferencedBuffer(BufferBase* buffer);

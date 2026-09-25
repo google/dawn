@@ -59,7 +59,12 @@ EncodingContext::~EncodingContext() {
 
 void EncodingContext::Destroy() {
     mDebugGroupLabels.clear();
-
+    if (!mWereRenderPassUsagesAcquired) {
+        mRenderPassUsages.clear();
+    }
+    if (!mWereComputePassUsagesAcquired) {
+        mComputePassUsages.clear();
+    }
     if (!mWereIndirectDrawMetadataAcquired) {
         mIndirectDrawMetadata.clear();
     }
