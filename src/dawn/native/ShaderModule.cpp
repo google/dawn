@@ -261,7 +261,7 @@ ResultOrError<TextureComponentType> TintComponentTypeToTextureComponentType(
         case tint::inspector::ComponentType::kU32:
             return TextureComponentType::Uint;
         case tint::inspector::ComponentType::kUnknown:
-            return DAWN_VALIDATION_ERROR("Attempted to convert 'Unknown' component type from Tint");
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -277,7 +277,7 @@ ResultOrError<VertexFormatBaseType> TintComponentTypeToVertexFormatBaseType(
         case tint::inspector::ComponentType::kU32:
             return VertexFormatBaseType::Uint;
         case tint::inspector::ComponentType::kUnknown:
-            return DAWN_VALIDATION_ERROR("Attempted to convert 'Unknown' component type from Tint");
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -292,7 +292,7 @@ ResultOrError<wgpu::BufferBindingType> TintResourceTypeToBufferBindingType(
         case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageBuffer:
             return wgpu::BufferBindingType::ReadOnlyStorage;
         default:
-            return DAWN_VALIDATION_ERROR("Attempted to convert non-buffer resource type");
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -307,7 +307,7 @@ ResultOrError<wgpu::StorageTextureAccess> TintResourceTypeToStorageTextureAccess
         case tint::inspector::ResourceBinding::ResourceType::kReadWriteStorageTexture:
             return wgpu::StorageTextureAccess::ReadWrite;
         default:
-            return DAWN_VALIDATION_ERROR("Attempted to convert non-storage texture resource type");
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -320,7 +320,7 @@ ResultOrError<wgpu::TexelBufferAccess> TintResourceTypeToTexelBufferAccess(
         case tint::inspector::ResourceBinding::ResourceType::kReadWriteTexelBuffer:
             return wgpu::TexelBufferAccess::ReadWrite;
         default:
-            return DAWN_VALIDATION_ERROR("Attempted to convert non-texel buffer resource type");
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -337,7 +337,7 @@ ResultOrError<InterStageComponentType> TintComponentTypeToInterStageComponentTyp
         case tint::inspector::ComponentType::kF16:
             return InterStageComponentType::F16;
         case tint::inspector::ComponentType::kUnknown:
-            return DAWN_VALIDATION_ERROR("Attempted to convert 'Unknown' component type from Tint");
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -354,7 +354,7 @@ ResultOrError<uint8_t> TintCompositionTypeToInterStageComponentCount(
         case tint::inspector::CompositionType::kVec4:
             return 4u;
         case tint::inspector::CompositionType::kUnknown:
-            return DAWN_VALIDATION_ERROR("Attempt to convert 'Unknown' composition type from Tint");
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -369,8 +369,7 @@ ResultOrError<InterpolationType> TintInterpolationTypeToInterpolationType(
         case tint::inspector::InterpolationType::kFlat:
             return InterpolationType::Flat;
         case tint::inspector::InterpolationType::kUnknown:
-            return DAWN_VALIDATION_ERROR(
-                "Attempted to convert 'Unknown' interpolation type from Tint");
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -391,8 +390,7 @@ ResultOrError<InterpolationSampling> TintInterpolationSamplingToInterpolationSam
         case tint::inspector::InterpolationSampling::kEither:
             return InterpolationSampling::Either;
         case tint::inspector::InterpolationSampling::kUnknown:
-            return DAWN_VALIDATION_ERROR(
-                "Attempted to convert 'Unknown' interpolation sampling type from Tint");
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -447,8 +445,7 @@ ResultOrError<PixelLocalMemberType> FromTintPixelLocalMemberType(
         case tint::inspector::PixelLocalMemberType::kF32:
             return PixelLocalMemberType::F32;
         case tint::inspector::PixelLocalMemberType::kUnknown:
-            return DAWN_VALIDATION_ERROR(
-                "Attempted to convert 'Unknown' pixel local member type from Tint");
+            break;
     }
     DAWN_UNREACHABLE();
 }
