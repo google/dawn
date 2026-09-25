@@ -172,27 +172,27 @@ TYPED_TEST(SpanTest, Constructor_Default) {
 TYPED_TEST(SpanDeathTest, Constructor_DefaultFixedSpan) {
     {
         SPAN<int, 5> sp;
-        EXPECT_DEATH_IF_SUPPORTED(sp.front(), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.back(), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp[0], "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.at(0), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.begin(), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.first(1), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.last(1), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.subspan(1), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.subspan(0, 1), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.front(), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.back(), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp[0], "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.at(0), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.begin(), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.first(1), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.last(1), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.subspan(1), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.subspan(0, 1), "");
     }
     {
         ITYP_SPAN<Index, int, Index{5u}> sp;
-        EXPECT_DEATH_IF_SUPPORTED(sp.front(), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.back(), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp[Index{0u}], "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.at(Index{0u}), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.begin(), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.first(Index{1u}), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.last(Index{1u}), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.subspan(Index{1u}), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.subspan(Index{0u}, Index{1u}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.front(), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.back(), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp[Index{0u}], "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.at(Index{0u}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.begin(), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.first(Index{1u}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.last(Index{1u}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.subspan(Index{1u}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.subspan(Index{0u}, Index{1u}), "");
     }
 }
 
@@ -298,14 +298,14 @@ TYPED_TEST(SpanDeathTest, Constructor_PointerAndSizeOversizedIndex) {
 
     constexpr Index64 kHugeSize{0x1'0000'0000LLU};
     // SAFETY: Test for the unsafe constructor.
-    DAWN_UNSAFE_BUFFERS(EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_UNSAFE_BUFFERS(DAWN_EXPECT_DEATH_IF_SUPPORTED(
         (ITYP_SPAN<Index64, const int>(kSpanData.data(), kHugeSize)), ""));
 }
 
 TYPED_TEST(SpanDeathTest, Constructor_PointerAndSizeDynamicExtent) {
     // DynamicExtent is invalid because it's reserved as a sentinel value.
     // SAFETY: Test for the unsafe constructor.
-    DAWN_UNSAFE_BUFFERS(EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_UNSAFE_BUFFERS(DAWN_EXPECT_DEATH_IF_SUPPORTED(
         (ITYP_SPAN<Index8, const int>(kSpanData.data(), detail::DynamicExtent<Index8>)), ""));
 }
 
@@ -406,9 +406,10 @@ TYPED_TEST(SpanTest, Constructor_TwoIterators) {
 TYPED_TEST(SpanDeathTest, Constructor_TwoIteratorsInverted) {
     std::array<int, 3> data = {1, 2, 3};
     // SAFETY: Test for the unsafe constructor.
-    DAWN_UNSAFE_BUFFERS(EXPECT_DEATH_IF_SUPPORTED((SPAN<int>{data.end(), data.begin()}), ""));
+    DAWN_UNSAFE_BUFFERS(DAWN_EXPECT_DEATH_IF_SUPPORTED((SPAN<int>{data.end(), data.begin()}), ""));
     // SAFETY: Test for the unsafe constructor.
-    DAWN_UNSAFE_BUFFERS(EXPECT_DEATH_IF_SUPPORTED((SPAN<int, 3>{data.end(), data.begin()}), ""));
+    DAWN_UNSAFE_BUFFERS(
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((SPAN<int, 3>{data.end(), data.begin()}), ""));
 }
 
 TYPED_TEST(SpanDeathTest, Constructor_TwoIteratorsLargerThanIndexType) {
@@ -417,13 +418,13 @@ TYPED_TEST(SpanDeathTest, Constructor_TwoIteratorsLargerThanIndexType) {
 
     // SAFETY: Test for the unsafe constructor.
     DAWN_UNSAFE_BUFFERS(
-        EXPECT_DEATH_IF_SUPPORTED((ITYP_SPAN<Index8, int>(data.begin(), data.end())), ""));
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((ITYP_SPAN<Index8, int>(data.begin(), data.end())), ""));
 
     // 255 is invalid because it's reserved as a sentinel value.
     data.resize(255);
     // SAFETY: Test for the unsafe constructor.
     DAWN_UNSAFE_BUFFERS(
-        EXPECT_DEATH_IF_SUPPORTED((ITYP_SPAN<Index8, int>(data.begin(), data.end())), ""));
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((ITYP_SPAN<Index8, int>(data.begin(), data.end())), ""));
 
     // Fits in uint8_t for indexing without matching DynamicExtent.
     data.resize(254);
@@ -594,18 +595,18 @@ TYPED_TEST(SpanDeathTest, Constructor_DynamicToFixedSizeMismatch) {
         SPAN<const int> constSp(constData);
 
         // Dynamic span larger than fixed extent.
-        EXPECT_DEATH_IF_SUPPORTED((SPAN<int, 2>{sp}), "");
-        EXPECT_DEATH_IF_SUPPORTED((SPAN<const int, 2>{constSp}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((SPAN<int, 2>{sp}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((SPAN<const int, 2>{constSp}), "");
 
         // Dynamic span smaller than fixed extent.
-        EXPECT_DEATH_IF_SUPPORTED((SPAN<int, 10>{sp}), "");
-        EXPECT_DEATH_IF_SUPPORTED((SPAN<const int, 10>{constSp}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((SPAN<int, 10>{sp}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((SPAN<const int, 10>{constSp}), "");
 
         // Empty dynamic span to non-zero fixed extent.
         SPAN<int> emptySp;
         SPAN<const int> emptyConstSp;
-        EXPECT_DEATH_IF_SUPPORTED((SPAN<int, 3>{emptySp}), "");
-        EXPECT_DEATH_IF_SUPPORTED((SPAN<const int, 3>{emptyConstSp}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((SPAN<int, 3>{emptySp}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((SPAN<const int, 3>{emptyConstSp}), "");
     }
 
     // Typed integer index tests.
@@ -614,16 +615,16 @@ TYPED_TEST(SpanDeathTest, Constructor_DynamicToFixedSizeMismatch) {
         ITYP_SPAN<Index, const int> constSp(data);
 
         // Dynamic span larger than fixed extent.
-        EXPECT_DEATH_IF_SUPPORTED((ITYP_SPAN<Index, const int, Index{2u}>{constSp}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((ITYP_SPAN<Index, const int, Index{2u}>{constSp}), "");
 
         // Dynamic span smaller than fixed extent.
-        EXPECT_DEATH_IF_SUPPORTED((ITYP_SPAN<Index, const int, Index{10u}>{constSp}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((ITYP_SPAN<Index, const int, Index{10u}>{constSp}), "");
 
         // Empty dynamic span to non-zero fixed extent.
         ITYP_SPAN<Index, int> emptySp;
         ITYP_SPAN<Index, const int> emptyConstSp;
-        EXPECT_DEATH_IF_SUPPORTED((ITYP_SPAN<Index, int, Index{3u}>{emptySp}), "");
-        EXPECT_DEATH_IF_SUPPORTED((ITYP_SPAN<Index, const int, Index{3u}>{emptyConstSp}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((ITYP_SPAN<Index, int, Index{3u}>{emptySp}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((ITYP_SPAN<Index, const int, Index{3u}>{emptyConstSp}), "");
     }
 }
 
@@ -807,7 +808,7 @@ TYPED_TEST(SpanDeathTest, IteratorsAreHardened) {
     // We check specifically that libc++'s bounded iterators are used as iterators for dawn::Span.
 #if defined(_LIBCPP_ABI_BOUNDED_ITERATORS)
     // Error case, the hardened iterator will fail when we try to write a non-existent 4th element.
-    EXPECT_DEATH_IF_SUPPORTED(std::ranges::copy(src4, dstSpan.begin()), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(std::ranges::copy(src4, dstSpan.begin()), "");
 #else
     // Still a success case because we don't have bounded iterators.
     std::ranges::copy(src4, dstSpan.begin());
@@ -840,13 +841,13 @@ TYPED_TEST(SpanTest, FrontBack) {
 TYPED_TEST(SpanDeathTest, FrontBackOfEmpty) {
     {
         SPAN<const int> sp;
-        EXPECT_DEATH_IF_SUPPORTED(sp.front(), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.back(), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.front(), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.back(), "");
     }
     {
         SPAN<const int, 0> sp;
-        EXPECT_DEATH_IF_SUPPORTED(sp.front(), "");
-        EXPECT_DEATH_IF_SUPPORTED(sp.back(), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.front(), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.back(), "");
     }
 }
 
@@ -885,16 +886,16 @@ TYPED_TEST(SpanTest, Indexing) {
 
 TYPED_TEST(SpanDeathTest, IndexingOOB) {
     SPAN<const int> sp(FakeRange{});
-    EXPECT_DEATH_IF_SUPPORTED(sp.at(sp.size()), "");
-    EXPECT_DEATH_IF_SUPPORTED(sp[sp.size()], "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.at(sp.size()), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(sp[sp.size()], "");
 
     SPAN<const int> spEmpty;
-    EXPECT_DEATH_IF_SUPPORTED(spEmpty.at(0u), "");
-    EXPECT_DEATH_IF_SUPPORTED(spEmpty[0u], "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(spEmpty.at(0u), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(spEmpty[0u], "");
 
     SPAN<const int, 0> spFixedEmpty;
-    EXPECT_DEATH_IF_SUPPORTED(spFixedEmpty.at(0u), "");
-    EXPECT_DEATH_IF_SUPPORTED(spFixedEmpty[0u], "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(spFixedEmpty.at(0u), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(spFixedEmpty[0u], "");
 }
 
 TYPED_TEST(SpanDeathTest, IndexingOversizedIndex) {
@@ -908,7 +909,7 @@ TYPED_TEST(SpanDeathTest, IndexingOversizedIndex) {
     // The narrowing to size_t would give 0 which is in bounds, so this checks that the cast to
     // size_t itself causes a crash.
     constexpr Index64 kHugeIndex{0x1'0000'0000LLU};
-    EXPECT_DEATH_IF_SUPPORTED(sp[kHugeIndex], "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(sp[kHugeIndex], "");
 }
 
 // .data() and .size() are tested in every test essentially.
@@ -1046,10 +1047,10 @@ TYPED_TEST(SpanDeathTest, FirstLastOOB) {
     SPAN<const int> sp{FakeRange()};
 
     sp.first(sp.size());
-    EXPECT_DEATH_IF_SUPPORTED(sp.first(sp.size() + 1), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.first(sp.size() + 1), "");
 
     sp.last(sp.size());
-    EXPECT_DEATH_IF_SUPPORTED(sp.last(sp.size() + 1), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.last(sp.size() + 1), "");
 }
 
 TYPED_TEST(SpanTest, Subspan1Arg) {
@@ -1099,12 +1100,12 @@ TYPED_TEST(SpanDeathTest, Subspan1ArgOOB) {
     {
         SPAN<const int> sp{FakeRange()};
         sp.subspan(sp.size());
-        EXPECT_DEATH_IF_SUPPORTED(sp.subspan(sp.size() + 1), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.subspan(sp.size() + 1), "");
     }
     {
         SPAN<const int, 5> sp{FakeRange()};
         sp.subspan(sp.size());
-        EXPECT_DEATH_IF_SUPPORTED(sp.subspan(sp.size() + 1), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.subspan(sp.size() + 1), "");
     }
 }
 
@@ -1156,11 +1157,11 @@ TYPED_TEST(SpanDeathTest, Subspan2ArgOOB) {
     SPAN<const int> sp{FakeRange()};
 
     sp.subspan(2, sp.size() - 2);
-    EXPECT_DEATH_IF_SUPPORTED(sp.subspan(2, sp.size() - 1), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.subspan(2, sp.size() - 1), "");
 
     // Check that overflows of offset + count is handled.
-    EXPECT_DEATH_IF_SUPPORTED(sp.subspan(std::numeric_limits<size_t>::max(), 1), "");
-    EXPECT_DEATH_IF_SUPPORTED(sp.subspan(1, std::numeric_limits<size_t>::max()), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.subspan(std::numeric_limits<size_t>::max(), 1), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.subspan(1, std::numeric_limits<size_t>::max()), "");
 
     // SAFETY: This is the same range as kSpanData, just viewed with a uint8_t index (which fits the
     // size of kSpanData since it is 5).
@@ -1170,11 +1171,11 @@ TYPED_TEST(SpanDeathTest, Subspan2ArgOOB) {
     Index8 kOne = Index8{uint8_t{1}};
     Index8 kTwo = Index8{uint8_t{2}};
     sp8.subspan(kTwo, sp8.size() - kTwo);
-    EXPECT_DEATH_IF_SUPPORTED(sp8.subspan(kTwo, sp8.size() - kOne), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(sp8.subspan(kTwo, sp8.size() - kOne), "");
 
     // Check that overflows of offset + count is handled.
-    EXPECT_DEATH_IF_SUPPORTED(sp8.subspan(std::numeric_limits<Index8>::max(), kOne), "");
-    EXPECT_DEATH_IF_SUPPORTED(sp8.subspan(kOne, std::numeric_limits<Index8>::max()), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(sp8.subspan(std::numeric_limits<Index8>::max(), kOne), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(sp8.subspan(kOne, std::numeric_limits<Index8>::max()), "");
 }
 
 TYPED_TEST(SpanTest, SpanAsBytes) {
@@ -1426,35 +1427,35 @@ TYPED_TEST(SpanDeathTest, ReinterpretSpan) {
         auto bsp = SPAN<std::byte>(bytes).subspan(1u, 0);
         EXPECT_EQ(bsp.size(), 0u);
         EXPECT_NE(bsp.data(), nullptr);
-        EXPECT_DEATH_IF_SUPPORTED(ReinterpretSpan<uint32_t>(bsp), "");
-        EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint32_t, Index>(bsp)), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(ReinterpretSpan<uint32_t>(bsp), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint32_t, Index>(bsp)), "");
     }
     // Alignment check fails.
     {
         alignas(uint32_t) std::array<std::byte, 9> bytes{};
         auto bsp = SPAN<std::byte>(bytes).subspan(1u, 4u);
         if (alignof(uint32_t) > 1) {
-            EXPECT_DEATH_IF_SUPPORTED(ReinterpretSpan<uint32_t>(bsp), "");
-            EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint32_t, Index>(bsp)), "");
+            DAWN_EXPECT_DEATH_IF_SUPPORTED(ReinterpretSpan<uint32_t>(bsp), "");
+            DAWN_EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint32_t, Index>(bsp)), "");
         }
     }
     // Size check fails.
     {
         alignas(uint32_t) std::array<std::byte, 8> bytes{};
         auto bsp = SPAN<std::byte>(bytes).first(7u);
-        EXPECT_DEATH_IF_SUPPORTED(ReinterpretSpan<uint32_t>(bsp), "");
-        EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint32_t, Index>(bsp)), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(ReinterpretSpan<uint32_t>(bsp), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint32_t, Index>(bsp)), "");
     }
     // Index check fails.
     {
         std::array<std::byte, 256> bytes{};
         auto bsp = SPAN<std::byte>(bytes);
-        EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint8_t, Index8>(bsp)), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint8_t, Index8>(bsp)), "");
     }
     {
         std::array<std::byte, 255> bytes{};
         auto bsp = SPAN<std::byte>(bytes);
-        EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint8_t, Index8>(bsp)), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint8_t, Index8>(bsp)), "");
     }
 }
 
@@ -1551,7 +1552,7 @@ TYPED_TEST(SpanDeathTest, TakeFirstOOB) {
     SPAN<const int> sp{FakeRange()};
 
     sp.TakeFirst(sp.size());
-    EXPECT_DEATH_IF_SUPPORTED(sp.TakeFirst(sp.size() + 1), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(sp.TakeFirst(sp.size() + 1), "");
 }
 
 TYPED_TEST(SpanTest, CopyFrom) {
@@ -1623,7 +1624,7 @@ TYPED_TEST(SpanDeathTest, CopyFromSizeMismatch) {
     SPAN<int> dst_sp{dst};
     SPAN<const int> src_sp{src};
 
-    EXPECT_DEATH_IF_SUPPORTED(dst_sp.CopyFrom(src_sp), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(dst_sp.CopyFrom(src_sp), "");
 }
 
 TYPED_TEST(SpanTest, CopyPrefixFrom) {
@@ -1695,7 +1696,7 @@ TYPED_TEST(SpanDeathTest, CopyPrefixFromSizeMismatch) {
     SPAN<int> dst_sp{dst};
     SPAN<const int> src_sp{src};
 
-    EXPECT_DEATH_IF_SUPPORTED(dst_sp.CopyPrefixFrom(src_sp), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(dst_sp.CopyPrefixFrom(src_sp), "");
 }
 
 TYPED_TEST(SpanTest, FillBytes) {

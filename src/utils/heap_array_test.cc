@@ -327,7 +327,7 @@ TEST_F(HeapArrayDeathTest, SmallIndex) {
         std::ignore = ityp::HeapArrayFrom<IndexU8>(std::array<int, 254>{});
 
         // 255 is invalid because it's reserved as a sentinel value by dawn::SpanBase.
-        EXPECT_DEATH_IF_SUPPORTED(
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(
             std::ignore = ityp::HeapArrayFrom<IndexU8>(std::array<int, 255>{}), "");
     }
 }
@@ -427,10 +427,10 @@ TEST_F(HeapArrayDeathTest, OutOfMemoryAtLimit) {
     // Allocation of uint8_t values
     {
         // Exact maximum amount that will fit in the address space
-        EXPECT_DEATH_IF_SUPPORTED(
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(
             PreventElidingAllocation(HeapArray<uint8_t>{std::numeric_limits<size_t>::max()}), "");
         // And a bit less.
-        EXPECT_DEATH_IF_SUPPORTED(
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(
             PreventElidingAllocation(HeapArray<uint8_t>{std::numeric_limits<size_t>::max() - 4095}),
             "");
     }
@@ -438,14 +438,16 @@ TEST_F(HeapArrayDeathTest, OutOfMemoryAtLimit) {
     {
         static constexpr size_t kMaxSize = std::numeric_limits<size_t>::max() / sizeof(uint32_t);
         // Maximum amount that will fit in the address space
-        EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize}), "");
         // And a bit less.
-        EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize - 1023}),
-                                  "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(
+            PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize - 1023}), "");
 
         // Cases where size * sizeof(val) is larger than the address space and could overflow.
-        EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize + 1}), "");
-        EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize + 2}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize + 1}),
+                                       "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize + 2}),
+                                       "");
     }
 }
 
@@ -454,8 +456,9 @@ TEST_F(HeapArrayDeathTest, OutOfMemory64) {
     using Key64 = TypedInteger<struct Key64T, uint64_t>;
     static constexpr Key64 kHugeSize{0x1000'0000'0000'0000u};
 
-    EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(ityp::HeapArray<Key64, Val>{kHugeSize}), "");
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(ityp::HeapArray<Key64, Val>{kHugeSize}),
+                                   "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         PreventElidingAllocation(
             // SAFETY: Testing unsafe API.
             DAWN_UNSAFE_BUFFERS(ityp::HeapArray<Key64, int>::Uninit(kHugeSize))),
@@ -471,10 +474,10 @@ TEST_F(HeapArrayDeathTest, OutOfBounds) {
     }
 
     HeapArrayVal arr{Index{10u}};
-    EXPECT_DEATH_IF_SUPPORTED(arr[Index{10u}], "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(arr[Index{10u}], "");
 
     const HeapArrayVal& constArr = arr;
-    EXPECT_DEATH_IF_SUPPORTED(constArr[Index{10u}], "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(constArr[Index{10u}], "");
 }
 
 // If the index/size is 64-bit, it needs to be narrowed to size_t. Verify that's checked correctly.
@@ -488,17 +491,17 @@ TEST_F(HeapArrayDeathTest, OversizedIndex) {
     static constexpr Key64 kHugeKey64{0x1000'0000'0000'0000u};
 
     // Crash either due to OOM (on 64-bit) or due to narrowing (on 32-bit).
-    EXPECT_DEATH_IF_SUPPORTED((ityp::HeapArray<Key64, Val>(kHugeKey64)), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED((ityp::HeapArray<Key64, Val>(kHugeKey64)), "");
 
     ityp::HeapArray<Key64, Val> vec(Key64{10u});
 
     vec[Key64{9u}];
     // Regular out-of-bounds.
-    EXPECT_DEATH_IF_SUPPORTED(vec[Key64{10u}], "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(vec[Key64{10u}], "");
 
     vec[Key64{0u}];
     // If this were cast to a 32-bit size_t without a check, it would be in-bounds.
-    EXPECT_DEATH_IF_SUPPORTED(vec[kHugeKey64], "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(vec[kHugeKey64], "");
 }
 
 // Using uninitialized memory should crash on MSan builds.
@@ -509,7 +512,7 @@ TEST_F(HeapArrayDeathTest, ReadUninitWithPODType) {
 
     // SAFETY: Testing unsafe API.
     auto arr = DAWN_UNSAFE_BUFFERS(HeapArrayPOD::Uninit(Index{1u}));
-    EXPECT_DEATH_IF_SUPPORTED([&]() { printf("%d\n", arr[Index{0u}]); }(), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED([&]() { printf("%d\n", arr[Index{0u}]); }(), "");
 }
 
 }  // anonymous namespace

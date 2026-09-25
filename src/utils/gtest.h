@@ -33,18 +33,39 @@
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
-#ifdef GTEST_HAS_DEATH_TEST
-// If death tests are supported, defer to *_DEBUG_DEATH.
+// Wrappers around *_DEATH_IF_SUPPORTED that only match the death message when assertions and
+// logging are enabled (since DAWN_CHECK / DAWN_ASSERT only log condition strings when
+// DAWN_ENABLE_ASSERTS is defined and DAWN_DISABLE_LOGGING is not defined).
+#if defined(DAWN_ENABLE_ASSERTS) && !defined(DAWN_DISABLE_LOGGING)
+#define DAWN_EXPECT_DEATH_IF_SUPPORTED(statement, matcher) \
+    EXPECT_DEATH_IF_SUPPORTED(statement, matcher)
+#define DAWN_ASSERT_DEATH_IF_SUPPORTED(statement, matcher) \
+    ASSERT_DEATH_IF_SUPPORTED(statement, matcher)
+#else
+#define DAWN_EXPECT_DEATH_IF_SUPPORTED(statement, matcher) EXPECT_DEATH_IF_SUPPORTED(statement, "")
+#define DAWN_ASSERT_DEATH_IF_SUPPORTED(statement, matcher) ASSERT_DEATH_IF_SUPPORTED(statement, "")
+#endif
+
+#if defined(GTEST_HAS_DEATH_TEST) && !defined(DAWN_ENABLE_ASSERTS)
+// If death tests are supported and asserts are not enabled, defer to *_DEBUG_DEATH (which under
+// NDEBUG executes the statement directly without expecting death).
+#if !defined(DAWN_DISABLE_LOGGING)
 #define DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher) \
     EXPECT_DEBUG_DEATH(statement, matcher)
 #define DAWN_ASSERT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher) \
     ASSERT_DEBUG_DEATH(statement, matcher)
 #else
-// Otherwise, defer to *_DEATH_IF_SUPPORTED, to print the warning that we couldn't do the test.
+// If logging is disabled, don't match the death messages.
+#define DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher) EXPECT_DEBUG_DEATH(statement, "")
+#define DAWN_ASSERT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher) ASSERT_DEBUG_DEATH(statement, "")
+#endif
+#else
+// Otherwise, defer to DAWN_*_DEATH_IF_SUPPORTED, which either runs the death test (if supported) or
+// prints the warning that we couldn't do the test.
 #define DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher) \
-    EXPECT_DEATH_IF_SUPPORTED(statement, matcher)
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(statement, matcher)
 #define DAWN_ASSERT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher) \
-    ASSERT_DEATH_IF_SUPPORTED(statement, matcher)
+    DAWN_ASSERT_DEATH_IF_SUPPORTED(statement, matcher)
 #endif
 
 // Use DAWN_EXPECT_ASSERT_DEATH_IF_SUPPORTED_ELSE_SKIP_UBSAN to test
@@ -54,11 +75,7 @@
 // - Expect the death due to an assert, if death tests are supported and assert are turned on.
 // - Otherwise skip the statement, if an undefined behavior sanitizer is active
 // - Otherwise perform the statement. (In part to ensure test coverage).
-#if defined(GTEST_HAS_DEATH_TEST) && defined(DAWN_ENABLE_ASSERTS)
-// Perform the statement and expect death.
-#define DAWN_EXPECT_ASSERT_DEATH_IF_SUPPORTED_ELSE_SKIP_UBSAN(statement, matcher) \
-    EXPECT_DEATH(statement, matcher)
-#elif DAWN_UBSAN_ENABLED()
+#if !defined(DAWN_ENABLE_ASSERTS) && DAWN_UBSAN_ENABLED()
 #define DAWN_EXPECT_ASSERT_DEATH_IF_SUPPORTED_ELSE_SKIP_UBSAN(statement, matcher)  \
     do {                                                                           \
         GTEST_SKIP() << "Test exercises undefined behavior, and ubsan is enabled"; \

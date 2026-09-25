@@ -27,8 +27,8 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/gtest.h"
 
 namespace dawn {
 namespace {
@@ -38,7 +38,7 @@ TEST(RawPtrTests, DanglingPointerCauseCrash) {
     std::unique_ptr<bool> owner = std::make_unique<bool>(true);
     raw_ptr<bool> ptr = owner.get();  // Lives until end of scope.
 
-    ASSERT_DEATH_IF_SUPPORTED(
+    DAWN_ASSERT_DEATH_IF_SUPPORTED(
         {
             owner.reset();  // DanglingRawPtrDetectedFn handler => no-op.
             ptr = nullptr;  // DanglingRawPtrReleasedFn handler => crash.

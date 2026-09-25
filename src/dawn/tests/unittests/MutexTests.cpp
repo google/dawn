@@ -28,8 +28,8 @@
 #include <memory>
 #include <utility>
 
-#include "gtest/gtest.h"
 #include "src/dawn/common/Mutex.h"
+#include "src/utils/gtest.h"
 
 namespace dawn {
 namespace {
@@ -150,7 +150,7 @@ using MutexDeathTest = MutexTest;
 TEST_F(MutexDeathTest, DoubleLockCalls) {
     Mutex::AutoLock autoLock1(&mMutex);
     EXPECT_TRUE(mMutex.IsLockedByCurrentThread());
-    ASSERT_DEATH_IF_SUPPORTED({ Mutex::AutoLock autoLock2(&mMutex); }, "");
+    DAWN_ASSERT_DEATH_IF_SUPPORTED({ Mutex::AutoLock autoLock2(&mMutex); }, "");
 }
 
 class RecursiveMutexTest : public ::testing::Test {

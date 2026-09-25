@@ -314,8 +314,9 @@ config("internal_config") {
   # running tests on the GPU builders. If we are not building with Chromium, we
   # ignore dcheck_always_on and rely on either dawn_always_assert or the build
   # type (is_debug) to enable asserts.
-  if (dawn_always_assert || (build_with_chromium && dcheck_always_on) ||
-      is_debug || use_fuzzing_engine) {
+  if (dawn_always_assert ||
+      (build_with_chromium && (dcheck_always_on || use_fuzzing_engine)) ||
+      is_debug) {
     defines += [ "DAWN_ENABLE_ASSERTS" ]
   }
 
