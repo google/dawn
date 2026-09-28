@@ -411,7 +411,7 @@ class BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
         MaybeError result = buffer->FinalizeMap(BufferState::Mapped);
         buffer->mState.notify_all();  // Notify the wait() in UnmapInternal().
         if (result.IsError()) {
-            auto error = result.AcquireError();
+            std::unique_ptr<InternalError> error = result.AcquireError();
             DAWN_CHECK(error->GetType() != InternalErrorType::Validation);
             std::string errorMsg = error->GetFormattedMessage();
 
