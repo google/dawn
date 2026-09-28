@@ -198,13 +198,17 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         module, immediate_data_layout, buffer_sizes_array_elements_num,
         array_length_from_constants.bindpoint_to_size_index));
 
+    {
+        // Must come before DecomposeBuffer.
+        core::ir::transform::PreservePaddingConfig preserve_config{.workgroup_buffer_view = true};
+        TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module, preserve_config));
+    }
     TINT_CHECK_RESULT(raise::DecomposeBuffer(module));
 
     if (!options.disable_workgroup_init) {
         TINT_CHECK_RESULT(core::ir::transform::ZeroInitWorkgroupMemory(module));
     }
 
-    TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module));
     TINT_CHECK_RESULT(core::ir::transform::VectorizeScalarMatrixConstructors(module));
     TINT_CHECK_RESULT(core::ir::transform::RemoveContinueInSwitch(module));
 

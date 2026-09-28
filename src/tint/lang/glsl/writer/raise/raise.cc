@@ -170,7 +170,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(core::ir::transform::MultiplanarExternalTexture(module, multiplanar_map));
 
     // `PreservePadding` must run before `DirectVariableAccess`.
-    TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module));
+    TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module, {}));
 
     {
         // This must come after `MultiplanarExternalTexture` as it will insert functions with

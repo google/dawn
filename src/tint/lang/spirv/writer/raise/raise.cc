@@ -155,7 +155,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     // PreservePadding must come before DirectVariableAccess.
-    TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module));
+    TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module, {}));
 
     core::ir::transform::DirectVariableAccessConfig dva_options;
     dva_options.transform_function = true;
