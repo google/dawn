@@ -199,6 +199,8 @@ targets.tests.gtest_test(
     ],
     args = [
         "--adapter-vendor-id=0x1414",
+        # TODO(crbug.com/565837005): Enable once GCE image enables developer mode
+        # "--assert-developer-mode",
     ],
     binary = "dawn_end2end_tests",
 )

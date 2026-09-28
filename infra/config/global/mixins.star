@@ -66,6 +66,7 @@ targets.mixin(
         # TODO(crbug.com/454365243): Remove this filter when including these
         # tests does not contribute to OOM issues.
         "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+        "--assert-developer-mode",
     ],
 )
 

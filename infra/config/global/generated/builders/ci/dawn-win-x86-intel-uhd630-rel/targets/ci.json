@@ -8,7 +8,8 @@
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
-          "--gtest_filter=-*WebGPU_WebGPU_backend_on*"
+          "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode"
         ],
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
@@ -40,7 +41,8 @@
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
-          "--gtest_filter=-*WebGPU_WebGPU_backend_on*"
+          "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode"
         ],
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
@@ -72,7 +74,8 @@
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
-          "--gtest_filter=-*WebGPU_WebGPU_backend_on*"
+          "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode"
         ],
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
@@ -105,7 +108,8 @@
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
-          "--gtest_filter=-*WebGPU_WebGPU_backend_on*"
+          "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode"
         ],
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
@@ -137,7 +141,8 @@
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
-          "--gtest_filter=-*WebGPU_WebGPU_backend_on*"
+          "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode"
         ],
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
@@ -168,7 +173,8 @@
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
-          "--gtest_filter=-*WebGPU_WebGPU_backend_on*"
+          "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode"
         ],
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
@@ -200,7 +206,8 @@
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
-          "--gtest_filter=-*WebGPU_WebGPU_backend_on*"
+          "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode"
         ],
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
@@ -232,7 +239,8 @@
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
-          "--gtest_filter=-*WebGPU_WebGPU_backend_on*"
+          "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode"
         ],
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"

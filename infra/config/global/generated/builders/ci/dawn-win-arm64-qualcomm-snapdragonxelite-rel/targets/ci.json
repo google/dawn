@@ -9,6 +9,7 @@
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
           "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode",
           "--adapter-vendor-id=0x4D4F4351"
         ],
         "merge": {
@@ -44,6 +45,7 @@
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
           "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode",
           "--adapter-vendor-id=0x4D4F4351"
         ],
         "merge": {
@@ -79,6 +81,7 @@
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
           "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode",
           "--adapter-vendor-id=0x4D4F4351"
         ],
         "merge": {
@@ -113,6 +116,7 @@
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
           "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode",
           "--adapter-vendor-id=0x4D4F4351"
         ],
         "merge": {
@@ -148,6 +152,7 @@
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
           "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode",
           "--adapter-vendor-id=0x4D4F4351"
         ],
         "merge": {
@@ -183,6 +188,7 @@
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
           "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
+          "--assert-developer-mode",
           "--adapter-vendor-id=0x4D4F4351"
         ],
         "merge": {
