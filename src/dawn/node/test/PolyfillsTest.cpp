@@ -164,6 +164,14 @@ class PolyfillsTest : public dawn::node::test::V8IsolateTest {
         return result;
     }
 
+    void RunScriptAllowingExit(const std::string& code) {
+        napi_value script_src;
+        napi_value result;
+        ASSERT_EQ(napi_create_string_utf8(env_, code.c_str(), code.length(), &script_src), napi_ok);
+        napi_run_script(env_, script_src, &result);
+        isolate_->CancelTerminateExecution();
+    }
+
     void RunMicrotasks() { isolate_->PerformMicrotaskCheckpoint(); }
 
     // Whether evaluating `expression` throws an Error. RunScript() expects the script itself to
@@ -752,7 +760,7 @@ TEST_F(PolyfillsTest, ProcessEnvIsEmptyWithoutDawnFlags) {
 TEST_F(PolyfillsTest, ProcessExitStopsTheLoop) {
     dawn::node::standalone::RegisterPolyfills(env_, loop());
 
-    RunScript("process.exit(42)");
+    RunScriptAllowingExit("process.exit(42)");
     EXPECT_TRUE(loop().stopped());
     EXPECT_EQ(loop().exit_code(), 42);
 }
@@ -760,7 +768,7 @@ TEST_F(PolyfillsTest, ProcessExitStopsTheLoop) {
 TEST_F(PolyfillsTest, ProcessExitDefaultsToZero) {
     dawn::node::standalone::RegisterPolyfills(env_, loop());
 
-    RunScript("process.exit()");
+    RunScriptAllowingExit("process.exit()");
     EXPECT_TRUE(loop().stopped());
     EXPECT_EQ(loop().exit_code(), 0);
 }
@@ -768,7 +776,7 @@ TEST_F(PolyfillsTest, ProcessExitDefaultsToZero) {
 TEST_F(PolyfillsTest, ProcessExitWithACodeThatIsNotANumberExitsWithZero) {
     dawn::node::standalone::RegisterPolyfills(env_, loop());
 
-    RunScript("process.exit('not a number')");
+    RunScriptAllowingExit("process.exit('not a number')");
     EXPECT_TRUE(loop().stopped());
     EXPECT_EQ(loop().exit_code(), 0);
 }
@@ -796,6 +804,54 @@ TEST_F(PolyfillsTest, ProcessStreamWriteReturnsTrue) {
     // 'drain' event.
     EXPECT_TRUE(ToBool(RunScript("process.stdout.write('x')")));
     EXPECT_TRUE(ToBool(RunScript("process.stderr.write('x')")));
+}
+
+// process.exit() must not return to JavaScript: once it is called, no further JavaScript runs,
+// JavaScript cannot catch the unwind, and a later exit() cannot overwrite the exit code.
+TEST_F(PolyfillsTest, ProcessExitDoesNotReturnToJavaScript) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    RunScript("globalThis._log = []; globalThis._record = (s) => { globalThis._log.push(s); };");
+    RunScriptAllowingExit(R"(
+        try {
+            process.exit(3);
+            _record('after-exit');
+        } catch (e) {
+            _record('caught');
+        } finally {
+            _record('finally');
+        }
+        _record('after-try');
+        process.exit(0);
+    )");
+
+    // The second exit() was never reached, so the first exit code stands, and nothing after the
+    // exit() ran - not even the `finally` block, which JavaScript would otherwise always run.
+    EXPECT_TRUE(loop().stopped());
+    EXPECT_EQ(loop().exit_code(), 3);
+    EXPECT_EQ(ToString(RunScript("globalThis._log.join(',')")), "");
+}
+
+TEST_F(PolyfillsTest, ProcessExitFromMicrotaskDoesNotReturnToJavaScript) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    RunScript(R"(
+        globalThis._log = [];
+        globalThis._record = (s) => { globalThis._log.push(s); };
+        Promise.resolve().then(() => {
+            process.exit(3);
+            _record('after-exit');
+        });
+        Promise.resolve().then(() => { _record('later-microtask'); });
+    )");
+
+    RunMicrotasks();
+    isolate_->CancelTerminateExecution();
+
+    // Neither the rest of the microtask that exited nor the microtask queued behind it ran.
+    EXPECT_TRUE(loop().stopped());
+    EXPECT_EQ(loop().exit_code(), 3);
+    EXPECT_EQ(ToString(RunScript("globalThis._log.join(',')")), "");
 }
 
 TEST_F(PolyfillsTest, EventGlobals) {

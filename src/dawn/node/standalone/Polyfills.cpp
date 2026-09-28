@@ -716,6 +716,11 @@ Napi::Value Exit(const Napi::CallbackInfo& info) {
         code = info[0].As<Napi::Number>().Int32Value();
     }
     ctx->loop.Stop(code);
+
+    // Unwind the running JavaScript frames with an uncatchable termination exception so execution
+    // does not continue after process.exit().
+    napi_env c_env = info.Env();
+    reinterpret_cast<napi_env__*>(c_env)->isolate->TerminateExecution();
     return info.Env().Undefined();
 }
 

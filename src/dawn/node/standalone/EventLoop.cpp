@@ -195,8 +195,10 @@ void EventLoop::Run() {
 
 void EventLoop::Stop(int exit_code) {
     AssertOnLoopThread();
-    stopped_ = true;
-    exit_code_ = exit_code;
+    if (!stopped_) {
+        stopped_ = true;
+        exit_code_ = exit_code;
+    }
 }
 
 void EventLoop::RunTask(Task task) {
@@ -204,6 +206,10 @@ void EventLoop::RunTask(Task task) {
         v8::HandleScope task_scope(isolate_);
         v8::TryCatch try_catch(isolate_);
         task();
+        if (try_catch.HasTerminated()) {
+            isolate_->CancelTerminateExecution();
+            return;
+        }
         if (try_catch.HasCaught()) {
             ReportException(isolate_, &try_catch);
             Stop(1);
@@ -212,6 +218,9 @@ void EventLoop::RunTask(Task task) {
     }
     // Outside the handle scope, since a microtask is a separate turn and opens its own.
     isolate_->PerformMicrotaskCheckpoint();
+    if (stopped_) {
+        isolate_->CancelTerminateExecution();
+    }
 }
 
 void EventLoop::WaitUntil(TimePoint due) {

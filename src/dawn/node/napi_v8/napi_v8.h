@@ -42,7 +42,8 @@
 #include <utility>
 #include <vector>
 
-#include "absl/container/linked_hash_map.h"
+#include "absl/container/flat_hash_map.h"
+#include "absl/container/linked_hash_set.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundef"
@@ -115,6 +116,7 @@ struct napi_ref__ {
 
     void SetWeak();
     void ClearWeak();
+    void ClearFinalizer();
 
     static void WeakCallback(const v8::WeakCallbackInfo<napi_ref__>& data);
     static void PostGarbageCollectionCallback(const v8::WeakCallbackInfo<napi_ref__>& data);
@@ -146,13 +148,16 @@ struct napi_env__ {
     std::vector<std::unique_ptr<napi_handle_scope__>> open_handle_scopes;
     std::vector<std::unique_ptr<CallbackBinding>> callback_bindings;
 
-    // Keyed by the reference's own address for O(1) erase on napi_delete_reference, while
-    // preserving insertion order so ~napi_env__ can finalize references in reverse creation order.
-    absl::linked_hash_map<napi_ref__*, std::unique_ptr<napi_ref__>> references;
+    // Owns all live references, keyed by address for O(1) lookup and deletion.
+    absl::flat_hash_map<napi_ref__*, std::unique_ptr<napi_ref__>> references;
+
+    // Subset of `references` that have a non-null `finalize_cb`, in creation order so ~napi_env__
+    // can run remaining finalizers in reverse creation order in O(1) per finalizer.
+    absl::linked_hash_set<napi_ref__*> finalizable_references;
 
     // References collected by V8 GC whose `napi_finalize` callbacks are waiting to run outside the
-    // GC atomic pause.
-    std::vector<napi_ref__*> pending_finalizers;
+    // GC atomic pause, in FIFO order.
+    absl::linked_hash_set<napi_ref__*> pending_finalizers;
     bool post_gc_callback_scheduled = false;
     bool finalizer_drain_scheduled = false;
 
@@ -170,34 +175,7 @@ struct napi_env__ {
         ClearLastError();
     }
 
-    ~napi_env__() {
-        if (instance_data.finalize_cb != nullptr) {
-            instance_data.finalize_cb(this, instance_data.data, instance_data.finalize_hint);
-            instance_data.finalize_cb = nullptr;
-        }
-
-        // Finalize all remaining references that have an active finalizer, most recently created
-        // first. Iteration order is insertion order, which absl::linked_hash_map preserves.
-        while (true) {
-            auto it = std::find_if(references.rbegin(), references.rend(), [](const auto& entry) {
-                return entry.second->finalize_cb != nullptr;
-            });
-            if (it == references.rend()) {
-                break;
-            }
-
-            napi_ref__* ref = it->second.get();
-            napi_finalize cb = ref->finalize_cb;
-            void* native_object = ref->native_object;
-            void* finalize_hint = ref->finalize_hint;
-
-            // Reset the handle and clear finalize_cb BEFORE calling user code.
-            ref->handle.Reset();
-            ref->finalize_cb = nullptr;
-
-            cb(this, native_object, finalize_hint);
-        }
-    }
+    ~napi_env__();
 
     v8::Local<v8::Context> GetContext() const { return context.Get(isolate); }
 
@@ -218,6 +196,38 @@ struct napi_env__ {
         return status;
     }
 };
+
+inline void napi_ref__::ClearFinalizer() {
+    finalize_cb = nullptr;
+    env->finalizable_references.erase(this);
+}
+
+inline napi_env__::~napi_env__() {
+    if (instance_data.finalize_cb != nullptr) {
+        instance_data.finalize_cb(this, instance_data.data, instance_data.finalize_hint);
+        instance_data.finalize_cb = nullptr;
+    }
+
+    pending_finalizers.clear();
+
+    // Finalize all remaining references that have an active finalizer, most recently created
+    // first. References stay in `references` until ~napi_env__ completes unless a finalizer
+    // explicitly calls napi_delete_reference.
+    while (!finalizable_references.empty()) {
+        napi_ref__* ref = *finalizable_references.rbegin();
+        napi_finalize cb = ref->finalize_cb;
+        void* native_object = ref->native_object;
+        void* finalize_hint = ref->finalize_hint;
+
+        // Reset the handle and clear finalize_cb BEFORE calling user code.
+        ref->handle.Reset();
+        ref->ClearFinalizer();
+
+        cb(this, native_object, finalize_hint);
+    }
+
+    references.clear();
+}
 
 // Inline handle conversion functions between V8 and Node-API.
 // v8::Local<v8::Value> is guaranteed by V8 to be a trivially copyable, pointer-sized

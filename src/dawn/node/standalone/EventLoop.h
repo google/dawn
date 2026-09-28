@@ -105,8 +105,8 @@ class EventLoop {
     // Runs iterations until Stop() is called or there is no work left to wait for.
     void Run();
 
-    // Asks the loop to finish. Takes effect between tasks, so the caller runs to completion.
-    // Backs process.exit().
+    // Asks the loop to finish. Takes effect between tasks. Once stopped, later calls do not
+    // overwrite the exit code. Backs process.exit().
     void Stop(int exit_code);
 
     bool stopped() const { return stopped_; }

@@ -72,15 +72,17 @@ napi_ref__::napi_ref__(napi_env e,
       finalize_hint(fin_hint),
       is_wrap_ref(wrap_ref),
       is_userland_ref(userland_ref) {
+    if (finalize_cb != nullptr) {
+        env->finalizable_references.insert(this);
+    }
     if (ref_count == 0) {
         SetWeak();
     }
 }
 
 napi_ref__::~napi_ref__() {
-    if (env != nullptr) {
-        std::erase(env->pending_finalizers, this);
-    }
+    env->pending_finalizers.erase(this);
+    ClearFinalizer();
     handle.Reset();
 }
 
@@ -94,8 +96,9 @@ void napi_ref__::ClearWeak() {
 
 void napi_env__::DrainFinalizers() {
     while (!pending_finalizers.empty()) {
-        napi_ref__* ref = pending_finalizers.front();
-        pending_finalizers.erase(pending_finalizers.begin());
+        auto it = pending_finalizers.begin();
+        napi_ref__* ref = *it;
+        pending_finalizers.erase(it);
         if (ref->finalize_cb == nullptr) {
             continue;
         }
@@ -103,7 +106,7 @@ void napi_env__::DrainFinalizers() {
         napi_finalize cb = ref->finalize_cb;
         void* native_object = ref->native_object;
         void* finalize_hint = ref->finalize_hint;
-        ref->finalize_cb = nullptr;
+        ref->ClearFinalizer();
 
         ClearLastError();
         cb(this, native_object, finalize_hint);
@@ -152,7 +155,7 @@ void napi_ref__::WeakCallback(const v8::WeakCallbackInfo<napi_ref__>& data) {
     self->handle.Reset();
     if (self->finalize_cb != nullptr) {
         napi_env env = self->env;
-        env->pending_finalizers.push_back(self);
+        env->pending_finalizers.insert(self);
         if (!env->post_gc_callback_scheduled && !env->finalizer_drain_scheduled) {
             env->post_gc_callback_scheduled = true;
             data.SetSecondPassCallback(&napi_ref__::PostGarbageCollectionCallback);
@@ -491,6 +494,9 @@ napi_status ProcessCallResult(napi_env env,
                               v8::TryCatch& try_catch,
                               v8::MaybeLocal<T> maybe_result,
                               napi_value* out_result) {
+    if (try_catch.HasTerminated()) {
+        return env->SetLastError(napi_generic_failure, "Execution was terminated");
+    }
     if (try_catch.HasCaught()) {
         env->last_exception.Reset(env->isolate, try_catch.Exception());
         return env->SetLastError(napi_pending_exception,
@@ -1725,7 +1731,7 @@ napi_status napi_remove_wrap(napi_env env, napi_value js_object, void** result) 
     }
 
     // Detach the reference, clearing the finalizer so it never runs on the removed native object.
-    ref->finalize_cb = nullptr;
+    ref->ClearFinalizer();
     ref->native_object = nullptr;
     ref->is_wrap_ref = false;
 
