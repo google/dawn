@@ -397,7 +397,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTexture) {
     // TODO(crbug.com/522869943): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(/*testDepth=*/false);
 
     // storeOp should not affect the result in the resolve target.
@@ -1088,7 +1087,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverage) {
     // TODO(crbug.com/522869943): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;
     constexpr bool kAlphaToCoverageEnabled = true;
 
@@ -1138,9 +1136,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverage) {
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndAlphaWriteMasked) {
     // TODO(crbug.com/522869943): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
-    // TODO(crbug.com/458113207): Flaky w/ WARP.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
 
     constexpr bool kTestDepth = false;
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;
@@ -1198,7 +1193,6 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCo
     // TODO(dawn:1550) Workaround introduces a bug on Qualcomm GPUs, but is necessary for ARM GPUs.
     DAWN_TEST_UNSUPPORTED_IF(IsAndroid() && IsQualcomm() &&
                              HasToggleEnabled("resolve_multiple_attachments_in_separate_passes"));
-
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -1330,7 +1324,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndSamp
     // at the same time. See the issue: https://github.com/gpuweb/gpuweb/issues/959.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && !IsApple());
 
-
     constexpr float kMSAACoverage = 0.50f;
     constexpr uint32_t kSampleMask = kFirstSampleMaskBit | kThirdSampleMaskBit;
     constexpr bool kAlphaToCoverageEnabled = true;
@@ -1373,7 +1366,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndRast
 
     // TODO(dawn:1550) Fails on ARM-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
-
 
     // Fails on Xclipse GPUs.
     DAWN_SUPPRESS_TEST_IF(IsSamsung());

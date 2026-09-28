@@ -31,7 +31,7 @@ vars = {
   'dawn_go_version': 'version:3@1.26.6',
   'dawn_node_version': 'version:2@20.11.0',
   'dawn_agility_sdk_version': 'version:2@1.721.0-preview',
-  'dawn_direct3d_warp_version': 'version:3@1.65535.20-preview.chromium.1',
+  'dawn_direct3d_warp_version': 'version:3@1.0.21.chromium.1',
   'dawn_bazelisk_version': 'version:3@1.29.0',
   'dawn_llvm-dev_version': 'version:3@22.1.0',
   'dawn_zstd_version': 'Lf-seQJdussz81cZXnez5xIxEdkejDRxKumQpHbHMOUC',

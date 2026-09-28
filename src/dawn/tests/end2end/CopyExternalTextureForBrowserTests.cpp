@@ -283,10 +283,6 @@ class CopyExternalTextureForBrowserTestsBase
                          const wgpu::Extent3D& dstTextureSize,
                          const wgpu::CopyTextureForBrowserOptions options = {},
                          const wgpu::TextureAspect dstAspect = wgpu::TextureAspect::All) {
-        // TODO(crbug.com/563423066): On D3D12 WARP with DXC (DXIL), WARP's ShaderJIT crashes in
-        // Implement_DXIL_ShuffleVector.
-        DAWN_SUPPRESS_TEST_IF(this->IsD3D12() && this->IsWARP());
-
         wgpu::ExternalTexture externalTexture = this->CreateDefaultExternalTexture();
         wgpu::ImageCopyExternalTexture srcImageCopyExternalTexture;
         srcImageCopyExternalTexture.externalTexture = externalTexture;
