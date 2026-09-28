@@ -73,7 +73,7 @@ class SharedTextureMemoryBase : public SharedResourceMemory {
 
     void SetProperties(const SharedTextureMemoryProperties& properties);
 
-    MaybeError GetProperties(SharedTextureMemoryProperties* properties) const;
+    MaybeValError GetProperties(SharedTextureMemoryProperties* properties) const;
 
   private:
     MaybeValError ValidateCreateTexture(const TextureDescriptor* rawDescriptor);
@@ -84,7 +84,7 @@ class SharedTextureMemoryBase : public SharedResourceMemory {
     virtual ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const UnpackedPtr<TextureDescriptor>& descriptor) = 0;
 
-    virtual MaybeError GetChainedProperties(
+    virtual MaybeValError GetChainedProperties(
         UnpackedPtr<SharedTextureMemoryProperties>& properties) const {
         return {};
     }

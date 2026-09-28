@@ -128,7 +128,8 @@ wgpu::Status SharedTextureMemoryBase::APIGetProperties(
     return wgpu::Status::Success;
 }
 
-MaybeError SharedTextureMemoryBase::GetProperties(SharedTextureMemoryProperties* properties) const {
+MaybeValError SharedTextureMemoryBase::GetProperties(
+    SharedTextureMemoryProperties* properties) const {
     properties->usage = mProperties.usage;
     properties->size = mProperties.size;
     properties->format = mProperties.format;
@@ -136,16 +137,13 @@ MaybeError SharedTextureMemoryBase::GetProperties(SharedTextureMemoryProperties*
     UnpackedPtr<SharedTextureMemoryProperties> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(properties));
 
-    if (unpacked.Has<SharedTextureMemoryAHardwareBufferProperties>()) {
-        DAWN_INVALID_IF(
+    DAWN_INVALID_IF(
+        unpacked.Has<SharedTextureMemoryAHardwareBufferProperties>() &&
             !GetDevice()->HasFeature(Feature::SharedTextureMemoryAHardwareBuffer),
-            "SharedTextureMemory properties (%s) have a chained "
-            "SharedTextureMemoryAHardwareBufferProperties without the %s feature being set.",
-            this, ToCppAPI(Feature::SharedTextureMemoryAHardwareBuffer));
-    }
+        "SharedTextureMemory properties (%s) have a chained "
+        "SharedTextureMemoryAHardwareBufferProperties without the %s feature being set.",
+        this, ToCppAPI(Feature::SharedTextureMemoryAHardwareBuffer));
 
-    // TODO(536639352): This will probably require special attention as we split the error types
-    // apart. Figure out if this should be Internal or Validation, or Unknown.
     DAWN_TRY(GetChainedProperties(unpacked));
 
     return {};

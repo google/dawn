@@ -98,7 +98,7 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
                                                      ExecutionSerial lastUsageSerial,
                                                      UnpackedPtr<EndAccessState>& state) override;
 
-    MaybeError GetChainedProperties(
+    MaybeValError GetChainedProperties(
         UnpackedPtr<SharedTextureMemoryProperties>& properties) const override;
 
     Ref<RefCountedVkHandle<VkImage>> mVkImage;

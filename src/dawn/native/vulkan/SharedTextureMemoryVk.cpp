@@ -1098,19 +1098,16 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
 
 #endif  // DAWN_PLATFORM_IS(FUCHSIA) || DAWN_PLATFORM_IS(LINUX)
 
-MaybeError SharedTextureMemory::GetChainedProperties(
+MaybeValError SharedTextureMemory::GetChainedProperties(
     UnpackedPtr<SharedTextureMemoryProperties>& properties) const {
     auto ahbProperties = properties.Get<SharedTextureMemoryAHardwareBufferProperties>();
-
     if (!ahbProperties) {
         return {};
     }
 
-    if (ahbProperties->yCbCrInfo.nextInChain) {
-        return DAWN_VALIDATION_ERROR(
-            "yCBCrInfo field of SharedTextureMemoryAHardwareBufferProperties has a chained "
-            "struct.");
-    }
+    DAWN_INVALID_IF(ahbProperties->yCbCrInfo.nextInChain,
+                    "yCBCrInfo field of SharedTextureMemoryAHardwareBufferProperties has a chained "
+                    "struct.");
 
     ahbProperties->yCbCrInfo = mYCbCrVkDesc;
 
