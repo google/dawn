@@ -29,6 +29,7 @@
 
 #include <gmock/gmock.h>
 
+#include <limits>
 #include <string>
 #include <utility>
 
@@ -268,6 +269,45 @@ TEST_F(IRBinaryDecodeTest, Overrides) {
     EXPECT_EQ(decoded, Success);
 
     EXPECT_TRUE(decoded.Get().properties.Contains(core::ir::Property::kAllowOverrides));
+}
+
+TEST_F(IRBinaryDecodeTest, BreakIf_InvalidNumNextIterValues) {
+    auto* fn = b.Function("Function", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Body(), [&] { b.Continue(loop); });
+        b.Append(loop->Continuing(), [&] { b.BreakIf(loop, true); });
+        b.Return(fn);
+    });
+
+    auto res = EncodeToProto(mod);
+    ASSERT_EQ(res, Success);
+
+    auto pb_mod = std::move(res.Get());
+
+    bool found = false;
+    for (int bi = 0; bi < pb_mod->blocks_size(); ++bi) {
+        auto* block = pb_mod->mutable_blocks(bi);
+        for (int ii = 0; ii < block->instructions_size(); ++ii) {
+            auto* inst = block->mutable_instructions(ii);
+            if (inst->has_break_if()) {
+                inst->clear_operands();
+                inst->mutable_break_if()->set_num_next_iter_values(
+                    std::numeric_limits<uint32_t>::max());
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            break;
+        }
+    }
+    ASSERT_TRUE(found);
+
+    auto decoded = Decode(*pb_mod);
+    EXPECT_NE(decoded, Success);
+    EXPECT_THAT(decoded.Failure().reason,
+                testing::HasSubstr("invalid value for num_next_iter_values()"));
 }
 
 }  // namespace

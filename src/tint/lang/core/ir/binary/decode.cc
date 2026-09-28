@@ -552,10 +552,10 @@ struct Decoder {
         if (inst_in.has_break_if()) {
             auto num_next_iter_values = inst_in.break_if().num_next_iter_values();
             bool is_valid =
-                inst_out->Operands().Length() >= num_next_iter_values + BreakIf::kArgsOperandOffset;
+                inst_out->Operands().Length() >= BreakIf::kArgsOperandOffset &&
+                inst_out->Operands().Length() - BreakIf::kArgsOperandOffset >= num_next_iter_values;
             if (DAWN_LIKELY(is_valid)) {
-                static_cast<BreakIf*>(inst_out)->SetNumNextIterValues(
-                    inst_in.break_if().num_next_iter_values());
+                static_cast<BreakIf*>(inst_out)->SetNumNextIterValues(num_next_iter_values);
             } else {
                 err_ << "invalid value for num_next_iter_values()\n";
             }
