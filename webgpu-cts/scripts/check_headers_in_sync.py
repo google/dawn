@@ -39,6 +39,8 @@ EXPECTATION_FILES = [
     os.path.realpath(
         os.path.join(os.path.dirname(__file__), '..',
                      'compat-expectations.txt')),
+    os.path.realpath(
+        os.path.join(os.path.dirname(__file__), '..', 'slow_tests.txt')),
 ]
 
 tag_headers = {}
