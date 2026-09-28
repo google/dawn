@@ -12,6 +12,7 @@ struct tint_module_vars_struct {
   device uint4* out;
   const constant tint_immediate_data_struct* tint_immediate_data;
 };
+typedef uint4 __attribute__((__may_alias__)) tint_aliased_vec4_u32;
 
 struct tint_array_lengths_struct {
   uint tint_array_length_0_0;
@@ -21,6 +22,7 @@ fragment void v_1(const device array<uchar, 1>* v [[buffer(0)]], device uint4* o
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v, .out=out, .tint_immediate_data=tint_immediate_data};
   uint const offset = 16u;
   uint const v_2 = (offset & 4294967280u);
-  const device uint4* const p = reinterpret_cast<const device uint4*>(reinterpret_cast<const device char*>(tint_module_vars.v) + select(v_2, 0u, (tint_array_lengths_struct{.tint_array_length_0_0=(*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u]}.tint_array_length_0_0 < addsat(v_2, 16u))));
+  const device tint_aliased_vec4_u32* const v_3 = reinterpret_cast<const device uint4*>(reinterpret_cast<const device char*>(tint_module_vars.v) + select(v_2, 0u, (tint_array_lengths_struct{.tint_array_length_0_0=(*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u]}.tint_array_length_0_0 < addsat(v_2, 16u))));
+  const device tint_aliased_vec4_u32* const p = v_3;
   (*tint_module_vars.out) = (*p);
 }

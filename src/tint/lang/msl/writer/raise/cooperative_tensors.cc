@@ -470,10 +470,13 @@ struct State {
         }
     }
 
-    void ElideRedundantPointerOffset(core::ir::Value*& p) {
+    msl::BuiltinFn ElideRedundantPointerOffset(core::ir::Value*& p) {
+        msl::BuiltinFn ptr_offset = msl::BuiltinFn::kPointerOffset;
         if (auto* pre_cast = p->AsInstruction<msl::ir::BuiltinCall>()) {
-            if (pre_cast->Func() == msl::BuiltinFn::kPointerOffset &&
+            if ((pre_cast->Func() == msl::BuiltinFn::kPointerOffset ||
+                 pre_cast->Func() == msl::BuiltinFn::kAliasPointerOffset) &&
                 pre_cast->Args()[1] == b.Constant(u32(0))) {
+                ptr_offset = pre_cast->Func();
                 p = pre_cast->Args()[0];
 
                 if (pre_cast->Result()->NumUsages() == 1) {
@@ -481,6 +484,7 @@ struct State {
                 }
             }
         }
+        return ptr_offset;
     }
 
     core::ir::Let* MakeTensorInline(std::string_view name,
@@ -488,7 +492,7 @@ struct State {
                                     core::ir::Value* offset,
                                     core::ir::Value* stride,
                                     const type::CooperativeTensor* tensor) {
-        ElideRedundantPointerOffset(p);
+        auto ptr_offset = ElideRedundantPointerOffset(p);
 
         auto* ptr = p->Type()->As<core::type::Pointer>();
         auto* arr = ptr->StoreType()->As<core::type::Array>();
@@ -505,8 +509,7 @@ struct State {
             offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
             offset = b.Multiply(offset, u32(arr_stride));
             data = b.CallExplicit<msl::ir::BuiltinCall>(
-                        ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()),
-                        msl::BuiltinFn::kPointerOffset,
+                        ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()), ptr_offset,
                         Vector<core::ir::TemplateParameter, 1>{mat_ele}, p, offset)
                        ->Result();
 

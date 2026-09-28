@@ -1119,9 +1119,12 @@ struct State {
 
             // If the array was a vec3, then FixTypeLayout may have inserted a (soon to be)
             // redundant pointer offset call. Elide it here.
+            msl::BuiltinFn ptr_offset = msl::BuiltinFn::kPointerOffset;
             if (auto* pre_cast = p->AsInstruction<msl::ir::BuiltinCall>()) {
-                if (pre_cast->Func() == msl::BuiltinFn::kPointerOffset &&
+                if ((pre_cast->Func() == msl::BuiltinFn::kPointerOffset ||
+                     pre_cast->Func() == msl::BuiltinFn::kAliasPointerOffset) &&
                     pre_cast->Args()[1] == b.Constant(u32(0))) {
+                    ptr_offset = pre_cast->Func();
                     p = pre_cast->Args()[0];
 
                     if (pre_cast->Result()->NumUsages() == 1) {
@@ -1151,8 +1154,7 @@ struct State {
                 offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
                 offset = b.Multiply(offset, u32(arr_stride));
                 src = b.CallExplicit<msl::ir::BuiltinCall>(
-                           ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()),
-                           msl::BuiltinFn::kPointerOffset,
+                           ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()), ptr_offset,
                            Vector<core::ir::TemplateParameter, 1>{mat_ele}, p, offset)
                           ->Result();
 
@@ -1199,9 +1201,12 @@ struct State {
 
             // If the array was a vec3, then FixTypeLayout may have inserted a (soon to be)
             // redundant pointer offset call. Elide it here.
+            msl::BuiltinFn ptr_offset = msl::BuiltinFn::kPointerOffset;
             if (auto* pre_cast = p->AsInstruction<msl::ir::BuiltinCall>()) {
-                if (pre_cast->Func() == msl::BuiltinFn::kPointerOffset &&
+                if ((pre_cast->Func() == msl::BuiltinFn::kPointerOffset ||
+                     pre_cast->Func() == msl::BuiltinFn::kAliasPointerOffset) &&
                     pre_cast->Args()[1] == b.Constant(u32(0))) {
+                    ptr_offset = pre_cast->Func();
                     p = pre_cast->Args()[0];
 
                     if (pre_cast->Result()->NumUsages() == 1) {
@@ -1231,8 +1236,7 @@ struct State {
                 offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
                 offset = b.Multiply(offset, u32(arr_stride));
                 dst = b.CallExplicit<msl::ir::BuiltinCall>(
-                           ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()),
-                           msl::BuiltinFn::kPointerOffset,
+                           ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()), ptr_offset,
                            Vector<core::ir::TemplateParameter, 1>{mat_ele}, p, offset)
                           ->Result();
 

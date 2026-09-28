@@ -86,6 +86,7 @@ if(TINT_BUILD_MSL_WRITER)
 # Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_msl_writer_test test
+  lang/msl/writer/alias_test.cc
   lang/msl/writer/binary_test.cc
   lang/msl/writer/constant_test.cc
   lang/msl/writer/discard_test.cc

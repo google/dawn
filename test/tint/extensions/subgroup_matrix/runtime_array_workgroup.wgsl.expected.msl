@@ -4,6 +4,7 @@ using namespace metal;
 struct tint_module_vars_struct {
   threadgroup array<uchar, 1024>* v;
 };
+typedef array<float, 1> __attribute__((__may_alias__)) tint_aliased_array_f32;
 
 struct tint_symbol_1 {
   array<uchar, 1024> tint_symbol;
@@ -25,17 +26,18 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
     }
   }
   (threadgroup_barrier(mem_flags::mem_threadgroup));
-  threadgroup array<float, 1>* const view = reinterpret_cast<threadgroup array<float, 1>*>(reinterpret_cast<threadgroup char*>(tint_module_vars.v) + 0u);
-  bool const v_3 = (64u <= 256u);
-  simdgroup_float8x8 v_4 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  (simdgroup_load(v_4, (&(*view)[select(0u, 0u, v_3)]), ulong(select(8u, 8u, v_3)), ulong2(0ul), true));
-  simdgroup_float8x8 const m = v_4;
-  bool const v_5 = (64u <= 256u);
-  (simdgroup_store(m, (&(*view)[select(0u, 0u, v_5)]), ulong(select(8u, 8u, v_5)), ulong2(0ul), false));
+  threadgroup tint_aliased_array_f32* const v_3 = reinterpret_cast<threadgroup array<float, 1>*>(reinterpret_cast<threadgroup char*>(tint_module_vars.v) + 0u);
+  threadgroup tint_aliased_array_f32* const view = v_3;
+  bool const v_4 = (64u <= 256u);
+  simdgroup_float8x8 v_5 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+  (simdgroup_load(v_5, (&(*view)[select(0u, 0u, v_4)]), ulong(select(8u, 8u, v_4)), ulong2(0ul), true));
+  simdgroup_float8x8 const m = v_5;
+  bool const v_6 = (64u <= 256u);
+  (simdgroup_store(m, (&(*view)[select(0u, 0u, v_6)]), ulong(select(8u, 8u, v_6)), ulong2(0ul), false));
 }
 
 [[max_total_threads_per_threadgroup(32)]]
-kernel void v_6(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_7 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_7).tint_symbol)};
+kernel void v_7(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_8 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_8).tint_symbol)};
   (main_inner(tint_local_index, tint_module_vars));
 }

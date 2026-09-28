@@ -4,10 +4,12 @@ using namespace metal;
 struct tint_module_vars_struct {
   device array<uchar, 128>* v;
 };
+typedef array<uint, 1> __attribute__((__may_alias__)) tint_aliased_array_u32;
 
 [[max_total_threads_per_threadgroup(1)]]
 kernel void v_1(device array<uchar, 128>* v [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
-  device array<uint, 1>* const p = reinterpret_cast<device array<uint, 1>*>(reinterpret_cast<device char*>(tint_module_vars.v) + 0u);
+  device tint_aliased_array_u32* const v_2 = reinterpret_cast<device array<uint, 1>*>(reinterpret_cast<device char*>(tint_module_vars.v) + 0u);
+  device tint_aliased_array_u32* const p = v_2;
   (*p)[min(0u, (8u - 1u))] = 2u;
 }

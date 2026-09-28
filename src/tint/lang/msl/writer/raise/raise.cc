@@ -63,6 +63,7 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/msl/writer/common/option_helpers.h"
+#include "src/tint/lang/msl/writer/raise/alias_to_let.h"
 #include "src/tint/lang/msl/writer/raise/argument_buffers.h"
 #include "src/tint/lang/msl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/msl/writer/raise/builtin_polyfill.h"
@@ -310,6 +311,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core::ir::transform::ValueToLetConfig cfg;
         TINT_CHECK_RESULT(core::ir::transform::ValueToLet(module, cfg));
     }
+
+    // Must be around the same time as ValueToLet to ensure aliased typedefs are generated at the
+    // correct places. These passes need to run late enough to avoid eliding the added lets.
+    TINT_CHECK_RESULT(raise::AliasToLet(module));
 
     return Success;
 }

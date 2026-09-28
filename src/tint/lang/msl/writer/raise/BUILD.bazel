@@ -43,6 +43,7 @@ exports_files(glob(["*.def", "*.tmpl"], allow_empty = True))
 cc_library(
   name = "raise",
   srcs = [
+    "alias_to_let.cc",
     "argument_buffers.cc",
     "binary_polyfill.cc",
     "builtin_polyfill.cc",
@@ -61,6 +62,7 @@ cc_library(
     "validate_subgroup_matrix.cc",
   ],
   hdrs = [
+    "alias_to_let.h",
     "argument_buffers.h",
     "binary_polyfill.h",
     "builtin_polyfill.h",
@@ -113,6 +115,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "alias_to_let_test.cc",
     "argument_buffers_test.cc",
     "binary_polyfill_test.cc",
     "builtin_polyfill_test.cc",

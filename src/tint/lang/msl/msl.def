@@ -502,6 +502,9 @@ implicit(T, S: address_space, A: access)
 implicit(T1, S: address_space, A: access)
   fn pointer_offset<T2>(ptr<S, T1, A>, u32) -> ptr<S, T2, A>
 
+implicit(T1, S: address_space, A: access)
+  fn alias_pointer_offset<T2>(ptr<S, T1, A>, u32) -> ptr<S, T2, A>
+
 fn volatile_zero() -> u32
 
 implicit(T: fiu32) fn resource_load(resource_table<texture_1d<T> >, u32) -> texture_1d<T>

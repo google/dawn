@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cctype>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -161,6 +162,9 @@ class Printer : public tint::TextGenerator {
         // Determine which structures will need to be emitted with host-shareable memory layouts.
         FindHostShareableStructs();
 
+        // Determine results that potentially need attributed as aliasable.
+        FindAliasedResults();
+
         // Emit functions.
         for (auto* func : ir_.DependencyOrderedFunctions()) {
             EmitFunction(func);
@@ -196,6 +200,9 @@ class Printer : public tint::TextGenerator {
     Hashset<const core::type::Struct*, 16> host_shareable_structs_;
     Hashset<const core::type::Struct*, 4> emitted_structs_;
     Hashmap<const core::type::ResourceTable*, Symbol, 4> resource_table_to_name_;
+
+    Hashset<const core::ir::InstructionResult*, 64> aliased_results_;
+    Hashmap<const core::type::Type*, std::string, 16> aliased_typedefs_;
 
     /// The name of the templated alias for matmul2d operations, if emitted.
     std::string tensor_operation_template_;
@@ -243,6 +250,30 @@ class Printer : public tint::TextGenerator {
     /// Block to emit for a continuing
     std::vector<std::unique_ptr<std::function<void()>>> emit_continuing_;
 
+    void FindAliasedResults() {
+        // Aliasable roots are the results of msl.alias_pointer_offset calls.
+        Vector<core::ir::Instruction*, 16> worklist;
+        for (auto* inst : ir_.Instructions()) {
+            if (auto* builtin = inst->As<msl::ir::BuiltinCall>()) {
+                if (builtin->Func() == msl::BuiltinFn::kAliasPointerOffset) {
+                    worklist.Push(builtin);
+                }
+            }
+        }
+
+        // TODO(495899057): this will need to traverse functions when aliasing is permitted.
+        while (!worklist.IsEmpty()) {
+            auto inst = worklist.Pop();
+            aliased_results_.Add(inst->Result());
+            for (auto use : inst->Result()->UsagesUnsorted()) {
+                if (use->instruction->Results().Length() == 1 &&
+                    use->instruction->Result()->Type()->Is<core::type::Pointer>()) {
+                    worklist.Push(use->instruction);
+                }
+            }
+        }
+    }
+
     /// Find all structures that are used in host-shareable address spaces and mark them as such so
     /// that we know to pad the properly when we emit them.
     void FindHostShareableStructs() {
@@ -280,7 +311,8 @@ class Printer : public tint::TextGenerator {
         // (and workgroup storage class).
         for (auto func : ir_.functions) {
             Traverse(func->Block(), [&](msl::ir::BuiltinCall* call) {
-                if (call->Func() != msl::BuiltinFn::kPointerOffset) {
+                if (call->Func() != msl::BuiltinFn::kPointerOffset &&
+                    call->Func() != msl::BuiltinFn::kAliasPointerOffset) {
                     return;
                 }
                 auto* ptr = call->Result()->Type()->As<core::type::Pointer>();
@@ -305,7 +337,8 @@ class Printer : public tint::TextGenerator {
             value->As<core::ir::InstructionResult>()->Instruction(),
             [&](const msl::ir::BuiltinCall* c) {
                 // Pointer offset is always a pointer
-                return c->Func() == msl::BuiltinFn::kPointerOffset;
+                return c->Func() == msl::BuiltinFn::kPointerOffset ||
+                       c->Func() == msl::BuiltinFn::kAliasPointerOffset;
             },
             [&](const core::ir::Var*) {
                 // Variable declarations are always references.
@@ -725,7 +758,11 @@ class Printer : public tint::TextGenerator {
             // (constructor) in metal is not constexpr.
             out << "const constant ";
         }
-        EmitType(out, l->Result()->Type());
+        if (aliased_results_.Contains(l->Result())) {
+            EmitAliasedType(out, l->Result()->Type());
+        } else {
+            EmitType(out, l->Result()->Type());
+        }
         out << " ";
         if (current_function_ != nullptr) {
             out << "const ";
@@ -1048,7 +1085,8 @@ class Printer : public tint::TextGenerator {
             out << ")";
             return;
         }
-        if (c->Func() == msl::BuiltinFn::kPointerOffset) {
+        if (c->Func() == msl::BuiltinFn::kPointerOffset ||
+            c->Func() == msl::BuiltinFn::kAliasPointerOffset) {
             const auto* result_type = c->Result()->Type()->As<core::type::Pointer>();
             out << "reinterpret_cast<";
             EmitType(out, result_type);
@@ -1644,6 +1682,35 @@ class Printer : public tint::TextGenerator {
             },
 
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    /// Handles emission of aliasable types.
+    ///
+    /// Generates a typedef the first time the store type of `type` is encountered that has the
+    /// attribute `__may_alias__` attached.
+    /// Emits the pointer using the typedef name.
+    /// @param out the output stream
+    /// @param type the pointer type
+    void EmitAliasedType(StringStream& out, const core::type::Type* type) {
+        TINT_IR_ASSERT(ir_, type->Is<core::type::Pointer>());
+        auto* ptr_type = type->As<core::type::Pointer>();
+        auto* ele_type = ptr_type->StoreType();
+
+        std::string alias_name = aliased_typedefs_.GetOrAdd(ele_type, [&] {
+            StringStream type_str;
+            EmitType(type_str, ele_type);
+            auto real_type = type_str.str();
+            std::string alias = UniqueIdentifier("tint_aliased_" + ele_type->IdentifierName());
+            TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+            Line() << "typedef " << real_type << " __attribute__((__may_alias__)) " << alias << ";";
+            return alias;
+        });
+
+        if (ptr_type->Access() == core::Access::kRead) {
+            out << "const ";
+        }
+        EmitAddressSpace(out, ptr_type->AddressSpace());
+        out << " " << alias_name << "*";
     }
 
     /// Handles generating a pointer declaration

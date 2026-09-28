@@ -81,7 +81,7 @@ $B1: {  # root
 
 %foo = func():void {
   $B2: {
-    %3:ptr<storage, u32, read_write> = msl.pointer_offset<u32> %gv, 0u
+    %3:ptr<storage, u32, read_write> = msl.alias_pointer_offset<u32> %gv, 0u
     %4:u32 = load %3
     ret
   }
@@ -135,7 +135,7 @@ $B1: {  # root
 %foo = func(%offset:i32, %size:i32):void {
   $B2: {
     %5:u32 = bitcast<u32> %offset
-    %6:ptr<storage, array<u32>, read_write> = msl.pointer_offset<array<u32>> %gv, %5
+    %6:ptr<storage, array<u32>, read_write> = msl.alias_pointer_offset<array<u32>> %gv, %5
     %7:ptr<storage, u32, read_write> = access %6, 4u
     %8:u32 = load %7
     ret
@@ -191,9 +191,9 @@ $B1: {  # root
 
 %foo = func():void {
   $B2: {
-    %3:ptr<storage, u32, read_write> = msl.pointer_offset<u32> %gv, 0u
+    %3:ptr<storage, u32, read_write> = msl.alias_pointer_offset<u32> %gv, 0u
     %4:u32 = load %3
-    %5:ptr<storage, array<u32>, read_write> = msl.pointer_offset<array<u32>> %gv, 16u
+    %5:ptr<storage, array<u32>, read_write> = msl.alias_pointer_offset<array<u32>> %gv, 16u
     %6:ptr<storage, u32, read_write> = access %5, 1u
     %7:u32 = load %6
     ret
@@ -569,8 +569,8 @@ $B1: {  # root
 }
 %bar = func(%bar_p1:ptr<storage, array<u8, 512>, read_write>, %bar_p2:ptr<workgroup, array<u8, 256>, read_write>):void {
   $B3: {
-    %10:ptr<storage, array<u32, 64>, read_write> = msl.pointer_offset<array<u32, 64>> %bar_p1, 32u
-    %11:ptr<workgroup, array<u32>, read_write> = msl.pointer_offset<array<u32>> %bar_p2, 4u
+    %10:ptr<storage, array<u32, 64>, read_write> = msl.alias_pointer_offset<array<u32, 64>> %bar_p1, 32u
+    %11:ptr<workgroup, array<u32>, read_write> = msl.alias_pointer_offset<array<u32>> %bar_p2, 4u
     %12:void = call %baz, %10, %11
     ret
   }
@@ -671,9 +671,9 @@ $B1: {  # root
 }
 %foo = func():void {
   $B3: {
-    %8:ptr<storage, array<u32>, read_write> = msl.pointer_offset<array<u32>> %gv1, 16u
+    %8:ptr<storage, array<u32>, read_write> = msl.alias_pointer_offset<array<u32>> %gv1, 16u
     %9:void = call %bar, %8
-    %10:ptr<storage, array<u32>, read_write> = msl.pointer_offset<array<u32>> %gv2, 32u
+    %10:ptr<storage, array<u32>, read_write> = msl.alias_pointer_offset<array<u32>> %gv2, 32u
     %11:void = call %bar, %10
     %12:void = call %bar, %gv3
     ret
@@ -765,11 +765,11 @@ $B1: {  # root
 }
 %foo = func():void {
   $B3: {
-    %8:ptr<storage, array<u32>, read_write> = msl.pointer_offset<array<u32>> %gv1, 16u
+    %8:ptr<storage, array<u32>, read_write> = msl.alias_pointer_offset<array<u32>> %gv1, 16u
     %l1:ptr<storage, array<u32>, read_write> = let %8
     %10:void = call %bar, %l1
     %l2:ptr<storage, array<u8, 128>, read_write> = let %gv2
-    %12:ptr<storage, array<u32>, read_write> = msl.pointer_offset<array<u32>> %l2, 32u
+    %12:ptr<storage, array<u32>, read_write> = msl.alias_pointer_offset<array<u32>> %l2, 32u
     %13:void = call %bar, %12
     %14:void = call %bar, %gv3
     ret

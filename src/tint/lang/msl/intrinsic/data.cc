@@ -7817,12 +7817,18 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [53] */
+    /* fn alias_pointer_offset<T2>[T1, S : address_space, A : access](ptr<S, T1, A>, u32) -> ptr<S, T2, A> */
+    /* num overloads */ 1,
+    /* overloads */ OverloadIndex(197),
+  },
+  {
+    /* [54] */
     /* fn volatile_zero() -> u32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(236),
   },
   {
-    /* [54] */
+    /* [55] */
     /* fn resource_load[T : fiu32](resource_table<texture_1d<T>>, u32) -> texture_1d<T> */
     /* fn resource_load[T : fiu32](resource_table<texture_2d<T>>, u32) -> texture_2d<T> */
     /* fn resource_load[T : fiu32](resource_table<texture_2d_array<T>>, u32) -> texture_2d_array<T> */
@@ -7845,7 +7851,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* overloads */ OverloadIndex(66),
   },
   {
-    /* [55] */
+    /* [56] */
     /* fn reinterpret_cast<K>[T](T) -> K */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(237),

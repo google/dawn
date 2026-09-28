@@ -16,6 +16,7 @@ struct tint_module_vars_struct {
 struct tint_array_lengths_struct {
   uint tint_array_length_0_0;
 };
+typedef array<uint4, 1> __attribute__((__may_alias__)) tint_aliased_array_vec4_u32;
 
 uint tint_div_u32(uint lhs, uint rhs) {
   return (lhs / select(rhs, 1u, (rhs == 0u)));
@@ -27,6 +28,7 @@ fragment void v_1(const device array<uchar, 1>* v [[buffer(0)]], device uint4* o
   uint const size = 16u;
   uint const v_3 = max((tint_div_u32(size, 16u) * 16u), 16u);
   bool const v_4 = (v_2.tint_array_length_0_0 < addsat(0u, v_3));
-  const device array<uint4, 1>* const p = reinterpret_cast<const device array<uint4, 1>*>(reinterpret_cast<const device char*>(tint_module_vars.v) + select(0u, 0u, v_4));
+  const device tint_aliased_array_vec4_u32* const v_5 = reinterpret_cast<const device array<uint4, 1>*>(reinterpret_cast<const device char*>(tint_module_vars.v) + select(0u, 0u, v_4));
+  const device tint_aliased_array_vec4_u32* const p = v_5;
   (*tint_module_vars.out) = (*p)[min(0u, ((select(v_3, 16u, v_4) / 16u) - 1u))];
 }
