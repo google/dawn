@@ -321,6 +321,16 @@ func TestTaskModeAndFuzzModeString(t *testing.T) {
 }
 
 func TestParseFlagsHelp(t *testing.T) {
+	// Empty args outputs help to stderr and returns ErrHelp
+	{
+		cfg := newDefaultMainConfig()
+		var stdout, stderr bytes.Buffer
+		err := parseFlags([]string{}, &cfg, &stdout, &stderr)
+		require.ErrorIs(t, err, flag.ErrHelp)
+		require.Contains(t, stderr.String(), "error: subcommand required")
+		require.Contains(t, stderr.String(), "Usage:\n  fuzz <subcommand> [flags...] [args...]")
+	}
+
 	// Top-level help
 	{
 		cfg := newDefaultMainConfig()
