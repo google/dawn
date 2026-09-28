@@ -76,6 +76,7 @@ class SharedTextureMemoryBase : public SharedResourceMemory {
     MaybeError GetProperties(SharedTextureMemoryProperties* properties) const;
 
   private:
+    MaybeValError ValidateCreateTexture(const TextureDescriptor* rawDescriptor);
     ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* rawDescriptor);
 
     Ref<SharedResourceMemoryContents> CreateContents() override;
