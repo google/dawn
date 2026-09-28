@@ -56,6 +56,15 @@ class NapiV8Test : public dawn::node::test::V8IsolateTest {
     void SetUp() override {
         V8IsolateTest::SetUp();
         env_ = dawn::napi_v8::CreateEnv(isolate_, context());
+        napi_value setup_script = nullptr;
+        ASSERT_EQ(napi_create_string_utf8(
+                      env_,
+                      "globalThis._immediateQueue = [];"
+                      "globalThis.setImmediate = (fn) => { globalThis._immediateQueue.push(fn); };",
+                      NAPI_AUTO_LENGTH, &setup_script),
+                  napi_ok);
+        napi_value unused = nullptr;
+        ASSERT_EQ(napi_run_script(env_, setup_script, &unused), napi_ok);
     }
 
     void TearDown() override {
@@ -69,8 +78,21 @@ class NapiV8Test : public dawn::node::test::V8IsolateTest {
 
     void DestroySubEnv(napi_env sub_env) { dawn::napi_v8::DestroyEnv(sub_env); }
 
+    void DrainImmediates() {
+        napi_value drain_script = nullptr;
+        ASSERT_EQ(napi_create_string_utf8(env_,
+                                          "while (globalThis._immediateQueue.length > 0) {"
+                                          "  globalThis._immediateQueue.shift()();"
+                                          "}",
+                                          NAPI_AUTO_LENGTH, &drain_script),
+                  napi_ok);
+        napi_value unused = nullptr;
+        ASSERT_EQ(napi_run_script(env_, drain_script, &unused), napi_ok);
+    }
+
     void RequestGC() {
         isolate_->RequestGarbageCollectionForTesting(v8::Isolate::kFullGarbageCollection);
+        DrainImmediates();
     }
 
     // Executes pending JavaScript microtasks (such as Promise .then() / .catch() callbacks).
@@ -3367,6 +3389,81 @@ TEST_F(NapiV8Test, UnwrapIgnoresLookalikeProperty) {
     ASSERT_EQ(napi_wrap(env_, obj, &real, nullptr, nullptr, nullptr), napi_ok);
     ASSERT_EQ(napi_unwrap(env_, obj, &unwrapped), napi_ok);
     EXPECT_EQ(unwrapped, &real);
+}
+
+void AllocateJsObjectInFinalizer(napi_env env, void* finalize_data, void*) {
+    auto* ran = static_cast<bool*>(finalize_data);
+    napi_handle_scope scope = nullptr;
+    ASSERT_EQ(napi_open_handle_scope(env, &scope), napi_ok);
+
+    napi_value obj = nullptr;
+    ASSERT_EQ(napi_create_object(env, &obj), napi_ok);
+    napi_value marker = nullptr;
+    ASSERT_EQ(napi_create_string_utf8(env, "allocated-in-finalizer", NAPI_AUTO_LENGTH, &marker),
+              napi_ok);
+    ASSERT_EQ(napi_set_named_property(env, obj, "status", marker), napi_ok);
+
+    napi_value global = nullptr;
+    ASSERT_EQ(napi_get_global(env, &global), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env, global, "_fromFinalizer", obj), napi_ok);
+
+    ASSERT_EQ(napi_close_handle_scope(env, scope), napi_ok);
+    *ran = true;
+}
+
+// Node-API `napi_finalize` callbacks receive a `napi_env` and are allowed to allocate JavaScript
+// objects and call into V8, which requires running them outside V8's first-pass GC pause.
+TEST_F(NapiV8Test, FinalizerCanAllocateJavaScriptObjects) {
+    bool finalized = false;
+    {
+        napi_handle_scope scope = nullptr;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+        napi_value obj = nullptr;
+        ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+        ASSERT_EQ(napi_add_finalizer(env_, obj, &finalized, AllocateJsObjectInFinalizer, nullptr,
+                                     nullptr),
+                  napi_ok);
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    RequestGC();
+    EXPECT_TRUE(finalized);
+
+    napi_value script = nullptr;
+    ASSERT_EQ(napi_create_string_utf8(env_, "globalThis._fromFinalizer.status", NAPI_AUTO_LENGTH,
+                                      &script),
+              napi_ok);
+    napi_value result = nullptr;
+    ASSERT_EQ(napi_run_script(env_, script, &result), napi_ok);
+    char buf[64] = {};
+    size_t len = 0;
+    ASSERT_EQ(napi_get_value_string_utf8(env_, result, buf, sizeof(buf), &len), napi_ok);
+    EXPECT_STREQ(buf, "allocated-in-finalizer");
+}
+
+void RecordFinalizedFlag(napi_env, void* finalize_data, void*) {
+    *static_cast<bool*>(finalize_data) = true;
+}
+
+// GC schedules `napi_finalize` callbacks onto `globalThis.setImmediate` rather than running them
+// during `CollectGarbage()`.
+TEST_F(NapiV8Test, FinalizerIsDeferredThroughSetImmediate) {
+    bool finalized = false;
+    {
+        napi_handle_scope scope = nullptr;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+        napi_value obj = nullptr;
+        ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+        ASSERT_EQ(napi_add_finalizer(env_, obj, &finalized, RecordFinalizedFlag, nullptr, nullptr),
+                  napi_ok);
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    isolate_->RequestGarbageCollectionForTesting(v8::Isolate::kFullGarbageCollection);
+    EXPECT_FALSE(finalized);
+
+    DrainImmediates();
+    EXPECT_TRUE(finalized);
 }
 
 }  // namespace

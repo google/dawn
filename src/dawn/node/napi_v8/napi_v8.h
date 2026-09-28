@@ -117,6 +117,7 @@ struct napi_ref__ {
     void ClearWeak();
 
     static void WeakCallback(const v8::WeakCallbackInfo<napi_ref__>& data);
+    static void PostGarbageCollectionCallback(const v8::WeakCallbackInfo<napi_ref__>& data);
 };
 
 // Internal struct representing a Node-API deferred promise (napi_deferred)
@@ -149,6 +150,12 @@ struct napi_env__ {
     // preserving insertion order so ~napi_env__ can finalize references in reverse creation order.
     absl::linked_hash_map<napi_ref__*, std::unique_ptr<napi_ref__>> references;
 
+    // References collected by V8 GC whose `napi_finalize` callbacks are waiting to run outside the
+    // GC atomic pause.
+    std::vector<napi_ref__*> pending_finalizers;
+    bool post_gc_callback_scheduled = false;
+    bool finalizer_drain_scheduled = false;
+
     std::vector<std::unique_ptr<napi_deferred__>> deferreds;
     InstanceData instance_data{};
 
@@ -156,6 +163,8 @@ struct napi_env__ {
     // its native object. Lazily created by GetWrapperKey(). Being a v8::Private, the property is
     // invisible to JavaScript, so it cannot be observed, enumerated or tampered with by scripts.
     v8::Global<v8::Private> wrapper_key;
+
+    void DrainFinalizers();
 
     napi_env__(v8::Isolate* iso, v8::Local<v8::Context> ctx) : isolate(iso), context(iso, ctx) {
         ClearLastError();

@@ -28,6 +28,7 @@
 #include "src/dawn/node/napi_v8/napi_v8.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -77,6 +78,9 @@ napi_ref__::napi_ref__(napi_env e,
 }
 
 napi_ref__::~napi_ref__() {
+    if (env != nullptr) {
+        std::erase(env->pending_finalizers, this);
+    }
     handle.Reset();
 }
 
@@ -88,23 +92,111 @@ void napi_ref__::ClearWeak() {
     handle.ClearWeak<void>();
 }
 
+void napi_env__::DrainFinalizers() {
+    while (!pending_finalizers.empty()) {
+        napi_ref__* ref = pending_finalizers.front();
+        pending_finalizers.erase(pending_finalizers.begin());
+        if (ref->finalize_cb == nullptr) {
+            continue;
+        }
+
+        napi_finalize cb = ref->finalize_cb;
+        void* native_object = ref->native_object;
+        void* finalize_hint = ref->finalize_hint;
+        ref->finalize_cb = nullptr;
+
+        ClearLastError();
+        cb(this, native_object, finalize_hint);
+        if (DeliverPendingException(this)) {
+            break;
+        }
+    }
+}
+
+namespace {
+
+void DrainFinalizersV8Callback(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    auto* env = static_cast<napi_env>(
+        info.Data().As<v8::External>()->Value(v8::kExternalPointerTypeTagDefault));
+    env->finalizer_drain_scheduled = false;
+    env->DrainFinalizers();
+}
+
+}  // namespace
+
+// Node-API `napi_finalize` callbacks (https://nodejs.org/api/n-api.html#napi_finalize) receive a
+// `napi_env` and are permitted to allocate JavaScript objects and call into the engine. However,
+// V8's weak handle callback (`v8::PersistentBase::SetWeak`,
+// https://chromium.googlesource.com/v8/v8/+/refs/heads/main/include/v8-persistent-handle.h) runs
+// synchronously inside V8's atomic garbage collection pause while the heap is being swept. As
+// documented on `v8::WeakCallbackInfo::SetSecondPassCallback`
+// (https://chromium.googlesource.com/v8/v8/+/refs/heads/main/include/v8-weak-callback-info.h), the
+// initial callback passed to `SetWeak` must call `Reset()` on the weak handle and is prohibited
+// from making any other V8 API calls or allocating on the heap; any further work must be deferred
+// via `SetSecondPassCallback()`.
+//
+// Finalization therefore runs in three stages:
+//   1. `WeakCallback` (during the GC atomic pause): resets `self->handle`, appends `self` to
+//      `env->pending_finalizers`, and registers `PostGarbageCollectionCallback` via
+//      `SetSecondPassCallback()` once per GC cycle.
+//   2. `PostGarbageCollectionCallback` (after the GC pause finishes): runs once V8's heap is
+//      consistent again (`AllowGarbageCollection`). It schedules a single
+//      `DrainFinalizersV8Callback` task onto `globalThis.setImmediate` (matching Node.js's
+//      `v8impl::Reference::WeakCallback` -> `SetImmediate` ordering so finalizers run in the event
+//      loop's check phase rather than inside `Heap::CollectGarbage()`, where V8 prohibits
+//      arbitrary JavaScript execution).
+//   3. `DrainFinalizers` (on the event loop): invokes each queued `napi_finalize` callback in FIFO
+//      order.
 void napi_ref__::WeakCallback(const v8::WeakCallbackInfo<napi_ref__>& data) {
     napi_ref__* self = data.GetParameter();
-    napi_env env = self->env;
-    void* native_object = self->native_object;
-    void* finalize_hint = self->finalize_hint;
-    napi_finalize finalize_cb = self->finalize_cb;
-
-    // Reset the handle and clear finalize_cb before invoking the callback.
-    // The finalize_cb may call napi_delete_reference, which deletes `self`.
     self->handle.Reset();
-    self->finalize_cb = nullptr;
-
-    if (finalize_cb != nullptr) {
-        env->ClearLastError();
-        finalize_cb(env, native_object, finalize_hint);
-        DeliverPendingException(env);
+    if (self->finalize_cb != nullptr) {
+        napi_env env = self->env;
+        env->pending_finalizers.push_back(self);
+        if (!env->post_gc_callback_scheduled && !env->finalizer_drain_scheduled) {
+            env->post_gc_callback_scheduled = true;
+            data.SetSecondPassCallback(&napi_ref__::PostGarbageCollectionCallback);
+        }
     }
+}
+
+// Invoked by V8 (`GlobalHandles::InvokeSecondPassPhantomCallbacks`) after the garbage collection
+// cycle completes (`Heap::NOT_IN_GC`), when V8 heap allocations are permitted again. Schedules
+// `DrainFinalizers` onto `globalThis.setImmediate`.
+void napi_ref__::PostGarbageCollectionCallback(const v8::WeakCallbackInfo<napi_ref__>& data) {
+    napi_env env = data.GetParameter()->env;
+    env->post_gc_callback_scheduled = false;
+    if (env->pending_finalizers.empty() || env->finalizer_drain_scheduled) {
+        return;
+    }
+
+    // V8 lifts `DisallowGarbageCollection` before invoking second-pass callbacks, but leaves
+    // `DisallowJavascriptExecution` active on the isolate; re-enable JS execution so we can call
+    // `globalThis.setImmediate` to enqueue `DrainFinalizersV8Callback`.
+    v8::Isolate::AllowJavascriptExecutionScope allow_js(env->isolate);
+    v8::HandleScope handle_scope(env->isolate);
+    v8::Local<v8::Context> ctx = env->GetContext();
+    v8::Context::Scope context_scope(ctx);
+
+    // `napi_v8` does not depend on `standalone::EventLoop`, so it schedules the batch drain once
+    // per GC cycle through `globalThis.setImmediate`, and then drains all queued references in C++
+    // inside `DrainFinalizers()`.
+    v8::Local<v8::String> key = v8::String::NewFromUtf8Literal(env->isolate, "setImmediate");
+    v8::Local<v8::Value> set_immediate_val;
+    [[maybe_unused]] bool has_set_immediate =
+        ctx->Global()->Get(ctx, key).ToLocal(&set_immediate_val) && set_immediate_val->IsFunction();
+    assert(has_set_immediate);
+
+    v8::Local<v8::External> ext =
+        v8::External::New(env->isolate, env, v8::kExternalPointerTypeTagDefault);
+    v8::Local<v8::Function> drain_fn;
+    [[maybe_unused]] bool has_drain_fn =
+        v8::Function::New(ctx, DrainFinalizersV8Callback, ext).ToLocal(&drain_fn);
+    assert(has_drain_fn);
+
+    env->finalizer_drain_scheduled = true;
+    v8::Local<v8::Value> arg = drain_fn;
+    (void)set_immediate_val.As<v8::Function>()->Call(ctx, ctx->Global(), 1, &arg);
 }
 
 namespace {
