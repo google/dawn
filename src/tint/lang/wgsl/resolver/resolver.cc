@@ -2749,6 +2749,8 @@ const core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
             return check_no_tmpl_args(b.create<core::type::ExternalTexture>());
         case core::BuiltinType::kTextureMultisampled2D:
             return MultisampledTexture(ident, core::type::TextureDimension::k2d);
+        case core::BuiltinType::kTextureMultisampled2DArray:
+            return MultisampledTexture(ident, core::type::TextureDimension::k2dArray);
         case core::BuiltinType::kTextureStorage1D:
             return StorageTexture(ident, core::type::TextureDimension::k1d);
         case core::BuiltinType::kTextureStorage2D:

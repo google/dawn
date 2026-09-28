@@ -1900,6 +1900,9 @@ bool Converter::Convert(wgpu::WGSLLanguageFeatureName& out, interop::WGSLLanguag
         case interop::WGSLLanguageFeatureName::kTextureFormatsTier1:
             out = wgpu::WGSLLanguageFeatureName::TextureFormatsTier1;
             return true;
+        case interop::WGSLLanguageFeatureName::kMultisampledArrayTextures:
+            out = wgpu::WGSLLanguageFeatureName::MultisampledArrayTextures;
+            return true;
     }
     return false;
 }
@@ -1956,6 +1959,9 @@ bool Converter::Convert(interop::WGSLLanguageFeatureName& out, wgpu::WGSLLanguag
             return true;
         case wgpu::WGSLLanguageFeatureName::TextureFormatsTier1:
             out = interop::WGSLLanguageFeatureName::kTextureFormatsTier1;
+            return true;
+        case wgpu::WGSLLanguageFeatureName::MultisampledArrayTextures:
+            out = interop::WGSLLanguageFeatureName::kMultisampledArrayTextures;
             return true;
 
         case wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented:

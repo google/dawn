@@ -408,8 +408,17 @@ bool Validator::SampledTexture(const core::type::SampledTexture* t, const Source
 
 bool Validator::MultisampledTexture(const core::type::MultisampledTexture* t,
                                     const Source& source) const {
-    if (t->Dim() != core::type::TextureDimension::k2d) {
-        AddError(source) << "only 2d multisampled textures are supported";
+    if (t->Dim() != core::type::TextureDimension::k2d &&
+        t->Dim() != core::type::TextureDimension::k2dArray) {
+        AddError(source) << "only 2d and 2d_array multisampled textures are supported";
+        return false;
+    }
+
+    if (t->Dim() == core::type::TextureDimension::k2dArray &&
+        !allowed_features_.features.contains(wgsl::LanguageFeature::kMultisampledArrayTextures)) {
+        AddError(source) << "use of " << style::Type("texture_multisampled_2d_array")
+                         << " requires the " << style::Code("multisampled_array_textures")
+                         << " language feature, which is not allowed in the current environment";
         return false;
     }
 

@@ -90,6 +90,7 @@ type texture_depth_cube
 type texture_depth_cube_array
 type texture_depth_multisampled_2d
 type texture_multisampled_2d<T>
+type texture_multisampled_2d_array<T>
 type texture_storage_1d<F: texel_format, A: access>
 type texture_storage_2d<F: texel_format, A: access>
 type texture_storage_2d_array<F: texel_format, A: access>
@@ -612,6 +613,11 @@ implicit(N: num, T: scalar) fn select(vec<N, bool>, vec<N, T>, vec<N, T>) -> vec
                                               width: ptr<function, u32, writable>,
                                              height: ptr<function, u32, writable>,
                                             samples: ptr<function, u32, writable>)
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_multisampled_2d_array<T>,
+                                              width: ptr<function, u32, writable>,
+                                             height: ptr<function, u32, writable>,
+                                           elements: ptr<function, u32, writable>,
+                                            samples: ptr<function, u32, writable>)
 
 @member_function fn GetDimensions(texture: texture_depth_2d,
                                     width: ptr<function, u32, writable>,
@@ -659,6 +665,9 @@ implicit(N: num, T: scalar) fn select(vec<N, bool>, vec<N, T>, vec<N, T>) -> vec
 @member_function implicit(T: fiu32) fn Load(texture: texture_2d_array<T>, location: vec4<i32>) -> vec4<T>
 @member_function implicit(T: fiu32) fn Load(texture: texture_multisampled_2d<T>,
                                   location: vec2<i32>,
+                              sample_index: i32) -> vec4<T>
+@member_function implicit(T: fiu32) fn Load(texture: texture_multisampled_2d_array<T>,
+                                  location: vec3<i32>,
                               sample_index: i32) -> vec4<T>
 @member_function implicit(T: fiu32) fn Load(texture: texture_3d<T>, location: vec4<i32>) -> vec4<T>
 

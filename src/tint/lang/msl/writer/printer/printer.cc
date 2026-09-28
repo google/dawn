@@ -1739,6 +1739,9 @@ class Printer : public tint::TextGenerator {
             TINT_IR_ICE(ir_) << "Multiplanar external texture transform was not run.";
         }
 
+        const bool is_multisampled =
+            tex->IsAnyOf<core::type::MultisampledTexture, core::type::DepthMultisampledTexture>();
+
         if (tex->IsAnyOf<core::type::DepthTexture, core::type::DepthMultisampledTexture>()) {
             out << "depth";
         } else {
@@ -1753,7 +1756,7 @@ class Printer : public tint::TextGenerator {
                 out << "2d";
                 break;
             case core::type::TextureDimension::k2dArray:
-                out << "2d_array";
+                out << (is_multisampled ? "2d_ms_array" : "2d_array");
                 break;
             case core::type::TextureDimension::k3d:
                 out << "3d";
@@ -1767,7 +1770,7 @@ class Printer : public tint::TextGenerator {
             default:
                 TINT_IR_ICE(ir_) << "invalid texture dimensions";
         }
-        if (tex->IsAnyOf<core::type::MultisampledTexture, core::type::DepthMultisampledTexture>()) {
+        if (is_multisampled && tex->Dim() != core::type::TextureDimension::k2dArray) {
             out << "_ms";
         }
         out << "<";

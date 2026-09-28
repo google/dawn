@@ -1531,6 +1531,44 @@ kernel void entry(texture2d_ms<uint, access::read> v [[texture(0)]]) {
 )");
 }
 
+TEST_F(MslWriterTest, EmitType_MultisampledArrayTexture) {
+    auto* ms = ty.multisampled_texture(core::type::TextureDimension::k2dArray, ty.u32());
+
+    auto* var = b.Var("v", ty.ptr(handle, ms));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    auto* param = b.FunctionParam("a", ms);
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {  //
+        b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("entry");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Load(var));
+        b.Return(eb);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+struct tint_module_vars_struct {
+  texture2d_ms_array<uint, access::read> v;
+};
+
+void foo(texture2d_ms_array<uint, access::read> a) {
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void entry(texture2d_ms_array<uint, access::read> v [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
+  (foo(tint_module_vars.v));
+}
+)");
+}
+
 struct MslStorageTextureData {
     core::type::TextureDimension dim;
     std::string result;

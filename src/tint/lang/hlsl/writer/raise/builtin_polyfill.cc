@@ -890,15 +890,18 @@ struct State {
         TINT_IR_ASSERT(ir, tex_type->Dim() == core::type::TextureDimension::k2dArray ||
                                tex_type->Dim() == core::type::TextureDimension::kCubeArray);
 
-        const core::type::Type* query_ty = ty.vec(ty.u32(), 3);
+        const bool is_ms = tex_type->Is<core::type::MultisampledTexture>();
+        const uint32_t query_size = is_ms ? 4u : 3u;
+        const core::type::Type* query_ty = ty.vec(ty.u32(), query_size);
         b.InsertBefore(call, [&] {
             core::ir::Value* out = b.Var(ty.ptr(function, query_ty))->Result();
 
-            b.MemberCall<hlsl::ir::MemberBuiltinCall>(
-                ty.void_(), hlsl::BuiltinFn::kGetDimensions, tex,
-                Vector<core::ir::Value*, 3>{b.Access(ty.ptr<function, u32>(), out, 0_u),
-                                            b.Access(ty.ptr<function, u32>(), out, 1_u),
-                                            b.Access(ty.ptr<function, u32>(), out, 2_u)});
+            Vector<core::ir::Value*, 4> args;
+            for (uint32_t i = 0; i < query_size; ++i) {
+                args.Push(b.Access(ty.ptr<function, u32>(), out, u32(i)));
+            }
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kGetDimensions,
+                                                      tex, args);
 
             out = b.Swizzle(ty.u32(), b.Load(out), {2_u});
             call->Result()->ReplaceAllUsesWith(out);
@@ -1038,21 +1041,25 @@ struct State {
         auto* tex = call->Args()[0];
         auto* tex_type = tex->Type()->As<core::type::Texture>();
 
-        TINT_IR_ASSERT(ir, tex_type->Dim() == core::type::TextureDimension::k2d);
+        const bool is_array = tex_type->Dim() == core::type::TextureDimension::k2dArray;
+        TINT_IR_ASSERT(ir, tex_type->Dim() == core::type::TextureDimension::k2d || is_array);
         TINT_IR_ASSERT(ir, (tex_type->IsAnyOf<core::type::DepthMultisampledTexture,
                                               core::type::MultisampledTexture>()));
 
-        const core::type::Type* query_ty = ty.vec(ty.u32(), 3);
+        const uint32_t query_size = is_array ? 4u : 3u;
+        const core::type::Type* query_ty = ty.vec(ty.u32(), query_size);
         b.InsertBefore(call, [&] {
             core::ir::Value* out = b.Var(ty.ptr(function, query_ty))->Result();
 
-            b.MemberCall<hlsl::ir::MemberBuiltinCall>(
-                ty.void_(), hlsl::BuiltinFn::kGetDimensions, tex,
-                Vector<core::ir::Value*, 3>{b.Access(ty.ptr<function, u32>(), out, 0_u),
-                                            b.Access(ty.ptr<function, u32>(), out, 1_u),
-                                            b.Access(ty.ptr<function, u32>(), out, 2_u)});
+            Vector<core::ir::Value*, 4> args;
+            for (uint32_t i = 0; i < query_size; ++i) {
+                args.Push(b.Access(ty.ptr<function, u32>(), out, u32(i)));
+            }
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kGetDimensions,
+                                                      tex, args);
 
-            out = b.Swizzle(ty.u32(), b.Load(out), {2_u});
+            auto* query = b.Load(out);
+            out = is_array ? b.Swizzle(ty.u32(), query, {3_u}) : b.Swizzle(ty.u32(), query, {2_u});
             call->Result()->ReplaceAllUsesWith(out);
         });
         call->Destroy();
@@ -1116,13 +1123,18 @@ struct State {
                 case core::type::TextureDimension::k2dArray: {
                     auto* coord = b.InsertConvertIfNeeded(ty.vec2i(), args[1]);
                     auto* ary_idx = b.InsertConvertIfNeeded(ty.i32(), args[2]);
-                    core::ir::Value* lvl = nullptr;
-                    if (is_storage) {
-                        lvl = b.Constant(0_i);
+                    if (is_ms) {
+                        call_args.Push(b.Construct(ty.vec3i(), coord, ary_idx));
+                        call_args.Push(b.InsertConvertIfNeeded(ty.i32(), args[3]));
                     } else {
-                        lvl = b.InsertConvertIfNeeded(ty.i32(), args[3]);
+                        core::ir::Value* lvl = nullptr;
+                        if (is_storage) {
+                            lvl = b.Constant(0_i);
+                        } else {
+                            lvl = b.InsertConvertIfNeeded(ty.i32(), args[3]);
+                        }
+                        call_args.Push(b.Construct(ty.vec4i(), coord, ary_idx, lvl));
                     }
-                    call_args.Push(b.Construct(ty.vec4i(), coord, ary_idx, lvl));
                     break;
                 }
                 case core::type::TextureDimension::k3d: {

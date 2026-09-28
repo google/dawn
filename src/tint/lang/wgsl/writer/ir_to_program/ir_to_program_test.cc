@@ -1455,6 +1455,19 @@ fn f(i : i32) {
 )");
 }
 
+TEST_F(IRToProgramTest, Type_Multisampled2DArrayTexture) {
+    auto* texture = b.Var(
+        "texture",
+        ty.ref(handle, ty.multisampled_texture(core::type::TextureDimension::k2dArray, ty.f32()),
+               read));
+    texture->SetBindingPoint(0, 0);
+    mod.root_block->Append(texture);
+
+    EXPECT_WGSL(R"(
+@group(0u) @binding(0u) var texture : texture_multisampled_2d_array<f32>;
+)");
+}
+
 TEST_F(IRToProgramTest, TypeConstruct_vec3i_Splat) {
     auto* fn = b.Function("f", ty.void_());
     auto* i = b.FunctionParam("i", ty.i32());

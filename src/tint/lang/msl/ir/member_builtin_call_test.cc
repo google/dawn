@@ -177,7 +177,7 @@ TEST_F(IR_MslMemberBuiltinCallTest, TooFewArgs) {
     EXPECT_EQ(res.Failure().reason,
               R"(:3:17 error: get_width: no matching call to 'get_width(texture_2d<f32>)'
 
-16 candidate functions:
+17 candidate functions:
  • 'get_width(texture: texture_depth_multisampled_2d  ✗ ) -> u32'
  • 'get_width(texture: texture_storage_1d<F, A>  ✗ ) -> u32'
  • 'get_width(texture: texture_1d<T>  ✗ ) -> u32' where:
@@ -185,6 +185,8 @@ TEST_F(IR_MslMemberBuiltinCallTest, TooFewArgs) {
  • 'get_width(texture: texture_2d<T>  ✓ , u32  ✗ ) -> u32' where:
       ✓  'T' is 'f32', 'i32' or 'u32'
  • 'get_width(texture: texture_multisampled_2d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_multisampled_2d_array<T>  ✗ ) -> u32' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'get_width(texture: texture_depth_2d  ✗ , u32  ✗ ) -> u32'
  • 'get_width(texture: texture_depth_2d_array  ✗ , u32  ✗ ) -> u32'
@@ -234,7 +236,7 @@ TEST_F(IR_MslMemberBuiltinCallTest, TooManyArgs) {
         res.Failure().reason,
         R"(:3:17 error: get_width: no matching call to 'get_width(texture_2d<f32>, u32, u32, u32)'
 
-16 candidate functions:
+17 candidate functions:
  • 'get_width(texture: texture_2d<T>  ✓ , u32  ✓ ) -> u32' where:
       ✗  overload expects 2 arguments, call passed 4 arguments
       ✓  'T' is 'f32', 'i32' or 'u32'
@@ -258,6 +260,8 @@ TEST_F(IR_MslMemberBuiltinCallTest, TooManyArgs) {
  • 'get_width(texture: texture_1d<T>  ✗ ) -> u32' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'get_width(texture: texture_multisampled_2d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_multisampled_2d_array<T>  ✗ ) -> u32' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
 
     %3:u32 = %t.get_width 0u, 1u, 2u

@@ -581,8 +581,10 @@ struct State {
             Vector<core::ir::Value*, 2> new_args;
             new_args.Push(tex);
 
-            // Non-storage textures require a LOD
-            if (!tex_ty->Is<core::type::StorageTexture>()) {
+            // Non-storage, non-multisampled textures require a LOD.
+            if (!(tex_ty->Is<core::type::StorageTexture>() ||
+                  tex_ty->Is<core::type::MultisampledTexture>() ||
+                  tex_ty->Is<core::type::DepthMultisampledTexture>())) {
                 new_args.Push(b.Constant(0_i));
             }
 
