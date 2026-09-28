@@ -136,3 +136,11 @@ crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:shader,validation,exp
 crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:shader,validation,expression,call,builtin,length:vec4:stage="override";type="vec4%3Cf32%3E" [ Slow ]
 crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:shader,execution,expression,call,builtin,subgroupAll:compute,split:predicate="lower_half" [ Slow ]
 crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:shader,execution,expression,call,builtin,subgroupAny:compute,split:predicate="every_even" [ Slow ]
+
+# Each createPipeline,at_over case runs 6 subcases that each create a new device, shader module and pipeline, which can exceed the heartbeat timeout.
+crbug.com/565370020 webgpu:api,validation,capability_checks,limits,maxStorageBuffersInFragmentStage:createPipeline,at_over:* [ Slow ]
+crbug.com/565370020 webgpu:api,validation,capability_checks,limits,maxStorageBuffersInVertexStage:createPipeline,at_over:* [ Slow ]
+crbug.com/565370020 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:* [ Slow ]
+crbug.com/565370020 webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipeline,at_over:* [ Slow ]
+crbug.com/565370020 webgpu:api,validation,capability_checks,limits,maxStorageTexturesInVertexStage:createPipeline,at_over:* [ Slow ]
+crbug.com/565370020 webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:* [ Slow ]
