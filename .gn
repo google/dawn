@@ -34,6 +34,7 @@ default_args = {
   clang_use_chrome_plugins = false
   clang_use_unsafe_buffers_plugin = true
   clang_unsafe_buffers_paths = "//unsafe_buffers_paths.txt"
+  clang_raw_ptr_plugin_config_file = "//src/utils/raw_ptr_plugin_config.yaml"
 
   angle_enable_abseil = false
   angle_standalone = false

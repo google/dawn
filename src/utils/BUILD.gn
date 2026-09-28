@@ -490,21 +490,33 @@ source_set("gmock_and_gtest") {
 #   plugin_arguments: List of arguments to pass to the plugin.
 template("clang_plugin") {
   config(target_name) {
+    forward_variables_from(invoker,
+                           [
+                             "cflags",
+                             "configs",
+                             "inputs",
+                           ])
+    if (!defined(cflags)) {
+      cflags = []
+    }
+
     # -Xclang=arg is mishandled by clang-tidy, so have to use the two-arg style.
-    cflags = [
+    cflags += [
       "-Xclang",
       "-add-plugin",
       "-Xclang",
       "${invoker.plugin}",
     ]
 
-    foreach(flag, invoker.plugin_arguments) {
-      cflags += [
-        "-Xclang",
-        "-plugin-arg-${invoker.plugin}",
-        "-Xclang",
-        "${flag}",
-      ]
+    if (defined(invoker.plugin_arguments)) {
+      foreach(flag, invoker.plugin_arguments) {
+        cflags += [
+          "-Xclang",
+          "-plugin-arg-${invoker.plugin}",
+          "-Xclang",
+          "${flag}",
+        ]
+      }
     }
   }
 }
@@ -514,12 +526,24 @@ clang_plugin("raw_ptr_check") {
   # Defined in <chromium>/tools/clang/raw_ptr_plugin/RawPtrPlugin.cpp
   plugin = "raw-ptr-plugin"
 
+  if (clang_raw_ptr_plugin_config_file != "") {
+    inputs = [ clang_raw_ptr_plugin_config_file ]
+  }
+
   plugin_arguments = [
     "check-raw-ptr-fields",
     "check-raw-ptr-to-stack-allocated",
     "check-raw-ref-fields",
     "check-span-fields",
   ]
+
+  if (enable_check_container_fields) {
+    if (clang_raw_ptr_plugin_config_file != "") {
+      plugin_arguments +=
+          [ "config-path=" +
+            rebase_path(clang_raw_ptr_plugin_config_file, root_build_dir) ]
+    }
+  }
 
   _exclusions = [
     "/include/",
