@@ -594,15 +594,19 @@ void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
         }
     }
     if (ir_.properties.Contains(Property::kAllowBufferTypes)) {
-        switch (call->Func()) {
-            case core::BuiltinFn::kBufferArrayView:
-                if (call->Result()->Type()->UnwrapPtr()->HasFixedFootprint()) {
-                    AddError(call)
-                        << call->FriendlyName() << " result type must not have a fixed footprint";
-                }
-                break;
-            default:
-                break;
+        if (call->Func() == core::BuiltinFn::kBufferView ||
+            call->Func() == core::BuiltinFn::kBufferArrayView) {
+            if (!call->Result()->Type()->UnwrapPtr()->IsHostShareable()) {
+                AddError(call) << call->FriendlyName()
+                               << " result store type must be host-shareable";
+            }
+        }
+
+        if (call->Func() == core::BuiltinFn::kBufferArrayView) {
+            if (call->Result()->Type()->UnwrapPtr()->HasFixedFootprint()) {
+                AddError(call) << call->FriendlyName()
+                               << " result type must not have a fixed footprint";
+            }
         }
     }
 
