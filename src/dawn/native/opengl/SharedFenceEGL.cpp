@@ -115,7 +115,7 @@ MaybeError SharedFenceEGL::ServerWait(uint64_t signaledValue) {
     });
 }
 
-MaybeError SharedFenceEGL::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const {
+MaybeValError SharedFenceEGL::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const {
     info->type = mType;
 
     switch (mType) {

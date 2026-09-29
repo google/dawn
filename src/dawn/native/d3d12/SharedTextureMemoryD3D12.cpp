@@ -145,7 +145,7 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
     return Texture::CreateFromSharedTextureMemory(this, descriptor);
 }
 
-MaybeError SharedTextureMemory::BeginAccessImpl(
+MaybeValError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY(d3d::SharedTextureMemory::BeginAccessImpl(texture, descriptor));

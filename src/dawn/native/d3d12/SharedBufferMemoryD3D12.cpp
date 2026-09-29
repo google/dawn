@@ -393,7 +393,7 @@ ID3D12Resource* SharedBufferMemory::GetD3DResource() const {
     return mResource.Get();
 }
 
-MaybeError SharedBufferMemory::BeginAccessImpl(
+MaybeValError SharedBufferMemory::BeginAccessImpl(
     BufferBase* buffer,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY(descriptor.ValidateSubset<>());

@@ -201,7 +201,7 @@ Ref<SharedResourceMemoryContents> SharedTextureMemory::CreateContents() {
     return AcquireRef(new SharedTextureMemoryContentsD3D11(GetWeakRef(this)));
 }
 
-MaybeError SharedTextureMemory::BeginAccessImpl(
+MaybeValError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<SharedTextureMemoryBeginAccessDescriptor>& descriptor) {
     DAWN_TRY(d3d::SharedTextureMemory::BeginAccessImpl(texture, descriptor));

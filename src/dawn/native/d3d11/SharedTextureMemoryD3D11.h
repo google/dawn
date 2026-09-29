@@ -86,8 +86,8 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
 
     Ref<SharedResourceMemoryContents> CreateContents() override;
 
-    MaybeError BeginAccessImpl(TextureBase* texture,
-                               const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;
+    MaybeValError BeginAccessImpl(TextureBase* texture,
+                                  const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;
     ResultOrError<FenceAndSignalValue> EndAccessImpl(
         TextureBase* texture,
         ExecutionSerial lastUsageSerial,

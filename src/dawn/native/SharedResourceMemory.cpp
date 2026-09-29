@@ -232,13 +232,13 @@ wgpu::Status SharedResourceMemory::APIEndAccess(BufferBase* buffer,
                : wgpu::Status::Success;
 }
 
-MaybeError SharedResourceMemory::BeginAccessImpl(
+MaybeValError SharedResourceMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<SharedTextureMemoryBeginAccessDescriptor>& descriptor) {
     DAWN_UNREACHABLE();
 }
 
-MaybeError SharedResourceMemory::BeginAccessImpl(
+MaybeValError SharedResourceMemory::BeginAccessImpl(
     BufferBase* buffer,
     const UnpackedPtr<SharedBufferMemoryBeginAccessDescriptor>& descriptor) {
     DAWN_UNREACHABLE();

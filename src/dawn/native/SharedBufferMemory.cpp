@@ -50,8 +50,8 @@ class ErrorSharedBufferMemory : public SharedBufferMemoryBase {
         const UnpackedPtr<BufferDescriptor>& descriptor) override {
         DAWN_UNREACHABLE();
     }
-    MaybeError BeginAccessImpl(BufferBase* buffer,
-                               const UnpackedPtr<BeginAccessDescriptor>& descriptor) override {
+    MaybeValError BeginAccessImpl(BufferBase* buffer,
+                                  const UnpackedPtr<BeginAccessDescriptor>& descriptor) override {
         DAWN_UNREACHABLE();
     }
     ResultOrError<FenceAndSignalValue> EndAccessImpl(BufferBase* buffer,

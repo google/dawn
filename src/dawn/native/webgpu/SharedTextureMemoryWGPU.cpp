@@ -168,7 +168,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     return FenceAndSignalValue{std::move(fence), static_cast<uint64_t>(lastUsageSerial)};
 }
 
-MaybeError SharedTextureMemory::BeginAccessImpl(
+MaybeValError SharedTextureMemory::BeginAccessImpl(
     TextureBase* textureBase,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     Texture* texture = ToBackend(textureBase);

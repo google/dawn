@@ -40,7 +40,7 @@ class ErrorSharedFence : public SharedFenceBase {
     ErrorSharedFence(DeviceBase* device, const SharedFenceDescriptor* descriptor)
         : SharedFenceBase(device, descriptor, ObjectBase::kError) {}
 
-    MaybeError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override {
+    MaybeValError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override {
         DAWN_UNREACHABLE();
     }
 };
@@ -71,7 +71,7 @@ void SharedFenceBase::APIExportInfo(SharedFenceExportInfo* info) const {
 
 void SharedFenceBase::DestroyImpl(DestroyReason reason) {}
 
-MaybeError SharedFenceBase::ExportInfo(SharedFenceExportInfo* info) const {
+MaybeValError SharedFenceBase::ExportInfo(SharedFenceExportInfo* info) const {
     // Set the type to 0. It will be overwritten to the actual type
     // as long as no error occurs.
     info->type = wgpu::SharedFenceType(0);

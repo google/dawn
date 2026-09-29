@@ -78,7 +78,7 @@ SharedFence::SharedFence(Device* device, StringView label, WGPUSharedFence inner
     mInnerHandle = innerHandle;
 }
 
-MaybeError SharedFence::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const {
+MaybeValError SharedFence::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const {
     WGPUSharedFenceExportInfo innerInfo = WGPU_SHARED_FENCE_EXPORT_INFO_INIT;
 
     // TODO(crbug.com/483147423): Handle all possible chained structures in SharedFenceExportInfo.

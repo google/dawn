@@ -80,8 +80,8 @@ class SharedBufferMemory final : public SharedBufferMemoryBase {
 
     ResultOrError<Ref<BufferBase>> CreateBufferImpl(
         const UnpackedPtr<BufferDescriptor>& descriptor) override;
-    MaybeError BeginAccessImpl(BufferBase* buffer,
-                               const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;
+    MaybeValError BeginAccessImpl(BufferBase* buffer,
+                                  const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;
     ResultOrError<FenceAndSignalValue> EndAccessImpl(BufferBase* buffer,
                                                      ExecutionSerial lastUsageSerial,
                                                      UnpackedPtr<EndAccessState>& state) override;

@@ -51,8 +51,8 @@ class ErrorSharedTextureMemory : public SharedTextureMemoryBase {
         const UnpackedPtr<TextureDescriptor>& descriptor) override {
         DAWN_UNREACHABLE();
     }
-    MaybeError BeginAccessImpl(TextureBase* texture,
-                               const UnpackedPtr<BeginAccessDescriptor>& descriptor) override {
+    MaybeValError BeginAccessImpl(TextureBase* texture,
+                                  const UnpackedPtr<BeginAccessDescriptor>& descriptor) override {
         DAWN_UNREACHABLE();
     }
     ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,

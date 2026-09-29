@@ -44,7 +44,7 @@ SharedTextureMemory::SharedTextureMemory(d3d::Device* device,
                                          SharedTextureMemoryProperties properties)
     : SharedTextureMemoryBase(device, label, properties) {}
 
-MaybeError SharedTextureMemory::BeginAccessImpl(
+MaybeValError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY((descriptor.ValidateSubset<SharedTextureMemoryD3DSwapchainBeginState,

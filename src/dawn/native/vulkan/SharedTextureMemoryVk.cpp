@@ -982,7 +982,7 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
     return SharedTexture::Create(this, descriptor);
 }
 
-MaybeError SharedTextureMemory::BeginAccessImpl(
+MaybeValError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     // TODO(dawn/2276): support concurrent read access.
