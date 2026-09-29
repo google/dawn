@@ -108,8 +108,8 @@ ResultOrError<WGPUSurface> CreateWGPUSurface(const DawnProcTable& procs,
             xlibDesc.window = surface->GetXWindow();
             descriptor.nextInChain = &xlibDesc.chain;
             break;
-        default:
-            return DAWN_VALIDATION_ERROR("Unknown surface type %s.", surface->GetType());
+        case Surface::Type::Undefined:
+            DAWN_UNREACHABLE();
     }
 
     WGPUSurface innerSurface = procs.instanceCreateSurface(instance, &descriptor);
