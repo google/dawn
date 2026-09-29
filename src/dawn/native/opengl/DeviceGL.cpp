@@ -299,10 +299,7 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
 }
 
 ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
-    const SharedTextureMemoryDescriptor* descriptor) {
-    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
         type, (unpacked.ValidateBranches<Branch<SharedTextureMemoryAHardwareBufferDescriptor>>()));
@@ -313,7 +310,7 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer);
             return SharedTextureMemoryEGL::Create(
-                this, descriptor->label,
+                this, unpacked->label,
                 unpacked.Get<SharedTextureMemoryAHardwareBufferDescriptor>());
         default:
             DAWN_UNREACHABLE();
@@ -321,10 +318,7 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
 }
 
 ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
-    const SharedFenceDescriptor* descriptor) {
-    UnpackedPtr<SharedFenceDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+    UnpackedPtr<SharedFenceDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(type, (unpacked.ValidateBranches<Branch<SharedFenceSyncFDDescriptor>,
                                                      Branch<SharedFenceEGLSyncDescriptor>>()));
@@ -333,12 +327,12 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
         case wgpu::SType::SharedFenceSyncFDDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceSyncFD), "%s is not enabled.",
                             wgpu::FeatureName::SharedFenceSyncFD);
-            return SharedFenceEGL::Create(this, descriptor->label,
+            return SharedFenceEGL::Create(this, unpacked->label,
                                           unpacked.Get<SharedFenceSyncFDDescriptor>());
         case wgpu::SType::SharedFenceEGLSyncDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceEGLSync), "%s is not enabled.",
                             wgpu::FeatureName::SharedFenceEGLSync);
-            return SharedFenceEGL::Create(this, descriptor->label,
+            return SharedFenceEGL::Create(this, unpacked->label,
                                           unpacked.Get<SharedFenceEGLSyncDescriptor>());
         default:
             DAWN_UNREACHABLE();

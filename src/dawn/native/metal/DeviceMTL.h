@@ -134,9 +134,9 @@ class Device final : public DeviceBase {
     void InitializeRenderPipelineAsyncImpl(Ref<CreateRenderPipelineAsyncEvent> event) override;
 
     ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
-        const SharedTextureMemoryDescriptor* descriptor) override;
+        UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) override;
     ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
-        const SharedFenceDescriptor* descriptor) override;
+        UnpackedPtr<SharedFenceDescriptor> unpacked) override;
 
     void StartTrace();
     void StopTrace();

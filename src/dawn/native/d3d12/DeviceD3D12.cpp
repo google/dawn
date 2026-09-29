@@ -468,10 +468,7 @@ void Device::InitializeRenderPipelineAsyncImpl(Ref<CreateRenderPipelineAsyncEven
 }
 
 ResultOrError<Ref<SharedBufferMemoryBase>> Device::ImportSharedBufferMemoryImpl(
-    const SharedBufferMemoryDescriptor* descriptor) {
-    UnpackedPtr<SharedBufferMemoryDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+    UnpackedPtr<SharedBufferMemoryDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
         type, (unpacked.ValidateBranches<Branch<SharedBufferMemoryD3D12ResourceDescriptor>,
@@ -484,29 +481,26 @@ ResultOrError<Ref<SharedBufferMemoryBase>> Device::ImportSharedBufferMemoryImpl(
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedBufferMemoryD3D12Resource);
             return SharedBufferMemory::Create(
-                this, descriptor->label, unpacked.Get<SharedBufferMemoryD3D12ResourceDescriptor>());
+                this, unpacked->label, unpacked.Get<SharedBufferMemoryD3D12ResourceDescriptor>());
         case wgpu::SType::SharedBufferMemoryFromWindowsHandleDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedBufferMemoryFromWindowsHandle),
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle);
             return SharedBufferMemory::Create(
-                this, descriptor->label,
+                this, unpacked->label,
                 unpacked.Get<SharedBufferMemoryFromWindowsHandleDescriptor>());
         case wgpu::SType::SharedBufferMemoryHostPointerDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedBufferMemoryHostPointer),
                             "%s is not enabled.", wgpu::FeatureName::SharedBufferMemoryHostPointer);
             return SharedBufferMemory::Create(
-                this, descriptor->label, unpacked.Get<SharedBufferMemoryHostPointerDescriptor>());
+                this, unpacked->label, unpacked.Get<SharedBufferMemoryHostPointerDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }
 }
 
 ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
-    const SharedTextureMemoryDescriptor* descriptor) {
-    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
         type, (unpacked.ValidateBranches<Branch<SharedTextureMemoryDXGISharedHandleDescriptor>,
@@ -518,25 +512,21 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedTextureMemoryDXGISharedHandle);
             return SharedTextureMemory::Create(
-                this, descriptor->label,
+                this, unpacked->label,
                 unpacked.Get<SharedTextureMemoryDXGISharedHandleDescriptor>());
         case wgpu::SType::SharedTextureMemoryD3D12ResourceDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedTextureMemoryD3D12Resource),
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedTextureMemoryD3D12Resource);
             return SharedTextureMemory::Create(
-                this, descriptor->label,
-                unpacked.Get<SharedTextureMemoryD3D12ResourceDescriptor>());
+                this, unpacked->label, unpacked.Get<SharedTextureMemoryD3D12ResourceDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }
 }
 
 ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
-    const SharedFenceDescriptor* descriptor) {
-    UnpackedPtr<SharedFenceDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+    UnpackedPtr<SharedFenceDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(type,
                     (unpacked.ValidateBranches<Branch<SharedFenceDXGISharedHandleDescriptor>>()));
@@ -545,7 +535,7 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
         case wgpu::SType::SharedFenceDXGISharedHandleDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceDXGISharedHandle), "%s is not enabled.",
                             wgpu::FeatureName::SharedFenceDXGISharedHandle);
-            return SharedFence::Create(this, descriptor->label,
+            return SharedFence::Create(this, unpacked->label,
                                        unpacked.Get<SharedFenceDXGISharedHandleDescriptor>());
         default:
             DAWN_UNREACHABLE();

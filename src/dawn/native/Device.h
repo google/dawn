@@ -565,11 +565,11 @@ class DeviceBase : public ErrorSink,
     virtual Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor) = 0;
     virtual ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
-        const SharedTextureMemoryDescriptor* descriptor);
+        UnpackedPtr<SharedTextureMemoryDescriptor> unpacked);
     virtual ResultOrError<Ref<SharedBufferMemoryBase>> ImportSharedBufferMemoryImpl(
-        const SharedBufferMemoryDescriptor* descriptor);
+        UnpackedPtr<SharedBufferMemoryDescriptor> unpacked);
     virtual ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
-        const SharedFenceDescriptor* descriptor);
+        UnpackedPtr<SharedFenceDescriptor> unpacked);
     virtual void SetLabelImpl();
     virtual bool ReduceMemoryUsageImpl();
     virtual void PerformIdleTasksImpl();

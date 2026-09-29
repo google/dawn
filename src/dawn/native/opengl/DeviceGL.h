@@ -281,9 +281,9 @@ class Device final : public DeviceBase {
     Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor) override;
     ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
-        const SharedTextureMemoryDescriptor* descriptor) override;
+        UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) override;
     ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
-        const SharedFenceDescriptor* descriptor) override;
+        UnpackedPtr<SharedFenceDescriptor> unpacked) override;
     ResultOrError<Ref<TextureBase>> CreateTextureWrappingEGLImageImpl(
         const ExternalImageDescriptor* descriptor,
         ::EGLImage image);

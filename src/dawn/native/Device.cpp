@@ -1657,11 +1657,15 @@ SharedBufferMemoryBase* DeviceBase::APIImportSharedBufferMemory(
 ResultOrError<Ref<SharedBufferMemoryBase>> DeviceBase::ImportSharedBufferMemory(
     const SharedBufferMemoryDescriptor* descriptor) {
     DAWN_TRY(ValidateIsAlive());
-    return ImportSharedBufferMemoryImpl(descriptor);
+
+    UnpackedPtr<SharedBufferMemoryDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+
+    return ImportSharedBufferMemoryImpl(unpacked);
 }
 
 ResultOrError<Ref<SharedBufferMemoryBase>> DeviceBase::ImportSharedBufferMemoryImpl(
-    const SharedBufferMemoryDescriptor* descriptor) {
+    UnpackedPtr<SharedBufferMemoryDescriptor> unpacked) {
     return DAWN_UNIMPLEMENTED_ERROR("Not implemented");
 }
 
@@ -1678,11 +1682,14 @@ SharedTextureMemoryBase* DeviceBase::APIImportSharedTextureMemory(
 ResultOrError<Ref<SharedTextureMemoryBase>> DeviceBase::ImportSharedTextureMemory(
     const SharedTextureMemoryDescriptor* descriptor) {
     DAWN_TRY(ValidateIsAlive());
-    return ImportSharedTextureMemoryImpl(descriptor);
+
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+    return ImportSharedTextureMemoryImpl(unpacked);
 }
 
 ResultOrError<Ref<SharedTextureMemoryBase>> DeviceBase::ImportSharedTextureMemoryImpl(
-    const SharedTextureMemoryDescriptor* descriptor) {
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) {
     return DAWN_UNIMPLEMENTED_ERROR("Not implemented");
 }
 
@@ -1698,11 +1705,14 @@ SharedFenceBase* DeviceBase::APIImportSharedFence(const SharedFenceDescriptor* d
 ResultOrError<Ref<SharedFenceBase>> DeviceBase::ImportSharedFence(
     const SharedFenceDescriptor* descriptor) {
     DAWN_TRY(ValidateIsAlive());
-    return ImportSharedFenceImpl(descriptor);
+
+    UnpackedPtr<SharedFenceDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+    return ImportSharedFenceImpl(unpacked);
 }
 
 ResultOrError<Ref<SharedFenceBase>> DeviceBase::ImportSharedFenceImpl(
-    const SharedFenceDescriptor* descriptor) {
+    UnpackedPtr<SharedFenceDescriptor> unpacked) {
     return DAWN_UNIMPLEMENTED_ERROR("Not implemented");
 }
 
