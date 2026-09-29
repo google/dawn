@@ -1647,15 +1647,17 @@ ExternalTextureBase* DeviceBase::APICreateExternalTexture(
 SharedBufferMemoryBase* DeviceBase::APIImportSharedBufferMemory(
     const SharedBufferMemoryDescriptor* descriptor) {
     Ref<SharedBufferMemoryBase> result = nullptr;
-    if (ConsumedError(
-            [&]() -> ResultOrError<Ref<SharedBufferMemoryBase>> {
-                DAWN_TRY(ValidateIsAlive());
-                return ImportSharedBufferMemoryImpl(descriptor);
-            }(),
-            &result, "calling %s.ImportSharedBufferMemory(%s).", this, descriptor)) {
+    if (ConsumedError(ImportSharedBufferMemory(descriptor), &result,
+                      "calling %s.ImportSharedBufferMemory(%s).", this, descriptor)) {
         return SharedBufferMemoryBase::MakeError(this, descriptor);
     }
     return result.Detach();
+}
+
+ResultOrError<Ref<SharedBufferMemoryBase>> DeviceBase::ImportSharedBufferMemory(
+    const SharedBufferMemoryDescriptor* descriptor) {
+    DAWN_TRY(ValidateIsAlive());
+    return ImportSharedBufferMemoryImpl(descriptor);
 }
 
 ResultOrError<Ref<SharedBufferMemoryBase>> DeviceBase::ImportSharedBufferMemoryImpl(
@@ -1666,15 +1668,17 @@ ResultOrError<Ref<SharedBufferMemoryBase>> DeviceBase::ImportSharedBufferMemoryI
 SharedTextureMemoryBase* DeviceBase::APIImportSharedTextureMemory(
     const SharedTextureMemoryDescriptor* descriptor) {
     Ref<SharedTextureMemoryBase> result;
-    if (ConsumedError(
-            [&]() -> ResultOrError<Ref<SharedTextureMemoryBase>> {
-                DAWN_TRY(ValidateIsAlive());
-                return ImportSharedTextureMemoryImpl(descriptor);
-            }(),
-            &result, "calling %s.ImportSharedTextureMemory(%s).", this, descriptor)) {
+    if (ConsumedError(ImportSharedTextureMemory(descriptor), &result,
+                      "calling %s.ImportSharedTextureMemory(%s).", this, descriptor)) {
         result = SharedTextureMemoryBase::MakeError(this, descriptor);
     }
     return ReturnToAPI(std::move(result));
+}
+
+ResultOrError<Ref<SharedTextureMemoryBase>> DeviceBase::ImportSharedTextureMemory(
+    const SharedTextureMemoryDescriptor* descriptor) {
+    DAWN_TRY(ValidateIsAlive());
+    return ImportSharedTextureMemoryImpl(descriptor);
 }
 
 ResultOrError<Ref<SharedTextureMemoryBase>> DeviceBase::ImportSharedTextureMemoryImpl(
@@ -1684,15 +1688,17 @@ ResultOrError<Ref<SharedTextureMemoryBase>> DeviceBase::ImportSharedTextureMemor
 
 SharedFenceBase* DeviceBase::APIImportSharedFence(const SharedFenceDescriptor* descriptor) {
     Ref<SharedFenceBase> result;
-    if (ConsumedError(
-            [&]() -> ResultOrError<Ref<SharedFenceBase>> {
-                DAWN_TRY(ValidateIsAlive());
-                return ImportSharedFenceImpl(descriptor);
-            }(),
-            &result, "calling %s.ImportSharedFence(%s).", this, descriptor)) {
+    if (ConsumedError(ImportSharedFence(descriptor), &result, "calling %s.ImportSharedFence(%s).",
+                      this, descriptor)) {
         result = SharedFenceBase::MakeError(this, descriptor);
     }
     return ReturnToAPI(std::move(result));
+}
+
+ResultOrError<Ref<SharedFenceBase>> DeviceBase::ImportSharedFence(
+    const SharedFenceDescriptor* descriptor) {
+    DAWN_TRY(ValidateIsAlive());
+    return ImportSharedFenceImpl(descriptor);
 }
 
 ResultOrError<Ref<SharedFenceBase>> DeviceBase::ImportSharedFenceImpl(

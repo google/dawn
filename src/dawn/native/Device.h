@@ -585,6 +585,12 @@ class DeviceBase : public ErrorSink,
     virtual MaybeError TickImpl() = 0;
     void FlushCallbackTaskQueue();
 
+    ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemory(
+        const SharedTextureMemoryDescriptor* descriptor);
+    ResultOrError<Ref<SharedBufferMemoryBase>> ImportSharedBufferMemory(
+        const SharedBufferMemoryDescriptor* descriptor);
+    ResultOrError<Ref<SharedFenceBase>> ImportSharedFence(const SharedFenceDescriptor* descriptor);
+
     ResultOrError<Ref<BindGroupLayoutBase>> CreateEmptyBindGroupLayout();
     ResultOrError<Ref<PipelineLayoutBase>> CreateEmptyPipelineLayout();
 
