@@ -60,7 +60,7 @@ PhysicalDevice::PhysicalDevice() : PhysicalDeviceBase(wgpu::BackendType::Null) {
     mVendorId = 0;
     mDeviceId = 0;
     mName = "Null backend";
-    mAdapterType = wgpu::AdapterType::CPU;
+    mAdapterType = wgpu::AdapterType::Unknown;
 }
 
 PhysicalDevice::~PhysicalDevice() = default;
