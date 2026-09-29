@@ -53,7 +53,6 @@
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
-#include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
@@ -184,14 +183,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // DecomposeAccess must come before BlockDecoratedStructs, which will wrap the
     // uniform variable in a structure. It must come after DirectVariableAccess which removes
     // uniform buffers passed as function parameters.
-    // Uniform buffers are only unconditionally decomposed if the implementation does not support
-    // uniform buffer standard layout. Otherwise, only buffer type variables are decomposed.
-    core::ir::transform::DecomposeAccessConfig decompose_config{.uniform =
-                                                                    !options.use_uniform_buffers};
+    // Uniform buffers are unconditionally decomposed to support implementations that do not support
+    // uniform buffer standard layout.
+    core::ir::transform::DecomposeAccessConfig decompose_config{
+        .uniform = true,
+    };
     TINT_CHECK_RESULT(core::ir::transform::DecomposeAccess(module, decompose_config));
-    if (options.use_uniform_buffers) {
-        TINT_CHECK_RESULT(core::ir::transform::Std140(module));
-    }
 
     // Note, this must come after DecomposeAccess to support buffer_view.
     // Note, this must come after Robustness as it may add `arrayLength`.

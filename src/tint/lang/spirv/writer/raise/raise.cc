@@ -51,7 +51,6 @@
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
-#include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
@@ -185,14 +184,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     // DecomposeAccess must come before BlockDecoratedStructs, which will wrap
     // buffer resource variables in a structure.
-    // Uniform buffers are only unconditionally decomposed if the implementation does not support
-    // uniform buffer standard layout. Otherwise, only buffer type variables are decomposed.
+    // Uniform buffers are unconditionally decomposed to support implementations that do not support
+    // uniform buffer standard layout.
     core::ir::transform::DecomposeAccessConfig decompose_config{
-        .uniform = !options.extensions.use_uniform_buffers};
+        .uniform = true,
+    };
     TINT_CHECK_RESULT(core::ir::transform::DecomposeAccess(module, decompose_config));
-    if (options.extensions.use_uniform_buffers) {
-        TINT_CHECK_RESULT(core::ir::transform::Std140(module));
-    }
     TINT_CHECK_RESULT(core::ir::transform::BlockDecoratedStructs(module));
 
     TINT_CHECK_RESULT(core::ir::transform::VectorizeScalarMatrixConstructors(module));
