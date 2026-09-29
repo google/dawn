@@ -469,8 +469,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.tintOptions.disable_integer_range_analysis =
         !GetDevice()->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
-    req.tintOptions.use_uniform_buffers =
-        !GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);
+    req.tintOptions.use_uniform_buffers = false;
 
     req.tintOptions.has_gl_ext_conservative_depth =
         gl.IsGLExtensionSupported("GL_EXT_conservative_depth");

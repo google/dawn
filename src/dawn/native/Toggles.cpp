@@ -766,10 +766,6 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"blob_cache_hash_validation",
       "Enable hash validation when loading/storing from/to the blob cache",
       "https://crbug.com/429938352", ToggleStage::Device}},
-    {Toggle::DecomposeUniformBuffers,
-     {"decompose_uniform_buffers",
-      "Decompose uniform buffers into arrays of vec4<u32> on backends for Vulkan and OpenGL.",
-      "https://crbug.com/448452698", ToggleStage::Adapter}},
     {Toggle::D3D12DecomposeWorkgroupAccess,
      {"d3d12_decompose_workgroup_access",
       "Decompose workgroup memory variables into flat scalar arrays and rewrite accesses as "

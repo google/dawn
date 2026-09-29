@@ -425,11 +425,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 }
 
 void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platform,
-                                                TogglesState* adapterToggles) const {
-    adapterToggles->Default(
-        Toggle::DecomposeUniformBuffers,
-        platform->IsFeatureEnabled(platform::Features::kWebGPUDecomposeUniformBuffers));
-}
+                                                TogglesState* adapterToggles) const {}
 
 void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,
                                                TogglesState* deviceToggles) const {

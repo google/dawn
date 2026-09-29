@@ -1021,10 +1021,6 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
     }
     adapterToggles->Default(Toggle::UseVulkanMemoryModel, true);
 
-    adapterToggles->Default(
-        Toggle::DecomposeUniformBuffers,
-        platform->IsFeatureEnabled(platform::Features::kWebGPUDecomposeUniformBuffers));
-
     // VulkanUseDynamicRendering and VulkanUseCreateRenderPass2 are treated as Adapter toggles
     // because they affect whether or not the MSAARenderToSingleSampled feature is available.
 
@@ -1453,13 +1449,6 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
             break;
 
         case wgpu::FeatureName::ShaderF16: {
-            if (!toggles.IsEnabled(Toggle::DecomposeUniformBuffers) &&
-                mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_FALSE) {
-                return FeatureValidationResult(
-                    absl::StrFormat("uniformAndStorageBuffer16BitAccess is required to enable %s "
-                                    "if `decompose_uniform_buffers` is not used",
-                                    feature));
-            }
             // Older Nvidia drivers have issues with f16 data types, so gate the feature behind a
             // toggle. See https://crbug.com/42251215.
             const gpu_info::DriverVersion kGoodNvidiaDriver = {615, 71, 0, 0};

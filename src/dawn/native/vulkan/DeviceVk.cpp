@@ -624,17 +624,10 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
                    mDeviceInfo.features.shaderInt16 == VK_TRUE &&
                    mDeviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
                    mDeviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE);
-        if (!IsToggleEnabled(Toggle::DecomposeUniformBuffers)) {
-            DAWN_CHECK(mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess ==
-                       VK_TRUE);
-        }
 
         usedKnobs.features.shaderInt16 = VK_TRUE;
         usedKnobs.shaderFloat16Int8Features.shaderFloat16 = VK_TRUE;
         usedKnobs._16BitStorageFeatures.storageBuffer16BitAccess = VK_TRUE;
-        if (!IsToggleEnabled(Toggle::DecomposeUniformBuffers)) {
-            usedKnobs._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess = VK_TRUE;
-        }
         if (mDeviceInfo._16BitStorageFeatures.storageInputOutput16 == VK_TRUE) {
             usedKnobs._16BitStorageFeatures.storageInputOutput16 = VK_TRUE;
         }

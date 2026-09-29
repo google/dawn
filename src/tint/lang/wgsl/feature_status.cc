@@ -50,7 +50,6 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
             ////////////////////////////////////////////////////////////////////
             // Shipped with killswitch features
             ///////////////////////////////////////////////////////////////////
-        case LanguageFeature::kUniformBufferStandardLayout:
         case LanguageFeature::kSubgroupId:
         case LanguageFeature::kSubgroupUniformity:
         case LanguageFeature::kTextureAndSamplerLet:
@@ -69,6 +68,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
         case LanguageFeature::kReadonlyAndReadwriteStorageTextures:
         case LanguageFeature::kUnrestrictedPointerParameters:
         case LanguageFeature::kImmediateAddressSpace:
+        case LanguageFeature::kUniformBufferStandardLayout:
             return FeatureStatus::kShipped;
 
             ////////////////////////////////////////////////////////////////////

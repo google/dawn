@@ -181,7 +181,6 @@ enum class Toggle {
     MetalUseArgumentBuffers,
     EnableShaderPrint,
     BlobCacheHashValidation,
-    DecomposeUniformBuffers,
     D3D12DecomposeWorkgroupAccess,
     D3D12PolyfillF16CeilFloor,
     CollapseSubgroupMinMax,
