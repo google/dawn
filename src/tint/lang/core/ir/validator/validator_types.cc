@@ -339,8 +339,15 @@ bool Validator::CheckStruct(const core::type::Struct* str,
             }
         }
 
-        cur_offset += (member->Offset() - cur_offset) + member->MinimumRequiredSize();
+        if (member->Offset() < cur_offset) {
+            diag() << "struct member " << member->Index() << " offset (" << member->Offset()
+                   << ") overlaps with previous member (ends at " << cur_offset << ")";
+            return false;
+        }
+
+        cur_offset = member->Offset() + member->MinimumRequiredSize();
     }
+
     if (str->Size() < cur_offset) {
         diag() << "struct size (" << str->Size() << ") is smaller than the end of the last member ("
                << cur_offset << ")";
