@@ -19,7 +19,7 @@
 package {{ kotlin_package }}
 {% set all_constants_info = kdocs.constants %}
 
-public object Constants {
+internal object Constants {
     /**
      * -1 to max int is resolved at compile time
      */
@@ -37,7 +37,7 @@ public object Constants {
 
             {{ generate_simple_kdoc(constant_doc, indent_prefix = "    ", line_wrap_prefix = "\n     * ") }}
         {% endif %}
-        public const val {{ as_ktName(constant.name.SNAKE_CASE() ) }}:{{ ' ' }}
+        const val {{ as_ktName(constant.name.SNAKE_CASE() ) }}:{{ ' ' }}
         {{- kotlin_declaration(constant) }} =
         {%- if constant.value == 'NAN' %}
             {% if constant.type.name.get() == 'float' -%}   {{ ' ' }}Float.NaN
