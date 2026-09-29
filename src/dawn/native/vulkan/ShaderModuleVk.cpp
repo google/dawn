@@ -508,9 +508,15 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetDevice()->GetPlatform(), "Vulkan.CreateShaderModule");
         TRACE_EVENT(DAWN_TRACE_CATEGORY(), "vkCreateShaderModule");
-        DAWN_TRY(CheckVkSuccess(
-            device->fn.CreateShaderModule(device->GetVkDevice(), &createInfo, nullptr, &*newHandle),
-            "CreateShaderModule"));
+
+        ::VkResult vkResult =
+            device->fn.CreateShaderModule(device->GetVkDevice(), &createInfo, nullptr, &*newHandle);
+        if (vkResult == VK_ERROR_UNKNOWN) {
+            return DAWN_PIPELINE_UNCATEGORIZED_ERROR(
+                "CreateShaderModule failed with VK_ERROR_UNKNOWN");
+        } else {
+            DAWN_TRY(CheckVkSuccess(vkResult, "CreateShaderModule"));
+        }
     }
     DAWN_CHECK(newHandle != VK_NULL_HANDLE);
 

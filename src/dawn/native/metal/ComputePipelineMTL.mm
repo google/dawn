@@ -84,8 +84,9 @@ ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
                                    reflection:nil
                                         error:&error]);
     if (error != nullptr) {
-        return DAWN_INTERNAL_ERROR("Error creating pipeline state " +
-                                   std::string([error.localizedDescription UTF8String]));
+        return DAWN_PIPELINE_UNCATEGORIZED_ERROR(
+            "Error creating pipeline state %s",
+            std::string([error.localizedDescription UTF8String]));
     }
     DAWN_ASSERT(mMtlComputePipelineState != nil);
     timer.RecordMicroseconds("Metal.newComputePipelineStateWithDescriptor.CacheMiss");

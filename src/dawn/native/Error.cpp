@@ -50,9 +50,9 @@ wgpu::ErrorType ToWGPUErrorType(InternalErrorType type) {
             return wgpu::ErrorType::Validation;
         case InternalErrorType::OutOfMemory:
             return wgpu::ErrorType::OutOfMemory;
-        case InternalErrorType::Internal:
+        case InternalErrorType::PipelineUncategorized:
             return wgpu::ErrorType::Internal;
-
+        case InternalErrorType::Internal:
         default:
             return wgpu::ErrorType::Unknown;
     }
@@ -109,6 +109,14 @@ AbslFormatConvert(InternalErrorType value,
             first = false;
             s->Append("Internal");
             value &= ~InternalErrorType::Internal;
+        }
+        if (value & InternalErrorType::PipelineUncategorized) {
+            if (!first) {
+                s->Append("|");
+            }
+            first = false;
+            s->Append("PipelineUncategorized");
+            value &= ~InternalErrorType::PipelineUncategorized;
         }
         if (value & InternalErrorType::OutOfMemory) {
             if (!first) {

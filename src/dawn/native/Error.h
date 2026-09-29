@@ -44,7 +44,8 @@ enum class InternalErrorType : uint32_t {
     Validation = 1,
     BackendDeviceLost = 2,
     Internal = 4,
-    OutOfMemory = 8
+    PipelineUncategorized = 8,
+    OutOfMemory = 16
 };
 
 class InternalError {
@@ -56,6 +57,7 @@ class InternalError {
     explicit InternalError(ErrorData&& d) : mData(std::move(d)) {}
 
     InternalErrorType GetType() const { return mData.GetType(); }
+    void SetType(InternalErrorType type) { mData.SetType(type); }
     const std::string& GetMessage() const { return mData.GetMessage(); }
     const std::vector<ErrorData::BacktraceRecord>& GetBacktrace() const {
         return mData.GetBacktrace();
@@ -163,6 +165,16 @@ struct IsResultOrError<ResultOrError<T>> {
         return DAWN_MAKE_VALIDATION_ERROR(absl::StrFormat(__VA_ARGS__)); \
     }                                                                    \
     for (;;)                                                             \
+    break
+
+#define DAWN_PIPELINE_UNCATEGORIZED_ERROR(...) \
+    DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::PipelineUncategorized, absl::StrFormat(__VA_ARGS__))
+
+#define DAWN_PIPELINE_UNCATEGORIZED_IF(EXPR, ...)              \
+    if (EXPR) [[unlikely]] {                                   \
+        return DAWN_PIPELINE_UNCATEGORIZED_ERROR(__VA_ARGS__); \
+    }                                                          \
+    for (;;)                                                   \
     break
 
 // DAWN_BACKEND_DEVICE_LOST_ERROR means that there was a real unrecoverable native device lost

@@ -62,6 +62,7 @@ using MockRenderPipelineAsyncCallback =
 
 static constexpr char kOomErrorMessage[] = "Out of memory error";
 static constexpr char kInternalErrorMessage[] = "Internal error";
+static constexpr char kPipelineUncategorizedErrorMessage[] = "Pipeline uncategorized";
 
 static constexpr std::string_view kComputeShader = R"(
         @compute @workgroup_size(1) fn main() {}
@@ -260,13 +261,15 @@ TEST_F(AllowedErrorTests, CreateComputePipelineInternalError) {
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
+        .WillOnce(
+            Return(ByMove(DAWN_PIPELINE_UNCATEGORIZED_ERROR(kPipelineUncategorizedErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
 
     // Expect the internal error.
-    EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), wgpu::ErrorType::Internal,
-                                           SizedStringMatches(HasSubstr(kInternalErrorMessage))))
+    EXPECT_CALL(mDeviceErrorCallback,
+                Call(CHandleIs(device.Get()), wgpu::ErrorType::Internal,
+                     SizedStringMatches(HasSubstr(kPipelineUncategorizedErrorMessage))))
         .Times(1);
     device.CreateComputePipeline(ToCppAPI(&desc));
 }
@@ -287,13 +290,15 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineInternalError) {
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
+        .WillOnce(
+            Return(ByMove(DAWN_PIPELINE_UNCATEGORIZED_ERROR(kPipelineUncategorizedErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
 
     // Expect the internal error.
-    EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), wgpu::ErrorType::Internal,
-                                           SizedStringMatches(HasSubstr(kInternalErrorMessage))))
+    EXPECT_CALL(mDeviceErrorCallback,
+                Call(CHandleIs(device.Get()), wgpu::ErrorType::Internal,
+                     SizedStringMatches(HasSubstr(kPipelineUncategorizedErrorMessage))))
         .Times(1);
     device.CreateRenderPipeline(ToCppAPI(&desc));
 }

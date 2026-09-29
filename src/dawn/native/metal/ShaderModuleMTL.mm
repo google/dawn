@@ -223,9 +223,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     const BindingInfoArray& moduleBindingInfo,
     bool useStrictMath,
     const ImmediateMask& pipelineImmediateMask) {
-    std::ostringstream errorStream;
-    errorStream << "Tint MSL failure:\n";
-
     bool useArgumentBuffers = device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers);
 
     tint::Bindings bindings =
@@ -434,7 +431,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                     uint32_t maxComputeWorkgroupStorageSize =
                         r.limits.maxComputeWorkgroupStorageSize;
                     uint64_t size = result->workgroup_allocations.front();
-                    DAWN_INTERNAL_ERROR_IF(
+                    DAWN_PIPELINE_UNCATEGORIZED_IF(
                         size > maxComputeWorkgroupStorageSize,
                         "The total combined workgroup storage (%u bytes) size with all workgroup "
                         "variables combined into a single structure is larger than the maximum "
@@ -599,7 +596,7 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
                 availableFunctions += "\n - \"";
                 availableFunctions += [fn UTF8String];
             }
-            return DAWN_FORMAT_INTERNAL_ERROR(
+            return DAWN_PIPELINE_UNCATEGORIZED_ERROR(
                 "ShaderModuleMTL: failed to get the MTLFunction \'%s\' from produced MSL "
                 "shader below:\n\n%s\n\nAvailable functions are:%s",
                 mslCompilation->remappedEntryPointName, mslCompilation->msl, availableFunctions);

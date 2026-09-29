@@ -1300,7 +1300,7 @@ ComputePipelineBase* DeviceBase::APICreateComputePipeline(
     }
 
     Ref<ComputePipelineBase> result;
-    if (ConsumedError(std::move(resultOrError), &result, InternalErrorType::Internal,
+    if (ConsumedError(std::move(resultOrError), &result, InternalErrorType::PipelineUncategorized,
                       "calling %s.CreateComputePipeline(%s).", this, descriptor)) {
         result = ComputePipelineBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
@@ -1446,7 +1446,7 @@ RenderPipelineBase* DeviceBase::APICreateRenderPipeline(
     }
 
     Ref<RenderPipelineBase> result;
-    if (ConsumedError(std::move(resultOrError), &result, InternalErrorType::Internal,
+    if (ConsumedError(std::move(resultOrError), &result, InternalErrorType::PipelineUncategorized,
                       "calling %s.CreateRenderPipeline(%s).", this, descriptor)) {
         result = RenderPipelineBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
