@@ -115,7 +115,7 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
 
     if (status != WGPUStatus_Success) {
         mBackend->GetFunctions().surfaceRelease(innerSurface);
-        return DAWN_VALIDATION_ERROR("Failed to get inner surface capabilities");
+        return DAWN_UNRECOVERABLE_ERROR("Failed to get inner surface capabilities");
     }
 
     Span<const WGPUTextureFormat> innerSurfaceFormats =
