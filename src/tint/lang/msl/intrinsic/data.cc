@@ -7819,7 +7819,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* [53] */
     /* fn alias_pointer_offset<T2>[T1, S : address_space, A : access](ptr<S, T1, A>, u32) -> ptr<S, T2, A> */
     /* num overloads */ 1,
-    /* overloads */ OverloadIndex(197),
+    /* overloads */ OverloadIndex(201),
   },
   {
     /* [54] */
