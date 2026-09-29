@@ -58,27 +58,6 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         ioSurfaceDesc.ioSurface = ioSurfaceChain->ioSurface;
         ioSurfaceDesc.allowStorageBinding = ioSurfaceChain->allowStorageBinding;
         innerDesc.nextInChain = &ioSurfaceDesc.chain;
-    } else if (descriptor.Get<SharedTextureMemoryAHardwareBufferDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedTextureMemoryDXGISharedHandleDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedTextureMemoryEGLImageDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedTextureMemoryOpaqueFDDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedTextureMemoryVkDedicatedAllocationDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedTextureMemoryZirconHandleDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedTextureMemoryDmaBufDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
     } else {
         DAWN_UNREACHABLE();
     }
