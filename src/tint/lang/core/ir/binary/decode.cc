@@ -1507,19 +1507,28 @@ struct Decoder {
             return b.InvalidConstant()->Value();
         }
 
-        uint32_t num_elements = type->Elements().count;
+        auto elements = type->Elements();
+        uint32_t num_elements = elements.count;
         if (DAWN_UNLIKELY(num_elements == 0)) {
             err_ << "cannot create a splat of type " << type->FriendlyName() << "\n";
             return b.InvalidConstant()->Value();
         }
         auto* value = ConstantValue(splat_in.elements());
-        for (uint32_t i = 0; i < num_elements; i++) {
-            auto* el_type = type->Element(i);
-            if (DAWN_UNLIKELY(el_type != value->Type())) {
+        if (elements.type) {
+            if (DAWN_UNLIKELY(elements.type != value->Type())) {
                 err_ << "constant splat element value type " << value->Type()->FriendlyName()
-                     << " does not match element " << i << " type " << el_type->FriendlyName()
-                     << "\n";
+                     << " does not match type " << elements.type->FriendlyName() << "\n";
                 return b.InvalidConstant()->Value();
+            }
+        } else {
+            for (uint32_t i = 0; i < num_elements; i++) {
+                auto* el_type = type->Element(i);
+                if (DAWN_UNLIKELY(el_type != value->Type())) {
+                    err_ << "constant splat element value type " << value->Type()->FriendlyName()
+                         << " does not match element " << i << " type " << el_type->FriendlyName()
+                         << "\n";
+                    return b.InvalidConstant()->Value();
+                }
             }
         }
         return mod_out_.constant_values.Splat(type, value);
