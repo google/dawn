@@ -104,8 +104,6 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/signed_integer_polyfill.h
   lang/core/ir/transform/single_entry_point.cc
   lang/core/ir/transform/single_entry_point.h
-  lang/core/ir/transform/std140.cc
-  lang/core/ir/transform/std140.h
   lang/core/ir/transform/substitute_overrides.cc
   lang/core/ir/transform/substitute_overrides.h
   lang/core/ir/transform/value_to_let.cc
@@ -181,7 +179,6 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/robustness_test.cc
   lang/core/ir/transform/signed_integer_polyfill_test.cc
   lang/core/ir/transform/single_entry_point_test.cc
-  lang/core/ir/transform/std140_test.cc
   lang/core/ir/transform/substitute_overrides_test.cc
   lang/core/ir/transform/value_to_let_test.cc
   lang/core/ir/transform/vectorize_scalar_matrix_constructors_test.cc
@@ -240,7 +237,6 @@ tint_add_target(tint_lang_core_ir_transform_fuzz fuzz
   lang/core/ir/transform/rename_conflicts_fuzz.cc
   lang/core/ir/transform/robustness_fuzz.cc
   lang/core/ir/transform/single_entry_point_fuzz.cc
-  lang/core/ir/transform/std140_fuzz.cc
   lang/core/ir/transform/substitute_overrides_fuzz.cc
   lang/core/ir/transform/value_to_let_fuzz.cc
   lang/core/ir/transform/vectorize_scalar_matrix_constructors_fuzz.cc
