@@ -590,28 +590,6 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
                                    Source source) const {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class-layout-constraints
 
-    auto is_uniform_struct_or_array = [address_space](const core::type::Type* ty) {
-        return address_space == core::AddressSpace::kUniform &&
-               ty->IsAnyOf<sem::Array, core::type::Struct>();
-    };
-
-    auto is_uniform_struct = [address_space](const core::type::Type* ty) {
-        return address_space == core::AddressSpace::kUniform && ty->Is<core::type::Struct>();
-    };
-
-    auto required_alignment_of = [&](const core::type::Type* ty) {
-        uint32_t actual_align = ty->Align();
-        uint32_t required_align = actual_align;
-        if (is_uniform_struct_or_array(ty) &&
-            !allowed_features_.features.contains(
-                wgsl::LanguageFeature::kUniformBufferStandardLayout)) {
-            required_align = tint::RoundUp(16u, actual_align);
-        }
-        return required_align;
-    };
-
-    auto member_name_of = [](const core::type::StructMember* sm) { return sm->Name().Name(); };
-
     // Only validate the [type + address space] once
     if (!valid_type_storage_layouts_.Add(TypeAndAddressSpace{store_ty, address_space})) {
         return true;
@@ -626,42 +604,13 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
         auto& str_source = str->Declaration()->name->source;
         for (size_t i = 0; i < str->Members().Length(); ++i) {
             auto* const m = str->Members()[i];
-            uint32_t required_align = required_alignment_of(m->Type());
+            uint32_t required_align = m->Type()->Align();
 
             // Recurse into the member type.
             if (!AddressSpaceLayout(m->Type(), address_space, m->Declaration()->type->source)) {
                 AddNote(str_source) << "see layout of struct:\n" << str->Layout();
                 note_usage();
                 return false;
-            }
-
-            // For uniform buffers, validate that the number of bytes between the previous member of
-            // type struct and the current is a multiple of 16 bytes.
-            auto* const prev_member = (i == 0) ? nullptr : str->Members()[i - 1];
-            if (prev_member && is_uniform_struct(prev_member->Type()) &&
-                !allowed_features_.features.contains(
-                    wgsl::LanguageFeature::kUniformBufferStandardLayout)) {
-                const uint32_t prev_to_curr_offset = m->Offset() - prev_member->Offset();
-                if (prev_to_curr_offset % 16 != 0) {
-                    AddError(m->Declaration()->source)
-                        << style::Enum("uniform")
-                        << " storage requires that the number of bytes between the start of the "
-                           "previous member of type struct and the current member be a "
-                           "multiple of 16 bytes, but there are currently "
-                        << prev_to_curr_offset << " bytes between "
-                        << style::Variable(member_name_of(prev_member)) << " and "
-                        << style::Variable(member_name_of(m)) << ". Consider setting "
-                        << style::Attribute("@align") << style::Code("(16)") << " on this member";
-
-                    AddNote(str_source) << "see layout of struct:\n" << str->Layout();
-
-                    auto* prev_member_str = prev_member->Type()->As<sem::Struct>();
-                    AddNote(prev_member_str->Declaration()->name->source)
-                        << "and layout of previous member struct:\n"
-                        << prev_member_str->Layout();
-                    note_usage();
-                    return false;
-                }
             }
 
             // If an alignment was explicitly specified, we need to validate that it satisfies the
@@ -681,7 +630,6 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
         }
     }
 
-    // For uniform buffer array members, validate that array elements are aligned to 16 bytes
     if (auto* arr = store_ty->As<sem::Array>()) {
         // Recurse into the element type.
         // TODO(crbug.com/tint/1388): Ideally we'd pass the source for nested element type here, but
@@ -689,37 +637,6 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
         // AST type nodes instead.
         if (!AddressSpaceLayout(arr->ElemType(), address_space, source)) {
             return false;
-        }
-
-        if (address_space == core::AddressSpace::kUniform &&
-            !allowed_features_.features.contains(
-                wgsl::LanguageFeature::kUniformBufferStandardLayout)) {
-            // We already validated that this array member is itself aligned to 16 bytes above, so
-            // we only need to validate that stride is a multiple of 16 bytes.
-            if (arr->ImplicitStride() % 16 != 0) {
-                // Since WGSL has no stride attribute, try to provide a useful hint for how the
-                // shader author can resolve the issue.
-                StyledText hint;
-                if (arr->ElemType()->Is<core::type::Scalar>()) {
-                    hint << "Consider using a vector or struct as the element type instead.";
-                } else if (auto* vec = arr->ElemType()->As<core::type::Vector>();
-                           vec && vec->Type()->Size() == 4) {
-                    hint << "Consider using a vec4 instead.";
-                } else if (arr->ElemType()->Is<sem::Struct>()) {
-                    hint << "Consider using the " << style::Attribute("@size")
-                         << " attribute on the last struct member.";
-                } else {
-                    hint << "Consider wrapping the element type in a struct and using the "
-                         << style::Attribute("@size") << " attribute.";
-                }
-                AddError(source) << style::Enum("uniform")
-                                 << " storage requires that array elements are aligned to 16 "
-                                    "bytes, but array element of type "
-                                 << style::Type(arr->ElemType()->FriendlyName())
-                                 << " has a stride of " << arr->ImplicitStride() << " bytes. "
-                                 << hint;
-                return false;
-            }
         }
     }
 
