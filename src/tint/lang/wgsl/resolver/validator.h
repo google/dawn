@@ -70,24 +70,6 @@ class Atomic;
 
 namespace tint::resolver {
 
-/// TypeAndAddressSpace is a pair of type and address space
-struct TypeAndAddressSpace {
-    /// The type
-    const core::type::Type* type;
-    /// The address space
-    core::AddressSpace address_space;
-
-    /// Equality operator
-    /// @param other the other TypeAndAddressSpace to compare this TypeAndAddressSpace to
-    /// @returns true if the type and address space of this TypeAndAddressSpace is equal to @p other
-    bool operator==(const TypeAndAddressSpace& other) const {
-        return type == other.type && address_space == other.address_space;
-    }
-
-    /// @returns the hash value of this object
-    tint::HashCode HashCode() const { return Hash(type, address_space); }
-};
-
 /// DiagnosticFilterStack is a scoped stack of diagnostic filters.
 using DiagnosticFilterStack = ScopeStack<wgsl::DiagnosticRule, wgsl::DiagnosticSeverity>;
 
@@ -111,13 +93,11 @@ class Validator {
     /// @param enabled_extensions all the extensions declared in current module
     /// @param allowed_features the allowed extensions and features
     /// @param atomic_composite_info atomic composite info of the module
-    /// @param valid_type_storage_layouts a set of validated type layouts by address space
     Validator(ProgramBuilder* builder,
               SemHelper& helper,
               const wgsl::Extensions& enabled_extensions,
               const wgsl::AllowedFeatures& allowed_features,
-              const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info,
-              Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts);
+              const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info);
     ~Validator();
 
     /// @returns an error diagnostic
@@ -592,15 +572,6 @@ class Validator {
                             const char* use,
                             DiagnosticDuplicates allow_duplicates) const;
 
-    /// Validates a address space layout
-    /// @param type the type to validate
-    /// @param sc the address space
-    /// @param source the source of the type
-    /// @returns true on success, false otherwise
-    bool AddressSpaceLayout(const core::type::Type* type,
-                            core::AddressSpace sc,
-                            Source source) const;
-
     /// Validates a swizzle assignment
     /// @param lhs the lhs swizzle to validate
     /// @param source the source of the swizzle
@@ -677,7 +648,6 @@ class Validator {
     const wgsl::Extensions& enabled_extensions_;
     const wgsl::AllowedFeatures& allowed_features_;
     const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info_;
-    Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts_;
 };
 
 }  // namespace tint::resolver

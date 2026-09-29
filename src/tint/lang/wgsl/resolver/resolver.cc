@@ -146,12 +146,7 @@ Resolver::Resolver(ProgramBuilder* builder, const wgsl::AllowedFeatures& allowed
       const_eval_(builder->constants, diagnostics_),
       intrinsic_table_{builder->Types(), builder->Symbols()},
       sem_(builder),
-      validator_(builder,
-                 sem_,
-                 enabled_extensions_,
-                 allowed_features_,
-                 atomic_composite_info_,
-                 valid_type_storage_layouts_),
+      validator_(builder, sem_, enabled_extensions_, allowed_features_, atomic_composite_info_),
       allowed_features_(allowed_features) {}
 
 Resolver::~Resolver() = default;

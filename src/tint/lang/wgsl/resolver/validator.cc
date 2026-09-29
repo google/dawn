@@ -180,15 +180,13 @@ Validator::Validator(
     SemHelper& sem,
     const wgsl::Extensions& enabled_extensions,
     const wgsl::AllowedFeatures& allowed_features,
-    const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info,
-    Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts)
+    const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info)
     : symbols_(builder->Symbols()),
       diagnostics_(builder->Diagnostics()),
       sem_(sem),
       enabled_extensions_(enabled_extensions),
       allowed_features_(allowed_features),
-      atomic_composite_info_(atomic_composite_info),
-      valid_type_storage_layouts_(valid_type_storage_layouts) {
+      atomic_composite_info_(atomic_composite_info) {
     // Set default severities for filterable diagnostic rules.
     diagnostic_filters_.Set(wgsl::CoreDiagnosticRule::kDerivativeUniformity,
                             wgsl::DiagnosticSeverity::kError);
@@ -580,64 +578,6 @@ bool Validator::VariableInitializer(const ast::Variable* v,
                             << style::Type(sem_.TypeNameOf(storage_ty)) << " with value of type "
                             << style::Type(sem_.TypeNameOf(initializer_ty));
         return false;
-    }
-
-    return true;
-}
-
-bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
-                                   core::AddressSpace address_space,
-                                   Source source) const {
-    // https://gpuweb.github.io/gpuweb/wgsl/#storage-class-layout-constraints
-
-    // Only validate the [type + address space] once
-    if (!valid_type_storage_layouts_.Add(TypeAndAddressSpace{store_ty, address_space})) {
-        return true;
-    }
-
-    auto note_usage = [&] {
-        AddNote(source) << style::Type(store_ty->FriendlyName()) << " used in address space "
-                        << style::Enum(address_space) << " here";
-    };
-
-    if (auto* str = store_ty->As<sem::Struct>()) {
-        auto& str_source = str->Declaration()->name->source;
-        for (size_t i = 0; i < str->Members().Length(); ++i) {
-            auto* const m = str->Members()[i];
-            uint32_t required_align = m->Type()->Align();
-
-            // Recurse into the member type.
-            if (!AddressSpaceLayout(m->Type(), address_space, m->Declaration()->type->source)) {
-                AddNote(str_source) << "see layout of struct:\n" << str->Layout();
-                note_usage();
-                return false;
-            }
-
-            // If an alignment was explicitly specified, we need to validate that it satisfies the
-            // alignment requirement of the address space.
-            auto* align_attr =
-                ast::GetAttribute<ast::StructMemberAlignAttribute>(m->Declaration()->attributes);
-            if (align_attr != nullptr) {
-                auto align = sem_.GetVal(align_attr->expr)->ConstantValue()->ValueAs<uint32_t>();
-                if (align % required_align != 0) {
-                    AddError(align_attr->expr->source)
-                        << "alignment must be a multiple of " << style::Literal(required_align)
-                        << " bytes for the " << style::Enum(address_space) << " address space";
-                    note_usage();
-                    return false;
-                }
-            }
-        }
-    }
-
-    if (auto* arr = store_ty->As<sem::Array>()) {
-        // Recurse into the element type.
-        // TODO(crbug.com/tint/1388): Ideally we'd pass the source for nested element type here, but
-        // we can't easily get that from the semantic node. We should consider recursing through the
-        // AST type nodes instead.
-        if (!AddressSpaceLayout(arr->ElemType(), address_space, source)) {
-            return false;
-        }
     }
 
     return true;
@@ -3483,10 +3423,6 @@ bool Validator::CheckTypeAccessAddressSpace(const core::type::Type* store_ty,
                                             core::Access access,
                                             core::AddressSpace address_space,
                                             const Source& source) const {
-    if (!AddressSpaceLayout(store_ty, address_space, source)) {
-        return false;
-    }
-
     switch (address_space) {
         case core::AddressSpace::kPixelLocal:
             if (auto* str = store_ty->As<sem::Struct>()) {

@@ -711,7 +711,6 @@ class Resolver {
     sem::CompoundStatement* current_compound_statement_ = nullptr;
     Vector<std::function<void(const sem::GlobalVariable*)>, 4> on_transitively_reference_global_;
     uint32_t current_scoping_depth_ = 0;
-    Hashset<TypeAndAddressSpace, 8> valid_type_storage_layouts_;
     Hashmap<const ast::Expression*, const ast::BinaryExpression*, 8> logical_binary_lhs_to_parent_;
     Hashset<const ast::Expression*, 8> not_evaluated_;
     Hashmap<const core::type::Type*, size_t, 8> nest_depth_;
