@@ -28,8 +28,13 @@
 #include "src/dawn/tests/perf_tests/DawnPerfTest.h"
 
 #include <algorithm>
+#include <charconv>
 #include <fstream>
 #include <limits>
+#include <memory>
+#include <span>
+#include <string_view>
+#include <system_error>
 #include <utility>
 
 #include "src/dawn/platform/tracing/TraceEvent.h"
@@ -108,35 +113,44 @@ namespace dawn {
 
 DawnPerfTestEnvironment::DawnPerfTestEnvironment(int argc, char** argv)
     : DawnTestEnvironment(argc, argv) {
-    size_t argLen = 0;  // Set when parsing --arg=X arguments
-    for (int i = 1; i < argc; ++i) {
-        if (DAWN_UNSAFE_TODO(strcmp("--calibration", argv[i])) == 0) {
+    // SAFETY: `argv` is guaranteed by the program entry point to contain `argc` elements.
+    const auto args = DAWN_UNSAFE_BUFFERS(std::span<char* const>(argv, static_cast<size_t>(argc)));
+    for (size_t i = 1; i < args.size(); ++i) {
+        const std::string_view arg = args[i];
+
+        if (arg == "--calibration") {
             mIsCalibrating = true;
             continue;
         }
 
-        constexpr const char kOverrideStepsArg[] = "--override-steps=";
-        argLen = sizeof(kOverrideStepsArg) - 1;
-        if (DAWN_UNSAFE_TODO(strncmp(argv[i], kOverrideStepsArg, argLen)) == 0) {
-            const char* overrideSteps = DAWN_UNSAFE_TODO(argv[i] + argLen);
-            if (overrideSteps[0] != '\0') {
-                mOverrideStepsToRun = DAWN_UNSAFE_TODO(strtoul(overrideSteps, nullptr, 0));
+        constexpr std::string_view kOverrideStepsArg = "--override-steps=";
+        if (arg.starts_with(kOverrideStepsArg)) {
+            const std::string_view overrideSteps = arg.substr(kOverrideStepsArg.size());
+            if (!overrideSteps.empty()) {
+                const char* first = std::to_address(overrideSteps.begin());
+                const char* last = std::to_address(overrideSteps.end());
+                unsigned int steps = 0;
+                auto [ptr, ec] = std::from_chars(first, last, steps);
+                if (ec == std::errc() && ptr == last) {
+                    mOverrideStepsToRun = steps;
+                } else {
+                    WarningLog() << "Ignoring invalid value for " << kOverrideStepsArg << ": \""
+                                 << overrideSteps << "\"";
+                }
             }
             continue;
         }
 
-        constexpr const char kTraceFileArg[] = "--trace-file=";
-        argLen = sizeof(kTraceFileArg) - 1;
-        if (DAWN_UNSAFE_TODO(strncmp(argv[i], kTraceFileArg, argLen)) == 0) {
-            const char* traceFile = DAWN_UNSAFE_TODO(argv[i] + argLen);
-            if (traceFile[0] != '\0') {
+        constexpr std::string_view kTraceFileArg = "--trace-file=";
+        if (arg.starts_with(kTraceFileArg)) {
+            const std::string_view traceFile = arg.substr(kTraceFileArg.size());
+            if (!traceFile.empty()) {
                 mTraceFile = traceFile;
             }
             continue;
         }
 
-        if (DAWN_UNSAFE_TODO(strcmp("-h", argv[i])) == 0 ||
-            DAWN_UNSAFE_TODO(strcmp("--help", argv[i])) == 0) {
+        if (arg == "-h" || arg == "--help") {
             InfoLog() << "Additional flags:"
                       << " [--calibration] [--override-steps=x] [--trace-file=file]\n"
                       << "  --calibration: Only run calibration. Calibration allows the perf test"
@@ -172,7 +186,7 @@ unsigned int DawnPerfTestEnvironment::OverrideStepsToRun() const {
 }
 
 const char* DawnPerfTestEnvironment::GetTraceFile() const {
-    return mTraceFile;
+    return mTraceFile.empty() ? nullptr : mTraceFile.c_str();
 }
 
 DawnPerfTestPlatform* DawnPerfTestEnvironment::GetPlatform() const {

@@ -70,7 +70,8 @@ class DawnPerfTestEnvironment : public DawnTestEnvironment {
     // If non-zero, overrides the number of steps.
     unsigned int mOverrideStepsToRun = 0;
 
-    const char* mTraceFile = nullptr;
+    // Empty if traces should not be written to a file.
+    std::string mTraceFile;
 
     std::unique_ptr<DawnPerfTestPlatform> mPlatform;
 };
