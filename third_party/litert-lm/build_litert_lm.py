@@ -164,7 +164,7 @@ def main():
             '--noexperimental_guard_against_concurrent_changes',
             '--nowatchfs',
             '--compilation_mode=opt',
-            '--define=litert_link_capi_so=true',
+            '--define=litert_runtime_link_mode=dynamic',
             '--define=resolve_symbols_in_exec=false',
             BAZEL_TARGET,
         ]

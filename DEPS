@@ -821,7 +821,7 @@ deps = {
   },
 
   'third_party/litert-lm/src': {
-    'url': '{chromium_git}/external/github.com/google-ai-edge/LiteRT-LM.git@df9bb057d50741d5a044de2c2ea4f97d72206949',
+    'url': '{chromium_git}/external/github.com/google-ai-edge/LiteRT-LM.git@2f8284d5ea323278989facfaaed1c476b174760a',
     'condition': 'checkout_litert_lm',
   },
 
@@ -830,7 +830,7 @@ deps = {
       {
         # TODO(crbug.com/527944617): Replace experimental CIPD dependency.
         'package': 'experimental/chouinard_at_google.com/litert_lm_benchmark_data',
-        'version': '3gymze25YpJCADvh_zTc0MCNgeLcMPkh8xcfb_HjkAQC',
+	'version': 'MfFYLUhIzajgKbb0NIc_KPoe5_r8qf9dwAi_Ndgy-nMC',
       }
     ],
     'dep_type': 'cipd',
