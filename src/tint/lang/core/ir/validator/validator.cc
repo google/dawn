@@ -730,9 +730,10 @@ Hashset<const ir::Function*, 4> Validator::ContainingEndPoints(const ir::Functio
     Hashset<const ir::Function*, 4> result{};
     Hashset<const ir::Function*, 4> visited{f};
 
-    auto call_sites = user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>()).Vector();
+    auto call_sites = user_func_calls_.GetOr(f, {}).Vector();
     while (!call_sites.IsEmpty()) {
         auto call_site = call_sites.Pop();
+
         auto calling_function = ContainingFunction(call_site);
         if (!calling_function) {
             continue;
@@ -747,8 +748,10 @@ Hashset<const ir::Function*, 4> Validator::ContainingEndPoints(const ir::Functio
             result.Add(calling_function);
         }
 
-        for (auto new_call_sites : user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>())) {
-            call_sites.Push(new_call_sites);
+        if (auto new_call_sites = user_func_calls_.Get(calling_function)) {
+            for (const ir::UserCall* call : *new_call_sites) {
+                call_sites.Push(call);
+            }
         }
     }
 
