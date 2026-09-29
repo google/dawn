@@ -102,7 +102,7 @@ autoninja -C out/active litert_lm
 1. GN first builds Dawn's monolithic shared library:
    - Linux: `out/active/libwebgpu_dawn.so`
    - macOS: `out/active/libwebgpu_dawn.dylib`
-   - Windows: `out/active/webgpu_dawn.dll` (also copied to `out/active/libwebgpu_dawn.dll`)
+   - Windows: `out/active/webgpu_dawn.dll`
 2. GN executes [`third_party/litert-lm/build_litert_lm.py`](../../third_party/litert-lm/build_litert_lm.py), which:
    - Configures Bazelisk with the hermetic Clang/LLVM toolchain from Dawn's `third_party/llvm-build` (on Linux/macOS) or Visual Studio toolchain (on Windows).
    - Links against the newly compiled local `libwebgpu_dawn` and platform prebuilts.

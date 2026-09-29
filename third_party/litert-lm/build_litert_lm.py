@@ -102,22 +102,17 @@ def main():
         # can resolve targets.
         platform_name = get_platform_name()
 
-        # Determine Dawn monolithic library name for current platform. MSVC
-        # emits `webgpu_dawn.dll` with no `lib` prefix, but the prebuilt LiteRT
-        # accelerators import it as `libwebgpu_dawn.dll`.
+        # Determine Dawn monolithic library name for current platform.
         if platform_name.startswith('macos'):
             dawn_lib_name = 'libwebgpu_dawn.dylib'
-            gn_dawn_lib_name = 'libwebgpu_dawn.dylib'
         elif platform_name.startswith('windows'):
-            dawn_lib_name = 'libwebgpu_dawn.dll'
-            gn_dawn_lib_name = 'webgpu_dawn.dll'
+            dawn_lib_name = 'webgpu_dawn.dll'
         else:
             dawn_lib_name = 'libwebgpu_dawn.so'
-            gn_dawn_lib_name = 'libwebgpu_dawn.so'
 
         # Find the locally compiled Dawn library in the active GN build
         # directory.
-        local_dawn_lib = dest_path.parent / gn_dawn_lib_name
+        local_dawn_lib = dest_path.parent / dawn_lib_name
         if not local_dawn_lib.exists():
             print(
                 f"Error: Local Dawn library (libwebgpu_dawn) not found in GN output directory: {local_dawn_lib}",
@@ -254,14 +249,6 @@ def main():
                 dest_file = dest_path.parent / f.name
                 shutil.copy2(f, dest_file)
                 dest_file.chmod(0o755)
-
-    # TODO(crbug.com/562894778): Investigate why the Windows prebuilts import
-    # `libwebgpu_dawn.dll` when Dawn's MSVC builds emit `webgpu_dawn.dll`.
-    if gn_dawn_lib_name != dawn_lib_name:
-        dest_dawn_file = dest_path.parent / dawn_lib_name
-        shutil.copy2(local_dawn_lib, dest_dawn_file)
-        dest_dawn_file.chmod(0o755)
-
     print("Build and copy successful.")
 
 

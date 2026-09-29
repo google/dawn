@@ -115,14 +115,12 @@ action("litert_lm_advanced_main") {
       "$root_out_dir/libLiteRt.dll",
       "$root_out_dir/libLiteRtTopKWebGpuSampler.dll",
       "$root_out_dir/libLiteRtWebGpuAccelerator.dll",
-      "$root_out_dir/libwebgpu_dawn.dll",
     ]
     data += [
       "$root_out_dir/libGemmaModelConstraintProvider.dll",
       "$root_out_dir/libLiteRt.dll",
       "$root_out_dir/libLiteRtTopKWebGpuSampler.dll",
       "$root_out_dir/libLiteRtWebGpuAccelerator.dll",
-      "$root_out_dir/libwebgpu_dawn.dll",
     ]
   }
 }
