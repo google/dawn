@@ -343,3 +343,30 @@ shared_library("dawn_node") {
   }
   include_dirs = [ "${dawn_node_gen_dir}" ]
 }
+
+if (checkout_v8 && dawn_node) {
+  executable("dawn_standalone_cts_runner") {
+    sources = [
+      "ManualConstructors.cpp",
+      "ManualConstructors.h",
+      "Module.cpp",
+      "Module.h",
+      "standalone/main.cpp",
+    ]
+    public_configs = [
+      ":common_config",
+      "${dawn_root}/src/dawn/node/standalone:polyfills_public_config",
+    ]
+    include_dirs = [ "${dawn_node_gen_dir}" ]
+    deps = [
+      ":dawn_node_binding",
+      "$dawn_root/src/dawn:proc",
+      "$dawn_root/src/dawn/native",
+      "$dawn_root/src/dawn/utils:system_utils",
+      "${dawn_root}/src/dawn/node/napi_v8",
+      "${dawn_root}/src/dawn/node/standalone:polyfills",
+      "//third_party/v8/src:v8",
+      "//third_party/v8/src:v8_libplatform",
+    ]
+  }
+}
