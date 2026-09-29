@@ -315,15 +315,6 @@ class Field {
         return *this;
     }
 
-    // Marks that this should only be used for storage buffer tests.
-    // Returns this Field so calls can be chained.
-    Field& StorageBufferOnly() {
-        mStorageBufferOnly = true;
-        return *this;
-    }
-
-    bool IsStorageBufferOnly() const { return mStorageBufferOnly; }
-
     // Call the DataMatcherCallback `callback` for continuous or strided data bytes, based on the
     // strided information of this field. The callback may be called once or multiple times. Note
     // that padding bytes are tested as well, as they must be preserved by the implementation.
@@ -410,9 +401,6 @@ class Field {
     bool mHasSizeAttribute = false;
     // Decorated size of the type in bytes indicated by @size attribute, if existed
     size_t mPaddedSize = 0;
-    // Whether this type doesn't meet the layout constraints for uniform buffer and thus should only
-    // be used for storage buffer tests
-    bool mStorageBufferOnly = false;
 
     // Describe the striding pattern of data part (i.e. the "natural size" part). Note that
     // continious types are described as mStrideDataBytes == mSize and mStridePaddingBytes == 0.
@@ -533,11 +521,6 @@ class ComputeLayoutMemoryBufferTests
     bool mUseDxcEnabledOrNonD3D12 = false;
 };
 
-// Align returns the WGSL decoration for an explicit structure field alignment
-std::string AlignDeco(uint32_t value) {
-    return "@align(" + std::to_string(value) + ") ";
-}
-
 // Test different types used as a struct member
 TEST_P(ComputeLayoutMemoryBufferTests, StructMember) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
@@ -576,8 +559,8 @@ struct Data {
 
 struct Input {
     header : u32,
-    {data_align}data : Data,
-    {footer_align}footer : u32,
+    data : Data,
+    footer : u32,
 }
 
 struct Output {
@@ -608,21 +591,7 @@ fn main() {
     }
 })";
 
-    // https://www.w3.org/TR/WGSL/#alignment-and-size
-    // Structure size: RoundUp(AlignOf(S), OffsetOf(S, L) + SizeOf(S, L))
-    // https://www.w3.org/TR/WGSL/#storage-class-constraints
-    // RequiredAlignOf(S, uniform): RoundUp(16, max(AlignOf(T0), ..., AlignOf(TN)))
-    uint32_t dataAlign = isUniform ? std::max(size_t{16}, field.GetAlign()) : field.GetAlign();
-
-    // https://www.w3.org/TR/WGSL/#structure-layout-rules
-    // Note: When underlying the target is a Vulkan device, we assume the device does not support
-    // the scalarBlockLayout feature. Therefore, a data value must not be placed in the padding at
-    // the end of a structure or matrix, nor in the padding at the last element of an array.
-    uint32_t footerAlign = isUniform ? 16 : 4;
-
-    shader = ReplaceAll(shader, "{data_align}", isUniform ? AlignDeco(dataAlign) : "");
     shader = ReplaceAll(shader, "{field_align}", std::to_string(field.GetAlign()));
-    shader = ReplaceAll(shader, "{footer_align}", isUniform ? AlignDeco(footerAlign) : "");
     shader = ReplaceAll(shader, "{field_size}", std::to_string(field.GetPaddedSize()));
     shader = ReplaceAll(shader, "{field_type}", field.GetWGSLType());
     shader = ReplaceAll(shader, "{input_header_code}", std::to_string(kInputHeaderCode));
@@ -642,7 +611,7 @@ fn main() {
     MemoryDataBuilder inputDataBuilder;  // The whole SSBO data
     {
         inputDataBuilder.AddFixedU32(kInputHeaderCode);  // Input.header
-        inputDataBuilder.AlignTo(dataAlign);             // Input.data
+        inputDataBuilder.AlignTo(field.GetAlign());      // Input.data
         {
             inputDataBuilder.AddFixedU32(kDataHeaderCode);           // Input.data.header
             inputDataBuilder.AddSubBuilder(field.GetDataBuilder());  // Input.data.field
@@ -650,7 +619,7 @@ fn main() {
             inputDataBuilder.AddFixedU32(kDataFooterCode);           // Input.data.footer
             inputDataBuilder.AlignTo(field.GetAlign());              // Input.data padding
         }
-        inputDataBuilder.AlignTo(footerAlign);           // Input.footer @align
+        inputDataBuilder.AlignTo(4);                     // Input.footer @align
         inputDataBuilder.AddFixedU32(kInputFooterCode);  // Input.footer
         inputDataBuilder.AlignTo(256);                   // Input padding
     }
@@ -926,28 +895,17 @@ auto GenerateParams() {
             Field::Matrix(4, 4, ScalarType::f16).SizeAttribute(128),
 
             // Array types with no custom alignment or size.
-            // Note: The use of StorageBufferOnly() is due to UBOs requiring 16 byte
-            // alignment of array elements. See
-            // https://www.w3.org/TR/WGSL/#storage-class-constraints
-            Field("array<u32, 1>", /* align */ 4, /* size */ 4, /* requireF16Feature */ false)
-                .StorageBufferOnly(),
-            Field("array<u32, 2>", /* align */ 4, /* size */ 8, /* requireF16Feature */ false)
-                .StorageBufferOnly(),
-            Field("array<u32, 3>", /* align */ 4, /* size */ 12, /* requireF16Feature */ false)
-                .StorageBufferOnly(),
-            Field("array<u32, 4>", /* align */ 4, /* size */ 16, /* requireF16Feature */ false)
-                .StorageBufferOnly(),
-            Field("array<vec2u, 1>", /* align */ 8, /* size */ 8, /* requireF16Feature */ false)
-                .StorageBufferOnly(),
+            Field("array<u32, 1>", /* align */ 4, /* size */ 4, /* requireF16Feature */ false),
+            Field("array<u32, 2>", /* align */ 4, /* size */ 8, /* requireF16Feature */ false),
+            Field("array<u32, 3>", /* align */ 4, /* size */ 12, /* requireF16Feature */ false),
+            Field("array<u32, 4>", /* align */ 4, /* size */ 16, /* requireF16Feature */ false),
+            Field("array<vec2u, 1>", /* align */ 8, /* size */ 8, /* requireF16Feature */ false),
             Field("array<vec2u, 2>", /* align */ 8, /* size */ 16,
-                  /* requireF16Feature */ false)
-                .StorageBufferOnly(),
+                  /* requireF16Feature */ false),
             Field("array<vec2u, 3>", /* align */ 8, /* size */ 24,
-                  /* requireF16Feature */ false)
-                .StorageBufferOnly(),
+                  /* requireF16Feature */ false),
             Field("array<vec2u, 4>", /* align */ 8, /* size */ 32,
-                  /* requireF16Feature */ false)
-                .StorageBufferOnly(),
+                  /* requireF16Feature */ false),
             Field("array<vec3u, 1>", /* align */ 16, /* size */ 16,
                   /* requireF16Feature */ false)
                 .Strided(12, 4),
@@ -971,32 +929,24 @@ auto GenerateParams() {
 
             // Array types with custom alignment
             Field("array<u32, 1>", /* align */ 4, /* size */ 4, /* requireF16Feature */ false)
-                .AlignAttribute(32)
-                .StorageBufferOnly(),
+                .AlignAttribute(32),
             Field("array<u32, 2>", /* align */ 4, /* size */ 8, /* requireF16Feature */ false)
-                .AlignAttribute(32)
-                .StorageBufferOnly(),
+                .AlignAttribute(32),
             Field("array<u32, 3>", /* align */ 4, /* size */ 12, /* requireF16Feature */ false)
-                .AlignAttribute(32)
-                .StorageBufferOnly(),
+                .AlignAttribute(32),
             Field("array<u32, 4>", /* align */ 4, /* size */ 16, /* requireF16Feature */ false)
-                .AlignAttribute(32)
-                .StorageBufferOnly(),
+                .AlignAttribute(32),
             Field("array<vec2u, 1>", /* align */ 8, /* size */ 8, /* requireF16Feature */ false)
-                .AlignAttribute(32)
-                .StorageBufferOnly(),
+                .AlignAttribute(32),
             Field("array<vec2u, 2>", /* align */ 8, /* size */ 16,
                   /* requireF16Feature */ false)
-                .AlignAttribute(32)
-                .StorageBufferOnly(),
+                .AlignAttribute(32),
             Field("array<vec2u, 3>", /* align */ 8, /* size */ 24,
                   /* requireF16Feature */ false)
-                .AlignAttribute(32)
-                .StorageBufferOnly(),
+                .AlignAttribute(32),
             Field("array<vec2u, 4>", /* align */ 8, /* size */ 32,
                   /* requireF16Feature */ false)
-                .AlignAttribute(32)
-                .StorageBufferOnly(),
+                .AlignAttribute(32),
             Field("array<vec3u, 1>", /* align */ 16, /* size */ 16,
                   /* requireF16Feature */ false)
                 .AlignAttribute(32)
@@ -1028,17 +978,13 @@ auto GenerateParams() {
 
             // Array types with custom size
             Field("array<u32, 1>", /* align */ 4, /* size */ 4, /* requireF16Feature */ false)
-                .SizeAttribute(128)
-                .StorageBufferOnly(),
+                .SizeAttribute(128),
             Field("array<u32, 2>", /* align */ 4, /* size */ 8, /* requireF16Feature */ false)
-                .SizeAttribute(128)
-                .StorageBufferOnly(),
+                .SizeAttribute(128),
             Field("array<u32, 3>", /* align */ 4, /* size */ 12, /* requireF16Feature */ false)
-                .SizeAttribute(128)
-                .StorageBufferOnly(),
+                .SizeAttribute(128),
             Field("array<u32, 4>", /* align */ 4, /* size */ 16, /* requireF16Feature */ false)
-                .SizeAttribute(128)
-                .StorageBufferOnly(),
+                .SizeAttribute(128),
             Field("array<vec3u, 4>", /* align */ 16, /* size */ 64,
                   /* requireF16Feature */ false)
                 .SizeAttribute(128)
@@ -1046,37 +992,21 @@ auto GenerateParams() {
 
             // Array of f32 matrix
             Field("array<mat2x2<f32>, 3>", /* align */ 8, /* size */ 48,
-                  /* requireF16Feature */ false)
-                .StorageBufferOnly(),
-            // Uniform scope require the array alignment round up to 16.
-            Field("array<mat2x2<f32>, 3>", /* align */ 8, /* size */ 48,
-                  /* requireF16Feature */ false)
-                .AlignAttribute(16),
+                  /* requireF16Feature */ false),
             Field("array<mat2x3<f32>, 3>", /* align */ 16, /* size */ 96,
                   /* requireF16Feature */ false)
                 .Strided(12, 4),
             Field("array<mat2x4<f32>, 3>", /* align */ 16, /* size */ 96,
                   /* requireF16Feature */ false),
             Field("array<mat3x2<f32>, 3>", /* align */ 8, /* size */ 72,
-                  /* requireF16Feature */ false)
-                .StorageBufferOnly(),
-            // `mat3x2<f16>` can not be the element type of a uniform array, because its size 24 is
-            // not a multiple of 16.
-            Field("array<mat3x2<f32>, 3>", /* align */ 8, /* size */ 72,
-                  /* requireF16Feature */ false)
-                .AlignAttribute(16)
-                .StorageBufferOnly(),
+                  /* requireF16Feature */ false),
             Field("array<mat3x3<f32>, 3>", /* align */ 16, /* size */ 144,
                   /* requireF16Feature */ false)
                 .Strided(12, 4),
             Field("array<mat3x4<f32>, 3>", /* align */ 16, /* size */ 144,
                   /* requireF16Feature */ false),
             Field("array<mat4x2<f32>, 3>", /* align */ 8, /* size */ 96,
-                  /* requireF16Feature */ false)
-                .StorageBufferOnly(),
-            Field("array<mat4x2<f32>, 3>", /* align */ 8, /* size */ 96,
-                  /* requireF16Feature */ false)
-                .AlignAttribute(16),
+                  /* requireF16Feature */ false),
             Field("array<mat4x3<f32>, 3>", /* align */ 16, /* size */ 192,
                   /* requireF16Feature */ false)
                 .Strided(12, 4),
@@ -1085,88 +1015,29 @@ auto GenerateParams() {
 
             // Array of f16 matrix
             Field("array<mat2x2<f16>, 3>", /* align */ 4, /* size */ 24,
-                  /* requireF16Feature */ true)
-                .StorageBufferOnly(),
+                  /* requireF16Feature */ true),
             Field("array<mat2x3<f16>, 3>", /* align */ 8, /* size */ 48,
                   /* requireF16Feature */ true)
-                .Strided(6, 2)
-                .StorageBufferOnly(),
-            Field("array<mat2x4<f16>, 3>", /* align */ 8, /* size */ 48,
-                  /* requireF16Feature */ true)
-                .StorageBufferOnly(),
-            Field("array<mat3x2<f16>, 3>", /* align */ 4, /* size */ 36,
-                  /* requireF16Feature */ true)
-                .StorageBufferOnly(),
-            Field("array<mat3x3<f16>, 3>", /* align */ 8, /* size */ 72,
-                  /* requireF16Feature */ true)
-                .Strided(6, 2)
-                .StorageBufferOnly(),
-            Field("array<mat3x4<f16>, 3>", /* align */ 8, /* size */ 72,
-                  /* requireF16Feature */ true)
-                .StorageBufferOnly(),
-            Field("array<mat4x2<f16>, 3>", /* align */ 4, /* size */ 48,
-                  /* requireF16Feature */ true)
-                .StorageBufferOnly(),
-            Field("array<mat4x3<f16>, 3>", /* align */ 8, /* size */ 96,
-                  /* requireF16Feature */ true)
-                .Strided(6, 2)
-                .StorageBufferOnly(),
-            Field("array<mat4x4<f16>, 3>", /* align */ 8, /* size */ 96,
-                  /* requireF16Feature */ true)
-                .StorageBufferOnly(),
-            // Uniform scope require the array alignment round up to 16, and array element size a
-            // multiple of 16.
-            Field("array<mat2x2<f16>, 3>", /* align */ 4, /* size */ 24,
-                  /* requireF16Feature */ true)
-                .AlignAttribute(16)
-                .StorageBufferOnly(),
-            Field("array<mat2x3<f16>, 3>", /* align */ 8, /* size */ 48,
-                  /* requireF16Feature */ true)
-                .AlignAttribute(16)
                 .Strided(6, 2),
             Field("array<mat2x4<f16>, 3>", /* align */ 8, /* size */ 48,
-                  /* requireF16Feature */ true)
-                .AlignAttribute(16),
+                  /* requireF16Feature */ true),
             Field("array<mat3x2<f16>, 3>", /* align */ 4, /* size */ 36,
-                  /* requireF16Feature */ true)
-                .AlignAttribute(16)
-                .StorageBufferOnly(),
+                  /* requireF16Feature */ true),
             Field("array<mat3x3<f16>, 3>", /* align */ 8, /* size */ 72,
                   /* requireF16Feature */ true)
-                .AlignAttribute(16)
-                .Strided(6, 2)
-                .StorageBufferOnly(),
+                .Strided(6, 2),
             Field("array<mat3x4<f16>, 3>", /* align */ 8, /* size */ 72,
-                  /* requireF16Feature */ true)
-                .AlignAttribute(16)
-                .StorageBufferOnly(),
+                  /* requireF16Feature */ true),
             Field("array<mat4x2<f16>, 3>", /* align */ 4, /* size */ 48,
-                  /* requireF16Feature */ true)
-                .AlignAttribute(16),
+                  /* requireF16Feature */ true),
             Field("array<mat4x3<f16>, 3>", /* align */ 8, /* size */ 96,
                   /* requireF16Feature */ true)
-                .AlignAttribute(16)
                 .Strided(6, 2),
             Field("array<mat4x4<f16>, 3>", /* align */ 8, /* size */ 96,
-                  /* requireF16Feature */ true)
-                .AlignAttribute(16),
+                  /* requireF16Feature */ true),
         });
 
-    std::vector<ComputeLayoutMemoryBufferTestParams> filtered;
-    for (auto param : params) {
-        // If the decompose_uniform_buffers toggle is disabled then Tint will not support the
-        // relaxed constraints on uniform buffers. We can remove this (and all of the
-        // StorageBufferOnly logic) when the killswitch for decompose_uniform_buffers is removed.
-        bool supportsUniformBufferStandardLayout =
-            std::find(param.forceDisabledWorkarounds.begin(), param.forceDisabledWorkarounds.end(),
-                      "decompose_uniform_buffers") == param.forceDisabledWorkarounds.end();
-        if (param.mAddressSpace != AddressSpace::Storage && param.mField.IsStorageBufferOnly() &&
-            !supportsUniformBufferStandardLayout) {
-            continue;
-        }
-        filtered.emplace_back(param);
-    }
-    return filtered;
+    return params;
 }
 
 INSTANTIATE_TEST_SUITE_P(,
