@@ -179,7 +179,8 @@ IndirectDrawMetadata::GetIndirectMultiDraws() const {
 
 void IndirectDrawMetadata::SetValidatedIndirectDrawArgs(const IndirectDraw& draw,
                                                         BufferBase* indirectBuffer,
-                                                        uint64_t indirectOffset) {
+                                                        uint64_t indirectOffset,
+                                                        BufferBase* sourceIndirectBuffer) {
     // The first time validated args are set ensure the array of args is large enough to store all
     // of the args that will be needed.
     if (mValidatedIndirectDraws.size() < mNextIndirectDrawIndex) {
@@ -191,6 +192,8 @@ void IndirectDrawMetadata::SetValidatedIndirectDrawArgs(const IndirectDraw& draw
         mValidatedIndirectDraws[draw.validatedDrawIndex];
     validatedDraw.indirectBuffer = indirectBuffer;
     validatedDraw.indirectOffset = indirectOffset;
+    validatedDraw.sourceIndirectBuffer = sourceIndirectBuffer;
+    validatedDraw.sourceIndirectOffset = draw.inputBufferOffset;
 
     // TODO(crbug.com/495489174): Currently running without validation does not populate the
     // validated indirect draws array. Setting the indirectBuffer of the command to null is used as
@@ -208,6 +211,8 @@ IndirectDrawMetadata::ValidatedIndirectDraw IndirectDrawMetadata::GetValidatedIn
         return {
             .indirectBuffer = cmd->indirectBuffer.Get(),
             .indirectOffset = cmd->indirectOffset,
+            .sourceIndirectBuffer = cmd->indirectBuffer.Get(),
+            .sourceIndirectOffset = cmd->indirectOffset,
         };
     }
     return mValidatedIndirectDraws[indirectDrawIndex];

@@ -694,7 +694,8 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
 
                 // Save the args that point to the validated values in the indirectDrawMetadata.
                 indirectDrawMetadata->SetValidatedIndirectDrawArgs(
-                    draw, outputParamsBuffer.GetBuffer(), outputParamsOffset);
+                    draw, outputParamsBuffer.GetBuffer(), outputParamsOffset,
+                    pass.inputIndirectBuffer);
                 if (pass.flags & kIndexedDraw) {
                     outputParamsOffset += kDrawIndexedIndirectSize;
                 } else {
