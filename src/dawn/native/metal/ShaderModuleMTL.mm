@@ -571,13 +571,11 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
     }
 
     if (error != nullptr) {
-        // clang-format formats the `mslCompilation->msl` below oddly as `mslCompilation -> msl`.
-        // clang-format off
-        DAWN_INVALID_IF(error.code != MTLLibraryErrorCompileWarning,
-                        "ShaderModuleMTL: Unable to create library object: %s from "
-                        "produced MSL shader below:\n\n%s",
-                        [error.localizedDescription UTF8String], mslCompilation->msl);
-        // clang-format on
+        DAWN_PIPELINE_UNCATEGORIZED_IF(error.code != MTLLibraryErrorCompileWarning,
+                                       "ShaderModuleMTL: Unable to create library object: %s from "
+                                       "produced MSL shader below:\n\n%s",
+                                       [error.localizedDescription UTF8String],
+                                       mslCompilation->msl);
     }
     DAWN_ASSERT(library != nil);
     timer.RecordMicroseconds("Metal.newLibraryWithSource.CacheMiss");
