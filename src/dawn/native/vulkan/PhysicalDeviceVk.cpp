@@ -189,7 +189,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
     const gpu_info::IntelWindowsDriverVersion kDriverVersion({30, 0, 101, 2111});
     if (IsWindows() && gpu_info::IsIntel(mDeviceInfo.properties.vendorID) &&
         gpu_info::IntelWindowsDriverVersion(mDriverVersion) < kDriverVersion) {
-        return DAWN_FORMAT_INTERNAL_ERROR(
+        return DAWN_FORMAT_UNRECOVERABLE_ERROR(
             "Disable Intel Vulkan adapter on Windows driver version %s. See "
             "https://crbug.com/1338622.",
             driverVersionStr);
@@ -237,13 +237,13 @@ MaybeError PhysicalDevice::InitializeImpl() {
 
     // Needed for security
     if (!mDeviceInfo.features.robustBufferAccess) {
-        return DAWN_INTERNAL_ERROR("Vulkan robustBufferAccess feature required.");
+        return DAWN_UNRECOVERABLE_ERROR("Vulkan robustBufferAccess feature required.");
     }
 
     if (!mDeviceInfo.features.textureCompressionBC &&
         !(mDeviceInfo.features.textureCompressionETC2 &&
           mDeviceInfo.features.textureCompressionASTC_LDR)) {
-        return DAWN_INTERNAL_ERROR(
+        return DAWN_UNRECOVERABLE_ERROR(
             "Vulkan textureCompressionBC feature required or both textureCompressionETC2 and "
             "textureCompressionASTC required.");
     }
@@ -253,29 +253,29 @@ MaybeError PhysicalDevice::InitializeImpl() {
         !mDeviceInfo.features.shaderStorageBufferArrayDynamicIndexing ||
         !mDeviceInfo.features.shaderSampledImageArrayDynamicIndexing ||
         !mDeviceInfo.features.shaderStorageImageArrayDynamicIndexing) {
-        return DAWN_INTERNAL_ERROR("Vulkan shaderUniform*ArrayDynamicIndexing required.");
+        return DAWN_UNRECOVERABLE_ERROR("Vulkan shaderUniform*ArrayDynamicIndexing required.");
     }
 
     // Needed for the respective WebGPU features.
     if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.depthBiasClamp) {
-        SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan depthBiasClamp feature required."));
+        SetCoreNotSupported(DAWN_UNRECOVERABLE_ERROR("Vulkan depthBiasClamp feature required."));
     }
     if (!mDeviceInfo.features.fragmentStoresAndAtomics) {
         // Technically `fragmentStoresAndAtomics` isn't needed for compat mode. It's essentially
         // always supported on Vulkan 1.1 devices so just leave it as required.
-        return DAWN_INTERNAL_ERROR("Vulkan fragmentStoresAndAtomics feature required.");
+        return DAWN_UNRECOVERABLE_ERROR("Vulkan fragmentStoresAndAtomics feature required.");
     }
     if (!mDeviceInfo.features.fullDrawIndexUint32) {
-        return DAWN_INTERNAL_ERROR("Vulkan fullDrawIndexUint32 feature required.");
+        return DAWN_UNRECOVERABLE_ERROR("Vulkan fullDrawIndexUint32 feature required.");
     }
     if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.imageCubeArray) {
-        SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan imageCubeArray feature required."));
+        SetCoreNotSupported(DAWN_UNRECOVERABLE_ERROR("Vulkan imageCubeArray feature required."));
     }
     if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.independentBlend) {
-        SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan independentBlend feature required."));
+        SetCoreNotSupported(DAWN_UNRECOVERABLE_ERROR("Vulkan independentBlend feature required."));
     }
     if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.sampleRateShading) {
-        SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan sampleRateShading feature required."));
+        SetCoreNotSupported(DAWN_UNRECOVERABLE_ERROR("Vulkan sampleRateShading feature required."));
     }
 
     return {};
@@ -753,15 +753,15 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
 
     const VkPhysicalDeviceLimits& vkLimits = mDeviceInfo.properties.limits;
 
-#define CHECK_V1_LIMIT_IMPL(vulkanName, webgpuName, compareOp, msgSegment)           \
-    do {                                                                             \
-        if (Safe##compareOp(vkLimits.vulkanName, baseLimits.v1.webgpuName)) {        \
-            return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for " #webgpuName \
-                                       "."                                           \
-                                       " VkPhysicalDeviceLimits::" #vulkanName       \
-                                       " must be at " msgSegment " " +               \
-                                       std::to_string(baseLimits.v1.webgpuName));    \
-        }                                                                            \
+#define CHECK_V1_LIMIT_IMPL(vulkanName, webgpuName, compareOp, msgSegment)                \
+    do {                                                                                  \
+        if (Safe##compareOp(vkLimits.vulkanName, baseLimits.v1.webgpuName)) {             \
+            return DAWN_UNRECOVERABLE_ERROR("Insufficient Vulkan limits for " #webgpuName \
+                                            "."                                           \
+                                            " VkPhysicalDeviceLimits::" #vulkanName       \
+                                            " must be at " msgSegment " " +               \
+                                            std::to_string(baseLimits.v1.webgpuName));    \
+        }                                                                                 \
     } while (false)
 
 #define CHECK_AND_SET_V1_LIMIT_IMPL(vulkanName, webgpuName, compareOp, msgSegment) \
@@ -821,7 +821,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     uint32_t maxUniformBufferSize = vkLimits.maxUniformBufferRange;
     maxUniformBufferSize = maxUniformBufferSize - (maxUniformBufferSize % 16);
     if (maxUniformBufferSize < baseLimits.v1.maxUniformBufferBindingSize) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxUniformBufferBindingSize");
+        return DAWN_UNRECOVERABLE_ERROR(
+            "Insufficient Vulkan limits for maxUniformBufferBindingSize");
     }
     limits->v1.maxUniformBufferBindingSize = maxUniformBufferSize;
 
@@ -872,7 +873,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
 
     if (vkLimits.maxVertexInputBindingStride < baseLimits.v1.maxVertexBufferArrayStride ||
         vkLimits.maxVertexInputAttributeOffset < baseLimits.v1.maxVertexBufferArrayStride - 1) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxVertexBufferArrayStride");
+        return DAWN_UNRECOVERABLE_ERROR(
+            "Insufficient Vulkan limits for maxVertexBufferArrayStride");
     }
     // Note that some drivers have UINT32_MAX as maxVertexInputAttributeOffset so we do that +1 only
     // after the std::min.
@@ -899,7 +901,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     }
     if (vkLimits.maxVertexOutputComponents < interStageShaderVariablesBase * 4 + 8 ||
         vkLimits.maxFragmentInputComponents < interStageShaderVariablesBase * 4 + 8) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxInterStageShaderVariables");
+        return DAWN_UNRECOVERABLE_ERROR(
+            "Insufficient Vulkan limits for maxInterStageShaderVariables");
     }
     // Reserve 1 for position and 1 for emulated fragment pixel center.
     auto constexpr kNumReservedVariables = 1 + 1;
@@ -924,11 +927,13 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
 
     if (!IsSubset(VkSampleCountFlags{VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT},
                   vkLimits.framebufferColorSampleCounts)) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for framebufferColorSampleCounts");
+        return DAWN_UNRECOVERABLE_ERROR(
+            "Insufficient Vulkan limits for framebufferColorSampleCounts");
     }
     if (!IsSubset(VkSampleCountFlags{VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT},
                   vkLimits.framebufferDepthSampleCounts)) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for framebufferDepthSampleCounts");
+        return DAWN_UNRECOVERABLE_ERROR(
+            "Insufficient Vulkan limits for framebufferDepthSampleCounts");
     }
 
     limits->v1.maxBufferSize = kAssumedMaxBufferSize;
@@ -949,7 +954,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     }
 
     if (limits->v1.maxBufferSize < baseLimits.v1.maxBufferSize) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan maxBufferSize limit");
+        return DAWN_UNRECOVERABLE_ERROR("Insufficient Vulkan maxBufferSize limit");
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl)) {
@@ -1876,7 +1881,7 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
     return subgroupMatrixConfigs;
 }
 
-void PhysicalDevice::SetCoreNotSupported(std::unique_ptr<InternalError> error) {
+void PhysicalDevice::SetCoreNotSupported(std::unique_ptr<UnrecoverableError> error) {
     DAWN_ASSERT(mSupportsCoreFeatureLevel);
     mSupportsCoreFeatureLevel = false;
     DAWN_ASSERT(error);

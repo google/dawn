@@ -52,7 +52,7 @@ ResultOrError<SystemEventReceiver> Queue::GetSystemEventReceiver() {
         HANDLE fenceEvent =
             ::CreateEvent(nullptr, /*bManualReset=*/true, /*bInitialState=*/false, nullptr);
         if (fenceEvent == nullptr) {
-            return DAWN_INTERNAL_ERROR("CreateEvent failed");
+            return DAWN_UNRECOVERABLE_ERROR("CreateEvent failed");
         }
         receiver = SystemEventReceiver(SystemHandle::Acquire(fenceEvent));
     }
@@ -63,7 +63,7 @@ ResultOrError<SystemEventReceiver> Queue::GetSystemEventReceiver() {
 MaybeError Queue::ReturnSystemEventReceivers(std::span<SystemEventReceiver> receivers) {
     for (const auto& receiver : receivers) {
         if (!ResetEvent(receiver.GetPrimitive().Get())) {
-            return DAWN_INTERNAL_ERROR("ResetEvent failed");
+            return DAWN_UNRECOVERABLE_ERROR("ResetEvent failed");
         }
     }
     mAvailableEventReceivers.Use([&](auto availableEventReceivers) {

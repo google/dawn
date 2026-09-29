@@ -157,7 +157,7 @@ class InstanceBase final : public ErrorSink, public RefCounted {
     void DisconnectDawnPlatform();
 
     // ErrorSink implementation
-    void ConsumeError(std::unique_ptr<InternalError> error,
+    void ConsumeError(std::unique_ptr<UnrecoverableError> error,
                       InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
 
   private:

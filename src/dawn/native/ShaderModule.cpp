@@ -1433,14 +1433,14 @@ ResultOrValError<Extent3D> ValidateComputeStageWorkgroupSize(
     return Extent3D{workgroupInfo.x, workgroupInfo.y, workgroupInfo.z};
 }
 
-CachedValidationError::CachedValidationError(std::unique_ptr<InternalError>&& errorData) {
+CachedValidationError::CachedValidationError(std::unique_ptr<UnrecoverableError>&& errorData) {
     DAWN_ASSERT(errorData->GetType() == InternalErrorType::Validation);
     message = errorData->GetMessage();
     contexts = errorData->GetContexts();
     DAWN_CHECK(!message.empty());
 }
 
-std::unique_ptr<InternalError> CachedValidationError::ToInternalError() const {
+std::unique_ptr<UnrecoverableError> CachedValidationError::ToUnrecoverableError() const {
     DAWN_CHECK(!message.empty());
     auto error = DAWN_MAKE_VALIDATION_ERROR(message);
     std::for_each(contexts.begin(), contexts.end(), [&error](auto c) { error->AppendContext(c); });
@@ -1458,12 +1458,12 @@ bool ShaderModuleParseResult::HasError() const {
     return cachedValidationError.has_value();
 }
 
-std::unique_ptr<InternalError> ShaderModuleParseResult::ToInternalError() const {
+std::unique_ptr<UnrecoverableError> ShaderModuleParseResult::ToUnrecoverableError() const {
     DAWN_ASSERT(HasError());
-    return cachedValidationError->ToInternalError();
+    return cachedValidationError->ToUnrecoverableError();
 }
 
-void ShaderModuleParseResult::SetValidationError(std::unique_ptr<InternalError>&& errorData) {
+void ShaderModuleParseResult::SetValidationError(std::unique_ptr<UnrecoverableError>&& errorData) {
     DAWN_ASSERT(errorData->GetType() == InternalErrorType::Validation);
     cachedValidationError = CachedValidationError(std::move(errorData));
     // If validation error occurs, clear the Tint program and metadata table.
@@ -1918,7 +1918,7 @@ void ShaderModuleBase::Initialize() {
             // If ShaderModuleParseResult has validation error, notify the caller that compilation
             // failed. The compilation messages have already been stored.
             if (parseResult.HasError()) {
-                return parseResult.cachedValidationError->ToInternalError();
+                return parseResult.cachedValidationError->ToUnrecoverableError();
             }
 
             DAWN_ASSERT(!parseResult.HasError());
@@ -1968,9 +1968,9 @@ void ShaderModuleBase::Initialize() {
     DAWN_ASSERT(IsInitialized());
 }
 
-std::unique_ptr<InternalError> ShaderModuleBase::GetInitializationError() {
+std::unique_ptr<UnrecoverableError> ShaderModuleBase::GetInitializationError() {
     DAWN_ASSERT(mInitializationError.has_value());
-    return mInitializationError->ToInternalError();
+    return mInitializationError->ToUnrecoverableError();
 }
 
 ObjectType ShaderModuleBase::GetType() const {

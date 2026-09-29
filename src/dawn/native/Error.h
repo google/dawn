@@ -43,18 +43,18 @@ enum class InternalErrorType : uint32_t {
     None = 0,
     Validation = 1,
     BackendDeviceLost = 2,
-    Internal = 4,
+    Unrecoverable = 4,
     PipelineUncategorized = 8,
     OutOfMemory = 16
 };
 
-class InternalError {
+class UnrecoverableError {
   public:
-    static std::unique_ptr<InternalError> Create(ErrorData data) {
-        return std::make_unique<InternalError>(std::move(data));
+    static std::unique_ptr<UnrecoverableError> Create(ErrorData data) {
+        return std::make_unique<UnrecoverableError>(std::move(data));
     }
 
-    explicit InternalError(ErrorData&& d) : mData(std::move(d)) {}
+    explicit UnrecoverableError(ErrorData&& d) : mData(std::move(d)) {}
 
     InternalErrorType GetType() const { return mData.GetType(); }
     void SetType(InternalErrorType type) { mData.SetType(type); }
@@ -83,11 +83,11 @@ class InternalError {
 
 // MaybeError and ResultOrError are meant to be used as return value for function that are not
 // expected to, but might fail. The handling of error is potentially much slower than successes.
-using MaybeError = Result<void, InternalError>;
+using MaybeError = Result<void, UnrecoverableError>;
 using MaybeValError = MaybeError;
 
 template <typename T>
-using ResultOrError = Result<T, InternalError>;
+using ResultOrError = Result<T, UnrecoverableError>;
 template <typename T>
 using ResultOrValError = ResultOrError<T>;
 
@@ -120,7 +120,7 @@ struct IsResultOrError<ResultOrError<T>> {
 //   return SomethingOfTypeT; // for ResultOrError<T>
 //
 // Returning an error is done via:
-//   return DAWN_MAKE_INTERNAL_ERROR(errorType, "My error message");
+//   return DAWN_MAKE_UNRECOVERABLE_ERROR(errorType, "My error message");
 //
 // but shorthand version for specific error types are preferred:
 //   return DAWN_VALIDATION_ERROR("My error message with details %s", details);
@@ -151,11 +151,11 @@ struct IsResultOrError<ResultOrError<T>> {
 #define DAWN_MAKE_ERROR_DATA(TYPE, MESSAGE) \
     ::dawn::native::ErrorData::Create(TYPE, MESSAGE, __FILE__, __func__, __LINE__)
 
-#define DAWN_MAKE_INTERNAL_ERROR(TYPE, MESSAGE) \
-    ::dawn::native::InternalError::Create(DAWN_MAKE_ERROR_DATA(TYPE, MESSAGE))
+#define DAWN_MAKE_UNRECOVERABLE_ERROR(TYPE, MESSAGE) \
+    ::dawn::native::UnrecoverableError::Create(DAWN_MAKE_ERROR_DATA(TYPE, MESSAGE))
 
-#define DAWN_MAKE_VALIDATION_ERROR(MESSAGE) \
-    ::dawn::native::InternalError::Create(  \
+#define DAWN_MAKE_VALIDATION_ERROR(MESSAGE)     \
+    ::dawn::native::UnrecoverableError::Create( \
         DAWN_MAKE_ERROR_DATA(InternalErrorType::Validation, MESSAGE))
 
 #define DAWN_VALIDATION_ERROR(...) DAWN_MAKE_VALIDATION_ERROR(absl::StrFormat(__VA_ARGS__))
@@ -167,8 +167,9 @@ struct IsResultOrError<ResultOrError<T>> {
     for (;;)                                                             \
     break
 
-#define DAWN_PIPELINE_UNCATEGORIZED_ERROR(...) \
-    DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::PipelineUncategorized, absl::StrFormat(__VA_ARGS__))
+#define DAWN_PIPELINE_UNCATEGORIZED_ERROR(...)                              \
+    DAWN_MAKE_UNRECOVERABLE_ERROR(InternalErrorType::PipelineUncategorized, \
+                                  absl::StrFormat(__VA_ARGS__))
 
 #define DAWN_PIPELINE_UNCATEGORIZED_IF(EXPR, ...)              \
     if (EXPR) [[unlikely]] {                                   \
@@ -180,31 +181,33 @@ struct IsResultOrError<ResultOrError<T>> {
 // DAWN_BACKEND_DEVICE_LOST_ERROR means that there was a real unrecoverable native device lost
 // error. We can't even do a graceful shutdown because the Device is gone.
 #define DAWN_BACKEND_DEVICE_LOST_ERROR(MESSAGE) \
-    DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::BackendDeviceLost, MESSAGE)
+    DAWN_MAKE_UNRECOVERABLE_ERROR(InternalErrorType::BackendDeviceLost, MESSAGE)
 
-// DAWN_INTERNAL_ERROR means Dawn hit an unexpected error in the backend and should try to
+// DAWN_UNRECOVERABLE_ERROR means Dawn hit an unexpected error in the backend and should try to
 // gracefully shut down.
-#define DAWN_INTERNAL_ERROR(MESSAGE) DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::Internal, MESSAGE)
+#define DAWN_UNRECOVERABLE_ERROR(MESSAGE) \
+    DAWN_MAKE_UNRECOVERABLE_ERROR(InternalErrorType::Unrecoverable, MESSAGE)
 
-#define DAWN_FORMAT_INTERNAL_ERROR(...) \
-    DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::Internal, absl::StrFormat(__VA_ARGS__))
+#define DAWN_FORMAT_UNRECOVERABLE_ERROR(...) \
+    DAWN_MAKE_UNRECOVERABLE_ERROR(InternalErrorType::Unrecoverable, absl::StrFormat(__VA_ARGS__))
 
-#define DAWN_INTERNAL_ERROR_IF(EXPR, ...)                              \
-    if (EXPR) [[unlikely]] {                                           \
-        return DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::Internal,   \
-                                        absl::StrFormat(__VA_ARGS__)); \
-    }                                                                  \
-    for (;;)                                                           \
+#define DAWN_UNRECOVERABLE_ERROR_IF(EXPR, ...)                                 \
+    if (EXPR) [[unlikely]] {                                                   \
+        return DAWN_MAKE_UNRECOVERABLE_ERROR(InternalErrorType::Unrecoverable, \
+                                             absl::StrFormat(__VA_ARGS__));    \
+    }                                                                          \
+    for (;;)                                                                   \
     break
 
-#define DAWN_UNIMPLEMENTED_ERROR(MESSAGE) \
-    DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::Internal, std::string("Unimplemented: ") + MESSAGE)
+#define DAWN_UNIMPLEMENTED_ERROR(MESSAGE)                           \
+    DAWN_MAKE_UNRECOVERABLE_ERROR(InternalErrorType::Unrecoverable, \
+                                  std::string("Unimplemented: ") + MESSAGE)
 
 // DAWN_OUT_OF_MEMORY_ERROR means we ran out of memory. It may be used as a signal internally in
 // Dawn to free up unused resources. Or, it may bubble up to the application to signal an allocation
 // was too large or they should free some existing resources.
 #define DAWN_OUT_OF_MEMORY_ERROR(MESSAGE) \
-    DAWN_MAKE_INTERNAL_ERROR(InternalErrorType::OutOfMemory, MESSAGE)
+    DAWN_MAKE_UNRECOVERABLE_ERROR(InternalErrorType::OutOfMemory, MESSAGE)
 
 template <typename T>
 std::string MakeIncreaseLimitMessage(std::string_view limitName, T adapterLimitValue) {

@@ -72,7 +72,7 @@ MaybeError PlatformFunctions::LoadD3D12() {
                            "D3D12SerializeVersionedRootSignature", &error) ||
         !mD3D12Lib.GetProc(&d3d12CreateVersionedRootSignatureDeserializer,
                            "D3D12CreateVersionedRootSignatureDeserializer", &error)) {
-        return DAWN_INTERNAL_ERROR(error.c_str());
+        return DAWN_UNRECOVERABLE_ERROR(error.c_str());
     }
     // Optional: only present in Agility SDK / newer d3d12.dll. Absence is not an error.
     mD3D12Lib.GetProc(&d3d12GetInterface, "D3D12GetInterface", &error);
@@ -88,7 +88,7 @@ MaybeError PlatformFunctions::LoadD3D11() {
     std::string error;
     if (!mD3D11Lib.OpenSystemLibrary(L"d3d11.dll", &error) ||
         !mD3D11Lib.GetProc(&d3d11on12CreateDevice, "D3D11On12CreateDevice", &error)) {
-        return DAWN_INTERNAL_ERROR(error.c_str());
+        return DAWN_UNRECOVERABLE_ERROR(error.c_str());
     }
 #endif
 
@@ -221,11 +221,11 @@ MaybeError PlatformFunctions::EnsureDXCLibraries(std::span<const std::string> se
     DynamicLib dxCompilerLib;
     std::string error;
     if (!dxCompilerLib.Open("dxcompiler.dll", searchPaths, &error)) {
-        return DAWN_INTERNAL_ERROR(std::move(error));
+        return DAWN_UNRECOVERABLE_ERROR(std::move(error));
     }
 
     if (!dxCompilerLib.GetProc(&dxcCreateInstance, "DxcCreateInstance", &error)) {
-        return DAWN_INTERNAL_ERROR(std::move(error));
+        return DAWN_UNRECOVERABLE_ERROR(std::move(error));
     }
 
     mDXCompilerLib = std::move(dxCompilerLib);

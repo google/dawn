@@ -31,7 +31,7 @@
 
 namespace dawn::native::detail {
 
-void LogCacheError(std::unique_ptr<InternalError> error) {
+void LogCacheError(std::unique_ptr<UnrecoverableError> error) {
     dawn::ErrorLog() << error->GetFormattedMessage();
 }
 

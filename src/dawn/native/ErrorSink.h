@@ -114,14 +114,14 @@ class ErrorSink {
     }
 
     template <typename... Args>
-    void ConsumeError(std::unique_ptr<InternalError> error,
+    void ConsumeError(std::unique_ptr<UnrecoverableError> error,
                       const char* formatStr,
                       const Args&... args) {
         ConsumeError(std::move(error), InternalErrorType::None, formatStr, args...);
     }
 
     template <typename... Args>
-    void ConsumeError(std::unique_ptr<InternalError> error,
+    void ConsumeError(std::unique_ptr<UnrecoverableError> error,
                       InternalErrorType additionalAllowedErrors,
                       const char* formatStr,
                       const Args&... args) {
@@ -134,7 +134,7 @@ class ErrorSink {
     }
 
     virtual void ConsumeError(
-        std::unique_ptr<InternalError> error,
+        std::unique_ptr<UnrecoverableError> error,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) = 0;
 };
 

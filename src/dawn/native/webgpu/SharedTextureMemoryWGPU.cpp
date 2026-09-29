@@ -95,7 +95,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     WGPUStatus status = wgpu.sharedTextureMemoryGetProperties(innerHandle, &innerProperties);
     if (status != WGPUStatus_Success) {
         wgpu.sharedTextureMemoryRelease(innerHandle);
-        return DAWN_INTERNAL_ERROR("sharedTextureMemoryGetProperties failed");
+        return DAWN_UNRECOVERABLE_ERROR("sharedTextureMemoryGetProperties failed");
     }
 
     Ref<SharedTextureMemory> stm = AcquireRef(new SharedTextureMemory(

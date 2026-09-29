@@ -188,7 +188,7 @@ TEST_P(MetalBackendTests, MapAsyncOnFailedCommandBuffer) {
 
         // This should set dst to valueB because despite the fake injected error, the Metal command
         // buffer actually succeeded. However, valueB should never be visible to the application
-        // because this causes a device loss due to DAWN_INTERNAL_ERROR.
+        // because this causes a device loss due to DAWN_UNRECOVERABLE_ERROR.
         queue.Submit(1, &commands);
     }
 

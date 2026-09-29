@@ -163,10 +163,10 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
             uint32_t{HasFeature(Feature::SharedFenceSyncFD)} +
             uint32_t{HasFeature(Feature::SharedFenceVkSemaphoreZirconHandle)} >
         1) {
-        return DAWN_FORMAT_INTERNAL_ERROR("At most one of %s, %s, and %s may be enabled.",
-                                          wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD,
-                                          wgpu::FeatureName::SharedFenceSyncFD,
-                                          wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle);
+        return DAWN_FORMAT_UNRECOVERABLE_ERROR(
+            "At most one of %s, %s, and %s may be enabled.",
+            wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD, wgpu::FeatureName::SharedFenceSyncFD,
+            wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle);
     }
     if (HasFeature(Feature::SharedFenceVkSemaphoreOpaqueFD)) {
         mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(
@@ -762,7 +762,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         }
 
         if (!foundQueueFamily) {
-            return DAWN_INTERNAL_ERROR("No universal queue family");
+            return DAWN_UNRECOVERABLE_ERROR("No universal queue family");
         }
         mMainQueueFamily = universalQueueFamily;
     }
@@ -1044,7 +1044,7 @@ MaybeError Device::CheckDebugLayerAndGenerateErrors() {
 
     // The debug layer messages will be appended later when DeviceBase::HandleError calls
     // AppendDebugLayerMessages.
-    return DAWN_INTERNAL_ERROR("The Vulkan validation layer reported uncaught errors.");
+    return DAWN_UNRECOVERABLE_ERROR("The Vulkan validation layer reported uncaught errors.");
 }
 
 void Device::AppendDebugLayerMessages(ErrorData* error) {
@@ -1290,7 +1290,7 @@ void Device::PerformIdleTasksImpl() {
     if (mMonolithicPipelineCache) {
         MaybeError maybeError = mMonolithicPipelineCache->StoreOnIdle();
         if (maybeError.IsError()) {
-            std::unique_ptr<InternalError> error = maybeError.AcquireError();
+            std::unique_ptr<UnrecoverableError> error = maybeError.AcquireError();
             EmitLog(wgpu::LoggingType::Error, error->GetFormattedMessage().c_str());
             return;
         }

@@ -67,7 +67,7 @@ namespace dawn::native {
 
 namespace {
 
-std::unique_ptr<InternalError> ConcurrentUseError() {
+std::unique_ptr<UnrecoverableError> ConcurrentUseError() {
     return DAWN_VALIDATION_ERROR("Concurrent buffer operations are not allowed");
 }
 
@@ -411,7 +411,7 @@ class BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
         MaybeError result = buffer->FinalizeMap(BufferState::Mapped);
         buffer->mState.notify_all();  // Notify the wait() in UnmapInternal().
         if (result.IsError()) {
-            std::unique_ptr<InternalError> error = result.AcquireError();
+            std::unique_ptr<UnrecoverableError> error = result.AcquireError();
             DAWN_CHECK(error->GetType() != InternalErrorType::Validation);
             std::string errorMsg = error->GetFormattedMessage();
 

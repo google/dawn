@@ -420,7 +420,7 @@ MaybeError DeviceBase::Initialize(const UnpackedPtr<DeviceDescriptor>& descripto
 
     // Fake an error after the creation of a device here for testing.
     if (descriptor.Has<DawnFakeDeviceInitializeErrorForTesting>()) {
-        return DAWN_INTERNAL_ERROR("DawnFakeDeviceInitialzeErrorForTesting");
+        return DAWN_UNRECOVERABLE_ERROR("DawnFakeDeviceInitialzeErrorForTesting");
     }
 
     DAWN_TRY_ASSIGN(mEmptyBindGroupLayout, CreateEmptyBindGroupLayout());
@@ -615,7 +615,7 @@ void DeviceBase::APIDestroy() {
     Destroy(DestroyReason::EarlyDestroy);
 }
 
-void DeviceBase::HandleEncoderError(std::unique_ptr<InternalError> error) {
+void DeviceBase::HandleEncoderError(std::unique_ptr<UnrecoverableError> error) {
     HandleError(std::move(error));
 }
 
@@ -625,7 +625,7 @@ void DeviceBase::HandleDeviceLost(wgpu::DeviceLostReason reason, std::string_vie
     }
 }
 
-void DeviceBase::HandleError(std::unique_ptr<InternalError> error,
+void DeviceBase::HandleError(std::unique_ptr<UnrecoverableError> error,
                              InternalErrorType additionalAllowedErrors,
                              wgpu::DeviceLostReason lostReason,
                              ForwardToErrorScope forwardToErrorScope) {
@@ -714,7 +714,7 @@ void DeviceBase::HandleErrorGeneratingAsyncTask(Ref<ErrorGeneratingAsyncTask> ta
     });
 }
 
-void DeviceBase::ConsumeError(std::unique_ptr<InternalError> error,
+void DeviceBase::ConsumeError(std::unique_ptr<UnrecoverableError> error,
                               InternalErrorType additionalAllowedErrors) {
     DAWN_CHECK(error != nullptr);
     HandleError(std::move(error), additionalAllowedErrors);
@@ -796,7 +796,7 @@ Future DeviceBase::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbac
                     DAWN_CHECK(task->IsCompleted() || completionType != EventCompletionType::Ready);
                     if (task->IsCompleted() && task->IsError() &&
                         pendingTask.captureErrorType == ToWGPUErrorType(task->GetErrorType())) {
-                        std::unique_ptr<InternalError> error = task->AcquireError();
+                        std::unique_ptr<UnrecoverableError> error = task->AcquireError();
                         mScope->CaptureError(ToWGPUErrorType(error->GetType()),
                                              error->GetMessage());
                     }
@@ -900,7 +900,7 @@ void DeviceBase::APIForceLoss(wgpu::DeviceLostReason reason, StringView messageI
     // Note that since we are passing None as the allowedErrors, an additional message will be
     // appended noting that the error was unexpected. Since this call is for testing only it is not
     // too important, but useful for users to understand where the extra message is coming from.
-    HandleError(DAWN_INTERNAL_ERROR(std::string(message)), InternalErrorType::None, reason);
+    HandleError(DAWN_UNRECOVERABLE_ERROR(std::string(message)), InternalErrorType::None, reason);
 }
 
 DeviceBase::State DeviceBase::GetState() const {
@@ -1249,7 +1249,7 @@ BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* rawDescriptor) {
 
     // 2. Error handling.
     Ref<BufferBase> buffer;
-    std::unique_ptr<InternalError> deferredError;
+    std::unique_ptr<UnrecoverableError> deferredError;
     if (resultOrError.IsSuccess()) [[likely]] {
         buffer = resultOrError.AcquireSuccess();
     } else {
@@ -1457,7 +1457,7 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
     TRACE_EVENT(DAWN_TRACE_CATEGORY(), "DeviceBase::APICreateShaderModule", "label", label.label);
 
     Ref<ShaderModuleBase> shaderModule;
-    std::unique_ptr<InternalError> errorData;
+    std::unique_ptr<UnrecoverableError> errorData;
     auto creationResult = CreateShaderModule(descriptor, /*internalExtensions=*/{});
     if (creationResult.IsSuccess()) {
         // CreateShaderModule can succeed but still return a shader module which failed compilation.
@@ -1482,7 +1482,7 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
         // Acquire the device lock for error handling.
         auto deviceGuard = GetGuard();
         // Emit error, including Tint errors and warnings.
-        ConsumeError(std::move(errorData), InternalErrorType::Internal,
+        ConsumeError(std::move(errorData), InternalErrorType::Unrecoverable,
                      "calling %s.CreateShaderModule(%s).", this, descriptor);
     }
 
@@ -1499,7 +1499,7 @@ ShaderModuleBase* DeviceBase::APICreateErrorShaderModule(const ShaderModuleDescr
         this, descriptor ? descriptor->label : nullptr, std::move(compilationMessages));
     auto log = result->GetCompilationLog();
 
-    std::unique_ptr<InternalError> errorData = DAWN_VALIDATION_ERROR(
+    std::unique_ptr<UnrecoverableError> errorData = DAWN_VALIDATION_ERROR(
         "Error in calling %s.CreateShaderModule(%s).\n%s", this, descriptor, log);
     ConsumeError(std::move(errorData));
 
@@ -1889,7 +1889,7 @@ wgpu::Status DeviceBase::APIGetAHardwareBufferProperties(void* handle,
     // is not cause to lose the Dawn device, as it is a client-side error and not a true internal
     // Dawn error.
     if (ConsumedError(GetAHardwareBufferPropertiesImpl(handle, properties),
-                      InternalErrorType::Internal)) {
+                      InternalErrorType::Unrecoverable)) {
         return wgpu::Status::Error;
     }
 
@@ -1949,7 +1949,7 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {
     if (errorType == InternalErrorType::Validation) {
         HandleError(DAWN_MAKE_VALIDATION_ERROR(std::string(message)));
     } else {
-        HandleError(DAWN_MAKE_INTERNAL_ERROR(errorType, std::string(message)),
+        HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(errorType, std::string(message)),
                     InternalErrorType::OutOfMemory);
     }
 }
@@ -2779,7 +2779,7 @@ std::pair<std::string, bool> DeviceBase::GetTraceInfo() {
 
 tint::InternalCompilerErrorCallbackInfo DeviceBase::GetTintInternalCompilerErrorCallback() {
     static auto tintInternalCompilerErrorCallback = [](std::string err, void* userdata) {
-        static_cast<DeviceBase*>(userdata)->HandleError(DAWN_INTERNAL_ERROR(err));
+        static_cast<DeviceBase*>(userdata)->HandleError(DAWN_UNRECOVERABLE_ERROR(err));
     };
     return tint::InternalCompilerErrorCallbackInfo{
         .callback = tintInternalCompilerErrorCallback,

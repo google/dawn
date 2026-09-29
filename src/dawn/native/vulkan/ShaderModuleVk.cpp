@@ -529,7 +529,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                           .workgroupSize = compilation->workgroupSize,
                           .explicitSubgroupSize = compilation->explicitSubgroupSize};
 #else
-    return DAWN_INTERNAL_ERROR("TINT_BUILD_SPV_WRITER is not defined.");
+    return DAWN_UNRECOVERABLE_ERROR("TINT_BUILD_SPV_WRITER is not defined.");
 #endif
 }
 

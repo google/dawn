@@ -286,7 +286,8 @@ MaybeError SharedTextureMemory::CreateMtlTextures() {
             mMtlPlaneTextures[plane] = AcquireNSPRef(
                 CreateTextureMtlForPlane(mMtlUsage, *format, plane, device, mIOSurface.Get()));
             if (mMtlPlaneTextures[plane] == nil) {
-                return DAWN_INTERNAL_ERROR("Failed to create MTLTexture plane view for IOSurface.");
+                return DAWN_UNRECOVERABLE_ERROR(
+                    "Failed to create MTLTexture plane view for IOSurface.");
             }
         }
     }

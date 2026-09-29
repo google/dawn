@@ -42,7 +42,7 @@ MaybeError CheckWGPUSuccessImpl(CEnum result, const char* context) {
         return {};
     }
 
-    return DAWN_FORMAT_INTERNAL_ERROR(" %s failed with (%s)", context, FromAPI(result));
+    return DAWN_FORMAT_UNRECOVERABLE_ERROR(" %s failed with (%s)", context, FromAPI(result));
 }
 
 // Returns a success only if resultIn is "success", otherwise returns an error with the context and

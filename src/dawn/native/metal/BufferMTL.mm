@@ -177,7 +177,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
                      deallocator:dispose]);
     if (mMtlBuffer == nil) {
         dispose(hostMappedDesc->pointer, GetSize());
-        return DAWN_INTERNAL_ERROR("Buffer allocation failed");
+        return DAWN_UNRECOVERABLE_ERROR("Buffer allocation failed");
     }
 
     // Data is assumed to be initialized since it is externally allocated.

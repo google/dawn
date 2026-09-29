@@ -168,7 +168,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     WGPUStatus status = GetFunctions().adapterGetLimits(mInnerAdapter, ToAPI(&limits->v1));
     if (status != WGPUStatus_Success) {
-        return DAWN_INTERNAL_ERROR("Fail to get inner adapter limits");
+        return DAWN_UNRECOVERABLE_ERROR("Fail to get inner adapter limits");
     }
     return {};
 }

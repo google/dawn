@@ -319,7 +319,7 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
         }
     }
     if (!formatIsSupported) {
-        return DAWN_INTERNAL_ERROR(absl::StrFormat(
+        return DAWN_UNRECOVERABLE_ERROR(absl::StrFormat(
             "Vulkan SwapChain must support %s with sRGB colorspace.", config.wgpuFormat));
     }
 
@@ -396,7 +396,7 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
         // TODO(crbug.com/dawn/269): If the swapchain image doesn't support TRANSFER_DST
         // then we'll need to have a second fallback that uses a blit shader :(
         if ((supportedUsages & VK_IMAGE_USAGE_TRANSFER_DST_BIT) == 0) {
-            return DAWN_INTERNAL_ERROR(
+            return DAWN_UNRECOVERABLE_ERROR(
                 "SwapChain cannot fallback to a blit because of a missing "
                 "VK_IMAGE_USAGE_TRANSFER_DST_BIT");
         }

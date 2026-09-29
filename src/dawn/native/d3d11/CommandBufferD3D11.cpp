@@ -557,7 +557,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
             }
 
             default:
-                return DAWN_FORMAT_INTERNAL_ERROR("Unknown command type: %d", type);
+                return DAWN_FORMAT_UNRECOVERABLE_ERROR("Unknown command type: %d", type);
         }
     }
 

@@ -528,7 +528,7 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
             }
         }
         if (!pixelCenterPolyfillLocation.has_value()) {
-            return DAWN_INTERNAL_ERROR(
+            return DAWN_UNRECOVERABLE_ERROR(
                 "unable to find a free vertex location for the pixel center polyfill");
         }
 

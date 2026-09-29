@@ -86,7 +86,7 @@ MaybeError CheckEGL(const EGLFunctions& egl, EGLBoolean result, const char* cont
     } else if (error == EGL_CONTEXT_LOST) {
         return DAWN_BACKEND_DEVICE_LOST_ERROR(message);
     } else {
-        return DAWN_INTERNAL_ERROR(message);
+        return DAWN_UNRECOVERABLE_ERROR(message);
     }
 }
 

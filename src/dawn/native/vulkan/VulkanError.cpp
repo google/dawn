@@ -103,7 +103,7 @@ MaybeError CheckVkSuccessImpl(VkResult result, const char* context) {
     if (result == VK_ERROR_DEVICE_LOST) {
         return DAWN_BACKEND_DEVICE_LOST_ERROR(message);
     } else {
-        return DAWN_INTERNAL_ERROR(message);
+        return DAWN_UNRECOVERABLE_ERROR(message);
     }
 }
 
@@ -120,7 +120,7 @@ MaybeError CheckVkOOMThenSuccessImpl(VkResult result, const char* context) {
     } else if (result == VK_ERROR_DEVICE_LOST) {
         return DAWN_BACKEND_DEVICE_LOST_ERROR(message);
     } else {
-        return DAWN_INTERNAL_ERROR(message);
+        return DAWN_UNRECOVERABLE_ERROR(message);
     }
 }
 

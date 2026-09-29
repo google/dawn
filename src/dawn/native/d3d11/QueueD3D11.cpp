@@ -571,9 +571,9 @@ ResultOrError<ExecutionSerial> SystemEventQueue::CheckCompletedSerialsImpl() {
             DWORD result = WaitForMultipleObjects(static_cast<DWORD>(handles.size()),
                                                   handles.data(), /*bWaitAll=*/false,
                                                   /*dwMilliseconds=*/0);
-            DAWN_INTERNAL_ERROR_IF(result == WAIT_FAILED, "WaitForMultipleObjects() failed");
+            DAWN_UNRECOVERABLE_ERROR_IF(result == WAIT_FAILED, "WaitForMultipleObjects() failed");
 
-            DAWN_INTERNAL_ERROR_IF(
+            DAWN_UNRECOVERABLE_ERROR_IF(
                 result >= WAIT_ABANDONED_0 && result < WAIT_ABANDONED_0 + handles.size(),
                 "WaitForMultipleObjects() get abandoned event");
 
@@ -624,7 +624,7 @@ ResultOrError<ExecutionSerial> SystemEventQueue::WaitForQueueSerialImpl(Executio
     }
 
     if (serial > GetLastSubmittedCommandSerial()) {
-        return DAWN_FORMAT_INTERNAL_ERROR(
+        return DAWN_FORMAT_UNRECOVERABLE_ERROR(
             "Wait a serial (%llu) which is greater than last submitted command serial (%llu).",
             uint64_t{serial}, uint64_t(GetLastSubmittedCommandSerial()));
     }
@@ -643,7 +643,7 @@ ResultOrError<ExecutionSerial> SystemEventQueue::WaitForQueueSerialImpl(Executio
         // TODO(crbug.com/335553337): call WaitForSingleObject() without holding the mutex.
         DWORD result =
             WaitForSingleObject(it->receiver.GetPrimitive().Get(), ToMilliseconds(timeout));
-        DAWN_INTERNAL_ERROR_IF(result == WAIT_FAILED, "WaitForSingleObject() failed");
+        DAWN_UNRECOVERABLE_ERROR_IF(result == WAIT_FAILED, "WaitForSingleObject() failed");
 
         if (result != WAIT_OBJECT_0) {
             return kWaitSerialTimeout;
@@ -765,7 +765,7 @@ ResultOrError<ExecutionSerial> DelayFlushQueue::WaitForQueueSerialImpl(Execution
     }
 
     if (waitSerial > GetLastSubmittedCommandSerial()) {
-        return DAWN_FORMAT_INTERNAL_ERROR(
+        return DAWN_FORMAT_UNRECOVERABLE_ERROR(
             "Wait a serial (%llu) which is greater than last submitted command serial (%llu).",
             uint64_t{waitSerial}, uint64_t(GetLastSubmittedCommandSerial()));
     }
@@ -839,7 +839,7 @@ MaybeError DelayFlushQueue::BlockWaitForLastSubmittedSerial(
     commandContext->Flush1(D3D11_CONTEXT_TYPE_ALL, receiver.GetPrimitive().Get());
 
     DWORD result = WaitForSingleObject(receiver.GetPrimitive().Get(), INFINITE);
-    DAWN_INTERNAL_ERROR_IF(result != WAIT_OBJECT_0, "WaitForSingleObject() failed");
+    DAWN_UNRECOVERABLE_ERROR_IF(result != WAIT_OBJECT_0, "WaitForSingleObject() failed");
 
     SystemEventReceiver returnedReceivers[] = {std::move(receiver)};
     return ReturnSystemEventReceivers(returnedReceivers);

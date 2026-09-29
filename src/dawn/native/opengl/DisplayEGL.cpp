@@ -85,12 +85,13 @@ MaybeError DisplayEGL::InitializeWithDynamicLoading(const char* libName,
                                                     std::span<const std::string> searchPaths) {
     std::string err;
     if (!mLib.Valid() && !mLib.Open(libName, searchPaths, &err)) {
-        return DAWN_FORMAT_INTERNAL_ERROR("Failed to load %s: \"%s\".", libName, err.c_str());
+        return DAWN_FORMAT_UNRECOVERABLE_ERROR("Failed to load %s: \"%s\".", libName, err.c_str());
     }
 
     EGLGetProcProc getProc = reinterpret_cast<EGLGetProcProc>(mLib.GetProc("eglGetProcAddress"));
     if (!getProc) {
-        return DAWN_FORMAT_INTERNAL_ERROR("Couldn't get \"eglGetProcAddress\" from %s.", libName);
+        return DAWN_FORMAT_UNRECOVERABLE_ERROR("Couldn't get \"eglGetProcAddress\" from %s.",
+                                               libName);
     }
 
     return InitializeWithProcAndDisplay(getProc, EGL_NO_DISPLAY);
@@ -105,7 +106,7 @@ MaybeError DisplayEGL::InitializeWithProcAndDisplay(EGLGetProcProc getProc, EGLD
         mDisplay = egl->GetDisplay(EGL_DEFAULT_DISPLAY);
     }
     if (mDisplay == EGL_NO_DISPLAY) {
-        return DAWN_INTERNAL_ERROR("Couldn't create the default EGL display.");
+        return DAWN_UNRECOVERABLE_ERROR("Couldn't create the default EGL display.");
     }
 
     DAWN_TRY(mFunctions.LoadDisplayProcs(mDisplay));

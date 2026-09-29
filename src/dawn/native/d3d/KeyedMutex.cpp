@@ -59,7 +59,7 @@ MaybeError KeyedMutex::AcquireKeyedMutex() {
     if (hr == DXGI_ERROR_DEVICE_REMOVED) {
         return DAWN_BACKEND_DEVICE_LOST_ERROR(msg.str());
     } else {
-        return DAWN_INTERNAL_ERROR(msg.str());
+        return DAWN_UNRECOVERABLE_ERROR(msg.str());
     }
 }
 

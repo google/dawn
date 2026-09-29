@@ -49,7 +49,7 @@ ResultOrError<InstanceExtSet> GatherInstanceExtensions(
     VkResult vkResult = VkResult::WrapUnsafe(
         vkFunctions.EnumerateInstanceExtensionProperties(layerName, &count, nullptr));
     if (vkResult != VK_SUCCESS && vkResult != VK_INCOMPLETE) {
-        return DAWN_INTERNAL_ERROR("vkEnumerateInstanceExtensionProperties");
+        return DAWN_UNRECOVERABLE_ERROR("vkEnumerateInstanceExtensionProperties");
     }
 
     std::vector<VkExtensionProperties> extensions(count);
@@ -102,7 +102,7 @@ ResultOrError<VulkanGlobalInfo> GatherGlobalInfo(const VulkanFunctions& vkFuncti
         // incomplete otherwise. This means that both values represent a success.
         // This is the same for all Enumarte functions
         if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
-            return DAWN_INTERNAL_ERROR("vkEnumerateInstanceLayerProperties");
+            return DAWN_UNRECOVERABLE_ERROR("vkEnumerateInstanceLayerProperties");
         }
 
         std::vector<VkLayerProperties> layersProperties(count);
@@ -144,7 +144,7 @@ ResultOrError<std::vector<VkPhysicalDevice>> GatherPhysicalDevices(
     VkResult result =
         VkResult::WrapUnsafe(vkFunctions.EnumeratePhysicalDevices(instance, &count, nullptr));
     if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
-        return DAWN_INTERNAL_ERROR("vkEnumeratePhysicalDevices");
+        return DAWN_UNRECOVERABLE_ERROR("vkEnumeratePhysicalDevices");
     }
 
     std::vector<VkPhysicalDevice> vkPhysicalDevices(count);
@@ -200,7 +200,7 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
         VkResult result = VkResult::WrapUnsafe(
             vkFunctions.EnumerateDeviceLayerProperties(vkPhysicalDevice, &count, nullptr));
         if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
-            return DAWN_INTERNAL_ERROR("vkEnumerateDeviceLayerProperties");
+            return DAWN_UNRECOVERABLE_ERROR("vkEnumerateDeviceLayerProperties");
         }
 
         info.layers.resize(count);
@@ -215,7 +215,7 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
         VkResult result = VkResult::WrapUnsafe(vkFunctions.EnumerateDeviceExtensionProperties(
             vkPhysicalDevice, nullptr, &count, nullptr));
         if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
-            return DAWN_INTERNAL_ERROR("vkEnumerateDeviceExtensionProperties");
+            return DAWN_UNRECOVERABLE_ERROR("vkEnumerateDeviceExtensionProperties");
         }
 
         std::vector<VkExtensionProperties> extensionsProperties;
@@ -471,7 +471,7 @@ ResultOrError<VulkanSurfaceInfo> GatherSurfaceInfo(const PhysicalDevice& device,
         VkResult result = VkResult::WrapUnsafe(vkFunctions.GetPhysicalDeviceSurfaceFormatsKHR(
             vkPhysicalDevice, surface, &count, nullptr));
         if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
-            return DAWN_INTERNAL_ERROR("vkGetPhysicalDeviceSurfaceFormatsKHR");
+            return DAWN_UNRECOVERABLE_ERROR("vkGetPhysicalDeviceSurfaceFormatsKHR");
         }
 
         info.formats.resize(count);
@@ -486,7 +486,7 @@ ResultOrError<VulkanSurfaceInfo> GatherSurfaceInfo(const PhysicalDevice& device,
         VkResult result = VkResult::WrapUnsafe(vkFunctions.GetPhysicalDeviceSurfacePresentModesKHR(
             vkPhysicalDevice, surface, &count, nullptr));
         if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
-            return DAWN_INTERNAL_ERROR("vkGetPhysicalDeviceSurfacePresentModesKHR");
+            return DAWN_UNRECOVERABLE_ERROR("vkGetPhysicalDeviceSurfacePresentModesKHR");
         }
 
         info.presentModes.resize(count);

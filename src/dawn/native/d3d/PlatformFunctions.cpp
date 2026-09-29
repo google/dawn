@@ -85,7 +85,7 @@ MaybeError PlatformFunctions::LoadDXGI() {
     if (!mDXGILib.OpenSystemLibrary(L"dxgi.dll", &error) ||
         !mDXGILib.GetProc(&dxgiGetDebugInterface1, "DXGIGetDebugInterface1", &error) ||
         !mDXGILib.GetProc(&createDxgiFactory2, "CreateDXGIFactory2", &error)) {
-        return DAWN_INTERNAL_ERROR(error.c_str());
+        return DAWN_UNRECOVERABLE_ERROR(error.c_str());
     }
 #endif
 
@@ -116,7 +116,7 @@ MaybeError PlatformFunctions::EnsureFXC(std::span<const std::string> searchPaths
 #endif
     if (!loadSuccess || !mFXCompilerLib.GetProc(&d3dCompile, "D3DCompile", &error) ||
         !mFXCompilerLib.GetProc(&d3dDisassemble, "D3DDisassemble", &error)) {
-        return DAWN_INTERNAL_ERROR(error.c_str());
+        return DAWN_UNRECOVERABLE_ERROR(error.c_str());
     }
 #endif
     return {};

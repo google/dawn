@@ -80,17 +80,17 @@ F AsVkFn(void(VKAPI_PTR* addr)()) {
 
 }  // anonymous namespace
 
-#define GET_GLOBAL_PROC(name)                                                        \
-    do {                                                                             \
-        name = AsVkFn<PFN_vk##name>(GetInstanceProcAddr(nullptr, "vk" #name));       \
-        if (name == nullptr) {                                                       \
-            return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #name); \
-        }                                                                            \
+#define GET_GLOBAL_PROC(name)                                                             \
+    do {                                                                                  \
+        name = AsVkFn<PFN_vk##name>(GetInstanceProcAddr(nullptr, "vk" #name));            \
+        if (name == nullptr) {                                                            \
+            return DAWN_UNRECOVERABLE_ERROR(std::string("Couldn't get proc vk") + #name); \
+        }                                                                                 \
     } while (0)
 
 MaybeError VulkanFunctions::LoadGlobalProcs(const DynamicLib& vulkanLib) {
     if (!vulkanLib.GetProc(&GetInstanceProcAddr, "vkGetInstanceProcAddr")) {
-        return DAWN_INTERNAL_ERROR("Couldn't get vkGetInstanceProcAddr");
+        return DAWN_UNRECOVERABLE_ERROR("Couldn't get vkGetInstanceProcAddr");
     }
 
     GET_GLOBAL_PROC(CreateInstance);
@@ -106,12 +106,12 @@ MaybeError VulkanFunctions::LoadGlobalProcs(const DynamicLib& vulkanLib) {
 
 #define GET_INSTANCE_PROC_NO_ERROR_BASE(name, procName) \
     name = AsVkFn<PFN_vk##name>(GetInstanceProcAddr(instance, "vk" #procName))
-#define GET_INSTANCE_PROC_BASE(name, procName)                                           \
-    do {                                                                                 \
-        GET_INSTANCE_PROC_NO_ERROR_BASE(name, procName);                                 \
-        if (name == nullptr) {                                                           \
-            return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #procName); \
-        }                                                                                \
+#define GET_INSTANCE_PROC_BASE(name, procName)                                                \
+    do {                                                                                      \
+        GET_INSTANCE_PROC_NO_ERROR_BASE(name, procName);                                      \
+        if (name == nullptr) {                                                                \
+            return DAWN_UNRECOVERABLE_ERROR(std::string("Couldn't get proc vk") + #procName); \
+        }                                                                                     \
     } while (0)
 
 #define GET_INSTANCE_PROC(name) GET_INSTANCE_PROC_BASE(name, name)
@@ -251,12 +251,12 @@ bool VulkanFunctions::TryLoadEXTDebugUtils(VkInstance instance) {
     return true;
 }
 
-#define GET_DEVICE_PROC(name)                                                        \
-    do {                                                                             \
-        name = AsVkFn<PFN_vk##name>(GetDeviceProcAddr(device, "vk" #name));          \
-        if (name == nullptr) {                                                       \
-            return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #name); \
-        }                                                                            \
+#define GET_DEVICE_PROC(name)                                                             \
+    do {                                                                                  \
+        name = AsVkFn<PFN_vk##name>(GetDeviceProcAddr(device, "vk" #name));               \
+        if (name == nullptr) {                                                            \
+            return DAWN_UNRECOVERABLE_ERROR(std::string("Couldn't get proc vk") + #name); \
+        }                                                                                 \
     } while (0)
 
 MaybeError VulkanFunctions::LoadDeviceProcs(VkInstance instance,

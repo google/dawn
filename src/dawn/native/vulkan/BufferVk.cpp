@@ -416,8 +416,8 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     MemoryKind requestKind = MemoryKind::Linear;
     auto maybeMemoryTypeIndex =
         device->GetResourceMemoryAllocator()->FindBestTypeIndex(requirements, requestKind);
-    DAWN_INTERNAL_ERROR_IF(!maybeMemoryTypeIndex.has_value(),
-                           "Unable to find an appropriate memory type for import.");
+    DAWN_UNRECOVERABLE_ERROR_IF(!maybeMemoryTypeIndex.has_value(),
+                                "Unable to find an appropriate memory type for import.");
     uint32_t memoryTypeIndex = maybeMemoryTypeIndex.value();
 
     // Make a device memory wrapping the host pointer.

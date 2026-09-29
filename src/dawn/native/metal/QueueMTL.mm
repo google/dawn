@@ -99,8 +99,9 @@ MaybeError Queue::Initialize() {
             id<MTLLogState> mtlLogState = [mtlDevice newLogStateWithDescriptor:logStateDesc
                                                                          error:&error];
             if (error != nil) {
-                return DAWN_INTERNAL_ERROR("Error creating MTLLogState:" +
-                                           std::string([error.localizedDescription UTF8String]));
+                return DAWN_UNRECOVERABLE_ERROR(
+                    "Error creating MTLLogState:" +
+                    std::string([error.localizedDescription UTF8String]));
             }
             [mtlLogState addLogHandler:^(NSString* substring, NSString* category, MTLLogLevel level,
                                          NSString* message) {
@@ -120,12 +121,12 @@ MaybeError Queue::Initialize() {
     }
 
     if (mCommandQueue == nil) {
-        return DAWN_INTERNAL_ERROR("Failed to allocate MTLCommandQueue.");
+        return DAWN_UNRECOVERABLE_ERROR("Failed to allocate MTLCommandQueue.");
     }
 
     mMtlSharedEvent.Acquire([mtlDevice newSharedEvent]);
     if (mMtlSharedEvent == nil) {
-        return DAWN_INTERNAL_ERROR("Failed to create MTLSharedEvent.");
+        return DAWN_UNRECOVERABLE_ERROR("Failed to create MTLSharedEvent.");
     }
     DAWN_TRY_ASSIGN(mSharedFence, GetOrCreateSharedFence());
 
@@ -207,7 +208,7 @@ CommandRecordingContext* Queue::GetPendingCommandContext(SubmitMode submitMode) 
 MaybeError Queue::CheckExecutionError() const {
     return mExecutionError.Use([](auto executionError) -> MaybeError {
         if (executionError->has_value()) {
-            return DAWN_INTERNAL_ERROR(executionError->value());
+            return DAWN_UNRECOVERABLE_ERROR(executionError->value());
         }
         return {};
     });

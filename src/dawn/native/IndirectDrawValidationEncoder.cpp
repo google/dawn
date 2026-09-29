@@ -535,7 +535,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
             newBatch.outputParamsOffset = Align(outputParamsSize, minStorageBufferOffsetAlignment);
             outputParamsSize = newBatch.outputParamsOffset + newBatch.outputParamsSize;
             if (outputParamsSize > maxStorageBufferBindingSize) {
-                return DAWN_INTERNAL_ERROR("Too many drawIndexedIndirect calls to validate");
+                return DAWN_UNRECOVERABLE_ERROR("Too many drawIndexedIndirect calls to validate");
             }
 
             Pass* currentPass = passes.empty() ? nullptr : &passes.back();
@@ -616,7 +616,8 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
                 Align(outputParamsSizeForMultiDraw, minStorageBufferOffsetAlignment);
 
             if (outputParamsSizeForMultiDraw > maxStorageBufferBindingSize) {
-                return DAWN_INTERNAL_ERROR("Too many multiDrawIndexedIndirect calls to validate");
+                return DAWN_UNRECOVERABLE_ERROR(
+                    "Too many multiDrawIndexedIndirect calls to validate");
             }
         }
     } else {

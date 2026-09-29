@@ -35,7 +35,7 @@ template<typename T>
 MaybeError OpenGLFunctionsBase::LoadProc(GLGetProcProc getProc, T* memberProc, const char* name) {
     *memberProc = reinterpret_cast<T>(getProc(name));
     if (DAWN_UNLIKELY(memberProc == nullptr)) {
-        return DAWN_INTERNAL_ERROR(std::string("Couldn't load GL proc: ") + name);
+        return DAWN_UNRECOVERABLE_ERROR(std::string("Couldn't load GL proc: ") + name);
     }
     return {};
 }
