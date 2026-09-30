@@ -17,6 +17,7 @@ solutions = [
             #"download_remoteexec_cfg": True,  # for Siso
             "checkout_clang_tidy": True,
             "checkout_clangd": True,
+            "checkout_v8": True,
             "dawn_node": True,
             "dawn_wasm": True,
         }

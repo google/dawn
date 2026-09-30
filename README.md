@@ -42,6 +42,7 @@ Developer documentation:
  - [Code of Conduct](CODE_OF_CONDUCT.md)
  - [Testing Dawn](docs/dawn/testing.md)
  - [Testing Tint](docs/tint/testing.md)
+ - [Running the WebGPU CTS with the standalone runner](docs/standalone_cts_runner.md)
  - [Debugging Dawn](docs/dawn/debugging.md)
  - [Dawn's infrastructure](docs/dawn/infra.md)
  - [Dawn errors](docs/dawn/errors.md)
