@@ -209,10 +209,11 @@
           "--test-launcher-print-test-stdio=always",
           "--test-launcher-jobs=1",
           "--test-launcher-retry-limit=0",
-          "--override-steps=1"
+          "--override-steps=1",
+          "--perf-results-file=${ISOLATED_OUTDIR}/dawn_perf_results.json"
         ],
         "merge": {
-          "script": "//scripts/merge_scripts/true_noop_merge.py"
+          "script": "//scripts/merge_scripts/merge_dawn_perf_tests_results.py"
         },
         "module_name": "//src/dawn/tests:dawn_perf_tests/",
         "module_scheme": "gtest",

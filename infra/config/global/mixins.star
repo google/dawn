@@ -183,6 +183,13 @@ targets.mixin(
 )
 
 targets.mixin(
+    name = "dawn_perf_tests_merge",
+    merge = targets.merge(
+        script = "//scripts/merge_scripts/merge_dawn_perf_tests_results.py",
+    ),
+)
+
+targets.mixin(
     name = "litert_lm_benchmark_merge",
     merge = targets.merge(
         script = "//scripts/merge_scripts/merge_litert_lm_benchmark_results.py",

@@ -253,14 +253,11 @@ targets.tests.isolated_script_test(
     binary = "dawn_node_cts",
 )
 
-# This is run as a gtest instead of an isolated script since on the bots
-# these are used more as a smoke test/to ensure that they continue to run
-# rather than for actual perf results.
 targets.tests.gtest_test(
     name = "dawn_perf_tests",
     mixins = [
         "result_adapter_gtest_json",
-        "true_noop_merge",
+        "dawn_perf_tests_merge",
         targets.mixin(
             linux_args = [
                 "--no-xvfb",
@@ -272,7 +269,13 @@ targets.tests.gtest_test(
         "--test-launcher-jobs=1",
         "--test-launcher-retry-limit=0",
         # Tell the tests to only run one step for faster iteration.
+        # TODO(crbug.com/563012573): A single step keeps CQ runtime low, but it
+        # bypasses calibration, so both the warmup run and each of the
+        # kNumTrials trials execute only one step. Once results are trending in
+        # perfgate, use the per-trial variance to decide whether the step count
+        # needs to be raised (or calibration re-enabled) for a stable signal.
         "--override-steps=1",
+        "--perf-results-file=${ISOLATED_OUTDIR}/dawn_perf_results.json",
     ],
     binary = "dawn_perf_tests",
 )
