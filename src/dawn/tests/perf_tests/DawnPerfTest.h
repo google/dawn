@@ -48,6 +48,19 @@ class DawnPerfTestPlatform;
 
 class DawnPerfTestEnvironment : public DawnTestEnvironment {
   public:
+    struct PerfResult {
+        std::string metric;
+        std::string testSuite;
+        std::string story;
+        std::string trace;
+        double value;
+        std::string units;
+        bool important;
+        // Index of the trial this measurement came from. Each test runs
+        // kNumTrials trials, so results are repeated samples of the same metric.
+        unsigned int trial;
+    };
+
     DawnPerfTestEnvironment(int argc, char** argv);
     ~DawnPerfTestEnvironment() override;
 
@@ -61,6 +74,11 @@ class DawnPerfTestEnvironment : public DawnTestEnvironment {
     // not be written to a json file.
     const char* GetTraceFile() const;
 
+    // Returns whether perf results should be written to a json file.
+    bool HasPerfResultsFile() const;
+
+    void AddPerfResult(PerfResult result);
+
     DawnPerfTestPlatform* GetPlatform() const;
 
   private:
@@ -72,6 +90,9 @@ class DawnPerfTestEnvironment : public DawnTestEnvironment {
 
     // Empty if traces should not be written to a file.
     std::string mTraceFile;
+    // Empty if perf results should not be written to a file.
+    std::string mPerfResultsFile;
+    std::vector<PerfResult> mPerfResults;
 
     std::unique_ptr<DawnPerfTestPlatform> mPlatform;
 };
@@ -115,7 +136,8 @@ class DawnPerfTestBase {
     void OutputResults(const std::vector<char>& traceData = {});
 
     void PrintResultImpl(const std::string& trace,
-                         const std::string& value,
+                         double numericValue,
+                         const std::string& valueStr,
                          const std::string& units,
                          bool important) const;
 
@@ -127,6 +149,8 @@ class DawnPerfTestBase {
     const unsigned int mMaxStepsInFlight;
     unsigned int mStepsToRun = 0;
     unsigned int mNumStepsPerformed = 0;
+    // Index of the trial currently being run, recorded with each perf result.
+    unsigned int mCurrentTrial = 0;
     double mCpuTime = 0;
     std::unique_ptr<utils::Timer> mTimer;
     std::optional<double> mGPUTime;
