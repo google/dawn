@@ -839,7 +839,7 @@ deps = {
 
   # V8 and its dependencies for standalone builds.
   'third_party/v8/src': {
-    'url': '{chromium_git}/v8/v8.git@b3bc61d7152c5cda513809abb6be04c4a695b7f6',
+    'url': '{chromium_git}/v8/v8.git@98155e5eafeee063d02a77e16e74558f118d837e',
     'condition': 'dawn_standalone and checkout_v8',
   },
 
