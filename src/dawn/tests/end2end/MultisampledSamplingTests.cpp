@@ -466,5 +466,154 @@ DAWN_INSTANTIATE_TEST(MultisampledSamplingTest,
                       VulkanBackend(),
                       WebGPUBackend());
 
+// Test that storage writes after discard do not take effect when multisampling is enabled.
+// See https://crbug.com/562093713
+using UseSampleIndex = bool;
+using UseAtomics = bool;
+DAWN_TEST_PARAM_STRUCT(FormatTestParams, UseSampleIndex, UseAtomics);
+using MultisampledSamplingDiscardTest = DawnTestWithParams<FormatTestParams>;
+TEST_P(MultisampledSamplingDiscardTest, StorageWrite) {
+    // @builtin(sample_index) is not supported in compatibility mode.
+    DAWN_TEST_UNSUPPORTED_IF(GetParam().mUseSampleIndex && IsCompatibilityMode());
+
+    // TODO(crbug.com/567916335): Re-enable when Pixel 10 OS is updated on CQ.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
+    constexpr uint32_t kTextureSize = 8;
+    constexpr uint32_t kSampleCount = 4;
+    constexpr uint32_t kBufferSlots = kTextureSize * kTextureSize * kSampleCount;
+
+    const char* sample_index_param =
+        GetParam().mUseSampleIndex ? "@builtin(sample_index) sample : u32" : "";
+    const char* sample_offset = GetParam().mUseSampleIndex ? "sample" : "0";
+    const char* write =
+        GetParam().mUseAtomics ? "atomicStore(&afterAtomic[slot], 1u)" : "after[slot] = 1u";
+
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(
+        device,
+        absl::StrFormat(R"(
+        const kTextureSize = %u;
+        const kSampleCount = %u;
+
+        @vertex
+        fn vs(@builtin(vertex_index) idx: u32) -> @builtin(position) vec4f {
+            // Cover the framebuffer with one triangle.
+            var pos = array(
+                vec2f(-1.0,  3.0),
+                vec2f(-1.0, -3.0),
+                vec2f( 3.0,  0.0),
+            );
+            return vec4f(pos[idx], 0, 1);
+        }
+
+        @group(0) @binding(0) var<storage, read_write> before: array<u32>;
+        @group(0) @binding(1) var<storage, read_write> after: array<u32>;
+        @group(0) @binding(1) var<storage, read_write> afterAtomic: array<atomic<u32>>;
+
+        @fragment
+        fn fs(@builtin(position) pos: vec4f, %s) -> @location(0) vec4f {
+            // Each sample will write `1` to the `before` buffer if it is about to discard, and
+            // should only write `1` to the `after` buffer if it did not discard.
+            let slot = (u32(pos.y) * kTextureSize + u32(pos.x)) * kSampleCount + %s;
+            if (pos.x < (f32(kTextureSize) / 2.0)) {
+              before[slot] = 1u;
+              discard;
+            }
+            %s;
+
+            // Samples that did not discard output green.
+            return vec4f(0.0, 1.0, 0.0, 1.0);
+        }
+    )",
+                        kTextureSize, kSampleCount, sample_index_param, sample_offset, write));
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = shaderModule;
+    desc.cFragment.module = shaderModule;
+    desc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    desc.multisample.count = kSampleCount;
+    desc.cFragment.targetCount = 1;
+    desc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+    bufferDesc.size = kBufferSlots * sizeof(uint32_t);
+    wgpu::Buffer beforeBuffer = device.CreateBuffer(&bufferDesc);
+    wgpu::Buffer afterBuffer = device.CreateBuffer(&bufferDesc);
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {
+                                                         {0, beforeBuffer},
+                                                         {1, afterBuffer},
+                                                     });
+
+    wgpu::TextureDescriptor msaaDesc;
+    msaaDesc.size = {kTextureSize, kTextureSize, 1};
+    msaaDesc.sampleCount = kSampleCount;
+    msaaDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    msaaDesc.usage = wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture msaaTexture = device.CreateTexture(&msaaDesc);
+
+    wgpu::TextureDescriptor resolveDesc;
+    resolveDesc.size = {kTextureSize, kTextureSize, 1};
+    resolveDesc.sampleCount = 1;
+    resolveDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    resolveDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture resolveTexture = device.CreateTexture(&resolveDesc);
+
+    utils::ComboRenderPassDescriptor renderPass({msaaTexture.CreateView()});
+    renderPass.cColorAttachments[0].resolveTarget = resolveTexture.CreateView();
+    renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+    renderPass.cColorAttachments[0].clearValue = {1.0f, 0.0f, 0.0f, 1.0f};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bindGroup);
+    pass.Draw(3);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    std::vector<uint32_t> expectedBefore(kBufferSlots, 0);
+    std::vector<uint32_t> expectedAfter(kBufferSlots, 0);
+    std::vector<utils::RGBA8> expectedPixels(kTextureSize * kTextureSize);
+    for (uint32_t y = 0; y < kTextureSize; ++y) {
+        for (uint32_t x = 0; x < kTextureSize; ++x) {
+            bool doesDiscard = (x < kTextureSize / 2);
+            expectedPixels[y * kTextureSize + x] =
+                doesDiscard ? utils::RGBA8(255, 0, 0, 255) : utils::RGBA8(0, 255, 0, 255);
+            for (uint32_t sample = 0; sample < kSampleCount; ++sample) {
+                uint32_t slot = (y * kTextureSize + x) * kSampleCount + sample;
+                expectedBefore[slot] = doesDiscard ? 1 : 0;
+                expectedAfter[slot] = doesDiscard ? 0 : 1;
+
+                // Only the first slot of each pixel is used if we are not using sample_index.
+                if (!GetParam().mUseSampleIndex) {
+                    break;
+                }
+            }
+        }
+    }
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedBefore.data(), beforeBuffer, 0, kBufferSlots);
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedAfter.data(), afterBuffer, 0, kBufferSlots);
+    EXPECT_TEXTURE_EQ(expectedPixels.data(), resolveTexture, {0, 0}, {kTextureSize, kTextureSize});
+}
+
+DAWN_INSTANTIATE_TEST_P(MultisampledSamplingDiscardTest,
+                        {
+                            D3D11Backend(),
+                            D3D12Backend(),
+                            MetalBackend(),
+                            OpenGLBackend(),
+                            OpenGLESBackend(),
+                            VulkanBackend(),
+                            WebGPUBackend(),
+                        },
+                        {false, true},
+                        {false, true});
+
 }  // anonymous namespace
 }  // namespace dawn

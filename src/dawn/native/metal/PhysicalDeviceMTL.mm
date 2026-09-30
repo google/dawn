@@ -400,6 +400,9 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
 
 void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,
                                                TogglesState* deviceToggles) const {
+    uint32_t deviceId = GetDeviceId();
+    uint32_t vendorId = GetVendorId();
+
     {
         bool haveStoreAndMSAAResolve = false;
 #if DAWN_PLATFORM_IS(MACOS)
@@ -453,13 +456,17 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // of the Metal Spec (v3.2).
     // TODO(crbug/390426577): Consider removing this toggle as it is no longer needs to be toggled
     // as it is (semantically correctly) supported for all Metal 2.3+.
-    deviceToggles->Default(Toggle::DisableDemoteToHelper, true);
+    if (gpu_info::IsApple(vendorId)) {
+        // When per-sample shading is enabled, writes that occur after discard_fragment() are
+        // sometimes still visible on Apple Silicon, so we use DemoteToHelper.
+        // See https://crbug.com/562093713
+        deviceToggles->Default(Toggle::DisableDemoteToHelper, false);
+    } else {
+        deviceToggles->Default(Toggle::DisableDemoteToHelper, true);
+    }
 
     // TODO(crbug.com/dawn/846): tighten this workaround when the driver bug is fixed.
     deviceToggles->Default(Toggle::AlwaysResolveIntoZeroLevelAndLayer, true);
-
-    uint32_t deviceId = GetDeviceId();
-    uint32_t vendorId = GetVendorId();
 
     // TODO(crbug.com/dawn/847): Use MTLStorageModeShared instead of MTLStorageModePrivate when
     // creating MTLCounterSampleBuffer in QuerySet on Intel platforms, otherwise it fails to
