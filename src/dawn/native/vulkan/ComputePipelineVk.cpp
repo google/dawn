@@ -202,10 +202,16 @@ ResultOrError<ComputePipeline::SpecializationResult> ComputePipeline::Initialize
     platform::metrics::DawnHistogramTimer cacheTimer(GetDevice()->GetPlatform());
     Ref<PipelineCache> cache = ToBackend(GetDevice()->GetOrCreatePipelineCache(GetCacheKey()));
     VkPipeline pipeline;
-    DAWN_TRY(
-        CheckVkSuccess(device->fn.CreateComputePipelines(device->GetVkDevice(), cache->GetHandle(),
-                                                         1, &createInfo, nullptr, &*pipeline),
-                       "CreateComputePipelines"));
+
+    ::VkResult vkResult = device->fn.CreateComputePipelines(
+        device->GetVkDevice(), cache->GetHandle(), 1, &createInfo, nullptr, &*pipeline);
+    if (vkResult == VK_ERROR_UNKNOWN) {
+        return DAWN_PIPELINE_UNCATEGORIZED_ERROR(
+            "CreateComputePipelines failed with VK_ERROR_UNKNOWN");
+    } else {
+        DAWN_TRY(CheckVkSuccess(vkResult, "CreateComputePipelines"));
+    }
+
     result.pipeline = AcquireRef(new RefCountedVkHandle<VkPipeline>(device, pipeline));
     cacheTimer.RecordMicroseconds(cache->CacheHit() ? "Vulkan.CreateComputePipelines.CacheHit"
                                                     : "Vulkan.CreateComputePipelines.CacheMiss");

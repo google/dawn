@@ -929,10 +929,16 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
     platform::metrics::DawnHistogramTimer cacheTimer(GetDevice()->GetPlatform());
     Ref<PipelineCache> cache = ToBackend(GetDevice()->GetOrCreatePipelineCache(GetCacheKey()));
     VkPipeline pipeline;
-    DAWN_TRY(
-        CheckVkSuccess(device->fn.CreateGraphicsPipelines(device->GetVkDevice(), cache->GetHandle(),
-                                                          1, &createInfo, nullptr, &*pipeline),
-                       "CreateGraphicsPipelines"));
+
+    ::VkResult vkResult = device->fn.CreateGraphicsPipelines(
+        device->GetVkDevice(), cache->GetHandle(), 1, &createInfo, nullptr, &*pipeline);
+    if (vkResult == VK_ERROR_UNKNOWN) {
+        return DAWN_PIPELINE_UNCATEGORIZED_ERROR(
+            "CreateGraphicsPipelines failed with VK_ERROR_UNKNOWN");
+    } else {
+        DAWN_TRY(CheckVkSuccess(vkResult, "CreateGraphicsPipelines"));
+    }
+
     result.pipeline = AcquireRef(new RefCountedVkHandle<VkPipeline>(device, pipeline));
     cacheTimer.RecordMicroseconds(cache->CacheHit() ? "Vulkan.CreateGraphicsPipelines.CacheHit"
                                                     : "Vulkan.CreateGraphicsPipelines.CacheMiss");
