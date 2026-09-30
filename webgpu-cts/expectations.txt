@@ -580,7 +580,6 @@ crbug.com/42241218 [ arch-x86_64 dawn-backend-validation graphite-enabled releas
 crbug.com/360916910 [ intel-0x9bc5 linux mesa_ge_23.2 no-clang-coverage ] webgpu:api,operation,storage_texture,read_only:basic:format="rgba8snorm";* [ Failure ]
 crbug.com/360916910 [ intel-0x9bc5 linux mesa_ge_23.2 no-clang-coverage ] webgpu:api,operation,storage_texture,read_only:basic:format="rgba8unorm";* [ Failure ]
 
-crbug.com/373670513 [ android-14 android-pixel-6 dawn-no-backend-validation ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
 crbug.com/489786288 [ amd mac ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
 
 # textureSampleCompareLevel failures with offset=true, in compute shader only, on Mac Intel
