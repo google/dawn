@@ -92,10 +92,31 @@ class InstanceBase final : public ErrorSink, public RefCounted {
     // Consume an error and log its warning at most once. This is useful for
     // physical device creation errors that happen because the backend is not
     // supported or doesn't meet the required capabilities.
-    bool ConsumedErrorAndWarnOnce(MaybeError maybeError);
-
     template <typename T>
-    [[nodiscard]] bool ConsumedErrorAndWarnOnce(ResultOrError<T> resultOrError, T* result) {
+        requires(IsMaybeConcreteError<T>)
+    bool ConsumedErrorAndWarnOnce(T maybeError) {
+        if (!maybeError.IsError()) {
+            return false;
+        }
+        return ConsumedErrorAndWarnOnce(maybeError.AcquireError());
+    }
+
+    // Consume an error and log its warning at most once. This is useful for
+    // physical device creation errors that happen because the backend is not
+    // supported or doesn't meet the required capabilities.
+    template <typename T>
+        requires(IsConcreteError<T>)
+    bool ConsumedErrorAndWarnOnce(std::unique_ptr<T> error) {
+        std::string message = error->GetFormattedMessage();
+        if (mWarningMessages.insert(message).second) {
+            EmitLog(WGPULoggingType_Warning, message);
+        }
+        return true;
+    }
+
+    template <typename E, typename T>
+        requires(IsResultOrConcreteError<E, T>)
+    [[nodiscard]] bool ConsumedErrorAndWarnOnce(E resultOrError, T* result) {
         if (resultOrError.IsError()) [[unlikely]] {
             return ConsumedErrorAndWarnOnce(resultOrError.AcquireError());
         }

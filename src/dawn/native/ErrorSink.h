@@ -44,7 +44,7 @@ class ErrorSink {
     // error may cause a fatal error and further execution may be undefined. This is especially
     // true for the ResultOrError variants.
     template <typename E>
-        requires(std::is_same_v<E, MaybeError> || std::is_same_v<E, MaybeValError>)
+        requires(IsMaybeConcreteError<E>)
     [[nodiscard]] bool ConsumedError(
         E maybeError,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
@@ -56,7 +56,7 @@ class ErrorSink {
     }
 
     template <typename E, typename... Args>
-        requires(std::is_same_v<E, MaybeError> || std::is_same_v<E, MaybeValError>)
+        requires(IsMaybeConcreteError<E>)
     [[nodiscard]] bool ConsumedError(E maybeError,
                                      InternalErrorType additionalAllowedErrors,
                                      const char* formatStr,
@@ -69,13 +69,13 @@ class ErrorSink {
     }
 
     template <typename E, typename... Args>
-        requires(std::is_same_v<E, MaybeError> || std::is_same_v<E, MaybeValError>)
+        requires(IsMaybeConcreteError<E>)
     [[nodiscard]] bool ConsumedError(E maybeError, const char* formatStr, const Args&... args) {
         return ConsumedError(std::move(maybeError), InternalErrorType::None, formatStr, args...);
     }
 
     template <typename E, typename T>
-        requires(std::is_same_v<E, ResultOrError<T>> || std::is_same_v<E, ResultOrValError<T>>)
+        requires(IsResultOrConcreteError<E, T>)
     [[nodiscard]] bool ConsumedError(
         E resultOrError,
         T* result,
@@ -89,7 +89,7 @@ class ErrorSink {
     }
 
     template <typename E, typename T, typename... Args>
-        requires(std::is_same_v<E, ResultOrError<T>> || std::is_same_v<E, ResultOrValError<T>>)
+        requires(IsResultOrConcreteError<E, T>)
     [[nodiscard]] bool ConsumedError(E resultOrError,
                                      T* result,
                                      InternalErrorType additionalAllowedErrors,
@@ -104,7 +104,7 @@ class ErrorSink {
     }
 
     template <typename E, typename T, typename... Args>
-        requires(std::is_same_v<E, ResultOrError<T>> || std::is_same_v<E, ResultOrValError<T>>)
+        requires(IsResultOrConcreteError<E, T>)
     [[nodiscard]] bool ConsumedError(E resultOrError,
                                      T* result,
                                      const char* formatStr,
@@ -113,15 +113,15 @@ class ErrorSink {
                              args...);
     }
 
-    template <typename... Args>
-    void ConsumeError(std::unique_ptr<UnrecoverableError> error,
-                      const char* formatStr,
-                      const Args&... args) {
+    template <typename T, typename... Args>
+        requires(IsConcreteError<T>)
+    void ConsumeError(std::unique_ptr<T> error, const char* formatStr, const Args&... args) {
         ConsumeError(std::move(error), InternalErrorType::None, formatStr, args...);
     }
 
-    template <typename... Args>
-    void ConsumeError(std::unique_ptr<UnrecoverableError> error,
+    template <typename T, typename... Args>
+        requires(IsConcreteError<T>)
+    void ConsumeError(std::unique_ptr<T> error,
                       InternalErrorType additionalAllowedErrors,
                       const char* formatStr,
                       const Args&... args) {

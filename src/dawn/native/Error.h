@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_ERROR_H_
 #define SRC_DAWN_NATIVE_ERROR_H_
 
+#include <concepts>  // IWYU pragma: export
 #include <memory>
 #include <string>
 #include <utility>
@@ -90,6 +91,16 @@ template <typename T>
 using ResultOrError = Result<T, UnrecoverableError>;
 template <typename T>
 using ResultOrValError = ResultOrError<T>;
+
+template <typename T>
+concept IsMaybeConcreteError = std::is_same_v<T, MaybeError> || std::is_same_v<T, MaybeValError>;
+
+template <typename E, typename T>
+concept IsResultOrConcreteError =
+    std::is_same_v<E, ResultOrError<T>> || std::is_same_v<E, ResultOrValError<T>>;
+
+template <typename T>
+concept IsConcreteError = std::is_same_v<T, UnrecoverableError>;
 
 namespace detail {
 

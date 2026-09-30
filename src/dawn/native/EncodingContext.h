@@ -38,6 +38,7 @@
 #include "src/dawn/native/CommandAllocator.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/ErrorData.h"
+#include "src/dawn/native/ErrorSink.h"
 #include "src/dawn/native/IndirectDrawMetadata.h"
 #include "src/dawn/native/PassResourceUsageTracker.h"
 #include "src/dawn/native/dawn_platform.h"
@@ -114,7 +115,9 @@ class EncodingContext {
     // Functions to handle encoder errors
     void HandleError(std::unique_ptr<UnrecoverableError> error);
 
-    inline bool ConsumedError(MaybeError maybeError) {
+    template <typename E>
+        requires(IsMaybeConcreteError<E>)
+    inline bool ConsumedError(E maybeError) {
         if (maybeError.IsError()) [[unlikely]] {
             HandleError(maybeError.AcquireError());
             return true;
@@ -122,10 +125,11 @@ class EncodingContext {
         return false;
     }
 
-    template <typename... Args>
-    inline bool ConsumedError(MaybeError maybeError, const char* formatStr, const Args&... args) {
+    template <typename E, typename... Args>
+        requires(IsMaybeConcreteError<E>)
+    inline bool ConsumedError(E maybeError, const char* formatStr, const Args&... args) {
         if (maybeError.IsError()) [[unlikely]] {
-            std::unique_ptr<UnrecoverableError> error = maybeError.AcquireError();
+            auto error = maybeError.AcquireError();
             if (error->GetType() == InternalErrorType::Validation) {
                 std::string out;
                 absl::UntypedFormatSpec format(formatStr);

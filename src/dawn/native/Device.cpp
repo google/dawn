@@ -615,39 +615,35 @@ void DeviceBase::APIDestroy() {
     Destroy(DestroyReason::EarlyDestroy);
 }
 
-void DeviceBase::HandleEncoderError(std::unique_ptr<UnrecoverableError> error) {
-    HandleError(std::move(error));
-}
-
 void DeviceBase::HandleDeviceLost(wgpu::DeviceLostReason reason, std::string_view message) {
     if (mLostEvent != nullptr) {
         mLostEvent->SetLost(GetInstance()->GetEventManager(), reason, message);
     }
 }
 
-void DeviceBase::HandleError(std::unique_ptr<UnrecoverableError> error,
+void DeviceBase::HandleError(ErrorData* data,
+                             InternalErrorType type,
                              InternalErrorType additionalAllowedErrors,
                              wgpu::DeviceLostReason lostReason,
                              ForwardToErrorScope forwardToErrorScope) {
     auto deviceGuard = GetGuard();
-    AppendDebugLayerMessages(error->GetData());
+    AppendDebugLayerMessages(data);
 
-    InternalErrorType type = error->GetType();
     if (type != InternalErrorType::Validation) {
         // D3D device can provide additional device removed reason. We would
         // like to query and log the device removed reason if the error is
         // not validation error.
-        AppendDeviceLostMessage(error->GetData());
+        AppendDeviceLostMessage(data);
     }
 
     InternalErrorType allowedErrors = InternalErrorType::Validation | additionalAllowedErrors;
 
     if (!(allowedErrors & type)) {
         // If we receive an error which we did not explicitly allow, assume the backend can't
-        // recover and lose the device now. Cleanup for the device will be deferred until the last
-        // external reference of the device is dropped, or an explicit call to Destroy.
-        error->AppendContext("handling unexpected error type %s when allowed errors are %s.", type,
-                             allowedErrors);
+        // recover and lose the device now. Cleanup for the device will be deferred until the
+        // last external reference of the device is dropped, or an explicit call to Destroy.
+        data->AppendContext("handling unexpected error type %s when allowed errors are %s.", type,
+                            allowedErrors);
 
         // Handle the remainder of this error as if it caused a device lost.
         type = InternalErrorType::BackendDeviceLost;
@@ -662,7 +658,7 @@ void DeviceBase::HandleError(std::unique_ptr<UnrecoverableError> error,
         mIsValidationEnabled = true;
     }
 
-    const std::string messageStr = error->GetFormattedMessage();
+    const std::string messageStr = data->GetFormattedMessage();
     if (type == InternalErrorType::BackendDeviceLost) {
         HandleDeviceLost(lostReason, messageStr);
 

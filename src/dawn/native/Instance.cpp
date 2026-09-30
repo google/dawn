@@ -583,17 +583,6 @@ void InstanceBase::EmitLog(WGPULoggingType type, const std::string_view message)
     }
 }
 
-bool InstanceBase::ConsumedErrorAndWarnOnce(MaybeError maybeErr) {
-    if (!maybeErr.IsError()) {
-        return false;
-    }
-    std::string message = maybeErr.AcquireError()->GetFormattedMessage();
-    if (mWarningMessages.insert(message).second) {
-        EmitLog(WGPULoggingType_Warning, message);
-    }
-    return true;
-}
-
 bool InstanceBase::IsBackendValidationEnabled() const {
     return mBackendValidationLevel != BackendValidationLevel::Disabled;
 }
