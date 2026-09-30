@@ -716,6 +716,12 @@ void DeviceBase::ConsumeError(std::unique_ptr<UnrecoverableError> error,
     HandleError(std::move(error), additionalAllowedErrors);
 }
 
+void DeviceBase::ConsumeError(std::unique_ptr<ValidationError> error,
+                              InternalErrorType additionalAllowedErrors) {
+    DAWN_CHECK(error != nullptr);
+    HandleError(std::move(error), additionalAllowedErrors);
+}
+
 void DeviceBase::APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackInfo) {
     if (mState != State::Alive || callbackInfo.callback == nullptr) {
         return;
@@ -1453,8 +1459,9 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
     TRACE_EVENT(DAWN_TRACE_CATEGORY(), "DeviceBase::APICreateShaderModule", "label", label.label);
 
     Ref<ShaderModuleBase> shaderModule;
-    std::unique_ptr<UnrecoverableError> errorData;
-    auto creationResult = CreateShaderModule(descriptor, /*internalExtensions=*/{});
+    std::unique_ptr<ValidationError> errorData;
+    ResultOrValError<Ref<ShaderModuleBase>> creationResult =
+        CreateShaderModule(descriptor, /*internalExtensions=*/{});
     if (creationResult.IsSuccess()) {
         // CreateShaderModule can succeed but still return a shader module which failed compilation.
         // TODO(crbug.com/406522796): Remove this once ShaderModuleBase writes directly to the error
@@ -1495,9 +1502,9 @@ ShaderModuleBase* DeviceBase::APICreateErrorShaderModule(const ShaderModuleDescr
         this, descriptor ? descriptor->label : nullptr, std::move(compilationMessages));
     auto log = result->GetCompilationLog();
 
-    std::unique_ptr<UnrecoverableError> errorData = DAWN_VALIDATION_ERROR(
-        "Error in calling %s.CreateShaderModule(%s).\n%s", this, descriptor, log);
-    ConsumeError(std::move(errorData));
+    ConsumeError(DAWN_VALIDATION_ERROR("Error in calling %s.CreateShaderModule(%s).\n%s", this,
+                                       descriptor, log)
+                     .AsVal());
 
     return ReturnToAPI(std::move(result));
 }
@@ -1518,7 +1525,7 @@ BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
         // This codepath isn't used (at the time of this writing). Just return nullptr
         // (pretend there was a mapping OOM), so we don't have to bother mapping the ErrorBuffer
         // (would have to return nullptr anyway if there was actually an OOM).
-        auto error =
+        std::unique_ptr<UnrecoverableError> error =
             DAWN_OUT_OF_MEMORY_ERROR("mappedAtCreation is not implemented for CreateErrorBuffer");
         error->AppendContext("calling %s.CreateBuffer(%s).", this, desc);
         EmitLog(wgpu::LoggingType::Error, error->GetFormattedMessage());
@@ -1890,10 +1897,11 @@ void DeviceBase::EmitLog(wgpu::LoggingType type, std::string_view message) {
 wgpu::Status DeviceBase::APIGetAHardwareBufferProperties(void* handle,
                                                          AHardwareBufferProperties* properties) {
     if (!HasFeature(Feature::SharedTextureMemoryAHardwareBuffer)) {
-        ConsumeError(
-            DAWN_VALIDATION_ERROR("Queried APIGetAHardwareBufferProperties() on %s "
-                                  "without the %s feature being set.",
-                                  this, ToCppAPI(Feature::SharedTextureMemoryAHardwareBuffer)));
+        ConsumeError(DAWN_VALIDATION_ERROR("Queried APIGetAHardwareBufferProperties() on %s "
+                                           "without the %s feature being set.",
+                                           this,
+                                           ToCppAPI(Feature::SharedTextureMemoryAHardwareBuffer))
+                         .AsVal());
         return wgpu::Status::Error;
     }
 
@@ -1947,8 +1955,8 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {
         return;
     }
 
-    // This method should only be used to make error scope reject. For DeviceLost there is the
-    // LoseForTesting function that can be used instead.
+    // This method should only be used to make error scope reject. For BackendDeviceLost there is
+    // the LoseForTesting function that can be used instead.
     if (type != wgpu::ErrorType::Validation && type != wgpu::ErrorType::OutOfMemory) {
         HandleError(
             DAWN_VALIDATION_ERROR("Invalid injected error, must be Validation or OutOfMemory"));
@@ -2264,7 +2272,7 @@ ResultOrError<Ref<ResourceTableBase>> DeviceBase::CreateResourceTable(
     // Not checked in ValidateResourceTableDescriptor because if size > kMaxResourceTableSize, we
     // throw a RangeError in WebGPU, which means returning nullptr here.
     if (descriptor->size > kMaxResourceTableSize) {
-        auto error = DAWN_VALIDATION_ERROR(
+        std::unique_ptr<ValidationError> error = DAWN_VALIDATION_ERROR(
             "Resource table size (%u) is larger than the maximum resource table size (%u)",
             descriptor->size, kMaxResourceTableSize);
         EmitLog(wgpu::LoggingType::Error, error->GetFormattedMessage());

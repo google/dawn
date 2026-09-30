@@ -1358,8 +1358,6 @@ wgpu::TextureUsage TextureBase::GetInternalUsage() const {
     return mInternalUsage;
 }
 
-
-
 void TextureBase::AddInternalUsage(wgpu::TextureUsage usage) {
     DAWN_CHECK(!IsError());
     mInternalUsage |= usage;

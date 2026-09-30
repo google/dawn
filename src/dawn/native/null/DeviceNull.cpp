@@ -610,6 +610,4 @@ bool Device::CanTextureLoadResolveTargetInTheSameRenderpass() const {
 Texture::Texture(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor)
     : TextureBase(device, descriptor) {}
 
-
-
 }  // namespace dawn::native::null

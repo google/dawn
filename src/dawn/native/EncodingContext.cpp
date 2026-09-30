@@ -121,6 +121,36 @@ void EncodingContext::HandleError(std::unique_ptr<UnrecoverableError> error) {
     CloseWithStatus(Status::ErrorInRecording);
 }
 
+void EncodingContext::HandleError(std::unique_ptr<ValidationError> error) {
+    // Append in reverse so that the most recently set debug group is printed first, like a
+    // call stack.
+    for (auto iter = mDebugGroupLabels.rbegin(); iter != mDebugGroupLabels.rend(); ++iter) {
+        error->AppendDebugGroup(*iter);
+    }
+
+    bool deferErrors = mStatus != Status::Finished;
+    if (mDevice->IsImmediateErrorHandlingEnabled()) {
+        deferErrors = false;
+    }
+
+    if (deferErrors) {
+        // TODO(crbug.com/42240579): ASSERT that encoding only generates validation errors.
+
+        // If the encoding context is not finished, errors are deferred until
+        // Finish() is called.
+        if (mError == nullptr) {
+            mError = std::make_unique<UnrecoverableError>(error->ReleaseData());
+        }
+    } else {
+        // EncodingContext is unprotected from multiple threads by default, but this code will
+        // modify Device's internal states so we need to lock the device now.
+        auto deviceGuard = mDevice->GetGuard();
+        mDevice->HandleEncoderError(std::move(error));
+    }
+
+    CloseWithStatus(Status::ErrorInRecording);
+}
+
 void EncodingContext::WillBeginRenderPass() {
     DAWN_CHECK(mCurrentEncoder == mTopLevelEncoder);
     if (mDevice->IsValidationEnabled() || mDevice->MayRequireDuplicationOfIndirectParameters()) {
@@ -197,8 +227,9 @@ void EncodingContext::EnsurePassExited(const ApiObjectBase* passEncoder) {
     if (mCurrentEncoder != mTopLevelEncoder && mCurrentEncoder == passEncoder) {
         // The current pass encoder is being deleted. Implicitly end the pass with an error.
         mCurrentEncoder = mTopLevelEncoder;
-        HandleError(DAWN_VALIDATION_ERROR("Command buffer recording ended before %s was ended.",
-                                          passEncoder));
+        std::unique_ptr<ValidationError> err = DAWN_VALIDATION_ERROR(
+            "Command buffer recording ended before %s was ended.", passEncoder);
+        HandleError(std::move(err));
     }
 }
 
@@ -245,10 +276,8 @@ MaybeError EncodingContext::Finish() {
         case Status::ErrorAtCreation:
         case Status::Destroyed:
             return {};
-
         case Status::Finished:
             return DAWN_VALIDATION_ERROR("Command encoding already finished.");
-
         case Status::ErrorInRecording:
         case Status::Open:
             break;

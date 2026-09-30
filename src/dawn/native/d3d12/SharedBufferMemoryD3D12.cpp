@@ -92,9 +92,8 @@ ResultOrError<HeapAccessType> MapToHeapAccessType(const D3D12_HEAP_PROPERTIES& h
                        heapProperties.MemoryPoolPreference == D3D12_MEMORY_POOL_L0) {
                 // A CUSTOM heap with WRITE_COMBINE + L0 is equivalent to a UPLOAD heap.
                 return HeapAccessType::Upload;
-            } else {
-                return DAWN_VALIDATION_ERROR("ID3D12Resources allocated on unsupported heap.");
             }
+            return DAWN_VALIDATION_ERROR("ID3D12Resources allocated on unsupported heap.");
         default:
             return DAWN_VALIDATION_ERROR("ID3D12Resources allocated on unsupported heap.");
     }
@@ -407,6 +406,8 @@ MaybeValError SharedBufferMemory::BeginAccessImpl(
                                 wgpu::FeatureName::SharedFenceDXGISharedHandle);
                 break;
             default:
+                // TODO(crbug.com/536639352): Move the validation of the fence type into the
+                // frontend to better separate the validation and internal error.
                 return DAWN_VALIDATION_ERROR("Unsupported fence type %s.", exportInfo.type);
         }
     }

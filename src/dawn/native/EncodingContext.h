@@ -114,6 +114,7 @@ class EncodingContext {
   private:
     // Functions to handle encoder errors
     void HandleError(std::unique_ptr<UnrecoverableError> error);
+    void HandleError(std::unique_ptr<ValidationError> error);
 
     template <typename E>
         requires(IsMaybeConcreteError<E>)

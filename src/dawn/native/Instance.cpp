@@ -442,7 +442,8 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     RequestAdapterOptions rawOptions = WithTrivialFrontendDefaults(*options);
     UnpackedPtr<RequestAdapterOptions> unpacked = Unpack(&rawOptions);
     if (unpacked.Has<RequestAdapterWebXROptions>()) {
-        ConsumedErrorAndWarnOnce(DAWN_VALIDATION_ERROR("RequestAdapterWebXROptions unsupported."));
+        ConsumedErrorAndWarnOnce(
+            DAWN_VALIDATION_ERROR("RequestAdapterWebXROptions unsupported.").AsVal());
         return {};
     }
     auto* togglesDesc = unpacked.Get<DawnTogglesDescriptor>();
@@ -547,8 +548,10 @@ std::vector<Ref<PhysicalDeviceBase>> InstanceBase::EnumeratePhysicalDevices(
     } else if (options->backendType == wgpu::BackendType::WebGPU) {
         // User is selecting WebGPU-on-WebGPU without RequestAdapterWebGPUBackendOptions.
         // This is invalid, set no backends and warn.
-        ConsumedErrorAndWarnOnce(DAWN_VALIDATION_ERROR(
-            "Select WebGPU backend without RequestAdapterWebGPUBackendOptions is invalid."));
+        ConsumedErrorAndWarnOnce(
+            DAWN_VALIDATION_ERROR(
+                "Select WebGPU backend without RequestAdapterWebGPUBackendOptions is invalid.")
+                .AsVal());
     } else if (options->backendType != wgpu::BackendType::Undefined) {
         // User is selecting a specific backend.
         if (!ConsumedErrorAndWarnOnce(ValidateBackendType(options->backendType))) {
@@ -701,6 +704,14 @@ EventManager* InstanceBase::GetEventManager() {
 }
 
 void InstanceBase::ConsumeError(std::unique_ptr<UnrecoverableError> error,
+                                InternalErrorType additionalAllowedErrors) {
+    // Note: `additionalAllowedErrors` is ignored. The instance considers every type of error to be
+    // an error that is logged.
+    DAWN_ASSERT(error != nullptr);
+    EmitLog(WGPULoggingType_Error, error->GetFormattedMessage());
+}
+
+void InstanceBase::ConsumeError(std::unique_ptr<ValidationError> error,
                                 InternalErrorType additionalAllowedErrors) {
     // Note: `additionalAllowedErrors` is ignored. The instance considers every type of error to be
     // an error that is logged.

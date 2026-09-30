@@ -31,6 +31,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <utility>
 
 #include "dawn/native/ObjectType_autogen.h"

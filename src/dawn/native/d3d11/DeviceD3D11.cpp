@@ -429,8 +429,8 @@ MaybeError Device::CheckDebugLayerAndGenerateErrors() {
         return {};
     }
 
-    auto error = DAWN_UNRECOVERABLE_ERROR("The D3D11 debug layer reported uncaught errors.");
-
+    std::unique_ptr<UnrecoverableError> error =
+        DAWN_UNRECOVERABLE_ERROR("The D3D11 debug layer reported uncaught errors.");
     const uint64_t emittedErrors =
         AppendDebugLayerMessagesToError(infoQueue.Get(), totalErrors, error->GetData());
     if (emittedErrors == 0) {

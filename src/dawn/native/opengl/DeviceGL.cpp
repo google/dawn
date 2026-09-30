@@ -459,7 +459,8 @@ ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingGLTextureImpl(
         textureDescriptor->size.height != static_cast<uint32_t>(height) ||
         textureDescriptor->size.depthOrArrayLayers != 1) {
         return DAWN_VALIDATION_ERROR(
-            "GL texture size (width: %u, height: %u, depth: 1) doesn't match descriptor size %s.",
+            "GL texture size (width: %u, height: %u, depth: 1) doesn't match descriptor size "
+            "%s.",
             width, height, textureDescriptor->size);
     }
 

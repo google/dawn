@@ -286,14 +286,13 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                         "The subgroup_size attribute (%u) is not in the allowed range "
                         "([%u, %u]).",
                         explicitSubgroupSize, r.waveLaneCountMin, r.waveLaneCountMax);
-                } else {
-                    return DAWN_VALIDATION_ERROR(
-                        "The subgroup_size attribute (%u) is not in the allowed range "
-                        "([%u, %u]). Note that on this device the allowed range is not "
-                        "[minSubgroupSize, maxSubgroupsize]([%u, %u]).",
-                        explicitSubgroupSize, r.waveLaneCountMin, r.waveLaneCountMax,
-                        r.minSubgroupSize, r.maxSubgroupSize);
                 }
+                return DAWN_VALIDATION_ERROR(
+                    "The subgroup_size attribute (%u) is not in the allowed range "
+                    "([%u, %u]). Note that on this device the allowed range is not "
+                    "[minSubgroupSize, maxSubgroupsize]([%u, %u]).",
+                    explicitSubgroupSize, r.waveLaneCountMin, r.waveLaneCountMax, r.minSubgroupSize,
+                    r.maxSubgroupSize);
             }
         }
 

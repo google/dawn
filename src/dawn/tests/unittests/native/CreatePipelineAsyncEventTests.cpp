@@ -88,8 +88,7 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateRende
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(
-            testing::ByMove(DAWN_MAKE_VALIDATION_ERROR(std::string(kErrorMessage)))));
+        .WillByDefault(testing::Return(testing::ByMove(DAWN_VALIDATION_ERROR(kErrorMessage))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
 
@@ -175,8 +174,7 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateCompu
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(
-            testing::ByMove(DAWN_MAKE_VALIDATION_ERROR(std::string(kErrorMessage)))));
+        .WillByDefault(testing::Return(testing::ByMove(DAWN_VALIDATION_ERROR(kErrorMessage))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
 

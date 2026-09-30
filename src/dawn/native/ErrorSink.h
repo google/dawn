@@ -133,8 +133,13 @@ class ErrorSink {
         ConsumeError(std::move(error), additionalAllowedErrors);
     }
 
+    // TODO(crbug.com/536639352): When `UnknownError` is available, determine if we can combine
+    // these overloads into a single one taking the UnknownError class.
     virtual void ConsumeError(
         std::unique_ptr<UnrecoverableError> error,
+        InternalErrorType additionalAllowedErrors = InternalErrorType::None) = 0;
+    virtual void ConsumeError(
+        std::unique_ptr<ValidationError> error,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) = 0;
 };
 

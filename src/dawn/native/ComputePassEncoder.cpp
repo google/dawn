@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <memory>
 
 #include "dawn/native/ObjectType_autogen.h"
 #include "src/dawn/common/Range.h"

@@ -277,7 +277,8 @@ class AdapterSurfaceCapCache {
                                                      adapter->GetInstance(), surface));
             mCachedCapabilitiesAdapter = GetWeakRef(adapter);
         }
-        return f(mCachedCapabilities);
+        DAWN_TRY(f(mCachedCapabilities));
+        return {};
     }
 
   private:
@@ -645,7 +646,8 @@ wgpu::Status Surface::APIPresent() {
     // Validation that the surface is configured. Note this is synchronous
     // validation so it can't be skipped even if the surface is an error.
     if (!GetCurrentDevice()) {
-        mInstance->ConsumeError(DAWN_VALIDATION_ERROR("%s is in the unconfigured state.", this));
+        mInstance->ConsumeError(
+            DAWN_VALIDATION_ERROR("%s is in the unconfigured state.", this).AsVal());
         return wgpu::Status::Error;
     }
 
