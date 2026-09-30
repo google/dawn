@@ -1000,6 +1000,7 @@ def compute_kotlin_params(loaded_json,
     params_kotlin['jni_signatures'] = kotlin_json['jni_signatures']
     kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
     customize_api = kotlin_json["customize_api"]
+    customize_functions = customize_api["functions"]
     customize_objects = customize_api["objects"]
     customize_structures = customize_api["structures"]
     customize_enums = customize_api["enums"]
@@ -1158,8 +1159,14 @@ def compute_kotlin_params(loaded_json,
         )
         return None
 
-    def kotlin_name(type):
-        return f"{'GPU' if type.category in ('object', 'structure') else ''}{type.name.CamelCase()}"
+    def kotlin_name(item):
+        if isinstance(item, FunctionDeclaration):
+            return customize_functions.get(item.name.get(),
+                                           {}).get('name',
+                                                   item.name.camelCase())
+        if isinstance(item, Method):
+            return item.name.camelCase()
+        return f"{'GPU' if item.category in ('object', 'structure') else ''}{item.name.CamelCase()}"
 
     def kotlin_return(method):
         for argument in method.arguments:
@@ -1199,7 +1206,8 @@ def compute_kotlin_params(loaded_json,
             return False
 
         if obj is None:
-            return True
+            return customize_functions.get(method.name.get(),
+                                           {}).get('omitted') is not True
 
         # Is the method marked omitted in dawn_kotlin.json?
         return customize_objects.get(obj.name.get(),

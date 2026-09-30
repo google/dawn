@@ -71,7 +71,8 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 
 {% macro render_method(method, object) %}
     {% set ObjectName = kotlin_name(object) if object else "GPU" %}
-    {% set FunctionSuffix = ObjectName + "_" +  method.name.camelCase() %}
+    {% set MethodName = kotlin_name(method) %}
+    {% set FunctionSuffix = ObjectName + "_" + MethodName %}
     {% set KotlinRecord = FunctionSuffix + "KotlinRecord" %}
     {% set ArgsStruct = FunctionSuffix + "ArgsStruct" %}
 
@@ -168,7 +169,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
                 jclass exClass = env->FindClass("androidx/webgpu/WebGpuException");
                 jmethodID exConstructor =
                     env->GetMethodID(exClass, "<init>", "(Ljava/lang/String;I)V");
-                std::string message = "Method GPU{% if object %}{{ object.name.CamelCase() + "." }}{% endif %}{{ method.name.camelCase() }} failed.";
+                std::string message = "Method {{ ObjectName }}.{{ MethodName }} failed.";
                 jstring jmessage = env->NewStringUTF(message.c_str());
                 jobject exception = env->NewObject(exClass, exConstructor, jmessage, result);
                 env->Throw(static_cast<jthrowable>(exception));

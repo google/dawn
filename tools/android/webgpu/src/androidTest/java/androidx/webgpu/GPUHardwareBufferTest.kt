@@ -23,7 +23,7 @@ import androidx.test.filters.MediumTest
 import androidx.webgpu.helper.GPUAndroidHardwareBufferUtil
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
-import androidx.webgpu.GPU.createInstance
+import androidx.webgpu.GPU.createGPUInstance
 import androidx.webgpu.helper.initLibrary
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -70,7 +70,7 @@ class GPUHardwareBufferTest {
     fun setup() = runBlocking {
         // 1. Check features BEFORE requesting the device
         initLibrary()
-        val instance = createInstance(
+        val instance = createGPUInstance(
             GPUInstanceDescriptor().apply {
                 dawnTogglesDescriptor = GPUDawnTogglesDescriptor(
                     enabledToggles = arrayOf("allow_unsafe_apis") // Required to enable experimental SharedTextureMemoryAHardwareBuffer features
