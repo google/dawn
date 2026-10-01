@@ -201,7 +201,7 @@ class Printer : public tint::TextGenerator {
     Hashset<const core::type::Struct*, 4> emitted_structs_;
     Hashmap<const core::type::ResourceTable*, Symbol, 4> resource_table_to_name_;
 
-    Hashset<const core::ir::InstructionResult*, 64> aliased_results_;
+    Hashset<const core::ir::Value*, 64> aliased_values_;
     Hashmap<const core::type::Type*, std::string, 16> aliased_typedefs_;
 
     /// The name of the templated alias for matmul2d operations, if emitted.
@@ -252,23 +252,29 @@ class Printer : public tint::TextGenerator {
 
     void FindAliasedResults() {
         // Aliasable roots are the results of msl.alias_pointer_offset calls.
-        Vector<core::ir::Instruction*, 16> worklist;
+        Vector<core::ir::Value*, 16> worklist;
         for (auto* inst : ir_.Instructions()) {
             if (auto* builtin = inst->As<msl::ir::BuiltinCall>()) {
                 if (builtin->Func() == msl::BuiltinFn::kAliasPointerOffset) {
-                    worklist.Push(builtin);
+                    worklist.Push(builtin->Result());
                 }
             }
         }
 
-        // TODO(495899057): this will need to traverse functions when aliasing is permitted.
         while (!worklist.IsEmpty()) {
-            auto inst = worklist.Pop();
-            aliased_results_.Add(inst->Result());
-            for (auto use : inst->Result()->UsagesUnsorted()) {
-                if (use->instruction->Results().Length() == 1 &&
-                    use->instruction->Result()->Type()->Is<core::type::Pointer>()) {
-                    worklist.Push(use->instruction);
+            auto value = worklist.Pop();
+            aliased_values_.Add(value);
+            for (auto use : value->UsagesUnsorted()) {
+                if (auto* call = use->instruction->As<core::ir::UserCall>()) {
+                    // Mark the parameter as aliased and keep traversing in the target.
+                    auto* target = call->Target();
+                    auto param_index = use->operand_index - call->ArgsOperandOffset();
+                    auto* param = target->Params()[param_index];
+                    aliased_values_.Add(param);
+                    worklist.Push(param);
+                } else if (use->instruction->Results().Length() == 1 &&
+                           use->instruction->Result()->Type()->Is<core::type::Pointer>()) {
+                    worklist.Push(use->instruction->Result());
                 }
             }
         }
@@ -454,7 +460,11 @@ class Printer : public tint::TextGenerator {
                 }
                 ++i;
 
-                EmitType(out, param->Type());
+                if (aliased_values_.Contains(param)) {
+                    EmitAliasedType(out, param->Type());
+                } else {
+                    EmitType(out, param->Type());
+                }
                 out << " ";
 
                 // Non-entrypoint pointers are set to `const` for the value
@@ -758,7 +768,7 @@ class Printer : public tint::TextGenerator {
             // (constructor) in metal is not constexpr.
             out << "const constant ";
         }
-        if (aliased_results_.Contains(l->Result())) {
+        if (aliased_values_.Contains(l->Result())) {
             EmitAliasedType(out, l->Result()->Type());
         } else {
             EmitType(out, l->Result()->Type());

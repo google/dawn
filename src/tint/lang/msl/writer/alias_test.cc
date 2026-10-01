@@ -547,5 +547,162 @@ kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadg
 )");
 }
 
+TEST_F(MslWriterAliasTest, FunctionParameter) {
+    auto* v = b.Var("v", ty.ptr(storage, ty.buffer(32)));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* other = b.FunctionParam("other", ty.u32());
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.u32()));
+    foo->SetParams({other, p});
+    b.Append(foo->Block(), [&] {
+        b.Let("ld", b.Load(p));
+        b.Return(foo);
+    });
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(storage, ty.u32()), core::BuiltinFn::kBufferView,
+                                    Vector<core::ir::TemplateParameter, 1>{ty.u32()}, v, 0_u);
+        b.Call(ty.void_(), foo, 0_u, view);
+        b.Return(ep);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
+    EXPECT_EQ(output_.msl,
+              MetalHeader() + R"(typedef uint __attribute__((__may_alias__)) tint_aliased_u32;
+
+struct tint_module_vars_struct {
+  device array<uchar, 32>* v;
+};
+
+void foo(uint other, device tint_aliased_u32* const p) {
+  uint const ld = (*p);
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void entry(device array<uchar, 32>* v [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
+  device tint_aliased_u32* const v_1 = reinterpret_cast<device uint*>(reinterpret_cast<device char*>(tint_module_vars.v) + 0u);
+  (foo(0u, v_1));
+}
+)");
+}
+
+TEST_F(MslWriterAliasTest, FunctionParameter_Nested) {
+    auto* v = b.Var("v", ty.ptr(storage, ty.buffer(32)));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* bar = b.Function("bar", ty.void_());
+    auto* p1 = b.FunctionParam("p1", ty.ptr(storage, ty.u32()));
+    auto* p2 = b.FunctionParam("p2", ty.ptr(storage, ty.f32()));
+    bar->SetParams({p1, p2});
+    b.Append(bar->Block(), [&] {
+        b.Let("ld1", b.Load(p1));
+        b.Let("ld2", b.Load(p2));
+        b.Return(bar);
+    });
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* other = b.FunctionParam("other", ty.u32());
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.u32()));
+    foo->SetParams({other, p});
+    b.Append(foo->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(storage, ty.f32()), core::BuiltinFn::kBufferView,
+                                    Vector<core::ir::TemplateParameter, 1>{ty.f32()}, v, 0_u);
+        b.Call(ty.void_(), bar, p, view);
+        b.Return(foo);
+    });
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(storage, ty.u32()), core::BuiltinFn::kBufferView,
+                                    Vector<core::ir::TemplateParameter, 1>{ty.u32()}, v, 0_u);
+        b.Call(ty.void_(), foo, 0_u, view);
+        b.Return(ep);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
+    EXPECT_EQ(output_.msl,
+              MetalHeader() + R"(typedef uint __attribute__((__may_alias__)) tint_aliased_u32;
+typedef float __attribute__((__may_alias__)) tint_aliased_f32;
+
+struct tint_module_vars_struct {
+  device array<uchar, 32>* v;
+};
+
+void bar(device tint_aliased_u32* const p1, device tint_aliased_f32* const p2) {
+  uint const ld1 = (*p1);
+  float const ld2 = (*p2);
+}
+
+void foo(uint other, device tint_aliased_u32* const p, tint_module_vars_struct tint_module_vars) {
+  device tint_aliased_f32* const v_1 = reinterpret_cast<device float*>(reinterpret_cast<device char*>(tint_module_vars.v) + 0u);
+  (bar(p, v_1));
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void entry(device array<uchar, 32>* v [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
+  device tint_aliased_u32* const v_2 = reinterpret_cast<device uint*>(reinterpret_cast<device char*>(tint_module_vars.v) + 0u);
+  (foo(0u, v_2, tint_module_vars));
+}
+)");
+}
+
+TEST_F(MslWriterAliasTest, FunctionParameter_LetFanout) {
+    auto* v = b.Var("v", ty.ptr(storage, ty.buffer(32)));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* other = b.FunctionParam("other", ty.u32());
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.u32()));
+    foo->SetParams({other, p});
+    b.Append(foo->Block(), [&] {
+        auto* l = b.Let("l", p);
+        b.Let("ld1", b.Load(l));
+        l = b.Let("l2", p);
+        b.Let("ld2", b.Load(l));
+        b.Return(foo);
+    });
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(storage, ty.u32()), core::BuiltinFn::kBufferView,
+                                    Vector<core::ir::TemplateParameter, 1>{ty.u32()}, v, 0_u);
+        b.Call(ty.void_(), foo, 0_u, view);
+        b.Return(ep);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
+    EXPECT_EQ(output_.msl,
+              MetalHeader() + R"(typedef uint __attribute__((__may_alias__)) tint_aliased_u32;
+
+struct tint_module_vars_struct {
+  device array<uchar, 32>* v;
+};
+
+void foo(uint other, device tint_aliased_u32* const p) {
+  device tint_aliased_u32* const l = p;
+  uint const ld1 = (*l);
+  device tint_aliased_u32* const l2 = p;
+  uint const ld2 = (*l2);
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void entry(device array<uchar, 32>* v [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
+  device tint_aliased_u32* const v_1 = reinterpret_cast<device uint*>(reinterpret_cast<device char*>(tint_module_vars.v) + 0u);
+  (foo(0u, v_1));
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::msl::writer
