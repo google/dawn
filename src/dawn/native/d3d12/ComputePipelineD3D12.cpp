@@ -184,7 +184,7 @@ PipelineLayoutHandle* ComputePipeline::GetPipelineLayoutHandle() const {
     return mPipelineLayoutHandle.Get();
 }
 
-ComPtr<ID3D12CommandSignature> ComputePipeline::GetDispatchIndirectCommandSignature() {
+const CommandSignature& ComputePipeline::GetDispatchIndirectCommandSignature() {
     if (UsesNumWorkgroups()) {
         return mPipelineLayoutHandle->GetDispatchIndirectCommandSignatureWithNumWorkgroups();
     }

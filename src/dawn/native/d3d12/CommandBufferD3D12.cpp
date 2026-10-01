@@ -927,38 +927,29 @@ class IndirectDrawBatcher {
     explicit IndirectDrawBatcher(CommandRecordingContext* commandContext)
         : mCommandContext(commandContext) {}
 
-    void Add(RenderPipeline* pipeline,
+    void Add(const CommandSignature& signature,
              Buffer* buffer,
-             uint64_t offset,
+             uint64_t bufferOffset,
              const BufferBase* sourceBuffer,
-             uint64_t sourceOffset) {
-        ComPtr<ID3D12CommandSignature> signature = pipeline->GetDrawIndirectCommandSignature();
-        // When the shader uses vertex_index or instance_index, validation appends copies of
-        // firstVertex and firstInstance for the command signature to set as root constants.
-        const uint32_t stride =
-            (pipeline->UsesVertexIndex() || pipeline->UsesInstanceIndex())
-                ? ((kDrawIndirectSize / sizeof(uint32_t)) + 2) * sizeof(uint32_t)
-                : static_cast<uint32_t>(kDrawIndirectSize);
-
+             uint64_t sourceBufferOffset) {
         // Dawn frontend indirect draw validation in EncodeIndirectDrawValidationCommands() packs
         // validated arguments from multiple draws into one internal output buffer. Require both
         // the validated arguments and their original source arguments to be consecutive before
         // combining them.
         const bool isAdjacent =
-            mCount != 0 && mSignature.Get() == signature.Get() && mBuffer == buffer &&
-            mStride == stride &&
-            offset == mFirstDrawOffset + static_cast<uint64_t>(mCount) * stride &&
+            mCount != 0 && mSignature == signature && mBuffer == buffer &&
+            bufferOffset ==
+                mBufferFirstOffset + static_cast<uint64_t>(mCount) * signature.byteStride &&
             mSourceBuffer == sourceBuffer &&
-            sourceOffset ==
-                mFirstDrawSourceOffset + static_cast<uint64_t>(mCount) * kDrawIndirectSize;
+            sourceBufferOffset ==
+                mSourceBufferFirstOffset + static_cast<uint64_t>(mCount) * kDrawIndirectSize;
         if (!isAdjacent) {
             Flush();
-            mSignature = std::move(signature);
+            mSignature = signature;
             mBuffer = buffer;
-            mFirstDrawOffset = offset;
-            mStride = stride;
+            mBufferFirstOffset = bufferOffset;
             mSourceBuffer = sourceBuffer;
-            mFirstDrawSourceOffset = sourceOffset;
+            mSourceBufferFirstOffset = sourceBufferOffset;
         }
         ++mCount;
     }
@@ -968,25 +959,24 @@ class IndirectDrawBatcher {
             return;
         }
         // ExecuteIndirect consumes mCount tightly strided commands starting at the first draw.
-        mCommandContext->GetCommandList()->ExecuteIndirect(
-            mSignature.Get(), mCount, mBuffer->GetD3D12Resource(), mFirstDrawOffset, nullptr, 0);
-        mSignature.Reset();
+        mCommandContext->GetCommandList()->ExecuteIndirect(mSignature.signature.Get(), mCount,
+                                                           mBuffer->GetD3D12Resource(),
+                                                           mBufferFirstOffset, nullptr, 0);
+        mSignature = {};
         mBuffer = nullptr;
-        mFirstDrawOffset = 0;
-        mStride = 0;
+        mBufferFirstOffset = 0;  // Offset of the start of the batch.
         mSourceBuffer = nullptr;
-        mFirstDrawSourceOffset = 0;
+        mSourceBufferFirstOffset = 0;  // Offset of the start of the batch.
         mCount = 0;
     }
 
   private:
     raw_ptr<CommandRecordingContext> mCommandContext;
-    ComPtr<ID3D12CommandSignature> mSignature;
+    CommandSignature mSignature;
     raw_ptr<Buffer> mBuffer = nullptr;
-    uint64_t mFirstDrawOffset = 0;
-    uint32_t mStride = 0;
+    uint64_t mBufferFirstOffset = 0;
     raw_ptr<const BufferBase> mSourceBuffer = nullptr;
-    uint64_t mFirstDrawSourceOffset = 0;
+    uint64_t mSourceBufferFirstOffset = 0;
     uint32_t mCount = 0;
 };
 
@@ -1549,11 +1539,10 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 DAWN_TRY(bindingTracker->Apply(commandContext, &immediates));
                 immediates.Apply(commandContext);
 
-                ComPtr<ID3D12CommandSignature> signature =
-                    lastPipeline->GetDispatchIndirectCommandSignature();
+                ID3D12CommandSignature* signature =
+                    lastPipeline->GetDispatchIndirectCommandSignature().signature.Get();
                 commandList->ExecuteIndirect(
-                    signature.Get(), 1,
-                    ToBackend(dispatch->indirectBuffer.Get())->GetD3D12Resource(),
+                    signature, 1, ToBackend(dispatch->indirectBuffer.Get())->GetD3D12Resource(),
                     dispatch->indirectOffset, nullptr, 0);
                 break;
             }
@@ -1931,7 +1920,8 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 Buffer* indirectBuffer = ToBackend(validatedDraw.indirectBuffer.Get());
                 DAWN_ASSERT(indirectBuffer != nullptr);
 
-                indirectDrawBatcher.Add(lastPipeline, indirectBuffer, validatedDraw.indirectOffset,
+                indirectDrawBatcher.Add(lastPipeline->GetDrawIndirectCommandSignature(),
+                                        indirectBuffer, validatedDraw.indirectOffset,
                                         validatedDraw.sourceIndirectBuffer.Get(),
                                         validatedDraw.sourceIndirectOffset);
                 break;
@@ -1950,9 +1940,9 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 Buffer* indirectBuffer = ToBackend(validatedDraw.indirectBuffer.Get());
                 DAWN_ASSERT(indirectBuffer != nullptr);
 
-                ComPtr<ID3D12CommandSignature> signature =
-                    lastPipeline->GetDrawIndexedIndirectCommandSignature();
-                commandList->ExecuteIndirect(signature.Get(), 1, indirectBuffer->GetD3D12Resource(),
+                ID3D12CommandSignature* signature =
+                    lastPipeline->GetDrawIndexedIndirectCommandSignature().signature.Get();
+                commandList->ExecuteIndirect(signature, 1, indirectBuffer->GetD3D12Resource(),
                                              validatedDraw.indirectOffset, nullptr, 0);
                 break;
             }
@@ -1971,11 +1961,10 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 // There is no distinction between DrawIndirect and MultiDrawIndirect in D3D12.
                 // This is why we can use the same command signature for both.
-                ComPtr<ID3D12CommandSignature> signature =
-                    lastPipeline->GetDrawIndirectCommandSignature();
-
+                ID3D12CommandSignature* signature =
+                    lastPipeline->GetDrawIndirectCommandSignature().signature.Get();
                 commandList->ExecuteIndirect(
-                    signature.Get(), draw->maxDrawCount, indirectBuffer->GetD3D12Resource(),
+                    signature, draw->maxDrawCount, indirectBuffer->GetD3D12Resource(),
                     draw->indirectOffset,
                     countBuffer != nullptr ? countBuffer->GetD3D12Resource() : nullptr,
                     countBuffer != nullptr ? draw->drawCountOffset : 0);
@@ -1998,11 +1987,10 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 // There is no distinction between DrawIndexedIndirect and MultiDrawIndexedIndirect
                 // in D3D12. This is why we can use the same command signature for both.
-                ComPtr<ID3D12CommandSignature> signature =
-                    lastPipeline->GetDrawIndexedIndirectCommandSignature();
-
+                ID3D12CommandSignature* signature =
+                    lastPipeline->GetDrawIndexedIndirectCommandSignature().signature.Get();
                 commandList->ExecuteIndirect(
-                    signature.Get(), draw->maxDrawCount, indirectBuffer->GetD3D12Resource(),
+                    signature, draw->maxDrawCount, indirectBuffer->GetD3D12Resource(),
                     draw->indirectOffset,
                     countBuffer != nullptr ? countBuffer->GetD3D12Resource() : nullptr,
                     countBuffer != nullptr ? draw->drawCountOffset : 0);

@@ -78,6 +78,12 @@ static constexpr uint64_t kZeroBufferSize = 1024ULL * 1024 * 4;  // 4 Mb
 static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
 }  // namespace
 
+CommandSignature::operator bool() const {
+    return signature.Get() != nullptr;
+}
+
+bool CommandSignature::operator==(const CommandSignature& other) const = default;
+
 // static
 ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           const UnpackedPtr<DeviceDescriptor>& descriptor,
@@ -157,27 +163,21 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
 
     // Initialize indirect commands
     D3D12_INDIRECT_ARGUMENT_DESC argumentDesc = {};
-    argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
-
     D3D12_COMMAND_SIGNATURE_DESC programDesc = {};
-    programDesc.ByteStride = 3 * sizeof(uint32_t);
     programDesc.NumArgumentDescs = 1;
     programDesc.pArgumentDescs = &argumentDesc;
 
-    GetD3D12Device()->CreateCommandSignature(&programDesc, nullptr,
-                                             IID_PPV_ARGS(&mDispatchIndirectSignature));
+    argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
+    programDesc.ByteStride = kDispatchIndirectSize;
+    DAWN_TRY_ASSIGN(mDispatchIndirectSignature, CreateCommandSignature(programDesc, nullptr));
 
     argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
-    programDesc.ByteStride = 4 * sizeof(uint32_t);
-
-    GetD3D12Device()->CreateCommandSignature(&programDesc, nullptr,
-                                             IID_PPV_ARGS(&mDrawIndirectSignature));
+    programDesc.ByteStride = kDrawIndirectSize;
+    DAWN_TRY_ASSIGN(mDrawIndirectSignature, CreateCommandSignature(programDesc, nullptr));
 
     argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
-    programDesc.ByteStride = 5 * sizeof(uint32_t);
-
-    GetD3D12Device()->CreateCommandSignature(&programDesc, nullptr,
-                                             IID_PPV_ARGS(&mDrawIndexedIndirectSignature));
+    programDesc.ByteStride = kDrawIndexedIndirectSize;
+    DAWN_TRY_ASSIGN(mDrawIndexedIndirectSignature, CreateCommandSignature(programDesc, nullptr));
 
     DAWN_TRY(DeviceBase::Initialize(descriptor, std::move(queue)));
     DAWN_TRY(EnsureCompilerLibraries());
@@ -284,15 +284,27 @@ void Device::Flush11On12DeviceToAvoidLeaks() {
     d3d11DeviceContext2->Flush();
 }
 
-ComPtr<ID3D12CommandSignature> Device::GetDispatchIndirectSignature() const {
+ResultOrError<CommandSignature> Device::CreateCommandSignature(
+    const D3D12_COMMAND_SIGNATURE_DESC& desc,
+    ID3D12RootSignature* rootSignature) const {
+    CommandSignature ret;
+    DAWN_TRY(CheckHRESULT(GetD3D12Device()->CreateCommandSignature(&desc, rootSignature,
+                                                                   IID_PPV_ARGS(&ret.signature)),
+                          "D3D12 CreateCommandSignature"));
+    DAWN_ASSERT(ret.signature.Get() != nullptr);
+    ret.byteStride = desc.ByteStride;
+    return ret;
+}
+
+const CommandSignature& Device::GetDispatchIndirectSignature() const {
     return mDispatchIndirectSignature;
 }
 
-ComPtr<ID3D12CommandSignature> Device::GetDrawIndirectSignature() const {
+const CommandSignature& Device::GetDrawIndirectSignature() const {
     return mDrawIndirectSignature;
 }
 
-ComPtr<ID3D12CommandSignature> Device::GetDrawIndexedIndirectSignature() const {
+const CommandSignature& Device::GetDrawIndexedIndirectSignature() const {
     return mDrawIndexedIndirectSignature;
 }
 
