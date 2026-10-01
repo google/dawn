@@ -328,7 +328,7 @@ ShaderModule::ShaderModule(Device* device,
                            std::vector<tint::wgsl::Extension> internalExtensions)
     : ShaderModuleBase(device, descriptor, std::move(internalExtensions)) {}
 
-ResultOrError<GLuint> ShaderModule::CompileShader(
+ResultOrValError<std::string> ShaderModule::CompileShader(
     const OpenGLFunctions& gl,
     const ProgrammableStage& programmableStage,
     SingleShaderStage stage,
@@ -536,8 +536,15 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         GetDevice()->EmitLog(wgpu::LoggingType::Info, dumpedMsg.str().c_str());
     }
 
+    GetDevice()->GetBlobCache()->EnsureStored(compilationResult);
+    return compilationResult->glsl;
+}
+
+ResultOrError<GLuint> ShaderModule::CreateGLShaderObject(const OpenGLFunctions& gl,
+                                                         SingleShaderStage stage,
+                                                         const std::string& glslSrc) {
     GLuint shader = DAWN_GL_TRY(gl, CreateShader(GLShaderType(stage)));
-    const char* source = compilationResult->glsl.c_str();
+    const char* source = glslSrc.c_str();
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetDevice()->GetPlatform(), "GLSL.CompileShader");
 
@@ -559,8 +566,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                                                      buffer.data());
         }
     }
-
-    GetDevice()->GetBlobCache()->EnsureStored(compilationResult);
 
     return shader;
 }

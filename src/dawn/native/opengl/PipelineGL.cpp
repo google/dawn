@@ -44,7 +44,6 @@
 #include "src/dawn/native/opengl/OpenGLFunctions.h"
 #include "src/dawn/native/opengl/PipelineLayoutGL.h"
 #include "src/dawn/native/opengl/SamplerGL.h"
-#include "src/dawn/native/opengl/ShaderModuleGL.h"
 #include "src/dawn/native/opengl/TextureGL.h"
 #include "src/dawn/native/opengl/UtilsGL.h"
 #include "src/utils/numeric.h"
@@ -55,14 +54,15 @@ PipelineGL::PipelineGL() : mProgram(0) {}
 
 PipelineGL::~PipelineGL() = default;
 
-MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
-                                      const PipelineLayout* layout,
-                                      const PerStage<ProgrammableStage>& stages,
-                                      ImmediateMask& pipelineImmediateMask,
-                                      VertexAttributeMask bgraSwizzleAttributes,
-                                      Extent3D* workgroupSize) {
-    mProgram = DAWN_GL_TRY(gl, CreateProgram());
-
+MaybeValError PipelineGL::InitializeShaders(
+    const OpenGLFunctions& gl,
+    const PipelineLayout* layout,
+    const PerStage<ProgrammableStage>& stages,
+    ImmediateMask& pipelineImmediateMask,
+    VertexAttributeMask bgraSwizzleAttributes,
+    Extent3D* workgroupSize,
+    std::set<CombinedSampler>* combinedSamplers,
+    std::unordered_map<SingleShaderStage, std::string>* shaders) {
     // Compute the set of active stages.
     wgpu::ShaderStage activeStages = wgpu::ShaderStage::None;
     for (SingleShaderStage stage : IterateStages(kAllStages)) {
@@ -110,15 +110,14 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
         }
     }
 
-    // Create an OpenGL shader for each stage and gather the list of combined samplers.
-    std::set<CombinedSampler> combinedSamplers;
-    std::vector<GLuint> glShaders;
     EmulatedTextureBuiltinRegistrar emulatedTextureBuiltins(layout);
+
+    // Create an OpenGL shader for each stage and gather the list of combined samplers.
     for (SingleShaderStage stage : IterateStages(activeStages)) {
         ShaderModule* module = ToBackend(stages[stage].module.Get());
         std::vector<CombinedSampler> stageCombinedSamplers;
         Extent3D localWorkgroupSize;
-        GLuint shader;
+        std::string shader;
         DAWN_TRY_ASSIGN(
             shader, module->CompileShader(gl, stages[stage], stage, pipelineImmediateMask,
                                           bgraSwizzleAttributes, &stageCombinedSamplers, layout,
@@ -128,13 +127,43 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
             *workgroupSize = localWorkgroupSize;
         }
 
-        combinedSamplers.insert(stageCombinedSamplers.begin(), stageCombinedSamplers.end());
+        combinedSamplers->insert(stageCombinedSamplers.begin(), stageCombinedSamplers.end());
+        shaders->emplace(stage, shader);
+    }
+
+    mEmulatedTextureBuiltinInfo = emulatedTextureBuiltins.AcquireInfo();
+    return {};
+}
+
+MaybeError PipelineGL::InitializeBase(
+    const OpenGLFunctions& gl,
+    const PipelineLayout* layout,
+    const PerStage<ProgrammableStage>& stages,
+    ImmediateMask& pipelineImmediateMask,
+    const std::set<CombinedSampler>& combinedSamplers,
+    const std::unordered_map<SingleShaderStage, std::string>& shaders) {
+    // Compute the set of active stages.
+    wgpu::ShaderStage activeStages = wgpu::ShaderStage::None;
+    for (SingleShaderStage stage : IterateStages(kAllStages)) {
+        if (stages[stage].module != nullptr) {
+            activeStages |= StageBit(stage);
+        }
+    }
+
+    mProgram = DAWN_GL_TRY(gl, CreateProgram());
+
+    std::vector<GLuint> glShaders;
+    for (SingleShaderStage stage : IterateStages(activeStages)) {
+        ShaderModule* module = ToBackend(stages[stage].module.Get());
+
+        DAWN_CHECK(shaders.contains(stage));
+
+        GLuint shader;
+        DAWN_TRY_ASSIGN(shader, module->CreateGLShaderObject(gl, stage, shaders.at(stage)));
 
         DAWN_GL_TRY(gl, AttachShader(mProgram, shader));
         glShaders.push_back(shader);
     }
-
-    mEmulatedTextureBuiltinInfo = emulatedTextureBuiltins.AcquireInfo();
 
     // Link all the shaders together.
     DAWN_GL_TRY(gl, LinkProgram(mProgram));
@@ -148,7 +177,7 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
         if (infoLogLength > 1) {
             std::vector<char> buffer(infoLogLength);
             DAWN_GL_TRY(gl, GetProgramInfoLog(mProgram, infoLogLength, nullptr, &buffer[0]));
-            return DAWN_FORMAT_UNRECOVERABLE_ERROR("Program link failed:\n%s", buffer.data());
+            return DAWN_PIPELINE_UNCATEGORIZED_ERROR("Program link failed:\n%s", buffer.data());
         }
     }
 

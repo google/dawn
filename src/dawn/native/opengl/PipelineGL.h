@@ -28,6 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_PIPELINEGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_PIPELINEGL_H_
 
+#include <set>
+#include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -39,6 +42,7 @@
 #include "src/dawn/native/PerStage.h"
 #include "src/dawn/native/Pipeline.h"
 #include "src/dawn/native/opengl/IntegerTypes.h"
+#include "src/dawn/native/opengl/ShaderModuleGL.h"
 #include "src/dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native {
@@ -105,12 +109,21 @@ class PipelineGL {
 
   protected:
     MaybeError ApplyNow(const OpenGLFunctions& gl, const PipelineLayout* layout);
+
+    MaybeValError InitializeShaders(const OpenGLFunctions& gl,
+                                    const PipelineLayout* layout,
+                                    const PerStage<ProgrammableStage>& stages,
+                                    ImmediateMask& pipelineImmediateMask,
+                                    VertexAttributeMask bgraSwizzleAttributes,
+                                    Extent3D* workgroupSize,
+                                    std::set<CombinedSampler>* combinedSamplers,
+                                    std::unordered_map<SingleShaderStage, std::string>* shaders);
     MaybeError InitializeBase(const OpenGLFunctions& gl,
                               const PipelineLayout* layout,
                               const PerStage<ProgrammableStage>& stages,
                               ImmediateMask& pipelineImmediateMask,
-                              VertexAttributeMask bgraSwizzleAttributes,
-                              Extent3D* workgroupSize = nullptr);
+                              const std::set<CombinedSampler>& combinedSamplers,
+                              const std::unordered_map<SingleShaderStage, std::string>& shaders);
 
   protected:
     GLuint mProgram;
