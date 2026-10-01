@@ -73,19 +73,16 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
     uint32_t GetQueueFamilyIndex() const;
 
   private:
-    static Ref<SharedTextureMemory> CreateAndReifyProperties(
-        Device* device,
-        StringView label,
-        SharedTextureMemoryProperties* properties,
-        uint32_t queueFamilyIndex,
-        const YCbCrVkDescriptor& yCbCrVkDesc = {});
+    class ImageImporter;
+    struct DmaBufImporter;
+    struct AHardwareBufferImporter;
+    struct OpaqueFDImporter;
 
     SharedTextureMemory(Device* device,
                         StringView label,
                         const SharedTextureMemoryProperties& properties,
                         uint32_t queueFamilyIndex,
                         const YCbCrVkDescriptor& yCbCrVkDesc);
-    MaybeError BindImageMemory();
     void DestroyImpl(DestroyReason reason) override;
 
     Ref<SharedResourceMemoryContents> CreateContents() override;
