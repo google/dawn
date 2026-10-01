@@ -103,8 +103,8 @@ MaybeError Queue::Initialize() {
                     "Error creating MTLLogState:" +
                     std::string([error.localizedDescription UTF8String]));
             }
-            [mtlLogState addLogHandler:^(NSString* substring, NSString* category, MTLLogLevel level,
-                                         NSString* message) {
+            [mtlLogState addLogHandler:[this](NSString* substring, NSString* category,
+                                              MTLLogLevel level, NSString* message) {
                 GetDevice()->EmitLog([message UTF8String]);
             }];
 
@@ -240,27 +240,25 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
     mLastSubmittedCommands.Use(
         [&](auto lastSubmittedCommands) { *lastSubmittedCommands = pendingCommands; });
 
-    // Make a local copy of the pointer to the commands because it's not clear how ObjC blocks
-    // handle types with copy / move constructors being referenced in the block.
-    id<MTLCommandBuffer> pendingCommandsPointer = pendingCommands.Get();
-
     // Update the completed serial once the completed handler is fired. Make a local copy of the
     // pending command serial so it is captured by value.
     ExecutionSerial pendingSerial = GetPendingCommandSerial();
 
-    [*pendingCommands addScheduledHandler:^(id<MTLCommandBuffer>) {
+    // These callbacks run on a thread internal to the Metal driver, so they must be thread-safe.
+    // Note it is safe for the callbacks to take raw pointers to the Queue and Device because we
+    // won't free them until the queue finishes executing.
+    //
+    // - Get a raw pointer to the device ahead of time to make TSan happy (GetDevice is not atomic).
+    DeviceBase* device = GetDevice();
+    auto ScheduledHandler = [this, pendingSerial](id<MTLCommandBuffer> commandBuffer) {
         this->mLastSubmittedCommands.Use([&](auto lastSubmittedCommands) {
-            if (*lastSubmittedCommands == pendingCommandsPointer) {
+            if (*lastSubmittedCommands == commandBuffer) {
                 *lastSubmittedCommands = nullptr;
             }
         });
-        this->UpdateCommandsScheduledEvents(pendingSerial);
-    }];
-
-    // This ObjC block runs on a different thread. Note that `this` and thus `device` are guaranteed
-    // to be alive because we won't destroy them until execution has fully completed.
-    DeviceBase* device = GetDevice();  // Not thread-safe, so we call it ahead of time.
-    [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
+        this->UpdateCommandsScheduledEvents(pendingSerial);  // Thread-safe.
+    };
+    auto CompletedHandler = [this, device, pendingSerial](id<MTLCommandBuffer> commandBuffer) {
         TRACE_EVENT_END(DAWN_TRACE_CATEGORY("gpu_work"),
                         perfetto::NamedTrack("DeviceMTL::CommandBuffer", uint64_t{pendingSerial}));
 
@@ -293,7 +291,10 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
         }
 
         this->UpdateCompletedSerialTo(QueuePriority::Lowest, pendingSerial);  // Thread-safe.
-    }];
+    };
+
+    [*pendingCommands addScheduledHandler:std::move(ScheduledHandler)];
+    [*pendingCommands addCompletedHandler:std::move(CompletedHandler)];
 
     TRACE_EVENT_BEGIN(DAWN_TRACE_CATEGORY("gpu_work"), "DeviceMTL::SubmitPendingCommandBuffer",
                       perfetto::NamedTrack("DeviceMTL::CommandBuffer", uint64_t{pendingSerial}));

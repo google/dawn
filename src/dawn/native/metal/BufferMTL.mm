@@ -165,9 +165,9 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     Ref<DeviceBase> deviceRef = GetDevice();
     wgpu::Callback callback = hostMappedDesc->disposeCallback;
     void* userdata = hostMappedDesc->userdata;
-    auto dispose = ^(void*, NSUInteger) {
+    auto dispose = [deviceRef, callback, userdata](void*, NSUInteger) {
         deviceRef->GetCallbackTaskManager()->AddCallbackTask(
-            [callback, userdata] { callback(userdata); });
+            [callback, userdata]() { callback(userdata); });
     };
 
     mMtlBuffer.Acquire([ToBackend(GetDevice())->GetMTLDevice()

@@ -209,6 +209,15 @@ _BANNED_CPP_PATTERNS: Sequence[BanRule] = (
         treat_as_error=True,
         surface_as_gerrit_lint=True,
     ),
+    BanRule(
+        pattern=r'/(?<!operator)\^\(',
+        excluded_paths=(r'\.(cc|cpp)$', ),
+        explanation=(
+            'Use C++ Lambdas []() { } instead of Objective-C Blocks ^() { }.',
+        ),
+        treat_as_error=True,
+        surface_as_gerrit_lint=True,
+    ),
 )
 
 EXPECTED_LICENSE_TEXT = {
