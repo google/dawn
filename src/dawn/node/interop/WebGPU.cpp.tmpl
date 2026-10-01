@@ -178,11 +178,13 @@ public:
     static Napi::Function Class(Napi::Env env) {
 {{-  end}}
       auto func = DefineClass(env, "{{$.Name}}", {
+        // WebIDL spec section 3 defines the property for %Symbol.toStringTag%
+        InstanceValue(Napi::Symbol::WellKnown(env, "toStringTag"), Napi::String::New(env, "{{$.Name}}"), napi_configurable),
 {{   if $s := SetlikeOf $}}
         InstanceMethod("has", &W{{$.Name}}::has),
         InstanceMethod("keys", &W{{$.Name}}::keys),
         InstanceAccessor("size", &W{{$.Name}}::getSize, nullptr),
-        InstanceMethod(Napi::Symbol::WellKnown(env,"iterator"), &W{{$.Name}}::iterator),
+        InstanceMethod(Napi::Symbol::WellKnown(env, "iterator"), &W{{$.Name}}::iterator),
 {{-  end}}
 {{-  range $m := $methods}}
         InstanceMethod("{{$m.Name}}", &W{{$.Name}}::{{$m.Name}}, static_cast<napi_property_attributes>(napi_default_jsproperty)),
