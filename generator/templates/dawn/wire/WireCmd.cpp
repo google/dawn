@@ -272,7 +272,7 @@
 
     //* Serializes `record` into `transfer`, using `buffer` to get more space for pointed-to data
     //* and `provider` to serialize objects.
-    [[nodiscard]] WireResult {{Return}}{{name}}Serialize(
+    WireResult {{Return}}{{name}}Serialize(
         const {{RecordName}}& record,
         volatile {{TransferStructName}}* transfer,
         [[maybe_unused]] SerializeBuffer* buffer
@@ -399,7 +399,7 @@
     //* Deserializes `transfer` into `record` getting more serialized data from `buffer` and `size`
     //* if needed, using `allocator` to store pointed-to values and `resolver` to translate object
     //* Ids to actual objects.
-    [[nodiscard]] WireResult {{Return}}{{name}}Deserialize(
+    WireResult {{Return}}{{name}}Deserialize(
         {{RecordName}}* record,
         const volatile {{TransferStructName}}* transfer,
         DeserializeBuffer* deserializeBuffer,
