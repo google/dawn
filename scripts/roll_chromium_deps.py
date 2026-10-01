@@ -121,6 +121,7 @@ SYNCED_GCS_DEPS = {
     'build/linux/debian_bullseye_mipsel-sysroot',
     'build/linux/debian_bullseye_mips64el-sysroot',
     'build/linux/debian_bullseye_amd64-sysroot',
+    'third_party/llvm-libclang',
 }
 
 # Files that are copied from Chromium directly. A map from Dawn file path to
