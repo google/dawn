@@ -39,7 +39,6 @@
 namespace dawn::native::d3d12 {
 
 namespace {
-#ifdef DAWN_USE_AGILITY_SDK
 std::vector<D3D12DeviceInfo::LinAlgWMMSupport> GatherLinAlgWaveMatrixMultiplySupports(
     ComPtr<ID3D12Device> d3d12Device,
     uint32_t waveLaneCountMin) {
@@ -110,7 +109,6 @@ std::vector<D3D12DeviceInfo::LinAlgWMMSupport> GatherLinAlgWaveMatrixMultiplySup
 
     return result;
 }
-#endif  // DAWN_USE_AGILITY_SDK
 }  // namespace
 
 ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDevice) {
@@ -218,16 +216,15 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
         info.supportsExistingHeap = existingHeapInfo.Supported;
     }
 
-    // D3D_SHADER_MODEL_6_10 is only defined in the Agility SDK headers; guard it
-    // so builds that fall back to the Windows SDK header still compile.
+    // Ask for the highest shader model we've been compiled with. If it not present because we're
+    // running on older Windows versions, or without the AgilitySDK or on a driver without support,
+    // CheckFeatureSupport will return an error. Continue trying lower shader models until
+    // CheckFeatureSupport succeeds.
     D3D12_FEATURE_DATA_SHADER_MODEL knownShaderModels[] = {
-#ifdef DAWN_USE_AGILITY_SDK
-        {D3D_SHADER_MODEL_6_10},
-#endif
-        {D3D_SHADER_MODEL_6_9},  {D3D_SHADER_MODEL_6_8}, {D3D_SHADER_MODEL_6_7},
-        {D3D_SHADER_MODEL_6_6},  {D3D_SHADER_MODEL_6_5}, {D3D_SHADER_MODEL_6_4},
-        {D3D_SHADER_MODEL_6_3},  {D3D_SHADER_MODEL_6_2}, {D3D_SHADER_MODEL_6_1},
-        {D3D_SHADER_MODEL_6_0},  {D3D_SHADER_MODEL_5_1}};
+        {D3D_SHADER_MODEL_6_10}, {D3D_SHADER_MODEL_6_9}, {D3D_SHADER_MODEL_6_8},
+        {D3D_SHADER_MODEL_6_7},  {D3D_SHADER_MODEL_6_6}, {D3D_SHADER_MODEL_6_5},
+        {D3D_SHADER_MODEL_6_4},  {D3D_SHADER_MODEL_6_3}, {D3D_SHADER_MODEL_6_2},
+        {D3D_SHADER_MODEL_6_1},  {D3D_SHADER_MODEL_6_0}, {D3D_SHADER_MODEL_5_1}};
 
     uint32_t driverShaderModel = 0;
     for (D3D12_FEATURE_DATA_SHADER_MODEL shaderModel : knownShaderModels) {
@@ -283,10 +280,10 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
         info.sharedSystemMemory = adapterDesc.SharedSystemMemory;
     }
 
-#ifdef DAWN_USE_AGILITY_SDK
-    info.linAlgWaveMatrixMultiplySupports =
-        GatherLinAlgWaveMatrixMultiplySupports(d3d12Device, info.waveLaneCountMin);
-#endif
+    if (info.supportsWaveOps) {
+        info.linAlgWaveMatrixMultiplySupports =
+            GatherLinAlgWaveMatrixMultiplySupports(d3d12Device, info.waveLaneCountMin);
+    }
 
     return std::move(info);
 }

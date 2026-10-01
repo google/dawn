@@ -62,6 +62,9 @@ config("internal") {
     "${dawn_root}/src/dawn/common:internal_config",
     "${dawn_root}/src/tint:tint_public_config",
   ]
+  if (dawn_enable_d3d12) {
+    configs += [ "${dawn_root}/third_party/agility-sdk:agility_sdk_config" ]
+  }
 }
 
 # Config that adds the @executable_path rpath if needed so that Swiftshader or
@@ -591,7 +594,8 @@ source_set("sources") {
 
   if (dawn_enable_d3d12) {
     if (dawn_use_agility_sdk) {
-      deps += [ "${dawn_agility_sdk_dir}:agility_sdk" ]
+      deps += [ "${dawn_root}/third_party/agility-sdk:agility_sdk" ]
+      defines += [ "DAWN_USE_AGILITY_SDK" ]
     }
     if (dawn_use_built_dxc) {
       deps += [ "${dawn_dxc_gn_dir}:dxcompiler" ]

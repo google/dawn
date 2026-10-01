@@ -28,7 +28,6 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_RESIDENCYMANAGERD3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_RESIDENCYMANAGERD3D12_H_
 
-#include "dawn/native/D3D12Backend.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/LinkedList.h"
 #include "src/dawn/native/Error.h"

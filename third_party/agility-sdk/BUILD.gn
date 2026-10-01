@@ -46,8 +46,7 @@ copy("copy_agility_sdk_dlls") {
 }
 
 config("agility_sdk_config") {
-  include_dirs = [ "$dawn_agility_sdk_dir/src/build/native/include" ]
-  defines = [ "DAWN_USE_AGILITY_SDK" ]
+  include_dirs = [ "$dawn_agility_sdk_dir/src" ]
 }
 
 group("agility_sdk") {

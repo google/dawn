@@ -27,6 +27,11 @@
 
 #include <vector>
 
+// Must precede any other D3D headers so internal tests use the Agility SDK declarations.
+// clang-format off
+#include "src/dawn/native/d3d12/d3d12_platform.h"
+// clang-format on
+
 #include "dawn/native/D3D12Backend.h"
 #include "src/dawn/native/d3d12/BufferD3D12.h"
 #include "src/dawn/native/d3d12/DeviceD3D12.h"

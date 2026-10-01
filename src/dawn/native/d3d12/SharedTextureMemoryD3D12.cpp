@@ -29,7 +29,6 @@
 
 #include <utility>
 
-#include "dawn/native/D3D12Backend.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/d3d/D3DError.h"
 #include "src/dawn/native/d3d/KeyedMutex.h"

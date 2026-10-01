@@ -205,7 +205,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::AtomicVec2uMinMax);
     }
 
-#ifdef DAWN_USE_AGILITY_SDK
     // Note: '70' means SM 6.10
     // TODO(crbug.com/513251803): Don't use shader model as decimal value
     if (mDeviceInfo.highestSupportedShaderModel >= 70) {
@@ -225,7 +224,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
             EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
         }
     }
-#endif  // DAWN_USE_AGILITY_SDK
 #endif  // DAWN_USE_BUILT_DXC
 
     D3D12_FEATURE_DATA_FORMAT_SUPPORT bgra8unormFormatInfo = {};
@@ -1081,7 +1079,6 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
 
 std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs(
     const TogglesState& toggles) const {
-#ifdef DAWN_USE_AGILITY_SDK
     auto ToWgpuType =
         [](D3D12_LINEAR_ALGEBRA_DATATYPE dataType) -> wgpu::SubgroupMatrixComponentType {
         switch (dataType) {
@@ -1178,9 +1175,6 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
     }
 
     return subgroupMatrixConfigs;
-#else
-    return {};
-#endif  // DAWN_USE_AGILITY_SDK
 }
 
 }  // namespace dawn::native::d3d12
