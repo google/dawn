@@ -102,7 +102,8 @@ uint32_t ComponentTypeToByteSize(wgpu::SubgroupMatrixComponentType c) {
 std::ostream& operator<<(std::ostream& o, const wgpu::SubgroupMatrixConfig& config) {
     o << config.M << "x" << config.N << "x" << config.K << " "
       << ComponentTypeToWgslType(config.componentType) << " -> "
-      << ComponentTypeToWgslType(config.resultComponentType);
+      << ComponentTypeToWgslType(config.resultComponentType) << " [" << config.minSubgroupSize
+      << ", " << config.maxSubgroupSize << "]";
     return o;
 }
 
@@ -348,6 +349,47 @@ TEST_P(SubgroupMatrixTest, QueryConfigsMustReturnNonZeroConfigs) {
     ASSERT_NE(subgroupMatrixConfigs.configCount, 0u);
 }
 
+// Test that if the feature is enabled, queried configs have valid fields.
+TEST_P(SubgroupMatrixTest, QueryConfigsValid) {
+    DAWN_TEST_UNSUPPORTED_IF(
+        !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
+
+    // Query the supported subgroup matrix configurations.
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
+    info.nextInChain = &subgroupMatrixConfigs;
+    ASSERT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
+
+    ASSERT_NE(subgroupMatrixConfigs.configCount, 0u);
+    for (size_t i = 0; i < subgroupMatrixConfigs.configCount; ++i) {
+        const auto& config = subgroupMatrixConfigs.configs[i];
+        std::ostringstream configTrace;
+        configTrace << config;
+        SCOPED_TRACE(configTrace.str());
+        EXPECT_GT(config.M, 0u);
+        EXPECT_GT(config.N, 0u);
+        EXPECT_GT(config.K, 0u);
+        EXPECT_GE(config.minSubgroupSize, 4u);
+        EXPECT_LE(config.maxSubgroupSize, 128u);
+        EXPECT_TRUE(IsPowerOfTwo(config.minSubgroupSize));
+        EXPECT_TRUE(IsPowerOfTwo(config.maxSubgroupSize));
+        EXPECT_LE(config.minSubgroupSize, config.maxSubgroupSize);
+        EXPECT_GE(config.minSubgroupSize, info.subgroupMinSize);
+        EXPECT_LE(config.maxSubgroupSize, info.subgroupMaxSize);
+
+        // Configs with identical shape and component types must have non-overlapping,
+        // non-adjacent subgroup size ranges (consecutive powers of two must be merged).
+        for (size_t j = 0; j < i; ++j) {
+            const auto& other = subgroupMatrixConfigs.configs[j];
+            if (config.componentType == other.componentType &&
+                config.resultComponentType == other.resultComponentType && config.M == other.M &&
+                config.N == other.N && config.K == other.K) {
+                EXPECT_GT(config.minSubgroupSize, other.maxSubgroupSize * 2);
+            }
+        }
+    }
+}
+
 // Test that advertised subgroup matrix configurations succeed and configurations with an
 // unadvertised M dimension fail.
 TEST_P(SubgroupMatrixTest, AdvertisedConfigsValidated) {
@@ -493,26 +535,17 @@ TEST_P(SubgroupMatrixSubgroupSizeControlTest, WorkgroupSizeUsesExplicitSubgroupS
     DAWN_TEST_UNSUPPORTED_IF(info.subgroupMinSize == info.subgroupMaxSize);
 
     bool testedConfig = false;
-    for (uint32_t subgroupSize = info.subgroupMinSize; subgroupSize < info.subgroupMaxSize;
-         subgroupSize *= 2) {
-        for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
-            const auto& config = subgroupMatrixConfigs.configs[i];
-
+    for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
+        const auto& config = subgroupMatrixConfigs.configs[i];
+        for (uint32_t subgroupSize = config.minSubgroupSize;
+             subgroupSize <= config.maxSubgroupSize && subgroupSize < info.subgroupMaxSize;
+             subgroupSize *= 2) {
             std::ostringstream configTrace;
             configTrace << config << " (subgroupSize=" << subgroupSize << ")";
 
             // Intel Gen12 cannot use subgroup size 8 on D3D12 despite advertising it as the
             // minimum.
             if (IsD3D12() && IsIntelGen12() && subgroupSize == 8) {
-                std::cout << "Skipping config: " << configTrace.str() << "\n";
-                continue;
-            }
-
-            // TODO(crbug.com/564583985): Remove this skip once SubgroupMatrixConfig exposes
-            // supported subgroup sizes. On D3D12 WARP, 4x4x4 configs are only supported at
-            // subgroup_size(4).
-            if (IsD3D12() && IsWARP() && config.M == 4 && config.N == 4 && config.K == 4 &&
-                subgroupSize != 4) {
                 std::cout << "Skipping config: " << configTrace.str() << "\n";
                 continue;
             }
@@ -1681,7 +1714,7 @@ TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest, MatrixMultiply) {
     // TODO(crbug.com/492539239): Access violation during test teardown.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsVulkan());
 
-    // TODO(crbug.com/525517826): On WARP 1.65535.20-preview, starts hanging for tile dim 2+
+    // TODO(crbug.com/525517826): On WARP, starts hanging for tile dim 2+
     DAWN_SUPPRESS_TEST_IF(IsWARP() && kTileDim >= 2);
 
     // TODO(525518027): On AMD Radeon RX 9060 XT, Windows Vulkan, getting invalid results for tile

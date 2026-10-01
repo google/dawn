@@ -35,6 +35,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/GPUInfo.h"
+#include "src/dawn/common/Math.h"
 #include "src/dawn/common/WindowsUtils.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Instance.h"
@@ -1160,16 +1161,47 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
             }
         }
 
+        DAWN_ASSERT(IsPowerOfTwo(wmms.Inputs.WaveSize));
         for (auto& shape : wmms.Shapes) {
             SubgroupMatrixConfig config;
             config.M = shape.M;
             config.N = shape.N;
             config.K = shape.K;
-            // TODO(564583985): Use the value returned by the query for min/max subgroup size.
             config.componentType = ToWgpuType(dataTypeAB);
             config.resultComponentType = ToWgpuType(dataTypeAcc);
-            config.minSubgroupSize = GetSubgroupMinSize();
-            config.maxSubgroupSize = GetSubgroupMaxSize();
+            config.minSubgroupSize = wmms.Inputs.WaveSize;
+            config.maxSubgroupSize = wmms.Inputs.WaveSize;
+
+            // If the same shape was added at a previous wave size, and it's the immediately
+            // preceding power-of-two size, extend its [minSubgroupSize, maxSubgroupSize] range.
+            // For example, if we have the same shapes for WaveSize 4, 16, and 32, after adding
+            // a config for 4, we would add a new config for 16 (because it's not 8), but we would
+            // merge 32 into 16's config, making its range [16,32].
+            //
+            // Note 1: This depends on linAlgWaveMatrixMultiplySupports being ordered by increasing
+            // WaveSize (asserted below).
+            //
+            // Note 2: The search is O(n), but n is typically small (e.g. 6 on AMD, 14 on WARP).
+            // Furthermore, the way linAlgWaveMatrixMultiplySupports is laid out, all
+            // (componentType, resultComponentType) type pairs are grouped together for each wave
+            // size, so reverse search typically matches in 1-2 iterations. Finally, this is only
+            // performed once at startup.
+            //
+            // TODO(crbug.com/567996254): Remove all this once we can use the Enumeration API
+            auto it = std::find_if(
+                subgroupMatrixConfigs.rbegin(), subgroupMatrixConfigs.rend(),
+                [&](const SubgroupMatrixConfig& found) {
+                    return found.componentType == config.componentType &&
+                           found.resultComponentType == config.resultComponentType &&
+                           found.M == config.M && found.N == config.N && found.K == config.K;
+                });
+            if (it != subgroupMatrixConfigs.rend()) {
+                DAWN_ASSERT(wmms.Inputs.WaveSize > it->maxSubgroupSize);
+                if (it->maxSubgroupSize == wmms.Inputs.WaveSize / 2) {
+                    it->maxSubgroupSize = wmms.Inputs.WaveSize;
+                    continue;
+                }
+            }
             subgroupMatrixConfigs.push_back(config);
         }
     }
