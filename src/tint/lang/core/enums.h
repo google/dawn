@@ -628,6 +628,7 @@ enum class BuiltinValue : uint8_t {
     kSubgroupInvocationId,
     kSubgroupSize,
     kVertexIndex,
+    kViewIndex,
     kWorkgroupId,
     kWorkgroupIndex,
 };
@@ -670,6 +671,7 @@ constexpr std::string_view kBuiltinValueStrings[] = {
     "subgroup_invocation_id",
     "subgroup_size",
     "vertex_index",
+    "view_index",
     "workgroup_id",
     "workgroup_index",
 };

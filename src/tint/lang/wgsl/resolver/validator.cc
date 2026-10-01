@@ -1101,6 +1101,25 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
             }
             break;
         }
+        case core::BuiltinValue::kViewIndex: {
+            if (!enabled_extensions_.Contains(wgsl::Extension::kViewInstancing)) {
+                AddError(attr->source)
+                    << "use of " << style::Attribute("@builtin")
+                    << style::Code("(", style::Enum(builtin), ")")
+                    << " requires enabling extension " << style::Code("view_instancing");
+                return false;
+            }
+            if (!type->Is<core::type::U32>()) {
+                err_builtin_type("u32");
+                return false;
+            }
+            if (stage != ast::PipelineStage::kNone && !((stage == ast::PipelineStage::kVertex ||
+                                                         stage == ast::PipelineStage::kFragment) &&
+                                                        is_input)) {
+                is_stage_mismatch = true;
+            }
+            break;
+        }
         case core::BuiltinValue::kBarycentricCoord: {
             if (!enabled_extensions_.Contains(
                     wgsl::Extension::kChromiumExperimentalBarycentricCoord)) {

@@ -559,6 +559,8 @@
 "vec4u"
 "vertex"
 "vertex_index"
+"view_index"
+"view_instancing"
 "w"
 "warning"
 "while"

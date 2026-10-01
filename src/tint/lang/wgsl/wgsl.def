@@ -98,6 +98,8 @@ enum extension {
   chromium_experimental_barycentric_coord
   // A Chromium-specific extension for resource table
   chromium_experimental_resource_table
+  // An extension for view-instanced rendering
+  view_instancing
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#language-extensions-sec

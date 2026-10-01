@@ -71,6 +71,7 @@ enum builtin_value {
   num_subgroups
   barycentric_coord
   primitive_index
+  view_index
   @internal __point_size
   @internal __cull_distance
 }

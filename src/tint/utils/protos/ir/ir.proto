@@ -650,6 +650,7 @@ enum BuiltinValue {
     num_subgroups = 20;
     global_invocation_index = 21;
     workgroup_index = 22;
+    view_index = 23;
 }
 
 enum BuiltinFn {

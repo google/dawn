@@ -647,6 +647,24 @@ TEST_F(IR_ValidatorTest, StructMember_InvalidBuiltinType_Unused) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr("primitive_index must be an u32"));
 }
 
+TEST_F(IR_ValidatorTest, StructMember_InvalidViewIndexType_Unused) {
+    core::IOAttributes attr;
+    attr.builtin = core::BuiltinValue::kViewIndex;
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {
+                                                      mod.symbols.New("m"),
+                                                      ty.i32(),
+                                                      attr,
+                                                  },
+                                              });
+
+    mod.root_block->Append(b.Var("v", ty.ptr<uniform, read>(s)));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("view_index must be an u32"));
+}
+
 TEST_F(IR_ValidatorTest, StructMember_InterpolationWithoutLocation) {
     core::IOAttributes attr;
     attr.interpolation = {InterpolationType::kFlat, InterpolationSampling::kUndefined};

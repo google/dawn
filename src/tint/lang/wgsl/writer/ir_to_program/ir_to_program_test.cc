@@ -338,6 +338,7 @@ TEST_F(IRToProgramTest, EntryPoint_ParameterAttribute_Fragment) {
         MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kSampleMask),
         MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kSubgroupSize),
         MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kPrimitiveIndex),
+        MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kViewIndex),
     });
 
     fn->Block()->Append(b.Return(fn));
@@ -345,9 +346,10 @@ TEST_F(IRToProgramTest, EntryPoint_ParameterAttribute_Fragment) {
     EXPECT_WGSL(R"(
 enable subgroups;
 enable primitive_index;
+enable view_instancing;
 
 @fragment
-fn f(@builtin(front_facing) v : bool, @builtin(sample_index) v_1 : u32, @builtin(sample_mask) v_2 : u32, @builtin(subgroup_size) v_3 : u32, @builtin(primitive_index) v_4 : u32) {
+fn f(@builtin(front_facing) v : bool, @builtin(sample_index) v_1 : u32, @builtin(sample_mask) v_2 : u32, @builtin(subgroup_size) v_3 : u32, @builtin(primitive_index) v_4 : u32, @builtin(view_index) v_5 : u32) {
 }
 )");
 }

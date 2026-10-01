@@ -346,6 +346,15 @@ constexpr BuiltInChecker kPrimitiveIndexChecker{
     .type_error = "must be an u32",
 };
 
+constexpr BuiltInChecker kViewIndexChecker{
+    .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexInputUsage,
+                                              IOAttributeUsage::kFragmentInputUsage},
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
+        return ty->Is<core::type::U32>();
+    },
+    .type_error = "must be an u32",
+};
+
 constexpr BuiltInChecker kBarycentricCoordChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
     .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
@@ -403,6 +412,8 @@ const BuiltInChecker& BuiltinCheckerFor(BuiltinValue builtin, const Properties& 
             return kWorkgroupIdChecker;
         case BuiltinValue::kPrimitiveIndex:
             return kPrimitiveIndexChecker;
+        case BuiltinValue::kViewIndex:
+            return kViewIndexChecker;
         case BuiltinValue::kBarycentricCoord:
             return kBarycentricCoordChecker;
         default:

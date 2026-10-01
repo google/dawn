@@ -1164,6 +1164,8 @@ struct Encoder {
                 return pb::BuiltinValue::clip_distances;
             case core::BuiltinValue::kPrimitiveIndex:
                 return pb::BuiltinValue::primitive_index;
+            case core::BuiltinValue::kViewIndex:
+                return pb::BuiltinValue::view_index;
             case core::BuiltinValue::kBarycentricCoord:
                 return pb::BuiltinValue::barycentric_coord;
             case core::BuiltinValue::kUndefined:

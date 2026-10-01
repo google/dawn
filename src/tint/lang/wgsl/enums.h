@@ -128,6 +128,7 @@ enum class Extension : uint8_t {
     kPrimitiveIndex,
     kSubgroupSizeControl,
     kSubgroups,
+    kViewInstancing,
 };
 
 /// @param value the enum value
@@ -163,6 +164,7 @@ constexpr std::string_view kExtensionStrings[] = {
     "primitive_index",
     "subgroup_size_control",
     "subgroups",
+    "view_instancing",
 };
 
 /// All extensions
@@ -181,6 +183,7 @@ inline constexpr Extension kAllExtensions[] = {
     Extension::kPrimitiveIndex,
     Extension::kSubgroupSizeControl,
     Extension::kSubgroups,
+    Extension::kViewInstancing,
 };
 
 /// An enumerator of WGSL language features

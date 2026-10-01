@@ -1928,6 +1928,8 @@ struct Decoder {
                 return core::BuiltinValue::kClipDistances;
             case pb::BuiltinValue::primitive_index:
                 return core::BuiltinValue::kPrimitiveIndex;
+            case pb::BuiltinValue::view_index:
+                return core::BuiltinValue::kViewIndex;
             case pb::BuiltinValue::barycentric_coord:
                 return core::BuiltinValue::kBarycentricCoord;
             case pb::BuiltinValue::BuiltinValue_INT_MIN_SENTINEL_DO_NOT_USE_:

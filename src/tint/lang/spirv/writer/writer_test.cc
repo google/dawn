@@ -61,6 +61,25 @@ TEST_F(SpirvWriterTest, ModuleHeader_VulkanMemoryModel) {
     EXPECT_INST("OpMemoryModel Logical Vulkan");
 }
 
+TEST_F(SpirvWriterTest, ViewIndex) {
+    auto* view_index = b.FunctionParam("view_index", ty.u32());
+    view_index->SetBuiltin(core::BuiltinValue::kViewIndex);
+
+    auto* ep = b.Function("main", ty.vec4f(), core::ir::Function::PipelineStage::kVertex);
+    ep->SetParams({view_index});
+    ep->SetReturnAttributes({.builtin = core::BuiltinValue::kPosition});
+    b.Append(ep->Block(), [&] {
+        b.Let("view", view_index);
+        b.Return(ep, b.Zero(ty.vec4f()));
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpExtension \"SPV_KHR_multiview\"");
+    EXPECT_INST("OpCapability MultiView");
+    EXPECT_INST("BuiltIn ViewIndex");
+}
+
 TEST_F(SpirvWriterTest, CanGenerate_SubgroupMatrixRequiresVulkanMemoryModel) {
     core::ir::Var* v = nullptr;
     b.Append(mod.root_block,

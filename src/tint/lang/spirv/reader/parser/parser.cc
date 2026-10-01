@@ -161,6 +161,7 @@ class Parser {
                 name != "SPV_KHR_non_semantic_info" &&     //
                 name != "SPV_KHR_16bit_storage" &&         //
                 name != "SPV_KHR_terminate_invocation" &&  //
+                name != "SPV_KHR_multiview" &&             //
                 // TODO(423644565): We assume the barriers are correct. We should check for any
                 // operation that makes barrier assumptions that aren't consistent with WGSL and
                 // generate the needed barriers.
@@ -189,6 +190,7 @@ class Parser {
                 case spv::Capability::ImageQuery:
                 case spv::Capability::InputAttachment:
                 case spv::Capability::Matrix:
+                case spv::Capability::MultiView:
                 case spv::Capability::Sampled1D:
                 case spv::Capability::SampledCubeArray:
                 case spv::Capability::SampleRateShading:
@@ -744,6 +746,8 @@ class Parser {
                 return core::BuiltinValue::kCullDistance;
             case spv::BuiltIn::PrimitiveId:
                 return core::BuiltinValue::kPrimitiveIndex;
+            case spv::BuiltIn::ViewIndex:
+                return core::BuiltinValue::kViewIndex;
             default:
                 return Failure("unhandled SPIR-V BuiltIn: " + std::string(spv::BuiltInToString(b)) +
                                " (val = " + std::to_string(static_cast<uint32_t>(b)) + ")");

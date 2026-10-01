@@ -1043,6 +1043,7 @@ fn ep_func() {}
     EXPECT_FALSE(result[0].frag_depth_used);
     EXPECT_FALSE(result[0].fine_derivative_builtin_used);
     EXPECT_FALSE(result[0].primitive_index_used);
+    EXPECT_FALSE(result[0].view_index_used);
     EXPECT_FALSE(result[0].subgroup_invocation_id_used);
     EXPECT_FALSE(result[0].subgroup_size_used);
     EXPECT_FALSE(result[0].global_invocation_index_used);
@@ -1171,6 +1172,39 @@ fn ep_func(in_var: in_struct) {}
 
     ASSERT_EQ(1u, result.size());
     EXPECT_TRUE(result[0].primitive_index_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, ViewIndexSimpleReferenced) {
+    auto* src = R"(
+enable view_instancing;
+@vertex
+fn ep_func(@builtin(view_index) in_var: u32) -> @builtin(position) vec4f {
+  return vec4f(f32(in_var));
+}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].view_index_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, ViewIndexStructReferenced) {
+    auto* src = R"(
+enable view_instancing;
+struct in_struct {
+  @builtin(view_index) view: u32,
+}
+@fragment
+fn ep_func(in_var: in_struct) {}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].view_index_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, SubgroupInvocationIdSimpleReferenced) {

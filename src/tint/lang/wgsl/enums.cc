@@ -90,6 +90,9 @@ Extension ParseExtension(std::string_view str) {
     if (str == "subgroups") {
         return Extension::kSubgroups;
     }
+    if (str == "view_instancing") {
+        return Extension::kViewInstancing;
+    }
     return Extension::kUndefined;
 }
 std::string_view ToString(Extension value) {
@@ -124,6 +127,8 @@ std::string_view ToString(Extension value) {
             return "subgroup_size_control";
         case Extension::kSubgroups:
             return "subgroups";
+        case Extension::kViewInstancing:
+            return "view_instancing";
     }
     return "<unknown>";
 }
