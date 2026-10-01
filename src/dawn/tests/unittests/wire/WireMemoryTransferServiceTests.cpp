@@ -444,6 +444,24 @@ TEST_P(WireMemoryTransferServiceBufferHandleTests, Destroy) {
     FlushClient();
 }
 
+// Regression test for crbug.com/566650084. Per-buffer state may retain backend state that still
+// references the buffer, so it must be destroyed before the backend buffer is released.
+TEST_P(WireMemoryTransferServiceBufferHandleTests, DestroyHandleBeforeReleasingBuffer) {
+    WGPUBuffer apiBuffer;
+    wgpu::Buffer buffer;
+    MockClientMemoryHandle* clientHandle;
+    MockServerMemoryHandle* serverHandle;
+    std::tie(apiBuffer, buffer, clientHandle, serverHandle) = CreateValidBuffer();
+
+    EXPECT_CALL(*clientHandle, Destroy).Times(1);
+    buffer = nullptr;
+
+    bool bufferReleased = false;
+    EXPECT_CALL(*serverHandle, Destroy).WillOnce([&] { EXPECT_FALSE(bufferReleased); });
+    EXPECT_CALL(api, BufferRelease(apiBuffer)).WillOnce([&] { bufferReleased = true; });
+    FlushClient();
+}
+
 // Test handle(s) creation failure.
 TEST_P(WireMemoryTransferServiceBufferHandleTests, CreationFailure) {
     ExpectHandleCreation(false);

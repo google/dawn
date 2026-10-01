@@ -111,20 +111,29 @@ namespace dawn::wire::server {
             {% for type in by_category["object"] %}
                 {% set cType = as_cType(type.name) %}
                 case ObjectType::{{type.name.CamelCase()}}: {
-                    ObjectData<{{cType}}> data;
-                    WIRE_TRY(Free<{{cType}}>(objectId, &data));
-
-                    //* Handle actually releasing the object after untracking it.
-                    if (data.state == AllocationState::Allocated) {
-                        DAWN_ASSERT(data.handle != nullptr);
+                    {{cType}} handle = nullptr;
+                    AllocationState state = AllocationState::Free;
+                    {
+                        //* Make `data` always released at the end of the scope, and the `handle`
+                        //* always released after the scope as the release of `data` may need a valid
+                        //* `handle`.
+                        ObjectData<{{cType}}> data;
+                        WIRE_TRY(Free<{{cType}}>(objectId, &data));
+                        handle = data.handle;
+                        state = data.state;
                         {% if type.name.get() == "device" %}
-                            //* Destroy the device to ensure that the spontaneous callbacks, i.e.
-                            //* the uncaptured error and logging callbacks, are cleared, and the
-                            //* device lost callback is fired. This is important because once we
-                            //* deallocate the ObjectData, those callbacks reference freed memory.
-                            mProcs->deviceDestroy(data.handle);
+                            if (state == AllocationState::Allocated) {
+                                //* Destroy the device to ensure that the spontaneous callbacks, i.e.
+                                //* the uncaptured error and logging callbacks, are cleared, and the
+                                //* device lost callback is fired. This is important because once we
+                                //* deallocate the ObjectData, those callbacks reference freed memory.
+                                mProcs->deviceDestroy(handle);
+                            }
                         {% endif %}
-                        Release(data.handle);
+                    }
+                    if (state == AllocationState::Allocated) {
+                        DAWN_ASSERT(handle != nullptr);
+                        Release(handle);
                     }
                     return WireResult::Success;
                 }
