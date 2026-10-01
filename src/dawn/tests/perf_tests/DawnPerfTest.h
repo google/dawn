@@ -171,6 +171,7 @@ class DawnPerfTestWithParams : public DawnTestWithParams<Params>, public DawnPer
     void SetUp() final {
         DawnTestWithParams<Params>::SetUp();
 
+        // Perf tests are not meaningful on the CPU.
         DAWN_TEST_UNSUPPORTED_IF(this->IsCPU());
 
         if (mSupportsTimestampQuery) {
