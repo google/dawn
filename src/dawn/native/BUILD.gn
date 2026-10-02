@@ -222,8 +222,10 @@ source_set("sources") {
     "${dawn_abseil_dir}:absl",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
     "${dawn_root}/src/dawn/platform",
-    "${dawn_root}/src/dawn/platform:dawn_perfetto",
   ]
+  if (dawn_enable_perfetto) {
+    public_deps += [ "${dawn_root}/src/dawn/platform:dawn_perfetto" ]
+  }
 
   if (defined(_copy_fxc_dll_target)) {
     deps += [ _copy_fxc_dll_target ]
