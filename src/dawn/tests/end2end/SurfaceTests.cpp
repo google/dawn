@@ -117,6 +117,7 @@ class SurfaceTests : public DawnTest {
     void ClearTexture(wgpu::Texture texture,
                       wgpu::Color color,
                       wgpu::Device preferredDevice = nullptr) {
+        ASSERT_NE(texture, nullptr);
         if (preferredDevice == nullptr) {
             preferredDevice = device;
         }
@@ -335,6 +336,9 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
     // crbug.com/358166481
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
+    // TODO(crbug.com/568452623): Flakily fails with DXGI_ERROR_DEVICE_REMOVED in
+    // IDXGISwapChain::Present on D3D11 WARP.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsWARP());
 
     constexpr wgpu::PresentMode kAllPresentModes[] = {
         wgpu::PresentMode::Immediate,
@@ -364,6 +368,8 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
 
                 wgpu::SurfaceTexture surfaceTexture;
                 surface.GetCurrentTexture(&surfaceTexture);
+                ASSERT_EQ(surfaceTexture.status,
+                          wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal);
                 ClearTexture(surfaceTexture.texture, {0.0, 0.0, 0.0, 1.0});
                 ASSERT_EQ(wgpu::Status::Success, surface.Present());
             }
@@ -374,6 +380,8 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
 
                 wgpu::SurfaceTexture surfaceTexture;
                 surface.GetCurrentTexture(&surfaceTexture);
+                ASSERT_EQ(surfaceTexture.status,
+                          wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal);
                 ClearTexture(surfaceTexture.texture, {0.0, 0.0, 0.0, 1.0});
                 ASSERT_EQ(wgpu::Status::Success, surface.Present());
                 surface.Unconfigure();
