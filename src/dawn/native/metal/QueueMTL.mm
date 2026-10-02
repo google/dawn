@@ -103,9 +103,13 @@ MaybeError Queue::Initialize() {
                     "Error creating MTLLogState:" +
                     std::string([error.localizedDescription UTF8String]));
             }
-            [mtlLogState addLogHandler:[this](NSString* substring, NSString* category,
-                                              MTLLogLevel level, NSString* message) {
-                GetDevice()->EmitLog([message UTF8String]);
+            // NOTE: If TSan errors are ever seen here, see the solution in addCompletedHandler.
+            [mtlLogState addLogHandler:[deviceRef = GetWeakRef(GetDevice())](
+                                           NSString* substring, NSString* category,
+                                           MTLLogLevel level, NSString* message) {
+                if (auto device = deviceRef.Promote()) {
+                    device->EmitLog([message UTF8String]);
+                }
             }];
 
             MTLCommandQueueDescriptor* mtlQueueDescriptor = [MTLCommandQueueDescriptor new];
@@ -245,22 +249,30 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
     ExecutionSerial pendingSerial = GetPendingCommandSerial();
 
     // These callbacks run on a thread internal to the Metal driver, so they must be thread-safe.
-    // Note it is safe for the callbacks to take raw pointers to the Queue and Device because we
-    // won't free them until the queue finishes executing.
     //
-    // - Get a raw pointer to the device ahead of time to make TSan happy (GetDevice is not atomic).
-    DeviceBase* device = GetDevice();
-    auto ScheduledHandler = [this, pendingSerial](id<MTLCommandBuffer> commandBuffer) {
-        this->mLastSubmittedCommands.Use([&](auto lastSubmittedCommands) {
+    // - Hold a strong-ref to the queue in the callbacks. While technically it is already guaranteed
+    //   that the queue won't be freed until it's finished executing, that's somewhat fragile and
+    //   it's safer to just be explicit about it. We assume the callbacks will get called eventually
+    //   and thus not leak.
+    auto ScheduledHandler = [queue = Ref<Queue>(this),
+                             pendingSerial](id<MTLCommandBuffer> commandBuffer) {
+        DAWN_TSAN_ACQUIRE(commandBuffer);  // See DAWN_TSAN_RELEASE below.
+
+        queue->mLastSubmittedCommands.Use([&](auto lastSubmittedCommands) {
             if (*lastSubmittedCommands == commandBuffer) {
                 *lastSubmittedCommands = nullptr;
             }
         });
-        this->UpdateCommandsScheduledEvents(pendingSerial);  // Thread-safe.
+        queue->UpdateCommandsScheduledEvents(pendingSerial);  // Thread-safe.
     };
-    auto CompletedHandler = [this, device, pendingSerial](id<MTLCommandBuffer> commandBuffer) {
+    auto CompletedHandler = [queue = Ref<Queue>(this),
+                             pendingSerial](id<MTLCommandBuffer> commandBuffer) {
+        DAWN_TSAN_ACQUIRE(commandBuffer);  // See DAWN_TSAN_RELEASE below.
+
         TRACE_EVENT_END(DAWN_TRACE_CATEGORY("gpu_work"),
                         perfetto::NamedTrack("DeviceMTL::CommandBuffer", uint64_t{pendingSerial}));
+
+        DeviceBase* device = queue->GetDevice();  // Thread-safe (immutable data).
 
         {
             // Make sure we didn't disconnect the device before it finished executing.
@@ -281,7 +293,7 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
                                         [[error localizedDescription] UTF8String],
                                         [[error domain] UTF8String], error.code)
                       : "Metal command buffer failed (with unspecified error)";
-            this->SetExecutionError(message);  // Thread-safe.
+            queue->SetExecutionError(message);  // Thread-safe.
 
             // Since we're not holding any lock here, we need to set the device as lost immediately
             // *before* updating the serial (as well as before any subsequent command buffers update
@@ -290,11 +302,28 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
             device->SetDisconnectingIfAlive();  // Thread-safe.
         }
 
-        this->UpdateCompletedSerialTo(QueuePriority::Lowest, pendingSerial);  // Thread-safe.
+        queue->UpdateCompletedSerialTo(QueuePriority::Lowest, pendingSerial);  // Thread-safe.
     };
 
     [*pendingCommands addScheduledHandler:std::move(ScheduledHandler)];
     [*pendingCommands addCompletedHandler:std::move(CompletedHandler)];
+
+    // TSan has trouble tracking these callbacks, probably because they pass through uninstrumented
+    // driver code. To prove to TSan that the callback object is initialized before it's executed,
+    // insert a __tsan_release() here (after initialization of the driver's copies of the handlers)
+    // to pair with the __tsan_acquire() in the callbacks (which happens before the callback code
+    // attempts to access any of the captured data).
+    //
+    // For the synchronization address, we use the command buffer itself since the driver takes care
+    // of that one for us, and it happens to have the correct scope/lifetime for this annotation. If
+    // this weren't the case, we would need to find some other address to sync on, itself captured
+    // as a raw pointer in the callback (because for some reason if the callback is not trivially
+    // copyable then the lambda object itself internally points these at an allocation that isn't
+    // synchronized).
+    //
+    // This issue has been specifically observed in Skia TSan builds, but not in dawn_end2end_tests
+    // (perhaps because Skia has a different API usage pattern?).
+    DAWN_TSAN_RELEASE(pendingCommands.Get());
 
     TRACE_EVENT_BEGIN(DAWN_TRACE_CATEGORY("gpu_work"), "DeviceMTL::SubmitPendingCommandBuffer",
                       perfetto::NamedTrack("DeviceMTL::CommandBuffer", uint64_t{pendingSerial}));
