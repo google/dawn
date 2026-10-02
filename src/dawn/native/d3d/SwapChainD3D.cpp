@@ -125,6 +125,18 @@ IWinUISwapChainPanelNative : public IUnknown {
 
 SwapChain::~SwapChain() = default;
 
+bool SwapChain::UsesComposition() const {
+    // DXGI only honours a non-opaque AlphaMode on composition swapchains, so a premultiplied
+    // request has to be routed through DirectComposition. Everything else keeps the plain
+    // CreateSwapChainForHwnd path.
+    //
+    // Note PhysicalDeviceD3D advertises Opaque and Premultiplied as the supported alpha modes,
+    // so Unpremultiplied never reaches here; DComp has no straight-alpha mode to map it to
+    // anyway.
+    return GetSurface()->GetType() == Surface::Type::WindowsHWND &&
+           GetAlphaMode() == wgpu::CompositeAlphaMode::Premultiplied;
+}
+
 // Initializes the swapchain on the surface. Note that `previousSwapChain` may or may not be
 // nullptr. If it is not nullptr it means that it is the swapchain previously in use on the
 // surface and that we have a chance to reuse it's underlying IDXGISwapChain and "buffers".
@@ -140,6 +152,14 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     mConfig.format = d3d::DXGITextureFormat(GetDevice(), GetFormat());
     mConfig.swapChainFlags = PresentModeToSwapChainFlags(GetPresentMode());
     mConfig.usage = ToDXGIUsage(GetDevice(), GetFormat(), GetUsage());
+
+    if (UsesComposition()) {
+        // A composition swapchain is never the fullscreen target of a window, and DXGI rejects
+        // creation outright if ALLOW_MODE_SWITCH is set. Mask it out of mConfig rather than at
+        // the creation site so the ResizeBuffers path below stays consistent with what the
+        // swapchain was actually created with.
+        mConfig.swapChainFlags &= ~DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+    }
 
     // There is no previous swapchain so we can create one directly and don't have anything else
     // to do.
@@ -164,10 +184,13 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
 
     // The previous swapchain is on the same device so we want to reuse it but it is still not
     // always possible. Because DXGI requires that a new swapchain be created if the
-    // DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING flag is changed.
+    // DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING flag is changed, or if the alpha mode changed: a
+    // swapchain's AlphaMode is fixed at creation, and a composition swapchain and an HWND
+    // swapchain are not interchangeable.
     bool canReuseSwapChain =
         ((mConfig.swapChainFlags ^ previousD3DSwapChain->mConfig.swapChainFlags) &
-         DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING) == 0;
+         DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING) == 0 &&
+        UsesComposition() == previousD3DSwapChain->UsesComposition();
 
     // We can't reuse the previous swapchain, so we destroy it and wait for all of its reference
     // to be forgotten (otherwise DXGI complains that there are outstanding references).
@@ -179,6 +202,13 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     // After all this we know we can reuse the swapchain, see if it is possible to also reuse
     // the buffers.
     mDXGISwapChain = std::move(previousD3DSwapChain->mDXGISwapChain);
+
+    // The visual tree belongs to the swapchain we just adopted, so it has to come with it.
+    // Leaving it on the previous object would destroy the target when that object dies, and
+    // the window would go blank while Present kept returning S_OK.
+    mDCompDevice = std::move(previousD3DSwapChain->mDCompDevice);
+    mDCompTarget = std::move(previousD3DSwapChain->mDCompTarget);
+    mDCompVisual = std::move(previousD3DSwapChain->mDCompVisual);
 
     bool canReuseBuffers = GetWidth() == previousSwapChain->GetWidth() &&
                            GetHeight() == previousSwapChain->GetHeight() &&
@@ -222,7 +252,12 @@ MaybeError SwapChain::InitializeSwapChainFromScratch() {
     swapChainDesc.BufferCount = mConfig.bufferCount;
     swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-    swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+    // Honour the WebGPU surface descriptor's alphaMode. Previously this hardcoded IGNORE, which
+    // silently dropped per-pixel transparency requests even though PhysicalDeviceD3D advertises
+    // Premultiplied as supported. DXGI only accepts a non-opaque mode on composition
+    // swapchains, so this pairs with the CreateSwapChainForComposition branch below.
+    swapChainDesc.AlphaMode =
+        UsesComposition() ? DXGI_ALPHA_MODE_PREMULTIPLIED : DXGI_ALPHA_MODE_IGNORE;
     swapChainDesc.Flags = mConfig.swapChainFlags;
 
     ComPtr<IDXGIFactory2> factory2 = nullptr;
@@ -232,16 +267,32 @@ MaybeError SwapChain::InitializeSwapChainFromScratch() {
     ComPtr<IDXGISwapChain1> swapChain1;
     switch (GetSurface()->GetType()) {
         case Surface::Type::WindowsHWND: {
+            HWND hwnd = static_cast<HWND>(GetSurface()->GetHWND());
+
+            if (UsesComposition()) {
+                // Transparent path. The swapchain is created unparented and then bound to the
+                // window through a DirectComposition visual. For the window to actually show
+                // through, it must have been created WS_EX_NOREDIRECTIONBITMAP — otherwise the
+                // redirection bitmap sits behind the visual and stays opaque.
+                DAWN_TRY(CheckHRESULT(
+                    factory2->CreateSwapChainForComposition(GetD3DDeviceForCreatingSwapChain(),
+                                                            &swapChainDesc, nullptr, &swapChain1),
+                    "Creating the composition IDXGISwapChain1"));
+
+                DAWN_TRY(InitializeDComp(hwnd, swapChain1.Get()));
+
+                // No MakeWindowAssociation here: a composition swapchain isn't associated with
+                // the window, and DXGI's alt+enter handling doesn't apply to it.
+                break;
+            }
+
             DAWN_TRY(CheckHRESULT(
-                factory2->CreateSwapChainForHwnd(GetD3DDeviceForCreatingSwapChain(),
-                                                 static_cast<HWND>(GetSurface()->GetHWND()),
+                factory2->CreateSwapChainForHwnd(GetD3DDeviceForCreatingSwapChain(), hwnd,
                                                  &swapChainDesc, nullptr, nullptr, &swapChain1),
                 "Creating the IDXGISwapChain1"));
 
-            DAWN_TRY(
-                CheckHRESULT(factory2->MakeWindowAssociation(
-                                 static_cast<HWND>(GetSurface()->GetHWND()), DXGI_MWA_NO_ALT_ENTER),
-                             "Disabling DXGI's alt+enter fullscreen handling"));
+            DAWN_TRY(CheckHRESULT(factory2->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER),
+                                  "Disabling DXGI's alt+enter fullscreen handling"));
             break;
         }
         case Surface::Type::WindowsCoreWindow: {
@@ -289,6 +340,29 @@ MaybeError SwapChain::InitializeSwapChainFromScratch() {
     return CollectSwapChainBuffers();
 }
 
+MaybeError SwapChain::InitializeDComp(HWND hwnd, IDXGISwapChain1* swapChain) {
+    // Passing nullptr for the DXGI device lets DComp pick one. We can't hand it ours: the
+    // backend-supplied IUnknown here is an ID3D12CommandQueue on D3D12 and an ID3D11Device on
+    // D3D11, and only the latter can produce an IDXGIDevice.
+    DAWN_TRY(CheckHRESULT(DCompositionCreateDevice(nullptr, IID_PPV_ARGS(&mDCompDevice)),
+                          "DCompositionCreateDevice"));
+
+    // topmost=TRUE so the visual composites above the (absent) redirection surface.
+    DAWN_TRY(CheckHRESULT(mDCompDevice->CreateTargetForHwnd(hwnd, TRUE, &mDCompTarget),
+                          "IDCompositionDevice::CreateTargetForHwnd"));
+    DAWN_TRY(CheckHRESULT(mDCompDevice->CreateVisual(&mDCompVisual),
+                          "IDCompositionDevice::CreateVisual"));
+    DAWN_TRY(CheckHRESULT(mDCompVisual->SetContent(swapChain), "IDCompositionVisual::SetContent"));
+    DAWN_TRY(
+        CheckHRESULT(mDCompTarget->SetRoot(mDCompVisual.Get()), "IDCompositionTarget::SetRoot"));
+
+    // Nothing in the visual tree takes effect until Commit. This is a one-time cost: later
+    // frames are published by IDXGISwapChain::Present alone.
+    DAWN_TRY(CheckHRESULT(mDCompDevice->Commit(), "IDCompositionDevice::Commit"));
+
+    return {};
+}
+
 MaybeError SwapChain::PresentDXGISwapChain() {
     // Do the actual present. DXGI_STATUS_OCCLUDED is a valid return value that's just a
     // message to the application that it could stop rendering.
@@ -307,6 +381,22 @@ MaybeError SwapChain::PresentDXGISwapChain() {
 }
 
 void SwapChain::ReleaseDXGISwapChain() {
+    // Unbind the visual tree before dropping our own reference. The visual holds a reference to
+    // the swapchain, so callers that need every reference gone — DetachAndWaitForDeallocation,
+    // and the DXGI operations it exists to satisfy — would otherwise still be blocked by it.
+    if (mDCompVisual != nullptr) {
+        mDCompVisual->SetContent(nullptr);
+    }
+    if (mDCompTarget != nullptr) {
+        mDCompTarget->SetRoot(nullptr);
+    }
+    if (mDCompDevice != nullptr) {
+        mDCompDevice->Commit();
+    }
+    mDCompVisual = nullptr;
+    mDCompTarget = nullptr;
+    mDCompDevice = nullptr;
+
     mDXGISwapChain = nullptr;
 }
 

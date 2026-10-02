@@ -34,6 +34,11 @@
 #include "src/dawn/native/SwapChain.h"
 #include "src/dawn/native/d3d/d3d_platform.h"
 
+// DirectComposition, for per-pixel-transparent HWND surfaces: DXGI only allows a non-opaque
+// AlphaMode on composition swapchains, never on the ones created by CreateSwapChainForHwnd.
+// Must come after d3d_platform.h, which brings in windows.h.
+#include <dcomp.h>
+
 namespace dawn::native::d3d {
 
 class Device;
@@ -73,12 +78,28 @@ class SwapChain : public SwapChainBase {
     };
     const Config& GetConfig() const;
 
+    // True when the surface asked for a per-pixel-transparent presentation and we therefore
+    // have to go through DirectComposition instead of CreateSwapChainForHwnd.
+    bool UsesComposition() const;
+
   private:
     // Does the swapchain initialization steps assuming there is nothing we can reuse.
     MaybeError InitializeSwapChainFromScratch();
 
+    // Builds the DirectComposition device / target / visual tree for `hwnd` and points it at
+    // `swapChain`. Only called on the composition path.
+    MaybeError InitializeDComp(HWND hwnd, IDXGISwapChain1* swapChain);
+
     Config mConfig;
     ComPtr<IDXGISwapChain3> mDXGISwapChain;
+
+    // DirectComposition objects backing a transparent HWND swapchain; null on the opaque path.
+    // These must outlive mDXGISwapChain, and must be moved across when a swapchain is recycled
+    // onto a new SwapChain object — otherwise the visual tree is destroyed with the old object
+    // and the window goes blank while still presenting successfully.
+    ComPtr<IDCompositionDevice> mDCompDevice;
+    ComPtr<IDCompositionTarget> mDCompTarget;
+    ComPtr<IDCompositionVisual> mDCompVisual;
 };
 
 }  // namespace dawn::native::d3d

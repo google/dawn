@@ -360,7 +360,9 @@ if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
         "d3d/SwapChainD3D.cpp"
         "d3d/UtilsD3D.cpp"
     )
-    list(APPEND conditional_private_platform_depends dxguid.lib)
+    # dcomp.lib provides DCompositionCreateDevice, used by SwapChainD3D to present
+    # per-pixel-transparent HWND surfaces through a DirectComposition visual.
+    list(APPEND conditional_private_platform_depends dxguid.lib dcomp.lib)
 endif()
 
 if (DAWN_ENABLE_D3D11)
