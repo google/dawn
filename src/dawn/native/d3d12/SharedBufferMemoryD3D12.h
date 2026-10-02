@@ -30,6 +30,7 @@
 
 #include <memory>
 
+#include "dawn/native/D3D12Backend.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/SharedBufferMemory.h"
 #include "src/dawn/native/d3d12/HeapD3D12.h"

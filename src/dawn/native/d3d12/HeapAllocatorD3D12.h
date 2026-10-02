@@ -30,6 +30,7 @@
 
 #include <memory>
 
+#include "dawn/native/D3D12Backend.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/native/PooledResourceMemoryAllocator.h"
 #include "src/dawn/native/ResourceHeapAllocator.h"

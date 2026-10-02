@@ -28,13 +28,10 @@
 // D3D12Backend.cpp: contains the definition of symbols exported by D3D12Backend.h so that they
 // can be compiled twice: once export (shared library), once not exported (static library)
 
+#include "dawn/native/D3D12Backend.h"
+
 #include <memory>
 #include <utility>
-
-// Include d3d12_platform.h instead of D3D12Backend.h.
-// clang-format off
-#include "src/dawn/native/d3d12/d3d12_platform.h"
-// clang-format on
 
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/d3d12/DeviceD3D12.h"

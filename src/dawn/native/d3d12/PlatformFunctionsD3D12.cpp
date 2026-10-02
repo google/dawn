@@ -40,16 +40,15 @@ namespace dawn::native::d3d12 {
 PlatformFunctions::PlatformFunctions() = default;
 PlatformFunctions::~PlatformFunctions() = default;
 
-MaybeError PlatformFunctions::Initialize(std::span<const std::string> searchPaths,
-                                         bool useAgilitySDK) {
+MaybeError PlatformFunctions::Initialize(std::span<const std::string> searchPaths) {
     DAWN_TRY(Base::Initialize());
 
     DAWN_TRY(LoadD3D12());
     DAWN_TRY(LoadD3D11());
     LoadPIXRuntime(searchPaths);
-    if (useAgilitySDK) {
-        TryInitializeAgilitySDKDeviceFactory();
-    }
+#ifdef DAWN_USE_AGILITY_SDK
+    EnsureAgilitySDKDeviceFactory();
+#endif
     return {};
 }
 
@@ -75,8 +74,7 @@ MaybeError PlatformFunctions::LoadD3D12() {
                            "D3D12CreateVersionedRootSignatureDeserializer", &error)) {
         return DAWN_UNRECOVERABLE_ERROR(error.c_str());
     }
-    // Optional: D3D12GetInterface is only present in the newer versions of d3d12.h which support
-    // the AgilitySDK.
+    // Optional: only present in Agility SDK / newer d3d12.dll. Absence is not an error.
     mD3D12Lib.GetProc(&d3d12GetInterface, "D3D12GetInterface", &error);
 #endif
 
@@ -105,9 +103,11 @@ HRESULT PlatformFunctions::CreateDevice(IUnknown* adapter,
                                         D3D_FEATURE_LEVEL featureLevel,
                                         REFIID riid,
                                         void** ppDevice) const {
+#ifdef DAWN_USE_AGILITY_SDK
     if (mDeviceFactory) {
         return mDeviceFactory->CreateDevice(adapter, featureLevel, riid, ppDevice);
     }
+#endif
     return d3d12CreateDevice(adapter, featureLevel, riid, ppDevice);
 }
 
@@ -115,9 +115,11 @@ HRESULT PlatformFunctions::SerializeVersionedRootSignature(
     const D3D12_VERSIONED_ROOT_SIGNATURE_DESC* pDesc,
     ID3DBlob** ppResult,
     ID3DBlob** ppError) const {
+#ifdef DAWN_USE_AGILITY_SDK
     if (mDeviceConfiguration) {
         return mDeviceConfiguration->SerializeVersionedRootSignature(pDesc, ppResult, ppError);
     }
+#endif
     return d3d12SerializeVersionedRootSignature(pDesc, ppResult, ppError);
 }
 
@@ -125,17 +127,19 @@ HRESULT PlatformFunctions::CreateVersionedRootSignatureDeserializer(const void* 
                                                                     SIZE_T size,
                                                                     REFIID riid,
                                                                     void** ppDeserializer) const {
+#ifdef DAWN_USE_AGILITY_SDK
     if (mDeviceConfiguration) {
         return mDeviceConfiguration->CreateVersionedRootSignatureDeserializer(pBlob, size, riid,
                                                                               ppDeserializer);
     }
+#endif
     return d3d12CreateVersionedRootSignatureDeserializer(pBlob, size, riid, ppDeserializer);
 }
 
-// Best-effort initializer for the Agility SDK device factory. The "try" will fail on machines
-// with no AgilitySDK or where ID3D12SDKConfiguration1 is absent.
-void PlatformFunctions::TryInitializeAgilitySDKDeviceFactory() {
-    DAWN_ASSERT(!mDeviceFactory);
+#ifdef DAWN_USE_AGILITY_SDK
+void PlatformFunctions::EnsureAgilitySDKDeviceFactory() {
+    // This helper is invoked exactly once by Initialize().
+    DAWN_CHECK(!mDeviceFactory);
 
     if (!IsWindowsDeveloperModeEnabled()) {
         dawn::InfoLog() << "[AgilitySDK] Developer Mode is not enabled; skipping Agility SDK "
@@ -143,63 +147,48 @@ void PlatformFunctions::TryInitializeAgilitySDKDeviceFactory() {
         return;
     }
 
-    if (d3d12GetInterface == nullptr) {
-        // Older system Win10 D3D12.dlls don't export D3D12GetInterface. Gracefully fall back to the
-        // system D3D12.
-        dawn::InfoLog() << "[AgilitySDK] D3D12GetInterface not exported by the loaded d3d12.dll; "
-                           "falling back to system d3d12.dll exports.";
-        return;
-    }
+    // d3d12GetInterface must be available when building with Agility SDK.
+    // TODO(crbug.com/517940507): Gracefully handle when D3D12GetInterface is not available.
+    DAWN_CHECK(d3d12GetInterface != nullptr);
 
     ComPtr<ID3D12SDKConfiguration1> sdkConfig1;
-    HRESULT hr = d3d12GetInterface(CLSID_D3D12SDKConfiguration, IID_PPV_ARGS(&sdkConfig1));
-    if (FAILED(hr)) {
-        // ID3D12SDKConfiguration1 is only available on Win10 20H2, Server 2022, and all versions of
-        // Win11. Gracefully fall back to system D3D12 if the interface is missing.
-        dawn::InfoLog() << "[AgilitySDK] D3D12GetInterface(CLSID_D3D12SDKConfiguration) failed "
-                           "(HRESULT 0x"
-                        << std::hex << static_cast<uint32_t>(hr)
-                        << "); falling back to system d3d12.dll exports.";
-        return;
-    }
+    DAWN_CHECK(
+        SUCCEEDED(d3d12GetInterface(CLSID_D3D12SDKConfiguration, IID_PPV_ARGS(&sdkConfig1))));
 
-    std::string baseDir;
+    std::string baseDir = std::string(".") + GetPathSeparator();
     if (auto moduleDirectory = GetModuleDirectory()) {
         baseDir = std::move(*moduleDirectory);
-    } else {
-        baseDir = std::string(".") + GetPathSeparator();
     }
-    const std::string sdkPath = std::move(baseDir) + "D3D12" + GetPathSeparator();
-
-    ComPtr<ID3D12DeviceFactory> factory;
+    std::string sdkPath = std::move(baseDir) + "D3D12" + GetPathSeparator();
     DAWN_CHECK(SUCCEEDED(sdkConfig1->CreateDeviceFactory(D3D12_PREVIEW_SDK_VERSION, sdkPath.c_str(),
-                                                         IID_PPV_ARGS(&factory))));
+                                                         IID_PPV_ARGS(&mDeviceFactory))));
 
-    // Allow the factory to return an existing compatible device rather than always creating a
-    // new one. Without this flag, Dawn and the Chromium media engine, which calls D3D12CreateDevice
-    // itself, would each end up loading a separate UMD, thus wasting memory.
-    DAWN_CHECK(
-        SUCCEEDED(factory->SetFlags(D3D12_DEVICE_FACTORY_FLAG_ALLOW_RETURNING_EXISTING_DEVICE)));
+    // Allow the factory to return an existing compatible device rather than
+    // always creating a new one. Without this flag, Dawn and the Chromium media
+    // engine would each load a separate UMD instance, wasting memory.
+    DAWN_CHECK(SUCCEEDED(
+        mDeviceFactory->SetFlags(D3D12_DEVICE_FACTORY_FLAG_ALLOW_RETURNING_EXISTING_DEVICE)));
 
-    ComPtr<ID3D12DeviceConfiguration> deviceConfiguration;
-    DAWN_CHECK(SUCCEEDED(factory.As(&deviceConfiguration)));
+    // Obtain the device configuration interface for root signature operations.
+    DAWN_CHECK(SUCCEEDED(mDeviceFactory.As(&mDeviceConfiguration)));
 
-    // SM 6.10 and D3D12 linear algebra are still preview features. EnableExperimentalFeatures must
-    // happen before the factory creates a device.
-    UUID features[] = {D3D12ExperimentalShaderModels};
-    hr = factory->EnableExperimentalFeatures(_countof(features), features, nullptr, nullptr);
-    if (FAILED(hr)) {
-        dawn::InfoLog()
-            << "[AgilitySDK] D3D12ExperimentalShaderModels, needed for LinAlg, is not supported, "
-               "either "
-               "because it's unrecognized, or Developer Mode is not enabled, or some other "
-               "reason.";
+    // Must enable experimental shader models for SM 6.10 to use D3D12 LinAlg while it's still in
+    // Preview. This must be done before the device is created via the factory.
+    {
+        UUID features[] = {D3D12ExperimentalShaderModels};
+        HRESULT hr = mDeviceFactory->EnableExperimentalFeatures(_countof(features), features,
+                                                                nullptr, nullptr);
+        if (FAILED(hr)) {
+            dawn::InfoLog() << "[AgilitySDK] D3D12ExperimentalShaderModels, needed for LinAlg, is "
+                               "not supported, either because it's unrecognized, or Developer Mode "
+                               "is not enabled, or some other reason.";
+            return;
+        }
     }
 
-    mDeviceFactory = std::move(factory);
-    mDeviceConfiguration = std::move(deviceConfiguration);
     dawn::InfoLog() << "[AgilitySDK] active: SDK version = " << D3D12_PREVIEW_SDK_VERSION;
 }
+#endif  // DAWN_USE_AGILITY_SDK
 
 void PlatformFunctions::LoadPIXRuntime(std::span<const std::string> searchPaths) {
     // TODO(dawn:766):

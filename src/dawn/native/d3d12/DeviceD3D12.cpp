@@ -33,6 +33,7 @@
 #include <sstream>
 #include <utility>
 
+#include "dawn/native/D3D12Backend.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "src/dawn/common/GPUInfo.h"
 #include "src/dawn/native/ChainUtils.h"

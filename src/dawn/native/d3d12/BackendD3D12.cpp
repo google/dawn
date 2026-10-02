@@ -30,6 +30,7 @@
 #include <memory>
 #include <utility>
 
+#include "dawn/native/D3D12Backend.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/d3d/D3DError.h"
 #include "src/dawn/native/d3d12/PhysicalDeviceD3D12.h"
@@ -46,12 +47,7 @@ MaybeError Backend::Initialize() {
         // Put function initialization in curly braces to avoid the temptation to use the
         // std::move-ed `functions` variable later in the method.
         auto functions = std::make_unique<PlatformFunctions>();
-#ifdef DAWN_USE_AGILITY_SDK
-        constexpr bool useAgilitySDK = true;
-#else
-        constexpr bool useAgilitySDK = false;
-#endif
-        DAWN_TRY(functions->Initialize(GetInstance()->GetRuntimeSearchPaths(), useAgilitySDK));
+        DAWN_TRY(functions->Initialize(GetInstance()->GetRuntimeSearchPaths()));
 
         DAWN_TRY(Base::Initialize(std::move(functions)));
     }

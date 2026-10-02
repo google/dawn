@@ -25,15 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <d3d12.h>
 #include <gtest/gtest.h>
 
 #include <string>
 #include <vector>
-
-// Must precede any other D3D headers so internal tests use the Agility SDK declarations.
-// clang-format off
-#include "src/dawn/native/d3d12/d3d12_platform.h"
-// clang-format on
 
 #include "dawn/native/D3D12Backend.h"
 #include "src/dawn/common/Math.h"

@@ -116,7 +116,7 @@ declare_args() {
   # don't enable this in Android builds.
   dawn_build_emdawnwebgpu = dawn_standalone && dawn_wasm && !is_android
 
-  # Whether Dawn uses the Agility SDK at runtime.
+  # Whether Dawn uses the Agility SDK.
   dawn_use_agility_sdk = false
 }
 
