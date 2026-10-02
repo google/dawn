@@ -1367,10 +1367,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         platform->IsFeatureEnabled(platform::Features::kWebGPUEnableRangeAnalysisForRobustness));
 
     // TODO(https://issues.chromium.org/498659375): Re-enable on Android ARM.
+    // Disable SPIR-V 1.4 on Adreno 7xx devices due to a driver bug with OpCopyLogical on structs
+    // (see https://crbug.com/566593641).
     if (GetDeviceInfo().HasExt(DeviceExt::Spirv14)) {
-        deviceToggles->Default(
-            Toggle::UseSpirv14,
-            platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirv14) && !IsAndroidARM());
+        deviceToggles->Default(Toggle::UseSpirv14,
+                               platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirv14) &&
+                                   !IsAndroidARM() && !IsAdreno7xx());
     } else {
         deviceToggles->ForceSet(Toggle::UseSpirv14, false);
     }
@@ -1521,6 +1523,11 @@ bool PhysicalDevice::IsAndroidHuawei() const {
 
 bool PhysicalDevice::IsAndroidImgTec() const {
     return IsAndroid() && gpu_info::IsImgTec(GetVendorId());
+}
+
+bool PhysicalDevice::IsAdreno7xx() const {
+    return gpu_info::IsQualcommPCIAdreno7xx(GetVendorId(), GetDeviceId()) ||
+           gpu_info::IsQualcommACPIAdreno7xx(GetVendorId(), GetDeviceId());
 }
 
 bool PhysicalDevice::IsPixel10() const {
