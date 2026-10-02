@@ -350,8 +350,8 @@ void QueueBase::APIWriteTexture(const TexelCopyTextureInfo* destination,
         return GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands();
     };
     std::ignore = GetDevice()->ConsumedError(
-        writeTexture(), "calling %s.WriteTexture(%s, (%u bytes), %s, %s)", this, destination,
-        data.size(), dataLayout, *writeSize);
+        writeTexture(), "calling %s.WriteTexture(%s, (%u bytes), %s, %s)", this, *destination,
+        data.size(), *dataLayout, *writeSize);
 }
 
 MaybeError QueueBase::WriteTextureInternal(const TexelCopyTextureInfo* destinationOrig,

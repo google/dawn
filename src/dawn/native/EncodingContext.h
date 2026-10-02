@@ -138,7 +138,7 @@ class EncodingContext {
                     error->AppendContext(std::move(out));
                 } else {
                     error->AppendContext(
-                        absl::StrFormat("[Failed to format error message: \"%s\"].", formatStr));
+                        absl::StrFormat("[Failed to format error: \"%s\"].", formatStr));
                 }
             }
             HandleError(std::move(error));

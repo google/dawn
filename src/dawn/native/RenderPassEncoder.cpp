@@ -221,7 +221,7 @@ void RenderPassEncoder::APISetBlendConstant(const Color* color) {
 
             return {};
         },
-        "encoding %s.SetBlendConstant(%s).", this, color);
+        "encoding %s.SetBlendConstant(%s).", this, *color);
 }
 
 void RenderPassEncoder::APISetViewport(float x,
