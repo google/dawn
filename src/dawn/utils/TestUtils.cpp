@@ -67,6 +67,7 @@ TextureDataCopyLayout GetTextureDataCopyLayoutForTextureAtLevel(
     wgpu::Extent3D textureSizeAtLevel0,
     uint32_t mipmapLevel,
     wgpu::TextureDimension dimension,
+    uint32_t bytesPerRow,
     uint32_t rowsPerImage,
     uint32_t textureBytesPerRowAlignment) {
     // Compressed texture formats not supported in this function yet.
@@ -83,8 +84,12 @@ TextureDataCopyLayout GetTextureDataCopyLayoutForTextureAtLevel(
             std::max(textureSizeAtLevel0.depthOrArrayLayers >> mipmapLevel, 1u);
     }
 
-    layout.bytesPerRow =
-        GetMinimumBytesPerRow(format, layout.mipSize.width, textureBytesPerRowAlignment);
+    // Default to the minimum valid bytesPerRow if the caller doesn't specify one.
+    if (bytesPerRow == wgpu::kCopyStrideUndefined) {
+        bytesPerRow =
+            GetMinimumBytesPerRow(format, layout.mipSize.width, textureBytesPerRowAlignment);
+    }
+    layout.bytesPerRow = bytesPerRow;
 
     if (rowsPerImage == wgpu::kCopyStrideUndefined) {
         rowsPerImage = layout.mipSize.height;
@@ -98,6 +103,7 @@ TextureDataCopyLayout GetTextureDataCopyLayoutForTextureAtLevel(
         RequiredBytesInCopy(layout.bytesPerRow, appliedRowsPerImage, layout.mipSize, format);
 
     const uint32_t bytesPerTexel = dawn::utils::GetTexelBlockSizeInBytes(format);
+    DAWN_ASSERT(layout.bytesPerRow % bytesPerTexel == 0);
     layout.texelBlocksPerRow = layout.bytesPerRow / bytesPerTexel;
     layout.texelBlocksPerImage = layout.bytesPerImage / bytesPerTexel;
     layout.texelBlockCount = layout.byteLength / bytesPerTexel;

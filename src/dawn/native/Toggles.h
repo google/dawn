@@ -131,6 +131,7 @@ enum class Toggle {
     UseBlitForSintTextureToBufferCopy,
     VulkanSplitBufferTextureCopyForArrayLayers,
     VulkanForceAlphaWriteForAlphaToCoverage,
+    SplitBufferTextureCopyForOversizedRow,
     GLUseArrayLengthFromImmediate,
     D3D11DisableCPUUploadBuffers,
     UseT2B2TForSRGBTextureCopy,

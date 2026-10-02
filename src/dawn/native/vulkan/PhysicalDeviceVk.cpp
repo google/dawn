@@ -1159,6 +1159,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::VulkanForceAlphaWriteForAlphaToCoverage, true);
     }
 
+    if (gpu_info::IsIntel(GetVendorId())) {
+        // crbug.com/481934465: Workaround an Intel GPU hardware limitation that corrupts
+        // buffer<->texture copies with a large row pitch.
+        deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
+    }
+
     // Collapse redundant subgroup min and max operations to workaround a driver crash on some AMD
     // GPUs.  Should only affect AMD Windows Driver versions < 31.0.22000.0, but because this is a
     // harmless "optimizing" workaround go ahead enable for all versions. See:

@@ -960,9 +960,13 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::D3D12PolyfillReflectVec2F32, true);
     }
 
-    // Currently this workaround is needed on old Intel drivers and newer version of Windows 11.
-    // See http://crbug.com/dawn/2308 for more information.
     if (gpu_info::IsIntel(vendorId)) {
+        // Workaround an Intel GPU hardware limitation that corrupts buffer<->texture copies with
+        // a large row pitch. See https://crbug.com/481934465.
+        deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
+
+        // The workaround below is needed on old Intel drivers and newer version of Windows 11.
+        // See http://crbug.com/dawn/2308 for more information.
         constexpr uint64_t kAffectedMinimumWindowsBuildNumber = 25957u;
         const gpu_info::IntelWindowsDriverVersion kAffectedMaximumDriverVersion = {27, 20, 100,
                                                                                    9664};

@@ -214,9 +214,19 @@ class CopyTests {
         }
     }
 
+    // Returns the texel block size (in bytes) recorded in a copy layout. Zero-width copy tests have
+    // bytesPerRow == 0 (so texelBlocksPerRow == 0) and no texels to generate, so return 0 rather
+    // than computing 0 / 0.
+    static uint32_t GetBytesPerTexelBlock(const utils::TextureDataCopyLayout& layout) {
+        if (layout.texelBlocksPerRow == 0) {
+            return 0;
+        }
+        return layout.bytesPerRow / layout.texelBlocksPerRow;
+    }
+
     static std::vector<uint8_t> GetExpectedTextureDataGeneral(
         const utils::TextureDataCopyLayout& layout) {
-        uint32_t bytesPerTexelBlock = layout.bytesPerRow / layout.texelBlocksPerRow;
+        uint32_t bytesPerTexelBlock = GetBytesPerTexelBlock(layout);
         std::vector<uint8_t> textureData(layout.byteLength);
         for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
             const uint32_t byteOffsetPerSlice = layout.bytesPerImage * layer;
@@ -264,7 +274,7 @@ class CopyTests {
         constexpr uint32_t formatByteSize = 2;
         constexpr uint32_t numGoodValues = goodBytes.size() / sizeof(uint8_t) / formatByteSize;
 
-        uint32_t bytesPerTexelBlock = layout.bytesPerRow / layout.texelBlocksPerRow;
+        uint32_t bytesPerTexelBlock = GetBytesPerTexelBlock(layout);
         std::vector<uint8_t> textureData(layout.byteLength);
         for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
             const uint32_t byteOffsetPerSlice = layout.bytesPerImage * layer;
@@ -308,7 +318,7 @@ class CopyTests {
         });
         constexpr uint32_t formatByteSize = 4;
         constexpr uint32_t numGoodValues = goodBytes.size() / formatByteSize;
-        uint32_t bytesPerTexelBlock = layout.bytesPerRow / layout.texelBlocksPerRow;
+        uint32_t bytesPerTexelBlock = GetBytesPerTexelBlock(layout);
         uint32_t channelsPerTexel = bytesPerTexelBlock / formatByteSize;
         std::vector<uint8_t> textureData(layout.byteLength);
         for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
@@ -345,7 +355,7 @@ class CopyTests {
              0x1D, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28});
         constexpr uint32_t formatByteSize = 4;
         constexpr uint32_t numGoodValues = goodBytes.size() / sizeof(uint8_t) / formatByteSize;
-        uint32_t bytesPerTexelBlock = layout.bytesPerRow / layout.texelBlocksPerRow;
+        uint32_t bytesPerTexelBlock = GetBytesPerTexelBlock(layout);
         std::vector<uint8_t> textureData(layout.byteLength);
         for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
             const uint32_t byteOffsetPerSlice = layout.bytesPerImage * layer;
@@ -378,7 +388,7 @@ class CopyTests {
         });
         constexpr uint32_t formatByteSize = 4;
         constexpr uint32_t numGoodValues = goodBytes.size() / formatByteSize;
-        uint32_t bytesPerTexelBlock = layout.bytesPerRow / layout.texelBlocksPerRow;
+        uint32_t bytesPerTexelBlock = GetBytesPerTexelBlock(layout);
         std::vector<uint8_t> textureData(layout.byteLength);
         for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
             const uint32_t byteOffsetPerSlice = layout.bytesPerImage * layer;
@@ -818,10 +828,9 @@ class CopyTests_B2T : public CopyTests_WithFormatParam {
                     PixelType::ComponentRepresentation tolerance = {}) {
         const uint32_t bytesPerTexel = PixelType::kDataSize;
         DAWN_ASSERT(bytesPerTexel == utils::GetTexelBlockSizeInBytes(textureSpec.format));
-        const utils::TextureDataCopyLayout copyLayout =
-            utils::GetTextureDataCopyLayoutForTextureAtLevel(
-                textureSpec.format, textureSpec.textureSize, textureSpec.copyLevel, dimension,
-                bufferSpec.rowsPerImage, GetTextureBytesPerRowAlignment());
+        utils::TextureDataCopyLayout copyLayout = utils::GetTextureDataCopyLayoutForTextureAtLevel(
+            textureSpec.format, textureSpec.textureSize, textureSpec.copyLevel, dimension,
+            bufferSpec.bytesPerRow, bufferSpec.rowsPerImage, GetTextureBytesPerRowAlignment());
 
         // Create a buffer and populate it with data
         wgpu::Buffer buffer;
@@ -1836,15 +1845,13 @@ TEST_P(CopyTests_T2B, BytesPerRowShouldNotCauseBufferOOBIfCopyHeightIsOne) {
     }
 }
 
-// Test copying rows with bytesPerRow extremely large (32k texels). This is to test a special case
-// in Metal where we need to split the copy to be row-by-row in that case.
+// Test texture->buffer copying rows with an extremely large bytesPerRow. This exercises the
+// row-by-row copy split needed on Metal (its own bytesPerRow limit) and the D3D11/D3D12/Vulkan
+// workaround for Intel hardware row-pitch/row-width register limits. See
+// https://crbug.com/481934465.
 TEST_P(CopyTests_T2B, ReallyLargeBytesPerRow) {
     // TODO(crbug.com/40238674): Fails on Pixel 10 gles and vulkan.
     DAWN_SUPPRESS_TEST_IF(IsImgTec() && (IsOpenGLES() || IsVulkan()));
-
-    // TODO(https://issues.chromium.org/481934465): Fails on Intel D3D12 / Vulkan which don't have
-    // the workaround.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && (IsD3D12() || IsVulkan()));
 
     // TODO(crbug.com/500445353): Fails to copy region on Win/AMD RX 5500 XT.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D11());
@@ -1852,12 +1859,15 @@ TEST_P(CopyTests_T2B, ReallyLargeBytesPerRow) {
     TextureSpec textureSpec;
     textureSpec.textureSize = {2, 2, 2};
 
-    const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(textureSpec.format);
-    const uint32_t bytesPerRow = 32 * 1024 * bytesPerTexel;
-    BufferSpec bufferSpec = MinimumBufferSpec({2, 2, 2}, /*overrideBytesPerRow=*/bytesPerRow);
-
-    // Check various offsets to cover each code path in the 2D split code in TextureCopySplitter.
-    DoTest(textureSpec, bufferSpec, {2, 2, 2});
+    // Check both limits the workaround enforces:
+    // - 18-bit row-pitch bytes boundary and near/above-boundary values to catch truncation
+    //   behavior (262144->0, 262400->256, 524288/1048576->0 without the workaround)
+    // - 14-bit row-width texels boundary with 1 byte/texel format(such as R8Unorm)
+    for (uint32_t bytesPerRow : {(1u << 18), (1u << 18) + 256u, (1u << 19), (1u << 20)}) {
+        SCOPED_TRACE(testing::Message() << "bytesPerRow=" << bytesPerRow);
+        BufferSpec bufferSpec = MinimumBufferSpec({2, 2, 2}, /*overrideBytesPerRow=*/bytesPerRow);
+        DoTest(textureSpec, bufferSpec, {2, 2, 2});
+    }
 }
 
 // Test that copying whole texture 2D array layers in one texture-to-buffer-copy works.
@@ -3042,6 +3052,31 @@ TEST_P(CopyTests_B2T, BytesPerRowWithOneRowCopy) {
         // bytesPerRow undefined
         bufferSpec.bytesPerRow = wgpu::kCopyStrideUndefined;
         DoTest(textureSpec, bufferSpec, {5, 1, 1});
+    }
+}
+
+// Test buffer->texture copying rows with an extremely large bytesPerRow. This exercises the
+// row-by-row copy split needed on Metal (its own bytesPerRow limit) and the D3D11/D3D12/Vulkan
+// workaround for Intel hardware row-pitch/row-width register limits. See
+// https://crbug.com/481934465.
+TEST_P(CopyTests_B2T, ReallyLargeBytesPerRow) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles and vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && (IsOpenGLES() || IsVulkan()));
+
+    // TODO(crbug.com/500445353): Fails to copy region on Win/AMD RX 5500 XT.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D11());
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {2, 2, 2};
+
+    // Check both limits the workaround enforces:
+    // - 18-bit row-pitch bytes boundary and near/above-boundary values to catch truncation
+    //   behavior (262144->0, 262400->256, 524288/1048576->0 without the workaround)
+    // - 14-bit row-width texels boundary with 1 byte/texel format (such as R8Unorm)
+    for (uint32_t bytesPerRow : {(1u << 18), (1u << 18) + 256u, (1u << 19), (1u << 20)}) {
+        SCOPED_TRACE(testing::Message() << "bytesPerRow=" << bytesPerRow);
+        BufferSpec bufferSpec = MinimumBufferSpec({2, 2, 2}, /*overrideBytesPerRow=*/bytesPerRow);
+        DoTest(textureSpec, bufferSpec, {2, 2, 2});
     }
 }
 

@@ -479,11 +479,15 @@ BeginRenderPassCmd::BeginRenderPassCmd() = default;
 BeginRenderPassCmd::~BeginRenderPassCmd() = default;
 
 BufferCopy::BufferCopy() = default;
+BufferCopy::BufferCopy(BufferCopy&&) = default;
+BufferCopy& BufferCopy::operator=(BufferCopy&&) = default;
 BufferCopy::~BufferCopy() = default;
 
 TextureCopy::TextureCopy() = default;
 TextureCopy::TextureCopy(const TextureCopy&) = default;
 TextureCopy& TextureCopy::operator=(const TextureCopy&) = default;
+TextureCopy::TextureCopy(TextureCopy&&) = default;
+TextureCopy& TextureCopy::operator=(TextureCopy&&) = default;
 TextureCopy::~TextureCopy() = default;
 
 const TexelBlockInfo& GetBlockInfo(const TextureCopy& t) {

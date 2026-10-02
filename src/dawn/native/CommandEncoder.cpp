@@ -46,6 +46,7 @@
 #include "src/dawn/native/BlitDepthToDepth.h"
 #include "src/dawn/native/BlitTextureToBuffer.h"
 #include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/BufferTextureCopyOversizedRow.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/CommandBuffer.h"
 #include "src/dawn/native/CommandBufferStateTracker.h"
@@ -1927,13 +1928,23 @@ void CommandEncoder::APICopyBufferToTexture(const TexelCopyBufferInfo* source,
                 return {};
             }
 
+            BufferCopy src;
+            src.buffer = source->buffer;
+            src.offset = srcLayout.offset;
+            src.blocksPerRow = blockInfo.BytesToBlocks(srcLayout.bytesPerRow);
+            src.rowsPerImage = BlockCount{srcLayout.rowsPerImage};
+
+            const BlockExtent3D blockCopySize = blockInfo.ToBlock(*copySize);
+            if (NeedsBufferTextureCopySplitForOversizedRow(GetDevice(), src, blockInfo)) {
+                SplitCopyBufferToTextureForOversizedRow(allocator, src, dst, blockCopySize,
+                                                        blockInfo);
+                return {};
+            }
+
             CopyBufferToTextureCmd* copy =
                 allocator->Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
-            copy->source.buffer = source->buffer;
-            copy->source.offset = srcLayout.offset;
-            copy->source.blocksPerRow = blockInfo.BytesToBlocks(srcLayout.bytesPerRow);
-            copy->source.rowsPerImage = BlockCount{srcLayout.rowsPerImage};
-            copy->destination = dst;
+            copy->source = std::move(src);
+            copy->destination = std::move(dst);
             copy->copySize = *copySize;
 
             return {};
@@ -2019,16 +2030,29 @@ void CommandEncoder::APICopyTextureToBuffer(const TexelCopyTextureInfo* sourceOr
                 return {};
             }
 
+            TextureCopy src;
+            src.texture = source.texture;
+            src.origin = source.origin;
+            src.mipLevel = source.mipLevel;
+            src.aspect = ConvertAspect(source.texture->GetFormat(), source.aspect);
+
+            BufferCopy dst;
+            dst.buffer = destination->buffer;
+            dst.offset = dstLayout.offset;
+            dst.blocksPerRow = blockInfo.BytesToBlocks(dstLayout.bytesPerRow);
+            dst.rowsPerImage = BlockCount{dstLayout.rowsPerImage};
+
+            const BlockExtent3D blockCopySize = blockInfo.ToBlock(*copySize);
+            if (NeedsBufferTextureCopySplitForOversizedRow(GetDevice(), dst, blockInfo)) {
+                SplitCopyTextureToBufferForOversizedRow(allocator, dst, src, blockCopySize,
+                                                        blockInfo);
+                return {};
+            }
+
             CopyTextureToBufferCmd* t2b =
                 allocator->Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
-            t2b->source.texture = source.texture;
-            t2b->source.origin = source.origin;
-            t2b->source.mipLevel = source.mipLevel;
-            t2b->source.aspect = ConvertAspect(source.texture->GetFormat(), source.aspect);
-            t2b->destination.buffer = destination->buffer;
-            t2b->destination.offset = dstLayout.offset;
-            t2b->destination.blocksPerRow = blockInfo.BytesToBlocks(dstLayout.bytesPerRow);
-            t2b->destination.rowsPerImage = BlockCount{dstLayout.rowsPerImage};
+            t2b->source = std::move(src);
+            t2b->destination = std::move(dst);
             t2b->copySize = *copySize;
 
             return {};
