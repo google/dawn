@@ -530,6 +530,13 @@ bool ConvertDataElementsToSpan(Napi::Env env,
                                interop::GPUSize64 data_offset_elements,
                                std::optional<interop::GPUSize64> size_elements);
 
+// Does the conversion from Uint32Array dynamic offsets data, start, length to a span.
+bool ConvertDynamicOffsetsToSpan(Napi::Env env,
+                                 std::span<const uint32_t>* out,
+                                 interop::Uint32Array data,
+                                 interop::GPUSize64 data_start,
+                                 interop::GPUSize32 data_length);
+
 }  // namespace wgpu::binding
 
 #endif  // SRC_DAWN_NODE_BINDING_CONVERTER_H_

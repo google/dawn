@@ -2143,4 +2143,29 @@ bool ConvertDataElementsToSpan(Napi::Env env,
     return true;
 }
 
+bool ConvertDynamicOffsetsToSpan(Napi::Env env,
+                                 std::span<const uint32_t>* out,
+                                 interop::Uint32Array data,
+                                 interop::GPUSize64 data_start,
+                                 interop::GPUSize32 data_length) {
+    if (data_start > data.ElementLength()) {
+        Napi::RangeError::New(env, "dynamicOffsetsDataStart is out of bound of dynamicOffsetData")
+            .ThrowAsJavaScriptException();
+        return false;
+    }
+
+    if (data_length > data.ElementLength() - data_start) {
+        Napi::RangeError::New(env,
+                              "dynamicOffsetsDataLength + dynamicOffsetsDataStart is out of "
+                              "bound of dynamicOffsetData")
+            .ThrowAsJavaScriptException();
+        return false;
+    }
+
+    // SAFETY: data provides storage of data.ElementLength() elements.
+    auto span = DAWN_UNSAFE_BUFFERS(std::span{data.Data(), data.ElementLength()});
+    *out = span.subspan(data_start, data_length);
+    return true;
+}
+
 }  // namespace wgpu::binding

@@ -83,12 +83,14 @@ void GPURenderBundleEncoder::setBindGroup(
     Converter conv(env);
 
     wgpu::BindGroup bg{};
-    if (!conv(bg, bindGroup)) {
+    std::span<const uint32_t> offsets;
+    if (!conv(bg, bindGroup) ||
+        !ConvertDynamicOffsetsToSpan(env, &offsets, dynamicOffsetsData, dynamicOffsetsDataStart,
+                                     dynamicOffsetsDataLength)) {
         return;
     }
 
-    enc_.SetBindGroup(index, bg, dynamicOffsetsDataLength,
-                      DAWN_UNSAFE_TODO(dynamicOffsetsData.Data() + dynamicOffsetsDataStart));
+    enc_.SetBindGroup(index, bg, offsets.size(), offsets.data());
 }
 
 void GPURenderBundleEncoder::setImmediates(Napi::Env env,

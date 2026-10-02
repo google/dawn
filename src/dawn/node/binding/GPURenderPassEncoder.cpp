@@ -132,26 +132,14 @@ void GPURenderPassEncoder::setBindGroup(
     Converter conv(env);
 
     wgpu::BindGroup bg{};
-    if (!conv(bg, bindGroup)) {
+    std::span<const uint32_t> offsets;
+    if (!conv(bg, bindGroup) ||
+        !ConvertDynamicOffsetsToSpan(env, &offsets, dynamicOffsetsData, dynamicOffsetsDataStart,
+                                     dynamicOffsetsDataLength)) {
         return;
     }
 
-    if (dynamicOffsetsDataStart > dynamicOffsetsData.ElementLength()) {
-        Napi::RangeError::New(env, "dynamicOffsetsDataStart is out of bound of dynamicOffsetData")
-            .ThrowAsJavaScriptException();
-        return;
-    }
-
-    if (dynamicOffsetsDataLength > dynamicOffsetsData.ElementLength() - dynamicOffsetsDataStart) {
-        Napi::RangeError::New(env,
-                              "dynamicOffsetsDataLength + dynamicOffsetsDataStart is out of "
-                              "bound of dynamicOffsetData")
-            .ThrowAsJavaScriptException();
-        return;
-    }
-
-    enc_.SetBindGroup(index, bg, dynamicOffsetsDataLength,
-                      DAWN_UNSAFE_TODO(dynamicOffsetsData.Data() + dynamicOffsetsDataStart));
+    enc_.SetBindGroup(index, bg, offsets.size(), offsets.data());
 }
 
 void GPURenderPassEncoder::setImmediates(Napi::Env env,
