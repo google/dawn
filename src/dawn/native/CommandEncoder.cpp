@@ -1939,7 +1939,7 @@ void CommandEncoder::APICopyBufferToTexture(const TexelCopyBufferInfo* source,
             return {};
         },
         "encoding %s.CopyBufferToTexture(%s, %s, %s).", this, source->buffer, destination.texture,
-        copySize);
+        *copySize);
 }
 
 void CommandEncoder::APICopyTextureToBuffer(const TexelCopyTextureInfo* sourceOrig,
@@ -2034,7 +2034,7 @@ void CommandEncoder::APICopyTextureToBuffer(const TexelCopyTextureInfo* sourceOr
             return {};
         },
         "encoding %s.CopyTextureToBuffer(%s, %s, %s).", this, source.texture, destination->buffer,
-        copySize);
+        *copySize);
 }
 
 void CommandEncoder::APICopyTextureToTexture(const TexelCopyTextureInfo* sourceOrig,
@@ -2162,7 +2162,7 @@ void CommandEncoder::APICopyTextureToTexture(const TexelCopyTextureInfo* sourceO
             return {};
         },
         "encoding %s.CopyTextureToTexture(%s, %s, %s).", this, source.texture, destination.texture,
-        copySize);
+        *copySize);
 }
 
 void CommandEncoder::APIClearBuffer(BufferBase* buffer, uint64_t offset, uint64_t size) {
