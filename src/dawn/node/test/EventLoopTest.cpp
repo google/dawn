@@ -140,7 +140,7 @@ class EventLoopTest : public test::V8IsolateTest {
   private:
     static void Record(const v8::FunctionCallbackInfo<v8::Value>& info) {
         auto* log = static_cast<std::vector<std::string>*>(
-            info.Data().As<v8::External>()->Value(v8::kExternalPointerTypeTagDefault));
+            info.DataV2().As<v8::External>()->Value(v8::kExternalPointerTypeTagDefault));
         v8::String::Utf8Value name(info.GetIsolate(), info[0]);
         log->emplace_back(*name != nullptr ? *name : "");
     }

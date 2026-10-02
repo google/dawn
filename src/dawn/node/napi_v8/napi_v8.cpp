@@ -120,7 +120,7 @@ namespace {
 
 void DrainFinalizersV8Callback(const v8::FunctionCallbackInfo<v8::Value>& info) {
     auto* env = static_cast<napi_env>(
-        info.Data().As<v8::External>()->Value(v8::kExternalPointerTypeTagDefault));
+        info.DataV2().As<v8::External>()->Value(v8::kExternalPointerTypeTagDefault));
     env->finalizer_drain_scheduled = false;
     env->DrainFinalizers();
 }
@@ -358,7 +358,7 @@ napi_status QueryProperty(napi_env env,
 
 // V8 and Node-API use different callback conventions:
 // - V8 callbacks use `void (const v8::FunctionCallbackInfo<v8::Value>&)` and pass user context via
-//   an attached `v8::External` value in `v8_info.Data()`.
+//   an attached `v8::External` value in `v8_info.DataV2()`.
 // - Node-API callbacks use `napi_value (*)(napi_env, napi_callback_info)` and retrieve user context
 //   via `napi_get_cb_info()`.
 //
@@ -367,7 +367,7 @@ napi_status QueryProperty(napi_env env,
 // wrapper referencing the active V8 callback arguments, executes the target `napi_callback`, and
 // forwards the returned `napi_value` back to V8.
 void NativeCallbackTrampoline(const v8::FunctionCallbackInfo<v8::Value>& v8_info) {
-    v8::Local<v8::External> ext = v8_info.Data().As<v8::External>();
+    v8::Local<v8::External> ext = v8_info.DataV2().As<v8::External>();
     auto* binding = static_cast<CallbackBinding*>(ext->Value(v8::kExternalPointerTypeTagDefault));
     napi_env env = binding->env;
 
