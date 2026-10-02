@@ -28,6 +28,7 @@
 """Invokes the hermetic Bazelisk binary to build LiteRT-LM and copy the output
 binary to GN's output directory."""
 
+import json
 import os
 from pathlib import Path
 import shutil
@@ -54,6 +55,64 @@ def get_platform_name():
     arch = 'x86_64' if cipd_arch == 'amd64' else cipd_arch
 
     return f"{plat_os}_{arch}"
+
+
+def make_bazel_vc_dir(toolchain, vc_dir):
+    """Creates a stand-in `VC` directory for Bazel's MSVC autodetection.
+
+    Bazel probes the compiler environment by running
+    `VC\\Auxiliary\\Build\\vcvarsall.bat`, which the hermetic toolchain does not
+    ship.
+
+    TODO(crbug.com/563366606): Remove if toolchain package starts shipping
+    vcvarsall.bat, then BAZEL_VC can point at the toolchain's VC directory.
+    """
+    win_sdk = Path(toolchain['win_sdk'])
+
+    # Bazel expects to find cl.exe and friends under `Tools/MSVC/<version>`.
+    tools_dir = vc_dir / 'Tools'
+    (vc_dir / 'Auxiliary' / 'Build').mkdir(parents=True, exist_ok=True)
+    tools_dir.unlink(missing_ok=True)
+    tools_dir.symlink_to(Path(toolchain['path']) / 'VC' / 'Tools',
+                         target_is_directory=True)
+
+    # Bazel invokes this as `vcvarsall.bat amd64 [sdk_version] [-vcvars_ver=..]`.
+    # The version arguments are ignored because the toolchain only contains one
+    # SDK and one toolset. SetEnv.cmd sets INCLUDE, LIB and PATH, but not the
+    # WINDOWSSDKDIR that Bazel also reads back.
+    (vc_dir / 'Auxiliary' / 'Build' / 'vcvarsall.bat').write_text(
+        '@echo off\r\n'
+        f'call "{win_sdk}\\bin\\SetEnv.cmd" /x64\r\n'
+        f'set "WINDOWSSDKDIR={win_sdk}"\r\n')
+
+    return vc_dir
+
+
+def configure_windows_toolchain_env(env, project_root, out_dir):
+    """Points Bazel at Dawn's hermetic Visual Studio toolchain.
+
+    On the bots Visual Studio is not installed machine-wide; gclient unpacks it
+    via depot_tools and records its location in build/win_toolchain.json. Bazel
+    cannot find it on its own, and `bazel.exe` itself fails to start without the
+    MSVC runtime DLLs on PATH.
+    """
+    # `bazel.exe` dynamically links MSVCP140.dll and VCRUNTIME140*.dll. GN
+    # copies those into the build directory, so make them resolvable.
+    path_entries = [str(out_dir)]
+
+    toolchain_json = project_root / 'build' / 'win_toolchain.json'
+    if toolchain_json.exists():
+        toolchain = json.loads(toolchain_json.read_text())
+        path_entries += toolchain['runtime_dirs']
+        # Bazel's cc_configure reads these to locate cl.exe and the SDK.
+        env['BAZEL_VC'] = str(
+            make_bazel_vc_dir(toolchain, out_dir / 'bazel_vc'))
+        env['WINDOWSSDKDIR'] = toolchain['win_sdk']
+
+    # rules_python needs python.exe in the path.
+    path_entries.append(str(Path(sys.executable).parent))
+
+    env['PATH'] = os.pathsep.join(path_entries + [env.get('PATH', '')])
 
 
 def main():
@@ -96,6 +155,9 @@ def main():
         prebuilt_src_dir.unlink()
     elif prebuilt_src_dir.exists():
         shutil.move(prebuilt_src_dir, backup_dir)
+
+    # Set once the Bazel server may have been started and needs shutting down.
+    bazel_shutdown_cmd = None
 
     try:
         # Symlink the CIPD-unpacked prebuilts and libwebgpu directly so Bazel
@@ -149,12 +211,17 @@ def main():
         else:
             bazel_user_root = dest_path.parent / '.bazel_root'
 
+        # Startup options select the Bazel server, so the build and shutdown
+        # commands must share them.
+        bazel_startup_cmd = [
+            str(bazelisk_path),
+            f"--output_user_root={bazel_user_root}",
+        ]
+
         # Compile the target using Bazelisk inside LiteRT-LM's standalone
         # workspace.
         print(f"Building Bazel target: {BAZEL_TARGET}...")
-        build_cmd = [
-            str(bazelisk_path),
-            f"--output_user_root={bazel_user_root}",
+        build_cmd = bazel_startup_cmd + [
             'build',
             '--noexperimental_guard_against_concurrent_changes',
             '--nowatchfs',
@@ -195,8 +262,27 @@ def main():
             if platform_name == 'macos_arm64':
                 build_cmd.append('--config=macos_arm64')
 
+        if platform_name.startswith('windows'):
+            configure_windows_toolchain_env(env, project_root,
+                                            dest_path.parent)
+
+            # On the bots Git bash comes from CIPD, so point Bazel at whichever
+            # one is on PATH, overriding LiteRT-LM's .bazelrc hardcoded path.
+            bash_path = shutil.which('bash', path=env['PATH'])
+            if bash_path:
+                build_cmd.append(f'--shell_executable={bash_path}')
+
+            # Bazel runs build-time tools (`[for tool]`) with an empty PATH, and
+            # the bots do not have vcruntime140.dll in C:\Windows\System32. Link
+            # host C++ and Rust tools against the static CRT so they do not
+            # depend on it.
+            build_cmd.extend([
+                '--host_features=static_link_msvcrt',
+                '--@rules_rust//rust/settings:extra_exec_rustc_flag=-Ctarget-feature=+crt-static',
+            ])
+
         # Prepend the hermetic LLVM toolchain bin directory to PATH and set CC/CXX.
-        # Windows uses the MSVC toolchain that Bazel autodetects instead.
+        # Windows uses the MSVC toolchain configured above instead.
         llvm_bin_dir = project_root / 'third_party' / 'llvm-build' / 'Release+Asserts' / 'bin'
         if llvm_bin_dir.exists() and not platform_name.startswith('windows'):
             env['PATH'] = f"{llvm_bin_dir}:{env.get('PATH', '')}"
@@ -205,6 +291,15 @@ def main():
             # cc_configure selects them.
             env['CC'] = str(llvm_bin_dir / 'clang')
             env['CXX'] = str(llvm_bin_dir / 'clang++')
+
+        # On Windows, a Bazel server left running after the build keeps open
+        # handles in its working directory (the LiteRT-LM checkout) and in
+        # TMP. That blocks Swarming from deleting the task directory, which
+        # hard fails the task, and blocks gclient from updating the
+        # submodule locally. Shut it down, and let the next build pay the
+        # server startup cost.
+        if platform_name.startswith('windows'):
+            bazel_shutdown_cmd = bazel_startup_cmd + ['shutdown']
 
         # `executable` is required because Bazelisk has no `.exe` suffix on Windows.
         proc = subprocess.run(build_cmd,
@@ -216,6 +311,14 @@ def main():
             sys.exit(proc.returncode)
 
     finally:
+        if bazel_shutdown_cmd:
+            print("Shutting down Bazel server...")
+            subprocess.run(bazel_shutdown_cmd,
+                           cwd=litert_lm_dir,
+                           env=env,
+                           executable=str(bazelisk_path),
+                           check=False)
+
         # Restore the original Git-tracked prebuilt directory regardless of
         # success or failure. This keeps the Git tree clean for gclient sync.
         print("Restoring original Git-tracked prebuilt directory...")
