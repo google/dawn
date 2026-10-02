@@ -1619,14 +1619,6 @@ crbug.com/543960651 [ android-sm-s926b ] webgpu:web_platform,copyToTexture,image
 # Flaky pixel mismatches across the canvas copyToTexture family on Win10 NVIDIA with backend validation.
 crbug.com/564903015 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:web_platform,copyToTexture,canvas:* [ RetryOnFailure ]
 
-# GPUCanvasContext::TransferToImageBitmap returns opaque black instead of transparent black when unconfigured
-crbug.com/565363515 [ android-pixel-4 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_unconfigured_nonzero_size:* [ Failure ]
-crbug.com/565363515 [ android-pixel-6 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_unconfigured_nonzero_size:* [ Failure ]
-crbug.com/565363515 [ android-sm-s926b ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_unconfigured_nonzero_size:* [ Failure ]
-crbug.com/565363515 [ intel win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_unconfigured_nonzero_size:* [ Failure ]
-crbug.com/565363515 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_unconfigured_nonzero_size:* [ Failure ]
-crbug.com/565363515 [ microsoft win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_unconfigured_nonzero_size:* [ Failure ]
-
 # canvas,configure:invalid_usage fails for bgra8unorm with STORAGE_BINDING when bgra8unorm-storage is unsupported
 crbug.com/565366976 [ android-pixel-4 ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="*";format="bgra8unorm";usage=8 [ Failure ]
 crbug.com/565366976 [ android-pixel-10 ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="*";format="bgra8unorm";usage=8 [ Failure ]
