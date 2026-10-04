@@ -16,85 +16,82 @@ RWByteAddressBuffer sbuffer : register(u1);
 groupshared S wbuffer;
 void v(uint offset, uint3 obj[4]) {
   {
-    uint v_1 = 0u;
-    v_1 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_2 = v_1;
-      if ((v_2 >= 4u)) {
+      uint v_1 = idx;
+      if ((v_1 >= 4u)) {
         break;
       }
-      sbuffer.Store3((offset + (v_2 * 16u)), obj[v_2]);
+      sbuffer.Store3((offset + (v_1 * 16u)), obj[v_1]);
       {
-        v_1 = (v_2 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
-void v_3(uint offset, S obj) {
+void v_2(uint offset, S obj) {
   sbuffer.Store3((offset + 0u), obj.a);
   sbuffer.Store((offset + 12u), obj.b);
-  uint3 v_4[4] = obj.c;
-  v((offset + 16u), v_4);
+  uint3 v_3[4] = obj.c;
+  v((offset + 16u), v_3);
 }
 
 typedef uint3 ary_ret[4];
-ary_ret v_5(uint offset) {
+ary_ret v_4(uint offset) {
   uint3 a[4] = (uint3[4])0;
   {
-    uint v_6 = 0u;
-    v_6 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_7 = v_6;
-      if ((v_7 >= 4u)) {
+      uint v_5 = idx;
+      if ((v_5 >= 4u)) {
         break;
       }
-      a[v_7] = sbuffer.Load3((offset + (v_7 * 16u)));
+      a[v_5] = sbuffer.Load3((offset + (v_5 * 16u)));
       {
-        v_6 = (v_7 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  uint3 v_8[4] = a;
-  return v_8;
+  uint3 v_6[4] = a;
+  return v_6;
 }
 
-S v_9(uint offset) {
-  uint3 v_10 = sbuffer.Load3((offset + 0u));
-  uint v_11 = sbuffer.Load((offset + 12u));
-  uint3 v_12[4] = v_5((offset + 16u));
-  S v_13 = {v_10, v_11, v_12};
-  return v_13;
+S v_7(uint offset) {
+  uint3 v_8 = sbuffer.Load3((offset + 0u));
+  uint v_9 = sbuffer.Load((offset + 12u));
+  uint3 v_10[4] = v_4((offset + 16u));
+  S v_11 = {v_8, v_9, v_10};
+  return v_11;
 }
 
 typedef uint3 ary_ret_1[4];
-ary_ret_1 v_14(uint start_byte_offset) {
+ary_ret_1 v_12(uint start_byte_offset) {
   uint3 a[4] = (uint3[4])0;
   {
-    uint v_15 = 0u;
-    v_15 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_16 = v_15;
-      if ((v_16 >= 4u)) {
+      uint v_13 = idx;
+      if ((v_13 >= 4u)) {
         break;
       }
-      a[v_16] = ubuffer[((start_byte_offset + (v_16 * 16u)) / 16u)].xyz;
+      a[v_13] = ubuffer[((start_byte_offset + (v_13 * 16u)) / 16u)].xyz;
       {
-        v_15 = (v_16 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  uint3 v_17[4] = a;
-  return v_17;
+  uint3 v_14[4] = a;
+  return v_14;
 }
 
-S v_18(uint start_byte_offset) {
-  uint3 v_19 = ubuffer[(start_byte_offset / 16u)].xyz;
-  uint v_20 = (12u + start_byte_offset);
-  uint v_21 = ubuffer[(v_20 / 16u)][((v_20 & 15u) >> 2u)];
-  uint3 v_22[4] = v_14((16u + start_byte_offset));
-  S v_23 = {v_19, v_21, v_22};
-  return v_23;
+S v_15(uint start_byte_offset) {
+  uint3 v_16 = ubuffer[(start_byte_offset / 16u)].xyz;
+  uint v_17 = (12u + start_byte_offset);
+  uint v_18 = ubuffer[(v_17 / 16u)][((v_17 & 15u) >> 2u)];
+  uint3 v_19[4] = v_12((16u + start_byte_offset));
+  S v_20 = {v_16, v_18, v_19};
+  return v_20;
 }
 
 void foo_inner(uint tint_local_index) {
@@ -103,26 +100,25 @@ void foo_inner(uint tint_local_index) {
     wbuffer.b = 0u;
   }
   {
-    uint v_24 = 0u;
-    v_24 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_25 = v_24;
-      if ((v_25 >= 4u)) {
+      uint v_21 = idx;
+      if ((v_21 >= 4u)) {
         break;
       }
-      wbuffer.c[v_25] = (0u).xxx;
+      wbuffer.c[v_21] = (0u).xxx;
       {
-        v_24 = (v_25 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  S u = v_18(0u);
-  S s = v_9(0u);
-  S w = v_9(0u);
-  S v_26 = (S)0;
-  v_3(0u, v_26);
-  wbuffer = v_26;
+  S u = v_15(0u);
+  S s = v_7(0u);
+  S w = v_7(0u);
+  S v_22 = (S)0;
+  v_2(0u, v_22);
+  wbuffer = v_22;
 }
 
 [numthreads(1, 1, 1)]

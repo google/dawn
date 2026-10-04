@@ -1,10 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 64
+; Bound: 67
 ; Schema: 0
                OpCapability Shader
-         %43 = OpExtInstImport "GLSL.std.450"
+         %41 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f" %f_local_invocation_index_Input
                OpExecutionMode %f LocalSize 1 1 1
@@ -20,6 +20,7 @@
                OpName %f_local_invocation_index_Input "f_local_invocation_index_Input"
                OpName %f_inner "f_inner"
                OpName %tint_local_index "tint_local_index"
+               OpName %idx "idx"
                OpName %f "f"
                OpDecorate %_arr_v4uint_uint_1 ArrayStride 16
                OpMemberDecorate %ubo_block_tint_explicit_layout 0 Offset 0
@@ -64,51 +65,56 @@
       %int_1 = OpConstant %int 1
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
      %uint_3 = OpConstant %uint 3
+%_ptr_Function_uint = OpTypePointer Function %uint
        %bool = OpTypeBool
       %int_0 = OpConstant %int 0
-         %60 = OpTypeFunction %void
+         %63 = OpTypeFunction %void
     %f_inner = OpFunction %void None %23
 %tint_local_index = OpFunctionParameter %uint
          %24 = OpLabel
+        %idx = OpVariable %_ptr_Function_uint Function
                OpBranch %25
          %25 = OpLabel
+               OpStore %idx %tint_local_index
                OpBranch %28
          %28 = OpLabel
-         %30 = OpPhi %uint %tint_local_index %25 %31 %27
                OpLoopMerge %29 %27 None
                OpBranch %26
          %26 = OpLabel
-         %53 = OpUGreaterThanEqual %bool %30 %uint_64
-               OpSelectionMerge %55 None
-               OpBranchConditional %53 %56 %55
-         %56 = OpLabel
+         %53 = OpLoad %uint %idx None
+         %54 = OpUGreaterThanEqual %bool %53 %uint_64
+               OpSelectionMerge %56 None
+               OpBranchConditional %54 %57 %56
+         %57 = OpLabel
                OpBranch %29
-         %55 = OpLabel
-         %57 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %30
-               OpStore %57 %int_0 None
+         %56 = OpLabel
+         %58 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %53
+               OpStore %58 %int_0 None
                OpBranch %27
          %27 = OpLabel
-         %31 = OpIAdd %uint %30 %uint_1
+         %60 = OpLoad %uint %idx None
+         %61 = OpIAdd %uint %60 %uint_1
+               OpStore %idx %61 None
                OpBranch %28
          %29 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %35 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
-         %38 = OpLoad %v4uint %35 None
-         %39 = OpCompositeExtract %uint %38 0
-         %40 = OpBitcast %int %39
-         %41 = OpBitcast %uint %40
-         %42 = OpExtInst %uint %43 UMin %41 %uint_63
-         %45 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %42
-               OpStore %45 %int_1 None
-         %48 = OpAccessChain %_ptr_StorageBuffer_int %8 %uint_0 %uint_0
-         %50 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %uint_3
-         %52 = OpLoad %int %50 None
-               OpStore %48 %52 None
+         %33 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %36 = OpLoad %v4uint %33 None
+         %37 = OpCompositeExtract %uint %36 0
+         %38 = OpBitcast %int %37
+         %39 = OpBitcast %uint %38
+         %40 = OpExtInst %uint %41 UMin %39 %uint_63
+         %43 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %40
+               OpStore %43 %int_1 None
+         %46 = OpAccessChain %_ptr_StorageBuffer_int %8 %uint_0 %uint_0
+         %48 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %uint_3
+         %50 = OpLoad %int %48 None
+               OpStore %46 %50 None
                OpReturn
                OpFunctionEnd
-          %f = OpFunction %void None %60
-         %61 = OpLabel
-         %62 = OpLoad %uint %f_local_invocation_index_Input None
-         %63 = OpFunctionCall %void %f_inner %62
+          %f = OpFunction %void None %63
+         %64 = OpLabel
+         %65 = OpLoad %uint %f_local_invocation_index_Input None
+         %66 = OpFunctionCall %void %f_inner %65
                OpReturn
                OpFunctionEnd

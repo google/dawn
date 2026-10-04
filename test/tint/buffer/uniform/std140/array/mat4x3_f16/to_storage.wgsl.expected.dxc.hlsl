@@ -38,46 +38,44 @@ matrix<float16_t, 4, 3> v_2(uint start_byte_offset) {
 
 void v_13(uint offset, matrix<float16_t, 4, 3> obj[4]) {
   {
-    uint v_14 = 0u;
-    v_14 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_15 = v_14;
-      if ((v_15 >= 4u)) {
+      uint v_14 = idx;
+      if ((v_14 >= 4u)) {
         break;
       }
-      v_1((offset + (v_15 * 32u)), obj[v_15]);
+      v_1((offset + (v_14 * 32u)), obj[v_14]);
       {
-        v_14 = (v_15 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
 typedef matrix<float16_t, 4, 3> ary_ret[4];
-ary_ret v_16(uint start_byte_offset) {
+ary_ret v_15(uint start_byte_offset) {
   matrix<float16_t, 4, 3> a[4] = (matrix<float16_t, 4, 3>[4])0;
   {
-    uint v_17 = 0u;
-    v_17 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_18 = v_17;
-      if ((v_18 >= 4u)) {
+      uint v_16 = idx;
+      if ((v_16 >= 4u)) {
         break;
       }
-      a[v_18] = v_2((start_byte_offset + (v_18 * 32u)));
+      a[v_16] = v_2((start_byte_offset + (v_16 * 32u)));
       {
-        v_17 = (v_18 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  matrix<float16_t, 4, 3> v_19[4] = a;
-  return v_19;
+  matrix<float16_t, 4, 3> v_17[4] = a;
+  return v_17;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  matrix<float16_t, 4, 3> v_20[4] = v_16(0u);
-  v_13(0u, v_20);
+  matrix<float16_t, 4, 3> v_18[4] = v_15(0u);
+  v_13(0u, v_18);
   v_1(32u, v_2(64u));
   s.Store<vector<float16_t, 3> >(32u, tint_bitcast_to_f16_1(u[0u].zw).xyz.zxy);
   s.Store<float16_t>(32u, tint_bitcast_to_f16(u[0u].z).x);

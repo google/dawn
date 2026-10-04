@@ -6,27 +6,26 @@ typedef int4 ary_ret[4];
 ary_ret v(uint start_byte_offset) {
   int4 a[4] = (int4[4])0;
   {
-    uint v_1 = 0u;
-    v_1 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_2 = v_1;
-      if ((v_2 >= 4u)) {
+      uint v_1 = idx;
+      if ((v_1 >= 4u)) {
         break;
       }
-      a[v_2] = asint(S[((start_byte_offset + (v_2 * 16u)) / 16u)]);
+      a[v_1] = asint(S[((start_byte_offset + (v_1 * 16u)) / 16u)]);
       {
-        v_1 = (v_2 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  int4 v_3[4] = a;
-  return v_3;
+  int4 v_2[4] = a;
+  return v_2;
 }
 
 typedef int4 ary_ret_1[4];
 ary_ret_1 func() {
-  int4 v_4[4] = v(0u);
-  return v_4;
+  int4 v_3[4] = v(0u);
+  return v_3;
 }
 
 [numthreads(1, 1, 1)]

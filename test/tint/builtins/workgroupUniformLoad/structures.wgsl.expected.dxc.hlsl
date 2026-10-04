@@ -23,17 +23,16 @@ Outer foo() {
 
 void main_inner(uint tint_local_index) {
   {
-    uint v_2 = 0u;
-    v_2 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 4u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 4u)) {
         break;
       }
-      Inner v_4 = (Inner)0;
-      v.a[v_3] = v_4;
+      Inner v_3 = (Inner)0;
+      v.a[v_2] = v_3;
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }

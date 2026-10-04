@@ -41,16 +41,15 @@ S v_5(uint start_byte_offset) {
 S[4] v_11(uint start_byte_offset) {
   S a_2[4] = S[4](S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0));
   {
-    uint v_12 = 0u;
-    v_12 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_13 = v_12;
-      if ((v_13 >= 4u)) {
+      uint v_12 = idx;
+      if ((v_12 >= 4u)) {
         break;
       }
-      a_2[v_13] = v_5((start_byte_offset + (v_13 * 128u)));
+      a_2[v_12] = v_5((start_byte_offset + (v_12 * 128u)));
       {
-        v_12 = (v_13 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -62,6 +61,6 @@ void main() {
   b(v_5(256u));
   c(v_2(260u));
   d(tint_bitcast_to_16bit(v_1.inner[0u].z).yx);
-  uvec4 v_14 = v_1.inner[0u];
-  e(tint_bitcast_to_16bit(v_14.z).y);
+  uvec4 v_13 = v_1.inner[0u];
+  e(tint_bitcast_to_16bit(v_13.z).y);
 }

@@ -23,31 +23,30 @@ struct tint_symbol_1 {
 
 void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
-    uint v_1 = 0u;
-    v_1 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint const v_2 = v_1;
-      if ((v_2 >= 1024u)) {
+      uint const v_1 = idx;
+      if ((v_1 >= 1024u)) {
         break;
       }
-      (*tint_module_vars.v)[v_2] = 0u;
+      (*tint_module_vars.v)[v_1] = 0u;
       {
-        v_1 = (v_2 + 32u);
+        idx = (idx + 32u);
       }
     }
   }
   (threadgroup_barrier(mem_flags::mem_threadgroup));
   threadgroup tint_array<float, 1>* const view = reinterpret_cast<threadgroup tint_array<float, 1>*>(reinterpret_cast<threadgroup char*>(tint_module_vars.v) + 0u);
-  bool const v_3 = (64u <= 256u);
-  simdgroup_float8x8 v_4 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  (simdgroup_load(v_4, (&(*view)[select(0u, 0u, v_3)]), ulong(select(8u, 8u, v_3)), ulong2(0ul), true));
-  simdgroup_float8x8 const m = v_4;
-  bool const v_5 = (64u <= 256u);
-  (simdgroup_store(m, (&(*view)[select(0u, 0u, v_5)]), ulong(select(8u, 8u, v_5)), ulong2(0ul), false));
+  bool const v_2 = (64u <= 256u);
+  simdgroup_float8x8 v_3 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+  (simdgroup_load(v_3, (&(*view)[select(0u, 0u, v_2)]), ulong(select(8u, 8u, v_2)), ulong2(0ul), true));
+  simdgroup_float8x8 const m = v_3;
+  bool const v_4 = (64u <= 256u);
+  (simdgroup_store(m, (&(*view)[select(0u, 0u, v_4)]), ulong(select(8u, 8u, v_4)), ulong2(0ul), false));
 }
 
 [[max_total_threads_per_threadgroup(32)]]
-kernel void v_6(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_7 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_7).tint_symbol)};
+kernel void v_5(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_6 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_6).tint_symbol)};
   (main_inner(tint_local_index, tint_module_vars));
 }

@@ -31,182 +31,176 @@ void v(uint offset, float3x3 obj) {
 
 void v_1(uint offset, float3x3 obj[1]) {
   {
-    uint v_2 = 0u;
-    v_2 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 1u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 1u)) {
         break;
       }
-      v((offset + (v_3 * 48u)), obj[v_3]);
+      v((offset + (v_2 * 48u)), obj[v_2]);
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
-void v_4(uint offset, S2 obj) {
-  float3x3 v_5[1] = obj.m;
-  v_1((offset + 0u), v_5);
+void v_3(uint offset, S2 obj) {
+  float3x3 v_4[1] = obj.m;
+  v_1((offset + 0u), v_4);
 }
 
-void v_6(uint offset, S2 obj[1]) {
+void v_5(uint offset, S2 obj[1]) {
   {
-    uint v_7 = 0u;
-    v_7 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_8 = v_7;
-      if ((v_8 >= 1u)) {
+      uint v_6 = idx;
+      if ((v_6 >= 1u)) {
         break;
       }
-      S2 v_9 = obj[v_8];
-      v_4((offset + (v_8 * 48u)), v_9);
+      S2 v_7 = obj[v_6];
+      v_3((offset + (v_6 * 48u)), v_7);
       {
-        v_7 = (v_8 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
-void v_10(uint offset, float3x3 obj) {
+void v_8(uint offset, float3x3 obj) {
   buffer6.Store3((offset + 0u), asuint(obj[0u]));
   buffer6.Store3((offset + 16u), asuint(obj[1u]));
   buffer6.Store3((offset + 32u), asuint(obj[2u]));
 }
 
-void v_11(uint offset, S obj) {
-  v_10((offset + 0u), obj.m);
+void v_9(uint offset, S obj) {
+  v_8((offset + 0u), obj.m);
 }
 
-void v_12(uint offset, S obj[1]) {
+void v_10(uint offset, S obj[1]) {
   {
-    uint v_13 = 0u;
-    v_13 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_14 = v_13;
-      if ((v_14 >= 1u)) {
+      uint v_11 = idx;
+      if ((v_11 >= 1u)) {
         break;
       }
-      S v_15 = obj[v_14];
-      v_11((offset + (v_14 * 48u)), v_15);
+      S v_12 = obj[v_11];
+      v_9((offset + (v_11 * 48u)), v_12);
       {
-        v_13 = (v_14 + 1u);
+        idx = (idx + 1u);
+      }
+    }
+  }
+}
+
+void v_13(uint offset, float3x3 obj) {
+  buffer5.Store3((offset + 0u), asuint(obj[0u]));
+  buffer5.Store3((offset + 16u), asuint(obj[1u]));
+  buffer5.Store3((offset + 32u), asuint(obj[2u]));
+}
+
+void v_14(uint offset, float3x3 obj[1]) {
+  {
+    uint idx = 0u;
+    while(true) {
+      uint v_15 = idx;
+      if ((v_15 >= 1u)) {
+        break;
+      }
+      v_13((offset + (v_15 * 48u)), obj[v_15]);
+      {
+        idx = (idx + 1u);
       }
     }
   }
 }
 
 void v_16(uint offset, float3x3 obj) {
-  buffer5.Store3((offset + 0u), asuint(obj[0u]));
-  buffer5.Store3((offset + 16u), asuint(obj[1u]));
-  buffer5.Store3((offset + 32u), asuint(obj[2u]));
-}
-
-void v_17(uint offset, float3x3 obj[1]) {
-  {
-    uint v_18 = 0u;
-    v_18 = 0u;
-    while(true) {
-      uint v_19 = v_18;
-      if ((v_19 >= 1u)) {
-        break;
-      }
-      v_16((offset + (v_19 * 48u)), obj[v_19]);
-      {
-        v_18 = (v_19 + 1u);
-      }
-    }
-  }
-}
-
-void v_20(uint offset, float3x3 obj) {
   buffer4.Store3((offset + 0u), asuint(obj[0u]));
   buffer4.Store3((offset + 16u), asuint(obj[1u]));
   buffer4.Store3((offset + 32u), asuint(obj[2u]));
 }
 
-void v_21(uint offset, S obj) {
-  v_20((offset + 0u), obj.m);
+void v_17(uint offset, S obj) {
+  v_16((offset + 0u), obj.m);
 }
 
-void v_22(uint offset, S obj[1]) {
+void v_18(uint offset, S obj[1]) {
   {
-    uint v_23 = 0u;
-    v_23 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_24 = v_23;
-      if ((v_24 >= 1u)) {
+      uint v_19 = idx;
+      if ((v_19 >= 1u)) {
         break;
       }
-      S v_25 = obj[v_24];
-      v_21((offset + (v_24 * 48u)), v_25);
+      S v_20 = obj[v_19];
+      v_17((offset + (v_19 * 48u)), v_20);
       {
-        v_23 = (v_24 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
-void v_26(uint offset, S4 obj) {
-  S v_27[1] = obj.s;
-  v_22((offset + 0u), v_27);
+void v_21(uint offset, S4 obj) {
+  S v_22[1] = obj.s;
+  v_18((offset + 0u), v_22);
 }
 
-void v_28(uint offset, float3x3 obj) {
+void v_23(uint offset, float3x3 obj) {
   buffer3.Store3((offset + 0u), asuint(obj[0u]));
   buffer3.Store3((offset + 16u), asuint(obj[1u]));
   buffer3.Store3((offset + 32u), asuint(obj[2u]));
 }
 
-void v_29(uint offset, S obj) {
-  v_28((offset + 0u), obj.m);
+void v_24(uint offset, S obj) {
+  v_23((offset + 0u), obj.m);
 }
 
-void v_30(uint offset, S3 obj) {
-  S v_31 = obj.s;
-  v_29((offset + 0u), v_31);
+void v_25(uint offset, S3 obj) {
+  S v_26 = obj.s;
+  v_24((offset + 0u), v_26);
 }
 
-void v_32(uint offset, float3x3 obj) {
+void v_27(uint offset, float3x3 obj) {
   buffer2.Store3((offset + 0u), asuint(obj[0u]));
   buffer2.Store3((offset + 16u), asuint(obj[1u]));
   buffer2.Store3((offset + 32u), asuint(obj[2u]));
 }
 
-void v_33(uint offset, float3x3 obj[1]) {
+void v_28(uint offset, float3x3 obj[1]) {
   {
-    uint v_34 = 0u;
-    v_34 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_35 = v_34;
-      if ((v_35 >= 1u)) {
+      uint v_29 = idx;
+      if ((v_29 >= 1u)) {
         break;
       }
-      v_32((offset + (v_35 * 48u)), obj[v_35]);
+      v_27((offset + (v_29 * 48u)), obj[v_29]);
       {
-        v_34 = (v_35 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
-void v_36(uint offset, S2 obj) {
-  float3x3 v_37[1] = obj.m;
-  v_33((offset + 0u), v_37);
+void v_30(uint offset, S2 obj) {
+  float3x3 v_31[1] = obj.m;
+  v_28((offset + 0u), v_31);
 }
 
-void v_38(uint offset, float3x3 obj) {
+void v_32(uint offset, float3x3 obj) {
   buffer1.Store3((offset + 0u), asuint(obj[0u]));
   buffer1.Store3((offset + 16u), asuint(obj[1u]));
   buffer1.Store3((offset + 32u), asuint(obj[2u]));
 }
 
-void v_39(uint offset, S obj) {
-  v_38((offset + 0u), obj.m);
+void v_33(uint offset, S obj) {
+  v_32((offset + 0u), obj.m);
 }
 
-void v_40(uint offset, float3x3 obj) {
+void v_34(uint offset, float3x3 obj) {
   buffer0.Store3((offset + 0u), asuint(obj[0u]));
   buffer0.Store3((offset + 16u), asuint(obj[1u]));
   buffer0.Store3((offset + 32u), asuint(obj[2u]));
@@ -218,24 +212,24 @@ void main() {
   {
     uint c = 0u;
     for( ; (c < 3u); c = (c + 1u)) {
-      uint v_41 = c;
-      float v_42 = float(((c * 3u) + 1u));
-      float v_43 = float(((c * 3u) + 2u));
-      float3 v_44 = float3(v_42, v_43, float(((c * 3u) + 3u)));
-      switch(v_41) {
+      uint v_35 = c;
+      float v_36 = float(((c * 3u) + 1u));
+      float v_37 = float(((c * 3u) + 2u));
+      float3 v_38 = float3(v_36, v_37, float(((c * 3u) + 3u)));
+      switch(v_35) {
         case 0u:
         {
-          m[0u] = v_44;
+          m[0u] = v_38;
           break;
         }
         case 1u:
         {
-          m[1u] = v_44;
+          m[1u] = v_38;
           break;
         }
         case 2u:
         {
-          m[2u] = v_44;
+          m[2u] = v_38;
           break;
         }
         default:
@@ -246,27 +240,27 @@ void main() {
     }
   }
   float3x3 a = m;
-  v_40(0u, a);
+  v_34(0u, a);
   S a_1 = {m};
-  v_39(0u, a_1);
-  float3x3 v_45[1] = {m};
-  S2 a_2 = {v_45};
-  v_36(0u, a_2);
-  S v_46 = {m};
-  S3 a_3 = {v_46};
-  v_30(0u, a_3);
-  S v_47 = {m};
-  S v_48[1] = {v_47};
-  S4 a_4 = {v_48};
-  v_26(0u, a_4);
+  v_33(0u, a_1);
+  float3x3 v_39[1] = {m};
+  S2 a_2 = {v_39};
+  v_30(0u, a_2);
+  S v_40 = {m};
+  S3 a_3 = {v_40};
+  v_25(0u, a_3);
+  S v_41 = {m};
+  S v_42[1] = {v_41};
+  S4 a_4 = {v_42};
+  v_21(0u, a_4);
   float3x3 a_5[1] = {m};
-  v_17(0u, a_5);
-  S v_49 = {m};
-  S a_6[1] = {v_49};
-  v_12(0u, a_6);
-  float3x3 v_50[1] = {m};
-  S2 v_51 = {v_50};
-  S2 a_7[1] = {v_51};
-  v_6(0u, a_7);
+  v_14(0u, a_5);
+  S v_43 = {m};
+  S a_6[1] = {v_43};
+  v_10(0u, a_6);
+  float3x3 v_44[1] = {m};
+  S2 v_45 = {v_44};
+  S2 a_7[1] = {v_45};
+  v_5(0u, a_7);
 }
 

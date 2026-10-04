@@ -144,16 +144,15 @@ struct tint_symbol_1 {
 
 void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint const v_1 = v;
-      if ((v_1 >= 1073741823u)) {
+      uint const v = idx;
+      if ((v >= 1073741823u)) {
         break;
       }
-      (*tint_module_vars.a)[v_1] = 0u;
+      (*tint_module_vars.a)[v] = 0u;
       {
-        v = (v_1 + 64u);
+        idx = (idx + 64u);
       }
     }
   }
@@ -161,8 +160,8 @@ void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars
 }
 
 [[max_total_threads_per_threadgroup(64)]]
-kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v_2).tint_symbol)};
+kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_1 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v_1).tint_symbol)};
   (entry_inner(tint_local_index, tint_module_vars));
 }
 )");
@@ -737,16 +736,15 @@ struct tint_symbol_1 {
 
 void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
-    uint v_1 = 0u;
-    v_1 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint const v_2 = v_1;
-      if ((v_2 >= 32u)) {
+      uint const v_1 = idx;
+      if ((v_1 >= 32u)) {
         break;
       }
-      (*tint_module_vars.v)[v_2] = 0u;
+      (*tint_module_vars.v)[v_1] = 0u;
       {
-        v_1 = (v_2 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -755,8 +753,8 @@ void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_3 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_3).tint_symbol)};
+kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_2).tint_symbol)};
   (entry_inner(tint_local_index, tint_module_vars));
 }
 )");
@@ -827,16 +825,15 @@ void foo(tint_module_vars_struct tint_module_vars) {
 
 void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
-    uint v_1 = 0u;
-    v_1 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint const v_2 = v_1;
-      if ((v_2 >= 128u)) {
+      uint const v_1 = idx;
+      if ((v_1 >= 128u)) {
         break;
       }
-      (*tint_module_vars.v)[v_2] = 0u;
+      (*tint_module_vars.v)[v_1] = 0u;
       {
-        v_1 = (v_2 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -845,8 +842,8 @@ void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_3 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_3).tint_symbol)};
+kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_2).tint_symbol)};
   (entry_inner(tint_local_index, tint_module_vars));
 }
 )");

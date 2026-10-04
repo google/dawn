@@ -29,64 +29,62 @@ typedef Inner ary_ret[4];
 ary_ret v_3(uint start_byte_offset) {
   Inner a_2[4] = (Inner[4])0;
   {
-    uint v_4 = 0u;
-    v_4 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_5 = v_4;
-      if ((v_5 >= 4u)) {
+      uint v_4 = idx;
+      if ((v_4 >= 4u)) {
         break;
       }
-      Inner v_6 = v_1((start_byte_offset + (v_5 * 64u)));
-      a_2[v_5] = v_6;
+      Inner v_5 = v_1((start_byte_offset + (v_4 * 64u)));
+      a_2[v_4] = v_5;
       {
-        v_4 = (v_5 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  Inner v_7[4] = a_2;
-  return v_7;
+  Inner v_6[4] = a_2;
+  return v_6;
 }
 
-Outer v_8(uint start_byte_offset) {
-  Inner v_9[4] = v_3(start_byte_offset);
-  Outer v_10 = {v_9};
-  return v_10;
+Outer v_7(uint start_byte_offset) {
+  Inner v_8[4] = v_3(start_byte_offset);
+  Outer v_9 = {v_8};
+  return v_9;
 }
 
 typedef Outer ary_ret_1[4];
-ary_ret_1 v_11(uint start_byte_offset) {
+ary_ret_1 v_10(uint start_byte_offset) {
   Outer a_1[4] = (Outer[4])0;
   {
-    uint v_12 = 0u;
-    v_12 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_13 = v_12;
-      if ((v_13 >= 4u)) {
+      uint v_11 = idx;
+      if ((v_11 >= 4u)) {
         break;
       }
-      Outer v_14 = v_8((start_byte_offset + (v_13 * 256u)));
-      a_1[v_13] = v_14;
+      Outer v_12 = v_7((start_byte_offset + (v_11 * 256u)));
+      a_1[v_11] = v_12;
       {
-        v_12 = (v_13 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  Outer v_15[4] = a_1;
-  return v_15;
+  Outer v_13[4] = a_1;
+  return v_13;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  uint v_16 = (min(uint(i()), 3u) * 256u);
-  uint v_17 = (min(uint(i()), 3u) * 64u);
-  uint v_18 = (min(uint(i()), 3u) * 16u);
-  Outer l_a[4] = v_11(0u);
-  Outer l_a_i = v_8(v_16);
-  Inner l_a_i_a[4] = v_3(v_16);
-  Inner l_a_i_a_i = v_1((v_16 + v_17));
-  float4x3 l_a_i_a_i_m = v((v_16 + v_17));
-  float3 l_a_i_a_i_m_i = asfloat(a[(((v_16 + v_17) + v_18) / 16u)].xyz);
-  uint v_19 = (((v_16 + v_17) + v_18) + (min(uint(i()), 2u) * 4u));
-  float l_a_i_a_i_m_i_i = asfloat(a[(v_19 / 16u)][((v_19 & 15u) >> 2u)]);
+  uint v_14 = (min(uint(i()), 3u) * 256u);
+  uint v_15 = (min(uint(i()), 3u) * 64u);
+  uint v_16 = (min(uint(i()), 3u) * 16u);
+  Outer l_a[4] = v_10(0u);
+  Outer l_a_i = v_7(v_14);
+  Inner l_a_i_a[4] = v_3(v_14);
+  Inner l_a_i_a_i = v_1((v_14 + v_15));
+  float4x3 l_a_i_a_i_m = v((v_14 + v_15));
+  float3 l_a_i_a_i_m_i = asfloat(a[(((v_14 + v_15) + v_16) / 16u)].xyz);
+  uint v_17 = (((v_14 + v_15) + v_16) + (min(uint(i()), 2u) * 4u));
+  float l_a_i_a_i_m_i_i = asfloat(a[(v_17 / 16u)][((v_17 & 15u) >> 2u)]);
 }
 

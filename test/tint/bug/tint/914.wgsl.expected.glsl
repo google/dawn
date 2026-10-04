@@ -73,17 +73,16 @@ uint tint_div_u32(uint lhs, uint rhs) {
 }
 void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
   {
-    uint v_16 = 0u;
-    v_16 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_17 = v_16;
-      if ((v_17 >= 4096u)) {
+      uint v_16 = idx;
+      if ((v_16 >= 4096u)) {
         break;
       }
-      mm_Asub[(v_17 / 64u)][(v_17 % 64u)] = 0.0f;
-      mm_Bsub[(v_17 / 64u)][(v_17 % 64u)] = 0.0f;
+      mm_Asub[(v_16 / 64u)][(v_16 % 64u)] = 0.0f;
+      mm_Bsub[(v_16 / 64u)][(v_16 % 64u)] = 0.0f;
       {
-        v_16 = (v_17 + 256u);
+        idx = (idx + 256u);
       }
     }
   }
@@ -92,8 +91,8 @@ void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
   uint tileCol = (local_id.x * 4u);
   uint globalRow = (global_id.y * 4u);
   uint globalCol = (global_id.x * 4u);
-  uvec4 v_18 = v.inner[0u];
-  uint numTiles = (tint_div_u32((v_18.y - 1u), 64u) + 1u);
+  uvec4 v_17 = v.inner[0u];
+  uint numTiles = (tint_div_u32((v_17.y - 1u), 64u) + 1u);
   float acc[16] = float[16](0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float ACached = 0.0f;
   float BCached[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
@@ -104,8 +103,8 @@ void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
       } else {
         break;
       }
-      uint v_19 = index;
-      acc[v_19] = 0.0f;
+      uint v_18 = index;
+      acc[v_18] = 0.0f;
       {
         index = (index + 1u);
       }
@@ -181,8 +180,8 @@ void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
               }
               uint inputRow = (tileRowB + innerRow);
               uint inputCol = (tileCol + innerCol);
-              uint v_20 = innerCol;
-              mm_Bsub[v_20][inputCol] = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
+              uint v_19 = innerCol;
+              mm_Bsub[v_19][inputCol] = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
               {
                 innerCol = (innerCol + 1u);
               }
@@ -212,10 +211,10 @@ void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
               } else {
                 break;
               }
-              uint v_21 = inner;
-              uint v_22 = k;
-              uint v_23 = (tileCol + inner);
-              BCached[v_21] = mm_Bsub[v_22][v_23];
+              uint v_20 = inner;
+              uint v_21 = k;
+              uint v_22 = (tileCol + inner);
+              BCached[v_20] = mm_Bsub[v_21][v_22];
               {
                 inner = (inner + 1u);
               }
@@ -228,9 +227,9 @@ void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
               } else {
                 break;
               }
-              uint v_24 = (tileRow + innerRow);
-              uint v_25 = k;
-              ACached = mm_Asub[v_24][v_25];
+              uint v_23 = (tileRow + innerRow);
+              uint v_24 = k;
+              ACached = mm_Asub[v_23][v_24];
               {
                 uint innerCol = 0u;
                 while(true) {
@@ -239,10 +238,10 @@ void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
                     break;
                   }
                   uint index = ((innerRow * 4u) + innerCol);
-                  float v_26 = acc[index];
-                  float v_27 = ACached;
-                  uint v_28 = innerCol;
-                  acc[index] = (v_26 + (v_27 * BCached[v_28]));
+                  float v_25 = acc[index];
+                  float v_26 = ACached;
+                  uint v_27 = innerCol;
+                  acc[index] = (v_25 + (v_26 * BCached[v_27]));
                   {
                     innerCol = (innerCol + 1u);
                   }

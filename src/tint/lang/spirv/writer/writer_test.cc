@@ -341,10 +341,10 @@ TEST_F(SpirvWriterTest, Spv14_CopyLogical) {
          %wg = OpVariable %_ptr_Workgroup__arr_uint_uint_4_0 Workgroup
 )");
     EXPECT_INST(R"(
-         %27 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_4 %1 %uint_0
-         %30 = OpLoad %_arr_uint_uint_4 %27 None
-         %31 = OpCopyLogical %_arr_uint_uint_4_0 %30
-               OpStore %wg %31 None
+         %25 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_4 %1 %uint_0
+         %28 = OpLoad %_arr_uint_uint_4 %25 None
+         %29 = OpCopyLogical %_arr_uint_uint_4_0 %28
+               OpStore %wg %29 None
                OpReturn
 )");
 }

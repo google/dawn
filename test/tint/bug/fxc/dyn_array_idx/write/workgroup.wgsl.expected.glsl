@@ -20,23 +20,22 @@ buffer result_block_1_ssbo {
 shared S s;
 void f_inner(uint tint_local_index) {
   {
-    uint v_2 = 0u;
-    v_2 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 64u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 64u)) {
         break;
       }
-      s.data[v_3] = 0;
+      s.data[v_2] = 0;
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
   barrier();
-  uvec4 v_4 = v.inner[0u];
-  uint v_5 = min(uint(int(v_4.x)), 63u);
-  s.data[v_5] = 1;
+  uvec4 v_3 = v.inner[0u];
+  uint v_4 = min(uint(int(v_3.x)), 63u);
+  s.data[v_4] = 1;
   v_1.inner.member_0 = s.data[3];
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

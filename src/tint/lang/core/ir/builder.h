@@ -2055,15 +2055,21 @@ class Builder {
         auto* end_value = Value(std::forward<END>(end));
         auto* step_value = Value(std::forward<STEP>(step));
 
+        // The loop index is held in a function variable rather than in a block parameter of the
+        // loop body. A block parameter becomes an OpPhi in SPIR-V, and loops with that shape hang
+        // the GPU on some Mali drivers (seen with Mali-G715, driver r54p3).
         auto* loop = Loop();
-        auto* idx = BlockParam("idx", start_value->Type());
-        loop->Body()->SetParams({idx});
+        ir::Var* idx_var = nullptr;
         Append(loop->Initializer(), [&] {
             // Start the loop with `idx = start`.
-            NextIteration(loop, start_value);
+            idx_var = Var("idx", ir.Types().ptr(core::AddressSpace::kFunction, start_value->Type(),
+                                                core::Access::kReadWrite));
+            idx_var->SetInitializer(start_value);
+            NextIteration(loop);
         });
         Append(loop->Body(), [&] {
             // Loop until `idx == end`.
+            auto* idx = Load(idx_var)->Result();
             auto* breakif = If(GreaterThanEqual(idx, end_value));
             Append(breakif->True(), [&] {  //
                 ExitLoop(loop);
@@ -2075,8 +2081,9 @@ class Builder {
         });
         Append(loop->Continuing(), [&] {
             // Update the index with `idx += step` and go to the next iteration.
-            auto* new_idx = Add(idx, step_value);
-            NextIteration(loop, new_idx);
+            auto* idx = Load(idx_var)->Result();
+            Store(idx_var, Add(idx, step_value));
+            NextIteration(loop);
         });
     }
 

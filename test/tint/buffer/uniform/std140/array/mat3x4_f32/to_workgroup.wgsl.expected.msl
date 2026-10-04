@@ -24,16 +24,15 @@ struct tint_symbol_1 {
 
 void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint const v_1 = v;
-      if ((v_1 >= 4u)) {
+      uint const v = idx;
+      if ((v >= 4u)) {
         break;
       }
-      (*tint_module_vars.w)[v_1] = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
+      (*tint_module_vars.w)[v] = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
       {
-        v = (v_1 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -45,7 +44,7 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void f(uint tint_local_index [[thread_index_in_threadgroup]], const constant tint_array<float3x4, 4>* u [[buffer(0)]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .w=(&(*v_2).tint_symbol)};
+kernel void f(uint tint_local_index [[thread_index_in_threadgroup]], const constant tint_array<float3x4, 4>* u [[buffer(0)]], threadgroup tint_symbol_1* v_1 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .w=(&(*v_1).tint_symbol)};
   (f_inner(tint_local_index, tint_module_vars));
 }

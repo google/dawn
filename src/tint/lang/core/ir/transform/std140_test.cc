@@ -655,39 +655,43 @@ $B1: {  # root
     %8:ptr<function, array<Inner, 4>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration 0u  # -> $B5
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B5
       }
-      $B5 (%idx:u32): {  # body
-        %10:bool = gte %idx, 4u
-        if %10 [t: $B7] {  # if_1
+      $B5: {  # body
+        %10:u32 = load %idx
+        %11:bool = gte %10, 4u
+        if %11 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %11:ptr<function, Inner, read_write> = access %8, %idx
-        %12:Inner_std140 = access %7, %idx
-        %13:Inner = call %tint_convert_Inner, %12
-        store %11, %13
+        %12:ptr<function, Inner, read_write> = access %8, %10
+        %13:Inner_std140 = access %7, %10
+        %14:Inner = call %tint_convert_Inner, %13
+        store %12, %14
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %15:u32 = add %idx, 1u
-        next_iteration %15  # -> $B5
+        %16:u32 = load %idx
+        %17:u32 = add %16, 1u
+        store %idx, %17
+        next_iteration  # -> $B5
       }
     }
-    %16:array<Inner, 4> = load %8
-    %17:Outer = construct %16
-    ret %17
+    %18:array<Inner, 4> = load %8
+    %19:Outer = construct %18
+    ret %19
   }
 }
 %tint_convert_Inner = func(%tint_input_1:Inner_std140):Inner {  # %tint_input_1: 'tint_input'
   $B8: {
-    %19:vec2<f32> = access %tint_input_1, 0u
-    %20:vec2<f32> = access %tint_input_1, 1u
-    %21:vec2<f32> = access %tint_input_1, 2u
-    %22:mat3x2<f32> = construct %19, %20, %21
-    %23:Inner = construct %22
-    ret %23
+    %21:vec2<f32> = access %tint_input_1, 0u
+    %22:vec2<f32> = access %tint_input_1, 1u
+    %23:vec2<f32> = access %tint_input_1, 2u
+    %24:mat3x2<f32> = construct %21, %22, %23
+    %25:Inner = construct %24
+    ret %25
   }
 }
 )";
@@ -1089,48 +1093,52 @@ $B1: {  # root
     %14:ptr<function, array<Inner, 4>, read_write> = var undef
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration 0u  # -> $B4
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B4
       }
-      $B4 (%idx:u32): {  # body
-        %16:bool = gte %idx, 4u
-        if %16 [t: $B6] {  # if_1
+      $B4: {  # body
+        %16:u32 = load %idx
+        %17:bool = gte %16, 4u
+        if %17 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %17:ptr<function, Inner, read_write> = access %14, %idx
-        %18:Inner_std140 = access %13, %idx
-        %19:Inner = call %tint_convert_Inner, %18
-        store %17, %19
+        %18:ptr<function, Inner, read_write> = access %14, %16
+        %19:Inner_std140 = access %13, %16
+        %20:Inner = call %tint_convert_Inner, %19
+        store %18, %20
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %21:u32 = add %idx, 1u
-        next_iteration %21  # -> $B4
+        %22:u32 = load %idx
+        %23:u32 = add %22, 1u
+        store %idx, %23
+        next_iteration  # -> $B4
       }
     }
-    %22:array<Inner, 4> = load %14
-    %arr:array<Inner, 4> = let %22
-    %24:Inner_std140 = load %4
-    %25:Inner = call %tint_convert_Inner, %24
-    %inner:Inner = let %25
+    %24:array<Inner, 4> = load %14
+    %arr:array<Inner, 4> = let %24
+    %26:Inner_std140 = load %4
+    %27:Inner = call %tint_convert_Inner, %26
+    %inner:Inner = let %27
     %mat:mat3x2<f32> = let %11
     %col:vec2<f32> = let %12
-    %29:f32 = access %12, 1u
-    %el:f32 = let %29
+    %31:f32 = access %12, 1u
+    %el:f32 = let %31
     ret
   }
 }
 %tint_convert_Inner = func(%tint_input:Inner_std140):Inner {
   $B7: {
-    %32:i32 = access %tint_input, 0u
-    %33:vec2<f32> = access %tint_input, 1u
-    %34:vec2<f32> = access %tint_input, 2u
-    %35:vec2<f32> = access %tint_input, 3u
-    %36:mat3x2<f32> = construct %33, %34, %35
-    %37:i32 = access %tint_input, 4u
-    %38:Inner = construct %32, %36, %37
-    ret %38
+    %34:i32 = access %tint_input, 0u
+    %35:vec2<f32> = access %tint_input, 1u
+    %36:vec2<f32> = access %tint_input, 2u
+    %37:vec2<f32> = access %tint_input, 3u
+    %38:mat3x2<f32> = construct %35, %36, %37
+    %39:i32 = access %tint_input, 4u
+    %40:Inner = construct %34, %38, %39
+    ret %40
   }
 }
 )";
@@ -1264,48 +1272,52 @@ $B1: {  # root
     %14:ptr<function, array<Inner, 4>, read_write> = var undef
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration 0u  # -> $B4
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B4
       }
-      $B4 (%idx:u32): {  # body
-        %16:bool = gte %idx, 4u
-        if %16 [t: $B6] {  # if_1
+      $B4: {  # body
+        %16:u32 = load %idx
+        %17:bool = gte %16, 4u
+        if %17 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %17:ptr<function, Inner, read_write> = access %14, %idx
-        %18:Inner_std140 = access %13, %idx
-        %19:Inner = call %tint_convert_Inner, %18
-        store %17, %19
+        %18:ptr<function, Inner, read_write> = access %14, %16
+        %19:Inner_std140 = access %13, %16
+        %20:Inner = call %tint_convert_Inner, %19
+        store %18, %20
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %21:u32 = add %idx, 1u
-        next_iteration %21  # -> $B4
+        %22:u32 = load %idx
+        %23:u32 = add %22, 1u
+        store %idx, %23
+        next_iteration  # -> $B4
       }
     }
-    %22:array<Inner, 4> = load %14
-    %arr:array<Inner, 4> = let %22
-    %24:Inner_std140 = load %4
-    %25:Inner = call %tint_convert_Inner, %24
-    %inner:Inner = let %25
+    %24:array<Inner, 4> = load %14
+    %arr:array<Inner, 4> = let %24
+    %26:Inner_std140 = load %4
+    %27:Inner = call %tint_convert_Inner, %26
+    %inner:Inner = let %27
     %mat:mat3x2<f32> = let %11
     %col:vec2<f32> = let %12
-    %29:f32 = access %12, 1u
-    %el:f32 = let %29
+    %31:f32 = access %12, 1u
+    %el:f32 = let %31
     ret
   }
 }
 %tint_convert_Inner = func(%tint_input:Inner_std140):Inner {
   $B7: {
-    %32:i32 = access %tint_input, 0u
-    %33:vec2<f32> = access %tint_input, 1u
-    %34:vec2<f32> = access %tint_input, 2u
-    %35:vec2<f32> = access %tint_input, 3u
-    %36:mat3x2<f32> = construct %33, %34, %35
-    %37:i32 = access %tint_input, 4u
-    %38:Inner = construct %32, %36, %37
-    ret %38
+    %34:i32 = access %tint_input, 0u
+    %35:vec2<f32> = access %tint_input, 1u
+    %36:vec2<f32> = access %tint_input, 2u
+    %37:vec2<f32> = access %tint_input, 3u
+    %38:mat3x2<f32> = construct %35, %36, %37
+    %39:i32 = access %tint_input, 4u
+    %40:Inner = construct %34, %38, %39
+    ret %40
   }
 }
 )";
@@ -1438,48 +1450,52 @@ $B1: {  # root
     %17:ptr<function, array<Inner, 4>, read_write> = var undef
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration 0u  # -> $B4
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B4
       }
-      $B4 (%idx:u32): {  # body
-        %19:bool = gte %idx, 4u
-        if %19 [t: $B6] {  # if_1
+      $B4: {  # body
+        %19:u32 = load %idx
+        %20:bool = gte %19, 4u
+        if %20 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %20:ptr<function, Inner, read_write> = access %17, %idx
-        %21:Inner_std140 = access %16, %idx
-        %22:Inner = call %tint_convert_Inner, %21
-        store %20, %22
+        %21:ptr<function, Inner, read_write> = access %17, %19
+        %22:Inner_std140 = access %16, %19
+        %23:Inner = call %tint_convert_Inner, %22
+        store %21, %23
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %24:u32 = add %idx, 1u
-        next_iteration %24  # -> $B4
+        %25:u32 = load %idx
+        %26:u32 = add %25, 1u
+        store %idx, %26
+        next_iteration  # -> $B4
       }
     }
-    %25:array<Inner, 4> = load %17
-    %arr:array<Inner, 4> = let %25
-    %27:Inner_std140 = load %7
-    %28:Inner = call %tint_convert_Inner, %27
-    %inner:Inner = let %28
+    %27:array<Inner, 4> = load %17
+    %arr:array<Inner, 4> = let %27
+    %29:Inner_std140 = load %7
+    %30:Inner = call %tint_convert_Inner, %29
+    %inner:Inner = let %30
     %mat:mat3x2<f32> = let %14
     %col:vec2<f32> = let %15
-    %32:f32 = access %15, %el_idx
-    %el:f32 = let %32
+    %34:f32 = access %15, %el_idx
+    %el:f32 = let %34
     ret
   }
 }
 %tint_convert_Inner = func(%tint_input:Inner_std140):Inner {
   $B7: {
-    %35:i32 = access %tint_input, 0u
-    %36:vec2<f32> = access %tint_input, 1u
-    %37:vec2<f32> = access %tint_input, 2u
-    %38:vec2<f32> = access %tint_input, 3u
-    %39:mat3x2<f32> = construct %36, %37, %38
-    %40:i32 = access %tint_input, 4u
-    %41:Inner = construct %35, %39, %40
-    ret %41
+    %37:i32 = access %tint_input, 0u
+    %38:vec2<f32> = access %tint_input, 1u
+    %39:vec2<f32> = access %tint_input, 2u
+    %40:vec2<f32> = access %tint_input, 3u
+    %41:mat3x2<f32> = construct %38, %39, %40
+    %42:i32 = access %tint_input, 4u
+    %43:Inner = construct %37, %41, %42
+    ret %43
   }
 }
 )";

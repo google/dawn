@@ -36,16 +36,15 @@ f16mat4x3 v_2(uint start_byte_offset) {
 f16mat4x3[4] v_13(uint start_byte_offset) {
   f16mat4x3 a[4] = f16mat4x3[4](f16mat4x3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)), f16mat4x3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)), f16mat4x3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)), f16mat4x3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)));
   {
-    uint v_14 = 0u;
-    v_14 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_15 = v_14;
-      if ((v_15 >= 4u)) {
+      uint v_14 = idx;
+      if ((v_14 >= 4u)) {
         break;
       }
-      a[v_15] = v_2((start_byte_offset + (v_15 * 32u)));
+      a[v_14] = v_2((start_byte_offset + (v_14 * 32u)));
       {
-        v_14 = (v_15 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -53,14 +52,14 @@ f16mat4x3[4] v_13(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_16 = (min(uint(i()), 3u) * 32u);
-  uint v_17 = (min(uint(i()), 3u) * 8u);
+  uint v_15 = (min(uint(i()), 3u) * 32u);
+  uint v_16 = (min(uint(i()), 3u) * 8u);
   f16mat4x3 l_a[4] = v_13(0u);
-  f16mat4x3 l_a_i = v_2(v_16);
-  uint v_18 = (v_16 + v_17);
-  uvec4 v_19 = v.inner[(v_18 / 16u)];
-  f16vec3 l_a_i_i = tint_bitcast_to_16bit(mix(v_19.xy, v_19.zw, bvec2((((v_18 & 15u) >> 2u) == 2u)))).xyz;
-  uint v_20 = (v_16 + v_17);
-  uvec4 v_21 = v.inner[(v_20 / 16u)];
-  v_1.inner = (((tint_bitcast_to_16bit_1(v_21[((v_20 & 15u) >> 2u)])[mix(1u, 0u, ((v_20 % 4u) == 0u))] + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x);
+  f16mat4x3 l_a_i = v_2(v_15);
+  uint v_17 = (v_15 + v_16);
+  uvec4 v_18 = v.inner[(v_17 / 16u)];
+  f16vec3 l_a_i_i = tint_bitcast_to_16bit(mix(v_18.xy, v_18.zw, bvec2((((v_17 & 15u) >> 2u) == 2u)))).xyz;
+  uint v_19 = (v_15 + v_16);
+  uvec4 v_20 = v.inner[(v_19 / 16u)];
+  v_1.inner = (((tint_bitcast_to_16bit_1(v_20[((v_19 & 15u) >> 2u)])[mix(1u, 0u, ((v_19 % 4u) == 0u))] + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x);
 }

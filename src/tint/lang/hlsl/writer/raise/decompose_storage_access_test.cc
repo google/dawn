@@ -614,30 +614,34 @@ $B1: {  # root
     %a_1:ptr<function, array<vec3<f32>, 5>, read_write> = var array<vec3<f32>, 5>(vec3<f32>(0.0f))  # %a_1: 'a'
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration 0u  # -> $B5
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B5
       }
-      $B5 (%idx:u32): {  # body
-        %12:bool = gte %idx, 5u
-        if %12 [t: $B7] {  # if_1
+      $B5: {  # body
+        %12:u32 = load %idx
+        %13:bool = gte %12, 5u
+        if %13 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %13:ptr<function, vec3<f32>, read_write> = access %a_1, %idx
-        %14:u32 = mul %idx, 16u
-        %15:u32 = add %offset, %14
-        %16:vec3<u32> = %v.Load3 %15
-        %17:vec3<f32> = bitcast<vec3<f32>> %16
-        store %13, %17
+        %14:ptr<function, vec3<f32>, read_write> = access %a_1, %12
+        %15:u32 = mul %12, 16u
+        %16:u32 = add %offset, %15
+        %17:vec3<u32> = %v.Load3 %16
+        %18:vec3<f32> = bitcast<vec3<f32>> %17
+        store %14, %18
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %18:u32 = add %idx, 1u
-        next_iteration %18  # -> $B5
+        %19:u32 = load %idx
+        %20:u32 = add %19, 1u
+        store %idx, %20
+        next_iteration  # -> $B5
       }
     }
-    %19:array<vec3<f32>, 5> = load %a_1
-    ret %19
+    %21:array<vec3<f32>, 5> = load %a_1
+    ret %21
   }
 }
 )";
@@ -695,30 +699,34 @@ $B1: {  # root
     %a_1:ptr<function, array<vec3<f32>, 42>, read_write> = var array<vec3<f32>, 42>(vec3<f32>(0.0f))  # %a_1: 'a'
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration 0u  # -> $B5
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B5
       }
-      $B5 (%idx:u32): {  # body
-        %12:bool = gte %idx, 42u
-        if %12 [t: $B7] {  # if_1
+      $B5: {  # body
+        %12:u32 = load %idx
+        %13:bool = gte %12, 42u
+        if %13 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %13:ptr<function, vec3<f32>, read_write> = access %a_1, %idx
-        %14:u32 = mul %idx, 16u
-        %15:u32 = add %offset, %14
-        %16:vec3<u32> = %v.Load3 %15
-        %17:vec3<f32> = bitcast<vec3<f32>> %16
-        store %13, %17
+        %14:ptr<function, vec3<f32>, read_write> = access %a_1, %12
+        %15:u32 = mul %12, 16u
+        %16:u32 = add %offset, %15
+        %17:vec3<u32> = %v.Load3 %16
+        %18:vec3<f32> = bitcast<vec3<f32>> %17
+        store %14, %18
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %18:u32 = add %idx, 1u
-        next_iteration %18  # -> $B5
+        %19:u32 = load %idx
+        %20:u32 = add %19, 1u
+        store %idx, %20
+        next_iteration  # -> $B5
       }
     }
-    %19:array<vec3<f32>, 42> = load %a_1
-    ret %19
+    %21:array<vec3<f32>, 42> = load %a_1
+    ret %21
   }
 }
 )";
@@ -947,30 +955,34 @@ $B1: {  # root
     %a_1:ptr<function, array<vec3<f32>, 5>, read_write> = var array<vec3<f32>, 5>(vec3<f32>(0.0f))  # %a_1: 'a'
     loop [i: $B8, b: $B9, c: $B10] {  # loop_1
       $B8: {  # initializer
-        next_iteration 0u  # -> $B9
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B9
       }
-      $B9 (%idx:u32): {  # body
-        %47:bool = gte %idx, 5u
-        if %47 [t: $B11] {  # if_1
+      $B9: {  # body
+        %47:u32 = load %idx
+        %48:bool = gte %47, 5u
+        if %48 [t: $B11] {  # if_1
           $B11: {  # true
             exit_loop  # loop_1
           }
         }
-        %48:ptr<function, vec3<f32>, read_write> = access %a_1, %idx
-        %49:u32 = mul %idx, 16u
-        %50:u32 = add %offset_4, %49
-        %51:vec3<u32> = %v.Load3 %50
-        %52:vec3<f32> = bitcast<vec3<f32>> %51
-        store %48, %52
+        %49:ptr<function, vec3<f32>, read_write> = access %a_1, %47
+        %50:u32 = mul %47, 16u
+        %51:u32 = add %offset_4, %50
+        %52:vec3<u32> = %v.Load3 %51
+        %53:vec3<f32> = bitcast<vec3<f32>> %52
+        store %49, %53
         continue  # -> $B10
       }
       $B10: {  # continuing
-        %53:u32 = add %idx, 1u
-        next_iteration %53  # -> $B9
+        %54:u32 = load %idx
+        %55:u32 = add %54, 1u
+        store %idx, %55
+        next_iteration  # -> $B9
       }
     }
-    %54:array<vec3<f32>, 5> = load %a_1
-    ret %54
+    %56:array<vec3<f32>, 5> = load %a_1
+    ret %56
   }
 }
 )";
@@ -3808,25 +3820,29 @@ $B1: {  # root
   $B3: {
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration 0u  # -> $B5
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B5
       }
-      $B5 (%idx:u32): {  # body
-        %9:bool = gte %idx, 5u
-        if %9 [t: $B7] {  # if_1
+      $B5: {  # body
+        %9:u32 = load %idx
+        %10:bool = gte %9, 5u
+        if %10 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %10:vec3<f32> = access %obj, %idx
-        %11:u32 = mul %idx, 16u
-        %12:u32 = add %offset, %11
-        %13:vec3<u32> = bitcast<vec3<u32>> %10
-        %14:void = %v.Store3 %12, %13
+        %11:vec3<f32> = access %obj, %9
+        %12:u32 = mul %9, 16u
+        %13:u32 = add %offset, %12
+        %14:vec3<u32> = bitcast<vec3<u32>> %11
+        %15:void = %v.Store3 %13, %14
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %15:u32 = add %idx, 1u
-        next_iteration %15  # -> $B5
+        %16:u32 = load %idx
+        %17:u32 = add %16, 1u
+        store %idx, %17
+        next_iteration  # -> $B5
       }
     }
     ret
@@ -4309,25 +4325,29 @@ $B1: {  # root
   $B7: {
     loop [i: $B8, b: $B9, c: $B10] {  # loop_1
       $B8: {  # initializer
-        next_iteration 0u  # -> $B9
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B9
       }
-      $B9 (%idx:u32): {  # body
-        %53:bool = gte %idx, 5u
-        if %53 [t: $B11] {  # if_1
+      $B9: {  # body
+        %53:u32 = load %idx
+        %54:bool = gte %53, 5u
+        if %54 [t: $B11] {  # if_1
           $B11: {  # true
             exit_loop  # loop_1
           }
         }
-        %54:vec3<f32> = access %obj_4, %idx
-        %55:u32 = mul %idx, 16u
-        %56:u32 = add %offset_4, %55
-        %57:vec3<u32> = bitcast<vec3<u32>> %54
-        %58:void = %v.Store3 %56, %57
+        %55:vec3<f32> = access %obj_4, %53
+        %56:u32 = mul %53, 16u
+        %57:u32 = add %offset_4, %56
+        %58:vec3<u32> = bitcast<vec3<u32>> %55
+        %59:void = %v.Store3 %57, %58
         continue  # -> $B10
       }
       $B10: {  # continuing
-        %59:u32 = add %idx, 1u
-        next_iteration %59  # -> $B9
+        %60:u32 = load %idx
+        %61:u32 = add %60, 1u
+        store %idx, %61
+        next_iteration  # -> $B9
       }
     }
     ret
@@ -4876,30 +4896,34 @@ $B1: {  # root
     %a_1:ptr<function, array<vec4<i32>, 2>, read_write> = var array<vec4<i32>, 2>(vec4<i32>(0i))  # %a_1: 'a'
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration 0u  # -> $B5
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B5
       }
-      $B5 (%idx:u32): {  # body
-        %12:bool = gte %idx, 2u
-        if %12 [t: $B7] {  # if_1
+      $B5: {  # body
+        %12:u32 = load %idx
+        %13:bool = gte %12, 2u
+        if %13 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %13:ptr<function, vec4<i32>, read_write> = access %a_1, %idx
-        %14:u32 = mul %idx, 16u
-        %15:u32 = add %offset, %14
-        %16:vec4<u32> = %v.Load4 %15
-        %17:vec4<i32> = bitcast<vec4<i32>> %16
-        store %13, %17
+        %14:ptr<function, vec4<i32>, read_write> = access %a_1, %12
+        %15:u32 = mul %12, 16u
+        %16:u32 = add %offset, %15
+        %17:vec4<u32> = %v.Load4 %16
+        %18:vec4<i32> = bitcast<vec4<i32>> %17
+        store %14, %18
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %18:u32 = add %idx, 1u
-        next_iteration %18  # -> $B5
+        %19:u32 = load %idx
+        %20:u32 = add %19, 1u
+        store %idx, %20
+        next_iteration  # -> $B5
       }
     }
-    %19:array<vec4<i32>, 2> = load %a_1
-    ret %19
+    %21:array<vec4<i32>, 2> = load %a_1
+    ret %21
   }
 }
 %4 = func(%offset_1:u32):array<vec4<f32>, 2> {  # %offset_1: 'offset'
@@ -4907,30 +4931,34 @@ $B1: {  # root
     %a_2:ptr<function, array<vec4<f32>, 2>, read_write> = var array<vec4<f32>, 2>(vec4<f32>(0.0f))  # %a_2: 'a'
     loop [i: $B9, b: $B10, c: $B11] {  # loop_2
       $B9: {  # initializer
-        next_iteration 0u  # -> $B10
+        %idx_1:ptr<function, u32, read_write> = var 0u  # %idx_1: 'idx'
+        next_iteration  # -> $B10
       }
-      $B10 (%idx_1:u32): {  # body
-        %23:bool = gte %idx_1, 2u
-        if %23 [t: $B12] {  # if_2
+      $B10: {  # body
+        %25:u32 = load %idx_1
+        %26:bool = gte %25, 2u
+        if %26 [t: $B12] {  # if_2
           $B12: {  # true
             exit_loop  # loop_2
           }
         }
-        %24:ptr<function, vec4<f32>, read_write> = access %a_2, %idx_1
-        %25:u32 = mul %idx_1, 16u
-        %26:u32 = add %offset_1, %25
-        %27:vec4<u32> = %v.Load4 %26
-        %28:vec4<f32> = bitcast<vec4<f32>> %27
-        store %24, %28
+        %27:ptr<function, vec4<f32>, read_write> = access %a_2, %25
+        %28:u32 = mul %25, 16u
+        %29:u32 = add %offset_1, %28
+        %30:vec4<u32> = %v.Load4 %29
+        %31:vec4<f32> = bitcast<vec4<f32>> %30
+        store %27, %31
         continue  # -> $B11
       }
       $B11: {  # continuing
-        %29:u32 = add %idx_1, 1u
-        next_iteration %29  # -> $B10
+        %32:u32 = load %idx_1
+        %33:u32 = add %32, 1u
+        store %idx_1, %33
+        next_iteration  # -> $B10
       }
     }
-    %30:array<vec4<f32>, 2> = load %a_2
-    ret %30
+    %34:array<vec4<f32>, 2> = load %a_2
+    ret %34
   }
 }
 )";
@@ -5012,30 +5040,34 @@ $B1: {  # root
     %a_1:ptr<function, array<vec4<i32>, 2>, read_write> = var array<vec4<i32>, 2>(vec4<i32>(0i))  # %a_1: 'a'
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration 0u  # -> $B5
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B5
       }
-      $B5 (%idx:u32): {  # body
-        %12:bool = gte %idx, 2u
-        if %12 [t: $B7] {  # if_1
+      $B5: {  # body
+        %12:u32 = load %idx
+        %13:bool = gte %12, 2u
+        if %13 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %13:ptr<function, vec4<i32>, read_write> = access %a_1, %idx
-        %14:u32 = mul %idx, 16u
-        %15:u32 = add %offset, %14
-        %16:vec4<u32> = %v.Load4 %15
-        %17:vec4<i32> = bitcast<vec4<i32>> %16
-        store %13, %17
+        %14:ptr<function, vec4<i32>, read_write> = access %a_1, %12
+        %15:u32 = mul %12, 16u
+        %16:u32 = add %offset, %15
+        %17:vec4<u32> = %v.Load4 %16
+        %18:vec4<i32> = bitcast<vec4<i32>> %17
+        store %14, %18
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %18:u32 = add %idx, 1u
-        next_iteration %18  # -> $B5
+        %19:u32 = load %idx
+        %20:u32 = add %19, 1u
+        store %idx, %20
+        next_iteration  # -> $B5
       }
     }
-    %19:array<vec4<i32>, 2> = load %a_1
-    ret %19
+    %21:array<vec4<i32>, 2> = load %a_1
+    ret %21
   }
 }
 %4 = func(%offset_1:u32):array<vec4<f32>, 2> {  # %offset_1: 'offset'
@@ -5043,30 +5075,34 @@ $B1: {  # root
     %a_2:ptr<function, array<vec4<f32>, 2>, read_write> = var array<vec4<f32>, 2>(vec4<f32>(0.0f))  # %a_2: 'a'
     loop [i: $B9, b: $B10, c: $B11] {  # loop_2
       $B9: {  # initializer
-        next_iteration 0u  # -> $B10
+        %idx_1:ptr<function, u32, read_write> = var 0u  # %idx_1: 'idx'
+        next_iteration  # -> $B10
       }
-      $B10 (%idx_1:u32): {  # body
-        %23:bool = gte %idx_1, 2u
-        if %23 [t: $B12] {  # if_2
+      $B10: {  # body
+        %25:u32 = load %idx_1
+        %26:bool = gte %25, 2u
+        if %26 [t: $B12] {  # if_2
           $B12: {  # true
             exit_loop  # loop_2
           }
         }
-        %24:ptr<function, vec4<f32>, read_write> = access %a_2, %idx_1
-        %25:u32 = mul %idx_1, 16u
-        %26:u32 = add %offset_1, %25
-        %27:vec4<u32> = %v.Load4 %26
-        %28:vec4<f32> = bitcast<vec4<f32>> %27
-        store %24, %28
+        %27:ptr<function, vec4<f32>, read_write> = access %a_2, %25
+        %28:u32 = mul %25, 16u
+        %29:u32 = add %offset_1, %28
+        %30:vec4<u32> = %v.Load4 %29
+        %31:vec4<f32> = bitcast<vec4<f32>> %30
+        store %27, %31
         continue  # -> $B11
       }
       $B11: {  # continuing
-        %29:u32 = add %idx_1, 1u
-        next_iteration %29  # -> $B10
+        %32:u32 = load %idx_1
+        %33:u32 = add %32, 1u
+        store %idx_1, %33
+        next_iteration  # -> $B10
       }
     }
-    %30:array<vec4<f32>, 2> = load %a_2
-    ret %30
+    %34:array<vec4<f32>, 2> = load %a_2
+    ret %34
   }
 }
 )";
@@ -5147,30 +5183,34 @@ $B1: {  # root
     %a_1:ptr<function, array<vec4<i32>, 2>, read_write> = var array<vec4<i32>, 2>(vec4<i32>(0i))  # %a_1: 'a'
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration 0u  # -> $B5
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B5
       }
-      $B5 (%idx:u32): {  # body
-        %12:bool = gte %idx, 2u
-        if %12 [t: $B7] {  # if_1
+      $B5: {  # body
+        %12:u32 = load %idx
+        %13:bool = gte %12, 2u
+        if %13 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %13:ptr<function, vec4<i32>, read_write> = access %a_1, %idx
-        %14:u32 = mul %idx, 16u
-        %15:u32 = add %offset, %14
-        %16:vec4<u32> = %v.Load4 %15
-        %17:vec4<i32> = bitcast<vec4<i32>> %16
-        store %13, %17
+        %14:ptr<function, vec4<i32>, read_write> = access %a_1, %12
+        %15:u32 = mul %12, 16u
+        %16:u32 = add %offset, %15
+        %17:vec4<u32> = %v.Load4 %16
+        %18:vec4<i32> = bitcast<vec4<i32>> %17
+        store %14, %18
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %18:u32 = add %idx, 1u
-        next_iteration %18  # -> $B5
+        %19:u32 = load %idx
+        %20:u32 = add %19, 1u
+        store %idx, %20
+        next_iteration  # -> $B5
       }
     }
-    %19:array<vec4<i32>, 2> = load %a_1
-    ret %19
+    %21:array<vec4<i32>, 2> = load %a_1
+    ret %21
   }
 }
 %4 = func(%offset_1:u32):array<vec4<f32>, 2> {  # %offset_1: 'offset'
@@ -5178,30 +5218,34 @@ $B1: {  # root
     %a_2:ptr<function, array<vec4<f32>, 2>, read_write> = var array<vec4<f32>, 2>(vec4<f32>(0.0f))  # %a_2: 'a'
     loop [i: $B9, b: $B10, c: $B11] {  # loop_2
       $B9: {  # initializer
-        next_iteration 0u  # -> $B10
+        %idx_1:ptr<function, u32, read_write> = var 0u  # %idx_1: 'idx'
+        next_iteration  # -> $B10
       }
-      $B10 (%idx_1:u32): {  # body
-        %23:bool = gte %idx_1, 2u
-        if %23 [t: $B12] {  # if_2
+      $B10: {  # body
+        %25:u32 = load %idx_1
+        %26:bool = gte %25, 2u
+        if %26 [t: $B12] {  # if_2
           $B12: {  # true
             exit_loop  # loop_2
           }
         }
-        %24:ptr<function, vec4<f32>, read_write> = access %a_2, %idx_1
-        %25:u32 = mul %idx_1, 16u
-        %26:u32 = add %offset_1, %25
-        %27:vec4<u32> = %v.Load4 %26
-        %28:vec4<f32> = bitcast<vec4<f32>> %27
-        store %24, %28
+        %27:ptr<function, vec4<f32>, read_write> = access %a_2, %25
+        %28:u32 = mul %25, 16u
+        %29:u32 = add %offset_1, %28
+        %30:vec4<u32> = %v.Load4 %29
+        %31:vec4<f32> = bitcast<vec4<f32>> %30
+        store %27, %31
         continue  # -> $B11
       }
       $B11: {  # continuing
-        %29:u32 = add %idx_1, 1u
-        next_iteration %29  # -> $B10
+        %32:u32 = load %idx_1
+        %33:u32 = add %32, 1u
+        store %idx_1, %33
+        next_iteration  # -> $B10
       }
     }
-    %30:array<vec4<f32>, 2> = load %a_2
-    ret %30
+    %34:array<vec4<f32>, 2> = load %a_2
+    ret %34
   }
 }
 )";
