@@ -227,8 +227,8 @@ MaybeError CheckFramebufferComplete(const OpenGLFunctions& gl, GLenum target) {
     if (status == GL_FRAMEBUFFER_COMPLETE) [[likely]] {
         return {};
     }
-    return DAWN_FORMAT_INTERNAL_ERROR("glCheckFramebufferStatus returned %s (0x%04X).",
-                                      GLFramebufferStatusAsString(status), status);
+    return DAWN_FORMAT_UNRECOVERABLE_ERROR("glCheckFramebufferStatus returned %s (0x%04X).",
+                                           GLFramebufferStatusAsString(status), status);
 }
 
 void ClearErrors(const OpenGLFunctions& gl,
@@ -288,9 +288,9 @@ MaybeError CheckError(const OpenGLFunctions& gl,
         case GL_OUT_OF_MEMORY:
             return DAWN_OUT_OF_MEMORY_ERROR(message);
         case GL_CONTEXT_LOST:
-            return DAWN_DEVICE_LOST_ERROR(message);
+            return DAWN_BACKEND_DEVICE_LOST_ERROR(message);
         default:
-            return DAWN_INTERNAL_ERROR(message);
+            return DAWN_UNRECOVERABLE_ERROR(message);
     }
 }
 

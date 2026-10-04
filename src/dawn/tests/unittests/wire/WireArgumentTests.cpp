@@ -281,7 +281,7 @@ TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
         api, QueueSubmit(apiQueue, 2, MatchesLambda([=](const WGPUCommandBuffer* cmdBufs) -> bool {
                              return cmdBufs[0] == apiCmdBufs[0] && cmdBufs[1] == apiCmdBufs[1];
                          }))));
-    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _));
+    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _, _));
 
     FlushClient();
 }

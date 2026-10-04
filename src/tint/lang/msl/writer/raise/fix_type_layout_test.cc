@@ -4635,6 +4635,87 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_FixTypeLayoutTest, AliasPointerOffset_Vec3) {
+    mod.properties.Add(core::ir::Property::kAllow8BitIntegers);
+
+    auto* S = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.New("a"), ty.vec3u()},
+                                                  {mod.symbols.New("b"), ty.u32()},
+                                              });
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.u8())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* p =
+            b.CallExplicit<ir::BuiltinCall>(ty.ptr(storage, S), BuiltinFn::kAliasPointerOffset,
+                                            Vector<core::ir::TemplateParameter, 1>{S}, v, 0_u);
+        b.Load(p);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  a:vec3<u32> @offset(0)
+  b:u32 @offset(12)
+}
+
+$B1: {  # root
+  %v:ptr<storage, array<u8>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<storage, S, read_write> = msl.alias_pointer_offset<S> %v, 0u
+    %4:S = load %3
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  a:vec3<u32> @offset(0)
+  b:u32 @offset(12)
+}
+
+S_packed_vec3 = struct @align(16) {
+  a:__packed_vec3<u32> @offset(0)
+  b:u32 @offset(12)
+}
+
+$B1: {  # root
+  %v:ptr<storage, array<u8>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<storage, S_packed_vec3, read_write> = msl.alias_pointer_offset<S_packed_vec3> %v, 0u
+    %4:S = call %tint_load_struct_packed_vec3, %3
+    ret
+  }
+}
+%tint_load_struct_packed_vec3 = func(%from:ptr<storage, S_packed_vec3, read_write>):S {
+  $B3: {
+    %7:ptr<storage, __packed_vec3<u32>, read_write> = access %from, 0u
+    %8:__packed_vec3<u32> = load %7
+    %9:vec3<u32> = msl.convert %8
+    %10:ptr<storage, u32, read_write> = access %from, 1u
+    %11:u32 = load %10
+    %12:S = construct %9, %11
+    ret %12
+  }
+}
+)";
+
+    RunTransform();
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_FixTypeLayoutTest, ArrayOfMatrixAndArrayOfArrayCollision) {
     auto* s = ty.Struct(mod.symbols.New("S"),
                         {

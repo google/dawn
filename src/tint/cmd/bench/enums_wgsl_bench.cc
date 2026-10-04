@@ -236,6 +236,13 @@ void ExtensionParser(::benchmark::State& state) {
         "subgous",
         "suYgrous",
         "subyr77upEY",
+        "view_instaooMdg",
+        "vieMM_intancing",
+        "view_insta55cing",
+        "view_instancing",
+        "viNw_istaning",
+        "vi3O_instanc33n",
+        "view_3nstancing",
     };
     for (auto _ : state) {
         for (auto* str : kStrings) {

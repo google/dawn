@@ -84,6 +84,8 @@ class IndirectDrawMetadata : public NonCopyable {
     struct ValidatedIndirectDraw {
         Ref<BufferBase> indirectBuffer = nullptr;
         uint64_t indirectOffset = 0;
+        Ref<BufferBase> sourceIndirectBuffer = nullptr;
+        uint64_t sourceIndirectOffset = 0;
     };
 
     struct IndirectValidationBatch {
@@ -209,7 +211,8 @@ class IndirectDrawMetadata : public NonCopyable {
 
     void SetValidatedIndirectDrawArgs(const IndirectDraw& draw,
                                       BufferBase* indirectBuffer,
-                                      uint64_t indirectOffset);
+                                      uint64_t indirectOffset,
+                                      BufferBase* sourceIndirectBuffer);
     ValidatedIndirectDraw GetValidatedIndirectDraw(DrawIndirectCmd* cmd,
                                                    IndirectDrawIndex indirectDrawIndex) const;
 

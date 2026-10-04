@@ -72,7 +72,7 @@ endfunction()
 # Function to add a target that copies a DLL from Windows SDK to main build directory
 # Parameters:
 #   - target_name: Name of the custom target to create
-#   - dll_name: Name of the DLL (e.g., "dxil.dll", "d3dcompiler_47.dll")
+#   - dll_name: Name of the DLL (e.g., "d3dcompiler_47.dll")
 function(AddCopyWindowsSDKDLLTarget target_name dll_name)
     if (NOT WIN32)
         message(FATAL_ERROR "AddCopyWindowsSDKDLLTarget can only be called on Windows")

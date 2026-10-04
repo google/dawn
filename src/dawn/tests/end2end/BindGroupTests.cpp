@@ -844,14 +844,14 @@ TEST_P(BindGroupTests, DynamicOffsetsWithAtomicOperations) {
 
 // Test for crash reported in http://crbug.com/478206474
 // Tests that a dynamic buffer bound to one stage does attempt to get applied to the other stage,
-// resulting in a crash during Tint's ArrayOffsetFromUniform transform.
+// resulting in a crash during Tint's ArrayOffsetFromImmediates transform.
 // We do this by binding a uniform buffer to (0,0) to both vertex and fragment stages,
 // and a dynamic storage buffer to (0,1) to only the fragment stage.
 // When the vertex shader is compiled, because of the ordering of resources in
 // BindGroupLayoutInternalBase, (BindingTypeOrder_DynamicBuffer first, then
 // BindingTypeOrder_RegularBuffer), the uniform buffer's WGSL binding will be remapped from (0,0) to
 // (0,1) - the same as the storage buffer's WGSL binding. Before fixing this bug, we would hit an
-// assertion in Tint's ArrayOffsetFromUniform transform because it was erroneously attempting to
+// assertion in Tint's ArrayOffsetFromImmediates transform because it was erroneously attempting to
 // apply an offset to the uniform buffer. This was fixed by making sure to only populate
 // bindpoint_to_offset_index for bindpoints that are visible for the stage being processed.
 TEST_P(BindGroupTests, DynamicBufferInOneStageNotAppliedToOtherStage1) {
@@ -892,7 +892,7 @@ TEST_P(BindGroupTests, DynamicBufferInOneStageNotAppliedToOtherStage1) {
 
 // Test for latent bug discovered when fixing the crash reported in http://crbug.com/478206474
 // Tests that a dynamic buffer bound to one stage does attempt to get applied to the other stage,
-// resulting in Tint's ArrayLengthFromUniform transform erroneously replacing arrayLength calls
+// resulting in Tint's ArrayLengthFromImmediates transform erroneously replacing arrayLength calls
 // on the non-dynamic storage buffer.
 // We do this by binding a regular storage buffer to (0,0) to both vertex and fragment stages,
 // and a dynamic storage buffer to (0,1) to only the fragment stage.
@@ -900,9 +900,9 @@ TEST_P(BindGroupTests, DynamicBufferInOneStageNotAppliedToOtherStage1) {
 // BindGroupLayoutInternalBase, (BindingTypeOrder_DynamicBuffer first, then
 // BindingTypeOrder_RegularBuffer), the uniform buffer's WGSL binding will be remapped from (0,0) to
 // (0,1) - the same as the storage buffer's WGSL binding. Before fixing this bug,
-// ArrayLengthFromUniform would erroneously replace the arrayLength of the regular storage buffer,
-// resulting in the wrong value being retrieved at execution time. This was fixed by making sure to
-// only populate bindpoint_to_size_index for bindpoints that are visible for the stage being
+// ArrayLengthFromImmediates would erroneously replace the arrayLength of the regular storage
+// buffer, resulting in the wrong value being retrieved at execution time. This was fixed by making
+// sure to only populate bindpoint_to_size_index for bindpoints that are visible for the stage being
 // processed.
 TEST_P(BindGroupTests, DynamicBufferInOneStageNotAppliedToOtherStage2) {
     DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 2);
@@ -1466,8 +1466,6 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
 // conflict. This can happen if the backend treats dynamic bindings separately from non-dynamic
 // bindings.
 TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     auto RunTestWith = [&](bool dynamicBufferFirst) {
         uint32_t dynamicBufferBindingNumber = dynamicBufferFirst ? 0 : 1;
         uint32_t bufferBindingNumber = dynamicBufferFirst ? 1 : 0;
@@ -1631,8 +1629,6 @@ TEST_P(BindGroupTests, DynamicBindingNoneVisibility) {
 
 // Test that bind group bindings may have unbounded and arbitrary binding numbers
 TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     // TODO(crbug.com/518759193): Produces incorrect colors.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 

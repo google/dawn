@@ -51,8 +51,8 @@ TEST_F(HlslWriterTest, DynamicOffset_RobustnessAndDynamicOffsetFromImmediates) {
     Options options{};
     options.disable_robustness = false;
     options.immediate_binding_point = BindingPoint{0, 30};
-    options.array_offset_from_uniform.buffer_offsets_offset = 16;
-    options.array_offset_from_uniform.bindpoint_to_offset_index[{0, 0}] = 0;
+    options.array_offset_from_immediate.buffer_offsets_offset = 16;
+    options.array_offset_from_immediate.bindpoint_to_offset_index[{0, 0}] = 0;
 
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
@@ -84,8 +84,8 @@ TEST_F(HlslWriterTest, DynamicOffset_AtomicWithImmediates) {
 
     Options options{};
     options.immediate_binding_point = BindingPoint{0, 30};
-    options.array_offset_from_uniform.buffer_offsets_offset = 0;
-    options.array_offset_from_uniform.bindpoint_to_offset_index[{0, 0}] = 0;
+    options.array_offset_from_immediate.buffer_offsets_offset = 0;
+    options.array_offset_from_immediate.bindpoint_to_offset_index[{0, 0}] = 0;
 
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
@@ -125,9 +125,9 @@ TEST_F(HlslWriterTest, DynamicOffset_MultipleBuffersWithImmediates) {
 
     Options options{};
     options.immediate_binding_point = BindingPoint{0, 30};
-    options.array_offset_from_uniform.buffer_offsets_offset = 0;
-    options.array_offset_from_uniform.bindpoint_to_offset_index[{0, 0}] = 0;
-    options.array_offset_from_uniform.bindpoint_to_offset_index[{0, 1}] = 1;
+    options.array_offset_from_immediate.buffer_offsets_offset = 0;
+    options.array_offset_from_immediate.bindpoint_to_offset_index[{0, 0}] = 0;
+    options.array_offset_from_immediate.bindpoint_to_offset_index[{0, 1}] = 1;
 
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
@@ -143,6 +143,19 @@ void main() {
 }
 
 )");
+}
+
+TEST_F(HlslWriterTest, DynamicOffsetFromImmediate_MissingOffset) {
+    auto* entry = b.ComputeFunction("main");
+    b.Append(entry->Block(), [&] { b.Return(entry); });
+
+    Options options;
+    options.array_offset_from_immediate.bindpoint_to_offset_index[{0, 0}] = 0;
+
+    auto result = Generate(options);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              "array offset from immediate requires a buffer offsets offset");
 }
 
 }  // namespace

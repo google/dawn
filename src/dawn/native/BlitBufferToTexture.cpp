@@ -41,7 +41,7 @@
 #include "src/dawn/native/Queue.h"
 #include "src/dawn/native/RenderPassEncoder.h"
 #include "src/dawn/native/RenderPipeline.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/utils/assert.h"
 
 namespace dawn::native {

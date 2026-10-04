@@ -44,6 +44,8 @@ namespace {{native_namespace}} {
             {% endfor %}
                 case ObjectType::BindGroupLayoutInternal:
                     return "BindGroupLayoutInternal";
+                case ObjectType::SwapChain:
+                    return "SwapChain";
             default:
                 DAWN_UNREACHABLE();
         }

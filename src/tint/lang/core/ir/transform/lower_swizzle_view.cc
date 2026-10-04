@@ -120,7 +120,7 @@ struct State {
     /// Lowers a load from a swizzle view.
     /// @param load the load instruction to lower
     void LowerLoad(core::ir::Load* load) {
-        auto* inst = load->From()->As<core::ir::InstructionResult>()->Instruction();
+        auto* inst = load->From()->AsInstruction();
         auto* swizzle = inst->As<core::ir::Swizzle>();
 
         // If loading through an accessor on a swizzle view (i.e. v.zyx[0]), extract the accessor
@@ -128,10 +128,7 @@ struct State {
         core::ir::Value* accessor_idx = nullptr;
         if (auto* access = inst->As<core::ir::Access>()) {
             accessor_idx = access->Indices()[0];
-            swizzle = access->Object()
-                          ->As<core::ir::InstructionResult>()
-                          ->Instruction()
-                          ->As<core::ir::Swizzle>();
+            swizzle = access->Object()->AsInstruction()->As<core::ir::Swizzle>();
         }
 
         auto collapsed = Collapse(swizzle);
@@ -246,19 +243,12 @@ struct State {
         return result;
     }
 
-    /// Maps an accessor index dynamically or statically to the target swizzle vector element index.
-    /// @param accessor_idx the accessor index (can be static constant or dynamic)
+    /// Maps an accessor index to the target swizzle vector element index.
+    /// @param accessor_idx the accessor index
     /// @param indices the collapsed swizzle indices
     /// @returns the mapped index value
     core::ir::Value* GetTargetIndex(core::ir::Value* accessor_idx,
                                     const tint::Vector<uint32_t, 4>& indices) {
-        // Index is constant.
-        if (auto* const_idx = accessor_idx->As<core::ir::Constant>()) {
-            uint32_t extra_idx = const_idx->Value()->ValueAs<uint32_t>();
-            return b.Constant(u32(indices[extra_idx]));
-        }
-
-        // Index is dynamic, and must be mapped into a composite array at runtime.
         tint::Vector<const core::constant::Value*, 4> const_indices;
         for (uint32_t idx : indices) {
             const_indices.Push(b.ConstantValue(u32(idx)));

@@ -5,8 +5,7 @@ struct main_inputs {
 
 groupshared uint v[16];
 void foo() {
-  min(0u, (4u - 1u));
-  v[0u] = 1065353216u;
+  v[((min(0u, (4u - 1u)) * 8u) / 4u)] = 1065353216u;
 }
 
 void main_inner(uint tint_local_index) {

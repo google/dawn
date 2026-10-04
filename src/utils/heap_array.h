@@ -187,7 +187,7 @@ class HeapArray :
     }
 
     static constexpr Value* AllocNoThrow(Index count, InitType initType) {
-#if DAWN_ASAN_ENABLED() || DAWN_MSAN_ENABLED()
+#if DAWN_ASAN_ENABLED() || DAWN_MSAN_ENABLED() || DAWN_TSAN_ENABLED()
         // std::nothrow isn't implemented in sanitizers and they often have a 2GB allocation
         // limit. Catch large allocations and error out so fuzzers make progress.
         constexpr size_t kLargestAllowedAllocationAttemptBytes = 0x70000000;

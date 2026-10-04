@@ -52,7 +52,7 @@ class ErrorTest {
         webGpu.processEventsLoop()
       }
       try {
-        val unused = webGpu.execute {
+        webGpu.execute<Unit> {
           assertThrows(ValidationException::class.java) {
             device.createTexture(
               GPUTextureDescriptor(
@@ -79,7 +79,7 @@ class ErrorTest {
         webGpu.processEventsLoop()
       }
       try {
-        val unused = webGpu.execute {
+        webGpu.execute<Unit> {
           // 1st uncaptured error -> invokes uncapturedErrorCallback (without fix, deletes userData1)
           assertThrows(ValidationException::class.java) {
             device.createTexture(

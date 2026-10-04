@@ -88,8 +88,7 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateRende
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(
-            DAWN_MAKE_ERROR(InternalErrorType::Validation, std::string(kErrorMessage)))));
+        .WillByDefault(testing::Return(testing::ByMove(DAWN_VALIDATION_ERROR(kErrorMessage))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
 
@@ -106,7 +105,7 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateRende
 
 // Verify CreateComputePipelineAsync and the internal CreateComputePipelineAsyncEvent behavior
 // on creating compute pipeline with internal error.
-TEST_F(CreatePipelineAsyncEventTests, InitializationInternalErrorInCreateRenderPipelineAsync) {
+TEST_F(CreatePipelineAsyncEventTests, InitializationUnrecoverableErrorInCreateRenderPipelineAsync) {
     wgpu::DepthStencilState ds = {};
     ds.format = wgpu::TextureFormat::Depth32Float;
     ds.depthWriteEnabled = wgpu::OptionalBool::True;
@@ -119,8 +118,8 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationInternalErrorInCreateRenderP
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(
-            DAWN_MAKE_ERROR(InternalErrorType::Internal, std::string(kErrorMessage)))));
+        .WillByDefault(testing::Return(testing::ByMove(DAWN_MAKE_UNRECOVERABLE_ERROR(
+            InternalErrorType::Unrecoverable, std::string(kErrorMessage)))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
 
@@ -175,8 +174,7 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateCompu
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(
-            DAWN_MAKE_ERROR(InternalErrorType::Validation, std::string(kErrorMessage)))));
+        .WillByDefault(testing::Return(testing::ByMove(DAWN_VALIDATION_ERROR(kErrorMessage))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
 
@@ -193,15 +191,16 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateCompu
 
 // Verify CreateComputePipelineAsync and the internal CreateComputePipelineAsyncEvent behavior
 // on creating compute pipeline with internal error.
-TEST_F(CreatePipelineAsyncEventTests, InitializationInternalErrorInCreateComputePipelineAsync) {
+TEST_F(CreatePipelineAsyncEventTests,
+       InitializationUnrecoverableErrorInCreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor desc = {};
     desc.compute.module = utils::CreateShaderModule(device, kComputeShader.data());
     Ref<ComputePipelineMock> computePipelineMock =
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(DAWN_MAKE_ERROR(
-            dawn::native::InternalErrorType::Internal, std::string(kErrorMessage)))));
+        .WillByDefault(testing::Return(testing::ByMove(DAWN_MAKE_UNRECOVERABLE_ERROR(
+            dawn::native::InternalErrorType::Unrecoverable, std::string(kErrorMessage)))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
 

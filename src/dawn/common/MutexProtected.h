@@ -37,7 +37,6 @@
 #include <utility>
 
 #include "src/dawn/common/Compiler.h"
-#include "src/dawn/common/Defer.h"
 #include "src/dawn/common/Mutex.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/StackAllocated.h"
@@ -159,21 +158,12 @@ class DAWN_SCOPED_LOCKABLE Guard : public NonMovable, StackAllocated {
     auto* operator->() const { return Get(); }
     auto& operator*() const { return *Get(); }
 
-    void Defer(std::function<void()> f) {
-        DAWN_ASSERT(mDefer);
-        mDefer->Append(std::move(f));
-    }
-
   protected:
     Guard() : mLock() {}
-    Guard(T* obj, typename Traits::MutexType& mutex, class Defer* defer = nullptr)
-        : mLock(Traits::GetMutex(mutex)), mObj(obj), mDefer(defer) {}
-    Guard(T* obj, typename Traits::template LockType<T>&& lock, class Defer* defer = nullptr)
-        : mLock(std::move(lock)), mObj(obj), mDefer(defer) {}
-    Guard(Guard&& other)
-        : mLock(std::move(other.mLock)),
-          mObj(std::move(other.mObj)),
-          mDefer(std::move(other.mDefer)) {
+    Guard(T* obj, typename Traits::MutexType& mutex) : mLock(Traits::GetMutex(mutex)), mObj(obj) {}
+    Guard(T* obj, typename Traits::template LockType<T>&& lock)
+        : mLock(std::move(lock)), mObj(obj) {}
+    Guard(Guard&& other) : mLock(std::move(other.mLock)), mObj(std::move(other.mObj)) {
         other.mObj = nullptr;
     }
 
@@ -181,9 +171,7 @@ class DAWN_SCOPED_LOCKABLE Guard : public NonMovable, StackAllocated {
         if (this != &other) {
             mLock = std::move(other.mLock);
             mObj = std::move(other.mObj);
-            mDefer = std::move(other.mDefer);
             other.mObj = nullptr;
-            other.mDefer = nullptr;
         }
         return *this;
     }
@@ -205,7 +193,6 @@ class DAWN_SCOPED_LOCKABLE Guard : public NonMovable, StackAllocated {
 
     typename Traits::template LockType<T> mLock;
     T* mObj = nullptr;
-    class Defer* mDefer = nullptr;
 };
 
 // CondVarGuard is a different guard class that internally holds a Guard, but provides additional
@@ -361,13 +348,7 @@ class MutexProtected {
         if (!maybeLock.has_value()) {
             return std::nullopt;
         }
-        return Usage(&mObj, std::move(*maybeLock), nullptr);
-    }
-
-    template <typename Fn>
-    auto UseWithDefer(Fn&& fn) {
-        Defer defer;
-        return fn(Usage(&mObj, mMutex, &defer));
+        return Usage(&mObj, std::move(*maybeLock));
     }
 
   private:

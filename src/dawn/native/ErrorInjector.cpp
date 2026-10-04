@@ -32,6 +32,8 @@
 
 namespace dawn::native {
 
+#if defined(DAWN_ENABLE_ERROR_INJECTION)
+
 namespace {
 
 bool sIsEnabled = false;
@@ -79,5 +81,7 @@ void InjectErrorAt(uint64_t index) {
     sInjectedFailureIndex = index;
     sHasPendingInjectedError = true;
 }
+
+#endif  // defined(DAWN_ENABLE_ERROR_INJECTION)
 
 }  // namespace dawn::native

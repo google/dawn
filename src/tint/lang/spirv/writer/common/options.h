@@ -211,10 +211,6 @@ struct Options {
         /// Set to `true` to generate polyfill for `dot4I8Packed` and `dot4U8Packed` builtins
         bool dot_4x8_packed = false;
 
-        /// Set to `true` to use the uniform buffer directly, `false` to decompose into array<vec4u,
-        /// ...>.
-        bool use_uniform_buffers = false;
-
         /// Set to `true` to add `MaximallyReconvergesKHR` to entry points.
         /// Takes precedence over `use_subgroup_uniform_control_flow`.
         bool use_maximal_reconvergence = false;
@@ -232,7 +228,6 @@ struct Options {
                      disable_runtime_sized_array_index_clamping,
                      disable_storage_subgroup_matrix_clamping,
                      dot_4x8_packed,
-                     use_uniform_buffers,
                      use_maximal_reconvergence,
                      use_subgroup_uniform_control_flow);
     };

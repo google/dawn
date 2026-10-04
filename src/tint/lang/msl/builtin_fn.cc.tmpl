@@ -91,6 +91,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kMakeDiagonalSimdgroupMatrix:
         case BuiltinFn::kMakeFilledSimdgroupMatrix:
         case BuiltinFn::kOsLog:
+        case BuiltinFn::kAliasPointerOffset:
         case BuiltinFn::kPointerOffset:
         case BuiltinFn::kVolatileZero:
         case BuiltinFn::kMadsat:

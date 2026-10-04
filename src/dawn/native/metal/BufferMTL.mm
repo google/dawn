@@ -165,9 +165,9 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     Ref<DeviceBase> deviceRef = GetDevice();
     wgpu::Callback callback = hostMappedDesc->disposeCallback;
     void* userdata = hostMappedDesc->userdata;
-    auto dispose = ^(void*, NSUInteger) {
+    auto dispose = [deviceRef, callback, userdata](void*, NSUInteger) {
         deviceRef->GetCallbackTaskManager()->AddCallbackTask(
-            [callback, userdata] { callback(userdata); });
+            [callback, userdata]() { callback(userdata); });
     };
 
     mMtlBuffer.Acquire([ToBackend(GetDevice())->GetMTLDevice()
@@ -177,7 +177,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
                      deallocator:dispose]);
     if (mMtlBuffer == nil) {
         dispose(hostMappedDesc->pointer, GetSize());
-        return DAWN_INTERNAL_ERROR("Buffer allocation failed");
+        return DAWN_UNRECOVERABLE_ERROR("Buffer allocation failed");
     }
 
     // Data is assumed to be initialized since it is externally allocated.

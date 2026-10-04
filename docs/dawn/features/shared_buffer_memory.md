@@ -5,6 +5,8 @@
 Shared Buffer Memory refers to a superset of features that allow Dawn to import externally allocated buffers.
 
 - `wgpu::FeatureName::SharedBufferMemoryD3D12Resource`
+- `wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle`
+- `wgpu::FeatureName::SharedBufferMemoryHostPointer`
 
 ```c++
 wgpu::SharedBufferMemoryFooBarDescriptor fooBarDesc = {

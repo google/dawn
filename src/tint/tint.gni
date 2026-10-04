@@ -161,6 +161,7 @@ template("tint_benchmarks_source_set") {
 #           (e.g. IR binary) are included in the build
 ###############################################################################
 import("//testing/libfuzzer/fuzzer_test.gni")
+
 template("tint_fuzz_source_set") {
   source_set(target_name) {
     forward_variables_from(invoker, "*", [ "configs" ])
@@ -209,9 +210,6 @@ template("tint_fuzzer_test") {
     forward_variables_from(invoker, "*", [ "output_name" ])
     exclude_main =
         (defined(invoker.exclude_main) && invoker.exclude_main) || false
-
-    # TODO(https://crbug.com/394563978): Remove once experiment ends.
-    high_end_job_required = true
 
     # TODO(crbug.com/505034799): Determine best migration path for this.
     is_fuzztest_compatible = false

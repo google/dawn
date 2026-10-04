@@ -3796,7 +3796,7 @@ DAWN_INSTANTIATE_TEST(ShaderTests,
                       OpenGLESBackend(),
                       OpenGLBackend({"disable_symbol_renaming"}),
                       OpenGLESBackend({"disable_symbol_renaming"}),
-                      OpenGLESBackend({"gl_use_array_length_from_uniform"}),
+                      OpenGLESBackend({"gl_use_array_length_from_immediate"}),
                       VulkanBackend(),
                       WebGPUBackend());
 

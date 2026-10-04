@@ -81,10 +81,10 @@ bool GetFormatModifierProps(const VulkanFunctions& fn,
 
 // Some modifiers use multiple planes (for example, see the comment for
 // I915_FORMAT_MOD_Y_TILED_CCS in drm/drm_fourcc.h).
-ResultOrError<uint32_t> GetModifierPlaneCount(const VulkanFunctions& fn,
-                                              VkPhysicalDevice vkPhysicalDevice,
-                                              VkFormat format,
-                                              uint64_t modifier) {
+ResultOrValError<uint32_t> GetModifierPlaneCount(const VulkanFunctions& fn,
+                                                 VkPhysicalDevice vkPhysicalDevice,
+                                                 VkFormat format,
+                                                 uint64_t modifier) {
     VkDrmFormatModifierPropertiesEXT props;
     if (GetFormatModifierProps(fn, vkPhysicalDevice, format, modifier, &props)) {
         return static_cast<uint32_t>(props.drmFormatModifierPlaneCount);

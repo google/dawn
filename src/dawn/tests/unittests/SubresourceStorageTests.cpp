@@ -248,10 +248,10 @@ TEST(SubresourceStorageTest, IterateMaybeError) {
             if (!errorLayer) {
                 errorLayer = layer;
             }
-            return DAWN_VALIDATION_ERROR("Errored at layer: %d", layer);
+            return DAWN_FORMAT_UNRECOVERABLE_ERROR("Errored at layer: %d", layer);
         });
     ASSERT_TRUE(maybeError.IsError());
-    std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+    std::unique_ptr<UnrecoverableError> error = maybeError.AcquireError();
     EXPECT_THAT(error->GetFormattedMessage(), HasSubstr(std::to_string(errorLayer)));
 }
 

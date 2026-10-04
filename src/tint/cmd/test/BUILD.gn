@@ -90,6 +90,10 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/text:unittests",
     ]
 
+    if (tint_build_fuzzers) {
+      deps += [ "${tint_src_dir}/cmd/fuzz/common:unittests" ]
+    }
+
     if (tint_build_glsl_validator && tint_build_glsl_writer) {
       deps += [ "${tint_src_dir}/lang/glsl/writer:unittests" ]
     }

@@ -242,8 +242,8 @@ list(REMOVE_ITEM libprotobuf_hdrs ${OFFENDING_FILES})
 list(REMOVE_ITEM util_test_files ${OFFENDING_FILES})
 
 # Also remove everything in src/google/protobuf/json from the lists.
-list(FILTER libprotobuf_srcs EXCLUDE REGEX "src/google/protobuf/json")
-list(FILTER libprotobuf_hdrs EXCLUDE REGEX "src/google/protobuf/json")
+list(FILTER libprotobuf_srcs EXCLUDE REGEX "src/google/protobuf/json/")
+list(FILTER libprotobuf_hdrs EXCLUDE REGEX "src/google/protobuf/json/")
 
 add_subdirectory("${DAWN_PROTOBUF_DIR}")
 
@@ -284,7 +284,10 @@ if(TARGET libprotoc)
   set_target_properties(libprotoc PROPERTIES SKIP_WKT TRUE)
 endif()
 
-target_compile_definitions(libprotobuf PUBLIC "-DPROTOBUF_ENABLE_DEBUG_LOGGING_MAY_LEAK_PII=0")
+target_compile_definitions(libprotobuf PUBLIC
+  -DPROTOBUF_ENABLE_DEBUG_LOGGING_MAY_LEAK_PII=0
+  -DPROTOBUF_MESSAGE_GLOBALS_TEMPORARY_OPTOUT
+)
 
 target_compile_options(libprotobuf PUBLIC -fno-exceptions)
 if (NOT DAWN_ENABLE_RTTI)

@@ -43,7 +43,7 @@
 #include "src/dawn/native/ObjectContentHasher.h"
 #include "src/dawn/native/RenderPassEncoder.h"
 #include "src/dawn/native/RenderPipeline.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/dawn/native/webgpu_absl_format.h"
 #include "src/utils/compiler.h"
 #include "src/utils/numeric.h"

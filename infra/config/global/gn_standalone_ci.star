@@ -684,6 +684,7 @@ gpu.ci.windows_builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
+                "checkout_litert_lm",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -1423,6 +1424,7 @@ ci.thin_tester(
     targets = targets.bundle(
         targets = [
             "real_hardware_common_gtests",
+            "litert_lm_benchmark",
         ],
         mixins = [
             "mac_arm64_apple_m2_retina_gpu_stable",
@@ -1684,6 +1686,14 @@ ci.thin_tester(
             "win11_qualcomm_snapdragon_x_elite_stable",
             "win_snapdragon_x_elite_gtest_args",
         ],
+        per_test_modifications = {
+            "dawn_end2end_no_dxc_tests": targets.remove(
+                reason = "D3D12 with FXC coverage is not necessary on Qualcomm Windows.",
+            ),
+            "dawn_end2end_no_dxc_validation_layers_tests": targets.remove(
+                reason = "D3D12 with FXC coverage is not necessary on Qualcomm Windows.",
+            ),
+        },
     ),
     targets_settings = targets.settings(
         browser_config = targets.browser_config.RELEASE,
@@ -1716,6 +1726,20 @@ ci.thin_tester(
     targets = targets.bundle(
         targets = [
             "real_hardware_win_gtests",
+            # TODO(crbug.com/565837005): Temporarily enable WARP on this real
+            # hardware configuration because GCE does not have developer mode enabled.
+            targets.bundle(
+                targets = [
+                    "dawn_end2end_warp_tests",
+                ],
+                mixins = [
+                    targets.mixin(
+                        args = [
+                            "--assert-developer-mode",
+                        ],
+                    ),
+                ],
+            ),
         ],
         mixins = [
             "win11_amd_rx_5500_xt_stable",
@@ -1943,6 +1967,7 @@ ci.thin_tester(
     targets = targets.bundle(
         targets = [
             "real_hardware_win_gtests",
+            "litert_lm_benchmark",
         ],
         mixins = [
             "win10_nvidia_gtx_1660_stable",

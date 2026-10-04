@@ -132,10 +132,8 @@ struct State {
 
         uint32_t byte_struct_offset = 0;
 
-        uint32_t byte_size = 0;
         core::ir::Value* byte_size_expr = nullptr;
 
-        uint32_t byte_length = 0;
         core::ir::Value* byte_length_expr = nullptr;
     };
 
@@ -153,9 +151,9 @@ struct State {
             const bool has_length = HasLengthData(offset);
             core::ir::Value* len = nullptr;
             if (has_size) {
-                len = SizeToValue(offset);
+                len = offset.byte_size_expr;
             } else if (has_length) {
-                len = LengthToValue(offset);
+                len = offset.byte_length_expr;
             } else {
                 // The `GetDimensions` call uses out parameters for all return values, there is no
                 // return value. This ends up being the result value we care about.
@@ -389,12 +387,8 @@ struct State {
                            core::Majorness::kColMajor);
             auto* layout = ColMajorToMatrixLayout(col_major);
             uint32_t bytes_per_element = arr_stride;
-            if (auto* cnst = stride->As<core::ir::Constant>()) {
-                stride = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() * bytes_per_element));
-            } else {
-                auto* u32_stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-                stride = b.Multiply(u32_stride, u32(bytes_per_element));
-            }
+            stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
+            stride = b.Multiply(stride, u32(bytes_per_element));
             b.CallExplicitWithResult<hlsl::ir::BuiltinCall>(
                 call->DetachResult(), BuiltinFn::kLoad, Vector<core::ir::TemplateParameter, 1>{sm},
                 var, OffsetToValue(offset), stride, layout);
@@ -428,12 +422,8 @@ struct State {
             auto* layout = ColMajorToMatrixLayout(col_major);
 
             uint32_t bytes_per_element = arr_stride;
-            if (auto* cnst = stride->As<core::ir::Constant>()) {
-                stride = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() * bytes_per_element));
-            } else {
-                auto* u32_stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
-                stride = b.Multiply(u32_stride, u32(bytes_per_element));
-            }
+            stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
+            stride = b.Multiply(stride, u32(bytes_per_element));
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kStore, value, var,
                                                       OffsetToValue(offset), stride, layout);
         });
@@ -456,30 +446,14 @@ struct State {
 
     // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
     void UpdateSizeData(core::ir::Value* v, OffsetData* offset) {
-        tint::Switch(
-            v,  //
-            [&](core::ir::Constant* idx_value) {
-                offset->byte_size += idx_value->Value()->ValueAs<uint32_t>();
-            },
-            [&](core::ir::Value* val) {
-                TINT_IR_ASSERT(ir, offset->byte_size_expr == nullptr);
-                offset->byte_size_expr = b.InsertConvertIfNeeded(ty.u32(), val);
-            },
-            TINT_ICE_ON_NO_MATCH);
+        TINT_IR_ASSERT(ir, offset->byte_size_expr == nullptr);
+        offset->byte_size_expr = b.InsertConvertIfNeeded(ty.u32(), v);
     }
 
     // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
     void UpdateLengthData(core::ir::Value* v, OffsetData* offset) {
-        tint::Switch(
-            v,  //
-            [&](core::ir::Constant* idx_value) {
-                offset->byte_length += idx_value->Value()->ValueAs<uint32_t>();
-            },
-            [&](core::ir::Value* val) {
-                TINT_IR_ASSERT(ir, offset->byte_length_expr == nullptr);
-                offset->byte_length_expr = b.InsertConvertIfNeeded(ty.u32(), val);
-            },
-            TINT_ICE_ON_NO_MATCH);
+        TINT_IR_ASSERT(ir, offset->byte_length_expr == nullptr);
+        offset->byte_length_expr = b.InsertConvertIfNeeded(ty.u32(), v);
     }
 
     // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
@@ -491,31 +465,9 @@ struct State {
         return val;
     }
 
-    // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
-    core::ir::Value* SizeToValue(const OffsetData& offset) {
-        if (offset.byte_size_expr != nullptr) {
-            TINT_IR_ASSERT(ir, offset.byte_size == 0);
-            return offset.byte_size_expr;
-        }
-        return b.Constant(u32(offset.byte_size));
-    }
+    bool HasSizeData(const OffsetData& offset) { return offset.byte_size_expr != nullptr; }
 
-    bool HasSizeData(const OffsetData& offset) {
-        return offset.byte_size != 0 || offset.byte_size_expr != nullptr;
-    }
-
-    // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
-    core::ir::Value* LengthToValue(const OffsetData& offset) {
-        if (offset.byte_length_expr != nullptr) {
-            TINT_IR_ASSERT(ir, offset.byte_length == 0);
-            return offset.byte_length_expr;
-        }
-        return b.Constant(u32(offset.byte_length));
-    }
-
-    bool HasLengthData(const OffsetData& offset) {
-        return offset.byte_length != 0 || offset.byte_length_expr != nullptr;
-    }
+    bool HasLengthData(const OffsetData& offset) { return offset.byte_length_expr != nullptr; }
 
     // Creates the appropriate store instructions for the given result type.
     void MakeStore(core::ir::Instruction* inst,

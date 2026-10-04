@@ -28,15 +28,21 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_PIPELINEGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_PIPELINEGL_H_
 
+#include <set>
+#include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/container/inlined_vector.h"
+#include "src/dawn/common/Constants.h"
 #include "src/dawn/common/ityp_vector.h"
 #include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/PerStage.h"
 #include "src/dawn/native/Pipeline.h"
 #include "src/dawn/native/opengl/IntegerTypes.h"
+#include "src/dawn/native/opengl/ShaderModuleGL.h"
 #include "src/dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native {
@@ -76,6 +82,18 @@ struct EmulatedTextureBuiltin {
 };
 using EmulatedTextureBuiltinInfo = absl::flat_hash_map<FlatBindingIndex, EmulatedTextureBuiltin>;
 
+// Map storage buffer bindings used by the pipeline's shaders to a compact array of byte sizes.
+// sizeIndex is relative to storageBufferSizes, whose offset in the pipeline's immediates is
+// computed separately. Bindings shared by shader stages use the same size entry.
+struct StorageBufferSizeImmediateInfo {
+    struct Binding {
+        BindingIndex bindingIndex;
+        BindingNumber bindingNumber;
+        uint32_t sizeIndex = 0;
+    };
+    PerBindGroup<absl::InlinedVector<Binding, kMaxStorageBuffersPerShaderStage>> bindings;
+};
+
 class PipelineGL {
   public:
     PipelineGL();
@@ -87,16 +105,25 @@ class PipelineGL {
     const EmulatedTextureBuiltinInfo& GetEmulatedTextureBuiltinInfo() const;
     bool NeedsTextureBuiltinUniformBuffer() const;
 
-    bool NeedsSSBOLengthUniformBuffer() const;
+    const StorageBufferSizeImmediateInfo& GetStorageBufferSizeImmediateInfo() const;
 
   protected:
     MaybeError ApplyNow(const OpenGLFunctions& gl, const PipelineLayout* layout);
+
+    MaybeValError InitializeShaders(const OpenGLFunctions& gl,
+                                    const PipelineLayout* layout,
+                                    const PerStage<ProgrammableStage>& stages,
+                                    ImmediateMask& pipelineImmediateMask,
+                                    VertexAttributeMask bgraSwizzleAttributes,
+                                    Extent3D* workgroupSize,
+                                    std::set<CombinedSampler>* combinedSamplers,
+                                    std::unordered_map<SingleShaderStage, std::string>* shaders);
     MaybeError InitializeBase(const OpenGLFunctions& gl,
                               const PipelineLayout* layout,
                               const PerStage<ProgrammableStage>& stages,
                               ImmediateMask& pipelineImmediateMask,
-                              VertexAttributeMask bgraSwizzleAttributes,
-                              Extent3D* workgroupSize = nullptr);
+                              const std::set<CombinedSampler>& combinedSamplers,
+                              const std::unordered_map<SingleShaderStage, std::string>& shaders);
 
   protected:
     GLuint mProgram;
@@ -109,13 +136,10 @@ class PipelineGL {
     // destruction complex as it requires the sampler to be destroyed before the sampler cache.
     Ref<Sampler> mPlaceholderSampler;
 
-    // Flag indicates if this pipeline has ssbo.length and need to use the array length from uniform
-    // workaround.
-    bool mNeedsSSBOLengthUniformBuffer = false;
-
     // Reflect info from tint: a map from texture binding point to extra data need to push into the
     // internal uniform buffer.
     EmulatedTextureBuiltinInfo mEmulatedTextureBuiltinInfo;
+    StorageBufferSizeImmediateInfo mStorageBufferSizeImmediateInfo;
 };
 
 // Helper class used to allocate the emulated texture builtins in the UBO during the initialization

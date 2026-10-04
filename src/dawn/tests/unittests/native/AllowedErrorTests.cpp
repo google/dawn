@@ -61,7 +61,8 @@ using MockRenderPipelineAsyncCallback =
     MockCppCallback<wgpu::CreateRenderPipelineAsyncCallback<void>*>;
 
 static constexpr char kOomErrorMessage[] = "Out of memory error";
-static constexpr char kInternalErrorMessage[] = "Internal error";
+static constexpr char kUnrecoverableErrorMessage[] = "Internal error";
+static constexpr char kPipelineUncategorizedErrorMessage[] = "Pipeline uncategorized";
 
 static constexpr std::string_view kComputeShader = R"(
         @compute @workgroup_size(1) fn main() {}
@@ -252,7 +253,7 @@ TEST_F(AllowedErrorTests, CreateRenderPipeline) {
 
 // Internal error from synchronously initializing a compute pipeline should not result in a device
 // loss.
-TEST_F(AllowedErrorTests, CreateComputePipelineInternalError) {
+TEST_F(AllowedErrorTests, CreateComputePipelineUnrecoverableError) {
     Ref<ShaderModuleMock> csModule = ShaderModuleMock::Create(mDeviceMock, kComputeShader.data());
 
     ComputePipelineDescriptor desc = {};
@@ -260,20 +261,22 @@ TEST_F(AllowedErrorTests, CreateComputePipelineInternalError) {
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
+        .WillOnce(
+            Return(ByMove(DAWN_PIPELINE_UNCATEGORIZED_ERROR(kPipelineUncategorizedErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
 
     // Expect the internal error.
-    EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), wgpu::ErrorType::Internal,
-                                           SizedStringMatches(HasSubstr(kInternalErrorMessage))))
+    EXPECT_CALL(mDeviceErrorCallback,
+                Call(CHandleIs(device.Get()), wgpu::ErrorType::Internal,
+                     SizedStringMatches(HasSubstr(kPipelineUncategorizedErrorMessage))))
         .Times(1);
     device.CreateComputePipeline(ToCppAPI(&desc));
 }
 
 // Internal error from synchronously initializing a render pipeline should not result in a device
 // loss.
-TEST_F(AllowedErrorTests, CreateRenderPipelineInternalError) {
+TEST_F(AllowedErrorTests, CreateRenderPipelineUnrecoverableError) {
     Ref<ShaderModuleMock> vsModule = ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
 
     DepthStencilState ds = {};
@@ -287,13 +290,15 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineInternalError) {
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
+        .WillOnce(
+            Return(ByMove(DAWN_PIPELINE_UNCATEGORIZED_ERROR(kPipelineUncategorizedErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
 
     // Expect the internal error.
-    EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), wgpu::ErrorType::Internal,
-                                           SizedStringMatches(HasSubstr(kInternalErrorMessage))))
+    EXPECT_CALL(mDeviceErrorCallback,
+                Call(CHandleIs(device.Get()), wgpu::ErrorType::Internal,
+                     SizedStringMatches(HasSubstr(kPipelineUncategorizedErrorMessage))))
         .Times(1);
     device.CreateRenderPipeline(ToCppAPI(&desc));
 }
@@ -356,7 +361,7 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsync) {
 
 // Internal error from asynchronously initializing a compute pipeline should not result in a device
 // loss.
-TEST_F(AllowedErrorTests, CreateComputePipelineAsyncInternalError) {
+TEST_F(AllowedErrorTests, CreateComputePipelineAsyncUnrecoverableError) {
     Ref<ShaderModuleMock> csModule = ShaderModuleMock::Create(mDeviceMock, kComputeShader.data());
 
     ComputePipelineDescriptor desc = {};
@@ -364,13 +369,13 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsyncInternalError) {
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
+        .WillOnce(Return(ByMove(DAWN_UNRECOVERABLE_ERROR(kUnrecoverableErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
 
     MockComputePipelineAsyncCallback cb;
     EXPECT_CALL(cb, Call(wgpu::CreatePipelineAsyncStatus::InternalError, _,
-                         HasSubstr(kInternalErrorMessage)))
+                         HasSubstr(kUnrecoverableErrorMessage)))
         .Times(1);
 
     device.CreateComputePipelineAsync(ToCppAPI(&desc), wgpu::CallbackMode::AllowProcessEvents,
@@ -380,7 +385,7 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsyncInternalError) {
 
 // Internal error from asynchronously initializing a render pipeline should not result in a device
 // loss.
-TEST_F(AllowedErrorTests, CreateRenderPipelineAsyncInternalError) {
+TEST_F(AllowedErrorTests, CreateRenderPipelineAsyncUnrecoverableError) {
     Ref<ShaderModuleMock> vsModule = ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
 
     DepthStencilState ds = {};
@@ -394,13 +399,13 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsyncInternalError) {
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
+        .WillOnce(Return(ByMove(DAWN_UNRECOVERABLE_ERROR(kUnrecoverableErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
 
     MockRenderPipelineAsyncCallback cb;
     EXPECT_CALL(cb, Call(wgpu::CreatePipelineAsyncStatus::InternalError, _,
-                         HasSubstr(kInternalErrorMessage)))
+                         HasSubstr(kUnrecoverableErrorMessage)))
         .Times(1);
 
     device.CreateRenderPipelineAsync(ToCppAPI(&desc), wgpu::CallbackMode::AllowProcessEvents,

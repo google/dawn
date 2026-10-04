@@ -425,11 +425,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 }
 
 void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platform,
-                                                TogglesState* adapterToggles) const {
-    adapterToggles->Default(
-        Toggle::DecomposeUniformBuffers,
-        platform->IsFeatureEnabled(platform::Features::kWebGPUDecomposeUniformBuffers));
-}
+                                                TogglesState* adapterToggles) const {}
 
 void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,
                                                TogglesState* deviceToggles) const {
@@ -452,11 +448,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     bool supportsStencilWriteTexture =
         gl.GetVersion().IsDesktop() || gl.IsGLExtensionSupported("GL_OES_texture_stencil8");
 
-    DAWN_ASSERT(gl.GetVersion().IsDesktop() || gl.IsAtLeastGLES(3, 2) ||
-                gl.IsGLExtensionSupported("GL_EXT_color_buffer_float"));
-    bool isFloat32Renderable = true;
-    bool isFloat16Renderable = true;
-    bool isRG11B10UfloatRenderable = true;
+    DAWN_CHECK(gl.GetVersion().IsDesktop() || gl.IsAtLeastGLES(3, 2) ||
+               gl.IsGLExtensionSupported("GL_EXT_color_buffer_float"));
 
     // TODO(crbug.com/dawn/343): Investigate emulation.
     deviceToggles->Default(Toggle::DisableIndexedDrawBuffers, !supportsIndexedDrawBuffers);
@@ -483,18 +476,20 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // For OpenGL ES, use compute shader blit to emulate bgra8unorm texture to buffer copies.
     deviceToggles->Default(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy, !supportsBGRARead);
 
-    // For OpenGL ES, use compute shader blit to emulate rgb9e5ufloat texture to buffer copies.
+    // For OpenGL ES, use compute shader blit to emulate rgb9e5ufloat texture to buffer copies if
+    // not color-renderable.
     deviceToggles->Default(Toggle::UseBlitForRGB9E5UfloatTextureCopy, gl.GetVersion().IsES());
 
-    // Use compute shader blit to emulate rg11b10ufloat texture to buffer copies if not color
-    // renderable.
-    deviceToggles->Default(Toggle::UseBlitForRG11B10UfloatTextureCopy, !isRG11B10UfloatRenderable);
-
-    // Use compute shader blit to emulate float16 texture to buffer copies if not color renderable.
-    deviceToggles->Default(Toggle::UseBlitForFloat16TextureCopy, !isFloat16Renderable);
-
-    // Use compute shader blit to emulate float32 texture to buffer copies if not color renderable.
-    deviceToggles->Default(Toggle::UseBlitForFloat32TextureCopy, !isFloat32Renderable);
+    // For OpenGL ES, use compute shader blit to emulate texture to buffer copies to work around
+    // glReadPixels not guaranteed support for certain format/type combinations.
+    if (gl.GetVersion().IsES()) {
+        deviceToggles->Default(Toggle::UseBlitForRG11B10UfloatTextureCopy, true);
+        deviceToggles->Default(Toggle::UseBlitForNonRGBAUnormTextureToBufferCopy, true);
+        deviceToggles->Default(Toggle::UseBlitForNonRGBAFloatTextureToBufferCopy, true);
+        deviceToggles->Default(Toggle::UseBlitForFloat16TextureCopy, true);
+        deviceToggles->Default(Toggle::UseBlitForUintTextureToBufferCopy, true);
+        deviceToggles->Default(Toggle::UseBlitForSintTextureToBufferCopy, true);
+    }
 
     // Use a blit to emulate stencil-only buffer-to-texture copies.
     deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);
@@ -515,7 +510,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // (crbug.com/42240914): Nividia GLES driver returns wrong value for .length() on
     // SSBO dynamic array.
     deviceToggles->Default(
-        Toggle::GLUseArrayLengthFromUniform,
+        Toggle::GLUseArrayLengthFromImmediate,
         mVendorId == gpu_info::kVendorID_ImgTec || mVendorId == gpu_info::kVendorID_Nvidia);
 
     // Enable the integer range analysis for shader robustness by default if the corresponding

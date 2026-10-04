@@ -141,8 +141,7 @@ struct State {
         // chain to get to the variable is a mix of loads and accesses (but don't have guarantees on
         // their order). There is at most one load and one access so the recursion is bounded.
         return Switch(
-            val->As<core::ir::InstructionResult>()->Instruction(),
-            [&](core::ir::Var* var) -> TextureVariablePath { return {var}; },
+            val->AsInstruction(), [&](core::ir::Var* var) -> TextureVariablePath { return {var}; },
             [&](core::ir::Load* load) -> TextureVariablePath {
                 return PathForTexture(load->From());
             },

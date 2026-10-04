@@ -54,7 +54,7 @@ class SharedFenceEGL : public SharedFence {
     MaybeError ServerWait(uint64_t signaledValue) override;
 
   private:
-    MaybeError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;
+    MaybeValError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;
 
     wgpu::SharedFenceType mType;
     SystemHandle mHandle;

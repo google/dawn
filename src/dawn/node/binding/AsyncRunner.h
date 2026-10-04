@@ -76,6 +76,15 @@ class AsyncRunner {
     bool process_events_queued_ = false;
 };
 
+// Whether an asynchronous task needs wgpuInstanceProcessEvents() to be called in order to make
+// progress. Tasks whose callbacks are registered with wgpu::CallbackMode::AllowSpontaneous are
+// signalled without any polling, so they must not keep the process-events pump running - doing so
+// would busy-loop the JavaScript thread for as long as the task is in flight.
+enum class AsyncPolling {
+    kRequired,
+    kNotRequired,
+};
+
 // AsyncTask is a RAII helper for calling AsyncRunner::Begin() on construction, and
 // AsyncRunner::End() on destruction, that also encapsulates the promise generally
 // associated with any async task.
@@ -83,17 +92,24 @@ template <typename T>
 class AsyncContext {
   public:
     // Constructor.
-    // Calls AsyncRunner::Begin()
+    // Calls AsyncRunner::Begin() if polling is AsyncPolling::kRequired.
     inline AsyncContext(Napi::Env env,
                         const interop::PromiseInfo& info,
-                        std::shared_ptr<AsyncRunner> runner)
-        : env(env), promise(env, info), runner_(runner) {
-        runner_->Begin(env);
+                        std::shared_ptr<AsyncRunner> runner,
+                        AsyncPolling polling = AsyncPolling::kRequired)
+        : env(env), promise(env, info), runner_(runner), polling_(polling) {
+        if (polling_ == AsyncPolling::kRequired) {
+            runner_->Begin(env);
+        }
     }
 
     // Destructor.
-    // Calls AsyncRunner::End()
-    inline ~AsyncContext() { runner_->End(); }
+    // Calls AsyncRunner::End() if polling is AsyncPolling::kRequired.
+    inline ~AsyncContext() {
+        if (polling_ == AsyncPolling::kRequired) {
+            runner_->End();
+        }
+    }
 
     // Note these are public to allow for access for the callbacks that take ownership of this
     // context.
@@ -105,6 +121,7 @@ class AsyncContext {
     AsyncContext& operator=(const AsyncContext&) = delete;
 
     std::shared_ptr<AsyncRunner> runner_;
+    const AsyncPolling polling_;
 };
 
 }  // namespace wgpu::binding

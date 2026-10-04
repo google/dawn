@@ -58,7 +58,7 @@ namespace tint::msl::writer::raise {
 /// * SubstituteOverrides
 /// * PropagateBufferSizes
 /// * Robustness
-/// * ArrayLengthFromUniform/Immediate
+/// * ArrayLengthFromImmediates
 ///
 /// @param module The module
 /// @returns Success or Failure

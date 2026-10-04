@@ -50,8 +50,8 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
     }
 
     tint::msl::writer::Options gen_options = {};
-    // TODO(crbug.com/366291600): Replace ubo with immediate block for bench
-    gen_options.array_length_from_constants.ubo_binding = 30;
+    gen_options.immediate_binding_point = tint::BindingPoint{0, 30};
+    gen_options.array_length_from_constants.buffer_sizes_offset = 0x800;
     gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(
         tint::BindingPoint{0, 0}, 0);
     gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(

@@ -1808,7 +1808,7 @@ $B1: {  # root
 }
 )";
 
-    mod.properties.Add(core::ir::Property::kAllowMslEntryPointInterface);
+    mod.properties.Add(core::ir::Property::kAllowPointerAndHandleInAggregates);
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_index;
     bindpoint_to_index[{0, 0}] = 0;
     Run(ArrayLengthFromUniform, BindingPoint{1, 2}, bindpoint_to_index);

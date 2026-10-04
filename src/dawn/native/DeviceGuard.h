@@ -29,13 +29,11 @@
 #define SRC_DAWN_NATIVE_DEVICEGUARD_H_
 
 #include <mutex>
-#include <optional>
 #include <thread>
 
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/Atomic.h"
 #include "src/dawn/common/Compiler.h"
-#include "src/dawn/common/Defer.h"
 #include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/common/Ref.h"
 
@@ -53,7 +51,6 @@ class DeviceMutex : public RecursiveMutex {
     ~DeviceMutex() override;
 
   private:
-    friend class DeviceBase;
     friend struct AutoLockBase<DeviceMutex*>;
     friend class DeviceMutexTest;
 
@@ -61,7 +58,6 @@ class DeviceMutex : public RecursiveMutex {
     void Unlock() DAWN_UNLOCK_FUNCTION;
 
     uint32_t mRecursionStackDepth = 0;
-    std::optional<class Defer> mDefer = std::nullopt;
     Atomic<std::thread::id, std::memory_order_acquire, std::memory_order_release> mOwningThread{
         std::thread::id()};
     const raw_ptr<dawn::platform::Platform> mPlatform = nullptr;
@@ -100,8 +96,8 @@ class DeviceGuardBase {
 
 // DeviceGuard is the equivalent to a Guard when using MutexProtected specifically designed for the
 // device-wide lock. Usually, Guards are scoped via lambda functions, but for the device-wide lock,
-// we provide ways to get this guard and call Defer from the Device. Since the device-wide lock is a
-// temporary solution, this provides a way get the guard without adding lambda scopes everywhere.
+// we provide ways to get this guard from the Device. Since the device-wide lock is a temporary
+// solution, this provides a way to get the guard without adding lambda scopes everywhere.
 class DeviceGuard : public detail::DeviceGuardBase,
                     private ::dawn::detail::Guard<DeviceBase, detail::DeviceMutexTraits> {
   public:

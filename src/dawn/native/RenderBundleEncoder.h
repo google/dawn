@@ -36,7 +36,7 @@
 
 namespace dawn::native {
 
-ResultOrError<UnpackedPtr<RenderBundleEncoderDescriptor>> ValidateRenderBundleEncoderDescriptor(
+ResultOrValError<UnpackedPtr<RenderBundleEncoderDescriptor>> ValidateRenderBundleEncoderDescriptor(
     DeviceBase* device,
     const RenderBundleEncoderDescriptor* descriptor);
 

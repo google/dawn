@@ -344,10 +344,7 @@ void Device::InitializeRenderPipelineAsyncImpl(Ref<CreateRenderPipelineAsyncEven
 }
 
 ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
-    const SharedTextureMemoryDescriptor* descriptor) {
-    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
         type, (unpacked.ValidateBranches<Branch<SharedTextureMemoryDXGISharedHandleDescriptor>,
@@ -359,25 +356,21 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedTextureMemoryDXGISharedHandle);
             return SharedTextureMemory::Create(
-                this, descriptor->label,
+                this, unpacked->label,
                 unpacked.Get<SharedTextureMemoryDXGISharedHandleDescriptor>());
         case wgpu::SType::SharedTextureMemoryD3D11Texture2DDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedTextureMemoryD3D11Texture2D),
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedTextureMemoryD3D11Texture2D);
             return SharedTextureMemory::Create(
-                this, descriptor->label,
-                unpacked.Get<SharedTextureMemoryD3D11Texture2DDescriptor>());
+                this, unpacked->label, unpacked.Get<SharedTextureMemoryD3D11Texture2DDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }
 }
 
 ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
-    const SharedFenceDescriptor* descriptor) {
-    UnpackedPtr<SharedFenceDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+    UnpackedPtr<SharedFenceDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(type,
                     (unpacked.ValidateBranches<Branch<SharedFenceDXGISharedHandleDescriptor>>()));
@@ -386,7 +379,7 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
         case wgpu::SType::SharedFenceDXGISharedHandleDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceDXGISharedHandle), "%s is not enabled.",
                             wgpu::FeatureName::SharedFenceDXGISharedHandle);
-            return SharedFence::Create(this, descriptor->label,
+            return SharedFence::Create(this, unpacked->label,
                                        unpacked.Get<SharedFenceDXGISharedHandleDescriptor>());
         default:
             DAWN_UNREACHABLE();
@@ -436,10 +429,10 @@ MaybeError Device::CheckDebugLayerAndGenerateErrors() {
         return {};
     }
 
-    auto error = DAWN_INTERNAL_ERROR("The D3D11 debug layer reported uncaught errors.");
-
+    std::unique_ptr<UnrecoverableError> error =
+        DAWN_UNRECOVERABLE_ERROR("The D3D11 debug layer reported uncaught errors.");
     const uint64_t emittedErrors =
-        AppendDebugLayerMessagesToError(infoQueue.Get(), totalErrors, error.get());
+        AppendDebugLayerMessagesToError(infoQueue.Get(), totalErrors, error->GetData());
     if (emittedErrors == 0) {
         return {};
     }
@@ -546,12 +539,6 @@ bool Device::ReduceMemoryUsageImpl() {
             ->GetScopedPendingCommandContext(ExecutionQueueBase::SubmitMode::Passive);
     commandContext.Flush();
     GetPlatform()->ReportProgress();
-
-    // Call Trim() to delete any internal resources created by the driver.
-    ComPtr<IDXGIDevice3> dxgiDevice3;
-    if (SUCCEEDED(mD3d11Device.As(&dxgiDevice3))) {
-        dxgiDevice3->Trim();
-    }
 
     return false;
 }

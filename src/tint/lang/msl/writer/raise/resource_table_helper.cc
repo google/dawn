@@ -41,7 +41,6 @@ Hashmap<const core::type::Type*, core::ir::Var*, 4> ResourceTableHelper::Generat
     core::ir::Builder& b,
     const BindingPoint& bp,
     const std::vector<ResourceType>& types) const {
-    b.ir.properties.Add(core::ir::Property::kAllowMslEntryPointInterface);
     b.ir.properties.Add(core::ir::Property::kAllow64BitIntegers);
 
     auto* v = b.Var(b.ir.Types().ptr(uniform, b.ir.Types().u64(), core::Access::kRead));

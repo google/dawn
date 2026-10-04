@@ -55,19 +55,19 @@ There's also a helper tool to run the fuzzers locally:
   [`test/tint`](../../test/tint), and using the dictionary in
   `src/tint/cmd/fuzz/wgsl/dictionary.txt` run:
 
-  `tools/run fuzz`
+  `tools/run fuzz run`
 
 - To check that all the test files, [`test/tint`](../../test/tint) by
   default, pass the fuzzers without crashing and then exit, run:
 
-  `tools/run fuzz --check`
+  `tools/run fuzz check`
 
   Note: This is run by Dawn's CQ to check that fuzzers aren't
   accidentally broken.
 
 - To run the local fuzzers using a generated corpus of .wgsl files:
 
-  `tools/run fuzz -inputs out/Fuzzer/wgsl_corpus`
+  `tools/run fuzz run -inputs out/Fuzzer/wgsl_corpus`
 
 Note: The above commands will run in the default WGSL mode only.  If
 you want to run using the IR fuzzer, you need to pass in `--ir` to run
@@ -76,9 +76,9 @@ in IR mode.
 Examples of IR mode:
 
 ```bash
-tools/run fuzz -ir
-tools/run fuzz -ir -inputs out/Fuzzer/ir_corpus
-tools/run fuzz -ir -check
+tools/run fuzz run -ir
+tools/run fuzz run -ir -inputs out/Fuzzer/ir_corpus
+tools/run fuzz check -ir
 ```
 
 `-ir` mode without any provided inputs will convert the default WGSL
@@ -99,7 +99,7 @@ restricted by this initial corpus, since it will mutate and recombine
 the examples to find new and interesting inputs.
 
 The helper tool is capable of producing appropriate corpora from test
-files via the `-generate` flag. `-generate` requires you to also pass
+files via the `generate` subcommand. `generate` requires you to also pass
 in `-out`, since otherwise the output would go to an ephemeral tmp
 directory and not be useable.
 
@@ -109,7 +109,7 @@ To generate a corpus based on the default test files from
 [`test/tint`](../../test/tint) no additional flags are needed
 
 ```bash
-tools/run fuzz -generate -out out/Fuzzer/wgsl_corpus
+tools/run fuzz generate -out out/Fuzzer/wgsl_corpus
 ```
 
 `-inputs` can be used to provide custom inputs to the tool. It will
@@ -117,7 +117,7 @@ use any .wgsl files found in the inputs that don't also include the
 string `.expected.` in their name.
 
 ```bash
-tools/run fuzz -generate -inputs my_super_cool_tests/ -out out/Fuzzer/wgsl_corpus
+tools/run fuzz generate -inputs my_super_cool_tests/ -out out/Fuzzer/wgsl_corpus
 ```
 
 `-out` will overwrite existing files that collide with the output file
@@ -133,14 +133,14 @@ An example of generating and then using a custom WGSL corpus:
 
 ```bash
 autoninja -C out/Fuzzer fuzzer_corpus_tools  # Guarantees the fuzzers and another tooling is present
-tools/run fuzz -generate -inputs my_super_cool_tests/ -out out/Fuzzer/wgsl_corpus
+tools/run fuzz generate -inputs my_super_cool_tests/ -out out/Fuzzer/wgsl_corpus
 
 # And then either
 out/Fuzzer/tint_wgsl_fuzzer -dict=src/tint/cmd/fuzz/wgsl/dictionary.txt out/Fuzzer/wgsl_corpus
 
 # or
 
-tools/run fuzz -inputs out/Fuzzer/wgsl_corpus
+tools/run fuzz run -inputs out/Fuzzer/wgsl_corpus
 ```
 
 #### tint_ir_fuzzer
@@ -161,27 +161,27 @@ inputs with `.expected.` will be filtered out.
 Generating a corpus based on the default WGSL tests:
 
 ```bash
-tools/run fuzz -ir -generate -out out/Fuzzer/wgsl_corpus
+tools/run fuzz generate -ir -out out/Fuzzer/wgsl_corpus
 ```
 
 Generating a corpus based on custom WGSL files:
 
 ```bash
-tools/run fuzz -ir -generate -input my_super_cool_tests/ -out out/Fuzzer/wgsl_corpus
+tools/run fuzz generate -ir -input my_super_cool_tests/ -out out/Fuzzer/wgsl_corpus
 ```
 
 An example of generating and using a custom IR corpus:
 
 ```bash
 autoninja -C out/Fuzzer fuzzer_corpus_tools  # Guarantees the fuzzers and another tooling is present
-tools/run fuzz -ir -generate -inputs my_super_cool_tests/ -out out/Fuzzer/ir_corpus
+tools/run fuzz generate -ir -inputs my_super_cool_tests/ -out out/Fuzzer/ir_corpus
 
 # And then either
 out/Fuzzer/tint_ir_fuzzer out/Fuzzer/ir_corpus
 
 # or
 
-tools/run fuzz -ir -inputs out/Fuzzer/ir_corpus
+tools/run fuzz run -ir -inputs out/Fuzzer/ir_corpus
 ```
 
 #### Minimizing the corpus
@@ -529,3 +529,112 @@ with just this file as input:
 ```bash
 out/libfuzz/tint_wgsl_fuzzer ./crash-21563a85afd5322d9e17c1c43fd3d4029778d6e7
 ```
+
+## Profiling
+
+It is possible to profile the fuzzers using callgrind from
+[valgrind](https://valgrind.org/). Profiling reports from callgrind
+can be processed using `callgrind_annotate` to get human readable text
+or visualized using
+[KCachegrind](https://kcachegrind.github.io/html/Home.html).
+
+**Note:** `callgrind` is not a sampling profiler (e.g. `perf`), which
+means it traces all the calls during the run which produces more
+complete data about the execution, but at the cost of causing a
+significant (i.e. orders of magnitude) performance hit. If you are
+looking for a fast, approximate profiling tool I would recommend
+looking at using `perf`.
+
+### Prerequisites
+#### System
+
+You will need to have valgrind (and optionally KCachegrind) installed
+on your machine. For APT based machines this looks like:
+
+```bash
+sudo apt get valgrind
+
+# Optionally for visualization
+sudo apt get kcachegrind
+```
+
+**Note:** If you are not running KDE or another QT based DE,
+installing KCachegrind will likely pull in a bunch of framework
+dependencies. Alternatives include: QCachegrind which is a lighter
+weight version of KCachegrind, and
+[gprof2dot](https://github.com/jrfonseca/gprof2dot) which supports
+outputting a variety of profiling formats to Graphviz dot files
+
+#### Build Configuration
+
+Because profiling requires symbol information and is going to be doing
+a bunch of call interception, there are some build flags that must be
+enabled and some that must be disabled in your `args.gn`
+
+```gn
+# If not enabled, profiling will still run, the trace will just be
+# empty
+is_debug = true
+
+# Technically will run with sanitizers on, but execution will likely
+# halt early due to the sanitizers triggering on the profiling
+# hooks. These flags are off by default in args.gn, but if you are
+# working with fuzzers regularly, you may have them enabled for your
+# specific build
+is_asan = false
+is_msan = false
+is_<any other san> = false
+
+```
+
+### Example Workflow
+
+The steps for profiling a hypothetical WGSL fuzzer test case that is
+causing timeouts.
+
+After doing whatever other triage I normally would do and determining
+that this is a performance bottleneck problem that requires
+profiling. The first step will be to actually generate the profiling
+trace.
+
+```bash
+valgrind \
+    --tool=callgrind \
+    --trace-children=yes \
+    --dump-instr=yes \
+    --collect-jumps=yes \
+    out/gn-callgrind/tint_wgsl_fuzzer triage/really_slow.wgsl
+```
+
+* `--trace-children=yes` is required for valgrind to follow flow
+across forks. Without this you will just get a trace of the libfuzzer
+framework
+* `--dump-instr=yes` and `--collect-jumps=yes` are needed to generate
+proper data attributing time up to parents. Without these flags each
+function call will be only assessed the time actually spent in the
+function's code and not include the time of anything it calls into.
+
+**Note:** This profiling can be very slow, this is a start executing
+and go get a snack type of task.
+
+After the profiling is done, I manually process the output, since the
+paths to files in report will be relative to the binary location, i.e
+`out/gn-callgrind`, so will include a leading `../../`. The original
+output file will be something like `callgrind.out.<pid>` where <pid>
+is the process id for the specific invocation.
+
+```bash
+sed -i 's#\./\.\./\.\./#./#g' callgrind.out.<pid> > callgrind.out.fixed.<pid>
+```
+
+And then to visualize and start inspecting the trace
+
+```bash
+kcachegrind callgrind.out.fixed.<pid>
+```
+
+As mentioned you can use `callgrind_annotate`, which is installed as
+part of valgrind, to pull out information like the N most expensive
+functions. The man page for `callgrind_annotate` is relatively brief,
+so I would suggest using your favourite search engine to find examples
+of specific usages.

@@ -44,7 +44,7 @@ SharedTextureMemory::SharedTextureMemory(d3d::Device* device,
                                          SharedTextureMemoryProperties properties)
     : SharedTextureMemoryBase(device, label, properties) {}
 
-MaybeError SharedTextureMemory::BeginAccessImpl(
+MaybeValError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY((descriptor.ValidateSubset<SharedTextureMemoryD3DSwapchainBeginState,
@@ -60,6 +60,8 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
                                 wgpu::SharedFenceType::DXGISharedHandle);
                 break;
             default:
+                // TODO(crbug.com/536639352): Move the validation of the fence type into the
+                // frontend to better separate the validation and internal error.
                 return DAWN_VALIDATION_ERROR("Unsupported fence type %s.", exportInfo.type);
         }
     }

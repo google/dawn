@@ -42,7 +42,7 @@ namespace {{native_namespace}} {
     // Helper functions to check the value of enums and bitmasks
     {% for type in by_category["enum"] + by_category["bitmask"] %}
         {% set namespace = metadata.namespace %}
-        MaybeError Validate{{type.name.CamelCase()}}({{namespace}}::{{as_cppType(type.name)}} value);
+        MaybeValError Validate{{type.name.CamelCase()}}({{namespace}}::{{as_cppType(type.name)}} value);
     {% endfor %}
 
 } // namespace {{native_namespace}}

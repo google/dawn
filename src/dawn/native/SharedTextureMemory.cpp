@@ -51,8 +51,8 @@ class ErrorSharedTextureMemory : public SharedTextureMemoryBase {
         const UnpackedPtr<TextureDescriptor>& descriptor) override {
         DAWN_UNREACHABLE();
     }
-    MaybeError BeginAccessImpl(TextureBase* texture,
-                               const UnpackedPtr<BeginAccessDescriptor>& descriptor) override {
+    MaybeValError BeginAccessImpl(TextureBase* texture,
+                                  const UnpackedPtr<BeginAccessDescriptor>& descriptor) override {
         DAWN_UNREACHABLE();
     }
     ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
@@ -128,7 +128,8 @@ wgpu::Status SharedTextureMemoryBase::APIGetProperties(
     return wgpu::Status::Success;
 }
 
-MaybeError SharedTextureMemoryBase::GetProperties(SharedTextureMemoryProperties* properties) const {
+MaybeValError SharedTextureMemoryBase::GetProperties(
+    SharedTextureMemoryProperties* properties) const {
     properties->usage = mProperties.usage;
     properties->size = mProperties.size;
     properties->format = mProperties.format;
@@ -136,13 +137,12 @@ MaybeError SharedTextureMemoryBase::GetProperties(SharedTextureMemoryProperties*
     UnpackedPtr<SharedTextureMemoryProperties> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(properties));
 
-    if (unpacked.Has<SharedTextureMemoryAHardwareBufferProperties>()) {
-        DAWN_INVALID_IF(
+    DAWN_INVALID_IF(
+        unpacked.Has<SharedTextureMemoryAHardwareBufferProperties>() &&
             !GetDevice()->HasFeature(Feature::SharedTextureMemoryAHardwareBuffer),
-            "SharedTextureMemory properties (%s) have a chained "
-            "SharedTextureMemoryAHardwareBufferProperties without the %s feature being set.",
-            this, ToCppAPI(Feature::SharedTextureMemoryAHardwareBuffer));
-    }
+        "SharedTextureMemory properties (%s) have a chained "
+        "SharedTextureMemoryAHardwareBufferProperties without the %s feature being set.",
+        this, ToCppAPI(Feature::SharedTextureMemoryAHardwareBuffer));
 
     DAWN_TRY(GetChainedProperties(unpacked));
 
@@ -150,8 +150,6 @@ MaybeError SharedTextureMemoryBase::GetProperties(SharedTextureMemoryProperties*
 }
 
 TextureBase* SharedTextureMemoryBase::APICreateTexture(const TextureDescriptor* descriptor) {
-    Ref<TextureBase> result;
-
     // Provide the defaults if no descriptor is provided.
     TextureDescriptor defaultDescriptor;
     if (descriptor == nullptr) {
@@ -162,6 +160,12 @@ TextureBase* SharedTextureMemoryBase::APICreateTexture(const TextureDescriptor* 
         descriptor = &defaultDescriptor;
     }
 
+    if (GetDevice()->ConsumedError(ValidateCreateTexture(descriptor),
+                                   "calling %s.CreateTexture(%s).", this, descriptor)) {
+        return ReturnToAPI(TextureBase::MakeError(GetDevice(), descriptor));
+    }
+
+    Ref<TextureBase> result;
     if (GetDevice()->ConsumedError(CreateTexture(descriptor), &result,
                                    InternalErrorType::OutOfMemory, "calling %s.CreateTexture(%s).",
                                    this, descriptor)) {
@@ -171,6 +175,22 @@ TextureBase* SharedTextureMemoryBase::APICreateTexture(const TextureDescriptor* 
 }
 
 ResultOrError<Ref<TextureBase>> SharedTextureMemoryBase::CreateTexture(
+    const TextureDescriptor* rawDescriptor) {
+    // Note, the `UnpackedPtr<TextureDescriptor>` is not returned from `ValidateCreateTexture`
+    // because the `reifiedDescriptor` is stack allocated and the unpacked pointer refers into that
+    // stack object.
+    TextureDescriptor reifiedDescriptor = WithTrivialFrontendDefaults(*rawDescriptor);
+    UnpackedPtr<TextureDescriptor> descriptor = Unpack(&reifiedDescriptor);
+
+    Ref<TextureBase> texture;
+    DAWN_TRY_ASSIGN(texture, CreateTextureImpl(descriptor));
+
+    // Access is started on memory.BeginAccess.
+    texture->OnEndAccess();
+    return texture;
+}
+
+MaybeValError SharedTextureMemoryBase::ValidateCreateTexture(
     const TextureDescriptor* rawDescriptor) {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
@@ -205,12 +225,7 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemoryBase::CreateTexture(
     // memory's usage.
     DAWN_TRY(ValidateTextureDescriptor(GetDevice(), descriptor, AllowMultiPlanarTextureFormat::Yes,
                                        mProperties.usage));
-
-    Ref<TextureBase> texture;
-    DAWN_TRY_ASSIGN(texture, CreateTextureImpl(descriptor));
-    // Access is started on memory.BeginAccess.
-    texture->OnEndAccess();
-    return texture;
+    return {};
 }
 
 Ref<SharedResourceMemoryContents> SharedTextureMemoryBase::CreateContents() {

@@ -46,9 +46,12 @@ ResultOrError<wgpu::SharedFenceType> ChooseFenceTypeFromFeatures(Device* device)
     } else if (device->HasFeature(Feature::SharedFenceEGLSync)) {
         return wgpu::SharedFenceType::EGLSync;
     } else {
+        // TODO(crbug.com/536639352): This should be moved to the frontend and we should check that
+        // we have at least a fence feature enabled when creating an STM/SBM.
         return DAWN_VALIDATION_ERROR("No enabled features for SharedFence creation.");
     }
 }
+
 }  // namespace
 
 SharedTextureMemory::SharedTextureMemory(Device* device,
@@ -61,7 +64,7 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
     return Texture::CreateFromSharedTextureMemory(this, descriptor);
 }
 
-MaybeError SharedTextureMemory::BeginAccessImpl(
+MaybeValError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY(descriptor.ValidateSubset<>());
@@ -82,6 +85,8 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
                                 wgpu::SharedFenceType::EGLSync);
                 break;
             default:
+                // TODO(crbug.com/536639352): Move the validation of the fence type into the
+                // frontend to better separate the validation and internal error.
                 return DAWN_VALIDATION_ERROR("Unsupported fence type %s.", exportInfo.type);
         }
 

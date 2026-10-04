@@ -41,7 +41,7 @@
 namespace dawn::native::metal {
 
 namespace {
-ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
+ResultOrValError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
     switch (format) {
         case kCVPixelFormatType_64RGBAHalf:
             return wgpu::TextureFormat::RGBA16Float;
@@ -64,18 +64,26 @@ ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t
         case kCVPixelFormatType_OneComponent16:
             return wgpu::TextureFormat::R16Unorm;
         case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
+        case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
         case kCVPixelFormatType_Lossless_420YpCbCr8BiPlanarVideoRange:
+        case kCVPixelFormatType_Lossless_420YpCbCr8BiPlanarFullRange:
             return wgpu::TextureFormat::R8BG8Biplanar420Unorm;
         case kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange:
+        case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
             return wgpu::TextureFormat::R8BG8Biplanar422Unorm;
         case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange:
+        case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
             return wgpu::TextureFormat::R8BG8Biplanar444Unorm;
         case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
+        case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
         case kCVPixelFormatType_Lossless_420YpCbCr10PackedBiPlanarVideoRange:
+        case kCVPixelFormatType_Lossless_420YpCbCr10PackedBiPlanarFullRange:
             return wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm;
         case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
+        case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
             return wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm;
         case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
+        case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
         case kCVPixelFormatType_Lossless_422YpCbCr10PackedBiPlanarVideoRange:
             return wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm;
         case kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar:
@@ -201,7 +209,7 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
     return Texture::CreateFromSharedTextureMemory(this, descriptor);
 }
 
-MaybeError SharedTextureMemory::BeginAccessImpl(
+MaybeValError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY(descriptor.ValidateSubset<>());
@@ -216,6 +224,8 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
                                 wgpu::SharedFenceType::MTLSharedEvent);
                 break;
             default:
+                // TODO(crbug.com/536639352): Move the validation of the fence type into the
+                // frontend to better separate the validation and internal error.
                 return DAWN_VALIDATION_ERROR("Unsupported fence type %s.", exportInfo.type);
         }
     }
@@ -278,7 +288,8 @@ MaybeError SharedTextureMemory::CreateMtlTextures() {
             mMtlPlaneTextures[plane] = AcquireNSPRef(
                 CreateTextureMtlForPlane(mMtlUsage, *format, plane, device, mIOSurface.Get()));
             if (mMtlPlaneTextures[plane] == nil) {
-                return DAWN_INTERNAL_ERROR("Failed to create MTLTexture plane view for IOSurface.");
+                return DAWN_UNRECOVERABLE_ERROR(
+                    "Failed to create MTLTexture plane view for IOSurface.");
             }
         }
     }

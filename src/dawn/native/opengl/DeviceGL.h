@@ -208,7 +208,7 @@ class Device final : public DeviceBase {
 
     float GetMaxTextureMaxAnisotropy() const;
 
-    MaybeError ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor);
+    MaybeValError ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor);
     Ref<TextureBase> CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
                                                    ::EGLImage image);
     Ref<TextureBase> CreateTextureWrappingGLTexture(const ExternalImageDescriptor* descriptor,
@@ -242,7 +242,6 @@ class Device final : public DeviceBase {
     const AHBFunctions* GetOrLoadAHBFunctions();
 
     const Buffer* GetInternalTextureBuiltinsUniformBuffer() const;
-    const Buffer* GetInternalArrayLengthUniformBuffer() const;
 
   private:
     Device(AdapterBase* adapter,
@@ -282,9 +281,9 @@ class Device final : public DeviceBase {
     Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor) override;
     ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
-        const SharedTextureMemoryDescriptor* descriptor) override;
+        UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) override;
     ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
-        const SharedFenceDescriptor* descriptor) override;
+        UnpackedPtr<SharedFenceDescriptor> unpacked) override;
     ResultOrError<Ref<TextureBase>> CreateTextureWrappingEGLImageImpl(
         const ExternalImageDescriptor* descriptor,
         ::EGLImage image);
@@ -307,9 +306,6 @@ class Device final : public DeviceBase {
     // Maintain an internal uniform buffer to store extra information needed by shader emulation for
     // certain texture builtins.
     Ref<Buffer> mTextureBuiltinsBuffer;
-
-    // Maintain an internal uniform buffer to store extra array length information if needed.
-    Ref<Buffer> mArrayLengthBuffer;
 
 #if DAWN_PLATFORM_IS(ANDROID)
     std::unique_ptr<AHBFunctions> mAHBFunctions;

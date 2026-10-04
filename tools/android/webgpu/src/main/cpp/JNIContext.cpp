@@ -27,6 +27,7 @@
 
 #include "JNIContext.h"
 
+#include <algorithm>
 #include <cassert>
 
 #include "structures.h"
@@ -47,10 +48,6 @@ JNIContext::~JNIContext() {
     for (auto [array, ints] : mIntArraysToRelease) {
         env->ReleaseIntArrayElements(array, ints, JNI_ABORT);
     }
-
-    for (auto allocation : mAllocationsToFree) {
-        allocation.deleter(allocation.ptr);
-    }
 }
 
 const char* JNIContext::GetStringUTFChars(jstring s) {
@@ -63,6 +60,43 @@ const jint* JNIContext::GetIntArrayElements(jintArray a) {
     jint* ints = env->GetIntArrayElements(a, nullptr);
     mIntArraysToRelease.emplace_back(a, ints);
     return ints;
+}
+
+void* JNIContext::AllocateRaw(size_t size, size_t alignment) {
+    if (mBumpBlocks.empty()) {
+        void* ptr = mInlineBuffer + mInlineOffset;
+        size_t space = kInlineBufferSize - mInlineOffset;
+        if (std::align(alignment, size, ptr, space)) {
+            mInlineOffset = kInlineBufferSize - space + size;
+            return ptr;
+        }
+    }
+    if (!mBumpBlocks.empty()) {
+        BumpBlock& block = mBumpBlocks.back();
+        void* ptr = block.data.get() + block.offset;
+        size_t space = block.size - block.offset;
+        if (std::align(alignment, size, ptr, space)) {
+            // std::align decreases `space` by the padding used.
+            block.offset = block.size - space + size;
+            return ptr;
+        }
+    }
+
+    if (size > std::numeric_limits<size_t>::max() - (alignment - 1)) {
+        env->ThrowNew(env->FindClass("java/lang/IllegalArgumentException"),
+                      "Allocation size overflow");
+        return nullptr;
+    }
+
+    size_t allocSize = std::max(size + alignment - 1, kDefaultBumpBlockSize);
+    mBumpBlocks.push_back({std::unique_ptr<std::byte[]>(new std::byte[allocSize]), allocSize, 0});
+
+    BumpBlock& block = mBumpBlocks.back();
+    void* ptr = block.data.get();
+    size_t space = block.size;
+    std::align(alignment, size, ptr, space);  // Guaranteed to succeed
+    block.offset = block.size - space + size;
+    return ptr;
 }
 
 }  // namespace dawn::kotlin_api

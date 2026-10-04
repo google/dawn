@@ -130,9 +130,7 @@ TEST(RefBase, Detach) {
     Ref ref(tracker);
 
     events.clear();
-    {
-        [[maybe_unused]] auto ptr = ref.Detach();
-    }
+    std::ignore = ref.Detach();
     EXPECT_THAT(events, testing::ElementsAre(Event{Action::kAssign, 1, 0}  // nullify ref
                                              ));
 }

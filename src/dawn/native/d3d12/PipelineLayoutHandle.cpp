@@ -46,121 +46,126 @@ Ref<PipelineLayoutHandle> PipelineLayoutHandle::Create(Device* device,
 PipelineLayoutHandle::~PipelineLayoutHandle() {
     mDevice->ReferenceUntilUnused(std::move(mRootSignature));
 
-    if (mDispatchIndirectCommandSignatureWithNumWorkgroups.Get()) {
-        mDevice->ReferenceUntilUnused(mDispatchIndirectCommandSignatureWithNumWorkgroups);
+    if (mDispatchIndirectCommandSignatureWithNumWorkgroups) {
+        mDevice->ReferenceUntilUnused(mDispatchIndirectCommandSignatureWithNumWorkgroups.signature);
     }
-    if (mDrawIndirectCommandSignatureWithInstanceVertexOffsets.Get()) {
-        mDevice->ReferenceUntilUnused(mDrawIndirectCommandSignatureWithInstanceVertexOffsets);
-    }
-    if (mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets.Get()) {
+    if (mDrawIndirectCommandSignatureWithInstanceVertexOffsets) {
         mDevice->ReferenceUntilUnused(
-            mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets);
+            mDrawIndirectCommandSignatureWithInstanceVertexOffsets.signature);
+    }
+    if (mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets) {
+        mDevice->ReferenceUntilUnused(
+            mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets.signature);
     }
 }
 
-ID3D12CommandSignature*
+const CommandSignature&
 PipelineLayoutHandle::GetDispatchIndirectCommandSignatureWithNumWorkgroups() {
-    // mDispatchIndirectCommandSignatureWithNumWorkgroups won't be created until it is needed.
-    if (mDispatchIndirectCommandSignatureWithNumWorkgroups.Get() != nullptr) {
-        return mDispatchIndirectCommandSignatureWithNumWorkgroups.Get();
+    constexpr uint32_t kExtraImmediates = 3;
+    constexpr uint32_t kByteStride = kDispatchIndirectSize + kExtraImmediates * sizeof(uint32_t);
+
+    // Command signature object is lazily-initialized.
+    if (!mDispatchIndirectCommandSignatureWithNumWorkgroups) {
+        D3D12_INDIRECT_ARGUMENT_DESC argumentDescs[2] = {};
+        argumentDescs[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
+        argumentDescs[0].Constant.RootParameterIndex = mImmediatesParameterIndex;
+        argumentDescs[0].Constant.Num32BitValuesToSet = kExtraImmediates;
+        argumentDescs[0].Constant.DestOffsetIn32BitValues =
+            GetImmediateByteOffsetInPipeline(&ComputeImmediates::numWorkgroups,
+                                             mPipelineImmediateMask) /
+            kImmediateElementByteSize;
+
+        // A command signature must contain exactly 1 Draw / Dispatch / DispatchMesh / DispatchRays
+        // command. That command must come last.
+        argumentDescs[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
+
+        D3D12_COMMAND_SIGNATURE_DESC programDesc = {};
+        programDesc.ByteStride = kByteStride;
+        programDesc.NumArgumentDescs = 2;
+        programDesc.pArgumentDescs = argumentDescs;
+
+        // The root signature must be specified if and only if the command signature changes one of
+        // the root arguments.
+        auto result = mDevice->CreateCommandSignature(programDesc, GetRootSignature());
+        DAWN_CHECK(result.IsSuccess());
+        mDispatchIndirectCommandSignatureWithNumWorkgroups = result.AcquireSuccess();
     }
 
-    D3D12_INDIRECT_ARGUMENT_DESC argumentDescs[2] = {};
-    argumentDescs[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
-    argumentDescs[0].Constant.RootParameterIndex = mImmediatesParameterIndex;
-    argumentDescs[0].Constant.Num32BitValuesToSet = 3;
-    argumentDescs[0].Constant.DestOffsetIn32BitValues =
-        GetImmediateByteOffsetInPipeline(&ComputeImmediates::numWorkgroups,
-                                         mPipelineImmediateMask) /
-        kImmediateElementByteSize;
-
-    // A command signature must contain exactly 1 Draw / Dispatch / DispatchMesh / DispatchRays
-    // command. That command must come last.
-    argumentDescs[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
-
-    D3D12_COMMAND_SIGNATURE_DESC programDesc = {};
-    programDesc.ByteStride = 6 * sizeof(uint32_t);
-    programDesc.NumArgumentDescs = 2;
-    programDesc.pArgumentDescs = argumentDescs;
-
-    // The root signature must be specified if and only if the command signature changes one of
-    // the root arguments.
-    mDevice->GetD3D12Device()->CreateCommandSignature(
-        &programDesc, GetRootSignature(),
-        IID_PPV_ARGS(&mDispatchIndirectCommandSignatureWithNumWorkgroups));
-    return mDispatchIndirectCommandSignatureWithNumWorkgroups.Get();
+    return mDispatchIndirectCommandSignatureWithNumWorkgroups;
 }
 
-ID3D12CommandSignature*
+const CommandSignature&
 PipelineLayoutHandle::GetDrawIndirectCommandSignatureWithInstanceVertexOffsets() {
-    // mDrawIndirectCommandSignatureWithInstanceVertexOffsets won't be created until it is
-    // needed.
-    if (mDrawIndirectCommandSignatureWithInstanceVertexOffsets.Get() != nullptr) {
-        return mDrawIndirectCommandSignatureWithInstanceVertexOffsets.Get();
+    constexpr uint32_t kExtraImmediates = 2;
+    constexpr uint32_t kByteStride = kDrawIndirectSize + kExtraImmediates * sizeof(uint32_t);
+
+    // Command signature object is lazily-initialized.
+    if (!mDrawIndirectCommandSignatureWithInstanceVertexOffsets) {
+        // First vertex and first instance are set in immediate mask together and first vertex is
+        // always just before instance index in the immediate mask.
+        D3D12_INDIRECT_ARGUMENT_DESC argumentDescs[2] = {};
+        argumentDescs[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
+        argumentDescs[0].Constant.RootParameterIndex = mImmediatesParameterIndex;
+        argumentDescs[0].Constant.Num32BitValuesToSet = kExtraImmediates;
+        argumentDescs[0].Constant.DestOffsetIn32BitValues =
+            GetImmediateByteOffsetInPipeline(&RenderImmediates::firstIndexOffset,
+                                             mPipelineImmediateMask) /
+            kImmediateElementByteSize;
+
+        // A command signature must contain exactly 1 Draw / Dispatch / DispatchMesh / DispatchRays
+        // command. That command must come last.
+        argumentDescs[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
+
+        D3D12_COMMAND_SIGNATURE_DESC programDesc = {};
+        programDesc.ByteStride = kByteStride;
+        programDesc.NumArgumentDescs = 2;
+        programDesc.pArgumentDescs = argumentDescs;
+
+        // The root signature must be specified if and only if the command signature changes one of
+        // the root arguments.
+        auto result = mDevice->CreateCommandSignature(programDesc, GetRootSignature());
+        DAWN_CHECK(result.IsSuccess());
+        mDrawIndirectCommandSignatureWithInstanceVertexOffsets = result.AcquireSuccess();
     }
 
-    // First vertex and first instance are set in immediate mask together and first vertex is
-    // always just before instance index in the immediate mask.
-    D3D12_INDIRECT_ARGUMENT_DESC argumentDescs[2] = {};
-    argumentDescs[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
-    argumentDescs[0].Constant.RootParameterIndex = mImmediatesParameterIndex;
-    argumentDescs[0].Constant.Num32BitValuesToSet = 2;
-    argumentDescs[0].Constant.DestOffsetIn32BitValues =
-        GetImmediateByteOffsetInPipeline(&RenderImmediates::firstIndexOffset,
-                                         mPipelineImmediateMask) /
-        kImmediateElementByteSize;
-
-    // A command signature must contain exactly 1 Draw / Dispatch / DispatchMesh / DispatchRays
-    // command. That command must come last.
-    argumentDescs[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
-
-    D3D12_COMMAND_SIGNATURE_DESC programDesc = {};
-    programDesc.ByteStride = 6 * sizeof(uint32_t);
-    programDesc.NumArgumentDescs = 2;
-    programDesc.pArgumentDescs = argumentDescs;
-
-    // The root signature must be specified if and only if the command signature changes one of
-    // the root arguments.
-    mDevice->GetD3D12Device()->CreateCommandSignature(
-        &programDesc, GetRootSignature(),
-        IID_PPV_ARGS(&mDrawIndirectCommandSignatureWithInstanceVertexOffsets));
-    return mDrawIndirectCommandSignatureWithInstanceVertexOffsets.Get();
+    return mDrawIndirectCommandSignatureWithInstanceVertexOffsets;
 }
 
-ID3D12CommandSignature*
+const CommandSignature&
 PipelineLayoutHandle::GetDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets() {
-    // mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets won't be created until it
-    // is needed.
-    if (mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets.Get() != nullptr) {
-        return mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets.Get();
+    constexpr uint32_t kExtraImmediates = 2;
+    constexpr uint32_t kByteStride = kDrawIndexedIndirectSize + kExtraImmediates * sizeof(uint32_t);
+
+    // Command signature object is lazily-initialized.
+    if (!mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets) {
+        // First vertex and first instance are set in immediate mask together and first vertex is
+        // always just before instance index in the immediate mask.
+        D3D12_INDIRECT_ARGUMENT_DESC argumentDescs[2] = {};
+        argumentDescs[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
+        argumentDescs[0].Constant.RootParameterIndex = mImmediatesParameterIndex;
+        argumentDescs[0].Constant.Num32BitValuesToSet = kExtraImmediates;
+        argumentDescs[0].Constant.DestOffsetIn32BitValues =
+            GetImmediateByteOffsetInPipeline(&RenderImmediates::firstIndexOffset,
+                                             mPipelineImmediateMask) /
+            kImmediateElementByteSize;
+
+        // A command signature must contain exactly 1 Draw / Dispatch / DispatchMesh / DispatchRays
+        // command. That command must come last.
+        argumentDescs[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+
+        D3D12_COMMAND_SIGNATURE_DESC programDesc = {};
+        programDesc.ByteStride = kByteStride;
+        programDesc.NumArgumentDescs = 2;
+        programDesc.pArgumentDescs = argumentDescs;
+
+        // The root signature must be specified if and only if the command signature changes one of
+        // the root arguments.
+        auto result = mDevice->CreateCommandSignature(programDesc, GetRootSignature());
+        DAWN_CHECK(result.IsSuccess());
+        mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets = result.AcquireSuccess();
     }
 
-    // First vertex and first instance are set in immediate mask together and first vertex is
-    // always just before instance index in the immediate mask.
-    D3D12_INDIRECT_ARGUMENT_DESC argumentDescs[2] = {};
-    argumentDescs[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
-    argumentDescs[0].Constant.RootParameterIndex = mImmediatesParameterIndex;
-    argumentDescs[0].Constant.Num32BitValuesToSet = 2;
-    argumentDescs[0].Constant.DestOffsetIn32BitValues =
-        GetImmediateByteOffsetInPipeline(&RenderImmediates::firstIndexOffset,
-                                         mPipelineImmediateMask) /
-        kImmediateElementByteSize;
-
-    // A command signature must contain exactly 1 Draw / Dispatch / DispatchMesh / DispatchRays
-    // command. That command must come last.
-    argumentDescs[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
-
-    D3D12_COMMAND_SIGNATURE_DESC programDesc = {};
-    programDesc.ByteStride = 7 * sizeof(uint32_t);
-    programDesc.NumArgumentDescs = 2;
-    programDesc.pArgumentDescs = argumentDescs;
-
-    // The root signature must be specified if and only if the command signature changes one of
-    // the root arguments.
-    mDevice->GetD3D12Device()->CreateCommandSignature(
-        &programDesc, GetRootSignature(),
-        IID_PPV_ARGS(&mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets));
-    return mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets.Get();
+    return mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets;
 }
 
 }  // namespace dawn::native::d3d12

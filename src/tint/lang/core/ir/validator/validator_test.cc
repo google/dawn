@@ -690,7 +690,20 @@ TEST_F(IR_ValidatorTest, Construct_TextureInStruct_WithProperty) {
         b.Return(f);
     });
 
-    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    mod.properties.Add(Property::kAllowPointerAndHandleInAggregates);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Construct_PointerInArray_WithProperty) {
+    auto* arr_ty = ty.array<ptr<function, u32>, 4>();
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(arr_ty);
+        b.Return(f);
+    });
+
+    mod.properties.Add(Property::kAllowPointerAndHandleInAggregates);
     auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
@@ -702,7 +715,7 @@ TEST_F(IR_ValidatorTest, Construct_NonConstructible_WithStructProperty) {
         b.Return(f);
     });
 
-    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    mod.properties.Add(Property::kAllowPointerAndHandleInAggregates);
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
@@ -1119,6 +1132,20 @@ TEST_F(IR_ValidatorTest, Convert_PtrToPtr) {
     %3:ptr<function, u32, read_write> = convert %v
                                         ^^^^^^^
 )")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Load_PointerFromArray_WithProperty) {
+    auto* arr_ty = ty.array<ptr<function, u32>, 4>();
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function>(arr_ty));
+        b.Load(b.Access(ty.ptr<function, ptr<function, u32>>(), var, 1_u));
+        b.Return(f);
+    });
+
+    mod.properties.Add(Property::kAllowPointerAndHandleInAggregates);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Block_NoTerminator) {

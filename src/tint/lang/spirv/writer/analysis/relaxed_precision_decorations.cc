@@ -273,12 +273,11 @@ struct State {
         while (true) {
             to_decorate.Push(value);
 
-            auto* result = value->As<core::ir::InstructionResult>();
-            if (!result) {
+            auto* inst = value->AsInstruction();
+            if (!inst) {
                 return false;
             }
 
-            auto* inst = result->Instruction();
             if (inst->IsAnyOf<core::ir::Convert>()) {
                 // Check if we are converting from F16.
                 if (IsF16(inst->Operand(0)->Type())) {

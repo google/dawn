@@ -41,6 +41,7 @@
 #include "src/dawn/common/RefCounted.h"
 #include "src/dawn/common/ityp_bitset.h"
 #include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/d3d12/DeviceD3D12.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {
@@ -62,9 +63,9 @@ class PipelineLayoutHandle final : public RefCounted {
     uint32_t GetImmediatesParameterIndex() const { return mImmediatesParameterIndex; }
 
     // Lazy-created later.
-    ID3D12CommandSignature* GetDispatchIndirectCommandSignatureWithNumWorkgroups();
-    ID3D12CommandSignature* GetDrawIndirectCommandSignatureWithInstanceVertexOffsets();
-    ID3D12CommandSignature* GetDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets();
+    const CommandSignature& GetDispatchIndirectCommandSignatureWithNumWorkgroups();
+    const CommandSignature& GetDrawIndirectCommandSignatureWithInstanceVertexOffsets();
+    const CommandSignature& GetDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets();
 
   private:
     PipelineLayoutHandle(Device* device,
@@ -87,9 +88,9 @@ class PipelineLayoutHandle final : public RefCounted {
     ComPtr<ID3D12RootSignature> mRootSignature;
     ComPtr<ID3DBlob> mRootSignatureBlob;
     uint32_t mImmediatesParameterIndex;
-    ComPtr<ID3D12CommandSignature> mDispatchIndirectCommandSignatureWithNumWorkgroups;
-    ComPtr<ID3D12CommandSignature> mDrawIndirectCommandSignatureWithInstanceVertexOffsets;
-    ComPtr<ID3D12CommandSignature> mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets;
+    CommandSignature mDispatchIndirectCommandSignatureWithNumWorkgroups;
+    CommandSignature mDrawIndirectCommandSignatureWithInstanceVertexOffsets;
+    CommandSignature mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets;
     ImmediateMask mPipelineImmediateMask = ImmediateMask(0);
 };
 

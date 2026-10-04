@@ -90,11 +90,7 @@ class WireConfusionDeathTest : public WireOne,
             WireTwo::GetWireClient()->Disconnect();
         }
         if (expectDeath) {
-#if defined(DAWN_ENABLE_ASSERTS)
-            EXPECT_DEATH_IF_SUPPORTED(lambda(), "forClient == mClient");
-#else
-            EXPECT_DEATH_IF_SUPPORTED(lambda(), "");
-#endif
+            DAWN_EXPECT_DEATH_IF_SUPPORTED(lambda(), "forClient == mClient");
         } else {
             lambda();
         }

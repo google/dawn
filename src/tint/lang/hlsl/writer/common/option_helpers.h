@@ -52,14 +52,14 @@ Result<SuccessType> ValidateBindingOptions(const core::ir::Module& ir, const Opt
 /// @param options the writer options
 /// @param remapper_data where to put the remapper data
 /// @param multiplanar_map where to store the multiplanar texture options
-/// @param array_length_from_uniform_options where to store the ArrayLengthFromUniform options
+/// @param array_length_from_immediate_options where to store the array length immediate options
 /// Note, these are populated together because there are dependencies between the two types of data.
 void PopulateBindingRelatedOptions(
     const Options& options,
     RemapperData& remapper_data,
     tint::transform::multiplanar::BindingsMap& multiplanar_map,
-    ArrayLengthFromUniformOptions& array_length_from_uniform_options,
-    ArrayOffsetFromUniformOptions& array_offset_from_uniform_options);
+    ArrayLengthFromImmediateOptions& array_length_from_immediate_options,
+    ArrayOffsetFromImmediateOptions& array_offset_from_immediate_options);
 
 }  // namespace tint::hlsl::writer
 

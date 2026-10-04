@@ -3,5 +3,4 @@ precision highp float;
 precision highp int;
 
 void main() {
-  uint v = 58u;
 }

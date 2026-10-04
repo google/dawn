@@ -60,7 +60,7 @@ PhysicalDevice::PhysicalDevice() : PhysicalDeviceBase(wgpu::BackendType::Null) {
     mVendorId = 0;
     mDeviceId = 0;
     mName = "Null backend";
-    mAdapterType = wgpu::AdapterType::CPU;
+    mAdapterType = wgpu::AdapterType::Unknown;
 }
 
 PhysicalDevice::~PhysicalDevice() = default;
@@ -128,6 +128,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     }
     if (auto* d3dProperties = info.Get<AdapterPropertiesD3D>()) {
         d3dProperties->shaderModel = 0;
+        d3dProperties->adapterLUIDLowPart = 0;
+        d3dProperties->adapterLUIDHighPart = 0;
     }
 }
 
@@ -607,7 +609,5 @@ bool Device::CanTextureLoadResolveTargetInTheSameRenderpass() const {
 
 Texture::Texture(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor)
     : TextureBase(device, descriptor) {}
-
-
 
 }  // namespace dawn::native::null

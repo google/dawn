@@ -305,7 +305,7 @@ MaybeError Queue::SubmitPendingCommandsImpl() {
     // Ensure that after calling this method we have a fresh recording context even if one of the
     // DAWN_TRY calls below fail.
     absl::Cleanup recycleContext = [&]() {
-        [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+        std::ignore = GetDevice()->ConsumedError(
             RecycleRecordingContext(), "Recycling recording context after submit failed for %s",
             this);
     };
@@ -406,7 +406,7 @@ ResultOrError<VkFence> Queue::GetUnusedFence() {
     VkDevice vkDevice = device->GetVkDevice();
 
     auto result =
-        mUnusedFences.Use([&](auto unusedFences) -> std::optional<ResultOrError<VkFence>> {
+        mUnusedFences.Use([&](auto unusedFences) -> ResultOrError<std::optional<VkFence>> {
             if (!unusedFences->empty()) {
                 VkFence fence = unusedFences->back();
                 DAWN_ASSERT(fence != VK_NULL_HANDLE);
@@ -414,12 +414,16 @@ ResultOrError<VkFence> Queue::GetUnusedFence() {
                     CheckVkSuccess(device->fn.ResetFences(vkDevice, 1, &*fence), "vkResetFences"));
 
                 unusedFences->pop_back();
-                return fence;
+                return {fence};
             }
-            return std::nullopt;
+            return {std::nullopt};
         });
-    if (result) {
-        return std::move(*result);
+    if (result.IsError()) {
+        return result.AcquireError();
+    }
+    auto v = result.AcquireSuccess();
+    if (v.has_value()) {
+        return std::move(v.value());
     }
 
     VkFenceCreateInfo createInfo;

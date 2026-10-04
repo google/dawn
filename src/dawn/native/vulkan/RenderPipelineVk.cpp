@@ -528,7 +528,7 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
             }
         }
         if (!pixelCenterPolyfillLocation.has_value()) {
-            return DAWN_INTERNAL_ERROR(
+            return DAWN_UNRECOVERABLE_ERROR(
                 "unable to find a free vertex location for the pixel center polyfill");
         }
 
@@ -658,6 +658,28 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
         for (auto i : GetColorAttachmentsMask()) {
             const ColorTargetState* target = GetColorTargetState(i);
             colorBlendAttachments[i] = ComputeColorDesc(target, fragmentOutputMask[i]);
+        }
+
+        // Force a real but destination-preserving alpha write so the driver cannot strip
+        // the fragment alpha and, with it, the alpha-to-coverage computation. The alpha
+        // blend (src * ZERO + dst * ONE) stores the destination alpha unchanged.
+        if (IsAlphaToCoverageEnabled() &&
+            device->IsToggleEnabled(Toggle::VulkanForceAlphaWriteForAlphaToCoverage)) {
+            constexpr ColorAttachmentIndex kAlphaToCoverageAttachment{uint8_t{0}};
+            DAWN_ASSERT(GetColorAttachmentsMask()[kAlphaToCoverageAttachment]);
+            auto& attachment = colorBlendAttachments[kAlphaToCoverageAttachment];
+
+            // TODO(crbug.com/561839163): We should be able to ASSERT IsBlendable.
+            const Format& format = device->GetValidInternalFormat(
+                GetColorAttachmentFormat(kAlphaToCoverageAttachment));
+            if ((attachment.colorWriteMask & VK_COLOR_COMPONENT_A_BIT) == 0 &&
+                format.IsBlendable()) {
+                attachment.colorWriteMask |= VK_COLOR_COMPONENT_A_BIT;
+                attachment.blendEnable = VK_TRUE;
+                attachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+                attachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+                attachment.alphaBlendOp = VK_BLEND_OP_ADD;
+            }
         }
 
         colorBlend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -907,10 +929,16 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
     platform::metrics::DawnHistogramTimer cacheTimer(GetDevice()->GetPlatform());
     Ref<PipelineCache> cache = ToBackend(GetDevice()->GetOrCreatePipelineCache(GetCacheKey()));
     VkPipeline pipeline;
-    DAWN_TRY(
-        CheckVkSuccess(device->fn.CreateGraphicsPipelines(device->GetVkDevice(), cache->GetHandle(),
-                                                          1, &createInfo, nullptr, &*pipeline),
-                       "CreateGraphicsPipelines"));
+
+    ::VkResult vkResult = device->fn.CreateGraphicsPipelines(
+        device->GetVkDevice(), cache->GetHandle(), 1, &createInfo, nullptr, &*pipeline);
+    if (vkResult == VK_ERROR_UNKNOWN) {
+        return DAWN_PIPELINE_UNCATEGORIZED_ERROR(
+            "CreateGraphicsPipelines failed with VK_ERROR_UNKNOWN");
+    } else {
+        DAWN_TRY(CheckVkSuccess(vkResult, "CreateGraphicsPipelines"));
+    }
+
     result.pipeline = AcquireRef(new RefCountedVkHandle<VkPipeline>(device, pipeline));
     cacheTimer.RecordMicroseconds(cache->CacheHit() ? "Vulkan.CreateGraphicsPipelines.CacheHit"
                                                     : "Vulkan.CreateGraphicsPipelines.CacheMiss");

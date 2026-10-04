@@ -119,7 +119,7 @@ WGPUDevice Adapter::CreateDevice(const WGPUDeviceDescriptor* deviceDescriptor) {
 }
 
 void Adapter::ResetInternalDeviceForTesting() {
-    [[maybe_unused]] bool hadError = mImpl->GetInstance()->ConsumedError(
+    std::ignore = mImpl->GetInstance()->ConsumedError(
         mImpl->GetPhysicalDevice()->ResetInternalDeviceForTesting());
 }
 

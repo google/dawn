@@ -64,10 +64,6 @@ class SharedTextureMemoryTestBackend {
     CreatePerDeviceSharedTextureMemories(const std::vector<wgpu::Device>& devices,
                                          int layerCount) = 0;
 
-    // Import `fence` which may have been created on some other device, onto `importingDevice`.
-    wgpu::SharedFence ImportFenceTo(const wgpu::Device& importingDevice,
-                                    const wgpu::SharedFence& fence);
-
     // Shorthand version of `CreatePerDeviceSharedTextureMemories` that creates memories on a single
     // device.
     std::vector<wgpu::SharedTextureMemory> CreateSharedTextureMemories(wgpu::Device& device,

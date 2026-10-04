@@ -256,8 +256,8 @@ void PopulateBindingRelatedOptions(
     const Options& options,
     RemapperData& remapper_data,
     tint::transform::multiplanar::BindingsMap& multiplanar_map,
-    ArrayLengthFromUniformOptions& array_length_from_uniform_options,
-    ArrayOffsetFromUniformOptions& array_offset_from_uniform_options) {
+    ArrayLengthFromImmediateOptions& array_length_from_immediate_options,
+    ArrayOffsetFromImmediateOptions& array_offset_from_immediate_options) {
     auto create_remappings = [&remapper_data](const auto& hsh) {
         for (const auto& it : hsh) {
             const BindingPoint& src_binding_point = it.first;
@@ -319,8 +319,7 @@ void PopulateBindingRelatedOptions(
         remapper_data.emplace(src_binding_point, dest_bp);
     }
 
-    // ArrayLengthFromUniformOptions and ArrayOffsetFromUniformOptions bindpoints may need to be
-    // remapped
+    // Immediate metadata bindpoints may need to be remapped.
     auto remap = [&remapper_data](const std::unordered_map<BindingPoint, uint32_t>& bp_to_index) {
         std::unordered_map<BindingPoint, uint32_t> remapped;
         for (auto& [bindpoint, index] : bp_to_index) {
@@ -334,17 +333,15 @@ void PopulateBindingRelatedOptions(
         return remapped;
     };
 
-    array_length_from_uniform_options.ubo_binding = options.array_length_from_uniform.ubo_binding;
-    array_length_from_uniform_options.buffer_sizes_offset =
-        options.array_length_from_uniform.buffer_sizes_offset;
-    array_length_from_uniform_options.bindpoint_to_size_index =
-        remap(options.array_length_from_uniform.bindpoint_to_size_index);
+    array_length_from_immediate_options.buffer_sizes_offset =
+        options.array_length_from_immediate.buffer_sizes_offset;
+    array_length_from_immediate_options.bindpoint_to_size_index =
+        remap(options.array_length_from_immediate.bindpoint_to_size_index);
 
-    array_offset_from_uniform_options.ubo_binding = options.array_offset_from_uniform.ubo_binding;
-    array_offset_from_uniform_options.buffer_offsets_offset =
-        options.array_offset_from_uniform.buffer_offsets_offset;
-    array_offset_from_uniform_options.bindpoint_to_offset_index =
-        remap(options.array_offset_from_uniform.bindpoint_to_offset_index);
+    array_offset_from_immediate_options.buffer_offsets_offset =
+        options.array_offset_from_immediate.buffer_offsets_offset;
+    array_offset_from_immediate_options.bindpoint_to_offset_index =
+        remap(options.array_offset_from_immediate.bindpoint_to_offset_index);
 }
 
 }  // namespace tint::hlsl::writer

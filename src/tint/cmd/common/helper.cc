@@ -239,8 +239,8 @@ void PrintWGSL(std::ostream& out, const tint::Program& program) {
         out << result.Failure() << "\n";
     }
 #else
-    (void)out;
-    (void)program;
+    std::ignore = out;
+    std::ignore = program;
 #endif
 }
 

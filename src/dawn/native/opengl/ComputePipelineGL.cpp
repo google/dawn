@@ -27,6 +27,9 @@
 
 #include "src/dawn/native/opengl/ComputePipelineGL.h"
 
+#include <set>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "src/dawn/native/TintUtils.h"
@@ -57,47 +60,23 @@ void ComputePipeline::DestroyImpl(DestroyReason reason) {
 }
 
 ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
+    auto layout = ToBackend(GetLayout());
+    Extent3D workgroupSize;
+    std::set<CombinedSampler> combinedSamplers;
+    std::unordered_map<SingleShaderStage, std::string> shaders;
+    DAWN_TRY(InitializeShaders(
+        ToBackend(GetDevice())->GetGL(false), layout, GetAllStages(), mImmediateMask,
+        /* bgraSwizzleAttributes */ {}, &workgroupSize, &combinedSamplers, &shaders));
+
     DAWN_TRY(ToBackend(GetDevice())
-                 ->EnqueueGL([self = Ref<ComputePipeline>(this)](
-                                 const OpenGLFunctions& gl) -> MaybeError {
-                     Extent3D workgroupSize;
+                 ->EnqueueGL([self = Ref<ComputePipeline>(this), combinedSamplers,
+                              shaders](const OpenGLFunctions& gl) -> MaybeError {
                      return self->InitializeBase(gl, ToBackend(self->GetLayout()),
                                                  self->GetAllStages(), self->mImmediateMask,
-                                                 /* bgraSwizzleAttributes */ {}, &workgroupSize);
+                                                 combinedSamplers, shaders);
                  }));
 
-    // Shader reflection after the application of overrides is required by the frontend for the
-    // workgroup size. In the case where GL execution is deferred, we need to compute the workgroup
-    // size immediately. (do it in the non-deferred case as well to avoid duplicating paths).
-    // TODO(https://issues.chromium.org/489650416): Move the GLSL translation to happen immediately
-    // here instead of during deferred GL execution, which would remove the need for this.
-    const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
-
-    tint::null::writer::Options tintOptions;
-    tintOptions.entry_point_name = computeStage.entryPoint;
-    tintOptions.substitute_overrides_config = {
-        .map = BuildSubstituteOverridesTransformConfig(computeStage),
-    };
-
-    // Convert the AST program to an IR module.
-    tint::wgsl::reader::IROptions irOptions{
-        .dump_ir_when_validating = GetDevice()->IsToggleEnabled(Toggle::DumpTintIR),
-        .enable_validation_asserts =
-            GetDevice()->IsToggleEnabled(Toggle::EnableTintIRValidationAsserts),
-    };
-    auto ir = tint::wgsl::reader::ProgramToLoweredIR(computeStage.module->GetTintProgram()->program,
-                                                     irOptions);
-    DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
-                    ir.Failure().reason);
-
-    tint::Result<tint::null::writer::Output> tintResult =
-        tint::null::writer::Generate(ir.Get(), tintOptions);
-
-    DAWN_INVALID_IF(tintResult != tint::Success, "An error occurred while running Null writer\n%s",
-                    tintResult.Failure().reason);
-
-    return {
-        {tintResult->workgroup_info.x, tintResult->workgroup_info.y, tintResult->workgroup_info.z}};
+    return workgroupSize;
 }
 
 MaybeError ComputePipeline::ApplyNow(const OpenGLFunctions& gl) {

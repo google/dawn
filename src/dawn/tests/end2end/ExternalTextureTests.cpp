@@ -416,6 +416,69 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderTexture, 0, 0);
 }
 
+// Test that single-plane external textures bypass YUV-to-RGB conversion, even when a
+// non-identity yuvToRgbConversionMatrix is set (e.g. Android AHB imports) and static
+// samplers are forced on Vulkan.
+TEST_P(ExternalTextureTests, SampleSinglePlaneWithYuvToRgbMatrix) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
+    // TODO(crbug.com/522868202): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
+    wgpu::Texture sampledTexture =
+        Create2DTexture(device, kWidth, kHeight, kFormat,
+                        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+    wgpu::Texture renderTexture =
+        Create2DTexture(device, kWidth, kHeight, kFormat,
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
+
+    // Initialize with red
+    {
+        utils::ComboRenderPassDescriptor renderPass({sampledTexture.CreateView()}, nullptr);
+        renderPass.cColorAttachments[0].clearValue = {1.0f, 0.0f, 0.0f, 1.0f};
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    // Pipeline Creation
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsSampleExternalTextureModule;
+    descriptor.cTargets[0].format = kFormat;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    // Set a non-identity BT.709 conversion matrix on an RGBA external texture.
+    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(sampledTexture);
+    externalDesc.yuvToRgbConversionMatrix = bt709ColorSpaceParams.yuvToRgbConversionMatrix.data();
+    wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+
+    wgpu::Sampler sampler = device.CreateSampler();
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {{0, sampler}, {1, externalTexture}});
+
+    wgpu::TextureView renderView = renderTexture.CreateView();
+    utils::ComboRenderPassDescriptor renderPass({renderView});
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+    {
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.Draw(3);
+        pass.End();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Output must stay red; YUV-to-RGB conversion must be skipped for single-plane textures.
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderTexture, 0, 0);
+}
+
 // Tests that a texture view can be used for an externalTexture binding.
 TEST_P(ExternalTextureTests, SampleTextureView) {
     // TODO(crbug.com/522868202): Produces incorrect result on Pixel 10.
@@ -477,8 +540,6 @@ TEST_P(ExternalTextureTests, SampleTextureView) {
 // Tests that textureDimensions WGSL built-in function works when a texture view is used for an
 // externalTexture binding.
 TEST_P(ExternalTextureTests, TextureDimensionsWithTextureView) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());  // Flaky on WARP
-
     // TODO(crbug.com/522868202): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && (IsVulkan() || IsOpenGLES()));
 
@@ -1755,8 +1816,6 @@ TEST_P(ExternalTextureTests, MultipleBindings) {
 //
 // Case with all in the same bindgroup layout.
 TEST_P(ExternalTextureTests, SampleDifferentKindsSameBindGroup) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     // Create our three test external of different kinds as well as the expected data.
     std::vector<wgpu::ExternalTexture> externalTextures;
     std::vector<utils::RGBA8> colors;
@@ -1830,8 +1889,6 @@ TEST_P(ExternalTextureTests, SampleDifferentKindsSameBindGroup) {
 
 // Case with all in different bind group layouts.
 TEST_P(ExternalTextureTests, SampleDifferentKindsDifferentBindGroups) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     // Create our three test external of different kinds as well as the expected data.
     std::vector<wgpu::ExternalTexture> externalTextures;
     std::vector<utils::RGBA8> colors;

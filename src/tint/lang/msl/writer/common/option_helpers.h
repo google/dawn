@@ -48,8 +48,7 @@ Result<SuccessType> ValidateBindingOptions(const Options& options);
 /// @param options the writer options
 /// @param remapper_data where to put the remapper data
 /// @param multiplanar_map where to store the multiplanar bindings map
-/// @param array_length_options where to store the ArrayLength options for ArrayLengthFromUniform
-/// and ArrayLengthFromImmediate transforms.
+/// @param array_length_options where to store the ArrayLengthFromImmediates options
 /// Note, these are populated together because there are dependencies between the two types of data.
 void PopulateBindingRelatedOptions(const Options& options,
                                    RemapperData& remapper_data,

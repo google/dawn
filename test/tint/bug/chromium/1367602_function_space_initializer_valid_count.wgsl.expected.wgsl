@@ -1,4 +1,4 @@
 @compute @workgroup_size(1)
 fn f() {
-  var v = array<bool, 32767>();
+  var v = array<bool, 8192>();
 }

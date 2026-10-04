@@ -368,9 +368,9 @@ bool Validator::CheckResult(const Instruction* inst, size_t idx) {
 
     if (check_size) {
         if (ty->Size() > tint::internal_limits::kMaxTemporaryStorageSize) {
-            AddResultError(inst, idx)
-                << "result type size (" << ty->Size() << ") exceeds maximum allowed ("
-                << tint::internal_limits::kMaxTemporaryStorageSize << ")";
+            AddError(inst, idx) << "result type size (" << ty->Size()
+                                << ") exceeds maximum allowed ("
+                                << tint::internal_limits::kMaxTemporaryStorageSize << ")";
             return false;
         }
     }
@@ -730,9 +730,10 @@ Hashset<const ir::Function*, 4> Validator::ContainingEndPoints(const ir::Functio
     Hashset<const ir::Function*, 4> result{};
     Hashset<const ir::Function*, 4> visited{f};
 
-    auto call_sites = user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>()).Vector();
+    auto call_sites = user_func_calls_.GetOr(f, {}).Vector();
     while (!call_sites.IsEmpty()) {
         auto call_site = call_sites.Pop();
+
         auto calling_function = ContainingFunction(call_site);
         if (!calling_function) {
             continue;
@@ -747,8 +748,10 @@ Hashset<const ir::Function*, 4> Validator::ContainingEndPoints(const ir::Functio
             result.Add(calling_function);
         }
 
-        for (auto new_call_sites : user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>())) {
-            call_sites.Push(new_call_sites);
+        if (auto new_call_sites = user_func_calls_.Get(calling_function)) {
+            for (const ir::UserCall* call : *new_call_sites) {
+                call_sites.Push(call);
+            }
         }
     }
 
@@ -968,7 +971,7 @@ bool Validator::CanLoad(const core::type::Type* ty) {
         [&](const core::type::Struct* str) {
             for (auto* member : str->Members()) {
                 if (member->Type()->Is<core::type::Pointer>() &&
-                    ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+                    ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates)) {
                     continue;
                 }
                 if (!CanLoad(member->Type())) {
@@ -976,6 +979,9 @@ bool Validator::CanLoad(const core::type::Type* ty) {
                 }
             }
             return true;
+        },
+        [&](const core::type::Pointer*) {
+            return ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates);
         },
         [&](Default) { return ty->IsConstructible() || ty->IsHandle(); });
 }

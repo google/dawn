@@ -51,7 +51,7 @@
 #include "src/dawn/native/ResourceTableDefaultResources.h"
 #include "src/dawn/native/Serializable.h"
 #include "src/dawn/native/TintUtils.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/dawn/native/vulkan/BindGroupLayoutVk.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
 #include "src/dawn/native/vulkan/FencedDeleter.h"
@@ -317,8 +317,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::PolyFillPacked4x8DotProduct);
     req.tintOptions.extensions.use_zero_initialize_workgroup_memory =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension);
-    req.tintOptions.extensions.use_uniform_buffers =
-        !GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);
 
     // Maximal reconvergence takes precedence over subgroup uniform control flow in the SPIR-V
     // backend so just try to turn both on.
@@ -508,9 +506,15 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetDevice()->GetPlatform(), "Vulkan.CreateShaderModule");
         TRACE_EVENT(DAWN_TRACE_CATEGORY(), "vkCreateShaderModule");
-        DAWN_TRY(CheckVkSuccess(
-            device->fn.CreateShaderModule(device->GetVkDevice(), &createInfo, nullptr, &*newHandle),
-            "CreateShaderModule"));
+
+        ::VkResult vkResult =
+            device->fn.CreateShaderModule(device->GetVkDevice(), &createInfo, nullptr, &*newHandle);
+        if (vkResult == VK_ERROR_UNKNOWN) {
+            return DAWN_PIPELINE_UNCATEGORIZED_ERROR(
+                "CreateShaderModule failed with VK_ERROR_UNKNOWN");
+        } else {
+            DAWN_TRY(CheckVkSuccess(vkResult, "CreateShaderModule"));
+        }
     }
     DAWN_CHECK(newHandle != VK_NULL_HANDLE);
 
@@ -523,7 +527,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                           .workgroupSize = compilation->workgroupSize,
                           .explicitSubgroupSize = compilation->explicitSubgroupSize};
 #else
-    return DAWN_INTERNAL_ERROR("TINT_BUILD_SPV_WRITER is not defined.");
+    return DAWN_UNRECOVERABLE_ERROR("TINT_BUILD_SPV_WRITER is not defined.");
 #endif
 }
 

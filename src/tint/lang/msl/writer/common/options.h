@@ -41,22 +41,17 @@
 
 namespace tint::msl::writer {
 
-/// Options used to specify a mapping of binding points to indices into a UBO
-/// from which to load buffer sizes.
-/// TODO(crbug.com/366291600): Remove ubo_binding after switch to immediates.
+/// Options used to load buffer sizes from immediate data.
 struct ArrayLengthOptions {
-    /// The MSL binding point to use to generate a uniform buffer from which to read buffer sizes.
-    std::optional<uint32_t> ubo_binding{};
-
     /// The offset in immediate block for buffer sizes.
     std::optional<uint32_t> buffer_sizes_offset{};
 
     /// The mapping from the storage buffer binding points in WGSL binding-point space to the index
-    /// into the uniform buffer where the length of the buffer is stored.
+    /// into the immediate data where the length of the buffer is stored.
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index{};
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(ArrayLengthOptions, ubo_binding, buffer_sizes_offset, bindpoint_to_size_index);
+    TINT_REFLECT(ArrayLengthOptions, buffer_sizes_offset, bindpoint_to_size_index);
     TINT_REFLECT_HASH_CODE(ArrayLengthOptions);
 
     bool operator==(const ArrayLengthOptions&) const = default;
@@ -228,8 +223,8 @@ struct Options {
     /// Index of pixel_local structure member index to attachment index
     std::unordered_map<uint32_t, uint32_t> pixel_local_attachments;
 
-    /// Options used to specify a mapping of binding points to indices into a UBO
-    /// or immediate block from which to load buffer sizes.
+    /// Options used to specify a mapping of binding points to indices into the immediate block
+    /// from which to load buffer sizes.
     ArrayLengthOptions array_length_from_constants = {};
 
     /// The optional vertex pulling configuration.

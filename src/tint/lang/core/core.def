@@ -71,6 +71,7 @@ enum builtin_value {
   num_subgroups
   barycentric_coord
   primitive_index
+  view_index
   @internal __point_size
   @internal __cull_distance
 }
@@ -175,6 +176,7 @@ enum builtin_type {
   texture_cube_array
   // https://www.w3.org/TR/WGSL/#multisampled-texture-type
   texture_multisampled_2d
+  texture_multisampled_2d_array
   // https://www.w3.org/TR/WGSL/#texture-storage
   texture_storage_1d
   texture_storage_2d
@@ -340,6 +342,7 @@ type texture_3d<T>
 type texture_cube<T>
 type texture_cube_array<T>
 type texture_multisampled_2d<T>
+type texture_multisampled_2d_array<T>
 type texture_depth_2d
 type texture_depth_2d_array
 type texture_depth_cube
@@ -956,6 +959,8 @@ match workgroup_uniform_storage
 
 @must_use implicit(T: fiu32)
   fn textureDimensions(texture: texture_multisampled_2d<T>) -> vec2<u32>
+@must_use implicit(T: fiu32)
+  fn textureDimensions(texture: texture_multisampled_2d_array<T>) -> vec2<u32>
 @must_use
   fn textureDimensions(texture: texture_depth_2d) -> vec2<u32>
 @must_use implicit(L: iu32)
@@ -1104,6 +1109,8 @@ match workgroup_uniform_storage
 @must_use implicit(T: fiu32)
   fn textureNumLayers(texture: texture_2d_array<T>) -> u32
 @must_use implicit(T: fiu32)
+  fn textureNumLayers(texture: texture_multisampled_2d_array<T>) -> u32
+@must_use implicit(T: fiu32)
   fn textureNumLayers(texture: texture_cube_array<T>) -> u32
 @must_use
   fn textureNumLayers(texture: texture_depth_2d_array) -> u32
@@ -1137,6 +1144,8 @@ match workgroup_uniform_storage
 
 @must_use implicit(T: fiu32)
   fn textureNumSamples(texture: texture_multisampled_2d<T>) -> u32
+@must_use implicit(T: fiu32)
+  fn textureNumSamples(texture: texture_multisampled_2d_array<T>) -> u32
 @must_use
   fn textureNumSamples(texture: texture_depth_multisampled_2d) -> u32
 
@@ -1532,6 +1541,11 @@ match workgroup_uniform_storage
 
 @must_use implicit(T: fiu32, C: iu32, S: iu32)
   fn textureLoad(texture: texture_multisampled_2d<T>, coords: vec2<C>, sample_index: S) -> vec4<T>
+@must_use implicit(T: fiu32, C: iu32, A: iu32, S: iu32)
+  fn textureLoad(texture: texture_multisampled_2d_array<T>,
+                 coords: vec2<C>,
+                 array_index: A,
+                 sample_index: S) -> vec4<T>
 @must_use implicit(C: iu32, L: iu32)
   fn textureLoad(texture: texture_depth_2d, coords: vec2<C>, level: L) -> f32
 @must_use implicit(C: iu32, A: iu32, L: iu32)

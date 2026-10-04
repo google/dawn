@@ -336,6 +336,51 @@ TEST_P(ComputeSharedMemoryTests, ComplexZeroInit) {
     EXPECT_BUFFER_U32_EQ(0u, output, 0u);
 }
 
+// Test copying a structure from workgroup memory to a storage buffer.
+// See https://crbug.com/566593641.
+TEST_P(ComputeSharedMemoryTests, StructCopy) {
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        struct S {
+            x: u32,
+        }
+        var<workgroup> wg: S;
+        @group(0) @binding(0)
+        var<storage, read_write> buf: S;
+        @compute @workgroup_size(1)
+        fn main() {
+            wg.x = 42;
+            buf = wg;
+        }
+    )");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    wgpu::BufferDescriptor bufDesc;
+    bufDesc.size = sizeof(uint32_t);
+    bufDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufDesc);
+
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    uint32_t expected = 42;
+    EXPECT_BUFFER_U32_RANGE_EQ(&expected, buffer, 0, 1);
+}
+
 DAWN_INSTANTIATE_TEST(ComputeSharedMemoryTests,
                       D3D11Backend(),
                       D3D12Backend(),

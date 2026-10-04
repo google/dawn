@@ -218,7 +218,7 @@ struct State {
         b.InsertBefore(call, [&] {
             offset_arg = b.InsertBitcastIfNeeded(ty.u32(), offset_arg);
             new_call = b.CallExplicitWithResult<msl::ir::BuiltinCall>(
-                call->DetachResult(), msl::BuiltinFn::kPointerOffset,
+                call->DetachResult(), msl::BuiltinFn::kAliasPointerOffset,
                 Vector{call->ExplicitTemplateParams()[0]}, call->Args()[0], offset_arg);
         });
     }

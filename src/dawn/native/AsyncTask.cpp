@@ -128,7 +128,7 @@ InternalErrorType ErrorGeneratingAsyncTask::GetErrorType() const {
     return mErrorData ? mErrorData->GetType() : InternalErrorType::None;
 }
 
-std::unique_ptr<ErrorData> ErrorGeneratingAsyncTask::AcquireError() {
+std::unique_ptr<UnrecoverableError> ErrorGeneratingAsyncTask::AcquireError() {
     DAWN_ASSERT(IsCompleted());
     return std::move(mErrorData);
 }

@@ -83,7 +83,7 @@ void CommandBufferBase::SetEncoderLabel(std::string encoderLabel) {
     mEncoderLabel = encoderLabel;
 }
 
-MaybeError CommandBufferBase::ValidateCanUseInSubmitNow() const {
+MaybeValError CommandBufferBase::ValidateCanUseInSubmitNow() const {
     DAWN_CHECK(!IsError());
 
     DAWN_INVALID_IF(!IsAlive(), "%s cannot be submitted more than once.", this);
@@ -91,9 +91,13 @@ MaybeError CommandBufferBase::ValidateCanUseInSubmitNow() const {
 }
 
 void CommandBufferBase::DestroyImpl(DestroyReason reason) {
-    // These metadatas hold raw_ptr to the commands, so they need to be cleared first.
-    mIndirectDrawMetadata.clear();
+    // Resource usages contain raw_ptrs to resources (buffers, textures). Clear them before
+    // releasing references in mIndirectDrawMetadata or commands to avoid dangling raw_ptrs.
     mResourceUsages = {};
+
+    // These metadatas hold raw_ptr to the commands, so they need to be cleared before commands are
+    // freed.
+    mIndirectDrawMetadata.clear();
 
     FreeCommands(&mCommands);
 }

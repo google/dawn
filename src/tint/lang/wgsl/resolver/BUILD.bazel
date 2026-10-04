@@ -172,6 +172,7 @@ cc_library(
     "value_constructor_validation_test.cc",
     "variable_test.cc",
     "variable_validation_test.cc",
+    "view_instancing_extension_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

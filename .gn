@@ -34,6 +34,7 @@ default_args = {
   clang_use_chrome_plugins = false
   clang_use_unsafe_buffers_plugin = true
   clang_unsafe_buffers_paths = "//unsafe_buffers_paths.txt"
+  clang_raw_ptr_plugin_config_file = "//src/utils/raw_ptr_plugin_config.yaml"
 
   angle_enable_abseil = false
   angle_standalone = false
@@ -69,6 +70,11 @@ default_args = {
   v8_enable_i18n_support = false
   v8_enable_temporal_support = false
   v8_use_external_startup_data = false
+
+  # The node bindings expose WebGPU's mapped buffers to JavaScript with
+  # napi_create_external_arraybuffer. That memory comes from the driver, so the
+  # sandbox must be disabled.
+  v8_enable_sandbox = false
 }
 
 # Export compile_commands.json to build dir for all generated targets.

@@ -1,4 +1,4 @@
-// flags: --glsl-desktop
+// flags: --glsl-desktop --glsl-has-conservative-depth
 
 requires fragment_depth;
 

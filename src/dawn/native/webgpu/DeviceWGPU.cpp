@@ -293,10 +293,7 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
 }
 
 ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
-    const SharedTextureMemoryDescriptor* baseDescriptor) {
-    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(baseDescriptor));
-
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) {
     // TODO(crbug.com/483147423): Handle all possible chained structures.
     if (unpacked.Get<SharedTextureMemoryIOSurfaceDescriptor>()) {
         auto feature = Feature::SharedTextureMemoryIOSurface;
@@ -338,10 +335,7 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
 }
 
 ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
-    const SharedFenceDescriptor* baseDescriptor) {
-    UnpackedPtr<SharedFenceDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(baseDescriptor));
-
+    UnpackedPtr<SharedFenceDescriptor> unpacked) {
     // TODO(crbug.com/483147423): Handle all possible chained structures.
     if (unpacked.Get<SharedFenceMTLSharedEventDescriptor>()) {
         auto feature = Feature::SharedFenceMTLSharedEvent;
@@ -472,18 +466,16 @@ bool Device::NeedsIndirectGPUValidation() const {
 }
 
 void Device::StartCapture(CaptureStream& commandStream, CaptureStream& contentStream) {
-    MaybeError result = ToBackend(GetQueue())
-                            ->SetCaptureContext(std::unique_ptr<CaptureContext>(
-                                new CaptureContext(this, commandStream, contentStream)));
-    [[maybe_unused]] bool hadError =
-        ConsumedError(std::move(result), "calling %s.StartCapture()", this);
+    MaybeValError result = ToBackend(GetQueue())
+                               ->SetCaptureContext(std::unique_ptr<CaptureContext>(
+                                   new CaptureContext(this, commandStream, contentStream)));
+    std::ignore = ConsumedError(std::move(result), "calling %s.StartCapture()", this);
 }
 
 void Device::EndCapture() {
     if (ToBackend(GetQueue())->IsCapturing()) {
-        MaybeError result = ToBackend(GetQueue())->SetCaptureContext(nullptr);
-        [[maybe_unused]] bool hadError =
-            ConsumedError(std::move(result), "calling %s.EndCapture()", this);
+        MaybeValError result = ToBackend(GetQueue())->SetCaptureContext(nullptr);
+        std::ignore = ConsumedError(std::move(result), "calling %s.EndCapture()", this);
     }
 }
 

@@ -163,18 +163,18 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         }
     }
 
-    tint::hlsl::writer::ArrayLengthFromUniformOptions arrayLengthFromUniform;
-    tint::hlsl::writer::ArrayOffsetFromUniformOptions arrayOffsetFromUniform;
+    tint::hlsl::writer::ArrayLengthFromImmediateOptions arrayLengthFromImmediate;
+    tint::hlsl::writer::ArrayOffsetFromImmediateOptions arrayOffsetFromImmediate;
 
     if (stage == SingleShaderStage::Compute) {
-        arrayLengthFromUniform.buffer_sizes_offset = GetImmediateByteOffsetInPipelineIfAny(
+        arrayLengthFromImmediate.buffer_sizes_offset = GetImmediateByteOffsetInPipelineIfAny(
             &ComputeImmediates::storageBufferDynamicLengths, pipelineImmediateMask);
-        arrayOffsetFromUniform.buffer_offsets_offset = GetImmediateByteOffsetInPipelineIfAny(
+        arrayOffsetFromImmediate.buffer_offsets_offset = GetImmediateByteOffsetInPipelineIfAny(
             &ComputeImmediates::storageBufferDynamicOffsets, pipelineImmediateMask);
     } else {
-        arrayLengthFromUniform.buffer_sizes_offset = GetImmediateByteOffsetInPipelineIfAny(
+        arrayLengthFromImmediate.buffer_sizes_offset = GetImmediateByteOffsetInPipelineIfAny(
             &RenderImmediates::storageBufferDynamicLengths, pipelineImmediateMask);
-        arrayOffsetFromUniform.buffer_offsets_offset = GetImmediateByteOffsetInPipelineIfAny(
+        arrayOffsetFromImmediate.buffer_offsets_offset = GetImmediateByteOffsetInPipelineIfAny(
             &RenderImmediates::storageBufferDynamicOffsets, pipelineImmediateMask);
     }
 
@@ -260,12 +260,13 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
             }
         }
 
-        // Add per-group arrayLengthFromUniform and arrayOffsetFromUniform options
+        // Add per-group array length and offset mappings.
         for (const auto& bindingAndImmediateIndex :
              layout->GetDynamicStorageBufferInfo()[group].bindingAndImmediateIndices) {
             // The bindpoint to index mapping is the same for both lengths and offsets,
-            // the difference is the uniform buffer object binding
-            // (arrayLengthFromUniform.ubo_binding and arrayOffsetFromUniform.ubo_binding).
+            // the difference is the offset in the immediate block
+            // (arrayLengthFromImmediate.buffer_sizes_offset and
+            // arrayOffsetFromImmediate.buffer_offsets_offset).
             BindingNumber bindingNum = bindingAndImmediateIndex.binding;
 
             // Skip bindings not present for the stage because GenerateBindingRemapping doesn't
@@ -279,8 +280,9 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
             uint32_t immediateIndex = bindingAndImmediateIndex.immediateIndex;
             tint::BindingPoint bindingPoint{static_cast<uint32_t>(group),
                                             static_cast<uint32_t>(bindingNum)};
-            arrayLengthFromUniform.bindpoint_to_size_index.emplace(bindingPoint, immediateIndex);
-            arrayOffsetFromUniform.bindpoint_to_offset_index.emplace(bindingPoint, immediateIndex);
+            arrayLengthFromImmediate.bindpoint_to_size_index.emplace(bindingPoint, immediateIndex);
+            arrayOffsetFromImmediate.bindpoint_to_offset_index.emplace(bindingPoint,
+                                                                       immediateIndex);
         }
     }
 
@@ -332,13 +334,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         }
     }
 
-    // TODO(dawn:549): HLSL generation outputs the indices into the
-    // array_length_from_uniform buffer that were actually used. When the blob cache can
-    // store more than compiled shaders, we should reflect these used indices and store
-    // them as well. This would allow us to only upload root constants that are actually
-    // read by the shader.
-    req.hlsl.tintOptions.array_length_from_uniform = std::move(arrayLengthFromUniform);
-    req.hlsl.tintOptions.array_offset_from_uniform = std::move(arrayOffsetFromUniform);
+    req.hlsl.tintOptions.array_length_from_immediate = std::move(arrayLengthFromImmediate);
+    req.hlsl.tintOptions.array_offset_from_immediate = std::move(arrayOffsetFromImmediate);
 
     if (stage == SingleShaderStage::Vertex) {
         // Now that only vertex shader can have interstage outputs.

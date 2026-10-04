@@ -30,8 +30,10 @@
 #include <cassert>
 #include <cctype>
 #include <iomanip>
+#include <span>
 #include <sstream>
 
+#include "src/dawn/node/binding/Converter.h"
 #include "src/utils/compiler.h"
 
 namespace wgpu::binding {
@@ -124,9 +126,10 @@ GPUAdapterInfo::GPUAdapterInfo(const wgpu::AdapterInfo& info)
     while (next) {
         if (next->sType == SType::AdapterPropertiesSubgroupMatrixConfigs) {
             auto* configs = static_cast<wgpu::AdapterPropertiesSubgroupMatrixConfigs*>(next);
-            subgroup_matrix_configs_.reserve(configs->configCount);
-            for (uint32_t i = 0; i < configs->configCount; i++) {
-                DAWN_UNSAFE_TODO(subgroup_matrix_configs_.push_back(configs->configs[i]));
+            auto matrix_configs = WGPU_SPAN(configs->config);
+            subgroup_matrix_configs_.reserve(matrix_configs.size());
+            for (const auto& config : matrix_configs) {
+                subgroup_matrix_configs_.push_back(config);
             }
         }
         next = next->nextInChain;

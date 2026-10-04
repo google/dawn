@@ -28,6 +28,7 @@
 #include "src/dawn/node/binding/GPUShaderModule.h"
 
 #include <memory>
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -122,11 +123,12 @@ GPUShaderModule::getCompilationInfo(Napi::Env env) {
         wgpu::CallbackMode::AllowProcessEvents,
         [ctx = std::move(ctx)](wgpu::CompilationInfoRequestStatus status,
                                wgpu::CompilationInfo const* compilationInfo) {
-            Messages messages(compilationInfo->messageCount);
-            for (uint32_t i = 0; i < compilationInfo->messageCount; i++) {
-                auto& msg = DAWN_UNSAFE_TODO(compilationInfo->messages[i]);
-                messages[i] =
-                    interop::GPUCompilationMessage::Create<GPUCompilationMessage>(ctx->env, msg);
+            auto msg_span = WGPU_SPAN(compilationInfo->message);
+            Messages messages;
+            messages.reserve(msg_span.size());
+            for (const auto& msg : msg_span) {
+                messages.push_back(
+                    interop::GPUCompilationMessage::Create<GPUCompilationMessage>(ctx->env, msg));
             }
 
             ctx->promise.Resolve(interop::GPUCompilationInfo::Create<GPUCompilationInfo>(

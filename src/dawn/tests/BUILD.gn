@@ -105,7 +105,6 @@ if (!dawn_use_built_dxc && build_with_chromium && is_win) {
   copy("copy_dxc_binary") {
     sources = [
       "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxcompiler.dll",
-      "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxil.dll",
     ]
 
     outputs = [ "$root_out_dir/{{source_file_part}}" ]
@@ -142,10 +141,7 @@ template("dawn_test") {
         if (!defined(deps)) {
           deps = []
         }
-        deps += [
-          "${dawn_dxc_gn_dir}:copy_dxil_dll",
-          "${dawn_dxc_gn_dir}:dxcompiler",
-        ]
+        deps += [ "${dawn_dxc_gn_dir}:dxcompiler" ]
       } else {
         if (!defined(data_deps)) {
           data_deps = []
@@ -361,6 +357,7 @@ dawn_test("dawn_unittests") {
     "unittests/validation/ObjectCachingTests.cpp",
     "unittests/validation/OverridableConstantsValidationTests.cpp",
     "unittests/validation/PipelineAndPassCompatibilityTests.cpp",
+    "unittests/validation/PipelineLayoutValidationTests.cpp",
     "unittests/validation/PixelLocalStorageTests.cpp",
     "unittests/validation/QueryValidationTests.cpp",
     "unittests/validation/QueueOnSubmittedWorkDoneValidationTests.cpp",
@@ -453,9 +450,17 @@ dawn_test("dawn_unittests") {
   }
 
   if (checkout_v8 && dawn_node) {
-    sources += [ "${dawn_root}/src/dawn/node/test/NapiV8Test.cpp" ]
+    sources += [
+      "${dawn_root}/src/dawn/node/test/EventLoopTest.cpp",
+      "${dawn_root}/src/dawn/node/test/NapiV8Test.cpp",
+      "${dawn_root}/src/dawn/node/test/PolyfillsTest.cpp",
+      "${dawn_root}/src/dawn/node/test/V8TestEnvironment.cpp",
+      "${dawn_root}/src/dawn/node/test/V8TestEnvironment.h",
+    ]
     deps += [
       "${dawn_root}/src/dawn/node/napi_v8",
+      "${dawn_root}/src/dawn/node/standalone:event_loop",
+      "${dawn_root}/src/dawn/node/standalone:polyfills",
       "//third_party/v8/src:v8",
       "//third_party/v8/src:v8_libplatform",
     ]
@@ -911,6 +916,7 @@ source_set("white_box_tests_sources") {
     defines += [ "DAWN_ANGLE_LIBS_SUFFIX=\"${angle_libs_suffix}\"" ]
     sources += [
       "white_box/EGLImageWrappingTests.cpp",
+      "white_box/GLBufferTests.cpp",
       "white_box/GLFramebufferCompletenessTests.cpp",
       "white_box/GLTextureWrappingTests.cpp",
     ]
@@ -925,6 +931,10 @@ dawn_test("dawn_end2end_tests") {
     ":white_box_tests_sources",
     "${dawn_root}/src/utils/chromium_test_compat",
   ]
+
+  if (dawn_standalone && (dawn_enable_d3d11 || dawn_enable_d3d12)) {
+    data_deps = [ "${dawn_direct3d_warp_dir}:copy_direct3d_warp" ]
+  }
 
   sources = []
   libs = []
@@ -979,6 +989,7 @@ dawn_test("dawn_perf_tests") {
     "perf_tests/ShaderRobustnessPerf.cpp",
     "perf_tests/SubresourceTrackingPerf.cpp",
     "perf_tests/UniformBufferUpdatePerf.cpp",
+    "perf_tests/UsageTrackingPerf.cpp",
     "perf_tests/VulkanZeroInitializeWorkgroupMemoryPerf.cpp",
     "perf_tests/WorkgroupAtomicPerf.cpp",
   ]

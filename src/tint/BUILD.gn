@@ -230,6 +230,7 @@ if (tint_build_benchmarks) {
     testonly = true
     public_deps = [ "//third_party/google_benchmark" ]
   }
+
   action("generate_benchmark_inputs") {
     generated_header_relpath = "gen/src/tint/cmd/bench/benchmark_inputs.h"
     generated_header_abspath = "${root_build_dir}/${generated_header_relpath}"
@@ -251,6 +252,7 @@ source_set("winsock") {
 config("dxc-include-config") {
   include_dirs = [ "${dawn_dxc_dir}/include" ]
 }
+
 source_set("dxc-include") {
   public_configs = [ ":dxc-include-config" ]
 }

@@ -13,12 +13,12 @@
           %3 = OpTypeFunction %void
        %bool = OpTypeBool
        %uint = OpTypeInt 32 0
- %uint_32767 = OpConstant %uint 32767
-%_arr_bool_uint_32767 = OpTypeArray %bool %uint_32767
-%_ptr_Function__arr_bool_uint_32767 = OpTypePointer Function %_arr_bool_uint_32767
-         %11 = OpConstantNull %_arr_bool_uint_32767
+  %uint_8192 = OpConstant %uint 8192
+%_arr_bool_uint_8192 = OpTypeArray %bool %uint_8192
+%_ptr_Function__arr_bool_uint_8192 = OpTypePointer Function %_arr_bool_uint_8192
+         %11 = OpConstantNull %_arr_bool_uint_8192
           %f = OpFunction %void None %3
           %4 = OpLabel
-          %v = OpVariable %_ptr_Function__arr_bool_uint_32767 Function %11
+          %v = OpVariable %_ptr_Function__arr_bool_uint_8192 Function %11
                OpReturn
                OpFunctionEnd

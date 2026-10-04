@@ -28,8 +28,14 @@
 #include "src/dawn/tests/perf_tests/DawnPerfTest.h"
 
 #include <algorithm>
+#include <charconv>
 #include <fstream>
+#include <iomanip>
 #include <limits>
+#include <memory>
+#include <span>
+#include <string_view>
+#include <system_error>
 #include <utility>
 
 #include "src/dawn/platform/tracing/TraceEvent.h"
@@ -108,41 +114,61 @@ namespace dawn {
 
 DawnPerfTestEnvironment::DawnPerfTestEnvironment(int argc, char** argv)
     : DawnTestEnvironment(argc, argv) {
-    size_t argLen = 0;  // Set when parsing --arg=X arguments
-    for (int i = 1; i < argc; ++i) {
-        if (DAWN_UNSAFE_TODO(strcmp("--calibration", argv[i])) == 0) {
+    // SAFETY: `argv` is guaranteed by the program entry point to contain `argc` elements.
+    const auto args = DAWN_UNSAFE_BUFFERS(std::span<char* const>(argv, static_cast<size_t>(argc)));
+    for (size_t i = 1; i < args.size(); ++i) {
+        const std::string_view arg = args[i];
+
+        if (arg == "--calibration") {
             mIsCalibrating = true;
             continue;
         }
 
-        constexpr const char kOverrideStepsArg[] = "--override-steps=";
-        argLen = sizeof(kOverrideStepsArg) - 1;
-        if (DAWN_UNSAFE_TODO(strncmp(argv[i], kOverrideStepsArg, argLen)) == 0) {
-            const char* overrideSteps = DAWN_UNSAFE_TODO(argv[i] + argLen);
-            if (overrideSteps[0] != '\0') {
-                mOverrideStepsToRun = DAWN_UNSAFE_TODO(strtoul(overrideSteps, nullptr, 0));
+        constexpr std::string_view kOverrideStepsArg = "--override-steps=";
+        if (arg.starts_with(kOverrideStepsArg)) {
+            const std::string_view overrideSteps = arg.substr(kOverrideStepsArg.size());
+            if (!overrideSteps.empty()) {
+                const char* first = std::to_address(overrideSteps.begin());
+                const char* last = std::to_address(overrideSteps.end());
+                unsigned int steps = 0;
+                auto [ptr, ec] = std::from_chars(first, last, steps);
+                if (ec == std::errc() && ptr == last) {
+                    mOverrideStepsToRun = steps;
+                } else {
+                    WarningLog() << "Ignoring invalid value for " << kOverrideStepsArg << ": \""
+                                 << overrideSteps << "\"";
+                }
             }
             continue;
         }
 
-        constexpr const char kTraceFileArg[] = "--trace-file=";
-        argLen = sizeof(kTraceFileArg) - 1;
-        if (DAWN_UNSAFE_TODO(strncmp(argv[i], kTraceFileArg, argLen)) == 0) {
-            const char* traceFile = DAWN_UNSAFE_TODO(argv[i] + argLen);
-            if (traceFile[0] != '\0') {
+        constexpr std::string_view kTraceFileArg = "--trace-file=";
+        if (arg.starts_with(kTraceFileArg)) {
+            const std::string_view traceFile = arg.substr(kTraceFileArg.size());
+            if (!traceFile.empty()) {
                 mTraceFile = traceFile;
             }
             continue;
         }
 
-        if (DAWN_UNSAFE_TODO(strcmp("-h", argv[i])) == 0 ||
-            DAWN_UNSAFE_TODO(strcmp("--help", argv[i])) == 0) {
+        constexpr std::string_view kPerfResultsFileArg = "--perf-results-file=";
+        if (arg.starts_with(kPerfResultsFileArg)) {
+            const std::string_view perfResultsFile = arg.substr(kPerfResultsFileArg.size());
+            if (!perfResultsFile.empty()) {
+                mPerfResultsFile = perfResultsFile;
+            }
+            continue;
+        }
+
+        if (arg == "-h" || arg == "--help") {
             InfoLog() << "Additional flags:"
-                      << " [--calibration] [--override-steps=x] [--trace-file=file]\n"
+                      << " [--calibration] [--override-steps=x] [--trace-file=file]"
+                      << " [--perf-results-file=file]\n"
                       << "  --calibration: Only run calibration. Calibration allows the perf test"
                          " runner script to save some time.\n"
                       << " --override-steps: Set a fixed number of steps to run for each test\n"
-                      << " --trace-file: The file to dump trace results.\n";
+                      << " --trace-file: The file to dump trace results.\n"
+                      << " --perf-results-file: The file to dump JSON perf results.\n";
             continue;
         }
     }
@@ -160,6 +186,33 @@ void DawnPerfTestEnvironment::SetUp() {
 }
 
 void DawnPerfTestEnvironment::TearDown() {
+    if (!mPerfResultsFile.empty()) {
+        std::ofstream outFile(mPerfResultsFile, std::ios::out | std::ios::trunc);
+        if (outFile) {
+            // Emit values at full round-trip precision.
+            outFile << std::setprecision(std::numeric_limits<double>::max_digits10);
+            outFile << "{\n  \"results\": [\n";
+            for (size_t i = 0; i < mPerfResults.size(); ++i) {
+                const auto& r = mPerfResults[i];
+                outFile << "    {\n"
+                        << "      \"metric\": \"" << r.metric << "\",\n"
+                        << "      \"test_suite\": \"" << r.testSuite << "\",\n"
+                        << "      \"story\": \"" << r.story << "\",\n"
+                        << "      \"trace\": \"" << r.trace << "\",\n"
+                        << "      \"value\": " << r.value << ",\n"
+                        << "      \"units\": \"" << r.units << "\",\n"
+                        << "      \"important\": " << (r.important ? "true" : "false") << ",\n"
+                        << "      \"trial\": " << r.trial << "\n"
+                        << "    }" << (i + 1 < mPerfResults.size() ? "," : "") << "\n";
+            }
+            outFile << "  ]\n}\n";
+            outFile.flush();
+            InfoLog() << "Wrote JSON perf results to " << mPerfResultsFile;
+        } else {
+            WarningLog() << "Error opening perf results file " << mPerfResultsFile
+                         << " for writing";
+        }
+    }
     DawnTestEnvironment::TearDown();
 }
 
@@ -172,7 +225,15 @@ unsigned int DawnPerfTestEnvironment::OverrideStepsToRun() const {
 }
 
 const char* DawnPerfTestEnvironment::GetTraceFile() const {
-    return mTraceFile;
+    return mTraceFile.empty() ? nullptr : mTraceFile.c_str();
+}
+
+bool DawnPerfTestEnvironment::HasPerfResultsFile() const {
+    return !mPerfResultsFile.empty();
+}
+
+void DawnPerfTestEnvironment::AddPerfResult(PerfResult result) {
+    mPerfResults.push_back(std::move(result));
 }
 
 DawnPerfTestPlatform* DawnPerfTestEnvironment::GetPlatform() const {
@@ -221,6 +282,7 @@ void DawnPerfTestBase::RunTest() {
     // Only enable trace event recording in this section.
     // We don't care about trace events during warmup and calibration.
     for (unsigned int trial = 0; trial < kNumTrials; ++trial) {
+        mCurrentTrial = trial;
 #if defined(DAWN_USE_PERFETTO)
         std::unique_ptr<perfetto::TracingSession> tracingSession;
         if (gTestEnv->GetTraceFile() != nullptr) {
@@ -369,32 +431,47 @@ void DawnPerfTestBase::PrintResult(const std::string& trace,
                                    double value,
                                    const std::string& units,
                                    bool important) const {
-    PrintResultImpl(trace, std::to_string(value), units, important);
+    PrintResultImpl(trace, value, std::to_string(value), units, important);
 }
 
 void DawnPerfTestBase::PrintResult(const std::string& trace,
                                    unsigned int value,
                                    const std::string& units,
                                    bool important) const {
-    PrintResultImpl(trace, std::to_string(value), units, important);
+    PrintResultImpl(trace, static_cast<double>(value), std::to_string(value), units, important);
 }
 
 void DawnPerfTestBase::PrintResultImpl(const std::string& trace,
-                                       const std::string& value,
+                                       double numericValue,
+                                       const std::string& valueStr,
                                        const std::string& units,
                                        bool important) const {
     const ::testing::TestInfo* const testInfo =
         ::testing::UnitTest::GetInstance()->current_test_info();
 
-    std::string metric = std::string(testInfo->test_suite_name()) + "." + trace;
+    std::string testSuite = testInfo->test_suite_name();
+    std::string metric = testSuite + "." + trace;
 
     std::string story = testInfo->name();
     std::replace(story.begin(), story.end(), '/', '_');
 
     // The results are printed according to the format specified at
     // [chromium]//src/tools/perf/generate_legacy_perf_dashboard_json.py
-    InfoLog() << (important ? "*" : "") << "RESULT " << metric << ": " << story << "= " << value
+    InfoLog() << (important ? "*" : "") << "RESULT " << metric << ": " << story << "= " << valueStr
               << " " << units;
+
+    if (gTestEnv->HasPerfResultsFile()) {
+        gTestEnv->AddPerfResult({
+            .metric = metric,
+            .testSuite = testSuite,
+            .story = story,
+            .trace = trace,
+            .value = numericValue,
+            .units = units,
+            .important = important,
+            .trial = mCurrentTrial,
+        });
+    }
 }
 
 }  // namespace dawn

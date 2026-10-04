@@ -43,6 +43,8 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 class IR_PreservePaddingTest : public TransformTest {
   protected:
+    void SetUp() override { mod.properties.Add(core::ir::Property::kAllowBufferTypes); }
+
     const core::type::Struct* MakeStructWithoutPadding() {
         auto* structure =
             ty.Struct(mod.symbols.New("MyStruct"), {
@@ -107,7 +109,8 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -146,7 +149,8 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -181,7 +185,8 @@ MyStruct = struct @align(16) {
 
     auto* expect = src;
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -222,7 +227,8 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -257,7 +263,8 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -292,7 +299,8 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -326,7 +334,8 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -365,7 +374,8 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -433,7 +443,8 @@ $B1: {  # root
 }
 )";
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -506,7 +517,8 @@ $B1: {  # root
 }
 )";
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -598,7 +610,8 @@ $B1: {  # root
 }
 )";
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -697,7 +710,8 @@ $B1: {  # root
 }
 )";
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -758,7 +772,8 @@ $B1: {  # root
 }
 )";
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -844,7 +859,8 @@ $B1: {  # root
 }
 )";
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -936,7 +952,8 @@ $B1: {  # root
 }
 )";
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1013,7 +1030,8 @@ $B1: {  # root
 }
 )";
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1240,7 +1258,8 @@ $B1: {  # root
 }
 )";
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1319,7 +1338,522 @@ $B1: {  # root
 }
 )";
 
-    Run(PreservePadding);
+    PreservePaddingConfig config;
+    Run(PreservePadding, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_PreservePaddingTest, Workgroup_BufferView_NoOption) {
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.buffer(64)));
+    mod.root_block->Append(v);
+
+    auto* structure = MakeStructWithInternalPadding();
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(workgroup, structure), BuiltinFn::kBufferView,
+                                    Vector<TemplateParameter, 1>{structure}, v, 0_u);
+        b.Store(view, b.Zero(structure));
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:vec4<u32> @offset(0)
+  b:u32 @offset(16)
+  c:vec4<u32> @offset(32)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, buffer<64>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, MyStruct, read_write> = bufferView<MyStruct> %v, 0u
+    store %3, MyStruct(vec4<u32>(0u), 0u, vec4<u32>(0u))
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    PreservePaddingConfig config{.workgroup_buffer_view = false};
+    Run(PreservePadding, config);
+
+    EXPECT_EQ(src, str());
+}
+
+TEST_F(IR_PreservePaddingTest, Workgroup_BufferView) {
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.buffer(64)));
+    mod.root_block->Append(v);
+
+    auto* structure = MakeStructWithInternalPadding();
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(workgroup, structure), BuiltinFn::kBufferView,
+                                    Vector<TemplateParameter, 1>{structure}, v, 0_u);
+        b.Store(view, b.Zero(structure));
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:vec4<u32> @offset(0)
+  b:u32 @offset(16)
+  c:vec4<u32> @offset(32)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, buffer<64>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, MyStruct, read_write> = bufferView<MyStruct> %v, 0u
+    store %3, MyStruct(vec4<u32>(0u), 0u, vec4<u32>(0u))
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:vec4<u32> @offset(0)
+  b:u32 @offset(16)
+  c:vec4<u32> @offset(32)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, buffer<64>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, MyStruct, read_write> = bufferView<MyStruct> %v, 0u
+    %4:void = call %tint_store_and_preserve_padding, %3, MyStruct(vec4<u32>(0u), 0u, vec4<u32>(0u))
+    ret
+  }
+}
+%tint_store_and_preserve_padding = func(%target:ptr<workgroup, MyStruct, read_write>, %value_param:MyStruct):void {
+  $B3: {
+    %8:ptr<workgroup, vec4<u32>, read_write> = access %target, 0u
+    %9:vec4<u32> = access %value_param, 0u
+    store %8, %9
+    %10:ptr<workgroup, u32, read_write> = access %target, 1u
+    %11:u32 = access %value_param, 1u
+    store %10, %11
+    %12:ptr<workgroup, vec4<u32>, read_write> = access %target, 2u
+    %13:vec4<u32> = access %value_param, 2u
+    store %12, %13
+    ret
+  }
+}
+)";
+
+    PreservePaddingConfig config{.workgroup_buffer_view = true};
+    Run(PreservePadding, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_PreservePaddingTest, Workgroup_BufferArrayView) {
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.buffer(64)));
+    mod.root_block->Append(v);
+
+    auto* structure = MakeStructWithInternalPadding();
+    auto* array = ty.runtime_array(structure);
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(workgroup, array), BuiltinFn::kBufferArrayView,
+                                    Vector<TemplateParameter, 1>{array}, v, 0_u, 64_u);
+        auto* a = b.Access(ty.ptr(workgroup, structure), view, 0_u);
+        b.Store(a, b.Zero(structure));
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:vec4<u32> @offset(0)
+  b:u32 @offset(16)
+  c:vec4<u32> @offset(32)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, buffer<64>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, array<MyStruct>, read_write> = bufferArrayView<array<MyStruct>> %v, 0u, 64u
+    %4:ptr<workgroup, MyStruct, read_write> = access %3, 0u
+    store %4, MyStruct(vec4<u32>(0u), 0u, vec4<u32>(0u))
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:vec4<u32> @offset(0)
+  b:u32 @offset(16)
+  c:vec4<u32> @offset(32)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, buffer<64>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, array<MyStruct>, read_write> = bufferArrayView<array<MyStruct>> %v, 0u, 64u
+    %4:ptr<workgroup, MyStruct, read_write> = access %3, 0u
+    %5:void = call %tint_store_and_preserve_padding, %4, MyStruct(vec4<u32>(0u), 0u, vec4<u32>(0u))
+    ret
+  }
+}
+%tint_store_and_preserve_padding = func(%target:ptr<workgroup, MyStruct, read_write>, %value_param:MyStruct):void {
+  $B3: {
+    %9:ptr<workgroup, vec4<u32>, read_write> = access %target, 0u
+    %10:vec4<u32> = access %value_param, 0u
+    store %9, %10
+    %11:ptr<workgroup, u32, read_write> = access %target, 1u
+    %12:u32 = access %value_param, 1u
+    store %11, %12
+    %13:ptr<workgroup, vec4<u32>, read_write> = access %target, 2u
+    %14:vec4<u32> = access %value_param, 2u
+    store %13, %14
+    ret
+  }
+}
+)";
+
+    PreservePaddingConfig config{.workgroup_buffer_view = true};
+    Run(PreservePadding, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_PreservePaddingTest, Workgroup_BufferView_ThroughFunction) {
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.buffer(64)));
+    mod.root_block->Append(v);
+
+    auto* structure = MakeStructWithInternalPadding();
+
+    auto* bar = b.Function("bar", ty.void_());
+    auto* p1 = b.FunctionParam("p1", ty.u32());
+    auto* p2 = b.FunctionParam("p2", ty.ptr(workgroup, structure));
+    bar->SetParams({p1, p2});
+    b.Append(bar->Block(), [&] {
+        b.Store(p2, b.Zero(structure));
+        b.Return(bar);
+    });
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(workgroup, structure), BuiltinFn::kBufferView,
+                                    Vector<TemplateParameter, 1>{structure}, v, 0_u);
+        b.Call(ty.void_(), bar, 0_u, view);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:vec4<u32> @offset(0)
+  b:u32 @offset(16)
+  c:vec4<u32> @offset(32)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, buffer<64>, read_write> = var undef
+}
+
+%bar = func(%p1:u32, %p2:ptr<workgroup, MyStruct, read_write>):void {
+  $B2: {
+    store %p2, MyStruct(vec4<u32>(0u), 0u, vec4<u32>(0u))
+    ret
+  }
+}
+%foo = func():void {
+  $B3: {
+    %6:ptr<workgroup, MyStruct, read_write> = bufferView<MyStruct> %v, 0u
+    %7:void = call %bar, 0u, %6
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:vec4<u32> @offset(0)
+  b:u32 @offset(16)
+  c:vec4<u32> @offset(32)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, buffer<64>, read_write> = var undef
+}
+
+%bar = func(%p1:u32, %p2:ptr<workgroup, MyStruct, read_write>):void {
+  $B2: {
+    %5:void = call %tint_store_and_preserve_padding, %p2, MyStruct(vec4<u32>(0u), 0u, vec4<u32>(0u))
+    ret
+  }
+}
+%foo = func():void {
+  $B3: {
+    %8:ptr<workgroup, MyStruct, read_write> = bufferView<MyStruct> %v, 0u
+    %9:void = call %bar, 0u, %8
+    ret
+  }
+}
+%tint_store_and_preserve_padding = func(%target:ptr<workgroup, MyStruct, read_write>, %value_param:MyStruct):void {
+  $B4: {
+    %12:ptr<workgroup, vec4<u32>, read_write> = access %target, 0u
+    %13:vec4<u32> = access %value_param, 0u
+    store %12, %13
+    %14:ptr<workgroup, u32, read_write> = access %target, 1u
+    %15:u32 = access %value_param, 1u
+    store %14, %15
+    %16:ptr<workgroup, vec4<u32>, read_write> = access %target, 2u
+    %17:vec4<u32> = access %value_param, 2u
+    store %16, %17
+    ret
+  }
+}
+)";
+
+    PreservePaddingConfig config{.workgroup_buffer_view = true};
+    Run(PreservePadding, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_PreservePaddingTest, Workgroup_BufferArrayView_MultipleFunctions) {
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.buffer(64)));
+    mod.root_block->Append(v);
+
+    auto* structure = MakeStructWithInternalPadding();
+    auto* array = ty.runtime_array(structure);
+
+    auto* baz = b.Function("baz", ty.void_());
+    auto* baz_p1 = b.FunctionParam("baz_p1", ty.ptr(workgroup, structure));
+    auto* baz_p2 = b.FunctionParam("baz_p2", ty.u32());
+    baz->SetParams({baz_p1, baz_p2});
+    b.Append(baz->Block(), [&] {
+        b.Store(baz_p1, b.Zero(structure));
+        b.Return(baz);
+    });
+
+    auto* bar = b.Function("bar", ty.void_());
+    auto* bar_p1 = b.FunctionParam("bar_p1", ty.u32());
+    auto* bar_p2 = b.FunctionParam("bar_p2", ty.ptr(workgroup, array));
+    bar->SetParams({bar_p1, bar_p2});
+    b.Append(bar->Block(), [&] {
+        auto* a = b.Access(ty.ptr(workgroup, structure), bar_p2, bar_p1);
+        b.Call(ty.void_(), baz, a, bar_p1);
+        b.Return(bar);
+    });
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(workgroup, array), BuiltinFn::kBufferArrayView,
+                                    Vector<TemplateParameter, 1>{array}, v, 0_u, 64_u);
+        b.Call(ty.void_(), bar, 0_u, view);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:vec4<u32> @offset(0)
+  b:u32 @offset(16)
+  c:vec4<u32> @offset(32)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, buffer<64>, read_write> = var undef
+}
+
+%baz = func(%baz_p1:ptr<workgroup, MyStruct, read_write>, %baz_p2:u32):void {
+  $B2: {
+    store %baz_p1, MyStruct(vec4<u32>(0u), 0u, vec4<u32>(0u))
+    ret
+  }
+}
+%bar = func(%bar_p1:u32, %bar_p2:ptr<workgroup, array<MyStruct>, read_write>):void {
+  $B3: {
+    %8:ptr<workgroup, MyStruct, read_write> = access %bar_p2, %bar_p1
+    %9:void = call %baz, %8, %bar_p1
+    ret
+  }
+}
+%foo = func():void {
+  $B4: {
+    %11:ptr<workgroup, array<MyStruct>, read_write> = bufferArrayView<array<MyStruct>> %v, 0u, 64u
+    %12:void = call %bar, 0u, %11
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:vec4<u32> @offset(0)
+  b:u32 @offset(16)
+  c:vec4<u32> @offset(32)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, buffer<64>, read_write> = var undef
+}
+
+%baz = func(%baz_p1:ptr<workgroup, MyStruct, read_write>, %baz_p2:u32):void {
+  $B2: {
+    %5:void = call %tint_store_and_preserve_padding, %baz_p1, MyStruct(vec4<u32>(0u), 0u, vec4<u32>(0u))
+    ret
+  }
+}
+%bar = func(%bar_p1:u32, %bar_p2:ptr<workgroup, array<MyStruct>, read_write>):void {
+  $B3: {
+    %10:ptr<workgroup, MyStruct, read_write> = access %bar_p2, %bar_p1
+    %11:void = call %baz, %10, %bar_p1
+    ret
+  }
+}
+%foo = func():void {
+  $B4: {
+    %13:ptr<workgroup, array<MyStruct>, read_write> = bufferArrayView<array<MyStruct>> %v, 0u, 64u
+    %14:void = call %bar, 0u, %13
+    ret
+  }
+}
+%tint_store_and_preserve_padding = func(%target:ptr<workgroup, MyStruct, read_write>, %value_param:MyStruct):void {
+  $B5: {
+    %17:ptr<workgroup, vec4<u32>, read_write> = access %target, 0u
+    %18:vec4<u32> = access %value_param, 0u
+    store %17, %18
+    %19:ptr<workgroup, u32, read_write> = access %target, 1u
+    %20:u32 = access %value_param, 1u
+    store %19, %20
+    %21:ptr<workgroup, vec4<u32>, read_write> = access %target, 2u
+    %22:vec4<u32> = access %value_param, 2u
+    store %21, %22
+    ret
+  }
+}
+)";
+
+    PreservePaddingConfig config{.workgroup_buffer_view = true};
+    Run(PreservePadding, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_PreservePaddingTest, BufferView_Workgroup_SameFunction_MultipleCalls) {
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.buffer(64)));
+    mod.root_block->Append(v);
+
+    auto* structure = MakeStructWithInternalPadding();
+
+    auto* bar = b.Function("bar", ty.void_());
+    auto* p1 = b.FunctionParam("p1", ty.u32());
+    auto* p2 = b.FunctionParam("p2", ty.ptr(workgroup, structure));
+    bar->SetParams({p1, p2});
+    b.Append(bar->Block(), [&] {
+        b.Store(p2, b.Zero(structure));
+        b.Return(bar);
+    });
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(workgroup, structure), BuiltinFn::kBufferView,
+                                    Vector<TemplateParameter, 1>{structure}, v, 0_u);
+        b.Call(ty.void_(), bar, 0_u, view);
+        b.Call(ty.void_(), bar, 1_u, view);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:vec4<u32> @offset(0)
+  b:u32 @offset(16)
+  c:vec4<u32> @offset(32)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, buffer<64>, read_write> = var undef
+}
+
+%bar = func(%p1:u32, %p2:ptr<workgroup, MyStruct, read_write>):void {
+  $B2: {
+    store %p2, MyStruct(vec4<u32>(0u), 0u, vec4<u32>(0u))
+    ret
+  }
+}
+%foo = func():void {
+  $B3: {
+    %6:ptr<workgroup, MyStruct, read_write> = bufferView<MyStruct> %v, 0u
+    %7:void = call %bar, 0u, %6
+    %8:void = call %bar, 1u, %6
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:vec4<u32> @offset(0)
+  b:u32 @offset(16)
+  c:vec4<u32> @offset(32)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, buffer<64>, read_write> = var undef
+}
+
+%bar = func(%p1:u32, %p2:ptr<workgroup, MyStruct, read_write>):void {
+  $B2: {
+    %5:void = call %tint_store_and_preserve_padding, %p2, MyStruct(vec4<u32>(0u), 0u, vec4<u32>(0u))
+    ret
+  }
+}
+%foo = func():void {
+  $B3: {
+    %8:ptr<workgroup, MyStruct, read_write> = bufferView<MyStruct> %v, 0u
+    %9:void = call %bar, 0u, %8
+    %10:void = call %bar, 1u, %8
+    ret
+  }
+}
+%tint_store_and_preserve_padding = func(%target:ptr<workgroup, MyStruct, read_write>, %value_param:MyStruct):void {
+  $B4: {
+    %13:ptr<workgroup, vec4<u32>, read_write> = access %target, 0u
+    %14:vec4<u32> = access %value_param, 0u
+    store %13, %14
+    %15:ptr<workgroup, u32, read_write> = access %target, 1u
+    %16:u32 = access %value_param, 1u
+    store %15, %16
+    %17:ptr<workgroup, vec4<u32>, read_write> = access %target, 2u
+    %18:vec4<u32> = access %value_param, 2u
+    store %17, %18
+    ret
+  }
+}
+)";
+
+    PreservePaddingConfig config{.workgroup_buffer_view = true};
+    Run(PreservePadding, config);
 
     EXPECT_EQ(expect, str());
 }

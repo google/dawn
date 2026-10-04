@@ -58,8 +58,8 @@ const VertexFormatInfo& GetVertexFormatInfo(wgpu::VertexFormat format);
 
 class DeviceBase;
 
-MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
-                                            const RenderPipelineDescriptor* descriptor);
+MaybeValError ValidateRenderPipelineDescriptor(DeviceBase* device,
+                                               const RenderPipelineDescriptor* descriptor);
 
 std::vector<StageAndDescriptor> GetRenderStagesAndSetPlaceholderShader(
     DeviceBase* device,

@@ -76,7 +76,12 @@ void stream::Stream<D3D12_INPUT_ELEMENT_DESC>::Write(stream::Sink* sink,
 template <>
 void stream::Stream<D3D12_INPUT_LAYOUT_DESC>::Write(stream::Sink* sink,
                                                     const D3D12_INPUT_LAYOUT_DESC& t) {
-    StreamIn(sink, Iterable(t.pInputElementDescs, t.NumElements));
+    auto inputElements =
+        // SAFETY: pInputElementDescs must point at NumElements valid entries.
+        DAWN_UNSAFE_BUFFERS(
+            Span<const D3D12_INPUT_ELEMENT_DESC>{t.pInputElementDescs, t.NumElements});
+
+    StreamIn(sink, inputElements);
 }
 
 template <>
@@ -89,8 +94,15 @@ void stream::Stream<D3D12_SO_DECLARATION_ENTRY>::Write(stream::Sink* sink,
 template <>
 void stream::Stream<D3D12_STREAM_OUTPUT_DESC>::Write(stream::Sink* sink,
                                                      const D3D12_STREAM_OUTPUT_DESC& t) {
-    StreamIn(sink, Iterable(t.pSODeclaration, t.NumEntries),
-             Iterable(t.pBufferStrides, t.NumStrides), t.RasterizedStream);
+    auto streamOutputs =
+        // SAFETY: pSODeclaration must point at NumEntries valid entries.
+        DAWN_UNSAFE_BUFFERS(Span<const D3D12_SO_DECLARATION_ENTRY>{t.pSODeclaration, t.NumEntries});
+
+    auto strides =
+        // SAFETY: pBufferStrides must point at NumStrides valid entries.
+        DAWN_UNSAFE_BUFFERS(Span<const UINT>{t.pBufferStrides, t.NumStrides});
+
+    StreamIn(sink, streamOutputs, strides, t.RasterizedStream);
 }
 
 template <>
@@ -101,19 +113,27 @@ void stream::Stream<DXGI_SAMPLE_DESC>::Write(stream::Sink* sink, const DXGI_SAMP
 template <>
 void stream::Stream<D3D12_SHADER_BYTECODE>::Write(stream::Sink* sink,
                                                   const D3D12_SHADER_BYTECODE& t) {
-    StreamIn(sink, Iterable(reinterpret_cast<const uint8_t*>(t.pShaderBytecode), t.BytecodeLength));
+    auto bytecode =
+        // SAFETY: pShaderBytecode must point at BytecodeLength valid bytes.
+        DAWN_UNSAFE_BUFFERS(Span<const std::byte>{static_cast<const std::byte*>(t.pShaderBytecode),
+                                                  t.BytecodeLength});
+
+    StreamIn(sink, bytecode);
 }
 
 template <>
 void stream::Stream<D3D12_GRAPHICS_PIPELINE_STATE_DESC>::Write(
     stream::Sink* sink,
     const D3D12_GRAPHICS_PIPELINE_STATE_DESC& t) {
-    // Don't Serialize pRootSignature as we already serialize the signature blob in pipline layout.
+    auto rtvFormats =
+        // SAFETY: RTVFormats must point at NumRenderTargets valid entries.
+        DAWN_UNSAFE_BUFFERS(Span<const DXGI_FORMAT>{t.RTVFormats, t.NumRenderTargets});
+
+    // Don't Serialize pRootSignature as we already serialize the signature blob in pipeline layout.
     // Don't Serialize CachedPSO as it is in the cached blob.
     StreamIn(sink, t.VS, t.PS, t.DS, t.HS, t.GS, t.StreamOutput, t.BlendState, t.SampleMask,
              t.RasterizerState, t.DepthStencilState, t.InputLayout, t.IBStripCutValue,
-             t.PrimitiveTopologyType, Iterable(t.RTVFormats, t.NumRenderTargets), t.DSVFormat,
-             t.SampleDesc, t.NodeMask, t.Flags);
+             t.PrimitiveTopologyType, rtvFormats, t.DSVFormat, t.SampleDesc, t.NodeMask, t.Flags);
 }
 
 template <>
@@ -128,8 +148,13 @@ template <>
 void stream::Stream<ID3DBlob>::Write(stream::Sink* sink, const ID3DBlob& t) {
     // Workaround: GetBufferPointer and GetbufferSize are not marked as const
     ID3DBlob* pBlob = const_cast<ID3DBlob*>(&t);
-    StreamIn(sink, Iterable(reinterpret_cast<uint8_t*>(pBlob->GetBufferPointer()),
-                            pBlob->GetBufferSize()));
+
+    auto blobSpan =
+        // SAFETY: Blob is owns GetBufferSize bytes at GetBufferPointer.
+        DAWN_UNSAFE_BUFFERS(Span<const std::byte>{
+            static_cast<const std::byte*>(pBlob->GetBufferPointer()), pBlob->GetBufferSize()});
+
+    StreamIn(sink, blobSpan);
 }
 
 }  // namespace dawn::native

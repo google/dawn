@@ -51,7 +51,6 @@
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
-#include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
@@ -155,7 +154,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     // PreservePadding must come before DirectVariableAccess.
-    TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module));
+    TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module, {}));
 
     core::ir::transform::DirectVariableAccessConfig dva_options;
     dva_options.transform_function = true;
@@ -185,14 +184,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     // DecomposeAccess must come before BlockDecoratedStructs, which will wrap
     // buffer resource variables in a structure.
-    // Uniform buffers are only unconditionally decomposed if the implementation does not support
-    // uniform buffer standard layout. Otherwise, only buffer type variables are decomposed.
+    // Uniform buffers are unconditionally decomposed to support implementations that do not support
+    // uniform buffer standard layout.
     core::ir::transform::DecomposeAccessConfig decompose_config{
-        .uniform = !options.extensions.use_uniform_buffers};
+        .uniform = true,
+    };
     TINT_CHECK_RESULT(core::ir::transform::DecomposeAccess(module, decompose_config));
-    if (options.extensions.use_uniform_buffers) {
-        TINT_CHECK_RESULT(core::ir::transform::Std140(module));
-    }
     TINT_CHECK_RESULT(core::ir::transform::BlockDecoratedStructs(module));
 
     TINT_CHECK_RESULT(core::ir::transform::VectorizeScalarMatrixConstructors(module));
@@ -282,6 +279,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                     .minimum_array_size = options.minimum_immediate_size,
                     .allow_dynamic_immediate_indices = false,
                 }));
+
+    // DecomposeAccess can introduce selects that need lowered, but ShaderIO requires subgroup
+    // builtins to have already been lowered.
+    raise::PolyfillConfig rerun_config = config;
+    rerun_config.rerun = true;
+    TINT_CHECK_RESULT(raise::BuiltinPolyfill(module, rerun_config));
 
     // BlockDecoratedStructs must run again to wrap the decomposed immediate array in a block
     // struct, as SPIR-V requires push constant variables to be typed as a struct. Storage and

@@ -43,6 +43,7 @@ using testing::Return;
 using testing::SaveArg;
 using testing::StrEq;
 using testing::WithArg;
+using testing::WithArgs;
 
 namespace dawn {
 
@@ -119,31 +120,32 @@ void WireTest::SetUp() {
     instance.RequestAdapter(nullptr, wgpu::CallbackMode::AllowSpontaneous, adapterCb.Callback(),
                             adapterCb.MakeUserdata(this));
 
-    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, _, _)).WillOnce([&]() {
-        EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
+    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, _, _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
+            EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
 
-        EXPECT_CALL(api, AdapterGetInfo(apiAdapter, NotNull()))
-            .WillOnce(WithArg<1>([&](WGPUAdapterInfo* info) {
-                *info = {};
-                info->vendor = kEmptyOutputStringView;
-                info->architecture = kEmptyOutputStringView;
-                info->device = kEmptyOutputStringView;
-                info->description = kEmptyOutputStringView;
-                return WGPUStatus_Success;
-            }));
+            EXPECT_CALL(api, AdapterGetInfo(apiAdapter, NotNull()))
+                .WillOnce(WithArg<1>([&](WGPUAdapterInfo* info) {
+                    *info = {};
+                    info->vendor = kEmptyOutputStringView;
+                    info->architecture = kEmptyOutputStringView;
+                    info->device = kEmptyOutputStringView;
+                    info->description = kEmptyOutputStringView;
+                    return WGPUStatus_Success;
+                }));
 
-        EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
-            .WillOnce(WithArg<1>([&](WGPULimits* limits) {
-                *limits = {};
-                return WGPUStatus_Success;
-            }));
+            EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
+                .WillOnce(WithArg<1>([&](WGPULimits* limits) {
+                    *limits = {};
+                    return WGPUStatus_Success;
+                }));
 
-        EXPECT_CALL(api, AdapterGetFeatures(apiAdapter, NotNull()))
-            .WillOnce(WithArg<1>([&](WGPUSupportedFeatures* features) { *features = {}; }));
+            EXPECT_CALL(api, AdapterGetFeatures(apiAdapter, NotNull()))
+                .WillOnce(WithArg<1>([&](WGPUSupportedFeatures* features) { *features = {}; }));
 
-        api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
-                                               apiAdapter, kEmptyOutputStringView);
-    });
+            api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
+                                                   apiAdapter, kEmptyOutputStringView, future);
+        }));
     FlushClient();
     EXPECT_CALL(adapterCb, Call(wgpu::RequestAdapterStatus::Success, NotNull(), StrEq(""), this))
         .WillOnce(SaveArg<1>(&adapter));
@@ -163,8 +165,8 @@ void WireTest::SetUp() {
         deviceCb;
     adapter.RequestDevice(&deviceDesc, wgpu::CallbackMode::AllowSpontaneous, deviceCb.Callback(),
                           deviceCb.MakeUserdata(this));
-    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
-        .WillOnce(WithArg<1>([&](const WGPUDeviceDescriptor* desc) {
+    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _, _))
+        .WillOnce(WithArgs<1, 3>([&](const WGPUDeviceDescriptor* desc, WGPUFuture future) {
             // Set on device creation to forward callbacks to the client.
             EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, _)).Times(1);
 
@@ -189,7 +191,7 @@ void WireTest::SetUp() {
                 .WillOnce(WithArg<1>([&](WGPUSupportedFeatures* features) { *features = {}; }));
 
             api.CallAdapterRequestDeviceCallback(apiAdapter, WGPURequestDeviceStatus_Success,
-                                                 apiDevice, kEmptyOutputStringView);
+                                                 apiDevice, kEmptyOutputStringView, future);
         }));
     FlushClient();
     EXPECT_CALL(deviceCb, Call(wgpu::RequestDeviceStatus::Success, NotNull(), StrEq(""), this))

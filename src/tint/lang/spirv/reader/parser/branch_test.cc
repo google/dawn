@@ -7746,7 +7746,7 @@ TEST_F(SpirvParserTest, ReplicatePointerAccess_ImageTexelPointer_Unsupported) {
 )");
     EXPECT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
-                testing::HasSubstr("unhandled SPIR-V instruction: OpImageTexelPointer"));
+                testing::HasSubstr("unhandled SPIR-V storage class: Image"));
 }
 
 TEST_F(SpirvParserTest, ReplicatePointerAccess_MultipleBlocks) {

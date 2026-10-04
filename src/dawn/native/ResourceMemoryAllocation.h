@@ -95,9 +95,7 @@ class ResourceMemoryAllocation {
     uint64_t mOffset = 0;
     // TODO(crbug.com/485825675): Investigate why this pointer is dangling.
     raw_ptr<ResourceHeapBase, DanglingUntriaged> mResourceHeap = nullptr;
-    // TODO(https://crbug.com/526537224): Use RawSpan even if we point at driver memory that's not
-    // owned by partition_alloc.
-    Span<std::byte> mMappedSpan = {};
+    RawSpan<std::byte> mMappedSpan = {};
 };
 }  // namespace dawn::native
 

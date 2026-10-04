@@ -57,20 +57,18 @@ class PipelineLayout final : public PipelineLayoutBase {
 
     FlatBindingIndex GetNumSamplers() const;
     FlatBindingIndex GetNumSampledTextures() const;
-    FlatBindingIndex GetNumSSBO() const;
 
+    // TODO(crbug.com/366291600): Use immediates instead of a uniform buffer for texture builtin
+    // metadata.
     FlatBindingIndex GetInternalTextureBuiltinsUniformBinding() const;
-    FlatBindingIndex GetInternalArrayLengthUniformBinding() const;
 
   private:
     ~PipelineLayout() override = default;
     BindingIndexInfo mIndexInfo;
     FlatBindingIndex mNumSamplers;
     FlatBindingIndex mNumSampledTextures;
-    FlatBindingIndex mNumSSBO;
 
     FlatBindingIndex mInternalTextureBuiltinsUniformBinding;
-    FlatBindingIndex mInternalArrayLengthUniformBinding;
 };
 
 }  // namespace dawn::native::opengl

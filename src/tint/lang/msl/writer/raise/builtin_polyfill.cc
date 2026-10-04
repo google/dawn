@@ -1119,15 +1119,16 @@ struct State {
 
             // If the array was a vec3, then FixTypeLayout may have inserted a (soon to be)
             // redundant pointer offset call. Elide it here.
-            if (auto* p_res = p->As<core::ir::InstructionResult>()) {
-                if (auto* pre_cast = p_res->Instruction()->As<msl::ir::BuiltinCall>()) {
-                    if (pre_cast->Func() == msl::BuiltinFn::kPointerOffset &&
-                        pre_cast->Args()[1] == b.Constant(u32(0))) {
-                        p = pre_cast->Args()[0];
+            msl::BuiltinFn ptr_offset = msl::BuiltinFn::kPointerOffset;
+            if (auto* pre_cast = p->AsInstruction<msl::ir::BuiltinCall>()) {
+                if ((pre_cast->Func() == msl::BuiltinFn::kPointerOffset ||
+                     pre_cast->Func() == msl::BuiltinFn::kAliasPointerOffset) &&
+                    pre_cast->Args()[1] == b.Constant(u32(0))) {
+                    ptr_offset = pre_cast->Func();
+                    p = pre_cast->Args()[0];
 
-                        if (p_res->NumUsages() == 1) {
-                            pre_cast->Destroy();
-                        }
+                    if (pre_cast->Result()->NumUsages() == 1) {
+                        pre_cast->Destroy();
                     }
                 }
             }
@@ -1153,8 +1154,7 @@ struct State {
                 offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
                 offset = b.Multiply(offset, u32(arr_stride));
                 src = b.CallExplicit<msl::ir::BuiltinCall>(
-                           ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()),
-                           msl::BuiltinFn::kPointerOffset,
+                           ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()), ptr_offset,
                            Vector<core::ir::TemplateParameter, 1>{mat_ele}, p, offset)
                           ->Result();
 
@@ -1201,15 +1201,16 @@ struct State {
 
             // If the array was a vec3, then FixTypeLayout may have inserted a (soon to be)
             // redundant pointer offset call. Elide it here.
-            if (auto* p_res = p->As<core::ir::InstructionResult>()) {
-                if (auto* pre_cast = p_res->Instruction()->As<msl::ir::BuiltinCall>()) {
-                    if (pre_cast->Func() == msl::BuiltinFn::kPointerOffset &&
-                        pre_cast->Args()[1] == b.Constant(u32(0))) {
-                        p = pre_cast->Args()[0];
+            msl::BuiltinFn ptr_offset = msl::BuiltinFn::kPointerOffset;
+            if (auto* pre_cast = p->AsInstruction<msl::ir::BuiltinCall>()) {
+                if ((pre_cast->Func() == msl::BuiltinFn::kPointerOffset ||
+                     pre_cast->Func() == msl::BuiltinFn::kAliasPointerOffset) &&
+                    pre_cast->Args()[1] == b.Constant(u32(0))) {
+                    ptr_offset = pre_cast->Func();
+                    p = pre_cast->Args()[0];
 
-                        if (p_res->NumUsages() == 1) {
-                            pre_cast->Destroy();
-                        }
+                    if (pre_cast->Result()->NumUsages() == 1) {
+                        pre_cast->Destroy();
                     }
                 }
             }
@@ -1235,8 +1236,7 @@ struct State {
                 offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
                 offset = b.Multiply(offset, u32(arr_stride));
                 dst = b.CallExplicit<msl::ir::BuiltinCall>(
-                           ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()),
-                           msl::BuiltinFn::kPointerOffset,
+                           ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()), ptr_offset,
                            Vector<core::ir::TemplateParameter, 1>{mat_ele}, p, offset)
                           ->Result();
 
@@ -1511,30 +1511,24 @@ struct State {
     void AddSat(core::ir::BuiltinCall* builtin) {
         auto* type = builtin->Result()->Type();
         auto* zero = b.Zero(type);
-        auto* lhs_result = builtin->Args()[0]->As<core::ir::InstructionResult>();
-        auto* rhs_result = builtin->Args()[1]->As<core::ir::InstructionResult>();
         // Replace addSat(msl.madsat(x, y, 0), z) with msl.madsat(x, y, z)
-        if (lhs_result) {
-            if (auto* lhs_call = lhs_result->Instruction()->As<msl::ir::BuiltinCall>()) {
-                if (lhs_call->Func() == msl::BuiltinFn::kMadsat && lhs_call->Args()[2] == zero) {
-                    lhs_call->SetArg(2, builtin->Args()[1]);
-                    builtin->SetArg(0, nullptr);
-                    builtin->Result()->ReplaceAllUsesWith(lhs_result);
-                    builtin->Destroy();
-                    return;
-                }
+        if (auto* lhs_call = builtin->Args()[0]->AsInstruction<msl::ir::BuiltinCall>()) {
+            if (lhs_call->Func() == msl::BuiltinFn::kMadsat && lhs_call->Args()[2] == zero) {
+                lhs_call->SetArg(2, builtin->Args()[1]);
+                builtin->SetArg(0, nullptr);
+                builtin->Result()->ReplaceAllUsesWith(lhs_call->Result());
+                builtin->Destroy();
+                return;
             }
         }
         // Replace addSat(z, msl.madsat(x, y, 0)) with msl.madsat(x, y, z)
-        if (rhs_result) {
-            if (auto* rhs_call = rhs_result->Instruction()->As<msl::ir::BuiltinCall>()) {
-                if (rhs_call->Func() == msl::BuiltinFn::kMadsat && rhs_call->Args()[2] == zero) {
-                    rhs_call->SetArg(2, builtin->Args()[0]);
-                    builtin->SetArg(1, nullptr);
-                    builtin->Result()->ReplaceAllUsesWith(rhs_result);
-                    builtin->Destroy();
-                    return;
-                }
+        if (auto* rhs_call = builtin->Args()[1]->AsInstruction<msl::ir::BuiltinCall>()) {
+            if (rhs_call->Func() == msl::BuiltinFn::kMadsat && rhs_call->Args()[2] == zero) {
+                rhs_call->SetArg(2, builtin->Args()[0]);
+                builtin->SetArg(1, nullptr);
+                builtin->Result()->ReplaceAllUsesWith(rhs_call->Result());
+                builtin->Destroy();
+                return;
             }
         }
     }

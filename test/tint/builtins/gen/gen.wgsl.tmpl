@@ -368,6 +368,11 @@ enable chromium_internal_input_attachments;
 enable f16;
 {{    end -}}
 
+{{- /* Emit 'requires multisampled_array_textures' if required */ -}}
+{{-   if OverloadUsesType $overload "texture_multisampled_2d_array"}}
+requires multisampled_array_textures;
+{{    end -}}
+
 {{- /* Emit 'requires texel_buffers' if required */ -}}
 {{-   if OverloadUsesType $overload "texel_buffer"}}
 requires texel_buffers;

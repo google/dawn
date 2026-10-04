@@ -83,8 +83,8 @@ class TestCache final : public LRUCache<CacheKey, CacheValue, CacheFuncs> {
         return result.AcquireSuccess();
     }
 
-    static Result<CacheValue, ErrorData> CreateFn(const CacheKey& key) {
-        DAWN_INTERNAL_ERROR_IF(key.mIsError, "CacheKey was an error key");
+    static Result<CacheValue, UnrecoverableError> CreateFn(const CacheKey& key) {
+        DAWN_UNRECOVERABLE_ERROR_IF(key.mIsError, "CacheKey was an error key");
         return CacheValue(key.mValue);
     }
 };

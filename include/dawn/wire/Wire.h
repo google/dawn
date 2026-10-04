@@ -53,7 +53,6 @@ class DAWN_WIRE_EXPORT CommandSerializer {
     virtual std::optional<std::span<volatile std::byte>> GetCommandSpace(size_t size) = 0;
     virtual bool Flush() = 0;
     virtual size_t GetMaximumAllocationSize() const = 0;
-    virtual void OnSerializeError();
 };
 
 class DAWN_WIRE_EXPORT CommandHandler {

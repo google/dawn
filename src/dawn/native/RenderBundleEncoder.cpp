@@ -45,8 +45,8 @@
 
 namespace dawn::native {
 
-MaybeError ValidateColorAttachmentFormat(const DeviceBase* device,
-                                         wgpu::TextureFormat textureFormat) {
+MaybeValError ValidateColorAttachmentFormat(const DeviceBase* device,
+                                            wgpu::TextureFormat textureFormat) {
     DAWN_TRY(ValidateTextureFormat(textureFormat));
     const Format* format = nullptr;
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
@@ -55,10 +55,10 @@ MaybeError ValidateColorAttachmentFormat(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
-                                                wgpu::TextureFormat textureFormat,
-                                                bool depthReadOnly,
-                                                bool stencilReadOnly) {
+MaybeValError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
+                                                   wgpu::TextureFormat textureFormat,
+                                                   bool depthReadOnly,
+                                                   bool stencilReadOnly) {
     DAWN_TRY(ValidateTextureFormat(textureFormat));
     const Format* format = nullptr;
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
@@ -67,7 +67,7 @@ MaybeError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
     return {};
 }
 
-ResultOrError<UnpackedPtr<RenderBundleEncoderDescriptor>> ValidateRenderBundleEncoderDescriptor(
+ResultOrValError<UnpackedPtr<RenderBundleEncoderDescriptor>> ValidateRenderBundleEncoderDescriptor(
     DeviceBase* device,
     const RenderBundleEncoderDescriptor* descriptor) {
     UnpackedPtr<RenderBundleEncoderDescriptor> unpacked;
@@ -149,10 +149,13 @@ RenderBundleEncoder::~RenderBundleEncoder() {
 }
 
 void RenderBundleEncoder::DestroyImpl(DestroyReason reason) {
-    mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     mCommandBufferState.End();
-    RenderEncoderBase::DestroyImpl(reason);
+    // Resource usages contain raw_ptrs to resources held by recorded commands. Clear them
+    // before releasing references in mIndirectDrawMetadata or commands to avoid dangling raw_ptrs.
+    mUsages = {};
+    mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     mBundleEncodingContext.Destroy();
+    RenderEncoderBase::DestroyImpl(reason);
 }
 
 // static

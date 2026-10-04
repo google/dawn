@@ -1515,9 +1515,6 @@ TEST_P(ResourceTableTests, HasResourceOOBIsFalse) {
 // test (that's for the CTS) but tries to check a few different interesting cases (MS, DS, Cube, 2D
 // array).
 TEST_P(ResourceTableTests, DefaultBindingsAreZeroAndSizeOne) {
-    // TODO(crbug.com/385158827): Fails on older WARP 10.0.19041.5794
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     // Create the test pipeline
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_resource_table;
@@ -2119,7 +2116,7 @@ TEST_P(ResourceTableTests, AddUniqueSamplersOverLimit) {
         if (shouldSucceed) {
             queue.Submit(1, &commands);
         } else {
-            ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+            EXPECT_DEVICE_LOSS(queue.Submit(1, &commands));
         }
     };
 
@@ -2486,9 +2483,6 @@ TEST_P(ResourceTableTests, RemoveThenAddTextureMultipleInSameSlot) {
 
 // Check that zero-initialization of the resources happens implicitly
 TEST_P(ResourceTableTests, ImplicitZeroInit) {
-    // TODO(crbug.com/385158827): Fails on older WARP 10.0.19041.5794
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     // Create the pipeline reading back from the texture.
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_resource_table;
@@ -2687,9 +2681,6 @@ TEST_P(ResourceTableTests, UpdateAfterRemoveRequiresGPUIsFinished_ErrorBindGroup
 
 // Check that Update and Insert make the new binding visible in the resource table.
 TEST_P(ResourceTableTests, UpdateAndInsertMakeBindingVisible) {
-    // TODO(crbug.com/385158827): Fails on older WARP 10.0.19041.5794
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     wgpu::ResourceTable table = MakeResourceTable(2);
 
     // Before we do anything, the table has no valid entries.
@@ -2709,9 +2700,6 @@ TEST_P(ResourceTableTests, UpdateAndInsertMakeBindingVisible) {
 // Check that Remove instantly makes the binding not visible, both for entries added with
 // Update and Insert.
 TEST_P(ResourceTableTests, RemoveMakeBindingInvalid) {
-    // TODO(crbug.com/385158827): Fails on older WARP 10.0.19041.5794
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     // Fill a resource table with both Update and Insert.
     wgpu::ResourceTable table = MakeResourceTable(2);
 
@@ -2733,9 +2721,6 @@ TEST_P(ResourceTableTests, RemoveMakeBindingInvalid) {
 
 // Check that removing a binding and adding a different one works.
 TEST_P(ResourceTableTests, ReplaceBinding) {
-    // TODO(crbug.com/385158827): Fails on older WARP 10.0.19041.5794
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     // Create the test resource table.
     wgpu::ResourceTable table = MakeResourceTable(1);
     wgpu::BindingResource resource = {.textureView = MakeU8View(19)};
@@ -2756,9 +2741,6 @@ TEST_P(ResourceTableTests, ReplaceBinding) {
 
 // Check that removing a binding and adding it back works.
 TEST_P(ResourceTableTests, ReplaceWithSameBinding) {
-    // TODO(crbug.com/385158827): Fails on older WARP 10.0.19041.5794
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     // Create the test resource table.
     wgpu::ResourceTable table = MakeResourceTable(1);
     wgpu::BindingResource resource = {.textureView = MakeU8View(19)};
@@ -2778,9 +2760,6 @@ TEST_P(ResourceTableTests, ReplaceWithSameBinding) {
 
 // Check that setting multiple resource table, on per dispatch, on a single pass works.
 TEST_P(ResourceTableTests, SingleComputePassMultipleResourceTables) {
-    // TODO(crbug.com/385158827): Fails on older WARP 10.0.19041.5794
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     std::vector<wgpu::BindingResource> resources;
 
     wgpu::ResourceTable table0 = MakeResourceTable(2);
@@ -2915,6 +2894,14 @@ TEST_P(ResourceTableTests, SwitchUseResourceTableAndNot) {
     EXPECT_BUFFER_U32_EQ(42, resultBuffer, 0);
     EXPECT_BUFFER_U32_EQ(10, resultBuffer, 4);
     EXPECT_BUFFER_U32_EQ(42, resultBuffer, 8);
+}
+
+// Check that Device::Destroy calls DestroyImpl on the ResourceTables
+// Regression test for https://crbug.com/564921047
+TEST_P(ResourceTableTests, DestroyDeviceThenResourceTable) {
+    wgpu::ResourceTable table = MakeResourceTable(0);
+    DestroyDevice();
+    table.Destroy();
 }
 
 DAWN_INSTANTIATE_TEST(ResourceTableTests, D3D12Backend(), MetalBackend(), VulkanBackend());

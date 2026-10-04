@@ -208,7 +208,7 @@ MaybeError Queue::SubmitFutureSync() {
                 {nullptr, WGPUCallbackMode_AllowSpontaneous,
                  [](WGPUQueueWorkDoneStatus, WGPUStringView, void*, void*) {}, nullptr, nullptr});
     if (future.id == kNullFutureID) {
-        return DAWN_INTERNAL_ERROR("inner queueOnSubmittedWorkDone returned a null future.");
+        return DAWN_UNRECOVERABLE_ERROR("inner queueOnSubmittedWorkDone returned a null future.");
     }
     IncrementLastSubmittedCommandSerial();
     mFuturesInFlight.Use([&](auto futuresInFlight) {
@@ -246,8 +246,8 @@ ResultOrError<ExecutionSerial> Queue::WaitForQueueSerialImpl(ExecutionSerial wai
             case WGPUWaitStatus_Success:
                 return completedSerial;
             default:
-                return DAWN_FORMAT_INTERNAL_ERROR("inner instanceWaitAny status is (%s).",
-                                                  FromAPI(status));
+                return DAWN_FORMAT_UNRECOVERABLE_ERROR("inner instanceWaitAny status is (%s).",
+                                                       FromAPI(status));
         }
     });
 }
@@ -276,7 +276,7 @@ bool Queue::IsCapturing() const {
     return mCaptureContext != nullptr;
 }
 
-MaybeError Queue::SetCaptureContext(std::unique_ptr<CaptureContext> captureContext) {
+MaybeValError Queue::SetCaptureContext(std::unique_ptr<CaptureContext> captureContext) {
     if (captureContext) {
         DAWN_INVALID_IF(mCaptureContext != nullptr, "A capture is already in progress.");
         mCaptureContext = std::move(captureContext);

@@ -552,10 +552,10 @@ struct Decoder {
         if (inst_in.has_break_if()) {
             auto num_next_iter_values = inst_in.break_if().num_next_iter_values();
             bool is_valid =
-                inst_out->Operands().Length() >= num_next_iter_values + BreakIf::kArgsOperandOffset;
+                inst_out->Operands().Length() >= BreakIf::kArgsOperandOffset &&
+                inst_out->Operands().Length() - BreakIf::kArgsOperandOffset >= num_next_iter_values;
             if (DAWN_LIKELY(is_valid)) {
-                static_cast<BreakIf*>(inst_out)->SetNumNextIterValues(
-                    inst_in.break_if().num_next_iter_values());
+                static_cast<BreakIf*>(inst_out)->SetNumNextIterValues(num_next_iter_values);
             } else {
                 err_ << "invalid value for num_next_iter_values()\n";
             }
@@ -1507,24 +1507,28 @@ struct Decoder {
             return b.InvalidConstant()->Value();
         }
 
-        uint32_t num_elements = type->Elements().count;
+        auto elements = type->Elements();
+        uint32_t num_elements = elements.count;
         if (DAWN_UNLIKELY(num_elements == 0)) {
             err_ << "cannot create a splat of type " << type->FriendlyName() << "\n";
             return b.InvalidConstant()->Value();
         }
-        if (DAWN_UNLIKELY(num_elements > internal_limits::kMaxArrayConstructorElements)) {
-            err_ << "array constructor has excessive number of elements (>"
-                 << internal_limits::kMaxArrayConstructorElements << ")\n";
-            return b.InvalidConstant()->Value();
-        }
         auto* value = ConstantValue(splat_in.elements());
-        for (uint32_t i = 0; i < num_elements; i++) {
-            auto* el_type = type->Element(i);
-            if (DAWN_UNLIKELY(el_type != value->Type())) {
+        if (elements.type) {
+            if (DAWN_UNLIKELY(elements.type != value->Type())) {
                 err_ << "constant splat element value type " << value->Type()->FriendlyName()
-                     << " does not match element " << i << " type " << el_type->FriendlyName()
-                     << "\n";
+                     << " does not match type " << elements.type->FriendlyName() << "\n";
                 return b.InvalidConstant()->Value();
+            }
+        } else {
+            for (uint32_t i = 0; i < num_elements; i++) {
+                auto* el_type = type->Element(i);
+                if (DAWN_UNLIKELY(el_type != value->Type())) {
+                    err_ << "constant splat element value type " << value->Type()->FriendlyName()
+                         << " does not match element " << i << " type " << el_type->FriendlyName()
+                         << "\n";
+                    return b.InvalidConstant()->Value();
+                }
             }
         }
         return mod_out_.constant_values.Splat(type, value);
@@ -1606,6 +1610,11 @@ struct Decoder {
     }
 
     core::Majorness Majorness(pb::Majorness in) {
+        if (!Majorness_IsValid(in)) {
+            err_ << "invalid majorness, " << std::to_string(in) << "\n";
+            return core::Majorness::kUndefined;
+        }
+
         switch (in) {
             case pb::Majorness::row_major:
                 return core::Majorness::kRowMajor;
@@ -1919,6 +1928,8 @@ struct Decoder {
                 return core::BuiltinValue::kClipDistances;
             case pb::BuiltinValue::primitive_index:
                 return core::BuiltinValue::kPrimitiveIndex;
+            case pb::BuiltinValue::view_index:
+                return core::BuiltinValue::kViewIndex;
             case pb::BuiltinValue::barycentric_coord:
                 return core::BuiltinValue::kBarycentricCoord;
             case pb::BuiltinValue::BuiltinValue_INT_MIN_SENTINEL_DO_NOT_USE_:

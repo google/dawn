@@ -90,6 +90,8 @@ static_library("test_utils") {
     "WireHelper.h",
   ]
 
+  deps = [ "${dawn_root}/src/dawn/wire:sources" ]
+
   public_deps = [
     ":wgpu_utils",
     "${dawn_abseil_dir}:absl",

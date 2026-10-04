@@ -47,14 +47,14 @@ TEST(ErrorTests, Error_Success) {
 
 // Check returning an error MaybeError with "return DAWN_VALIDATION_ERROR"
 TEST(ErrorTests, Error_Error) {
-    auto ReturnError = []() -> MaybeError {
+    auto ReturnError = []() -> MaybeValError {
         return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
     };
 
-    MaybeError result = ReturnError();
+    MaybeValError result = ReturnError();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<ValidationError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -69,14 +69,14 @@ TEST(ErrorTests, ResultOrError_Success) {
 
 // Check returning an error ResultOrError with "return DAWN_VALIDATION_ERROR"
 TEST(ErrorTests, ResultOrError_Error) {
-    auto ReturnError = []() -> ResultOrError<int*> {
+    auto ReturnError = []() -> ResultOrValError<int*> {
         return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
     };
 
-    ResultOrError<int*> result = ReturnError();
+    ResultOrValError<int*> result = ReturnError();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<ValidationError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -100,48 +100,48 @@ TEST(ErrorTests, TRY_Success) {
 
 // Check DAWN_TRY handles errors correctly.
 TEST(ErrorTests, TRY_Error) {
-    auto ReturnError = []() -> MaybeError {
+    auto ReturnError = []() -> MaybeValError {
         return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
     };
 
-    auto Try = [ReturnError]() -> MaybeError {
+    auto Try = [ReturnError]() -> MaybeValError {
         DAWN_TRY(ReturnError());
         // DAWN_TRY should return before this point
         EXPECT_FALSE(true);
         return {};
     };
 
-    MaybeError result = Try();
+    MaybeValError result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<ValidationError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
 // Check DAWN_TRY adds to the backtrace.
 TEST(ErrorTests, TRY_AddsToBacktrace) {
-    auto ReturnError = []() -> MaybeError {
+    auto ReturnError = []() -> MaybeValError {
         return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
     };
 
-    auto SingleTry = [ReturnError]() -> MaybeError {
+    auto SingleTry = [ReturnError]() -> MaybeValError {
         DAWN_TRY(ReturnError());
         return {};
     };
 
-    auto DoubleTry = [SingleTry]() -> MaybeError {
+    auto DoubleTry = [SingleTry]() -> MaybeValError {
         DAWN_TRY(SingleTry());
         return {};
     };
 
-    MaybeError singleResult = SingleTry();
+    MaybeValError singleResult = SingleTry();
     ASSERT_TRUE(singleResult.IsError());
 
-    MaybeError doubleResult = DoubleTry();
+    MaybeValError doubleResult = DoubleTry();
     ASSERT_TRUE(doubleResult.IsError());
 
-    std::unique_ptr<ErrorData> singleData = singleResult.AcquireError();
-    std::unique_ptr<ErrorData> doubleData = doubleResult.AcquireError();
+    std::unique_ptr<ValidationError> singleData = singleResult.AcquireError();
+    std::unique_ptr<ValidationError> doubleData = doubleResult.AcquireError();
 
     // Backtraces are only added in debug mode.
 #if defined(DAWN_ENABLE_ASSERTS)
@@ -175,50 +175,49 @@ TEST(ErrorTests, TRY_RESULT_Success) {
 
 // Check DAWN_TRY_ASSIGN handles errors correctly.
 TEST(ErrorTests, TRY_RESULT_Error) {
-    auto ReturnError = []() -> ResultOrError<int*> {
+    auto ReturnError = []() -> ResultOrValError<int*> {
         return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
     };
 
-    auto Try = [ReturnError]() -> ResultOrError<int*> {
-        [[maybe_unused]] int* result = nullptr;
-        DAWN_TRY_ASSIGN(result, ReturnError());
+    auto Try = [ReturnError]() -> ResultOrValError<int*> {
+        DAWN_TRY_ASSIGN(std::ignore, ReturnError());
 
         // DAWN_TRY should return before this point
         EXPECT_FALSE(true);
         return &placeholderSuccess;
     };
 
-    ResultOrError<int*> result = Try();
+    ResultOrValError<int*> result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<ValidationError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
 // Check DAWN_TRY_ASSIGN adds to the backtrace.
 TEST(ErrorTests, TRY_RESULT_AddsToBacktrace) {
-    auto ReturnError = []() -> ResultOrError<int*> {
+    auto ReturnError = []() -> ResultOrValError<int*> {
         return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
     };
 
-    auto SingleTry = [ReturnError]() -> ResultOrError<int*> {
+    auto SingleTry = [ReturnError]() -> ResultOrValError<int*> {
         DAWN_TRY(ReturnError());
         return &placeholderSuccess;
     };
 
-    auto DoubleTry = [SingleTry]() -> ResultOrError<int*> {
+    auto DoubleTry = [SingleTry]() -> ResultOrValError<int*> {
         DAWN_TRY(SingleTry());
         return &placeholderSuccess;
     };
 
-    ResultOrError<int*> singleResult = SingleTry();
+    ResultOrValError<int*> singleResult = SingleTry();
     ASSERT_TRUE(singleResult.IsError());
 
-    ResultOrError<int*> doubleResult = DoubleTry();
+    ResultOrValError<int*> doubleResult = DoubleTry();
     ASSERT_TRUE(doubleResult.IsError());
 
-    std::unique_ptr<ErrorData> singleData = singleResult.AcquireError();
-    std::unique_ptr<ErrorData> doubleData = doubleResult.AcquireError();
+    std::unique_ptr<ValidationError> singleData = singleResult.AcquireError();
+    std::unique_ptr<ValidationError> doubleData = doubleResult.AcquireError();
 
     // Backtraces are only added in debug mode.
 #if defined(DAWN_ENABLE_ASSERTS)
@@ -230,42 +229,40 @@ TEST(ErrorTests, TRY_RESULT_AddsToBacktrace) {
 
 // Check a ResultOrError can be DAWN_TRY_ASSIGNED in a function that returns an Error
 TEST(ErrorTests, TRY_RESULT_ConversionToError) {
-    auto ReturnError = []() -> ResultOrError<int*> {
+    auto ReturnError = []() -> ResultOrValError<int*> {
         return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
     };
 
-    auto Try = [ReturnError]() -> MaybeError {
-        [[maybe_unused]] int* result = nullptr;
-        DAWN_TRY_ASSIGN(result, ReturnError());
+    auto Try = [ReturnError]() -> MaybeValError {
+        DAWN_TRY_ASSIGN(std::ignore, ReturnError());
 
         return {};
     };
 
-    MaybeError result = Try();
+    MaybeValError result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<ValidationError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
 // Check a ResultOrError can be DAWN_TRY_ASSIGNED in a function that returns an Error
 // Version without Result<E*, T*>
 TEST(ErrorTests, TRY_RESULT_ConversionToErrorNonPointer) {
-    auto ReturnError = []() -> ResultOrError<int> {
+    auto ReturnError = []() -> ResultOrValError<int> {
         return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
     };
 
-    auto Try = [ReturnError]() -> MaybeError {
-        [[maybe_unused]] int result = 0;
-        DAWN_TRY_ASSIGN(result, ReturnError());
+    auto Try = [ReturnError]() -> MaybeValError {
+        DAWN_TRY_ASSIGN(std::ignore, ReturnError());
 
         return {};
     };
 
-    MaybeError result = Try();
+    MaybeValError result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<ValidationError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
@@ -296,84 +293,64 @@ TEST(ErrorTests, TRY_RESULT_CLEANUP_Success) {
 
 // Check DAWN_TRY_ASSIGN handles cleanups.
 TEST(ErrorTests, TRY_RESULT_CLEANUP_Cleanup) {
-    auto ReturnError = []() -> ResultOrError<int*> {
+    auto ReturnError = []() -> ResultOrValError<int*> {
         return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
     };
 
     // We need to check that DAWN_TRY_ASSIGN_WITH_CLEANUP calls cleanup when error.
     bool tryCleanup = false;
 
-    auto Try = [ReturnError, &tryCleanup]() -> ResultOrError<int*> {
-        [[maybe_unused]] int* result = nullptr;
-        DAWN_TRY_ASSIGN_WITH_CLEANUP(result, ReturnError(), { tryCleanup = true; });
+    auto Try = [ReturnError, &tryCleanup]() -> ResultOrValError<int*> {
+        DAWN_TRY_ASSIGN_WITH_CLEANUP(std::ignore, ReturnError(), { tryCleanup = true; });
 
         // DAWN_TRY_ASSIGN_WITH_CLEANUP should return before this point
         EXPECT_FALSE(true);
         return &placeholderSuccess;
     };
 
-    ResultOrError<int*> result = Try();
+    ResultOrValError<int*> result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<ValidationError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
     ASSERT_TRUE(tryCleanup);
-}
-
-// Check DAWN_TRY_ASSIGN can override return value when needed.
-TEST(ErrorTests, TRY_RESULT_CLEANUP_OverrideReturn) {
-    auto ReturnError = []() -> ResultOrError<int*> {
-        return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
-    };
-
-    auto Try = [ReturnError]() -> bool {
-        [[maybe_unused]] int* result = nullptr;
-        DAWN_TRY_ASSIGN_WITH_CLEANUP(result, ReturnError(), {}, true);
-
-        // DAWN_TRY_ASSIGN_WITH_CLEANUP should return before this point
-        EXPECT_FALSE(true);
-        return false;
-    };
-
-    bool result = Try();
-    ASSERT_TRUE(result);
 }
 
 // Check a MaybeError can be DAWN_TRIED in a function that returns an ResultOrError
 // Check DAWN_TRY handles errors correctly.
 TEST(ErrorTests, TRY_ConversionToErrorOrResult) {
-    auto ReturnError = []() -> MaybeError {
+    auto ReturnError = []() -> MaybeValError {
         return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
     };
 
-    auto Try = [ReturnError]() -> ResultOrError<int*> {
+    auto Try = [ReturnError]() -> ResultOrValError<int*> {
         DAWN_TRY(ReturnError());
         return &placeholderSuccess;
     };
 
-    ResultOrError<int*> result = Try();
+    ResultOrValError<int*> result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<ValidationError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 
 // Check a MaybeError can be DAWN_TRIED in a function that returns an ResultOrError
 // Check DAWN_TRY handles errors correctly. Version without Result<E*, T*>
 TEST(ErrorTests, TRY_ConversionToErrorOrResultNonPointer) {
-    auto ReturnError = []() -> MaybeError {
+    auto ReturnError = []() -> MaybeValError {
         return DAWN_VALIDATION_ERROR(placeholderErrorMessage);
     };
 
-    auto Try = [ReturnError]() -> ResultOrError<int> {
+    auto Try = [ReturnError]() -> ResultOrValError<int> {
         DAWN_TRY(ReturnError());
         return 42;
     };
 
-    ResultOrError<int> result = Try();
+    ResultOrValError<int> result = Try();
     ASSERT_TRUE(result.IsError());
 
-    std::unique_ptr<ErrorData> errorData = result.AcquireError();
+    std::unique_ptr<ValidationError> errorData = result.AcquireError();
     ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
 }
 

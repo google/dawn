@@ -42,10 +42,10 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::hlsl::writer::raise {
 namespace {
 
-using SplitWorkgroupAtomicsTest = core::ir::transform::TransformTest;
+using HlslWriter_SplitWorkgroupAtomicsTest = core::ir::transform::TransformTest;
 
 // Workgroup variables without atomics are not modified.
-TEST_F(SplitWorkgroupAtomicsTest, NoAtomics) {
+TEST_F(HlslWriter_SplitWorkgroupAtomicsTest, NoAtomics) {
     auto* str_ty = ty.Struct(mod.symbols.New("S"), {
                                                        {mod.symbols.New("a"), ty.u32()},
                                                        {mod.symbols.New("b"), ty.f32()},
@@ -83,12 +83,13 @@ $B1: {  # root
     ASSERT_EQ(src, str());
 
     auto* expect = src;
-    Run(SplitWorkgroupAtomics);
+    SplitWorkgroupAtomicsConfig config{.mode = SplitMode::kAll};
+    Run(SplitWorkgroupAtomics, config);
     EXPECT_EQ(expect, str());
 }
 
 // Split a simple structure with one atomic member.
-TEST_F(SplitWorkgroupAtomicsTest, SimpleStructWithAtomic) {
+TEST_F(HlslWriter_SplitWorkgroupAtomicsTest, SimpleStructWithAtomic) {
     auto* str_ty =
         ty.Struct(mod.symbols.New("S"), {
                                             {mod.symbols.New("data"), ty.u32()},
@@ -159,12 +160,13 @@ $B1: {  # root
   }
 }
 )";
-    Run(SplitWorkgroupAtomics);
+    SplitWorkgroupAtomicsConfig config{.mode = SplitMode::kAll};
+    Run(SplitWorkgroupAtomics, config);
     EXPECT_EQ(expect, str());
 }
 
 // Preserve an outer array even when it contains only one element.
-TEST_F(SplitWorkgroupAtomicsTest, ArrayOfOneStructPreservesArrayShape) {
+TEST_F(HlslWriter_SplitWorkgroupAtomicsTest, ArrayOfOneStructPreservesArrayShape) {
     auto* str_ty =
         ty.Struct(mod.symbols.New("S"), {
                                             {mod.symbols.New("counter"), ty.atomic<u32>()},
@@ -221,12 +223,13 @@ $B1: {  # root
   }
 }
 )";
-    Run(SplitWorkgroupAtomics);
+    SplitWorkgroupAtomicsConfig config{.mode = SplitMode::kAll};
+    Run(SplitWorkgroupAtomics, config);
     EXPECT_EQ(expect, str());
 }
 
 // Split each atomic member into its own array while preserving the struct array index.
-TEST_F(SplitWorkgroupAtomicsTest, MultipleAtomicMembersPreserveStructArrayIndices) {
+TEST_F(HlslWriter_SplitWorkgroupAtomicsTest, MultipleAtomicMembersPreserveStructArrayIndices) {
     auto* str_ty =
         ty.Struct(mod.symbols.New("S"), {
                                             {mod.symbols.New("first"), ty.atomic<u32>()},
@@ -295,12 +298,13 @@ $B1: {  # root
   }
 }
 )";
-    Run(SplitWorkgroupAtomics);
+    SplitWorkgroupAtomicsConfig config{.mode = SplitMode::kAll};
+    Run(SplitWorkgroupAtomics, config);
     EXPECT_EQ(expect, str());
 }
 
 // Preserve nested array dimensions and indices for each atomic leaf.
-TEST_F(SplitWorkgroupAtomicsTest, NestedAtomicArraysPreserveDimensions) {
+TEST_F(HlslWriter_SplitWorkgroupAtomicsTest, NestedAtomicArraysPreserveDimensions) {
     auto* inner_ty =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("counter"), ty.atomic<u32>()},
@@ -373,12 +377,13 @@ $B1: {  # root
   }
 }
 )";
-    Run(SplitWorkgroupAtomics);
+    SplitWorkgroupAtomicsConfig config{.mode = SplitMode::kAll};
+    Run(SplitWorkgroupAtomics, config);
     EXPECT_EQ(expect, str());
 }
 
 // Normalize pointer aliases and chained accesses before splitting an atomic leaf.
-TEST_F(SplitWorkgroupAtomicsTest, ChainedAccessAndPointerAliases) {
+TEST_F(HlslWriter_SplitWorkgroupAtomicsTest, ChainedAccessAndPointerAliases) {
     auto* inner_ty =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("counter"), ty.atomic<u32>()},
@@ -455,12 +460,13 @@ $B1: {  # root
   }
 }
 )";
-    Run(SplitWorkgroupAtomics);
+    SplitWorkgroupAtomicsConfig config{.mode = SplitMode::kAll};
+    Run(SplitWorkgroupAtomics, config);
     EXPECT_EQ(expect, str());
 }
 
 // Verify that f16 matrix data interoperates with workgroup access decomposition.
-TEST_F(SplitWorkgroupAtomicsTest, F16MatrixDataInteroperatesWithDecomposeAccess) {
+TEST_F(HlslWriter_SplitWorkgroupAtomicsTest, F16MatrixDataInteroperatesWithDecomposeAccess) {
     mod.properties.Add(core::ir::Property::kAllow16BitFloats);
 
     auto* str_ty = ty.Struct(mod.symbols.New("S"), {
@@ -528,7 +534,8 @@ $B1: {  # root
   }
 }
 )";
-    Run(SplitWorkgroupAtomics);
+    SplitWorkgroupAtomicsConfig config{.mode = SplitMode::kAll};
+    Run(SplitWorkgroupAtomics, config);
     ASSERT_EQ(expect, str());
 
     core::ir::transform::DecomposeAccessConfig options{.workgroup = true};
@@ -567,7 +574,7 @@ $B1: {  # root
 
 // Copy a shared structure from storage to workgroup memory one member at a time.
 // Structures containing atomics cannot be loaded or stored as whole values.
-TEST_F(SplitWorkgroupAtomicsTest, CopyStorageStructMembersToWorkgroup) {
+TEST_F(HlslWriter_SplitWorkgroupAtomicsTest, CopyStorageStructMembersToWorkgroup) {
     auto* str_ty =
         ty.Struct(mod.symbols.New("S"), {
                                             {mod.symbols.New("data"), ty.u32()},
@@ -651,13 +658,14 @@ $B1: {  # root
   }
 }
 )";
-    Run(SplitWorkgroupAtomics);
+    SplitWorkgroupAtomicsConfig config{.mode = SplitMode::kAll};
+    Run(SplitWorkgroupAtomics, config);
     EXPECT_EQ(expect, str());
 }
 
 // Copy a shared structure from workgroup memory to storage one member at a time.
 // Structures containing atomics cannot be loaded or stored as whole values.
-TEST_F(SplitWorkgroupAtomicsTest, CopyWorkgroupStructMembersToStorage) {
+TEST_F(HlslWriter_SplitWorkgroupAtomicsTest, CopyWorkgroupStructMembersToStorage) {
     auto* str_ty =
         ty.Struct(mod.symbols.New("S"), {
                                             {mod.symbols.New("data"), ty.u32()},
@@ -741,13 +749,14 @@ $B1: {  # root
   }
 }
 )";
-    Run(SplitWorkgroupAtomics);
+    SplitWorkgroupAtomicsConfig config{.mode = SplitMode::kAll};
+    Run(SplitWorkgroupAtomics, config);
     EXPECT_EQ(expect, str());
 }
 
 // Do not clone a nested structure that does not contain atomics. Structure types are nominal, so
 // changing an access to use a cloned type would make values of the original type invalid to store.
-TEST_F(SplitWorkgroupAtomicsTest, PreserveNonAtomicNestedStructType) {
+TEST_F(HlslWriter_SplitWorkgroupAtomicsTest, PreserveNonAtomicNestedStructType) {
     auto* inner_ty =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("old_value"), ty.i32()},
@@ -824,7 +833,213 @@ $B1: {  # root
   }
 }
 )";
-    Run(SplitWorkgroupAtomics);
+    SplitWorkgroupAtomicsConfig config{.mode = SplitMode::kAll};
+    Run(SplitWorkgroupAtomics, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_SplitWorkgroupAtomicsTest, SubgroupMatrixOnly_NoUse) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("S"), {
+                                            {mod.symbols.New("data"), ty.u32()},
+                                            {mod.symbols.New("counter"), ty.atomic<u32>()},
+                                        });
+
+    auto* var = b.Var("wg", ty.ptr(workgroup, str_ty));
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(b.Constant(1_u), b.Constant(1_u), b.Constant(1_u));
+    b.Append(func->Block(), [&] {
+        // Non-atomic access.
+        auto* data_ptr = b.Access(ty.ptr(workgroup, ty.u32()), var, 0_u);
+        b.Store(data_ptr, 1_u);
+
+        // Atomic access.
+        auto* atomic_ptr = b.Access(ty.ptr(workgroup, ty.atomic<u32>()), var, 1_u);
+        b.Call(ty.void_(), core::BuiltinFn::kAtomicStore, atomic_ptr, 0_u);
+
+        b.Return(func);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  data:u32 @offset(0)
+  counter:atomic<u32> @offset(4)
+}
+
+$B1: {  # root
+  %wg:ptr<workgroup, S, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %wg, 0u
+    store %3, 1u
+    %4:ptr<workgroup, atomic<u32>, read_write> = access %wg, 1u
+    %5:void = atomicStore %4, 0u
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    SplitWorkgroupAtomicsConfig config{.mode = SplitMode::kSubgroupMatrix};
+    Run(SplitWorkgroupAtomics, config);
+    EXPECT_EQ(src, str());
+}
+
+TEST_F(HlslWriter_SplitWorkgroupAtomicsTest, SubgroupMatrix_Load) {
+    auto* S = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.New("a"), ty.atomic<u32>()},
+                                                  {mod.symbols.New("b"), ty.array(ty.f32(), 64)},
+                                              });
+    auto* v = b.Var("v", ty.ptr(workgroup, S));
+    mod.root_block->Append(v);
+
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8, 8);
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* l = b.Let("l", v);
+        auto* a = b.Access(ty.ptr(workgroup, ty.array(ty.f32(), 64)), l, 1_u);
+        b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<core::ir::TemplateParameter, 2>{mat_ty, core::Majorness::kRowMajor},
+                       a, 0_u, 8_u);
+        auto* atomic_ptr = b.Access(ty.ptr(workgroup, ty.atomic<u32>()), v, 0_u);
+        b.Call(ty.void_(), core::BuiltinFn::kAtomicStore, atomic_ptr, 0_u);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:atomic<u32> @offset(0)
+  b:array<f32, 64> @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %l:ptr<workgroup, S, read_write> = let %v
+    %4:ptr<workgroup, array<f32, 64>, read_write> = access %l, 1u
+    %5:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major> %4, 0u, 8u
+    %6:ptr<workgroup, atomic<u32>, read_write> = access %v, 0u
+    %7:void = atomicStore %6, 0u
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(4) {
+  a:atomic<u32> @offset(0)
+  b:array<f32, 64> @offset(4)
+}
+
+S_data = struct @align(4) {
+  a:u32 @offset(0)
+  b:array<f32, 64> @offset(4)
+}
+
+$B1: {  # root
+  %a:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %data:ptr<workgroup, S_data, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %4:ptr<workgroup, array<f32, 64>, read_write> = access %data, 1u
+    %5:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major> %4, 0u, 8u
+    %6:void = atomicStore %a, 0u
+    ret
+  }
+}
+)";
+
+    SplitWorkgroupAtomicsConfig config{.mode = SplitMode::kSubgroupMatrix};
+    Run(SplitWorkgroupAtomics, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_SplitWorkgroupAtomicsTest, SubgroupMatrix_Store) {
+    auto* S = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.New("a"), ty.atomic<u32>()},
+                                                  {mod.symbols.New("b"), ty.array(ty.f32(), 64)},
+                                              });
+    auto* v = b.Var("v", ty.ptr(workgroup, S));
+    mod.root_block->Append(v);
+
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8, 8);
+    auto* foo = b.Function("foo", ty.void_());
+    auto* mat = b.FunctionParam("mat", mat_ty);
+    foo->SetParams({mat});
+    b.Append(foo->Block(), [&] {
+        auto* a = b.Access(ty.ptr(workgroup, ty.array(ty.f32(), 64)), v, 1_u);
+        auto* l = b.Let("l", a);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, l, 0_u,
+                       mat, 8_u);
+        auto* atomic_ptr = b.Access(ty.ptr(workgroup, ty.atomic<u32>()), v, 0_u);
+        b.Call(ty.void_(), core::BuiltinFn::kAtomicStore, atomic_ptr, 0_u);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:atomic<u32> @offset(0)
+  b:array<f32, 64> @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S, read_write> = var undef
+}
+
+%foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
+  $B2: {
+    %4:ptr<workgroup, array<f32, 64>, read_write> = access %v, 1u
+    %l:ptr<workgroup, array<f32, 64>, read_write> = let %4
+    %6:void = subgroupMatrixStore<row_major> %l, 0u, %mat, 8u
+    %7:ptr<workgroup, atomic<u32>, read_write> = access %v, 0u
+    %8:void = atomicStore %7, 0u
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(4) {
+  a:atomic<u32> @offset(0)
+  b:array<f32, 64> @offset(4)
+}
+
+S_data = struct @align(4) {
+  a:u32 @offset(0)
+  b:array<f32, 64> @offset(4)
+}
+
+$B1: {  # root
+  %a:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %data:ptr<workgroup, S_data, read_write> = var undef
+}
+
+%foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
+  $B2: {
+    %5:ptr<workgroup, array<f32, 64>, read_write> = access %data, 1u
+    %6:void = subgroupMatrixStore<row_major> %5, 0u, %mat, 8u
+    %7:void = atomicStore %a, 0u
+    ret
+  }
+}
+)";
+
+    SplitWorkgroupAtomicsConfig config{.mode = SplitMode::kSubgroupMatrix};
+    Run(SplitWorkgroupAtomics, config);
     EXPECT_EQ(expect, str());
 }
 

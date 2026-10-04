@@ -27,6 +27,8 @@
 
 #include "src/tint/lang/msl/writer/raise/cooperative_tensors.h"
 
+#include <utility>
+
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -56,11 +58,8 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
-    /// A map from a subgroup matrix value to the local var that contains the cooperative_tensor.
-    Hashmap<const core::ir::Value*, core::ir::Var*, 8> value_to_local_var{};
-
-    /// The set of local variables that are shared across multiple uses.
-    Hashset<const core::ir::Var*, 8> shared_local_vars{};
+    /// The set of local variables that only have a single use.
+    Hashset<const core::ir::Value*, 8> single_use_local_vars{};
 
     /// Process the module.
     void Process() {
@@ -98,6 +97,7 @@ struct State {
             for (auto* inst : worklist) {
                 tint::Switch(
                     inst,                                                   //
+                    [&](core::ir::Access* a) { ProcessAccess(a); },         //
                     [&](core::ir::CoreBuiltinCall* c) { ProcessCall(c); },  //
                     [&](core::ir::Construct* c) { ProcessConstruct(c); },   //
                     [&](core::ir::Let* let) { ProcessLet(let); },           //
@@ -126,13 +126,173 @@ struct State {
             [](Default) { return false; });
     }
 
-    /// Register @p var as the local variable for the value @p val.
-    /// If the value is used multiple times, the local variable is marked as shared.
-    void RegisterLocalVar(core::ir::Value* val, core::ir::Var* var) {
-        if (val->NumUsages() > 1u) {
-            shared_local_vars.Add(var);
+    /// Create a cooperative_tensor equivalent type for @p type.
+    /// A subgroup matrix type used as an aggregate element type will be converted into a pointer to
+    /// a cooperative_tensor variable.
+    const core::type::Type* RewriteType(const core::type::Type* type) {
+        return tint::Switch(
+            type,                                        //
+            [&](const core::type::SubgroupMatrix* sm) {  //
+                return ToCooperativeTensor(sm);
+            },
+            [&](const core::type::Array* arr) {
+                // Wrap cooperative_tensor element types in a pointer.
+                auto* el_ty = RewriteType(arr->ElemType());
+                if (el_ty->Is<type::CooperativeTensor>()) {
+                    el_ty = ty.ptr(function, el_ty, read_write);
+                }
+                return ty.array(el_ty, arr->ConstantCount().value());
+            },
+            [&](const core::type::Pointer* ptr) {
+                return ty.ptr(ptr->AddressSpace(), RewriteType(ptr->StoreType()), ptr->Access());
+            },
+            TINT_ICE_ON_NO_MATCH);
+    }
+
+    /// @returns a new local tensor variable that replaces the result of @p inst
+    core::ir::Value* MakeLocalTensorVar(const core::type::Type* type, core::ir::Instruction* inst) {
+        auto* var = tint::Switch(
+            type,  //
+            [&](const core::type::SubgroupMatrix* sm) {
+                // Declare a new local cooperative_tensor variable.
+                auto* tensor_type = ToCooperativeTensor(sm);
+                auto* ptr_type = ty.ptr(function, tensor_type, read_write);
+                return b.Var(ptr_type)->Result();
+            },
+            [&](const core::type::Array* arr) {
+                // Create a new local tensor variable for each element of the array.
+                Vector<core::ir::Value*, 4> args;
+                for (uint32_t i = 0; i < arr->ConstantCount().value(); i++) {
+                    args.Push(MakeLocalTensorVar(arr->ElemType(), nullptr));
+                }
+                return b.Construct(RewriteType(arr), std::move(args));
+            },
+            [&](const core::type::Pointer* ptr) -> core::ir::Value* {  //
+                return MakeLocalTensorVar(ptr->StoreType(), nullptr);
+            },
+            TINT_ICE_ON_NO_MATCH);
+
+        // Do not try and replace the instruction if we are not the outermost level.
+        if (inst == nullptr) {
+            return var;
         }
-        value_to_local_var.Add(val, var);
+
+        // If we are creating a local variable for a `var` instruction and we do not yet have a
+        // pointer type, wrap the value in a new variable.
+        if (inst->Is<core::ir::Var>() && !var->Type()->Is<core::type::Pointer>()) {
+            var = b.Var<function>(var)->Result();
+        }
+
+        if (auto name = ir.NameOf(inst); name.IsValid()) {
+            ir.SetName(var, name);
+        }
+
+        inst->Result()->ReplaceAllUsesWith(var);
+
+        if (var->NumUsages() == 1u) {
+            single_use_local_vars.Add(var);
+        }
+
+        return var;
+    }
+
+    /// @returns true if the local tensor variable created for @p pointer can be consumed by @p user
+    bool CanTakeLocalTensorVar(core::ir::Value* pointer, core::ir::Instruction* user) {
+        // If a value is not shared, and was declared in the same block, then we can just take the
+        // local variable that it allocated and use that directly.
+        auto* result = pointer->As<core::ir::InstructionResult>();
+        TINT_IR_ASSERT(ir, result);
+        return result->Instruction()->Block() == user->Block() &&
+               single_use_local_vars.Contains(result);
+    }
+
+    /// Fill @p dest with zeros.
+    void FillWithZero(core::ir::Value* dst) {
+        tint::Switch(
+            dst->Type()->UnwrapPtr(),  //
+            [&](const type::CooperativeTensor* tensor) {
+                // Use a helper to fill the local tensor variable with zero values.
+                auto* el_ty = tensor->Kind() == core::SubgroupMatrixKind::kResult
+                                  ? tensor->ResultType()
+                                  : tensor->InputType();
+                b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kFillCooperativeTensor, dst,
+                                        b.Zero(el_ty));
+            },
+            [&](const core::type::Array* arr) {
+                // Fill each array element with zero values.
+                auto* el_type = arr->ElemType();
+                if (dst->Type()->Is<core::type::Pointer>()) {
+                    el_type = ty.ptr(function, el_type, read_write);
+                }
+                for (uint32_t i = 0; i < arr->ConstantCount().value(); i++) {
+                    auto* el = b.Access(el_type, dst, u32(i));
+                    FillWithZero(el);
+                }
+            },
+            [&](const core::type::Pointer*) {  //
+                // If there's another pointer inside the pointer, load it.
+                FillWithZero(b.Load(dst)->Result());
+            },
+            TINT_ICE_ON_NO_MATCH);
+    }
+
+    /// Copy tensor variable @p src into @p dst.
+    void CopyTensorVar(core::ir::Value* dst, core::ir::Value* src) {
+        tint::Switch(
+            dst->Type()->UnwrapPtr(),  //
+            [&](const type::CooperativeTensor*) {
+                // The source could be a pointer to a pointer if it was an aggregate containing
+                // local tensor variables, in which case we load here to get the actual tensor
+                // pointer.
+                if (src->Type()->UnwrapPtr()->Is<core::type::Pointer>()) {
+                    src = b.Load(src)->Result();
+                }
+
+                b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor, dst, src);
+            },
+            [&](const core::type::Array* arr) {
+                // Copy each array element.
+                auto* src_el_type = arr->ElemType();
+                if (src->Type()->Is<core::type::Pointer>()) {
+                    src_el_type = ty.ptr<function>(src_el_type);
+                }
+                auto* dst_el_type = arr->ElemType();
+                if (dst->Type()->Is<core::type::Pointer>()) {
+                    dst_el_type = ty.ptr<function>(dst_el_type);
+                }
+                for (uint32_t i = 0; i < arr->ConstantCount().value(); i++) {
+                    auto* d = b.Access(dst_el_type, dst, u32(i));
+                    auto* s = b.Access(src_el_type, src, u32(i));
+                    CopyTensorVar(d, s);
+                }
+            },
+            [&](const core::type::Pointer*) {
+                // If there's another pointer inside the pointer, load it.
+                CopyTensorVar(b.Load(dst)->Result(), src);
+            },
+            TINT_ICE_ON_NO_MATCH);
+    }
+
+    /// Process an `access` instruction.
+    /// @param a the access instruction
+    void ProcessAccess(core::ir::Access* a) {
+        // Rewrite the result type. If the result is a subgroup matrix then it will be wrapped in a
+        // pointer due to the local variable.
+        bool is_tensor = a->Result()->Type()->UnwrapPtr()->Is<core::type::SubgroupMatrix>();
+        auto* result_type = RewriteType(a->Result()->Type());
+        if (is_tensor) {
+            result_type = ty.ptr<function>(result_type);
+        }
+        a->Result()->SetType(result_type);
+
+        // If we are producing a pointer to a subgroup matrix, we need to load the local variable
+        // pointer that would have been introduced for the tensor.
+        if (is_tensor && a->Object()->Type()->Is<core::type::Pointer>()) {
+            auto* load = b.Load(a->Result());
+            load->InsertAfter(a);
+            a->Result()->ReplaceAllUsesWith(load->Result());
+            load->SetOperand(0, a->Result());
+        }
     }
 
     /// Process a `call` instruction to replace its type and initializer.
@@ -160,63 +320,71 @@ struct State {
     /// Process a `construct` instruction.
     /// @param c the construct instruction
     void ProcessConstruct(core::ir::Construct* c) {
-        auto* sm_ty = c->Result()->Type()->As<core::type::SubgroupMatrix>();
+        b.InsertBefore(c, [&] {
+            auto args = c->Args();
+            core::ir::Value* value = nullptr;
+            if (args.size() > 0) {
+                value = args[0];
 
-        // TODO(555437691): Handle aggregates.
-        TINT_IR_ASSERT(ir, sm_ty);
+                auto* type = c->Result()->Type();
+                auto* sm_ty = type->As<core::type::SubgroupMatrix>();
+                if (sm_ty) {
+                    // If we are constructing a subgroup matrix type, the argument will be used to
+                    // fill every element of the matrix.
+                    // Declare a local variable to hold the result of the construct and then use a
+                    // helper to fill it with the constructor value.
+                    auto* var = MakeLocalTensorVar(c->Result()->Type(), c);
+                    b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kFillCooperativeTensor, var,
+                                            value);
+                    c->Destroy();
+                } else {
+                    // If we are constructing an aggregate, the arguments will already have local
+                    // tensor variables, but we may need to introduce copies of them.
+                    for (uint32_t i = 0; i < args.size(); i++) {
+                        if (!CanTakeLocalTensorVar(args[i], c)) {
+                            // Copy the contents of the argument into a new variable.
+                            auto* var = MakeLocalTensorVar(type->Element(i), nullptr);
+                            CopyTensorVar(var, args[i]);
+                            c->SetOperand(core::ir::Construct::kArgsOperandOffset + i, var);
+                        }
+                    }
 
-        auto args = c->Args();
-        core::ir::Value* value = nullptr;
-        if (args.size() > 0) {
-            value = args[0];
-        } else {
-            value = b.Zero(sm_ty->Type());
-        }
-
-        // Declare a local variable to hold the result of the construct and then use a helper to
-        // fill it with the constructor value.
-        b.InsertAfter(c, [&] {
-            auto* tensor_type = ToCooperativeTensor(sm_ty);
-            auto* ptr_type = ty.ptr(function, tensor_type, read_write);
-            auto* var = b.Var(ptr_type);
-
-            b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kFillCooperativeTensor, var, value);
-
-            RegisterLocalVar(c->Result(), var);
+                    // Update the result type and check if its user can take ownership of the var.
+                    c->Result()->SetType(RewriteType(type));
+                    if (c->Result()->NumUsages() == 1u) {
+                        single_use_local_vars.Add(c->Result());
+                    }
+                }
+            } else {
+                // Generate a new zero-initialized cooperative tensor variable.
+                auto* var = MakeLocalTensorVar(c->Result()->Type(), c);
+                FillWithZero(var);
+                c->Destroy();
+            }
         });
-        c->Destroy();
     }
 
     /// Process a `let` instruction to replace its value.
     /// @param let the let instruction
     void ProcessLet(core::ir::Let* let) {
-        auto* sm_ty = let->Result()->Type()->As<core::type::SubgroupMatrix>();
-
-        // TODO(555437691): Handle aggregates.
-        TINT_IR_ASSERT(ir, sm_ty);
+        // If the let is capturing a pointer then just update the result type.
+        if (let->Result()->Type()->Is<core::type::Pointer>()) {
+            let->Result()->SetType(RewriteType(let->Result()->Type()));
+            return;
+        }
 
         auto* init = let->Value();
-        auto* local_var = value_to_local_var.GetOr(init, nullptr);
-        TINT_IR_ASSERT(ir, local_var);
 
-        if (!shared_local_vars.Contains(local_var) && local_var->Block() == let->Block()) {
-            // If the initializer value is not shared, and was declared in the same block,
-            // then we can just take the local variable that it allocated and use that directly.
-            ir.SetName(local_var, ir.NameOf(let));
-            RegisterLocalVar(let->Result(), local_var);
+        if (CanTakeLocalTensorVar(init, let)) {
+            ir.SetName(init, ir.NameOf(let));
+            let->Result()->ReplaceAllUsesWith(init);
+            single_use_local_vars.Remove(init);
         } else {
             // Declare a new local variable and copy the contents of the initializer
             // cooperative_tensor into it.
             b.InsertAfter(let, [&] {
-                auto* tensor_type = ToCooperativeTensor(sm_ty);
-                auto* ptr_type = ty.ptr(function, tensor_type, read_write);
-                auto* var = b.Var(ptr_type);
-                ir.SetName(var, ir.NameOf(let));
-
-                b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor, var,
-                                        local_var);
-
-                RegisterLocalVar(let->Result(), var);
+                auto* var = MakeLocalTensorVar(let->Result()->Type(), let);
+                CopyTensorVar(var, init);
             });
         }
         let->Destroy();
@@ -225,24 +393,10 @@ struct State {
     /// Process a `load` instruction to copy to a new local variable.
     /// @param load the load instruction
     void ProcessLoad(core::ir::Load* load) {
-        auto* sm_ty = load->Result()->Type()->As<core::type::SubgroupMatrix>();
-
-        // TODO(555437691): Handle aggregates.
-        TINT_IR_ASSERT(ir, sm_ty);
-
         b.InsertAfter(load, [&] {
             // TODO(557925365): Elide the copy when possible.
-            auto* tensor_type = ToCooperativeTensor(sm_ty);
-            auto* ptr_type = ty.ptr(function, tensor_type, read_write);
-            auto* var = b.Var(ptr_type);
-            if (auto name = ir.NameOf(load); name.IsValid()) {
-                ir.SetName(var, name);
-            }
-
-            b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor, var,
-                                    load->From());
-
-            RegisterLocalVar(load->Result(), var);
+            auto* var = MakeLocalTensorVar(load->Result()->Type(), load);
+            CopyTensorVar(var, load->From());
         });
         load->Destroy();
     }
@@ -250,17 +404,8 @@ struct State {
     /// Process a `store` instruction to copy to the destination variable.
     /// @param store the store instruction
     void ProcessStore(core::ir::Store* store) {
-        auto* sm_ty = store->From()->Type()->As<core::type::SubgroupMatrix>();
-
-        // TODO(555437691): Handle aggregates.
-        TINT_IR_ASSERT(ir, sm_ty);
-
-        auto* from_var = value_to_local_var.GetOr(store->From(), nullptr);
-        TINT_IR_ASSERT(ir, from_var);
-
-        b.InsertBefore(store, [&] {
-            b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor, store->To(),
-                                    from_var);
+        b.InsertBefore(store, [&] {  //
+            CopyTensorVar(store->To(), store->From());
         });
         store->Destroy();
     }
@@ -269,38 +414,35 @@ struct State {
     /// @param var the var instruction
     void ProcessVar(core::ir::Var* var) {
         auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
-        auto* sm_ty = ptr->StoreType()->As<core::type::SubgroupMatrix>();
-
-        // TODO(555437691): Handle aggregates.
-        TINT_IR_ASSERT(ir, sm_ty);
-
-        // Change the type to a cooperative_tensor.
-        auto* tensor_type = ToCooperativeTensor(sm_ty);
-        var->Result()->SetType(ty.ptr(ptr->AddressSpace(), tensor_type, ptr->Access()));
 
         auto* init = var->Initializer();
         if (init) {
-            auto* local_var = value_to_local_var.GetOr(init, nullptr);
-            TINT_IR_ASSERT(ir, local_var);
-
-            if (!shared_local_vars.Contains(local_var) && local_var->Block() == var->Block()) {
-                // If the initializer value is not shared, and was declared in the same block, then
-                // then we can just take the local variable that it allocated and use that directly.
-                ir.SetName(local_var, ir.NameOf(var));
-                var->Result()->ReplaceAllUsesWith(local_var->Result());
+            if (CanTakeLocalTensorVar(init, var)) {
+                auto* new_var = init;
+                if (!new_var->Type()->Is<core::type::Pointer>()) {
+                    b.InsertAfter(var, [&] {  //
+                        new_var = b.Var<function>(new_var)->Result();
+                    });
+                }
+                ir.SetName(new_var, ir.NameOf(var));
+                var->Result()->ReplaceAllUsesWith(new_var);
                 var->Destroy();
+                single_use_local_vars.Remove(new_var);
             } else {
-                // Copy the contents of the initializer cooperative_tensor into this variable.
+                // Change the type to use cooperative_tensor and copy the initializer into it.
+                var->Result()->SetType(RewriteType(ptr));
                 var->SetInitializer(nullptr);
-                auto* copy = b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor,
-                                                     var, local_var);
-                copy->InsertAfter(var);
+                b.InsertAfter(var, [&] {  //
+                    CopyTensorVar(var->Result(), init);
+                });
             }
         } else {
-            // Use a helper to fill the cooperative_tensor with zero values.
-            auto* fill = b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kFillCooperativeTensor, var,
-                                                 b.Zero(sm_ty->Type()));
-            fill->InsertAfter(var);
+            // Generate a new zero-initialized cooperative tensor variable.
+            b.InsertAfter(var, [&] {
+                auto* new_var = MakeLocalTensorVar(ptr, var);
+                FillWithZero(new_var);
+            });
+            var->Destroy();
         }
     }
 
@@ -328,10 +470,13 @@ struct State {
         }
     }
 
-    void ElideRedundantPointerOffset(core::ir::Value*& p) {
+    msl::BuiltinFn ElideRedundantPointerOffset(core::ir::Value*& p) {
+        msl::BuiltinFn ptr_offset = msl::BuiltinFn::kPointerOffset;
         if (auto* pre_cast = p->AsInstruction<msl::ir::BuiltinCall>()) {
-            if (pre_cast->Func() == msl::BuiltinFn::kPointerOffset &&
+            if ((pre_cast->Func() == msl::BuiltinFn::kPointerOffset ||
+                 pre_cast->Func() == msl::BuiltinFn::kAliasPointerOffset) &&
                 pre_cast->Args()[1] == b.Constant(u32(0))) {
+                ptr_offset = pre_cast->Func();
                 p = pre_cast->Args()[0];
 
                 if (pre_cast->Result()->NumUsages() == 1) {
@@ -339,20 +484,22 @@ struct State {
                 }
             }
         }
+        return ptr_offset;
     }
 
     core::ir::Let* MakeTensorInline(std::string_view name,
                                     core::ir::Value* p,
                                     core::ir::Value* offset,
                                     core::ir::Value* stride,
-                                    const core::type::SubgroupMatrix* mat) {
-        ElideRedundantPointerOffset(p);
+                                    const type::CooperativeTensor* tensor) {
+        auto ptr_offset = ElideRedundantPointerOffset(p);
 
         auto* ptr = p->Type()->As<core::type::Pointer>();
         auto* arr = ptr->StoreType()->As<core::type::Array>();
         const uint32_t arr_stride = arr->ImplicitStride();
 
-        auto* mat_ele = mat->Type();
+        auto* mat_ele = tensor->Kind() == core::SubgroupMatrixKind::kResult ? tensor->ResultType()
+                                                                            : tensor->InputType();
 
         core::ir::Value* data = nullptr;
         if (arr->ElemType() != mat_ele) {
@@ -362,8 +509,7 @@ struct State {
             offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
             offset = b.Multiply(offset, u32(arr_stride));
             data = b.CallExplicit<msl::ir::BuiltinCall>(
-                        ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()),
-                        msl::BuiltinFn::kPointerOffset,
+                        ty.ptr(ptr->AddressSpace(), mat_ele, ptr->Access()), ptr_offset,
                         Vector<core::ir::TemplateParameter, 1>{mat_ele}, p, offset)
                        ->Result();
 
@@ -376,7 +522,25 @@ struct State {
         }
 
         // The tensor extents are the dimensions of the matrix.
-        auto* extents = b.Composite(ty.vec2u(), u32(mat->Columns()), u32(mat->Rows()));
+        uint32_t rows = 0;
+        uint32_t cols = 0;
+        switch (tensor->Kind()) {
+            case core::SubgroupMatrixKind::kLeft:
+                rows = tensor->M();
+                cols = tensor->K();
+                break;
+            case core::SubgroupMatrixKind::kRight:
+                rows = tensor->K();
+                cols = tensor->N();
+                break;
+            case core::SubgroupMatrixKind::kResult:
+                rows = tensor->M();
+                cols = tensor->N();
+                break;
+            case core::SubgroupMatrixKind::kUndefined:
+                TINT_IR_UNREACHABLE(ir);
+        }
+        auto* extents = b.Composite(ty.vec2u(), u32(rows), u32(cols));
 
         // Create a tensor_inline from the data pointer.
         return b.Let(name, b.Call<msl::ir::BuiltinCall>(ty.Get<msl::type::TensorInline>(),
@@ -398,20 +562,17 @@ struct State {
         b.InsertAfter(c, [&] {
             TINT_IR_ASSERT(ir,
                            std::holds_alternative<core::Majorness>(c->ExplicitTemplateParams()[1]));
-            auto* mat = c->Result()->Type()->As<core::type::SubgroupMatrix>();
+            auto* sm_ty = c->Result()->Type()->As<core::type::SubgroupMatrix>();
 
-            auto* tensor_inline = MakeTensorInline("tint_src_tensor", p, offset, stride, mat);
+            auto* tensor = ToCooperativeTensor(sm_ty);
+            auto* tensor_inline = MakeTensorInline("tint_src_tensor", p, offset, stride, tensor);
 
             // Declare a local variable to hold the loaded cooperative_tensor.
-            auto* tensor_type = ToCooperativeTensor(mat);
-            auto* ptr_type = ty.ptr(function, tensor_type, read_write);
-            auto* var = b.Var(ptr_type);
+            auto* var = MakeLocalTensorVar(sm_ty, c);
 
             // Load the cooperative_tensor value from the tensor_inline.
             b.MemberCall<msl::ir::MemberBuiltinCall>(ty.void_(), msl::BuiltinFn::kLoad, b.Load(var),
                                                      tensor_inline);
-
-            RegisterLocalVar(c->Result(), var);
         });
     }
 
@@ -430,14 +591,13 @@ struct State {
         b.InsertAfter(c, [&] {
             TINT_IR_ASSERT(ir,
                            std::holds_alternative<core::Majorness>(c->ExplicitTemplateParams()[0]));
-            auto* mat = value->Type()->As<core::type::SubgroupMatrix>();
 
-            auto* tensor_inline = MakeTensorInline("tint_dst_tensor", p, offset, stride, mat);
+            auto* tensor = value->Type()->UnwrapPtr()->As<type::CooperativeTensor>();
+            auto* tensor_inline = MakeTensorInline("tint_dst_tensor", p, offset, stride, tensor);
 
             // Store the cooperative_tensor value to the tensor_inline.
-            auto* local_var = value_to_local_var.GetOr(value, nullptr);
             b.MemberCall<msl::ir::MemberBuiltinCall>(ty.void_(), msl::BuiltinFn::kStore,
-                                                     b.Load(local_var), tensor_inline);
+                                                     b.Load(value), tensor_inline);
         });
     }
 
@@ -446,25 +606,17 @@ struct State {
         auto* rhs = c->Args()[1];
 
         b.InsertAfter(c, [&] {
-            auto* sm_ty = c->Result()->Type()->As<core::type::SubgroupMatrix>();
-
-            // Get the local variables that hold the LHS and RHS cooperative tensors.
-            auto* lhs_var = value_to_local_var.GetOr(lhs, nullptr);
-            auto* rhs_var = value_to_local_var.GetOr(rhs, nullptr);
-            TINT_IR_ASSERT(ir, lhs_var && rhs_var);
-
             // Declare a local variable for the result cooperative_tensor.
-            auto* tensor_type = ToCooperativeTensor(sm_ty);
-            auto* ptr_type = ty.ptr(function, tensor_type, read_write);
-            auto* result_var = b.Var(ptr_type);
+            auto* sm_ty = c->Result()->Type()->As<core::type::SubgroupMatrix>();
+            auto* result_var = MakeLocalTensorVar(sm_ty, c);
 
-            auto* load_lhs = b.Load(lhs_var);
-            auto* load_rhs = b.Load(rhs_var);
+            // Load the cooperative tensor values from their local variables.
+            auto* load_lhs = b.Load(lhs);
+            auto* load_rhs = b.Load(rhs);
             auto* load_result = b.Load(result_var);
+
             b.Call<msl::ir::BuiltinCall>(ty.void_(), msl::BuiltinFn::kRunTensorMultiply, load_lhs,
                                          load_rhs, load_result);
-
-            RegisterLocalVar(c->Result(), result_var);
         });
     }
 
@@ -474,30 +626,20 @@ struct State {
         auto* acc = c->Args()[2];
 
         b.InsertAfter(c, [&] {
-            auto* sm_ty = c->Result()->Type()->As<core::type::SubgroupMatrix>();
-
-            // Get the local variables that hold the LHS and RHS cooperative tensors.
-            auto* lhs_var = value_to_local_var.GetOr(lhs, nullptr);
-            auto* rhs_var = value_to_local_var.GetOr(rhs, nullptr);
-            auto* acc_var = value_to_local_var.GetOr(acc, nullptr);
-            TINT_IR_ASSERT(ir, lhs_var && rhs_var && acc_var);
-
             // Declare a local variable for the result cooperative_tensor.
-            auto* tensor_type = ToCooperativeTensor(sm_ty);
-            auto* ptr_type = ty.ptr(function, tensor_type, read_write);
-            auto* result_var = b.Var(ptr_type);
+            auto* sm_ty = c->Result()->Type()->As<core::type::SubgroupMatrix>();
+            auto* result_var = MakeLocalTensorVar(sm_ty, c);
 
             // Copy the contents of the accumulator into the result variable.
-            b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor, result_var,
-                                    acc_var);
+            b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor, result_var, acc);
 
-            auto* load_lhs = b.Load(lhs_var);
-            auto* load_rhs = b.Load(rhs_var);
+            // Load the cooperative tensor values from their local variables.
+            auto* load_lhs = b.Load(lhs);
+            auto* load_rhs = b.Load(rhs);
             auto* load_result = b.Load(result_var);
+
             b.Call<msl::ir::BuiltinCall>(ty.void_(), msl::BuiltinFn::kRunTensorMultiplyAccumulate,
                                          load_lhs, load_rhs, load_result);
-
-            RegisterLocalVar(c->Result(), result_var);
         });
     }
 };
@@ -510,6 +652,7 @@ Result<SuccessType> CooperativeTensors(core::ir::Module& ir) {
     State{ir}.Process();
 
     ir.properties.Add(core::ir::Property::kAllowNonCoreTypes);
+    ir.properties.Add(core::ir::Property::kAllowPointerAndHandleInAggregates);
 
     return Success;
 }

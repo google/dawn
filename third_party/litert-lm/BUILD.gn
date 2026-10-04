@@ -27,9 +27,13 @@
 
 action("litert_lm_advanced_main") {
   script = "build_litert_lm.py"
-  args =
-      [ rebase_path("$root_out_dir/litert_lm_advanced_main", root_build_dir) ]
-  outputs = [ "$root_out_dir/litert_lm_advanced_main" ]
+  if (is_win) {
+    _output_name = "litert_lm_advanced_main.exe"
+  } else {
+    _output_name = "litert_lm_advanced_main"
+  }
+  args = [ rebase_path("$root_out_dir/$_output_name", root_build_dir) ]
+  outputs = [ "$root_out_dir/$_output_name" ]
   inputs = [ "build_litert_lm.py" ]
   if (is_linux) {
     inputs += [ "$root_out_dir/libwebgpu_dawn.so" ]
@@ -58,12 +62,26 @@ action("litert_lm_advanced_main") {
       "data/prebuilt/macos_arm64/libLiteRtWebGpuAccelerator.dylib",
     ]
   }
+  if (is_win) {
+    inputs += [
+      "$root_out_dir/webgpu_dawn.dll",
+      "data/prebuilt/windows_x86_64/libGemmaModelConstraintProvider.dll",
+      "data/prebuilt/windows_x86_64/libLiteRt.dll",
+      "data/prebuilt/windows_x86_64/libLiteRtTopKWebGpuSampler.dll",
+      "data/prebuilt/windows_x86_64/libLiteRtWebGpuAccelerator.dll",
+    ]
+  }
   deps = [ "//src/dawn/native:webgpu_dawn_shared" ]
-  data_deps = [ "//src/dawn/native:webgpu_dawn_shared" ]
+  data_deps = [
+    "//src/dawn/native:webgpu_dawn_shared",
+    "//testing:test_scripts_shared",
+  ]
   data = [
     "data/model.litertlm",
     "//scripts/run_litert_lm_benchmark.py",
-    "$root_out_dir/litert_lm_advanced_main",
+    "//scripts/merge_scripts/merge_litert_lm_benchmark_results.py",
+    "//scripts/merge_scripts/perf_results_common.py",
+    "$root_out_dir/$_output_name",
   ]
   if (is_linux) {
     outputs += [
@@ -77,6 +95,40 @@ action("litert_lm_advanced_main") {
       "$root_out_dir/libLiteRt.so",
       "$root_out_dir/libLiteRtTopKWebGpuSampler.so",
       "$root_out_dir/libLiteRtWebGpuAccelerator.so",
+    ]
+  } else if (is_mac) {
+    outputs += [
+      "$root_out_dir/libGemmaModelConstraintProvider.dylib",
+      "$root_out_dir/libLiteRt.dylib",
+      "$root_out_dir/libLiteRtMetalAccelerator.dylib",
+      "$root_out_dir/libLiteRtTopKMetalSampler.dylib",
+      "$root_out_dir/libLiteRtTopKWebGpuSampler.dylib",
+      "$root_out_dir/libLiteRtWebGpuAccelerator.dylib",
+    ]
+    data += [
+      "$root_out_dir/libGemmaModelConstraintProvider.dylib",
+      "$root_out_dir/libLiteRt.dylib",
+      "$root_out_dir/libLiteRtMetalAccelerator.dylib",
+      "$root_out_dir/libLiteRtTopKMetalSampler.dylib",
+      "$root_out_dir/libLiteRtTopKWebGpuSampler.dylib",
+      "$root_out_dir/libLiteRtWebGpuAccelerator.dylib",
+    ]
+  } else if (is_win) {
+    outputs += [
+      "$root_out_dir/libGemmaModelConstraintProvider.dll",
+      "$root_out_dir/libLiteRt.dll",
+      "$root_out_dir/libLiteRtTopKWebGpuSampler.dll",
+      "$root_out_dir/libLiteRtWebGpuAccelerator.dll",
+    ]
+    data += [
+      "$root_out_dir/libGemmaModelConstraintProvider.dll",
+      "$root_out_dir/libLiteRt.dll",
+      "$root_out_dir/libLiteRtTopKWebGpuSampler.dll",
+      "$root_out_dir/libLiteRtWebGpuAccelerator.dll",
+      "$root_out_dir/msvcp140.dll",
+      "$root_out_dir/msvcp140_atomic_wait.dll",
+      "$root_out_dir/vcruntime140.dll",
+      "$root_out_dir/vcruntime140_1.dll",
     ]
   }
 }

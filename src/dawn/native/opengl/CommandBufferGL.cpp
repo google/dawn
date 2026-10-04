@@ -42,6 +42,7 @@
 #include "src/dawn/native/ExternalTexture.h"
 #include "src/dawn/native/ImmediatesTracker.h"
 #include "src/dawn/native/RenderBundle.h"
+#include "src/dawn/native/opengl/BindGroupGL.h"
 #include "src/dawn/native/opengl/BufferGL.h"
 #include "src/dawn/native/opengl/ComputePipelineGL.h"
 #include "src/dawn/native/opengl/DeviceGL.h"
@@ -335,13 +336,20 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
         ResetInternalUniformDataBindgroupAndDirtyRange();
     }
 
-    MaybeError Apply(const OpenGLFunctions& gl) {
+    template <typename Immediates>
+    MaybeError Apply(const OpenGLFunctions& gl, Immediates& immediates) {
         BeforeApply();
         for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
             DAWN_TRY(ApplyBindGroup(gl, index, mBindGroups[index], GetDynamicOffsets(index)));
         }
+        BindGroupMask storageBufferSizeMask = mDirtyBindGroups;
+        if (mLastAppliedPipeline != mPipeline) {
+            storageBufferSizeMask = mBindGroupLayoutsMask;
+        }
+        for (BindGroupIndex index : storageBufferSizeMask) {
+            ApplyStorageBufferSizes(index, mBindGroups[index], immediates);
+        }
         DAWN_TRY(ApplyInternalUniforms(gl));
-        DAWN_TRY(ApplyInternalArrayLengthUniforms(gl));
         AfterApply();
         return {};
     }
@@ -397,7 +405,6 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
                         case wgpu::BufferBindingType::ReadOnlyStorage:
                         case kInternalReadOnlyStorageBufferBinding:
                             target = GL_SHADER_STORAGE_BUFFER;
-                            UpdateSSBOLengthUniformData(gl, binding.size, groupIndex, bindingIndex);
                             break;
                         case wgpu::BufferBindingType::BindingNotUsed:
                         case wgpu::BufferBindingType::Undefined:
@@ -531,6 +538,19 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
         return {};
     }
 
+    template <typename Immediates>
+    void ApplyStorageBufferSizes(BindGroupIndex groupIndex,
+                                 BindGroupBase* group,
+                                 Immediates& immediates) {
+        for (const auto& bindingInfo :
+             mPipelineGL->GetStorageBufferSizeImmediateInfo().bindings[groupIndex]) {
+            immediates.SetStorageBufferSize(
+                bindingInfo.sizeIndex,
+                checked_cast<uint32_t>(
+                    group->GetBindingAsBufferBinding(bindingInfo.bindingIndex).size));
+        }
+    }
+
     void UpdateTextureBuiltinsUniformData(const OpenGLFunctions& gl,
                                           const TextureView* view,
                                           FlatBindingIndex textureIndex) {
@@ -599,66 +619,6 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
         return {};
     }
 
-    MaybeError ApplyInternalArrayLengthUniforms(const OpenGLFunctions& gl) {
-        if (!mPipelineGL->NeedsSSBOLengthUniformBuffer()) {
-            return {};
-        }
-
-        if (mDirtyRangeArrayLength.begin >= mDirtyRangeArrayLength.end) {
-            // Early return if no dirty uniform range needs updating.
-            return {};
-        }
-
-        const Buffer* internalUniformBuffer =
-            ToBackend(mPipeline->GetLayout()->GetDevice())->GetInternalArrayLengthUniformBuffer();
-        DAWN_ASSERT(internalUniformBuffer);
-
-        GLuint internalUniformBufferHandle = internalUniformBuffer->GetHandle();
-        DAWN_GL_TRY(
-            gl,
-            BindBufferBase(
-                GL_UNIFORM_BUFFER,
-                GLuint(ToBackend(mPipeline->GetLayout())->GetInternalArrayLengthUniformBinding()),
-                internalUniformBufferHandle));
-
-        DAWN_GL_TRY(gl, BindBuffer(GL_UNIFORM_BUFFER, internalUniformBufferHandle));
-        DAWN_UNSAFE_TODO(DAWN_GL_TRY(
-            gl, BufferSubData(
-                    GL_UNIFORM_BUFFER, sizeof(uint32_t) * mDirtyRangeArrayLength.begin,
-                    sizeof(uint32_t) * (mDirtyRangeArrayLength.end - mDirtyRangeArrayLength.begin),
-                    mInternalArrayLengthBufferData.data() + mDirtyRangeArrayLength.begin)));
-        DAWN_GL_TRY(gl, BindBuffer(GL_UNIFORM_BUFFER, 0));
-
-        ResetInternalUniformDataDirtyRangeArrayLength();
-
-        return {};
-    }
-
-    void UpdateSSBOLengthUniformData(const OpenGLFunctions& gl,
-                                     uint64_t size,
-                                     BindGroupIndex groupIndex,
-                                     BindingIndex bindingIndex) {
-        if (!mPipelineGL->NeedsSSBOLengthUniformBuffer()) {
-            return;
-        }
-
-        const auto& bindingIndexInfo = ToBackend(mPipeline->GetLayout())->GetBindingIndexInfo();
-        FlatBindingIndex ssboIndex = bindingIndexInfo[groupIndex][bindingIndex];
-
-        if (ssboIndex >= mInternalArrayLengthBufferData.size()) {
-            mInternalArrayLengthBufferData.resize(ssboIndex + FlatBindingIndex(4u));
-        }
-        mInternalArrayLengthBufferData[ssboIndex] = static_cast<uint32_t>(size);
-
-        // Updating dirty range of the data vector
-        mDirtyRangeArrayLength.begin = std::min(mDirtyRangeArrayLength.begin, size_t{ssboIndex});
-        mDirtyRangeArrayLength.end = std::max(mDirtyRangeArrayLength.end, size_t{ssboIndex} + 1);
-    }
-
-    void ResetInternalUniformDataDirtyRangeArrayLength() {
-        mDirtyRangeArrayLength = {size_t{mInternalArrayLengthBufferData.size()}, 0};
-    }
-
     void ResetInternalUniformDataBindgroupAndDirtyRange() {
         // Mark bind groups that need emulated builtin uniforms dirty so that they can be updated
         // properly, even if the bind group is not updated.
@@ -670,7 +630,6 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
             mDirtyBindGroupsObjectChangedOrIsDynamic.set(BindGroupIndex(entry.second.group));
         }
         ResetInternalUniformDataDirtyRange();
-        ResetInternalUniformDataDirtyRangeArrayLength();
     }
 
     raw_ptr<PipelineGL> mPipelineGL = nullptr;
@@ -682,12 +641,6 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
     // Tracking dirty byte range of the mInternalUniformBufferData that needs to call bufferSubData
     // to update to the internal uniform buffer of mPipelineGL.
     VectorDirtyRangeInfo mDirtyRange;
-
-    // The data used for mPipelineGL's internal uniform buffer to store ssbo buffer sizes.
-    ityp::vector<FlatBindingIndex, uint32_t> mInternalArrayLengthBufferData;
-    // Tracking dirty byte range of the mInternalArrayLengthBufferData that needs to call
-    // bufferSubData to update to the internal uniform buffer of mPipelineGL.
-    VectorDirtyRangeInfo mDirtyRangeArrayLength;
 };
 
 MaybeError ResolveMultisampledRenderTargets(const OpenGLFunctions& gl,
@@ -774,9 +727,23 @@ class RenderImmediatesTracker
     void SetFirstInstance(uint32_t firstInstance) {
         UpdateImmediates(offsetof(RenderImmediates, firstInstance), firstInstance);
     }
+
+    void SetStorageBufferSize(uint32_t index, uint32_t size) {
+        UpdateImmediates(offsetof(RenderImmediates, storageBufferSizes) +
+                             size_t{index} * kImmediateElementByteSize,
+                         size);
+    }
 };
 
-using ComputeImmediatesTracker = UserImmediatesTrackerBase<ComputeImmediates, ComputePipelineBase>;
+class ComputeImmediatesTracker
+    : public UserImmediatesTrackerBase<ComputeImmediates, ComputePipelineBase> {
+  public:
+    void SetStorageBufferSize(uint32_t index, uint32_t size) {
+        UpdateImmediates(offsetof(ComputeImmediates, storageBufferSizes) +
+                             size_t{index} * kImmediateElementByteSize,
+                         size);
+    }
+};
 
 template <typename T>
 class ImmediateTracker : public T {
@@ -793,9 +760,10 @@ class ImmediateTracker : public T {
             size_t immediateContentStartOffset = size_t{offset} * kImmediateElementByteSize;
             auto location =
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
-            auto count = static_cast<uint32_t>(size);
-            auto value = this->mContent.template Get<uint32_t>(immediateContentStartOffset);
-            DAWN_GL_TRY(gl, Uniform1uiv(location, count, value));
+            auto data = ReinterpretSpan<const uint32_t>(this->mContent.GetDataBytes(
+                immediateContentStartOffset, size * kImmediateElementByteSize));
+            DAWN_GL_TRY(gl,
+                        Uniform1uiv(location, checked_cast<uint32_t>(data.size()), data.data()));
         }
 
         // Reset all dirty bits after uploading.
@@ -1032,6 +1000,53 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                             DAWN_ASSERT(texture->GetArrayLayers() == 6);
                             const uint64_t bytesPerImage =
                                 blockInfo.ToBytes(dst.blocksPerRow * dst.rowsPerImage);
+
+                            // Integer (Uint/Sint) cube textures cannot take the compute blit path
+                            // in compat mode (see ShouldUseTextureToBufferBlit() in
+                            // CommandEncoder.cpp. Since glReadPixels might not support such
+                            // format/type, query GL_IMPLEMENTATION_COLOR_READ_FORMAT/TYPE first.
+                            // These are queried from the currently bound read framebuffer, so
+                            // attach the first face and check upfront, before doing any readback,
+                            // to fail the copy loudly instead of returning garbage.
+                            // TODO(crbug.com/562077184): revisit when query for all formats are
+                            // implemented.
+                            const bool isIntegerColor =
+                                src.aspect == Aspect::Color &&
+                                (formatInfo.GetAspectInfo(Aspect::Color).baseType ==
+                                     TextureComponentType::Uint ||
+                                 formatInfo.GetAspectInfo(Aspect::Color).baseType ==
+                                     TextureComponentType::Sint);
+                            // RGBA32Uint/RGBA32Sint are skipped: RGBA_INTEGER + UNSIGNED_INT/INT is
+                            // the only integer format/type combination the GLES spec guarantees
+                            // glReadPixels to support, so no query is needed for them.
+                            const bool isGuaranteedReadFormat =
+                                formatInfo.format == wgpu::TextureFormat::RGBA32Uint ||
+                                formatInfo.format == wgpu::TextureFormat::RGBA32Sint;
+                            if (isIntegerColor && !isGuaranteedReadFormat) {
+                                GLenum firstCubeMapTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X +
+                                                            dchecked_cast<uint32_t>(src.origin.z);
+                                DAWN_GL_TRY(
+                                    gl, FramebufferTexture2D(
+                                            GL_READ_FRAMEBUFFER, glAttachment, firstCubeMapTarget,
+                                            texture->GetTextureHandle(), src.mipLevel));
+                                DAWN_TRY(CheckFramebufferComplete(gl, GL_READ_FRAMEBUFFER));
+
+                                GLint implFormat = 0;
+                                GLint implType = 0;
+                                DAWN_GL_TRY(gl, GetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT,
+                                                            &implFormat));
+                                DAWN_GL_TRY(
+                                    gl, GetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &implType));
+                                DAWN_UNRECOVERABLE_ERROR_IF(
+                                    static_cast<GLenum>(implFormat) != glFormat ||
+                                        static_cast<GLenum>(implType) != glType,
+                                    "glReadPixels of an integer cube texture requires "
+                                    "format/type (%#x, %#x) but the implementation only supports "
+                                    "(%#x, %#x).",
+                                    glFormat, glType, static_cast<GLenum>(implFormat),
+                                    static_cast<GLenum>(implType));
+                            }
+
                             for (TexelCount z{0u}; z < copySize.depthOrArrayLayers; ++z) {
                                 GLenum cubeMapTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X +
                                                        dchecked_cast<uint32_t>(z + src.origin.z);
@@ -1234,7 +1249,7 @@ MaybeError CommandBuffer::ExecuteComputePass(const OpenGLFunctions& gl) {
 
             case Command::Dispatch: {
                 DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
-                DAWN_TRY(bindGroupTracker.Apply(gl));
+                DAWN_TRY(bindGroupTracker.Apply(gl, immediates));
                 DAWN_TRY(immediates.Apply(gl));
 
                 DAWN_GL_TRY(gl, DispatchCompute(dispatch->x, dispatch->y, dispatch->z));
@@ -1244,7 +1259,7 @@ MaybeError CommandBuffer::ExecuteComputePass(const OpenGLFunctions& gl) {
 
             case Command::DispatchIndirect: {
                 DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
-                DAWN_TRY(bindGroupTracker.Apply(gl));
+                DAWN_TRY(bindGroupTracker.Apply(gl, immediates));
                 DAWN_TRY(immediates.Apply(gl));
 
                 uint64_t indirectBufferOffset = dispatch->indirectOffset;
@@ -1455,7 +1470,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
             case Command::Draw: {
                 DrawCmd* draw = iter->NextCommand<DrawCmd>();
                 DAWN_TRY(vertexStateBufferBindingTracker.Apply(gl, 0, draw->firstInstance));
-                DAWN_TRY(bindGroupTracker.Apply(gl));
+                DAWN_TRY(bindGroupTracker.Apply(gl, immediates));
 
                 immediates.SetFirstVertex(0);
                 immediates.SetFirstInstance(draw->firstInstance);
@@ -1470,7 +1485,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                 DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
                 DAWN_TRY(vertexStateBufferBindingTracker.Apply(gl, draw->baseVertex,
                                                                draw->firstInstance));
-                DAWN_TRY(bindGroupTracker.Apply(gl));
+                DAWN_TRY(bindGroupTracker.Apply(gl, immediates));
 
                 const auto topology = lastPipeline->GetGLPrimitiveTopology();
                 if (topology == GL_LINE_STRIP || topology == GL_TRIANGLE_STRIP) {
@@ -1493,11 +1508,12 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
 
             case Command::DrawIndirect: {
                 DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
+                DAWN_TRY(bindGroupTracker.Apply(gl, immediates));
+
                 immediates.SetFirstInstance(0);
                 DAWN_TRY(immediates.Apply(gl));
 
                 DAWN_TRY(vertexStateBufferBindingTracker.Apply(gl, 0, 0));
-                DAWN_TRY(bindGroupTracker.Apply(gl));
 
                 IndirectDrawMetadata::ValidatedIndirectDraw validatedDraw =
                     metadata.GetValidatedIndirectDraw(draw, indirectDrawIndex++);
@@ -1516,11 +1532,12 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
             case Command::DrawIndexedIndirect: {
                 DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
 
+                DAWN_TRY(bindGroupTracker.Apply(gl, immediates));
+
                 immediates.SetFirstInstance(0);
                 DAWN_TRY(immediates.Apply(gl));
 
                 DAWN_TRY(vertexStateBufferBindingTracker.Apply(gl, 0, 0));
-                DAWN_TRY(bindGroupTracker.Apply(gl));
 
                 IndirectDrawMetadata::ValidatedIndirectDraw validatedDraw =
                     metadata.GetValidatedIndirectDraw(draw, indirectDrawIndex++);

@@ -38,7 +38,11 @@
 
 namespace dawn::replay {
 
-enum class InternalErrorType : uint32_t { None = 0, Internal = 1, OutOfMemory = 2 };
+enum class InternalErrorType : uint32_t {
+    None = 0,
+    Unrecoverable = 1,
+    OutOfMemory = 2,
+};
 
 enum class VisitStatus { Continue, Stop };
 
@@ -73,10 +77,10 @@ using VisitResult = ResultOrError<VisitStatus>;
 //   return SomethingOfTypeT; // for ResultOrError<T>
 //
 // Returning an error is done via:
-//   return DAWN_MAKE_ERROR(errorType, "My error message");
+//   return DAWN_MAKE_UNRECOVERABLE_ERROR(errorType, "My error message");
 //
 // but shorthand version for specific error types are preferred:
-//   return DAWN_INTERNAL_ERROR("My error message with details %s", details);
+//   return DAWN_UNRECOVERABLE_ERROR("My error message with details %s", details);
 //
 // There are different types of errors that should be used for different purpose:
 //
@@ -87,23 +91,23 @@ using VisitResult = ResultOrError<VisitStatus>;
 #define DAWN_MAKE_ERROR(TYPE, MESSAGE) \
     ::dawn::replay::ErrorData::Create(TYPE, MESSAGE, __FILE__, __func__, __LINE__)
 
-// DAWN_INTERNAL_ERROR means Replay hit an unexpected error in the backend and should try to
+// DAWN_UNRECOVERABLE_ERROR means Replay hit an unexpected error in the backend and should try to
 // gracefully shut down.
-#define DAWN_INTERNAL_ERROR(...) \
-    DAWN_MAKE_ERROR(InternalErrorType::Internal, absl::StrFormat(__VA_ARGS__))
+#define DAWN_UNRECOVERABLE_ERROR(...) \
+    DAWN_MAKE_ERROR(InternalErrorType::Unrecoverable, absl::StrFormat(__VA_ARGS__))
 
-#define DAWN_FORMAT_INTERNAL_ERROR(...) \
-    DAWN_MAKE_ERROR(InternalErrorType::Internal, absl::StrFormat(__VA_ARGS__))
+#define DAWN_FORMAT_UNRECOVERABLE_ERROR(...) \
+    DAWN_MAKE_ERROR(InternalErrorType::Unrecoverable, absl::StrFormat(__VA_ARGS__))
 
-#define DAWN_INTERNAL_ERROR_IF(EXPR, ...)                                                  \
-    if (EXPR) [[unlikely]] {                                                               \
-        return DAWN_MAKE_ERROR(InternalErrorType::Internal, absl::StrFormat(__VA_ARGS__)); \
-    }                                                                                      \
-    for (;;)                                                                               \
+#define DAWN_UNRECOVERABLE_ERROR_IF(EXPR, ...)                                                  \
+    if (EXPR) [[unlikely]] {                                                                    \
+        return DAWN_MAKE_ERROR(InternalErrorType::Unrecoverable, absl::StrFormat(__VA_ARGS__)); \
+    }                                                                                           \
+    for (;;)                                                                                    \
     break
 
 #define DAWN_UNIMPLEMENTED_ERROR(MESSAGE) \
-    DAWN_MAKE_ERROR(InternalErrorType::Internal, std::string("Unimplemented: ") + MESSAGE)
+    DAWN_MAKE_ERROR(InternalErrorType::Unrecoverable, std::string("Unimplemented: ") + MESSAGE)
 
 // DAWN_OUT_OF_MEMORY_ERROR means we ran out of memory. It may be used as a signal internally
 // in Dawn to free up unused resources. Or, it may bubble up to the application to signal an

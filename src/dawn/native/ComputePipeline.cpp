@@ -34,8 +34,8 @@
 
 namespace dawn::native {
 
-MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
-                                             const ComputePipelineDescriptor* descriptor) {
+MaybeValError ValidateComputePipelineDescriptor(DeviceBase* device,
+                                                const ComputePipelineDescriptor* descriptor) {
     if (descriptor->layout != nullptr) {
         DAWN_TRY(device->ValidateObject(descriptor->layout));
     }

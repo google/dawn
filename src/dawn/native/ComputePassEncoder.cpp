@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <memory>
 
 #include "dawn/native/ObjectType_autogen.h"
 #include "src/dawn/common/Range.h"
@@ -46,7 +47,7 @@
 #include "src/dawn/native/PassResourceUsageTracker.h"
 #include "src/dawn/native/QuerySet.h"
 #include "src/dawn/native/ResourceTable.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {
@@ -185,6 +186,7 @@ Ref<ComputePassEncoder> ComputePassEncoder::MakeError(DeviceBase* device,
 
 void ComputePassEncoder::DestroyImpl(DestroyReason reason) {
     mCommandBufferState.End();
+    mUsageTracker = {};
 
     // Ensure that the pass has exited. This is done for passes only since validation requires
     // they exit before destruction while bundles do not.
@@ -225,7 +227,7 @@ void ComputePassEncoder::APIDispatchWorkgroups(uint32_t workgroupCountX,
                                                uint32_t workgroupCountZ) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 if (workgroupCountX == 0 || workgroupCountY == 0 || workgroupCountZ == 0) {
                     GetDevice()->EmitWarningOnce(absl::StrFormat(
@@ -417,7 +419,7 @@ void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffe
                                                        uint64_t indirectOffset) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
@@ -513,7 +515,7 @@ void ComputePassEncoder::APISetPipeline(ComputePipelineBase* pipeline) {
 void ComputePassEncoder::APISetResourceTable(ResourceTableBase* table) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_INVALID_IF(
                     !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),

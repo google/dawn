@@ -174,6 +174,7 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/value_constructor_validation_test.cc
   lang/wgsl/resolver/variable_test.cc
   lang/wgsl/resolver/variable_validation_test.cc
+  lang/wgsl/resolver/view_instancing_extension_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_resolver_test test

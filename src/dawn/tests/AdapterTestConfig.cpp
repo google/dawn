@@ -91,6 +91,12 @@ BackendTestConfig VulkanBackend(std::initializer_list<const char*> forceEnabledW
                              forceDisabledWorkarounds);
 }
 
+BackendTestConfig BackendTestConfig::EnableSharedMemoryInWire() const {
+    BackendTestConfig copy = *this;
+    copy.enableSharedMemoryInWire = true;
+    return copy;
+}
+
 TestAdapterProperties::TestAdapterProperties(const wgpu::AdapterInfo& info,
                                              bool selected,
                                              bool compatibilityMode,
@@ -153,7 +159,8 @@ AdapterTestParam::AdapterTestParam(const BackendTestConfig& config,
                                    const TestAdapterProperties& adapterProperties)
     : adapterProperties(adapterProperties),
       forceEnabledWorkarounds(config.forceEnabledWorkarounds),
-      forceDisabledWorkarounds(config.forceDisabledWorkarounds) {}
+      forceDisabledWorkarounds(config.forceDisabledWorkarounds),
+      enableSharedMemoryInWire(config.enableSharedMemoryInWire) {}
 
 std::ostream& operator<<(std::ostream& os, const AdapterTestParam& param) {
     os << param.adapterProperties.ParamName() << " " << param.adapterProperties.name;
@@ -171,6 +178,9 @@ std::ostream& operator<<(std::ostream& os, const AdapterTestParam& param) {
     }
     for (const char* forceDisabledWorkaround : param.forceDisabledWorkarounds) {
         os << "; d:" << forceDisabledWorkaround;
+    }
+    if (param.enableSharedMemoryInWire) {
+        os << "; sharedMemoryInWire";
     }
     return os;
 }

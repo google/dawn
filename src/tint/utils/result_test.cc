@@ -71,10 +71,7 @@ TEST(ResultTest, ValueCast) {
 
     Y* y = nullptr;
     auto r_y = Result<Y*>{y};
-    auto r_x = Result<X*>{r_y};
-
-    (void)r_x;
-    (void)r_y;
+    std::ignore = Result<X*>{r_y};
 }
 
 TEST(ResultTest, CheckResultMacro_ExpressionEvaluatedOnlyOnce) {

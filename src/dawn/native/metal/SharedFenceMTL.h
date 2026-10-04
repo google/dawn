@@ -52,7 +52,7 @@ class SharedFence final : public SharedFenceBase {
   private:
     SharedFence(Device* device, StringView label, id<MTLSharedEvent> sharedEvent);
 
-    MaybeError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;
+    MaybeValError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;
 
     NSPRef<id> mSharedEvent;
 };

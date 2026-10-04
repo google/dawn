@@ -347,19 +347,6 @@ void Validator::CheckVar(const Var* var) {
         }
     }
 
-    bool generates_initializer = var->Initializer() != nullptr ||
-                                 mv->AddressSpace() == core::AddressSpace::kPrivate ||
-                                 mv->AddressSpace() == core::AddressSpace::kFunction;
-    if (generates_initializer) {
-        if (ElementsCount(result_type->UnwrapPtrOrRef()) >
-            internal_limits::kMaxArrayConstructorElements) {
-            AddError(var) << "type has excessive number of elements (>"
-                          << internal_limits::kMaxArrayConstructorElements
-                          << ") for an initializer";
-            return;
-        }
-    }
-
     // Check that initializer and result type match
     if (var->Initializer()) {
         if (mv->AddressSpace() != AddressSpace::kFunction &&
@@ -392,7 +379,7 @@ void Validator::CheckVar(const Var* var) {
     if (mv->AddressSpace() != AddressSpace::kStorage &&
         mv->AddressSpace() != AddressSpace::kHandle) {
         if (mv->AddressSpace() == AddressSpace::kWorkgroup ||
-            !ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+            !ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates)) {
             if (!mv->StoreType()->HasFixedFootprint()) {
                 AddError(var) << "vars not in the 'storage' or 'handle' address spaces "
                                  "must have a fixed footprint";
@@ -475,11 +462,6 @@ void Validator::CheckLet(const Let* l) {
     }
 
     auto* result_ty = l->Result()->Type();
-    if (ElementsCount(result_ty) > internal_limits::kMaxArrayConstructorElements) {
-        AddError(l) << "type has excessive number of elements (>"
-                    << internal_limits::kMaxArrayConstructorElements << ") for an initializer";
-        return;
-    }
     auto* value_ty = l->Value()->Type();
     if (value_ty != result_ty) {
         AddError(l) << "result type " << NameOf(l->Result()->Type())
@@ -612,15 +594,19 @@ void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
         }
     }
     if (ir_.properties.Contains(Property::kAllowBufferTypes)) {
-        switch (call->Func()) {
-            case core::BuiltinFn::kBufferArrayView:
-                if (call->Result()->Type()->UnwrapPtr()->HasFixedFootprint()) {
-                    AddError(call)
-                        << call->FriendlyName() << " result type must not have a fixed footprint";
-                }
-                break;
-            default:
-                break;
+        if (call->Func() == core::BuiltinFn::kBufferView ||
+            call->Func() == core::BuiltinFn::kBufferArrayView) {
+            if (!call->Result()->Type()->UnwrapPtr()->IsHostShareable()) {
+                AddError(call) << call->FriendlyName()
+                               << " result store type must be host-shareable";
+            }
+        }
+
+        if (call->Func() == core::BuiltinFn::kBufferArrayView) {
+            if (call->Result()->Type()->UnwrapPtr()->HasFixedFootprint()) {
+                AddError(call) << call->FriendlyName()
+                               << " result type must not have a fixed footprint";
+            }
         }
     }
 
@@ -747,8 +733,7 @@ void Validator::CheckExtractBitsCall(const CoreBuiltinCall* call) {
     if (const_val_count && const_val_offset) {
         auto* zero = const_eval_.Zero(param0->Type(), {}, Source{}).Get();
         auto fakeArgs = Vector{zero, const_val_offset, const_val_count};
-        [[maybe_unused]] auto result =
-            const_eval_.extractBits(param0->Type(), fakeArgs, ir_.SourceOf(call));
+        std::ignore = const_eval_.extractBits(param0->Type(), fakeArgs, ir_.SourceOf(call));
     }
 }
 
@@ -760,8 +745,7 @@ void Validator::CheckInsertBitsCall(const CoreBuiltinCall* call) {
     if (const_val_count && const_val_offset) {
         auto* zero = const_eval_.Zero(param0->Type(), {}, Source{}).Get();
         auto fakeArgs = Vector{zero, zero, const_val_offset, const_val_count};
-        [[maybe_unused]] auto result =
-            const_eval_.insertBits(param0->Type(), fakeArgs, ir_.SourceOf(call));
+        std::ignore = const_eval_.insertBits(param0->Type(), fakeArgs, ir_.SourceOf(call));
     }
 }
 
@@ -770,22 +754,21 @@ void Validator::CheckLdexpCall(const CoreBuiltinCall* call) {
     if (auto const_val = GetConstArg(call, 1)) {
         auto* zero = const_eval_.Zero(param0->Type(), {}, Source{}).Get();
         auto fakeArgs = Vector{zero, const_val};
-        [[maybe_unused]] auto result =
-            const_eval_.ldexp(param0->Type(), fakeArgs, ir_.SourceOf(call));
+        std::ignore = const_eval_.ldexp(param0->Type(), fakeArgs, ir_.SourceOf(call));
     }
 }
 
 void Validator::CheckQuantizeToF16(const CoreBuiltinCall* call) {
     if (auto const_val = GetConstArg(call, 0)) {
-        [[maybe_unused]] auto result = const_eval_.quantizeToF16(
-            call->Result()->Type(), Vector{const_val}, ir_.SourceOf(call));
+        std::ignore = const_eval_.quantizeToF16(call->Result()->Type(), Vector{const_val},
+                                                ir_.SourceOf(call));
     }
 }
 
 void Validator::CheckPack2x16float(const CoreBuiltinCall* call) {
     if (auto const_val = GetConstArg(call, 0)) {
-        [[maybe_unused]] auto result = const_eval_.pack2x16float(
-            call->Result()->Type(), Vector{const_val}, ir_.SourceOf(call));
+        std::ignore = const_eval_.pack2x16float(call->Result()->Type(), Vector{const_val},
+                                                ir_.SourceOf(call));
     }
 }
 
@@ -794,8 +777,7 @@ void Validator::CheckClampCall(const CoreBuiltinCall* call) {
     auto* const_val_high = GetConstArg(call, 2);
     if (const_val_low && const_val_high) {
         auto fakeArgs = Vector{const_val_low, const_val_low, const_val_high};
-        [[maybe_unused]] auto result =
-            const_eval_.clamp(call->Result()->Type(), fakeArgs, ir_.SourceOf(call));
+        std::ignore = const_eval_.clamp(call->Result()->Type(), fakeArgs, ir_.SourceOf(call));
     }
 }
 
@@ -804,8 +786,7 @@ void Validator::CheckSmoothstepCall(const CoreBuiltinCall* call) {
     auto* const_val_high = GetConstArg(call, 1);
     if (const_val_low && const_val_high) {
         auto fakeArgs = Vector{const_val_low, const_val_high, const_val_high};
-        [[maybe_unused]] auto result =
-            const_eval_.smoothstep(call->Result()->Type(), fakeArgs, ir_.SourceOf(call));
+        std::ignore = const_eval_.smoothstep(call->Result()->Type(), fakeArgs, ir_.SourceOf(call));
     }
 }
 
@@ -894,17 +875,11 @@ void Validator::CheckConstruct(const Construct* construct) {
     }
 
     auto* result_type = construct->Result()->Type();
-    if (ElementsCount(result_type) > internal_limits::kMaxArrayConstructorElements) {
-        AddError(construct) << "type has excessive number of elements (>"
-                            << internal_limits::kMaxArrayConstructorElements
-                            << ") for an initializer";
-        return;
-    }
     if (!result_type->IsConstructible()) {
         // We only allow `construct` to create non-constructible types when they are structures that
         // contain pointers and handle types, with the corresponding property enabled.
-        if (!(result_type->Is<core::type::Struct>() &&
-              ir_.properties.Contains(Property::kAllowMslEntryPointInterface))) {
+        if (!(result_type->IsAnyOf<core::type::Array, core::type::Struct>() &&
+              ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates))) {
             AddError(construct) << "type is not constructible";
             return;
         }

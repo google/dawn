@@ -545,7 +545,7 @@ TEST_F(WgslIntrinsicTableTest, OverloadOrderByNumberOfParameters) {
     ASSERT_EQ(result.Failure().Plain(),
               R"(no matching call to 'textureDimensions(bool, bool)'
 
-33 candidate functions:
+34 candidate functions:
  • 'textureDimensions(texture: texture_depth_2d  ✗ , level: L  ✗ ) -> vec2<u32>' where:
       ✗  'L' is 'i32' or 'u32'
  • 'textureDimensions(texture: texture_depth_2d_array  ✗ , level: L  ✗ ) -> vec2<u32>' where:
@@ -592,6 +592,8 @@ TEST_F(WgslIntrinsicTableTest, OverloadOrderByNumberOfParameters) {
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'textureDimensions(texture: texture_multisampled_2d<T>  ✗ ) -> vec2<u32>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_multisampled_2d_array<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
  • 'textureDimensions(texture: texture_storage_1d<F, R>  ✗ ) -> u32' where:
       ✗  'R' is 'read'
  • 'textureDimensions(texture: texture_storage_2d<F, R>  ✗ ) -> vec2<u32>' where:
@@ -624,7 +626,7 @@ TEST_F(WgslIntrinsicTableTest, OverloadOrderByMatchingParameter) {
     ASSERT_EQ(result.Failure().Plain(),
               R"(no matching call to 'textureDimensions(texture_depth_2d, bool)'
 
-33 candidate functions:
+34 candidate functions:
  • 'textureDimensions(texture: texture_depth_2d  ✓ , level: L  ✗ ) -> vec2<u32>' where:
       ✗  'L' is 'i32' or 'u32'
  • 'textureDimensions(texture: texture_depth_2d  ✓ ) -> vec2<u32>' where:
@@ -671,6 +673,8 @@ TEST_F(WgslIntrinsicTableTest, OverloadOrderByMatchingParameter) {
  • 'textureDimensions(texture: texture_cube_array<T>  ✗ ) -> vec2<u32>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'textureDimensions(texture: texture_multisampled_2d<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_multisampled_2d_array<T>  ✗ ) -> vec2<u32>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'textureDimensions(texture: texture_storage_1d<F, R>  ✗ ) -> u32' where:
       ✗  'R' is 'read'

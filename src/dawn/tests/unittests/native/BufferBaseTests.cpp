@@ -104,7 +104,7 @@ TEST_F(BufferBaseTest, MapAsyncImplError) {
     constexpr std::string_view kErrorText = "Platform error";
 
     EXPECT_CALL(*mBufferMock.Get(), MapAsyncImpl).WillOnce([&]() -> MaybeError {
-        return DAWN_FORMAT_INTERNAL_ERROR(kErrorText);
+        return DAWN_FORMAT_UNRECOVERABLE_ERROR(kErrorText);
     });
 
     // Internal error will cause device loss as well.
@@ -122,7 +122,8 @@ TEST_F(BufferBaseTest, MapAsyncWhileUsedByQueueFails) {
     EXPECT_CALL(mDeviceErrorCallback,
                 Call(_, wgpu::ErrorType::Validation, HasSubstr(kValidationErrorMessage)));
 
-    ResultOrError<BufferBase::ScopedUseBuffer> validate = mBufferMock->ValidateCanUseOnQueueNow();
+    ResultOrValError<BufferBase::ScopedUseBuffer> validate =
+        mBufferMock->ValidateCanUseOnQueueNow();
     ASSERT_TRUE(validate.IsSuccess());
     auto scopedUse = validate.AcquireSuccess();
 
@@ -137,7 +138,8 @@ TEST_F(BufferBaseTest, UnmapWhileUsedByQueueFails) {
     EXPECT_CALL(mDeviceErrorCallback,
                 Call(_, wgpu::ErrorType::Validation, HasSubstr(kValidationErrorMessage)));
 
-    ResultOrError<BufferBase::ScopedUseBuffer> validate = mBufferMock->ValidateCanUseOnQueueNow();
+    ResultOrValError<BufferBase::ScopedUseBuffer> validate =
+        mBufferMock->ValidateCanUseOnQueueNow();
     ASSERT_TRUE(validate.IsSuccess());
     auto scopedUse = validate.AcquireSuccess();
 

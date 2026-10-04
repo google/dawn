@@ -563,7 +563,7 @@ class Resolver {
     /// Records the address space usage for the given type, and any transient
     /// dependencies of the type. Validates that the type can be used for the
     /// given address space, erroring if it cannot.
-    /// @param sc the address space to apply to the type and transitent types
+    /// @param sc the address space to apply to the type and transient types
     /// @param ty the type to apply the address space on
     /// @param usage the Source of the root variable declaration that uses the
     /// given type and address space. Used for generating sensible error
@@ -711,7 +711,6 @@ class Resolver {
     sem::CompoundStatement* current_compound_statement_ = nullptr;
     Vector<std::function<void(const sem::GlobalVariable*)>, 4> on_transitively_reference_global_;
     uint32_t current_scoping_depth_ = 0;
-    Hashset<TypeAndAddressSpace, 8> valid_type_storage_layouts_;
     Hashmap<const ast::Expression*, const ast::BinaryExpression*, 8> logical_binary_lhs_to_parent_;
     Hashset<const ast::Expression*, 8> not_evaluated_;
     Hashmap<const core::type::Type*, size_t, 8> nest_depth_;

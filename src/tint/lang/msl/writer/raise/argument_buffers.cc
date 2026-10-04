@@ -397,6 +397,7 @@ Result<SuccessType> ArgumentBuffers(core::ir::Module& ir, const ArgumentBuffersC
     TINT_CHECK_RESULT((State{config, ir}.Process()));
 
     ir.properties.Add(core::ir::Property::kAllowMslEntryPointInterface);
+    ir.properties.Add(core::ir::Property::kAllowPointerAndHandleInAggregates);
 
     return Success;
 }

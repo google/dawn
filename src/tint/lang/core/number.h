@@ -167,6 +167,7 @@ struct Number : NumberBase<Number<T>> {
     /// Constructor.
     /// @param v the value to initialize this Number to
     template <typename U>
+        requires(std::is_arithmetic_v<U> || std::is_enum_v<U>)
     explicit Number(U v) : value(static_cast<T>(v)) {}
 
     /// Constructor.
@@ -236,6 +237,7 @@ struct Number<tint::core::detail::NumberKindF16>
     /// Constructor.
     /// @param v the value to initialize this Number to
     template <typename U>
+        requires(std::is_arithmetic_v<U>)
     explicit Number(U v) : value(Quantize(static_cast<type>(v))) {}
 
     /// Constructor.

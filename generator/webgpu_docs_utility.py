@@ -158,10 +158,6 @@ def clean_doc_for_kotlin(doc,
     if any(sub in doc for sub in kdocs_blocklist):
         return ""
 
-    # Example: WGPU_COPY_SRC -> Constants.COPY_SRC
-    # Converts C-style constants to Kotlin-style constant references.
-    doc = re.sub(r"WGPU_([A-Z][A-Z_]*)", r"Constants.\1", doc)
-
     # Example: See @ref WGPUTextureView -> @see WGPUTextureView
     # Normalizes Doxygen-style @ref tags to standard @see tags for KDoc.
     doc = re.sub(r"(?:[Ss]ee\s+)?@ref\s+(\S+)", r"@see \1", doc)
@@ -181,9 +177,6 @@ def clean_doc_for_kotlin(doc,
         if "::" in ref:
             new_ref = ref.replace("::", ".")
             doc = doc.replace(ref, new_ref)
-            continue
-
-        if ref.startswith("Constants."):
             continue
 
         if any(s in ref for s in KOTLIN_HARDCODED_LINK_REFS):

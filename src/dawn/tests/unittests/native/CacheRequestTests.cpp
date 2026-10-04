@@ -320,7 +320,7 @@ TEST_P(CacheRequestTests, CacheHitError) {
         EXPECT_EQ(memcmp(blob.DataPtr(), kCachedData, sizeof(kCachedData)), 0);
 
         // Return an error.
-        return DAWN_VALIDATION_ERROR("fake test error");
+        return DAWN_UNRECOVERABLE_ERROR("fake test error");
     }));
 
     // Expect the cache miss handler since the cache hit errored.

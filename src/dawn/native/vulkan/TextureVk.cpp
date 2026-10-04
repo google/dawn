@@ -621,7 +621,7 @@ VkFormat ColorVulkanImageFormat(wgpu::TextureFormat format) {
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<wgpu::TextureFormat> FormatFromVkFormat(const Device* device, VkFormat vkFormat) {
+ResultOrValError<wgpu::TextureFormat> FormatFromVkFormat(const Device* device, VkFormat vkFormat) {
     switch (vkFormat) {
 #define X(wgpuFormat, vkFormat) \
     case vkFormat:              \
@@ -846,8 +846,8 @@ VkSampleCountFlagBits VulkanSampleCount(uint32_t sampleCount) {
     DAWN_UNREACHABLE();
 }
 
-MaybeError ValidateVulkanImageCanBeWrapped(const DeviceBase*,
-                                           const UnpackedPtr<TextureDescriptor>& descriptor) {
+MaybeValError ValidateVulkanImageCanBeWrapped(const DeviceBase*,
+                                              const UnpackedPtr<TextureDescriptor>& descriptor) {
     DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
                     "Texture dimension (%s) is not %s.", descriptor->dimension,
                     wgpu::TextureDimension::e2D);
@@ -1390,8 +1390,6 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
     }
     return {};
 }
-
-
 
 MaybeError Texture::EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
                                                         const SubresourceRange& range) {
@@ -2135,7 +2133,10 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
             // that's going to be used for the ExternalTexture static samplers.
             // TODO(https://crbug.com/497675620): Specialize the conversion at the same time as all
             // the other state, in order to take advantage of hardware YCbCr to RGB conversion when
-            // present.
+            // present. This will also allow specializing chromaFilter to match the sampler
+            // filtering when
+            // VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_SEPARATE_RECONSTRUCTION_FILTER_BIT
+            // is not available for the format.
             DAWN_ASSERT(device->HasFeature(Feature::OpaqueYCbCrAndroidForExternalTexture));
 
             yCbCr = StaticSamplerSpecialization::GetYCbCrForTextureView(
@@ -2298,7 +2299,7 @@ bool TextureView::IsYCbCrFilterable() const {
 }
 
 VkImageLayout TextureView::VulkanImageLayout(wgpu::TextureUsage usage) const {
-    return dawn::native::vulkan::VulkanImageLayout(GetFormat(), usage, GetUsage());
+    return dawn::native::vulkan::VulkanImageLayout(GetFormat(), usage, GetTexture()->GetUsage());
 }
 
 void TextureView::SetLabelImpl() {

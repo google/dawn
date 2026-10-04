@@ -45,6 +45,9 @@
 #include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
+#if TINT_BUILD_IR_BINARY
+#include "src/tint/lang/core/ir/binary/decode.h"
+#endif
 #endif
 
 namespace tint::fuzz::ir {
@@ -81,7 +84,17 @@ void Register(const IRFuzzer& fuzzer) {
                 .enable_validation_asserts = !context.options.disable_ir_validator,
             };
 
-            auto ir = tint::wgsl::reader::ProgramToLoweredIR(program, ir_options);
+            tint::Result<core::ir::Module> ir;
+#if TINT_BUILD_IR_BINARY
+            if (context.ir_binary.has_value()) {
+                ir = tint::core::ir::binary::Decode(context.ir_binary.value().AsSpan());
+            } else {
+                ir = tint::wgsl::reader::ProgramToLoweredIR(program, ir_options);
+            }
+#elif
+            ir = tint::wgsl::reader::ProgramToLoweredIR(program, ir_options);
+#endif  // TINT_BUILD_IR_BINARY
+
             if (ir != Success) {
                 return;
             }

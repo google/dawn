@@ -49,6 +49,7 @@
 # install calls, but since GN's behaviour is to build to the output
 # directory, they are being called as one command).
 
+import("../../scripts/dawn_overrides_with_defaults.gni")
 import("meson_overrides_with_defaults.gni")
 
 import("//build/config/clang/clang.gni")
@@ -138,8 +139,8 @@ template("_meson_setup") {
       "ar = '" + rebase_path("$clang_base_path/bin/llvm-ar") + "'",
       "strip = '" + rebase_path("$clang_base_path/bin/llvm-strip") + "'",
       "pkg-config = 'pkg-config'",
-      "python = ['vpython3', '-vpython-spec', '" + rebase_path("//.vpython3") +
-          "']",
+      "python = ['vpython3', '-vpython-spec', '" +
+          rebase_path("${dawn_root}/vpython.toml") + "']",
       "glslang = ['python3', '" + rebase_path(_glslang_wrapper_path) + "']",
       "glslangValidator = ['python3', '" + rebase_path(_glslang_wrapper_path) +
           "']",

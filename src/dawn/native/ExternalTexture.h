@@ -81,8 +81,8 @@ struct ExternalTextureParams {
     math::Vec4f ootfParam;
 };
 
-MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
-                                             const ExternalTextureDescriptor* descriptor);
+MaybeValError ValidateExternalTextureDescriptor(const DeviceBase* device,
+                                                const ExternalTextureDescriptor* descriptor);
 
 // Create a parameter buffer for a simple texture view intended for use as an external texture. The
 // buffer contains the uniform parameters required by a shader to sample from an external texture.
@@ -100,7 +100,7 @@ class ExternalTextureBase : public ApiObjectBase {
     ObjectType GetType() const override;
     bool HasSingleView() const;
 
-    MaybeError ValidateCanUseInSubmitNow() const;
+    MaybeValError ValidateCanUseInSubmitNow() const;
     static Ref<ExternalTextureBase> MakeError(DeviceBase* device, StringView label = {});
 
     void APIExpire();
@@ -119,8 +119,8 @@ class ExternalTextureBase : public ApiObjectBase {
     enum class ExternalTextureState { Active, Expired, Destroyed };
     ExternalTextureBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
-    MaybeError ValidateRefresh();
-    MaybeError ValidateExpire();
+    MaybeValError ValidateRefresh();
+    MaybeValError ValidateExpire();
 
     uint32_t mViewCount = 0;
     Ref<BufferBase> mParamsBuffer;

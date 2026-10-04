@@ -1,0 +1,1303 @@
+// Copyright 2026 The Dawn & Tint Authors
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// 3. Neither the name of the copyright holder nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#include "src/dawn/node/standalone/Polyfills.h"
+
+#include <algorithm>
+#include <cctype>
+#include <chrono>
+#include <cstdint>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <optional>
+#include <regex>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <system_error>
+#include <utility>
+#include <vector>
+
+#include "absl/container/flat_hash_map.h"
+#include "src/dawn/common/SystemUtils.h"
+#include "src/dawn/node/napi_v8/napi_v8.h"
+#include "src/dawn/node/standalone/EventLoop.h"
+
+namespace dawn::node::standalone {
+
+namespace {
+
+// State shared by the polyfills that outlives registration. Owned by the `process` object, which
+// deletes it from its finalizer.
+struct PolyfillContext {
+    struct RequireContext {
+        PolyfillContext* ctx;
+        std::string from_dir;
+    };
+
+    PolyfillContext(EventLoop& event_loop, PolyfillOptions opts)
+        : loop(event_loop), options(std::move(opts)) {}
+
+    EventLoop& loop;
+    PolyfillOptions options;
+    std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+    absl::flat_hash_map<std::string, Napi::ObjectReference> module_cache;
+    std::vector<std::unique_ptr<RequireContext>> require_contexts;
+};
+
+void DeletePolyfillContext(const Napi::Env&, PolyfillContext* ctx) {
+    delete ctx;
+}
+
+// Joins the call's arguments with spaces, as the console methods display them.
+Napi::Value FormatArgs(const Napi::CallbackInfo& info) {
+    std::stringstream ss;
+    for (size_t i = 0; i < info.Length(); ++i) {
+        if (i > 0) {
+            ss << " ";
+        }
+        ss << info[i].ToString().Utf8Value();
+    }
+    return Napi::String::New(info.Env(), ss.str());
+}
+
+// ---------------------------------------------------------------------------
+// console
+// ---------------------------------------------------------------------------
+
+// Backs console.log(), console.info() and console.debug(). Node defines the latter two as
+// aliases of the first, all writing to stdout with no prefix:
+// https://nodejs.org/api/console.html#consoledebugdata-args
+Napi::Value ConsoleLog(const Napi::CallbackInfo& info) {
+    std::cout << FormatArgs(info).As<Napi::String>().Utf8Value() << std::endl;
+    return info.Env().Undefined();
+}
+
+Napi::Value ConsoleWarn(const Napi::CallbackInfo& info) {
+    std::clog << "[WARN] " << FormatArgs(info).As<Napi::String>().Utf8Value() << std::endl;
+    return info.Env().Undefined();
+}
+
+Napi::Value ConsoleError(const Napi::CallbackInfo& info) {
+    std::cerr << "[ERROR] " << FormatArgs(info).As<Napi::String>().Utf8Value() << std::endl;
+    return info.Env().Undefined();
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/API/console
+void RegisterConsole(Napi::Env env) {
+    Napi::Object console = Napi::Object::New(env);
+    console.Set("log", Napi::Function::New(env, ConsoleLog, "log"));
+    console.Set("info", Napi::Function::New(env, ConsoleLog, "info"));
+    console.Set("debug", Napi::Function::New(env, ConsoleLog, "debug"));
+    console.Set("warn", Napi::Function::New(env, ConsoleWarn, "warn"));
+    console.Set("error", Napi::Function::New(env, ConsoleError, "error"));
+    env.Global().Set("console", console);
+}
+
+// ---------------------------------------------------------------------------
+// Paths
+// ---------------------------------------------------------------------------
+
+// Whether `c` can begin a UNC path on this platform.
+//
+// Windows accepts both "\\server\share" and "//server/share" as UNC. On POSIX only the backslash
+// form is treated as one, because a leading "//" is a legal POSIX path.
+bool BeginsUncPath(char c) {
+#if defined(_WIN32)
+    return c == '/' || c == '\\';
+#else
+    return c == '\\';
+#endif
+}
+
+// Returns true if the path begins with two separators. That is the whole test: anything beginning
+// that way is a UNC path ("\\server\share") or a device path ("\\?\C:\..." and "\\.\...").
+bool IsUncPath(std::string_view path) {
+    return path.size() >= 2 && BeginsUncPath(path[0]) && BeginsUncPath(path[1]);
+}
+
+// Throws a JavaScript exception if `path` is a UNC or device path. Returns true if it threw.
+//
+// These are deliberately unsupported. Node.js handles them very differently
+// than std::filesystem::path. To match Node.js, we would need to implement it
+// from scratch. We will not do that unless there is a request from the users.
+bool RejectUncPath(Napi::Env env, const std::string& path) {
+    if (!IsUncPath(path)) {
+        return false;
+    }
+    Napi::Error::New(env, "UNC and device paths are not supported: " + path)
+        .ThrowAsJavaScriptException();
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// fs
+// ---------------------------------------------------------------------------
+
+// Retrieves the path argument from `info` and stores it in `*path`. Every fs
+// entry point with a path argument has it in the first position. If the path
+// cannot be retrieved or it is a UNC path, a JavaScript exception is thrown.
+bool GetPathArgument(const Napi::CallbackInfo& info, std::string* path) {
+    if (info.Length() < 1 || !info[0].IsString()) {
+        Napi::TypeError::New(info.Env(), "String expected for path").ThrowAsJavaScriptException();
+        return false;
+    }
+    *path = info[0].As<Napi::String>().Utf8Value();
+    return !RejectUncPath(info.Env(), *path);
+}
+
+// Which encoding the caller asked for. What kNone means is up to the caller: readFileSync()
+// answers with bytes, readdirSync() with UTF-8 strings, matching Node's defaults.
+enum class Encoding {
+    kNone,
+    kUtf8,
+};
+
+// Reads the options argument the fs entry points take, which may be an encoding on its own or an
+// object holding one.
+//
+// Only UTF-8 is implemented and `encoding` is the only option understood. Anything else throws a
+// JavaScript exception.
+bool GetEncodingOption(const Napi::CallbackInfo& info, Encoding* encoding) {
+    Napi::Env env = info.Env();
+    *encoding = Encoding::kNone;
+    if (info.Length() < 2 || info[1].IsUndefined() || info[1].IsNull()) {
+        return true;
+    }
+
+    Napi::Value value = info[1];
+    if (value.IsObject()) {
+        Napi::Object options = value.As<Napi::Object>();
+        Napi::Array names = options.GetPropertyNames();
+        for (uint32_t i = 0; i < names.Length(); ++i) {
+            std::string name = names.Get(i).ToString().Utf8Value();
+            if (name != "encoding") {
+                Napi::Error::New(env, "Unsupported fs option: " + name)
+                    .ThrowAsJavaScriptException();
+                return false;
+            }
+        }
+        value = options.Get("encoding");
+        if (value.IsUndefined() || value.IsNull()) {
+            return true;
+        }
+    }
+
+    if (!value.IsString()) {
+        Napi::TypeError::New(env, "String expected for encoding").ThrowAsJavaScriptException();
+        return false;
+    }
+    std::string name = value.As<Napi::String>().Utf8Value();
+    std::string lower_name = name;
+    for (char& c : lower_name) {
+        c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    }
+    // Node.js documentation specifies that all buffer encodings are case-insensitive.
+    if (lower_name != "utf8" && lower_name != "utf-8") {
+        Napi::Error::New(env, "Unsupported fs encoding: " + name).ThrowAsJavaScriptException();
+        return false;
+    }
+    *encoding = Encoding::kUtf8;
+    return true;
+}
+
+bool OpenAndSizeFile(Napi::Env env,
+                     const std::string& path,
+                     std::ifstream* file,
+                     std::streamoff* size) {
+    // Node.js reads the file in binary regardless of the encoding.
+    file->open(path, std::ios::binary | std::ios::ate);
+    if (!file->is_open()) {
+        Napi::Error::New(env, "Failed to open file: " + path).ThrowAsJavaScriptException();
+        return false;
+    }
+
+    *size = file->tellg();
+    if (*size < 0) {
+        Napi::Error::New(env, "Failed to size file: " + path).ThrowAsJavaScriptException();
+        return false;
+    }
+    file->seekg(0, std::ios::beg);
+    return true;
+}
+
+bool ReadFileUtf8(Napi::Env env, const std::string& path, std::string* out) {
+    std::ifstream file;
+    std::streamoff offset = 0;
+    if (!OpenAndSizeFile(env, path, &file, &offset)) {
+        return false;
+    }
+    out->resize(static_cast<size_t>(offset));
+    file.read(out->data(), offset);
+    out->resize(static_cast<size_t>(file.gcount()));
+    return true;
+}
+
+Napi::Value ReadFileSync(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    std::string path;
+    Encoding encoding = Encoding::kNone;
+    if (!GetPathArgument(info, &path) || !GetEncodingOption(info, &encoding)) {
+        return env.Undefined();
+    }
+
+    if (encoding == Encoding::kUtf8) {
+        std::string content;
+        if (!ReadFileUtf8(env, path, &content)) {
+            return env.Undefined();
+        }
+        return Napi::String::New(env, content);
+    }
+
+    std::ifstream file;
+    std::streamoff offset = 0;
+    if (!OpenAndSizeFile(env, path, &file, &offset)) {
+        return env.Undefined();
+    }
+
+    // Read straight into the object being returned, so the contents are written once.
+    // Resize to gcount() in case the file shrank between the seek and the read.
+    Napi::ArrayBuffer array_buffer = Napi::ArrayBuffer::New(env, static_cast<size_t>(offset));
+    file.read(static_cast<char*>(array_buffer.Data()), offset);
+    return Napi::Uint8Array::New(env, static_cast<size_t>(file.gcount()), array_buffer, 0);
+}
+
+// Returns true if the given file exists. A JavaScript exception is thrown if a
+// UNC path is given.
+Napi::Value ExistsSync(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    if (info.Length() < 1 || !info[0].IsString()) {
+        return Napi::Boolean::New(env, false);
+    }
+    std::string path = info[0].As<Napi::String>().Utf8Value();
+    if (RejectUncPath(env, path)) {
+        return env.Undefined();
+    }
+    std::error_code ec;
+    bool exists = std::filesystem::exists(path, ec);
+    return Napi::Boolean::New(env, exists && !ec);
+}
+
+Napi::Value ReaddirSync(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    std::string path;
+    // The entries are always strings, so the encoding needs validating rather than honouring; the
+    // point of the call is to reject `withFileTypes` and friends.
+    Encoding encoding = Encoding::kNone;
+    if (!GetPathArgument(info, &path) || !GetEncodingOption(info, &encoding)) {
+        return env.Undefined();
+    }
+
+    std::error_code ec;
+    std::filesystem::directory_iterator it(path, ec);
+    if (ec) {
+        Napi::Error::New(env, ec.message()).ThrowAsJavaScriptException();
+        return env.Undefined();
+    }
+
+    Napi::Array result = Napi::Array::New(env);
+    uint32_t index = 0;
+    for (const auto& entry : it) {
+        result.Set(index++, Napi::String::New(env, entry.path().filename().string()));
+    }
+    return result;
+}
+
+Napi::Value ReturnTrue(const Napi::CallbackInfo& info) {
+    return Napi::Boolean::New(info.Env(), true);
+}
+
+Napi::Value ReturnFalse(const Napi::CallbackInfo& info) {
+    return Napi::Boolean::New(info.Env(), false);
+}
+
+Napi::Value StatSync(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    std::string path;
+    Encoding encoding = Encoding::kNone;
+    if (!GetPathArgument(info, &path) || !GetEncodingOption(info, &encoding)) {
+        return env.Undefined();
+    }
+
+    std::error_code ec;
+    std::filesystem::file_status status = std::filesystem::status(path, ec);
+    if (ec || !std::filesystem::exists(status)) {
+        Napi::Error::New(env, "Failed to stat: " + path).ThrowAsJavaScriptException();
+        return env.Undefined();
+    }
+
+    // The answer is settled here, so each predicate is just the constant it will always return.
+    Napi::Object stats = Napi::Object::New(env);
+    stats.Set(
+        "isFile",
+        Napi::Function::New(
+            env, std::filesystem::is_regular_file(status) ? ReturnTrue : ReturnFalse, "isFile"));
+    stats.Set(
+        "isDirectory",
+        Napi::Function::New(env, std::filesystem::is_directory(status) ? ReturnTrue : ReturnFalse,
+                            "isDirectory"));
+    return stats;
+}
+
+// https://nodejs.org/api/fs.html
+//
+// Only the synchronous entry points are native. The callback and promise forms are built on top of
+// them by the bootstrap script.
+void RegisterFs(Napi::Env env) {
+    Napi::Object fs = Napi::Object::New(env);
+    fs.Set("readFileSync", Napi::Function::New(env, ReadFileSync, "readFileSync"));
+    fs.Set("existsSync", Napi::Function::New(env, ExistsSync, "existsSync"));
+    fs.Set("readdirSync", Napi::Function::New(env, ReaddirSync, "readdirSync"));
+    fs.Set("statSync", Napi::Function::New(env, StatSync, "statSync"));
+    env.Global().Set("_fs_polyfill", fs);
+}
+
+// ---------------------------------------------------------------------------
+// path
+// ---------------------------------------------------------------------------
+//
+// Built on std::filesystem, which walks the components and, on Windows, understands drive letters
+// and accepts either separator. Its conventions are not Node's, so each function below lets
+// std::filesystem handle the general case and then fixes up the places where the two disagree.
+//
+// UNC and device paths are refused rather than reconciled; see RejectUncPath.
+
+constexpr char kPreferredSeparator = static_cast<char>(std::filesystem::path::preferred_separator);
+
+// What counts as a separator on this host. Windows accepts either; POSIX only the forward slash.
+#if defined(_WIN32)
+constexpr std::string_view kSeparators = "/\\";
+#else
+constexpr std::string_view kSeparators = "/";
+#endif
+
+bool IsSeparator(char c) {
+    return kSeparators.find(c) != std::string_view::npos;
+}
+
+// A trailing separator is a flag to Node but a real, empty final component to std::filesystem, so
+// filename(), extension() and parent_path() all see one component more than Node does. Dropping it
+// first is what makes them agree. The root is never stripped: "/" and "C:\" are not trailing
+// separators.
+std::string TrimTrailingSeparators(const std::filesystem::path& path) {
+    const std::string text = path.string();
+    const size_t root = path.root_path().string().size();
+    const size_t last = text.find_last_not_of(kSeparators);
+    const size_t end = last == std::string::npos ? root : std::max(root, last + 1);
+    return text.substr(0, end);
+}
+
+// Two or more leading separators collapse to one, which is what Node does on POSIX. On Windows two
+// separators would mean UNC, and those are refused at the boundary, so anything arriving here with
+// the shape is an ordinary rooted path that concatenation happened to produce - join('/', 'a')
+// builds "/\a" on the way to "\a".
+std::string CollapseLeadingSeparators(std::string text) {
+    size_t run = text.find_first_not_of(kSeparators);
+    if (run == std::string::npos) {
+        run = text.size();  // nothing but separators
+    }
+    if (run > 1) {
+        text.erase(0, run - 1);
+    }
+    return text;
+}
+
+std::string NormalizePath(const std::string& input) {
+    if (input.empty()) {
+        return ".";  // lexically_normal() returns ""
+    }
+    const std::filesystem::path path(input);
+    // lexically_normal() both drops a trailing separator ("./" becomes ".") and invents one
+    // ("a/b/.." becomes "a/"), so neither its presence nor its absence in the output means
+    // anything. Taking it off and putting it back according to the input is what Node does.
+    const bool trailing = IsSeparator(input.back());
+    std::string result = TrimTrailingSeparators(path.lexically_normal());
+    if (result.empty()) {
+        result = ".";
+    } else if (path.has_root_name() && !path.has_root_directory() &&
+               result == path.root_name().string()) {
+        // A path like "C:" on Windows implies the "." directory on that drive.
+        // Node makes this explicit by turning it into "C:.".
+        // This cannot happen for POSIX.
+        result += '.';
+    }
+    if (trailing && !IsSeparator(result.back())) {
+        result += kPreferredSeparator;
+    }
+    return CollapseLeadingSeparators(result);
+}
+
+// The one entry point not expressible in terms of a std::filesystem primitive. Node's dirname() is
+// a raw string slice that deliberately does not normalize - dirname("/a//b") is "/a/", separator
+// run intact - while parent_path() is component-based and has already discarded that. So Node's
+// scan is transcribed, with root_path() supplying the one genuinely platform-specific part: where
+// the root ends, be that "/" or "C:\".
+std::string DirnamePath(const std::string& input) {
+    if (input.empty()) {
+        return ".";
+    }
+    const size_t root_length = std::filesystem::path(input).root_path().string().size();
+    const bool has_root = root_length > 0;
+
+    // Search for the last separator, ignoring any trailing separators and the
+    // root. Separators in the root have a special meaning. The result is
+    // everything that appears before the separator preceding the last component.
+    const std::string_view path_without_root = std::string_view(input).substr(root_length);
+
+    // Skip any trailing separators to locate the end of the last path component.
+    const size_t last_non_separator = path_without_root.find_last_not_of(kSeparators);
+
+    // Find the separator immediately preceding the last component.
+    const size_t separator_before_last_component =
+        last_non_separator == std::string_view::npos
+            ? std::string_view::npos
+            : path_without_root.find_last_of(kSeparators, last_non_separator);
+    if (separator_before_last_component == std::string_view::npos) {
+        // Nothing to cut back to, so the answer is the root, or "." when there is no root.
+        return has_root ? input.substr(0, root_length) : ".";
+    }
+
+    // Find the index of the separator in the original string.
+    const size_t last_separator_index = root_length + separator_before_last_component;
+
+    /*
+     * Node's posix dirname() has exactly one special case, quoted from Node's implementation:
+     *
+     *   // POSIX reserves a leading '//' for implementation-defined purposes.
+     *   // (IEEE Std 1003.1-2017, Section 4.13 Pathname Resolution:
+     *   //  "A pathname that begins with two successive slashes may be interpreted
+     *   //   in an implementation-defined manner, although more than two leading
+     *   //   slashes shall be treated as a single slash.")
+     *   // Node keeps both slashes: dirname("//a") is "//" rather than "/".
+     *
+     * On Windows, leading double slashes represent a UNC path, which is rejected
+     * earlier before reaching this function.
+     */
+    if (has_root && last_separator_index == 1) {
+        return input.substr(0, 2);
+    }
+
+    // Return the substring up to, but not including, the separator before the last component.
+    return input.substr(0, last_separator_index);
+}
+
+std::string JoinPaths(const std::vector<std::string>& args) {
+    // std::filesystem::path::append cannot be used here. If one of `args` is an
+    // absolute path, Node will join them: {"/a", "/b"} -> "/a/b". However,
+    // std::filesystem::path drops the previous paths: {"/a", "/b"} -> "/b".
+    std::string joined;
+    for (const std::string& arg : args) {
+        if (arg.empty()) {
+            continue;  // Node skips empty arguments rather than reading them as "."
+        }
+        if (!joined.empty()) {
+            joined += kPreferredSeparator;
+        }
+        joined += arg;
+    }
+    if (joined.empty()) {
+        return ".";
+    }
+    return NormalizePath(joined);
+}
+
+// The working directory, or false with an exception pending. Shared by process.cwd() and by
+// resolve(), which anchors relative arguments on it.
+bool CurrentDirectory(Napi::Env env, std::string* out) {
+    std::error_code ec;
+    const std::filesystem::path cwd = std::filesystem::current_path(ec);
+    if (ec) {
+        Napi::Error::New(env, "Could not read the working directory: " + ec.message())
+            .ThrowAsJavaScriptException();
+        return false;
+    }
+    *out = cwd.string();
+    // A UNC working directory means a checkout on a network share. Everything resolve() produces
+    // would be built on it, so it fails here rather than somewhere downstream that gives no hint
+    // of the cause.
+    return !RejectUncPath(env, *out);
+}
+
+bool ResolvePaths(Napi::Env env, const std::vector<std::string>& args, std::string* out) {
+    std::filesystem::path accumulated;
+    for (const std::string& arg : args) {
+        if (arg.empty()) {
+            continue;  // absolute("") fails with EINVAL, and Node ignores empty arguments
+        }
+        // Here operator/ is exactly right: its rule that a later absolute argument replaces
+        // everything before it, including the Windows rule that a rooted argument keeps the
+        // left-hand side's drive, is what resolve() specifies.
+        accumulated /= std::filesystem::path(arg);
+    }
+
+    // The working directory is read here rather than left to absolute() so that a working
+    // directory that cannot be read, or that is UNC, is reported as such instead of surfacing as a
+    // confusing failure about the argument.
+    if (!accumulated.is_absolute()) {
+        std::string cwd;
+        if (!CurrentDirectory(env, &cwd)) {
+            return false;
+        }
+
+        // If `accumulated` is empty, the call to std::filesystem::absolute
+        // below will fail. Replacing it with `cwd` to match Node's behaviour.
+        if (accumulated.empty()) {
+            accumulated = std::filesystem::path(cwd);
+        }
+    }
+
+    // absolute() rather than `cwd / accumulated`: on Windows a drive-relative argument like "C:a"
+    // names the working directory of that drive, which only absolute() knows how to consult -
+    // operator/ would see a root-name of its own and keep "C:a" relative. On POSIX the two are the
+    // same thing.
+    std::error_code ec;
+    const std::filesystem::path absolute = std::filesystem::absolute(accumulated, ec);
+    if (ec) {
+        Napi::Error::New(env, "Could not resolve path: " + ec.message())
+            .ThrowAsJavaScriptException();
+        return false;
+    }
+    // Node's resolve() never returns a trailing separator, but lexically_normal() produces one
+    // whenever the last component was a dot segment.
+    std::string result = TrimTrailingSeparators(absolute.lexically_normal());
+    if (result.empty()) {
+        result = ".";
+    }
+    *out = CollapseLeadingSeparators(result);
+    return true;
+}
+
+bool RelativePath(Napi::Env env, const std::string& from, const std::string& to, std::string* out) {
+    // Node resolves both sides first, so the answer depends only on where they land.
+    std::string from_resolved;
+    std::string to_resolved;
+    if (!ResolvePaths(env, {from}, &from_resolved) || !ResolvePaths(env, {to}, &to_resolved)) {
+        return false;
+    }
+
+    const std::filesystem::path result =
+        std::filesystem::path(to_resolved).lexically_relative(std::filesystem::path(from_resolved));
+    if (result == std::filesystem::path(".")) {
+        *out = "";  // lexically_relative() says "." for identical paths; Node says ""
+    } else if (result.empty()) {
+        *out = to_resolved;  // unrelated roots, where Node falls back to the resolved `to`
+    } else {
+        *out = result.string();
+    }
+    return true;
+}
+
+// Reads the string arguments a path entry point takes, throwing the TypeError Node throws for a
+// non-string, and refusing UNC paths.
+bool GetPathArguments(const Napi::CallbackInfo& info,
+                      size_t least,
+                      std::vector<std::string>* args) {
+    if (info.Length() < least) {
+        Napi::TypeError::New(info.Env(), "String expected for path").ThrowAsJavaScriptException();
+        return false;
+    }
+    for (size_t i = 0; i < info.Length(); ++i) {
+        if (!info[i].IsString()) {
+            Napi::TypeError::New(info.Env(), "String expected for path")
+                .ThrowAsJavaScriptException();
+            return false;
+        }
+        std::string arg = info[i].As<Napi::String>().Utf8Value();
+        if (RejectUncPath(info.Env(), arg)) {
+            return false;
+        }
+        args->push_back(std::move(arg));
+    }
+    return true;
+}
+
+Napi::Value PathNormalize(const Napi::CallbackInfo& info) {
+    std::vector<std::string> args;
+    if (!GetPathArguments(info, 1, &args)) {
+        return info.Env().Undefined();
+    }
+    return Napi::String::New(info.Env(), NormalizePath(args[0]));
+}
+
+Napi::Value PathDirname(const Napi::CallbackInfo& info) {
+    std::vector<std::string> args;
+    if (!GetPathArguments(info, 1, &args)) {
+        return info.Env().Undefined();
+    }
+    return Napi::String::New(info.Env(), DirnamePath(args[0]));
+}
+
+Napi::Value PathJoin(const Napi::CallbackInfo& info) {
+    std::vector<std::string> args;
+    if (!GetPathArguments(info, 0, &args)) {
+        return info.Env().Undefined();
+    }
+    return Napi::String::New(info.Env(), JoinPaths(args));
+}
+
+Napi::Value PathResolve(const Napi::CallbackInfo& info) {
+    std::vector<std::string> args;
+    std::string resolved;
+    if (!GetPathArguments(info, 0, &args) || !ResolvePaths(info.Env(), args, &resolved)) {
+        return info.Env().Undefined();
+    }
+    return Napi::String::New(info.Env(), resolved);
+}
+
+Napi::Value PathRelative(const Napi::CallbackInfo& info) {
+    std::vector<std::string> args;
+    std::string relative;
+    if (!GetPathArguments(info, 2, &args) ||
+        !RelativePath(info.Env(), args[0], args[1], &relative)) {
+        return info.Env().Undefined();
+    }
+    return Napi::String::New(info.Env(), relative);
+}
+
+// https://nodejs.org/api/path.html
+void RegisterPath(Napi::Env env) {
+    Napi::Object path = Napi::Object::New(env);
+    path.Set("dirname", Napi::Function::New(env, PathDirname, "dirname"));
+    path.Set("join", Napi::Function::New(env, PathJoin, "join"));
+    path.Set("normalize", Napi::Function::New(env, PathNormalize, "normalize"));
+    path.Set("relative", Napi::Function::New(env, PathRelative, "relative"));
+    path.Set("resolve", Napi::Function::New(env, PathResolve, "resolve"));
+    path.Set("sep", Napi::String::New(env, std::string(1, kPreferredSeparator)));
+    env.Global().Set("_path_polyfill", path);
+}
+
+// ---------------------------------------------------------------------------
+// process
+// ---------------------------------------------------------------------------
+
+Napi::Value Cwd(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    // The working directory is the one path the runtime is not handed by its caller, so it is also
+    // the one that can go wrong without anybody having asked for anything unusual. Everything
+    // resolve() produces is built on it, so CurrentDirectory() throws rather than return a string
+    // that would quietly contaminate every path derived from it.
+    std::string cwd;
+    if (!CurrentDirectory(env, &cwd)) {
+        return env.Undefined();
+    }
+    return Napi::String::New(env, cwd);
+}
+
+Napi::Value Exit(const Napi::CallbackInfo& info) {
+    auto* ctx = static_cast<PolyfillContext*>(info.Data());
+    int32_t code = 0;
+    if (info.Length() > 0 && info[0].IsNumber()) {
+        code = info[0].As<Napi::Number>().Int32Value();
+    }
+    ctx->loop.Stop(code);
+
+    // Unwind the running JavaScript frames with an uncatchable termination exception so execution
+    // does not continue after process.exit().
+    napi_env c_env = info.Env();
+    reinterpret_cast<napi_env__*>(c_env)->isolate->TerminateExecution();
+    return info.Env().Undefined();
+}
+
+Napi::Value HrtimeBigint(const Napi::CallbackInfo& info) {
+    auto now = std::chrono::steady_clock::now().time_since_epoch();
+    int64_t nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
+    return Napi::BigInt::New(info.Env(), nanos);
+}
+
+// https://nodejs.org/api/stream.html#writablewritechunk-encoding-callback
+//
+// write() returns whether the caller may continue writing immediately, or should wait for a
+// 'drain' event because the stream buffered the chunk. These writes go straight to the underlying
+// stream and buffer nothing, so the answer is always true.
+Napi::Value StdoutWrite(const Napi::CallbackInfo& info) {
+    if (info.Length() > 0) {
+        std::cout << info[0].ToString().Utf8Value() << std::flush;
+    }
+    return Napi::Boolean::New(info.Env(), true);
+}
+
+Napi::Value StderrWrite(const Napi::CallbackInfo& info) {
+    if (info.Length() > 0) {
+        std::clog << info[0].ToString().Utf8Value() << std::flush;
+    }
+    return Napi::Boolean::New(info.Env(), true);
+}
+
+// https://nodejs.org/api/process.html
+void RegisterProcess(Napi::Env env, const PolyfillOptions& options, PolyfillContext* ctx) {
+    Napi::Object process = Napi::Object::New(env);
+    process.Set("cwd", Napi::Function::New(env, Cwd, "cwd"));
+    process.Set("exit", Napi::Function::New(env, Exit, "exit", ctx));
+
+    Napi::Object hrtime = Napi::Object::New(env);
+    hrtime.Set("bigint", Napi::Function::New(env, HrtimeBigint, "bigint"));
+    process.Set("hrtime", hrtime);
+
+    // Libraries detect a Node-like environment via `process?.versions?.node !== undefined`; the
+    // version string itself is not inspected.
+    Napi::Object versions = Napi::Object::New(env);
+    versions.Set("node", Napi::String::New(env, "0.0.0"));
+    process.Set("versions", versions);
+
+    Napi::Object env_obj = Napi::Object::New(env);
+    if (auto [dawn_flags, is_set] = dawn::GetEnvironmentVar("DAWN_FLAGS"); is_set) {
+        env_obj.Set("DAWN_FLAGS", Napi::String::New(env, dawn_flags));
+    }
+    process.Set("env", env_obj);
+
+    Napi::Array argv_array = Napi::Array::New(env, options.argv.size());
+    for (uint32_t i = 0; i < options.argv.size(); ++i) {
+        argv_array.Set(i, Napi::String::New(env, options.argv[i]));
+    }
+    process.Set("argv", argv_array);
+
+    Napi::Object stdout_obj = Napi::Object::New(env);
+    stdout_obj.Set("write", Napi::Function::New(env, StdoutWrite));
+    process.Set("stdout", stdout_obj);
+
+    Napi::Object stderr_obj = Napi::Object::New(env);
+    stderr_obj.Set("write", Napi::Function::New(env, StderrWrite));
+    process.Set("stderr", stderr_obj);
+
+    // `process` owns the context: this releases it once the object is collected.
+    process.AddFinalizer(DeletePolyfillContext, ctx);
+
+    env.Global().Set("process", process);
+}
+
+// ---------------------------------------------------------------------------
+// Scheduling / Timers (setImmediate, setTimeout, clearTimeout)
+// ---------------------------------------------------------------------------
+
+// Captures the arguments a timer callback is to be called with: everything from `first` onwards.
+std::vector<Napi::Reference<Napi::Value>> CaptureArgs(const Napi::CallbackInfo& info,
+                                                      size_t first) {
+    std::vector<Napi::Reference<Napi::Value>> args;
+    args.reserve(info.Length() > first ? info.Length() - first : 0);
+    for (size_t i = first; i < info.Length(); ++i) {
+        args.push_back(Napi::Persistent(info[i]));
+    }
+    return args;
+}
+
+// Reads captured arguments back out for a call.
+std::vector<napi_value> ResolveArgs(const std::vector<Napi::Reference<Napi::Value>>& args) {
+    std::vector<napi_value> values;
+    values.reserve(args.size());
+    for (const auto& arg : args) {
+        values.push_back(arg.Value());
+    }
+    return values;
+}
+
+// Implements setImmediate(). Node runs these in the check phase of its event loop, so the task is
+// handed to the embedder rather than run here; the embedder decides when the check phase comes
+// around. V8 has no queue of its own to use instead: macrotasks are not an ECMAScript concept, and
+// the only queue V8 owns is the microtask queue that backs promise reactions.
+//
+// Node returns an Immediate object (with ref(), unref() and clearImmediate() cancellation). The
+// loop has no cancellation for check-phase tasks and nothing in the CTS or Dawn bindings uses the
+// return value, so this returns undefined and clearImmediate is not registered.
+Napi::Value SetImmediate(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    if (info.Length() < 1 || !info[0].IsFunction()) {
+        Napi::TypeError::New(env, "Function expected for setImmediate")
+            .ThrowAsJavaScriptException();
+        return env.Undefined();
+    }
+
+    auto* ctx = static_cast<PolyfillContext*>(info.Data());
+    Napi::FunctionReference fn = Napi::Persistent(info[0].As<Napi::Function>());
+    // Any arguments beyond the callback are forwarded to it.
+    std::vector<Napi::Reference<Napi::Value>> args = CaptureArgs(info, 1);
+    ctx->loop.PostTask(
+        [fn = std::move(fn), args = std::move(args)]() mutable { fn.Call(ResolveArgs(args)); });
+    return env.Undefined();
+}
+
+// Converts a JavaScript delay, which is a possibly fractional count of milliseconds, to the
+// duration the loop measures in.
+EventLoop::Duration DelayFromMilliseconds(double delay_ms) {
+    return std::chrono::duration_cast<EventLoop::Duration>(
+        std::chrono::duration<double, std::milli>(delay_ms));
+}
+
+// Implements setTimeout(). Returns the EventLoop::TimerId as a number to pass to clearTimeout().
+// Node.js returns a Timeout object, but a numeric handle - as on the web - is all the CTS uses.
+Napi::Value SetTimeout(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    if (info.Length() < 1 || !info[0].IsFunction()) {
+        Napi::TypeError::New(env, "Function expected for setTimeout").ThrowAsJavaScriptException();
+        return env.Undefined();
+    }
+
+    double delay_ms = 0.0;
+    if (info.Length() > 1 && info[1].IsNumber()) {
+        delay_ms = info[1].As<Napi::Number>().DoubleValue();
+    }
+    // Match the web platform: negative, NaN and missing delays are treated as zero.
+    if (!(delay_ms > 0.0)) {
+        delay_ms = 0.0;
+    }
+
+    auto* ctx = static_cast<PolyfillContext*>(info.Data());
+    Napi::FunctionReference fn = Napi::Persistent(info[0].As<Napi::Function>());
+    std::vector<Napi::Reference<Napi::Value>> args = CaptureArgs(info, 2);
+    const EventLoop::TimerId id = ctx->loop.PostDelayedTask(
+        [fn = std::move(fn), args = std::move(args)]() mutable { fn.Call(ResolveArgs(args)); },
+        DelayFromMilliseconds(delay_ms));
+    return Napi::Number::New(env, static_cast<double>(id));
+}
+
+// Implements clearTimeout(). Clearing an unknown or already-fired handle is not an error, as
+// required by the standard.
+Napi::Value ClearTimeout(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    auto* ctx = static_cast<PolyfillContext*>(info.Data());
+    if (ctx == nullptr || info.Length() < 1 || !info[0].IsNumber()) {
+        return env.Undefined();
+    }
+
+    const auto id = static_cast<EventLoop::TimerId>(info[0].As<Napi::Number>().DoubleValue());
+    ctx->loop.CancelDelayedTask(id);
+    return env.Undefined();
+}
+
+void RegisterTimers(Napi::Env env, PolyfillContext* ctx) {
+    env.Global().Set("setImmediate", Napi::Function::New(env, SetImmediate, "setImmediate", ctx));
+    env.Global().Set("setTimeout", Napi::Function::New(env, SetTimeout, "setTimeout", ctx));
+    env.Global().Set("clearTimeout", Napi::Function::New(env, ClearTimeout, "clearTimeout", ctx));
+}
+
+// ---------------------------------------------------------------------------
+// performance
+// ---------------------------------------------------------------------------
+
+Napi::Value PerformanceNow(const Napi::CallbackInfo& info) {
+    auto* ctx = static_cast<PolyfillContext*>(info.Data());
+    auto now = std::chrono::steady_clock::now();
+    double millis = 0.0;
+    if (ctx != nullptr) {
+        millis = std::chrono::duration<double, std::milli>(now - ctx->start_time).count();
+    }
+    return Napi::Number::New(info.Env(), millis);
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
+void RegisterPerformance(Napi::Env env, PolyfillContext* ctx) {
+    Napi::Object performance = Napi::Object::New(env);
+    performance.Set("now", Napi::Function::New(env, PerformanceNow, "now", ctx));
+    env.Global().Set("performance", performance);
+}
+
+// ---------------------------------------------------------------------------
+// TextEncoder
+// ---------------------------------------------------------------------------
+
+void TextEncoderConstructor(const Napi::CallbackInfo&) {}
+
+// Implements TextEncoder.prototype.encode(). V8 holds strings as UTF-16, and its UTF-8 conversion
+// already implements the WHATWG encode algorithm: unpaired surrogates become U+FFFD rather than an
+// error.
+Napi::Value EncodeUtf8(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    std::string utf8;
+    if (info.Length() > 0 && !info[0].IsUndefined()) {
+        utf8 = info[0].ToString().Utf8Value();
+    }
+    Napi::Uint8Array out = Napi::Uint8Array::New(env, utf8.size());
+    std::ranges::copy(utf8, out.Data());
+    return out;
+}
+
+void RegisterTextEncoder(Napi::Env env) {
+    // Only encode() is implemented.
+    Napi::Function ctor = Napi::Function::New(env, TextEncoderConstructor, "TextEncoder");
+    ctor.Get("prototype")
+        .As<Napi::Object>()
+        .Set("encode", Napi::Function::New(env, EncodeUtf8, "encode"));
+    env.Global().Set("TextEncoder", ctor);
+}
+
+// ---------------------------------------------------------------------------
+// require
+// ---------------------------------------------------------------------------
+
+std::optional<Napi::Value> TryGetBuiltinModule(Napi::Env env, std::string_view specifier) {
+    if (specifier.starts_with("node:")) {
+        specifier.remove_prefix(5);
+    }
+    Napi::Object global = env.Global();
+    if (specifier == "fs") {
+        return global.Get("_fs_polyfill");
+    }
+    if (specifier == "path") {
+        return global.Get("_path_polyfill");
+    }
+    if (specifier == "process") {
+        return global.Get("process");
+    }
+    if (specifier == "perf_hooks") {
+        Napi::Object perf_hooks = Napi::Object::New(env);
+        perf_hooks.Set("performance", global.Get("performance"));
+        return perf_hooks;
+    }
+    // `dawn.node` is statically linked into the runner binary and registered on
+    // `globalThis._webgpu_module`.
+    if (std::filesystem::path(specifier).filename() == "dawn.node") {
+        return global.Get("_webgpu_module");
+    }
+    return std::nullopt;
+}
+
+// Returns true if `specifier` is a CommonJS bare package name (such as "ansi-colors" or
+// "pkg/subpath") rather than a relative or absolute filesystem path.
+bool IsBarePackageName(std::string_view specifier) {
+    // If `specifier` starts with an explicit relative path (like `.` or `..`) or a root slash, it
+    // is not a bare package name.
+    static const std::regex kPathPrefix(R"(^(\.\.?$|\.*[/\\]))");
+    if (std::regex_search(specifier.begin(), specifier.end(), kPathPrefix)) {
+        return false;
+    }
+    return !std::filesystem::path(specifier).is_absolute();
+}
+
+// Returns a JavaScript function that takes parameters `(exports, require, module, __filename,
+// __dirname)` and runs `source` as the body. `filename` is the name of the file the source came
+// from. Errors will be reported using their line number in `source` in the given `filename`.
+//
+// Note, this is different than `napi_run_script()`, which immediately executes a top-level script
+// and is not concerned with the file and line number for reporting errors, which is why they have
+// different implementations.
+Napi::Function CompileModuleFunction(Napi::Env env,
+                                     const std::string& source,
+                                     const std::string& filename) {
+    napi_env c_env = env;
+    v8::Isolate* isolate = c_env->isolate;
+    v8::Local<v8::Context> context = c_env->GetContext();
+
+    v8::Local<v8::String> v8_source =
+        dawn::napi_v8::ToV8(Napi::String::New(env, source)).As<v8::String>();
+    v8::Local<v8::String> v8_origin =
+        dawn::napi_v8::ToV8(Napi::String::New(env, filename)).As<v8::String>();
+
+    v8::Local<v8::String> params[] = {
+        v8::String::NewFromUtf8Literal(isolate, "exports"),
+        v8::String::NewFromUtf8Literal(isolate, "require"),
+        v8::String::NewFromUtf8Literal(isolate, "module"),
+        v8::String::NewFromUtf8Literal(isolate, "__filename"),
+        v8::String::NewFromUtf8Literal(isolate, "__dirname"),
+    };
+
+    v8::ScriptOrigin origin(v8_origin);
+    v8::ScriptCompiler::Source script_source(v8_source, origin);
+    v8::MaybeLocal<v8::Function> function;
+    v8::Local<v8::Value> exception;
+    {
+        v8::TryCatch try_catch(isolate);
+        function =
+            v8::ScriptCompiler::CompileFunction(context, &script_source, std::size(params), params);
+        if (function.IsEmpty() || try_catch.HasCaught()) {
+            exception = try_catch.Exception();
+        }
+    }
+    if (!exception.IsEmpty()) {
+        napi_throw(c_env, dawn::napi_v8::ToNapi(exception));
+        return Napi::Function();
+    }
+
+    return Napi::Function(env, dawn::napi_v8::ToNapi(function.ToLocalChecked()));
+}
+
+Napi::Function MakeRequire(Napi::Env env, PolyfillContext* ctx, std::string from_dir);
+
+Napi::Value LoadModule(Napi::Env env, PolyfillContext* ctx, const std::string& resolved_path) {
+    auto cached = ctx->module_cache.find(resolved_path);
+    if (cached != ctx->module_cache.end()) {
+        return cached->second.Value().Get("exports");
+    }
+
+    std::string content;
+    if (!ReadFileUtf8(env, resolved_path, &content)) {
+        return env.Undefined();
+    }
+
+    std::string dirname = DirnamePath(resolved_path);
+    Napi::Object module = Napi::Object::New(env);
+    Napi::Object exports = Napi::Object::New(env);
+    module.Set("exports", exports);
+    module.Set("id", Napi::String::New(env, resolved_path));
+    module.Set("filename", Napi::String::New(env, resolved_path));
+    module.Set("path", Napi::String::New(env, dirname));
+    module.Set("loaded", Napi::Boolean::New(env, false));
+
+    // Cache before running the module body so circular require() calls receive the in-progress
+    // exports object rather than re-entering LoadModule.
+    ctx->module_cache.emplace(resolved_path, Napi::Persistent(module));
+
+    Napi::Function fn = CompileModuleFunction(env, content, resolved_path);
+    if (fn.IsEmpty()) {
+        ctx->module_cache.erase(resolved_path);
+        return env.Undefined();
+    }
+
+    Napi::Function local_require = MakeRequire(env, ctx, dirname);
+    Napi::Value call_result =
+        fn.Call({exports, local_require, module, Napi::String::New(env, resolved_path),
+                 Napi::String::New(env, dirname)});
+    if (call_result.IsEmpty()) {
+        ctx->module_cache.erase(resolved_path);
+        return env.Undefined();
+    }
+
+    module.Set("loaded", Napi::Boolean::New(env, true));
+    return module.Get("exports");
+}
+
+Napi::Value Require(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    if (info.Length() < 1 || !info[0].IsString()) {
+        Napi::TypeError::New(env, "String expected for module specifier")
+            .ThrowAsJavaScriptException();
+        return env.Undefined();
+    }
+
+    std::string specifier = info[0].As<Napi::String>().Utf8Value();
+    if (RejectUncPath(env, specifier)) {
+        return env.Undefined();
+    }
+
+    if (std::optional<Napi::Value> builtin = TryGetBuiltinModule(env, specifier)) {
+        return *builtin;
+    }
+
+    // Bare package names outside `TryGetBuiltinModule` are not resolved against `node_modules`.
+    if (IsBarePackageName(specifier)) {
+        Napi::Error::New(env, "Cannot find module '" + specifier + "'")
+            .ThrowAsJavaScriptException();
+        return env.Undefined();
+    }
+
+    auto* req_ctx = static_cast<PolyfillContext::RequireContext*>(info.Data());
+    std::string from_dir = req_ctx->from_dir;
+    if (from_dir.empty() && !CurrentDirectory(env, &from_dir)) {
+        return env.Undefined();
+    }
+
+    std::string resolved;
+    if (!ResolvePaths(env, {from_dir, specifier}, &resolved)) {
+        return env.Undefined();
+    }
+
+    return LoadModule(env, req_ctx->ctx, resolved);
+}
+
+Napi::Function MakeRequire(Napi::Env env, PolyfillContext* ctx, std::string from_dir) {
+    auto& req_ctx =
+        ctx->require_contexts.emplace_back(std::make_unique<PolyfillContext::RequireContext>(
+            PolyfillContext::RequireContext{ctx, std::move(from_dir)}));
+    return Napi::Function::New(env, Require, "require", req_ctx.get());
+}
+
+// https://nodejs.org/api/modules.html
+void RegisterRequire(Napi::Env env, PolyfillContext* ctx) {
+    env.Global().Set("require", MakeRequire(env, ctx, ""));
+}
+
+// ---------------------------------------------------------------------------
+// bootstrap
+// ---------------------------------------------------------------------------
+
+const char* kBootstrapScript = R"bootstrap(
+(function() {
+    // DOM / Web Event Globals. Only the fields and methods used by Dawn's bindings and the CTS are
+    // implemented.
+    class Event {
+        constructor(type, eventInitDict) {
+            this.type = type;
+            this.cancelable = Boolean(eventInitDict && eventInitDict.cancelable);
+            this.defaultPrevented = false;
+        }
+        preventDefault() {
+            if (this.cancelable) {
+                this.defaultPrevented = true;
+            }
+        }
+    }
+
+    class EventTarget {
+        constructor() {
+            // Keyed by `type` alone (not `(type, capture)`) so dispatchEvent runs listeners in
+            // registration order. There will be at most 2 entries per listener and type (capture
+            // true and false).
+            this._listeners = {};
+        }
+
+        addEventListener(type, listener, options) {
+            if (!listener) {
+                return;
+            }
+
+            if (!this._listeners[type]) {
+                this._listeners[type] = [];
+            }
+
+            const capture = typeof options === 'boolean'
+                ? options : Boolean(options && options.capture);
+            if (this._listeners[type].some(
+                    e => e.listener === listener && e.capture === capture)) {
+                return;
+            }
+
+            const once = Boolean(options && typeof options === 'object' && options.once);
+            this._listeners[type].push({ listener, once, capture });
+        }
+
+        removeEventListener(type, listener, options) {
+            if (!this._listeners[type]) {
+                return;
+            }
+
+            const capture = typeof options === 'boolean'
+                ? options : Boolean(options && options.capture);
+
+            this._listeners[type] = this._listeners[type].filter(
+                e => e.listener !== listener || e.capture !== capture);
+        }
+
+        dispatchEvent(event) {
+            const type = event.type;
+
+            // Copied, since a listener may add or remove listeners while it runs - a 'once'
+            // listener removes itself before being invoked.
+            const entries = this._listeners[type] ? this._listeners[type].slice() : [];
+
+            for (const entry of entries) {
+                if (entry.once) {
+                    this.removeEventListener(type, entry.listener, entry.capture);
+                }
+
+                const listener = entry.listener;
+                if (typeof listener === 'function') {
+                    listener.call(this, event);
+                } else if (listener && typeof listener.handleEvent === 'function') {
+                    listener.handleEvent(event);
+                }
+            }
+
+            // A dispatch reports whether the default action should still be taken.
+            return !event.defaultPrevented;
+        }
+    }
+
+    class DOMException extends Error {
+        constructor(message, name) {
+            super(message);
+            this.name = name || 'Error';
+        }
+    }
+
+    class CustomEvent extends Event {}
+
+    class MessageEvent extends Event {
+        constructor(type, eventInitDict) {
+            super(type, eventInitDict);
+            this.data = eventInitDict ? eventInitDict.data : undefined;
+        }
+    }
+
+    globalThis.Event = Event;
+    globalThis.CustomEvent = CustomEvent;
+    globalThis.EventTarget = EventTarget;
+    globalThis.DOMException = DOMException;
+    globalThis.MessageEvent = MessageEvent;
+
+    // queueMicrotask
+    if (typeof globalThis.queueMicrotask !== 'function') {
+        globalThis.queueMicrotask = function(callback) {
+            Promise.resolve().then(callback);
+        };
+    }
+
+    // The callback and promise forms of fs, over the native synchronous calls. Deferring to a
+    // microtask is what makes them asynchronous; the work itself still blocks.
+    // https://nodejs.org/api/fs.html
+    const fs = globalThis._fs_polyfill;
+
+    fs.readFile = function(path, options, callback) {
+        if (typeof options === 'function') {
+            callback = options;
+            options = undefined;
+        }
+        Promise.resolve().then(() => {
+            let data;
+            try {
+                data = fs.readFileSync(path, options);
+            } catch (err) {
+                callback(err);
+                return;
+            }
+            callback(null, data);
+        });
+    };
+
+    fs.promises = {
+        readdir: (path) => Promise.resolve().then(() => fs.readdirSync(path)),
+        stat: (path) => Promise.resolve().then(() => fs.statSync(path)),
+        readFile: (path, options) => Promise.resolve().then(() => fs.readFileSync(path, options)),
+    };
+})();
+)bootstrap";
+
+// Runs the JavaScript half of the polyfills, for the globals that are simpler to express in
+// script than to assemble through the C++ API.
+void RunBootstrapScript(Napi::Env env) {
+    napi_value script_src;
+    napi_create_string_utf8(env, kBootstrapScript, NAPI_AUTO_LENGTH, &script_src);
+    napi_value result;
+    napi_run_script(env, script_src, &result);
+}
+
+}  // namespace
+
+void RegisterPolyfills(Napi::Env env, EventLoop& loop, const PolyfillOptions& options) {
+    auto* ctx = new PolyfillContext(loop, options);
+
+    RegisterConsole(env);
+    RegisterFs(env);
+    RegisterPath(env);
+    RegisterProcess(env, options, ctx);
+    RegisterTimers(env, ctx);
+    RegisterPerformance(env, ctx);
+    RegisterTextEncoder(env);
+    RegisterRequire(env, ctx);
+    RunBootstrapScript(env);
+}
+
+}  // namespace dawn::node::standalone

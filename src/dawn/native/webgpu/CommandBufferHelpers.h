@@ -51,10 +51,10 @@ class CaptureContext;
 // Note: These are fine to be pointers and not Refs as this object
 // does not outlast a CommandBuffer which itself uses Refs.
 struct CommandBufferResourceUsages {
-    std::vector<ComputePipelineBase*> computePipelines;
-    std::vector<RenderPipelineBase*> renderPipelines;
-    std::vector<BindGroupBase*> bindGroups;
-    std::vector<RenderBundleBase*> renderBundles;
+    std::vector<raw_ptr<ComputePipelineBase>> computePipelines;
+    std::vector<raw_ptr<RenderPipelineBase>> renderPipelines;
+    std::vector<raw_ptr<BindGroupBase>> bindGroups;
+    std::vector<raw_ptr<RenderBundleBase>> renderBundles;
 };
 
 void CaptureSharedCommand(CaptureContext& captureContext, CommandIterator& commands, Command type);

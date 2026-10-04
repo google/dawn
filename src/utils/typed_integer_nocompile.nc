@@ -66,10 +66,10 @@ void TestAssignmentToTyped() {
 // Casts from TypedInteger to primitive.
 void TestCastToPrimitive() {
     // Cannot convert to narrower types.
-    (void) int32_t{i};   // (control case.)
-    (void) int16_t{i};   // expected-error {{no viable conversion from}}
-    (void) uint32_t{i};  // expected-error {{no viable conversion from}}
-    (void) int32_t{u};   // expected-error {{no viable conversion from}}
+    std::ignore = int32_t{i};   // (control case.)
+    std::ignore = int16_t{i};   // expected-error {{no viable conversion from}}
+    std::ignore = uint32_t{i};  // expected-error {{no viable conversion from}}
+    std::ignore = int32_t{u};   // expected-error {{no viable conversion from}}
 }
 
 // Assignment to primitive from TypedInteger.

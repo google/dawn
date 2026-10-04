@@ -36,6 +36,7 @@
 
 #include <array>
 #include <sstream>
+#include <tuple>
 #include <vector>
 
 #include "src/tint/utils/command/command.h"
@@ -127,7 +128,7 @@ bool ExecutableExists(const std::string& path) {
 
 std::string GetCWD() {
     char cwd[PATH_MAX] = "";
-    [[maybe_unused]] auto res = getcwd(cwd, sizeof(cwd));
+    std::ignore = getcwd(cwd, sizeof(cwd));
     return cwd;
 }
 

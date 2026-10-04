@@ -162,20 +162,28 @@ _BANNED_CPP_PATTERNS: Sequence[BanRule] = (
         surface_as_gerrit_lint=True,
     ),
     BanRule(
-        pattern=r'/\b(EXPECT_DEATH|EXPECT_DEBUG_DEATH)\b',
-        excluded_paths=(r'^src/utils/gtest\.h$', ),
+        pattern=
+        r'/\b(EXPECT_DEATH|EXPECT_DEBUG_DEATH|EXPECT_DEATH_IF_SUPPORTED)\b',
+        excluded_paths=(
+            r'^src/utils/gtest\.h$',
+            r'^src/tint/',
+        ),
         explanation=(
-            'Use EXPECT_DEATH_IF_SUPPORTED or ',
+            'Use DAWN_EXPECT_DEATH_IF_SUPPORTED or ',
             'DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED instead.',
         ),
         treat_as_error=True,
         surface_as_gerrit_lint=True,
     ),
     BanRule(
-        pattern=r'/\b(ASSERT_DEATH|ASSERT_DEBUG_DEATH)\b',
-        excluded_paths=(r'^src/utils/gtest\.h$', ),
+        pattern=
+        r'/\b(ASSERT_DEATH|ASSERT_DEBUG_DEATH|ASSERT_DEATH_IF_SUPPORTED)\b',
+        excluded_paths=(
+            r'^src/utils/gtest\.h$',
+            r'^src/tint/',
+        ),
         explanation=(
-            'Use ASSERT_DEATH_IF_SUPPORTED or ',
+            'Use DAWN_ASSERT_DEATH_IF_SUPPORTED or ',
             'DAWN_ASSERT_DEBUG_DEATH_IF_SUPPORTED instead.',
         ),
         treat_as_error=True,
@@ -197,6 +205,15 @@ _BANNED_CPP_PATTERNS: Sequence[BanRule] = (
         explanation=(
             'Use explicit(false) for constructors, and ',
             'NOLINTNEXTLINE(google-explicit-constructor) for operators.',
+        ),
+        treat_as_error=True,
+        surface_as_gerrit_lint=True,
+    ),
+    BanRule(
+        pattern=r'/(?<!operator)\^\(',
+        excluded_paths=(r'\.(cc|cpp)$', ),
+        explanation=(
+            'Use C++ Lambdas []() { } instead of Objective-C Blocks ^() { }.',
         ),
         treat_as_error=True,
         surface_as_gerrit_lint=True,

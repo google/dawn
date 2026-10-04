@@ -38,17 +38,17 @@
 
 namespace dawn::native {
 
-std::unique_ptr<ErrorData> ErrorData::Create(InternalErrorType type,
-                                             std::string message,
-                                             const char* file,
-                                             const char* function,
-                                             int line) {
-    std::unique_ptr<ErrorData> error = std::make_unique<ErrorData>(type, std::move(message));
-    error->AppendBacktrace(file, function, line);
+ErrorData ErrorData::Create(InternalErrorType type,
+                            std::string message,
+                            const char* file,
+                            const char* function,
+                            int line) {
+    ErrorData error(type, std::move(message));
+    error.AppendBacktrace(file, function, line);
 
     auto [var, present] = GetEnvironmentVar("DAWN_DEBUG_BREAK_ON_ERROR");
     if (present && !var.empty() && var != "0") {
-        ErrorLog() << error->GetMessage();
+        ErrorLog() << error.GetMessage();
         DAWN_FORCE_CRASH();
     }
     return error;

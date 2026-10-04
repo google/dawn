@@ -327,11 +327,6 @@ TEST_P(CopyExternalTextureForBrowserTests_Basic, Copy) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm() &&
                           srcCopyRect != CopyRect::TopLeft);
 
-    // Test skip due to crbug.com/dawn/1719
-    DAWN_SUPPRESS_TEST_IF(IsWARP() && srcCopyRect != CopyRect::TopLeft &&
-                          srcCopyRect != CopyRect::FullSize && dstCopyRect != CopyRect::TopLeft &&
-                          dstCopyRect != CopyRect::FullSize && scaleType == ScaleType::DownScale);
-
     float scaleFactor = 1.0;
 
     switch (scaleType) {

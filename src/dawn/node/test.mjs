@@ -257,12 +257,27 @@ describe('tests', async () => {
         });
         texture.destroy();
       });
-      assert.ok(() => e?.error.message.includes('maxTextureDimension2D'));
+      assert.ok(() => e?.error.message.includes('exceeded maximum texture size'));
     });
 
   });
 
-  describe('worker threads tests', () => {
+  await describe('prototype toStringTag', async () => {
+    await it('the property is present in the prototype', async () => {
+      assert.ok(() => GPU.prototype[Symbol.toStringTag] === 'GPU');
+
+      const descriptor = Object.getOwnPropertyDescriptor(GPU.prototype, Symbol.toStringTag);
+      assert.ok(() => !descriptor.writable);
+      assert.ok(() => !descriptor.enumerable);
+      assert.ok(() => descriptor.configurable);
+    });
+
+    await it('toString.call works on instances', async () => {
+      assert.ok(() => Object.prototype.toString.call(navigator.gpu) === '[object GPU]');
+    });
+  });
+
+  await describe('worker threads tests', async () => {
     it('can request adapter in multiple worker threads simultaneously', async () => {
       const numWorkers = 4;
       const workers = [];

@@ -661,8 +661,6 @@ class BufferViewTest : public DawnTest {
 };
 
 TEST_P(BufferViewTest, BufferViewArrayLength) {
-    // TODO(crbug.com/tint/512253562): Older WARP gets incorrect results, but newer WARP passes.
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
     // TODO(crbug.com/518635945): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 

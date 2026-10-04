@@ -52,9 +52,9 @@ namespace dawn::native {
 
 namespace {
 
-MaybeError ValidateTextureViewFormatCompatibility(const DeviceBase* device,
-                                                  const Format& format,
-                                                  wgpu::TextureFormat viewFormatEnum) {
+MaybeValError ValidateTextureViewFormatCompatibility(const DeviceBase* device,
+                                                     const Format& format,
+                                                     wgpu::TextureFormat viewFormatEnum) {
     const Format* viewFormat;
     DAWN_TRY_ASSIGN(viewFormat, device->GetInternalFormat(viewFormatEnum));
 
@@ -69,10 +69,10 @@ MaybeError ValidateTextureViewFormatCompatibility(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateCanViewTextureAs(const DeviceBase* device,
-                                    const TextureBase* texture,
-                                    const Format& viewFormat,
-                                    wgpu::TextureAspect aspect) {
+MaybeValError ValidateCanViewTextureAs(const DeviceBase* device,
+                                       const TextureBase* texture,
+                                       const Format& viewFormat,
+                                       wgpu::TextureAspect aspect) {
     const Format& format = texture->GetFormat();
 
     if (aspect != wgpu::TextureAspect::All) {
@@ -145,7 +145,7 @@ bool IsTextureViewDimensionCompatibleWithTextureDimension(
     DAWN_UNREACHABLE();
 }
 
-MaybeError ValidateDepthOrArrayLayersIsCompatibleWithTextureBindingViewDimension(
+MaybeValError ValidateDepthOrArrayLayersIsCompatibleWithTextureBindingViewDimension(
     wgpu::TextureViewDimension textureBindingViewDimension,
     uint32_t depthOrArrayLayers) {
     switch (textureBindingViewDimension) {
@@ -190,9 +190,9 @@ bool IsArrayLayerValidForTextureViewDimension(wgpu::TextureViewDimension texture
     DAWN_UNREACHABLE();
 }
 
-MaybeError ValidateSampleCount(const TextureDescriptor* descriptor,
-                               wgpu::TextureUsage usage,
-                               const Format* format) {
+MaybeValError ValidateSampleCount(const TextureDescriptor* descriptor,
+                                  wgpu::TextureUsage usage,
+                                  const Format* format) {
     DAWN_INVALID_IF(!IsValidSampleCount(descriptor->sampleCount),
                     "The sample count (%u) of the texture is not supported.",
                     descriptor->sampleCount);
@@ -234,7 +234,7 @@ MaybeError ValidateSampleCount(const TextureDescriptor* descriptor,
     return {};
 }
 
-MaybeError ValidateTextureViewDimensionCompatibility(
+MaybeValError ValidateTextureViewDimensionCompatibility(
     const DeviceBase* device,
     const TextureBase* texture,
     const UnpackedPtr<TextureViewDescriptor>& descriptor) {
@@ -284,9 +284,9 @@ MaybeError ValidateTextureViewDimensionCompatibility(
     return {};
 }
 
-MaybeError ValidateTextureSize(const DeviceBase* device,
-                               const TextureDescriptor* descriptor,
-                               const Format* format) {
+MaybeValError ValidateTextureSize(const DeviceBase* device,
+                                  const TextureDescriptor* descriptor,
+                                  const Format* format) {
     DAWN_CHECK(descriptor->size.width != 0 && descriptor->size.height != 0 &&
                descriptor->size.depthOrArrayLayers != 0);
     const CombinedLimits& limits = device->GetLimits();
@@ -399,7 +399,7 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateTextureUsageConstraints(
+MaybeValError ValidateTextureUsageConstraints(
     const DeviceBase* device,
     wgpu::TextureDimension textureDimension,
     wgpu::TextureUsage usage,
@@ -491,9 +491,10 @@ wgpu::TextureUsage GetTextureViewUsage(wgpu::TextureUsage sourceTextureUsage,
                                                             : sourceTextureUsage;
 }
 
-MaybeError ValidateTextureComponentSwizzle(const DeviceBase* device,
-                                           const TextureBase* texture,
-                                           const UnpackedPtr<TextureViewDescriptor>& descriptor) {
+MaybeValError ValidateTextureComponentSwizzle(
+    const DeviceBase* device,
+    const TextureBase* texture,
+    const UnpackedPtr<TextureViewDescriptor>& descriptor) {
     if (auto* swizzleDesc = descriptor.Get<TextureComponentSwizzleDescriptor>()) {
         DAWN_INVALID_IF(!device->HasFeature(Feature::TextureComponentSwizzle),
                         "swizzle used without the %s feature enabled.",
@@ -509,10 +510,10 @@ MaybeError ValidateTextureComponentSwizzle(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateTextureViewUsage(const DeviceBase* device,
-                                    const TextureBase* texture,
-                                    wgpu::TextureUsage usage,
-                                    const Format* format) {
+MaybeValError ValidateTextureViewUsage(const DeviceBase* device,
+                                       const TextureBase* texture,
+                                       wgpu::TextureUsage usage,
+                                       const Format* format) {
     wgpu::TextureUsage inheritedUsage = GetTextureViewUsage(texture->GetUsage(), usage);
 
     DAWN_INVALID_IF(!IsSubset(inheritedUsage, texture->GetUsage()),
@@ -564,6 +565,43 @@ bool CopySrcNeedsInternalTextureBindingUsage(const DeviceBase* device, const For
         device->IsToggleEnabled(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy)) {
         return true;
     }
+    // Non-RGBA unorm
+    if ((format.format == wgpu::TextureFormat::R8Unorm ||
+         format.format == wgpu::TextureFormat::RG8Unorm) &&
+        device->IsToggleEnabled(Toggle::UseBlitForNonRGBAUnormTextureToBufferCopy)) {
+        return true;
+    }
+    // Non-RGBA float
+    if ((format.format == wgpu::TextureFormat::R32Float ||
+         format.format == wgpu::TextureFormat::RG32Float) &&
+        device->IsToggleEnabled(Toggle::UseBlitForNonRGBAFloatTextureToBufferCopy)) {
+        return true;
+    }
+    // Uint
+    if ((format.format == wgpu::TextureFormat::R8Uint ||
+         format.format == wgpu::TextureFormat::RG8Uint ||
+         format.format == wgpu::TextureFormat::RGBA8Uint ||
+         format.format == wgpu::TextureFormat::R16Uint ||
+         format.format == wgpu::TextureFormat::RG16Uint ||
+         format.format == wgpu::TextureFormat::RGBA16Uint ||
+         format.format == wgpu::TextureFormat::R32Uint ||
+         format.format == wgpu::TextureFormat::RG32Uint ||
+         format.format == wgpu::TextureFormat::RGB10A2Uint) &&
+        device->IsToggleEnabled(Toggle::UseBlitForUintTextureToBufferCopy)) {
+        return true;
+    }
+    // Sint
+    if ((format.format == wgpu::TextureFormat::R8Sint ||
+         format.format == wgpu::TextureFormat::RG8Sint ||
+         format.format == wgpu::TextureFormat::RGBA8Sint ||
+         format.format == wgpu::TextureFormat::R16Sint ||
+         format.format == wgpu::TextureFormat::RG16Sint ||
+         format.format == wgpu::TextureFormat::RGBA16Sint ||
+         format.format == wgpu::TextureFormat::R32Sint ||
+         format.format == wgpu::TextureFormat::RG32Sint) &&
+        device->IsToggleEnabled(Toggle::UseBlitForSintTextureToBufferCopy)) {
+        return true;
+    }
     // RGB9E5Ufloat
     if (format.format == wgpu::TextureFormat::RGB9E5Ufloat &&
         device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy)) {
@@ -579,13 +617,6 @@ bool CopySrcNeedsInternalTextureBindingUsage(const DeviceBase* device, const For
          format.format == wgpu::TextureFormat::RG16Float ||
          format.format == wgpu::TextureFormat::RGBA16Float) &&
         device->IsToggleEnabled(Toggle::UseBlitForFloat16TextureCopy)) {
-        return true;
-    }
-    // float32
-    if ((format.format == wgpu::TextureFormat::R32Float ||
-         format.format == wgpu::TextureFormat::RG32Float ||
-         format.format == wgpu::TextureFormat::RGBA32Float) &&
-        device->IsToggleEnabled(Toggle::UseBlitForFloat32TextureCopy)) {
         return true;
     }
 
@@ -751,7 +782,7 @@ wgpu::ComponentSwizzle ComposeSwizzleComponent(wgpu::TextureComponentSwizzle swi
 
 }  // anonymous namespace
 
-MaybeError ValidateTextureDescriptor(
+MaybeValError ValidateTextureDescriptor(
     const DeviceBase* device,
     const UnpackedPtr<TextureDescriptor>& descriptor,
     AllowMultiPlanarTextureFormat allowMultiPlanar,
@@ -889,9 +920,9 @@ MaybeError ValidateTextureDescriptor(
     return {};
 }
 
-MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
-                                         const TextureBase* texture,
-                                         const UnpackedPtr<TextureViewDescriptor>& descriptor) {
+MaybeValError ValidateTextureViewDescriptor(const DeviceBase* device,
+                                            const TextureBase* texture,
+                                            const UnpackedPtr<TextureViewDescriptor>& descriptor) {
     // Parent texture should have been already validated.
     DAWN_CHECK(texture);
     DAWN_CHECK(!texture->IsError());
@@ -1327,8 +1358,6 @@ wgpu::TextureUsage TextureBase::GetInternalUsage() const {
     return mInternalUsage;
 }
 
-
-
 void TextureBase::AddInternalUsage(wgpu::TextureUsage usage) {
     DAWN_CHECK(!IsError());
     mInternalUsage |= usage;
@@ -1417,7 +1446,7 @@ void TextureBase::SetIsSubresourceContentInitialized(bool isInitialized,
     }
 }
 
-MaybeError TextureBase::ValidateCanUseInSubmitNow() const {
+MaybeValError TextureBase::ValidateCanUseInSubmitNow() const {
     DAWN_CHECK(!IsError());
     if (mState.destroyed || !mState.hasAccess) [[unlikely]] {
         DAWN_INVALID_IF(mState.destroyed, "Destroyed texture %s used in a submit.", this);

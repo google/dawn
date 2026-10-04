@@ -139,6 +139,12 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
                                            size_t size,
                                            std::span<std::byte> target) = 0;
 
+        // Try to wrap the memory handle into a WGPUBuffer and get access to it. Returns a valid
+        // WGPUBuffer if succeeds.
+        virtual WGPUBuffer TryWrapInBuffer(const DawnProcTable* procs,
+                                           WGPUDevice device,
+                                           const WGPUBufferDescriptor* descriptor);
+
       private:
         MemoryHandle(const MemoryHandle&) = delete;
         MemoryHandle& operator=(const MemoryHandle&) = delete;

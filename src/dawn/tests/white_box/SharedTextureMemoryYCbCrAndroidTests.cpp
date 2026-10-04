@@ -779,6 +779,64 @@ TEST_P(SharedTextureMemoryOpaqueYCbCrAndroidForExternalTexture, NoopSampleY8Cb8C
                           1);
 }
 
+// Check that sampling a YCbCr AHB with a linear sampler works.
+TEST_P(SharedTextureMemoryOpaqueYCbCrAndroidForExternalTexture,
+       SampleExternalTextureWithLinearSampler) {
+    const std::array<uint8_t, 4> yData = {50, 100, 150, 200};
+    const std::array<uint8_t, 1> cbData = {130};
+    const std::array<uint8_t, 1> crData = {140};
+    AHardwareBuffer* ahb = MakeY8Cb8Cr8AHB(2, 2, yData, cbData, crData);
+
+    ImportedAHB imported = ImportAHB(ahb);
+    AHardwareBuffer_release(ahb);
+
+    wgpu::ExternalTexture externalTexture =
+        utils::MakePassthroughExternalTexture(device, imported.texture);
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @vertex fn quad(@builtin(vertex_index) i : u32) -> @builtin(position) vec4f {
+            const pos = array(
+                vec2f(-1.0, -1.0),
+                vec2f( 3.0, -1.0),
+                vec2f(-1.0,  3.0));
+            return vec4f(pos[i], 0.0, 1.0);
+        }
+
+        @group(0) @binding(0) var s : sampler;
+        @group(0) @binding(1) var t : texture_external;
+        @fragment fn fs(@builtin(position) pos : vec4f) -> @location(0) vec4f {
+            return textureSampleBaseClampToEdge(t, s, pos.xy / 2);
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.vertex.module = module;
+    pDesc.cFragment.module = module;
+    pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
+
+    // Provide a sampler with Linear filtering.
+    wgpu::SamplerDescriptor sDesc;
+    sDesc.minFilter = wgpu::FilterMode::Linear;
+    sDesc.magFilter = wgpu::FilterMode::Linear;
+    wgpu::Sampler linearSampler = device.CreateSampler(&sDesc);
+
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                              {{0, linearSampler}, {1, externalTexture}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    utils::BasicRenderPass renderPass =
+        utils::CreateBasicRenderPass(device, 2, 2, wgpu::TextureFormat::RGBA8Unorm);
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bg);
+    pass.Draw(3);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+}
+
 // Check that a pipeline works when JITted with a mixture of RGBA / YCbCr / Multiplanar external
 // textures. Rotate the external textures in multiple draws to check that the JIT caching doesn't
 // reuse when it shouldn't.

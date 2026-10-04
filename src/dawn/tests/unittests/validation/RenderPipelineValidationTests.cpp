@@ -408,6 +408,37 @@ TEST_F(RenderPipelineValidationTest, ColorTargetStateRequired) {
     }
 }
 
+// Test that targetCount is checked before dereferencing targets.
+TEST_F(RenderPipelineValidationTest, TargetCountOverLimitsNotAccessed) {
+    // This is a test for dawn::native only.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    // Check that targets is not accessed if their count is higher that the color attachment limit.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.cFragment.targetCount = kMaxColorAttachments + 1;
+        descriptor.cFragment.targets = nullptr;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+
+    // Check that a targetCount that would end up being ColorAttachmentIndex{1} still causes a
+    // validation error.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.cFragment.targetCount = 256 + 1;
+        descriptor.cFragment.targets = nullptr;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+}
+
 // Tests that target blend must not be set if the format is undefined.
 TEST_F(RenderPipelineValidationTest, UndefinedColorStateFormatWithBlend) {
     {
@@ -1247,6 +1278,23 @@ TEST_F(RenderPipelineValidationTest, AlphaToCoverageAndColorTargetAlpha) {
     }
 }
 
+// Tests when alphaToCoverageEnabled is true, targets[0] must be blendable.
+TEST_F(RenderPipelineValidationTest, AlphaToCoverageAndColorTargetBlendable) {
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.multisample.count = 4;
+    descriptor.multisample.alphaToCoverageEnabled = true;
+
+    // Control case: blendable with alpha.
+    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    device.CreateRenderPipeline(&descriptor);
+
+    // Error case: not blendable with alpha.
+    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA32Float;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+}
+
 // Tests that the texture component type in shader must match the bind group layout.
 TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
     constexpr uint32_t kNumTextureComponentType = 3u;
@@ -1661,6 +1709,36 @@ TEST_F(RenderPipelineValidationTest, EntryPointNameRequiredIfNoCompatibleEntryPo
     }
 }
 
+// Test that bufferCount is checked before dereferencing buffers.
+TEST_F(RenderPipelineValidationTest, VertexBufferCountOverLimitsNotAccessed) {
+    // This is a test for dawn::native only.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    // Check that buffers is not accessed if their count is higher that the vertex buffer limit.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.vertex.bufferCount = kMaxVertexBuffers + 1;
+        descriptor.vertex.buffers = nullptr;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+
+    // Check that a bufferCount that would end up being VertexBufferSlot{1} still causes a
+    // validation error.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.vertex.bufferCount = 256 + 1;
+        descriptor.vertex.buffers = nullptr;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+}
 // Test that vertex attrib validation is for the correct entryPoint
 TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
@@ -3593,6 +3671,31 @@ TEST_F(RG11B10UfloatRenderablePipelineTest, MultisampleSupportWithFeatureEnabled
     descriptor.cFragment.module = fsModule;
     descriptor.cTargets[0].format = wgpu::TextureFormat::RG11B10Ufloat;
     descriptor.multisample.count = 4;
+    device.CreateRenderPipeline(&descriptor);
+}
+
+class AlphaToCoverageBlendableRequirementKillSwitchTest : public RenderPipelineValidationTest {
+    std::vector<const char*> GetEnabledToggles() override {
+        // Disable the AllowUnsafeAPIs toggles in device toggles descriptor to override the
+        // inheritance and create a device disallowing unsafe apis.
+        return {"allow_alpha_to_coverage_not_blendable"};
+    }
+};
+
+// Tests when alphaToCoverageEnabled is true, targets[0] must be blendable.
+TEST_F(AlphaToCoverageBlendableRequirementKillSwitchTest, KillSwitchAllowsNonBlendable) {
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.multisample.count = 4;
+    descriptor.multisample.alphaToCoverageEnabled = true;
+
+    // Control case: blendable with alpha.
+    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    device.CreateRenderPipeline(&descriptor);
+
+    // Success case: not blendable with alpha is allowed with the killswitch
+    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA32Float;
     device.CreateRenderPipeline(&descriptor);
 }
 

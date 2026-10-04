@@ -50,8 +50,10 @@ namespace opengl {
 
 class Device;
 class EmulatedTextureBuiltinRegistrar;
+// NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
 class PipelineLayout;
 struct OpenGLFunctions;
+struct StorageBufferSizeImmediateInfo;
 
 #define COMBINED_SAMPLER_ELEMENT_MEMBERS(X)                                                 \
     X(BindGroupIndex, group)                                                                \
@@ -84,16 +86,20 @@ class ShaderModule final : public ShaderModuleBase {
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions);
 
-    ResultOrError<GLuint> CompileShader(const OpenGLFunctions& gl,
-                                        const ProgrammableStage& programmableStage,
-                                        SingleShaderStage stage,
-                                        const ImmediateMask& pipelineImmediateMask,
-                                        VertexAttributeMask bgraSwizzleAttributes,
-                                        std::vector<CombinedSampler>* combinedSamplersOut,
-                                        const PipelineLayout* layout,
-                                        EmulatedTextureBuiltinRegistrar* emulatedTextureBuiltins,
-                                        bool* needsSSBOLengthUniformBuffer,
-                                        Extent3D* workgroupSize);
+    ResultOrValError<std::string> CompileShader(
+        const OpenGLFunctions& gl,
+        const ProgrammableStage& programmableStage,
+        SingleShaderStage stage,
+        const ImmediateMask& pipelineImmediateMask,
+        VertexAttributeMask bgraSwizzleAttributes,
+        std::vector<CombinedSampler>* combinedSamplersOut,
+        const PipelineLayout* layout,
+        const StorageBufferSizeImmediateInfo& storageBufferSizeInfo,
+        EmulatedTextureBuiltinRegistrar* emulatedTextureBuiltins,
+        Extent3D* workgroupSize);
+    ResultOrError<GLuint> CreateGLShaderObject(const OpenGLFunctions& gl,
+                                               SingleShaderStage stage,
+                                               const std::string& glslSrc);
 
   private:
     ShaderModule(Device* device,

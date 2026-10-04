@@ -42,6 +42,7 @@ import (
 	"unicode/utf8"
 
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/glob"
 )
 
 // Analyze mode path stems that get used multiple times
@@ -800,6 +801,27 @@ func generateLcovReport(t *taskConfig, fuzzer string, binDir string, output stri
 		"-p", inputs,
 		"--coverage-tools-dir", binDir,
 	}
+
+	// Add dynamic libraries for coverage
+	if files, err := glob.Glob(filepath.Join(binDir, "**"), t.osWrapper); err == nil {
+		for _, f := range files {
+			ext := filepath.Ext(f)
+			// coverage.py accepts shared libraries via -a
+			if ext == ".so" || ext == ".dylib" || ext == ".dll" || strings.Contains(f, ".so.") || strings.Contains(f, ".dylib.") {
+				cmdArgs = append(cmdArgs, "-a", f)
+			}
+		}
+	}
+
+	dawnRoot := fileutils.DawnRoot(t.osWrapper)
+	if buildDir, err := filepath.Abs(t.build); err == nil {
+		// Path equivalence for Mesa source resolution
+		cmdArgs = append(cmdArgs, "--path-equivalence=/third_party/mesa,"+filepath.Join(dawnRoot, "third_party", "mesa"))
+		cmdArgs = append(cmdArgs, "--path-equivalence="+filepath.Join(buildDir, "src")+","+filepath.Join(buildDir, "gen", "third_party", "mesa", "mesa_build_setup", "src"))
+	}
+
+	// Exclude /usr/.*
+	cmdArgs = append(cmdArgs, "-i", "\\/usr\\/.*")
 
 	if _, err := t.runCmd("vpython3", cmdArgs...); err != nil {
 		return fmt.Errorf("failed to execute coverage.py: %w", err)

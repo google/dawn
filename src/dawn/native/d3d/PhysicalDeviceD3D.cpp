@@ -53,6 +53,10 @@ Backend* PhysicalDevice::GetBackendBase() const {
     return mBackend;
 }
 
+const LUID& PhysicalDevice::GetAdapterLUID() const {
+    return mAdapterLUID;
+}
+
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
     InstanceBase*,
     const Surface*) const {
@@ -92,6 +96,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
     mDeviceId = adapterDesc.DeviceId;
     mVendorId = adapterDesc.VendorId;
     mName = WCharToUTF8(adapterDesc.Description);
+    mAdapterLUID = adapterDesc.AdapterLuid;
 
     if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
         mAdapterType = wgpu::AdapterType::CPU;

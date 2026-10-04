@@ -27,6 +27,7 @@
 
 #include "src/dawn/node/binding/Converter.h"
 
+#include <algorithm>
 #include <cassert>
 #include <limits>
 #include <sstream>
@@ -178,8 +179,11 @@ bool Converter::Convert(BufferSource& out, interop::BufferSource in) {
     if (auto* view = std::get_if<interop::ArrayBufferView>(&in)) {
         std::visit(
             [&](auto&& v) {
-                auto arr = v.ArrayBuffer();
-                out.data = DAWN_UNSAFE_TODO(static_cast<uint8_t*>(arr.Data()) + v.ByteOffset());
+                // SAFETY: Node-API does not expose a span directly. ByteOffset() and
+                // ByteLength() represent the view into the backing ArrayBuffer, guaranteeing
+                // the buffer provides storage of at least ByteOffset() + ByteLength() bytes.
+                out.data = DAWN_UNSAFE_BUFFERS(static_cast<uint8_t*>(v.ArrayBuffer().Data()) +
+                                               v.ByteOffset());
                 out.size = v.ByteLength();
                 out.bytesPerElement = v.ElementSize();
             },
@@ -1183,6 +1187,16 @@ bool Converter::Convert(wgpu::VertexBufferLayout& out, const interop::GPUVertexB
            Convert(out.arrayStride, in.arrayStride) && Convert(out.stepMode, in.stepMode);
 }
 
+bool Converter::Convert(wgpu::VertexBufferLayout& out,
+                        const std::optional<interop::GPUVertexBufferLayout>& in) {
+    if (in.has_value()) {
+        return Convert(out, in.value());
+    }
+    out = {};
+    out.stepMode = wgpu::VertexStepMode::Undefined;
+    return true;
+}
+
 bool Converter::Convert(wgpu::VertexState& out, const interop::GPUVertexState& in) {
     out = {};
 
@@ -1190,24 +1204,9 @@ bool Converter::Convert(wgpu::VertexState& out, const interop::GPUVertexState& i
     // identifiers. This is so that using "main\0" doesn't match an entryPoint named "main".
     out.entryPoint = in.entryPoint ? ConvertStringReplacingNull(in.entryPoint.value()) : nullptr;
 
-    wgpu::VertexBufferLayout* outBuffers = nullptr;
-    if (!Convert(out.module, in.module) ||                    //
-        !Convert(outBuffers, out.bufferCount, in.buffers) ||  //
-        !Convert(out.constants, out.constantCount, in.constants)) {
-        return false;
-    }
-
-    // Patch up the unused vertex buffer layouts to use wgpu::VertexStepMode::Undefined.
-    // The converter for optional value will have put the default value of wgpu::VertexBufferLayout
-    // that has wgpu::VertexStepMode::Vertex.
-    out.buffers = outBuffers;
-    for (size_t i = 0; i < in.buffers.size(); i++) {
-        if (!in.buffers[i].has_value()) {
-            DAWN_UNSAFE_TODO(outBuffers[i].stepMode = wgpu::VertexStepMode::Undefined);
-        }
-    }
-
-    return true;
+    return Convert(out.module, in.module) &&                     //
+           Convert(out.buffers, out.bufferCount, in.buffers) &&  //
+           Convert(out.constants, out.constantCount, in.constants);
 }
 
 bool Converter::Convert(wgpu::VertexStepMode& out, const interop::GPUVertexStepMode& in) {
@@ -1836,6 +1835,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::FlexibleTextureViews:
         case wgpu::FeatureName::AdapterPropertiesWGPU:
         case wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle:
+        case wgpu::FeatureName::SharedBufferMemoryHostPointer:
         case wgpu::FeatureName::SharedTextureMemoryD3D12Resource:
         case wgpu::FeatureName::Unorm16FormatsForExternalTexture:
         case wgpu::FeatureName::OpaqueYCbCrAndroidForExternalTexture:
@@ -1900,6 +1900,9 @@ bool Converter::Convert(wgpu::WGSLLanguageFeatureName& out, interop::WGSLLanguag
         case interop::WGSLLanguageFeatureName::kTextureFormatsTier1:
             out = wgpu::WGSLLanguageFeatureName::TextureFormatsTier1;
             return true;
+        case interop::WGSLLanguageFeatureName::kMultisampledArrayTextures:
+            out = wgpu::WGSLLanguageFeatureName::MultisampledArrayTextures;
+            return true;
     }
     return false;
 }
@@ -1956,6 +1959,9 @@ bool Converter::Convert(interop::WGSLLanguageFeatureName& out, wgpu::WGSLLanguag
             return true;
         case wgpu::WGSLLanguageFeatureName::TextureFormatsTier1:
             out = interop::WGSLLanguageFeatureName::kTextureFormatsTier1;
+            return true;
+        case wgpu::WGSLLanguageFeatureName::MultisampledArrayTextures:
+            out = interop::WGSLLanguageFeatureName::kMultisampledArrayTextures;
             return true;
 
         case wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented:
@@ -2069,19 +2075,10 @@ bool Converter::Convert(wgpu::OptionalBool& out, const std::optional<bool>& in) 
     return true;
 }
 
-char* Converter::ConvertStringReplacingNull(std::string_view in) {
-    char* out = Allocate<char>(in.size() + 1);
-    DAWN_UNSAFE_TODO(out[in.size()] = '\0');
-
-    for (size_t i = 0; i < in.size(); i++) {
-        if (in[i] == '\0') {
-            DAWN_UNSAFE_TODO(out[i] = '#');
-        } else {
-            DAWN_UNSAFE_TODO(out[i] = in[i]);
-        }
-    }
-
-    return out;
+wgpu::StringView Converter::ConvertStringReplacingNull(std::string_view in) {
+    std::span<char> sp = AllocateArray<char>(in.size());
+    std::ranges::replace_copy(in, sp.begin(), '\0', '#');
+    return std::string_view(sp.begin(), sp.end());
 }
 
 bool Converter::Throw(std::string&& message) {
@@ -2143,6 +2140,31 @@ bool ConvertDataElementsToSpan(Napi::Env env,
     *out = DAWN_UNSAFE_TODO(std::span<const uint8_t>(reinterpret_cast<const uint8_t*>(src.data),
                                                      static_cast<size_t>(size64)));
 
+    return true;
+}
+
+bool ConvertDynamicOffsetsToSpan(Napi::Env env,
+                                 std::span<const uint32_t>* out,
+                                 interop::Uint32Array data,
+                                 interop::GPUSize64 data_start,
+                                 interop::GPUSize32 data_length) {
+    if (data_start > data.ElementLength()) {
+        Napi::RangeError::New(env, "dynamicOffsetsDataStart is out of bound of dynamicOffsetData")
+            .ThrowAsJavaScriptException();
+        return false;
+    }
+
+    if (data_length > data.ElementLength() - data_start) {
+        Napi::RangeError::New(env,
+                              "dynamicOffsetsDataLength + dynamicOffsetsDataStart is out of "
+                              "bound of dynamicOffsetData")
+            .ThrowAsJavaScriptException();
+        return false;
+    }
+
+    // SAFETY: data provides storage of data.ElementLength() elements.
+    auto span = DAWN_UNSAFE_BUFFERS(std::span{data.Data(), data.ElementLength()});
+    *out = span.subspan(data_start, data_length);
     return true;
 }
 

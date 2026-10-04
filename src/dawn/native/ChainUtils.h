@@ -77,10 +77,10 @@ UnpackedPtr<T> Unpack(T* chain);
 // Unpacks chained structures into UnpackedPtr<T> while applying validation.
 template <typename T,
           typename = std::enable_if_t<detail::ExtensibilityFor<T> == detail::Extensibility::In>>
-ResultOrError<UnpackedPtr<T>> ValidateAndUnpack(const T* chain);
+ResultOrValError<UnpackedPtr<T>> ValidateAndUnpack(const T* chain);
 template <typename T,
           typename = std::enable_if_t<detail::ExtensibilityFor<T> == detail::Extensibility::Out>>
-ResultOrError<UnpackedPtr<T>> ValidateAndUnpack(T* chain);
+ResultOrValError<UnpackedPtr<T>> ValidateAndUnpack(T* chain);
 
 //
 // Wrapper class for unpacked pointers. The classes essentially acts like a const T* or T* with
@@ -115,13 +115,13 @@ class UnpackedPtr {
 
     // Validation functions. See implementations of these below for usage, details, and examples.
     template <typename... Branches>
-    ResultOrError<wgpu::SType> ValidateBranches() const;
+    ResultOrValError<wgpu::SType> ValidateBranches() const;
     template <typename... Allowed>
-    MaybeError ValidateSubset() const;
+    MaybeValError ValidateSubset() const;
 
   private:
     friend UnpackedPtr<T> Unpack<T>(PtrType chain);
-    friend ResultOrError<UnpackedPtr<T>> ValidateAndUnpack<T>(PtrType chain);
+    friend ResultOrValError<UnpackedPtr<T>> ValidateAndUnpack<T>(PtrType chain);
 
     explicit UnpackedPtr(PtrType packed) : mStruct(packed) {}
 
@@ -222,7 +222,7 @@ template <typename UnpackedPtrT, typename... Allowed>
 struct SubsetValidator {
     using BitsetType = typename UnpackedPtrT::BitsetType;
 
-    static MaybeError Validate(const UnpackedPtrT& unpacked, const BitsetType& bitset) {
+    static MaybeValError Validate(const UnpackedPtrT& unpacked, const BitsetType& bitset) {
         // Allowed set of extensions includes the branch root as well.
         constexpr auto allowed = detail::UnpackedPtrBitsetForExts<
             UnpackedPtrT, typename detail::PtrTypeFor<UnpackedPtrT, Allowed>::Type...>;
@@ -313,7 +313,7 @@ std::string UnpackedPtr<T>::ToString() const {
 // Any other configuration is deemed invalid.
 template <typename T>
 template <typename... Branches>
-ResultOrError<wgpu::SType> UnpackedPtr<T>::ValidateBranches() const {
+ResultOrValError<wgpu::SType> UnpackedPtr<T>::ValidateBranches() const {
     using Validator = detail::BranchesValidator<UnpackedPtr<T>, Branches...>;
 
     wgpu::SType match = wgpu::SType(0u);
@@ -338,7 +338,7 @@ ResultOrError<wgpu::SType> UnpackedPtr<T>::ValidateBranches() const {
 // will further enforce that Ext2 is not on the chain in the example above.
 template <typename T>
 template <typename... Allowed>
-MaybeError UnpackedPtr<T>::ValidateSubset() const {
+MaybeValError UnpackedPtr<T>::ValidateSubset() const {
     return detail::SubsetValidator<UnpackedPtr<T>, Allowed...>::Validate(*this, mBitset);
 }
 

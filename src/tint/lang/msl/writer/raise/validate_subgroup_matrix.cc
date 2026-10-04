@@ -81,6 +81,12 @@ struct State {
         }
 
         for (auto& i : info.multiplies) {
+            if (i.input_type != i.output_type) {
+                diagnostics_.AddError(Source{})
+                    << "Mixed precision subgroup matrix multiply is not supported by the device";
+                break;
+            }
+
             if (enable_tensors) {
                 // At least one dimension must be 32.
                 if (i.M != 32 || i.N != 32 || i.K != 32) {

@@ -70,6 +70,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_SharedFenceMTLSharedEvent:
         case WGPUFeatureName_SharedBufferMemoryD3D12Resource:
         case WGPUFeatureName_SharedBufferMemoryFromWindowsHandle:
+        case WGPUFeatureName_SharedBufferMemoryHostPointer:
 
         case WGPUFeatureName_Depth32FloatStencil8:
         case WGPUFeatureName_TimestampQuery:

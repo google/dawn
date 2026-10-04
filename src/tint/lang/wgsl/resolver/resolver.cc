@@ -146,12 +146,7 @@ Resolver::Resolver(ProgramBuilder* builder, const wgsl::AllowedFeatures& allowed
       const_eval_(builder->constants, diagnostics_),
       intrinsic_table_{builder->Types(), builder->Symbols()},
       sem_(builder),
-      validator_(builder,
-                 sem_,
-                 enabled_extensions_,
-                 allowed_features_,
-                 atomic_composite_info_,
-                 valid_type_storage_layouts_),
+      validator_(builder, sem_, enabled_extensions_, allowed_features_, atomic_composite_info_),
       allowed_features_(allowed_features) {}
 
 Resolver::~Resolver() = default;
@@ -919,14 +914,16 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
         }
     }
 
-    if (auto* str = const_cast<core::type::Struct*>(return_type->As<core::type::Struct>())) {
-        if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, str,
+    if (decl->return_type && return_type->IsConstructible()) {
+        if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, return_type,
                                           decl->return_type->source)) {
             AddNote(decl->return_type)
                 << "while instantiating return type for " << decl->name->symbol.NameView();
             return nullptr;
         }
+    }
 
+    if (auto* str = const_cast<core::type::Struct*>(return_type->As<core::type::Struct>())) {
         switch (decl->PipelineStage()) {
             case ast::PipelineStage::kVertex:
                 str->AddUsage(core::type::PipelineStageUsage::kVertexOutput);
@@ -2747,6 +2744,8 @@ const core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
             return check_no_tmpl_args(b.create<core::type::ExternalTexture>());
         case core::BuiltinType::kTextureMultisampled2D:
             return MultisampledTexture(ident, core::type::TextureDimension::k2d);
+        case core::BuiltinType::kTextureMultisampled2DArray:
+            return MultisampledTexture(ident, core::type::TextureDimension::k2dArray);
         case core::BuiltinType::kTextureStorage1D:
             return StorageTexture(ident, core::type::TextureDimension::k1d);
         case core::BuiltinType::kTextureStorage2D:
@@ -4610,6 +4609,12 @@ sem::Statement* Resolver::AssignmentStatement(const ast::AssignmentStatement* st
             rhs = Load(Materialize(rhs, lhs_type));
         } else {
             rhs = Load(rhs);
+            if (rhs && rhs->Type()->UnwrapRef()->IsConstructible()) {
+                if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, rhs->Type(),
+                                                  stmt->rhs->source)) {
+                    return false;
+                }
+            }
         }
 
         TINT_RET_IF(!rhs);

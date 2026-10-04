@@ -106,6 +106,9 @@ class InlineMemoryTransferService : public MemoryTransferService {
 
         ~MemoryHandleWithSharedMemoryImpl() override = default;
 
+        // `InlineSharedMemoryManager::CreateSharedMemory` guarantees zero-initialized memory.
+        bool IsInitialized() const override { return true; }
+
         size_t GetSerializeCreateSize() const override { return sizeof(SharedMemoryHandle); }
 
         void SerializeCreate(std::span<volatile std::byte> serializeSpace) const override {

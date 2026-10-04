@@ -271,44 +271,20 @@ void GenerateTextureBuiltinFromUniformData(
     }
 }
 
-bool GenerateArrayLengthFromuniformData(
+void GenerateArrayLengthFromImmediateData(
     const BindingInfoArray& moduleBindingInfo,
-    const PipelineLayout* layout,
-    SingleShaderStage stage,
-    tint::glsl::writer::ArrayLengthFromUniformOptions& options) {
-    const PipelineLayout::BindingIndexInfo& indexInfo = layout->GetBindingIndexInfo();
-
-    for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
-        const BindGroupLayoutInternalBase* bgl = layout->GetBindGroupLayout(group);
-
-        for (BindingIndex binding : bgl->GetBufferIndices()) {
-            const BindingInfo& bindingInfo = bgl->GetBindingInfo(binding);
-
-            // Skip bindings that aren't visible to this stage.
-            if (!(bindingInfo.visibility & StageBit(stage))) {
+    const StorageBufferSizeImmediateInfo& storageBufferSizeInfo,
+    tint::glsl::writer::ArrayLengthFromImmediateOptions& options) {
+    for (auto [group, bindingInfos] : Enumerate(storageBufferSizeInfo.bindings)) {
+        for (const auto& bindingInfo : bindingInfos) {
+            if (!moduleBindingInfo[group].contains(bindingInfo.bindingNumber)) {
                 continue;
             }
-
-            switch (std::get<BufferBindingInfo>(bindingInfo.bindingLayout).type) {
-                case wgpu::BufferBindingType::Storage:
-                case kInternalStorageBufferBinding:
-                case wgpu::BufferBindingType::ReadOnlyStorage:
-                case kInternalReadOnlyStorageBufferBinding: {
-                    // Use ssbo index as the indices for the buffer size lookups
-                    // in the array length from uniform transform.
-                    tint::BindingPoint srcBindingPoint = {uint32_t{group},
-                                                          uint32_t{bindingInfo.binding}};
-                    FlatBindingIndex ssboIndex = indexInfo[group][binding];
-                    options.bindpoint_to_size_index.emplace(srcBindingPoint, uint32_t{ssboIndex});
-                    break;
-                }
-                default:
-                    break;
-            }
+            tint::BindingPoint srcBindingPoint = {uint32_t{group},
+                                                  uint32_t{bindingInfo.bindingNumber}};
+            options.bindpoint_to_size_index.emplace(srcBindingPoint, bindingInfo.sizeIndex);
         }
     }
-
-    return options.bindpoint_to_size_index.size() > 0;
 }
 
 }  // namespace
@@ -352,7 +328,7 @@ ShaderModule::ShaderModule(Device* device,
                            std::vector<tint::wgsl::Extension> internalExtensions)
     : ShaderModuleBase(device, descriptor, std::move(internalExtensions)) {}
 
-ResultOrError<GLuint> ShaderModule::CompileShader(
+ResultOrValError<std::string> ShaderModule::CompileShader(
     const OpenGLFunctions& gl,
     const ProgrammableStage& programmableStage,
     SingleShaderStage stage,
@@ -360,8 +336,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     VertexAttributeMask bgraSwizzleAttributes,
     std::vector<CombinedSampler>* combinedSamplersOut,
     const PipelineLayout* layout,
+    const StorageBufferSizeImmediateInfo& storageBufferSizeInfo,
     EmulatedTextureBuiltinRegistrar* emulatedTextureBuiltins,
-    bool* needsSSBOLengthUniformBuffer,
     Extent3D* workgroupSize) {
     TRACE_EVENT(DAWN_TRACE_CATEGORY(), "TranslateToGLSL");
 
@@ -414,21 +390,16 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.adapterSupportedLimits = UnsafeUnserializedValue(
         LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1));
 
-    if (GetDevice()->IsToggleEnabled(Toggle::GLUseArrayLengthFromUniform)) {
-        *needsSSBOLengthUniformBuffer = GenerateArrayLengthFromuniformData(
-            moduleBindingInfo, layout, stage, req.tintOptions.array_length_from_uniform);
-        if (*needsSSBOLengthUniformBuffer) {
-            req.tintOptions.use_array_length_from_uniform = true;
-            req.tintOptions.array_length_from_uniform.ubo_binding = {
-                .group = kMaxBindGroups + 2,
-                .binding = 0,
-            };
-            bindings.uniform.emplace(
-                req.tintOptions.array_length_from_uniform.ubo_binding,
-                tint::BindingPoint{
-                    .group = 0,
-                    .binding = uint32_t{layout->GetInternalArrayLengthUniformBinding()},
-                });
+    if (GetDevice()->IsToggleEnabled(Toggle::GLUseArrayLengthFromImmediate)) {
+        GenerateArrayLengthFromImmediateData(moduleBindingInfo, storageBufferSizeInfo,
+                                             req.tintOptions.array_length_from_immediate);
+        if (!req.tintOptions.array_length_from_immediate.bindpoint_to_size_index.empty()) {
+            req.tintOptions.array_length_from_immediate.buffer_sizes_offset =
+                stage == SingleShaderStage::Compute
+                    ? GetImmediateByteOffsetInPipeline(&ComputeImmediates::storageBufferSizes,
+                                                       pipelineImmediateMask)
+                    : GetImmediateByteOffsetInPipeline(&RenderImmediates::storageBufferSizes,
+                                                       pipelineImmediateMask);
         }
     }
 
@@ -455,17 +426,20 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
     req.tintOptions.minimum_immediate_size =
         checked_cast<uint32_t>(immediateCount * kImmediateElementByteSize);
-    if (HasImmediates(&RenderImmediates::firstVertex, pipelineImmediateMask)) {
+    if (stage != SingleShaderStage::Compute &&
+        HasImmediates(&RenderImmediates::firstVertex, pipelineImmediateMask)) {
         req.tintOptions.first_vertex_offset = GetImmediateByteOffsetInPipelineIfAny(
             &RenderImmediates::firstVertex, pipelineImmediateMask);
     }
 
-    if (HasImmediates(&RenderImmediates::firstInstance, pipelineImmediateMask)) {
+    if (stage != SingleShaderStage::Compute &&
+        HasImmediates(&RenderImmediates::firstInstance, pipelineImmediateMask)) {
         req.tintOptions.first_instance_offset = GetImmediateByteOffsetInPipelineIfAny(
             &RenderImmediates::firstInstance, pipelineImmediateMask);
     }
 
-    if (HasImmediates(&RenderImmediates::clampFragDepth, pipelineImmediateMask)) {
+    if (stage != SingleShaderStage::Compute &&
+        HasImmediates(&RenderImmediates::clampFragDepth, pipelineImmediateMask)) {
         uint32_t offsetStartBytes = GetImmediateByteOffsetInPipeline(
             &RenderImmediates::clampFragDepth, pipelineImmediateMask);
         req.tintOptions.depth_range_offsets = {offsetStartBytes,
@@ -495,8 +469,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.tintOptions.disable_integer_range_analysis =
         !GetDevice()->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
-    req.tintOptions.use_uniform_buffers =
-        !GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);
+    req.tintOptions.has_gl_ext_conservative_depth =
+        gl.IsGLExtensionSupported("GL_EXT_conservative_depth");
 
     CacheResult<GLSLCompilation> compilationResult;
     DAWN_TRY_LOAD_OR_RUN(
@@ -562,8 +536,15 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         GetDevice()->EmitLog(wgpu::LoggingType::Info, dumpedMsg.str().c_str());
     }
 
+    GetDevice()->GetBlobCache()->EnsureStored(compilationResult);
+    return compilationResult->glsl;
+}
+
+ResultOrError<GLuint> ShaderModule::CreateGLShaderObject(const OpenGLFunctions& gl,
+                                                         SingleShaderStage stage,
+                                                         const std::string& glslSrc) {
     GLuint shader = DAWN_GL_TRY(gl, CreateShader(GLShaderType(stage)));
-    const char* source = compilationResult->glsl.c_str();
+    const char* source = glslSrc.c_str();
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetDevice()->GetPlatform(), "GLSL.CompileShader");
 
@@ -581,12 +562,10 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             std::vector<char> buffer(infoLogLength);
             DAWN_GL_TRY(gl, GetShaderInfoLog(shader, infoLogLength, nullptr, &buffer[0]));
             DAWN_GL_TRY(gl, DeleteShader(shader));
-            return DAWN_VALIDATION_ERROR("%s\nProgram compilation failed:\n%s", source,
-                                         buffer.data());
+            return DAWN_PIPELINE_UNCATEGORIZED_ERROR("%s\nProgram compilation failed:\n%s", source,
+                                                     buffer.data());
         }
     }
-
-    GetDevice()->GetBlobCache()->EnsureStored(compilationResult);
 
     return shader;
 }

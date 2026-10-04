@@ -22,7 +22,7 @@ import androidx.test.filters.MediumTest
 import androidx.webgpu.helper.GPUAndroidHardwareBufferUtil
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
-import androidx.webgpu.GPU.createInstance
+import androidx.webgpu.GPU.createGPUInstance
 import androidx.webgpu.helper.initLibrary
 import androidx.webgpu.helper.toSyncFence
 import java.util.concurrent.Executor
@@ -64,7 +64,7 @@ class GPUSyncFenceTest {
     fun setup() = runBlocking {
         // 1. Check features BEFORE requesting the device
         initLibrary()
-        val instance = createInstance(
+        val instance = createGPUInstance(
             GPUInstanceDescriptor().apply {
                 dawnTogglesDescriptor = GPUDawnTogglesDescriptor(
                     enabledToggles = arrayOf("allow_unsafe_apis") // Required to enable experimental SharedTextureMemoryAHardwareBuffer features
@@ -194,7 +194,7 @@ class GPUSyncFenceTest {
     @MediumTest
     @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     fun testSyncFence_lifecycleAndAwaiting() = runBlocking {
-        val unused = webGpu.execute {
+        webGpu.execute {
             val (rgbBuffer, wrapper) = createTestTextureWrapper()
 
             val pipeline = setupPipelineAndDraw(wrapper)
@@ -229,10 +229,10 @@ class GPUSyncFenceTest {
     @ApiRequirement(minApi = 33, onlySkipOnEmulator = true)
     @androidx.test.filters.SdkSuppress(minSdkVersion = 33)
     fun testSyncFence_fromPlatformSyncFence() = runBlocking {
-        val unused = webGpu.execute {
+        webGpu.execute {
             val (rgbBuffer, wrapper) = createTestTextureWrapper()
 
-            val unusedPipeline = setupPipelineAndDraw(wrapper)
+            setupPipelineAndDraw(wrapper).close()
             val fence = requireNotNull(wrapper.endAccess()) { "Sync fence should not be null" }
 
             try {

@@ -768,9 +768,6 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
     // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
-    // TODO(42242119): fail on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
-
     wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
         1, 1, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
         kDepthStencilFormat);
@@ -2637,8 +2634,6 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyBufferToTexture) {
 // Test that 0 lazy clear count happens when we copy buffer to texture to a nonzero mip level
 // (with physical size different from the virtual mip size)
 TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroMipLevel) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
                               wgpu::TextureUsage::TextureBinding;
@@ -2661,8 +2656,6 @@ TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroMipLevel) {
 // Test that 1 lazy clear count happens when we copy buffer to half texture to a nonzero mip level
 // (with physical size different from the virtual mip size)
 TEST_P(CompressedTextureZeroInitTest, HalfCopyToNonZeroMipLevel) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
                               wgpu::TextureUsage::TextureBinding;
@@ -2830,7 +2823,6 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyTextureToTextureMipLevel) {
 TEST_P(CompressedTextureZeroInitTest, Copy2DArrayCompressedB2T2B) {
     // Compatibility mode does not support compressed texture-to-buffer copies.
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     // create srcTexture with data
     wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor(
@@ -2902,6 +2894,74 @@ TEST_P(CompressedTextureZeroInitTest, Copy2DArrayCompressedB2T2B) {
     }
     // Check final contents
     EXPECT_BUFFER_U8_RANGE_EQ(expected.data(), readbackBuffer, 0, expected.size());
+}
+
+// Test that when a full-subresource compressed texture-to-texture copy has to go through a
+// temporary staging buffer that cannot be created because it would exceed the maxBufferSize
+// limit, the internal buffer creation failure results in device loss so that the uninitialized
+// destination cannot be read back.
+//
+// https://crbug.com/536639352
+TEST_P(CompressedTextureZeroInitTest, DISABLED_CopyTextureToTextureLargerThanMaxBufferSize) {
+    // Compatibility mode does not support compressed texture-to-texture copies.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
+    // The temporary-buffer copy path is a Vulkan-specific workaround.
+    DAWN_TEST_UNSUPPORTED_IF(!HasToggleEnabled("use_temporary_buffer_in_texture_to_texture_copy"));
+
+    // SwiftShader stores an additional decompressed copy of compressed textures so the required
+    // large textures do not fit within its per-allocation limit.
+    DAWN_SUPPRESS_TEST_IF(IsSwiftshader());
+
+    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::BC7RGBAUnorm;
+    constexpr uint32_t kBlockByteSize = 16u;
+    constexpr uint32_t kBlockDim = 4u;
+    constexpr uint32_t kDstSize = 2048u;
+    constexpr uint32_t kSrcBaseSize = 4092u;
+    constexpr uint32_t kLayerCount = 65u;
+    constexpr uint32_t kSrcMipLevel = 1u;
+
+    // The copy fully covers the physical size of the destination mip level, so the destination
+    // subresources are considered fully overwritten and do not need to be cleared before the
+    // copy. The virtual size of the source mip level differs from the destination though, which
+    // forces the copy to go through a temporary buffer larger than the default maxBufferSize.
+    constexpr wgpu::Extent3D kCopySize = {kDstSize, kDstSize, kLayerCount};
+    constexpr uint64_t kTempBufferSize = uint64_t{kDstSize / kBlockDim} *
+                                         uint64_t{kDstSize / kBlockDim} * kLayerCount *
+                                         kBlockByteSize;
+    ASSERT_NE((kSrcBaseSize >> kSrcMipLevel) % kBlockDim, 0u);
+    DAWN_ASSERT(kTempBufferSize > GetSupportedLimits().maxBufferSize);
+
+    wgpu::TextureDescriptor srcDescriptor{
+        .usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst,
+        .size = {kSrcBaseSize, kSrcBaseSize, kLayerCount},
+        .format = kFormat,
+        .mipLevelCount = kSrcMipLevel + 1,
+    };
+    wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
+
+    wgpu::TextureDescriptor dstDescriptor{
+        .usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst,
+        .size = {kDstSize, kDstSize, kLayerCount},
+        .format = kFormat,
+        .mipLevelCount = 1,
+    };
+    wgpu::Texture dstTexture = device.CreateTexture(&dstDescriptor);
+
+    EXPECT_FALSE(native::IsTextureSubresourceInitialized(dstTexture.Get(), 0, 1, 0, kLayerCount));
+
+    wgpu::TexelCopyTextureInfo srcTexelCopyTextureInfo =
+        utils::CreateTexelCopyTextureInfo(srcTexture, kSrcMipLevel, {0, 0, 0});
+    wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo =
+        utils::CreateTexelCopyTextureInfo(dstTexture, 0, {0, 0, 0});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToTexture(&srcTexelCopyTextureInfo, &dstTexelCopyTextureInfo, &kCopySize);
+    wgpu::CommandBuffer commands = encoder.Finish();
+
+    // Submitting the copy fails and loses the device because the temporary staging buffer used for
+    // the copy exceeds the maxBufferSize limit.
+    EXPECT_DEVICE_LOSS_MSG(queue.Submit(1, &commands), testing::HasSubstr("max buffer size limit"));
 }
 
 DAWN_INSTANTIATE_TEST(CompressedTextureZeroInitTest,

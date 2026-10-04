@@ -29,8 +29,11 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -44,6 +47,8 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/progressbar"
 	"dawn.googlesource.com/dawn/tools/src/transform"
 	"dawn.googlesource.com/dawn/tools/src/utils"
+
+	"golang.org/x/sync/errgroup"
 )
 
 // TODO(crbug.com/416755658): Add unittest coverage when exec calls are done
@@ -137,119 +142,318 @@ type mainConfig struct {
 	exitFn             func(int)
 }
 
-func showUsage() {
-	out := flag.CommandLine.Output()
-	_, _ = fmt.Fprintln(out, `
-fuzz is a helper for running the tint fuzzer executables and other related tasks
-
-fuzz has 7, mutually exclusive, tasks that it can perform:
-1. Run a fuzzer locally, requires no additional flag.
-2. Check that a fuzzer successfully handles contents of -inputs, requires -check flag
-3. Generate a fuzzer corpus based on contents of -inputs, requires -generate flag
-4. Triage a specific fuzzer crash, requires -triage flag
-5. Bisect a specific fuzzer crash test case, requires -bisect flag
-6. Run performance and benchmarking experiments, requires -experiment flag
-7. Analyze data from experiment runs, requires -analyze flag
-
-usage:
-  fuzz [flags...]`)
-	flag.PrintDefaults()
-	_, _ = fmt.Fprintln(out, ``)
-}
-
-func main() {
+func newDefaultMainConfig() mainConfig {
 	c := mainConfig{}
 	c.osWrapper = oswrapper.GetRealOSWrapper()
 	c.execWrapper = execwrapper.CreateRealExecWrapper()
 	c.progressBuilder = progressbar.New
 	c.exitFn = os.Exit
+	return c
+}
 
-	flag.Usage = showUsage
+type subcommand struct {
+	name          string
+	description   string
+	usageArgs     string
+	registerFlags func(fs *flag.FlagSet, c *mainConfig, irMode *bool)
+	validate      func(fs *flag.FlagSet, c *mainConfig) error
+}
 
-	check, generate, irMode := false, false, false
-	flag.BoolVar(&c.verbose, "verbose", false, "print additional output")
-	flag.BoolVar(&check, "check", false, "check that all the end-to-end tests in -inputs do not fail")
-	flag.BoolVar(&generate, "generate", false, "generate fuzzing corpus based on -inputs")
-	flag.BoolVar(&c.dump, "dump", false, "dumps shader input/output from fuzzer")
-	flag.BoolVar(&irMode, "ir", false, "runs using IR fuzzer instead of WGSL fuzzer")
-	flag.BoolVar(&c.mesaMode, "mesa", false, "runs using Mesa fuzzer variants")
-	flag.StringVar(&c.filter, "filter", "", "filter the fuzzing passes run to those with this substring")
-	flag.StringVar(&c.inputs, "corpus", defaultWgslCorpusDir(c.osWrapper), "obsolete, use -inputs instead")
-	flag.StringVar(&c.inputs, "inputs", defaultWgslCorpusDir(c.osWrapper), "the directory that holds the files to use")
-	flag.StringVar(&c.triageFile, "triage", "", "triage a fuzzer crash")
-	flag.StringVar(&c.bisectFile, "bisect", "", "bisect a fuzzer crash")
-	flag.StringVar(&c.knownFailing, "known-failing", "", "known failing git hash or time")
-	flag.StringVar(&c.knownPassing, "known-passing", "", "known passing git hash or time")
-	flag.StringVar(&c.build, "build", defaultBuildDir(c.osWrapper), "the build directory")
-	flag.StringVar(&c.out, "out", "<tmp>", "the directory to store outputs to")
-	flag.IntVar(&c.numProcesses, "j", 0, "number of concurrent fuzzers to run (defaults to 1 for experiments, NumCPU for others)")
-	flag.BoolVar(&c.bisectStep, "bisect-step", false, "internal flag used by git bisect run")
-	flag.BoolVar(&c.isFix, "is-fix", false, "internal flag used by git bisect run to indicate if we are bisecting a fix")
-	flag.BoolVar(&c.skipInputTypeCheck, "skip-input-type-check", false, "bypass the heuristic text/binary input file type check")
-	flag.StringVar(&c.experimentPath, "experiment", "", "run an experiment using the configuration at <root> (WIP feature)")
-	flag.StringVar(&c.analyzePath, "analyze", "", "analyze data from an experiment at <root>  (WIP feature)")
-	flag.StringVar(&c.machineName, "machine", "", "machine name to identify results")
-	flag.IntVar(&c.timeout, "timeout", 60, "override the default timeout (in seconds) for triage and bisect modes")
-	flag.Parse()
-
-	if c.mesaMode && c.filter != "" {
-		fmt.Println("cannot set -mesa and -filter flags at the same time, as Mesa fuzzers only run a single specific pass")
-		os.Exit(1)
-	}
-
-	modeCount := 0
-	if check {
-		modeCount++
-	}
-	if generate {
-		modeCount++
-	}
-	if c.triageFile != "" {
-		modeCount++
-	}
-	if c.bisectFile != "" {
-		modeCount++
-	}
-	if c.experimentPath != "" {
-		modeCount++
-	}
-	if c.analyzePath != "" {
-		modeCount++
+var (
+	runCmd = &subcommand{
+		name:        "run",
+		description: "run a fuzzer locally against test cases",
+		usageArgs:   "[flags]",
+		registerFlags: func(fs *flag.FlagSet, c *mainConfig, irMode *bool) {
+			fs.BoolVar(irMode, "ir", false, "runs using IR fuzzer instead of WGSL fuzzer")
+			fs.BoolVar(&c.mesaMode, "mesa", false, "runs using Mesa fuzzer variants")
+			fs.BoolVar(&c.dump, "dump", false, "dumps shader input/output from fuzzer")
+			fs.StringVar(&c.filter, "filter", "", "filter the fuzzing passes run to those with this substring")
+			fs.StringVar(&c.inputs, "corpus", defaultWgslCorpusDir(c.osWrapper), "obsolete, use -inputs instead")
+			fs.StringVar(&c.inputs, "inputs", defaultWgslCorpusDir(c.osWrapper), "the directory that holds the files to use")
+			fs.StringVar(&c.out, "out", "<tmp>", "the directory to store outputs to")
+			fs.IntVar(&c.numProcesses, "j", 0, "number of concurrent fuzzers to run (defaults to NumCPU)")
+		},
+		validate: func(fs *flag.FlagSet, c *mainConfig) error {
+			if len(fs.Args()) > 0 {
+				return fmt.Errorf("unexpected arguments for run: %v", fs.Args())
+			}
+			if c.mesaMode && c.filter != "" {
+				return fmt.Errorf("cannot set -mesa and -filter flags at the same time, as Mesa fuzzers only run a single specific pass")
+			}
+			if c.numProcesses < 1 {
+				c.numProcesses = runtime.NumCPU()
+			}
+			c.cmdMode = TaskModeRun
+			return nil
+		},
 	}
 
-	if !c.bisectStep && modeCount > 1 {
-		fmt.Println("cannot set more than one of -check, -generate, -triage, -bisect, -experiment, and -analyze flags at the same time")
-		os.Exit(1)
+	checkCmd = &subcommand{
+		name:        "check",
+		description: "check that all the end-to-end tests in -inputs do not fail",
+		usageArgs:   "[flags]",
+		registerFlags: func(fs *flag.FlagSet, c *mainConfig, irMode *bool) {
+			fs.BoolVar(irMode, "ir", false, "runs using IR fuzzer instead of WGSL fuzzer")
+			fs.BoolVar(&c.mesaMode, "mesa", false, "runs using Mesa fuzzer variants")
+			fs.StringVar(&c.inputs, "corpus", defaultWgslCorpusDir(c.osWrapper), "obsolete, use -inputs instead")
+			fs.StringVar(&c.inputs, "inputs", defaultWgslCorpusDir(c.osWrapper), "the directory that holds the files to use")
+			fs.StringVar(&c.out, "out", "<tmp>", "the directory to store outputs to")
+			fs.IntVar(&c.numProcesses, "j", 0, "number of concurrent fuzzers to run (defaults to NumCPU)")
+		},
+		validate: func(fs *flag.FlagSet, c *mainConfig) error {
+			if len(fs.Args()) > 0 {
+				return fmt.Errorf("unexpected arguments for check: %v", fs.Args())
+			}
+			if c.numProcesses < 1 {
+				c.numProcesses = runtime.NumCPU()
+			}
+			c.cmdMode = TaskModeCheck
+			return nil
+		},
 	}
 
-	switch {
-	case c.bisectStep:
-		c.cmdMode = TaskModeBisectStep
-	case check:
-		c.cmdMode = TaskModeCheck
-	case generate:
-		c.cmdMode = TaskModeGenerate
-	case c.triageFile != "":
-		c.cmdMode = TaskModeTriage
-	case c.bisectFile != "":
-		c.cmdMode = TaskModeBisect
-	case c.experimentPath != "":
-		c.cmdMode = TaskModeExperiment
-	case c.analyzePath != "":
-		c.cmdMode = TaskModeAnalyze
-	default:
-		c.cmdMode = TaskModeRun
+	generateCmd = &subcommand{
+		name:        "generate",
+		description: "generate fuzzing corpus based on -inputs",
+		usageArgs:   "[flags]",
+		registerFlags: func(fs *flag.FlagSet, c *mainConfig, irMode *bool) {
+			fs.BoolVar(irMode, "ir", false, "runs using IR fuzzer instead of WGSL fuzzer")
+			fs.BoolVar(&c.mesaMode, "mesa", false, "runs using Mesa fuzzer variants")
+			fs.StringVar(&c.inputs, "corpus", defaultWgslCorpusDir(c.osWrapper), "obsolete, use -inputs instead")
+			fs.StringVar(&c.inputs, "inputs", defaultWgslCorpusDir(c.osWrapper), "the directory that holds the files to use")
+			fs.StringVar(&c.out, "out", "<tmp>", "the directory to store outputs to")
+		},
+		validate: func(fs *flag.FlagSet, c *mainConfig) error {
+			if len(fs.Args()) > 0 {
+				return fmt.Errorf("unexpected arguments for generate: %v", fs.Args())
+			}
+			if c.out == "" || c.out == "<tmp>" {
+				return fmt.Errorf("need to specify -out when using generate")
+			}
+			c.cmdMode = TaskModeGenerate
+			return nil
+		},
 	}
 
-	timeoutSet := false
-	flag.Visit(func(f *flag.Flag) {
-		if f.Name == "timeout" {
-			timeoutSet = true
+	triageCmd = &subcommand{
+		name:        "triage",
+		description: "triage a specific fuzzer crash test case",
+		usageArgs:   "[flags] <file>",
+		registerFlags: func(fs *flag.FlagSet, c *mainConfig, irMode *bool) {
+			fs.BoolVar(irMode, "ir", false, "runs using IR fuzzer instead of WGSL fuzzer")
+			fs.BoolVar(&c.mesaMode, "mesa", false, "runs using Mesa fuzzer variants")
+			fs.BoolVar(&c.skipInputTypeCheck, "skip-input-type-check", false, "bypass the heuristic text/binary input file type check")
+			fs.IntVar(&c.timeout, "timeout", 60, "override the default timeout (in seconds)")
+			fs.StringVar(&c.out, "out", "<tmp>", "the directory to store outputs to")
+		},
+		validate: func(fs *flag.FlagSet, c *mainConfig) error {
+			if len(fs.Args()) == 0 {
+				return fmt.Errorf("triage requires a test case file path\nusage: fuzz triage [flags] <file>")
+			}
+			if len(fs.Args()) > 1 {
+				return fmt.Errorf("triage accepts only one test case file path\nusage: fuzz triage [flags] <file>")
+			}
+			c.triageFile = fs.Arg(0)
+			c.cmdMode = TaskModeTriage
+			return nil
+		},
+	}
+
+	bisectCmd = &subcommand{
+		name:        "bisect",
+		description: "bisect a specific fuzzer crash test case",
+		usageArgs:   "[flags] <file>",
+		registerFlags: func(fs *flag.FlagSet, c *mainConfig, irMode *bool) {
+			fs.BoolVar(irMode, "ir", false, "runs using IR fuzzer instead of WGSL fuzzer")
+			fs.BoolVar(&c.mesaMode, "mesa", false, "runs using Mesa fuzzer variants")
+			fs.StringVar(&c.knownFailing, "known-failing", "", "known failing git hash or time")
+			fs.StringVar(&c.knownPassing, "known-passing", "", "known passing git hash or time")
+			fs.BoolVar(&c.skipInputTypeCheck, "skip-input-type-check", false, "bypass the heuristic text/binary input file type check")
+			fs.IntVar(&c.timeout, "timeout", 60, "override the default timeout (in seconds)")
+		},
+		validate: func(fs *flag.FlagSet, c *mainConfig) error {
+			if len(fs.Args()) == 0 {
+				return fmt.Errorf("bisect requires a test case file path\nusage: fuzz bisect [flags] <file>")
+			}
+			if len(fs.Args()) > 1 {
+				return fmt.Errorf("bisect accepts only one test case file path\nusage: fuzz bisect [flags] <file>")
+			}
+			if c.knownFailing == "" {
+				return fmt.Errorf("-known-failing flag is required when bisecting")
+			}
+			c.bisectFile = fs.Arg(0)
+			c.cmdMode = TaskModeBisect
+			return nil
+		},
+	}
+
+	bisectStepCmd = &subcommand{
+		name:        "bisect-step",
+		description: "internal step command invoked during git bisect run",
+		usageArgs:   "[flags] <file>",
+		registerFlags: func(fs *flag.FlagSet, c *mainConfig, irMode *bool) {
+			fs.BoolVar(irMode, "ir", false, "runs using IR fuzzer instead of WGSL fuzzer")
+			fs.BoolVar(&c.mesaMode, "mesa", false, "runs using Mesa fuzzer variants")
+			fs.BoolVar(&c.isFix, "is-fix", false, "internal flag used by git bisect run to indicate if we are bisecting a fix")
+			fs.IntVar(&c.timeout, "timeout", 60, "override the default timeout (in seconds)")
+			fs.StringVar(&c.bisectFile, "bisect", "", "test case file path (alternative to positional argument)")
+		},
+		validate: func(fs *flag.FlagSet, c *mainConfig) error {
+			if len(fs.Args()) == 1 {
+				c.bisectFile = fs.Arg(0)
+			} else if len(fs.Args()) > 1 {
+				return fmt.Errorf("bisect-step accepts only one test case file path\nusage: fuzz bisect-step [flags] <file>")
+			} else if c.bisectFile == "" {
+				return fmt.Errorf("bisect-step requires a test case file path\nusage: fuzz bisect-step [flags] <file>")
+			}
+			c.bisectStep = true
+			c.cmdMode = TaskModeBisectStep
+			return nil
+		},
+	}
+
+	experimentCmd = &subcommand{
+		name:        "experiment",
+		description: "run performance and benchmarking experiments",
+		usageArgs:   "[flags] <dir>",
+		registerFlags: func(fs *flag.FlagSet, c *mainConfig, irMode *bool) {
+			fs.StringVar(&c.machineName, "machine", "", "machine name to identify results")
+			fs.IntVar(&c.numProcesses, "j", 0, "number of concurrent fuzzers to run (defaults to 1)")
+		},
+		validate: func(fs *flag.FlagSet, c *mainConfig) error {
+			if len(fs.Args()) == 0 {
+				return fmt.Errorf("experiment requires an experiment root directory\nusage: fuzz experiment [flags] <dir>")
+			}
+			if len(fs.Args()) > 1 {
+				return fmt.Errorf("experiment accepts only one experiment root directory\nusage: fuzz experiment [flags] <dir>")
+			}
+			c.experimentPath = fs.Arg(0)
+			if c.numProcesses < 1 {
+				c.numProcesses = 1
+			}
+			c.cmdMode = TaskModeExperiment
+			return nil
+		},
+	}
+
+	analyzeCmd = &subcommand{
+		name:        "analyze",
+		description: "analyze data from experiment runs",
+		usageArgs:   "[flags] <dir>",
+		registerFlags: func(fs *flag.FlagSet, c *mainConfig, irMode *bool) {
+			fs.StringVar(&c.machineName, "machine", "", "machine name to identify results")
+			fs.IntVar(&c.numProcesses, "j", 0, "number of concurrent fuzzers to run (defaults to NumCPU)")
+		},
+		validate: func(fs *flag.FlagSet, c *mainConfig) error {
+			if len(fs.Args()) == 0 {
+				return fmt.Errorf("analyze requires an experiment root directory\nusage: fuzz analyze [flags] <dir>")
+			}
+			if len(fs.Args()) > 1 {
+				return fmt.Errorf("analyze accepts only one experiment root directory\nusage: fuzz analyze [flags] <dir>")
+			}
+			c.analyzePath = fs.Arg(0)
+			if c.numProcesses < 1 {
+				c.numProcesses = runtime.NumCPU()
+			}
+			c.cmdMode = TaskModeAnalyze
+			return nil
+		},
+	}
+
+	subcommands = map[string]*subcommand{
+		"run":         runCmd,
+		"check":       checkCmd,
+		"generate":    generateCmd,
+		"triage":      triageCmd,
+		"bisect":      bisectCmd,
+		"bisect-step": bisectStepCmd,
+		"experiment":  experimentCmd,
+		"analyze":     analyzeCmd,
+		"help":        nil,
+	}
+)
+
+func printTopLevelHelp(out io.Writer) {
+	fmt.Fprintln(out, `fuzz is a helper for running the tint fuzzer executables and other related tasks
+
+Usage:
+  fuzz <subcommand> [flags...] [args...]
+
+Available Subcommands:
+  run          run a fuzzer locally against test cases
+  check        check that all the end-to-end tests in -inputs do not fail
+  generate     generate fuzzing corpus based on -inputs
+  triage       triage a specific fuzzer crash test case
+  bisect       bisect a fuzzer crash test case
+  bisect-step  internal step command invoked during git bisect run
+  experiment   run performance and benchmarking experiments
+  analyze      analyze data from experiment runs
+  help         show help for fuzz or a specific subcommand
+
+Common Flags (available across subcommands):
+  -build string
+        the build directory (default "out/active")
+  -verbose
+        print additional output
+
+Use 'fuzz help <subcommand>' or 'fuzz <subcommand> -help' for more information about a subcommand.`)
+}
+
+func printSubcommandHelp(cmd *subcommand, c *mainConfig, out io.Writer) {
+	fs := flag.NewFlagSet(cmd.name, flag.ContinueOnError)
+	fs.SetOutput(out)
+	fs.Usage = func() {
+		fmt.Fprintf(out, "Usage: fuzz %s %s\n\n", cmd.name, cmd.usageArgs)
+		fmt.Fprintf(out, "%s\n\n", cmd.description)
+		fmt.Fprintf(out, "Flags:\n")
+		fs.PrintDefaults()
+	}
+	config := *c
+	fs.StringVar(&config.build, "build", defaultBuildDir(config.osWrapper), "the build directory")
+	fs.BoolVar(&config.verbose, "verbose", false, "print additional output")
+	var irMode bool
+	cmd.registerFlags(fs, &config, &irMode)
+	fs.Usage()
+}
+
+func parseSubcommandFlags(args []string, c *mainConfig, stdout, stderr io.Writer) error {
+	subcmdName := args[0]
+	if subcmdName == "help" {
+		if len(args) == 1 {
+			printTopLevelHelp(stdout)
+			return flag.ErrHelp
 		}
-	})
-	if timeoutSet && c.cmdMode != TaskModeTriage && c.cmdMode != TaskModeBisect && c.cmdMode != TaskModeBisectStep {
-		fmt.Println("cannot set -timeout flag outside of triage and bisect modes")
-		os.Exit(1)
+		targetCmd := subcommands[args[1]]
+		if targetCmd == nil {
+			return fmt.Errorf("unknown subcommand %q to get help for. Run 'fuzz help' for a list of available subcommands", args[1])
+		}
+		printSubcommandHelp(targetCmd, c, stdout)
+		return flag.ErrHelp
+	}
+
+	cmd := subcommands[subcmdName]
+	if cmd == nil {
+		return fmt.Errorf("unknown subcommand %q. Run 'fuzz help' for a list of available subcommands", subcmdName)
+	}
+
+	fs := flag.NewFlagSet(subcmdName, flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	fs.Usage = func() {
+		fmt.Fprintf(stderr, "Usage: fuzz %s %s\n\n", cmd.name, cmd.usageArgs)
+		fmt.Fprintf(stderr, "%s\n\n", cmd.description)
+		fmt.Fprintf(stderr, "Flags:\n")
+		fs.PrintDefaults()
+	}
+
+	fs.StringVar(&c.build, "build", defaultBuildDir(c.osWrapper), "the build directory")
+	fs.BoolVar(&c.verbose, "verbose", false, "print additional output")
+
+	var irMode bool
+	cmd.registerFlags(fs, c, &irMode)
+
+	if err := fs.Parse(args[1:]); err != nil {
+		return err
 	}
 
 	if irMode {
@@ -258,22 +462,33 @@ func main() {
 		c.fuzzMode = FuzzModeWgsl
 	}
 
-	if c.numProcesses == 0 {
-		// If running experiment default to single thread to avoid overloading system, otherwise try to run as many
-		// threads as possible without swamping
-		if c.cmdMode == TaskModeExperiment {
-			c.numProcesses = 1
-		} else {
-			c.numProcesses = runtime.NumCPU()
+	if err := cmd.validate(fs, c); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// parseFlags parses the command line arguments to determine the subcommand to run and configures the mainConfig
+// appropriately. If no subcommand is specified, it prints the top-level help and returns flag.ErrHelp.
+func parseFlags(args []string, c *mainConfig, stdout, stderr io.Writer) error {
+	if len(args) == 0 {
+		fmt.Fprintln(stderr, "error: subcommand required")
+		printTopLevelHelp(stderr)
+		return flag.ErrHelp
+	}
+
+	return parseSubcommandFlags(args, c, stdout, stderr)
+}
+
+func main() {
+	c := newDefaultMainConfig()
+	err := parseFlags(os.Args[1:], &c, os.Stdout, os.Stderr)
+	if err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			os.Exit(0)
 		}
-	}
-
-	if c.numProcesses < 1 {
-		c.numProcesses = 1
-	}
-
-	if c.cmdMode == TaskModeGenerate && (c.out == "" || c.out == "<tmp>") {
-		fmt.Println("need to specify -output when using -generate")
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -382,21 +597,22 @@ func run(c *mainConfig) error {
 
 	queue := make([]*taskConfig, 0, 1)
 
-	if c.fuzzMode == FuzzModeIr && (c.cmdMode == TaskModeRun || c.cmdMode == TaskModeCheck) {
-		// The default input files are .wgsl files and tint_ir_fuzzer runs on .tirb files, so need
-		// to convert them before running/checking
+	if c.cmdMode == TaskModeRun || c.cmdMode == TaskModeCheck {
+		// Preprocess inputs when pointing at the default test directory:
+		// - Strips comments and copyright headers from .wgsl files
+		// - Converts .wgsl files to .tirb files for IR mode
 		if c.inputs == defaultWgslCorpusDir(c.osWrapper) {
 			origOut := c.out
-			tmp, err := c.osWrapper.MkdirTemp("", "ir_corpus")
+			tmp, err := c.osWrapper.MkdirTemp("", "fuzz_corpus")
 			if err != nil {
-				return fmt.Errorf("failed to create temporary directory for IR corpus: %w", err)
+				return fmt.Errorf("failed to create temporary directory for fuzz corpus: %w", err)
 			}
 			defer c.osWrapper.RemoveAll(tmp)
 
 			c.out = tmp
 			t, err := generateTaskConfig(TaskModeGenerate, c)
 			if err != nil {
-				return fmt.Errorf("failed to generate task config for IR corpus generation: %w", err)
+				return fmt.Errorf("failed to generate task config for fuzz corpus generation: %w", err)
 			}
 			queue = append(queue, t)
 
@@ -530,26 +746,48 @@ func checkFuzzer(t *taskConfig) error {
 	defer pb.Stop()
 	var numDone uint32
 
-	routine := func() error {
-		for file := range remaining {
-			atomic.AddUint32(&numDone, 1)
-			pb.Update(progressbar.Status{
-				Total: len(files),
-				Segments: []progressbar.Segment{
-					{Count: int(atomic.LoadUint32(&numDone))},
-				},
-			})
+	failureChan := make(chan error, len(files))
 
-			if out, err := t.runCmd(t.fuzzer, file); err != nil {
-				_, fuzzer := filepath.Split(t.fuzzer)
-				return fmt.Errorf("fuzzer '%s' failed to process file '%s' with error: %w\nOutput:\n%s", fuzzer, file, err, string(out))
+	eg, ctx := errgroup.WithContext(utils.CancelOnInterruptContext(context.Background()))
+	for i := 0; i < t.numProcesses; i++ {
+		eg.Go(func() error {
+			for {
+				select {
+				case <-ctx.Done():
+					return ctx.Err()
+				case file, ok := <-remaining:
+					if !ok {
+						return nil
+					}
+					atomic.AddUint32(&numDone, 1)
+					pb.Update(progressbar.Status{
+						Total: len(files),
+						Segments: []progressbar.Segment{
+							{Count: int(atomic.LoadUint32(&numDone))},
+						},
+					})
+
+					if out, err := t.runCmd(t.fuzzer, file); err != nil {
+						_, fuzzer := filepath.Split(t.fuzzer)
+						failureChan <- fmt.Errorf("fuzzer '%s' failed to process file '%s' with error: %w\nOutput:\n%s", fuzzer, file, err, string(out))
+					}
+				}
 			}
-		}
-		return nil
+		})
 	}
 
-	if err := utils.RunConcurrent(t.numProcesses, routine); err != nil {
+	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return err
+	}
+
+	close(failureChan)
+
+	if len(failureChan) > 0 {
+		runFailures := make([]error, 0, len(failureChan))
+		for err := range failureChan {
+			runFailures = append(runFailures, err)
+		}
+		return errors.Join(runFailures...)
 	}
 
 	fmt.Println("done")

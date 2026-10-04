@@ -54,8 +54,7 @@ ResultOrError<Ref<Buffer>> Buffer::CreateInternalBuffer(Device* device,
     }
 
     if (descriptor->mappedAtCreation) {
-        [[maybe_unused]] bool usingStagingBuffer;
-        DAWN_TRY_ASSIGN(usingStagingBuffer, buffer->MapAtCreationInternal());
+        DAWN_TRY_ASSIGN(std::ignore, buffer->MapAtCreationInternal());
     }
 
     return std::move(buffer);
@@ -288,15 +287,16 @@ void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
 
     auto device = ToBackend(GetDevice());
 
-    if (newState == BufferState::Destroyed) {
-        return;
-    }
-
-    // There is nothing to do for empty mappings, and the buffer wasn't even mapped.
+    // There is nothing to do for empty mappings, and the buffer wasn't even mapped. Also ensure
+    // that all code paths clear mMappedData.
     if (mMappedData.empty()) {
         return;
     }
+    mMappedData = {};
 
+    if (newState == BufferState::Destroyed) {
+        return;
+    }
     IgnoreErrors(
         device->EnqueueGL([self = Ref<Buffer>(this)](const OpenGLFunctions& gl) -> MaybeError {
             DAWN_GL_TRY(gl, BindBuffer(GL_ARRAY_BUFFER, self->mBuffer));

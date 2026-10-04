@@ -34,6 +34,7 @@
 #include <string>
 
 #include "src/tint/lang/core/enums.h"
+#include "src/tint/lang/core/ir/array_count.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
@@ -337,6 +338,7 @@ TEST_F(IRToProgramTest, EntryPoint_ParameterAttribute_Fragment) {
         MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kSampleMask),
         MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kSubgroupSize),
         MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kPrimitiveIndex),
+        MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kViewIndex),
     });
 
     fn->Block()->Append(b.Return(fn));
@@ -344,9 +346,10 @@ TEST_F(IRToProgramTest, EntryPoint_ParameterAttribute_Fragment) {
     EXPECT_WGSL(R"(
 enable subgroups;
 enable primitive_index;
+enable view_instancing;
 
 @fragment
-fn f(@builtin(front_facing) v : bool, @builtin(sample_index) v_1 : u32, @builtin(sample_mask) v_2 : u32, @builtin(subgroup_size) v_3 : u32, @builtin(primitive_index) v_4 : u32) {
+fn f(@builtin(front_facing) v : bool, @builtin(sample_index) v_1 : u32, @builtin(sample_mask) v_2 : u32, @builtin(subgroup_size) v_3 : u32, @builtin(primitive_index) v_4 : u32, @builtin(view_index) v_5 : u32) {
 }
 )");
 }
@@ -1451,6 +1454,19 @@ TEST_F(IRToProgramTest, TypeConstruct_binding_array) {
 
 fn f(i : i32) {
 }
+)");
+}
+
+TEST_F(IRToProgramTest, Type_Multisampled2DArrayTexture) {
+    auto* texture = b.Var(
+        "texture",
+        ty.ref(handle, ty.multisampled_texture(core::type::TextureDimension::k2dArray, ty.f32()),
+               read));
+    texture->SetBindingPoint(0, 0);
+    mod.root_block->Append(texture);
+
+    EXPECT_WGSL(R"(
+@group(0u) @binding(0u) var texture : texture_multisampled_2d_array<f32>;
 )");
 }
 
@@ -3582,6 +3598,41 @@ override o : i32 = bitcast<i32>(v);
 fn f() -> i32 {
   return o;
 }
+)");
+}
+
+TEST_F(IRToProgramTest, Override_ArraySize) {
+    b.Append(b.ir.root_block, [&] {
+        auto* o = b.Override("o", ty.i32());
+        o->SetOverrideId(OverrideId{10});
+
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(o->Result());
+        auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 0_u);
+        b.Var("v", ty.ref(workgroup, ary, read_write));
+    });
+
+    EXPECT_WGSL(R"(
+@id(10) override o : i32;
+
+var<workgroup> v : array<i32, o>;
+)");
+}
+
+TEST_F(IRToProgramTest, Override_ArraySize_Expression) {
+    b.Append(b.ir.root_block, [&] {
+        auto* wgsize = b.Override("wgsize", ty.i32());
+        wgsize->SetOverrideId(OverrideId{10});
+
+        auto* mul = b.Multiply(wgsize, 2_i);
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(mul);
+        auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 0_u);
+        b.Var("v", ty.ref(workgroup, ary, read_write));
+    });
+
+    EXPECT_WGSL(R"(
+@id(10) override wgsize : i32;
+
+var<workgroup> v : array<i32, (wgsize * 2i)>;
 )");
 }
 

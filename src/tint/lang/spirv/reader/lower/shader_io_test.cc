@@ -2396,6 +2396,48 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_ShaderIOTest, ViewIndex_u32) {
+    auto* idx = b.Var("view_idx", ty.ptr(core::AddressSpace::kIn, ty.u32()));
+    idx->SetBuiltin(core::BuiltinValue::kViewIndex);
+    mod.root_block->Append(idx);
+
+    auto* ep = b.Function("foo", ty.u32(), core::ir::Function::PipelineStage::kFragment);
+    ep->SetReturnLocation(0);
+    b.Append(ep->Block(), [&] {
+        auto* idx_value = b.Load(idx);
+        auto* doubled = b.Multiply(idx_value, 2_u);
+        b.Return(ep, doubled);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %view_idx:ptr<__in, u32, read> = var undef @builtin(view_index)
+}
+
+%foo = @fragment func():u32 [@location(0)] {
+  $B2: {
+    %3:u32 = load %view_idx
+    %4:u32 = mul %3, 2u
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func(%view_idx:u32 [@view_index]):u32 [@location(0)] {
+  $B1: {
+    %3:u32 = mul %view_idx, 2u
+    ret %3
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvReader_ShaderIOTest, LocalInvocationIndex_i32) {
     auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.i32()));
     idx->SetBuiltin(core::BuiltinValue::kLocalInvocationIndex);

@@ -33,6 +33,7 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/common/DynamicLib.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/RefCounted.h"
@@ -98,7 +99,7 @@ class VulkanInstance : public RefCounted {
 
     VkDebugUtilsMessengerEXT mDebugUtilsMessenger = VK_NULL_HANDLE;
 
-    std::vector<VkPhysicalDevice> mVkPhysicalDevices;
+    RAW_PTR_EXCLUSION std::vector<VkPhysicalDevice> mVkPhysicalDevices;
 
     // Devices keep the VulkanInstance alive, so as long as devices remove themselves from this
     // map on destruction the pointers it contains should remain valid.

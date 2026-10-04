@@ -407,7 +407,7 @@ class ImmediateTracker : public T {
         this->UpdateImmediates(offsetof(ComputeImmediates, numWorkgroups), numWorkgroupsDimensions);
     }
 
-    void SetDynamicStorageBufferLength(uint32_t offset, Span<const uint32_t> data) {
+    void SetDynamicStorageBufferLength(uint32_t offset, ityp::span<uint32_t, const uint32_t> data) {
         this->WriteImmediates(offsetof(ImmediateType, storageBufferDynamicLengths) + offset,
                               SpanAsBytes(data));
     }
@@ -432,8 +432,8 @@ class ImmediateTracker : public T {
             SetRootConstant(
                 commandContext->GetCommandList(),
                 ToBackend(lastPipeline)->GetPipelineLayoutHandle()->GetImmediatesParameterIndex(),
-                static_cast<uint32_t>(size),
-                this->mContent.template Get<uint32_t>(immediateContentStartOffset),
+                ReinterpretSpan<const uint32_t>(this->mContent.GetDataBytes(
+                    immediateContentStartOffset, size * kImmediateElementByteSize)),
                 immediateRangeStartOffset);
         }
 
@@ -447,16 +447,17 @@ class ImmediateTracker : public T {
 
     void SetRootConstant(ID3D12GraphicsCommandList* commandList,
                          uint32_t parameterIndex,
-                         uint32_t rootConstantsLength,
-                         const void* rootConstantsData,
+                         Span<const uint32_t> rootConstants,
                          uint32_t registerOffset) const {
         if constexpr (kIsRenderImmediates) {
-            commandList->SetGraphicsRoot32BitConstants(parameterIndex, rootConstantsLength,
-                                                       rootConstantsData, registerOffset);
+            commandList->SetGraphicsRoot32BitConstants(parameterIndex,
+                                                       checked_cast<uint32_t>(rootConstants.size()),
+                                                       rootConstants.data(), registerOffset);
         } else {
             static_assert(kIsComputeImmediates);
-            commandList->SetComputeRoot32BitConstants(parameterIndex, rootConstantsLength,
-                                                      rootConstantsData, registerOffset);
+            commandList->SetComputeRoot32BitConstants(parameterIndex,
+                                                      checked_cast<uint32_t>(rootConstants.size()),
+                                                      rootConstants.data(), registerOffset);
         }
     }
 };
@@ -793,11 +794,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
             uint32_t firstImmediateIndex =
                 pipelineLayout->GetDynamicStorageBufferInfo()[index].firstImmediateIndex;
             immediates->SetDynamicStorageBufferLength(
-                firstImmediateIndex * kImmediateElementByteSize,
-                // TODO(https://crbug.com/532946455): Support constructing a span from
-                // ityp::stack_vec.
-                DAWN_UNSAFE_TODO(Span<const uint32_t>(dynamicStorageBufferLengths.data(),
-                                                      dynamicStorageBufferLengths.size())));
+                firstImmediateIndex * kImmediateElementByteSize, dynamicStorageBufferLengths);
         }
     }
 
@@ -921,6 +918,66 @@ class VertexBufferTracker {
     VertexBufferSlot mStartSlot{kMaxVertexBuffers};
     VertexBufferSlot mEndSlot{};
     PerVertexBuffer<D3D12_VERTEX_BUFFER_VIEW> mD3D12BufferViews = {};
+};
+
+// Coalesces consecutive DrawIndirect commands into a single ExecuteIndirect call. The caller
+// flushes the batch before recording any command that would break render-pass command ordering.
+class IndirectDrawBatcher {
+  public:
+    explicit IndirectDrawBatcher(CommandRecordingContext* commandContext)
+        : mCommandContext(commandContext) {}
+
+    void Add(const CommandSignature& signature,
+             Buffer* buffer,
+             uint64_t bufferOffset,
+             const BufferBase* sourceBuffer,
+             uint64_t sourceBufferOffset) {
+        // Dawn frontend indirect draw validation in EncodeIndirectDrawValidationCommands() packs
+        // validated arguments from multiple draws into one internal output buffer. Require both
+        // the validated arguments and their original source arguments to be consecutive before
+        // combining them.
+        const bool isAdjacent =
+            mCount != 0 && mSignature == signature && mBuffer == buffer &&
+            bufferOffset ==
+                mBufferFirstOffset + static_cast<uint64_t>(mCount) * signature.byteStride &&
+            mSourceBuffer == sourceBuffer &&
+            sourceBufferOffset ==
+                mSourceBufferFirstOffset + static_cast<uint64_t>(mCount) * kDrawIndirectSize;
+        if (!isAdjacent) {
+            Flush();
+            mSignature = signature;
+            mBuffer = buffer;
+            mBufferFirstOffset = bufferOffset;
+            mSourceBuffer = sourceBuffer;
+            mSourceBufferFirstOffset = sourceBufferOffset;
+        }
+        ++mCount;
+    }
+
+    void Flush() {
+        if (mCount == 0) {
+            return;
+        }
+        // ExecuteIndirect consumes mCount tightly strided commands starting at the first draw.
+        mCommandContext->GetCommandList()->ExecuteIndirect(mSignature.signature.Get(), mCount,
+                                                           mBuffer->GetD3D12Resource(),
+                                                           mBufferFirstOffset, nullptr, 0);
+        mSignature = {};
+        mBuffer = nullptr;
+        mBufferFirstOffset = 0;  // Offset of the start of the batch.
+        mSourceBuffer = nullptr;
+        mSourceBufferFirstOffset = 0;  // Offset of the start of the batch.
+        mCount = 0;
+    }
+
+  private:
+    raw_ptr<CommandRecordingContext> mCommandContext;
+    CommandSignature mSignature;
+    raw_ptr<Buffer> mBuffer = nullptr;
+    uint64_t mBufferFirstOffset = 0;
+    raw_ptr<const BufferBase> mSourceBuffer = nullptr;
+    uint64_t mSourceBufferFirstOffset = 0;
+    uint32_t mCount = 0;
 };
 
 MaybeError EnsureResolveTargetInitialized(CommandRecordingContext* commandContext,
@@ -1066,9 +1123,9 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 Buffer* dstBuffer = ToBackend(copy->destination.Get());
 
                 DAWN_TRY(srcBuffer->EnsureDataInitialized(commandContext));
-                [[maybe_unused]] bool cleared;
-                DAWN_TRY_ASSIGN(cleared, dstBuffer->EnsureDataInitializedAsDestination(
-                                             commandContext, copy->destinationOffset, copy->size));
+                DAWN_TRY_ASSIGN(std::ignore,
+                                dstBuffer->EnsureDataInitializedAsDestination(
+                                    commandContext, copy->destinationOffset, copy->size));
 
                 srcBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopySrc);
                 dstBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
@@ -1317,10 +1374,9 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 QuerySet* querySet = ToBackend(cmd->querySet.Get());
                 Buffer* destination = ToBackend(cmd->destination.Get());
 
-                [[maybe_unused]] bool cleared;
-                DAWN_TRY_ASSIGN(cleared, destination->EnsureDataInitializedAsDestination(
-                                             commandContext, cmd->destinationOffset,
-                                             ToQueryStorageSize(cmd->queryCount)));
+                DAWN_TRY_ASSIGN(std::ignore, destination->EnsureDataInitializedAsDestination(
+                                                 commandContext, cmd->destinationOffset,
+                                                 ToQueryStorageSize(cmd->queryCount)));
 
                 // Resolving unavailable queries is undefined behaviour on D3D12, we only can
                 // resolve the available part of sparse queries. In order to resolve the
@@ -1412,9 +1468,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                     data.size(), kCopyBufferToBufferOffsetAlignment,
                     [&](UploadReservation reservation) -> MaybeError {
                         reservation.mappedData.CopyFrom(data);
-                        [[maybe_unused]] bool cleared;
-                        DAWN_TRY_ASSIGN(cleared, dstBuffer->EnsureDataInitializedAsDestination(
-                                                     commandContext, offset, data.size()));
+                        DAWN_TRY_ASSIGN(std::ignore, dstBuffer->EnsureDataInitializedAsDestination(
+                                                         commandContext, offset, data.size()));
 
                         dstBuffer->TrackUsageAndTransitionNow(commandContext,
                                                               wgpu::BufferUsage::CopyDst);
@@ -1484,11 +1539,10 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 DAWN_TRY(bindingTracker->Apply(commandContext, &immediates));
                 immediates.Apply(commandContext);
 
-                ComPtr<ID3D12CommandSignature> signature =
-                    lastPipeline->GetDispatchIndirectCommandSignature();
+                ID3D12CommandSignature* signature =
+                    lastPipeline->GetDispatchIndirectCommandSignature().signature.Get();
                 commandList->ExecuteIndirect(
-                    signature.Get(), 1,
-                    ToBackend(dispatch->indirectBuffer.Get())->GetD3D12Resource(),
+                    signature, 1, ToBackend(dispatch->indirectBuffer.Get())->GetD3D12Resource(),
                     dispatch->indirectOffset, nullptr, 0);
                 break;
             }
@@ -1819,8 +1873,13 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
     RenderPipeline* lastPipeline = nullptr;
     VertexBufferTracker vertexBufferTracker = {};
     ImmediateTracker<RenderImmediatesTracker> immediates = {};
+    IndirectDrawBatcher indirectDrawBatcher(commandContext);
 
     auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) -> MaybeError {
+        // Flush before recording a different command.
+        if (type != Command::DrawIndirect) {
+            indirectDrawBatcher.Flush();
+        }
         switch (type) {
             case Command::Draw: {
                 DrawCmd* draw = iter->NextCommand<DrawCmd>();
@@ -1861,10 +1920,10 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 Buffer* indirectBuffer = ToBackend(validatedDraw.indirectBuffer.Get());
                 DAWN_ASSERT(indirectBuffer != nullptr);
 
-                ComPtr<ID3D12CommandSignature> signature =
-                    lastPipeline->GetDrawIndirectCommandSignature();
-                commandList->ExecuteIndirect(signature.Get(), 1, indirectBuffer->GetD3D12Resource(),
-                                             validatedDraw.indirectOffset, nullptr, 0);
+                indirectDrawBatcher.Add(lastPipeline->GetDrawIndirectCommandSignature(),
+                                        indirectBuffer, validatedDraw.indirectOffset,
+                                        validatedDraw.sourceIndirectBuffer.Get(),
+                                        validatedDraw.sourceIndirectOffset);
                 break;
             }
 
@@ -1881,9 +1940,9 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 Buffer* indirectBuffer = ToBackend(validatedDraw.indirectBuffer.Get());
                 DAWN_ASSERT(indirectBuffer != nullptr);
 
-                ComPtr<ID3D12CommandSignature> signature =
-                    lastPipeline->GetDrawIndexedIndirectCommandSignature();
-                commandList->ExecuteIndirect(signature.Get(), 1, indirectBuffer->GetD3D12Resource(),
+                ID3D12CommandSignature* signature =
+                    lastPipeline->GetDrawIndexedIndirectCommandSignature().signature.Get();
+                commandList->ExecuteIndirect(signature, 1, indirectBuffer->GetD3D12Resource(),
                                              validatedDraw.indirectOffset, nullptr, 0);
                 break;
             }
@@ -1902,11 +1961,10 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 // There is no distinction between DrawIndirect and MultiDrawIndirect in D3D12.
                 // This is why we can use the same command signature for both.
-                ComPtr<ID3D12CommandSignature> signature =
-                    lastPipeline->GetDrawIndirectCommandSignature();
-
+                ID3D12CommandSignature* signature =
+                    lastPipeline->GetDrawIndirectCommandSignature().signature.Get();
                 commandList->ExecuteIndirect(
-                    signature.Get(), draw->maxDrawCount, indirectBuffer->GetD3D12Resource(),
+                    signature, draw->maxDrawCount, indirectBuffer->GetD3D12Resource(),
                     draw->indirectOffset,
                     countBuffer != nullptr ? countBuffer->GetD3D12Resource() : nullptr,
                     countBuffer != nullptr ? draw->drawCountOffset : 0);
@@ -1929,11 +1987,10 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 // There is no distinction between DrawIndexedIndirect and MultiDrawIndexedIndirect
                 // in D3D12. This is why we can use the same command signature for both.
-                ComPtr<ID3D12CommandSignature> signature =
-                    lastPipeline->GetDrawIndexedIndirectCommandSignature();
-
+                ID3D12CommandSignature* signature =
+                    lastPipeline->GetDrawIndexedIndirectCommandSignature().signature.Get();
                 commandList->ExecuteIndirect(
-                    signature.Get(), draw->maxDrawCount, indirectBuffer->GetD3D12Resource(),
+                    signature, draw->maxDrawCount, indirectBuffer->GetD3D12Resource(),
                     draw->indirectOffset,
                     countBuffer != nullptr ? countBuffer->GetD3D12Resource() : nullptr,
                     countBuffer != nullptr ? draw->drawCountOffset : 0);
@@ -2048,6 +2105,10 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
     Command type;
     while (mCommands.NextCommandId(&type)) {
+        // Flush before recording a different command.
+        if (type != Command::DrawIndirect) {
+            indirectDrawBatcher.Flush();
+        }
         switch (type) {
             case Command::EndRenderPass: {
                 mCommands.NextCommand<EndRenderPassCmd>();
@@ -2130,6 +2191,8 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                     while (iter->NextCommandId(&type)) {
                         DAWN_TRY(EncodeRenderBundleCommand(iter, type));
                     }
+                    // Do not batch draws across render bundles.
+                    indirectDrawBatcher.Flush();
                 }
                 break;
             }

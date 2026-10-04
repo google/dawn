@@ -43,8 +43,10 @@ class ErrorSink {
     // Variants of ConsumedError must use the returned boolean to handle failure cases since an
     // error may cause a fatal error and further execution may be undefined. This is especially
     // true for the ResultOrError variants.
+    template <typename E>
+        requires(IsMaybeConcreteError<E>)
     [[nodiscard]] bool ConsumedError(
-        MaybeError maybeError,
+        E maybeError,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
         if (maybeError.IsError()) [[unlikely]] {
             ConsumeError(maybeError.AcquireError(), additionalAllowedErrors);
@@ -53,34 +55,29 @@ class ErrorSink {
         return false;
     }
 
-    template <typename... Args>
-    [[nodiscard]] bool ConsumedError(MaybeError maybeError,
+    template <typename E, typename... Args>
+        requires(IsMaybeConcreteError<E>)
+    [[nodiscard]] bool ConsumedError(E maybeError,
                                      InternalErrorType additionalAllowedErrors,
                                      const char* formatStr,
                                      const Args&... args) {
         if (maybeError.IsError()) [[unlikely]] {
-            std::unique_ptr<ErrorData> error = maybeError.AcquireError();
-            if (static_cast<uint32_t>(error->GetType()) &
-                (static_cast<uint32_t>(additionalAllowedErrors) |
-                 static_cast<uint32_t>(InternalErrorType::Validation))) {
-                error->AppendContext(formatStr, args...);
-            }
-            ConsumeError(std::move(error), additionalAllowedErrors);
+            ConsumeError(maybeError.AcquireError(), additionalAllowedErrors, formatStr, args...);
             return true;
         }
         return false;
     }
 
-    template <typename... Args>
-    [[nodiscard]] bool ConsumedError(MaybeError maybeError,
-                                     const char* formatStr,
-                                     const Args&... args) {
+    template <typename E, typename... Args>
+        requires(IsMaybeConcreteError<E>)
+    [[nodiscard]] bool ConsumedError(E maybeError, const char* formatStr, const Args&... args) {
         return ConsumedError(std::move(maybeError), InternalErrorType::None, formatStr, args...);
     }
 
-    template <typename T>
+    template <typename E, typename T>
+        requires(IsResultOrConcreteError<E, T>)
     [[nodiscard]] bool ConsumedError(
-        ResultOrError<T> resultOrError,
+        E resultOrError,
         T* result,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
         if (resultOrError.IsError()) [[unlikely]] {
@@ -91,28 +88,24 @@ class ErrorSink {
         return false;
     }
 
-    template <typename T, typename... Args>
-    [[nodiscard]] bool ConsumedError(ResultOrError<T> resultOrError,
+    template <typename E, typename T, typename... Args>
+        requires(IsResultOrConcreteError<E, T>)
+    [[nodiscard]] bool ConsumedError(E resultOrError,
                                      T* result,
                                      InternalErrorType additionalAllowedErrors,
                                      const char* formatStr,
                                      const Args&... args) {
         if (resultOrError.IsError()) [[unlikely]] {
-            std::unique_ptr<ErrorData> error = resultOrError.AcquireError();
-            if (static_cast<uint32_t>(error->GetType()) &
-                (static_cast<uint32_t>(additionalAllowedErrors) |
-                 static_cast<uint32_t>(InternalErrorType::Validation))) {
-                error->AppendContext(formatStr, args...);
-            }
-            ConsumeError(std::move(error), additionalAllowedErrors);
+            ConsumeError(resultOrError.AcquireError(), additionalAllowedErrors, formatStr, args...);
             return true;
         }
         *result = resultOrError.AcquireSuccess();
         return false;
     }
 
-    template <typename T, typename... Args>
-    [[nodiscard]] bool ConsumedError(ResultOrError<T> resultOrError,
+    template <typename E, typename T, typename... Args>
+        requires(IsResultOrConcreteError<E, T>)
+    [[nodiscard]] bool ConsumedError(E resultOrError,
                                      T* result,
                                      const char* formatStr,
                                      const Args&... args) {
@@ -120,9 +113,33 @@ class ErrorSink {
                              args...);
     }
 
-  private:
+    template <typename T, typename... Args>
+        requires(IsConcreteError<T>)
+    void ConsumeError(std::unique_ptr<T> error, const char* formatStr, const Args&... args) {
+        ConsumeError(std::move(error), InternalErrorType::None, formatStr, args...);
+    }
+
+    template <typename T, typename... Args>
+        requires(IsConcreteError<T>)
+    void ConsumeError(std::unique_ptr<T> error,
+                      InternalErrorType additionalAllowedErrors,
+                      const char* formatStr,
+                      const Args&... args) {
+        if (static_cast<uint32_t>(error->GetType()) &
+            (static_cast<uint32_t>(additionalAllowedErrors) |
+             static_cast<uint32_t>(InternalErrorType::Validation))) {
+            error->AppendContext(formatStr, args...);
+        }
+        ConsumeError(std::move(error), additionalAllowedErrors);
+    }
+
+    // TODO(crbug.com/536639352): When `UnknownError` is available, determine if we can combine
+    // these overloads into a single one taking the UnknownError class.
     virtual void ConsumeError(
-        std::unique_ptr<ErrorData> error,
+        std::unique_ptr<UnrecoverableError> error,
+        InternalErrorType additionalAllowedErrors = InternalErrorType::None) = 0;
+    virtual void ConsumeError(
+        std::unique_ptr<ValidationError> error,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) = 0;
 };
 

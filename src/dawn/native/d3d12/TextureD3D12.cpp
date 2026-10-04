@@ -356,8 +356,6 @@ void Texture::DestroyImpl(DestroyReason reason) {
     mIsExternalSwapChainTexture = false;
 }
 
-
-
 DXGI_FORMAT Texture::GetD3D12Format() const {
     return d3d::DXGITextureFormat(GetDevice(), GetFormat().format);
 }

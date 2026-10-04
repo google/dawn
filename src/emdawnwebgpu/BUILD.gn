@@ -307,6 +307,7 @@ if (is_wasm) {
     inputs = [ "${dawn_template_dir}/emdawnwebgpu/LinkTest.cpp" ]
     outputs = [ "src/emdawnwebgpu/LinkTest.cpp" ]
   }
+
   executable("emdawnwebgpu_link_test") {
     # The test is just that this links, not that it runs (it will just
     # crash), so just build to .js. Since it has a main() function, this is

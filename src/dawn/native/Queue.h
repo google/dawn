@@ -136,13 +136,13 @@ class QueueBase : public ExecutionQueueBase, public WeakRefSupport<QueueBase> {
                                                      const TexelCopyTextureInfo* destination,
                                                      const Extent3D* copySize,
                                                      const CopyTextureForBrowserOptions* options);
-    MaybeError ValidateSubmit(Span<CommandBufferBase* const> commands,
-                              BufferSet& buffersFromCommands) const;
-    MaybeError ValidateOnSubmittedWorkDone() const;
-    MaybeError ValidateWriteTexture(const TexelCopyTextureInfo* destination,
-                                    size_t dataSize,
-                                    const TexelCopyBufferLayout& dataLayout,
-                                    const Extent3D* writeSize) const;
+    MaybeValError ValidateSubmit(Span<CommandBufferBase* const> commands,
+                                 BufferSet& buffersFromCommands) const;
+    MaybeValError ValidateOnSubmittedWorkDone() const;
+    MaybeValError ValidateWriteTexture(const TexelCopyTextureInfo* destination,
+                                       size_t dataSize,
+                                       const TexelCopyBufferLayout& dataLayout,
+                                       const Extent3D* writeSize) const;
 
     MaybeError SubmitInternal(Span<CommandBufferBase* const> commands);
 

@@ -617,6 +617,7 @@ inline bool MatchTextureMultisampled(intrinsic::MatchState&,
     }
 
 DECLARE_MULTISAMPLED_TEXTURE(2D, type::TextureDimension::k2d)
+DECLARE_MULTISAMPLED_TEXTURE(2DArray, type::TextureDimension::k2dArray)
 #undef DECLARE_MULTISAMPLED_TEXTURE
 
 inline bool MatchTextureDepth(intrinsic::MatchState&,

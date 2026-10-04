@@ -125,9 +125,9 @@ class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
         TextureBase* texture,
         const UnpackedPtr<TextureViewDescriptor>& descriptor) override;
     ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
-        const SharedTextureMemoryDescriptor* descriptor) override;
+        UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) override;
     ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
-        const SharedFenceDescriptor* descriptor) override;
+        UnpackedPtr<SharedFenceDescriptor> unpacked) override;
 
     MaybeError TickImpl() override;
 

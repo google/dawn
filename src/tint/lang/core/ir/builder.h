@@ -1617,6 +1617,27 @@ class Builder {
     /// @returns the instruction
     ir::Var* Var(std::string_view name, const core::type::MemoryView* type);
 
+    /// Creates a new `var` declaration with an initializer value
+    /// @tparam SPACE the var's address space
+    /// @tparam ACCESS the var's access mode
+    /// @param init the var initializer
+    /// @returns the instruction
+    template <core::AddressSpace SPACE = core::AddressSpace::kFunction,
+              core::Access ACCESS = core::Access::kReadWrite,
+              typename VALUE = void>
+        requires(
+            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>)
+    ir::Var* Var(VALUE&& init) {
+        auto* val = Value(std::forward<VALUE>(init));
+        if (DAWN_UNLIKELY(!val)) {
+            TINT_ASSERT(val);
+            return nullptr;
+        }
+        auto* var = Var(ir.Types().ptr(SPACE, val->Type(), ACCESS));
+        var->SetInitializer(val);
+        return var;
+    }
+
     /// Creates a new `var` declaration with a name and initializer value
     /// @tparam SPACE the var's address space
     /// @tparam ACCESS the var's access mode

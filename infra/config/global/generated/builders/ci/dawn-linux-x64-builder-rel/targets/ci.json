@@ -203,10 +203,11 @@
           "--test-launcher-jobs=1",
           "--test-launcher-retry-limit=0",
           "--override-steps=1",
+          "--perf-results-file=${ISOLATED_OUTDIR}/dawn_perf_results.json",
           "--no-xvfb"
         ],
         "merge": {
-          "script": "//scripts/merge_scripts/true_noop_merge.py"
+          "script": "//scripts/merge_scripts/merge_dawn_perf_tests_results.py"
         },
         "module_name": "//src/dawn/tests:dawn_perf_tests/",
         "module_scheme": "gtest",
@@ -434,10 +435,11 @@
           "--test-launcher-jobs=1",
           "--test-launcher-retry-limit=0",
           "--override-steps=1",
+          "--perf-results-file=${ISOLATED_OUTDIR}/dawn_perf_results.json",
           "--no-xvfb"
         ],
         "merge": {
-          "script": "//scripts/merge_scripts/true_noop_merge.py"
+          "script": "//scripts/merge_scripts/merge_dawn_perf_tests_results.py"
         },
         "module_name": "//src/dawn/tests:dawn_perf_tests/",
         "module_scheme": "gtest",
@@ -485,7 +487,7 @@
           "containment_type": "AUTO",
           "dimensions": {
             "display_server": "x11",
-            "gpu": "10de:2184-595.91.07",
+            "gpu": "10de:2184-595.104.02",
             "os": "Ubuntu-24.04",
             "pool": "chromium.tests.gpu"
           },
@@ -517,7 +519,7 @@
           "containment_type": "AUTO",
           "dimensions": {
             "display_server": "x11",
-            "gpu": "10de:2184-595.91.07",
+            "gpu": "10de:2184-595.104.02",
             "os": "Ubuntu-24.04",
             "pool": "chromium.tests.gpu"
           },
@@ -549,7 +551,7 @@
           "containment_type": "AUTO",
           "dimensions": {
             "display_server": "x11",
-            "gpu": "10de:2184-595.91.07",
+            "gpu": "10de:2184-595.104.02",
             "os": "Ubuntu-24.04",
             "pool": "chromium.tests.gpu"
           },
@@ -580,7 +582,7 @@
           "containment_type": "AUTO",
           "dimensions": {
             "display_server": "x11",
-            "gpu": "10de:2184-595.91.07",
+            "gpu": "10de:2184-595.104.02",
             "os": "Ubuntu-24.04",
             "pool": "chromium.tests.gpu"
           },
@@ -612,7 +614,7 @@
           "containment_type": "AUTO",
           "dimensions": {
             "display_server": "x11",
-            "gpu": "10de:2184-595.91.07",
+            "gpu": "10de:2184-595.104.02",
             "os": "Ubuntu-24.04",
             "pool": "chromium.tests.gpu"
           },
@@ -644,7 +646,7 @@
           "containment_type": "AUTO",
           "dimensions": {
             "display_server": "x11",
-            "gpu": "10de:2184-595.91.07",
+            "gpu": "10de:2184-595.104.02",
             "os": "Ubuntu-24.04",
             "pool": "chromium.tests.gpu"
           },
@@ -660,10 +662,11 @@
           "--test-launcher-jobs=1",
           "--test-launcher-retry-limit=0",
           "--override-steps=1",
+          "--perf-results-file=${ISOLATED_OUTDIR}/dawn_perf_results.json",
           "--no-xvfb"
         ],
         "merge": {
-          "script": "//scripts/merge_scripts/true_noop_merge.py"
+          "script": "//scripts/merge_scripts/merge_dawn_perf_tests_results.py"
         },
         "module_name": "//src/dawn/tests:dawn_perf_tests/",
         "module_scheme": "gtest",
@@ -675,7 +678,7 @@
           "containment_type": "AUTO",
           "dimensions": {
             "display_server": "x11",
-            "gpu": "10de:2184-595.91.07",
+            "gpu": "10de:2184-595.104.02",
             "os": "Ubuntu-24.04",
             "pool": "chromium.tests.gpu"
           },
@@ -701,7 +704,7 @@
           "containment_type": "AUTO",
           "dimensions": {
             "display_server": "x11",
-            "gpu": "10de:2184-595.91.07",
+            "gpu": "10de:2184-595.104.02",
             "os": "Ubuntu-24.04",
             "pool": "chromium.tests.gpu"
           },
@@ -911,10 +914,11 @@
           "--test-launcher-jobs=1",
           "--test-launcher-retry-limit=0",
           "--override-steps=1",
+          "--perf-results-file=${ISOLATED_OUTDIR}/dawn_perf_results.json",
           "--no-xvfb"
         ],
         "merge": {
-          "script": "//scripts/merge_scripts/true_noop_merge.py"
+          "script": "//scripts/merge_scripts/merge_dawn_perf_tests_results.py"
         },
         "module_name": "//src/dawn/tests:dawn_perf_tests/",
         "module_scheme": "gtest",

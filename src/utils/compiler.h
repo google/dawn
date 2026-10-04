@@ -118,6 +118,30 @@
 #endif
 #endif
 
+// DAWN_TSAN_ENABLED()
+//
+// Checks whether TSan is enabled.
+#if DAWN_COMPILER_IS(CLANG)
+#define DAWN_TSAN_ENABLED() __has_feature(thread_sanitizer)
+#elif DAWN_COMPILER_IS(GCC) || DAWN_COMPILER_IS(MSVC)
+#if defined(__SANITIZE_THREAD__)
+#define DAWN_TSAN_ENABLED() 1
+#else
+#define DAWN_TSAN_ENABLED() 0
+#endif
+#endif
+
+// DAWN_TSAN_RELEASE(addr)/DAWN_TSAN_ACQUIRE(addr)
+//
+// Emits a __tsan_release(addr)/__tsan_acquire(addr) if TSan is enabled, and nothing otherwise.
+#if DAWN_TSAN_ENABLED()
+#define DAWN_TSAN_RELEASE(addr) __tsan_release(addr)
+#define DAWN_TSAN_ACQUIRE(addr) __tsan_acquire(addr)
+#else
+#define DAWN_TSAN_RELEASE(addr)
+#define DAWN_TSAN_ACQUIRE(addr)
+#endif
+
 // DAWN_UBSAN_ENABLED()
 //
 // Checks whether the undefined behavior sanitizer is enabled.

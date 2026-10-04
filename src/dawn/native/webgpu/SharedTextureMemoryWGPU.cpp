@@ -58,27 +58,6 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         ioSurfaceDesc.ioSurface = ioSurfaceChain->ioSurface;
         ioSurfaceDesc.allowStorageBinding = ioSurfaceChain->allowStorageBinding;
         innerDesc.nextInChain = &ioSurfaceDesc.chain;
-    } else if (descriptor.Get<SharedTextureMemoryAHardwareBufferDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedTextureMemoryDXGISharedHandleDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedTextureMemoryEGLImageDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedTextureMemoryOpaqueFDDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedTextureMemoryVkDedicatedAllocationDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedTextureMemoryZirconHandleDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedTextureMemoryDmaBufDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
     } else {
         DAWN_UNREACHABLE();
     }
@@ -95,7 +74,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     WGPUStatus status = wgpu.sharedTextureMemoryGetProperties(innerHandle, &innerProperties);
     if (status != WGPUStatus_Success) {
         wgpu.sharedTextureMemoryRelease(innerHandle);
-        return DAWN_INTERNAL_ERROR("sharedTextureMemoryGetProperties failed");
+        return DAWN_UNRECOVERABLE_ERROR("sharedTextureMemoryGetProperties failed");
     }
 
     Ref<SharedTextureMemory> stm = AcquireRef(new SharedTextureMemory(
@@ -189,7 +168,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     return FenceAndSignalValue{std::move(fence), static_cast<uint64_t>(lastUsageSerial)};
 }
 
-MaybeError SharedTextureMemory::BeginAccessImpl(
+MaybeValError SharedTextureMemory::BeginAccessImpl(
     TextureBase* textureBase,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     Texture* texture = ToBackend(textureBase);

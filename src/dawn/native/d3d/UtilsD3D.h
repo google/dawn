@@ -44,7 +44,7 @@ bool IsDepthStencil(DXGI_FORMAT format);
 DXGI_FORMAT DXGITypelessTextureFormat(const DeviceBase* device, wgpu::TextureFormat format);
 DXGI_FORMAT DXGITextureFormat(const DeviceBase* device, wgpu::TextureFormat format);
 
-ResultOrError<wgpu::TextureFormat> FromUncompressedColorDXGITextureFormat(DXGI_FORMAT format);
+ResultOrValError<wgpu::TextureFormat> FromUncompressedColorDXGITextureFormat(DXGI_FORMAT format);
 
 DXGI_FORMAT DXGIVertexFormat(wgpu::VertexFormat format);
 

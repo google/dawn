@@ -48,6 +48,7 @@ using testing::NonEmptySizedString;
 using testing::NotNull;
 using testing::Return;
 using testing::SizedString;
+using testing::WithArg;
 
 using WireCreateComputePipelineAsyncTestBase =
     WireFutureTest<wgpu::CreateComputePipelineAsyncCallback<void>*>;
@@ -148,10 +149,12 @@ DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireCreateRenderPipelineAsyncTest);
 TEST_P(WireCreateComputePipelineAsyncTest, CreateSuccess) {
     CreateComputePipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _)).WillOnce([&] {
-        api.CallDeviceCreateComputePipelineAsyncCallback(
-            apiDevice, WGPUCreatePipelineAsyncStatus_Success, apiPipeline, kEmptyOutputStringView);
-    });
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
+            api.CallDeviceCreateComputePipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_Success, apiPipeline,
+                kEmptyOutputStringView, future);
+        }));
 
     FlushClient();
     FlushFutures();
@@ -168,10 +171,12 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateSuccess) {
 TEST_P(WireCreateRenderPipelineAsyncTest, CreateSuccess) {
     CreateRenderPipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _)).WillOnce([&] {
-        api.CallDeviceCreateRenderPipelineAsyncCallback(
-            apiDevice, WGPUCreatePipelineAsyncStatus_Success, apiPipeline, kEmptyOutputStringView);
-    });
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
+            api.CallDeviceCreateRenderPipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_Success, apiPipeline,
+                kEmptyOutputStringView, future);
+        }));
 
     FlushClient();
     FlushFutures();
@@ -188,11 +193,12 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateSuccess) {
 TEST_P(WireCreateComputePipelineAsyncTest, CreateError) {
     CreateComputePipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _)).WillOnce([&] {
-        api.CallDeviceCreateComputePipelineAsyncCallback(
-            apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
-            ToOutputStringView("Some error message"));
-    });
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
+            api.CallDeviceCreateComputePipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
+                ToOutputStringView("Some error message"), future);
+        }));
 
     FlushClient();
     FlushFutures();
@@ -209,11 +215,12 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateError) {
 TEST_P(WireCreateRenderPipelineAsyncTest, CreateError) {
     CreateRenderPipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _)).WillOnce([&] {
-        api.CallDeviceCreateRenderPipelineAsyncCallback(
-            apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
-            ToOutputStringView("Some error message"));
-    });
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
+            api.CallDeviceCreateRenderPipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
+                ToOutputStringView("Some error message"), future);
+        }));
 
     FlushClient();
     FlushFutures();
@@ -231,10 +238,12 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateError) {
 TEST_P(WireCreateComputePipelineAsyncTest, CreateThenDisconnect) {
     CreateComputePipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _)).WillOnce([&] {
-        api.CallDeviceCreateComputePipelineAsyncCallback(
-            apiDevice, WGPUCreatePipelineAsyncStatus_Success, apiPipeline, kEmptyOutputStringView);
-    });
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
+            api.CallDeviceCreateComputePipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_Success, apiPipeline,
+                kEmptyOutputStringView, future);
+        }));
 
     FlushClient();
     ExpectWireCallbacksWhen([&](auto& mockCb) {
@@ -251,10 +260,12 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateThenDisconnect) {
 TEST_P(WireCreateRenderPipelineAsyncTest, CreateThenDisconnect) {
     CreateRenderPipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _)).WillOnce([&] {
-        api.CallDeviceCreateRenderPipelineAsyncCallback(
-            apiDevice, WGPUCreatePipelineAsyncStatus_Success, apiPipeline, kEmptyOutputStringView);
-    });
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
+            api.CallDeviceCreateRenderPipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_Success, apiPipeline,
+                kEmptyOutputStringView, future);
+        }));
 
     FlushClient();
     ExpectWireCallbacksWhen([&](auto& mockCb) {
@@ -294,18 +305,17 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateAfterDisconnect) {
     });
 }
 
-
-
 TEST_P(WireCreateComputePipelineAsyncTest, CreateInvalidThenDestroyDevice) {
     DAWN_SKIP_TEST_IF(IsSpontaneous());
 
     CreateComputePipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _)).WillOnce([&] {
-        api.CallDeviceCreateComputePipelineAsyncCallback(
-            apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
-            ToOutputStringView("Some error message"));
-    });
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
+            api.CallDeviceCreateComputePipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
+                ToOutputStringView("Some error message"), future);
+        }));
 
     FlushClient();
 
@@ -332,11 +342,12 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateInvalidThenDestroyDevice) {
 
     CreateRenderPipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _)).WillOnce([&] {
-        api.CallDeviceCreateRenderPipelineAsyncCallback(
-            apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
-            ToOutputStringView("Some error message"));
-    });
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
+            api.CallDeviceCreateRenderPipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
+                ToOutputStringView("Some error message"), future);
+        }));
 
     FlushClient();
 

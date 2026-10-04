@@ -452,6 +452,7 @@ enum class BuiltinType : uint8_t {
     kTextureDepthMultisampled2D,
     kTextureExternal,
     kTextureMultisampled2D,
+    kTextureMultisampled2DArray,
     kTextureStorage1D,
     kTextureStorage2D,
     kTextureStorage2DArray,
@@ -578,6 +579,7 @@ constexpr std::string_view kBuiltinTypeStrings[] = {
     "texture_depth_multisampled_2d",
     "texture_external",
     "texture_multisampled_2d",
+    "texture_multisampled_2d_array",
     "texture_storage_1d",
     "texture_storage_2d",
     "texture_storage_2d_array",
@@ -626,6 +628,7 @@ enum class BuiltinValue : uint8_t {
     kSubgroupInvocationId,
     kSubgroupSize,
     kVertexIndex,
+    kViewIndex,
     kWorkgroupId,
     kWorkgroupIndex,
 };
@@ -668,6 +671,7 @@ constexpr std::string_view kBuiltinValueStrings[] = {
     "subgroup_invocation_id",
     "subgroup_size",
     "vertex_index",
+    "view_index",
     "workgroup_id",
     "workgroup_index",
 };

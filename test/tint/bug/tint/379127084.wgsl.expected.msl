@@ -14,34 +14,28 @@ struct tint_array_lengths_struct {
   uint tint_array_length_0_0;
 };
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct FSUniformData {
   /* 0x0000 */ float2 baseFrequency_1;
   /* 0x0008 */ float2 stitchData_1;
   /* 0x0010 */ int noiseType_1;
   /* 0x0014 */ int numOctaves_1;
   /* 0x0018 */ int stitching_1;
-  /* 0x001c */ tint_array<int8_t, 4> tint_pad;
+  /* 0x001c */ array<int8_t, 4> tint_pad;
   /* 0x0020 */ float4x4 matrix_4;
   /* 0x0060 */ float4 translate_4;
   /* 0x0070 */ int inHSL_4;
   /* 0x0074 */ int clampRGB_4;
-  /* 0x0078 */ tint_array<int8_t, 8> tint_pad_1;
+  /* 0x0078 */ array<int8_t, 8> tint_pad_1;
 };
 
 struct FSUniforms {
-  /* 0x0000 */ tint_array<FSUniformData, 1> fsUniformData;
+  /* 0x0000 */ array<FSUniformData, 1> fsUniformData;
+};
+
+struct tint_immediate_data_struct {
+  /* 0x0000 */ uint tint_non_constant_zero;
+  /* 0x0004 */ array<int8_t, 2044> tint_pad_2;
+  /* 0x0800 */ array<uint, 1> tint_storage_buffer_sizes;
 };
 
 struct tint_module_vars_struct {
@@ -51,7 +45,7 @@ struct tint_module_vars_struct {
   texture2d<float, access::sample> permutationsSampler_1_Texture;
   sampler noiseSampler_1_Sampler;
   texture2d<float, access::sample> noiseSampler_1_Texture;
-  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+  const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
 struct main_outputs {
@@ -242,13 +236,13 @@ void _skslMain(FSIn _stageIn, thread FSOut* const _stageOut, tint_array_lengths_
 
 FSOut main_inner(FSIn _stageIn, tint_module_vars_struct tint_module_vars) {
   FSOut _stageOut = {};
-  (_skslMain(_stageIn, (&_stageOut), tint_array_lengths_struct{.tint_array_length_0_0=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 128u)}, tint_module_vars));
+  (_skslMain(_stageIn, (&_stageOut), tint_array_lengths_struct{.tint_array_length_0_0=(((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] - 0u) / 128u)}, tint_module_vars));
   return _stageOut;
 }
 
-fragment main_outputs v_15(main_inputs inputs [[stage_in]], const device FSUniforms* _storage1 [[buffer(0)]], sampler permutationsSampler_1_Sampler [[sampler(0)]], texture2d<float, access::sample> permutationsSampler_1_Texture [[texture(0)]], sampler noiseSampler_1_Sampler [[sampler(1)]], texture2d<float, access::sample> noiseSampler_1_Texture [[texture(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+fragment main_outputs v_15(main_inputs inputs [[stage_in]], const device FSUniforms* _storage1 [[buffer(0)]], sampler permutationsSampler_1_Sampler [[sampler(0)]], texture2d<float, access::sample> permutationsSampler_1_Texture [[texture(0)]], sampler noiseSampler_1_Sampler [[sampler(1)]], texture2d<float, access::sample> noiseSampler_1_Texture [[texture(1)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
   thread uint shadingSsboIndex = 0u;
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{._storage1=_storage1, .shadingSsboIndex=(&shadingSsboIndex), .permutationsSampler_1_Sampler=permutationsSampler_1_Sampler, .permutationsSampler_1_Texture=permutationsSampler_1_Texture, .noiseSampler_1_Sampler=noiseSampler_1_Sampler, .noiseSampler_1_Texture=noiseSampler_1_Texture, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{._storage1=_storage1, .shadingSsboIndex=(&shadingSsboIndex), .permutationsSampler_1_Sampler=permutationsSampler_1_Sampler, .permutationsSampler_1_Texture=permutationsSampler_1_Texture, .noiseSampler_1_Sampler=noiseSampler_1_Sampler, .noiseSampler_1_Texture=noiseSampler_1_Texture, .tint_immediate_data=tint_immediate_data};
   main_outputs tint_wrapper_result = {};
   tint_wrapper_result.FSOut_sk_FragColor = main_inner(FSIn{.ssboIndicesVar=inputs.FSIn_ssboIndicesVar, .localCoordsVar=inputs.FSIn_localCoordsVar}, tint_module_vars).sk_FragColor;
   return tint_wrapper_result;

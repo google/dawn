@@ -557,7 +557,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
             }
 
             default:
-                return DAWN_FORMAT_INTERNAL_ERROR("Unknown command type: %d", type);
+                return DAWN_FORMAT_UNRECOVERABLE_ERROR("Unknown command type: %d", type);
         }
     }
 
@@ -1098,7 +1098,7 @@ void CommandBuffer::HandleDebugCommands(
         }
 
         case Command::PopDebugGroup: {
-            [[maybe_unused]] auto cmd = iter->NextCommand<PopDebugGroupCmd>();
+            std::ignore = iter->NextCommand<PopDebugGroupCmd>();
             commandContext->GetD3DUserDefinedAnnotation()->EndEvent();
             break;
         }

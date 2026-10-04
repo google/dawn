@@ -399,9 +399,6 @@ MaybeError RenderPipeline::InitializeImpl() {
         " getting vertex MTLFunction for %s", this);
 
     descriptorMTL.vertexFunction = vertexData.function.Get();
-    if (vertexData.needsStorageBufferLength) {
-        mStagesRequiringStorageBufferLength |= wgpu::ShaderStage::Vertex;
-    }
 
     ShaderModule::MetalFunctionData fragmentData;
     if (GetStageMask() & wgpu::ShaderStage::Fragment) {
@@ -413,9 +410,6 @@ MaybeError RenderPipeline::InitializeImpl() {
             " getting fragment MTLFunction for %s", this);
 
         descriptorMTL.fragmentFunction = fragmentData.function.Get();
-        if (fragmentData.needsStorageBufferLength) {
-            mStagesRequiringStorageBufferLength |= wgpu::ShaderStage::Fragment;
-        }
 
         const auto& fragmentOutputMask = fragmentStage.metadata->fragmentOutputMask;
         for (auto i : GetColorAttachmentsMask()) {
@@ -484,7 +478,7 @@ MaybeError RenderPipeline::InitializeImpl() {
         if (GetStageMask() & wgpu::ShaderStage::Fragment) {
             absl::StrAppendFormat(&errorMessage, "\n\nand fragment MSL:\n\n%s", fragmentData.msl);
         }
-        return DAWN_INTERNAL_ERROR(errorMessage);
+        return DAWN_UNRECOVERABLE_ERROR(errorMessage);
     }
     DAWN_ASSERT(mMtlRenderPipelineState != nil);
     timer.RecordMicroseconds("Metal.newRenderPipelineStateWithDescriptor.CacheMiss");
@@ -522,10 +516,6 @@ id<MTLDepthStencilState> RenderPipeline::GetMTLDepthStencilState() {
 uint32_t RenderPipeline::GetMtlVertexBufferIndex(VertexBufferSlot slot) const {
     DAWN_ASSERT(slot < kMaxVertexBuffersTyped);
     return mMtlVertexBufferIndices[slot];
-}
-
-wgpu::ShaderStage RenderPipeline::GetStagesRequiringStorageBufferLength() const {
-    return mStagesRequiringStorageBufferLength;
 }
 
 NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() const {

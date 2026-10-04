@@ -57,6 +57,8 @@ class Buffer final : public BufferBase {
 
     void TrackUsage() { MarkUsedInPendingCommands(); }
 
+    const void* GetMappedDataForTesting() const { return mMappedData.data(); }
+
   private:
     Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor);
     ~Buffer() override;
@@ -71,8 +73,7 @@ class Buffer final : public BufferBase {
     MaybeError InitializeToZero();
 
     GLuint mBuffer = 0;
-    // TODO(https://crbug.com/526537224): Use RawSpan.
-    Span<std::byte> mMappedData;
+    RawSpan<std::byte> mMappedData;
     size_t mMappedDataOffsetInBuffer = 0u;
     // Used as staging for mMappedData when running in GLDefer mode. Copied to the actual mapping
     // when executing GL commands.

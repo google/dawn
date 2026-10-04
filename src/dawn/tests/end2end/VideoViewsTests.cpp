@@ -168,10 +168,6 @@ bool VideoViewsTestsBase::IsFormatSupported() const {
         if (IsD3D12()) {
             return false;
         }
-        // DXGI_FORMAT_P010 is not supported on WARP.
-        if (IsWARP()) {
-            return false;
-        }
         return IsUnorm16FormatsForExternalTextureSupported() && IsMultiPlanarFormatP010Supported();
     }
 

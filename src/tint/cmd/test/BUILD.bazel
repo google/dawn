@@ -87,6 +87,11 @@ cc_binary(
     "//src/utils/chromium_test_compat",
     "//src/utils:crash_handler",
   ] + select({
+    ":tint_build_fuzzers": [
+      "//src/tint/cmd/fuzz/common:test",
+    ],
+    "//conditions:default": [],
+  }) + select({
     ":tint_build_glsl_validator_and_tint_build_glsl_writer": [
       "//src/tint/lang/glsl/writer:test",
     ],
@@ -177,6 +182,11 @@ cc_binary(
   }),
   copts = COPTS,
   visibility = ["//visibility:public"],
+)
+
+alias(
+  name = "tint_build_fuzzers",
+  actual = "//src/tint:tint_build_fuzzers_true",
 )
 
 alias(

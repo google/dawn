@@ -101,9 +101,9 @@ MaybeError CheckVkSuccessImpl(VkResult result, const char* context) {
     std::string message = std::string(context) + " failed with " + VkResultAsString(result);
 
     if (result == VK_ERROR_DEVICE_LOST) {
-        return DAWN_DEVICE_LOST_ERROR(message);
+        return DAWN_BACKEND_DEVICE_LOST_ERROR(message);
     } else {
-        return DAWN_INTERNAL_ERROR(message);
+        return DAWN_UNRECOVERABLE_ERROR(message);
     }
 }
 
@@ -118,9 +118,9 @@ MaybeError CheckVkOOMThenSuccessImpl(VkResult result, const char* context) {
         result == VK_FAKE_DEVICE_OOM_FOR_TESTING) {
         return DAWN_OUT_OF_MEMORY_ERROR(message);
     } else if (result == VK_ERROR_DEVICE_LOST) {
-        return DAWN_DEVICE_LOST_ERROR(message);
+        return DAWN_BACKEND_DEVICE_LOST_ERROR(message);
     } else {
-        return DAWN_INTERNAL_ERROR(message);
+        return DAWN_UNRECOVERABLE_ERROR(message);
     }
 }
 

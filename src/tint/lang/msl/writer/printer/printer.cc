@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cctype>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -161,6 +162,9 @@ class Printer : public tint::TextGenerator {
         // Determine which structures will need to be emitted with host-shareable memory layouts.
         FindHostShareableStructs();
 
+        // Determine results that potentially need attributed as aliasable.
+        FindAliasedResults();
+
         // Emit functions.
         for (auto* func : ir_.DependencyOrderedFunctions()) {
             EmitFunction(func);
@@ -196,6 +200,9 @@ class Printer : public tint::TextGenerator {
     Hashset<const core::type::Struct*, 16> host_shareable_structs_;
     Hashset<const core::type::Struct*, 4> emitted_structs_;
     Hashmap<const core::type::ResourceTable*, Symbol, 4> resource_table_to_name_;
+
+    Hashset<const core::ir::Value*, 64> aliased_values_;
+    Hashmap<const core::type::Type*, std::string, 16> aliased_typedefs_;
 
     /// The name of the templated alias for matmul2d operations, if emitted.
     std::string tensor_operation_template_;
@@ -240,41 +247,37 @@ class Printer : public tint::TextGenerator {
     /// The current block being emitted
     const core::ir::Block* current_block_ = nullptr;
 
-    /// Unique name of the tint_array<T, N> template.
-    /// Non-empty only if the template has been generated.
-    std::string array_template_name_;
-
     /// Block to emit for a continuing
     std::vector<std::unique_ptr<std::function<void()>>> emit_continuing_;
 
-    /// @returns the name of the templated `tint_array` helper type, generating it if needed
-    const std::string& ArrayTemplateName() {
-        if (!array_template_name_.empty()) {
-            return array_template_name_;
-        }
-
-        array_template_name_ = UniqueIdentifier("tint_array");
-
-        TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
-        Line();
-        Line() << "template<typename T, size_t N>";
-        Line() << "struct " << array_template_name_ << " {";
-
-        {
-            ScopedIndent si(current_buffer_);
-            Line()
-                << "const constant T& operator[](size_t i) const constant { return elements[i]; }";
-            for (auto* space : {"device", "thread", "threadgroup"}) {
-                Line() << space << " T& operator[](size_t i) " << space
-                       << " { return elements[i]; }";
-                Line() << "const " << space << " T& operator[](size_t i) const " << space
-                       << " { return elements[i]; }";
+    void FindAliasedResults() {
+        // Aliasable roots are the results of msl.alias_pointer_offset calls.
+        Vector<core::ir::Value*, 16> worklist;
+        for (auto* inst : ir_.Instructions()) {
+            if (auto* builtin = inst->As<msl::ir::BuiltinCall>()) {
+                if (builtin->Func() == msl::BuiltinFn::kAliasPointerOffset) {
+                    worklist.Push(builtin->Result());
+                }
             }
-            Line() << "T elements[N];";
         }
-        Line() << "};";
 
-        return array_template_name_;
+        while (!worklist.IsEmpty()) {
+            auto value = worklist.Pop();
+            aliased_values_.Add(value);
+            for (auto use : value->UsagesUnsorted()) {
+                if (auto* call = use->instruction->As<core::ir::UserCall>()) {
+                    // Mark the parameter as aliased and keep traversing in the target.
+                    auto* target = call->Target();
+                    auto param_index = use->operand_index - call->ArgsOperandOffset();
+                    auto* param = target->Params()[param_index];
+                    aliased_values_.Add(param);
+                    worklist.Push(param);
+                } else if (use->instruction->Results().Length() == 1 &&
+                           use->instruction->Result()->Type()->Is<core::type::Pointer>()) {
+                    worklist.Push(use->instruction->Result());
+                }
+            }
+        }
     }
 
     /// Find all structures that are used in host-shareable address spaces and mark them as such so
@@ -314,7 +317,8 @@ class Printer : public tint::TextGenerator {
         // (and workgroup storage class).
         for (auto func : ir_.functions) {
             Traverse(func->Block(), [&](msl::ir::BuiltinCall* call) {
-                if (call->Func() != msl::BuiltinFn::kPointerOffset) {
+                if (call->Func() != msl::BuiltinFn::kPointerOffset &&
+                    call->Func() != msl::BuiltinFn::kAliasPointerOffset) {
                     return;
                 }
                 auto* ptr = call->Result()->Type()->As<core::type::Pointer>();
@@ -339,7 +343,8 @@ class Printer : public tint::TextGenerator {
             value->As<core::ir::InstructionResult>()->Instruction(),
             [&](const msl::ir::BuiltinCall* c) {
                 // Pointer offset is always a pointer
-                return c->Func() == msl::BuiltinFn::kPointerOffset;
+                return c->Func() == msl::BuiltinFn::kPointerOffset ||
+                       c->Func() == msl::BuiltinFn::kAliasPointerOffset;
             },
             [&](const core::ir::Var*) {
                 // Variable declarations are always references.
@@ -347,6 +352,10 @@ class Printer : public tint::TextGenerator {
             },
             [&](const core::ir::Let*) {
                 // Let declarations capture actual pointers.
+                return true;
+            },
+            [&](const core::ir::Load*) {
+                // Load instructions produce real pointers when loading nested pointers.
                 return true;
             },
             [&](const core::ir::Access* a) {
@@ -451,7 +460,11 @@ class Printer : public tint::TextGenerator {
                 }
                 ++i;
 
-                EmitType(out, param->Type());
+                if (aliased_values_.Contains(param)) {
+                    EmitAliasedType(out, param->Type());
+                } else {
+                    EmitType(out, param->Type());
+                }
                 out << " ";
 
                 // Non-entrypoint pointers are set to `const` for the value
@@ -755,7 +768,11 @@ class Printer : public tint::TextGenerator {
             // (constructor) in metal is not constexpr.
             out << "const constant ";
         }
-        EmitType(out, l->Result()->Type());
+        if (aliased_values_.Contains(l->Result())) {
+            EmitAliasedType(out, l->Result()->Type());
+        } else {
+            EmitType(out, l->Result()->Type());
+        }
         out << " ";
         if (current_function_ != nullptr) {
             out << "const ";
@@ -1078,7 +1095,8 @@ class Printer : public tint::TextGenerator {
             out << ")";
             return;
         }
-        if (c->Func() == msl::BuiltinFn::kPointerOffset) {
+        if (c->Func() == msl::BuiltinFn::kPointerOffset ||
+            c->Func() == msl::BuiltinFn::kAliasPointerOffset) {
             const auto* result_type = c->Result()->Type()->As<core::type::Pointer>();
             out << "reinterpret_cast<";
             EmitType(out, result_type);
@@ -1523,7 +1541,7 @@ class Printer : public tint::TextGenerator {
                     if (i > 0) {
                         out << ", ";
                     }
-                    EmitValue(out, arg);
+                    EmitAndTakeAddressIfNeeded(out, arg);
                     i++;
                 }
                 out << "}";
@@ -1676,6 +1694,35 @@ class Printer : public tint::TextGenerator {
             TINT_ICE_ON_NO_MATCH);
     }
 
+    /// Handles emission of aliasable types.
+    ///
+    /// Generates a typedef the first time the store type of `type` is encountered that has the
+    /// attribute `__may_alias__` attached.
+    /// Emits the pointer using the typedef name.
+    /// @param out the output stream
+    /// @param type the pointer type
+    void EmitAliasedType(StringStream& out, const core::type::Type* type) {
+        TINT_IR_ASSERT(ir_, type->Is<core::type::Pointer>());
+        auto* ptr_type = type->As<core::type::Pointer>();
+        auto* ele_type = ptr_type->StoreType();
+
+        std::string alias_name = aliased_typedefs_.GetOrAdd(ele_type, [&] {
+            StringStream type_str;
+            EmitType(type_str, ele_type);
+            auto real_type = type_str.str();
+            std::string alias = UniqueIdentifier("tint_aliased_" + ele_type->IdentifierName());
+            TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+            Line() << "typedef " << real_type << " __attribute__((__may_alias__)) " << alias << ";";
+            return alias;
+        });
+
+        if (ptr_type->Access() == core::Access::kRead) {
+            out << "const ";
+        }
+        EmitAddressSpace(out, ptr_type->AddressSpace());
+        out << " " << alias_name << "*";
+    }
+
     /// Handles generating a pointer declaration
     /// @param out the output stream
     /// @param ptr the pointer to emit
@@ -1713,7 +1760,7 @@ class Printer : public tint::TextGenerator {
     /// @param out the output stream
     /// @param arr the array to emit
     void EmitArrayType(StringStream& out, const core::type::Array* arr) {
-        out << ArrayTemplateName() << "<";
+        out << "array<";
         EmitType(out, arr->ElemType());
         out << ", ";
         if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
@@ -1769,6 +1816,9 @@ class Printer : public tint::TextGenerator {
             TINT_IR_ICE(ir_) << "Multiplanar external texture transform was not run.";
         }
 
+        const bool is_multisampled =
+            tex->IsAnyOf<core::type::MultisampledTexture, core::type::DepthMultisampledTexture>();
+
         if (tex->IsAnyOf<core::type::DepthTexture, core::type::DepthMultisampledTexture>()) {
             out << "depth";
         } else {
@@ -1783,7 +1833,7 @@ class Printer : public tint::TextGenerator {
                 out << "2d";
                 break;
             case core::type::TextureDimension::k2dArray:
-                out << "2d_array";
+                out << (is_multisampled ? "2d_ms_array" : "2d_array");
                 break;
             case core::type::TextureDimension::k3d:
                 out << "3d";
@@ -1797,7 +1847,7 @@ class Printer : public tint::TextGenerator {
             default:
                 TINT_IR_ICE(ir_) << "invalid texture dimensions";
         }
-        if (tex->IsAnyOf<core::type::MultisampledTexture, core::type::DepthMultisampledTexture>()) {
+        if (is_multisampled && tex->Dim() != core::type::TextureDimension::k2dArray) {
             out << "_ms";
         }
         out << "<";
@@ -1841,10 +1891,10 @@ class Printer : public tint::TextGenerator {
             return;
         }
 
-        // This does not append directly to the preamble because a struct may require other
-        // structs, or the array template, to get emitted before it. So, the struct emits into a
-        // temporary text buffer, then anything it depends on will emit to the preamble first,
-        // and then it copies the text buffer into the preamble.
+        // This does not append directly to the preamble because a struct may require other structs
+        // to get emitted before it. So, the struct emits into a temporary text buffer, then
+        // anything it depends on will emit to the preamble first, and then it copies the text
+        // buffer into the preamble.
         TextBuffer str_buf;
         Line(&str_buf);
         Line(&str_buf) << "struct " << StructName(str) << " {";
@@ -1866,7 +1916,7 @@ class Printer : public tint::TextGenerator {
 
             auto out = Line(&str_buf);
             add_byte_offset_comment(out, msl_offset);
-            out << ArrayTemplateName() << "<int8_t, " << size << "> " << name << ";";
+            out << "array<int8_t, " << size << "> " << name << ";";
         };
 
         str_buf.IncrementIndent();
@@ -1897,8 +1947,8 @@ class Printer : public tint::TextGenerator {
             auto* ty = mem->Type();
 
             // The clip distances builtin is an array, but needs to be emitted as a C-style array
-            // instead of using Tint's array wrapper. Additionally, the builtin attribute needs to
-            // be emitted after the member name and before the array count.
+            // instead of using the `metal::array` class. Additionally, the builtin attribute needs
+            // to be emitted after the member name and before the array count.
             if (mem->Attributes().builtin == core::BuiltinValue::kClipDistances) {
                 auto* arr = ty->As<core::type::Array>();
                 out << "float " << mem_name << " [[clip_distance]] ["

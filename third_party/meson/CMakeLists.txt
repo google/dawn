@@ -95,7 +95,7 @@ function(meson_target TARGET_NAME)
             "strip = '${LLVM_STRIP_PATH}'\n"
             "pkg-config = 'pkg-config'\n"
             "llvm-config = '${LLVM_CONFIG_PATH}'\n"
-            "python = ['vpython3', '-vpython-spec', '${PROJECT_SOURCE_DIR}/.vpython3']\n"
+            "python = ['vpython3', '-vpython-spec', '${PROJECT_SOURCE_DIR}/vpython.toml']\n"
             "\n"
             "[properties]\n"
             "pkg_config_path = ['${ZSTD_PKGCONFIG_DIR}']\n"

@@ -27,30 +27,32 @@
 
 #include "src/dawn/native/d3d/BlobD3D.h"
 
+#include "src/utils/compiler.h"
+
 namespace dawn::native {
 
 Blob CreateBlob(ComPtr<ID3DBlob> blob) {
     // Detach so the deleter callback can "own" the reference
     ID3DBlob* ptr = blob.Detach();
-    return Blob::UnsafeCreateWithDeleter(reinterpret_cast<uint8_t*>(ptr->GetBufferPointer()),
-                                         ptr->GetBufferSize(), [=] {
-                                             // Reattach and drop to delete it.
-                                             ComPtr<ID3DBlob> b;
-                                             b.Attach(ptr);
-                                             b = nullptr;
-                                         });
+    return DAWN_UNSAFE_TODO(Blob::UnsafeCreateWithDeleter(
+        reinterpret_cast<uint8_t*>(ptr->GetBufferPointer()), ptr->GetBufferSize(), [=] {
+            // Reattach and drop to delete it.
+            ComPtr<ID3DBlob> b;
+            b.Attach(ptr);
+            b = nullptr;
+        }));
 }
 
 Blob CreateBlob(ComPtr<IDxcBlob> blob) {
     // Detach so the deleter callback can "own" the reference
     IDxcBlob* ptr = blob.Detach();
-    return Blob::UnsafeCreateWithDeleter(reinterpret_cast<uint8_t*>(ptr->GetBufferPointer()),
-                                         ptr->GetBufferSize(), [=] {
-                                             // Reattach and drop to delete it.
-                                             ComPtr<IDxcBlob> b;
-                                             b.Attach(ptr);
-                                             b = nullptr;
-                                         });
+    return DAWN_UNSAFE_TODO(Blob::UnsafeCreateWithDeleter(
+        reinterpret_cast<uint8_t*>(ptr->GetBufferPointer()), ptr->GetBufferSize(), [=] {
+            // Reattach and drop to delete it.
+            ComPtr<IDxcBlob> b;
+            b.Attach(ptr);
+            b = nullptr;
+        }));
 }
 
 }  // namespace dawn::native

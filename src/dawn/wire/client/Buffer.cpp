@@ -42,6 +42,9 @@
 #include "src/utils/numeric.h"
 
 namespace dawn::wire::client {
+
+using MemoryHandleUse = MemoryTransferService::MemoryHandleUse;
+
 namespace {
 
 // Returns either an error buffer or null, depending on mappedAtCreation.
@@ -54,6 +57,16 @@ namespace {
     errorInfo.outOfMemory = true;
     errorBufferDescriptor.nextInChain = &errorInfo;
     return device->APICreateErrorBuffer(&errorBufferDescriptor);
+}
+
+MemoryHandleUse GetMemoryHandleUse(const BufferDescriptor* descriptor) {
+    if (descriptor->usage & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) {
+        return MemoryHandleUse::MappedBuffer;
+    }
+    if (descriptor->mappedAtCreation) {
+        return MemoryHandleUse::MappedAtCreationData;
+    }
+    return MemoryHandleUse::BulkData;
 }
 
 }  // anonymous namespace
@@ -214,15 +227,16 @@ Buffer* Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
     std::shared_ptr<MemoryTransferService::MemoryHandle> memoryHandle = nullptr;
     size_t memoryHandleCreateInfoLength = 0;
     if (mappable) {
+        MemoryHandleUse memoryHandleUse = GetMemoryHandleUse(descriptor);
         memoryHandle = wireClient->GetMemoryTransferService()->CreateMemoryHandle(
-            checked_cast<size_t>(descriptor->size));
+            checked_cast<size_t>(descriptor->size), memoryHandleUse);
         if (memoryHandle == nullptr) {
             return ReturnOOMAtClient(device, descriptor);
         }
         memoryHandleCreateInfoLength = memoryHandle->GetSerializeCreateSize();
 
         // Prevent uninitialized memory from being visible via GetMappedRange().
-        if (mappableForWrite) {
+        if (mappableForWrite && !memoryHandle->IsInitialized()) {
             std::ranges::fill(memoryHandle->GetData(), std::byte(0u));
         }
     }
@@ -372,7 +386,7 @@ Future Buffer::APIMapAsync(wgpu::MapMode mode,
         return true;
     });
     if (!success) {
-        [[maybe_unused]] auto id = GetEventManager().SetFutureReady<MapAsyncEvent>(
+        std::ignore = GetEventManager().SetFutureReady<MapAsyncEvent>(
             futureIDInternal, wgpu::MapAsyncStatus::Error,
             "Buffer already has an outstanding map pending.");
         return {futureIDInternal};

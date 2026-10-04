@@ -194,15 +194,14 @@ struct Options {
 
 #if TINT_BUILD_GLSL_WRITER
     bool glsl_desktop = false;
+    bool glsl_has_conservative_depth = false;
     std::vector<uint32_t> bgra_swizzle;
 #endif  // TINT_BUILD_GLSL_WRITER
 };
 
 /// @param filename the filename to inspect
 /// @returns the inferred format for the filename suffix
-Format InferFormat(const std::string& filename) {
-    (void)filename;
-
+Format InferFormat([[maybe_unused]] const std::string& filename) {
 #if TINT_BUILD_SPV_WRITER
     if (filename.ends_with(".spv")) {
         return Format::kSpirv;
@@ -488,6 +487,11 @@ Valid values are 1.3 and 1.4)",
     auto& glsl_desktop = options.Add<BoolOption>(
         "glsl-desktop", "Set the version to the desktop GL instead of ES", Default{false});
     TINT_DEFER(opts->glsl_desktop = *glsl_desktop.value);
+
+    auto& glsl_has_conservative_depth = options.Add<BoolOption>(
+        "glsl-has-conservative-depth", "Set to true to enable GL_EXT_conservative_depth extension",
+        Default{false});
+    TINT_DEFER(opts->glsl_has_conservative_depth = *glsl_has_conservative_depth.value);
 
     auto& bgra_swizzle =
         options.Add<StringOption>("bgra-swizzle", "BGRA swizzle indices", Default{""});
@@ -980,9 +984,9 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 /// @param inspector the inspector
 /// @param ir the module to generate
 /// @returns true on success
-[[maybe_unused]] bool GenerateSpirv([[maybe_unused]] const Options& options,
-                                    [[maybe_unused]] tint::inspector::Inspector& inspector,
-                                    [[maybe_unused]] tint::core::ir::Module& ir) {
+[[nodiscard]] bool GenerateSpirv([[maybe_unused]] const Options& options,
+                                 [[maybe_unused]] tint::inspector::Inspector& inspector,
+                                 [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_SPV_WRITER
     tint::spirv::writer::Options gen_options;
     if (options.rename_all) {
@@ -1145,9 +1149,7 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
 #if TINT_BUILD_MSL_WRITER
 tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::core::ir::Module& ir,
                                                                        const std::string& ep_name) {
-    tint::msl::writer::ArrayLengthOptions options{
-        .ubo_binding = 30,
-    };
+    tint::msl::writer::ArrayLengthOptions options{};
 
     tint::core::ir::Function* ep_func = nullptr;
     for (auto* f : ir.functions) {
@@ -1175,7 +1177,7 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
 
         auto* ty = var->Result()->Type()->As<tint::core::type::Pointer>();
         if (ty && ty->AddressSpace() == tint::core::AddressSpace::kStorage &&
-            !ty->HasFixedFootprint()) {
+            !ty->StoreType()->HasFixedFootprint()) {
             if (storage_bindings.insert(*bp).second) {
                 options.bindpoint_to_size_index.emplace(
                     *bp, static_cast<uint32_t>(storage_bindings.size() - 1));
@@ -1183,6 +1185,9 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
         }
     }
 
+    if (!options.bindpoint_to_size_index.empty()) {
+        options.buffer_sizes_offset = 0x800;
+    }
     return options;
 }
 #endif  // TINT_BUILD_MSL_WRITER
@@ -1192,9 +1197,9 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
 /// @param inspector the inspector
 /// @param ir the module to generate
 /// @returns true on success
-[[maybe_unused]] bool GenerateMsl([[maybe_unused]] const Options& options,
-                                  [[maybe_unused]] tint::inspector::Inspector& inspector,
-                                  [[maybe_unused]] tint::core::ir::Module& ir) {
+[[nodiscard]] bool GenerateMsl([[maybe_unused]] const Options& options,
+                               [[maybe_unused]] tint::inspector::Inspector& inspector,
+                               [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_MSL_WRITER
     // Set up the backend options.
     tint::msl::writer::Options gen_options;
@@ -1210,7 +1215,6 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
         ir, options.ep_name, !options.use_argument_buffers, !options.use_argument_buffers);
     gen_options.resource_table = tint::core::ir::transform::GenerateResourceTableConfig(
         ir, options.treat_samplers_as_filtering);
-    // TODO(crbug.com/366291600): Replace ubo with immediate block for end2end tests
     gen_options.immediate_binding_point = tint::BindingPoint{.group = 0u, .binding = 30u};
     gen_options.extensions.disable_demote_to_helper = options.disable_demote_to_helper;
     gen_options.use_argument_buffers = options.use_argument_buffers;
@@ -1282,9 +1286,9 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
 /// @param inspector the inspector
 /// @param ir the module to generate
 /// @returns true on success
-[[maybe_unused]] bool GenerateHlsl([[maybe_unused]] const Options& options,
-                                   [[maybe_unused]] tint::inspector::Inspector& inspector,
-                                   [[maybe_unused]] tint::core::ir::Module& ir) {
+[[nodiscard]] bool GenerateHlsl([[maybe_unused]] const Options& options,
+                                [[maybe_unused]] tint::inspector::Inspector& inspector,
+                                [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_HLSL_WRITER
     const bool for_fxc = options.format == Format::kHlslFxc;
     // Set up the backend options.
@@ -1420,9 +1424,9 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
 /// @param inspector the inspector
 /// @param ir the module to generate
 /// @returns true on success
-[[maybe_unused]] bool GenerateGlsl([[maybe_unused]] const Options& options,
-                                   [[maybe_unused]] tint::inspector::Inspector& inspector,
-                                   [[maybe_unused]] tint::core::ir::Module& ir) {
+[[nodiscard]] bool GenerateGlsl([[maybe_unused]] const Options& options,
+                                [[maybe_unused]] tint::inspector::Inspector& inspector,
+                                [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_GLSL_WRITER
     tint::glsl::writer::Options gen_options;
     gen_options.strip_all_names = options.rename_all;
@@ -1435,6 +1439,7 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
 
     gen_options.entry_point_name = options.ep_name;
     gen_options.disable_robustness = !options.enable_robustness;
+    gen_options.has_gl_ext_conservative_depth = options.glsl_has_conservative_depth;
 
     // Run SubstituteOverrides to replace override instructions with constants.
     // This needs to run after SingleEntryPoint which removes unused overrides.

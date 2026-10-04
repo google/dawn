@@ -1226,9 +1226,6 @@ TEST_P(CopyTextureForBrowser_SubRects, CopySubRect) {
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
-    // Tests skip due to crbug.com/dawn/1104.
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     DoCopySubRectTest();
 }
 
@@ -1247,9 +1244,6 @@ TEST_P(CopyTextureForBrowser_AlphaMode, alphaMode) {
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
 
-    // Tests skip due to crbug.com/dawn/1104.
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-
     DoAlphaModeTest();
 }
 
@@ -1267,9 +1261,6 @@ TEST_P(CopyTextureForBrowser_ColorSpace, colorSpaceConversion) {
     // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
-
-    // Tests skip due to crbug.com/dawn/1104.
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     DoColorSpaceConversionTest();
 }

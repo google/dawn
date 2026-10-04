@@ -42,7 +42,7 @@ ResultOrError<std::wstring> ConvertStringToWstring(std::string_view s) {
     size_t numChars = checked_cast<size_t>(MultiByteToWideChar(
         CP_UTF8, MB_ERR_INVALID_CHARS, s.data(), static_cast<int>(len), nullptr, 0));
     if (numChars == 0) {
-        return DAWN_INTERNAL_ERROR("Failed to convert string to wide string");
+        return DAWN_UNRECOVERABLE_ERROR("Failed to convert string to wide string");
     }
     std::wstring result;
     result.resize(numChars);
@@ -50,7 +50,7 @@ ResultOrError<std::wstring> ConvertStringToWstring(std::string_view s) {
         MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s.data(), static_cast<int>(len),
                             &result[0], static_cast<int>(numChars));
     if (static_cast<size_t>(numConvertedChars) != numChars) {
-        return DAWN_INTERNAL_ERROR("Failed to convert string to wide string");
+        return DAWN_UNRECOVERABLE_ERROR("Failed to convert string to wide string");
     }
     return std::move(result);
 }
@@ -422,7 +422,7 @@ DXGI_FORMAT DXGITextureFormat(const DeviceBase* device, wgpu::TextureFormat form
     }
 }
 
-ResultOrError<wgpu::TextureFormat> FromUncompressedColorDXGITextureFormat(DXGI_FORMAT format) {
+ResultOrValError<wgpu::TextureFormat> FromUncompressedColorDXGITextureFormat(DXGI_FORMAT format) {
     switch (format) {
 #define X(wgpuFormat, dxgiFormat) \
     case dxgiFormat:              \

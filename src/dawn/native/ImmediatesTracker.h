@@ -49,18 +49,6 @@ namespace dawn::native {
 template <typename T>
 struct ImmediateDataContent {
   public:
-    // TODO(https://crbug.com/532946455): Spanify these two Get() methods.
-    template <typename Out>
-    const Out* Get(size_t offset) const {
-        DAWN_ASSERT(sizeof(Out) + offset <= sizeof(T));
-        return reinterpret_cast<const Out*>(&ByteSpanFromRef(mData)[offset]);
-    }
-    template <typename Out>
-    Out* Get(size_t offset) {
-        DAWN_ASSERT(sizeof(Out) + offset <= sizeof(T));
-        return reinterpret_cast<Out*>(&ByteSpanFromRef(mData)[offset]);
-    }
-
     Span<const std::byte> GetDataBytes(size_t offset, size_t size) const {
         return ByteSpanFromRef(mData).subspan(offset, size);
     }

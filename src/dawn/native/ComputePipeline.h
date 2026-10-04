@@ -40,8 +40,8 @@ namespace dawn::native {
 class DeviceBase;
 struct EntryPointMetadata;
 
-MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
-                                             const ComputePipelineDescriptor* descriptor);
+MaybeValError ValidateComputePipelineDescriptor(DeviceBase* device,
+                                                const ComputePipelineDescriptor* descriptor);
 
 class ComputePipelineBase : public PipelineBase,
                             public ContentLessObjectCacheable<ComputePipelineBase> {

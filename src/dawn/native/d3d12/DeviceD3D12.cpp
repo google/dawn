@@ -79,6 +79,12 @@ static constexpr uint64_t kZeroBufferSize = 1024ULL * 1024 * 4;  // 4 Mb
 static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
 }  // namespace
 
+CommandSignature::operator bool() const {
+    return signature.Get() != nullptr;
+}
+
+bool CommandSignature::operator==(const CommandSignature& other) const = default;
+
 // static
 ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           const UnpackedPtr<DeviceDescriptor>& descriptor,
@@ -158,27 +164,21 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
 
     // Initialize indirect commands
     D3D12_INDIRECT_ARGUMENT_DESC argumentDesc = {};
-    argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
-
     D3D12_COMMAND_SIGNATURE_DESC programDesc = {};
-    programDesc.ByteStride = 3 * sizeof(uint32_t);
     programDesc.NumArgumentDescs = 1;
     programDesc.pArgumentDescs = &argumentDesc;
 
-    GetD3D12Device()->CreateCommandSignature(&programDesc, nullptr,
-                                             IID_PPV_ARGS(&mDispatchIndirectSignature));
+    argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
+    programDesc.ByteStride = kDispatchIndirectSize;
+    DAWN_TRY_ASSIGN(mDispatchIndirectSignature, CreateCommandSignature(programDesc, nullptr));
 
     argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
-    programDesc.ByteStride = 4 * sizeof(uint32_t);
-
-    GetD3D12Device()->CreateCommandSignature(&programDesc, nullptr,
-                                             IID_PPV_ARGS(&mDrawIndirectSignature));
+    programDesc.ByteStride = kDrawIndirectSize;
+    DAWN_TRY_ASSIGN(mDrawIndirectSignature, CreateCommandSignature(programDesc, nullptr));
 
     argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
-    programDesc.ByteStride = 5 * sizeof(uint32_t);
-
-    GetD3D12Device()->CreateCommandSignature(&programDesc, nullptr,
-                                             IID_PPV_ARGS(&mDrawIndexedIndirectSignature));
+    programDesc.ByteStride = kDrawIndexedIndirectSize;
+    DAWN_TRY_ASSIGN(mDrawIndexedIndirectSignature, CreateCommandSignature(programDesc, nullptr));
 
     DAWN_TRY(DeviceBase::Initialize(descriptor, std::move(queue)));
     DAWN_TRY(EnsureCompilerLibraries());
@@ -285,15 +285,27 @@ void Device::Flush11On12DeviceToAvoidLeaks() {
     d3d11DeviceContext2->Flush();
 }
 
-ComPtr<ID3D12CommandSignature> Device::GetDispatchIndirectSignature() const {
+ResultOrError<CommandSignature> Device::CreateCommandSignature(
+    const D3D12_COMMAND_SIGNATURE_DESC& desc,
+    ID3D12RootSignature* rootSignature) const {
+    CommandSignature ret;
+    DAWN_TRY(CheckHRESULT(GetD3D12Device()->CreateCommandSignature(&desc, rootSignature,
+                                                                   IID_PPV_ARGS(&ret.signature)),
+                          "D3D12 CreateCommandSignature"));
+    DAWN_ASSERT(ret.signature.Get() != nullptr);
+    ret.byteStride = desc.ByteStride;
+    return ret;
+}
+
+const CommandSignature& Device::GetDispatchIndirectSignature() const {
     return mDispatchIndirectSignature;
 }
 
-ComPtr<ID3D12CommandSignature> Device::GetDrawIndirectSignature() const {
+const CommandSignature& Device::GetDrawIndirectSignature() const {
     return mDrawIndirectSignature;
 }
 
-ComPtr<ID3D12CommandSignature> Device::GetDrawIndexedIndirectSignature() const {
+const CommandSignature& Device::GetDrawIndexedIndirectSignature() const {
     return mDrawIndexedIndirectSignature;
 }
 
@@ -468,14 +480,12 @@ void Device::InitializeRenderPipelineAsyncImpl(Ref<CreateRenderPipelineAsyncEven
 }
 
 ResultOrError<Ref<SharedBufferMemoryBase>> Device::ImportSharedBufferMemoryImpl(
-    const SharedBufferMemoryDescriptor* descriptor) {
-    UnpackedPtr<SharedBufferMemoryDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+    UnpackedPtr<SharedBufferMemoryDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
         type, (unpacked.ValidateBranches<Branch<SharedBufferMemoryD3D12ResourceDescriptor>,
-                                         Branch<SharedBufferMemoryFromWindowsHandleDescriptor>>()));
+                                         Branch<SharedBufferMemoryFromWindowsHandleDescriptor>,
+                                         Branch<SharedBufferMemoryHostPointerDescriptor>>()));
 
     switch (type) {
         case wgpu::SType::SharedBufferMemoryD3D12ResourceDescriptor:
@@ -483,24 +493,26 @@ ResultOrError<Ref<SharedBufferMemoryBase>> Device::ImportSharedBufferMemoryImpl(
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedBufferMemoryD3D12Resource);
             return SharedBufferMemory::Create(
-                this, descriptor->label, unpacked.Get<SharedBufferMemoryD3D12ResourceDescriptor>());
+                this, unpacked->label, unpacked.Get<SharedBufferMemoryD3D12ResourceDescriptor>());
         case wgpu::SType::SharedBufferMemoryFromWindowsHandleDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedBufferMemoryFromWindowsHandle),
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle);
             return SharedBufferMemory::Create(
-                this, descriptor->label,
+                this, unpacked->label,
                 unpacked.Get<SharedBufferMemoryFromWindowsHandleDescriptor>());
+        case wgpu::SType::SharedBufferMemoryHostPointerDescriptor:
+            DAWN_INVALID_IF(!HasFeature(Feature::SharedBufferMemoryHostPointer),
+                            "%s is not enabled.", wgpu::FeatureName::SharedBufferMemoryHostPointer);
+            return SharedBufferMemory::Create(
+                this, unpacked->label, unpacked.Get<SharedBufferMemoryHostPointerDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }
 }
 
 ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
-    const SharedTextureMemoryDescriptor* descriptor) {
-    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
         type, (unpacked.ValidateBranches<Branch<SharedTextureMemoryDXGISharedHandleDescriptor>,
@@ -512,25 +524,21 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedTextureMemoryDXGISharedHandle);
             return SharedTextureMemory::Create(
-                this, descriptor->label,
+                this, unpacked->label,
                 unpacked.Get<SharedTextureMemoryDXGISharedHandleDescriptor>());
         case wgpu::SType::SharedTextureMemoryD3D12ResourceDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedTextureMemoryD3D12Resource),
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedTextureMemoryD3D12Resource);
             return SharedTextureMemory::Create(
-                this, descriptor->label,
-                unpacked.Get<SharedTextureMemoryD3D12ResourceDescriptor>());
+                this, unpacked->label, unpacked.Get<SharedTextureMemoryD3D12ResourceDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }
 }
 
 ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
-    const SharedFenceDescriptor* descriptor) {
-    UnpackedPtr<SharedFenceDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+    UnpackedPtr<SharedFenceDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(type,
                     (unpacked.ValidateBranches<Branch<SharedFenceDXGISharedHandleDescriptor>>()));
@@ -539,7 +547,7 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
         case wgpu::SType::SharedFenceDXGISharedHandleDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceDXGISharedHandle), "%s is not enabled.",
                             wgpu::FeatureName::SharedFenceDXGISharedHandle);
-            return SharedFence::Create(this, descriptor->label,
+            return SharedFence::Create(this, unpacked->label,
                                        unpacked.Get<SharedFenceDXGISharedHandleDescriptor>());
         default:
             DAWN_UNREACHABLE();
@@ -556,9 +564,8 @@ MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
 
     Buffer* dstBuffer = ToBackend(destination);
 
-    [[maybe_unused]] bool cleared;
-    DAWN_TRY_ASSIGN(cleared, dstBuffer->EnsureDataInitializedAsDestination(
-                                 commandRecordingContext, destinationOffset, size));
+    DAWN_TRY_ASSIGN(std::ignore, dstBuffer->EnsureDataInitializedAsDestination(
+                                     commandRecordingContext, destinationOffset, size));
 
     CopyFromStagingToBufferHelper(commandRecordingContext, source, sourceOffset, destination,
                                   destinationOffset, size);
@@ -742,9 +749,9 @@ MaybeError Device::CheckDebugLayerAndGenerateErrors() {
         return {};
     }
 
-    auto error = DAWN_INTERNAL_ERROR("The D3D12 debug layer reported uncaught errors.");
-
-    AppendDebugLayerMessagesToError(infoQueue.Get(), totalErrors, error.get());
+    std::unique_ptr<UnrecoverableError> error =
+        DAWN_UNRECOVERABLE_ERROR("The D3D12 debug layer reported uncaught errors.");
+    AppendDebugLayerMessagesToError(infoQueue.Get(), totalErrors, error->GetData());
 
     return error;
 }

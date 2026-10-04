@@ -10,18 +10,6 @@ struct Flip {
   /* 0x0000 */ uint value;
 };
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct tint_packed_vec3_f32_array_element {
   packed_float3 packed;
 };
@@ -32,11 +20,11 @@ struct tint_module_vars_struct {
   texture2d<float, access::sample> inputTex;
   texture2d<float, access::write> outputTex;
   const constant Flip* flip;
-  threadgroup tint_array<tint_array<tint_packed_vec3_f32_array_element, 256>, 4>* tile;
+  threadgroup array<array<tint_packed_vec3_f32_array_element, 256>, 4>* tile;
 };
 
 struct tint_symbol_1 {
-  tint_array<tint_array<tint_packed_vec3_f32_array_element, 256>, 4> tint_symbol;
+  array<array<tint_packed_vec3_f32_array_element, 256>, 4> tint_symbol;
 };
 
 uint tint_div_u32(uint lhs, uint rhs) {

@@ -499,12 +499,10 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverSamplerHeap) {
 
     Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
     auto* allocator = d3dDevice->GetSamplerShaderVisibleDescriptorAllocator();
-    [[maybe_unused]] const uint64_t samplerHeapSize =
-        allocator->GetShaderVisibleHeapSizeForTesting();
 
     // This test is written assuming a certain heap size. If this value is changed, we likely need
     // to update this test.
-    DAWN_ASSERT(samplerHeapSize == 16);
+    DAWN_CHECK(allocator->GetShaderVisibleHeapSizeForTesting() == 16);
 
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
 
@@ -633,12 +631,10 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverSamplerHeapBecauseOfBindingGroup0) {
 
     Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
     auto* allocator = d3dDevice->GetSamplerShaderVisibleDescriptorAllocator();
-    [[maybe_unused]] const uint64_t samplerHeapSize =
-        allocator->GetShaderVisibleHeapSizeForTesting();
 
     // This test is written assuming a certain heap size to trigger. If this value is changed, we
     // likely need to update this test.
-    DAWN_ASSERT(samplerHeapSize == 16);
+    DAWN_ASSERT(allocator->GetShaderVisibleHeapSizeForTesting() == 16);
 
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
 
@@ -939,9 +935,6 @@ TEST_P(D3D12DescriptorHeapTests, GrowHeapsInPendingSubmit) {
 // once no longer pending.
 // Switches over many times until |kNumOfPooledHeaps| heaps are pool-allocated.
 TEST_P(D3D12DescriptorHeapTests, GrowAndPoolHeapsInPendingAndMultipleSubmits) {
-    // TODO(crbug.com/463661448): Flaky on Snapdragon X Elite SoCs.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
-
     auto* allocator = mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
     uint32_t heapSize = allocator->GetShaderVisibleHeapSizeForTesting();
 
@@ -1057,7 +1050,6 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
 TEST_P(D3D12DescriptorHeapTests, EncodeUBOOverflowMultipleSubmit) {
     DAWN_TEST_UNSUPPORTED_IF(
         !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 

@@ -63,6 +63,7 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/msl/writer/common/option_helpers.h"
+#include "src/tint/lang/msl/writer/raise/alias_to_let.h"
 #include "src/tint/lang/msl/writer/raise/argument_buffers.h"
 #include "src/tint/lang/msl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/msl/writer/raise/builtin_polyfill.h"
@@ -81,7 +82,7 @@
 
 namespace tint::msl::writer {
 
-Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
+Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(core::ir::transform::SingleEntryPoint(module, options.entry_point_name));
 
     TINT_CHECK_RESULT(
@@ -92,8 +93,6 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     if (options.workarounds.collapse_subgroup_min_max) {
         TINT_CHECK_RESULT(core::ir::transform::CollapseSubgroupMinMax(module));
     }
-
-    RaiseResult raise_result;
 
     // VertexPulling must come before BindingRemapper and Robustness.
     if (options.vertex_pulling_config) {
@@ -109,11 +108,16 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     PopulateBindingRelatedOptions(options, remapper_data, multiplanar_map,
                                   array_length_from_constants);
 
+    if (!array_length_from_constants.bindpoint_to_size_index.empty() &&
+        !array_length_from_constants.buffer_sizes_offset.has_value()) {
+        return Failure("array length from immediate requires a buffer sizes offset");
+    }
+
     uint32_t buffer_sizes_array_elements_num = 0;
 
     // PrepareImmediateData must come before any transform that needs internal immediates.
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    if (array_length_from_constants.buffer_sizes_offset) {
+    if (array_length_from_constants.buffer_sizes_offset.has_value()) {
         uint32_t max_index = 0;
         for (auto& entry : array_length_from_constants.bindpoint_to_size_index) {
             max_index = std::max(max_index, entry.second);
@@ -190,34 +194,21 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     TINT_CHECK_RESULT(core::ir::transform::MultiplanarExternalTexture(module, multiplanar_map));
 
-    // TODO(crbug.com/366291600): Replace ArrayLengthFromUniform with ArrayLengthFromImmediates
-    if (array_length_from_constants.ubo_binding) {
-        TINT_CHECK_RESULT_UNWRAP(
-            array_length_from_uniform_result,
-            core::ir::transform::ArrayLengthFromUniform(
-                module, BindingPoint{0u, array_length_from_constants.ubo_binding.value()},
-                array_length_from_constants.bindpoint_to_size_index));
-        raise_result.needs_storage_buffer_sizes =
-            array_length_from_uniform_result.needs_storage_buffer_sizes;
-    }
+    TINT_CHECK_RESULT(core::ir::transform::ArrayLengthFromImmediates(
+        module, immediate_data_layout, buffer_sizes_array_elements_num,
+        array_length_from_constants.bindpoint_to_size_index));
 
-    if (array_length_from_constants.buffer_sizes_offset) {
-        TINT_IR_ASSERT(module, !array_length_from_constants.ubo_binding);
-        TINT_CHECK_RESULT_UNWRAP(array_length_from_immediate_result,
-                                 core::ir::transform::ArrayLengthFromImmediates(
-                                     module, immediate_data_layout, buffer_sizes_array_elements_num,
-                                     array_length_from_constants.bindpoint_to_size_index));
-        raise_result.needs_storage_buffer_sizes =
-            array_length_from_immediate_result.needs_storage_buffer_sizes;
+    {
+        // Must come before DecomposeBuffer.
+        core::ir::transform::PreservePaddingConfig preserve_config{.workgroup_buffer_view = true};
+        TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module, preserve_config));
     }
-
     TINT_CHECK_RESULT(raise::DecomposeBuffer(module));
 
     if (!options.disable_workgroup_init) {
         TINT_CHECK_RESULT(core::ir::transform::ZeroInitWorkgroupMemory(module));
     }
 
-    TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module));
     TINT_CHECK_RESULT(core::ir::transform::VectorizeScalarMatrixConstructors(module));
     TINT_CHECK_RESULT(core::ir::transform::RemoveContinueInSwitch(module));
 
@@ -251,11 +242,6 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
         if (options.immediate_binding_point) {
             cfg.skip_bindings.insert(options.immediate_binding_point.value());
-        }
-
-        if (array_length_from_constants.ubo_binding) {
-            cfg.skip_bindings.insert(
-                BindingPoint{0u, array_length_from_constants.ubo_binding.value()});
         }
 
         if (options.vertex_pulling_config) {
@@ -330,7 +316,11 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         TINT_CHECK_RESULT(core::ir::transform::ValueToLet(module, cfg));
     }
 
-    return raise_result;
+    // Must be around the same time as ValueToLet to ensure aliased typedefs are generated at the
+    // correct places. These passes need to run late enough to avoid eliding the added lets.
+    TINT_CHECK_RESULT(raise::AliasToLet(module));
+
+    return Success;
 }
 
 }  // namespace tint::msl::writer

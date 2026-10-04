@@ -33,6 +33,9 @@ import("dawn_features.gni")
 # The tests run during build, then produce empty object files to "link" with.
 # They run only when the build is configured to use Dawn's own copy of Clang
 # that's pinned at a known revision. Otherwise, the source set is a no-op.
+#
+# Directive syntax for expected errors:
+# https://clang.llvm.org/docs/InternalsManual.html#verifying-diagnostics
 template("dawn_nocompile_source_set") {
   if (dawn_standalone && is_clang) {
     nocompile_source_set(target_name) {

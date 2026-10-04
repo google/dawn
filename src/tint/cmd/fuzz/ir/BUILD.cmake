@@ -61,7 +61,6 @@ tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
   tint_lang_core_ir_validator
   tint_lang_core_type
   tint_utils
-  tint_utils_bytes
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -138,7 +137,6 @@ tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz fuzz
   tint_lang_core_ir_validator
   tint_lang_core_type
   tint_utils
-  tint_utils_bytes
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -155,6 +153,12 @@ tint_target_add_external_dependencies(tint_cmd_fuzz_ir_fuzz fuzz
   "src_utils"
   "thread"
 )
+
+if(TINT_BUILD_IR_BINARY)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz fuzz
+    tint_lang_core_ir_binary
+  )
+endif(TINT_BUILD_IR_BINARY)
 
 if(TINT_BUILD_WGSL_READER)
   tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz fuzz

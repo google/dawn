@@ -70,14 +70,9 @@ class CommandRecordingContextGuard : public ::dawn::detail::Guard<Ctx, Traits> {
     CommandRecordingContextGuard() = default;
     CommandRecordingContextGuard(CommandRecordingContextGuard&& rhs) = default;
     CommandRecordingContextGuard& operator=(CommandRecordingContextGuard&& other) = default;
-    CommandRecordingContextGuard(Ctx* ctx,
-                                 typename Traits::MutexType& mutex,
-                                 Defer* defer = nullptr)
-        : Base(ctx, mutex, defer) {}
-    CommandRecordingContextGuard(Ctx* ctx,
-                                 typename Traits::template LockType<Ctx>&& lock,
-                                 Defer* defer = nullptr)
-        : Base(ctx, std::move(lock), defer) {}
+    CommandRecordingContextGuard(Ctx* ctx, typename Traits::MutexType& mutex) : Base(ctx, mutex) {}
+    CommandRecordingContextGuard(Ctx* ctx, typename Traits::template LockType<Ctx>&& lock)
+        : Base(ctx, std::move(lock)) {}
 
     CommandRecordingContextGuard(const CommandRecordingContextGuard& other) = delete;
     CommandRecordingContextGuard& operator=(const CommandRecordingContextGuard& other) = delete;

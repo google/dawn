@@ -50,21 +50,10 @@ namespace tint::core::ir::analysis {
 
 namespace {
 
-/// Returns an instruction of the given kind if @p val is the result of such an instruction.
-/// Otherwise returns nullptr.
-template <typename InstClass>
-InstClass* As(Value* val) {
-    if (auto* instres = val->As<InstructionResult>()) {
-        return instres->Instruction()->As<InstClass>();
-    }
-    return nullptr;
-}
-
 /// Returns the value, after unwrapping all bitcasts.
 Value* UnwrapBitcast(Value* val) {
-    while (auto* inst_res = val->As<InstructionResult>()) {
-        auto* call = inst_res->Instruction()->As<CoreBuiltinCall>();
-        if (call && call->Func() == core::BuiltinFn::kBitcast) {
+    while (auto* call = val->AsInstruction<CoreBuiltinCall>()) {
+        if (call->Func() == core::BuiltinFn::kBitcast) {
             val = call->Args()[0];
             continue;
         }
@@ -88,12 +77,12 @@ bool IsOne(Value* v) {
 /// Returns `true` if `val` is definitely `var +/- 1`.
 bool IsIncrementOrDecrementOfVar(const Var& var, Value* val) {
     auto is_var_op_one = [&](Value* a, Value* b) {
-        if (auto* a_load = As<Load>(a)) {
+        if (auto* a_load = a->AsInstruction<Load>()) {
             return (a_load->From() == var.Result()) && IsOne(b);
         }
         return false;
     };
-    if (auto* binary = As<Binary>(UnwrapBitcast(val))) {
+    if (auto* binary = UnwrapBitcast(val)->AsInstruction<Binary>()) {
         auto* lhs = UnwrapBitcast(binary->LHS());
         auto* rhs = UnwrapBitcast(binary->RHS());
         if (binary->Op() == BinaryOp::kAdd) {
@@ -214,7 +203,7 @@ struct LoopAnalysisImpl {
     bool IsBreakIfOnIndex(If* i, Var& index) {
         // Returns `true` if the given value is a load of the index variable.
         auto is_index = [&index](Value* v) {
-            if (auto* load = As<Load>(UnwrapBitcast(v))) {
+            if (auto* load = UnwrapBitcast(v)->AsInstruction<Load>()) {
                 return load->From() == index.Result();
             }
             return false;
@@ -331,7 +320,7 @@ struct LoopAnalysisImpl {
 
         // Check if the condition matches (%idx < %bound) or (%idx > %bound).
         // The value %bound can be any immutable value that was declared before the body.
-        auto* binary = As<Binary>(i->Condition());
+        auto* binary = i->Condition()->AsInstruction<Binary>();
         if (!binary) {
             return false;
         }

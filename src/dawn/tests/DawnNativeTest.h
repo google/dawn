@@ -38,10 +38,6 @@
 
 namespace dawn::native {
 
-// This is similar to DAWN_TRY_ASSIGN but produces a fatal GTest error if EXPR is an error.
-#define DAWN_ASSERT_AND_ASSIGN(VAR, EXPR) \
-    DAWN_TRY_ASSIGN_WITH_CLEANUP(VAR, EXPR, {}, AddFatalDawnFailure(#EXPR, error.get()))
-
 void AddFatalDawnFailure(const char* expression, const ErrorData* error);
 
 }  // namespace dawn::native

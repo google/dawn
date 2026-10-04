@@ -37,7 +37,7 @@
 
 namespace dawn::native {
 
-MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor* descriptor) {
+MaybeValError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor* descriptor) {
     DAWN_TRY(ValidateFloat("lodMinClamp", descriptor->lodMinClamp));
     DAWN_TRY(ValidateFloat("lodMaxClamp", descriptor->lodMaxClamp));
 

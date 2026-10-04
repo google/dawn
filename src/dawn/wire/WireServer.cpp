@@ -85,6 +85,13 @@ MemoryTransferService::~MemoryTransferService() = default;
 MemoryTransferService::MemoryHandle::MemoryHandle() = default;
 
 MemoryTransferService::MemoryHandle::~MemoryHandle() = default;
+
+WGPUBuffer MemoryTransferService::MemoryHandle::TryWrapInBuffer(
+    const DawnProcTable* procs,
+    WGPUDevice device,
+    const WGPUBufferDescriptor* descriptor) {
+    return nullptr;
+}
 }  // namespace server
 
 }  // namespace dawn::wire

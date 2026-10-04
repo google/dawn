@@ -1772,7 +1772,7 @@ TEST_F(SpirvReader_TransposeRowMajorTest, InsertInStructConstructor_Square) {
     // struct S {
     //   @offset(0) @row_major m1 : mat3x3<f32>,
     //   @offset(48) m2 : mat4x4<f32>,
-    //   @offset(102) @row_major m3 : mat4x4<f32>,
+    //   @offset(112) @row_major m3 : mat4x4<f32>,
     // };
     // @group(0) @binding(0) var<storage, read_write> s : S;
     //
@@ -1787,7 +1787,7 @@ TEST_F(SpirvReader_TransposeRowMajorTest, InsertInStructConstructor_Square) {
         mod.symbols.New("m1"), ty.mat4x4<f32>(), 1u, 48u, 64u, 64u, core::IOAttributes{});
 
     auto* matrix_member_2 = ty.Get<core::type::StructMember>(
-        mod.symbols.New("m2"), ty.mat4x4<f32>(), 2u, 102u, 64u, 64u, core::IOAttributes{});
+        mod.symbols.New("m2"), ty.mat4x4<f32>(), 2u, 112u, 64u, 64u, core::IOAttributes{});
     matrix_member_2->SetRowMajor();
 
     auto* strct =
@@ -1810,7 +1810,7 @@ TEST_F(SpirvReader_TransposeRowMajorTest, InsertInStructConstructor_Square) {
 S = struct @align(64) {
   m0:mat3x3<f32> @offset(0), @row_major
   m1:mat4x4<f32> @offset(48)
-  m2:mat4x4<f32> @offset(102), @row_major
+  m2:mat4x4<f32> @offset(112), @row_major
 }
 
 $B1: {  # root
@@ -1832,13 +1832,13 @@ $B1: {  # root
 S = struct @align(64) {
   m0:mat3x3<f32> @offset(0), @row_major
   m1:mat4x4<f32> @offset(48)
-  m2:mat4x4<f32> @offset(102), @row_major
+  m2:mat4x4<f32> @offset(112), @row_major
 }
 
 S_1 = struct @align(64) {
   m0:mat3x3<f32> @offset(0)
   m1:mat4x4<f32> @offset(48)
-  m2:mat4x4<f32> @offset(102)
+  m2:mat4x4<f32> @offset(112)
 }
 
 $B1: {  # root

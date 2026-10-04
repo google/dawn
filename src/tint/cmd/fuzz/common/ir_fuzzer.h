@@ -37,11 +37,10 @@
 #include <tuple>
 #include <utility>
 
+#include "src/tint/cmd/fuzz/common/fuzzer_decoder.h"
 #include "src/tint/cmd/fuzz/common/options.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
-#include "src/tint/utils/bytes/buffer_reader.h"
-#include "src/tint/utils/bytes/decoder.h"
 #include "src/tint/utils/macros/static_init.h"
 #include "src/tint/utils/result.h"
 
@@ -67,20 +66,10 @@ struct IRFuzzer {
         if constexpr (sizeof...(ARGS) > 0) {
             auto fn_with_decode = [fn](core::ir::Module& module, const Context& context,
                                        std::span<const std::byte> data) -> Result<SuccessType> {
-                if (data.empty()) {
-                    return Failure{"Data expected but no data provided."};
-                }
-
-                bytes::BufferReader reader{data};
-                auto data_args = bytes::Decode<std::tuple<std::decay_t<ARGS>...>>(reader);
-                if (data_args != Success) {
-                    return Failure("Failed to decode fuzzer argument data: " +
-                                   data_args.Failure().reason);
-                }
-
-                auto all_args =
-                    std::tuple_cat(std::tuple<core::ir::Module&, const Context&>{module, context},
-                                   data_args.Get());
+                SafeFuzzerDecoder decoder{data};
+                auto data_args = FuzzDecoder<std::tuple<std::decay_t<ARGS>...>>::Decode(decoder);
+                auto all_args = std::tuple_cat(
+                    std::tuple<core::ir::Module&, const Context&>{module, context}, data_args);
                 return std::apply(*fn, all_args);
             };
             return IRFuzzer{

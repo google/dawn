@@ -45,8 +45,6 @@ class DepthStencilStateTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
-        // TODO(crbug.com/458102531): Flaky on WARP.
-        DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
 
         // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
         DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());

@@ -93,10 +93,10 @@ class ChunkedCommandSerializer {
 
     template <typename Cmd>
     void SerializeCommand(Cmd&& cmd) {
-        SerializeCommandImpl(std::forward<Cmd>(cmd), [](const Cmd& cmd, size_t requiredSize,
-                                                        SerializeBuffer* serializeBuffer) {
-            return cmd.Serialize(requiredSize, serializeBuffer);
-        });
+        SerializeCommandImpl(std::forward<Cmd>(cmd),
+                             [](const Cmd& cmd, SerializeBuffer* serializeBuffer) {
+                                 return cmd.Serialize(serializeBuffer);
+                             });
     }
 
     template <typename Cmd, typename Extension, typename... Extensions>
@@ -104,8 +104,8 @@ class ChunkedCommandSerializer {
     void SerializeCommand(Cmd&& cmd, Extension&& e, Extensions&&... es) {
         SerializeCommandImpl(
             std::forward<Cmd>(cmd),
-            [](const Cmd& cmd, size_t requiredSize, SerializeBuffer* serializeBuffer) {
-                return cmd.Serialize(requiredSize, serializeBuffer);
+            [](const Cmd& cmd, SerializeBuffer* serializeBuffer) {
+                return cmd.Serialize(serializeBuffer);
             },
             std::forward<Extension>(e), std::forward<Extensions>(es)...);
     }
@@ -116,9 +116,8 @@ class ChunkedCommandSerializer {
                           Extensions&&... extensions) {
         SerializeCommandImpl(
             std::forward<Cmd>(cmd),
-            [&objectIdProvider](const Cmd& cmd, size_t requiredSize,
-                                SerializeBuffer* serializeBuffer) {
-                return cmd.Serialize(requiredSize, serializeBuffer, objectIdProvider);
+            [&objectIdProvider](const Cmd& cmd, SerializeBuffer* serializeBuffer) {
+                return cmd.Serialize(serializeBuffer, objectIdProvider);
             },
             std::forward<Extensions>(extensions)...);
     }
@@ -152,10 +151,9 @@ class ChunkedCommandSerializer {
                 // Now that the command's extension members have been updated, we can serialise the
                 // command.
                 SerializeBuffer cmdSerializeBuffer(cmdBuffer);
-                WireResult rCmd = SerializeCmd(cmd, requiredSize, &cmdSerializeBuffer);
-                if (rCmd != WireResult::Success || rExts != WireResult::Success) [[unlikely]] {
-                    mSerializer->OnSerializeError();
-                }
+                WireResult rCmd = SerializeCmd(cmd, &cmdSerializeBuffer);
+
+                DAWN_CHECK(rCmd == WireResult::Success && rExts == WireResult::Success);
             }
             return;
         }
@@ -173,11 +171,10 @@ class ChunkedCommandSerializer {
 
         // Now that the command's extension members have been updated, we can serialise the command.
         SerializeBuffer cmdSerializeBuffer(cmdBuffer);
-        WireResult rCmd = SerializeCmd(cmd, requiredSize, &cmdSerializeBuffer);
-        if (rCmd != WireResult::Success || rExts != WireResult::Success) [[unlikely]] {
-            mSerializer->OnSerializeError();
-            return;
-        }
+        WireResult rCmd = SerializeCmd(cmd, &cmdSerializeBuffer);
+
+        DAWN_CHECK(rCmd == WireResult::Success && rExts == WireResult::Success);
+
         SerializeChunkedCommand(cmdSpace);
     }
 

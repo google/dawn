@@ -664,5 +664,37 @@ fn main() {
 )");
 }
 
+TEST_F(ResolverVariableValidationTest, PhonyAssignment_ExcessiveElements) {
+    EXPECT_ERROR(
+        R"(
+@group(0) @binding(0) var<storage> v : array<i32, 1000000>;
+fn main() {
+  _ = v;
+}
+)",
+        R"(input.wgsl:4:7 error: array count (1000000) must be less than 65536
+  _ = v;
+      ^
+)");
+}
+
+TEST_F(ResolverVariableValidationTest, ReturnType_ExcessiveElements) {
+    EXPECT_ERROR(
+        R"(
+@group(0) @binding(0) var<storage> v : array<i32, 1000000>;
+fn foo() -> array<i32, 1000000> {
+  return v;
+}
+)",
+        R"(input.wgsl:3:13 error: array count (1000000) must be less than 65536
+fn foo() -> array<i32, 1000000> {
+            ^^^^^^^^^^^^^^^^^^^
+
+input.wgsl:3:13 note: while instantiating return type for foo
+fn foo() -> array<i32, 1000000> {
+            ^^^^^^^^^^^^^^^^^^^
+)");
+}
+
 }  // namespace
 }  // namespace tint::resolver

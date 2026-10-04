@@ -55,6 +55,15 @@ class StagingDescriptorAllocator;
         DAWN_ASSERT(SUCCEEDED(succeeded)); \
     } while (0)
 
+struct CommandSignature {
+    ComPtr<ID3D12CommandSignature> signature = nullptr;
+    // The ByteStride that the signature was created with.
+    uint32_t byteStride = 0;
+
+    explicit operator bool() const;
+    bool operator==(const CommandSignature& other) const;
+};
+
 // Definition of backend types
 class Device final : public d3d::Device {
   public:
@@ -76,9 +85,13 @@ class Device final : public d3d::Device {
     ComPtr<ID3D11On12Device> GetOrCreateD3D11On12Device();
     ComPtr<ID3D12CommandQueue> GetD3D12CommandQueue() const;
 
-    ComPtr<ID3D12CommandSignature> GetDispatchIndirectSignature() const;
-    ComPtr<ID3D12CommandSignature> GetDrawIndirectSignature() const;
-    ComPtr<ID3D12CommandSignature> GetDrawIndexedIndirectSignature() const;
+    ResultOrError<CommandSignature> CreateCommandSignature(
+        const D3D12_COMMAND_SIGNATURE_DESC& desc,
+        ID3D12RootSignature* rootSignature) const;
+
+    const CommandSignature& GetDispatchIndirectSignature() const;
+    const CommandSignature& GetDrawIndirectSignature() const;
+    const CommandSignature& GetDrawIndexedIndirectSignature() const;
 
     MutexProtected<ResidencyManager>& GetResidencyManager() const;
 
@@ -219,11 +232,11 @@ class Device final : public d3d::Device {
     void InitializeRenderPipelineAsyncImpl(Ref<CreateRenderPipelineAsyncEvent> event) override;
 
     ResultOrError<Ref<SharedBufferMemoryBase>> ImportSharedBufferMemoryImpl(
-        const SharedBufferMemoryDescriptor* descriptor) override;
+        UnpackedPtr<SharedBufferMemoryDescriptor> unpacked) override;
     ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
-        const SharedTextureMemoryDescriptor* descriptor) override;
+        UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) override;
     ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
-        const SharedFenceDescriptor* descriptor) override;
+        UnpackedPtr<SharedFenceDescriptor> unpacked) override;
 
     void DestroyImpl(DestroyReason reason) override;
 
@@ -244,9 +257,9 @@ class Device final : public d3d::Device {
     // 11on12 device corresponding to queue's mCommandQueue.
     ComPtr<ID3D11On12Device> mD3d11On12Device;
 
-    ComPtr<ID3D12CommandSignature> mDispatchIndirectSignature;
-    ComPtr<ID3D12CommandSignature> mDrawIndirectSignature;
-    ComPtr<ID3D12CommandSignature> mDrawIndexedIndirectSignature;
+    CommandSignature mDispatchIndirectSignature;
+    CommandSignature mDrawIndirectSignature;
+    CommandSignature mDrawIndexedIndirectSignature;
 
     MutexProtected<SerialQueue<ExecutionSerial, ComPtr<IUnknown>>> mUsedComObjectRefs;
 

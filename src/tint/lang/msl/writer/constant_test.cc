@@ -326,10 +326,10 @@ TEST_F(MslWriterTest, Constant_Array_Splat) {
 
     auto result = Generate();
     ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 [[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
-  tint_array<float, 3> const a = tint_array<float, 3>{1.5f, 1.5f, 1.5f};
+  array<float, 3> const a = array<float, 3>{1.5f, 1.5f, 1.5f};
 }
 )");
 }
@@ -344,10 +344,10 @@ TEST_F(MslWriterTest, Constant_Array_Composite) {
 
     auto result = Generate();
     ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 [[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
-  tint_array<float, 3> const a = tint_array<float, 3>{1.5f, 1.0f, 2.0f};
+  array<float, 3> const a = array<float, 3>{1.5f, 1.0f, 2.0f};
 }
 )");
 }
@@ -362,10 +362,10 @@ TEST_F(MslWriterTest, Constant_Array_Composite_AnyZero) {
 
     auto result = Generate();
     ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 [[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
-  tint_array<float, 2> const a = tint_array<float, 2>{1.0f, 0.0f};
+  array<float, 2> const a = array<float, 2>{1.0f, 0.0f};
 }
 )");
 }
@@ -380,10 +380,10 @@ TEST_F(MslWriterTest, Constant_Array_Composite_AllZero) {
 
     auto result = Generate();
     ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 [[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
-  tint_array<float, 3> const a = tint_array<float, 3>{};
+  array<float, 3> const a = array<float, 3>{};
 }
 )");
 }

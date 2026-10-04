@@ -567,21 +567,21 @@ class ImmediateTracker : public T {
                 static_cast<uint32_t>(offset) * kImmediateElementByteSize;
             size_t immediateRangeStartOffset =
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
-            WriteImmediateBlocks(stages, immediateRangeStartOffset,
-                                 this->mContent.template Get<uint32_t>(immediateContentStartOffset),
-                                 size * kImmediateElementByteSize);
+            WriteImmediateBlocks(stages, immediateRangeStartOffset * kImmediateElementByteSize,
+                                 this->mContent.GetDataBytes(immediateContentStartOffset,
+                                                             size * kImmediateElementByteSize));
         }
 
         uint32_t bufferSizeByteOffset = GetImmediateBufferSizesByteOffset(pipelineMask);
-        size_t bufferSizeOffsetElements = bufferSizeByteOffset / kImmediateElementByteSize;
 
         // Update storage buffer length data that are needed and changed.
         for (auto stage : IterateStages(lengthTracker->dirtyStages)) {
             // Sizes must be > 0, otherwise we'll do min(index, bufferSize - 1) and underflow.
             // TODO(crbug.com/488400770): Should be able to assert that, but Graphite violates it.
 
-            WriteImmediateBlocks(StageBit(stage), bufferSizeOffsetElements,
-                                 lengthTracker->data[stage].data(), lengthTracker->dataSize[stage]);
+            WriteImmediateBlocks(
+                StageBit(stage), bufferSizeByteOffset,
+                ByteSpanFromRef(lengthTracker->data[stage]).first(lengthTracker->dataSize[stage]));
         }
 
         for (auto stage : IterateStages(stages)) {
@@ -617,16 +617,13 @@ class ImmediateTracker : public T {
     // Writes data to the immediate block content for the specified shader stages.
     // This is used for both immediates and storage buffer length data.
     void WriteImmediateBlocks(wgpu::ShaderStage stages,
-                              size_t offset,
-                              const void* data,
-                              size_t size) {
-        DAWN_ASSERT(offset < kMaxImmediateBlockSize);
-        DAWN_ASSERT(size <= sizeof(uint32_t) * (kMaxImmediateBlockSize - offset));
-        // Copy data to all affected shader stages
+                              size_t byteOffset,
+                              Span<const std::byte> data) {
+        // Copy data to all affected shader stages.
         for (auto stage : IterateStages(stages)) {
-            // TODO(https://crbug.com/532946455): Spanify ImmediateTracker.
-            // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
-            DAWN_UNSAFE_TODO(std::memcpy(&mImmediateBlockContent[stage][offset], data, size));
+            ByteSpanFromRef(mImmediateBlockContent[stage])
+                .subspan(byteOffset, data.size())
+                .CopyFrom(data);
         }
         dirtyStages |= stages;
     }

@@ -250,7 +250,7 @@ SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
     }
     mTextureSyncInfos.clear();
 
-    for (auto* const it : mExternalTextureUsages) {
+    for (ExternalTextureBase* it : mExternalTextureUsages) {
         result.externalTextures.push_back(it);
     }
     mExternalTextureUsages.clear();
@@ -265,7 +265,13 @@ SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
 
 ComputePassResourceUsageTracker::ComputePassResourceUsageTracker() = default;
 
+ComputePassResourceUsageTracker::ComputePassResourceUsageTracker(
+    ComputePassResourceUsageTracker&&) = default;
+
 ComputePassResourceUsageTracker::~ComputePassResourceUsageTracker() = default;
+
+ComputePassResourceUsageTracker& ComputePassResourceUsageTracker::operator=(
+    ComputePassResourceUsageTracker&&) = default;
 
 void ComputePassResourceUsageTracker::AddDispatch(SyncScopeResourceUsage scope) {
     mUsage.dispatchUsages.push_back(std::move(scope));

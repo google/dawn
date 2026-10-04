@@ -54,9 +54,6 @@ struct Output {
     /// The generated MSL.
     std::string msl = "";
 
-    /// True if the shader needs a UBO of buffer sizes.
-    bool needs_storage_buffer_sizes = false;
-
     /// True if the generated shader uses the invariant attribute.
     bool has_invariant_attribute = false;
 

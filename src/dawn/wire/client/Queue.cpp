@@ -85,6 +85,8 @@ class WorkDoneEvent : public TrackedEvent {
 
 }  // anonymous namespace
 
+using MemoryHandleUse = MemoryTransferService::MemoryHandleUse;
+
 Queue::~Queue() = default;
 
 ObjectType Queue::GetObjectType() const {
@@ -180,7 +182,8 @@ void Queue::WriteBufferXL(Buffer* buffer, uint64_t bufferOffset, Span<const std:
     Client* client = GetClient();
 
     // Create the MemoryHandle.
-    auto memoryHandle = client->GetMemoryTransferService()->CreateMemoryHandle(data.size());
+    auto memoryHandle = client->GetMemoryTransferService()->CreateMemoryHandle(
+        data.size(), MemoryHandleUse::BulkData);
     if (memoryHandle == nullptr) {
         // There was an OOM that we cannot handle in WriteBuffer: trigger a device loss.
         client->Disconnect();
@@ -237,7 +240,8 @@ void Queue::WriteTextureXL(const TexelCopyTextureInfo* destination,
     Client* client = GetClient();
 
     // Create the MemoryHandle.
-    auto memoryHandle = client->GetMemoryTransferService()->CreateMemoryHandle(data.size());
+    auto memoryHandle = client->GetMemoryTransferService()->CreateMemoryHandle(
+        data.size(), MemoryHandleUse::BulkData);
     if (memoryHandle == nullptr) {
         // There was an OOM that we cannot handle in WriteBuffer: trigger a device loss.
         client->Disconnect();

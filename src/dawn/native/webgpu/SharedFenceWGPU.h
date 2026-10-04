@@ -48,7 +48,7 @@ class SharedFence final : public SharedFenceBase, public ObjectWGPU<WGPUSharedFe
 
   private:
     SharedFence(Device* device, StringView label, WGPUSharedFence innerHandle);
-    MaybeError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;
+    MaybeValError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;
 
     void SetLabelImpl() override;
 

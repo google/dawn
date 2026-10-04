@@ -436,11 +436,18 @@ static constexpr auto kFeatureInfo = std::to_array<FeatureEnumAndInfo>({
       FeatureInfo::FeatureState::Experimental}},
     {Feature::SharedBufferMemoryFromWindowsHandle,
      {"Supports importing a shared memory file mapping handle as shared buffer memory.",
-      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/shared_buffer.md",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "shared_buffer_memory.md",
+      FeatureInfo::FeatureState::Experimental}},
+    {Feature::SharedBufferMemoryHostPointer,
+     {"Supports importing a host-allocated memory pointer as shared buffer memory.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "shared_buffer_memory.md",
       FeatureInfo::FeatureState::Experimental}},
     {Feature::SharedTextureMemoryD3D12Resource,
      {"Support importing ID3D12Resource as shared texture memory.",
-      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/shared_texture.md",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "shared_texture_memory.md",
       FeatureInfo::FeatureState::Experimental}},
     {Feature::ChromiumExperimentalSamplingResourceTable,
      {"Experimental support for the bindless sampling resource table",
@@ -455,7 +462,7 @@ static constexpr auto kFeatureInfo = std::to_array<FeatureEnumAndInfo>({
      {"Support the \"enable atomic_vec2u_min_max;\" directive for 64-bit atomics via vec2<u32> "
       "types",
       "https://github.com/gpuweb/gpuweb/blob/main/proposals/atomic-64-min-max.md",
-      FeatureInfo::FeatureState::Experimental}},
+      FeatureInfo::FeatureState::Stable}},
     {Feature::Unorm16FormatsForExternalTexture,
      {"Supports R/RG/RGBA16Unorm formats for ExternalTexture planes even if not all the required "
       "feature support has been enabled.",
@@ -481,8 +488,8 @@ static constexpr auto kFeatureInfo = std::to_array<FeatureEnumAndInfo>({
       FeatureInfo::FeatureState::Experimental}},
     {Feature::TextureCompressionUnaligned,
      {"Supports creating compressed texture with partial blocks in level 0",
-      // TODO(https://crbug.com/528245806): point at the WebGPU spec once landed.
-      "https://crbug.com/528245806", FeatureInfo::FeatureState::Experimental}},
+      "https://gpuweb.github.io/gpuweb/#dom-gpufeaturename-texture-compression-unaligned",
+      FeatureInfo::FeatureState::Stable}},
     {Feature::DawnAllowUndefinedLoadStoreOp,
      {"Allow wgpu::LoadOp::Undefined and wgpu::StoreOp::Undefined to be used for render pass "
       "attachments.",

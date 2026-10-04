@@ -263,7 +263,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                                 "global_invocation_id");
         }
 
-        if (needs_num_workgroups &&
+        if (HasBuiltinInput(core::BuiltinValue::kNumWorkgroups) &&
             !config.immediate_data_layout.HasImmediate(core::InternalImmediate::kNumWorkgroups)) {
             return Failure("num_workgroups required but no immediate offset provided");
         }

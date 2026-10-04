@@ -43,13 +43,13 @@ MaybeError ReadHead::ReadBytes(std::span<uint8_t> dest) {
         return {};
     }
     mBad = true;
-    return DAWN_INTERNAL_ERROR("Read past end of data");
+    return DAWN_UNRECOVERABLE_ERROR("Read past end of data");
 }
 
 ResultOrError<const uint32_t*> ReadHead::GetData(size_t size) {
     if (size % 4 != 0) {
         mBad = true;
-        return DAWN_INTERNAL_ERROR("GetData size not multiple of 4");
+        return DAWN_UNRECOVERABLE_ERROR("GetData size not multiple of 4");
     }
     size_t alignedSize = (size + 3) & ~3u;
     auto newHead = mReadHead + sign_cast(alignedSize);
@@ -60,7 +60,7 @@ ResultOrError<const uint32_t*> ReadHead::GetData(size_t size) {
     }
 
     mBad = true;
-    return DAWN_INTERNAL_ERROR("GetData past end of data");
+    return DAWN_UNRECOVERABLE_ERROR("GetData past end of data");
 }
 
 bool ReadHead::IsBad() const {

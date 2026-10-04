@@ -380,6 +380,8 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
             core::BuiltinValue::kInstanceIndex, param->Type(), param->Declaration()->attributes);
         entry_point.primitive_index_used |= ContainsBuiltin(
             core::BuiltinValue::kPrimitiveIndex, param->Type(), param->Declaration()->attributes);
+        entry_point.view_index_used |= ContainsBuiltin(
+            core::BuiltinValue::kViewIndex, param->Type(), param->Declaration()->attributes);
         entry_point.subgroup_invocation_id_used |=
             ContainsBuiltin(core::BuiltinValue::kSubgroupInvocationId, param->Type(),
                             param->Declaration()->attributes);

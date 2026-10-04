@@ -41,11 +41,6 @@ class SizedBindingArrayTests : public DawnTest {
   public:
     void SetUp() override {
         DawnTest::SetUp();
-
-        // TODO(https://issues.chromium.org/411573959) Fails using WARP but not on real hardware.
-        // WARP 10.0.19031.4355 samples the wrong textures when indexing while WARP 1.0.12.0 fails
-        // pipeline creation.
-        DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
     }
 
     // A 1x1 texture with a single value to check the correct binding is used.

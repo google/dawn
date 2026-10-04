@@ -227,16 +227,6 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         mTextureBuiltinsBuffer = ToBackend(std::move(buffer));
     }
 
-    if (IsToggleEnabled(Toggle::GLUseArrayLengthFromUniform) &&
-        mArrayLengthBuffer.Get() == nullptr) {
-        BufferDescriptor desc = {};
-        desc.size = kGLMaxShaderStorageBufferBindingsReported * sizeof(uint32_t);
-        desc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
-        Ref<BufferBase> buffer;
-        DAWN_TRY_ASSIGN(buffer, Buffer::CreateInternalBuffer(this, &desc, false));
-        mArrayLengthBuffer = ToBackend(std::move(buffer));
-    }
-
     return scopedCurrentContext.End();
 }
 
@@ -309,10 +299,7 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
 }
 
 ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
-    const SharedTextureMemoryDescriptor* descriptor) {
-    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
         type, (unpacked.ValidateBranches<Branch<SharedTextureMemoryAHardwareBufferDescriptor>>()));
@@ -323,7 +310,7 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer);
             return SharedTextureMemoryEGL::Create(
-                this, descriptor->label,
+                this, unpacked->label,
                 unpacked.Get<SharedTextureMemoryAHardwareBufferDescriptor>());
         default:
             DAWN_UNREACHABLE();
@@ -331,10 +318,7 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
 }
 
 ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
-    const SharedFenceDescriptor* descriptor) {
-    UnpackedPtr<SharedFenceDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+    UnpackedPtr<SharedFenceDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(type, (unpacked.ValidateBranches<Branch<SharedFenceSyncFDDescriptor>,
                                                      Branch<SharedFenceEGLSyncDescriptor>>()));
@@ -343,19 +327,20 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
         case wgpu::SType::SharedFenceSyncFDDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceSyncFD), "%s is not enabled.",
                             wgpu::FeatureName::SharedFenceSyncFD);
-            return SharedFenceEGL::Create(this, descriptor->label,
+            return SharedFenceEGL::Create(this, unpacked->label,
                                           unpacked.Get<SharedFenceSyncFDDescriptor>());
         case wgpu::SType::SharedFenceEGLSyncDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceEGLSync), "%s is not enabled.",
                             wgpu::FeatureName::SharedFenceEGLSync);
-            return SharedFenceEGL::Create(this, descriptor->label,
+            return SharedFenceEGL::Create(this, unpacked->label,
                                           unpacked.Get<SharedFenceEGLSyncDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }
 }
 
-MaybeError Device::ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor) {
+MaybeValError Device::ValidateTextureCanBeWrapped(
+    const UnpackedPtr<TextureDescriptor>& descriptor) {
     DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
                     "Texture dimension (%s) is not %s.", descriptor->dimension,
                     wgpu::TextureDimension::e2D);
@@ -474,7 +459,8 @@ ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingGLTextureImpl(
         textureDescriptor->size.height != static_cast<uint32_t>(height) ||
         textureDescriptor->size.depthOrArrayLayers != 1) {
         return DAWN_VALIDATION_ERROR(
-            "GL texture size (width: %u, height: %u, depth: 1) doesn't match descriptor size %s.",
+            "GL texture size (width: %u, height: %u, depth: 1) doesn't match descriptor size "
+            "%s.",
             width, height, textureDescriptor->size);
     }
 
@@ -529,7 +515,6 @@ void Device::DestroyImpl(DestroyReason reason) {
     DAWN_ASSERT(GetState() == State::Disconnected);
 
     mTextureBuiltinsBuffer = nullptr;
-    mArrayLengthBuffer = nullptr;
 }
 
 void Device::MarkGLUsed(ExecutionQueueBase::SubmitMode submitMode) const {
@@ -602,10 +587,6 @@ ContextEGL* Device::GetContext() const {
 
 const Buffer* Device::GetInternalTextureBuiltinsUniformBuffer() const {
     return mTextureBuiltinsBuffer.Get();
-}
-
-const Buffer* Device::GetInternalArrayLengthUniformBuffer() const {
-    return mArrayLengthBuffer.Get();
 }
 
 }  // namespace dawn::native::opengl

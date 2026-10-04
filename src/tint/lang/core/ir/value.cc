@@ -89,4 +89,11 @@ Instruction* Value::AsInstruction() {
     return nullptr;
 }
 
+const Instruction* Value::AsInstruction() const {
+    if (auto* res = As<InstructionResult>()) {
+        return res->Instruction();
+    }
+    return nullptr;
+}
+
 }  // namespace tint::core::ir

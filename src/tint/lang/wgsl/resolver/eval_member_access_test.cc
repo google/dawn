@@ -120,9 +120,6 @@ TEST_F(ConstEvalTest, MatrixMemberAccess_AFloat) {
     auto* e11 = Const("e11", IndexAccessor("col_1", 1_i));
     auto* e12 = Const("e12", IndexAccessor("col_1", 2_i));
 
-    (void)col_0;
-    (void)col_1;
-
     WrapInFunction(c, col_0, col_1, e00, e01, e02, e10, e11, e12);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -195,9 +192,6 @@ TEST_F(ConstEvalTest, MatrixMemberAccess_f32) {
     auto* e10 = Const("e10", IndexAccessor("col_1", 0_i));
     auto* e11 = Const("e11", IndexAccessor("col_1", 1_i));
     auto* e12 = Const("e12", IndexAccessor("col_1", 2_i));
-
-    (void)col_0;
-    (void)col_1;
 
     WrapInFunction(c, col_0, col_1, e00, e01, e02, e10, e11, e12);
 

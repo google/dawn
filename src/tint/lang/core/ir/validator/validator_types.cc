@@ -251,7 +251,7 @@ bool Validator::CheckStruct(const core::type::Struct* str,
             return false;
         }
 
-        if (!ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+        if (!ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates)) {
             if (member->Type()->Is<core::type::Pointer>()) {
                 diag() << "struct member " << member->Index() << " cannot be a pointer type";
                 return false;
@@ -339,8 +339,15 @@ bool Validator::CheckStruct(const core::type::Struct* str,
             }
         }
 
-        cur_offset += (member->Offset() - cur_offset) + member->MinimumRequiredSize();
+        if (member->Offset() < cur_offset) {
+            diag() << "struct member " << member->Index() << " offset (" << member->Offset()
+                   << ") overlaps with previous member (ends at " << cur_offset << ")";
+            return false;
+        }
+
+        cur_offset = member->Offset() + member->MinimumRequiredSize();
     }
+
     if (str->Size() < cur_offset) {
         diag() << "struct size (" << str->Size() << ") is smaller than the end of the last member ("
                << cur_offset << ")";
@@ -442,7 +449,8 @@ bool Validator::CheckPtr(const core::type::Pointer* ptr, std::function<diag::Dia
         return false;
     }
 
-    if (ptr->StoreType()->Is<core::type::Pointer>()) {
+    if (ptr->StoreType()->Is<core::type::Pointer>() &&
+        !ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates)) {
         diag() << "pointers to pointers are not allowed";
         return false;
     }
@@ -500,7 +508,8 @@ bool Validator::Check16BitFloat(std::function<diag::Diagnostic&()>& diag) {
 }
 
 bool Validator::CheckArray(const core::type::Array* arr, std::function<diag::Diagnostic&()>& diag) {
-    if (!arr->ElemType()->HasCreationFixedFootprint()) {
+    if (!arr->ElemType()->HasCreationFixedFootprint() &&
+        !ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates)) {
         diag() << "array elements, " << NameOf(arr) << ", must have creation-fixed footprint";
         return false;
     }
@@ -592,6 +601,7 @@ bool Validator::CheckMultisampledTexture(const core::type::MultisampledTexture* 
 
     switch (ms->Dim()) {
         case core::type::TextureDimension::k2d:
+        case core::type::TextureDimension::k2dArray:
             break;
         default:
             diag() << "invalid multisampled texture dimension: "

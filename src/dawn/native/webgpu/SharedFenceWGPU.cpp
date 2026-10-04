@@ -48,21 +48,6 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
         DAWN_INVALID_IF(mtlEventChain->sharedEvent == nullptr, "MTLSharedEvent is missing.");
         mtlEventDesc.sharedEvent = mtlEventChain->sharedEvent;
         innerDesc.nextInChain = &mtlEventDesc.chain;
-    } else if (descriptor.Get<SharedFenceDXGISharedHandleDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedFence in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedFenceEGLSyncDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedFence in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedFenceSyncFDDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedFence in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedFenceVkSemaphoreOpaqueFDDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedFence in WebGPU backend has not been implemented for all platforms.");
-    } else if (descriptor.Get<SharedFenceVkSemaphoreZirconHandleDescriptor>()) {
-        return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedFence in WebGPU backend has not been implemented for all platforms.");
     } else {
         DAWN_UNREACHABLE();
     }
@@ -93,7 +78,7 @@ SharedFence::SharedFence(Device* device, StringView label, WGPUSharedFence inner
     mInnerHandle = innerHandle;
 }
 
-MaybeError SharedFence::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const {
+MaybeValError SharedFence::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const {
     WGPUSharedFenceExportInfo innerInfo = WGPU_SHARED_FENCE_EXPORT_INFO_INIT;
 
     // TODO(crbug.com/483147423): Handle all possible chained structures in SharedFenceExportInfo.

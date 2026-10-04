@@ -700,6 +700,47 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumLayers) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumLayersMultisampledArray) {
+    auto* t = b.FunctionParam(
+        "t", ty.multisampled_texture(core::type::TextureDimension::k2dArray, ty.f32()));
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<u32>(core::BuiltinFn::kTextureNumLayers, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_multisampled_2d_array<f32>):u32 {
+  $B1: {
+    %3:u32 = textureNumLayers %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_multisampled_2d_array<f32>):u32 {
+  $B1: {
+    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %4:ptr<function, u32, read_write> = access %3, 0u
+    %5:ptr<function, u32, read_write> = access %3, 1u
+    %6:ptr<function, u32, read_write> = access %3, 2u
+    %7:ptr<function, u32, read_write> = access %3, 3u
+    %8:void = %t.GetDimensions %4, %5, %6, %7
+    %9:vec4<u32> = load %3
+    %10:u32 = swizzle %9, z
+    ret %10
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumSamples) {
     auto* t =
         b.FunctionParam("t", ty.multisampled_texture(core::type::TextureDimension::k2d, ty.f32()));
@@ -731,6 +772,47 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumSamples) {
     %8:vec3<u32> = load %3
     %9:u32 = swizzle %8, z
     ret %9
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumSamplesArray) {
+    auto* t = b.FunctionParam(
+        "t", ty.multisampled_texture(core::type::TextureDimension::k2dArray, ty.f32()));
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<u32>(core::BuiltinFn::kTextureNumSamples, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_multisampled_2d_array<f32>):u32 {
+  $B1: {
+    %3:u32 = textureNumSamples %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_multisampled_2d_array<f32>):u32 {
+  $B1: {
+    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %4:ptr<function, u32, read_write> = access %3, 0u
+    %5:ptr<function, u32, read_write> = access %3, 1u
+    %6:ptr<function, u32, read_write> = access %3, 2u
+    %7:ptr<function, u32, read_write> = access %3, 3u
+    %8:void = %t.GetDimensions %4, %5, %6, %7
+    %9:vec4<u32> = load %3
+    %10:u32 = swizzle %9, w
+    ret %10
   }
 }
 )";
@@ -1096,6 +1178,44 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_Multisampled2DI32) {
 %foo = func(%t:texture_multisampled_2d<i32>):vec4<i32> {
   $B1: {
     %3:vec4<i32> = %t.Load vec2<i32>(0i), 0i
+    ret %3
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_Multisampled2DArrayI32) {
+    auto* t = b.FunctionParam(
+        "t", ty.multisampled_texture(core::type::TextureDimension::k2dArray, ty.i32()));
+    auto* func = b.Function("foo", ty.vec4i());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Zero<vec2<i32>>();
+        auto* array_idx = b.Zero<u32>();
+        auto* sample_idx = b.Zero<u32>();
+        auto* result =
+            b.Call<vec4<i32>>(core::BuiltinFn::kTextureLoad, t, coords, array_idx, sample_idx);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_multisampled_2d_array<i32>):vec4<i32> {
+  $B1: {
+    %3:vec4<i32> = textureLoad %t, vec2<i32>(0i), 0u, 0u
+    ret %3
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_multisampled_2d_array<i32>):vec4<i32> {
+  $B1: {
+    %3:vec4<i32> = %t.Load vec3<i32>(0i), 0i
     ret %3
   }
 }

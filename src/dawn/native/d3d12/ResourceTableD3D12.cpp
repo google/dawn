@@ -72,8 +72,7 @@ class ResourceTable::SamplerIndexPool {
         if (inserted) {
             // Grab a new one
             if (mUnused.empty()) {
-                // TODO(crbug.com/512089609): Make this an Internal error as this is unrecoverable.
-                return DAWN_VALIDATION_ERROR("No more unique sampler indices available");
+                return DAWN_UNRECOVERABLE_ERROR("No more unique sampler indices available");
             }
             entry.index = mUnused.back();
             mUnused.pop_back();
@@ -310,7 +309,7 @@ MaybeError ResourceTable::ApplyPendingUpdates(
         writableTextures,
         [&](const std::vector<MetadataUpdate>& metadataUpdates,
             const std::vector<ResourceDiff>& resourceDiffs,
-            const absl::flat_hash_set<TextureBase*>& texturesToTransition) -> MaybeError {
+            const absl::flat_hash_set<raw_ptr<TextureBase>>& texturesToTransition) -> MaybeError {
             // Transition and initialize all required textures
             if (!texturesToTransition.empty()) {
                 DAWN_TRY(TransitionResources(recordingContext, texturesToTransition));
@@ -327,8 +326,9 @@ MaybeError ResourceTable::ApplyPendingUpdates(
         });
 }
 
-MaybeError ResourceTable::TransitionResources(CommandRecordingContext* recordingContext,
-                                              const absl::flat_hash_set<TextureBase*>& textures) {
+MaybeError ResourceTable::TransitionResources(
+    CommandRecordingContext* recordingContext,
+    const absl::flat_hash_set<raw_ptr<TextureBase>>& textures) {
     for (const auto& texture : textures) {
         Texture* textureBackend = ToBackend(texture);
         DAWN_TRY(textureBackend->EnsureSubresourceContentInitialized(

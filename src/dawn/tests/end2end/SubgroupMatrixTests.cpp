@@ -41,6 +41,7 @@
 #include "src/dawn/common/Math.h"
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/span.h"
 
 namespace dawn {
 namespace {
@@ -101,7 +102,8 @@ uint32_t ComponentTypeToByteSize(wgpu::SubgroupMatrixComponentType c) {
 std::ostream& operator<<(std::ostream& o, const wgpu::SubgroupMatrixConfig& config) {
     o << config.M << "x" << config.N << "x" << config.K << " "
       << ComponentTypeToWgslType(config.componentType) << " -> "
-      << ComponentTypeToWgslType(config.resultComponentType);
+      << ComponentTypeToWgslType(config.resultComponentType) << " [" << config.minSubgroupSize
+      << ", " << config.maxSubgroupSize << "]";
     return o;
 }
 
@@ -347,6 +349,47 @@ TEST_P(SubgroupMatrixTest, QueryConfigsMustReturnNonZeroConfigs) {
     ASSERT_NE(subgroupMatrixConfigs.configCount, 0u);
 }
 
+// Test that if the feature is enabled, queried configs have valid fields.
+TEST_P(SubgroupMatrixTest, QueryConfigsValid) {
+    DAWN_TEST_UNSUPPORTED_IF(
+        !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
+
+    // Query the supported subgroup matrix configurations.
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
+    info.nextInChain = &subgroupMatrixConfigs;
+    ASSERT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
+
+    ASSERT_NE(subgroupMatrixConfigs.configCount, 0u);
+    for (size_t i = 0; i < subgroupMatrixConfigs.configCount; ++i) {
+        const auto& config = subgroupMatrixConfigs.configs[i];
+        std::ostringstream configTrace;
+        configTrace << config;
+        SCOPED_TRACE(configTrace.str());
+        EXPECT_GT(config.M, 0u);
+        EXPECT_GT(config.N, 0u);
+        EXPECT_GT(config.K, 0u);
+        EXPECT_GE(config.minSubgroupSize, 4u);
+        EXPECT_LE(config.maxSubgroupSize, 128u);
+        EXPECT_TRUE(IsPowerOfTwo(config.minSubgroupSize));
+        EXPECT_TRUE(IsPowerOfTwo(config.maxSubgroupSize));
+        EXPECT_LE(config.minSubgroupSize, config.maxSubgroupSize);
+        EXPECT_GE(config.minSubgroupSize, info.subgroupMinSize);
+        EXPECT_LE(config.maxSubgroupSize, info.subgroupMaxSize);
+
+        // Configs with identical shape and component types must have non-overlapping,
+        // non-adjacent subgroup size ranges (consecutive powers of two must be merged).
+        for (size_t j = 0; j < i; ++j) {
+            const auto& other = subgroupMatrixConfigs.configs[j];
+            if (config.componentType == other.componentType &&
+                config.resultComponentType == other.resultComponentType && config.M == other.M &&
+                config.N == other.N && config.K == other.K) {
+                EXPECT_GT(config.minSubgroupSize, other.maxSubgroupSize * 2);
+            }
+        }
+    }
+}
+
 // Test that advertised subgroup matrix configurations succeed and configurations with an
 // unadvertised M dimension fail.
 TEST_P(SubgroupMatrixTest, AdvertisedConfigsValidated) {
@@ -490,42 +533,48 @@ TEST_P(SubgroupMatrixSubgroupSizeControlTest, WorkgroupSizeUsesExplicitSubgroupS
     // A size smaller than the maximum is needed to distinguish explicit-subgroup-size validation
     // from the default maximum-subgroup-size validation.
     DAWN_TEST_UNSUPPORTED_IF(info.subgroupMinSize == info.subgroupMaxSize);
-    const uint32_t subgroupSize = info.subgroupMaxSize / 2;
-    DAWN_TEST_UNSUPPORTED_IF(subgroupSize < info.subgroupMinSize);
-
-    // Intel Gen12 cannot use subgroup size 8 on D3D12 despite advertising it as the minimum.
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12() && IsIntelGen12() && subgroupSize == 8);
 
     bool testedConfig = false;
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         const auto& config = subgroupMatrixConfigs.configs[i];
+        for (uint32_t subgroupSize = config.minSubgroupSize;
+             subgroupSize <= config.maxSubgroupSize && subgroupSize < info.subgroupMaxSize;
+             subgroupSize *= 2) {
+            std::ostringstream configTrace;
+            configTrace << config << " (subgroupSize=" << subgroupSize << ")";
 
-        std::ostringstream configTrace;
-        configTrace << config;
-        SCOPED_TRACE(configTrace.str());
-        testedConfig = true;
+            // Intel Gen12 cannot use subgroup size 8 on D3D12 despite advertising it as the
+            // minimum.
+            if (IsD3D12() && IsIntelGen12() && subgroupSize == 8) {
+                std::cout << "Skipping config: " << configTrace.str() << "\n";
+                continue;
+            }
 
-        std::ostringstream shader;
-        shader << "enable subgroups;\n";
-        shader << "enable subgroup_size_control;\n";
-        shader << "enable chromium_experimental_subgroup_matrix;\n";
-        if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16) {
-            shader << "enable f16;\n";
-        }
-        shader << "alias ResultComponentType = "
-               << ComponentTypeToWgslType(config.resultComponentType) << ";\n";
-        shader << "const M = " << config.M << ";\n";
-        shader << "const N = " << config.N << ";\n";
-        shader << "const SubgroupSize = " << subgroupSize << ";\n";
-        shader << R"(
+            SCOPED_TRACE(configTrace.str());
+            testedConfig = true;
+
+            std::ostringstream shader;
+            shader << "enable subgroups;\n";
+            shader << "enable subgroup_size_control;\n";
+            shader << "enable chromium_experimental_subgroup_matrix;\n";
+            if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16) {
+                shader << "enable f16;\n";
+            }
+            shader << "alias ResultComponentType = "
+                   << ComponentTypeToWgslType(config.resultComponentType) << ";\n";
+            shader << "const M = " << config.M << ";\n";
+            shader << "const N = " << config.N << ";\n";
+            shader << "const SubgroupSize = " << subgroupSize << ";\n";
+            shader << R"(
 @compute @workgroup_size(SubgroupSize) @subgroup_size(SubgroupSize)
 fn main() {
     _ = subgroup_matrix_result<ResultComponentType, N, M>();
 })";
 
-        wgpu::ComputePipelineDescriptor csDesc;
-        csDesc.compute.module = utils::CreateShaderModule(device, shader.str());
-        device.CreateComputePipeline(&csDesc);
+            wgpu::ComputePipelineDescriptor csDesc;
+            csDesc.compute.module = utils::CreateShaderModule(device, shader.str());
+            device.CreateComputePipeline(&csDesc);
+        }
     }
     DAWN_TEST_UNSUPPORTED_IF(!testedConfig);
 }
@@ -1185,6 +1234,279 @@ DAWN_INSTANTIATE_TEST_P(SubgroupMatrix_MatrixStoreTest,
                             false,
                         });
 
+// Tests that out-of-bounds subgroupMatrixLoad/subgroupMatrixStore accesses do not affect buffer
+// data that lies outside of the range that is bound to the shader.
+using DynamicOffset = bool;
+DAWN_TEST_PARAM_STRUCT(MatrixOutOfBoundsParams, InputColumnMajor, DynamicOffset);
+class SubgroupMatrix_OutOfBoundsTest : public DawnTestWithParams<MatrixOutOfBoundsParams> {
+  protected:
+    static constexpr uint8_t kCanaryByte = 0xCD;
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> features;
+        if (SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix})) {
+            features.push_back(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix);
+        }
+        if (SupportsFeatures({wgpu::FeatureName::ShaderF16})) {
+            features.push_back(wgpu::FeatureName::ShaderF16);
+        }
+        return features;
+    }
+
+    static bool NeedsF16(const wgpu::SubgroupMatrixConfig& config) {
+        return config.componentType == wgpu::SubgroupMatrixComponentType::F16;
+    }
+
+    // Builds a shader that performs a fully in-bounds load from `input`, and an out-of-bounds
+    // store into `output`.
+    std::string GetStoreOutOfBoundsShader(const wgpu::SubgroupMatrixConfig& config,
+                                          uint32_t subgroupMaxSize,
+                                          bool inputColumnMajor) {
+        const char* major = inputColumnMajor ? "col_major" : "row_major";
+        std::ostringstream shader;
+        shader << "enable chromium_experimental_subgroup_matrix;\n";
+        if (NeedsF16(config)) {
+            shader << "enable f16;\n";
+        }
+        shader << "\nalias ComponentType = " << ComponentTypeToWgslType(config.componentType)
+               << ";\n";
+        shader << "alias InputType = subgroup_matrix_left<ComponentType, K, M>;\n";
+        shader << "const K = " << config.K << ";\n";
+        shader << "const M = " << config.M << ";\n";
+        shader << "const naturalStride = " << (inputColumnMajor ? config.M : config.K) << ";\n";
+        // A stride well beyond the natural minimum makes the store's accessed range extend past
+        // the bound sub-range of `output`, forcing a dynamic out-of-bounds access.
+        shader << "const oobStride = naturalStride * 2;\n";
+        shader << "const SubgroupMaxSize = " << subgroupMaxSize << ";\n";
+        shader << R"(
+@group(0) @binding(0) var<storage, read>       input : array<ComponentType, K * M>;
+@group(0) @binding(1) var<storage, read_write> output : array<ComponentType>;
+
+@compute @workgroup_size(SubgroupMaxSize)
+fn main() {
+)";
+        shader << "  let mat = subgroupMatrixLoad<InputType, " << major
+               << ">(&input, 0, naturalStride);\n";
+        shader << "  subgroupMatrixStore<" << major << ">(&output, 0, mat, oobStride);\n";
+        shader << "}";
+        return shader.str();
+    }
+
+    // Builds a shader that performs an out-of-bounds load from `input`.
+    std::string GetLoadOutOfBoundsShader(const wgpu::SubgroupMatrixConfig& config,
+                                         uint32_t subgroupMaxSize,
+                                         bool inputColumnMajor) {
+        const char* major = inputColumnMajor ? "col_major" : "row_major";
+        std::ostringstream shader;
+        shader << "enable chromium_experimental_subgroup_matrix;\n";
+        if (NeedsF16(config)) {
+            shader << "enable f16;\n";
+        }
+        shader << "\nalias ComponentType = " << ComponentTypeToWgslType(config.componentType)
+               << ";\n";
+        shader << "alias InputType = subgroup_matrix_left<ComponentType, K, M>;\n";
+        shader << "const K = " << config.K << ";\n";
+        shader << "const M = " << config.M << ";\n";
+        shader << "const naturalStride = " << (inputColumnMajor ? config.M : config.K) << ";\n";
+        // A stride well beyond the natural minimum makes the load's accessed range extend past
+        // the bound sub-range of `input`, forcing a dynamic out-of-bounds access.
+        shader << "const oobStride = naturalStride * 2;\n";
+        shader << "const kStoreOffset = K * M;\n";
+        shader << "const SubgroupMaxSize = " << subgroupMaxSize << ";\n";
+        shader << R"(
+@group(0) @binding(0) var<storage, read>       input : array<ComponentType>;
+@group(0) @binding(1) var<storage, read_write> output : array<ComponentType, kStoreOffset * 2>;
+
+@compute @workgroup_size(SubgroupMaxSize)
+fn main() {
+)";
+        shader << "  let mat = subgroupMatrixLoad<InputType, " << major
+               << ">(&input, 0, oobStride);\n";
+        shader << "  subgroupMatrixStore<" << major
+               << ">(&output, kStoreOffset, mat, naturalStride);\n";
+        shader << "}";
+        return shader.str();
+    }
+
+    wgpu::ComputePipeline MakePipeline(const std::string& source, wgpu::BindGroupLayout bgl) {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.layout = utils::MakeBasicPipelineLayout(device, &bgl);
+        csDesc.compute.module = utils::CreateShaderModule(device, source);
+        return device.CreateComputePipeline(&csDesc);
+    }
+
+    wgpu::BindGroupLayout MakeBindGroupLayout(bool inputIsDynamic, bool outputIsDynamic) {
+        return utils::MakeBindGroupLayout(
+            device,
+            {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage,
+              inputIsDynamic},
+             {1, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage, outputIsDynamic}});
+    }
+
+    uint32_t GetDynamicOffset(bool useDynamicOffset) {
+        return useDynamicOffset ? GetSupportedLimits().minStorageBufferOffsetAlignment : 0u;
+    }
+
+    void TestStoreOutOfBounds(const wgpu::SubgroupMatrixConfig& config,
+                              uint32_t subgroupMaxSize,
+                              bool inputColumnMajor,
+                              bool useDynamicOffset) {
+        wgpu::BindGroupLayout bgl = MakeBindGroupLayout(false, useDynamicOffset);
+        wgpu::ComputePipeline pipeline =
+            MakePipeline(GetStoreOutOfBoundsShader(config, subgroupMaxSize, inputColumnMajor), bgl);
+
+        Matrix inputMatrix(config.K, config.M, config.componentType, inputColumnMajor);
+        inputMatrix.Fill(0);
+        wgpu::Buffer inputBuffer =
+            utils::CreateBufferFromData(device, inputMatrix.data, inputMatrix.TotalByteSize(),
+                                        wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage);
+
+        uint64_t minBindingSize = inputMatrix.TotalByteSize();
+        uint32_t dynamicOffset = GetDynamicOffset(useDynamicOffset);
+        uint64_t physicalOutputSize = dynamicOffset + minBindingSize * 2;
+        std::vector<uint8_t> canary(physicalOutputSize, kCanaryByte);
+        wgpu::Buffer output =
+            utils::CreateBufferFromData(device, canary.data(), physicalOutputSize,
+                                        wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage);
+
+        wgpu::BindGroup bindGroup =
+            utils::MakeBindGroup(device, bgl, {{0, inputBuffer}, {1, output, 0, minBindingSize}});
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup, useDynamicOffset ? 1 : 0, &dynamicOffset);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // Only `output[dynamicOffset, dynamicOffset + minBindingSize)` is bound to the shader;
+        // everything outside of that is not accessible and must retain its canary value,
+        // regardless of how the out-of-bounds store is handled.
+        if (dynamicOffset > 0) {
+            std::vector<uint8_t> expectedHead(dynamicOffset, kCanaryByte);
+            EXPECT_BUFFER_U8_RANGE_EQ(expectedHead.data(), output, 0, dynamicOffset) << config;
+        }
+        uint64_t tailOffset = dynamicOffset + minBindingSize;
+        std::vector<uint8_t> expectedCanary(physicalOutputSize - tailOffset, kCanaryByte);
+        EXPECT_BUFFER_U8_RANGE_EQ(expectedCanary.data(), output, static_cast<uint32_t>(tailOffset),
+                                  static_cast<uint32_t>(expectedCanary.size()))
+            << config;
+    }
+
+    void TestLoadOutOfBounds(const wgpu::SubgroupMatrixConfig& config,
+                             uint32_t subgroupMaxSize,
+                             bool inputColumnMajor,
+                             bool useDynamicOffset) {
+        wgpu::BindGroupLayout bgl = MakeBindGroupLayout(useDynamicOffset, false);
+        wgpu::ComputePipeline pipeline =
+            MakePipeline(GetLoadOutOfBoundsShader(config, subgroupMaxSize, inputColumnMajor), bgl);
+
+        Matrix inputMatrix(config.K, config.M, config.componentType, inputColumnMajor);
+        inputMatrix.Fill(0);
+        uint64_t inputBindingSize = inputMatrix.TotalByteSize();
+        uint32_t dynamicOffset = GetDynamicOffset(useDynamicOffset);
+        // Pad the input buffer past the bound range so that an unclamped load reads memory that is
+        // still inside the buffer but outside of the binding.
+        std::vector<uint8_t> inputData(dynamicOffset + inputBindingSize * 2, kCanaryByte);
+        dawn::Span<uint8_t>(inputData)
+            .subspan(dynamicOffset, inputBindingSize)
+            .CopyFrom(dawn::Span<uint8_t>(inputMatrix.data.get(), inputBindingSize));
+        wgpu::Buffer inputBuffer =
+            utils::CreateBufferFromData(device, inputData.data(), inputData.size(),
+                                        wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage);
+
+        uint64_t storeOffset = inputMatrix.TotalByteSize();
+        uint64_t outputSize = storeOffset * 2;
+        std::vector<uint8_t> canary(outputSize, kCanaryByte);
+        wgpu::Buffer output =
+            utils::CreateBufferFromData(device, canary.data(), outputSize,
+                                        wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage);
+
+        wgpu::BindGroup bindGroup =
+            utils::MakeBindGroup(device, bgl, {{0, inputBuffer, 0, inputBindingSize}, {1, output}});
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup, useDynamicOffset ? 1 : 0, &dynamicOffset);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // The shader only ever writes into `output[storeOffset, storeOffset + storeOffset)`. The
+        // first half of `output` is never targeted by the shader, so the out-of-bounds load must
+        // not have any effect on it, no matter what values it ends up loading.
+        std::vector<uint8_t> expectedCanary(storeOffset, kCanaryByte);
+        EXPECT_BUFFER_U8_RANGE_EQ(expectedCanary.data(), output, 0,
+                                  static_cast<uint32_t>(storeOffset))
+            << config;
+    }
+};
+
+TEST_P(SubgroupMatrix_OutOfBoundsTest, StoreOutOfBoundsDoesNotAffectDataOutsideRange) {
+    DAWN_TEST_UNSUPPORTED_IF(
+        !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
+
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
+    info.nextInChain = &subgroupMatrixConfigs;
+    ASSERT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
+
+    for (const auto& config : dawn::Span<const wgpu::SubgroupMatrixConfig>(
+             subgroupMatrixConfigs.configs, subgroupMatrixConfigs.configCount)) {
+        // Only test f16 right now as i8 and u8 have not been well supported on D3D12 backends yet.
+        if (Is8Bit(config.componentType)) {
+            continue;
+        }
+        if (NeedsF16(config) && !adapter.HasFeature(wgpu::FeatureName::ShaderF16)) {
+            continue;
+        }
+        TestStoreOutOfBounds(config, info.subgroupMaxSize, GetParam().mInputColumnMajor,
+                             GetParam().mDynamicOffset);
+    }
+}
+
+TEST_P(SubgroupMatrix_OutOfBoundsTest, LoadOutOfBoundsDoesNotAffectDataOutsideRange) {
+    DAWN_TEST_UNSUPPORTED_IF(
+        !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
+
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
+    info.nextInChain = &subgroupMatrixConfigs;
+    ASSERT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
+
+    for (const auto& config : dawn::Span<const wgpu::SubgroupMatrixConfig>(
+             subgroupMatrixConfigs.configs, subgroupMatrixConfigs.configCount)) {
+        // Only test f16 right now as i8 and u8 have not been well supported on D3D12 backends yet.
+        if (Is8Bit(config.componentType)) {
+            continue;
+        }
+        if (NeedsF16(config) && !adapter.HasFeature(wgpu::FeatureName::ShaderF16)) {
+            continue;
+        }
+        TestLoadOutOfBounds(config, info.subgroupMaxSize, GetParam().mInputColumnMajor,
+                            GetParam().mDynamicOffset);
+    }
+}
+
+DAWN_INSTANTIATE_TEST_P(SubgroupMatrix_OutOfBoundsTest,
+                        {
+                            D3D12Backend(),
+                            MetalBackend(),
+                            VulkanBackend(),
+                        },
+                        {
+                            // Input matrix is in column-major or not
+                            true,
+                            false,
+                        },
+                        {
+                            // The buffer accessed out of bounds uses a dynamic offset or not
+                            true,
+                            false,
+                        });
+
 using WithArgument = bool;
 DAWN_TEST_PARAM_STRUCT(MatrixConstructorParams, WithArgument);
 class SubgroupMatrix_MatrixConstructorTest : public DawnTestWithParams<MatrixConstructorParams> {
@@ -1392,7 +1714,7 @@ TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest, MatrixMultiply) {
     // TODO(crbug.com/492539239): Access violation during test teardown.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsVulkan());
 
-    // TODO(crbug.com/525517826): On WARP 1.65535.20-preview, starts hanging for tile dim 2+
+    // TODO(crbug.com/525517826): On WARP, starts hanging for tile dim 2+
     DAWN_SUPPRESS_TEST_IF(IsWARP() && kTileDim >= 2);
 
     // TODO(525518027): On AMD Radeon RX 9060 XT, Windows Vulkan, getting invalid results for tile

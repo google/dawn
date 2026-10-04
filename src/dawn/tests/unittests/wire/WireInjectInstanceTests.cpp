@@ -39,6 +39,7 @@ namespace {
 using testing::_;
 using testing::Mock;
 using testing::MockCallback;
+using testing::WithArg;
 
 class WireInjectInstanceTests : public WireTest {
   public:
@@ -60,10 +61,12 @@ TEST_F(WireInjectInstanceTests, CallAfterReserveInject) {
     instance.RequestAdapter(nullptr, wgpu::CallbackMode::AllowSpontaneous, adapterCb.Callback(),
                             adapterCb.MakeUserdata(this));
 
-    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, _, _)).WillOnce([&]() {
-        api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Error, nullptr,
-                                               ToOutputStringView("Some error message."));
-    });
+    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, _, _, _))
+        .WillOnce(WithArg<3>([&](WGPUFuture future) {
+            api.CallInstanceRequestAdapterCallback(
+                apiInstance, WGPURequestAdapterStatus_Error, nullptr,
+                ToOutputStringView("Some error message."), future);
+        }));
     FlushClient();
 
     EXPECT_CALL(adapterCb, Call(wgpu::RequestAdapterStatus::Error, _, _, this));

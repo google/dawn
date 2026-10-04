@@ -136,9 +136,12 @@ constexpr bool SafeGreaterThan(T a, U b) {
 
 }  // anonymous namespace
 
-PhysicalDevice::PhysicalDevice(VulkanInstance* vulkanInstance, VkPhysicalDevice physicalDevice)
+PhysicalDevice::PhysicalDevice(InstanceBase* instance,
+                               VulkanInstance* vulkanInstance,
+                               VkPhysicalDevice physicalDevice)
     : PhysicalDeviceBase(wgpu::BackendType::Vulkan),
       mVkPhysicalDevice(physicalDevice),
+      mInstance(instance),
       mVulkanInstance(vulkanInstance) {}
 
 PhysicalDevice::~PhysicalDevice() = default;
@@ -186,7 +189,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
     const gpu_info::IntelWindowsDriverVersion kDriverVersion({30, 0, 101, 2111});
     if (IsWindows() && gpu_info::IsIntel(mDeviceInfo.properties.vendorID) &&
         gpu_info::IntelWindowsDriverVersion(mDriverVersion) < kDriverVersion) {
-        return DAWN_FORMAT_INTERNAL_ERROR(
+        return DAWN_FORMAT_UNRECOVERABLE_ERROR(
             "Disable Intel Vulkan adapter on Windows driver version %s. See "
             "https://crbug.com/1338622.",
             driverVersionStr);
@@ -214,6 +217,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
             mAdapterType = wgpu::AdapterType::IntegratedGPU;
             break;
         case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+        case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
             mAdapterType = wgpu::AdapterType::DiscreteGPU;
             break;
         case VK_PHYSICAL_DEVICE_TYPE_CPU:
@@ -234,13 +238,13 @@ MaybeError PhysicalDevice::InitializeImpl() {
 
     // Needed for security
     if (!mDeviceInfo.features.robustBufferAccess) {
-        return DAWN_INTERNAL_ERROR("Vulkan robustBufferAccess feature required.");
+        return DAWN_UNRECOVERABLE_ERROR("Vulkan robustBufferAccess feature required.");
     }
 
     if (!mDeviceInfo.features.textureCompressionBC &&
         !(mDeviceInfo.features.textureCompressionETC2 &&
           mDeviceInfo.features.textureCompressionASTC_LDR)) {
-        return DAWN_INTERNAL_ERROR(
+        return DAWN_UNRECOVERABLE_ERROR(
             "Vulkan textureCompressionBC feature required or both textureCompressionETC2 and "
             "textureCompressionASTC required.");
     }
@@ -250,29 +254,29 @@ MaybeError PhysicalDevice::InitializeImpl() {
         !mDeviceInfo.features.shaderStorageBufferArrayDynamicIndexing ||
         !mDeviceInfo.features.shaderSampledImageArrayDynamicIndexing ||
         !mDeviceInfo.features.shaderStorageImageArrayDynamicIndexing) {
-        return DAWN_INTERNAL_ERROR("Vulkan shaderUniform*ArrayDynamicIndexing required.");
+        return DAWN_UNRECOVERABLE_ERROR("Vulkan shaderUniform*ArrayDynamicIndexing required.");
     }
 
     // Needed for the respective WebGPU features.
     if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.depthBiasClamp) {
-        SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan depthBiasClamp feature required."));
+        SetCoreNotSupported(DAWN_UNRECOVERABLE_ERROR("Vulkan depthBiasClamp feature required."));
     }
     if (!mDeviceInfo.features.fragmentStoresAndAtomics) {
         // Technically `fragmentStoresAndAtomics` isn't needed for compat mode. It's essentially
         // always supported on Vulkan 1.1 devices so just leave it as required.
-        return DAWN_INTERNAL_ERROR("Vulkan fragmentStoresAndAtomics feature required.");
+        return DAWN_UNRECOVERABLE_ERROR("Vulkan fragmentStoresAndAtomics feature required.");
     }
     if (!mDeviceInfo.features.fullDrawIndexUint32) {
-        return DAWN_INTERNAL_ERROR("Vulkan fullDrawIndexUint32 feature required.");
+        return DAWN_UNRECOVERABLE_ERROR("Vulkan fullDrawIndexUint32 feature required.");
     }
     if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.imageCubeArray) {
-        SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan imageCubeArray feature required."));
+        SetCoreNotSupported(DAWN_UNRECOVERABLE_ERROR("Vulkan imageCubeArray feature required."));
     }
     if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.independentBlend) {
-        SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan independentBlend feature required."));
+        SetCoreNotSupported(DAWN_UNRECOVERABLE_ERROR("Vulkan independentBlend feature required."));
     }
     if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.sampleRateShading) {
-        SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan sampleRateShading feature required."));
+        SetCoreNotSupported(DAWN_UNRECOVERABLE_ERROR("Vulkan sampleRateShading feature required."));
     }
 
     return {};
@@ -527,8 +531,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         !shaderF16Enabled ||
         (mDeviceInfo.shaderSubgroupExtendedTypes.shaderSubgroupExtendedTypes == VK_TRUE);
 
-    const bool hasAtomic64Support = mDeviceInfo.HasExt(DeviceExt::ShaderBufferInt64Atomics) &&
-                                    mDeviceInfo.shaderAtomicInt64Features.shaderBufferInt64Atomics;
+    const bool hasAtomic64Support =
+        mDeviceInfo.HasExt(DeviceExt::ShaderBufferInt64Atomics) &&
+        mDeviceInfo.shaderAtomicInt64Features.shaderBufferInt64Atomics &&
+        mDeviceInfo.features.shaderInt64 == VK_TRUE;
 
     if (hasAtomic64Support) {
         EnableFeature(Feature::AtomicVec2uMinMax);
@@ -748,15 +754,15 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
 
     const VkPhysicalDeviceLimits& vkLimits = mDeviceInfo.properties.limits;
 
-#define CHECK_V1_LIMIT_IMPL(vulkanName, webgpuName, compareOp, msgSegment)           \
-    do {                                                                             \
-        if (Safe##compareOp(vkLimits.vulkanName, baseLimits.v1.webgpuName)) {        \
-            return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for " #webgpuName \
-                                       "."                                           \
-                                       " VkPhysicalDeviceLimits::" #vulkanName       \
-                                       " must be at " msgSegment " " +               \
-                                       std::to_string(baseLimits.v1.webgpuName));    \
-        }                                                                            \
+#define CHECK_V1_LIMIT_IMPL(vulkanName, webgpuName, compareOp, msgSegment)                \
+    do {                                                                                  \
+        if (Safe##compareOp(vkLimits.vulkanName, baseLimits.v1.webgpuName)) {             \
+            return DAWN_UNRECOVERABLE_ERROR("Insufficient Vulkan limits for " #webgpuName \
+                                            "."                                           \
+                                            " VkPhysicalDeviceLimits::" #vulkanName       \
+                                            " must be at " msgSegment " " +               \
+                                            std::to_string(baseLimits.v1.webgpuName));    \
+        }                                                                                 \
     } while (false)
 
 #define CHECK_AND_SET_V1_LIMIT_IMPL(vulkanName, webgpuName, compareOp, msgSegment) \
@@ -816,7 +822,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     uint32_t maxUniformBufferSize = vkLimits.maxUniformBufferRange;
     maxUniformBufferSize = maxUniformBufferSize - (maxUniformBufferSize % 16);
     if (maxUniformBufferSize < baseLimits.v1.maxUniformBufferBindingSize) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxUniformBufferBindingSize");
+        return DAWN_UNRECOVERABLE_ERROR(
+            "Insufficient Vulkan limits for maxUniformBufferBindingSize");
     }
     limits->v1.maxUniformBufferBindingSize = maxUniformBufferSize;
 
@@ -867,7 +874,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
 
     if (vkLimits.maxVertexInputBindingStride < baseLimits.v1.maxVertexBufferArrayStride ||
         vkLimits.maxVertexInputAttributeOffset < baseLimits.v1.maxVertexBufferArrayStride - 1) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxVertexBufferArrayStride");
+        return DAWN_UNRECOVERABLE_ERROR(
+            "Insufficient Vulkan limits for maxVertexBufferArrayStride");
     }
     // Note that some drivers have UINT32_MAX as maxVertexInputAttributeOffset so we do that +1 only
     // after the std::min.
@@ -882,9 +890,20 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     // multisampling. Vulkan does not provide a reliable way of enforcing this so must potentially
     // use another vec4f slot to emulate this behavior. So on any WebGPU Vulkan backend
     // `maxVertexOutputComponents` must be no less than 72 = (16 * 4 + 8).
-    if (vkLimits.maxVertexOutputComponents < baseLimits.v1.maxInterStageShaderVariables * 4 + 8 ||
-        vkLimits.maxFragmentInputComponents < baseLimits.v1.maxInterStageShaderVariables * 4 + 8) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxInterStageShaderVariables");
+    // Some PowerVR (ImgTec) drivers only report the Vulkan-spec-guaranteed floor of 64 for
+    // maxVertexOutputComponents/maxFragmentInputComponents, below WebGPU's default tiered
+    // requirement. Rather than discarding the whole physical device (which prevents using the
+    // Vulkan backend), accept that floor for these devices. 64 components leave room for 14
+    // inter-stage variables (14 * 4 + 8) instead of the 16 required above.
+    uint32_t interStageShaderVariablesBase = baseLimits.v1.maxInterStageShaderVariables;
+    if (gpu_info::IsImgTec(GetVendorId()) &&
+        mInstance->GetTogglesState().IsEnabled(Toggle::VulkanRelaxMaxInterStageShaderVariables)) {
+        interStageShaderVariablesBase = std::min(interStageShaderVariablesBase, 14u);
+    }
+    if (vkLimits.maxVertexOutputComponents < interStageShaderVariablesBase * 4 + 8 ||
+        vkLimits.maxFragmentInputComponents < interStageShaderVariablesBase * 4 + 8) {
+        return DAWN_UNRECOVERABLE_ERROR(
+            "Insufficient Vulkan limits for maxInterStageShaderVariables");
     }
     // Reserve 1 for position and 1 for emulated fragment pixel center.
     auto constexpr kNumReservedVariables = 1 + 1;
@@ -909,11 +928,13 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
 
     if (!IsSubset(VkSampleCountFlags{VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT},
                   vkLimits.framebufferColorSampleCounts)) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for framebufferColorSampleCounts");
+        return DAWN_UNRECOVERABLE_ERROR(
+            "Insufficient Vulkan limits for framebufferColorSampleCounts");
     }
     if (!IsSubset(VkSampleCountFlags{VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT},
                   vkLimits.framebufferDepthSampleCounts)) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for framebufferDepthSampleCounts");
+        return DAWN_UNRECOVERABLE_ERROR(
+            "Insufficient Vulkan limits for framebufferDepthSampleCounts");
     }
 
     limits->v1.maxBufferSize = kAssumedMaxBufferSize;
@@ -934,7 +955,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     }
 
     if (limits->v1.maxBufferSize < baseLimits.v1.maxBufferSize) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan maxBufferSize limit");
+        return DAWN_UNRECOVERABLE_ERROR("Insufficient Vulkan maxBufferSize limit");
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl)) {
@@ -1000,10 +1021,6 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
         adapterToggles->ForceSet(Toggle::UseVulkanMemoryModel, false);
     }
     adapterToggles->Default(Toggle::UseVulkanMemoryModel, true);
-
-    adapterToggles->Default(
-        Toggle::DecomposeUniformBuffers,
-        platform->IsFeatureEnabled(platform::Features::kWebGPUDecomposeUniformBuffers));
 
     // VulkanUseDynamicRendering and VulkanUseCreateRenderPass2 are treated as Adapter toggles
     // because they affect whether or not the MSAARenderToSingleSampled feature is available.
@@ -1134,6 +1151,18 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // the correct buffer offset when a copy region has layerCount > 1.
         // Split such copies into one region per layer.
         deviceToggles->Default(Toggle::VulkanSplitBufferTextureCopyForArrayLayers, true);
+
+        // crbug.com/525294804: Maleoon drivers drop the alpha-to-coverage computation
+        // when the fragment alpha is not written (masked-off alpha channel), counting
+        // every sample as covered. Force a real -- but destination-preserving -- alpha
+        // write so the driver computes coverage.
+        deviceToggles->Default(Toggle::VulkanForceAlphaWriteForAlphaToCoverage, true);
+    }
+
+    if (gpu_info::IsIntel(GetVendorId())) {
+        // crbug.com/481934465: Workaround an Intel GPU hardware limitation that corrupts
+        // buffer<->texture copies with a large row pitch.
+        deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
     }
 
     // Collapse redundant subgroup min and max operations to workaround a driver crash on some AMD
@@ -1338,10 +1367,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         platform->IsFeatureEnabled(platform::Features::kWebGPUEnableRangeAnalysisForRobustness));
 
     // TODO(https://issues.chromium.org/498659375): Re-enable on Android ARM.
+    // Disable SPIR-V 1.4 on Adreno 7xx devices due to a driver bug with OpCopyLogical on structs
+    // (see https://crbug.com/566593641).
     if (GetDeviceInfo().HasExt(DeviceExt::Spirv14)) {
-        deviceToggles->Default(
-            Toggle::UseSpirv14,
-            platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirv14) && !IsAndroidARM());
+        deviceToggles->Default(Toggle::UseSpirv14,
+                               platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirv14) &&
+                                   !IsAndroidARM() && !IsAdreno7xx());
     } else {
         deviceToggles->ForceSet(Toggle::UseSpirv14, false);
     }
@@ -1426,22 +1457,17 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
             }
             break;
 
-        case wgpu::FeatureName::ShaderF16:
-            if (!toggles.IsEnabled(Toggle::DecomposeUniformBuffers) &&
-                mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_FALSE) {
-                return FeatureValidationResult(
-                    absl::StrFormat("uniformAndStorageBuffer16BitAccess is required to enable %s "
-                                    "if `decompose_uniform_buffers` is not used",
-                                    feature));
-            }
-            // TODO(crbug.com/42251215): Investigate f16 CTS test failures to enable on Nvidia.
-            if (gpu_info::IsNvidia(mVendorId) &&
+        case wgpu::FeatureName::ShaderF16: {
+            // Older Nvidia drivers have issues with f16 data types, so gate the feature behind a
+            // toggle. See https://crbug.com/42251215.
+            const gpu_info::DriverVersion kGoodNvidiaDriver = {615, 71, 0, 0};
+            if (gpu_info::IsNvidia(mVendorId) && GetDriverVersion() < kGoodNvidiaDriver &&
                 !toggles.IsEnabled(Toggle::VulkanEnableF16OnNvidia)) {
                 return FeatureValidationResult(
-                    absl::StrFormat("Feature %s is not yet supported on Nvidia GPUs", feature));
+                    absl::StrFormat("Feature %s requires Nvidia driver 615.71 or above", feature));
             }
             break;
-
+        }
         case wgpu::FeatureName::MSAARenderToSingleSampled:
             // Must be using either Dynamic Rendering or CreateRenderPass2 for this feature to be
             // available.
@@ -1497,6 +1523,11 @@ bool PhysicalDevice::IsAndroidHuawei() const {
 
 bool PhysicalDevice::IsAndroidImgTec() const {
     return IsAndroid() && gpu_info::IsImgTec(GetVendorId());
+}
+
+bool PhysicalDevice::IsAdreno7xx() const {
+    return gpu_info::IsQualcommPCIAdreno7xx(GetVendorId(), GetDeviceId()) ||
+           gpu_info::IsQualcommACPIAdreno7xx(GetVendorId(), GetDeviceId());
 }
 
 bool PhysicalDevice::IsPixel10() const {
@@ -1829,6 +1860,8 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
         config.M = p.MSize;
         config.N = p.NSize;
         config.K = p.KSize;
+        config.minSubgroupSize = GetSubgroupMinSize();
+        config.maxSubgroupSize = GetSubgroupMaxSize();
 
         // Filter out the component types that WebGPU does not support.
         if (!VKComponentTypeToWGPUSubgroupMatrixComponentType(&config.componentType, p.AType)) {
@@ -1851,7 +1884,7 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
     return subgroupMatrixConfigs;
 }
 
-void PhysicalDevice::SetCoreNotSupported(std::unique_ptr<ErrorData> error) {
+void PhysicalDevice::SetCoreNotSupported(std::unique_ptr<UnrecoverableError> error) {
     DAWN_ASSERT(mSupportsCoreFeatureLevel);
     mSupportsCoreFeatureLevel = false;
     DAWN_ASSERT(error);

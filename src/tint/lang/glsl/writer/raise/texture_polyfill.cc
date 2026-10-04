@@ -180,8 +180,7 @@ struct State {
         // chain to get to the variable is a mix of loads and accesses (but don't have guarantees on
         // their order). There is at most one load and one access so the recursion is bounded.
         return Switch(
-            val->As<core::ir::InstructionResult>()->Instruction(),
-            [&](core::ir::Var* var) -> HandleVariablePath { return {var}; },
+            val->AsInstruction(), [&](core::ir::Var* var) -> HandleVariablePath { return {var}; },
             [&](core::ir::Load* load) -> HandleVariablePath { return PathForHandle(load->From()); },
             [&](core::ir::Access* access) -> HandleVariablePath {
                 auto* binding_array = access->Object();
@@ -582,8 +581,10 @@ struct State {
             Vector<core::ir::Value*, 2> new_args;
             new_args.Push(tex);
 
-            // Non-storage textures require a LOD
-            if (!tex_ty->Is<core::type::StorageTexture>()) {
+            // Non-storage, non-multisampled textures require a LOD.
+            if (!(tex_ty->Is<core::type::StorageTexture>() ||
+                  tex_ty->Is<core::type::MultisampledTexture>() ||
+                  tex_ty->Is<core::type::DepthMultisampledTexture>())) {
                 new_args.Push(b.Constant(0_i));
             }
 

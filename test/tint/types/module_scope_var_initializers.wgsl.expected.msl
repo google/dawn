@@ -1,18 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct S {
   float a;
 };
@@ -26,7 +14,7 @@ struct tint_module_vars_struct {
   thread uint3* v3u32_var;
   thread float4* v4f32_var;
   thread float2x3* m2x3_var;
-  thread tint_array<float, 4>* arr_var;
+  thread array<float, 4>* arr_var;
   thread S* struct_var;
 };
 
@@ -40,7 +28,7 @@ kernel void v() {
   thread uint3 v3u32_var = uint3(0u);
   thread float4 v4f32_var = float4(0.0f);
   thread float2x3 m2x3_var = float2x3(float3(0.0f), float3(0.0f));
-  thread tint_array<float, 4> arr_var = tint_array<float, 4>{};
+  thread array<float, 4> arr_var = array<float, 4>{};
   thread S struct_var = S{};
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.bool_var=(&bool_var), .i32_var=(&i32_var), .u32_var=(&u32_var), .f32_var=(&f32_var), .v2i32_var=(&v2i32_var), .v3u32_var=(&v3u32_var), .v4f32_var=(&v4f32_var), .m2x3_var=(&m2x3_var), .arr_var=(&arr_var), .struct_var=(&struct_var)};
   (*tint_module_vars.bool_var) = false;
@@ -51,6 +39,6 @@ kernel void v() {
   (*tint_module_vars.v3u32_var) = uint3(0u);
   (*tint_module_vars.v4f32_var) = float4(0.0f);
   (*tint_module_vars.m2x3_var) = float2x3(float3(0.0f), float3(0.0f));
-  (*tint_module_vars.arr_var) = tint_array<float, 4>{};
+  (*tint_module_vars.arr_var) = array<float, 4>{};
   (*tint_module_vars.struct_var) = S{};
 }

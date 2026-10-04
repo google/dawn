@@ -61,8 +61,7 @@ class Buffer final : public BufferBase, public RecordableObject, public ObjectWG
 
     MaybeError AddContentToCapture(CaptureContext& captureContext);
 
-    // TODO(https://crbug.com/526537224): Use RawSpan.
-    Span<std::byte> mMappedData;
+    RawSpan<std::byte> mMappedData;
     size_t mMappedDataOffsetInBuffer = 0u;
     bool mNeedsCapture = true;
 };

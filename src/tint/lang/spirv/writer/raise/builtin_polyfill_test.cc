@@ -1319,6 +1319,80 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_VectorCondition_VectorOperands) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_ScalarCondition_ScalarOperands_Rerun) {
+    auto* argf = b.FunctionParam("argf", ty.i32());
+    auto* argt = b.FunctionParam("argt", ty.i32());
+    auto* cond = b.FunctionParam("cond", ty.bool_());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({argf, argt, cond});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), core::BuiltinFn::kSelect, argf, argt, cond);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%argf:i32, %argt:i32, %cond:bool):i32 {
+  $B1: {
+    %5:i32 = select %argf, %argt, %cond
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%argf:i32, %argt:i32, %cond:bool):i32 {
+  $B1: {
+    %5:i32 = spirv.select %cond, %argt, %argf
+    ret %5
+  }
+}
+)";
+
+    PolyfillConfig config{.rerun = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_VectorCondition_VectorOperands_Rerun) {
+    auto* argf = b.FunctionParam("argf", ty.vec4i());
+    auto* argt = b.FunctionParam("argt", ty.vec4i());
+    auto* cond = b.FunctionParam("cond", ty.vec4<bool>());
+    auto* func = b.Function("foo", ty.vec4i());
+    func->SetParams({argf, argt, cond});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4i(), core::BuiltinFn::kSelect, argf, argt, cond);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%argf:vec4<i32>, %argt:vec4<i32>, %cond:vec4<bool>):vec4<i32> {
+  $B1: {
+    %5:vec4<i32> = select %argf, %argt, %cond
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%argf:vec4<i32>, %argt:vec4<i32>, %cond:vec4<bool>):vec4<i32> {
+  $B1: {
+    %5:vec4<i32> = spirv.select %cond, %argt, %argf
+    ret %5
+  }
+}
+)";
+
+    PolyfillConfig config{.rerun = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_BuiltinPolyfillTest, Clamp_VectorOperands_DisabledScalarize) {
     auto* x = b.FunctionParam("x", ty.vec2f());
     auto* low = b.FunctionParam("low", ty.vec2f());

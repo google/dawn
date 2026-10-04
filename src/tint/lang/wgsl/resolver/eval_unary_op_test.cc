@@ -171,7 +171,6 @@ INSTANTIATE_TEST_SUITE_P(Negation,
 TEST_F(ConstEvalTest, UnaryNegateLowestAbstract) {
     // const break_me = -(-9223372036854775808);
     auto* c = GlobalConst("break_me", Negation(Negation(Expr(9223372036854775808_a))));
-    (void)c;
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(c);
     EXPECT_EQ(sem->ConstantValue()->ValueAs<AInt>(), 9223372036854775808_a);

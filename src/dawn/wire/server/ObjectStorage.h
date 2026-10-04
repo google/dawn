@@ -74,6 +74,7 @@ struct ObjectData<WGPUBuffer> : public ObjectDataBase<WGPUBuffer> {
     WGPUBufferUsage usage = WGPUBufferUsage_None;
     // Indicate if memoryHandle needs to be destroyed on unmap
     bool mappedAtCreation = false;
+    bool backedWithSharedMemory = false;
 };
 
 struct DeviceInfo {
@@ -321,10 +322,17 @@ class KnownObjects<WGPUDevice> : public KnownObjectsBase<WGPUDevice> {
         KnownObjectsBase<WGPUDevice>::FreeImpl(id);
     }
 
+    // Clear mKnownSet so that device handles acquired here and subsequently released
+    // do not leave dangling raw_ptr entries in mKnownSet.
+    std::vector<WGPUDevice> AcquireAllHandles() {
+        mKnownSet.clear();
+        return KnownObjectsBase<WGPUDevice>::AcquireAllHandles();
+    }
+
     bool IsKnown(WGPUDevice device) const { return mKnownSet.contains(device); }
 
   private:
-    absl::flat_hash_set<WGPUDevice> mKnownSet;
+    absl::flat_hash_set<raw_ptr<WGPUDeviceImpl>> mKnownSet;
 };
 
 }  // namespace dawn::wire::server

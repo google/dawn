@@ -90,6 +90,11 @@
         "In Wasm, if `memcpy`ing from this range, prefer using @ref wgpuBufferReadMappedRange instead for better performance.": ""
     },
     "customize_api": {
+        "functions": {
+            "create instance": {
+                "name": "createGPUInstance"
+            }
+        },
         "objects": {
             "device": {
                 "methods": {
