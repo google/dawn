@@ -365,7 +365,7 @@ MaybeError VulkanInstance::Initialize(const InstanceBase* instance, ICD icd) {
         if (mVulkanLib.Open(libName, searchPaths, &error)) {
             return {};
         }
-        return DAWN_FORMAT_UNRECOVERABLE_ERROR("Couldn't load Vulkan: %s", error.c_str());
+        return DAWN_UNRECOVERABLE_ERROR("Couldn't load Vulkan: %s", error.c_str());
     };
 
     switch (icd) {
@@ -406,7 +406,7 @@ MaybeError VulkanInstance::Initialize(const InstanceBase* instance, ICD icd) {
         versionError << "Vulkan " << FormatAPIVersion(mGlobalInfo.apiVersion)
                      << " driver is unsupported. At least Vulkan "
                      << FormatAPIVersion(kRequiredVulkanVersion) << " is required.";
-        return DAWN_UNRECOVERABLE_ERROR(versionError.str());
+        return DAWN_MAKE_UNRECOVERABLE_ERROR(versionError.str());
     }
 
     VulkanGlobalKnobs usedGlobalKnobs = {};

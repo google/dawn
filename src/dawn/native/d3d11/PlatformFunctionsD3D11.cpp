@@ -51,7 +51,7 @@ MaybeError PlatformFunctions::LoadD3D11() {
     std::string error;
     if (!mD3D11Lib.OpenSystemLibrary(L"d3d11.dll", &error) ||
         !mD3D11Lib.GetProc(&d3d11CreateDevice, "D3D11CreateDevice", &error)) {
-        return DAWN_UNRECOVERABLE_ERROR(error.c_str());
+        return DAWN_MAKE_UNRECOVERABLE_ERROR(error.c_str());
     }
 #endif
 

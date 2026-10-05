@@ -189,7 +189,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
     const gpu_info::IntelWindowsDriverVersion kDriverVersion({30, 0, 101, 2111});
     if (IsWindows() && gpu_info::IsIntel(mDeviceInfo.properties.vendorID) &&
         gpu_info::IntelWindowsDriverVersion(mDriverVersion) < kDriverVersion) {
-        return DAWN_FORMAT_UNRECOVERABLE_ERROR(
+        return DAWN_UNRECOVERABLE_ERROR(
             "Disable Intel Vulkan adapter on Windows driver version %s. See "
             "https://crbug.com/1338622.",
             driverVersionStr);
@@ -760,7 +760,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
             return DAWN_UNRECOVERABLE_ERROR("Insufficient Vulkan limits for " #webgpuName \
                                             "."                                           \
                                             " VkPhysicalDeviceLimits::" #vulkanName       \
-                                            " must be at " msgSegment " " +               \
+                                            " must be at " msgSegment " %s",              \
                                             std::to_string(baseLimits.v1.webgpuName));    \
         }                                                                                 \
     } while (false)

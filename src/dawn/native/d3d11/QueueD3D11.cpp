@@ -624,7 +624,7 @@ ResultOrError<ExecutionSerial> SystemEventQueue::WaitForQueueSerialImpl(Executio
     }
 
     if (serial > GetLastSubmittedCommandSerial()) {
-        return DAWN_FORMAT_UNRECOVERABLE_ERROR(
+        return DAWN_UNRECOVERABLE_ERROR(
             "Wait a serial (%llu) which is greater than last submitted command serial (%llu).",
             uint64_t{serial}, uint64_t(GetLastSubmittedCommandSerial()));
     }
@@ -765,7 +765,7 @@ ResultOrError<ExecutionSerial> DelayFlushQueue::WaitForQueueSerialImpl(Execution
     }
 
     if (waitSerial > GetLastSubmittedCommandSerial()) {
-        return DAWN_FORMAT_UNRECOVERABLE_ERROR(
+        return DAWN_UNRECOVERABLE_ERROR(
             "Wait a serial (%llu) which is greater than last submitted command serial (%llu).",
             uint64_t{waitSerial}, uint64_t(GetLastSubmittedCommandSerial()));
     }

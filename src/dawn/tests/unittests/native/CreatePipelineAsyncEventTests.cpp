@@ -119,10 +119,8 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationUnrecoverableErrorInCreateRe
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(
-            testing::ByMove(DAWN_MAKE_UNRECOVERABLE_ERROR(InternalErrorType::Unrecoverable,
-                                                          std::string(kErrorMessage))
-                                .TakeAsUnknown())));
+        .WillByDefault(testing::Return(testing::ByMove(
+            DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(kErrorMessage)).TakeAsUnknown())));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
 
@@ -204,9 +202,7 @@ TEST_F(CreatePipelineAsyncEventTests,
 
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
         .WillByDefault(testing::Return(testing::ByMove(
-            DAWN_MAKE_UNRECOVERABLE_ERROR(dawn::native::InternalErrorType::Unrecoverable,
-                                          std::string(kErrorMessage))
-                .TakeAsUnknown())));
+            DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(kErrorMessage)).TakeAsUnknown())));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
 

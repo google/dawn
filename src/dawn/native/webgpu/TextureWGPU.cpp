@@ -311,7 +311,7 @@ MaybeError MapBufferAndWriteTextureData(CaptureContext::ScopedContentWriter& wri
     DAWN_ASSERT(mapAsyncResult.status == WGPUMapAsyncStatus_Success);
 
     if (mapAsyncResult.status != WGPUMapAsyncStatus_Success) {
-        return DAWN_UNRECOVERABLE_ERROR(mapAsyncResult.message);
+        return DAWN_MAKE_UNRECOVERABLE_ERROR(mapAsyncResult.message);
     }
 
     // We only write out the beginning of each row, the rest is padding.

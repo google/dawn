@@ -232,7 +232,7 @@ MaybeError MultiDrawConverterPipeline::Initialize(DeviceBase* device) {
     NSString* source = [NSString stringWithUTF8String:kShaderSource];
     id<MTLLibrary> lib = [mtlDevice newLibraryWithSource:source options:nullptr error:&error];
     if (error != nullptr) {
-        return DAWN_UNRECOVERABLE_ERROR("Error creating multi draw MTLLibrary:" +
+        return DAWN_UNRECOVERABLE_ERROR("Error creating multi draw MTLLibrary:%s",
                                         std::string([error.localizedDescription UTF8String]));
     }
     DAWN_ASSERT(lib != nil);
@@ -246,7 +246,7 @@ MaybeError MultiDrawConverterPipeline::Initialize(DeviceBase* device) {
                                             constantValues:funcConstants
                                                      error:&error];
     if (error != nullptr) {
-        return DAWN_UNRECOVERABLE_ERROR("Error creating multi draw converter compute function:" +
+        return DAWN_UNRECOVERABLE_ERROR("Error creating multi draw converter compute function:%s",
                                         std::string([error.localizedDescription UTF8String]));
     }
     DAWN_ASSERT(convertFunc != nil);
@@ -255,7 +255,7 @@ MaybeError MultiDrawConverterPipeline::Initialize(DeviceBase* device) {
     mPipeline = [mtlDevice newComputePipelineStateWithFunction:convertFunc error:&error];
 
     if (error != nullptr) {
-        return DAWN_UNRECOVERABLE_ERROR("Error creating multi draw converter compute pipeline:" +
+        return DAWN_UNRECOVERABLE_ERROR("Error creating multi draw converter compute pipeline:%s",
                                         std::string([error.localizedDescription UTF8String]));
     }
     DAWN_ASSERT(mPipeline != nil);

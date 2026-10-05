@@ -135,7 +135,7 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
 
         contextConfig = mDisplay->ChooseConfig(EGL_WINDOW_BIT, format);
         if (contextConfig == kNoConfig) {
-            return DAWN_FORMAT_UNRECOVERABLE_ERROR(
+            return DAWN_UNRECOVERABLE_ERROR(
                 "Couldn't find an EGLConfig rendering to a window for %s.", format);
         }
     }
@@ -218,7 +218,7 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
 
         EGLConfig pbufferConfig = mDisplay->ChooseConfig(EGL_PBUFFER_BIT, format);
         if (pbufferConfig == kNoConfig) {
-            return DAWN_FORMAT_UNRECOVERABLE_ERROR(
+            return DAWN_UNRECOVERABLE_ERROR(
                 "Couldn't find an EGLConfig rendering to a window for %s.", format);
         }
 

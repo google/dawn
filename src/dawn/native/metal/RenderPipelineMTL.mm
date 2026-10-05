@@ -478,7 +478,7 @@ MaybeUnknownError RenderPipeline::InitializeImpl() {
         if (GetStageMask() & wgpu::ShaderStage::Fragment) {
             absl::StrAppendFormat(&errorMessage, "\n\nand fragment MSL:\n\n%s", fragmentData.msl);
         }
-        return DAWN_UNRECOVERABLE_ERROR(errorMessage);
+        return DAWN_MAKE_UNRECOVERABLE_ERROR(errorMessage);
     }
     DAWN_ASSERT(mMtlRenderPipelineState != nil);
     timer.RecordMicroseconds("Metal.newRenderPipelineStateWithDescriptor.CacheMiss");

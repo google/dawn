@@ -904,7 +904,8 @@ void DeviceBase::APIForceLoss(wgpu::DeviceLostReason reason, StringView messageI
     // Note that since we are passing None as the allowedErrors, an additional message will be
     // appended noting that the error was unexpected. Since this call is for testing only it is not
     // too important, but useful for users to understand where the extra message is coming from.
-    HandleError(DAWN_UNRECOVERABLE_ERROR(std::string(message)), InternalErrorType::None, reason);
+    HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(message)), InternalErrorType::None,
+                reason);
 }
 
 DeviceBase::State DeviceBase::GetState() const {
@@ -1982,7 +1983,7 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {
     if (errorType == InternalErrorType::Validation) {
         HandleError(DAWN_MAKE_VALIDATION_ERROR(std::string(message)));
     } else {
-        HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(errorType, std::string(message)),
+        HandleError(DAWN_MAKE_ERROR(errorType, std::string(message)),
                     InternalErrorType::OutOfMemory);
     }
 }
@@ -2813,7 +2814,7 @@ std::pair<std::string, bool> DeviceBase::GetTraceInfo() {
 
 tint::InternalCompilerErrorCallbackInfo DeviceBase::GetTintInternalCompilerErrorCallback() {
     static auto tintInternalCompilerErrorCallback = [](std::string err, void* userdata) {
-        static_cast<DeviceBase*>(userdata)->HandleError(DAWN_UNRECOVERABLE_ERROR(err));
+        static_cast<DeviceBase*>(userdata)->HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(err));
     };
     return tint::InternalCompilerErrorCallbackInfo{
         .callback = tintInternalCompilerErrorCallback,

@@ -118,7 +118,7 @@ MaybeError CheckHRESULTImpl(HRESULT result, const char* context) {
     if (result == DXGI_ERROR_DEVICE_REMOVED) {
         return DAWN_BACKEND_DEVICE_LOST_ERROR(messageStream.str());
     } else {
-        return DAWN_UNRECOVERABLE_ERROR(messageStream.str());
+        return DAWN_MAKE_UNRECOVERABLE_ERROR(messageStream.str());
     }
 }
 

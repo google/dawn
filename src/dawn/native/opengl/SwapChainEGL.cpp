@@ -174,8 +174,8 @@ MaybeError SwapChainEGL::CreateEGLSurface(const DisplayEGL* display) {
 
     EGLConfig config = display->ChooseConfig(EGL_WINDOW_BIT, GetFormat());
     if (config == kNoConfig) {
-        return DAWN_FORMAT_UNRECOVERABLE_ERROR("Couldn't find an EGLConfig for %s on %s.",
-                                               GetFormat(), GetSurface());
+        return DAWN_UNRECOVERABLE_ERROR("Couldn't find an EGLConfig for %s on %s.", GetFormat(),
+                                        GetSurface());
     }
 
     [[maybe_unused]] const EGLFunctions& egl = display->egl.get();
@@ -231,13 +231,13 @@ MaybeError SwapChainEGL::CreateEGLSurface(const DisplayEGL* display) {
             case Surface::Type::WaylandSurface:
 
             default:
-                return DAWN_FORMAT_UNRECOVERABLE_ERROR("%s cannot be supported on EGL.", surface);
+                return DAWN_UNRECOVERABLE_ERROR("%s cannot be supported on EGL.", surface);
         }
     };
 
     DAWN_TRY(TryCreateSurface());
     if (mEGLSurface == EGL_NO_SURFACE) {
-        return DAWN_FORMAT_UNRECOVERABLE_ERROR("Couldn't create an EGLSurface for %s.", surface);
+        return DAWN_UNRECOVERABLE_ERROR("Couldn't create an EGLSurface for %s.", surface);
     }
     return {};
 }

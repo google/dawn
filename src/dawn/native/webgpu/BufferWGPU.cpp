@@ -147,7 +147,7 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     wgpu.instanceWaitAny(ToBackend(GetDevice())->GetInnerInstance(), 1, &waitInfo, UINT64_MAX);
 
     if (mapAsyncResult.status != WGPUMapAsyncStatus_Success) {
-        return DAWN_UNRECOVERABLE_ERROR(mapAsyncResult.message);
+        return DAWN_MAKE_UNRECOVERABLE_ERROR(mapAsyncResult.message);
     }
 
     // The frontend requires a non-const span but will never write to it when using it for MapRead
@@ -310,7 +310,7 @@ MaybeError Buffer::AddContentToCapture(CaptureContext& captureContext) {
         DAWN_ASSERT(mapAsyncResult.status == WGPUMapAsyncStatus_Success);
 
         if (mapAsyncResult.status != WGPUMapAsyncStatus_Success) {
-            return DAWN_UNRECOVERABLE_ERROR(mapAsyncResult.message);
+            return DAWN_MAKE_UNRECOVERABLE_ERROR(mapAsyncResult.message);
         }
 
         const void* data =

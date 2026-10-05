@@ -104,12 +104,12 @@ static constexpr std::array<ExtensionInfo, kExtensionCount> kExtensionInfos{{
 
 }  // anonymous namespace
 
-#define GET_PROC_WITH_NAME(member, name)                                               \
-    do {                                                                               \
-        member = reinterpret_cast<decltype(member)>(GetProcAddress(name));             \
-        if (member == nullptr) {                                                       \
-            return DAWN_UNRECOVERABLE_ERROR(std::string("Couldn't get proc ") + name); \
-        }                                                                              \
+#define GET_PROC_WITH_NAME(member, name)                                   \
+    do {                                                                   \
+        member = reinterpret_cast<decltype(member)>(GetProcAddress(name)); \
+        if (member == nullptr) {                                           \
+            return DAWN_UNRECOVERABLE_ERROR("Couldn't get proc %s", name); \
+        }                                                                  \
     } while (0)
 
 #define GET_PROC(name) GET_PROC_WITH_NAME(name, "egl" #name)

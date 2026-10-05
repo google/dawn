@@ -104,7 +104,7 @@ TEST_F(BufferBaseTest, MapAsyncImplError) {
     constexpr std::string_view kErrorText = "Platform error";
 
     EXPECT_CALL(*mBufferMock.Get(), MapAsyncImpl).WillOnce([&]() -> MaybeError {
-        return DAWN_FORMAT_UNRECOVERABLE_ERROR(kErrorText);
+        return DAWN_UNRECOVERABLE_ERROR(kErrorText);
     });
 
     // Internal error will cause device loss as well.

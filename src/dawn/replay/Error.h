@@ -96,9 +96,6 @@ using VisitResult = ResultOrError<VisitStatus>;
 #define DAWN_UNRECOVERABLE_ERROR(...) \
     DAWN_MAKE_ERROR(InternalErrorType::Unrecoverable, absl::StrFormat(__VA_ARGS__))
 
-#define DAWN_FORMAT_UNRECOVERABLE_ERROR(...) \
-    DAWN_MAKE_ERROR(InternalErrorType::Unrecoverable, absl::StrFormat(__VA_ARGS__))
-
 #define DAWN_UNRECOVERABLE_ERROR_IF(EXPR, ...)                                                  \
     if (EXPR) [[unlikely]] {                                                                    \
         return DAWN_MAKE_ERROR(InternalErrorType::Unrecoverable, absl::StrFormat(__VA_ARGS__)); \

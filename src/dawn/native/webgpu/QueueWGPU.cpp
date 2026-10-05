@@ -246,8 +246,8 @@ ResultOrError<ExecutionSerial> Queue::WaitForQueueSerialImpl(ExecutionSerial wai
             case WGPUWaitStatus_Success:
                 return completedSerial;
             default:
-                return DAWN_FORMAT_UNRECOVERABLE_ERROR("inner instanceWaitAny status is (%s).",
-                                                       FromAPI(status));
+                return DAWN_UNRECOVERABLE_ERROR("inner instanceWaitAny status is (%s).",
+                                                FromAPI(status));
         }
     });
 }

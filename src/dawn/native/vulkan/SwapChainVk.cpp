@@ -319,7 +319,7 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
         }
     }
     if (!formatIsSupported) {
-        return DAWN_UNRECOVERABLE_ERROR(absl::StrFormat(
+        return DAWN_MAKE_UNRECOVERABLE_ERROR(absl::StrFormat(
             "Vulkan SwapChain must support %s with sRGB colorspace.", config.wgpuFormat));
     }
 
