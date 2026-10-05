@@ -27,7 +27,6 @@
 
 """Try Dawn builders using GN and a standalone Dawn checkout (instead of Chromium)."""
 
-load("@chromium-luci//builders.star", "os")
 load("@chromium-luci//gpu.star", "gpu")
 load("@chromium-luci//try.star", "try_")
 load("//constants.star", "siso")
@@ -58,12 +57,6 @@ def apply_cq_builder_defaults(kwargs):
     kwargs.setdefault("max_concurrent_builds", 3)
     return kwargs
 
-def apply_linux_cq_builder_defaults(kwargs):
-    kwargs = apply_cq_builder_defaults(kwargs)
-    kwargs.setdefault("os", os.LINUX_DEFAULT)
-    kwargs.setdefault("ssd", None)
-    return kwargs
-
 def apply_functional_builder_with_node_defaults(kwargs):
     kwargs.setdefault("cq_settings", try_.cq_settings(
         location_filters = exclusion_filters.gn_clang_cq_file_exclusions,
@@ -89,12 +82,6 @@ def add_builder_to_milestone_cq_groups(name, disable_reuse = False):
             builder = "dawn:try/" + name,
             disable_reuse = disable_reuse,
         )
-
-def add_presubmit_builder_to_main_and_milestone_cq_groups(kwargs):
-    # TODO(crbug.com/543082386): Add a GPU presubmit builder helper and
-    # migrate this to use that.
-    try_.presubmit_builder(**kwargs)
-    add_builder_to_milestone_cq_groups(kwargs["name"], disable_reuse = True)
 
 def dawn_android_functional_cq_tester(**kwargs):
     kwargs = apply_cq_builder_defaults(kwargs)
@@ -141,8 +128,9 @@ def dawn_linux_fuzz_cq_tester(**kwargs):
     add_builder_to_milestone_cq_groups(kwargs["name"])
 
 def dawn_linux_presubmit_builder(**kwargs):
-    kwargs = apply_linux_cq_builder_defaults(kwargs)
-    add_presubmit_builder_to_main_and_milestone_cq_groups(kwargs)
+    kwargs = apply_cq_builder_defaults(kwargs)
+    gpu.try_.linux_presubmit_builder(**kwargs)
+    add_builder_to_milestone_cq_groups(kwargs["name"], disable_reuse = True)
 
 ## Functional testers
 
