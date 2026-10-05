@@ -941,7 +941,7 @@ void DeviceBase::Disconnect() {
 
     // Wait for all GPU work to complete before proceeding with destruction.
     // ConsumedError ensures that we pick up any errors that should trigger the DeviceLost callback.
-    std::ignore = ConsumedError(mQueue->WaitForIdleForDestruction());
+    mQueue->WaitForIdleForDestruction();
     std::ignore = ConsumedError(TickImpl());
 
     // The GPU timeline is finished.
