@@ -542,14 +542,6 @@ TEST_P(SubgroupMatrixSubgroupSizeControlTest, WorkgroupSizeUsesExplicitSubgroupS
              subgroupSize *= 2) {
             std::ostringstream configTrace;
             configTrace << config << " (subgroupSize=" << subgroupSize << ")";
-
-            // Intel Gen12 cannot use subgroup size 8 on D3D12 despite advertising it as the
-            // minimum.
-            if (IsD3D12() && IsIntelGen12() && subgroupSize == 8) {
-                std::cout << "Skipping config: " << configTrace.str() << "\n";
-                continue;
-            }
-
             SCOPED_TRACE(configTrace.str());
             testedConfig = true;
 
