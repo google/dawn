@@ -978,6 +978,9 @@ crbug.com/558827232 [ dawn-no-backend-validation nvidia-0x2184 nvidia_ge_32.0.16
 crbug.com/558827232 [ dawn-no-backend-validation nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-disabled win11 ] webgpu:shader,execution,expression,unary,af_arithmetic:negation:inputSource="const";vectorize="_undef_" [ Failure ]
 crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-enabled win11 ] webgpu:shader,execution,expression,unary,af_arithmetic:negation:inputSource="const";vectorize="_undef_" [ Failure ]
 
+# Linux/GTX 1660 failures when going to 595.104.02
+crbug.com/568459643 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing* [ Failure ]
+
 # Win/Snapdragon X Elite failures
 # TODO(crbug.com/452840618): Remove this disable block once the tests are actually running.
 # finder:disable-unused Unused removal disabled until tests are actually enabled
