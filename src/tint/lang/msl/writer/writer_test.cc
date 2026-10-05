@@ -590,6 +590,19 @@ TEST_F(MslWriterTest, CanGenerate_TexelBufferUnsupported) {
                 testing::HasSubstr("texel buffers are not supported by the MSL backend"));
 }
 
+TEST_F(MslWriterTest, CanGenerate_ViewIndexUnsupported) {
+    auto* ep = b.Function("entry", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* view_index = b.FunctionParam("view_index", ty.u32());
+    view_index->SetBuiltin(core::BuiltinValue::kViewIndex);
+    ep->AppendParam(view_index);
+    b.Append(ep->Block(), [&] { b.Return(ep); });
+
+    auto result = Generate();
+    ASSERT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("view_index is not supported by the MSL backend"));
+}
+
 TEST_F(MslWriterTest, CanGenerate_DynamicOffsetOnNonBufferType) {
     auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* var = b.Var("tex", ty.ptr<handle>(tex_ty));
