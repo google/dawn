@@ -1094,7 +1094,7 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
     StreamIn(&mCacheKey, CacheKey::Type::RenderPipeline, device->GetCacheKey());
 }
 
-MaybeError RenderPipelineBase::InitializeWithShaders() {
+MaybeUnknownError RenderPipelineBase::InitializeWithShaders() {
     return InitializeImpl();
 }
 
@@ -1120,7 +1120,7 @@ Ref<RenderPipelineBase> RenderPipelineBase::MakeError(DeviceBase* device, String
         explicit ErrorRenderPipeline(DeviceBase* device, StringView label)
             : RenderPipelineBase(device, ObjectBase::kError, label) {}
 
-        MaybeError InitializeImpl() override {
+        MaybeUnknownError InitializeImpl() override {
             DAWN_UNREACHABLE();
             return {};
         }

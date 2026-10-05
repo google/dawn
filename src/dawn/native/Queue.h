@@ -91,7 +91,9 @@ class QueueBase : public ExecutionQueueBase, public WeakRefSupport<QueueBase> {
                                           const Extent3D* copySize,
                                           const CopyTextureForBrowserOptions* options);
 
-    MaybeError WriteBuffer(BufferBase* buffer, uint64_t bufferOffset, Span<const std::byte> data);
+    MaybeUnknownError WriteBuffer(BufferBase* buffer,
+                                  uint64_t bufferOffset,
+                                  Span<const std::byte> data);
 
     // Ensure a flush occurs if needed, and track this task as complete after the
     // scheduled work is complete.
@@ -124,18 +126,19 @@ class QueueBase : public ExecutionQueueBase, public WeakRefSupport<QueueBase> {
                                         const Extent3D& writeSize);
 
   private:
-    MaybeError WriteTextureInternal(const TexelCopyTextureInfo* destination,
-                                    Span<const std::byte> data,
-                                    const TexelCopyBufferLayout& dataLayout,
-                                    const Extent3D* writeSize);
-    MaybeError CopyTextureForBrowserInternal(const TexelCopyTextureInfo* source,
-                                             const TexelCopyTextureInfo* destination,
-                                             const Extent3D* copySize,
-                                             const CopyTextureForBrowserOptions* options);
-    MaybeError CopyExternalTextureForBrowserInternal(const ImageCopyExternalTexture* source,
-                                                     const TexelCopyTextureInfo* destination,
-                                                     const Extent3D* copySize,
-                                                     const CopyTextureForBrowserOptions* options);
+    MaybeUnknownError WriteTextureInternal(const TexelCopyTextureInfo* destination,
+                                           Span<const std::byte> data,
+                                           const TexelCopyBufferLayout& dataLayout,
+                                           const Extent3D* writeSize);
+    MaybeUnknownError CopyTextureForBrowserInternal(const TexelCopyTextureInfo* source,
+                                                    const TexelCopyTextureInfo* destination,
+                                                    const Extent3D* copySize,
+                                                    const CopyTextureForBrowserOptions* options);
+    MaybeUnknownError CopyExternalTextureForBrowserInternal(
+        const ImageCopyExternalTexture* source,
+        const TexelCopyTextureInfo* destination,
+        const Extent3D* copySize,
+        const CopyTextureForBrowserOptions* options);
     MaybeValError ValidateSubmit(Span<CommandBufferBase* const> commands,
                                  BufferSet& buffersFromCommands) const;
     MaybeValError ValidateOnSubmittedWorkDone() const;
@@ -144,7 +147,7 @@ class QueueBase : public ExecutionQueueBase, public WeakRefSupport<QueueBase> {
                                        const TexelCopyBufferLayout& dataLayout,
                                        const Extent3D* writeSize) const;
 
-    MaybeError SubmitInternal(Span<CommandBufferBase* const> commands);
+    MaybeUnknownError SubmitInternal(Span<CommandBufferBase* const> commands);
 
     MutexProtected<SerialMap<ExecutionSerial, std::unique_ptr<TrackTaskCallback>>> mTasksInFlight;
 };

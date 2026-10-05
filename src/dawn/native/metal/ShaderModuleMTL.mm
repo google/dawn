@@ -213,7 +213,7 @@ std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo> GenerateArgu
     return info;
 }
 
-ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
+ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
     DeviceBase* device,
     const ProgrammableStage& programmableStage,
     SingleShaderStage stage,
@@ -380,7 +380,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     CacheResult<MslCompilation> mslCompilation;
     DAWN_TRY_LOAD_OR_RUN(
         mslCompilation, device, std::move(req), MslCompilation::FromValidatedBlob,
-        [](MslCompilationRequest r) -> ResultOrError<MslCompilation> {
+        [](MslCompilationRequest r) -> ResultOrUnknownError<MslCompilation> {
             TRACE_EVENT(DAWN_TRACE_CATEGORY(), "tint::msl::writer::Generate");
             // Requires Tint Program here right before actual using.
             auto shaderModule = r.inputProgram.UnsafeGetValue();
@@ -494,13 +494,13 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
 }  // namespace
 
-MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
-                                        const ProgrammableStage& programmableStage,
-                                        const PipelineLayout* layout,
-                                        const ImmediateMask& pipelineImmediateMask,
-                                        ShaderModule::MetalFunctionData* out,
-                                        uint32_t sampleMask,
-                                        const RenderPipeline* renderPipeline) {
+MaybeUnknownError ShaderModule::CreateFunction(SingleShaderStage stage,
+                                               const ProgrammableStage& programmableStage,
+                                               const PipelineLayout* layout,
+                                               const ImmediateMask& pipelineImmediateMask,
+                                               ShaderModule::MetalFunctionData* out,
+                                               uint32_t sampleMask,
+                                               const RenderPipeline* renderPipeline) {
     TRACE_EVENT(DAWN_TRACE_CATEGORY(), "metal::ShaderModule::CreateFunction", "label",
                 utils::GetLabelForTrace(GetLabel()));
 

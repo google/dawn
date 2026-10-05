@@ -2902,7 +2902,10 @@ TEST_P(CompressedTextureZeroInitTest, Copy2DArrayCompressedB2T2B) {
 // destination cannot be read back.
 //
 // https://crbug.com/536639352
-TEST_P(CompressedTextureZeroInitTest, DISABLED_CopyTextureToTextureLargerThanMaxBufferSize) {
+TEST_P(CompressedTextureZeroInitTest, CopyTextureToTextureLargerThanMaxBufferSize) {
+    // Requires validation to trigger on the buffer size mismatch
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
     // Compatibility mode does not support compressed texture-to-texture copies.
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 

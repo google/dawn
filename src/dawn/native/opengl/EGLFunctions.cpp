@@ -165,7 +165,7 @@ MaybeError EGLFunctions::LoadDisplayProcs(EGLDisplay display) {
     {
         EGLint major, minor;
         DAWN_TRY(CheckEGL(*this, Initialize(display, &major, &minor), "eglInitialize"));
-        DAWN_INVALID_IF(major != 1, "EGL version (%u) is not 1.", major);
+        DAWN_UNRECOVERABLE_ERROR_IF(major != 1, "EGL version (%u) is not 1.", major);
         mMajorVersion = major;
         mMinorVersion = minor;
     }

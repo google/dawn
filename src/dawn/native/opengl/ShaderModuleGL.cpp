@@ -328,7 +328,7 @@ ShaderModule::ShaderModule(Device* device,
                            std::vector<tint::wgsl::Extension> internalExtensions)
     : ShaderModuleBase(device, descriptor, std::move(internalExtensions)) {}
 
-ResultOrValError<std::string> ShaderModule::CompileShader(
+ResultOrUnknownError<std::string> ShaderModule::CompileShader(
     const OpenGLFunctions& gl,
     const ProgrammableStage& programmableStage,
     SingleShaderStage stage,
@@ -475,7 +475,7 @@ ResultOrValError<std::string> ShaderModule::CompileShader(
     CacheResult<GLSLCompilation> compilationResult;
     DAWN_TRY_LOAD_OR_RUN(
         compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromValidatedBlob,
-        [](GLSLCompilationRequest r) -> ResultOrError<GLSLCompilation> {
+        [](GLSLCompilationRequest r) -> ResultOrUnknownError<GLSLCompilation> {
             // Requires Tint Program here right before actual using.
             auto shaderModule = r.inputProgram.UnsafeGetValue();
             auto inputProgram = shaderModule->GetTintProgram();

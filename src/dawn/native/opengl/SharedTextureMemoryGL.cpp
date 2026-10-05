@@ -40,16 +40,16 @@
 namespace dawn::native::opengl {
 
 namespace {
-ResultOrError<wgpu::SharedFenceType> ChooseFenceTypeFromFeatures(Device* device) {
+ResultOrValError<wgpu::SharedFenceType> ChooseFenceTypeFromFeatures(Device* device) {
     if (device->HasFeature(Feature::SharedFenceSyncFD)) {
         return wgpu::SharedFenceType::SyncFD;
-    } else if (device->HasFeature(Feature::SharedFenceEGLSync)) {
-        return wgpu::SharedFenceType::EGLSync;
-    } else {
-        // TODO(crbug.com/536639352): This should be moved to the frontend and we should check that
-        // we have at least a fence feature enabled when creating an STM/SBM.
-        return DAWN_VALIDATION_ERROR("No enabled features for SharedFence creation.");
     }
+    if (device->HasFeature(Feature::SharedFenceEGLSync)) {
+        return wgpu::SharedFenceType::EGLSync;
+    }
+    // TODO(crbug.com/536639352): This should be moved to the frontend and we should check that
+    // we have at least a fence feature enabled when creating an STM/SBM.
+    return DAWN_VALIDATION_ERROR("No enabled features for SharedFence creation.");
 }
 
 }  // namespace
@@ -98,7 +98,7 @@ MaybeValError SharedTextureMemory::BeginAccessImpl(
     return {};
 }
 
-ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
+ResultOrUnknownError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {

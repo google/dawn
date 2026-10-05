@@ -111,15 +111,15 @@ class SharedResourceMemory : public ApiObjectBase, public WeakRefSupport<SharedR
     MaybeValError ValidateResourceCreatedFromSelf(SharedResource* resource);
 
     template <typename Resource, typename BeginAccessDescriptor>
-    MaybeError BeginAccess(Resource* resource, const BeginAccessDescriptor* rawDescriptor);
+    MaybeUnknownError BeginAccess(Resource* resource, const BeginAccessDescriptor* rawDescriptor);
 
     template <typename Resource, typename EndAccessState>
-    MaybeError EndAccess(Resource* resource, EndAccessState* state);
+    MaybeUnknownError EndAccess(Resource* resource, EndAccessState* state);
 
     template <typename Resource, typename EndAccessState>
-    ResultOrError<FenceAndSignalValue> EndAccessInternal(ExecutionSerial lastUsageSerial,
-                                                         Resource* resource,
-                                                         EndAccessState* rawState);
+    ResultOrUnknownError<FenceAndSignalValue> EndAccessInternal(ExecutionSerial lastUsageSerial,
+                                                                Resource* resource,
+                                                                EndAccessState* rawState);
 
     // BeginAccessImpl validates the operation is valid on the backend, and performs any
     // backend specific operations. It does NOT need to acquire begin fences; that is done in the
@@ -132,11 +132,11 @@ class SharedResourceMemory : public ApiObjectBase, public WeakRefSupport<SharedR
         const UnpackedPtr<SharedBufferMemoryBeginAccessDescriptor>& descriptor);
     // EndAccessImpl validates the operation is valid on the backend, and returns the end fence.
     // It should also write out any backend specific state in chained out structs of EndAccessState.
-    virtual ResultOrError<FenceAndSignalValue> EndAccessImpl(
+    virtual ResultOrUnknownError<FenceAndSignalValue> EndAccessImpl(
         TextureBase* texture,
         ExecutionSerial lastUsageSerial,
         UnpackedPtr<SharedTextureMemoryEndAccessState>& state);
-    virtual ResultOrError<FenceAndSignalValue> EndAccessImpl(
+    virtual ResultOrUnknownError<FenceAndSignalValue> EndAccessImpl(
         BufferBase* buffer,
         ExecutionSerial lastUsageSerial,
         UnpackedPtr<SharedBufferMemoryEndAccessState>& state);

@@ -1514,7 +1514,16 @@ class BufferZeroInitMaxBufferSizeTest : public BufferZeroInitTest {};
 // executing prior commands from the rejected submit.
 //
 // https://crbug.com/563359278
-TEST_P(BufferZeroInitMaxBufferSizeTest, DISABLED_CopyTextureToBufferLargerThanMaxBufferSize) {
+TEST_P(BufferZeroInitMaxBufferSizeTest, CopyTextureToBufferLargerThanMaxBufferSize) {
+    // Requires validation to trigger on the buffer size mismatch
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    // Test fails with WebGPU on WebGPU with a : `Inner Device on WebGPU backend on
+    // BackendType::Metal Apple M3 Pro"] is lost.` error. This implies it's doing the right thing,
+    // in that we are losing the device but because WebGPUOnWebGPU wraps the error we get the
+    // incorrect error output.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA32Float;
     constexpr uint32_t kBytesPerTexel = 16u;
     constexpr wgpu::Extent3D kPoisonSize = {256u, 256u, 257u};

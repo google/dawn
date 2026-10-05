@@ -226,7 +226,7 @@ RenderPipeline::RenderPipeline(Device* device,
       mVertexArrayObject(0),
       mGlPrimitiveTopology(GLPrimitiveTopology(GetPrimitiveTopology())) {}
 
-MaybeError RenderPipeline::InitializeImpl() {
+MaybeUnknownError RenderPipeline::InitializeImpl() {
     if (UsesVertexIndex()) {
         mImmediateMask |= GetImmediateBlockBits(offsetof(RenderImmediates, firstVertex),
                                                 kImmediateElementByteSize);
@@ -252,14 +252,15 @@ MaybeError RenderPipeline::InitializeImpl() {
                                mImmediateMask, bgraSwizzleAttributes, nullptr, &combinedSamplers,
                                &shaders));
 
-    return ToBackend(GetDevice())
-        ->EnqueueGL([self = Ref<RenderPipeline>(this), combinedSamplers,
-                     shaders](const OpenGLFunctions& gl) -> MaybeError {
-            DAWN_TRY(self->InitializeBase(gl, ToBackend(self->GetLayout()), self->GetAllStages(),
-                                          self->mImmediateMask, combinedSamplers, shaders));
-            DAWN_TRY(self->CreateVAOForVertexState(gl));
-            return {};
-        });
+    DAWN_TRY(ToBackend(GetDevice())
+                 ->EnqueueGL([self = Ref<RenderPipeline>(this), combinedSamplers,
+                              shaders](const OpenGLFunctions& gl) -> MaybeError {
+                     DAWN_TRY(self->InitializeBase(gl, ToBackend(self->GetLayout()),
+                                                   self->GetAllStages(), self->mImmediateMask,
+                                                   combinedSamplers, shaders));
+                     return self->CreateVAOForVertexState(gl);
+                 }));
+    return {};
 }
 
 RenderPipeline::~RenderPipeline() = default;

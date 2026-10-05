@@ -54,7 +54,7 @@ class ComputePipeline final : public ComputePipelineBase {
 
   private:
     using ComputePipelineBase::ComputePipelineBase;
-    ResultOrError<Extent3D> InitializeImpl() override;
+    ResultOrUnknownError<Extent3D> InitializeImpl() override;
 
     NSPRef<id<MTLComputePipelineState>> mMtlComputePipelineState;
     std::vector<uint32_t> mWorkgroupAllocations;

@@ -316,14 +316,14 @@ class ComputePipeline final : public ComputePipelineBase {
     using ComputePipelineBase::ComputePipelineBase;
 
   private:
-    ResultOrError<Extent3D> InitializeImpl() override;
+    ResultOrUnknownError<Extent3D> InitializeImpl() override;
 };
 
 class RenderPipeline final : public RenderPipelineBase {
   public:
     using RenderPipelineBase::RenderPipelineBase;
 
-    MaybeError InitializeImpl() override;
+    MaybeUnknownError InitializeImpl() override;
 };
 
 class ResourceTable final : public ResourceTableBase {

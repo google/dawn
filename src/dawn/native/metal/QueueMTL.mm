@@ -342,7 +342,7 @@ id<MTLSharedEvent> Queue::GetMTLSharedEvent() const {
     return mMtlSharedEvent.Get();
 }
 
-ResultOrError<Ref<SharedFence>> Queue::GetOrCreateSharedFence() {
+ResultOrUnknownError<Ref<SharedFence>> Queue::GetOrCreateSharedFence() {
     if (mSharedFence) {
         return mSharedFence;
     }

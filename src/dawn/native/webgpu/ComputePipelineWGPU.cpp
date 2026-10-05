@@ -55,7 +55,7 @@ ComputePipeline::ComputePipeline(Device* device,
       RecordableObject(schema::ObjectType::ComputePipeline),
       ObjectWGPU(device->wgpu->computePipelineRelease) {}
 
-ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
+ResultOrUnknownError<Extent3D> ComputePipeline::InitializeImpl() {
     std::string label = GetLabel();
     WGPUComputePipelineDescriptor desc;
     desc.nextInChain = nullptr;

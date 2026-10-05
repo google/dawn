@@ -38,7 +38,7 @@
 #include "src/utils/span.h"
 
 namespace dawn::native::opengl {
-ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(
+ResultOrUnknownError<Ref<SharedFence>> SharedFenceEGL::Create(
     Device* device,
     StringView label,
     const SharedFenceSyncFDDescriptor* descriptor) {
@@ -56,7 +56,7 @@ ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(
 
     return device->ExecuteGL(
         ExecutionQueueBase::SubmitMode::Passive,
-        [&](const OpenGLFunctions& gl) -> ResultOrError<Ref<SharedFence>> {
+        [&](const OpenGLFunctions& gl) -> ResultOrUnknownError<Ref<SharedFence>> {
             DisplayEGL* display = ToBackend(device->GetPhysicalDevice())->GetDisplay();
             Ref<WrappedEGLSync> sync;
             EGLint fdForSharedFence;
@@ -80,7 +80,7 @@ ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(
 #endif
 }
 
-ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(
+ResultOrUnknownError<Ref<SharedFence>> SharedFenceEGL::Create(
     Device* device,
     StringView label,
     const SharedFenceEGLSyncDescriptor* descriptor) {

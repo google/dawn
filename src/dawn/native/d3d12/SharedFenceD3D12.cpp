@@ -37,7 +37,7 @@
 namespace dawn::native::d3d12 {
 
 // static
-ResultOrError<Ref<SharedFence>> SharedFence::Create(
+ResultOrUnknownError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
     StringView label,
     const SharedFenceDXGISharedHandleDescriptor* descriptor) {

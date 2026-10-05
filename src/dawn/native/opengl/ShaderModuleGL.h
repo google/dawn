@@ -86,7 +86,7 @@ class ShaderModule final : public ShaderModuleBase {
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions);
 
-    ResultOrValError<std::string> CompileShader(
+    ResultOrUnknownError<std::string> CompileShader(
         const OpenGLFunctions& gl,
         const ProgrammableStage& programmableStage,
         SingleShaderStage stage,

@@ -54,9 +54,10 @@ class ErrorSharedBufferMemory : public SharedBufferMemoryBase {
                                   const UnpackedPtr<BeginAccessDescriptor>& descriptor) override {
         DAWN_UNREACHABLE();
     }
-    ResultOrError<FenceAndSignalValue> EndAccessImpl(BufferBase* buffer,
-                                                     ExecutionSerial lastUsageSerial,
-                                                     UnpackedPtr<EndAccessState>& state) override {
+    ResultOrUnknownError<FenceAndSignalValue> EndAccessImpl(
+        BufferBase* buffer,
+        ExecutionSerial lastUsageSerial,
+        UnpackedPtr<EndAccessState>& state) override {
         DAWN_UNREACHABLE();
     }
     void DestroyImpl(DestroyReason reason) override {}
@@ -119,44 +120,44 @@ BufferBase* SharedBufferMemoryBase::APICreateBuffer(const BufferDescriptor* rawD
 
     // 1. Validate the descriptor and create the buffer (without mapping).
     bool fakeOOMAtNativeMap = false;
-    ResultOrError<Ref<BufferBase>> resultOrError = ([&]() -> ResultOrError<Ref<BufferBase>> {
-        DAWN_TRY(GetDevice()->ValidateIsAlive());
-        DAWN_TRY(GetDevice()->ValidateObject(this));
-        // Validate the buffer descriptor.
-        UnpackedPtr<BufferDescriptor> descriptor;
-        DAWN_TRY_ASSIGN(descriptor, ValidateBufferDescriptor(GetDevice(), rawDescriptor));
+    ResultOrUnknownError<Ref<BufferBase>> resultOrError =
+        ([&]() -> ResultOrUnknownError<Ref<BufferBase>> {
+            DAWN_TRY(GetDevice()->ValidateIsAlive());
+            DAWN_TRY(GetDevice()->ValidateObject(this));
+            // Validate the buffer descriptor.
+            UnpackedPtr<BufferDescriptor> descriptor;
+            DAWN_TRY_ASSIGN(descriptor, ValidateBufferDescriptor(GetDevice(), rawDescriptor));
 
-        // Ensure the buffer descriptor usage is a subset of the shared buffer memory's usage.
-        DAWN_INVALID_IF(
-            !IsSubset(descriptor->usage, mProperties.usage),
-            "The buffer usage (%s) is incompatible with the SharedBufferMemory usage (%s).",
-            descriptor->usage, mProperties.usage);
+            // Ensure the buffer descriptor usage is a subset of the shared buffer memory's usage.
+            DAWN_INVALID_IF(
+                !IsSubset(descriptor->usage, mProperties.usage),
+                "The buffer usage (%s) is incompatible with the SharedBufferMemory usage (%s).",
+                descriptor->usage, mProperties.usage);
 
-        // Require MapWrite usage on the shared buffer memory when mappedAtCreation is true.
-        DAWN_INVALID_IF(
-            descriptor->mappedAtCreation && !CanBeWrittenByCPU(),
-            "Buffer created from SharedBufferMemory with mappedAtCreation=true requires "
-            "the SharedBufferMemory to have MapWrite usage.");
+            // Require MapWrite usage on the shared buffer memory when mappedAtCreation is true.
+            DAWN_INVALID_IF(
+                descriptor->mappedAtCreation && !CanBeWrittenByCPU(),
+                "Buffer created from SharedBufferMemory with mappedAtCreation=true requires "
+                "the SharedBufferMemory to have MapWrite usage.");
 
-        // Validate that the buffer size does not exceed the shared buffer memory's size.
-        DAWN_INVALID_IF(descriptor->size > mProperties.size,
-                        "The buffer size (%u) is larger than SharedBufferMemory size (%u).",
-                        descriptor->size, mProperties.size);
+            // Validate that the buffer size does not exceed the shared buffer memory's size.
+            DAWN_INVALID_IF(descriptor->size > mProperties.size,
+                            "The buffer size (%u) is larger than SharedBufferMemory size (%u).",
+                            descriptor->size, mProperties.size);
 
-        if (auto* ext = descriptor.Get<DawnFakeBufferOOMForTesting>()) {
-            fakeOOMAtNativeMap = ext->fakeOOMAtNativeMap;
-            if (ext->fakeOOMAtDevice) {
-                return DAWN_OUT_OF_MEMORY_ERROR("DawnFakeBufferOOMForTesting fakeOOMAtDevice");
+            if (auto* ext = descriptor.Get<DawnFakeBufferOOMForTesting>()) {
+                fakeOOMAtNativeMap = ext->fakeOOMAtNativeMap;
+                if (ext->fakeOOMAtDevice) {
+                    return DAWN_OUT_OF_MEMORY_ERROR("DawnFakeBufferOOMForTesting fakeOOMAtDevice");
+                }
             }
-        }
-
-        return CreateBufferImpl(descriptor);
-    })();
+            return CreateBufferImpl(descriptor);
+        })();
 
     // 2. Error handling. Defer descriptor / allocation errors until after we've tried to map, so
     // that errors from mapping take priority. This mirrors DeviceBase::APICreateBuffer.
     Ref<BufferBase> buffer;
-    std::unique_ptr<UnrecoverableError> deferredError;
+    std::unique_ptr<UnknownError> deferredError;
     const bool createSucceeded = resultOrError.IsSuccess();
     if (createSucceeded) [[likely]] {
         buffer = resultOrError.AcquireSuccess();
@@ -175,9 +176,9 @@ BufferBase* SharedBufferMemoryBase::APICreateBuffer(const BufferDescriptor* rawD
 
     // If there was a deferredError saved from earlier, surface it now.
     if (deferredError) {
-        std::ignore = GetDevice()->ConsumedError(
-            MaybeError(std::move(deferredError)), InternalErrorType::OutOfMemory,
-            "calling %s.CreateBuffer(%s).", this, rawDescriptor);
+        std::ignore =
+            GetDevice()->ConsumedError(std::move(deferredError), InternalErrorType::OutOfMemory,
+                                       "calling %s.CreateBuffer(%s).", this, rawDescriptor);
     }
 
     // Access is not allowed until BeginAccess has been called.

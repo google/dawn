@@ -127,6 +127,13 @@ class InstanceBase final : public ErrorSink, public RefCounted {
         return false;
     }
 
+    bool ConsumedErrorAndWarnOnce(UnknownError error) {
+        if (error.IsVal()) {
+            return ConsumedErrorAndWarnOnce(error.TakeAsVal());
+        }
+        return ConsumedErrorAndWarnOnce(error.TakeAsUnrecoverable());
+    }
+
     const TogglesState& GetTogglesState() const;
     const absl::flat_hash_set<tint::wgsl::LanguageFeature>& GetAllowedWGSLLanguageFeatures() const;
 
@@ -181,6 +188,7 @@ class InstanceBase final : public ErrorSink, public RefCounted {
     void DisconnectDawnPlatform();
 
     // ErrorSink implementation
+    using ErrorSink::ConsumeError;
     void ConsumeError(std::unique_ptr<UnrecoverableError> error,
                       InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
     void ConsumeError(std::unique_ptr<ValidationError> error,

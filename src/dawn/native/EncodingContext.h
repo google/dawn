@@ -91,12 +91,12 @@ class EncodingContext {
 
     // Functions to set current encoder state
     void EnterPass(const ApiObjectBase* passEncoder);
-    MaybeError ExitRenderPass(const ApiObjectBase* passEncoder,
-                              RenderPassResourceUsageTracker usageTracker,
-                              CommandEncoder* commandEncoder,
-                              IndirectDrawMetadata indirectDrawMetadata);
+    MaybeUnknownError ExitRenderPass(const ApiObjectBase* passEncoder,
+                                     RenderPassResourceUsageTracker usageTracker,
+                                     CommandEncoder* commandEncoder,
+                                     IndirectDrawMetadata indirectDrawMetadata);
     void ExitComputePass(const ApiObjectBase* passEncoder, ComputePassResourceUsage usages);
-    MaybeError Finish();
+    MaybeUnknownError Finish();
 
     // Called when a pass encoder is deleted. Provides an opportunity to clean up if it's the
     // mCurrentEncoder.
@@ -143,6 +143,19 @@ class EncodingContext {
             }
             HandleError(std::move(error));
             return true;
+        }
+        return false;
+    }
+    template <typename... Args>
+    [[nodiscard]] bool ConsumedError(MaybeUnknownError maybeError,
+                                     const char* formatStr,
+                                     const Args&... args) {
+        if (maybeError.IsError()) [[unlikely]] {
+            std::unique_ptr<UnknownError> error = maybeError.AcquireError();
+            if (error->IsVal()) {
+                return ConsumedError(MaybeValError{error->TakeAsVal()}, formatStr, args...);
+            }
+            return ConsumedError(MaybeError{error->TakeAsUnrecoverable()}, formatStr, args...);
         }
         return false;
     }

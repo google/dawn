@@ -55,9 +55,9 @@ enum class HeapAccessType {
     GPUQueueAccessible,
 };
 
-ResultOrError<HeapAccessType> MapToHeapAccessType(const D3D12_HEAP_PROPERTIES& heapProperties,
-                                                  const D3D12_HEAP_FLAGS& heapFlags,
-                                                  const Device* device) {
+ResultOrValError<HeapAccessType> MapToHeapAccessType(const D3D12_HEAP_PROPERTIES& heapProperties,
+                                                     const D3D12_HEAP_FLAGS& heapFlags,
+                                                     const Device* device) {
     switch (heapProperties.Type) {
         case D3D12_HEAP_TYPE_UPLOAD:
             return HeapAccessType::Upload;
@@ -99,7 +99,7 @@ ResultOrError<HeapAccessType> MapToHeapAccessType(const D3D12_HEAP_PROPERTIES& h
     }
 }
 
-ResultOrError<SharedBufferMemoryProperties> GetSharedBufferMemoryProperties(
+ResultOrValError<SharedBufferMemoryProperties> GetSharedBufferMemoryProperties(
     Device* device,
     D3D12_HEAP_PROPERTIES heapProperties,
     D3D12_HEAP_FLAGS heapFlags,
@@ -214,7 +214,7 @@ void SharedBufferMemory::DestroyImpl(DestroyReason reason) {
 }
 
 // static
-ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::CreateFromHeap(
+ResultOrUnknownError<Ref<SharedBufferMemory>> SharedBufferMemory::CreateFromHeap(
     Device* device,
     StringView label,
     ComPtr<ID3D12Heap> d3d12Heap,
@@ -276,7 +276,7 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::CreateFromHeap(
 }
 
 // static
-ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
+ResultOrUnknownError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     Device* device,
     StringView label,
     const SharedBufferMemoryD3D12ResourceDescriptor* descriptor) {
@@ -315,7 +315,7 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
 }
 
 // static
-ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
+ResultOrUnknownError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     Device* device,
     StringView label,
     const SharedBufferMemoryFromWindowsHandleDescriptor* descriptor) {
@@ -340,7 +340,7 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
 }
 
 // static
-ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
+ResultOrUnknownError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     Device* device,
     StringView label,
     const SharedBufferMemoryHostPointerDescriptor* descriptor) {
@@ -415,7 +415,7 @@ MaybeValError SharedBufferMemory::BeginAccessImpl(
     return {};
 }
 
-ResultOrError<FenceAndSignalValue> SharedBufferMemory::EndAccessImpl(
+ResultOrUnknownError<FenceAndSignalValue> SharedBufferMemory::EndAccessImpl(
     BufferBase* buffer,
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {

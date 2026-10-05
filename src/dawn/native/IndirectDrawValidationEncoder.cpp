@@ -449,10 +449,13 @@ uint32_t ComputeMaxDrawCallsPerIndirectValidationBatch(const CombinedLimits& lim
                   uint64_t{std::numeric_limits<uint32_t>::max()}}));
 }
 
-MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
-                                                CommandEncoder* commandEncoder,
-                                                RenderPassResourceUsageTracker* usageTracker,
-                                                IndirectDrawMetadata* indirectDrawMetadata) {
+// TODO(536639352): This should return `MaybeError`. Currently the `ValidateIsAlive` below forces it
+// to be Unknown. Verify that it is safe to remove the validation as per the comment below and then
+// convert this to a MaybeError.
+MaybeUnknownError EncodeIndirectDrawValidationCommands(DeviceBase* device,
+                                                       CommandEncoder* commandEncoder,
+                                                       RenderPassResourceUsageTracker* usageTracker,
+                                                       IndirectDrawMetadata* indirectDrawMetadata) {
     DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
     // Since encoding validation commands may create new objects, verify that the device is alive.
     // TODO(dawn:1199): This check is obsolete if device loss causes device.destroy().

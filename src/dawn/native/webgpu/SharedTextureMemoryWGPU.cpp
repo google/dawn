@@ -103,7 +103,7 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
     return Texture::CreateFromSharedTextureMemory(this, descriptor);
 }
 
-ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
+ResultOrUnknownError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {

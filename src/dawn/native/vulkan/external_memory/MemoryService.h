@@ -79,8 +79,8 @@ class Service {
                                                VkImage image);
 
     // Create a VkImage for the given handle type
-    ResultOrError<VkImage> CreateImage(const ExternalImageDescriptor* descriptor,
-                                       const VkImageCreateInfo& baseCreateInfo);
+    ResultOrUnknownError<VkImage> CreateImage(const ExternalImageDescriptor* descriptor,
+                                              const VkImageCreateInfo& baseCreateInfo);
 
   private:
     ServiceImplementation* GetServiceImplementation(ExternalImageType externalImageType);

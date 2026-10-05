@@ -112,7 +112,7 @@ MaybeError DisplayEGL::InitializeWithProcAndDisplay(EGLGetProcProc getProc, EGLD
     DAWN_TRY(mFunctions.LoadDisplayProcs(mDisplay));
 
     // We require at least EGL 1.4.
-    DAWN_INVALID_IF(
+    DAWN_UNRECOVERABLE_ERROR_IF(
         egl->GetMajorVersion() < 1 || (egl->GetMajorVersion() == 1 && egl->GetMinorVersion() < 4),
         "EGL version (%u.%u) must be at least 1.4", egl->GetMajorVersion(), egl->GetMinorVersion());
 
@@ -123,9 +123,10 @@ MaybeError DisplayEGL::InitializeWithProcAndDisplay(EGLGetProcProc getProc, EGLD
     if (rawClientAPIs != nullptr) {
         absl::flat_hash_set<std::string_view> clientAPIs = absl::StrSplit(rawClientAPIs, " ");
         const char* targetAPI = (mApiEnum == EGL_OPENGL_API) ? "OpenGL" : "OpenGL_ES";
-        DAWN_INVALID_IF(!clientAPIs.contains(targetAPI),
-                        "EGL display does not support requested client API '%s' (supported: %s).",
-                        targetAPI, rawClientAPIs);
+        DAWN_UNRECOVERABLE_ERROR_IF(
+            !clientAPIs.contains(targetAPI),
+            "EGL display does not support requested client API '%s' (supported: %s).", targetAPI,
+            rawClientAPIs);
     }
 
     return {};

@@ -54,7 +54,7 @@ class RenderPipeline final : public RenderPipelineBase, public PipelineGL {
     MaybeError ApplyNow(const OpenGLFunctions& gl,
                         PersistentPipelineState& persistentPipelineState);
 
-    MaybeError InitializeImpl() override;
+    MaybeUnknownError InitializeImpl() override;
 
   private:
     RenderPipeline(Device* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);

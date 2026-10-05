@@ -51,7 +51,7 @@ Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
     return AcquireRef(new ComputePipeline(device, descriptor));
 }
 
-ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
+ResultOrUnknownError<Extent3D> ComputePipeline::InitializeImpl() {
     if (GetDevice()->NeedsStaticSamplerForExternalTexture() && GetLayout()->HasExternalTextures()) {
         DAWN_ASSERT(!GetLayout()->HasAPIStaticSamplers());
         mRequiresSpecialization = true;
@@ -76,7 +76,7 @@ ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
     return workgroupSize;
 }
 
-ResultOrError<PipelineHandles> ComputePipeline::GetOrCreateSpecializedHandle(
+ResultOrUnknownError<PipelineHandles> ComputePipeline::GetOrCreateSpecializedHandle(
     Specialization&& specializationIn) {
     Specialization specialization = specializationIn;
     specialization.layout.pushConstantBytes = ToPushConstantBytes(mImmediateMask);
@@ -98,7 +98,7 @@ ResultOrError<PipelineHandles> ComputePipeline::GetOrCreateSpecializedHandle(
     SpecializationResult r;
     DAWN_TRY_ASSIGN(r, InitializeSpecialization(specialization, /*buildCacheKey=*/false));
 
-    return mSpecializations.Use([&](auto specializations) -> ResultOrError<PipelineHandles> {
+    return mSpecializations.Use([&](auto specializations) -> ResultOrUnknownError<PipelineHandles> {
         auto handles = PipelineHandles{.pipeline = r.pipeline->Get(), .layout = r.layout->Get()};
 
         auto [it, inserted] = specializations->insert({specialization, r});
@@ -110,9 +110,9 @@ ResultOrError<PipelineHandles> ComputePipeline::GetOrCreateSpecializedHandle(
     });
 }
 
-ResultOrError<ComputePipeline::SpecializationResult> ComputePipeline::InitializeSpecialization(
-    const Specialization& specialization,
-    bool buildCacheKey) {
+ResultOrUnknownError<ComputePipeline::SpecializationResult>
+ComputePipeline::InitializeSpecialization(const Specialization& specialization,
+                                          bool buildCacheKey) {
     Device* device = ToBackend(GetDevice());
     PipelineLayout* layout = ToBackend(GetLayout());
 

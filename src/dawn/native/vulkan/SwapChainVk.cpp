@@ -630,9 +630,9 @@ void SwapChain::DetachFromSurfaceImpl() {
     }
 }
 
-ResultOrError<VkSurfaceKHR> CreateVulkanSurface(InstanceBase* instance,
-                                                const PhysicalDevice* physicalDevice,
-                                                const Surface* surface) {
+ResultOrUnknownError<VkSurfaceKHR> CreateVulkanSurface(InstanceBase* instance,
+                                                       const PhysicalDevice* physicalDevice,
+                                                       const Surface* surface) {
     // May not be used in the platform-specific switches below.
     [[maybe_unused]] const VulkanGlobalInfo& info =
         physicalDevice->GetVulkanInstance()->GetGlobalInfo();

@@ -45,7 +45,7 @@ class ComputePipelineMock : public ComputePipelineBase {
 
     ~ComputePipelineMock() override;
 
-    MOCK_METHOD(ResultOrError<Extent3D>, InitializeImpl, (), (override));
+    MOCK_METHOD(ResultOrUnknownError<Extent3D>, InitializeImpl, (), (override));
     MOCK_METHOD(void, DestroyImpl, (DestroyReason), (override));
 
   protected:

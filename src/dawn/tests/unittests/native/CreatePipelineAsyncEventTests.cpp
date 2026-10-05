@@ -88,7 +88,8 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateRende
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(DAWN_VALIDATION_ERROR(kErrorMessage))));
+        .WillByDefault(
+            testing::Return(testing::ByMove(DAWN_VALIDATION_ERROR(kErrorMessage).TakeAsUnknown())));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
 
@@ -118,8 +119,10 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationUnrecoverableErrorInCreateRe
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(DAWN_MAKE_UNRECOVERABLE_ERROR(
-            InternalErrorType::Unrecoverable, std::string(kErrorMessage)))));
+        .WillByDefault(testing::Return(
+            testing::ByMove(DAWN_MAKE_UNRECOVERABLE_ERROR(InternalErrorType::Unrecoverable,
+                                                          std::string(kErrorMessage))
+                                .TakeAsUnknown())));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
 
@@ -149,7 +152,7 @@ TEST_F(CreatePipelineAsyncEventTests, LongAsyncTaskFinishesBeforeDeviceIsDropped
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     // Simulate that Initialize() would take a long time to finish.
-    ON_CALL(*renderPipelineMock.Get(), InitializeImpl).WillByDefault([]() -> MaybeError {
+    ON_CALL(*renderPipelineMock.Get(), InitializeImpl).WillByDefault([]() -> MaybeUnknownError {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         return {};
     });
@@ -174,7 +177,8 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateCompu
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(DAWN_VALIDATION_ERROR(kErrorMessage))));
+        .WillByDefault(
+            testing::Return(testing::ByMove(DAWN_VALIDATION_ERROR(kErrorMessage).TakeAsUnknown())));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
 
@@ -199,8 +203,10 @@ TEST_F(CreatePipelineAsyncEventTests,
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(DAWN_MAKE_UNRECOVERABLE_ERROR(
-            dawn::native::InternalErrorType::Unrecoverable, std::string(kErrorMessage)))));
+        .WillByDefault(testing::Return(testing::ByMove(
+            DAWN_MAKE_UNRECOVERABLE_ERROR(dawn::native::InternalErrorType::Unrecoverable,
+                                          std::string(kErrorMessage))
+                .TakeAsUnknown())));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
 
@@ -223,7 +229,7 @@ TEST_F(CreatePipelineAsyncEventTests, NoexceptCallbackInCreateComputePipelineAsy
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillByDefault([]() -> ResultOrError<Extent3D> { return Extent3D{}; });
+        .WillByDefault([]() -> ResultOrUnknownError<Extent3D> { return Extent3D{}; });
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
 
@@ -253,7 +259,7 @@ TEST_F(CreatePipelineAsyncEventTests, NoexceptCallbackInCreateRenderPipelineAsyn
     Ref<RenderPipelineMock> renderPipelineMock =
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
-    ON_CALL(*renderPipelineMock.Get(), InitializeImpl).WillByDefault([]() -> MaybeError {
+    ON_CALL(*renderPipelineMock.Get(), InitializeImpl).WillByDefault([]() -> MaybeUnknownError {
         return {};
     });
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
@@ -280,7 +286,7 @@ TEST_F(CreatePipelineAsyncEventTests, NoexceptFunctionPtrInCreateComputePipeline
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillByDefault([]() -> ResultOrError<Extent3D> { return Extent3D{}; });
+        .WillByDefault([]() -> ResultOrUnknownError<Extent3D> { return Extent3D{}; });
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
 
@@ -308,7 +314,7 @@ TEST_F(CreatePipelineAsyncEventTests, NoexceptFunctionPtrInCreateRenderPipelineA
     Ref<RenderPipelineMock> renderPipelineMock =
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
-    ON_CALL(*renderPipelineMock.Get(), InitializeImpl).WillByDefault([]() -> MaybeError {
+    ON_CALL(*renderPipelineMock.Get(), InitializeImpl).WillByDefault([]() -> MaybeUnknownError {
         return {};
     });
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)

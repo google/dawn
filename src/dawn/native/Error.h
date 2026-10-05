@@ -49,6 +49,8 @@ enum class InternalErrorType : uint32_t {
     OutOfMemory = 16
 };
 
+class UnknownError;
+
 // TODO(crbug.com/536639352): Once `UnknownError` is implemented determine what can be unified
 // between the three error classes.
 class ValidationError {
@@ -58,8 +60,7 @@ class ValidationError {
     }
 
     explicit ValidationError(ErrorData&& d) : mData(std::move(d)) {
-        // TODO(crbug.com/536639352): Enable assert when the auto-conversions are removed.
-        // DAWN_ASSERT(mData.GetType() == InternalErrorType::Validation);
+        DAWN_ASSERT(mData.GetType() == InternalErrorType::Validation);
     }
 
     InternalErrorType GetType() const { return mData.GetType(); }
@@ -96,6 +97,8 @@ class UnrecoverableError {
     }
 
     explicit UnrecoverableError(ErrorData&& d) : mData(std::move(d)) {}
+
+    explicit(false) UnrecoverableError(std::unique_ptr<UnknownError> err);
 
     InternalErrorType GetType() const { return mData.GetType(); }
     void SetType(InternalErrorType type) { mData.SetType(type); }
@@ -147,6 +150,175 @@ template <typename T>
 concept IsConcreteError =
     std::is_same_v<T, UnrecoverableError> || std::is_same_v<T, ValidationError>;
 
+class UnknownError {
+  public:
+    static std::unique_ptr<UnknownError> Create(std::unique_ptr<UnrecoverableError> e) {
+        return std::make_unique<UnknownError>(std::move(e));
+    }
+    static std::unique_ptr<UnknownError> Create(std::unique_ptr<ValidationError> e) {
+        return std::make_unique<UnknownError>(std::move(e));
+    }
+
+    explicit UnknownError(std::unique_ptr<UnrecoverableError> d) : mData(std::move(d)) {}
+    explicit UnknownError(std::unique_ptr<ValidationError> d) : mData(std::move(d)) {}
+    explicit UnknownError(std::unique_ptr<UnknownError> d) {
+        if (d->IsVal()) {
+            mData = d->TakeAsVal();
+        } else {
+            mData = d->TakeAsUnrecoverable();
+        }
+    }
+
+    ~UnknownError() = default;
+
+    bool IsUnrecoverable() const {
+        return std::holds_alternative<std::unique_ptr<UnrecoverableError>>(mData);
+    }
+    bool IsVal() const { return std::holds_alternative<std::unique_ptr<ValidationError>>(mData); }
+
+    std::unique_ptr<UnknownError> TakeAsUnknown() {
+        if (IsVal()) {
+            return Create(TakeAsVal());
+        }
+        return Create(TakeAsUnrecoverable());
+    }
+
+    UnrecoverableError* AsUnrecoverable() const {
+        DAWN_CHECK(IsUnrecoverable());
+        return std::get<std::unique_ptr<UnrecoverableError>>(mData).get();
+    }
+    std::unique_ptr<UnrecoverableError> TakeAsUnrecoverable() {
+        DAWN_CHECK(IsUnrecoverable());
+        return std::move(std::get<std::unique_ptr<UnrecoverableError>>(mData));
+    }
+
+    ValidationError* AsVal() const {
+        DAWN_CHECK(IsVal());
+        return std::get<std::unique_ptr<ValidationError>>(mData).get();
+    }
+    std::unique_ptr<ValidationError> TakeAsVal() {
+        DAWN_CHECK(IsVal());
+        return std::move(std::get<std::unique_ptr<ValidationError>>(mData));
+    }
+
+    explicit(false) operator std::unique_ptr<ValidationError>() { return TakeAsVal(); }
+    explicit(false) operator std::unique_ptr<UnrecoverableError>() {
+        if (IsVal()) {
+            std::unique_ptr<ValidationError> e = TakeAsVal();
+            ErrorData data = e->ReleaseData();
+            data.SetType(InternalErrorType::Unrecoverable);
+            return std::make_unique<UnrecoverableError>(std::move(data));
+        }
+        return TakeAsUnrecoverable();
+    }
+
+    explicit(false) operator MaybeError() {  // NOLINT(google-explicit-constructor)
+        if (IsVal()) {
+            std::unique_ptr<ValidationError> e = TakeAsVal();
+            ErrorData data = e->ReleaseData();
+            data.SetType(InternalErrorType::Unrecoverable);
+            return std::make_unique<UnrecoverableError>(std::move(data));
+        }
+        return TakeAsUnrecoverable();
+    }
+    // NOLINTNEXTLINE(google-explicit-constructor)
+    explicit(false) operator MaybeValError() { return {TakeAsVal()}; }
+    explicit(false) operator Result<void, UnknownError>() {  // NOLINT(google-explicit-constructor)
+        if (IsVal()) {
+            return Result<void, UnknownError>{Create(TakeAsVal())};
+        }
+        return Result<void, UnknownError>{Create(TakeAsUnrecoverable())};
+    }
+
+    template <typename K>
+    explicit(false) operator ResultOrError<K>() {  // NOLINT(google-explicit-constructor)
+        if (IsVal()) {
+            std::unique_ptr<ValidationError> e = TakeAsVal();
+            ErrorData data = e->ReleaseData();
+            data.SetType(InternalErrorType::Unrecoverable);
+            return std::make_unique<UnrecoverableError>(std::move(data));
+        }
+        return TakeAsUnrecoverable();
+    }
+
+    template <typename K>
+    explicit(false) operator ResultOrValError<K>() {  // NOLINT(google-explicit-constructor)
+        return {TakeAsVal()};
+    }
+    template <typename K>
+    explicit(false) operator Result<K, UnknownError>() {  // NOLINT(google-explicit-constructor)
+        if (IsVal()) {
+            return Result<K, UnknownError>{Create(TakeAsVal())};
+        }
+        return Result<K, UnknownError>{Create(TakeAsUnrecoverable())};
+    }
+
+    std::unique_ptr<UnrecoverableError> ConvertToUnrecoverable() {
+        std::unique_ptr<ValidationError> e = TakeAsVal();
+        ErrorData data = e->ReleaseData();
+        data.SetType(InternalErrorType::Unrecoverable);
+        return std::make_unique<UnrecoverableError>(std::move(data));
+    }
+
+    InternalErrorType GetType() const {
+        if (IsVal()) {
+            return AsVal()->GetType();
+        }
+        return AsUnrecoverable()->GetType();
+    }
+
+    const std::string& GetMessage() const {
+        if (IsVal()) {
+            return AsVal()->GetMessage();
+        }
+        return AsUnrecoverable()->GetMessage();
+    }
+
+    std::string GetFormattedMessage() const {
+        if (IsVal()) {
+            return AsVal()->GetFormattedMessage();
+        }
+        return AsUnrecoverable()->GetFormattedMessage();
+    }
+
+    void AppendBacktrace(const char* file, const char* function, int line) {
+        if (IsVal()) {
+            AsVal()->AppendBacktrace(file, function, line);
+        } else {
+            AsUnrecoverable()->AppendBacktrace(file, function, line);
+        }
+    }
+
+    void AppendContext(std::string context) {
+        if (IsVal()) {
+            AsVal()->AppendContext(std::move(context));
+        } else {
+            AsUnrecoverable()->AppendContext(std::move(context));
+        }
+    }
+    template <typename... Args>
+    void AppendContext(const char* formatStr, const Args&... args) {
+        if (IsVal()) {
+            AsVal()->AppendContext(formatStr, args...);
+        } else {
+            AsUnrecoverable()->AppendContext(formatStr, args...);
+        }
+    }
+
+    UnknownError(const UnknownError&) = delete;
+    UnknownError(UnknownError&&) = delete;
+    UnknownError& operator=(const UnknownError&) = delete;
+    UnknownError& operator=(UnknownError&&) = delete;
+
+  private:
+    std::variant<std::unique_ptr<UnrecoverableError>, std::unique_ptr<ValidationError>> mData;
+};
+
+using MaybeUnknownError = Result<void, UnknownError>;
+
+template <typename T>
+using ResultOrUnknownError = Result<T, UnknownError>;
+
 namespace detail {
 
 template <typename T>
@@ -160,6 +332,10 @@ struct UnwrapResultOrError<ResultOrError<T>> {
 };
 template <typename T>
 struct UnwrapResultOrError<ResultOrValError<T>> {
+    using type = T;
+};
+template <typename T>
+struct UnwrapResultOrError<ResultOrUnknownError<T>> {
     using type = T;
 };
 
@@ -176,52 +352,19 @@ template <typename T>
 struct IsResultOrError<ResultOrValError<T>> {
     static constexpr bool value = true;
 };
+template <typename T>
+struct IsResultOrError<ResultOrUnknownError<T>> {
+    static constexpr bool value = true;
+};
 
 template <typename T>
-class ErrorAdapter {
-  public:
-    explicit ErrorAdapter(std::unique_ptr<T> d) : mData(d->ReleaseData()) {}
-    ~ErrorAdapter() = default;
-
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    explicit(false) operator std::unique_ptr<UnrecoverableError>() {
-        return std::make_unique<UnrecoverableError>(std::move(mData));
-    }
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    explicit(false) operator std::unique_ptr<ValidationError>() {
-        return std::make_unique<ValidationError>(std::move(mData));
-    }
-
-    explicit(false) operator MaybeError() {  // NOLINT(google-explicit-constructor)
-        return {std::make_unique<UnrecoverableError>(std::move(mData))};
-    }
-
-    template <typename K>
-    explicit(false) operator ResultOrError<K>() {  // NOLINT(google-explicit-constructor)
-        return {std::make_unique<UnrecoverableError>(std::move(mData))};
-    }
-
-    explicit(false) operator MaybeValError() {  // NOLINT(google-explicit-constructor)
-        return {std::make_unique<ValidationError>(std::move(mData))};
-    }
-
-    template <typename K>
-    explicit(false) operator ResultOrValError<K>() {  // NOLINT(google-explicit-constructor)
-        return {std::make_unique<ValidationError>(std::move(mData))};
-    }
-
-    std::unique_ptr<ValidationError> AsVal() {
-        return {std::make_unique<ValidationError>(std::move(mData))};
-    }
-    std::unique_ptr<UnrecoverableError> AsUnrecoverable() {
-        return {std::make_unique<UnrecoverableError>(std::move(mData))};
-    }
-
-  private:
-    ErrorData mData;
+struct IsResultOrUnknownError {
+    static constexpr bool value = false;
 };
 template <typename T>
-ErrorAdapter(std::unique_ptr<T>) -> ErrorAdapter<T>;
+struct IsResultOrUnknownError<ResultOrUnknownError<T>> {
+    static constexpr bool value = true;
+};
 
 }  // namespace detail
 
@@ -262,12 +405,12 @@ ErrorAdapter(std::unique_ptr<T>) -> ErrorAdapter<T>;
     ::dawn::native::ErrorData::Create(TYPE, MESSAGE, __FILE__, __func__, __LINE__)
 
 #define DAWN_MAKE_UNRECOVERABLE_ERROR(TYPE, MESSAGE)                                    \
-    ::dawn::native::detail::ErrorAdapter {                                              \
+    ::dawn::native::UnknownError {                                                      \
         ::dawn::native::UnrecoverableError::Create(DAWN_MAKE_ERROR_DATA(TYPE, MESSAGE)) \
     }
 
 #define DAWN_MAKE_VALIDATION_ERROR(MESSAGE)                               \
-    ::dawn::native::detail::ErrorAdapter {                                \
+    ::dawn::native::UnknownError {                                        \
         ::dawn::native::ValidationError::Create(                          \
             DAWN_MAKE_ERROR_DATA(InternalErrorType::Validation, MESSAGE)) \
     }
@@ -364,17 +507,17 @@ std::string MakeIncreaseLimitMessage(std::string_view limitName, T adapterLimitV
     DAWN_TRY_WITH_CLEANUP(EXPR,     \
                           { DAWN_LOCAL_VAR(Error)->AppendContext(absl::StrFormat(__VA_ARGS__)); })
 
-#define DAWN_TRY_WITH_CLEANUP(EXPR, BODY)                                                  \
-    {                                                                                      \
-        auto DAWN_LOCAL_VAR(Result) = EXPR;                                                \
-        if (DAWN_LOCAL_VAR(Result).IsError()) [[unlikely]] {                               \
-            auto DAWN_LOCAL_VAR(Error) = DAWN_LOCAL_VAR(Result).AcquireError();            \
-            {BODY} /* comment to force the formatter to insert a newline */                \
-            DAWN_APPEND_ERROR_BACKTRACE(DAWN_LOCAL_VAR(Error));                            \
-            return ::dawn::native::detail::ErrorAdapter{std::move(DAWN_LOCAL_VAR(Error))}; \
-        }                                                                                  \
-    }                                                                                      \
-    for (;;)                                                                               \
+#define DAWN_TRY_WITH_CLEANUP(EXPR, BODY)                                          \
+    {                                                                              \
+        auto DAWN_LOCAL_VAR(Result) = EXPR;                                        \
+        if (DAWN_LOCAL_VAR(Result).IsError()) [[unlikely]] {                       \
+            auto DAWN_LOCAL_VAR(Error) = DAWN_LOCAL_VAR(Result).AcquireError();    \
+            {BODY} /* comment to force the formatter to insert a newline */        \
+            DAWN_APPEND_ERROR_BACKTRACE(DAWN_LOCAL_VAR(Error));                    \
+            return ::dawn::native::UnknownError{std::move(DAWN_LOCAL_VAR(Error))}; \
+        }                                                                          \
+    }                                                                              \
+    for (;;)                                                                       \
     break
 
 // DAWN_TRY_ASSIGN is the same as DAWN_TRY for ResultOrError and assigns the success value, if
@@ -395,21 +538,22 @@ std::string MakeIncreaseLimitMessage(std::string_view limitName, T adapterLimitV
 //          AddAdditionalErrorInformation(DAWN_LOCAL_VAR(Error).get());
 //      });
 //
-#define DAWN_TRY_ASSIGN_WITH_CLEANUP(VAR, EXPR, BODY)                                      \
-    {                                                                                      \
-        auto DAWN_LOCAL_VAR(Result) = EXPR;                                                \
-        if (DAWN_LOCAL_VAR(Result).IsError()) [[unlikely]] {                               \
-            auto DAWN_LOCAL_VAR(Error) = DAWN_LOCAL_VAR(Result).AcquireError();            \
-            {BODY} /* comment to force the formatter to insert a newline */                \
-            DAWN_APPEND_ERROR_BACKTRACE(DAWN_LOCAL_VAR(Error));                            \
-            return ::dawn::native::detail::ErrorAdapter{std::move(DAWN_LOCAL_VAR(Error))}; \
-        }                                                                                  \
-        VAR = DAWN_LOCAL_VAR(Result).AcquireSuccess();                                     \
-    }                                                                                      \
-    for (;;)                                                                               \
+#define DAWN_TRY_ASSIGN_WITH_CLEANUP(VAR, EXPR, BODY)                              \
+    {                                                                              \
+        auto DAWN_LOCAL_VAR(Result) = EXPR;                                        \
+        if (DAWN_LOCAL_VAR(Result).IsError()) [[unlikely]] {                       \
+            auto DAWN_LOCAL_VAR(Error) = DAWN_LOCAL_VAR(Result).AcquireError();    \
+            {BODY} /* comment to force the formatter to insert a newline */        \
+            DAWN_APPEND_ERROR_BACKTRACE(DAWN_LOCAL_VAR(Error));                    \
+            return ::dawn::native::UnknownError{std::move(DAWN_LOCAL_VAR(Error))}; \
+        }                                                                          \
+        VAR = DAWN_LOCAL_VAR(Result).AcquireSuccess();                             \
+    }                                                                              \
+    for (;;)                                                                       \
     break
 
 // Assert that errors are device loss so that we can continue with destruction
+void IgnoreErrors(MaybeUnknownError maybeError);
 void IgnoreErrors(MaybeError maybeError);
 
 wgpu::ErrorType ToWGPUErrorType(InternalErrorType type);

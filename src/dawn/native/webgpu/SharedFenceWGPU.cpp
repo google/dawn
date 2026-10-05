@@ -34,7 +34,7 @@
 namespace dawn::native::webgpu {
 
 // static
-ResultOrError<Ref<SharedFence>> SharedFence::Create(
+ResultOrUnknownError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
     const UnpackedPtr<SharedFenceDescriptor>& descriptor) {
     WGPUSharedFenceDescriptor innerDesc = WGPU_SHARED_FENCE_DESCRIPTOR_INIT;

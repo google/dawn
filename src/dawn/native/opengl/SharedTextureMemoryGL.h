@@ -49,9 +49,10 @@ class SharedTextureMemory : public SharedTextureMemoryBase {
         const UnpackedPtr<TextureDescriptor>& descriptor) override;
     MaybeValError BeginAccessImpl(TextureBase* texture,
                                   const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;
-    ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
-                                                     ExecutionSerial lastUsageSerial,
-                                                     UnpackedPtr<EndAccessState>& state) override;
+    ResultOrUnknownError<FenceAndSignalValue> EndAccessImpl(
+        TextureBase* texture,
+        ExecutionSerial lastUsageSerial,
+        UnpackedPtr<EndAccessState>& state) override;
 };
 
 }  // namespace dawn::native::opengl

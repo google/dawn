@@ -110,14 +110,15 @@ class PipelineGL {
   protected:
     MaybeError ApplyNow(const OpenGLFunctions& gl, const PipelineLayout* layout);
 
-    MaybeValError InitializeShaders(const OpenGLFunctions& gl,
-                                    const PipelineLayout* layout,
-                                    const PerStage<ProgrammableStage>& stages,
-                                    ImmediateMask& pipelineImmediateMask,
-                                    VertexAttributeMask bgraSwizzleAttributes,
-                                    Extent3D* workgroupSize,
-                                    std::set<CombinedSampler>* combinedSamplers,
-                                    std::unordered_map<SingleShaderStage, std::string>* shaders);
+    MaybeUnknownError InitializeShaders(
+        const OpenGLFunctions& gl,
+        const PipelineLayout* layout,
+        const PerStage<ProgrammableStage>& stages,
+        ImmediateMask& pipelineImmediateMask,
+        VertexAttributeMask bgraSwizzleAttributes,
+        Extent3D* workgroupSize,
+        std::set<CombinedSampler>* combinedSamplers,
+        std::unordered_map<SingleShaderStage, std::string>* shaders);
     MaybeError InitializeBase(const OpenGLFunctions& gl,
                               const PipelineLayout* layout,
                               const PerStage<ProgrammableStage>& stages,

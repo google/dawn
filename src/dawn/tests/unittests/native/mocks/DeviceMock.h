@@ -96,7 +96,7 @@ class DeviceMock : public DeviceBase {
                 CreateUninitializedComputePipelineImpl,
                 (const UnpackedPtr<ComputePipelineDescriptor>&),
                 (override));
-    MOCK_METHOD(ResultOrError<Ref<ExternalTextureBase>>,
+    MOCK_METHOD(ResultOrUnknownError<Ref<ExternalTextureBase>>,
                 CreateExternalTextureImpl,
                 (const ExternalTextureDescriptor*),
                 (override));

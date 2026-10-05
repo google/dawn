@@ -39,7 +39,7 @@ class Device;
 
 class SharedFence final : public SharedFenceBase, public ObjectWGPU<WGPUSharedFence> {
   public:
-    static ResultOrError<Ref<SharedFence>> Create(
+    static ResultOrUnknownError<Ref<SharedFence>> Create(
         Device* device,
         const UnpackedPtr<SharedFenceDescriptor>& descriptor);
     static Ref<SharedFence> CreateFromHandle(Device* device,

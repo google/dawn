@@ -108,7 +108,7 @@ class CommandEncoder final : public ApiObjectBase {
 
     Ref<ComputePassEncoder> BeginComputePass(const ComputePassDescriptor* descriptor = nullptr);
     Ref<RenderPassEncoder> BeginRenderPass(const RenderPassDescriptor* rawDescriptor);
-    ResultOrError<Ref<CommandBufferBase>> Finish(
+    ResultOrUnknownError<Ref<CommandBufferBase>> Finish(
         const CommandBufferDescriptor* descriptor = nullptr);
 
     // `InternalUsageScope` is a scoped class that temporarily changes validation such that the

@@ -148,7 +148,7 @@ ResultOrError<SurfaceTexture> SwapChainBase::GetCurrentTexture() {
     return surfaceTexture;
 }
 
-MaybeError SwapChainBase::Present() {
+MaybeUnknownError SwapChainBase::Present() {
     DAWN_TRY(ValidatePresent());
     DAWN_TRY(PresentImpl());
 

@@ -172,10 +172,10 @@ void EncodingContext::EnterPass(const ApiObjectBase* passEncoder) {
     mCurrentEncoder = passEncoder;
 }
 
-MaybeError EncodingContext::ExitRenderPass(const ApiObjectBase* passEncoder,
-                                           RenderPassResourceUsageTracker usageTracker,
-                                           CommandEncoder* commandEncoder,
-                                           IndirectDrawMetadata indirectDrawMetadata) {
+MaybeUnknownError EncodingContext::ExitRenderPass(const ApiObjectBase* passEncoder,
+                                                  RenderPassResourceUsageTracker usageTracker,
+                                                  CommandEncoder* commandEncoder,
+                                                  IndirectDrawMetadata indirectDrawMetadata) {
     DAWN_CHECK(mCurrentEncoder != mTopLevelEncoder);
     DAWN_CHECK(mCurrentEncoder == passEncoder);
 
@@ -269,7 +269,7 @@ void EncodingContext::PopDebugGroupLabel() {
     mDebugGroupLabels.pop_back();
 }
 
-MaybeError EncodingContext::Finish() {
+MaybeUnknownError EncodingContext::Finish() {
     CommitCommands(std::move(mPendingCommands));
 
     switch (mStatus) {
@@ -289,7 +289,7 @@ MaybeError EncodingContext::Finish() {
     CloseWithStatus(Status::Finished);
 
     if (mError != nullptr) {
-        return std::move(mError);
+        return UnknownError{std::move(mError)};
     }
 
     DAWN_INVALID_IF(currentEncoder != topLevelEncoder,

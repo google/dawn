@@ -102,19 +102,21 @@ DAWN_MAKE_CACHE_REQUEST(CacheRequestForTesting, REQUEST_MEMBERS);
 TEST_P(CacheRequestTests, CacheResultTypes) {
     EXPECT_CALL(mMockCache, FindKey(_)).WillRepeatedly(Return(0));
 
-    // (int, ResultOrError<int>), should be ResultOrError<CacheResult<int>>.
+    // (int, ResultOrUnknownError<int>), should be ResultOrUnknownError<CacheResult<int>>.
     auto v1 = LoadOrRun(
         GetDevice(), CacheRequestForTesting{}, [](Blob) -> int { return 0; },
-        [](CacheRequestForTesting) -> ResultOrError<int> { return 1; });
+        [](CacheRequestForTesting) -> ResultOrUnknownError<int> { return 1; });
     v1.AcquireSuccess();
-    static_assert(std::is_same_v<ResultOrError<CacheResult<int>>, decltype(v1)>);
+    static_assert(std::is_same_v<ResultOrUnknownError<CacheResult<int>>, decltype(v1)>);
 
-    // (ResultOrError<float>, ResultOrError<float>), should be ResultOrError<CacheResult<float>>.
+    // (ResultOrUnknownError<float>, ResultOrUnknownError<float>), should be
+    // ResultOrUnknownError<CacheResult<float>>.
     auto v2 = LoadOrRun(
-        GetDevice(), CacheRequestForTesting{}, [](Blob) -> ResultOrError<float> { return 0.0; },
-        [](CacheRequestForTesting) -> ResultOrError<float> { return 1.0; });
+        GetDevice(), CacheRequestForTesting{},
+        [](Blob) -> ResultOrUnknownError<float> { return 0.0; },
+        [](CacheRequestForTesting) -> ResultOrUnknownError<float> { return 1.0; });
     v2.AcquireSuccess();
-    static_assert(std::is_same_v<ResultOrError<CacheResult<float>>, decltype(v2)>);
+    static_assert(std::is_same_v<ResultOrUnknownError<CacheResult<float>>, decltype(v2)>);
 }
 
 // Test that using a CacheRequest builds a key from the device key, the request type enum, and all
@@ -142,7 +144,7 @@ TEST_P(CacheRequestTests, MakesCacheKey) {
     // Load the request.
     auto result = LoadOrRun(
                       GetDevice(), std::move(req), [](Blob) -> int { return 0; },
-                      [](CacheRequestForTesting) -> ResultOrError<int> { return 0; })
+                      [](CacheRequestForTesting) -> ResultOrUnknownError<int> { return 0; })
                       .AcquireSuccess();
 
     // The created cache key should be saved on the result.
@@ -175,7 +177,7 @@ TEST_P(CacheRequestTests, CacheKeyIgnoresUnsafeIgnoredValue) {
     }));
     auto r1 = LoadOrRun(
                   GetDevice(), std::move(req1), [](Blob) { return 0; },
-                  [](CacheRequestForTesting req) -> ResultOrError<int> {
+                  [](CacheRequestForTesting req) -> ResultOrUnknownError<int> {
                       return cacheMissFn.Call(std::move(req));
                   })
                   .AcquireSuccess();
@@ -188,7 +190,7 @@ TEST_P(CacheRequestTests, CacheKeyIgnoresUnsafeIgnoredValue) {
     }));
     auto r2 = LoadOrRun(
                   GetDevice(), std::move(req2), [](Blob) { return 0; },
-                  [](CacheRequestForTesting req) -> ResultOrError<int> {
+                  [](CacheRequestForTesting req) -> ResultOrUnknownError<int> {
                       return cacheMissFn.Call(std::move(req));
                   })
                   .AcquireSuccess();
@@ -229,7 +231,7 @@ TEST_P(CacheRequestTests, CacheMiss) {
     auto result = LoadOrRun(
                       GetDevice(), std::move(req),
                       [](Blob blob) -> int { return cacheHitFn.Call(std::move(blob)); },
-                      [](CacheRequestForTesting req) -> ResultOrError<int> {
+                      [](CacheRequestForTesting req) -> ResultOrUnknownError<int> {
                           return cacheMissFn.Call(std::move(req));
                       })
                       .AcquireSuccess();
@@ -277,7 +279,7 @@ TEST_P(CacheRequestTests, CacheHit) {
     auto result = LoadOrRun(
                       GetDevice(), std::move(req),
                       [](Blob blob) -> int { return cacheHitFn.Call(std::move(blob)); },
-                      [](CacheRequestForTesting req) -> ResultOrError<int> {
+                      [](CacheRequestForTesting req) -> ResultOrUnknownError<int> {
                           return cacheMissFn.Call(std::move(req));
                       })
                       .AcquireSuccess();
@@ -297,7 +299,7 @@ TEST_P(CacheRequestTests, CacheHitError) {
 
     unsigned int* cPtr = req.c.data();
 
-    static StrictMock<MockFunction<ResultOrError<int>(Blob)>> cacheHitFn;
+    static StrictMock<MockFunction<ResultOrUnknownError<int>(Blob)>> cacheHitFn;
     static StrictMock<MockFunction<int(CacheRequestForTesting)>> cacheMissFn;
 
     static constexpr char kCachedData[] = "hello world!";
@@ -338,8 +340,8 @@ TEST_P(CacheRequestTests, CacheHitError) {
     auto result =
         LoadOrRun(
             GetDevice(), std::move(req),
-            [](Blob blob) -> ResultOrError<int> { return cacheHitFn.Call(std::move(blob)); },
-            [](CacheRequestForTesting req) -> ResultOrError<int> {
+            [](Blob blob) -> ResultOrUnknownError<int> { return cacheHitFn.Call(std::move(blob)); },
+            [](CacheRequestForTesting req) -> ResultOrUnknownError<int> {
                 return cacheMissFn.Call(std::move(req));
             })
             .AcquireSuccess();
@@ -383,7 +385,7 @@ TEST_P(CacheRequestTests, CacheHitDifferentLoadSizes) {
     auto result = LoadOrRun(
                       GetDevice(), std::move(req),
                       [](Blob blob) -> int { return cacheHitFn.Call(std::move(blob)); },
-                      [](CacheRequestForTesting req) -> ResultOrError<int> {
+                      [](CacheRequestForTesting req) -> ResultOrUnknownError<int> {
                           return cacheMissFn.Call(std::move(req));
                       })
                       .AcquireSuccess();
@@ -470,7 +472,7 @@ TEST_P(CacheRequestTests, CacheHitHashValidationFailed) {
         auto result = LoadOrRun(
                           GetDevice(), std::move(req),
                           [](Blob blob) -> int { return cacheHitFn->Call(std::move(blob)); },
-                          [](CacheRequestForTesting req) -> ResultOrError<int> {
+                          [](CacheRequestForTesting req) -> ResultOrUnknownError<int> {
                               return cacheMissFn->Call(std::move(req));
                           })
                           .AcquireSuccess();

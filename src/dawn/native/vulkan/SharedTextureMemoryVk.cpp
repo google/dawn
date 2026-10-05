@@ -166,10 +166,10 @@ void AddImageFormatQueryChain(PNextChainBuilder& builder, Chain& chain) {
 // Query import support and validate the image-format limits available before creation.
 // Query-only chains are kept local; the caller's creation chain is never modified.
 template <typename... AdditionalChains>
-MaybeError CheckExternalImageFormatSupport(Device* device,
-                                           const SharedTextureMemoryProperties& properties,
-                                           const VkImageCreateInfo& createInfo,
-                                           AdditionalChains... additionalChains) {
+MaybeUnknownError CheckExternalImageFormatSupport(Device* device,
+                                                  const SharedTextureMemoryProperties& properties,
+                                                  const VkImageCreateInfo& createInfo,
+                                                  AdditionalChains... additionalChains) {
     VkPhysicalDeviceImageFormatInfo2 imageFormatInfo = {};
     imageFormatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2;
     imageFormatInfo.format = createInfo.format;
@@ -297,7 +297,7 @@ class SharedTextureMemory::ImageImporter : public StackAllocated, NonMovable {
     }
     virtual ~ImageImporter() = default;
 
-    ResultOrError<Ref<SharedTextureMemory>> DoImport(StringView label);
+    ResultOrUnknownError<Ref<SharedTextureMemory>> DoImport(StringView label);
 
   protected:
     struct ImportProperties {
@@ -310,10 +310,10 @@ class SharedTextureMemory::ImageImporter : public StackAllocated, NonMovable {
         uint32_t memoryTypeIndex;
     };
 
-    virtual ResultOrError<ImportProperties> ValidateDescriptorAndMakeProperties() = 0;
-    virtual MaybeError ValidateAndDescribeViewFormats() = 0;
+    virtual ResultOrUnknownError<ImportProperties> ValidateDescriptorAndMakeProperties() = 0;
+    virtual MaybeValError ValidateAndDescribeViewFormats() = 0;
     virtual VkImageCreateInfo MakeImageCreateInfo() = 0;
-    virtual MaybeError CheckSupport(const VkImageCreateInfo& createInfo) {
+    virtual MaybeUnknownError CheckSupport(const VkImageCreateInfo& createInfo) {
         return CheckExternalImageFormatSupport(device, GetProperties(), createInfo,
                                                externalImageFormatInfo, imageFormatListInfo);
     }
@@ -382,7 +382,7 @@ struct SharedTextureMemory::DmaBufImporter final : ImageImporter {
                         VK_QUEUE_FAMILY_EXTERNAL_KHR),
           descriptor(descriptor) {}
 
-    ResultOrError<ImportProperties> ValidateDescriptorAndMakeProperties() override {
+    ResultOrUnknownError<ImportProperties> ValidateDescriptorAndMakeProperties() override {
         const CombinedLimits& limits = device->GetLimits();
         DAWN_INVALID_IF(
             descriptor->size.width == 0 || descriptor->size.width > limits.v1.maxTextureDimension2D,
@@ -450,7 +450,7 @@ struct SharedTextureMemory::DmaBufImporter final : ImageImporter {
         return ImportProperties{properties};
     }
 
-    MaybeError ValidateAndDescribeViewFormats() override {
+    MaybeValError ValidateAndDescribeViewFormats() override {
         const auto& properties = GetProperties();
         const auto& compatibleViewFormats = device->GetCompatibleViewFormats(*internalFormat);
         const auto viewRequirements =
@@ -512,7 +512,7 @@ struct SharedTextureMemory::DmaBufImporter final : ImageImporter {
                                                   explicitCreateInfo);
     }
 
-    MaybeError CheckSupport(const VkImageCreateInfo& createInfo) override {
+    MaybeUnknownError CheckSupport(const VkImageCreateInfo& createInfo) override {
         VkPhysicalDeviceImageDrmFormatModifierInfoEXT drmModifierInfo = {};
         drmModifierInfo.sType =
             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_DRM_FORMAT_MODIFIER_INFO_EXT;
@@ -583,7 +583,7 @@ struct SharedTextureMemory::AHardwareBufferImporter final : ImageImporter {
                         VK_QUEUE_FAMILY_FOREIGN_EXT),
           aHardwareBuffer(static_cast<struct AHardwareBuffer*>(descriptor->handle)) {}
 
-    ResultOrError<ImportProperties> ValidateDescriptorAndMakeProperties() override {
+    ResultOrUnknownError<ImportProperties> ValidateDescriptorAndMakeProperties() override {
         const auto* ahbFunctions =
             ToBackend(device->GetAdapter()->GetPhysicalDevice())->GetOrLoadAHBFunctions();
         VkDevice vkDevice = device->GetVkDevice();
@@ -690,7 +690,7 @@ struct SharedTextureMemory::AHardwareBufferImporter final : ImageImporter {
         return ImportProperties{properties, yCbCrVkDesc};
     }
 
-    MaybeError ValidateAndDescribeViewFormats() override {
+    MaybeValError ValidateAndDescribeViewFormats() override {
         const auto& properties = GetProperties();
         if (usesExternalFormat) {
             return {};
@@ -725,7 +725,7 @@ struct SharedTextureMemory::AHardwareBufferImporter final : ImageImporter {
         return ImageImporter::MakeImageCreateInfo(VK_IMAGE_TILING_OPTIMAL, externalFormatAndroid);
     }
 
-    MaybeError CheckSupport(const VkImageCreateInfo& createInfo) override {
+    MaybeUnknownError CheckSupport(const VkImageCreateInfo& createInfo) override {
         // External Android formats use VK_FORMAT_UNDEFINED and cannot use this format query.
         if (usesExternalFormat) {
             return {};
@@ -796,7 +796,7 @@ struct SharedTextureMemory::OpaqueFDImporter final : ImageImporter {
           descriptor(descriptor),
           createInfo(static_cast<const VkImageCreateInfo*>(descriptor->vkImageCreateInfo)) {}
 
-    ResultOrError<ImportProperties> ValidateDescriptorAndMakeProperties() override {
+    ResultOrUnknownError<ImportProperties> ValidateDescriptorAndMakeProperties() override {
         imageFormatListInfo = {};
         DAWN_INVALID_IF(
             createInfo->sType != VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -874,7 +874,7 @@ struct SharedTextureMemory::OpaqueFDImporter final : ImageImporter {
         return ImportProperties{properties};
     }
 
-    MaybeError ValidateAndDescribeViewFormats() override {
+    MaybeValError ValidateAndDescribeViewFormats() override {
         const auto& properties = GetProperties();
         const auto& compatibleViewFormats = device->GetCompatibleViewFormats(*internalFormat);
         const bool isBGRA8UnormStorage = createInfo->format == VK_FORMAT_B8G8R8A8_UNORM &&
@@ -950,7 +950,7 @@ struct SharedTextureMemory::OpaqueFDImporter final : ImageImporter {
 
 // Keep the import sequence here so each handle type validates and acquires resources in the
 // same order. The STM owns each resource as soon as it is created, including on failure.
-ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::ImageImporter::DoImport(
+ResultOrUnknownError<Ref<SharedTextureMemory>> SharedTextureMemory::ImageImporter::DoImport(
     StringView label) {
     ImportProperties importProperties;
     DAWN_TRY_ASSIGN(importProperties, ValidateDescriptorAndMakeProperties());
@@ -983,7 +983,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::ImageImporter::DoIm
 }
 
 // static
-ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
+ResultOrUnknownError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
     StringView label,
     const SharedTextureMemoryDmaBufDescriptor* descriptor) {
@@ -996,7 +996,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 }
 
 // static
-ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
+ResultOrUnknownError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
     StringView label,
     const SharedTextureMemoryAHardwareBufferDescriptor* descriptor) {
@@ -1009,7 +1009,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 }
 
 // static
-ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
+ResultOrUnknownError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
     StringView label,
     const SharedTextureMemoryOpaqueFDDescriptor* descriptor) {
@@ -1090,7 +1090,7 @@ MaybeValError SharedTextureMemory::BeginAccessImpl(
 }
 
 #if DAWN_PLATFORM_IS(FUCHSIA) || DAWN_PLATFORM_IS(LINUX)
-ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
+ResultOrUnknownError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {
@@ -1163,7 +1163,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
 
 #else  // DAWN_PLATFORM_IS(FUCHSIA) || DAWN_PLATFORM_IS(LINUX)
 
-ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
+ResultOrUnknownError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {

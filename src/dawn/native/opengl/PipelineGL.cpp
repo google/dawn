@@ -54,7 +54,7 @@ PipelineGL::PipelineGL() : mProgram(0) {}
 
 PipelineGL::~PipelineGL() = default;
 
-MaybeValError PipelineGL::InitializeShaders(
+MaybeUnknownError PipelineGL::InitializeShaders(
     const OpenGLFunctions& gl,
     const PipelineLayout* layout,
     const PerStage<ProgrammableStage>& stages,

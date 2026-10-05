@@ -33,6 +33,15 @@
 
 namespace dawn::native {
 
+UnrecoverableError::UnrecoverableError(std::unique_ptr<UnknownError> err)
+    : mData(err->ConvertToUnrecoverable()->ReleaseData()) {}
+
+void IgnoreErrors(MaybeUnknownError maybeError) {
+    if (maybeError.IsError()) {
+        IgnoreErrors(maybeError.AcquireError()->TakeAsUnrecoverable());
+    }
+}
+
 void IgnoreErrors(MaybeError maybeError) {
     if (maybeError.IsError()) {
         std::unique_ptr<UnrecoverableError> errorData = maybeError.AcquireError();

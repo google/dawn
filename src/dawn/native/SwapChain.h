@@ -81,7 +81,7 @@ class SwapChainBase : public ApiObjectBase {
 
     // The returned texture must match the swapchain descriptor exactly.
     ResultOrError<SurfaceTexture> GetCurrentTexture();
-    MaybeError Present();
+    MaybeUnknownError Present();
 
   protected:
     ~SwapChainBase() override;

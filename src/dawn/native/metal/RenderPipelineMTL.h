@@ -58,7 +58,7 @@ class RenderPipeline final : public RenderPipelineBase {
     // vertex buffer table.
     uint32_t GetMtlVertexBufferIndex(VertexBufferSlot slot) const;
 
-    MaybeError InitializeImpl() override;
+    MaybeUnknownError InitializeImpl() override;
 
   private:
     using RenderPipelineBase::RenderPipelineBase;

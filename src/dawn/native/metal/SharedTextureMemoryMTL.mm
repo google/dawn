@@ -111,7 +111,7 @@ MTLTextureUsage MetalTextureUsage(bool allowStorageBinding) {
 }  // anonymous namespace
 
 // static
-ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
+ResultOrUnknownError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
     StringView label,
     const SharedTextureMemoryIOSurfaceDescriptor* descriptor) {
@@ -232,7 +232,7 @@ MaybeValError SharedTextureMemory::BeginAccessImpl(
     return {};
 }
 
-ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
+ResultOrUnknownError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {

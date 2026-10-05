@@ -163,7 +163,7 @@ void DumpShaderFromDescriptor(LogEmitter* logEmitter,
 // returned within ShaderModuleParseResult together with compilation messages, rather than as an
 // error (i.e. ResultOrError::IsSuccess() is true in this case). Other types of errors still get
 // returned as ErrorData in ResultOrError (i.e. ResultOrError::IsError() is true).
-ResultOrError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseRequest req);
+ResultOrUnknownError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseRequest req);
 
 MaybeValError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
                                                       const EntryPointMetadata& entryPoint,

@@ -38,12 +38,10 @@ class Device;
 
 class SharedFenceEGL : public SharedFence {
   public:
-    static ResultOrError<Ref<SharedFence>> Create(Device* device,
-                                                  StringView label,
-                                                  const SharedFenceSyncFDDescriptor* descriptor);
-    static ResultOrError<Ref<SharedFence>> Create(Device* device,
-                                                  StringView label,
-                                                  const SharedFenceEGLSyncDescriptor* descriptor);
+    static ResultOrUnknownError<Ref<SharedFence>>
+    Create(Device* device, StringView label, const SharedFenceSyncFDDescriptor* descriptor);
+    static ResultOrUnknownError<Ref<SharedFence>>
+    Create(Device* device, StringView label, const SharedFenceEGLSyncDescriptor* descriptor);
 
     SharedFenceEGL(Device* device,
                    StringView label,

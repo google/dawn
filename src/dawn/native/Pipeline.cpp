@@ -363,7 +363,8 @@ MaybeValError PipelineBase::ValidateGetBindGroupLayout(BindGroupIndex groupIndex
     return {};
 }
 
-ResultOrError<Ref<BindGroupLayoutBase>> PipelineBase::GetBindGroupLayout(uint32_t groupIndexIn) {
+ResultOrUnknownError<Ref<BindGroupLayoutBase>> PipelineBase::GetBindGroupLayout(
+    uint32_t groupIndexIn) {
     BindGroupIndex groupIndex(groupIndexIn);
 
     DAWN_TRY(ValidateGetBindGroupLayout(groupIndex));
@@ -433,7 +434,8 @@ PipelineBase::ScopedUseShaderPrograms PipelineBase::UseShaderPrograms() {
     return programs;
 }
 
-MaybeError PipelineBase::Initialize(std::optional<ScopedUseShaderPrograms> scopedUsePrograms) {
+MaybeUnknownError PipelineBase::Initialize(
+    std::optional<ScopedUseShaderPrograms> scopedUsePrograms) {
     if (!scopedUsePrograms) {
         scopedUsePrograms = UseShaderPrograms();
     }

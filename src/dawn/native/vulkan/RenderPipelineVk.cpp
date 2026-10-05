@@ -395,7 +395,7 @@ Ref<RenderPipeline> RenderPipeline::CreateUninitialized(
     return AcquireRef(new RenderPipeline(device, descriptor));
 }
 
-MaybeError RenderPipeline::InitializeImpl() {
+MaybeUnknownError RenderPipeline::InitializeImpl() {
     // Gather list of internal immediates used by this pipeline
     if ((NeedsPixelCenterPolyfill() || UsesFragDepth()) && !HasUnclippedDepth()) {
         mImmediateMask |= GetImmediateBlockBits(offsetof(RenderImmediates, clampFragDepth),
@@ -429,7 +429,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     return {};
 }
 
-ResultOrError<PipelineHandles> RenderPipeline::GetOrCreateSpecializedHandle(
+ResultOrUnknownError<PipelineHandles> RenderPipeline::GetOrCreateSpecializedHandle(
     Specialization&& specializationIn) {
     Specialization specialization = specializationIn;
     specialization.layout.pushConstantBytes = ToPushConstantBytes(mImmediateMask);
@@ -455,7 +455,7 @@ ResultOrError<PipelineHandles> RenderPipeline::GetOrCreateSpecializedHandle(
     SpecializationResult r;
     DAWN_TRY_ASSIGN(r, InitializeSpecialization(specialization, /*buildCacheKey=*/false));
 
-    return mSpecializations.Use([&](auto specializations) -> ResultOrError<PipelineHandles> {
+    return mSpecializations.Use([&](auto specializations) -> ResultOrUnknownError<PipelineHandles> {
         auto handles = PipelineHandles{.pipeline = r.pipeline->Get(), .layout = r.layout->Get()};
 
         auto [it, inserted] = specializations->insert({specialization, r});
@@ -467,7 +467,7 @@ ResultOrError<PipelineHandles> RenderPipeline::GetOrCreateSpecializedHandle(
     });
 }
 
-ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSpecialization(
+ResultOrUnknownError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSpecialization(
     const Specialization& specialization,
     bool buildCacheKey) {
     Device* device = ToBackend(GetDevice());

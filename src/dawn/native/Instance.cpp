@@ -442,8 +442,7 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     RequestAdapterOptions rawOptions = WithTrivialFrontendDefaults(*options);
     UnpackedPtr<RequestAdapterOptions> unpacked = Unpack(&rawOptions);
     if (unpacked.Has<RequestAdapterWebXROptions>()) {
-        ConsumedErrorAndWarnOnce(
-            DAWN_VALIDATION_ERROR("RequestAdapterWebXROptions unsupported.").AsVal());
+        ConsumedErrorAndWarnOnce(DAWN_VALIDATION_ERROR("RequestAdapterWebXROptions unsupported."));
         return {};
     }
     auto* togglesDesc = unpacked.Get<DawnTogglesDescriptor>();
@@ -548,10 +547,8 @@ std::vector<Ref<PhysicalDeviceBase>> InstanceBase::EnumeratePhysicalDevices(
     } else if (options->backendType == wgpu::BackendType::WebGPU) {
         // User is selecting WebGPU-on-WebGPU without RequestAdapterWebGPUBackendOptions.
         // This is invalid, set no backends and warn.
-        ConsumedErrorAndWarnOnce(
-            DAWN_VALIDATION_ERROR(
-                "Select WebGPU backend without RequestAdapterWebGPUBackendOptions is invalid.")
-                .AsVal());
+        ConsumedErrorAndWarnOnce(DAWN_VALIDATION_ERROR(
+            "Select WebGPU backend without RequestAdapterWebGPUBackendOptions is invalid."));
     } else if (options->backendType != wgpu::BackendType::Undefined) {
         // User is selecting a specific backend.
         if (!ConsumedErrorAndWarnOnce(ValidateBackendType(options->backendType))) {

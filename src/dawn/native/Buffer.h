@@ -210,7 +210,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     wgpu::BufferMapState APIGetMapState() const;
     uint64_t APIGetSize() const;
 
-    ResultOrError<Ref<TexelBufferViewBase>> CreateTexelView(
+    ResultOrUnknownError<Ref<TexelBufferViewBase>> CreateTexelView(
         const TexelBufferViewDescriptor* descriptor);
     TexelBufferViewBase* APICreateTexelView(const TexelBufferViewDescriptor* descriptor);
 
@@ -271,7 +271,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
                                                           bool writable);
     [[nodiscard]] Ref<MapAsyncEvent> UnmapEarly(BufferState newState,
                                                 std::string_view abortMessage);
-    MaybeError UnmapInternal(bool forDestroy);
+    MaybeValError UnmapInternal(bool forDestroy);
 
     // Updates internal state to reflect that the buffer is now mapped.
     MaybeError FinalizeMap(BufferState newState);

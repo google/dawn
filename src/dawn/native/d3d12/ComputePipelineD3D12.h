@@ -58,7 +58,7 @@ class ComputePipeline final : public ComputePipelineBase {
   private:
     ~ComputePipeline() override;
 
-    ResultOrError<Extent3D> InitializeImpl() override;
+    ResultOrUnknownError<Extent3D> InitializeImpl() override;
     void DestroyImpl(DestroyReason reason) override;
 
     Ref<PipelineLayoutHandle> mPipelineLayoutHandle;

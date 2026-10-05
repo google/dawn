@@ -44,7 +44,7 @@ class Device;
 
 class SharedFence final : public SharedFenceBase {
   public:
-    static ResultOrError<Ref<SharedFence>>
+    static ResultOrUnknownError<Ref<SharedFence>>
     Create(Device* device, StringView label, const SharedFenceMTLSharedEventDescriptor* descriptor);
 
     id<MTLSharedEvent> GetMTLSharedEvent() const;

@@ -67,7 +67,7 @@ namespace dawn::native {
 
 namespace {
 
-std::unique_ptr<ValidationError> ConcurrentUseError() {
+UnknownError ConcurrentUseError() {
     return DAWN_VALIDATION_ERROR("Concurrent buffer operations are not allowed");
 }
 
@@ -544,7 +544,8 @@ void BufferBase::DestroyImpl(DestroyReason reason) {
             case BufferState::InUse: {
                 // This is never supposed to happen but another operation is happening concurrently
                 // with API Destroy() call.
-                GetDevice()->ConsumeError(ConcurrentUseError(), "calling %s.Destroy().", this);
+                GetDevice()->ConsumeError(ConcurrentUseError().TakeAsVal(), "calling %s.Destroy().",
+                                          this);
                 while (mState.load(std::memory_order::acquire) == BufferState::InUse) {
                     // Spin loop instead of wait() to avoid overhead of signal in map/unmap.
                 }
@@ -811,7 +812,7 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
         }
 
         WGPUMapAsyncStatus errorStatus = WGPUMapAsyncStatus_Aborted;
-        MaybeValError maybeError = [&]() -> MaybeValError {
+        MaybeUnknownError maybeError = [&]() -> MaybeUnknownError {
             DAWN_TRY(GetDevice()->ValidateIsAlive());
             errorStatus = WGPUMapAsyncStatus_Error;
             DAWN_TRY(ValidateMapAsync(mode, offset, size));
@@ -842,7 +843,7 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
         }();
 
         if (maybeError.IsError()) {
-            auto error = maybeError.AcquireError();
+            std::unique_ptr<UnknownError> error = maybeError.AcquireError();
             event = AcquireRef(new MapAsyncEvent(callbackInfo, error->GetMessage(), errorStatus));
             GetDevice()->ConsumeError(std::move(error), "calling %s.MapAsync(%s, %u, %u, ...).",
                                       this, mode, offset, size);
@@ -947,9 +948,10 @@ void BufferBase::APIUnmap() {
     if (GetDevice()->ConsumedError(ValidateUnmap(), "calling %s.Unmap().", this)) {
         return;
     }
-    auto unmap = [&]() -> MaybeError {
+    auto unmap = [&]() -> MaybeUnknownError {
         DAWN_TRY(UnmapInternal(false));
-        return GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands();
+        DAWN_TRY(GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands());
+        return {};
     };
     std::ignore = GetDevice()->ConsumedError(unmap(), "calling %s.Unmap().", this);
 }
@@ -1015,7 +1017,7 @@ Ref<BufferBase::MapAsyncEvent> BufferBase::UnmapEarly(BufferState newState,
     return std::move(mPendingMapEvent);
 }
 
-MaybeError BufferBase::UnmapInternal(bool forDestroy) {
+MaybeValError BufferBase::UnmapInternal(bool forDestroy) {
     BufferState state = mState.load(std::memory_order::acquire);
 
     // If the buffer is already destroyed, we don't need to do anything.
@@ -1239,7 +1241,7 @@ void BufferBase::DumpMemoryStatistics(MemoryDump* dump, const char* prefix) cons
     dump->AddString(name.c_str(), "usage", absl::StrFormat("%s", GetInternalUsage()));
 }
 
-ResultOrError<Ref<TexelBufferViewBase>> BufferBase::CreateTexelView(
+ResultOrUnknownError<Ref<TexelBufferViewBase>> BufferBase::CreateTexelView(
     const TexelBufferViewDescriptor* descriptor) {
     DAWN_CHECK(descriptor != nullptr);
     return GetDevice()->CreateTexelBufferView(this, descriptor);

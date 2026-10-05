@@ -211,6 +211,11 @@ class [[nodiscard]] Result<Ref<T>, E> {
         requires std::convertible_to<U*, T*>
     Result<Ref<U>, E>& operator=(Result<Ref<U>, E>&& other);
 
+    template <typename E2, typename U>
+        requires(std::convertible_to<U*, T*> && !std::same_as<E, E2> &&
+                 std::constructible_from<E, std::unique_ptr<E2>>)
+    explicit(false) Result(Result<Ref<U>, E2>&& other);
+
     ~Result();
 
     bool IsError() const;
@@ -437,6 +442,14 @@ template <typename U>
 Result<Ref<T>, E>::Result(Result<Ref<U>, E>&& other) : mPayload(other.mPayload) {
     other.mPayload = detail::kEmptyPayload;
 }
+
+template <typename T, typename E>
+template <typename E2, typename U>
+    requires(std::convertible_to<U*, T*> && !std::same_as<E, E2> &&
+             std::constructible_from<E, std::unique_ptr<E2>>)
+Result<Ref<T>, E>::Result(Result<Ref<U>, E2>&& other)
+    : Result(other.IsError() ? Result(std::make_unique<E>(other.AcquireError()))
+                             : Result(other.AcquireSuccess())) {}
 
 template <typename T, typename E>
 template <typename U>

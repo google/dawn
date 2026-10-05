@@ -70,7 +70,7 @@ MaybeValError ValidateTextureDescriptor(
 MaybeValError ValidateTextureViewDescriptor(const DeviceBase* device,
                                             const TextureBase* texture,
                                             const UnpackedPtr<TextureViewDescriptor>& descriptor);
-ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
+ResultOrValError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
     const TextureBase* texture,
     const TextureViewDescriptor* descriptor);
 
@@ -222,7 +222,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     void AddResourceTableUse(ResourceTableBase* table);
     void RemoveResourceTableUse(ResourceTableBase* table);
 
-    ResultOrError<Ref<TextureViewBase>> CreateView(
+    ResultOrUnknownError<Ref<TextureViewBase>> CreateView(
         const TextureViewDescriptor* descriptor = nullptr);
     Ref<TextureViewBase> CreateErrorView(const TextureViewDescriptor* descriptor = nullptr);
     ApiObjectList* GetViewTrackingList();
@@ -232,7 +232,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     uint64_t ComputeEstimatedByteSize() const;
 
     template <typename CreateFn>
-    ResultOrError<Ref<TextureViewBase>> GetOrCreateViewFromCache(
+    ResultOrUnknownError<Ref<TextureViewBase>> GetOrCreateViewFromCache(
         const UnpackedPtr<TextureViewDescriptor>& desc,
         CreateFn createFn);
 
@@ -279,7 +279,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     std::string GetSizeLabel() const;
 
-    ResultOrError<Ref<TextureViewBase>> GetOrCreateDefaultView();
+    ResultOrUnknownError<Ref<TextureViewBase>> GetOrCreateDefaultView();
 
     void MarkDestroyedInResourceTables();
 
@@ -324,7 +324,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 };
 
 template <typename CreateFn>
-ResultOrError<Ref<TextureViewBase>> TextureBase::GetOrCreateViewFromCache(
+ResultOrUnknownError<Ref<TextureViewBase>> TextureBase::GetOrCreateViewFromCache(
     const UnpackedPtr<TextureViewDescriptor>& desc,
     CreateFn createFn) {
     TextureViewQuery query(desc);

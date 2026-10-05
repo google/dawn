@@ -267,7 +267,7 @@ class ImportedTextureBase : public Texture {
 // A texture created from an VkImage that references an external memory object.
 class ExternalVkImageTexture final : public ImportedTextureBase {
   public:
-    static ResultOrError<Ref<ExternalVkImageTexture>> Create(
+    static ResultOrUnknownError<Ref<ExternalVkImageTexture>> Create(
         Device* device,
         const ExternalImageDescriptorVk* descriptor,
         const UnpackedPtr<TextureDescriptor>& textureDescriptor,
@@ -279,17 +279,17 @@ class ExternalVkImageTexture final : public ImportedTextureBase {
                                   VkDeviceMemory externalMemoryAllocation,
                                   std::vector<VkSemaphore> waitSemaphores);
 
-    MaybeError ExportExternalTexture(VkImageLayout desiredLayout,
-                                     ExternalSemaphoreHandle* handle,
-                                     VkImageLayout* releasedOldLayout,
-                                     VkImageLayout* releasedNewLayout);
+    MaybeUnknownError ExportExternalTexture(VkImageLayout desiredLayout,
+                                            ExternalSemaphoreHandle* handle,
+                                            VkImageLayout* releasedOldLayout,
+                                            VkImageLayout* releasedNewLayout);
 
     MaybeError OnBeforeSubmit(CommandRecordingContext* context) override;
 
   private:
     using ImportedTextureBase::ImportedTextureBase;
-    MaybeError Initialize(const ExternalImageDescriptorVk* descriptor,
-                          external_memory::Service* externalMemoryService);
+    MaybeUnknownError Initialize(const ExternalImageDescriptorVk* descriptor,
+                                 external_memory::Service* externalMemoryService);
     void DestroyImpl(DestroyReason reason) override;
 
     VkDeviceMemory mExternalAllocation = VK_NULL_HANDLE;

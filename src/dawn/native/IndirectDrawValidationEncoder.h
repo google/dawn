@@ -43,10 +43,10 @@ class RenderPassResourceUsageTracker;
 // allowed storage binding size (with the base limits, it is about 6.7M).
 uint32_t ComputeMaxDrawCallsPerIndirectValidationBatch(const CombinedLimits& limits);
 
-MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
-                                                CommandEncoder* commandEncoder,
-                                                RenderPassResourceUsageTracker* usageTracker,
-                                                IndirectDrawMetadata* indirectDrawMetadata);
+MaybeUnknownError EncodeIndirectDrawValidationCommands(DeviceBase* device,
+                                                       CommandEncoder* commandEncoder,
+                                                       RenderPassResourceUsageTracker* usageTracker,
+                                                       IndirectDrawMetadata* indirectDrawMetadata);
 
 }  // namespace dawn::native
 

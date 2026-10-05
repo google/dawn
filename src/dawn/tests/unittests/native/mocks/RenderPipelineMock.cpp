@@ -36,7 +36,7 @@ using ::testing::NiceMock;
 RenderPipelineMock::RenderPipelineMock(DeviceMock* device,
                                        const UnpackedPtr<RenderPipelineDescriptor>& descriptor)
     : RenderPipelineBase(device, descriptor) {
-    ON_CALL(*this, InitializeImpl).WillByDefault([]() -> MaybeError { return {}; });
+    ON_CALL(*this, InitializeImpl).WillByDefault([]() -> MaybeUnknownError { return {}; });
     ON_CALL(*this, DestroyImpl).WillByDefault([this](DestroyReason reason) {
         this->RenderPipelineBase::DestroyImpl(reason);
     });

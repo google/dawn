@@ -327,8 +327,8 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
         return allocatedMemory;
     }
 
-    ResultOrError<VkImage> CreateImage(const ExternalImageDescriptor* descriptor,
-                                       const VkImageCreateInfo& baseCreateInfo) override {
+    ResultOrUnknownError<VkImage> CreateImage(const ExternalImageDescriptor* descriptor,
+                                              const VkImageCreateInfo& baseCreateInfo) override {
         DAWN_INVALID_IF(descriptor->GetType() != ExternalImageType::DmaBuf,
                         "ExternalImageDescriptor is not a dma-buf descriptor.");
 

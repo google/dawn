@@ -78,7 +78,7 @@ class PipelineLayoutBase : public ApiObjectBase,
     ~PipelineLayoutBase() override;
 
     static Ref<PipelineLayoutBase> MakeError(DeviceBase* device, StringView label);
-    static ResultOrError<Ref<PipelineLayoutBase>> CreateDefault(
+    static ResultOrUnknownError<Ref<PipelineLayoutBase>> CreateDefault(
         DeviceBase* device,
         std::vector<StageAndDescriptor> stages,
         bool allowInternalBinding);

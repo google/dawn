@@ -53,7 +53,7 @@ RenderPipeline::RenderPipeline(Device* device,
       RecordableObject(schema::ObjectType::RenderPipeline),
       ObjectWGPU(device->wgpu->renderPipelineRelease) {}
 
-MaybeError RenderPipeline::InitializeImpl() {
+MaybeUnknownError RenderPipeline::InitializeImpl() {
     auto device = ToBackend(GetDevice());
 
     WGPURenderPipelineDescriptor desc;

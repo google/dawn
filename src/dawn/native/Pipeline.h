@@ -88,7 +88,7 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     const ImmediateMask& GetImmediateMask() const;
     virtual ImmediateMask GetUserImmediateSlots() const;
 
-    ResultOrError<Ref<BindGroupLayoutBase>> GetBindGroupLayout(uint32_t groupIndex);
+    ResultOrUnknownError<Ref<BindGroupLayoutBase>> GetBindGroupLayout(uint32_t groupIndex);
 
     // Helper functions for std::unordered_map-based pipeline caches.
     size_t ComputeContentHash() override;
@@ -101,7 +101,8 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     ScopedUseShaderPrograms UseShaderPrograms();
 
     // Initialize() should only be called once by the frontend when the shaders are ready.
-    MaybeError Initialize(std::optional<ScopedUseShaderPrograms> scopedUsePrograms = std::nullopt);
+    MaybeUnknownError Initialize(
+        std::optional<ScopedUseShaderPrograms> scopedUsePrograms = std::nullopt);
 
     uint32_t GetImmediateSize() const;
 
@@ -128,7 +129,7 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     MaybeValError ValidateGetBindGroupLayout(BindGroupIndex group);
 
     // Overridden by child classes to perform their initialization when the shaders are ready.
-    virtual MaybeError InitializeWithShaders() = 0;
+    virtual MaybeUnknownError InitializeWithShaders() = 0;
 
     wgpu::ShaderStage mStageMask = wgpu::ShaderStage::None;
     PerStage<ProgrammableStage> mStages;

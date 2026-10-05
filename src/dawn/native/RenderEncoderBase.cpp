@@ -710,7 +710,7 @@ void RenderEncoderBase::APISetBindGroup(uint32_t groupIndexIn,
                                         ityp::span<BindingIndex, const uint32_t> dynamicOffsets) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             BindGroupIndex groupIndex(groupIndexIn);
 
             if (IsValidationEnabled()) {
@@ -734,7 +734,7 @@ void RenderEncoderBase::APISetBindGroup(uint32_t groupIndexIn,
 void RenderEncoderBase::APISetImmediates(uint32_t offset, Span<const std::byte> data) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(ValidateSetImmediates(offset, data.size()));
             }

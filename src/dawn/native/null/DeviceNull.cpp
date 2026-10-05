@@ -488,7 +488,7 @@ MaybeError Queue::WaitForIdleForDestructionImpl() {
 }
 
 // ComputePipeline
-ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
+ResultOrUnknownError<Extent3D> ComputePipeline::InitializeImpl() {
     const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
 
     tint::null::writer::Options tintOptions;
@@ -530,7 +530,7 @@ ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
 }
 
 // RenderPipeline
-MaybeError RenderPipeline::InitializeImpl() {
+MaybeUnknownError RenderPipeline::InitializeImpl() {
     return {};
 }
 

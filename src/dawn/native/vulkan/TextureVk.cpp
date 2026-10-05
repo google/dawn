@@ -1871,7 +1871,7 @@ MaybeError ImportedTextureBase::OnAfterSubmit() {
 //
 
 // static
-ResultOrError<Ref<ExternalVkImageTexture>> ExternalVkImageTexture::Create(
+ResultOrUnknownError<Ref<ExternalVkImageTexture>> ExternalVkImageTexture::Create(
     Device* device,
     const ExternalImageDescriptorVk* descriptor,
     const UnpackedPtr<TextureDescriptor>& textureDescriptor,
@@ -1903,8 +1903,9 @@ void ExternalVkImageTexture::DestroyImpl(DestroyReason reason) {
     ImportedTextureBase::DestroyImpl(reason);
 }
 
-MaybeError ExternalVkImageTexture::Initialize(const ExternalImageDescriptorVk* descriptor,
-                                              external_memory::Service* externalMemoryService) {
+MaybeUnknownError ExternalVkImageTexture::Initialize(
+    const ExternalImageDescriptorVk* descriptor,
+    external_memory::Service* externalMemoryService) {
     Device* device = ToBackend(GetDevice());
     VkFormat format = VulkanImageFormat(device, GetFormat().format);
     VkImageUsageFlags usage = VulkanImageUsage(device, GetInternalUsage(), GetFormat());
@@ -1985,10 +1986,10 @@ MaybeError ExternalVkImageTexture::BindExternalMemory(const ExternalImageDescrip
     return {};
 }
 
-MaybeError ExternalVkImageTexture::ExportExternalTexture(VkImageLayout desiredLayout,
-                                                         ExternalSemaphoreHandle* handle,
-                                                         VkImageLayout* releasedOldLayout,
-                                                         VkImageLayout* releasedNewLayout) {
+MaybeUnknownError ExternalVkImageTexture::ExportExternalTexture(VkImageLayout desiredLayout,
+                                                                ExternalSemaphoreHandle* handle,
+                                                                VkImageLayout* releasedOldLayout,
+                                                                VkImageLayout* releasedNewLayout) {
     DAWN_INVALID_IF(mExternalState == ExternalState::Released,
                     "Can't export a signal semaphore from signaled texture %s.", this);
 

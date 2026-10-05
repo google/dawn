@@ -39,16 +39,15 @@ class Device;
 
 class SharedFence final : public SharedFenceBase {
   public:
-    static ResultOrError<Ref<SharedFence>> Create(
+    static ResultOrUnknownError<Ref<SharedFence>> Create(
         Device* device,
         StringView label,
         const SharedFenceVkSemaphoreOpaqueFDDescriptor* descriptor);
 
-    static ResultOrError<Ref<SharedFence>> Create(Device* device,
-                                                  StringView label,
-                                                  const SharedFenceSyncFDDescriptor* descriptor);
+    static ResultOrUnknownError<Ref<SharedFence>>
+    Create(Device* device, StringView label, const SharedFenceSyncFDDescriptor* descriptor);
 
-    static ResultOrError<Ref<SharedFence>> Create(
+    static ResultOrUnknownError<Ref<SharedFence>> Create(
         Device* device,
         StringView label,
         const SharedFenceVkSemaphoreZirconHandleDescriptor* descriptor);

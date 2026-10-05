@@ -235,7 +235,7 @@ DeviceBase* AdapterBase::APICreateDevice(const DeviceDescriptor* descriptor) {
     return ReturnToAPI(std::move(device));
 }
 
-ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
+ResultOrUnknownError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     const DeviceDescriptor* rawDescriptor,
     Ref<DeviceBase::DeviceLostEvent> lostEvent) {
     DAWN_CHECK(rawDescriptor != nullptr);
@@ -305,7 +305,7 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     DAWN_INVALID_IF(mAdapterIsConsumed,
                     "adapter is \"consumed\": it has already been used to create a device");
 
-    auto result =
+    ResultOrError<Ref<DeviceBase>> result =
         mPhysicalDevice->CreateDevice(this, descriptor, deviceToggles, std::move(lostEvent));
 
     // The adapter should be consumed only upon successful device creation if the instance doesn't
@@ -317,11 +317,10 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     if (result.IsSuccess() && consumeOnSuccess) {
         mAdapterIsConsumed = true;
     }
-
     return result;
 }
 
-std::pair<Ref<DeviceBase::DeviceLostEvent>, ResultOrError<Ref<DeviceBase>>>
+std::pair<Ref<DeviceBase::DeviceLostEvent>, ResultOrUnknownError<Ref<DeviceBase>>>
 AdapterBase::CreateDevice(const DeviceDescriptor* descriptor) {
     DAWN_CHECK(descriptor != nullptr);
 
@@ -330,7 +329,7 @@ AdapterBase::CreateDevice(const DeviceDescriptor* descriptor) {
 
     // Catch any errors to directly complete the device lost event with the error message.
     if (result.IsError()) {
-        auto error = result.AcquireError();
+        std::unique_ptr<UnknownError> error = result.AcquireError();
         lostEvent->SetLost(mInstance->GetEventManager(), wgpu::DeviceLostReason::FailedCreation,
                            "Failed to create device:\n" + error->GetFormattedMessage());
 

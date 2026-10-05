@@ -268,7 +268,7 @@ MaybeValError ValidateSurfaceConfiguration(DeviceBase* device,
 class AdapterSurfaceCapCache {
   public:
     template <typename F>
-    MaybeError WithAdapterCapabilities(AdapterBase* adapter, const Surface* surface, F f) {
+    MaybeUnknownError WithAdapterCapabilities(AdapterBase* adapter, const Surface* surface, F f) {
         if (mCachedCapabilitiesAdapter.Promote().Get() != adapter) {
             const PhysicalDeviceBase* physicalDevice = adapter->GetPhysicalDevice();
             // TODO(536639352): This will probably require special attention as we split the error
@@ -466,7 +466,7 @@ uint64_t Surface::GetXWindow() const {
     return mXWindow;
 }
 
-MaybeError Surface::Configure(const SurfaceConfiguration* configIn) {
+MaybeUnknownError Surface::Configure(const SurfaceConfiguration* configIn) {
     SurfaceConfiguration config = WithTrivialFrontendDefaults(*configIn);
     DAWN_CHECK(config.device);
     // Configured-or-not is specified as a client-side state, so it must be
@@ -609,7 +609,7 @@ const std::string& Surface::GetLabel() const {
 }
 
 void Surface::APIConfigure(const SurfaceConfiguration* config) {
-    MaybeError maybeError = Configure(config);
+    MaybeUnknownError maybeError = Configure(config);
     if (!GetCurrentDevice()) {
         std::ignore = mInstance->ConsumedError(std::move(maybeError));
     } else {
@@ -646,12 +646,11 @@ wgpu::Status Surface::APIPresent() {
     // Validation that the surface is configured. Note this is synchronous
     // validation so it can't be skipped even if the surface is an error.
     if (!GetCurrentDevice()) {
-        mInstance->ConsumeError(
-            DAWN_VALIDATION_ERROR("%s is in the unconfigured state.", this).AsVal());
+        mInstance->ConsumeError(DAWN_VALIDATION_ERROR("%s is in the unconfigured state.", this));
         return wgpu::Status::Error;
     }
 
-    std::ignore = GetCurrentDevice()->ConsumedError([&]() -> MaybeValError {
+    std::ignore = GetCurrentDevice()->ConsumedError([&]() -> MaybeUnknownError {
         DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
         DAWN_INVALID_IF(!mSwapChain.Get(), "%s is not successfully configured.", this);
         {

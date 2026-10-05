@@ -1035,13 +1035,13 @@ MaybeValError ValidateRenderPassDescriptor(DeviceBase* device,
 
 // Adds a single attachment to the validation state to ensure that it is valid and can report a
 // render width and height.
-MaybeError InitializeValidationStateAttachment(DeviceBase* device,
-                                               UnpackedPtr<RenderPassDescriptor> descriptor,
-                                               RenderPassValidationState* validationState) {
+MaybeValError InitializeValidationStateAttachment(DeviceBase* device,
+                                                  UnpackedPtr<RenderPassDescriptor> descriptor,
+                                                  RenderPassValidationState* validationState) {
     TextureViewBase* representativeView = nullptr;
 
     // Check every attachment to guard against invalid objects caused by OOM errors.
-    auto CheckAttachment = [&](TextureViewBase* view) -> MaybeError {
+    auto CheckAttachment = [&](TextureViewBase* view) -> MaybeValError {
         DAWN_CHECK(view);
         DAWN_TRY(device->IsNotErrorObject(view));
         representativeView = view;
@@ -1410,7 +1410,7 @@ Ref<ComputePassEncoder> CommandEncoder::BeginComputePass(const ComputePassDescri
 
     bool success = mEncodingContext.TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateComputePassDescriptor(device, descriptor));
             }
@@ -1492,7 +1492,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
 
     bool success = mEncodingContext.TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeUnknownError {
             DAWN_TRY_ASSIGN_CONTEXT(descriptor, ValidateAndUnpack(rawDescriptor),
                                     "validating and unpacking chained structs.");
 
@@ -1960,7 +1960,7 @@ void CommandEncoder::APICopyTextureToBuffer(const TexelCopyTextureInfo* sourceOr
 
     mEncodingContext.TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeUnknownError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateTexelCopyTextureInfo(GetDevice(), source, *copySize));
                 DAWN_TRY_CONTEXT(ValidateCanUseAs(source.texture, wgpu::TextureUsage::CopySrc,
@@ -2285,7 +2285,7 @@ void CommandEncoder::APIPushDebugGroup(StringView groupLabelIn) {
     std::string_view groupLabel = utils::NormalizeMessageString(groupLabelIn);
     mEncodingContext.TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             PushDebugGroupCmd* cmd =
                 allocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
             std::string_view copiedLabel =
@@ -2309,7 +2309,7 @@ void CommandEncoder::APIResolveQuerySet(QuerySetBase* querySet,
 
     mEncodingContext.TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeUnknownError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(querySet));
                 DAWN_TRY(GetDevice()->ValidateObject(destination));
@@ -2346,8 +2346,9 @@ void CommandEncoder::APIResolveQuerySet(QuerySetBase* querySet,
             }
 
             auto deviceGuard = GetDevice()->GetGuard();
-            return EncodeTimestampsToNanosecondsConversion(this, querySet, firstQuery, queryCount,
-                                                           destination, destinationOffset);
+            DAWN_TRY(EncodeTimestampsToNanosecondsConversion(this, querySet, firstQuery, queryCount,
+                                                             destination, destinationOffset));
+            return {};
         },
         "encoding %s.ResolveQuerySet(%s, %u, %u, %s, %u).", this, querySet, firstQuery, queryCount,
         destination, destinationOffset);
@@ -2358,7 +2359,7 @@ void CommandEncoder::APIWriteBuffer(BufferBase* buffer,
                                     Span<const std::byte> data) {
     mEncodingContext.TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateWriteBuffer(GetDevice(), buffer, bufferOffset, data.size()));
             }
@@ -2419,7 +2420,7 @@ CommandBufferBase* CommandEncoder::APIFinish(const CommandBufferDescriptor* desc
     return ReturnToAPI(std::move(commandBuffer));
 }
 
-ResultOrError<Ref<CommandBufferBase>> CommandEncoder::Finish(
+ResultOrUnknownError<Ref<CommandBufferBase>> CommandEncoder::Finish(
     const CommandBufferDescriptor* descriptor) {
     DeviceBase* device = GetDevice();
 
@@ -2439,7 +2440,6 @@ ResultOrError<Ref<CommandBufferBase>> CommandEncoder::Finish(
     if (descriptor == nullptr) {
         descriptor = &defaultDescriptor;
     }
-
     return device->CreateCommandBuffer(this, descriptor);
 }
 

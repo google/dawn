@@ -60,7 +60,7 @@ class RenderPipeline final : public RenderPipelineBase {
     RenderPipeline(Device* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
     ~RenderPipeline() override;
 
-    MaybeError InitializeImpl() override;
+    MaybeUnknownError InitializeImpl() override;
     void SetLabelImpl() override;
 
     MaybeError InitializeRasterizerState();

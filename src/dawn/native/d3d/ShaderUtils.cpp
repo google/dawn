@@ -213,9 +213,9 @@ ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const d3d::D3DBytecodeCompilati
     return std::move(compiledShader);
 }
 
-MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
-                           UnsafeUnserializedValue<dawn::platform::Platform*> tracePlatform,
-                           CompiledShader* compiledShader) {
+MaybeUnknownError TranslateToHLSL(d3d::HlslCompilationRequest r,
+                                  UnsafeUnserializedValue<dawn::platform::Platform*> tracePlatform,
+                                  CompiledShader* compiledShader) {
     r.tintOptions.strip_all_names = !r.disableSymbolRenaming;
 
     TRACE_EVENT(DAWN_TRACE_CATEGORY(), "tint::hlsl::writer::Generate");
@@ -376,7 +376,7 @@ std::string CompileFlagsToString(uint32_t compileFlags) {
     return result;
 }
 
-ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
+ResultOrUnknownError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
     CompiledShader compiledShader;
     bool dumpShadersOnFailure = r.hlsl.dumpShaders || r.hlsl.dumpShadersOnFailure;
     // Compile the source shader to HLSL.

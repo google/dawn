@@ -34,7 +34,7 @@
 namespace dawn::native::metal {
 
 // static
-ResultOrError<Ref<SharedFence>> SharedFence::Create(
+ResultOrUnknownError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
     StringView label,
     const SharedFenceMTLSharedEventDescriptor* descriptor) {

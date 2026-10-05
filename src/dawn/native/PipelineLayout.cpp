@@ -389,7 +389,7 @@ BindGroupLayoutEntry ConvertMetadataToEntry(
 }
 
 // Creates the BGL from the entries for a stage, checking it is valid.
-ResultOrError<Ref<BindGroupLayoutBase>> CreateBGL(
+ResultOrUnknownError<Ref<BindGroupLayoutBase>> CreateBGL(
     DeviceBase* device,
     absl::flat_hash_map<BindingNumber, BindGroupLayoutEntry> entries,
     PipelineCompatibilityToken pipelineCompatibilityToken,
@@ -512,7 +512,7 @@ void ResolveUnknownTypes(
 }  // namespace
 
 // static
-ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
+ResultOrUnknownError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     DeviceBase* device,
     std::vector<StageAndDescriptor> stages,
     bool allowInternalBinding) {

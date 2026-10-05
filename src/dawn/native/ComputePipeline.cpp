@@ -71,7 +71,7 @@ ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
     StreamIn(&mCacheKey, CacheKey::Type::ComputePipeline, device->GetCacheKey());
 }
 
-MaybeError ComputePipelineBase::InitializeWithShaders() {
+MaybeUnknownError ComputePipelineBase::InitializeWithShaders() {
     DAWN_TRY_ASSIGN(mWorkgroupSize, InitializeImpl());
     return {};
 }
@@ -110,7 +110,7 @@ Ref<ComputePipelineBase> ComputePipelineBase::MakeError(DeviceBase* device, Stri
             : ComputePipelineBase(device, ObjectBase::kError, label) {}
 
       private:
-        ResultOrError<Extent3D> InitializeImpl() override { DAWN_UNREACHABLE(); }
+        ResultOrUnknownError<Extent3D> InitializeImpl() override { DAWN_UNREACHABLE(); }
     };
 
     return AcquireRef(new ErrorComputePipeline(device, label));

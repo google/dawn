@@ -59,7 +59,7 @@ void ComputePipeline::DestroyImpl(DestroyReason reason) {
                                }));
 }
 
-ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
+ResultOrUnknownError<Extent3D> ComputePipeline::InitializeImpl() {
     auto layout = ToBackend(GetLayout());
     Extent3D workgroupSize;
     std::set<CombinedSampler> combinedSamplers;

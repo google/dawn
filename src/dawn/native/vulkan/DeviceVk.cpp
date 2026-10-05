@@ -300,7 +300,7 @@ void Device::InitializeRenderPipelineAsyncImpl(Ref<CreateRenderPipelineAsyncEven
     event->InitializeAsync();
 }
 
-ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
+ResultOrUnknownError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
     UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(type,
@@ -331,7 +331,7 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
     }
 }
 
-ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
+ResultOrUnknownError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     UnpackedPtr<SharedFenceDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
@@ -923,7 +923,7 @@ bool Device::SignalAndExportExternalTexture(
     ExternalImageExportInfoVk* info,
     std::vector<ExternalSemaphoreHandle>* semaphoreHandles) {
     ExternalVkImageTexture* externalTexture = static_cast<ExternalVkImageTexture*>(texture);
-    return !ConsumedError([&]() -> MaybeError {
+    return !ConsumedError([&]() -> MaybeUnknownError {
         DAWN_TRY(ValidateObject(texture));
 
         ExternalSemaphoreHandle semaphoreHandle;
@@ -964,7 +964,7 @@ MaybeValError Device::ValidateTextureWrappingVulkanImage(
     return {};
 }
 
-ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingVulkanImage(
+ResultOrUnknownError<Ref<TextureBase>> Device::CreateTextureWrappingVulkanImage(
     const ExternalImageDescriptorVk* descriptor,
     ExternalMemoryHandle memoryHandle,
     const std::vector<ExternalSemaphoreHandle>& waitHandles) {

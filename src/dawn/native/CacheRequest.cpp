@@ -35,4 +35,8 @@ void LogCacheError(std::unique_ptr<UnrecoverableError> error) {
     dawn::ErrorLog() << error->GetFormattedMessage();
 }
 
+void LogCacheError(std::unique_ptr<UnknownError> error) {
+    dawn::ErrorLog() << error->GetFormattedMessage();
+}
+
 }  // namespace dawn::native::detail

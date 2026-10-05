@@ -228,7 +228,7 @@ ResultOrError<Ref<BufferBase>> Device::CreateBufferImpl(
     return Buffer::Create(this, descriptor);
 }
 
-ResultOrError<Ref<ExternalTextureBase>> Device::CreateExternalTextureImpl(
+ResultOrUnknownError<Ref<ExternalTextureBase>> Device::CreateExternalTextureImpl(
     const ExternalTextureDescriptor* descriptor) {
     return ExternalTexture::Create(this, descriptor);
 }
@@ -292,7 +292,7 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     return TextureView::Create(texture, descriptor);
 }
 
-ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
+ResultOrUnknownError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
     UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) {
     // TODO(crbug.com/483147423): Handle all possible chained structures.
     if (unpacked.Get<SharedTextureMemoryIOSurfaceDescriptor>()) {
@@ -300,7 +300,8 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
         DAWN_INVALID_IF(!HasFeature(feature), "%s is not enabled.", ToCppAPI(feature));
     } else if (unpacked.Get<SharedTextureMemoryAHardwareBufferDescriptor>()) {
         return DAWN_UNIMPLEMENTED_ERROR(
-            "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
+            "SharedTextureMemory in WebGPU backend has "
+            "not been implemented for all platforms.");
     } else if (unpacked.Get<SharedTextureMemoryDXGISharedHandleDescriptor>()) {
         return DAWN_UNIMPLEMENTED_ERROR(
             "SharedTextureMemory in WebGPU backend has not been implemented for all platforms.");
@@ -334,7 +335,7 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
     return SharedTextureMemory::Create(this, unpacked);
 }
 
-ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
+ResultOrUnknownError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     UnpackedPtr<SharedFenceDescriptor> unpacked) {
     // TODO(crbug.com/483147423): Handle all possible chained structures.
     if (unpacked.Get<SharedFenceMTLSharedEventDescriptor>()) {

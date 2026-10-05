@@ -48,6 +48,7 @@ namespace dawn::native {
 namespace detail {
 
 void LogCacheError(std::unique_ptr<UnrecoverableError> error);
+void LogCacheError(std::unique_ptr<UnknownError> error);
 
 }  // namespace detail
 
@@ -113,7 +114,7 @@ class CacheRequestImpl {
             std::is_convertible_v<CacheMissFn, CacheMissReturnType (*)(Request)>,
             "CacheMissFn function signature does not match, or it is not a free function.");
 
-        static_assert(detail::IsResultOrError<CacheMissReturnType>::value,
+        static_assert(detail::IsResultOrUnknownError<CacheMissReturnType>::value,
                       "CacheMissFn should return a ResultOrError.");
         using UnwrappedReturnType = typename detail::UnwrapResultOrError<CacheMissReturnType>::type;
 
@@ -122,7 +123,7 @@ class CacheRequestImpl {
                       "If CacheMissFn returns T, CacheHitFn must return T or ResultOrError<T>.");
 
         using CacheResultType = CacheResult<UnwrappedReturnType>;
-        using ReturnType = ResultOrError<CacheResultType>;
+        using ReturnType = ResultOrUnknownError<CacheResultType>;
 
         CacheKey key = r.CreateCacheKey(device);
         platform::metrics::DawnHistogramTimer cacheTimer(

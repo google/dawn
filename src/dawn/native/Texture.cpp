@@ -997,7 +997,7 @@ MaybeValError ValidateTextureViewDescriptor(const DeviceBase* device,
     return {};
 }
 
-ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
+ResultOrValError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
     const TextureBase* texture,
     const TextureViewDescriptor* descriptor) {
     DAWN_CHECK(texture);
@@ -1574,7 +1574,7 @@ Extent3D TextureBase::GetMipLevelSubresourcePhysicalSize(uint32_t level, Aspect 
     return extent;
 }
 
-ResultOrError<Ref<TextureViewBase>> TextureBase::CreateView(
+ResultOrUnknownError<Ref<TextureViewBase>> TextureBase::CreateView(
     const TextureViewDescriptor* descriptor) {
     if (descriptor == nullptr) {
         return GetOrCreateDefaultView();
@@ -1649,7 +1649,7 @@ uint64_t TextureBase::ComputeEstimatedByteSize() const {
     return byteSize;
 }
 
-ResultOrError<Ref<TextureViewBase>> TextureBase::GetOrCreateDefaultView() {
+ResultOrUnknownError<Ref<TextureViewBase>> TextureBase::GetOrCreateDefaultView() {
     // Texture view caching is not enabled, so don't cache the default view.
     if (!mTextureViewCache) {
         return GetDevice()->CreateTextureView(this, nullptr);

@@ -110,7 +110,7 @@ ResultOrValError<SharedTextureMemoryProperties> PropertiesFromD3D11Texture(
 }  // namespace
 
 // static
-ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
+ResultOrUnknownError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
     StringView label,
     const SharedTextureMemoryDXGISharedHandleDescriptor* descriptor) {
@@ -218,7 +218,7 @@ MaybeValError SharedTextureMemory::BeginAccessImpl(
     return {};
 }
 
-ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
+ResultOrUnknownError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<SharedTextureMemoryEndAccessState>& descriptor) {

@@ -208,7 +208,7 @@ void ComputePassEncoder::APIEnd() {
 
     if (mEncodingContext->TryEncode(
             this,
-            [&](CommandAllocator* allocator) -> MaybeError {
+            [&](CommandAllocator* allocator) -> MaybeValError {
                 if (IsValidationEnabled()) {
                     DAWN_TRY(ValidateProgrammableEncoderEnd());
                 }
@@ -496,7 +496,7 @@ void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffe
 void ComputePassEncoder::APISetPipeline(ComputePipelineBase* pipeline) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(pipeline));
             }
@@ -546,7 +546,7 @@ void ComputePassEncoder::APISetBindGroup(uint32_t groupIndexIn,
                                          ityp::span<BindingIndex, const uint32_t> dynamicOffsets) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             BindGroupIndex groupIndex(groupIndexIn);
 
             if (IsValidationEnabled()) {
@@ -570,7 +570,7 @@ void ComputePassEncoder::APISetBindGroup(uint32_t groupIndexIn,
 void ComputePassEncoder::APISetImmediates(uint32_t offset, Span<const std::byte> data) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(ValidateSetImmediates(offset, data.size()));
             }
@@ -587,7 +587,7 @@ void ComputePassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t quer
 
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(ValidateTimestampQuery(
                     GetDevice(), querySet, queryIndex,

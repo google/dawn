@@ -202,7 +202,6 @@ ResultOrError<Ref<BindGroupBase>> MakeBindGroup(
     BindGroupDescriptor descriptor;
     descriptor.layout = layout.Get();
     descriptor.entries = entries;
-
     return device->CreateBindGroup(&descriptor, mode);
 }
 

@@ -59,7 +59,7 @@ class Queue final : public QueueBase {
     FutureID GetCommandsScheduledFuture();
 
     id<MTLSharedEvent> GetMTLSharedEvent() const;
-    ResultOrError<Ref<SharedFence>> GetOrCreateSharedFence();
+    ResultOrUnknownError<Ref<SharedFence>> GetOrCreateSharedFence();
 
   private:
     Queue(Device* device, const QueueDescriptor* descriptor);

@@ -298,7 +298,7 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     return TextureView::Create(texture, descriptor);
 }
 
-ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
+ResultOrUnknownError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
     UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
@@ -317,7 +317,7 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
     }
 }
 
-ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
+ResultOrUnknownError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     UnpackedPtr<SharedFenceDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(type, (unpacked.ValidateBranches<Branch<SharedFenceSyncFDDescriptor>,
@@ -367,7 +367,7 @@ Ref<TextureBase> Device::CreateTextureWrappingEGLImage(const ExternalImageDescri
     return result;
 }
 
-ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingEGLImageImpl(
+ResultOrUnknownError<Ref<TextureBase>> Device::CreateTextureWrappingEGLImageImpl(
     const ExternalImageDescriptor* descriptor,
     ::EGLImage image) {
     // TODO(451928481): We cannot defer the GL work here because the external texture may be
@@ -429,7 +429,7 @@ Ref<TextureBase> Device::CreateTextureWrappingGLTexture(const ExternalImageDescr
     return result;
 }
 
-ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingGLTextureImpl(
+ResultOrUnknownError<Ref<TextureBase>> Device::CreateTextureWrappingGLTextureImpl(
     const ExternalImageDescriptor* descriptor,
     GLuint texture) {
     // TODO(451928481): We cannot defer the GL work here because the external texture may be

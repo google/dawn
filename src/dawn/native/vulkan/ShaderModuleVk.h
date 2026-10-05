@@ -78,7 +78,7 @@ class ShaderModule final : public ShaderModuleBase {
         bool needsMultisampledFramebufferFetch = false;
     };
 
-    ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(const CompileParameters& in);
+    ResultOrUnknownError<ModuleAndSpirv> GetHandleAndSpirv(const CompileParameters& in);
 
   private:
     ShaderModule(Device* device,

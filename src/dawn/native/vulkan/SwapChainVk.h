@@ -107,9 +107,9 @@ class SwapChain : public SwapChainBase {
     Ref<Texture> mTexture;
 };
 
-ResultOrError<VkSurfaceKHR> CreateVulkanSurface(InstanceBase* instance,
-                                                const PhysicalDevice* physicalDevice,
-                                                const Surface* surface);
+ResultOrUnknownError<VkSurfaceKHR> CreateVulkanSurface(InstanceBase* instance,
+                                                       const PhysicalDevice* physicalDevice,
+                                                       const Surface* surface);
 
 }  // namespace dawn::native::vulkan
 

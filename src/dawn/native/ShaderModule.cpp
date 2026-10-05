@@ -452,10 +452,10 @@ ResultOrError<PixelLocalMemberType> FromTintPixelLocalMemberType(
 
 // Validation errors, if any, are stored within outputParseResult instead of get returned as
 // ErrorData.
-MaybeError ParseWGSL(std::unique_ptr<tint::Source::File> file,
-                     const WGSLAllowedFeatures& allowedFeatures,
-                     const std::vector<tint::wgsl::Extension>& internalExtensions,
-                     ShaderModuleParseResult* outputParseResult) {
+void ParseWGSL(std::unique_ptr<tint::Source::File> file,
+               const WGSLAllowedFeatures& allowedFeatures,
+               const std::vector<tint::wgsl::Extension>& internalExtensions,
+               ShaderModuleParseResult* outputParseResult) {
     tint::wgsl::reader::Options options;
     options.allowed_features = allowedFeatures.ToTint();
     options.allowed_features.extensions.insert(internalExtensions.begin(),
@@ -476,23 +476,21 @@ MaybeError ParseWGSL(std::unique_ptr<tint::Source::File> file,
             DAWN_VALIDATION_ERROR("Error while parsing WGSL: %s\n", program.Diagnostics().Str()));
         DAWN_CHECK(!outputParseResult->HasTintProgram() && outputParseResult->HasError());
     }
-
-    return {};
 }
 
 #if TINT_BUILD_SPV_READER
 // Validation errors, if any, are stored within outputParseResult instead of get returned as
 // ErrorData
-MaybeError ParseSPIRV(const std::vector<uint32_t>& spirv,
-                      const WGSLAllowedFeatures& allowedFeatures,
-                      ShaderModuleParseResult* outputParseResult,
-                      bool allowNonUniformDerivatives) {
+void ParseSPIRV(const std::vector<uint32_t>& spirv,
+                const WGSLAllowedFeatures& allowedFeatures,
+                ShaderModuleParseResult* outputParseResult,
+                bool allowNonUniformDerivatives) {
     tint::Result<tint::core::ir::Module> irResult = tint::spirv::reader::ReadIR(spirv);
     if (irResult != tint::Success) {
         outputParseResult->SetValidationError(
             DAWN_VALIDATION_ERROR("Error while parsing SPIR-V: %s\n", irResult.Failure().reason));
         DAWN_CHECK(!outputParseResult->HasTintProgram() && outputParseResult->HasError());
-        return {};
+        return;
     }
 
     tint::wgsl::writer::Options options;
@@ -517,8 +515,6 @@ MaybeError ParseSPIRV(const std::vector<uint32_t>& spirv,
             "Error while generating WGSL: %s\n", wgslResult.Failure().reason));
         DAWN_CHECK(!outputParseResult->HasTintProgram() && outputParseResult->HasError());
     }
-
-    return {};
 }
 #endif  // TINT_BUILD_SPV_READER
 
@@ -775,10 +771,10 @@ MaybeValError ValidateCompatibilityOfSingleBindingWithLayout(
         });
 }
 
-MaybeError ValidateCompatibilityWithBindGroupLayout(DeviceBase* device,
-                                                    BindGroupIndex group,
-                                                    const EntryPointMetadata& entryPoint,
-                                                    const BindGroupLayoutInternalBase* layout) {
+MaybeValError ValidateCompatibilityWithBindGroupLayout(DeviceBase* device,
+                                                       BindGroupIndex group,
+                                                       const EntryPointMetadata& entryPoint,
+                                                       const BindGroupLayoutInternalBase* layout) {
     // Iterate over all bindings used by this group in the shader, and find the
     // corresponding binding in the BindGroupLayout, if it exists.
     for (const auto& [bindingId, bindingInfo] : entryPoint.bindings[group]) {
@@ -1503,7 +1499,7 @@ void DumpShaderFromDescriptor(LogEmitter* logEmitter,
     logEmitter->EmitLog(wgpu::LoggingType::Info, dumpedMsg.str().c_str());
 }
 
-ResultOrError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseRequest req) {
+ResultOrUnknownError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseRequest req) {
     ShaderModuleParseResult outputParseResult;
 
     const ShaderModuleParseDeviceInfo& deviceInfo = req.deviceInfo;
@@ -1529,8 +1525,8 @@ ResultOrError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseReques
 #endif  // DAWN_ENABLE_SPIRV_VALIDATION
         // Try parsing SpirV if no validation error.
         if (!outputParseResult.HasError()) {
-            DAWN_TRY(ParseSPIRV(spirvCode, deviceInfo.wgslAllowedFeatures, &outputParseResult,
-                                spirvDesc.allowNonUniformDerivatives));
+            ParseSPIRV(spirvCode, deviceInfo.wgslAllowedFeatures, &outputParseResult,
+                       spirvDesc.allowNonUniformDerivatives);
         }
     }
 #else   // TINT_BUILD_SPV_READER
@@ -1547,8 +1543,8 @@ ResultOrError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseReques
         const StringView& wgsl = wgslDesc.wgsl.UnsafeGetValue();
         auto tintFile = std::make_unique<tint::Source::File>("", wgsl);
 
-        DAWN_TRY(ParseWGSL(std::move(tintFile), deviceInfo.wgslAllowedFeatures, internalExtensions,
-                           &outputParseResult));
+        ParseWGSL(std::move(tintFile), deviceInfo.wgslAllowedFeatures, internalExtensions,
+                  &outputParseResult);
     }
 
     // Generate reflection information if required and parsed succeed.

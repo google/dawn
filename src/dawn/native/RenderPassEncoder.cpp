@@ -198,7 +198,7 @@ void RenderPassEncoder::End() {
 void RenderPassEncoder::APISetStencilReference(uint32_t reference) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             SetStencilReferenceCmd* cmd =
                 allocator->Allocate<SetStencilReferenceCmd>(Command::SetStencilReference);
             cmd->reference = reference & 255;
@@ -211,7 +211,7 @@ void RenderPassEncoder::APISetStencilReference(uint32_t reference) {
 void RenderPassEncoder::APISetBlendConstant(const Color* color) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(ValidateColor("color", *color));
             }
@@ -507,7 +507,7 @@ void RenderPassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t query
 
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(ValidateTimestampQuery(
                     GetDevice(), querySet, queryIndex,

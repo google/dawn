@@ -48,7 +48,7 @@ bool IsSameHandle(DeviceBase* device, HANDLE handle, HANDLE other) {
 }  // namespace
 
 // static
-ResultOrError<Ref<SharedFence>> SharedFence::Create(
+ResultOrUnknownError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
     StringView label,
     const SharedFenceDXGISharedHandleDescriptor* descriptor) {
