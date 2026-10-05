@@ -25,7 +25,7 @@ import dalvik.annotation.optimization.FastNative
 public object GPU {
 
     {% set all_functions_info = kdocs.functions %}
-    {% for function in by_category['function'] if include_method(None, function) %}
+    {% for function in by_category['function'] if include_method(function) %}
         {% set _kotlin_return = kotlin_return(function) %}
         //* Generating KDocs
         {% set function_info = all_functions_info.get(function.name.get()) %}
