@@ -451,5 +451,44 @@ TEST(ResultNonDefaultConstructible, ReturningSuccess) {
     TestSuccess(&result, NonDefaultConstructible(1.0f));
 }
 
+struct VError {
+  public:
+    int a = 2;
+};
+
+struct UError {
+  public:
+    UError() = default;
+    explicit(false) UError(std::unique_ptr<VError>) {}
+    bool operator==(const UError&) const { return true; }
+    int a = 1;
+};
+
+TEST(ResultGeneric, ConvertRefDiffereingError) {
+    Child child;
+    Ref<Child> refChild(&child);
+
+    Result<Ref<Child>, VError> initial(std::move(refChild));
+    Result<Ref<Base>, UError> result = std::move(initial);
+
+    TestSuccess<Base>(&result, &child);
+}
+
+TEST(ResultGeneric, ConvertErrorSameType) {
+    Result<Ref<Child>, VError> initial(std::make_unique<VError>());
+    Result<Ref<Child>, UError> result = std::move(initial);
+
+    UError uerr;
+    TestError(&result, uerr);
+}
+
+TEST(ResultGeneric, ConvertErrorSameDifferentType) {
+    Result<Ref<Child>, VError> initial(std::make_unique<VError>());
+    Result<Ref<Base>, UError> result = std::move(initial);
+
+    UError uerr;
+    TestError(&result, uerr);
+}
+
 }  // anonymous namespace
 }  // namespace dawn
