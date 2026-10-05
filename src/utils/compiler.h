@@ -28,6 +28,17 @@
 #ifndef SRC_UTILS_COMPILER_H_
 #define SRC_UTILS_COMPILER_H_
 
+#if !defined(DAWN_HAVE_UTILS_BUILD_CONFIG)
+#error "Something is wrong with the build config. Global defines must be set to use src/utils."
+#endif
+#if !defined(NDEBUG) && !defined(DAWN_ENABLE_ASSERTS)
+// There should only be three combinations of these settings:
+// -          DAWN_ENABLE_ASSERTS = debug build
+// - NDEBUG                       = release build
+// - NDEBUG + DAWN_ENABLE_ASSERTS = release build with dawn_always_assert
+#error "One or both of NDEBUG and DAWN_ENABLE_ASSERTS should always be set."
+#endif
+
 // DAWN_COMPILER_IS(CLANG|GCC|MSVC): Compiler detection
 //
 // Note: clang masquerades as GCC on POSIX and as MSVC on Windows. It must be checked first.

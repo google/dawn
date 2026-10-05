@@ -46,6 +46,7 @@ if (checkout_v8 && dawn_node) {
 
     deps = [
       "${dawn_abseil_dir}/absl/container:linked_hash_map",
+      "${dawn_root}/src/utils",
       "//third_party/v8/src:v8",
     ]
   }

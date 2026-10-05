@@ -300,10 +300,10 @@ config("dawn_warnings") {
 # TODO(crbug.com/523358231): Some targets pick up this config multiple times and
 # receive all of the warning flags repeatedly, for example they're repeated
 # three times in obj/src/dawn/native/sources/Device.o. Can this be avoided?
-config("internal_config") {
+config("utils_config") {
   include_dirs = [ "${dawn_root}" ]
 
-  defines = []
+  defines = [ "DAWN_HAVE_UTILS_BUILD_CONFIG" ]
   configs = [ ":dawn_warnings" ]
 
   if (is_clang && dawn_standalone && !is_wasm) {
@@ -362,7 +362,7 @@ static_library("utils") {
     sources += [ "windows_with_undefs.h" ]
   }
 
-  public_configs = [ ":internal_config" ]
+  public_configs = [ ":utils_config" ]
   public_deps = [ "${dawn_root}/src/dawn/partition_alloc:raw_ptr" ]
 }
 
@@ -371,7 +371,7 @@ source_set("crash_handler") {
     "crash_handler.cc",
     "crash_handler.h",
   ]
-  public_configs = [ ":internal_config" ]
+  public_configs = [ ":utils_config" ]
   public_deps = [ "${dawn_abseil_dir}:absl" ]
 }
 

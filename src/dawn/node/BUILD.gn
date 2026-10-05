@@ -155,11 +155,11 @@ static_library("dawn_node_interop") {
     "interop/NodeAPI.h",
   ]
   include_dirs = [ "${dawn_node_gen_dir}" ]
+  public_deps = [ "$dawn_root/src/utils" ]
   deps = [
     ":idlgen_webgpu_cpp",
     ":idlgen_webgpu_h",
     "$dawn_root/include/dawn:cpp_headers",
-    "$dawn_root/src/utils",
   ]
 }
 
@@ -242,7 +242,6 @@ static_library("dawn_node_binding") {
   deps = [
     "$dawn_root/src/dawn/native",
     "$dawn_root/src/dawn/utils:wgpu_utils",
-    "$dawn_root/src/utils",
   ]
 }
 

@@ -51,5 +51,5 @@ else:
     # Generate the NapiSymbols.h file from the Napi symbol list
     assert output_file.suffix == ".h", output_file.suffix
     with open(output_file, "w") as f:
-        matches2 = [f"NAPI_SYMBOL({symbol})" for symbol in matches]
-        f.write("\n".join(matches2))
+        for symbol in matches:
+            f.write(f"NAPI_SYMBOL({symbol})\n")

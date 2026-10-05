@@ -47,8 +47,9 @@
 #endif
 
 #if defined(GTEST_HAS_DEATH_TEST) && !defined(DAWN_ENABLE_ASSERTS)
-// If death tests are supported and asserts are not enabled, defer to *_DEBUG_DEATH (which under
-// NDEBUG executes the statement directly without expecting death).
+// If death tests are supported and asserts are not enabled, defer to *_DEBUG_DEATH. It's guaranteed
+// here that NDEBUG is set (compiler.h checks this), which means this always just executes the
+// statement directly without expecting death.
 #if !defined(DAWN_DISABLE_LOGGING)
 #define DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher) \
     EXPECT_DEBUG_DEATH(statement, matcher)
