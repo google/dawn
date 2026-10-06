@@ -80,3 +80,8 @@ default_args = {
 # Export compile_commands.json to build dir for all generated targets.
 # Useful for editors that parse the compilation database for symbol lookup.
 export_compile_commands = [ "*" ]
+
+# V8 does not pass unrestricted header inclusion checks (it sets
+# no_check_targets in its own .gn). Exclude it here so gn gen --check does not
+# fail when checkout_v8 is enabled on CQ builders.
+no_check_targets = [ "//third_party/v8/*" ]
