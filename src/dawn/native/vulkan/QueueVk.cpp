@@ -182,6 +182,7 @@ MaybeError Queue::WaitForIdleForDestructionImpl() {
     // (so they are as good as waited on) or success.
     VkResult waitIdleResult = VkResult::WrapUnsafe(device->fn.QueueWaitIdle(mQueue));
 
+    // Insert an arbitrary sleep to avoid destroying the device too early on some faulty drivers.
     if (waitIdleResult == VK_ERROR_DEVICE_LOST &&
         GetDevice()->IsToggleEnabled(Toggle::VulkanSleepAfterLostDeviceWait)) {
         dawn::utils::USleep(1000);

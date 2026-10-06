@@ -1137,8 +1137,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // See crbug.com/460209126
         deviceToggles->Default(Toggle::VulkanCooperativeMatrixStrideIsMatrixElements, true);
 
-        // TODO(https://crbug.com/500417361): Add details once available.
-        deviceToggles->Default(Toggle::VulkanSleepAfterLostDeviceWait, true);
+        // On device loss, some Mali drivers may return from vkQueueWaitIdle and
+        // vkDeviceWaitIdle before it's safe to destroy the device.
+        // https://crbug.com/500417361
+        const gpu_info::DriverVersion kWaitIdleBadDriver = {42, 0, 0, 0};
+        const gpu_info::DriverVersion kWaitIdleGoodDriver = {56, 0, 0, 0};
+        if (GetDriverVersion() >= kWaitIdleBadDriver && GetDriverVersion() < kWaitIdleGoodDriver) {
+            deviceToggles->Default(Toggle::VulkanSleepAfterLostDeviceWait, true);
+        }
     }
 
     if (IsAndroidSamsung() || IsAndroidQualcomm() || IsAndroidHuawei()) {

@@ -844,7 +844,8 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "https://crbug.com/517225032", ToggleStage::Device}},
     {Toggle::VulkanSleepAfterLostDeviceWait,
      {"vulkan_sleep_after_lost_device_wait",
-      "Insert an arbitrary sleep after WaitIdle functions on device loss.",
+      "Insert an arbitrary sleep after WaitIdle functions on device loss. On some Mali drivers, "
+      "these may return before it's safe to destroy the device.",
       "https://crbug.com/500417361", ToggleStage::Device}},
     {Toggle::UseSpirvReconvergenceMode,
      {"use_spirv_reconvergence_mode",
