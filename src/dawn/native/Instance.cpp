@@ -700,20 +700,10 @@ EventManager* InstanceBase::GetEventManager() {
     return &mEventManager;
 }
 
-void InstanceBase::ConsumeError(std::unique_ptr<UnrecoverableError> error,
-                                InternalErrorType additionalAllowedErrors) {
+void InstanceBase::ConsumeError(UnknownError error, InternalErrorType additionalAllowedErrors) {
     // Note: `additionalAllowedErrors` is ignored. The instance considers every type of error to be
     // an error that is logged.
-    DAWN_ASSERT(error != nullptr);
-    EmitLog(WGPULoggingType_Error, error->GetFormattedMessage());
-}
-
-void InstanceBase::ConsumeError(std::unique_ptr<ValidationError> error,
-                                InternalErrorType additionalAllowedErrors) {
-    // Note: `additionalAllowedErrors` is ignored. The instance considers every type of error to be
-    // an error that is logged.
-    DAWN_ASSERT(error != nullptr);
-    EmitLog(WGPULoggingType_Error, error->GetFormattedMessage());
+    EmitLog(WGPULoggingType_Error, error.GetFormattedMessage());
 }
 
 const X11Functions* InstanceBase::GetOrLoadX11Functions() {

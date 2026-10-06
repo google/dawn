@@ -624,13 +624,13 @@ void DeviceBase::HandleDeviceLost(wgpu::DeviceLostReason reason, std::string_vie
 }
 
 void DeviceBase::HandleError(ErrorData* data,
-                             InternalErrorType type,
                              InternalErrorType additionalAllowedErrors,
                              wgpu::DeviceLostReason lostReason,
                              ForwardToErrorScope forwardToErrorScope) {
     auto deviceGuard = GetGuard();
     AppendDebugLayerMessages(data);
 
+    InternalErrorType type = data->GetType();
     if (type != InternalErrorType::Validation) {
         // D3D device can provide additional device removed reason. We would
         // like to query and log the device removed reason if the error is
@@ -707,21 +707,13 @@ void DeviceBase::HandleErrorGeneratingAsyncTask(Ref<ErrorGeneratingAsyncTask> ta
         // representable as wgpu::ErrorType. Forward it to HandleError but disable error scope
         // capturing. This will handle device loss and call the uncaptured error callback if one is
         // set.
-        HandleError(task->AcquireError(), InternalErrorType::None, wgpu::DeviceLostReason::Unknown,
-                    ForwardToErrorScope::No);
+        HandleError(UnknownError(task->AcquireError()), InternalErrorType::None,
+                    wgpu::DeviceLostReason::Unknown, ForwardToErrorScope::No);
     });
 }
 
-void DeviceBase::ConsumeError(std::unique_ptr<UnrecoverableError> error,
-                              InternalErrorType additionalAllowedErrors) {
-    DAWN_CHECK(error != nullptr);
-    HandleError(std::move(error), additionalAllowedErrors);
-}
-
-void DeviceBase::ConsumeError(std::unique_ptr<ValidationError> error,
-                              InternalErrorType additionalAllowedErrors) {
-    DAWN_CHECK(error != nullptr);
-    HandleError(std::move(error), additionalAllowedErrors);
+void DeviceBase::ConsumeError(UnknownError err, InternalErrorType additionalAllowedErrors) {
+    HandleError(std::move(err), additionalAllowedErrors);
 }
 
 void DeviceBase::APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackInfo) {
@@ -1285,11 +1277,7 @@ BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* rawDescriptor) {
     // If there was a deferredError saved from earlier, surface it now.
     if (deferredError) {
         deferredError->AppendContext("calling %s.CreateBuffer(%s).", this, rawDescriptor);
-        if (deferredError->IsVal()) {
-            ConsumeError(deferredError->TakeAsVal());
-        } else {
-            ConsumeError(deferredError->TakeAsUnrecoverable(), InternalErrorType::OutOfMemory);
-        }
+        ConsumeError(std::move(deferredError), InternalErrorType::OutOfMemory);
     }
     return ReturnToAPI(std::move(buffer));
 }

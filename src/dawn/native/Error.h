@@ -168,8 +168,11 @@ class UnknownError {
             mData = d->TakeAsUnrecoverable();
         }
     }
+    UnknownError(UnknownError&&) = default;
 
     ~UnknownError() = default;
+
+    UnknownError& operator=(UnknownError&&) = default;
 
     bool IsUnrecoverable() const {
         return std::holds_alternative<std::unique_ptr<UnrecoverableError>>(mData);
@@ -306,9 +309,7 @@ class UnknownError {
     }
 
     UnknownError(const UnknownError&) = delete;
-    UnknownError(UnknownError&&) = delete;
     UnknownError& operator=(const UnknownError&) = delete;
-    UnknownError& operator=(UnknownError&&) = delete;
 
   private:
     std::variant<std::unique_ptr<UnrecoverableError>, std::unique_ptr<ValidationError>> mData;

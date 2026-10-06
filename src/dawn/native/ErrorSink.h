@@ -45,54 +45,27 @@ class ErrorSink {
     // error may cause a fatal error and further execution may be undefined. This is especially
     // true for the ResultOrError variants.
     template <typename E>
-        requires(IsMaybeConcreteError<E>)
+        requires(IsMaybeConcreteError<E> || std::is_same_v<E, MaybeUnknownError>)
     [[nodiscard]] bool ConsumedError(
         E maybeError,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
         if (maybeError.IsError()) [[unlikely]] {
-            ConsumeError(maybeError.AcquireError(), additionalAllowedErrors);
+            ConsumeError(UnknownError(maybeError.AcquireError()), additionalAllowedErrors);
             return true;
-        }
-        return false;
-    }
-    [[nodiscard]] bool ConsumedError(
-        MaybeUnknownError maybeError,
-        InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
-        if (maybeError.IsError()) [[unlikely]] {
-            std::unique_ptr<UnknownError> error = maybeError.AcquireError();
-            if (error->IsVal()) {
-                return ConsumedError(MaybeValError{error->TakeAsVal()}, additionalAllowedErrors);
-            }
-            return ConsumedError(MaybeError{error->TakeAsUnrecoverable()}, additionalAllowedErrors);
         }
         return false;
     }
 
     template <typename E, typename... Args>
-        requires(IsMaybeConcreteError<E>)
+        requires(IsMaybeConcreteError<E> || std::is_same_v<E, MaybeUnknownError>)
     [[nodiscard]] bool ConsumedError(E maybeError,
                                      InternalErrorType additionalAllowedErrors,
                                      const char* formatStr,
                                      const Args&... args) {
         if (maybeError.IsError()) [[unlikely]] {
-            ConsumeError(maybeError.AcquireError(), additionalAllowedErrors, formatStr, args...);
+            ConsumeError(UnknownError(maybeError.AcquireError()), additionalAllowedErrors,
+                         formatStr, args...);
             return true;
-        }
-        return false;
-    }
-    template <typename... Args>
-    [[nodiscard]] bool ConsumedError(MaybeUnknownError maybeError,
-                                     InternalErrorType additionalAllowedErrors,
-                                     const char* formatStr,
-                                     const Args&... args) {
-        if (maybeError.IsError()) [[unlikely]] {
-            std::unique_ptr<UnknownError> error = maybeError.AcquireError();
-            if (error->IsVal()) {
-                return ConsumedError(MaybeValError{error->TakeAsVal()}, additionalAllowedErrors,
-                                     formatStr, args...);
-            }
-            return ConsumedError(MaybeError{error->TakeAsUnrecoverable()}, additionalAllowedErrors,
-                                 formatStr, args...);
         }
         return false;
     }
@@ -104,64 +77,13 @@ class ErrorSink {
     }
 
     template <typename E, typename T>
-        requires(IsResultOrConcreteError<E, T>)
+        requires(IsResultOrConcreteError<E, T> || std::is_same_v<E, ResultOrUnknownError<T>>)
     [[nodiscard]] bool ConsumedError(
         E resultOrError,
         T* result,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
         if (resultOrError.IsError()) [[unlikely]] {
-            ConsumeError(resultOrError.AcquireError(), additionalAllowedErrors);
-            return true;
-        }
-        *result = resultOrError.AcquireSuccess();
-        return false;
-    }
-    template <typename T>
-    [[nodiscard]] bool ConsumedError(
-        ResultOrUnknownError<T> resultOrError,
-        T* result,
-        InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
-        if (resultOrError.IsError()) [[unlikely]] {
-            std::unique_ptr<UnknownError> error = resultOrError.AcquireError();
-            if (error->IsVal()) {
-                ConsumeError(error->TakeAsVal(), additionalAllowedErrors);
-            } else {
-                ConsumeError(error->TakeAsUnrecoverable(), additionalAllowedErrors);
-            }
-            return true;
-        }
-        *result = resultOrError.AcquireSuccess();
-        return false;
-    }
-
-    template <typename E, typename T, typename... Args>
-        requires(IsResultOrConcreteError<E, T>)
-    [[nodiscard]] bool ConsumedError(E resultOrError,
-                                     T* result,
-                                     InternalErrorType additionalAllowedErrors,
-                                     const char* formatStr,
-                                     const Args&... args) {
-        if (resultOrError.IsError()) [[unlikely]] {
-            ConsumeError(resultOrError.AcquireError(), additionalAllowedErrors, formatStr, args...);
-            return true;
-        }
-        *result = resultOrError.AcquireSuccess();
-        return false;
-    }
-    template <typename T, typename... Args>
-    [[nodiscard]] bool ConsumedError(ResultOrUnknownError<T> resultOrError,
-                                     T* result,
-                                     InternalErrorType additionalAllowedErrors,
-                                     const char* formatStr,
-                                     const Args&... args) {
-        if (resultOrError.IsError()) [[unlikely]] {
-            std::unique_ptr<UnknownError> error = resultOrError.AcquireError();
-            if (error->IsVal()) {
-                ConsumeError(error->TakeAsVal(), additionalAllowedErrors, formatStr, args...);
-            } else {
-                ConsumeError(error->TakeAsUnrecoverable(), additionalAllowedErrors, formatStr,
-                             args...);
-            }
+            ConsumeError(UnknownError(resultOrError.AcquireError()), additionalAllowedErrors);
             return true;
         }
         *result = resultOrError.AcquireSuccess();
@@ -178,65 +100,64 @@ class ErrorSink {
                              args...);
     }
 
-    template <typename... Args>
-    void ConsumeError(std::unique_ptr<UnknownError> error,
-                      const char* formatStr,
-                      const Args&... args) {
-        if (error->IsVal()) {
-            ConsumeError(error->TakeAsVal(), formatStr, args...);
-        } else {
-            ConsumeError(error->TakeAsUnrecoverable(), formatStr, args...);
+    template <typename E, typename T, typename... Args>
+        requires(IsResultOrConcreteError<E, T> || std::is_same_v<E, ResultOrUnknownError<T>>)
+    [[nodiscard]] bool ConsumedError(E resultOrError,
+                                     T* result,
+                                     InternalErrorType additionalAllowedErrors,
+                                     const char* formatStr,
+                                     const Args&... args) {
+        if (resultOrError.IsError()) [[unlikely]] {
+            ConsumeError(UnknownError(resultOrError.AcquireError()), additionalAllowedErrors,
+                         formatStr, args...);
+            return true;
         }
+        *result = resultOrError.AcquireSuccess();
+        return false;
     }
 
     template <typename T, typename... Args>
         requires(IsConcreteError<T>)
+    void ConsumeError(std::unique_ptr<T> error) {
+        ConsumeError(UnknownError(std::move(error)), InternalErrorType::None);
+    }
+
+    template <typename T, typename... Args>
+        requires(IsConcreteError<T> || std::is_same_v<T, UnknownError>)
+    void ConsumeError(std::unique_ptr<T> error, InternalErrorType additionalAllowedErrors) {
+        return ConsumeError(UnknownError(std::move(error)), additionalAllowedErrors);
+    }
+
+    template <typename T, typename... Args>
+        requires(IsConcreteError<T> || std::is_same_v<T, UnknownError>)
     void ConsumeError(std::unique_ptr<T> error, const char* formatStr, const Args&... args) {
         ConsumeError(std::move(error), InternalErrorType::None, formatStr, args...);
     }
 
-    template <typename... Args>
-    void ConsumeError(std::unique_ptr<UnknownError> error,
-                      InternalErrorType additionalAllowedErrors,
-                      const char* formatStr,
-                      const Args&... args) {
-        if (error->IsVal()) {
-            ConsumeError(error->TakeAsVal(), additionalAllowedErrors, formatStr, args...);
-        } else {
-            ConsumeError(error->TakeAsUnrecoverable(), additionalAllowedErrors, formatStr, args...);
-        }
-    }
-
     template <typename T, typename... Args>
-        requires(IsConcreteError<T>)
+        requires(IsConcreteError<T> || std::is_same_v<T, UnknownError>)
     void ConsumeError(std::unique_ptr<T> error,
                       InternalErrorType additionalAllowedErrors,
                       const char* formatStr,
                       const Args&... args) {
-        if (static_cast<uint32_t>(error->GetType()) &
+        ConsumeError(UnknownError(std::move(error)), additionalAllowedErrors, formatStr, args...);
+    }
+
+    template <typename... Args>
+    void ConsumeError(UnknownError error,
+                      InternalErrorType additionalAllowedErrors,
+                      const char* formatStr,
+                      const Args&... args) {
+        if (static_cast<uint32_t>(error.GetType()) &
             (static_cast<uint32_t>(additionalAllowedErrors) |
              static_cast<uint32_t>(InternalErrorType::Validation))) {
-            error->AppendContext(formatStr, args...);
+            error.AppendContext(formatStr, args...);
         }
         ConsumeError(std::move(error), additionalAllowedErrors);
     }
 
-    void ConsumeError(UnknownError error,
-                      InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
-        if (error.IsVal()) {
-            ConsumeError(error.TakeAsVal());
-        } else {
-            ConsumeError(error.TakeAsUnrecoverable());
-        }
-    }
-
-    // TODO(crbug.com/536639352): When `UnknownError` is available, determine if we can combine
-    // these overloads into a single one taking the UnknownError class.
     virtual void ConsumeError(
-        std::unique_ptr<UnrecoverableError> error,
-        InternalErrorType additionalAllowedErrors = InternalErrorType::None) = 0;
-    virtual void ConsumeError(
-        std::unique_ptr<ValidationError> error,
+        UnknownError error,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) = 0;
 };
 

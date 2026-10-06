@@ -189,9 +189,7 @@ class InstanceBase final : public ErrorSink, public RefCounted {
 
     // ErrorSink implementation
     using ErrorSink::ConsumeError;
-    void ConsumeError(std::unique_ptr<UnrecoverableError> error,
-                      InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
-    void ConsumeError(std::unique_ptr<ValidationError> error,
+    void ConsumeError(UnknownError error,
                       InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
 
   private:

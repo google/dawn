@@ -176,9 +176,8 @@ BufferBase* SharedBufferMemoryBase::APICreateBuffer(const BufferDescriptor* rawD
 
     // If there was a deferredError saved from earlier, surface it now.
     if (deferredError) {
-        std::ignore =
-            GetDevice()->ConsumedError(std::move(deferredError), InternalErrorType::OutOfMemory,
-                                       "calling %s.CreateBuffer(%s).", this, rawDescriptor);
+        GetDevice()->ConsumeError(std::move(deferredError), InternalErrorType::OutOfMemory,
+                                  "calling %s.CreateBuffer(%s).", this, rawDescriptor);
     }
 
     // Access is not allowed until BeginAccess has been called.
