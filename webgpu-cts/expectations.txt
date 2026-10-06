@@ -580,9 +580,10 @@ crbug.com/360916910 [ intel-0x9bc5 linux mesa_ge_23.2 no-clang-coverage ] webgpu
 
 crbug.com/489786288 [ amd mac ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
 
-# textureSampleCompareLevel failures with offset=true, in compute shader only, on Mac Intel
+# textureSampleCompareLevel failures with offset=true, and texture_utils:weights, in compute shader only, on Mac Intel
 crbug.com/408250017 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:stage="c";*;offset=true [ Failure ] # CAT:Accuracy
 crbug.com/408250017 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:stage="c";*;offset=true [ Failure ] # CAT:Accuracy
+crbug.com/408250017 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:weights:stage="compute" [ Failure ] # CAT:Accuracy
 
 # All textureSampleCompareLevel:2d_coords/3d_coords fail on Pixel 4
 crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Failure ] # CAT:Accuracy
@@ -602,9 +603,10 @@ crbug.com/407088846 [ angle-d3d11 arch-x86_64 desktop graphite-enabled memory_ge
 # external_texture failures
 crbug.com/407109053 [ intel-0x9bc5 linux no-clang-coverage webgpu-adapter-default ] webgpu:web_platform,external_texture,* [ Failure ]
 
-# `render_pipeline,overrides:*:isAsync=true` flaky or failing on Android Qualcomm
+# `render_pipeline,overrides:*:isAsync=true` and `fma:values:stage="override"` flaky or failing on Android Qualcomm
 crbug.com/407109054 [ android-r qualcomm ] webgpu:api,operation,render_pipeline,overrides:precision:isAsync=true [ Failure ]
 crbug.com/407109054 [ android-pixel-4 ] webgpu:api,operation,render_pipeline,overrides:multi_entry_points:isAsync=true [ Failure ]
+crbug.com/407109054 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,fma:values:stage="override";type="vec3%3Cf32%3E" [ Failure ]
 
 crbug.com/407109057 [ android-pixel-6 arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ] # CAT:Accuracy
 crbug.com/407109057 [ android-pixel-6 android-t arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ] # CAT:Accuracy
@@ -615,9 +617,10 @@ crbug.com/407109057 [ android-pixel-6 android-t ] webgpu:shader,execution,shader
 crbug.com/407109057 [ android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ] # CAT:Accuracy
 crbug.com/407109057 [ android-pixel-6 android-t ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ] # CAT:Accuracy
 
-# `memory_layout:read_layout` failures on Pixel 4
+# `memory_layout:read_layout` and `memory_layout:write_layout` failures on Pixel 4
 crbug.com/407109058 [ android-pixel-4 ] webgpu:shader,execution,memory_layout:read_layout:case="array_stride_size";aspace="function" [ Failure ] # CAT:Critical
 crbug.com/407109058 [ android-pixel-4 ] webgpu:shader,execution,memory_layout:read_layout:case="array_stride_size";aspace="private" [ Failure ] # CAT:Critical
+crbug.com/407109058 [ android-r qualcomm ] webgpu:shader,execution,memory_layout:write_layout:* [ Failure ] # CAT:Critical
 
 # `memory_layout:read_layout` vec3h/vec4 failures on Win Intel DXC
 crbug.com/407076131 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,memory_layout:read_layout:case="vec3h_align8";aspace="function" [ Failure ] # CAT:Critical
@@ -1702,7 +1705,4 @@ crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,access,structure
 crbug.com/0000 [ dawn-no-backend-validation intel-0x9bc5 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,af_matrix_subtraction:matrix:inputSource="const";cols=2;rows=4 [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation intel-0x4680 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:subtraction_vector_scalar_compound:inputSource="storage_rw";vectorize_lhs=4 [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation intel-0x4680 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,u32_arithmetic:subtraction_scalar_vector:inputSource="const";vectorize_rhs=2 [ Failure ]
-crbug.com/0000 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:weights:stage="compute" [ Failure ]
-crbug.com/0000 [ android-r qualcomm ] webgpu:shader,execution,memory_layout:write_layout:* [ Failure ]
 crbug.com/0000 [ android-r ] webgpu:shader,execution,shader_io,vertex_builtins:* [ Failure ]
-crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,fma:values:stage="override";type="vec3%3Cf32%3E" [ Failure ]
