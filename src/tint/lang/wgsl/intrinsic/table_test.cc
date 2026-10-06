@@ -40,6 +40,7 @@
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/intrinsic/dialect.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
@@ -72,6 +73,16 @@ TEST_F(WgslIntrinsicTableTest, MatchF32) {
     EXPECT_EQ(result->return_type, f32);
     ASSERT_EQ(result->parameters.Length(), 1u);
     EXPECT_EQ(result->parameters[0].type, f32);
+}
+
+TEST_F(WgslIntrinsicTableTest, MatchPrintString) {
+    auto* str = create<core::type::String>();
+    auto result =
+        table.Lookup(wgsl::BuiltinFn::kPrint, Empty, Vector{str}, core::EvaluationStage::kRuntime);
+    ASSERT_EQ(result, Success);
+    EXPECT_EQ(result->return_type, create<core::type::Void>());
+    ASSERT_EQ(result->parameters.Length(), 1u);
+    EXPECT_EQ(result->parameters[0].type, str);
 }
 
 TEST_F(WgslIntrinsicTableTest, MismatchF32) {

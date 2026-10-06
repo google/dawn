@@ -1003,5 +1003,14 @@ TEST_F(CoreIntrinsicTableTest, MemberFunctionDoesNotMatchNonMemberFunction) {
 )");
 }
 
+TEST_F(CoreIntrinsicTableTest, MatchPrintString) {
+    auto result =
+        table.Lookup(BuiltinFn::kPrint, Empty, Vector{ty.String()}, EvaluationStage::kRuntime);
+    ASSERT_EQ(result, Success);
+    EXPECT_EQ(result->return_type, ty.void_());
+    ASSERT_EQ(result->parameters.Length(), 1u);
+    EXPECT_EQ(result->parameters[0].type, ty.String());
+}
+
 }  // namespace
 }  // namespace tint::core::intrinsic

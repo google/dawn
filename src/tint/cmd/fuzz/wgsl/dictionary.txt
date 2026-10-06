@@ -439,6 +439,7 @@
 "step"
 "storage"
 "storageBarrier"
+"string"
 "struct"
 "subgroupAdd"
 "subgroupAll"

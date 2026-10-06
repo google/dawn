@@ -37,6 +37,13 @@ See:
           ) }}
 {{-     range .Overloads  -}}
 {{-       range $I.Permute . -}}
+{{-         $has_string := false -}}
+{{-         range .Parameters -}}
+{{-           if eq .Type.Target.Name "string" -}}
+{{-             $has_string = true -}}
+{{-           end -}}
+{{-         end -}}
+{{-         if not $has_string -}}
 {{- /*      Generate a ./literal/<function>/<permuataion-hash>.wgsl file using
             the Permutation macro defined below                             */ -}}
 {{-         $file := printf "./literal/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
@@ -47,6 +54,7 @@ See:
 {{-         $file := printf "./var/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
 {{-         $content := Eval "Permutation" "Overload" . "Mode" "var" -}}
 {{-         WriteFile $file $content -}}
+{{-         end -}}
 {{-       end  }}
 {{-     end  }}
 {{-   end  }}

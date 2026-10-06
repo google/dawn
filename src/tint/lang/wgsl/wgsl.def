@@ -195,6 +195,7 @@ type texture_storage_3d<F: texel_format, A: access>
 type texture_external
 type texel_buffer<F: texel_format, A: access>
 type input_attachment<T>
+type string
 
 @display("__modf_result_{T}")        type __modf_result<T>
 @display("__modf_result_vec{N}_{T}") type __modf_result_vec<N: num, T>
@@ -1792,6 +1793,7 @@ match uniform_or_storage
   fn bufferLength(ptr<AS, unsized_buffer, W>) -> u32
 
 // chromium_experimental_print
+fn print(string)
 implicit(T: concrete_scalar)
   fn print(T)
 implicit(N: num, T: concrete_scalar)
