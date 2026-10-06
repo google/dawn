@@ -1584,12 +1584,6 @@ void napi_fatal_error(const char* location,
     std::abort();
 }
 
-static napi_module* g_registered_module = nullptr;
-
-void napi_module_register(napi_module* mod) {
-    g_registered_module = mod;
-}
-
 // ============================================================================
 // References, ObjectWrap & Instance Data
 // ============================================================================

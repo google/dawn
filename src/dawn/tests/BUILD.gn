@@ -449,7 +449,8 @@ dawn_test("dawn_unittests") {
     deps += [ "${dawn_spirv_tools_dir}:spvtools_opt" ]
   }
 
-  if (checkout_v8 && dawn_node) {
+  # V8 does not build with MSVC.
+  if (checkout_v8 && dawn_node && is_clang) {
     sources += [
       "${dawn_root}/src/dawn/node/test/EventLoopTest.cpp",
       "${dawn_root}/src/dawn/node/test/NapiV8Test.cpp",

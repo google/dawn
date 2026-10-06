@@ -45,6 +45,7 @@
 #pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
 #pragma clang diagnostic ignored "-Wunique-object-duplication"
 #pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
+#pragma clang diagnostic ignored "-Wsign-conversion"
 #include <v8.h>
 
 #include "libplatform/libplatform.h"

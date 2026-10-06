@@ -45,7 +45,7 @@ if (checkout_v8 && dawn_node) {
     public_configs = [ ":napi_v8_public_config" ]
 
     deps = [
-      "${dawn_abseil_dir}/absl/container:linked_hash_map",
+      "${dawn_abseil_dir}:absl",
       "${dawn_root}/src/utils",
       "//third_party/v8/src:v8",
     ]

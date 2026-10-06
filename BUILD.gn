@@ -89,7 +89,9 @@ if (dawn_standalone) {
         (target_cpu == "arm64" && is_win)) {
       deps += [ "${dawn_dxc_gn_dir}:dxc" ]
     }
-    if (checkout_v8 && dawn_build_node_bindings) {
+
+    # V8 does not build with MSVC.
+    if (checkout_v8 && dawn_build_node_bindings && is_clang) {
       deps += [ "src/dawn/node:dawn_standalone_cts_runner" ]
     }
   }

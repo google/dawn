@@ -104,6 +104,10 @@ src:*third_party{/,\\}abseil-cpp{/,\\}absl{/,\\}*
 # absl uses enable_if.
 src:*third_party{/,\\}abseil-cpp{/,\\}absl{/,\\}*
 
+[redundant-parens]
+# absl's btree_container.h declares `const_iterator(hint)` parameters through a macro.
+src:*third_party{/,\\}abseil-cpp{/,\\}absl{/,\\}*
+
 [implicit-float-conversion]
 # Implicit float conversions in tests, samples, and external dependencies.
 src:*src{/,\\}dawn{/,\\}tests{/,\\}*
