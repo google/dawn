@@ -1087,6 +1087,21 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
 std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs(
     const TogglesState& toggles) const {
 #ifdef DAWN_USE_AGILITY_SDK
+    return EnumerateSubgroupMatrixConfigs(
+        GetDeviceInfo().linAlgWaveMatrixMultiplySupports, mVendorId, mDeviceId,
+        IsFeatureSupportedWithToggles(wgpu::FeatureName::ShaderF16, toggles));
+#else
+    return {};
+#endif  // DAWN_USE_AGILITY_SDK
+}
+
+#ifdef DAWN_USE_AGILITY_SDK
+// static
+std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs(
+    std::span<const D3D12DeviceInfo::LinAlgWMMSupport> supports,
+    uint32_t vendorId,
+    uint32_t deviceId,
+    bool supportsShaderF16) {
     auto ToWgpuType =
         [](D3D12_LINEAR_ALGEBRA_DATATYPE dataType) -> wgpu::SubgroupMatrixComponentType {
         switch (dataType) {
@@ -1133,9 +1148,13 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
         DAWN_UNREACHABLE();
     };
 
+    auto IsMultipleOf = [](const SubgroupMatrixConfig& a, const SubgroupMatrixConfig& b) {
+        return a.M % b.M == 0 && a.N % b.N == 0 && a.K % b.K == 0;
+    };
+
     std::vector<SubgroupMatrixConfig> subgroupMatrixConfigs;
 
-    for (auto& wmms : GetDeviceInfo().linAlgWaveMatrixMultiplySupports) {
+    for (const auto& wmms : supports) {
         DAWN_ASSERT(wmms.Inputs.MatrixAComponentType == wmms.Inputs.MatrixBComponentType);
         auto dataTypeAB = wmms.Inputs.MatrixAComponentType;
         auto dataTypeAcc = wmms.Inputs.AccumulatorComponentType;
@@ -1153,7 +1172,7 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
             continue;
         }
 
-        if (gpu_info::IsMicrosoftWARP(mVendorId, mDeviceId)) {
+        if (gpu_info::IsMicrosoftWARP(vendorId, deviceId)) {
             // On WARP 1.65535.20-preview, CheckFeatureSupport returns shapes for SINT8 and UINT8,
             // even though these types are not supported.
             // TODO(crbug.com/527049636): Remove once this is fixed in WARP.
@@ -1162,14 +1181,14 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
             }
         }
 
-        if (!IsFeatureSupportedWithToggles(wgpu::FeatureName::ShaderF16, toggles)) {
+        if (!supportsShaderF16) {
             if (IsFloat(dataTypeAB) || IsFloat(dataTypeAcc)) {
                 continue;
             }
         }
 
         DAWN_ASSERT(IsPowerOfTwo(wmms.Inputs.WaveSize));
-        for (auto& shape : wmms.Shapes) {
+        for (const auto& shape : wmms.Shapes) {
             SubgroupMatrixConfig config;
             config.M = shape.M;
             config.N = shape.N;
@@ -1179,44 +1198,67 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
             config.minSubgroupSize = wmms.Inputs.WaveSize;
             config.maxSubgroupSize = wmms.Inputs.WaveSize;
 
-            // If the same shape was added at a previous wave size, and it's the immediately
-            // preceding power-of-two size, extend its [minSubgroupSize, maxSubgroupSize] range.
-            // For example, if we have the same shapes for WaveSize 4, 16, and 32, after adding
-            // a config for 4, we would add a new config for 16 (because it's not 8), but we would
-            // merge 32 into 16's config, making its range [16,32].
+            // D3D12 reports the base shape(s) for each wave size, and automatically decomposes any
+            // multiple of a base shape into native ops. Therefore, when comparing `config` at the
+            // current wave size against a previously added `found` config with consecutive/adjacent
+            // power-of-two subgroup sizes:
+            // - If `config` is a multiple of `found`, `config` is also supported across `found`'s
+            //   subgroup size range, so extend `config.minSubgroupSize` down to
+            //   `found.minSubgroupSize`. E.g. on WARP, curr is 8x8x4 range [8,8], found is 4x4x4
+            //   range [4,4], extend 8x8x4's range to [4,8].
+            // - If `found` is a multiple of `config`, `found` is also supported at the current wave
+            //   size, so extend `found.maxSubgroupSize` up to `wmms.Inputs.WaveSize`. (Handled for
+            //   completeness; e.g. if curr is 4x4x4 range [8,8] and found is 8x8x4 range [4,4],
+            //   extend 8x8x4's range to [4,8].)
+            // - If both are true (`found` and `config` have the exact same shape) and their ranges
+            //   merged, do not insert a duplicate `config`. E.g. on AMD, curr is 16x16x16 range
+            //   [64,64], found is 16x16x16 range [32,32], extend found's range to [32,64] and do
+            //   not add curr.
             //
-            // Note 1: This depends on linAlgWaveMatrixMultiplySupports being ordered by increasing
-            // WaveSize (asserted below).
+            // Note 1: This depends on `supports` being ordered by non-decreasing WaveSize for each
+            // type pair (asserted below).
             //
-            // Note 2: The search is O(n), but n is typically small (e.g. 6 on AMD, 14 on WARP).
-            // Furthermore, the way linAlgWaveMatrixMultiplySupports is laid out, all
-            // (componentType, resultComponentType) type pairs are grouped together for each wave
-            // size, so reverse search typically matches in 1-2 iterations. Finally, this is only
-            // performed once at startup.
+            // Note 2: The search is O(n), but n is typically small (e.g. 6 on AMD, 14 on WARP), and
+            // this is only performed once at startup.
             //
             // TODO(crbug.com/567996254): Remove all this once we can use the Enumeration API
-            auto it = std::find_if(
-                subgroupMatrixConfigs.rbegin(), subgroupMatrixConfigs.rend(),
-                [&](const SubgroupMatrixConfig& found) {
-                    return found.componentType == config.componentType &&
-                           found.resultComponentType == config.resultComponentType &&
-                           found.M == config.M && found.N == config.N && found.K == config.K;
-                });
-            if (it != subgroupMatrixConfigs.rend()) {
-                DAWN_ASSERT(wmms.Inputs.WaveSize > it->maxSubgroupSize);
-                if (it->maxSubgroupSize == wmms.Inputs.WaveSize / 2) {
-                    it->maxSubgroupSize = wmms.Inputs.WaveSize;
+            bool addConfig = true;
+            for (auto it = subgroupMatrixConfigs.rbegin(); it != subgroupMatrixConfigs.rend();
+                 ++it) {
+                SubgroupMatrixConfig& found = *it;
+                // Skip non-matching type pair
+                if (found.componentType != config.componentType ||
+                    found.resultComponentType != config.resultComponentType) {
                     continue;
                 }
+
+                const bool configIsMultipleOfFound = IsMultipleOf(config, found);
+                const bool foundIsMultipleOfConfig = IsMultipleOf(found, config);
+
+                if (configIsMultipleOfFound) {
+                    if (found.maxSubgroupSize >= config.minSubgroupSize / 2) {
+                        config.minSubgroupSize =
+                            std::min(config.minSubgroupSize, found.minSubgroupSize);
+                    }
+                }
+                if (foundIsMultipleOfConfig) {
+                    DAWN_ASSERT(wmms.Inputs.WaveSize >= found.maxSubgroupSize);
+                    if (found.maxSubgroupSize >= wmms.Inputs.WaveSize / 2) {
+                        found.maxSubgroupSize = wmms.Inputs.WaveSize;
+                        if (DAWN_LIKELY(configIsMultipleOfFound)) {
+                            addConfig = false;
+                        }
+                    }
+                }
             }
-            subgroupMatrixConfigs.push_back(config);
+            if (addConfig) {
+                subgroupMatrixConfigs.push_back(config);
+            }
         }
     }
 
     return subgroupMatrixConfigs;
-#else
-    return {};
-#endif  // DAWN_USE_AGILITY_SDK
 }
+#endif  // DAWN_USE_AGILITY_SDK
 
 }  // namespace dawn::native::d3d12

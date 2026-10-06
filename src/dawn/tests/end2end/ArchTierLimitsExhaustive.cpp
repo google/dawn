@@ -666,48 +666,69 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, SemiExhaustiveTestSubgroupMatrixConfigs
     {
             using enum wgpu::SubgroupMatrixComponentType;
 
-  AddDevice({{F16, F32, 8, 8, 16},
-            {I8, I32, 8, 8, 32},
-            {U8, U32, 8, 8, 32},
+  AddDevice({{F16, F32, 8, 8, 16, 8, 32},
+            {I8, I32, 8, 8, 32, 8, 32},
+            {U8, U32, 8, 8, 32, 8, 32},
             }, "Vulkan_Intel_R__Iris_R__Xe_Graphics__TGL_GT2");
-  AddDevice({{F32, F32, 8, 8, 8},
-            {F16, F16, 8, 8, 8},
+  AddDevice({{F32, F32, 8, 8, 8, 32, 32},
+            {F16, F16, 8, 8, 8, 32, 32},
             }, "Metal_Apple_M2");
-  AddDevice({{F16, F32, 16, 16, 16},
-            {F16, F16, 16, 16, 16},
-            {U8, I32, 16, 16, 16},
-            {I8, I32, 16, 16, 16},
+  AddDevice({{F16, F32, 16, 16, 16, 32, 64},
+            {F16, F16, 16, 16, 16, 32, 64},
+            {U8, I32, 16, 16, 16, 32, 64},
+            {I8, I32, 16, 16, 16, 32, 64},
             }, "Vulkan_Radeon_RX_5500_XT");
-  AddDevice({{I32, I32, 4, 4, 4},
-            {I32, I32, 8, 8, 4},
-            {I32, U32, 4, 4, 4},
-            {I32, U32, 8, 8, 4},
-            {U32, I32, 4, 4, 4},
-            {U32, I32, 8, 8, 4},
-            {U32, U32, 4, 4, 4},
-            {U32, U32, 8, 8, 4},
-            {F16, F16, 4, 4, 4},
-            {F16, F16, 8, 8, 4},
-            {F16, F32, 4, 4, 4},
-            {F16, F32, 8, 8, 4},
-            {F32, F32, 4, 4, 4},
-            {F32, F32, 8, 8, 4},
-            }, "D3D12_Microsoft_Basic_Render_Driver_CPU");
-  AddDevice({{I32, I32, 4, 4, 4},
-            {I32, I32, 8, 8, 4},
-            {I32, U32, 4, 4, 4},
-            {I32, U32, 8, 8, 4},
-            {U32, I32, 4, 4, 4},
-            {U32, I32, 8, 8, 4},
-            {U32, U32, 4, 4, 4},
-            {U32, U32, 8, 8, 4},
-            {F16, F16, 4, 4, 4},
-            {F16, F16, 8, 8, 4},
-            {F16, F32, 4, 4, 4},
-            {F16, F32, 8, 8, 4},
-            {F32, F32, 4, 4, 4},
-            {F32, F32, 8, 8, 4},
-            }, "D3D12_Microsoft_Basic_Render_Driver_Integrated_GPU");
+  for (const char* warpDevice : {"D3D12_Microsoft_Basic_Render_Driver_CPU",
+                                 "D3D12_Microsoft_Basic_Render_Driver_Integrated_GPU"}) {
+    // SSE / NEON (max native wave size 4)
+    AddDevice({{I32, I32, 4, 4, 4, 4, 4},
+              {I32, U32, 4, 4, 4, 4, 4},
+              {U32, I32, 4, 4, 4, 4, 4},
+              {U32, U32, 4, 4, 4, 4, 4},
+              {F16, F16, 4, 4, 4, 4, 4},
+              {F16, F32, 4, 4, 4, 4, 4},
+              {F32, F32, 4, 4, 4, 4, 4},
+              }, warpDevice);
+    // AVX2 (max native wave size 8)
+    AddDevice({{I32, I32, 4, 4, 4, 4, 4},
+              {I32, I32, 8, 8, 4, 4, 8},
+              {I32, U32, 4, 4, 4, 4, 4},
+              {I32, U32, 8, 8, 4, 4, 8},
+              {U32, I32, 4, 4, 4, 4, 4},
+              {U32, I32, 8, 8, 4, 4, 8},
+              {U32, U32, 4, 4, 4, 4, 4},
+              {U32, U32, 8, 8, 4, 4, 8},
+              {F16, F16, 4, 4, 4, 4, 4},
+              {F16, F16, 8, 8, 4, 4, 8},
+              {F16, F32, 4, 4, 4, 4, 4},
+              {F16, F32, 8, 8, 4, 4, 8},
+              {F32, F32, 4, 4, 4, 4, 4},
+              {F32, F32, 8, 8, 4, 4, 8},
+              }, warpDevice);
+    // AVX-512 (max native wave size 16)
+    AddDevice({{I32, I32, 4, 4, 4, 4, 4},
+              {I32, I32, 8, 8, 4, 4, 8},
+              {I32, I32, 16, 16, 4, 4, 16},
+              {I32, U32, 4, 4, 4, 4, 4},
+              {I32, U32, 8, 8, 4, 4, 8},
+              {I32, U32, 16, 16, 4, 4, 16},
+              {U32, I32, 4, 4, 4, 4, 4},
+              {U32, I32, 8, 8, 4, 4, 8},
+              {U32, I32, 16, 16, 4, 4, 16},
+              {U32, U32, 4, 4, 4, 4, 4},
+              {U32, U32, 8, 8, 4, 4, 8},
+              {U32, U32, 16, 16, 4, 4, 16},
+              {F16, F16, 4, 4, 4, 4, 4},
+              {F16, F16, 8, 8, 4, 4, 8},
+              {F16, F16, 16, 16, 4, 4, 16},
+              {F16, F32, 4, 4, 4, 4, 4},
+              {F16, F32, 8, 8, 4, 4, 8},
+              {F16, F32, 16, 16, 4, 4, 16},
+              {F32, F32, 4, 4, 4, 4, 4},
+              {F32, F32, 8, 8, 4, 4, 8},
+              {F32, F32, 16, 16, 4, 4, 16},
+              }, warpDevice);
+  }
    }
     // clang-format on
 
@@ -747,8 +768,10 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, SemiExhaustiveTestSubgroupMatrixConfigs
                 auto& expect_config = expect_configs[i];
                 if (config.componentType != expect_config.componentType ||
                     config.resultComponentType != expect_config.resultComponentType ||
-                    config.N != expect_config.N || config.M != expect_config.M ||
-                    config.K != expect_config.K) {
+                    config.M != expect_config.M || config.N != expect_config.N ||
+                    config.K != expect_config.K ||
+                    config.minSubgroupSize != expect_config.minSubgroupSize ||
+                    config.maxSubgroupSize != expect_config.maxSubgroupSize) {
                     encountered_error = true;
                     break;
                 }
@@ -775,11 +798,15 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, SemiExhaustiveTestSubgroupMatrixConfigs
             expected_str += ", ";
             expected_str += SubgroupMatrixComponentTypeToString(config.resultComponentType);
             expected_str += ", ";
-            expected_str += std::to_string(config.N);
-            expected_str += ", ";
             expected_str += std::to_string(config.M);
             expected_str += ", ";
+            expected_str += std::to_string(config.N);
+            expected_str += ", ";
             expected_str += std::to_string(config.K);
+            expected_str += ", ";
+            expected_str += std::to_string(config.minSubgroupSize);
+            expected_str += ", ";
+            expected_str += std::to_string(config.maxSubgroupSize);
             expected_str += "},\n            ";
         }
         expected_str += "}, \"" + full_param + "\");\n";

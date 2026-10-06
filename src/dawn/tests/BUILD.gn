@@ -428,6 +428,10 @@ dawn_test("dawn_unittests") {
 
   if (dawn_enable_d3d12) {
     sources += [ "unittests/d3d12/CopySplitTests.cpp" ]
+    if (dawn_use_agility_sdk) {
+      sources += [ "unittests/d3d12/SubgroupMatrixConfigTests.cpp" ]
+      deps += [ "${dawn_agility_sdk_dir}:agility_sdk" ]
+    }
   }
 
   if (dawn_enable_webgpu_on_webgpu) {

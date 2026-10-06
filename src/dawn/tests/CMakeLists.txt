@@ -722,6 +722,12 @@ if (DAWN_ENABLE_D3D12)
     list(APPEND unittest_sources
         "unittests/d3d12/CopySplitTests.cpp"
     )
+    if (DAWN_USE_AGILITY_SDK)
+        list(APPEND unittest_sources
+            "unittests/d3d12/SubgroupMatrixConfigTests.cpp"
+        )
+        list(APPEND unittest_conditional_private_depends agility-sdk)
+    endif()
 endif()
 
 if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
