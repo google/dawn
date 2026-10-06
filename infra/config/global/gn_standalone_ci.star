@@ -77,7 +77,6 @@ gpu.ci.linux_builder(
                 "dawn_android",
                 "dawn_node",
                 "dawn_wasm",
-                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -118,7 +117,6 @@ gpu.ci.linux_builder(
                 "dawn_android",
                 "dawn_node",
                 "dawn_wasm",
-                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -158,7 +156,6 @@ gpu.ci.linux_builder(
             apply_configs = [
                 "dawn_node",
                 "dawn_wasm",
-                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -201,7 +198,6 @@ gpu.ci.linux_builder(
                 "dawn_node",
                 "dawn_wasm",
                 "checkout_litert_lm",
-                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -364,7 +360,6 @@ gpu.ci.mac_builder(
                 "dawn_node",
                 "dawn_wasm",
                 "checkout_litert_lm",
-                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -405,7 +400,6 @@ gpu.ci.mac_builder(
             apply_configs = [
                 "dawn_node",
                 "dawn_wasm",
-                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -446,7 +440,6 @@ gpu.ci.mac_builder(
             apply_configs = [
                 "dawn_node",
                 "dawn_wasm",
-                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -486,7 +479,6 @@ gpu.ci.windows_builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
-                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -527,7 +519,6 @@ gpu.ci.windows_builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
-                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -569,7 +560,6 @@ gpu.ci.windows_builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
-                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -610,7 +600,6 @@ gpu.ci.windows_builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
-                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -653,7 +642,6 @@ gpu.ci.windows_builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
-                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -697,7 +685,6 @@ gpu.ci.windows_builder(
             apply_configs = [
                 "dawn_node",
                 "checkout_litert_lm",
-                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
