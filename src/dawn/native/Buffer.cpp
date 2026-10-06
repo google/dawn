@@ -812,7 +812,7 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
         }
 
         WGPUMapAsyncStatus errorStatus = WGPUMapAsyncStatus_Aborted;
-        MaybeUnknownError maybeError = [&]() -> MaybeUnknownError {
+        MaybeValError maybeValError = [&]() -> MaybeValError {
             DAWN_TRY(GetDevice()->ValidateIsAlive());
             errorStatus = WGPUMapAsyncStatus_Error;
             DAWN_TRY(ValidateMapAsync(mode, offset, size));
@@ -835,30 +835,41 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
             }
 
             DAWN_TRY(TransitionState(BufferState::Unmapped, BufferState::InUse));
-            DAWN_TRY_WITH_CLEANUP(MapAsyncImpl(mode, offset, size), {
-                // Reset state since an error stopped this from reaching pending map state.
-                mState.store(BufferState::Unmapped, std::memory_order::release);
-            });
             return {};
         }();
 
-        if (maybeError.IsError()) {
-            std::unique_ptr<UnknownError> error = maybeError.AcquireError();
+        auto EmitError = [&](auto error) {
             event = AcquireRef(new MapAsyncEvent(callbackInfo, error->GetMessage(), errorStatus));
             GetDevice()->ConsumeError(std::move(error), "calling %s.MapAsync(%s, %u, %u, ...).",
                                       this, mode, offset, size);
-        } else {
-            mMapMode = mode;
-            mMapOffset = offset;
-            mMapSize = size;
-            mAllocatedMapSize = size;
+        };
 
-            event =
-                AcquireRef(new MapAsyncEvent(GetDevice(), this, callbackInfo, mLastUsageSerial));
-            DAWN_CHECK(mMappedRange.data() == nullptr);
-            DAWN_CHECK(!mPendingMapEvent);
-            mPendingMapEvent = event;
-            mState.store(BufferState::PendingMap, std::memory_order::release);
+        if (maybeValError.IsError()) {
+            EmitError(maybeValError.AcquireError());
+        } else {
+            MaybeError maybeError = [&]() -> MaybeError {
+                DAWN_TRY_WITH_CLEANUP(MapAsyncImpl(mode, offset, size), {
+                    // Reset state since an error stopped this from reaching pending map state.
+                    mState.store(BufferState::Unmapped, std::memory_order::release);
+                });
+                return {};
+            }();
+
+            if (maybeError.IsError()) {
+                EmitError(maybeError.AcquireError());
+            } else {
+                mMapMode = mode;
+                mMapOffset = offset;
+                mMapSize = size;
+                mAllocatedMapSize = size;
+
+                event = AcquireRef(
+                    new MapAsyncEvent(GetDevice(), this, callbackInfo, mLastUsageSerial));
+                DAWN_CHECK(mMappedRange.data() == nullptr);
+                DAWN_CHECK(!mPendingMapEvent);
+                mPendingMapEvent = event;
+                mState.store(BufferState::PendingMap, std::memory_order::release);
+            }
         }
     }
 
@@ -945,15 +956,20 @@ MaybeError BufferBase::CopyFromStagingBuffer() {
 }
 
 void BufferBase::APIUnmap() {
-    if (GetDevice()->ConsumedError(ValidateUnmap(), "calling %s.Unmap().", this)) {
+    MaybeValError validateUnmapError = [&]() -> MaybeValError {
+        DAWN_TRY(ValidateUnmap());
+        DAWN_TRY(UnmapInternal(false));
+        return {};
+    }();
+    if (GetDevice()->ConsumedError(std::move(validateUnmapError), "calling %s.Unmap().", this)) {
         return;
     }
-    auto unmap = [&]() -> MaybeUnknownError {
-        DAWN_TRY(UnmapInternal(false));
+
+    MaybeError unmapError = [&]() -> MaybeError {
         DAWN_TRY(GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands());
         return {};
-    };
-    std::ignore = GetDevice()->ConsumedError(unmap(), "calling %s.Unmap().", this);
+    }();
+    std::ignore = GetDevice()->ConsumedError(std::move(unmapError), "calling %s.Unmap().", this);
 }
 
 MaybeValError BufferBase::Unmap(bool forDestroy) {
