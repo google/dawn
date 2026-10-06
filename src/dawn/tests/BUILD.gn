@@ -591,7 +591,6 @@ source_set("end2end_tests_sources") {
     "end2end/AdapterFormatCapabilitiesVkTests.cpp",
     "end2end/AdapterPropertiesD3DTests.cpp",
     "end2end/AdapterPropertiesDrmTests.cpp",
-    "end2end/AdapterPropertiesVkTests.cpp",
     "end2end/ArchTierLimitsExhaustive.cpp",
     "end2end/BasicTests.cpp",
     "end2end/BindGroupTests.cpp",
@@ -765,7 +764,10 @@ source_set("end2end_tests_sources") {
   }
 
   if (dawn_enable_vulkan) {
-    sources += [ "end2end/AllocatorMemoryInstrumentationTests.cpp" ]
+    sources += [
+      "end2end/AdapterPropertiesVkTests.cpp",
+      "end2end/AllocatorMemoryInstrumentationTests.cpp",
+    ]
   }
 
   if (dawn_enable_webgpu_on_webgpu) {

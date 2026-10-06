@@ -939,9 +939,9 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
 
     limits->v1.maxBufferSize = kAssumedMaxBufferSize;
     if (mDeviceInfo.HasExt(DeviceExt::Maintenance4)) {
-        limits->v1.maxBufferSize = mDeviceInfo.propertiesMaintenance4.maxBufferSize;
+        limits->v1.maxBufferSize = mDeviceInfo.maintenance4Properties.maxBufferSize;
     } else {
-        limits->v1.maxBufferSize = mDeviceInfo.propertiesMaintenance3.maxMemoryAllocationSize;
+        limits->v1.maxBufferSize = mDeviceInfo.maintenance3Properties.maxMemoryAllocationSize;
     }
 
     // OpArrayLength returns 0 for buffers >= 2GB for some NVIDIA devices.
@@ -1793,6 +1793,12 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     }
     if (auto* vkProperties = info.Get<AdapterPropertiesVk>()) {
         vkProperties->driverVersion = mDeviceInfo.properties.driverVersion;
+    }
+    if (auto* uuidProperties = info.Get<AdapterPropertiesVulkanUUIDs>()) {
+        ByteSpanFromRef(uuidProperties->deviceUUID)
+            .CopyFrom(ByteSpanFromRef(mDeviceInfo.idProperties.deviceUUID));
+        ByteSpanFromRef(uuidProperties->driverUUID)
+            .CopyFrom(ByteSpanFromRef(mDeviceInfo.idProperties.driverUUID));
     }
     if (auto* drmProperties = info.Get<AdapterPropertiesDrm>()) {
         drmProperties->hasPrimary = mDeviceInfo.drmProperties.hasPrimary;

@@ -4235,7 +4235,9 @@
             {"value": 81, "name": "adapter properties drm", "tags": ["dawn", "native"]},
             {"value": 82, "name": "render bundle encoder resource table", "tags": ["dawn"]},
             {"value": 83, "name": "dawn shader source SPIRV", "tags": ["dawn"]},
-            {"value": 84, "name": "shared buffer memory host pointer descriptor", "tags": ["dawn", "native"]}
+            {"value": 84, "name": "shared buffer memory host pointer descriptor", "tags": ["dawn", "native"]},
+            {"value": 85, "name": "request adapter options vulkan UUIDs", "tags": ["dawn", "native"]},
+            {"value": 86, "name": "adapter properties vulkan UUIDs", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {

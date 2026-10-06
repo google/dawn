@@ -60,6 +60,15 @@ struct AdapterPropertiesVk {
 };
 ```
 
+Likewise `dawn::native::vulkan::AdapterPropertiesVulkanUUIDs` may be chained on `wgpu::AdapterInfo` to query the following:
+
+```
+struct AdapterPropertiesVulkanUUIDs {
+    std::array<uint8_t, VK_UUID_SIZE> deviceUUID;
+    std::array<uint8_t, VK_UUID_SIZE> driverUUID;
+};
+```
+
 ## WebGPU
 
 `wgpu::FeatureName::AdapterPropertiesWGPU` allows querying inner backend information of the WebGPUBackend from the adapter.

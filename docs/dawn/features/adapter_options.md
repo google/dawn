@@ -38,6 +38,10 @@ When discovering adapters on D3D11 and D3D12, Dawn only discovers adapters match
 
 When discovering adapter on D3D11, Dawn creates an adapter matching the provided `RequestAdapterOptionsD3D11Device::device`, and `wgpu::Device` created from the adapter will share the same D3D11 device from `RequestAdapterOptionsD3D11Device::device`. This extension struct does nothing on other backends.
 
+### `RequestAdapterOptionsVulkanUUIDs`
+
+When discovering adapters on Vulkan, Dawn only discovers adapters matching the provided `RequestAdapterOptionsVulkanUUIDs::driverUUID/deviceUUID`. This extension struct does nothing on other backends.
+
 ### `DawnTogglesDescriptor`
 
 When discovering adapters, Dawn will use chained `DawnTogglesDescriptor` as required adapter

@@ -256,7 +256,8 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
     properties2.pNext = nullptr;
     PNextChainBuilder propertiesChain(&properties2);
 
-    propertiesChain.Add(&info.propertiesMaintenance3,
+    propertiesChain.Add(&info.idProperties, VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES);
+    propertiesChain.Add(&info.maintenance3Properties,
                         VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES);
 
     featuresChain.Add(&info._16BitStorageFeatures,
@@ -304,7 +305,7 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
     }
 
     if (info.extensions[DeviceExt::Maintenance4]) {
-        propertiesChain.Add(&info.propertiesMaintenance4,
+        propertiesChain.Add(&info.maintenance4Properties,
                             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_4_PROPERTIES);
     }
 
@@ -378,7 +379,7 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
     }
 
     if (info.extensions[DeviceExt::Maintenance5]) {
-        propertiesChain.Add(&info.propertiesMaintenance5,
+        propertiesChain.Add(&info.maintenance5Properties,
                             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_5_PROPERTIES);
     }
 

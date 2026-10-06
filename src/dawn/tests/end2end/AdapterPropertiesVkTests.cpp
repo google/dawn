@@ -27,13 +27,20 @@
 
 #include "src/dawn/tests/DawnTest.h"
 
+// This must be above VulkanBackend.h otherwise vulkan.h will be included before we can wrap it with
+// vulkan_platform.h.
+#include "src/dawn/common/vulkan_platform.h"
+
+// After vulkan_platform
+#include "dawn/native/VulkanBackend.h"
+
 namespace dawn {
 namespace {
 
 class AdapterPropertiesVkTest : public DawnTest {};
 
-// TODO(dawn:2257) test that is is invalid to request AdapterPropertiesVk if the
-// feature is not available.
+// TODO(dawn:2257) test that is is invalid to request AdapterPropertiesVk and
+// AdapterPropertiesVulkanUUIDs if the feature is not available.
 
 // Test that it is possible to query the Vulkan properties, and it is populated with a valid data.
 TEST_P(AdapterPropertiesVkTest, GetVkProperties) {
@@ -42,8 +49,7 @@ TEST_P(AdapterPropertiesVkTest, GetVkProperties) {
         wgpu::AdapterInfo info;
         wgpu::AdapterPropertiesVk vkProperties;
         info.nextInChain = &vkProperties;
-
-        adapter.GetInfo(&info);
+        EXPECT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
 
         // The driver version should be set to something but it depends on the hardware.
         EXPECT_NE(vkProperties.driverVersion, 0u);
@@ -52,11 +58,29 @@ TEST_P(AdapterPropertiesVkTest, GetVkProperties) {
         wgpu::AdapterInfo adapterInfo;
         wgpu::AdapterPropertiesVk vkProperties;
         adapterInfo.nextInChain = &vkProperties;
-
-        device.GetAdapterInfo(&adapterInfo);
+        EXPECT_EQ(device.GetAdapterInfo(&adapterInfo), wgpu::Status::Success);
 
         // The driver version should be set to something but it depends on the hardware.
         EXPECT_NE(vkProperties.driverVersion, 0u);
+    }
+}
+
+// Test that it is possible to query the Vulkan UUIDs.
+TEST_P(AdapterPropertiesVkTest, GetVulkanUUIDsProperties) {
+    DAWN_TEST_UNSUPPORTED_IF(!adapter.HasFeature(wgpu::FeatureName::AdapterPropertiesVk));
+    {
+        wgpu::AdapterInfo info;
+        native::vulkan::AdapterPropertiesVulkanUUIDs uuidProperties;
+        info.nextInChain = &uuidProperties;
+
+        EXPECT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
+    }
+    {
+        wgpu::AdapterInfo adapterInfo;
+        native::vulkan::AdapterPropertiesVulkanUUIDs uuidProperties;
+        adapterInfo.nextInChain = &uuidProperties;
+
+        EXPECT_EQ(device.GetAdapterInfo(&adapterInfo), wgpu::Status::Success);
     }
 }
 

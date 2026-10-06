@@ -429,7 +429,7 @@ void MaybeConvertDepthStencilSwizzleOneToAlpha(bool isDepthOrStencilFormat,
     // This is enabled by the VK_KHR_maintenance5 extension.
     // https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html#textures-component-swizzle
     if (deviceInfo.HasExt(DeviceExt::Maintenance5) &&
-        deviceInfo.propertiesMaintenance5.depthStencilSwizzleOneSupport == VK_TRUE) {
+        deviceInfo.maintenance5Properties.depthStencilSwizzleOneSupport == VK_TRUE) {
         return;
     }
 

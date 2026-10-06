@@ -41,6 +41,22 @@ DAWN_NATIVE_EXPORT VkInstance GetInstance(WGPUDevice device);
 
 DAWN_NATIVE_EXPORT PFN_vkVoidFunction GetInstanceProcAddr(WGPUDevice device, const char* pName);
 
+// Can be chained in WGPURequestAdapterOptions
+struct DAWN_NATIVE_EXPORT RequestAdapterOptionsVulkanUUIDs : wgpu::ChainedStruct {
+    RequestAdapterOptionsVulkanUUIDs();
+
+    std::array<uint8_t, VK_UUID_SIZE> deviceUUID = {};
+    std::array<uint8_t, VK_UUID_SIZE> driverUUID = {};
+};
+
+// Can be chained in WGPUAdapterInfo
+struct DAWN_NATIVE_EXPORT AdapterPropertiesVulkanUUIDs : wgpu::ChainedStructOut {
+    AdapterPropertiesVulkanUUIDs();
+
+    std::array<uint8_t, VK_UUID_SIZE> deviceUUID = {};
+    std::array<uint8_t, VK_UUID_SIZE> driverUUID = {};
+};
+
 enum class NeedsDedicatedAllocation {
     Yes,
     No,

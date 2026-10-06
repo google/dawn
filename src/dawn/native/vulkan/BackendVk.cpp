@@ -631,6 +631,15 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
             }
         }
         for (auto& physicalDevice : mPhysicalDevices[icd]) {
+            if (auto* uuidOptions = options.Get<RequestAdapterOptionsVulkanUUIDs>()) {
+                const VkPhysicalDeviceIDProperties& idProps =
+                    physicalDevice->GetDeviceInfo().idProperties;
+                if (!std::ranges::equal(uuidOptions->deviceUUID, idProps.deviceUUID) ||
+                    !std::ranges::equal(uuidOptions->driverUUID, idProps.driverUUID)) {
+                    continue;
+                }
+            }
+
             if (physicalDevice->SupportsFeatureLevel(options->featureLevel, instance)) {
                 physicalDevices.push_back(physicalDevice);
             }

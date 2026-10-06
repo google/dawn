@@ -172,6 +172,9 @@ ResultOrValError<UnpackedPtr<AdapterInfo>> AdapterBase::ValidateGetInfo(AdapterI
     DAWN_INVALID_IF(unpacked.Has<AdapterPropertiesVk>() &&
                         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesVk),
                     "Feature AdapterPropertiesVk is not available.");
+    DAWN_INVALID_IF(unpacked.Has<vulkan::AdapterPropertiesVulkanUUIDs>() &&
+                        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesVk),
+                    "Feature AdapterPropertiesVk is not available.");
     DAWN_INVALID_IF(unpacked.Has<AdapterPropertiesDrm>() &&
                         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesDrm),
                     "Feature AdapterPropertiesDrm is not available.");

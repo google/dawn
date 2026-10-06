@@ -57,6 +57,14 @@ DAWN_NATIVE_EXPORT PFN_vkVoidFunction GetInstanceProcAddr(WGPUDevice device, con
     return (*backendDevice->fn.GetInstanceProcAddr)(backendDevice->GetVkInstance(), pName);
 }
 
+RequestAdapterOptionsVulkanUUIDs::RequestAdapterOptionsVulkanUUIDs() {
+    sType = wgpu::SType::RequestAdapterOptionsVulkanUUIDs;
+}
+
+AdapterPropertiesVulkanUUIDs::AdapterPropertiesVulkanUUIDs() {
+    sType = wgpu::SType::AdapterPropertiesVulkanUUIDs;
+}
+
 #if DAWN_PLATFORM_IS(LINUX)
 ExternalImageDescriptorOpaqueFD::ExternalImageDescriptorOpaqueFD()
     : ExternalImageDescriptorFD(ExternalImageType::OpaqueFD) {}

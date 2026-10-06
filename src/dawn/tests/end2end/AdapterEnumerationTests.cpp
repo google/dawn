@@ -29,10 +29,12 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 #include "src/dawn/common/GPUInfo.h"
+#include "src/dawn/common/Sha3.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/utils/compiler.h"
 
@@ -183,7 +185,7 @@ TEST_F(AdapterEnumerationTests, MatchingDXGIAdapterD3D11) {
 TEST_F(AdapterEnumerationTests, OnlyD3D12) {
     native::Instance instance;
 
-    wgpu::RequestAdapterOptions adapterOptions = {};
+    wgpu::RequestAdapterOptions adapterOptions;
     adapterOptions.backendType = wgpu::BackendType::D3D12;
 
     const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
@@ -323,6 +325,78 @@ TEST_F(AdapterEnumerationTests, OneBackendThenTheOther) {
         EXPECT_EQ(metalAdapterCount, metalAdapterCount2);
     }
 }
+
+#if defined(DAWN_ENABLE_BACKEND_VULKAN)
+// Test enumerating a Vulkan physical devices matching specific device/driver UUIDs
+TEST_F(AdapterEnumerationTests, MatchingVulkanUUIDs) {
+    native::Instance instance;
+
+    wgpu::RequestAdapterOptions testAdapterOptions;
+    testAdapterOptions.backendType = wgpu::BackendType::Vulkan;
+    const auto& testAdapters = instance.EnumerateAdapters(&testAdapterOptions);
+
+    for (const auto& testAdapter : testAdapters) {
+        native::vulkan::RequestAdapterOptionsVulkanUUIDs uuidOptions;
+
+        wgpu::RequestAdapterOptions adapterOptions = {};
+        adapterOptions.backendType = wgpu::BackendType::Vulkan;
+        adapterOptions.nextInChain = &uuidOptions;
+
+        // Check requesting the UUIDs for a specific Vulkan physical device.
+        {
+            // Fill UUID options with UUIDs from the current adapter.
+            {
+                wgpu::AdapterInfo info;
+                native::vulkan::AdapterPropertiesVulkanUUIDs uuidProperties;
+                info.nextInChain = &uuidProperties;
+                EXPECT_EQ(wgpu::Adapter(testAdapter.Get()).GetInfo(&info), wgpu::Status::Success);
+
+                ByteSpanFromRef(uuidOptions.driverUUID)
+                    .CopyFrom(ByteSpanFromRef(uuidProperties.driverUUID));
+                ByteSpanFromRef(uuidOptions.deviceUUID)
+                    .CopyFrom(ByteSpanFromRef(uuidProperties.deviceUUID));
+            }
+
+            // A single adapter should be returned that should be a device with the exact same
+            // UUIDs.
+            std::vector<native::Adapter> adapters = instance.EnumerateAdapters(&adapterOptions);
+            ASSERT_EQ(adapters.size(), 1u);
+
+            // UUID of the returned adapter should be the same as requested.
+            {
+                wgpu::AdapterInfo info;
+                native::vulkan::AdapterPropertiesVulkanUUIDs uuidProperties;
+                info.nextInChain = &uuidProperties;
+                EXPECT_EQ(wgpu::Adapter(adapters[0].Get()).GetInfo(&info), wgpu::Status::Success);
+
+                EXPECT_TRUE(std::ranges::equal(uuidOptions.driverUUID, uuidProperties.driverUUID));
+                EXPECT_TRUE(std::ranges::equal(uuidOptions.deviceUUID, uuidProperties.deviceUUID));
+            }
+        }
+    }
+
+    // Check requesting a non-existent UUID (choose a "random" non-existent set of UUIDs by hashing
+    // some value).
+    {
+        uint32_t seed = 0x12345678;
+        Sha3_256::Output randomData = Sha3_256::Hash(ByteSpanFromRef(seed));
+        static_assert(sizeof(randomData) == 2 * VK_UUID_SIZE);
+
+        native::vulkan::RequestAdapterOptionsVulkanUUIDs uuidOptions;
+        ByteSpanFromRef(uuidOptions.driverUUID)
+            .CopyFrom(ByteSpanFromRef(randomData).first(VK_UUID_SIZE));
+        ByteSpanFromRef(uuidOptions.deviceUUID)
+            .CopyFrom(ByteSpanFromRef(randomData).subspan(VK_UUID_SIZE));
+
+        wgpu::RequestAdapterOptions adapterOptions = {};
+        adapterOptions.backendType = wgpu::BackendType::Vulkan;
+        adapterOptions.nextInChain = &uuidOptions;
+
+        std::vector<native::Adapter> adapters = instance.EnumerateAdapters(&adapterOptions);
+        ASSERT_TRUE(adapters.empty());
+    }
+}
+#endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
 
 #if defined(DAWN_ENABLE_BACKEND_WEBGPU)
 // Test enumerating the WebGPU backend with the RequestAdapterWebGPUBackendOptions.

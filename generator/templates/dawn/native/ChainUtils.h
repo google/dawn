@@ -93,6 +93,8 @@ struct UnpackedPtrChain<AdditionalExtensionsList<Additionals...>, Ts...> {
 template <typename T>
 constexpr inline wgpu::SType STypeFor = detail::STypeForImpl<T>;
 template <typename T>
+constexpr inline wgpu::SType STypeFor<T*> = detail::STypeForImpl<T>;
+template <typename T>
 constexpr inline wgpu::SType STypeFor<const T*> = detail::STypeForImpl<T>;
 
 }  // namespace {{native_namespace}}

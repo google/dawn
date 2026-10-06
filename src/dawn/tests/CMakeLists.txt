@@ -97,7 +97,6 @@ set(end2end_sources
     "end2end/AdapterEnumerationTests.cpp"
     "end2end/AdapterFormatCapabilitiesVkTests.cpp"
     "end2end/AdapterPropertiesD3DTests.cpp"
-    "end2end/AdapterPropertiesVkTests.cpp"
     "end2end/AdapterPropertiesDrmTests.cpp"
     "end2end/ArchTierLimitsExhaustive.cpp"
     "end2end/BasicTests.cpp"
@@ -294,6 +293,7 @@ endif()
 if (DAWN_ENABLE_VULKAN)
     list(APPEND end2end_sources
         "end2end/AllocatorMemoryInstrumentationTests.cpp"
+        "end2end/AdapterPropertiesVkTests.cpp"
     )
 endif()
 
