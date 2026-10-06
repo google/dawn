@@ -426,7 +426,7 @@ CounterSampleBufferAllocator* Device::GetCounterSampleBufferAllocator() const {
 }
 
 void Device::StartTrace() {
-    assert(!mTraceInProgress);
+    DAWN_ASSERT(!mTraceInProgress);
 
     auto [filenameBase, shouldTrace] = GetTraceInfo();
     if (!shouldTrace) {

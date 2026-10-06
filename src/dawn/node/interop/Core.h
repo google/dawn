@@ -32,7 +32,6 @@
 #define SRC_DAWN_NODE_INTEROP_CORE_H_
 
 #include <algorithm>
-#include <cassert>
 #include <concepts>
 #include <cstdint>
 #include <limits>
@@ -46,6 +45,7 @@
 
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/utils/Debug.h"
+#include "src/utils/assert.h"
 
 #define ENABLE_INTEROP_LOGGING 0  // Enable for verbose interop logging
 
@@ -838,7 +838,7 @@ inline Result FromJS(const Napi::CallbackInfo& info, PARAM_TYPES& args) {
 template <typename F>
 Napi::Value CatchExceptionIntoPromise(Napi::Env env, F&& f) {
     Napi::Value result = f();
-    assert(result.IsEmpty() || result.IsPromise());
+    DAWN_ASSERT(result.IsEmpty() || result.IsPromise());
     if (!env.IsExceptionPending()) {
         return result;
     }

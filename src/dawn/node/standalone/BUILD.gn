@@ -43,7 +43,10 @@ if (checkout_v8 && dawn_node) {
     # Private: EventLoop.h only forward declares the V8 types it holds pointers
     # to, so a consumer that never runs a task needs none of this.
     include_dirs = [ "${dawn_root}/third_party/v8/src/include" ]
-    deps = [ "//third_party/v8/src:v8" ]
+    deps = [
+      "${dawn_root}/src/utils",
+      "//third_party/v8/src:v8",
+    ]
 
     # Public because EventLoop::Task is an absl::AnyInvocable.
     public_deps = [ "${dawn_abseil_dir}:absl" ]

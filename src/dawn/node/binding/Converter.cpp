@@ -28,7 +28,6 @@
 #include "src/dawn/node/binding/Converter.h"
 
 #include <algorithm>
-#include <cassert>
 #include <limits>
 #include <sstream>
 #include <string>
@@ -41,6 +40,7 @@
 #include "src/dawn/node/binding/GPUTexture.h"
 #include "src/dawn/node/binding/GPUTextureView.h"
 #include "src/dawn/node/utils/Debug.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace wgpu::binding {
@@ -54,7 +54,7 @@ Converter::~Converter() {
 bool Converter::HasFeature(wgpu::FeatureName feature) {
     // Not all uses of the converter will have a device (for example for adapter-related
     // conversions).
-    assert(device.Get() != nullptr);
+    DAWN_ASSERT(device.Get() != nullptr);
     return device.HasFeature(feature);
 }
 
@@ -578,7 +578,7 @@ bool Converter::Convert(wgpu::TextureFormat& out, const interop::GPUTextureForma
             // Note: they need to be added below as well.
     }
 
-    assert(requiredFeature != wgpu::FeatureName(0u));
+    DAWN_ASSERT(requiredFeature != wgpu::FeatureName(0u));
     if (!HasFeature(requiredFeature)) {
         std::stringstream err;
         err << "" << out << " requires feature '" << requiredFeature << "'";
@@ -965,7 +965,7 @@ bool Converter::Convert(wgpu::BlendFactor& out, const interop::GPUBlendFactor& i
             return Throw(err.str());
     }
 
-    assert(requiredFeature != wgpu::FeatureName(0u));
+    DAWN_ASSERT(requiredFeature != wgpu::FeatureName(0u));
     if (!HasFeature(requiredFeature)) {
         std::stringstream err;
         err << "" << out << " requires feature '" << requiredFeature << "'";
@@ -2136,7 +2136,7 @@ bool ConvertDataElementsToSpan(Napi::Env env,
         return false;
     }
 
-    assert(size64 <= std::numeric_limits<size_t>::max());
+    DAWN_ASSERT(size64 <= std::numeric_limits<size_t>::max());
     *out = DAWN_UNSAFE_TODO(std::span<const uint8_t>(reinterpret_cast<const uint8_t*>(src.data),
                                                      static_cast<size_t>(size64)));
 

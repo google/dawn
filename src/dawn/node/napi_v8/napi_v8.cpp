@@ -28,13 +28,13 @@
 #include "src/dawn/node/napi_v8/napi_v8.h"
 
 #include <algorithm>
-#include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <limits>
 #include <utility>
 
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace {
@@ -188,14 +188,14 @@ void napi_ref__::PostGarbageCollectionCallback(const v8::WeakCallbackInfo<napi_r
     v8::Local<v8::Value> set_immediate_val;
     [[maybe_unused]] bool has_set_immediate =
         ctx->Global()->Get(ctx, key).ToLocal(&set_immediate_val) && set_immediate_val->IsFunction();
-    assert(has_set_immediate);
+    DAWN_ASSERT(has_set_immediate);
 
     v8::Local<v8::External> ext =
         v8::External::New(env->isolate, env, v8::kExternalPointerTypeTagDefault);
     v8::Local<v8::Function> drain_fn;
     [[maybe_unused]] bool has_drain_fn =
         v8::Function::New(ctx, DrainFinalizersV8Callback, ext).ToLocal(&drain_fn);
-    assert(has_drain_fn);
+    DAWN_ASSERT(has_drain_fn);
 
     env->finalizer_drain_scheduled = true;
     v8::Local<v8::Value> arg = drain_fn;

@@ -28,7 +28,6 @@
 {% from 'art/kotlin_record_conversion.cpp' import define_kotlin_record_structure, define_kotlin_to_struct_conversion with context %}
 #include "structures.h"
 
-#include <cassert>
 #include <string>
 #include <mutex>
 #include <unordered_map>
@@ -36,7 +35,6 @@
 #include <jni.h>
 #include <webgpu/webgpu.h>
 
-#include "src/utils/assert.h"
 #include "src/utils/log.h"
 #include "JNIClasses.h"
 #include "JNIContext.h"

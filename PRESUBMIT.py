@@ -126,9 +126,9 @@ _BANNED_CPP_PATTERNS: Sequence[BanRule] = (
             r'^src/tint/lang/glsl/validate/validate\.cc$',
         ),
         explanation=(
-            'Do not introduce new instances of TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE) ',
-            'or TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER). ',
-            'Use DAWN_UNSAFE_BUFFERS with a // SAFETY: comment instead, ',
+            'Do not introduce new instances of TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE)',
+            'or TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER).',
+            'Use DAWN_UNSAFE_BUFFERS with a // SAFETY: comment instead,',
             'or rewrite to be safe.',
         ),
         treat_as_error=False,
@@ -137,8 +137,8 @@ _BANNED_CPP_PATTERNS: Sequence[BanRule] = (
     BanRule(
         pattern=r'/\bDAWN_UNSAFE_TODO\b',
         explanation=(
-            'Do not introduce new instances of DAWN_UNSAFE_TODO. ',
-            'Use DAWN_UNSAFE_BUFFERS with a // SAFETY: comment instead, ',
+            'Do not introduce new instances of DAWN_UNSAFE_TODO.',
+            'Use DAWN_UNSAFE_BUFFERS with a // SAFETY: comment instead,',
             'or rewrite to be safe.',
         ),
         treat_as_error=False,
@@ -147,17 +147,40 @@ _BANNED_CPP_PATTERNS: Sequence[BanRule] = (
     BanRule(
         pattern=r'/#pragma\s+allow_unsafe_buffers\b',
         explanation=(
-            '#pragma allow_unsafe_buffers is discouraged. Prefer using ',
-            'DAWN_UNSAFE_BUFFERS with a // SAFETY: comment for ',
+            '#pragma allow_unsafe_buffers is discouraged. Prefer using',
+            'DAWN_UNSAFE_BUFFERS with a // SAFETY: comment for',
             'specific blocks, or rewrite to be safe.',
         ),
         treat_as_error=False,
         surface_as_gerrit_lint=True,
     ),
     BanRule(
-        pattern=r'__EMSCRIPTEN__\b',
+        pattern=r'/\bNDEBUG\b',
+        excluded_paths=(r'^src/utils/compiler\.h$', ),
+        explanation=(
+            'Use DAWN_ENABLE_ASSERTS for anything assert-related, instead of NDEBUG.',
+            '(NDEBUG builds can still have asserts, due to dawn_always_assert.)',
+        ),
+        treat_as_error=False,
+        surface_as_gerrit_lint=True,
+    ),
+    BanRule(
+        pattern=r'/([<"]cassert[">]|[<"]assert\.h[">]|\bassert\(.*\);)',
+        excluded_paths=(
+            # assert() is allowed in public headers which don't have DAWN_ASSERT.
+            r'^generator/templates/api_cpp.h$',
+            r'^include/.*\.h$',
+        ),
+        explanation=('Use DAWN_ASSERT() instead of assert().', ),
+        treat_as_error=True,
+        surface_as_gerrit_lint=True,
+    ),
+    BanRule(
+        pattern=r'/\b__EMSCRIPTEN__\b',
         excluded_paths=(r'^src/utils/platform\.h$', ),
-        explanation='Use DAWN_PLATFORM_IS(EMSCRIPTEN) instead where possible.',
+        explanation=
+        ('Use DAWN_PLATFORM_IS(EMSCRIPTEN) instead of __EMSCRIPTEN__ where possible.',
+         ),
         treat_as_error=False,
         surface_as_gerrit_lint=True,
     ),
@@ -169,7 +192,7 @@ _BANNED_CPP_PATTERNS: Sequence[BanRule] = (
             r'^src/tint/',
         ),
         explanation=(
-            'Use DAWN_EXPECT_DEATH_IF_SUPPORTED or ',
+            'Use DAWN_EXPECT_DEATH_IF_SUPPORTED or',
             'DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED instead.',
         ),
         treat_as_error=True,
@@ -183,7 +206,7 @@ _BANNED_CPP_PATTERNS: Sequence[BanRule] = (
             r'^src/tint/',
         ),
         explanation=(
-            'Use DAWN_ASSERT_DEATH_IF_SUPPORTED or ',
+            'Use DAWN_ASSERT_DEATH_IF_SUPPORTED or',
             'DAWN_ASSERT_DEBUG_DEATH_IF_SUPPORTED instead.',
         ),
         treat_as_error=True,
@@ -203,7 +226,7 @@ _BANNED_CPP_PATTERNS: Sequence[BanRule] = (
         # There's no ban rule on google-explicit-constructor because it's hard
         # to implement while allowing it on operators.
         explanation=(
-            'Use explicit(false) for constructors, and ',
+            'Use explicit(false) for constructors, and',
             'NOLINTNEXTLINE(google-explicit-constructor) for operators.',
         ),
         treat_as_error=True,

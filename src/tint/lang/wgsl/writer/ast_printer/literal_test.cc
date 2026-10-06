@@ -32,7 +32,7 @@
 #include "src/tint/lang/wgsl/writer/ast_printer/helper_test.h"
 #include "src/tint/utils/memory/bitcast.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "src/utils/compiler.h"
+#include "src/utils/assert.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
@@ -61,15 +61,15 @@ f32 MakeF32(uint32_t sign, uint32_t biased_exponent, uint32_t mantissa) {
 // - 'exponent_bits' is placed in the exponent space.
 // - the exponent bias (15) already be included.
 f16 MakeF16(uint32_t sign, uint32_t f16_biased_exponent, uint16_t f16_mantissa) {
-    assert((f16_biased_exponent & 0xffffffe0u) == 0);
-    assert((f16_mantissa & 0xfc00u) == 0);
+    DAWN_ASSERT((f16_biased_exponent & 0xffffffe0u) == 0);
+    DAWN_ASSERT((f16_mantissa & 0xfc00u) == 0);
 
     const uint32_t sign_bit = sign ? 0x80000000u : 0u;
 
     // F16 has a exponent bias of 15, and f32 bias 127. Adding 127-15=112 to the f16-biased exponent
     // to get f32-biased exponent.
     uint32_t f32_biased_exponent = (f16_biased_exponent & 0x1fu) + 112;
-    assert((f32_biased_exponent & 0xffffff00u) == 0);
+    DAWN_ASSERT((f32_biased_exponent & 0xffffff00u) == 0);
 
     if (f16_biased_exponent == 0) {
         // +/- zero, or subnormal
@@ -82,7 +82,7 @@ f16 MakeF16(uint32_t sign, uint32_t f16_biased_exponent, uint16_t f16_mantissa) 
         // There must be at least one of the 10 mantissa bits being 1, left-shift the mantissa bits
         // until the most significant 1 bit is left-shifted to 10th bit (count from zero), which
         // will be omitted in the resulting f32 mantissa part.
-        assert(f16_mantissa & 0x03ffu);
+        DAWN_ASSERT(f16_mantissa & 0x03ffu);
         while ((f16_mantissa & 0x0400u) == 0) {
             f16_mantissa = static_cast<uint16_t>(f16_mantissa << 1);
             f32_biased_exponent--;

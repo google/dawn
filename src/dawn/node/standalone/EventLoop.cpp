@@ -28,12 +28,13 @@
 #include "src/dawn/node/standalone/EventLoop.h"
 
 #include <algorithm>
-#include <cassert>
 #include <deque>
 #include <iostream>
 #include <optional>
 #include <thread>
 #include <utility>
+
+#include "src/utils/assert.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundef"
@@ -95,7 +96,7 @@ EventLoop::EventLoop(v8::Isolate* isolate, v8::Platform* platform)
 EventLoop::~EventLoop() = default;
 
 void EventLoop::AssertOnLoopThread() const {
-    assert(std::this_thread::get_id() == thread_id_);
+    DAWN_ASSERT(std::this_thread::get_id() == thread_id_);
 }
 
 void EventLoop::PostTask(Task task) {

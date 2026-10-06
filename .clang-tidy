@@ -340,3 +340,5 @@ CheckOptions:
     value: dawn::to_underlying
   - key: modernize-use-to-underlying.ReplacementFunctionHeader
     value: src/utils/numeric.h
+  - key: portability-restrict-system-includes.Includes
+    value: "*,-cassert,-assert.h"

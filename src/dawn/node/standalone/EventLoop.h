@@ -151,7 +151,7 @@ class EventLoop {
     v8::Isolate* const isolate_;
     v8::Platform* const platform_;
     // The thread the loop belongs to. Only read by AssertOnLoopThread().
-    [[maybe_unused]] const std::thread::id thread_id_ = std::this_thread::get_id();
+    const std::thread::id thread_id_ = std::this_thread::get_id();
     // Tasks waiting for the next check phase, in the order they were posted.
     std::deque<Task> immediates_;
     absl::btree_map<TimerKey, Task> timers_;

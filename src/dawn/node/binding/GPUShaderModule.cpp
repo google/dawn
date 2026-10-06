@@ -33,7 +33,7 @@
 #include <vector>
 
 #include "src/dawn/node/binding/Converter.h"
-#include "src/utils/compiler.h"
+#include "src/utils/assert.h"
 
 namespace wgpu::binding {
 
@@ -60,7 +60,7 @@ GPUShaderModule::getCompilationInfo(Napi::Env env) {
             [[maybe_unused]] bool foundUtf16 = false;
             for (const auto* chain = m.nextInChain; chain != nullptr; chain = chain->nextInChain) {
                 if (chain->sType == wgpu::SType::DawnCompilationMessageUtf16) {
-                    assert(!foundUtf16);
+                    DAWN_ASSERT(!foundUtf16);
                     foundUtf16 = true;
                     const auto* utf16 =
                         reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(chain);
@@ -69,7 +69,7 @@ GPUShaderModule::getCompilationInfo(Napi::Env env) {
                     length = utf16->length;
                 }
             }
-            assert(foundUtf16);
+            DAWN_ASSERT(foundUtf16);
 
             switch (m.type) {
                 case wgpu::CompilationMessageType::Error:

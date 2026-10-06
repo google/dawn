@@ -27,13 +27,13 @@
 
 #include "src/dawn/node/binding/GPUAdapterInfo.h"
 
-#include <cassert>
 #include <cctype>
 #include <iomanip>
 #include <span>
 #include <sstream>
 
 #include "src/dawn/node/binding/Converter.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace wgpu::binding {
@@ -60,7 +60,7 @@ interop::GPUSubgroupMatrixComponentType SubgroupMatrixComponentType(
         case SubgroupMatrixComponentType::I8:
             return interop::GPUSubgroupMatrixComponentType::kI8;
     }
-    assert(false);
+    DAWN_ASSERT(false);
     return interop::GPUSubgroupMatrixComponentType::kF32;
 }
 
