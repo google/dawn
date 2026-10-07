@@ -679,5 +679,338 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_ConvertPrintToLogTest, StringLiteral) {
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] {
+        b.Call<void>(core::BuiltinFn::kPrint, b.Constant("hello world"));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:void = print "hello world"
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
+  $B2: {
+    store %tint_print_invocation_id, %tint_symbol
+    %4:vec3<u32> = load %tint_print_invocation_id
+    %5:u32 = swizzle %4, x
+    %6:u32 = swizzle %4, y
+    %7:u32 = swizzle %4, z
+    %8:void = msl.os_log "[ comp foo:L0 global_invocation_id(%u, %u, %u) ] hello world", %5, %6, %7
+    ret
+  }
+}
+)";
+
+    Run(ConvertPrintToLog);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ConvertPrintToLogTest, StringLiteral_Empty) {
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] {
+        b.Call<void>(core::BuiltinFn::kPrint, b.Constant(""));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:void = print ""
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
+  $B2: {
+    store %tint_print_invocation_id, %tint_symbol
+    %4:vec3<u32> = load %tint_print_invocation_id
+    %5:u32 = swizzle %4, x
+    %6:u32 = swizzle %4, y
+    %7:u32 = swizzle %4, z
+    %8:void = msl.os_log "[ comp foo:L0 global_invocation_id(%u, %u, %u) ] ", %5, %6, %7
+    ret
+  }
+}
+)";
+
+    Run(ConvertPrintToLog);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ConvertPrintToLogTest, StringLiteral_PercentEscaped) {
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] {
+        b.Call<void>(core::BuiltinFn::kPrint, b.Constant("100% completed %d"));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:void = print "100% completed %d"
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
+  $B2: {
+    store %tint_print_invocation_id, %tint_symbol
+    %4:vec3<u32> = load %tint_print_invocation_id
+    %5:u32 = swizzle %4, x
+    %6:u32 = swizzle %4, y
+    %7:u32 = swizzle %4, z
+    %8:void = msl.os_log "[ comp foo:L0 global_invocation_id(%u, %u, %u) ] 100%% completed %%d", %5, %6, %7
+    ret
+  }
+}
+)";
+
+    Run(ConvertPrintToLog);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Single) {
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] {
+        auto* fs = b.FormatString(b.Constant("value: "), 42_i);
+        b.Call<void>(core::BuiltinFn::kPrint, fs);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:string = format_string "value: ", 42i
+    %3:void = print %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
+  $B2: {
+    store %tint_print_invocation_id, %tint_symbol
+    %4:vec3<u32> = load %tint_print_invocation_id
+    %5:u32 = swizzle %4, x
+    %6:u32 = swizzle %4, y
+    %7:u32 = swizzle %4, z
+    %8:void = msl.os_log "[ comp foo:L0 global_invocation_id(%u, %u, %u) ] value: %i", %5, %6, %7, 42i
+    ret
+  }
+}
+)";
+
+    Run(ConvertPrintToLog);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Multiple) {
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] {
+        auto* fs =
+            b.FormatString(b.Constant("x: "), 42_i, b.Constant(", y: "), 1.5_f, b.Constant("!"));
+        b.Call<void>(core::BuiltinFn::kPrint, fs);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:string = format_string "x: ", 42i, ", y: ", 1.5f, "!"
+    %3:void = print %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
+  $B2: {
+    store %tint_print_invocation_id, %tint_symbol
+    %4:vec3<u32> = load %tint_print_invocation_id
+    %5:u32 = swizzle %4, x
+    %6:u32 = swizzle %4, y
+    %7:u32 = swizzle %4, z
+    %8:void = msl.os_log "[ comp foo:L0 global_invocation_id(%u, %u, %u) ] x: %i, y: %f!", %5, %6, %7, 42i, 1.5f
+    ret
+  }
+}
+)";
+
+    Run(ConvertPrintToLog);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Vector) {
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] {
+        auto* fs = b.FormatString(b.Constant("vec: "), b.Composite<vec2<f32>>(1.0_f, 2.0_f));
+        b.Call<void>(core::BuiltinFn::kPrint, fs);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:string = format_string "vec: ", vec2<f32>(1.0f, 2.0f)
+    %3:void = print %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
+  $B2: {
+    store %tint_print_invocation_id, %tint_symbol
+    %4:vec3<u32> = load %tint_print_invocation_id
+    %5:u32 = swizzle %4, x
+    %6:u32 = swizzle %4, y
+    %7:u32 = swizzle %4, z
+    %8:void = msl.os_log "[ comp foo:L0 global_invocation_id(%u, %u, %u) ] vec: %v2hlf", %5, %6, %7, vec2<f32>(1.0f, 2.0f)
+    ret
+  }
+}
+)";
+
+    Run(ConvertPrintToLog);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Bool) {
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] {
+        auto* fs = b.FormatString(b.Constant("flag: "), true);
+        b.Call<void>(core::BuiltinFn::kPrint, fs);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:string = format_string "flag: ", true
+    %3:void = print %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
+  $B2: {
+    store %tint_print_invocation_id, %tint_symbol
+    %4:vec3<u32> = load %tint_print_invocation_id
+    %5:u32 = swizzle %4, x
+    %6:u32 = swizzle %4, y
+    %7:u32 = swizzle %4, z
+    %8:void = msl.os_log "[ comp foo:L0 global_invocation_id(%u, %u, %u) ] flag: %i", %5, %6, %7, 1i
+    ret
+  }
+}
+)";
+
+    Run(ConvertPrintToLog);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Nested) {
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] {
+        auto* inner = b.FormatString(b.Constant("inner "), 42_i);
+        auto* outer = b.FormatString(b.Constant("outer "), inner, b.Constant(" end"));
+        b.Call<void>(core::BuiltinFn::kPrint, outer);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:string = format_string "inner ", 42i
+    %3:string = format_string "outer ", %2, " end"
+    %4:void = print %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
+  $B2: {
+    store %tint_print_invocation_id, %tint_symbol
+    %4:vec3<u32> = load %tint_print_invocation_id
+    %5:u32 = swizzle %4, x
+    %6:u32 = swizzle %4, y
+    %7:u32 = swizzle %4, z
+    %8:void = msl.os_log "[ comp foo:L0 global_invocation_id(%u, %u, %u) ] outer inner %i end", %5, %6, %7, 42i
+    ret
+  }
+}
+)";
+
+    Run(ConvertPrintToLog);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

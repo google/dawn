@@ -158,8 +158,6 @@ type level
 
 type __packed_vec3<T>
 
-type string
-
 type resource_table<T>
 
 type cooperative_tensor<S: subgroup_matrix_kind, M: num, N: num, K: num, IT, RT>
@@ -483,15 +481,6 @@ fn convert(u32) -> u64
                                     cooperative_tensor<subgroup_matrix_kind_right, M, N, K, IT, RT>,
                                     cooperative_tensor<subgroup_matrix_kind_result, M, N, K, IT, RT>)
 
-// Compute
-implicit(T: scalar) fn os_log(string, u32, u32, u32, T)
-implicit(N: num, T: scalar) fn os_log(string, u32, u32, u32, vec<N, T>)
-// Fragment
-implicit(T: scalar) fn os_log(string, f32, f32, f32, T)
-implicit(N: num, T: scalar) fn os_log(string, f32, f32, f32, vec<N, T>)
-// Vertex
-implicit(T: scalar) fn os_log(string, u32, u32, T)
-implicit(N: num, T: scalar) fn os_log(string, u32, u32, vec<N, T>)
 
 implicit(S: address_space, A: access)
   fn pointer_offset<T>(ptr<S, runtime_array<u8>, A>, u32) -> ptr<S, T, A>

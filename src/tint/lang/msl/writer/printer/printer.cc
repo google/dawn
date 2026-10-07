@@ -103,6 +103,7 @@
 #include "src/tint/lang/msl/ir/component.h"
 #include "src/tint/lang/msl/ir/member_builtin_call.h"
 #include "src/tint/lang/msl/ir/memory_order.h"
+#include "src/tint/lang/msl/ir/os_log.h"
 #include "src/tint/lang/msl/type/bias.h"
 #include "src/tint/lang/msl/type/cooperative_tensor.h"
 #include "src/tint/lang/msl/type/gradient.h"
@@ -626,6 +627,7 @@ class Printer : public tint::TextGenerator {
                     [&](const msl::ir::MemberBuiltinCall* c) {
                         EmitMslMemberBuiltinCall(out, c);
                     },                                                                         //
+                    [&](const msl::ir::OsLog* c) { EmitOsLog(out, c); },                       //
                     [&](const core::ir::CoreBuiltinCall* c) { EmitCoreBuiltinCall(out, c); },  //
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },                //
                     [&](const core::ir::LoadVectorElement* e) {
@@ -1262,13 +1264,20 @@ class Printer : public tint::TextGenerator {
             return;
         }
 
-        // Some builtins need special-casing for the name they use.
-        if (c->Func() == msl::BuiltinFn::kOsLog) {
-            out << "os_log_default.log(";
-        } else {
-            out << c->Func() << "(";
+        out << c->Func() << "(";
+        bool needs_comma = false;
+        for (const auto* arg : c->Args()) {
+            if (needs_comma) {
+                out << ", ";
+            }
+            EmitAndTakeAddressIfNeeded(out, arg);
+            needs_comma = true;
         }
+        out << ")";
+    }
 
+    void EmitOsLog(StringStream& out, const msl::ir::OsLog* c) {
+        out << "os_log_default.log(";
         bool needs_comma = false;
         for (const auto* arg : c->Args()) {
             if (needs_comma) {

@@ -47,12 +47,14 @@ cc_library(
     "component.cc",
     "member_builtin_call.cc",
     "memory_order.cc",
+    "os_log.cc",
   ],
   hdrs = [
     "builtin_call.h",
     "component.h",
     "member_builtin_call.h",
     "memory_order.h",
+    "os_log.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -85,6 +87,7 @@ cc_library(
   srcs = [
     "builtin_call_test.cc",
     "member_builtin_call_test.cc",
+    "os_log_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

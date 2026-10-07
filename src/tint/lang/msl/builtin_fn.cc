@@ -146,8 +146,6 @@ const char* str(BuiltinFn i) {
             return "run_tensor_multiply";
         case BuiltinFn::kRunTensorMultiplyAccumulate:
             return "run_tensor_multiply_accumulate";
-        case BuiltinFn::kOsLog:
-            return "os_log";
         case BuiltinFn::kPointerOffset:
             return "pointer_offset";
         case BuiltinFn::kAliasPointerOffset:
@@ -221,7 +219,6 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSimdgroupMultiplyAccumulate:
         case BuiltinFn::kMakeDiagonalSimdgroupMatrix:
         case BuiltinFn::kMakeFilledSimdgroupMatrix:
-        case BuiltinFn::kOsLog:
         case BuiltinFn::kAliasPointerOffset:
         case BuiltinFn::kPointerOffset:
         case BuiltinFn::kVolatileZero:
