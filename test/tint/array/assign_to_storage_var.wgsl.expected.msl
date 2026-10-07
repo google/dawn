@@ -49,16 +49,15 @@ void foo(array<int4, 4> src_param, tint_module_vars_struct tint_module_vars) {
 
 void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint const v_1 = v;
-      if ((v_1 >= 4u)) {
+      uint const v = idx;
+      if ((v >= 4u)) {
         break;
       }
-      (*tint_module_vars.src_workgroup)[v_1] = int4(0);
+      (*tint_module_vars.src_workgroup)[v] = int4(0);
       {
-        v = (v_1 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -68,8 +67,8 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v_2(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_3 [[threadgroup(0)]], const constant S* src_uniform [[buffer(0)]], device S* src_storage [[buffer(1)]], device S* dst [[buffer(2)]], device S_nested* dst_nested [[buffer(3)]]) {
+kernel void v_1(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]], const constant S* src_uniform [[buffer(0)]], device S* src_storage [[buffer(1)]], device S* dst [[buffer(2)]], device S_nested* dst_nested [[buffer(3)]]) {
   thread array<int4, 4> src_private = {};
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src_private=(&src_private), .src_workgroup=(&(*v_3).tint_symbol), .src_uniform=src_uniform, .src_storage=src_storage, .dst=dst, .dst_nested=dst_nested};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src_private=(&src_private), .src_workgroup=(&(*v_2).tint_symbol), .src_uniform=src_uniform, .src_storage=src_storage, .dst=dst, .dst_nested=dst_nested};
   (main_inner(tint_local_index, tint_module_vars));
 }

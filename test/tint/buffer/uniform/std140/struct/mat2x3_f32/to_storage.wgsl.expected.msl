@@ -46,26 +46,25 @@ S tint_load_struct_packed_vec3(const constant S_packed_vec3* const from) {
 
 void tint_store_and_preserve_padding(device array<S_packed_vec3, 4>* const target, array<S, 4> value_param) {
   {
-    uint v_3 = 0u;
-    v_3 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint const v_4 = v_3;
-      if ((v_4 >= 4u)) {
+      uint const v_3 = idx;
+      if ((v_3 >= 4u)) {
         break;
       }
-      (tint_store_and_preserve_padding_1((&(*target)[v_4]), value_param[v_4]));
+      (tint_store_and_preserve_padding_1((&(*target)[v_3]), value_param[v_3]));
       {
-        v_3 = (v_4 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
 array<S, 4> tint_load_array_packed_vec3(const constant array<S_packed_vec3, 4>* const from) {
-  S const v_5 = tint_load_struct_packed_vec3((&(*from)[0u]));
-  S const v_6 = tint_load_struct_packed_vec3((&(*from)[1u]));
-  S const v_7 = tint_load_struct_packed_vec3((&(*from)[2u]));
-  return array<S, 4>{v_5, v_6, v_7, tint_load_struct_packed_vec3((&(*from)[3u]))};
+  S const v_4 = tint_load_struct_packed_vec3((&(*from)[0u]));
+  S const v_5 = tint_load_struct_packed_vec3((&(*from)[1u]));
+  S const v_6 = tint_load_struct_packed_vec3((&(*from)[2u]));
+  return array<S, 4>{v_4, v_5, v_6, tint_load_struct_packed_vec3((&(*from)[3u]))};
 }
 
 [[max_total_threads_per_threadgroup(1)]]
@@ -73,7 +72,7 @@ kernel void f(const constant array<S_packed_vec3, 4>* u [[buffer(0)]], device ar
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   (tint_store_and_preserve_padding(tint_module_vars.s, tint_load_array_packed_vec3(tint_module_vars.u)));
   (tint_store_and_preserve_padding_1((&(*tint_module_vars.s)[1]), tint_load_struct_packed_vec3((&(*tint_module_vars.u)[2]))));
-  array<tint_packed_vec3_f32_array_element, 2> const v_8 = (*tint_module_vars.u)[2].m;
-  (tint_store_and_preserve_padding_2((&(*tint_module_vars.s)[3].m), float2x3(float3(v_8[0u].packed), float3(v_8[1u].packed))));
+  array<tint_packed_vec3_f32_array_element, 2> const v_7 = (*tint_module_vars.u)[2].m;
+  (tint_store_and_preserve_padding_2((&(*tint_module_vars.s)[3].m), float2x3(float3(v_7[0u].packed), float3(v_7[1u].packed))));
   (*tint_module_vars.s)[1].m[0].packed = packed_float3(float3((*tint_module_vars.u)[0].m[1].packed).zxy);
 }

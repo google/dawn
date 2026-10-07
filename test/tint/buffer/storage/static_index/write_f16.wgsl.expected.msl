@@ -82,16 +82,15 @@ void tint_store_and_preserve_padding_7(device Inner* const target, Inner value_p
 
 void tint_store_and_preserve_padding_8(device array<Inner, 4>* const target, array<Inner, 4> value_param) {
   {
-    uint v = 0u;
-    v = 0u;
+    uint idx = 0u;
     while(true) {
-      uint const v_1 = v;
-      if ((v_1 >= 4u)) {
+      uint const v = idx;
+      if ((v >= 4u)) {
         break;
       }
-      (tint_store_and_preserve_padding_7((&(*target)[v_1]), value_param[v_1]));
+      (tint_store_and_preserve_padding_7((&(*target)[v]), value_param[v]));
       {
-        v = (v_1 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -99,16 +98,15 @@ void tint_store_and_preserve_padding_8(device array<Inner, 4>* const target, arr
 
 void tint_store_and_preserve_padding_6(device array<tint_packed_vec3_f32_array_element, 2>* const target, array<float3, 2> value_param) {
   {
-    uint v_2 = 0u;
-    v_2 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint const v_3 = v_2;
-      if ((v_3 >= 2u)) {
+      uint const v_1 = idx;
+      if ((v_1 >= 2u)) {
         break;
       }
-      (*target)[v_3].packed = packed_float3(value_param[v_3]);
+      (*target)[v_1].packed = packed_float3(value_param[v_1]);
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -151,7 +149,7 @@ void tint_store_and_preserve_padding(device array<tint_packed_vec3_f32_array_ele
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v_4(device S_packed_vec3* sb [[buffer(0)]]) {
+kernel void v_2(device S_packed_vec3* sb [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb};
   (*tint_module_vars.sb).scalar_f32 = 0.0f;
   (*tint_module_vars.sb).scalar_i32 = 0;

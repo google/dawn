@@ -39,30 +39,29 @@ typedef S ary_ret[4];
 ary_ret v_7(uint start_byte_offset) {
   S a_2[4] = (S[4])0;
   {
-    uint v_8 = 0u;
-    v_8 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_9 = v_8;
-      if ((v_9 >= 4u)) {
+      uint v_8 = idx;
+      if ((v_8 >= 4u)) {
         break;
       }
-      S v_10 = v_2((start_byte_offset + (v_9 * 192u)));
-      a_2[v_9] = v_10;
+      S v_9 = v_2((start_byte_offset + (v_8 * 192u)));
+      a_2[v_8] = v_9;
       {
-        v_8 = (v_9 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  S v_11[4] = a_2;
-  return v_11;
+  S v_10[4] = a_2;
+  return v_10;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  S v_12[4] = v_7(0u);
-  a(v_12);
-  S v_13 = v_2(384u);
-  b(v_13);
+  S v_11[4] = v_7(0u);
+  a(v_11);
+  S v_12 = v_2(384u);
+  b(v_12);
   c(v_1(400u));
   d(asfloat(u[2u].xyz).zxy);
   e(asfloat(u[2u].z));

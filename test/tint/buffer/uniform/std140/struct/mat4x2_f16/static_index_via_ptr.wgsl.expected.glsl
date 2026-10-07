@@ -32,37 +32,35 @@ Inner v_8(uint start_byte_offset) {
 Inner[4] v_9(uint start_byte_offset) {
   Inner a[4] = Inner[4](Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))));
   {
-    uint v_10 = 0u;
-    v_10 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_11 = v_10;
-      if ((v_11 >= 4u)) {
+      uint v_10 = idx;
+      if ((v_10 >= 4u)) {
         break;
       }
-      a[v_11] = v_8((start_byte_offset + (v_11 * 64u)));
+      a[v_10] = v_8((start_byte_offset + (v_10 * 64u)));
       {
-        v_10 = (v_11 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
   return a;
 }
-Outer v_12(uint start_byte_offset) {
+Outer v_11(uint start_byte_offset) {
   return Outer(v_9(start_byte_offset));
 }
-Outer[4] v_13(uint start_byte_offset) {
+Outer[4] v_12(uint start_byte_offset) {
   Outer a[4] = Outer[4](Outer(Inner[4](Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))))), Outer(Inner[4](Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))))), Outer(Inner[4](Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))))), Outer(Inner[4](Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf))))));
   {
-    uint v_14 = 0u;
-    v_14 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_15 = v_14;
-      if ((v_15 >= 4u)) {
+      uint v_13 = idx;
+      if ((v_13 >= 4u)) {
         break;
       }
-      a[v_15] = v_12((start_byte_offset + (v_15 * 256u)));
+      a[v_13] = v_11((start_byte_offset + (v_13 * 256u)));
       {
-        v_14 = (v_15 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -70,12 +68,12 @@ Outer[4] v_13(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  Outer l_a[4] = v_13(0u);
-  Outer l_a_3 = v_12(768u);
+  Outer l_a[4] = v_12(0u);
+  Outer l_a_3 = v_11(768u);
   Inner l_a_3_a[4] = v_9(768u);
   Inner l_a_3_a_2 = v_8(896u);
   f16mat4x2 l_a_3_a_2_m = v_1(896u);
   f16vec2 l_a_3_a_2_m_1 = tint_bitcast_to_16bit(v.inner[56u].y);
-  uvec4 v_16 = v.inner[56u];
-  float16_t l_a_3_a_2_m_1_0 = tint_bitcast_to_16bit(v_16.y).x;
+  uvec4 v_14 = v.inner[56u];
+  float16_t l_a_3_a_2_m_1_0 = tint_bitcast_to_16bit(v_14.y).x;
 }

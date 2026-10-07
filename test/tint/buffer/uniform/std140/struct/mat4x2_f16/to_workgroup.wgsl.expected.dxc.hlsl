@@ -41,45 +41,43 @@ typedef S ary_ret[4];
 ary_ret v_13(uint start_byte_offset) {
   S a[4] = (S[4])0;
   {
-    uint v_14 = 0u;
-    v_14 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_15 = v_14;
-      if ((v_15 >= 4u)) {
+      uint v_14 = idx;
+      if ((v_14 >= 4u)) {
         break;
       }
-      S v_16 = v_8((start_byte_offset + (v_15 * 128u)));
-      a[v_15] = v_16;
+      S v_15 = v_8((start_byte_offset + (v_14 * 128u)));
+      a[v_14] = v_15;
       {
-        v_14 = (v_15 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  S v_17[4] = a;
-  return v_17;
+  S v_16[4] = a;
+  return v_16;
 }
 
 void f_inner(uint tint_local_index) {
   {
-    uint v_18 = 0u;
-    v_18 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_19 = v_18;
-      if ((v_19 >= 4u)) {
+      uint v_17 = idx;
+      if ((v_17 >= 4u)) {
         break;
       }
-      S v_20 = (S)0;
-      w[v_19] = v_20;
+      S v_18 = (S)0;
+      w[v_17] = v_18;
       {
-        v_18 = (v_19 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  S v_21[4] = v_13(0u);
-  w = v_21;
-  S v_22 = v_8(256u);
-  w[int(1)] = v_22;
+  S v_19[4] = v_13(0u);
+  w = v_19;
+  S v_20 = v_8(256u);
+  w[int(1)] = v_20;
   w[int(3)].m = v_1(260u);
   w[int(1)].m[int(0)] = tint_bitcast_to_f16(u[0u].z).yx;
 }

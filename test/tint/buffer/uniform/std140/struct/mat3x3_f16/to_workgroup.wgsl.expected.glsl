@@ -37,16 +37,15 @@ S v_9(uint start_byte_offset) {
 S[4] v_15(uint start_byte_offset) {
   S a[4] = S[4](S(0, f16mat3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)), 0), S(0, f16mat3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)), 0), S(0, f16mat3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)), 0), S(0, f16mat3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)), 0));
   {
-    uint v_16 = 0u;
-    v_16 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_17 = v_16;
-      if ((v_17 >= 4u)) {
+      uint v_16 = idx;
+      if ((v_16 >= 4u)) {
         break;
       }
-      a[v_17] = v_9((start_byte_offset + (v_17 * 128u)));
+      a[v_16] = v_9((start_byte_offset + (v_16 * 128u)));
       {
-        v_16 = (v_17 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -54,16 +53,15 @@ S[4] v_15(uint start_byte_offset) {
 }
 void f_inner(uint tint_local_index) {
   {
-    uint v_18 = 0u;
-    v_18 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_19 = v_18;
-      if ((v_19 >= 4u)) {
+      uint v_17 = idx;
+      if ((v_17 >= 4u)) {
         break;
       }
-      w[v_19] = S(0, f16mat3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)), 0);
+      w[v_17] = S(0, f16mat3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)), 0);
       {
-        v_18 = (v_19 + 1u);
+        idx = (idx + 1u);
       }
     }
   }

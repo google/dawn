@@ -272,16 +272,15 @@ TEST_F(GlslWriterTest, WorkgroupStorageSize_OverflowAfterAlign) {
 shared uint a[1073741823];
 void main_inner(uint tint_local_index) {
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_1 = v;
-      if ((v_1 >= 1073741823u)) {
+      uint v = idx;
+      if ((v >= 1073741823u)) {
         break;
       }
-      a[v_1] = 0u;
+      a[v] = 0u;
       {
-        v = (v_1 + 64u);
+        idx = (idx + 64u);
       }
     }
   }

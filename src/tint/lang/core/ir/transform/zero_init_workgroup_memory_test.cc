@@ -624,30 +624,34 @@ $B1: {  # root
   $B2: {
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration %tint_local_index  # -> $B4
+        %idx:ptr<function, u32, read_write> = var %tint_local_index
+        next_iteration  # -> $B4
       }
-      $B4 (%idx:u32): {  # body
-        %5:bool = gte %idx, 105u
-        if %5 [t: $B6] {  # if_1
+      $B4: {  # body
+        %5:u32 = load %idx
+        %6:bool = gte %5, 105u
+        if %6 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %idx, 7u
-        %7:u32 = div %idx, 7u
-        %8:u32 = mod %7, 5u
-        %9:u32 = div %idx, 35u
-        %10:ptr<workgroup, i32, read_write> = access %wgvar, %9, %8, %6
-        store %10, 0i
+        %7:u32 = mod %5, 7u
+        %8:u32 = div %5, 7u
+        %9:u32 = mod %8, 5u
+        %10:u32 = div %5, 35u
+        %11:ptr<workgroup, i32, read_write> = access %wgvar, %10, %9, %7
+        store %11, 0i
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %11:u32 = add %idx, 1u
-        next_iteration %11  # -> $B4
+        %12:u32 = load %idx
+        %13:u32 = add %12, 1u
+        store %idx, %13
+        next_iteration  # -> $B4
       }
     }
-    %12:void = workgroupBarrier
-    %13:array<array<array<i32, 7>, 5>, 3> = load %wgvar
+    %14:void = workgroupBarrier
+    %15:array<array<array<i32, 7>, 5>, 3> = load %wgvar
     ret
   }
 }
@@ -690,28 +694,32 @@ $B1: {  # root
   $B2: {
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration %tint_local_index  # -> $B4
+        %idx:ptr<function, u32, read_write> = var %tint_local_index
+        next_iteration  # -> $B4
       }
-      $B4 (%idx:u32): {  # body
-        %5:bool = gte %idx, 15u
-        if %5 [t: $B6] {  # if_1
+      $B4: {  # body
+        %5:u32 = load %idx
+        %6:bool = gte %5, 15u
+        if %6 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %idx, 5u
-        %7:u32 = div %idx, 5u
-        %8:ptr<workgroup, i32, read_write> = access %wgvar, %7, %6, 0u
-        store %8, 0i
+        %7:u32 = mod %5, 5u
+        %8:u32 = div %5, 5u
+        %9:ptr<workgroup, i32, read_write> = access %wgvar, %8, %7, 0u
+        store %9, 0i
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %9:u32 = add %idx, 1u
-        next_iteration %9  # -> $B4
+        %10:u32 = load %idx
+        %11:u32 = add %10, 1u
+        store %idx, %11
+        next_iteration  # -> $B4
       }
     }
-    %10:void = workgroupBarrier
-    %11:array<array<array<i32, 1>, 5>, 3> = load %wgvar
+    %12:void = workgroupBarrier
+    %13:array<array<array<i32, 1>, 5>, 3> = load %wgvar
     ret
   }
 }
@@ -754,28 +762,32 @@ $B1: {  # root
   $B2: {
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration %tint_local_index  # -> $B4
+        %idx:ptr<function, u32, read_write> = var %tint_local_index
+        next_iteration  # -> $B4
       }
-      $B4 (%idx:u32): {  # body
-        %5:bool = gte %idx, 15u
-        if %5 [t: $B6] {  # if_1
+      $B4: {  # body
+        %5:u32 = load %idx
+        %6:bool = gte %5, 15u
+        if %6 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %idx, 3u
-        %7:u32 = div %idx, 3u
-        %8:ptr<workgroup, i32, read_write> = access %wgvar, %7, 0u, %6
-        store %8, 0i
+        %7:u32 = mod %5, 3u
+        %8:u32 = div %5, 3u
+        %9:ptr<workgroup, i32, read_write> = access %wgvar, %8, 0u, %7
+        store %9, 0i
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %9:u32 = add %idx, 1u
-        next_iteration %9  # -> $B4
+        %10:u32 = load %idx
+        %11:u32 = add %10, 1u
+        store %idx, %11
+        next_iteration  # -> $B4
       }
     }
-    %10:void = workgroupBarrier
-    %11:array<array<array<i32, 3>, 1>, 5> = load %wgvar
+    %12:void = workgroupBarrier
+    %13:array<array<array<i32, 3>, 1>, 5> = load %wgvar
     ret
   }
 }
@@ -818,28 +830,32 @@ $B1: {  # root
   $B2: {
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration %tint_local_index  # -> $B4
+        %idx:ptr<function, u32, read_write> = var %tint_local_index
+        next_iteration  # -> $B4
       }
-      $B4 (%idx:u32): {  # body
-        %5:bool = gte %idx, 15u
-        if %5 [t: $B6] {  # if_1
+      $B4: {  # body
+        %5:u32 = load %idx
+        %6:bool = gte %5, 15u
+        if %6 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %idx, 3u
-        %7:u32 = div %idx, 3u
-        %8:ptr<workgroup, i32, read_write> = access %wgvar, 0u, %7, %6
-        store %8, 0i
+        %7:u32 = mod %5, 3u
+        %8:u32 = div %5, 3u
+        %9:ptr<workgroup, i32, read_write> = access %wgvar, 0u, %8, %7
+        store %9, 0i
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %9:u32 = add %idx, 1u
-        next_iteration %9  # -> $B4
+        %10:u32 = load %idx
+        %11:u32 = add %10, 1u
+        store %idx, %11
+        next_iteration  # -> $B4
       }
     }
-    %10:void = workgroupBarrier
-    %11:array<array<array<i32, 3>, 5>, 1> = load %wgvar
+    %12:void = workgroupBarrier
+    %13:array<array<array<i32, 3>, 5>, 1> = load %wgvar
     ret
   }
 }
@@ -1210,33 +1226,37 @@ $B1: {  # root
     }
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration %tint_local_index  # -> $B5
+        %idx:ptr<function, u32, read_write> = var %tint_local_index
+        next_iteration  # -> $B5
       }
-      $B5 (%idx:u32): {  # body
-        %8:bool = gte %idx, 91u
-        if %8 [t: $B7] {  # if_2
+      $B5: {  # body
+        %8:u32 = load %idx
+        %9:bool = gte %8, 91u
+        if %9 [t: $B7] {  # if_2
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %9:u32 = mod %idx, 13u
-        %10:u32 = div %idx, 13u
-        %11:ptr<workgroup, i32, read_write> = access %wgvar, %10, 1u, %9, 0u
-        store %11, 0i
-        %12:u32 = mod %idx, 13u
-        %13:u32 = div %idx, 13u
-        %14:ptr<workgroup, atomic<u32>, read_write> = access %wgvar, %13, 1u, %12, 1u
-        %15:void = atomicStore %14, 0u
+        %10:u32 = mod %8, 13u
+        %11:u32 = div %8, 13u
+        %12:ptr<workgroup, i32, read_write> = access %wgvar, %11, 1u, %10, 0u
+        store %12, 0i
+        %13:u32 = mod %8, 13u
+        %14:u32 = div %8, 13u
+        %15:ptr<workgroup, atomic<u32>, read_write> = access %wgvar, %14, 1u, %13, 1u
+        %16:void = atomicStore %15, 0u
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %16:u32 = add %idx, 42u
-        next_iteration %16  # -> $B5
+        %17:u32 = load %idx
+        %18:u32 = add %17, 42u
+        store %idx, %18
+        next_iteration  # -> $B5
       }
     }
-    %17:void = workgroupBarrier
-    %18:ptr<workgroup, f32, read_write> = access %wgvar, 0u, 0u
-    %19:f32 = load %18
+    %19:void = workgroupBarrier
+    %20:ptr<workgroup, f32, read_write> = access %wgvar, 0u, 0u
+    %21:f32 = load %20
     ret
   }
 }
@@ -2059,26 +2079,30 @@ $B1: {  # root
     %4:ptr<workgroup, array<u32, 64>, read_write> = bufferView<array<u32, 64>> %wgvar, 0u
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration %tint_local_index  # -> $B4
+        %idx:ptr<function, u32, read_write> = var %tint_local_index
+        next_iteration  # -> $B4
       }
-      $B4 (%idx:u32): {  # body
-        %6:bool = gte %idx, 64u
-        if %6 [t: $B6] {  # if_1
+      $B4: {  # body
+        %6:u32 = load %idx
+        %7:bool = gte %6, 64u
+        if %7 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %7:ptr<workgroup, u32, read_write> = access %4, %idx
-        store %7, 0u
+        %8:ptr<workgroup, u32, read_write> = access %4, %6
+        store %8, 0u
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %8:u32 = add %idx, 16u
-        next_iteration %8  # -> $B4
+        %9:u32 = load %idx
+        %10:u32 = add %9, 16u
+        store %idx, %10
+        next_iteration  # -> $B4
       }
     }
-    %9:void = workgroupBarrier
-    %10:u32 = bufferLength %wgvar
+    %11:void = workgroupBarrier
+    %12:u32 = bufferLength %wgvar
     ret
   }
 }
@@ -2122,26 +2146,30 @@ $B1: {  # root
     %4:ptr<workgroup, array<u32, 75>, read_write> = bufferView<array<u32, 75>> %wgvar, 0u
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration %tint_local_index  # -> $B4
+        %idx:ptr<function, u32, read_write> = var %tint_local_index
+        next_iteration  # -> $B4
       }
-      $B4 (%idx:u32): {  # body
-        %6:bool = gte %idx, 75u
-        if %6 [t: $B6] {  # if_1
+      $B4: {  # body
+        %6:u32 = load %idx
+        %7:bool = gte %6, 75u
+        if %7 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %7:ptr<workgroup, u32, read_write> = access %4, %idx
-        store %7, 0u
+        %8:ptr<workgroup, u32, read_write> = access %4, %6
+        store %8, 0u
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %8:u32 = add %idx, 7u
-        next_iteration %8  # -> $B4
+        %9:u32 = load %idx
+        %10:u32 = add %9, 7u
+        store %idx, %10
+        next_iteration  # -> $B4
       }
     }
-    %9:void = workgroupBarrier
-    %10:u32 = bufferLength %wgvar
+    %11:void = workgroupBarrier
+    %12:u32 = bufferLength %wgvar
     ret
   }
 }
@@ -2199,27 +2227,31 @@ $B1: {  # root
     %8:ptr<workgroup, array<u32, 75>, read_write> = bufferView<array<u32, 75>> %v1, 0u
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration %tint_local_index  # -> $B5
+        %idx:ptr<function, u32, read_write> = var %tint_local_index
+        next_iteration  # -> $B5
       }
-      $B5 (%idx:u32): {  # body
-        %10:bool = gte %idx, 75u
-        if %10 [t: $B7] {  # if_2
+      $B5: {  # body
+        %10:u32 = load %idx
+        %11:bool = gte %10, 75u
+        if %11 [t: $B7] {  # if_2
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %11:ptr<workgroup, u32, read_write> = access %8, %idx
-        store %11, 0u
+        %12:ptr<workgroup, u32, read_write> = access %8, %10
+        store %12, 0u
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %12:u32 = add %idx, 7u
-        next_iteration %12  # -> $B5
+        %13:u32 = load %idx
+        %14:u32 = add %13, 7u
+        store %idx, %14
+        next_iteration  # -> $B5
       }
     }
-    %13:void = workgroupBarrier
-    %14:u32 = bufferLength %v1
-    %15:u32 = bufferLength %v2
+    %15:void = workgroupBarrier
+    %16:u32 = bufferLength %v1
+    %17:u32 = bufferLength %v2
     ret
   }
 }

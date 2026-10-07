@@ -19,78 +19,76 @@ typedef Inner ary_ret[4];
 ary_ret v_2(uint offset) {
   Inner a[4] = (Inner[4])0;
   {
-    uint v_3 = 0u;
-    v_3 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_4 = v_3;
-      if ((v_4 >= 4u)) {
+      uint v_3 = idx;
+      if ((v_3 >= 4u)) {
         break;
       }
-      Inner v_5 = v((offset + (v_4 * 8u)));
-      a[v_4] = v_5;
+      Inner v_4 = v((offset + (v_3 * 8u)));
+      a[v_3] = v_4;
       {
-        v_3 = (v_4 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  Inner v_6[4] = a;
-  return v_6;
+  Inner v_5[4] = a;
+  return v_5;
 }
 
 typedef float3 ary_ret_1[2];
-ary_ret_1 v_7(uint offset) {
+ary_ret_1 v_6(uint offset) {
   float3 a[2] = (float3[2])0;
   {
-    uint v_8 = 0u;
-    v_8 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_9 = v_8;
-      if ((v_9 >= 2u)) {
+      uint v_7 = idx;
+      if ((v_7 >= 2u)) {
         break;
       }
-      a[v_9] = asfloat(sb.Load3((offset + (v_9 * 16u))));
+      a[v_7] = asfloat(sb.Load3((offset + (v_7 * 16u))));
       {
-        v_8 = (v_9 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float3 v_10[2] = a;
-  return v_10;
+  float3 v_8[2] = a;
+  return v_8;
 }
 
-float4x4 v_11(uint offset) {
+float4x4 v_9(uint offset) {
   return float4x4(asfloat(sb.Load4((offset + 0u))), asfloat(sb.Load4((offset + 16u))), asfloat(sb.Load4((offset + 32u))), asfloat(sb.Load4((offset + 48u))));
 }
 
-float4x3 v_12(uint offset) {
+float4x3 v_10(uint offset) {
   return float4x3(asfloat(sb.Load3((offset + 0u))), asfloat(sb.Load3((offset + 16u))), asfloat(sb.Load3((offset + 32u))), asfloat(sb.Load3((offset + 48u))));
 }
 
-float4x2 v_13(uint offset) {
+float4x2 v_11(uint offset) {
   return float4x2(asfloat(sb.Load2((offset + 0u))), asfloat(sb.Load2((offset + 8u))), asfloat(sb.Load2((offset + 16u))), asfloat(sb.Load2((offset + 24u))));
 }
 
-float3x4 v_14(uint offset) {
+float3x4 v_12(uint offset) {
   return float3x4(asfloat(sb.Load4((offset + 0u))), asfloat(sb.Load4((offset + 16u))), asfloat(sb.Load4((offset + 32u))));
 }
 
-float3x3 v_15(uint offset) {
+float3x3 v_13(uint offset) {
   return float3x3(asfloat(sb.Load3((offset + 0u))), asfloat(sb.Load3((offset + 16u))), asfloat(sb.Load3((offset + 32u))));
 }
 
-float3x2 v_16(uint offset) {
+float3x2 v_14(uint offset) {
   return float3x2(asfloat(sb.Load2((offset + 0u))), asfloat(sb.Load2((offset + 8u))), asfloat(sb.Load2((offset + 16u))));
 }
 
-float2x4 v_17(uint offset) {
+float2x4 v_15(uint offset) {
   return float2x4(asfloat(sb.Load4((offset + 0u))), asfloat(sb.Load4((offset + 16u))));
 }
 
-float2x3 v_18(uint offset) {
+float2x3 v_16(uint offset) {
   return float2x3(asfloat(sb.Load3((offset + 0u))), asfloat(sb.Load3((offset + 16u))));
 }
 
-float2x2 v_19(uint offset) {
+float2x2 v_17(uint offset) {
   return float2x2(asfloat(sb.Load2((offset + 0u))), asfloat(sb.Load2((offset + 8u))));
 }
 
@@ -108,35 +106,35 @@ void main() {
   float4 vec4_f32 = asfloat(sb.Load4(96u));
   int4 vec4_i32 = asint(sb.Load4(112u));
   uint4 vec4_u32 = sb.Load4(128u);
-  float2x2 mat2x2_f32 = v_19(144u);
-  float2x3 mat2x3_f32 = v_18(160u);
-  float2x4 mat2x4_f32 = v_17(192u);
-  float3x2 mat3x2_f32 = v_16(224u);
-  float3x3 mat3x3_f32 = v_15(256u);
-  float3x4 mat3x4_f32 = v_14(304u);
-  float4x2 mat4x2_f32 = v_13(352u);
-  float4x3 mat4x3_f32 = v_12(384u);
-  float4x4 mat4x4_f32 = v_11(448u);
-  float3 arr2_vec3_f32[2] = v_7(512u);
+  float2x2 mat2x2_f32 = v_17(144u);
+  float2x3 mat2x3_f32 = v_16(160u);
+  float2x4 mat2x4_f32 = v_15(192u);
+  float3x2 mat3x2_f32 = v_14(224u);
+  float3x3 mat3x3_f32 = v_13(256u);
+  float3x4 mat3x4_f32 = v_12(304u);
+  float4x2 mat4x2_f32 = v_11(352u);
+  float4x3 mat4x3_f32 = v_10(384u);
+  float4x4 mat4x4_f32 = v_9(448u);
+  float3 arr2_vec3_f32[2] = v_6(512u);
   Inner struct_inner = v(544u);
   Inner array_struct_inner[4] = v_2(552u);
-  int v_20 = asint((asuint(tint_f32_to_i32(scalar_f32)) + asuint(scalar_i32)));
-  int v_21 = asint((asuint(v_20) + asuint(int(scalar_u32))));
-  int v_22 = asint((asuint(asint((asuint(v_21) + asuint(tint_f32_to_i32(vec2_f32.x))))) + asuint(vec2_i32.x)));
-  int v_23 = asint((asuint(v_22) + asuint(int(vec2_u32.x))));
-  int v_24 = asint((asuint(asint((asuint(v_23) + asuint(tint_f32_to_i32(vec3_f32.y))))) + asuint(vec3_i32.y)));
-  int v_25 = asint((asuint(v_24) + asuint(int(vec3_u32.y))));
-  int v_26 = asint((asuint(asint((asuint(v_25) + asuint(tint_f32_to_i32(vec4_f32.z))))) + asuint(vec4_i32.z)));
-  int v_27 = asint((asuint(v_26) + asuint(int(vec4_u32.z))));
-  int v_28 = asint((asuint(v_27) + asuint(tint_f32_to_i32(mat2x2_f32[int(0)].x))));
-  int v_29 = asint((asuint(v_28) + asuint(tint_f32_to_i32(mat2x3_f32[int(0)].x))));
-  int v_30 = asint((asuint(v_29) + asuint(tint_f32_to_i32(mat2x4_f32[int(0)].x))));
-  int v_31 = asint((asuint(v_30) + asuint(tint_f32_to_i32(mat3x2_f32[int(0)].x))));
-  int v_32 = asint((asuint(v_31) + asuint(tint_f32_to_i32(mat3x3_f32[int(0)].x))));
-  int v_33 = asint((asuint(v_32) + asuint(tint_f32_to_i32(mat3x4_f32[int(0)].x))));
-  int v_34 = asint((asuint(v_33) + asuint(tint_f32_to_i32(mat4x2_f32[int(0)].x))));
-  int v_35 = asint((asuint(v_34) + asuint(tint_f32_to_i32(mat4x3_f32[int(0)].x))));
-  int v_36 = asint((asuint(v_35) + asuint(tint_f32_to_i32(mat4x4_f32[int(0)].x))));
-  s.Store(0u, asuint(asint((asuint(asint((asuint(asint((asuint(v_36) + asuint(tint_f32_to_i32(arr2_vec3_f32[int(0)].x))))) + asuint(struct_inner.scalar_i32)))) + asuint(array_struct_inner[int(0)].scalar_i32)))));
+  int v_18 = asint((asuint(tint_f32_to_i32(scalar_f32)) + asuint(scalar_i32)));
+  int v_19 = asint((asuint(v_18) + asuint(int(scalar_u32))));
+  int v_20 = asint((asuint(asint((asuint(v_19) + asuint(tint_f32_to_i32(vec2_f32.x))))) + asuint(vec2_i32.x)));
+  int v_21 = asint((asuint(v_20) + asuint(int(vec2_u32.x))));
+  int v_22 = asint((asuint(asint((asuint(v_21) + asuint(tint_f32_to_i32(vec3_f32.y))))) + asuint(vec3_i32.y)));
+  int v_23 = asint((asuint(v_22) + asuint(int(vec3_u32.y))));
+  int v_24 = asint((asuint(asint((asuint(v_23) + asuint(tint_f32_to_i32(vec4_f32.z))))) + asuint(vec4_i32.z)));
+  int v_25 = asint((asuint(v_24) + asuint(int(vec4_u32.z))));
+  int v_26 = asint((asuint(v_25) + asuint(tint_f32_to_i32(mat2x2_f32[int(0)].x))));
+  int v_27 = asint((asuint(v_26) + asuint(tint_f32_to_i32(mat2x3_f32[int(0)].x))));
+  int v_28 = asint((asuint(v_27) + asuint(tint_f32_to_i32(mat2x4_f32[int(0)].x))));
+  int v_29 = asint((asuint(v_28) + asuint(tint_f32_to_i32(mat3x2_f32[int(0)].x))));
+  int v_30 = asint((asuint(v_29) + asuint(tint_f32_to_i32(mat3x3_f32[int(0)].x))));
+  int v_31 = asint((asuint(v_30) + asuint(tint_f32_to_i32(mat3x4_f32[int(0)].x))));
+  int v_32 = asint((asuint(v_31) + asuint(tint_f32_to_i32(mat4x2_f32[int(0)].x))));
+  int v_33 = asint((asuint(v_32) + asuint(tint_f32_to_i32(mat4x3_f32[int(0)].x))));
+  int v_34 = asint((asuint(v_33) + asuint(tint_f32_to_i32(mat4x4_f32[int(0)].x))));
+  s.Store(0u, asuint(asint((asuint(asint((asuint(asint((asuint(v_34) + asuint(tint_f32_to_i32(arr2_vec3_f32[int(0)].x))))) + asuint(struct_inner.scalar_i32)))) + asuint(array_struct_inner[int(0)].scalar_i32)))));
 }
 

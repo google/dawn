@@ -49,16 +49,15 @@ buffer sb_block_1_ssbo {
 } v;
 void tint_store_and_preserve_padding_3(vec3 value_param[2]) {
   {
-    uint v_1 = 0u;
-    v_1 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_2 = v_1;
-      if ((v_2 >= 2u)) {
+      uint v_1 = idx;
+      if ((v_1 >= 2u)) {
         break;
       }
-      v.inner.arr2_vec3_f32[v_2] = value_param[v_2];
+      v.inner.arr2_vec3_f32[v_1] = value_param[v_1];
       {
-        v_1 = (v_2 + 1u);
+        idx = (idx + 1u);
       }
     }
   }

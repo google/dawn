@@ -16,27 +16,26 @@ typedef float2x2 ary_ret[4];
 ary_ret v_5(uint start_byte_offset) {
   float2x2 a[4] = (float2x2[4])0;
   {
-    uint v_6 = 0u;
-    v_6 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_7 = v_6;
-      if ((v_7 >= 4u)) {
+      uint v_6 = idx;
+      if ((v_6 >= 4u)) {
         break;
       }
-      a[v_7] = v((start_byte_offset + (v_7 * 16u)));
+      a[v_6] = v((start_byte_offset + (v_6 * 16u)));
       {
-        v_6 = (v_7 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float2x2 v_8[4] = a;
-  return v_8;
+  float2x2 v_7[4] = a;
+  return v_7;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  float2x2 v_9[4] = v_5(0u);
-  p = v_9;
+  float2x2 v_8[4] = v_5(0u);
+  p = v_8;
   p[int(1)] = v(32u);
   p[int(1)][int(0)] = asfloat(u[0u].zw).yx;
   p[int(1)][int(0)].x = asfloat(u[0u].z);

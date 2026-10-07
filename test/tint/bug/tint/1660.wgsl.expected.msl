@@ -11,16 +11,15 @@ struct tint_symbol_1 {
 
 void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint const v_1 = v;
-      if ((v_1 >= 2u)) {
+      uint const v = idx;
+      if ((v >= 2u)) {
         break;
       }
-      (*tint_module_vars.a)[v_1] = 0.0f;
+      (*tint_module_vars.a)[v] = 0.0f;
       {
-        v = (v_1 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -28,7 +27,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v_2(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_3 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v_3).tint_symbol)};
+kernel void v_1(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v_2).tint_symbol)};
   (main_inner(tint_local_index, tint_module_vars));
 }

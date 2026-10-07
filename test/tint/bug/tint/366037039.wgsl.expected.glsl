@@ -18,16 +18,15 @@ buffer sbuffer_block_1_ssbo {
 shared S wbuffer;
 void tint_store_and_preserve_padding_1(uvec3 value_param[4]) {
   {
-    uint v_2 = 0u;
-    v_2 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 4u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 4u)) {
         break;
       }
-      v_1.inner.c[v_3] = value_param[v_3];
+      v_1.inner.c[v_2] = value_param[v_2];
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -37,29 +36,28 @@ void tint_store_and_preserve_padding(S value_param) {
   v_1.inner.b = value_param.b;
   tint_store_and_preserve_padding_1(value_param.c);
 }
-uvec3[4] v_4(uint start_byte_offset) {
+uvec3[4] v_3(uint start_byte_offset) {
   uvec3 a[4] = uvec3[4](uvec3(0u), uvec3(0u), uvec3(0u), uvec3(0u));
   {
-    uint v_5 = 0u;
-    v_5 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_6 = v_5;
-      if ((v_6 >= 4u)) {
+      uint v_4 = idx;
+      if ((v_4 >= 4u)) {
         break;
       }
-      a[v_6] = v.inner[((start_byte_offset + (v_6 * 16u)) / 16u)].xyz;
+      a[v_4] = v.inner[((start_byte_offset + (v_4 * 16u)) / 16u)].xyz;
       {
-        v_5 = (v_6 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
   return a;
 }
-S v_7(uint start_byte_offset) {
-  uvec3 v_8 = v.inner[(start_byte_offset / 16u)].xyz;
-  uint v_9 = (12u + start_byte_offset);
-  uvec4 v_10 = v.inner[(v_9 / 16u)];
-  return S(v_8, v_10[((v_9 & 15u) >> 2u)], v_4((16u + start_byte_offset)));
+S v_5(uint start_byte_offset) {
+  uvec3 v_6 = v.inner[(start_byte_offset / 16u)].xyz;
+  uint v_7 = (12u + start_byte_offset);
+  uvec4 v_8 = v.inner[(v_7 / 16u)];
+  return S(v_6, v_8[((v_7 & 15u) >> 2u)], v_3((16u + start_byte_offset)));
 }
 void foo_inner(uint tint_local_index) {
   if ((tint_local_index < 1u)) {
@@ -67,21 +65,20 @@ void foo_inner(uint tint_local_index) {
     wbuffer.b = 0u;
   }
   {
-    uint v_11 = 0u;
-    v_11 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_12 = v_11;
-      if ((v_12 >= 4u)) {
+      uint v_9 = idx;
+      if ((v_9 >= 4u)) {
         break;
       }
-      wbuffer.c[v_12] = uvec3(0u);
+      wbuffer.c[v_9] = uvec3(0u);
       {
-        v_11 = (v_12 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
   barrier();
-  S u = v_7(0u);
+  S u = v_5(0u);
   S s = v_1.inner;
   S w = v_1.inner;
   tint_store_and_preserve_padding(S(uvec3(0u), 0u, uvec3[4](uvec3(0u), uvec3(0u), uvec3(0u), uvec3(0u))));

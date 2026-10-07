@@ -19,16 +19,15 @@ str func(threadgroup str* const pointer) {
 
 void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint const v_1 = v;
-      if ((v_1 >= 4u)) {
+      uint const v = idx;
+      if ((v >= 4u)) {
         break;
       }
-      (*tint_module_vars.S)[v_1] = str{};
+      (*tint_module_vars.S)[v] = str{};
       {
-        v = (v_1 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -37,7 +36,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v_2(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_3 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.S=(&(*v_3).tint_symbol)};
+kernel void v_1(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.S=(&(*v_2).tint_symbol)};
   (main_inner(tint_local_index, tint_module_vars));
 }

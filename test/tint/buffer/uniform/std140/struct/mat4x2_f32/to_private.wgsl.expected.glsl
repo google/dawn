@@ -36,16 +36,15 @@ S v_12(uint start_byte_offset) {
 S[4] v_18(uint start_byte_offset) {
   S a[4] = S[4](S(0, mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f)), 0), S(0, mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f)), 0), S(0, mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f)), 0), S(0, mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f)), 0));
   {
-    uint v_19 = 0u;
-    v_19 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_20 = v_19;
-      if ((v_20 >= 4u)) {
+      uint v_19 = idx;
+      if ((v_19 >= 4u)) {
         break;
       }
-      a[v_20] = v_12((start_byte_offset + (v_20 * 128u)));
+      a[v_19] = v_12((start_byte_offset + (v_19 * 128u)));
       {
-        v_19 = (v_20 + 1u);
+        idx = (idx + 1u);
       }
     }
   }

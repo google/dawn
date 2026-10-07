@@ -6,16 +6,15 @@ struct main_inputs {
 groupshared int zero[23];
 void main_inner(uint tint_local_index) {
   {
-    uint v_1 = 0u;
-    v_1 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_2 = v_1;
-      if ((v_2 >= 23u)) {
+      uint v_1 = idx;
+      if ((v_1 >= 23u)) {
         break;
       }
-      zero[v_2] = int(0);
+      zero[v_1] = int(0);
       {
-        v_1 = (v_2 + 13u);
+        idx = (idx + 13u);
       }
     }
   }

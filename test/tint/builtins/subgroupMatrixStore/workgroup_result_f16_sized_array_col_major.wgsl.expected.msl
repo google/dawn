@@ -31,22 +31,21 @@ struct tint_symbol_7 {
 
 void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint const v_1 = v;
-      if ((v_1 >= 1024u)) {
+      uint const v = idx;
+      if ((v >= 1024u)) {
         break;
       }
-      (*tint_module_vars.out0)[v_1] = 0u;
-      (*tint_module_vars.out1)[v_1] = int2(0);
-      (*tint_module_vars.out2)[v_1].packed = packed_float3(float3(0.0f));
-      (*tint_module_vars.out3)[v_1] = uint4(0u);
-      (*tint_module_vars.out4)[v_1] = 0.0h;
-      (*tint_module_vars.out5)[v_1] = half2(0.0h);
-      (*tint_module_vars.out6)[v_1].packed_1 = packed_half3(half3(0.0h));
+      (*tint_module_vars.out0)[v] = 0u;
+      (*tint_module_vars.out1)[v] = int2(0);
+      (*tint_module_vars.out2)[v].packed = packed_float3(float3(0.0f));
+      (*tint_module_vars.out3)[v] = uint4(0u);
+      (*tint_module_vars.out4)[v] = 0.0h;
+      (*tint_module_vars.out5)[v] = half2(0.0h);
+      (*tint_module_vars.out6)[v].packed_1 = packed_half3(half3(0.0h));
       {
-        v = (v_1 + 64u);
+        idx = (idx + 64u);
       }
     }
   }
@@ -62,7 +61,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
 }
 
 [[max_total_threads_per_threadgroup(64)]]
-kernel void v_2(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_7* v_3 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.out0=(&(*v_3).tint_symbol), .out1=(&(*v_3).tint_symbol_1), .out2=(&(*v_3).tint_symbol_2), .out3=(&(*v_3).tint_symbol_3), .out4=(&(*v_3).tint_symbol_4), .out5=(&(*v_3).tint_symbol_5), .out6=(&(*v_3).tint_symbol_6)};
+kernel void v_1(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_7* v_2 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.out0=(&(*v_2).tint_symbol), .out1=(&(*v_2).tint_symbol_1), .out2=(&(*v_2).tint_symbol_2), .out3=(&(*v_2).tint_symbol_3), .out4=(&(*v_2).tint_symbol_4), .out5=(&(*v_2).tint_symbol_5), .out6=(&(*v_2).tint_symbol_6)};
   (main_inner(tint_local_index, tint_module_vars));
 }
