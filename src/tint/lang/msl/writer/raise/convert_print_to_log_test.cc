@@ -799,10 +799,10 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Single) {
+TEST_F(MslWriter_ConvertPrintToLogTest, InterpolateString_Single) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        auto* fs = b.FormatString(b.Constant("value: "), 42_i);
+        auto* fs = b.InterpolateString(b.Constant("value: "), 42_i);
         b.Call<void>(core::BuiltinFn::kPrint, fs);
         b.Return(func);
     });
@@ -810,7 +810,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Single) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:string = format_string "value: ", 42i
+    %2:string = interpolate_string "value: ", 42i
     %3:void = print %2
     ret
   }
@@ -841,11 +841,11 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Multiple) {
+TEST_F(MslWriter_ConvertPrintToLogTest, InterpolateString_Multiple) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        auto* fs =
-            b.FormatString(b.Constant("x: "), 42_i, b.Constant(", y: "), 1.5_f, b.Constant("!"));
+        auto* fs = b.InterpolateString(b.Constant("x: "), 42_i, b.Constant(", y: "), 1.5_f,
+                                       b.Constant("!"));
         b.Call<void>(core::BuiltinFn::kPrint, fs);
         b.Return(func);
     });
@@ -853,7 +853,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Multiple) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:string = format_string "x: ", 42i, ", y: ", 1.5f, "!"
+    %2:string = interpolate_string "x: ", 42i, ", y: ", 1.5f, "!"
     %3:void = print %2
     ret
   }
@@ -884,10 +884,10 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Vector) {
+TEST_F(MslWriter_ConvertPrintToLogTest, InterpolateString_Vector) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        auto* fs = b.FormatString(b.Constant("vec: "), b.Composite<vec2<f32>>(1.0_f, 2.0_f));
+        auto* fs = b.InterpolateString(b.Constant("vec: "), b.Composite<vec2<f32>>(1.0_f, 2.0_f));
         b.Call<void>(core::BuiltinFn::kPrint, fs);
         b.Return(func);
     });
@@ -895,7 +895,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Vector) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:string = format_string "vec: ", vec2<f32>(1.0f, 2.0f)
+    %2:string = interpolate_string "vec: ", vec2<f32>(1.0f, 2.0f)
     %3:void = print %2
     ret
   }
@@ -926,10 +926,10 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Bool) {
+TEST_F(MslWriter_ConvertPrintToLogTest, InterpolateString_Bool) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        auto* fs = b.FormatString(b.Constant("flag: "), true);
+        auto* fs = b.InterpolateString(b.Constant("flag: "), true);
         b.Call<void>(core::BuiltinFn::kPrint, fs);
         b.Return(func);
     });
@@ -937,7 +937,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Bool) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:string = format_string "flag: ", true
+    %2:string = interpolate_string "flag: ", true
     %3:void = print %2
     ret
   }
@@ -968,11 +968,11 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Nested) {
+TEST_F(MslWriter_ConvertPrintToLogTest, InterpolateString_Nested) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        auto* inner = b.FormatString(b.Constant("inner "), 42_i);
-        auto* outer = b.FormatString(b.Constant("outer "), inner, b.Constant(" end"));
+        auto* inner = b.InterpolateString(b.Constant("inner "), 42_i);
+        auto* outer = b.InterpolateString(b.Constant("outer "), inner, b.Constant(" end"));
         b.Call<void>(core::BuiltinFn::kPrint, outer);
         b.Return(func);
     });
@@ -980,8 +980,8 @@ TEST_F(MslWriter_ConvertPrintToLogTest, FormatString_Nested) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:string = format_string "inner ", 42i
-    %3:string = format_string "outer ", %2, " end"
+    %2:string = interpolate_string "inner ", 42i
+    %3:string = interpolate_string "outer ", %2, " end"
     %4:void = print %3
     ret
   }

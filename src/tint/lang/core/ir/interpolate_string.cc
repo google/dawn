@@ -25,31 +25,31 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/format_string.h"
+#include "src/tint/lang/core/ir/interpolate_string.h"
 
 #include <utility>
 
 #include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/module.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::core::ir::FormatString);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::InterpolateString);
 
 namespace tint::core::ir {
 
-FormatString::FormatString(Id id) : Base(id) {}
+InterpolateString::InterpolateString(Id id) : Base(id) {}
 
-FormatString::FormatString(Id id, InstructionResult* result, VectorRef<Value*> operands)
+InterpolateString::InterpolateString(Id id, InstructionResult* result, VectorRef<Value*> operands)
     : Base(id) {
     AddOperands(0, std::move(operands));
     AddResult(result);
 }
 
-FormatString::~FormatString() = default;
+InterpolateString::~InterpolateString() = default;
 
-FormatString* FormatString::Clone(CloneContext& ctx) {
+InterpolateString* InterpolateString::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result());
-    auto operands = ctx.Remap<FormatString::kDefaultNumOperands>(Elements());
-    return ctx.ir.CreateInstruction<FormatString>(new_result, operands);
+    auto operands = ctx.Remap<InterpolateString::kDefaultNumOperands>(Elements());
+    return ctx.ir.CreateInstruction<InterpolateString>(new_result, operands);
 }
 
 }  // namespace tint::core::ir

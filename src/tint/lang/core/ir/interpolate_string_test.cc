@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/format_string.h"
+#include "src/tint/lang/core/ir/interpolate_string.h"
 
 #include "gmock/gmock.h"
 #include "src/tint/lang/core/constant/scalar.h"
@@ -38,20 +38,20 @@ namespace tint::core::ir {
 namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
-using IR_FormatStringTest = IRTestHelper;
+using IR_InterpolateStringTest = IRTestHelper;
 
-TEST_F(IR_FormatStringTest, Usage) {
+TEST_F(IR_InterpolateStringTest, Usage) {
     auto* arg1 = b.Constant("hello ");
     auto* arg2 = b.Constant(42_i);
-    auto* fs = b.FormatString(arg1, arg2);
+    auto* fs = b.InterpolateString(arg1, arg2);
 
     EXPECT_THAT(arg1->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{fs, 0u}));
     EXPECT_THAT(arg2->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{fs, 1u}));
 }
 
-TEST_F(IR_FormatStringTest, Result) {
+TEST_F(IR_InterpolateStringTest, Result) {
     auto* arg = b.Constant("hello");
-    auto* fs = b.FormatString(arg);
+    auto* fs = b.InterpolateString(arg);
 
     EXPECT_EQ(fs->Results().Length(), 1u);
     EXPECT_TRUE(fs->Result(0)->Is<InstructionResult>());
@@ -59,10 +59,10 @@ TEST_F(IR_FormatStringTest, Result) {
     EXPECT_TRUE(fs->Result(0)->Type()->Is<core::type::String>());
 }
 
-TEST_F(IR_FormatStringTest, Clone) {
+TEST_F(IR_InterpolateStringTest, Clone) {
     auto* arg1 = b.Constant("val: ");
     auto* arg2 = b.Constant(42_i);
-    auto* fs = b.FormatString(arg1, arg2);
+    auto* fs = b.InterpolateString(arg1, arg2);
 
     auto* new_fs = clone_ctx.Clone(fs);
 
@@ -80,8 +80,8 @@ TEST_F(IR_FormatStringTest, Clone) {
     EXPECT_EQ(42, val1->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_FormatStringTest, CloneEmpty) {
-    auto* fs = b.FormatString();
+TEST_F(IR_InterpolateStringTest, CloneEmpty) {
+    auto* fs = b.InterpolateString();
 
     auto* new_fs = clone_ctx.Clone(fs);
     EXPECT_NE(fs, new_fs);
@@ -90,17 +90,17 @@ TEST_F(IR_FormatStringTest, CloneEmpty) {
     EXPECT_TRUE(new_fs->Elements().empty());
 }
 
-TEST_F(IR_FormatStringTest, Disassemble) {
+TEST_F(IR_InterpolateStringTest, Disassemble) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
-        b.FormatString(b.Constant("hello "), 42_i, b.Constant(" world"));
+        b.InterpolateString(b.Constant("hello "), 42_i, b.Constant(" world"));
         b.Return(f);
     });
 
     EXPECT_EQ(str(), R"(
 %my_func = func():void {
   $B1: {
-    %2:string = format_string "hello ", 42i, " world"
+    %2:string = interpolate_string "hello ", 42i, " world"
     ret
   }
 }

@@ -358,7 +358,7 @@ message Instruction {
         InstructionUnreachable unreachable = 29;
         InstructionOverride override = 30;
         InstructionConstExprIf const_expr_if = 31;
-        InstructionFormatString format_string = 33;
+        InstructionInterpolateString interpolate_string = 33;
     }
     reserved 9;
     reserved "bitcast";
@@ -464,7 +464,7 @@ message InstructionOverride {
     optional uint32 override_id = 1;
 }
 
-message InstructionFormatString {}
+message InstructionInterpolateString {}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Attributes

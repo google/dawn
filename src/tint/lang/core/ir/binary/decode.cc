@@ -38,7 +38,7 @@
 #include "src/tint/lang/core/ir/array_count.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/control_instruction.h"
-#include "src/tint/lang/core/ir/format_string.h"
+#include "src/tint/lang/core/ir/interpolate_string.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
@@ -474,8 +474,8 @@ struct Decoder {
             case pb::Instruction::KindCase::kExitSwitch:
                 inst_out = CreateInstructionExitSwitch(inst_in.exit_switch());
                 break;
-            case pb::Instruction::KindCase::kFormatString:
-                inst_out = CreateInstructionFormatString(inst_in.format_string());
+            case pb::Instruction::KindCase::kInterpolateString:
+                inst_out = CreateInstructionInterpolateString(inst_in.interpolate_string());
                 break;
             case pb::Instruction::KindCase::kDiscard:
                 inst_out = CreateInstructionDiscard(inst_in.discard());
@@ -633,8 +633,9 @@ struct Decoder {
         return exit_out;
     }
 
-    ir::FormatString* CreateInstructionFormatString(const pb::InstructionFormatString&) {
-        return mod_out_.CreateInstruction<ir::FormatString>();
+    ir::InterpolateString* CreateInstructionInterpolateString(
+        const pb::InstructionInterpolateString&) {
+        return mod_out_.CreateInstruction<ir::InterpolateString>();
     }
 
     ir::Discard* CreateInstructionDiscard(const pb::InstructionDiscard&) {

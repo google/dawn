@@ -50,9 +50,9 @@
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/exit_switch.h"
-#include "src/tint/lang/core/ir/format_string.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/if.h"
+#include "src/tint/lang/core/ir/interpolate_string.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
@@ -241,8 +241,8 @@ struct Encoder {
             [&](const ir::ExitSwitch* i) {
                 InstructionExitSwitch(*inst_out.mutable_exit_switch(), i);
             },
-            [&](const ir::FormatString* i) {
-                InstructionFormatString(*inst_out.mutable_format_string(), i);
+            [&](const ir::InterpolateString* i) {
+                InstructionInterpolateString(*inst_out.mutable_interpolate_string(), i);
             },
             [&](const ir::If* i) { InstructionIf(*inst_out.mutable_if_(), i); },
             [&](const ir::Let* i) { InstructionLet(*inst_out.mutable_let(), i); },
@@ -312,7 +312,8 @@ struct Encoder {
 
     void InstructionConvert(pb::InstructionConvert&, const ir::Convert*) {}
 
-    void InstructionFormatString(pb::InstructionFormatString&, const ir::FormatString*) {}
+    void InstructionInterpolateString(pb::InstructionInterpolateString&,
+                                      const ir::InterpolateString*) {}
 
     void InstructionIf(pb::InstructionIf& if_out, const ir::If* if_in) {
         if (auto* block = if_in->True()) {

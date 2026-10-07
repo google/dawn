@@ -32,7 +32,7 @@
 
 #include "src/tint/lang/core/constant/string.h"
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/format_string.h"
+#include "src/tint/lang/core/ir/interpolate_string.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/msl/ir/os_log.h"
 
@@ -77,7 +77,7 @@ struct State {
         SetupGlobals();
         TINT_IR_ASSERT(ir, entry_point != nullptr);
 
-        Vector<core::ir::FormatString*, 4> format_strings_to_destroy;
+        Vector<core::ir::InterpolateString*, 4> interpolate_strings_to_destroy;
 
         b.InsertBefore(call, [&] {
             auto* id = b.Load(invocation_id);
@@ -114,7 +114,7 @@ struct State {
             }
 
             auto* value = call->Args()[0];
-            ProcessValue(value, ss, args, format_strings_to_destroy);
+            ProcessValue(value, ss, args, interpolate_strings_to_destroy);
 
             args[0] = b.Constant(ir.constant_values.Get(ss.str()));
 
@@ -124,9 +124,9 @@ struct State {
         });
 
         call->Destroy();
-        for (auto* fs : format_strings_to_destroy) {
-            TINT_IR_ASSERT(ir, !fs->Result()->IsUsed());
-            fs->Destroy();
+        for (auto* is : interpolate_strings_to_destroy) {
+            TINT_IR_ASSERT(ir, !is->Result()->IsUsed());
+            is->Destroy();
         }
     }
 
@@ -134,15 +134,16 @@ struct State {
     /// @param value the value to process
     /// @param ss the string stream for the format string
     /// @param args the argument vector for the os_log call
-    /// @param format_strings_to_destroy vector tracking FormatString instructions to destroy
+    /// @param interpolate_strings_to_destroy vector tracking InterpolateString instructions to
+    /// destroy
     void ProcessValue(core::ir::Value* value,
                       StringStream& ss,
                       Vector<core::ir::Value*, 8>& args,
-                      Vector<core::ir::FormatString*, 4>& format_strings_to_destroy) {
-        if (auto* fs = value->AsInstruction<core::ir::FormatString>()) {
-            format_strings_to_destroy.Push(fs);
-            for (auto* operand : fs->Operands()) {
-                ProcessValue(operand, ss, args, format_strings_to_destroy);
+                      Vector<core::ir::InterpolateString*, 4>& interpolate_strings_to_destroy) {
+        if (auto* is = value->AsInstruction<core::ir::InterpolateString>()) {
+            interpolate_strings_to_destroy.Push(is);
+            for (auto* operand : is->Operands()) {
+                ProcessValue(operand, ss, args, interpolate_strings_to_destroy);
             }
             return;
         }

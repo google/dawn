@@ -50,11 +50,11 @@
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/exit_switch.h"
-#include "src/tint/lang/core/ir/format_string.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
+#include "src/tint/lang/core/ir/interpolate_string.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
@@ -2029,23 +2029,24 @@ class Builder {
         return Swizzle(type, obj_val, Vector<uint32_t, 4>(indices));
     }
 
-    /// Creates a format string instruction with an existing instruction result
+    /// Creates an interpolate string instruction with an existing instruction result
     /// @param result the instruction result to use
-    /// @param operands the operands to format
+    /// @param operands the operands to interpolate
     /// @returns the instruction
     template <typename... ARGS>
-    ir::FormatString* FormatStringWithResult(ir::InstructionResult* result, ARGS&&... operands) {
+    ir::InterpolateString* InterpolateStringWithResult(ir::InstructionResult* result,
+                                                       ARGS&&... operands) {
         auto values = Values(std::forward<ARGS>(operands)...);
-        return Append(ir.CreateInstruction<ir::FormatString>(result, values));
+        return Append(ir.CreateInstruction<ir::InterpolateString>(result, values));
     }
 
-    /// Creates a format string instruction
-    /// @param operands the operands to format
+    /// Creates an interpolate string instruction
+    /// @param operands the operands to interpolate
     /// @returns the instruction
     template <typename... ARGS>
-    ir::FormatString* FormatString(ARGS&&... operands) {
+    ir::InterpolateString* InterpolateString(ARGS&&... operands) {
         auto* res = InstructionResult(ir.Types().Get<core::type::String>());
-        return FormatStringWithResult(res, std::forward<ARGS>(operands)...);
+        return InterpolateStringWithResult(res, std::forward<ARGS>(operands)...);
     }
 
     /// Name names the value or instruction with @p name

@@ -257,7 +257,7 @@ void Validator::CheckInstruction(const Instruction* inst) {
         [&](const StoreVectorElement* s) { CheckStoreVectorElement(s); },  //
         [&](const Switch* s) { CheckSwitch(s); },                          //
         [&](const Swizzle* s) { CheckSwizzle(s); },                        //
-        [&](const FormatString* fs) { CheckFormatString(fs); },            //
+        [&](const InterpolateString* is) { CheckInterpolateString(is); },  //
         [&](const Terminator* b) { CheckTerminator(b); },                  //
         [&](const Unary* u) { CheckUnary(u); },                            //
         [&](const Override* o) { CheckOverride(o); },                      //
@@ -1568,20 +1568,20 @@ void Validator::CheckSwizzle(const Swizzle* s) {
     }
 }
 
-void Validator::CheckFormatString(const FormatString* fs) {
-    if (!CheckResultsAndOperandRange(fs, FormatString::kNumResults, FormatString::kMinOperands,
-                                     std::nullopt)) {
+void Validator::CheckInterpolateString(const InterpolateString* is) {
+    if (!CheckResultsAndOperandRange(is, InterpolateString::kNumResults,
+                                     InterpolateString::kMinOperands, std::nullopt)) {
         return;
     }
 
-    if (!fs->Result()->Type()->Is<core::type::String>()) {
-        AddResultError(fs, 0) << "result type must be string";
+    if (!is->Result()->Type()->Is<core::type::String>()) {
+        AddResultError(is, 0) << "result type must be string";
     }
 
-    for (size_t i = 0; i < fs->Operands().Length(); ++i) {
-        auto* ty = fs->Operand(i)->Type();
+    for (size_t i = 0; i < is->Operands().Length(); ++i) {
+        auto* ty = is->Operand(i)->Type();
         if (!ty->IsAnyOf<core::type::Scalar, core::type::Vector, core::type::String>()) {
-            AddError(fs, i) << "operand must be a scalar, vector, or string";
+            AddError(is, i) << "operand must be a scalar, vector, or string";
         }
     }
 }

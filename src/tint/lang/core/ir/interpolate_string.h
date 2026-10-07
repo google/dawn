@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_FORMAT_STRING_H_
-#define SRC_TINT_LANG_CORE_IR_FORMAT_STRING_H_
+#ifndef SRC_TINT_LANG_CORE_IR_INTERPOLATE_STRING_H_
+#define SRC_TINT_LANG_CORE_IR_INTERPOLATE_STRING_H_
 
 #include <span>
 #include <string>
@@ -36,8 +36,8 @@
 
 namespace tint::core::ir {
 
-/// A format string instruction in the IR.
-class FormatString final : public Castable<FormatString, OperandInstruction<4, 1>> {
+/// An interpolate string instruction in the IR.
+class InterpolateString final : public Castable<InterpolateString, OperandInstruction<4, 1>> {
   public:
     /// The fixed number of results returned by this instruction
     static constexpr size_t kNumResults = 1;
@@ -47,29 +47,29 @@ class FormatString final : public Castable<FormatString, OperandInstruction<4, 1
 
     /// Constructor (no results, no operands)
     /// @param id the instruction id
-    explicit FormatString(Id id);
+    explicit InterpolateString(Id id);
 
     /// Constructor
     /// @param id the instruction id
     /// @param result the result value
-    /// @param operands the format string operands
-    FormatString(Id id, InstructionResult* result, VectorRef<Value*> operands = tint::Empty);
+    /// @param operands the interpolate string operands
+    InterpolateString(Id id, InstructionResult* result, VectorRef<Value*> operands = tint::Empty);
 
-    ~FormatString() override;
+    ~InterpolateString() override;
 
     /// @copydoc Instruction::Clone()
-    FormatString* Clone(CloneContext& ctx) override;
+    InterpolateString* Clone(CloneContext& ctx) override;
 
-    /// @returns the format string elements
+    /// @returns the interpolate string elements
     std::span<Value* const> Elements() { return operands_.AsSpan(); }
 
-    /// @returns the format string elements
+    /// @returns the interpolate string elements
     std::span<const Value* const> Elements() const { return operands_.AsSpan(); }
 
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() const override { return "format_string"; }
+    std::string FriendlyName() const override { return "interpolate_string"; }
 };
 
 }  // namespace tint::core::ir
 
-#endif  // SRC_TINT_LANG_CORE_IR_FORMAT_STRING_H_
+#endif  // SRC_TINT_LANG_CORE_IR_INTERPOLATE_STRING_H_

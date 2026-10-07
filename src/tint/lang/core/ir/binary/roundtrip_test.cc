@@ -494,12 +494,12 @@ TEST_F(IRBinaryRoundtripTest, BuiltinCall) {
     RUN_TEST();
 }
 
-TEST_F(IRBinaryRoundtripTest, FormatString) {
+TEST_F(IRBinaryRoundtripTest, InterpolateString) {
     auto* x = b.FunctionParam<i32>("x");
     auto* fn = b.Function("Function", ty.void_());
     fn->SetParams({x});
     b.Append(fn->Block(), [&] {
-        auto* str = b.FormatString(b.Constant("x = "), x, b.Constant("!"));
+        auto* str = b.InterpolateString(b.Constant("x = "), x, b.Constant("!"));
         b.Call(ty.void_(), core::BuiltinFn::kPrint, str);
         b.Return(fn);
     });
