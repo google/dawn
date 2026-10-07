@@ -297,18 +297,16 @@ config("dawn_warnings") {
   cflags_objcc = cflags_cc
 }
 
-# TODO(crbug.com/523358231): Some targets pick up this config multiple times and
-# receive all of the warning flags repeatedly, for example they're repeated
-# three times in obj/src/dawn/native/sources/Device.o. Can this be avoided?
-config("utils_config") {
+# Include paths and defines required by any code that includes src/utils
+# headers, either directly or transitively (e.g. through Tint headers).
+#
+# Unlike :utils_config, this doesn't carry Dawn's warning configuration, so it
+# is safe to propagate to targets outside of Dawn (e.g. Chromium targets that
+# include Tint headers). See "tint_public_config" in src/tint/BUILD.gn.
+config("utils_public_config") {
   include_dirs = [ "${dawn_root}" ]
 
   defines = [ "DAWN_HAVE_UTILS_BUILD_CONFIG" ]
-  configs = [ ":dawn_warnings" ]
-
-  if (is_clang && dawn_standalone && !is_wasm) {
-    configs += [ ":raw_ptr_check" ]
-  }
 
   # Use Chromium's dcheck_always_on when available so that we respect it when
   # running tests on the GPU builders. If we are not building with Chromium, we
@@ -336,6 +334,20 @@ config("utils_config") {
   # Inject it from the build system
   if (is_chromeos) {
     defines += [ "DAWN_OS_CHROMEOS" ]
+  }
+}
+
+# TODO(crbug.com/523358231): Some targets pick up this config multiple times and
+# receive all of the warning flags repeatedly, for example they're repeated
+# three times in obj/src/dawn/native/sources/Device.o. Can this be avoided?
+config("utils_config") {
+  configs = [
+    ":utils_public_config",
+    ":dawn_warnings",
+  ]
+
+  if (is_clang && dawn_standalone && !is_wasm) {
+    configs += [ ":raw_ptr_check" ]
   }
 }
 
