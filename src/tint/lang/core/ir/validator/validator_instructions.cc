@@ -43,6 +43,8 @@
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/scalar.h"
+#include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
@@ -255,6 +257,7 @@ void Validator::CheckInstruction(const Instruction* inst) {
         [&](const StoreVectorElement* s) { CheckStoreVectorElement(s); },  //
         [&](const Switch* s) { CheckSwitch(s); },                          //
         [&](const Swizzle* s) { CheckSwizzle(s); },                        //
+        [&](const FormatString* fs) { CheckFormatString(fs); },            //
         [&](const Terminator* b) { CheckTerminator(b); },                  //
         [&](const Unary* u) { CheckUnary(u); },                            //
         [&](const Override* o) { CheckOverride(o); },                      //
@@ -1562,6 +1565,24 @@ void Validator::CheckSwizzle(const Swizzle* s) {
         AddError(s) << "result type " << NameOf(result_ty) << " does not match expected type, "
                     << NameOf(expected_ty);
         return;
+    }
+}
+
+void Validator::CheckFormatString(const FormatString* fs) {
+    if (!CheckResultsAndOperandRange(fs, FormatString::kNumResults, FormatString::kMinOperands,
+                                     std::nullopt)) {
+        return;
+    }
+
+    if (!fs->Result()->Type()->Is<core::type::String>()) {
+        AddResultError(fs, 0) << "result type must be string";
+    }
+
+    for (size_t i = 0; i < fs->Operands().Length(); ++i) {
+        auto* ty = fs->Operand(i)->Type();
+        if (!ty->IsAnyOf<core::type::Scalar, core::type::Vector, core::type::String>()) {
+            AddError(fs, i) << "operand must be a scalar, vector, or string";
+        }
     }
 }
 

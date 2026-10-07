@@ -96,6 +96,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/exit_loop.h
   lang/core/ir/exit_switch.cc
   lang/core/ir/exit_switch.h
+  lang/core/ir/format_string.cc
+  lang/core/ir/format_string.h
   lang/core/ir/function.cc
   lang/core/ir/function.h
   lang/core/ir/function_param.cc
@@ -207,6 +209,7 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/exit_if_test.cc
   lang/core/ir/exit_loop_test.cc
   lang/core/ir/exit_switch_test.cc
+  lang/core/ir/format_string_test.cc
   lang/core/ir/function_param_test.cc
   lang/core/ir/function_test.cc
   lang/core/ir/if_test.cc

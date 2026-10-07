@@ -32,6 +32,7 @@
 
 #include "src/tint/lang/core/constant/scalar.h"  // IWYU pragma: export
 #include "src/tint/lang/core/constant/splat.h"   // IWYU pragma: export
+#include "src/tint/lang/core/constant/string.h"  // IWYU pragma: export
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/break_if.h"
@@ -49,6 +50,7 @@
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/exit_switch.h"
+#include "src/tint/lang/core/ir/format_string.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/if.h"
@@ -84,6 +86,7 @@
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"       // IWYU pragma: export
 #include "src/tint/lang/core/type/reference.h"     // IWYU pragma: export
+#include "src/tint/lang/core/type/string.h"        // IWYU pragma: export
 #include "src/tint/lang/core/type/swizzle_view.h"  // IWYU pragma: export
 #include "src/tint/lang/core/type/type.h"          // IWYU pragma: export
 #include "src/tint/lang/core/type/u16.h"           // IWYU pragma: export
@@ -408,6 +411,11 @@ class Builder {
         return Constant(ConstantValue(v));
     }
 
+    /// Creates a ir::Constant for a string
+    /// @param v the value
+    /// @returns the new constant
+    ir::Constant* Constant(std::string_view v) { return Constant(ConstantValue(v)); }
+
     /// Creates a new invalid ir::Constant
     /// @returns the new constant
     ir::Constant* InvalidConstant() { return Constant(ir.constant_values.Invalid()); }
@@ -463,6 +471,13 @@ class Builder {
     template <typename BOOL>
         requires(std::is_same_v<BOOL, bool>)
     const core::constant::Value* ConstantValue(BOOL v) {
+        return ir.constant_values.Get(v);
+    }
+
+    /// Creates a core::constant::Value for a string
+    /// @param v the value
+    /// @returns the new constant
+    const core::constant::Value* ConstantValue(std::string_view v) {
         return ir.constant_values.Get(v);
     }
 
@@ -2012,6 +2027,25 @@ class Builder {
                        std::initializer_list<uint32_t> indices) {
         auto* obj_val = Value(std::forward<OBJ>(object));
         return Swizzle(type, obj_val, Vector<uint32_t, 4>(indices));
+    }
+
+    /// Creates a format string instruction with an existing instruction result
+    /// @param result the instruction result to use
+    /// @param operands the operands to format
+    /// @returns the instruction
+    template <typename... ARGS>
+    ir::FormatString* FormatStringWithResult(ir::InstructionResult* result, ARGS&&... operands) {
+        auto values = Values(std::forward<ARGS>(operands)...);
+        return Append(ir.CreateInstruction<ir::FormatString>(result, values));
+    }
+
+    /// Creates a format string instruction
+    /// @param operands the operands to format
+    /// @returns the instruction
+    template <typename... ARGS>
+    ir::FormatString* FormatString(ARGS&&... operands) {
+        auto* res = InstructionResult(ir.Types().Get<core::type::String>());
+        return FormatStringWithResult(res, std::forward<ARGS>(operands)...);
     }
 
     /// Name names the value or instruction with @p name

@@ -48,6 +48,7 @@
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/exit_switch.h"
+#include "src/tint/lang/core/ir/format_string.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/if.h"
@@ -486,6 +487,7 @@ class Validator {
     void CheckLoopContinuing(const Loop* loop);
     void CheckSwitch(const Switch* s);
     void CheckSwizzle(const Swizzle* s);
+    void CheckFormatString(const FormatString* fs);
     void CheckTerminator(const Terminator* b);
     void CheckBreakIf(const BreakIf* b);
     void CheckContinue(const Continue* c);

@@ -3121,4 +3121,40 @@ TEST_F(IR_ValidatorTest, IncorrectDomainModulo_Vec) {
     EXPECT_EQ(res.Failure().reason, "5:7 error: binary: integer division by zero is invalid");
 }
 
+TEST_F(IR_ValidatorTest, FormatString_Valid) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.FormatString(b.Constant("hello "), 42_i, b.Constant(" world"));
+        b.Return(f);
+    });
+    EXPECT_EQ(ir::Validate(mod), Success);
+}
+
+TEST_F(IR_ValidatorTest, FormatString_InvalidResultType) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* res = b.InstructionResult(ty.i32());
+        b.FormatStringWithResult(res, 42_i);
+        b.Return(f);
+    });
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("error: format_string: result type must be string"));
+}
+
+TEST_F(IR_ValidatorTest, FormatString_InvalidOperandType) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* arr = b.Zero(ty.array<i32, 4>());
+        b.FormatString(arr);
+        b.Return(f);
+    });
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("error: format_string: operand must be a scalar, vector, or string"));
+}
+
 }  // namespace tint::core::ir
