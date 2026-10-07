@@ -96,7 +96,7 @@ class InstanceBase final : public ErrorSink, public RefCounted {
     // physical device creation errors that happen because the backend is not
     // supported or doesn't meet the required capabilities.
     template <typename T>
-        requires(IsMaybeConcreteError<T>)
+        requires(IsMaybeError<T>)
     bool ConsumedErrorAndWarnOnce(T maybeError) {
         if (!maybeError.IsError()) {
             return false;
@@ -107,9 +107,7 @@ class InstanceBase final : public ErrorSink, public RefCounted {
     // Consume an error and log its warning at most once. This is useful for
     // physical device creation errors that happen because the backend is not
     // supported or doesn't meet the required capabilities.
-    template <typename T>
-        requires(IsConcreteError<T>)
-    bool ConsumedErrorAndWarnOnce(std::unique_ptr<T> error) {
+    bool ConsumedErrorAndWarnOnce(std::unique_ptr<UnknownError> error) {
         std::string message = error->GetFormattedMessage();
         if (mWarningMessages.insert(message).second) {
             EmitLog(WGPULoggingType_Warning, message);
@@ -125,13 +123,6 @@ class InstanceBase final : public ErrorSink, public RefCounted {
         }
         *result = resultOrError.AcquireSuccess();
         return false;
-    }
-
-    bool ConsumedErrorAndWarnOnce(UnknownError error) {
-        if (error.IsVal()) {
-            return ConsumedErrorAndWarnOnce(error.TakeAsVal());
-        }
-        return ConsumedErrorAndWarnOnce(error.TakeAsUnrecoverable());
     }
 
     const TogglesState& GetTogglesState() const;

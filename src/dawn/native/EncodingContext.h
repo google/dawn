@@ -113,11 +113,10 @@ class EncodingContext {
 
   private:
     // Functions to handle encoder errors
-    void HandleError(std::unique_ptr<UnrecoverableError> error);
-    void HandleError(std::unique_ptr<ValidationError> error);
+    void HandleError(std::unique_ptr<UnknownError> error);
 
     template <typename E>
-        requires(IsMaybeConcreteError<E>)
+        requires(IsMaybeError<E>)
     inline bool ConsumedError(E maybeError) {
         if (maybeError.IsError()) [[unlikely]] {
             HandleError(maybeError.AcquireError());
@@ -127,7 +126,7 @@ class EncodingContext {
     }
 
     template <typename E, typename... Args>
-        requires(IsMaybeConcreteError<E>)
+        requires(IsMaybeError<E>)
     inline bool ConsumedError(E maybeError, const char* formatStr, const Args&... args) {
         if (maybeError.IsError()) [[unlikely]] {
             auto error = maybeError.AcquireError();
@@ -143,19 +142,6 @@ class EncodingContext {
             }
             HandleError(std::move(error));
             return true;
-        }
-        return false;
-    }
-    template <typename... Args>
-    [[nodiscard]] bool ConsumedError(MaybeUnknownError maybeError,
-                                     const char* formatStr,
-                                     const Args&... args) {
-        if (maybeError.IsError()) [[unlikely]] {
-            std::unique_ptr<UnknownError> error = maybeError.AcquireError();
-            if (error->IsVal()) {
-                return ConsumedError(MaybeValError{error->TakeAsVal()}, formatStr, args...);
-            }
-            return ConsumedError(MaybeError{error->TakeAsUnrecoverable()}, formatStr, args...);
         }
         return false;
     }
@@ -240,7 +226,7 @@ class EncodingContext {
     std::vector<std::string_view> mDebugGroupLabels;
 
     Status mStatus = Status::Open;
-    std::unique_ptr<UnrecoverableError> mError;
+    std::unique_ptr<UnknownError> mError;
 };
 
 }  // namespace dawn::native

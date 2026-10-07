@@ -67,7 +67,8 @@ template <typename T>
 using ResultOrUnknownError = Result<T, UnknownError>;
 
 template <typename T>
-concept IsMaybeConcreteError = std::is_same_v<T, MaybeError> || std::is_same_v<T, MaybeValError>;
+concept IsMaybeError = std::is_same_v<T, MaybeError> || std::is_same_v<T, MaybeValError> ||
+                       std::is_same_v<T, MaybeUnknownError>;
 
 template <typename E, typename T>
 concept IsResultOrConcreteError =
@@ -93,9 +94,6 @@ class UnknownError {
     UnknownError& operator=(UnknownError&&) = default;
 
     bool IsVal() const { return GetType() == InternalErrorType::Validation; }
-
-    std::unique_ptr<ValidationError> TakeAsVal();
-    std::unique_ptr<UnrecoverableError> TakeAsUnrecoverable();
 
     InternalErrorType GetType() const { return mData->GetType(); }
 

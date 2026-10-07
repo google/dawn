@@ -45,7 +45,7 @@ class ErrorSink {
     // error may cause a fatal error and further execution may be undefined. This is especially
     // true for the ResultOrError variants.
     template <typename E>
-        requires(IsMaybeConcreteError<E> || std::is_same_v<E, MaybeUnknownError>)
+        requires(IsMaybeError<E>)
     [[nodiscard]] bool ConsumedError(
         E maybeError,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
@@ -57,7 +57,7 @@ class ErrorSink {
     }
 
     template <typename E, typename... Args>
-        requires(IsMaybeConcreteError<E> || std::is_same_v<E, MaybeUnknownError>)
+        requires(IsMaybeError<E>)
     [[nodiscard]] bool ConsumedError(E maybeError,
                                      InternalErrorType additionalAllowedErrors,
                                      const char* formatStr,
@@ -70,7 +70,7 @@ class ErrorSink {
     }
 
     template <typename E, typename... Args>
-        requires(IsMaybeConcreteError<E> || std::is_same_v<E, MaybeUnknownError>)
+        requires(IsMaybeError<E>)
     [[nodiscard]] bool ConsumedError(E maybeError, const char* formatStr, const Args&... args) {
         return ConsumedError(std::move(maybeError), InternalErrorType::None, formatStr, args...);
     }
