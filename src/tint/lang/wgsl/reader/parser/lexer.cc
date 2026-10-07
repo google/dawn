@@ -226,6 +226,10 @@ Token Lexer::next() {
         return std::move(t.value());
     }
 
+    if (auto t = try_interpolated_string(); t.has_value() && !t->IsUninitialized()) {
+        return std::move(t.value());
+    }
+
     if (auto t = try_punctuation(); t.has_value() && !t->IsUninitialized()) {
         return std::move(t.value());
     }
@@ -318,6 +322,10 @@ std::optional<Token> Lexer::skip_blankspace_and_comments() {
         }
     }
     if (is_eof()) {
+        if (!interpolated_string_stack_.IsEmpty()) {
+            return Token{Token::Type::kError, interpolated_string_stack_.Back().source,
+                         "unterminated interpolated string literal"};
+        }
         return Token{Token::Type::kEOF, begin_source()};
     }
 
@@ -1126,6 +1134,9 @@ std::optional<Token> Lexer::try_punctuation() {
             advance(1);
             break;
         case '{':
+            if (!interpolated_string_stack_.IsEmpty()) {
+                interpolated_string_stack_.Back().brace_depth++;
+            }
             // Expression terminating token. No opening template list can hold this tokens, so clear
             // the stack and expression depth.
             reset_nest_depth();
@@ -1133,6 +1144,17 @@ std::optional<Token> Lexer::try_punctuation() {
             advance(1);
             break;
         case '}':
+            if (!interpolated_string_stack_.IsEmpty()) {
+                if (interpolated_string_stack_.Back().brace_depth > 0) {
+                    interpolated_string_stack_.Back().brace_depth--;
+                    type = Token::Type::kBraceRight;
+                    advance(1);
+                    break;
+                }
+                // This was the final '}' that closes the interpolated expression.
+                advance(1);
+                return scan_interpolated_string_chunk(source, /* is_tail_or_middle */ true);
+            }
             type = Token::Type::kBraceRight;
             advance(1);
             break;
@@ -1334,6 +1356,118 @@ std::optional<Token> Lexer::try_punctuation() {
     end_source(source);
 
     return Token{type, source};
+}
+
+std::optional<Token> Lexer::try_interpolated_string() {
+    if (is_eol() || at(pos()) != '`') {
+        return {};
+    }
+
+    auto source = begin_source();
+    advance(1);  // consume the opening backtick
+    return scan_interpolated_string_chunk(source, /* is_tail_or_middle */ false);
+}
+
+Token Lexer::scan_interpolated_string_chunk(Source source, bool is_tail_or_middle) {
+    auto unicode_length = [](std::string_view str, size_t i) {
+        auto [_, n] = tint::utf8::Decode(str.substr(i));
+        return static_cast<uint32_t>(n);
+    };
+
+    std::string str;
+    while (!is_eof()) {
+        if (is_null()) {
+            return Token{Token::Type::kError, begin_source(), "null character found"};
+        }
+
+        if (is_eol()) {
+            str += '\n';
+            advance_line();
+            continue;
+        }
+
+        // Check for the end of the literal.
+        if (matches(pos(), '`')) {
+            advance(1);
+            end_source(source);
+            if (is_tail_or_middle) {
+                interpolated_string_stack_.Pop();
+                return Token{Token::Type::kInterpolatedStringTail, source, std::move(str)};
+            }
+            return Token{Token::Type::kStringLiteral, source, std::move(str)};
+        }
+
+        // Check for the beginning of a new expression interpolation delimiter.
+        if (matches(pos(), "${")) {
+            advance(2);
+            end_source(source);
+            if (is_tail_or_middle) {
+                interpolated_string_stack_.Back().brace_depth = 0;
+                return Token{Token::Type::kInterpolatedStringMiddle, source, std::move(str)};
+            }
+            interpolated_string_stack_.Push(InterpolatedStringContext{0, source});
+            return Token{Token::Type::kInterpolatedStringHead, source, std::move(str)};
+        }
+
+        // Check for escape characters.
+        if (matches(pos(), '\\')) {
+            auto esc_source = begin_source();
+            advance(1);
+            if (is_eof()) {
+                return Token{Token::Type::kError,
+                             is_tail_or_middle ? interpolated_string_stack_.Back().source : source,
+                             "unterminated interpolated string literal"};
+            }
+            if (is_eol()) {
+                // Line continuation: backslash followed by newline is ignored
+                advance_line();
+                continue;
+            }
+            char next_ch = at(pos());
+            switch (next_ch) {
+                case 'n':
+                    str += '\n';
+                    advance(1);
+                    break;
+                case 'r':
+                    str += '\r';
+                    advance(1);
+                    break;
+                case 't':
+                    str += '\t';
+                    advance(1);
+                    break;
+                case '\\':
+                    str += '\\';
+                    advance(1);
+                    break;
+                case '`':
+                    str += '`';
+                    advance(1);
+                    break;
+                case '$':
+                    str += '$';
+                    advance(1);
+                    break;
+                default:
+                    advance(1);
+                    end_source(esc_source);
+                    return Token{Token::Type::kError, esc_source, "unknown escape sequence"};
+            }
+            continue;
+        }
+
+        auto n = unicode_length(line(), pos());
+        if (n == 0) {
+            return Token{Token::Type::kError, begin_source(), "invalid UTF-8"};
+        }
+        str.append(substr(pos(), n));
+        advance(n);
+    }
+
+    return Token{Token::Type::kError,
+                 is_tail_or_middle ? interpolated_string_stack_.Back().source : source,
+                 "unterminated interpolated string literal"};
 }
 
 std::optional<Token::Type> Lexer::parse_keyword(std::string_view str) {

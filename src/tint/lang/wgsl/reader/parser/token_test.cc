@@ -107,5 +107,39 @@ TEST_F(TokenTest, ToStr) {
     EXPECT_EQ(Token(Token::Type::kError, Source{}, "blah").to_str(), "blah");
 }
 
+TEST_F(TokenTest, StringAndTemplateTokens) {
+    Token str_tok(Token::Type::kStringLiteral, Source{}, "hello");
+    EXPECT_TRUE(str_tok.IsStringLiteral());
+    EXPECT_TRUE(str_tok.IsLiteral());
+    EXPECT_FALSE(str_tok.IsInterpolatedString());
+    EXPECT_EQ(str_tok.to_str(), "hello");
+    EXPECT_EQ(str_tok.to_str_view(), "hello");
+    EXPECT_EQ(str_tok.to_name(), "string literal");
+
+    Token head_tok(Token::Type::kInterpolatedStringHead, Source{}, "head ");
+    EXPECT_FALSE(head_tok.IsStringLiteral());
+    EXPECT_FALSE(head_tok.IsLiteral());
+    EXPECT_TRUE(head_tok.IsInterpolatedString());
+    EXPECT_EQ(head_tok.to_str(), "head ");
+    EXPECT_EQ(head_tok.to_str_view(), "head ");
+    EXPECT_EQ(head_tok.to_name(), "interpolated string head");
+
+    Token mid_tok(Token::Type::kInterpolatedStringMiddle, Source{}, " mid ");
+    EXPECT_FALSE(mid_tok.IsStringLiteral());
+    EXPECT_FALSE(mid_tok.IsLiteral());
+    EXPECT_TRUE(mid_tok.IsInterpolatedString());
+    EXPECT_EQ(mid_tok.to_str(), " mid ");
+    EXPECT_EQ(mid_tok.to_str_view(), " mid ");
+    EXPECT_EQ(mid_tok.to_name(), "interpolated string middle");
+
+    Token tail_tok(Token::Type::kInterpolatedStringTail, Source{}, " tail");
+    EXPECT_FALSE(tail_tok.IsStringLiteral());
+    EXPECT_FALSE(tail_tok.IsLiteral());
+    EXPECT_TRUE(tail_tok.IsInterpolatedString());
+    EXPECT_EQ(tail_tok.to_str(), " tail");
+    EXPECT_EQ(tail_tok.to_str_view(), " tail");
+    EXPECT_EQ(tail_tok.to_name(), "interpolated string tail");
+}
+
 }  // namespace
 }  // namespace tint::wgsl::reader
